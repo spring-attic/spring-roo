@@ -64,10 +64,20 @@ public interface ImportRegistrationResolver {
 	 * Explicitly registers an import. Note that no verification will be performed to ensure an import is legal or
 	 * does not conflict with an existing import (use {@link #isAdditionLegal(JavaType)} for verification).
 	 *
-	 * @param javaType to register (required)
+	 * @param typeToImport to register (can be <code>null</code> to do nothing)
 	 */
-	void addImport(JavaType javaType);
+	void addImport(JavaType typeToImport);
 
+	/**
+	 * Explicitly registers the given imports. Note that no verification will be
+	 * performed to ensure an import is legal or does not conflict with an
+	 * existing import (use {@link #isAdditionLegal(JavaType)} for verification).
+	 *
+	 * @param typesToImport any <code>null</code> elements will be ignored
+	 * @since 1.2.0
+	 */
+	void addImports(JavaType... typesToImport);
+	
 	/**
 	 * Provides access to the registered imports.
 	 *

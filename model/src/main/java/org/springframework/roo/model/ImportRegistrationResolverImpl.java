@@ -126,8 +126,9 @@ public class ImportRegistrationResolverImpl implements ImportRegistrationResolve
 	}
 
 	public void addImport(final JavaType javaType) {
-		Assert.notNull(javaType, "Java type required");
-		registeredImports.add(javaType);
+		if (javaType != null) {
+			registeredImports.add(javaType);
+		}
 	}
 
 	public JavaPackage getCompilationUnitPackage() {
@@ -205,5 +206,11 @@ public class ImportRegistrationResolverImpl implements ImportRegistrationResolve
 	public static boolean isPartOfJavaLang(final String simpleTypeName) {
 		Assert.hasText(simpleTypeName, "Simple type name required");
 		return javaLangSimpleTypeNames.contains(simpleTypeName);
+	}
+
+	public void addImports(final JavaType... typesToImport) {
+		for (final JavaType typeToImport : typesToImport) {
+			addImport(typeToImport);
+		}
 	}
 }
