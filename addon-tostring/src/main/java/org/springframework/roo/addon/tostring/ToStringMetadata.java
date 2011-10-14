@@ -84,7 +84,7 @@ public class ToStringMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 		JavaSymbolName methodName = new JavaSymbolName(toStringMethod);
 
 		// See if the type itself declared the method
-		if (getGovernorMethod(methodName) != null) {
+		if (governorHasMethod(methodName)) {
 			return null;
 		}
 		final ImportRegistrationResolver imports = builder.getImportRegistrationResolver();

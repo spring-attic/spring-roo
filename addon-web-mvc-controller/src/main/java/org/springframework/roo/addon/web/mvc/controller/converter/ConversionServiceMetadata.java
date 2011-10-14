@@ -177,7 +177,7 @@ public class ConversionServiceMetadata extends AbstractItdTypeDetailsProvidingMe
 	}
 
 	private MethodMetadata getToStringConverterMethod(final JavaType targetType, final JavaSymbolName methodName) {
-		if (getGovernorMethod(methodName) != null) {
+		if (governorHasMethod(methodName)) {
 			return null;
 		}
 

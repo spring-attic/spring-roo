@@ -342,7 +342,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		final JavaType[] parameterTypes = { entity, JavaType.INT_PRIMITIVE };
 
 		// Locate user-defined method
-		if (getGovernorMethod(methodName, parameterTypes) != null) {
+		if (governorHasMethod(methodName, parameterTypes)) {
 			// Method found in governor so do not create method in ITD
 			return null;
 		}
@@ -383,7 +383,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		final JavaType[] parameterTypes = { entity, JavaType.INT_PRIMITIVE };
 
 		// Locate user-defined method
-		if (getGovernorMethod(methodName, parameterTypes) != null) {
+		if (governorHasMethod(methodName, parameterTypes)) {
 			// Method found in governor so do not create method in ITD
 			return null;
 		}
