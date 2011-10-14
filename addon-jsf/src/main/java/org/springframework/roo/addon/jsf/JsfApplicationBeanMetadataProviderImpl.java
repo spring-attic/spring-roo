@@ -9,6 +9,7 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
+import org.springframework.roo.addon.configurable.ConfigurableMetadataProvider;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.TypeLocationService;
@@ -31,6 +32,9 @@ import org.springframework.roo.support.util.Assert;
 @Component(immediate = true)
 @Service
 public class JsfApplicationBeanMetadataProviderImpl extends AbstractItdMetadataProvider implements JsfApplicationBeanMetadataProvider {
+	
+	// Fields
+	@Reference private ConfigurableMetadataProvider configurableMetadataProvider;
 	@Reference private TypeLocationService typeLocationService;
 	@Reference private ProjectOperations projectOperations;
 
@@ -41,12 +45,14 @@ public class JsfApplicationBeanMetadataProviderImpl extends AbstractItdMetadataP
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		metadataDependencyRegistry.registerDependency(JsfManagedBeanMetadata.getMetadataIdentiferType(), getProvidesType());
 		addMetadataTrigger(ROO_JSF_APPLICATION_BEAN);
+		configurableMetadataProvider.addMetadataTrigger(ROO_JSF_APPLICATION_BEAN);
 	}
 
 	protected void deactivate(final ComponentContext context) {
 		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		metadataDependencyRegistry.deregisterDependency(JsfManagedBeanMetadata.getMetadataIdentiferType(), getProvidesType());
 		removeMetadataTrigger(ROO_JSF_APPLICATION_BEAN);
+		configurableMetadataProvider.removeMetadataTrigger(ROO_JSF_APPLICATION_BEAN);
 	}
 
 	@Override

@@ -16,6 +16,8 @@ public interface JsfOperations {
 
 	boolean isScaffoldAvailable();
 
+	boolean isFileUploadAvailable();
+
 	void setup(JsfImplementation jsfImplementation, Theme theme);
 
 	void generateAll(JavaPackage destinationPackage);

@@ -194,7 +194,7 @@ public class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDiscoverin
 			metadataDependencyRegistry.registerDependency(field.getDeclaredByMetadataId(), metadataId);
 
 			// Check field is to be displayed in the entity's list view
-			if (listViewFields <= MAX_LIST_VIEW_FIELDS && isDisplayableInListView(field)) {
+			if (listViewFields < MAX_LIST_VIEW_FIELDS && isDisplayableInListView(field)) {
 				listViewFields++;
 				final CustomDataBuilder customDataBuilder = new CustomDataBuilder();
 				customDataBuilder.put(JsfManagedBeanMetadataProvider.LIST_VIEW_FIELD_CUSTOM_DATA_KEY, "true");

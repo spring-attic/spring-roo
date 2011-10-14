@@ -111,7 +111,7 @@ public class JsfApplicationBeanMetadata extends AbstractItdTypeDetailsProvidingM
 
 	private MethodMetadata getInitMethod() {
 		JavaSymbolName methodName = new JavaSymbolName("init");
-		if (getGovernorMethod(methodName) != null) {
+		if (governorHasMethod(methodName)) {
 			return null;
 		}
 
@@ -164,6 +164,7 @@ public class JsfApplicationBeanMetadata extends AbstractItdTypeDetailsProvidingM
 			bodyBuilder.appendFormalLine("item.setActionExpression(expressionFactory.createMethodExpression(elContext, \"#{" + beanName + "." + DISPLAY_CREATE_DIALOG + "}\", String.class, new Class[0]));");
 			bodyBuilder.appendFormalLine("item.setAjax(false);");
 			bodyBuilder.appendFormalLine("item.setAsync(false);");
+			bodyBuilder.appendFormalLine("item.setUpdate(\"data\");");
 			bodyBuilder.appendFormalLine("submenu.getChildren().add(item);");
 
 			bodyBuilder.appendFormalLine("item = new MenuItem();");
@@ -172,6 +173,7 @@ public class JsfApplicationBeanMetadata extends AbstractItdTypeDetailsProvidingM
 			bodyBuilder.appendFormalLine("item.setActionExpression(expressionFactory.createMethodExpression(elContext, \"#{" + beanName + "." + DISPLAY_LIST + "}\", String.class, new Class[0]));");
 			bodyBuilder.appendFormalLine("item.setAjax(false);");
 			bodyBuilder.appendFormalLine("item.setAsync(false);");
+			bodyBuilder.appendFormalLine("item.setUpdate(\"data\");");
 			bodyBuilder.appendFormalLine("submenu.getChildren().add(item);");
 
 			bodyBuilder.appendFormalLine("menuModel.addSubmenu(submenu);");

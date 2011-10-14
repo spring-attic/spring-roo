@@ -40,7 +40,7 @@
                             <f:setPropertyActionListener value="#{__LC_DOMAIN_TYPE__}" target="#{__BEAN_NAME__.__LC_DOMAIN_TYPE__}" />
                         </p:commandButton>
                         <p:tooltip for="viewButton" value="#{messages.label_view}" showEffect="fade" hideEffect="fade" />
-                        <p:commandButton id="editButton" image="ui-icon-pencil" update="editDialog" oncomplete="editDialog.show()" title="#{messages.label_edit}">
+                        <p:commandButton id="editButton" image="ui-icon-pencil" action="#{__BEAN_NAME__.onEdit}" update="editDialog" oncomplete="editDialog.show()" title="#{messages.label_edit}">
                             <f:setPropertyActionListener value="#{__LC_DOMAIN_TYPE__}" target="#{__BEAN_NAME__.__LC_DOMAIN_TYPE__}" />
                         </p:commandButton>
                         <p:tooltip for="editButton" value="#{messages.label_edit}" showEffect="fade" hideEffect="fade" />
@@ -52,21 +52,21 @@
                 </p:dataTable>
             </p:panel>
         </h:form>
-        <p:dialog id="createDialog" header="#{messages.label_create} __DOMAIN_TYPE__" modal="true" widgetVar="createDialog" visible="#{__BEAN_NAME__.createDialogVisible}" resizable="true" showEffect="fade" hideEffect="explode">
+        <p:dialog id="createDialog" header="#{messages.label_create} __DOMAIN_TYPE__" modal="true" widgetVar="createDialog" dynamic="true" visible="#{__BEAN_NAME__.createDialogVisible}" resizable="true" maximizable="true" showEffect="fade" hideEffect="explode">
             <p:ajax event="close" update="data" listener="#{__BEAN_NAME__.handleDialogClose}" />
             <h:form id="createForm" enctype="multipart/form-data">
                 <h:panelGrid id="createPanelGrid" columns="3" binding="#{__BEAN_NAME__.createPanelGrid}" styleClass="dialog" columnClasses="col1,col2,col3" />
-                <p:commandButton action="#{__BEAN_NAME__.persist}" value="#{messages.label_save}" update="createPanelGrid growl" />
+                <p:commandButton value="#{messages.label_save}" action="#{__BEAN_NAME__.persist}" update="createPanelGrid growl" />
             </h:form>
         </p:dialog>
-        <p:dialog id="editDialog" header="#{messages.label_edit} __DOMAIN_TYPE__" modal="true" widgetVar="editDialog" resizable="true" showEffect="fade" hideEffect="explode">
+        <p:dialog id="editDialog" header="#{messages.label_edit} __DOMAIN_TYPE__" modal="true" widgetVar="editDialog" dynamic="true" resizable="true" maximizable="true" showEffect="fade" hideEffect="explode">
             <p:ajax event="close" update="data" listener="#{__BEAN_NAME__.handleDialogClose}" />
             <h:form id="editForm" enctype="multipart/form-data">
                 <h:panelGrid id="editPanelGrid" columns="3" binding="#{__BEAN_NAME__.editPanelGrid}" styleClass="dialog" columnClasses="col1,col2,col3" />
-                <p:commandButton action="#{__BEAN_NAME__.persist}" value="#{messages.label_save}" update="editPanelGrid growl" />
+                <p:commandButton value="#{messages.label_save}" action="#{__BEAN_NAME__.persist}" update="editPanelGrid growl" />
             </h:form>
         </p:dialog>
-        <p:dialog id="viewDialog" header="#{messages.label_view} __DOMAIN_TYPE__" modal="true" widgetVar="viewDialog" resizable="true" showEffect="fade" hideEffect="explode">
+        <p:dialog id="viewDialog" header="#{messages.label_view} __DOMAIN_TYPE__" modal="true" widgetVar="viewDialog" dynamic="true" resizable="true" maximizable="true" showEffect="fade" hideEffect="explode">
             <h:form id="viewForm" enctype="multipart/form-data">
                 <h:panelGrid id="viewPanelGrid" columns="2" binding="#{__BEAN_NAME__.viewPanelGrid}" styleClass="dialog" columnClasses="col1,col2" />
                 <p:commandButton value="#{messages.label_close}" onclick="viewDialog.hide()" />

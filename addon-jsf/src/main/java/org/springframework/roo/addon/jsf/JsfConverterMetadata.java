@@ -92,7 +92,7 @@ public class JsfConverterMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	private MethodMetadata getGetAsObjectMethod(final MemberTypeAdditions findAllMethod) {
 		final JavaSymbolName methodName = new JavaSymbolName("getAsObject");
 		final List<JavaType> parameterTypes = Arrays.asList(FACES_CONTEXT, UI_COMPONENT, JavaType.STRING);
-		if (getGovernorMethod(methodName, parameterTypes) != null) {
+		if (governorHasMethod(methodName, parameterTypes)) {
 			return null;
 		}
 
@@ -131,7 +131,7 @@ public class JsfConverterMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	private MethodMetadata getGetAsStringMethod(final MemberTypeAdditions findAllMethod) {
 		final JavaSymbolName methodName = new JavaSymbolName("getAsString");
 		final List<JavaType> parameterTypes = Arrays.asList(FACES_CONTEXT, UI_COMPONENT, OBJECT);
-		if (getGovernorMethod(methodName, parameterTypes) != null) {
+		if (governorHasMethod(methodName, parameterTypes)) {
 			return null;
 		}
 
@@ -141,15 +141,9 @@ public class JsfConverterMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		imports.addImport(UI_COMPONENT);
 
 		String simpleTypeName = entity.getSimpleTypeName();
-
+		
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		bodyBuilder.appendFormalLine("if (value == null) {");  
-		bodyBuilder.indent();
-		bodyBuilder.appendFormalLine("return \"\";");
-		bodyBuilder.indentRemove();
-		bodyBuilder.appendFormalLine("}");
-		bodyBuilder.appendFormalLine(simpleTypeName + " " + StringUtils.uncapitalize(simpleTypeName) + " = (" + simpleTypeName + ") value;" );
-		bodyBuilder.appendFormalLine("return " + StringUtils.uncapitalize(simpleTypeName) + ".getDisplayString();");
+		bodyBuilder.appendFormalLine("return value instanceof " + simpleTypeName + " ? ((" + simpleTypeName + ") value).getDisplayString() : \"\";");  
 
 		// Create getAsString method
 		final List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("context"), new JavaSymbolName("component"), new JavaSymbolName("value"));

@@ -24,6 +24,7 @@ public class JsfJavaType {
 	public static final JavaType CONVERTER = new JavaType("javax.faces.convert.Converter");
 	public static final JavaType DATE_TIME_CONVERTER =  new JavaType("javax.faces.convert.DateTimeConverter");
 	public static final JavaType DOUBLE_RANGE_VALIDATOR = new JavaType("javax.faces.validator.DoubleRangeValidator");
+	public static final JavaType ENUM_CONVERTER = new JavaType("javax.faces.convert.EnumConverter");
 	public static final JavaType FACES_CONTEXT = new JavaType("javax.faces.context.FacesContext");
 	public static final JavaType FACES_CONVERTER = new JavaType("javax.faces.convert.FacesConverter");
 	public static final JavaType FACES_MESSAGE = new JavaType("javax.faces.application.FacesMessage");

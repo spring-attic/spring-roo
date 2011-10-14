@@ -12,6 +12,7 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
+import org.springframework.roo.addon.configurable.ConfigurableMetadataProvider;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.TypeLocationService;
@@ -42,6 +43,7 @@ public class JsfConverterMetadataProviderImpl extends AbstractMemberDiscoveringI
 	private static final int LAYER_POSITION = LayerType.HIGHEST.getPosition();
 
 	// Fields
+	@Reference private ConfigurableMetadataProvider configurableMetadataProvider;
 	@Reference private LayerService layerService;
 	@Reference private TypeLocationService typeLocationService;
 	private final Map<JavaType, String> entityToConverterMidMap = new LinkedHashMap<JavaType, String>();
@@ -51,12 +53,14 @@ public class JsfConverterMetadataProviderImpl extends AbstractMemberDiscoveringI
 		metadataDependencyRegistry.addNotificationListener(this);
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		addMetadataTrigger(ROO_JSF_CONVERTER);
+		configurableMetadataProvider.addMetadataTrigger(ROO_JSF_CONVERTER);
 	}
 
 	protected void deactivate(final ComponentContext context) {
 		metadataDependencyRegistry.removeNotificationListener(this);
 		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		removeMetadataTrigger(ROO_JSF_CONVERTER);
+		configurableMetadataProvider.removeMetadataTrigger(ROO_JSF_CONVERTER);
 	}
 
 	@Override
