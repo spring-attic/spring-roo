@@ -81,12 +81,13 @@ public class JavaType implements Comparable<JavaType> {
 		COMMON_COLLECTION_TYPES.add(TreeMap.class.getName());
 		COMMON_COLLECTION_TYPES.add(Vector.class.getName());
 	}
-
+	
 	/**
 	 * Returns a {@link JavaType} for a list of the given element type
 	 *
 	 * @param elementType the type of element in the list (required)
 	 * @return a non-<code>null</code> type
+	 * @since 1.2.0
 	 */
 	public static JavaType listOf(final JavaType elementType) {
 		return new JavaType(List.class.getName(), 0, DataType.TYPE, null, Arrays.asList(elementType));
@@ -397,12 +398,29 @@ public class JavaType implements Comparable<JavaType> {
 		return defaultPackage;
 	}
 
+	/**
+	 * Indicates whether this type is a primitive, or in the case of an array,
+	 * whether its elements are primitive.
+	 * 
+	 * @return see above
+	 */
 	public boolean isPrimitive() {
 		return DataType.PRIMITIVE == dataType;
 	}
 
 	public boolean isCommonCollectionType() {
 		return COMMON_COLLECTION_TYPES.contains(this.fullyQualifiedTypeName);
+	}
+	
+	/**
+	 * Indicates whether a field or variable of this type can contain multiple
+	 * values
+	 *  
+	 * @return see above
+	 * @since 1.2.0
+	 */
+	public boolean isMultiValued() {
+		return isCommonCollectionType() || isArray();
 	}
 
 	public List<JavaType> getParameters() {
