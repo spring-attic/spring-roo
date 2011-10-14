@@ -35,9 +35,43 @@ import org.springframework.roo.support.util.StringUtils;
 public class DisplayStringMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 	// Constants
+	private static final int MAX_LIST_VIEW_FIELDS = 4;
+	private static final String DEFAULT_SEPARATOR = " ";
 	private static final String PROVIDES_TYPE_STRING = DisplayStringMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
-	private static final int MAX_LIST_VIEW_FIELDS = 4;
+
+	/**
+	 * A method call and its associated imports
+	 *
+	 * @author Andrew Swan
+	 * @since 1.2.0
+	 */
+	private static class MethodCall {
+
+		// Fields
+		final String codeSnippet;
+		final JavaType[] imports;
+
+		/**
+		 * Constructor
+		 *
+		 * @param codeSnippet the Java snippet that calls the method
+		 * @param imports any imports required for the snippet to compile
+		 */
+		private MethodCall(final String codeSnippet, final JavaType... imports) {
+			Assert.hasText(codeSnippet, "Method call is required");
+			this.imports = imports;
+			this.codeSnippet = codeSnippet;
+		}
+
+		private String getCodeSnippet() {
+			return codeSnippet;
+		}
+
+		private JavaType[] getImports() {
+			return imports;
+		}
+	}
 
 	// Fields
 	private final DisplayStringAnnotationValues annotationValues;
@@ -79,78 +113,105 @@ public class DisplayStringMetadata extends AbstractItdTypeDetailsProvidingMetada
 	 * @return the display name method declared on this type or that will be introduced (or null if undeclared and not introduced)
 	 */
 	private MethodMetadata getDisplayStringMethod() {
-		JavaSymbolName methodName = new JavaSymbolName("getDisplayString");
-		if (getGovernorMethod(methodName) != null) {
+		final JavaSymbolName methodName = new JavaSymbolName("getDisplayString");
+		if (governorHasMethod(methodName)) {
 			return null;
 		}
-
-		final ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
-
-		final List<?> fieldsList = CollectionUtils.arrayToList(annotationValues.getFields());
-		int methodCount = 0;
-		final List<String> displayMethods = new ArrayList<String>();
-		for (MethodMetadata accessor : locatedAccessors) {
-			String accessorName = accessor.getMethodName().getSymbolName();
-			String accessorText;
-			if (accessor.getReturnType().isCommonCollectionType() || accessor.getReturnType().isArray()) {
-				continue;
-			} else if (CALENDAR.equals(accessor.getReturnType())) {
-				accessorText = accessorName + "() == null ? \"\" : DateFormat.getDateInstance(DateFormat.LONG).format(" + accessorName + "().getTime())";
-			} else if (DATE.equals(accessor.getReturnType())) {
-				accessorText = accessorName + "() == null ? \"\" : DateFormat.getDateInstance(DateFormat.LONG).format(" + accessorName + "())";
-			} else {
-				accessorText = accessorName + "()";
-			}
-
-			if (!fieldsList.isEmpty()) {
-				String fieldName = BeanInfoUtils.getPropertyNameForJavaBeanMethod(accessor).getSymbolName();
-				if (fieldsList.contains(StringUtils.uncapitalize(fieldName))) {
-					addDateFormatImport(imports, accessor);
-					displayMethods.add(accessorText);
-				}
-				continue;
-			}
-
-			if (methodCount <= MAX_LIST_VIEW_FIELDS) {
-				if (identifierAccessor != null && accessor.hasSameName(identifierAccessor)) {
-					continue;
-				}
-				methodCount++;
-				addDateFormatImport(imports, accessor);
-				displayMethods.add(accessorText);
-			}
-		}
-
-		if (displayMethods.isEmpty() && identifierAccessor != null) {
-			displayMethods.add(identifierAccessor.getMethodName().getSymbolName() + "()");
-		}
-
-		String separator = StringUtils.defaultIfEmpty(annotationValues.getSeparator(), " ");
-		final StringBuilder builder = new StringBuilder("return new StringBuilder()");
-		for (int i = 0; i < displayMethods.size(); i++) {
-			if (i > 0) {
-				builder.append(".append(\"").append(separator).append("\")");
-			}
-			builder.append(".append(").append(displayMethods.get(i)).append(")");
-		}
-		builder.append(".toString();");
-
 		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		bodyBuilder.appendFormalLine(builder.toString());
-
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, STRING, bodyBuilder);
-		return methodBuilder.build();
+		bodyBuilder.appendFormalLine(getDisplayMethodBody(getDisplayMethodCalls(), annotationValues.getSeparator()));
+		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, STRING, bodyBuilder).build();
+	}
+	
+	/**
+	 * Generates the body of the <code>getDisplayString</code> method
+	 * 
+	 * @param displayMethods the method calls that return the values to be
+	 * displayed (required, can be empty)
+	 * @param separator the separator to show between each display value
+	 * (defaulted to {@value #DEFAULT_SEPARATOR} if blank)
+	 * @return a non-empty method body
+	 */
+	private String getDisplayMethodBody(final List<String> displayMethods, final String separator) {
+		final StringBuilder builder = new StringBuilder("return new StringBuilder()");
+		final String delimiter = ".append(\"" + StringUtils.defaultIfEmpty(separator, DEFAULT_SEPARATOR) + "\")";
+		builder.append(StringUtils.collectionToDelimitedString(displayMethods, delimiter, ".append(", ")"));
+		builder.append(".toString();");
+		return builder.toString();
 	}
 
-	private void addDateFormatImport(final ImportRegistrationResolver imports, final MethodMetadata accessor) {
-		if (CALENDAR.equals(accessor.getReturnType()) || DATE.equals(accessor.getReturnType())) {
-			imports.addImport(DATE_FORMAT);
+	/**
+	 * Returns the invocations of the display methods, e.g. "getFirstName()"
+	 *
+	 * @return a non-<code>null</code> list (can be empty)
+	 */
+	private List<String> getDisplayMethodCalls() {
+		final ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
+
+		final List<?> displayFields = CollectionUtils.arrayToList(annotationValues.getFields());
+		final List<String> displayMethodCalls = new ArrayList<String>();
+		for (final MethodMetadata accessor : locatedAccessors) {
+			final MethodCall accessorCall = getAccessorCall(accessor);
+			if (accessorCall != null && isDisplayFieldAccessor(displayFields, displayMethodCalls, accessor)) {
+				displayMethodCalls.add(accessorCall.getCodeSnippet());
+				imports.addImports(accessorCall.getImports());
+			}
 		}
+
+		if (displayMethodCalls.isEmpty() && identifierAccessor != null) {
+			// Fall back to displaying the entity's ID
+			displayMethodCalls.add(identifierAccessor.getMethodName().getSymbolName() + "()");
+		}
+		return displayMethodCalls;
+	}
+
+	/**
+	 * Returns a Java snippet that invokes the given accessor for display purposes.
+	 *
+	 * @param accessor the accessor to check (required)
+	 * @return a String like "getFirstName()"; <code>null</code> if this
+	 * accessor is not suitable for a display value
+	 */
+	private MethodCall getAccessorCall(final MethodMetadata accessor) {
+		if (accessor.getReturnType().isMultiValued()) {
+			return null;
+		}
+		final String accessorName = accessor.getMethodName().getSymbolName();
+		if (CALENDAR.equals(accessor.getReturnType())) {
+			final String codeSnippet = accessorName + "() == null ? \"\" : DateFormat.getDateInstance(DateFormat.LONG).format(" + accessorName + "().getTime())";
+			return new MethodCall(codeSnippet, DATE_FORMAT);
+		}
+		if (DATE.equals(accessor.getReturnType())) {
+			final String codeSnippet = accessorName + "() == null ? \"\" : DateFormat.getDateInstance(DateFormat.LONG).format(" + accessorName + "())";
+			return new MethodCall(codeSnippet, DATE_FORMAT);
+		}
+		return new MethodCall(accessorName + "()");
+	}
+
+	/**
+	 * Indicates whether the given accessor is for a field to be displayed
+	 *
+	 * @param displayFields the fields specified by the user (can be empty)
+	 * @param displayMethods
+	 * @param accessor
+	 * @return
+	 */
+	private boolean isDisplayFieldAccessor(final List<?> displayFields, final List<String> displayMethods, final MethodMetadata accessor) {
+		if (CollectionUtils.isEmpty(displayFields)) {
+			// The user specified no display fields; use the first "x" non-ID accessors
+			return displayMethods.size() <= MAX_LIST_VIEW_FIELDS && !isIdentifierAccessor(accessor);
+		}
+		// The user did specify some display fields; see if this was one of them
+		final String fieldName = BeanInfoUtils.getPropertyNameForJavaBeanMethod(accessor).getSymbolName();
+		return displayFields.contains(StringUtils.uncapitalize(fieldName));
+	}
+
+	private boolean isIdentifierAccessor(final MethodMetadata accessor) {
+		return accessor.hasSameName(identifierAccessor);
 	}
 
 	@Override
 	public String toString() {
-		ToStringCreator tsc = new ToStringCreator(this);
+		final ToStringCreator tsc = new ToStringCreator(this);
 		tsc.append("identifier", getId());
 		tsc.append("valid", valid);
 		tsc.append("aspectName", aspectName);
