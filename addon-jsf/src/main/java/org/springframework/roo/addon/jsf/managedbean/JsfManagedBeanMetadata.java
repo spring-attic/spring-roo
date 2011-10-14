@@ -227,8 +227,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 				methods.add(getAutoCompleteEnumMethod(jsfFieldHolder.getField()));
 			} else if (jsfFieldHolder.isGenericType()) {
 				final String fieldName = jsfFieldHolder.getField().getFieldName().getSymbolName();
-				final Map<JavaType, String> genericTypes = jsfFieldHolder.getGenericTypes();
-				final JavaType genericType = genericTypes.keySet().iterator().next();
+				final JavaType genericType = jsfFieldHolder.getGenericType();
 				final JavaSymbolName selectedFieldName = new JavaSymbolName(getSelectedFieldName(fieldName));
 				final JavaType listType = getListType(genericType);
 
@@ -354,18 +353,17 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 			imports.addImport(ARRAY_LIST);
 
 			final String fieldName = jsfFieldHolder.getField().getFieldName().getSymbolName();
-			final Map.Entry<JavaType, String> entry = jsfFieldHolder.getGenericTypes().entrySet().iterator().next();
-			final JavaType genericType = entry.getKey();
-			final String genericTypeBeanName = entry.getValue();
+			final JavaType genericType = jsfFieldHolder.getGenericType();
+			final String genericTypeBeanName = jsfFieldHolder.getGenericTypeBeanName();
 			final String genericTypePlural = jsfFieldHolder.getGenericTypePlural();
-			
+
 			bodyBuilder.appendFormalLine("if (" + entityName.getSymbolName() + " != null && " + entityName.getSymbolName() + ".get" + (StringUtils.hasText(genericTypeBeanName) ? genericTypePlural : StringUtils.capitalize(fieldName)) + "() != null) {");
 			bodyBuilder.indent();
 			bodyBuilder.appendFormalLine(getSelectedFieldName(fieldName) + " = new ArrayList<" + genericType.getSimpleTypeName() + ">(" + entityName.getSymbolName() + ".get" + StringUtils.capitalize(fieldName) + "());");
 			bodyBuilder.indentRemove();
 			bodyBuilder.appendFormalLine("}");
 		}
-		
+
 		bodyBuilder.appendFormalLine("return null;");
 		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), PUBLIC, methodName, JavaType.STRING, new ArrayList<AnnotatedJavaType>(), new ArrayList<JavaSymbolName>(), bodyBuilder);
 		return methodBuilder.build();
@@ -641,9 +639,8 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 					}
 				}
 			} else if (jsfFieldHolder.isGenericType()) {
-				final Map.Entry<JavaType, String> entry = jsfFieldHolder.getGenericTypes().entrySet().iterator().next();
-				final JavaType genericType = entry.getKey();
-				final String genericTypeBeanName = entry.getValue();
+				final JavaType genericType = jsfFieldHolder.getGenericType();
+				final String genericTypeBeanName = jsfFieldHolder.getGenericTypeBeanName();
 				final String genericTypeFieldName = StringUtils.uncapitalize(genericType.getSimpleTypeName());
 				
 				imports.addImport(PRIMEFACES_SELECT_MANY_MENU);
@@ -1030,8 +1027,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 				continue;
 			}
 			
-			final Map.Entry<JavaType, String> entry = jsfFieldHolder.getGenericTypes().entrySet().iterator().next();
-			final String genericTypeBeanName = entry.getValue();
+			final String genericTypeBeanName = jsfFieldHolder.getGenericTypeBeanName();
 			final String genericTypePlural = jsfFieldHolder.getGenericTypePlural();
 			final JavaSymbolName fieldName = new JavaSymbolName(getSelectedFieldName(StringUtils.hasText(genericTypeBeanName) ? genericTypePlural : jsfFieldHolder.getField().getFieldName().getSymbolName()));
 			bodyBuilder.appendFormalLine(fieldName.getSymbolName() + " = null;");

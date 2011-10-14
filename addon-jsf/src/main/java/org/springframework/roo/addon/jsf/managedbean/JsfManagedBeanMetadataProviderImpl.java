@@ -206,23 +206,25 @@ public class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDiscoverin
 
 			final JavaType fieldType = field.getFieldType();
 			final boolean enumerated = field.getCustomData().keySet().contains(CustomDataKeys.ENUMERATED_FIELD) || isEnum(fieldType);
-			final Map<JavaType, String> genericTypes = new LinkedHashMap<JavaType, String>();
+			JavaType genericType = null;
+			String genericTypeBeanName = null;
 			String genericTypePlural = null;
 			MemberDetails applicationTypeMemberDetails = null;
 			final Map<MethodMetadataCustomDataKey, MemberTypeAdditions> crudAdditions = new LinkedHashMap<MethodMetadataCustomDataKey, MemberTypeAdditions>();
 			
 			if (!enumerated) {
 				if (fieldType.isCommonCollectionType()) {
-					genericTypeLoop: for (JavaType genericType : fieldType.getParameters()) {
-						if (isApplicationType(genericType)) {
+					genericTypeLoop: for (JavaType parameter : fieldType.getParameters()) {
+						if (isApplicationType(parameter)) {
 							for (ClassOrInterfaceTypeDetails managedBean : managedBeans) {
 								AnnotationMetadata managedBeanAnnotation = managedBean.getAnnotation(ROO_JSF_MANAGED_BEAN);
 								AnnotationAttributeValue<?> entityAttribute = managedBeanAnnotation.getAttribute("entity");
 								if (entityAttribute != null) {
 									JavaType attrValue = (JavaType) entityAttribute.getValue();
-									if (attrValue.equals(genericType)) {
+									if (attrValue.equals(parameter)) {
 										AnnotationAttributeValue<?> beanNameAttribute = managedBeanAnnotation.getAttribute("beanName");
-										genericTypes.put(genericType, (String) beanNameAttribute.getValue());
+										genericType = parameter;
+										genericTypeBeanName = (String) beanNameAttribute.getValue();
 										final PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(genericType));
 										genericTypePlural = pluralMetadata.getPlural();
 										break genericTypeLoop; // Only support one generic type parameter
@@ -230,8 +232,8 @@ public class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDiscoverin
 								}
 							}
 							// Generic type is not an entity - test for an enum
-							if (isEnum(genericType)) {
-								genericTypes.put(genericType, "");
+							if (isEnum(parameter)) {
+								genericType = parameter;
 							}
 						}
 					}
@@ -243,7 +245,7 @@ public class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDiscoverin
 				}
 			}
 
-			final JsfFieldHolder jsfFieldHolder = new JsfFieldHolder(field, enumerated, genericTypePlural, genericTypes, applicationTypeMemberDetails, crudAdditions);
+			final JsfFieldHolder jsfFieldHolder = new JsfFieldHolder(field, enumerated, genericType, genericTypePlural, genericTypeBeanName, applicationTypeMemberDetails, crudAdditions);
 			locatedFields.add(jsfFieldHolder);
 		}
 

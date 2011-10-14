@@ -23,24 +23,24 @@ public class JsfFieldHolder {
 	// Fields
 	private final FieldMetadata field;
 	private boolean enumerated;
-	private final String genericTypePlural;
-	private Map<JavaType, String> genericTypes;
+	private JavaType genericType;
+	private String genericTypePlural;
+	private String genericTypeBeanName;
 	private MemberDetails applicationTypeMemberDetails;
 	private Map<MethodMetadataCustomDataKey, MemberTypeAdditions> crudAdditions;
 	private boolean applicationType;
-	private boolean genericType;
 	private boolean uploadFileField;
 
-	public JsfFieldHolder(final FieldMetadata field, final boolean enumerated, final String genericTypePlural, final Map<JavaType, String> genericTypes, final MemberDetails applicationTypeMemberDetails, final Map<MethodMetadataCustomDataKey, MemberTypeAdditions> crudAdditions) {
+	public JsfFieldHolder(final FieldMetadata field, final boolean enumerated, final JavaType genericType, final String genericTypePlural, final String genericTypeBeanName, final MemberDetails applicationTypeMemberDetails, final Map<MethodMetadataCustomDataKey, MemberTypeAdditions> crudAdditions) {
 		Assert.notNull(field, "Field required");
 		this.field = field;
 		this.enumerated = enumerated;
+		this.genericType = genericType;
 		this.genericTypePlural = genericTypePlural;
-		this.genericTypes = genericTypes;
+		this.genericTypeBeanName = genericTypeBeanName;
 		this.crudAdditions = crudAdditions;
 		this.applicationTypeMemberDetails = applicationTypeMemberDetails;
 		applicationType = this.applicationTypeMemberDetails != null && !CollectionUtils.isEmpty(this.crudAdditions);
-		genericType = !CollectionUtils.isEmpty(this.genericTypes) && this.genericTypes.size() == 1;
 		uploadFileField = field.getAnnotation(ROO_UPLOADED_FILE) != null;
 	}
 
@@ -52,12 +52,16 @@ public class JsfFieldHolder {
 		return enumerated;
 	}
 
+	public JavaType getGenericType() {
+		return genericType;
+	}
+
 	public String getGenericTypePlural() {
 		return genericTypePlural;
 	}
 
-	public Map<JavaType, String> getGenericTypes() {
-		return genericTypes;
+	public String getGenericTypeBeanName() {
+		return genericTypeBeanName;
 	}
 
 	public MemberDetails getApplicationTypeMemberDetails() {
@@ -68,12 +72,12 @@ public class JsfFieldHolder {
 		return crudAdditions;
 	}
 
+	public boolean isGenericType() {
+		return genericType != null && genericTypeBeanName != null;
+	}
+	
 	public boolean isApplicationType() {
 		return applicationType;
-	}
-
-	public boolean isGenericType() {
-		return genericType;
 	}
 
 	public boolean isUploadFileField() {
