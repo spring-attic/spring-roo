@@ -82,10 +82,6 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 		return hasWebXml();
 	}
 
-	public boolean isFileUploadAvailable() {
-		return hasFacesConfig();
-	}
-
 	public void setup(JsfImplementation jsfImplementation, final Theme theme) {
 		if (jsfImplementation == null) {
 			jsfImplementation = JsfImplementation.ORACLE_MOJARRA;

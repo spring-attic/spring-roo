@@ -32,11 +32,6 @@ public class JsfCommands implements CommandMarker {
 		return jsfOperations.isScaffoldAvailable();
 	}
 	
-	@CliAvailabilityIndicator({ "field file" })
-	public boolean isFileUploadAvailable() {
-		return jsfOperations.isFileUploadAvailable();
-	}
-
 	@CliCommand(value = "web jsf setup", help = "Set up JSF environment")
 	public void webJsfSetup(
 		@CliOption(key = "implementation", mandatory = false, help = "The JSF implementation to use") final JsfImplementation jsfImplementation,
