@@ -19,7 +19,6 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.addon.jsf.managedbean.JsfManagedBeanMetadata;
-import org.springframework.roo.addon.jsf.model.Theme;
 import org.springframework.roo.addon.jsf.model.UploadedFileContentType;
 import org.springframework.roo.addon.plural.PluralMetadata;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
