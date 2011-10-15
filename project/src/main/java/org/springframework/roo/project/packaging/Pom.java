@@ -11,7 +11,7 @@ import org.apache.felix.scr.annotations.Service;
  */
 @Component
 @Service
-public class Pom extends AbstractPackagingType {
+public class Pom extends CorePackagingType {
 
 	/**
 	 * Constructor

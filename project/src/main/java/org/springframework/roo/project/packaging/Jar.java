@@ -20,7 +20,7 @@ import org.springframework.roo.support.util.TemplateUtils;
  */
 @Component
 @Service
-public class Jar extends AbstractPackagingType {
+public class Jar extends CorePackagingType {
 
 	/**
 	 * Constructor invoked by the OSGi container

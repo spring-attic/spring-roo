@@ -34,13 +34,13 @@ public class PackagingTypeConverter implements Converter<PackagingType> {
 
 	protected void bindPackagingType(final PackagingType packagingType) {
 		synchronized (mutex) {
-			packagingTypes.put(packagingType.getName(), packagingType);
+			packagingTypes.put(packagingType.getId(), packagingType);
 		}
 	}
 
 	protected void unbindPackagingType(final PackagingType packagingType) {
 		synchronized (mutex) {
-			packagingTypes.remove(packagingType.getName());
+			packagingTypes.remove(packagingType.getId());
 		}
 	}
 
@@ -58,9 +58,9 @@ public class PackagingTypeConverter implements Converter<PackagingType> {
 	}
 
 	public boolean getAllPossibleValues(final List<String> completions, final Class<?> targetType, final String existingData, final String optionContext, final MethodTarget target) {
-		for (final String packaging : packagingTypes.keySet()) {
-			if (!StringUtils.hasText(existingData) || packaging.toLowerCase().startsWith(existingData.toLowerCase())) {
-				completions.add(packaging.toUpperCase());
+		for (final String id : packagingTypes.keySet()) {
+			if (!StringUtils.hasText(existingData) || id.toLowerCase().startsWith(existingData.toLowerCase())) {
+				completions.add(id.toUpperCase());
 			}
 		}
 		Collections.sort(completions);

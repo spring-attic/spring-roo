@@ -10,14 +10,25 @@ import org.springframework.roo.project.GAV;
  * @since 1.2.0
  */
 public interface PackagingType {
-
+	
 	/**
-	 * Returns the Maven name for this type of packaging, i.e. the text that
-	 * appears in the POM's <code>&lt;packaging&gt;</code> element.
-	 *
-	 * @return a non-blank name
+	 * Returns the unique identifier of this {@link PackagingType}, for use in
+	 * the Roo user interface.
+	 * <p>
+	 * The intent of this method is to allow third-party addons to provide
+	 * alternative behaviour for a given Maven packaging type. For example, the
+	 * core Roo WAR packaging type will have an ID of "war". If the user wants
+	 * to customise how WAR modules are generated, they can implement their own
+	 * {@link PackagingType} with an ID of (say) "my-war". The Roo shell will
+	 * then offer them a choice of "WAR" and "MY-WAR" when entering the "new
+	 * module" command; both of these options will result in the new module
+	 * having a Maven packaging type of "war" (as both the core and third-party
+	 * {@link PackagingType}s will return that value when {@link #getName()} is
+	 * called).
+	 * 
+	 * @return a non-blank ID, unique when case is ignored
 	 */
-	String getName();
+	String getId();
 
 	/**
 	 * Creates the initial set of artifacts (files and directories) for a project or module having this type of packaging

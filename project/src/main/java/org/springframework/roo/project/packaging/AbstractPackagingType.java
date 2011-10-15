@@ -22,7 +22,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 /**
- * Convenient superclass for implementing {@link PackagingType}.
+ * Convenient superclass for implementing a {@link PackagingType}.
  *
  * Uses the "Template Method" GoF pattern.
  *
@@ -42,12 +42,14 @@ public abstract class AbstractPackagingType implements PackagingType {
 	@Reference protected PathResolver pathResolver;
 	@Reference protected ProjectOperations projectOperations;
 
+	private final String id;
 	private final String name;
 	private final String pomTemplate;
 
 	/**
 	 * Constructor
 	 *
+	 * @param id the unique ID of this packaging type, see {@link PackagingType#getId()}
 	 * @param name the name of this type of packaging as used in the POM (required)
 	 * @param pomTemplate the path of this packaging type's POM template,
 	 * relative to its own package, as per {@link Class#getResourceAsStream(String)};
@@ -55,11 +57,17 @@ public abstract class AbstractPackagingType implements PackagingType {
 	 * artifactId, and version elements; this parent element will be removed if
 	 * not required
 	 */
-	protected AbstractPackagingType(final String name, final String pomTemplate) {
+	protected AbstractPackagingType(final String id, final String name, final String pomTemplate) {
+		Assert.hasText(id, "ID is required");
 		Assert.hasText(name, "Name is required");
 		Assert.hasText(pomTemplate, "POM template path is required");
+		this.id = id;
 		this.name = name;
 		this.pomTemplate = pomTemplate;
+	}
+	
+	public String getId() {
+		return id;
 	}
 
 	public String getName() {

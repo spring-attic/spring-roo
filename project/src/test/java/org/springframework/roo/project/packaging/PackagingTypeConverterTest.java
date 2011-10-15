@@ -25,38 +25,39 @@ import org.springframework.roo.model.JavaType;
 public class PackagingTypeConverterTest {
 
 	// Constants
-	private static final String JAR = "jar";
-	private static final String JOB = "job";
-	private static final String WAR = "war";
+	private static final String UNKNOWN = "no-such-id";
+	private static final String CORE_JAR_ID = "jar";
+	private static final String CUSTOM_JAR_ID = "jar_custom";
+	private static final String CORE_WAR_ID = "war";
 
 	// Fixture
 	private PackagingTypeConverter converter;
-	@Mock private PackagingType mockPackagingType1;
-	@Mock private PackagingType mockPackagingType2;
-	@Mock private PackagingType mockPackagingType3;
+	@Mock private PackagingType mockCoreJarPackaging;
+	@Mock private PackagingType mockCustomJarPackaging;
+	@Mock private PackagingType mockWarPackaging;
 
 	@Before
 	public void setUp() {
 		// Mocks
 		MockitoAnnotations.initMocks(this);
-		when(mockPackagingType1.getName()).thenReturn(JAR);
-		when(mockPackagingType2.getName()).thenReturn(WAR);
-		when(mockPackagingType3.getName()).thenReturn(JOB);
+		when(mockCoreJarPackaging.getId()).thenReturn(CORE_JAR_ID);
+		when(mockCustomJarPackaging.getId()).thenReturn(CUSTOM_JAR_ID);
+		when(mockWarPackaging.getId()).thenReturn(CORE_WAR_ID);
 
 		// Object under test
 		this.converter = new PackagingTypeConverter();
-		this.converter.bindPackagingType(mockPackagingType1);
-		this.converter.bindPackagingType(mockPackagingType2);
-		this.converter.bindPackagingType(mockPackagingType3);
+		this.converter.bindPackagingType(mockCoreJarPackaging);
+		this.converter.bindPackagingType(mockCustomJarPackaging);
+		this.converter.bindPackagingType(mockWarPackaging);
 	}
-
+	
 	@Test
-	public void testDoesNotSupportJavaType() {
+	public void testDoesNotSupportWrongType() {
 		assertFalse(converter.supports(JavaType.class, null));
 	}
 
 	@Test
-	public void testSupportsPackagingType() {
+	public void testSupportsCorrectType() {
 		assertTrue(converter.supports(PackagingType.class, null));
 	}
 
@@ -91,38 +92,38 @@ public class PackagingTypeConverterTest {
 
 	@Test
 	public void testConvertPartialString() {
-		assertInvalidString(WAR.substring(0, 1));
+		assertInvalidString(CORE_WAR_ID.substring(0, 1));
 	}
 
 	@Test
 	public void testConvertValidString() {
 		// Invoke and check
-		assertEquals(mockPackagingType2, converter.convertFromText(WAR, PackagingType.class, null));
+		assertEquals(mockCustomJarPackaging, converter.convertFromText(CUSTOM_JAR_ID, PackagingType.class, null));
 	}
 
 	@Test
 	public void testGetAllPossibleValuesForInvalidExistingData() {
-		assertPossibleValues("x");
+		assertPossibleValues(UNKNOWN);
 	}
 
 	@Test
 	public void testGetAllPossibleValuesForNullExistingData() {
-		assertPossibleValues(null, JAR.toUpperCase(), JOB.toUpperCase(), WAR.toUpperCase());
+		assertPossibleValues(null, CORE_JAR_ID.toUpperCase(), CUSTOM_JAR_ID.toUpperCase(), CORE_WAR_ID.toUpperCase());
 	}
 
 	@Test
 	public void testGetAllPossibleValuesForEmptyExistingData() {
-		assertPossibleValues("", JAR.toUpperCase(), JOB.toUpperCase(), WAR.toUpperCase());
+		assertPossibleValues("", CORE_JAR_ID.toUpperCase(), CUSTOM_JAR_ID.toUpperCase(), CORE_WAR_ID.toUpperCase());
 	}
 
 	@Test
 	public void testGetAllPossibleValuesForLowerCaseExistingData() {
-		assertPossibleValues("j", JAR.toUpperCase(), JOB.toUpperCase());
+		assertPossibleValues("j", CORE_JAR_ID.toUpperCase(), CUSTOM_JAR_ID.toUpperCase());
 	}
 
 	@Test
 	public void testGetAllPossibleValuesForUpperCaseExistingData() {
-		assertPossibleValues("J", JAR.toUpperCase(), JOB.toUpperCase());
+		assertPossibleValues("J", CORE_JAR_ID.toUpperCase(), CUSTOM_JAR_ID.toUpperCase());
 	}
 
 	/**
