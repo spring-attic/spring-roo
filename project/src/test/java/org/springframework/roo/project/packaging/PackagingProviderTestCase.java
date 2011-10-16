@@ -10,35 +10,40 @@ import org.junit.Test;
 import org.springframework.roo.support.util.StringUtils;
 
 /**
- * Convenient superclass for writing tests of concrete {@link PackagingType} implementations.
+ * Convenient superclass for writing tests of concrete {@link PackagingProvider} implementations.
  *
  * @author Andrew Swan
  * @since 1.2.0
  */
-public abstract class PackagingTypeTestCase<T extends AbstractPackagingType> {
+public abstract class PackagingProviderTestCase<T extends AbstractPackagingProvider> {
 
 	// Fixture
-	private T packagingType;
+	private T provider;
 
 	@Before
 	public void setUp() throws Exception {
-		this.packagingType = getPackagingType();
+		this.provider = getProvider();
 	}
+	
+	/**
+	 * Subclasses must return an instance of the provider being tested
+	 * 
+	 * @return a non-<code>null</code> instance
+	 */
+	protected abstract T getProvider();
 
 	@Test
 	public void testNameIsNotBlank() {
-		assertTrue(StringUtils.hasText(packagingType.getName()));
+		assertTrue(StringUtils.hasText(provider.getName()));
 	}
-
-	protected abstract T getPackagingType();
 
 	@Test
 	public void testTemplateExists() {
 		// Set up
-		final String pomTemplate = packagingType.getPomTemplate();
+		final String pomTemplate = provider.getPomTemplate();
 
 		// Invoke
-		final URL pomTemplateUrl = packagingType.getClass().getResource(pomTemplate);
+		final URL pomTemplateUrl = provider.getClass().getResource(pomTemplate);
 
 		// Check
 		assertNotNull("Can't find POM template '" + pomTemplate + "'", pomTemplateUrl);

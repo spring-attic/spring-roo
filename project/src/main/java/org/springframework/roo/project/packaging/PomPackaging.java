@@ -4,19 +4,19 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 
 /**
- * The Maven "pom" {@link PackagingType}
+ * The Maven "pom" {@link PackagingProvider}
  *
  * @author Andrew Swan
  * @since 1.2.0
  */
 @Component
 @Service
-public class Pom extends CorePackagingType {
+public class PomPackaging extends CorePackagingProvider {
 
 	/**
 	 * Constructor
 	 */
-	public Pom() {
+	public PomPackaging() {
 		super("pom", "parent-pom-template.xml");
 	}
 }

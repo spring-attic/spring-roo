@@ -3,7 +3,7 @@ package org.springframework.roo.project;
 import java.io.IOException;
 
 import org.springframework.roo.model.JavaPackage;
-import org.springframework.roo.project.packaging.PackagingType;
+import org.springframework.roo.project.packaging.PackagingProvider;
 
 /**
  * Provides Maven project operations.
@@ -31,7 +31,7 @@ public interface MavenOperations extends ProjectOperations {
 	 * @param parent the Maven coordinates of the parent POM (can be <code>null</code> for none)
 	 * @param packagingType the Maven packaging of the project to create (pom, war, jar, ear, etc.) (required)
 	 */
-	void createProject(JavaPackage topLevelPackage, String projectName, Integer majorJavaVersion, GAV parent, PackagingType packagingType);
+	void createProject(JavaPackage topLevelPackage, String projectName, Integer majorJavaVersion, GAV parent, PackagingProvider packagingType);
 
 	/**
 	 * Executes the given Maven command
@@ -56,7 +56,7 @@ public interface MavenOperations extends ProjectOperations {
 	 * @param parent the Maven coordinates of the parent POM (can be <code>null</code> for none)
 	 * @param packagingType the Maven packaging of the module to create (pom, war, jar, ear, etc.) (required)
 	 */
-	void createModule(JavaPackage topLevelPackage, String name, GAV parent,	PackagingType packagingType);
+	void createModule(JavaPackage topLevelPackage, String name, GAV parent,	PackagingProvider packagingType);
 
 	/**
 	 * Changes the focus to the given module (or root) of the project.

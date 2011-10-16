@@ -14,7 +14,7 @@ import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.process.manager.ActiveProcessManager;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.process.manager.ProcessManager;
-import org.springframework.roo.project.packaging.PackagingType;
+import org.springframework.roo.project.packaging.PackagingProvider;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.IOUtils;
@@ -46,7 +46,7 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements Ma
 		return pathResolver.getRoot(Path.ROOT);
 	}
 
-	public void createProject(final JavaPackage topLevelPackage, final String projectName, final Integer majorJavaVersion, final GAV parentPom, final PackagingType packagingType) {
+	public void createProject(final JavaPackage topLevelPackage, final String projectName, final Integer majorJavaVersion, final GAV parentPom, final PackagingProvider packagingType) {
 		Assert.isTrue(isCreateProjectAvailable(), "Project creation is unavailable at this time");
 		final String javaVersion = getJavaVersion(majorJavaVersion);
 		packagingType.createArtifacts(topLevelPackage, projectName, javaVersion, parentPom);
@@ -148,7 +148,7 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements Ma
 		return false;
 	}
 
-	public void createModule(final JavaPackage topLevelPackage, final String name, final GAV parent, final PackagingType packagingType) {
+	public void createModule(final JavaPackage topLevelPackage, final String name, final GAV parent, final PackagingProvider packagingType) {
 		Assert.isTrue(isCreateModuleAvailable(), "Cannot create modules at this time");
 		final String moduleName = StringUtils.defaultIfEmpty(name, topLevelPackage.getLastElement());
 		final GAV module = new GAV(topLevelPackage.getFullyQualifiedPackageName(), moduleName, parent.getVersion());

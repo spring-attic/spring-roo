@@ -17,39 +17,39 @@ import org.springframework.roo.shell.MethodTarget;
 import org.springframework.roo.support.util.StringUtils;
 
 /**
- * A {@link Converter} for {@link PackagingType}s
+ * A {@link Converter} for {@link PackagingProvider}s
  *
  * @author Andrew Swan
  * @since 1.2.0
  */
 @Component
 @Service
-@Reference(name = "packagingType", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC, referenceInterface = PackagingType.class, cardinality = ReferenceCardinality.MANDATORY_MULTIPLE)
-public class PackagingTypeConverter implements Converter<PackagingType> {
+@Reference(name = "packagingType", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC, referenceInterface = PackagingProvider.class, cardinality = ReferenceCardinality.MANDATORY_MULTIPLE)
+public class PackagingProviderConverter implements Converter<PackagingProvider> {
 
 	// Fields
 	private final Object mutex = new Object();
 	// Using a map avoids each PackagingType having to implement equals() properly
-	private final Map<String, PackagingType> packagingTypes = new HashMap<String, PackagingType>();
+	private final Map<String, PackagingProvider> packagingTypes = new HashMap<String, PackagingProvider>();
 
-	protected void bindPackagingType(final PackagingType packagingType) {
+	protected void bindPackagingType(final PackagingProvider packagingType) {
 		synchronized (mutex) {
 			packagingTypes.put(packagingType.getId(), packagingType);
 		}
 	}
 
-	protected void unbindPackagingType(final PackagingType packagingType) {
+	protected void unbindPackagingType(final PackagingProvider packagingType) {
 		synchronized (mutex) {
 			packagingTypes.remove(packagingType.getId());
 		}
 	}
 
 	public boolean supports(final Class<?> type, final String optionContext) {
-		return PackagingType.class.isAssignableFrom(type);
+		return PackagingProvider.class.isAssignableFrom(type);
 	}
 
-	public PackagingType convertFromText(final String value, final Class<?> targetType, final String optionContext) {
-		for (final Entry<String, PackagingType> entry : packagingTypes.entrySet()) {
+	public PackagingProvider convertFromText(final String value, final Class<?> targetType, final String optionContext) {
+		for (final Entry<String, PackagingProvider> entry : packagingTypes.entrySet()) {
 			if (entry.getKey().equalsIgnoreCase(value)) {
 				return entry.getValue();
 			}

@@ -22,7 +22,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 /**
- * Convenient superclass for implementing a {@link PackagingType}.
+ * Convenient superclass for implementing a {@link PackagingProvider}.
  *
  * Uses the "Template Method" GoF pattern.
  *
@@ -30,10 +30,10 @@ import org.w3c.dom.Element;
  * @since 1.2.0
  */
 @Component(componentAbstract = true)
-public abstract class AbstractPackagingType implements PackagingType {
+public abstract class AbstractPackagingProvider implements PackagingProvider {
 
 	// Constants
-	protected static final Logger LOGGER = HandlerUtils.getLogger(PackagingType.class);
+	protected static final Logger LOGGER = HandlerUtils.getLogger(PackagingProvider.class);
 	private static final String JAVA_VERSION_PLACEHOLDER = "JAVA_VERSION";
 
 	// Fields
@@ -49,7 +49,7 @@ public abstract class AbstractPackagingType implements PackagingType {
 	/**
 	 * Constructor
 	 *
-	 * @param id the unique ID of this packaging type, see {@link PackagingType#getId()}
+	 * @param id the unique ID of this packaging type, see {@link PackagingProvider#getId()}
 	 * @param name the name of this type of packaging as used in the POM (required)
 	 * @param pomTemplate the path of this packaging type's POM template,
 	 * relative to its own package, as per {@link Class#getResourceAsStream(String)};
@@ -57,7 +57,7 @@ public abstract class AbstractPackagingType implements PackagingType {
 	 * artifactId, and version elements; this parent element will be removed if
 	 * not required
 	 */
-	protected AbstractPackagingType(final String id, final String name, final String pomTemplate) {
+	protected AbstractPackagingProvider(final String id, final String name, final String pomTemplate) {
 		Assert.hasText(id, "ID is required");
 		Assert.hasText(name, "Name is required");
 		Assert.hasText(pomTemplate, "POM template path is required");
@@ -95,7 +95,7 @@ public abstract class AbstractPackagingType implements PackagingType {
 	 * </ul>
 	 *
 	 * This method makes as few assumptions about the POM template as possible,
-	 * to make life easier for authors of new {@link PackagingType}s.
+	 * to make life easier for authors of new {@link PackagingProvider}s.
 	 *
 	 * @param topLevelPackage the new project or module's top-level Java package (required)
 	 * @param nullableProjectName the project name provided by the user (can be blank)
@@ -224,7 +224,7 @@ public abstract class AbstractPackagingType implements PackagingType {
 	protected void createOtherArtifacts() {}
 
 	/**
-	 * Returns the package-relative path to this {@link PackagingType}'s POM template.
+	 * Returns the package-relative path to this {@link PackagingProvider}'s POM template.
 	 *
 	 * @return a non-blank path
 	 */

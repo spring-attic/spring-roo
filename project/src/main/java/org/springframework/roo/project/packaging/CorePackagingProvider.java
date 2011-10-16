@@ -1,13 +1,13 @@
 package org.springframework.roo.project.packaging;
 
 /**
- * A {@link PackagingType} provided by Spring Roo, i.e. not by a third-party
+ * A {@link PackagingProvider} provided by Spring Roo, i.e. not by a third-party
  * addon.
  *
  * @author Andrew Swan
  * @since 1.2.0 
  */
-abstract class CorePackagingType extends AbstractPackagingType {
+abstract class CorePackagingProvider extends AbstractPackagingProvider {
 
 	/**
 	 * Constructor
@@ -19,7 +19,7 @@ abstract class CorePackagingType extends AbstractPackagingType {
 	 * artifactId, and version elements; this parent element will be removed if
 	 * not required
 	 */
-	protected CorePackagingType(final String name, final String pomTemplate) {
+	protected CorePackagingProvider(final String name, final String pomTemplate) {
 		/*
 		 * Core instances use the Maven packaging type as the ID so that the
 		 * user sees intuitively-named packaging options on the command line. If

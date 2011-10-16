@@ -13,19 +13,19 @@ import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.TemplateUtils;
 
 /**
- * The {@link PackagingType} that creates a JAR file.
+ * The {@link PackagingProvider} that creates a JAR file.
  *
  * @author Andrew Swan
  * @since 1.2.0
  */
 @Component
 @Service
-public class Jar extends CorePackagingType {
+public class JarPackaging extends CorePackagingProvider {
 
 	/**
 	 * Constructor invoked by the OSGi container
 	 */
-	public Jar() {
+	public JarPackaging() {
 		super("jar", "jar-pom-template.xml");
 	}
 

@@ -1,13 +1,13 @@
 package org.springframework.roo.project;
 
-import org.springframework.roo.project.packaging.PackagingType;
+import org.springframework.roo.project.packaging.PackagingProvider;
 import org.springframework.roo.support.util.Assert;
 
 /**
  * Provides available project types for the project. Currently only war and jar
  * types are supported, but other types can be added in future.
  *
- * TODO check how this type can/should be replaced by {@link PackagingType}
+ * TODO check how this type can/should be replaced by {@link PackagingProvider}
  *
  * @author Stefan Schmidt
  * @since 1.0

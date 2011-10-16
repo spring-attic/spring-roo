@@ -17,12 +17,12 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.roo.model.JavaType;
 
 /**
- * Unit test of {@link PackagingTypeConverter}
+ * Unit test of {@link PackagingProviderConverter}
  *
  * @author Andrew Swan
  * @since 1.2.0
  */
-public class PackagingTypeConverterTest {
+public class PackagingProviderConverterTest {
 
 	// Constants
 	private static final String UNKNOWN = "no-such-id";
@@ -31,10 +31,10 @@ public class PackagingTypeConverterTest {
 	private static final String CORE_WAR_ID = "war";
 
 	// Fixture
-	private PackagingTypeConverter converter;
-	@Mock private PackagingType mockCoreJarPackaging;
-	@Mock private PackagingType mockCustomJarPackaging;
-	@Mock private PackagingType mockWarPackaging;
+	private PackagingProviderConverter converter;
+	@Mock private PackagingProvider mockCoreJarPackaging;
+	@Mock private PackagingProvider mockCustomJarPackaging;
+	@Mock private PackagingProvider mockWarPackaging;
 
 	@Before
 	public void setUp() {
@@ -45,7 +45,7 @@ public class PackagingTypeConverterTest {
 		when(mockWarPackaging.getId()).thenReturn(CORE_WAR_ID);
 
 		// Object under test
-		this.converter = new PackagingTypeConverter();
+		this.converter = new PackagingProviderConverter();
 		this.converter.bindPackagingType(mockCoreJarPackaging);
 		this.converter.bindPackagingType(mockCustomJarPackaging);
 		this.converter.bindPackagingType(mockWarPackaging);
@@ -58,17 +58,17 @@ public class PackagingTypeConverterTest {
 
 	@Test
 	public void testSupportsCorrectType() {
-		assertTrue(converter.supports(PackagingType.class, null));
+		assertTrue(converter.supports(PackagingProvider.class, null));
 	}
 
 	/**
-	 * Asserts that the given string can't be converted to a {@link PackagingType}
+	 * Asserts that the given string can't be converted to a {@link PackagingProvider}
 	 *
 	 * @param string the string to convert (can be blank)
 	 */
 	private void assertInvalidString(final String string) {
 		try {
-			converter.convertFromText(string, PackagingType.class, null);
+			converter.convertFromText(string, PackagingProvider.class, null);
 			fail("Expected a " + UnsupportedOperationException.class);
 		} catch (UnsupportedOperationException expected) {
 			assertEquals("Unsupported packaging type '" + string + "'", expected.getMessage());
@@ -98,7 +98,7 @@ public class PackagingTypeConverterTest {
 	@Test
 	public void testConvertValidString() {
 		// Invoke and check
-		assertEquals(mockCustomJarPackaging, converter.convertFromText(CUSTOM_JAR_ID, PackagingType.class, null));
+		assertEquals(mockCustomJarPackaging, converter.convertFromText(CUSTOM_JAR_ID, PackagingProvider.class, null));
 	}
 
 	@Test
@@ -137,7 +137,7 @@ public class PackagingTypeConverterTest {
 		final List<String> completions = new ArrayList<String>();
 
 		// Invoke
-		final boolean addSpace = converter.getAllPossibleValues(completions, PackagingType.class, existingData, null, null);
+		final boolean addSpace = converter.getAllPossibleValues(completions, PackagingProvider.class, existingData, null, null);
 
 		// Check
 		assertTrue(addSpace);
