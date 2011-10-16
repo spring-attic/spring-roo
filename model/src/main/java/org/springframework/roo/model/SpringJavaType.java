@@ -28,6 +28,7 @@ public final class SpringJavaType {
 	public static final JavaType FORMATTER_REGISTRY = new JavaType("org.springframework.format.FormatterRegistry");
 	public static final JavaType HTTP_HEADERS = new JavaType("org.springframework.http.HttpHeaders");
 	public static final JavaType HTTP_STATUS = new JavaType("org.springframework.http.HttpStatus");
+	public static final JavaType JMS_OPERATIONS = new JavaType("org.springframework.jms.core.JmsOperations");
 	public static final JavaType JMS_TEMPLATE = new JavaType("org.springframework.jms.core.JmsTemplate");
 	public static final JavaType LOCALE_CONTEXT_HOLDER = new JavaType("org.springframework.context.i18n.LocaleContextHolder");
 	public static final JavaType MAIL_SENDER = new JavaType("org.springframework.mail.MailSender");

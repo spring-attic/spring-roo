@@ -41,7 +41,7 @@ public class JmsCommands implements CommandMarker {
 		return jmsOperations.isInstallJmsAvailable();
 	}
 
-	@CliCommand(value = "jms setup", help = "Install a JMS provider in your project")
+	@CliCommand(value = "jms setup", help = "Install a JMS provider into your project")
 	public void installJms(
 		@CliOption(key = { "provider" }, mandatory = true, help = "The persistence provider to support") final JmsProvider jmsProvider,
 		@CliOption(key = { "destinationName" }, mandatory = false, unspecifiedDefaultValue = "myDestination", specifiedDefaultValue = "myDestination", help = "The name of the destination") final String name,
@@ -55,16 +55,16 @@ public class JmsCommands implements CommandMarker {
 		return jmsOperations.isManageJmsAvailable();
 	}
 
-	@CliCommand(value = "field jms template", help = "insert a JmsTemplate field into an existing type")
+	@CliCommand(value = "field jms template", help = "Insert a JmsOperations field into an existing type")
 	public void injectJmsProducer(
-		@CliOption(key = { "", "fieldName" }, mandatory = false, specifiedDefaultValue = "jmsTemplate", unspecifiedDefaultValue = "jmsTemplate", help = "The name of the field to add") final JavaSymbolName fieldName,
+		@CliOption(key = { "", "fieldName" }, mandatory = false, specifiedDefaultValue = "jmsOperations", unspecifiedDefaultValue = "jmsOperations", help = "The name of the field to add") final JavaSymbolName fieldName,
 		@CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*", optionContext = "update,project", help = "The name of the class to receive this field") final JavaType typeName,
 		@CliOption(key = "async", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue="true", help = "Indicates if the injected method should be executed asynchronously") final boolean async) {
 
 		jmsOperations.injectJmsTemplate(typeName, fieldName, async);
 	}
 
-	@CliCommand(value = "jms listener class", help = "Create a new class which is a asynchronous JMS consumer")
+	@CliCommand(value = "jms listener class", help = "Create an asynchronous JMS consumer")
 	public void addJmsListener(
 		@CliOption(key = "class", mandatory = true, help = "The name of the class to create") final JavaType typeName,
 		@CliOption(key = { "destinationName" }, mandatory = false, unspecifiedDefaultValue = "myDestination", specifiedDefaultValue = "myDestination", help = "The name of the destination") final String name,
