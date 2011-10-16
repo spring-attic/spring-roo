@@ -145,8 +145,8 @@ public abstract class AbstractMemberHoldingTypeDetails extends AbstractIdentifia
 		final List<MethodMetadata> result = new ArrayList<MethodMetadata>();
 		MemberHoldingTypeDetails current = this;
 		while (current != null) {
-			for (final MethodMetadata methods : current.getDeclaredMethods()) {
-				result.add(methods);
+			for (final MethodMetadata method : current.getDeclaredMethods()) {
+				result.add(method);
 			}
 			if (current instanceof ClassOrInterfaceTypeDetails) {
 				current = ((ClassOrInterfaceTypeDetails) current).getSuperclass();

@@ -28,8 +28,6 @@ public class JsfFieldHolder {
 	private String genericTypeBeanName;
 	private MemberDetails applicationTypeMemberDetails;
 	private Map<MethodMetadataCustomDataKey, MemberTypeAdditions> crudAdditions;
-	private boolean applicationType;
-	private boolean uploadFileField;
 
 	public JsfFieldHolder(final FieldMetadata field, final boolean enumerated, final JavaType genericType, final String genericTypePlural, final String genericTypeBeanName, final MemberDetails applicationTypeMemberDetails, final Map<MethodMetadataCustomDataKey, MemberTypeAdditions> crudAdditions) {
 		Assert.notNull(field, "Field required");
@@ -38,10 +36,8 @@ public class JsfFieldHolder {
 		this.genericType = genericType;
 		this.genericTypePlural = genericTypePlural;
 		this.genericTypeBeanName = genericTypeBeanName;
-		this.crudAdditions = crudAdditions;
 		this.applicationTypeMemberDetails = applicationTypeMemberDetails;
-		applicationType = this.applicationTypeMemberDetails != null && !CollectionUtils.isEmpty(this.crudAdditions);
-		uploadFileField = field.getAnnotation(ROO_UPLOADED_FILE) != null;
+		this.crudAdditions = crudAdditions;
 	}
 
 	public FieldMetadata getField() {
@@ -77,10 +73,10 @@ public class JsfFieldHolder {
 	}
 	
 	public boolean isApplicationType() {
-		return applicationType;
+		return applicationTypeMemberDetails != null && !CollectionUtils.isEmpty(crudAdditions);
 	}
 
 	public boolean isUploadFileField() {
-		return uploadFileField;
+		return field.getAnnotation(ROO_UPLOADED_FILE) != null;
 	}
 }

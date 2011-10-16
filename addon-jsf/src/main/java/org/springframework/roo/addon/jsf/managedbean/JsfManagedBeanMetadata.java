@@ -1026,7 +1026,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 			if (!jsfFieldHolder.isGenericType()) {
 				continue;
 			}
-			
+
 			final String genericTypeBeanName = jsfFieldHolder.getGenericTypeBeanName();
 			final String genericTypePlural = jsfFieldHolder.getGenericTypePlural();
 			final JavaSymbolName fieldName = new JavaSymbolName(getSelectedFieldName(StringUtils.hasText(genericTypeBeanName) ? genericTypePlural : jsfFieldHolder.getField().getFieldName().getSymbolName()));

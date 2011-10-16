@@ -11,7 +11,7 @@ import org.springframework.roo.support.util.StringUtils;
  *
  * @author Ben Alex
  */
-public abstract class ReservedWords {
+public final class ReservedWords {
 
 	/**
 	 * Represents an unmodifiable set of lowercase reserved words in Java.
@@ -81,4 +81,9 @@ public abstract class ReservedWords {
 			throw new IllegalStateException("Reserved SQL keyword '" + string.toLowerCase() + "' is not permitted");
 		}
 	}
+	
+	/**
+	 * Constructor is private to prevent instantiation
+	 */
+	private ReservedWords() {}
 }

@@ -116,8 +116,8 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 				continue;
 			}
 			// Not interested in fields that are JPA transient fields or immutable fields
-			FieldMetadata fieldMetadata = BeanInfoUtils.getFieldForPropertyName(memberDetails, BeanInfoUtils.getPropertyNameForJavaBeanMethod(method));
-			if (fieldMetadata == null || fieldMetadata.getCustomData().keySet().contains(CustomDataKeys.TRANSIENT_FIELD) || !BeanInfoUtils.hasAccessorAndMutator(fieldMetadata, memberDetails)) {
+			FieldMetadata field = BeanInfoUtils.getFieldForPropertyName(memberDetails, BeanInfoUtils.getPropertyNameForJavaBeanMethod(method));
+			if (field == null || field.getCustomData().keySet().contains(CustomDataKeys.TRANSIENT_FIELD) || !BeanInfoUtils.hasAccessorAndMutator(field, memberDetails)) {
 				continue;
 			}
 			JavaType type = method.getReturnType();
@@ -129,7 +129,7 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 					}
 				}
 			} else {
-				if (isApplicationType(type) && !fieldMetadata.getCustomData().keySet().contains(EMBEDDED_FIELD)) {
+				if (isApplicationType(type) && !field.getCustomData().keySet().contains(EMBEDDED_FIELD)) {
 					MemberDetails typeMemberDetails = getMemberDetails(type);
 					specialTypes.put(type, getJavaTypeMetadataDetails(type, typeMemberDetails, metadataIdentificationString));
 				}
