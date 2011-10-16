@@ -84,7 +84,7 @@ public class EqualsMetadataProviderImpl extends AbstractMemberDiscoveringItdMeta
 			if (excludeFieldsList.contains(field.getFieldName().getSymbolName())) {
 				continue;
 			}
-			if (Modifier.isStatic(field.getModifier()) || Modifier.isTransient(field.getModifier()) || field.getFieldType().isCommonCollectionType()) {
+			if (Modifier.isStatic(field.getModifier()) || Modifier.isTransient(field.getModifier()) || field.getFieldType().isCommonCollectionType() || field.getFieldType().isArray()) {
 				continue;
 			}
 			if (versionField != null && field.getFieldName().equals(versionField.getFieldName())) {
