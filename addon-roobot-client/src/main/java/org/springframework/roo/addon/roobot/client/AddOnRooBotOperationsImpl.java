@@ -16,8 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.logging.Logger;
-import java.util.prefs.BackingStoreException;
-import java.util.prefs.Preferences;
 import java.util.zip.ZipInputStream;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -34,6 +32,8 @@ import org.springframework.roo.addon.roobot.client.model.Bundle;
 import org.springframework.roo.addon.roobot.client.model.BundleVersion;
 import org.springframework.roo.addon.roobot.client.model.Comment;
 import org.springframework.roo.addon.roobot.client.model.Rating;
+import org.springframework.roo.classpath.preferences.Preferences;
+import org.springframework.roo.classpath.preferences.PreferencesService;
 import org.springframework.roo.felix.BundleSymbolicName;
 import org.springframework.roo.felix.pgp.PgpKeyId;
 import org.springframework.roo.felix.pgp.PgpService;
@@ -93,6 +93,7 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 
 	// Fields
 	@Reference private PgpService pgpService;
+	@Reference private PreferencesService preferencesService;
 	@Reference private Shell shell;
 	@Reference private UrlInputStreamService urlInputStreamService;
 	private final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
@@ -107,7 +108,7 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 
 	protected void activate(final ComponentContext context) {
 		this.context = context;
-		prefs = Preferences.userNodeForPackage(AddOnRooBotOperationsImpl.class);
+		prefs = preferencesService.getPreferencesFor(AddOnRooBotOperationsImpl.class);
 		bundleCache = new HashMap<String, Bundle>();
 		searchResultCache = new HashMap<String, Bundle>();
 		BundleContext bundleContext = context.getBundleContext();
@@ -454,7 +455,7 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 			prefs.putInt(ADDON_UPGRADE_STABILITY_LEVEL, addOnStabilityLevel.getLevel());
 			try {
 				prefs.flush();
-			} catch (BackingStoreException ignore) {
+			} catch (IllegalStateException ignore) {
 				success = false;
 			}
 			if (success) {

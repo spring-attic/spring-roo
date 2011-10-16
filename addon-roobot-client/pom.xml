@@ -34,6 +34,10 @@
         <!-- Spring Roo modules -->
         <dependency>
             <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.classpath</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
             <artifactId>org.springframework.roo.metadata</artifactId>
         </dependency>
         <dependency>

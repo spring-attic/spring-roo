@@ -28,6 +28,8 @@ public class Preferences {
 	
 	/**
 	 * Flushes any changes in these preferences to the persistent storage.
+	 * 
+	 * @throws IllegalStateException if there was a problem
 	 */
 	public void flush() {
 		try {
@@ -67,6 +69,16 @@ public class Preferences {
 			throw new UnsupportedOperationException(e);
 		} 
 	}
+	
+	/**
+	 * Returns the int with the given key, or if none, the given default value.
+	 * 
+	 * @param key the key whose value to retrieve (can be <code>null</code>)
+	 * @param defaultValue see above
+	 */
+	public int getInt(final String key, final int defaultValue) {
+		return this.preferences.getInt(key, defaultValue);
+	}
 
 	/**
 	 * Adds the given byte array under the given key.
@@ -76,5 +88,15 @@ public class Preferences {
 	 */
 	public void putByteArray(final String key, final byte[] value) {
 		this.preferences.putByteArray(key, value);
+	}
+	
+	/**
+	 * Adds the given int value under the given key.
+	 * 
+	 * @param key
+	 * @param value
+	 */
+	public void putInt(final String key, final int value) {
+		this.preferences.putInt(key, value);
 	}
 }
