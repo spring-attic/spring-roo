@@ -116,33 +116,17 @@ public class SolrJspMetadataListener implements MetadataProvider, MetadataNotifi
 		Document document = builder.newDocument();
 
 		// Add document namespaces
-		Element div = new XmlElementBuilder("div", document)
-								.addAttribute("xmlns:page", "urn:jsptagdir:/WEB-INF/tags/form")
-								.addAttribute("xmlns:fields", "urn:jsptagdir:/WEB-INF/tags/form/fields")
-								.addAttribute("xmlns:jsp", "http://java.sun.com/JSP/Page")
-								.addAttribute("version", "2.0")
-								.addChild(new XmlElementBuilder("jsp:output", document).addAttribute("omit-xml-declaration", "yes").build())
-							.build();
+		Element div = new XmlElementBuilder("div", document).addAttribute("xmlns:page", "urn:jsptagdir:/WEB-INF/tags/form").addAttribute("xmlns:fields", "urn:jsptagdir:/WEB-INF/tags/form/fields").addAttribute("xmlns:jsp", "http://java.sun.com/JSP/Page").addAttribute("version", "2.0").addChild(new XmlElementBuilder("jsp:output", document).addAttribute("omit-xml-declaration", "yes").build()).build();
 		document.appendChild(div);
 
-		Element pageSearch = new XmlElementBuilder("page:search", document)
-									.addAttribute("id", XmlUtils.convertId("ps:" + webScaffoldMetadata.getAnnotationValues().getFormBackingObject().getFullyQualifiedTypeName()))
-									.addAttribute("path", webScaffoldMetadata.getAnnotationValues().getPath())
-								.build();
+		Element pageSearch = new XmlElementBuilder("page:search", document).addAttribute("id", XmlUtils.convertId("ps:" + webScaffoldMetadata.getAnnotationValues().getFormBackingObject().getFullyQualifiedTypeName())).addAttribute("path", webScaffoldMetadata.getAnnotationValues().getPath()).build();
 		pageSearch.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(pageSearch));
 
 		final List<FieldMetadata> idFields = persistenceMemberLocator.getIdentifierFields(formbackingObject);
 		if (idFields.isEmpty()) {
 			return null;
 		}
-		Element resultTable = new XmlElementBuilder("fields:table", document)
-		.addAttribute("id", XmlUtils.convertId("rt:" + webScaffoldMetadata.getAnnotationValues().getFormBackingObject().getFullyQualifiedTypeName()))
-		.addAttribute("data", "${searchResults}")
-		.addAttribute("delete", "false")
-		.addAttribute("update", "false")
-		.addAttribute("path", webScaffoldMetadata.getAnnotationValues().getPath())
-		.addAttribute("typeIdFieldName", formbackingObject.getSimpleTypeName().toLowerCase() + "." + idFields.get(0).getFieldName().getSymbolName().toLowerCase() + SolrUtils.getSolrDynamicFieldPostFix(idFields.get(0).getFieldType()))
-		.build();
+		Element resultTable = new XmlElementBuilder("fields:table", document).addAttribute("id", XmlUtils.convertId("rt:" + webScaffoldMetadata.getAnnotationValues().getFormBackingObject().getFullyQualifiedTypeName())).addAttribute("data", "${searchResults}").addAttribute("delete", "false").addAttribute("update", "false").addAttribute("path", webScaffoldMetadata.getAnnotationValues().getPath()).addAttribute("typeIdFieldName", formbackingObject.getSimpleTypeName().toLowerCase() + "." + idFields.get(0).getFieldName().getSymbolName().toLowerCase() + SolrUtils.getSolrDynamicFieldPostFix(idFields.get(0).getFieldType())).build();
 		resultTable.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(resultTable));
 
 		StringBuilder facetFields = new StringBuilder();
@@ -160,9 +144,8 @@ public class SolrJspMetadataListener implements MetadataProvider, MetadataNotifi
 			if (!BeanInfoUtils.isAccessorMethod(method)) {
 				continue;
 			}
-			if(++fieldCounter < 7) {
-				if (method.getMethodName().equals(identifierAccessor.getMethodName()) ||
-						method.getMethodName().equals(versionAccessor.getMethodName())) {
+			if (++fieldCounter < 7) {
+				if (method.getMethodName().equals(identifierAccessor.getMethodName()) || method.getMethodName().equals(versionAccessor.getMethodName())) {
 					continue;
 				}
 				FieldMetadata field = BeanInfoUtils.getFieldForPropertyName(memberDetails, BeanInfoUtils.getPropertyNameForJavaBeanMethod(method));
@@ -170,25 +153,17 @@ public class SolrJspMetadataListener implements MetadataProvider, MetadataNotifi
 
 				facetFields.append(formbackingObject.getSimpleTypeName().toLowerCase()).append(".").append(field.getFieldName()).append(SolrUtils.getSolrDynamicFieldPostFix(field.getFieldType())).append(",");
 
-				Element columnElement = new XmlElementBuilder("fields:column", document)
-											.addAttribute("id", XmlUtils.convertId("c:" + formbackingObject.getFullyQualifiedTypeName() + "." + field.getFieldName().getSymbolName()))
-											.addAttribute("property", formbackingObject.getSimpleTypeName().toLowerCase() + "." + field.getFieldName().getSymbolName().toLowerCase() + SolrUtils.getSolrDynamicFieldPostFix(field.getFieldType()))
-										.build();
+				Element columnElement = new XmlElementBuilder("fields:column", document).addAttribute("id", XmlUtils.convertId("c:" + formbackingObject.getFullyQualifiedTypeName() + "." + field.getFieldName().getSymbolName())).addAttribute("property", formbackingObject.getSimpleTypeName().toLowerCase() + "." + field.getFieldName().getSymbolName().toLowerCase() + SolrUtils.getSolrDynamicFieldPostFix(field.getFieldType())).build();
 				columnElement.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(columnElement));
 				resultTable.appendChild(columnElement);
 			}
 		}
 
-		Element searchFacet = new XmlElementBuilder("fields:search-facet", document)
-									.addAttribute("id", XmlUtils.convertId("sfacet:" + webScaffoldMetadata.getAnnotationValues().getFormBackingObject().getFullyQualifiedTypeName()))
-									.addAttribute("facetFields", facetFields.toString())
-								.build();
+		Element searchFacet = new XmlElementBuilder("fields:search-facet", document).addAttribute("id", XmlUtils.convertId("sfacet:" + webScaffoldMetadata.getAnnotationValues().getFormBackingObject().getFullyQualifiedTypeName())).addAttribute("facetFields", facetFields.toString()).build();
 		searchFacet.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(searchFacet));
 		pageSearch.appendChild(searchFacet);
 
-		Element searchField = new XmlElementBuilder("fields:search-field", document)
-				.addAttribute("id", XmlUtils.convertId("sfield:" + webScaffoldMetadata.getAnnotationValues().getFormBackingObject().getFullyQualifiedTypeName()))
-			.build();
+		Element searchField = new XmlElementBuilder("fields:search-field", document).addAttribute("id", XmlUtils.convertId("sfield:" + webScaffoldMetadata.getAnnotationValues().getFormBackingObject().getFullyQualifiedTypeName())).build();
 		searchField.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(searchField));
 
 		pageSearch.appendChild(searchFacet);
