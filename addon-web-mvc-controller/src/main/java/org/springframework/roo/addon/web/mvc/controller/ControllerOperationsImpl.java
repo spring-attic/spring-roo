@@ -70,7 +70,7 @@ public class ControllerOperationsImpl implements ControllerOperations {
 	}
 
 	public boolean isScaffoldAvailable() {
-		return fileManager.exists(projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/spring/webmvc-config.xml"));
+		return fileManager.exists(projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/spring/webmvc-config.xml")) && !fileManager.exists(projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/faces-config.xml"));
 	}
 
 	public void setup() {
