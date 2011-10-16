@@ -149,7 +149,9 @@ public class SolrJspMetadataListener implements MetadataProvider, MetadataNotifi
 					continue;
 				}
 				FieldMetadata field = BeanInfoUtils.getFieldForPropertyName(memberDetails, BeanInfoUtils.getPropertyNameForJavaBeanMethod(method));
-				Assert.notNull(field, "Could not determine field for accessor: " + method.getMethodName());
+				if (field == null) {
+					continue;
+				}
 
 				facetFields.append(formbackingObject.getSimpleTypeName().toLowerCase()).append(".").append(field.getFieldName()).append(SolrUtils.getSolrDynamicFieldPostFix(field.getFieldType())).append(",");
 
