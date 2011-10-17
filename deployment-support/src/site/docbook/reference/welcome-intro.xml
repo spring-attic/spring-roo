@@ -587,7 +587,7 @@ Once JPA is installed, type 'hint' and ENTER for the next suggestion.</programli
 
     <programlisting>roo&gt; <emphasis role="bold">jpa setup --provider HIBERNATE --database HYPERSONIC_IN_MEMORY</emphasis>
 roo&gt; <emphasis role="bold">hint</emphasis>
-roo&gt; <emphasis role="bold">entity --class ~.Timer --testAutomatically</emphasis>
+roo&gt; <emphasis role="bold">entity jpa --class ~.Timer --testAutomatically</emphasis>
 roo&gt; <emphasis role="bold">hint</emphasis>
 roo&gt; <emphasis role="bold">field string --fieldName message --notNull</emphasis>
 roo&gt; <emphasis role="bold"><emphasis role="bold">hint </emphasis>web mvc</emphasis>

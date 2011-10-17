@@ -134,7 +134,7 @@ enum constant --name Mammal
 enum constant --name Reptile
 enum constant --name Amphibian
 
-entity --class ~.server.domain.Animal
+entity jpa --class ~.server.domain.Animal
 field string --fieldName name --notNull
 field enum --fieldName species --type ~.shared.domain.Species</programlisting>
 

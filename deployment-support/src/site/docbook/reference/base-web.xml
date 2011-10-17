@@ -19,7 +19,7 @@
     </sidebar>The Web MVC addons allow you to conveniently scaffold Spring MVC
   controllers and JSP(X) views for an existing domain model. Currently this
   domain model is derived from the Roo supported JPA integration through the
-  entity and related field commands. As shown in the <link
+  entity jpa and related field commands. As shown in the <link
   linkend="intro">Introduction</link> and the <link
   linkend="beginning">Beginning With Roo: The Tutorial</link> the Web MVC
   scaffolding can deliver a fully functional Web frontend to your domain
@@ -413,7 +413,7 @@ public class ApplicationConversionServiceFactoryBean extends FormattingConversio
 
     <para>At this point Roo will notice that the addition of the method and
     will remove it from the ITD much like overriding the toString() method in
-    a Roo entity works. </para>
+    a Roo entity works.</para>
 
     <para>Note, in some cases you may create a form backing entity which does
     not contain any suitable fields for conversion. For example, the entity

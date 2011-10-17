@@ -226,6 +226,23 @@
   </section>
 
   <section>
+    <title>Upgrading to 1.2.0.RC1</title>
+
+    <para>The main changes you need to be aware of when upgrading from Spring
+    Roo 1.2.0.M1 to Spring Roo 1.2.0.RC1 are as follows:</para>
+
+    <itemizedlist>
+      <listitem>
+        <para>To align with the new persistence and repository choices
+        introduced with Roo 1.2.0.M1 the entity command has been adjusted to
+        take the target persistence type into account. Please change your
+        log.roo scripts to use the new <link
+        linkend="command-index-entity-jpa">entity jpa</link> command.</para>
+      </listitem>
+    </itemizedlist>
+  </section>
+
+  <section>
     <title>Upgrading to 1.2.0.M1</title>
 
     <para>The main changes you need to be aware of when upgrading from Spring
@@ -252,10 +269,9 @@
         command.</para>
       </listitem>
 
-		<listitem>
-        <para>To update a Roo GWT project please run
-		<link linkend="command-index-web-gwt-setup">web gwt setup</link>
-		</para>
+      <listitem>
+        <para>To update a Roo GWT project please run <link
+        linkend="command-index-web-gwt-setup">web gwt setup</link></para>
       </listitem>
     </itemizedlist>
   </section>

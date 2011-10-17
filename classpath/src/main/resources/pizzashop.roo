@@ -5,19 +5,19 @@ project com.springsource.pizzashop
 jpa setup --provider ECLIPSELINK --database H2_IN_MEMORY
 
 // Create domain entities
-entity --class ~.domain.Base --activeRecord false --testAutomatically
+entity jpa --class ~.domain.Base --activeRecord false --testAutomatically
 field string --fieldName name --sizeMin 2 --notNull
 
-entity --class ~.domain.Topping --activeRecord false --testAutomatically
+entity jpa --class ~.domain.Topping --activeRecord false --testAutomatically
 field string --fieldName name --sizeMin 2 --notNull
 
-entity --class ~.domain.Pizza --activeRecord false --testAutomatically
+entity jpa --class ~.domain.Pizza --activeRecord false --testAutomatically
 field string --fieldName name --notNull --sizeMin 2
 field number --fieldName price --type java.math.BigDecimal
 field set --fieldName toppings --type ~.domain.Topping
 field reference --fieldName base --type ~.domain.Base
 
-entity --class ~.domain.PizzaOrder --testAutomatically --activeRecord false --identifierType ~.domain.PizzaOrderPk
+entity jpa --class ~.domain.PizzaOrder --testAutomatically --activeRecord false --identifierType ~.domain.PizzaOrderPk
 field string --fieldName name --notNull --sizeMin 2
 field string --fieldName address --sizeMax 30
 field number --fieldName total --type java.math.BigDecimal

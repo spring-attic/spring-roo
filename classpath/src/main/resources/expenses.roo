@@ -6,7 +6,7 @@ enum type --class ~.shared.domain.Gender
 enum constant --name MALE
 enum constant --name FEMALE
 
-entity --class ~.server.domain.Employee --testAutomatically
+entity jpa --class ~.server.domain.Employee --testAutomatically
 field string --fieldName displayName --notNull
 field string --fieldName userName --sizeMin 3 --sizeMax 30 --notNull
 field string --fieldName department
@@ -14,7 +14,7 @@ field reference --type Employee supervisor
 field enum --fieldName gender --type ~.shared.domain.Gender
 field boolean --fieldName admin --notNull
 
-entity --class ~.server.domain.Report --testAutomatically
+entity jpa --class ~.server.domain.Report --testAutomatically
 field string --fieldName purpose
 field string --fieldName notes
 field date --fieldName created --type java.util.Date
@@ -22,7 +22,7 @@ field string --fieldName department
 field reference --type Employee reporter
 field reference --type Employee approvedSupervisor
 
-entity --class ~.server.domain.Expense --testAutomatically
+entity jpa --class ~.server.domain.Expense --testAutomatically
 field number --type java.lang.Double amount
 field string --fieldName description
 field reference --type Report report

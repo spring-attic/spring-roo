@@ -2,13 +2,13 @@ project --topLevelPackage com.springsource.vote
 
 jpa setup --provider HIBERNATE --database HYPERSONIC_PERSISTENT
 
-entity --class ~.domain.Choice --testAutomatically
+entity jpa --class ~.domain.Choice --testAutomatically
 field string namingChoice --notNull --sizeMin 1 --sizeMax 30
 field string description --sizeMax 80
 web mvc setup
 web mvc scaffold ~.web.ChoiceController
 
-entity --class Vote --testAutomatically
+entity jpa --class Vote --testAutomatically
 field reference choice --type Choice
 field string ip --notNull --sizeMin 7 --sizeMax 15
 field date registered --type java.util.Date --notNull --past

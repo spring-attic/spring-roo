@@ -80,7 +80,7 @@
       addition this annotation creates the typical CRUD methods to support
       data access.</para>
 
-      <para><programlisting>roo&gt; entity --class ~.domain.Pizza</programlisting>This
+      <para><programlisting>roo&gt; <emphasis role="bold">entity jpa</emphasis> --class ~.domain.Pizza</programlisting>This
       command will create a Pizza domain type along with active record-style
       methods to persist, update, read and delete your entity. The following
       example also contains a number of fields which can be added through the
@@ -121,7 +121,7 @@ public class Pizza {
       linkend="command-index-jpa-setup">jpa setup</link> command, this
       functionality is automatically provided by annotating the domain type
       with Roo's <emphasis role="bold">@RooJpaEntity</emphasis>
-      annotation.<programlisting>roo&gt; entity --class ~.domain.Pizza <emphasis
+      annotation.<programlisting>roo&gt; <emphasis role="bold">entity jpa</emphasis> --class ~.domain.Pizza <emphasis
             role="bold">--activeRecord false</emphasis></programlisting>By
       defining --activeRecord false you can opt out of the otherwise default
       Active Record style. The following example also contains a number of
@@ -185,7 +185,7 @@ public interface PizzaRepository {
       xlink:href="http://www.mongodb.org/">MongoDB</link> support by
       leveraging the <link
       xlink:href="http://www.springsource.org/spring-data/mongodb">Spring Data
-      MongoDB</link> project. </para>
+      MongoDB</link> project.</para>
 
       <section>
         <title>Setup</title>
@@ -207,7 +207,9 @@ public interface PizzaRepository {
         <title>Entities</title>
 
         <para>Once the application is configured for MongoDB support, the
-        entity mongo and repository mongo commands become available:</para>
+        <link linkend="command-index-entity-mongo">entity mongo</link> and
+        <link linkend="command-index-repository-mongo">repository mongo</link>
+        commands become available:</para>
 
         <para><programlisting>roo&gt; <emphasis role="bold">entity mongo</emphasis> --class ~.domain.Pizza</programlisting>This
         command will create a Pizza domain type annotated with <emphasis

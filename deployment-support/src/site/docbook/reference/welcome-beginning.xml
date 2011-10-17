@@ -278,9 +278,9 @@ com.springsource.roo.pizzashop roo&gt;
 
     <para>When you are ready to test or install your application in a
     production setting, the <emphasis role="bold"><link
-    linkend="command-index-jpa-setup">persistence setup</link></emphasis>
-    command can be repeated. This allows you to nominate a different database,
-    or even ORM. Roo offers TAB completion for production databases including
+    linkend="command-index-jpa-setup">jpa setup</link></emphasis> command can
+    be repeated. This allows you to nominate a different database, or even
+    ORM. Roo offers TAB completion for production databases including
     Postgres, MySQL, Microsoft SQL Server, Oracle, DB2, Sybase, H2, Hypersonic
     and more. Another important step is to edit the
     <code>SRC_MAIN_RESOURCES/META-INF/persistence.xml</code> file and modify
@@ -305,12 +305,15 @@ com.springsource.roo.pizzashop roo&gt;
     <title>Step 2: Creating Entities and Fields</title>
 
     <para>Now it is time to create our domain objects and fields which we have
-    identified in our class diagram. First, we can use the <emphasis
-    role="bold"><link linkend="command-index-entity">entity</link></emphasis>
-    command to create the actual domain object. The entity command has a
-    number of <link linkend="command-index-entity">optional attributes</link>
-    and one required attribute which is <code>--class</code>. In addition to
-    the required <code>--class</code> attribute we use the
+    identified in our class diagram. First, we can use the <link
+    linkend="command-index-entity-jpa"><emphasis
+    linkend="command-index-entity-jpa" role="bold"><emphasis role="bold"><link
+    linkend="command-index-entity">entity</link></emphasis>
+    jpa</emphasis></link> command to create the actual domain object. The
+    entity jpa command has a number of <link
+    linkend="command-index-entity-jpa">optional attributes</link> and one
+    required attribute which is <code>--class</code>. In addition to the
+    required <code>--class</code> attribute we use the
     <code>--testAutomatically</code> attribute which conveniently creates
     integration tests for a domain object. So let's start with the
     <code>Topping</code> domain object:</para>
@@ -333,7 +336,7 @@ and hit ENTER. You can always use this approach to view optional arguments.
 
 After creating an entity, use 'hint' for the next suggestion.
 com.springsource.roo.pizzashop roo&gt;
-com.springsource.roo.pizzashop roo&gt; <emphasis role="bold">entity --class ~.domain.Topping --testAutomatically  </emphasis>                  
+com.springsource.roo.pizzashop roo&gt; <emphasis role="bold">entity jpa --class ~.domain.Topping --testAutomatically  </emphasis>                  
 Created SRC_MAIN_JAVA/com/springsource/roo/pizzashop/domain
 Created SRC_MAIN_JAVA/com/springsource/roo/pizzashop/domain/Topping.java
 Created SRC_TEST_JAVA/com/springsource/roo/pizzashop/domain
@@ -348,11 +351,11 @@ Created SRC_TEST_JAVA/com/springsource/roo/pizzashop/domain/ToppingIntegrationTe
 Created SRC_TEST_JAVA/com/springsource/roo/pizzashop/domain/ToppingDataOnDemand_Roo_Configurable.aj
 </programlisting>You will notice that besides the creation of Java and AspectJ
     sources, the <emphasis role="bold"><link
-    linkend="command-index-entity">entity</link></emphasis> command in the Roo
-    shell takes care of creating the appropriate folder structure in your
-    project for the top level package you defined earlier. You will notice
-    that we used the '<emphasis role="bold">~</emphasis>' character as a
-    placeholder for the project's top level package. While this serves a
+    linkend="command-index-entity-jpa">entity jpa</link></emphasis> command in
+    the Roo shell takes care of creating the appropriate folder structure in
+    your project for the top level package you defined earlier. You will
+    notice that we used the '<emphasis role="bold">~</emphasis>' character as
+    a placeholder for the project's top level package. While this serves a
     convenience to abbreviate long commands, you can also tab-complete the
     full top level package in the Roo shell.</para>
 
@@ -418,9 +421,9 @@ Managed SRC_MAIN_JAVA/com/springsource/roo/pizzashop/domain/Topping_Roo_ToString
     <code>Pizza</code> domain object in a similar fashion by issuing the
     following commands (shell output omitted):</para>
 
-    <para><programlisting>entity --class ~.domain.Base --testAutomatically 
+    <para><programlisting>entity jpa --class ~.domain.Base --testAutomatically 
 field string --fieldName name --notNull --sizeMin 2
-entity --class ~.domain.Pizza --testAutomatically 
+entity jpa --class ~.domain.Pizza --testAutomatically 
 field string --fieldName name --notNull --sizeMin 2
 field number --fieldName price --type java.lang.Float </programlisting>After
     adding the name and the price field to the <code>Pizza</code> domain class
@@ -450,7 +453,7 @@ field number --fieldName price --type java.lang.Float </programlisting>After
     <emphasis role="bold"><link linkend="command-index-field-number">field
     number</link></emphasis> commands:</para>
 
-    <para><programlisting>entity --class ~.domain.PizzaOrder --testAutomatically 
+    <para><programlisting>entity jpa --class ~.domain.PizzaOrder --testAutomatically 
 field string --fieldName name --notNull --sizeMin 2
 field string --fieldName address --sizeMax 30
 field number --fieldName total --type java.lang.Float 

@@ -50,12 +50,12 @@ public class EntityCommands implements CommandMarker {
 	@Reference private EqualsOperations equalsOperations;
 	@Reference private IntegrationTestOperations integrationTestOperations;
 
-	@CliAvailabilityIndicator( { "entity", "embeddable" })
+	@CliAvailabilityIndicator( { "entity jpa", "embeddable" })
 	public boolean isPersistentClassAvailable() {
 		return entityOperations.isPersistentClassAvailable();
 	}
 
-	@CliCommand(value = "entity", help = "Creates a new JPA persistent entity in SRC_MAIN_JAVA")
+	@CliCommand(value = "entity jpa", help = "Creates a new JPA persistent entity in SRC_MAIN_JAVA")
 	public void newPersistenceClassJpa(
 		@CliOption(key = "class", optionContext = "update,project", mandatory = true, help = "Name of the entity to create") final JavaType name,
 		@CliOption(key = "extends", mandatory = false, unspecifiedDefaultValue = "java.lang.Object", help = "The superclass (defaults to java.lang.Object)") final JavaType superclass,

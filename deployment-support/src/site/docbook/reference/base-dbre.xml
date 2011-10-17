@@ -206,10 +206,9 @@ JDBC driver not available for 'com.mysql.jdbc.Driver'</programlisting></para>
     <title xml:id="dbre_commands">DBRE Add-On commands</title>
 
     <para>After you have configured your persistence layer with the <link
-    linkend="command-index-jpa-setup">jpa setup</link> command
-    and installed all the JDBC drivers, you can introspect and reverse
-    engineer the database configured for your project. DBRE contains two
-    commands:</para>
+    linkend="command-index-jpa-setup">jpa setup</link> command and installed
+    all the JDBC drivers, you can introspect and reverse engineer the database
+    configured for your project. DBRE contains two commands:</para>
 
     <orderedlist>
       <listitem>
@@ -391,7 +390,8 @@ public class Employee {
 
       <para>For a table with a single primary key column, DBRE causes an
       identifier field to be created in the entity ITD annotated with @Id and
-      @Column. This is similar to executing the entity command by
+      @Column. This is similar to executing the <link
+      linkend="command-index-entity-jpa">entity jpa</link> command by
       itself.</para>
     </section>
 

@@ -19,8 +19,8 @@
   <section>
     <title>JPA setup command</title>
 
-    <para>The <link linkend="command-index-jpa-setup">jpa
-    setup</link> command provides the following options and attributes:</para>
+    <para>The <link linkend="command-index-jpa-setup">jpa setup</link> command
+    provides the following options and attributes:</para>
 
     <para>Database Options:</para>
 
@@ -135,17 +135,16 @@
     you are intending to deploy to VMforce cloud environments. In most cases
     we recommend you use Hibernate, OpenJPA or EclipseLink.</para>
 
-    <para>In addition, the <link
-    linkend="command-index-jpa-setup">jpa setup</link> command
-    accepts optional <emphasis>databaseName</emphasis>,
+    <para>In addition, the <link linkend="command-index-jpa-setup">jpa
+    setup</link> command accepts optional <emphasis>databaseName</emphasis>,
     <emphasis>userName</emphasis> and <emphasis>password</emphasis> attributes
     for your convenience. However, it's not necessary to use this command. You
     can easily edit these details in the <code>database.properties</code> file
     at any time. Finally, you can also specify a pre-configured JNDI
     datasource via the <emphasis>jndiDataSource</emphasis> attribute.</para>
 
-    <para>The jpa setup command can be re-run at any time. This means
-    you can change your ORM provider or database when you plan to move your
+    <para>The jpa setup command can be re-run at any time. This means you can
+    change your ORM provider or database when you plan to move your
     application between your development setup (e.g. Hibernate with HSQLDB) to
     your production setup (e.g. EclipseLink with DB2). Of course this is a
     convenience only. You'll naturally experience fewer deployment issues if
@@ -213,10 +212,9 @@ database.driverClassName=org.hsqldb.jdbcDriver
         linkend="command-index-properties-set">properties set</link> command,
         or by using the <emphasis>databaseName</emphasis>,
         <emphasis>userName</emphasis> and <emphasis>password</emphasis>
-        attributes of the <link
-        linkend="command-index-jpa-setup">jpa setup</link>
-        command. You can edit the properties file or use any of these commands
-        at any time.</para>
+        attributes of the <link linkend="command-index-jpa-setup">jpa
+        setup</link> command. You can edit the properties file or use any of
+        these commands at any time.</para>
       </listitem>
 
       <listitem>
@@ -247,15 +245,15 @@ database.driverClassName=org.hsqldb.jdbcDriver
   </section>
 
   <section>
-    <title>Entity command</title>
+    <title>Entity JPA command</title>
 
-    <para>Using the <link linkend="command-index-entity">entity</link> command
-    you can create simple Java beans which are annotated with JPA annotations.
-    There are several optional attributes which can be used as part of this
-    command but in its simplest form it will generate the following
-    artifacts:</para>
+    <para>Using the <link linkend="command-index-entity-jpa"><link
+    linkend="command-index-entity">entity</link> jpa</link> coxmmand you can
+    create simple Java beans which are annotated with JPA annotations. There
+    are several optional attributes which can be used as part of this command
+    but in its simplest form it will generate the following artifacts:</para>
 
-    <para><programlisting>roo&gt; entity --class ~.Person   
+    <para><programlisting>roo&gt; entity jpa --class ~.Person   
 Created SRC_MAIN_JAVA/com/foo
 Created SRC_MAIN_JAVA/com/foo/Person.java
 Created SRC_MAIN_JAVA/com/foo/Person_Roo_Entity.aj
@@ -284,7 +282,7 @@ public class Person {
         <para>Person_Roo_JavaBean.aj (this will only be generated when fields
         are added to the Person type)</para>
 
-        <para>The first annotation added by the entity command is the
+        <para>The first annotation added by the entity jpa command is the
         @RooJavaBean annotation. This annotation will automatically add public
         accessors and mutators via an ITD for each field added to the Person
         type. This annotation (like all Roo annotations) has source retention
@@ -464,19 +462,20 @@ public class Person {
       </listitem>
     </orderedlist>
 
-    <para>The <link linkend="command-index-entity">entity</link> command
-    offers a number of optional (but very useful) attributes worth mentioning.
-    For example the <emphasis role="bold">--testAutomatically</emphasis>
-    attribute can be used to have Roo to generate and maintain integration
-    tests for the Person type (and the persistence methods generated as part
-    of it). Furthermore, the <emphasis role="bold">--abstract</emphasis> and
-    <emphasis role="bold">--extends</emphasis> attributes allow you to mark
-    classes as abstract or inheritance patterns. Of course this can also be
-    done directly in the Java sources of the Person type but sometimes it is
-    useful to do this through a Roo command which can be scripted and replayed
-    if desired. Other attributes allow you to define the identifier field name
-    as well as the identifier field type which, in turn, allows the use of
-    complex identifier types.</para>
+    <para>The <link linkend="command-index-entity-jpa"><link
+    linkend="command-index-entity">entity</link> jpa</link> command offers a
+    number of optional (but very useful) attributes worth mentioning. For
+    example the <emphasis role="bold">--testAutomatically</emphasis> attribute
+    can be used to have Roo to generate and maintain integration tests for the
+    Person type (and the persistence methods generated as part of it).
+    Furthermore, the <emphasis role="bold">--abstract</emphasis> and <emphasis
+    role="bold">--extends</emphasis> attributes allow you to mark classes as
+    abstract or inheritance patterns. Of course this can also be done directly
+    in the Java sources of the Person type but sometimes it is useful to do
+    this through a Roo command which can be scripted and replayed if desired.
+    Other attributes allow you to define the identifier field name as well as
+    the identifier field type which, in turn, allows the use of complex
+    identifier types.</para>
   </section>
 
   <section>
@@ -605,15 +604,15 @@ private Set&lt;Car&gt; cars = new HashSet&lt;Car&gt;();</programlisting>To
       </listitem>
     </orderedlist>
 
-    <para>Like the <link linkend="command-index-entity">entity</link> command,
-    the <link linkend="command-index-field-commands">field</link> command
-    offeres a number of optional (but very useful) attributes worth
-    mentioning. For example, you can change the field / column name
-    translations with the <emphasis role="bold">--column</emphasis> attribute.
-    Furthermore there are a number of attributes which translate directly to
-    their equivalents defined in <link
-    xlink:href="http://jcp.org/en/jsr/detail?id=303">JSR 303 (Bean
-    Validation)</link>. These attributes include <emphasis
+    <para>Like the <link linkend="command-index-entity-jpa"><link
+    linkend="command-index-entity">entity</link> jpa</link> command, the <link
+    linkend="command-index-field-commands">field</link> command offeres a
+    number of optional (but very useful) attributes worth mentioning. For
+    example, you can change the field / column name translations with the
+    <emphasis role="bold">--column</emphasis> attribute. Furthermore there are
+    a number of attributes which translate directly to their equivalents
+    defined in <link xlink:href="http://jcp.org/en/jsr/detail?id=303">JSR 303
+    (Bean Validation)</link>. These attributes include <emphasis
     role="bold">--notNull</emphasis>, <emphasis
     role="bold">--sizeMin</emphasis>, <emphasis
     role="bold">--sizeMax</emphasis> and other related attributes. Please

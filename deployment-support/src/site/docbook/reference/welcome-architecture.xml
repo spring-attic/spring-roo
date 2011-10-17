@@ -123,7 +123,7 @@
 
       <programlisting>roo&gt; <emphasis role="bold">project --topLevelPackage com.aspectj.rocks</emphasis>
 roo&gt; <emphasis role="bold">jpa setup --database HYPERSONIC_IN_MEMORY --provider HIBERNATE</emphasis>
-roo&gt; <emphasis role="bold">entity --class ~.Hello</emphasis>
+roo&gt; <emphasis role="bold">entity jpa --class ~.Hello</emphasis>
 Created SRC_MAIN_JAVA/com/aspectj/rocks
 Created SRC_MAIN_JAVA/com/aspectj/rocks/Hello.java
 Created SRC_MAIN_JAVA/com/aspectj/rocks/Hello_Roo_Entity.aj
@@ -146,12 +146,10 @@ Managed SRC_MAIN_JAVA/com/aspectj/rocks/Hello_Roo_ToString.aj</programlisting>
 
       <programlisting>package com.aspectj.rocks;
 
-import javax.persistence.Entity;
 import org.springframework.roo.addon.javabean.RooJavaBean;
 import org.springframework.roo.addon.tostring.RooToString;
 import org.springframework.roo.addon.entity.RooEntity;
 
-@Entity
 @RooJavaBean
 @RooToString
 @RooEntity
@@ -363,20 +361,19 @@ public class com.aspectj.rocks.Hello extends java.lang.Object implements org.spr
     you from even needing to know which annotation(s) should be used.</para>
 
     <para>Let's consider a simple entity that has been created using the <link
-    linkend="command-index-entity">entity</link> command and following it with
-    a single <link linkend="command-index-field-commands">field</link>
-    command:</para>
+    linkend="command-index-entity-jpa"><link
+    linkend="command-index-entity">entity</link> jpa</link> command and
+    following it with a single <link
+    linkend="command-index-field-commands">field</link> command:</para>
 
     <programlisting>package com.springsource.vote.domain;
 
-import javax.persistence.Entity;
 import org.springframework.roo.addon.javabean.RooJavaBean;
 import org.springframework.roo.addon.tostring.RooToString;
 import org.springframework.roo.addon.entity.RooEntity;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-@Entity
 @RooJavaBean
 @RooToString
 @RooEntity
