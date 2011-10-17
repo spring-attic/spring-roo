@@ -325,16 +325,14 @@ public class JpaOperationsImpl implements JpaOperations {
 		final Properties dialects = propFileOperations.loadProperties(JPA_DIALECTS_FILE, getClass());
 		final Element properties = persistence.createElement("properties");
 		boolean isDbreProject = fileManager.exists(projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_RESOURCES, "dbre.xml"));
+		final boolean isDbreProjectOrDB2400 = isDbreProject || jdbcDatabase == JdbcDatabase.DB2_400;
+		
 		switch (ormProvider) {
 			case HIBERNATE:
 				final String dialectKey = ormProvider.name() + "." + jdbcDatabase.name();
 				properties.appendChild(createPropertyElement("hibernate.dialect", dialects.getProperty(dialectKey), persistence));
 				properties.appendChild(persistence.createComment(" value=\"create\" to build a new database on each run; value=\"update\" to modify an existing database; value=\"create-drop\" means the same as \"create\" but also drops tables when Hibernate closes; value=\"validate\" makes no changes to the database ")); // ROO-627
-				String hbm2dll = "create";
-				if (isDbreProject || jdbcDatabase == JdbcDatabase.DB2_400) {
-					hbm2dll = "validate";
-				}
-				properties.appendChild(createPropertyElement("hibernate.hbm2ddl.auto", hbm2dll, persistence));
+				properties.appendChild(createPropertyElement("hibernate.hbm2ddl.auto", (isDbreProjectOrDB2400 ? "validate" : "create"), persistence));
 				properties.appendChild(createPropertyElement("hibernate.ejb.naming_strategy", "org.hibernate.cfg.ImprovedNamingStrategy", persistence));
 				properties.appendChild(createPropertyElement("hibernate.connection.charSet", "UTF-8", persistence));
 				properties.appendChild(persistence.createComment(" Uncomment the following two properties for JBoss only "));
@@ -344,13 +342,13 @@ public class JpaOperationsImpl implements JpaOperations {
 			case OPENJPA:
 				properties.appendChild(createPropertyElement("openjpa.jdbc.DBDictionary", dialects.getProperty(ormProvider.name() + "." + jdbcDatabase.name()), persistence));
 				properties.appendChild(persistence.createComment(" value=\"buildSchema\" to runtime forward map the DDL SQL; value=\"validate\" makes no changes to the database ")); // ROO-627
-				properties.appendChild(createPropertyElement("openjpa.jdbc.SynchronizeMappings", (isDbreProject ? "validate" : "buildSchema"), persistence));
+				properties.appendChild(createPropertyElement("openjpa.jdbc.SynchronizeMappings", (isDbreProjectOrDB2400 ? "validate" : "buildSchema"), persistence));
 				properties.appendChild(createPropertyElement("openjpa.RuntimeUnenhancedClasses", "supported", persistence));
 				break;
 			case ECLIPSELINK:
 				properties.appendChild(createPropertyElement("eclipselink.target-database", dialects.getProperty(ormProvider.name() + "." + jdbcDatabase.name()), persistence));
 				properties.appendChild(persistence.createComment(" value=\"drop-and-create-tables\" to build a new database on each run; value=\"create-tables\" creates new tables if needed; value=\"none\" makes no changes to the database ")); // ROO-627
-				properties.appendChild(createPropertyElement("eclipselink.ddl-generation", (isDbreProject ? "none" : "drop-and-create-tables"), persistence));
+				properties.appendChild(createPropertyElement("eclipselink.ddl-generation", (isDbreProjectOrDB2400 ? "none" : "drop-and-create-tables"), persistence));
 				properties.appendChild(createPropertyElement("eclipselink.ddl-generation.output-mode", "database", persistence));
 				properties.appendChild(createPropertyElement("eclipselink.weaving", "static", persistence));
 				break;
