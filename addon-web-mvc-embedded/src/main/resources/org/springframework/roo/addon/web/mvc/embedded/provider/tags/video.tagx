@@ -11,7 +11,7 @@
 
     <c:when test="${provider eq 'youtube'}">
       <spring:url value="http://www.youtube.com/v/${videoId}" var="video" />
-      <iframe title="YouTube video player" width="545" height="320" src="${video}" frameborder="0" allowfullscreen="true"></iframe>
+      <iframe title="YouTube video player" width="545" height="320" src="${video}" frameborder="0" allowfullscreen="true"><!-- content required --></iframe>
     </c:when>
 
     <c:when test="${provider eq 'vimeo'}">

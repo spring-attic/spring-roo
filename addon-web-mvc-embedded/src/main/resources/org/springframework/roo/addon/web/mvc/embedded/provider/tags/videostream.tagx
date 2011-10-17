@@ -23,11 +23,13 @@
 
     <c:when test="${provider eq 'livestream'}">
         <iframe width="560"
-            height="340"
-            src="http://cdn.livestream.com/embed/${streamId}?layout=4&amp;height=340&amp;width=560&amp;autoplay=false"
-            style="border:0;outline:0"
-            frameborder="0"
-            scrolling="no" />
+                height="340"
+                src="http://cdn.livestream.com/embed/${streamId}?layout=4&amp;height=340&amp;width=560&amp;autoplay=false"
+                style="border:0;outline:0"
+                frameborder="0"
+                scrolling="no">
+            <!-- content required -->
+        </iframe>
     </c:when>
 
   </c:choose>

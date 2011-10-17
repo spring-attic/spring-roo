@@ -14,8 +14,7 @@
         <spring:param name="interval" value="10" />
         <spring:param name="size" value="m" />
       </spring:url>
-      <iframe src="${document}" frameborder="0" width="545" height="445"><!-- content required -->
-      </iframe>
+      <iframe src="${document}" frameborder="0" width="545" height="445"><!-- content required --></iframe>
     </c:when>
 
     <c:when test="${provider eq 'scribd'}">
