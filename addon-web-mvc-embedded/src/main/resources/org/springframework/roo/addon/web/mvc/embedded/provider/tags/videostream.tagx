@@ -22,15 +22,12 @@
     </c:when>
 
     <c:when test="${provider eq 'livestream'}">
-      <spring:url value="http://cdn.livestream.com/grid/LSPlayer.swf" var="url">
-        <spring:param name="channel" value="${streamId}"/>
-      </spring:url>
-      <object width="545" height="343" id="lsplayer" classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000">
-        <param name="movie" value="${url}"></param>
-        <param name="allowScriptAccess" value="always"></param>
-        <param name="allowFullScreen" value="true"></param>
-        <embed name="lsplayer" wmode="transparent" src="${url}" width="545" height="330" allowScriptAccess="always" allowFullScreen="true" type="application/x-shockwave-flash"></embed>
-      </object>
+        <iframe width="560"
+            height="340"
+            src="http://cdn.livestream.com/embed/${streamId}?layout=4&amp;height=340&amp;width=560&amp;autoplay=false"
+            style="border:0;outline:0"
+            frameborder="0"
+            scrolling="no" />
     </c:when>
 
   </c:choose>
