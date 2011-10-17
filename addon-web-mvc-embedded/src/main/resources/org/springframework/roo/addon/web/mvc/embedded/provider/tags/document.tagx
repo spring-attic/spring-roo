@@ -32,7 +32,8 @@
         <param name="bgcolor" value="#ffffff" />
         <param name="allowFullScreen" value="true" />
         <param name="allowScriptAccess" value="always" />
-        <param name="FlashVars" value="${fn:substringAfter(document, base_url)}" />
+        <c:set value="${base_url}?" var="suffixedBase" />
+        <param name="FlashVars" value="${fn:substringAfter(document, suffixedBase)}" />
         <embed id="doc_124839913729923" name="doc_124839913729923" src="${document}" type="application/x-shockwave-flash" allowscriptaccess="always" allowfullscreen="true" height="500" width="100%" wmode="opaque" bgcolor="#ffffff"></embed>
       </object>
     </c:when>
