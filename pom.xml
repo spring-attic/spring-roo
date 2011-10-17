@@ -678,13 +678,11 @@
                 <artifactId>org.springframework.roo.addon.web.mvc.selenium</artifactId>
                 <version>${project.version}</version>
             </dependency>
-           
             <dependency> 
                 <groupId>org.springframework.roo</groupId> 
                 <artifactId>org.springframework.roo.addon.jsf</artifactId> 
                 <version>${project.version}</version> 
             </dependency>
-           
             <dependency>
                 <groupId>org.springframework.roo</groupId>
                 <artifactId>org.springframework.roo.bootstrap</artifactId>
