@@ -81,7 +81,7 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 	}
 
 	public boolean isScaffoldAvailable() {
-		return hasWebXml();
+		return hasWebXml() && !fileManager.exists(projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/spring/webmvc-config.xml"));
 	}
 
 	public void setup(JsfImplementation jsfImplementation, final Theme theme) {
@@ -117,9 +117,9 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 		installFacesConfig(managedBean.getPackage());
 		installI18n(managedBean.getPackage());
 		installBean("ApplicationBean-template.java", managedBean.getPackage());
-		installBean("LocaleBean-template.java", managedBean.getPackage());
-		installBean("ViewExpiredExceptionExceptionHandlerFactory-template.java", managedBean.getPackage());
-		installBean("ViewExpiredExceptionExceptionHandler-template.java", managedBean.getPackage());
+		installBean("LocaleBean-template.java", new JavaPackage(managedBean.getPackage().getFullyQualifiedPackageName() + ".util"));
+		installBean("ViewExpiredExceptionExceptionHandlerFactory-template.java", new JavaPackage(managedBean.getPackage().getFullyQualifiedPackageName() + ".util"));
+		installBean("ViewExpiredExceptionExceptionHandler-template.java", new JavaPackage(managedBean.getPackage().getFullyQualifiedPackageName() + ".util"));
 
 		if (fileManager.exists(typeLocationService.getPhysicalTypeCanonicalPath(managedBean, Path.SRC_MAIN_JAVA))) {
 			// Type exists already - nothing to do
@@ -157,7 +157,7 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 
 		if (createConverter) {
 			// Create a javax.faces.convert.Converter class for the entity
-			createConverter(managedBean.getPackage(), entity);
+			createConverter(new JavaPackage(managedBean.getPackage().getFullyQualifiedPackageName() + ".converter"), entity);
 		}
 	}
 

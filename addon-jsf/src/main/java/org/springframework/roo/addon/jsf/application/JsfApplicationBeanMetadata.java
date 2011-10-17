@@ -99,7 +99,7 @@ public class JsfApplicationBeanMetadata extends AbstractItdTypeDetailsProvidingM
 		if (hasScopeAnnotation()) {
 			return null;
 		}
-		AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(SESSION_SCOPED);
+		AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(REQUEST_SCOPED);
 		return annotationBuilder.build();
 	}
 

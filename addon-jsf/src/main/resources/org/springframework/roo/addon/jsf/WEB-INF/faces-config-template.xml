@@ -16,6 +16,6 @@
         </locale-config>
     </application>
     <factory>
-        <exception-handler-factory>__PACKAGE__.ViewExpiredExceptionExceptionHandlerFactory</exception-handler-factory>
+        <exception-handler-factory>__PACKAGE__.util.ViewExpiredExceptionExceptionHandlerFactory</exception-handler-factory>
     </factory>
 </faces-config>

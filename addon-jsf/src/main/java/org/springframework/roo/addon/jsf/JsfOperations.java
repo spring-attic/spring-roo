@@ -6,7 +6,7 @@ import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 
 /**
- * Provides JSF managed bean operations.
+ * Provides JSF managed-bean operations.
  *
  * @author Alan Stewart
  * @since 1.2.0
