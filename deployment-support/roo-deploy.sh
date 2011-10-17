@@ -531,6 +531,9 @@ if [[ "$COMMAND" = "assembly" ]]; then
 		pizzashop_tests
 
         load_roo_build_and_test script expenses.roo	
+        
+        load_roo_build_and_test script bikeshop.roo
+        tomcat_stop_start_get_stop http://localhost:8888/bikeshop
 
         log "Removing Roo distribution from test area"
         rm -rf /tmp/$RELEASE_IDENTIFIER
