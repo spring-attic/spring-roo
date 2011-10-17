@@ -3,6 +3,7 @@ package org.springframework.roo.shell.converters;
 import java.util.List;
 import java.util.Locale;
 
+import org.springframework.roo.shell.Completion;
 import org.springframework.roo.shell.Converter;
 import org.springframework.roo.shell.MethodTarget;
 
@@ -28,7 +29,7 @@ public class LocaleConverter implements Converter<Locale> {
 		}
 	}
 
-	public boolean getAllPossibleValues(final List<String> completions, final Class<?> requiredType, final String existingData, final String optionContext, final MethodTarget target) {
+	public boolean getAllPossibleValues(final List<Completion> completions, final Class<?> requiredType, final String existingData, final String optionContext, final MethodTarget target) {
 		return false;
 	}
 

@@ -2,6 +2,7 @@ package org.springframework.roo.shell.converters;
 
 import java.util.List;
 
+import org.springframework.roo.shell.Completion;
 import org.springframework.roo.shell.Converter;
 import org.springframework.roo.shell.MethodTarget;
 
@@ -23,13 +24,13 @@ public class BooleanConverter implements Converter<Boolean> {
 		}
 	}
 
-	public boolean getAllPossibleValues(final List<String> completions, final Class<?> requiredType, final String existingData, final String optionContext, final MethodTarget target) {
-		completions.add("true");
-		completions.add("false");
-		completions.add("yes");
-		completions.add("no");
-		completions.add("1");
-		completions.add("0");
+	public boolean getAllPossibleValues(final List<Completion> completions, final Class<?> requiredType, final String existingData, final String optionContext, final MethodTarget target) {
+		completions.add(new Completion("true"));
+		completions.add(new Completion("false"));
+		completions.add(new Completion("yes"));
+		completions.add(new Completion("no"));
+		completions.add(new Completion("1"));
+		completions.add(new Completion("0"));
 		return false;
 	}
 

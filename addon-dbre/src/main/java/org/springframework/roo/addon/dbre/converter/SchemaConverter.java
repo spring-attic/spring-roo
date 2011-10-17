@@ -9,6 +9,7 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.addon.dbre.model.DbreModelService;
 import org.springframework.roo.addon.dbre.model.Schema;
+import org.springframework.roo.shell.Completion;
 import org.springframework.roo.shell.Converter;
 import org.springframework.roo.shell.MethodTarget;
 import org.springframework.roo.support.util.StringUtils;
@@ -38,18 +39,18 @@ public class SchemaConverter implements Converter<Set<Schema>> {
 		return schemas;
 	}
 
-	public boolean getAllPossibleValues(final List<String> completions, final Class<?> requiredType, final String existingData, final String optionContext, final MethodTarget target) {
+	public boolean getAllPossibleValues(final List<Completion> completions, final Class<?> requiredType, final String existingData, final String optionContext, final MethodTarget target) {
 		try {
 			if (dbreModelService.supportsSchema(false)) {
 				Set<Schema> schemas = dbreModelService.getSchemas(false);
 				for (Schema schema : schemas) {
-					completions.add(schema.getName());
+					completions.add(new Completion(schema.getName()));
 				}
 			} else {
-				completions.add(DbreModelService.NO_SCHEMA_REQUIRED);
+				completions.add(new Completion(DbreModelService.NO_SCHEMA_REQUIRED));
 			}
 		} catch (Exception e) {
-			completions.add("unable-to-obtain-connection");
+			completions.add(new Completion("unable-to-obtain-connection"));
 		}
 
 		return true;

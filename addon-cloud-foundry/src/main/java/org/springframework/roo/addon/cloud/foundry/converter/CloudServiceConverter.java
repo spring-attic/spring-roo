@@ -6,6 +6,7 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.addon.cloud.foundry.CloudFoundrySession;
+import org.springframework.roo.shell.Completion;
 import org.springframework.roo.shell.Converter;
 import org.springframework.roo.shell.MethodTarget;
 
@@ -34,8 +35,10 @@ public class CloudServiceConverter implements Converter<CloudService> {
 		return CloudService.class.isAssignableFrom(requiredType);
 	}
 
-	public boolean getAllPossibleValues(final List<String> completions, final Class<?> requiredType, final String existingData, final String optionContext, final MethodTarget target) {
-		completions.addAll(session.getProvisionedServices());
+	public boolean getAllPossibleValues(final List<Completion> completions, final Class<?> requiredType, final String existingData, final String optionContext, final MethodTarget target) {
+		for (String provisionedService : session.getProvisionedServices()) {
+			completions.add(new Completion(provisionedService));
+		}
 		return false;
 	}
 }

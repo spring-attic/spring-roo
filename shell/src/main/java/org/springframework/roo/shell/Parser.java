@@ -12,5 +12,5 @@ public interface Parser {
 
 	ParseResult parse(String buffer);
 
-	int complete(String buffer, int cursor, List<String> candidates);
+	int complete(String buffer, int cursor, List<Completion> candidates);
 }

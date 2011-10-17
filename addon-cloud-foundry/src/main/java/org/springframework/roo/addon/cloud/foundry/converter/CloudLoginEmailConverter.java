@@ -7,6 +7,7 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.addon.cloud.foundry.CloudFoundrySession;
 import org.springframework.roo.addon.cloud.foundry.model.CloudLoginEmail;
+import org.springframework.roo.shell.Completion;
 import org.springframework.roo.shell.Converter;
 import org.springframework.roo.shell.MethodTarget;
 
@@ -33,8 +34,10 @@ public class CloudLoginEmailConverter implements Converter<Object> {
 		return CloudLoginEmail.class.isAssignableFrom(requiredType);
 	}
 
-	public boolean getAllPossibleValues(final List<String> completions, final Class<?> requiredType, final String existingData, final String optionContext, final MethodTarget target) {
-		completions.addAll(session.getStoredEmails());
+	public boolean getAllPossibleValues(final List<Completion> completions, final Class<?> requiredType, final String existingData, final String optionContext, final MethodTarget target) {
+		for (String storedEmail : session.getStoredEmails()) {
+			completions.add(new Completion(storedEmail));
+		}
 		return false;
 	}
 }

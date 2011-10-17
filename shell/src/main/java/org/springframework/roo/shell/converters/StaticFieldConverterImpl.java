@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.roo.shell.Completion;
 import org.springframework.roo.shell.Converter;
 import org.springframework.roo.shell.MethodTarget;
 import org.springframework.roo.support.util.Assert;
@@ -71,12 +72,14 @@ public class StaticFieldConverterImpl implements StaticFieldConverter {
 		}
 	}
 
-	public boolean getAllPossibleValues(final List<String> completions, final Class<?> requiredType, final String existingData, final String optionContext, final MethodTarget target) {
+	public boolean getAllPossibleValues(final List<Completion> completions, final Class<?> requiredType, final String existingData, final String optionContext, final MethodTarget target) {
 		Map<String,Field> ffields = fields.get(requiredType);
 		if (ffields == null) {
 			return true;
 		}
-		completions.addAll(ffields.keySet());
+		for (String field : ffields.keySet()) {
+			completions.add(new Completion(field));
+		}
 		return true;
 	}
 

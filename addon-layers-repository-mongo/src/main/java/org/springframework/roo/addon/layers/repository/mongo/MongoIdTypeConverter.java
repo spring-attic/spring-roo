@@ -7,6 +7,7 @@ import java.util.TreeSet;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
+import org.springframework.roo.shell.Completion;
 import org.springframework.roo.shell.Converter;
 import org.springframework.roo.shell.MethodTarget;
 
@@ -31,14 +32,14 @@ public class MongoIdTypeConverter implements Converter<MongoIdType> {
 		return new MongoIdType(value);
 	}
 
-	public boolean getAllPossibleValues(final List<String> completions, final Class<?> targetType, final String existingData, final String optionContext, final MethodTarget target) {
+	public boolean getAllPossibleValues(final List<Completion> completions, final Class<?> targetType, final String existingData, final String optionContext, final MethodTarget target) {
 		SortedSet<String> types = new TreeSet<String>();
 		types.add(BigInteger.class.getName());
 		types.add("org.bson.types.ObjectId");
 
 		for (String type : types) {
 			if (type.startsWith(existingData) || existingData.startsWith(type)) {
-				completions.add(type);
+				completions.add(new Completion(type));
 			}
 		}
 		return false;

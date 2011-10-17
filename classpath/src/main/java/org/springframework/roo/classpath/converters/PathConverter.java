@@ -7,6 +7,7 @@ import java.util.TreeSet;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.project.Path;
+import org.springframework.roo.shell.Completion;
 import org.springframework.roo.shell.Converter;
 import org.springframework.roo.shell.MethodTarget;
 
@@ -46,10 +47,10 @@ public class PathConverter implements Converter<Path> {
 		return Path.class.isAssignableFrom(requiredType);
 	}
 
-	public boolean getAllPossibleValues(final List<String> completions, final Class<?> requiredType, final String existingData, final String optionContext, final MethodTarget target) {
+	public boolean getAllPossibleValues(final List<Completion> completions, final Class<?> requiredType, final String existingData, final String optionContext, final MethodTarget target) {
 		for (String candidate : legalValues) {
 			if ("".equals(existingData) || candidate.startsWith(existingData)) {
-				completions.add(candidate);
+				completions.add(new Completion(candidate));
 			}
 		}
 		return true;

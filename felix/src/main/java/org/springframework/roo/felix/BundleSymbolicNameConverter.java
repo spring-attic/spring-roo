@@ -10,6 +10,7 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.framework.Bundle;
 import org.osgi.service.component.ComponentContext;
+import org.springframework.roo.shell.Completion;
 import org.springframework.roo.shell.Converter;
 import org.springframework.roo.shell.MethodTarget;
 
@@ -40,7 +41,7 @@ public class BundleSymbolicNameConverter implements Converter<BundleSymbolicName
 		return new BundleSymbolicName(value.trim());
 	}
 
-	public boolean getAllPossibleValues(final List<String> completions, final Class<?> requiredType, final String originalUserInput, final String optionContext, final MethodTarget target) {
+	public boolean getAllPossibleValues(final List<Completion> completions, final Class<?> requiredType, final String originalUserInput, final String optionContext, final MethodTarget target) {
 		boolean local = false;
 		boolean obr = false;
 
@@ -62,7 +63,7 @@ public class BundleSymbolicNameConverter implements Converter<BundleSymbolicName
 				for (Bundle bundle : bundles) {
 					String bsn = bundle.getSymbolicName();
 					if (bsn != null && bsn.startsWith(originalUserInput)) {
-						completions.add(bsn);
+						completions.add(new Completion(bsn));
 					}
 				}
 			}
@@ -76,7 +77,7 @@ public class BundleSymbolicNameConverter implements Converter<BundleSymbolicName
 					if (resources != null) {
 						for (Resource resource : resources) {
 							if (resource.getSymbolicName().startsWith(originalUserInput)) {
-								completions.add(resource.getSymbolicName());
+								completions.add(new Completion(resource.getSymbolicName()));
 							}
 						}
 					}

@@ -7,6 +7,7 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.addon.cloud.foundry.CloudFoundrySession;
 import org.springframework.roo.addon.cloud.foundry.model.CloudAppMemoryOption;
+import org.springframework.roo.shell.Completion;
 import org.springframework.roo.shell.Converter;
 import org.springframework.roo.shell.MethodTarget;
 
@@ -34,9 +35,9 @@ public class CloudAppMemoryOptionConverter implements Converter<CloudAppMemoryOp
 		return CloudAppMemoryOption.class.isAssignableFrom(requiredType);
 	}
 
-	public boolean getAllPossibleValues(final List<String> completions, final Class<?> requiredType, final String existingData, final String optionContext, final MethodTarget target) {
+	public boolean getAllPossibleValues(final List<Completion> completions, final Class<?> requiredType, final String existingData, final String optionContext, final MethodTarget target) {
 		for (Integer memoryOption : session.getApplicationMemoryOptions()) {
-			completions.add(memoryOption + MEMORY_OPTION_SUFFIX);
+			completions.add(new Completion(memoryOption + MEMORY_OPTION_SUFFIX));
 		}
 		return false;
 	}

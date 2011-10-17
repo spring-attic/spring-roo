@@ -5,6 +5,7 @@ import java.util.List;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.springframework.roo.shell.Completion;
 import org.springframework.roo.shell.Converter;
 import org.springframework.roo.shell.MethodTarget;
 
@@ -25,11 +26,11 @@ public class PgpKeyIdConverter implements Converter<PgpKeyId> {
 		return new PgpKeyId(value.trim());
 	}
 
-	public boolean getAllPossibleValues(final List<String> completions, final Class<?> requiredType, final String originalUserInput, final String optionContext, final MethodTarget target) {
+	public boolean getAllPossibleValues(final List<Completion> completions, final Class<?> requiredType, final String originalUserInput, final String optionContext, final MethodTarget target) {
 		for (PgpKeyId candidate : pgpService.getDiscoveredKeyIds()) {
 			String id = candidate.getId();
 			if (id.toUpperCase().startsWith(originalUserInput.toUpperCase())) {
-				completions.add(id);
+				completions.add(new Completion(id));
 			}
 		}
 

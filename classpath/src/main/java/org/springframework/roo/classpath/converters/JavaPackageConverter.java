@@ -14,6 +14,7 @@ import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
+import org.springframework.roo.shell.Completion;
 import org.springframework.roo.shell.Converter;
 import org.springframework.roo.shell.MethodTarget;
 
@@ -65,7 +66,7 @@ public class JavaPackageConverter implements Converter<JavaPackage> {
 		return JavaPackage.class.isAssignableFrom(requiredType);
 	}
 
-	public boolean getAllPossibleValues(final List<String> completions, final Class<?> requiredType, String existingData, final String optionContext, final MethodTarget target) {
+	public boolean getAllPossibleValues(final List<Completion> completions, final Class<?> requiredType, String existingData, final String optionContext, final MethodTarget target) {
 		if (existingData == null) {
 			existingData = "";
 		}
@@ -114,7 +115,7 @@ public class JavaPackageConverter implements Converter<JavaPackage> {
 					}
 				}
 				candidate = candidate.replace(File.separator, ".");
-				completions.add(candidate);
+				completions.add(new Completion(candidate));
 			}
 		}
 

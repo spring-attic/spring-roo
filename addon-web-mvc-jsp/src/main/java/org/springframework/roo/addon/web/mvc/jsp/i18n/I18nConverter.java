@@ -6,6 +6,7 @@ import java.util.Locale;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.springframework.roo.shell.Completion;
 import org.springframework.roo.shell.Converter;
 import org.springframework.roo.shell.MethodTarget;
 
@@ -34,14 +35,14 @@ public class I18nConverter implements Converter<I18n> {
 		return null;
 	}
 
-	public boolean getAllPossibleValues(final List<String> completions, final Class<?> requiredType, final String existingData, final String optionContext, final MethodTarget target) {
+	public boolean getAllPossibleValues(final List<Completion> completions, final Class<?> requiredType, final String existingData, final String optionContext, final MethodTarget target) {
 		for(I18n i18n: i18nSupport.getSupportedLanguages()) {
 			Locale locale = i18n.getLocale();
-			StringBuffer localeString = new StringBuffer(locale.getLanguage());
+			StringBuilder localeString = new StringBuilder(locale.getLanguage());
 			if (locale.getCountry() == null || locale.getCountry().length() > 0) {
 				localeString.append("_").append(locale.getCountry().toUpperCase());
 			}
-			completions.add(localeString.toString());
+			completions.add(new Completion(localeString.toString()));
 		}
 		return true;
 	}

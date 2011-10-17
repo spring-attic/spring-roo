@@ -2,6 +2,7 @@ package org.springframework.roo.shell.converters;
 
 import java.util.List;
 
+import org.springframework.roo.shell.Completion;
 import org.springframework.roo.shell.Converter;
 import org.springframework.roo.shell.MethodTarget;
 
@@ -20,12 +21,12 @@ public class EnumConverter implements Converter<Enum> {
 		return Enum.valueOf(enumClass, value);
 	}
 
-	public boolean getAllPossibleValues(final List<String> completions, final Class<?> requiredType, final String existingData, final String optionContext, final MethodTarget target) {
+	public boolean getAllPossibleValues(final List<Completion> completions, final Class<?> requiredType, final String existingData, final String optionContext, final MethodTarget target) {
 		Class<Enum> enumClass = (Class<Enum>) requiredType;
 		for (Enum enumValue : enumClass.getEnumConstants()) {
 			String candidate = enumValue.name();
 			if ("".equals(existingData) || candidate.startsWith(existingData) || existingData.startsWith(candidate) || candidate.toUpperCase().startsWith(existingData.toUpperCase()) || existingData.toUpperCase().startsWith(candidate.toUpperCase())) {
-				completions.add(candidate);
+				completions.add(new Completion(candidate));
 			}
 		}
 		return true;

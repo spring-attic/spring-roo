@@ -5,6 +5,7 @@ import java.util.List;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.springframework.roo.shell.Completion;
 import org.springframework.roo.shell.Converter;
 import org.springframework.roo.shell.MethodTarget;
 
@@ -25,8 +26,10 @@ public class HintConverter implements Converter<String> {
 		return value;
 	}
 
-	public boolean getAllPossibleValues(final List<String> completions, final Class<?> requiredType, final String existingData, final String optionContext, final MethodTarget target) {
-		completions.addAll(hintOperations.getCurrentTopics());
+	public boolean getAllPossibleValues(final List<Completion> completions, final Class<?> requiredType, final String existingData, final String optionContext, final MethodTarget target) {
+		for (String currentTopic : hintOperations.getCurrentTopics()) {
+			completions.add(new Completion(currentTopic));
+		}
 		return false;
 	}
 

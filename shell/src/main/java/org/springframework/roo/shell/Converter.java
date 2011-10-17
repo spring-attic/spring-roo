@@ -42,5 +42,5 @@ public interface Converter<T> {
 	 * values, or <code>false</code> if the user can press TAB to add further
 	 * information to some or all of them
 	 */
-	boolean getAllPossibleValues(List<String> completions, Class<?> targetType, String existingData, String optionContext, MethodTarget target);
+	boolean getAllPossibleValues(List<Completion> completions, Class<?> targetType, String existingData, String optionContext, MethodTarget target);
 }

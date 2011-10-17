@@ -3,6 +3,7 @@ package org.springframework.roo.shell.converters;
 import java.io.File;
 import java.util.List;
 
+import org.springframework.roo.shell.Completion;
 import org.springframework.roo.shell.Converter;
 import org.springframework.roo.shell.MethodTarget;
 import org.springframework.roo.support.util.Assert;
@@ -33,7 +34,7 @@ public abstract class FileConverter implements Converter<File> {
 		return new File(convertUserInputIntoAFullyQualifiedPath(value));
 	}
 
-	public boolean getAllPossibleValues(final List<String> completions, final Class<?> requiredType, final String originalUserInput, final String optionContext, final MethodTarget target) {
+	public boolean getAllPossibleValues(final List<Completion> completions, final Class<?> requiredType, final String originalUserInput, final String optionContext, final MethodTarget target) {
 		String adjustedUserInput = convertUserInputIntoAFullyQualifiedPath(originalUserInput);
 
 		String directoryData = adjustedUserInput.substring(0, adjustedUserInput.lastIndexOf(File.separator) + 1);
@@ -44,7 +45,7 @@ public abstract class FileConverter implements Converter<File> {
 		return false;
 	}
 
-	protected void populate(final List<String> completions, final String adjustedUserInput, final String originalUserInput, final String directoryData) {
+	protected void populate(final List<Completion> completions, final String adjustedUserInput, final String originalUserInput, final String directoryData) {
 		File directory = new File(directoryData);
 
 		if (!directory.isDirectory()) {
@@ -63,9 +64,9 @@ public abstract class FileConverter implements Converter<File> {
 				completion = convertCompletionBackIntoUserInputStyle(originalUserInput, completion);
 
 				if (file.isDirectory()) {
-					completions.add(completion + File.separator);
+					completions.add(new Completion(completion + File.separator));
 				} else {
-					completions.add(completion);
+					completions.add(new Completion(completion));
 				}
 			}
 		}

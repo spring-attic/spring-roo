@@ -7,6 +7,7 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.addon.cloud.foundry.CloudFoundrySession;
 import org.springframework.roo.addon.cloud.foundry.model.CloudControllerUrl;
+import org.springframework.roo.shell.Completion;
 import org.springframework.roo.shell.Converter;
 import org.springframework.roo.shell.MethodTarget;
 
@@ -33,8 +34,10 @@ public class CloudControllerUrlConverter implements Converter<CloudControllerUrl
 		return CloudControllerUrl.class.isAssignableFrom(requiredType);
 	}
 
-	public boolean getAllPossibleValues(final List<String> completions, final Class<?> requiredType, final String existingData, final String optionContext, final MethodTarget target) {
-		completions.addAll(session.getStoredUrls());
+	public boolean getAllPossibleValues(final List<Completion> completions, final Class<?> requiredType, final String existingData, final String optionContext, final MethodTarget target) {
+		for (String storedUrl : session.getStoredUrls()) {
+			completions.add(new Completion(storedUrl));
+		}
 		return false;
 	}
 }

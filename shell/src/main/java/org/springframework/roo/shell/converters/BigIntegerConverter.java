@@ -3,6 +3,7 @@ package org.springframework.roo.shell.converters;
 import java.math.BigInteger;
 import java.util.List;
 
+import org.springframework.roo.shell.Completion;
 import org.springframework.roo.shell.Converter;
 import org.springframework.roo.shell.MethodTarget;
 
@@ -18,7 +19,7 @@ public class BigIntegerConverter implements Converter<BigInteger> {
 		return new BigInteger(value);
 	}
 
-	public boolean getAllPossibleValues(final List<String> completions, final Class<?> requiredType, final String existingData, final String optionContext, final MethodTarget target) {
+	public boolean getAllPossibleValues(final List<Completion> completions, final Class<?> requiredType, final String existingData, final String optionContext, final MethodTarget target) {
 		return false;
 	}
 

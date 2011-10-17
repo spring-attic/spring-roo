@@ -9,6 +9,7 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.addon.cloud.foundry.CloudFoundrySession;
 import org.springframework.roo.addon.cloud.foundry.model.CloudFile;
+import org.springframework.roo.shell.Completion;
 import org.springframework.roo.shell.Converter;
 import org.springframework.roo.shell.MethodTarget;
 
@@ -35,7 +36,7 @@ public class CloudFileConverter implements Converter<CloudFile> {
 		return CloudFile.class.isAssignableFrom(requiredType);
 	}
 
-	public boolean getAllPossibleValues(final List<String> completions, final Class<?> requiredType, final String existingData, final String optionContext, final MethodTarget target) {
+	public boolean getAllPossibleValues(final List<Completion> completions, final Class<?> requiredType, final String existingData, final String optionContext, final MethodTarget target) {
 		final String appName = ConverterUtils.getOptionValue("appName", target.getRemainingBuffer());
 		String path = ConverterUtils.getOptionValue("path", target.getRemainingBuffer());
 		if (path != null) {
@@ -53,7 +54,7 @@ public class CloudFileConverter implements Converter<CloudFile> {
 				if (path == null) {
 					path = "";
 				}
-				completions.add(path + option);
+				completions.add(new Completion(path + option));
 			}
 		} catch (Exception ignored) {
 		}

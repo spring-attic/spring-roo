@@ -25,6 +25,7 @@ import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
+import org.springframework.roo.shell.Completion;
 import org.springframework.roo.shell.Converter;
 import org.springframework.roo.shell.MethodTarget;
 import org.springframework.roo.support.util.StringUtils;
@@ -104,7 +105,7 @@ public class JavaTypeConverter implements Converter<JavaType> {
 		return JavaType.class.isAssignableFrom(requiredType);
 	}
 
-	public boolean getAllPossibleValues(final List<String> completions, final Class<?> requiredType, String existingData, final String optionContext, final MethodTarget target) {
+	public boolean getAllPossibleValues(final List<Completion> completions, final Class<?> requiredType, String existingData, final String optionContext, final MethodTarget target) {
 		if (existingData == null) {
 			existingData = "";
 		}
@@ -123,7 +124,7 @@ public class JavaTypeConverter implements Converter<JavaType> {
 	/**
 	 * Adds common "java." types to the completions. For now we just provide them statically.
 	 */
-	private void completeJavaSpecificPaths(final List<String> completions, final String existingData, String optionContext) {
+	private void completeJavaSpecificPaths(final List<Completion> completions, final String existingData, String optionContext) {
 		SortedSet<String> types = new TreeSet<String>();
 
 		if (optionContext == null || "".equals(optionContext)) {
@@ -177,7 +178,7 @@ public class JavaTypeConverter implements Converter<JavaType> {
 
 		for (String type : types) {
 			if (type.startsWith(existingData) || existingData.startsWith(type)) {
-				completions.add(type);
+				completions.add(new Completion(type));
 			}
 		}
 	}
@@ -242,7 +243,7 @@ public class JavaTypeConverter implements Converter<JavaType> {
 				if (directory) {
 					candidate = candidate + ".";
 				}
-				completions.add(candidate);
+				completions.add(new Completion(candidate));
 			}
 		}
 	}

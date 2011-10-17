@@ -15,8 +15,8 @@ import org.springframework.roo.addon.cloud.foundry.model.CloudDeployableFile;
 import org.springframework.roo.file.monitor.event.FileDetails;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.MavenOperationsImpl;
-import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectOperations;
+import org.springframework.roo.shell.Completion;
 import org.springframework.roo.shell.Converter;
 import org.springframework.roo.shell.MethodTarget;
 
@@ -46,7 +46,7 @@ public class CloudDeployableFileConverter implements Converter<CloudDeployableFi
 						return null;
 					}
 					((MavenOperationsImpl) projectOperations).executeMvnCommand("clean package");
-					String rootPath = projectOperations.getPathResolver().getRoot(Path.ROOT);
+					String rootPath = projectOperations.getFocusedModule().getRoot();
 					Set<FileDetails> fileDetails = fileManager.findMatchingAntPath(rootPath + File.separator + "**" + File.separator + "*.war");
 					if (fileDetails.size() > 0) {
 						FileDetails fileToDeploy = fileDetails.iterator().next();
@@ -62,12 +62,12 @@ public class CloudDeployableFileConverter implements Converter<CloudDeployableFi
 		if (value.contains(oppositeFileSeparator)) {
 			value = value.replaceAll(escapeString(oppositeFileSeparator), escapeString(File.separator));
 		}
-		String path = projectOperations.getPathResolver().getRoot(Path.ROOT) + value;
+		String path = projectOperations.getFocusedModule().getRoot() + value;
 		if (!new File(path).exists())  {
 			logger.severe("The file at path '" + path + "' doesn't exist; cannot continue");
 			return null;
 		}
-		FileDetails fileToDeploy = fileManager.readFile(projectOperations.getPathResolver().getRoot(Path.ROOT) + value);
+		FileDetails fileToDeploy = fileManager.readFile(projectOperations.getFocusedModule().getRoot() + value);
 		return new CloudDeployableFile(fileToDeploy);
 	}
 
@@ -75,20 +75,20 @@ public class CloudDeployableFileConverter implements Converter<CloudDeployableFi
 		return CloudDeployableFile.class.isAssignableFrom(requiredType);
 	}
 
-	public boolean getAllPossibleValues(final List<String> completions, final Class<?> requiredType, final String existingData, final String optionContext, final MethodTarget target) {
+	public boolean getAllPossibleValues(final List<Completion> completions, final Class<?> requiredType, final String existingData, final String optionContext, final MethodTarget target) {
 		if (projectOperations.getPathResolver() == null) {
 			logger.warning("A project has not been created please specify the full path of the file you wish to deploy");
 			return false;
 		}
-		String rootPath = projectOperations.getPathResolver().getRoot(Path.ROOT);
+		String rootPath = projectOperations.getFocusedModule().getRoot();
 		Set<FileDetails> fileDetails = fileManager.findMatchingAntPath(rootPath + File.separator + "**" + File.separator + "*.war");
 
 		if (fileDetails.isEmpty()) {
 			logger.warning("No deployable files found in the project directory. Please use the '" + CREATE_OPTION + "' option to build the war.");
-			completions.add(CREATE_OPTION);
+			completions.add(new Completion(CREATE_OPTION));
 		}
 		for (FileDetails fileDetail : fileDetails) {
-			completions.add(fileDetail.getCanonicalPath().replaceAll(escapeString(rootPath), ""));
+			completions.add(new Completion(fileDetail.getCanonicalPath().replaceAll(escapeString(rootPath), "")));
 		}
 
 		return false;

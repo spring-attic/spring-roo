@@ -7,6 +7,7 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.addon.cloud.foundry.CloudFoundrySession;
 import org.springframework.roo.addon.cloud.foundry.model.CloudUri;
+import org.springframework.roo.shell.Completion;
 import org.springframework.roo.shell.Converter;
 import org.springframework.roo.shell.MethodTarget;
 
@@ -33,11 +34,13 @@ public class CloudUriConverter implements Converter<CloudUri> {
 		return CloudUri.class.isAssignableFrom(requiredType);
 	}
 
-	public boolean getAllPossibleValues(final List<String> completions, final Class<?> requiredType, final String existingData, final String optionContext, final MethodTarget target) {
+	public boolean getAllPossibleValues(final List<Completion> completions, final Class<?> requiredType, final String existingData, final String optionContext, final MethodTarget target) {
 		final String appName = ConverterUtils.getOptionValue("appName", target.getRemainingBuffer());
 		final List<String> uris = session.getBoundUrlMap().get(appName);
 		if (uris != null) {
-			completions.addAll(uris);
+			for (String uri : uris) {
+				completions.add(new Completion(uri));
+			}
 		}
 		return false;
 	}

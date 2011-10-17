@@ -324,7 +324,7 @@
             <dependency>
                 <groupId>net.sourceforge.jline</groupId>
                 <artifactId>jline</artifactId>
-                <version>1.0.S2-A</version>
+                <version>1.0.S2-B</version>
             </dependency>
             <dependency>
                 <groupId>org.fusesource.jansi</groupId>
