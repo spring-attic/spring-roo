@@ -52,12 +52,7 @@
     </c:when>
 
     <c:when test="${provider eq 'screenr'}">
-      <object width='545' height='340' classid='clsid:d27cdb6e-ae6d-11cf-96b8-444553540000' codebase='http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=9,0,115,0'>
-        <param name='movie' value='http://screenr.com/Content/assets/screenr_1116090935.swf' />
-        <param name='flashvars' value='${videoId}' />
-        <param name='allowFullScreen' value='true' />
-        <embed src='http://screenr.com/Content/assets/screenr_1116090935.swf' flashvars='${videoId}' allowFullScreen='true' width='545' height='340' pluginspage='http://www.macromedia.com/go/getflashplayer'></embed>
-      </object>
+      <iframe src="http://www.screenr.com/embed/${videoId}" width="650" height="396" frameborder="0"><!-- Content required --></iframe>
     </c:when>
 
   </c:choose>

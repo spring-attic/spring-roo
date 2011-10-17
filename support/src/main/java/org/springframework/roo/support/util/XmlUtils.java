@@ -97,6 +97,7 @@ public final class XmlUtils {
 	 *
 	 * @param inputStream the input stream to read from (required).  The stream is closed upon completion.
 	 * @return a document.
+	 * @throws IllegalStateException if the stream could not be read
 	 */
 	public static Document readXml(InputStream inputStream) {
 		Assert.notNull(inputStream, "InputStream required");

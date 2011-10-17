@@ -9,6 +9,7 @@ import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.addon.web.mvc.embedded.AbstractEmbeddedProvider;
 import org.springframework.roo.addon.web.mvc.embedded.EmbeddedCompletor;
 import org.springframework.roo.support.style.ToStringCreator;
+import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlRoundTripUtils;
 import org.springframework.roo.support.util.XmlUtils;
@@ -72,12 +73,8 @@ public class VideoEmbeddedProvider extends AbstractEmbeddedProvider {
 		if (!isProviderSupported(provider, VideoProvider.values())) {
 			return false;
 		}
-		String id = options.get("id");
-
-		if (VideoProvider.SCREENR.name().equals(provider)) {
-			id = getScreenrId("http://screenr.com/" + id);
-		}
-		if (id == null || id.length() == 0) {
+		final String id = options.get("id");
+		if (!StringUtils.hasText(id)) {
 			return false;
 		}
 		installTagx("video");
@@ -85,22 +82,6 @@ public class VideoEmbeddedProvider extends AbstractEmbeddedProvider {
 		video.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(video));
 		installJspx(getViewName(viewName, provider.toLowerCase()), null, video);
 		return true;
-	}
-
-	private String getScreenrId(final String url) {
-		String xml = sendHttpGetRequest("http://screenr.com/api/oembed.xml?url=" + url);
-		if (xml != null) {
-			try {
-				Document doc = XmlUtils.readXml(new ByteArrayInputStream(xml.getBytes()));
-				Element movie = XmlUtils.findRequiredElement("//html", doc.getDocumentElement());
-				String movieId = movie.getTextContent();
-				movieId = movieId.substring(movieId.indexOf("value=\"i=") + 7);
-				return movieId.substring(0, movieId.indexOf("\"") == -1 ? movieId.length() : movieId.indexOf("\""));
-			} catch (Exception e) {
-				throw new IllegalStateException("Could not parse oembed document from screenr.com", e);
-			}
-		}
-		return null;
 	}
 
 	private String getViddlerId(final String url) {
