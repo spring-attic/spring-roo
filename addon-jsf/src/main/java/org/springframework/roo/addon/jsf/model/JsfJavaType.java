@@ -33,6 +33,7 @@ public class JsfJavaType {
 	public static final JavaType LENGTH_VALIDATOR = new JavaType("javax.faces.validator.LengthValidator");
 	public static final JavaType LONG_RANGE_VALIDATOR = new JavaType("javax.faces.validator.LongRangeValidator");
 	public static final JavaType MANAGED_BEAN = new JavaType("javax.faces.bean.ManagedBean");
+	public static final JavaType REGEX_VALIDATOR = new JavaType("javax.faces.validator.RegexValidator");
 	public static final JavaType REQUEST_SCOPED = new JavaType("javax.faces.bean.RequestScoped");
 	public static final JavaType SESSION_SCOPED = new JavaType("javax.faces.bean.SessionScoped");
 	public static final JavaType UI_COMPONENT = new JavaType("javax.faces.component.UIComponent");

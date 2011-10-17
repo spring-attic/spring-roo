@@ -32,6 +32,7 @@ import static org.springframework.roo.addon.jsf.model.JsfJavaType.PRIMEFACES_SEL
 import static org.springframework.roo.addon.jsf.model.JsfJavaType.PRIMEFACES_SELECT_MANY_MENU;
 import static org.springframework.roo.addon.jsf.model.JsfJavaType.PRIMEFACES_SPINNER;
 import static org.springframework.roo.addon.jsf.model.JsfJavaType.PRIMEFACES_STREAMED_CONTENT;
+import static org.springframework.roo.addon.jsf.model.JsfJavaType.REGEX_VALIDATOR;
 import static org.springframework.roo.addon.jsf.model.JsfJavaType.REQUEST_SCOPED;
 import static org.springframework.roo.addon.jsf.model.JsfJavaType.SESSION_SCOPED;
 import static org.springframework.roo.addon.jsf.model.JsfJavaType.UI_SELECT_ITEM;
@@ -39,6 +40,8 @@ import static org.springframework.roo.addon.jsf.model.JsfJavaType.UI_SELECT_ITEM
 import static org.springframework.roo.addon.jsf.model.JsfJavaType.VIEW_SCOPED;
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.FIND_ALL_METHOD;
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.MERGE_METHOD;
+import static org.springframework.roo.classpath.customdata.CustomDataKeys.ONE_TO_MANY_FIELD;
+import static org.springframework.roo.classpath.customdata.CustomDataKeys.ONE_TO_ONE_FIELD;
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.PERSIST_METHOD;
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.REMOVE_METHOD;
 import static org.springframework.roo.model.JavaType.BOOLEAN_PRIMITIVE;
@@ -49,11 +52,17 @@ import static org.springframework.roo.model.JdkJavaType.DATE;
 import static org.springframework.roo.model.JdkJavaType.HASH_SET;
 import static org.springframework.roo.model.JdkJavaType.LIST;
 import static org.springframework.roo.model.JdkJavaType.POST_CONSTRUCT;
+import static org.springframework.roo.model.JpaJavaType.MANY_TO_MANY;
+import static org.springframework.roo.model.JpaJavaType.ONE_TO_MANY;
+import static org.springframework.roo.model.JpaJavaType.ONE_TO_ONE;
 import static org.springframework.roo.model.Jsr303JavaType.DECIMAL_MAX;
 import static org.springframework.roo.model.Jsr303JavaType.DECIMAL_MIN;
+import static org.springframework.roo.model.Jsr303JavaType.FUTURE;
 import static org.springframework.roo.model.Jsr303JavaType.MAX;
 import static org.springframework.roo.model.Jsr303JavaType.MIN;
 import static org.springframework.roo.model.Jsr303JavaType.NOT_NULL;
+import static org.springframework.roo.model.Jsr303JavaType.PAST;
+import static org.springframework.roo.model.Jsr303JavaType.PATTERN;
 import static org.springframework.roo.model.Jsr303JavaType.SIZE;
 import static org.springframework.roo.model.RooJavaType.ROO_UPLOADED_FILE;
 
@@ -88,7 +97,6 @@ import org.springframework.roo.model.ImportRegistrationResolver;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.JdkJavaType;
-import org.springframework.roo.model.JpaJavaType;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
@@ -567,6 +575,12 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 					bodyBuilder.appendFormalLine(fieldValueId + ".setEffect(\"slideDown\");");
 					bodyBuilder.appendFormalLine(fieldValueId + ".setPattern(\"dd/MM/yyyy\");");
 					bodyBuilder.appendFormalLine(requiredStr);
+					if (MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), PAST) != null) {
+						bodyBuilder.appendFormalLine(fieldValueId + ".setMaxdate(new Date());");
+					}
+					if (MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), FUTURE) != null) {
+						bodyBuilder.appendFormalLine(fieldValueId + ".setMindate(new Date());");
+					}
 				}
 			} else if (JdkJavaType.isIntegerType(fieldType)) {
 				if (action == Action.VIEW) {
@@ -627,6 +641,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 					if (sizeMinValue != null || sizeMaxValue != null) {
 						bodyBuilder.append(getLengthValdatorString(fieldValueId, sizeMinValue, sizeMaxValue));
 					}
+					setRegexPatternValidationString(field, fieldValueId, bodyBuilder);
 				}
 			} else if (fieldType.equals(STRING) && !isTextarea) {
 				if (action == Action.VIEW) {
@@ -642,27 +657,18 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 					if (sizeMinValue != null || sizeMaxValue != null) {
 						bodyBuilder.append(getLengthValdatorString(fieldValueId, sizeMinValue, sizeMaxValue));
 					}
+					setRegexPatternValidationString(field, fieldValueId, bodyBuilder);
 				}
 			} else if (jsfFieldHolder.isGenericType()) {
 				final JavaType genericType = jsfFieldHolder.getGenericType();
-				final String genericTypeBeanName = jsfFieldHolder.getGenericTypeBeanName();
 				final String gerericTypeSimpleTypeName = genericType.getSimpleTypeName();
 				final String genericTypeFieldName = StringUtils.uncapitalize(gerericTypeSimpleTypeName);
-				AnnotationAttributeValue<?> mappedByAttr = null;
-
+				final String genericTypeBeanName = jsfFieldHolder.getGenericTypeBeanName();
 				if (StringUtils.hasText(genericTypeBeanName)) {
-					if (field.getCustomData().keySet().contains(CustomDataKeys.ONE_TO_MANY_FIELD) || field.getCustomData().keySet().contains(CustomDataKeys.MANY_TO_MANY_FIELD)) {
-						AnnotationMetadata annotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), JpaJavaType.ONE_TO_MANY);
-						if (annotation != null) {
-							mappedByAttr = annotation.getAttribute(new JavaSymbolName("mappedBy"));
-						} else if ((annotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), JpaJavaType.MANY_TO_MANY)) != null) {
-							mappedByAttr = annotation.getAttribute(new JavaSymbolName("mappedBy"));
-						}
-					}
-					if (mappedByAttr != null) {
+					if (field.getCustomData().keySet().contains(ONE_TO_MANY_FIELD) || field.getCustomData().keySet().contains(CustomDataKeys.MANY_TO_MANY_FIELD) && isInverseSideOfRelationship(field, ONE_TO_MANY, MANY_TO_MANY)) {
 						bodyBuilder.appendFormalLine(htmlOutputTextStr);
 						bodyBuilder.appendFormalLine(componentIdStr);
-						bodyBuilder.appendFormalLine(fieldValueId + ".setValue(\"This relationship is managed from the " + genericType.getSimpleTypeName() + " side\");");
+						bodyBuilder.appendFormalLine(fieldValueId + ".setValue(\"This relationship is managed from the " + gerericTypeSimpleTypeName + " side\");");
 					} else {
 						final JavaType converterType = new JavaType(destination.getPackage().getFullyQualifiedPackageName() + ".converter." + gerericTypeSimpleTypeName + "Converter");
 						imports.addImport(PRIMEFACES_SELECT_MANY_MENU);
@@ -678,7 +684,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 						if (action == Action.VIEW) {
 							bodyBuilder.appendFormalLine(fieldValueId + ".setReadonly(true);");
 							bodyBuilder.appendFormalLine(fieldValueId + ".setDisabled(true);");
-							bodyBuilder.appendFormalLine(fieldValueId + "Items.setValueExpression(\"value\", expressionFactory.createValueExpression(elContext, \"#{" + beanName + "." + entityName.getSymbolName() + "." + fieldName + "}\", " + fieldType.getSimpleTypeName() + ".class));");
+							bodyBuilder.appendFormalLine(fieldValueId + "Items.setValueExpression(\"value\", expressionFactory.createValueExpression(elContext, \"#{" + beanName + "." + entityName.getSymbolName() + "." + fieldName + "}\", " + simpleTypeName + ".class));");
 						} else {
 							bodyBuilder.appendFormalLine(fieldValueId + "Items.setValueExpression(\"value\", expressionFactory.createValueExpression(elContext, \"#{" + genericTypeBeanName + ".all" + StringUtils.capitalize(jsfFieldHolder.getGenericTypePlural()) + "}\", List.class));");
 							bodyBuilder.appendFormalLine(requiredStr);
@@ -697,7 +703,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 						bodyBuilder.appendFormalLine(fieldValueId + ".setDisabled(true);");
 						bodyBuilder.appendFormalLine(fieldValueId + ".setValueExpression(\"value\", expressionFactory.createValueExpression(elContext, \"#{" + beanName + "." + getSelectedFieldName(fieldName) + "}\", List.class));");
 						bodyBuilder.appendFormalLine("UISelectItems " + fieldValueId + "Items = (UISelectItems) facesContext.getApplication().createComponent(UISelectItems.COMPONENT_TYPE);");
-						bodyBuilder.appendFormalLine(fieldValueId + "Items.setValueExpression(\"value\", expressionFactory.createValueExpression(elContext, \"#{" + beanName + "." + entityName.getSymbolName() + "." + fieldName + "}\", " + fieldType.getSimpleTypeName() + ".class));");
+						bodyBuilder.appendFormalLine(fieldValueId + "Items.setValueExpression(\"value\", expressionFactory.createValueExpression(elContext, \"#{" + beanName + "." + entityName.getSymbolName() + "." + fieldName + "}\", " + simpleTypeName + ".class));");
 						bodyBuilder.appendFormalLine(fieldValueId + "Items.setValueExpression(\"var\", expressionFactory.createValueExpression(elContext, \"" + genericTypeFieldName + "\", String.class));");
 						bodyBuilder.appendFormalLine(fieldValueId + "Items.setValueExpression(\"itemLabel\", expressionFactory.createValueExpression(elContext, \"#{" + genericTypeFieldName + "}\", String.class));");
 						bodyBuilder.appendFormalLine(fieldValueId + "Items.setValueExpression(\"itemValue\", expressionFactory.createValueExpression(elContext, \"#{" + genericTypeFieldName + "}\", " + gerericTypeSimpleTypeName + ".class));");
@@ -721,26 +727,32 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 					}
 				}
 			} else if (jsfFieldHolder.isApplicationType()) {
-				JavaType converterType = new JavaType(destination.getPackage().getFullyQualifiedPackageName() + ".converter." + simpleTypeName + "Converter");
-				imports.addImport(converterType);
-				if (action == Action.VIEW) {
+				if (field.getCustomData().keySet().contains(ONE_TO_ONE_FIELD) && isInverseSideOfRelationship(field, ONE_TO_ONE)) {
 					bodyBuilder.appendFormalLine(htmlOutputTextStr);
-					bodyBuilder.appendFormalLine(getSetValueExpression(fieldValueId, fieldName, simpleTypeName));
-					bodyBuilder.appendFormalLine(fieldValueId + ".setConverter(new " + converterType.getSimpleTypeName() + "());");
-				} else {
-					imports.addImport(PRIMEFACES_AUTO_COMPLETE);
-					imports.addImport(fieldType);
-
-					bodyBuilder.appendFormalLine("AutoComplete " + fieldValueId + " = " + getComponentCreation("AutoComplete"));
 					bodyBuilder.appendFormalLine(componentIdStr);
-					bodyBuilder.appendFormalLine(getSetValueExpression(fieldValueId, fieldName, simpleTypeName));
-					bodyBuilder.appendFormalLine(getSetCompleteMethod(fieldValueId, fieldName));
-					bodyBuilder.appendFormalLine(fieldValueId + ".setDropdown(true);");
-					bodyBuilder.appendFormalLine(fieldValueId + ".setValueExpression(\"var\", expressionFactory.createValueExpression(elContext, \"" + fieldName + "\", String.class));");
-					bodyBuilder.appendFormalLine(fieldValueId + ".setValueExpression(\"itemLabel\", expressionFactory.createValueExpression(elContext, \"#{" + fieldName + ".displayString}\", String.class));");
-					bodyBuilder.appendFormalLine(fieldValueId + ".setValueExpression(\"itemValue\", expressionFactory.createValueExpression(elContext, \"#{" + fieldName + "}\", " + simpleTypeName + ".class));");
-					bodyBuilder.appendFormalLine(fieldValueId + ".setConverter(new " + converterType.getSimpleTypeName() + "());");
-					bodyBuilder.appendFormalLine(requiredStr);
+					bodyBuilder.appendFormalLine(fieldValueId + ".setValue(\"This relationship is managed from the " + simpleTypeName + " side\");");
+				} else {
+					JavaType converterType = new JavaType(destination.getPackage().getFullyQualifiedPackageName() + ".converter." + simpleTypeName + "Converter");
+					imports.addImport(converterType);
+					if (action == Action.VIEW) {
+						bodyBuilder.appendFormalLine(htmlOutputTextStr);
+						bodyBuilder.appendFormalLine(getSetValueExpression(fieldValueId, fieldName, simpleTypeName));
+						bodyBuilder.appendFormalLine(fieldValueId + ".setConverter(new " + converterType.getSimpleTypeName() + "());");
+					} else {
+						imports.addImport(PRIMEFACES_AUTO_COMPLETE);
+						imports.addImport(fieldType);
+
+						bodyBuilder.appendFormalLine("AutoComplete " + fieldValueId + " = " + getComponentCreation("AutoComplete"));
+						bodyBuilder.appendFormalLine(componentIdStr);
+						bodyBuilder.appendFormalLine(getSetValueExpression(fieldValueId, fieldName, simpleTypeName));
+						bodyBuilder.appendFormalLine(getSetCompleteMethod(fieldValueId, fieldName));
+						bodyBuilder.appendFormalLine(fieldValueId + ".setDropdown(true);");
+						bodyBuilder.appendFormalLine(fieldValueId + ".setValueExpression(\"var\", expressionFactory.createValueExpression(elContext, \"" + fieldName + "\", String.class));");
+						bodyBuilder.appendFormalLine(fieldValueId + ".setValueExpression(\"itemLabel\", expressionFactory.createValueExpression(elContext, \"#{" + fieldName + ".displayString}\", String.class));");
+						bodyBuilder.appendFormalLine(fieldValueId + ".setValueExpression(\"itemValue\", expressionFactory.createValueExpression(elContext, \"#{" + fieldName + "}\", " + simpleTypeName + ".class));");
+						bodyBuilder.appendFormalLine(fieldValueId + ".setConverter(new " + converterType.getSimpleTypeName() + "());");
+						bodyBuilder.appendFormalLine(requiredStr);
+					}
 				}
 			} else {
 				if (action == Action.VIEW) {
@@ -778,6 +790,19 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 
 		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), PUBLIC, methodName, HTML_PANEL_GRID, new ArrayList<AnnotatedJavaType>(), new ArrayList<JavaSymbolName>(), bodyBuilder);
 		return methodBuilder.build();
+	}
+
+	private void setRegexPatternValidationString(final FieldMetadata field, final String fieldValueId, final InvocableMemberBodyBuilder bodyBuilder) {
+		final AnnotationMetadata patternAnnotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), PATTERN);
+		if (patternAnnotation != null) {
+			final ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
+			imports.addImport(REGEX_VALIDATOR);
+
+			AnnotationAttributeValue<?> regexpAttr = patternAnnotation.getAttribute(new JavaSymbolName("regexp"));
+			bodyBuilder.appendFormalLine("RegexValidator " + fieldValueId + "RegexValidator = new RegexValidator();");
+			bodyBuilder.appendFormalLine(fieldValueId + "RegexValidator.setPattern(\"" + regexpAttr.getValue() + "\");");
+			bodyBuilder.appendFormalLine(fieldValueId + ".addValidator(" + fieldValueId + "RegexValidator);");
+		}
 	}
 
 	private String getAllowTypeRegex(String allowedType) {
@@ -1099,6 +1124,16 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		return fieldValueId + ".setCompleteMethod(expressionFactory.createMethodExpression(elContext, \"#{" + beanName + ".complete" + StringUtils.capitalize(fieldName) + "}\", List.class, new Class[] { String.class }));";
 	}
 
+	private boolean isInverseSideOfRelationship(FieldMetadata field, JavaType... annotationTypes) {
+		for (JavaType annotationType : annotationTypes) {
+			AnnotationMetadata annotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), annotationType);
+			if (annotation != null && annotation.getAttribute(new JavaSymbolName("mappedBy")) != null) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	public String toString() {
 		final ToStringCreator tsc = new ToStringCreator(this);
 		tsc.append("identifier", getId());
