@@ -95,7 +95,8 @@ public class EmbeddedCommands implements CommandMarker {
 
 	@CliCommand(value="web mvc embed map", help="Embed a map for your WEB MVC application")
 	public void embedMap(@CliOption(key="location", mandatory=true, help="The location of the map (ie \"Sydney, Australia\")") final String location,
-			@CliOption(key="viewName", mandatory=false, help="The name of the jspx view") final String viewName) {
+		@CliOption(key="viewName", mandatory=false, help="The name of the jspx view") final String viewName) {
+		
 		Map<String, String> options = new HashMap<String, String>();
 		options.put("provider", "GOOGLE_MAPS");
 		options.put("location", location);
@@ -118,8 +119,9 @@ public class EmbeddedCommands implements CommandMarker {
 
 	@CliCommand(value="web mvc embed stream video", help="Embed a video stream into your WEB MVC application")
 	public void embedVideoStream(@CliOption(key="provider", mandatory=true, help="The provider of the video stream") final VideoStreamProvider provider,
-			@CliOption(key="streamId", mandatory=true, help="The stream id") final String streamId,
-			@CliOption(key="viewName", mandatory=false, help="The name of the jspx view") final String viewName) {
+		@CliOption(key="streamId", mandatory=true, help="The stream id") final String streamId,
+		@CliOption(key="viewName", mandatory=false, help="The name of the jspx view") final String viewName) {
+		
 		Map<String, String> options = new HashMap<String, String>();
 		options.put("provider", provider.name());
 		options.put("id", streamId);
@@ -129,7 +131,8 @@ public class EmbeddedCommands implements CommandMarker {
 	// TODO: disabled due to ROO-2562
 //	@CliCommand(value="web mvc embed finances", help="Embed a stock ticker into your WEB MVC application")
 //	public void embedFinance(@CliOption(key="stockSymbol", mandatory=true, help="The stock symbol") String stockSymbol,
-//			@CliOption(key="viewName", mandatory=false, help="The name of the jspx view") String viewName) {
+//		@CliOption(key="viewName", mandatory=false, help="The name of the jspx view") String viewName) {
+//
 //		Map<String, String> options = new HashMap<String, String>();
 //		options.put("provider", "FINANCES");
 //		options.put("stockSymbol", stockSymbol);
