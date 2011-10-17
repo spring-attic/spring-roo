@@ -182,20 +182,16 @@
   <section xml:id="resources-source-repository">
     <title>Source Repository</title>
 
-    <para>Anonymous URI: <link
-    xlink:href="https://anonsvn.springframework.org/svn/spring-roo/">https://anonsvn.springframework.org/svn/spring-roo/</link></para>
+    <para>Read repository: <link
+    xlink:href="https://src.springframework.org/svn/spring-roo/"><link
+    xlink:href="https://github.com/springsource/spring-roo">https://github.com/springsource/spring-roo</link></link></para>
 
-    <para>Read/write URI: <link
-    xlink:href="https://src.springframework.org/svn/spring-roo/">https://src.springframework.org/svn/spring-roo/</link></para>
+    <para>The Git source control system is currently used by Roo for mainline
+    development.</para>
 
-    <para>The Subversion source control system is currently used by Roo for
-    mainline development. There are two repository URIs, one for anonymous
-    access and the other for people with commit access. Both URIs contain the
-    same source code.</para>
-
-    <para>Historical releases of Roo can be accessed by the "release_xxx"
-    branches within Subversion. The mainline development of Roo occurs on the
-    "trunk" branch.</para>
+    <para>Historical releases of Roo can be accessed by browsing the tags
+    branches within our Git repository. The mainline development of Roo occurs
+    on the "master" branch.</para>
 
     <para>To detailed information about how to check out and build Roo from
     Subversion, please refer to the <link linkend="development">Development
@@ -206,7 +202,7 @@
     <title>Source Web Browsing</title>
 
     <para>Web: <link
-    xlink:href="https://fisheye.springsource.org/browse/spring-roo">https://fisheye.springsource.org/browse/spring-roo</link></para>
+    xlink:href="https://github.com/springsource/spring-roo">https://github.com/springsource/spring-roo</link></para>
 
     <para>To assist those who wish to simply review the current Roo code but
     not check it out fully onto their own computer, Spring Roo offers a public
