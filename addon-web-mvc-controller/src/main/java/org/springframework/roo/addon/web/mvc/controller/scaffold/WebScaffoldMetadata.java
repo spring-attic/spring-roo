@@ -35,7 +35,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.SortedMap;
 
-import org.springframework.roo.addon.web.mvc.controller.RooWebScaffold;
 import org.springframework.roo.addon.web.mvc.controller.details.DateTimeFormatDetails;
 import org.springframework.roo.addon.web.mvc.controller.details.JavaTypeMetadataDetails;
 import org.springframework.roo.addon.web.mvc.controller.details.JavaTypePersistenceMetadataDetails;

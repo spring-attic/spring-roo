@@ -26,8 +26,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.springframework.roo.addon.json.JsonMetadata;
-import org.springframework.roo.addon.web.mvc.controller.RooWebScaffold;
 import org.springframework.roo.addon.web.mvc.controller.details.FinderMetadataDetails;
+import org.springframework.roo.addon.web.mvc.controller.scaffold.RooWebScaffold;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.customdata.tagkeys.MethodMetadataCustomDataKey;

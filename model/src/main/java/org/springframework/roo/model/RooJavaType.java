@@ -12,7 +12,7 @@ public final class RooJavaType {
 
 	// org.springframework.roo.addon
 	public static final JavaType ROO_CONFIGURABLE = new JavaType("org.springframework.roo.addon.configurable.RooConfigurable");
-	public static final JavaType ROO_CONVERSION_SERVICE = new JavaType("org.springframework.roo.addon.web.mvc.controller.RooConversionService");
+	public static final JavaType ROO_CONVERSION_SERVICE = new JavaType("org.springframework.roo.addon.web.mvc.controller.converter.RooConversionService");
 	public static final JavaType ROO_DATA_ON_DEMAND = new JavaType("org.springframework.roo.addon.dod.RooDataOnDemand");
 	public static final JavaType ROO_DISPLAY_STRING = new JavaType("org.springframework.roo.addon.displaystring.RooDisplayString");
 	public static final JavaType ROO_DB_MANAGED = new JavaType("org.springframework.roo.addon.dbre.RooDbManaged");
@@ -44,7 +44,7 @@ public final class RooJavaType {
 	public static final JavaType ROO_UPLOADED_FILE = new JavaType("org.springframework.roo.addon.jsf.model.RooUploadedFile");
 	public static final JavaType ROO_WEB_FINDER = new JavaType("org.springframework.roo.addon.web.mvc.controller.finder.RooWebFinder");
 	public static final JavaType ROO_WEB_JSON = new JavaType("org.springframework.roo.addon.web.mvc.controller.json.RooWebJson");
-	public static final JavaType ROO_WEB_SCAFFOLD = new JavaType("org.springframework.roo.addon.web.mvc.controller.RooWebScaffold");
+	public static final JavaType ROO_WEB_SCAFFOLD = new JavaType("org.springframework.roo.addon.web.mvc.controller.scaffold.RooWebScaffold");
 
 	/**
 	 * Constructor is private to prevent instantiation

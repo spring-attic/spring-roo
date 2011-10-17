@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.web.mvc.controller;
+package org.springframework.roo.addon.web.mvc.controller.converter;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

@@ -16,10 +16,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 
-import org.springframework.roo.addon.web.mvc.controller.RooWebScaffold;
 import org.springframework.roo.addon.web.mvc.controller.details.FinderMetadataDetails;
 import org.springframework.roo.addon.web.mvc.controller.details.JavaTypeMetadataDetails;
 import org.springframework.roo.addon.web.mvc.controller.details.JavaTypePersistenceMetadataDetails;
+import org.springframework.roo.addon.web.mvc.controller.scaffold.RooWebScaffold;
 import org.springframework.roo.addon.web.mvc.controller.scaffold.WebScaffoldAnnotationValues;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;

@@ -1,8 +1,13 @@
 package org.springframework.roo.addon.web.mvc.jsp;
 
+import static org.springframework.roo.model.JavaType.DOUBLE_OBJECT;
+import static org.springframework.roo.model.JavaType.FLOAT_OBJECT;
 import static org.springframework.roo.model.JavaType.INT_OBJECT;
 import static org.springframework.roo.model.JavaType.LONG_OBJECT;
 import static org.springframework.roo.model.JavaType.SHORT_OBJECT;
+import static org.springframework.roo.model.JdkJavaType.BIG_DECIMAL;
+import static org.springframework.roo.model.JdkJavaType.BIG_INTEGER;
+import static org.springframework.roo.model.JdkJavaType.DATE;
 import static org.springframework.roo.model.Jsr303JavaType.DECIMAL_MAX;
 import static org.springframework.roo.model.Jsr303JavaType.DECIMAL_MIN;
 import static org.springframework.roo.model.Jsr303JavaType.FUTURE;
@@ -12,8 +17,6 @@ import static org.springframework.roo.model.Jsr303JavaType.NOT_NULL;
 import static org.springframework.roo.model.Jsr303JavaType.PAST;
 import static org.springframework.roo.model.Jsr303JavaType.PATTERN;
 import static org.springframework.roo.model.Jsr303JavaType.SIZE;
-import static org.springframework.roo.model.JdkJavaType.BIG_DECIMAL;
-import static org.springframework.roo.model.JdkJavaType.BIG_INTEGER;
 
 import java.beans.Introspector;
 import java.util.ArrayList;
@@ -38,6 +41,7 @@ import org.springframework.roo.classpath.details.annotations.AnnotationAttribute
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.JdkJavaType;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.DomUtils;
 import org.springframework.roo.support.util.StringUtils;
@@ -288,7 +292,6 @@ public class JspViewManager {
 
 		Element formFind = new XmlElementBuilder("form:find", document).addAttribute("id", XmlUtils.convertId("ff:" + formbackingType.getFullyQualifiedTypeName())).addAttribute("path", controllerPath).addAttribute("finderName", finderMetadataDetails.getFinderMethodMetadata().getMethodName().getSymbolName().replace("find" + formbackingTypeMetadata.getPlural(), "")).build();
 		formFind.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(formFind));
-
 		div.appendChild(formFind);
 
 		for (FieldMetadata field: finderMetadataDetails.getFinderMethodParamFields()) {
@@ -384,15 +387,13 @@ public class JspViewManager {
 				JavaTypeMetadataDetails referenceTypeMetadata = relatedDomainTypes.get(referenceType);
 				if (referenceType != null/** fix for ROO-1888 --> **/ && referenceTypeMetadata != null && referenceTypeMetadata.isApplicationType() && typePersistenceMetadataHolder != null) {
 					fieldElement = new XmlElementBuilder("field:select", document).addAttribute("items", "${" + referenceTypeMetadata.getPlural().toLowerCase() + "}").addAttribute("itemValue", typePersistenceMetadataHolder.getIdentifierField().getFieldName().getSymbolName()).addAttribute("path", "/" + getPathForType(getJavaTypeForField(field))).build();
-
 					if (field.getCustomData().keySet().contains(CustomDataKeys.MANY_TO_MANY_FIELD)) {
 						fieldElement.setAttribute("multiple", "true");
 					}
 				}
-			} else if (fieldType.getFullyQualifiedTypeName().equals(Date.class.getName()) || fieldType.getFullyQualifiedTypeName().equals(Calendar.class.getName())) {
+			} else if (fieldType.equals(DATE) || fieldType.equals(JdkJavaType.CALENDAR)) {
 				// Only include the date picker for styles supported by Dojo (SMALL & MEDIUM)
 				fieldElement = new XmlElementBuilder("field:datetime", document).addAttribute("dateTimePattern", "${" + entityName + "_" + fieldName.toLowerCase() + "_date_format}").build();
-
 				if (null != MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), FUTURE)) {
 					fieldElement.setAttribute("future", "true");
 				} else if (null != MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), PAST)) {
@@ -401,7 +402,7 @@ public class JspViewManager {
 			} else if (field.getCustomData().keySet().contains(CustomDataKeys.LOB_FIELD)) {
 				fieldElement = new XmlElementBuilder("field:textarea", document).build();
 			}
-			if (null != (annotationMetadata = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), SIZE))) {
+			if ((annotationMetadata = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), SIZE)) != null) {
 				AnnotationAttributeValue<?> max = annotationMetadata.getAttribute(new JavaSymbolName("max"));
 				if (max != null) {
 					int maxValue = (Integer) max.getValue();
@@ -450,7 +451,7 @@ public class JspViewManager {
 			fieldElement.setAttribute("validationMessageCode", "field_invalid_integer");
 		} else if (uncapitalize(field.getFieldName().getSymbolName()).contains("email")) {
 			fieldElement.setAttribute("validationMessageCode", "field_invalid_email");
-		} else if (field.getFieldType().equals(JavaType.DOUBLE_OBJECT) || field.getFieldType().getFullyQualifiedTypeName().equals(double.class.getName()) || field.getFieldType().equals(JavaType.FLOAT_OBJECT) || field.getFieldType().getFullyQualifiedTypeName().equals(float.class.getName()) || field.getFieldType().equals(BIG_DECIMAL)) {
+		} else if (field.getFieldType().equals(DOUBLE_OBJECT) || field.getFieldType().getFullyQualifiedTypeName().equals(double.class.getName()) || field.getFieldType().equals(FLOAT_OBJECT) || field.getFieldType().getFullyQualifiedTypeName().equals(float.class.getName()) || field.getFieldType().equals(BIG_DECIMAL)) {
 			fieldElement.setAttribute("validationMessageCode", "field_invalid_number");
 		}
 		if ("field:input".equals(fieldElement.getTagName()) && null != (annotationMetadata = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), MIN))) {

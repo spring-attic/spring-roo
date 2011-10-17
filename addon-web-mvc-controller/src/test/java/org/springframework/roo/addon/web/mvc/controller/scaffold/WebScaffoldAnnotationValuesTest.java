@@ -1,6 +1,5 @@
 package org.springframework.roo.addon.web.mvc.controller.scaffold;
 
-import org.springframework.roo.addon.web.mvc.controller.RooWebScaffold;
 import org.springframework.roo.classpath.details.annotations.populator.AnnotationValuesTestCase;
 
 /**
