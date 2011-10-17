@@ -33,6 +33,11 @@ public class JsfCommands implements CommandMarker {
 		return jsfOperations.isScaffoldAvailable();
 	}
 	
+	@CliAvailabilityIndicator({ "web jsf media" })
+	public boolean isMediaAdditionAvailable() {
+		return jsfOperations.isMediaAdditionAvailable();
+	}
+
 	@CliCommand(value = "web jsf setup", help = "Set up JSF environment")
 	public void webJsfSetup(
 		@CliOption(key = "implementation", mandatory = false, help = "The JSF implementation to use") final JsfImplementation jsfImplementation,
@@ -57,6 +62,14 @@ public class JsfCommands implements CommandMarker {
 		@CliOption(key = "createConverter", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "true", help = "Create JSF converter for the entity") final boolean createConverter) {
 
 		jsfOperations.createManagedBean(managedBean, entity, beanName, includeOnMenu, createConverter);
+	}
+
+	@CliCommand(value = "web jsf media", help = "Add a cross-browser generic player to embed multimedia content")
+	public void webJsfMedia(
+		@CliOption(key = "url", mandatory = true, help = "The url of the media source") final String url, 
+		@CliOption(key = "player", mandatory = false, help = "The name of the media player") final MediaPlayer mediaPlayer) {
+
+		jsfOperations.addMediaSuurce(url, mediaPlayer);
 	}
 
 	@CliCommand(value = "field file", help ="Adds a field for storing uploaded file contents")

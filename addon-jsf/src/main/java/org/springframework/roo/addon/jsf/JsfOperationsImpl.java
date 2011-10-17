@@ -51,6 +51,7 @@ import org.springframework.roo.support.util.IOUtils;
 import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.TemplateUtils;
 import org.springframework.roo.support.util.WebXmlUtils;
+import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -82,6 +83,10 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 
 	public boolean isScaffoldAvailable() {
 		return hasWebXml() && !fileManager.exists(projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/spring/webmvc-config.xml"));
+	}
+
+	public boolean isMediaAdditionAvailable() {
+		return hasFacesConfig();
 	}
 
 	public void setup(JsfImplementation jsfImplementation, final Theme theme) {
@@ -187,6 +192,44 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 		FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(fieldDetails.getPhysicalTypeIdentifier(), Modifier.PRIVATE, annotations, fieldDetails.getFieldName(), fieldDetails.getFieldType());
 
 		typeManagementService.addField(fieldBuilder.build());
+	}
+
+	public void addMediaSuurce(final String url, MediaPlayer mediaPlayer) {
+		Assert.isTrue(StringUtils.hasText(url), "Media source url required");
+
+		String mainPage = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "pages/main.xhtml");
+		Document document = XmlUtils.readXml(fileManager.getInputStream(mainPage));
+		Element divElement = XmlUtils.findFirstElement("//div[@id = 'media']", document.getDocumentElement());
+		if (divElement == null) {
+			return;
+		}
+		
+		if (mediaPlayer == null) {
+			mp: for (MediaPlayer mp : MediaPlayer.values()) {
+				for (String mediaType : mp.getMediaTypes()) {
+					if (StringUtils.toLowerCase(url).contains(mediaType)) {
+						mediaPlayer = mp;
+						break mp;
+					}
+				}
+			}
+		}
+
+		if (url.contains("youtube")) {
+			mediaPlayer = MediaPlayer.FLASH;
+		}
+
+		Element paraElement = new XmlElementBuilder("p", document).build();
+		Element mediaElement;
+		if (mediaPlayer == null) {
+			mediaElement = new XmlElementBuilder("p:media", document).addAttribute("value", url).build();
+		} else {
+			mediaElement = new XmlElementBuilder("p:media", document).addAttribute("value", url).addAttribute("player", StringUtils.toLowerCase(mediaPlayer.name())).build();
+		}
+		paraElement.appendChild(mediaElement);
+		divElement.appendChild(paraElement);
+
+		fileManager.createOrUpdateTextFileIfRequired(mainPage, XmlUtils.nodeToString(document), false);
 	}
 
 	private void generateManagedBeans(final JavaPackage destinationPackage) {
