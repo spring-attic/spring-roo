@@ -10,7 +10,6 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
-import org.springframework.roo.classpath.details.ItdTypeDetailsTestCase;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.JdkJavaType;
@@ -21,7 +20,7 @@ import org.springframework.roo.model.JdkJavaType;
  * @author Andrew Swan
  * @since 1.2.0
  */
-public class SerializableMetadataTest extends ItdTypeDetailsTestCase {
+public class SerializableMetadataTest {
 
 	// Constants
 	private static final String METADATA_ID = "MID:org.springframework.roo.addon.serializable.SerializableMetadata#SRC_MAIN_JAVA?com.example.Person";
