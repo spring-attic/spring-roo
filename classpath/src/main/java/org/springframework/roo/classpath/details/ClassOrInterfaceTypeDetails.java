@@ -35,4 +35,12 @@ public interface ClassOrInterfaceTypeDetails extends MemberHoldingTypeDetails {
 	 * @return the explicitly-registered imports this user wishes to have defined in the type (cannot be null, but may be empty)
 	 */
 	Set<ImportMetadata> getRegisteredImports();
+	
+	/**
+	 * Indicates whether this class or interface declares a field with the given name
+	 * 
+	 * @param fieldName the field name to check for (can be <code>null</code>)
+	 * @return <code>false</code> if a <code>null</code> field name is given
+	 */
+	boolean declaresField(JavaSymbolName fieldName);
 }

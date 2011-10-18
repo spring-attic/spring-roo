@@ -212,4 +212,8 @@ public class DefaultClassOrInterfaceTypeDetails extends AbstractMemberHoldingTyp
 		}
 		return dynamicFinders;
 	}
+
+	public boolean declaresField(final JavaSymbolName fieldName) {
+		return getDeclaredField(fieldName) != null;
+	}
 }

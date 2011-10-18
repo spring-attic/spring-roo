@@ -25,6 +25,16 @@ public interface MemberHoldingTypeDetails extends PhysicalTypeDetails, Identifia
 	boolean extendsType(JavaType type);
 
 	/**
+	 * Indicates whether this type implements the given interface. Equivalent to
+	 * calling {@link #getImplementsTypes()} and checking whether the given type
+	 * is in the returned list.
+	 *
+	 * @param type the interface being checked for (required)
+	 * @return see above
+	 */
+	boolean implementsType(JavaType interfaceType);
+	
+	/**
 	 * Indicates whether this type implements the given types. Equivalent to
 	 * calling {@link #getImplementsTypes()} and checking whether the given types
 	 * are in the returned list.

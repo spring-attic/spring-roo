@@ -180,4 +180,8 @@ public abstract class AbstractMemberHoldingTypeDetails extends AbstractIdentifia
 		}
 		return (List<JavaType>) entities;
 	}
+	
+	public boolean implementsType(final JavaType interfaceType) {
+		return getImplementsTypes().contains(interfaceType);
+	}
 }
