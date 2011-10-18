@@ -1,7 +1,5 @@
 package org.springframework.roo.addon.property.editor;
 
-import static org.springframework.roo.model.RooJavaType.ROO_EDITOR;
-
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,8 +12,6 @@ import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
-import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
-import org.springframework.roo.classpath.details.annotations.populator.AutoPopulationUtils;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
@@ -49,12 +45,6 @@ public class EditorMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		if (!isValid() || findMethod == null) {
 			valid = false;
 			return;
-		}
-
-		// Process values from the annotation, if present
-		AnnotationMetadata annotation = governorTypeDetails.getAnnotation(ROO_EDITOR);
-		if (annotation != null) {
-			AutoPopulationUtils.populate(this, annotation);
 		}
 
 		// Only make the ITD cause PropertyEditorSupport to be subclasses if the governor doesn't already subclass it
