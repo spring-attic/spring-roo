@@ -46,6 +46,7 @@ import org.springframework.roo.project.ProjectType;
 import org.springframework.roo.project.Repository;
 import org.springframework.roo.shell.Shell;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.DomUtils;
 import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.IOUtils;
 import org.springframework.roo.support.util.StringUtils;
@@ -82,7 +83,7 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 	}
 
 	public boolean isScaffoldAvailable() {
-		return hasWebXml() && !fileManager.exists(projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/spring/webmvc-config.xml"));
+		return fileManager.exists(getWebXmlFile()) && !fileManager.exists(projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/spring/webmvc-config.xml"));
 	}
 
 	public boolean isMediaAdditionAvailable() {
@@ -199,11 +200,12 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 
 		String mainPage = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "pages/main.xhtml");
 		Document document = XmlUtils.readXml(fileManager.getInputStream(mainPage));
-		Element divElement = XmlUtils.findFirstElement("//div[@id = 'media']", document.getDocumentElement());
-		if (divElement == null) {
+		final Element root = document.getDocumentElement();
+		Element element = DomUtils.findFirstElementByName("p:panel", root);
+		if (element == null) {
 			return;
 		}
-		
+
 		if (mediaPlayer == null) {
 			mp: for (MediaPlayer mp : MediaPlayer.values()) {
 				for (String mediaType : mp.getMediaTypes()) {
@@ -227,7 +229,7 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 			mediaElement = new XmlElementBuilder("p:media", document).addAttribute("value", url).addAttribute("player", StringUtils.toLowerCase(mediaPlayer.name())).build();
 		}
 		paraElement.appendChild(mediaElement);
-		divElement.appendChild(paraElement);
+		element.appendChild(paraElement);
 
 		fileManager.createOrUpdateTextFileIfRequired(mainPage, XmlUtils.nodeToString(document), false);
 	}
@@ -292,30 +294,26 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 		shell.flash(Level.FINE, "", JsfOperationsImpl.class.getName());
 	}
 
-	private boolean hasWebXml() {
-		return fileManager.exists(getWebXmlFile());
-	}
-
 	private String getWebXmlFile() {
 		return projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/web.xml");
 	}
 
 	private void createOrUpdateWebXml(final Theme theme) {
 		String webXmlPath = getWebXmlFile();
-		boolean hasWebXml = hasWebXml();
+		boolean hasWebXml = fileManager.exists(webXmlPath);
 		if (hasWebXml && theme == null) {
 			return;
 		}
 
 		Document document;
-		if (!hasWebXml) {
+		if (hasWebXml) {
+			document = XmlUtils.readXml(fileManager.getInputStream(webXmlPath));
+		} else {
 			document = getDocumentTemplate("WEB-INF/web-template.xml");
 			String projectName = projectOperations.getProjectMetadata().getProjectName();
 			WebXmlUtils.setDisplayName(projectName, document, null);
 			WebXmlUtils.setDescription("Roo generated " + projectName + " application", document, null);
-		} else {
-			document = XmlUtils.readXml(fileManager.getInputStream(webXmlPath));
-		}
+	}
 		if (theme != null) {
 			changeTheme(theme, document);
 		}
