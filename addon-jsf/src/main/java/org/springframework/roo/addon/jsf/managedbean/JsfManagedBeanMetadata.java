@@ -35,7 +35,6 @@ import static org.springframework.roo.addon.jsf.model.JsfJavaType.PRIMEFACES_STR
 import static org.springframework.roo.addon.jsf.model.JsfJavaType.REGEX_VALIDATOR;
 import static org.springframework.roo.addon.jsf.model.JsfJavaType.REQUEST_SCOPED;
 import static org.springframework.roo.addon.jsf.model.JsfJavaType.SESSION_SCOPED;
-import static org.springframework.roo.addon.jsf.model.JsfJavaType.UI_COMPONENT;
 import static org.springframework.roo.addon.jsf.model.JsfJavaType.UI_SELECT_ITEM;
 import static org.springframework.roo.addon.jsf.model.JsfJavaType.UI_SELECT_ITEMS;
 import static org.springframework.roo.addon.jsf.model.JsfJavaType.VIEW_SCOPED;
@@ -507,13 +506,16 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 				final String contentType = (String) annotation.getAttribute("contentType").getValue();
 				final String allowedType = UploadedFileContentType.getFileExtension(contentType).name();
 				if (action == Action.VIEW) {
-					imports.addImport(UI_COMPONENT);
+					// imports.addImport(UI_COMPONENT);
 					imports.addImport(PRIMEFACES_FILE_DOWNLOAD_ACTION_LISTENER);
 					imports.addImport(PRIMEFACES_COMMAND_BUTTON);
 					imports.addImport(PRIMEFACES_STREAMED_CONTENT);
 
 					bodyBuilder.appendFormalLine("CommandButton " + fieldValueId + " = " + getComponentCreation("CommandButton"));
 					bodyBuilder.appendFormalLine(fieldValueId + ".addActionListener(new FileDownloadActionListener(expressionFactory.createValueExpression(elContext, \"#{" + beanName + "." + fieldName + "StreamedContent}\", StreamedContent.class), null));");
+					bodyBuilder.appendFormalLine(fieldValueId + ".setValue(\"Download\");");
+					bodyBuilder.appendFormalLine(fieldValueId + ".setAjax(false);");
+					
 					// TODO Make following code work as currently the view panel is not refreshed and the download field is always seen as null
 					// bodyBuilder.appendFormalLine("UIComponent " + fieldValueId + ";");
 					// bodyBuilder.appendFormalLine("if (" + entityName + ".get" + StringUtils.capitalize(fieldName) + "() != null && " + entityName + ".get" + StringUtils.capitalize(fieldName) +
