@@ -38,4 +38,12 @@ public interface PhysicalTypeMetadata extends MemberHoldingTypeDetailsMetadataIt
 	 * @return the {@link JavaType} applicable for this ITD (never null)
 	 */
 	JavaType getItdJavaType(ItdMetadataProvider metadataProvider);
+	
+	/**
+	 * Returns the Java type for this physical type
+	 * 
+	 * @return a non-<code>null</code> type
+	 * @since 1.2.0
+	 */
+	JavaType getType();
 }

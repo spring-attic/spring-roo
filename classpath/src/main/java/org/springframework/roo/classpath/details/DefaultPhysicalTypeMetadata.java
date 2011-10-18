@@ -52,6 +52,10 @@ public class DefaultPhysicalTypeMetadata extends AbstractMetadataItem implements
 		return new JavaType(PhysicalTypeIdentifier.getJavaType(getId()).getFullyQualifiedTypeName() + "_Roo_" + metadataProvider.getItdUniquenessFilenameSuffix());
 	}
 	
+	public JavaType getType() {
+		return memberHoldingTypeDetails.getName();
+	}
+	
 	@Override
 	public String toString() {
 		// Used for example by the "metadata for id" command
