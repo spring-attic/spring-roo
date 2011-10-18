@@ -131,17 +131,6 @@ public abstract class AbstractItdTypeDetailsProvidingMetadataItem extends Abstra
 	}
 	
 	/**
-	 * Indicates whether the governor contains a field with the given name
-	 * 
-	 * @param fieldName the field name to look for (can be <code>null</code>)
-	 * @return false if a <code>null</code> name is given
-	 * @since 1.2.0
-	 */
-	protected boolean governorHasField(final JavaSymbolName fieldName) {
-		return governorTypeDetails.getDeclaredField(fieldName) != null;
-	}
-	
-	/**
 	 * Indicates whether the governor has a method with the given signature.
 	 * 
 	 * @param methodName the name of the method for which to search
@@ -253,7 +242,7 @@ public abstract class AbstractItdTypeDetailsProvidingMetadataItem extends Abstra
 	 * @since 1.2.0
 	 */
 	protected final void ensureGovernorImplements(final JavaType javaType) {
-		if (!governorPhysicalTypeMetadata.getMemberHoldingTypeDetails().implementsAny(javaType)) {
+		if (!governorTypeDetails.implementsType(javaType)) {
 			builder.addImplementsType(javaType);
 		}
 	}

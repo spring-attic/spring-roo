@@ -1,21 +1,21 @@
 package org.springframework.roo.addon.serializable;
 
-import static org.springframework.roo.model.RooJavaType.ROO_SERIALIZABLE;
-
-import java.lang.reflect.Modifier;
+import static java.lang.reflect.Modifier.FINAL;
+import static java.lang.reflect.Modifier.PRIVATE;
+import static java.lang.reflect.Modifier.STATIC;
+import static org.springframework.roo.model.JavaType.LONG_PRIMITIVE;
+import static org.springframework.roo.model.JdkJavaType.SERIALIZABLE;
 
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
-import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
-import org.springframework.roo.classpath.details.annotations.populator.AutoPopulate;
-import org.springframework.roo.classpath.details.annotations.populator.AutoPopulationUtils;
+import org.springframework.roo.classpath.details.ItdTypeDetails;
+import org.springframework.roo.classpath.details.ItdTypeDetailsBuilder;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.model.JdkJavaType;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
@@ -29,75 +29,10 @@ import org.springframework.roo.support.util.Assert;
 public class SerializableMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 	// Constants
+	static final JavaSymbolName SERIAL_VERSION_FIELD = new JavaSymbolName("serialVersionUID");
+	private static final String DEFAULT_SERIAL_VERSION = "1L";
 	private static final String PROVIDES_TYPE_STRING = SerializableMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
-
-	// From annotation
-	@AutoPopulate private final String serialVersionUIDField = "serialVersionUID";
-
-	public SerializableMetadata(final String identifier, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata) {
-		super(identifier, aspectName, governorPhysicalTypeMetadata);
-		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
-
-		if (!isValid()) {
-			return;
-		}
-
-		// Process values from the annotation, if present
-		AnnotationMetadata annotation = governorTypeDetails.getAnnotation(ROO_SERIALIZABLE);
-		if (annotation != null) {
-			AutoPopulationUtils.populate(this, annotation);
-		}
-
-		// Generate "implements Serializable"
-		ensureGovernorImplements(JdkJavaType.SERIALIZABLE);
-
-		// Generate the serialVersionUID field
-		builder.addField(getSerialVersionUIDField());
-
-		// Create a representation of the desired output ITD
-		itdTypeDetails = builder.build();
-	}
-
-	/**
-	 * Obtains the "serialVersionUID" field for this type, if available.
-	 *
-	 * <p>
-	 * If the user provided a "serialVersionUID" field, that field will be returned.
-	 *
-	 * @return the "serialVersionUID" field declared on this type or that will be introduced (or null if undeclared and not introduced)
-	 */
-	private FieldMetadata getSerialVersionUIDField() {
-		// Compute the relevant toString method name
-		JavaSymbolName fieldName = new JavaSymbolName("serialVersionUID");
-		if (!this.serialVersionUIDField.equals("")) {
-			fieldName = new JavaSymbolName(this.serialVersionUIDField);
-		}
-
-		// See if the type itself declared the field
-		FieldMetadata result = governorTypeDetails.getDeclaredField(fieldName);
-		if (result != null) {
-			FieldMetadataBuilder field = new FieldMetadataBuilder(result);
-			field.putCustomData(CustomDataSerializableTags.SERIAL_VERSION_UUID_FIELD.name(), null);
-			return field.build();
-		}
-
-		FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), Modifier.PRIVATE | Modifier.STATIC | Modifier.FINAL, fieldName, JavaType.LONG_PRIMITIVE, "1L");
-		fieldBuilder.putCustomData(CustomDataSerializableTags.SERIAL_VERSION_UUID_FIELD.name(), null);
-		return fieldBuilder.build();
-	}
-
-	@Override
-	public String toString() {
-		ToStringCreator tsc = new ToStringCreator(this);
-		tsc.append("identifier", getId());
-		tsc.append("valid", valid);
-		tsc.append("aspectName", aspectName);
-		tsc.append("destinationType", destination);
-		tsc.append("governor", governorPhysicalTypeMetadata.getId());
-		tsc.append("itdTypeDetails", itdTypeDetails);
-		return tsc.toString();
-	}
 
 	public static String getMetadataIdentiferType() {
 		return PROVIDES_TYPE;
@@ -117,5 +52,63 @@ public class SerializableMetadata extends AbstractItdTypeDetailsProvidingMetadat
 
 	public static boolean isValid(final String metadataIdentificationString) {
 		return PhysicalTypeIdentifierNamingUtils.isValid(PROVIDES_TYPE_STRING, metadataIdentificationString);
+	}
+	
+	/**
+	 * Constructor
+	 *
+	 * @param identifier
+	 * @param aspectName
+	 * @param governorPhysicalTypeMetadata
+	 */
+	public SerializableMetadata(final String identifier, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata) {
+		super(identifier, aspectName, governorPhysicalTypeMetadata);
+		Assert.isTrue(isValid(identifier), "Metadata id '" + identifier + "' is invalid");
+
+		if (isValid()) {
+			ensureGovernorImplements(SERIALIZABLE);
+			addSerialVersionUIDFieldIfRequired();
+			buildItd();
+		}
+	}
+
+	/**
+	 * Adds a "serialVersionUID" field to the {@link ItdTypeDetailsBuilder} if
+	 * the governor doesn't already contain it.
+	 */
+	private void addSerialVersionUIDFieldIfRequired() {
+		if (!governorTypeDetails.declaresField(SERIAL_VERSION_FIELD)) {
+			builder.addField(createSerialVersionField());
+		}
+	}
+
+	/**
+	 * Generates a field to store the serialization ID
+	 * 
+	 * @return a non-<code>null</code> field
+	 */
+	private FieldMetadata createSerialVersionField() {
+		return new FieldMetadataBuilder(getId(), PRIVATE | STATIC | FINAL, SERIAL_VERSION_FIELD, LONG_PRIMITIVE, DEFAULT_SERIAL_VERSION).build();
+	}
+
+	@Override
+	public String toString() {
+		ToStringCreator tsc = new ToStringCreator(this);
+		tsc.append("identifier", getId());
+		tsc.append("valid", valid);
+		tsc.append("aspectName", aspectName);
+		tsc.append("destinationType", destination);
+		tsc.append("governor", governorPhysicalTypeMetadata.getId());
+		tsc.append("itdTypeDetails", itdTypeDetails);
+		return tsc.toString();
+	}
+	
+	/**
+	 * For unit testing
+	 * 
+	 * @return
+	 */
+	ItdTypeDetails getItdTypeDetails() {
+		return this.itdTypeDetails;
 	}
 }
