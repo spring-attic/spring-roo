@@ -50,7 +50,7 @@ public interface MemberHoldingTypeDetails extends PhysicalTypeDetails, Identifia
 	/**
 	 * Locates the specified field.
 	 *
-	 * @param fieldName to locate (required)
+	 * @param fieldName to locate (can be <code>null</code>)
 	 * @return the field, or <code>null</code> if not found
 	 * @since 1.2.0
 	 */

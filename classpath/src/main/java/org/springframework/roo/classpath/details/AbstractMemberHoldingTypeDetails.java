@@ -46,7 +46,6 @@ public abstract class AbstractMemberHoldingTypeDetails extends AbstractIdentifia
 	}
 
 	public FieldMetadata getDeclaredField(final JavaSymbolName fieldName) {
-		Assert.notNull(fieldName, "Field name required");
 		for (FieldMetadata field : getDeclaredFields()) {
 			if (field.getFieldName().equals(fieldName)) {
 				return field;
