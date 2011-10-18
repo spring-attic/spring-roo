@@ -1,6 +1,6 @@
 package org.springframework.roo.addon.finder;
 
-import static org.springframework.roo.model.RooJavaType.ROO_ENTITY;
+import static org.springframework.roo.model.RooJavaType.ROO_JPA_ACTIVE_RECORD;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -165,7 +165,7 @@ public class FinderOperationsImpl implements FinderOperations {
 
 		// We know there should be an existing RooEntity annotation
 		List<? extends AnnotationMetadata> annotations = classOrInterfaceTypeDetails.getAnnotations();
-		AnnotationMetadata rooEntityAnnotation = MemberFindingUtils.getAnnotationOfType(annotations, ROO_ENTITY);
+		AnnotationMetadata rooEntityAnnotation = MemberFindingUtils.getAnnotationOfType(annotations, ROO_JPA_ACTIVE_RECORD);
 		if (rooEntityAnnotation == null) {
 			logger.warning("Unable to find the entity annotation on '" + typeName.getFullyQualifiedTypeName() + "'");
 			return;
@@ -214,12 +214,12 @@ public class FinderOperationsImpl implements FinderOperations {
 		attributes.add(new ArrayAttributeValue<StringAttributeValue>(new JavaSymbolName("finders"), desiredFinders));
 
 		ClassOrInterfaceTypeDetailsBuilder classOrInterfaceTypeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(classOrInterfaceTypeDetails);
-		AnnotationMetadataBuilder annotation = new AnnotationMetadataBuilder(ROO_ENTITY, attributes);
+		AnnotationMetadataBuilder annotation = new AnnotationMetadataBuilder(ROO_JPA_ACTIVE_RECORD, attributes);
 		classOrInterfaceTypeDetailsBuilder.updateTypeAnnotation(annotation.build(), new HashSet<JavaSymbolName>());
 		typeManagementService.createOrUpdateTypeOnDisk(classOrInterfaceTypeDetailsBuilder.build());
 	}
 
 	private String getErrorMsg() {
-		return "Annotation " + ROO_ENTITY.getSimpleTypeName() + " attribute 'finders' must be an array of strings";
+		return "Annotation " + ROO_JPA_ACTIVE_RECORD.getSimpleTypeName() + " attribute 'finders' must be an array of strings";
 	}
 }

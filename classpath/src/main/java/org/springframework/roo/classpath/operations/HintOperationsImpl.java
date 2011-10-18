@@ -77,7 +77,7 @@ public class HintOperationsImpl implements HintOperations {
 			return "jpa";
 		}
 
-		int entityCount = fileManager.findMatchingAntPath(pathResolver.getRoot(Path.SRC_MAIN_JAVA) + ANT_MATCH_DIRECTORY_PATTERN + "*_Roo_Entity.aj").size();
+		int entityCount = fileManager.findMatchingAntPath(pathResolver.getRoot(Path.SRC_MAIN_JAVA) + ANT_MATCH_DIRECTORY_PATTERN + "*_ROO_JPA_ACTIVE_RECORD.aj").size();
 		if (entityCount == 0) {
 			return "entities";
 		}

@@ -1,15 +1,15 @@
 package org.springframework.roo.addon.entity;
 
-import static org.springframework.roo.addon.entity.RooEntity.CLEAR_METHOD_DEFAULT;
-import static org.springframework.roo.addon.entity.RooEntity.COUNT_METHOD_DEFAULT;
-import static org.springframework.roo.addon.entity.RooEntity.FIND_ALL_METHOD_DEFAULT;
-import static org.springframework.roo.addon.entity.RooEntity.FIND_ENTRIES_METHOD_DEFAULT;
-import static org.springframework.roo.addon.entity.RooEntity.FIND_METHOD_DEFAULT;
-import static org.springframework.roo.addon.entity.RooEntity.FLUSH_METHOD_DEFAULT;
-import static org.springframework.roo.addon.entity.RooEntity.MERGE_METHOD_DEFAULT;
-import static org.springframework.roo.addon.entity.RooEntity.PERSIST_METHOD_DEFAULT;
-import static org.springframework.roo.addon.entity.RooEntity.REMOVE_METHOD_DEFAULT;
-import static org.springframework.roo.model.RooJavaType.ROO_ENTITY;
+import static org.springframework.roo.addon.entity.RooJpaActiveRecord.CLEAR_METHOD_DEFAULT;
+import static org.springframework.roo.addon.entity.RooJpaActiveRecord.COUNT_METHOD_DEFAULT;
+import static org.springframework.roo.addon.entity.RooJpaActiveRecord.FIND_ALL_METHOD_DEFAULT;
+import static org.springframework.roo.addon.entity.RooJpaActiveRecord.FIND_ENTRIES_METHOD_DEFAULT;
+import static org.springframework.roo.addon.entity.RooJpaActiveRecord.FIND_METHOD_DEFAULT;
+import static org.springframework.roo.addon.entity.RooJpaActiveRecord.FLUSH_METHOD_DEFAULT;
+import static org.springframework.roo.addon.entity.RooJpaActiveRecord.MERGE_METHOD_DEFAULT;
+import static org.springframework.roo.addon.entity.RooJpaActiveRecord.PERSIST_METHOD_DEFAULT;
+import static org.springframework.roo.addon.entity.RooJpaActiveRecord.REMOVE_METHOD_DEFAULT;
+import static org.springframework.roo.model.RooJavaType.ROO_JPA_ACTIVE_RECORD;
 
 import org.springframework.roo.classpath.details.annotations.populator.AbstractAnnotationValues;
 import org.springframework.roo.classpath.details.annotations.populator.AutoPopulate;
@@ -18,7 +18,7 @@ import org.springframework.roo.classpath.itd.MemberHoldingTypeDetailsMetadataIte
 import org.springframework.roo.support.util.StringUtils;
 
 /**
- * The purely CRUD-related values of a parsed {@link RooEntity} annotation.
+ * The purely CRUD-related values of a parsed {@link RooJpaActiveRecord} annotation.
  *
  * @author Andrew Swan
  * @since 1.2.0
@@ -45,7 +45,7 @@ public class JpaCrudAnnotationValues extends AbstractAnnotationValues {
 	 * @param annotatedType
 	 */
 	public JpaCrudAnnotationValues(final MemberHoldingTypeDetailsMetadataItem<?> annotatedType) {
-		super(annotatedType, ROO_ENTITY);
+		super(annotatedType, ROO_JPA_ACTIVE_RECORD);
 		AutoPopulationUtils.populate(this, annotationMetadata);
 	}
 

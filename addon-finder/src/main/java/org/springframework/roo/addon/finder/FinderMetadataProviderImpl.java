@@ -1,6 +1,6 @@
 package org.springframework.roo.addon.finder;
 
-import static org.springframework.roo.model.RooJavaType.ROO_ENTITY;
+import static org.springframework.roo.model.RooJavaType.ROO_JPA_ACTIVE_RECORD;
 
 import java.util.Collections;
 import java.util.SortedMap;
@@ -41,13 +41,13 @@ public class FinderMetadataProviderImpl extends AbstractMemberDiscoveringItdMeta
 	protected void activate(final ComponentContext context) {
 		metadataDependencyRegistry.addNotificationListener(this);
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-		addMetadataTrigger(ROO_ENTITY);
+		addMetadataTrigger(ROO_JPA_ACTIVE_RECORD);
 	}
 
 	protected void deactivate(final ComponentContext context) {
 		metadataDependencyRegistry.removeNotificationListener(this);
 		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-		removeMetadataTrigger(ROO_ENTITY);
+		removeMetadataTrigger(ROO_JPA_ACTIVE_RECORD);
 	}
 
 	@Override

@@ -10,7 +10,7 @@ import org.junit.Test;
 import org.springframework.roo.support.util.ObjectUtils;
 
 /**
- * Unit test of the {@link RooEntity} annotation.
+ * Unit test of the {@link RooJpaActiveRecord} annotation.
  *
  * @author Andrew Swan
  * @since 1.2.0
@@ -24,7 +24,7 @@ public class RooEntityTest {
 	 */
 	@Test
 	public void testAllRooJpaEntityMethodsExistInRooEntity() {
-		final List<Method> rooEntityMethods = Arrays.asList(RooEntity.class.getMethods());
+		final List<Method> rooEntityMethods = Arrays.asList(RooJpaActiveRecord.class.getMethods());
 		for (final Method jpaEntityMethod : RooJpaEntity.class.getMethods()) {
 			assertMethodExists(jpaEntityMethod, rooEntityMethods);
 		}
@@ -47,6 +47,6 @@ public class RooEntityTest {
 				return; // Found a match
 			}
 		}
-		fail("No " + RooEntity.class.getSimpleName() + " method has the signature \"" + targetMethod.getReturnType().getSimpleName() + " " + targetMethod.getName() + "() default " + targetMethod.getDefaultValue() + "\"");
+		fail("No " + RooJpaActiveRecord.class.getSimpleName() + " method has the signature \"" + targetMethod.getReturnType().getSimpleName() + " " + targetMethod.getName() + "() default " + targetMethod.getDefaultValue() + "\"");
 	}
 }

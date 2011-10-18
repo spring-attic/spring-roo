@@ -9,7 +9,7 @@ import org.springframework.roo.model.JdkJavaType;
 import org.springframework.roo.model.RooJavaType;
 
 /**
- * The values of a {@link RooRepositoryMongo} annotation.
+ * The values of a {@link RooMongoRepository} annotation.
  *
  * @author Stefan Schmidt
  * @since 1.2.0

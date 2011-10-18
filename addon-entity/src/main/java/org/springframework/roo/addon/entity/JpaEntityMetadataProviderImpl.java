@@ -30,7 +30,7 @@ import static org.springframework.roo.model.JpaJavaType.ONE_TO_MANY;
 import static org.springframework.roo.model.JpaJavaType.ONE_TO_ONE;
 import static org.springframework.roo.model.JpaJavaType.TRANSIENT;
 import static org.springframework.roo.model.JpaJavaType.VERSION;
-import static org.springframework.roo.model.RooJavaType.ROO_ENTITY;
+import static org.springframework.roo.model.RooJavaType.ROO_JPA_ACTIVE_RECORD;
 import static org.springframework.roo.model.RooJavaType.ROO_JPA_ENTITY;
 
 import java.util.Arrays;
@@ -92,7 +92,7 @@ public class JpaEntityMetadataProviderImpl extends AbstractIdentifierServiceAwar
 		// We trigger off RooJpaEntity in case the user doesn't want Active Record methods
 		ROO_JPA_ENTITY,
 		// We trigger off RooEntity so that existing projects don't need to add RooJpaEntity
-		ROO_ENTITY,
+		ROO_JPA_ACTIVE_RECORD,
 	};
 
 	private static final String PROVIDES_TYPE_STRING = JpaEntityMetadata.class.getName();
@@ -150,7 +150,7 @@ public class JpaEntityMetadataProviderImpl extends AbstractIdentifierServiceAwar
 			getClass(),
 			// Type matchers
 			new MidTypeMatcher(IDENTIFIER_TYPE, "org.springframework.roo.addon.entity.IdentifierMetadata"),
-			new AnnotatedTypeMatcher(PERSISTENT_TYPE, RooJavaType.ROO_ENTITY, RooJavaType.ROO_JPA_ENTITY),
+			new AnnotatedTypeMatcher(PERSISTENT_TYPE, RooJavaType.ROO_JPA_ACTIVE_RECORD, RooJavaType.ROO_JPA_ENTITY),
 			// Field matchers
 			JPA_COLUMN_FIELD_MATCHER,
 			JPA_EMBEDDED_FIELD_MATCHER,

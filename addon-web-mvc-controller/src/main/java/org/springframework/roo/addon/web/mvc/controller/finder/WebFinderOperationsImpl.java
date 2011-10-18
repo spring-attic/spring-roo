@@ -45,8 +45,8 @@ public class WebFinderOperationsImpl implements WebFinderOperations {
 	public void annotateAll() {
 		// First, find all entities with finders.
 		Set<JavaType> finderEntities = new HashSet<JavaType>();
-		for (ClassOrInterfaceTypeDetails cod : typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_ENTITY)) {
-			if (MemberFindingUtils.getAnnotationOfType(cod.getAnnotations(), RooJavaType.ROO_ENTITY).getAttribute("finders") != null) {
+		for (ClassOrInterfaceTypeDetails cod : typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_JPA_ACTIVE_RECORD)) {
+			if (MemberFindingUtils.getAnnotationOfType(cod.getAnnotations(), RooJavaType.ROO_JPA_ACTIVE_RECORD).getAttribute("finders") != null) {
 				finderEntities.add(cod.getName());
 			}
 		}

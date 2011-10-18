@@ -17,7 +17,7 @@ import java.lang.annotation.Target;
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.SOURCE)
-public @interface RooRepositoryMongo {
+public @interface RooMongoRepository {
 
 	/**
 	 * The name of this annotation's attribute that specifies the managed domain

@@ -105,7 +105,7 @@ public class GwtOperationsImpl implements GwtOperations {
 	}
 
 	public void proxyAll(final JavaPackage proxyPackage) {
-		for (ClassOrInterfaceTypeDetails entity : typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_JPA_ENTITY, RooJavaType.ROO_ENTITY)) {
+		for (ClassOrInterfaceTypeDetails entity : typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_JPA_ENTITY, RooJavaType.ROO_JPA_ACTIVE_RECORD)) {
 			createProxy(entity, proxyPackage);
 		}
 		copyDirectoryContents(GwtPath.LOCATOR);
@@ -120,7 +120,7 @@ public class GwtOperationsImpl implements GwtOperations {
 	}
 
 	public void requestAll(final JavaPackage proxyPackage) {
-		for (ClassOrInterfaceTypeDetails entity : typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_JPA_ENTITY, RooJavaType.ROO_ENTITY)) {
+		for (ClassOrInterfaceTypeDetails entity : typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_JPA_ENTITY, RooJavaType.ROO_JPA_ACTIVE_RECORD)) {
 			createRequest(entity, proxyPackage);
 		}
 	}

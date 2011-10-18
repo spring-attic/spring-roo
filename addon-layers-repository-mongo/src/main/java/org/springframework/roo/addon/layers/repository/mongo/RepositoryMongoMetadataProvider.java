@@ -34,7 +34,7 @@ public class RepositoryMongoMetadataProvider extends AbstractItdMetadataProvider
 		super.setDependsOnGovernorBeingAClass(false);
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		addMetadataTrigger(ROO_REPOSITORY_MONGO);
-		customDataKeyDecorator.registerMatchers(getClass(), new LayerTypeMatcher(ROO_REPOSITORY_MONGO, new JavaSymbolName(RooRepositoryMongo.DOMAIN_TYPE_ATTRIBUTE)));
+		customDataKeyDecorator.registerMatchers(getClass(), new LayerTypeMatcher(ROO_REPOSITORY_MONGO, new JavaSymbolName(RooMongoRepository.DOMAIN_TYPE_ATTRIBUTE)));
 	}
 
 	protected void deactivate(final ComponentContext context) {

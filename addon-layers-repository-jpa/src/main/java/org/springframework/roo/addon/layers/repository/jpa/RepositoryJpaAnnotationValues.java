@@ -8,7 +8,7 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
 
 /**
- * The values of a {@link RooRepositoryJpa} annotation.
+ * The values of a {@link RooJpaRepository} annotation.
  *
  * @author Stefan Schmidt
  * @author Andrew Swan

@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 /**
  * Indicates a type that is a JPA entity. Created to reduce the number of
- * concerns managed by {@link RooEntity}.
+ * concerns managed by {@link RooJpaActiveRecord}.
  *
  * @author Andrew Swan
  * @since 1.2.0
@@ -45,7 +45,7 @@ public @interface RooJpaEntity {
 	/**
 	 * Creates an identifier, unless there is already a JPA @Id field annotation
 	 * in a superclass (either written in normal Java source ,or introduced by a
-	 * superclass that is annotated with either {@link RooEntity} or
+	 * superclass that is annotated with either {@link RooJpaActiveRecord} or
 	 * {@link RooJpaEntity}.
 	 *
 	 * <p>
@@ -101,7 +101,7 @@ public @interface RooJpaEntity {
 	 * Creates an optimistic locking version field, unless there is already a
 	 * JPA @Version field annotation in a superclass (either written in normal
 	 * Java source, or introduced by a superclass annotated with
-	 * {@link RooEntity} or {@link RooJpaEntity}. The produced field will be of
+	 * {@link RooJpaActiveRecord} or {@link RooJpaEntity}. The produced field will be of
 	 * the type specified by {@link #versionType()}.
 	 *
 	 * <p>

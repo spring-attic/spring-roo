@@ -11,7 +11,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.SortedMap;
 
-import org.springframework.roo.addon.entity.RooEntity;
+import org.springframework.roo.addon.entity.RooJpaActiveRecord;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.MethodMetadata;
@@ -28,7 +28,7 @@ import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
 
 /**
- * Metadata for {@link RooEntity#finders()}.
+ * Metadata for {@link RooJpaActiveRecord#finders()}.
  *
  * @author Stefan Schmidt
  * @author Ben Alex
@@ -72,7 +72,7 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 
 	/**
 	 * Obtains all the currently-legal dynamic finders known to this metadata instance. This may be a subset (or even completely empty)
-	 * versus those requested via the {@link RooEntity} annotation, as the user may have made a typing error in representing the
+	 * versus those requested via the {@link RooJpaActiveRecord} annotation, as the user may have made a typing error in representing the
 	 * requested dynamic finder, the field may have been deleted by the user, or an add-on which produces the field (or its mutator)
 	 * might not yet be loaded or in error or other similar conditions.
 	 *
@@ -86,7 +86,7 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	 * Locates a dynamic finder method of the specified name, or creates one on demand if not present.
 	 *
 	 * <p>
-	 * It is required that the requested name was defined in the {@link RooEntity#finders()}. If it is not
+	 * It is required that the requested name was defined in the {@link RooJpaActiveRecord#finders()}. If it is not
 	 * present, an exception is thrown.
 	 *
 	 * @param finderName the dynamic finder method name

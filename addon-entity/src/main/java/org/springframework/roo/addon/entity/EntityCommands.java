@@ -211,7 +211,7 @@ public class EntityCommands implements CommandMarker {
 	 */
 	private JavaType getEntityAnnotationType(final boolean activeRecord) {
 		if (activeRecord) {
-			return RooJavaType.ROO_ENTITY;
+			return RooJavaType.ROO_JPA_ACTIVE_RECORD;
 		}
 		return RooJavaType.ROO_JPA_ENTITY;
 	}

@@ -11,7 +11,7 @@ import static org.springframework.roo.classpath.customdata.CustomDataKeys.PERSIS
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.REMOVE_METHOD;
 import static org.springframework.roo.model.JavaType.INT_PRIMITIVE;
 import static org.springframework.roo.model.RooJavaType.ROO_DATA_ON_DEMAND;
-import static org.springframework.roo.model.RooJavaType.ROO_ENTITY;
+import static org.springframework.roo.model.RooJavaType.ROO_JPA_ACTIVE_RECORD;
 import static org.springframework.roo.model.RooJavaType.ROO_INTEGRATION_TEST;
 
 import java.util.HashMap;
@@ -178,7 +178,7 @@ public class IntegrationTestMetadataProviderImpl extends AbstractItdMetadataProv
 		}
 
 		String transactionManager = null;
-		final AnnotationMetadata rooEntityAnnotation = memberDetails.getAnnotation(ROO_ENTITY);
+		final AnnotationMetadata rooEntityAnnotation = memberDetails.getAnnotation(ROO_JPA_ACTIVE_RECORD);
 		if (rooEntityAnnotation != null) {
 			final StringAttributeValue transactionManagerAttr = (StringAttributeValue) rooEntityAnnotation.getAttribute(new JavaSymbolName("transactionManager"));
 			if (transactionManagerAttr != null) {

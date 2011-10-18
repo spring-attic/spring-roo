@@ -35,7 +35,7 @@ public class RepositoryJpaMetadataProvider extends AbstractItdMetadataProvider {
 		super.setDependsOnGovernorBeingAClass(false);
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		addMetadataTrigger(ROO_REPOSITORY_JPA);
-		customDataKeyDecorator.registerMatchers(getClass(), new LayerTypeMatcher(ROO_REPOSITORY_JPA, new JavaSymbolName(RooRepositoryJpa.DOMAIN_TYPE_ATTRIBUTE)));
+		customDataKeyDecorator.registerMatchers(getClass(), new LayerTypeMatcher(ROO_REPOSITORY_JPA, new JavaSymbolName(RooJpaRepository.DOMAIN_TYPE_ATTRIBUTE)));
 	}
 
 	protected void deactivate(final ComponentContext context) {

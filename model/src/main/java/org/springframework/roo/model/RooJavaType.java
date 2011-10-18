@@ -17,7 +17,7 @@ public final class RooJavaType {
 	public static final JavaType ROO_DISPLAY_STRING = new JavaType("org.springframework.roo.addon.displaystring.RooDisplayString");
 	public static final JavaType ROO_DB_MANAGED = new JavaType("org.springframework.roo.addon.dbre.RooDbManaged");
 	public static final JavaType ROO_EDITOR = new JavaType("org.springframework.roo.addon.property.editor.RooEditor");
-	public static final JavaType ROO_ENTITY = new JavaType("org.springframework.roo.addon.entity.RooEntity");
+	public static final JavaType ROO_JPA_ACTIVE_RECORD = new JavaType("org.springframework.roo.addon.entity.RooJpaActiveRecord");
 	public static final JavaType ROO_EQUALS = new JavaType("org.springframework.roo.addon.equals.RooEquals");
 	public static final JavaType ROO_GWT_LOCATOR = new JavaType("org.springframework.roo.addon.gwt.RooGwtLocator");
 	public static final JavaType ROO_GWT_MIRRORED_FROM = new JavaType("org.springframework.roo.addon.gwt.RooGwtMirroredFrom");
@@ -34,8 +34,8 @@ public final class RooJavaType {
 	public static final JavaType ROO_MONGO_ENTITY = new JavaType("org.springframework.roo.addon.layers.repository.mongo.RooMongoEntity");
 	public static final JavaType ROO_OP4J = new JavaType("org.springframework.roo.addon.op4j.RooOp4j");
 	public static final JavaType ROO_PLURAL = new JavaType("org.springframework.roo.addon.plural.RooPlural");
-	public static final JavaType ROO_REPOSITORY_JPA = new JavaType("org.springframework.roo.addon.layers.repository.jpa.RooRepositoryJpa");
-	public static final JavaType ROO_REPOSITORY_MONGO = new JavaType("org.springframework.roo.addon.layers.repository.mongo.RooRepositoryMongo");
+	public static final JavaType ROO_REPOSITORY_JPA = new JavaType("org.springframework.roo.addon.layers.repository.jpa.RooJpaRepository");
+	public static final JavaType ROO_REPOSITORY_MONGO = new JavaType("org.springframework.roo.addon.layers.repository.mongo.RooMongoRepository");
 	public static final JavaType ROO_SERIALIZABLE = new JavaType("org.springframework.roo.addon.serializable.RooSerializable");
 	public static final JavaType ROO_SERVICE = new JavaType("org.springframework.roo.addon.layers.service.RooService");
 	public static final JavaType ROO_SOLR_SEARCHABLE = new JavaType("org.springframework.roo.addon.solr.RooSolrSearchable");

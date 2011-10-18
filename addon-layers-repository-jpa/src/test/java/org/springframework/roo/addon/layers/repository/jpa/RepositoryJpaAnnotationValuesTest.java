@@ -8,11 +8,11 @@ import org.springframework.roo.classpath.details.annotations.populator.Annotatio
  * @author Andrew Swan
  * @since 1.2.0
  */
-public class RepositoryJpaAnnotationValuesTest extends AnnotationValuesTestCase<RooRepositoryJpa, RepositoryJpaAnnotationValues> {
+public class RepositoryJpaAnnotationValuesTest extends AnnotationValuesTestCase<RooJpaRepository, RepositoryJpaAnnotationValues> {
 
 	@Override
-	protected Class<RooRepositoryJpa> getAnnotationClass() {
-		return RooRepositoryJpa.class;
+	protected Class<RooJpaRepository> getAnnotationClass() {
+		return RooJpaRepository.class;
 	}
 
 	@Override

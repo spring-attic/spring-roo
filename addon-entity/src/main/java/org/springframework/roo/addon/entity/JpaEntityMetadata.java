@@ -78,7 +78,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 	 * event that the annotation doesn't provide such information; can be
 	 * <code>null</code>
 	 * @param annotationValues the effective annotation values taking into
-	 * account the presence of a {@link RooEntity} and/or {@link RooJpaEntity}
+	 * account the presence of a {@link RooJpaActiveRecord} and/or {@link RooJpaEntity}
 	 * annotation (required)
 	 */
 	public JpaEntityMetadata(final String metadataId, final JavaType itdName, final PhysicalTypeMetadata entityPhysicalType, final JpaEntityMetadata parentEntity, final ProjectMetadata project, final MemberDetails entityMemberDetails, final Identifier identifier, final JpaEntityAnnotationValues annotationValues, final boolean isGaeEnabled, final boolean isDatabaseDotComEnabled) {
@@ -214,7 +214,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 	 * If no parent is defined, one will be located or created. Any declared or inherited field which has the
 	 * {@link javax.persistence.Id @Id} or {@link javax.persistence.EmbeddedId @EmbeddedId} annotation will be
 	 * taken as the identifier and returned. If no such field is located, a private field will be created as
-	 * per the details contained in the {@link RooEntity} or {@link RooJpaEntity} annotation, as applicable.
+	 * per the details contained in the {@link RooJpaActiveRecord} or {@link RooJpaEntity} annotation, as applicable.
 	 *
 	 * @param parent (can be <code>null</code>)
 	 * @param project the user's project (required)
@@ -543,7 +543,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 	 * <p>
 	 * If no parent is defined, one may be located or created. Any declared or inherited field which is annotated
 	 * with javax.persistence.Version will be taken as the version and returned. If no such field is located,
-	 * a private field may be created as per the details contained in {@link RooEntity} or {@link RooJpaEntity} annotation, as applicable.
+	 * a private field may be created as per the details contained in {@link RooJpaActiveRecord} or {@link RooJpaEntity} annotation, as applicable.
 	 *
 	 * @return the version field (may be null)
 	 */

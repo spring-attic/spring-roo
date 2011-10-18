@@ -10,7 +10,7 @@ import org.springframework.roo.model.JavaType;
 
 /**
  * The purely JPA-related values of a single {@link RooJpaEntity} or
- * {@link RooEntity} annotation.
+ * {@link RooJpaActiveRecord} annotation.
  *
  * @author Andrew Swan
  * @since 1.2.0

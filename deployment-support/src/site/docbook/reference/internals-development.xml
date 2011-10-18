@@ -146,7 +146,7 @@
 
             <itemizedlist>
               <listitem>
-                <para>E.g. the 'Entity' add-on provides *_Roo_Entity.aj</para>
+                <para>E.g. the 'Entity' add-on provides *_ROO_JPA_ACTIVE_RECORD.aj</para>
               </listitem>
 
               <listitem>

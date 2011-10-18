@@ -1,7 +1,7 @@
 package org.springframework.roo.addon.dbre;
 
 import static org.springframework.roo.model.JpaJavaType.TABLE;
-import static org.springframework.roo.model.RooJavaType.ROO_ENTITY;
+import static org.springframework.roo.model.RooJavaType.ROO_JPA_ACTIVE_RECORD;
 import static org.springframework.roo.model.RooJavaType.ROO_JPA_ENTITY;
 
 import java.util.LinkedHashMap;
@@ -41,7 +41,7 @@ public abstract class DbreTypeUtils {
 	static {
 		TABLE_ATTRIBUTES.put(TABLE, NAME_ATTRIBUTE);
 		TABLE_ATTRIBUTES.put(ROO_JPA_ENTITY, TABLE_ATTRIBUTE);
-		TABLE_ATTRIBUTES.put(ROO_ENTITY, TABLE_ATTRIBUTE);
+		TABLE_ATTRIBUTES.put(ROO_JPA_ACTIVE_RECORD, TABLE_ATTRIBUTE);
 	}
 
 	// The annotation attributes from which to read the db schema name
@@ -50,7 +50,7 @@ public abstract class DbreTypeUtils {
 	static {
 		SCHEMA_ATTRIBUTES.put(TABLE, SCHEMA_ATTRIBUTE);
 		SCHEMA_ATTRIBUTES.put(ROO_JPA_ENTITY, SCHEMA_ATTRIBUTE);
-		SCHEMA_ATTRIBUTES.put(ROO_ENTITY, SCHEMA_ATTRIBUTE);
+		SCHEMA_ATTRIBUTES.put(ROO_JPA_ACTIVE_RECORD, SCHEMA_ATTRIBUTE);
 	}
 
 	/**

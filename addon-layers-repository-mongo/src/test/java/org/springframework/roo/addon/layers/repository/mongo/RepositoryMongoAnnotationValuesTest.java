@@ -1,7 +1,7 @@
 package org.springframework.roo.addon.layers.repository.mongo;
 
 import org.springframework.roo.addon.layers.repository.mongo.RepositoryMongoAnnotationValues;
-import org.springframework.roo.addon.layers.repository.mongo.RooRepositoryMongo;
+import org.springframework.roo.addon.layers.repository.mongo.RooMongoRepository;
 import org.springframework.roo.classpath.details.annotations.populator.AnnotationValuesTestCase;
 
 /**
@@ -10,11 +10,11 @@ import org.springframework.roo.classpath.details.annotations.populator.Annotatio
  * @author Stefan Schmidt
  * @since 1.2.0
  */
-public class RepositoryMongoAnnotationValuesTest extends AnnotationValuesTestCase<RooRepositoryMongo, RepositoryMongoAnnotationValues> {
+public class RepositoryMongoAnnotationValuesTest extends AnnotationValuesTestCase<RooMongoRepository, RepositoryMongoAnnotationValues> {
 
 	@Override
-	protected Class<RooRepositoryMongo> getAnnotationClass() {
-		return RooRepositoryMongo.class;
+	protected Class<RooMongoRepository> getAnnotationClass() {
+		return RooMongoRepository.class;
 	}
 
 	@Override

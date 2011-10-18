@@ -216,7 +216,7 @@ enum EntityLayerMethod {
 	 * Returns the desired name of this method based on the given annotation
 	 * values
 	 *
-	 * @param annotationValues the values of the {@link RooEntity} annotation
+	 * @param annotationValues the values of the {@link RooJpaActiveRecord} annotation
 	 * on the entity type
 	 * @param targetEntity the entity type (required)
 	 * @param plural the plural form of the entity (required)
@@ -228,7 +228,7 @@ enum EntityLayerMethod {
 	 * Returns the Java snippet that invokes this method, including the target
 	 * if any
 	 *
-	 * @param annotationValues the CRUD-related values of the {@link RooEntity}
+	 * @param annotationValues the CRUD-related values of the {@link RooJpaActiveRecord}
 	 * annotation
 	 * on the entity type
 	 * @param targetEntity the type of entity being managed (required)

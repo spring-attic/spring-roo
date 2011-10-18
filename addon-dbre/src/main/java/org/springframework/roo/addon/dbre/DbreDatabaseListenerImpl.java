@@ -2,7 +2,7 @@ package org.springframework.roo.addon.dbre;
 
 import static org.springframework.roo.model.JavaType.OBJECT;
 import static org.springframework.roo.model.RooJavaType.ROO_DB_MANAGED;
-import static org.springframework.roo.model.RooJavaType.ROO_ENTITY;
+import static org.springframework.roo.model.RooJavaType.ROO_JPA_ACTIVE_RECORD;
 import static org.springframework.roo.model.RooJavaType.ROO_IDENTIFIER;
 import static org.springframework.roo.model.RooJavaType.ROO_JAVA_BEAN;
 import static org.springframework.roo.model.RooJavaType.ROO_JPA_ENTITY;
@@ -185,7 +185,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 		 * having to enter the same value for the "activeRecord" option each
 		 * time they run the database reverse engineer command.
 		 */
-		return managedEntities.iterator().next().getAnnotation(ROO_ENTITY) != null;
+		return managedEntities.iterator().next().getAnnotation(ROO_JPA_ACTIVE_RECORD) != null;
 	}
 
 	private JavaPackage getDestinationPackage(final Database database, final Set<ClassOrInterfaceTypeDetails> managedEntities) {
@@ -238,7 +238,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 	private Table updateOrDeleteManagedEntity(final ClassOrInterfaceTypeDetails managedEntity, final Database database) {
 		// Update the attributes of the existing JPA-related annotation
 		final AnnotationMetadata jpaAnnotation = getJpaAnnotation(managedEntity);
-		Assert.state(jpaAnnotation != null, "Neither " + ROO_ENTITY.getSimpleTypeName() + " nor " + ROO_JPA_ENTITY.getSimpleTypeName() + " found on existing DBRE-managed entity " + managedEntity.getName().getFullyQualifiedTypeName());
+		Assert.state(jpaAnnotation != null, "Neither " + ROO_JPA_ACTIVE_RECORD.getSimpleTypeName() + " nor " + ROO_JPA_ENTITY.getSimpleTypeName() + " found on existing DBRE-managed entity " + managedEntity.getName().getFullyQualifiedTypeName());
 
 		// Find table in database using 'table' and 'schema' attributes from the JPA annotation
 		final AnnotationAttributeValue<?> tableAttribute = jpaAnnotation.getAttribute(new JavaSymbolName("table"));
@@ -298,7 +298,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 		if (rooJpaEntity != null) {
 			return rooJpaEntity;
 		}
-		return managedEntity.getAnnotation(ROO_ENTITY);
+		return managedEntity.getAnnotation(ROO_JPA_ACTIVE_RECORD);
 	}
 
 	/**
@@ -317,7 +317,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 		annotations.add(new AnnotationMetadataBuilder(ROO_TO_STRING));
 
 		// Find primary key from db metadata and add identifier attributes to @RooEntity
-		final AnnotationMetadataBuilder jpaAnnotationBuilder = new AnnotationMetadataBuilder(activeRecord ? ROO_ENTITY : ROO_JPA_ENTITY);
+		final AnnotationMetadataBuilder jpaAnnotationBuilder = new AnnotationMetadataBuilder(activeRecord ? ROO_JPA_ACTIVE_RECORD : ROO_JPA_ENTITY);
 		manageIdentifier(javaType, jpaAnnotationBuilder, new HashSet<JavaSymbolName>(), table);
 
 		if (!hasVersionField(table)) {
@@ -496,7 +496,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 		// There are exactly four - check for any non-standard ones
 		for (final AnnotationMetadata annotation : typeAnnotations) {
 			final JavaType annotationType = annotation.getAnnotationType();
-			final boolean entityAnnotation = ROO_ENTITY.equals(annotationType) || ROO_JPA_ENTITY.equals(annotationType);
+			final boolean entityAnnotation = ROO_JPA_ACTIVE_RECORD.equals(annotationType) || ROO_JPA_ENTITY.equals(annotationType);
 			if (!entityAnnotation && !ROO_DB_MANAGED.equals(annotationType) && !ROO_JAVA_BEAN.equals(annotationType) && !ROO_TO_STRING.equals(annotationType)) {
 				return false;
 			}

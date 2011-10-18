@@ -15,7 +15,7 @@ import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.uaa.client.util.Assert;
 
 /**
- * Creates metadata for repository ITDs (annotated with {@link RooRepositoryMongo}.
+ * Creates metadata for repository ITDs (annotated with {@link RooMongoRepository}.
  *
  * @author Stefan Schmidt
  * @since 1.2.0

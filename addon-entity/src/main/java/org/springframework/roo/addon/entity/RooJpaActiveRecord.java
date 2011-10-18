@@ -19,7 +19,7 @@ import java.lang.annotation.Target;
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.SOURCE)
-public @interface RooEntity {
+public @interface RooJpaActiveRecord {
 
 	// Constants for the non-blank default attribute values
 	String CLEAR_METHOD_DEFAULT = "clear";
@@ -107,7 +107,7 @@ public @interface RooEntity {
 	/**
 	 * Creates an identifier, unless there is already a JPA @Id field annotation
 	 * in a superclass (either written in normal Java source or introduced by a
-	 * superclass that has the {@link RooEntity} or {@link RooJpaEntity}
+	 * superclass that has the {@link RooJpaActiveRecord} or {@link RooJpaEntity}
 	 * annotation.
 	 *
 	 * <p>
@@ -187,7 +187,7 @@ public @interface RooEntity {
 	/**
 	 * Creates an optimistic locking version field, unless there is already a
 	 * JPA @Version field annotation on a superclass (either written in normal
-	 * Java source or introduced by a superclass that uses the {@link RooEntity}
+	 * Java source or introduced by a superclass that uses the {@link RooJpaActiveRecord}
 	 * or {@link RooJpaEntity} annotation. The produced field will be of the
 	 * type specified by {@link #versionType()}.
 	 *

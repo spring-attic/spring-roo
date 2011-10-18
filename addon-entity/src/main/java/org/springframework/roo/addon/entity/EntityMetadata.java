@@ -39,7 +39,7 @@ import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
 
 /**
- * Metadata for a type annotated with {@link RooEntity}.
+ * Metadata for a type annotated with {@link RooJpaActiveRecord}.
  *
  * @author Ben Alex
  * @author Stefan Schmidt
