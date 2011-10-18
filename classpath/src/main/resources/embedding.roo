@@ -1,7 +1,6 @@
 project --topLevelPackage org.springsource.embedding
-persistence setup --database HYPERSONIC_IN_MEMORY --provider HIBERNATE 
 web mvc setup
-# These commands are sorted by command name then by provider
+// These commands are sorted by command name then by provider
 web mvc embed document --provider GOOGLE_PRESENTATION --documentId 0AcgEqD3JotEpZGQ4cmY4dDlfMzFjOWYyZmNnZA --viewName Google_Presentation
 web mvc embed document --provider SCRIBD --documentId 27766735 --viewName Scribd_Document
 web mvc embed document --provider SLIDESHARE --documentId springone2gxslidesstefanschmidt-100120044009-phpapp01 --viewName Slideshare_Presentation
@@ -18,4 +17,4 @@ web mvc embed video --provider VIDDLER --videoId 34a0a068 --viewName Viddler
 web mvc embed video --provider VIMEO --videoId 11890173 --viewName Vimeo
 web mvc embed video --provider YOUTUBE --videoId Gb1Z0lfl52I --viewName YouTube_Specific
 quit
-# Now start this application using "mvn jetty:run" or "mvn tomcat:run"
+// Now start this application using "mvn jetty:run" or "mvn tomcat:run"
