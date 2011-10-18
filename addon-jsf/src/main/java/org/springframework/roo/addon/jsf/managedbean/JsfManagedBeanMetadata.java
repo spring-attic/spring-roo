@@ -513,6 +513,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 					imports.addImport(PRIMEFACES_STREAMED_CONTENT);
 
 					bodyBuilder.appendFormalLine("CommandButton " + fieldValueId + " = " + getComponentCreation("CommandButton"));
+					bodyBuilder.appendFormalLine(fieldValueId + ".addActionListener(new FileDownloadActionListener(expressionFactory.createValueExpression(elContext, \"#{" + beanName + "." + fieldName + "StreamedContent}\", StreamedContent.class), null));");
 					// TODO Make following code work as currently the view panel is not refreshed and the download field is always seen as null
 					// bodyBuilder.appendFormalLine("UIComponent " + fieldValueId + ";");
 					// bodyBuilder.appendFormalLine("if (" + entityName + ".get" + StringUtils.capitalize(fieldName) + "() != null && " + entityName + ".get" + StringUtils.capitalize(fieldName) +

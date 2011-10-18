@@ -53,6 +53,7 @@ public class JsfJavaType {
 	public static final JavaType PRIMEFACES_FILE_UPLOAD_EVENT = new JavaType("org.primefaces.event.FileUploadEvent");
 	public static final JavaType PRIMEFACES_INPUT_TEXT = new JavaType("org.primefaces.component.inputtext.InputText");
 	public static final JavaType PRIMEFACES_INPUT_TEXTAREA = new JavaType("org.primefaces.component.inputtextarea.InputTextarea");
+	public static final JavaType PRIMEFACES_KEYBOARD = new JavaType("org.primefaces.component.keyboard.Keyboard");
 	public static final JavaType PRIMEFACES_MENU_ITEM = new JavaType("org.primefaces.component.menuitem.MenuItem");
 	public static final JavaType PRIMEFACES_MENU_MODEL = new JavaType("org.primefaces.model.MenuModel");
 	public static final JavaType PRIMEFACES_MESSAGE = new JavaType("org.primefaces.component.message.Message");

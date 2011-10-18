@@ -22,7 +22,9 @@
                         <h:link outcome="main">
                             <h:graphicImage library="images" name="roo_logo.png" styleClass="banner" />
                         </h:link>
-                        <p:menu model="#{applicationBean.menuModel}" style="width:198px" />
+                        <ui:insert name="menu">
+                            <ui:include src="menu.xhtml" />
+                        </ui:insert>
                     </h:form>
                 </p:panel>
                 <h:panelGroup>
