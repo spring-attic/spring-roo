@@ -101,11 +101,11 @@ public class EntityMetadataProviderImpl extends AbstractItdMetadataProvider impl
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(final String metadataId, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalType, final String itdFilename) {
 		// Get the CRUD-related annotation values
 		final JpaCrudAnnotationValues crudAnnotationValues = new JpaCrudAnnotationValues(governorPhysicalType);
-		// Get the purely JPA-related annotation values, from @RooJpaEntity if present, otherwise from @RooEntity
+		// Get the purely JPA-related annotation values, from @RooJpaEntity if present, otherwise from @RooJpaActiveRecord
 		JpaEntityAnnotationValues jpaEntityAnnotationValues = new JpaEntityAnnotationValues(governorPhysicalType, ROO_JPA_ENTITY);
 		if (!jpaEntityAnnotationValues.isAnnotationFound()) {
 			jpaEntityAnnotationValues = new JpaEntityAnnotationValues(governorPhysicalType, ROO_JPA_ACTIVE_RECORD);
-			Assert.state(jpaEntityAnnotationValues.isAnnotationFound(), "No @RooJpaEntity or @RooEntity on " + metadataId);
+			Assert.state(jpaEntityAnnotationValues.isAnnotationFound(), "No @RooJpaEntity or @RooJpaActiveRecord on " + metadataId);
 		}
 
 		// Look up the inheritance hierarchy for existing EntityMetadata
@@ -173,7 +173,7 @@ public class EntityMetadataProviderImpl extends AbstractItdMetadataProvider impl
 		Assert.notNull(javaType, "JavaType required");
 		final MemberHoldingTypeDetailsMetadataItem<?> governor = (MemberHoldingTypeDetailsMetadataItem<?>) metadataService.get(PhysicalTypeIdentifier.createIdentifier(javaType));
 		if (MemberFindingUtils.getAnnotationOfType(governor, ROO_JPA_ACTIVE_RECORD) == null) {
-			// The type can't be found or it's not annotated with @RooEntity
+			// The type can't be found or it's not annotated with @RooJpaActiveRecord
 			return null;
 		}
 		return new JpaCrudAnnotationValues(governor);

@@ -25,7 +25,7 @@ import org.springframework.roo.support.util.StringUtils;
  */
 public class JpaCrudAnnotationValues extends AbstractAnnotationValues {
 
-	// Fields (for each @RooEntity attribute)
+	// Fields (for each @RooJpaActiveRecord attribute)
 	@AutoPopulate private String clearMethod = CLEAR_METHOD_DEFAULT;
 	@AutoPopulate private String countMethod = COUNT_METHOD_DEFAULT;
 	@AutoPopulate private String findAllMethod = FIND_ALL_METHOD_DEFAULT;

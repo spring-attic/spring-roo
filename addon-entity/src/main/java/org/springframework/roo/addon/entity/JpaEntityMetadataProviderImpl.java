@@ -235,7 +235,7 @@ public class JpaEntityMetadataProviderImpl extends AbstractIdentifierServiceAwar
 			return null;
 		}
 		// We have potential identifier information from an IdentifierService.
-		// We only use this identifier information if the user did NOT provide ANY identifier-related attributes on @RooEntity....
+		// We only use this identifier information if the user did NOT provide ANY identifier-related attributes on @RooJpaActiveRecord....
 		Assert.isTrue(identifiers.size() == 1, "Identifier service indicates " + identifiers.size() + " fields illegally for the entity '" + entity.getSimpleTypeName() + "' (should only be one identifier field given this is an entity, not an Identifier class)");
 		return identifiers.iterator().next();
 	}

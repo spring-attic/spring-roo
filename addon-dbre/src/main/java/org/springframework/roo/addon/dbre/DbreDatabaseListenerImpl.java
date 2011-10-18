@@ -2,9 +2,9 @@ package org.springframework.roo.addon.dbre;
 
 import static org.springframework.roo.model.JavaType.OBJECT;
 import static org.springframework.roo.model.RooJavaType.ROO_DB_MANAGED;
-import static org.springframework.roo.model.RooJavaType.ROO_JPA_ACTIVE_RECORD;
 import static org.springframework.roo.model.RooJavaType.ROO_IDENTIFIER;
 import static org.springframework.roo.model.RooJavaType.ROO_JAVA_BEAN;
+import static org.springframework.roo.model.RooJavaType.ROO_JPA_ACTIVE_RECORD;
 import static org.springframework.roo.model.RooJavaType.ROO_JPA_ENTITY;
 import static org.springframework.roo.model.RooJavaType.ROO_TO_STRING;
 
@@ -259,7 +259,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 
 		table.setIncludeNonPortableAttributes(database.isIncludeNonPortableAttributes());
 
-		// Update the @RooEntity/@RooJpaEntity attributes
+		// Update the @RooJpaEntity/@RooJpaActiveRecord attributes
 		final AnnotationMetadataBuilder jpaAnnotationBuilder = new AnnotationMetadataBuilder(jpaAnnotation);
 		final Set<JavaSymbolName> attributesToDeleteIfPresent = new LinkedHashSet<JavaSymbolName>();
 		manageIdentifier(managedEntity.getName(), jpaAnnotationBuilder, attributesToDeleteIfPresent, table);
@@ -316,7 +316,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 		annotations.add(new AnnotationMetadataBuilder(ROO_JAVA_BEAN));
 		annotations.add(new AnnotationMetadataBuilder(ROO_TO_STRING));
 
-		// Find primary key from db metadata and add identifier attributes to @RooEntity
+		// Find primary key from db metadata and add identifier attributes to @RooJpaEntity
 		final AnnotationMetadataBuilder jpaAnnotationBuilder = new AnnotationMetadataBuilder(activeRecord ? ROO_JPA_ACTIVE_RECORD : ROO_JPA_ENTITY);
 		manageIdentifier(javaType, jpaAnnotationBuilder, new HashSet<JavaSymbolName>(), table);
 

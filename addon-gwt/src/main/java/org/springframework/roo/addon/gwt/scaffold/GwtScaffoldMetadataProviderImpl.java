@@ -48,7 +48,7 @@ import org.springframework.roo.support.util.StringUtils;
  * You can find a list of mirror-compatible objects in {@link org.springframework.roo.addon.gwt.GwtType}.
  * <p/>
  * <p/>
- * For now only @RooEntity instances will be mirror-compatible.
+ * For now only @RooJpaEntity instances will be mirror-compatible.
  * <p/>
  * <p/>
  * Like all Roo add-ons, this provider aims to expose potentially-useful contents of the above files via {@link GwtScaffoldMetadata}.
