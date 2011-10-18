@@ -75,9 +75,9 @@
       linkend="base-persistence">here</link>.</para>
 
       <para>Active record-style JPA entities supported by Roo need to have a
-      <emphasis role="bold">@RooEntity</emphasis> annotation which takes care
-      of providing an ID field along with its accessor and mutator, In
-      addition this annotation creates the typical CRUD methods to support
+      <emphasis role="bold">@RooJpaActiveRecord</emphasis> annotation which
+      takes care of providing an ID field along with its accessor and mutator,
+      In addition this annotation creates the typical CRUD methods to support
       data access.</para>
 
       <para><programlisting>roo&gt; <emphasis role="bold">entity jpa</emphasis> --class ~.domain.Pizza</programlisting>This
@@ -89,7 +89,7 @@
 
       <para><programlisting>@RooJavaBean
 @RooToString
-<emphasis role="bold">@RooEntity</emphasis>
+<emphasis role="bold">@RooJpaActiveRecord</emphasis>
 public class Pizza {
 
     @NotNull
@@ -154,16 +154,16 @@ public class Pizza {
       will create a simple interface definition which leverages Spring Data
       JPA:</para>
 
-      <para><programlisting><emphasis role="bold">@RooRepositoryJpa</emphasis>(domainType = Pizza.class)
+      <para><programlisting><emphasis role="bold">@RooJpaRepository</emphasis>(domainType = Pizza.class)
 public interface PizzaRepository {
 }</programlisting>Of course, you can simply add the <emphasis
-      role="bold">@RooRepositoryJpa</emphasis> annotation on any interface by
+      role="bold">@RooJpaRepository</emphasis> annotation on any interface by
       hand in lieu of issuing the <link
       linkend="command-index-repository-jpa">repository jpa</link> command in
       the Roo shell.</para>
 
       <para>The adition of the <emphasis
-      role="bold">@RooRepositoryJpa</emphasis> annotation will trigger the
+      role="bold">@RooJpaRepository</emphasis> annotation will trigger the
       creation of a fairly trivial AspectJ ITD which adds an extends statement
       to the PizzaRepository interface resulting in the equivalent of this
       interface definition:</para>
@@ -246,7 +246,7 @@ public class Pizza {
         for this type by using the <link
         linkend="command-index-repository-mongo"><link
         linkend="command-index-repository-jpa">repository</link> mongo</link>
-        command (or by applying the @RooRepositoryMongo annotation to an
+        command (or by applying the @RooMongoRepository annotation to an
         arbitrary interface:</para>
 
         <para><programlisting>roo&gt; <emphasis role="bold">repository mongo </emphasis>--interface ~.repository.PizzaRepository --entity ~.domain.Pizza</programlisting>This
@@ -254,7 +254,7 @@ public class Pizza {
         xlink:href="http://www.springsource.org/spring-data/mongodb">Spring
         Data MongoDB</link>:</para>
 
-        <para><programlisting><emphasis role="bold">@RooRepositoryMongo</emphasis>(domainType = Pizza.class)
+        <para><programlisting><emphasis role="bold">@RooMongoRepository</emphasis>(domainType = Pizza.class)
 public interface PizzaRepository {
 
     List&lt;Pizza&gt; findAll();

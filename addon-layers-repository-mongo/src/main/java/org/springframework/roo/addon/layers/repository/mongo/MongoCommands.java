@@ -46,7 +46,7 @@ public class MongoCommands implements CommandMarker {
 		mongoOperations.setup(username, password, name, port, host, cloudFoundry);
 	}
 
-	@CliCommand(value = "repository mongo", help = "Adds @RooRepositoryMongo annotation to target type")
+	@CliCommand(value = "repository mongo", help = "Adds @RooMongoRepository annotation to target type")
 	public void repository(
 		@CliOption(key = "interface", mandatory = true, help = "The java interface to apply this annotation to") final JavaType interfaceType,
 		@CliOption(key = "class", mandatory = false, help = "Implementation class for the specified interface") JavaType classType,

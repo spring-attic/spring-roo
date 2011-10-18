@@ -541,8 +541,8 @@ field enum --fieldName species --type ~.shared.domain.Species</programlisting>
       </listitem>
 
       <listitem>
-        <para>When an entity is deleted, or the @RooEntity annotation is
-        removed, the mirrored types will remain in play as to remain
+        <para>When an entity is deleted, or the @RooJpaActiveRecord annotation
+        is removed, the mirrored types will remain in play as to remain
         consistent with not touch user source.</para>
       </listitem>
 

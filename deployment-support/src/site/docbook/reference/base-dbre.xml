@@ -298,13 +298,14 @@ JDBC driver not available for 'com.mysql.jdbc.Driver'</programlisting></para>
 
     <para>The @RooDbManaged annotation is added to all new entities created by
     executing the database reverse engineer command. Other Roo annotations,
-    @RooEntity, @RooJavaBean, and @RooToString are also added to the entity
-    class. The attribute "automaticallyDelete" is added to the @RooDbManaged
-    annotation and is set to "true" so that Roo can delete the entity if the
-    associated table has been dropped. However, if "automaticallyDelete" is
-    set to "false", or if any annotations, fields, constructors, or methods
-    have been added to the entity (i.e in the .java file), or if any of the
-    Roo annotations are removed, the entity will not be deleted.</para>
+    @RooJpaActiveRecord, @RooJavaBean, and @RooToString are also added to the
+    entity class. The attribute "automaticallyDelete" is added to the
+    @RooDbManaged annotation and is set to "true" so that Roo can delete the
+    entity if the associated table has been dropped. However, if
+    "automaticallyDelete" is set to "false", or if any annotations, fields,
+    constructors, or methods have been added to the entity (i.e in the .java
+    file), or if any of the Roo annotations are removed, the entity will not
+    be deleted.</para>
 
     <para>The presence of the @RooDbmanaged annotation on an entity class
     triggers the creation of an AspectJ inter-type declaration (ITD) ".aj"
@@ -319,7 +320,7 @@ JDBC driver not available for 'com.mysql.jdbc.Driver'</programlisting></para>
     <para><programlisting>@RooJavaBean
 @RooToString
 @RooDbManaged(automaticallyDelete = true)
-@RooEntity(table = "employee", schema = "expenses")
+@RooJpaActiveRecord(table = "employee", schema = "expenses")
 public class Employee {
 }</programlisting></para>
 
@@ -401,15 +402,15 @@ public class Employee {
       <para>For tables with two or more primary key columns, DBRE will create
       a primary key class annotated with @RooIdentifier(dbManaged = true) and
       add the "identifierType" attribute with the identifier class name to the
-      @RooEntity annotation in the entity class. For example, a line_item
-      table has two primary keys, line_item_id and order_id. DBRE will create
-      the LineItem entity class and LineItemPK identifier class as
+      @RooJpaActiveRecord annotation in the entity class. For example, a
+      line_item table has two primary keys, line_item_id and order_id. DBRE
+      will create the LineItem entity class and LineItemPK identifier class as
       follows:</para>
 
       <para><programlisting>@RooJavaBean
 @RooToString
 @RooDbManaged(automaticallyDelete = true)
-@RooEntity(identifierType = LineItemPK.class, table = "line_item", schema = "order")
+@RooJpaActiveRecord(identifierType = LineItemPK.class, table = "line_item", schema = "order")
 public class LineItem {
 }</programlisting></para>
 
@@ -730,11 +731,11 @@ public class LineItemPK {
         engineering</emphasis></para>
 
         <para>When DBRE first creates an entity it puts in the table name in
-        the 'table' attribute of the @RooEntity annotation. This is the only
-        mechanism DBRE has for associating an entity with a table. If you
-        remove the 'table' attribute, DBRE has no way of determining what the
-        entity's corresponding table is and as a result cannot maintain the
-        entity's fields and associations.</para>
+        the 'table' attribute of the @RooJpaActiveRecord annotation. This is
+        the only mechanism DBRE has for associating an entity with a table. If
+        you remove the 'table' attribute, DBRE has no way of determining what
+        the entity's corresponding table is and as a result cannot maintain
+        the entity's fields and associations.</para>
       </listitem>
     </itemizedlist>
   </section>

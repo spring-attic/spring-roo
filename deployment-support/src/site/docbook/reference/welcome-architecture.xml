@@ -148,11 +148,11 @@ Managed SRC_MAIN_JAVA/com/aspectj/rocks/Hello_Roo_ToString.aj</programlisting>
 
 import org.springframework.roo.addon.javabean.RooJavaBean;
 import org.springframework.roo.addon.tostring.RooToString;
-import org.springframework.roo.addon.entity.RooEntity;
+import org.springframework.roo.addon.entity.RooJpaActiveRecord;
 
 @RooJavaBean
 @RooToString
-@RooEntity
+@RooJpaActiveRecord
 public class Hello {
 
     private String comment;
@@ -370,13 +370,13 @@ public class com.aspectj.rocks.Hello extends java.lang.Object implements org.spr
 
 import org.springframework.roo.addon.javabean.RooJavaBean;
 import org.springframework.roo.addon.tostring.RooToString;
-import org.springframework.roo.addon.entity.RooEntity;
+import org.springframework.roo.addon.entity.RooJpaActiveRecord;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 @RooJavaBean
 @RooToString
-@RooEntity
+@RooJpaActiveRecord
 public class Choice {
 
     @NotNull
@@ -407,11 +407,12 @@ public class Choice {
     Choice, JPA facade methods for persisting, removing, merging and flushing
     the entity, plus accessors and mutators for both the identifier and
     version properties. You can fine-tune these settings by modifying
-    attributes on the <code>@RooEntity</code> annotation. You can also have
-    Roo remove these services by simply removing the <code>@RooEntity</code>
-    annotation from the class, in which case you'll be left with a normal JPA
-    @Entity that you'll need to manage by hand (e.g. provide your own
-    persistence methods, identifier, version etc).</para>
+    attributes on the <code>@RooJpaActiveRecord</code> annotation. You can
+    also have Roo remove these services by simply removing the
+    <code>@RooJpaActiveRecord</code> annotation from the class, in which case
+    you'll be left with a normal JPA @Entity that you'll need to manage by
+    hand (e.g. provide your own persistence methods, identifier, version
+    etc).</para>
 
     <para>The <code>@RooJavaBean</code> annotation causes an accessor and
     mutator (getter and setter) to automatically be generated for each field
@@ -422,7 +423,8 @@ public class Choice {
     <code>@RooJavaBean</code> annotation if you don't want any generated
     accessors or mutators (although those related to the version and
     identifier fields will remain, as they are associated with
-    <code>@RooEntity</code> instead of <code>@RooJavaBean</code>).</para>
+    <code>@RooJpaActiveRecord</code> instead of
+    <code>@RooJavaBean</code>).</para>
 
     <para>Finally, the <code>@RooToString</code> annotation causes Roo to
     create and maintain a <code>public String toString()</code> method in a
@@ -468,17 +470,18 @@ public class Choice {
     best GWT 2.1 features.</para>
 
     <para>Scaffolded web controllers always delegate directly to methods
-    provided on an <code>@RooEntity</code> class. For maximum compatibility
-    with scaffolded controllers, it is recommended to observe the default
-    identifier and version conventions provided by <code>@RooEntity</code>
-    implementations. If you write a web controller by hand (perhaps with the
-    assistance of the <link linkend="command-index-web-mvc-controller">web mvc
-    controller</link> command), it is recommended you also use the methods
-    directly exposed on entities. Most Roo applications will place their
-    business logic between the entities and web controllers, with only
-    occasional use of services layers. Please refer to the <link
-    linkend="architecture-services">services layer</link> section for a more
-    complete treatment of when you'd use a services layer.</para>
+    provided on an <code>@RooJpaActiveRecord</code> class. For maximum
+    compatibility with scaffolded controllers, it is recommended to observe
+    the default identifier and version conventions provided by
+    <code>@RooJpaActiveRecord</code> implementations. If you write a web
+    controller by hand (perhaps with the assistance of the <link
+    linkend="command-index-web-mvc-controller">web mvc controller</link>
+    command), it is recommended you also use the methods directly exposed on
+    entities. Most Roo applications will place their business logic between
+    the entities and web controllers, with only occasional use of services
+    layers. Please refer to the <link linkend="architecture-services">services
+    layer</link> section for a more complete treatment of when you'd use a
+    services layer.</para>
   </section>
 
   <section xml:id="architecture-services">
@@ -670,9 +673,9 @@ public class Choice {
     majority of Roo add-ons will not be compatible with such DAOs. As such you
     will not receive automated testing or MVC controllers that understand your
     hand-written DAOs. Our advice is therefore not to hand write DAOs. Simply
-    use the entity methods provided by <code>@RooEntity</code>, as it's
-    engineering-wise desirable and it's also far less effort for you to write
-    and maintain.</para>
+    use the entity methods provided by <code>@RooJpaActiveRecord</code>, as
+    it's engineering-wise desirable and it's also far less effort for you to
+    write and maintain.</para>
 
     <para>If you are interested in DAO support despite the above Roo offers
     support for different repository layers as of release 1.2.0. Please refer

@@ -25,7 +25,7 @@ public class RepositoryJpaCommands implements CommandMarker {
 		return repositoryJpaOperations.isRepositoryCommandAvailable();
 	}
 
-	@CliCommand(value = "repository jpa", help = "Adds @RooRepositoryJpa annotation to target type")
+	@CliCommand(value = "repository jpa", help = "Adds @RooJpaRepository annotation to target type")
 	public void repository(
 		@CliOption(key = "interface", mandatory = true, help = "The java interface to apply this annotation to") final JavaType interfaceType,
 		@CliOption(key = "class", mandatory = false, help = "Implementation class for the specified interface") JavaType classType,

@@ -270,7 +270,7 @@ Created SRC_MAIN_JAVA/com/foo/Person_Roo_Configurable.aj
 
         <para><programlisting>@RooJavaBean
 @RooToString
-@RooEntity
+@RooJpaActiveRecord
 public class Person {
 }
 </programlisting>You will notice that by default, the Person type does not
@@ -320,9 +320,9 @@ public class Person {
       <listitem>
         <para>Person_Roo_Entity.aj</para>
 
-        <para>The fourth annotation is the @RooEntity annotation. This
-        annotation will introduce a number of persistence related methods into
-        your Person type via an ITD:</para>
+        <para>The fourth annotation is the @RooJpaActiveRecord annotation.
+        This annotation will introduce a number of persistence related methods
+        into your Person type via an ITD:</para>
 
         <para><programlisting>privileged aspect Person_Roo_Entity {
     
@@ -453,12 +453,12 @@ public class Person {
 
         <para>Similar to the @RooToString annotation you can change the
         default method name for all persistence-related methods generated
-        through the @RooEntity annotation. Furthermore, if you don't want Roo
-        to generate certain methods as part of this addon at all you can
-        assign an empty String as the method name which will instruct Roo to
-        not generate the method:</para>
+        through the @RooJpaActiveRecord annotation. Furthermore, if you don't
+        want Roo to generate certain methods as part of this addon at all you
+        can assign an empty String as the method name which will instruct Roo
+        to not generate the method:</para>
 
-        <para><programlisting>@RooEntity(countMethod = "")</programlisting></para>
+        <para><programlisting>@RooJpaActiveRecord(countMethod = "")</programlisting></para>
       </listitem>
     </orderedlist>
 
@@ -552,7 +552,7 @@ private Car car;</programlisting>You can add the mappedBy attribute to the
 
         <para><programlisting>@Entity
 @RooJavaBean
-@RooEntity
+@RooJpaActiveRecord
 public class Person {
 
     // Inverse side ("car" table has the FK column)
@@ -563,7 +563,7 @@ public class Person {
 
         <para><programlisting>@Entity
 @RooJavaBean
-@RooEntity
+@RooJpaActiveRecord
 public class Car {
 
     // Owning side (this table has the FK column)
