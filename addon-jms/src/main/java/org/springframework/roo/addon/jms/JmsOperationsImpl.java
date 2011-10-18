@@ -219,7 +219,7 @@ public class JmsOperationsImpl implements JmsOperations {
 		final Element root = document.getDocumentElement();
 
 		Element listenerContainer = DomUtils.findFirstElementByName("jms:listener-container", root);
-		if (listenerContainer != null && destinationType.name().toLowerCase().equals(listenerContainer.getAttribute("destination-type"))) {
+		if (listenerContainer != null && destinationType.name().equalsIgnoreCase(listenerContainer.getAttribute("destination-type"))) {
 			listenerContainer = document.createElement("jms:listener-container");
 			listenerContainer.setAttribute("connection-factory", "jmsFactory");
 			listenerContainer.setAttribute("destination-type", destinationType.name().toLowerCase());

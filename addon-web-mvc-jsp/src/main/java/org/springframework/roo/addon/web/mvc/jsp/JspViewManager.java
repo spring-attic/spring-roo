@@ -204,7 +204,7 @@ public class JspViewManager {
 		// Add form create element
 		Element formCreate = new XmlElementBuilder("form:create", document).addAttribute("id", XmlUtils.convertId("fc:" + formbackingType.getFullyQualifiedTypeName())).addAttribute("modelAttribute", entityName).addAttribute("path", controllerPath).addAttribute("render", "${empty dependencies}").build();
 
-		if (!controllerPath.toLowerCase().equals(formbackingType.getSimpleTypeName().toLowerCase())) {
+		if (!controllerPath.equalsIgnoreCase(formbackingType.getSimpleTypeName())) {
 			formCreate.setAttribute("path", controllerPath);
 		}
 
@@ -251,7 +251,7 @@ public class JspViewManager {
 		// Add form update element
 		Element formUpdate = new XmlElementBuilder("form:update", document).addAttribute("id", XmlUtils.convertId("fu:" + formbackingType.getFullyQualifiedTypeName())).addAttribute("modelAttribute", entityName).build();
 
-		if (!controllerPath.toLowerCase().equals(formbackingType.getSimpleTypeName().toLowerCase())) {
+		if (!controllerPath.equalsIgnoreCase(formbackingType.getSimpleTypeName())) {
 			formUpdate.setAttribute("path", controllerPath);
 		}
 		if (!"id".equals(formbackingTypePersistenceMetadata.getIdentifierField().getFieldName().getSymbolName())) {
