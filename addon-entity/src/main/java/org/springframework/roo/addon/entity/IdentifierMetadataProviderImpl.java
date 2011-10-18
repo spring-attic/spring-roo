@@ -63,8 +63,13 @@ public class IdentifierMetadataProviderImpl extends AbstractIdentifierServiceAwa
 			// If the project itself changes, we want a chance to refresh this item
 			metadataDependencyRegistry.registerDependency(ProjectMetadata.getProjectIdentifier(), metadataIdentificationString);
 		}
+		
+		final IdentifierAnnotationValues annotationValues = new IdentifierAnnotationValues(governorPhysicalTypeMetadata);
+		if (!annotationValues.isAnnotationFound()) {
+			return null;
+		}
 
-		return new IdentifierMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, noArgConstructor, identifierServiceResult);
+		return new IdentifierMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, noArgConstructor, identifierServiceResult, annotationValues);
 	}
 
 	public String getItdUniquenessFilenameSuffix() {

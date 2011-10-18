@@ -9,7 +9,6 @@ import static org.springframework.roo.model.JpaJavaType.EMBEDDABLE;
 import static org.springframework.roo.model.JpaJavaType.TEMPORAL;
 import static org.springframework.roo.model.JpaJavaType.TEMPORAL_TYPE;
 import static org.springframework.roo.model.JpaJavaType.TRANSIENT;
-import static org.springframework.roo.model.RooJavaType.ROO_IDENTIFIER;
 import static org.springframework.roo.model.SpringJavaType.DATE_TIME_FORMAT;
 
 import java.lang.reflect.Modifier;
@@ -28,8 +27,6 @@ import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
-import org.springframework.roo.classpath.details.annotations.populator.AutoPopulate;
-import org.springframework.roo.classpath.details.annotations.populator.AutoPopulationUtils;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
@@ -56,15 +53,10 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 	private boolean noArgConstructor;
 	private boolean publicNoArgConstructor;
 	private List<FieldMetadata> fields;
-
-	// From annotation
-	@AutoPopulate private final boolean gettersByDefault = true;
-	@AutoPopulate private final boolean settersByDefault = false;
-
-	/** See {@link IdentifierService} for further information (populated via {@link IdentifierMetadataProviderImpl}); may be null */
+	// See {@link IdentifierService} for further information (populated via {@link IdentifierMetadataProviderImpl}); may be null
 	private List<Identifier> identifierServiceResult;
 
-	public IdentifierMetadata(final String identifier, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final boolean noArgConstructor, final List<Identifier> identifierServiceResult) {
+	public IdentifierMetadata(final String identifier, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final boolean noArgConstructor, final List<Identifier> identifierServiceResult, final IdentifierAnnotationValues annotationValues) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
 
@@ -72,14 +64,8 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 			return;
 		}
 
-		this.noArgConstructor = noArgConstructor;
 		this.identifierServiceResult = identifierServiceResult;
-
-		// Process values from the annotation, if present
-		AnnotationMetadata annotation = governorTypeDetails.getAnnotation(ROO_IDENTIFIER);
-		if (annotation != null) {
-			AutoPopulationUtils.populate(this, annotation);
-		}
+		this.noArgConstructor = noArgConstructor;
 
 		// Add @Embeddable annotation
 		builder.addAnnotation(getEmbeddableAnnotation());
@@ -90,19 +76,19 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 			builder.addField(field);
 		}
 
-		// Obtain an parameterised constructor,
+		// Obtain a parameterised constructor
 		builder.addConstructor(getParameterizedConstructor());
 
 		// Obtain a no-arg constructor, if one is appropriate to provide
 		builder.addConstructor(getNoArgConstructor());
 
-		if (gettersByDefault) {
+		if (annotationValues.isGettersByDefault()) {
 			List<MethodMetadata> accessors = getAccessors();
 			for (MethodMetadata accessor : accessors) {
 				builder.addMethod(accessor);
 			}
 		}
-		if (settersByDefault) {
+		if (annotationValues.isSettersByDefault()) {
 			List<MethodMetadata> mutators = getMutators();
 			for (MethodMetadata mutator : mutators) {
 				builder.addMethod(mutator);
@@ -113,7 +99,7 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 		builder.putCustomData(IDENTIFIER_TYPE, null);
 
 		// Create a representation of the desired output ITD
-		itdTypeDetails = builder.build();
+		buildItd();
 	}
 
 	public AnnotationMetadata getEmbeddableAnnotation() {
