@@ -67,6 +67,7 @@ import org.springframework.roo.support.util.StringUtils;
 public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNotifier implements IdentifierService, FileEventListener {
 
 	// Constants
+	private static final JavaSymbolName DB_MANAGED = new JavaSymbolName("dbManaged");
 	private static final String IDENTIFIER_TYPE = "identifierType";
 	private static final String VERSION_FIELD = "versionField";
 	private static final String VERSION = "version";
@@ -227,7 +228,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 		final Set<ClassOrInterfaceTypeDetails> identifierTypes = typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(ROO_IDENTIFIER);
 		for (final ClassOrInterfaceTypeDetails managedIdentifierType : identifierTypes) {
 			final AnnotationMetadata identifierAnnotation = managedIdentifierType.getTypeAnnotation(ROO_IDENTIFIER);
-			final AnnotationAttributeValue<?> attrValue = identifierAnnotation.getAttribute(new JavaSymbolName("dbManaged"));
+			final AnnotationAttributeValue<?> attrValue = identifierAnnotation.getAttribute(DB_MANAGED);
 			if (attrValue != null && (Boolean) attrValue.getValue()) {
 				managedIdentifierTypes.add(managedIdentifierType);
 			}
@@ -238,7 +239,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 	private Table updateOrDeleteManagedEntity(final ClassOrInterfaceTypeDetails managedEntity, final Database database) {
 		// Update the attributes of the existing JPA-related annotation
 		final AnnotationMetadata jpaAnnotation = getJpaAnnotation(managedEntity);
-		Assert.state(jpaAnnotation != null, "Neither " + ROO_JPA_ACTIVE_RECORD.getSimpleTypeName() + " nor " + ROO_JPA_ENTITY.getSimpleTypeName() + " found on existing DBRE-managed entity " + managedEntity.getName().getFullyQualifiedTypeName());
+		Assert.state(jpaAnnotation != null, "Neither @" + ROO_JPA_ACTIVE_RECORD.getSimpleTypeName() + " nor @" + ROO_JPA_ENTITY.getSimpleTypeName() + " found on existing DBRE-managed entity " + managedEntity.getName().getFullyQualifiedTypeName());
 
 		// Find table in database using 'table' and 'schema' attributes from the JPA annotation
 		final AnnotationAttributeValue<?> tableAttribute = jpaAnnotation.getAttribute(new JavaSymbolName("table"));
@@ -407,7 +408,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 		final List<AnnotationMetadataBuilder> identifierAnnotations = new ArrayList<AnnotationMetadataBuilder>();
 
 		final AnnotationMetadataBuilder identifierBuilder = new AnnotationMetadataBuilder(ROO_IDENTIFIER);
-		identifierBuilder.addBooleanAttribute("dbManaged", true);
+		identifierBuilder.addBooleanAttribute(DB_MANAGED.getSymbolName(), true);
 		identifierAnnotations.add(identifierBuilder);
 
 		// Produce identifier itself

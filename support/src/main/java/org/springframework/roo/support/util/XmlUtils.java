@@ -105,7 +105,7 @@ public final class XmlUtils {
 			if (!(inputStream instanceof BufferedInputStream)) {
 				inputStream = new BufferedInputStream(inputStream);
 			}
-			return factory.newDocumentBuilder().parse(inputStream);
+			return getDocumentBuilder().parse(inputStream);
 		} catch (final Exception e) {
 			throw new IllegalStateException("Could not open input stream", e);
 		} finally {
