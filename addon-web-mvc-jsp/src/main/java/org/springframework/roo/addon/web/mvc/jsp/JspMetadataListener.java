@@ -193,16 +193,17 @@ public class JspMetadataListener implements MetadataProvider, MetadataNotificati
 		properties.put(resourceId, new JavaSymbolName(formBackingType.getSimpleTypeName()).getReadableSymbolName());
 
 		String pluralResourceId = XmlUtils.convertId(resourceId + ".plural");
-		properties.put(pluralResourceId, new JavaSymbolName(formBackingTypeMetadataDetails.getPlural()).getReadableSymbolName());
-
-		if (formBackingTypeMetadataDetails.getPersistenceDetails() != null && !formBackingTypeMetadataDetails.getPersistenceDetails().getRooIdentifierFields().isEmpty()) {
-			for (FieldMetadata idField: formBackingTypeMetadataDetails.getPersistenceDetails().getRooIdentifierFields()) {
-				properties.put(XmlUtils.convertId(resourceId + "." + formBackingTypeMetadataDetails.getPersistenceDetails().getIdentifierField().getFieldName().getSymbolName() + "." + idField.getFieldName().getSymbolName().toLowerCase()), idField.getFieldName().getReadableSymbolName());
-			}
-		}
+		final String plural = formBackingTypeMetadataDetails.getPlural();
+		properties.put(pluralResourceId, new JavaSymbolName(plural).getReadableSymbolName());
 
 		JavaTypePersistenceMetadataDetails javaTypePersistenceMetadataDetails = formBackingTypeMetadataDetails.getPersistenceDetails();
 		Assert.notNull(javaTypePersistenceMetadataDetails, "Unable to determine persistence metadata for type " + formBackingType.getFullyQualifiedTypeName());
+
+		if (!javaTypePersistenceMetadataDetails.getRooIdentifierFields().isEmpty()) {
+			for (FieldMetadata idField: javaTypePersistenceMetadataDetails.getRooIdentifierFields()) {
+				properties.put(XmlUtils.convertId(resourceId + "." + javaTypePersistenceMetadataDetails.getIdentifierField().getFieldName().getSymbolName() + "." + idField.getFieldName().getSymbolName().toLowerCase()), idField.getFieldName().getReadableSymbolName());
+			}
+		}
 
 		for (MethodMetadata method : memberDetails.getMethods()) {
 			if (!BeanInfoUtils.isAccessorMethod(method)) {
@@ -232,7 +233,7 @@ public class JspMetadataListener implements MetadataProvider, MetadataNotificati
 			// Add 'list all' menu item
 			JavaSymbolName menuItemId = new JavaSymbolName("list");
 			menuOperations.addMenuItem(categoryName, menuItemId, "global_menu_list", "/" + controllerPath + "?page=1&size=${empty param.size ? 10 : param.size}", MenuOperations.DEFAULT_MENU_ITEM_PREFIX);
-			properties.put("menu_item_" + categoryName.getSymbolName().toLowerCase() + "_" + menuItemId.getSymbolName().toLowerCase() + "_label", new JavaSymbolName(formBackingTypeMetadataDetails.getPlural()).getReadableSymbolName());
+			properties.put("menu_item_" + categoryName.getSymbolName().toLowerCase() + "_" + menuItemId.getSymbolName().toLowerCase() + "_label", new JavaSymbolName(plural).getReadableSymbolName());
 		} else {
 			menuOperations.cleanUpMenuItem(categoryName, new JavaSymbolName("list"), MenuOperations.DEFAULT_MENU_ITEM_PREFIX);
 		}
@@ -251,9 +252,9 @@ public class JspMetadataListener implements MetadataProvider, MetadataNotificati
 						continue;
 					}
 					xmlRoundTripFileManager.writeToDiskIfNecessary(listPath, viewManager.getFinderDocument(finderDetails));
-					JavaSymbolName finderLabel = new JavaSymbolName(finderName.replace("find" + formBackingTypeMetadataDetails.getPlural() + "By", ""));
+					JavaSymbolName finderLabel = new JavaSymbolName(finderName.replace("find" + plural + "By", ""));
 					// Add 'Find by' menu item
-					menuOperations.addMenuItem(categoryName, finderLabel, "global_menu_find", "/" + controllerPath + "?find=" + finderName.replace("find" + formBackingTypeMetadataDetails.getPlural(), "") + "&form", MenuOperations.FINDER_MENU_ITEM_PREFIX);
+					menuOperations.addMenuItem(categoryName, finderLabel, "global_menu_find", "/" + controllerPath + "?find=" + finderName.replace("find" + plural, "") + "&form", MenuOperations.FINDER_MENU_ITEM_PREFIX);
 					properties.put("menu_item_" + categoryName.getSymbolName().toLowerCase() + "_" + finderLabel.getSymbolName().toLowerCase() + "_label", finderLabel.getReadableSymbolName());
 					allowedMenuItems.add(MenuOperations.FINDER_MENU_ITEM_PREFIX + categoryName.getSymbolName().toLowerCase() + "_" + finderLabel.getSymbolName().toLowerCase());
 					for (JavaSymbolName paramName : finderDetails.getFinderMethodMetadata().getParameterNames()) {
