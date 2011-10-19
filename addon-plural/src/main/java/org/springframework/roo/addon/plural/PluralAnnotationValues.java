@@ -17,8 +17,8 @@ public class PluralAnnotationValues extends AbstractAnnotationValues {
 	@AutoPopulate private String value = "";
 
 	/**
-	 * Constructor that reads the {@link RooPlural} annotation on the given
-	 * governor
+	 * Constructor that reads the {@link RooPlural} annotation (if any) on the
+	 * given governor.
 	 *
 	 * @param governor the governor's metadata (required)
 	 */

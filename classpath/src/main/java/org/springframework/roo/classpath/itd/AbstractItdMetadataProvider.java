@@ -52,7 +52,7 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.0
  */
 @Component(componentAbstract = true)
-public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTrackingMetadataNotifier implements ItdMetadataProvider, MetadataNotificationListener {
+public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTrackingMetadataNotifier implements ItdTriggerBasedMetadataProvider, MetadataNotificationListener {
 
 	// Fields
 	@Reference protected FileManager fileManager;
@@ -277,16 +277,12 @@ public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTracki
 			return null;
 		}
 
-		// Determine ITD details
-		String itdFilename = governorPhysicalTypeMetadata.getItdCanoncialPath(this);
-		JavaType aspectName = governorPhysicalTypeMetadata.getItdJavaType(this);
-
 		// Flag to indicate whether we'll even try to create this metadata
 		boolean produceMetadata = false;
 
 		// Determine if we should generate the metadata on the basis of it containing a trigger annotation
 		ClassOrInterfaceTypeDetails cid = null;
-		if (governorPhysicalTypeMetadata.getMemberHoldingTypeDetails() != null && governorPhysicalTypeMetadata.getMemberHoldingTypeDetails() instanceof ClassOrInterfaceTypeDetails) {
+		if (governorPhysicalTypeMetadata.getMemberHoldingTypeDetails() instanceof ClassOrInterfaceTypeDetails) {
 			cid = (ClassOrInterfaceTypeDetails) governorPhysicalTypeMetadata.getMemberHoldingTypeDetails();
 			// Only create metadata if the type is annotated with one of the metadata triggers
 			for (JavaType trigger : metadataTriggers) {
@@ -312,6 +308,7 @@ public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTracki
 			produceMetadata = false;
 		}
 
+		String itdFilename = governorPhysicalTypeMetadata.getItdCanoncialPath(this);
 		if (!produceMetadata && isGovernor(cid) && fileManager.exists(itdFilename)) {
 			// We don't seem to want metadata anymore, yet the ITD physically exists, so get rid of it
 			// This might be because the trigger annotation has been removed, the governor is missing a class declaration, etc.
@@ -321,6 +318,7 @@ public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTracki
 
 		if (produceMetadata) {
 			// This type contains an annotation we were configured to detect, or there is an ITD (which may need deletion), so we need to produce the metadata
+			JavaType aspectName = governorPhysicalTypeMetadata.getItdJavaType(this);
 			ItdTypeDetailsProvidingMetadataItem metadata = getMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, itdFilename);
 
 			// There is no requirement to register a direct connection with the physical type and this metadata because changes will

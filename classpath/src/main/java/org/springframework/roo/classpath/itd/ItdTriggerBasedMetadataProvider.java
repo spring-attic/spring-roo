@@ -1,5 +1,6 @@
 package org.springframework.roo.classpath.itd;
 
+import org.springframework.roo.classpath.TriggerBasedMetadataProvider;
 import org.springframework.roo.model.JavaType;
 
 /**
@@ -10,9 +11,4 @@ import org.springframework.roo.model.JavaType;
  * @author Ben Alex
  * @since 1.1
  */
-public interface ItdTriggerBasedMetadataProvider extends ItdMetadataProvider {
-
-	void addMetadataTrigger(JavaType javaType);
-
-	void removeMetadataTrigger(JavaType javaType);
-}
+public interface ItdTriggerBasedMetadataProvider extends ItdMetadataProvider, TriggerBasedMetadataProvider {}
