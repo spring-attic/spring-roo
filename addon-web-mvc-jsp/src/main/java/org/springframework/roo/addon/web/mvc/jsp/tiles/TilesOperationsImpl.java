@@ -47,7 +47,6 @@ public class TilesOperationsImpl implements TilesOperations {
 		Assert.hasText(viewLocation, "View location required");
 
 		final String viewsDefinitionFile = getTilesConfigFile(folderName);
-
 		final String unprefixedViewName = StringUtils.removePrefix(tilesViewName, "/");
 		final Element root = getViewsElement(viewsDefinitionFile);
 		final Element existingDefinition = XmlUtils.findFirstElement("/tiles-definitions/definition[@name = '" + unprefixedViewName + "']", root);
@@ -74,7 +73,6 @@ public class TilesOperationsImpl implements TilesOperations {
 		Assert.hasText(name, "View name required");
 
 		final String viewsDefinitionFile = getTilesConfigFile(folderName);
-
 		final Element root = getViewsElement(viewsDefinitionFile);
 
 		// Find menu item under this category if exists
@@ -122,6 +120,7 @@ public class TilesOperationsImpl implements TilesOperations {
 			try {
 				// We need to write the file out (it's a new file, or the existing file has different contents)
 				FileCopyUtils.copy(viewContent, new OutputStreamWriter(mutableFile.getOutputStream()));
+				
 				// Return and indicate we wrote out the file
 				return true;
 			} catch (final IOException ioe) {

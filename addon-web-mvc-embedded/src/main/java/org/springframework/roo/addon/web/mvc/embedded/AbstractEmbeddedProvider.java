@@ -81,13 +81,7 @@ public abstract class AbstractEmbeddedProvider implements EmbeddedProvider {
 		Document document = contentElement.getOwnerDocument();
 		if(!fileManager.exists(jspx)) {
 			// Add document namespaces
-			Element div = new XmlElementBuilder("div", document)
-									.addAttribute("xmlns:util", "urn:jsptagdir:/WEB-INF/tags/util")
-									.addAttribute("xmlns:embed", "urn:jsptagdir:/WEB-INF/tags/embed")
-									.addAttribute("xmlns:jsp", "http://java.sun.com/JSP/Page")
-									.addAttribute("version", "2.0")
-									.addChild(new XmlElementBuilder("jsp:output", document).addAttribute("omit-xml-declaration", "yes").build())
-								.build();
+			Element div = new XmlElementBuilder("div", document).addAttribute("xmlns:util", "urn:jsptagdir:/WEB-INF/tags/util").addAttribute("xmlns:embed", "urn:jsptagdir:/WEB-INF/tags/embed").addAttribute("xmlns:jsp", "http://java.sun.com/JSP/Page").addAttribute("version", "2.0").addChild(new XmlElementBuilder("jsp:output", document).addAttribute("omit-xml-declaration", "yes").build()).build();
 			document.appendChild(div);
 
 			div.appendChild(new XmlElementBuilder("util:panel", document).addAttribute("id", "title").addAttribute("title", title).addChild(contentElement).build());

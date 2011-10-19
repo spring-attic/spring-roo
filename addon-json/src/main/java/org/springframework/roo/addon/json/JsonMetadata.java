@@ -12,7 +12,6 @@ import java.util.List;
 
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
-import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
@@ -25,6 +24,7 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Metadata to be triggered by {@link RooJson} annotation
@@ -68,7 +68,7 @@ public class JsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 	public JavaSymbolName getToJsonMethodName() {
 		String methodLabel = annotationValues.getToJsonMethod();
-		if (methodLabel == null || methodLabel.length() == 0) {
+		if (!StringUtils.hasText(methodLabel)) {
 			return null;
 		}
 		return new JavaSymbolName(methodLabel);
@@ -82,9 +82,8 @@ public class JsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		}
 
 		// See if the type itself declared the method
-		MethodMetadata result = MemberFindingUtils.getDeclaredMethod(governorTypeDetails, methodName, null);
-		if (result != null) {
-			return result;
+		if (governorHasMethod(methodName)) {
+			return null;
 		}
 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
@@ -99,7 +98,7 @@ public class JsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 	public JavaSymbolName getToJsonArrayMethodName() {
 		String methodLabel = annotationValues.getToJsonArrayMethod();
-		if (methodLabel == null || methodLabel.length() == 0) {
+		if (!StringUtils.hasText(methodLabel)) {
 			return null;
 		}
 		return new JavaSymbolName(methodLabel);
@@ -115,9 +114,8 @@ public class JsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		final JavaType parameterType = new JavaType(Collection.class.getName(), 0, DataType.TYPE, null, Arrays.asList(destination));
 
 		// See if the type itself declared the method
-		MethodMetadata result = getGovernorMethod(methodName, parameterType);
-		if (result != null) {
-			return result;
+		if (governorHasMethod(methodName, parameterType)) {
+			return null;
 		}
 
 		List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("collection"));
@@ -134,7 +132,7 @@ public class JsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 	public JavaSymbolName getFromJsonArrayMethodName() {
 		String methodLabel = annotationValues.getFromJsonArrayMethod();
-		if (methodLabel == null || methodLabel.length() == 0) {
+		if (!StringUtils.hasText(methodLabel)) {
 			return null;
 		}
 
@@ -149,9 +147,8 @@ public class JsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		}
 
 		final JavaType parameterType = JavaType.STRING;
-		MethodMetadata result = getGovernorMethod(methodName, parameterType);
-		if (result != null) {
-			return result;
+		if (governorHasMethod(methodName, parameterType)) {
+			return null;
 		}
 
 		String list = LIST.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
@@ -173,7 +170,7 @@ public class JsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 	public JavaSymbolName getFromJsonMethodName() {
 		String methodLabel = annotationValues.getFromJsonMethod();
-		if (methodLabel == null || methodLabel.length() == 0) {
+		if (!StringUtils.hasText(methodLabel)) {
 			return null;
 		}
 
@@ -188,9 +185,8 @@ public class JsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		}
 
 		final JavaType parameterType = JavaType.STRING;
-		MethodMetadata result = getGovernorMethod(methodName, parameterType);
-		if (result != null) {
-			return result;
+		if (governorHasMethod(methodName, parameterType)) {
+			return null;
 		}
 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();

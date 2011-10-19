@@ -156,33 +156,36 @@ public class MenuOperationsImpl implements MenuOperations {
 			try {
 				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "menu.jspx"), fileManager.createFile(menuFileName).getOutputStream());
 			} catch (Exception e) {
-				throw new IllegalStateException("Encountered an error during copying of resources for MVC Menu addon.", e);
+				throw new IllegalStateException("Encountered an error during copying of menu.jspx for MVC Menu addon.", e);
 			}
 		}
 
 		PathResolver pathResolver = projectOperations.getPathResolver();
 
-		if (!fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/tags/menu/menu.tagx"))) {
+		final String menuPath = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/tags/menu/menu.tagx");
+		if (!fileManager.exists(menuPath)) {
 			try {
-				fileManager.createOrUpdateTextFileIfRequired(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/tags/menu/menu.tagx"), FileCopyUtils.copyToString(new InputStreamReader(TemplateUtils.getTemplate(getClass(), "menu.tagx"))), false);
+				fileManager.createOrUpdateTextFileIfRequired(menuPath, FileCopyUtils.copyToString(new InputStreamReader(TemplateUtils.getTemplate(getClass(), "menu.tagx"))), false);
 			} catch (Exception e) {
-				throw new IllegalStateException("Encountered an error during copying of resources for MVC Menu addon.", e);
+				throw new IllegalStateException("Encountered an error during copying of menu.tagx for MVC Menu addon.", e);
 			}
 		}
 
-		if (!fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/tags/menu/item.tagx"))) {
+		final String itemPath = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/tags/menu/item.tagx");
+		if (!fileManager.exists(itemPath)) {
 			try {
-				fileManager.createOrUpdateTextFileIfRequired(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/tags/menu/item.tagx"), FileCopyUtils.copyToString(new InputStreamReader(TemplateUtils.getTemplate(getClass(), "item.tagx"))), false);
+				fileManager.createOrUpdateTextFileIfRequired(itemPath, FileCopyUtils.copyToString(new InputStreamReader(TemplateUtils.getTemplate(getClass(), "item.tagx"))), false);
 			} catch (Exception e) {
-				throw new IllegalStateException("Encountered an error during copying of resources for MVC Menu addon.", e);
+				throw new IllegalStateException("Encountered an error during copying of item.tagx for MVC Menu addon.", e);
 			}
 		}
 
-		if (!fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/tags/menu/category.tagx"))) {
+		final String categoryPath = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/tags/menu/category.tagx");
+		if (!fileManager.exists(categoryPath)) {
 			try {
-				fileManager.createOrUpdateTextFileIfRequired(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/tags/menu/category.tagx"), FileCopyUtils.copyToString(new InputStreamReader(TemplateUtils.getTemplate(getClass(), "category.tagx"))), false);
+				fileManager.createOrUpdateTextFileIfRequired(categoryPath, FileCopyUtils.copyToString(new InputStreamReader(TemplateUtils.getTemplate(getClass(), "category.tagx"))), false);
 			} catch (Exception e) {
-				throw new IllegalStateException("Encountered an error during copying of resources for MVC Menu addon.", e);
+				throw new IllegalStateException("Encountered an error during copying of category.tagx for MVC Menu addon.", e);
 			}
 		}
 
