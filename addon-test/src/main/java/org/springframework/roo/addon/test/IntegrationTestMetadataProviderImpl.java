@@ -11,8 +11,8 @@ import static org.springframework.roo.classpath.customdata.CustomDataKeys.PERSIS
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.REMOVE_METHOD;
 import static org.springframework.roo.model.JavaType.INT_PRIMITIVE;
 import static org.springframework.roo.model.RooJavaType.ROO_DATA_ON_DEMAND;
-import static org.springframework.roo.model.RooJavaType.ROO_JPA_ACTIVE_RECORD;
 import static org.springframework.roo.model.RooJavaType.ROO_INTEGRATION_TEST;
+import static org.springframework.roo.model.RooJavaType.ROO_JPA_ACTIVE_RECORD;
 
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -42,14 +42,12 @@ import org.springframework.roo.classpath.layers.LayerType;
 import org.springframework.roo.classpath.layers.MemberTypeAdditions;
 import org.springframework.roo.classpath.layers.MethodParameter;
 import org.springframework.roo.classpath.scanner.MemberDetails;
-import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
-import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Implementation of {@link IntegrationTestMetadataProvider}.
@@ -63,6 +61,7 @@ public class IntegrationTestMetadataProviderImpl extends AbstractItdMetadataProv
 
 	// Constants
 	private static final int LAYER_POSITION = LayerType.HIGHEST.getPosition();
+	private static final JavaSymbolName TRANSACTION_MANAGER_ATTRIBUTE = new JavaSymbolName("transactionManager");
 
 	// Fields
 	@Reference private ConfigurableMetadataProvider configurableMetadataProvider;
@@ -89,34 +88,51 @@ public class IntegrationTestMetadataProviderImpl extends AbstractItdMetadataProv
 		removeMetadataTrigger(ROO_INTEGRATION_TEST);
 	}
 
-	// We need to notified when ProjectMetadata changes in order to handle JPA <-> GAE persistence changes
 	@Override
 	protected void notifyForGenericListener(final String upstreamDependency) {
-		// If the upstream dependency is null or invalid do not continue
-		if (!StringUtils.hasText(upstreamDependency) || !MetadataIdentificationUtils.isValid(upstreamDependency)) {
-			return;
-		}
-
-		// We do need to be informed if a new layer is available to see if we should use that
 		if (PhysicalTypeIdentifier.isValid(upstreamDependency)) {
-			final MemberHoldingTypeDetails memberHoldingTypeDetails = typeLocationService.findClassOrInterface(PhysicalTypeIdentifier.getJavaType(upstreamDependency));
-			if (memberHoldingTypeDetails != null) {
-				for (final JavaType type : memberHoldingTypeDetails.getLayerEntities()) {
-					final String localMidType = managedEntityTypes.get(type);
-					if (localMidType != null) {
-						metadataService.get(localMidType);
-					}
-				}
+			handleGenericChangeToPhysicalType(PhysicalTypeIdentifier.getJavaType(upstreamDependency));
+		}
+		if (ProjectMetadata.getProjectIdentifier().equals(upstreamDependency)) {
+			handleGenericChangeToProject();
+		}
+	}
+	
+	/**
+	 * Handles a generic change (i.e. with no explicit downstream dependency)
+	 * to the given physical type
+	 * 
+	 * @param physicalType the type that changed (required)
+	 */
+	private void handleGenericChangeToPhysicalType(final JavaType physicalType) {
+		handleChangesToTestedEntities(physicalType);		
+		handleChangesToLayeringForTestedEntities(physicalType);
+	}
+
+	private void handleChangesToTestedEntities(final JavaType physicalType) {
+		final String localMid = managedEntityTypes.get(physicalType);
+		if (localMid != null) {
+			// One of the entities for which we produce metadata has changed; refresh that metadata
+			metadataService.get(localMid);
+		}
+	}
+
+	private void handleChangesToLayeringForTestedEntities(final JavaType physicalType) {
+		final MemberHoldingTypeDetails memberHoldingTypeDetails = typeLocationService.findClassOrInterface(physicalType);
+		if (memberHoldingTypeDetails != null) {
+			for (final JavaType type : memberHoldingTypeDetails.getLayerEntities()) {
+				handleChangesToTestedEntities(type);
 			}
 		}
-
-		// If the upstream dependency isn't ProjectMetadata do not continue
-		if (upstreamDependency.equals(ProjectMetadata.getProjectIdentifier())) {
-			final ProjectMetadata projectMetadata = projectOperations.getProjectMetadata();
-			// If ProjectMetadata isn't valid do not continue
-			if (projectMetadata == null || !projectMetadata.isValid()) {
-				return;
-			}
+	}
+	
+	/**
+	 * Handles a generic change (i.e. with no explicit downstream dependency)
+	 * to the project metadata
+	 */
+	private void handleGenericChangeToProject() {
+		final ProjectMetadata projectMetadata = projectOperations.getProjectMetadata();
+		if (projectMetadata != null && projectMetadata.isValid()) {
 			final boolean isGaeEnabled = projectMetadata.isGaeEnabled();
 			// We need to determine if the persistence state has changed, we do this by comparing the last known state to the current state
 			final boolean hasGaeStateChanged = wasGaeEnabled == null || isGaeEnabled != wasGaeEnabled;
@@ -180,7 +196,7 @@ public class IntegrationTestMetadataProviderImpl extends AbstractItdMetadataProv
 		String transactionManager = null;
 		final AnnotationMetadata rooEntityAnnotation = memberDetails.getAnnotation(ROO_JPA_ACTIVE_RECORD);
 		if (rooEntityAnnotation != null) {
-			final StringAttributeValue transactionManagerAttr = (StringAttributeValue) rooEntityAnnotation.getAttribute(new JavaSymbolName("transactionManager"));
+			final StringAttributeValue transactionManagerAttr = (StringAttributeValue) rooEntityAnnotation.getAttribute(TRANSACTION_MANAGER_ATTRIBUTE);
 			if (transactionManagerAttr != null) {
 				transactionManager = transactionManagerAttr.getValue();
 			}
