@@ -34,6 +34,7 @@ import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
+import org.springframework.roo.project.ContextualPath;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.logging.HandlerUtils;
@@ -63,20 +64,20 @@ public class FinderOperationsImpl implements FinderOperations {
 	@Reference private TypeLocationService typeLocationService;
 
 	public boolean isFinderCommandAvailable() {
-		return projectOperations.isProjectAvailable() && fileManager.exists(projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml"));
+		return projectOperations.isFocusedProjectAvailable() && fileManager.exists(projectOperations.getPathResolver().getFocusedIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml"));
 	}
 
 	public SortedSet<String> listFindersFor(final JavaType typeName, final Integer depth) {
 		Assert.notNull(typeName, "Java type required");
-
-		String id = typeLocationService.findIdentifier(typeName);
+		
+		String id = typeLocationService.getPhysicalTypeIdentifier(typeName);
 		if (id == null) {
 			throw new IllegalArgumentException("Cannot locate source for '" + typeName.getFullyQualifiedTypeName() + "'");
 		}
 
 		// Go and get the entity metadata, as any type with finders has to be an entity
 		JavaType javaType = PhysicalTypeIdentifier.getJavaType(id);
-		Path path = PhysicalTypeIdentifier.getPath(id);
+		ContextualPath path = PhysicalTypeIdentifier.getPath(id);
 		String entityMid = EntityMetadata.createIdentifier(javaType, path);
 
 		// Get the entity metadata
@@ -86,7 +87,7 @@ public class FinderOperationsImpl implements FinderOperations {
 		}
 
 		// Get the member details
-		PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(javaType, Path.SRC_MAIN_JAVA));
+		PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(javaType, path));
 		if (physicalTypeMetadata == null) {
 			throw new IllegalStateException("Could not determine physical type metadata for type " + javaType);
 		}
@@ -139,7 +140,7 @@ public class FinderOperationsImpl implements FinderOperations {
 		Assert.notNull(typeName, "Java type required");
 		Assert.notNull(finderName, "Finer name required");
 
-		String id = typeLocationService.findIdentifier(typeName);
+		String id = typeLocationService.getPhysicalTypeIdentifier(typeName);
 		if (id == null) {
 			logger.warning("Cannot locate source for '" + typeName.getFullyQualifiedTypeName() + "'");
 			return;
@@ -147,18 +148,18 @@ public class FinderOperationsImpl implements FinderOperations {
 
 		// Go and get the entity metadata, as any type with finders has to be an entity
 		JavaType javaType = PhysicalTypeIdentifier.getJavaType(id);
-		Path path = PhysicalTypeIdentifier.getPath(id);
+		ContextualPath path = PhysicalTypeIdentifier.getPath(id);
 		String entityMid = EntityMetadata.createIdentifier(javaType, path);
 
 		// Get the entity metadata
 		EntityMetadata entityMetadata = (EntityMetadata) metadataService.get(entityMid);
 		if (entityMetadata == null) {
-			logger.warning("Cannot provide finders because '" + typeName.getFullyQualifiedTypeName() + "' is not an entity");
+			logger.warning("Cannot provide finders because '" + typeName.getFullyQualifiedTypeName() + "' is not an entity - " + entityMid);
 			return;
 		}
 
 		// We know the file exists, as there's already entity metadata for it
-		ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = typeLocationService.getTypeForIdentifier(id);
+		ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = typeLocationService.getTypeDetails(id);
 		if (classOrInterfaceTypeDetails == null) {
 			throw new IllegalArgumentException("Cannot locate source for '" + javaType.getFullyQualifiedTypeName() + "'");
 		}

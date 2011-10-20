@@ -18,6 +18,7 @@ import org.springframework.roo.addon.dbre.model.Schema;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Path;
+import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
@@ -43,10 +44,11 @@ public class DbreOperationsImpl implements DbreOperations {
 	// Fields
 	@Reference private DbreModelService dbreModelService;
 	@Reference private FileManager fileManager;
+	@Reference private PathResolver pathResolver;
 	@Reference private ProjectOperations projectOperations;
 
 	public boolean isDbreAvailable() {
-		return projectOperations.isProjectAvailable() && (fileManager.exists(projectOperations.getPathResolver().getIdentifier(Path.SPRING_CONFIG_ROOT, "database.properties")) || fileManager.exists(projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml")));
+		return projectOperations.isFocusedProjectAvailable() && (fileManager.exists(pathResolver.getFocusedIdentifier(Path.SPRING_CONFIG_ROOT, "database.properties")) || fileManager.exists(projectOperations.getPathResolver().getFocusedIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml")));
 	}
 
 	public void displayDatabaseMetadata(final Set<Schema> schemas, final File file, final boolean view) {
@@ -96,7 +98,7 @@ public class DbreOperationsImpl implements DbreOperations {
 	}
 
 	private void updatePom() {
-		String pom = projectOperations.getPathResolver().getIdentifier(Path.ROOT, "pom.xml");
+		String pom = pathResolver.getFocusedIdentifier(Path.ROOT, "pom.xml");
 		Document document = XmlUtils.readXml(fileManager.getInputStream(pom));
 		Element root = document.getDocumentElement();
 
@@ -132,7 +134,7 @@ public class DbreOperationsImpl implements DbreOperations {
 	}
 
 	private void updatePersistenceXml() {
-		String persistencePath = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml");
+		String persistencePath = pathResolver.getFocusedIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml");
 		Document document = XmlUtils.readXml(fileManager.getInputStream(persistencePath));
 		Element root = document.getDocumentElement();
 

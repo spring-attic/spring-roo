@@ -9,6 +9,7 @@ import org.springframework.roo.support.ant.AntPathMatcher;
 import org.springframework.roo.support.ant.PathMatcher;
 import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.FileUtils;
 
 /**
  * Represents the details of a file that once existed on the disk.
@@ -102,8 +103,7 @@ public class FileDetails implements Comparable<FileDetails> {
 	 */
 	public boolean isParentOf(final String possibleChildCanonicalPath) {
 		Assert.hasText(possibleChildCanonicalPath, "Possible child to evaluate is required");
-		String parent = getCanonicalPath();
-		return possibleChildCanonicalPath.startsWith(parent);
+		return FileUtils.normalise(possibleChildCanonicalPath).startsWith(FileUtils.normalise(getCanonicalPath()));
 	}
 
 	/**

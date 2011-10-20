@@ -19,6 +19,7 @@ import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMeta
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.project.ContextualPath;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
@@ -148,13 +149,11 @@ public class PluralMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	 * {@link Path#SRC_MAIN_JAVA}
 	 *
 	 * @param javaType (required)
+	 * @param path
 	 * @return a non-<code>null</code> ID
 	 */
-	public static String createIdentifier(final JavaType javaType) {
-		return createIdentifier(javaType, Path.SRC_MAIN_JAVA);
-	}
-
-	public static String createIdentifier(final JavaType javaType, final Path path) {
+	
+	public static String createIdentifier(final JavaType javaType, final ContextualPath path) {
 		return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
 	}
 
@@ -162,7 +161,7 @@ public class PluralMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		return PhysicalTypeIdentifierNamingUtils.getJavaType(PROVIDES_TYPE_STRING, metadataIdentificationString);
 	}
 
-	public static Path getPath(final String metadataIdentificationString) {
+	public static ContextualPath getPath(String metadataIdentificationString) {
 		return PhysicalTypeIdentifierNamingUtils.getPath(PROVIDES_TYPE_STRING, metadataIdentificationString);
 	}
 

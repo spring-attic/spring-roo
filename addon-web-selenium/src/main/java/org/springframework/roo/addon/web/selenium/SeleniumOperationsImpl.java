@@ -1,10 +1,10 @@
 package org.springframework.roo.addon.web.selenium;
 
 import static org.springframework.roo.model.JavaType.LONG_OBJECT;
+import static org.springframework.roo.model.JdkJavaType.BIG_DECIMAL;
 import static org.springframework.roo.model.Jsr303JavaType.FUTURE;
 import static org.springframework.roo.model.Jsr303JavaType.MIN;
 import static org.springframework.roo.model.Jsr303JavaType.PAST;
-import static org.springframework.roo.model.JdkJavaType.BIG_DECIMAL;
 import static org.springframework.roo.model.SpringJavaType.DATE_TIME_FORMAT;
 
 import java.io.InputStream;
@@ -24,7 +24,7 @@ import org.springframework.roo.addon.web.mvc.controller.details.WebMetadataServi
 import org.springframework.roo.addon.web.mvc.controller.scaffold.WebScaffoldMetadata;
 import org.springframework.roo.addon.web.mvc.jsp.menu.MenuOperations;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
-import org.springframework.roo.classpath.PhysicalTypeMetadata;
+import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
@@ -39,7 +39,9 @@ import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
+import org.springframework.roo.project.ContextualPath;
 import org.springframework.roo.project.Path;
+import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.Plugin;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
@@ -71,10 +73,12 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 	@Reference private MemberDetailsScanner memberDetailsScanner;
 	@Reference private ProjectOperations projectOperations;
 	@Reference private WebMetadataService webMetadataService;
+	@Reference private PathResolver pathResolver;
 	@Reference private PersistenceMemberLocator persistenceMemberLocator;
-
+	@Reference private TypeLocationService typeLocationService;
+	
 	public boolean isProjectAvailable() {
-		return projectOperations.isProjectAvailable() && fileManager.exists(projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/web.xml"));
+		return projectOperations.isFocusedProjectAvailable() && fileManager.exists(pathResolver.getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/web.xml"));
 	}
 
 	/**
@@ -85,8 +89,10 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 	 */
 	public void generateTest(final JavaType controller, String name, String serverURL) {
 		Assert.notNull(controller, "Controller type required");
-
-		String webScaffoldMetadataIdentifier = WebScaffoldMetadata.createIdentifier(controller, Path.SRC_MAIN_JAVA);
+		ClassOrInterfaceTypeDetails controllerTypeDetails = typeLocationService.getTypeDetails(controller);
+		Assert.notNull(controllerTypeDetails, "Class or interface type details for type '" + controller + "' could not be resolved");
+		ContextualPath path = PhysicalTypeIdentifier.getPath(controllerTypeDetails.getDeclaredByMetadataId());
+		String webScaffoldMetadataIdentifier = WebScaffoldMetadata.createIdentifier(controller, path);
 		WebScaffoldMetadata webScaffoldMetadata = (WebScaffoldMetadata) metadataService.get(webScaffoldMetadataIdentifier);
 		Assert.notNull(webScaffoldMetadata, "Web controller '" + controller.getFullyQualifiedTypeName() + "' does not appear to be an automatic, scaffolded controller");
 
@@ -103,7 +109,7 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 		JavaType formBackingType = webScaffoldMetadata.getAnnotationValues().getFormBackingObject();
 
 		String relativeTestFilePath = "selenium/test-" + formBackingType.getSimpleTypeName().toLowerCase() + ".xhtml";
-		String seleniumPath = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, relativeTestFilePath);
+		String seleniumPath = pathResolver.getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, relativeTestFilePath);
 
 		InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), "selenium-template.xhtml");
 		Assert.notNull(templateInputStream, "Could not acquire selenium.xhtml template");
@@ -120,12 +126,11 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 		XmlUtils.findRequiredElement("/html/body/table/thead/tr/td", root).setTextContent(name);
 
 		Element tbody = XmlUtils.findRequiredElement("/html/body/table/tbody", root);
-		tbody.appendChild(openCommand(document, serverURL + projectOperations.getProjectMetadata().getProjectName() + "/" + webScaffoldMetadata.getAnnotationValues().getPath() + "?form"));
+		tbody.appendChild(openCommand(document, serverURL + projectOperations.getProjectName(projectOperations.getFocusedModuleName()) + "/" + webScaffoldMetadata.getAnnotationValues().getPath() + "?form"));
 
-		PhysicalTypeMetadata formBackingObjectPhysicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(formBackingType, Path.SRC_MAIN_JAVA));
-		Assert.notNull(formBackingObjectPhysicalTypeMetadata, "Unable to obtain physical type metadata for type " + formBackingType.getFullyQualifiedTypeName());
-		ClassOrInterfaceTypeDetails formBackingClassOrInterfaceDetails = (ClassOrInterfaceTypeDetails) formBackingObjectPhysicalTypeMetadata.getMemberHoldingTypeDetails();
-		MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(getClass().getName(), formBackingClassOrInterfaceDetails);
+		ClassOrInterfaceTypeDetails formBackingTypeDetails = typeLocationService.getTypeDetails(formBackingType);
+		Assert.notNull(formBackingType, "Class or interface type details for type '" + formBackingType + "' could not be resolved");
+		MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(getClass().getName(), formBackingTypeDetails);
 
 		// Add composite PK identifier fields if needed
 		for (FieldMetadata field : persistenceMemberLocator.getEmbeddedIdentifierFields(formBackingType)) {
@@ -163,7 +168,7 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 
 	private void manageTestSuite(final String testPath, final String name, final String serverURL) {
 		String relativeTestFilePath = "selenium/test-suite.xhtml";
-		String seleniumPath = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, relativeTestFilePath);
+		String seleniumPath = pathResolver.getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, relativeTestFilePath);
 
 		final InputStream in;
 		if (fileManager.exists(seleniumPath)) {
@@ -174,18 +179,18 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 		}
 		final Document suite = XmlUtils.readXml(in);
 
-		ProjectMetadata projectMetadata = projectOperations.getProjectMetadata();
+		ProjectMetadata projectMetadata = projectOperations.getProjectMetadata(projectOperations.getFocusedModuleName());
 		Assert.notNull(projectMetadata, "Unable to obtain project metadata");
 
 		Element root = (Element) suite.getLastChild();
 
-		XmlUtils.findRequiredElement("/html/head/title", root).setTextContent("Test suite for " + projectMetadata.getProjectName() + "project");
+		XmlUtils.findRequiredElement("/html/head/title", root).setTextContent("Test suite for " + projectOperations.getProjectName(projectOperations.getFocusedModuleName()) + "project");
 
 		Element tr = suite.createElement("tr");
 		Element td = suite.createElement("td");
 		tr.appendChild(td);
 		Element a = suite.createElement("a");
-		a.setAttribute("href", serverURL + projectMetadata.getProjectName() + "/resources/" + testPath);
+		a.setAttribute("href", serverURL + projectOperations.getProjectName(projectOperations.getFocusedModuleName()) + "/resources/" + testPath);
 		a.setTextContent(name);
 		td.appendChild(a);
 
@@ -193,12 +198,12 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 
 		fileManager.createOrUpdateTextFileIfRequired(seleniumPath, XmlUtils.nodeToString(suite), false);
 
-		menuOperations.addMenuItem(new JavaSymbolName("SeleniumTests"), new JavaSymbolName("Test"), "Test", "selenium_menu_test_suite", "/resources/" + relativeTestFilePath, "si_");
+		menuOperations.addMenuItem(new JavaSymbolName("SeleniumTests"), new JavaSymbolName("Test"), "Test", "selenium_menu_test_suite", "/resources/" + relativeTestFilePath, "si_", pathResolver.getFocusedPath(Path.SRC_MAIN_WEBAPP));
 	}
 
 	private void installMavenPlugin() {
 		// Stop if the plugin is already installed
-		for (Plugin plugin : projectOperations.getProjectMetadata().getBuildPlugins()) {
+		for (Plugin plugin : projectOperations.getFocusedModule().getBuildPlugins()) {
 			if (plugin.getArtifactId().equals("selenium-maven-plugin")) {
 				return;
 			}
@@ -209,7 +214,7 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 
 		// Now install the plugin itself
 		if (plugin != null) {
-			projectOperations.addBuildPlugin(new Plugin(plugin));
+			projectOperations.addBuildPlugin(projectOperations.getFocusedModuleName(), new Plugin(plugin));
 		}
 	}
 
@@ -309,9 +314,9 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 		} else if (fieldType.equals(JavaType.INT_OBJECT) || fieldType.equals(JavaType.INT_PRIMITIVE)) {
 			initializer = Integer.valueOf(index).toString();
 		} else if (fieldType.equals(JavaType.DOUBLE_OBJECT) || fieldType.equals(JavaType.DOUBLE_PRIMITIVE)) {
-			initializer = new Double(index).toString();
+			initializer = Double.toString(index);
 		} else if (fieldType.equals(JavaType.FLOAT_OBJECT) || fieldType.equals(JavaType.FLOAT_PRIMITIVE)) {
-			initializer = new Float(index).toString();
+			initializer = Float.toString(index);
 		} else if (fieldType.equals(LONG_OBJECT) || fieldType.equals(JavaType.LONG_PRIMITIVE)) {
 			initializer = Long.valueOf(index).toString();
 		} else if (fieldType.equals(JavaType.SHORT_OBJECT) || fieldType.equals(JavaType.SHORT_PRIMITIVE)) {
@@ -338,11 +343,8 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 	}
 
 	private boolean isSpecialType(final JavaType javaType) {
-		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(javaType, Path.SRC_MAIN_JAVA);
+		String physicalTypeIdentifier = typeLocationService.getPhysicalTypeIdentifier(javaType);
 		// We are only interested if the type is part of our application and if no editor exists for it already
-		if (metadataService.get(physicalTypeIdentifier) != null) {
-			return true;
-		}
-		return false;
+		return physicalTypeIdentifier == null || metadataService.get(physicalTypeIdentifier) != null;
 	}
 }

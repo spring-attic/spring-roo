@@ -4,7 +4,7 @@ import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.metadata.AbstractMetadataItem;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.Path;
+import org.springframework.roo.project.ContextualPath;
 
 public class GwtRequestMetadata extends AbstractMetadataItem {
 
@@ -20,16 +20,11 @@ public class GwtRequestMetadata extends AbstractMetadataItem {
 		this.requestTypeContents = requestTypeContents;
 	}
 
-	public GwtRequestMetadata(final JavaType javaType, final String requestTypeContents) {
-		super(createIdentifier(javaType, Path.SRC_MAIN_JAVA));
-		this.requestTypeContents = requestTypeContents;
-	}
-
 	public static String getMetadataIdentifierType() {
 		return PROVIDES_TYPE;
 	}
 
-	public static String createIdentifier(final JavaType javaType, final Path path) {
+	public static String createIdentifier(final JavaType javaType, final ContextualPath path) {
 		return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
 	}
 
@@ -37,7 +32,7 @@ public class GwtRequestMetadata extends AbstractMetadataItem {
 		return PhysicalTypeIdentifierNamingUtils.getJavaType(PROVIDES_TYPE_STRING, metadataIdentificationString);
 	}
 
-	public static Path getPath(final String metadataIdentificationString) {
+	public static ContextualPath getPath(final String metadataIdentificationString) {
 		return PhysicalTypeIdentifierNamingUtils.getPath(PROVIDES_TYPE_STRING, metadataIdentificationString);
 	}
 

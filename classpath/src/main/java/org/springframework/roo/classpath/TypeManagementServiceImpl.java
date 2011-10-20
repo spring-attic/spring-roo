@@ -6,10 +6,12 @@ import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
 import org.springframework.roo.classpath.details.FieldMetadata;
+import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.process.manager.FileManager;
+import org.springframework.roo.project.ContextualPath;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
 
@@ -36,7 +38,6 @@ public class TypeManagementServiceImpl implements TypeManagementService {
 	}
 
 	public void addEnumConstant(final String physicalTypeIdentifier, final JavaSymbolName constantName) {
-		Assert.isTrue(projectOperations.isProjectAvailable(), "Cannot add a constant at this time");
 		Assert.hasText(physicalTypeIdentifier, "Type identifier not provided");
 		Assert.notNull(constantName, "Constant name required");
 
@@ -55,7 +56,6 @@ public class TypeManagementServiceImpl implements TypeManagementService {
 	}
 
 	public void addField(final FieldMetadata fieldMetadata) {
-		Assert.isTrue(projectOperations.isProjectAvailable(), "Field cannot be added at this time");
 		Assert.notNull(fieldMetadata, "Field metadata not provided");
 
 		// Obtain the physical type and ITD mutable details
@@ -74,9 +74,11 @@ public class TypeManagementServiceImpl implements TypeManagementService {
 			}
 		}
 
+		ContextualPath path = PhysicalTypeIdentifier.getPath(classOrInterfaceTypeDetailsBuilder.getDeclaredByMetadataId());
+
 		if (jsr303Required) {
 			// It's more likely the version below represents a later version than any specified in the user's own dependency list
-			projectOperations.addDependency("javax.validation", "validation-api", "1.0.0.GA");
+			projectOperations.addDependency(path.getModule(), "javax.validation", "validation-api", "1.0.0.GA");
 		}
 		classOrInterfaceTypeDetailsBuilder.addField(fieldMetadata);
 		createOrUpdateTypeOnDisk(classOrInterfaceTypeDetailsBuilder.build());
@@ -85,10 +87,13 @@ public class TypeManagementServiceImpl implements TypeManagementService {
 	public void createOrUpdateTypeOnDisk(final ClassOrInterfaceTypeDetails cit) {
 		Assert.notNull(fileManager, "File manager required");
 		Assert.notNull(cit, "Class or interface type details required");
-		String fileIdentifier = typeLocationService.getPhysicalTypeCanonicalPath(cit.getDeclaredByMetadataId());
+		ContextualPath path = PhysicalTypeIdentifier.getPath(cit.getDeclaredByMetadataId());
+		ClassOrInterfaceTypeDetailsBuilder builder = new ClassOrInterfaceTypeDetailsBuilder(PhysicalTypeIdentifier.createIdentifier(cit.getName(), path), cit);
+
+		String fileIdentifier = typeLocationService.getPhysicalTypeCanonicalPath(builder.getDeclaredByMetadataId());
 		Assert.hasText(fileIdentifier, "File identifier required");
 
-		final String newContents = typeParsingService.getCompilationUnitContents(cit);
+		final String newContents = typeParsingService.getCompilationUnitContents(builder.build());
 		fileManager.createOrUpdateTextFileIfRequired(fileIdentifier, newContents, true);
 	}
 }

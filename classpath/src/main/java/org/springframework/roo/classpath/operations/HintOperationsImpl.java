@@ -38,6 +38,7 @@ public class HintOperationsImpl implements HintOperations {
 
 	// Fields
 	@Reference private FileManager fileManager;
+	@Reference private PathResolver pathResolver;
 	@Reference private ProjectOperations projectOperations;
 
 	public String hint(String topic) {
@@ -67,22 +68,21 @@ public class HintOperationsImpl implements HintOperations {
 	}
 
 	private String determineTopic() {
-		if (!projectOperations.isProjectAvailable()) {
+		if (!projectOperations.isFocusedProjectAvailable()) {
 			return "start";
 		}
 
-		PathResolver pathResolver = projectOperations.getPathResolver();
-
-		if (!fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml"))) {
+		if (!fileManager.exists(pathResolver.getFocusedIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml"))) {
 			return "jpa";
 		}
 
-		int entityCount = fileManager.findMatchingAntPath(pathResolver.getRoot(Path.SRC_MAIN_JAVA) + ANT_MATCH_DIRECTORY_PATTERN + "*_ROO_JPA_ACTIVE_RECORD.aj").size();
+		int entityCount = fileManager.findMatchingAntPath(pathResolver.getFocusedRoot(Path.SRC_MAIN_JAVA) + ANT_MATCH_DIRECTORY_PATTERN + "*_ROO_JPA_ACTIVE_RECORD.aj").size();
+
 		if (entityCount == 0) {
 			return "entities";
 		}
 
-		int javaBeanCount = fileManager.findMatchingAntPath(pathResolver.getRoot(Path.SRC_MAIN_JAVA) + ANT_MATCH_DIRECTORY_PATTERN + "*_Roo_JavaBean.aj").size();
+		int javaBeanCount = fileManager.findMatchingAntPath(pathResolver.getFocusedRoot(Path.SRC_MAIN_JAVA) + ANT_MATCH_DIRECTORY_PATTERN + "*_Roo_JavaBean.aj").size();
 		if (javaBeanCount == 0) {
 			return "fields";
 		}

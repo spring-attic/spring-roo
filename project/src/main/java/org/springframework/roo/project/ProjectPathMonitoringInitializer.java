@@ -52,9 +52,9 @@ public class ProjectPathMonitoringInitializer implements MetadataNotificationLis
 		notifyOn.add(FileOperation.UPDATED);
 		notifyOn.add(FileOperation.DELETED);
 
-		for (Path p : pathResolver.getPaths()) {
+		for (ContextualPath p : pathResolver.getPaths()) {
 			// Verify path exists and ensure it's monitored, except root (which we assume is already monitored via ProcessManager)
-			if (!Path.ROOT.equals(p)) {
+			if (!Path.ROOT.equals(p.getPath())) {
 				String fileIdentifier = pathResolver.getRoot(p);
 				File file = new File(fileIdentifier);
 				Assert.isTrue(!file.exists() || (file.exists() && file.isDirectory()), "Path '" + fileIdentifier + "' must either not exist or be a directory");
@@ -71,6 +71,6 @@ public class ProjectPathMonitoringInitializer implements MetadataNotificationLis
 		pathsRegistered = true;
 
 		// Explicitly perform a scan now that we've added all the directories we wish to monitor
-		fileMonitorService.scanAll();
+		//fileMonitorService.scanAll();
 	}
 }

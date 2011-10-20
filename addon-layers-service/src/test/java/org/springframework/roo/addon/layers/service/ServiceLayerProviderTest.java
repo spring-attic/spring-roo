@@ -18,11 +18,13 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.roo.addon.plural.PluralMetadata;
+import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.layers.MemberTypeAdditions;
 import org.springframework.roo.classpath.layers.MethodParameter;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.project.Path;
 
 /**
  * Unit test of {@link ServiceLayerProvider}
@@ -47,7 +49,8 @@ public class ServiceLayerProviderTest {
 	@Mock private MetadataService mockMetadataService;
 	@Mock private ServiceAnnotationValuesFactory mockServiceAnnotationValuesFactory;
 	@Mock private ServiceInterfaceLocator mockServiceInterfaceLocator;
-
+	@Mock private TypeLocationService mockTypeLocationService;
+	
 	// -- Others
 	private ServiceLayerProvider provider;
 	private String pluralId;
@@ -59,11 +62,13 @@ public class ServiceLayerProviderTest {
 		this.provider.setMetadataService(mockMetadataService);
 		this.provider.setServiceAnnotationValuesFactory(mockServiceAnnotationValuesFactory);
 		this.provider.setServiceInterfaceLocator(mockServiceInterfaceLocator);
-
+		this.provider.typeLocationService = mockTypeLocationService;
+		
 		when(mockTargetType.getFullyQualifiedTypeName()).thenReturn("com.example.domain.Person");
 		when(mockIdType.getFullyQualifiedTypeName()).thenReturn(Long.class.getName());
 		when(mockTargetType.getSimpleTypeName()).thenReturn("Person");
-		this.pluralId = PluralMetadata.createIdentifier(mockTargetType);
+		when(mockTypeLocationService.getTypePath(mockTargetType)).thenReturn(Path.SRC_MAIN_JAVA.contextualize(""));
+		this.pluralId = PluralMetadata.createIdentifier(mockTargetType, Path.SRC_MAIN_JAVA.contextualize());
 	}
 
 	/**

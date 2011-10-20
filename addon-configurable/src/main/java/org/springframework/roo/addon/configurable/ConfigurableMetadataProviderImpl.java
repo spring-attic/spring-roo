@@ -10,7 +10,7 @@ import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.Path;
+import org.springframework.roo.project.ContextualPath;
 /**
  * Implementation of {@link ConfigurableMetadataProvider}.
  *
@@ -43,12 +43,12 @@ public class ConfigurableMetadataProviderImpl extends AbstractItdMetadataProvide
 	@Override
 	protected String getGovernorPhysicalTypeIdentifier(final String metadataIdentificationString) {
 		JavaType javaType = ConfigurableMetadata.getJavaType(metadataIdentificationString);
-		Path path = ConfigurableMetadata.getPath(metadataIdentificationString);
+		ContextualPath path = ConfigurableMetadata.getPath(metadataIdentificationString);
 		return PhysicalTypeIdentifier.createIdentifier(javaType, path);
 	}
 
 	@Override
-	protected String createLocalIdentifier(final JavaType javaType, final Path path) {
+	protected String createLocalIdentifier(final JavaType javaType, final ContextualPath path) {
 		return ConfigurableMetadata.createIdentifier(javaType, path);
 	}
 

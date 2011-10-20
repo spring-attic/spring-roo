@@ -1,20 +1,5 @@
 package org.springframework.roo.support.util;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.StringWriter;
-import java.io.UnsupportedEncodingException;
-import java.io.Writer;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -29,6 +14,20 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
+import java.io.Writer;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.w3c.dom.DOMConfiguration;
 import org.w3c.dom.DOMImplementation;
@@ -508,6 +507,18 @@ public final class XmlUtils {
 				throw new IllegalArgumentException("Illegal name '" + element + "' (illegal character)");
 			}
 		}
+	}
+
+	public static String getTextContent(String path, Element parentElement) {
+		return getTextContent(path, parentElement, null);
+	}
+
+	public static String getTextContent(String path, Element parentElement, String valueIfNull) {
+		final Element element = XmlUtils.findFirstElement(path, parentElement);
+		if (element != null) {
+			return element.getTextContent();
+		}
+		return valueIfNull;
 	}
 	
 	/**

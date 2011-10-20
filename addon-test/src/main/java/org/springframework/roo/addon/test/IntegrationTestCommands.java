@@ -34,7 +34,7 @@ public class IntegrationTestCommands implements CommandMarker {
 
 	@CliAvailabilityIndicator({ "test mock", "test stub" })
 	public boolean isAvailable() {
-		return projectOperations.isProjectAvailable();
+		return projectOperations.isFocusedProjectAvailable();
 	}
 
 	@CliCommand(value = "test integration", help = "Creates a new integration test for the specified entity")

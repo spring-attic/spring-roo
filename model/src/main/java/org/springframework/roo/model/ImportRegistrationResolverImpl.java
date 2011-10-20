@@ -20,6 +20,7 @@ public class ImportRegistrationResolverImpl implements ImportRegistrationResolve
 
 	// Constants
 	private static final List<String> javaLangSimpleTypeNames = new ArrayList<String>();
+	private static final List<String> javaLangTypes = new ArrayList<String>();
 
 	// Fields
 	private final JavaPackage compilationUnitPackage;
@@ -127,7 +128,9 @@ public class ImportRegistrationResolverImpl implements ImportRegistrationResolve
 
 	public void addImport(final JavaType javaType) {
 		if (javaType != null) {
-			registeredImports.add(javaType);
+			if (!isPartOfJavaLang(javaType)) {
+				registeredImports.add(javaType);
+			}
 		}
 	}
 
@@ -206,6 +209,16 @@ public class ImportRegistrationResolverImpl implements ImportRegistrationResolve
 	public static boolean isPartOfJavaLang(final String simpleTypeName) {
 		Assert.hasText(simpleTypeName, "Simple type name required");
 		return javaLangSimpleTypeNames.contains(simpleTypeName);
+	}
+
+	public static boolean isPartOfJavaLang(final JavaType javaType) {
+		Assert.notNull(javaType, "Java type required");
+		if (javaLangTypes.isEmpty()) {
+			for (String javaLangSimpleTypeName : javaLangSimpleTypeNames) {
+				javaLangTypes.add("java.lang." + javaLangSimpleTypeName);
+			}
+		}
+		return javaLangTypes.contains(javaType.getFullyQualifiedTypeName());
 	}
 
 	public void addImports(final JavaType... typesToImport) {

@@ -20,7 +20,7 @@ import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadat
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.Path;
+import org.springframework.roo.project.ContextualPath;
 
 /**
  * Provides {@link ToStringMetadata}.
@@ -96,12 +96,12 @@ public class ToStringMetadataProvider extends AbstractMemberDiscoveringItdMetada
 	@Override
 	protected String getGovernorPhysicalTypeIdentifier(final String metadataIdentificationString) {
 		JavaType javaType = ToStringMetadata.getJavaType(metadataIdentificationString);
-		Path path = ToStringMetadata.getPath(metadataIdentificationString);
+		ContextualPath path = ToStringMetadata.getPath(metadataIdentificationString);
 		return PhysicalTypeIdentifier.createIdentifier(javaType, path);
 	}
 
 	@Override
-	protected String createLocalIdentifier(final JavaType javaType, final Path path) {
+	protected String createLocalIdentifier(final JavaType javaType, final ContextualPath path) {
 		return ToStringMetadata.createIdentifier(javaType, path);
 	}
 

@@ -11,7 +11,7 @@ import org.apache.felix.scr.annotations.Reference;
 import org.springframework.roo.addon.web.mvc.jsp.JspOperations;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Path;
-import org.springframework.roo.project.ProjectOperations;
+import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.IOUtils;
@@ -40,7 +40,7 @@ public abstract class AbstractEmbeddedProvider implements EmbeddedProvider {
 	@Reference private FileManager fileManager;
 	@Reference private UrlInputStreamService httpService;
 	@Reference private JspOperations jspOperations;
-	@Reference private ProjectOperations projectOperations;
+	@Reference private PathResolver pathResolver;
 
 	/**
 	 * Method to install tagx file into /WEB-INF/tags/embed/ of target project.
@@ -53,7 +53,7 @@ public abstract class AbstractEmbeddedProvider implements EmbeddedProvider {
 		if (!tagName.endsWith(".tagx")) {
 			tagName = tagName.concat(".tagx");
 		}
-		String tagx = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/tags/embed/" + tagName);
+		String tagx = pathResolver.getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/tags/embed/" + tagName);
 		if(!fileManager.exists(tagx)) {
 			try {
 				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "tags/" + tagName), fileManager.createFile(tagx).getOutputStream());
@@ -77,7 +77,7 @@ public abstract class AbstractEmbeddedProvider implements EmbeddedProvider {
 			title = getTitle(viewName);
 		}
 		viewName = getViewName(viewName, "default");
-		String jspx = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/views/embed/" + viewName + ".jspx");
+		String jspx = pathResolver.getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/views/embed/" + viewName + ".jspx");
 		Document document = contentElement.getOwnerDocument();
 		if(!fileManager.exists(jspx)) {
 			// Add document namespaces
@@ -86,7 +86,8 @@ public abstract class AbstractEmbeddedProvider implements EmbeddedProvider {
 
 			div.appendChild(new XmlElementBuilder("util:panel", document).addAttribute("id", "title").addAttribute("title", title).addChild(contentElement).build());
 
-			jspOperations.installView("/embed", viewName, title, "Embedded", document);
+			jspOperations.installView("/embed", viewName, title, "Embedded", document, pathResolver.getFocusedPath(Path.SRC_MAIN_WEBAPP));
+
 		} else {
 			logger.warning("Could not install jspx with name " + viewName + " because it exists already. Use the --viewName attribute to specify unique name.");
 		}

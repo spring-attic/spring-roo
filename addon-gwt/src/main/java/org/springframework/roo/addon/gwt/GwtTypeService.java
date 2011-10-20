@@ -9,7 +9,6 @@ import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.ProjectMetadata;
 
 /**
  * Interface for {@link GwtTypeServiceImpl}.
@@ -19,13 +18,13 @@ import org.springframework.roo.project.ProjectMetadata;
  */
 public interface GwtTypeService {
 
-	JavaType getGwtSideLeafType(JavaType returnType, ProjectMetadata projectMetadata, JavaType governorType, boolean requestType, boolean convertPrimitive);
+	JavaType getGwtSideLeafType(JavaType returnType, JavaType governorType, boolean requestType, boolean convertPrimitive);
 
 	List<MemberHoldingTypeDetails> getExtendsTypes(ClassOrInterfaceTypeDetails childType);
 
 	List<ClassOrInterfaceTypeDetails> buildType(GwtType destType, ClassOrInterfaceTypeDetails templateClass, List<MemberHoldingTypeDetails> extendsTypes);
 
-	void buildType(GwtType destType, List<ClassOrInterfaceTypeDetails> templateTypeDetails);
+	void buildType(GwtType destType, List<ClassOrInterfaceTypeDetails> templateTypeDetails, String moduleName);
 
 	List<MethodMetadata> getRequestMethods(ClassOrInterfaceTypeDetails governorTypeDetails);
 
@@ -35,7 +34,7 @@ public interface GwtTypeService {
 
 	boolean isMethodReturnTypesInSourcePath(MethodMetadata method, MemberHoldingTypeDetails memberHoldingTypeDetail, Set<String> sourcePaths);
 
-	Set<String> getSourcePaths();
+	Set<String> getSourcePaths(String moduleName);
 
 	ClassOrInterfaceTypeDetails lookupRequestFromProxy(ClassOrInterfaceTypeDetails proxy);
 

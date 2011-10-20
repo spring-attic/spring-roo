@@ -16,13 +16,12 @@ import org.springframework.roo.addon.web.mvc.controller.scaffold.WebScaffoldAnno
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.customdata.CustomDataKeys;
-import org.springframework.roo.classpath.details.MemberFindingUtils;
-import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.Path;
+import org.springframework.roo.project.ContextualPath;
 
 /**
  * Implementation of {@link WebFinderMetadataProvider}.
@@ -57,16 +56,15 @@ public class WebFinderMetadataProviderImpl extends AbstractItdMetadataProvider i
 
 		// Lookup the form backing object's metadata
 		final JavaType formBackingType = annotationValues.getFormBackingObject();
-		final PhysicalTypeMetadata formBackingObjectPhysicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(formBackingType, Path.SRC_MAIN_JAVA));
-		final MemberDetails formBackingObjectMemberDetails = getMemberDetails(formBackingObjectPhysicalTypeMetadata);
-		final MemberHoldingTypeDetails formBackingMemberHoldingTypeDetails = MemberFindingUtils.getMostConcreteMemberHoldingTypeDetailsWithTag(formBackingObjectMemberDetails, CustomDataKeys.PERSISTENT_TYPE);
-		if (formBackingMemberHoldingTypeDetails == null) {
+		final ClassOrInterfaceTypeDetails formBackingTypeDetails = typeLocationService.getTypeDetails(formBackingType);
+		if (formBackingTypeDetails == null || !formBackingTypeDetails.getCustomData().keySet().contains(CustomDataKeys.PERSISTENT_TYPE)) {
 			return null;
 		}
 
 		// We need to be informed if our dependent metadata changes
-		metadataDependencyRegistry.registerDependency(formBackingMemberHoldingTypeDetails.getDeclaredByMetadataId(), metadataIdentificationString);
+		metadataDependencyRegistry.registerDependency(formBackingTypeDetails.getDeclaredByMetadataId(), metadataIdentificationString);
 
+		final MemberDetails formBackingObjectMemberDetails = getMemberDetails(formBackingTypeDetails);
 		final Set<FinderMetadataDetails> dynamicFinderMethods = webMetadataService.getDynamicFinderMethodsAndFields(formBackingType, formBackingObjectMemberDetails, metadataIdentificationString);
 		final SortedMap<JavaType, JavaTypeMetadataDetails> relatedApplicationTypeMetadata = webMetadataService.getRelatedApplicationTypeMetadata(formBackingType, formBackingObjectMemberDetails, metadataIdentificationString);
 
@@ -82,12 +80,12 @@ public class WebFinderMetadataProviderImpl extends AbstractItdMetadataProvider i
 	@Override
 	protected String getGovernorPhysicalTypeIdentifier(final String metadataIdentificationString) {
 		JavaType javaType = WebFinderMetadata.getJavaType(metadataIdentificationString);
-		Path path = WebFinderMetadata.getPath(metadataIdentificationString);
+		ContextualPath path = WebFinderMetadata.getPath(metadataIdentificationString);
 		return PhysicalTypeIdentifier.createIdentifier(javaType, path);
 	}
 
 	@Override
-	protected String createLocalIdentifier(final JavaType javaType, final Path path) {
+	protected String createLocalIdentifier(final JavaType javaType, final ContextualPath path) {
 		return WebFinderMetadata.createIdentifier(javaType, path);
 	}
 

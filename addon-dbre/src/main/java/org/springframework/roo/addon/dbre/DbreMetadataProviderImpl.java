@@ -12,7 +12,6 @@ import org.springframework.roo.addon.dbre.model.Database;
 import org.springframework.roo.addon.dbre.model.DbreModelService;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
-import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.TypeManagementService;
 import org.springframework.roo.classpath.customdata.CustomDataKeys;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
@@ -20,7 +19,7 @@ import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.Path;
+import org.springframework.roo.project.ContextualPath;
 
 /**
  * Implementation of  {@link DbreMetadataProvider}.
@@ -34,7 +33,6 @@ public class DbreMetadataProviderImpl extends AbstractItdMetadataProvider implem
 
 	// Fields
 	@Reference private DbreModelService dbreModelService;
-	@Reference private TypeLocationService typeLocationService;
 	@Reference private TypeManagementService typeManagementService;
 
 	protected void activate(final ComponentContext context) {
@@ -48,14 +46,14 @@ public class DbreMetadataProviderImpl extends AbstractItdMetadataProvider implem
 	}
 
 	@Override
-	protected String createLocalIdentifier(final JavaType javaType, final Path path) {
+	protected String createLocalIdentifier(final JavaType javaType, final ContextualPath path) {
 		return DbreMetadata.createIdentifier(javaType, path);
 	}
 
 	@Override
 	protected String getGovernorPhysicalTypeIdentifier(final String metadataIdentificationString) {
 		JavaType javaType = DbreMetadata.getJavaType(metadataIdentificationString);
-		Path path = DbreMetadata.getPath(metadataIdentificationString);
+		ContextualPath path = DbreMetadata.getPath(metadataIdentificationString);
 		return PhysicalTypeIdentifier.createIdentifier(javaType, path);
 	}
 
@@ -93,7 +91,7 @@ public class DbreMetadataProviderImpl extends AbstractItdMetadataProvider implem
 			}
 		}
 		if (!found) {
-			String mid = typeLocationService.findIdentifier(javaType);
+			String mid = typeLocationService.getPhysicalTypeIdentifier(javaType);
 			metadataDependencyRegistry.registerDependency(mid, metadataIdentificationString);
 			return null;
 		}

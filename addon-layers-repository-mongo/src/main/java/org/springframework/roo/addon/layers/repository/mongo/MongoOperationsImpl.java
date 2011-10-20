@@ -37,6 +37,7 @@ import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.Path;
+import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.Repository;
 import org.springframework.roo.support.util.FileCopyUtils;
@@ -62,16 +63,17 @@ public class MongoOperationsImpl implements MongoOperations {
 	@Reference private ProjectOperations projectOperations;
 	@Reference private TypeLocationService typeLocationService;
 	@Reference private TypeManagementService typeManagementService;
+	@Reference private PathResolver pathResolver;
 	@Reference private PropFileOperations propFileOperations;
 	@Reference private IntegrationTestOperations integrationTestOperations;
 	@Reference private DataOnDemandOperations dataOnDemandOperations;
 
 	public boolean isSetupCommandAvailable() {
-		return projectOperations.isProjectAvailable();
+		return projectOperations.isFocusedProjectAvailable();
 	}
 
 	public boolean isRepositoryCommandAvailable() {
-		return projectOperations.isProjectAvailable() && fileManager.exists(projectOperations.getPathResolver().getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext-mongo.xml"));
+		return projectOperations.isFocusedProjectAvailable() && fileManager.exists(pathResolver.getFocusedIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext-mongo.xml"));
 	}
 
 	public void setupRepository(final JavaType interfaceType, final JavaType classType, final JavaType domainType) {
@@ -79,9 +81,9 @@ public class MongoOperationsImpl implements MongoOperations {
 		Assert.notNull(classType, "Class type required");
 		Assert.notNull(domainType, "Domain type required");
 
-		String interfaceIdentifier = typeLocationService.getPhysicalTypeCanonicalPath(interfaceType, Path.SRC_MAIN_JAVA);
-		String classIdentifier = typeLocationService.getPhysicalTypeCanonicalPath(classType, Path.SRC_MAIN_JAVA);
-
+		String interfaceIdentifier = pathResolver.getFocusedCanonicalPath(Path.SRC_MAIN_JAVA, interfaceType);
+		String classIdentifier = pathResolver.getFocusedCanonicalPath(Path.SRC_MAIN_JAVA, classType);
+		
 		if (fileManager.exists(interfaceIdentifier) || fileManager.exists(classIdentifier)) {
 			return; // Type exists already - nothing to do
 		}
@@ -89,7 +91,7 @@ public class MongoOperationsImpl implements MongoOperations {
 		// First build interface type
 		AnnotationMetadataBuilder interfaceAnnotationMetadata = new AnnotationMetadataBuilder(ROO_REPOSITORY_MONGO);
 		interfaceAnnotationMetadata.addAttribute(new ClassAttributeValue(new JavaSymbolName("domainType"), domainType));
-		String interfaceMdId = PhysicalTypeIdentifier.createIdentifier(interfaceType, projectOperations.getPathResolver().getPath(interfaceIdentifier));
+		String interfaceMdId = PhysicalTypeIdentifier.createIdentifier(interfaceType, pathResolver.getPath(interfaceIdentifier));
 		ClassOrInterfaceTypeDetailsBuilder interfaceTypeBuilder = new ClassOrInterfaceTypeDetailsBuilder(interfaceMdId, Modifier.PUBLIC, interfaceType, PhysicalTypeCategory.INTERFACE);
 		interfaceTypeBuilder.addAnnotation(interfaceAnnotationMetadata.build());
 		JavaType listType = new JavaType(List.class.getName(), 0, DataType.TYPE, null, Arrays.asList(domainType));
@@ -100,13 +102,13 @@ public class MongoOperationsImpl implements MongoOperations {
 	public void createType(final JavaType classType, final JavaType idType, final boolean testAutomatically) {
 		Assert.notNull(classType, "Class type required");
 		Assert.notNull(idType, "Identifier type required");
-
-		String classIdentifier = typeLocationService.getPhysicalTypeCanonicalPath(classType, Path.SRC_MAIN_JAVA);
+		
+		String classIdentifier = typeLocationService.getPhysicalTypeCanonicalPath(classType, pathResolver.getFocusedPath(Path.SRC_MAIN_JAVA));
 		if (fileManager.exists(classIdentifier)) {
 			return; // Type exists already - nothing to do
 		}
-
-		String classMdId = PhysicalTypeIdentifier.createIdentifier(classType, projectOperations.getPathResolver().getPath(classIdentifier));
+		
+		String classMdId = PhysicalTypeIdentifier.createIdentifier(classType, pathResolver.getPath(classIdentifier));
 		ClassOrInterfaceTypeDetailsBuilder classTypeBuilder = new ClassOrInterfaceTypeDetailsBuilder(classMdId, Modifier.PUBLIC, classType, PhysicalTypeCategory.CLASS);
 		classTypeBuilder.addAnnotation(new AnnotationMetadataBuilder(RooJavaType.ROO_JAVA_BEAN));
 		classTypeBuilder.addAnnotation(new AnnotationMetadataBuilder(RooJavaType.ROO_TO_STRING));
@@ -121,24 +123,24 @@ public class MongoOperationsImpl implements MongoOperations {
 
 		if (testAutomatically) {
 			integrationTestOperations.newIntegrationTest(classType, false);
-			dataOnDemandOperations.newDod(classType, new JavaType(classType.getFullyQualifiedTypeName() + "DataOnDemand"), Path.SRC_TEST_JAVA);
+			dataOnDemandOperations.newDod(classType, new JavaType(classType.getFullyQualifiedTypeName() + "DataOnDemand"), pathResolver.getFocusedPath(Path.SRC_TEST_JAVA));
 		}
 	}
 
-	public void setup(final String username, final String password, final String name, final String port, final String host, final boolean cloudFoundry) {
-		writeProperties(username, password, name, port, host);
-		manageDependencies();
-		manageAppCtx(username, password, name, cloudFoundry);
+	public void setup(final String username, final String password, final String name, final String port, final String host, final boolean cloudFoundry, final String moduleName) {
+		writeProperties(username, password, name, port, host, moduleName);
+		manageDependencies(moduleName);
+		manageAppCtx(username, password, name, cloudFoundry, moduleName);
 	}
 
-	private void manageAppCtx(final String username, final String password, final String name, final boolean cloudFoundry) {
-		String appCtxId = projectOperations.getPathResolver().getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext-mongo.xml");
+	private void manageAppCtx(String username, String password, String name, boolean cloudFoundry, final String moduleName) {
+		String appCtxId = pathResolver.getFocusedIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext-mongo.xml");
 		if (!fileManager.exists(appCtxId)) {
 			try {
 				InputStream inputStream = TemplateUtils.getTemplate(getClass(), "applicationContext-mongo.xml");
 				MutableFile mutableFile = fileManager.createFile(appCtxId);
 				String input = FileCopyUtils.copyToString(new InputStreamReader(inputStream));
-				input = input.replace("TO_BE_CHANGED_BY_ADDON", projectOperations.getProjectMetadata().getTopLevelPackage().getFullyQualifiedPackageName());
+				input = input.replace("TO_BE_CHANGED_BY_ADDON", projectOperations.getTopLevelPackage(moduleName).getFullyQualifiedPackageName());
 				FileCopyUtils.copy(input.getBytes(), mutableFile.getOutputStream());
 				inputStream.close();
 			} catch (IOException e) {
@@ -185,7 +187,7 @@ public class MongoOperationsImpl implements MongoOperations {
 		fileManager.createOrUpdateTextFileIfRequired(appCtxId, XmlUtils.nodeToString(doc), false);
 	}
 
-	private void manageDependencies() {
+	private void manageDependencies(final String moduleName) {
 		Element configuration = XmlUtils.getConfiguration(getClass());
 
 		List<Dependency> dependencies = new ArrayList<Dependency>();
@@ -199,15 +201,15 @@ public class MongoOperationsImpl implements MongoOperations {
 		for (Element repositoryElement : repositoryElements) {
 			repositories.add(new Repository(repositoryElement));
 		}
-
-		projectOperations.addRepositories(repositories);
-		projectOperations.addDependencies(dependencies);
+		
+		projectOperations.addRepositories(moduleName, repositories);
+		projectOperations.addDependencies(moduleName, dependencies);
 	}
 
-	private void writeProperties(String username, String password, String name, String port, String host) {
+	private void writeProperties(String username, String password, String name, String port, String host, String moduleName) {
 		if (!StringUtils.hasText(username)) username = "";
 		if (!StringUtils.hasText(password)) password = "";
-		if (!StringUtils.hasText(name)) name = projectOperations.getProjectMetadata().getProjectName();
+		if (!StringUtils.hasText(name)) name = projectOperations.getProjectName(moduleName);
 		if (!StringUtils.hasText(port)) port = "27017";
 		if (!StringUtils.hasText(host)) host = "127.0.0.1";
 
@@ -217,6 +219,6 @@ public class MongoOperationsImpl implements MongoOperations {
 		properties.put("mongo.name", name);
 		properties.put("mongo.port", port);
 		properties.put("mongo.host", host);
-		propFileOperations.addProperties(Path.SPRING_CONFIG_ROOT, "database.properties", properties, true, false);
+		propFileOperations.addProperties(Path.SPRING_CONFIG_ROOT.contextualize(projectOperations.getFocusedModuleName()), "database.properties", properties, true, false);
 	}
 }

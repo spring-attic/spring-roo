@@ -25,7 +25,9 @@ import org.springframework.roo.addon.web.mvc.jsp.roundtrip.XmlRoundTripFileManag
 import org.springframework.roo.addon.web.mvc.jsp.tiles.TilesOperations;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
+import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.details.BeanInfoUtils;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
@@ -43,6 +45,7 @@ import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.process.manager.FileManager;
+import org.springframework.roo.project.ContextualPath;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
@@ -74,6 +77,7 @@ public class JspMetadataListener implements MetadataProvider, MetadataNotificati
 	@Reference private PropFileOperations propFileOperations;
 	@Reference private ProjectOperations projectOperations;
 	@Reference private TilesOperations tilesOperations;
+	@Reference private TypeLocationService typeLocationService;
 	@Reference private WebMetadataService webMetadataService;
 	@Reference private XmlRoundTripFileManager xmlRoundTripFileManager;
 
@@ -116,22 +120,26 @@ public class JspMetadataListener implements MetadataProvider, MetadataNotificati
 		if (formBackingTypePersistenceMetadata == null) {
 			return null;
 		}
-
-		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.createIdentifier(formBackingType, Path.SRC_MAIN_JAVA), JspMetadata.createIdentifier(formBackingType, Path.SRC_MAIN_JAVA));
+		ClassOrInterfaceTypeDetails formBackingTypeDetails = typeLocationService.getTypeDetails(formBackingType);
+		ContextualPath formBackingTypePath = PhysicalTypeIdentifier.getPath(formBackingTypeDetails.getDeclaredByMetadataId());
+		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.createIdentifier(formBackingType, formBackingTypePath), JspMetadata.createIdentifier(formBackingType, formBackingTypePath));
+		ContextualPath path = JspMetadata.getPath(metadataIdentificationString);
 
 		// Install web artifacts only if Spring MVC config is missing
 		// TODO: Remove this call when 'controller' commands are gone
 		PathResolver pathResolver = projectOperations.getPathResolver();
-		if (!fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, WEB_INF_VIEWS))) {
-			jspOperations.installCommonViewArtefacts();
+		ContextualPath webappPath = ContextualPath.getInstance(Path.SRC_MAIN_WEBAPP, path.getModule());
+
+		if (!fileManager.exists(pathResolver.getIdentifier(webappPath, WEB_INF_VIEWS))) {
+			jspOperations.installCommonViewArtefacts(webappPath);
 		}
 
-		installImage("images/show.png");
+		installImage(webappPath, "images/show.png");
 		if (webScaffoldMetadata.getAnnotationValues().isUpdate()) {
-			installImage("images/update.png");
+			installImage(webappPath, "images/update.png");
 		}
 		if (webScaffoldMetadata.getAnnotationValues().isDelete()) {
-			installImage("images/delete.png");
+			installImage(webappPath, "images/delete.png");
 		}
 
 		List<FieldMetadata> eligibleFields = webMetadataService.getScaffoldEligibleFieldMetadata(formBackingType, memberDetails, metadataIdentificationString);
@@ -146,7 +154,7 @@ public class JspMetadataListener implements MetadataProvider, MetadataNotificati
 		}
 
 		// Make the holding directory for this controller
-		String destinationDirectory = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, WEB_INF_VIEWS + controllerPath);
+		String destinationDirectory = pathResolver.getIdentifier(webappPath, WEB_INF_VIEWS + controllerPath);
 		if (!fileManager.exists(destinationDirectory)) {
 			fileManager.createDirectory(destinationDirectory);
 		} else {
@@ -157,11 +165,11 @@ public class JspMetadataListener implements MetadataProvider, MetadataNotificati
 		// By now we have a directory to put the JSPs inside
 		String listPath1 = destinationDirectory + "/list.jspx";
 		xmlRoundTripFileManager.writeToDiskIfNecessary(listPath1, viewManager.getListDocument());
-		tilesOperations.addViewDefinition(controllerPath, controllerPath + "/" + "list", TilesOperations.DEFAULT_TEMPLATE, WEB_INF_VIEWS + controllerPath + "/list.jspx");
+		tilesOperations.addViewDefinition(controllerPath, webappPath, controllerPath + "/" + "list", TilesOperations.DEFAULT_TEMPLATE, WEB_INF_VIEWS + controllerPath + "/list.jspx");
 
 		String showPath = destinationDirectory + "/show.jspx";
 		xmlRoundTripFileManager.writeToDiskIfNecessary(showPath, viewManager.getShowDocument());
-		tilesOperations.addViewDefinition(controllerPath, controllerPath + "/" + "show", TilesOperations.DEFAULT_TEMPLATE, WEB_INF_VIEWS + controllerPath + "/show.jspx");
+		tilesOperations.addViewDefinition(controllerPath, webappPath, controllerPath + "/" + "show", TilesOperations.DEFAULT_TEMPLATE, WEB_INF_VIEWS + controllerPath + "/show.jspx");
 
 		JavaSymbolName categoryName = new JavaSymbolName(formBackingType.getSimpleTypeName());
 
@@ -173,19 +181,19 @@ public class JspMetadataListener implements MetadataProvider, MetadataNotificati
 			xmlRoundTripFileManager.writeToDiskIfNecessary(listPath, viewManager.getCreateDocument());
 			JavaSymbolName menuItemId = new JavaSymbolName("new");
 			// Add 'create new' menu item
-			menuOperations.addMenuItem(categoryName, menuItemId, "global_menu_new", "/" + controllerPath + "?form", MenuOperations.DEFAULT_MENU_ITEM_PREFIX);
+			menuOperations.addMenuItem(categoryName, menuItemId, "global_menu_new", "/" + controllerPath + "?form", MenuOperations.DEFAULT_MENU_ITEM_PREFIX, webappPath);
 			properties.put("menu_item_" + categoryName.getSymbolName().toLowerCase() + "_" + menuItemId.getSymbolName().toLowerCase() + "_label", new JavaSymbolName(formBackingType.getSimpleTypeName()).getReadableSymbolName());
-			tilesOperations.addViewDefinition(controllerPath, controllerPath + "/" + "create", TilesOperations.DEFAULT_TEMPLATE, WEB_INF_VIEWS + controllerPath + "/create.jspx");
+			tilesOperations.addViewDefinition(controllerPath, webappPath, controllerPath + "/" + "create", TilesOperations.DEFAULT_TEMPLATE, WEB_INF_VIEWS + controllerPath + "/create.jspx");
 		} else {
-			menuOperations.cleanUpMenuItem(categoryName, new JavaSymbolName("new"), MenuOperations.DEFAULT_MENU_ITEM_PREFIX);
-			tilesOperations.removeViewDefinition(controllerPath + "/" + "create", controllerPath);
+			menuOperations.cleanUpMenuItem(categoryName, new JavaSymbolName("new"), MenuOperations.DEFAULT_MENU_ITEM_PREFIX, webappPath);
+			tilesOperations.removeViewDefinition(controllerPath + "/" + "create", controllerPath, webappPath);
 		}
 		if (webScaffoldMetadata.getAnnotationValues().isUpdate()) {
 			String listPath = destinationDirectory + "/update.jspx";
 			xmlRoundTripFileManager.writeToDiskIfNecessary(listPath, viewManager.getUpdateDocument());
-			tilesOperations.addViewDefinition(controllerPath, controllerPath + "/" + "update", TilesOperations.DEFAULT_TEMPLATE, WEB_INF_VIEWS + controllerPath + "/update.jspx");
+			tilesOperations.addViewDefinition(controllerPath, webappPath, controllerPath + "/" + "update", TilesOperations.DEFAULT_TEMPLATE, WEB_INF_VIEWS + controllerPath + "/update.jspx");
 		} else {
-			tilesOperations.removeViewDefinition(controllerPath + "/" + "update", controllerPath);
+			tilesOperations.removeViewDefinition(controllerPath + "/" + "update", controllerPath, webappPath);
 		}
 
 		// Setup labels for i18n support
@@ -232,10 +240,10 @@ public class JspMetadataListener implements MetadataProvider, MetadataNotificati
 		if (javaTypePersistenceMetadataDetails.getFindAllMethod() != null) {
 			// Add 'list all' menu item
 			JavaSymbolName menuItemId = new JavaSymbolName("list");
-			menuOperations.addMenuItem(categoryName, menuItemId, "global_menu_list", "/" + controllerPath + "?page=1&size=${empty param.size ? 10 : param.size}", MenuOperations.DEFAULT_MENU_ITEM_PREFIX);
-			properties.put("menu_item_" + categoryName.getSymbolName().toLowerCase() + "_" + menuItemId.getSymbolName().toLowerCase() + "_label", new JavaSymbolName(plural).getReadableSymbolName());
+			menuOperations.addMenuItem(categoryName, menuItemId, "global_menu_list", "/" + controllerPath + "?page=1&size=${empty param.size ? 10 : param.size}", MenuOperations.DEFAULT_MENU_ITEM_PREFIX, webappPath);
+			properties.put("menu_item_" + categoryName.getSymbolName().toLowerCase() + "_" + menuItemId.getSymbolName().toLowerCase() + "_label",  new JavaSymbolName(plural).getReadableSymbolName());
 		} else {
-			menuOperations.cleanUpMenuItem(categoryName, new JavaSymbolName("list"), MenuOperations.DEFAULT_MENU_ITEM_PREFIX);
+			menuOperations.cleanUpMenuItem(categoryName, new JavaSymbolName("list"), MenuOperations.DEFAULT_MENU_ITEM_PREFIX, webappPath);
 		}
 
 		List<String> allowedMenuItems = new ArrayList<String>();
@@ -254,21 +262,22 @@ public class JspMetadataListener implements MetadataProvider, MetadataNotificati
 					xmlRoundTripFileManager.writeToDiskIfNecessary(listPath, viewManager.getFinderDocument(finderDetails));
 					JavaSymbolName finderLabel = new JavaSymbolName(finderName.replace("find" + plural + "By", ""));
 					// Add 'Find by' menu item
-					menuOperations.addMenuItem(categoryName, finderLabel, "global_menu_find", "/" + controllerPath + "?find=" + finderName.replace("find" + plural, "") + "&form", MenuOperations.FINDER_MENU_ITEM_PREFIX);
+
+					menuOperations.addMenuItem(categoryName, finderLabel, "global_menu_find", "/" + controllerPath + "?find=" + finderName.replace("find" + plural, "") + "&form", MenuOperations.FINDER_MENU_ITEM_PREFIX, webappPath);
 					properties.put("menu_item_" + categoryName.getSymbolName().toLowerCase() + "_" + finderLabel.getSymbolName().toLowerCase() + "_label", finderLabel.getReadableSymbolName());
 					allowedMenuItems.add(MenuOperations.FINDER_MENU_ITEM_PREFIX + categoryName.getSymbolName().toLowerCase() + "_" + finderLabel.getSymbolName().toLowerCase());
 					for (JavaSymbolName paramName : finderDetails.getFinderMethodMetadata().getParameterNames()) {
 						properties.put(XmlUtils.convertId(resourceId + "." + paramName.getSymbolName().toLowerCase()), paramName.getReadableSymbolName());
 					}
-					tilesOperations.addViewDefinition(controllerPath, controllerPath + "/" + finderName, TilesOperations.DEFAULT_TEMPLATE, WEB_INF_VIEWS + controllerPath + "/" + finderName + ".jspx");
+					tilesOperations.addViewDefinition(controllerPath, webappPath, controllerPath + "/" + finderName, TilesOperations.DEFAULT_TEMPLATE, WEB_INF_VIEWS + controllerPath + "/" + finderName + ".jspx");
 				}
 			}
 		}
 
-		propFileOperations.addProperties(Path.SRC_MAIN_WEBAPP, "WEB-INF/i18n/application.properties", properties, true, false);
+		propFileOperations.addProperties(webappPath, "WEB-INF/i18n/application.properties", properties, true, false);
 
 		// Clean up links to finders which are removed by now
-		menuOperations.cleanUpFinderMenuItems(categoryName, allowedMenuItems);
+		menuOperations.cleanUpFinderMenuItems(categoryName, allowedMenuItems, webappPath);
 
 		return new JspMetadata(metadataIdentificationString, webScaffoldMetadata);
 	}
@@ -278,11 +287,11 @@ public class JspMetadataListener implements MetadataProvider, MetadataNotificati
 			// A physical Java type has changed, and determine what the corresponding local metadata identification string would have been
 			if (WebScaffoldMetadata.isValid(upstreamDependency)) {
 				JavaType javaType = WebScaffoldMetadata.getJavaType(upstreamDependency);
-				Path path = WebScaffoldMetadata.getPath(upstreamDependency);
+				ContextualPath path = WebScaffoldMetadata.getPath(upstreamDependency);
 				downstreamDependency = JspMetadata.createIdentifier(javaType, path);
 			} else if (WebFinderMetadata.isValid(upstreamDependency)) {
 				JavaType javaType = WebFinderMetadata.getJavaType(upstreamDependency);
-				Path path = WebFinderMetadata.getPath(upstreamDependency);
+				ContextualPath path = WebFinderMetadata.getPath(upstreamDependency);
 				downstreamDependency = JspMetadata.createIdentifier(javaType, path);
 			}
 
@@ -324,12 +333,12 @@ public class JspMetadataListener implements MetadataProvider, MetadataNotificati
 		return JspMetadata.getMetadataIdentiferType();
 	}
 
-	private void installImage(final String imagePath) {
+	private void installImage(ContextualPath path, String imagePath) {
 		PathResolver pathResolver = projectOperations.getPathResolver();
-		String imageFile = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, imagePath);
+		String imageFile = pathResolver.getIdentifier(path, imagePath);
 		if (!fileManager.exists(imageFile)) {
 			try {
-				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), imagePath), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, imagePath)).getOutputStream());
+				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), imagePath), fileManager.createFile(pathResolver.getIdentifier(path, imagePath)).getOutputStream());
 			} catch (Exception e) {
 				throw new IllegalStateException("Encountered an error during copying of resources for MVC JSP addon.", e);
 			}

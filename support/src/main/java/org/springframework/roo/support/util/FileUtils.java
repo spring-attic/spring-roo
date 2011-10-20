@@ -109,4 +109,39 @@ public abstract class FileUtils {
 		return fileName.startsWith(File.separator);
 	}
 
+	public static String getFirstDirectory(String fileIdentifier) {
+		fileIdentifier = removeTrailingSeparator(fileIdentifier);
+		File file = new File(fileIdentifier);
+		if (file.isDirectory()) {
+			return fileIdentifier;
+		}
+		return backOneDirectory(fileIdentifier);
+	}
+
+	public static String backOneDirectory(String fileIdentifier) {
+		fileIdentifier = removeTrailingSeparator(fileIdentifier);
+		fileIdentifier = fileIdentifier.substring(0, fileIdentifier.lastIndexOf(File.separator));
+		return removeTrailingSeparator(fileIdentifier);
+	}
+
+	public static String removeTrailingSeparator(String pomPath) {
+		while (pomPath.endsWith(File.separator)) {
+			pomPath = pomPath.substring(0, pomPath.length() - 1);
+		}
+		return pomPath;
+	}
+
+	public static String removePrePostSeparator(String pomPath) {
+		while (pomPath.endsWith(File.separator)) {
+			pomPath = pomPath.substring(0, pomPath.length() - 1);
+		}
+		while (pomPath.startsWith(File.separator)) {
+			pomPath = pomPath.substring(1, pomPath.length());
+		}
+		return pomPath;
+	}
+
+	public static String normalise(String pomPath) {
+		return removeTrailingSeparator(pomPath) + File.separatorChar;
+	}
 }

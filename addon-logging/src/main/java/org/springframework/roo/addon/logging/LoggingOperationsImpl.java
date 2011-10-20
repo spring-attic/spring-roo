@@ -13,6 +13,7 @@ import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.project.Path;
+import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.IOUtils;
@@ -30,10 +31,11 @@ public class LoggingOperationsImpl implements LoggingOperations {
 
 	// Fields
 	@Reference private FileManager fileManager;
+	@Reference private PathResolver pathResolver;
 	@Reference private ProjectOperations projectOperations;
 
 	public boolean isConfigureLoggingAvailable() {
-		return projectOperations.isProjectAvailable();
+		return projectOperations.isFocusedProjectAvailable();
 	}
 
 	public void configureLogging(final LogLevel logLevel, final LoggerPackage loggerPackage) {
@@ -43,8 +45,8 @@ public class LoggingOperationsImpl implements LoggingOperations {
 		setupProperties(logLevel, loggerPackage);
 	}
 
-	private void setupProperties(final LogLevel logLevel, final LoggerPackage loggerPackage) {
-		String filePath = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_RESOURCES, "log4j.properties");
+	private void setupProperties(LogLevel logLevel, LoggerPackage loggerPackage) {
+		String filePath = pathResolver.getFocusedIdentifier(Path.SRC_MAIN_RESOURCES, "log4j.properties");
 		MutableFile log4jMutableFile = null;
 		Properties props = new Properties();
 
@@ -66,7 +68,7 @@ public class LoggingOperationsImpl implements LoggingOperations {
 			IOUtils.closeQuietly(inputStream);
 		}
 
-		JavaPackage topLevelPackage = projectOperations.getProjectMetadata().getTopLevelPackage();
+		JavaPackage topLevelPackage = projectOperations.getTopLevelPackage(projectOperations.getFocusedModuleName());
 		final String logStr = "log4j.logger.";
 
 		switch (loggerPackage) {

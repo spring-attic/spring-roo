@@ -14,7 +14,7 @@ import org.springframework.roo.classpath.details.annotations.AnnotationMetadataB
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
-import org.springframework.roo.project.ProjectMetadata;
+import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
 
 /**
@@ -29,17 +29,18 @@ public class JsonOperationsImpl implements JsonOperations {
 
 	// Fields
 	@Reference private MetadataService metadataService;
+	@Reference private ProjectOperations projectOperations;
 	@Reference private TypeLocationService typeLocationService;
 	@Reference private TypeManagementService typeManagementService;
 
 	public boolean isCommandAvailable() {
-		return metadataService.get(ProjectMetadata.getProjectIdentifier()) != null;
+		return projectOperations.isFocusedProjectAvailable();
 	}
 
 	public void annotateType(final JavaType javaType, final String rootName, final boolean deepSerialize) {
 		Assert.notNull(javaType, "Java type required");
 
-		ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = typeLocationService.findClassOrInterface(javaType);
+		ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = typeLocationService.getTypeDetails(javaType);
 		if (classOrInterfaceTypeDetails == null) {
 			throw new IllegalArgumentException("Cannot locate source for '" + javaType.getFullyQualifiedTypeName() + "'");
 		}

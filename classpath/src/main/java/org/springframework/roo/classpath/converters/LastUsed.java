@@ -2,6 +2,7 @@ package org.springframework.roo.classpath.converters;
 
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.project.maven.Pom;
 
 /**
  * Interface for {@link LastUsedImpl}.
@@ -34,4 +35,7 @@ public interface LastUsed {
 	 * @return the package, either explicitly set or via a type set (may also be null if never set)
 	 */
 	JavaPackage getJavaPackage();
+
+	void setType(JavaType javaType, Pom module);
+
 }

@@ -2,6 +2,7 @@ package org.springframework.roo.addon.web.mvc.jsp;
 
 import org.springframework.roo.addon.web.mvc.jsp.i18n.I18n;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.project.ContextualPath;
 import org.w3c.dom.Document;
 
 /**
@@ -21,7 +22,7 @@ public interface JspOperations {
 	/**
 	 * installs all common view artifacts needed for MVC scaffolding
 	 */
-	void installCommonViewArtefacts();
+	void installCommonViewArtefacts(ContextualPath webappPath);
 
 	/**
 	 * Creates a new Spring MVC controller.
@@ -34,15 +35,15 @@ public interface JspOperations {
 	 * @param controller the controller class to create (required)
 	 * @param preferredMapping the mapping this controller should adopt (optional; if unspecified it will be based on the controller name)
 	 */
-	void createManualController(JavaType controller, String preferredMapping);
-
+	void createManualController(JavaType controller, String preferredMapping, ContextualPath webappPath);
+	
 	/**
 	 * Installs additional languages into Web MVC app.
 	 *
 	 * @param language the language
 	 */
-	void installI18n(I18n language);
-
+	void installI18n(I18n language, ContextualPath webappPath);
+	
 	/**
 	 * Creates a new Spring MVC static view.
 	 *
@@ -51,8 +52,8 @@ public interface JspOperations {
 	 * @param category the menu category name (required)
 	 * @param viewName the mapping this view should adopt (required, ie 'index')
 	 */
-	void installView(String path, String viewName, String title, String category);
-
+	void installView(String path, String viewName, String title, String category, ContextualPath webappPath);
+	
 	/**
 	 * Installs a new Spring MVC static view.
 	 *
@@ -62,12 +63,12 @@ public interface JspOperations {
 	 *  @param category the menu category name (required)
 	 * @param document the jspx document to use for the view
 	 */
-	void installView(String path, String viewName, String title, String category, Document document);
-
+	void installView(String path, String viewName, String title, String category, Document document, ContextualPath webappPath);
+	
 	/**
 	 * Replaces an existing tag library with the latest version (set backup flag to backup your application first)
 	 *
 	 * @param backup indicates wether your application should be backed up prior to replacing the tagx library
 	 */
-	void updateTags(boolean backup);
+	void updateTags(boolean backup, ContextualPath webappPath);
 }

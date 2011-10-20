@@ -13,6 +13,7 @@ import org.springframework.roo.addon.propfiles.PropFileOperations;
 import org.springframework.roo.addon.web.mvc.jsp.roundtrip.XmlRoundTripFileManager;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.process.manager.FileManager;
+import org.springframework.roo.project.ContextualPath;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
@@ -42,15 +43,15 @@ public class MenuOperationsImpl implements MenuOperations {
 	@Reference private PropFileOperations propFileOperations;
 	@Reference private XmlRoundTripFileManager xmlRoundTripFileManager;
 
-	public void addMenuItem(final JavaSymbolName menuCategoryName, final JavaSymbolName menuItemId, final String globalMessageCode, final String link, final String idPrefix) {
-		addMenuItem(menuCategoryName, menuItemId, "", globalMessageCode, link, idPrefix, false);
+	public void addMenuItem(JavaSymbolName menuCategoryName, JavaSymbolName menuItemId, String globalMessageCode, String link, String idPrefix, ContextualPath contextualPath) {
+		addMenuItem(menuCategoryName, menuItemId, "", globalMessageCode, link, idPrefix, false, contextualPath);
 	}
 
-	public void addMenuItem(final JavaSymbolName menuCategoryName, final JavaSymbolName menuItemId, final String menuItemLabel, final String globalMessageCode, final String link, final String idPrefix) {
-		addMenuItem(menuCategoryName, menuItemId, menuItemLabel, globalMessageCode, link, idPrefix, true);
+	public void addMenuItem(JavaSymbolName menuCategoryName, JavaSymbolName menuItemId, String menuItemLabel, String globalMessageCode, String link, String idPrefix, ContextualPath contextualPath) {
+		addMenuItem(menuCategoryName, menuItemId, menuItemLabel, globalMessageCode, link, idPrefix, true, contextualPath);
 	}
 
-	private void addMenuItem(final JavaSymbolName menuCategoryName, final JavaSymbolName menuItemId, final String menuItemLabel, final String globalMessageCode, final String link, String idPrefix, final boolean writeProps) {
+	private void addMenuItem(JavaSymbolName menuCategoryName, JavaSymbolName menuItemId, String menuItemLabel, String globalMessageCode, String link, String idPrefix, boolean writeProps, ContextualPath contextualPath) {
 		Assert.notNull(menuCategoryName, "Menu category name required");
 		Assert.notNull(menuItemId, "Menu item name required");
 		Assert.hasText(link, "Link required");
@@ -61,7 +62,7 @@ public class MenuOperationsImpl implements MenuOperations {
 			idPrefix = DEFAULT_MENU_ITEM_PREFIX;
 		}
 
-		Document document = getMenuDocument();
+		Document document = getMenuDocument(contextualPath);
 
 		// Make the root element of the menu the one with the menu identifier allowing for different decorations of menu
 		Element rootElement = XmlUtils.findFirstElement("//*[@id='_menu']", document.getFirstChild());
@@ -89,16 +90,16 @@ public class MenuOperationsImpl implements MenuOperations {
 		}
 		if (writeProps) {
 			properties.put("menu_item_" + menuCategoryName.getSymbolName().toLowerCase() + "_" + menuItemId.getSymbolName().toLowerCase() + "_label", menuItemLabel);
-			propFileOperations.addProperties(Path.SRC_MAIN_WEBAPP, "WEB-INF/i18n/application.properties", properties, true, false);
+			propFileOperations.addProperties(projectOperations.getPathResolver().getFocusedPath(Path.SRC_MAIN_WEBAPP), "WEB-INF/i18n/application.properties", properties, true, false);
 		}
-		xmlRoundTripFileManager.writeToDiskIfNecessary(getMenuFileName(), document);
+		xmlRoundTripFileManager.writeToDiskIfNecessary(getMenuFileName(contextualPath), document);
 	}
 
-	public void cleanUpFinderMenuItems(final JavaSymbolName menuCategoryName, final List<String> allowedFinderMenuIds) {
+	public void cleanUpFinderMenuItems(final JavaSymbolName menuCategoryName, final List<String> allowedFinderMenuIds, final ContextualPath contextualPath) {
 		Assert.notNull(menuCategoryName, "Menu category identifier required");
 		Assert.notNull(allowedFinderMenuIds, "List of allowed menu items required");
 
-		Document document = getMenuDocument();
+		Document document = getMenuDocument(contextualPath);
 
 		// Find any menu items under this category which have an id that starts with the menuItemIdPrefix
 		List<Element> elements = XmlUtils.findElements("//category[@id='c_" + menuCategoryName.getSymbolName().toLowerCase() + "']//item[starts-with(@id, '" + FINDER_MENU_ITEM_PREFIX + "')]", document.getDocumentElement());
@@ -110,7 +111,7 @@ public class MenuOperationsImpl implements MenuOperations {
 				element.getParentNode().removeChild(element);
 			}
 		}
-		xmlRoundTripFileManager.writeToDiskIfNecessary(getMenuFileName(), document);
+		xmlRoundTripFileManager.writeToDiskIfNecessary(getMenuFileName(contextualPath), document);
 	}
 
 	/**
@@ -120,7 +121,7 @@ public class MenuOperationsImpl implements MenuOperations {
 	 * @param menuItemName the menu item identifier (required)
 	 * @param idPrefix the prefix to be used for this menu item (optional, MenuOperations.DEFAULT_MENU_ITEM_PREFIX is default)
 	 */
-	public void cleanUpMenuItem(final JavaSymbolName menuCategoryName, final JavaSymbolName menuItemName, String idPrefix) {
+	public void cleanUpMenuItem(final JavaSymbolName menuCategoryName, final JavaSymbolName menuItemName, String idPrefix, final ContextualPath contextualPath) {
 		Assert.notNull(menuCategoryName, "Menu category identifier required");
 		Assert.notNull(menuItemName, "Menu item id required");
 
@@ -128,7 +129,7 @@ public class MenuOperationsImpl implements MenuOperations {
 			idPrefix = DEFAULT_MENU_ITEM_PREFIX;
 		}
 
-		Document document = getMenuDocument();
+		Document document = getMenuDocument(contextualPath);
 
 		// Find menu item under this category if exists
 		Element element = XmlUtils.findFirstElement("//category[@id='c_" + menuCategoryName.getSymbolName().toLowerCase() + "']//item[@id='" + idPrefix + menuCategoryName.getSymbolName().toLowerCase() + "_" + menuItemName.getSymbolName().toLowerCase() + "']", document.getDocumentElement());
@@ -139,19 +140,19 @@ public class MenuOperationsImpl implements MenuOperations {
 			element.getParentNode().removeChild(element);
 		}
 
-		xmlRoundTripFileManager.writeToDiskIfNecessary(getMenuFileName(), document);
+		xmlRoundTripFileManager.writeToDiskIfNecessary(getMenuFileName(contextualPath), document);
 	}
 
-	private Document getMenuDocument() {
+	private Document getMenuDocument(ContextualPath contextualPath) {
 		try {
-			return XmlUtils.readXml(getMenuFileInputStream());
+			return XmlUtils.readXml(getMenuFileInputStream(contextualPath));
 		} catch (Exception e) {
 			throw new IllegalArgumentException("Unable to parse menu.jspx" + (!StringUtils.hasText(e.getMessage()) ? "" : " (" + e.getMessage() + ")"), e);
 		}
 	}
 
-	private InputStream getMenuFileInputStream() {
-		String menuFileName = getMenuFileName();
+	private InputStream getMenuFileInputStream(ContextualPath contextualPath) {
+		String menuFileName = getMenuFileName(contextualPath);
 		if (!fileManager.exists(menuFileName)) {
 			try {
 				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "menu.jspx"), fileManager.createFile(menuFileName).getOutputStream());
@@ -162,7 +163,7 @@ public class MenuOperationsImpl implements MenuOperations {
 
 		PathResolver pathResolver = projectOperations.getPathResolver();
 
-		final String menuPath = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/tags/menu/menu.tagx");
+		final String menuPath = pathResolver.getIdentifier(contextualPath, "WEB-INF/tags/menu/menu.tagx");
 		if (!fileManager.exists(menuPath)) {
 			try {
 				fileManager.createOrUpdateTextFileIfRequired(menuPath, FileCopyUtils.copyToString(new InputStreamReader(TemplateUtils.getTemplate(getClass(), "menu.tagx"))), false);
@@ -171,7 +172,7 @@ public class MenuOperationsImpl implements MenuOperations {
 			}
 		}
 
-		final String itemPath = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/tags/menu/item.tagx");
+		final String itemPath = pathResolver.getIdentifier(contextualPath, "WEB-INF/tags/menu/item.tagx");
 		if (!fileManager.exists(itemPath)) {
 			try {
 				fileManager.createOrUpdateTextFileIfRequired(itemPath, FileCopyUtils.copyToString(new InputStreamReader(TemplateUtils.getTemplate(getClass(), "item.tagx"))), false);
@@ -180,7 +181,7 @@ public class MenuOperationsImpl implements MenuOperations {
 			}
 		}
 
-		final String categoryPath = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/tags/menu/category.tagx");
+		final String categoryPath = pathResolver.getIdentifier(contextualPath, "WEB-INF/tags/menu/category.tagx");
 		if (!fileManager.exists(categoryPath)) {
 			try {
 				fileManager.createOrUpdateTextFileIfRequired(categoryPath, FileCopyUtils.copyToString(new InputStreamReader(TemplateUtils.getTemplate(getClass(), "category.tagx"))), false);
@@ -192,7 +193,7 @@ public class MenuOperationsImpl implements MenuOperations {
 		return fileManager.getInputStream(menuFileName);
 	}
 
-	private String getMenuFileName() {
-		return projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/views/menu.jspx");
+	private String getMenuFileName(ContextualPath contextualPath) {
+		return projectOperations.getPathResolver().getIdentifier(contextualPath, "WEB-INF/views/menu.jspx");
 	}
 }

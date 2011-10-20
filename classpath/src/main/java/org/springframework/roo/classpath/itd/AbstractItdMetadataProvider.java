@@ -10,6 +10,7 @@ import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
+import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.IdentifiableJavaStructure;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
@@ -25,6 +26,7 @@ import org.springframework.roo.metadata.MetadataNotificationListener;
 import org.springframework.roo.metadata.MetadataProvider;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
+import org.springframework.roo.project.ContextualPath;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.support.util.Assert;
 
@@ -59,6 +61,7 @@ public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTracki
 	@Reference protected ItdDiscoveryService itdDiscoveryService;
 	@Reference protected MemberDetailsScanner memberDetailsScanner;
 	@Reference protected PersistenceMemberLocator persistenceMemberLocator;
+	@Reference protected TypeLocationService typeLocationService;
 
 	/** Cancel production if the governor type details are required, but aren't available */
 	private boolean dependsOnGovernorTypeDetailAvailability = true;
@@ -118,7 +121,7 @@ public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTracki
 
 		// A physical Java type has changed, and determine what the corresponding local metadata identification string would have been
 		JavaType javaType = PhysicalTypeIdentifier.getJavaType(upstreamDependency);
-		Path path = PhysicalTypeIdentifier.getPath(upstreamDependency);
+		ContextualPath path = PhysicalTypeIdentifier.getPath(upstreamDependency);
 		return createLocalIdentifier(javaType, path);
 	}
 
@@ -163,8 +166,8 @@ public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTracki
 	 * @param path the path (required)
 	 * @return an instance-specific identifier that is compatible with {@link #getProvidesType()} (never null or empty)
 	 */
-	protected abstract String createLocalIdentifier(JavaType javaType, Path path);
-
+	protected abstract String createLocalIdentifier(JavaType javaType, ContextualPath path);
+	
 	/**
 	 * Called whenever there is a requirement to convert a local metadata identification string (ie an instance identifier
 	 * consistent with {@link #getProvidesType()}) into the corresponding governor physical type identifier.
@@ -201,7 +204,7 @@ public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTracki
 		ClassOrInterfaceTypeDetails superCid = child.getSuperclass();
 		while (parentMetadata == null && superCid != null) {
 			final String superCidPhysicalTypeIdentifier = superCid.getDeclaredByMetadataId();
-			final Path path = PhysicalTypeIdentifier.getPath(superCidPhysicalTypeIdentifier);
+			final ContextualPath path = PhysicalTypeIdentifier.getPath(superCidPhysicalTypeIdentifier);
 			final String superCidLocalIdentifier = createLocalIdentifier(superCid.getName(), path);
 			parentMetadata = (T) metadataService.get(superCidLocalIdentifier);
 			superCid = superCid.getSuperclass();
@@ -415,7 +418,7 @@ public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTracki
 	public final String getIdForPhysicalJavaType(final String physicalJavaTypeIdentifier) {
 		Assert.isTrue(MetadataIdentificationUtils.getMetadataClass(physicalJavaTypeIdentifier).equals(MetadataIdentificationUtils.getMetadataClass(PhysicalTypeIdentifier.getMetadataIdentiferType())), "Expected a valid physical Java type instance identifier (not '" + physicalJavaTypeIdentifier + "')");
 		JavaType javaType = PhysicalTypeIdentifier.getJavaType(physicalJavaTypeIdentifier);
-		Path path = PhysicalTypeIdentifier.getPath(physicalJavaTypeIdentifier);
+		ContextualPath path = PhysicalTypeIdentifier.getPath(physicalJavaTypeIdentifier);
 		return createLocalIdentifier(javaType, path);
 	}
 
@@ -451,8 +454,7 @@ public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTracki
 
 		// Extract out the metadata provider class (we need this later to extract just the Path it is located in)
 		String providesType = MetadataIdentificationUtils.getMetadataClass(memberHoldingTypeDetails.getDeclaredByMetadataId());
-		Path path = PhysicalTypeIdentifierNamingUtils.getPath(providesType, memberHoldingTypeDetails.getDeclaredByMetadataId());
-
+		ContextualPath path = PhysicalTypeIdentifierNamingUtils.getPath(providesType, memberHoldingTypeDetails.getDeclaredByMetadataId());
 		// Produce the local MID we're going to use to make the request
 		return createLocalIdentifier(governorType, path);
 	}
@@ -464,8 +466,12 @@ public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTracki
 	 * @return <code>null</code> if the member details are unavailable
 	 */
 	protected MemberDetails getMemberDetails(final JavaType type) {
+		String physicalTypeIdentifier = typeLocationService.getPhysicalTypeIdentifier(type);
+		if (physicalTypeIdentifier == null) {
+			return null;
+		}
 		// We need to lookup the metadata we depend on
-		final PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(type, Path.SRC_MAIN_JAVA));
+		final PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(physicalTypeIdentifier);
 		return getMemberDetails(physicalTypeMetadata);
 	}
 
@@ -487,6 +493,21 @@ public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTracki
 			// Abort if the type's class details aren't available (parse error etc)
 			return null;
 		}
+		return memberDetailsScanner.getMemberDetails(getClass().getName(), classOrInterfaceTypeDetails);
+	}
+
+	/**
+	 * Returns details of the given class or interface type's members
+	 *
+	 * @param classOrInterfaceTypeDetails the physical type for which to get the
+	 * members (can be <code>null</code>)
+	 * @return <code>null</code> if the member details are unavailable
+	 */
+	protected MemberDetails getMemberDetails(final ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails) {
+		if (classOrInterfaceTypeDetails == null) {
+			return null;
+		}
+
 		return memberDetailsScanner.getMemberDetails(getClass().getName(), classOrInterfaceTypeDetails);
 	}
 }

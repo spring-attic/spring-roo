@@ -37,13 +37,13 @@ public class Op4jOperationsImpl implements Op4jOperations {
 	@Reference private TypeManagementService typeManagementService;
 
 	public boolean isOp4jAvailable() {
-		return projectOperations.isProjectAvailable();
+		return projectOperations.isFocusedProjectAvailable();
 	}
 
 	public void annotateType(final JavaType javaType) {
 		Assert.notNull(javaType, "Java type required");
 
-		ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = typeLocationService.findClassOrInterface(javaType);
+		ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = typeLocationService.getTypeDetails(javaType);
 		if (classOrInterfaceTypeDetails == null) {
 			throw new IllegalArgumentException("Cannot locate source for '" + javaType.getFullyQualifiedTypeName() + "'");
 		}
@@ -64,6 +64,6 @@ public class Op4jOperationsImpl implements Op4jOperations {
 		for (Element dependencyElement : op4jDependencies) {
 			dependencies.add(new Dependency(dependencyElement));
 		}
-		projectOperations.addDependencies(dependencies);
+		projectOperations.addDependencies(projectOperations.getFocusedModuleName(), dependencies);
 	}
 }

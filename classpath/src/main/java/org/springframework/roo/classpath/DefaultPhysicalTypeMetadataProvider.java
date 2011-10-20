@@ -27,9 +27,10 @@ import org.springframework.roo.metadata.MetadataItem;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
-import org.springframework.roo.project.Path;
+import org.springframework.roo.project.ContextualPath;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Monitors for *.java files and produces a {@link PhysicalTypeMetadata} for each,
@@ -94,14 +95,12 @@ public class DefaultPhysicalTypeMetadataProvider implements PhysicalTypeMetadata
 		// Check to see if file is of interest
 		if (fileIdentifier.endsWith(".java") && fileEvent.getOperation() != FileOperation.MONITORING_FINISH && !fileIdentifier.endsWith("package-info.java")) {
 			// Figure out the PhysicalTypeIdentifier
-			String id = typeLocationService.findIdentifier(fileIdentifier);
-
+			String id = typeLocationService.getPhysicalTypeIdentifier(fileIdentifier);
 			if (id == null) {
 				return;
 			}
-
 			// Now we've worked out the id, we can publish the event in case others were interested
-			metadataService.evict(id);
+			metadataService.get(id, true);
 			metadataDependencyRegistry.notifyDownstream(id);
 		}
 	}
@@ -109,6 +108,9 @@ public class DefaultPhysicalTypeMetadataProvider implements PhysicalTypeMetadata
 	public MetadataItem get(final String metadataId) {
 		Assert.isTrue(PhysicalTypeIdentifier.isValid(metadataId), "Metadata id '" + metadataId + "' is not valid for this metadata provider");
 		final String canonicalPath = typeLocationService.getPhysicalTypeCanonicalPath(metadataId);
+		if (!StringUtils.hasText(canonicalPath)) {
+			return null;
+		}
 		metadataDependencyRegistry.deregisterDependencies(metadataId);
 		if (!fileManager.exists(canonicalPath)) {
 			// Couldn't find the file, so return null to distinguish from a file that was found but could not be parsed
@@ -132,8 +134,8 @@ public class DefaultPhysicalTypeMetadataProvider implements PhysicalTypeMetadata
 					metadataDependencyRegistry.registerDependency(superclassId, result.getId());
 				} else {
 					// We have a dependency on the superclass, but no metadata is available
-					// We're left with no choice but to register for every physical type change, in the hope we discover our parent later
-					for (Path sourcePath : projectOperations.getPathResolver().getSourcePaths()) {
+					// We're left with no choice but to register for every physical type change, in the hope we discover our parent someday (sad, isn't it? :-) )
+					for (ContextualPath sourcePath : projectOperations.getPathResolver().getSourcePaths()) {
 						String possibleSuperclass = PhysicalTypeIdentifier.createIdentifier(details.getExtendsTypes().get(0), sourcePath);
 						metadataDependencyRegistry.registerDependency(possibleSuperclass, result.getId());
 					}

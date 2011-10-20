@@ -7,7 +7,6 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Before;
@@ -15,6 +14,7 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.shell.Completion;
 
 /**
  * Unit test of {@link PackagingProviderConverter}
@@ -133,14 +133,19 @@ public class PackagingProviderConverterTest {
 	 * @param expectedCompletions
 	 */
 	private void assertPossibleValues(final String existingData, final String... expectedCompletions) {
+		List<Completion> expectedCompletionList = new ArrayList<Completion>();
+		for (String expectedCompletion : expectedCompletions) {
+			expectedCompletionList.add(new Completion(expectedCompletion));
+		}
 		// Set up
-		final List<String> completions = new ArrayList<String>();
+		final List<Completion> completions = new ArrayList<Completion>();
 
 		// Invoke
 		final boolean addSpace = converter.getAllPossibleValues(completions, PackagingProvider.class, existingData, null, null);
 
 		// Check
 		assertTrue(addSpace);
-		assertEquals(Arrays.asList(expectedCompletions), completions);
+		assertEquals(expectedCompletionList.size(), completions.size());
+		assertTrue("Expected " + expectedCompletionList + " but was " + completions, completions.containsAll(expectedCompletionList));
 	}
 }

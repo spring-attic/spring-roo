@@ -6,6 +6,7 @@ import static org.springframework.roo.classpath.customdata.CustomDataKeys.FIND_E
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.FIND_METHOD;
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.FLUSH_METHOD;
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.IDENTIFIER_ACCESSOR_METHOD;
+import static org.springframework.roo.classpath.customdata.CustomDataKeys.LAYER_TYPE;
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.MERGE_METHOD;
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.PERSIST_METHOD;
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.REMOVE_METHOD;
@@ -16,6 +17,7 @@ import static org.springframework.roo.model.RooJavaType.ROO_JPA_ACTIVE_RECORD;
 
 import java.util.HashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -27,8 +29,8 @@ import org.springframework.roo.addon.configurable.ConfigurableMetadataProvider;
 import org.springframework.roo.addon.dod.DataOnDemandMetadata;
 import org.springframework.roo.classpath.PhysicalTypeDetails;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
+import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
-import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
@@ -44,7 +46,7 @@ import org.springframework.roo.classpath.layers.MethodParameter;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.Path;
+import org.springframework.roo.project.ContextualPath;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
@@ -67,7 +69,6 @@ public class IntegrationTestMetadataProviderImpl extends AbstractItdMetadataProv
 	@Reference private ConfigurableMetadataProvider configurableMetadataProvider;
 	@Reference private LayerService layerService;
 	@Reference private ProjectOperations projectOperations;
-	@Reference private TypeLocationService typeLocationService;
 
 	private final Map<JavaType, String> managedEntityTypes = new HashMap<JavaType, String>();
 	private final Set<String> producedMids = new LinkedHashSet<String>();
@@ -93,8 +94,8 @@ public class IntegrationTestMetadataProviderImpl extends AbstractItdMetadataProv
 		if (PhysicalTypeIdentifier.isValid(upstreamDependency)) {
 			handleGenericChangeToPhysicalType(PhysicalTypeIdentifier.getJavaType(upstreamDependency));
 		}
-		if (ProjectMetadata.getProjectIdentifier().equals(upstreamDependency)) {
-			handleGenericChangeToProject();
+		if (ProjectMetadata.isValid(upstreamDependency)) {
+			handleGenericChangeToProject(ProjectMetadata.getModuleName(upstreamDependency));
 		}
 	}
 	
@@ -118,7 +119,7 @@ public class IntegrationTestMetadataProviderImpl extends AbstractItdMetadataProv
 	}
 
 	private void handleChangesToLayeringForTestedEntities(final JavaType physicalType) {
-		final MemberHoldingTypeDetails memberHoldingTypeDetails = typeLocationService.findClassOrInterface(physicalType);
+		final MemberHoldingTypeDetails memberHoldingTypeDetails = typeLocationService.getTypeDetails(physicalType);
 		if (memberHoldingTypeDetails != null) {
 			for (final JavaType type : memberHoldingTypeDetails.getLayerEntities()) {
 				handleChangesToTestedEntities(type);
@@ -130,10 +131,10 @@ public class IntegrationTestMetadataProviderImpl extends AbstractItdMetadataProv
 	 * Handles a generic change (i.e. with no explicit downstream dependency)
 	 * to the project metadata
 	 */
-	private void handleGenericChangeToProject() {
-		final ProjectMetadata projectMetadata = projectOperations.getProjectMetadata();
+	private void handleGenericChangeToProject(String moduleName) {
+		final ProjectMetadata projectMetadata = projectOperations.getProjectMetadata(moduleName);
 		if (projectMetadata != null && projectMetadata.isValid()) {
-			final boolean isGaeEnabled = projectMetadata.isGaeEnabled();
+			final boolean isGaeEnabled = projectOperations.isGaeEnabled(moduleName);
 			// We need to determine if the persistence state has changed, we do this by comparing the last known state to the current state
 			final boolean hasGaeStateChanged = wasGaeEnabled == null || isGaeEnabled != wasGaeEnabled;
 			if (hasGaeStateChanged) {
@@ -155,7 +156,7 @@ public class IntegrationTestMetadataProviderImpl extends AbstractItdMetadataProv
 		}
 
 		final JavaType dataOnDemandType = getDataOnDemandType(entity);
-		final String dataOnDemandMetadataKey = DataOnDemandMetadata.createIdentifier(dataOnDemandType, Path.SRC_TEST_JAVA);
+		final String dataOnDemandMetadataKey = DataOnDemandMetadata.createIdentifier(dataOnDemandType, typeLocationService.getTypePath(dataOnDemandType));
 		final DataOnDemandMetadata dataOnDemandMetadata = (DataOnDemandMetadata) metadataService.get(dataOnDemandMetadataKey);
 
 		// We need to be informed if our dependent metadata changes
@@ -220,9 +221,9 @@ public class IntegrationTestMetadataProviderImpl extends AbstractItdMetadataProv
 
 		boolean isGaeEnabled = false;
 
-		final ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
-		if (projectMetadata != null && projectMetadata.isValid()) {
-			isGaeEnabled = projectMetadata.isGaeEnabled();
+		String moduleName = PhysicalTypeIdentifierNamingUtils.getPath(metadataIdentificationString).getModule();
+		if (projectOperations.isProjectAvailable(moduleName)) {
+			isGaeEnabled = projectOperations.isGaeEnabled(moduleName);
 		}
 
 		return new IntegrationTestMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, dataOnDemandMetadata, identifierAccessorMethod, versionAccessorMethod, countMethodAdditions, findMethodAdditions, findAllMethodAdditions, findEntriesMethod, flushMethodAdditions, mergeMethodAdditions, persistMethodAdditions, removeMethodAdditions, transactionManager, hasEmbeddedIdentifier, entityHasSuperclass, isGaeEnabled);
@@ -237,7 +238,7 @@ public class IntegrationTestMetadataProviderImpl extends AbstractItdMetadataProv
 	private JavaType getDataOnDemandType(final JavaType entity) {
 		// First check for an existing type with the standard DoD naming convention
 		final JavaType defaultDodType = new JavaType(entity.getFullyQualifiedTypeName() + "DataOnDemand");
-		if (typeLocationService.getClassOrInterface(defaultDodType) != null) {
+		if (typeLocationService.getTypeDetails(defaultDodType) != null) {
 			return defaultDodType;
 		}
 
@@ -254,7 +255,7 @@ public class IntegrationTestMetadataProviderImpl extends AbstractItdMetadataProv
 	}
 
 	private ClassOrInterfaceTypeDetails getEntitySuperclass(final JavaType entity) {
-		final String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(entity, Path.SRC_MAIN_JAVA);
+		final String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(entity, typeLocationService.getTypePath(entity));
 		final PhysicalTypeMetadata ptm = (PhysicalTypeMetadata) metadataService.get(physicalTypeIdentifier);
 		Assert.notNull(ptm, "Java source code unavailable for type " + PhysicalTypeIdentifier.getFriendlyName(physicalTypeIdentifier));
 		final PhysicalTypeDetails ptd = ptm.getMemberHoldingTypeDetails();
@@ -271,12 +272,12 @@ public class IntegrationTestMetadataProviderImpl extends AbstractItdMetadataProv
 	@Override
 	protected String getGovernorPhysicalTypeIdentifier(final String metadataIdentificationString) {
 		final JavaType javaType = IntegrationTestMetadata.getJavaType(metadataIdentificationString);
-		final Path path = IntegrationTestMetadata.getPath(metadataIdentificationString);
+		final ContextualPath path = IntegrationTestMetadata.getPath(metadataIdentificationString);
 		return PhysicalTypeIdentifier.createIdentifier(javaType, path);
 	}
 
 	@Override
-	protected String createLocalIdentifier(final JavaType javaType, final Path path) {
+	protected String createLocalIdentifier(final JavaType javaType, final ContextualPath path) {
 		return IntegrationTestMetadata.createIdentifier(javaType, path);
 	}
 

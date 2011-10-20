@@ -13,13 +13,12 @@ import org.springframework.roo.addon.configurable.ConfigurableMetadataProvider;
 import org.springframework.roo.addon.jsf.managedbean.JsfManagedBeanMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
-import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.Path;
+import org.springframework.roo.project.ContextualPath;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
@@ -36,7 +35,6 @@ public class JsfApplicationBeanMetadataProviderImpl extends AbstractItdMetadataP
 	
 	// Fields
 	@Reference private ConfigurableMetadataProvider configurableMetadataProvider;
-	@Reference private TypeLocationService typeLocationService;
 	@Reference private ProjectOperations projectOperations;
 
 	// Stores the MID (as accepted by this JsfApplicationBeanMetadataProvider) for the one (and only one) application-wide menu bean
@@ -79,10 +77,10 @@ public class JsfApplicationBeanMetadataProviderImpl extends AbstractItdMetadataP
 			metadataDependencyRegistry.registerDependency(managedBean.getDeclaredByMetadataId(), metadataIdentificationString);
 		}
 
-		ProjectMetadata projectMetadata = projectOperations.getProjectMetadata();
+		ProjectMetadata projectMetadata = projectOperations.getFocusedProjectMetadata();
 		Assert.notNull(projectMetadata, "Project metadata required");
 
-		return new JsfApplicationBeanMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, managedBeans, projectMetadata.getProjectName());
+		return new JsfApplicationBeanMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, managedBeans, projectMetadata.getPom().getName());
 	}
 
 	public String getItdUniquenessFilenameSuffix() {
@@ -92,12 +90,12 @@ public class JsfApplicationBeanMetadataProviderImpl extends AbstractItdMetadataP
 	@Override
 	protected String getGovernorPhysicalTypeIdentifier(final String metadataIdentificationString) {
 		JavaType javaType = JsfApplicationBeanMetadata.getJavaType(metadataIdentificationString);
-		Path path = JsfApplicationBeanMetadata.getPath(metadataIdentificationString);
+		ContextualPath path = JsfApplicationBeanMetadata.getPath(metadataIdentificationString);
 		return PhysicalTypeIdentifier.createIdentifier(javaType, path);
 	}
 
 	@Override
-	protected String createLocalIdentifier(final JavaType javaType, final Path path) {
+	protected String createLocalIdentifier(final JavaType javaType, final ContextualPath path) {
 		return JsfApplicationBeanMetadata.createIdentifier(javaType, path);
 	}
 

@@ -1,5 +1,6 @@
 package org.springframework.roo.addon.dbre.model;
 
+import javax.xml.parsers.DocumentBuilder;
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -12,8 +13,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
-import javax.xml.parsers.DocumentBuilder;
-
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -22,6 +21,7 @@ import org.springframework.roo.addon.propfiles.PropFileOperations;
 import org.springframework.roo.file.monitor.event.FileDetails;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Path;
+import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.IOUtils;
@@ -43,8 +43,10 @@ public class DbreModelServiceImpl implements DbreModelService {
 	// Fields
 	@Reference private ConnectionProvider connectionProvider;
 	@Reference private FileManager fileManager;
+	@Reference private PathResolver pathResolver;
 	@Reference private ProjectOperations projectOperations;
 	@Reference private PropFileOperations propFileOperations;
+
 	private Database lastDatabase;
 	private final Set<Database> cachedIntrospections = new HashSet<Database>();
 
@@ -113,7 +115,7 @@ public class DbreModelServiceImpl implements DbreModelService {
 	}
 
 	public String getDbreXmlPath() {
-		return projectOperations.isProjectAvailable() ? projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_RESOURCES, DbreModelService.DBRE_XML) : null;
+		return projectOperations.isFocusedProjectAvailable() ? pathResolver.getFocusedIdentifier(Path.SRC_MAIN_RESOURCES, DbreModelService.DBRE_XML) : null;
 	}
 
 	public Database refreshDatabase(final Set<Schema> schemas, final boolean view, final Set<String> includeTables, final Set<String> excludeTables) {
@@ -141,8 +143,8 @@ public class DbreModelServiceImpl implements DbreModelService {
 	}
 
 	private Connection getConnection(final boolean displayAddOns) {
-		if (fileManager.exists(projectOperations.getPathResolver().getIdentifier(Path.SPRING_CONFIG_ROOT, "database.properties"))) {
-			Map<String, String> connectionProperties = propFileOperations.getProperties(Path.SPRING_CONFIG_ROOT, "database.properties");
+		if (fileManager.exists(pathResolver.getFocusedIdentifier(Path.SPRING_CONFIG_ROOT, "database.properties"))) {
+			Map<String, String> connectionProperties = propFileOperations.getProperties(Path.SPRING_CONFIG_ROOT.contextualize(projectOperations.getFocusedModuleName()), "database.properties");
 			return connectionProvider.getConnection(connectionProperties, displayAddOns);
 		}
 
@@ -151,7 +153,7 @@ public class DbreModelServiceImpl implements DbreModelService {
 	}
 
 	private Properties getConnectionPropertiesFromDataNucleusConfiguration() {
-		String persistenceXmlPath = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml");
+		String persistenceXmlPath = pathResolver.getFocusedIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml");
 		if (!fileManager.exists(persistenceXmlPath)) {
 			throw new IllegalStateException("Failed to find " + persistenceXmlPath);
 		}

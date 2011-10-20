@@ -32,11 +32,14 @@ import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.customdata.CustomDataKeys;
 import org.springframework.roo.classpath.details.BeanInfoUtils;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadata;
+import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.layers.LayerService;
@@ -46,7 +49,8 @@ import org.springframework.roo.classpath.layers.MethodParameter;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.Path;
+import org.springframework.roo.model.RooJavaType;
+import org.springframework.roo.project.ContextualPath;
 import org.springframework.roo.shell.NaturalOrderComparator;
 
 /**
@@ -309,8 +313,21 @@ public class DataOnDemandMetadataProviderImpl extends AbstractMemberDiscoveringI
 			return null;
 		}
 
+		String otherProvider = null;
+		for (ClassOrInterfaceTypeDetails cid : typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_DATA_ON_DEMAND)) {
+			AnnotationMetadata annotationMetadata = MemberFindingUtils.getAnnotationOfType(cid.getAnnotations(), RooJavaType.ROO_DATA_ON_DEMAND);
+			AnnotationAttributeValue<JavaType> annotationAttributeValue = annotationMetadata.getAttribute("entity");
+			if (annotationAttributeValue != null && annotationAttributeValue.getValue().equals(field.getFieldType())) {
+				otherProvider = DataOnDemandMetadata.createIdentifier(cid.getName(), PhysicalTypeIdentifier.getPath(cid.getDeclaredByMetadataId()));
+				break;
+			}
+		}
+
+		if (otherProvider == null) {
+			return null;
+		}
+		
 		// Look up the metadata we are relying on
-		String otherProvider = DataOnDemandMetadata.createIdentifier(new JavaType(field.getFieldType() + "DataOnDemand"), Path.SRC_TEST_JAVA);
 		if (otherProvider.equals(metadataIdentificationString)) {
 			return null; // Ignore self-references
 		}
@@ -328,12 +345,12 @@ public class DataOnDemandMetadataProviderImpl extends AbstractMemberDiscoveringI
 	@Override
 	protected String getGovernorPhysicalTypeIdentifier(final String metadataIdentificationString) {
 		JavaType javaType = DataOnDemandMetadata.getJavaType(metadataIdentificationString);
-		Path path = DataOnDemandMetadata.getPath(metadataIdentificationString);
+		ContextualPath path = DataOnDemandMetadata.getPath(metadataIdentificationString);
 		return PhysicalTypeIdentifier.createIdentifier(javaType, path);
 	}
 
 	@Override
-	protected String createLocalIdentifier(final JavaType javaType, final Path path) {
+	protected String createLocalIdentifier(final JavaType javaType, final ContextualPath path) {
 		return DataOnDemandMetadata.createIdentifier(javaType, path);
 	}
 

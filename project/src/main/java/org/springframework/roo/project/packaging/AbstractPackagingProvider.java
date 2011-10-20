@@ -134,7 +134,7 @@ public abstract class AbstractPackagingProvider implements PackagingProvider {
 		}
 
 		// Write the new POM to disk
-		fileManager.createOrUpdateTextFileIfRequired(pathResolver.getIdentifier(Path.ROOT, "pom.xml"), XmlUtils.nodeToString(pom), true);
+		fileManager.createOrUpdateTextFileIfRequired(pathResolver.getFocusedIdentifier(Path.ROOT, "pom.xml"), XmlUtils.nodeToString(pom), true);
 	}
 
 	/**

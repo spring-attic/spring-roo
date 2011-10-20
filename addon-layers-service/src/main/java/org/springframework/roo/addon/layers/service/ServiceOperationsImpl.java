@@ -20,6 +20,7 @@ import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Path;
+import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.uaa.client.util.Assert;
 
@@ -35,22 +36,23 @@ public class ServiceOperationsImpl implements ServiceOperations {
 
 	// Fields
 	@Reference private FileManager fileManager;
+	@Reference private PathResolver pathResolver;
 	@Reference private ProjectOperations projectOperations;
 	@Reference private TypeLocationService typeLocationService;
 	@Reference private TypeManagementService typeManagementService;
 
 	public boolean isServiceCommandAvailable() {
-		return projectOperations.isProjectAvailable();
+		return projectOperations.isFocusedProjectAvailable();
 	}
 
 	public void setupService(final JavaType interfaceType, final JavaType classType, final JavaType domainType) {
 		Assert.notNull(interfaceType, "Interface type required");
 		Assert.notNull(classType, "Class type required");
 		Assert.notNull(domainType, "Domain type required");
-
-		String interfaceIdentifier = typeLocationService.getPhysicalTypeCanonicalPath(interfaceType, Path.SRC_MAIN_JAVA);
-		String classIdentifier = typeLocationService.getPhysicalTypeCanonicalPath(classType, Path.SRC_MAIN_JAVA);
-
+		
+		String interfaceIdentifier = pathResolver.getFocusedCanonicalPath(Path.SRC_MAIN_JAVA, interfaceType);
+		String classIdentifier = pathResolver.getFocusedCanonicalPath(Path.SRC_MAIN_JAVA, classType);
+		
 		if (fileManager.exists(interfaceIdentifier) || fileManager.exists(classIdentifier)) {
 			return; // Type exists already - nothing to do
 		}
@@ -58,13 +60,13 @@ public class ServiceOperationsImpl implements ServiceOperations {
 		// First build interface type
 		AnnotationMetadataBuilder interfaceAnnotationMetadata = new AnnotationMetadataBuilder(ROO_SERVICE);
 		interfaceAnnotationMetadata.addAttribute(new ArrayAttributeValue<ClassAttributeValue>(new JavaSymbolName("domainTypes"), Arrays.asList(new ClassAttributeValue(new JavaSymbolName("foo"), domainType))));
-		String interfaceMdId = PhysicalTypeIdentifier.createIdentifier(interfaceType, projectOperations.getPathResolver().getPath(interfaceIdentifier));
+		String interfaceMdId = PhysicalTypeIdentifier.createIdentifier(interfaceType, pathResolver.getPath(interfaceIdentifier));
 		ClassOrInterfaceTypeDetailsBuilder interfaceTypeBuilder = new ClassOrInterfaceTypeDetailsBuilder(interfaceMdId, Modifier.PUBLIC, interfaceType, PhysicalTypeCategory.INTERFACE);
 		interfaceTypeBuilder.addAnnotation(interfaceAnnotationMetadata.build());
 		typeManagementService.createOrUpdateTypeOnDisk(interfaceTypeBuilder.build());
 
 		// Second build the implementing class
-		String classMdId = PhysicalTypeIdentifier.createIdentifier(classType, projectOperations.getPathResolver().getPath(classIdentifier));
+		String classMdId = PhysicalTypeIdentifier.createIdentifier(classType, pathResolver.getPath(classIdentifier));
 		ClassOrInterfaceTypeDetailsBuilder classTypeBuilder = new ClassOrInterfaceTypeDetailsBuilder(classMdId, Modifier.PUBLIC, classType, PhysicalTypeCategory.CLASS);
 		classTypeBuilder.addImplementsType(interfaceType);
 		typeManagementService.createOrUpdateTypeOnDisk(classTypeBuilder.build());

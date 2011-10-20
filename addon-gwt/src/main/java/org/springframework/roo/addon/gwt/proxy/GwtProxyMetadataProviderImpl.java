@@ -34,7 +34,7 @@ import org.springframework.roo.metadata.MetadataItem;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
-import org.springframework.roo.project.Path;
+import org.springframework.roo.project.ContextualPath;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
@@ -59,12 +59,6 @@ public class GwtProxyMetadataProviderImpl extends AbstractHashCodeTrackingMetada
 	}
 
 	public MetadataItem get(final String metadataIdentificationString) {
-		// Abort early if we can't continue
-		ProjectMetadata projectMetadata = projectOperations.getProjectMetadata();
-		if (projectMetadata == null) {
-			return null;
-		}
-
 		ClassOrInterfaceTypeDetails proxy = getGovernor(metadataIdentificationString);
 		if (proxy == null) {
 			return null;
@@ -107,34 +101,35 @@ public class GwtProxyMetadataProviderImpl extends AbstractHashCodeTrackingMetada
 			readOnlyList.add(readOnlyStringAttribute.getValue());
 		}
 
-		ClassOrInterfaceTypeDetails mirroredDetails = typeLocationService.findClassOrInterface(mirroredType);
+		ClassOrInterfaceTypeDetails mirroredDetails = typeLocationService.getTypeDetails(mirroredType);
 		if (mirroredDetails == null || Modifier.isAbstract(mirroredDetails.getModifier())) {
 			return null;
 		}
 
+		ProjectMetadata projectMetadata = projectOperations.getProjectMetadata(PhysicalTypeIdentifier.getPath(proxy.getDeclaredByMetadataId()).getModule());
 		Map<JavaSymbolName, MethodMetadata> proxyMethods = gwtTypeService.getProxyMethods(mirroredDetails);
 		List<MethodMetadata> convertedProxyMethods = new ArrayList<MethodMetadata>();
 		for (MethodMetadata method : proxyMethods.values()) {
-			JavaType gwtType = gwtTypeService.getGwtSideLeafType(method.getReturnType(), projectMetadata, mirroredDetails.getName(), false, true);
+			JavaType gwtType = gwtTypeService.getGwtSideLeafType(method.getReturnType(), mirroredDetails.getName(), false, true);
 			MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(method);
 			methodBuilder.setReturnType(gwtType);
 			MethodMetadata convertedMethod = methodBuilder.build();
-			Set<String> sourcePaths = gwtTypeService.getSourcePaths();
+			Set<String> sourcePaths = gwtTypeService.getSourcePaths(projectMetadata.getModuleName());
 			if (gwtTypeService.isMethodReturnTypesInSourcePath(convertedMethod, mirroredDetails, sourcePaths)) {
 				convertedProxyMethods.add(methodBuilder.build());
 			}
 		}
-		GwtProxyMetadata metadata = new GwtProxyMetadata(proxy.getName(), updateProxy(proxy, convertedProxyMethods, exclusionList, readOnlyList));
+		GwtProxyMetadata metadata = new GwtProxyMetadata(metadataIdentificationString, updateProxy(proxy, convertedProxyMethods, exclusionList, readOnlyList));
 		notifyIfRequired(metadata);
 		return metadata;
 	}
 
 	private ClassOrInterfaceTypeDetails getGovernor(final String metadataIdentificationString) {
 		JavaType governorTypeName = GwtProxyMetadata.getJavaType(metadataIdentificationString);
-		Path governorTypePath = GwtProxyMetadata.getPath(metadataIdentificationString);
+		ContextualPath governorTypePath = GwtProxyMetadata.getPath(metadataIdentificationString);
 
 		String physicalTypeId = PhysicalTypeIdentifier.createIdentifier(governorTypeName, governorTypePath);
-		return typeLocationService.getTypeForIdentifier(physicalTypeId);
+		return typeLocationService.getTypeDetails(physicalTypeId);
 	}
 
 	private String updateProxy(final ClassOrInterfaceTypeDetails proxy, final List<MethodMetadata> proxyMethods, final List<String> exclusionList, final List<String> readOnlyList) {
@@ -183,16 +178,11 @@ public class GwtProxyMetadataProviderImpl extends AbstractHashCodeTrackingMetada
 		return gwtFileManager.write(typeDetailsBuilder.build(), GwtUtils.PROXY_REQUEST_WARNING);
 	}
 
-	public void notify(final String upstreamDependency, String downstreamDependency) {
-		ProjectMetadata projectMetadata = projectOperations.getProjectMetadata();
-		if (projectMetadata == null) {
-			return;
-		}
-
+	public void notify(String upstreamDependency, String downstreamDependency) {
 		if (MetadataIdentificationUtils.isIdentifyingClass(downstreamDependency)) {
 			Assert.isTrue(MetadataIdentificationUtils.getMetadataClass(upstreamDependency).equals(MetadataIdentificationUtils.getMetadataClass(PhysicalTypeIdentifier.getMetadataIdentiferType())), "Expected class-level notifications only for PhysicalTypeIdentifier (not '" + upstreamDependency + "')");
 
-			ClassOrInterfaceTypeDetails cid = typeLocationService.getTypeForIdentifier(upstreamDependency);
+			ClassOrInterfaceTypeDetails cid = typeLocationService.getTypeDetails(upstreamDependency);
 			if (cid == null) {
 				return;
 			}
@@ -207,7 +197,7 @@ public class GwtProxyMetadataProviderImpl extends AbstractHashCodeTrackingMetada
 							if (mirrorName != null && cid.getName().getFullyQualifiedTypeName().equals(attributeValue.getValue())) {
 								found = true;
 								JavaType typeName = PhysicalTypeIdentifier.getJavaType(classOrInterfaceTypeDetails.getDeclaredByMetadataId());
-								Path typePath = PhysicalTypeIdentifier.getPath(classOrInterfaceTypeDetails.getDeclaredByMetadataId());
+								ContextualPath typePath = PhysicalTypeIdentifier.getPath(classOrInterfaceTypeDetails.getDeclaredByMetadataId());
 								downstreamDependency = GwtProxyMetadata.createIdentifier(typeName, typePath);
 								break;
 							}
@@ -220,7 +210,7 @@ public class GwtProxyMetadataProviderImpl extends AbstractHashCodeTrackingMetada
 			} else {
 				// A physical Java type has changed, and determine what the corresponding local metadata identification string would have been
 				JavaType typeName = PhysicalTypeIdentifier.getJavaType(upstreamDependency);
-				Path typePath = PhysicalTypeIdentifier.getPath(upstreamDependency);
+				ContextualPath typePath = PhysicalTypeIdentifier.getPath(upstreamDependency);
 				downstreamDependency = GwtProxyMetadata.createIdentifier(typeName, typePath);
 			}
 

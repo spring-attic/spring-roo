@@ -9,6 +9,7 @@ import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.MetadataNotificationListener;
 import org.springframework.roo.metadata.MetadataService;
+import org.springframework.roo.project.maven.Pom;
 
 /**
  * Automatically upgrades a Spring Roo annotation JAR to the current version of Roo.
@@ -28,11 +29,11 @@ public class AutomaticProjectUpgradeService implements MetadataNotificationListe
 	@Reference private ProjectOperations projectOperations;
 	@Reference private MetadataDependencyRegistry metadataDependencyRegistry;
 	@Reference private MetadataService metadataService;
+	@Reference private PomManagementService pomManagementService;
+
 	private VersionInfo bundleVersionInfo;
 
-	private static final String PROJECT_METADATA_IDENTIFIER = ProjectMetadata.getProjectIdentifier();
-
-	protected void activate(final ComponentContext componentContext) {
+	protected void activate(ComponentContext componentContext) {
 		metadataDependencyRegistry.addNotificationListener(this);
 		for (Bundle b : componentContext.getBundleContext().getBundles()) {
 			if (!MY_BUNDLE_SYMBOLIC_NAME.equals(b.getSymbolicName())) {
@@ -78,26 +79,27 @@ public class AutomaticProjectUpgradeService implements MetadataNotificationListe
 		return null;
 	}
 
-	public void notify(final String upstreamDependency, final String downstreamDependency) {
-		if (bundleVersionInfo != null && upstreamDependency.equals(PROJECT_METADATA_IDENTIFIER)) {
-			// Project Metadata changed.
-			ProjectMetadata md = (ProjectMetadata) metadataService.get(PROJECT_METADATA_IDENTIFIER);
-			if (md == null) {
+	public void notify(String upstreamDependency, String downstreamDependency) {
+		if (bundleVersionInfo != null && ProjectMetadata.isValid(upstreamDependency)) {
+			String moduleName = ProjectMetadata.getModuleName(upstreamDependency);
+			// Project Metadata available.
+			if (!projectOperations.isProjectAvailable(moduleName)) {
 				return;
 			}
 
-			Set<Property> results = md.getPropertiesExcludingValue(new Property("roo.version"));
-			for (Property existingProperty : results) {
-				VersionInfo rooVersion = extractVersionInfoFromString(existingProperty.getValue());
-				if (rooVersion != null) {
-					if (rooVersion.compareTo(bundleVersionInfo) < 0) {
-						Property newProperty = new Property(existingProperty.getName(), bundleVersionInfo.toString());
-						projectOperations.addProperty(newProperty);
-						break;
+			for (Pom module : pomManagementService.getPomMap().values()) {
+				Set<Property> results = module.getPropertiesExcludingValue(new Property("roo.version"));
+				for (Property existingProperty : results) {
+					VersionInfo rooVersion = extractVersionInfoFromString(existingProperty.getValue());
+					if (rooVersion != null) {
+						if (rooVersion.compareTo(bundleVersionInfo) < 0) {
+							Property newProperty = new Property(existingProperty.getName(), bundleVersionInfo.toString());
+							projectOperations.addProperty(moduleName, newProperty);
+							break;
+						}
 					}
 				}
 			}
-
 		}
 	}
 

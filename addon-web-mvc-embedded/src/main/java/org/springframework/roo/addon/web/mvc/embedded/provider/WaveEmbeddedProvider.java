@@ -27,7 +27,7 @@ public class WaveEmbeddedProvider extends AbstractEmbeddedProvider {
 			String qStart = url.substring(url.indexOf("%252B") + 5);
 			Map<String, String> options = new HashMap<String, String>();
 			options.put("provider", "GOOGLE_WAVE");
-			options.put("id", qStart.substring(0, qStart.indexOf(".") == -1 ? qStart.length() : qStart.indexOf(".")));
+			options.put("id", qStart.substring(0, !qStart.contains(".") ? qStart.length() : qStart.indexOf(".")));
 			return install(viewName, options);
 		}
 		return false;

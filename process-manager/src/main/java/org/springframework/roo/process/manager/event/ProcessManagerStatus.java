@@ -1,7 +1,5 @@
 package org.springframework.roo.process.manager.event;
 
-import org.springframework.roo.process.manager.ProcessManager;
-
 /**
  * Represents the different states that a {@link ProcessManager} can legally be in.
  *

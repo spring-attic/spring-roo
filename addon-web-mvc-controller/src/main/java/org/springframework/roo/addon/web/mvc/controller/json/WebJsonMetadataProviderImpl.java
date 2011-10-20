@@ -22,6 +22,7 @@ import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.customdata.CustomDataKeys;
 import org.springframework.roo.classpath.customdata.tagkeys.MethodMetadataCustomDataKey;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
@@ -31,6 +32,8 @@ import org.springframework.roo.classpath.layers.MemberTypeAdditions;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
+import org.springframework.roo.model.RooJavaType;
+import org.springframework.roo.project.ContextualPath;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
 
@@ -46,7 +49,6 @@ public class WebJsonMetadataProviderImpl extends AbstractMemberDiscoveringItdMet
 
 	// Fields
 	@Reference private WebMetadataService webMetadataService;
-	@Reference private TypeLocationService typeLocationService;
 
 	// Maps entities to the IDs of their WebJsonMetadata
 	private final Map<JavaType, String> managedEntityTypes = new HashMap<JavaType, String>();
@@ -65,7 +67,7 @@ public class WebJsonMetadataProviderImpl extends AbstractMemberDiscoveringItdMet
 
 	@Override
 	protected String getLocalMidToRequest(final ItdTypeDetails itdTypeDetails) {
-		final MemberHoldingTypeDetails governorDetails = typeLocationService.findClassOrInterface(itdTypeDetails.getName());
+		final MemberHoldingTypeDetails governorDetails = typeLocationService.getTypeDetails(itdTypeDetails.getName());
 
 		// Check whether a relevant layer component has appeared, changed, or disappeared
 		final String localMidForLayerManagedEntity = getWebJsonMidIfLayerComponent(governorDetails);
@@ -131,13 +133,18 @@ public class WebJsonMetadataProviderImpl extends AbstractMemberDiscoveringItdMet
 		}
 
 		// Lookup the form backing object's metadata
-		final JavaType jsonObject = annotationValues.getJsonObject();
-		final JsonMetadata jsonMetadata = (JsonMetadata) metadataService.get(JsonMetadata.createIdentifier(jsonObject, Path.SRC_MAIN_JAVA));
+		JavaType jsonObject = annotationValues.getJsonObject();
+		ClassOrInterfaceTypeDetails jsonTypeDetails = typeLocationService.getTypeDetails(jsonObject);
+		if (jsonTypeDetails == null) {
+			return null;
+		}
+		ContextualPath jsonObjectPath = PhysicalTypeIdentifier.getPath(jsonTypeDetails.getDeclaredByMetadataId());
+		JsonMetadata jsonMetadata = (JsonMetadata) metadataService.get(JsonMetadata.createIdentifier(jsonObject, jsonObjectPath));
 		if (jsonMetadata == null) {
 			return null;
 		}
-
-		final PhysicalTypeMetadata backingObjectPhysicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(jsonObject, Path.SRC_MAIN_JAVA));
+		
+		PhysicalTypeMetadata backingObjectPhysicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(jsonObject, typeLocationService.getTypePath(jsonObject)));
 		Assert.notNull(backingObjectPhysicalTypeMetadata, "Unable to obtain physical type metadata for type " + jsonObject.getFullyQualifiedTypeName());
 		final MemberDetails formBackingObjectMemberDetails = getMemberDetails(backingObjectPhysicalTypeMetadata);
 		final MemberHoldingTypeDetails backingMemberHoldingTypeDetails = MemberFindingUtils.getMostConcreteMemberHoldingTypeDetailsWithTag(formBackingObjectMemberDetails, CustomDataKeys.PERSISTENT_TYPE);
@@ -152,7 +159,7 @@ public class WebJsonMetadataProviderImpl extends AbstractMemberDiscoveringItdMet
 
 		final Map<MethodMetadataCustomDataKey, MemberTypeAdditions> persistenceAdditions = webMetadataService.getCrudAdditions(jsonObject, metadataId);
 		final JavaTypePersistenceMetadataDetails javaTypePersistenceMetadataDetails = webMetadataService.getJavaTypePersistenceMetadataDetails(jsonObject, getMemberDetails(jsonObject), metadataId);
-		final PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(jsonObject));
+		PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(jsonObject, typeLocationService.getTypePath(jsonObject)));
 		if (persistenceAdditions.isEmpty() || javaTypePersistenceMetadataDetails == null || pluralMetadata == null) {
 			return null;
 		}
@@ -184,12 +191,12 @@ public class WebJsonMetadataProviderImpl extends AbstractMemberDiscoveringItdMet
 	@Override
 	protected String getGovernorPhysicalTypeIdentifier(final String metadataIdentificationString) {
 		JavaType javaType = WebJsonMetadata.getJavaType(metadataIdentificationString);
-		Path path = WebJsonMetadata.getPath(metadataIdentificationString);
+		ContextualPath path = WebJsonMetadata.getPath(metadataIdentificationString);
 		return PhysicalTypeIdentifier.createIdentifier(javaType, path);
 	}
 
 	@Override
-	protected String createLocalIdentifier(final JavaType javaType, final Path path) {
+	protected String createLocalIdentifier(final JavaType javaType, final ContextualPath path) {
 		return WebJsonMetadata.createIdentifier(javaType, path);
 	}
 

@@ -17,7 +17,6 @@ import org.springframework.roo.addon.web.mvc.controller.details.JavaTypeMetadata
 import org.springframework.roo.addon.web.mvc.controller.details.WebMetadataService;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
-import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.customdata.tagkeys.MethodMetadataCustomDataKey;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
@@ -28,7 +27,7 @@ import org.springframework.roo.classpath.layers.MemberTypeAdditions;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.Path;
+import org.springframework.roo.project.ContextualPath;
 import org.springframework.roo.support.util.CollectionUtils;
 
 /**
@@ -42,7 +41,6 @@ import org.springframework.roo.support.util.CollectionUtils;
 public class WebScaffoldMetadataProviderImpl extends AbstractMemberDiscoveringItdMetadataProvider implements WebScaffoldMetadataProvider {
 
 	// Fields
-	@Reference private TypeLocationService typeLocationService;
 	@Reference private WebMetadataService webMetadataService;
 
 	private final Map<JavaType, String> entityToWebScaffoldMidMap = new LinkedHashMap<JavaType, String>();
@@ -89,7 +87,7 @@ public class WebScaffoldMetadataProviderImpl extends AbstractMemberDiscoveringIt
 	 * @return see above
 	 */
 	private String getWebScaffoldMidIfLayerComponent(final JavaType governor) {
-		final MemberHoldingTypeDetails governorDetails = typeLocationService.findClassOrInterface(governor);
+		final MemberHoldingTypeDetails governorDetails = typeLocationService.getTypeDetails(governor);
 		if (governorDetails != null) {
 			for (final JavaType type : governorDetails.getLayerEntities()) {
 				final String localMid = entityToWebScaffoldMidMap.get(type);
@@ -155,12 +153,12 @@ public class WebScaffoldMetadataProviderImpl extends AbstractMemberDiscoveringIt
 	@Override
 	protected String getGovernorPhysicalTypeIdentifier(final String metadataIdentificationString) {
 		JavaType javaType = WebScaffoldMetadata.getJavaType(metadataIdentificationString);
-		Path path = WebScaffoldMetadata.getPath(metadataIdentificationString);
+		ContextualPath path = WebScaffoldMetadata.getPath(metadataIdentificationString);
 		return PhysicalTypeIdentifier.createIdentifier(javaType, path);
 	}
 
 	@Override
-	protected String createLocalIdentifier(final JavaType javaType, final Path path) {
+	protected String createLocalIdentifier(final JavaType javaType, final ContextualPath path) {
 		return WebScaffoldMetadata.createIdentifier(javaType, path);
 	}
 

@@ -5,6 +5,7 @@ import java.util.List;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.project.GAV;
+import org.springframework.roo.shell.Completion;
 import org.springframework.roo.shell.Converter;
 import org.springframework.roo.shell.MethodTarget;
 
@@ -26,7 +27,7 @@ public class GAVConverter implements Converter<GAV> {
 		return GAV.getInstance(value);
 	}
 
-	public boolean getAllPossibleValues(final List<String> completions, final Class<?> targetType, final String existingData, final String optionContext, final MethodTarget target) {
+	public boolean getAllPossibleValues(final List<Completion> completions, final Class<?> targetType, final String existingData, final String optionContext, final MethodTarget target) {
 		// Currently (i.e. with no multi-module support), we can't offer any
 		// completions as we don't know what GAVs are valid for the user and
 		// the "this" alias (representing the current project or module) isn't

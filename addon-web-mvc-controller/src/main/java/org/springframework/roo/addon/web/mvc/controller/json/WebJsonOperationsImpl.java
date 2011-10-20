@@ -31,7 +31,7 @@ import org.springframework.roo.model.SpringJavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.Path;
-import org.springframework.roo.project.ProjectMetadata;
+import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.ProjectType;
 import org.springframework.roo.support.util.Assert;
@@ -56,10 +56,11 @@ public class WebJsonOperationsImpl implements WebJsonOperations {
 	@Reference private TypeLocationService typeLocationService;
 	@Reference private TypeManagementService typeManagementService;
 	@Reference private WebMvcOperations mvcOperations;
+	@Reference private PathResolver pathResolver;
 	@Reference private ProjectOperations projectOperations;
 
 	public boolean isSetupAvailable() {
-		String mvcConfig = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/spring/webmvc-config.xml");
+		String mvcConfig = pathResolver.getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/spring/webmvc-config.xml");
 		return !fileManager.exists(mvcConfig);
 	}
 
@@ -68,9 +69,9 @@ public class WebJsonOperationsImpl implements WebJsonOperations {
 	}
 
 	public void setup() {
-		mvcOperations.installMinmalWebArtefacts();
+		mvcOperations.installMinimalWebArtifacts();
 		// Verify that the web.xml already exists
-		String webXmlPath = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/web.xml");
+		String webXmlPath = pathResolver.getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/web.xml");
 		Assert.isTrue(fileManager.exists(webXmlPath), "'" + webXmlPath + "' does not exist");
 
 		Document document = XmlUtils.readXml(fileManager.getInputStream(webXmlPath));
@@ -89,8 +90,7 @@ public class WebJsonOperationsImpl implements WebJsonOperations {
 	public void annotateType(final JavaType type, final JavaType jsonEntity) {
 		Assert.notNull(type, "Target type required");
 		Assert.notNull(jsonEntity, "Json entity required");
-
-		String id = typeLocationService.findIdentifier(type);
+		String id = typeLocationService.getPhysicalTypeIdentifier(type);
 		if (id == null) {
 			createNewType(type, jsonEntity);
 		} else {
@@ -100,8 +100,7 @@ public class WebJsonOperationsImpl implements WebJsonOperations {
 
 	public void annotateAll(JavaPackage javaPackage) {
 		if (javaPackage == null) {
-			ProjectMetadata projectMetadata = projectOperations.getProjectMetadata();
-			javaPackage = projectMetadata.getTopLevelPackage();
+			javaPackage = projectOperations.getTopLevelPackage(projectOperations.getFocusedModuleName());
 		}
 		for (ClassOrInterfaceTypeDetails cod : typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_JSON)) {
 			if (Modifier.isAbstract(cod.getModifier())) {
@@ -127,7 +126,7 @@ public class WebJsonOperationsImpl implements WebJsonOperations {
 	}
 
 	private void appendToExistingType(final JavaType type, final JavaType jsonEntity) {
-		ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = typeLocationService.findClassOrInterface(type);
+		ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = typeLocationService.getTypeDetails(type);
 		if (classOrInterfaceTypeDetails == null) {
 			throw new IllegalArgumentException("Cannot locate source for '" + type.getFullyQualifiedTypeName() + "'");
 		}
@@ -142,11 +141,11 @@ public class WebJsonOperationsImpl implements WebJsonOperations {
 	}
 
 	private void createNewType(final JavaType type, final JavaType jsonEntity) {
-		PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(jsonEntity));
+		PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(jsonEntity, typeLocationService.getTypePath(jsonEntity)));
 		if (pluralMetadata == null) {
 			return;
 		}
-		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(type, Path.SRC_MAIN_JAVA);
+		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(type, pathResolver.getFocusedPath(Path.SRC_MAIN_JAVA));
 		ClassOrInterfaceTypeDetailsBuilder classOrInterfaceTypeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC, type, PhysicalTypeCategory.CLASS);
 		classOrInterfaceTypeDetailsBuilder.addAnnotation(getAnnotation(jsonEntity));
 		classOrInterfaceTypeDetailsBuilder.addAnnotation(new AnnotationMetadataBuilder(SpringJavaType.CONTROLLER));
@@ -171,8 +170,8 @@ public class WebJsonOperationsImpl implements WebJsonOperations {
 		for (Element dependencyElement : springDependencies) {
 			dependencies.add(new Dependency(dependencyElement));
 		}
-		projectOperations.addDependencies(dependencies);
-
-		projectOperations.updateProjectType(ProjectType.WAR);
+		projectOperations.addDependencies(projectOperations.getFocusedModuleName(), dependencies);
+		
+		projectOperations.updateProjectType(projectOperations.getFocusedModuleName(), ProjectType.WAR);
 	}
 }

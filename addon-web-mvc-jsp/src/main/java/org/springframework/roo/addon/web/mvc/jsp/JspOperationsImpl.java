@@ -5,7 +5,6 @@ import static org.springframework.roo.model.SpringJavaType.MODEL_MAP;
 import static org.springframework.roo.model.SpringJavaType.PATH_VARIABLE;
 import static org.springframework.roo.model.SpringJavaType.REQUEST_MAPPING;
 import static org.springframework.roo.model.SpringJavaType.REQUEST_METHOD;
-import static org.springframework.roo.project.Path.SRC_MAIN_JAVA;
 import static org.springframework.roo.project.Path.SRC_MAIN_WEBAPP;
 
 import java.io.IOException;
@@ -40,7 +39,9 @@ import org.springframework.roo.classpath.operations.AbstractOperations;
 import org.springframework.roo.model.EnumDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.project.ContextualPath;
 import org.springframework.roo.project.Dependency;
+import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.osgi.BundleFindingUtils;
@@ -95,6 +96,7 @@ public class JspOperationsImpl extends AbstractOperations implements JspOperatio
 	@Reference private BackupOperations backupOperations;
 	@Reference private I18nSupport i18nSupport;
 	@Reference private MenuOperations menuOperations;
+	@Reference private PathResolver pathResolver;
 	@Reference private ProjectOperations projectOperations;
 	@Reference private PropFileOperations propFileOperations;
 	@Reference private TilesOperations tilesOperations;
@@ -104,11 +106,12 @@ public class JspOperationsImpl extends AbstractOperations implements JspOperatio
 	@Reference private WebMvcOperations webMvcOperations;
 
 	public boolean isControllerAvailable() {
-		return fileManager.exists(projectOperations.getPathResolver().getIdentifier(SRC_MAIN_WEBAPP, "WEB-INF/views")) && !fileManager.exists(projectOperations.getPathResolver().getIdentifier(SRC_MAIN_WEBAPP, "WEB-INF/faces-config.xml"));
+
+		return fileManager.exists(pathResolver.getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/views")) && !fileManager.exists(pathResolver.getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/faces-config.xml"));
 	}
 
 	private boolean isProjectAvailable() {
-		return projectOperations.isProjectAvailable();
+		return projectOperations.isFocusedProjectAvailable();
 	}
 
 	public boolean isSetupAvailable() {
@@ -116,68 +119,67 @@ public class JspOperationsImpl extends AbstractOperations implements JspOperatio
 	}
 
 	public boolean isInstallLanguageCommandAvailable() {
-		return isProjectAvailable() && fileManager.exists(projectOperations.getPathResolver().getIdentifier(SRC_MAIN_WEBAPP, "WEB-INF/views/footer.jspx"));
+		return isProjectAvailable() && fileManager.exists(pathResolver.getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/views/footer.jspx"));
 	}
 
-	public void installCommonViewArtefacts() {
+	public void installCommonViewArtefacts(ContextualPath webappPath) {
 		Assert.isTrue(isProjectAvailable(), "Project metadata required");
 
 		if (!isControllerAvailable()) {
 			webMvcOperations.installAllWebMvcArtifacts();
 		}
 
-		final PathResolver pathResolver = projectOperations.getPathResolver();
-
 		// Install tiles config
 		updateConfiguration();
 
 		// Install styles
-		copyDirectoryContents("images/*.*", pathResolver.getIdentifier(SRC_MAIN_WEBAPP, "images"), false);
+
+		copyDirectoryContents("images/*.*", pathResolver.getIdentifier(webappPath, "images"), false);
 
 		// Install styles
-		copyDirectoryContents("styles/*.css", pathResolver.getIdentifier(SRC_MAIN_WEBAPP, "styles"), false);
-		copyDirectoryContents("styles/*.properties", pathResolver.getIdentifier(SRC_MAIN_WEBAPP, "WEB-INF/classes"), false);
+		copyDirectoryContents("styles/*.css", pathResolver.getIdentifier(webappPath, "styles"), false);
+		copyDirectoryContents("styles/*.properties", pathResolver.getIdentifier(webappPath, "WEB-INF/classes"), false);
 
 		// Install layout
-		copyDirectoryContents("tiles/default.jspx", pathResolver.getIdentifier(SRC_MAIN_WEBAPP, "WEB-INF/layouts/"), false);
-		copyDirectoryContents("tiles/layouts.xml", pathResolver.getIdentifier(SRC_MAIN_WEBAPP, "WEB-INF/layouts/"), false);
-		copyDirectoryContents("tiles/header.jspx", pathResolver.getIdentifier(SRC_MAIN_WEBAPP, "WEB-INF/views/"), false);
-		copyDirectoryContents("tiles/footer.jspx", pathResolver.getIdentifier(SRC_MAIN_WEBAPP, "WEB-INF/views/"), false);
-		copyDirectoryContents("tiles/views.xml", pathResolver.getIdentifier(SRC_MAIN_WEBAPP, "WEB-INF/views/"), false);
+		copyDirectoryContents("tiles/default.jspx", pathResolver.getIdentifier(webappPath, "WEB-INF/layouts/"), false);
+		copyDirectoryContents("tiles/layouts.xml", pathResolver.getIdentifier(webappPath, "WEB-INF/layouts/"), false);
+		copyDirectoryContents("tiles/header.jspx", pathResolver.getIdentifier(webappPath, "WEB-INF/views/"), false);
+		copyDirectoryContents("tiles/footer.jspx", pathResolver.getIdentifier(webappPath, "WEB-INF/views/"), false);
+		copyDirectoryContents("tiles/views.xml", pathResolver.getIdentifier(webappPath, "WEB-INF/views/"), false);
 
 		// Install common view files
-		copyDirectoryContents("*.jspx", pathResolver.getIdentifier(SRC_MAIN_WEBAPP, "WEB-INF/views/"), false);
+		copyDirectoryContents("*.jspx", pathResolver.getIdentifier(webappPath, "WEB-INF/views/"), false);
 
 		// Install tags
-		copyDirectoryContents("tags/form/*.tagx", pathResolver.getIdentifier(SRC_MAIN_WEBAPP, "WEB-INF/tags/form"), false);
-		copyDirectoryContents("tags/form/fields/*.tagx", pathResolver.getIdentifier(SRC_MAIN_WEBAPP, "WEB-INF/tags/form/fields"), false);
-		copyDirectoryContents("tags/menu/*.tagx", pathResolver.getIdentifier(SRC_MAIN_WEBAPP, "WEB-INF/tags/menu"), false);
-		copyDirectoryContents("tags/util/*.tagx", pathResolver.getIdentifier(SRC_MAIN_WEBAPP, "WEB-INF/tags/util"), false);
+		copyDirectoryContents("tags/form/*.tagx", pathResolver.getIdentifier(webappPath, "WEB-INF/tags/form"), false);
+		copyDirectoryContents("tags/form/fields/*.tagx", pathResolver.getIdentifier(webappPath, "WEB-INF/tags/form/fields"), false);
+		copyDirectoryContents("tags/menu/*.tagx", pathResolver.getIdentifier(webappPath, "WEB-INF/tags/menu"), false);
+		copyDirectoryContents("tags/util/*.tagx", pathResolver.getIdentifier(webappPath, "WEB-INF/tags/util"), false);
 
 		// Install default language 'en'
-		installI18n(i18nSupport.getLanguage(Locale.ENGLISH));
+		installI18n(i18nSupport.getLanguage(Locale.ENGLISH), webappPath);
 
-		final String i18nDirectory = pathResolver.getIdentifier(SRC_MAIN_WEBAPP, "WEB-INF/i18n/application.properties");
+		final String i18nDirectory = pathResolver.getIdentifier(webappPath, "WEB-INF/i18n/application.properties");
 		if (!fileManager.exists(i18nDirectory)) {
 			try {
-				final String projectName = projectOperations.getProjectMetadata().getProjectName();
-				fileManager.createFile(pathResolver.getIdentifier(SRC_MAIN_WEBAPP, "WEB-INF/i18n/application.properties"));
-				propFileOperations.addPropertyIfNotExists(SRC_MAIN_WEBAPP, "WEB-INF/i18n/application.properties", "application_name", projectName.substring(0, 1).toUpperCase() + projectName.substring(1), true);
-			} catch (final Exception e) {
+				final String projectName = projectOperations.getProjectName(projectOperations.getFocusedModuleName());
+				fileManager.createFile(pathResolver.getIdentifier(webappPath, "WEB-INF/i18n/application.properties"));
+				propFileOperations.addPropertyIfNotExists(webappPath, "WEB-INF/i18n/application.properties", "application_name", projectName.substring(0, 1).toUpperCase() + projectName.substring(1), true);
+			} catch (Exception e) {
 				throw new IllegalStateException("Encountered an error during copying of resources for MVC JSP addon.", e);
 			}
 		}
 	}
 
-	public void installView(final String path, final String viewName, final String title, final String category) {
-		installView(path, viewName, title, category, null, true);
+	public void installView(String path, String viewName, String title, String category, ContextualPath webappPath) {
+		installView(path, viewName, title, category, null, true, webappPath);
 	}
 
-	public void installView(final String path, final String viewName, final String title, final String category, final Document document) {
-		installView(path, viewName, title, category, document, true);
+	public void installView(String path, String viewName, String title, String category, Document document, ContextualPath webappPath) {
+		installView(path, viewName, title, category, document, true, webappPath);
 	}
 
-	private void installView(final String path, final String viewName, final String title, final String category, Document document, final boolean registerStaticController) {
+	private void installView(String path, String viewName, String title, String category, Document document, boolean registerStaticController, ContextualPath webappPath) {
 		Assert.hasText(path, "Path required");
 		Assert.hasText(viewName, "View name required");
 		Assert.hasText(title, "Title required");
@@ -195,10 +197,10 @@ public class JspOperationsImpl extends AbstractOperations implements JspOperatio
 			}
 		}
 
-		final String viewFile = projectOperations.getPathResolver().getIdentifier(SRC_MAIN_WEBAPP, "WEB-INF/views" + cleanedPath.toLowerCase() + "/" + lcViewName + ".jspx");
+		String viewFile = pathResolver.getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/views" + cleanedPath.toLowerCase() + "/" + lcViewName + ".jspx");
 		fileManager.createOrUpdateTextFileIfRequired(viewFile, XmlUtils.nodeToString(document), false);
 
-		installView(new JavaSymbolName(cleanedViewName), cleanedPath, title, category, registerStaticController);
+		installView(new JavaSymbolName(lcViewName), cleanedPath, title, category, registerStaticController, webappPath);
 	}
 
 	/**
@@ -209,29 +211,29 @@ public class JspOperationsImpl extends AbstractOperations implements JspOperatio
 	 * @param category the menu category in which to list the new view (required)
 	 * @param registerStaticController whether to register a static controller in the Spring MVC configuration file
 	 */
-	private void installView(final JavaSymbolName viewName, final String folderName, final String title, final String category, final boolean registerStaticController) {
+	private void installView(final JavaSymbolName viewName, final String folderName, final String title, final String category, final boolean registerStaticController, ContextualPath webappPath) {
 		// Probe if common web artifacts exist, and install them if needed
 		final PathResolver pathResolver = projectOperations.getPathResolver();
-		if (!fileManager.exists(pathResolver.getIdentifier(SRC_MAIN_WEBAPP, "WEB-INF/layouts/default.jspx"))) {
-			installCommonViewArtefacts();
+		if (!fileManager.exists(pathResolver.getIdentifier(webappPath, "WEB-INF/layouts/default.jspx"))) {
+			installCommonViewArtefacts(webappPath);
 		}
 		
 		final String lcViewName = viewName.getSymbolName().toLowerCase();
 
 		// Update the application-specific resource bundle (i.e. default translation)
 		final String messageCode = "label" + folderName.replace("/", "_").toLowerCase() + "_" + lcViewName;
-		propFileOperations.addPropertyIfNotExists(SRC_MAIN_WEBAPP, "WEB-INF/i18n/application.properties", messageCode, title, true);
+		propFileOperations.addPropertyIfNotExists(pathResolver.getFocusedPath(Path.SRC_MAIN_WEBAPP), "WEB-INF/i18n/application.properties", messageCode, title, true);
 		
 		// Add the menu item
 		final String relativeUrl = folderName + "/" + lcViewName;
-		menuOperations.addMenuItem(new JavaSymbolName(category), new JavaSymbolName(folderName.replace("/", "_").toLowerCase() + lcViewName + "_id"), title, "global_generic", relativeUrl, null);
+		menuOperations.addMenuItem(new JavaSymbolName(category), new JavaSymbolName(folderName.replace("/", "_").toLowerCase() + lcViewName + "_id"), title, "global_generic", relativeUrl, webappPath);
 		
 		// Add the view definition
-		tilesOperations.addViewDefinition(folderName.toLowerCase(), relativeUrl, TilesOperations.DEFAULT_TEMPLATE, "/WEB-INF/views" + folderName.toLowerCase() + "/" + lcViewName + ".jspx");
+		tilesOperations.addViewDefinition(folderName.toLowerCase(), pathResolver.getFocusedPath(Path.SRC_MAIN_WEBAPP), relativeUrl, TilesOperations.DEFAULT_TEMPLATE, "/WEB-INF/views" + folderName.toLowerCase() + "/" + lcViewName + ".jspx");
 
 		if (registerStaticController) {
 			// Update the Spring MVC config file
-			registerStaticSpringMvcController(relativeUrl);
+			registerStaticSpringMvcController(relativeUrl, webappPath);
 		}
 	}
 
@@ -241,8 +243,8 @@ public class JspOperationsImpl extends AbstractOperations implements JspOperatio
 	 * @param relativeUrl the relative URL to handle (required); a leading slash
 	 * will be added if required
 	 */
-	private void registerStaticSpringMvcController(final String relativeUrl) {
-		final String mvcConfig = projectOperations.getPathResolver().getIdentifier(SRC_MAIN_WEBAPP, "WEB-INF/spring/webmvc-config.xml");
+	private void registerStaticSpringMvcController(final String relativeUrl, ContextualPath webappPath) {
+		final String mvcConfig = projectOperations.getPathResolver().getIdentifier(webappPath, "WEB-INF/spring/webmvc-config.xml");
 		if (fileManager.exists(mvcConfig)) {
 			final Document document = XmlUtils.readXml(fileManager.getInputStream(mvcConfig));
 			final String prefixedUrl = StringUtils.prefix(relativeUrl, "/");
@@ -258,17 +260,17 @@ public class JspOperationsImpl extends AbstractOperations implements JspOperatio
 			}
 		}
 	}
-
-	public void updateTags(final boolean backup) {
+	
+	public void updateTags(boolean backup, ContextualPath webappPath) {
 		if (backup) {
 			backupOperations.backup();
 		}
-		final PathResolver pathResolver = projectOperations.getPathResolver();
+
 		// Update tags
-		copyDirectoryContents("tags/form/*.tagx", pathResolver.getIdentifier(SRC_MAIN_WEBAPP, "WEB-INF/tags/form"), true);
-		copyDirectoryContents("tags/form/fields/*.tagx", pathResolver.getIdentifier(SRC_MAIN_WEBAPP, "WEB-INF/tags/form/fields"), true);
-		copyDirectoryContents("tags/menu/*.tagx", pathResolver.getIdentifier(SRC_MAIN_WEBAPP, "WEB-INF/tags/menu"), true);
-		copyDirectoryContents("tags/util/*.tagx", pathResolver.getIdentifier(SRC_MAIN_WEBAPP, "WEB-INF/tags/util"), true);
+		copyDirectoryContents("tags/form/*.tagx", pathResolver.getIdentifier(webappPath, "WEB-INF/tags/form"), true);
+		copyDirectoryContents("tags/form/fields/*.tagx", pathResolver.getIdentifier(webappPath, "WEB-INF/tags/form/fields"), true);
+		copyDirectoryContents("tags/menu/*.tagx", pathResolver.getIdentifier(webappPath, "WEB-INF/tags/menu"), true);
+		copyDirectoryContents("tags/util/*.tagx", pathResolver.getIdentifier(webappPath, "WEB-INF/tags/util"), true);
 	}
 
 	/**
@@ -280,14 +282,14 @@ public class JspOperationsImpl extends AbstractOperations implements JspOperatio
 	 * @param controller the controller class to create (required)
 	 * @param preferredMapping the mapping this controller should adopt (optional; if unspecified it will be based on the controller name)
 	 */
-	public void createManualController(final JavaType controller, final String preferredMapping) {
+	public void createManualController(final JavaType controller, final String preferredMapping, ContextualPath webappPath) {
 		Assert.notNull(controller, "Controller Java Type required");
 
 		// Create annotation @RequestMapping("/myobject/**")
 		final Pair<String, String> folderAndMapping = getFolderAndMapping(preferredMapping, controller);
 		final String folderName = folderAndMapping.getKey();
 
-		final String resourceIdentifier = typeLocationService.getPhysicalTypeCanonicalPath(controller, SRC_MAIN_JAVA);
+		final String resourceIdentifier = pathResolver.getFocusedCanonicalPath(Path.SRC_MAIN_JAVA, controller);
 		final String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(controller, projectOperations.getPathResolver().getPath(resourceIdentifier));
 		final List<MethodMetadataBuilder> methods = new ArrayList<MethodMetadataBuilder>();
 
@@ -318,7 +320,7 @@ public class JspOperationsImpl extends AbstractOperations implements JspOperatio
 		typeDetailsBuilder.setDeclaredMethods(methods);
 		typeManagementService.createOrUpdateTypeOnDisk(typeDetailsBuilder.build());
 
-		installView(folderName, "/index", new JavaSymbolName(controller.getSimpleTypeName()).getReadableSymbolName() + " View", "Controller", null, false);
+		installView(folderName, "/index", new JavaSymbolName(controller.getSimpleTypeName()).getReadableSymbolName() + " View", "Controller", null, false, webappPath);
 	}
 
 	private MethodMetadataBuilder getIndexMethod(final String folderName, final String declaredByMetadataId) {
@@ -388,10 +390,10 @@ public class JspOperationsImpl extends AbstractOperations implements JspOperatio
 		for (final Element dependencyElement : springDependencies) {
 			dependencies.add(new Dependency(dependencyElement));
 		}
-		projectOperations.addDependencies(dependencies);
+		projectOperations.addDependencies(projectOperations.getFocusedModuleName(), dependencies);
 
 		// Add config to MVC app context
-		final String mvcConfig = projectOperations.getPathResolver().getIdentifier(SRC_MAIN_WEBAPP, "WEB-INF/spring/webmvc-config.xml");
+		final String mvcConfig = pathResolver.getFocusedIdentifier(SRC_MAIN_WEBAPP, "WEB-INF/spring/webmvc-config.xml");
 		final Document mvcConfigDocument = XmlUtils.readXml(fileManager.getInputStream(mvcConfig));
 		final Element beans = mvcConfigDocument.getDocumentElement();
 
@@ -409,7 +411,7 @@ public class JspOperationsImpl extends AbstractOperations implements JspOperatio
 		fileManager.createOrUpdateTextFileIfRequired(mvcConfig, XmlUtils.nodeToString(mvcConfigDocument), true);
 	}
 
-	public void installI18n(final I18n i18n) {
+	public void installI18n(I18n i18n, ContextualPath webappPath) {
 		Assert.notNull(i18n, "Language choice required");
 
 		if (i18n.getLocale() == null) {
@@ -417,8 +419,8 @@ public class JspOperationsImpl extends AbstractOperations implements JspOperatio
 			return;
 		}
 
-		final String targetDirectory = projectOperations.getPathResolver().getIdentifier(SRC_MAIN_WEBAPP, "");
-
+		String targetDirectory = pathResolver.getIdentifier(webappPath, "");
+		
 		// Install message bundle
 		String messageBundle = targetDirectory + "/WEB-INF/i18n/messages_" + i18n.getLocale().getLanguage() /*+ country*/ + ".properties";
 		// Special case for english locale (default)

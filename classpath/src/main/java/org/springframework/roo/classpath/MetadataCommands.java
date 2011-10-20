@@ -14,7 +14,6 @@ import org.springframework.roo.metadata.MetadataLogger;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.metadata.MetadataTimingStatistic;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.Path;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
 import org.springframework.roo.shell.CommandMarker;
@@ -85,19 +84,18 @@ public class MetadataCommands implements CommandMarker {
 
 	@CliCommand(value="metadata for type", help="Shows detailed metadata for the indicated type")
 	public String metadataForType(@CliOption(key={"", "type"}, mandatory=true, help="The Java type name to display metadata for") final JavaType javaType) {
-		String id = typeLocationService.findIdentifier(javaType);
+		String id = typeLocationService.getPhysicalTypeIdentifier(javaType);
 		if (id == null) {
 			return "Cannot locate source for " + javaType.getFullyQualifiedTypeName();
 		}
 		StringBuilder sb = new StringBuilder();
-		sb.append("Java Type  : ").append(javaType.getFullyQualifiedTypeName()).append(LINE_SEPARATOR);
-		PhysicalTypeMetadata ptm = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(javaType, Path.SRC_MAIN_JAVA));
-		if (ptm == null || !(ptm.getMemberHoldingTypeDetails() instanceof ClassOrInterfaceTypeDetails)) {
-			sb.append("Java type details unavailable").append(LINE_SEPARATOR);
+		sb.append("Java Type  : ").append(javaType.getFullyQualifiedTypeName()).append(System.getProperty("line.separator"));
+		ClassOrInterfaceTypeDetails javaTypeDetails = typeLocationService.getTypeDetails(javaType);
+		if (javaTypeDetails == null) {
+			sb.append("Java type details unavailable").append(System.getProperty("line.separator"));
 		} else {
-			ClassOrInterfaceTypeDetails cid = (ClassOrInterfaceTypeDetails) ptm.getMemberHoldingTypeDetails();
-			for (MemberHoldingTypeDetails holder : memberDetailsScanner.getMemberDetails(getClass().getName(), cid).getDetails()) {
-				sb.append("Member scan: ").append(holder.getDeclaredByMetadataId()).append(LINE_SEPARATOR);
+			for (MemberHoldingTypeDetails holder : memberDetailsScanner.getMemberDetails(getClass().getName(), javaTypeDetails).getDetails()) {
+				sb.append("Member scan: ").append(holder.getDeclaredByMetadataId()).append(System.getProperty("line.separator"));
 			}
 		}
 		sb.append(metadataForId(id));

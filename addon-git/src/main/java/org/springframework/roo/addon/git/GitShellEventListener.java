@@ -6,6 +6,7 @@ import org.apache.felix.scr.annotations.Service;
 import org.eclipse.jgit.lib.Constants;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.process.manager.FileManager;
+import org.springframework.roo.project.ContextualPath;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.shell.Shell;
@@ -44,6 +45,6 @@ public class GitShellEventListener implements ShellStatusListener {
 	}
 
 	private boolean isGitEnabled() {
-		return fileManager.exists(pathResolver.getIdentifier(Path.ROOT, Constants.DOT_GIT));
+		return fileManager.exists(pathResolver.getIdentifier(ContextualPath.getInstance(Path.ROOT), Constants.DOT_GIT));
 	}
 }

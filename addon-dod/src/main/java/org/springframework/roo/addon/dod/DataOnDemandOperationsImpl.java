@@ -10,9 +10,8 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
-import org.springframework.roo.classpath.PhysicalTypeDetails;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
-import org.springframework.roo.classpath.PhysicalTypeMetadata;
+import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.TypeManagementService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
@@ -26,7 +25,7 @@ import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
-import org.springframework.roo.project.Path;
+import org.springframework.roo.project.ContextualPath;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
 
@@ -44,13 +43,14 @@ public class DataOnDemandOperationsImpl implements DataOnDemandOperations {
 	@Reference private MetadataService metadataService;
 	@Reference private MemberDetailsScanner memberDetailsScanner;
 	@Reference private ProjectOperations projectOperations;
+	@Reference private TypeLocationService typeLocationService;
 	@Reference private TypeManagementService typeManagementService;
 
 	public boolean isPersistentClassAvailable() {
-		return projectOperations.isProjectAvailable();
+		return projectOperations.isFocusedProjectAvailable();
 	}
 
-	public void newDod(final JavaType entity, final JavaType name, final Path path) {
+	public void newDod(final JavaType entity, final JavaType name, final ContextualPath path) {
 		Assert.notNull(entity, "Entity to produce a data on demand provider for is required");
 		Assert.notNull(name, "Name of the new data on demand provider is required");
 		Assert.notNull(path, "Location of the new data on demand provider is required");
@@ -88,13 +88,9 @@ public class DataOnDemandOperationsImpl implements DataOnDemandOperations {
 	 * @param entity the entity to lookup required
 	 * @return the type details (never null; throws an exception if it cannot be obtained or parsed)
 	 */
-	private ClassOrInterfaceTypeDetails getEntity(final JavaType entity) {
-		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(entity, Path.SRC_MAIN_JAVA);
-		PhysicalTypeMetadata ptm = (PhysicalTypeMetadata) metadataService.get(physicalTypeIdentifier);
-		Assert.notNull(ptm, "Java source code unavailable for type " + PhysicalTypeIdentifier.getFriendlyName(physicalTypeIdentifier));
-		PhysicalTypeDetails ptd = ptm.getMemberHoldingTypeDetails();
-		Assert.notNull(ptd, "Java source code details unavailable for type " + PhysicalTypeIdentifier.getFriendlyName(physicalTypeIdentifier));
-		Assert.isInstanceOf(ClassOrInterfaceTypeDetails.class, ptd, "Java source code is immutable for type " + PhysicalTypeIdentifier.getFriendlyName(physicalTypeIdentifier));
-		return (ClassOrInterfaceTypeDetails) ptd;
+	private ClassOrInterfaceTypeDetails getEntity(JavaType entity) {
+		ClassOrInterfaceTypeDetails cid = typeLocationService.getTypeDetails(entity);
+		Assert.notNull(cid, "Java source code details unavailable for type '" + entity + "'");
+		return cid;
 	}
 }

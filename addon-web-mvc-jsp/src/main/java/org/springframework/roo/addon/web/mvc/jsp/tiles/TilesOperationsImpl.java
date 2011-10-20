@@ -1,21 +1,20 @@
 package org.springframework.roo.addon.web.mvc.jsp.tiles;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.process.manager.MutableFile;
-import org.springframework.roo.project.Path;
-import org.springframework.roo.project.ProjectOperations;
+import org.springframework.roo.project.ContextualPath;
+import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.StringUtils;
@@ -39,14 +38,15 @@ public class TilesOperationsImpl implements TilesOperations {
 
 	// Fields
 	@Reference private FileManager fileManager;
-	@Reference private ProjectOperations projectOperations;
+	@Reference private PathResolver pathResolver;
 
-	public void addViewDefinition(final String folderName, final String tilesViewName, final String tilesTemplateName, final String viewLocation) {
+	public void addViewDefinition(final String folderName, ContextualPath path, final String tilesViewName, String tilesTemplateName, String viewLocation) {
 		Assert.hasText(tilesViewName, "View name required");
 		Assert.hasText(tilesTemplateName, "Template name required");
 		Assert.hasText(viewLocation, "View location required");
 
-		final String viewsDefinitionFile = getTilesConfigFile(folderName);
+		final String viewsDefinitionFile = getTilesConfigFile(folderName, path);
+
 		final String unprefixedViewName = StringUtils.removePrefix(tilesViewName, "/");
 		final Element root = getViewsElement(viewsDefinitionFile);
 		final Element existingDefinition = XmlUtils.findFirstElement("/tiles-definitions/definition[@name = '" + unprefixedViewName + "']", root);
@@ -69,10 +69,11 @@ public class TilesOperationsImpl implements TilesOperations {
 		writeToDiskIfNecessary(viewsDefinitionFile, root);
 	}
 
-	public void removeViewDefinition(final String name, final String folderName) {
+	public void removeViewDefinition(final String name, final String folderName, ContextualPath path) {
 		Assert.hasText(name, "View name required");
 
-		final String viewsDefinitionFile = getTilesConfigFile(folderName);
+		final String viewsDefinitionFile = getTilesConfigFile(folderName, path);
+
 		final Element root = getViewsElement(viewsDefinitionFile);
 
 		// Find menu item under this category if exists
@@ -163,16 +164,17 @@ public class TilesOperationsImpl implements TilesOperations {
 	 *
 	 * @param folderName can be blank for the main views file; if not, any
 	 * leading slash is ignored
+	 * @param path
 	 * @return a non-<code>null</code> path
 	 */
-	private String getTilesConfigFile(final String folderName) {
+	private String getTilesConfigFile(final String folderName, ContextualPath path) {
 		final String subPath;
 		if (StringUtils.hasText(folderName) && !"/".equals(folderName)) {
 			subPath = StringUtils.prefix(folderName, "/");
 		} else {
 			subPath = "";
 		}
-		return projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/views" + subPath + "/views.xml");
+		return pathResolver.getIdentifier(path, "WEB-INF/views" + subPath + "/views.xml");
 	}
 
 	private static class TilesDtdResolver implements EntityResolver {

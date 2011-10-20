@@ -5,7 +5,7 @@ import java.util.SortedSet;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.springframework.roo.project.Path;
+import org.springframework.roo.project.ContextualPath;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
@@ -32,15 +32,15 @@ public class PropFileCommands implements CommandMarker {
 	@CliCommand(value = "properties list", help = "Shows the details of a particular properties file")
 	public SortedSet<String> propertyFileKeys(
 		@CliOption(key = "name", mandatory = true, help = "Property file name (including .properties suffix)") final String name,
-		@CliOption(key = "path", mandatory = true, help = "Source path to property file") final Path path) {
-
+		@CliOption(key = "path", mandatory = true, help = "Source path to property file") final ContextualPath path) {
+		
 		return propFileOperations.getPropertyKeys(path, name, true);
 	}
 
 	@CliCommand(value = "properties set", help = "Changes a particular properties file property")
 	public void databaseSet(
 		@CliOption(key = "name", mandatory = true, help = "Property file name (including .properties suffix)") final String name,
-		@CliOption(key = "path", mandatory = true, help = "Source path to property file") final Path path,
+		@CliOption(key = "path", mandatory = true, help = "Source path to property file") final ContextualPath path,
 		@CliOption(key = "key", mandatory = true, help = "The property key that should be changed") final String key,
 		@CliOption(key = "value", mandatory = true, help = "The new vale for this property key") final String value) {
 
@@ -50,7 +50,7 @@ public class PropFileCommands implements CommandMarker {
 	@CliCommand(value = "properties remove", help = "Removes a particular properties file property")
 	public void databaseRemove(
 		@CliOption(key = "name", mandatory = true, help = "Property file name (including .properties suffix)") final String name,
-		@CliOption(key = "path", mandatory = true, help = "Source path to property file") final Path path,
+		@CliOption(key = "path", mandatory = true, help = "Source path to property file") final ContextualPath path,
 		@CliOption(key = { "", "key" }, mandatory = true, help = "The property key that should be removed") final String key) {
 
 		propFileOperations.removeProperty(path, name, key);

@@ -15,7 +15,7 @@ import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem
 import org.springframework.roo.classpath.layers.LayerTypeMatcher;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.Path;
+import org.springframework.roo.project.ContextualPath;
 /**
  * Provides the metadata for an ITD that implements a Spring Data JPA repository
  *
@@ -59,7 +59,7 @@ public class RepositoryJpaMetadataProvider extends AbstractItdMetadataProvider {
 		if (idType == null) {
 			return null;
 		}
-		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.createIdentifier(domainType, Path.SRC_MAIN_JAVA), metadataId);
+		metadataDependencyRegistry.registerDependency(typeLocationService.getPhysicalTypeIdentifier(domainType), metadataId);
 		return new RepositoryJpaMetadata(metadataId, aspectName, governorPhysicalTypeMetadata, idType, annotationValues);
 	}
 
@@ -72,14 +72,14 @@ public class RepositoryJpaMetadataProvider extends AbstractItdMetadataProvider {
 	}
 
 	@Override
-	protected String createLocalIdentifier(final JavaType javaType, final Path path) {
+	protected String createLocalIdentifier(final JavaType javaType, final ContextualPath path) {
 		return RepositoryJpaMetadata.createIdentifier(javaType, path);
 	}
 
 	@Override
 	protected String getGovernorPhysicalTypeIdentifier(final String metadataIdentificationString) {
 		final JavaType javaType = RepositoryJpaMetadata.getJavaType(metadataIdentificationString);
-		final Path path = RepositoryJpaMetadata.getPath(metadataIdentificationString);
+		final ContextualPath path = RepositoryJpaMetadata.getPath(metadataIdentificationString);
 		return PhysicalTypeIdentifier.createIdentifier(javaType, path);
 	}
 }

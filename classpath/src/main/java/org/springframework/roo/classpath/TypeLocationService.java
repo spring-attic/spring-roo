@@ -5,7 +5,9 @@ import java.util.Set;
 
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.project.ContextualPath;
 import org.springframework.roo.project.Path;
+import org.springframework.roo.project.maven.Pom;
 
 /**
  * Locates types.
@@ -17,21 +19,14 @@ import org.springframework.roo.project.Path;
 public interface TypeLocationService {
 
 	/**
-	 * Obtains the requested {@link JavaType}, assuming it is a class or interface that exists at this time and can be parsed.
+	 * Attempts to find the {@link ClassOrInterfaceTypeDetails} for  the requested {@link JavaType}, assuming
+	 * it is a class or interface that exists at this time and can be parsed.
 	 * If these assumption are not met, an exception will be thrown.
 	 *
 	 * @param requiredClassOrInterface that should be parsed (required)
 	 * @return the ClassOrInterfaceTypeDetails (never returns null)
 	 */
-	ClassOrInterfaceTypeDetails getClassOrInterface(JavaType requiredClassOrInterface);
-
-	/**
-	 * Attempts to find the requested {@link JavaType}, assuming it is a class or interface.
-	 *
-	 * @param requiredClassOrInterface that should be parsed (required)
-	 * @return the ClassOrInterfaceTypeDetails if found, otherwise null if not found
-	 */
-	ClassOrInterfaceTypeDetails findClassOrInterface(JavaType requiredClassOrInterface);
+	ClassOrInterfaceTypeDetails getTypeDetails(JavaType requiredClassOrInterface);
 
 	/**
 	 * Processes types with the specified list of annotations and uses the supplied
@@ -75,14 +70,6 @@ public interface TypeLocationService {
 	Set<ClassOrInterfaceTypeDetails> findClassesOrInterfaceDetailsWithTag(Object tag);
 
 	/**
-	 * Returns a list of {@link ClassOrInterfaceTypeDetails} that are contained within the specified {@link Path}.
-	 *
-	 * @param path
-	 * @return a list of ClassOrInterfaceTypeDetails contained in path.
-	 */
-	List<ClassOrInterfaceTypeDetails> getProjectJavaTypes(Path path);
-
-	/**
 	 * Attempts to locate the specified {@link JavaType} by searching the physical disk (does not
 	 * search for existing {@link PhysicalTypeMetadata}).
 	 *
@@ -101,7 +88,7 @@ public interface TypeLocationService {
 	 * @param javaType the type to locate (required)
 	 * @return the string (in {@link PhysicalTypeIdentifier} format) if found, or null if not found
 	 */
-	String findIdentifier(JavaType javaType);
+	String getPhysicalTypeIdentifier(JavaType javaType);
 
 	/**
 	 * Resolves the physical type identifier for the provided canonical path. If the path doesn't correspond with a type
@@ -110,7 +97,7 @@ public interface TypeLocationService {
 	 * @param fileIdentifier the path to the physical type (required)
 	 * @return the physical type identifier if found, otherwise null if not found
 	 */
-	String findIdentifier(String fileIdentifier);
+	String getPhysicalTypeIdentifier(String fileIdentifier);
 
 	/**
 	 * Resolves the canonical file path to for the provided physical type identifier. If the physical type identifier doesn't
@@ -129,7 +116,7 @@ public interface TypeLocationService {
 	 * @param physicalTypeIdentifier the physical type identifier (required)
 	 * @return the resolved {@link ClassOrInterfaceTypeDetails}
 	 */
-	ClassOrInterfaceTypeDetails getTypeForIdentifier(String physicalTypeIdentifier);
+	ClassOrInterfaceTypeDetails getTypeDetails(String physicalTypeIdentifier);
 
 	/**
 	 * Resolves the canonical file path to for the provided {@link JavaType} and {@link Path}.
@@ -138,7 +125,7 @@ public interface TypeLocationService {
 	 * @param path the type type's path
 	 * @return the resolved path
 	 */
-	String getPhysicalTypeCanonicalPath(JavaType javaType, Path path);
+	String getPhysicalTypeCanonicalPath(JavaType javaType, ContextualPath path);
 
 	/**
 	 * Indicates whether the passed in type has changed since last invocation by the requesting class.
@@ -148,4 +135,40 @@ public interface TypeLocationService {
 	 * @return a collection of MIDs which represent changed types
 	 */
 	boolean hasTypeChanged(String requestingClass, JavaType javaType);
+
+	/**
+	 *
+	 * @param type
+	 * @param path
+	 * @return
+	 */
+	String getPhysicalTypeIdentifier(JavaType type, ContextualPath path);
+
+	/**
+	 *
+	 * @param modulePath
+	 * @return
+	 */
+	Set<String> getTypesForModule(String modulePath);
+
+	/**
+	 *
+	 * @param module
+	 * @return
+	 */
+	String getTopLevelPackageForModule(Pom module);
+
+	/**
+	 *
+	 * @param module
+	 * @return
+	 */
+	List<String> getPotentialTopLevelPackagesForModule(Pom module);
+
+	/**
+	 *
+	 * @param javaType
+	 * @return
+	 */
+	ContextualPath getTypePath(JavaType javaType);
 }

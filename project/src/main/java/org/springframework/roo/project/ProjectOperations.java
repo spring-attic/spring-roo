@@ -1,466 +1,550 @@
 package org.springframework.roo.project;
 
-import java.util.List;
+import java.util.Collection;
 
-import org.springframework.roo.project.listeners.DependencyListener;
-import org.springframework.roo.project.listeners.FilterListener;
-import org.springframework.roo.project.listeners.PluginListener;
-import org.springframework.roo.project.listeners.PropertyListener;
-import org.springframework.roo.project.listeners.RepositoryListener;
+import org.springframework.roo.model.JavaPackage;
+import org.springframework.roo.project.maven.Pom;
 
 /**
  * Specifies methods for various project-related operations.
- *
+ * 
  * @author Ben Alex
  * @since 1.0
  */
 @SuppressWarnings("deprecation")
 public interface ProjectOperations {
 
-	/**
+	/** 
 	 * Determines where is project is available.
-	 *
+	 * 
+	 * @param moduleName the name of the module to act upon (required)
 	 * @return true if the project exists, otherwise false
 	 */
-	boolean isProjectAvailable();
+	boolean isProjectAvailable(String moduleName);
 
+	/**
+	 *
+	 * @return true if the focused project exists, otherwise false
+	 */
+	boolean isFocusedProjectAvailable();
+	
 	/**
 	 * Returns the {@link ProjectMetadata} for the project.
-	 *
+	 * 
+	 * @param moduleName the name of the module to act upon (required)
 	 * @return the {@link ProjectMetadata} object;
 	 */
-	ProjectMetadata getProjectMetadata();
+	ProjectMetadata getProjectMetadata(String moduleName);
 
 	/**
-	 * Convenience method to return the {@link PathResolver} from the project's {@link ProjectMetadata}.
 	 *
+	 * @return the focused {@link ProjectMetadata} object;
+	 */
+	ProjectMetadata getFocusedProjectMetadata();
+	
+	/**
+	 * Convenience method to return the {@link PathResolver} from the project's {@link ProjectMetadata}.
+	 * 
 	 * @return the {@link PathResolver}, or null if the project is unavailable
 	 */
 	PathResolver getPathResolver();
 
+	
 	/**
-	 * Register a listener to track changes in build dependencies.
-	 *
-	 * @param listener the DependencyListener to register.
-	 */
-	@Deprecated
-	void addDependencyListener(DependencyListener listener);
-
-	/**
-	 * Remove a dependency listener from change tracking.
-	 *
-	 * @param listener the DependencyListener to remove.
-	 */
-	@Deprecated
-	void removeDependencyListener(DependencyListener listener);
-
-	/**
-	 * Register a listener to track changes in repositories.
-	 *
-	 * @param listener the RepositoryListener to register.
-	 */
-	@Deprecated
-	void addRepositoryListener(RepositoryListener listener);
-
-	/**
-	 * Remove a repository listener from change tracking
-	 *
-	 * @param listener the RepositoryListener to remove.
-	 */
-	@Deprecated
-	void removeRepositoryListener(RepositoryListener listener);
-
-	/**
-	 * Register a listener to track changes in plugin repositories
-	 *
-	 * @param listener the RepositoryListener to register.
-	 */
-	@Deprecated
-	void addPluginRepositoryListener(RepositoryListener listener);
-
-	/**
-	 * Remove a plugin repository listener from change tracking
-	 *
-	 * @param listener the RepositoryListener to remove.
-	 */
-	@Deprecated
-	void removePluginRepositoryListener(RepositoryListener listener);
-
-	/**
-	 * Register a listener to track changes in build plugins
-	 *
-	 * @param listener the PluginListener to register.
-	 */
-	@Deprecated
-	void addPluginListener(PluginListener listener);
-
-	/**
-	 * Remove a build plugin listener from change tracking
-	 *
-	 * @param listener the PluginListener to remove.
-	 */
-	@Deprecated
-	void removePluginListener(PluginListener listener);
-
-	/**
-	 * Register a listener to track changes in pom properties
-	 */
-	@Deprecated
-	void addPropertyListener(PropertyListener listener);
-
-	/**
-	 * Remove a property listener from change tracking
-	 *
-	 * @param listener the PropertyListener to remove.
-	 */
-	@Deprecated
-	void removePropertyListener(PropertyListener listener);
-
-	/**
-	 * Register a listener to track changes in pom filters
-
-	 * @param listener the FilterListener to register.
-	 */
-	@Deprecated
-	void addFilterListener(FilterListener listener);
-
-	/**
-	 * Remove a filter listener from change tracking
-	 *
-	 * @param listener the FilterListener to remove.
-	 */
-	@Deprecated
-	void removeFilterListener(FilterListener listener);
-
-	/**
-	 * Updates the project type.
-	 *
-	 * @param projectType the ProjectType to update.
-	 */
-	void updateProjectType(ProjectType projectType);
-
-	/**
-	 * Allows addition of JAR dependencies to the POM.
-	 *
-	 * <p>
-	 * Provides a convenient way for third parties to instruct end users how to use the CLI to add support
-	 * for their projects without requiring the user to manually edit a pom.xml or write an add-on.
-	 *
-	 * @param dependencies a list of dependencies to add (required)
-	 */
-	void addDependencies(List<Dependency> dependencies);
-
-	/**
-	 * Allows addition of a JAR dependency to the POM.
-	 *
-	 * <p>
-	 * Provides a convenient way for third parties to instruct end users how to use the CLI to add support
-	 * for their projects without requiring the user to manually edit a pom.xml or write an add-on.
-	 *
-	 * @param dependency the dependency to add (required)
-	 */
-	void addDependency(Dependency dependency);
-
-	/**
-	 * Allows addition of a JAR dependency to the POM.
-	 *
-	 * <p>
-	 * Provides a convenient way for third parties to instruct end users how to use the CLI to add support
-	 * for their projects without requiring the user to manually edit a pom.xml or write an add-on.
-	 *
-	 * @param groupId the group id of the dependency (required)
-	 * @param artifactId the artifact id of the dependency (required)
-	 * @param version the version of the dependency (required)
-	 * @param scope the scope of the dependency
-	 * @param classifier the classifier of the dependency
-	 */
-	void addDependency(String groupId, String artifactId, String version, DependencyScope scope, String classifier);
-
-	/**
-	 * Allows addition of a JAR dependency to the POM.
-	 *
-	 * <p>
-	 * Provides a convenient way for third parties to instruct end users how to use the CLI to add support
-	 * for their projects without requiring the user to manually edit a pom.xml or write an add-on.
-	 *
-	 * @param groupId the group id of the dependency (required)
-	 * @param artifactId the artifact id of the dependency (required)
-	 * @param version the version of the dependency (required)
-	 * @param scope the scope of the dependency
-	 */
-	void addDependency(String groupId, String artifactId, String version, DependencyScope scope);
-
-	/**
-	 * Allows addition of a JAR dependency to the POM.
-	 *
-	 * <p>
-	 * Provides a convenient way for third parties to instruct end users how to use the CLI to add support
-	 * for their projects without requiring the user to manually edit a pom.xml or write an add-on.
-	 *
-	 * @param groupId the group id of the dependency (required)
-	 * @param artifactId the artifact id of the dependency (required)
-	 * @param version the version of the dependency (required)
-	 */
-	void addDependency(String groupId, String artifactId, String version);
-
-	/**
-	 * Allows removal of JAR dependencies from the POM.
-	 *
-	 * <p>
-	 * Provides a convenient way for third parties to instruct end users how to use the CLI to add support
-	 * for their projects without requiring the user to manually edit a pom.xml or write an add-on.
-	 *
-	 * @param dependencies a list of dependencies to remove (required)
-	 */
-	void removeDependencies(List<Dependency> dependencies);
-
-	/**
-	 * Allows removal of a JAR dependency from the POM.
-	 *
-	 * <p>
-	 * Provides a convenient way for third parties to instruct end users how to use the CLI to remove an unwanted
-	 * dependency from their projects without requiring the user to manually edit a pom.xml or write an add-on.
-	 *
-	 * @param dependency the dependency to remove (required)
-	 */
-	void removeDependency(Dependency dependency);
-
-	/**
-	 * Allows remove of an existing JAR dependency from the POM.
-	 *
-	 * <p>
-	 * Provides a convenient way for third parties to instruct end users how to use the CLI to remove an unwanted
-	 * dependency from their projects without requiring the user to manually edit a pom.xml or write an add-on.
-	 *
-	 * @param groupId the group id of the dependency (required)
-	 * @param artifactId the artifact id of the dependency (required)
-	 * @param version the version of the dependency (required)
-	 * @param classifier the classifier of the dependency
-	 */
-	void removeDependency(String groupId, String artifactId, String version, String classifier);
-
-	/**
-	 * Allows remove of an existing JAR dependency from the POM.
-	 *
-	 * <p>
-	 * Provides a convenient way for third parties to instruct end users how to use the CLI to remove an unwanted
-	 * dependency from their projects without requiring the user to manually edit a pom.xml or write an add-on.
-	 *
-	 * @param groupId the group id of the dependency (required)
-	 * @param artifactId the artifact id of the dependency (required)
-	 * @param version the version of the dependency (required)
-	 */
-	void removeDependency(String groupId, String artifactId, String version);
-
-	/**
-	 * Attempts to update the scope of the specified dependency. If the dependency does not exist according
-	 * to {@link ProjectMetadata#isDependencyRegistered(Dependency)}, the method silently returns.
-	 * Otherwise the located dependency is updated.
+	 * Attempts to update the project packaging type as defined via {@link ProjectType}. If the
+	 * project packaging is not defined it will create a new definition.
 	 *
 	 * <p>
 	 * An exception is thrown if this method is called before there is {@link ProjectMetadata}
 	 * available, or if the on-disk representation cannot be modified for any reason.
 	 *
+	 * @param moduleName the name of the module to act upon (required)
+	 * @param projectType the project type to update (required)
+	 */
+	void updateProjectType(final String moduleName, ProjectType projectType);
+	
+	/**
+	 * Attempts to add the specified dependencies. If all the dependencies already exist according
+	 * to {@link ProjectMetadata#isAllDependencyRegistered(Dependency)}, the method silently returns.
+	 * Otherwise each new dependency is added.
+	 *
+	 * <p>
+	 * An exception is thrown if this method is called before there is {@link ProjectMetadata}
+	 * available, or if the on-disk representation cannot be modified for any reason.
+	 *
+	 * @param moduleName the name of the module to act upon (required)
+	 * @param dependencies the dependencies to add (required)
+	 */
+	void addDependencies(final String moduleName, Collection<? extends Dependency> dependencies);
+
+	/**
+	 * Attempts to add the specified dependency. If the dependency already exists according to
+	 * to {@link ProjectMetadata#isDependencyRegistered(org.springframework.roo.project.Dependency)}, the method silently returns.
+	 * Otherwise the dependency is added.
+	 *
+	 * <p>
+	 * An exception is thrown if this method is called before there is {@link ProjectMetadata}
+	 * available, or if the on-disk representation cannot be modified for any reason.
+	 * 
+	 * @param moduleName the name of the module to act upon (required)
+	 * @param dependency the dependency to add (required)
+	 */
+	void addDependency(final String moduleName, Dependency dependency);
+
+	/**
+	 * Allows addition of a JAR dependency to the POM. 
+	 * 
+	 * <p>
+	 * Provides a convenient way for third parties to instruct end users how to use the CLI to add support
+	 * for their projects without requiring the user to manually edit a pom.xml or write an add-on.
+	 * 
+	 * @param moduleName the name of the module to act upon (required)
+	 * @param groupId the group id of the dependency (required)
+	 * @param artifactId the artifact id of the dependency (required)
+	 * @param version the version of the dependency (required)
+	 * @param scope the scope of the dependency
+	 * @param classifier the classifier of the dependency
+	 */
+	void addDependency(final String moduleName, String groupId, String artifactId, String version, DependencyScope scope, String classifier);
+
+	/**
+	 * Allows addition of a JAR dependency to the POM. 
+	 * 
+	 * <p>
+	 * Provides a convenient way for third parties to instruct end users how to use the CLI to add support
+	 * for their projects without requiring the user to manually edit a pom.xml or write an add-on.
+	 * 
+	 * @param moduleName the name of the module to act upon (required)
+	 * @param groupId the group id of the dependency (required)
+	 * @param artifactId the artifact id of the dependency (required)
+	 * @param version the version of the dependency (required)
+	 * @param scope the scope of the dependency
+	 */
+	void addDependency(final String moduleName, String groupId, String artifactId, String version, DependencyScope scope);
+
+	/**
+	 * Allows addition of a JAR dependency to the POM. 
+	 * 
+	 * <p>
+	 * Provides a convenient way for third parties to instruct end users how to use the CLI to add support
+	 * for their projects without requiring the user to manually edit a pom.xml or write an add-on.
+	 * 
+	 * @param moduleName the name of the module to act upon (required)
+	 * @param groupId the group id of the dependency (required)
+	 * @param artifactId the artifact id of the dependency (required)
+	 * @param version the version of the dependency (required)
+	 */
+	void addDependency(final String moduleName, String groupId, String artifactId, String version);
+
+	/**
+	 * Attempts to remove the specified dependencies. If all the dependencies do not exist according
+	 * to {@link ProjectMetadata#isDependencyRegistered(Dependency)}, the method silently returns.
+	 * Otherwise each located dependency is removed.
+	 *
+	 * <p>
+	 * An exception is thrown if this method is called before there is {@link ProjectMetadata}
+	 * available, or if the on-disk representation cannot be modified for any reason.
+	 *
+	 * @param moduleName the name of the module to act upon (required)
+	 * @param dependencies the dependencies to remove (required)
+	 */
+	void removeDependencies(final String moduleName, Collection<? extends Dependency> dependencies);
+
+	/**
+	 * Attempts to remove the specified dependency. If the dependency does not exist according
+	 * to {@link ProjectMetadata#isDependencyRegistered(Dependency)}, the method silently returns.
+	 * Otherwise the located dependency is removed.
+	 *
+	 * <p>
+	 * An exception is thrown if this method is called before there is {@link ProjectMetadata}
+	 * available, or if the on-disk representation cannot be modified for any reason.
+	 * 
+	 * @param moduleName the name of the module to act upon (required)
+	 * @param dependency the dependency to remove (required)
+	 */
+	void removeDependency(final String moduleName, Dependency dependency);
+
+	/**
+	 * Allows remove of an existing JAR dependency from the POM. 
+	 * 
+	 * <p>
+	 * Provides a convenient way for third parties to instruct end users how to use the CLI to remove an unwanted
+	 * dependency from their projects without requiring the user to manually edit a pom.xml or write an add-on.
+	 * 
+	 * @param moduleName the name of the module to act upon (required)
+	 * @param groupId the group id of the dependency (required)
+	 * @param artifactId the artifact id of the dependency (required)
+	 * @param version the version of the dependency (required)
+	 * @param classifier the classifier of the dependency
+	 */
+	void removeDependency(final String moduleName, String groupId, String artifactId, String version, String classifier);
+
+	/**
+	 * Allows remove of an existing JAR dependency from the POM. 
+	 * 
+	 * <p>
+	 * Provides a convenient way for third parties to instruct end users how to use the CLI to remove an unwanted
+	 * dependency from their projects without requiring the user to manually edit a pom.xml or write an add-on.
+	 * 
+	 * @param moduleName the name of the module to act upon (required)
+	 * @param groupId the group id of the dependency (required)
+	 * @param artifactId the artifact id of the dependency (required)
+	 * @param version the version of the dependency (required)
+	 */
+	void removeDependency(final String moduleName, String groupId, String artifactId, String version);
+
+	/**
+	 * Attempts to update the scope of the specified dependency. If the dependency does not exist according
+	 * to {@link ProjectMetadata#isDependencyRegistered(Dependency)}, the method silently returns.
+	 * Otherwise the located dependency is updated.
+	 * 
+	 * <p>
+	 * An exception is thrown if this method is called before there is {@link ProjectMetadata}
+	 * available, or if the on-disk representation cannot be modified for any reason.
+	 * 
+	 * @param moduleName the name of the module to act upon (required)
 	 * @param dependency the dependency to update (required)
 	 * @param dependencyScope the dependency scope. May be null, in which case the <scope> element will be removed
 	 */
-	void updateDependencyScope(Dependency dependency, DependencyScope dependencyScope);
+	void updateDependencyScope(final String moduleName, Dependency dependency, DependencyScope dependencyScope);
 
 	/**
-	 * Allows addition of repositories to the POM.
+	 * Attempts to add the specified repositories. If all the repositories already exists according
+	 * to {@link ProjectMetadata#isRepositoryRegistered(Repository)}, the method silently returns.
+	 * Otherwise each new repository is added.
 	 *
 	 * <p>
-	 * Provides a convenient way for third parties to instruct end users how to use the CLI to add support
-	 * for their projects without requiring the user to manually edit a pom.xml or write an add-on.
-	 *
+	 * An exception is thrown if this method is called before there is {@link ProjectMetadata}
+	 * available, or if the on-disk representation cannot be modified for any reason.
+	 * 
+	 * @param moduleName the name of the module to act upon (required)
 	 * @param repositories a list of repositories to add (required)
 	 */
-	void addRepositories(List<Repository> repositories);
+	void addRepositories(final String moduleName, Collection<? extends Repository> repositories);
 
 	/**
-	 * Allows addition of a repository to the POM.
+	 * Attempts to add the specified repository. If the repository already exists according
+	 * to {@link ProjectMetadata#isRepositoryRegistered(Repository)}, the method silently returns.
+	 * Otherwise the repository is added.
 	 *
 	 * <p>
-	 * Provides a convenient way for third parties to instruct end users how to use the CLI to add support
-	 * for their projects without requiring the user to manually edit a pom.xml or write an add-on.
-	 *
+	 * An exception is thrown if this method is called before there is {@link ProjectMetadata}
+	 * available, or if the on-disk representation cannot be modified for any reason.
+	 * 
+	 * @param moduleName the name of the module to act upon (required)
 	 * @param repository the repository to add (required)
 	 */
-	void addRepository(Repository repository);
+	void addRepository(final String moduleName, Repository repository);
 
 	/**
-	 * Allows remove of an existing repository from the POM.
+	 * Attempts to remove the specified repository. If the repository does not
+	 * exist according to {@link ProjectMetadata#isRepositoryRegistered(Repository)},
+	 * the method silently returns. Otherwise the located repository is removed.
 	 *
 	 * <p>
-	 * Provides a convenient way for third parties to instruct end users how to use the CLI to remove an unwanted
-	 * repository from their projects without requiring the user to manually edit a pom.xml or write an add-on.
-	 *
+	 * An exception is thrown if this method is called before there is {@link ProjectMetadata}
+	 * available, or if the on-disk representation cannot be modified for any reason.
+	 * 
+	 * @param moduleName the name of the module to act upon (required)
 	 * @param repository the repository to remove (required)
 	 */
-	void removeRepository(Repository repository);
+	void removeRepository(final String moduleName, Repository repository);
 
 	/**
-	 * Allows addition of plugin repositories to the POM.
+	 * Attempts to add the specified plugin repositories. If all the repositories already exists according
+	 * to {@link ProjectMetadata#isPluginRepositoryRegistered(Repository)}, the method silently returns.
+	 * Otherwise each new repository is added.
 	 *
 	 * <p>
-	 * Provides a convenient way for third parties to instruct end users how to use the CLI to add support
-	 * for their projects without requiring the user to manually edit a pom.xml or write an add-on.
-	 *
+	 * An exception is thrown if this method is called before there is {@link ProjectMetadata}
+	 * available, or if the on-disk representation cannot be modified for any reason.
+	 * 
+	 * @param moduleName the name of the module to act upon (required)
 	 * @param repositories a list of plugin repositories to add (required)
 	 */
-	void addPluginRepositories(List<Repository> repositories);
+	void addPluginRepositories(final String moduleName, Collection<? extends Repository> repositories);
 
 	/**
-	 * Allows addition of a plugin repository to the POM.
+	 * Attempts to add the specified plugin repository. If the plugin repository already exists according
+	 * to {@link ProjectMetadata#isPluginRepositoryRegistered(Repository)}, the method silently returns.
+	 * Otherwise the repository is added.
 	 *
 	 * <p>
-	 * Provides a convenient way for third parties to instruct end users how to use the CLI to add support
-	 * for their projects without requiring the user to manually edit a pom.xml or write an add-on.
-	 *
+	 * An exception is thrown if this method is called before there is {@link ProjectMetadata}
+	 * available, or if the on-disk representation cannot be modified for any reason.
+	 * 
+	 * @param moduleName the name of the module to act upon (required)
 	 * @param repository the plugin repository to add (required)
 	 */
-	void addPluginRepository(Repository repository);
-
+	void addPluginRepository(final String moduleName, Repository repository);
+	
 	/**
-	 * Allows remove of an existing plugin repository from the POM.
+	 * Attempts to remove the specified plugin repository. If the plugin repository does not
+	 * exist according to {@link ProjectMetadata#isPluginRepositoryRegistered(Repository)},
+	 * the method silently returns. Otherwise the located plugin repository is removed.
 	 *
 	 * <p>
-	 * Provides a convenient way for third parties to instruct end users how to use the CLI to remove an unwanted
-	 * plugin repository from their projects without requiring the user to manually edit a pom.xml or write an add-on.
-	 *
+	 * An exception is thrown if this method is called before there is {@link ProjectMetadata}
+	 * available, or if the on-disk representation cannot be modified for any reason.
+	 * 
+	 * @param moduleName the name of the module to act upon (required)
 	 * @param repository the plugin repository to remove (required)
 	 */
-	void removePluginRepository(Repository repository);
+	void removePluginRepository(final String moduleName, Repository repository);
 
 	/**
-	 * Allows addition of a build plugins to the POM.
+	 * Attempts to add the specified plugins. If all the plugins already exist according
+	 * to {@link ProjectMetadata#isAllPluginRegistered(Plugin)}, the method silently returns.
+	 * Otherwise each new dependency is added.
 	 *
 	 * <p>
-	 * Provides a convenient way for third parties to instruct end users how to use the CLI to add
-	 * a new build capability to their projects without requiring the user to manually edit a pom.xml or write an add-on.
+	 * An exception is thrown if this method is called before there is {@link ProjectMetadata}
+	 * available, or if the on-disk representation cannot be modified for any reason.
 	 *
-	 * @param plugins a list build plugins to add (required)
+	 * @param moduleName the name of the module to act upon (required)
+	 * @param plugins the plugins to add (required)
 	 */
-	void addBuildPlugins(List<Plugin> plugins);
+	void addBuildPlugins(final String moduleName, Collection<? extends Plugin> plugins);
 
 	/**
-	 * Allows addition of a build plugin to the POM.
+	 * Attempts to add the specified build plugin. If the plugin already exists
+	 * according to {@link ProjectMetadata#isBuildPluginRegistered(org.springframework.roo.project.Plugin)},
+	 * the method silently returns. Otherwise the plugin is added.
 	 *
 	 * <p>
-	 * Provides a convenient way for third parties to instruct end users how to use the CLI to add
-	 * a new build capability to their projects without requiring the user to manually edit a pom.xml or write an add-on.
+	 * An exception is thrown if this method is called before there is {@link ProjectMetadata}
+	 * available, or if the on-disk representation cannot be modified for any reason.
 	 *
-	 * @param plugin the build plugin to add (required)
+	 * @param moduleName the name of the module to act upon (required)
+	 * @param plugin the plugin to add (required)
 	 */
-	void addBuildPlugin(Plugin plugin);
+	void addBuildPlugin(final String moduleName, Plugin plugin);
 
 	/**
-	 * Allows removal of an existing build plugins from the POM.
+	 * Removes any plugins with the same groupId and artifactId as any of the
+	 * given plugins.
 	 *
-	 * <p>
-	 * Provides a convenient way for third parties to instruct end users how to use the CLI to remove an unwanted
-	 * build plugins from their projects without requiring the user to manually edit a pom.xml or write an add-on.
-	 *
-	 * @param plugins a list build plugins to remove (required)
+	 * @param moduleName the name of the module to act upon (required)
+	 * @param plugins the plugins to remove; can be <code>null</code>, any
+	 * <code>null</code> elements will be quietly ignored
+	 * @throws IllegalArgumentException if this method is called before the
+	 * {@link ProjectMetadata} is available, or if the on-disk representation
+	 * cannot be modified for any reason
 	 */
-	void removeBuildPlugins(List<Plugin> plugins);
-
+	void removeBuildPlugins(final String moduleName, Collection<? extends Plugin> plugins);
+	
 	/**
-	 * Allows removall of an existing build plugin from the POM.
+	 * Removes any plugins with the same groupId and artifactId as the given
+	 * plugin.
 	 *
-	 * <p>
-	 * Provides a convenient way for third parties to instruct end users how to use the CLI to remove an unwanted
-	 * build plugin from their projects without requiring the user to manually edit a pom.xml or write an add-on.
-	 *
-	 * @param plugin the build plugin to remove (required)
+	 * @param moduleName the name of the module to act upon (required)
+	 * @param plugin the plugin to remove (can be <code>null</code>)
+	 * @throws IllegalArgumentException if this method is called before the
+	 * {@link ProjectMetadata} is available, or if the on-disk representation
+	 * cannot be modified for any reason
 	 */
-	void removeBuildPlugin(Plugin plugin);
+	void removeBuildPlugin(final String moduleName, Plugin plugin);
 
 	/**
 	 * Verifies if the specified  build plugin is present. If it is present, silently returns. If it is not
 	 * present, removes any build plugin which matches {@link ProjectMetadata#getBuildPluginsExcludingVersion(Plugin)}.
 	 * Always adds the presented plugin.
-	 *
+	 * 
+	 * @param moduleName the name of the module to act upon (required)
 	 * @param plugin the build plugin to update (required)
 	 */
-	void updateBuildPlugin(Plugin plugin);
-
+	void updateBuildPlugin(final String moduleName, Plugin plugin);
+	
 	/**
 	 * Verifies if the specified  build plugin is present. If it is present, silently returns. If it is not
 	 * present, removes any build plugin which matches {@link ProjectMetadata#getBuildPluginsExcludingVersion(Plugin)}.
 	 * Always adds the presented plugin.
-	 *
+	 * 
 	 * <p>
 	 * This method is deprecated - use {@link #updateBuildPlugin(Plugin)} instead.
-	 *
+	 * 
+	 * @param moduleName the name of the module to act upon (required)
 	 * @param plugin the build plugin to update (required)
 	 */
 	@Deprecated
-	void buildPluginUpdate(Plugin plugin);
+	void buildPluginUpdate(final String moduleName, Plugin plugin);
 
 	/**
-	 * Allows addition of a property to the POM.
+	 * Attempts to add the specified property. If the property already exists
+	 * according to {@link ProjectMetadata#isPropertyRegistered(org.springframework.roo.project.Property)},
+	 * the method silently returns. Otherwise the property is added.
 	 *
 	 * <p>
-	 * Provides a convenient way for third parties to instruct end users how to use the CLI to add support
-	 * for their projects without requiring the user to manually edit a pom.xml or write an add-on.
+	 * An exception is thrown if this method is called before there is {@link ProjectMetadata}
+	 * available, or if the on-disk representation cannot be modified for any reason.
 	 *
-	 * @param property the POM property to add (required)
+	 * @param moduleName the name of the module to act upon (required)
+	 * @param property the property to add (required)
 	 */
-	void addProperty(Property property);
+	void addProperty(final String moduleName, Property property);
 
 	/**
-	 * Allows remove of an existing property from the POM.
+	 * Attempts to remove the specified property dependency. If the dependency does not
+	 * exist according to {@link ProjectMetadata#isPropertyRegistered(Property)},
+	 * the method silently returns. Otherwise the located dependency is removed.
 	 *
 	 * <p>
-	 * Provides a convenient way for third parties to instruct end users how to use the CLI to remove an unwanted
-	 * property from their projects without requiring the user to manually edit a pom.xml or write an add-on.
+	 * An exception is thrown if this method is called before there is {@link ProjectMetadata}
+	 * available, or if the on-disk representation cannot be modified for any reason.
 	 *
-	 * @param property the POM property to remove (required)
+	 * @param moduleName the name of the module to act upon (required)
+	 * @param property the property to remove (required)
 	 */
-	void removeProperty(Property property);
-
+	void removeProperty(final String moduleName, Property property);
+	
 	/**
-	 * Allows addition of a filter to the POM.
+	 * Attempts to add the specified filter. If the filter already exists according
+	 * to {@link ProjectMetadata#isFilterRegistered(org.springframework.roo.project.Filter)}, the method silently returns.
+	 * Otherwise the filter is added.
 	 *
 	 * <p>
-	 * Provides a convenient way for third parties to instruct end users how to use the CLI to add support
-	 * for their projects without requiring the user to manually edit a pom.xml or write an add-on.
-	 *
+	 * An exception is thrown if this method is called before there is {@link ProjectMetadata}
+	 * available, or if the on-disk representation cannot be modified for any reason.
+	 * 
+	 * @param moduleName the name of the module to act upon (required)
 	 * @param filter the filter to add (required)
 	 */
-	void addFilter(Filter filter);
-
+	void addFilter(final String moduleName, Filter filter);
+	
 	/**
-	 * Allows remove of an existing filter from the POM.
+	 * Attempts to remove the specified filter. If the filter does not
+	 * exist according to {@link ProjectMetadata#isFilterRegistered(org.springframework.roo.project.Filter)},
+	 * the method silently returns. Otherwise the located filter is removed.
 	 *
 	 * <p>
-	 * Provides a convenient way for third parties to instruct end users how to use the CLI to remove an unwanted
-	 * filter from their projects without requiring the user to manually edit a pom.xml or write an add-on.
-	 *
+	 * An exception is thrown if this method is called before there is {@link ProjectMetadata}
+	 * available, or if the on-disk representation cannot be modified for any reason.
+	 * 
+	 * @param moduleName the name of the module to act upon (required)
 	 * @param filter the filter to remove (required)
 	 */
-	void removeFilter(Filter filter);
+	void removeFilter(final String moduleName, Filter filter);
 
 	/**
-	 * Allows addition of a resource to the POM.
+	 * Attempts to add the specified resource. If the resource already exists according
+	 * to {@link ProjectMetadata#isResourceRegistered(Resource)}, the method silently returns.
+	 * Otherwise the resource is added.
 	 *
 	 * <p>
-	 * Provides a convenient way for third parties to instruct end users how to use the CLI to add support
-	 * for their projects without requiring the user to manually edit a pom.xml or write an add-on.
-	 *
+	 * An exception is thrown if this method is called before there is {@link ProjectMetadata}
+	 * available, or if the on-disk representation cannot be modified for any reason.
+	 * 
+	 * @param moduleName the name of the module to act upon (required)
 	 * @param resource the resource to add (required)
 	 */
-	void addResource(Resource resource);
-
+	void addResource(final String moduleName, Resource resource);
+	
 	/**
-	 * Allows remove of an existing resource from the POM.
+	 * Attempts to remove the specified resource. If the resource does not
+	 * exist according to {@link ProjectMetadata#isResourceRegistered(Resource)},
+	 * the method silently returns. Otherwise the located resource is removed.
 	 *
 	 * <p>
-	 * Provides a convenient way for third parties to instruct end users how to use the CLI to remove an unwanted
-	 * resource from their projects without requiring the user to manually edit a pom.xml or write an add-on.
-	 *
+	 * An exception is thrown if this method is called before there is {@link ProjectMetadata}
+	 * available, or if the on-disk representation cannot be modified for any reason.
+	 * 
+	 * @param moduleName the name of the module to act upon (required)
 	 * @param resource the resource to remove (required)
 	 */
-	void removeResource(Resource resource);
+	void removeResource(String moduleName, Resource resource);
+
+	/**
+	 * Determines whether the Database.com Maven dependency exists in the pom.
+	 *
+	 * @param moduleName the name of the module to act upon (required)
+	 * @return true if the com.force.sdk is present in the pom.xml, otherwise false
+	 */
+	boolean isDatabaseDotComEnabled(String moduleName);
+
+	/**
+	 * Determines whether the DataNucleus Maven plugin exists in the pom.
+	 *
+	 * @param moduleName the name of the module to act upon (required)
+	 * @return true if the maven-datanucleus-plugin is present in the pom.xml, otherwise false
+	 */
+	boolean isDataNucleusEnabled(String moduleName);
+
+	/**
+	 * Determines whether the Google App Engine Maven plugin exists in the pom.
+	 *
+	 * @param moduleName the name of the module to act upon (required)
+	 * @return true if the maven-gae-plugin is present in the pom.xml, otherwise false
+	 */
+	boolean isGaeEnabled(String moduleName);
+
+	/**
+	 * Determines whether the GWT Maven plugin exists in the pom.
+	 *
+	 * @param moduleName the name of the module to act upon (required)
+	 * @return true if the gwt-maven-plugin is present in the pom.xml, otherwise false
+	 */
+	boolean isGwtEnabled(String moduleName);
+
+	/**
+	 *
+	 * @param moduleName the name of the module to act upon (required)
+	 * @return
+	 */
+	JavaPackage getTopLevelPackage(String moduleName);
+
+	/**
+	 *
+	 * @param moduleName the name of the module to act upon (required)
+	 * @return
+	 */
+	String getProjectName(String moduleName);
+
+	/**
+	 *
+	 * @return
+	 */
+	JavaPackage getFocusedTopLevelPackage();
+
+	/**
+	 *
+	 * @return
+	 */
+	String getFocusedProjectName();
+
+	/**
+	 *
+	 * @param module
+	 */
+	void setModule(Pom module);
+
+	/**
+	 *
+	 * @return
+	 */
+	Pom getFocusedModule();
+
+	/**
+	 *
+	 * @return
+	 */
+	String getFocusedModuleName();
+
+	/**
+	 *
+	 * @param moduleName the name of the module to act upon (required)
+	 * @return
+	 */
+	Pom getPomFromModuleName(String moduleName);
+
+	/**
+	 *
+	 * @return
+	 */
+	PomManagementService getPomManagementService();
+
+	/**
+	 *
+	 * @param moduleName the name of the module to act upon (required)
+	 */
+	void addModuleDependency(String moduleName);
 }

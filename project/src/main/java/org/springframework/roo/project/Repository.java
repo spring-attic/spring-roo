@@ -63,7 +63,7 @@ public class Repository implements Comparable<Repository> {
 		Assert.notNull(element, "Element required");
 		final Element name = XmlUtils.findFirstElement("name", element);
 		final Element snapshotsElement = XmlUtils.findFirstElement("snapshots", element);
-		this.enableSnapshots = (snapshotsElement == null ? false : Boolean.valueOf(XmlUtils.findRequiredElement("snapshots/enabled", element).getTextContent()));
+		this.enableSnapshots = (snapshotsElement == null ? false : Boolean.valueOf(XmlUtils.findRequiredElement("enabled", snapshotsElement).getTextContent()));
 		this.id = XmlUtils.findRequiredElement("id", element).getTextContent();
 		this.name = (name == null ? null : name.getTextContent());
 		this.url = XmlUtils.findRequiredElement("url", element).getTextContent();

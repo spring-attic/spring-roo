@@ -53,7 +53,7 @@ public class WebFinderOperationsImpl implements WebFinderOperations {
 
 		// Second, find controllers for those entities.
 		for (ClassOrInterfaceTypeDetails cod : typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_WEB_SCAFFOLD)) {
-			PhysicalTypeMetadata ptm = (PhysicalTypeMetadata) metadataService.get(typeLocationService.findIdentifier(cod.getName()));
+			PhysicalTypeMetadata ptm = (PhysicalTypeMetadata) metadataService.get(typeLocationService.getPhysicalTypeIdentifier(cod.getName()));
 			Assert.notNull(ptm, "Java source code unavailable for type " + cod.getName().getFullyQualifiedTypeName());
 			WebScaffoldAnnotationValues webScaffoldAnnotationValues = new WebScaffoldAnnotationValues(ptm);
 			for (JavaType finderEntity : finderEntities) {
@@ -68,8 +68,9 @@ public class WebFinderOperationsImpl implements WebFinderOperations {
 	public void annotateType(final JavaType controllerType, final JavaType entityType) {
 		Assert.notNull(controllerType, "Controller type required");
 		Assert.notNull(entityType, "Entity type required");
+		
+		String id = typeLocationService.getPhysicalTypeIdentifier(controllerType);
 
-		String id = typeLocationService.findIdentifier(controllerType);
 		if (id == null) {
 			throw new IllegalArgumentException("Cannot locate source for '" + controllerType.getFullyQualifiedTypeName() + "'");
 		}

@@ -44,7 +44,7 @@ public class EqualsOperationsImpl implements EqualsOperations {
 		updateConfiguration();
 
 		// Add @RooEquals annotation to class if not yet present
-		ClassOrInterfaceTypeDetails cid = typeLocationService.findClassOrInterface(javaType);
+		ClassOrInterfaceTypeDetails cid = typeLocationService.getTypeDetails(javaType);
 		if (cid == null || cid.getTypeAnnotation(ROO_EQUALS) != null) {
 			return;
 		}
@@ -72,7 +72,7 @@ public class EqualsOperationsImpl implements EqualsOperations {
 		final Element dependencyElement = XmlUtils.findFirstElement("/configuration/equals/dependencies/dependency", configuration);
 		if (dependencyElement != null) {
 			final Dependency dependency = new Dependency(dependencyElement);
-			projectOperations.addDependency(dependency);
+			projectOperations.addDependency(projectOperations.getFocusedModuleName(), dependency);
 		}
 	}
 }

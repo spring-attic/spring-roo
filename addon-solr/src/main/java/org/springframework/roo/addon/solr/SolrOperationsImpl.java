@@ -53,7 +53,7 @@ public class SolrOperationsImpl implements SolrOperations {
 	@Reference private TypeManagementService typeManagementService;
 
 	public boolean isInstallSearchAvailable() {
-		return projectOperations.isProjectAvailable() && !solrPropsInstalled() && fileManager.exists(projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml"));
+		return projectOperations.isFocusedProjectAvailable() && !solrPropsInstalled() && fileManager.exists(projectOperations.getPathResolver().getFocusedIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml"));
 	}
 
 	public boolean isSearchAvailable() {
@@ -61,15 +61,15 @@ public class SolrOperationsImpl implements SolrOperations {
 	}
 
 	private boolean solrPropsInstalled() {
-		return fileManager.exists(projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/spring/solr.properties"));
+		return fileManager.exists(projectOperations.getPathResolver().getFocusedIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/spring/solr.properties"));
 	}
 
 	public void setupConfig(final String solrServerUrl) {
-		projectOperations.addDependency(SOLRJ);
+		projectOperations.addDependency(projectOperations.getFocusedModuleName(), SOLRJ);
 
 		updateSolrProperties(solrServerUrl);
 
-		String contextPath = projectOperations.getPathResolver().getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext.xml");
+		String contextPath = projectOperations.getPathResolver().getFocusedIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext.xml");
 		Document appCtx = XmlUtils.readXml(fileManager.getInputStream(contextPath));
 		Element root = appCtx.getDocumentElement();
 
@@ -94,7 +94,7 @@ public class SolrOperationsImpl implements SolrOperations {
 	}
 
 	private void updateSolrProperties(final String solrServerUrl) {
-		String solrPath = projectOperations.getPathResolver().getIdentifier(Path.SPRING_CONFIG_ROOT, "solr.properties");
+		String solrPath = projectOperations.getPathResolver().getFocusedIdentifier(Path.SPRING_CONFIG_ROOT, "solr.properties");
 		boolean solrExists = fileManager.exists(solrPath);
 
 		Properties props = new Properties();
@@ -137,7 +137,7 @@ public class SolrOperationsImpl implements SolrOperations {
 	public void addSearch(final JavaType javaType) {
 		Assert.notNull(javaType, "Java type required");
 
-		ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = typeLocationService.findClassOrInterface(javaType);
+		ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = typeLocationService.getTypeDetails(javaType);
 		if (classOrInterfaceTypeDetails == null) {
 			throw new IllegalArgumentException("Cannot locate source for '" + javaType.getFullyQualifiedTypeName() + "'");
 		}

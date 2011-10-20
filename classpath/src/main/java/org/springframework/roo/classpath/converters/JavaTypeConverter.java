@@ -1,6 +1,5 @@
 package org.springframework.roo.classpath.converters;
 
-import java.io.File;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Arrays;
@@ -17,17 +16,17 @@ import java.util.TreeSet;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.springframework.roo.file.monitor.event.FileDetails;
+import org.springframework.roo.classpath.PhysicalTypeIdentifier;
+import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
-import org.springframework.roo.project.Path;
-import org.springframework.roo.project.PathResolver;
-import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
+import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.shell.Completion;
 import org.springframework.roo.shell.Converter;
 import org.springframework.roo.shell.MethodTarget;
+import org.springframework.roo.support.util.AnsiEscapeCode;
 import org.springframework.roo.support.util.StringUtils;
 
 /**
@@ -46,8 +45,9 @@ public class JavaTypeConverter implements Converter<JavaType> {
 	@Reference protected LastUsed lastUsed;
 	@Reference protected FileManager fileManager;
 	@Reference protected ProjectOperations projectOperations;
+	@Reference private TypeLocationService typeLocationService;
 
-	public JavaType convertFromText(final String value, final Class<?> requiredType, final String optionContext) {
+	public JavaType convertFromText(String value, final Class<?> requiredType, final String optionContext) {
 		if (value == null || "".equals(value)) {
 			return null;
 		}
@@ -65,22 +65,36 @@ public class JavaTypeConverter implements Converter<JavaType> {
 			return result;
 		}
 
-		String topLevelPath = null;
-		ProjectMetadata projectMetadata = projectOperations.getProjectMetadata();
-		if (projectMetadata != null) {
-			JavaPackage topLevelPackage = projectMetadata.getTopLevelPackage();
-			topLevelPath = topLevelPackage.getFullyQualifiedPackageName();
-			lastUsed.setTopLevelPackage(topLevelPackage);
+		String topLevelPath;
+
+		Pom module = projectOperations.getFocusedModule();
+
+		if (value.contains("|")) {
+			String moduleName = value.substring(0, value.indexOf("|"));
+			module = projectOperations.getPomManagementService().getPomFromModuleName(moduleName);
+			topLevelPath = typeLocationService.getTopLevelPackageForModule(module);
+			value = value.substring(value.indexOf("|") + 1, value.length()).trim();
+			projectOperations.getPomManagementService().setFocusedModule(module);
+		} else {
+			topLevelPath = typeLocationService.getTopLevelPackageForModule(projectOperations.getFocusedModule());
 		}
 
-		String newValue = value;
-		if (value.startsWith("~") && topLevelPath != null) {
-			if (value.length() > 1) {
-				newValue = (!(value.charAt(1) == '.') ? topLevelPath + "." : topLevelPath) + value.substring(1);
-			} else {
-				newValue = topLevelPath;
+		if (value.equals(topLevelPath)) {
+			return null;
+		}
+
+		String newValue = locateExisting(value, topLevelPath);
+		if (newValue == null) {
+			newValue = locateNew(value, topLevelPath);
+		}
+
+		if (StringUtils.hasText(newValue)) {
+			String physicalTypeIdentifier = typeLocationService.getPhysicalTypeIdentifier(new JavaType(newValue));
+			if (StringUtils.hasText(physicalTypeIdentifier)) {
+				module = projectOperations.getPomManagementService().getPomFromModuleName(PhysicalTypeIdentifier.getPath(physicalTypeIdentifier).getModule());
 			}
 		}
+
 
 		// If the user did not provide a java type name containing a dot, it's taken as relative to the current package directory
 		if (!newValue.contains(".")) {
@@ -96,12 +110,58 @@ public class JavaTypeConverter implements Converter<JavaType> {
 		}
 		JavaType result = new JavaType(newValue);
 		if (optionContext.contains("update")) {
-			lastUsed.setType(result);
+			lastUsed.setType(result, module);
 		}
 		return result;
 	}
 
-	public boolean supports(final Class<?> requiredType, final String optionContext) {
+	private String locateNew(String value, String topLevelPath) {
+		String newValue = value;
+		if (value.startsWith("~")) {
+			if (value.length() > 1) {
+				newValue = (value.charAt(1) == '.' ? topLevelPath : topLevelPath + ".") + value.substring(1);
+			} else {
+				newValue = topLevelPath + ".";
+			}
+		}
+
+		lastUsed.setTopLevelPackage(new JavaPackage(topLevelPath));
+
+		return newValue;
+	}
+
+	private String locateExisting(String value, String topLevelPath) {
+		String newValue = value;
+		if (value.startsWith("~")) {
+			boolean found = false;
+			while (!found) {
+				if (value.length() > 1) {
+					newValue = (value.charAt(1) == '.' ? topLevelPath : topLevelPath + ".") + value.substring(1);
+				} else {
+					newValue = topLevelPath + ".";
+				}
+				String physicalTypeIdentifier = typeLocationService.getPhysicalTypeIdentifier(new JavaType(newValue));
+				if (physicalTypeIdentifier != null) {
+					topLevelPath = typeLocationService.getTopLevelPackageForModule(projectOperations.getPomFromModuleName(PhysicalTypeIdentifier.getPath(physicalTypeIdentifier).getModule()));
+					found = true;
+				} else {
+					int index = topLevelPath.lastIndexOf('.');
+					if (index == -1) {
+						break;
+					}
+					topLevelPath = topLevelPath.substring(0, topLevelPath.lastIndexOf('.'));
+				}
+			}
+			if (found) {
+				lastUsed.setTopLevelPackage(new JavaPackage(topLevelPath));
+			} else {
+				return null;
+			}
+		}
+		return newValue;
+	}
+
+	public boolean supports(Class<?> requiredType, String optionContext) {
 		return JavaType.class.isAssignableFrom(requiredType);
 	}
 
@@ -183,67 +243,67 @@ public class JavaTypeConverter implements Converter<JavaType> {
 		}
 	}
 
-	private void completeProjectSpecificPaths(final List<String> completions, final String existingData) {
+	private void completeProjectSpecificPaths(final List<Completion> completions, String existingData) {
 		String topLevelPath = "";
-		ProjectMetadata projectMetadata = projectOperations.getProjectMetadata();
 
-		if (projectMetadata == null) {
+		if (!projectOperations.isFocusedProjectAvailable()) {
 			return;
 		}
 
-		topLevelPath = projectMetadata.getTopLevelPackage().getFullyQualifiedPackageName();
+		topLevelPath = typeLocationService.getTopLevelPackageForModule(projectOperations.getFocusedModule());
+
+		Pom focusedModule = projectOperations.getFocusedModule();
+		String focusedModulePath = projectOperations.getFocusedModule().getPath();
+		String focusedModuleName = focusedModule.getModuleName();
+		boolean intraModule = false;
+		if (existingData.contains("|")) {
+			focusedModuleName = existingData.substring(0, existingData.indexOf('|'));
+			focusedModule = projectOperations.getPomFromModuleName(focusedModuleName);
+			focusedModulePath = focusedModule.getPath();
+			existingData = existingData.substring(existingData.indexOf('|') + 1, existingData.length());
+			topLevelPath = typeLocationService.getTopLevelPackageForModule(focusedModule);
+			intraModule = true;
+		}
 
 		String newValue = existingData;
 		if (existingData.startsWith("~")) {
 			if (existingData.length() > 1) {
 				newValue = (existingData.charAt(1) == '.' ? topLevelPath : topLevelPath + ".") + existingData.substring(1);
 			} else {
-				newValue = topLevelPath + File.separator;
+				newValue = topLevelPath + ".";
 			}
 		}
 
-		PathResolver pathResolver = projectOperations.getPathResolver();
+		String prefix = "";
+		String formattedPrefix = "";
 
-		// Pass 1: If a '.' suffixes the value then sub-folders will be picked up explicitly
-		String antPath = projectOperations.getPathResolver().getRoot(Path.SRC_MAIN_JAVA) + File.separatorChar + newValue.replace(".", File.separator) + "*";
-		SortedSet<FileDetails> entries = fileManager.findMatchingAntPath(antPath);
+		if (!focusedModulePath.equals(projectOperations.getFocusedModule().getPath())) {
+			prefix = focusedModuleName + "|";
+			formattedPrefix = AnsiEscapeCode.decorate(focusedModuleName + "|", AnsiEscapeCode.FG_CYAN);
+		}
 
-		// Pass 2: Add a separator to the end of the value to pick up sub-folders
-		antPath = pathResolver.getRoot(Path.SRC_MAIN_JAVA) + File.separatorChar + newValue.replace(".", File.separator) + File.separator + "*";
-		entries.addAll(fileManager.findMatchingAntPath(antPath));
-
-		for (FileDetails fileIdentifier : entries) {
-			String candidate = pathResolver.getRelativeSegment(fileIdentifier.getCanonicalPath()).substring(1); // drop the leading "/"
-			boolean include = false;
-			boolean directory = false;
-			if (fileIdentifier.getFile().isDirectory()) {
-				// Do not include directories that start with ., as this is used for purposes like SVN (see ROO-125)
-				if (!fileIdentifier.getFile().getName().startsWith(".")) {
-					include = true;
-					directory = true;
-				}
-			} else {
-				// A file
-				if (candidate.endsWith(".java")) {
-					candidate = candidate.substring(0, candidate.length() - 5); // Drop .java
-					include = true;
-				}
+		for (String moduleName : projectOperations.getPomManagementService().getModuleNames()) {
+			if (!moduleName.equals(focusedModuleName)) {
+				Completion completion = new Completion(moduleName + "|", AnsiEscapeCode.decorate(moduleName + "|", AnsiEscapeCode.FG_CYAN), "Modules", 0);
+				completions.add(completion);
 			}
+		}
 
-			if (include) {
-				// Convert this path back into something the user would type
-				if (existingData.startsWith("~")) {
-					if (existingData.length() > 1) {
-						candidate = (existingData.charAt(1) == '.' ? "~." : "~") + candidate.substring(topLevelPath.length() + 1);
-					} else {
-						candidate = "~" + candidate.substring(topLevelPath.length() + 1);
-					}
-				}
-				candidate = candidate.replace(File.separator, ".");
-				if (directory) {
-					candidate = candidate + ".";
-				}
-				completions.add(new Completion(candidate));
+		String heading = "";
+		if (!intraModule) {
+			heading = focusedModuleName;
+		}
+		if (typeLocationService.getTypesForModule(focusedModulePath).isEmpty()) {
+			completions.add(new Completion(prefix + focusedModule.getGroupId(), formattedPrefix + focusedModule.getGroupId(), heading, 1));
+			return;
+		}  else {
+			completions.add(new Completion(prefix + topLevelPath, formattedPrefix + topLevelPath, heading, 1));
+		}
+
+		for (String type : typeLocationService.getTypesForModule(focusedModulePath)) {
+			if (type.startsWith(newValue)) {
+				type = type.replaceFirst(topLevelPath, "~");
+				completions.add(new Completion(prefix + type, formattedPrefix + type, heading, 1));
 			}
 		}
 	}

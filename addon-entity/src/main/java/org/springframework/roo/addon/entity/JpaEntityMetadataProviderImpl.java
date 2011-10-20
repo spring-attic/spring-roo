@@ -56,8 +56,9 @@ import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
-import org.springframework.roo.project.Path;
+import org.springframework.roo.project.ContextualPath;
 import org.springframework.roo.project.ProjectMetadata;
+import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.CollectionUtils;
 
@@ -101,18 +102,19 @@ public class JpaEntityMetadataProviderImpl extends AbstractIdentifierServiceAwar
 	// Fields
 	@Reference private CustomDataKeyDecorator customDataKeyDecorator;
 	@Reference private DisplayStringMetadataProvider displayStringMetadataProvider;
-
+	@Reference private ProjectOperations projectOperations;
+	
 	// ------------- Mandatory AbstractItdMetadataProvider methods -------------
 
 	@Override
-	protected String createLocalIdentifier(final JavaType javaType, final Path path) {
+	protected String createLocalIdentifier(final JavaType javaType, final ContextualPath path) {
 		return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
 	}
 
 	@Override
 	protected String getGovernorPhysicalTypeIdentifier(final String metadataIdentificationString) {
 		final JavaType javaType = getType(metadataIdentificationString);
-		final Path path = PhysicalTypeIdentifierNamingUtils.getPath(PROVIDES_TYPE_STRING, metadataIdentificationString);
+		final ContextualPath path = PhysicalTypeIdentifierNamingUtils.getPath(PROVIDES_TYPE_STRING, metadataIdentificationString);
 		return PhysicalTypeIdentifier.createIdentifier(javaType, path);
 	}
 
@@ -195,15 +197,15 @@ public class JpaEntityMetadataProviderImpl extends AbstractIdentifierServiceAwar
 		boolean isGaeEnabled = false;
 		boolean isDatabaseDotComEnabled = false;
 
-		final ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.PROJECT_IDENTIFIER);
-		if (projectMetadata != null) {
+		String moduleName = PhysicalTypeIdentifierNamingUtils.getPath(metadataId).getModule();
+		if (projectOperations.isProjectAvailable(moduleName)) {
 			// If the project itself changes, we want a chance to refresh this item
-			metadataDependencyRegistry.registerDependency(ProjectMetadata.PROJECT_IDENTIFIER, metadataId);
-			isGaeEnabled = projectMetadata.isGaeEnabled();
-			isDatabaseDotComEnabled = projectMetadata.isDatabaseDotComEnabled();
+			metadataDependencyRegistry.registerDependency(ProjectMetadata.getProjectIdentifier(moduleName), metadataId);
+			isGaeEnabled = projectOperations.isGaeEnabled(moduleName);
+			isDatabaseDotComEnabled = projectOperations.isDatabaseDotComEnabled(moduleName);
 		}
 
-		return new JpaEntityMetadata(metadataId, aspectName, governorPhysicalType, parentEntity, projectMetadata, governorMemberDetails, identifier, jpaEntityAnnotationValues, isGaeEnabled, isDatabaseDotComEnabled);
+		return new JpaEntityMetadata(metadataId, aspectName, governorPhysicalType, parentEntity, projectOperations.getProjectMetadata(moduleName), governorMemberDetails, identifier, jpaEntityAnnotationValues, isGaeEnabled, isDatabaseDotComEnabled);
 	}
 
 	/**

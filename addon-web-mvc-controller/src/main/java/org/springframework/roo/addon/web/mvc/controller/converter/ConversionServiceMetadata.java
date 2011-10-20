@@ -84,7 +84,10 @@ public class ConversionServiceMetadata extends AbstractItdTypeDetailsProvidingMe
 		final MethodMetadataBuilder installMethodBuilder = new MethodMetadataBuilder(getInstallMethod());
 		final Set<String> methodNames = new HashSet<String>();
 
-		for (final JavaType formBackingObject : relevantDomainTypes) {
+		List<JavaType> sortedRelevantDomainTypes = new ArrayList<JavaType>(relevantDomainTypes);
+		Collections.sort(sortedRelevantDomainTypes);
+
+		for (final JavaType formBackingObject : sortedRelevantDomainTypes) {
 			String simpleName = formBackingObject.getSimpleTypeName();
 			while (methodNames.contains(simpleName)) {
 				simpleName += "_";

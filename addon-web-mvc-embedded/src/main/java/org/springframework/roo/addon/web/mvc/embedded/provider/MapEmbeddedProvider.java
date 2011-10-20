@@ -30,7 +30,7 @@ public class MapEmbeddedProvider extends AbstractEmbeddedProvider {
 
 			Map<String, String> options = new HashMap<String, String>();
 			options.put("provider", "GOOGLE_MAPS");
-			options.put("location", qStart.substring(0, qStart.indexOf("&") == -1 ? qStart.length() : qStart.indexOf("&")));
+			options.put("location", qStart.substring(0, !qStart.contains("&") ? qStart.length() : qStart.indexOf("&")));
 			return install(viewName, options);
 		}
 		return false;

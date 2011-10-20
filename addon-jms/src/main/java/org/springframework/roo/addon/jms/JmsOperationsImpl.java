@@ -32,6 +32,7 @@ import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
+import org.springframework.roo.project.ContextualPath;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectOperations;
@@ -63,22 +64,23 @@ public class JmsOperationsImpl implements JmsOperations {
 	@Reference private TypeLocationService typeLocationService;
 
 	public boolean isInstallJmsAvailable() {
-		return projectOperations.isProjectAvailable() && !hasJmsContext();
+		return projectOperations.isFocusedProjectAvailable() && !hasJmsContext();
 	}
 
 	public boolean isManageJmsAvailable() {
-		return projectOperations.isProjectAvailable() && hasJmsContext();
+		return projectOperations.isFocusedProjectAvailable() && hasJmsContext();
 	}
 
 	private boolean hasJmsContext() {
-		return fileManager.exists(projectOperations.getPathResolver().getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext-jms.xml"));
+		return fileManager.exists(projectOperations.getPathResolver().getFocusedIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext-jms.xml"));
 	}
 
 	public void installJms(final JmsProvider jmsProvider, final String name, final JmsDestinationType destinationType) {
 		Assert.isTrue(isInstallJmsAvailable(), "Project not available");
 		Assert.notNull(jmsProvider, "JMS provider required");
 
-		final String jmsContextPath = projectOperations.getPathResolver().getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext-jms.xml");
+		String jmsContextPath = projectOperations.getPathResolver().getFocusedIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext-jms.xml");
+
 		final InputStream in;
 		if (fileManager.exists(jmsContextPath)) {
 			in = fileManager.getInputStream(jmsContextPath);
@@ -117,7 +119,7 @@ public class JmsOperationsImpl implements JmsOperations {
 		Assert.notNull(targetType, "Java type required");
 		Assert.notNull(fieldName, "Field name required");
 
-		final ClassOrInterfaceTypeDetails targetTypeDetails = typeLocationService.findClassOrInterface(targetType);
+		ClassOrInterfaceTypeDetails targetTypeDetails = typeLocationService.getTypeDetails(targetType);
 		Assert.isTrue(targetTypeDetails != null, "Cannot locate source for '" + targetType.getFullyQualifiedTypeName() + "'");
 
 		final String declaredByMetadataId = targetTypeDetails.getDeclaredByMetadataId();
@@ -163,7 +165,7 @@ public class JmsOperationsImpl implements JmsOperations {
 	 * properties to support asynchronous tasks.
 	 */
 	private void ensureSpringAsynchronousSupportEnabled() {
-		final String contextPath = projectOperations.getPathResolver().getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext.xml");
+		final String contextPath = projectOperations.getPathResolver().getFocusedIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext.xml");
 		final Document appContext = XmlUtils.readXml(fileManager.getInputStream(contextPath));
 		final Element root = appContext.getDocumentElement();
 
@@ -177,7 +179,7 @@ public class JmsOperationsImpl implements JmsOperations {
 
 			fileManager.createOrUpdateTextFileIfRequired(contextPath, XmlUtils.nodeToString(appContext), false);
 
-			propFileOperations.addPropertyIfNotExists(Path.SPRING_CONFIG_ROOT, "jms.properties", "executor.poolSize", "10", true);
+			propFileOperations.addPropertyIfNotExists(Path.SPRING_CONFIG_ROOT.contextualize(projectOperations.getFocusedModuleName()), "jms.properties", "executor.poolSize", "10", true);
 		}
 	}
 
@@ -192,7 +194,7 @@ public class JmsOperationsImpl implements JmsOperations {
 	public void addJmsListener(final JavaType targetType, final String name, final JmsDestinationType destinationType) {
 		Assert.notNull(targetType, "Java type required");
 
-		final String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(targetType, Path.SRC_MAIN_JAVA);
+		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(targetType, projectOperations.getPathResolver().getFocusedPath(Path.SRC_MAIN_JAVA));
 
 		final List<MethodMetadataBuilder> methods = new ArrayList<MethodMetadataBuilder>();
 		final List<JavaType> parameterTypes = Arrays.asList(OBJECT);
@@ -214,10 +216,10 @@ public class JmsOperationsImpl implements JmsOperations {
 
 		typeManagementService.createOrUpdateTypeOnDisk(typeDetailsBuilder.build());
 
-		final String jmsContextPath = projectOperations.getPathResolver().getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext-jms.xml");
-		final Document document = XmlUtils.readXml(fileManager.getInputStream(jmsContextPath));
-		final Element root = document.getDocumentElement();
-
+		String jmsContextPath = projectOperations.getPathResolver().getFocusedIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext-jms.xml");
+		Document document = XmlUtils.readXml(fileManager.getInputStream(jmsContextPath));
+		Element root = document.getDocumentElement();
+		
 		Element listenerContainer = DomUtils.findFirstElementByName("jms:listener-container", root);
 		if (listenerContainer != null && destinationType.name().equalsIgnoreCase(listenerContainer.getAttribute("destination-type"))) {
 			listenerContainer = document.createElement("jms:listener-container");
@@ -257,8 +259,8 @@ public class JmsOperationsImpl implements JmsOperations {
 		for (final Element dependencyElement : jmsDependencies) {
 			dependencies.add(new Dependency(dependencyElement));
 		}
-
-		projectOperations.addDependencies(dependencies);
+		
+		projectOperations.addDependencies(projectOperations.getFocusedModuleName(), dependencies);
 	}
 
 	private void addDefaultDestination(final Document appCtx, final String name) {
@@ -278,7 +280,7 @@ public class JmsOperationsImpl implements JmsOperations {
 	private String getPhysicalLocationCanonicalPath(final String physicalTypeIdentifier) {
 		Assert.isTrue(PhysicalTypeIdentifier.isValid(physicalTypeIdentifier), "Physical type identifier is invalid");
 		final JavaType javaType = PhysicalTypeIdentifier.getJavaType(physicalTypeIdentifier);
-		final Path path = PhysicalTypeIdentifier.getPath(physicalTypeIdentifier);
+		final ContextualPath path = PhysicalTypeIdentifier.getPath(physicalTypeIdentifier);
 		final String relativePath = javaType.getFullyQualifiedTypeName().replace('.', File.separatorChar) + ".java";
 		return projectOperations.getPathResolver().getIdentifier(path, relativePath);
 	}

@@ -13,6 +13,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.roo.project.GAV;
 import org.springframework.roo.project.MavenUtils;
+import org.springframework.roo.shell.Completion;
 import org.springframework.roo.support.util.StringUtils;
 
 /**
@@ -109,9 +110,9 @@ public class GAVConverterTest {
 	 * conversion as complete
 	 * @param expectedCompletions
 	 */
-	private void assertPossibleValues(final String existingData, final boolean expectedComplete, final String... expectedCompletions) {
+	private void assertPossibleValues(final String existingData, final boolean expectedComplete, final Completion... expectedCompletions) {
 		// Set up
-		final List<String> completions = new ArrayList<String>();
+		final List<Completion> completions = new ArrayList<Completion>();
 
 		// Invoke
 		final boolean complete = converter.getAllPossibleValues(completions, null, existingData, null, null);

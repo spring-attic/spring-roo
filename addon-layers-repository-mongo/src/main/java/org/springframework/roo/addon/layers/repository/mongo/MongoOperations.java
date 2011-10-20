@@ -36,8 +36,8 @@ public interface MongoOperations {
 	 * @param host (optional, defaults to 127.0.0.1)
 	 * @param cloudFoundry indicate if project should be deployable on VMware CloudFoundry (optional, defaults to false)
 	 */
-	void setup(String username, String password, String name, String port, String host, boolean cloudFoundry);
-
+	void setup(String username, String password, String name, String port, String host, boolean cloudFoundry, String moduleName);
+	
 	/**
 	 * Creates a new Repository interface for Spring Data JPA MongoDB integration.
 	 *

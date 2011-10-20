@@ -38,6 +38,7 @@ import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.ReservedWords;
+import org.springframework.roo.project.ContextualPath;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
@@ -73,17 +74,18 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 	// Fields
 	@Reference private MetadataDependencyRegistry metadataDependencyRegistry;
 	@Reference private MetadataService metadataService;
+	@Reference private PathResolver pathResolver;
 	@Reference private ProjectOperations projectOperations;
 	@Reference private TypeLocationService typeLocationService;
 	@Reference private TypeManagementService typeManagementService;
 	@Reference private Shell shell;
 
 	public boolean isSetupAvailable() {
-		return projectOperations.isProjectAvailable();
+		return projectOperations.isFocusedProjectAvailable();
 	}
 
 	public boolean isScaffoldAvailable() {
-		return fileManager.exists(getWebXmlFile()) && !fileManager.exists(projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/spring/webmvc-config.xml"));
+		return fileManager.exists(getWebXmlFile()) && !fileManager.exists(projectOperations.getPathResolver().getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/spring/webmvc-config.xml"));
 	}
 
 	public boolean isMediaAdditionAvailable() {
@@ -99,15 +101,15 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 		createOrUpdateWebXml(theme);
 
 		PathResolver pathResolver = projectOperations.getPathResolver();
-		copyDirectoryContents("index.html", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, ""), false);
-		copyDirectoryContents("viewExpired.xhtml", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, ""), false);
-		copyDirectoryContents("resources/images/*.*", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "resources/images"), false);
-		copyDirectoryContents("resources/css/*.css", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "resources/css"), false);
-		copyDirectoryContents("resources/js/*.js", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "resources/js"), false);
-		copyDirectoryContents("templates/*.xhtml", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "templates"), false);
-		copyDirectoryContents("pages/main.xhtml", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "pages"), false);
+		copyDirectoryContents("index.html", pathResolver.getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, ""), false);
+		copyDirectoryContents("viewExpired.xhtml", pathResolver.getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, ""), false);
+		copyDirectoryContents("resources/images/*.*", pathResolver.getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, "resources/images"), false);
+		copyDirectoryContents("resources/css/*.css", pathResolver.getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, "resources/css"), false);
+		copyDirectoryContents("resources/js/*.js", pathResolver.getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, "resources/js"), false);
+		copyDirectoryContents("templates/*.xhtml", pathResolver.getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, "templates"), false);
+		copyDirectoryContents("pages/main.xhtml", pathResolver.getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, "pages"), false);
 
-		projectOperations.updateProjectType(ProjectType.WAR);
+		projectOperations.updateProjectType(projectOperations.getFocusedModuleName(), ProjectType.WAR);
 
 		fileManager.scan();
 	}
@@ -127,12 +129,15 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 		installBean("ViewExpiredExceptionExceptionHandlerFactory-template.java", new JavaPackage(managedBean.getPackage().getFullyQualifiedPackageName() + ".util"));
 		installBean("ViewExpiredExceptionExceptionHandler-template.java", new JavaPackage(managedBean.getPackage().getFullyQualifiedPackageName() + ".util"));
 
-		if (fileManager.exists(typeLocationService.getPhysicalTypeCanonicalPath(managedBean, Path.SRC_MAIN_JAVA))) {
+		if (fileManager.exists(typeLocationService.getPhysicalTypeCanonicalPath(managedBean, pathResolver.getFocusedPath(Path.SRC_MAIN_JAVA)))) {
 			// Type exists already - nothing to do
 			return;
 		}
 
-		PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(entity));
+		ClassOrInterfaceTypeDetails entityTypeDetails = typeLocationService.getTypeDetails(entity);
+		Assert.notNull(entityTypeDetails, "The type '" + entity + "' could not be resolved");
+
+		PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(entity, PhysicalTypeIdentifier.getPath(entityTypeDetails.getDeclaredByMetadataId())));
 		if (pluralMetadata == null) {
 			return;
 		}
@@ -150,7 +155,7 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 			annotationBuilder.addBooleanAttribute("includeOnMenu", includeOnMenu);
 		}
 		
-		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(managedBean, Path.SRC_MAIN_JAVA);
+		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(managedBean, pathResolver.getFocusedPath(Path.SRC_MAIN_JAVA));
 		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC, managedBean, PhysicalTypeCategory.CLASS);
 		typeDetailsBuilder.addAnnotation(annotationBuilder);
 
@@ -168,7 +173,9 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 	}
 
 	public void addFileUploadField(final JavaSymbolName fieldName, final JavaType typeName, final UploadedFileContentType contentType, final Boolean autoUpload, final String column, final Boolean notNull, final boolean permitReservedWords) {
-		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(typeName, Path.SRC_MAIN_JAVA);
+		ClassOrInterfaceTypeDetails entityTypeDetails = typeLocationService.getTypeDetails(typeName);
+		Assert.notNull(entityTypeDetails, "The type '" + typeName + "' could not be resolved");
+		String physicalTypeIdentifier = entityTypeDetails.getDeclaredByMetadataId();
 		JavaType fieldType = JavaType.BYTE_ARRAY_PRIMITIVE;
 		FieldDetails fieldDetails = new FieldDetails(physicalTypeIdentifier, fieldType, fieldName);
 
@@ -198,7 +205,7 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 	public void addMediaSuurce(final String url, MediaPlayer mediaPlayer) {
 		Assert.isTrue(StringUtils.hasText(url), "Media source url required");
 
-		String mainPage = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "pages/main.xhtml");
+		String mainPage = projectOperations.getPathResolver().getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, "pages/main.xhtml");
 		Document document = XmlUtils.readXml(fileManager.getInputStream(mainPage));
 		final Element root = document.getDocumentElement();
 		Element element = DomUtils.findFirstElementByName("p:panel", root);
@@ -241,7 +248,7 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 			}
 
 			JavaType entity = cid.getName();
-			Path path = PhysicalTypeIdentifier.getPath(cid.getDeclaredByMetadataId());
+			ContextualPath path = PhysicalTypeIdentifier.getPath(cid.getDeclaredByMetadataId());
 
 			// Check to see if this persistent type has a JSF metadata listening to it
 			String downstreamJsfMetadataId = JsfManagedBeanMetadata.createIdentifier(entity, path);
@@ -259,12 +266,12 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 
 	private void installI18n(final JavaPackage destinationPackage) {
 		String packagePath = destinationPackage.getFullyQualifiedPackageName().replace('.', File.separatorChar);
-		String i18nDirectory = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_RESOURCES, packagePath + "/i18n");
+		String i18nDirectory = projectOperations.getPathResolver().getFocusedIdentifier(Path.SRC_MAIN_RESOURCES, packagePath + "/i18n");
 		copyDirectoryContents("i18n/*.properties", i18nDirectory, false);
 	}
 
 	private void copyEntityTypePage(final JavaType entity, final String beanName, final String plural) {
-		String domainTypeFile = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "pages/" + StringUtils.uncapitalize(entity.getSimpleTypeName()) + ".xhtml");
+		String domainTypeFile = projectOperations.getPathResolver().getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, "pages/" + StringUtils.uncapitalize(entity.getSimpleTypeName()) + ".xhtml");
 		try {
 			InputStream inputStream = TemplateUtils.getTemplate(getClass(), "pages/content-template.xhtml");
 			String input = FileCopyUtils.copyToString(new InputStreamReader(inputStream));
@@ -284,7 +291,7 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 		JavaType converterType = new JavaType(javaPackage.getFullyQualifiedPackageName() + "." + entity.getSimpleTypeName() + "Converter");
 		AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(ROO_JSF_CONVERTER);
 		annotationBuilder.addClassAttribute("entity", entity);
-		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(converterType, Path.SRC_MAIN_JAVA);
+		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(converterType, pathResolver.getFocusedPath(Path.SRC_MAIN_JAVA));
 		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC, converterType, PhysicalTypeCategory.CLASS);
 		typeDetailsBuilder.addAnnotation(annotationBuilder);
 
@@ -295,7 +302,7 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 	}
 
 	private String getWebXmlFile() {
-		return projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/web.xml");
+		return projectOperations.getPathResolver().getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/web.xml");
 	}
 
 	private void createOrUpdateWebXml(final Theme theme) {
@@ -310,7 +317,7 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 			document = XmlUtils.readXml(fileManager.getInputStream(webXmlPath));
 		} else {
 			document = getDocumentTemplate("WEB-INF/web-template.xml");
-			String projectName = projectOperations.getProjectMetadata().getProjectName();
+			String projectName = projectOperations.getFocusedModule().getName();
 			WebXmlUtils.setDisplayName(projectName, document, null);
 			WebXmlUtils.setDescription("Roo generated " + projectName + " application", document, null);
 	}
@@ -327,7 +334,7 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 
 		// Add theme to the pom if not already there
 		String themeName = StringUtils.toLowerCase(theme.name().replace("_", "-"));
-		projectOperations.addDependency("org.primefaces.themes", themeName, "1.0.1");
+		projectOperations.addDependency(projectOperations.getFocusedModuleName(), "org.primefaces.themes", themeName, "1.0.1");
 
 		// Update the web.xml primefaces.THEME content-param
 		Element root = document.getDocumentElement();
@@ -340,7 +347,7 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 	}
 
 	private void installFacesConfig(final JavaPackage destinationPackage) {
-		Assert.isTrue(projectOperations.isProjectAvailable(), "Project metadata required");
+		Assert.isTrue(projectOperations.isFocusedProjectAvailable(), "Project metadata required");
 		if (hasFacesConfig()) {
 			return;
 		}
@@ -363,7 +370,7 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 	}
 
 	private String getFacesConfigFile() {
-		return projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/faces-config.xml");
+		return projectOperations.getPathResolver().getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/faces-config.xml");
 	}
 
 	private void updateConfiguration(final JsfImplementation jsfImplementation) {
@@ -408,8 +415,8 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 		redundantDependencies.removeAll(requiredDependencies);
 
 		// Update the POM
-		projectOperations.addDependencies(requiredDependencies);
-		projectOperations.removeDependencies(redundantDependencies);
+		projectOperations.addDependencies(projectOperations.getFocusedModuleName(), requiredDependencies);
+		projectOperations.removeDependencies(projectOperations.getFocusedModuleName(), redundantDependencies);
 	}
 
 	private void updateRepositories(final Element configuration, final JsfImplementation jsfImplementation, final String jsfImplementationXPath) {
@@ -425,7 +432,7 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 			repositories.add(new Repository(repositoryElement));
 		}
 
-		projectOperations.addRepositories(repositories);
+		projectOperations.addRepositories(projectOperations.getFocusedModuleName(), repositories);
 	}
 
 	private List<JsfImplementation> getUnwantedJsfImplementations(final JsfImplementation jsfImplementation) {
@@ -437,7 +444,8 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 	private void installBean(final String templateName, final JavaPackage destinationPackage) {
 		String beanName = templateName.substring(0, templateName.indexOf("-template"));
 		JavaType javaType = new JavaType(destinationPackage.getFullyQualifiedPackageName() + "." + beanName);
-		String physicalPath = typeLocationService.getPhysicalTypeCanonicalPath(javaType, Path.SRC_MAIN_JAVA);
+		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(javaType, pathResolver.getFocusedPath(Path.SRC_MAIN_JAVA));
+		String physicalPath = typeLocationService.getPhysicalTypeCanonicalPath(physicalTypeIdentifier);
 		if (fileManager.exists(physicalPath)) {
 			return;
 		}

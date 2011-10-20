@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.roo.shell.Completion;
 
 /**
  * Unit test of {@link EnumConverter}
@@ -42,15 +43,15 @@ public class EnumConverterTest {
 	@Test
 	public void testGetAllPossibleValuesForPartialName() {
 		// Set up
-		final List<String> completions = new ArrayList<String>();
-
+		final List<Completion> completions = new ArrayList<Completion>();
+		
 		// Invoke
 		final boolean result = enumConverter.getAllPossibleValues(completions, Flavour.class, "b", "anything", null);
 
 		// Check
 		assertTrue(result);
 		assertEquals(1, completions.size());
-		assertEquals(Flavour.BANANA.name(), completions.get(0));
+		assertEquals(Flavour.BANANA.name(), completions.get(0).getValue());
 	}
 
 	/**

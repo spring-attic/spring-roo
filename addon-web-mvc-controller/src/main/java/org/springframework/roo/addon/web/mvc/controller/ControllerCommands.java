@@ -9,12 +9,13 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.addon.plural.PluralMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
-import org.springframework.roo.classpath.PhysicalTypeMetadata;
+import org.springframework.roo.classpath.TypeLocationService;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.Path;
-import org.springframework.roo.project.ProjectMetadata;
+import org.springframework.roo.project.ContextualPath;
+import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
@@ -39,8 +40,10 @@ public class ControllerCommands implements CommandMarker {
 	// Fields
 	@Reference private ControllerOperations controllerOperations;
 	@Reference private MetadataService metadataService;
-
-	@CliAvailabilityIndicator({ "web mvc all", "web mvc scaffold" })
+	@Reference private ProjectOperations projectOperations;
+	@Reference private TypeLocationService typeLocationService;
+	
+	@CliAvailabilityIndicator({ "web mvc all", "web mvc scaffold" }) 
 	public boolean isScaffoldAvailable() {
 		return controllerOperations.isScaffoldAvailable();
 	}
@@ -54,10 +57,8 @@ public class ControllerCommands implements CommandMarker {
 	@CliCommand(value = "web mvc all", help = "Scaffold Spring MVC controllers for all project entities without an existing controller")
 	public void webMvcAll(
 		@CliOption(key = "package", mandatory = true, optionContext = "update", help = "The package in which new controllers will be placed") final JavaPackage javaPackage) {
-
-		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
-		Assert.notNull(projectMetadata, "Could not obtain ProjectMetadata");
-		if (!javaPackage.getFullyQualifiedPackageName().startsWith(projectMetadata.getTopLevelPackage().getFullyQualifiedPackageName())) {
+		Assert.isTrue(projectOperations.isFocusedProjectAvailable(), "Could not obtain ProjectMetadata");
+		if (!javaPackage.getFullyQualifiedPackageName().startsWith(projectOperations.getTopLevelPackage(projectOperations.getFocusedModuleName()).getFullyQualifiedPackageName())) {
 			logger.warning("Your controller was created outside of the project's top level package and is therefore not included in the preconfigured component scanning. Please adjust your component scanning manually in webmvc-config.xml");
 		}
 		controllerOperations.generateAll(javaPackage);
@@ -70,8 +71,15 @@ public class ControllerCommands implements CommandMarker {
 		@CliOption(key = "path", mandatory = false, help = "The base path under which the controller listens for RESTful requests (defaults to the simple name of the form backing object)") String path,
 		@CliOption(key = "disallowedOperations", mandatory = false, help = "A comma separated list of operations (only create, update, delete allowed) that should not be generated in the controller") final String disallowedOperations) {
 
-		PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(backingType, Path.SRC_MAIN_JAVA));
-		if (physicalTypeMetadata == null) {
+		String targetMid = typeLocationService.getPhysicalTypeIdentifier(backingType);
+		if (targetMid == null) {
+			logger.warning("The specified entity can not be resolved to a type in your project");
+			return;
+		}
+
+
+		ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = typeLocationService.getTypeDetails(backingType);
+		if (classOrInterfaceTypeDetails == null) {
 			logger.warning("The specified entity can not be resolved to a type in your project");
 			return;
 		}
@@ -93,7 +101,8 @@ public class ControllerCommands implements CommandMarker {
 		}
 
 		if (!StringUtils.hasText(path)) {
-			PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(backingType));
+			ContextualPath targetPath = PhysicalTypeIdentifier.getPath(classOrInterfaceTypeDetails.getDeclaredByMetadataId());
+			PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(backingType, targetPath));
 			Assert.notNull(pluralMetadata, "Could not determine plural for '" + backingType.getSimpleTypeName() + "'");
 			path = pluralMetadata.getPlural().toLowerCase();
 		} else if (path.equals("/") || path.equals("/*")) {

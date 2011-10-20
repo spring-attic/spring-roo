@@ -52,23 +52,24 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
 
 	// Fields
 	@Reference private FileManager fileManager;
+	@Reference private PathResolver pathResolver;
 	@Reference private ProjectOperations projectOperations;
 	@Reference private TypeLocationService typeLocationService;
 
-	public void installMinmalWebArtefacts() {
+	public void installMinimalWebArtifacts() {
 		// Note that the sequence matters here as some of these artifacts are loaded further down the line
 		createWebApplicationContext();
 		copyWebXml();
 	}
 
 	public void installAllWebMvcArtifacts() {
-		installMinmalWebArtefacts();
+		installMinimalWebArtifacts();
 		manageWebXml();
 		updateConfiguration();
 	}
 
 	public void installConversionService(final JavaPackage destinationPackage) {
-		String webMvcConfigPath = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/spring/webmvc-config.xml");
+		String webMvcConfigPath = pathResolver.getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/spring/webmvc-config.xml");
 		Assert.isTrue(fileManager.exists(webMvcConfigPath), "'" + webMvcConfigPath + "' does not exist");
 
 		Document document = XmlUtils.readXml(fileManager.getInputStream(webMvcConfigPath));
@@ -92,7 +93,7 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
 	}
 
 	public void registerWebFlowConversionServiceExposingInterceptor() {
-		String webFlowConfigPath = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/spring/webflow-config.xml");
+		String webFlowConfigPath = pathResolver.getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/spring/webflow-config.xml");
 		if (! fileManager.exists(webFlowConfigPath)) {
 			// No web flow configured, moving on.
 			return;
@@ -122,14 +123,13 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
 	}
 
 	private void copyWebXml() {
-		Assert.isTrue(projectOperations.isProjectAvailable(), "Project metadata required");
-		PathResolver pathResolver = projectOperations.getPathResolver();
+		Assert.isTrue(projectOperations.isFocusedProjectAvailable(), "Project metadata required");
 
 		// Verify the servlet application context already exists
 		String servletCtxFilename = "WEB-INF/spring/webmvc-config.xml";
-		Assert.isTrue(fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, servletCtxFilename)), "'" + servletCtxFilename + "' does not exist");
+		Assert.isTrue(fileManager.exists(pathResolver.getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, servletCtxFilename)), "'" + servletCtxFilename + "' does not exist");
 
-		String webXmlPath = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/web.xml");
+		String webXmlPath = pathResolver.getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/web.xml");
 		if (fileManager.exists(webXmlPath)) {
 			// File exists, so nothing to do
 			return;
@@ -139,7 +139,7 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
 		Assert.notNull(templateInputStream, "Could not acquire web.xml template");
 		final Document document = XmlUtils.readXml(templateInputStream);
 
-		String projectName = projectOperations.getProjectMetadata().getProjectName();
+		String projectName = projectOperations.getProjectName(projectOperations.getFocusedModuleName());
 		WebXmlUtils.setDisplayName(projectName, document, null);
 		WebXmlUtils.setDescription("Roo generated " + projectName + " application", document, null);
 
@@ -147,11 +147,10 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
 	}
 
 	private void manageWebXml() {
-		Assert.isTrue(projectOperations.isProjectAvailable(), "Project metadata required");
-		PathResolver pathResolver = projectOperations.getPathResolver();
+		Assert.isTrue(projectOperations.isFocusedProjectAvailable(), "Project metadata required");
 
 		// Verify that the web.xml already exists
-		String webXmlPath = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/web.xml");
+		String webXmlPath = pathResolver.getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/web.xml");
 		Assert.isTrue(fileManager.exists(webXmlPath), "'" + webXmlPath + "' does not exist");
 
 		Document document = XmlUtils.readXml(fileManager.getInputStream(webXmlPath));
@@ -160,11 +159,11 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
 		WebXmlUtils.addContextParam(new WebXmlUtils.WebXmlParam("contextConfigLocation", "classpath*:META-INF/spring/applicationContext*.xml"), document, null);
 		WebXmlUtils.addFilter(WebMvcOperations.CHARACTER_ENCODING_FILTER_NAME, "org.springframework.web.filter.CharacterEncodingFilter", "/*", document, null, new WebXmlUtils.WebXmlParam("encoding", "UTF-8"), new WebXmlUtils.WebXmlParam("forceEncoding", "true"));
 		WebXmlUtils.addFilter(WebMvcOperations.HTTP_METHOD_FILTER_NAME, "org.springframework.web.filter.HiddenHttpMethodFilter", "/*", document, null);
-		if (fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml"))) {
+		if (fileManager.exists(pathResolver.getFocusedIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml"))) {
 			WebXmlUtils.addFilter(WebMvcOperations.OPEN_ENTITYMANAGER_IN_VIEW_FILTER_NAME, "org.springframework.orm.jpa.support.OpenEntityManagerInViewFilter", "/*", document, null);
 		}
 		WebXmlUtils.addListener("org.springframework.web.context.ContextLoaderListener", document, "Creates the Spring Container shared by all Servlets and Filters");
-		WebXmlUtils.addServlet(projectOperations.getProjectMetadata().getProjectName(), "org.springframework.web.servlet.DispatcherServlet", "/", 1, document, "Handles Spring requests", new WebXmlUtils.WebXmlParam("contextConfigLocation", "WEB-INF/spring/webmvc-config.xml"));
+		WebXmlUtils.addServlet(projectOperations.getProjectName(projectOperations.getFocusedModuleName()), "org.springframework.web.servlet.DispatcherServlet", "/", 1, document, "Handles Spring requests", new WebXmlUtils.WebXmlParam("contextConfigLocation", "WEB-INF/spring/webmvc-config.xml"));
 		WebXmlUtils.setSessionTimeout(10, document, null);
 		WebXmlUtils.addExceptionType("java.lang.Exception", "/uncaughtException", document, null);
 		WebXmlUtils.addErrorCode(new Integer(404), "/resourceNotFound", document, null);
@@ -173,13 +172,12 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
 	}
 
 	private void createWebApplicationContext() {
-		Assert.isTrue(projectOperations.isProjectAvailable(), "Project metadata required");
-		PathResolver pathResolver = projectOperations.getPathResolver();
+		Assert.isTrue(projectOperations.isFocusedProjectAvailable(), "Project metadata required");
 
 		// Verify the middle tier application context already exists
-		Assert.isTrue(fileManager.exists(pathResolver.getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext.xml")), "Application context does not exist");
+		Assert.isTrue(fileManager.exists(pathResolver.getFocusedIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext.xml")), "Application context does not exist");
 
-		String webConfigFile = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/spring/webmvc-config.xml");
+		String webConfigFile = pathResolver.getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/spring/webmvc-config.xml");
 		final InputStream in;
 		if (!fileManager.exists(webConfigFile)) {
 			in = TemplateUtils.getTemplate(getClass(), "webmvc-config.xml");
@@ -190,15 +188,14 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
 		final Document document = XmlUtils.readXml(in);
 
 		Element root = (Element) document.getFirstChild();
-		DomUtils.findFirstElementByName("context:component-scan", root).setAttribute("base-package", projectOperations.getProjectMetadata().getTopLevelPackage().getFullyQualifiedPackageName());
-
+		DomUtils.findFirstElementByName("context:component-scan", root).setAttribute("base-package", projectOperations.getTopLevelPackage(projectOperations.getFocusedModuleName()).getFullyQualifiedPackageName());
+		
 		fileManager.createOrUpdateTextFileIfRequired(webConfigFile, XmlUtils.nodeToString(document), true);
 	}
 
 	private void updateConfiguration() {
 		// Update webmvc-config.xml if needed.
-		PathResolver pathResolver = projectOperations.getPathResolver();
-		String webConfigFile = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/spring/webmvc-config.xml");
+		String webConfigFile = pathResolver.getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/spring/webmvc-config.xml");
 		Assert.isTrue(fileManager.exists(webConfigFile), "Aborting: Unable to find " + webConfigFile);
 		InputStream webMvcConfigInputStream = null;
 		try {
@@ -221,7 +218,7 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
 		}
 
 		// Add MVC dependencies.
-		boolean isGaeEnabled = projectOperations.getProjectMetadata().isGaeEnabled();
+		boolean isGaeEnabled = projectOperations.isGaeEnabled(projectOperations.getFocusedModuleName());
 		Element configuration = XmlUtils.getConfiguration(getClass());
 
 		List<Dependency> dependencies = new ArrayList<Dependency>();
@@ -234,13 +231,14 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
 				dependencies.add(dependency);
 			}
 		}
-		projectOperations.addDependencies(dependencies);
 
-		projectOperations.updateProjectType(ProjectType.WAR);
+		projectOperations.addDependencies(projectOperations.getFocusedModuleName(), dependencies);
+		
+		projectOperations.updateProjectType(projectOperations.getFocusedModuleName(), ProjectType.WAR);
 	}
 
 	private boolean isConversionServiceConfigured() {
-		String webMvcConfigPath = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/spring/webmvc-config.xml");
+		String webMvcConfigPath = pathResolver.getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/spring/webmvc-config.xml");
 		Assert.isTrue(fileManager.exists(webMvcConfigPath), webMvcConfigPath + " doesn't exist");
 
 		MutableFile mutableFile = fileManager.updateFile(webMvcConfigPath);
@@ -268,7 +266,7 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
 
 	private void installConversionServiceJavaClass(final JavaPackage thePackage) {
 		JavaType javaType = new JavaType(thePackage.getFullyQualifiedPackageName() + ".ApplicationConversionServiceFactoryBean");
-		String physicalPath = typeLocationService.getPhysicalTypeCanonicalPath(javaType, Path.SRC_MAIN_JAVA);
+		String physicalPath = pathResolver.getFocusedCanonicalPath(Path.SRC_MAIN_JAVA, javaType);
 		if (fileManager.exists(physicalPath)) {
 			return;
 		}

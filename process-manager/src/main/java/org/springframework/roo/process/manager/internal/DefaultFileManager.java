@@ -174,8 +174,9 @@ public class DefaultFileManager implements FileManager, UndoListener {
 	}
 
 	public void commit() {
+		Map<String, String> toRemove = new LinkedHashMap<String, String>(deferredFileWrites);
 		try {
-			for (final Entry<String, String> entry : deferredFileWrites.entrySet()) {
+			for (final Entry<String, String> entry : toRemove.entrySet()) {
 				final String fileIdentifier = entry.getKey();
 				final String newContents = entry.getValue();
 				if (StringUtils.hasText(newContents)) {
@@ -185,7 +186,10 @@ public class DefaultFileManager implements FileManager, UndoListener {
 				}
 			}
 		} finally {
-			clear();
+			for (String remove : toRemove.keySet())  {
+				deferredFileWrites.remove(remove);
+			}
+			deferredDescriptionOfChanges.clear();
 		}
 	}
 

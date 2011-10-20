@@ -16,6 +16,7 @@ import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.Path;
+import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.ProjectType;
 import org.springframework.roo.project.Repository;
@@ -39,6 +40,7 @@ public class WebFlowOperationsImpl implements WebFlowOperations {
 
 	// Fields
 	@Reference private FileManager fileManager;
+	@Reference private PathResolver pathResolver;
 	@Reference private ProjectOperations projectOperations;
 	@Reference private MenuOperations menuOperations;
 	@Reference private WebMvcOperations webMvcOperations;
@@ -46,11 +48,11 @@ public class WebFlowOperationsImpl implements WebFlowOperations {
 	@Reference private TilesOperations tilesOperations;
 
 	public boolean isInstallWebFlowAvailable() {
-		return projectOperations.isProjectAvailable();
+		return projectOperations.isFocusedProjectAvailable();
 	}
 
 	public boolean isManageWebFlowAvailable() {
-		return isInstallWebFlowAvailable() && fileManager.exists(projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/spring/webflow-config.xml"));
+		return isInstallWebFlowAvailable() && fileManager.exists(pathResolver.getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/spring/webflow-config.xml"));
 	}
 
 	/**
@@ -61,7 +63,7 @@ public class WebFlowOperationsImpl implements WebFlowOperations {
 
 		final String flowId = getFlowId(flowName);
 		String webRelativeFlowPath = "/WEB-INF/views/" + flowId;
-		String resolvedFlowPath = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, webRelativeFlowPath);
+		String resolvedFlowPath = pathResolver.getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, webRelativeFlowPath);
 		String resolvedFlowDefinitionPath = resolvedFlowPath + "/flow.xml";
 
 		if (fileManager.exists(resolvedFlowPath)) {
@@ -88,14 +90,14 @@ public class WebFlowOperationsImpl implements WebFlowOperations {
 		JavaSymbolName flowMenuName = new JavaSymbolName(flowId.replaceAll("/", "_"));
 		menuOperations.addMenuItem(flowMenuCategory, flowMenuName, flowMenuName.getReadableSymbolName(), "webflow_menu_enter", "/" + flowId, null);
 
-		tilesOperations.addViewDefinition(flowId, flowId + "/*", TilesOperations.DEFAULT_TEMPLATE, webRelativeFlowPath + "/{1}.jspx");
+		tilesOperations.addViewDefinition(flowId, pathResolver.getFocusedPath(Path.SRC_MAIN_WEBAPP), flowId + "/*", TilesOperations.DEFAULT_TEMPLATE, webRelativeFlowPath + "/{1}.jspx");
 
 		updateConfiguration();
 		webMvcOperations.registerWebFlowConversionServiceExposingInterceptor();
 	}
 
 	private void installWebFlowConfiguration() {
-		String resolvedSpringConfigPath = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/spring");
+		String resolvedSpringConfigPath = pathResolver.getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/spring");
 		if (fileManager.exists(resolvedSpringConfigPath + "/webflow-config.xml")) {
 			return;
 		}
@@ -106,8 +108,8 @@ public class WebFlowOperationsImpl implements WebFlowOperations {
 		if (!fileManager.exists(webMvcConfigPath)) {
 			webMvcOperations.installAllWebMvcArtifacts();
 		}
-
-		jspOperations.installCommonViewArtefacts();
+		
+		jspOperations.installCommonViewArtefacts(pathResolver.getFocusedPath(Path.SRC_MAIN_WEBAPP));
 
 		new XmlTemplate(fileManager).update(webMvcConfigPath, new DomElementCallback() {
 			public boolean doWithElement(final Document document, final Element root) {
@@ -130,13 +132,14 @@ public class WebFlowOperationsImpl implements WebFlowOperations {
 		for (Element d : webFlowDependencies) {
 			dependencies.add(new Dependency(d));
 		}
-		projectOperations.addDependencies(dependencies);
 
+		projectOperations.addDependencies(projectOperations.getFocusedModuleName(), dependencies);
+		
 		List<Element> repositories = XmlUtils.findElements("/configuration/springWebFlow/repositories/repository", configuration);
 		for (Element r : repositories) {
-			projectOperations.addRepository(new Repository(r));
+			projectOperations.addRepository(projectOperations.getFocusedModuleName(), new Repository(r));
 		}
-		projectOperations.updateProjectType(ProjectType.WAR);
+		projectOperations.updateProjectType(projectOperations.getFocusedModuleName(), ProjectType.WAR);
 	}
 
 	private String getFlowId(String flowName) {

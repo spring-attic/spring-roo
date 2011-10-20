@@ -33,8 +33,9 @@ public class ResourceTest extends XmlTestCase {
 	@Test
 	public void testGetElement() {
 		// Set up
-		final Resource resource = new Resource(new Path(DIRECTORY), FILTERING, Arrays.asList(INCLUDE_1, INCLUDE_2));
 
+		final Resource resource = new Resource(DIRECTORY, FILTERING, Arrays.asList(INCLUDE_1, INCLUDE_2));
+		
 		// Invoke
 		final Element element = resource.getElement(DOCUMENT_BUILDER.newDocument());
 

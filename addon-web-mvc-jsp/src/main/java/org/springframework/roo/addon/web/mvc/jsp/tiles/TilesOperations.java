@@ -1,6 +1,7 @@
 package org.springframework.roo.addon.web.mvc.jsp.tiles;
 
 import org.springframework.roo.addon.web.mvc.controller.scaffold.WebScaffoldMetadata;
+import org.springframework.roo.project.ContextualPath;
 
 /**
  * Methods for manipulating Apache Tiles view configuration files.
@@ -26,7 +27,7 @@ public interface TilesOperations {
 	 * @param tilesTemplateName The template name (i.e. 'admin', 'public')
 	 * @param viewLocation The location of the view in the Web application (i.e. "/WEB-INF/views/owner/list.jspx")
 	 */
-	void addViewDefinition(String folderName, String tilesViewName, String tilesTemplateName, String viewLocation);
+	void addViewDefinition(String folderName, ContextualPath path, String tilesViewName, String tilesTemplateName, String viewLocation);
 
 	/**
 	 * Removes a view definition from the <code>views.xml</code> Tiles configuration in the given folder
@@ -35,5 +36,5 @@ public interface TilesOperations {
 	 * @param folderName the name of the folder under <code>/WEB-INF/views</code>; can be
 	 * blank to update the main views file, or if not, any leading slash is ignored
 	 */
-	void removeViewDefinition(String name, String folderName);
+	void removeViewDefinition(String name, String folderName, ContextualPath path);
 }

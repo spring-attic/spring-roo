@@ -27,7 +27,7 @@ import org.springframework.roo.classpath.layers.LayerType;
 import org.springframework.roo.classpath.layers.MemberTypeAdditions;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.Path;
+import org.springframework.roo.project.ContextualPath;
 
 /**
  * Implementation of {@link JsfConverterMetadataProvider}.
@@ -45,7 +45,6 @@ public class JsfConverterMetadataProviderImpl extends AbstractMemberDiscoveringI
 	// Fields
 	@Reference private ConfigurableMetadataProvider configurableMetadataProvider;
 	@Reference private LayerService layerService;
-	@Reference private TypeLocationService typeLocationService;
 	private final Map<JavaType, String> entityToConverterMidMap = new LinkedHashMap<JavaType, String>();
 	private final Map<String, JavaType> converterMidToEntityMap = new LinkedHashMap<String, JavaType>();
 
@@ -72,7 +71,7 @@ public class JsfConverterMetadataProviderImpl extends AbstractMemberDiscoveringI
 			return localMid;
 		}
 
-		final MemberHoldingTypeDetails memberHoldingTypeDetails = typeLocationService.findClassOrInterface(itdTypeDetails.getGovernor().getName());
+		final MemberHoldingTypeDetails memberHoldingTypeDetails = typeLocationService.getTypeDetails(itdTypeDetails.getGovernor().getName());
 		if (memberHoldingTypeDetails != null) {
 			for (final JavaType type : memberHoldingTypeDetails.getLayerEntities()) {
 				String localMidType = entityToConverterMidMap.get(type);
@@ -140,12 +139,12 @@ public class JsfConverterMetadataProviderImpl extends AbstractMemberDiscoveringI
 	@Override
 	protected String getGovernorPhysicalTypeIdentifier(final String metadataIdentificationString) {
 		final JavaType javaType = JsfConverterMetadata.getJavaType(metadataIdentificationString);
-		final Path path = JsfConverterMetadata.getPath(metadataIdentificationString);
+		final ContextualPath path = JsfConverterMetadata.getPath(metadataIdentificationString);
 		return PhysicalTypeIdentifier.createIdentifier(javaType, path);
 	}
 
 	@Override
-	protected String createLocalIdentifier(final JavaType javaType, final Path path) {
+	protected String createLocalIdentifier(final JavaType javaType, final ContextualPath path) {
 		return JsfConverterMetadata.createIdentifier(javaType, path);
 	}
 

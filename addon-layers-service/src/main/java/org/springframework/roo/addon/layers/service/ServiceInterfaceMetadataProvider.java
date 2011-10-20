@@ -12,7 +12,6 @@ import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.plural.PluralMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
-import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.customdata.taggers.CustomDataKeyDecorator;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
@@ -24,7 +23,7 @@ import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.metadata.MetadataProvider;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.Path;
+import org.springframework.roo.project.ContextualPath;
 
 /**
  * {@link MetadataProvider} providing {@link ServiceInterfaceMetadata}
@@ -38,7 +37,6 @@ public class ServiceInterfaceMetadataProvider extends AbstractMemberDiscoveringI
 
 	// Fields
 	@Reference private CustomDataKeyDecorator customDataKeyDecorator;
-	@Reference private TypeLocationService typeLocationService;
 
 	private final Map<JavaType, String> managedEntityTypes = new HashMap<JavaType, String>();
 
@@ -66,7 +64,7 @@ public class ServiceInterfaceMetadataProvider extends AbstractMemberDiscoveringI
 			return localMid;
 		}
 
-		final MemberHoldingTypeDetails memberHoldingTypeDetails = typeLocationService.findClassOrInterface(governor);
+		final MemberHoldingTypeDetails memberHoldingTypeDetails = typeLocationService.getTypeDetails(governor);
 		if (memberHoldingTypeDetails != null) {
 			for (final JavaType type : memberHoldingTypeDetails.getLayerEntities()) {
 				final String localMidType = managedEntityTypes.get(type);
@@ -99,7 +97,12 @@ public class ServiceInterfaceMetadataProvider extends AbstractMemberDiscoveringI
 			}
 			// We simply take the first disregarding any further fields which may be identifiers
 			domainTypeToIdTypeMap.put(type, idType);
-			String pluralId = PluralMetadata.createIdentifier(type);
+			String domainTypeId = typeLocationService.getPhysicalTypeIdentifier(type);
+			if (domainTypeId == null) {
+				return null;
+			}
+			ContextualPath path = PhysicalTypeIdentifier.getPath(domainTypeId);
+			String pluralId = PluralMetadata.createIdentifier(type, path);
 			PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(pluralId);
 			if (pluralMetadata == null) {
 				return null;
@@ -122,15 +125,14 @@ public class ServiceInterfaceMetadataProvider extends AbstractMemberDiscoveringI
 	}
 
 	@Override
-	protected String createLocalIdentifier(final JavaType javaType, final Path path) {
+	protected String createLocalIdentifier(final JavaType javaType, final ContextualPath path) {
 		return ServiceInterfaceMetadata.createIdentifier(javaType, path);
 	}
 
 	@Override
 	protected String getGovernorPhysicalTypeIdentifier(final String metadataIdentificationString) {
 		JavaType javaType = ServiceInterfaceMetadata.getJavaType(metadataIdentificationString);
-		Path path = ServiceInterfaceMetadata.getPath(metadataIdentificationString);
-		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(javaType, path);
-		return physicalTypeIdentifier;
+		ContextualPath path = ServiceInterfaceMetadata.getPath(metadataIdentificationString);
+		return PhysicalTypeIdentifier.createIdentifier(javaType, path);
 	}
 }

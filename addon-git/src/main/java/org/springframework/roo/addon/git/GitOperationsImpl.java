@@ -186,8 +186,9 @@ public class GitOperationsImpl implements GitOperations {
 		setConfig("remote \"origin\"", "fetch", "+refs/heads/*:refs/remotes/origin/*");
 		setConfig("branch \"master\"", "remote", "origin");
 		setConfig("branch \"master\"", "merge", "refs/heads/master");
+	
+		String gitIgnore = pathResolver.getFocusedIdentifier(Path.ROOT, Constants.GITIGNORE_FILENAME);
 
-		String gitIgnore = pathResolver.getIdentifier(Path.ROOT, Constants.GITIGNORE_FILENAME);
 		if (!fileManager.exists(gitIgnore)) {
 			try {
 				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "gitignore-template"), fileManager.createFile(gitIgnore).getOutputStream());
@@ -209,6 +210,6 @@ public class GitOperationsImpl implements GitOperations {
 	}
 
 	private boolean hasDotGit() {
-		return fileManager.exists(pathResolver.getIdentifier(Path.ROOT, Constants.DOT_GIT));
+		return fileManager.exists(pathResolver.getFocusedIdentifier(Path.ROOT, Constants.DOT_GIT));
 	}
 }

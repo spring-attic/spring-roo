@@ -6,6 +6,7 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.addon.plural.PluralMetadata;
+import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.layers.CoreLayerProvider;
 import org.springframework.roo.classpath.layers.LayerType;
 import org.springframework.roo.classpath.layers.MemberTypeAdditions;
@@ -32,6 +33,7 @@ public class EntityLayerProvider extends CoreLayerProvider {
 	// Fields
 	@Reference private EntityMetadataProvider entityMetadataProvider;
 	@Reference private MetadataService metadataService;
+	@Reference TypeLocationService typeLocationService;
 
 	public MemberTypeAdditions getMemberTypeAdditions(final String callerMID, final String methodIdentifier, final JavaType targetEntity, final JavaType idType, final MethodParameter... methodParameters) {
 		Assert.isTrue(StringUtils.hasText(callerMID), "Metadata identifier required");
@@ -75,7 +77,8 @@ public class EntityLayerProvider extends CoreLayerProvider {
 	 * @return <code>null</code> if it can't be found or is actually <code>null</code>
 	 */
 	private String getPlural(final JavaType javaType) {
-		final PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(javaType));
+		final String key = PluralMetadata.createIdentifier(javaType, typeLocationService.getTypePath(javaType));
+		final PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(key);
 		if (pluralMetadata == null) {
 			// Can't acquire the plural
 			return null;

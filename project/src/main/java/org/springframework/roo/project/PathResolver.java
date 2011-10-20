@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.List;
 
 import org.springframework.roo.file.monitor.event.FileDetails;
+import org.springframework.roo.model.JavaType;
 
 /**
  * Allows resolution between {@link File}, {@link Path} and canonical path {@link String}s.
@@ -25,24 +26,24 @@ public interface PathResolver {
 	 * @param relativePath to use (cannot be null, but may be empty if referring to the path itself)
 	 * @return the canonical path to the file (never null)
 	 */
-	String getIdentifier(Path path, String relativePath);
-
+	String getIdentifier(ContextualPath path, String relativePath);
+	
 	/**
 	 * Attempts to determine which {@link Path} the specified canonical path falls under.
 	 *
 	 * @param identifier to lookup (required)
 	 * @return the {@link Path}, or null if the identifier refers to a location not under a know path.
 	 */
-	Path getPath(String identifier);
-
+	ContextualPath getPath(String identifier);
+	
 	/**
 	 * Returns a canonical path that represents the root of the presented {@link Path}.
 	 *
 	 * @param path to lookup (required)
 	 * @return the root of the path (never null or empty)
 	 */
-	String getRoot(Path path);
-
+	String getRoot(ContextualPath path);
+	
 	/**
 	 * Attempts to determine which {@link Path} the specified canonical path falls under,
 	 * and then returns the relative portion of the file name.
@@ -82,8 +83,8 @@ public interface PathResolver {
 	 *
 	 * @return the paths, in order of compilation priority (never null and never empty)
 	 */
-	List<Path> getSourcePaths();
-
+	List<ContextualPath> getSourcePaths();
+	
 	/**
 	 * Similar to {@link #getSourcePaths()}, but only returns {@link Path}s which are not compiled.
 	 *
@@ -97,8 +98,8 @@ public interface PathResolver {
 	 * @return the paths which are not compiled, in an order defined by the implementation (never null
 	 * and never empty).
 	 */
-	List<Path> getNonSourcePaths();
-
+	List<ContextualPath> getNonSourcePaths();
+	
 	/**
 	 * Returns all paths supported by the implementation, in an order defined by the implementation.
 	 *
@@ -116,5 +117,49 @@ public interface PathResolver {
 	 *
 	 * @return all supported paths (never null and never empty)
 	 */
-	List<Path> getPaths();
+	List<ContextualPath> getPaths();
+
+	/**
+	 *
+	 * @return
+	 */
+	String getRoot();
+
+	/**
+	 *
+	 * @param path
+	 * @param javaType
+	 * @return
+	 */
+	String getCanonicalPath(ContextualPath path, JavaType javaType);
+
+	/**
+	 *
+	 * @param path
+	 * @param javaType
+	 * @return
+	 */
+	String getFocusedCanonicalPath(Path path, JavaType javaType);
+
+	/**
+	 *
+	 * @param path
+	 * @param relativePath
+	 * @return
+	 */
+	String getFocusedIdentifier(Path path, String relativePath);
+
+	/**
+	 *
+	 * @param path
+	 * @return
+	 */
+	String getFocusedRoot(Path path);
+
+	/**
+	 *
+	 * @param path
+	 * @return
+	 */
+	ContextualPath getFocusedPath(Path path);
 }

@@ -25,7 +25,7 @@ public class Resource implements Comparable<Resource> {
 	// Fields
 	private final Boolean filtering;
 	private final List<String> includes = new ArrayList<String>();
-	private final Path directory;
+	private final String directory;
 
 	/**
 	 * Creates an immutable {@link Resource} with no "includes".
@@ -33,7 +33,7 @@ public class Resource implements Comparable<Resource> {
 	 * @param directory the {@link Path directory} (required)
 	 * @param filtering whether filtering should occur
 	 */
-	public Resource(final Path directory, final Boolean filtering) {
+	public Resource(final String directory, final Boolean filtering) {
 		this(directory, filtering, null);
 	}
 
@@ -44,7 +44,7 @@ public class Resource implements Comparable<Resource> {
 	 * @param filtering whether filtering should occur
 	 * @param includes the list of includes; can be <code>null</code>
 	 */
-	public Resource(final Path directory, final Boolean filtering, final Collection<String> includes) {
+	public Resource(final String directory, final Boolean filtering, final Collection<String> includes) {
 		Assert.notNull(directory, "Directory required");
 		this.directory = directory;
 		this.filtering = filtering;
@@ -61,7 +61,7 @@ public class Resource implements Comparable<Resource> {
 	public Resource(final Element resource) {
 		final Element directoryElement = XmlUtils.findFirstElement("directory", resource);
 		Assert.notNull(directoryElement, "directory element required");
-		this.directory = new Path(directoryElement.getTextContent());
+		this.directory = directoryElement.getTextContent();
 
 		final Element filteringElement = XmlUtils.findFirstElement("filtering", resource);
 		this.filtering = (filteringElement == null ? null : Boolean.valueOf(filteringElement.getTextContent()));
@@ -72,7 +72,7 @@ public class Resource implements Comparable<Resource> {
 		}
 	}
 
-	public Path getDirectory() {
+	public String getDirectory() {
 		return directory;
 	}
 
@@ -110,7 +110,7 @@ public class Resource implements Comparable<Resource> {
 
 	public String getSimpleDescription() {
 		final StringBuilder builder = new StringBuilder();
-		builder.append("directory ").append(directory.getName());
+		builder.append("directory ").append(directory);
 		if (filtering != null) {
 			builder.append(", filtering ").append(filtering.toString());
 		}
@@ -137,7 +137,7 @@ public class Resource implements Comparable<Resource> {
 	 */
 	public Element getElement(final Document document) {
 		final Element resourceElement = document.createElement("resource");
-		resourceElement.appendChild(XmlUtils.createTextElement(document, "directory", this.directory.getName()));
+		resourceElement.appendChild(XmlUtils.createTextElement(document, "directory", this.directory));
 
 		if (this.filtering != null) {
 			resourceElement.appendChild(XmlUtils.createTextElement(document, "filtering", this.filtering.toString()));

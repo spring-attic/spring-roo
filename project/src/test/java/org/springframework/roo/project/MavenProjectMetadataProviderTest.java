@@ -16,6 +16,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.process.manager.FileManager;
+import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.support.util.StringUtils;
 
 /**
@@ -39,20 +40,22 @@ public class MavenProjectMetadataProviderTest {
 	@Mock private MetadataService mockMetadataService;
 	@Mock private ProjectMetadata mockProjectMetadata;
 	@Mock private PathResolver mockPathResolver;
-	private MavenProjectMetadataProvider metadataProvider;
-
+	@Mock private PomManagementService mockPomManagementService;
+	private MavenOperationsImpl projectOperations;
+	
 	@Before
 	public void setUp() {
 		// Mocks
 		MockitoAnnotations.initMocks(this);
-		when(mockPathResolver.getIdentifier(Path.ROOT, MavenProjectMetadataProvider.POM_RELATIVE_PATH)).thenReturn(POM_PATH);
 
+		when(mockPathResolver.getIdentifier(Path.ROOT.contextualize(""), MavenProjectMetadataProvider.POM_RELATIVE_PATH)).thenReturn(POM_PATH);
+		
 		// Object under test
-		metadataProvider = new MavenProjectMetadataProvider();
-		metadataProvider.fileManager = mockFileManager;
-		metadataProvider.metadataService = mockMetadataService;
-		metadataProvider.pathResolver = mockPathResolver;
-		metadataProvider.activate(null);	// context is ignored
+		projectOperations = new MavenOperationsImpl();
+		projectOperations.fileManager = mockFileManager;
+		projectOperations.metadataService = mockMetadataService;
+		projectOperations.pathResolver = mockPathResolver;
+		projectOperations.pomManagementService = mockPomManagementService;
 	}
 
 	private static final String POM_BEFORE_DEPENDENCY_REMOVED =
@@ -99,15 +102,19 @@ public class MavenProjectMetadataProviderTest {
 		when(mockDependency.getSimpleDescription()).thenReturn(SIMPLE_DESCRIPTION);
 		when(mockDependency.getType()).thenReturn(DependencyType.JAR);
 		when(mockDependency.getVersion()).thenReturn(VERSION);
+		when(mockMetadataService.get(ProjectMetadata.getProjectIdentifier(""))).thenReturn(mockProjectMetadata);
 
-		when(mockMetadataService.get(ProjectMetadata.PROJECT_IDENTIFIER)).thenReturn(mockProjectMetadata);
+		final Pom pom = mock(Pom.class);
+		when(pom.getPath()).thenReturn(POM_PATH);
+		when(mockPomManagementService.getPomFromModuleName("")).thenReturn(pom);
+
 		final Collection<Dependency> dependencies = Arrays.asList(mockDependency, mockDependency);
-		when(mockProjectMetadata.isAnyDependenciesRegistered(dependencies)).thenReturn(true);
-		when(mockProjectMetadata.isDependencyRegistered(mockDependency)).thenReturn(true);
+		when(pom.isAnyDependenciesRegistered(dependencies)).thenReturn(true);
+		when(pom.isDependencyRegistered(mockDependency)).thenReturn(true);
 
 		// Invoke
-		metadataProvider.removeDependencies(dependencies);
-
+		projectOperations.removeDependencies("", dependencies);
+		
 		// Check
 		final String expectedPom = POM_AFTER_DEPENDENCY_REMOVED.replace("\n", StringUtils.LINE_SEPARATOR);
 		verify(mockFileManager).createOrUpdateTextFileIfRequired(eq(POM_PATH), eq(expectedPom), (String) any(), eq(false));

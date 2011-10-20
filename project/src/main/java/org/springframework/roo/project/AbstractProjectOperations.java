@@ -1,19 +1,30 @@
 package org.springframework.roo.project;
 
-import java.util.HashSet;
+import static org.springframework.roo.support.util.AnsiEscapeCode.FG_CYAN;
+import static org.springframework.roo.support.util.AnsiEscapeCode.decorate;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
+import java.util.logging.Level;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.springframework.roo.metadata.MetadataService;
-import org.springframework.roo.project.listeners.DependencyListener;
-import org.springframework.roo.project.listeners.FilterListener;
-import org.springframework.roo.project.listeners.PluginListener;
-import org.springframework.roo.project.listeners.PropertyListener;
-import org.springframework.roo.project.listeners.RepositoryListener;
-import org.springframework.roo.project.listeners.ResourceListener;
+import org.springframework.roo.model.JavaPackage;
+import org.springframework.roo.process.manager.FileManager;
+import org.springframework.roo.project.maven.Pom;
+import org.springframework.roo.shell.Shell;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.CollectionUtils;
+import org.springframework.roo.support.util.DomUtils;
+import org.springframework.roo.support.util.StringUtils;
+import org.springframework.roo.support.util.XmlElementBuilder;
+import org.springframework.roo.support.util.XmlUtils;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 /**
  * Provides common project operations. Should be subclassed by a project-specific operations subclass.
@@ -28,222 +39,166 @@ import org.springframework.roo.support.util.Assert;
 @Component(componentAbstract = true)
 public abstract class AbstractProjectOperations implements ProjectOperations {
 
+	// Constants
+	static final String ADDED = "added";
+	static final String CHANGED = "changed";
+	static final String REMOVED = "removed";
+	static final String UPDATED = "updated";
+	
 	// Fields
-	@Reference protected MetadataService metadataService;
-	@Reference protected PathResolver pathResolver;
-	@Reference protected ProjectMetadataProvider projectMetadataProvider;
+	@Reference FileManager fileManager;
+	@Reference MetadataService metadataService;
+	@Reference PathResolver pathResolver;
+	@Reference protected Shell shell;
+	@Reference PomManagementService pomManagementService;
 
-	private final Set<DependencyListener> listeners = new HashSet<DependencyListener>();
-	private final Set<RepositoryListener> repositoryListeners = new HashSet<RepositoryListener>();
-	private final Set<RepositoryListener> pluginRepositoryListeners = new HashSet<RepositoryListener>();
-	private final Set<PluginListener> pluginListeners = new HashSet<PluginListener>();
-	private final Set<PropertyListener> propertyListeners = new HashSet<PropertyListener>();
-	private final Set<FilterListener> filterListeners = new HashSet<FilterListener>();
-	private final Set<ResourceListener> resourceListeners = new HashSet<ResourceListener>();
-
-	public final boolean isProjectAvailable() {
-		return getProjectMetadata() != null;
+	/**
+	 * Generates a message about the addition of the given items to the POM
+	 *
+	 * @param action the past tense of the action that was performed
+	 * @param items the items that were acted upon (required, can be empty)
+	 * @param singular the singular of this type of item (required)
+	 * @param plural the plural of this type of item (required)
+	 * @return a non-<code>null</code> message
+	 * @since 1.2.0
+	 */
+	static String getDescriptionOfChange(final String action, final Collection<String> items, final String singular, final String plural) {
+		if (items.isEmpty()) {
+			return "";
+		}
+		return highlight(action + " " + (items.size() == 1 ? singular : plural)) + " " + StringUtils.collectionToDelimitedString(items, ", ");
 	}
 
-	public final ProjectMetadata getProjectMetadata() {
-		return (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
+	/**
+	 * Highlights the given text
+	 *
+	 * @param text the text to highlight (can be blank)
+	 * @return the highlighted text
+	 */
+	static String highlight(final String text) {
+		return decorate(text, FG_CYAN);
+	}
+
+	public final boolean isProjectAvailable(String moduleName) {
+		Pom pom = pomManagementService.getPomFromModuleName(moduleName);
+		return pom != null;
+	}
+	
+	public final ProjectMetadata getProjectMetadata(String moduleName) {
+		return (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier(moduleName));
+	}
+
+	public Pom getFocusedModule() {
+		return pomManagementService.getFocusedModule();
+	}
+
+	public String getFocusedModuleName() {
+		return pomManagementService.getFocusedModuleName();
+	}
+
+	public void setModule(Pom module) {
+		// Update window title with project name
+		shell.flash(Level.FINE, "Spring Roo: " + getTopLevelPackage(module.getModuleName()), Shell.WINDOW_TITLE_SLOT);
+		shell.setPromptPath(module.getModuleName());
+		pomManagementService.setFocusedModule(module);
+	}
+
+	public final Pom getPomFromModuleName(String moduleName) {
+		return pomManagementService.getPomFromModuleName(moduleName);
 	}
 
 	public PathResolver getPathResolver() {
 		return pathResolver;
 	}
 
-	@Deprecated
-	public void addDependencyListener(final DependencyListener listener) {
-		this.listeners.add(listener);
+	public PomManagementService getPomManagementService() {
+		return pomManagementService;
 	}
 
-	@Deprecated
-	public void removeDependencyListener(final DependencyListener listener) {
-		this.listeners.remove(listener);
-	}
-
-	@Deprecated
-	private void sendDependencyAdditionNotifications(final Dependency dependency) {
-		for (DependencyListener listener : listeners) {
-			listener.dependencyAdded(dependency);
+	public void addModuleDependency(String moduleName) {
+		if (moduleName != null) {
+			Pom focusedModule = getFocusedModule();
+			if (StringUtils.hasText(moduleName) && StringUtils.hasText(focusedModule.getModuleName()) && !moduleName.equals(getFocusedModule().getModuleName())) {
+				Pom externalModule = pomManagementService.getPomFromModuleName(moduleName);
+				if (externalModule != null) {
+					if (!externalModule.getPath().equals(focusedModule.getPath())) {
+						detectCircularDependency(focusedModule, externalModule);
+						Dependency dependency = new Dependency(externalModule.getGroupId(), externalModule.getArtifactId(), externalModule.getVersion());
+						if (getFocusedModule().getDependenciesExcludingVersion(dependency).isEmpty()) {
+							addDependency(getFocusedModuleName(), dependency);
+						}
+					}
+				}
+			}
 		}
 	}
 
-	@Deprecated
-	private void sendDependencyRemovalNotifications(final Dependency dependency) {
-		for (DependencyListener listener :listeners) {
-			listener.dependencyRemoved(dependency);
+	private void detectCircularDependency(Pom module1, Pom module2) {
+		if (module1.isDependencyRegistered(new Dependency(module2.getGroupId(), module2.getArtifactId(), module2.getVersion()))) {
+			if (module2.isDependencyRegistered(new Dependency(module1.getGroupId(), module1.getArtifactId(), module1.getVersion()))) {
+				throw new IllegalStateException("Circular dependency detected, '" + module1.getModuleName() + "' depends on '" + module2.getModuleName() + "' and vice versa");
+			}
 		}
 	}
 
-	@Deprecated
-	public void addRepositoryListener(final RepositoryListener listener) {
-		this.repositoryListeners.add(listener);
-	}
-
-	@Deprecated
-	public void removeRepositoryListener(final RepositoryListener listener) {
-		this.repositoryListeners.remove(listener);
-	}
-
-	@Deprecated
-	private void sendRepositoryAdditionNotifications(final Repository repository) {
-		for (RepositoryListener listener : repositoryListeners) {
-			listener.repositoryAdded(repository);
+	public JavaPackage getTopLevelPackage(String moduleName) {
+		Pom pom = getPomFromModuleName(moduleName);
+		if (pom != null) {
+			return new JavaPackage(pom.getGroupId());
 		}
+		return null;
 	}
 
-	@Deprecated
-	private void sendRepositoryRemovalNotifications(final Repository repository) {
-		for (RepositoryListener listener : repositoryListeners) {
-			listener.repositoryRemoved(repository);
-		}
+	/**
+	 * Determines whether the GWT Maven plugin exists in the pom.
+	 *
+	 * @return true if the gwt-maven-plugin is present in the pom.xml, otherwise false
+	 */
+	public boolean isGwtEnabled(String moduleName) {
+		Pom pom = getPomFromModuleName(moduleName);
+		return pom != null && pom.isGwtEnabled();
 	}
 
-	@Deprecated
-	public void addPluginRepositoryListener(final RepositoryListener listener) {
-		this.pluginRepositoryListeners.add(listener);
+
+	/**
+	 * Determines whether the Google App Engine Maven plugin exists in the pom.
+	 *
+	 * @return true if the maven-gae-plugin is present in the pom.xml, otherwise false
+	 */
+	public boolean isGaeEnabled(String moduleName) {
+		Pom pom = getPomFromModuleName(moduleName);
+		return pom != null && pom.isGaeEnabled();
 	}
 
-	@Deprecated
-	public void removePluginRepositoryListener(final RepositoryListener listener) {
-		this.pluginRepositoryListeners.remove(listener);
+	/**
+	 * Determines whether the DataNucleus Maven plugin exists in the pom.
+	 *
+	 * @return true if the maven-datanucleus-plugin is present in the pom.xml, otherwise false
+	 */
+	public boolean isDataNucleusEnabled(String moduleName) {
+		Pom pom = getPomFromModuleName(moduleName);
+		return pom != null && pom.isDataNucleusEnabled();
 	}
 
-	@Deprecated
-	private void sendPluginRepositoryAdditionNotifications(final Repository repository) {
-		for (RepositoryListener listener : pluginRepositoryListeners) {
-			listener.repositoryAdded(repository);
-		}
+	/**
+	 * Determines whether the Database.com Maven dependency exists in the pom.
+	 *
+	 * @return true if the com.force.sdk is present in the pom.xml, otherwise false
+	 */
+	public boolean isDatabaseDotComEnabled(String moduleName) {
+		Pom pom = getPomFromModuleName(moduleName);
+		return pom != null && pom.isDatabaseDotComEnabled();
 	}
 
-	@Deprecated
-	private void sendPluginRepositoryRemovalNotifications(final Repository repository) {
-		for (RepositoryListener listener : pluginRepositoryListeners) {
-			listener.repositoryRemoved(repository);
-		}
+	public String getProjectName(String moduleName) {
+		Pom pom = getPomFromModuleName(moduleName);
+		Assert.notNull(pom, "A pom with module name '" + moduleName + "' could not be found");
+		return pom.getName();
+
 	}
 
-	@Deprecated
-	public void addPluginListener(final PluginListener listener) {
-		this.pluginListeners.add(listener);
-	}
-
-	@Deprecated
-	public void removePluginListener(final PluginListener listener) {
-		this.pluginListeners.remove(listener);
-	}
-
-	@Deprecated
-	private void sendPluginAdditionNotifications(final Plugin plugin) {
-		for (PluginListener listener : pluginListeners) {
-			listener.pluginAdded(plugin);
-		}
-	}
-
-	@Deprecated
-	private void sendPluginRemovalNotifications(final Plugin plugin) {
-		for (PluginListener listener : pluginListeners) {
-			listener.pluginRemoved(plugin);
-		}
-	}
-
-	@Deprecated
-	public void addPropertyListener(final PropertyListener listener) {
-		this.propertyListeners.add(listener);
-	}
-
-	@Deprecated
-	public void removePropertyListener(final PropertyListener listener) {
-		this.propertyListeners.remove(listener);
-	}
-
-	@Deprecated
-	private void sendPropertyAdditionNotifications(final Property property) {
-		for (PropertyListener listener : propertyListeners) {
-			listener.propertyAdded(property);
-		}
-	}
-
-	@Deprecated
-	private void sendPropertyRemovalNotifications(final Property property) {
-		for (PropertyListener listener : propertyListeners) {
-			listener.propertyRemoved(property);
-		}
-	}
-
-	@Deprecated
-	public void addFilterListener(final FilterListener listener) {
-		this.filterListeners.add(listener);
-	}
-
-	@Deprecated
-	public void removeFilterListener(final FilterListener listener) {
-		this.filterListeners.remove(listener);
-	}
-
-	@Deprecated
-	private void sendFilterAdditionNotifications(final Filter filter) {
-		for (FilterListener listener : filterListeners) {
-			listener.filterAdded(filter);
-		}
-	}
-
-	@Deprecated
-	private void sendFilterRemovalNotifications(final Filter filter) {
-		for (FilterListener listener : filterListeners) {
-			listener.filterRemoved(filter);
-		}
-	}
-
-	@Deprecated
-	public void addResourceListener(final ResourceListener listener) {
-		this.resourceListeners.add(listener);
-	}
-
-	@Deprecated
-	public void removeResourceListener(final ResourceListener listener) {
-		this.resourceListeners.remove(listener);
-	}
-
-	@Deprecated
-	private void sendResourceAdditionNotifications(final Resource resource) {
-		for (ResourceListener listener : resourceListeners) {
-			listener.resourceAdded(resource);
-		}
-	}
-
-	@Deprecated
-	private void sendResourceRemovalNotifications(final Resource resource) {
-		for (ResourceListener listener : resourceListeners) {
-			listener.resourceRemoved(resource);
-		}
-	}
-
-	public void updateProjectType(final ProjectType projectType) {
-		Assert.notNull(projectType, "ProjectType required");
-		projectMetadataProvider.updateProjectType(projectType);
-	}
-
-	public final void addDependencies(final List<Dependency> dependencies) {
-		Assert.isTrue(isProjectAvailable(), "Dependency modification prohibited at this time");
-		Assert.notNull(dependencies, "Dependencies required");
-		projectMetadataProvider.addDependencies(dependencies);
-		for (Dependency dependency : dependencies) {
-			sendDependencyAdditionNotifications(dependency);
-		}
-	}
-
-	public final void addDependency(final Dependency dependency) {
-		Assert.isTrue(isProjectAvailable(), "Dependency modification prohibited at this time");
-		Assert.notNull(dependency, "Dependency required");
-		projectMetadataProvider.addDependency(dependency);
-		sendDependencyAdditionNotifications(dependency);
-	}
-
-	public final void addDependency(final String groupId, final String artifactId, final String version, DependencyScope scope, final String classifier) {
-		Assert.isTrue(isProjectAvailable(), "Dependency modification prohibited at this time");
+	public final void addDependency(final String moduleName, String groupId, String artifactId, String version, DependencyScope scope, String classifier) {
+		Assert.isTrue(isProjectAvailable(moduleName), "Dependency modification prohibited at this time");
 		Assert.notNull(groupId, "Group ID required");
 		Assert.notNull(artifactId, "Artifact ID required");
 		Assert.hasText(version, "Version required");
@@ -251,137 +206,35 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 			scope = DependencyScope.COMPILE;
 		}
 		Dependency dependency = new Dependency(groupId, artifactId, version, DependencyType.JAR, scope, classifier);
-		projectMetadataProvider.addDependency(dependency);
-		sendDependencyAdditionNotifications(dependency);
+		addDependency(moduleName, dependency);
 	}
 
-	public final void addDependency(final String groupId, final String artifactId, final String version, final DependencyScope scope) {
-		addDependency(groupId, artifactId, version, scope, "");
+	public final void addDependency(final String moduleName, String groupId, String artifactId, String version, DependencyScope scope) {
+		addDependency(moduleName, groupId, artifactId, version, scope, "");
 	}
 
-	public final void addDependency(final String groupId, final String artifactId, final String version) {
-		addDependency(groupId, artifactId, version, DependencyScope.COMPILE);
+	public final void addDependency(final String moduleName, String groupId, String artifactId, String version) {
+		addDependency(moduleName, groupId, artifactId, version, DependencyScope.COMPILE);
 	}
 
-	public final void removeDependencies(final List<Dependency> dependencies) {
-		Assert.isTrue(isProjectAvailable(), "Dependency modification prohibited at this time");
-		Assert.notNull(dependencies, "Dependencies required");
-		projectMetadataProvider.removeDependencies(dependencies);
-		for (Dependency dependency : dependencies) {
-			sendDependencyRemovalNotifications(dependency);
-		}
-	}
-
-	public final void removeDependency(final Dependency dependency) {
-		Assert.isTrue(isProjectAvailable(), "Dependency modification prohibited at this time");
-		Assert.notNull(dependency, "Dependency required");
-		projectMetadataProvider.removeDependency(dependency);
-		sendDependencyAdditionNotifications(dependency);
-	}
-
-	public final void removeDependency(final String groupId, final String artifactId, final String version, final String classifier) {
-		Assert.isTrue(isProjectAvailable(), "Dependency modification prohibited at this time");
+	public final void removeDependency(final String moduleName, String groupId, String artifactId, String version, String classifier) {
+		Assert.isTrue(isProjectAvailable(moduleName), "Dependency modification prohibited at this time");
 		Assert.notNull(groupId, "Group ID required");
 		Assert.notNull(artifactId, "Artifact ID required");
 		Assert.hasText(version, "Version required");
 		Dependency dependency = new Dependency(groupId, artifactId, version, DependencyType.JAR, DependencyScope.COMPILE, classifier);
-		projectMetadataProvider.removeDependency(dependency);
-		sendDependencyRemovalNotifications(dependency);
+		removeDependency(moduleName, dependency);
 	}
 
-	public final void updateDependencyScope(final Dependency dependency, final DependencyScope dependencyScope) {
-		Assert.isTrue(isProjectAvailable(), "Dependency modification prohibited at this time");
-		Assert.notNull(dependency, "Dependency required");
-		projectMetadataProvider.updateDependencyScope(dependency, dependencyScope);
+	public final void removeDependency(final String moduleName, String groupId, String artifactId, String version) {
+		removeDependency(moduleName, groupId, artifactId, version, "");
 	}
 
-	public final void removeDependency(final String groupId, final String artifactId, final String version) {
-		removeDependency(groupId, artifactId, version, "");
-	}
-
-	public final void addRepositories(final List<Repository> repositories) {
-		Assert.isTrue(isProjectAvailable(), "Repository modification prohibited at this time");
-		Assert.notNull(repositories, "Repositories required");
-		projectMetadataProvider.addRepositories(repositories);
-		for (Repository repository : repositories) {
-			sendRepositoryAdditionNotifications(repository);
-		}
-	}
-
-	public final void addRepository(final Repository repository) {
-		Assert.isTrue(isProjectAvailable(), "Repository modification prohibited at this time");
-		Assert.notNull(repository, "Repository required");
-		projectMetadataProvider.addRepository(repository);
-		sendRepositoryAdditionNotifications(repository);
-	}
-
-	public final void removeRepository(final Repository repository) {
-		Assert.isTrue(isProjectAvailable(), "Repository modification prohibited at this time");
-		Assert.notNull(repository, "Repository required");
-		projectMetadataProvider.removeRepository(repository);
-		sendRepositoryRemovalNotifications(repository);
-	}
-
-	public final void addPluginRepositories(final List<Repository> repositories) {
-		Assert.isTrue(isProjectAvailable(), "Plugin repository modification prohibited at this time");
-		Assert.notNull(repositories, "Plugin repositories required");
-		projectMetadataProvider.addPluginRepositories(repositories);
-		for (Repository repository : repositories) {
-			sendPluginRepositoryAdditionNotifications(repository);
-		}
-	}
-
-	public final void addPluginRepository(final Repository repository) {
-		Assert.isTrue(isProjectAvailable(), "Plugin repository modification prohibited at this time");
-		Assert.notNull(repository, "Repository required");
-		projectMetadataProvider.addPluginRepository(repository);
-		sendPluginRepositoryAdditionNotifications(repository);
-	}
-
-	public final void removePluginRepository(final Repository repository) {
-		Assert.isTrue(isProjectAvailable(), "Plugin repository modification prohibited at this time");
-		Assert.notNull(repository, "Repository required");
-		projectMetadataProvider.removePluginRepository(repository);
-		sendPluginRepositoryRemovalNotifications(repository);
-	}
-
-	public final void addBuildPlugins(final List<Plugin> plugins) {
-		Assert.isTrue(isProjectAvailable(), "Plugin modification prohibited at this time");
-		Assert.notNull(plugins, "BuildPlugins required");
-		projectMetadataProvider.addBuildPlugins(plugins);
-		for (Plugin plugin : plugins) {
-			sendPluginAdditionNotifications(plugin);
-		}
-	}
-
-	public final void addBuildPlugin(final Plugin plugin) {
-		Assert.isTrue(isProjectAvailable(), "Plugin modification prohibited at this time");
+	public void updateBuildPlugin(final String moduleName, final Plugin plugin) {
+		final Pom pom = getPomFromModuleName(moduleName);
+		Assert.notNull(pom, "The pom is not available, so plugins cannot be modified at this time");
 		Assert.notNull(plugin, "Plugin required");
-		projectMetadataProvider.addBuildPlugin(plugin);
-		sendPluginAdditionNotifications(plugin);
-	}
-
-	public final void removeBuildPlugins(final List<Plugin> plugins) {
-		Assert.isTrue(isProjectAvailable(), "Plugin modification prohibited at this time");
-		Assert.notNull(plugins, "Plugins required");
-		projectMetadataProvider.removeBuildPlugins(plugins);
-		for (Plugin plugin : plugins) {
-			sendPluginRemovalNotifications(plugin);
-		}
-	}
-
-	public final void removeBuildPlugin(final Plugin plugin) {
-		Assert.isTrue(isProjectAvailable(), "Plugin modification prohibited at this time");
-		Assert.notNull(plugin, "Plugin required");
-		projectMetadataProvider.removeBuildPlugin(plugin);
-		sendPluginRemovalNotifications(plugin);
-	}
-
-	public void updateBuildPlugin(final Plugin plugin) {
-		ProjectMetadata projectMetadata = getProjectMetadata();
-		Assert.notNull(projectMetadata, "Plugin modification prohibited at this time");
-		Assert.notNull(plugin, "Plugin required");
-		for (Plugin existingPlugin : projectMetadata.getBuildPlugins()) {
+		for (Plugin existingPlugin : pom.getBuildPlugins()) {
 			if (existingPlugin.equals(plugin)) {
 				// Already exists, so just quit
 				return;
@@ -389,57 +242,598 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 		}
 
 		// Delete any existing plugin with a different version
-		projectMetadataProvider.removeBuildPlugin(plugin);
+		removeBuildPlugin(moduleName, plugin);
 
 		// Add the plugin
-		projectMetadataProvider.addBuildPlugin(plugin);
-		sendPluginAdditionNotifications(plugin);
+		addBuildPlugin(moduleName, plugin);
 	}
 
 	@Deprecated
-	public void buildPluginUpdate(final Plugin plugin) {
-		updateBuildPlugin(plugin);
+	public void buildPluginUpdate(final String moduleName, Plugin plugin) {
+		updateBuildPlugin(moduleName, plugin);
 	}
 
-	public final void addProperty(final Property property) {
-		Assert.isTrue(isProjectAvailable(), "Property modification prohibited at this time");
-		Assert.notNull(property, "Property required");
-		projectMetadataProvider.addProperty(property);
-		sendPropertyAdditionNotifications(property);
+	public void addDependencies(final String moduleName, final Collection<? extends Dependency> dependencies) {
+		Assert.isTrue(isProjectAvailable(moduleName), "Dependency modification prohibited at this time");
+		Assert.notNull(dependencies, "Dependencies required");
+
+		if (CollectionUtils.isEmpty(dependencies)) {
+			return;
+		}
+		final Pom pom = getPomFromModuleName(moduleName);
+		Assert.notNull(pom, "The pom is not available, so dependency addition cannot be performed");
+		if (pom.isAllDependenciesRegistered(dependencies)) {
+			// No need to spend time parsing pom.xml
+			return;
+		}
+
+		final Document document = XmlUtils.readXml(fileManager.getInputStream(pom.getPath()));
+		final Element dependenciesElement = DomUtils.createChildIfNotExists("dependencies", document.getDocumentElement(), document);
+		final List<Element> existingDependencyElements = XmlUtils.findElements("dependency", dependenciesElement);
+
+		final List<String> newDependencies = new ArrayList<String>();
+		final List<String> removedDependencies = new ArrayList<String>();
+		for (final Dependency newDependency : dependencies) {
+			if (newDependency != null && !pom.isDependencyRegistered(newDependency)) {
+				// Look for any existing instances of this dependency
+				boolean inserted = false;
+				for (final Element existingDependencyElement : existingDependencyElements) {
+					final Dependency existingDependency = new Dependency(existingDependencyElement);
+					if (existingDependency.hasSameCoordinates(newDependency)) {
+						// It's the same artifact, but might have a different version, exclusions, etc.
+						if (!inserted) {
+							// We haven't added the new one yet; do so now
+							dependenciesElement.insertBefore(newDependency.getElement(document), existingDependencyElement);
+							inserted = true;
+							if (!newDependency.getVersion().equals(existingDependency.getVersion())) {
+								// It's a genuine version change => mention the old and new versions in the message
+								newDependencies.add(newDependency.getSimpleDescription());
+								removedDependencies.add(existingDependency.getSimpleDescription());
+							}
+						}
+						// Either way, we remove the previous one in case it was different in any way
+						dependenciesElement.removeChild(existingDependencyElement);
+					}
+					// Keep looping in case it's present more than once
+				}
+				if (!inserted) {
+					// We didn't encounter any existing dependencies with the same coordinates; add it now
+					dependenciesElement.appendChild(newDependency.getElement(document));
+					newDependencies.add(newDependency.getSimpleDescription());
+				}
+			}
+		}
+		if (!newDependencies.isEmpty()) {
+			final String addMessage = getDescriptionOfChange(ADDED, newDependencies, "dependency", "dependencies");
+			final String removeMessage = getDescriptionOfChange(REMOVED, removedDependencies, "dependency", "dependencies");
+			final String message = StringUtils.hasText(removeMessage) ? addMessage + "; " + removeMessage : addMessage;
+			fileManager.createOrUpdateTextFileIfRequired(pom.getPath(), XmlUtils.nodeToString(document), message, false);
+		}
 	}
 
-	public final void removeProperty(final Property property) {
-		Assert.isTrue(isProjectAvailable(), "Property modification prohibited at this time");
-		Assert.notNull(property, "Property required");
-		projectMetadataProvider.removeProperty(property);
-		sendPropertyRemovalNotifications(property);
+	public void addDependency(final String moduleName, final Dependency dependency) {
+		Assert.isTrue(isProjectAvailable(moduleName), "Dependency modification prohibited at this time");
+		Assert.notNull(dependency, "Dependency required");
+		addDependencies(moduleName, Collections.singletonList(dependency));
 	}
 
-	public final void addFilter(final Filter filter) {
-		Assert.isTrue(isProjectAvailable(), "Filter modification prohibited at this time");
+	public void removeDependencies(final String moduleName, final Collection<? extends Dependency> dependenciesToRemove) {
+		Assert.isTrue(isProjectAvailable(moduleName), "Dependency modification prohibited at this time");
+		Assert.notNull(dependenciesToRemove, "Dependencies required");
+		if (CollectionUtils.isEmpty(dependenciesToRemove)) {
+			return;
+		}
+		final Pom pom = getPomFromModuleName(moduleName);
+		Assert.notNull(pom, "The pom is not available, so dependency removal cannot be performed");
+		if (!pom.isAnyDependenciesRegistered(dependenciesToRemove)) {
+			return;
+		}
+
+		final Document document = XmlUtils.readXml(fileManager.getInputStream(pom.getPath()));
+		final Element root = document.getDocumentElement();
+		final Element dependenciesElement = XmlUtils.findFirstElement("/project/dependencies", root);
+		if (dependenciesElement == null) {
+			return;
+		}
+
+		final List<Element> existingDependencyElements = XmlUtils.findElements("dependency", dependenciesElement);
+		final List<String> removedDependencies = new ArrayList<String>();
+		for (final Dependency dependencyToRemove : dependenciesToRemove) {
+			if (pom.isDependencyRegistered(dependencyToRemove)) {
+				for (final Iterator<Element> iter = existingDependencyElements.iterator(); iter.hasNext();) {
+					final Element candidate = iter.next();
+					final Dependency candidateDependency = new Dependency(candidate);
+					if (candidateDependency.equals(dependencyToRemove)) {
+						// It's the same dependency; remove it
+						dependenciesElement.removeChild(candidate);
+						// Ensure we don't try to remove it again for another Dependency
+						iter.remove();
+						removedDependencies.add(candidateDependency.getSimpleDescription());
+					}
+					// Keep looping in case it's in the POM more than once
+				}
+			}
+		}
+		if (removedDependencies.isEmpty()) {
+			return;
+		}
+		DomUtils.removeTextNodes(dependenciesElement);
+		final String message = getDescriptionOfChange(REMOVED, removedDependencies, "dependency", "dependencies");
+
+		fileManager.createOrUpdateTextFileIfRequired(pom.getPath(), XmlUtils.nodeToString(document), message, false);
+	}
+
+
+	public void removeDependency(final String moduleName, final Dependency dependency) {
+		removeDependency(moduleName, dependency, "/project/dependencies", "/project/dependencies/dependency");
+	}
+
+	public void updateDependencyScope(final String moduleName, final Dependency dependency, final DependencyScope dependencyScope) {
+		Assert.isTrue(isProjectAvailable(moduleName), "Dependency modification prohibited at this time");
+		Assert.notNull(dependency, "Dependency to update required");
+		final Pom pom = getPomFromModuleName(moduleName);
+		Assert.notNull(pom, "The pom is not available, so updating a dependency cannot be performed");
+		if (!pom.isDependencyRegistered(dependency)) {
+			return;
+		}
+
+		final Document document = XmlUtils.readXml(fileManager.getInputStream(pom.getPath()));
+		final Element root = document.getDocumentElement();
+		final Element dependencyElement = XmlUtils.findFirstElement("/project/dependencies/dependency[groupId = '" + dependency.getGroupId() + "' and artifactId = '" + dependency.getArtifactId() + "' and version = '" + dependency.getVersion() + "']", root);
+		if (dependencyElement == null) {
+			return;
+		}
+
+		final Element scopeElement = XmlUtils.findFirstElement("scope", dependencyElement);
+		final String descriptionOfChange;
+		if (scopeElement == null) {
+			if (dependencyScope != null) {
+				dependencyElement.appendChild(new XmlElementBuilder("scope", document).setText(dependencyScope.name().toLowerCase()).build());
+				descriptionOfChange = highlight(ADDED + " scope") + " " + dependencyScope.name().toLowerCase() + " to dependency " + dependency.getSimpleDescription();
+			} else {
+				descriptionOfChange = null;
+			}
+		} else {
+			if (dependencyScope != null) {
+				scopeElement.setTextContent(dependencyScope.name().toLowerCase());
+				descriptionOfChange = highlight(CHANGED + " scope") + " to " + dependencyScope.name().toLowerCase() + " in dependency " + dependency.getSimpleDescription();
+			} else {
+				dependencyElement.removeChild(scopeElement);
+				descriptionOfChange = highlight(REMOVED + " scope") + " from dependency " + dependency.getSimpleDescription();
+			}
+		}
+
+		if (descriptionOfChange != null) {
+			fileManager.createOrUpdateTextFileIfRequired(pom.getPath(), XmlUtils.nodeToString(document), descriptionOfChange, false);
+		}
+	}
+
+	public void addBuildPlugins(final String moduleName, final Collection<? extends Plugin> plugins) {
+		Assert.isTrue(isProjectAvailable(moduleName), "Plugin modification prohibited at this time");
+		Assert.notNull(plugins, "BuildPlugins required");
+		if (CollectionUtils.isEmpty(plugins)) {
+			return;
+		}
+		final Pom pom = getPomFromModuleName(moduleName);
+		Assert.notNull(pom, "The pom is not available, so plugin addition cannot be performed");
+		if (pom.isAllPluginsRegistered(plugins)) {
+			return;
+		}
+
+		final Document document = XmlUtils.readXml(fileManager.getInputStream(pom.getPath()));
+		final Element root = document.getDocumentElement();
+		final Element pluginsElement = DomUtils.createChildIfNotExists("/project/build/plugins", root, document);
+
+		final List<String> newPlugins = new ArrayList<String>();
+		for (final Plugin plugin : plugins) {
+			if (plugin != null && !pom.isBuildPluginRegistered(plugin)) {
+				pluginsElement.appendChild(plugin.getElement(document));
+				newPlugins.add(plugin.getSimpleDescription());
+			}
+		}
+		if (newPlugins.size() == 0) {
+			return;
+		}
+		final String message = getDescriptionOfChange(ADDED, newPlugins, "plugin", "plugins");
+		fileManager.createOrUpdateTextFileIfRequired(pom.getPath(), XmlUtils.nodeToString(document), message, false);
+	}
+
+	public void addBuildPlugin(final String moduleName, final Plugin plugin) {
+		Assert.isTrue(isProjectAvailable(moduleName), "Plugin modification prohibited at this time");
+		Assert.notNull(plugin, "Plugin required");
+		addBuildPlugins(moduleName, Collections.singletonList(plugin));
+	}
+
+	public boolean isFocusedProjectAvailable() {
+		return isProjectAvailable(getFocusedModuleName());
+	}
+
+	public void removeBuildPlugins(final String moduleName, final Collection<? extends Plugin> plugins) {
+		Assert.isTrue(isProjectAvailable(moduleName), "Plugin modification prohibited at this time");
+		Assert.notNull(plugins, "Plugins required");
+		if (CollectionUtils.isEmpty(plugins)) {
+			return;
+		}
+		final Pom pom = getPomFromModuleName(moduleName);
+		Assert.notNull(pom, "The pom is not available, so plugin removal cannot be performed");
+		if (!pom.isAnyPluginsRegistered(plugins)) {
+			return;
+		}
+
+		final Document document = XmlUtils.readXml(fileManager.getInputStream(pom.getPath()));
+		final Element pluginsElement = XmlUtils.findFirstElement("/project/build/plugins", document.getDocumentElement());
+		if (pluginsElement == null) {
+			return;
+		}
+
+		final List<String> removedPlugins = new ArrayList<String>();
+		for (final Plugin plugin : plugins) {
+			// Can't filter the XPath on groupId, as it's optional in the POM for Apache-owned plugins
+			for (final Element candidate : XmlUtils.findElements("plugin[artifactId = '" + plugin.getArtifactId() + "' and version = '" + plugin.getVersion() + "']", pluginsElement)) {
+				final Plugin candidatePlugin = new Plugin(candidate);
+				if (candidatePlugin.getGroupId().equals(plugin.getGroupId())) {
+					// This element has the same groupId, artifactId, and version as the plugin to be removed; remove it
+					pluginsElement.removeChild(candidate);
+					removedPlugins.add(candidatePlugin.getSimpleDescription());
+					// Keep looping in case this plugin is in the POM more than once (unlikely)
+				}
+			}
+		}
+		if (removedPlugins.isEmpty()) {
+			return;
+		}
+		DomUtils.removeTextNodes(pluginsElement);
+		final String message = getDescriptionOfChange(REMOVED, removedPlugins, "plugin", "plugins");
+
+		fileManager.createOrUpdateTextFileIfRequired(pom.getPath(), XmlUtils.nodeToString(document), message, false);
+	}
+
+	public void removeBuildPlugin(final String moduleName, final Plugin plugin) {
+		Assert.isTrue(isProjectAvailable(moduleName), "Plugin modification prohibited at this time");
+		Assert.notNull(plugin, "Plugin required");
+		removeBuildPlugins(moduleName, Collections.singletonList(plugin));
+	}
+
+	public void addRepositories(final String moduleName, final Collection<? extends Repository> repositories) {
+		addRepositories(moduleName, repositories, "repositories", "repository");
+	}
+
+	public void addRepository(final String moduleName, final Repository repository) {
+		addRepository(moduleName, repository, "repositories", "repository");
+	}
+
+	public void removeRepository(final String moduleName, final Repository repository) {
+		removeRepository(moduleName, repository, "/project/repositories/repository");
+	}
+
+	public void addPluginRepositories(final String moduleName, final Collection<? extends Repository> repositories) {
+		Assert.isTrue(isProjectAvailable(moduleName), "Plugin repository modification prohibited at this time");
+		Assert.notNull(repositories, "Plugin repositories required");
+		addRepositories(moduleName, repositories, "pluginRepositories", "pluginRepository");
+	}
+
+	public void addPluginRepository(final String moduleName, final Repository repository) {
+		Assert.isTrue(isProjectAvailable(moduleName), "Plugin repository modification prohibited at this time");
+		Assert.notNull(repository, "Repository required");
+		addRepository(moduleName, repository, "pluginRepositories", "pluginRepository");
+	}
+
+	public void removePluginRepository(final String moduleName, final Repository repository) {
+		Assert.isTrue(isProjectAvailable(moduleName), "Plugin repository modification prohibited at this time");
+		Assert.notNull(repository, "Repository required");
+		removeRepository(moduleName, repository, "/project/pluginRepositories/pluginRepository");
+	}
+
+	public void updateProjectType(final String moduleName, final ProjectType projectType) {
+		Assert.notNull(projectType, "Project type required");
+		final Pom pom = getPomFromModuleName(moduleName);
+		Assert.notNull(pom, "The pom is not available, so the project type cannot be changed");
+
+		final Document document = XmlUtils.readXml(fileManager.getInputStream(pom.getPath()));
+		final Element packaging = DomUtils.createChildIfNotExists("packaging", document.getDocumentElement(), document);
+		if (packaging.getTextContent().equals(projectType.getType())) {
+			return;
+		}
+
+		packaging.setTextContent(projectType.getType());
+		final String descriptionOfChange = highlight(UPDATED + " project type") + " to " + projectType.getType();
+
+		fileManager.createOrUpdateTextFileIfRequired(pom.getPath(), XmlUtils.nodeToString(document), descriptionOfChange, false);
+	}
+
+	private void addRepositories(final String moduleName, final Collection<? extends Repository> repositories, final String containingPath, final String path) {
+		Assert.isTrue(isProjectAvailable(moduleName), "Repository modification prohibited at this time");
+		Assert.notNull(repositories, "Repositories required");
+
+		if (CollectionUtils.isEmpty(repositories)) {
+			return;
+		}
+		final Pom pom = getPomFromModuleName(moduleName);
+		Assert.notNull(pom, "The pom is not available, so repository addition cannot be performed");
+		if ("pluginRepository".equals(path)) {
+			if (pom.isAllPluginRepositoriesRegistered(repositories)) {
+				return;
+			}
+		} else if (pom.isAllRepositoriesRegistered(repositories)) {
+			return;
+		}
+
+		final Document document = XmlUtils.readXml(fileManager.getInputStream(pom.getPath()));
+		final Element repositoriesElement = DomUtils.createChildIfNotExists(containingPath, document.getDocumentElement(), document);
+
+		final List<String> addedRepositories = new ArrayList<String>();
+		for (final Repository repository : repositories) {
+			if ("pluginRepository".equals(path)) {
+				if (pom.isPluginRepositoryRegistered(repository)) {
+					continue;
+				}
+			} else {
+				if (pom.isRepositoryRegistered(repository)) {
+					continue;
+				}
+			}
+			if (repository != null) {
+				repositoriesElement.appendChild(repository.getElement(document, path));
+				addedRepositories.add(repository.getUrl());
+			}
+		}
+		final String message = getDescriptionOfChange(ADDED, addedRepositories, path, containingPath);
+
+		fileManager.createOrUpdateTextFileIfRequired(pom.getPath(), XmlUtils.nodeToString(document), message, false);
+	}
+
+	private void addRepository(final String moduleName, final Repository repository, final String containingPath, final String path) {
+		Assert.isTrue(isProjectAvailable(moduleName), "Repository modification prohibited at this time");
+		Assert.notNull(repository, "Repository required");
+		addRepositories(moduleName, Collections.singletonList(repository), containingPath, path);
+	}
+
+	private void removeRepository(final String moduleName, final Repository repository, final String path) {
+		Assert.isTrue(isProjectAvailable(moduleName), "Repository modification prohibited at this time");
+		Assert.notNull(repository, "Repository required");
+		final Pom pom = getPomFromModuleName(moduleName);
+		Assert.notNull(pom, "The pom is not available, so repository removal cannot be performed");
+		if ("pluginRepository".equals(path)) {
+			if (!pom.isPluginRepositoryRegistered(repository)) {
+				return;
+			}
+		} else {
+			if (!pom.isRepositoryRegistered(repository)) {
+				return;
+			}
+		}
+
+		final Document document = XmlUtils.readXml(fileManager.getInputStream(pom.getPath()));
+		final Element root = document.getDocumentElement();
+
+		String descriptionOfChange = "";
+		for (final Element candidate : XmlUtils.findElements(path, root)) {
+			if (repository.equals(new Repository(candidate))) {
+				candidate.getParentNode().removeChild(candidate);
+				descriptionOfChange = highlight(REMOVED + " repository") + " " + repository.getUrl();
+				// We stay in the loop just in case it was in the POM more than once
+			}
+		}
+
+		fileManager.createOrUpdateTextFileIfRequired(pom.getPath(), XmlUtils.nodeToString(document), descriptionOfChange, false);
+	}
+
+	public void addProperty(final String moduleName, final Property property) {
+		Assert.isTrue(isProjectAvailable(moduleName), "Property modification prohibited at this time");
+		Assert.notNull(property, "Property to add required");
+		final Pom pom = getPomFromModuleName(moduleName);
+		Assert.notNull(pom, "The pom is not available, so property addition cannot be performed");
+		if (pom.isPropertyRegistered(property)) {
+			return;
+		}
+
+		final Document document = XmlUtils.readXml(fileManager.getInputStream(pom.getPath()));
+		final Element root = document.getDocumentElement();
+
+		final String descriptionOfChange;
+		final Element existing = XmlUtils.findFirstElement("/project/properties/" + property.getName(), root);
+		if (existing == null) {
+			// No existing property of this name; add it
+			final Element properties = DomUtils.createChildIfNotExists("properties", document.getDocumentElement(), document);
+			properties.appendChild(XmlUtils.createTextElement(document, property.getName(), property.getValue()));
+			descriptionOfChange = highlight(ADDED + " property") + " '" + property.getName() + "' = '" + property.getValue() + "'";
+		} else {
+			// A property of this name exists; update it
+			existing.setTextContent(property.getValue());
+			descriptionOfChange = highlight(UPDATED + " property") + " '" + property.getName() + "' to '" + property.getValue() + "'";
+		}
+
+		fileManager.createOrUpdateTextFileIfRequired(pom.getPath(), XmlUtils.nodeToString(document), descriptionOfChange, false);
+	}
+
+	public void removeProperty(final String moduleName, final Property property) {
+		Assert.isTrue(isProjectAvailable(moduleName), "Property modification prohibited at this time");
+		Assert.notNull(property, "Property to remove required");
+		final Pom pom = getPomFromModuleName(moduleName);
+		Assert.notNull(pom, "The pom is not available, so property removal cannot be performed");
+		if (!pom.isPropertyRegistered(property)) {
+			return;
+		}
+
+		final Document document = XmlUtils.readXml(fileManager.getInputStream(pom.getPath()));
+		final Element root = document.getDocumentElement();
+
+		String descriptionOfChange = "";
+		final Element propertiesElement = XmlUtils.findFirstElement("/project/properties", root);
+		for (final Element candidate : XmlUtils.findElements("/project/properties/*", document.getDocumentElement())) {
+			if (property.equals(new Property(candidate))) {
+				propertiesElement.removeChild(candidate);
+				descriptionOfChange = highlight(REMOVED + " property") + " " + property.getName();
+				// Stay in the loop just in case it was in the POM more than once
+			}
+		}
+
+		DomUtils.removeTextNodes(propertiesElement);
+
+		fileManager.createOrUpdateTextFileIfRequired(pom.getPath(), XmlUtils.nodeToString(document), descriptionOfChange, false);
+	}
+
+	public void addFilter(final String moduleName, final Filter filter) {
+		Assert.isTrue(isProjectAvailable(moduleName), "Filter modification prohibited at this time");
 		Assert.notNull(filter, "Filter required");
-		projectMetadataProvider.addFilter(filter);
-		sendFilterAdditionNotifications(filter);
+		final Pom pom = getPomFromModuleName(moduleName);
+		Assert.notNull(pom, "The pom is not available, so filter addition cannot be performed");
+		if (filter == null || pom.isFilterRegistered(filter)) {
+			return;
+		}
+
+		final Document document = XmlUtils.readXml(fileManager.getInputStream(pom.getPath()));
+		final Element root = document.getDocumentElement();
+
+		final Element buildElement = XmlUtils.findFirstElement("/project/build", root);
+		final String descriptionOfChange;
+		final Element existingFilter = XmlUtils.findFirstElement("filters/filter['" + filter.getValue() + "']", buildElement);
+		if (existingFilter == null) {
+			// No such filter; add it
+			final Element filtersElement = DomUtils.createChildIfNotExists("filters", buildElement, document);
+			filtersElement.appendChild(XmlUtils.createTextElement(document, "filter", filter.getValue()));
+			descriptionOfChange = highlight(ADDED + " filter") + " '" + filter.getValue() + "'";
+		} else {
+			existingFilter.setTextContent(filter.getValue());
+			descriptionOfChange = highlight(UPDATED + " filter") + " '" + filter.getValue() + "'";
+		}
+
+		fileManager.createOrUpdateTextFileIfRequired(pom.getPath(), XmlUtils.nodeToString(document), descriptionOfChange, false);
 	}
 
-	public final void removeFilter(final Filter filter) {
-		Assert.isTrue(isProjectAvailable(), "Filter modification prohibited at this time");
+	public void removeFilter(String moduleName, final Filter filter) {
+		Assert.isTrue(isProjectAvailable(moduleName), "Filter modification prohibited at this time");
 		Assert.notNull(filter, "Filter required");
-		projectMetadataProvider.removeFilter(filter);
-		sendFilterRemovalNotifications(filter);
+		final Pom pom = getPomFromModuleName(moduleName);
+		Assert.notNull(pom, "The pom is not available, so filter removal cannot be performed");
+		if (filter == null || !pom.isFilterRegistered(filter)) {
+			return;
+		}
+
+		final Document document = XmlUtils.readXml(fileManager.getInputStream(pom.getPath()));
+		final Element root = document.getDocumentElement();
+
+		final Element filtersElement = XmlUtils.findFirstElement("/project/build/filters", root);
+		if (filtersElement == null) {
+			return;
+		}
+
+		String descriptionOfChange = "";
+		for (final Element candidate : XmlUtils.findElements("filter", filtersElement)) {
+			if (filter.equals(new Filter(candidate))) {
+				filtersElement.removeChild(candidate);
+				descriptionOfChange = highlight(REMOVED + " filter") + " '" + filter.getValue() + "'";
+				// We will not break the loop (even though we could theoretically), just in case it was in the POM more than once
+			}
+		}
+
+		final List<Element> filterElements = XmlUtils.findElements("filter", filtersElement);
+		if (filterElements.isEmpty()) {
+			filtersElement.getParentNode().removeChild(filtersElement);
+		}
+
+		DomUtils.removeTextNodes(root);
+
+		fileManager.createOrUpdateTextFileIfRequired(pom.getPath(), XmlUtils.nodeToString(document), descriptionOfChange, false);
 	}
 
-	public final void addResource(final Resource resource) {
-		Assert.isTrue(isProjectAvailable(), "Resource modification prohibited at this time");
-		Assert.notNull(resource, "Resource required");
-		projectMetadataProvider.addResource(resource);
-		sendResourceAdditionNotifications(resource);
+	public void addResource(final String moduleName, final Resource resource) {
+		Assert.isTrue(isProjectAvailable(moduleName), "Resource modification prohibited at this time");
+		Assert.notNull(resource, "Resource to add required");
+		final Pom pom = getPomFromModuleName(moduleName);
+		Assert.notNull(pom, "The pom is not available, so resource addition cannot be performed");
+		if (pom.isResourceRegistered(resource)) {
+			return;
+		}
+
+		final Document document = XmlUtils.readXml(fileManager.getInputStream(pom.getPath()));
+		final Element buildElement = XmlUtils.findFirstElement("/project/build", document.getDocumentElement());
+		final Element resourcesElement = DomUtils.createChildIfNotExists("resources", buildElement, document);
+		resourcesElement.appendChild(resource.getElement(document));
+		final String descriptionOfChange = highlight(ADDED + " resource") + " " + resource.getSimpleDescription();
+
+		fileManager.createOrUpdateTextFileIfRequired(pom.getPath(), XmlUtils.nodeToString(document), descriptionOfChange, false);
 	}
 
-	public final void removeResource(final Resource resource) {
-		Assert.isTrue(isProjectAvailable(), "Resource modification prohibited at this time");
+	public void removeResource(final String moduleName, final Resource resource) {
+		Assert.isTrue(isProjectAvailable(moduleName), "Resource modification prohibited at this time");
 		Assert.notNull(resource, "Resource required");
-		projectMetadataProvider.removeResource(resource);
-		sendResourceRemovalNotifications(resource);
+		final Pom pom = getPomFromModuleName(moduleName);
+		Assert.notNull(pom, "The pom is not available, so resource removal cannot be performed");
+		if (!pom.isResourceRegistered(resource)) {
+			return;
+		}
+
+		final Document document = XmlUtils.readXml(fileManager.getInputStream(pom.getPath()));
+		final Element root = document.getDocumentElement();
+
+		final Element resourcesElement = XmlUtils.findFirstElement("/project/build/resources", root);
+		if (resourcesElement == null) {
+			return;
+		}
+		String descriptionOfChange = "";
+		for (final Element candidate : XmlUtils.findElements("resource[directory = '" + resource.getDirectory() + "']", resourcesElement)) {
+			if (resource.equals(new Resource(candidate))) {
+				resourcesElement.removeChild(candidate);
+				descriptionOfChange = highlight(REMOVED + " resource") + " " + resource.getSimpleDescription();
+				// Stay in the loop just in case it was in the POM more than once
+			}
+		}
+
+		final List<Element> resourceElements = XmlUtils.findElements("resource", resourcesElement);
+		if (resourceElements.isEmpty()) {
+			resourcesElement.getParentNode().removeChild(resourcesElement);
+		}
+
+		DomUtils.removeTextNodes(root);
+
+		fileManager.createOrUpdateTextFileIfRequired(pom.getPath(), XmlUtils.nodeToString(document), descriptionOfChange, false);
+	}
+
+	/**
+	 * Removes an element identified by the given dependency, whenever it occurs at the given path
+	 *
+	 * @param moduleName the name of the module to remove the dependency from
+	 * @param dependency the dependency to remove
+	 * @param containingPath the path to the dependencies element
+	 * @param path the path to the individual dependency elements
+	 */
+	private void removeDependency(final String moduleName, final Dependency dependency, final String containingPath, final String path) {
+		Assert.isTrue(isProjectAvailable(moduleName), "Dependency modification prohibited at this time");
+		Assert.notNull(dependency, "Dependency to remove required");
+		final Pom pom = getPomFromModuleName(moduleName);
+		Assert.notNull(pom, "The pom is not available, so dependency removal cannot be performed");
+		if (!pom.isDependencyRegistered(dependency)) {
+			return;
+		}
+
+		final Document document = XmlUtils.readXml(fileManager.getInputStream(pom.getPath()));
+		final Element root = document.getDocumentElement();
+
+		String descriptionOfChange = "";
+		final Element dependenciesElement = XmlUtils.findFirstElement(containingPath, root);
+		for (final Element candidate : XmlUtils.findElements(path, root)) {
+			if (dependency.equals(new Dependency(candidate))) {
+				dependenciesElement.removeChild(candidate);
+				descriptionOfChange = highlight(REMOVED + " dependency") + " " + dependency.getSimpleDescription();
+				// Stay in the loop, just in case it was in the POM more than once
+			}
+		}
+
+		DomUtils.removeTextNodes(dependenciesElement);
+
+		fileManager.createOrUpdateTextFileIfRequired(pom.getPath(), XmlUtils.nodeToString(document), descriptionOfChange, false);
+	}
+
+	public String getFocusedProjectName() {
+		return getProjectName(getFocusedModuleName());
+	}
+
+	public JavaPackage getFocusedTopLevelPackage() {
+		return getTopLevelPackage(getFocusedModuleName());
+	}
+
+	public ProjectMetadata getFocusedProjectMetadata() {
+		return getProjectMetadata(getFocusedModuleName());
 	}
 }

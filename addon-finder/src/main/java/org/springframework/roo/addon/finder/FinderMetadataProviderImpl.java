@@ -12,6 +12,7 @@ import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.entity.EntityMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
+import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
@@ -20,8 +21,8 @@ import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.Path;
-import org.springframework.roo.project.ProjectMetadata;
+import org.springframework.roo.project.ContextualPath;
+import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
 /**
  * Implementation of {@link FinderMetadataProvider}.
@@ -37,6 +38,7 @@ public class FinderMetadataProviderImpl extends AbstractMemberDiscoveringItdMeta
 
 	// Fields
 	@Reference private DynamicFinderServices dynamicFinderServices;
+	@Reference private ProjectOperations projectOperations;
 
 	protected void activate(final ComponentContext context) {
 		metadataDependencyRegistry.addNotificationListener(this);
@@ -56,7 +58,7 @@ public class FinderMetadataProviderImpl extends AbstractMemberDiscoveringItdMeta
 
 		// Work out the MIDs of the other metadata we depend on
 		JavaType javaType = FinderMetadata.getJavaType(metadataIdentificationString);
-		Path path = FinderMetadata.getPath(metadataIdentificationString);
+		ContextualPath path = FinderMetadata.getPath(metadataIdentificationString);
 		String entityMetadataKey = EntityMetadata.createIdentifier(javaType, path);
 
 		// We need to lookup the metadata we depend on
@@ -96,9 +98,10 @@ public class FinderMetadataProviderImpl extends AbstractMemberDiscoveringItdMeta
 
 		boolean isDataNucleusEnabled = false;
 
-		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
-		if (projectMetadata != null && !projectMetadata.isValid()) {
-			isDataNucleusEnabled = projectMetadata.isDataNucleusEnabled();
+		String moduleName = PhysicalTypeIdentifierNamingUtils.getPath(metadataIdentificationString).getModule();
+		if (projectOperations.isProjectAvailable(moduleName)) {
+
+			isDataNucleusEnabled = projectOperations.isDataNucleusEnabled(moduleName);
 		}
 
 		// We make the queryHolders immutable in case FinderMetadata in the future makes it available through an accessor etc
@@ -117,12 +120,12 @@ public class FinderMetadataProviderImpl extends AbstractMemberDiscoveringItdMeta
 	@Override
 	protected String getGovernorPhysicalTypeIdentifier(final String metadataIdentificationString) {
 		JavaType javaType = FinderMetadata.getJavaType(metadataIdentificationString);
-		Path path = FinderMetadata.getPath(metadataIdentificationString);
+		ContextualPath path = FinderMetadata.getPath(metadataIdentificationString);
 		return PhysicalTypeIdentifier.createIdentifier(javaType, path);
 	}
 
 	@Override
-	protected String createLocalIdentifier(final JavaType javaType, final Path path) {
+	protected String createLocalIdentifier(final JavaType javaType, final ContextualPath path) {
 		return FinderMetadata.createIdentifier(javaType, path);
 	}
 

@@ -133,8 +133,7 @@ public class Dependency implements Comparable<Dependency> {
 			this.scope = DependencyScope.getScope(dependency);
 			if (scope == DependencyScope.SYSTEM) {
 				if (XmlUtils.findFirstElement("systemPath", dependency) != null) {
-					final String path = XmlUtils.findFirstElement("systemPath", dependency).getTextContent().trim();
-					systemPath = path;
+					systemPath = XmlUtils.findFirstElement("systemPath", dependency).getTextContent().trim();
 				} else {
 					throw new IllegalArgumentException("Missing <systemPath> declaration for system scope");
 				}

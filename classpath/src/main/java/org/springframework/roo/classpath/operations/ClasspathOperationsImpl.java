@@ -26,7 +26,9 @@ import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.ReservedWords;
+import org.springframework.roo.project.ContextualPath;
 import org.springframework.roo.project.Path;
+import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.shell.converters.StaticFieldConverter;
 import org.springframework.roo.support.util.Assert;
 
@@ -42,6 +44,7 @@ public class ClasspathOperationsImpl implements ClasspathOperations {
 
 	// Fields
 	@Reference private MetadataService metadataService;
+	@Reference private PathResolver pathResolver;
 	@Reference private StaticFieldConverter staticFieldConverter;
 	@Reference private TypeLocationService typeLocationService;
 	@Reference private TypeManagementService typeManagementService;
@@ -61,7 +64,7 @@ public class ClasspathOperationsImpl implements ClasspathOperations {
 		Assert.notNull(ptm, "Class " + PhysicalTypeIdentifier.getFriendlyName(physicalTypeIdentifier) + " does not exist");
 	}
 
-	public void createClass(final JavaType name, final boolean rooAnnotations, final Path path, final JavaType superclass, final boolean createAbstract, final boolean permitReservedWords) {
+	public void createClass(final JavaType name, final boolean rooAnnotations, final ContextualPath path, final JavaType superclass, final boolean createAbstract, final boolean permitReservedWords) {
 		if (!permitReservedWords) {
 			ReservedWords.verifyReservedWordsNotPresent(name);
 		}
@@ -76,7 +79,7 @@ public class ClasspathOperationsImpl implements ClasspathOperations {
 		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, modifier, name, PhysicalTypeCategory.CLASS);
 
 		if (!superclass.equals(OBJECT)) {
-			ClassOrInterfaceTypeDetails superclassClassOrInterfaceTypeDetails = typeLocationService.getClassOrInterface(superclass);
+			ClassOrInterfaceTypeDetails superclassClassOrInterfaceTypeDetails = typeLocationService.getTypeDetails(superclass);
 			if (superclassClassOrInterfaceTypeDetails != null) {
 				typeDetailsBuilder.setSuperclass(new ClassOrInterfaceTypeDetailsBuilder(superclassClassOrInterfaceTypeDetails));
 			}
@@ -97,7 +100,7 @@ public class ClasspathOperationsImpl implements ClasspathOperations {
 		typeManagementService.createOrUpdateTypeOnDisk(typeDetailsBuilder.build());
 	}
 
-	public void createInterface(final JavaType name, final Path path, final boolean permitReservedWords) {
+	public void createInterface(final JavaType name, final ContextualPath path, final boolean permitReservedWords) {
 		if (!permitReservedWords) {
 			ReservedWords.verifyReservedWordsNotPresent(name);
 		}
@@ -107,7 +110,7 @@ public class ClasspathOperationsImpl implements ClasspathOperations {
 		typeManagementService.createOrUpdateTypeOnDisk(typeDetailsBuilder.build());
 	}
 
-	public void createEnum(final JavaType name, final Path path, final boolean permitReservedWords) {
+	public void createEnum(final JavaType name, final ContextualPath path, final boolean permitReservedWords) {
 		if (!permitReservedWords) {
 			ReservedWords.verifyReservedWordsNotPresent(name);
 		}
@@ -123,7 +126,7 @@ public class ClasspathOperationsImpl implements ClasspathOperations {
 			ReservedWords.verifyReservedWordsNotPresent(fieldName);
 		}
 
-		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(name, Path.SRC_MAIN_JAVA);
+		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(name, pathResolver.getFocusedPath(Path.SRC_MAIN_JAVA));
 		typeManagementService.addEnumConstant(declaredByMetadataId, fieldName);
 	}
 }

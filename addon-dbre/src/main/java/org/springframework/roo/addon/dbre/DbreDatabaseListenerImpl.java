@@ -49,7 +49,7 @@ import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Path;
-import org.springframework.roo.project.ProjectMetadata;
+import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.shell.Shell;
 import org.springframework.roo.support.util.Assert;
@@ -77,10 +77,12 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 	@Reference private DbreModelService dbreModelService;
 	@Reference private FileManager fileManager;
 	@Reference private IntegrationTestOperations integrationTestOperations;
+	@Reference private PathResolver pathResolver;
 	@Reference private ProjectOperations projectOperations;
 	@Reference private TypeLocationService typeLocationService;
 	@Reference private TypeManagementService typeManagementService;
 	@Reference private Shell shell;
+
 	private Map<JavaType, List<Identifier>> identifierResults;
 
 	public void onFileEvent(final FileEvent fileEvent) {
@@ -145,7 +147,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 					schemaPackage = new JavaPackage(destinationPackage.getFullyQualifiedPackageName() + "." + DbreTypeUtils.suggestPackageName(table.getSchema().getName()));
 				}
 				final JavaType javaType = DbreTypeUtils.suggestTypeNameForNewTable(table.getName(), schemaPackage);
-				if (typeLocationService.findClassOrInterface(javaType) == null) {
+				if (typeLocationService.getTypeDetails(javaType) == null) {
 					table.setIncludeNonPortableAttributes(database.isIncludeNonPortableAttributes());
 					newEntities.add(createNewManagedEntityFromTable(javaType, table, database.isActiveRecord()));
 				}
@@ -200,8 +202,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 
 		// Fall back to project's top level package
 		if (destinationPackage == null) {
-			final ProjectMetadata projectMetadata = projectOperations.getProjectMetadata();
-			destinationPackage = projectMetadata.getTopLevelPackage();
+			destinationPackage = projectOperations.getFocusedTopLevelPackage();
 		}
 		return destinationPackage;
 	}
@@ -340,7 +341,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 		extendsTypes.add(superclass);
 
 		// Create entity class
-		final String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(javaType, Path.SRC_MAIN_JAVA);
+		final String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(javaType, pathResolver.getFocusedPath(Path.SRC_MAIN_JAVA));
 		final ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC, javaType, PhysicalTypeCategory.CLASS);
 		typeDetailsBuilder.setExtendsTypes(extendsTypes);
 		typeDetailsBuilder.setAnnotations(annotations);
@@ -412,7 +413,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 		identifierAnnotations.add(identifierBuilder);
 
 		// Produce identifier itself
-		final String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(identifierType, Path.SRC_MAIN_JAVA);
+		final String declaredByMetadataId = typeLocationService.getPhysicalTypeIdentifier(identifierType);
 		final ClassOrInterfaceTypeDetailsBuilder identifierTypeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC | Modifier.FINAL, identifierType, PhysicalTypeCategory.CLASS);
 		identifierTypeDetailsBuilder.setAnnotations(identifierAnnotations);
 		typeManagementService.createOrUpdateTypeOnDisk(identifierTypeDetailsBuilder.build());
@@ -465,7 +466,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 	}
 
 	private boolean isEntityDeletable(final ClassOrInterfaceTypeDetails managedEntity) {
-		final String declaredByMetadataId = DbreMetadata.createIdentifier(managedEntity.getName(), Path.SRC_MAIN_JAVA);
+		final String declaredByMetadataId = DbreMetadata.createIdentifier(managedEntity.getName(), PhysicalTypeIdentifier.getPath(managedEntity.getDeclaredByMetadataId()));
 		final DbreMetadata dbreMetadata = (DbreMetadata) metadataService.get(declaredByMetadataId);
 		if (dbreMetadata == null || !dbreMetadata.isAutomaticallyDelete()) {
 			return false;
@@ -563,7 +564,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 	}
 
 	private PhysicalTypeMetadata getPhysicalTypeMetadata(final JavaType javaType) {
-		final String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(javaType, Path.SRC_MAIN_JAVA);
+		final String declaredByMetadataId = typeLocationService.getPhysicalTypeIdentifier(javaType);
 		return (PhysicalTypeMetadata) metadataService.get(declaredByMetadataId);
 	}
 }

@@ -46,7 +46,7 @@ public class BackupOperationsImpl implements BackupOperations {
 	@Reference private ProjectOperations projectOperations;
 
 	public boolean isBackupAvailable() {
-		return projectOperations.isProjectAvailable();
+		return projectOperations.isFocusedProjectAvailable();
 	}
 
 	public String backup() {
@@ -63,8 +63,8 @@ public class BackupOperationsImpl implements BackupOperations {
 
 		ZipOutputStream zos = null;
 		try {
-			File projectDirectory = new File(projectOperations.getPathResolver().getIdentifier(Path.ROOT, "."));
-			MutableFile file = fileManager.createFile(FileDetails.getCanonicalPath(new File(projectDirectory, projectOperations.getProjectMetadata().getProjectName() + "_" + df.format(new Date()) + ".zip")));
+			File projectDirectory = new File(projectOperations.getPathResolver().getFocusedIdentifier(Path.ROOT, "."));
+			MutableFile file = fileManager.createFile(FileDetails.getCanonicalPath(new File(projectDirectory, projectOperations.getFocusedProjectName() + "_" + df.format(new Date()) + ".zip")));
 			zos = new ZipOutputStream(file.getOutputStream());
 			zip(projectDirectory, projectDirectory, zos);
 		} catch (FileNotFoundException e) {

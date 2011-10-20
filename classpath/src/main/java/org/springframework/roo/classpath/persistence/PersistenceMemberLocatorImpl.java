@@ -94,10 +94,12 @@ public class PersistenceMemberLocatorImpl implements PersistenceMemberLocator {
 			return;
 		}
 
-		final MemberDetails memberDetails = getMemberDetails(domainType);
-		if (MemberFindingUtils.getMostConcreteMemberHoldingTypeDetailsWithTag(memberDetails, CustomDataKeys.PERSISTENT_TYPE) == null) {
+		ClassOrInterfaceTypeDetails domainTypeDetails = typeLocationService.getTypeDetails(domainType);
+		if (domainTypeDetails == null || !domainTypeDetails.getCustomData().keySet().contains(CustomDataKeys.PERSISTENT_TYPE)) {
 			return;
 		}
+
+		final MemberDetails memberDetails = getMemberDetails(domainTypeDetails);
 
 		// Update normal persistence ID fields cache
 		populateIdTypes(memberDetails, domainType);
@@ -186,10 +188,14 @@ public class PersistenceMemberLocatorImpl implements PersistenceMemberLocator {
 	}
 
 	private MemberDetails getMemberDetails(final JavaType type) {
-		final ClassOrInterfaceTypeDetails physicalTypeMetadata = typeLocationService.getTypeForIdentifier(PhysicalTypeIdentifier.createIdentifier(type));
+		final ClassOrInterfaceTypeDetails physicalTypeMetadata = typeLocationService.getTypeDetails(PhysicalTypeIdentifier.createIdentifier(type));
 		if (physicalTypeMetadata == null ) {
 			return null;
 		}
 		return memberDetailsScanner.getMemberDetails(getClass().getName(),  physicalTypeMetadata);
+	}
+
+	private MemberDetails getMemberDetails(final ClassOrInterfaceTypeDetails typeDetails) {
+		return memberDetailsScanner.getMemberDetails(getClass().getName(),  typeDetails);
 	}
 }

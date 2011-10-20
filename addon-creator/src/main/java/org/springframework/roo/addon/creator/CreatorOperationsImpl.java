@@ -78,6 +78,7 @@ public class CreatorOperationsImpl implements CreatorOperations {
 
 	// Fields
 	@Reference private FileManager fileManager;
+	@Reference private PathResolver pathResolver;
 	@Reference private ProjectOperations projectOperations;
 	@Reference private UrlInputStreamService httpService;
 
@@ -91,7 +92,7 @@ public class CreatorOperationsImpl implements CreatorOperations {
 	}
 
 	public boolean isCommandAvailable() {
-		return !projectOperations.isProjectAvailable();
+		return !projectOperations.isFocusedProjectAvailable();
 	}
 
 	public void createAdvancedAddon(final JavaPackage topLevelPackage, final String description, final String projectName) {
@@ -206,20 +207,18 @@ public class CreatorOperationsImpl implements CreatorOperations {
 
 		install("assembly.xml", topLevelPackage, Path.ROOT, Type.I18N, projectName);
 
-		PathResolver pathResolver = projectOperations.getPathResolver();
-
 		try {
-			FileCopyUtils.copy(new FileInputStream(messageBundle), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, packagePath + separatorChar + messageBundle.getName())).getOutputStream());
+			FileCopyUtils.copy(new FileInputStream(messageBundle), fileManager.createFile(pathResolver.getFocusedIdentifier(Path.SRC_MAIN_RESOURCES, packagePath + separatorChar + messageBundle.getName())).getOutputStream());
 			if (flagGraphic != null) {
-				FileCopyUtils.copy(new FileInputStream(flagGraphic), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, packagePath + separatorChar + flagGraphic.getName())).getOutputStream());
+				FileCopyUtils.copy(new FileInputStream(flagGraphic), fileManager.createFile(pathResolver.getFocusedIdentifier(Path.SRC_MAIN_RESOURCES, packagePath + separatorChar + flagGraphic.getName())).getOutputStream());
 			} else {
 				installFlagGraphic(locale, packagePath);
 			}
 		} catch (IOException e) {
 			throw new IllegalStateException("Could not copy addon resources into project", e);
 		}
-
-		String destinationFile = pathResolver.getIdentifier(Path.SRC_MAIN_JAVA, packagePath + separatorChar + languageName + "Language.java");
+		
+		String destinationFile = pathResolver.getFocusedIdentifier(Path.SRC_MAIN_JAVA, packagePath + separatorChar + languageName + "Language.java");
 
 		if (!fileManager.exists(destinationFile)) {
 			InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), Type.I18N.name().toLowerCase() +  "/Language.java-template");
@@ -294,7 +293,7 @@ public class CreatorOperationsImpl implements CreatorOperations {
 	 * @param pom the POM to write (required)
 	 */
 	private void writePomFile(final Document pom) {
-		final MutableFile pomFile = fileManager.createFile(projectOperations.getPathResolver().getIdentifier(Path.ROOT, POM_XML));
+		final MutableFile pomFile = fileManager.createFile(pathResolver.getFocusedIdentifier(Path.ROOT, POM_XML));
 		XmlUtils.writeXml(pomFile.getOutputStream(), pom);
 	}
 
@@ -305,18 +304,18 @@ public class CreatorOperationsImpl implements CreatorOperations {
 		String topLevelPackageName = topLevelPackage.getFullyQualifiedPackageName();
 		String packagePath = topLevelPackageName.replace('.', separatorChar);
 		String destinationFile = "";
-		PathResolver pathResolver = projectOperations.getPathResolver();
+
 		if (targetFilename.endsWith(".java")) {
-			destinationFile = pathResolver.getIdentifier(path, packagePath + separatorChar + StringUtils.capitalize(topLevelPackageName.substring(topLevelPackageName.lastIndexOf(".") + 1)) + targetFilename);
+			destinationFile = pathResolver.getFocusedIdentifier(path, packagePath + separatorChar + StringUtils.capitalize(topLevelPackageName.substring(topLevelPackageName.lastIndexOf(".") + 1)) + targetFilename);
 		} else {
-			destinationFile = pathResolver.getIdentifier(path, packagePath + separatorChar + targetFilename);
+			destinationFile = pathResolver.getFocusedIdentifier(path, packagePath + separatorChar + targetFilename);
 		}
 
 		// Different destination for assembly.xml
 		if ("assembly.xml".equals(targetFilename)) {
-			destinationFile = pathResolver.getIdentifier(path, "src" + separatorChar + "main" + separatorChar + "assembly" + separatorChar + targetFilename);
+			destinationFile = pathResolver.getFocusedIdentifier(path, "src" + separatorChar + "main" + separatorChar + "assembly" + separatorChar + targetFilename);
 		} else if (targetFilename.startsWith("RooAnnotation")) { // Adjust name for Roo Annotation
-			destinationFile = pathResolver.getIdentifier(path, packagePath + separatorChar + "Roo" + StringUtils.capitalize(topLevelPackageName.substring(topLevelPackageName.lastIndexOf(".") + 1)) + ".java");
+			destinationFile = pathResolver.getFocusedIdentifier(path, packagePath + separatorChar + "Roo" + StringUtils.capitalize(topLevelPackageName.substring(topLevelPackageName.lastIndexOf(".") + 1)) + ".java");
 		}
 
 		if (!fileManager.exists(destinationFile)) {
@@ -341,7 +340,7 @@ public class CreatorOperationsImpl implements CreatorOperations {
 	private void writeTextFile(final String fullPathFromRoot, final String message) {
 		Assert.hasText(fullPathFromRoot, "Text file name to write is required");
 		Assert.hasText(message, "Message required");
-		String path = projectOperations.getPathResolver().getIdentifier(Path.ROOT, fullPathFromRoot);
+		String path = pathResolver.getFocusedIdentifier(Path.ROOT, fullPathFromRoot);
 		MutableFile mutableFile = fileManager.exists(path) ? fileManager.updateFile(path) : fileManager.createFile(path);
 		byte[] input = message.getBytes();
 		try {
@@ -367,7 +366,7 @@ public class CreatorOperationsImpl implements CreatorOperations {
 				if (entry.getName().equals(expectedEntryName)) {
 					int size;
 					byte[] buffer = new byte[2048];
-					MutableFile target = fileManager.createFile(projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_RESOURCES, packagePath + "/" + countryCode + ".png"));
+					MutableFile target = fileManager.createFile(pathResolver.getFocusedIdentifier(Path.SRC_MAIN_RESOURCES, packagePath + "/" + countryCode + ".png"));
 					BufferedOutputStream bos = null;
 					try {
 						bos = new BufferedOutputStream(target.getOutputStream(), buffer.length);

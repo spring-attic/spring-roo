@@ -1,5 +1,10 @@
 package org.springframework.roo.classpath.javaparser.details;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import japa.parser.ast.CompilationUnit;
 import japa.parser.ast.ImportDeclaration;
 import japa.parser.ast.body.BodyDeclaration;
@@ -14,12 +19,6 @@ import japa.parser.ast.body.VariableDeclarator;
 import japa.parser.ast.expr.AnnotationExpr;
 import japa.parser.ast.expr.QualifiedNameExpr;
 import japa.parser.ast.type.ClassOrInterfaceType;
-
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
@@ -128,20 +127,24 @@ public class JavaParserClassOrInterfaceTypeDetailsBuilder implements Builder<Cla
 	}
 
 	public ClassOrInterfaceTypeDetails build() {
-		final ClassOrInterfaceTypeDetailsBuilder classOrInterfaceTypeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId);
+		Assert.notEmpty(compilationUnit.getTypes(), "No types in compilation unit, so unable to continue parsing");
 
 		ClassOrInterfaceDeclaration clazz = null;
 		EnumDeclaration enumClazz = null;
 
-		imports = compilationUnit.getImports();
-		if (imports == null) {
-			imports = new ArrayList<ImportDeclaration>();
-			compilationUnit.setImports(imports);
+		StringBuilder sb = new StringBuilder(compilationUnit.getPackage().getName().toString());
+		if (name.getEnclosingType() != null) {
+			sb.append(".").append(name.getEnclosingType().getSimpleTypeName());
 		}
+		compilationUnitPackage = new JavaPackage(sb.toString());
 
-		compilationUnitPackage = name.getPackage();
+		// Determine the type name, adding type parameters if possible
+		final JavaType newName = JavaParserUtils.getJavaType(compilationUnitServices, typeDeclaration);
 
-		Assert.notEmpty(compilationUnit.getTypes(), "No types in compilation unit, so unable to continue parsing");
+		// Revert back to the original type name (thus avoiding unnecessary inferences about java.lang types; see ROO-244)
+		name = new JavaType(newName.getFullyQualifiedTypeName(), newName.getEnclosingType(), newName.getArray(), newName.getDataType(), newName.getArgName(), newName.getParameters());
+
+		final ClassOrInterfaceTypeDetailsBuilder classOrInterfaceTypeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId);
 
 		physicalTypeCategory = PhysicalTypeCategory.CLASS;
 		if (typeDeclaration instanceof ClassOrInterfaceDeclaration) {
@@ -155,9 +158,19 @@ public class JavaParserClassOrInterfaceTypeDetailsBuilder implements Builder<Cla
 			physicalTypeCategory = PhysicalTypeCategory.ENUMERATION;
 		}
 
+		Assert.notNull(physicalTypeCategory, UNSUPPORTED_MESSAGE_PREFIX + " (" + typeDeclaration.getClass().getSimpleName() + " for " + name + ")");
+
+		classOrInterfaceTypeDetailsBuilder.setName(name);
 		classOrInterfaceTypeDetailsBuilder.setPhysicalTypeCategory(physicalTypeCategory);
 
-		Assert.notNull(physicalTypeCategory, UNSUPPORTED_MESSAGE_PREFIX + " (" + typeDeclaration.getClass().getSimpleName() + " for " + name + ")");
+		imports = compilationUnit.getImports();
+		if (imports == null) {
+			imports = new ArrayList<ImportDeclaration>();
+			compilationUnit.setImports(imports);
+		}
+
+		// Verify the package declaration appears to be correct
+		Assert.isTrue(compilationUnitPackage.equals(name.getPackage()), "Compilation unit package '" + compilationUnitPackage + "' unexpected for type '" + name.getPackage() + "'");
 
 		for (final ImportDeclaration importDeclaration : imports) {
 			if (importDeclaration.getName() instanceof QualifiedNameExpr) {
@@ -172,20 +185,6 @@ public class JavaParserClassOrInterfaceTypeDetailsBuilder implements Builder<Cla
 				classOrInterfaceTypeDetailsBuilder.add(newImport.build());
 			}
 		}
-
-		if (typeDeclaration instanceof ClassOrInterfaceDeclaration) {
-			clazz = (ClassOrInterfaceDeclaration) typeDeclaration;
-
-			// Determine the type name, adding type parameters if possible
-			final JavaType newName = JavaParserUtils.getJavaType(compilationUnitServices, clazz);
-
-			// Revert back to the original type name (thus avoiding unnecessary inferences about java.lang types; see ROO-244)
-			name = new JavaType(name.getFullyQualifiedTypeName(), newName.getArray(), newName.getDataType(), newName.getArgName(), newName.getParameters());
-		}
-		classOrInterfaceTypeDetailsBuilder.setName(name);
-
-		// Verify the package declaration appears to be correct
-		Assert.isTrue(compilationUnitPackage.equals(name.getPackage()), "Compilation unit package '" + compilationUnitPackage + "' unexpected for type '" + name.getPackage() + "'");
 
 		// Convert Java Parser modifier into JDK modifier
 		classOrInterfaceTypeDetailsBuilder.setModifier(JavaParserUtils.getJdkModifier(typeDeclaration.getModifiers()));
@@ -217,7 +216,7 @@ public class JavaParserClassOrInterfaceTypeDetailsBuilder implements Builder<Cla
 			// Obtain the superclass, if this is a class and one is available
 			if (physicalTypeCategory == PhysicalTypeCategory.CLASS && extendsTypes.size() == 1) {
 				final JavaType superclass = extendsTypes.get(0);
-				final String superclassId = typeLocationService.findIdentifier(superclass);
+				final String superclassId = typeLocationService.getPhysicalTypeIdentifier(superclass);
 				PhysicalTypeMetadata superPtm = null;
 				if (superclassId != null) {
 					superPtm = (PhysicalTypeMetadata) metadataService.get(superclassId);
@@ -289,7 +288,7 @@ public class JavaParserClassOrInterfaceTypeDetailsBuilder implements Builder<Cla
 				}
 				if (member instanceof TypeDeclaration) {
 					final TypeDeclaration castMember = (TypeDeclaration) member;
-					final JavaType innerType = new JavaType(castMember.getName());
+					final JavaType innerType = new JavaType(castMember.getName(), name);
 					final String innerTypeMetadataId = PhysicalTypeIdentifier.createIdentifier(innerType, PhysicalTypeIdentifier.getPath(declaredByMetadataId));
 					final ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = new JavaParserClassOrInterfaceTypeDetailsBuilder(compilationUnit, compilationUnitServices, castMember, innerTypeMetadataId, innerType, metadataService, typeLocationService).build();
 					classOrInterfaceTypeDetailsBuilder.addInnerType(classOrInterfaceTypeDetails);

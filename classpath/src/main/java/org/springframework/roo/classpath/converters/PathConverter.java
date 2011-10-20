@@ -1,8 +1,6 @@
 package org.springframework.roo.classpath.converters;
 
 import java.util.List;
-import java.util.SortedSet;
-import java.util.TreeSet;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
@@ -21,36 +19,23 @@ import org.springframework.roo.shell.MethodTarget;
 @Service
 public class PathConverter implements Converter<Path> {
 
-	// Fields
-	private final SortedSet<String> legalValues = new TreeSet<String>();
-
-	public PathConverter() {
-		legalValues.add(Path.ROOT.getName());
-		legalValues.add(Path.SRC_MAIN_JAVA.getName());
-		legalValues.add(Path.SRC_MAIN_RESOURCES.getName());
-		legalValues.add(Path.SRC_MAIN_WEBAPP.getName());
-		legalValues.add(Path.SRC_TEST_JAVA.getName());
-		legalValues.add(Path.SRC_TEST_RESOURCES.getName());
-		legalValues.add(Path.SPRING_CONFIG_ROOT.getName());
-	}
-
-	// TODO: Allow context to limit to source paths only, limit to resource paths only
-	public Path convertFromText(final String value, final Class<?> requiredType, final String optionContext) {
-		if (value == null || "".equals(value) || !legalValues.contains(value)) {
+	// TODO: Allow context to limit to source paths only, limit to resource paths only 
+	public Path convertFromText(String value, Class<?> requiredType, String optionContext) {
+		if (value == null || "".equals(value)) {
 			return null;
 		}
-
-		return new Path(value);
+		
+		return Path.valueOf(value);
 	}
 
 	public boolean supports(final Class<?> requiredType, final String optionContext) {
 		return Path.class.isAssignableFrom(requiredType);
 	}
 
-	public boolean getAllPossibleValues(final List<Completion> completions, final Class<?> requiredType, final String existingData, final String optionContext, final MethodTarget target) {
-		for (String candidate : legalValues) {
-			if ("".equals(existingData) || candidate.startsWith(existingData)) {
-				completions.add(new Completion(candidate));
+	public boolean getAllPossibleValues(List<Completion> completions, Class<?> requiredType, String existingData, String optionContext, MethodTarget target) {
+		for (Path candidate : Path.values()) {
+			if ("".equals(existingData) || candidate.name().startsWith(existingData)) {
+				completions.add(new Completion(candidate.name()));
 			}
 		}
 		return true;

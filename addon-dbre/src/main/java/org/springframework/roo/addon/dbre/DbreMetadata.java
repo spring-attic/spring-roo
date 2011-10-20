@@ -36,7 +36,6 @@ import org.springframework.roo.addon.dbre.model.Database;
 import org.springframework.roo.addon.dbre.model.ForeignKey;
 import org.springframework.roo.addon.dbre.model.Reference;
 import org.springframework.roo.addon.dbre.model.Table;
-import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
@@ -60,7 +59,7 @@ import org.springframework.roo.model.ImportRegistrationResolver;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.JdkJavaType;
-import org.springframework.roo.project.Path;
+import org.springframework.roo.project.ContextualPath;
 import org.springframework.roo.support.util.Assert;
 
 /**
@@ -339,8 +338,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		Assert.notNull(element, "Attempted to create many-to-many owning-side field '"+ fieldName + "' in '" + destination.getFullyQualifiedTypeName() + "' " + getErrorMsg(inverseSideTable.getFullyQualifiedTableName()));
 
 		List<JavaType> params = Arrays.asList(element);
-		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(element, Path.SRC_MAIN_JAVA);
-		SetField fieldDetails = new SetField(physicalTypeIdentifier, new JavaType(SET.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, params), fieldName, element, Cardinality.MANY_TO_MANY);
+		JavaType fieldType = new JavaType(SET.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, params);
 
 		// Add annotations to field
 		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
@@ -378,7 +376,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		joinTableBuilder.setAttributes(joinTableAnnotationAttributes);
 		annotations.add(joinTableBuilder);
 
-		FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), Modifier.PRIVATE, annotations, fieldDetails.getFieldName(), fieldDetails.getFieldType());
+		FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), Modifier.PRIVATE, annotations, fieldName, fieldType);
 		return fieldBuilder.build();
 	}
 
@@ -387,8 +385,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		Assert.notNull(element, "Attempted to create many-to-many inverse-side field '"+ fieldName + "' in '" + destination.getFullyQualifiedTypeName() + "'" + getErrorMsg(owningSideTable.getFullyQualifiedTableName()));
 
 		List<JavaType> params = Arrays.asList(element);
-		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(element, Path.SRC_MAIN_JAVA);
-		SetField fieldDetails = new SetField(physicalTypeIdentifier, new JavaType(SET.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, params), fieldName, element, Cardinality.MANY_TO_MANY);
+		JavaType fieldType = new JavaType(SET.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, params);
 
 		// Add annotations to field
 		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
@@ -397,7 +394,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		addCascadeType(manyToManyBuilder, onUpdate, onDelete);
 		annotations.add(manyToManyBuilder);
 
-		FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), Modifier.PRIVATE, annotations, fieldDetails.getFieldName(), fieldDetails.getFieldType());
+		FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), Modifier.PRIVATE, annotations, fieldName, fieldType);
 		return fieldBuilder.build();
 	}
 
@@ -480,10 +477,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		JavaType element = DbreTypeUtils.findTypeForTableName(managedEntities, foreignTableName, foreignSchemaName);
 		Assert.notNull(element , "Attempted to create one-to-many mapped-by field '"+ fieldName + "' in '" + destination.getFullyQualifiedTypeName() + "'" + getErrorMsg(foreignTableName + "." + foreignSchemaName));
 
-		List<JavaType> params = Arrays.asList(element);
-		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(element, Path.SRC_MAIN_JAVA);
-		SetField fieldDetails = new SetField(physicalTypeIdentifier, new JavaType(SET.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, params), fieldName, element, Cardinality.ONE_TO_MANY);
-
+		JavaType fieldType = new JavaType(SET.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, Arrays.asList(element));
 		// Add @OneToMany annotation
 		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 		AnnotationMetadataBuilder oneToManyBuilder = new AnnotationMetadataBuilder(ONE_TO_MANY);
@@ -491,7 +485,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		addCascadeType(oneToManyBuilder, onUpdate, onDelete);
 		annotations.add(oneToManyBuilder);
 
-		FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), Modifier.PRIVATE, annotations, fieldDetails.getFieldName(), fieldDetails.getFieldType());
+		FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), Modifier.PRIVATE, annotations, fieldName, fieldType);
 		return fieldBuilder.build();
 	}
 
@@ -790,7 +784,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		return PROVIDES_TYPE;
 	}
 
-	public static String createIdentifier(final JavaType javaType, final Path path) {
+	public static String createIdentifier(final JavaType javaType, final ContextualPath path) {
 		return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
 	}
 
@@ -798,7 +792,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		return PhysicalTypeIdentifierNamingUtils.getJavaType(PROVIDES_TYPE_STRING, metadataIdentificationString);
 	}
 
-	public static Path getPath(final String metadataIdentificationString) {
+	public static ContextualPath getPath(final String metadataIdentificationString) {
 		return PhysicalTypeIdentifierNamingUtils.getPath(PROVIDES_TYPE_STRING, metadataIdentificationString);
 	}
 

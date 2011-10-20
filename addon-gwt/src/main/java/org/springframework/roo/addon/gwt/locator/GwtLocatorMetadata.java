@@ -4,7 +4,7 @@ import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.metadata.AbstractMetadataItem;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.Path;
+import org.springframework.roo.project.ContextualPath;
 
 public class GwtLocatorMetadata extends AbstractMetadataItem {
 
@@ -20,16 +20,12 @@ public class GwtLocatorMetadata extends AbstractMetadataItem {
 		this.proxyTypeContents = proxyTypeContents;
 	}
 
-	public GwtLocatorMetadata(final JavaType javaType, final String proxyTypeContents) {
-		super(createIdentifier(javaType, Path.SRC_MAIN_JAVA));
-		this.proxyTypeContents = proxyTypeContents;
-	}
 
 	public static String getMetadataIdentifierType() {
 		return PROVIDES_TYPE;
 	}
 
-	public static String createIdentifier(final JavaType javaType, final Path path) {
+	public static String createIdentifier(final JavaType javaType, final ContextualPath path) {
 		return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
 	}
 
@@ -37,7 +33,7 @@ public class GwtLocatorMetadata extends AbstractMetadataItem {
 		return PhysicalTypeIdentifierNamingUtils.getJavaType(PROVIDES_TYPE_STRING, metadataIdentificationString);
 	}
 
-	public static Path getPath(final String metadataIdentificationString) {
+	public static ContextualPath getPath(final String metadataIdentificationString) {
 		return PhysicalTypeIdentifierNamingUtils.getPath(PROVIDES_TYPE_STRING, metadataIdentificationString);
 	}
 

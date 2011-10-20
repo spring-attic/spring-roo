@@ -4,6 +4,7 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.metadata.MetadataService;
+import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.DomUtils;
@@ -28,13 +29,13 @@ public class ApplicationContextOperationsImpl implements ApplicationContextOpera
 	@Reference private MetadataService metadataService;
 	@Reference private PathResolver pathResolver;
 
-	public void createMiddleTierApplicationContext() {
-		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
+	public void createMiddleTierApplicationContext(JavaPackage topLevelPackage, String moduleName) {
+		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier(moduleName));
 		Assert.notNull(projectMetadata, "Project metadata required");
 		final Document document = XmlUtils.readXml(TemplateUtils.getTemplate(getClass(), "applicationContext-template.xml"));
 		final Element root = document.getDocumentElement();
-		DomUtils.findFirstElementByName("context:component-scan", root).setAttribute("base-package", projectMetadata.getTopLevelPackage().getFullyQualifiedPackageName());
-		fileManager.createOrUpdateTextFileIfRequired(pathResolver.getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext.xml"), XmlUtils.nodeToString(document), false);
+		DomUtils.findFirstElementByName("context:component-scan", root).setAttribute("base-package", topLevelPackage.getFullyQualifiedPackageName());
+		fileManager.createOrUpdateTextFileIfRequired(pathResolver.getIdentifier(Path.SPRING_CONFIG_ROOT.contextualize(moduleName), "applicationContext.xml"), XmlUtils.nodeToString(document), false);
 		fileManager.scan();
 	}
 }

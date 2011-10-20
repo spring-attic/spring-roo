@@ -23,7 +23,7 @@ import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.Path;
+import org.springframework.roo.project.ContextualPath;
 import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
 
@@ -231,7 +231,7 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		return PROVIDES_TYPE;
 	}
 
-	public static String createIdentifier(final JavaType javaType, final Path path) {
+	public static String createIdentifier(final JavaType javaType, final ContextualPath path) {
 		return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
 	}
 
@@ -239,7 +239,7 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		return PhysicalTypeIdentifierNamingUtils.getJavaType(PROVIDES_TYPE_STRING, metadataIdentificationString);
 	}
 
-	public static Path getPath(final String metadataIdentificationString) {
+	public static ContextualPath getPath(final String metadataIdentificationString) {
 		return PhysicalTypeIdentifierNamingUtils.getPath(PROVIDES_TYPE_STRING, metadataIdentificationString);
 	}
 

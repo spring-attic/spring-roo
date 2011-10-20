@@ -24,10 +24,12 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.roo.addon.plural.PluralMetadata;
+import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.customdata.tagkeys.MethodMetadataCustomDataKey;
 import org.springframework.roo.classpath.layers.MemberTypeAdditions;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.project.Path;
 
 /**
  * Unit test of {@link EntityLayerProvider}
@@ -65,15 +67,19 @@ public class EntityLayerProviderTest {
 	@Mock private JpaCrudAnnotationValues mockAnnotationValues;
 	@Mock private MetadataService mockMetadataService;
 	@Mock private PluralMetadata mockPluralMetadata;
+	@Mock private TypeLocationService mockTypeLocationService;
 
+	
 	@Before
 	public void setUp() {
 		MockitoAnnotations.initMocks(this);
 		when(mockTargetEntity.getFullyQualifiedTypeName()).thenReturn("com.example.Pizza");
 		when(mockIdType.getFullyQualifiedTypeName()).thenReturn(Long.class.getName());
-		this.pluralId = PluralMetadata.createIdentifier(mockTargetEntity);
+		when(mockTypeLocationService.getTypePath(mockTargetEntity)).thenReturn(Path.SRC_MAIN_JAVA.contextualize(""));
 
+		this.pluralId = PluralMetadata.createIdentifier(mockTargetEntity, Path.SRC_MAIN_JAVA.contextualize(""));
 		this.layerProvider = new EntityLayerProvider();
+		this.layerProvider.typeLocationService = mockTypeLocationService;
 		this.layerProvider.setEntityMetadataProvider(mockEntityMetadataProvider);
 		this.layerProvider.setMetadataService(mockMetadataService);
 	}

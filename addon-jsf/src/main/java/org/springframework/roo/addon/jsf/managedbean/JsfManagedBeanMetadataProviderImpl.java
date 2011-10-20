@@ -33,7 +33,6 @@ import org.springframework.roo.addon.plural.PluralMetadata;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
-import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.customdata.CustomDataKeys;
 import org.springframework.roo.classpath.customdata.tagkeys.MethodMetadataCustomDataKey;
 import org.springframework.roo.classpath.details.BeanInfoUtils;
@@ -56,7 +55,7 @@ import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.CustomDataBuilder;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.Path;
+import org.springframework.roo.project.ContextualPath;
 import org.springframework.roo.support.util.Assert;
 
 /**
@@ -77,7 +76,6 @@ public class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDiscoverin
 	// Fields
 	@Reference private ConfigurableMetadataProvider configurableMetadataProvider;
 	@Reference private LayerService layerService;
-	@Reference private TypeLocationService typeLocationService;
 	private final Map<JavaType, String> entityToManagedBeanMidMap = new LinkedHashMap<JavaType, String>();
 	private final Map<String, JavaType> managedBeanMidToEntityMap = new LinkedHashMap<String, JavaType>();
 
@@ -104,7 +102,7 @@ public class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDiscoverin
 			return localMid;
 		}
 
-		final MemberHoldingTypeDetails memberHoldingTypeDetails = typeLocationService.findClassOrInterface(itdTypeDetails.getGovernor().getName());
+		final MemberHoldingTypeDetails memberHoldingTypeDetails = typeLocationService.getTypeDetails(governor);
 		if (memberHoldingTypeDetails != null) {
 			for (final JavaType type : memberHoldingTypeDetails.getLayerEntities()) {
 				final String localMidType = entityToManagedBeanMidMap.get(type);
@@ -154,7 +152,9 @@ public class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDiscoverin
 		entityToManagedBeanMidMap.put(entity, metadataId);
 		managedBeanMidToEntityMap.put(metadataId, entity);
 
-		final PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(entity));
+		String physicalTypeIdentifier = typeLocationService.getPhysicalTypeIdentifier(entity);
+		ContextualPath path = PhysicalTypeIdentifier.getPath(physicalTypeIdentifier);
+		final PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(entity, path));
 		Assert.notNull(pluralMetadata, "Could not determine plural for '" + entity.getSimpleTypeName() + "'");
 		final String plural = pluralMetadata.getPlural();
 
@@ -225,7 +225,10 @@ public class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDiscoverin
 										AnnotationAttributeValue<?> beanNameAttribute = managedBeanAnnotation.getAttribute("beanName");
 										genericType = parameter;
 										genericTypeBeanName = (String) beanNameAttribute.getValue();
-										final PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(genericType));
+										ClassOrInterfaceTypeDetails genericTypeDetails = typeLocationService.getTypeDetails(genericType);
+										Assert.notNull(genericTypeDetails, "The type '" + genericType + "' could not be resolved");
+										ContextualPath path = PhysicalTypeIdentifier.getPath(genericTypeDetails.getDeclaredByMetadataId());
+										final PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(genericType, path));
 										genericTypePlural = pluralMetadata.getPlural();
 										break genericTypeLoop; // Only support one generic type parameter
 									}
@@ -295,7 +298,7 @@ public class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDiscoverin
 	}
 	
 	private boolean isEnum(final JavaType fieldType) {
-		ClassOrInterfaceTypeDetails cid = typeLocationService.findClassOrInterface(fieldType);
+		ClassOrInterfaceTypeDetails cid = typeLocationService.getTypeDetails(fieldType);
 		return cid != null && cid.getPhysicalTypeCategory() == PhysicalTypeCategory.ENUMERATION;
 	}
 
@@ -323,12 +326,12 @@ public class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDiscoverin
 	@Override
 	protected String getGovernorPhysicalTypeIdentifier(final String metadataIdentificationString) {
 		final JavaType javaType = JsfManagedBeanMetadata.getJavaType(metadataIdentificationString);
-		final Path path = JsfManagedBeanMetadata.getPath(metadataIdentificationString);
+		final ContextualPath path = JsfManagedBeanMetadata.getPath(metadataIdentificationString);
 		return PhysicalTypeIdentifier.createIdentifier(javaType, path);
 	}
 
 	@Override
-	protected String createLocalIdentifier(final JavaType javaType, final Path path) {
+	protected String createLocalIdentifier(final JavaType javaType, final ContextualPath path) {
 		return JsfManagedBeanMetadata.createIdentifier(javaType, path);
 	}
 

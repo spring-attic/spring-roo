@@ -9,6 +9,7 @@ import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.propfiles.PropFileOperations;
 import org.springframework.roo.project.Path;
+import org.springframework.roo.project.PomManagementService;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
@@ -33,6 +34,7 @@ public class JpaCommands implements CommandMarker {
 
 	// Fields
 	@Reference private JpaOperations jpaOperations;
+	@Reference private PomManagementService pomManagementService;
 	@Reference private PropFileOperations propFileOperations;
 	@Reference private StaticFieldConverter staticFieldConverter;
 
@@ -79,7 +81,7 @@ public class JpaCommands implements CommandMarker {
 			return;
 		}
 
-		jpaOperations.configureJpa(ormProvider, jdbcDatabase, jndi, applicationId, hostName, databaseName, userName, password, transactionManager, persistenceUnit);
+		jpaOperations.configureJpa(ormProvider, jdbcDatabase, jndi, applicationId, hostName, databaseName, userName, password, transactionManager, persistenceUnit, pomManagementService.getFocusedModuleName());
 	}
 
 	@Deprecated
@@ -109,14 +111,14 @@ public class JpaCommands implements CommandMarker {
 		@CliOption(key = "key", mandatory = true, help = "The property key that should be changed") final String key,
 		@CliOption(key = "value", mandatory = true, help = "The new vale for this property key") final String value) {
 
-		propFileOperations.changeProperty(Path.SPRING_CONFIG_ROOT, "database.properties", key, value);
+		propFileOperations.changeProperty(Path.SPRING_CONFIG_ROOT.contextualize(pomManagementService.getFocusedModuleName()), "database.properties", key, value);
 	}
 
 	@CliCommand(value = "database properties remove", help = "Removes a particular database property")
 	public void databaseRemove(
 		@CliOption(key = { "", "key" }, mandatory = true, help = "The property key that should be removed") final String key) {
 
-		propFileOperations.removeProperty(Path.SPRING_CONFIG_ROOT, "database.properties", key);
+		propFileOperations.removeProperty(Path.SPRING_CONFIG_ROOT.contextualize(pomManagementService.getFocusedModuleName()), "database.properties", key);
 	}
 
 	@CliAvailabilityIndicator("database properties list")

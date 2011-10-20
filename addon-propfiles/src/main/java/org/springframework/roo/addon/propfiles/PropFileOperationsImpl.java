@@ -21,7 +21,7 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.process.manager.MutableFile;
-import org.springframework.roo.project.Path;
+import org.springframework.roo.project.ContextualPath;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.IOUtils;
@@ -47,30 +47,30 @@ public class PropFileOperationsImpl implements PropFileOperations {
 	@Reference private ProjectOperations projectOperations;
 
 	public boolean isPropertiesCommandAvailable() {
-		return projectOperations.isProjectAvailable();
+		return projectOperations.isFocusedProjectAvailable();
 	}
-
-	public void addProperties(final Path propertyFilePath, final String propertyFilename, final Map<String, String> properties, final boolean sorted, final boolean changeExisting) {
+	
+	public void addProperties(ContextualPath propertyFilePath, String propertyFilename, Map<String, String> properties, boolean sorted, boolean changeExisting) {
 		manageProperty(propertyFilePath, propertyFilename, properties, sorted, changeExisting);
 	}
 
-	public void addPropertyIfNotExists(final Path propertyFilePath, final String propertyFilename, final String key, final String value) {
+	public void addPropertyIfNotExists(ContextualPath propertyFilePath, String propertyFilename, String key, String value) {
 		manageProperty(propertyFilePath, propertyFilename, asMap(key, value), !SORTED, !CHANGE_EXISTING);
 	}
 
-	public void addPropertyIfNotExists(final Path propertyFilePath, final String propertyFilename, final String key, final String value, final boolean sorted) {
+	public void addPropertyIfNotExists(ContextualPath propertyFilePath, String propertyFilename, String key, String value, boolean sorted) {
 		manageProperty(propertyFilePath, propertyFilename, asMap(key, value), sorted, !CHANGE_EXISTING);
 	}
 
-	public void changeProperty(final Path propertyFilePath, final String propertyFilename, final String key, final String value) {
+	public void changeProperty(ContextualPath propertyFilePath, String propertyFilename, String key, String value) {
 		manageProperty(propertyFilePath, propertyFilename, asMap(key, value), !SORTED, CHANGE_EXISTING);
 	}
 
-	public void changeProperty(final Path propertyFilePath, final String propertyFilename, final String key, final String value, final boolean sorted) {
+	public void changeProperty(ContextualPath propertyFilePath, String propertyFilename, String key, String value, boolean sorted) {
 		manageProperty(propertyFilePath, propertyFilename, asMap(key, value), sorted, CHANGE_EXISTING);
 	}
 
-	private void manageProperty(final Path propertyFilePath, final String propertyFilename, final Map<String, String> properties, final boolean sorted, final boolean changeExisting) {
+	private void manageProperty(ContextualPath propertyFilePath, String propertyFilename, Map<String, String> properties, boolean sorted, boolean changeExisting) {
 		Assert.notNull(propertyFilePath, "Property file path required");
 		Assert.hasText(propertyFilename, "Property filename required");
 		Assert.notNull(properties, "Property map required");
@@ -129,7 +129,7 @@ public class PropFileOperationsImpl implements PropFileOperations {
 		}
 	}
 
-	public void removeProperty(final Path propertyFilePath, final String propertyFilename, final String key) {
+	public void removeProperty(final ContextualPath propertyFilePath, final String propertyFilename, final String key) {
 		Assert.notNull(propertyFilePath, "Property file path required");
 		Assert.hasText(propertyFilename, "Property filename required");
 		Assert.hasText(key, "Key required");
@@ -150,7 +150,7 @@ public class PropFileOperationsImpl implements PropFileOperations {
 		storeProps(props, mutableFile.getOutputStream(), "Updated at " + new Date());
 	}
 
-	public String getProperty(final Path propertyFilePath, final String propertyFilename, final String key) {
+	public String getProperty(final ContextualPath propertyFilePath, final String propertyFilename, final String key) {
 		Assert.notNull(propertyFilePath, "Property file path required");
 		Assert.hasText(propertyFilename, "Property filename required");
 		Assert.hasText(key, "Key required");
@@ -169,7 +169,7 @@ public class PropFileOperationsImpl implements PropFileOperations {
 		return props.getProperty(key);
 	}
 
-	public SortedSet<String> getPropertyKeys(final Path propertyFilePath, final String propertyFilename, final boolean includeValues) {
+	public SortedSet<String> getPropertyKeys(final ContextualPath propertyFilePath, final String propertyFilename, final boolean includeValues) {
 		Assert.notNull(propertyFilePath, "Property file path required");
 		Assert.hasText(propertyFilename, "Property filename required");
 
@@ -197,7 +197,7 @@ public class PropFileOperationsImpl implements PropFileOperations {
 		return result;
 	}
 
-	public Map<String, String> getProperties(final Path propertyFilePath, final String propertyFilename) {
+	public Map<String, String> getProperties(final ContextualPath propertyFilePath, final String propertyFilename) {
 		Assert.notNull(propertyFilePath, "Property file path required");
 		Assert.hasText(propertyFilename, "Property filename required");
 

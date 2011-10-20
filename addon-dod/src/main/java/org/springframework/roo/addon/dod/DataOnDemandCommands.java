@@ -7,6 +7,7 @@ import org.springframework.roo.classpath.details.BeanInfoUtils;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.ReservedWords;
 import org.springframework.roo.project.Path;
+import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
@@ -25,7 +26,8 @@ public class DataOnDemandCommands implements CommandMarker {
 
 	// Fields
 	@Reference private DataOnDemandOperations dataOnDemandOperations;
-
+	@Reference private PathResolver pathResolver;
+	
 	@CliAvailabilityIndicator( { "dod" })
 	public boolean isPersistentClassAvailable() {
 		return dataOnDemandOperations.isPersistentClassAvailable();
@@ -47,6 +49,6 @@ public class DataOnDemandCommands implements CommandMarker {
 			clazz = new JavaType(entity.getFullyQualifiedTypeName() + "DataOnDemand");
 		}
 
-		dataOnDemandOperations.newDod(entity, clazz, Path.SRC_TEST_JAVA);
+		dataOnDemandOperations.newDod(entity, clazz, pathResolver.getFocusedPath(Path.SRC_TEST_JAVA));
 	}
 }

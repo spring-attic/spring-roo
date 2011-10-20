@@ -22,7 +22,7 @@ import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.Path;
+import org.springframework.roo.project.ContextualPath;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.StringUtils;
@@ -39,6 +39,7 @@ public class JavaBeanMetadataProvider extends AbstractItdMetadataProvider {
 
 	// Fields
 	@Reference private ProjectOperations projectOperations;
+
 	private final Set<String> producedMids = new LinkedHashSet<String>();
 	private Boolean wasGaeEnabled;
 
@@ -62,13 +63,12 @@ public class JavaBeanMetadataProvider extends AbstractItdMetadataProvider {
 			return;
 		}
 		// If the upstream dependency isn't ProjectMetadata do not continue
-		if (!upstreamDependency.equals(ProjectMetadata.getProjectIdentifier())) {
+		if (!ProjectMetadata.isValid(upstreamDependency)) {
 			return;
 		}
-		ProjectMetadata projectMetadata = projectOperations.getProjectMetadata();
-		// If ProjectMetadata isn't valid do not continue
-		if (projectMetadata != null && !projectMetadata.isValid()) {
-			boolean isGaeEnabled = projectMetadata.isGaeEnabled();
+		// If the project isn't valid do not continue
+		if (projectOperations.isProjectAvailable(ProjectMetadata.getModuleName(upstreamDependency))) {
+			boolean isGaeEnabled = projectOperations.isGaeEnabled(ProjectMetadata.getModuleName(upstreamDependency));
 			// We need to determine if the persistence state has changed, we do this by comparing the last known state to the current state
 			boolean hasGaeStateChanged = wasGaeEnabled == null || isGaeEnabled != wasGaeEnabled;
 			if (hasGaeStateChanged) {
@@ -99,7 +99,8 @@ public class JavaBeanMetadataProvider extends AbstractItdMetadataProvider {
 	}
 
 	private JavaSymbolName getIdentifierAccessorMethodName(final FieldMetadata field, final String metadataIdentificationString) {
-		if (projectOperations.getProjectMetadata() == null || !projectOperations.getProjectMetadata().isGaeEnabled()) {
+		ContextualPath path = PhysicalTypeIdentifier.getPath(field.getDeclaredByMetadataId());
+		if (projectOperations.isProjectAvailable(path.getModule()) || !projectOperations.isGaeEnabled(path.getModule())) {
 			return null;
 		}
 		// We are not interested if the field is annotated with @javax.persistence.Transient
@@ -133,12 +134,12 @@ public class JavaBeanMetadataProvider extends AbstractItdMetadataProvider {
 	@Override
 	protected String getGovernorPhysicalTypeIdentifier(final String metadataIdentificationString) {
 		JavaType javaType = JavaBeanMetadata.getJavaType(metadataIdentificationString);
-		Path path = JavaBeanMetadata.getPath(metadataIdentificationString);
+		ContextualPath path = JavaBeanMetadata.getPath(metadataIdentificationString);
 		return PhysicalTypeIdentifier.createIdentifier(javaType, path);
 	}
 
 	@Override
-	protected String createLocalIdentifier(final JavaType javaType, final Path path) {
+	protected String createLocalIdentifier(final JavaType javaType, final ContextualPath path) {
 		return JavaBeanMetadata.createIdentifier(javaType, path);
 	}
 

@@ -34,6 +34,7 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.Path;
+import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
@@ -66,17 +67,18 @@ public class MailOperationsImpl implements MailOperations {
 
 	// Fields
 	@Reference private FileManager fileManager;
+	@Reference private PathResolver pathResolver;
 	@Reference private ProjectOperations projectOperations;
 	@Reference private PropFileOperations propFileOperations;
 	@Reference private TypeManagementService typeManagementService;
 	@Reference private TypeLocationService typeLocationService;
 
 	public boolean isInstallEmailAvailable() {
-		return projectOperations.isProjectAvailable();
+		return projectOperations.isFocusedProjectAvailable();
 	}
 
 	public boolean isManageEmailAvailable() {
-		return projectOperations.isProjectAvailable() && fileManager.exists(getApplicationContextPath());
+		return projectOperations.isFocusedProjectAvailable() && fileManager.exists(getApplicationContextPath());
 	}
 
 	/**
@@ -86,7 +88,7 @@ public class MailOperationsImpl implements MailOperations {
 	 * @return a non-blank path
 	 */
 	private String getApplicationContextPath() {
-		return projectOperations.getPathResolver().getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext.xml");
+		return pathResolver.getFocusedIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext.xml");
 	}
 
 	public void installEmail(final String hostServer, final MailProtocol protocol, final String port, final String encoding, final String username, final String password) {
@@ -177,10 +179,10 @@ public class MailOperationsImpl implements MailOperations {
 		fileManager.createOrUpdateTextFileIfRequired(contextPath, XmlUtils.nodeToString(document), false);
 
 		if (installDependencies) {
-			updateConfiguration();
+			updateConfiguration(projectOperations.getFocusedModuleName());
 		}
 
-		propFileOperations.addProperties(Path.SPRING_CONFIG_ROOT, "email.properties", props, true, true);
+		propFileOperations.addProperties(Path.SPRING_CONFIG_ROOT.contextualize(projectOperations.getFocusedModuleName()), "email.properties", props, true, true);
 	}
 
 	public void configureTemplateMessage(final String from, final String subject) {
@@ -230,7 +232,7 @@ public class MailOperationsImpl implements MailOperations {
 		}
 
 		if (props.size() > 0) {
-			propFileOperations.addProperties(Path.SPRING_CONFIG_ROOT, "email.properties", props, true, true);
+			propFileOperations.addProperties(Path.SPRING_CONFIG_ROOT.contextualize(projectOperations.getPomManagementService().getFocusedModuleName()), "email.properties", props, true, true);
 		}
 	}
 
@@ -254,7 +256,7 @@ public class MailOperationsImpl implements MailOperations {
 
 		// Obtain the physical type and its mutable class details
 		final String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(targetType);
-		ClassOrInterfaceTypeDetails existing = typeLocationService.findClassOrInterface(targetType);
+		ClassOrInterfaceTypeDetails existing = typeLocationService.getTypeDetails(targetType);
 		if (existing == null) {
 			log.warning("Aborting: Unable to find metadata for target type '" + targetType.getFullyQualifiedTypeName() + "'");
 			return;
@@ -334,14 +336,14 @@ public class MailOperationsImpl implements MailOperations {
 				// Write out the new Spring config file
 				fileManager.createOrUpdateTextFileIfRequired(contextPath, XmlUtils.nodeToString(document), false);
 				// Update the email properties file
-				propFileOperations.addPropertyIfNotExists(Path.SPRING_CONFIG_ROOT, "email.properties", "executor.poolSize", "10", true);
+				propFileOperations.addPropertyIfNotExists(pathResolver.getFocusedPath(Path.SPRING_CONFIG_ROOT), "email.properties", "executor.poolSize", "10", true);
 			}
 			methodBuilder.addAnnotation(new AnnotationMetadataBuilder(ASYNC));
 		}
 		return methodBuilder.build();
 	}
 
-	private void updateConfiguration() {
+	private void updateConfiguration(String moduleName) {
 		final Element configuration = XmlUtils.getConfiguration(getClass());
 
 		final List<Dependency> dependencies = new ArrayList<Dependency>();
@@ -349,6 +351,6 @@ public class MailOperationsImpl implements MailOperations {
 		for (final Element dependencyElement : emailDependencies) {
 			dependencies.add(new Dependency(dependencyElement));
 		}
-		projectOperations.addDependencies(dependencies);
+		projectOperations.addDependencies(moduleName, dependencies);
 	}
 }

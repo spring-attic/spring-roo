@@ -1,6 +1,5 @@
 package org.springframework.roo.project.packaging;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,6 +11,7 @@ import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.ReferenceStrategy;
 import org.apache.felix.scr.annotations.Service;
+import org.springframework.roo.shell.Completion;
 import org.springframework.roo.shell.Converter;
 import org.springframework.roo.shell.MethodTarget;
 import org.springframework.roo.support.util.StringUtils;
@@ -57,13 +57,12 @@ public class PackagingProviderConverter implements Converter<PackagingProvider> 
 		throw new UnsupportedOperationException("Unsupported packaging type '" + value + "'");
 	}
 
-	public boolean getAllPossibleValues(final List<String> completions, final Class<?> targetType, final String existingData, final String optionContext, final MethodTarget target) {
+	public boolean getAllPossibleValues(final List<Completion> completions, final Class<?> targetType, final String existingData, final String optionContext, final MethodTarget target) {
 		for (final String id : packagingTypes.keySet()) {
 			if (!StringUtils.hasText(existingData) || id.toLowerCase().startsWith(existingData.toLowerCase())) {
-				completions.add(id.toUpperCase());
+				completions.add(new Completion(id.toUpperCase()));
 			}
 		}
-		Collections.sort(completions);
 		return true;
 	}
 }

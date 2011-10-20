@@ -2,8 +2,8 @@ package org.springframework.roo.addon.gwt;
 
 import java.io.File;
 
+import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.project.Path;
-import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
 
 public enum GwtPath {
@@ -49,11 +49,11 @@ public enum GwtPath {
 	}
 
 	public String canonicalFileSystemPath(final ProjectOperations projectOperations) {
-		String packagePath = projectOperations.getProjectMetadata().getTopLevelPackage().getFullyQualifiedPackageName().replace('.', File.separatorChar) + getSegmentName().replace('/', File.separatorChar);
+		String packagePath = projectOperations.getFocusedTopLevelPackage().getFullyQualifiedPackageName().replace('.', File.separatorChar) + getSegmentName().replace('/', File.separatorChar);
 		if (WEB.equals(this)) {
-			return projectOperations.getPathResolver().getRoot(Path.SRC_MAIN_WEBAPP);
+			return projectOperations.getPathResolver().getFocusedRoot(Path.SRC_MAIN_WEBAPP);
 		}
-		return projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_JAVA, packagePath);
+		return projectOperations.getPathResolver().getFocusedIdentifier(Path.SRC_MAIN_JAVA, packagePath);
 	}
 
 	public String segmentPackage() {
@@ -63,10 +63,10 @@ public enum GwtPath {
 		return getSegmentName().substring(1).replace('/', '.');
 	}
 
-	public String packageName(final ProjectMetadata projectMetadata) {
+	public String packageName(JavaPackage topLevelPackage) {
 		if (WEB.equals(this)) {
 			return "";
 		}
-		return projectMetadata.getTopLevelPackage().getFullyQualifiedPackageName() + getSegmentName().replace('/', '.');
+		return topLevelPackage.getFullyQualifiedPackageName() + getSegmentName().replace('/', '.');
 	}
 }

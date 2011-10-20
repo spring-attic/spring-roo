@@ -1,6 +1,7 @@
 package org.springframework.roo.addon.web.mvc.controller.scaffold;
 
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.annotations.populator.AbstractAnnotationValues;
 import org.springframework.roo.classpath.details.annotations.populator.AutoPopulate;
 import org.springframework.roo.classpath.details.annotations.populator.AutoPopulationUtils;
@@ -33,6 +34,11 @@ public class WebScaffoldAnnotationValues extends AbstractAnnotationValues {
 	 */
 	public WebScaffoldAnnotationValues(final PhysicalTypeMetadata governorPhysicalTypeMetadata) {
 		super(governorPhysicalTypeMetadata, RooJavaType.ROO_WEB_SCAFFOLD);
+		AutoPopulationUtils.populate(this, annotationMetadata);
+	}
+
+	public WebScaffoldAnnotationValues(ClassOrInterfaceTypeDetails governorPhysicalTypeDetails) {
+		super(governorPhysicalTypeDetails, RooJavaType.ROO_WEB_SCAFFOLD);
 		AutoPopulationUtils.populate(this, annotationMetadata);
 	}
 

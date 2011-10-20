@@ -1,9 +1,8 @@
 package org.springframework.roo.addon.solr;
 
+import javax.xml.parsers.DocumentBuilder;
 import java.io.IOException;
 import java.util.List;
-
-import javax.xml.parsers.DocumentBuilder;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -14,8 +13,8 @@ import org.springframework.roo.addon.web.mvc.controller.scaffold.WebScaffoldMeta
 import org.springframework.roo.addon.web.mvc.jsp.menu.MenuOperations;
 import org.springframework.roo.addon.web.mvc.jsp.roundtrip.XmlRoundTripFileManager;
 import org.springframework.roo.addon.web.mvc.jsp.tiles.TilesOperations;
-import org.springframework.roo.classpath.PhysicalTypeIdentifier;
-import org.springframework.roo.classpath.PhysicalTypeMetadata;
+import org.springframework.roo.addon.web.mvc.jsp.tiles.TilesOperationsImpl;
+import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.details.BeanInfoUtils;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
@@ -32,7 +31,9 @@ import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
+import org.springframework.roo.project.ContextualPath;
 import org.springframework.roo.project.Path;
+import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
@@ -61,7 +62,9 @@ public class SolrJspMetadataListener implements MetadataProvider, MetadataNotifi
 	@Reference private MenuOperations menuOperations;
 	@Reference private MemberDetailsScanner memberDetailsScanner;
 	@Reference private PersistenceMemberLocator persistenceMemberLocator;
+	@Reference private PathResolver pathResolver;
 	@Reference private ProjectOperations projectOperations;
+	@Reference private TypeLocationService typeLocationService;
 	@Reference private XmlRoundTripFileManager xmlRoundTripFileManager;
 
 	private WebScaffoldMetadata webScaffoldMetadata;
@@ -75,41 +78,43 @@ public class SolrJspMetadataListener implements MetadataProvider, MetadataNotifi
 
 	public MetadataItem get(final String metadataIdentificationString) {
 		javaType = SolrJspMetadata.getJavaType(metadataIdentificationString);
-		Path path = SolrJspMetadata.getPath(metadataIdentificationString);
+		ContextualPath path = SolrJspMetadata.getPath(metadataIdentificationString);
 		String solrWebSearchMetadataKeyString = SolrWebSearchMetadata.createIdentifier(javaType, path);
 		SolrWebSearchMetadata webSearchMetadata = (SolrWebSearchMetadata) metadataService.get(solrWebSearchMetadataKeyString);
 		if (webSearchMetadata == null || !webSearchMetadata.isValid()) {
 			return null;
 		}
 
-		webScaffoldMetadata = (WebScaffoldMetadata) metadataService.get(WebScaffoldMetadata.createIdentifier(javaType, Path.SRC_MAIN_JAVA));
+
+		webScaffoldMetadata = (WebScaffoldMetadata) metadataService.get(WebScaffoldMetadata.createIdentifier(javaType, path));
 		Assert.notNull(webScaffoldMetadata, "Web scaffold metadata required");
 
 		formbackingObject = webScaffoldMetadata.getAnnotationValues().getFormBackingObject();
 
 		entityMetadata = (EntityMetadata) metadataService.get(EntityMetadata.createIdentifier(formbackingObject, path));
 		Assert.notNull(entityMetadata, "Could not determine entity metadata for type: " + javaType.getFullyQualifiedTypeName());
-
-		installMvcArtifacts(javaType, path);
-
+		
+		installMvcArtifacts(webScaffoldMetadata);
+		
 		return new SolrJspMetadata(metadataIdentificationString, webSearchMetadata);
 	}
-
-	private void installMvcArtifacts(final JavaType javaType, final Path path) {
+	
+	public void installMvcArtifacts(WebScaffoldMetadata webScaffoldMetadata) {
 		copyArtifacts("form/search.tagx", "WEB-INF/tags/form/search.tagx");
 		copyArtifacts("form/fields/search-facet.tagx", "WEB-INF/tags/form/fields/search-facet.tagx");
 		copyArtifacts("form/fields/search-field.tagx", "WEB-INF/tags/form/fields/search-field.tagx");
 
-		xmlRoundTripFileManager.writeToDiskIfNecessary(projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/views/" + webScaffoldMetadata.getAnnotationValues().getPath() + "/search.jspx"), getSearchDocument());
-
+		ContextualPath path = WebScaffoldMetadata.getPath(webScaffoldMetadata.getId());
+		
+		xmlRoundTripFileManager.writeToDiskIfNecessary(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP.contextualize(path.getModule()), "WEB-INF/views/" + webScaffoldMetadata.getAnnotationValues().getPath() + "/search.jspx"), getSearchDocument(webScaffoldMetadata));
+		
 		String folderName = webScaffoldMetadata.getAnnotationValues().getPath();
-		tilesOperations.addViewDefinition(folderName, folderName + "/search", TilesOperations.DEFAULT_TEMPLATE, "/WEB-INF/views/" + webScaffoldMetadata.getAnnotationValues().getPath() + "/search.jspx");
-		menuOperations.addMenuItem(new JavaSymbolName(formbackingObject.getSimpleTypeName()), new JavaSymbolName("solr"), new JavaSymbolName(entityMetadata.getPlural()).getReadableSymbolName(), "global.menu.find", "/" + webScaffoldMetadata.getAnnotationValues().getPath() + "?search", "s:");
+		tilesOperations.addViewDefinition(folderName, path, folderName + "/search", TilesOperationsImpl.DEFAULT_TEMPLATE, "WEB-INF/views/" + webScaffoldMetadata.getAnnotationValues().getPath() + "/search.jspx");
+		menuOperations.addMenuItem(new JavaSymbolName(formbackingObject.getSimpleTypeName()), new JavaSymbolName("solr"), new JavaSymbolName(entityMetadata.getPlural()).getReadableSymbolName(), "global.menu.find", "/" + webScaffoldMetadata.getAnnotationValues().getPath() + "?search", "s:", path);
 	}
-
-	private Document getSearchDocument() {
+	
+	private Document getSearchDocument(WebScaffoldMetadata webScaffoldMetadata) {
 		// Next install search.jspx
-		WebScaffoldMetadata webScaffoldMetadata = (WebScaffoldMetadata) metadataService.get(WebScaffoldMetadata.createIdentifier(javaType, Path.SRC_MAIN_JAVA));
 		Assert.notNull(webScaffoldMetadata, "Web scaffold metadata required");
 
 		DocumentBuilder builder = XmlUtils.getDocumentBuilder();
@@ -132,9 +137,9 @@ public class SolrJspMetadataListener implements MetadataProvider, MetadataNotifi
 		StringBuilder facetFields = new StringBuilder();
 		int fieldCounter = 0;
 
-		PhysicalTypeMetadata formBackingObjectPhysicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(formbackingObject, Path.SRC_MAIN_JAVA));
-		Assert.notNull(formBackingObjectPhysicalTypeMetadata, "Unable to obtain physical type metadata for type " + formbackingObject.getFullyQualifiedTypeName());
-		ClassOrInterfaceTypeDetails formbackingClassOrInterfaceDetails = (ClassOrInterfaceTypeDetails) formBackingObjectPhysicalTypeMetadata.getMemberHoldingTypeDetails();
+		
+		ClassOrInterfaceTypeDetails formbackingClassOrInterfaceDetails = typeLocationService.getTypeDetails(formbackingObject);
+		Assert.notNull(formbackingClassOrInterfaceDetails, "Unable to obtain physical type metadata for type " + formbackingObject.getFullyQualifiedTypeName());
 		MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(getClass().getName(), formbackingClassOrInterfaceDetails);
 		final MethodMetadata identifierAccessor = persistenceMemberLocator.getIdentifierAccessor(formbackingObject);
 		final MethodMetadata versionAccessor = persistenceMemberLocator.getVersionAccessor(formbackingObject);
@@ -187,7 +192,7 @@ public class SolrJspMetadataListener implements MetadataProvider, MetadataNotifi
 
 			// A physical Java type has changed, and determine what the corresponding local metadata identification string would have been
 			JavaType javaType = SolrWebSearchMetadata.getJavaType(upstreamDependency);
-			Path path = SolrWebSearchMetadata.getPath(upstreamDependency);
+			ContextualPath path = SolrWebSearchMetadata.getPath(upstreamDependency);
 			downstreamDependency = SolrJspMetadata.createIdentifier(javaType, path);
 
 			// We only need to proceed if the downstream dependency relationship is not already registered
@@ -208,7 +213,7 @@ public class SolrJspMetadataListener implements MetadataProvider, MetadataNotifi
 
 	private void copyArtifacts(final String relativeTemplateLocation, final String relativeProjectFileLocation) {
 		// First install search.tagx
-		String projectFileLocation = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, relativeProjectFileLocation);
+		String projectFileLocation = pathResolver.getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, relativeProjectFileLocation);
 		if (!fileManager.exists(projectFileLocation)) {
 			try {
 				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), relativeTemplateLocation), fileManager.createFile(projectFileLocation).getOutputStream());

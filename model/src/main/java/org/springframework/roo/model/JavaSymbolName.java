@@ -63,6 +63,15 @@ public class JavaSymbolName implements Comparable<JavaSymbolName> {
 		}
 	}
 
+	public static boolean isLegalJavaName(final String name) {
+		try {
+		  assertJavaNameLegal(name);
+		} catch (IllegalArgumentException e) {
+			return false;
+		}
+		return true;
+	}
+
 	/**
 	 * @return a camel case string in human readable form
 	 */

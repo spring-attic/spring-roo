@@ -37,7 +37,6 @@ import org.springframework.roo.addon.plural.PluralMetadata;
 import org.springframework.roo.addon.web.mvc.controller.scaffold.WebScaffoldMetadata;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
-import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.customdata.CustomDataKeys;
 import org.springframework.roo.classpath.customdata.tagkeys.MethodMetadataCustomDataKey;
@@ -64,7 +63,7 @@ import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.JdkJavaType;
-import org.springframework.roo.project.Path;
+import org.springframework.roo.project.ContextualPath;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.CollectionUtils;
@@ -232,10 +231,13 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 		Assert.notNull(javaType, "Java type required");
 		Assert.notNull(metadataService, "Metadata service required");
 
-		String pluralId = PluralMetadata.createIdentifier(javaType);
-		PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(pluralId);
+		ClassOrInterfaceTypeDetails javaTypeDetails = typeLocationService.getTypeDetails(javaType);
+		Assert.notNull(javaType, "Class or interface type details isn't available for type '" + javaType + "'");
+		ContextualPath contextualPath = PhysicalTypeIdentifier.getPath(javaTypeDetails.getDeclaredByMetadataId());
+		String pluralMetadataKey = PluralMetadata.createIdentifier(javaType, contextualPath);
+		PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(pluralMetadataKey);
 		if (pluralMetadata != null) {
-			registerDependency(pluralId, metadataIdentificationString);
+			registerDependency(pluralMetadata.getId(), metadataIdentificationString);
 			String plural = pluralMetadata.getPlural();
 			if (plural.equalsIgnoreCase(javaType.getSimpleTypeName())) {
 				return plural + "Items";
@@ -255,18 +257,10 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 	private boolean isEnumType(final JavaType javaType) {
 		Assert.notNull(javaType, "Java type required");
 		Assert.notNull(metadataService, "Metadata service required");
-
-		PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(javaType, Path.SRC_MAIN_JAVA));
-		if (physicalTypeMetadata != null) {
-			ClassOrInterfaceTypeDetails details = (ClassOrInterfaceTypeDetails) physicalTypeMetadata.getMemberHoldingTypeDetails();
-			if (details != null) {
-				if (details.getPhysicalTypeCategory().equals(PhysicalTypeCategory.ENUMERATION)) {
-					return true;
-				}
-//				@Enumerated has a target of Method or Field
-//				if (MemberFindingUtils.getAnnotationOfType(details.getAnnotations(), ENUMERATED) != null) {
-//					return true;
-//				}
+		ClassOrInterfaceTypeDetails javaTypeDetails = typeLocationService.getTypeDetails(javaType);
+		if (javaTypeDetails != null) {
+			if (javaTypeDetails.getPhysicalTypeCategory().equals(PhysicalTypeCategory.ENUMERATION)) {
+				return true;
 			}
 		}
 		return false;
@@ -339,7 +333,10 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 		Assert.notNull(memberDetails, "Member details required");
 
 		SortedSet<FinderMetadataDetails> finderMetadataDetails = new TreeSet<FinderMetadataDetails>();
-		String finderMetadataKey = FinderMetadata.createIdentifier(javaType, Path.SRC_MAIN_JAVA);
+		ClassOrInterfaceTypeDetails javaTypeDetails = typeLocationService.getTypeDetails(javaType);
+		Assert.notNull(javaType, "Class or interface type details isn't available for type '" + javaType + "'");
+		ContextualPath contextualPath = PhysicalTypeIdentifier.getPath(javaTypeDetails.getDeclaredByMetadataId());
+		String finderMetadataKey = FinderMetadata.createIdentifier(javaType, contextualPath);
 		registerDependency(finderMetadataKey, metadataIdentificationString);
 		FinderMetadata finderMetadata = (FinderMetadata) metadataService.get(finderMetadataKey);
 		if (finderMetadata != null) {
@@ -376,7 +373,7 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 
 	public JavaTypeMetadataDetails getJavaTypeMetadataDetails(final JavaType javaType, final MemberDetails memberDetails, final String metadataIdentificationString) {
 		Assert.notNull(javaType, "Java type required");
-		registerDependency(PhysicalTypeIdentifier.createIdentifier(javaType, Path.SRC_MAIN_JAVA), metadataIdentificationString);
+		registerDependency(memberDetails.getDetails().get(memberDetails.getDetails().size() - 1).getDeclaredByMetadataId(), metadataIdentificationString);
 		return new JavaTypeMetadataDetails(
 				javaType,
 				getPlural(javaType, metadataIdentificationString),
@@ -406,7 +403,8 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 								pathMap.put(type.getFullyQualifiedTypeName(), pathString);
 								return pathString;
 							}
-							webScaffoldMetadataKey = WebScaffoldMetadata.createIdentifier(coitd.getName(), Path.SRC_MAIN_JAVA);
+							ContextualPath coitdPath = PhysicalTypeIdentifier.getPath(coitd.getDeclaredByMetadataId());
+							webScaffoldMetadataKey = WebScaffoldMetadata.createIdentifier(coitd.getName(), coitdPath);
 							webScaffoldMetadata = (WebScaffoldMetadata) metadataService.get(webScaffoldMetadataKey);
 							break;
 						}
@@ -430,13 +428,16 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 	}
 
 	public MemberDetails getMemberDetails(final JavaType javaType) {
-		ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = typeLocationService.getClassOrInterface(javaType);
+		ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = typeLocationService.getTypeDetails(javaType);
 		Assert.notNull(classOrInterfaceTypeDetails, "Unable to obtain physical type metadata for type " + javaType.getFullyQualifiedTypeName());
 		return memberDetailsScanner.getMemberDetails(WebMetadataServiceImpl.class.getName(), classOrInterfaceTypeDetails);
 	}
 
 	public Map<MethodMetadataCustomDataKey, MemberTypeAdditions> getCrudAdditions(final JavaType domainType, final String metadataId) {
-		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.createIdentifier(domainType, Path.SRC_MAIN_JAVA), metadataId);
+		String domainTypeMid = typeLocationService.getPhysicalTypeIdentifier(domainType);
+		if (domainTypeMid != null) {
+			metadataDependencyRegistry.registerDependency(domainTypeMid, metadataId);
+		}
 
 		final JavaTypePersistenceMetadataDetails persistenceDetails = getJavaTypePersistenceMetadataDetails(domainType, getMemberDetails(domainType), metadataId);
 		if (persistenceDetails == null) {

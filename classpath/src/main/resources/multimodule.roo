@@ -1,0 +1,74 @@
+project --topLevelPackage com.springsource.petclinic
+
+module create --moduleName jpa --topLevelPackage com.springsource.petclinic
+
+jpa setup --provider HIBERNATE --database HYPERSONIC_IN_MEMORY
+
+enum type --class ~.reference.PetType
+enum constant --name Dog
+enum constant --name Cat
+enum constant --name Bird
+
+enum type --class ~.reference.Specialty
+enum constant --name Cardiology
+enum constant --name Dentistry
+enum constant --name Nutrition
+
+entity jpa --class ~.domain.Pet --testAutomatically
+entity jpa --class ~.domain.Visit --testAutomatically
+entity jpa --class ~.domain.AbstractPerson --abstract
+entity jpa --class ~.domain.Vet --extends ~.domain.AbstractPerson --testAutomatically
+entity jpa --class ~.domain.Owner --extends ~.domain.AbstractPerson --testAutomatically
+
+field string --fieldName firstName --sizeMin 3 --sizeMax 30 --class ~.domain.AbstractPerson
+field string --fieldName lastName --notNull --sizeMin 3 --sizeMax 30
+field string --fieldName address --notNull --sizeMax 50 --sizeMin 1
+field string --fieldName city --notNull --sizeMax 30
+field string --fieldName telephone --notNull
+field string --fieldName homePage --sizeMax 30
+field string --fieldName email --sizeMax 30 --sizeMin 6
+field date --fieldName birthDay --type java.util.Date --notNull
+
+field string --fieldName description --sizeMax 255 --class ~.domain.Visit
+field date --fieldName visitDate --type java.util.Date --notNull --past
+field reference --fieldName pet --type ~.domain.Pet --notNull
+field reference --fieldName vet --type ~.domain.Vet
+
+field boolean --fieldName sendReminders --notNull --primitive --class ~.domain.Pet
+field string --fieldName name --notNull --sizeMin 1
+field number --fieldName weight --type java.lang.Float --notNull --min 0
+field reference --fieldName owner --type ~.domain.Owner
+field enum --fieldName type --type ~.reference.PetType --notNull
+
+field date --fieldName employedSince --type java.util.Calendar --notNull --past --class ~.domain.Vet
+field enum --fieldName specialty --type ~.reference.Specialty --notNull false
+
+field set --class ~.domain.Owner --fieldName pets --type ~.domain.Pet --mappedBy owner --notNull false --cardinality ONE_TO_MANY
+
+finder add --finderName findPetsByNameAndWeight --class ~.domain.Pet
+finder add --finderName findPetsByOwner
+finder add --finderName findPetsBySendRemindersAndWeightLessThan
+finder add --finderName findPetsByTypeAndNameLike
+
+finder add --finderName findVisitsByDescriptionAndVisitDate --class ~.domain.Visit
+finder add --finderName findVisitsByVisitDateBetween
+finder add --finderName findVisitsByDescriptionLike
+
+module focus --moduleName ~
+module create --moduleName web --topLevelPackage com.springsource.petclinic
+
+web mvc setup
+web mvc all --package ~.web
+web mvc finder all
+
+web mvc language --code de
+web mvc language --code es
+
+selenium test --controller ~.web.OwnerController
+selenium test --controller ~.web.PetController
+selenium test --controller ~.web.VetController
+selenium test --controller ~.web.VisitController
+
+module focus --moduleName ~
+
+logging setup --level INFO

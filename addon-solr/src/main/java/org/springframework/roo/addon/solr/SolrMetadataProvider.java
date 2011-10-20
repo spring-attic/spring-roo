@@ -24,7 +24,7 @@ import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.Path;
+import org.springframework.roo.project.ContextualPath;
 
 /**
  * Provides {@link SolrMetadata}.
@@ -61,7 +61,7 @@ public class SolrMetadataProvider extends AbstractMemberDiscoveringItdMetadataPr
 
 		// Acquire bean info (we need getters details, specifically)
 		JavaType javaType = SolrMetadata.getJavaType(metadataIdentificationString);
-		Path path = SolrMetadata.getPath(metadataIdentificationString);
+		ContextualPath path = SolrMetadata.getPath(metadataIdentificationString);
 		String entityMetadataKey = EntityMetadata.createIdentifier(javaType, path);
 
 		// We want to be notified if the getter info changes in any way
@@ -107,13 +107,10 @@ public class SolrMetadataProvider extends AbstractMemberDiscoveringItdMetadataPr
 				// Determine the governor for this ITD, and the Path the ITD is stored within
 				JavaType governorType = itdTypeDetails.getName();
 				String providesType = MetadataIdentificationUtils.getMetadataClass(itdTypeDetails.getDeclaredByMetadataId());
-				Path itdPath = PhysicalTypeIdentifierNamingUtils.getPath(providesType, itdTypeDetails.getDeclaredByMetadataId());
-
-				//  Produce the local MID we're going to use to make the request
-				String localMid = createLocalIdentifier(governorType, itdPath);
-
-				// Request the local MID
-				return localMid;
+				ContextualPath itdPath = PhysicalTypeIdentifierNamingUtils.getPath(providesType, itdTypeDetails.getDeclaredByMetadataId());
+				
+				//  Produce the local MID we're going to use and make the request
+				return createLocalIdentifier(governorType, itdPath);
 			}
 		}
 
@@ -127,12 +124,12 @@ public class SolrMetadataProvider extends AbstractMemberDiscoveringItdMetadataPr
 	@Override
 	protected String getGovernorPhysicalTypeIdentifier(final String metadataIdentificationString) {
 		JavaType javaType = SolrMetadata.getJavaType(metadataIdentificationString);
-		Path path = SolrMetadata.getPath(metadataIdentificationString);
+		ContextualPath path = SolrMetadata.getPath(metadataIdentificationString);
 		return PhysicalTypeIdentifier.createIdentifier(javaType, path);
 	}
 
 	@Override
-	protected String createLocalIdentifier(final JavaType javaType, final Path path) {
+	protected String createLocalIdentifier(final JavaType javaType, final ContextualPath path) {
 		return SolrMetadata.createIdentifier(javaType, path);
 	}
 

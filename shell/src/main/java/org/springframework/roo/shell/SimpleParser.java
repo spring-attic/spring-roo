@@ -1,5 +1,7 @@
 package org.springframework.roo.shell;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.transform.Transformer;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileFilter;
@@ -24,9 +26,6 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.transform.Transformer;
-
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.ExceptionUtils;
@@ -48,8 +47,9 @@ public class SimpleParser implements Parser {
 
 	// Constants
 	private static final Logger logger = HandlerUtils.getLogger(SimpleParser.class);
-	private static final Comparator<String> comparator = new NaturalOrderComparator<String>();
 
+	private static final Comparator<Object> comparator = new NaturalOrderComparator<Object>();
+	
 	// Fields
 	private final Object mutex = this;
 	private final Set<Converter<?>> converters = new HashSet<Converter<?>>();
@@ -389,7 +389,7 @@ public class SimpleParser implements Parser {
 		return null; // Not a match
 	}
 
-	public int complete(String buffer, int cursor, final List<String> candidates) {
+	public int complete(String buffer, int cursor, List<Completion> candidates) {
 		synchronized (mutex) {
 			Assert.notNull(buffer, "Buffer required");
 			Assert.notNull(candidates, "Candidates list required");
@@ -411,7 +411,7 @@ public class SimpleParser implements Parser {
 
 			// Start by locating a method that matches
 			Set<MethodTarget> targets = locateTargets(translated, false, true);
-			SortedSet<String> results = new TreeSet<String>(comparator);
+			SortedSet<Completion> results = new TreeSet<Completion>(comparator);
 
 			if (targets.isEmpty()) {
 				// Nothing matches the buffer they've presented
@@ -428,8 +428,8 @@ public class SimpleParser implements Parser {
 					if (stopAt == -1) {
 						stopAt = target.getKey().length();
 					}
-
-					results.add(target.getKey().substring(0, stopAt) + " ");
+					
+					results.add(new Completion(target.getKey().substring(0, stopAt) + " "));
 				}
 				candidates.addAll(results);
 				return 0;
@@ -448,7 +448,7 @@ public class SimpleParser implements Parser {
 				options = ParserUtils.tokenize(methodTarget.getRemainingBuffer());
 			} catch (IllegalArgumentException ex) {
 				// Assume any IllegalArgumentException is due to a quotation mark mismatch
-				candidates.add(translated + "\"");
+				candidates.add(new Completion(translated + "\""));
 				return 0;
 			}
 
@@ -459,7 +459,7 @@ public class SimpleParser implements Parser {
 			if (parameterAnnotations.length == 0) {
 				for (String value : cmd.value()) {
 					if (buffer.startsWith(value) || value.startsWith(buffer)) {
-						results.add(value); // no space at the end, as there's no need to continue the command further
+						results.add(new Completion(value)); // no space at the end, as there's no need to continue the command further
 					}
 				}
 				candidates.addAll(results);
@@ -474,7 +474,7 @@ public class SimpleParser implements Parser {
 						// We only need provide completion, though, if they failed to specify it fully
 						if (!buffer.startsWith(value)) {
 							// They failed to specify the command fully
-							results.add(value + " ");
+							results.add(new Completion(value + " "));
 						}
 					}
 				}
@@ -544,14 +544,13 @@ public class SimpleParser implements Parser {
 				for (CliOption include : unspecified) {
 					for (String value : include.key()) {
 						if (!"".equals(value)) {
-							results.add(translated + value + " ");
+							results.add(new Completion(translated + value + " "));
 						}
 					}
 					if (!showAllRemaining) {
 						break;
 					}
 				}
-
 				candidates.addAll(results);
 				return 0;
 			}
@@ -592,9 +591,9 @@ public class SimpleParser implements Parser {
 								}
 							} catch (RuntimeException notYetReady) {
 								if (translated.endsWith(" ")) {
-									results.add(translated + "--" + value + " ");
+									results.add(new Completion(translated + "--" + value + " "));
 								} else {
-									results.add(translated + " --" + value + " ");
+									results.add(new Completion(translated + " --" + value + " "));
 								}
 								continue;
 							}
@@ -603,9 +602,9 @@ public class SimpleParser implements Parser {
 						// Handle normal mandatory options
 						if (!"".equals(value) && include.mandatory()) {
 							if (translated.endsWith(" ")) {
-								results.add(translated + "--" + value + " ");
+								results.add(new Completion(translated + "--" + value + " "));
 							} else {
-								results.add(translated + " --" + value + " ");
+								results.add(new Completion(translated + " --" + value + " "));
 							}
 						}
 					}
@@ -625,11 +624,11 @@ public class SimpleParser implements Parser {
 				for (CliOption option : cliOptions) {
 					for (String value : option.key()) {
 						if (value != null && lastOptionKey != null && value.regionMatches(true, 0, lastOptionKey, 0, lastOptionKey.length())) {
-							results.add(translated.substring(0, (translated.length() - lastOptionKey.length())) + value + " ");
+							String completionValue = translated.substring(0, (translated.length() - lastOptionKey.length())) + value + " ";
+							results.add(new Completion(completionValue));
 						}
 					}
 				}
-
 				candidates.addAll(results);
 				return 0;
 			}
@@ -645,7 +644,7 @@ public class SimpleParser implements Parser {
 
 					for (String key : option.key()) {
 						if (key.equals(lastOptionKey)) {
-							List<String> allValues = new ArrayList<String>();
+							List<Completion> allValues = new ArrayList<Completion>();
 							String suffix = " ";
 
 							// Let's use a Converter if one is available
@@ -665,21 +664,21 @@ public class SimpleParser implements Parser {
 
 								// Provide some simple options for common types
 								if (Boolean.class.isAssignableFrom(parameterType) || Boolean.TYPE.isAssignableFrom(parameterType)) {
-									allValues.add("true");
-									allValues.add("false");
+									allValues.add(new Completion("true"));
+									allValues.add(new Completion("false"));
 								}
 
 								if (Number.class.isAssignableFrom(parameterType)) {
-									allValues.add("0");
-									allValues.add("1");
-									allValues.add("2");
-									allValues.add("3");
-									allValues.add("4");
-									allValues.add("5");
-									allValues.add("6");
-									allValues.add("7");
-									allValues.add("8");
-									allValues.add("9");
+									allValues.add(new Completion("0"));
+									allValues.add(new Completion("1"));
+									allValues.add(new Completion("2"));
+									allValues.add(new Completion("3"));
+									allValues.add(new Completion("4"));
+									allValues.add(new Completion("5"));
+									allValues.add(new Completion("6"));
+									allValues.add(new Completion("7"));
+									allValues.add(new Completion("8"));
+									allValues.add(new Completion("9"));
 								}
 							}
 
@@ -689,15 +688,15 @@ public class SimpleParser implements Parser {
 							}
 
 							// Only include in the candidates those results which are compatible with the present buffer
-							for (String currentValue : allValues) {
+							for (Completion currentValue : allValues) {
 								// We only provide a suggestion if the lastOptionValue == ""
 								if (!StringUtils.hasText(lastOptionValue)) {
 									// We should add the result, as they haven't typed anything yet
-									results.add(prefix + currentValue + suffix);
+									results.add(new Completion(prefix + currentValue.getValue() + suffix, currentValue.getFormattedValue(), currentValue.getHeading(), currentValue.getOrder()));
 								} else {
 									// Only add the result **if** what they've typed is compatible *AND* they haven't already typed it in full
-									if (currentValue.toLowerCase().startsWith(lastOptionValue.toLowerCase()) && !lastOptionValue.equalsIgnoreCase(currentValue) && lastOptionValue.length() < currentValue.length()) {
-										results.add(prefix + currentValue + suffix);
+									if (currentValue.getValue().toLowerCase().startsWith(lastOptionValue.toLowerCase()) && !lastOptionValue.equalsIgnoreCase(currentValue.getValue()) && lastOptionValue.length() < currentValue.getValue().length()) {
+										results.add(new Completion(prefix + currentValue.getValue() + suffix, currentValue.getFormattedValue(), currentValue.getHeading(), currentValue.getOrder()));
 									}
 								}
 							}
@@ -728,7 +727,7 @@ public class SimpleParser implements Parser {
 							logger.info(help.toString());
 
 							if (results.size() == 1) {
-								String suggestion = results.iterator().next().trim();
+								String suggestion = results.iterator().next().getValue().trim();
 								if (suggestion.equals(lastOptionValue)) {
 									// They have pressed TAB in the default value, and the default value has already been provided as an explicit option
 									return 0;

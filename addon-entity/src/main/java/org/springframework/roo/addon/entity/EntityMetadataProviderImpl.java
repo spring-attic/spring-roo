@@ -31,6 +31,7 @@ import org.springframework.roo.addon.displaystring.DisplayStringMetadataProvider
 import org.springframework.roo.addon.plural.PluralMetadata;
 import org.springframework.roo.addon.plural.PluralMetadataProvider;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
+import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.customdata.taggers.CustomDataKeyDecorator;
 import org.springframework.roo.classpath.customdata.taggers.MethodMatcher;
@@ -42,8 +43,9 @@ import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem
 import org.springframework.roo.classpath.itd.MemberHoldingTypeDetailsMetadataItem;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.Path;
+import org.springframework.roo.project.ContextualPath;
 import org.springframework.roo.project.ProjectMetadata;
+import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
 
@@ -62,6 +64,7 @@ public class EntityMetadataProviderImpl extends AbstractItdMetadataProvider impl
 	@Reference private CustomDataKeyDecorator customDataKeyDecorator;
 	@Reference private DisplayStringMetadataProvider displayStringMetadataProvider;
 	@Reference private PluralMetadataProvider pluralMetadataProvider;
+	@Reference private ProjectOperations projectOperations;
 
 	protected void activate(final ComponentContext context) {
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
@@ -120,7 +123,7 @@ public class EntityMetadataProviderImpl extends AbstractItdMetadataProvider impl
 		}
 		// We also need the plural
 		final JavaType entity = EntityMetadata.getJavaType(metadataId);
-		final Path path = EntityMetadata.getPath(metadataId);
+		final ContextualPath path = EntityMetadata.getPath(metadataId);
 		final String pluralId = PluralMetadata.createIdentifier(entity, path);
 		final PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(pluralId);
 		if (pluralMetadata == null) {
@@ -139,12 +142,12 @@ public class EntityMetadataProviderImpl extends AbstractItdMetadataProvider impl
 		boolean isGaeEnabled = false;
 		boolean isDataNucleusEnabled = false;
 
-		final ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
-		if (projectMetadata != null) {
+		String moduleName = path.getModule();
+		if (projectOperations.isProjectAvailable(moduleName)) {
 			// If the project itself changes, we want a chance to refresh this item
-			metadataDependencyRegistry.registerDependency(ProjectMetadata.getProjectIdentifier(), metadataId);
-			isGaeEnabled = projectMetadata.isGaeEnabled();
-			isDataNucleusEnabled = projectMetadata.isDataNucleusEnabled();
+			metadataDependencyRegistry.registerDependency(ProjectMetadata.getProjectIdentifier(moduleName), metadataId);
+			isGaeEnabled = projectOperations.isGaeEnabled(moduleName);
+			isDataNucleusEnabled = projectOperations.isDataNucleusEnabled(moduleName);
 		}
 		return new EntityMetadata(metadataId, aspectName, governorPhysicalType, parent, crudAnnotationValues, pluralMetadata.getPlural(), idFields.get(0), entityName, isGaeEnabled, isDataNucleusEnabled);
 	}
@@ -156,12 +159,12 @@ public class EntityMetadataProviderImpl extends AbstractItdMetadataProvider impl
 	@Override
 	protected String getGovernorPhysicalTypeIdentifier(final String metadataIdentificationString) {
 		JavaType javaType = EntityMetadata.getJavaType(metadataIdentificationString);
-		Path path = EntityMetadata.getPath(metadataIdentificationString);
+		ContextualPath path = EntityMetadata.getPath(metadataIdentificationString);
 		return PhysicalTypeIdentifier.createIdentifier(javaType, path);
 	}
 
 	@Override
-	protected String createLocalIdentifier(final JavaType javaType, final Path path) {
+	protected String createLocalIdentifier(final JavaType javaType, final ContextualPath path) {
 		return EntityMetadata.createIdentifier(javaType, path);
 	}
 

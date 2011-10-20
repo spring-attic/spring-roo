@@ -35,7 +35,9 @@ import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
+import org.springframework.roo.project.ContextualPath;
 import org.springframework.roo.project.Path;
+import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
@@ -62,15 +64,16 @@ public class ControllerOperationsImpl implements ControllerOperations {
 	@Reference private ProjectOperations projectOperations;
 	@Reference private WebMvcOperations webMvcOperations;
 	@Reference private MetadataDependencyRegistry dependencyRegistry;
+	@Reference private PathResolver pathResolver;
 	@Reference private TypeLocationService typeLocationService;
 	@Reference private TypeManagementService typeManagementService;
 
 	public boolean isNewControllerAvailable() {
-		return projectOperations.isProjectAvailable();
+		return projectOperations.isFocusedProjectAvailable();
 	}
 
 	public boolean isScaffoldAvailable() {
-		return fileManager.exists(projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/spring/webmvc-config.xml")) && !fileManager.exists(projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/faces-config.xml"));
+		return fileManager.exists(pathResolver.getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/spring/webmvc-config.xml")) && !fileManager.exists(pathResolver.getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/faces-config.xml"));
 	}
 
 	public void setup() {
@@ -84,7 +87,8 @@ public class ControllerOperationsImpl implements ControllerOperations {
 			}
 
 			JavaType javaType = cid.getName();
-			Path path = PhysicalTypeIdentifier.getPath(cid.getDeclaredByMetadataId());
+			ContextualPath path = PhysicalTypeIdentifier.getPath(cid.getDeclaredByMetadataId());
+			path = ContextualPath.getInstance(path.getPath(), projectOperations.getFocusedModuleName());
 
 			// Check to see if this persistent type has a web scaffold metadata listening to it
 			String downstreamWebScaffoldMetadataId = WebScaffoldMetadata.createIdentifier(javaType, path);
@@ -119,9 +123,10 @@ public class ControllerOperationsImpl implements ControllerOperations {
 
 		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = null;
 		if (existingController == null) {
-			String resourceIdentifier = typeLocationService.getPhysicalTypeCanonicalPath(controller, Path.SRC_MAIN_JAVA);
-			String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(controller, projectOperations.getPathResolver().getPath(resourceIdentifier));
-
+			ContextualPath controllerPath = pathResolver.getFocusedPath(Path.SRC_MAIN_JAVA);
+			String resourceIdentifier = typeLocationService.getPhysicalTypeCanonicalPath(controller, controllerPath);
+			String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(controller, pathResolver.getPath(resourceIdentifier));
+			
 			// Create annotation @RequestMapping("/myobject/**")
 			List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 			requestMappingAttributes.add(new StringAttributeValue(VALUE, "/" + path));

@@ -2,6 +2,8 @@ package org.springframework.roo.classpath.details.annotations.populator;
 
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
+import org.springframework.roo.classpath.details.MemberFindingUtils;
+import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.itd.MemberHoldingTypeDetailsMetadataItem;
 import org.springframework.roo.model.JavaType;
@@ -66,6 +68,20 @@ public abstract class AbstractAnnotationValues {
 		}
 	}
 
+	protected AbstractAnnotationValues(final MemberHoldingTypeDetails memberHoldingTypeDetails, final JavaType annotationType) {
+		Assert.notNull(annotationType, "Annotation to locate is required");
+
+		if (memberHoldingTypeDetails instanceof ClassOrInterfaceTypeDetails) {
+			this.classParsed = true;
+
+			// We have reliable physical type details
+			this.governorTypeDetails = (ClassOrInterfaceTypeDetails) memberHoldingTypeDetails;
+
+			// Process values from the annotation, if present
+			this.annotationMetadata = MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, annotationType);
+		}
+	}
+	
 	/**
 	 * @return the type which declared the annotation (ie the governor; never returns null)
 	 */

@@ -62,11 +62,12 @@ public class JpaOperationsImplTest {
 
 		// Mocks
 		when(mockProjectOperations.getPathResolver()).thenReturn(mockPathResolver);
-		when(mockPathResolver.getIdentifier(Path.ROOT, JpaOperationsImpl.POM_XML)).thenReturn(POM_PATH);
-		when(mockPathResolver.getIdentifier(Path.SPRING_CONFIG_ROOT, JpaOperationsImpl.APPLICATION_CONTEXT_XML)).thenReturn(APPLICATION_CONTEXT_PATH);
-
+		when(mockPathResolver.getFocusedIdentifier(Path.ROOT, JpaOperationsImpl.POM_XML)).thenReturn(POM_PATH);
+		when(mockPathResolver.getFocusedIdentifier(Path.SPRING_CONFIG_ROOT, JpaOperationsImpl.APPLICATION_CONTEXT_XML)).thenReturn(APPLICATION_CONTEXT_PATH);
+		
 		// Object under test
 		this.jpaOperations = new JpaOperationsImpl();
+		this.jpaOperations.pathResolver = mockPathResolver;
 		this.jpaOperations.fileManager = mockFileManager;
 		this.jpaOperations.projectOperations = mockProjectOperations;
 		this.jpaOperations.propFileOperations = mockPropFileOperations;
@@ -156,19 +157,20 @@ public class JpaOperationsImplTest {
 		// Set up
 		when(mockFileManager.getInputStream(POM_PATH)).thenReturn(getPomInputStream(POM), getPomInputStream(POM));
 		when(mockFileManager.getInputStream(APPLICATION_CONTEXT_PATH)).thenReturn(getAppContextInputStream(APP_CONTEXT));
-		when(mockPathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, PERSISTENCE_XML)).thenReturn(PERSISTENCE_PATH);
+		when(mockPathResolver.getFocusedIdentifier(Path.SRC_MAIN_RESOURCES, PERSISTENCE_XML)).thenReturn(PERSISTENCE_PATH);
 		when(mockFileManager.exists(PERSISTENCE_PATH)).thenReturn(false);	// i.e. no existing persistence.xml
 		when(mockPropFileOperations.loadProperties(JPA_DIALECTS_FILE, JpaOperationsImpl.class)).thenReturn(dialects);
-		final ProjectMetadata mockProjectMetadata = mock(ProjectMetadata.class);
-		when(mockProjectOperations.getProjectMetadata()).thenReturn(mockProjectMetadata);
 
+		final ProjectMetadata mockProjectMetadata = mock(ProjectMetadata.class);
+		when(mockProjectOperations.getProjectMetadata("")).thenReturn(mockProjectMetadata);
+		
 		final OrmProvider ormProvider = HIBERNATE;
 		final JdbcDatabase jdbcDatabase = H2_IN_MEMORY;
 		dialects.put(ormProvider.name() + "." + jdbcDatabase.name(), DB_DIALECT);
 
 		// Invoke
-		this.jpaOperations.configureJpa(ormProvider, jdbcDatabase, DB_JNDI_NAME, null, DB_HOST_NAME, DB_NAME, DB_USER_NAME, DB_PASSWORD, TRANSACTION_MANAGER, PERSISTENCE_UNIT);
-
+		this.jpaOperations.configureJpa(ormProvider, jdbcDatabase, DB_JNDI_NAME, null, DB_HOST_NAME, DB_NAME, DB_USER_NAME, DB_PASSWORD, TRANSACTION_MANAGER, PERSISTENCE_UNIT, "");
+		
 		// Check
 		verifyFileUpdate(EXPECTED_APPLICATION_CONTEXT, APPLICATION_CONTEXT_PATH);
 		verifyFileUpdate(EXPECTED_PERSISTENCE_XML_FOR_H2_IN_MEMORY_AND_HIBERNATE, PERSISTENCE_PATH);

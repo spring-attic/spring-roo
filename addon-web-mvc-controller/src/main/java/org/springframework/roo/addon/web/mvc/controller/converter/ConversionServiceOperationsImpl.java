@@ -14,6 +14,7 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.project.Path;
+import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.IOUtils;
 import org.springframework.roo.support.util.TemplateUtils;
@@ -31,6 +32,7 @@ public class ConversionServiceOperationsImpl implements ConversionServiceOperati
 
 	// Fields
 	@Reference private FileManager fileManager;
+	@Reference private PathResolver pathResolver;
 	@Reference private TypeLocationService typeLocationService;
 	@Reference private WebMvcOperations webMvcOperations;
 
@@ -50,7 +52,7 @@ public class ConversionServiceOperationsImpl implements ConversionServiceOperati
 
 	void installJavaClass(final JavaPackage thePackage) {
 		JavaType javaType = new JavaType(thePackage.getFullyQualifiedPackageName() + "." + CONVERSION_SERVICE_SIMPLE_TYPE);
-		String physicalPath = typeLocationService.getPhysicalTypeCanonicalPath(javaType, Path.SRC_MAIN_JAVA);
+		String physicalPath = pathResolver.getFocusedCanonicalPath(Path.SRC_MAIN_JAVA, javaType);
 		if (fileManager.exists(physicalPath)) {
 			return;
 		}

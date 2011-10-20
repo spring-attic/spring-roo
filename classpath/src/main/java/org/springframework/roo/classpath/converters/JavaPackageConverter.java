@@ -7,13 +7,13 @@ import java.util.SortedSet;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.file.monitor.event.FileDetails;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.process.manager.FileManager;
-import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
-import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
+import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.shell.Completion;
 import org.springframework.roo.shell.Converter;
 import org.springframework.roo.shell.MethodTarget;
@@ -32,6 +32,7 @@ public class JavaPackageConverter implements Converter<JavaPackage> {
 	@Reference private FileManager fileManager;
 	@Reference private LastUsed lastUsed;
 	@Reference private ProjectOperations projectOperations;
+	@Reference private TypeLocationService typeLocationService;
 
 	public JavaPackage convertFromText(final String value, final Class<?> requiredType, final String optionContext) {
 		if (value == null || "".equals(value)) {
@@ -41,9 +42,8 @@ public class JavaPackageConverter implements Converter<JavaPackage> {
 		if (value.startsWith("~")) {
 			try {
 				String topLevelPath = "";
-				ProjectMetadata projectMetadata = projectOperations.getProjectMetadata();
-				if (projectMetadata != null) {
-					topLevelPath = projectMetadata.getTopLevelPackage().getFullyQualifiedPackageName();
+				if (projectOperations.isFocusedProjectAvailable()) {
+					topLevelPath = typeLocationService.getTopLevelPackageForModule(projectOperations.getFocusedModule());//projectOperations.getTopLevelPackage().getFullyQualifiedPackageName();
 				}
 				if (value.length() > 1) {
 					newValue = (!(value.charAt(1) == '.') ? topLevelPath + "." : topLevelPath) + value.substring(1);
@@ -70,13 +70,22 @@ public class JavaPackageConverter implements Converter<JavaPackage> {
 		if (existingData == null) {
 			existingData = "";
 		}
-
-		ProjectMetadata projectMetadata = projectOperations.getProjectMetadata();
-		if (projectMetadata == null) {
+		String topLevelPath = "";
+		if (!projectOperations.isFocusedProjectAvailable()) {
 			return false;
 		}
 
-		String topLevelPath = projectMetadata.getTopLevelPackage().getFullyQualifiedPackageName();
+		for (Pom pom : projectOperations.getPomManagementService().getPomMap().values()) {
+			for (String type : typeLocationService.getTypesForModule(pom.getPath())) {
+				completions.add(new Completion(type.substring(0, type.lastIndexOf('.'))));
+			}
+		}
+
+		if (true) {
+			return false;
+		}
+
+		topLevelPath = typeLocationService.getTopLevelPackageForModule(projectOperations.getFocusedModule());
 
 		String newValue = existingData;
 		if (existingData.startsWith("~")) {
@@ -90,15 +99,20 @@ public class JavaPackageConverter implements Converter<JavaPackage> {
 		PathResolver pathResolver = projectOperations.getPathResolver();
 
 		// Pass 1: If a '.' suffixes the value then sub-folders will be picked up explicitly
-		String antPath = pathResolver.getRoot(Path.SRC_MAIN_JAVA) + File.separatorChar + newValue.replace(".", File.separator).toLowerCase() + "*";
+		String antPath = pathResolver.getRoot() + File.separatorChar + newValue.replace(".", File.separator).toLowerCase() + "*";
 		SortedSet<FileDetails> entries = fileManager.findMatchingAntPath(antPath);
 
 		// Pass 2: Add a separator to the end of the value to pick up sub-folders
-		antPath = pathResolver.getRoot(Path.SRC_MAIN_JAVA) + File.separatorChar + newValue.replace(".", File.separator).toLowerCase() + File.separator + "*";
+		antPath = pathResolver.getRoot() + File.separatorChar + newValue.replace(".", File.separator).toLowerCase() + File.separator + "*";
 		entries.addAll(fileManager.findMatchingAntPath(antPath));
 
 		for (FileDetails fileIdentifier : entries) {
-			String candidate = pathResolver.getRelativeSegment(fileIdentifier.getCanonicalPath()).substring(1); // Drop the leading "/"
+			String candidate = pathResolver.getRelativeSegment(fileIdentifier.getCanonicalPath());
+			if (candidate.length() > 0) {
+				// Drop the leading "/"
+				candidate = candidate.substring(1);
+			}
+
 			boolean include = false;
 			// Do not include directories that start with ., as this is used for purposes like SVN (see ROO-125)
 			if (fileIdentifier.getFile().isDirectory() && !fileIdentifier.getFile().getName().startsWith(".")) {

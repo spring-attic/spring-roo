@@ -1,7 +1,7 @@
 package org.springframework.roo.addon.dod;
 
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.Path;
+import org.springframework.roo.project.ContextualPath;
 
 /**
  * Creates a new data-on-demand class for an entity.
@@ -25,5 +25,5 @@ public interface DataOnDemandOperations {
 	 * @param name the name of the new DoD class (required)
 	 * @param path the location for the new DoD class (required)
 	 */
-	void newDod(JavaType entity, JavaType name, Path path);
+	void newDod(JavaType entity, JavaType name, ContextualPath path);
 }

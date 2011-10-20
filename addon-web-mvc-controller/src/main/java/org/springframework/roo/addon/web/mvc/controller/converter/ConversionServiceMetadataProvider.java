@@ -22,8 +22,8 @@ import org.springframework.roo.addon.web.mvc.controller.scaffold.WebScaffoldMeta
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
-import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.customdata.CustomDataKeys;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MethodMetadata;
@@ -37,7 +37,7 @@ import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.Path;
+import org.springframework.roo.project.ContextualPath;
 import org.springframework.roo.support.util.Assert;
 
 /**
@@ -56,7 +56,6 @@ public class ConversionServiceMetadataProvider extends AbstractItdMetadataProvid
 
 	// Fields
 	@Reference private LayerService layerService;
-	@Reference private TypeLocationService typeLocationService;
 
 	// Stores the MID (as accepted by this ConversionServiceMetadataProvider) for the one (and only one) application-wide conversion service
 	private String applicationConversionServiceFactoryBeanMid;
@@ -98,9 +97,9 @@ public class ConversionServiceMetadataProvider extends AbstractItdMetadataProvid
 		final Map<JavaType, JavaType> idTypes = new HashMap<JavaType, JavaType>();
 
 		for (JavaType controller : controllers) {
-			PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(controller, Path.SRC_MAIN_JAVA));
-			Assert.notNull(physicalTypeMetadata, "Unable to obtain physical type metadata for type " + controller.getFullyQualifiedTypeName());
-			WebScaffoldAnnotationValues webScaffoldAnnotationValues = new WebScaffoldAnnotationValues(physicalTypeMetadata);
+			ClassOrInterfaceTypeDetails controllerTypeDetails = typeLocationService.getTypeDetails(controller);
+			Assert.notNull(controllerTypeDetails, "Unable to obtain physical type metadata for type " + controller.getFullyQualifiedTypeName());
+			WebScaffoldAnnotationValues webScaffoldAnnotationValues = new WebScaffoldAnnotationValues(controllerTypeDetails);
 			final JavaType formBackingObject = webScaffoldAnnotationValues.getFormBackingObject();
 			if (formBackingObject == null) {
 				continue;
@@ -124,9 +123,9 @@ public class ConversionServiceMetadataProvider extends AbstractItdMetadataProvid
 	private Map<JavaType, Map<Object, JavaSymbolName>> findCompositePrimaryKeyTypesRequiringAConverter(final Set<JavaType> controllers) {
 		Map<JavaType, Map<Object, JavaSymbolName>> types = new TreeMap<JavaType, Map<Object,JavaSymbolName>>();
 		for (JavaType controller : controllers) {
-			PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(controller, Path.SRC_MAIN_JAVA));
-			Assert.notNull(physicalTypeMetadata, "Unable to obtain physical type metadata for type " + controller.getFullyQualifiedTypeName());
-			WebScaffoldAnnotationValues webScaffoldAnnotationValues = new WebScaffoldAnnotationValues(physicalTypeMetadata);
+			ClassOrInterfaceTypeDetails physicalTypeDetails = typeLocationService.getTypeDetails(controller);
+			Assert.notNull(physicalTypeDetails, "Unable to obtain physical type metadata for type " + controller.getFullyQualifiedTypeName());
+			WebScaffoldAnnotationValues webScaffoldAnnotationValues = new WebScaffoldAnnotationValues(physicalTypeDetails);
 			JavaType formBackingObject = webScaffoldAnnotationValues.getFormBackingObject();
 			if (formBackingObject == null) {
 				continue;
@@ -161,14 +160,14 @@ public class ConversionServiceMetadataProvider extends AbstractItdMetadataProvid
 	}
 
 	@Override
-	protected String createLocalIdentifier(final JavaType javaType, final Path path) {
+	protected String createLocalIdentifier(final JavaType javaType, final ContextualPath path) {
 		return PhysicalTypeIdentifierNamingUtils.createIdentifier(ConversionServiceMetadata.class.getName(), javaType, path);
 	}
 
 	@Override
 	protected String getGovernorPhysicalTypeIdentifier(final String metadataId) {
 		JavaType javaType = PhysicalTypeIdentifierNamingUtils.getJavaType(ConversionServiceMetadata.class.getName(), metadataId);
-		Path path = PhysicalTypeIdentifierNamingUtils.getPath(ConversionServiceMetadata.class.getName(), metadataId);
+		ContextualPath path = PhysicalTypeIdentifierNamingUtils.getPath(ConversionServiceMetadata.class.getName(), metadataId);
 		return PhysicalTypeIdentifier.createIdentifier(javaType, path);
 	}
 }

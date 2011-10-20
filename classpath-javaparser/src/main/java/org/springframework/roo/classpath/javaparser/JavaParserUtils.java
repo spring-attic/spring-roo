@@ -1,6 +1,13 @@
 package org.springframework.roo.classpath.javaparser;
 
 import static org.springframework.roo.model.JavaType.OBJECT;
+
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import japa.parser.ast.CompilationUnit;
 import japa.parser.ast.ImportDeclaration;
 import japa.parser.ast.TypeParameter;
@@ -23,13 +30,6 @@ import japa.parser.ast.type.ReferenceType;
 import japa.parser.ast.type.Type;
 import japa.parser.ast.type.VoidType;
 import japa.parser.ast.type.WildcardType;
-
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.ImportRegistrationResolverImpl;
 import org.springframework.roo.model.JavaPackage;
@@ -344,7 +344,7 @@ public final class JavaParserUtils  {
 			if (isEqual(qneQualifier, enclosedBy)) {
 				// This qualified name expression is simply an inner type reference
 				String name = compilationUnitServices.getEnclosingTypeName().getFullyQualifiedTypeName() + "." + nameToFind.getName();
-				return new JavaType(name);
+				return new JavaType(name, compilationUnitServices.getEnclosingTypeName());
 			}
 
 			// Refers to a different enclosing type, so calculate the package name based on convention of an uppercase letter denotes same package (ROO-1210)
@@ -511,34 +511,37 @@ public final class JavaParserUtils  {
 	 * type parameters.
 	 *
 	 * @param compilationUnitServices for package management (required)
-	 * @param cid the class or interface declaration to resolve (required)
+	 * @param typeDeclaration the type declaration to resolve (required)
 	 * @return the effective Java type (never null)
 	 */
-	public static JavaType getJavaType(final CompilationUnitServices compilationUnitServices, final ClassOrInterfaceDeclaration cid) {
+	public static JavaType getJavaType(CompilationUnitServices compilationUnitServices, TypeDeclaration typeDeclaration) {
 		Assert.notNull(compilationUnitServices, "Compilation unit services required");
-		Assert.notNull(cid, "ClassOrInterfaceType required");
+		Assert.notNull(typeDeclaration, "Type declaration required");
 
 		// Convert the ClassOrInterfaceDeclaration name into a JavaType
-		NameExpr nameExpr = getNameExpr(cid.getName());
+		NameExpr nameExpr = getNameExpr(typeDeclaration.getName());
 		JavaType effectiveType = getJavaType(compilationUnitServices, nameExpr, null);
 
-		// Populate JavaType with type parameters
 		List<JavaType> parameterTypes = new ArrayList<JavaType>();
-		List<TypeParameter> typeParameters = cid.getTypeParameters();
-		if (typeParameters != null) {
-			Set<JavaSymbolName> locatedTypeParameters = new HashSet<JavaSymbolName>();
-			for (TypeParameter candidate : typeParameters) {
-				JavaSymbolName currentTypeParam = new JavaSymbolName(candidate.getName());
-				locatedTypeParameters.add(currentTypeParam);
-				JavaType javaType = null;
-				if (candidate.getTypeBound() == null) {
-					javaType = new JavaType(OBJECT.getFullyQualifiedTypeName(), 0, DataType.TYPE, currentTypeParam, null);
-				} else {
-					ClassOrInterfaceType cit = candidate.getTypeBound().get(0);
-					javaType = JavaParserUtils.getJavaTypeNow(compilationUnitServices, cit, locatedTypeParameters);
-					javaType = new JavaType(javaType.getFullyQualifiedTypeName(), javaType.getArray(), javaType.getDataType(), currentTypeParam, javaType.getParameters());
+		if (typeDeclaration instanceof ClassOrInterfaceDeclaration) {
+			ClassOrInterfaceDeclaration clazz = (ClassOrInterfaceDeclaration) typeDeclaration;
+			// Populate JavaType with type parameters
+			List<TypeParameter> typeParameters = clazz.getTypeParameters();
+			if (typeParameters != null) {
+				Set<JavaSymbolName> locatedTypeParameters = new HashSet<JavaSymbolName>();
+				for (TypeParameter candidate : typeParameters) {
+					JavaSymbolName currentTypeParam = new JavaSymbolName(candidate.getName());
+					locatedTypeParameters.add(currentTypeParam);
+					JavaType javaType = null;
+					if (candidate.getTypeBound() == null) {
+						javaType = new JavaType(OBJECT.getFullyQualifiedTypeName(), 0, DataType.TYPE, currentTypeParam, null);
+					} else {
+						ClassOrInterfaceType cit = candidate.getTypeBound().get(0);
+						javaType = JavaParserUtils.getJavaTypeNow(compilationUnitServices, cit, locatedTypeParameters);
+						javaType = new JavaType(javaType.getFullyQualifiedTypeName(), javaType.getArray(), javaType.getDataType(), currentTypeParam, javaType.getParameters());
+					}
+					parameterTypes.add(javaType);
 				}
-				parameterTypes.add(javaType);
 			}
 		}
 

@@ -1,5 +1,7 @@
 package org.springframework.roo.project;
 
+import org.springframework.roo.model.JavaPackage;
+
 /**
  * Interface to methods available in {@link ApplicationContextOperationsImpl}.
  *
@@ -8,5 +10,5 @@ package org.springframework.roo.project;
  */
 public interface ApplicationContextOperations {
 
-	void createMiddleTierApplicationContext();
+	void createMiddleTierApplicationContext(JavaPackage topLevelPackage, String moduleName);
 }

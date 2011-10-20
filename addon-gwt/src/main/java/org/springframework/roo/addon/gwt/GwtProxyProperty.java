@@ -14,36 +14,35 @@ import static org.springframework.roo.model.SpringJavaType.NUMBER_FORMAT;
 import java.util.List;
 
 import org.springframework.roo.classpath.PhysicalTypeCategory;
-import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
+import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
 
 public class GwtProxyProperty {
 
 	// Fields
-	private final ProjectMetadata projectMetadata;
-	private final PhysicalTypeMetadata ptmd;
+	private final JavaPackage topLevelPackage;
+	private final ClassOrInterfaceTypeDetails ptmd;
 	private final JavaType type;
 	private String name;
 	private List<AnnotationMetadata> annotations;
 	private String getter;
 
-	public GwtProxyProperty(final ProjectMetadata projectMetadata, final PhysicalTypeMetadata ptmd, final JavaType type) {
+	public GwtProxyProperty(JavaPackage topLevelPackage, ClassOrInterfaceTypeDetails ptmd, JavaType type) {
 		Assert.notNull(type, "Type required");
-		this.projectMetadata = projectMetadata;
+		this.topLevelPackage = topLevelPackage;
 		this.ptmd = ptmd;
 		this.type = type;
 	}
 
-	public GwtProxyProperty(final ProjectMetadata projectMetadata, final PhysicalTypeMetadata ptmd, final JavaType type, final String name, final List<AnnotationMetadata> annotations, final String getter) {
-		this(projectMetadata, ptmd, type);
+	public GwtProxyProperty(JavaPackage topLevelPackage, ClassOrInterfaceTypeDetails ptmd, JavaType type, String name, List<AnnotationMetadata> annotations, String getter) {
+		this(topLevelPackage, ptmd, type);
 		this.name = name;
 		this.annotations = annotations;
 		this.getter = getter;
@@ -132,7 +131,7 @@ public class GwtProxyProperty {
 	}
 
 	public JavaType getSetEditorType() {
-		return new JavaType(GwtType.SET_EDITOR.getPath().packageName(projectMetadata) + "." + getSetEditor());
+		return new JavaType(GwtType.SET_EDITOR.getPath().packageName(topLevelPackage) + "." + getSetEditor());
 	}
 
 	private String getEditor() {
@@ -171,7 +170,7 @@ public class GwtProxyProperty {
 		if (type.getParameters().size() > 0) {
 			arg = type.getParameters().get(0);
 		}
-		return GwtPath.SCAFFOLD_PLACE.packageName(projectMetadata) + ".CollectionRenderer.of(" + new GwtProxyProperty(projectMetadata, ptmd, arg).getRenderer() + ")";
+		return GwtPath.SCAFFOLD_PLACE.packageName(topLevelPackage) + ".CollectionRenderer.of(" + new GwtProxyProperty(topLevelPackage, ptmd, arg).getRenderer() + ")";
 	}
 
 	public String getFormatter() {
@@ -246,11 +245,11 @@ public class GwtProxyProperty {
 	}
 
 	String getProxyRendererType() {
-		return getProxyRendererType(projectMetadata, isCollectionOfProxy() ? type.getParameters().get(0) : type);
+		return getProxyRendererType(topLevelPackage, isCollectionOfProxy() ? type.getParameters().get(0) : type);
 	}
 
-	public static String getProxyRendererType(final ProjectMetadata projectMetadata, final JavaType javaType) {
-		return GwtType.EDIT_RENDERER.getPath().packageName(projectMetadata) + "." + javaType.getSimpleTypeName() + "Renderer";
+	public static String getProxyRendererType(JavaPackage topLevelPackage, JavaType javaType) {
+		return GwtType.EDIT_RENDERER.getPath().packageName(topLevelPackage) + "." + javaType.getSimpleTypeName() + "Renderer";
 	}
 
 	public String getCheckboxSubtype() {
@@ -293,17 +292,15 @@ public class GwtProxyProperty {
 	}
 
 	boolean isEnum() {
-		return ptmd != null && ptmd.getMemberHoldingTypeDetails() != null && ptmd.getMemberHoldingTypeDetails().getPhysicalTypeCategory() == PhysicalTypeCategory.ENUMERATION;
+		return ptmd != null && ptmd.getPhysicalTypeCategory() == PhysicalTypeCategory.ENUMERATION;
 	}
 
 	public boolean isEmbeddable() {
-		if (ptmd != null && ptmd.getMemberHoldingTypeDetails() != null) {
-			if (ptmd.getMemberHoldingTypeDetails() instanceof ClassOrInterfaceTypeDetails) {
-				List<AnnotationMetadata> annotations = ptmd.getMemberHoldingTypeDetails().getAnnotations();
-				for (AnnotationMetadata annotation : annotations) {
-					if (annotation.getAnnotationType().equals(EMBEDDABLE)) {
-						return true;
-					}
+		if (ptmd != null) {
+			List<AnnotationMetadata> annotations = ptmd.getAnnotations();
+			for (AnnotationMetadata annotation : annotations) {
+				if (annotation.getAnnotationType().equals(EMBEDDABLE)) {
+					return true;
 				}
 			}
 		}
@@ -320,7 +317,7 @@ public class GwtProxyProperty {
 	}
 
 	public boolean isCollectionOfProxy() {
-		return type.getParameters().size() != 0 && isCollection() && new GwtProxyProperty(projectMetadata, ptmd, type.getParameters().get(0)).isProxy();
+		return type.getParameters().size() != 0 && isCollection() && new GwtProxyProperty(topLevelPackage, ptmd, type.getParameters().get(0)).isProxy();
 	}
 
 	public JavaType getValueType() {

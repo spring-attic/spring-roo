@@ -3,65 +3,30 @@ package org.springframework.roo.project;
 import java.io.IOException;
 
 import org.springframework.roo.model.JavaPackage;
-import org.springframework.roo.project.packaging.PackagingProvider;
 
 /**
  * Provides Maven project operations.
- *
+ * 
  * @author Ben Alex
  * @since 1.1
  */
 public interface MavenOperations extends ProjectOperations {
 
-	/**
-	 * Indicates whether the "create project" command is available
-	 *
-	 * @return see above
-	 */
 	boolean isCreateProjectAvailable();
 
 	String getProjectRoot();
 
 	/**
 	 * Creates a Maven-based project
-	 *
+	 * 
 	 * @param topLevelPackage the top-level Java package (required)
-	 * @param projectName the name of the project (can be blank to infer it from the top-level package)
+	 * @param projectName the name of the project (can be blank to generate it from the top-level package)
 	 * @param majorJavaVersion the major Java version for which this project is targetted (can be <code>null</code> to autodetect)
-	 * @param parent the Maven coordinates of the parent POM (can be <code>null</code> for none)
-	 * @param packagingType the Maven packaging of the project to create (pom, war, jar, ear, etc.) (required)
+	 * @param parent the Maven coordinates of the parent POM, in the form "groupId:artifactId:version" (can be blank for none)
 	 */
-	void createProject(JavaPackage topLevelPackage, String projectName, Integer majorJavaVersion, GAV parent, PackagingProvider packagingType);
+	void createProject(JavaPackage topLevelPackage, String projectName, Integer majorJavaVersion, String parent);
 
-	/**
-	 * Executes the given Maven command
-	 *
-	 * @param command the options and arguments to pass to the Maven executable (required)
-	 * @throws IOException
-	 */
-	void executeMvnCommand(String command) throws IOException;
+	void executeMvnCommand(String extra) throws IOException;
 
-	/**
-	 * Indicates whether new modules can be created in the current project
-	 *
-	 * @return see above
-	 */
-	boolean isCreateModuleAvailable();
-
-	/**
-	 * Creates a module within an existing multi-module Maven project
-	 *
-	 * @param topLevelPackage the top-level Java package (required)
-	 * @param name the name of the project (can be blank to infer it from the top-level package)
-	 * @param parent the Maven coordinates of the parent POM (can be <code>null</code> for none)
-	 * @param packagingType the Maven packaging of the module to create (pom, war, jar, ear, etc.) (required)
-	 */
-	void createModule(JavaPackage topLevelPackage, String name, GAV parent,	PackagingProvider packagingType);
-
-	/**
-	 * Changes the focus to the given module (or root) of the project.
-	 *
-	 * @param module the module to focus on (required)
-	 */
-	void focus(final GAV module);
+	void createModule(final JavaPackage topLevelPackage, final String projectName, final Integer majorJavaVersion, final String parentPom, String moduleName);
 }

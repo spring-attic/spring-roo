@@ -13,7 +13,7 @@ import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.Path;
+import org.springframework.roo.project.ContextualPath;
 import org.springframework.roo.support.util.Assert;
 /**
  * Provides {@link SolrWebSearchMetadata}.
@@ -56,7 +56,7 @@ public class SolrWebSearchMetadataProvider extends AbstractItdMetadataProvider {
 
 		// Acquire bean info (we need getters details, specifically)
 		JavaType javaType = SolrWebSearchMetadata.getJavaType(metadataIdentificationString);
-		Path path = SolrWebSearchMetadata.getPath(metadataIdentificationString);
+		ContextualPath path = SolrWebSearchMetadata.getPath(metadataIdentificationString);
 		String webScaffoldMetadataKey = WebScaffoldMetadata.createIdentifier(javaType, path);
 
 		// We want to be notified if the getter info changes in any way
@@ -71,7 +71,10 @@ public class SolrWebSearchMetadataProvider extends AbstractItdMetadataProvider {
 		JavaType targetObject = webScaffoldMetadata.getAnnotationValues().getFormBackingObject();
 		Assert.notNull(targetObject, "Could not acquire form backing object for the '" + WebScaffoldMetadata.getJavaType(webScaffoldMetadata.getId()).getFullyQualifiedTypeName() + "' controller");
 
-		SolrMetadata solrMetadata = (SolrMetadata) metadataService.get(SolrMetadata.createIdentifier(targetObject, Path.SRC_MAIN_JAVA));
+		String targetObjectMid = typeLocationService.getPhysicalTypeIdentifier(targetObject);
+		ContextualPath targetObjectPath = PhysicalTypeIdentifier.getPath(targetObjectMid);
+
+		SolrMetadata solrMetadata = (SolrMetadata) metadataService.get(SolrMetadata.createIdentifier(targetObject, targetObjectPath));
 		Assert.notNull(solrMetadata, "Could not determine SolrMetadata for type '" + targetObject.getFullyQualifiedTypeName() + "'");
 
 		// Otherwise go off and create the to String metadata
@@ -85,12 +88,12 @@ public class SolrWebSearchMetadataProvider extends AbstractItdMetadataProvider {
 	@Override
 	protected String getGovernorPhysicalTypeIdentifier(final String metadataIdentificationString) {
 		JavaType javaType = SolrWebSearchMetadata.getJavaType(metadataIdentificationString);
-		Path path = SolrWebSearchMetadata.getPath(metadataIdentificationString);
+		ContextualPath path = SolrWebSearchMetadata.getPath(metadataIdentificationString);
 		return PhysicalTypeIdentifier.createIdentifier(javaType, path);
 	}
 
 	@Override
-	protected String createLocalIdentifier(final JavaType javaType, final Path path) {
+	protected String createLocalIdentifier(final JavaType javaType, final ContextualPath path) {
 		return SolrWebSearchMetadata.createIdentifier(javaType, path);
 	}
 

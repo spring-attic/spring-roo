@@ -13,7 +13,7 @@ import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.ReferenceStrategy;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.metadata.MetadataService;
-import org.springframework.roo.project.ProjectMetadata;
+import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.logging.HandlerUtils;
 
 /**
@@ -32,11 +32,13 @@ public class EmbeddedOperationsImpl implements EmbeddedOperations {
 
 	// Fields
 	@Reference private MetadataService metadataService;
+	@Reference private ProjectOperations projectOperations;
+
 	private final Object mutex = new Object();
 	private final Set<EmbeddedProvider> providers = new HashSet<EmbeddedProvider>();
 
 	public boolean isCommandAvailable() {
-		return metadataService.get(ProjectMetadata.getProjectIdentifier()) != null;
+		return projectOperations.isFocusedProjectAvailable();
 	}
 
 	public boolean embed(final String url, final String viewName) {

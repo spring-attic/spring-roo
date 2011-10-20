@@ -2,43 +2,7 @@ package org.springframework.roo.addon.jsf.managedbean;
 
 import static java.lang.reflect.Modifier.PRIVATE;
 import static java.lang.reflect.Modifier.PUBLIC;
-import static org.springframework.roo.addon.jsf.model.JsfJavaType.DATE_TIME_CONVERTER;
-import static org.springframework.roo.addon.jsf.model.JsfJavaType.DISPLAY_CREATE_DIALOG;
-import static org.springframework.roo.addon.jsf.model.JsfJavaType.DISPLAY_LIST;
-import static org.springframework.roo.addon.jsf.model.JsfJavaType.DOUBLE_RANGE_VALIDATOR;
-import static org.springframework.roo.addon.jsf.model.JsfJavaType.EL_CONTEXT;
-import static org.springframework.roo.addon.jsf.model.JsfJavaType.ENUM_CONVERTER;
-import static org.springframework.roo.addon.jsf.model.JsfJavaType.EXPRESSION_FACTORY;
-import static org.springframework.roo.addon.jsf.model.JsfJavaType.FACES_CONTEXT;
-import static org.springframework.roo.addon.jsf.model.JsfJavaType.FACES_MESSAGE;
-import static org.springframework.roo.addon.jsf.model.JsfJavaType.HTML_OUTPUT_TEXT;
-import static org.springframework.roo.addon.jsf.model.JsfJavaType.HTML_PANEL_GRID;
-import static org.springframework.roo.addon.jsf.model.JsfJavaType.LENGTH_VALIDATOR;
-import static org.springframework.roo.addon.jsf.model.JsfJavaType.LONG_RANGE_VALIDATOR;
-import static org.springframework.roo.addon.jsf.model.JsfJavaType.MANAGED_BEAN;
-import static org.springframework.roo.addon.jsf.model.JsfJavaType.PRIMEFACES_AUTO_COMPLETE;
-import static org.springframework.roo.addon.jsf.model.JsfJavaType.PRIMEFACES_CALENDAR;
-import static org.springframework.roo.addon.jsf.model.JsfJavaType.PRIMEFACES_CLOSE_EVENT;
-import static org.springframework.roo.addon.jsf.model.JsfJavaType.PRIMEFACES_COMMAND_BUTTON;
-import static org.springframework.roo.addon.jsf.model.JsfJavaType.PRIMEFACES_DEFAULT_STREAMED_CONTENT;
-import static org.springframework.roo.addon.jsf.model.JsfJavaType.PRIMEFACES_FILE_DOWNLOAD_ACTION_LISTENER;
-import static org.springframework.roo.addon.jsf.model.JsfJavaType.PRIMEFACES_FILE_UPLOAD;
-import static org.springframework.roo.addon.jsf.model.JsfJavaType.PRIMEFACES_FILE_UPLOAD_EVENT;
-import static org.springframework.roo.addon.jsf.model.JsfJavaType.PRIMEFACES_INPUT_TEXT;
-import static org.springframework.roo.addon.jsf.model.JsfJavaType.PRIMEFACES_INPUT_TEXTAREA;
-import static org.springframework.roo.addon.jsf.model.JsfJavaType.PRIMEFACES_MESSAGE;
-import static org.springframework.roo.addon.jsf.model.JsfJavaType.PRIMEFACES_REQUEST_CONTEXT;
-import static org.springframework.roo.addon.jsf.model.JsfJavaType.PRIMEFACES_SELECT_BOOLEAN_CHECKBOX;
-import static org.springframework.roo.addon.jsf.model.JsfJavaType.PRIMEFACES_SELECT_MANY_MENU;
-import static org.springframework.roo.addon.jsf.model.JsfJavaType.PRIMEFACES_SPINNER;
-import static org.springframework.roo.addon.jsf.model.JsfJavaType.PRIMEFACES_STREAMED_CONTENT;
-import static org.springframework.roo.addon.jsf.model.JsfJavaType.REGEX_VALIDATOR;
-import static org.springframework.roo.addon.jsf.model.JsfJavaType.REQUEST_SCOPED;
-import static org.springframework.roo.addon.jsf.model.JsfJavaType.SESSION_SCOPED;
-import static org.springframework.roo.addon.jsf.model.JsfJavaType.UI_COMPONENT;
-import static org.springframework.roo.addon.jsf.model.JsfJavaType.UI_SELECT_ITEM;
-import static org.springframework.roo.addon.jsf.model.JsfJavaType.UI_SELECT_ITEMS;
-import static org.springframework.roo.addon.jsf.model.JsfJavaType.VIEW_SCOPED;
+import static org.springframework.roo.addon.jsf.model.JsfJavaType.*;
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.FIND_ALL_METHOD;
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.MERGE_METHOD;
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.ONE_TO_MANY_FIELD;
@@ -98,7 +62,7 @@ import org.springframework.roo.model.ImportRegistrationResolver;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.JdkJavaType;
-import org.springframework.roo.project.Path;
+import org.springframework.roo.project.ContextualPath;
 import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.NumberUtils;
@@ -1162,7 +1126,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		return PROVIDES_TYPE;
 	}
 
-	public static String createIdentifier(final JavaType javaType, final Path path) {
+	public static String createIdentifier(final JavaType javaType, final ContextualPath path) {
 		return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
 	}
 
@@ -1170,7 +1134,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		return PhysicalTypeIdentifierNamingUtils.getJavaType(PROVIDES_TYPE_STRING, metadataIdentificationString);
 	}
 
-	public static Path getPath(final String metadataIdentificationString) {
+	public static ContextualPath getPath(final String metadataIdentificationString) {
 		return PhysicalTypeIdentifierNamingUtils.getPath(PROVIDES_TYPE_STRING, metadataIdentificationString);
 	}
 

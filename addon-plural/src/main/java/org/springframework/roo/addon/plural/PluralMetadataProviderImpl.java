@@ -8,7 +8,7 @@ import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.Path;
+import org.springframework.roo.project.ContextualPath;
 
 /**
  * Implementation of {@link PluralMetadataProvider}.
@@ -42,12 +42,11 @@ public class PluralMetadataProviderImpl extends AbstractItdMetadataProvider impl
 	@Override
 	protected String getGovernorPhysicalTypeIdentifier(final String metadataIdentificationString) {
 		JavaType javaType = PluralMetadata.getJavaType(metadataIdentificationString);
-		Path path = PluralMetadata.getPath(metadataIdentificationString);
+		ContextualPath path = PluralMetadata.getPath(metadataIdentificationString);
 		return PhysicalTypeIdentifier.createIdentifier(javaType, path);
 	}
 
-	@Override
-	protected String createLocalIdentifier(final JavaType javaType, final Path path) {
+	protected String createLocalIdentifier(JavaType javaType, ContextualPath path) {
 		return PluralMetadata.createIdentifier(javaType, path);
 	}
 

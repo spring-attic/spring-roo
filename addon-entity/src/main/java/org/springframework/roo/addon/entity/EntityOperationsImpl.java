@@ -25,6 +25,7 @@ import org.springframework.roo.classpath.details.annotations.AnnotationMetadataB
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Path;
+import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
 
@@ -40,18 +41,19 @@ public class EntityOperationsImpl implements EntityOperations {
 
 	// Fields
 	@Reference private FileManager fileManager;
+	@Reference private PathResolver pathResolver;
 	@Reference private ProjectOperations projectOperations;
 	@Reference private TypeLocationService typeLocationService;
 	@Reference private TypeManagementService typeManagementService;
 
 	public boolean isPersistentClassAvailable() {
-		return projectOperations.isProjectAvailable() && fileManager.exists(projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml"));
+		return projectOperations.isFocusedProjectAvailable() && fileManager.exists(pathResolver.getFocusedIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml"));
 	}
 
 	public void newEntity(final JavaType name, final boolean createAbstract, final JavaType superclass, final List<AnnotationMetadataBuilder> annotations) {
 		Assert.notNull(name, "Entity name required");
-
-		final String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(name, Path.SRC_MAIN_JAVA);
+		
+		final String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(name, pathResolver.getFocusedPath(Path.SRC_MAIN_JAVA));
 
 		int modifier = Modifier.PUBLIC;
 		if (createAbstract) {
@@ -61,7 +63,7 @@ public class EntityOperationsImpl implements EntityOperations {
 		final ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, modifier, name, PhysicalTypeCategory.CLASS);
 
 		if (!superclass.equals(OBJECT)) {
-			final ClassOrInterfaceTypeDetails superclassClassOrInterfaceTypeDetails = typeLocationService.getClassOrInterface(superclass);
+			final ClassOrInterfaceTypeDetails superclassClassOrInterfaceTypeDetails = typeLocationService.getTypeDetails(superclass);
 			if (superclassClassOrInterfaceTypeDetails != null) {
 				typeDetailsBuilder.setSuperclass(new ClassOrInterfaceTypeDetailsBuilder(superclassClassOrInterfaceTypeDetails));
 			}
@@ -75,8 +77,8 @@ public class EntityOperationsImpl implements EntityOperations {
 
 	public void newEmbeddableClass(final JavaType name, final boolean serializable) {
 		Assert.notNull(name, "Embeddable name required");
-
-		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(name, Path.SRC_MAIN_JAVA);
+		
+		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(name, pathResolver.getFocusedPath(Path.SRC_MAIN_JAVA));
 
 		final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 		annotations.add(new AnnotationMetadataBuilder(ROO_JAVA_BEAN));
@@ -96,8 +98,8 @@ public class EntityOperationsImpl implements EntityOperations {
 
 	public void newIdentifier(final JavaType identifierType, final String identifierField, final String identifierColumn) {
 		Assert.notNull(identifierType, "Identifier type required");
-
-		final String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(identifierType, Path.SRC_MAIN_JAVA);
+		
+		final String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(identifierType, pathResolver.getFocusedPath(Path.SRC_MAIN_JAVA));
 		final List<AnnotationMetadataBuilder> identifierAnnotations = Arrays.asList(new AnnotationMetadataBuilder(ROO_TO_STRING), new AnnotationMetadataBuilder(ROO_IDENTIFIER));
 		final ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC | Modifier.FINAL, identifierType, PhysicalTypeCategory.CLASS);
 		typeDetailsBuilder.setAnnotations(identifierAnnotations);

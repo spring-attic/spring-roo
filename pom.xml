@@ -107,6 +107,7 @@
             <url>http://spring-roo-repository.springsource.org/snapshot</url>
             <snapshots>
                 <updatePolicy>never</updatePolicy>
+				<enabled>true</enabled>
             </snapshots>
         </repository>
     </repositories>
