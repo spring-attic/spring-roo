@@ -1,5 +1,7 @@
 package org.springframework.roo.addon.displaystring;
 
+import static org.springframework.roo.model.JavaType.BOOLEAN_OBJECT;
+import static org.springframework.roo.model.JavaType.BOOLEAN_PRIMITIVE;
 import static org.springframework.roo.model.JavaType.STRING;
 import static org.springframework.roo.model.JdkJavaType.CALENDAR;
 import static org.springframework.roo.model.JdkJavaType.DATE;
@@ -172,15 +174,16 @@ public class DisplayStringMetadata extends AbstractItdTypeDetailsProvidingMetada
 	 * accessor is not suitable for a display value
 	 */
 	private MethodCall getAccessorCall(final MethodMetadata accessor) {
-		if (accessor.getReturnType().isMultiValued()) {
+		final JavaType returnType = accessor.getReturnType();
+		if (returnType.isMultiValued() || returnType.equals(BOOLEAN_OBJECT) || returnType.equals(BOOLEAN_PRIMITIVE)) {
 			return null;
 		}
 		final String accessorName = accessor.getMethodName().getSymbolName();
-		if (CALENDAR.equals(accessor.getReturnType())) {
+		if (CALENDAR.equals(returnType)) {
 			final String codeSnippet = accessorName + "() == null ? \"\" : DateFormat.getDateInstance(DateFormat.LONG).format(" + accessorName + "().getTime())";
 			return new MethodCall(codeSnippet, DATE_FORMAT);
 		}
-		if (DATE.equals(accessor.getReturnType())) {
+		if (DATE.equals(returnType)) {
 			final String codeSnippet = accessorName + "() == null ? \"\" : DateFormat.getDateInstance(DateFormat.LONG).format(" + accessorName + "())";
 			return new MethodCall(codeSnippet, DATE_FORMAT);
 		}
