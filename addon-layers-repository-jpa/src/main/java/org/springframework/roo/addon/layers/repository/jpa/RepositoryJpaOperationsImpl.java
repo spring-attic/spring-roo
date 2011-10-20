@@ -14,7 +14,6 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
-import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.TypeManagementService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
@@ -47,7 +46,6 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
 	@Reference private FileManager fileManager;
 	@Reference private PathResolver pathResolver;
 	@Reference private ProjectOperations projectOperations;
-	@Reference private TypeLocationService typeLocationService;
 	@Reference private TypeManagementService typeManagementService;
 
 	public boolean isRepositoryCommandAvailable() {

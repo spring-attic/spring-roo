@@ -523,11 +523,4 @@ public class Pom {
 	private String moduleRoot(String pomPath) {
 		return FileUtils.getFirstDirectory(pomPath);
 	}
-
-	private String removeTrailingSeparator(String pomPath) {
-		if (pomPath.endsWith(File.separator)) {
-			return pomPath.substring(0, pomPath.length() - 1);
-		}
-		return pomPath;
-	}
 }

@@ -23,7 +23,6 @@ import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.TypeManagementService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
-import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
@@ -440,7 +439,7 @@ public class FieldCommands implements CommandMarker {
 		// Check if the field type is a JPA @Embeddable class
 		ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = typeLocationService.getTypeDetails(fieldType);
 		Assert.notNull(classOrInterfaceTypeDetails, "The specified target '--type' does not exist or can not be found. Please create this type first.");
-		Assert.notNull(MemberFindingUtils.getDeclaredTypeAnnotation(classOrInterfaceTypeDetails, EMBEDDABLE), "The field embedded command is only applicable to JPA @Embeddable field types.");
+		Assert.notNull(classOrInterfaceTypeDetails.getAnnotation(EMBEDDABLE), "The field embedded command is only applicable to JPA @Embeddable field types.");
 		
 		// Check if the requested entity is a JPA @Entity
 		ClassOrInterfaceTypeDetails javaTypeDetails = typeLocationService.getTypeDetails(typeName);
@@ -454,7 +453,7 @@ public class FieldCommands implements CommandMarker {
 
 		ClassOrInterfaceTypeDetails targetTypeDetails = (ClassOrInterfaceTypeDetails) targetPtd;
 		MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(this.getClass().getName(), targetTypeDetails);
-		Assert.notNull(MemberFindingUtils.getDeclaredTypeAnnotation(memberDetails, ENTITY), "The field embedded command is only applicable to JPA @Entity target types.");
+		Assert.notNull(memberDetails.getAnnotation(ENTITY), "The field embedded command is only applicable to JPA @Entity target types.");
 
 		EmbeddedField fieldDetails = new EmbeddedField(physicalTypeIdentifier, fieldType, fieldName);
 

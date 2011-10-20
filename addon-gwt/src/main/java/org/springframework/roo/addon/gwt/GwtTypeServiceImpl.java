@@ -603,7 +603,7 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 		if (ptmd == null) {
 			return false;
 		}
-		AnnotationMetadata annotationMetadata = MemberFindingUtils.getDeclaredTypeAnnotation(ptmd, EMBEDDABLE);
+		AnnotationMetadata annotationMetadata = ptmd.getAnnotation(EMBEDDABLE);
 		return annotationMetadata != null;
 	}
 

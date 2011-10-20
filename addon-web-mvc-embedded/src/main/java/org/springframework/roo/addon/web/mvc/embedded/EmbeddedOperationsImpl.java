@@ -12,7 +12,6 @@ import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.ReferenceStrategy;
 import org.apache.felix.scr.annotations.Service;
-import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.logging.HandlerUtils;
 
@@ -31,7 +30,6 @@ public class EmbeddedOperationsImpl implements EmbeddedOperations {
 	private static final Logger logger = HandlerUtils.getLogger(EmbeddedOperationsImpl.class);
 
 	// Fields
-	@Reference private MetadataService metadataService;
 	@Reference private ProjectOperations projectOperations;
 
 	private final Object mutex = new Object();

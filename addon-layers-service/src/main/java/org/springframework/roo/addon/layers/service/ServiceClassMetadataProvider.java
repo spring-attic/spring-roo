@@ -24,7 +24,6 @@ import org.springframework.roo.classpath.layers.MethodParameter;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.ContextualPath;
-import org.springframework.roo.project.Path;
 
 /**
  * Provides {@link ServiceClassMetadata} for building the ITD for the
@@ -40,11 +39,10 @@ public class ServiceClassMetadataProvider extends AbstractMemberDiscoveringItdMe
 
 	// Constants
 	private static final int LAYER_POSITION = LayerType.SERVICE.getPosition();
-	private static final Path SRC = Path.SRC_MAIN_JAVA;
-	private final Map<JavaType, String> managedEntityTypes = new HashMap<JavaType, String>();
 
 	// Fields
 	@Reference private LayerService layerService;
+	private final Map<JavaType, String> managedEntityTypes = new HashMap<JavaType, String>();
 
 	protected void activate(final ComponentContext context) {
 		metadataDependencyRegistry.addNotificationListener(this);

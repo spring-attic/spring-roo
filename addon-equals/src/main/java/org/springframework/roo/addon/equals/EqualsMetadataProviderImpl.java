@@ -21,7 +21,6 @@ import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.ContextualPath;
-import org.springframework.roo.project.Path;
 import org.springframework.roo.support.util.CollectionUtils;
 
 /**

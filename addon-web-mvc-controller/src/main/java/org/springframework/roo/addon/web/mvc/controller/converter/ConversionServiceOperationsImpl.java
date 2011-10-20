@@ -8,7 +8,6 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.addon.web.mvc.controller.WebMvcOperations;
-import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
@@ -33,15 +32,13 @@ public class ConversionServiceOperationsImpl implements ConversionServiceOperati
 	// Fields
 	@Reference private FileManager fileManager;
 	@Reference private PathResolver pathResolver;
-	@Reference private TypeLocationService typeLocationService;
 	@Reference private WebMvcOperations webMvcOperations;
 
 	public ConversionServiceOperationsImpl() {}
 
-	public ConversionServiceOperationsImpl(final FileManager fileManager, final TypeLocationService typeLocationService) {
+	public ConversionServiceOperationsImpl(final FileManager fileManager) {
 		// For testing
 		this.fileManager = fileManager;
-		this.typeLocationService = typeLocationService;
 	}
 
 	public void installConversionService(final JavaPackage thePackage) {

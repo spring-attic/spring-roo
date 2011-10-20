@@ -9,7 +9,6 @@ import java.util.List;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
@@ -54,7 +53,6 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
 	@Reference private FileManager fileManager;
 	@Reference private PathResolver pathResolver;
 	@Reference private ProjectOperations projectOperations;
-	@Reference private TypeLocationService typeLocationService;
 
 	public void installMinimalWebArtifacts() {
 		// Note that the sequence matters here as some of these artifacts are loaded further down the line

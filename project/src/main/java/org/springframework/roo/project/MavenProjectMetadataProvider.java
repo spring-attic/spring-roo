@@ -1,9 +1,5 @@
 package org.springframework.roo.project;
 
-import static org.springframework.roo.support.util.AnsiEscapeCode.FG_CYAN;
-import static org.springframework.roo.support.util.AnsiEscapeCode.decorate;
-
-import java.util.Collection;
 import java.util.Set;
 
 import org.apache.felix.scr.annotations.Component;
@@ -12,17 +8,13 @@ import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.file.monitor.event.FileEvent;
 import org.springframework.roo.file.monitor.event.FileEventListener;
 import org.springframework.roo.file.monitor.event.FileOperation;
-import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.metadata.MetadataItem;
 import org.springframework.roo.metadata.MetadataProvider;
-import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.maven.Pom;
-import org.springframework.roo.shell.Shell;
 import org.springframework.roo.support.util.Assert;
-import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.uaa.UaaRegistrationService;
 import org.springframework.uaa.client.UaaDetectedProducts;
 import org.springframework.uaa.client.UaaDetectedProducts.ProductInfo;

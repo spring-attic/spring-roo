@@ -24,7 +24,6 @@ public class TypeCacheImpl implements TypeCache {
 	private final Map<String, String> typeNameToModuleNameMap = new HashMap<String, String>();
 	private final Map<String, String> typeIdentifierToFilePathMap = new HashMap<String, String>();
 	private final Map<String, Set<String>> moduleFilePathToTypeNamesMap = new HashMap<String, Set<String>>();
-	private final Map<String, Pom> pomPathToPomMap = new HashMap<String, Pom>();
 	private final Map<String, Set<String>> simpleTypeNameTypesMap = new HashMap<String, Set<String>>();
 
 	public void cacheType(String typeFilePath, ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails) {

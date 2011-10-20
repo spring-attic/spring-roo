@@ -1,8 +1,9 @@
 package org.springframework.roo.addon.solr;
 
-import javax.xml.parsers.DocumentBuilder;
 import java.io.IOException;
 import java.util.List;
+
+import javax.xml.parsers.DocumentBuilder;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -34,7 +35,6 @@ import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.ContextualPath;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
-import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.TemplateUtils;
@@ -63,7 +63,6 @@ public class SolrJspMetadataListener implements MetadataProvider, MetadataNotifi
 	@Reference private MemberDetailsScanner memberDetailsScanner;
 	@Reference private PersistenceMemberLocator persistenceMemberLocator;
 	@Reference private PathResolver pathResolver;
-	@Reference private ProjectOperations projectOperations;
 	@Reference private TypeLocationService typeLocationService;
 	@Reference private XmlRoundTripFileManager xmlRoundTripFileManager;
 

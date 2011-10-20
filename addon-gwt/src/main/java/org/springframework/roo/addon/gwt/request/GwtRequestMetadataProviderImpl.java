@@ -226,8 +226,6 @@ public class GwtRequestMetadataProviderImpl extends AbstractHashCodeTrackingMeta
 		if (mirroredTypeDetails == null) {
 			return null;
 		}
-		ContextualPath path = PhysicalTypeIdentifier.getPath(request.getDeclaredByMetadataId());
-		ProjectMetadata projectMetadata = projectOperations.getProjectMetadata(path.getModule());
 		for (AnnotatedJavaType parameterType : methodMetadata.getParameterTypes()) {
 			paramaterTypes.add(new AnnotatedJavaType(gwtTypeService.getGwtSideLeafType(parameterType.getJavaType(), mirroredTypeDetails.getName(), true, false)));
 		}

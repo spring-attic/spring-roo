@@ -11,7 +11,6 @@ import org.springframework.roo.project.maven.Pom;
  * @author Ben Alex
  * @since 1.0
  */
-@SuppressWarnings("deprecation")
 public interface ProjectOperations {
 
 	/** 

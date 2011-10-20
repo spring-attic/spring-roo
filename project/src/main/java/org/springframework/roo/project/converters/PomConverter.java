@@ -8,7 +8,6 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.project.PomManagementService;
-import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.shell.Completion;
 import org.springframework.roo.shell.Converter;
@@ -18,7 +17,7 @@ import org.springframework.roo.shell.MethodTarget;
 @Service
 public class PomConverter implements Converter<Pom>{
 
-	@Reference private ProjectOperations projectOperations;
+	// Fields
 	@Reference private PomManagementService pomManagementService;
 
 	public boolean supports(Class<?> type, String optionContext) {

@@ -2,7 +2,6 @@ package org.springframework.roo.classpath.details.annotations.populator;
 
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
-import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.itd.MemberHoldingTypeDetailsMetadataItem;
@@ -78,7 +77,7 @@ public abstract class AbstractAnnotationValues {
 			this.governorTypeDetails = (ClassOrInterfaceTypeDetails) memberHoldingTypeDetails;
 
 			// Process values from the annotation, if present
-			this.annotationMetadata = MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, annotationType);
+			this.annotationMetadata = governorTypeDetails.getAnnotation(annotationType);
 		}
 	}
 	

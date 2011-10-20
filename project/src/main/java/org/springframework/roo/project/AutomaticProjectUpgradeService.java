@@ -8,7 +8,6 @@ import org.osgi.framework.Bundle;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.MetadataNotificationListener;
-import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.project.maven.Pom;
 
 /**
@@ -26,10 +25,9 @@ public class AutomaticProjectUpgradeService implements MetadataNotificationListe
 	private static final String MY_BUNDLE_SYMBOLIC_NAME = AutomaticProjectUpgradeService.class.getPackage().getName();
 
 	// Fields
-	@Reference private ProjectOperations projectOperations;
 	@Reference private MetadataDependencyRegistry metadataDependencyRegistry;
-	@Reference private MetadataService metadataService;
 	@Reference private PomManagementService pomManagementService;
+	@Reference private ProjectOperations projectOperations;
 
 	private VersionInfo bundleVersionInfo;
 

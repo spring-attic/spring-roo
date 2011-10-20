@@ -33,7 +33,6 @@ import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.EnumDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.ContextualPath;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;

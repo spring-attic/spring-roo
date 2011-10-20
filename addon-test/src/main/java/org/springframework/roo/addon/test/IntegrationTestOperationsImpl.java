@@ -19,7 +19,6 @@ import org.springframework.roo.classpath.customdata.CustomDataKeys;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
-import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
@@ -143,7 +142,7 @@ public class IntegrationTestOperationsImpl implements IntegrationTestOperations 
 		ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = typeLocationService.getTypeDetails(entity);
 		if (classOrInterfaceTypeDetails != null) {
 			MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(IntegrationTestOperationsImpl.class.getName(), classOrInterfaceTypeDetails);
-			List<MethodMetadata> countMethods = MemberFindingUtils.getMethodsWithTag(memberDetails, CustomDataKeys.COUNT_ALL_METHOD);
+			List<MethodMetadata> countMethods = memberDetails.getMethodsWithTag(CustomDataKeys.COUNT_ALL_METHOD);
 			if (countMethods.size() == 1) {
 				String countMethod = entity.getSimpleTypeName() + "." + countMethods.get(0).getMethodName().getSymbolName() + "()";
 				bodyBuilder.appendFormalLine("int expectedCount = 13;");
