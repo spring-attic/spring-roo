@@ -14,6 +14,7 @@ import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.file.monitor.MonitoringRequest;
 import org.springframework.roo.file.monitor.event.FileDetails;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.support.osgi.OSGiUtils;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileUtils;
 
@@ -21,15 +22,14 @@ import org.springframework.roo.support.util.FileUtils;
 @Service
 public class DefaultPathResolvingStrategy implements PathResolvingStrategy {
 
+	// Fields
 	@Reference private PomManagementService pomManagementService;
 
 	private Map<Path, PathInformation> pathInformation = new HashMap<Path, PathInformation>();
 	private String rootPath;
 
-
 	protected void activate(ComponentContext context) {
-		// TODO CD move constant to proper location
-		String workingDir = context.getBundleContext().getProperty("roo.working.directory");
+		String workingDir = OSGiUtils.getRooWorkingDirectory(context);
 		File root = MonitoringRequest.getInitialMonitoringRequest(workingDir).getFile();
 		rootPath = FileDetails.getCanonicalPath(root);
 		pathInformation.put(Path.SRC_MAIN_JAVA, new PathInformation(Path.SRC_MAIN_JAVA.contextualize(), true, new File(root, "src/main/java")));

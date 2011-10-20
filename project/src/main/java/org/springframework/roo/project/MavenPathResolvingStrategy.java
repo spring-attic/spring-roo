@@ -12,6 +12,7 @@ import org.springframework.roo.file.monitor.MonitoringRequest;
 import org.springframework.roo.file.monitor.event.FileDetails;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.maven.Pom;
+import org.springframework.roo.support.osgi.OSGiUtils;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileUtils;
 import org.springframework.roo.support.util.StringUtils;
@@ -24,13 +25,11 @@ public class MavenPathResolvingStrategy implements PathResolvingStrategy {
 
 	private String rootPath;
 
-	protected void activate(ComponentContext context) {
-		// TODO CD move constant to proper location
-		String workingDir = context.getBundleContext().getProperty("roo.working.directory");
-		File root = MonitoringRequest.getInitialMonitoringRequest(workingDir).getFile();
+	protected void activate(final ComponentContext context) {
+		final String workingDir = OSGiUtils.getRooWorkingDirectory(context);
+		final File root = MonitoringRequest.getInitialMonitoringRequest(workingDir).getFile();
 		rootPath = FileDetails.getCanonicalPath(root);
 	}
-
 
 	public String getFriendlyName(String identifier) {
 		Assert.notNull(identifier, "Identifier required");

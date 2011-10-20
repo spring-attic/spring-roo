@@ -20,6 +20,7 @@ import org.springframework.roo.process.manager.ProcessManager;
 import org.springframework.roo.process.manager.event.AbstractProcessManagerStatusPublisher;
 import org.springframework.roo.process.manager.event.ProcessManagerStatus;
 import org.springframework.roo.support.logging.HandlerUtils;
+import org.springframework.roo.support.osgi.OSGiUtils;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.ExceptionUtils;
 
@@ -47,9 +48,7 @@ public class DefaultProcessManager extends AbstractProcessManagerStatusPublisher
 	private String workingDir; // The working directory of the current roo project
 
 	protected void activate(final ComponentContext context) {
-		// Obtain the working directory from the framework properties
-		// TODO CD move constant to proper location
-		workingDir = context.getBundleContext().getProperty("roo.working.directory");
+		workingDir = OSGiUtils.getRooWorkingDirectory(context);
 		context.getBundleContext().addFrameworkListener(new FrameworkListener() {
 			public void frameworkEvent(final FrameworkEvent event) {
 				if (startLevel.getStartLevel() >= 99) {

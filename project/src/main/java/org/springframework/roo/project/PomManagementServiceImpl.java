@@ -24,6 +24,7 @@ import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.project.maven.PomBuilder;
 import org.springframework.roo.shell.Shell;
+import org.springframework.roo.support.osgi.OSGiUtils;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.FileUtils;
@@ -133,9 +134,8 @@ public class PomManagementServiceImpl implements PomManagementService {
 	}
 
 	protected void activate(ComponentContext context) {
-		// TODO CD move constant to proper location
-		String workingDir = context.getBundleContext().getProperty("roo.working.directory");
-		File root = MonitoringRequest.getInitialMonitoringRequest(workingDir).getFile();
+		final String workingDir = OSGiUtils.getRooWorkingDirectory(context);
+		final File root = MonitoringRequest.getInitialMonitoringRequest(workingDir).getFile();
 		rootPath = FileDetails.getCanonicalPath(root);
 	}
 

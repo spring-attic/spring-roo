@@ -9,6 +9,7 @@ import java.util.Enumeration;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.support.ant.AntPathMatcher;
 import org.springframework.roo.support.ant.PathMatcher;
 import org.springframework.roo.support.util.Assert;
@@ -20,11 +21,16 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.2.0
  */
 public final class OSGiUtils {
-
+	
 	/**
 	 * The root path within an OSGi bundle
 	 */
 	public static final String ROOT_PATH = "/";
+
+	/**
+	 * The name of the property that stores the Roo working directory.
+	 */
+	static final String ROO_WORKING_DIRECTORY_PROPERTY = "roo.working.directory";
 
 	private static final PathMatcher PATH_MATCHER = new AntPathMatcher();
 
@@ -132,4 +138,20 @@ public final class OSGiUtils {
 			callback.execute(bundle);
 		}
 	}
+	
+	/**
+	 * Returns the Roo working directory for the given OSGi component context
+	 * 
+	 * @param componentContext the component context (required)
+	 * @return the path of the Roo working directory
+	 * @since 1.2.0
+	 */
+	public static String getRooWorkingDirectory(final ComponentContext componentContext) {
+		return componentContext.getBundleContext().getProperty(ROO_WORKING_DIRECTORY_PROPERTY);
+	}
+	
+	/**
+	 * Constructor is private to prevent instantiation
+	 */
+	private OSGiUtils() {}
 }
