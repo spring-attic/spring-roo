@@ -1,5 +1,7 @@
 package org.springframework.roo.classpath.converters;
 
+import static org.springframework.roo.project.ContextualPath.MODULE_PATH_SEPARATOR;
+
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -76,7 +78,7 @@ public class LastUsedImpl implements LastUsed {
 		if (module != null) {
 
 			if (StringUtils.hasText(module.getModuleName())) {
-				moduleName = AnsiEscapeCode.decorate(module.getModuleName() + "|", AnsiEscapeCode.FG_CYAN);
+				moduleName = AnsiEscapeCode.decorate(module.getModuleName() + MODULE_PATH_SEPARATOR, AnsiEscapeCode.FG_CYAN);
 			}
 		}
 

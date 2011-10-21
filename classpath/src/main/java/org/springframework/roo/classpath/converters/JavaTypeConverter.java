@@ -1,5 +1,7 @@
 package org.springframework.roo.classpath.converters;
 
+import static org.springframework.roo.project.ContextualPath.MODULE_PATH_SEPARATOR;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Arrays;
@@ -69,11 +71,11 @@ public class JavaTypeConverter implements Converter<JavaType> {
 
 		Pom module = projectOperations.getFocusedModule();
 
-		if (value.contains("|")) {
-			String moduleName = value.substring(0, value.indexOf("|"));
+		if (value.contains(MODULE_PATH_SEPARATOR)) {
+			String moduleName = value.substring(0, value.indexOf(MODULE_PATH_SEPARATOR));
 			module = projectOperations.getPomManagementService().getPomFromModuleName(moduleName);
 			topLevelPath = typeLocationService.getTopLevelPackageForModule(module);
-			value = value.substring(value.indexOf("|") + 1, value.length()).trim();
+			value = value.substring(value.indexOf(MODULE_PATH_SEPARATOR) + 1, value.length()).trim();
 			projectOperations.getPomManagementService().setFocusedModule(module);
 		} else {
 			topLevelPath = typeLocationService.getTopLevelPackageForModule(projectOperations.getFocusedModule());
@@ -256,11 +258,11 @@ public class JavaTypeConverter implements Converter<JavaType> {
 		String focusedModulePath = projectOperations.getFocusedModule().getPath();
 		String focusedModuleName = focusedModule.getModuleName();
 		boolean intraModule = false;
-		if (existingData.contains("|")) {
-			focusedModuleName = existingData.substring(0, existingData.indexOf('|'));
+		if (existingData.contains(MODULE_PATH_SEPARATOR)) {
+			focusedModuleName = existingData.substring(0, existingData.indexOf(MODULE_PATH_SEPARATOR));
 			focusedModule = projectOperations.getPomFromModuleName(focusedModuleName);
 			focusedModulePath = focusedModule.getPath();
-			existingData = existingData.substring(existingData.indexOf('|') + 1, existingData.length());
+			existingData = existingData.substring(existingData.indexOf(MODULE_PATH_SEPARATOR) + 1, existingData.length());
 			topLevelPath = typeLocationService.getTopLevelPackageForModule(focusedModule);
 			intraModule = true;
 		}
@@ -278,13 +280,13 @@ public class JavaTypeConverter implements Converter<JavaType> {
 		String formattedPrefix = "";
 
 		if (!focusedModulePath.equals(projectOperations.getFocusedModule().getPath())) {
-			prefix = focusedModuleName + "|";
-			formattedPrefix = AnsiEscapeCode.decorate(focusedModuleName + "|", AnsiEscapeCode.FG_CYAN);
+			prefix = focusedModuleName + MODULE_PATH_SEPARATOR;
+			formattedPrefix = AnsiEscapeCode.decorate(focusedModuleName + MODULE_PATH_SEPARATOR, AnsiEscapeCode.FG_CYAN);
 		}
 
 		for (String moduleName : projectOperations.getPomManagementService().getModuleNames()) {
 			if (!moduleName.equals(focusedModuleName)) {
-				Completion completion = new Completion(moduleName + "|", AnsiEscapeCode.decorate(moduleName + "|", AnsiEscapeCode.FG_CYAN), "Modules", 0);
+				Completion completion = new Completion(moduleName + MODULE_PATH_SEPARATOR, AnsiEscapeCode.decorate(moduleName + MODULE_PATH_SEPARATOR, AnsiEscapeCode.FG_CYAN), "Modules", 0);
 				completions.add(completion);
 			}
 		}
