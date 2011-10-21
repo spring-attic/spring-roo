@@ -324,7 +324,6 @@ public class FieldCommands implements CommandMarker {
 		@CliOption(key = "transient", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates to mark the field as transient") final boolean transientModifier,
 		@CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") final boolean permitReservedWords) {
 
-		System.out.println("fieldType: " + fieldType);
 		ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = typeLocationService.getTypeDetails(fieldType);
 		Assert.notNull(classOrInterfaceTypeDetails, "The specified target '--type' does not exist or can not be found. Please create this type first.");
 
