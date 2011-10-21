@@ -156,8 +156,8 @@ public class MavenPathResolvingStrategy implements PathResolvingStrategy {
 		return parentFileDetails.getRelativeSegment(identifier);
 	}
 
-	public boolean inactive() {
-		return pomManagementService.getPomMap().size() == 0;
+	public boolean isActive() {
+		return !pomManagementService.getPomMap().isEmpty();
 	}
 
 	public PathInformation getPathInformation(ContextualPath contextualPath) {

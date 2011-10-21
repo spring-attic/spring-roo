@@ -46,7 +46,7 @@ public class DelegatePathResolver implements PathResolver {
 	private PathResolvingStrategy getStrategy() {
 		PathResolvingStrategy chosenStrategy = null;
 		for (PathResolvingStrategy pathResolvingStrategy : pathResolvingStrategies) {
-			if (!pathResolvingStrategy.inactive()) {
+			if (pathResolvingStrategy.isActive()) {
 				if (chosenStrategy != null) {
 					throw new IllegalArgumentException("Multiple path resolving strategies are active :<");
 				} else {
@@ -56,7 +56,6 @@ public class DelegatePathResolver implements PathResolver {
 		}
 		return chosenStrategy;
 	}
-
 
 	public String getIdentifier(ContextualPath path, String relativePath) {
 		return getStrategy().getIdentifier(path, relativePath);

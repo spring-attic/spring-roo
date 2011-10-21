@@ -4,6 +4,12 @@ import java.util.List;
 
 import org.springframework.roo.model.JavaType;
 
+/**
+ * A strategy for resolving logical {@link Path}s to physical file system locations.
+ *
+ * @author James Tyrrell
+ * @since 1.2.0
+ */
 public interface PathResolvingStrategy {
 
 	/**
@@ -107,10 +113,12 @@ public interface PathResolvingStrategy {
 	List<ContextualPath> getPaths();
 
 	/**
-	 *
-	 * @return true if this strategy is not active
+	 * Indicates whether this strategy is active. The {@link PathResolver} will
+	 * typically expect exactly one strategy to be active at a time.
+	 * 
+	 * @return see above
 	 */
-	boolean inactive();
+	boolean isActive();
 
 	/**
 	 * @return the directory where Roo was launched

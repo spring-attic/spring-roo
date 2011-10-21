@@ -42,8 +42,8 @@ public class DefaultPathResolvingStrategy implements PathResolvingStrategy {
 		init();
 	}
 
-	public boolean inactive() {
-		return pomManagementService.getPomMap().size() > 0;
+	public boolean isActive() {
+		return pomManagementService.getPomMap().isEmpty();
 	}
 
 	public String getIdentifier(ContextualPath path, String relativePath) {
