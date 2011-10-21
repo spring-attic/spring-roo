@@ -12,11 +12,12 @@ import org.springframework.roo.classpath.itd.MemberHoldingTypeDetailsMetadataIte
  * @since 1.2.0
  */
 public class IdentifierAnnotationValues extends AbstractAnnotationValues {
-	
+
 	// From annotation
 	@AutoPopulate private boolean dbManaged;
 	@AutoPopulate private boolean gettersByDefault = true;
 	@AutoPopulate private boolean settersByDefault;
+	@AutoPopulate private boolean noArgConstructor = true;
 	
 	/**
 	 * Constructor that reads the {@link RooIdentifier} annotation on the given
@@ -54,5 +55,14 @@ public class IdentifierAnnotationValues extends AbstractAnnotationValues {
 	 */
 	public boolean isSettersByDefault() {
 		return settersByDefault;
+	}
+
+	/**
+	 * Indicates whether to generate a no-argument constructor for the class
+	 * 
+	 * @return
+	 */
+	public boolean isNoArgConstructor() {
+		return noArgConstructor;
 	}
 }

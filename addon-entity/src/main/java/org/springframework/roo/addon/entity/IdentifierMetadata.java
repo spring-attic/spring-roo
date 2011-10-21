@@ -50,22 +50,21 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
 
 	// Fields
-	private boolean noArgConstructor;
 	private boolean publicNoArgConstructor;
 	private List<FieldMetadata> fields;
 	// See {@link IdentifierService} for further information (populated via {@link IdentifierMetadataProviderImpl}); may be null
 	private List<Identifier> identifierServiceResult;
 
-	public IdentifierMetadata(final String identifier, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final boolean noArgConstructor, final List<Identifier> identifierServiceResult, final IdentifierAnnotationValues annotationValues) {
+	public IdentifierMetadata(final String identifier, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final IdentifierAnnotationValues annotationValues, final List<Identifier> identifierServiceResult) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
+		Assert.notNull(annotationValues, "Annotation values required");
 
 		if (!isValid()) {
 			return;
 		}
 
 		this.identifierServiceResult = identifierServiceResult;
-		this.noArgConstructor = noArgConstructor;
 
 		// Add @Embeddable annotation
 		builder.addAnnotation(getEmbeddableAnnotation());
@@ -80,17 +79,17 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 		builder.addConstructor(getParameterizedConstructor());
 
 		// Obtain a no-arg constructor, if one is appropriate to provide
-		builder.addConstructor(getNoArgConstructor());
+		if (annotationValues.isNoArgConstructor()) {
+			builder.addConstructor(getNoArgConstructor());
+		}
 
 		if (annotationValues.isGettersByDefault()) {
-			List<MethodMetadata> accessors = getAccessors();
-			for (MethodMetadata accessor : accessors) {
+			for (MethodMetadata accessor : getAccessors()) {
 				builder.addMethod(accessor);
 			}
 		}
 		if (annotationValues.isSettersByDefault()) {
-			List<MethodMetadata> mutators = getMutators();
-			for (MethodMetadata mutator : mutators) {
+			for (MethodMetadata mutator : getMutators()) {
 				builder.addMethod(mutator);
 			}
 		}
@@ -102,7 +101,7 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 		buildItd();
 	}
 
-	public AnnotationMetadata getEmbeddableAnnotation() {
+	private AnnotationMetadata getEmbeddableAnnotation() {
 		if (governorTypeDetails.getAnnotation(EMBEDDABLE) != null) {
 			return null;
 		}
@@ -118,7 +117,7 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 	 *
 	 * @return fields (never returns null)
 	 */
-	public List<FieldMetadata> getFields() {
+	private List<FieldMetadata> getFields() {
 		// Locate all declared fields
 		List<? extends FieldMetadata> declaredFields = governorTypeDetails.getDeclaredFields();
 
@@ -231,7 +230,7 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 	 *
 	 * @return the accessors (never returns null)
 	 */
-	public List<MethodMetadata> getAccessors() {
+	private List<MethodMetadata> getAccessors() {
 		Assert.notNull(fields, "Fields required");
 		List<MethodMetadata> accessors = new ArrayList<MethodMetadata>();
 
@@ -258,7 +257,7 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 	 *
 	 * @return the mutators (never returns null)
 	 */
-	public List<MethodMetadata> getMutators() {
+	private List<MethodMetadata> getMutators() {
 		Assert.notNull(fields, "Fields required");
 		List<MethodMetadata> mutators = new ArrayList<MethodMetadata>();
 
@@ -283,7 +282,7 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 	 *
 	 * @return the constructor, never null.
 	 */
-	public ConstructorMetadata getParameterizedConstructor() {
+	private ConstructorMetadata getParameterizedConstructor() {
 		Assert.notNull(fields, "Fields required");
 		// Search for an existing constructor
 		List<JavaType> parameterTypes = new ArrayList<JavaType>();
@@ -293,9 +292,9 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 
 		ConstructorMetadata result = governorTypeDetails.getDeclaredConstructor(parameterTypes);
 		if (result != null) {
-			// Found an existing no-arg constructor on this class, so return it
+			// Found an existing parameterised constructor on this class
 			publicNoArgConstructor = true;
-			return result;
+			return null;
 		}
 
 		List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
@@ -325,25 +324,18 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 	 *
 	 * <p>
 	 * If a class does not define a no-arg constructor, one might be created. It
-	 * will only be created if the {@link #noArgConstructor} is true AND there
+	 * will only be created if the {@link RooIdentifier#noArgConstructor} is true AND there
 	 * is at least one other constructor declared in the source file. If a
 	 * constructor is created, it will have a private access modifier.
 	 *
 	 * @return the constructor (may return null if no constructor is to be produced)
 	 */
-	public ConstructorMetadata getNoArgConstructor() {
+	private ConstructorMetadata getNoArgConstructor() {
 		// Search for an existing constructor
 		List<JavaType> parameterTypes = new ArrayList<JavaType>();
 		ConstructorMetadata result = governorTypeDetails.getDeclaredConstructor(parameterTypes);
 		if (result != null) {
-			// Found an existing no-arg constructor on this class, so return it
-			return result;
-		}
-
-		// To get this far, the user did not define a no-arg constructor
-
-		if (!noArgConstructor) {
-			// This metadata instance is prohibited from making a no-arg constructor
+			// Found an existing no-arg constructor on this class
 			return null;
 		}
 

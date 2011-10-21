@@ -120,6 +120,7 @@ public class EntityCommands implements CommandMarker {
 		// Create entity identifier class if required
 		if (!(identifierType.getPackage().getFullyQualifiedPackageName().startsWith("java.") || identifierType.equals(GAE_DATASTORE_KEY))) {
 			entityOperations.newIdentifier(identifierType, identifierField, identifierColumn);
+			equalsOperations.updateConfiguration();
 		}
 
 		if (testAutomatically) {

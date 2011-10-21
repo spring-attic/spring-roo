@@ -2,6 +2,7 @@ package org.springframework.roo.addon.entity;
 
 import static org.springframework.roo.model.JavaType.OBJECT;
 import static org.springframework.roo.model.JpaJavaType.EMBEDDABLE;
+import static org.springframework.roo.model.RooJavaType.ROO_EQUALS;
 import static org.springframework.roo.model.RooJavaType.ROO_IDENTIFIER;
 import static org.springframework.roo.model.RooJavaType.ROO_JAVA_BEAN;
 import static org.springframework.roo.model.RooJavaType.ROO_SERIALIZABLE;
@@ -100,7 +101,7 @@ public class EntityOperationsImpl implements EntityOperations {
 		Assert.notNull(identifierType, "Identifier type required");
 		
 		final String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(identifierType, pathResolver.getFocusedPath(Path.SRC_MAIN_JAVA));
-		final List<AnnotationMetadataBuilder> identifierAnnotations = Arrays.asList(new AnnotationMetadataBuilder(ROO_TO_STRING), new AnnotationMetadataBuilder(ROO_IDENTIFIER));
+		final List<AnnotationMetadataBuilder> identifierAnnotations = Arrays.asList(new AnnotationMetadataBuilder(ROO_TO_STRING), new AnnotationMetadataBuilder(ROO_EQUALS), new AnnotationMetadataBuilder(ROO_IDENTIFIER));
 		final ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC | Modifier.FINAL, identifierType, PhysicalTypeCategory.CLASS);
 		typeDetailsBuilder.setAnnotations(identifierAnnotations);
 
