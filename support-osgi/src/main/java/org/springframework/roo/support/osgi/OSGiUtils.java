@@ -30,7 +30,7 @@ public final class OSGiUtils {
 	/**
 	 * The name of the property that stores the Roo working directory.
 	 */
-	static final String ROO_WORKING_DIRECTORY_PROPERTY = "roo.working.directory";
+	public static final String ROO_WORKING_DIRECTORY_PROPERTY = "roo.working.directory";
 
 	private static final PathMatcher PATH_MATCHER = new AntPathMatcher();
 
