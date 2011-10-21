@@ -10,7 +10,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import org.springframework.roo.addon.dbre.model.dialect.Dialect;
 import org.springframework.roo.support.util.StringUtils;
 
 /**
@@ -281,16 +280,6 @@ public class DatabaseIntrospector extends AbstractIntrospector {
 			return StringUtils.toUpperCase(artifactName);
 		} else {
 			return artifactName;
-		}
-	}
-
-	@SuppressWarnings("unused")
-	private Dialect getDialect() {
-		try {
-			String productName = databaseMetaData.getDatabaseProductName();
-			return (Dialect) Class.forName("org.springframework.roo.addon.dbre.model.dialect." + productName + "Dialect").newInstance();
-		} catch (Exception e) {
-			return null;
 		}
 	}
 }

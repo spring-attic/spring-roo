@@ -40,6 +40,11 @@ public class MethodTarget implements Comparable<MethodTarget> {
 	public boolean equals(final Object other) {
 		return other == this || (other instanceof MethodTarget && compareTo((MethodTarget) other) == 0);
 	}
+	
+	@Override
+	public int hashCode() {
+		return remainingBuffer.hashCode();
+	}
 
 	public int compareTo(final MethodTarget other) {
 		if (other == null) {

@@ -8,6 +8,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -51,7 +52,7 @@ public class PomManagementServiceImpl implements PomManagementService {
 	private String rootPath;
 	private final Set<String> toBeParsed = new HashSet<String>();
 
-	public Pom getModuleForFileIdentifier(String fileIdentifier) {
+	public Pom getModuleForFileIdentifier(final String fileIdentifier) {
 		updatePomCache();
 		String startingPoint = FileUtils.getFirstDirectory(fileIdentifier);
 		String pomPath = FileUtils.normalise(startingPoint) + "pom.xml";
@@ -67,14 +68,14 @@ public class PomManagementServiceImpl implements PomManagementService {
 		return getPomFromPath(pomPath);
 	}
 
-	public Pom getPomFromPath(String pomPath) {
+	public Pom getPomFromPath(final String pomPath) {
 		updatePomCache();
 		return pomMap.get(pomPath);
 	}
 
-	public Pom getPomFromModuleName(String moduleName) {
+	public Pom getPomFromModuleName(final String moduleName) {
 		updatePomCache();
-		for (Map.Entry<String, Pom> entry : pomMap.entrySet()) {
+		for (final Map.Entry<String, Pom> entry : pomMap.entrySet()) {
 			if (moduleName.equals(entry.getValue().getModuleName())) {
 				return pomMap.get(entry.getKey());
 			}
@@ -82,14 +83,14 @@ public class PomManagementServiceImpl implements PomManagementService {
 		return null;
 	}
 
-	private String getModuleName(String pomRoot) {
-		String moduleName = FileUtils.normalise(pomRoot).replaceAll(FileUtils.normalise(rootPath), "");
+	private String getModuleName(final String pomRoot) {
+		final String moduleName = FileUtils.normalise(pomRoot).replaceAll(FileUtils.normalise(rootPath), "");
 		return FileUtils.removeTrailingSeparator(moduleName);
 	}
 
 	public Set<String> getModuleNames() {
-		Set<String> moduleNames = new HashSet<String>();
-		for (Pom module : pomMap.values()) {
+		final Set<String> moduleNames = new HashSet<String>();
+		for (final Pom module : pomMap.values()) {
 		 	moduleNames.add(module.getModuleName());
 		}
 		return moduleNames;
@@ -120,11 +121,11 @@ public class PomManagementServiceImpl implements PomManagementService {
 		return getFocusedModule().getModuleName();
 	}
 
-	public void setFocusedModule(Pom focusedModule) {
+	public void setFocusedModule(final Pom focusedModule) {
 		setFocusedModule(focusedModule.getPath());
 	}
 
-	public void setFocusedModule(String focusedModulePath) {
+	public void setFocusedModule(final String focusedModulePath) {
 		Assert.hasText(focusedModulePath, "Module path required");
 		if (focusedModulePath.equals(this.focusedModulePath)) {
 			return;
@@ -133,30 +134,30 @@ public class PomManagementServiceImpl implements PomManagementService {
 		shell.setPromptPath(pomMap.get(focusedModulePath).getModuleName());
 	}
 
-	protected void activate(ComponentContext context) {
+	protected void activate(final ComponentContext context) {
 		final String workingDir = OSGiUtils.getRooWorkingDirectory(context);
 		final File root = MonitoringRequest.getInitialMonitoringRequest(workingDir).getFile();
 		rootPath = FileDetails.getCanonicalPath(root);
 	}
 
 	private void updatePomCache() {
-		Set<String> changes = fileMonitorService.getDirtyFiles(getClass().getName());
-		for (String change : changes) {
+		final Set<String> changes = fileMonitorService.getDirtyFiles(getClass().getName());
+		for (final String change : changes) {
 			if (change.endsWith("pom.xml")) {
 				toBeParsed.add(change);
 			}
 		}
-		Map<String, String> pomModuleMap = new HashMap<String, String>();
-		Set<String> toRemove = new HashSet<String>();
-		Set<Pom> newPoms = new HashSet<Pom>();
-		for (String change : toBeParsed) {
+		final Map<String, String> pomModuleMap = new HashMap<String, String>();
+		final Set<String> toRemove = new HashSet<String>();
+		final Set<Pom> newPoms = new HashSet<Pom>();
+		for (final String change : toBeParsed) {
 			try {
 				if (new File(change).exists()) {
-					String fileContents = FileCopyUtils.copyToString(new File(change));
+					final String fileContents = FileCopyUtils.copyToString(new File(change));
 					if (StringUtils.hasText(fileContents)) {
 						final Document pomDocument = XmlUtils.readXml(fileManager.getInputStream(change));
 						resolvePoms(pomDocument.getDocumentElement(), change, pomModuleMap);
-						String moduleName = getModuleName(FileUtils.getFirstDirectory(change));
+						final String moduleName = getModuleName(FileUtils.getFirstDirectory(change));
 						final PomBuilder pomBuilder = new PomBuilder(pomDocument.getDocumentElement(), change, moduleName);
 						final Pom pom = pomBuilder.build();
 						pomMap.put(change, pom);
@@ -164,14 +165,14 @@ public class PomManagementServiceImpl implements PomManagementService {
 						toRemove.add(change);
 					}
 				}
-			} catch (IOException e) {
+			} catch (final IOException e) {
 				throw new IllegalStateException(e);
 			}
 		}
 		toBeParsed.removeAll(toRemove);
 		if (!newPoms.isEmpty()) {
 			sortPomMap();
-			for (Pom pom : newPoms) {
+			for (final Pom pom : newPoms) {
 				metadataService.get(ProjectMetadata.getProjectIdentifier(pom.getModuleName()), true);
 				metadataDependencyRegistry.notifyDownstream(ProjectMetadata.getProjectIdentifier(pom.getModuleName()));
 			}
@@ -210,24 +211,24 @@ public class PomManagementServiceImpl implements PomManagementService {
 		}
 	}
 
-	private String resolveRelativePath(String relativeTo, String relativePath) {
+	private String resolveRelativePath(String relativeTo, final String relativePath) {
 		if (relativeTo.endsWith(File.separator)) {
 			relativeTo = relativeTo.substring(0, relativeTo.length() - 1);
 		}
 		while (new File(relativeTo).isFile()) {
 			relativeTo = relativeTo.substring(0, relativeTo.lastIndexOf(File.separator));
 		}
-		String[] relativePathSegments = relativePath.split(File.separator);
+		final String[] relativePathSegments = relativePath.split(File.separator);
 
 		int backCount = 0;
-		for (String relativePathSegment : relativePathSegments) {
+		for (final String relativePathSegment : relativePathSegments) {
 			if (relativePathSegment.equals("..")) {
 				backCount++;
 			} else {
 				break;
 			}
 		}
-		StringBuilder sb = new StringBuilder();
+		final StringBuilder sb = new StringBuilder();
 		for (int i = backCount; i < relativePathSegments.length; i++) {
 			sb.append(relativePathSegments[i]);
 			sb.append("/");
@@ -247,17 +248,23 @@ public class PomManagementServiceImpl implements PomManagementService {
 		return path;
 	}
 
-	private class PomComparator implements Comparator<String> {
+	private static class PomComparator implements Comparator<String> {
 
-		private Map<String, Pom> pomMap;
+		// Fields
+		private final Map<String, Pom> pomMap;
 
-		private PomComparator(Map<String, Pom> pomMap) {
+		/**
+		 * Constructor
+		 *
+		 * @param pomMap
+		 */
+		private PomComparator(final Map<String, Pom> pomMap) {
 			this.pomMap = pomMap;
 		}
 
-		public int compare(String s1, String s2) {
-			String p1 = pomMap.get(s1).getRoot() + File.separator;
-			String p2 = pomMap.get(s2).getRoot() + File.separator;
+		public int compare(final String s1, final String s2) {
+			final String p1 = pomMap.get(s1).getRoot() + File.separator;
+			final String p2 = pomMap.get(s2).getRoot() + File.separator;
 			if (p1.startsWith(p2)) {
 				return -1;
 			} else if (p2.startsWith(p1)) {
@@ -268,10 +275,10 @@ public class PomManagementServiceImpl implements PomManagementService {
 	}
 
 	private void sortPomMap() {
-		ArrayList<String> sortedPomPaths = new ArrayList<String>(pomMap.keySet());
+		final List<String> sortedPomPaths = new ArrayList<String>(pomMap.keySet());
 		Collections.sort(sortedPomPaths, new PomComparator(pomMap));
-		Map<String, Pom> sortedPomMap = new LinkedHashMap<String, Pom>();
-		for (String pomPath : sortedPomPaths) {
+		final Map<String, Pom> sortedPomMap = new LinkedHashMap<String, Pom>();
+		for (final String pomPath : sortedPomPaths) {
 			sortedPomMap.put(pomPath, pomMap.get(pomPath));
 		}
 		pomMap = sortedPomMap;

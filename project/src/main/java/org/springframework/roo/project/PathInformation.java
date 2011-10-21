@@ -15,10 +15,17 @@ import org.springframework.roo.support.util.Assert;
 public class PathInformation {
 
 	// Fields
-	private ContextualPath contextualPath;
-	private boolean source;
-	private File location;
+	private final ContextualPath contextualPath;
+	private final boolean source;
+	private final File location;
 	
+	/**
+	 * Constructor
+	 *
+	 * @param contextualPath (required)
+	 * @param source whether this path contains source code
+	 * @param location the physical location of this path (required)
+	 */
 	public PathInformation(final ContextualPath contextualPath, final boolean source, final File location) {
 		Assert.notNull(contextualPath, "Module path required");
 		Assert.notNull(location, "Location required");
