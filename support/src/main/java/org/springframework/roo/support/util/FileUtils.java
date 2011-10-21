@@ -109,6 +109,13 @@ public abstract class FileUtils {
 		return fileName.startsWith(File.separator);
 	}
 
+	/**
+	 * TODO
+	 * 
+	 * @param fileIdentifier
+	 * @return
+	 * @since 1.2.0
+	 */
 	public static String getFirstDirectory(String fileIdentifier) {
 		fileIdentifier = removeTrailingSeparator(fileIdentifier);
 		File file = new File(fileIdentifier);
@@ -118,12 +125,26 @@ public abstract class FileUtils {
 		return backOneDirectory(fileIdentifier);
 	}
 
+	/**
+	 * TODO
+	 * 
+	 * @param fileIdentifier
+	 * @return
+	 * @since 1.2.0
+	 */
 	public static String backOneDirectory(String fileIdentifier) {
 		fileIdentifier = removeTrailingSeparator(fileIdentifier);
 		fileIdentifier = fileIdentifier.substring(0, fileIdentifier.lastIndexOf(File.separator));
 		return removeTrailingSeparator(fileIdentifier);
 	}
 
+	/**
+	 * TODO
+	 * 
+	 * @param pomPath
+	 * @return
+	 * @since 1.2.0
+	 */
 	public static String removeTrailingSeparator(String pomPath) {
 		while (pomPath.endsWith(File.separator)) {
 			pomPath = pomPath.substring(0, pomPath.length() - 1);
@@ -131,6 +152,13 @@ public abstract class FileUtils {
 		return pomPath;
 	}
 
+	/**
+	 * TODO
+	 * 
+	 * @param pomPath
+	 * @return
+	 * @since 1.2.0
+	 */
 	public static String removePrePostSeparator(String pomPath) {
 		while (pomPath.endsWith(File.separator)) {
 			pomPath = pomPath.substring(0, pomPath.length() - 1);
@@ -141,7 +169,34 @@ public abstract class FileUtils {
 		return pomPath;
 	}
 
+	/**
+	 * TODO
+	 * 
+	 * @param pomPath
+	 * @return
+	 * @since 1.2.0
+	 */
 	public static String normalise(String pomPath) {
 		return removeTrailingSeparator(pomPath) + File.separatorChar;
 	}
+	
+	/**
+	 * Returns an operating-system-dependent path consisting of the given
+	 * elements, separated by {@link File#separator}.
+	 * 
+	 * @param pathElements the path elements from uppermost downwards (can't be empty)
+	 * @return a non-blank string
+	 * @since 1.2.0
+	 */
+	public static String getSystemDependentPath(final String... pathElements) {
+		Assert.notEmpty(pathElements);
+		return StringUtils.arrayToDelimitedString(pathElements, File.separator);
+	}
+	
+	/**
+	 * Constructor is private to prevent instantiation
+	 * 
+	 * @since 1.2.0
+	 */
+	private FileUtils() {}
 }
