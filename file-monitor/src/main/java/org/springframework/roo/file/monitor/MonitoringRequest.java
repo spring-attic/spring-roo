@@ -14,14 +14,66 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.0
  */
 public abstract class MonitoringRequest {
+	
+	/**
+	 * Factory method for monitoring the following operations upon the given
+	 * file or directory:
+	 * <ul>
+	 * <li>{@link FileOperation#CREATED}</li>
+	 * <li>{@link FileOperation#RENAMED}</li>
+	 * <li>{@link FileOperation#UPDATED}</li>
+	 * <li>{@link FileOperation#DELETED}</li>
+	 * </ul>
+	 * 
+	 * @param resource the resource to monitor; <code>null</code> means the current directory
+	 * @return a non-<code>null</code> monitoring request
+	 */
+	public static MonitoringRequest getInitialMonitoringRequest(String resource) {
+		if (resource == null) {
+			resource = ".";
+		}
+		final MonitoringRequestEditor mre = new MonitoringRequestEditor();
+		mre.setAsText(resource + ",CRUD");
+		return mre.getValue();
+	}
+	
+	/**
+	 * Factory method for monitoring the following operations upon the given
+	 * directory and its sub-tree:
+	 * <ul>
+	 * <li>{@link FileOperation#CREATED}</li>
+	 * <li>{@link FileOperation#RENAMED}</li>
+	 * <li>{@link FileOperation#UPDATED}</li>
+	 * <li>{@link FileOperation#DELETED}</li>
+	 * </ul>
+	 * 
+	 * @param directory the directory to monitor; <code>null</code> means the current directory
+	 * @return a non-<code>null</code> monitoring request
+	 */
+	public static MonitoringRequest getInitialSubTreeMonitoringRequest(String directory) {
+		if (directory == null) {
+			directory = ".";
+		}
+		final MonitoringRequestEditor mre = new MonitoringRequestEditor();
+		mre.setAsText(directory + ",CRUD,**");
+		return mre.getValue();
+	}
+
+	// Fields
 	private final File resource;
 	private final Set<FileOperation> notifyOn;
 
-	public MonitoringRequest(final File resource, final Set<FileOperation> notifyOn) {
-		Assert.notNull(resource, "File to monitor is required");
+	/**
+	 * Constructor
+	 *
+	 * @param resource the file to monitor (required)
+	 * @param notifyOn the file operations to notify upon (can't be empty)
+	 */
+	protected MonitoringRequest(final File resource, final Set<FileOperation> notifyOn) {
+		Assert.notNull(resource, "Resource to monitor is required");
 		Assert.notEmpty(notifyOn, "At least one FileOperation to monitor must be specified");
-		this.resource = resource;
 		this.notifyOn = notifyOn;
+		this.resource = resource;
 	}
 
 	/**
@@ -36,23 +88,5 @@ public abstract class MonitoringRequest {
 	 */
 	public Set<FileOperation> getNotifyOn() {
 		return Collections.unmodifiableSet(notifyOn);
-	}
-
-	public static MonitoringRequest getInitialMonitoringRequest(String workingDir) {
-		if (workingDir == null) {
-			workingDir = ".";
-		}
-		MonitoringRequestEditor mre = new MonitoringRequestEditor();
-		mre.setAsText(workingDir + ",CRUD");
-		return (MonitoringRequest) mre.getValue();
-	}
-
-	public static MonitoringRequest getInitialSubTreeMonitoringRequest(String workingDir) {
-		if (workingDir == null) {
-			workingDir = ".";
-		}
-		MonitoringRequestEditor mre = new MonitoringRequestEditor();
-		mre.setAsText(workingDir + ",CRUD,**");
-		return (MonitoringRequest) mre.getValue();
 	}
 }
