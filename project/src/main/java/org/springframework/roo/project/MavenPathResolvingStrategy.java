@@ -1,5 +1,7 @@
 package org.springframework.roo.project;
 
+import static org.springframework.roo.support.util.FileUtils.CURRENT_DIRECTORY;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -8,7 +10,6 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
-import org.springframework.roo.file.monitor.MonitoringRequest;
 import org.springframework.roo.file.monitor.event.FileDetails;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.maven.Pom;
@@ -21,14 +22,14 @@ import org.springframework.roo.support.util.StringUtils;
 @Service
 public class MavenPathResolvingStrategy implements PathResolvingStrategy {
 
+	// Fields
 	@Reference protected PomManagementService pomManagementService;
 
 	private String rootPath;
 
 	protected void activate(final ComponentContext context) {
-		final String workingDir = OSGiUtils.getRooWorkingDirectory(context);
-		final File root = MonitoringRequest.getInitialMonitoringRequest(workingDir).getFile();
-		rootPath = FileDetails.getCanonicalPath(root);
+		final File projectDirectory = new File(StringUtils.defaultIfEmpty(OSGiUtils.getRooWorkingDirectory(context), CURRENT_DIRECTORY));
+		rootPath = FileDetails.getCanonicalPath(projectDirectory);
 	}
 
 	public String getFriendlyName(String identifier) {

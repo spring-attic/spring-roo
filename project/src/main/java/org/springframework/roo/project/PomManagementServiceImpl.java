@@ -1,5 +1,7 @@
 package org.springframework.roo.project;
 
+import static org.springframework.roo.support.util.FileUtils.CURRENT_DIRECTORY;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -16,7 +18,6 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
-import org.springframework.roo.file.monitor.MonitoringRequest;
 import org.springframework.roo.file.monitor.NotifiableFileMonitorService;
 import org.springframework.roo.file.monitor.event.FileDetails;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
@@ -38,19 +39,21 @@ import org.w3c.dom.Element;
 @Service
 public class PomManagementServiceImpl implements PomManagementService {
 
-	@Reference private NotifiableFileMonitorService fileMonitorService;
-	@Reference private MetadataDependencyRegistry metadataDependencyRegistry;
-	@Reference private MetadataService metadataService;
-	@Reference private FileManager fileManager;
-	@Reference private Shell shell;
-
+	// Constants
 	private static final String DEFAULT_POM_NAME = "pom.xml";
 	private static final String DEFAULT_RELATIVE_PATH = "../pom.xml";
+	
+	// Fields
+	@Reference private FileManager fileManager;
+	@Reference private MetadataDependencyRegistry metadataDependencyRegistry;
+	@Reference private MetadataService metadataService;
+	@Reference private NotifiableFileMonitorService fileMonitorService;
+	@Reference private Shell shell;
 
-	private String focusedModulePath;
-	private Map<String, Pom> pomMap = new HashMap<String, Pom>();
-	private String rootPath;
 	private final Set<String> toBeParsed = new HashSet<String>();
+	private Map<String, Pom> pomMap = new HashMap<String, Pom>();
+	private String focusedModulePath;
+	private String rootPath;
 
 	public Pom getModuleForFileIdentifier(final String fileIdentifier) {
 		updatePomCache();
@@ -135,9 +138,8 @@ public class PomManagementServiceImpl implements PomManagementService {
 	}
 
 	protected void activate(final ComponentContext context) {
-		final String workingDir = OSGiUtils.getRooWorkingDirectory(context);
-		final File root = MonitoringRequest.getInitialMonitoringRequest(workingDir).getFile();
-		rootPath = FileDetails.getCanonicalPath(root);
+		final File projectDirectory = new File(StringUtils.defaultIfEmpty(OSGiUtils.getRooWorkingDirectory(context), CURRENT_DIRECTORY));
+		rootPath = FileDetails.getCanonicalPath(projectDirectory);
 	}
 
 	private void updatePomCache() {

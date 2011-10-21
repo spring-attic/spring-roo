@@ -11,6 +11,12 @@ import java.util.regex.Pattern;
  * @since 1.0
  */
 public final class FileUtils {
+	
+	/**
+	 * The relative file path to the current directory. Should be valid on all
+	 * platforms that Roo supports.
+	 */
+	public static final String CURRENT_DIRECTORY = ".";
 
 	// Doesn't check for backslash after the colon, since Java has no issues with paths like c:/Windows
 	private static final Pattern WINDOWS_DRIVE_PATH= Pattern.compile("^[A-Za-z]:.*");
