@@ -277,4 +277,24 @@ public class StringUtilsTest {
 	public void testDoubletonCollectionToDelimitedString() {
 		assertEquals("foo:bar", StringUtils.collectionToDelimitedString(Arrays.asList("foo", "bar"), ":"));
 	}
+	
+	@Test
+	public void testNullIsBlank() {
+		assertTrue(StringUtils.isBlank(null));
+	}
+	
+	@Test
+	public void testEmptyStringIsBlank() {
+		assertTrue(StringUtils.isBlank(""));
+	}
+	
+	@Test
+	public void testWhitespaceIsBlank() {
+		assertTrue(StringUtils.isBlank("\n\r\t "));
+	}
+	
+	@Test
+	public void testNonBlankStringIsNotBlank() {
+		assertFalse(StringUtils.isBlank("x"));
+	}
 }

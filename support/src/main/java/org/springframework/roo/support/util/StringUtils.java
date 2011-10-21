@@ -1315,6 +1315,18 @@ public final class StringUtils {
 		}
 		return string1.equals(string2);
 	}
+	
+	/**
+	 * Indicates whether the given text is blank. More fluent than calling
+	 * <code>!StringUtils.hasText(blah)</code>.
+	 * 
+	 * @param text the text to check (can be blank)
+	 * @return the opposite of {@link #hasText(String)}
+	 * @since 1.2.0
+	 */
+	public static boolean isBlank(final String text) {
+		return !hasText(text);
+	}
 
 	/**
 	 * Constructor is private to prevent instantiation
