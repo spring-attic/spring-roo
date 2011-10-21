@@ -220,7 +220,7 @@ public class PomManagementServiceImpl implements PomManagementService {
 		while (new File(relativeTo).isFile()) {
 			relativeTo = relativeTo.substring(0, relativeTo.lastIndexOf(File.separator));
 		}
-		final String[] relativePathSegments = relativePath.split(File.separator);
+		final String[] relativePathSegments = relativePath.split(FileUtils.getFileSeparatorAsRegex());
 
 		int backCount = 0;
 		for (final String relativePathSegment : relativePathSegments) {

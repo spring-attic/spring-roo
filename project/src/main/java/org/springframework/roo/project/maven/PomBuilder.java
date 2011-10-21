@@ -13,6 +13,7 @@ import org.springframework.roo.project.Property;
 import org.springframework.roo.project.Repository;
 import org.springframework.roo.project.Resource;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.FileUtils;
 import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Element;
@@ -222,7 +223,7 @@ public class PomBuilder implements Builder<Pom> {
 		while (new File(relativeTo).isFile()) {
 			relativeTo = relativeTo.substring(0, relativeTo.lastIndexOf(File.separator));
 		}
-		String[] relativePathSegments = relativePath.split(File.separator);
+		String[] relativePathSegments = relativePath.split(FileUtils.getFileSeparatorAsRegex());
 
 		int backCount = 0;
 		for (String relativePathSegment : relativePathSegments) {

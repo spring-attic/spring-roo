@@ -12,6 +12,10 @@ import java.util.regex.Pattern;
  */
 public final class FileUtils {
 	
+	// Constants
+	private static final String BACKSLASH = "\\";
+	private static final String ESCAPED_BACKSLASH = "\\\\";
+
 	/**
 	 * The relative file path to the current directory. Should be valid on all
 	 * platforms that Roo supports.
@@ -19,7 +23,7 @@ public final class FileUtils {
 	public static final String CURRENT_DIRECTORY = ".";
 
 	// Doesn't check for backslash after the colon, since Java has no issues with paths like c:/Windows
-	private static final Pattern WINDOWS_DRIVE_PATH= Pattern.compile("^[A-Za-z]:.*");
+	private static final Pattern WINDOWS_DRIVE_PATH = Pattern.compile("^[A-Za-z]:.*");
 
 	/**
 	 * Deletes the specified {@link File}.
@@ -197,6 +201,21 @@ public final class FileUtils {
 	public static String getSystemDependentPath(final String... pathElements) {
 		Assert.notEmpty(pathElements);
 		return StringUtils.arrayToDelimitedString(pathElements, File.separator);
+	}
+	
+	/**
+	 * Returns the platform-specific file separator as a regular expression.
+	 * 
+	 * @return a non-blank regex
+	 * @since 1.2.0
+	 */
+	public static String getFileSeparatorAsRegex() {
+		final String fileSeparator = File.separator;
+		if (fileSeparator.contains(BACKSLASH)) {
+			// Escape the backslashes
+			return fileSeparator.replace(BACKSLASH, ESCAPED_BACKSLASH);
+		}
+		return fileSeparator;
 	}
 	
 	/**
