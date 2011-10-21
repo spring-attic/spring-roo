@@ -90,11 +90,17 @@ public class JLineShellComponent extends JLineShell {
 		}
 		// Parse the returned JSON. This is a once off operation so we can used JSONValue.parse without penalty
 		JSONArray object = (JSONArray) JSONValue.parse(string);
+		if (object == null) {
+			return null;
+		}
 		int index = 0;
 		if (object.size() > 4) {
 			index = new Random().nextInt(5);
 		}
 		JSONObject jsonObject = (JSONObject) object.get(index);
+		if (jsonObject == null) {
+			return null;
+		}
 		String screenName = (String) ((JSONObject) jsonObject.get("user")).get("screen_name");
 		String tweet = (String) jsonObject.get("text");
 		// We only want one line
