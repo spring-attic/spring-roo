@@ -32,7 +32,7 @@ public class MavenPathResolvingStrategy implements PathResolvingStrategy {
 		rootPath = FileDetails.getCanonicalPath(projectDirectory);
 	}
 
-	public String getFriendlyName(String identifier) {
+	public String getFriendlyName(final String identifier) {
 		Assert.notNull(identifier, "Identifier required");
 		ContextualPath p = getPath(identifier);
 
@@ -42,28 +42,28 @@ public class MavenPathResolvingStrategy implements PathResolvingStrategy {
 		return p.getName() + getRelativeSegment(identifier);
 	}
 
-	public String getCanonicalPath(ContextualPath path, JavaType javaType) {
+	public String getCanonicalPath(final ContextualPath path, final JavaType javaType) {
 		String relativePath = javaType.getFullyQualifiedTypeName().replace('.', File.separatorChar) + ".java";
 		return getIdentifier(path, relativePath);
 	}
 
-	public String getFocusedIdentifier(Path path, String relativePath) {
+	public String getFocusedIdentifier(final Path path, final String relativePath) {
 		return getIdentifier(ContextualPath.getInstance(path, pomManagementService.getFocusedModuleName()), relativePath);
 	}
 
-	public String getFocusedRoot(Path path) {
+	public String getFocusedRoot(final Path path) {
 		return pomManagementService.getFocusedModule().getPathLocation(path);
 	}
 
-	public ContextualPath getFocusedPath(Path path) {
+	public ContextualPath getFocusedPath(final Path path) {
 		return pomManagementService.getFocusedModule().getPathInformation(path).getContextualPath();
 	}
 
-	public String getFocusedCanonicalPath(Path path, JavaType javaType) {
+	public String getFocusedCanonicalPath(final Path path, final JavaType javaType) {
 		return getCanonicalPath(path.contextualize(pomManagementService.getFocusedModuleName()), javaType);
 	}
 
-	public String getRoot(ContextualPath path) {
+	public String getRoot(final ContextualPath path) {
 		Assert.notNull(path, "Path required");
 		PathInformation pathInfo = pomManagementService.getFocusedModule().getPathInformation(path);
 		Assert.notNull(pathInfo, "Unable to determine information for path '" + path + "'");
@@ -77,7 +77,7 @@ public class MavenPathResolvingStrategy implements PathResolvingStrategy {
 	 * @param requireSource true if the path is source, false if the path is NOT source, or null if source is ignored
 	 * @return a list of the matching paths (never null)
 	 */
-	private List<ContextualPath> getPaths(Boolean requireSource) {
+	private List<ContextualPath> getPaths(final Boolean requireSource) {
 		List<ContextualPath> result = new ArrayList<ContextualPath>();
 		for(Pom pom : pomManagementService.getPomMap().values()) {
 			for (PathInformation pi : pom.getPathInformation()) {
@@ -112,7 +112,7 @@ public class MavenPathResolvingStrategy implements PathResolvingStrategy {
 	 * @param identifier to locate the parent of (required)
 	 * @return the first matching parent, or null if not found
 	 */
-	private PathInformation getApplicablePathInformation(String identifier) {
+	private PathInformation getApplicablePathInformation(final String identifier) {
 		Assert.notNull(identifier, "Identifier required");
 		PathInformation pathInformation = null;
 		int longest = 0;
@@ -133,14 +133,14 @@ public class MavenPathResolvingStrategy implements PathResolvingStrategy {
 		return pathInformation;
 	}
 
-	private String removeTrailingSeparator(String pomPath) {
+	private String removeTrailingSeparator(final String pomPath) {
 		if (pomPath.endsWith(File.separator)) {
 			return pomPath.substring(0, pomPath.length() - 1);
 		}
 		return pomPath + File.separator;
 	}
 
-	public ContextualPath getPath(String identifier) {
+	public ContextualPath getPath(final String identifier) {
 		PathInformation parent = getApplicablePathInformation(identifier);
 		if (parent == null) {
 			return null;
@@ -148,7 +148,7 @@ public class MavenPathResolvingStrategy implements PathResolvingStrategy {
 		return parent.getContextualPath();
 	}
 
-	public String getRelativeSegment(String identifier) {
+	public String getRelativeSegment(final String identifier) {
 		PathInformation parent = getApplicablePathInformation(identifier);
 		if (parent == null) {
 			return null;
@@ -161,7 +161,7 @@ public class MavenPathResolvingStrategy implements PathResolvingStrategy {
 		return !pomManagementService.getPomMap().isEmpty();
 	}
 
-	public PathInformation getPathInformation(ContextualPath contextualPath) {
+	public PathInformation getPathInformation(final ContextualPath contextualPath) {
 		Pom module = pomManagementService.getPomFromModuleName(contextualPath.getModule());
 		StringBuilder sb = new StringBuilder();
 		Path path = contextualPath.getPath();
@@ -204,7 +204,7 @@ public class MavenPathResolvingStrategy implements PathResolvingStrategy {
 		return new PathInformation(contextualPath, true, new File(sb.toString()));
 	}
 
-	public String getIdentifier(ContextualPath contextualPath, String relativePath) {
+	public String getIdentifier(final ContextualPath contextualPath, final String relativePath) {
 		Assert.notNull(contextualPath, "Path required");
 		Assert.notNull(relativePath, "Relative path cannot be null, although it can be empty");
 

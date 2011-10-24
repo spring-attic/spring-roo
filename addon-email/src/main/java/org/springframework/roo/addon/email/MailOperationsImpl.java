@@ -343,7 +343,7 @@ public class MailOperationsImpl implements MailOperations {
 		return methodBuilder.build();
 	}
 
-	private void updateConfiguration(String moduleName) {
+	private void updateConfiguration(final String moduleName) {
 		final Element configuration = XmlUtils.getConfiguration(getClass());
 
 		final List<Dependency> dependencies = new ArrayList<Dependency>();

@@ -236,7 +236,7 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 		return extendsTypes;
 	}
 
-	private Set<String> getGwtModuleXml(String moduleName) {
+	private Set<String> getGwtModuleXml(final String moduleName) {
 
 		String gwtModuleXml = projectOperations.getPathResolver().getFocusedRoot(Path.SRC_MAIN_JAVA) + projectOperations.getTopLevelPackage(moduleName).getFullyQualifiedPackageName().replace('.', File.separatorChar) + File.separator + "*.gwt.xml";
 		Set<String> paths = new LinkedHashSet<String>();
@@ -263,7 +263,7 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 		gwtFileManager.write(typesToBeWritten, type.isOverwriteConcrete());
 	}
 
-	public Set<String> getSourcePaths(String moduleName) {
+	public Set<String> getSourcePaths(final String moduleName) {
 		Set<String> sourcePaths = new HashSet<String>();
 		Set<String> gwtModuleXml = getGwtModuleXml(moduleName);
 		Assert.isTrue(!gwtModuleXml.isEmpty(), "GWT module XML file(s) not found");
@@ -325,7 +325,7 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 		return proxyMethods;
 	}
 
-	public List<MethodMetadata> getRequestMethods(ClassOrInterfaceTypeDetails governorTypeDetails) {
+	public List<MethodMetadata> getRequestMethods(final ClassOrInterfaceTypeDetails governorTypeDetails) {
 		List<MethodMetadata> requestMethods = new ArrayList<MethodMetadata>();
 		MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(GwtTypeServiceImpl.class.getName(), governorTypeDetails);
 		setRequestMethod(requestMethods, governorTypeDetails, memberDetails, CustomDataKeys.PERSIST_METHOD);
@@ -337,7 +337,7 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 		return requestMethods;
 	}
 
-	private void setRequestMethod(List<MethodMetadata> requestMethods, ClassOrInterfaceTypeDetails governorTypeDetails, MemberDetails memberDetails, Object tagKey) {
+	private void setRequestMethod(final List<MethodMetadata> requestMethods, final ClassOrInterfaceTypeDetails governorTypeDetails, final MemberDetails memberDetails, final Object tagKey) {
 		MethodMetadata method = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, tagKey);
 		if (method == null) {
 			return;

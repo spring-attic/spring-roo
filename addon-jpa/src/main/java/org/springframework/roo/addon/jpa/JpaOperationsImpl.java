@@ -101,7 +101,7 @@ public class JpaOperationsImpl implements JpaOperations {
 		return pathResolver.getFocusedIdentifier(Path.SPRING_CONFIG_ROOT, "database.properties");
 	}
 
-	public void configureJpa(final OrmProvider ormProvider, final JdbcDatabase jdbcDatabase, final String jndi, final String applicationId, final String hostName, final String databaseName, final String userName, final String password, final String transactionManager, final String persistenceUnit, String moduleName) {
+	public void configureJpa(final OrmProvider ormProvider, final JdbcDatabase jdbcDatabase, final String jndi, final String applicationId, final String hostName, final String databaseName, final String userName, final String password, final String transactionManager, final String persistenceUnit, final String moduleName) {
 		Assert.notNull(ormProvider, "ORM provider required");
 		Assert.notNull(jdbcDatabase, "JDBC database required");
 
@@ -255,7 +255,7 @@ public class JpaOperationsImpl implements JpaOperations {
 		fileManager.createOrUpdateTextFileIfRequired(contextPath, XmlUtils.nodeToString(appCtx), false);
 	}
 
-	private void updatePersistenceXml(final OrmProvider ormProvider, final JdbcDatabase jdbcDatabase, final String hostName, final String databaseName, String userName, final String password, final String persistenceUnit, String moduleName) {
+	private void updatePersistenceXml(final OrmProvider ormProvider, final JdbcDatabase jdbcDatabase, final String hostName, final String databaseName, String userName, final String password, final String persistenceUnit, final String moduleName) {
 		final String persistencePath = getPersistencePath();
 		final InputStream inputStream;
 		if (fileManager.exists(persistencePath)) {
@@ -401,7 +401,7 @@ public class JpaOperationsImpl implements JpaOperations {
 		}
 	}
 
-	private String getConnectionString(final JdbcDatabase jdbcDatabase, String hostName, final String databaseName, String moduleName) {
+	private String getConnectionString(final JdbcDatabase jdbcDatabase, String hostName, final String databaseName, final String moduleName) {
 		String connectionString = jdbcDatabase.getConnectionString();
 		if (connectionString.contains("TO_BE_CHANGED_BY_ADDON")) {
 			connectionString = connectionString.replace("TO_BE_CHANGED_BY_ADDON", (StringUtils.hasText(databaseName) ? databaseName : projectOperations.getProjectName(moduleName)));
@@ -418,7 +418,7 @@ public class JpaOperationsImpl implements JpaOperations {
 		return connectionString.replace("HOST_NAME", hostName);
 	}
 
-	private void manageGaeXml(final OrmProvider ormProvider, final JdbcDatabase jdbcDatabase, final String applicationId, String moduleName) {
+	private void manageGaeXml(final OrmProvider ormProvider, final JdbcDatabase jdbcDatabase, final String applicationId, final String moduleName) {
 		final String appenginePath = pathResolver.getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/appengine-web.xml");
 		final boolean appenginePathExists = fileManager.exists(appenginePath);
 
@@ -463,7 +463,7 @@ public class JpaOperationsImpl implements JpaOperations {
 		}
 	}
 
-	private void updateDatabaseProperties(final OrmProvider ormProvider, final JdbcDatabase jdbcDatabase, final String hostName, final String databaseName, String userName, final String password, String moduleName) {
+	private void updateDatabaseProperties(final OrmProvider ormProvider, final JdbcDatabase jdbcDatabase, final String hostName, final String databaseName, String userName, final String password, final String moduleName) {
 		final String databasePath = getDatabasePropertiesPath();
 		final boolean databaseExists = fileManager.exists(databasePath);
 
@@ -530,7 +530,7 @@ public class JpaOperationsImpl implements JpaOperations {
 		}
 	}
 
-	private void updateDbdcConfigProperties(final OrmProvider ormProvider, final JdbcDatabase jdbcDatabase, final String hostName, final String userName, final String password, final String persistenceUnit, String moduleName) {
+	private void updateDbdcConfigProperties(final OrmProvider ormProvider, final JdbcDatabase jdbcDatabase, final String hostName, final String userName, final String password, final String persistenceUnit, final String moduleName) {
 		final String configPath = pathResolver.getFocusedIdentifier(Path.SRC_MAIN_RESOURCES, persistenceUnit + ".properties");
 		final boolean configExists = fileManager.exists(configPath);
 
@@ -610,7 +610,7 @@ public class JpaOperationsImpl implements JpaOperations {
 		}
 	}
 
-	private void updatePomProperties(final Element configuration, final OrmProvider ormProvider, final JdbcDatabase jdbcDatabase, String moduleName) {
+	private void updatePomProperties(final Element configuration, final OrmProvider ormProvider, final JdbcDatabase jdbcDatabase, final String moduleName) {
 		final List<Element> databaseProperties = XmlUtils.findElements(getDbXPath(jdbcDatabase) + "/properties/*", configuration);
 		for (final Element property : databaseProperties) {
 			projectOperations.addProperty(moduleName, new Property(property));
@@ -632,7 +632,7 @@ public class JpaOperationsImpl implements JpaOperations {
 	 * @param databaseXPath
 	 * @param providersXPath
 	 */
-	private void updateDependencies(final Element configuration, final OrmProvider ormProvider, final JdbcDatabase jdbcDatabase, final String databaseXPath, final String providersXPath, String moduleName) {
+	private void updateDependencies(final Element configuration, final OrmProvider ormProvider, final JdbcDatabase jdbcDatabase, final String databaseXPath, final String providersXPath, final String moduleName) {
 		final List<Dependency> requiredDependencies = new ArrayList<Dependency>();
 
 		final List<Element> databaseDependencies = XmlUtils.findElements(getDbXPath(jdbcDatabase) + "/dependencies/dependency", configuration);
@@ -668,11 +668,11 @@ public class JpaOperationsImpl implements JpaOperations {
 		projectOperations.removeDependencies(moduleName, redundantDependencies);
 	}
 
-	private String getProjectName(String moduleName) {
+	private String getProjectName(final String moduleName) {
 		return projectOperations.getProjectName(moduleName);
 	}
 
-	private void updateRepositories(final Element configuration, final OrmProvider ormProvider, final JdbcDatabase jdbcDatabase, String moduleName) {
+	private void updateRepositories(final Element configuration, final OrmProvider ormProvider, final JdbcDatabase jdbcDatabase, final String moduleName) {
 		final List<Repository> repositories = new ArrayList<Repository>();
 
 		final List<Element> databaseRepositories = XmlUtils.findElements(getDbXPath(jdbcDatabase) + "/repositories/repository", configuration);
@@ -881,7 +881,7 @@ public class JpaOperationsImpl implements JpaOperations {
 		return unwantedOrmProviders;
 	}
 
-	private List<Dependency> getDependencies(final String xPathExpression, final Element configuration, String moduleName) {
+	private List<Dependency> getDependencies(final String xPathExpression, final Element configuration, final String moduleName) {
 		final List<Dependency> dependencies = new ArrayList<Dependency>();
 		for (final Element dependencyElement : XmlUtils.findElements(xPathExpression + "/dependencies/dependency", configuration)) {
 			final Dependency dependency = new Dependency(dependencyElement);

@@ -30,7 +30,7 @@ public enum Path {
 		return ContextualPath.getInstance(this);
 	}
 
-	public ContextualPath contextualize(String context) {
+	public ContextualPath contextualize(final String context) {
 		return ContextualPath.getInstance(this, context);
 	}
 }

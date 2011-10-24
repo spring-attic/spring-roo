@@ -47,7 +47,7 @@ public class SolrJspMetadata extends AbstractMetadataItem {
 		return PROVIDES_TYPE;
 	}
 	
-	public static String createIdentifier(JavaType javaType, ContextualPath path) {
+	public static String createIdentifier(final JavaType javaType, final ContextualPath path) {
 		return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
 	}
 
@@ -55,7 +55,7 @@ public class SolrJspMetadata extends AbstractMetadataItem {
 		return PhysicalTypeIdentifierNamingUtils.getJavaType(PROVIDES_TYPE_STRING, metadataIdentificationString);
 	}
 
-	public static ContextualPath getPath(String metadataIdentificationString) {
+	public static ContextualPath getPath(final String metadataIdentificationString) {
 		return PhysicalTypeIdentifierNamingUtils.getPath(PROVIDES_TYPE_STRING, metadataIdentificationString);
 	}
 

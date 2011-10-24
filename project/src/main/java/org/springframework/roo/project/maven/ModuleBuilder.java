@@ -7,7 +7,7 @@ public class ModuleBuilder implements Builder<Module>{
 	private final String name;
 	private final String pomPath;
 
-	public ModuleBuilder(String name, String pomPath) {
+	public ModuleBuilder(final String name, final String pomPath) {
 		this.name = name;
 		this.pomPath = pomPath;
 	}

@@ -29,7 +29,7 @@ public class JarPackaging extends CorePackagingProvider {
 	private static final Dependency JAXB_API = new Dependency("javax.xml.bind", "jaxb-api", "2.1");
 	private static final Dependency JSR250_API = new Dependency("javax.annotation", "jsr250-api", "1.0");
 
-	protected void createPom(final JavaPackage topLevelPackage, final String nullableProjectName, final String javaVersion, final GAV parentPom, String moduleName) {
+	protected void createPom(final JavaPackage topLevelPackage, final String nullableProjectName, final String javaVersion, final GAV parentPom, final String moduleName) {
 		super.createPom(topLevelPackage, nullableProjectName, javaVersion, parentPom);
 
 		// TODO might be able to move this block to "createOtherArtifacts" and delete this overriding method

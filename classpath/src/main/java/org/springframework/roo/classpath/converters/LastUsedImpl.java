@@ -55,7 +55,7 @@ public class LastUsedImpl implements LastUsed {
 		setPromptPath(javaType.getFullyQualifiedTypeName());
 	}
 
-	public void setType(JavaType javaType, Pom module) {
+	public void setType(final JavaType javaType, final Pom module) {
 		Assert.notNull(javaType, "JavaType required");
 		if (javaType.getPackage().getFullyQualifiedPackageName().startsWith("java.")) {
 			return;
@@ -66,7 +66,7 @@ public class LastUsedImpl implements LastUsed {
 		setPromptPath(javaType.getFullyQualifiedTypeName());
 	}
 
-	private void setPromptPath(String fullyQualifiedName) {
+	private void setPromptPath(final String fullyQualifiedName) {
 		if (topLevelPackage == null) {
 			return;
 		}

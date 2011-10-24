@@ -333,7 +333,7 @@ public class JspMetadataListener implements MetadataProvider, MetadataNotificati
 		return JspMetadata.getMetadataIdentiferType();
 	}
 
-	private void installImage(ContextualPath path, String imagePath) {
+	private void installImage(final ContextualPath path, final String imagePath) {
 		PathResolver pathResolver = projectOperations.getPathResolver();
 		String imageFile = pathResolver.getIdentifier(path, imagePath);
 		if (!fileManager.exists(imageFile)) {

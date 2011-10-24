@@ -60,7 +60,7 @@ public class Pom {
 	/**
 	 * Constructor
 	 */
-	public Pom(String groupId, String artifactId, String version, String packaging, Set<Dependency> dependencies, Parent parent, Set<Module> modules, Set<Property> pomProperties, String name, Set<Repository> repositories, Set<Repository> pluginRepositories, String sourceDirectory, String testSourceDirectory, Set<Filter> filters, Set<Plugin> buildPlugins, Set<Resource> resources, String path, String moduleName) {
+	public Pom(final String groupId, final String artifactId, final String version, final String packaging, final Set<Dependency> dependencies, final Parent parent, final Set<Module> modules, final Set<Property> pomProperties, final String name, final Set<Repository> repositories, final Set<Repository> pluginRepositories, final String sourceDirectory, final String testSourceDirectory, final Set<Filter> filters, final Set<Plugin> buildPlugins, final Set<Resource> resources, final String path, final String moduleName) {
 		this.groupId = groupId;
 		this.artifactId = artifactId;
 		this.version = version;
@@ -89,23 +89,23 @@ public class Pom {
 		cachePathInformation(Path.ROOT);
 	}
 
-	public String getPathLocation(Path path) {
+	public String getPathLocation(final Path path) {
 		return FileUtils.normalise(getPathInformation(path).getLocationPath());
 	}
 
-	public PathInformation getPathInformation(Path path) {
+	public PathInformation getPathInformation(final Path path) {
 		return pathCache.get(path);
 	}
 
-	public PathInformation getPathInformation(ContextualPath path) {
+	public PathInformation getPathInformation(final ContextualPath path) {
 		return pathCache.get(path.getPath());
 	}
 
-	public String getRoot(Path path) {
+	public String getRoot(final Path path) {
 		return getPathLocation(path);
 	}
 
-	private void cachePathInformation(Path path) {
+	private void cachePathInformation(final Path path) {
 		String moduleRoot = moduleRoot(getPath());
 		StringBuilder sb = new StringBuilder();
 		sb.append(moduleRoot).append(File.separator);
@@ -525,7 +525,7 @@ public class Pom {
 		return moduleName;
 	}
 
-	private String moduleRoot(String pomPath) {
+	private String moduleRoot(final String pomPath) {
 		return FileUtils.getFirstDirectory(pomPath);
 	}
 }

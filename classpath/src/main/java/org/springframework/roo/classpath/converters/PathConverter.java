@@ -20,7 +20,7 @@ import org.springframework.roo.shell.MethodTarget;
 public class PathConverter implements Converter<Path> {
 
 	// TODO: Allow context to limit to source paths only, limit to resource paths only 
-	public Path convertFromText(String value, Class<?> requiredType, String optionContext) {
+	public Path convertFromText(final String value, final Class<?> requiredType, final String optionContext) {
 		if (value == null || "".equals(value)) {
 			return null;
 		}
@@ -32,7 +32,7 @@ public class PathConverter implements Converter<Path> {
 		return Path.class.isAssignableFrom(requiredType);
 	}
 
-	public boolean getAllPossibleValues(List<Completion> completions, Class<?> requiredType, String existingData, String optionContext, MethodTarget target) {
+	public boolean getAllPossibleValues(final List<Completion> completions, final Class<?> requiredType, final String existingData, final String optionContext, final MethodTarget target) {
 		for (Path candidate : Path.values()) {
 			if ("".equals(existingData) || candidate.name().startsWith(existingData)) {
 				completions.add(new Completion(candidate.name()));

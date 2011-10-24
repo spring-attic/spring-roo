@@ -336,8 +336,8 @@ public class TypeLocationServiceImpl implements TypeLocationService {
 		}
 	}
 
-	private Set<String> discoveredTypes = new HashSet<String>();
-	private Set<String> dirtyFiles = new HashSet<String>();
+	private final Set<String> discoveredTypes = new HashSet<String>();
+	private final Set<String> dirtyFiles = new HashSet<String>();
 
 	private Set<String> discoverTypes() {
 		// Retrieve a list of paths that have been discovered or modified since the last invocation by this class
@@ -404,7 +404,7 @@ public class TypeLocationServiceImpl implements TypeLocationService {
 		return mid;
 	}
 
-	public String getPhysicalTypeIdentifier(JavaType type, ContextualPath path) {
+	public String getPhysicalTypeIdentifier(final JavaType type, final ContextualPath path) {
 		Assert.notNull(type, "Java type required");
 		Assert.notNull(type, "Contextual path required");
 
@@ -435,13 +435,13 @@ public class TypeLocationServiceImpl implements TypeLocationService {
 		return mid;
 	}
 
-	public Set<String> getTypesForModule(String modulePath) {
+	public Set<String> getTypesForModule(final String modulePath) {
 		Assert.notNull(modulePath, "Module path required");
 
 		return typeCache.getTypeNamesForModuleFilePath(modulePath);
 	}
 
-	public boolean hasTypeChanged(String requestingClass, JavaType javaType) {
+	public boolean hasTypeChanged(final String requestingClass, final JavaType javaType) {
 		Assert.notNull(requestingClass, "Requesting class required");
 		Assert.notNull(javaType, "Java type required");
 
@@ -474,7 +474,7 @@ public class TypeLocationServiceImpl implements TypeLocationService {
 		}
 	}
 
-	public List<String> getPotentialTopLevelPackagesForModule(Pom module) {
+	public List<String> getPotentialTopLevelPackagesForModule(final Pom module) {
 		Assert.notNull(module, "Module required");
 
 		Map<String, Set<String>> packageMap =  new HashMap<String, Set<String>>();
@@ -518,7 +518,7 @@ public class TypeLocationServiceImpl implements TypeLocationService {
 		return topLevelPackages;
 	}
 
-	public String getTopLevelPackageForModule(Pom module) {
+	public String getTopLevelPackageForModule(final Pom module) {
 		Assert.notNull(module, "Module required");
 
 		Map<String, Set<String>> packageMap =  new HashMap<String, Set<String>>();
@@ -556,7 +556,7 @@ public class TypeLocationServiceImpl implements TypeLocationService {
 
 		List<String> packageList = new ArrayList<String>(packageMap.keySet());
 		Collections.sort(packageList, new Comparator<String>() {
-			public int compare(String s1, String s2) {
+			public int compare(final String s1, final String s2) {
 				return Integer.valueOf(s1.length()).compareTo(s2.length());
 			}
 		});
@@ -578,19 +578,19 @@ public class TypeLocationServiceImpl implements TypeLocationService {
 		return topLevelPackage;
 	}
 
-	public ContextualPath getTypePath(JavaType javaType) {
+	public ContextualPath getTypePath(final JavaType javaType) {
 		Assert.notNull(javaType, "Java type required");
 		return PhysicalTypeIdentifier.getPath(getPhysicalTypeIdentifier(javaType));
 	}
 
-	public String getPhysicalTypeCanonicalPath(JavaType javaType, ContextualPath path) {
+	public String getPhysicalTypeCanonicalPath(final JavaType javaType, final ContextualPath path) {
 		Assert.notNull(javaType, "Java type required");
 		Assert.notNull(path, "Path required");
 		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(javaType, path);
 		return getPhysicalTypeCanonicalPath(physicalTypeIdentifier);
 	}
 
-	public String getPhysicalTypeCanonicalPath(String physicalTypeIdentifier) {
+	public String getPhysicalTypeCanonicalPath(final String physicalTypeIdentifier) {
 		Assert.isTrue(PhysicalTypeIdentifier.isValid(physicalTypeIdentifier), "Physical type identifier is invalid");
 		ContextualPath path = PhysicalTypeIdentifier.getPath(physicalTypeIdentifier);
 		JavaType javaType = PhysicalTypeIdentifier.getJavaType(physicalTypeIdentifier);

@@ -79,12 +79,12 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 		return decorate(text, FG_CYAN);
 	}
 
-	public final boolean isProjectAvailable(String moduleName) {
+	public final boolean isProjectAvailable(final String moduleName) {
 		Pom pom = pomManagementService.getPomFromModuleName(moduleName);
 		return pom != null;
 	}
 	
-	public final ProjectMetadata getProjectMetadata(String moduleName) {
+	public final ProjectMetadata getProjectMetadata(final String moduleName) {
 		return (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier(moduleName));
 	}
 
@@ -96,14 +96,14 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 		return pomManagementService.getFocusedModuleName();
 	}
 
-	public void setModule(Pom module) {
+	public void setModule(final Pom module) {
 		// Update window title with project name
 		shell.flash(Level.FINE, "Spring Roo: " + getTopLevelPackage(module.getModuleName()), Shell.WINDOW_TITLE_SLOT);
 		shell.setPromptPath(module.getModuleName());
 		pomManagementService.setFocusedModule(module);
 	}
 
-	public final Pom getPomFromModuleName(String moduleName) {
+	public final Pom getPomFromModuleName(final String moduleName) {
 		return pomManagementService.getPomFromModuleName(moduleName);
 	}
 
@@ -115,7 +115,7 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 		return pomManagementService;
 	}
 
-	public void addModuleDependency(String moduleName) {
+	public void addModuleDependency(final String moduleName) {
 		if (moduleName != null) {
 			Pom focusedModule = getFocusedModule();
 			if (StringUtils.hasText(moduleName) && StringUtils.hasText(focusedModule.getModuleName()) && !moduleName.equals(getFocusedModule().getModuleName())) {
@@ -133,7 +133,7 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 		}
 	}
 
-	private void detectCircularDependency(Pom module1, Pom module2) {
+	private void detectCircularDependency(final Pom module1, final Pom module2) {
 		if (module1.isDependencyRegistered(new Dependency(module2.getGroupId(), module2.getArtifactId(), module2.getVersion()))) {
 			if (module2.isDependencyRegistered(new Dependency(module1.getGroupId(), module1.getArtifactId(), module1.getVersion()))) {
 				throw new IllegalStateException("Circular dependency detected, '" + module1.getModuleName() + "' depends on '" + module2.getModuleName() + "' and vice versa");
@@ -141,7 +141,7 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 		}
 	}
 
-	public JavaPackage getTopLevelPackage(String moduleName) {
+	public JavaPackage getTopLevelPackage(final String moduleName) {
 		Pom pom = getPomFromModuleName(moduleName);
 		if (pom != null) {
 			return new JavaPackage(pom.getGroupId());
@@ -154,7 +154,7 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 	 *
 	 * @return true if the gwt-maven-plugin is present in the pom.xml, otherwise false
 	 */
-	public boolean isGwtEnabled(String moduleName) {
+	public boolean isGwtEnabled(final String moduleName) {
 		Pom pom = getPomFromModuleName(moduleName);
 		return pom != null && pom.isGwtEnabled();
 	}
@@ -165,7 +165,7 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 	 *
 	 * @return true if the maven-gae-plugin is present in the pom.xml, otherwise false
 	 */
-	public boolean isGaeEnabled(String moduleName) {
+	public boolean isGaeEnabled(final String moduleName) {
 		Pom pom = getPomFromModuleName(moduleName);
 		return pom != null && pom.isGaeEnabled();
 	}
@@ -175,7 +175,7 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 	 *
 	 * @return true if the maven-datanucleus-plugin is present in the pom.xml, otherwise false
 	 */
-	public boolean isDataNucleusEnabled(String moduleName) {
+	public boolean isDataNucleusEnabled(final String moduleName) {
 		Pom pom = getPomFromModuleName(moduleName);
 		return pom != null && pom.isDataNucleusEnabled();
 	}
@@ -185,19 +185,19 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 	 *
 	 * @return true if the com.force.sdk is present in the pom.xml, otherwise false
 	 */
-	public boolean isDatabaseDotComEnabled(String moduleName) {
+	public boolean isDatabaseDotComEnabled(final String moduleName) {
 		Pom pom = getPomFromModuleName(moduleName);
 		return pom != null && pom.isDatabaseDotComEnabled();
 	}
 
-	public String getProjectName(String moduleName) {
+	public String getProjectName(final String moduleName) {
 		Pom pom = getPomFromModuleName(moduleName);
 		Assert.notNull(pom, "A pom with module name '" + moduleName + "' could not be found");
 		return pom.getName();
 
 	}
 
-	public final void addDependency(final String moduleName, String groupId, String artifactId, String version, DependencyScope scope, String classifier) {
+	public final void addDependency(final String moduleName, final String groupId, final String artifactId, final String version, DependencyScope scope, final String classifier) {
 		Assert.isTrue(isProjectAvailable(moduleName), "Dependency modification prohibited at this time");
 		Assert.notNull(groupId, "Group ID required");
 		Assert.notNull(artifactId, "Artifact ID required");
@@ -209,15 +209,15 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 		addDependency(moduleName, dependency);
 	}
 
-	public final void addDependency(final String moduleName, String groupId, String artifactId, String version, DependencyScope scope) {
+	public final void addDependency(final String moduleName, final String groupId, final String artifactId, final String version, final DependencyScope scope) {
 		addDependency(moduleName, groupId, artifactId, version, scope, "");
 	}
 
-	public final void addDependency(final String moduleName, String groupId, String artifactId, String version) {
+	public final void addDependency(final String moduleName, final String groupId, final String artifactId, final String version) {
 		addDependency(moduleName, groupId, artifactId, version, DependencyScope.COMPILE);
 	}
 
-	public final void removeDependency(final String moduleName, String groupId, String artifactId, String version, String classifier) {
+	public final void removeDependency(final String moduleName, final String groupId, final String artifactId, final String version, final String classifier) {
 		Assert.isTrue(isProjectAvailable(moduleName), "Dependency modification prohibited at this time");
 		Assert.notNull(groupId, "Group ID required");
 		Assert.notNull(artifactId, "Artifact ID required");
@@ -226,7 +226,7 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 		removeDependency(moduleName, dependency);
 	}
 
-	public final void removeDependency(final String moduleName, String groupId, String artifactId, String version) {
+	public final void removeDependency(final String moduleName, final String groupId, final String artifactId, final String version) {
 		removeDependency(moduleName, groupId, artifactId, version, "");
 	}
 
@@ -249,7 +249,7 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 	}
 
 	@Deprecated
-	public void buildPluginUpdate(final String moduleName, Plugin plugin) {
+	public void buildPluginUpdate(final String moduleName, final Plugin plugin) {
 		updateBuildPlugin(moduleName, plugin);
 	}
 
@@ -701,7 +701,7 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 		fileManager.createOrUpdateTextFileIfRequired(pom.getPath(), XmlUtils.nodeToString(document), descriptionOfChange, false);
 	}
 
-	public void removeFilter(String moduleName, final Filter filter) {
+	public void removeFilter(final String moduleName, final Filter filter) {
 		Assert.isTrue(isProjectAvailable(moduleName), "Filter modification prohibited at this time");
 		Assert.notNull(filter, "Filter required");
 		final Pom pom = getPomFromModuleName(moduleName);

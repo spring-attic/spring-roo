@@ -31,7 +31,7 @@ public enum UploadedFileContentType {
 	
 	private String contentType;
 	
-	private UploadedFileContentType(String contentType) {
+	private UploadedFileContentType(final String contentType) {
 		this.contentType = contentType;
 	}
 
@@ -39,7 +39,7 @@ public enum UploadedFileContentType {
 		return contentType;
 	}
 	
-	public static UploadedFileContentType getFileExtension(String contentType) {
+	public static UploadedFileContentType getFileExtension(final String contentType) {
 		for (UploadedFileContentType uploadedFileContentType : UploadedFileContentType.values()) {
 			if (uploadedFileContentType.getContentType().equals(contentType)) {
 				return uploadedFileContentType;

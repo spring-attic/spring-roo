@@ -98,7 +98,7 @@ public class SolrJspMetadataListener implements MetadataProvider, MetadataNotifi
 		return new SolrJspMetadata(metadataIdentificationString, webSearchMetadata);
 	}
 	
-	public void installMvcArtifacts(WebScaffoldMetadata webScaffoldMetadata) {
+	public void installMvcArtifacts(final WebScaffoldMetadata webScaffoldMetadata) {
 		copyArtifacts("form/search.tagx", "WEB-INF/tags/form/search.tagx");
 		copyArtifacts("form/fields/search-facet.tagx", "WEB-INF/tags/form/fields/search-facet.tagx");
 		copyArtifacts("form/fields/search-field.tagx", "WEB-INF/tags/form/fields/search-field.tagx");
@@ -112,7 +112,7 @@ public class SolrJspMetadataListener implements MetadataProvider, MetadataNotifi
 		menuOperations.addMenuItem(new JavaSymbolName(formbackingObject.getSimpleTypeName()), new JavaSymbolName("solr"), new JavaSymbolName(entityMetadata.getPlural()).getReadableSymbolName(), "global.menu.find", "/" + webScaffoldMetadata.getAnnotationValues().getPath() + "?search", "s:", path);
 	}
 	
-	private Document getSearchDocument(WebScaffoldMetadata webScaffoldMetadata) {
+	private Document getSearchDocument(final WebScaffoldMetadata webScaffoldMetadata) {
 		// Next install search.jspx
 		Assert.notNull(webScaffoldMetadata, "Web scaffold metadata required");
 

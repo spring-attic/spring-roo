@@ -34,14 +34,14 @@ public class GwtProxyProperty {
 	private List<AnnotationMetadata> annotations;
 	private String getter;
 
-	public GwtProxyProperty(JavaPackage topLevelPackage, ClassOrInterfaceTypeDetails ptmd, JavaType type) {
+	public GwtProxyProperty(final JavaPackage topLevelPackage, final ClassOrInterfaceTypeDetails ptmd, final JavaType type) {
 		Assert.notNull(type, "Type required");
 		this.topLevelPackage = topLevelPackage;
 		this.ptmd = ptmd;
 		this.type = type;
 	}
 
-	public GwtProxyProperty(JavaPackage topLevelPackage, ClassOrInterfaceTypeDetails ptmd, JavaType type, String name, List<AnnotationMetadata> annotations, String getter) {
+	public GwtProxyProperty(final JavaPackage topLevelPackage, final ClassOrInterfaceTypeDetails ptmd, final JavaType type, final String name, final List<AnnotationMetadata> annotations, final String getter) {
 		this(topLevelPackage, ptmd, type);
 		this.name = name;
 		this.annotations = annotations;
@@ -248,7 +248,7 @@ public class GwtProxyProperty {
 		return getProxyRendererType(topLevelPackage, isCollectionOfProxy() ? type.getParameters().get(0) : type);
 	}
 
-	public static String getProxyRendererType(JavaPackage topLevelPackage, JavaType javaType) {
+	public static String getProxyRendererType(final JavaPackage topLevelPackage, final JavaType javaType) {
 		return GwtType.EDIT_RENDERER.getPath().packageName(topLevelPackage) + "." + javaType.getSimpleTypeName() + "Renderer";
 	}
 

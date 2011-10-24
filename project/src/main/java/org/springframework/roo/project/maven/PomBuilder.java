@@ -52,7 +52,7 @@ public class PomBuilder implements Builder<Pom> {
 	 * @param pomPath the POM's canonical file system path
 	 * @param moduleName
 	 */
-	public PomBuilder(Element root, String pomPath, String moduleName) {
+	public PomBuilder(final Element root, final String pomPath, final String moduleName) {
 		this.path = pomPath;
 
 		String groupId = XmlUtils.getTextContent("/project/groupId", root);
@@ -132,7 +132,7 @@ public class PomBuilder implements Builder<Pom> {
 		return new Pom(groupId, artifactId, version, packaging, dependencies, parentPom, builtModules, pomProperties, name, repositories, pluginRepositories, sourceDirectory, testSourceDirectory, filters, buildPlugins, resources, path, moduleName);
 	}
 
-	private ParentBuilder getParent(String pomPath, Element root) {
+	private ParentBuilder getParent(final String pomPath, final Element root) {
 		Element parentElement = XmlUtils.findFirstElement("/project/parent", root);
 
 		if (parentElement != null) {
@@ -144,7 +144,7 @@ public class PomBuilder implements Builder<Pom> {
 		return null;
 	}
 
-	private String resolveRelativePath(String relativeTo, String relativePath) {
+	private String resolveRelativePath(String relativeTo, final String relativePath) {
 		if (relativeTo.endsWith(File.separator)) {
 			relativeTo = relativeTo.substring(0, relativeTo.length() - 1);
 		}

@@ -83,7 +83,7 @@ public class GwtScaffoldMetadataProviderImpl implements GwtScaffoldMetadataProvi
 		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 	}
 
-	public MetadataItem get(String metadataIdentificationString) {
+	public MetadataItem get(final String metadataIdentificationString) {
 		// Obtain the governor's information
 		ClassOrInterfaceTypeDetails mirroredType = getGovernor(metadataIdentificationString);
 		if (mirroredType == null || Modifier.isAbstract(mirroredType.getModifier())) {
@@ -194,7 +194,7 @@ public class GwtScaffoldMetadataProviderImpl implements GwtScaffoldMetadataProvi
 		return typeLocationService.getTypeDetails(physicalTypeId);
 	}
 
-	private void buildType(GwtType type, ProjectMetadata projectMetadata) {
+	private void buildType(final GwtType type, final ProjectMetadata projectMetadata) {
 		gwtTypeService.buildType(type, gwtTemplateService.getStaticTemplateTypeDetails(type, projectMetadata), projectMetadata.getModuleName());
 	}
 

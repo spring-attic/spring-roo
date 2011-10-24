@@ -8,7 +8,7 @@ public class Parent {
 	private final String relativePath;
 	private final String pomPath;
 
-	public Parent(String groupId, String artifactId, String version, String relativePath, String pomPath) {
+	public Parent(final String groupId, final String artifactId, final String version, final String relativePath, final String pomPath) {
 		this.groupId = groupId;
 		this.artifactId = artifactId;
 		this.version = version;

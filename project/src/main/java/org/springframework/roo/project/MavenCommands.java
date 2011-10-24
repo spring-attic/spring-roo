@@ -46,9 +46,9 @@ public class MavenCommands implements CommandMarker {
 
 	@CliCommand(value = PROJECT_COMMAND, help = "Creates a new Maven project")
 	public void createProject(
-		@CliOption(key = { "", "topLevelPackage" }, mandatory = true, optionContext = "update", help = "The uppermost package name (this becomes the <groupId> in Maven and also the '~' value when using Roo's shell)") JavaPackage topLevelPackage,
-		@CliOption(key = "projectName", mandatory = false, help = "The name of the project (last segment of package name used as default)") String projectName,
-		@CliOption(key = "java", mandatory = false, help = "Forces a particular major version of Java to be used (will be auto-detected if unspecified; specify 5 or 6 or 7 only)") Integer majorJavaVersion,
+		@CliOption(key = { "", "topLevelPackage" }, mandatory = true, optionContext = "update", help = "The uppermost package name (this becomes the <groupId> in Maven and also the '~' value when using Roo's shell)") final JavaPackage topLevelPackage,
+		@CliOption(key = "projectName", mandatory = false, help = "The name of the project (last segment of package name used as default)") final String projectName,
+		@CliOption(key = "java", mandatory = false, help = "Forces a particular major version of Java to be used (will be auto-detected if unspecified; specify 5 or 6 or 7 only)") final Integer majorJavaVersion,
 		@CliOption(key = "parent", help = "The Maven coordinates of the parent POM, in the form \"groupId:artifactId:version\"") final String parent) {
 
 		mavenOperations.createProject(topLevelPackage, projectName, majorJavaVersion, parent);
@@ -67,16 +67,16 @@ public class MavenCommands implements CommandMarker {
 
 	@CliCommand(value = MODULE_FOCUS_COMMAND, help = "Changes focus to a different type")
 	public void focusModule(
-		@CliOption(key = "moduleName", mandatory = true, optionContext = "update,project", help = "The type to focus on") Pom module) {
+		@CliOption(key = "moduleName", mandatory = true, optionContext = "update,project", help = "The type to focus on") final Pom module) {
 		mavenOperations.setModule(module);
 	}
 
 	@CliCommand(value = MODULE_CREATE_COMMAND, help = "Creates a new Maven module")
 	public void createModule(
-		@CliOption(key = "moduleName", mandatory = true, help = "The name of the project (last segment of package name used as default)") String moduleName,
-		@CliOption(key = "topLevelPackage", mandatory = true, optionContext = "update", help = "The uppermost package name (this becomes the <groupId> in Maven and also the '~' value when using Roo's shell)") JavaPackage topLevelPackage,
-		@CliOption(key = "projectName", mandatory = false, help = "The name of the project (last segment of package name used as default)") String projectName,
-		@CliOption(key = "java", mandatory = false, help = "Forces a particular major version of Java to be used (will be auto-detected if unspecified; specify 5 or 6 or 7 only)") Integer majorJavaVersion,
+		@CliOption(key = "moduleName", mandatory = true, help = "The name of the project (last segment of package name used as default)") final String moduleName,
+		@CliOption(key = "topLevelPackage", mandatory = true, optionContext = "update", help = "The uppermost package name (this becomes the <groupId> in Maven and also the '~' value when using Roo's shell)") final JavaPackage topLevelPackage,
+		@CliOption(key = "projectName", mandatory = false, help = "The name of the project (last segment of package name used as default)") final String projectName,
+		@CliOption(key = "java", mandatory = false, help = "Forces a particular major version of Java to be used (will be auto-detected if unspecified; specify 5 or 6 or 7 only)") final Integer majorJavaVersion,
 		@CliOption(key = "parent", help = "The Maven coordinates of the parent POM, in the form \"groupId:artifactId:version\"") final String parent) {
 
 		mavenOperations.createModule(topLevelPackage, projectName, majorJavaVersion, parent, moduleName);

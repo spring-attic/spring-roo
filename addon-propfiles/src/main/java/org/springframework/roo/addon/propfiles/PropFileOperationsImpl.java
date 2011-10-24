@@ -50,27 +50,27 @@ public class PropFileOperationsImpl implements PropFileOperations {
 		return projectOperations.isFocusedProjectAvailable();
 	}
 	
-	public void addProperties(ContextualPath propertyFilePath, String propertyFilename, Map<String, String> properties, boolean sorted, boolean changeExisting) {
+	public void addProperties(final ContextualPath propertyFilePath, final String propertyFilename, final Map<String, String> properties, final boolean sorted, final boolean changeExisting) {
 		manageProperty(propertyFilePath, propertyFilename, properties, sorted, changeExisting);
 	}
 
-	public void addPropertyIfNotExists(ContextualPath propertyFilePath, String propertyFilename, String key, String value) {
+	public void addPropertyIfNotExists(final ContextualPath propertyFilePath, final String propertyFilename, final String key, final String value) {
 		manageProperty(propertyFilePath, propertyFilename, asMap(key, value), !SORTED, !CHANGE_EXISTING);
 	}
 
-	public void addPropertyIfNotExists(ContextualPath propertyFilePath, String propertyFilename, String key, String value, boolean sorted) {
+	public void addPropertyIfNotExists(final ContextualPath propertyFilePath, final String propertyFilename, final String key, final String value, final boolean sorted) {
 		manageProperty(propertyFilePath, propertyFilename, asMap(key, value), sorted, !CHANGE_EXISTING);
 	}
 
-	public void changeProperty(ContextualPath propertyFilePath, String propertyFilename, String key, String value) {
+	public void changeProperty(final ContextualPath propertyFilePath, final String propertyFilename, final String key, final String value) {
 		manageProperty(propertyFilePath, propertyFilename, asMap(key, value), !SORTED, CHANGE_EXISTING);
 	}
 
-	public void changeProperty(ContextualPath propertyFilePath, String propertyFilename, String key, String value, boolean sorted) {
+	public void changeProperty(final ContextualPath propertyFilePath, final String propertyFilename, final String key, final String value, final boolean sorted) {
 		manageProperty(propertyFilePath, propertyFilename, asMap(key, value), sorted, CHANGE_EXISTING);
 	}
 
-	private void manageProperty(ContextualPath propertyFilePath, String propertyFilename, Map<String, String> properties, boolean sorted, boolean changeExisting) {
+	private void manageProperty(final ContextualPath propertyFilePath, final String propertyFilename, final Map<String, String> properties, final boolean sorted, final boolean changeExisting) {
 		Assert.notNull(propertyFilePath, "Property file path required");
 		Assert.hasText(propertyFilename, "Property filename required");
 		Assert.notNull(properties, "Property map required");

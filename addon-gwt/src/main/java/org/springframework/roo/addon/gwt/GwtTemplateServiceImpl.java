@@ -409,7 +409,7 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
 		return dataDictionary;
 	}
 
-	private TemplateDataDictionary buildStandardDataDictionary(GwtType type, final ProjectMetadata projectMetadata) {
+	private TemplateDataDictionary buildStandardDataDictionary(final GwtType type, final ProjectMetadata projectMetadata) {
 
 		JavaType javaType = new JavaType(getFullyQualifiedTypeName(type, projectMetadata));
 		TemplateDataDictionary dataDictionary = TemplateDictionary.create();

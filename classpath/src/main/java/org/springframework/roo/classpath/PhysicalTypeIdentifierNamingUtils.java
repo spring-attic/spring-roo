@@ -60,21 +60,21 @@ public final class PhysicalTypeIdentifierNamingUtils {
 	 * @param metadataId the ID of the metadata instance (must identify an instance of the given metadata class)
 	 * @return a non-<code>null</code> path
 	 */
-	public static ContextualPath getPath(String providesType, String metadataIdentificationString) {
+	public static ContextualPath getPath(final String providesType, final String metadataIdentificationString) {
 		Assert.isTrue(isValid(providesType, metadataIdentificationString), "Metadata identification string '" + metadataIdentificationString + "' does not appear to be a valid physical type identifier");
 		String instance = MetadataIdentificationUtils.getMetadataInstance(metadataIdentificationString);
 		int index = instance.indexOf("?");
 		return ContextualPath.getInstance(instance.substring(0, index));
 	}
 
-	public static ContextualPath getPath(String metadataIdentificationString) {
+	public static ContextualPath getPath(final String metadataIdentificationString) {
 		Assert.isTrue(metadataIdentificationString.contains("#"), "Metadata identification string '" + metadataIdentificationString + "' does not appear to be a valid identifier");
 		String instance = MetadataIdentificationUtils.getMetadataInstance(metadataIdentificationString);
 		int index = instance.indexOf("?");
 		return ContextualPath.getInstance(instance.substring(0, index));
 	}
 
-	public static JavaType getJavaType(String metadataIdentificationString) {
+	public static JavaType getJavaType(final String metadataIdentificationString) {
 		Assert.isTrue(metadataIdentificationString.contains("#"), "Metadata identification string '" + metadataIdentificationString + "' does not appear to be a valid identifier");
 		String instance = MetadataIdentificationUtils.getMetadataInstance(metadataIdentificationString);
 		int index = instance.indexOf("?");

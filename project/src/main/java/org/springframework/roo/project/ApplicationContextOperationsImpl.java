@@ -29,7 +29,7 @@ public class ApplicationContextOperationsImpl implements ApplicationContextOpera
 	@Reference private MetadataService metadataService;
 	@Reference private PathResolver pathResolver;
 
-	public void createMiddleTierApplicationContext(JavaPackage topLevelPackage, String moduleName) {
+	public void createMiddleTierApplicationContext(final JavaPackage topLevelPackage, final String moduleName) {
 		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier(moduleName));
 		Assert.notNull(projectMetadata, "Project metadata required");
 		final Document document = XmlUtils.readXml(TemplateUtils.getTemplate(getClass(), "applicationContext-template.xml"));

@@ -16,7 +16,7 @@ import org.apache.felix.scr.annotations.Service;
 @Service
 public class PreferencesServiceImpl implements PreferencesService {
 
-	public Preferences getPreferencesFor(Class<?> owningClass) {
+	public Preferences getPreferencesFor(final Class<?> owningClass) {
 		// Create the Preferences object, suppressing "Created user preferences directory" messages if there is no Java preferences directory
 		// TODO Switch to UAA's PreferencesUtils (but must wait for UAA 1.0.3 due to bug in UAA 1.0.2 and earlier)
 		final Logger l = Logger.getLogger("java.util.prefs");

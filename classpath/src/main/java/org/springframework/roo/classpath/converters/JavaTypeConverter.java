@@ -117,7 +117,7 @@ public class JavaTypeConverter implements Converter<JavaType> {
 		return result;
 	}
 
-	private String locateNew(String value, String topLevelPath) {
+	private String locateNew(final String value, final String topLevelPath) {
 		String newValue = value;
 		if (value.startsWith("~")) {
 			if (value.length() > 1) {
@@ -132,7 +132,7 @@ public class JavaTypeConverter implements Converter<JavaType> {
 		return newValue;
 	}
 
-	private String locateExisting(String value, String topLevelPath) {
+	private String locateExisting(final String value, String topLevelPath) {
 		String newValue = value;
 		if (value.startsWith("~")) {
 			boolean found = false;
@@ -163,7 +163,7 @@ public class JavaTypeConverter implements Converter<JavaType> {
 		return newValue;
 	}
 
-	public boolean supports(Class<?> requiredType, String optionContext) {
+	public boolean supports(final Class<?> requiredType, final String optionContext) {
 		return JavaType.class.isAssignableFrom(requiredType);
 	}
 

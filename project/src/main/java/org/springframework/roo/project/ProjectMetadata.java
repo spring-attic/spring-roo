@@ -45,7 +45,7 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	 * @param moduleName
 	 * @return a non-blank MID
 	 */
-	public static String getProjectIdentifier(String moduleName) {
+	public static String getProjectIdentifier(final String moduleName) {
 		StringBuilder sb = new StringBuilder(PROJECT_IDENTIFIER);
 		if (StringUtils.hasText(moduleName)) {
 			sb.append("?").append(moduleName);
@@ -57,7 +57,7 @@ public class ProjectMetadata extends AbstractMetadataItem {
 		return metadataIdentificationString.startsWith(PROJECT_IDENTIFIER);
 	}
 
-	public static String getModuleName(String metadataIdentificationString) {
+	public static String getModuleName(final String metadataIdentificationString) {
 		if (metadataIdentificationString.contains("?")) {
 			return metadataIdentificationString.substring(metadataIdentificationString.lastIndexOf('?') + 1, metadataIdentificationString.length());
 		}
@@ -72,7 +72,7 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	 *
 	 * @param pom (required)
 	 */
-	public ProjectMetadata(Pom pom) {
+	public ProjectMetadata(final Pom pom) {
 		super(getProjectIdentifier(pom.getModuleName()));
 		Assert.notNull(pom, "POMs required");
 		this.pom = pom;

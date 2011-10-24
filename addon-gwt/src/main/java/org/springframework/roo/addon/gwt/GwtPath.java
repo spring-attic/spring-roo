@@ -63,7 +63,7 @@ public enum GwtPath {
 		return getSegmentName().substring(1).replace('/', '.');
 	}
 
-	public String packageName(JavaPackage topLevelPackage) {
+	public String packageName(final JavaPackage topLevelPackage) {
 		if (WEB.equals(this)) {
 			return "";
 		}

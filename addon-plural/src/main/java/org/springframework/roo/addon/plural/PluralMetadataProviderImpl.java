@@ -46,7 +46,8 @@ public class PluralMetadataProviderImpl extends AbstractItdMetadataProvider impl
 		return PhysicalTypeIdentifier.createIdentifier(javaType, path);
 	}
 
-	protected String createLocalIdentifier(JavaType javaType, ContextualPath path) {
+	@Override
+	protected String createLocalIdentifier(final JavaType javaType, final ContextualPath path) {
 		return PluralMetadata.createIdentifier(javaType, path);
 	}
 

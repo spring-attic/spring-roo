@@ -40,7 +40,7 @@ public class TilesOperationsImpl implements TilesOperations {
 	@Reference private FileManager fileManager;
 	@Reference private PathResolver pathResolver;
 
-	public void addViewDefinition(final String folderName, ContextualPath path, final String tilesViewName, String tilesTemplateName, String viewLocation) {
+	public void addViewDefinition(final String folderName, final ContextualPath path, final String tilesViewName, final String tilesTemplateName, final String viewLocation) {
 		Assert.hasText(tilesViewName, "View name required");
 		Assert.hasText(tilesTemplateName, "Template name required");
 		Assert.hasText(viewLocation, "View location required");
@@ -69,7 +69,7 @@ public class TilesOperationsImpl implements TilesOperations {
 		writeToDiskIfNecessary(viewsDefinitionFile, root);
 	}
 
-	public void removeViewDefinition(final String name, final String folderName, ContextualPath path) {
+	public void removeViewDefinition(final String name, final String folderName, final ContextualPath path) {
 		Assert.hasText(name, "View name required");
 
 		final String viewsDefinitionFile = getTilesConfigFile(folderName, path);
@@ -167,7 +167,7 @@ public class TilesOperationsImpl implements TilesOperations {
 	 * @param path
 	 * @return a non-<code>null</code> path
 	 */
-	private String getTilesConfigFile(final String folderName, ContextualPath path) {
+	private String getTilesConfigFile(final String folderName, final ContextualPath path) {
 		final String subPath;
 		if (StringUtils.hasText(folderName) && !"/".equals(folderName)) {
 			subPath = StringUtils.prefix(folderName, "/");

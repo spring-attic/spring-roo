@@ -22,12 +22,12 @@ public class JsfFieldHolder {
 
 	// Fields
 	private final FieldMetadata field;
-	private boolean enumerated;
-	private JavaType genericType;
-	private String genericTypePlural;
-	private String genericTypeBeanName;
-	private MemberDetails applicationTypeMemberDetails;
-	private Map<MethodMetadataCustomDataKey, MemberTypeAdditions> crudAdditions;
+	private final boolean enumerated;
+	private final JavaType genericType;
+	private final String genericTypePlural;
+	private final String genericTypeBeanName;
+	private final MemberDetails applicationTypeMemberDetails;
+	private final Map<MethodMetadataCustomDataKey, MemberTypeAdditions> crudAdditions;
 
 	public JsfFieldHolder(final FieldMetadata field, final boolean enumerated, final JavaType genericType, final String genericTypePlural, final String genericTypeBeanName, final MemberDetails applicationTypeMemberDetails, final Map<MethodMetadataCustomDataKey, MemberTypeAdditions> crudAdditions) {
 		Assert.notNull(field, "Field required");

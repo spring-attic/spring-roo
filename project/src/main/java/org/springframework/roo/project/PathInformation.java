@@ -54,6 +54,7 @@ public class PathInformation {
 		return contextualPath.getPath();
 	}
 	
+	@Override
 	public final String toString() {
 		ToStringCreator tsc = new ToStringCreator(this);
 		tsc.append("contextualPath", contextualPath);

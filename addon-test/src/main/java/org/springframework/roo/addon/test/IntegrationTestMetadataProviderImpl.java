@@ -129,7 +129,7 @@ public class IntegrationTestMetadataProviderImpl extends AbstractItdMetadataProv
 	 * Handles a generic change (i.e. with no explicit downstream dependency)
 	 * to the project metadata
 	 */
-	private void handleGenericChangeToProject(String moduleName) {
+	private void handleGenericChangeToProject(final String moduleName) {
 		final ProjectMetadata projectMetadata = projectOperations.getProjectMetadata(moduleName);
 		if (projectMetadata != null && projectMetadata.isValid()) {
 			final boolean isGaeEnabled = projectOperations.isGaeEnabled(moduleName);

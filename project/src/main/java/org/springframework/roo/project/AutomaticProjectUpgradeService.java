@@ -31,7 +31,7 @@ public class AutomaticProjectUpgradeService implements MetadataNotificationListe
 
 	private VersionInfo bundleVersionInfo;
 
-	protected void activate(ComponentContext componentContext) {
+	protected void activate(final ComponentContext componentContext) {
 		metadataDependencyRegistry.addNotificationListener(this);
 		for (Bundle b : componentContext.getBundleContext().getBundles()) {
 			if (!MY_BUNDLE_SYMBOLIC_NAME.equals(b.getSymbolicName())) {
@@ -77,7 +77,7 @@ public class AutomaticProjectUpgradeService implements MetadataNotificationListe
 		return null;
 	}
 
-	public void notify(String upstreamDependency, String downstreamDependency) {
+	public void notify(final String upstreamDependency, final String downstreamDependency) {
 		if (bundleVersionInfo != null && ProjectMetadata.isValid(upstreamDependency)) {
 			String moduleName = ProjectMetadata.getModuleName(upstreamDependency);
 			// Project Metadata available.

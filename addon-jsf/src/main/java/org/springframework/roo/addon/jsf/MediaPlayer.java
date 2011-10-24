@@ -14,7 +14,7 @@ public enum MediaPlayer {
 	
 	private String[] mediaTypes;
 	
-	private MediaPlayer(String... mediaTypes) {
+	private MediaPlayer(final String... mediaTypes) {
 		this.mediaTypes = mediaTypes;
 	}
 	

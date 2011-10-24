@@ -5,7 +5,7 @@ public class Module {
 	private final String name;
 	private final String pomPath;
 
-	public Module(String name, String pomPath) {
+	public Module(final String name, final String pomPath) {
 		this.name = name;
 		this.pomPath = pomPath;
 	}

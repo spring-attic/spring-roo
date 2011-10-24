@@ -514,7 +514,7 @@ public final class JavaParserUtils  {
 	 * @param typeDeclaration the type declaration to resolve (required)
 	 * @return the effective Java type (never null)
 	 */
-	public static JavaType getJavaType(CompilationUnitServices compilationUnitServices, TypeDeclaration typeDeclaration) {
+	public static JavaType getJavaType(final CompilationUnitServices compilationUnitServices, final TypeDeclaration typeDeclaration) {
 		Assert.notNull(compilationUnitServices, "Compilation unit services required");
 		Assert.notNull(typeDeclaration, "Type declaration required");
 

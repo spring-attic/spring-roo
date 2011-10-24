@@ -31,13 +31,13 @@ public class DelegatePathResolver implements PathResolver {
 	// Mutex
 	private final Object lock = new Object();
 
-	protected void bindPathResolvingStrategy(PathResolvingStrategy strategy) {
+	protected void bindPathResolvingStrategy(final PathResolvingStrategy strategy) {
 		synchronized (lock) {
 			pathResolvingStrategies.add(strategy);
 		}
 	}
 
-	protected void unbindPathResolvingStrategy(PathResolvingStrategy strategy) {
+	protected void unbindPathResolvingStrategy(final PathResolvingStrategy strategy) {
 		synchronized (lock) {
 			pathResolvingStrategies.remove(strategy);
 		}
@@ -57,23 +57,23 @@ public class DelegatePathResolver implements PathResolver {
 		return chosenStrategy;
 	}
 
-	public String getIdentifier(ContextualPath path, String relativePath) {
+	public String getIdentifier(final ContextualPath path, final String relativePath) {
 		return getStrategy().getIdentifier(path, relativePath);
 	}
 
-	public ContextualPath getPath(String identifier) {
+	public ContextualPath getPath(final String identifier) {
 		return getStrategy().getPath(identifier);
 	}
 
-	public String getRoot(ContextualPath path) {
+	public String getRoot(final ContextualPath path) {
 		return getStrategy().getRoot(path);
 	}
 
-	public String getRelativeSegment(String identifier) {
+	public String getRelativeSegment(final String identifier) {
 		return getStrategy().getRelativeSegment(identifier);
 	}
 
-	public String getFriendlyName(String identifier) {
+	public String getFriendlyName(final String identifier) {
 		return getStrategy().getFriendlyName(identifier);
 	}
 
@@ -93,23 +93,23 @@ public class DelegatePathResolver implements PathResolver {
 		return getStrategy().getRoot();
 	}
 
-	public String getCanonicalPath(ContextualPath path, JavaType javaType) {
+	public String getCanonicalPath(final ContextualPath path, final JavaType javaType) {
 		return getStrategy().getCanonicalPath(path, javaType);
 	}
 
-	public String getFocusedCanonicalPath(Path path, JavaType javaType) {
+	public String getFocusedCanonicalPath(final Path path, final JavaType javaType) {
 		return getStrategy().getFocusedCanonicalPath(path, javaType);
 	}
 
-	public String getFocusedIdentifier(Path path, String relativePath) {
+	public String getFocusedIdentifier(final Path path, final String relativePath) {
 		return getStrategy().getFocusedIdentifier(path, relativePath);
 	}
 
-	public String getFocusedRoot(Path path) {
+	public String getFocusedRoot(final Path path) {
 		return getStrategy().getFocusedRoot(path);
 	}
 
-	public ContextualPath getFocusedPath(Path path) {
+	public ContextualPath getFocusedPath(final Path path) {
 		return getStrategy().getFocusedPath(path);
 	}
 }

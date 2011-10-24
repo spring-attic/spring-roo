@@ -45,7 +45,7 @@ public class LoggingOperationsImpl implements LoggingOperations {
 		setupProperties(logLevel, loggerPackage);
 	}
 
-	private void setupProperties(LogLevel logLevel, LoggerPackage loggerPackage) {
+	private void setupProperties(final LogLevel logLevel, final LoggerPackage loggerPackage) {
 		String filePath = pathResolver.getFocusedIdentifier(Path.SRC_MAIN_RESOURCES, "log4j.properties");
 		MutableFile log4jMutableFile = null;
 		Properties props = new Properties();

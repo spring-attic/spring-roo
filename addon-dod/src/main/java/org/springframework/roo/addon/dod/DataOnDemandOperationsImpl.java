@@ -88,7 +88,7 @@ public class DataOnDemandOperationsImpl implements DataOnDemandOperations {
 	 * @param entity the entity to lookup required
 	 * @return the type details (never null; throws an exception if it cannot be obtained or parsed)
 	 */
-	private ClassOrInterfaceTypeDetails getEntity(JavaType entity) {
+	private ClassOrInterfaceTypeDetails getEntity(final JavaType entity) {
 		ClassOrInterfaceTypeDetails cid = typeLocationService.getTypeDetails(entity);
 		Assert.notNull(cid, "Java source code details unavailable for type '" + entity + "'");
 		return cid;

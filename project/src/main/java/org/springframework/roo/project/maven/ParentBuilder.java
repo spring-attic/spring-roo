@@ -12,7 +12,7 @@ public class ParentBuilder implements Builder<Parent>{
 	private final String relativePath;
 	private final String pomPath;
 
-	public ParentBuilder(Element parentElement, String pomPath) {
+	public ParentBuilder(final Element parentElement, final String pomPath) {
 		this.groupId = XmlUtils.getTextContent("/groupId", parentElement);
 		this.artifactId = XmlUtils.getTextContent("/artifactId", parentElement);
 		this.version = XmlUtils.getTextContent("/version", parentElement);

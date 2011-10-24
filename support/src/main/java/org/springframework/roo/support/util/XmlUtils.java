@@ -509,11 +509,11 @@ public final class XmlUtils {
 		}
 	}
 
-	public static String getTextContent(String path, Element parentElement) {
+	public static String getTextContent(final String path, final Element parentElement) {
 		return getTextContent(path, parentElement, null);
 	}
 
-	public static String getTextContent(String path, Element parentElement, String valueIfNull) {
+	public static String getTextContent(final String path, final Element parentElement, final String valueIfNull) {
 		final Element element = XmlUtils.findFirstElement(path, parentElement);
 		if (element != null) {
 			return element.getTextContent();

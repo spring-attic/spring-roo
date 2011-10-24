@@ -26,7 +26,7 @@ public class TypeCacheImpl implements TypeCache {
 	private final Map<String, Set<String>> moduleFilePathToTypeNamesMap = new HashMap<String, Set<String>>();
 	private final Map<String, Set<String>> simpleTypeNameTypesMap = new HashMap<String, Set<String>>();
 
-	public void cacheType(String typeFilePath, ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails) {
+	public void cacheType(final String typeFilePath, final ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails) {
 		Assert.hasText(typeFilePath, "Module name required");
 		Assert.notNull(classOrInterfaceTypeDetails, "Type details required");
 
@@ -45,18 +45,18 @@ public class TypeCacheImpl implements TypeCache {
 		simpleTypeNameTypesMap.get(simpleTypeName).add(fullyQualifiedTypeName);
 	}
 
-	public Set<String> getTypesForSimpleTypeName(String simpleTypeName) {
+	public Set<String> getTypesForSimpleTypeName(final String simpleTypeName) {
 		if (!simpleTypeNameTypesMap.containsKey(simpleTypeName)) {
 			return new HashSet<String>();
 		}
 		return simpleTypeNameTypesMap.get(simpleTypeName);
 	}
 
-	public void cacheFilePathAgainstTypeIdentifier(String typeFilePath, String typeIdentifier) {
+	public void cacheFilePathAgainstTypeIdentifier(final String typeFilePath, final String typeIdentifier) {
 		typeFilePathToMidMap.put(typeFilePath, typeIdentifier);
 	}
 
-	public void cacheTypeAgainstModule(Pom pom, JavaType javaType) {
+	public void cacheTypeAgainstModule(final Pom pom, final JavaType javaType) {
 		Assert.notNull(pom, "Pom cannot be null");
 		Assert.notNull(javaType, "Java type cannot be null");
    		typeNameToModuleFilePathMap.put(javaType.getFullyQualifiedTypeName(), pom.getPath());
@@ -75,7 +75,7 @@ public class TypeCacheImpl implements TypeCache {
 		return new HashSet<JavaType>(types);
 	}
 
-	public void removeType(String typeIdentifier) {
+	public void removeType(final String typeIdentifier) {
 		Assert.hasText(typeIdentifier, "Physical type identifier required");
 		ClassOrInterfaceTypeDetails cid = midToTypeDetailsMap.get(typeIdentifier);
 		if (cid != null) {
@@ -91,7 +91,7 @@ public class TypeCacheImpl implements TypeCache {
 
 	}
 
-	public Set<String> getTypeNamesForModuleFilePath(String moduleFilePath) {
+	public Set<String> getTypeNamesForModuleFilePath(final String moduleFilePath) {
 		Assert.hasText(moduleFilePath, "Pom file path required");
 		if (!moduleFilePathToTypeNamesMap.containsKey(moduleFilePath)) {
 			moduleFilePathToTypeNamesMap.put(moduleFilePath, new HashSet<String>());
@@ -99,17 +99,17 @@ public class TypeCacheImpl implements TypeCache {
 		return new HashSet<String>(moduleFilePathToTypeNamesMap.get(moduleFilePath));
 	}
 
-	public ClassOrInterfaceTypeDetails getTypeDetails(String mid) {
+	public ClassOrInterfaceTypeDetails getTypeDetails(final String mid) {
 		Assert.hasText(mid, "Physical type identifier required");
 		return midToTypeDetailsMap.get(mid);
 	}
 
-	public String getPhysicalTypeIdentifier(JavaType javaType) {
+	public String getPhysicalTypeIdentifier(final JavaType javaType) {
 		Assert.notNull(javaType, "Java type cannot be null");
 		return typeNameToMidMap.get(javaType.getFullyQualifiedTypeName());
 	}
 
-	public String getTypeIdFromTypeFilePath(String typeFilePath) {
+	public String getTypeIdFromTypeFilePath(final String typeFilePath) {
 		Assert.hasText(typeFilePath, "Physical type file path required");
 		return typeFilePathToMidMap.get(typeFilePath);
 	}

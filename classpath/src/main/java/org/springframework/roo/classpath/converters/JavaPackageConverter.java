@@ -93,7 +93,7 @@ public class JavaPackageConverter implements Converter<JavaPackage> {
 		return JavaPackage.class.isAssignableFrom(requiredType);
 	}
 
-	public boolean getAllPossibleValues(final List<Completion> completions, final Class<?> requiredType, String existingData, final String optionContext, final MethodTarget target) {
+	public boolean getAllPossibleValues(final List<Completion> completions, final Class<?> requiredType, final String existingData, final String optionContext, final MethodTarget target) {
 		if (projectOperations.isFocusedProjectAvailable()) {
 			completions.addAll(getCompletionsForAllKnownPackages());
 		}

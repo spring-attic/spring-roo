@@ -69,7 +69,7 @@ public final class GwtUtils {
 		return mirrorTypeMap;
 	}
 
-	public static JavaType convertGovernorTypeNameIntoKeyTypeName(final JavaType governorType, GwtType type, final ProjectOperations projectOperations) {
+	public static JavaType convertGovernorTypeNameIntoKeyTypeName(final JavaType governorType, final GwtType type, final ProjectOperations projectOperations) {
 		String destinationPackage = type.getPath().packageName(projectOperations.getFocusedTopLevelPackage());
 		String typeName;
 		if (type.isMirrorType()) {

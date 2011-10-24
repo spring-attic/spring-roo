@@ -281,7 +281,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		}
 	}
 
-	private AnnotationMetadata getManagedBeanAnnotation(String beanName) {
+	private AnnotationMetadata getManagedBeanAnnotation(final String beanName) {
 		AnnotationMetadata annotation = getTypeAnnotation(MANAGED_BEAN);
 		if (annotation == null) {
 			return null;
@@ -818,7 +818,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		}
 	}
 
-	private String getAllowTypeRegex(String allowedType) {
+	private String getAllowTypeRegex(final String allowedType) {
 		StringBuilder builder = new StringBuilder();
 		char[] value = allowedType.toCharArray();
 		for (int i = 0; i < value.length; i++) {
@@ -846,7 +846,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		return MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), NOT_NULL) == null;
 	}
 
-	private BigDecimal getMinOrMax(final FieldMetadata field, JavaType annotationType) {
+	private BigDecimal getMinOrMax(final FieldMetadata field, final JavaType annotationType) {
 		AnnotationMetadata annotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), annotationType);
 		if (annotation != null && annotation.getAttribute(new JavaSymbolName("value")) != null) {
 			return new BigDecimal(String.valueOf(annotation.getAttribute(new JavaSymbolName("value")).getValue()));
@@ -854,7 +854,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		return null;
 	}
 
-	private Integer getSizeMinOrMax(final FieldMetadata field, String attrName) {
+	private Integer getSizeMinOrMax(final FieldMetadata field, final String attrName) {
 		AnnotationMetadata annotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), SIZE);
 		if (annotation != null && annotation.getAttribute(new JavaSymbolName(attrName)) != null) {
 			return (Integer) annotation.getAttribute(new JavaSymbolName(attrName)).getValue();
@@ -871,7 +871,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		return null;
 	}
 
-	public String getLongRangeValdatorString(String fieldValueId, BigDecimal minValue, BigDecimal maxValue) {
+	public String getLongRangeValdatorString(final String fieldValueId, final BigDecimal minValue, final BigDecimal maxValue) {
 		final ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
 		imports.addImport(LONG_RANGE_VALIDATOR);
 
@@ -887,7 +887,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		return bodyBuilder.getOutput();
 	}
 
-	public String getDoubleRangeValdatorString(String fieldValueId, BigDecimal minValue, BigDecimal maxValue) {
+	public String getDoubleRangeValdatorString(final String fieldValueId, final BigDecimal minValue, final BigDecimal maxValue) {
 		final ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
 		imports.addImport(DOUBLE_RANGE_VALIDATOR);
 
@@ -903,7 +903,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		return bodyBuilder.getOutput();
 	}
 
-	public String getLengthValdatorString(String fieldValueId, Number minValue, Number maxValue) {
+	public String getLengthValdatorString(final String fieldValueId, final Number minValue, final Number maxValue) {
 		final ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
 		imports.addImport(LENGTH_VALIDATOR);
 
@@ -1129,15 +1129,15 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		return inputFieldVar + ".setValueExpression(\"value\", expressionFactory.createValueExpression(elContext, \"#{" + beanName + "." + entityName.getSymbolName() + "." + fieldName + "}\", " + className + ".class));";
 	}
 
-	private String getSetValueExpression(String fieldValueId, final String fieldName) {
+	private String getSetValueExpression(final String fieldValueId, final String fieldName) {
 		return getSetValueExpression(fieldValueId, fieldName, "String");
 	}
 
-	private String getSetCompleteMethod(String fieldValueId, final String fieldName) {
+	private String getSetCompleteMethod(final String fieldValueId, final String fieldName) {
 		return fieldValueId + ".setCompleteMethod(expressionFactory.createMethodExpression(elContext, \"#{" + beanName + ".complete" + StringUtils.capitalize(fieldName) + "}\", List.class, new Class[] { String.class }));";
 	}
 
-	private boolean isInverseSideOfRelationship(FieldMetadata field, JavaType... annotationTypes) {
+	private boolean isInverseSideOfRelationship(final FieldMetadata field, final JavaType... annotationTypes) {
 		for (JavaType annotationType : annotationTypes) {
 			AnnotationMetadata annotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), annotationType);
 			if (annotation != null && annotation.getAttribute(new JavaSymbolName("mappedBy")) != null) {
@@ -1147,6 +1147,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		return false;
 	}
 	
+	@Override
 	public String toString() {
 		final ToStringCreator tsc = new ToStringCreator(this);
 		tsc.append("identifier", getId());

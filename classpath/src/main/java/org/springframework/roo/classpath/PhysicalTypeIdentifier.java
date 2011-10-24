@@ -72,7 +72,7 @@ public final class PhysicalTypeIdentifier {
 	 * @param metadataId the metadata ID to parse (must identify an instance of {@link PhysicalTypeIdentifier#PHYSICAL_METADATA_TYPE})
 	 * @return a non-<code>null</code> path
 	 */
-	public static ContextualPath getPath(String metadataId) {
+	public static ContextualPath getPath(final String metadataId) {
 		return PhysicalTypeIdentifierNamingUtils.getPath(PHYSICAL_METADATA_TYPE, metadataId);
 	}
 

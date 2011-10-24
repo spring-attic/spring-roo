@@ -186,7 +186,7 @@ public final class FileUtils {
 	 * @return
 	 * @since 1.2.0
 	 */
-	public static String normalise(String pomPath) {
+	public static String normalise(final String pomPath) {
 		return removeTrailingSeparator(pomPath) + File.separatorChar;
 	}
 	

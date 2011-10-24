@@ -20,11 +20,11 @@ public class PomConverter implements Converter<Pom>{
 	// Fields
 	@Reference private PomManagementService pomManagementService;
 
-	public boolean supports(Class<?> type, String optionContext) {
+	public boolean supports(final Class<?> type, final String optionContext) {
 		return Pom.class.isAssignableFrom(type);
 	}
 
-	public Pom convertFromText(String value, Class<?> targetType, String optionContext) {
+	public Pom convertFromText(String value, final Class<?> targetType, final String optionContext) {
 		if ("~".equals(value)) {
 			value = "";
 		}
@@ -35,7 +35,7 @@ public class PomConverter implements Converter<Pom>{
 		return abbreviationMap.get(value);
 	}
 
-	public boolean getAllPossibleValues(List<Completion> completions, Class<?> targetType, String existingData, String optionContext, MethodTarget target) {
+	public boolean getAllPossibleValues(final List<Completion> completions, final Class<?> targetType, final String existingData, final String optionContext, final MethodTarget target) {
 		Pom focusedModule = pomManagementService.getFocusedModule();
 		if (focusedModule == null) {
 			return false;

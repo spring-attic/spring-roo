@@ -172,7 +172,7 @@ public abstract class JLineShell extends AbstractShell implements CommandMarker,
 		}
 	}
 
-	public void setPromptPath(String path, boolean overrideStyle) {
+	public void setPromptPath(final String path, final boolean overrideStyle) {
 		if (reader.getTerminal().isANSISupported()) {
 			ANSIBuffer ansi = JLineLogHandler.getANSIBuffer();
 			if ("".equals(path) || path == null) {
@@ -195,7 +195,7 @@ public abstract class JLineShell extends AbstractShell implements CommandMarker,
 	}
 
 	@Override
-	public void setPromptPath(String path) {
+	public void setPromptPath(final String path) {
 		setPromptPath(path, false);
 	}
 

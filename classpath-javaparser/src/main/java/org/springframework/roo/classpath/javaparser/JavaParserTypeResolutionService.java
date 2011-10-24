@@ -21,7 +21,7 @@ import org.springframework.roo.support.util.StringUtils;
 @Service
 public class JavaParserTypeResolutionService implements TypeResolutionService{
 
-	public final JavaType getJavaType(String fileIdentifier) {
+	public final JavaType getJavaType(final String fileIdentifier) {
 		Assert.hasText(fileIdentifier, "Compilation unit path required");
 		Assert.isTrue(new File(fileIdentifier).exists(), "The file doesn't exist");
 		Assert.isTrue(new File(fileIdentifier).isFile(), "The identifier doesn't represent a file");
@@ -43,7 +43,7 @@ public class JavaParserTypeResolutionService implements TypeResolutionService{
 		}
 	}
 
-	public final JavaPackage getPackage(String fileIdentifier) {
+	public final JavaPackage getPackage(final String fileIdentifier) {
 		Assert.hasText(fileIdentifier, "Compilation unit path required");
 		Assert.isTrue(new File(fileIdentifier).exists(), "The file doesn't exist");
 		Assert.isTrue(new File(fileIdentifier).isFile(), "The identifier doesn't represent a file");

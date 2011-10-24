@@ -78,7 +78,7 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements Ma
 		}
 	}
 
-	public void createModule(final JavaPackage topLevelPackage, final String projectName, final Integer majorJavaVersion, final String parentPom, String moduleName) {
+	public void createModule(final JavaPackage topLevelPackage, final String projectName, final Integer majorJavaVersion, final String parentPom, final String moduleName) {
 		Assert.isTrue(isCreateModuleAvailable(), "Project creation is unavailable at this time");
 		String pomPath = createMavenPom(topLevelPackage, projectName, majorJavaVersion, parentPom, moduleName);
 
@@ -134,7 +134,7 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements Ma
 	 * @param moduleName
 	 * @return
 	 */
-	private String createMavenPom(final JavaPackage topLevelPackage, String nullableProjectName, final Integer majorJavaVersion, final String parentPom, String moduleName) {
+	private String createMavenPom(final JavaPackage topLevelPackage, String nullableProjectName, final Integer majorJavaVersion, final String parentPom, final String moduleName) {
 		Assert.notNull(topLevelPackage, "Top level package required");
 		
 		// Read the POM template from this addon's classpath resources

@@ -19,11 +19,11 @@ public class ContextualPathConverter implements Converter<ContextualPath> {
 
 	@Reference PomManagementService pomManagementService;
 
-	public boolean supports(Class<?> requiredType, String optionContext) {
+	public boolean supports(final Class<?> requiredType, final String optionContext) {
 		return ContextualPath.class.isAssignableFrom(requiredType);
 	}
 
-	public ContextualPath convertFromText(String value, Class<?> targetType, String optionContext) {
+	public ContextualPath convertFromText(final String value, final Class<?> targetType, final String optionContext) {
 		ContextualPath contextualPath = ContextualPath.getInstance(value);
 		if (contextualPath.getModule().equals("FOCUSED")) {
 			contextualPath = ContextualPath.getInstance(contextualPath.getPath(), pomManagementService.getFocusedModuleName());
@@ -31,7 +31,7 @@ public class ContextualPathConverter implements Converter<ContextualPath> {
 		return contextualPath;
 	}
 
-	public boolean getAllPossibleValues(List<Completion> completions, Class<?> targetType, String existingData, String optionContext, MethodTarget target) {
+	public boolean getAllPossibleValues(final List<Completion> completions, final Class<?> targetType, final String existingData, final String optionContext, final MethodTarget target) {
 		for (Pom pom : pomManagementService.getPomMap().values()) {
 			for (PathInformation pathInformation : pom.getPathInformation()) {
 				completions.add(new Completion(pathInformation.getContextualPath().getName()));

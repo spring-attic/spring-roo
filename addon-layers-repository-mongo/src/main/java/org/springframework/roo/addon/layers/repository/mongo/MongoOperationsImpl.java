@@ -133,7 +133,7 @@ public class MongoOperationsImpl implements MongoOperations {
 		manageAppCtx(username, password, name, cloudFoundry, moduleName);
 	}
 
-	private void manageAppCtx(String username, String password, String name, boolean cloudFoundry, final String moduleName) {
+	private void manageAppCtx(final String username, final String password, final String name, final boolean cloudFoundry, final String moduleName) {
 		String appCtxId = pathResolver.getFocusedIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext-mongo.xml");
 		if (!fileManager.exists(appCtxId)) {
 			try {
@@ -206,7 +206,7 @@ public class MongoOperationsImpl implements MongoOperations {
 		projectOperations.addDependencies(moduleName, dependencies);
 	}
 
-	private void writeProperties(String username, String password, String name, String port, String host, String moduleName) {
+	private void writeProperties(String username, String password, String name, String port, String host, final String moduleName) {
 		if (!StringUtils.hasText(username)) username = "";
 		if (!StringUtils.hasText(password)) password = "";
 		if (!StringUtils.hasText(name)) name = projectOperations.getProjectName(moduleName);

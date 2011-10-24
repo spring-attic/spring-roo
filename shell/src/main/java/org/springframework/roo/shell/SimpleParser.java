@@ -389,7 +389,7 @@ public class SimpleParser implements Parser {
 		return null; // Not a match
 	}
 
-	public int complete(String buffer, int cursor, List<Completion> candidates) {
+	public int complete(String buffer, int cursor, final List<Completion> candidates) {
 		synchronized (mutex) {
 			Assert.notNull(buffer, "Buffer required");
 			Assert.notNull(candidates, "Candidates list required");

@@ -101,14 +101,14 @@ public class SecurityOperationsImpl implements SecurityOperations {
 		fileManager.createOrUpdateTextFileIfRequired(webConfigPath, XmlUtils.nodeToString(webConfigDocument), false);
 	}
 
-	private void updatePomProperties(Element configuration, final String moduleName) {
+	private void updatePomProperties(final Element configuration, final String moduleName) {
 		List<Element> databaseProperties = XmlUtils.findElements("/configuration/spring-security/properties/*", configuration);
 		for (Element property : databaseProperties) {
 			projectOperations.addProperty(moduleName, new Property(property));
 		}
 	}
 
-	private void updateDependencies(Element configuration, final String moduleName) {
+	private void updateDependencies(final Element configuration, final String moduleName) {
 		List<Dependency> dependencies = new ArrayList<Dependency>();
 		List<Element> securityDependencies = XmlUtils.findElements("/configuration/spring-security/dependencies/dependency", configuration);
 		for (Element dependencyElement : securityDependencies) {
