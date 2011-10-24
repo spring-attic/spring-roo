@@ -5,6 +5,7 @@ import static org.springframework.roo.support.util.FileUtils.CURRENT_DIRECTORY;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -78,9 +79,9 @@ public class PomManagementServiceImpl implements PomManagementService {
 
 	public Pom getPomFromModuleName(final String moduleName) {
 		updatePomCache();
-		for (final Map.Entry<String, Pom> entry : pomMap.entrySet()) {
-			if (moduleName.equals(entry.getValue().getModuleName())) {
-				return pomMap.get(entry.getKey());
+		for (final Pom pom : pomMap.values()) {
+			if (moduleName.equals(pom.getModuleName())) {
+				return pom;
 			}
 		}
 		return null;
@@ -152,19 +153,19 @@ public class PomManagementServiceImpl implements PomManagementService {
 		final Map<String, String> pomModuleMap = new HashMap<String, String>();
 		final Set<String> toRemove = new HashSet<String>();
 		final Set<Pom> newPoms = new HashSet<Pom>();
-		for (final String change : toBeParsed) {
+		for (final String changedPom : toBeParsed) {
 			try {
-				if (new File(change).exists()) {
-					final String fileContents = FileCopyUtils.copyToString(new File(change));
+				if (new File(changedPom).exists()) {
+					final String fileContents = FileCopyUtils.copyToString(new File(changedPom));
 					if (StringUtils.hasText(fileContents)) {
-						final Document pomDocument = XmlUtils.readXml(fileManager.getInputStream(change));
-						resolvePoms(pomDocument.getDocumentElement(), change, pomModuleMap);
-						final String moduleName = getModuleName(FileUtils.getFirstDirectory(change));
-						final PomBuilder pomBuilder = new PomBuilder(pomDocument.getDocumentElement(), change, moduleName);
+						final Document pomDocument = XmlUtils.readXml(fileManager.getInputStream(changedPom));
+						resolvePoms(pomDocument.getDocumentElement(), changedPom, pomModuleMap);
+						final String moduleName = getModuleName(FileUtils.getFirstDirectory(changedPom));
+						final PomBuilder pomBuilder = new PomBuilder(pomDocument.getDocumentElement(), changedPom, moduleName);
 						final Pom pom = pomBuilder.build();
-						pomMap.put(change, pom);
+						pomMap.put(changedPom, pom);
 						newPoms.add(pom);
-						toRemove.add(change);
+						toRemove.add(changedPom);
 					}
 				}
 			} catch (final IOException e) {
@@ -284,5 +285,9 @@ public class PomManagementServiceImpl implements PomManagementService {
 			sortedPomMap.put(pomPath, pomMap.get(pomPath));
 		}
 		pomMap = sortedPomMap;
+	}
+
+	public Collection<Pom> getPoms() {
+		return getPomMap().values();
 	}
 }

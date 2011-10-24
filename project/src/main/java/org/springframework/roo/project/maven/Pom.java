@@ -512,6 +512,11 @@ public class Pom {
 		return resources;
 	}
 
+	/**
+	 * Returns this POM's canonical path on the file system
+	 * 
+	 * @return a valid canonical path
+	 */
 	public String getPath() {
 		return path;
 	}

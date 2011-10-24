@@ -572,7 +572,6 @@ public class TypeLocationServiceImpl implements TypeLocationService {
 				if (entry.getKey().length() > longestPackage) {
 					longestPackage = entry.getKey().length();
 					topLevelPackage = entry.getKey();
-					System.out.println("topLevePackage: " + topLevelPackage + " - " + moduleTypes.size() + " - " + entry.getValue().size());
 				}
 			}
 		}

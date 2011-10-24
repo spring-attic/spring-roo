@@ -1,17 +1,20 @@
 package org.springframework.roo.classpath.converters;
 
-import java.io.File;
+import static org.springframework.roo.support.util.StringUtils.isBlank;
+import static org.springframework.roo.support.util.StringUtils.removePrefix;
+import static org.springframework.roo.support.util.StringUtils.removeSuffix;
+
+import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.SortedSet;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.classpath.TypeLocationService;
-import org.springframework.roo.file.monitor.event.FileDetails;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.process.manager.FileManager;
-import org.springframework.roo.project.PathResolver;
+import org.springframework.roo.project.PomManagementService;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.shell.Completion;
@@ -19,7 +22,8 @@ import org.springframework.roo.shell.Converter;
 import org.springframework.roo.shell.MethodTarget;
 
 /**
- * Provides conversion to and from {@link JavaPackage}, with full support for using "~" as denoting the user's top-level package.
+ * A {@link Converter} for {@link JavaPackage}s, with support for using "~" to
+ * denote the user's top-level package.
  *
  * @author Ben Alex
  * @since 1.0
@@ -28,38 +32,61 @@ import org.springframework.roo.shell.MethodTarget;
 @Service
 public class JavaPackageConverter implements Converter<JavaPackage> {
 
+	/**
+	 * The shell character that represents the current project or module's top
+	 * level Java package.
+	 * 
+	 * TODO move (if appropriate) and reuse
+	 */
+	private static final String TOP_LEVEL_PACKAGE_SYMBOL = "~";
+	
 	// Fields
-	@Reference private FileManager fileManager;
-	@Reference private LastUsed lastUsed;
-	@Reference private ProjectOperations projectOperations;
-	@Reference private TypeLocationService typeLocationService;
+	@Reference FileManager fileManager;
+	@Reference LastUsed lastUsed;
+	@Reference PomManagementService pomManagementService;
+	@Reference ProjectOperations projectOperations;
+	@Reference TypeLocationService typeLocationService;
 
 	public JavaPackage convertFromText(final String value, final Class<?> requiredType, final String optionContext) {
-		if (value == null || "".equals(value)) {
+		if (isBlank(value)) {
 			return null;
 		}
-		String newValue = value.toLowerCase();
-		if (value.startsWith("~")) {
-			try {
-				String topLevelPath = "";
-				if (projectOperations.isFocusedProjectAvailable()) {
-					topLevelPath = typeLocationService.getTopLevelPackageForModule(projectOperations.getFocusedModule());//projectOperations.getTopLevelPackage().getFullyQualifiedPackageName();
-				}
-				if (value.length() > 1) {
-					newValue = (!(value.charAt(1) == '.') ? topLevelPath + "." : topLevelPath) + value.substring(1);
-				} else {
-					newValue = topLevelPath;
-				}
-			} catch (RuntimeException ignored) {}
-		}
-		if (newValue.endsWith(".")) {
-			newValue = newValue.substring(0, newValue.length() - 1);
-		}
-		JavaPackage result = new JavaPackage(newValue);
-		if (optionContext.contains("update")) {
+		final JavaPackage result = new JavaPackage(convertToFullyQualifiedPackageName(value));
+		if (optionContext != null && optionContext.contains("update")) {
 			lastUsed.setPackage(result);
 		}
 		return result;
+	}
+	
+	private String convertToFullyQualifiedPackageName(final String text) {
+		final String normalisedText = removeSuffix(text, ".").toLowerCase();
+		if (normalisedText.startsWith(TOP_LEVEL_PACKAGE_SYMBOL)) {
+			return replaceTopLevelPackageSymbol(normalisedText);
+		}
+		return normalisedText;
+	}
+	
+	/**
+	 * Replaces the {@link #TOP_LEVEL_PACKAGE_SYMBOL} at the beginning of the
+	 * given text with the current project/module's top-level package
+	 * 
+	 * @param text
+	 * @return a well-formed Java package name (might have a trailing dot)
+	 */
+	private String replaceTopLevelPackageSymbol(final String text) {
+		final String topLevelPackage = getTopLevelPackage();
+		if (TOP_LEVEL_PACKAGE_SYMBOL.equals(text)) {
+			return topLevelPackage;
+		}
+		final String textWithoutSymbol = removePrefix(text, TOP_LEVEL_PACKAGE_SYMBOL);
+		return topLevelPackage + "." + removePrefix(textWithoutSymbol, ".");
+	}
+	
+	private String getTopLevelPackage() {
+		if (projectOperations.isFocusedProjectAvailable()) {
+			return typeLocationService.getTopLevelPackageForModule(projectOperations.getFocusedModule());
+		}
+		return "";	// shouldn't happen if there's a project, i.e. most of the time
 	}
 
 	public boolean supports(final Class<?> requiredType, final String optionContext) {
@@ -67,72 +94,19 @@ public class JavaPackageConverter implements Converter<JavaPackage> {
 	}
 
 	public boolean getAllPossibleValues(final List<Completion> completions, final Class<?> requiredType, String existingData, final String optionContext, final MethodTarget target) {
-		if (existingData == null) {
-			existingData = "";
+		if (projectOperations.isFocusedProjectAvailable()) {
+			completions.addAll(getCompletionsForAllKnownPackages());
 		}
-		String topLevelPath = "";
-		if (!projectOperations.isFocusedProjectAvailable()) {
-			return false;
-		}
+		return false;
+	}
 
-		for (Pom pom : projectOperations.getPomManagementService().getPomMap().values()) {
-			for (String type : typeLocationService.getTypesForModule(pom.getPath())) {
+	private Collection<Completion> getCompletionsForAllKnownPackages() {
+		final Collection<Completion> completions = new LinkedHashSet<Completion>();
+		for (final Pom pom : pomManagementService.getPoms()) {
+			for (final String type : typeLocationService.getTypesForModule(pom.getPath())) {
 				completions.add(new Completion(type.substring(0, type.lastIndexOf('.'))));
 			}
 		}
-
-		if (true) {
-			return false;
-		}
-
-		topLevelPath = typeLocationService.getTopLevelPackageForModule(projectOperations.getFocusedModule());
-
-		String newValue = existingData;
-		if (existingData.startsWith("~")) {
-			if (existingData.length() > 1) {
-				newValue = (existingData.charAt(1) == '.' ? topLevelPath : topLevelPath + ".") + existingData.substring(1);
-			} else {
-				newValue = topLevelPath + File.separator;
-			}
-		}
-
-		PathResolver pathResolver = projectOperations.getPathResolver();
-
-		// Pass 1: If a '.' suffixes the value then sub-folders will be picked up explicitly
-		String antPath = pathResolver.getRoot() + File.separatorChar + newValue.replace(".", File.separator).toLowerCase() + "*";
-		SortedSet<FileDetails> entries = fileManager.findMatchingAntPath(antPath);
-
-		// Pass 2: Add a separator to the end of the value to pick up sub-folders
-		antPath = pathResolver.getRoot() + File.separatorChar + newValue.replace(".", File.separator).toLowerCase() + File.separator + "*";
-		entries.addAll(fileManager.findMatchingAntPath(antPath));
-
-		for (FileDetails fileIdentifier : entries) {
-			String candidate = pathResolver.getRelativeSegment(fileIdentifier.getCanonicalPath());
-			if (candidate.length() > 0) {
-				// Drop the leading "/"
-				candidate = candidate.substring(1);
-			}
-
-			boolean include = false;
-			// Do not include directories that start with ., as this is used for purposes like SVN (see ROO-125)
-			if (fileIdentifier.getFile().isDirectory() && !fileIdentifier.getFile().getName().startsWith(".")) {
-				include = true;
-			}
-
-			if (include) {
-				// Convert this path back into something the user would type
-				if (existingData.startsWith("~")) {
-					if (existingData.length() > 1) {
-						candidate = (existingData.charAt(1) == '.' ? "~." : "~") + candidate.substring(topLevelPath.length() + 1);
-					} else {
-						candidate = "~" + candidate.substring(topLevelPath.length() + 1);
-					}
-				}
-				candidate = candidate.replace(File.separator, ".");
-				completions.add(new Completion(candidate));
-			}
-		}
-
-		return false;
+		return completions;
 	}
 }

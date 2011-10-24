@@ -1,5 +1,6 @@
 package org.springframework.roo.classpath;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -149,7 +150,7 @@ public interface TypeLocationService {
 	 * @param modulePath
 	 * @return
 	 */
-	Set<String> getTypesForModule(String modulePath);
+	Collection<String> getTypesForModule(String modulePath);
 
 	/**
 	 *

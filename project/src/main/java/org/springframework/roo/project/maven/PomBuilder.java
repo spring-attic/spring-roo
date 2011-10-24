@@ -20,39 +20,39 @@ import org.w3c.dom.Element;
 
 public class PomBuilder implements Builder<Pom> {
 
+	// Constants
 	private static final String DEFAULT_RELATIVE_PATH = "../pom.xml";
 	private static final String DEFAULT_SOURCE_DIRECTORY = "${project.basedir}/src/main/java";
 	private static final String DEFAULT_TEST_SOURCE_DIRECTORY = "${project.basedir}/src/test/java";
 
-	private  String groupId;
-	private  String artifactId;
-	private  String version;
-	private  String packaging;
+	// Fields
+	private final ParentBuilder parent;
 	private final Set<Dependency> dependencies = new HashSet<Dependency>();
-	private  ParentBuilder parent;
-	private final Set<ModuleBuilder> modules = new LinkedHashSet<ModuleBuilder>();
-	private final Set<Property> pomProperties = new HashSet<Property>();
-
-	private String name;
-	private String moduleName;
-
-	private final Set<Repository> repositories = new HashSet<Repository>();
-	private final Set<Repository> pluginRepositories = new HashSet<Repository>();
-
-	private  String sourceDirectory;
-	private  String testSourceDirectory;
 	private final Set<Filter> filters = new HashSet<Filter>();
+	private final Set<ModuleBuilder> modules = new LinkedHashSet<ModuleBuilder>();
 	private final Set<Plugin> buildPlugins = new HashSet<Plugin>();
+	private final Set<Property> pomProperties = new HashSet<Property>();
+	private final Set<Repository> pluginRepositories = new HashSet<Repository>();
+	private final Set<Repository> repositories = new HashSet<Repository>();
 	private final Set<Resource> resources = new HashSet<Resource>();
-
+	private final String artifactId;
+	private final String groupId;
+	private final String moduleName;
+	private final String name;
+	private final String packaging;
 	private final String path;
+	private final String sourceDirectory;
+	private final String testSourceDirectory;
+	private final String version;
 
-	public static PomBuilder getInstance(Element root, String pomPath, String moduleName) {
-		return new PomBuilder(root, pomPath, moduleName);
-	}
-
+	/**
+	 * Constructor
+	 *
+	 * @param root
+	 * @param pomPath the POM's canonical file system path
+	 * @param moduleName
+	 */
 	public PomBuilder(Element root, String pomPath, String moduleName) {
-
 		this.path = pomPath;
 
 		String groupId = XmlUtils.getTextContent("/project/groupId", root);
@@ -120,7 +120,7 @@ public class PomBuilder implements Builder<Pom> {
 	}
 
 	public Pom build() {
-		//TODO: Add checks to verify that all the parameters are available for Pom construction
+		// TODO: Add checks to verify that all the parameters are available for POM construction
 		Set<Module> builtModules = new LinkedHashSet<Module>();
 		Parent parentPom = null;
 		if (parent != null)  {
@@ -130,78 +130,6 @@ public class PomBuilder implements Builder<Pom> {
 			builtModules.add(moduleBuilder.build());
 		}
 		return new Pom(groupId, artifactId, version, packaging, dependencies, parentPom, builtModules, pomProperties, name, repositories, pluginRepositories, sourceDirectory, testSourceDirectory, filters, buildPlugins, resources, path, moduleName);
-	}
-
-	public String getGroupId() {
-		return groupId;
-	}
-
-	public String getArtifactId() {
-		return artifactId;
-	}
-
-	public String getVersion() {
-		return version;
-	}
-
-	public String getPackaging() {
-		return packaging;
-	}
-
-	public Set<Dependency> getDependencies() {
-		return dependencies;
-	}
-
-	public ParentBuilder getParent() {
-		return parent;
-	}
-
-	public Set<ModuleBuilder> getModules() {
-		return modules;
-	}
-
-	public Set<Property> getPomProperties() {
-		return pomProperties;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public Set<Repository> getRepositories() {
-		return repositories;
-	}
-
-	public Set<Repository> getPluginRepositories() {
-		return pluginRepositories;
-	}
-
-	public String getSourceDirectory() {
-		return sourceDirectory;
-	}
-
-	public String getTestSourceDirectory() {
-		return testSourceDirectory;
-	}
-
-	public Set<Filter> getFilters() {
-		return filters;
-	}
-
-	public Set<Plugin> getBuildPlugins() {
-		return buildPlugins;
-	}
-
-	public Set<Resource> getResources() {
-		return resources;
-	}
-
-	public String getPath() {
-		return path;
-	}
-
-	public String getModuleName() {
-		return moduleName;
 	}
 
 	private ParentBuilder getParent(String pomPath, Element root) {

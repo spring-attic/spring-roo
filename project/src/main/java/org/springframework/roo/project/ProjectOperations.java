@@ -14,16 +14,17 @@ import org.springframework.roo.project.maven.Pom;
 public interface ProjectOperations {
 
 	/** 
-	 * Determines where is project is available.
+	 * Indicates whether a module with the given name is available.
 	 * 
-	 * @param moduleName the name of the module to act upon (required)
-	 * @return true if the project exists, otherwise false
+	 * @param moduleName the name of the module to act upon (can be blank)
+	 * @return see above
 	 */
 	boolean isProjectAvailable(String moduleName);
 
 	/**
-	 *
-	 * @return true if the focused project exists, otherwise false
+	 * Indicates whether the module whose name has the focus, if any, is available.
+	 * 
+	 * @return see above
 	 */
 	boolean isFocusedProjectAvailable();
 	
@@ -517,14 +518,17 @@ public interface ProjectOperations {
 	void setModule(Pom module);
 
 	/**
-	 *
-	 * @return
+	 * Returns the {@link Pom} of the currently focussed module, or if no module
+	 * has the focus, the root {@link Pom}.
+	 * 
+	 * @return <code>null</code> if none of the above Poms exist
 	 */
 	Pom getFocusedModule();
 
 	/**
+	 * Returns the name of the currently focussed module.
 	 *
-	 * @return
+	 * @return an empty string if no module has the focus
 	 */
 	String getFocusedModuleName();
 

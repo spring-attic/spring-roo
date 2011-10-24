@@ -1,5 +1,6 @@
 package org.springframework.roo.project;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
@@ -8,14 +9,18 @@ import org.springframework.roo.project.maven.Pom;
 public interface PomManagementService {
 
 	/**
+	 * Returns the {@link Pom} for the given canonical path
+	 * 
 	 * @param pomPath the canonical path of the pom.xml file
-	 * @return the {@link Pom} associated with the passed in path
+	 * @return <code>null</code> if there is no such Pom
 	 */
 	Pom getPomFromPath(String pomPath);
 
 	/**
-	 * @param moduleName the name of the module to lookup
-	 * @return the {@link Pom} associated with the passed in module name
+	 * Returns the {@link Pom} for the module with the given name.
+	 * 
+	 * @param moduleName the name of the module to look up (can be blank)
+	 * @return <code>null</code> if there's no such module
 	 */
 	Pom getPomFromModuleName(String moduleName);
 
@@ -30,12 +35,17 @@ public interface PomManagementService {
 	Pom getRootPom();
 
 	/**
-	 * @return the currently focused {@link Pom}
+	 * Returns the {@link Pom} of the currently focussed module, or if no module
+	 * has the focus, the root {@link Pom}.
+	 * 
+	 * @return <code>null</code> if none of the above Poms exist
 	 */
 	Pom getFocusedModule();
 
 	/**
-	 * @return the name of the currently focused module
+	 * Returns the name of the currently focussed module.
+	 * 
+	 * @return an empty string if no module has the focus.
 	 */
 	String getFocusedModuleName();
 
@@ -61,4 +71,11 @@ public interface PomManagementService {
 	 * @return a set of all available module names
 	 */
 	Set<String> getModuleNames();
+
+	/**
+	 * Returns the known {@link Pom}s
+	 * 
+	 * @return a non-<code>null</code> collection
+	 */
+	Collection<Pom> getPoms();
 }
