@@ -72,7 +72,6 @@ public class LastUsedImpl implements LastUsed {
 		}
 
 		topLevelPackage =  new JavaPackage(typeLocationService.getTopLevelPackageForModule(projectOperations.getFocusedModule()));
-		System.out.println("topLevePackage: " + topLevelPackage);
 
 		String moduleName = "";
 		if (module != null) {
