@@ -565,6 +565,9 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 
 	private PhysicalTypeMetadata getPhysicalTypeMetadata(final JavaType javaType) {
 		final String declaredByMetadataId = typeLocationService.getPhysicalTypeIdentifier(javaType);
+		if (StringUtils.isBlank(declaredByMetadataId)) {
+			return null;
+		}
 		return (PhysicalTypeMetadata) metadataService.get(declaredByMetadataId);
 	}
 }
