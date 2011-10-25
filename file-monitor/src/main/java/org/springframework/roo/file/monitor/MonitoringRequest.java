@@ -1,8 +1,9 @@
 package org.springframework.roo.file.monitor;
 
 import java.io.File;
+import java.util.Collection;
 import java.util.Collections;
-import java.util.Set;
+import java.util.HashSet;
 
 import org.springframework.roo.file.monitor.event.FileOperation;
 import org.springframework.roo.support.util.Assert;
@@ -60,8 +61,8 @@ public abstract class MonitoringRequest {
 	}
 
 	// Fields
+	private final Collection<FileOperation> notifyOn;
 	private final File resource;
-	private final Set<FileOperation> notifyOn;
 
 	/**
 	 * Constructor
@@ -69,10 +70,10 @@ public abstract class MonitoringRequest {
 	 * @param resource the file to monitor (required)
 	 * @param notifyOn the file operations to notify upon (can't be empty)
 	 */
-	protected MonitoringRequest(final File resource, final Set<FileOperation> notifyOn) {
+	protected MonitoringRequest(final File resource, final Collection<FileOperation> notifyOn) {
 		Assert.notNull(resource, "Resource to monitor is required");
 		Assert.notEmpty(notifyOn, "At least one FileOperation to monitor must be specified");
-		this.notifyOn = notifyOn;
+		this.notifyOn = new HashSet<FileOperation>(notifyOn);
 		this.resource = resource;
 	}
 
@@ -84,9 +85,11 @@ public abstract class MonitoringRequest {
 	}
 
 	/**
-	 * @return an unmodifiable set containing one or more operations to be monitored (never null or empty)
+	 * Returns the operations to be monitored
+	 * 
+	 * @return an unmodifiable collection containing one or more elements
 	 */
-	public Set<FileOperation> getNotifyOn() {
-		return Collections.unmodifiableSet(notifyOn);
+	public Collection<FileOperation> getNotifyOn() {
+		return Collections.unmodifiableCollection(notifyOn);
 	}
 }

@@ -9,6 +9,7 @@ import java.beans.PropertyEditor;
 import java.beans.PropertyEditorSupport;
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -41,6 +42,7 @@ import org.springframework.roo.support.util.StringUtils;
 public class MonitoringRequestEditor extends PropertyEditorSupport {
 
 	// Constants
+	private static final FileOperation[] MONITORED_OPERATIONS = { CREATED, RENAMED, UPDATED, DELETED };
 	private static final String SUBTREE_WILDCARD = "**";
 
 	/**
@@ -59,17 +61,10 @@ public class MonitoringRequestEditor extends PropertyEditorSupport {
 			throw new IllegalStateException("Failure retrieving path for request '" + req + "'", ioe);
 		}
 		text.append(",");
-		if (req.getNotifyOn().contains(CREATED)) {
-			text.append("C");
-		}
-		if (req.getNotifyOn().contains(RENAMED)) {
-			text.append("R");
-		}
-		if (req.getNotifyOn().contains(UPDATED)) {
-			text.append("U");
-		}
-		if (req.getNotifyOn().contains(DELETED)) {
-			text.append("D");
+		for (final FileOperation fileOperation : MONITORED_OPERATIONS) {
+			if (req.getNotifyOn().contains(fileOperation)) {
+				text.append(fileOperation.name().charAt(0));
+			}
 		}
 		if (req instanceof DirectoryMonitoringRequest) {
 			DirectoryMonitoringRequest dmr = (DirectoryMonitoringRequest) req;
@@ -97,7 +92,7 @@ public class MonitoringRequestEditor extends PropertyEditorSupport {
 		final File file = new File(segments[0]);
 		Assert.isTrue(file.exists(), "File '" + file + "' does not exist");
 
-		final Set<FileOperation> fileOperations = parseFileOperations(segments[1]);
+		final Collection<FileOperation> fileOperations = parseFileOperations(segments[1]);
 		Assert.notEmpty(fileOperations, "One or more valid operation codes ('CRUD') required for file '" + file + "'");
 
 		if (file.isFile()) {
@@ -108,24 +103,17 @@ public class MonitoringRequestEditor extends PropertyEditorSupport {
 		}
 	}
 
-	private Set<FileOperation> parseFileOperations(final String fileOperationCodes) {
+	private Collection<FileOperation> parseFileOperations(final String fileOperationCodes) {
 		final Set<FileOperation> fileOperations = new HashSet<FileOperation>();
-		if (fileOperationCodes.contains("C")) {
-			fileOperations.add(CREATED);
-		}
-		if (fileOperationCodes.contains("R")) {
-			fileOperations.add(RENAMED);
-		}
-		if (fileOperationCodes.contains("U")) {
-			fileOperations.add(UPDATED);
-		}
-		if (fileOperationCodes.contains("D")) {
-			fileOperations.add(DELETED);
+		for (final FileOperation fileOperation : MONITORED_OPERATIONS) {
+			if (fileOperationCodes.contains(fileOperation.name().substring(0, 1))) {
+				fileOperations.add(fileOperation);
+			}
 		}
 		return fileOperations;
 	}
 
-	private void setValueToDirectoryMonitoringRequest(final String[] segments, final File file,	final Set<FileOperation> fileOperations) {
+	private void setValueToDirectoryMonitoringRequest(final String[] segments, final File file, final Collection<FileOperation> fileOperations) {
 		if (segments.length == 3) {
 			Assert.isTrue(SUBTREE_WILDCARD.equals(segments[2]), "The third value for directory '" + file + "' can only be '" + SUBTREE_WILDCARD + "' (or completely remove the third parameter if you do not want to watch the subtree)");
 			setValue(new DirectoryMonitoringRequest(file, true, fileOperations));

@@ -1,7 +1,7 @@
 package org.springframework.roo.file.monitor;
 
 import java.io.File;
-import java.util.Set;
+import java.util.Collection;
 
 import org.springframework.roo.file.monitor.event.FileOperation;
 import org.springframework.roo.support.style.ToStringCreator;
@@ -15,7 +15,7 @@ import org.springframework.roo.support.util.Assert;
  */
 public class FileMonitoringRequest extends MonitoringRequest {
 
-	public FileMonitoringRequest(final File file, final Set<FileOperation> notifyOn) {
+	public FileMonitoringRequest(final File file, final Collection<FileOperation> notifyOn) {
 		super(file, notifyOn);
 		Assert.isTrue(file.isFile(), "File '" + file + "' must be a file");
 	}
@@ -27,5 +27,4 @@ public class FileMonitoringRequest extends MonitoringRequest {
 		tsc.append("notifyOn", getNotifyOn());
 		return tsc.toString();
 	}
-
 }

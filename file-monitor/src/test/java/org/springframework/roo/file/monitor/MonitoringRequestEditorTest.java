@@ -1,9 +1,13 @@
 package org.springframework.roo.file.monitor;
 
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.springframework.roo.file.monitor.event.FileOperation.CREATED;
 import static org.springframework.roo.file.monitor.event.FileOperation.DELETED;
 import static org.springframework.roo.file.monitor.event.FileOperation.RENAMED;
 import static org.springframework.roo.file.monitor.event.FileOperation.UPDATED;
@@ -124,6 +128,56 @@ public class MonitoringRequestEditorTest {
 		final MonitoringRequest monitoringRequest = assertMonitoringRequest(this.testDirectory.getAbsolutePath() + ",D,**", this.testDirectory, DELETED);
 		final DirectoryMonitoringRequest directoryMonitoringRequest = (DirectoryMonitoringRequest) monitoringRequest;
 		assertTrue(directoryMonitoringRequest.isWatchSubtree());
+	}
+	
+	@Test
+	public void testGetAsTextWhenNoValueSet() {
+		assertNull(editor.getAsText());
+	}
+	
+	@Test
+	public void testGetAsTextWhenMonitoringDirectoryOnly() throws Exception {
+		// Set up
+		final DirectoryMonitoringRequest mockMonitoringRequest = mock(DirectoryMonitoringRequest.class);
+		when(mockMonitoringRequest.isWatchSubtree()).thenReturn(false);
+		assertAsText(mockMonitoringRequest, "/path/to/file,CD");
+	}
+	
+	@Test
+	public void testGetAsTextWhenMonitoringDirectoryAndSubTree() throws Exception {
+		// Set up
+		final DirectoryMonitoringRequest mockMonitoringRequest = mock(DirectoryMonitoringRequest.class);
+		when(mockMonitoringRequest.isWatchSubtree()).thenReturn(true);
+		assertAsText(mockMonitoringRequest, "/path/to/file,CD,**");
+	}
+	
+	@Test
+	public void testGetAsTextWhenMonitoringFile() throws Exception {
+		assertAsText(mock(MonitoringRequest.class), "/path/to/file,CD");
+	}
+	
+	/**
+	 * Asserts that the editor converts the given {@link MonitoringRequest} to
+	 * the given text
+	 * 
+	 * @param mockMonitoringRequest
+	 * @param expectedText
+	 * @throws Exception
+	 */
+	private void assertAsText(final MonitoringRequest mockMonitoringRequest, final String expectedText) throws Exception {
+		// Set up
+		final File mockFile = mock(File.class);
+		when(mockMonitoringRequest.getFile()).thenReturn(mockFile);
+		when(mockFile.getCanonicalPath()).thenReturn("/path/to/file");
+		final FileOperation[] operations = { CREATED, DELETED };
+		when(mockMonitoringRequest.getNotifyOn()).thenReturn(Arrays.asList(operations));
+		this.editor.setValue(mockMonitoringRequest);
+		
+		// Invoke
+		final String text = this.editor.getAsText();
+		
+		// Check
+		assertEquals(expectedText, text);
 	}
 	
 	@After

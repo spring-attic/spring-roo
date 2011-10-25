@@ -1,7 +1,8 @@
 package org.springframework.roo.file.monitor;
 
 import java.io.File;
-import java.util.Set;
+import java.util.Arrays;
+import java.util.Collection;
 
 import org.springframework.roo.file.monitor.event.FileOperation;
 import org.springframework.roo.support.style.ToStringCreator;
@@ -12,14 +13,33 @@ import org.springframework.roo.support.util.Assert;
  *
  * @author Ben Alex
  * @since 1.0
- *
  */
 public class DirectoryMonitoringRequest extends MonitoringRequest {
+	
+	// Fields
 	private final boolean watchSubtree;
 
-	public DirectoryMonitoringRequest(final File file, final boolean watchSubtree, final Set<FileOperation> notifyOn) {
-		super(file, notifyOn);
-		Assert.isTrue(file.isDirectory(), "File '" + file + "' must be a directory");
+	/**
+	 * Constructor that accepts an array of operations
+	 *
+	 * @param directory the directory to monitor; must be an existing directory
+	 * @param watchSubtree whether to also monitor the sub-directories of the given directory
+	 * @param notifyOn the operations to notify upon (can't be empty)
+	 */
+	public DirectoryMonitoringRequest(final File file, final boolean watchSubtree, final FileOperation... notifyOn) {
+		this(file, watchSubtree, Arrays.asList(notifyOn));
+	}
+	
+	/**
+	 * Constructor that accepts a Collection of operations
+	 *
+	 * @param directory the directory to monitor; must be an existing directory
+	 * @param watchSubtree whether to also monitor the sub-directories of the given directory
+	 * @param notifyOn the operations to notify upon (can't be empty)
+	 */
+	public DirectoryMonitoringRequest(final File directory, final boolean watchSubtree, final Collection<FileOperation> notifyOn) {
+		super(directory, notifyOn);
+		Assert.isTrue(directory.isDirectory(), "File '" + directory + "' must be a directory");
 		this.watchSubtree = watchSubtree;
 	}
 

@@ -9,7 +9,7 @@ import static org.springframework.roo.file.monitor.event.FileOperation.UPDATED;
 
 import java.io.File;
 import java.util.Arrays;
-import java.util.Set;
+import java.util.Collection;
 
 import org.junit.Test;
 import org.springframework.roo.file.monitor.event.FileOperation;
@@ -35,7 +35,7 @@ public class MonitoringRequestTest {
 	private void assertMonitorsCurrentDirectory(final MonitoringRequest monitoringRequest, final boolean expectedToWatchSubTree) {
 		assertEquals(DirectoryMonitoringRequest.class, monitoringRequest.getClass());
 		assertEquals(expectedToWatchSubTree, ((DirectoryMonitoringRequest) monitoringRequest).isWatchSubtree());
-		final Set<FileOperation> notifyOn = monitoringRequest.getNotifyOn();
+		final Collection<FileOperation> notifyOn = monitoringRequest.getNotifyOn();
 		assertEquals(CRUD_OPERATIONS.length, notifyOn.size());
 		assertTrue(notifyOn.containsAll(Arrays.asList(CRUD_OPERATIONS)));
 		assertEquals(new File("."), monitoringRequest.getFile());
