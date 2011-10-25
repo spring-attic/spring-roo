@@ -180,7 +180,7 @@ public class MavenPathResolvingStrategy implements PathResolvingStrategy {
 			String sourceDirectory = Pom.DEFAULT_SOURCE_DIRECTORY;
 			if (module != null) {
 				if (StringUtils.hasText(module.getSourceDirectory())) {
-					sourceDirectory = module.getSourceDirectory().replace("${project.basedir}/", "");
+					sourceDirectory = module.getSourceDirectory();
 				}
 			}
 			sb.append(sourceDirectory);
@@ -190,7 +190,7 @@ public class MavenPathResolvingStrategy implements PathResolvingStrategy {
 			String testSourceDirectory = Pom.DEFAULT_TEST_SOURCE_DIRECTORY;
 			if (module != null) {
 				if (StringUtils.hasText(module.getTestSourceDirectory())) {
-					testSourceDirectory = module.getTestSourceDirectory().replace("${project.basedir}/", "");
+					testSourceDirectory = module.getTestSourceDirectory();
 				}
 			}
 			sb.append(testSourceDirectory);

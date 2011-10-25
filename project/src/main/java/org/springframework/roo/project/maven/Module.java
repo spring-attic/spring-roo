@@ -18,7 +18,7 @@ public class Module {
 	 * Constructor
 	 *
 	 * @param name the module's name (can't be blank)
-	 * @param pomPath the canonical path of the POM file (can't be blank)
+	 * @param pomPath the canonical path of the module's POM file (can't be blank)
 	 */
 	public Module(final String name, final String pomPath) {
 		Assert.hasText(name, "Invalid module name '" + name + "'");

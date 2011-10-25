@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -25,60 +26,83 @@ import org.springframework.roo.support.util.StringUtils;
 
 public class Pom {
 
-	private final String groupId;
-	private final String artifactId;
-	private final String version;
-	private final String packaging;
-	private final Set<Dependency> dependencies;
+	// Constants
+	private static final String DEFAULT_PACKAGING = "jar";	// Maven behaviour
+	public static final String DEFAULT_RESOURCES_DIRECTORY = "src/main/resources";
+	public static final String DEFAULT_SOURCE_DIRECTORY = "src/main/java";
+	public static final String DEFAULT_SPRING_CONFIG_ROOT = DEFAULT_RESOURCES_DIRECTORY + "/META-INF/spring";
+	public static final String DEFAULT_TEST_RESOURCES_DIRECTORY = "src/test/resources";
+	public static final String DEFAULT_TEST_SOURCE_DIRECTORY = "src/test/java";
+	public static final String DEFAULT_WAR_SOURCE_DIRECTORY = "src/main/webapp";
+
+	// Fields
+	private final Map<Path, PathInformation> pathCache = new LinkedHashMap<Path, PathInformation>();
 	private final Parent parent;
-	private final Set<Module> modules;
-	private final Set<Property> pomProperties;
-
-	private final String name;
+	private final Set<Dependency> dependencies = new LinkedHashSet<Dependency>();
+	private final Set<Filter> filters = new LinkedHashSet<Filter>();
+	private final Set<Module> modules = new LinkedHashSet<Module>();
+	private final Set<Plugin> buildPlugins = new LinkedHashSet<Plugin>();
+	private final Set<Property> pomProperties = new LinkedHashSet<Property>();
+	private final Set<Repository> pluginRepositories = new LinkedHashSet<Repository>();
+	private final Set<Repository> repositories = new LinkedHashSet<Repository>();
+	private final Set<Resource> resources = new LinkedHashSet<Resource>();
+	private final String artifactId;
+	private final String groupId;
 	private final String moduleName;
-
-	private final Set<Repository> repositories;
-	private final Set<Repository> pluginRepositories;
-
+	private final String name;
+	private final String packaging;
+	private final String path;
 	private final String sourceDirectory;
 	private final String testSourceDirectory;
-	private final Set<Filter> filters;
-	private final Set<Plugin> buildPlugins;
-	private final Set<Resource> resources;
-
-	private final String path;
-
-	private final Map<Path, PathInformation> pathCache = new LinkedHashMap<Path, PathInformation>();
-
-	public static final String DEFAULT_SOURCE_DIRECTORY = "src/main/java";
-	public static final String DEFAULT_RESOURCES_DIRECTORY = "src/main/resources";
-	public static final String DEFAULT_TEST_SOURCE_DIRECTORY = "src/test/java";
-	public static final String DEFAULT_TEST_RESOURCES_DIRECTORY = "src/test/resources";
-	public static final String DEFAULT_WAR_SOURCE_DIRECTORY = "src/main/webapp";
-	public static final String DEFAULT_SPRING_CONFIG_ROOT = DEFAULT_RESOURCES_DIRECTORY + "/META-INF/spring";
+	private final String version;
 
 	/**
 	 * Constructor
+	 *
+	 * @param groupId the Maven groupId, explicit or inherited (required)
+	 * @param artifactId the Maven artifactId (required)
+	 * @param version the version of the artifact being built (required)
+	 * @param packaging the Maven packaging (can be blank for the default)
+	 * @param dependencies (can be <code>null</code> for none)
+	 * @param parent the POM's parent declaration (can be <code>null</code> for none)
+	 * @param modules the modules defined by this POM (only applies when packaging is "pom"; can be <code>null</code> for none)
+	 * @param pomProperties any properties defined in the POM (can be <code>null</code> for none)
+	 * @param name the Maven name of the artifact being built (can be blank)
+	 * @param repositories any repositories defined in the POM (can be <code>null</code> for none)
+	 * @param pluginRepositories any plugin repositories defined in the POM (can be <code>null</code> for none)
+	 * @param sourceDirectory the directory relative to the POM that contains production code (can be blank for the Maven default)
+	 * @param testSourceDirectory the directory relative to the POM that contains test code (can be blank for the Maven default)
+	 * @param filters any filters defined in the POM (can be <code>null</code> for none)
+	 * @param buildPlugins any plugins defined in the POM (can be <code>null</code> for none)
+	 * @param resources any build resources defined in the POM (can be <code>null</code> for none)
+	 * @param path the canonical path of this POM (required)
+	 * @param moduleName the Maven name of this module (blank for the project's root or only POM) 
 	 */
-	public Pom(final String groupId, final String artifactId, final String version, final String packaging, final Set<Dependency> dependencies, final Parent parent, final Set<Module> modules, final Set<Property> pomProperties, final String name, final Set<Repository> repositories, final Set<Repository> pluginRepositories, final String sourceDirectory, final String testSourceDirectory, final Set<Filter> filters, final Set<Plugin> buildPlugins, final Set<Resource> resources, final String path, final String moduleName) {
-		this.groupId = groupId;
+	public Pom(final String groupId, final String artifactId, final String version, final String packaging, final Collection<? extends Dependency> dependencies, final Parent parent, final Collection<? extends Module> modules, final Collection<? extends Property> pomProperties, final String name, final Collection<? extends Repository> repositories, final Collection<? extends Repository> pluginRepositories, final String sourceDirectory, final String testSourceDirectory, final Collection<? extends Filter> filters, final Collection<? extends Plugin> buildPlugins, final Collection<? extends Resource> resources, final String path, final String moduleName) {
+		Assert.hasText(groupId, "Invalid groupId '" + groupId + "'");
+		Assert.hasText(artifactId, "Invalid artifactId '" + artifactId + "'");
+		Assert.hasText(version, "Invalid version '" + version + "'");
+		Assert.hasText(path, "Invalid path '" + path + "'");
+		
 		this.artifactId = artifactId;
-		this.version = version;
-		this.packaging = packaging;
-		this.dependencies = dependencies;
+		this.groupId = groupId;
+		this.moduleName = StringUtils.trimToEmpty(moduleName);
+		this.name = StringUtils.trimToEmpty(name);
+		this.packaging = StringUtils.defaultIfEmpty(packaging, DEFAULT_PACKAGING);
 		this.parent = parent;
-		this.modules = modules;
-		this.pomProperties = pomProperties;
-		this.name = name;
-		this.repositories = repositories;
-		this.pluginRepositories = pluginRepositories;
-		this.sourceDirectory = sourceDirectory;
-		this.testSourceDirectory = testSourceDirectory;
-		this.filters = filters;
-		this.buildPlugins = buildPlugins;
-		this.resources = resources;
 		this.path = path;
-		this.moduleName = moduleName;
+		this.sourceDirectory = StringUtils.defaultIfEmpty(sourceDirectory, DEFAULT_SOURCE_DIRECTORY);
+		this.testSourceDirectory = StringUtils.defaultIfEmpty(testSourceDirectory, DEFAULT_TEST_SOURCE_DIRECTORY);
+		this.version = version;
+
+		CollectionUtils.populate(this.buildPlugins, buildPlugins);
+		CollectionUtils.populate(this.dependencies, dependencies);
+		CollectionUtils.populate(this.filters, filters);
+		CollectionUtils.populate(this.modules, modules);
+		CollectionUtils.populate(this.pluginRepositories, pluginRepositories);
+		CollectionUtils.populate(this.pomProperties, pomProperties);
+		CollectionUtils.populate(this.repositories, repositories);
+		CollectionUtils.populate(this.resources, resources);
 
 		cachePathInformation(Path.SRC_MAIN_JAVA);
 		cachePathInformation(Path.SRC_TEST_JAVA);
@@ -111,7 +135,6 @@ public class Pom {
 		sb.append(moduleRoot).append(File.separator);
 		if (path.equals(Path.SRC_MAIN_JAVA)) {
 			String sourceDirectory = getSourceDirectory();
-			sourceDirectory = sourceDirectory.replace("${project.basedir}/", "");
 			if (!StringUtils.hasText(sourceDirectory)) {
 				sourceDirectory = DEFAULT_SOURCE_DIRECTORY;
 			}
@@ -120,7 +143,6 @@ public class Pom {
 			sb.append(File.separator).append(DEFAULT_RESOURCES_DIRECTORY);
 		} else if (path.equals(Path.SRC_TEST_JAVA)) {
 			String testSourceDirectory = getTestSourceDirectory();
-			testSourceDirectory = testSourceDirectory.replace("${project.basedir}/", "");
 			if (!StringUtils.hasText(testSourceDirectory)) {
 				testSourceDirectory = DEFAULT_TEST_SOURCE_DIRECTORY;
 			}

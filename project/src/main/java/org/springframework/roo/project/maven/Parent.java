@@ -1,7 +1,14 @@
 package org.springframework.roo.project.maven;
 
+/**
+ * The parent declaration within a Maven POM.
+ *
+ * @author James Tyrrell
+ * @since 1.2.0
+ */
 public class Parent {
 
+	// Fields
 	private final String groupId;
 	private final String artifactId;
 	private final String version;

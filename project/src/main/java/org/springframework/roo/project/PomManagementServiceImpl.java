@@ -25,7 +25,7 @@ import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.maven.Pom;
-import org.springframework.roo.project.maven.PomBuilder;
+import org.springframework.roo.project.maven.PomFactory;
 import org.springframework.roo.shell.Shell;
 import org.springframework.roo.support.osgi.OSGiUtils;
 import org.springframework.roo.support.util.Assert;
@@ -49,6 +49,7 @@ public class PomManagementServiceImpl implements PomManagementService {
 	@Reference private MetadataDependencyRegistry metadataDependencyRegistry;
 	@Reference private MetadataService metadataService;
 	@Reference private NotifiableFileMonitorService fileMonitorService;
+	@Reference private PomFactory pomFactory;
 	@Reference private Shell shell;
 
 	private final Set<String> toBeParsed = new HashSet<String>();
@@ -161,8 +162,7 @@ public class PomManagementServiceImpl implements PomManagementService {
 						final Document pomDocument = XmlUtils.readXml(fileManager.getInputStream(changedPom));
 						resolvePoms(pomDocument.getDocumentElement(), changedPom, pomModuleMap);
 						final String moduleName = getModuleName(FileUtils.getFirstDirectory(changedPom));
-						final PomBuilder pomBuilder = new PomBuilder(pomDocument.getDocumentElement(), changedPom, moduleName);
-						final Pom pom = pomBuilder.build();
+						final Pom pom = pomFactory.getInstance(pomDocument.getDocumentElement(), changedPom, moduleName);
 						pomMap.put(changedPom, pom);
 						newPoms.add(pom);
 						toRemove.add(changedPom);
