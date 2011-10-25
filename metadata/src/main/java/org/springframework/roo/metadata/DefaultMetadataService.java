@@ -83,7 +83,7 @@ public class DefaultMetadataService extends AbstractMetadataCache implements Met
 		return getInternal(metadataIdentificationString, evictCache, true);
 	}
 
-	public MetadataItem getInternal(final String metadataIdentificationString, final boolean evictCache, final boolean cacheRetrievalAllowed) {
+	private MetadataItem getInternal(final String metadataIdentificationString, final boolean evictCache, final boolean cacheRetrievalAllowed) {
 		Assert.isTrue(MetadataIdentificationUtils.isIdentifyingInstance(metadataIdentificationString), "Metadata identification string '" + metadataIdentificationString + "' does not identify a metadata instance");
 
 		synchronized (lock) {
