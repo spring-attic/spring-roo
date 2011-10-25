@@ -65,28 +65,30 @@ public class MavenPathResolvingStrategy implements PathResolvingStrategy {
 
 	public String getRoot(final ContextualPath path) {
 		Assert.notNull(path, "Path required");
-		PathInformation pathInfo = pomManagementService.getFocusedModule().getPathInformation(path);
+		final Pom focusedModule = pomManagementService.getFocusedModule();
+		if (focusedModule == null) {
+			return null;
+		}
+		final PathInformation pathInfo = focusedModule.getPathInformation(path);
 		Assert.notNull(pathInfo, "Unable to determine information for path '" + path + "'");
-		File root = pathInfo.getLocation();
+		final File root = pathInfo.getLocation();
 		return FileDetails.getCanonicalPath(root);
 	}
 
 	/**
 	 * Obtains the {@link Path}s.
 	 *
-	 * @param requireSource true if the path is source, false if the path is NOT source, or null if source is ignored
+	 * @param sourcePaths <code>true</code> to return only source paths,
+	 * <code>false</code> to return only non-source paths, or <code>null</code>
+	 * to return all paths
 	 * @return a list of the matching paths (never null)
 	 */
-	private List<ContextualPath> getPaths(final Boolean requireSource) {
-		List<ContextualPath> result = new ArrayList<ContextualPath>();
-		for(Pom pom : pomManagementService.getPomMap().values()) {
-			for (PathInformation pi : pom.getPathInformation()) {
-				if (requireSource == null) {
+	private List<ContextualPath> getPaths(final Boolean sourcePaths) {
+		final List<ContextualPath> result = new ArrayList<ContextualPath>();
+		for (final Pom pom : pomManagementService.getPoms()) {
+			for (final PathInformation pi : pom.getPathInformation()) {
+				if (sourcePaths == null || sourcePaths.equals(pi.isSource())) {
 					result.add(pi.getContextualPath());
-				} else {
-					if ((requireSource && pi.isSource()) || (!requireSource && !pi.isSource())) {
-						result.add(pi.getContextualPath());
-					}
 				}
 			}
 		}
