@@ -29,7 +29,7 @@ public class PomBuilder implements Builder<Pom> {
 	private final ParentBuilder parent;
 	private final Set<Dependency> dependencies = new HashSet<Dependency>();
 	private final Set<Filter> filters = new HashSet<Filter>();
-	private final Set<ModuleBuilder> modules = new LinkedHashSet<ModuleBuilder>();
+	private final Set<Module> modules = new LinkedHashSet<Module>();
 	private final Set<Plugin> buildPlugins = new HashSet<Plugin>();
 	private final Set<Property> pomProperties = new HashSet<Property>();
 	private final Set<Repository> pluginRepositories = new HashSet<Repository>();
@@ -48,11 +48,12 @@ public class PomBuilder implements Builder<Pom> {
 	/**
 	 * Constructor
 	 *
-	 * @param root
-	 * @param pomPath the POM's canonical file system path
-	 * @param moduleName
+	 * @param root the root element of the POM's XML file (required)
+	 * @param pomPath the POM's canonical file system path (required)
+	 * @param moduleName the name of the module to which the POM applies
 	 */
 	public PomBuilder(final Element root, final String pomPath, final String moduleName) {
+		Assert.hasText(pomPath, "POM's canonical path is required");
 		this.path = pomPath;
 
 		String groupId = XmlUtils.getTextContent("/project/groupId", root);
@@ -77,7 +78,7 @@ public class PomBuilder implements Builder<Pom> {
 			String name = module.getTextContent();
 			if (StringUtils.hasText(name)) {
 				String modulePath = resolveRelativePath(pomPath, name);
-				modules.add(new ModuleBuilder(name, modulePath));
+				modules.add(new Module(name, modulePath));
 			}
 		}
 
@@ -121,15 +122,11 @@ public class PomBuilder implements Builder<Pom> {
 
 	public Pom build() {
 		// TODO: Add checks to verify that all the parameters are available for POM construction
-		Set<Module> builtModules = new LinkedHashSet<Module>();
 		Parent parentPom = null;
 		if (parent != null)  {
 			parentPom = parent.build();
 		}
-		for (ModuleBuilder moduleBuilder : modules) {
-			builtModules.add(moduleBuilder.build());
-		}
-		return new Pom(groupId, artifactId, version, packaging, dependencies, parentPom, builtModules, pomProperties, name, repositories, pluginRepositories, sourceDirectory, testSourceDirectory, filters, buildPlugins, resources, path, moduleName);
+		return new Pom(groupId, artifactId, version, packaging, dependencies, parentPom, modules, pomProperties, name, repositories, pluginRepositories, sourceDirectory, testSourceDirectory, filters, buildPlugins, resources, path, moduleName);
 	}
 
 	private ParentBuilder getParent(final String pomPath, final Element root) {
