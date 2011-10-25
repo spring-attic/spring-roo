@@ -41,9 +41,22 @@ public class DefaultPhysicalTypeMetadataTest {
 		when(mockItdMetadataProvider.getItdUniquenessFilenameSuffix()).thenReturn("MySuffix");
 		
 		// Invoke
-		final String itdCanoncialPath = metadata.getItdCanoncialPath(mockItdMetadataProvider);
+		final String itdCanonicalPath = metadata.getItdCanoncialPath(mockItdMetadataProvider);
 		
 		// Check
-		assertEquals("/usr/bob/projects/foo/Foo_Roo_MySuffix.aj", itdCanoncialPath);
+		assertEquals("/usr/bob/projects/foo/Foo_Roo_MySuffix.aj", itdCanonicalPath);
+	}
+	
+	@Test
+	public void testGetItdCanonicalPath() {
+		// Set up
+		final ItdMetadataProvider mockItdMetadataProvider = mock(ItdMetadataProvider.class);
+		when(mockItdMetadataProvider.getItdUniquenessFilenameSuffix()).thenReturn("MySuffix");
+		
+		// Invoke
+		final String itdCanonicalPath = metadata.getItdCanonicalPath(mockItdMetadataProvider);
+		
+		// Check
+		assertEquals("/usr/bob/projects/foo/Foo_Roo_MySuffix.aj", itdCanonicalPath);
 	}
 }

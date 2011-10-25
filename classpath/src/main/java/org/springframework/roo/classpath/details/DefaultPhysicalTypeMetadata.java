@@ -41,10 +41,8 @@ public class DefaultPhysicalTypeMetadata extends AbstractMetadataItem implements
 	}
 
 	public String getItdCanoncialPath(final ItdMetadataProvider metadataProvider) {
-		Assert.notNull(metadataProvider, "Metadata provider required");
-		final int dropFrom = this.physicalLocationCanonicalPath.lastIndexOf(".java");
-		Assert.isTrue(dropFrom > -1, "Unexpected governor filename format '" + this.physicalLocationCanonicalPath + "'");
-		return this.physicalLocationCanonicalPath.substring(0, dropFrom) + "_Roo_" + metadataProvider.getItdUniquenessFilenameSuffix() + ".aj";
+		// Delegate to the correctly spelled method
+		return getItdCanonicalPath(metadataProvider);
 	}
 
 	public JavaType getItdJavaType(final ItdMetadataProvider metadataProvider) {
@@ -60,5 +58,12 @@ public class DefaultPhysicalTypeMetadata extends AbstractMetadataItem implements
 	public String toString() {
 		// Used for example by the "metadata for id" command
 		return getClass().getSimpleName() + " for " + memberHoldingTypeDetails.getName();
+	}
+
+	public String getItdCanonicalPath(final ItdMetadataProvider metadataProvider) {
+		Assert.notNull(metadataProvider, "Metadata provider required");
+		final int dropFrom = this.physicalLocationCanonicalPath.lastIndexOf(".java");
+		Assert.isTrue(dropFrom > -1, "Unexpected governor filename format '" + this.physicalLocationCanonicalPath + "'");
+		return this.physicalLocationCanonicalPath.substring(0, dropFrom) + "_Roo_" + metadataProvider.getItdUniquenessFilenameSuffix() + ".aj";
 	}
 }
