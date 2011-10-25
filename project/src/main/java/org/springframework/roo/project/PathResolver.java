@@ -40,7 +40,7 @@ public interface PathResolver {
 	 * Returns a canonical path that represents the root of the presented {@link Path}.
 	 *
 	 * @param path to lookup (required)
-	 * @return the root of the path (never null or empty)
+	 * @return <code>null</code> if the root path cannot be determined
 	 */
 	String getRoot(ContextualPath path);
 	
@@ -101,21 +101,9 @@ public interface PathResolver {
 	List<ContextualPath> getNonSourcePaths();
 	
 	/**
-	 * Returns all paths supported by the implementation, in an order defined by the implementation.
+	 * Returns all known project paths.
 	 *
-	 * <p>
-	 * By default this method will return, in the following order:
-	 * <ul>
-	 * <li>{@link Path#SRC_MAIN_JAVA}</li>
-	 * <li>{@link Path#SRC_MAIN_RESOURCES}</li>
-	 * <li>{@link Path#SRC_MAIN_WEBAPP}</li>
-	 * <li>{@link Path#SRC_TEST_JAVA}</li>
-	 * <li>{@link Path#SRC_TEST_RESOURCES}</li>
-	 * <li>{@link Path#ROOT}</li>
-	 * <li>{@link Path#SPRING_CONFIG_ROOT}</li>
-	 * </ul>
-	 *
-	 * @return all supported paths (never null and never empty)
+	 * @return a non-<code>null</code> list (might be empty)
 	 */
 	List<ContextualPath> getPaths();
 
