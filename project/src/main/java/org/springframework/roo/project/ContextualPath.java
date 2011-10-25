@@ -128,4 +128,13 @@ public class ContextualPath {
 	public final String toString() {
 		return getName();
 	}
+
+	/**
+	 * Indicates whether this is the root of the entire user project.
+	 * 
+	 * @return see above
+	 */
+	public boolean isProjectRoot() {
+		return path == Path.ROOT && StringUtils.isBlank(module);
+	}
 }

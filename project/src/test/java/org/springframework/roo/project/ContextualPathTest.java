@@ -148,5 +148,20 @@ public class ContextualPathTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void testGetInstanceFromBlankString() {
 		ContextualPath.getInstance(" ");
-	}	
+	}
+	
+	@Test
+	public void testModuleRootIsNotProjectRoot() {
+		assertFalse(ContextualPath.getInstance(Path.ROOT, "web").isProjectRoot());
+	}
+	
+	@Test
+	public void testNonRootPathIsNotProjectRoot() {
+		assertFalse(ContextualPath.getInstance(Path.SRC_MAIN_RESOURCES, null).isProjectRoot());
+	}
+	
+	@Test
+	public void testProjectRootIsProjectRoot() {
+		assertTrue(ContextualPath.getInstance(Path.ROOT, null).isProjectRoot());
+	}
 }
