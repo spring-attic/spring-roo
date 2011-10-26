@@ -13,7 +13,6 @@ import java.util.Arrays;
  * @author Rod Johnson
  * @author Rob Harrop
  * @author Alex Ruiz
- * @since 19.03.2004
  * @see org.apache.commons.lang.ObjectUtils
  */
 public final class ObjectUtils {
@@ -32,6 +31,7 @@ public final class ObjectUtils {
 	/**
 	 * Return whether the given throwable is a checked exception:
 	 * that is, neither a RuntimeException nor an Error.
+	 * 
 	 * @param ex the throwable to check
 	 * @return whether the throwable is a checked exception
 	 * @see java.lang.Exception
@@ -45,11 +45,12 @@ public final class ObjectUtils {
 	/**
 	 * Check whether the given exception is compatible with the exceptions
 	 * declared in a throws clause.
+	 * 
 	 * @param ex the exception to checked
 	 * @param declaredExceptions the exceptions declared in the throws clause
 	 * @return whether the given exception is compatible
 	 */
-	public static boolean isCompatibleWithThrowsClause(final Throwable ex, final Class<?>[] declaredExceptions) {
+	public static boolean isCompatibleWithThrowsClause(final Throwable ex, final Class<?>... declaredExceptions) {
 		if (!isCheckedException(ex)) {
 			return true;
 		}
@@ -68,15 +69,17 @@ public final class ObjectUtils {
 	/**
 	 * Return whether the given array is empty: that is, <code>null</code>
 	 * or of zero length.
+	 * 
 	 * @param array the array to check
 	 * @return whether the given array is empty
 	 */
 	public static boolean isEmpty(final Object[] array) {
-		return (array == null || array.length == 0);
+		return array == null || array.length == 0;
 	}
 
 	/**
 	 * Check whether the given array contains the given element.
+	 * 
 	 * @param array the array to check (may be <code>null</code>,
 	 * in which case the return value will always be <code>false</code>)
 	 * @param element the element to check for
@@ -97,6 +100,7 @@ public final class ObjectUtils {
 	/**
 	 * Append the given Object to the given array, returning a new array
 	 * consisting of the input array contents plus the given Object.
+	 * 
 	 * @param array the array to append to (can be <code>null</code>)
 	 * @param obj the Object to append
 	 * @return the new array (of the same component type; never <code>null</code>)
@@ -123,6 +127,7 @@ public final class ObjectUtils {
 	 * object array (if necessary of primitive wrapper objects).
 	 * <p>A <code>null</code> source value will be converted to an
 	 * empty Object array.
+	 * 
 	 * @param source the (potentially primitive) array
 	 * @return the corresponding object array (never <code>null</code>)
 	 * @throws IllegalArgumentException if the parameter is not an array
@@ -159,6 +164,7 @@ public final class ObjectUtils {
 	 * <code>null</code>.
 	 * <p>Compares arrays with <code>Arrays.equals</code>, performing an equality
 	 * check based on the array elements rather than the array reference.
+	 * 
 	 * @param o1 first Object to compare
 	 * @param o2 second Object to compare
 	 * @return whether the given objects are equal
@@ -212,6 +218,7 @@ public final class ObjectUtils {
 	 * this method will delegate to any of the <code>nullSafeHashCode</code>
 	 * methods for arrays in this class. If the object is <code>null</code>,
 	 * this method returns 0.
+	 * 
 	 * @see #nullSafeHashCode(Object[])
 	 * @see #nullSafeHashCode(boolean[])
 	 * @see #nullSafeHashCode(byte[])
@@ -260,25 +267,28 @@ public final class ObjectUtils {
 
 	/**
 	 * Return a hash code based on the contents of the specified array.
-	 * If <code>array</code> is <code>null</code>, this method returns 0.
+	 * 
+	 * @param array the array from whose elements to calculate the hash code (can be <code>null</code>)
+	 * @return 0 if the array is <code>null</code>
 	 */
-	public static int nullSafeHashCode(final Object[] array) {
+	public static int nullSafeHashCode(final Object... array) {
 		if (array == null) {
 			return 0;
 		}
 		int hash = INITIAL_HASH;
-		int arraySize = array.length;
-		for (int i = 0; i < arraySize; i++) {
-			hash = MULTIPLIER * hash + nullSafeHashCode(array[i]);
+		for (final Object element : array) {
+			hash = MULTIPLIER * hash + nullSafeHashCode(element);
 		}
 		return hash;
 	}
 
 	/**
 	 * Return a hash code based on the contents of the specified array.
-	 * If <code>array</code> is <code>null</code>, this method returns 0.
+	 * 
+	 * @param array can be <code>null</code>
+	 * @return 0 if <code>array</code> is <code>null</code>
 	 */
-	public static int nullSafeHashCode(final boolean[] array) {
+	public static int nullSafeHashCode(final boolean... array) {
 		if (array == null) {
 			return 0;
 		}
@@ -292,9 +302,11 @@ public final class ObjectUtils {
 
 	/**
 	 * Return a hash code based on the contents of the specified array.
-	 * If <code>array</code> is <code>null</code>, this method returns 0.
+	 * 
+	 * @param array can be <code>null</code>
+	 * @return 0 if <code>array</code> is <code>null</code>
 	 */
-	public static int nullSafeHashCode(final byte[] array) {
+	public static int nullSafeHashCode(final byte... array) {
 		if (array == null) {
 			return 0;
 		}
@@ -308,9 +320,11 @@ public final class ObjectUtils {
 
 	/**
 	 * Return a hash code based on the contents of the specified array.
-	 * If <code>array</code> is <code>null</code>, this method returns 0.
+	 * 
+	 * @param array can be <code>null</code>
+	 * @return 0 if <code>array</code> is <code>null</code>
 	 */
-	public static int nullSafeHashCode(final char[] array) {
+	public static int nullSafeHashCode(final char... array) {
 		if (array == null) {
 			return 0;
 		}
@@ -324,9 +338,11 @@ public final class ObjectUtils {
 
 	/**
 	 * Return a hash code based on the contents of the specified array.
-	 * If <code>array</code> is <code>null</code>, this method returns 0.
+	 * 
+	 * @param array can be <code>null</code>
+	 * @return 0 if <code>array</code> is <code>null</code>
 	 */
-	public static int nullSafeHashCode(final double[] array) {
+	public static int nullSafeHashCode(final double... array) {
 		if (array == null) {
 			return 0;
 		}
@@ -340,9 +356,11 @@ public final class ObjectUtils {
 
 	/**
 	 * Return a hash code based on the contents of the specified array.
-	 * If <code>array</code> is <code>null</code>, this method returns 0.
+	 * 
+	 * @param array can be <code>null</code>
+	 * @return 0 if <code>array</code> is <code>null</code>
 	 */
-	public static int nullSafeHashCode(final float[] array) {
+	public static int nullSafeHashCode(final float... array) {
 		if (array == null) {
 			return 0;
 		}
@@ -356,9 +374,11 @@ public final class ObjectUtils {
 
 	/**
 	 * Return a hash code based on the contents of the specified array.
-	 * If <code>array</code> is <code>null</code>, this method returns 0.
+	 * 
+	 * @param array can be <code>null</code>
+	 * @return 0 if <code>array</code> is <code>null</code>
 	 */
-	public static int nullSafeHashCode(final int[] array) {
+	public static int nullSafeHashCode(final int... array) {
 		if (array == null) {
 			return 0;
 		}
@@ -372,9 +392,11 @@ public final class ObjectUtils {
 
 	/**
 	 * Return a hash code based on the contents of the specified array.
-	 * If <code>array</code> is <code>null</code>, this method returns 0.
+	 * 
+	 * @param array can be <code>null</code>
+	 * @return 0 if <code>array</code> is <code>null</code>
 	 */
-	public static int nullSafeHashCode(final long[] array) {
+	public static int nullSafeHashCode(final long... array) {
 		if (array == null) {
 			return 0;
 		}
@@ -388,9 +410,11 @@ public final class ObjectUtils {
 
 	/**
 	 * Return a hash code based on the contents of the specified array.
-	 * If <code>array</code> is <code>null</code>, this method returns 0.
+	 * 
+	 * @param array can be <code>null</code>
+	 * @return 0 if <code>array</code> is <code>null</code>
 	 */
-	public static int nullSafeHashCode(final short[] array) {
+	public static int nullSafeHashCode(final short... array) {
 		if (array == null) {
 			return 0;
 		}
@@ -403,15 +427,18 @@ public final class ObjectUtils {
 	}
 
 	/**
-	 * Return the same value as <code>{@link Boolean#hashCode()}</code>.
-	 * @see Boolean#hashCode()
+	 * Returns the hash code of the given boolean value.
+	 * 
+	 * @param bool the boolean for which to return the hash code
+	 * @return see {@link Boolean#hashCode()}
 	 */
 	public static int hashCode(final boolean bool) {
-		return bool ? 1231 : 1237;
+		return Boolean.valueOf(bool).hashCode();
 	}
 
 	/**
 	 * Return the same value as <code>{@link Double#hashCode()}</code>.
+	 * 
 	 * @see Double#hashCode()
 	 */
 	public static int hashCode(final double dbl) {
@@ -421,6 +448,7 @@ public final class ObjectUtils {
 
 	/**
 	 * Return the same value as <code>{@link Float#hashCode()}</code>.
+	 * 
 	 * @see Float#hashCode()
 	 */
 	public static int hashCode(final float flt) {
@@ -429,6 +457,7 @@ public final class ObjectUtils {
 
 	/**
 	 * Return the same value as <code>{@link Long#hashCode()}</code>.
+	 * 
 	 * @see Long#hashCode()
 	 */
 	public static int hashCode(final long lng) {
@@ -441,6 +470,7 @@ public final class ObjectUtils {
 
 	/**
 	 * Return a String representation of an object's overall identity.
+	 * 
 	 * @param obj the object (may be <code>null</code>)
 	 * @return the object's identity as String representation,
 	 * or an empty String if the object was <code>null</code>
@@ -454,6 +484,7 @@ public final class ObjectUtils {
 
 	/**
 	 * Return a hex String form of an object's identity hash code.
+	 * 
 	 * @param obj the object
 	 * @return the object's identity code in hex notation
 	 */
@@ -466,6 +497,7 @@ public final class ObjectUtils {
 	 * not <code>null</code>; otherwise returns an empty String.
 	 * <p>Differs from {@link #nullSafeToString(Object)} in that it returns
 	 * an empty String rather than "null" for a <code>null</code> value.
+	 * 
 	 * @param obj the object to build a display String for
 	 * @return a display String representation of <code>obj</code>
 	 * @see #nullSafeToString(Object)
@@ -480,6 +512,7 @@ public final class ObjectUtils {
 	/**
 	 * Determine the class name for the given object.
 	 * <p>Returns <code>"null"</code> if <code>obj</code> is <code>null</code>.
+	 * 
 	 * @param obj the object to introspect (may be <code>null</code>)
 	 * @return the corresponding class name
 	 */
@@ -491,6 +524,7 @@ public final class ObjectUtils {
 	 * Return a String representation of the specified Object.
 	 * <p>Builds a String representation of the contents in case of an array.
 	 * Returns <code>"null"</code> if <code>obj</code> is <code>null</code>.
+	 * 
 	 * @param obj the object to build a String representation for
 	 * @return a String representation of <code>obj</code>
 	 */
@@ -538,10 +572,11 @@ public final class ObjectUtils {
 	 * enclosed in curly braces (<code>"{}"</code>). Adjacent elements are separated
 	 * by the characters <code>", "</code> (a comma followed by a space). Returns
 	 * <code>"null"</code> if <code>array</code> is <code>null</code>.
+	 * 
 	 * @param array the array to build a String representation for
 	 * @return a String representation of <code>array</code>
 	 */
-	public static String nullSafeToString(final Object[] array) {
+	public static String nullSafeToString(final Object... array) {
 		if (array == null) {
 			return NULL_STRING;
 		}
@@ -569,10 +604,11 @@ public final class ObjectUtils {
 	 * enclosed in curly braces (<code>"{}"</code>). Adjacent elements are separated
 	 * by the characters <code>", "</code> (a comma followed by a space). Returns
 	 * <code>"null"</code> if <code>array</code> is <code>null</code>.
+	 * 
 	 * @param array the array to build a String representation for
 	 * @return a String representation of <code>array</code>
 	 */
-	public static String nullSafeToString(final boolean[] array) {
+	public static String nullSafeToString(final boolean... array) {
 		if (array == null) {
 			return NULL_STRING;
 		}
@@ -601,10 +637,11 @@ public final class ObjectUtils {
 	 * enclosed in curly braces (<code>"{}"</code>). Adjacent elements are separated
 	 * by the characters <code>", "</code> (a comma followed by a space). Returns
 	 * <code>"null"</code> if <code>array</code> is <code>null</code>.
+	 * 
 	 * @param array the array to build a String representation for
 	 * @return a String representation of <code>array</code>
 	 */
-	public static String nullSafeToString(final byte[] array) {
+	public static String nullSafeToString(final byte... array) {
 		if (array == null) {
 			return NULL_STRING;
 		}
@@ -632,10 +669,11 @@ public final class ObjectUtils {
 	 * enclosed in curly braces (<code>"{}"</code>). Adjacent elements are separated
 	 * by the characters <code>", "</code> (a comma followed by a space). Returns
 	 * <code>"null"</code> if <code>array</code> is <code>null</code>.
+	 * 
 	 * @param array the array to build a String representation for
 	 * @return a String representation of <code>array</code>
 	 */
-	public static String nullSafeToString(final char[] array) {
+	public static String nullSafeToString(final char... array) {
 		if (array == null) {
 			return NULL_STRING;
 		}
@@ -663,10 +701,11 @@ public final class ObjectUtils {
 	 * enclosed in curly braces (<code>"{}"</code>). Adjacent elements are separated
 	 * by the characters <code>", "</code> (a comma followed by a space). Returns
 	 * <code>"null"</code> if <code>array</code> is <code>null</code>.
+	 * 
 	 * @param array the array to build a String representation for
 	 * @return a String representation of <code>array</code>
 	 */
-	public static String nullSafeToString(final double[] array) {
+	public static String nullSafeToString(final double... array) {
 		if (array == null) {
 			return NULL_STRING;
 		}
@@ -695,10 +734,11 @@ public final class ObjectUtils {
 	 * enclosed in curly braces (<code>"{}"</code>). Adjacent elements are separated
 	 * by the characters <code>", "</code> (a comma followed by a space). Returns
 	 * <code>"null"</code> if <code>array</code> is <code>null</code>.
+	 * 
 	 * @param array the array to build a String representation for
 	 * @return a String representation of <code>array</code>
 	 */
-	public static String nullSafeToString(final float[] array) {
+	public static String nullSafeToString(final float... array) {
 		if (array == null) {
 			return NULL_STRING;
 		}
@@ -727,10 +767,11 @@ public final class ObjectUtils {
 	 * enclosed in curly braces (<code>"{}"</code>). Adjacent elements are separated
 	 * by the characters <code>", "</code> (a comma followed by a space). Returns
 	 * <code>"null"</code> if <code>array</code> is <code>null</code>.
+	 * 
 	 * @param array the array to build a String representation for
 	 * @return a String representation of <code>array</code>
 	 */
-	public static String nullSafeToString(final int[] array) {
+	public static String nullSafeToString(final int... array) {
 		if (array == null) {
 			return NULL_STRING;
 		}
@@ -758,10 +799,11 @@ public final class ObjectUtils {
 	 * enclosed in curly braces (<code>"{}"</code>). Adjacent elements are separated
 	 * by the characters <code>", "</code> (a comma followed by a space). Returns
 	 * <code>"null"</code> if <code>array</code> is <code>null</code>.
+	 * 
 	 * @param array the array to build a String representation for
 	 * @return a String representation of <code>array</code>
 	 */
-	public static String nullSafeToString(final long[] array) {
+	public static String nullSafeToString(final long... array) {
 		if (array == null) {
 			return NULL_STRING;
 		}
@@ -789,10 +831,11 @@ public final class ObjectUtils {
 	 * enclosed in curly braces (<code>"{}"</code>). Adjacent elements are separated
 	 * by the characters <code>", "</code> (a comma followed by a space). Returns
 	 * <code>"null"</code> if <code>array</code> is <code>null</code>.
+	 * 
 	 * @param array the array to build a String representation for
 	 * @return a String representation of <code>array</code>
 	 */
-	public static String nullSafeToString(final short[] array) {
+	public static String nullSafeToString(final short... array) {
 		if (array == null) {
 			return NULL_STRING;
 		}

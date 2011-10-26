@@ -245,7 +245,7 @@ public final class CollectionUtils {
 	 * @return a value of one of the given types found if there is a clear match,
 	 * or <code>null</code> if none or more than one such value found
 	 */
-	public static Object findValueOfType(final Collection<?> collection, final Class<?>[] types) {
+	public static Object findValueOfType(final Collection<?> collection, final Class<?>... types) {
 		if (isEmpty(collection) || ObjectUtils.isEmpty(types)) {
 			return null;
 		}
