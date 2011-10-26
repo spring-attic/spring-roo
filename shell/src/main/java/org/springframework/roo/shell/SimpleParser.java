@@ -1,7 +1,5 @@
 package org.springframework.roo.shell;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.transform.Transformer;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileFilter;
@@ -10,6 +8,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -26,8 +25,12 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.transform.Transformer;
+
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.CollectionUtils;
 import org.springframework.roo.support.util.ExceptionUtils;
 import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.StringUtils;
@@ -66,11 +69,11 @@ public class SimpleParser implements Parser {
 			final String input = normalise(rawInput);
 
 			// Locate the applicable targets which match this buffer
-			Set<MethodTarget> matchingTargets = locateTargets(input, true, true);
+			final Collection<MethodTarget> matchingTargets = locateTargets(input, true, true);
 			if (matchingTargets.isEmpty()) {
 				// Before we just give up, let's see if we can offer a more informative message to the user
 				// by seeing the command is simply unavailable at this point in time
-				matchingTargets = locateTargets(input, true, false);
+				CollectionUtils.populate(matchingTargets, locateTargets(input, true, false));
 				if (matchingTargets.isEmpty()) {
 					commandNotFound(logger, input);
 				} else {
@@ -270,9 +273,9 @@ public class SimpleParser implements Parser {
 		logger.warning("Command '" + buffer + "' not found (for assistance press " + AbstractShell.completionKeys + " or type \"hint\" then hit ENTER)");
 	}
 
-	private Set<MethodTarget> locateTargets(final String buffer, final boolean strictMatching, final boolean checkAvailabilityIndicators) {
+	private Collection<MethodTarget> locateTargets(final String buffer, final boolean strictMatching, final boolean checkAvailabilityIndicators) {
 		Assert.notNull(buffer, "Buffer required");
-		Set<MethodTarget> result = new HashSet<MethodTarget>();
+		final Collection<MethodTarget> result = new HashSet<MethodTarget>();
 
 		// The reflection could certainly be optimised, but it's good enough for now (and cached reflection
 		// is unlikely to be noticeable to a human being using the CLI)
@@ -410,7 +413,7 @@ public class SimpleParser implements Parser {
 			String translated = buffer.substring(0, cursor);
 
 			// Start by locating a method that matches
-			Set<MethodTarget> targets = locateTargets(translated, false, true);
+			final Collection<MethodTarget> targets = locateTargets(translated, false, true);
 			SortedSet<Completion> results = new TreeSet<Completion>(comparator);
 
 			if (targets.isEmpty()) {
@@ -937,7 +940,7 @@ public class SimpleParser implements Parser {
 			StringBuilder sb = new StringBuilder();
 
 			// Figure out if there's a single command we can offer help for
-			Set<MethodTarget> matchingTargets = locateTargets(buffer, false, false);
+			final Collection<MethodTarget> matchingTargets = locateTargets(buffer, false, false);
 			if (matchingTargets.size() == 1) {
 				// Single command help
 				MethodTarget methodTarget = matchingTargets.iterator().next();
