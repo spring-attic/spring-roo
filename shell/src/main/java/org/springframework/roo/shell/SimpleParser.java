@@ -275,7 +275,7 @@ public class SimpleParser implements Parser {
 
 	private Collection<MethodTarget> locateTargets(final String buffer, final boolean strictMatching, final boolean checkAvailabilityIndicators) {
 		Assert.notNull(buffer, "Buffer required");
-		final Collection<MethodTarget> result = new HashSet<MethodTarget>();
+		final Collection<MethodTarget> result = new ArrayList<MethodTarget>();
 
 		// The reflection could certainly be optimised, but it's good enough for now (and cached reflection
 		// is unlikely to be noticeable to a human being using the CLI)
