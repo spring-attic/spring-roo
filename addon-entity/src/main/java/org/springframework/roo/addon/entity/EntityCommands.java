@@ -70,7 +70,7 @@ public class EntityCommands implements CommandMarker {
 		@CliOption(key = "versionField", mandatory = false, help = "The JPA version field name to use for this entity") final String versionField,
 		@CliOption(key = "versionColumn", mandatory = false, help = "The JPA version field column to use for this entity") final String versionColumn,
 		@CliOption(key = "versionType", mandatory = false, optionContext = "java-lang,project", unspecifiedDefaultValue = "java.lang.Integer", help = "The data type that will be used for the JPA version field (defaults to java.lang.Integer)") final JavaType versionType,
-		@CliOption(key = "inheritanceType", mandatory = false, help = "The JPA @Inheritance value") final InheritanceType inheritanceType,
+		@CliOption(key = "inheritanceType", mandatory = false, help = "The JPA @Inheritance value (apply to base class)") final InheritanceType inheritanceType,
 		@CliOption(key = "mappedSuperclass", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Apply @MappedSuperclass for this entity") final boolean mappedSuperclass,
 		@CliOption(key = "equals", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Whether the generated class should implement equals and hashCode methods") final boolean equals,
 		@CliOption(key = "serializable", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Whether the generated class should implement java.io.Serializable") final boolean serializable,
