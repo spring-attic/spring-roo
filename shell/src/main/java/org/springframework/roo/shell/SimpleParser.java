@@ -275,11 +275,11 @@ public class SimpleParser implements Parser {
 
 	private Collection<MethodTarget> locateTargets(final String buffer, final boolean strictMatching, final boolean checkAvailabilityIndicators) {
 		Assert.notNull(buffer, "Buffer required");
-		final Collection<MethodTarget> result = new ArrayList<MethodTarget>();
+		final Collection<MethodTarget> result = new HashSet<MethodTarget>();
 
 		// The reflection could certainly be optimised, but it's good enough for now (and cached reflection
 		// is unlikely to be noticeable to a human being using the CLI)
-		for (final Object command : commands) {
+		for (final CommandMarker command : commands) {
 			for (final Method method : command.getClass().getMethods()) {
 				CliCommand cmd = method.getAnnotation(CliCommand.class);
 				if (cmd != null) {
@@ -1034,7 +1034,7 @@ public class SimpleParser implements Parser {
 					Assert.isTrue(method.getReturnType().equals(Boolean.TYPE), "CliAvailabilityIndicator is only legal for primitive boolean return types (" + method.toGenericString() + ")");
 					for (String cmd : availability.value()) {
 						Assert.isTrue(!availabilityIndicators.containsKey(cmd), "Cannot specify an availability indicator for '" + cmd + "' more than once");
-						availabilityIndicators.put(cmd, new MethodTarget(method, command, null, null));
+						availabilityIndicators.put(cmd, new MethodTarget(method, command));
 					}
 				}
 			}
