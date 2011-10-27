@@ -32,7 +32,7 @@ public class ContextualPathConverter implements Converter<ContextualPath> {
 	}
 
 	public boolean getAllPossibleValues(final List<Completion> completions, final Class<?> targetType, final String existingData, final String optionContext, final MethodTarget target) {
-		for (Pom pom : pomManagementService.getPomMap().values()) {
+		for (final Pom pom : pomManagementService.getPoms()) {
 			for (PathInformation pathInformation : pom.getPathInformation()) {
 				completions.add(new Completion(pathInformation.getContextualPath().getName()));
 			}

@@ -78,9 +78,8 @@ public class PomManagementServiceImpl implements PomManagementService {
 	}
 
 	public Pom getPomFromModuleName(final String moduleName) {
-		updatePomCache();
-		for (final Pom pom : pomMap.values()) {
-			if (moduleName.equals(pom.getModuleName())) {
+		for (final Pom pom : getPoms()) {
+			if (pom.getModuleName().equals(moduleName)) {
 				return pom;
 			}
 		}
@@ -98,11 +97,6 @@ public class PomManagementServiceImpl implements PomManagementService {
 		 	moduleNames.add(module.getModuleName());
 		}
 		return moduleNames;
-	}
-
-	public Map<String, Pom> getPomMap() {
-		updatePomCache();
-		return pomMap;
 	}
 
 	public Pom getRootPom() {
@@ -287,6 +281,7 @@ public class PomManagementServiceImpl implements PomManagementService {
 	}
 
 	public Collection<Pom> getPoms() {
-		return getPomMap().values();
+		updatePomCache();
+		return new ArrayList<Pom>(pomMap.values());
 	}
 }

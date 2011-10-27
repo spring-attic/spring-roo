@@ -1,7 +1,6 @@
 package org.springframework.roo.project;
 
 import java.util.Collection;
-import java.util.Map;
 import java.util.Set;
 
 import org.springframework.roo.project.maven.Pom;
@@ -23,11 +22,6 @@ public interface PomManagementService {
 	 * @return <code>null</code> if there's no such module
 	 */
 	Pom getPomFromModuleName(String moduleName);
-
-	/**
-	 * @return a map whose key is the pom.xml path and value is the associated {@link Pom}
-	 */
-	Map<String, Pom> getPomMap();
 
 	/**
 	 * Returns the {@link Pom} associated with the project's root pom.xml file
@@ -77,7 +71,7 @@ public interface PomManagementService {
 	/**
 	 * Returns the known {@link Pom}s
 	 * 
-	 * @return a non-<code>null</code> collection
+	 * @return a non-<code>null</code> copy of this collection
 	 */
 	Collection<Pom> getPoms();
 }

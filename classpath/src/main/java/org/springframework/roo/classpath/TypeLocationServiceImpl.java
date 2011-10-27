@@ -390,7 +390,7 @@ public class TypeLocationServiceImpl implements TypeLocationService {
 		}
 		String reducedPath = FileUtils.ensureTrailingSeparator(typePath.replaceAll(typeRelativePath, ""));
 		String mid = null;
-		for (Pom pom : pomManagementService.getPomMap().values()) {
+		for (final Pom pom : pomManagementService.getPoms()) {
 			for (Path path : Arrays.asList(Path.SRC_MAIN_JAVA, Path.SRC_TEST_JAVA)) {
 				PathInformation pathInformation = pom.getPathInformation(path);
 				String pathLocation = FileUtils.ensureTrailingSeparator(pathInformation.getLocationPath());
@@ -418,11 +418,10 @@ public class TypeLocationServiceImpl implements TypeLocationService {
 		}
 		if (typeFilePath == null) {
 			return null;
-			//throw new IllegalStateException("The source for '" + type.getFullyQualifiedTypeName() + "' could not be resolved");
 		}
 		String reducedPath = FileUtils.ensureTrailingSeparator(typeFilePath.replaceAll(typeRelativePath, ""));
 		String mid = null;
-		for (Pom pom : pomManagementService.getPomMap().values()) {
+		for (final Pom pom : pomManagementService.getPoms()) {
 			PathInformation pathInformation = pom.getPathInformation(path.getPath());
 			String pathLocation = FileUtils.ensureTrailingSeparator(pathInformation.getLocationPath());
 			if (pathLocation.startsWith(reducedPath)) {
@@ -464,7 +463,7 @@ public class TypeLocationServiceImpl implements TypeLocationService {
 	}
 
 	private void initTypeMap() {
-		for (Pom pom : pomManagementService.getPomMap().values()) {
+		for (final Pom pom : pomManagementService.getPoms()) {
 			for (Path path : Arrays.asList(Path.SRC_MAIN_JAVA, Path.SRC_TEST_JAVA)) {
 				String pathToResolve = FileUtils.ensureTrailingSeparator(pom.getPathInformation(path).getLocationPath()) + "**" + File.separatorChar + "*.java";
 				for (FileDetails file : fileManager.findMatchingAntPath(pathToResolve)) {

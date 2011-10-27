@@ -29,7 +29,7 @@ public class PomConverter implements Converter<Pom>{
 			value = "";
 		}
 		final Map<String, Pom> abbreviationMap = new HashMap<String, Pom>();
-		for (Pom pom : pomManagementService.getPomMap().values()) {
+		for (final Pom pom : pomManagementService.getPoms()) {
 			abbreviationMap.put(pom.getModuleName(), pom);
 		}
 		return abbreviationMap.get(value);
@@ -41,7 +41,7 @@ public class PomConverter implements Converter<Pom>{
 			return false;
 		}
 		String focusedModuleName = focusedModule.getModuleName();
-		for (Pom pom : pomManagementService.getPomMap().values()) {
+		for (final Pom pom : pomManagementService.getPoms()) {
 			String moduleName = pom.getModuleName();
 			if (moduleName.equals("")) {
 				moduleName = "~";

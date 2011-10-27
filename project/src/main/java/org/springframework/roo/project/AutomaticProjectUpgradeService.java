@@ -85,8 +85,8 @@ public class AutomaticProjectUpgradeService implements MetadataNotificationListe
 				return;
 			}
 
-			for (Pom module : pomManagementService.getPomMap().values()) {
-				Set<Property> results = module.getPropertiesExcludingValue(new Property("roo.version"));
+			for (final Pom pom : pomManagementService.getPoms()) {
+				Set<Property> results = pom.getPropertiesExcludingValue(new Property("roo.version"));
 				for (Property existingProperty : results) {
 					VersionInfo rooVersion = extractVersionInfoFromString(existingProperty.getValue());
 					if (rooVersion != null) {
