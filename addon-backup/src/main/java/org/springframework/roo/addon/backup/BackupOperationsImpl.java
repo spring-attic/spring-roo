@@ -17,13 +17,13 @@ import java.util.zip.ZipOutputStream;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.springframework.roo.file.monitor.event.FileDetails;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.FileUtils;
 import org.springframework.roo.support.util.IOUtils;
 
 /**
@@ -64,7 +64,7 @@ public class BackupOperationsImpl implements BackupOperations {
 		ZipOutputStream zos = null;
 		try {
 			File projectDirectory = new File(projectOperations.getPathResolver().getFocusedIdentifier(Path.ROOT, "."));
-			MutableFile file = fileManager.createFile(FileDetails.getCanonicalPath(new File(projectDirectory, projectOperations.getFocusedProjectName() + "_" + df.format(new Date()) + ".zip")));
+			MutableFile file = fileManager.createFile(FileUtils.getCanonicalPath(new File(projectDirectory, projectOperations.getFocusedProjectName() + "_" + df.format(new Date()) + ".zip")));
 			zos = new ZipOutputStream(file.getOutputStream());
 			zip(projectDirectory, projectDirectory, zos);
 		} catch (FileNotFoundException e) {

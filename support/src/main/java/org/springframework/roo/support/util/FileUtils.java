@@ -4,6 +4,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.regex.Pattern;
 
+import org.springframework.roo.support.ant.AntPathMatcher;
+import org.springframework.roo.support.ant.PathMatcher;
+
 /**
  * Utilities for handling {@link File} instances.
  *
@@ -24,6 +27,13 @@ public final class FileUtils {
 
 	// Doesn't check for backslash after the colon, since Java has no issues with paths like c:/Windows
 	private static final Pattern WINDOWS_DRIVE_PATH = Pattern.compile("^[A-Za-z]:.*");
+	
+	private static final PathMatcher PATH_MATCHER;
+	
+	static {
+		PATH_MATCHER = new AntPathMatcher();
+		((AntPathMatcher) PATH_MATCHER).setPathSeparator(File.separator);
+	}
 
 	/**
 	 * Deletes the specified {@link File}.
@@ -149,45 +159,63 @@ public final class FileUtils {
 	}
 
 	/**
-	 * TODO
+	 * Removes any trailing {@link File#separator}s from the given path
 	 * 
-	 * @param pomPath
-	 * @return
+	 * @param path the path to modify (can be <code>null</code>)
+	 * @return the modified path
 	 * @since 1.2.0
 	 */
-	public static String removeTrailingSeparator(String pomPath) {
-		while (pomPath.endsWith(File.separator)) {
-			pomPath = pomPath.substring(0, pomPath.length() - 1);
+	public static String removeTrailingSeparator(String path) {
+		while (path != null && path.endsWith(File.separator)) {
+			path = StringUtils.removeSuffix(path, File.separator);
 		}
-		return pomPath;
+		return path;
+	}
+	
+	/**
+	 * Indicates whether the given canonical path matches the given Ant-style pattern
+	 * 
+	 * @param antPattern the pattern to check against (can't be blank)
+	 * @param canonicalPath the path to check (can't be blank)
+	 * @return see above
+	 * @since 1.2.0
+	 */
+	public static boolean matchesAntPath(final String antPattern, final String canonicalPath) {
+		Assert.hasText(antPattern, "Ant pattern required");
+		Assert.hasText(canonicalPath, "Canonical path required");
+		return PATH_MATCHER.match(antPattern, canonicalPath);
 	}
 
 	/**
-	 * TODO
+	 * Removes any leading or trailing {@link File#separator}s from the given path.
 	 * 
-	 * @param pomPath
-	 * @return
+	 * @param path the path to modify (can be <code>null</code>)
+	 * @return the path, modified as above, or <code>null</code> if <code>null</code> was given
 	 * @since 1.2.0
 	 */
-	public static String removePrePostSeparator(String pomPath) {
-		while (pomPath.endsWith(File.separator)) {
-			pomPath = pomPath.substring(0, pomPath.length() - 1);
+	public static String removeLeadingAndTrailingSeparators(String path) {
+		if (StringUtils.isBlank(path)) {
+			return path;
 		}
-		while (pomPath.startsWith(File.separator)) {
-			pomPath = pomPath.substring(1, pomPath.length());
+		while (path.endsWith(File.separator)) {
+			path = StringUtils.removeSuffix(path, File.separator);
 		}
-		return pomPath;
+		while (path.startsWith(File.separator)) {
+			path = StringUtils.removePrefix(path, File.separator);
+		}
+		return path;
 	}
 
 	/**
-	 * TODO
+	 * Ensures that the given path has exactly one trailing {@link File#separator}
 	 * 
-	 * @param pomPath
-	 * @return
+	 * @param path the path to modify (can't be <code>null</code>)
+	 * @return the normalised path
 	 * @since 1.2.0
 	 */
-	public static String normalise(final String pomPath) {
-		return removeTrailingSeparator(pomPath) + File.separatorChar;
+	public static String ensureTrailingSeparator(final String path) {
+		Assert.notNull(path);
+		return removeTrailingSeparator(path) + File.separatorChar;
 	}
 	
 	/**
@@ -201,6 +229,24 @@ public final class FileUtils {
 	public static String getSystemDependentPath(final String... pathElements) {
 		Assert.notEmpty(pathElements);
 		return StringUtils.arrayToDelimitedString(pathElements, File.separator);
+	}
+	
+	/**
+	 * Returns the canonical path of the given {@link File}.
+	 *
+	 * @param file the file for which to find the canonical path (can be <code>null</code>)
+	 * @return the canonical path, or <code>null</code> if a <code>null</code> file is given
+	 * @since 1.2.0
+	 */
+	public static String getCanonicalPath(final File file) {
+		if (file == null) {
+			return null;
+		}
+		try {
+			return file.getCanonicalPath();
+		} catch (final IOException ioe) {
+			throw new IllegalStateException("Cannot determine canonical path for '" + file + "'", ioe);
+		}
 	}
 	
 	/**

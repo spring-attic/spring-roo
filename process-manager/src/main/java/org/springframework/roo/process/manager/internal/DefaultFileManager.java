@@ -31,6 +31,7 @@ import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.process.manager.ProcessManager;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
+import org.springframework.roo.support.util.FileUtils;
 import org.springframework.roo.support.util.StringUtils;
 
 /**
@@ -112,7 +113,7 @@ public class DefaultFileManager implements FileManager, UndoListener {
 		} catch (IOException ignored) {}
 		File parentDirectory = new File(actual.getParent());
 		if (!parentDirectory.exists()) {
-			createDirectory(FileDetails.getCanonicalPath(parentDirectory));
+			createDirectory(FileUtils.getCanonicalPath(parentDirectory));
 		}
 		new CreateFile(undoManager, filenameResolver, actual);
 		ManagedMessageRenderer renderer = new ManagedMessageRenderer(filenameResolver, actual, true);

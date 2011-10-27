@@ -8,10 +8,10 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 import org.springframework.roo.file.monitor.NotifiableFileMonitorService;
-import org.springframework.roo.file.monitor.event.FileDetails;
 import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.FileUtils;
 
 /**
  * Default implementation of {@link MutableFile}.
@@ -42,7 +42,7 @@ public class DefaultMutableFile implements MutableFile {
 	}
 
 	public String getCanonicalPath() {
-		return FileDetails.getCanonicalPath(file);
+		return FileUtils.getCanonicalPath(file);
 	}
 
 	public InputStream getInputStream() {

@@ -113,8 +113,8 @@ public class TypeLocationServiceImpl implements TypeLocationService {
 		// Determine the JavaType for this file
 		String relativePath = "";
 		for (PathInformation pathInformation : pomManagementService.getModuleForFileIdentifier(fileCanonicalPath).getPathInformation()) {
-			if (fileCanonicalPath.startsWith(FileUtils.normalise(FileDetails.getCanonicalPath(pathInformation.getLocation())))) {
-				relativePath = File.separator + fileCanonicalPath.replaceFirst(FileUtils.normalise(FileDetails.getCanonicalPath(pathInformation.getLocation())), "");
+			if (fileCanonicalPath.startsWith(FileUtils.ensureTrailingSeparator(FileUtils.getCanonicalPath(pathInformation.getLocation())))) {
+				relativePath = File.separator + fileCanonicalPath.replaceFirst(FileUtils.ensureTrailingSeparator(FileUtils.getCanonicalPath(pathInformation.getLocation())), "");
 				break;
 			}
 		}
@@ -388,12 +388,12 @@ public class TypeLocationServiceImpl implements TypeLocationService {
 		if (typePath == null) {
 			return null;
 		}
-		String reducedPath = FileUtils.normalise(typePath.replaceAll(typeRelativePath, ""));
+		String reducedPath = FileUtils.ensureTrailingSeparator(typePath.replaceAll(typeRelativePath, ""));
 		String mid = null;
 		for (Pom pom : pomManagementService.getPomMap().values()) {
 			for (Path path : Arrays.asList(Path.SRC_MAIN_JAVA, Path.SRC_TEST_JAVA)) {
 				PathInformation pathInformation = pom.getPathInformation(path);
-				String pathLocation = FileUtils.normalise(pathInformation.getLocationPath());
+				String pathLocation = FileUtils.ensureTrailingSeparator(pathInformation.getLocationPath());
 				if (pathLocation.startsWith(reducedPath)) {
 					mid = PhysicalTypeIdentifier.createIdentifier(type, pathInformation.getContextualPath());
 					projectOperations.addModuleDependency(pathInformation.getContextualPath().getModule());
@@ -420,11 +420,11 @@ public class TypeLocationServiceImpl implements TypeLocationService {
 			return null;
 			//throw new IllegalStateException("The source for '" + type.getFullyQualifiedTypeName() + "' could not be resolved");
 		}
-		String reducedPath = FileUtils.normalise(typeFilePath.replaceAll(typeRelativePath, ""));
+		String reducedPath = FileUtils.ensureTrailingSeparator(typeFilePath.replaceAll(typeRelativePath, ""));
 		String mid = null;
 		for (Pom pom : pomManagementService.getPomMap().values()) {
 			PathInformation pathInformation = pom.getPathInformation(path.getPath());
-			String pathLocation = FileUtils.normalise(pathInformation.getLocationPath());
+			String pathLocation = FileUtils.ensureTrailingSeparator(pathInformation.getLocationPath());
 			if (pathLocation.startsWith(reducedPath)) {
 				mid = PhysicalTypeIdentifier.createIdentifier(type, pathInformation.getContextualPath());
 				break;
@@ -466,7 +466,7 @@ public class TypeLocationServiceImpl implements TypeLocationService {
 	private void initTypeMap() {
 		for (Pom pom : pomManagementService.getPomMap().values()) {
 			for (Path path : Arrays.asList(Path.SRC_MAIN_JAVA, Path.SRC_TEST_JAVA)) {
-				String pathToResolve = FileUtils.normalise(pom.getPathInformation(path).getLocationPath()) + "**" + File.separatorChar + "*.java";
+				String pathToResolve = FileUtils.ensureTrailingSeparator(pom.getPathInformation(path).getLocationPath()) + "**" + File.separatorChar + "*.java";
 				for (FileDetails file : fileManager.findMatchingAntPath(pathToResolve)) {
 					cacheType(file.getCanonicalPath());
 				}

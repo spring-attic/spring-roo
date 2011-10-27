@@ -1,37 +1,59 @@
 package org.springframework.roo.file.monitor.event;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Date;
 
 import org.springframework.roo.file.monitor.FileMonitorService;
-import org.springframework.roo.support.ant.AntPathMatcher;
-import org.springframework.roo.support.ant.PathMatcher;
 import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileUtils;
+import org.springframework.roo.support.util.ObjectUtils;
 
 /**
- * Represents the details of a file that once existed on the disk.
- *
+ * The details of a file that once existed on the disk.
  * <p>
  * Instances of this class are usually included within a {@link FileEvent} object.
  *
  * @author Ben Alex
  * @since 1.0
- *
  */
 public class FileDetails implements Comparable<FileDetails> {
-	private final File file;
-	private final Long lastModified;
 
-	private static final PathMatcher pathMatcher;
-
-	static {
-		pathMatcher = new AntPathMatcher();
-		((AntPathMatcher) pathMatcher).setPathSeparator(File.separator);
+	/**
+	 * Returns the canonical path of the given {@link File}.
+	 *
+	 * @param file the file for which to find the canonical path (required)
+	 * @return the canonical path
+	 * @deprecated use {@link FileUtils#getCanonicalPath(File)} instead
+	 */
+	@Deprecated
+	public static String getCanonicalPath(final File file) {
+		return FileUtils.getCanonicalPath(file);
 	}
 
+	/**
+	 * Indicates whether the given canonical path matches the given Ant-style pattern
+	 * 
+	 * @param antPattern the pattern to check against (can't be blank)
+	 * @param canonicalPath the path to check (can't be blank)
+	 * @return see above
+	 * @deprecated use {@link FileUtils#matchesAntPath(String, String)} instead
+	 */
+	@Deprecated
+	public static boolean matchesAntPath(final String antPattern, final String canonicalPath) {
+		return FileUtils.matchesAntPath(antPattern, canonicalPath);
+	}
+
+	// Fields
+	private final Long lastModified;
+	private final File file;
+	
+	/**
+	 * Constructor
+	 *
+	 * @param file the file for which these are the details (required)
+	 * @param lastModified the system clock in milliseconds when this file was last modified (can be <code>null</code>)
+	 */
 	public FileDetails(final File file, final Long lastModified) {
 		Assert.notNull(file, "File required");
 		this.file = file;
@@ -40,21 +62,22 @@ public class FileDetails implements Comparable<FileDetails> {
 
 	@Override
 	public int hashCode() {
-		return 7 * this.file.hashCode() * this.lastModified.hashCode();
+		return 7 * this.file.hashCode() * ObjectUtils.nullSafeHashCode(lastModified);
 	}
 
 	@Override
 	public boolean equals(final Object obj) {
-		return obj instanceof FileDetails && this.compareTo((FileDetails)obj) == 0;
+		return obj instanceof FileDetails && this.compareTo((FileDetails) obj) == 0;
 	}
 
 	public int compareTo(final FileDetails o) {
 		if (o == null) {
 			throw new NullPointerException();
 		}
-		int result = o.file.compareTo(file);
+		// N.B. this is in reverse order to how we'd normally compare
+		int result = o.getFile().compareTo(this.file);
 		if (result == 0) {
-			result = o.lastModified.compareTo(lastModified);
+			result = ObjectUtils.nullSafeComparison(o.getLastModified(), this.lastModified);
 		}
 		return result;
 	}
@@ -67,28 +90,9 @@ public class FileDetails implements Comparable<FileDetails> {
 	 * @return the canonical path.
 	 */
 	public String getCanonicalPath() {
-		try {
-			return file.getCanonicalPath();
-		} catch (IOException ioe) {
-			throw new IllegalStateException("Cannot determine canonical path for '" + file + "'", ioe);
-		}
+		return FileUtils.getCanonicalPath(file);
 	}
-
-	/**
-	 * Static convenience method to allow the acquisition of a canonical file path for a {@link File}.
-	 *
-	 * @param file the File to find the canonical path for.
-	 * @return the canonical path.
-	 */
-	public static String getCanonicalPath(final File file) {
-		Assert.notNull(file, "File required");
-		try {
-			return file.getCanonicalPath();
-		} catch (IOException ioe) {
-			throw new IllegalStateException("Cannot determine canonical path for '" + file + "'", ioe);
-		}
-	}
-
+	
 	/**
 	 * Indicates whether the presented canonical path is a child of the current
 	 * {@link FileDetails} instance. Put differently, returning true indicates the
@@ -103,28 +107,20 @@ public class FileDetails implements Comparable<FileDetails> {
 	 */
 	public boolean isParentOf(final String possibleChildCanonicalPath) {
 		Assert.hasText(possibleChildCanonicalPath, "Possible child to evaluate is required");
-		return FileUtils.normalise(possibleChildCanonicalPath).startsWith(FileUtils.normalise(getCanonicalPath()));
+		return FileUtils.ensureTrailingSeparator(possibleChildCanonicalPath).startsWith(FileUtils.ensureTrailingSeparator(getCanonicalPath()));
 	}
 
 	/**
-	 * Determines whether the presented Ant path matches this {@link FileDetails} canonical path.
-	 *
+	 * Indicates whether this file's canonical path matches the given Ant-style pattern.
 	 * <p>
-	 * The presented path must be in Ant syntax. It should include a full prefix that is
-	 * consistent with the {@link #getCanonicalPath()} method.
+	 * The presented path must be in Ant syntax. It should include a full prefix
+	 * that is consistent with the {@link #getCanonicalPath()} method.
 	 *
-	 * @param antPath to evaluate (required and cannot be empty)
+	 * @param antPattern the pattern to check this file against (cannot be blank)
 	 * @return whether the path matches or not
 	 */
-	public boolean matchesAntPath(final String antPath) {
-		Assert.hasText(antPath, "Ant path to match required");
-		return matchesAntPath(antPath, getCanonicalPath());
-	}
-
-	public static boolean matchesAntPath(final String antPath, final String canonicalPath) {
-		Assert.hasText(antPath, "Ant path to match required");
-		Assert.hasText(canonicalPath, "Canonical path to match required");
-		return pathMatcher.match(antPath, canonicalPath);
+	public boolean matchesAntPath(final String antPattern) {
+		return FileUtils.matchesAntPath(antPattern, getCanonicalPath());
 	}
 
 	/**
@@ -171,5 +167,4 @@ public class FileDetails implements Comparable<FileDetails> {
 		tsc.append("lastModified", lastModified == null ? "Unavailable" : new Date(lastModified).toString());
 		return tsc.toString();
 	}
-
 }

@@ -35,7 +35,7 @@ public class DefaultPathResolvingStrategy implements PathResolvingStrategy {
 
 	protected void activate(final ComponentContext context) {
 		final File projectDirectory = new File(StringUtils.defaultIfEmpty(OSGiUtils.getRooWorkingDirectory(context), CURRENT_DIRECTORY));
-		rootPath = FileDetails.getCanonicalPath(projectDirectory);
+		rootPath = FileUtils.getCanonicalPath(projectDirectory);
 		populatePathsMap(projectDirectory);
 		initialisePathCollections();
 	}
@@ -55,7 +55,7 @@ public class DefaultPathResolvingStrategy implements PathResolvingStrategy {
 	}
 
 	public String getIdentifier(final ContextualPath path, final String relativePath) {
-		return FileUtils.normalise(pathCache.get(path.getPath()).getLocationPath()) + relativePath;
+		return FileUtils.ensureTrailingSeparator(pathCache.get(path.getPath()).getLocationPath()) + relativePath;
 	}
 
 	/**
@@ -95,7 +95,7 @@ public class DefaultPathResolvingStrategy implements PathResolvingStrategy {
 		final PathInformation pathInfo = pathCache.get(contextualPath.getPath());
 		Assert.notNull(pathInfo, "Unable to determine information for path '" + contextualPath + "'");
 		final File root = pathInfo.getLocation();
-		return FileDetails.getCanonicalPath(root);
+		return FileUtils.getCanonicalPath(root);
 	}
 
 	/**
@@ -171,7 +171,7 @@ public class DefaultPathResolvingStrategy implements PathResolvingStrategy {
 		final PathInformation pi = pathCache.get(path);
 		Assert.notNull(pi, "Path '" + path + "' is unknown to the path resolver");
 		final File newPath = new File(pi.getLocation(), relativePath);
-		return FileDetails.getCanonicalPath(newPath);
+		return FileUtils.getCanonicalPath(newPath);
 	}
 
 	public String getRoot() {

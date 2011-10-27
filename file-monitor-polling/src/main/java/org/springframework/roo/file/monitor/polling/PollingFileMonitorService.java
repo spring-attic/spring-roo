@@ -23,6 +23,7 @@ import org.springframework.roo.file.monitor.event.FileEvent;
 import org.springframework.roo.file.monitor.event.FileEventListener;
 import org.springframework.roo.file.monitor.event.FileOperation;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.FileUtils;
 
 /**
  * A simple polling-based {@link FileMonitorService}.
@@ -127,7 +128,7 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 					return false; // Not within this directory or a sub-directory
 				}
 			} else {
-				if (!FileDetails.matchesAntPath(requestCanonicalPath + File.separator + "*", filePath)) {
+				if (!FileUtils.matchesAntPath(requestCanonicalPath + File.separator + "*", filePath)) {
 					return false; // Not within this directory
 				}
 			}
@@ -495,7 +496,7 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 		}
 		for (File f : listFiles) {
 			try {
-				if (FileDetails.matchesAntPath(antPath, f.getCanonicalPath())) {
+				if (FileUtils.matchesAntPath(antPath, f.getCanonicalPath())) {
 					result.add(new FileDetails(f, f.lastModified()));
 				}
 			} catch (IOException ignored) {}

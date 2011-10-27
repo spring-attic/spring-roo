@@ -20,7 +20,6 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.file.monitor.NotifiableFileMonitorService;
-import org.springframework.roo.file.monitor.event.FileDetails;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.process.manager.FileManager;
@@ -60,14 +59,14 @@ public class PomManagementServiceImpl implements PomManagementService {
 	public Pom getModuleForFileIdentifier(final String fileIdentifier) {
 		updatePomCache();
 		String startingPoint = FileUtils.getFirstDirectory(fileIdentifier);
-		String pomPath = FileUtils.normalise(startingPoint) + "pom.xml";
+		String pomPath = FileUtils.ensureTrailingSeparator(startingPoint) + "pom.xml";
 		File pom = new File(pomPath);
 		while (!pom.exists()) {
 			if (startingPoint.equals(File.separator)) {
 				break;
 			}
 			startingPoint = FileUtils.backOneDirectory(startingPoint);
-			pomPath = FileUtils.normalise(startingPoint) + "pom.xml";
+			pomPath = FileUtils.ensureTrailingSeparator(startingPoint) + "pom.xml";
 			pom = new File(pomPath);
 		}
 		return getPomFromPath(pomPath);
@@ -89,7 +88,7 @@ public class PomManagementServiceImpl implements PomManagementService {
 	}
 
 	private String getModuleName(final String pomRoot) {
-		final String moduleName = FileUtils.normalise(pomRoot).replaceAll(FileUtils.normalise(rootPath), "");
+		final String moduleName = FileUtils.ensureTrailingSeparator(pomRoot).replaceAll(FileUtils.ensureTrailingSeparator(rootPath), "");
 		return FileUtils.removeTrailingSeparator(moduleName);
 	}
 
@@ -141,7 +140,7 @@ public class PomManagementServiceImpl implements PomManagementService {
 
 	protected void activate(final ComponentContext context) {
 		final File projectDirectory = new File(StringUtils.defaultIfEmpty(OSGiUtils.getRooWorkingDirectory(context), CURRENT_DIRECTORY));
-		rootPath = FileDetails.getCanonicalPath(projectDirectory);
+		rootPath = FileUtils.getCanonicalPath(projectDirectory);
 	}
 
 	private void updatePomCache() {

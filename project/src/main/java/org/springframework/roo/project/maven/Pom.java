@@ -113,8 +113,14 @@ public class Pom {
 		cachePathInformation(Path.ROOT);
 	}
 
+	/**
+	 * Returns the canonical path of the given logical {@link Path} within this module, plus a trailing separator
+	 * 
+	 * @param path the logical path for which to get the canonical location (required)
+	 * @return a valid canonical path
+	 */
 	public String getPathLocation(final Path path) {
-		return FileUtils.normalise(getPathInformation(path).getLocationPath());
+		return FileUtils.ensureTrailingSeparator(getPathInformation(path).getLocationPath());
 	}
 
 	public PathInformation getPathInformation(final Path path) {
@@ -123,10 +129,6 @@ public class Pom {
 
 	public PathInformation getPathInformation(final ContextualPath path) {
 		return pathCache.get(path.getPath());
-	}
-
-	public String getRoot(final Path path) {
-		return getPathLocation(path);
 	}
 
 	private void cachePathInformation(final Path path) {
@@ -160,15 +162,18 @@ public class Pom {
 		pathCache.put(path, pathInformation);
 	}
 
+	/**
+	 * Returns the canonical path of this module's root directory, plus a trailing separator
+	 * 
+	 * @return a valid canonical path
+	 */
 	public String getRoot() {
-		return getRoot(Path.ROOT);
+		return getPathLocation(Path.ROOT);
 	}
 
 	public List<PathInformation> getPathInformation() {
 		return new ArrayList<PathInformation>(pathCache.values());
 	}
-
-
 
 	/**
 	 * Indicates whether all of the given dependencies are registered, using

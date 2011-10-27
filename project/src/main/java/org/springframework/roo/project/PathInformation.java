@@ -2,9 +2,9 @@ package org.springframework.roo.project;
 
 import java.io.File;
 
-import org.springframework.roo.file.monitor.event.FileDetails;
 import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.FileUtils;
 
 /**
  * Used by {@link DelegatePathResolver} to permit subclasses to register path details.
@@ -47,7 +47,7 @@ public class PathInformation {
 	}
 
 	public String getLocationPath() {
-		return FileDetails.getCanonicalPath(location);
+		return FileUtils.getCanonicalPath(location);
 	}
 
 	public Path getPath() {
