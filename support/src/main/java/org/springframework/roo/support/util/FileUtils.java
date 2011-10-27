@@ -2,6 +2,8 @@ package org.springframework.roo.support.util;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.regex.Pattern;
 
 import org.springframework.roo.support.ant.AntPathMatcher;
@@ -227,8 +229,20 @@ public final class FileUtils {
 	 * @since 1.2.0
 	 */
 	public static String getSystemDependentPath(final String... pathElements) {
+		return getSystemDependentPath(Arrays.asList(pathElements));
+	}
+	
+	/**
+	 * Returns an operating-system-dependent path consisting of the given
+	 * elements, separated by {@link File#separator}.
+	 * 
+	 * @param pathElements the path elements from uppermost downwards (can't be empty)
+	 * @return a non-blank string
+	 * @since 1.2.0
+	 */
+	public static String getSystemDependentPath(final Collection<String> pathElements) {
 		Assert.notEmpty(pathElements);
-		return StringUtils.arrayToDelimitedString(pathElements, File.separator);
+		return StringUtils.collectionToDelimitedString(pathElements, File.separator);
 	}
 	
 	/**

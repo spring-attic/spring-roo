@@ -19,7 +19,7 @@ import org.junit.Test;
  */
 public class FileUtilsTest {
 	
-	@Test(expected = IllegalArgumentException.class)
+	@Test(expected = NullPointerException.class)
 	public void testGetSystemDependentPathFromNullArray() {
 		FileUtils.getSystemDependentPath((String[]) null);
 	}
