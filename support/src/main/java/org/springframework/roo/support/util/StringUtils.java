@@ -1078,6 +1078,20 @@ public final class StringUtils {
 	/**
 	 * Convenience method to return a String array as a delimited (e.g. CSV)
 	 * String. E.g. useful for <code>toString()</code> implementations.
+	 * 
+	 * @param arr the array to display
+	 * @param delim the delimiter to use (probably a ",")
+	 * @return the delimited String
+	 * @since 1.2.0
+	 */
+	public static String arrayToDelimitedString(final String delim, final Object... arr) {
+		return arrayToDelimitedString(arr, delim);
+	}
+	
+	/**
+	 * Convenience method to return a String array as a delimited (e.g. CSV)
+	 * String. E.g. useful for <code>toString()</code> implementations.
+	 * 
 	 * @param arr the array to display
 	 * @param delim the delimiter to use (probably a ",")
 	 * @return the delimited String

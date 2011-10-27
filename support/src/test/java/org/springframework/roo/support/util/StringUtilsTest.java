@@ -297,4 +297,24 @@ public class StringUtilsTest {
 	public void testNonBlankStringIsNotBlank() {
 		assertFalse(StringUtils.isBlank("x"));
 	}
+	
+	@Test
+	public void testArrayToDelimitedStringWithNullArray() {
+		assertEquals("", StringUtils.arrayToDelimitedString(";", new Object[0]));
+	}
+	
+	@Test
+	public void testArrayToDelimitedStringWithEmptyArray() {
+		assertEquals("", StringUtils.arrayToDelimitedString(";"));
+	}
+	
+	@Test
+	public void testArrayToDelimitedStringWithSingleElementArray() {
+		assertEquals("foo", StringUtils.arrayToDelimitedString(";", "foo"));
+	}
+	
+	@Test
+	public void testArrayToDelimitedStringWithMultiElementArray() {
+		assertEquals("foo;27", StringUtils.arrayToDelimitedString(";", "foo", 27));
+	}
 }
