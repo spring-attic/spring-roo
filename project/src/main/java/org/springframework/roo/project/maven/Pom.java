@@ -13,6 +13,7 @@ import java.util.Set;
 import org.springframework.roo.project.ContextualPath;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.Filter;
+import org.springframework.roo.project.GAV;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathInformation;
 import org.springframework.roo.project.Plugin;
@@ -548,11 +549,22 @@ public class Pom {
 		return path;
 	}
 
+	/**
+	 * Returns the name of the Maven module to which this POM belongs
+	 * 
+	 * @return a non-<code>null</code> name; empty for the root POM
+	 */
 	public String getModuleName() {
 		return moduleName;
 	}
 
 	private String moduleRoot(final String pomPath) {
 		return FileUtils.getFirstDirectory(pomPath);
+	}
+	
+	@Override
+	public String toString() {
+		// For debugging
+		return new GAV(groupId, artifactId, version) + " at " + path;
 	}
 }

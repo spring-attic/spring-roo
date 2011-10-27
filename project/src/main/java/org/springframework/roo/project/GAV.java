@@ -63,4 +63,10 @@ public class GAV {
 	public String getVersion() {
 		return version;
 	}
+	
+	@Override
+	public String toString() {
+		// For debugging
+		return StringUtils.arrayToDelimitedString(":", groupId, artifactId, version);
+	}
 }

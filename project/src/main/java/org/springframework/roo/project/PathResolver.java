@@ -122,7 +122,9 @@ public interface PathResolver {
 	String getCanonicalPath(ContextualPath path, JavaType javaType);
 
 	/**
-	 *
+	 * Returns the canonical path of the given {@link JavaType} in the given
+	 * {@link Path} of the currently focussed module.
+	 * 
 	 * @param path
 	 * @param javaType
 	 * @return
