@@ -30,7 +30,9 @@ public interface PomManagementService {
 	Map<String, Pom> getPomMap();
 
 	/**
-	 * @return the {@link Pom} associated with the root pom.xml file
+	 * Returns the {@link Pom} associated with the project's root pom.xml file
+	 * 
+	 * @return <code>null</code> if there's no such POM
 	 */
 	Pom getRootPom();
 

@@ -173,7 +173,7 @@ public class MavenPathResolvingStrategy implements PathResolvingStrategy {
 	}
 
 	public boolean isActive() {
-		return !pomManagementService.getPomMap().isEmpty();
+		return pomManagementService.getRootPom() != null;
 	}
 
 	private PathInformation getPathInformation(final ContextualPath contextualPath) {
