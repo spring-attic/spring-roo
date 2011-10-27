@@ -1,5 +1,6 @@
 package org.springframework.roo.project;
 
+import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
 
@@ -136,5 +137,15 @@ public class ContextualPath {
 	 */
 	public boolean isProjectRoot() {
 		return path == Path.ROOT && StringUtils.isBlank(module);
+	}
+
+	/**
+	 * Returns the physical path of this logical path relative to the given POM
+	 * 
+	 * @param pom can be <code>null</code>
+	 * @return a non-<code>null</code> path
+	 */
+	public String getPathRelativeToPom(final Pom pom) {
+		return path.getPathRelativeToPom(pom);
 	}
 }

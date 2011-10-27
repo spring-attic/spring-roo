@@ -1,18 +1,5 @@
 package org.springframework.roo.project;
 
-import static org.springframework.roo.project.Path.ROOT;
-import static org.springframework.roo.project.Path.SPRING_CONFIG_ROOT;
-import static org.springframework.roo.project.Path.SRC_MAIN_JAVA;
-import static org.springframework.roo.project.Path.SRC_MAIN_RESOURCES;
-import static org.springframework.roo.project.Path.SRC_MAIN_WEBAPP;
-import static org.springframework.roo.project.Path.SRC_TEST_JAVA;
-import static org.springframework.roo.project.Path.SRC_TEST_RESOURCES;
-import static org.springframework.roo.project.maven.Pom.DEFAULT_RESOURCES_DIRECTORY;
-import static org.springframework.roo.project.maven.Pom.DEFAULT_SOURCE_DIRECTORY;
-import static org.springframework.roo.project.maven.Pom.DEFAULT_SPRING_CONFIG_ROOT;
-import static org.springframework.roo.project.maven.Pom.DEFAULT_TEST_RESOURCES_DIRECTORY;
-import static org.springframework.roo.project.maven.Pom.DEFAULT_TEST_SOURCE_DIRECTORY;
-import static org.springframework.roo.project.maven.Pom.DEFAULT_WAR_SOURCE_DIRECTORY;
 import static org.springframework.roo.support.util.FileUtils.CURRENT_DIRECTORY;
 
 import java.io.File;
@@ -175,57 +162,30 @@ public class MavenPathResolvingStrategy implements PathResolvingStrategy {
 	public boolean isActive() {
 		return pomManagementService.getRootPom() != null;
 	}
-
-	private PathInformation getPathInformation(final ContextualPath contextualPath) {
-		final Pom pom = pomManagementService.getPomFromModuleName(contextualPath.getModule());
-		final StringBuilder location = new StringBuilder();
-		final Path path = contextualPath.getPath();
-		if (pom == null) {
-			location.append(pomManagementService.getFocusedModule().getRoot()).append(File.separator);
-			if (StringUtils.hasText(contextualPath.getModule())) {
-				location.append(contextualPath.getModule()).append(File.separator);
-			}
-		} else {
-			location.append(pom.getRoot()).append(File.separator);
-		}
-
-		if (path.equals(SRC_MAIN_JAVA)) {
-			String sourceDirectory = DEFAULT_SOURCE_DIRECTORY;
-			if (pom != null) {
-				if (StringUtils.hasText(pom.getSourceDirectory())) {
-					sourceDirectory = pom.getSourceDirectory();
-				}
-			}
-			location.append(sourceDirectory);
-		} else if (path.equals(SRC_MAIN_RESOURCES)) {
-			location.append(File.separator).append(DEFAULT_RESOURCES_DIRECTORY);
-		} else if (path.equals(SRC_TEST_JAVA)) {
-			String testSourceDirectory = DEFAULT_TEST_SOURCE_DIRECTORY;
-			if (pom != null) {
-				if (StringUtils.hasText(pom.getTestSourceDirectory())) {
-					testSourceDirectory = pom.getTestSourceDirectory();
-				}
-			}
-			location.append(testSourceDirectory);
-		} else if (path.equals(SRC_TEST_RESOURCES)) {
-			location.append(DEFAULT_TEST_RESOURCES_DIRECTORY);
-		} else if (path.equals(SRC_MAIN_WEBAPP)) {
-			location.append(DEFAULT_WAR_SOURCE_DIRECTORY);
-		} else if (path.equals(SPRING_CONFIG_ROOT)) {
-			location.append(DEFAULT_SPRING_CONFIG_ROOT);
-		} else if (path.equals(ROOT)) {
-			// do nothing
-		}
-		return new PathInformation(contextualPath, true, new File(location.toString()));
-	}
-
+	
 	public String getIdentifier(final ContextualPath contextualPath, final String relativePath) {
 		Assert.notNull(contextualPath, "Path required");
 		Assert.notNull(relativePath, "Relative path cannot be null, although it can be empty");
 
-		String initialPath = getPathInformation(contextualPath).getLocationPath();
+		String initialPath = FileUtils.getCanonicalPath(getPath(contextualPath));
 		initialPath = FileUtils.ensureTrailingSeparator(initialPath);
 		return initialPath + FileUtils.removeLeadingAndTrailingSeparators(relativePath);
+	}
+	
+	private File getPath(final ContextualPath contextualPath) {
+		final Pom pom = pomManagementService.getPomFromModuleName(contextualPath.getModule());
+		final File moduleRoot = getModuleRoot(contextualPath.getModule(), pom);
+		final String pathRelativeToPom = contextualPath.getPathRelativeToPom(pom);
+		return new File(moduleRoot, pathRelativeToPom);
+	}
+	
+	private File getModuleRoot(final String module, final Pom pom) {
+		if (pom == null) {
+			// No POM exists for this module; we must be creating it
+			return new File(pomManagementService.getFocusedModule().getRoot(), module);
+		}
+		// This is a known module; use its known root path
+		return new File(pom.getRoot());
 	}
 
 	public String getRoot() {
