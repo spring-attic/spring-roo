@@ -1183,12 +1183,16 @@ public final class StringUtils {
 	}
 
 	/**
-	 * Returns either the passed in String, or if the String is empty or null, the value of defaultStr.
+	 * Returns either the passed in String, or if it's blank, the first of the
+	 * given default values that is not blank. If all the given Strings are
+	 * blank, returns the last of them.
 	 *
 	 * <ul>
 	 * <li><code>StringUtils.defaultIfEmpty(null, "NULL") = "NULL"</code></li>
 	 * <li><code>StringUtils.defaultIfEmpty("", "NULL") = "NULL"</code></li>
 	 * <li><code>StringUtils.defaultIfEmpty("bat", "NULL") = "bat"</code></li>
+	 * <li><code>StringUtils.defaultIfEmpty(null, "", "bat") = "bat"</code></li>
+	 * <li><code>StringUtils.defaultIfEmpty(null, null, "") = ""</code></li>
 	 * </ul>
 	 *
 	 * @param str the String to check, may be null
@@ -1200,8 +1204,16 @@ public final class StringUtils {
 	 * this method
 	 * @return the passed in String, or the default
 	 */
-	public static String defaultIfEmpty(final String str, final String defaultStr) {
-		return hasText(str) ? str : defaultStr;
+	public static String defaultIfEmpty(final String str, final String... defaultValues) {
+		if (hasText(str) || ObjectUtils.isEmpty(defaultValues)) {
+			return str;
+		}
+		for (final String defaultValue : defaultValues) {
+			if (hasText(defaultValue)) {
+				return defaultValue;
+			}
+		}
+		return defaultValues[defaultValues.length - 1];
 	}
 
 	/**
@@ -1341,7 +1353,7 @@ public final class StringUtils {
 	public static boolean isBlank(final String text) {
 		return !hasText(text);
 	}
-
+	
 	/**
 	 * Constructor is private to prevent instantiation
 	 */

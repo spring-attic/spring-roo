@@ -317,4 +317,34 @@ public class StringUtilsTest {
 	public void testArrayToDelimitedStringWithMultiElementArray() {
 		assertEquals("foo;27", StringUtils.arrayToDelimitedString(";", "foo", 27));
 	}
+	
+	@Test
+	public void testDefaultIfEmptyWhenValueIsNullAndNoDefaults() {
+		assertNull(StringUtils.defaultIfEmpty(null));
+	}
+	
+	@Test
+	public void testDefaultIfEmptyWhenValueIsEmptyAndNoDefaults() {
+		assertEquals("", StringUtils.defaultIfEmpty(""));
+	}
+	
+	@Test
+	public void testDefaultIfEmptyWhenValueIsNullAndOneDefault() {
+		assertEquals("x", StringUtils.defaultIfEmpty(null, "x"));
+	}
+	
+	@Test
+	public void testDefaultIfEmptyWhenValueIsEmptyAndOneDefault() {
+		assertEquals("x", StringUtils.defaultIfEmpty("", "x"));
+	}
+	
+	@Test
+	public void testDefaultIfEmptyWhenAllValuesAreBlank() {
+		assertEquals("", StringUtils.defaultIfEmpty(null, null, null, ""));
+	}
+	
+	@Test
+	public void testDefaultIfEmptyWhenValueIsEmptyAndTwoDefaults() {
+		assertEquals("x", StringUtils.defaultIfEmpty("", null, "x"));
+	}
 }
