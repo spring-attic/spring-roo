@@ -379,7 +379,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		return methodBuilder.build();
 	}
 
-	private MethodMetadata getFindAllEntitiesMethod(final JavaSymbolName fieldName, final MemberTypeAdditions findAllMethod) {
+	private MethodMetadata getFindAllEntitiesMethod(final JavaSymbolName allEntitiesFieldName, final MemberTypeAdditions findAllMethod) {
 		final JavaSymbolName methodName = new JavaSymbolName("findAll" + plural);
 		if (governorHasMethod(methodName)) {
 			return null;
@@ -388,8 +388,8 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		findAllMethod.copyAdditionsTo(builder, governorTypeDetails);
 
 		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		bodyBuilder.appendFormalLine(fieldName.getSymbolName() + " = " + findAllMethod.getMethodCall() + ";");
-		bodyBuilder.appendFormalLine(DATA_VISIBLE + " = !" + fieldName.getSymbolName() + ".isEmpty();");
+		bodyBuilder.appendFormalLine(allEntitiesFieldName.getSymbolName() + " = " + findAllMethod.getMethodCall() + ";");
+		bodyBuilder.appendFormalLine(DATA_VISIBLE + " = !" + allEntitiesFieldName.getSymbolName() + ".isEmpty();");
 		bodyBuilder.appendFormalLine("return null;");
 
 		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), PUBLIC, methodName, JavaType.STRING, new ArrayList<AnnotatedJavaType>(), new ArrayList<JavaSymbolName>(), bodyBuilder);
@@ -1017,7 +1017,16 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 	}
 
 	private MethodMetadata getDisplayListMethod() {
-		return getMethod(PUBLIC, new JavaSymbolName(DISPLAY_LIST), STRING, null, null, InvocableMemberBodyBuilder.getInstance().appendFormalLine(CREATE_DIALOG_VISIBLE + " = false;").appendFormalLine("return \"" + entityName.getSymbolName() + "\";"));
+		final JavaSymbolName methodName = new JavaSymbolName(DISPLAY_LIST);
+		if (governorHasMethod(methodName)) {
+			return null;
+		}
+
+		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+		bodyBuilder.appendFormalLine(CREATE_DIALOG_VISIBLE + " = false;");
+		bodyBuilder.appendFormalLine("findAll" + plural + "();");
+		bodyBuilder.appendFormalLine("return \"" + entityName.getSymbolName() + "\";");
+		return getMethod(PUBLIC, methodName, STRING, null, null, bodyBuilder);
 	}
 
 	private MethodMetadata getPersistMethod(final MemberTypeAdditions mergeMethod, final MemberTypeAdditions persistMethod, final MethodMetadata identifierAccessor) {
