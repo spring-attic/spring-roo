@@ -5,6 +5,7 @@ import static org.springframework.roo.model.JdkJavaType.DATE;
 import static org.springframework.roo.model.JdkJavaType.SET;
 import static org.springframework.roo.model.JpaJavaType.EMBEDDABLE;
 import static org.springframework.roo.model.JpaJavaType.ENTITY;
+import static org.springframework.roo.model.SpringJavaType.PERSISTENT;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -330,7 +331,8 @@ public class FieldCommands implements CommandMarker {
 		// Check if the requested entity is a JPA @Entity
 		MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(this.getClass().getName(), classOrInterfaceTypeDetails);
 		AnnotationMetadata entityAnnotation = memberDetails.getAnnotation(ENTITY);
-		Assert.notNull(entityAnnotation, "The field reference command is only applicable to JPA @Entity target types.");
+		AnnotationMetadata persistentAnnotation = memberDetails.getAnnotation(PERSISTENT);
+		Assert.isTrue(entityAnnotation != null || persistentAnnotation != null, "The field reference command is only applicable to JPA @Entity or Spring Data @Persistent target types.");
 
 		Assert.isTrue(cardinality == Cardinality.MANY_TO_ONE || cardinality == Cardinality.ONE_TO_ONE, "Cardinality must be MANY_TO_ONE or ONE_TO_ONE for the field reference command");
 
@@ -374,12 +376,16 @@ public class FieldCommands implements CommandMarker {
 		// Check if the requested entity is a JPA @Entity
 		MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(this.getClass().getName(), classOrInterfaceTypeDetails);
 		AnnotationMetadata entityAnnotation = memberDetails.getAnnotation(ENTITY);
+		AnnotationMetadata persistentAnnotation = memberDetails.getAnnotation(PERSISTENT);
+
 		if (entityAnnotation != null) {
 			Assert.isTrue(cardinality == Cardinality.ONE_TO_MANY || cardinality == Cardinality.MANY_TO_MANY, "Cardinality must be ONE_TO_MANY or MANY_TO_MANY for the field set command");
 		} else if (classOrInterfaceTypeDetails.getPhysicalTypeCategory() == PhysicalTypeCategory.ENUMERATION) {
 			cardinality = null;
+		} else if (persistentAnnotation != null){
+			// yes, we can deal with that
 		} else {
-			throw new IllegalStateException("The field set command is only applicable to enum and JPA @Entity elements");
+			throw new IllegalStateException("The field set command is only applicable to enum, JPA @Entity or Spring Data @Persistence elements");
 		}
 
 		ClassOrInterfaceTypeDetails javaTypeDetails = typeLocationService.getTypeDetails(typeName);
@@ -452,7 +458,7 @@ public class FieldCommands implements CommandMarker {
 
 		ClassOrInterfaceTypeDetails targetTypeDetails = (ClassOrInterfaceTypeDetails) targetPtd;
 		MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(this.getClass().getName(), targetTypeDetails);
-		Assert.notNull(memberDetails.getAnnotation(ENTITY), "The field embedded command is only applicable to JPA @Entity target types.");
+		Assert.isTrue(memberDetails.getAnnotation(ENTITY) != null || memberDetails.getAnnotation(PERSISTENT) != null, "The field embedded command is only applicable to JPA @Entity or Spring Data @Persistent target types.");
 
 		EmbeddedField fieldDetails = new EmbeddedField(physicalTypeIdentifier, fieldType, fieldName);
 

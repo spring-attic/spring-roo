@@ -1,6 +1,7 @@
 package org.springframework.roo.addon.dod;
 
 import static org.springframework.roo.model.JpaJavaType.ENTITY;
+import static org.springframework.roo.model.SpringJavaType.PERSISTENT;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -63,7 +64,8 @@ public class DataOnDemandOperationsImpl implements DataOnDemandOperations {
 		// Check if the requested entity is a JPA @Entity
 		MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(DataOnDemandOperationsImpl.class.getName(), classOrInterfaceTypeDetails);
 		AnnotationMetadata entityAnnotation = memberDetails.getAnnotation(ENTITY);
-		Assert.notNull(entityAnnotation, "Type " + entity.getFullyQualifiedTypeName() + " must be an @Entity");
+		AnnotationMetadata persistentAnnotation = memberDetails.getAnnotation(PERSISTENT);
+		Assert.isTrue(entityAnnotation != null || persistentAnnotation != null, "Type " + entity.getFullyQualifiedTypeName() + " must be a persistent type");
 
 		// Everything is OK to proceed
 		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(name, path);
