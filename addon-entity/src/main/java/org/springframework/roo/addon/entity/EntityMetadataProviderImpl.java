@@ -152,7 +152,7 @@ public class EntityMetadataProviderImpl extends AbstractItdMetadataProvider impl
 	}
 
 	public String getItdUniquenessFilenameSuffix() {
-		return "Entity";
+		return "Jpa_ActiveRecord";
 	}
 
 	@Override
