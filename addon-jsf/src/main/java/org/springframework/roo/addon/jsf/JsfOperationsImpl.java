@@ -176,13 +176,12 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 		ClassOrInterfaceTypeDetails entityTypeDetails = typeLocationService.getTypeDetails(typeName);
 		Assert.notNull(entityTypeDetails, "The type '" + typeName + "' could not be resolved");
 		String physicalTypeIdentifier = entityTypeDetails.getDeclaredByMetadataId();
-		JavaType fieldType = JavaType.BYTE_ARRAY_PRIMITIVE;
-		FieldDetails fieldDetails = new FieldDetails(physicalTypeIdentifier, fieldType, fieldName);
+		FieldDetails fieldDetails = new FieldDetails(physicalTypeIdentifier, JavaType.BYTE_ARRAY_PRIMITIVE, fieldName);
 
 		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 		AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(ROO_UPLOADED_FILE);
 		annotationBuilder.addStringAttribute("contentType", contentType.getContentType());
-		if (autoUpload != null && autoUpload) {
+		if (autoUpload) {
 			annotationBuilder.addBooleanAttribute("autoUpload", autoUpload);
 		}
 		annotations.add(annotationBuilder);

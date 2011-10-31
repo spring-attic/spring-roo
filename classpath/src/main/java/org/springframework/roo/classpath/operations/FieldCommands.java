@@ -98,7 +98,7 @@ public class FieldCommands implements CommandMarker {
 		return projectOperations.isFocusedProjectAvailable();
 	}
 
-	@CliAvailabilityIndicator({"field reference", "field set"})
+	@CliAvailabilityIndicator({ "field reference", "field set" })
 	public boolean isJpaFieldManagementAvailable() {
 		// In a separate method in case we decide to check for JPA registration in the future
 		return projectOperations.isFocusedProjectAvailable();

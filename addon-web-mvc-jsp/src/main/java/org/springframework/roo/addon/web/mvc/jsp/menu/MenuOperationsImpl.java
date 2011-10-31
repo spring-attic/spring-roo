@@ -73,23 +73,25 @@ public class MenuOperationsImpl implements MenuOperations {
 		}
 
 		// Check for existence of menu category by looking for the identifier provided
-		Element category = XmlUtils.findFirstElement("//*[@id='c_" + menuCategoryName.getSymbolName().toLowerCase() + "']", rootElement);
+		final String lcMenuCategoryName = menuCategoryName.getSymbolName().toLowerCase();
+
+		Element category = XmlUtils.findFirstElement("//*[@id='c_" + lcMenuCategoryName + "']", rootElement);
 		// If not exists, create new one
 		if (category == null) {
-			category = (Element) rootElement.appendChild(new XmlElementBuilder("menu:category", document).addAttribute("id", "c_" + menuCategoryName.getSymbolName().toLowerCase()).build());
+			category = (Element) rootElement.appendChild(new XmlElementBuilder("menu:category", document).addAttribute("id", "c_" + lcMenuCategoryName).build());
 			category.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(category));
-			properties.put("menu_category_" + menuCategoryName.getSymbolName().toLowerCase() + "_label", menuCategoryName.getReadableSymbolName());
+			properties.put("menu_category_" + lcMenuCategoryName + "_label", menuCategoryName.getReadableSymbolName());
 		}
 
 		// Check for existence of menu item by looking for the identifier provided
-		Element menuItem = XmlUtils.findFirstElement("//*[@id='" + idPrefix + menuCategoryName.getSymbolName().toLowerCase() + "_" + menuItemId.getSymbolName().toLowerCase() + "']", rootElement);
+		Element menuItem = XmlUtils.findFirstElement("//*[@id='" + idPrefix + lcMenuCategoryName + "_" + menuItemId.getSymbolName().toLowerCase() + "']", rootElement);
 		if (menuItem == null) {
-			menuItem = new XmlElementBuilder("menu:item", document).addAttribute("id", idPrefix + menuCategoryName.getSymbolName().toLowerCase() + "_" + menuItemId.getSymbolName().toLowerCase()).addAttribute("messageCode", globalMessageCode).addAttribute("url", link).build();
+			menuItem = new XmlElementBuilder("menu:item", document).addAttribute("id", idPrefix + lcMenuCategoryName + "_" + menuItemId.getSymbolName().toLowerCase()).addAttribute("messageCode", globalMessageCode).addAttribute("url", link).build();
 			menuItem.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(menuItem));
 			category.appendChild(menuItem);
 		}
 		if (writeProps) {
-			properties.put("menu_item_" + menuCategoryName.getSymbolName().toLowerCase() + "_" + menuItemId.getSymbolName().toLowerCase() + "_label", menuItemLabel);
+			properties.put("menu_item_" + lcMenuCategoryName + "_" + menuItemId.getSymbolName().toLowerCase() + "_label", menuItemLabel);
 			propFileOperations.addProperties(projectOperations.getPathResolver().getFocusedPath(Path.SRC_MAIN_WEBAPP), "WEB-INF/i18n/application.properties", properties, true, false);
 		}
 		xmlRoundTripFileManager.writeToDiskIfNecessary(getMenuFileName(contextualPath), document);

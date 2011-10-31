@@ -44,7 +44,7 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 	static final String CHANGED = "changed";
 	static final String REMOVED = "removed";
 	static final String UPDATED = "updated";
-	
+
 	// Fields
 	@Reference FileManager fileManager;
 	@Reference MetadataService metadataService;
@@ -54,7 +54,7 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 
 	/**
 	 * Generates a message about the addition of the given items to the POM
-	 *
+	 * 
 	 * @param action the past tense of the action that was performed
 	 * @param items the items that were acted upon (required, can be empty)
 	 * @param singular the singular of this type of item (required)
@@ -71,7 +71,7 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 
 	/**
 	 * Highlights the given text
-	 *
+	 * 
 	 * @param text the text to highlight (can be blank)
 	 * @return the highlighted text
 	 */
@@ -80,10 +80,9 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 	}
 
 	public final boolean isProjectAvailable(final String moduleName) {
-		Pom pom = pomManagementService.getPomFromModuleName(moduleName);
-		return pom != null;
+		return pomManagementService.getPomFromModuleName(moduleName) != null;
 	}
-	
+
 	public final ProjectMetadata getProjectMetadata(final String moduleName) {
 		return (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier(moduleName));
 	}
@@ -151,7 +150,7 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 
 	/**
 	 * Determines whether the GWT Maven plugin exists in the pom.
-	 *
+	 * 
 	 * @return true if the gwt-maven-plugin is present in the pom.xml, otherwise false
 	 */
 	public boolean isGwtEnabled(final String moduleName) {
@@ -159,10 +158,9 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 		return pom != null && pom.isGwtEnabled();
 	}
 
-
 	/**
 	 * Determines whether the Google App Engine Maven plugin exists in the pom.
-	 *
+	 * 
 	 * @return true if the maven-gae-plugin is present in the pom.xml, otherwise false
 	 */
 	public boolean isGaeEnabled(final String moduleName) {
@@ -172,7 +170,7 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 
 	/**
 	 * Determines whether the DataNucleus Maven plugin exists in the pom.
-	 *
+	 * 
 	 * @return true if the maven-datanucleus-plugin is present in the pom.xml, otherwise false
 	 */
 	public boolean isDataNucleusEnabled(final String moduleName) {
@@ -182,7 +180,7 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 
 	/**
 	 * Determines whether the Database.com Maven dependency exists in the pom.
-	 *
+	 * 
 	 * @return true if the com.force.sdk is present in the pom.xml, otherwise false
 	 */
 	public boolean isDatabaseDotComEnabled(final String moduleName) {
@@ -194,7 +192,6 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 		Pom pom = getPomFromModuleName(moduleName);
 		Assert.notNull(pom, "A pom with module name '" + moduleName + "' could not be found");
 		return pom.getName();
-
 	}
 
 	public final void addDependency(final String moduleName, final String groupId, final String artifactId, final String version, DependencyScope scope, final String classifier) {
@@ -362,7 +359,6 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 
 		fileManager.createOrUpdateTextFileIfRequired(pom.getPath(), XmlUtils.nodeToString(document), message, false);
 	}
-
 
 	public void removeDependency(final String moduleName, final Dependency dependency) {
 		removeDependency(moduleName, dependency, "/project/dependencies", "/project/dependencies/dependency");
@@ -792,7 +788,7 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 
 	/**
 	 * Removes an element identified by the given dependency, whenever it occurs at the given path
-	 *
+	 * 
 	 * @param moduleName the name of the module to remove the dependency from
 	 * @param dependency the dependency to remove
 	 * @param containingPath the path to the dependencies element
