@@ -224,7 +224,7 @@ public class JspOperationsImpl extends AbstractOperations implements JspOperatio
 		
 		// Add the menu item
 		final String relativeUrl = folderName + "/" + lcViewName;
-		menuOperations.addMenuItem(new JavaSymbolName(category), new JavaSymbolName(folderName.replace("/", "_").toLowerCase() + lcViewName + "_id"), title, "global_generic", relativeUrl, webappPath);
+		menuOperations.addMenuItem(new JavaSymbolName(category), new JavaSymbolName(folderName.replace("/", "_").toLowerCase() + lcViewName + "_id"), title, "global_generic", relativeUrl, null, webappPath);
 		
 		// Add the view definition
 		tilesOperations.addViewDefinition(folderName.toLowerCase(), pathResolver.getFocusedPath(Path.SRC_MAIN_WEBAPP), relativeUrl, TilesOperations.DEFAULT_TEMPLATE, "/WEB-INF/views" + folderName.toLowerCase() + "/" + lcViewName + ".jspx");
