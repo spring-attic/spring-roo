@@ -83,7 +83,7 @@ public class SecurityOperationsImpl implements SecurityOperations {
 		}
 
 		if (fileManager.exists(pathResolver.getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/views/views.xml"))) {
-			tilesOperations.addViewDefinition("", pathResolver.getFocusedPath(Path.SRC_MAIN_WEBAPP), "login", TilesOperations.PUBLIC_TEMPLATE, "WEB-INF/views/login.jspx");
+			tilesOperations.addViewDefinition("", pathResolver.getFocusedPath(Path.SRC_MAIN_WEBAPP), "login", TilesOperations.PUBLIC_TEMPLATE, "/WEB-INF/views/login.jspx");
 		}
 
 		String webXmlPath = pathResolver.getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/web.xml");
