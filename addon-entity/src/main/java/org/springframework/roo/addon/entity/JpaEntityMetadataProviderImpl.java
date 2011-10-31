@@ -196,8 +196,7 @@ public class JpaEntityMetadataProviderImpl extends AbstractIdentifierServiceAwar
 
 		boolean isGaeEnabled = false;
 		boolean isDatabaseDotComEnabled = false;
-
-		String moduleName = PhysicalTypeIdentifierNamingUtils.getPath(metadataId).getModule();
+		final String moduleName = PhysicalTypeIdentifierNamingUtils.getPath(metadataId).getModule();
 		if (projectOperations.isProjectAvailable(moduleName)) {
 			// If the project itself changes, we want a chance to refresh this item
 			metadataDependencyRegistry.registerDependency(ProjectMetadata.getProjectIdentifier(moduleName), metadataId);

@@ -100,7 +100,8 @@ public class JavaBeanMetadataProvider extends AbstractItdMetadataProvider {
 
 	private JavaSymbolName getIdentifierAccessorMethodName(final FieldMetadata field, final String metadataIdentificationString) {
 		ContextualPath path = PhysicalTypeIdentifier.getPath(field.getDeclaredByMetadataId());
-		if (projectOperations.isProjectAvailable(path.getModule()) || !projectOperations.isGaeEnabled(path.getModule())) {
+		final String moduleNme = path.getModule();
+		if (projectOperations.isProjectAvailable(moduleNme) || !projectOperations.isGaeEnabled(moduleNme)) {
 			return null;
 		}
 		// We are not interested if the field is annotated with @javax.persistence.Transient

@@ -49,7 +49,6 @@ public interface ProjectOperations {
 	 */
 	PathResolver getPathResolver();
 
-	
 	/**
 	 * Attempts to update the project packaging type as defined via {@link ProjectType}. If the
 	 * project packaging is not defined it will create a new definition.

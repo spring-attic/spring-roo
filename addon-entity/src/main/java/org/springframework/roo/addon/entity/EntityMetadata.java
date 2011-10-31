@@ -136,17 +136,15 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 
 	/**
 	 * Locates the entity manager field that should be used.
-	 *
+	 * 
 	 * <p>
 	 * If a parent is defined, it must provide the field.
-	 *
+	 * 
 	 * <p>
-	 * We generally expect the field to be named "entityManager" and be of type javax.persistence.EntityManager. We
-	 * also require it to be public or protected, and annotated with @PersistenceContext. If there is an
-	 * existing field which doesn't meet these latter requirements, we add an underscore prefix to the "entityManager" name
-	 * and try again, until such time as we come up with a unique name that either meets the requirements or the
-	 * name is not used and we will create it.
-	 *
+	 * We generally expect the field to be named "entityManager" and be of type javax.persistence.EntityManager. We also require it to be public or protected, and annotated with @PersistenceContext.
+	 * If there is an existing field which doesn't meet these latter requirements, we add an underscore prefix to the "entityManager" name and try again, until such time as we come up with a unique
+	 * name that either meets the requirements or the name is not used and we will create it.
+	 * 
 	 * @return the entity manager field (never returns null)
 	 */
 	public FieldMetadata getEntityManagerField() {
@@ -323,7 +321,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		} else {
 			// Persist
 			addTransactionalAnnotation(annotations, true);
-			bodyBuilder.appendFormalLine("this." + entityManagerFieldName + "." + methodDelegateName  + "(this);");
+			bodyBuilder.appendFormalLine("this." + entityManagerFieldName + "." + methodDelegateName + "(this);");
 		}
 
 		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), new ArrayList<JavaSymbolName>(), bodyBuilder);
@@ -347,8 +345,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	}
 
 	/**
-	 * @return the static utility entityManager() method used by other methods to obtain
-	 * entity manager and available as a utility for user code (never returns nulls)
+	 * @return the static utility entityManager() method used by other methods to obtain entity manager and available as a utility for user code (never returns nulls)
 	 */
 	public MethodMetadata getEntityManagerMethod() {
 		if (parent != null) {
@@ -414,7 +411,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 
 	/**
 	 * Finds (creating if necessary) the method that counts entities of this type
-	 *
+	 * 
 	 * @return the count method (never null)
 	 */
 	private MethodMetadata getCountMethod() {
@@ -474,7 +471,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("return " + ENTITY_MANAGER_METHOD_NAME + "().createQuery(\"SELECT o FROM " + entityName + " o\", " + destination.getSimpleTypeName() + ".class).getResultList();");
 
-		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(),  Modifier.PUBLIC | Modifier.STATIC, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
+		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC | Modifier.STATIC, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
 		return methodBuilder.build();
 	}
@@ -532,7 +529,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 
 		// Method definition to find or build
 		final JavaSymbolName methodName = new JavaSymbolName(crudAnnotationValues.getFindEntriesMethod() + destination.getSimpleTypeName() + "Entries");
-		final JavaType[] parameterTypes = {INT_PRIMITIVE, INT_PRIMITIVE};
+		final JavaType[] parameterTypes = { INT_PRIMITIVE, INT_PRIMITIVE };
 		final List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("firstResult"), new JavaSymbolName("maxResults"));
 		final JavaType returnType = new JavaType(LIST.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, Arrays.asList(destination));
 
@@ -551,7 +548,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 
 		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("return " + ENTITY_MANAGER_METHOD_NAME + "().createQuery(\"SELECT o FROM " + entityName + " o\", " + destination.getSimpleTypeName() + ".class).setFirstResult(firstResult).setMaxResults(maxResults).getResultList();");
- 
+
 		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC | Modifier.STATIC, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
 		return methodBuilder.build();
@@ -589,7 +586,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 
 	/**
 	 * Returns the JPA name of this entity.
-	 *
+	 * 
 	 * @return a non-<code>null</code> name (might be empty)
 	 */
 	public String getEntityName() {
