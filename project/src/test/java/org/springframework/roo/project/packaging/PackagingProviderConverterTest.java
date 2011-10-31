@@ -7,6 +7,7 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Before;
@@ -25,13 +26,13 @@ import org.springframework.roo.shell.Completion;
 public class PackagingProviderConverterTest {
 
 	// Constants
-	private static final String UNKNOWN = "no-such-id";
 	private static final String CORE_JAR_ID = "jar";
 	private static final String CUSTOM_JAR_ID = "jar_custom";
 	private static final String CORE_WAR_ID = "war";
 
 	// Fixture
 	private PackagingProviderConverter converter;
+	@Mock private PackagingProviderRegistry mockPackagingProviderRegistry;
 	@Mock private CorePackagingProvider mockCoreJarPackaging;
 	@Mock private PackagingProvider mockCustomJarPackaging;
 	@Mock private CorePackagingProvider mockWarPackaging;
@@ -46,9 +47,7 @@ public class PackagingProviderConverterTest {
 
 		// Object under test
 		this.converter = new PackagingProviderConverter();
-		this.converter.bindPackagingProvider(mockCoreJarPackaging);
-		this.converter.bindPackagingProvider(mockCustomJarPackaging);
-		this.converter.bindPackagingProvider(mockWarPackaging);
+		this.converter.packagingProviderRegistry = mockPackagingProviderRegistry;
 	}
 	
 	private void setUpMockPackagingProvider(final PackagingProvider mockPackagingProvider, final String id, final boolean isDefault) {
@@ -74,9 +73,9 @@ public class PackagingProviderConverterTest {
 	private void assertInvalidString(final String string) {
 		try {
 			converter.convertFromText(string, PackagingProvider.class, null);
-			fail("Expected a " + UnsupportedOperationException.class);
-		} catch (UnsupportedOperationException expected) {
-			assertEquals("Unsupported packaging type '" + string + "'", expected.getMessage());
+			fail("Expected a " + IllegalArgumentException.class);
+		} catch (IllegalArgumentException expected) {
+			assertEquals("Unsupported packaging id '" + string + "'", expected.getMessage());
 		}
 	}
 
@@ -102,66 +101,34 @@ public class PackagingProviderConverterTest {
 
 	@Test
 	public void testConvertValidString() {
-		// Invoke and check
-		assertEquals(mockCustomJarPackaging, converter.convertFromText(CUSTOM_JAR_ID, PackagingProvider.class, null));
-	}
-
-	@Test
-	public void testGetAllPossibleValuesForInvalidExistingData() {
-		assertPossibleValues(UNKNOWN);
-	}
-
-	@Test
-	public void testGetAllPossibleValuesForNullExistingData() {
-		assertPossibleValues(null, CORE_JAR_ID.toUpperCase(), CUSTOM_JAR_ID.toUpperCase(), CORE_WAR_ID.toUpperCase());
-	}
-
-	@Test
-	public void testGetAllPossibleValuesForEmptyExistingData() {
-		assertPossibleValues("", CORE_JAR_ID.toUpperCase(), CUSTOM_JAR_ID.toUpperCase(), CORE_WAR_ID.toUpperCase());
-	}
-
-	@Test
-	public void testGetAllPossibleValuesForLowerCaseExistingData() {
-		assertPossibleValues("j", CORE_JAR_ID.toUpperCase(), CUSTOM_JAR_ID.toUpperCase());
-	}
-
-	@Test
-	public void testGetAllPossibleValuesForUpperCaseExistingData() {
-		assertPossibleValues("J", CORE_JAR_ID.toUpperCase(), CUSTOM_JAR_ID.toUpperCase());
-	}
-
-	/**
-	 * Asserts that the completions for the given existing data are as expected
-	 *
-	 * @param existingData can't be <code>null</code> (not part of the contract)
-	 * @param expectedCompletions
-	 */
-	private void assertPossibleValues(final String existingData, final String... expectedCompletions) {
-		List<Completion> expectedCompletionList = new ArrayList<Completion>();
-		for (String expectedCompletion : expectedCompletions) {
-			expectedCompletionList.add(new Completion(expectedCompletion));
-		}
 		// Set up
+		final String id = "some-id";
+		when(mockPackagingProviderRegistry.getPackagingProvider(id)).thenReturn(mockCoreJarPackaging);
+		
+		// Invoke
+		final PackagingProvider packagingProvider = converter.convertFromText(id, PackagingProvider.class, null);
+		
+		// Check
+		assertEquals(mockCoreJarPackaging, packagingProvider);
+	}
+
+	@Test
+	public void testGetAllPossibleValues() {
+		// Set up
+		final PackagingProvider[] providers = {mockCoreJarPackaging, mockCustomJarPackaging, mockWarPackaging};
+		when(mockPackagingProviderRegistry.getAllPackagingProviders()).thenReturn(Arrays.asList(providers));
+		final List<Completion> expectedCompletions = new ArrayList<Completion>();
+		for (PackagingProvider provider : providers) {
+			expectedCompletions.add(new Completion(provider.getId().toUpperCase()));
+		}
 		final List<Completion> completions = new ArrayList<Completion>();
 
 		// Invoke
-		final boolean addSpace = converter.getAllPossibleValues(completions, PackagingProvider.class, existingData, null, null);
+		final boolean addSpace = converter.getAllPossibleValues(completions, PackagingProvider.class, "ignored", null, null);
 
 		// Check
 		assertTrue(addSpace);
-		assertEquals(expectedCompletionList.size(), completions.size());
-		assertTrue("Expected " + expectedCompletionList + " but was " + completions, completions.containsAll(expectedCompletionList));
-	}
-	
-	@Test
-	public void testGetDefaultPackagingProviderWhenACustomIsDefault() {
-		assertEquals(mockCustomJarPackaging, converter.getDefaultPackagingProvider());
-	}
-	
-	@Test
-	public void testGetDefaultPackagingProviderWhenNoCustomIsDefault() {
-		when(mockCustomJarPackaging.isDefault()).thenReturn(false);
-		assertEquals(mockCoreJarPackaging, converter.getDefaultPackagingProvider());
+		assertEquals(expectedCompletions.size(), completions.size());
+		assertTrue("Expected " + expectedCompletions + " but was " + completions, completions.containsAll(expectedCompletions));
 	}
 }

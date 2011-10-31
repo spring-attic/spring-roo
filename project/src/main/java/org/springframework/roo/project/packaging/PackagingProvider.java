@@ -2,6 +2,7 @@ package org.springframework.roo.project.packaging;
 
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.project.GAV;
+import org.springframework.roo.project.ProjectOperations;
 
 /**
  * Creates the initial set of artifacts for a given Maven packaging type.
@@ -36,9 +37,12 @@ public interface PackagingProvider {
 	 * @param nullableProjectName the project name provided by the user (can be blank)
 	 * @param javaVersion the Java version for this project or module (required)
 	 * @param parentPom the Maven coordinates of the parent POM (can be <code>null</code> for none)
+	 * @param moduleName the name of the module being created (blank for the root or only module)
+	 * @param projectOperations in case it's required (never <code>null</code>)
+	 * @return the path of the newly created POM
 	 */
-	void createArtifacts(JavaPackage topLevelPackage, String projectName, String javaVersion, GAV parentPom);
-
+	String createArtifacts(JavaPackage topLevelPackage, String projectName, String javaVersion, GAV parentPom, String moduleName, ProjectOperations projectOperations);
+	
 	/**
 	 * Indicates whether this type of packaging should be used for new projects
 	 * and modules by default, i.e. when the user doesn't specify the packaging.

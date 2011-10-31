@@ -7,6 +7,7 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.project.maven.Pom;
+import org.springframework.roo.project.packaging.PackagingProvider;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
@@ -25,7 +26,6 @@ public class MavenCommands implements CommandMarker {
 	// Constants
 	private static final String DEPENDENCY_ADD_COMMAND = "dependency add";
 	private static final String DEPENDENCY_REMOVE_COMMAND = "dependency remove";
-	private static final String MODULE_COMMAND = "module";
 	private static final String MODULE_CREATE_COMMAND = "module create";
 	private static final String MODULE_FOCUS_COMMAND = "module focus";
 	private static final String PERFORM_ASSEMBLY_COMMAND = "perform assembly";
@@ -47,17 +47,12 @@ public class MavenCommands implements CommandMarker {
 	@CliCommand(value = PROJECT_COMMAND, help = "Creates a new Maven project")
 	public void createProject(
 		@CliOption(key = { "", "topLevelPackage" }, mandatory = true, optionContext = "update", help = "The uppermost package name (this becomes the <groupId> in Maven and also the '~' value when using Roo's shell)") final JavaPackage topLevelPackage,
-		@CliOption(key = "projectName", mandatory = false, help = "The name of the project (last segment of package name used as default)") final String projectName,
-		@CliOption(key = "java", mandatory = false, help = "Forces a particular major version of Java to be used (will be auto-detected if unspecified; specify 5 or 6 or 7 only)") final Integer majorJavaVersion,
-		@CliOption(key = "parent", help = "The Maven coordinates of the parent POM, in the form \"groupId:artifactId:version\"") final String parent) {
+		@CliOption(key = "projectName", help = "The name of the project (last segment of package name used as default)") final String projectName,
+		@CliOption(key = "java", help = "Forces a particular major version of Java to be used (will be auto-detected if unspecified; specify 5 or 6 or 7 only)") final Integer majorJavaVersion,
+		@CliOption(key = "parent", help = "The Maven coordinates of the parent POM, in the form \"groupId:artifactId:version\"") final GAV parentPom,
+		@CliOption(key = "packaging", help = "The Maven packaging of this project") final PackagingProvider packaging) {
 
-		mavenOperations.createProject(topLevelPackage, projectName, majorJavaVersion, parent);
-	}
-
-
-	@CliAvailabilityIndicator({MODULE_COMMAND})
-	public boolean isCreateModuleAvailable() {
-		return true;
+		mavenOperations.createProject(topLevelPackage, projectName, majorJavaVersion, parentPom, packaging);
 	}
 
 	@CliAvailabilityIndicator({ DEPENDENCY_ADD_COMMAND, DEPENDENCY_REMOVE_COMMAND })
@@ -73,13 +68,13 @@ public class MavenCommands implements CommandMarker {
 
 	@CliCommand(value = MODULE_CREATE_COMMAND, help = "Creates a new Maven module")
 	public void createModule(
-		@CliOption(key = "moduleName", mandatory = true, help = "The name of the project (last segment of package name used as default)") final String moduleName,
+		@CliOption(key = "moduleName", mandatory = true, help = "The name of the module") final String moduleName,
 		@CliOption(key = "topLevelPackage", mandatory = true, optionContext = "update", help = "The uppermost package name (this becomes the <groupId> in Maven and also the '~' value when using Roo's shell)") final JavaPackage topLevelPackage,
-		@CliOption(key = "projectName", mandatory = false, help = "The name of the project (last segment of package name used as default)") final String projectName,
-		@CliOption(key = "java", mandatory = false, help = "Forces a particular major version of Java to be used (will be auto-detected if unspecified; specify 5 or 6 or 7 only)") final Integer majorJavaVersion,
-		@CliOption(key = "parent", help = "The Maven coordinates of the parent POM, in the form \"groupId:artifactId:version\"") final String parent) {
+		@CliOption(key = "java", help = "Forces a particular major version of Java to be used (will be auto-detected if unspecified; specify 5 or 6 or 7 only)") final Integer majorJavaVersion,
+		@CliOption(key = "parent", help = "The Maven coordinates of the parent POM, in the form \"groupId:artifactId:version\"") final GAV parentPom,
+		@CliOption(key = "packaging", help = "The Maven packaging of this module") final PackagingProvider packaging) {
 
-		mavenOperations.createModule(topLevelPackage, projectName, majorJavaVersion, parent, moduleName);
+		mavenOperations.createModule(topLevelPackage, parentPom, moduleName, packaging, majorJavaVersion);
 	}
 
 	@CliCommand(value = DEPENDENCY_ADD_COMMAND, help = "Adds a new dependency to the Maven project object model (POM)")
@@ -87,8 +82,8 @@ public class MavenCommands implements CommandMarker {
 		@CliOption(key = "groupId", mandatory = true, help = "The group ID of the dependency") final String groupId,
 		@CliOption(key = "artifactId", mandatory = true, help = "The artifact ID of the dependency") final String artifactId,
 		@CliOption(key = "version", mandatory = true, help = "The version of the dependency") final String version,
-		@CliOption(key = "classifier", mandatory = false, help = "The classifier of the dependency") final String classifier,
-		@CliOption(key = "scope", mandatory = false, help = "The scope of the dependency") final DependencyScope scope) {
+		@CliOption(key = "classifier", help = "The classifier of the dependency") final String classifier,
+		@CliOption(key = "scope", help = "The scope of the dependency") final DependencyScope scope) {
 
 		mavenOperations.addDependency(mavenOperations.getFocusedModuleName(), groupId, artifactId, version, scope, classifier);
 	}
@@ -98,7 +93,7 @@ public class MavenCommands implements CommandMarker {
 		@CliOption(key = "groupId", mandatory = true, help = "The group ID of the dependency") final String groupId,
 		@CliOption(key = "artifactId", mandatory = true, help = "The artifact ID of the dependency") final String artifactId,
 		@CliOption(key = "version", mandatory = true, help = "The version of the dependency") final String version,
-		@CliOption(key = "classifier", mandatory = false, help = "The classifier of the dependency") final String classifier) {
+		@CliOption(key = "classifier", help = "The classifier of the dependency") final String classifier) {
 
 		mavenOperations.removeDependency(groupId, artifactId, version, classifier);
 	}

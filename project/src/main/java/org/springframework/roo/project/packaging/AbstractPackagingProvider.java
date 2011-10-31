@@ -1,5 +1,7 @@
 package org.springframework.roo.project.packaging;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -15,6 +17,7 @@ import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.DomUtils;
+import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.TemplateUtils;
 import org.springframework.roo.support.util.XmlUtils;
@@ -22,7 +25,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 /**
- * Convenient superclass for implementing a {@link PackagingProvider}.
+ * Convenient superclass for core or third-party addons to implement a {@link PackagingProvider}.
  *
  * Uses the "Template Method" GoF pattern.
  *
@@ -40,7 +43,6 @@ public abstract class AbstractPackagingProvider implements PackagingProvider {
 	@Reference protected ApplicationContextOperations applicationContextOperations;
 	@Reference protected FileManager fileManager;
 	@Reference protected PathResolver pathResolver;
-	@Reference protected ProjectOperations projectOperations;
 
 	private final String id;
 	private final String name;
@@ -70,14 +72,11 @@ public abstract class AbstractPackagingProvider implements PackagingProvider {
 		return id;
 	}
 
-	public String getName() {
-		return this.name;
-	}
-
-	public void createArtifacts(final JavaPackage topLevelPackage, final String nullableProjectName, final String javaVersion, final GAV parentPom) {
-		createPom(topLevelPackage, nullableProjectName, javaVersion, parentPom);
+	public String createArtifacts(final JavaPackage topLevelPackage, final String nullableProjectName, final String javaVersion, final GAV parentPom, final String module, final ProjectOperations projectOperations) {
+		final String pomPath = createPom(topLevelPackage, nullableProjectName, javaVersion, parentPom, module, projectOperations);
 		fileManager.scan();	// TODO not sure why or if this is necessary; find out and document/remove it
-		createOtherArtifacts();
+		createOtherArtifacts(topLevelPackage, module);
+		return pomPath;
 	}
 
 	/**
@@ -98,11 +97,12 @@ public abstract class AbstractPackagingProvider implements PackagingProvider {
 	 * to make life easier for authors of new {@link PackagingProvider}s.
 	 *
 	 * @param topLevelPackage the new project or module's top-level Java package (required)
-	 * @param nullableProjectName the project name provided by the user (can be blank)
+	 * @param projectName the project name provided by the user (can be blank)
 	 * @param javaVersion the Java version to substitute into the POM (required)
 	 * @param parentPom the Maven coordinates of the parent POM (can be <code>null</code>)
+	 * @return the path of the newly created POM
 	 */
-	protected void createPom(final JavaPackage topLevelPackage, final String nullableProjectName, final String javaVersion, final GAV parentPom) {
+	protected String createPom(final JavaPackage topLevelPackage, final String projectName, final String javaVersion, final GAV parentPom, final String module, final ProjectOperations projectOperations) {
 		Assert.hasText(javaVersion, "Java version required");
 		Assert.notNull(topLevelPackage, "Top level package required");
 
@@ -111,21 +111,25 @@ public abstract class AbstractPackagingProvider implements PackagingProvider {
 		final Element root = pom.getDocumentElement();
 
 		// name
-		final String projectName = getProjectName(nullableProjectName, topLevelPackage);
-		if (StringUtils.hasText(projectName)) {
-			DomUtils.createChildIfNotExists("name", root, pom).setTextContent(projectName.trim());
+		final String mavenName = getProjectName(projectName, module, topLevelPackage);
+		if (StringUtils.hasText(mavenName)) {
+			// If the user wants this element in the traditional place, ensure
+			// the template already contains it
+			DomUtils.createChildIfNotExists("name", root, pom).setTextContent(mavenName.trim());
+		} else {
+			DomUtils.removeElements("name", root);
 		}
 
 		// parent and groupId
 		setGroupIdAndParent(getGroupId(topLevelPackage), parentPom, root, pom);
 
 		// artifactId
-		final String artifactId = getArtifactId(nullableProjectName, topLevelPackage);
+		final String artifactId = getArtifactId(projectName, module, topLevelPackage);
 		Assert.hasText(artifactId, "Maven artifactIds cannot be blank");
 		DomUtils.createChildIfNotExists("artifactId", root, pom).setTextContent(artifactId.trim());
 
 		// packaging
-		DomUtils.createChildIfNotExists("packaging", root, pom).setTextContent(getName());
+		DomUtils.createChildIfNotExists("packaging", root, pom).setTextContent(this.name);
 
 		// Java versions
 		final List<Element> versionElements = XmlUtils.findElements("//*[.='" + JAVA_VERSION_PLACEHOLDER + "']", root);
@@ -134,7 +138,9 @@ public abstract class AbstractPackagingProvider implements PackagingProvider {
 		}
 
 		// Write the new POM to disk
-		fileManager.createOrUpdateTextFileIfRequired(pathResolver.getFocusedIdentifier(Path.ROOT, "pom.xml"), XmlUtils.nodeToString(pom), true);
+		final String pomPath = pathResolver.getIdentifier(Path.ROOT.contextualize(module), "pom.xml");
+		fileManager.createOrUpdateTextFileIfRequired(pomPath, XmlUtils.nodeToString(pom), true);
+		return pomPath;
 	}
 
 	/**
@@ -159,12 +165,13 @@ public abstract class AbstractPackagingProvider implements PackagingProvider {
 	 * method to use a different strategy.
 	 *
 	 * @param nullableProjectName the project name entered by the user (can be blank)
+	 * @param module the name of the module being created (blank for the root module)
 	 * @param topLevelPackage the project or module's top level Java package (required)
 	 *
 	 * @return a blank name if none is required
 	 */
-	protected String getProjectName(final String nullableProjectName, final JavaPackage topLevelPackage) {
-		return StringUtils.defaultIfEmpty(nullableProjectName, topLevelPackage.getLastElement());
+	protected String getProjectName(final String nullableProjectName, final String module, final JavaPackage topLevelPackage) {
+		return StringUtils.defaultIfEmpty(nullableProjectName, module, topLevelPackage.getLastElement());
 	}
 
 	/**
@@ -174,12 +181,13 @@ public abstract class AbstractPackagingProvider implements PackagingProvider {
 	 * Subclasses can override this method to use a different strategy.
 	 *
 	 * @param nullableProjectName the project name entered by the user (can be blank)
+	 * @param module the name of the module being created (blank for the root module)
 	 * @param topLevelPackage the project or module's top level Java package (required)
 	 *
 	 * @return a non-blank artifactId
 	 */
-	protected String getArtifactId(final String nullableProjectName, final JavaPackage topLevelPackage) {
-		return getProjectName(nullableProjectName, topLevelPackage);
+	protected String getArtifactId(final String nullableProjectName, final String module, final JavaPackage topLevelPackage) {
+		return getProjectName(nullableProjectName, module, topLevelPackage);
 	}
 
 	/**
@@ -219,9 +227,28 @@ public abstract class AbstractPackagingProvider implements PackagingProvider {
 	/**
 	 * Subclasses can override this method to create any other required files
 	 * or directories (apart from the POM, which has previously been generated
-	 * by {@link #createPom}). This implementation does nothing.
+	 * by {@link #createPom}).
+	 * <p>
+	 * This implementation sets up the Log4j configuration file for the root module.
+	 * @param topLevelPackage 
+	 * 
+	 * @param module 
 	 */
-	protected void createOtherArtifacts() {}
+	protected void createOtherArtifacts(final JavaPackage topLevelPackage, final String module) {
+		if (StringUtils.isBlank(module)) {
+			setUpLog4jConfiguration();
+		}
+	}
+	
+	private void setUpLog4jConfiguration() {
+		final String log4jConfigFile = pathResolver.getFocusedIdentifier(Path.SRC_MAIN_RESOURCES, "log4j.properties");
+		final InputStream template = TemplateUtils.getTemplate(getClass(), "packaging/log4j.properties-template");
+		try {
+			FileCopyUtils.copy(template, fileManager.createFile(log4jConfigFile).getOutputStream());
+		} catch (final IOException e) {
+			LOGGER.warning("Unable to install log4j logging configuration");
+		}
+	}
 
 	/**
 	 * Returns the package-relative path to this {@link PackagingProvider}'s POM template.

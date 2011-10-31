@@ -33,8 +33,8 @@ public abstract class PackagingProviderTestCase<T extends AbstractPackagingProvi
 	protected abstract T getProvider();
 
 	@Test
-	public void testNameIsNotBlank() {
-		assertTrue(StringUtils.hasText(provider.getName()));
+	public void testIdIsNotBlank() {
+		assertTrue(StringUtils.hasText(provider.getId()));
 	}
 
 	@Test
