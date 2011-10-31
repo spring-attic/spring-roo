@@ -236,9 +236,6 @@ public class GwtOperationsImpl implements GwtOperations {
 		// Update web.xml
 		updateWebXml();
 
-		// Update persistence.xml
-		updatePersistenceXml();
-
 		updateBuildPlugins(projectOperations.isGaeEnabled(projectOperations.getFocusedModuleName()));
 	}
 
@@ -471,21 +468,6 @@ public class GwtOperationsImpl implements GwtOperations {
 		removeIfFound("/web-app/error-page", root);
 
 		fileManager.createOrUpdateTextFileIfRequired(webXmlpath, XmlUtils.nodeToString(webXml), false);
-	}
-
-	private void updatePersistenceXml() {
-		String persistencePath = projectOperations.getPathResolver().getFocusedIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml");
-		Document persistenceXml = XmlUtils.readXml(fileManager.getInputStream(persistencePath));
-		Element root = persistenceXml.getDocumentElement();
-
-		for (Element persistenceUnitElement : XmlUtils.findElements("persistence-unit", root)) {
-			Element provider = XmlUtils.findFirstElement("provider", persistenceUnitElement);
-			if (provider != null && "org.datanucleus.store.appengine.jpa.DatastorePersistenceProvider".equals(provider.getTextContent()) && !projectOperations.isGaeEnabled(projectOperations.getFocusedModuleName())) {
-				persistenceUnitElement.getParentNode().removeChild(persistenceUnitElement);
-				fileManager.createOrUpdateTextFileIfRequired(persistencePath, XmlUtils.nodeToString(persistenceXml), false);
-				break;
-			}
-		}
 	}
 
 	private void updateGaeHelper() {
