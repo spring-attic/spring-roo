@@ -272,6 +272,21 @@ public final class DomUtils {
 		Assert.notNull(root, "Root element required");
 		return (Element) root.getElementsByTagName(name).item(0);
 	}
+	
+	/**
+	 * Removes any elements matching the given XPath expression, relative to
+	 * the given Element
+	 * 
+	 * @param xPath the XPath of the element(s) to remove (can be blank)
+	 * @param searchBase the element to which the XPath expression is relative
+	 */
+	public static void removeElements(final String xPath, final Element searchBase) {
+		for (final Element elementToDelete : XmlUtils.findElements(xPath, searchBase)) {
+			final Node parentNode = elementToDelete.getParentNode();
+			parentNode.removeChild(elementToDelete);
+			removeTextNodes(parentNode);
+		}
+	}
 
 	/**
 	 * Constructor is private to prevent instantiation
