@@ -70,6 +70,7 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 
 	// Constants
 	private static final String PRIMEFACES_XPATH = "/configuration/jsf-libraries/jsf-library[@id = 'PRIMEFACES']";
+	private static final String PRIMEFACES_THEMES_VERSION = "1.0.1";
 
 	// Fields
 	@Reference private MetadataDependencyRegistry metadataDependencyRegistry;
@@ -333,7 +334,7 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 
 		// Add theme to the pom if not already there
 		String themeName = StringUtils.toLowerCase(theme.name().replace("_", "-"));
-		projectOperations.addDependency(projectOperations.getFocusedModuleName(), "org.primefaces.themes", themeName, "1.0.1");
+		projectOperations.addDependency(projectOperations.getFocusedModuleName(), "org.primefaces.themes", themeName, PRIMEFACES_THEMES_VERSION);
 
 		// Update the web.xml primefaces.THEME content-param
 		Element root = document.getDocumentElement();
