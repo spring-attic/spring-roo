@@ -169,16 +169,6 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 	}
 
 	/**
-	 * Determines whether the DataNucleus Maven plugin exists in the pom.
-	 * 
-	 * @return true if the maven-datanucleus-plugin is present in the pom.xml, otherwise false
-	 */
-	public boolean isDataNucleusEnabled(final String moduleName) {
-		Pom pom = getPomFromModuleName(moduleName);
-		return pom != null && pom.isDataNucleusEnabled();
-	}
-
-	/**
 	 * Determines whether the Database.com Maven dependency exists in the pom.
 	 * 
 	 * @return true if the com.force.sdk is present in the pom.xml, otherwise false

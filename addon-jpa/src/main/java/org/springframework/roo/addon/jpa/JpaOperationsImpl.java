@@ -146,7 +146,7 @@ public class JpaOperationsImpl implements JpaOperations {
 		Element dataSource = XmlUtils.findFirstElement("/beans/bean[@id = 'dataSource']", root);
 		Element dataSourceJndi = XmlUtils.findFirstElement("/beans/jndi-lookup[@id = 'dataSource']", root);
 
-		if (ormProvider == OrmProvider.DATANUCLEUS || ormProvider == OrmProvider.DATANUCLEUS_2) {
+		if (ormProvider == OrmProvider.DATANUCLEUS) {
 			if (dataSource != null) {
 				root.removeChild(dataSource);
 			}
@@ -242,7 +242,7 @@ public class JpaOperationsImpl implements JpaOperations {
 			default:
 				entityManagerFactory.setAttribute("class", "org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean");
 				entityManagerFactory.appendChild(createPropertyElement("persistenceUnitName", StringUtils.defaultIfEmpty(persistenceUnit, DEFAULT_PERSISTENCE_UNIT), appCtx));
-				if (!ormProvider.name().startsWith("DATANUCLEUS")) {
+				if (ormProvider != OrmProvider.DATANUCLEUS) {
 					entityManagerFactory.appendChild(createRefElement("dataSource", "dataSource", appCtx));
 				}
 				break;
@@ -287,30 +287,18 @@ public class JpaOperationsImpl implements JpaOperations {
 			persistenceElement.appendChild(persistenceUnitElement);
 		}
 
-		// Set attributes for DataNuclueus 1.1.x/GAE-specific requirements
-		switch (ormProvider) {
-			case DATANUCLEUS:
-				persistenceElement.setAttribute("version", "1.0");
-				persistenceElement.setAttribute("xsi:schemaLocation", "http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_1_0.xsd");
-				break;
-			default:
-				persistenceElement.setAttribute("version", "2.0");
-				persistenceElement.setAttribute("xsi:schemaLocation", "http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd");
-				break;
-		}
-
 		// Add provider element
 		final Element provider = persistence.createElement("provider");
 		switch (jdbcDatabase) {
 			case GOOGLE_APP_ENGINE:
 				persistenceUnitElement.setAttribute("name", (StringUtils.defaultIfEmpty(persistenceUnit, GAE_PERSISTENCE_UNIT_NAME)));
 				persistenceUnitElement.removeAttribute("transaction-type");
-				provider.setTextContent(ormProvider.getAlternateAdapter());
+				provider.setTextContent(ormProvider.getAdapter());
 				break;
 			case DATABASE_DOT_COM:
 				persistenceUnitElement.setAttribute("name", (StringUtils.defaultIfEmpty(persistenceUnit, DEFAULT_PERSISTENCE_UNIT)));
 				persistenceUnitElement.removeAttribute("transaction-type");
-				provider.setTextContent(ormProvider.getAlternateAdapter());
+				provider.setTextContent("com.force.sdk.jpa.PersistenceProviderImpl");
 				break;
 			default:
 				persistenceUnitElement.setAttribute("name", (StringUtils.defaultIfEmpty(persistenceUnit, DEFAULT_PERSISTENCE_UNIT)));
@@ -352,7 +340,6 @@ public class JpaOperationsImpl implements JpaOperations {
 				properties.appendChild(createPropertyElement("eclipselink.weaving", "static", persistence));
 				break;
 			case DATANUCLEUS:
-			case DATANUCLEUS_2:
 				String connectionString = getConnectionString(jdbcDatabase, hostName, databaseName, moduleName);
 				switch (jdbcDatabase) {
 					case GOOGLE_APP_ENGINE:
@@ -396,7 +383,7 @@ public class JpaOperationsImpl implements JpaOperations {
 
 		fileManager.createOrUpdateTextFileIfRequired(persistencePath, XmlUtils.nodeToString(persistence), false);
 
-		if (jdbcDatabase != JdbcDatabase.GOOGLE_APP_ENGINE && (ormProvider == OrmProvider.DATANUCLEUS || ormProvider == OrmProvider.DATANUCLEUS_2)) {
+		if (jdbcDatabase != JdbcDatabase.GOOGLE_APP_ENGINE && ormProvider == OrmProvider.DATANUCLEUS) {
 			LOGGER.warning("Please update your database details in src/main/resources/META-INF/persistence.xml.");
 		}
 	}
@@ -467,7 +454,7 @@ public class JpaOperationsImpl implements JpaOperations {
 		final String databasePath = getDatabasePropertiesPath();
 		final boolean databaseExists = fileManager.exists(databasePath);
 
-		if (ormProvider == OrmProvider.DATANUCLEUS || ormProvider == OrmProvider.DATANUCLEUS_2) {
+		if (ormProvider == OrmProvider.DATANUCLEUS) {
 			if (databaseExists) {
 				fileManager.delete(databasePath, "ORM provider is " + ormProvider.name());
 			}

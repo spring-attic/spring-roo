@@ -2,7 +2,6 @@ package org.springframework.roo.addon.entity;
 
 import static org.springframework.roo.model.JavaType.INT_PRIMITIVE;
 import static org.springframework.roo.model.JdkJavaType.LIST;
-import static org.springframework.roo.model.JdkJavaType.SUPPRESS_WARNINGS;
 import static org.springframework.roo.model.JpaJavaType.ENTITY_MANAGER;
 import static org.springframework.roo.model.JpaJavaType.PERSISTENCE_CONTEXT;
 import static org.springframework.roo.model.SpringJavaType.PROPAGATION;
@@ -23,9 +22,7 @@ import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
-import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
-import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
@@ -75,7 +72,6 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	}
 
 	// Fields
-	private boolean isDataNucleusEnabled;
 	private boolean isGaeEnabled;
 	private EntityMetadata parent;
 	private FieldMetadata identifierField;
@@ -96,7 +92,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	 * @param identifierField the entity's identifier field (required)
 	 * @param entityName the JPA entity name (required)
 	 */
-	public EntityMetadata(final String metadataId, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final EntityMetadata parent, final JpaCrudAnnotationValues crudAnnotationValues, final String plural, final FieldMetadata identifierField, final String entityName, final boolean isGaeEnabled, final boolean isDataNucleusEnabled) {
+	public EntityMetadata(final String metadataId, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final EntityMetadata parent, final JpaCrudAnnotationValues crudAnnotationValues, final String plural, final FieldMetadata identifierField, final String entityName, final boolean isGaeEnabled) {
 		super(metadataId, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(metadataId), "Metadata identification string '" + metadataId + "' does not appear to be a valid");
 		Assert.notNull(crudAnnotationValues, "CRUD-related annotation values required");
@@ -111,7 +107,6 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		this.crudAnnotationValues = crudAnnotationValues;
 		this.entityName = entityName;
 		this.identifierField = identifierField;
-		this.isDataNucleusEnabled = isDataNucleusEnabled;
 		this.isGaeEnabled = isGaeEnabled;
 		this.parent = parent;
 		this.plural = StringUtils.capitalize(plural);
@@ -442,14 +437,9 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		}
 
 		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		if (isDataNucleusEnabled) {
-			bodyBuilder.appendFormalLine("return ((Number) " + ENTITY_MANAGER_METHOD_NAME + "().createQuery(\"SELECT COUNT(o) FROM " + entityName + " o\").getSingleResult()).longValue();");
-		} else {
-			bodyBuilder.appendFormalLine("return " + ENTITY_MANAGER_METHOD_NAME + "().createQuery(\"SELECT COUNT(o) FROM " + entityName + " o\", Long.class).getSingleResult();");
-		}
-		final int modifier = Modifier.PUBLIC | Modifier.STATIC;
+		bodyBuilder.appendFormalLine("return " + ENTITY_MANAGER_METHOD_NAME + "().createQuery(\"SELECT COUNT(o) FROM " + entityName + " o\", Long.class).getSingleResult();");
 
-		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), modifier, methodName, COUNT_RETURN_TYPE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
+		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC | Modifier.STATIC, methodName, COUNT_RETURN_TYPE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
 		return methodBuilder.build();
 	}
@@ -477,19 +467,14 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 
 		// Create method
 		final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
-		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		if (isDataNucleusEnabled) {
-			addSuppressWarnings(annotations);
-			bodyBuilder.appendFormalLine("return " + ENTITY_MANAGER_METHOD_NAME + "().createQuery(\"SELECT o FROM " + entityName + " o\").getResultList();");
-		} else {
-			bodyBuilder.appendFormalLine("return " + ENTITY_MANAGER_METHOD_NAME + "().createQuery(\"SELECT o FROM " + entityName + " o\", " + destination.getSimpleTypeName() + ".class).getResultList();");
-		}
- 		final int modifier = Modifier.PUBLIC | Modifier.STATIC;
 		if (isGaeEnabled) {
 			addTransactionalAnnotation(annotations);
 		}
 
-		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), modifier, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
+		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+		bodyBuilder.appendFormalLine("return " + ENTITY_MANAGER_METHOD_NAME + "().createQuery(\"SELECT o FROM " + entityName + " o\", " + destination.getSimpleTypeName() + ".class).getResultList();");
+
+		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(),  Modifier.PUBLIC | Modifier.STATIC, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
 		return methodBuilder.build();
 	}
@@ -518,6 +503,10 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 
 		// Create method
 		final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+		if (isGaeEnabled) {
+			addTransactionalAnnotation(annotations);
+		}
+
 		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
 		if (JavaType.STRING.equals(identifierField.getFieldType())) {
@@ -526,32 +515,9 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 			bodyBuilder.appendFormalLine("if (" + idFieldName + " == null) return null;");
 		}
 
-		if (isDataNucleusEnabled) {
-			bodyBuilder.appendFormalLine("try {");
-			bodyBuilder.indent();
-			bodyBuilder.appendFormalLine("return (" + destination.getSimpleTypeName() + ") " + ENTITY_MANAGER_METHOD_NAME + "().createQuery(\"SELECT o FROM " + entityName + " o WHERE o." + idFieldName + " = :" + idFieldName + "\").setParameter(\"" + idFieldName + "\", " + idFieldName + ").getSingleResult();");
-			bodyBuilder.indentRemove();
-			// Catch the Spring exception thrown by JpaExceptionTranslatorAspect
-			bodyBuilder.appendFormalLine("} catch (org.springframework.dao.EmptyResultDataAccessException e) {");
-			bodyBuilder.indent();
-			bodyBuilder.appendFormalLine("return null;");
-			bodyBuilder.indentRemove();
-			// ... and the original JPA exception in case the aspect doesn't trigger
-			bodyBuilder.appendFormalLine("} catch (javax.persistence.NoResultException e) {");
-			bodyBuilder.indent();
-			bodyBuilder.appendFormalLine("return null;");
-			bodyBuilder.indentRemove();
-			bodyBuilder.appendFormalLine("}");
-		} else {
-			bodyBuilder.appendFormalLine("return " + ENTITY_MANAGER_METHOD_NAME + "().find(" + returnType.getSimpleTypeName() + ".class, " + idFieldName + ");");
-		}
+		bodyBuilder.appendFormalLine("return " + ENTITY_MANAGER_METHOD_NAME + "().find(" + returnType.getSimpleTypeName() + ".class, " + idFieldName + ");");
 
-		if (isGaeEnabled) {
-			addTransactionalAnnotation(annotations);
-		}
-
-		final int modifier = Modifier.PUBLIC | Modifier.STATIC;
-		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), modifier, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(parameterType), parameterNames, bodyBuilder);
+		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC | Modifier.STATIC, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(parameterType), parameterNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
 		return methodBuilder.build();
 	}
@@ -579,27 +545,16 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 
 		// Create method
 		final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
-		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		if (isDataNucleusEnabled) {
-			addSuppressWarnings(annotations);
-			bodyBuilder.appendFormalLine("return " + ENTITY_MANAGER_METHOD_NAME + "().createQuery(\"SELECT o FROM " + entityName + " o\").setFirstResult(firstResult).setMaxResults(maxResults).getResultList();");
-		} else {
-			bodyBuilder.appendFormalLine("return " + ENTITY_MANAGER_METHOD_NAME + "().createQuery(\"SELECT o FROM " + entityName + " o\", " + destination.getSimpleTypeName() + ".class).setFirstResult(firstResult).setMaxResults(maxResults).getResultList();");
-		}
- 		final int modifier = Modifier.PUBLIC | Modifier.STATIC;
 		if (isGaeEnabled) {
 			addTransactionalAnnotation(annotations);
 		}
 
-		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), modifier, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
+		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+		bodyBuilder.appendFormalLine("return " + ENTITY_MANAGER_METHOD_NAME + "().createQuery(\"SELECT o FROM " + entityName + " o\", " + destination.getSimpleTypeName() + ".class).setFirstResult(firstResult).setMaxResults(maxResults).getResultList();");
+ 
+		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC | Modifier.STATIC, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
 		return methodBuilder.build();
-	}
-
-	private void addSuppressWarnings(final List<AnnotationMetadataBuilder> annotations) {
-		final List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
-		attributes.add(new StringAttributeValue(new JavaSymbolName("value"), "unchecked"));
-		annotations.add(new AnnotationMetadataBuilder(SUPPRESS_WARNINGS, attributes));
 	}
 
 	/**

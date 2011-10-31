@@ -12,7 +12,6 @@ import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.entity.EntityMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
-import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
@@ -22,7 +21,6 @@ import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.ContextualPath;
-import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
 /**
  * Implementation of {@link FinderMetadataProvider}.
@@ -38,7 +36,6 @@ public class FinderMetadataProviderImpl extends AbstractMemberDiscoveringItdMeta
 
 	// Fields
 	@Reference private DynamicFinderServices dynamicFinderServices;
-	@Reference private ProjectOperations projectOperations;
 
 	protected void activate(final ComponentContext context) {
 		metadataDependencyRegistry.addNotificationListener(this);
@@ -96,16 +93,8 @@ public class FinderMetadataProviderImpl extends AbstractMemberDiscoveringItdMeta
 		// We need to be informed if our dependent metadata changes
 		metadataDependencyRegistry.registerDependency(entityMetadataKey, metadataIdentificationString);
 
-		boolean isDataNucleusEnabled = false;
-
-		String moduleName = PhysicalTypeIdentifierNamingUtils.getPath(metadataIdentificationString).getModule();
-		if (projectOperations.isProjectAvailable(moduleName)) {
-
-			isDataNucleusEnabled = projectOperations.isDataNucleusEnabled(moduleName);
-		}
-
 		// We make the queryHolders immutable in case FinderMetadata in the future makes it available through an accessor etc
-		return new FinderMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, isDataNucleusEnabled, entityMetadata.getEntityManagerMethod(), Collections.unmodifiableSortedMap(queryHolders));
+		return new FinderMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, entityMetadata.getEntityManagerMethod(), Collections.unmodifiableSortedMap(queryHolders));
 	}
 
 	@Override

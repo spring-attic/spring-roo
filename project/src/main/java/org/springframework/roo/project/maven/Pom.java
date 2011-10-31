@@ -433,7 +433,6 @@ public class Pom {
 		return false;
 	}
 
-
 	/**
 	 * Determines whether the Google App Engine Maven plugin exists in the pom.
 	 *
@@ -442,20 +441,6 @@ public class Pom {
 	public boolean isGaeEnabled() {
 		for (final Plugin buildPlugin : getBuildPlugins()) {
 			if ("maven-gae-plugin".equals(buildPlugin.getArtifactId())) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	/**
-	 * Determines whether the DataNucleus Maven plugin exists in the pom.
-	 *
-	 * @return true if the maven-datanucleus-plugin is present in the pom.xml, otherwise false
-	 */
-	public boolean isDataNucleusEnabled() {
-		for (final Plugin buildPlugin : getBuildPlugins()) {
-			if ("maven-datanucleus-plugin".equals(buildPlugin.getArtifactId())) {
 				return true;
 			}
 		}

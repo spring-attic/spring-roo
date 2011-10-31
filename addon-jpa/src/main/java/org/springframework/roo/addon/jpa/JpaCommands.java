@@ -71,8 +71,8 @@ public class JpaCommands implements CommandMarker {
 			return;
 		}
 
-		if (jdbcDatabase == JdbcDatabase.DATABASE_DOT_COM && ormProvider != OrmProvider.DATANUCLEUS_2) {
-			logger.warning("Provider must be " + OrmProvider.DATANUCLEUS_2.name() + " for Database.com");
+		if (jdbcDatabase == JdbcDatabase.DATABASE_DOT_COM && ormProvider != OrmProvider.DATANUCLEUS) {
+			logger.warning("Provider must be " + OrmProvider.DATANUCLEUS.name() + " for Database.com");
 			return;
 		}
 

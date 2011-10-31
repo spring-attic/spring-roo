@@ -117,7 +117,7 @@
         </database>
         <database id="GAE">
             <properties>
-                <gae.home>${user.home}/.m2/repository/com/google/appengine/appengine-java-sdk/1.5.4/appengine-java-sdk-1.5.4</gae.home>
+                <gae.home>${user.home}/.m2/repository/com/google/appengine/appengine-java-sdk/1.5.5/appengine-java-sdk-1.5.5</gae.home>
             </properties>
             <repositories>
                 <repository>
@@ -137,29 +137,29 @@
                 <dependency>
                     <groupId>com.google.appengine.orm</groupId>
                     <artifactId>datanucleus-appengine</artifactId>
-                    <version>1.0.7.final</version>
+                    <version>2.0.0-beta</version>
                 </dependency>
                 <dependency>
                     <groupId>com.google.appengine</groupId>
                     <artifactId>appengine-api-1.0-sdk</artifactId>
-                    <version>1.5.4</version>
+                    <version>1.5.5</version>
                 </dependency>
                 <dependency>
                     <groupId>com.google.appengine</groupId>
                     <artifactId>appengine-testing</artifactId>
-                    <version>1.5.4</version>
+                    <version>1.5.5</version>
                     <scope>test</scope>
                 </dependency>
                 <dependency>
                     <groupId>com.google.appengine</groupId>
                     <artifactId>appengine-api-stubs</artifactId>
-                    <version>1.5.4</version>
+                    <version>1.5.5</version>
                     <scope>test</scope>
                 </dependency>
                 <dependency>
                     <groupId>com.google.appengine</groupId>
                     <artifactId>appengine-api-labs</artifactId>
-                    <version>1.5.4</version>
+                    <version>1.5.5</version>
                     <scope>test</scope>
                 </dependency>
             </dependencies>
@@ -167,9 +167,9 @@
                 <plugin>
                     <groupId>net.kindleit</groupId>
                     <artifactId>maven-gae-plugin</artifactId>
-                    <version>0.9.1</version>
+                    <version>0.9.2</version>
                     <configuration>
-                        <unpackVersion>1.5.4</unpackVersion>
+                        <unpackVersion>1.5.5</unpackVersion>
                     </configuration>
                     <executions>
                         <execution>
@@ -303,9 +303,9 @@
         <provider id="DATANUCLEUS">
             <repositories>
                 <repository>
-                    <id>DataNucleus_2</id>
-                    <name>DataNucleus</name>
-                    <url>http://www.datanucleus.org/downloads/maven2/</url>
+                    <id>DataNucleus_Repos2</id>
+                    <name>DataNucleus Repository</name>
+                    <url>http://www.datanucleus.org/downloads/maven2</url>
                 </repository>
             </repositories>
             <pluginRepositories>
@@ -316,55 +316,36 @@
             </pluginRepositories>
             <dependencies>
                 <dependency>
-                    <groupId>javax.persistence</groupId>
-                    <artifactId>persistence-api</artifactId>
+                    <groupId>javax.jdo</groupId>
+                    <artifactId>jdo-api</artifactId>
+                    <version>3.0</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.apache.geronimo.specs</groupId>
+                    <artifactId>geronimo-jpa_2.0_spec</artifactId>
                     <version>1.0</version>
                 </dependency>
                 <dependency>
                     <groupId>org.datanucleus</groupId>
                     <artifactId>datanucleus-core</artifactId>
-                    <version>1.1.5</version>
-                    <scope>runtime</scope>
-                    <exclusions>
-                        <exclusion>
-                            <groupId>javax.transaction</groupId>
-                            <artifactId>transaction-api</artifactId>
-                        </exclusion>
-                    </exclusions>
+                    <version>3.0.2</version>
                 </dependency>
                 <dependency>
                     <groupId>org.datanucleus</groupId>
-                    <artifactId>datanucleus-jpa</artifactId>
-                    <version>1.1.5</version>
+                    <artifactId>datanucleus-api-jpa</artifactId>
+                    <version>3.0.2</version>
                 </dependency>
                 <dependency>
                     <groupId>org.datanucleus</groupId>
                     <artifactId>datanucleus-rdbms</artifactId>
-                    <version>1.1.5</version>
-                </dependency>
-                <dependency>
-                    <groupId>org.datanucleus</groupId>
-                    <artifactId>datanucleus-enhancer</artifactId>
-                    <version>1.1.4</version>
-                    <scope>provided</scope>
-                </dependency>
-                <dependency>
-                    <groupId>javax.jdo</groupId>
-                    <artifactId>jdo2-api</artifactId>
-                    <version>2.3-ec</version>
-                    <exclusions>
-                        <exclusion>
-                            <groupId>javax.transaction</groupId>
-                            <artifactId>transaction-api</artifactId>
-                        </exclusion>
-                    </exclusions>
+                    <version>3.0.2</version>
                 </dependency>
             </dependencies>
             <plugins>
                 <plugin>
                     <groupId>org.datanucleus</groupId>
                     <artifactId>maven-datanucleus-plugin</artifactId>
-                    <version>1.1.4</version>
+                    <version>3.0.0-release</version>
                     <configuration>
                         <fork>false</fork>
                         <log4jConfiguration>${basedir}/src/main/resources/log4j.properties</log4jConfiguration>
@@ -381,139 +362,6 @@
                             </goals>
                         </execution>
                     </executions>
-                    <dependencies>
-                        <dependency>
-                            <groupId>org.datanucleus</groupId>
-                            <artifactId>datanucleus-core</artifactId>
-                            <version>1.1.5</version>
-                            <exclusions>
-                                <exclusion>
-                                    <groupId>javax.transaction</groupId>
-                                    <artifactId>transaction-api</artifactId>
-                                </exclusion>
-                            </exclusions>
-                        </dependency>
-                        <dependency>
-                            <groupId>org.datanucleus</groupId>
-                            <artifactId>datanucleus-rdbms</artifactId>
-                            <version>1.1.5</version>
-                        </dependency>
-                        <dependency>
-                            <groupId>org.datanucleus</groupId>
-                            <artifactId>datanucleus-enhancer</artifactId>
-                            <version>1.1.4</version>
-                        </dependency>
-                    </dependencies>
-                </plugin>
-            </plugins>
-        </provider>
-        <provider id="DATANUCLEUS_2">
-            <repositories>
-                <repository>
-                    <id>DataNucleus_2</id>
-                    <name>DataNucleus</name>
-                    <url>http://www.datanucleus.org/downloads/maven2/</url>
-                </repository>
-            </repositories>
-            <pluginRepositories>
-                <pluginRepository>
-                    <id>DataNucleus_2</id>
-                    <url>http://www.datanucleus.org/downloads/maven2/</url>
-                </pluginRepository>
-            </pluginRepositories>
-            <dependencies>
-                <dependency>
-                    <groupId>org.apache.geronimo.specs</groupId>
-                    <artifactId>geronimo-jpa_2.0_spec</artifactId>
-                    <version>1.1</version>
-                </dependency>
-                <dependency>
-                    <groupId>org.datanucleus</groupId>
-                    <artifactId>datanucleus-core</artifactId>
-                    <version>2.2.3</version>
-                    <exclusions>
-                        <exclusion>
-                            <groupId>javax.transaction</groupId>
-                            <artifactId>transaction-api</artifactId>
-                        </exclusion>
-                    </exclusions>
-                </dependency>
-                <dependency>
-                    <groupId>org.datanucleus</groupId>
-                    <artifactId>datanucleus-jpa</artifactId>
-                    <version>2.1.7</version>
-                </dependency>
-                <dependency>
-                    <groupId>org.datanucleus</groupId>
-                    <artifactId>datanucleus-rdbms</artifactId>
-                    <version>2.1.0-release</version>
-                </dependency>
-                <dependency>
-                    <groupId>org.datanucleus</groupId>
-                    <artifactId>datanucleus-enhancer</artifactId>
-                    <version>2.1.0-release</version>
-                </dependency>
-                <dependency>
-                    <groupId>javax.jdo</groupId>
-                    <artifactId>jdo-api</artifactId>
-                    <version>3.0</version>
-                    <exclusions>
-                        <exclusion>
-                            <groupId>javax.transaction</groupId>
-                            <artifactId>transaction-api</artifactId>
-                        </exclusion>
-                    </exclusions>
-                </dependency>
-            </dependencies>
-            <plugins>
-                <plugin>
-                    <groupId>org.datanucleus</groupId>
-                    <artifactId>maven-datanucleus-plugin</artifactId>
-                    <version>2.1.0-release</version>
-                    <configuration>
-                        <fork>false</fork>
-                        <log4jConfiguration>${basedir}/src/main/resources/log4j.properties</log4jConfiguration>
-                        <mappingIncludes>**/*.class</mappingIncludes>
-                        <verbose>true</verbose>
-                        <enhancerName>ASM</enhancerName>
-                        <api>JPA</api>
-                    </configuration>
-                    <executions>
-                        <execution>
-                            <phase>compile</phase>
-                            <goals>
-                                <goal>enhance</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                    <dependencies>
-                        <dependency>
-                            <groupId>org.datanucleus</groupId>
-                            <artifactId>datanucleus-core</artifactId>
-                            <version>2.2.3</version>
-                            <exclusions>
-                                <exclusion>
-                                    <groupId>javax.transaction</groupId>
-                                    <artifactId>transaction-api</artifactId>
-                                </exclusion>
-                            </exclusions>
-                        </dependency>
-                        <dependency>
-                            <groupId>org.datanucleus</groupId>
-                            <artifactId>datanucleus-jpa</artifactId>
-                            <version>2.1.7</version>
-                        </dependency>
-                        <dependency>
-                            <groupId>org.datanucleus</groupId>
-                            <artifactId>datanucleus-rdbms</artifactId>
-                            <version>2.1.0-release</version>
-                        </dependency>
-                        <dependency>
-                            <groupId>org.datanucleus</groupId>
-                            <artifactId>datanucleus-enhancer</artifactId>
-                            <version>2.1.0-release</version>
-                        </dependency>
-                    </dependencies>
                 </plugin>
             </plugins>
         </provider>

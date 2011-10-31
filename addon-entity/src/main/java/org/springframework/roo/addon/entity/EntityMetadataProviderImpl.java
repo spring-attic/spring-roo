@@ -139,16 +139,14 @@ public class EntityMetadataProviderImpl extends AbstractItdMetadataProvider impl
 		final String entityName = StringUtils.defaultIfEmpty(jpaEntityAnnotationValues.getEntityName(), entity.getSimpleTypeName());
 
 		boolean isGaeEnabled = false;
-		boolean isDataNucleusEnabled = false;
 
 		String moduleName = path.getModule();
 		if (projectOperations.isProjectAvailable(moduleName)) {
 			// If the project itself changes, we want a chance to refresh this item
 			metadataDependencyRegistry.registerDependency(ProjectMetadata.getProjectIdentifier(moduleName), metadataId);
 			isGaeEnabled = projectOperations.isGaeEnabled(moduleName);
-			isDataNucleusEnabled = projectOperations.isDataNucleusEnabled(moduleName);
 		}
-		return new EntityMetadata(metadataId, aspectName, governorPhysicalType, parent, crudAnnotationValues, pluralMetadata.getPlural(), idFields.get(0), entityName, isGaeEnabled, isDataNucleusEnabled);
+		return new EntityMetadata(metadataId, aspectName, governorPhysicalType, parent, crudAnnotationValues, pluralMetadata.getPlural(), idFields.get(0), entityName, isGaeEnabled);
 	}
 
 	public String getItdUniquenessFilenameSuffix() {

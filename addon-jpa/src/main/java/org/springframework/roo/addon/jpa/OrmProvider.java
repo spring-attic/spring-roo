@@ -15,46 +15,30 @@ public enum OrmProvider {
 	HIBERNATE("org.hibernate.ejb.HibernatePersistence"),
 	OPENJPA("org.apache.openjpa.persistence.PersistenceProviderImpl"),
 	ECLIPSELINK("org.eclipse.persistence.jpa.PersistenceProvider"),
-	DATANUCLEUS("org.datanucleus.jpa.PersistenceProviderImpl", "org.datanucleus.store.appengine.jpa.DatastorePersistenceProvider"),
-	DATANUCLEUS_2("org.datanucleus.jpa.PersistenceProviderImpl", "com.force.sdk.jpa.PersistenceProviderImpl");
+	DATANUCLEUS("org.datanucleus.api.jpa.PersistenceProviderImpl");
 
 	// Fields
 	private final String adapter;
-	private final String alternateAdapter;
 
 	/**
-	 * Constructor that accepts an alternate adapter
-	 *
-	 * @param adapter (required)
-	 * @param alternateAdapter (can be blank)
-	 */
-	private OrmProvider(final String adapter, final String alternateAdapter) {
-		Assert.hasText(adapter, "Adapter is required");
-		this.adapter = adapter;
-		this.alternateAdapter = alternateAdapter;
-	}
-
-	/**
-	 * Constructor for no alternate adapter
+	 * Constructor
 	 *
 	 * @param adapter (required)
 	 */
 	private OrmProvider(final String adapter) {
-		this(adapter, "");
+		Assert.hasText(adapter, "Adapter is required");
+		this.adapter = adapter;
 	}
 
 	public String getAdapter() {
 		return adapter;
 	}
 
-	public String getAlternateAdapter() {
-		return alternateAdapter;
-	}
-
 	@Override
 	public String toString() {
 		final ToStringCreator tsc = new ToStringCreator(this);
 		tsc.append("provider", name());
+		tsc.append("adapter", adapter);
 		return tsc.toString();
 	}
 }

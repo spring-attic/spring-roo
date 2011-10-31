@@ -218,7 +218,6 @@ public class IntegrationTestMetadataProviderImpl extends AbstractItdMetadataProv
 		managedEntityTypes.put(entity, metadataIdentificationString);
 
 		boolean isGaeEnabled = false;
-
 		String moduleName = PhysicalTypeIdentifierNamingUtils.getPath(metadataIdentificationString).getModule();
 		if (projectOperations.isProjectAvailable(moduleName)) {
 			isGaeEnabled = projectOperations.isGaeEnabled(moduleName);

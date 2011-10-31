@@ -462,14 +462,6 @@ public interface ProjectOperations {
 	boolean isDatabaseDotComEnabled(String moduleName);
 
 	/**
-	 * Determines whether the DataNucleus Maven plugin exists in the pom.
-	 *
-	 * @param moduleName the name of the module to act upon (required)
-	 * @return true if the maven-datanucleus-plugin is present in the pom.xml, otherwise false
-	 */
-	boolean isDataNucleusEnabled(String moduleName);
-
-	/**
 	 * Determines whether the Google App Engine Maven plugin exists in the pom.
 	 *
 	 * @param moduleName the name of the module to act upon (required)
