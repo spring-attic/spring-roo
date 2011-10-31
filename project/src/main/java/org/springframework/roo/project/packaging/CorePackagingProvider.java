@@ -28,4 +28,8 @@ abstract class CorePackagingProvider extends AbstractPackagingProvider {
 		 */
 		super(name, name, pomTemplate);
 	}
+	
+	public boolean isDefault() {
+		return false;
+	}
 }

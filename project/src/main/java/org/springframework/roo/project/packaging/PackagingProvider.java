@@ -38,4 +38,16 @@ public interface PackagingProvider {
 	 * @param parentPom the Maven coordinates of the parent POM (can be <code>null</code> for none)
 	 */
 	void createArtifacts(JavaPackage topLevelPackage, String projectName, String javaVersion, GAV parentPom);
+
+	/**
+	 * Indicates whether this type of packaging should be used for new projects
+	 * and modules by default, i.e. when the user doesn't specify the packaging.
+	 * <p>
+	 * If the user defines their own {@link PackagingProvider}s, they should
+	 * ensure that at most one of them returns <code>true</code> from this
+	 * method.
+	 * 
+	 * @return see above
+	 */
+	boolean isDefault();
 }

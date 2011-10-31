@@ -32,23 +32,28 @@ public class PackagingProviderConverterTest {
 
 	// Fixture
 	private PackagingProviderConverter converter;
-	@Mock private PackagingProvider mockCoreJarPackaging;
+	@Mock private CorePackagingProvider mockCoreJarPackaging;
 	@Mock private PackagingProvider mockCustomJarPackaging;
-	@Mock private PackagingProvider mockWarPackaging;
+	@Mock private CorePackagingProvider mockWarPackaging;
 
 	@Before
 	public void setUp() {
 		// Mocks
 		MockitoAnnotations.initMocks(this);
-		when(mockCoreJarPackaging.getId()).thenReturn(CORE_JAR_ID);
-		when(mockCustomJarPackaging.getId()).thenReturn(CUSTOM_JAR_ID);
-		when(mockWarPackaging.getId()).thenReturn(CORE_WAR_ID);
+		setUpMockPackagingProvider(mockCoreJarPackaging, CORE_JAR_ID, true);
+		setUpMockPackagingProvider(mockCustomJarPackaging, CUSTOM_JAR_ID, true);
+		setUpMockPackagingProvider(mockWarPackaging, CORE_WAR_ID, false);
 
 		// Object under test
 		this.converter = new PackagingProviderConverter();
-		this.converter.bindPackagingType(mockCoreJarPackaging);
-		this.converter.bindPackagingType(mockCustomJarPackaging);
-		this.converter.bindPackagingType(mockWarPackaging);
+		this.converter.bindPackagingProvider(mockCoreJarPackaging);
+		this.converter.bindPackagingProvider(mockCustomJarPackaging);
+		this.converter.bindPackagingProvider(mockWarPackaging);
+	}
+	
+	private void setUpMockPackagingProvider(final PackagingProvider mockPackagingProvider, final String id, final boolean isDefault) {
+		when(mockPackagingProvider.getId()).thenReturn(id);
+		when(mockPackagingProvider.isDefault()).thenReturn(isDefault);
 	}
 	
 	@Test
@@ -147,5 +152,16 @@ public class PackagingProviderConverterTest {
 		assertTrue(addSpace);
 		assertEquals(expectedCompletionList.size(), completions.size());
 		assertTrue("Expected " + expectedCompletionList + " but was " + completions, completions.containsAll(expectedCompletionList));
+	}
+	
+	@Test
+	public void testGetDefaultPackagingProviderWhenACustomIsDefault() {
+		assertEquals(mockCustomJarPackaging, converter.getDefaultPackagingProvider());
+	}
+	
+	@Test
+	public void testGetDefaultPackagingProviderWhenNoCustomIsDefault() {
+		when(mockCustomJarPackaging.isDefault()).thenReturn(false);
+		assertEquals(mockCoreJarPackaging, converter.getDefaultPackagingProvider());
 	}
 }
