@@ -1,4 +1,4 @@
-package org.springframework.roo.project.converters;
+package org.springframework.roo.project.converter;
 
 import java.util.HashMap;
 import java.util.List;
