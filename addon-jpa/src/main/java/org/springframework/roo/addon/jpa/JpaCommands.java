@@ -5,6 +5,8 @@ import static org.springframework.roo.model.JavaType.LONG_OBJECT;
 import static org.springframework.roo.model.RooJavaType.ROO_DISPLAY_STRING;
 import static org.springframework.roo.model.RooJavaType.ROO_EQUALS;
 import static org.springframework.roo.model.RooJavaType.ROO_JAVA_BEAN;
+import static org.springframework.roo.model.RooJavaType.ROO_JPA_ACTIVE_RECORD;
+import static org.springframework.roo.model.RooJavaType.ROO_JPA_ENTITY;
 import static org.springframework.roo.model.RooJavaType.ROO_SERIALIZABLE;
 import static org.springframework.roo.model.RooJavaType.ROO_TO_STRING;
 
@@ -26,7 +28,6 @@ import org.springframework.roo.classpath.details.annotations.AnnotationMetadataB
 import org.springframework.roo.classpath.operations.InheritanceType;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.ReservedWords;
-import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PomManagementService;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
@@ -332,10 +333,7 @@ public class JpaCommands implements CommandMarker {
 	 * @return a non-<code>null</code> type
 	 */
 	private JavaType getEntityAnnotationType(final boolean activeRecord) {
-		if (activeRecord) {
-			return RooJavaType.ROO_JPA_ACTIVE_RECORD;
-		}
-		return RooJavaType.ROO_JPA_ENTITY;
+		return activeRecord ? ROO_JPA_ACTIVE_RECORD : ROO_JPA_ENTITY;
 	}
 
 	private boolean isJdk6OrHigher() {
