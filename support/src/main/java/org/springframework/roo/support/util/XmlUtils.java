@@ -65,16 +65,21 @@ public final class XmlUtils {
 	 *
 	 * @param xml the XML to convert; can be blank
 	 * @return <code>null</code> if the given XML is blank
-	 * @throws IOException
-	 * @throws ParserConfigurationException
-	 * @throws SAXException
 	 * @since 1.2.0
 	 */
-	public static Element stringToElement(final String xml) throws IOException, ParserConfigurationException, SAXException {
-		if (StringUtils.hasText(xml)) {
-			return factory.newDocumentBuilder().parse(new ByteArrayInputStream(xml.getBytes())).getDocumentElement();
+	public static Element stringToElement(final String xml) {
+		if (StringUtils.isBlank(xml)) {
+			return null;
 		}
-		return null;
+		try {
+			return factory.newDocumentBuilder().parse(new ByteArrayInputStream(xml.getBytes())).getDocumentElement();
+		} catch (final IOException e) {
+			throw new IllegalStateException(e);
+		} catch (final ParserConfigurationException e) {
+			throw new IllegalStateException(e);
+		} catch (final SAXException e) {
+			throw new IllegalStateException(e);
+		}
 	}
 
 	/**
