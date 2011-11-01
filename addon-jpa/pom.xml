@@ -10,7 +10,7 @@
     <artifactId>org.springframework.roo.addon.jpa</artifactId>
     <packaging>bundle</packaging>
     <name>Spring Roo - Addon - JPA</name>
-    <description>Support for Java Persistence API features in the target project.</description>
+    <description>Support for Java Persistence API (JPA) features and domain entities in the target project</description>
     <dependencies>
         <!-- OSGi -->
         <dependency>
@@ -27,6 +27,30 @@
             <artifactId>org.apache.felix.scr.annotations</artifactId>
         </dependency>
         <!-- Roo -->
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.addon.configurable</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.addon.plural</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.addon.test</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.addon.serializable</artifactId>
+        </dependency>
+         <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.addon.equals</artifactId>
+        </dependency>
+         <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.addon.displaystring</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.springframework.roo</groupId>
             <artifactId>org.springframework.roo.addon.propfiles</artifactId>
@@ -49,15 +73,15 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.roo</groupId>
-            <artifactId>org.springframework.roo.model</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.roo</groupId>
             <artifactId>org.springframework.roo.process.manager</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.roo</groupId>
             <artifactId>org.springframework.roo.project</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.model</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.roo</groupId>

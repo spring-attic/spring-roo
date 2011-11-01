@@ -5,7 +5,7 @@ import static org.springframework.roo.model.RooJavaType.ROO_EDITOR;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
-import org.springframework.roo.addon.entity.EntityMetadata;
+import org.springframework.roo.addon.jpa.activerecord.JpaActiveRecordMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.MethodMetadata;
@@ -52,18 +52,18 @@ public class EditorMetadataProvider extends AbstractItdMetadataProvider {
 			return null;
 		}
 		ContextualPath path = EditorMetadata.getPath(typeMid);
-		String entityMetadataKey = EntityMetadata.createIdentifier(javaType, path);
+		String jpaActiveRecordMetadataKey = JpaActiveRecordMetadata.createIdentifier(javaType, path);
 
 		// We need to lookup the metadata we depend on
-		EntityMetadata entityMetadata = (EntityMetadata) metadataService.get(entityMetadataKey);
+		JpaActiveRecordMetadata jpaActiveRecordMetadata = (JpaActiveRecordMetadata) metadataService.get(jpaActiveRecordMetadataKey);
 
 		// We need to abort if we couldn't find dependent metadata
-		if (entityMetadata == null || !entityMetadata.isValid()) {
+		if (jpaActiveRecordMetadata == null || !jpaActiveRecordMetadata.isValid()) {
 			return null;
 		}
 
 		// We need to be informed if our dependent metadata changes
-		metadataDependencyRegistry.registerDependency(entityMetadataKey, metadataIdentificationString);
+		metadataDependencyRegistry.registerDependency(jpaActiveRecordMetadataKey, metadataIdentificationString);
 
 		// We do not need to monitor the parent, as any changes to the java type associated with the parent will trickle down to
 		// the governing java type
@@ -77,7 +77,7 @@ public class EditorMetadataProvider extends AbstractItdMetadataProvider {
 			return null;
 		}
 
-		return new EditorMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, javaType, identifierType, identifierAccessor, entityMetadata.getFindMethod());
+		return new EditorMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, javaType, identifierType, identifierAccessor, jpaActiveRecordMetadata.getFindMethod());
 	}
 
 	public String getItdUniquenessFilenameSuffix() {

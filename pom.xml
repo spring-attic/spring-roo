@@ -44,7 +44,6 @@
         <module>addon-email</module>
         <module>addon-jpa</module>
         <module>addon-jms</module>
-        <module>addon-entity</module>
         <module>addon-finder</module>
         <module>addon-logging</module>
         <module>addon-property-editor</module>
@@ -547,11 +546,6 @@
             <dependency>
                 <groupId>org.springframework.roo</groupId>
                 <artifactId>org.springframework.roo.addon.email</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.roo</groupId>
-                <artifactId>org.springframework.roo.addon.entity</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

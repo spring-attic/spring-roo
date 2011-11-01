@@ -9,8 +9,8 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
-import org.springframework.roo.addon.entity.EntityMetadata;
-import org.springframework.roo.addon.entity.EntityMetadataProvider;
+import org.springframework.roo.addon.jpa.activerecord.JpaActiveRecordMetadata;
+import org.springframework.roo.addon.jpa.activerecord.JpaActiveRecordMetadataProvider;
 import org.springframework.roo.addon.plural.PluralMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
@@ -37,17 +37,17 @@ import org.springframework.roo.project.ContextualPath;
 public class SolrMetadataProvider extends AbstractMemberDiscoveringItdMetadataProvider {
 
 	// Fields
-	@Reference private EntityMetadataProvider entityMetadataProvider;
+	@Reference private JpaActiveRecordMetadataProvider jpaActiveRecordMetadataProvider;
 
 	protected void activate(final ComponentContext context) {
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-		entityMetadataProvider.addMetadataTrigger(ROO_SOLR_SEARCHABLE);
+		jpaActiveRecordMetadataProvider.addMetadataTrigger(ROO_SOLR_SEARCHABLE);
 		addMetadataTrigger(ROO_SOLR_SEARCHABLE);
 	}
 
 	protected void deactivate(final ComponentContext context) {
 		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-		entityMetadataProvider.removeMetadataTrigger(ROO_SOLR_SEARCHABLE);
+		jpaActiveRecordMetadataProvider.removeMetadataTrigger(ROO_SOLR_SEARCHABLE);
 		removeMetadataTrigger(ROO_SOLR_SEARCHABLE);
 	}
 
@@ -62,14 +62,14 @@ public class SolrMetadataProvider extends AbstractMemberDiscoveringItdMetadataPr
 		// Acquire bean info (we need getters details, specifically)
 		JavaType javaType = SolrMetadata.getJavaType(metadataIdentificationString);
 		ContextualPath path = SolrMetadata.getPath(metadataIdentificationString);
-		String entityMetadataKey = EntityMetadata.createIdentifier(javaType, path);
+		String jpaActiveRecordMetadataKey = JpaActiveRecordMetadata.createIdentifier(javaType, path);
 
 		// We want to be notified if the getter info changes in any way
-		metadataDependencyRegistry.registerDependency(entityMetadataKey, metadataIdentificationString);
-		EntityMetadata entityMetadata = (EntityMetadata) metadataService.get(entityMetadataKey);
+		metadataDependencyRegistry.registerDependency(jpaActiveRecordMetadataKey, metadataIdentificationString);
+		JpaActiveRecordMetadata jpaActiveRecordMetadata = (JpaActiveRecordMetadata) metadataService.get(jpaActiveRecordMetadataKey);
 
 		// Abort if we don't have getter information available
-		if (entityMetadata == null || !entityMetadata.isValid()) {
+		if (jpaActiveRecordMetadata == null || !jpaActiveRecordMetadata.isValid()) {
 			return null;
 		}
 

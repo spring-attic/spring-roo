@@ -1,8 +1,17 @@
 package org.springframework.roo.addon.jpa;
 
+import static org.springframework.roo.model.JavaType.OBJECT;
+import static org.springframework.roo.model.JpaJavaType.EMBEDDABLE;
+import static org.springframework.roo.model.RooJavaType.ROO_EQUALS;
+import static org.springframework.roo.model.RooJavaType.ROO_IDENTIFIER;
+import static org.springframework.roo.model.RooJavaType.ROO_JAVA_BEAN;
+import static org.springframework.roo.model.RooJavaType.ROO_SERIALIZABLE;
+import static org.springframework.roo.model.RooJavaType.ROO_TO_STRING;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -17,6 +26,14 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.addon.propfiles.PropFileOperations;
+import org.springframework.roo.classpath.PhysicalTypeCategory;
+import org.springframework.roo.classpath.PhysicalTypeIdentifier;
+import org.springframework.roo.classpath.TypeLocationService;
+import org.springframework.roo.classpath.TypeManagementService;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
+import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.project.Dependency;
@@ -42,7 +59,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 /**
- * Provides JPA configuration operations.
+ * Implementation of {@link JpaOperations}.
  *
  * @author Stefan Schmidt
  * @author Alan Stewart
@@ -73,6 +90,8 @@ public class JpaOperationsImpl implements JpaOperations {
 	@Reference PathResolver pathResolver;
 	@Reference ProjectOperations projectOperations;
 	@Reference PropFileOperations propFileOperations;
+	@Reference TypeLocationService typeLocationService;
+	@Reference TypeManagementService typeManagementService;
 
 	public boolean isJpaInstallationPossible() {
 		return projectOperations.isFocusedProjectAvailable() && !fileManager.exists(getPersistencePath());
@@ -91,14 +110,6 @@ public class JpaOperationsImpl implements JpaOperations {
 			return propFileOperations.getPropertyKeys(Path.SPRING_CONFIG_ROOT.contextualize(projectOperations.getPomManagementService().getFocusedModuleName()), "database.properties", true);
 		}
 		return getPropertiesFromDataNucleusConfiguration();
-	}
-
-	private String getPersistencePath() {
-		return pathResolver.getFocusedIdentifier(Path.SRC_MAIN_RESOURCES, PERSISTENCE_XML);
-	}
-
-	private String getDatabasePropertiesPath() {
-		return pathResolver.getFocusedIdentifier(Path.SPRING_CONFIG_ROOT, "database.properties");
 	}
 
 	public void configureJpa(final OrmProvider ormProvider, final JdbcDatabase jdbcDatabase, final String jndi, final String applicationId, final String hostName, final String databaseName, final String userName, final String password, final String transactionManager, final String persistenceUnit, final String moduleName) {
@@ -135,6 +146,75 @@ public class JpaOperationsImpl implements JpaOperations {
 		updateFilters(configuration, ormProvider, jdbcDatabase, databaseXPath, providersXPath, moduleName);
 		updateResources(configuration, ormProvider, jdbcDatabase, databaseXPath, providersXPath, moduleName);
 		updateBuildPlugins(configuration, ormProvider, jdbcDatabase, databaseXPath, providersXPath, moduleName);
+	}
+
+	public boolean isPersistentClassAvailable() {
+		return projectOperations.isFocusedProjectAvailable() && fileManager.exists(pathResolver.getFocusedIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml"));
+	}
+
+	public void newEntity(final JavaType name, final boolean createAbstract, final JavaType superclass, final List<AnnotationMetadataBuilder> annotations) {
+		Assert.notNull(name, "Entity name required");
+		
+		final String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(name, pathResolver.getFocusedPath(Path.SRC_MAIN_JAVA));
+
+		int modifier = Modifier.PUBLIC;
+		if (createAbstract) {
+			modifier |= Modifier.ABSTRACT;
+		}
+
+		final ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, modifier, name, PhysicalTypeCategory.CLASS);
+
+		if (!superclass.equals(OBJECT)) {
+			final ClassOrInterfaceTypeDetails superclassClassOrInterfaceTypeDetails = typeLocationService.getTypeDetails(superclass);
+			if (superclassClassOrInterfaceTypeDetails != null) {
+				typeDetailsBuilder.setSuperclass(new ClassOrInterfaceTypeDetailsBuilder(superclassClassOrInterfaceTypeDetails));
+			}
+		}
+
+		typeDetailsBuilder.setExtendsTypes(Arrays.asList(superclass));
+		typeDetailsBuilder.setAnnotations(annotations);
+
+		typeManagementService.createOrUpdateTypeOnDisk(typeDetailsBuilder.build());
+	}
+
+	public void newEmbeddableClass(final JavaType name, final boolean serializable) {
+		Assert.notNull(name, "Embeddable name required");
+		
+		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(name, pathResolver.getFocusedPath(Path.SRC_MAIN_JAVA));
+
+		final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+		annotations.add(new AnnotationMetadataBuilder(ROO_JAVA_BEAN));
+		annotations.add(new AnnotationMetadataBuilder(ROO_TO_STRING));
+		annotations.add(new AnnotationMetadataBuilder(EMBEDDABLE));
+
+		if (serializable) {
+			annotations.add(new AnnotationMetadataBuilder(ROO_SERIALIZABLE));
+		}
+
+		int modifier = Modifier.PUBLIC;
+		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, modifier, name, PhysicalTypeCategory.CLASS);
+		typeDetailsBuilder.setAnnotations(annotations);
+
+		typeManagementService.createOrUpdateTypeOnDisk(typeDetailsBuilder.build());
+	}
+
+	public void newIdentifier(final JavaType identifierType, final String identifierField, final String identifierColumn) {
+		Assert.notNull(identifierType, "Identifier type required");
+		
+		final String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(identifierType, pathResolver.getFocusedPath(Path.SRC_MAIN_JAVA));
+		final List<AnnotationMetadataBuilder> identifierAnnotations = Arrays.asList(new AnnotationMetadataBuilder(ROO_TO_STRING), new AnnotationMetadataBuilder(ROO_EQUALS), new AnnotationMetadataBuilder(ROO_IDENTIFIER));
+		final ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC | Modifier.FINAL, identifierType, PhysicalTypeCategory.CLASS);
+		typeDetailsBuilder.setAnnotations(identifierAnnotations);
+
+		typeManagementService.createOrUpdateTypeOnDisk(typeDetailsBuilder.build());
+	}
+	
+	private String getPersistencePath() {
+		return pathResolver.getFocusedIdentifier(Path.SRC_MAIN_RESOURCES, PERSISTENCE_XML);
+	}
+
+	private String getDatabasePropertiesPath() {
+		return pathResolver.getFocusedIdentifier(Path.SPRING_CONFIG_ROOT, "database.properties");
 	}
 
 	private void updateApplicationContext(final OrmProvider ormProvider, final JdbcDatabase jdbcDatabase, final String jndi, String transactionManager, final String persistenceUnit) {

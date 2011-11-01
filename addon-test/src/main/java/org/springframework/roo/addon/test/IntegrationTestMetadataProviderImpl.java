@@ -193,9 +193,9 @@ public class IntegrationTestMetadataProviderImpl extends AbstractItdMetadataProv
 		}
 
 		String transactionManager = null;
-		final AnnotationMetadata rooEntityAnnotation = memberDetails.getAnnotation(ROO_JPA_ACTIVE_RECORD);
-		if (rooEntityAnnotation != null) {
-			final StringAttributeValue transactionManagerAttr = (StringAttributeValue) rooEntityAnnotation.getAttribute(TRANSACTION_MANAGER_ATTRIBUTE);
+		final AnnotationMetadata jpaActiveRecordAnnotation = memberDetails.getAnnotation(ROO_JPA_ACTIVE_RECORD);
+		if (jpaActiveRecordAnnotation != null) {
+			final StringAttributeValue transactionManagerAttr = (StringAttributeValue) jpaActiveRecordAnnotation.getAttribute(TRANSACTION_MANAGER_ATTRIBUTE);
 			if (transactionManagerAttr != null) {
 				transactionManager = transactionManagerAttr.getValue();
 			}

@@ -26,8 +26,8 @@ import org.springframework.roo.addon.dbre.model.Column;
 import org.springframework.roo.addon.dbre.model.Database;
 import org.springframework.roo.addon.dbre.model.DbreModelService;
 import org.springframework.roo.addon.dbre.model.Table;
-import org.springframework.roo.addon.entity.Identifier;
-import org.springframework.roo.addon.entity.IdentifierService;
+import org.springframework.roo.addon.jpa.identifier.Identifier;
+import org.springframework.roo.addon.jpa.identifier.IdentifierService;
 import org.springframework.roo.addon.test.IntegrationTestOperations;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
@@ -385,7 +385,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 
 			attributesToDeleteIfPresent.add(new JavaSymbolName(IDENTIFIER_TYPE));
 
-			// We don't need a PK class, so we just tell the EntityMetadataProvider via IdentifierService the column name, field type and field name to use
+			// We don't need a PK class, so we just tell the JpaActiveRecordProvider via IdentifierService the column name, field type and field name to use
 			final List<Identifier> identifiers = getIdentifiersFromPrimaryKeys(table);
 			identifierResults.put(javaType, identifiers);
 		} else if (pkCount == 0 || pkCount > 1) {

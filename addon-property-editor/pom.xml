@@ -33,7 +33,7 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.roo</groupId>
-            <artifactId>org.springframework.roo.addon.entity</artifactId>
+            <artifactId>org.springframework.roo.addon.jpa</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.roo</groupId>

@@ -124,16 +124,10 @@
       </listitem>
 
       <listitem>
-        <para><link xlink:href="http://www.datanucleus.org/">Data
-        Nucleus</link></para>
+        <para><link xlink:href="http://www.datanucleus.org/">DataNucleus
+        3.0</link></para>
       </listitem>
     </itemizedlist>
-
-    <para>In relation to Data Nucleus, both version 1 and version 2 are
-    supported. Version 1 does not support JPA 2 and should only be used if you
-    are intending to deploy to Google App Engine. Version 2 should be used if
-    you are intending to deploy to VMforce cloud environments. In most cases
-    we recommend you use Hibernate, OpenJPA or EclipseLink.</para>
 
     <para>In addition, the <link linkend="command-index-jpa-setup">jpa
     setup</link> command accepts optional <emphasis>databaseName</emphasis>,
@@ -318,13 +312,13 @@ public class Person {
       </listitem>
 
       <listitem>
-        <para>Person_Roo_Entity.aj</para>
+        <para>Person_Roo_Jpa_ActiveRecord.aj</para>
 
         <para>The fourth annotation is the @RooJpaActiveRecord annotation.
         This annotation will introduce a number of persistence related methods
         into your Person type via an ITD:</para>
 
-        <para><programlisting>privileged aspect Person_Roo_Entity {
+        <para><programlisting>privileged aspect Person_Roo_Jpa_ActiveRecord {
     
     declare @type: Person: @Entity;   
 
@@ -425,10 +419,10 @@ public class Person {
         your database for this type. Once fields are added to the Person type,
         they will be added as columns to the Person table.</para>
 
-        <para>As can be seen, the Person_Roo_Entity.aj ITD introduces three
-        fields by default. An <emphasis>id</emphasis> field (which is
-        auto-incremented), a <emphasis>version</emphasis> field (used for
-        JPA-managed optimistic locking), and an
+        <para>As can be seen, the Person_Roo_Jpa_ActiveRecord.aj ITD
+        introduces three fields by default. An <emphasis>id</emphasis> field
+        (which is auto-incremented), a <emphasis>version</emphasis> field
+        (used for JPA-managed optimistic locking), and an
         <emphasis>entityManager</emphasis> field which can be used by the
         developer to create additional persistence-related
         functionality.</para>

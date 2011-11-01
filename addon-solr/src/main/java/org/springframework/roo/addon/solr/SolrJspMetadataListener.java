@@ -9,7 +9,7 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
-import org.springframework.roo.addon.entity.EntityMetadata;
+import org.springframework.roo.addon.jpa.activerecord.JpaActiveRecordMetadata;
 import org.springframework.roo.addon.web.mvc.controller.scaffold.WebScaffoldMetadata;
 import org.springframework.roo.addon.web.mvc.jsp.menu.MenuOperations;
 import org.springframework.roo.addon.web.mvc.jsp.roundtrip.XmlRoundTripFileManager;
@@ -67,7 +67,7 @@ public class SolrJspMetadataListener implements MetadataProvider, MetadataNotifi
 	@Reference private XmlRoundTripFileManager xmlRoundTripFileManager;
 
 	private WebScaffoldMetadata webScaffoldMetadata;
-	private EntityMetadata entityMetadata;
+	private JpaActiveRecordMetadata jpaActiveRecordMetadata;
 	private JavaType javaType;
 	private JavaType formbackingObject;
 
@@ -89,9 +89,8 @@ public class SolrJspMetadataListener implements MetadataProvider, MetadataNotifi
 		Assert.notNull(webScaffoldMetadata, "Web scaffold metadata required");
 
 		formbackingObject = webScaffoldMetadata.getAnnotationValues().getFormBackingObject();
-
-		entityMetadata = (EntityMetadata) metadataService.get(EntityMetadata.createIdentifier(formbackingObject, path));
-		Assert.notNull(entityMetadata, "Could not determine entity metadata for type: " + javaType.getFullyQualifiedTypeName());
+		jpaActiveRecordMetadata = (JpaActiveRecordMetadata) metadataService.get(JpaActiveRecordMetadata.createIdentifier(formbackingObject, path));
+		Assert.notNull(jpaActiveRecordMetadata, "Could not determine entity metadata for type: " + javaType.getFullyQualifiedTypeName());
 		
 		installMvcArtifacts(webScaffoldMetadata);
 		
@@ -109,7 +108,7 @@ public class SolrJspMetadataListener implements MetadataProvider, MetadataNotifi
 		
 		String folderName = webScaffoldMetadata.getAnnotationValues().getPath();
 		tilesOperations.addViewDefinition(folderName, path, folderName + "/search", TilesOperationsImpl.DEFAULT_TEMPLATE, "WEB-INF/views/" + webScaffoldMetadata.getAnnotationValues().getPath() + "/search.jspx");
-		menuOperations.addMenuItem(new JavaSymbolName(formbackingObject.getSimpleTypeName()), new JavaSymbolName("solr"), new JavaSymbolName(entityMetadata.getPlural()).getReadableSymbolName(), "global.menu.find", "/" + webScaffoldMetadata.getAnnotationValues().getPath() + "?search", "s:", path);
+		menuOperations.addMenuItem(new JavaSymbolName(formbackingObject.getSimpleTypeName()), new JavaSymbolName("solr"), new JavaSymbolName(jpaActiveRecordMetadata.getPlural()).getReadableSymbolName(), "global.menu.find", "/" + webScaffoldMetadata.getAnnotationValues().getPath() + "?search", "s:", path);
 	}
 	
 	private Document getSearchDocument(final WebScaffoldMetadata webScaffoldMetadata) {

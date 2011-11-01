@@ -13,7 +13,7 @@ import java.util.logging.Logger;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.springframework.roo.addon.entity.EntityMetadata;
+import org.springframework.roo.addon.jpa.activerecord.JpaActiveRecordMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.TypeLocationService;
@@ -78,11 +78,11 @@ public class FinderOperationsImpl implements FinderOperations {
 		// Go and get the entity metadata, as any type with finders has to be an entity
 		JavaType javaType = PhysicalTypeIdentifier.getJavaType(id);
 		ContextualPath path = PhysicalTypeIdentifier.getPath(id);
-		String entityMid = EntityMetadata.createIdentifier(javaType, path);
+		String entityMid = JpaActiveRecordMetadata.createIdentifier(javaType, path);
 
 		// Get the entity metadata
-		EntityMetadata entityMetadata = (EntityMetadata) metadataService.get(entityMid);
-		if (entityMetadata == null) {
+		JpaActiveRecordMetadata jpaActiveRecordMetadata = (JpaActiveRecordMetadata) metadataService.get(entityMid);
+		if (jpaActiveRecordMetadata == null) {
 			throw new IllegalArgumentException("Cannot provide finders because '" + typeName.getFullyQualifiedTypeName() + "' is not an entity");
 		}
 
@@ -101,7 +101,7 @@ public class FinderOperationsImpl implements FinderOperations {
 
 		// Compute the finders (excluding the ID, version, and EM fields)
 		Set<JavaSymbolName> exclusions = new HashSet<JavaSymbolName>();
-		exclusions.add(entityMetadata.getEntityManagerField().getFieldName());
+		exclusions.add(jpaActiveRecordMetadata.getEntityManagerField().getFieldName());
 		for (final FieldMetadata idField : idFields) {
 			exclusions.add(idField.getFieldName());
 		}
@@ -112,11 +112,11 @@ public class FinderOperationsImpl implements FinderOperations {
 
 		SortedSet<String> result = new TreeSet<String>();
 
-		List<JavaSymbolName> finders = dynamicFinderServices.getFinders(memberDetails, entityMetadata.getPlural(), depth, exclusions);
+		List<JavaSymbolName> finders = dynamicFinderServices.getFinders(memberDetails, jpaActiveRecordMetadata.getPlural(), depth, exclusions);
 		for (JavaSymbolName finder : finders) {
 			// Avoid displaying problematic finders
 			try {
-				QueryHolder queryHolder = dynamicFinderServices.getQueryHolder(memberDetails, finder, entityMetadata.getPlural(), entityMetadata.getEntityName());
+				QueryHolder queryHolder = dynamicFinderServices.getQueryHolder(memberDetails, finder, jpaActiveRecordMetadata.getPlural(), jpaActiveRecordMetadata.getEntityName());
 				List<JavaSymbolName> parameterNames = queryHolder.getParameterNames();
 				List<JavaType> parameterTypes = queryHolder.getParameterTypes();
 				StringBuilder signature = new StringBuilder();
@@ -149,11 +149,11 @@ public class FinderOperationsImpl implements FinderOperations {
 		// Go and get the entity metadata, as any type with finders has to be an entity
 		JavaType javaType = PhysicalTypeIdentifier.getJavaType(id);
 		ContextualPath path = PhysicalTypeIdentifier.getPath(id);
-		String entityMid = EntityMetadata.createIdentifier(javaType, path);
+		String entityMid = JpaActiveRecordMetadata.createIdentifier(javaType, path);
 
 		// Get the entity metadata
-		EntityMetadata entityMetadata = (EntityMetadata) metadataService.get(entityMid);
-		if (entityMetadata == null) {
+		JpaActiveRecordMetadata jpaActiveRecordMetadata = (JpaActiveRecordMetadata) metadataService.get(entityMid);
+		if (jpaActiveRecordMetadata == null) {
 			logger.warning("Cannot provide finders because '" + typeName.getFullyQualifiedTypeName() + "' is not an entity - " + entityMid);
 			return;
 		}
@@ -166,15 +166,15 @@ public class FinderOperationsImpl implements FinderOperations {
 
 		// We know there should be an existing RooEntity annotation
 		List<? extends AnnotationMetadata> annotations = classOrInterfaceTypeDetails.getAnnotations();
-		AnnotationMetadata rooEntityAnnotation = MemberFindingUtils.getAnnotationOfType(annotations, ROO_JPA_ACTIVE_RECORD);
-		if (rooEntityAnnotation == null) {
+		AnnotationMetadata jpaActiveRecordAnnotation = MemberFindingUtils.getAnnotationOfType(annotations, ROO_JPA_ACTIVE_RECORD);
+		if (jpaActiveRecordAnnotation == null) {
 			logger.warning("Unable to find the entity annotation on '" + typeName.getFullyQualifiedTypeName() + "'");
 			return;
 		}
 
 		// Confirm they typed a valid finder name
 		MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(getClass().getName(), classOrInterfaceTypeDetails);
-		if (dynamicFinderServices.getQueryHolder(memberDetails, finderName, entityMetadata.getPlural(), entityMetadata.getEntityName()) == null) {
+		if (dynamicFinderServices.getQueryHolder(memberDetails, finderName, jpaActiveRecordMetadata.getPlural(), jpaActiveRecordMetadata.getEntityName()) == null) {
 			logger.warning("Finder name '" + finderName.getSymbolName() + "' either does not exist or contains an error");
 			return;
 		}
@@ -185,7 +185,7 @@ public class FinderOperationsImpl implements FinderOperations {
 
 		// Copy the existing attributes, excluding the "finder" attribute
 		boolean alreadyAdded = false;
-		AnnotationAttributeValue<?> val = rooEntityAnnotation.getAttribute(new JavaSymbolName("finders"));
+		AnnotationAttributeValue<?> val = jpaActiveRecordAnnotation.getAttribute(new JavaSymbolName("finders"));
 		if (val != null) {
 			// Ensure we have an array of strings
 			if (!(val instanceof ArrayAttributeValue<?>)) {

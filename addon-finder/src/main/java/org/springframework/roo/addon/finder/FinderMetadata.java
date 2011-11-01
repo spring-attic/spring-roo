@@ -10,7 +10,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.SortedMap;
 
-import org.springframework.roo.addon.entity.RooJpaActiveRecord;
+import org.springframework.roo.addon.jpa.activerecord.RooJpaActiveRecord;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.MethodMetadata;
