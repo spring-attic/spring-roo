@@ -155,7 +155,7 @@ public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTracki
 
 		// We no longer notify downstreams here, as the "get" operation with eviction will ensure the main get(String) method below will be fired and it
 		// directly notified downstreams as part of that method (BPA 10 Dec 2010)
-		metadataService.get(downstreamDependency, true);
+		metadataService.evictAndGet(downstreamDependency);
 	}
 
 	/**

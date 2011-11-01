@@ -293,4 +293,8 @@ public class DefaultMetadataService extends AbstractMetadataCache implements Met
 		tsc.append("cacheMaximumSize", getMaxCapacity());
 		return tsc.toString().replaceFirst("@[0-9a-f]{8}", ":");
 	}
+
+	public MetadataItem evictAndGet(final String metadataId) {
+		return getInternal(metadataId, true, false);
+	}
 }

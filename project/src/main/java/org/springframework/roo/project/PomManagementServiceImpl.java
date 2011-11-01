@@ -169,7 +169,7 @@ public class PomManagementServiceImpl implements PomManagementService {
 		if (!newPoms.isEmpty()) {
 			sortPomMap();
 			for (final Pom pom : newPoms) {
-				metadataService.get(ProjectMetadata.getProjectIdentifier(pom.getModuleName()), true);
+				metadataService.evictAndGet(ProjectMetadata.getProjectIdentifier(pom.getModuleName()));
 				metadataDependencyRegistry.notifyDownstream(ProjectMetadata.getProjectIdentifier(pom.getModuleName()));
 			}
 		}

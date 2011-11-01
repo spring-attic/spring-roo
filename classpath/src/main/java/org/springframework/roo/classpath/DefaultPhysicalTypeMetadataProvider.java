@@ -100,7 +100,7 @@ public class DefaultPhysicalTypeMetadataProvider implements PhysicalTypeMetadata
 				return;
 			}
 			// Now we've worked out the id, we can publish the event in case others were interested
-			metadataService.get(id, true);
+			metadataService.evictAndGet(id);
 			metadataDependencyRegistry.notifyDownstream(id);
 		}
 	}

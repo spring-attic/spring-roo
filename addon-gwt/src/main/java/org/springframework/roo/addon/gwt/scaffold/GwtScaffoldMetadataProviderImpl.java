@@ -239,7 +239,7 @@ public class GwtScaffoldMetadataProviderImpl implements GwtScaffoldMetadataProvi
 		// We should now have an instance-specific "downstream dependency" that can be processed by this class
 		Assert.isTrue(MetadataIdentificationUtils.getMetadataClass(downstreamDependency).equals(MetadataIdentificationUtils.getMetadataClass(getProvidesType())), "Unexpected downstream notification for '" + downstreamDependency + "' to this provider (which uses '" + getProvidesType() + "'");
 
-		metadataService.get(downstreamDependency, true);
+		metadataService.evictAndGet(downstreamDependency);
 	}
 
 	private String createLocalIdentifier(final JavaType javaType, final ContextualPath path) {

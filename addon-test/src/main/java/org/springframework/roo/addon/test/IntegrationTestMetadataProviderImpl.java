@@ -138,7 +138,7 @@ public class IntegrationTestMetadataProviderImpl extends AbstractItdMetadataProv
 			if (hasGaeStateChanged) {
 				wasGaeEnabled = isGaeEnabled;
 				for (final String producedMid : producedMids) {
-					metadataService.get(producedMid, true);
+					metadataService.evictAndGet(producedMid);
 				}
 			}
 		}

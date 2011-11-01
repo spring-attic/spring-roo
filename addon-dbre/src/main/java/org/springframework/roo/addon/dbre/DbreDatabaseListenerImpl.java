@@ -209,14 +209,14 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 
 	private void notify(final List<ClassOrInterfaceTypeDetails> entities) {
 		for (final ClassOrInterfaceTypeDetails managedIdentifierType : getManagedIdentifiers()) {
-			final MetadataItem metadataItem = metadataService.get(managedIdentifierType.getDeclaredByMetadataId(), true);
+			final MetadataItem metadataItem = metadataService.evictAndGet(managedIdentifierType.getDeclaredByMetadataId());
 			if (metadataItem != null) {
 				notifyIfRequired(metadataItem);
 			}
 		}
 
 		for (final ClassOrInterfaceTypeDetails entity : entities) {
-			final MetadataItem metadataItem = metadataService.get(entity.getDeclaredByMetadataId(), true);
+			final MetadataItem metadataItem = metadataService.evictAndGet(entity.getDeclaredByMetadataId());
 			if (metadataItem != null) {
 				notifyIfRequired(metadataItem);
 			}

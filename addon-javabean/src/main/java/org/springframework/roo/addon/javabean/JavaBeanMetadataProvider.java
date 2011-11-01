@@ -74,7 +74,7 @@ public class JavaBeanMetadataProvider extends AbstractItdMetadataProvider {
 			if (hasGaeStateChanged) {
 				wasGaeEnabled = isGaeEnabled;
 				for (String producedMid : producedMids) {
-					metadataService.get(producedMid, true);
+					metadataService.evictAndGet(producedMid);
 				}
 			}
 		}

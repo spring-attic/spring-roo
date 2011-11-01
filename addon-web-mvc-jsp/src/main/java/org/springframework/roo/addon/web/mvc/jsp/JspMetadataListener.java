@@ -321,12 +321,12 @@ public class JspMetadataListener implements MetadataProvider, MetadataNotificati
 
 			String localMid = formBackingObjectTypesToLocalMids.get(itdTypeDetails.getGovernor().getName());
 			if (localMid != null) {
-				metadataService.get(localMid, true);
+				metadataService.evictAndGet(localMid);
 			}
 			return;
 		}
 
-		metadataService.get(downstreamDependency, true);
+		metadataService.evictAndGet(downstreamDependency);
 	}
 
 	public String getProvidesType() {
