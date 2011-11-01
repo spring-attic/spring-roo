@@ -254,7 +254,7 @@ Created SRC_MAIN_JAVA/com/foo/Person_Roo_Entity.aj
 Created SRC_MAIN_JAVA/com/foo/Person_Roo_ToString.aj
 Created SRC_MAIN_JAVA/com/foo/Person_Roo_Configurable.aj
 ~.Person roo&gt;
-</programlisting>As you can see from the Roo shell messages there are 4 files
+</programlisting>As you can see from the Roo shell messages there are 7 files
     generated (also, note that the context has changed to the Person type in
     the Roo shell):</para>
 
@@ -264,6 +264,7 @@ Created SRC_MAIN_JAVA/com/foo/Person_Roo_Configurable.aj
 
         <para><programlisting>@RooJavaBean
 @RooToString
+@RooDisplayString
 @RooJpaActiveRecord
 public class Person {
 }
@@ -301,30 +302,52 @@ public class Person {
       </listitem>
 
       <listitem>
+        <para>Person_Roo_DisplayString.aj</para>
+
+        <para>The third annotation added to the Person type is the
+        @RooDisplayString annotation. This annotation will generate a
+        pretty-print method for the Person type via an ITD. The
+        <emphasis>getDisplayString</emphasis>() method will contain a
+        concatenated representation of certain field values for use in web
+        UIs. If you want to customize and provide your own fields instead of
+        what Roo generates in the <emphasis>getDisplayString</emphasis>()
+        method you can declare the <emphasis>fields</emphasis> attribute in
+        the @RooDisplayString annotation.</para>
+      </listitem>
+
+      <listitem>
         <para>Person_Roo_Configurable.aj</para>
 
-        <para>The third annotation takes care of marking the Person type with
-        Spring's @Configurable annotation. This annotation allows you to
-        inject any types from the Spring bean factory into the Person type.
-        The injection of the JPA entity manager (which is defined as a bean in
-        the application context) is possible due to the presence of the
+        <para>This ITD is automatically created and does not require the
+        @RooConfigurable annotation to be introduced into the Person.java
+        type. It takes care of marking the Person type with Spring's
+        @Configurable annotation. This annotation allows you to inject any
+        types from the Spring bean factory into the Person type. The injection
+        of the JPA entity manager (which is defined as a bean in the
+        application context) is possible due to the presence of the
         @Configurable annotation.</para>
       </listitem>
 
       <listitem>
-        <para>Person_Roo_Jpa_ActiveRecord.aj</para>
+        <para>Person_Roo_Jpa_Entity.aj</para>
 
-        <para>The fourth annotation is the @RooJpaActiveRecord annotation.
-        This annotation will introduce a number of persistence related methods
-        into your Person type via an ITD:</para>
+        <para>The forth annotation is the @RooJpaActiveRecord annotation. This
+        annotation triggers the creation of two ITDs: the
+        Person_Roo_Jpa_Entity.aj ITD and the Person_Roo_Jpa_ActiveRecord.aj
+        ITD. Note that If you do not want ActiveRecord-style methods in your
+        domain object you can just use the @RooJpaEntity annotation. </para>
 
-        <para><programlisting>privileged aspect Person_Roo_Jpa_ActiveRecord {
+        <para>The JPA @Entity annotation is added to the
+        Person_Roo_Jpa_Entity.aj ITD. This annotation marks the Person as
+        persistable. By default, the JPA implementation of your choice will
+        create a table definition in your database for this type. Once fields
+        are added to the Person type, they will be added as columns to the
+        Person table.</para>
+
+        <programlisting>privileged aspect Person_Roo_Jpa_Entity {
     
     declare @type: Person: @Entity;   
 
-    @PersistenceContext
-    transient EntityManager Person.entityManager;
-    
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id")
@@ -349,6 +372,27 @@ public class Person {
     public void Person.setVersion(Integer version) {
         this.version = version;
     }
+}
+</programlisting>
+
+        <para>As can be seen, the Person_Roo_Jpa_Entity.aj ITD introduces two
+        fields by default. An <emphasis>id</emphasis> field (which is
+        auto-incremented) and a <emphasis>version</emphasis> field (used for
+        JPA-managed optimistic locking).</para>
+      </listitem>
+
+      <listitem>
+        <para>Person_Roo_Jpa_ActiveRecord.aj</para>
+
+        <para>As mentioned previously, the @RooJpaActiveRecord annotation also
+        triggers the creation of the Person_Roo_Jpa_ActiveRecord.aj ITD. This
+        contains a number of persistence related CRUD methods into your Person
+        type via the ITD:</para>
+
+        <programlisting>privileged aspect Person_Roo_Jpa_ActiveRecord {
+    
+    @PersistenceContext
+    transient EntityManager Person.entityManager;
     
     @Transactional
     public void Person.persist() {
@@ -411,25 +455,10 @@ public class Person {
                    .setFirstResult(firstResult).setMaxResults(maxResults).getResultList();
     }
 }
-</programlisting></para>
+</programlisting>
 
-        <para>The JPA @Entity annotation is added to the Person_Roo_Entity.aj
-        ITD. This annotation marks the Person as persistable. By default, the
-        JPA implementation of your choice will create a table definition in
-        your database for this type. Once fields are added to the Person type,
-        they will be added as columns to the Person table.</para>
-
-        <para>As can be seen, the Person_Roo_Jpa_ActiveRecord.aj ITD
-        introduces three fields by default. An <emphasis>id</emphasis> field
-        (which is auto-incremented), a <emphasis>version</emphasis> field
-        (used for JPA-managed optimistic locking), and an
-        <emphasis>entityManager</emphasis> field which can be used by the
-        developer to create additional persistence-related
-        functionality.</para>
-
-        <para>In addition to these three fields, the Person_Roo_Entity.aj ITD
-        introduces a number of methods such as
-        <emphasis>persist<emphasis>()</emphasis></emphasis>,
+        <para>The Person_Roo_Jpa_ActiveRecord.aj ITD introduces a number of
+        methods such as <emphasis>persist<emphasis>()</emphasis></emphasis>,
         <emphasis>remove</emphasis>(), <emphasis>merge</emphasis>(),
         <emphasis>flush</emphasis>() which allow the execution of <link
         xlink:href="http://en.wikipedia.org/wiki/Active_record_pattern">ActiveRecord</link>-style
