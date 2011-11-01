@@ -103,7 +103,7 @@ public class JLineShellComponent extends JLineShell {
 		String screenName = (String) ((JSONObject) jsonObject.get("user")).get("screen_name");
 		String tweet = (String) jsonObject.get("text");
 		// We only want one line
-		tweet = tweet.replaceAll(StringUtils.LINE_SEPARATOR, " ");
+		tweet = tweet.replace(StringUtils.LINE_SEPARATOR, " ");
 		List<String> words = Arrays.asList(tweet.split(" "));
 		StringBuilder sb = new StringBuilder();
 		// Add in Roo's twitter account to give context to the notification

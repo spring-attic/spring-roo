@@ -146,7 +146,7 @@ public class TypeLocationServiceImpl implements TypeLocationService {
 			typeCache.cacheTypeAgainstModule(module, javaType);
 
 			String relativeTypePath = javaType.getFullyQualifiedTypeName().replace('.', File.separatorChar) + ".java";
-			String reducedPath = fileCanonicalPath.replaceAll(relativeTypePath, "");
+			String reducedPath = fileCanonicalPath.replace(relativeTypePath, "");
 			reducedPath = FileUtils.removeTrailingSeparator(reducedPath);
 
 			for (PathInformation pathInformation : module.getPathInformation()) {
@@ -388,7 +388,7 @@ public class TypeLocationServiceImpl implements TypeLocationService {
 		if (typePath == null) {
 			return null;
 		}
-		String reducedPath = FileUtils.ensureTrailingSeparator(typePath.replaceAll(typeRelativePath, ""));
+		String reducedPath = FileUtils.ensureTrailingSeparator(typePath.replace(typeRelativePath, ""));
 		String mid = null;
 		for (final Pom pom : pomManagementService.getPoms()) {
 			for (Path path : Arrays.asList(Path.SRC_MAIN_JAVA, Path.SRC_TEST_JAVA)) {
@@ -419,7 +419,7 @@ public class TypeLocationServiceImpl implements TypeLocationService {
 		if (typeFilePath == null) {
 			return null;
 		}
-		String reducedPath = FileUtils.ensureTrailingSeparator(typeFilePath.replaceAll(typeRelativePath, ""));
+		String reducedPath = FileUtils.ensureTrailingSeparator(typeFilePath.replace(typeRelativePath, ""));
 		String mid = null;
 		for (final Pom pom : pomManagementService.getPoms()) {
 			PathInformation pathInformation = pom.getPathInformation(path.getPath());

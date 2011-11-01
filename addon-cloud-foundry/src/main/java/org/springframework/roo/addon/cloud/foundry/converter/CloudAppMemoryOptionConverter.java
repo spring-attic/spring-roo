@@ -28,7 +28,7 @@ public class CloudAppMemoryOptionConverter implements Converter<CloudAppMemoryOp
 		if (value == null || "".equals(value)) {
 			return null;
 		}
-		return new CloudAppMemoryOption(Integer.valueOf(value.replaceAll(MEMORY_OPTION_SUFFIX, "")));
+		return new CloudAppMemoryOption(Integer.valueOf(value.replace(MEMORY_OPTION_SUFFIX, "")));
 	}
 
 	public boolean supports(final Class<?> requiredType, final String optionContext) {

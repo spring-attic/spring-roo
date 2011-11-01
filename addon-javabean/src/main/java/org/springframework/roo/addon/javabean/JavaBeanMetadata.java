@@ -248,16 +248,16 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 		JavaType collectionType = field.getFieldType();
 		builder.getImportRegistrationResolver().addImport(collectionType);
 
-		String collectionName = field.getFieldType().getNameIncludingTypeParameters().replaceAll(field.getFieldType().getPackage().getFullyQualifiedPackageName() + ".", "");
+		String collectionName = field.getFieldType().getNameIncludingTypeParameters().replace(field.getFieldType().getPackage().getFullyQualifiedPackageName() + ".", "");
 		String instantiableCollection = collectionName;
 
 		// GAE only supports java.util.List and java.util.Set collections and we need a concrete implementation of either.
 		if (collectionType.getFullyQualifiedTypeName().equals(LIST.getFullyQualifiedTypeName())) {
 			collectionType = new JavaType(ARRAY_LIST.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, collectionType.getParameters());
-			instantiableCollection = collectionType.getNameIncludingTypeParameters().replaceAll(collectionType.getPackage().getFullyQualifiedPackageName() + ".", "");
+			instantiableCollection = collectionType.getNameIncludingTypeParameters().replace(collectionType.getPackage().getFullyQualifiedPackageName() + ".", "");
 		} else if (collectionType.getFullyQualifiedTypeName().equals(SET.getFullyQualifiedTypeName())) {
 			collectionType = new JavaType(HASH_SET.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, collectionType.getParameters());
-			instantiableCollection = collectionType.getNameIncludingTypeParameters().replaceAll(collectionType.getPackage().getFullyQualifiedPackageName() + ".", "");
+			instantiableCollection = collectionType.getNameIncludingTypeParameters().replace(collectionType.getPackage().getFullyQualifiedPackageName() + ".", "");
 		}
 
 		builder.getImportRegistrationResolver().addImport(collectionType);
@@ -289,14 +289,14 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 		JavaType collectionType = field.getFieldType();
 		builder.getImportRegistrationResolver().addImport(collectionType);
 
-		String collectionName = field.getFieldType().getNameIncludingTypeParameters().replaceAll(field.getFieldType().getPackage().getFullyQualifiedPackageName() + ".", "");
+		String collectionName = field.getFieldType().getNameIncludingTypeParameters().replace(field.getFieldType().getPackage().getFullyQualifiedPackageName() + ".", "");
 		String instantiableCollection = collectionName;
 		if (collectionType.getFullyQualifiedTypeName().equals(LIST.getFullyQualifiedTypeName())) {
 			collectionType = new JavaType(ARRAY_LIST.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, collectionType.getParameters());
-			instantiableCollection = collectionType.getNameIncludingTypeParameters().replaceAll(collectionType.getPackage().getFullyQualifiedPackageName() + ".", "");
+			instantiableCollection = collectionType.getNameIncludingTypeParameters().replace(collectionType.getPackage().getFullyQualifiedPackageName() + ".", "");
 		} else if (collectionType.getFullyQualifiedTypeName().equals(SET.getFullyQualifiedTypeName())) {
 			collectionType = new JavaType(HASH_SET.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, collectionType.getParameters());
-			instantiableCollection = collectionType.getNameIncludingTypeParameters().replaceAll(collectionType.getPackage().getFullyQualifiedPackageName() + ".", "");
+			instantiableCollection = collectionType.getNameIncludingTypeParameters().replace(collectionType.getPackage().getFullyQualifiedPackageName() + ".", "");
 		}
 
 		builder.getImportRegistrationResolver().addImport(collectionType);

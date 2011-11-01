@@ -87,7 +87,7 @@ public class WebFlowOperationsImpl implements WebFlowOperations {
 		});
 
 		JavaSymbolName flowMenuCategory = new JavaSymbolName("Flows");
-		JavaSymbolName flowMenuName = new JavaSymbolName(flowId.replaceAll("/", "_"));
+		JavaSymbolName flowMenuName = new JavaSymbolName(flowId.replace("/", "_"));
 		menuOperations.addMenuItem(flowMenuCategory, flowMenuName, flowMenuName.getReadableSymbolName(), "webflow_menu_enter", "/" + flowId, null);
 
 		tilesOperations.addViewDefinition(flowId, pathResolver.getFocusedPath(Path.SRC_MAIN_WEBAPP), flowId + "/*", TilesOperations.DEFAULT_TEMPLATE, webRelativeFlowPath + "/{1}.jspx");
