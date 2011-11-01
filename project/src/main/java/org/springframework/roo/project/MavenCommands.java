@@ -7,6 +7,7 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.project.maven.Pom;
+import org.springframework.roo.project.packaging.JarPackaging;
 import org.springframework.roo.project.packaging.PackagingProvider;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
@@ -50,7 +51,7 @@ public class MavenCommands implements CommandMarker {
 		@CliOption(key = "projectName", help = "The name of the project (last segment of package name used as default)") final String projectName,
 		@CliOption(key = "java", help = "Forces a particular major version of Java to be used (will be auto-detected if unspecified; specify 5 or 6 or 7 only)") final Integer majorJavaVersion,
 		@CliOption(key = "parent", help = "The Maven coordinates of the parent POM, in the form \"groupId:artifactId:version\"") final GAV parentPom,
-		@CliOption(key = "packaging", help = "The Maven packaging of this project") final PackagingProvider packaging) {
+		@CliOption(key = "packaging", help = "The Maven packaging of this project", unspecifiedDefaultValue = JarPackaging.NAME) final PackagingProvider packaging) {
 
 		mavenOperations.createProject(topLevelPackage, projectName, majorJavaVersion, parentPom, packaging);
 	}
@@ -72,7 +73,7 @@ public class MavenCommands implements CommandMarker {
 		@CliOption(key = "topLevelPackage", mandatory = true, optionContext = "update", help = "The uppermost package name (this becomes the <groupId> in Maven and also the '~' value when using Roo's shell)") final JavaPackage topLevelPackage,
 		@CliOption(key = "java", help = "Forces a particular major version of Java to be used (will be auto-detected if unspecified; specify 5 or 6 or 7 only)") final Integer majorJavaVersion,
 		@CliOption(key = "parent", help = "The Maven coordinates of the parent POM, in the form \"groupId:artifactId:version\"") final GAV parentPom,
-		@CliOption(key = "packaging", help = "The Maven packaging of this module") final PackagingProvider packaging) {
+		@CliOption(key = "packaging", help = "The Maven packaging of this module", unspecifiedDefaultValue = JarPackaging.NAME) final PackagingProvider packaging) {
 
 		mavenOperations.createModule(topLevelPackage, parentPom, moduleName, packaging, majorJavaVersion);
 	}

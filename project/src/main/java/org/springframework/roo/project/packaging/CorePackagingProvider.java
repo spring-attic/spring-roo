@@ -21,7 +21,7 @@ abstract class CorePackagingProvider extends AbstractPackagingProvider {
 	 */
 	protected CorePackagingProvider(final String name, final String pomTemplate) {
 		/*
-		 * Core instances use the Maven packaging type as the ID so that the
+		 * Core instances use the Maven packaging name as the ID so that the
 		 * user sees intuitively-named packaging options on the command line. If
 		 * they implement their own packaging types, they can name them with
 		 * any other name that makes sense to them.

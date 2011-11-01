@@ -21,6 +21,7 @@ import org.springframework.roo.project.ProjectOperations;
 public class JarPackaging extends CorePackagingProvider {
 	
 	// Constants
+	public static final String NAME = "jar";
 	private static final Dependency JAXB_API = new Dependency("javax.xml.bind", "jaxb-api", "2.1");
 	private static final Dependency JSR250_API = new Dependency("javax.annotation", "jsr250-api", "1.0");
 	// Java 5 needs the javax.annotation library (it's included in Java 6 and above), and the jaxb-api for Hibernate
@@ -30,7 +31,7 @@ public class JarPackaging extends CorePackagingProvider {
 	 * Constructor invoked by the OSGi container
 	 */
 	public JarPackaging() {
-		super("jar", "jar-pom-template.xml");
+		super(NAME, "jar-pom-template.xml");
 	}
 	
 	public String getId() {
