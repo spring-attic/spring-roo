@@ -3,6 +3,8 @@ package org.springframework.roo.support.util;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.regex.Pattern;
@@ -133,23 +135,24 @@ public final class FileUtils {
 	}
 
 	/**
-	 * TODO
+	 * Returns the part of the given path that represents a directory, in other
+	 * words the given path if it's already a directory, or the parent directory
+	 * if it's a file. 
 	 * 
-	 * @param fileIdentifier
-	 * @return
+	 * @param fileIdentifier the path to parse (required)
+	 * @return see above
 	 * @since 1.2.0
 	 */
 	public static String getFirstDirectory(String fileIdentifier) {
 		fileIdentifier = removeTrailingSeparator(fileIdentifier);
-		File file = new File(fileIdentifier);
-		if (file.isDirectory()) {
+		if (new File(fileIdentifier).isDirectory()) {
 			return fileIdentifier;
 		}
 		return backOneDirectory(fileIdentifier);
 	}
 
 	/**
-	 * TODO
+	 * Returns the given file system path minus its last element
 	 * 
 	 * @param fileIdentifier
 	 * @return
@@ -293,6 +296,24 @@ public final class FileUtils {
 		Assert.isTrue(!relativeFilename.startsWith("/"), "Filename shouldn't start with a slash");
 		// Slashes instead of File.separatorChar is correct here, as these are classloader paths (not file system paths)
 		return "/" + loadingClass.getPackage().getName().replace('.', '/') + "/" + relativeFilename;
+	}
+	
+	/**
+	 * Loads the given file from the classpath.
+	 *
+	 * @param loadingClass the class from whose package to load the file (required)
+	 * @param filename the name of the file to load, relative to that package (required)
+	 * @return the file's input stream (never <code>null</code>)
+	 * @throws IllegalArgumentException if the given file cannot be found
+	 */
+	public static File getFile(final Class<?> loadingClass, final String filename) {
+		final URL url = loadingClass.getResource(filename);
+		Assert.notNull(url, "Could not locate '" + filename + "' in classpath of " + loadingClass.getName());
+		try {
+			return new File(url.toURI());
+		} catch (URISyntaxException e) {
+			throw new IllegalArgumentException(e);
+		}
 	}
 	
 	/**

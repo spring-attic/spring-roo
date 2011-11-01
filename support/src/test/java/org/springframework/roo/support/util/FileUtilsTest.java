@@ -22,6 +22,7 @@ import org.springframework.roo.support.util.loader.Loader;
  */
 public class FileUtilsTest {
 	
+	private static final String MISSING_FILE = "no-such-file.txt";
 	private static final String TEST_FILE = "sub/file-utils-test.txt";
 
 	@Test(expected = NullPointerException.class)
@@ -164,6 +165,11 @@ public class FileUtilsTest {
 	}
 	
 	@Test
+	public void testGetFile() {
+		assertTrue(FileUtils.getFile(Loader.class, TEST_FILE).isFile());
+	}
+
+	@Test
 	public void testGetPath() {
 		assertEquals("/org/springframework/roo/support/util/loader/sub/file-utils-test.txt", FileUtils.getPath(Loader.class, TEST_FILE));
 	}
@@ -180,6 +186,36 @@ public class FileUtilsTest {
 	
 	@Test(expected = IllegalArgumentException.class)
 	public void testGetInputStreamOfInvalidFile() throws Exception {
-		FileUtils.getInputStream(Loader.class, "no-such-file.txt");
+		FileUtils.getInputStream(Loader.class, MISSING_FILE);
+	}
+	
+	private void assertFirstDirectory(final String path, final String expectedFirstDirectory) {
+		// Invoke
+		final String firstDirectory = FileUtils.getFirstDirectory(path);
+		
+		// Check
+		assertEquals(expectedFirstDirectory, firstDirectory);
+	}
+	
+	@Test
+	public void testGetFirstDirectoryOfExistingDirectory() {
+		// Set up
+		final String directory = FileUtils.getFile(Loader.class, TEST_FILE).getParent();
+		
+		// Invoke
+		final String firstDirectory = FileUtils.getFirstDirectory(directory);
+		
+		// Check
+		assertTrue(firstDirectory.endsWith("sub"));
+	}
+	
+	@Test
+	public void testGetFirstDirectoryOfExistingFile() {
+		assertFirstDirectory(TEST_FILE, "sub");
+	}
+	
+	@Test
+	public void testBackOneDirectory() {
+		assertEquals("foo/bar", FileUtils.backOneDirectory("foo/bar/baz/"));
 	}
 }

@@ -131,7 +131,7 @@ public class PluginTest extends XmlTestCase {
 	 * @param expectedExecutions
 	 * @throws Exception
 	 */
-	private void assertPluginFromXml(final String xml, final String expectedGroupId, final String expectedArtifactId, final String expectedVersion, final Configuration expectedConfiguration, final List<Dependency> expectedDependencies, final List<Execution> expectedExecutions) throws Exception {
+	private void assertPluginFromXml(final String xml, final String expectedGroupId, final String expectedArtifactId, final String expectedVersion, final Configuration expectedConfiguration, final List<Dependency> expectedDependencies, final List<Execution> expectedExecutions) {
 		// Set up
 		final Element pluginElement = stringToElement(xml);
 
