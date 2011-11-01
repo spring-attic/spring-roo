@@ -237,7 +237,132 @@
         introduced with Roo 1.2.0.M1 the entity command has been adjusted to
         take the target persistence type into account. Please change your
         log.roo scripts to use the new <link
-        linkend="command-index-entity-jpa">entity jpa</link> command.</para>
+        linkend="command-index-entity-jpa">entity jpa</link> command. More
+        details about the new entity JPA command as well as related annotation
+        changes please refer to <link
+        xlink:href="https://jira.springsource.org/browse/ROO-2833">ROO-2833</link>:</para>
+
+        <table>
+          <title>Old Annotations &amp; Commands</title>
+
+          <tgroup cols="5">
+            <thead>
+              <row>
+                <entry align="center"></entry>
+
+                <entry align="center">Active Record</entry>
+
+                <entry align="center">Repository</entry>
+
+                <entry align="center">Entity</entry>
+
+                <entry align="center">Command</entry>
+              </row>
+            </thead>
+
+            <tbody>
+              <row>
+                <entry>JPA</entry>
+
+                <entry>@RooEntity</entry>
+
+                <entry></entry>
+
+                <entry></entry>
+
+                <entry>entity</entry>
+              </row>
+
+              <row>
+                <entry>Spring Data JPA</entry>
+
+                <entry></entry>
+
+                <entry>@RooRepositoryJpa</entry>
+
+                <entry>@RooJpaEntity</entry>
+
+                <entry>entity --activeRecord false + repository jpa</entry>
+              </row>
+
+              <row>
+                <entry>Spring Data MongoDB</entry>
+
+                <entry></entry>
+
+                <entry>@RooRepositoryMongo</entry>
+
+                <entry>@RooMongoEntity</entry>
+
+                <entry>entity mongo + repository mongo</entry>
+              </row>
+            </tbody>
+          </tgroup>
+        </table>
+
+        <para></para>
+
+        <para><table>
+            <title>New Annotations &amp; Commands</title>
+
+            <tgroup cols="5">
+              <thead>
+                <row>
+                  <entry align="center"></entry>
+
+                  <entry align="center">Active Record</entry>
+
+                  <entry align="center">Repository</entry>
+
+                  <entry align="center">Entity</entry>
+
+                  <entry align="center">Command</entry>
+                </row>
+              </thead>
+
+              <tbody>
+                <row>
+                  <entry>JPA</entry>
+
+                  <entry><emphasis
+                  role="bold">@RooJpaActiveRecord</emphasis></entry>
+
+                  <entry></entry>
+
+                  <entry></entry>
+
+                  <entry>entity <emphasis role="bold">jpa</emphasis></entry>
+                </row>
+
+                <row>
+                  <entry>Spring Data JPA</entry>
+
+                  <entry></entry>
+
+                  <entry><emphasis
+                  role="bold">@RooJpaRepository</emphasis></entry>
+
+                  <entry>@RooJpaEntity</entry>
+
+                  <entry>entity <emphasis role="bold">jpa</emphasis>
+                  --activeRecord false + repository jpa</entry>
+                </row>
+
+                <row>
+                  <entry>Spring Data MongoDB</entry>
+
+                  <entry></entry>
+
+                  <entry><emphasis
+                  role="bold">@RooMongoRepository</emphasis></entry>
+
+                  <entry>@RooMongoEntity</entry>
+
+                  <entry>entity mongo + repository mongo</entry>
+                </row>
+              </tbody>
+            </tgroup>
+          </table></para>
       </listitem>
     </itemizedlist>
   </section>
