@@ -8,7 +8,7 @@ import java.io.InputStream;
  * @author Ben Alex
  * @since 1.0
  */
-public abstract class TemplateUtils {
+public final class TemplateUtils {
 
 	/**
 	 * Determines the path to the requested template.
@@ -16,13 +16,11 @@ public abstract class TemplateUtils {
 	 * @param clazz which owns the template (required)
 	 * @param templateFilename the filename of the template (required)
 	 * @return the full classloader-specific path to the template (never null)
+	 * @deprecated use {@link FileUtils#getPath(Class, String)} instead
 	 */
-	public static String getTemplatePath(final Class<?> clazz, final String templateFilename) {
-		Assert.notNull(clazz, "Owning class required");
-		Assert.hasText(templateFilename, "Template filename required");
-		Assert.isTrue(!templateFilename.startsWith("/"), "Template filename shouldn't start with a slash");
-		// Slashes instead of File.separatorChar is correct here, as these are classloader paths (not file system paths)
-		return "/" + clazz.getPackage().getName().replace('.', '/') + "/" + templateFilename;
+	@Deprecated
+	public static String getTemplatePath(final Class<?> loadingClass, final String relativeFilename) {
+		return FileUtils.getPath(loadingClass, relativeFilename);
 	}
 
 	/**
@@ -31,11 +29,15 @@ public abstract class TemplateUtils {
 	 * @param clazz which owns the template (required)
 	 * @param templateFilename the filename of the template (required)
 	 * @return the input stream (never null; an exception is thrown if cannot be found)
+	 * @deprecated use {@link FileUtils#getInputStream(Class, String)} instead
 	 */
+	@Deprecated
 	public static InputStream getTemplate(final Class<?> clazz, final String templateFilename) {
-		String templatePath = getTemplatePath(clazz, templateFilename);
-		InputStream result = clazz.getResourceAsStream(templatePath);
-		Assert.notNull(result, "Could not locate '" + templatePath + "' in classloader of " + clazz.getName());
-		return result;
+		return clazz.getResourceAsStream(templateFilename);
 	}
+	
+	/**
+	 * Constructor is private to prevent instantiation
+	 */
+	private TemplateUtils() {}
 }

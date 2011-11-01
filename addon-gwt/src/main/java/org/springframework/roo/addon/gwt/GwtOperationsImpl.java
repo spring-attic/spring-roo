@@ -46,7 +46,7 @@ import org.springframework.roo.support.osgi.OSGiUtils;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.DomUtils;
 import org.springframework.roo.support.util.FileCopyUtils;
-import org.springframework.roo.support.util.TemplateUtils;
+import org.springframework.roo.support.util.FileUtils;
 import org.springframework.roo.support.util.WebXmlUtils;
 import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlUtils;
@@ -500,7 +500,7 @@ public class GwtOperationsImpl implements GwtOperations {
 			fileManager.createDirectory(targetDirectory);
 		}
 
-		String path = TemplateUtils.getTemplatePath(getClass(), sourceAntPath);
+		String path = FileUtils.getPath(getClass(), sourceAntPath);
 		final Iterable<URL> uris = OSGiUtils.findEntriesByPattern(context.getBundleContext(), path);
 		Assert.notNull(uris, "Could not search bundles for resources for Ant Path '" + path + "'");
 
@@ -531,7 +531,7 @@ public class GwtOperationsImpl implements GwtOperations {
 			fileManager.createDirectory(targetDirectory);
 		}
 
-		String path = TemplateUtils.getTemplatePath(getClass(), sourceAntPath);
+		String path = FileUtils.getPath(getClass(), sourceAntPath);
 		final Iterable<URL> urls = OSGiUtils.findEntriesByPattern(context.getBundleContext(), path);
 		Assert.notNull(urls, "Could not search bundles for resources for Ant Path '" + path + "'");
 

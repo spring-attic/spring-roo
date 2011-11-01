@@ -49,9 +49,9 @@ import org.springframework.roo.shell.Shell;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.DomUtils;
 import org.springframework.roo.support.util.FileCopyUtils;
+import org.springframework.roo.support.util.FileUtils;
 import org.springframework.roo.support.util.IOUtils;
 import org.springframework.roo.support.util.StringUtils;
-import org.springframework.roo.support.util.TemplateUtils;
 import org.springframework.roo.support.util.WebXmlUtils;
 import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlUtils;
@@ -273,7 +273,7 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 	private void copyEntityTypePage(final JavaType entity, final String beanName, final String plural) {
 		String domainTypeFile = projectOperations.getPathResolver().getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, "pages/" + StringUtils.uncapitalize(entity.getSimpleTypeName()) + ".xhtml");
 		try {
-			InputStream inputStream = TemplateUtils.getTemplate(getClass(), "pages/content-template.xhtml");
+			InputStream inputStream = FileUtils.getInputStream(getClass(), "pages/content-template.xhtml");
 			String input = FileCopyUtils.copyToString(new InputStreamReader(inputStream));
 			input = input.replace("__BEAN_NAME__", beanName);
 			input = input.replace("__DOMAIN_TYPE__", entity.getSimpleTypeName());
@@ -354,7 +354,7 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 
 		InputStream inputStream = null;
 		try {
-			inputStream = TemplateUtils.getTemplate(getClass(), "WEB-INF/faces-config-template.xml");
+			inputStream = FileUtils.getInputStream(getClass(), "WEB-INF/faces-config-template.xml");
 			String input = FileCopyUtils.copyToString(new InputStreamReader(inputStream));
 			input = input.replace("__PACKAGE__", destinationPackage.getFullyQualifiedPackageName());
 			fileManager.createOrUpdateTextFileIfRequired(getFacesConfigFile(), input, false);
@@ -452,7 +452,7 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 
 		InputStream inputStream = null;
 		try {
-			inputStream = TemplateUtils.getTemplate(getClass(), templateName);
+			inputStream = FileUtils.getInputStream(getClass(), templateName);
 			String input = FileCopyUtils.copyToString(new InputStreamReader(inputStream));
 			input = input.replace("__PACKAGE__", destinationPackage.getFullyQualifiedPackageName());
 			fileManager.createOrUpdateTextFileIfRequired(physicalPath, input, false);

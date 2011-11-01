@@ -51,7 +51,7 @@ import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
-import org.springframework.roo.support.util.TemplateUtils;
+import org.springframework.roo.support.util.FileUtils;
 import org.springframework.roo.support.util.XmlUtils;
 
 /**
@@ -338,7 +338,7 @@ public class JspMetadataListener implements MetadataProvider, MetadataNotificati
 		String imageFile = pathResolver.getIdentifier(path, imagePath);
 		if (!fileManager.exists(imageFile)) {
 			try {
-				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), imagePath), fileManager.createFile(pathResolver.getIdentifier(path, imagePath)).getOutputStream());
+				FileCopyUtils.copy(FileUtils.getInputStream(getClass(), imagePath), fileManager.createFile(pathResolver.getIdentifier(path, imagePath)).getOutputStream());
 			} catch (Exception e) {
 				throw new IllegalStateException("Encountered an error during copying of resources for MVC JSP addon.", e);
 			}

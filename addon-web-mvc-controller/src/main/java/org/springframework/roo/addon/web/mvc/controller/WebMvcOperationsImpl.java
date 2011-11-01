@@ -23,9 +23,9 @@ import org.springframework.roo.project.ProjectType;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.DomUtils;
 import org.springframework.roo.support.util.FileCopyUtils;
+import org.springframework.roo.support.util.FileUtils;
 import org.springframework.roo.support.util.IOUtils;
 import org.springframework.roo.support.util.StringUtils;
-import org.springframework.roo.support.util.TemplateUtils;
 import org.springframework.roo.support.util.WebXmlUtils;
 import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlUtils;
@@ -133,7 +133,7 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
 			return;
 		}
 
-		final InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), "web-template.xml");
+		final InputStream templateInputStream = FileUtils.getInputStream(getClass(), "web-template.xml");
 		Assert.notNull(templateInputStream, "Could not acquire web.xml template");
 		final Document document = XmlUtils.readXml(templateInputStream);
 
@@ -178,7 +178,7 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
 		String webConfigFile = pathResolver.getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/spring/webmvc-config.xml");
 		final InputStream in;
 		if (!fileManager.exists(webConfigFile)) {
-			in = TemplateUtils.getTemplate(getClass(), "webmvc-config.xml");
+			in = FileUtils.getInputStream(getClass(), "webmvc-config.xml");
 			Assert.notNull(in, "Could not acquire web.xml template");
 		} else {
 			in = fileManager.getInputStream(webConfigFile);
@@ -202,7 +202,7 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
 			Document webMvcConfig = XmlUtils.readXml(webMvcConfigInputStream);
 			Element root = webMvcConfig.getDocumentElement();
 			if (XmlUtils.findFirstElement("/beans/interceptors", root) == null) {
-				InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), "webmvc-config-additions.xml");
+				InputStream templateInputStream = FileUtils.getInputStream(getClass(), "webmvc-config-additions.xml");
 				Assert.notNull(templateInputStream, "Could not acquire webmvc-config-additions.xml template");
 				Document webMvcConfigAdditions = XmlUtils.readXml(templateInputStream);
 				NodeList nodes = webMvcConfigAdditions.getDocumentElement().getChildNodes();
@@ -269,7 +269,7 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
 			return;
 		}
 		try {
-			InputStream template = TemplateUtils.getTemplate(getClass(), "converter/ApplicationConversionServiceFactoryBean-template._java");
+			InputStream template = FileUtils.getInputStream(getClass(), "converter/ApplicationConversionServiceFactoryBean-template._java");
 			String input = FileCopyUtils.copyToString(new InputStreamReader(template));
 			input = input.replace("__PACKAGE__", thePackage.getFullyQualifiedPackageName());
 			fileManager.createOrUpdateTextFileIfRequired(physicalPath, input, false);

@@ -37,7 +37,7 @@ import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
-import org.springframework.roo.support.util.TemplateUtils;
+import org.springframework.roo.support.util.FileUtils;
 import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlRoundTripUtils;
 import org.springframework.roo.support.util.XmlUtils;
@@ -215,7 +215,7 @@ public class SolrJspMetadataListener implements MetadataProvider, MetadataNotifi
 		String projectFileLocation = pathResolver.getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, relativeProjectFileLocation);
 		if (!fileManager.exists(projectFileLocation)) {
 			try {
-				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), relativeTemplateLocation), fileManager.createFile(projectFileLocation).getOutputStream());
+				FileCopyUtils.copy(FileUtils.getInputStream(getClass(), relativeTemplateLocation), fileManager.createFile(projectFileLocation).getOutputStream());
 			} catch (IOException e) {
 				throw new IllegalStateException("Could not copy " + relativeProjectFileLocation + " into project", e);
 			}

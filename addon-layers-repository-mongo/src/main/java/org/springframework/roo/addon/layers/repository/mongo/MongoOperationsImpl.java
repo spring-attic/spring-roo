@@ -41,8 +41,8 @@ import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.Repository;
 import org.springframework.roo.support.util.FileCopyUtils;
+import org.springframework.roo.support.util.FileUtils;
 import org.springframework.roo.support.util.StringUtils;
-import org.springframework.roo.support.util.TemplateUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.springframework.uaa.client.util.Assert;
 import org.w3c.dom.Document;
@@ -137,7 +137,7 @@ public class MongoOperationsImpl implements MongoOperations {
 		String appCtxId = pathResolver.getFocusedIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext-mongo.xml");
 		if (!fileManager.exists(appCtxId)) {
 			try {
-				InputStream inputStream = TemplateUtils.getTemplate(getClass(), "applicationContext-mongo.xml");
+				InputStream inputStream = FileUtils.getInputStream(getClass(), "applicationContext-mongo.xml");
 				MutableFile mutableFile = fileManager.createFile(appCtxId);
 				String input = FileCopyUtils.copyToString(new InputStreamReader(inputStream));
 				input = input.replace("TO_BE_CHANGED_BY_ADDON", projectOperations.getTopLevelPackage(moduleName).getFullyQualifiedPackageName());

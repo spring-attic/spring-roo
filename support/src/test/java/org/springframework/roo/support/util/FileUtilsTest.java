@@ -8,8 +8,11 @@ import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 
 import org.junit.Test;
+import org.springframework.roo.support.util.loader.Loader;
 
 /**
  * Unit test of {@link FileUtils}
@@ -19,6 +22,8 @@ import org.junit.Test;
  */
 public class FileUtilsTest {
 	
+	private static final String TEST_FILE = "sub/file-utils-test.txt";
+
 	@Test(expected = NullPointerException.class)
 	public void testGetSystemDependentPathFromNullArray() {
 		FileUtils.getSystemDependentPath((String[]) null);
@@ -156,5 +161,25 @@ public class FileUtilsTest {
 		
 		// Invoke and check
 		assertEquals("foo", FileUtils.removeLeadingAndTrailingSeparators(path));
+	}
+	
+	@Test
+	public void testGetPath() {
+		assertEquals("/org/springframework/roo/support/util/loader/sub/file-utils-test.txt", FileUtils.getPath(Loader.class, TEST_FILE));
+	}
+	
+	@Test
+	public void testGetInputStreamOfFileInSubDirectory() throws Exception {
+		// Invoke
+		final InputStream inputStream = FileUtils.getInputStream(Loader.class, TEST_FILE);
+		
+		// Check
+		final String contents = FileCopyUtils.copyToString(new InputStreamReader(inputStream));
+		assertEquals("This file is required for FileUtilsTest.", contents);
+	}
+	
+	@Test(expected = IllegalArgumentException.class)
+	public void testGetInputStreamOfInvalidFile() throws Exception {
+		FileUtils.getInputStream(Loader.class, "no-such-file.txt");
 	}
 }

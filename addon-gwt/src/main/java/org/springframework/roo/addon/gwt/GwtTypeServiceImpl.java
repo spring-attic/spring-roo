@@ -66,9 +66,9 @@ import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.FileUtils;
 import org.springframework.roo.support.util.IOUtils;
 import org.springframework.roo.support.util.StringUtils;
-import org.springframework.roo.support.util.TemplateUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -278,7 +278,7 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 		builder.setEntityResolver(new EntityResolver() {
 			public InputSource resolveEntity(final String publicId, final String systemId) throws SAXException, IOException {
 				if (systemId.endsWith("gwt-module.dtd")) {
-					return new InputSource(TemplateUtils.getTemplate(GwtScaffoldMetadata.class, "templates/gwt-module.dtd"));
+					return new InputSource(FileUtils.getInputStream(GwtScaffoldMetadata.class, "templates/gwt-module.dtd"));
 				}
 
 				// Use the default behaviour

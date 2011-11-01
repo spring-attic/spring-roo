@@ -2,6 +2,7 @@ package org.springframework.roo.support.util;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.regex.Pattern;
@@ -276,6 +277,36 @@ public final class FileUtils {
 			return fileSeparator.replace(BACKSLASH, ESCAPED_BACKSLASH);
 		}
 		return fileSeparator;
+	}
+	
+	/**
+	 * Determines the path to the requested file, relative to the given class.
+	 *
+	 * @param loadingClass the class to whose package the given file is relative (required)
+	 * @param relativeFilename the name of the file relative to that package (required)
+	 * @return the full classloader-specific path to the file (never <code>null</code>)
+	 * @since 1.2.0
+	 */
+	public static String getPath(final Class<?> loadingClass, final String relativeFilename) {
+		Assert.notNull(loadingClass, "Loading class required");
+		Assert.hasText(relativeFilename, "Filename required");
+		Assert.isTrue(!relativeFilename.startsWith("/"), "Filename shouldn't start with a slash");
+		// Slashes instead of File.separatorChar is correct here, as these are classloader paths (not file system paths)
+		return "/" + loadingClass.getPackage().getName().replace('.', '/') + "/" + relativeFilename;
+	}
+	
+	/**
+	 * Loads the given file from the classpath.
+	 *
+	 * @param loadingClass the class from whose package to load the file (required)
+	 * @param filename the name of the file to load, relative to that package (required)
+	 * @return the file's input stream (never <code>null</code>)
+	 * @throws IllegalArgumentException if the given file cannot be found
+	 */
+	public static InputStream getInputStream(final Class<?> loadingClass, final String filename) {
+		final InputStream inputStream = loadingClass.getResourceAsStream(filename);
+		Assert.notNull(inputStream, "Could not locate '" + filename + "' in classpath of " + loadingClass.getName());
+		return inputStream;
 	}
 	
 	/**

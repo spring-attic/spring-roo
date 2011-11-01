@@ -14,9 +14,9 @@ import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
+import org.springframework.roo.support.util.FileUtils;
 import org.springframework.roo.support.util.IOUtils;
 import org.springframework.roo.support.util.StringUtils;
-import org.springframework.roo.support.util.TemplateUtils;
 import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.url.stream.UrlInputStreamService;
 import org.w3c.dom.Document;
@@ -54,9 +54,9 @@ public abstract class AbstractEmbeddedProvider implements EmbeddedProvider {
 			tagName = tagName.concat(".tagx");
 		}
 		String tagx = pathResolver.getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/tags/embed/" + tagName);
-		if(!fileManager.exists(tagx)) {
+		if (!fileManager.exists(tagx)) {
 			try {
-				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "tags/" + tagName), fileManager.createFile(tagx).getOutputStream());
+				FileCopyUtils.copy(FileUtils.getInputStream(getClass(), "tags/" + tagName), fileManager.createFile(tagx).getOutputStream());
 			} catch (IOException e) {
 				throw new IllegalStateException("Could not install " + tagx);
 			}

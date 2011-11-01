@@ -18,7 +18,7 @@ import org.springframework.roo.project.Property;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.DomUtils;
 import org.springframework.roo.support.util.FileCopyUtils;
-import org.springframework.roo.support.util.TemplateUtils;
+import org.springframework.roo.support.util.FileUtils;
 import org.springframework.roo.support.util.WebXmlUtils;
 import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlUtils;
@@ -66,7 +66,7 @@ public class SecurityOperationsImpl implements SecurityOperations {
 		String destination = pathResolver.getFocusedIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext-security.xml");
 		if (!fileManager.exists(destination)) {
 			try {
-				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "applicationContext-security-template.xml"), fileManager.createFile(destination).getOutputStream());
+				FileCopyUtils.copy(FileUtils.getInputStream(getClass(), "applicationContext-security-template.xml"), fileManager.createFile(destination).getOutputStream());
 			} catch (IOException ioe) {
 				throw new IllegalStateException(ioe);
 			}
@@ -76,7 +76,7 @@ public class SecurityOperationsImpl implements SecurityOperations {
 		String loginPage = pathResolver.getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/views/login.jspx");
 		if (!fileManager.exists(loginPage)) {
 			try {
-				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "login.jspx"), fileManager.createFile(loginPage).getOutputStream());
+				FileCopyUtils.copy(FileUtils.getInputStream(getClass(), "login.jspx"), fileManager.createFile(loginPage).getOutputStream());
 			} catch (IOException ioe) {
 				throw new IllegalStateException(ioe);
 			}

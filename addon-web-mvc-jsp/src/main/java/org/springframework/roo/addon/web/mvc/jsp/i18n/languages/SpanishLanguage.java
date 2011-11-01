@@ -6,7 +6,7 @@ import java.util.Locale;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.addon.web.mvc.jsp.i18n.AbstractLanguage;
-import org.springframework.roo.support.util.TemplateUtils;
+import org.springframework.roo.support.util.FileUtils;
 
 /**
  * Spanish language support.
@@ -27,10 +27,10 @@ public class SpanishLanguage extends AbstractLanguage {
 	}
 
 	public InputStream getFlagGraphic() {
-		return TemplateUtils.getTemplate(getClass(), "es.png");
+		return FileUtils.getInputStream(getClass(), "es.png");
 	}
 
 	public InputStream getMessageBundle() {
-		return TemplateUtils.getTemplate(getClass(), "messages_es.properties");
+		return FileUtils.getInputStream(getClass(), "messages_es.properties");
 	}
 }

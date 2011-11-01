@@ -14,8 +14,8 @@ import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.osgi.OSGiUtils;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
+import org.springframework.roo.support.util.FileUtils;
 import org.springframework.roo.support.util.IOUtils;
-import org.springframework.roo.support.util.TemplateUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 
@@ -40,7 +40,7 @@ public abstract class AbstractOperations {
 	}
 
 	public Document getDocumentTemplate(final String templateName) {
-		return XmlUtils.readXml(TemplateUtils.getTemplate(getClass(), templateName));
+		return XmlUtils.readXml(FileUtils.getInputStream(getClass(), templateName));
 	}
 
 	/**
@@ -61,7 +61,7 @@ public abstract class AbstractOperations {
 			fileManager.createDirectory(targetDirectory);
 		}
 
-		String path = TemplateUtils.getTemplatePath(getClass(), sourceAntPath);
+		String path = FileUtils.getPath(getClass(), sourceAntPath);
 		final Iterable<URL> urls = OSGiUtils.findEntriesByPattern(context.getBundleContext(), path);
 		Assert.notNull(urls, "Could not search bundles for resources for Ant Path '" + path + "'");
 		for (final URL url : urls) {

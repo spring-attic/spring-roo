@@ -38,8 +38,8 @@ import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.DomUtils;
+import org.springframework.roo.support.util.FileUtils;
 import org.springframework.roo.support.util.StringUtils;
-import org.springframework.roo.support.util.TemplateUtils;
 import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
@@ -85,7 +85,7 @@ public class JmsOperationsImpl implements JmsOperations {
 		if (fileManager.exists(jmsContextPath)) {
 			in = fileManager.getInputStream(jmsContextPath);
 		} else {
-			in = TemplateUtils.getTemplate(getClass(), "applicationContext-jms-template.xml");
+			in = FileUtils.getInputStream(getClass(), "applicationContext-jms-template.xml");
 			Assert.notNull(in, "Could not acquire applicationContext-jms.xml template");
 		}
 		final Document document = XmlUtils.readXml(in);

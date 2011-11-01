@@ -15,8 +15,8 @@ import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.support.util.FileCopyUtils;
+import org.springframework.roo.support.util.FileUtils;
 import org.springframework.roo.support.util.IOUtils;
-import org.springframework.roo.support.util.TemplateUtils;
 
 /**
  * A default implementation of {@link ConversionServiceOperations}.
@@ -55,7 +55,7 @@ public class ConversionServiceOperationsImpl implements ConversionServiceOperati
 		}
 		InputStream template = null;
 		try {
-			template = TemplateUtils.getTemplate(getClass(), CONVERSION_SERVICE_SIMPLE_TYPE + "-template._java");
+			template = FileUtils.getInputStream(getClass(), CONVERSION_SERVICE_SIMPLE_TYPE + "-template._java");
 			String input = FileCopyUtils.copyToString(new InputStreamReader(template));
 			input = input.replace("__PACKAGE__", thePackage.getFullyQualifiedPackageName());
 			MutableFile mutableFile = fileManager.createFile(physicalPath);

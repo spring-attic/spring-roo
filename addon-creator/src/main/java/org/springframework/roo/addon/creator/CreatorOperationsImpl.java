@@ -27,9 +27,9 @@ import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
+import org.springframework.roo.support.util.FileUtils;
 import org.springframework.roo.support.util.IOUtils;
 import org.springframework.roo.support.util.StringUtils;
-import org.springframework.roo.support.util.TemplateUtils;
 import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlUtils;
 import org.springframework.roo.url.stream.UrlInputStreamService;
@@ -129,7 +129,7 @@ public class CreatorOperationsImpl implements CreatorOperations {
 		if (!StringUtils.hasText(projectName)) {
 			projectName = topLevelPackage.getFullyQualifiedPackageName().replace(".", "-");
 		}
-		Document pom = XmlUtils.readXml(TemplateUtils.getTemplate(getClass(), "wrapper/roo-addon-wrapper-template.xml"));
+		Document pom = XmlUtils.readXml(FileUtils.getInputStream(getClass(), "wrapper/roo-addon-wrapper-template.xml"));
 		Element root = pom.getDocumentElement();
 
 		XmlUtils.findRequiredElement("/project/name", root).setTextContent(projectName);
@@ -164,7 +164,7 @@ public class CreatorOperationsImpl implements CreatorOperations {
 
 		if (!StringUtils.hasText(language)) {
 			language = "";
-			InputStreamReader is = new InputStreamReader(TemplateUtils.getTemplate(getClass(), Type.I18N.name().toLowerCase() +  "/iso3166.txt"));
+			InputStreamReader is = new InputStreamReader(FileUtils.getInputStream(getClass(), Type.I18N.name().toLowerCase() +  "/iso3166.txt"));
 			BufferedReader br = new BufferedReader(is);
 			String line;
 			try {
@@ -221,7 +221,7 @@ public class CreatorOperationsImpl implements CreatorOperations {
 		String destinationFile = pathResolver.getFocusedIdentifier(Path.SRC_MAIN_JAVA, packagePath + separatorChar + languageName + "Language.java");
 
 		if (!fileManager.exists(destinationFile)) {
-			InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), Type.I18N.name().toLowerCase() +  "/Language.java-template");
+			InputStream templateInputStream = FileUtils.getInputStream(getClass(), Type.I18N.name().toLowerCase() +  "/Language.java-template");
 			try {
 				// Read template and insert the user's package
 				String input = FileCopyUtils.copyToString(new InputStreamReader(templateInputStream));
@@ -265,7 +265,7 @@ public class CreatorOperationsImpl implements CreatorOperations {
 
 		// Load the POM template
 		final String pomTemplate = type.name().toLowerCase() + "/roo-addon-" + type.name().toLowerCase() + "-template.xml";
-		final Document pom = XmlUtils.readXml(TemplateUtils.getTemplate(getClass(), pomTemplate));
+		final Document pom = XmlUtils.readXml(FileUtils.getInputStream(getClass(), pomTemplate));
 		final Element root = pom.getDocumentElement();
 
 		// Populate it from the given inputs
@@ -319,7 +319,7 @@ public class CreatorOperationsImpl implements CreatorOperations {
 		}
 
 		if (!fileManager.exists(destinationFile)) {
-			InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), type.name().toLowerCase() + "/" + targetFilename + "-template");
+			InputStream templateInputStream = FileUtils.getInputStream(getClass(), type.name().toLowerCase() + "/" + targetFilename + "-template");
 			try {
 				// Read template and insert the user's package
 				String input = FileCopyUtils.copyToString(new InputStreamReader(templateInputStream));

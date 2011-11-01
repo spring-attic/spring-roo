@@ -1,12 +1,13 @@
 package org.springframework.roo.addon.web.mvc.jsp.tiles;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -17,8 +18,8 @@ import org.springframework.roo.project.ContextualPath;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
+import org.springframework.roo.support.util.FileUtils;
 import org.springframework.roo.support.util.StringUtils;
-import org.springframework.roo.support.util.TemplateUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -180,7 +181,7 @@ public class TilesOperationsImpl implements TilesOperations {
 	private static class TilesDtdResolver implements EntityResolver {
 		public InputSource resolveEntity(final String publicId, final String systemId) {
 			if (systemId.equals("http://tiles.apache.org/dtds/tiles-config_2_1.dtd")) {
-				return new InputSource(TemplateUtils.getTemplate(TilesOperationsImpl.class, "tiles-config_2_1.dtd"));
+				return new InputSource(FileUtils.getInputStream(TilesOperationsImpl.class, "tiles-config_2_1.dtd"));
 			}
 			// Use the default behaviour
 			return null;

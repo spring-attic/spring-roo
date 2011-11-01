@@ -47,7 +47,7 @@ import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
-import org.springframework.roo.support.util.TemplateUtils;
+import org.springframework.roo.support.util.FileUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -111,7 +111,7 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 		String relativeTestFilePath = "selenium/test-" + formBackingType.getSimpleTypeName().toLowerCase() + ".xhtml";
 		String seleniumPath = pathResolver.getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, relativeTestFilePath);
 
-		InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), "selenium-template.xhtml");
+		InputStream templateInputStream = FileUtils.getInputStream(getClass(), "selenium-template.xhtml");
 		Assert.notNull(templateInputStream, "Could not acquire selenium.xhtml template");
 		final Document document = XmlUtils.readXml(templateInputStream);
 
@@ -174,7 +174,7 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 		if (fileManager.exists(seleniumPath)) {
 			in = fileManager.getInputStream(seleniumPath);
 		} else {
-			in = TemplateUtils.getTemplate(getClass(), "selenium-test-suite-template.xhtml");
+			in = FileUtils.getInputStream(getClass(), "selenium-test-suite-template.xhtml");
 			Assert.notNull(in, "Could not acquire selenium test suite template");
 		}
 		final Document suite = XmlUtils.readXml(in);

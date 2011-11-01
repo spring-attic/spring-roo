@@ -16,8 +16,8 @@ import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.FileUtils;
 import org.springframework.roo.support.util.IOUtils;
-import org.springframework.roo.support.util.TemplateUtils;
 
 /**
  * Implementation of {@link LoggingOperations}.
@@ -58,7 +58,7 @@ public class LoggingOperationsImpl implements LoggingOperations {
 				props.load(inputStream);
 			} else {
 				log4jMutableFile = fileManager.createFile(filePath);
-				inputStream = TemplateUtils.getTemplate(getClass(), "log4j-template.properties");
+				inputStream = FileUtils.getInputStream(getClass(), "log4j-template.properties");
 				Assert.notNull(inputStream, "Could not acquire log4j configuration template");
 				props.load(inputStream);
 			}

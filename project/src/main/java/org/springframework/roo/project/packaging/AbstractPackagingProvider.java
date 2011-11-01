@@ -18,8 +18,8 @@ import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.DomUtils;
 import org.springframework.roo.support.util.FileCopyUtils;
+import org.springframework.roo.support.util.FileUtils;
 import org.springframework.roo.support.util.StringUtils;
-import org.springframework.roo.support.util.TemplateUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -107,7 +107,7 @@ public abstract class AbstractPackagingProvider implements PackagingProvider {
 		Assert.notNull(topLevelPackage, "Top level package required");
 
 		// Read the POM template from the classpath
-		final Document pom = XmlUtils.readXml(TemplateUtils.getTemplate(getClass(), this.pomTemplate));
+		final Document pom = XmlUtils.readXml(FileUtils.getInputStream(getClass(), this.pomTemplate));
 		final Element root = pom.getDocumentElement();
 
 		// name
@@ -242,7 +242,7 @@ public abstract class AbstractPackagingProvider implements PackagingProvider {
 	
 	private void setUpLog4jConfiguration() {
 		final String log4jConfigFile = pathResolver.getFocusedIdentifier(Path.SRC_MAIN_RESOURCES, "log4j.properties");
-		final InputStream template = TemplateUtils.getTemplate(getClass(), "packaging/log4j.properties-template");
+		final InputStream template = FileUtils.getInputStream(getClass(), "packaging/log4j.properties-template");
 		try {
 			FileCopyUtils.copy(template, fileManager.createFile(log4jConfigFile).getOutputStream());
 		} catch (final IOException e) {

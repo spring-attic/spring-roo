@@ -23,7 +23,7 @@ import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.support.util.FileCopyUtils;
-import org.springframework.roo.support.util.TemplateUtils;
+import org.springframework.roo.support.util.FileUtils;
 
 /**
  * Operations for Git addon.
@@ -191,7 +191,7 @@ public class GitOperationsImpl implements GitOperations {
 
 		if (!fileManager.exists(gitIgnore)) {
 			try {
-				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "gitignore-template"), fileManager.createFile(gitIgnore).getOutputStream());
+				FileCopyUtils.copy(FileUtils.getInputStream(getClass(), "gitignore-template"), fileManager.createFile(gitIgnore).getOutputStream());
 			} catch (IOException e) {
 				throw new IllegalStateException("Could not install " + Constants.GITIGNORE_FILENAME + " file in project", e);
 			}

@@ -6,7 +6,7 @@ import java.util.Locale;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.addon.web.mvc.jsp.i18n.AbstractLanguage;
-import org.springframework.roo.support.util.TemplateUtils;
+import org.springframework.roo.support.util.FileUtils;
 
 /**
  * Italian language support.
@@ -27,10 +27,10 @@ public class ItalianLanguage extends AbstractLanguage {
 	}
 
 	public InputStream getFlagGraphic() {
-		return TemplateUtils.getTemplate(getClass(), "it.png");
+		return FileUtils.getInputStream(getClass(), "it.png");
 	}
 
 	public InputStream getMessageBundle() {
-		return TemplateUtils.getTemplate(getClass(), "messages_it.properties");
+		return FileUtils.getInputStream(getClass(), "messages_it.properties");
 	}
 }

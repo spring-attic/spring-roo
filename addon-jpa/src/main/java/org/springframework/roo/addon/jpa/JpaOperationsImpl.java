@@ -33,9 +33,9 @@ import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.DomUtils;
 import org.springframework.roo.support.util.FileCopyUtils;
+import org.springframework.roo.support.util.FileUtils;
 import org.springframework.roo.support.util.IOUtils;
 import org.springframework.roo.support.util.StringUtils;
-import org.springframework.roo.support.util.TemplateUtils;
 import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
@@ -263,7 +263,7 @@ public class JpaOperationsImpl implements JpaOperations {
 			inputStream = fileManager.getInputStream(persistencePath);
 		} else {
 			// Use the addon's template file
-			inputStream = TemplateUtils.getTemplate(getClass(), "persistence-template.xml");
+			inputStream = FileUtils.getInputStream(getClass(), "persistence-template.xml");
 			Assert.notNull(inputStream, "Could not acquire persistence.xml template");
 		}
 		final Document persistence = XmlUtils.readXml(inputStream);
@@ -426,7 +426,7 @@ public class JpaOperationsImpl implements JpaOperations {
 		if (appenginePathExists) {
 			in = fileManager.getInputStream(appenginePath);
 		} else {
-			in = TemplateUtils.getTemplate(getClass(), "appengine-web-template.xml");
+			in = FileUtils.getInputStream(getClass(), "appengine-web-template.xml");
 			Assert.notNull(in, "Could not acquire appengine-web.xml template");
 		}
 		final Document appengine = XmlUtils.readXml(in);
@@ -442,7 +442,7 @@ public class JpaOperationsImpl implements JpaOperations {
 
 		if (!loggingPropertiesPathExists) {
 			try {
-				final InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), "logging.properties");
+				final InputStream templateInputStream = FileUtils.getInputStream(getClass(), "logging.properties");
 				FileCopyUtils.copy(templateInputStream, fileManager.createFile(loggingPropertiesPath).getOutputStream());
 			} catch (final IOException e) {
 				throw new IllegalStateException(e);
@@ -559,7 +559,7 @@ public class JpaOperationsImpl implements JpaOperations {
 			if (exists) {
 				inputStream = fileManager.getInputStream(path);
 			} else {
-				inputStream = TemplateUtils.getTemplate(getClass(), templateFilename);
+				inputStream = FileUtils.getInputStream(getClass(), templateFilename);
 				Assert.notNull(inputStream, "Could not acquire " + templateFilename);
 			}
 			props.load(inputStream);

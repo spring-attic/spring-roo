@@ -21,8 +21,8 @@ import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.ProjectType;
 import org.springframework.roo.project.Repository;
 import org.springframework.roo.support.util.FileCopyUtils;
+import org.springframework.roo.support.util.FileUtils;
 import org.springframework.roo.support.util.StringUtils;
-import org.springframework.roo.support.util.TemplateUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -152,7 +152,7 @@ public class WebFlowOperationsImpl implements WebFlowOperations {
 
 	private void copyTemplate(final String templateFileName, final String resolvedTargetDirectoryPath) {
 		try {
-			FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), templateFileName), fileManager.createFile(resolvedTargetDirectoryPath + "/" + templateFileName).getOutputStream());
+			FileCopyUtils.copy(FileUtils.getInputStream(getClass(), templateFileName), fileManager.createFile(resolvedTargetDirectoryPath + "/" + templateFileName).getOutputStream());
 		} catch (IOException e) {
 			throw new IllegalStateException("Encountered an error during copying of resources for Web Flow addon.", e);
 		}

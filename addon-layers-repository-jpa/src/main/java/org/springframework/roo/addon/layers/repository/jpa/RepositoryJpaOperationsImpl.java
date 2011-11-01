@@ -27,7 +27,7 @@ import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.FileCopyUtils;
-import org.springframework.roo.support.util.TemplateUtils;
+import org.springframework.roo.support.util.FileUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.springframework.uaa.client.util.Assert;
 import org.w3c.dom.Element;
@@ -98,7 +98,7 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
 		if (fileManager.exists(appCtxId)) {
 			return;
 		} else {
-			InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), "applicationContext-jpa.xml");
+			InputStream templateInputStream = FileUtils.getInputStream(getClass(), "applicationContext-jpa.xml");
 			try {
 				String input = FileCopyUtils.copyToString(new InputStreamReader(templateInputStream));
 				input = input.replace("TO_BE_CHANGED_BY_ADDON", projectOperations.getFocusedTopLevelPackage().getFullyQualifiedPackageName());

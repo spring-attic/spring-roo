@@ -461,7 +461,7 @@ public final class XmlUtils {
 	 * @see Document#getDocumentElement()
 	 */
 	public static Element getRootElement(final Class<?> clazz, final String xmlFilePath) {
-		final InputStream inputStream = TemplateUtils.getTemplate(clazz, xmlFilePath);
+		final InputStream inputStream = FileUtils.getInputStream(clazz, xmlFilePath);
 		Assert.notNull(inputStream, "Could not open the file '" + xmlFilePath + "'");
 		return readXml(inputStream).getDocumentElement();
 	}

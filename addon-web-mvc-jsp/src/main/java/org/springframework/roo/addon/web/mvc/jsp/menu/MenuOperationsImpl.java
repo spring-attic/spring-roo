@@ -19,8 +19,8 @@ import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
+import org.springframework.roo.support.util.FileUtils;
 import org.springframework.roo.support.util.StringUtils;
-import org.springframework.roo.support.util.TemplateUtils;
 import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlRoundTripUtils;
 import org.springframework.roo.support.util.XmlUtils;
@@ -157,7 +157,7 @@ public class MenuOperationsImpl implements MenuOperations {
 		String menuFileName = getMenuFileName(contextualPath);
 		if (!fileManager.exists(menuFileName)) {
 			try {
-				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "menu.jspx"), fileManager.createFile(menuFileName).getOutputStream());
+				FileCopyUtils.copy(FileUtils.getInputStream(getClass(), "menu.jspx"), fileManager.createFile(menuFileName).getOutputStream());
 			} catch (Exception e) {
 				throw new IllegalStateException("Encountered an error during copying of menu.jspx for MVC Menu addon.", e);
 			}
@@ -168,7 +168,7 @@ public class MenuOperationsImpl implements MenuOperations {
 		final String menuPath = pathResolver.getIdentifier(contextualPath, "WEB-INF/tags/menu/menu.tagx");
 		if (!fileManager.exists(menuPath)) {
 			try {
-				fileManager.createOrUpdateTextFileIfRequired(menuPath, FileCopyUtils.copyToString(new InputStreamReader(TemplateUtils.getTemplate(getClass(), "menu.tagx"))), false);
+				fileManager.createOrUpdateTextFileIfRequired(menuPath, FileCopyUtils.copyToString(new InputStreamReader(FileUtils.getInputStream(getClass(), "menu.tagx"))), false);
 			} catch (Exception e) {
 				throw new IllegalStateException("Encountered an error during copying of menu.tagx for MVC Menu addon.", e);
 			}
@@ -177,7 +177,7 @@ public class MenuOperationsImpl implements MenuOperations {
 		final String itemPath = pathResolver.getIdentifier(contextualPath, "WEB-INF/tags/menu/item.tagx");
 		if (!fileManager.exists(itemPath)) {
 			try {
-				fileManager.createOrUpdateTextFileIfRequired(itemPath, FileCopyUtils.copyToString(new InputStreamReader(TemplateUtils.getTemplate(getClass(), "item.tagx"))), false);
+				fileManager.createOrUpdateTextFileIfRequired(itemPath, FileCopyUtils.copyToString(new InputStreamReader(FileUtils.getInputStream(getClass(), "item.tagx"))), false);
 			} catch (Exception e) {
 				throw new IllegalStateException("Encountered an error during copying of item.tagx for MVC Menu addon.", e);
 			}
@@ -186,7 +186,7 @@ public class MenuOperationsImpl implements MenuOperations {
 		final String categoryPath = pathResolver.getIdentifier(contextualPath, "WEB-INF/tags/menu/category.tagx");
 		if (!fileManager.exists(categoryPath)) {
 			try {
-				fileManager.createOrUpdateTextFileIfRequired(categoryPath, FileCopyUtils.copyToString(new InputStreamReader(TemplateUtils.getTemplate(getClass(), "category.tagx"))), false);
+				fileManager.createOrUpdateTextFileIfRequired(categoryPath, FileCopyUtils.copyToString(new InputStreamReader(FileUtils.getInputStream(getClass(), "category.tagx"))), false);
 			} catch (Exception e) {
 				throw new IllegalStateException("Encountered an error during copying of category.tagx for MVC Menu addon.", e);
 			}

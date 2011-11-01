@@ -57,8 +57,8 @@ import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.FileUtils;
 import org.springframework.roo.support.util.StringUtils;
-import org.springframework.roo.support.util.TemplateUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -168,7 +168,7 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
 			builder.setEntityResolver(new EntityResolver() {
 				public InputSource resolveEntity(final String publicId, final String systemId) throws SAXException, IOException {
 					if (systemId.equals("http://dl.google.com/gwt/DTD/xhtml.ent")) {
-						return new InputSource(TemplateUtils.getTemplate(GwtScaffoldMetadata.class, "templates/xhtml.ent"));
+						return new InputSource(FileUtils.getInputStream(GwtScaffoldMetadata.class, "templates/xhtml.ent"));
 					}
 
 					// Use the default behaviour

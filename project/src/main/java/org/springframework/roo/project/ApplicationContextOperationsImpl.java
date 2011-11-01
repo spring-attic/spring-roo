@@ -8,7 +8,7 @@ import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.DomUtils;
-import org.springframework.roo.support.util.TemplateUtils;
+import org.springframework.roo.support.util.FileUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -32,7 +32,7 @@ public class ApplicationContextOperationsImpl implements ApplicationContextOpera
 	public void createMiddleTierApplicationContext(final JavaPackage topLevelPackage, final String moduleName) {
 		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier(moduleName));
 		Assert.notNull(projectMetadata, "Project metadata required");
-		final Document document = XmlUtils.readXml(TemplateUtils.getTemplate(getClass(), "applicationContext-template.xml"));
+		final Document document = XmlUtils.readXml(FileUtils.getInputStream(getClass(), "applicationContext-template.xml"));
 		final Element root = document.getDocumentElement();
 		DomUtils.findFirstElementByName("context:component-scan", root).setAttribute("base-package", topLevelPackage.getFullyQualifiedPackageName());
 		fileManager.createOrUpdateTextFileIfRequired(pathResolver.getIdentifier(Path.SPRING_CONFIG_ROOT.contextualize(moduleName), "applicationContext.xml"), XmlUtils.nodeToString(document), false);
