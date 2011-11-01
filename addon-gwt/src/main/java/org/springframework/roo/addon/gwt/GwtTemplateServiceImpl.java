@@ -56,6 +56,7 @@ import org.springframework.roo.project.ContextualPath;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
+import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.TemplateUtils;
 import org.springframework.roo.support.util.XmlUtils;
@@ -270,8 +271,8 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
 
 	private String transformXml(final Document document) throws TransformerException {
 		Transformer transformer = XmlUtils.createIndentingTransformer();
-		StreamResult result = new StreamResult(new StringWriter());
 		DOMSource source = new DOMSource(document);
+		StreamResult result = new StreamResult(new StringWriter());
 		transformer.transform(source, result);
 		return result.getWriter().toString();
 	}
@@ -291,6 +292,7 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
 		try {
 			TemplateLoader templateLoader = TemplateResourceLoader.create();
 			Template template = templateLoader.getTemplate(templateFile);
+			Assert.notNull(template, "Tenmplate required for '" + templateFile + "'");
 			templateContents = template.renderToString(dataDictionary);
 			ContextualPath contextualPath = projectOperations.getPathResolver().getFocusedPath(Path.SRC_MAIN_JAVA);
 			String templateId = PhysicalTypeIdentifier.createIdentifier(templateType, contextualPath);
@@ -410,7 +412,6 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
 	}
 
 	private TemplateDataDictionary buildStandardDataDictionary(final GwtType type, final ProjectMetadata projectMetadata) {
-
 		JavaType javaType = new JavaType(getFullyQualifiedTypeName(type, projectMetadata));
 		TemplateDataDictionary dataDictionary = TemplateDictionary.create();
 		for (GwtType reference : type.getReferences()) {
@@ -668,10 +669,9 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
 		if (javaType.equals(LIST)) {
 			return new JavaType(ARRAY_LIST.getFullyQualifiedTypeName(), javaType.getArray(), javaType.getDataType(), javaType.getArgName(), javaType.getParameters());
 		}
-
 		return javaType;
 	}
-	
+
 	private String getFullyQualifiedTypeName(final GwtType gwtType, final ProjectMetadata projectMetadata) {
 		return gwtType.getPath().packageName(projectOperations.getTopLevelPackage(projectMetadata.getModuleName())) + "." + gwtType.getTemplate();
 	}
