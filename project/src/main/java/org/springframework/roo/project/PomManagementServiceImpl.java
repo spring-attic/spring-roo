@@ -138,8 +138,7 @@ public class PomManagementServiceImpl implements PomManagementService {
 	}
 
 	private void updatePomCache() {
-		final Set<String> changes = fileMonitorService.getDirtyFiles(getClass().getName());
-		for (final String change : changes) {
+		for (final String change : fileMonitorService.getDirtyFiles(getClass().getName())) {
 			if (change.endsWith("pom.xml")) {
 				toBeParsed.add(change);
 			}
