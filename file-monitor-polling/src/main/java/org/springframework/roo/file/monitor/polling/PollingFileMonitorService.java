@@ -3,6 +3,7 @@ package org.springframework.roo.file.monitor.polling;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -99,9 +100,9 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 		}
 	}
 
-	public Set<String> getDirtyFiles(final String requestingClass) {
+	public Collection<String> getDirtyFiles(final String requestingClass) {
 		synchronized (lock) {
-			Set<String> changesSinceLastRequest = changeMap.get(requestingClass);
+			Collection<String> changesSinceLastRequest = changeMap.get(requestingClass);
 			if (changesSinceLastRequest == null) {
 				changesSinceLastRequest = new LinkedHashSet<String>(allFiles);
 				changeMap.put(requestingClass, new LinkedHashSet<String>());

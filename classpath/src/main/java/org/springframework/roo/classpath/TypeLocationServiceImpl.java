@@ -341,8 +341,7 @@ public class TypeLocationServiceImpl implements TypeLocationService {
 
 	private Set<String> discoverTypes() {
 		// Retrieve a list of paths that have been discovered or modified since the last invocation by this class
-		Set<String> changes = fileMonitorService.getDirtyFiles(TypeLocationServiceImpl.class.getName());
-		for (String change : changes) {
+		for (String change : fileMonitorService.getDirtyFiles(TypeLocationServiceImpl.class.getName())) {
 			if (doesPathIndicateJavaType(change)) {
 				discoveredTypes.add(change);
 				dirtyFiles.add(change);
