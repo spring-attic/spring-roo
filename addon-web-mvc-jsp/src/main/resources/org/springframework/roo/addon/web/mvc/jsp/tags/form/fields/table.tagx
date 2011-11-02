@@ -35,16 +35,16 @@
     </c:if>
 
     <spring:message var="typeName" code="menu_item_${fn:toLowerCase(fn:split(id,'_')[fn:length(fn:split(id,'_')) - 1])}_new_label" htmlEscape="false" />
-    <c:set var="lengths" value="${fn:split(columnMaxLengths, ',')}" scope="request" />
-    <c:set var="types" value="${fn:split(columnTypes, ',')}" scope="request" />
-    <c:set var="patterns" value="${fn:split(columnDatePatterns, ',')}" scope="request" />
-	
+    <c:set var="lengths" value="${fn:split(columnMaxLengths, '&#9999;')}" scope="request" />
+    <c:set var="types" value="${fn:split(columnTypes, '&#9999;')}" scope="request" />
+    <c:set var="patterns" value="${fn:split(columnDatePatterns, '&#9999;')}" scope="request" />
+
     <spring:eval var="colCounter" expression="1" />
-    
+
     <table>
       <thead>
         <tr>
-          <c:forTokens items="${columnLabels}" delims="," var="columnHeading">
+          <c:forTokens items="${columnLabels}" delims="${'&#9999;'}" var="columnHeading">
             <th>
               <c:out value="${columnHeading}" />
               <spring:eval var="colCounter" expression="colCounter  + 1" />
@@ -63,7 +63,7 @@
       </thead>
       <c:forEach items="${data}" var="item">
         <tr>
-          <c:forTokens items="${columnProperties}" delims="," var="column" varStatus="num">
+          <c:forTokens items="${columnProperties}" delims="${'&#9999;'}" var="column" varStatus="num">
             <c:set var="columnMaxLength" value="${lengths[num.count-1]}" />
             <c:set var="columnType" value="${types[num.count-1]}" />
             <c:set var="columnDatePattern" value="${patterns[num.count-1]}" />

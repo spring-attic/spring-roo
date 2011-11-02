@@ -26,24 +26,24 @@
         <c:set var="columnDatePatterns" value="${dateTimePattern}" scope="request" />
       </c:when>
       <c:when test="${date and not empty columnTypes}">
-        <c:set var="columnTypes" value="${columnTypes},date" scope="request" />
-        <c:set var="columnDatePatterns" value="${columnDatePatterns},${dateTimePattern}" scope="request" />
+        <c:set var="columnTypes" value="${columnTypes}&#9999;date" scope="request" />
+        <c:set var="columnDatePatterns" value="${columnDatePatterns}&#9999;${dateTimePattern}" scope="request" />
       </c:when>
       <c:when test="${calendar and empty columnTypes}">
         <c:set var="columnTypes" value="calendar" scope="request" />
         <c:set var="columnDatePatterns" value="${dateTimePattern}" scope="request" />
       </c:when>
       <c:when test="${calendar and not empty columnTypes}">
-        <c:set var="columnTypes" value="${columnTypes},calendar" scope="request" />
-        <c:set var="columnDatePatterns" value="${columnDatePatterns},${dateTimePattern}" scope="request" />
+        <c:set var="columnTypes" value="${columnTypes}&#9999;calendar" scope="request" />
+        <c:set var="columnDatePatterns" value="${columnDatePatterns}&#9999;${dateTimePattern}" scope="request" />
       </c:when>
       <c:when test="${empty columnTypes}">
         <c:set var="columnTypes" value="default" scope="request" />
         <c:set var="columnDatePatterns" value="none" scope="request" />
       </c:when>
       <c:otherwise>
-        <c:set var="columnTypes" value="${columnTypes},default" scope="request" />
-        <c:set var="columnDatePatterns" value="${columnDatePatterns},none" scope="request" />
+        <c:set var="columnTypes" value="${columnTypes}&#9999;default" scope="request" />
+        <c:set var="columnDatePatterns" value="${columnDatePatterns}&#9999;none" scope="request" />
       </c:otherwise>
     </c:choose>
 
@@ -51,12 +51,12 @@
       <c:when test="${empty columnProperties and empty columnLabels}">
         <c:set var="columnProperties" value="${property}" scope="request" />
         <c:set var="columnLabels" value="${label}" scope="request" />
-        <c:set var="columnMaxLengths" value="${empty maxLength ? 10 : maxLength}" scope="request" />
+        <c:set var="columnMaxLengths" value="${empty maxLength ? 128 : maxLength}" scope="request" />
       </c:when>
       <c:otherwise>
-        <c:set var="columnProperties" value="${columnProperties},${property}" scope="request" />
-        <c:set var="columnLabels" value="${columnLabels},${label}" scope="request" />
-        <c:set var="columnMaxLengths" value="${columnMaxLengths},${empty maxLength ? 10 : maxLength}" scope="request" />
+        <c:set var="columnProperties" value="${columnProperties}&#9999;${property}" scope="request" />
+        <c:set var="columnLabels" value="${columnLabels}&#9999;${label}" scope="request" />
+        <c:set var="columnMaxLengths" value="${columnMaxLengths}&#9999;${empty maxLength ? 128 : maxLength}" scope="request" />
       </c:otherwise>
     </c:choose>
   </c:if>
