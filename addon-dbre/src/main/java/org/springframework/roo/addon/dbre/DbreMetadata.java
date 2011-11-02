@@ -578,7 +578,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 			boolean hasEmbeddedIdField = isEmbeddedIdField(fieldName) && !isCompositeKeyField;
 			if (hasEmbeddedIdField) {
-				fieldName = governorTypeDetails.getUniqueFieldName(fieldName.getSymbolName(), true);
+				fieldName = governorTypeDetails.getUniqueFieldName(fieldName.getSymbolName());
 			}
 
 			field = getField(fieldName, column, table.getName(), table.isIncludeNonPortableAttributes());

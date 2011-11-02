@@ -166,15 +166,11 @@ public interface MemberHoldingTypeDetails extends PhysicalTypeDetails, Identifia
 	 * proposed name and adding underscores until it's unique.
 	 *
 	 * @param proposedName the proposed field name (required)
-	 * @param prepend whether to prepend (<code>true</code>) or append
-	 * (<code>false</code>) the underscores, if any
-	 * TODO is it a bug or a feature that this parameter is necessary? Why
-	 * wouldn't all callers generate unique names in the same way?
 	 * @return a non-<code>null</code> name that's unique within the governor
 	 * @see MemberFindingUtils#getField(org.springframework.roo.classpath.details.MemberHoldingTypeDetails, JavaSymbolName)
 	 * @since 1.2.0
 	 */
-	JavaSymbolName getUniqueFieldName(final String proposedName, final boolean prepend);
+	JavaSymbolName getUniqueFieldName(final String proposedName);
 
 	/**
 	 * Returns the names of any dynamic finders

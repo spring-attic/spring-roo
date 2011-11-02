@@ -76,7 +76,7 @@ public class MongoEntityMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		if (!idFields.isEmpty()) {
 			return idFields.get(0);
 		}
-		JavaSymbolName idFieldName = governorTypeDetails.getUniqueFieldName("id", false);
+		JavaSymbolName idFieldName = governorTypeDetails.getUniqueFieldName("id");
 		FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), Modifier.PRIVATE, idFieldName, idType, null);
 		fieldBuilder.addAnnotation(new AnnotationMetadataBuilder(SpringJavaType.DATA_ID));
 		return fieldBuilder.build();

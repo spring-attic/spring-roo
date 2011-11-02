@@ -250,7 +250,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 		}
 
 		// Ensure there isn't already a field called "id"; if so, compute a unique name (it's not really a fatal situation at the end of the day)
-		final JavaSymbolName idField = governorTypeDetails.getUniqueFieldName(getIdentifierFieldName(), false);
+		final JavaSymbolName idField = governorTypeDetails.getUniqueFieldName(getIdentifierFieldName());
 
 		// We need to create one
 		final JavaType identifierType = getIdentifierType();
@@ -571,7 +571,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 		}
 
 		// Ensure there isn't already a field called "version"; if so, compute a unique name (it's not really a fatal situation at the end of the day)
-		final JavaSymbolName verField = governorTypeDetails.getUniqueFieldName(versionField, false);
+		final JavaSymbolName verField = governorTypeDetails.getUniqueFieldName(versionField);
 
 		// We're creating one
 		JavaType versionType = annotationValues.getVersionType();

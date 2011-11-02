@@ -94,11 +94,11 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 			if (entry.getValue() != null) {
 				JavaSymbolName hiddenIdFieldName;
 				if (field.getFieldType().isCommonCollectionType()) {
-					hiddenIdFieldName = governorTypeDetails.getUniqueFieldName(field.getFieldName().getSymbolName() + "Keys", true);
+					hiddenIdFieldName = governorTypeDetails.getUniqueFieldName(field.getFieldName().getSymbolName() + "Keys");
 					builder.getImportRegistrationResolver().addImport(GAE_DATASTORE_KEY_FACTORY);
 					builder.addField(getMultipleEntityIdField(hiddenIdFieldName));
 				} else {
-					hiddenIdFieldName = governorTypeDetails.getUniqueFieldName(field.getFieldName().getSymbolName() + "Id", true);
+					hiddenIdFieldName = governorTypeDetails.getUniqueFieldName(field.getFieldName().getSymbolName() + "Id");
 					builder.addField(getSingularEntityIdField(hiddenIdFieldName));
 				}
 

@@ -156,17 +156,12 @@ public abstract class AbstractMemberHoldingTypeDetails extends AbstractIdentifia
 		return result;
 	}
 
-	public JavaSymbolName getUniqueFieldName(final String proposedName, final boolean prepend) {
+	public JavaSymbolName getUniqueFieldName(final String proposedName) {
 		Assert.hasText(proposedName, "Proposed field name is required");
 		String candidateName = proposedName;
 		while (getField(new JavaSymbolName(candidateName)) != null) {
 			// The proposed field name is taken; differentiate it
-			if (prepend) {
-				candidateName = "_" + candidateName;
-			} else {
-				// Append
-				candidateName = candidateName + "_";
-			}
+			candidateName += "_";
 		}
 		// We've derived a unique name
 		return new JavaSymbolName(candidateName);
