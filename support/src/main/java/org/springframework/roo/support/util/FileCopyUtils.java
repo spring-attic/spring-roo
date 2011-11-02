@@ -26,7 +26,8 @@ import java.io.Writer;
  * @author Juergen Hoeller
  * @since 1.0
  */
-public abstract class FileCopyUtils {
+public final class FileCopyUtils {
+	
 	public static final int BUFFER_SIZE = 4096;
 
 	// ---------------------------------------------------------------------
@@ -210,13 +211,21 @@ public abstract class FileCopyUtils {
 	}
 
 	/**
-	 * Copy the contents of the given File into a String.
+	 * Returns the contents of the given File as a String.
+	 * <p>
+	 * Consider using {@link FileUtils#read(File)} instead if any
+	 * {@link IOException}s would be unrecoverable.
 	 *
 	 * @param file the file to read from
-	 * @return the String that has been copied to
+	 * @return the contents
 	 * @throws IOException in case of I/O errors
 	 */
 	public static String copyToString(final File file) throws IOException {
 		return copyToString(new BufferedReader(new FileReader(file)));
 	}
+	
+	/**
+	 * Constructor is private to prevent instantiation
+	 */
+	private FileCopyUtils() {}
 }

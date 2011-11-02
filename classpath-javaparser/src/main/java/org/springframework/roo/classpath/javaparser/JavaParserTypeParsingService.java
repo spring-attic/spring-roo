@@ -20,7 +20,6 @@ import japa.parser.ast.type.ClassOrInterfaceType;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -49,7 +48,7 @@ import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.support.util.Assert;
-import org.springframework.roo.support.util.FileCopyUtils;
+import org.springframework.roo.support.util.FileUtils;
 import org.springframework.roo.support.util.StringUtils;
 
 @Component(immediate = true)
@@ -85,16 +84,12 @@ public class JavaParserTypeParsingService implements TypeParsingService {
 		Assert.hasText(fileIdentifier, "Compilation unit path required");
 		Assert.hasText(declaredByMetadataId, "Declaring metadata ID required");
 		Assert.notNull(typeName, "Java type to locate required");
-		try {
-			File file = new File(fileIdentifier);
-			String typeContents = FileCopyUtils.copyToString(file);
-			if (!StringUtils.hasText(typeContents)) {
-				return null;
-			}
-			return getTypeFromString(typeContents, declaredByMetadataId, typeName);
-		} catch (IOException e) {
-			throw new IllegalStateException(e);
+		final File file = new File(fileIdentifier);
+		final String typeContents = FileUtils.read(file);
+		if (StringUtils.isBlank(typeContents)) {
+			return null;
 		}
+		return getTypeFromString(typeContents, declaredByMetadataId, typeName);
 	}
 
 	public ClassOrInterfaceTypeDetails getTypeFromString(final String fileContents, final String declaredByMetadataId, final JavaType typeName) {

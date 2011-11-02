@@ -331,6 +331,22 @@ public final class FileUtils {
 	}
 	
 	/**
+	 * Returns the contents of the given File as a String.
+	 *
+	 * @param file the file to read from (must be an existing file)
+	 * @return the contents
+	 * @throws IllegalStateException in case of I/O errors
+	 * @since 1.2.0
+	 */
+	public static String read(final File file) {
+		try {
+			return FileCopyUtils.copyToString(file);
+		} catch (final IOException e) {
+			throw new IllegalStateException(e);
+		}
+	}
+	
+	/**
 	 * Constructor is private to prevent instantiation
 	 * 
 	 * @since 1.2.0
