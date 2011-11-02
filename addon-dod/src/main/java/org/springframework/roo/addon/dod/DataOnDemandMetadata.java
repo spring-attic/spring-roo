@@ -306,7 +306,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 
 		// Create method
 		ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
-		imports.addImport(new JavaType(entity.getFullyQualifiedTypeName()));
+		imports.addImport(entity);
 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine(entity.getSimpleTypeName() + " obj = new " + entity.getSimpleTypeName() + "();");

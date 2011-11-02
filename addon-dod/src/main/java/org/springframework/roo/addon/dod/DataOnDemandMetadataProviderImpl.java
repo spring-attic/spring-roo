@@ -49,7 +49,6 @@ import org.springframework.roo.classpath.layers.MethodParameter;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.ContextualPath;
 import org.springframework.roo.shell.NaturalOrderComparator;
 
@@ -293,8 +292,7 @@ public class DataOnDemandMetadataProviderImpl extends AbstractMemberDiscoveringI
 	 *
 	 * @param metadataIdentificationString
 	 * @param field
-	 * @return <code>null</code> if it's not an n:1 or 1:1 field, or the DoD
-	 * metadata is simply not available
+	 * @return <code>null</code> if it's not an n:1 or 1:1 field, or the DoD metadata is simply not available
 	 */
 	private DataOnDemandMetadata locateCollaboratingMetadata(final String metadataIdentificationString, final FieldMetadata field) {
 		// Check field type to ensure it is a persistent type and is not abstract
@@ -314,8 +312,8 @@ public class DataOnDemandMetadataProviderImpl extends AbstractMemberDiscoveringI
 		}
 
 		String otherProvider = null;
-		for (ClassOrInterfaceTypeDetails cid : typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_DATA_ON_DEMAND)) {
-			AnnotationMetadata annotationMetadata = MemberFindingUtils.getAnnotationOfType(cid.getAnnotations(), RooJavaType.ROO_DATA_ON_DEMAND);
+		for (ClassOrInterfaceTypeDetails cid : typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(ROO_DATA_ON_DEMAND)) {
+			AnnotationMetadata annotationMetadata = MemberFindingUtils.getAnnotationOfType(cid.getAnnotations(), ROO_DATA_ON_DEMAND);
 			AnnotationAttributeValue<JavaType> annotationAttributeValue = annotationMetadata.getAttribute("entity");
 			if (annotationAttributeValue != null && annotationAttributeValue.getValue().equals(field.getFieldType())) {
 				otherProvider = DataOnDemandMetadata.createIdentifier(cid.getName(), PhysicalTypeIdentifier.getPath(cid.getDeclaredByMetadataId()));
@@ -323,15 +321,11 @@ public class DataOnDemandMetadataProviderImpl extends AbstractMemberDiscoveringI
 			}
 		}
 
-		if (otherProvider == null) {
+		if (otherProvider == null || otherProvider.equals(metadataIdentificationString)) {
+			 // No other provider or ignore self-references
 			return null;
 		}
 		
-		// Look up the metadata we are relying on
-		if (otherProvider.equals(metadataIdentificationString)) {
-			return null; // Ignore self-references
-		}
-
 		// The field points to a single instance of another domain entity - register for changes to it
 		metadataDependencyRegistry.registerDependency(persistenceMemberHoldingTypeDetails.getDeclaredByMetadataId(), metadataIdentificationString);
 		metadataDependencyRegistry.registerDependency(otherProvider, metadataIdentificationString);
