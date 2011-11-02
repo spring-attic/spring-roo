@@ -6,16 +6,9 @@
       xmlns:f="http://java.sun.com/jsf/core"
       xmlns:h="http://java.sun.com/jsf/html"
       xmlns:ui="http://java.sun.com/jsf/facelets"
-      xmlns:p="http://primefaces.prime.com.tr/ui">
+      xmlns:p="http://primefaces.org/ui">
 <ui:composition template="../templates/layout.xhtml">
     <ui:define name="content">
-        <p:inputText value="" rendered="false"/>
-        <p:calendar rendered="false"/>
-        <p:autoComplete rendered="false"/>
-        <p:selectManyMenu rendered="false"/>
-        <p:fileUpload rendered="false"/>
-        <p:spinner rendered="false"/>
-        <p:message rendered="false"/>
         <p:growl id="growl" showDetail="false" />
         <h:form prependId="false">
             <p:panel id="data" toggleable="true" toggleSpeed="250">
