@@ -31,22 +31,16 @@ import org.springframework.roo.support.util.StringUtils;
 public class ProjectMetadata extends AbstractMetadataItem {
 
 	// Constants
-	/**
-	 * The MID for the project-level metadata. Is a constant because each
-	 * running instance of Roo only ever manages one project at a time.
-	 */
-	// MID:org.springframework.roo.project.ProjectMetadata#the_project
-	private static final String PROJECT_IDENTIFIER = MetadataIdentificationUtils.create(ProjectMetadata.class.getName(), "the_project");
+	private static final String PROJECT_MID_PREFIX = MetadataIdentificationUtils.create(ProjectMetadata.class.getName(), "the_project");
 
 	/**
-	 * Returns the metadata ID for the project-level metadata. Is static because
-	 * each running instance of Roo only ever manages one project at a time.
+	 * Returns the metadata ID for the project-level metadata of the given module.
 	 * 
-	 * @param moduleName
+	 * @param moduleName can be blank for the root or only module
 	 * @return a non-blank MID
 	 */
 	public static String getProjectIdentifier(final String moduleName) {
-		StringBuilder sb = new StringBuilder(PROJECT_IDENTIFIER);
+		final StringBuilder sb = new StringBuilder(PROJECT_MID_PREFIX);
 		if (StringUtils.hasText(moduleName)) {
 			sb.append("?").append(moduleName);
 		}
@@ -54,7 +48,7 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	}
 
 	public static boolean isValid(final String metadataIdentificationString) {
-		return metadataIdentificationString.startsWith(PROJECT_IDENTIFIER);
+		return metadataIdentificationString.startsWith(PROJECT_MID_PREFIX);
 	}
 
 	public static String getModuleName(final String metadataIdentificationString) {
