@@ -143,22 +143,15 @@ public class GwtOperationsImpl implements GwtOperations {
 	}
 
 	public void scaffoldAll(final JavaPackage proxyPackage, final JavaPackage requestPackage) {
+		updateScaffoldBoilerPlate();
 		proxyAll(proxyPackage);
 		requestAll(requestPackage);
-		updateScaffoldBoilerPlate();
 		for (ClassOrInterfaceTypeDetails proxy : typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_GWT_PROXY)) {
 			ClassOrInterfaceTypeDetails request = gwtTypeService.lookupRequestFromProxy(proxy);
 			if (request == null) {
 				throw new IllegalStateException("In order to scaffold, an entity must have a request");
 			}
-			AnnotationMetadata annotationMetadata = GwtUtils.getFirstAnnotation(proxy, RooJavaType.ROO_GWT_PROXY);
-			if (annotationMetadata != null) {
-				ClassOrInterfaceTypeDetailsBuilder proxyBuilder = new ClassOrInterfaceTypeDetailsBuilder(proxy);
-				AnnotationMetadataBuilder annotationMetadataBuilder = new AnnotationMetadataBuilder(annotationMetadata);
-				annotationMetadataBuilder.addBooleanAttribute("scaffold", true);
-				proxyBuilder.updateTypeAnnotation(annotationMetadataBuilder);
-				typeManagementService.createOrUpdateTypeOnDisk(proxyBuilder.build());
-			}
+			createScaffold(proxy);
 		}
 	}
 
@@ -239,6 +232,15 @@ public class GwtOperationsImpl implements GwtOperations {
 		updateBuildPlugins(projectOperations.isGaeEnabled(projectOperations.getFocusedModuleName()));
 	}
 
+	private void addPackageToGwtXml(String packageName) {
+		String gwtConfig = gwtTypeService.getGwtModuleXml(projectOperations.getFocusedModuleName());
+		gwtConfig = FileUtils.removeTrailingSeparator(gwtConfig).substring(0, gwtConfig.lastIndexOf(File.separator));
+		String moduleRoot = projectOperations.getPathResolver().getFocusedRoot(Path.SRC_MAIN_JAVA);
+		String topLevelPackage = gwtConfig.replaceAll(FileUtils.ensureTrailingSeparator(moduleRoot), "").replaceAll(File.separator, ".");
+		String sourcePath = packageName.replaceAll(topLevelPackage + ".", "");
+		gwtTypeService.addSourcePath(sourcePath, projectOperations.getFocusedModuleName());
+	}
+
 	private void createProxy(final ClassOrInterfaceTypeDetails entity, final JavaPackage destinationPackage) {
 		ClassOrInterfaceTypeDetails existingProxy = gwtTypeService.lookupProxyFromEntity(entity);
 		if (existingProxy != null) {
@@ -271,6 +273,7 @@ public class GwtOperationsImpl implements GwtOperations {
 		attributeValues.add(readOnlyAttribute);
 		builder.updateTypeAnnotation(new AnnotationMetadataBuilder(RooJavaType.ROO_GWT_PROXY, attributeValues));
 		typeManagementService.createOrUpdateTypeOnDisk(builder.build());
+		addPackageToGwtXml(destinationPackage.getFullyQualifiedPackageName());
 	}
 
 	private void createRequest(final ClassOrInterfaceTypeDetails entity, final JavaPackage destinationPackage) {
@@ -298,22 +301,26 @@ public class GwtOperationsImpl implements GwtOperations {
 		attributeValues.add(exclude);
 		builder.updateTypeAnnotation(new AnnotationMetadataBuilder(RooJavaType.ROO_GWT_REQUEST, attributeValues));
 		typeManagementService.createOrUpdateTypeOnDisk(builder.build());
+		addPackageToGwtXml(destinationPackage.getFullyQualifiedPackageName());
 	}
 
 	private void createScaffold(final ClassOrInterfaceTypeDetails proxy) {
 		AnnotationMetadata annotationMetadata = GwtUtils.getFirstAnnotation(proxy, RooJavaType.ROO_GWT_PROXY);
 		if (annotationMetadata != null) {
-			ClassOrInterfaceTypeDetailsBuilder proxyBuilder = new ClassOrInterfaceTypeDetailsBuilder(proxy);
-			AnnotationMetadataBuilder annotationMetadataBuilder = new AnnotationMetadataBuilder(annotationMetadata);
-			annotationMetadataBuilder.addBooleanAttribute("scaffold", true);
-			for (AnnotationMetadataBuilder existingAnnotation : proxyBuilder.getAnnotations()) {
-				if (existingAnnotation.getAnnotationType().equals(annotationMetadata.getAnnotationType())) {
-					proxyBuilder.getAnnotations().remove(existingAnnotation);
-					proxyBuilder.getAnnotations().add(annotationMetadataBuilder);
-					break;
+			AnnotationAttributeValue<Boolean> booleanAttributeValue = annotationMetadata.getAttribute("scaffold");
+			if (booleanAttributeValue == null || !booleanAttributeValue.getValue()) {
+				ClassOrInterfaceTypeDetailsBuilder proxyBuilder = new ClassOrInterfaceTypeDetailsBuilder(proxy);
+				AnnotationMetadataBuilder annotationMetadataBuilder = new AnnotationMetadataBuilder(annotationMetadata);
+				annotationMetadataBuilder.addBooleanAttribute("scaffold", true);
+				for (AnnotationMetadataBuilder existingAnnotation : proxyBuilder.getAnnotations()) {
+					if (existingAnnotation.getAnnotationType().equals(annotationMetadata.getAnnotationType())) {
+						proxyBuilder.getAnnotations().remove(existingAnnotation);
+						proxyBuilder.getAnnotations().add(annotationMetadataBuilder);
+						break;
+					}
 				}
+				typeManagementService.createOrUpdateTypeOnDisk(proxyBuilder.build());
 			}
-			typeManagementService.createOrUpdateTypeOnDisk(proxyBuilder.build());
 		}
 	}
 
@@ -516,6 +523,7 @@ public class GwtOperationsImpl implements GwtOperations {
 				input = processTemplate(input, null);
 				String existing = FileCopyUtils.copyToString(new File(targetFilename));
 				if (existing.equals(input)) {
+					//new File(targetFilename).delete();
 					fileManager.delete(targetFilename);
 				}
 			} catch (IOException ignored) {

@@ -106,7 +106,7 @@ public class MavenProjectMetadataProviderTest {
 
 		final Pom pom = mock(Pom.class);
 		when(pom.getPath()).thenReturn(POM_PATH);
-		when(mockPomManagementService.getPomFromModuleName("")).thenReturn(pom);
+		when(mockProjectMetadata.getPom()).thenReturn(pom);
 
 		final Collection<Dependency> dependencies = Arrays.asList(mockDependency, mockDependency);
 		when(pom.isAnyDependenciesRegistered(dependencies)).thenReturn(true);

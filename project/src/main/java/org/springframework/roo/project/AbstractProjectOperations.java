@@ -80,7 +80,7 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 	}
 
 	public final boolean isProjectAvailable(final String moduleName) {
-		return pomManagementService.getPomFromModuleName(moduleName) != null;
+		return getProjectMetadata(moduleName) != null;
 	}
 
 	public final ProjectMetadata getProjectMetadata(final String moduleName) {
@@ -88,7 +88,7 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 	}
 
 	public Pom getFocusedModule() {
-		return pomManagementService.getFocusedModule();
+		return getFocusedProjectMetadata().getPom();
 	}
 
 	public String getFocusedModuleName() {
@@ -103,7 +103,7 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 	}
 
 	public final Pom getPomFromModuleName(final String moduleName) {
-		return pomManagementService.getPomFromModuleName(moduleName);
+		return getProjectMetadata(moduleName).getPom();
 	}
 
 	public PathResolver getPathResolver() {
@@ -118,7 +118,7 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 		if (moduleName != null) {
 			Pom focusedModule = getFocusedModule();
 			if (StringUtils.hasText(moduleName) && StringUtils.hasText(focusedModule.getModuleName()) && !moduleName.equals(getFocusedModule().getModuleName())) {
-				Pom externalModule = pomManagementService.getPomFromModuleName(moduleName);
+				Pom externalModule = getProjectMetadata(moduleName).getPom();
 				if (externalModule != null) {
 					if (!externalModule.getPath().equals(focusedModule.getPath())) {
 						detectCircularDependency(focusedModule, externalModule);

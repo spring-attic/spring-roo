@@ -7,6 +7,7 @@ import static org.springframework.roo.model.JdkJavaType.LIST;
 import static org.springframework.roo.model.JdkJavaType.SET;
 import static org.springframework.roo.model.JpaJavaType.EMBEDDABLE;
 
+import javax.xml.parsers.DocumentBuilder;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -24,8 +25,6 @@ import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.logging.Logger;
-
-import javax.xml.parsers.DocumentBuilder;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -236,14 +235,20 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 		return extendsTypes;
 	}
 
-	private Set<String> getGwtModuleXml(final String moduleName) {
+	public String getGwtModuleXml(final String moduleName) {
 
 		String gwtModuleXml = projectOperations.getPathResolver().getFocusedRoot(Path.SRC_MAIN_JAVA) + projectOperations.getTopLevelPackage(moduleName).getFullyQualifiedPackageName().replace('.', File.separatorChar) + File.separator + "*.gwt.xml";
 		Set<String> paths = new LinkedHashSet<String>();
 		for (FileDetails fileDetails : fileManager.findMatchingAntPath(gwtModuleXml)) {
 			paths.add(fileDetails.getCanonicalPath());
 		}
-		return paths;
+		if (paths.isEmpty()) {
+			throw new IllegalStateException("Each module must have a gwt.xml file");
+		}
+		if (paths.size() > 1) {
+			throw new IllegalStateException("Each module can only have only gwt.xml file: " + paths.size());
+		}
+		return paths.iterator().next();
 	}
 
 	public void buildType(final GwtType type, final List<ClassOrInterfaceTypeDetails> templateTypeDetails, final String moduleName) {
@@ -264,23 +269,51 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 	}
 
 	public Set<String> getSourcePaths(final String moduleName) {
-		Set<String> sourcePaths = new HashSet<String>();
-		Set<String> gwtModuleXml = getGwtModuleXml(moduleName);
-		Assert.isTrue(!gwtModuleXml.isEmpty(), "GWT module XML file(s) not found");
-		for (String gwtModuleCanonicalPath : gwtModuleXml) {
-			sourcePaths.addAll(getSourcePaths(gwtModuleCanonicalPath, moduleName));
+		String gwtModuleXml = getGwtModuleXml(moduleName);
+		return getSourcePaths(gwtModuleXml, moduleName);
+	}
+
+	public void addSourcePath(String sourcePath, String moduleName) {
+		String gwtXmlPath = getGwtModuleXml(moduleName);
+		Assert.hasText(gwtXmlPath, "gwt.xml could not be found for module '" + moduleName + "'");
+		Document gwtXmlDoc = getGwtXmlDocument(gwtXmlPath);
+
+		Element gwtXmlRoot = gwtXmlDoc.getDocumentElement();
+		List<Element> sourceElements = XmlUtils.findElements("/module/source", gwtXmlRoot);
+		for (Element sourceElement : sourceElements) {
+			if (sourcePath.startsWith(sourceElement.getAttribute("path"))) {
+				return;
+			}
 		}
-		return sourcePaths;
+		Element firstSourceElement = sourceElements.get(0);
+		Element sourceElement = gwtXmlDoc.createElement("source");
+		sourceElement.setAttribute("path", sourcePath);
+		gwtXmlRoot.insertBefore(sourceElement, firstSourceElement);
+		fileManager.createOrUpdateTextFileIfRequired(gwtXmlPath, XmlUtils.nodeToString(gwtXmlDoc), "Added source paths to gwt.xml file", true);
 	}
 
 	public Set<String> getSourcePaths(final String gwtModuleCanonicalPath, final String moduleName) {
+
+		Document gwtXmlDoc = getGwtXmlDocument(gwtModuleCanonicalPath);
+
+		Element gwtXmlRoot = gwtXmlDoc.getDocumentElement();
+		Set<String> sourcePaths = new HashSet<String>();
+		List<Element> sourcePathElements = XmlUtils.findElements("/module/source", gwtXmlRoot);
+		for (Element sourcePathElement : sourcePathElements) {
+			String path = projectOperations.getTopLevelPackage(moduleName) + "." + sourcePathElement.getAttribute("path");
+			sourcePaths.add(path);
+		}
+
+		return sourcePaths;
+	}
+
+	public Document getGwtXmlDocument(String gwtModuleCanonicalPath) {
 		DocumentBuilder builder = XmlUtils.getDocumentBuilder();
 		builder.setEntityResolver(new EntityResolver() {
 			public InputSource resolveEntity(final String publicId, final String systemId) throws SAXException, IOException {
 				if (systemId.endsWith("gwt-module.dtd")) {
 					return new InputSource(FileUtils.getInputStream(GwtScaffoldMetadata.class, "templates/gwt-module.dtd"));
 				}
-
 				// Use the default behaviour
 				return null;
 			}
@@ -297,15 +330,7 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 			IOUtils.closeQuietly(inputStream);
 		}
 
-		Element gwtXmlRoot = gwtXmlDoc.getDocumentElement();
-		Set<String> sourcePaths = new HashSet<String>();
-		List<Element> sourcePathElements = XmlUtils.findElements("/module/source", gwtXmlRoot);
-		for (Element sourcePathElement : sourcePathElements) {
-			String path = projectOperations.getTopLevelPackage(moduleName) + "." + sourcePathElement.getAttribute("path");
-			sourcePaths.add(path);
-		}
-
-		return sourcePaths;
+		return gwtXmlDoc;
 	}
 
 	public Map<JavaSymbolName, MethodMetadata> getProxyMethods(final ClassOrInterfaceTypeDetails governorTypeDetails) {

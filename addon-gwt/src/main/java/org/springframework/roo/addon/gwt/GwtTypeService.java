@@ -51,4 +51,8 @@ public interface GwtTypeService {
 	ClassOrInterfaceTypeDetails lookupEntityFromLocator(ClassOrInterfaceTypeDetails request);
 
 	ClassOrInterfaceTypeDetails lookupTargetServiceFromRequest(ClassOrInterfaceTypeDetails request);
+
+	String getGwtModuleXml(String moduleName);
+
+	void addSourcePath(String sourcePath, String moduleName);
 }
