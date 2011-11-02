@@ -78,7 +78,7 @@ public class ServiceClassMetadataProvider extends AbstractMemberDiscoveringItdMe
 
 	@Override
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(final String metadataIdentificationString, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final String itdFilename) {
-		final ClassOrInterfaceTypeDetails serviceClass = (ClassOrInterfaceTypeDetails) governorPhysicalTypeMetadata.getMemberHoldingTypeDetails();
+		final ClassOrInterfaceTypeDetails serviceClass = governorPhysicalTypeMetadata.getMemberHoldingTypeDetails();
 		if (serviceClass == null) {
 			return null;
 		}

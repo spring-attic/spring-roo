@@ -79,7 +79,7 @@ public class ServiceInterfaceMetadataProvider extends AbstractMemberDiscoveringI
 	@Override
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(final String metadataIdentificationString, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final String itdFilename) {
 		ServiceAnnotationValues annotationValues = new ServiceAnnotationValues(governorPhysicalTypeMetadata);
-		ClassOrInterfaceTypeDetails coitd = (ClassOrInterfaceTypeDetails) governorPhysicalTypeMetadata.getMemberHoldingTypeDetails();
+		ClassOrInterfaceTypeDetails coitd = governorPhysicalTypeMetadata.getMemberHoldingTypeDetails();
 		if (coitd == null) {
 			return null;
 		}

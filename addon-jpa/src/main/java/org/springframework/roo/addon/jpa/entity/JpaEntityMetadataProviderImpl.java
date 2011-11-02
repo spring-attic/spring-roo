@@ -51,7 +51,6 @@ import org.springframework.roo.classpath.customdata.taggers.CustomDataKeyDecorat
 import org.springframework.roo.classpath.customdata.taggers.FieldMatcher;
 import org.springframework.roo.classpath.customdata.taggers.MethodMatcher;
 import org.springframework.roo.classpath.customdata.taggers.MidTypeMatcher;
-import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.scanner.MemberDetails;
@@ -188,7 +187,7 @@ public class JpaEntityMetadataProviderImpl extends AbstractIdentifierServiceAwar
 		 * don't need to monitor any such parent, as any changes to its Java
 		 * type will trickle down to the governing java type.
 		 */
-		final JpaEntityMetadata parentEntity = getParentMetadata((ClassOrInterfaceTypeDetails) governorPhysicalType.getMemberHoldingTypeDetails());
+		final JpaEntityMetadata parentEntity = getParentMetadata(governorPhysicalType.getMemberHoldingTypeDetails());
 
 		// Get the governor's members
 		final MemberDetails governorMemberDetails = getMemberDetails(governorPhysicalType);

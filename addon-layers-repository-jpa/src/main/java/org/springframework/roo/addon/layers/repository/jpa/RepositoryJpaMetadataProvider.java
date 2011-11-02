@@ -47,7 +47,7 @@ public class RepositoryJpaMetadataProvider extends AbstractItdMetadataProvider {
 	@Override
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(final String metadataId, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final String itdFilename) {
 		final RepositoryJpaAnnotationValues annotationValues = new RepositoryJpaAnnotationValues(governorPhysicalTypeMetadata);
-		final ClassOrInterfaceTypeDetails coitd = (ClassOrInterfaceTypeDetails) governorPhysicalTypeMetadata.getMemberHoldingTypeDetails();
+		final ClassOrInterfaceTypeDetails coitd = governorPhysicalTypeMetadata.getMemberHoldingTypeDetails();
 		if (coitd == null) {
 			return null;
 		}

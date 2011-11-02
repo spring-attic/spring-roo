@@ -91,7 +91,7 @@ public class FinderOperationsImpl implements FinderOperations {
 		if (physicalTypeMetadata == null) {
 			throw new IllegalStateException("Could not determine physical type metadata for type " + javaType);
 		}
-		ClassOrInterfaceTypeDetails cid = (ClassOrInterfaceTypeDetails) physicalTypeMetadata.getMemberHoldingTypeDetails();
+		ClassOrInterfaceTypeDetails cid = physicalTypeMetadata.getMemberHoldingTypeDetails();
 		if (cid == null) {
 			throw new IllegalStateException("Could not determine class or interface type details for type " + javaType);
 		}

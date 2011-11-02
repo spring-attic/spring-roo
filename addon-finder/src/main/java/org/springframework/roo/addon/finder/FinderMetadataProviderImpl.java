@@ -65,7 +65,7 @@ public class FinderMetadataProviderImpl extends AbstractMemberDiscoveringItdMeta
 			return null;
 		}
 
-		ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = (ClassOrInterfaceTypeDetails) governorPhysicalTypeMetadata.getMemberHoldingTypeDetails();
+		ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = governorPhysicalTypeMetadata.getMemberHoldingTypeDetails();
 		Assert.notNull(classOrInterfaceTypeDetails, "Governor failed to provide class type details, in violation of superclass contract");
 
 		MemberDetails memberDetails = getMemberDetails(governorPhysicalTypeMetadata);

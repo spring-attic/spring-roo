@@ -284,9 +284,8 @@ public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTracki
 		boolean produceMetadata = false;
 
 		// Determine if we should generate the metadata on the basis of it containing a trigger annotation
-		ClassOrInterfaceTypeDetails cid = null;
-		if (governorPhysicalTypeMetadata.getMemberHoldingTypeDetails() instanceof ClassOrInterfaceTypeDetails) {
-			cid = (ClassOrInterfaceTypeDetails) governorPhysicalTypeMetadata.getMemberHoldingTypeDetails();
+		final ClassOrInterfaceTypeDetails cid = governorPhysicalTypeMetadata.getMemberHoldingTypeDetails();
+		if (cid != null) {
 			// Only create metadata if the type is annotated with one of the metadata triggers
 			for (JavaType trigger : metadataTriggers) {
 				if (cid.getAnnotation(trigger) != null) {
@@ -488,7 +487,7 @@ public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTracki
 			return null;
 		}
 
-		final ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = (ClassOrInterfaceTypeDetails) physicalTypeMetadata.getMemberHoldingTypeDetails();
+		final ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = physicalTypeMetadata.getMemberHoldingTypeDetails();
 		if (classOrInterfaceTypeDetails == null) {
 			// Abort if the type's class details aren't available (parse error etc)
 			return null;

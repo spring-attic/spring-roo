@@ -35,7 +35,6 @@ import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.customdata.taggers.CustomDataKeyDecorator;
 import org.springframework.roo.classpath.customdata.taggers.MethodMatcher;
-import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
@@ -112,10 +111,10 @@ public class JpaActiveRecordMetadataProviderImpl extends AbstractItdMetadataProv
 		}
 
 		// Look up the inheritance hierarchy for existing JpaActiveRecordMetadata
-		final JpaActiveRecordMetadata parent = getParentMetadata((ClassOrInterfaceTypeDetails) governorPhysicalType.getMemberHoldingTypeDetails());
+		final JpaActiveRecordMetadata parent = getParentMetadata(governorPhysicalType.getMemberHoldingTypeDetails());
 
 		// If the parent is null, but the type has a super class it is likely that the we don't have information to proceed
-		if (parent == null && ((ClassOrInterfaceTypeDetails) governorPhysicalType.getMemberHoldingTypeDetails()).getSuperclass() != null) {
+		if (parent == null && (governorPhysicalType.getMemberHoldingTypeDetails()).getSuperclass() != null) {
 			// If the superclass is annotated with the Entity trigger annotation then we can be pretty sure that we don't have enough information to proceed
 			if (MemberFindingUtils.getAnnotationOfType(governorPhysicalType.getMemberHoldingTypeDetails().getAnnotations(), ROO_JPA_ACTIVE_RECORD) != null) {
 				return null;

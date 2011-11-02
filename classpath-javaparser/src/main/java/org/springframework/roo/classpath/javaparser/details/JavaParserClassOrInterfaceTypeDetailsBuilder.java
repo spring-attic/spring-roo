@@ -1,10 +1,5 @@
 package org.springframework.roo.classpath.javaparser.details;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import japa.parser.ast.CompilationUnit;
 import japa.parser.ast.ImportDeclaration;
 import japa.parser.ast.body.BodyDeclaration;
@@ -19,6 +14,12 @@ import japa.parser.ast.body.VariableDeclarator;
 import japa.parser.ast.expr.AnnotationExpr;
 import japa.parser.ast.expr.QualifiedNameExpr;
 import japa.parser.ast.type.ClassOrInterfaceType;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
@@ -221,8 +222,8 @@ public class JavaParserClassOrInterfaceTypeDetailsBuilder implements Builder<Cla
 				if (superclassId != null) {
 					superPtm = (PhysicalTypeMetadata) metadataService.get(superclassId);
 				}
-				if (superPtm != null && superPtm.getMemberHoldingTypeDetails() != null && superPtm.getMemberHoldingTypeDetails() instanceof ClassOrInterfaceTypeDetails) {
-					classOrInterfaceTypeDetailsBuilder.setSuperclass((ClassOrInterfaceTypeDetails) superPtm.getMemberHoldingTypeDetails());
+				if (superPtm != null && superPtm.getMemberHoldingTypeDetails() != null) {
+					classOrInterfaceTypeDetailsBuilder.setSuperclass(superPtm.getMemberHoldingTypeDetails());
 				}
 			}
 

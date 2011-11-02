@@ -262,8 +262,8 @@ public class TypeLocationServiceImpl implements TypeLocationService {
 	private ClassOrInterfaceTypeDetails lookupClassOrInterfaceTypeDetails(final String physicalTypeIdentifier) {
 		Assert.hasText(physicalTypeIdentifier, "Physical type identifier required");
 		PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService.evictAndGet(physicalTypeIdentifier);
-		if (physicalTypeMetadata != null && physicalTypeMetadata.getMemberHoldingTypeDetails() != null && physicalTypeMetadata.getMemberHoldingTypeDetails() instanceof ClassOrInterfaceTypeDetails) {
-			return (ClassOrInterfaceTypeDetails) physicalTypeMetadata.getMemberHoldingTypeDetails();
+		if (physicalTypeMetadata != null && physicalTypeMetadata.getMemberHoldingTypeDetails() != null) {
+			return physicalTypeMetadata.getMemberHoldingTypeDetails();
 		}
 		return null;
 	}

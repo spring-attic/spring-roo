@@ -392,7 +392,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 			// Table has either no primary keys or more than one primary key so create a composite key
 
 			// Check if identifier class already exists and if not, create it
-			if (identifierPhysicalTypeMetadata == null || !identifierPhysicalTypeMetadata.isValid() || !(identifierPhysicalTypeMetadata.getMemberHoldingTypeDetails() instanceof ClassOrInterfaceTypeDetails)) {
+			if (identifierPhysicalTypeMetadata == null || !identifierPhysicalTypeMetadata.isValid() || identifierPhysicalTypeMetadata.getMemberHoldingTypeDetails() == null) {
 				createIdentifierClass(identifierType);
 			}
 
@@ -513,7 +513,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 		}
 
 		// Check for added constructors, fields and methods
-		final ClassOrInterfaceTypeDetails managedIdentifier = (ClassOrInterfaceTypeDetails) governorPhysicalTypeMetadata.getMemberHoldingTypeDetails();
+		final ClassOrInterfaceTypeDetails managedIdentifier = governorPhysicalTypeMetadata.getMemberHoldingTypeDetails();
 		return managedIdentifier.getDeclaredConstructors().isEmpty() && managedIdentifier.getDeclaredFields().isEmpty() && managedIdentifier.getDeclaredMethods().isEmpty();
 	}
 
@@ -545,7 +545,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 	private JavaType getIdentifierType(final JavaType entity) {
 		final PhysicalTypeMetadata governorPhysicalTypeMetadata = getPhysicalTypeMetadata(entity);
 		if (governorPhysicalTypeMetadata != null) {
-			final ClassOrInterfaceTypeDetails governorTypeDetails = (ClassOrInterfaceTypeDetails) governorPhysicalTypeMetadata.getMemberHoldingTypeDetails();
+			final ClassOrInterfaceTypeDetails governorTypeDetails = governorPhysicalTypeMetadata.getMemberHoldingTypeDetails();
 			final AnnotationMetadata jpaAnnotation = getJpaAnnotation(governorTypeDetails);
 			if (jpaAnnotation != null) {
 				final AnnotationAttributeValue<?> identifierTypeAttribute = jpaAnnotation.getAttribute(new JavaSymbolName(IDENTIFIER_TYPE));
