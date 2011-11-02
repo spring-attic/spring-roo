@@ -1,8 +1,8 @@
 package org.springframework.roo.classpath.scanner;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.springframework.roo.classpath.details.AbstractMemberHoldingTypeDetailsBuilder;
@@ -45,7 +45,7 @@ public class MemberDetailsBuilder {
 		}
 	}
 
-	public MemberDetailsBuilder(final List<MemberHoldingTypeDetails> memberHoldingTypeDetailsList) {
+	public MemberDetailsBuilder(final Collection<? extends MemberHoldingTypeDetails> memberHoldingTypeDetailsList) {
 		this.originalMemberDetails = new MemberDetailsImpl(memberHoldingTypeDetailsList);
 		for (MemberHoldingTypeDetails memberHoldingTypeDetails : originalMemberDetails.getDetails()) {
 			memberHoldingTypeDetailsMap.put(memberHoldingTypeDetails.getDeclaredByMetadataId(), memberHoldingTypeDetails);

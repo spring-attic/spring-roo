@@ -13,7 +13,7 @@ import org.springframework.roo.support.util.Assert;
 public class DefaultPhysicalTypeMetadata extends AbstractMetadataItem implements PhysicalTypeMetadata {
 
 	// Fields
-	private final MemberHoldingTypeDetails memberHoldingTypeDetails;
+	private final ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails;
 	private final String physicalLocationCanonicalPath;
 
 	/**
@@ -21,19 +21,19 @@ public class DefaultPhysicalTypeMetadata extends AbstractMetadataItem implements
 	 *
 	 * @param metadataId the ID to assign this {@link org.springframework.roo.metadata.MetadataItem} (must satisfy {@link PhysicalTypeIdentifier#isValid(String)})
 	 * @param physicalLocationCanonicalPath the canonical path of the file containing this Java type (required)
-	 * @param memberHoldingTypeDetails the members of this type (required)
+	 * @param classOrInterfaceTypeDetails the details of this type (required)
 	 */
-	public DefaultPhysicalTypeMetadata(final String metadataId, final String physicalLocationCanonicalPath, final MemberHoldingTypeDetails memberHoldingTypeDetails) {
+	public DefaultPhysicalTypeMetadata(final String metadataId, final String physicalLocationCanonicalPath, final ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails) {
 		super(metadataId);
 		Assert.isTrue(PhysicalTypeIdentifier.isValid(metadataId), "Metadata id '" + metadataId + "' is not a valid physical type identifier");
 		Assert.hasText(physicalLocationCanonicalPath, "Physical location canonical path required");
-		Assert.notNull(memberHoldingTypeDetails, "Member holding type details required");
-		this.memberHoldingTypeDetails = memberHoldingTypeDetails;
+		Assert.notNull(classOrInterfaceTypeDetails, "Class or interface type details required");
+		this.classOrInterfaceTypeDetails = classOrInterfaceTypeDetails;
 		this.physicalLocationCanonicalPath = physicalLocationCanonicalPath;
 	}
 
-	public MemberHoldingTypeDetails getMemberHoldingTypeDetails() {
-		return memberHoldingTypeDetails;
+	public ClassOrInterfaceTypeDetails getMemberHoldingTypeDetails() {
+		return classOrInterfaceTypeDetails;
 	}
 
 	public String getPhysicalLocationCanonicalPath() {
@@ -51,13 +51,13 @@ public class DefaultPhysicalTypeMetadata extends AbstractMetadataItem implements
 	}
 	
 	public JavaType getType() {
-		return memberHoldingTypeDetails.getName();
+		return classOrInterfaceTypeDetails.getName();
 	}
 	
 	@Override
 	public String toString() {
 		// Used for example by the "metadata for id" command
-		return getClass().getSimpleName() + " for " + memberHoldingTypeDetails.getName();
+		return getClass().getSimpleName() + " for " + classOrInterfaceTypeDetails.getName();
 	}
 
 	public String getItdCanonicalPath(final ItdMetadataProvider metadataProvider) {

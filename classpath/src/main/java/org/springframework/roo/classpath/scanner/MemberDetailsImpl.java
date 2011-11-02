@@ -1,6 +1,7 @@
 package org.springframework.roo.classpath.scanner;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -24,16 +25,16 @@ import org.springframework.roo.support.util.CollectionUtils;
 public class MemberDetailsImpl implements MemberDetails {
 
 	// Fields
-	private final  List<MemberHoldingTypeDetails> details;
+	private final List<MemberHoldingTypeDetails> details = new ArrayList<MemberHoldingTypeDetails>();
 
 	/**
 	 * Constructs a new instance.
 	 *
-	 * @param details the member holders that should be stored in this instance (cannot be null or empty)
+	 * @param details the member holders that should be stored in this instance (can be <code>null</code>)
 	 */
-	MemberDetailsImpl(final List<MemberHoldingTypeDetails> details) {
+	MemberDetailsImpl(final Collection<? extends MemberHoldingTypeDetails> details) {
 		Assert.notEmpty(details, "Member holding details required");
-		this.details = details;
+		CollectionUtils.populate(this.details, details);
 	}
 
 	public AnnotationMetadata getAnnotation(final JavaType type) {

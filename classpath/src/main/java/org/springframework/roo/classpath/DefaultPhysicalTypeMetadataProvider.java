@@ -1,8 +1,7 @@
 package org.springframework.roo.classpath;
 
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.Comparator;
-import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -15,7 +14,6 @@ import org.apache.felix.scr.annotations.References;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.DefaultPhysicalTypeMetadata;
-import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.classpath.scanner.MemberDetailsBuilder;
 import org.springframework.roo.classpath.scanner.MemberDetailsDecorator;
@@ -117,33 +115,30 @@ public class DefaultPhysicalTypeMetadataProvider implements PhysicalTypeMetadata
 			return null;
 		}
 		final JavaType javaType = PhysicalTypeIdentifier.getJavaType(metadataId);
-		ClassOrInterfaceTypeDetails typeDetails = typeParsingService.getTypeAtLocation(canonicalPath, metadataId, javaType);
+		final ClassOrInterfaceTypeDetails typeDetails = typeParsingService.getTypeAtLocation(canonicalPath, metadataId, javaType);
 		if (typeDetails == null) {
 			return null;
 		}
-		DefaultPhysicalTypeMetadata result = new DefaultPhysicalTypeMetadata(metadataId, canonicalPath, typeDetails);
-		if (result.getMemberHoldingTypeDetails() != null && result.getMemberHoldingTypeDetails() instanceof ClassOrInterfaceTypeDetails) {
-			ClassOrInterfaceTypeDetails details = (ClassOrInterfaceTypeDetails) result.getMemberHoldingTypeDetails();
-			if (details.getPhysicalTypeCategory() == PhysicalTypeCategory.CLASS && details.getExtendsTypes().size() == 1) {
-				// This is a class, and it extends another class
-				if (details.getSuperclass() != null) {
-					// We have a dependency on the superclass, and there is metadata available for the superclass
-					// We won't implement the full MetadataNotificationListener here, but rely on MetadataService's fallback
-					// (which is to evict from cache and call get again given JavaParserMetadataProvider doesn't implement MetadataNotificationListener, then notify everyone we've changed)
-					String superclassId = details.getSuperclass().getDeclaredByMetadataId();
-					metadataDependencyRegistry.registerDependency(superclassId, result.getId());
-				} else {
-					// We have a dependency on the superclass, but no metadata is available
-					// We're left with no choice but to register for every physical type change, in the hope we discover our parent someday (sad, isn't it? :-) )
-					for (ContextualPath sourcePath : projectOperations.getPathResolver().getSourcePaths()) {
-						String possibleSuperclass = PhysicalTypeIdentifier.createIdentifier(details.getExtendsTypes().get(0), sourcePath);
-						metadataDependencyRegistry.registerDependency(possibleSuperclass, result.getId());
-					}
+		final PhysicalTypeMetadata result = new DefaultPhysicalTypeMetadata(metadataId, canonicalPath, typeDetails);
+		final ClassOrInterfaceTypeDetails details = result.getMemberHoldingTypeDetails();
+		if (details != null && details.getPhysicalTypeCategory() == PhysicalTypeCategory.CLASS && details.getExtendsTypes().size() == 1) {
+			// This is a class, and it extends another class
+			if (details.getSuperclass() != null) {
+				// We have a dependency on the superclass, and there is metadata available for the superclass
+				// We won't implement the full MetadataNotificationListener here, but rely on MetadataService's fallback
+				// (which is to evict from cache and call get again given JavaParserMetadataProvider doesn't implement MetadataNotificationListener, then notify everyone we've changed)
+				String superclassId = details.getSuperclass().getDeclaredByMetadataId();
+				metadataDependencyRegistry.registerDependency(superclassId, result.getId());
+			} else {
+				// We have a dependency on the superclass, but no metadata is available
+				// We're left with no choice but to register for every physical type change, in the hope we discover our parent someday
+				for (ContextualPath sourcePath : projectOperations.getPathResolver().getSourcePaths()) {
+					String possibleSuperclass = PhysicalTypeIdentifier.createIdentifier(details.getExtendsTypes().get(0), sourcePath);
+					metadataDependencyRegistry.registerDependency(possibleSuperclass, result.getId());
 				}
 			}
 		}
-		List<MemberHoldingTypeDetails> memberHoldingTypeDetailsList = Collections.singletonList(result.getMemberHoldingTypeDetails());
-		MemberDetails memberDetails = new MemberDetailsBuilder(memberHoldingTypeDetailsList).build();
+		MemberDetails memberDetails = new MemberDetailsBuilder(Arrays.asList(details)).build();
 		// Loop until such time as we complete a full loop where no changes are made to the result
 		boolean additionalLoopRequired = true;
 		while (additionalLoopRequired) {
@@ -151,14 +146,14 @@ public class DefaultPhysicalTypeMetadataProvider implements PhysicalTypeMetadata
 			for (MemberDetailsDecorator decorator : decorators) {
 				MemberDetails newResult = decorator.decorateTypes(DefaultPhysicalTypeMetadataProvider.class.getName(), memberDetails);
 				Assert.isTrue(newResult != null, "Decorator '" + decorator.getClass().getName() + "' returned an illegal result");
-				if (newResult != null && !newResult.equals(memberDetails)) {
+				if (!newResult.equals(memberDetails)) {
 					additionalLoopRequired = true;
 					memberDetails = newResult;
 				}
 			}
 		}
 
-		return new DefaultPhysicalTypeMetadata(metadataId, canonicalPath, memberDetails.getDetails().get(0));
+		return new DefaultPhysicalTypeMetadata(metadataId, canonicalPath, (ClassOrInterfaceTypeDetails) memberDetails.getDetails().get(0));
 	}
 }
 

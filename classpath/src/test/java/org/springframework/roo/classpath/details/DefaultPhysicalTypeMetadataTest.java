@@ -26,12 +26,12 @@ public class DefaultPhysicalTypeMetadataTest {
 	
 	// Fixture
 	private DefaultPhysicalTypeMetadata metadata;
-	@Mock private MemberHoldingTypeDetails mockMemberHoldingTypeDetails;
+	@Mock private ClassOrInterfaceTypeDetails mockClassOrInterfaceTypeDetails;
 	
 	@Before
 	public void setUp() {
 		MockitoAnnotations.initMocks(this);
-		this.metadata = new DefaultPhysicalTypeMetadata(METADATA_ID, CANONICAL_PATH, mockMemberHoldingTypeDetails);
+		this.metadata = new DefaultPhysicalTypeMetadata(METADATA_ID, CANONICAL_PATH, mockClassOrInterfaceTypeDetails);
 	}
 
 	@Test
