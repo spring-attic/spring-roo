@@ -124,30 +124,9 @@
     </pluginRepositories>
     <developers>
         <developer>
-            <name>Ben Alex</name>
-            <id>balex</id>
-            <email>balex at vmware.com</email>
-            <organization>VMware</organization>
-            <timezone>+10</timezone>
-        </developer>
-        <developer>
-            <name>Stefan Schmidt</name>
-            <id>schmidts</id>
-            <email>schmidts at vmware.com</email>
-            <organization>VMware</organization>
-            <timezone>+10</timezone>
-        </developer>
-        <developer>
             <name>Alan Stewart</name>
             <id>stewarta</id>
             <email>stewarta at vmware.com</email>
-            <organization>VMware</organization>
-            <timezone>+10</timezone>
-        </developer>
-        <developer>
-            <name>James Tyrrell</name>
-            <id>jtyrrell</id>
-            <email>jtyrrell at vmware.com</email>
             <organization>VMware</organization>
             <timezone>+10</timezone>
         </developer>
