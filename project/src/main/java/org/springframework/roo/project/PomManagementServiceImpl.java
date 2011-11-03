@@ -3,13 +3,13 @@ package org.springframework.roo.project;
 import static org.springframework.roo.support.util.FileUtils.CURRENT_DIRECTORY;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,7 +19,7 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
-import org.springframework.roo.file.monitor.NotifiableFileMonitorService;
+import org.springframework.roo.file.monitor.FileMonitorService;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.process.manager.FileManager;
@@ -28,7 +28,6 @@ import org.springframework.roo.project.maven.PomFactory;
 import org.springframework.roo.shell.Shell;
 import org.springframework.roo.support.osgi.OSGiUtils;
 import org.springframework.roo.support.util.Assert;
-import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.FileUtils;
 import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.XmlUtils;
@@ -41,32 +40,41 @@ public class PomManagementServiceImpl implements PomManagementService {
 
 	// Constants
 	private static final String DEFAULT_POM_NAME = "pom.xml";
-	private static final String DEFAULT_RELATIVE_PATH = "../pom.xml";
+	private static final String DEFAULT_RELATIVE_PATH = "../" + DEFAULT_POM_NAME;
 	
 	// Fields
-	@Reference private FileManager fileManager;
-	@Reference private MetadataDependencyRegistry metadataDependencyRegistry;
-	@Reference private MetadataService metadataService;
-	@Reference private NotifiableFileMonitorService fileMonitorService;
-	@Reference private PomFactory pomFactory;
-	@Reference private Shell shell;
+	@Reference FileManager fileManager;
+	@Reference FileMonitorService fileMonitorService;
+	@Reference MetadataDependencyRegistry metadataDependencyRegistry;
+	@Reference MetadataService metadataService;
+	@Reference PomFactory pomFactory;
+	@Reference Shell shell;
 
 	private final Set<String> toBeParsed = new HashSet<String>();
-	private Map<String, Pom> pomMap = new HashMap<String, Pom>();
+	private final Map<String, Pom> pomMap = new HashMap<String, Pom>();
 	private String focusedModulePath;
 	private String rootPath;
 
+	// ------------------------ OSGi lifecycle callbacks -----------------------
+
+	protected void activate(final ComponentContext context) {
+		final File projectDirectory = new File(StringUtils.defaultIfEmpty(OSGiUtils.getRooWorkingDirectory(context), CURRENT_DIRECTORY));
+		rootPath = FileUtils.getCanonicalPath(projectDirectory);
+	}
+	
+	// --------------------- PomManagementService methods ----------------------
+	
 	public Pom getModuleForFileIdentifier(final String fileIdentifier) {
 		updatePomCache();
 		String startingPoint = FileUtils.getFirstDirectory(fileIdentifier);
-		String pomPath = FileUtils.ensureTrailingSeparator(startingPoint) + "pom.xml";
+		String pomPath = FileUtils.ensureTrailingSeparator(startingPoint) + DEFAULT_POM_NAME;
 		File pom = new File(pomPath);
 		while (!pom.exists()) {
 			if (startingPoint.equals(File.separator)) {
 				break;
 			}
 			startingPoint = FileUtils.backOneDirectory(startingPoint);
-			pomPath = FileUtils.ensureTrailingSeparator(startingPoint) + "pom.xml";
+			pomPath = FileUtils.ensureTrailingSeparator(startingPoint) + DEFAULT_POM_NAME;
 			pom = new File(pomPath);
 		}
 		return getPomFromPath(pomPath);
@@ -132,65 +140,70 @@ public class PomManagementServiceImpl implements PomManagementService {
 		shell.setPromptPath(pomMap.get(focusedModulePath).getModuleName());
 	}
 
-	protected void activate(final ComponentContext context) {
-		final File projectDirectory = new File(StringUtils.defaultIfEmpty(OSGiUtils.getRooWorkingDirectory(context), CURRENT_DIRECTORY));
-		rootPath = FileUtils.getCanonicalPath(projectDirectory);
-	}
-
 	private void updatePomCache() {
+		findUnparsedPoms();
+		final Collection<Pom> newPoms = parseUnparsedPoms();
+		if (!newPoms.isEmpty()) {
+			sortPomMap();
+		}
+		updateProjectMetadataForModules(newPoms);
+	}
+	
+	private void findUnparsedPoms() {
 		for (final String change : fileMonitorService.getDirtyFiles(getClass().getName())) {
-			if (change.endsWith("pom.xml")) {
+			if (change.endsWith(DEFAULT_POM_NAME)) {
 				toBeParsed.add(change);
 			}
 		}
+	}
+
+	private Set<Pom> parseUnparsedPoms() {
 		final Map<String, String> pomModuleMap = new HashMap<String, String>();
-		final Set<String> toRemove = new HashSet<String>();
 		final Set<Pom> newPoms = new HashSet<Pom>();
-		for (final String changedPom : toBeParsed) {
-			try {
-				if (new File(changedPom).exists()) {
-					final String fileContents = FileCopyUtils.copyToString(new File(changedPom));
-					if (StringUtils.hasText(fileContents)) {
-						final Document pomDocument = XmlUtils.readXml(fileManager.getInputStream(changedPom));
-						resolvePoms(pomDocument.getDocumentElement(), changedPom, pomModuleMap);
-						final String moduleName = getModuleName(FileUtils.getFirstDirectory(changedPom));
-						final Pom pom = pomFactory.getInstance(pomDocument.getDocumentElement(), changedPom, moduleName);
-						pomMap.put(changedPom, pom);
-						newPoms.add(pom);
-						toRemove.add(changedPom);
-					}
+		for (final Iterator<String> iter = toBeParsed.iterator(); iter.hasNext();) {
+			final String pathToChangedPom = iter.next();
+			if (new File(pathToChangedPom).exists()) {
+				final String pomContents = FileUtils.read(new File(pathToChangedPom));
+				if (StringUtils.hasText(pomContents)) {
+					final Element rootElement = XmlUtils.stringToElement(pomContents);
+					resolvePoms(rootElement, pathToChangedPom, pomModuleMap);
+					final String moduleName = getModuleName(FileUtils.getFirstDirectory(pathToChangedPom));
+					final Pom pom = pomFactory.getInstance(rootElement, pathToChangedPom, moduleName);
+					pomMap.put(pathToChangedPom, pom);
+					newPoms.add(pom);
+					iter.remove();
 				}
-			} catch (final IOException e) {
-				throw new IllegalStateException(e);
 			}
 		}
-		toBeParsed.removeAll(toRemove);
-		if (!newPoms.isEmpty()) {
-			sortPomMap();
-			for (final Pom pom : newPoms) {
-				metadataService.evictAndGet(ProjectMetadata.getProjectIdentifier(pom.getModuleName()));
-				metadataDependencyRegistry.notifyDownstream(ProjectMetadata.getProjectIdentifier(pom.getModuleName()));
-			}
-		}
+		return newPoms;
 	}
 
 	private void resolvePoms(final Element pomRoot, final String pomPath, final Map<String, String> pomSet) {
-		pomSet.put(pomPath, pomSet.get(pomPath));
+		pomSet.put(pomPath, pomSet.get(pomPath));	// ensures this key exists
 
 		final Element parentElement = XmlUtils.findFirstElement("/project/parent", pomRoot);
-
 		if (parentElement != null) {
-			final String relativePath = XmlUtils.getTextContent("/relativePath", parentElement, DEFAULT_RELATIVE_PATH);
-			final String parentPomPath = resolveRelativePath(pomPath, relativePath);
-			final boolean alreadyDiscovered = pomSet.containsKey(parentPomPath);
+			resolveParentPom(pomPath, pomSet, parentElement);
+		}
+
+		resolveChildModulePoms(pomRoot, pomPath, pomSet);
+	}
+	
+	private void resolveParentPom(final String pomPath, final Map<String, String> pomSet, final Element parentElement) {
+		final String relativePath = XmlUtils.getTextContent("/relativePath", parentElement, DEFAULT_RELATIVE_PATH);
+		final String parentPomPath = resolveRelativePath(pomPath, relativePath);
+		final boolean alreadyDiscovered = pomSet.containsKey(parentPomPath);
+		if (!alreadyDiscovered) {
 			pomSet.put(parentPomPath, pomSet.get(parentPomPath));
-			if (!alreadyDiscovered) {
+			if (new File(parentPomPath).isFile()) {
 				final Document pomDocument = XmlUtils.readXml(fileManager.getInputStream(parentPomPath));
 				final Element root = pomDocument.getDocumentElement();
 				resolvePoms(root, parentPomPath, pomSet);
 			}
 		}
+	}
 
+	private void resolveChildModulePoms(final Element pomRoot, final String pomPath, final Map<String, String> pomSet) {
 		for (final Element module : XmlUtils.findElements("/project/modules/module", pomRoot)) {
 			final String moduleName = module.getTextContent();
 			if (StringUtils.hasText(moduleName)) {
@@ -235,12 +248,45 @@ public class PomManagementServiceImpl implements PomManagementService {
 		}
 		String path = relativeTo + File.separator + sb.toString();
 		if (new File(path).isDirectory()) {
-			path = path + "pom.xml";
+			path = path + DEFAULT_POM_NAME;
 		}
 		if (path.endsWith(File.separator)) {
 			path = path.substring(0, path.length() - 1);
 		}
 		return path;
+	}
+	
+	private void sortPomMap() {
+		final List<String> sortedPomPaths = new ArrayList<String>(pomMap.keySet());
+		Collections.sort(sortedPomPaths, new PomComparator(pomMap));
+		final Map<String, Pom> sortedPomMap = new LinkedHashMap<String, Pom>();
+		for (final String pomPath : sortedPomPaths) {
+			sortedPomMap.put(pomPath, pomMap.get(pomPath));
+		}
+		pomMap.clear();
+		pomMap.putAll(sortedPomMap);
+	}
+	
+	private void updateProjectMetadataForModules(final Iterable<Pom> newPoms) {
+		for (final Pom pom : newPoms) {
+			final String projectMetadataId = ProjectMetadata.getProjectIdentifier(pom.getModuleName());
+			metadataService.evictAndGet(projectMetadataId);
+			metadataDependencyRegistry.notifyDownstream(projectMetadataId);
+		}
+	}
+	
+	public Collection<Pom> getPoms() {
+		updatePomCache();
+		return new ArrayList<Pom>(pomMap.values());
+	}
+	
+	/**
+	 * For test cases to set up the state of this service
+	 * 
+	 * @param pom the POM to add (required)
+	 */
+	void addPom(final Pom pom) {
+		pomMap.put(pom.getPath(), pom);
 	}
 
 	private static class PomComparator implements Comparator<String> {
@@ -267,20 +313,5 @@ public class PomManagementServiceImpl implements PomManagementService {
 			}
 			return 0;
 		}
-	}
-
-	private void sortPomMap() {
-		final List<String> sortedPomPaths = new ArrayList<String>(pomMap.keySet());
-		Collections.sort(sortedPomPaths, new PomComparator(pomMap));
-		final Map<String, Pom> sortedPomMap = new LinkedHashMap<String, Pom>();
-		for (final String pomPath : sortedPomPaths) {
-			sortedPomMap.put(pomPath, pomMap.get(pomPath));
-		}
-		pomMap = sortedPomMap;
-	}
-
-	public Collection<Pom> getPoms() {
-		updatePomCache();
-		return new ArrayList<Pom>(pomMap.values());
 	}
 }

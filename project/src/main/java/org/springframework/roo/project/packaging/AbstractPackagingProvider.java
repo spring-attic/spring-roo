@@ -242,7 +242,7 @@ public abstract class AbstractPackagingProvider implements PackagingProvider {
 	
 	private void setUpLog4jConfiguration() {
 		final String log4jConfigFile = pathResolver.getFocusedIdentifier(Path.SRC_MAIN_RESOURCES, "log4j.properties");
-		final InputStream template = FileUtils.getInputStream(getClass(), "packaging/log4j.properties-template");
+		final InputStream template = FileUtils.getInputStream(getClass(), "log4j.properties-template");
 		try {
 			FileCopyUtils.copy(template, fileManager.createFile(log4jConfigFile).getOutputStream());
 		} catch (final IOException e) {
