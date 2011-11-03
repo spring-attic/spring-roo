@@ -405,7 +405,7 @@ public class SimpleParser implements Parser {
 
 			// Replace all multiple spaces with a single space
 			while (buffer.contains("  ")) {
-				buffer = buffer.replaceFirst("  ", " ");
+				buffer = StringUtils.replaceFirst(buffer, "  ", " ");
 				cursor--;
 			}
 

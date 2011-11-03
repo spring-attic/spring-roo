@@ -304,7 +304,7 @@ public class JavaTypeConverter implements Converter<JavaType> {
 
 		for (String type : typeLocationService.getTypesForModule(focusedModulePath)) {
 			if (type.startsWith(newValue)) {
-				type = type.replaceFirst(topLevelPath, "~");
+				type = StringUtils.replaceFirst(type, topLevelPath, "~");
 				completions.add(new Completion(prefix + type, formattedPrefix + type, heading, 1));
 			}
 		}

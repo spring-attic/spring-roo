@@ -164,7 +164,7 @@ public class JavaParserTypeParsingService implements TypeParsingService {
 
 					for (JavaType param : cit.getName().getParameters()) {
 						NameExpr pNameExpr = JavaParserUtils.importTypeIfRequired(cit.getName(), compilationUnit.getImports(), param);
-						String tempName = pNameExpr.toString().replaceFirst(param.getArgName() + " extends ", "");
+						String tempName = StringUtils.replaceFirst(pNameExpr.toString(), param.getArgName() + " extends ", "");
 						pNameExpr = new NameExpr(tempName);
 						ClassOrInterfaceType pResolvedName = JavaParserUtils.getClassOrInterfaceType(pNameExpr);
 						classOrInterfaceDeclaration.getTypeParameters().add(new TypeParameter(param.getArgName().getSymbolName(), Collections.singletonList(pResolvedName)));

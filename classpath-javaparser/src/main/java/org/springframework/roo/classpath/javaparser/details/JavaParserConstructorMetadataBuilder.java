@@ -33,6 +33,7 @@ import org.springframework.roo.model.Builder;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Java Parser implementation of {@link ConstructorMetadata}.
@@ -84,8 +85,7 @@ public class JavaParserConstructorMetadataBuilder implements Builder<Constructor
 
 		// Get the body
 		this.body = constructorDeclaration.getBlock().toString();
-
-        this.body = this.body.replaceFirst("\\{","");
+        this.body = StringUtils.replaceFirst(this.body, "{", "");
         this.body = this.body.substring(0, this.body.lastIndexOf("}"));
 
 		// Lookup the parameters and their names

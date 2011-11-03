@@ -1,12 +1,5 @@
 package org.springframework.roo.classpath.javaparser.details;
 
-import java.io.ByteArrayInputStream;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import japa.parser.JavaParser;
 import japa.parser.ParseException;
 import japa.parser.ast.CompilationUnit;
@@ -22,6 +15,14 @@ import japa.parser.ast.stmt.BlockStmt;
 import japa.parser.ast.type.ClassOrInterfaceType;
 import japa.parser.ast.type.ReferenceType;
 import japa.parser.ast.type.Type;
+
+import java.io.ByteArrayInputStream;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
@@ -89,7 +90,7 @@ public class JavaParserMethodMetadataBuilder implements Builder<MethodMetadata>{
 		this.body = methodDeclaration.getBody() == null ? null : methodDeclaration.getBody().toString();
 
         if (this.body != null) {
-            this.body = this.body.replaceFirst("\\{", "");
+            this.body = StringUtils.replaceFirst(this.body, "{", "");
             this.body = this.body.substring(0, this.body.lastIndexOf("}"));
         }
 
