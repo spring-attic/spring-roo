@@ -1,6 +1,5 @@
 package org.springframework.roo.shell;
 
-import java.beans.PropertyEditor;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -41,7 +40,7 @@ public @interface CliOption {
 	String specifiedDefaultValue() default "__NULL__";
 
 	/**
-	 * @return the name of a context which will be available to the {@link PropertyEditor} and {@link jline.Completor}
+	 * @return the name of a context which will be available to the {@link Converter} and {@link jline.Completor}
 	 * when being asked to process the option (defaults to an empty String, meaning no option context is set)
 	 */
 	String optionContext() default "";
