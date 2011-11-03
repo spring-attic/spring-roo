@@ -76,7 +76,7 @@ public class MavenPathResolvingStrategy implements PathResolvingStrategy {
 	}
 
 	/**
-	 * Obtains the {@link Path}s.
+	 * Obtains the {@link ContextualPath}s.
 	 *
 	 * @param sourcePaths <code>true</code> to return only source paths,
 	 * <code>false</code> to return only non-source paths, or <code>null</code>

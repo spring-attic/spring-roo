@@ -132,10 +132,12 @@ public interface PathResolver {
 	String getFocusedCanonicalPath(Path path, JavaType javaType);
 
 	/**
-	 *
+	 * Returns the canonical path of the given path relative to the given
+	 * {@link Path} of the currently focussed module.
+	 * 
 	 * @param path
 	 * @param relativePath
-	 * @return
+	 * @return a canonical path
 	 */
 	String getFocusedIdentifier(Path path, String relativePath);
 

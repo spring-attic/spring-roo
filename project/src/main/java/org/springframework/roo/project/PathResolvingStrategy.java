@@ -13,7 +13,7 @@ import org.springframework.roo.model.JavaType;
 public interface PathResolvingStrategy {
 
 	/**
-	 * Produces a canonical path for the presented {@link Path} and relative path.
+	 * Produces a canonical path for the presented {@link ContextualPath} and relative path.
 	 *
 	 * @param path to use (required)
 	 * @param relativePath to use (cannot be null, but may be empty if referring to the path itself)
@@ -30,7 +30,7 @@ public interface PathResolvingStrategy {
 	ContextualPath getPath(String identifier);
 
 	/**
-	 * Returns a canonical path that represents the root of the presented {@link Path}.
+	 * Returns a canonical path that represents the root of the presented {@link ContextualPath}.
 	 *
 	 * @param path to lookup (required)
 	 * @return <code>null</code> if the root path cannot be determined
@@ -59,7 +59,7 @@ public interface PathResolvingStrategy {
 	String getFriendlyName(String identifier);
 
 	/**
-	 * Indicates all the source code {@link Path}s known to this {@link PathResolver}.
+	 * Returns all source code {@link ContextualPath}s known to this strategy.
 	 *
 	 * <p>
 	 * Whilst generally add-ons should know which paths contain source and which do not, this method
@@ -79,7 +79,7 @@ public interface PathResolvingStrategy {
 	List<ContextualPath> getSourcePaths();
 
 	/**
-	 * Similar to {@link #getSourcePaths()}, but only returns {@link Path}s which are not compiled.
+	 * Similar to {@link #getSourcePaths()}, but only returns {@link ContextualPath}s that do not contain source code.
 	 *
 	 * <p>
 	 * By default this method will return, in the following order:
