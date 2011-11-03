@@ -87,7 +87,7 @@ public class PomManagementServiceImpl implements PomManagementService {
 	}
 
 	private String getModuleName(final String pomRoot) {
-		final String moduleName = FileUtils.ensureTrailingSeparator(pomRoot).replaceAll(FileUtils.ensureTrailingSeparator(rootPath), "");
+		final String moduleName = FileUtils.ensureTrailingSeparator(pomRoot).replace(FileUtils.ensureTrailingSeparator(rootPath), "");
 		return FileUtils.removeTrailingSeparator(moduleName);
 	}
 

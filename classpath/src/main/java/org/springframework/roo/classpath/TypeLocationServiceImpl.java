@@ -36,6 +36,7 @@ import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.shell.NaturalOrderComparator;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileUtils;
+import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Implementation of {@link TypeLocationService}.
@@ -113,8 +114,9 @@ public class TypeLocationServiceImpl implements TypeLocationService {
 		// Determine the JavaType for this file
 		String relativePath = "";
 		for (PathInformation pathInformation : pomManagementService.getModuleForFileIdentifier(fileCanonicalPath).getPathInformation()) {
-			if (fileCanonicalPath.startsWith(FileUtils.ensureTrailingSeparator(FileUtils.getCanonicalPath(pathInformation.getLocation())))) {
-				relativePath = File.separator + fileCanonicalPath.replaceFirst(FileUtils.ensureTrailingSeparator(FileUtils.getCanonicalPath(pathInformation.getLocation())), "");
+			final String moduleCanonicalPath = FileUtils.ensureTrailingSeparator(FileUtils.getCanonicalPath(pathInformation.getLocation()));
+			if (fileCanonicalPath.startsWith(moduleCanonicalPath)) {
+				relativePath = File.separator + StringUtils.replaceFirst(fileCanonicalPath, moduleCanonicalPath, "");
 				break;
 			}
 		}
@@ -135,7 +137,7 @@ public class TypeLocationServiceImpl implements TypeLocationService {
 				return physicalTypeIdentifier;
 			}
 			String typeDirectory = FileUtils.getFirstDirectory(fileCanonicalPath);
-			String simpleTypeName = fileCanonicalPath.replaceFirst(typeDirectory + File.separator, "").replaceAll("\\.java", "");
+			String simpleTypeName = StringUtils.replaceFirst(fileCanonicalPath, typeDirectory + File.separator, "").replace("\\.java", "");
 			JavaPackage javaPackage = typeResolutionService.getPackage(fileCanonicalPath);
 			if (javaPackage == null) {
 				return null;
