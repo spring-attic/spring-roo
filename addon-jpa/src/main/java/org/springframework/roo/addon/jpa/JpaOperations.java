@@ -14,12 +14,29 @@ import org.springframework.roo.model.JavaType;
  * @since 1.0
  */
 public interface JpaOperations {
+	
+	boolean hasDatabaseProperties();
 
+	/**
+	 * Indicates whether JPA can be installed in the currently focussed module.
+	 * 
+	 * @return <code>false</code> if no module has the focus
+	 */
 	boolean isJpaInstallationPossible();
 
+	/**
+	 * Indicates whether JPA is installed in the currently focussed module.
+	 * 
+	 * @return <code>false</code> if no module has the focus
+	 */
 	boolean isJpaInstalled();
 
-	boolean hasDatabaseProperties();
+	/**
+	 * Indicates whether JPA is installed anywhere in the user project.
+	 * 
+	 * @return see above
+	 */
+	boolean isJpaInstalledInProject();
 
 	/**
 	 * This method is responsible for managing all JPA related artifacts (META-INF/persistence.xml, applicationContext.xml, database.properties and the project pom.xml)

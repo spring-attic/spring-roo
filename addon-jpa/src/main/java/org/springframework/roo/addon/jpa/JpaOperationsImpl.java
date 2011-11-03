@@ -36,16 +36,19 @@ import org.springframework.roo.classpath.details.annotations.AnnotationMetadataB
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.process.manager.MutableFile;
+import org.springframework.roo.project.ContextualPath;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.DependencyScope;
 import org.springframework.roo.project.Filter;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.Plugin;
+import org.springframework.roo.project.PomManagementService;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.Property;
 import org.springframework.roo.project.Repository;
 import org.springframework.roo.project.Resource;
+import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.DomUtils;
@@ -88,17 +91,18 @@ public class JpaOperationsImpl implements JpaOperations {
 	// Fields (package access so unit tests can inject mocks)
 	@Reference FileManager fileManager;
 	@Reference PathResolver pathResolver;
+	@Reference PomManagementService pomManagementService;
 	@Reference ProjectOperations projectOperations;
 	@Reference PropFileOperations propFileOperations;
 	@Reference TypeLocationService typeLocationService;
 	@Reference TypeManagementService typeManagementService;
 
 	public boolean isJpaInstallationPossible() {
-		return projectOperations.isFocusedProjectAvailable() && !fileManager.exists(getPersistencePath());
+		return projectOperations.isFocusedProjectAvailable() && !fileManager.exists(getPersistencePathOfFocussedModule());
 	}
 
 	public boolean isJpaInstalled() {
-		return projectOperations.isFocusedProjectAvailable() && fileManager.exists(getPersistencePath());
+		return projectOperations.isFocusedProjectAvailable() && fileManager.exists(getPersistencePathOfFocussedModule());
 	}
 
 	public boolean hasDatabaseProperties() {
@@ -209,7 +213,7 @@ public class JpaOperationsImpl implements JpaOperations {
 		typeManagementService.createOrUpdateTypeOnDisk(typeDetailsBuilder.build());
 	}
 	
-	private String getPersistencePath() {
+	private String getPersistencePathOfFocussedModule() {
 		return pathResolver.getFocusedIdentifier(Path.SRC_MAIN_RESOURCES, PERSISTENCE_XML);
 	}
 
@@ -336,7 +340,7 @@ public class JpaOperationsImpl implements JpaOperations {
 	}
 
 	private void updatePersistenceXml(final OrmProvider ormProvider, final JdbcDatabase jdbcDatabase, final String hostName, final String databaseName, String userName, final String password, final String persistenceUnit, final String moduleName) {
-		final String persistencePath = getPersistencePath();
+		final String persistencePath = getPersistencePathOfFocussedModule();
 		final InputStream inputStream;
 		if (fileManager.exists(persistencePath)) {
 			// There's an existing persistence config file; read it
@@ -1071,5 +1075,16 @@ public class JpaOperationsImpl implements JpaOperations {
 			}
 		}
 		return properties;
+	}
+
+	public boolean isJpaInstalledInProject() {
+		for (final Pom pom : pomManagementService.getPoms()) {
+			final ContextualPath srcMainResources = ContextualPath.getInstance(Path.SRC_MAIN_RESOURCES, pom.getModuleName());
+			final String persistenceUnitFile = pathResolver.getIdentifier(srcMainResources, PERSISTENCE_XML);
+			if (fileManager.exists(persistenceUnitFile)) {
+				return true;
+			}
+		}
+		return false;
 	}
 }
