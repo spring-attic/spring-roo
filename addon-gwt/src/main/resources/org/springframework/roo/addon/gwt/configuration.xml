@@ -51,7 +51,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>gwt-maven-plugin</artifactId>
-                <!-- Don't upgrade to 2.3.0+ as it doesn't work in Windows -->
+                <!-- Do not upgrade to 2.3.0+ as it does not work in Windows -->
                 <version>2.2.0</version>
                 <dependencies>
                     <dependency>
@@ -124,7 +124,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>gwt-maven-plugin</artifactId>
-                <!-- Don't upgrade to 2.3.0+ as it doesn't work in Windows -->
+                <!-- Do not upgrade to 2.3.0+ as it does not work in Windows -->
                 <version>2.2.0</version>
                 <dependencies>
                     <dependency>

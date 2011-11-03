@@ -100,7 +100,7 @@ public class GwtCommands implements CommandMarker {
 	}
 
 	@CliCommand(value = "web gwt gae update", help = "Updates the GWT project to support GAE")
-	public void updateGae() {
+	public void updateGaeConfiguration() {
 		gwtOperations.updateGaeConfiguration();
 	}
 }

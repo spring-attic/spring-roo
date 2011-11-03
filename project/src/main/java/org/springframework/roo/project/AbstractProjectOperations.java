@@ -83,8 +83,16 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 		return getProjectMetadata(moduleName) != null;
 	}
 
+	public boolean isFocusedProjectAvailable() {
+		return isProjectAvailable(getFocusedModuleName());
+	}
+
 	public final ProjectMetadata getProjectMetadata(final String moduleName) {
 		return (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier(moduleName));
+	}
+
+	public ProjectMetadata getFocusedProjectMetadata() {
+		return getProjectMetadata(getFocusedModuleName());
 	}
 
 	public Pom getFocusedModule() {
@@ -115,17 +123,18 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 	}
 
 	public void addModuleDependency(final String moduleName) {
-		if (moduleName != null) {
-			Pom focusedModule = getFocusedModule();
-			if (StringUtils.hasText(moduleName) && StringUtils.hasText(focusedModule.getModuleName()) && !moduleName.equals(getFocusedModule().getModuleName())) {
-				Pom externalModule = getProjectMetadata(moduleName).getPom();
-				if (externalModule != null) {
-					if (!externalModule.getPath().equals(focusedModule.getPath())) {
-						detectCircularDependency(focusedModule, externalModule);
-						Dependency dependency = new Dependency(externalModule.getGroupId(), externalModule.getArtifactId(), externalModule.getVersion());
-						if (getFocusedModule().getDependenciesExcludingVersion(dependency).isEmpty()) {
-							addDependency(getFocusedModuleName(), dependency);
-						}
+		if (!StringUtils.hasText(moduleName)) {
+			return;
+		}
+		Pom focusedModule = getFocusedModule();
+		if (StringUtils.hasText(moduleName) && StringUtils.hasText(focusedModule.getModuleName()) && !moduleName.equals(getFocusedModule().getModuleName())) {
+			Pom externalModule = getProjectMetadata(moduleName).getPom();
+			if (externalModule != null) {
+				if (!externalModule.getPath().equals(focusedModule.getPath())) {
+					detectCircularDependency(focusedModule, externalModule);
+					Dependency dependency = new Dependency(externalModule.getGroupId(), externalModule.getArtifactId(), externalModule.getVersion());
+					if (getFocusedModule().getDependenciesExcludingVersion(dependency).isEmpty()) {
+						addDependency(getFocusedModuleName(), dependency);
 					}
 				}
 			}
@@ -217,29 +226,6 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 		removeDependency(moduleName, groupId, artifactId, version, "");
 	}
 
-	public void updateBuildPlugin(final String moduleName, final Plugin plugin) {
-		final Pom pom = getPomFromModuleName(moduleName);
-		Assert.notNull(pom, "The pom is not available, so plugins cannot be modified at this time");
-		Assert.notNull(plugin, "Plugin required");
-		for (Plugin existingPlugin : pom.getBuildPlugins()) {
-			if (existingPlugin.equals(plugin)) {
-				// Already exists, so just quit
-				return;
-			}
-		}
-
-		// Delete any existing plugin with a different version
-		removeBuildPlugin(moduleName, plugin);
-
-		// Add the plugin
-		addBuildPlugin(moduleName, plugin);
-	}
-
-	@Deprecated
-	public void buildPluginUpdate(final String moduleName, final Plugin plugin) {
-		updateBuildPlugin(moduleName, plugin);
-	}
-
 	public void addDependencies(final String moduleName, final Collection<? extends Dependency> dependencies) {
 		Assert.isTrue(isProjectAvailable(moduleName), "Dependency modification prohibited at this time");
 		Assert.notNull(dependencies, "Dependencies required");
@@ -250,7 +236,6 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 		final Pom pom = getPomFromModuleName(moduleName);
 		Assert.notNull(pom, "The pom is not available, so dependency addition cannot be performed");
 		if (pom.isAllDependenciesRegistered(dependencies)) {
-			// No need to spend time parsing pom.xml
 			return;
 		}
 
@@ -396,7 +381,7 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 
 	public void addBuildPlugins(final String moduleName, final Collection<? extends Plugin> plugins) {
 		Assert.isTrue(isProjectAvailable(moduleName), "Plugin modification prohibited at this time");
-		Assert.notNull(plugins, "BuildPlugins required");
+		Assert.notNull(plugins, "Plugins required");
 		if (CollectionUtils.isEmpty(plugins)) {
 			return;
 		}
@@ -417,10 +402,11 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 				newPlugins.add(plugin.getSimpleDescription());
 			}
 		}
-		if (newPlugins.size() == 0) {
+		if (newPlugins.isEmpty()) {
 			return;
 		}
 		final String message = getDescriptionOfChange(ADDED, newPlugins, "plugin", "plugins");
+
 		fileManager.createOrUpdateTextFileIfRequired(pom.getPath(), XmlUtils.nodeToString(document), message, false);
 	}
 
@@ -430,11 +416,46 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 		addBuildPlugins(moduleName, Collections.singletonList(plugin));
 	}
 
-	public boolean isFocusedProjectAvailable() {
-		return isProjectAvailable(getFocusedModuleName());
+	public void removeBuildPlugins(final String moduleName, final Collection<? extends Plugin> plugins) {
+		removeBuildPlugins(moduleName, plugins, false);
 	}
 
-	public void removeBuildPlugins(final String moduleName, final Collection<? extends Plugin> plugins) {
+	public void removeBuildPlugin(final String moduleName, final Plugin plugin) {
+		Assert.isTrue(isProjectAvailable(moduleName), "Plugin modification prohibited at this time");
+		Assert.notNull(plugin, "Plugin required");
+		removeBuildPlugins(moduleName, Collections.singletonList(plugin));
+	}
+
+	public void removeBuildPluginImmediately(final String moduleName, final Plugin plugin) {
+		Assert.isTrue(isProjectAvailable(moduleName), "Plugin modification prohibited at this time");
+		Assert.notNull(plugin, "Plugin required");
+		removeBuildPlugins(moduleName, Collections.singletonList(plugin), true);
+	}
+
+	public void updateBuildPlugin(final String moduleName, final Plugin plugin) {
+		final Pom pom = getPomFromModuleName(moduleName);
+		Assert.notNull(pom, "The pom is not available, so plugins cannot be modified at this time");
+		Assert.notNull(plugin, "Plugin required");
+		for (Plugin existingPlugin : pom.getBuildPlugins()) {
+			if (existingPlugin.equals(plugin)) {
+				// Already exists, so just quit
+				return;
+			}
+		}
+
+		// Delete any existing plugin with a different version
+		removeBuildPlugin(moduleName, plugin);
+
+		// Add the plugin
+		addBuildPlugin(moduleName, plugin);
+	}
+
+	@Deprecated
+	public void buildPluginUpdate(final String moduleName, final Plugin plugin) {
+		updateBuildPlugin(moduleName, plugin);
+	}
+
+	private void removeBuildPlugins(final String moduleName, final Collection<? extends Plugin> plugins, boolean writeImmediately) {
 		Assert.isTrue(isProjectAvailable(moduleName), "Plugin modification prohibited at this time");
 		Assert.notNull(plugins, "Plugins required");
 		if (CollectionUtils.isEmpty(plugins)) {
@@ -447,7 +468,8 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 		}
 
 		final Document document = XmlUtils.readXml(fileManager.getInputStream(pom.getPath()));
-		final Element pluginsElement = XmlUtils.findFirstElement("/project/build/plugins", document.getDocumentElement());
+		final Element root = document.getDocumentElement();
+		final Element pluginsElement = XmlUtils.findFirstElement("/project/build/plugins", root);
 		if (pluginsElement == null) {
 			return;
 		}
@@ -471,13 +493,7 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 		DomUtils.removeTextNodes(pluginsElement);
 		final String message = getDescriptionOfChange(REMOVED, removedPlugins, "plugin", "plugins");
 
-		fileManager.createOrUpdateTextFileIfRequired(pom.getPath(), XmlUtils.nodeToString(document), message, false);
-	}
-
-	public void removeBuildPlugin(final String moduleName, final Plugin plugin) {
-		Assert.isTrue(isProjectAvailable(moduleName), "Plugin modification prohibited at this time");
-		Assert.notNull(plugin, "Plugin required");
-		removeBuildPlugins(moduleName, Collections.singletonList(plugin));
+		fileManager.createOrUpdateTextFileIfRequired(pom.getPath(), XmlUtils.nodeToString(document), message, writeImmediately);
 	}
 
 	public void addRepositories(final String moduleName, final Collection<? extends Repository> repositories) {
@@ -817,9 +833,5 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 
 	public JavaPackage getFocusedTopLevelPackage() {
 		return getTopLevelPackage(getFocusedModuleName());
-	}
-
-	public ProjectMetadata getFocusedProjectMetadata() {
-		return getProjectMetadata(getFocusedModuleName());
 	}
 }

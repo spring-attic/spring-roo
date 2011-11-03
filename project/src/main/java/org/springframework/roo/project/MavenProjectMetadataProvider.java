@@ -35,13 +35,12 @@ import org.springframework.uaa.client.protobuf.UaaClient.Product;
 @Component(immediate = true)
 @Service
 public class MavenProjectMetadataProvider implements MetadataProvider, FileEventListener {
-	
+
 	// Constants
 	static final String POM_RELATIVE_PATH = "/pom.xml";
 
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(MetadataIdentificationUtils.getMetadataClass(ProjectMetadata.getProjectIdentifier("")));
 
-	
 	// Fields (some with default-level access for testability)
 	@Reference FileManager fileManager;
 	@Reference private PomManagementService pomManagementService;

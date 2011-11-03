@@ -4,7 +4,7 @@ import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaType;
 
 /**
- * Provides GWT installation services.
+ * Provides GWT operations.
  *
  * @author Ben Alex
  * @author James Tyrrell
@@ -15,6 +15,8 @@ public interface GwtOperations {
 	boolean isSetupAvailable();
 
 	boolean isGwtEnabled();
+
+	boolean isGaeEnabled();
 
 	void setup();
 
@@ -35,6 +37,4 @@ public interface GwtOperations {
 	void scaffoldType(JavaPackage proxyPackage, JavaPackage requestPackage, JavaType type);
 
 	void updateGaeConfiguration();
-
-	boolean isGaeEnabled();
 }

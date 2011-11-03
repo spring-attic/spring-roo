@@ -320,8 +320,7 @@ public interface ProjectOperations {
 	void addBuildPlugin(final String moduleName, Plugin plugin);
 
 	/**
-	 * Removes any plugins with the same groupId and artifactId as any of the
-	 * given plugins.
+	 * Removes any plugins with the same groupId and artifactId as any of the given plugins.
 	 *
 	 * @param moduleName the name of the module to act upon (required)
 	 * @param plugins the plugins to remove; can be <code>null</code>, any
@@ -331,10 +330,9 @@ public interface ProjectOperations {
 	 * cannot be modified for any reason
 	 */
 	void removeBuildPlugins(final String moduleName, Collection<? extends Plugin> plugins);
-	
+
 	/**
-	 * Removes any plugins with the same groupId and artifactId as the given
-	 * plugin.
+	 * Removes any plugins with the same groupId and artifactId as the given plugin. 
 	 *
 	 * @param moduleName the name of the module to act upon (required)
 	 * @param plugin the plugin to remove (can be <code>null</code>)
@@ -343,6 +341,18 @@ public interface ProjectOperations {
 	 * cannot be modified for any reason
 	 */
 	void removeBuildPlugin(final String moduleName, Plugin plugin);
+
+	/**
+	 * Removes any plugins with the same groupId and artifactId as the given
+	 * plugin and immediately writes the pom to the file system.
+	 *
+	 * @param moduleName the name of the module to act upon (required)
+	 * @param plugin the plugin to remove (can be <code>null</code>)
+	 * @throws IllegalArgumentException if this method is called before the
+	 * {@link ProjectMetadata} is available, or if the on-disk representation
+	 * cannot be modified for any reason
+	 */
+	void removeBuildPluginImmediately(String moduleName, Plugin plugin);
 
 	/**
 	 * Verifies if the specified  build plugin is present. If it is present, silently returns. If it is not
