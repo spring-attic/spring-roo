@@ -1368,6 +1368,42 @@ public final class StringUtils {
 	}
 	
 	/**
+	 * Returns the substring after the last occurrence of a separator. The separator is not returned.
+	 * <p>A null string input will return null. An empty ("") string input will return the empty string.
+	 * An empty or null separator will return the empty string if the input string is not null.
+	 * <p>If nothing is found, the empty string is returned.
+	 * <pre>
+	     StringUtils.substringAfterLast(null, *)      = null
+	     StringUtils.substringAfterLast("", *)        = ""
+	     StringUtils.substringAfterLast(*, "")        = ""
+	     StringUtils.substringAfterLast(*, null)      = ""
+	     StringUtils.substringAfterLast("abc", "a")   = "bc"
+	     StringUtils.substringAfterLast("abcba", "b") = "a"
+	     StringUtils.substringAfterLast("abc", "c")   = ""
+	     StringUtils.substringAfterLast("a", "a")     = ""
+	     StringUtils.substringAfterLast("a", "z")     = ""</pre>
+	 *
+	 * @param original the String to get a substring from, may be <code>null</code>
+	 * @param separator the String to search for, may be <code>null</code>
+	 * @return the substring after the last occurrence of the separator,
+	 * <code>null</code> if <code>null</code> String input
+	 * @since 1.2.0
+	 */
+	public static String substringAfterLast(final String original, final String separator) {
+		if (!hasLength(original)) {
+			return original;
+		}
+		if (!hasLength(separator)) {
+			return "";
+		}
+		final int separatorStart = original.lastIndexOf(separator);
+		if (separatorStart == -1) {
+			return "";
+		}
+		return original.substring(separatorStart + separator.length());
+	}
+	
+	/**
 	 * Constructor is private to prevent instantiation
 	 */
 	private StringUtils() {}

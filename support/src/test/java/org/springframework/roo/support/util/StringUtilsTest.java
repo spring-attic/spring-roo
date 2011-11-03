@@ -443,4 +443,24 @@ public class StringUtilsTest {
 	public void testReplaceFirstWhenNoArgumentsAreBlank() {
 		assertEquals("x-yz", StringUtils.replaceFirst("xyyz", "y", "-"));
 	}
+	
+	private static final String[][] SUBSTRING_AFTER_LAST_SCENARIOS = {
+		// 0 = original, 1 = separator, 2 = expected result
+		{null, "anything", null},
+		{"", "anything", ""},
+		{"anything", "", ""},
+		{"anything", null, ""},
+		{"abc", "a", "bc"},
+		{"abcba", "b", "a"},
+		{"abc", "c", ""},
+		{"a", "a", ""},
+		{"a", "z", ""}
+	};
+	
+	@Test
+	public void testSubstringAfterLast() {
+		for (final String[] scenario : SUBSTRING_AFTER_LAST_SCENARIOS) {
+			assertEquals(scenario[2], StringUtils.substringAfterLast(scenario[0], scenario[1]));
+		}
+	}
 }
