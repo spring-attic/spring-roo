@@ -36,6 +36,8 @@ public class MavenCommands implements CommandMarker {
 	private static final String PERFORM_PACKAGE_COMMAND = "perform package";
 	private static final String PERFORM_TESTS_COMMAND = "perform tests";
 	private static final String PROJECT_COMMAND = "project";
+	private static final String REPOSITORY_ADD_COMMAND = "maven repository add";
+	private static final String REPOSITORY_REMOVE_COMMAND = "maven repository remove";
 
 	// Fields
 	@Reference private MavenOperations mavenOperations;
@@ -64,6 +66,7 @@ public class MavenCommands implements CommandMarker {
 	@CliCommand(value = MODULE_FOCUS_COMMAND, help = "Changes focus to a different project module")
 	public void focusModule(
 		@CliOption(key = "moduleName", mandatory = true, optionContext = "update,project", help = "The module to focus on") final Pom module) {
+		
 		mavenOperations.setModule(module);
 	}
 
@@ -96,7 +99,24 @@ public class MavenCommands implements CommandMarker {
 		@CliOption(key = "version", mandatory = true, help = "The version of the dependency") final String version,
 		@CliOption(key = "classifier", help = "The classifier of the dependency") final String classifier) {
 
-		mavenOperations.removeDependency(groupId, artifactId, version, classifier);
+		mavenOperations.removeDependency(mavenOperations.getFocusedModuleName(), groupId, artifactId, version, classifier);
+	}
+
+	@CliCommand(value = REPOSITORY_ADD_COMMAND, help = "Adds a new repository to the Maven project object model (POM)")
+	public void addRepository(
+		@CliOption(key = "id", mandatory = true, help = "The ID of the repository") final String id,
+		@CliOption(key = "name", mandatory = false, help = "The name of the repository") final String name,
+		@CliOption(key = "url", mandatory = true, help = "The URL of the repository") final String url) {
+
+		mavenOperations.addRepository(mavenOperations.getFocusedModuleName(), new Repository(id, name, url));
+	}
+
+	@CliCommand(value = REPOSITORY_REMOVE_COMMAND, help = "Removes an existing repository from the Maven project object model (POM)")
+	public void removeRepository(
+		@CliOption(key = "id", mandatory = true, help = "The ID of the repository") final String id,
+		@CliOption(key = "url", mandatory = true, help = "The URL of the repository") final String url) {
+
+		mavenOperations.removeRepository(mavenOperations.getFocusedModuleName(), new Repository(id, null, url));
 	}
 
 	@CliAvailabilityIndicator({ PERFORM_PACKAGE_COMMAND, PERFORM_ECLIPSE_COMMAND, PERFORM_TESTS_COMMAND, PERFORM_CLEAN_COMMAND, PERFORM_ASSEMBLY_COMMAND, PERFORM_COMMAND_COMMAND })
