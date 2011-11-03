@@ -347,4 +347,100 @@ public class StringUtilsTest {
 	public void testDefaultIfEmptyWhenValueIsEmptyAndTwoDefaults() {
 		assertEquals("x", StringUtils.defaultIfEmpty("", null, "x"));
 	}
+	
+	@Test
+	public void testReplaceAllWhenNoArgumentsAreBlank() {
+		// Deliberately chose characters with special meaning to regexs
+		assertEquals("[a[b[c[", StringUtils.replace(".a.b.c.", ".", "["));
+	}
+	
+	@Test
+	public void testReplaceAllWhenReplacementIsNull() {
+		assertEquals(" ", StringUtils.replace(" ", " ", null));
+	}
+	
+	@Test
+	public void testReplaceAllWhenReplacementIsEmpty() {
+		assertEquals(" a  ", StringUtils.replace(" a b ", "b", ""));
+	}
+	
+	@Test
+	public void testReplaceAllWhenReplacementIsWhitespace() {
+		assertEquals(" a   ", StringUtils.replace(" a b ", "b", " "));
+	}
+	
+	@Test
+	public void testReplaceAllWhenToReplaceIsNull() {
+		assertEquals(" ", StringUtils.replace(" ", null, "x"));
+	}
+	
+	@Test
+	public void testReplaceAllWhenToReplaceIsEmpty() {
+		assertEquals(" ", StringUtils.replace(" ", "", "x"));
+	}
+	
+	@Test
+	public void testReplaceAllWhenToReplaceIsWhiteSpace() {
+		assertEquals("x", StringUtils.replace(" ", " ", "x"));
+	}
+	
+	@Test
+	public void testReplaceAllWhenOriginalIsNull() {
+		assertNull(StringUtils.replace(null, "x", "y"));
+	}
+	
+	@Test
+	public void testReplaceAllWhenOriginalIsEmpty() {
+		assertEquals("", StringUtils.replace("", "x", "y"));
+	}
+	
+	@Test
+	public void testReplaceFirstWhenOriginalIsNull() {
+		assertNull(StringUtils.replaceFirst(null, "x", "y"));
+	}
+	
+	@Test
+	public void testReplaceFirstWhenOriginalIsEmpty() {
+		assertEquals("", StringUtils.replaceFirst("", "x", "y"));
+	}
+	
+	@Test
+	public void testReplaceFirstWhenOriginalIsWhitespace() {
+		assertEquals("[ ", StringUtils.replaceFirst("  ", " ", "["));
+	}
+	
+	@Test
+	public void testReplaceFirstWhenToReplaceIsNull() {
+		assertEquals(" ", StringUtils.replaceFirst(" ", null, "x"));
+	}
+	
+	@Test
+	public void testReplaceFirstWhenToReplaceIsEmpty() {
+		assertEquals(" ", StringUtils.replaceFirst(" ", "", "x"));
+	}
+	
+	@Test
+	public void testReplaceFirstWhenToReplaceIsWhitespace() {
+		assertEquals("x", StringUtils.replaceFirst("x", " ", "y"));
+	}
+	
+	@Test
+	public void testReplaceFirstWhenReplacementIsNull() {
+		assertEquals("x", StringUtils.replaceFirst("x", "x", null));
+	}
+	
+	@Test
+	public void testReplaceFirstWhenReplacementIsEmpty() {
+		assertEquals("x", StringUtils.replaceFirst("xx", "x", ""));
+	}
+	
+	@Test
+	public void testReplaceFirstWhenReplacementIsWhitespace() {
+		assertEquals("x  ", StringUtils.replaceFirst("x y", "y", " "));
+	}
+	
+	@Test
+	public void testReplaceFirstWhenNoArgumentsAreBlank() {
+		assertEquals("x-yz", StringUtils.replaceFirst("xyyz", "y", "-"));
+	}
 }

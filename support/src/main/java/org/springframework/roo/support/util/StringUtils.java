@@ -366,31 +366,21 @@ public final class StringUtils {
 	}
 
 	/**
-	 * Replace all occurrences of a substring within a string with another string.
+	 * Replaces all occurrences of one string within another.
 	 *
-	 * @param inString String to examine
-	 * @param oldPattern String to replace
-	 * @param newPattern String to insert
-	 * @return a String with the replacements
+	 * @param original the string to modify (can be zero length to do nothing)
+	 * @param toReplace the string to replace (can be blank to do nothing)
+	 * @param replacement the string to replace it with (can be <code>null</code> to do nothing)
+	 * @return the original string, modified as necessary
 	 */
-	public static String replace(final String inString, final String oldPattern, final String newPattern) {
-		if (!hasLength(inString) || !hasLength(oldPattern) || newPattern == null) {
-			return inString;
-		}
-		StringBuilder sb = new StringBuilder();
-		int pos = 0; // Our position in the old string
-		int index = inString.indexOf(oldPattern);
-		// The index of an occurrence we've found, or -1
-		int patLen = oldPattern.length();
-		while (index >= 0) {
-			sb.append(inString.substring(pos, index));
-			sb.append(newPattern);
-			pos = index + patLen;
-			index = inString.indexOf(oldPattern, pos);
-		}
-		sb.append(inString.substring(pos));
-		// Remember to append any characters to the right of a match
-		return sb.toString();
+	public static String replace(final String original, final String toReplace, final String replacement) {
+		String result = original;
+		String previousResult;
+		do {
+			previousResult = result;
+			result = replaceFirst(previousResult, toReplace, replacement);
+		} while (!equals(previousResult, result));
+		return result;
 	}
 
 	/**
@@ -1352,6 +1342,29 @@ public final class StringUtils {
 	 */
 	public static boolean isBlank(final String text) {
 		return !hasText(text);
+	}
+	
+	/**
+	 * Replaces the first occurrence of the given substring in the given string.
+	 * <p>
+	 * Use in preference to {@link String#replaceFirst(String, String)} when
+	 * <code>toReplace</code> is not a regular expression (e.g. some part of a
+	 * file path, which on Windows will contain backslashes, which have special
+	 * meaning to regexs).
+	 * 
+	 * @param original the string to modify (can be zero length to do nothing)
+	 * @param toReplace the string to replace (can be blank to do nothing)
+	 * @param replacement the string to replace it with (can be <code>null</code> to do nothing)
+	 * @return the original string, modified as necessary
+	 * @since 1.2.0
+	 */
+	public static String replaceFirst(final String original, final String toReplace, final String replacement) {
+		if (!hasLength(original) || !hasLength(toReplace) || replacement == null || !original.contains(toReplace)) {
+			return original;
+		}
+		final int startOfOld = original.indexOf(toReplace);
+		final int endOfOld = startOfOld + toReplace.length();
+		return arrayToDelimitedString("", original.substring(0, startOfOld), replacement, original.substring(endOfOld));
 	}
 	
 	/**
