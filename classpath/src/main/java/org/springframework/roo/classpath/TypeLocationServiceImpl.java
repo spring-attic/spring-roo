@@ -137,7 +137,7 @@ public class TypeLocationServiceImpl implements TypeLocationService {
 				return physicalTypeIdentifier;
 			}
 			String typeDirectory = FileUtils.getFirstDirectory(fileCanonicalPath);
-			String simpleTypeName = StringUtils.replaceFirst(fileCanonicalPath, typeDirectory + File.separator, "").replace("\\.java", "");
+			String simpleTypeName = StringUtils.replaceFirst(fileCanonicalPath, typeDirectory + File.separator, "").replace(".java", "");
 			JavaPackage javaPackage = typeResolutionService.getPackage(fileCanonicalPath);
 			if (javaPackage == null) {
 				return null;
