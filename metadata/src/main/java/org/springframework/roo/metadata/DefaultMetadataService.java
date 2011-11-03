@@ -36,6 +36,7 @@ public class DefaultMetadataService extends AbstractMetadataCache implements Met
 	// Fields
 	@Reference private MetadataDependencyRegistry metadataDependencyRegistry;
 	@Reference private MetadataLogger metadataLogger;
+
 	private int validGets = 0;
 	private int recursiveGets = 0;
 	private int cachePuts = 0;
@@ -280,6 +281,10 @@ public class DefaultMetadataService extends AbstractMetadataCache implements Met
 		}
 	}
 
+	public MetadataItem evictAndGet(final String metadataId) {
+		return getInternal(metadataId, true, false);
+	}
+
 	@Override
 	public final String toString() {
 		ToStringCreator tsc = new ToStringCreator(this);
@@ -292,9 +297,5 @@ public class DefaultMetadataService extends AbstractMetadataCache implements Met
 		tsc.append("cacheCurrentSize", getCacheSize());
 		tsc.append("cacheMaximumSize", getMaxCapacity());
 		return tsc.toString().replaceFirst("@[0-9a-f]{8}", ":");
-	}
-
-	public MetadataItem evictAndGet(final String metadataId) {
-		return getInternal(metadataId, true, false);
 	}
 }

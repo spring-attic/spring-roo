@@ -20,7 +20,7 @@ public abstract class AbstractMetadataCache implements MetadataCache {
 	private static final float hashTableLoadFactor = 0.75f;
 
 	// Fields
-	private LinkedHashMap<String,MetadataItem> map;
+	private LinkedHashMap<String, MetadataItem> map;
 	private int maxCapacity = 100000;
 
 	protected AbstractMetadataCache() {
@@ -45,17 +45,17 @@ public abstract class AbstractMetadataCache implements MetadataCache {
 
 	public void put(final MetadataItem metadataItem) {
 		Assert.notNull(metadataItem, "A metadata item is required");
-		this.map.put(metadataItem.getId(), metadataItem);
+		map.put(metadataItem.getId(), metadataItem);
 	}
 
 	protected MetadataItem getFromCache(final String metadataIdentificationString) {
 		Assert.isTrue(MetadataIdentificationUtils.isIdentifyingInstance(metadataIdentificationString), "Only metadata instances can be cached (not '" + metadataIdentificationString + "')");
-		return this.map.get(metadataIdentificationString);
+		return map.get(metadataIdentificationString);
 	}
 
 	public void evict(final String metadataIdentificationString) {
 		Assert.isTrue(MetadataIdentificationUtils.isIdentifyingInstance(metadataIdentificationString), "Only metadata instances can be cached (not '" + metadataIdentificationString + "')");
-		this.map.remove(metadataIdentificationString);
+		map.remove(metadataIdentificationString);
 	}
 
 	public void evictAll() {
@@ -64,10 +64,11 @@ public abstract class AbstractMetadataCache implements MetadataCache {
 
 	private void init() {
 		int hashTableCapacity = (int) Math.ceil(maxCapacity / hashTableLoadFactor) + 1;
-		map = new LinkedHashMap<String,MetadataItem>(hashTableCapacity, hashTableLoadFactor, true) {
+		map = new LinkedHashMap<String, MetadataItem>(hashTableCapacity, hashTableLoadFactor, true) {
 			private static final long serialVersionUID = 1;
+
 			@Override
-			protected boolean removeEldestEntry(final Map.Entry<String,MetadataItem> eldest) {
+			protected boolean removeEldestEntry(final Map.Entry<String, MetadataItem> eldest) {
 				return size() > maxCapacity;
 			}
 		};

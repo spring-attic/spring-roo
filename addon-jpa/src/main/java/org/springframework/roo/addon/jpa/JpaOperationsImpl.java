@@ -653,27 +653,29 @@ public class JpaOperationsImpl implements JpaOperations {
 
 	private void updateLog4j(final OrmProvider ormProvider) {
 		final String log4jPath = pathResolver.getFocusedIdentifier(Path.SRC_MAIN_RESOURCES, "log4j.properties");
-		if (fileManager.exists(log4jPath)) {
-			final MutableFile log4jMutableFile = fileManager.updateFile(log4jPath);
-			final Properties props = new Properties();
-			OutputStream outputStream = null;
-			try {
-				props.load(log4jMutableFile.getInputStream());
-				final String dnKey = "log4j.category.DataNucleus";
-				if (ormProvider == OrmProvider.DATANUCLEUS && !props.containsKey(dnKey)) {
-					outputStream = log4jMutableFile.getOutputStream();
-					props.put(dnKey, "WARN");
-					props.store(outputStream, "Updated at " + new Date());
-				} else if (ormProvider != OrmProvider.DATANUCLEUS && props.containsKey(dnKey)) {
-					outputStream = log4jMutableFile.getOutputStream();
-					props.remove(dnKey);
-					props.store(outputStream, "Updated at " + new Date());
-				}
-			} catch (final IOException e) {
-				throw new IllegalStateException(e);
-			} finally {
-				IOUtils.closeQuietly(outputStream);
+		if (!fileManager.exists(log4jPath)) {
+			return;
+		}
+		
+		final MutableFile log4jMutableFile = fileManager.updateFile(log4jPath);
+		final Properties props = new Properties();
+		OutputStream outputStream = null;
+		try {
+			props.load(log4jMutableFile.getInputStream());
+			final String dnKey = "log4j.category.DataNucleus";
+			if (ormProvider == OrmProvider.DATANUCLEUS && !props.containsKey(dnKey)) {
+				outputStream = log4jMutableFile.getOutputStream();
+				props.put(dnKey, "WARN");
+				props.store(outputStream, "Updated at " + new Date());
+			} else if (ormProvider != OrmProvider.DATANUCLEUS && props.containsKey(dnKey)) {
+				outputStream = log4jMutableFile.getOutputStream();
+				props.remove(dnKey);
+				props.store(outputStream, "Updated at " + new Date());
 			}
+		} catch (final IOException e) {
+			throw new IllegalStateException(e);
+		} finally {
+			IOUtils.closeQuietly(outputStream);
 		}
 	}
 
