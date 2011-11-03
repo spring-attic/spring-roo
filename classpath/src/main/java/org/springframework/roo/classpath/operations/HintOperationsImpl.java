@@ -1,6 +1,7 @@
 package org.springframework.roo.classpath.operations;
 
 import java.io.File;
+import java.math.BigDecimal;
 import java.util.Enumeration;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
@@ -15,6 +16,7 @@ import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.shell.AbstractShell;
+import org.springframework.roo.support.util.NumberUtils;
 import org.springframework.roo.support.util.StringUtils;
 
 /**
@@ -26,6 +28,7 @@ import org.springframework.roo.support.util.StringUtils;
  * third-party add-ons can provide their own hints (see ROO-610 for details).
  *
  * @author Ben Alex
+ * @author Alan Stewart
  * @since 1.1
  */
 @Service
@@ -42,7 +45,7 @@ public class HintOperationsImpl implements HintOperations {
 	@Reference private ProjectOperations projectOperations;
 
 	public String hint(String topic) {
-		if (topic == null || "".equals(topic)) {
+		if (!StringUtils.hasText(topic)) {
 			topic = determineTopic();
 		}
 		try {
@@ -72,21 +75,23 @@ public class HintOperationsImpl implements HintOperations {
 			return "start";
 		}
 
-		if (!fileManager.exists(pathResolver.getFocusedIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml"))) {
-			return "jpa";
+		if (!(fileManager.exists(pathResolver.getFocusedIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml")) || fileManager.exists(pathResolver.getFocusedIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/spring/applicationContext-mongo.xml")))) {
+			return "persistence";
 		}
 
-		int entityCount = fileManager.findMatchingAntPath(pathResolver.getFocusedRoot(Path.SRC_MAIN_JAVA) + ANT_MATCH_DIRECTORY_PATTERN + "*_ROO_JPA_ACTIVE_RECORD.aj").size();
-
-		if (entityCount == 0) {
+		if (NumberUtils.max(getItdCount("Jpa_ActiveRecord"), getItdCount("Jpa_Entity"), getItdCount("Mongo_Entity")).compareTo(BigDecimal.ZERO) == 0) {
 			return "entities";
 		}
 
-		int javaBeanCount = fileManager.findMatchingAntPath(pathResolver.getFocusedRoot(Path.SRC_MAIN_JAVA) + ANT_MATCH_DIRECTORY_PATTERN + "*_Roo_JavaBean.aj").size();
+		int javaBeanCount = getItdCount("JavaBean");
 		if (javaBeanCount == 0) {
 			return "fields";
 		}
 
 		return "general";
+	}
+
+	private int getItdCount(final String itdUniquenessFilenameSuffix) {
+		return fileManager.findMatchingAntPath(pathResolver.getFocusedRoot(Path.SRC_MAIN_JAVA) + ANT_MATCH_DIRECTORY_PATTERN + "*_Roo_" + itdUniquenessFilenameSuffix + ".aj").size();
 	}
 }
