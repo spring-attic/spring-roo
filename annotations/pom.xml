@@ -12,9 +12,9 @@
     <name>Spring Roo - Annotations (ASLv2 Licensed)</name>
     <build>
         <plugins>
-            <plugin> <!-- should move antrun to a pluginManagement section in root POM; similarly do this for all other plugins -->
+            <plugin> <!-- Should move antrun to a pluginManagement section in root POM; similarly do this for all other plugins -->
                 <artifactId>maven-antrun-plugin</artifactId>
-                <version>1.6</version>
+                <version>1.7</version>
                 <executions>
                     <execution>
                         <id>generate-sources</id>
