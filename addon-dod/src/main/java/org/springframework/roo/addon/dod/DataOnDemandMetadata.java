@@ -78,6 +78,8 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	// Constants
 	private static final String PROVIDES_TYPE_STRING = DataOnDemandMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
+	private static final JavaSymbolName INDEX = new JavaSymbolName("index");
+	private static final JavaSymbolName VALUE = new JavaSymbolName("value");
 
 	// Fields
 	private DataOnDemandAnnotationValues annotationValues;
@@ -295,7 +297,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		JavaSymbolName methodName = new JavaSymbolName("getNewTransient" + entity.getSimpleTypeName());
 
 		final JavaType parameterType = JavaType.INT_PRIMITIVE;
-		List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("index"));
+		List<JavaSymbolName> parameterNames = Arrays.asList(INDEX);
 
 		// Locate user-defined method
 		MethodMetadata userMethod = getGovernorMethod(methodName, parameterType);
@@ -372,7 +374,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		bodyBuilder.appendFormalLine(embeddedIdentifierFieldType.getSimpleTypeName() + " embeddedIdClass = new " + embeddedIdentifierFieldType.getSimpleTypeName() + "(" + sb.toString() + ");");
 		bodyBuilder.appendFormalLine("obj." + embeddedIdentifierMutator + "(embeddedIdClass);");
 
-		List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("obj"), new JavaSymbolName("index"));
+		List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("obj"), INDEX);
 
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
 		return methodBuilder.build();
@@ -400,7 +402,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		}
 		bodyBuilder.appendFormalLine("obj." + embeddedHolder.getEmbeddedMutatorMethodName() + "(embeddedClass);");
 
-		List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("obj"), new JavaSymbolName("index"));
+		List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("obj"), INDEX);
 
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
 		return methodBuilder.build();
@@ -411,7 +413,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	}
 
 	private void addEmbeddedClassFieldMutatorMethodsToBuilder(final EmbeddedHolder embeddedHolder) {
-		List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("obj"), new JavaSymbolName("index"));
+		List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("obj"), INDEX);
 
 		JavaType embeddedFieldType = embeddedHolder.getEmbeddedField().getFieldType();
 		final JavaType[] parameterTypes = { embeddedFieldType, JavaType.INT_PRIMITIVE };
@@ -444,8 +446,8 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	private List<MethodMetadata> getFieldMutatorMethods() {
 		List<MethodMetadata> fieldMutatorMethods = new ArrayList<MethodMetadata>();
 
-		List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("obj"), new JavaSymbolName("index"));
-		final JavaType[] parameterTypes = {entity, JavaType.INT_PRIMITIVE};
+		List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("obj"), INDEX);
+		final JavaType[] parameterTypes = { entity, JavaType.INT_PRIMITIVE };
 
 		Set<String> existingMutators = new HashSet<String>();
 
@@ -614,7 +616,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		JavaType fieldType = field.getFieldType();
 
 		if (decimalMinAnnotation != null && decimalMaxAnnotation == null) {
-			String minValue = (String) decimalMinAnnotation.getAttribute(new JavaSymbolName("value")).getValue();
+			String minValue = (String) decimalMinAnnotation.getAttribute(VALUE).getValue();
 
 			if (fieldType.equals(BIG_DECIMAL)) {
 				bodyBuilder.appendFormalLine("if (" + fieldName + ".compareTo(new " + BIG_DECIMAL.getSimpleTypeName() + "(\"" + minValue + "\")) == -1) {");
@@ -629,7 +631,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			bodyBuilder.indentRemove();
 			bodyBuilder.appendFormalLine("}");
 		} else if (decimalMinAnnotation == null && decimalMaxAnnotation != null) {
-			String maxValue = (String) decimalMaxAnnotation.getAttribute(new JavaSymbolName("value")).getValue();
+			String maxValue = (String) decimalMaxAnnotation.getAttribute(VALUE).getValue();
 
 			if (fieldType.equals(BIG_DECIMAL)) {
 				bodyBuilder.appendFormalLine("if (" + fieldName + ".compareTo(new " + BIG_DECIMAL.getSimpleTypeName() + "(\"" + maxValue + "\")) == 1) {");
@@ -644,8 +646,8 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			bodyBuilder.indentRemove();
 			bodyBuilder.appendFormalLine("}");
 		} else if (decimalMinAnnotation != null && decimalMaxAnnotation != null) {
-			String minValue = (String) decimalMinAnnotation.getAttribute(new JavaSymbolName("value")).getValue();
-			String maxValue = (String) decimalMaxAnnotation.getAttribute(new JavaSymbolName("value")).getValue();
+			String minValue = (String) decimalMinAnnotation.getAttribute(VALUE).getValue();
+			String maxValue = (String) decimalMaxAnnotation.getAttribute(VALUE).getValue();
 			Assert.isTrue(Double.parseDouble(maxValue) >= Double.parseDouble(minValue), "The value of @DecimalMax must be greater or equal to the value of @DecimalMin for field " + fieldName);
 
 			if (fieldType.equals(BIG_DECIMAL)) {
@@ -705,7 +707,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		AnnotationMetadata minAnnotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), MIN);
 		AnnotationMetadata maxAnnotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), MAX);
 		if (minAnnotation != null && maxAnnotation == null) {
-			Number minValue = (Number) minAnnotation.getAttribute(new JavaSymbolName("value")).getValue();
+			Number minValue = (Number) minAnnotation.getAttribute(VALUE).getValue();
 
 			if (fieldType.equals(BIG_INTEGER)) {
 				bodyBuilder.appendFormalLine("if (" + fieldName + ".compareTo(new " + BIG_INTEGER.getSimpleTypeName() + "(\"" + minValue + "\")) == -1) {");
@@ -720,7 +722,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			bodyBuilder.indentRemove();
 			bodyBuilder.appendFormalLine("}");
 		} else if (minAnnotation == null && maxAnnotation != null) {
-			Number maxValue = (Number) maxAnnotation.getAttribute(new JavaSymbolName("value")).getValue();
+			Number maxValue = (Number) maxAnnotation.getAttribute(VALUE).getValue();
 
 			if (fieldType.equals(BIG_INTEGER)) {
 				bodyBuilder.appendFormalLine("if (" + fieldName + ".compareTo(new " + BIG_INTEGER.getSimpleTypeName() + "(\"" + maxValue + "\")) == 1) {");
@@ -735,8 +737,8 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			bodyBuilder.indentRemove();
 			bodyBuilder.appendFormalLine("}");
 		} else if (minAnnotation != null && maxAnnotation != null) {
-			Number minValue = (Number) minAnnotation.getAttribute(new JavaSymbolName("value")).getValue();
-			Number maxValue = (Number) maxAnnotation.getAttribute(new JavaSymbolName("value")).getValue();
+			Number minValue = (Number) minAnnotation.getAttribute(VALUE).getValue();
+			Number maxValue = (Number) maxAnnotation.getAttribute(VALUE).getValue();
 			Assert.isTrue(maxValue.longValue() >= minValue.longValue(), "The value of @Max must be greater or equal to the value of @Min for field " + fieldName);
 
 			if (fieldType.equals(BIG_INTEGER)) {
@@ -816,7 +818,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		// Method definition to find or build
 		JavaSymbolName methodName = new JavaSymbolName("getSpecific" + entity.getSimpleTypeName());
 		final JavaType parameterType = JavaType.INT_PRIMITIVE;
-		List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("index"));
+		List<JavaSymbolName> parameterNames = Arrays.asList(INDEX);
 
 		// Locate user-defined method
 		MethodMetadata userMethod = getGovernorMethod(methodName, parameterType);
@@ -937,7 +939,8 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	}
 
 	private String getFieldInitializer(final FieldMetadata field, final DataOnDemandMetadata collaboratingMetadata) {
-		JavaType fieldType = field.getFieldType();
+		final JavaType fieldType = field.getFieldType();
+		final String fieldName = field.getFieldName().getSymbolName();
 		String initializer = "null";
 		String fieldInitializer = field.getFieldInitializer();
 		Set<Object> fieldCustomDataKeys = field.getCustomData().keySet();
@@ -973,10 +976,10 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 				int offset = fieldInitializer.indexOf("\"");
 				initializer = fieldInitializer.substring(offset + 1, fieldInitializer.lastIndexOf("\""));
 			} else {
-				initializer = field.getFieldName().getSymbolName();
+				initializer = fieldName;
 			}
 
-			if (MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), VALIDATOR_CONSTRAINTS_EMAIL) != null) {
+			if (MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), VALIDATOR_CONSTRAINTS_EMAIL) != null || fieldName.toLowerCase().contains("email")) {
 				initializer = "\"foo\" + index + \"@bar.com\"";
 			} else {
 				int maxLength = Integer.MAX_VALUE;
@@ -991,7 +994,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 					AnnotationAttributeValue<?> minValue = sizeAnnotation.getAttribute(new JavaSymbolName("min"));
 					if (minValue != null) {
 						int minLength = ((Integer) minValue.getValue()).intValue();
-						Assert.isTrue(maxLength >= minLength, "@Size attribute 'max' must be greater than 'min' for field '" + field.getFieldName().getSymbolName() + "' in " + entity.getFullyQualifiedTypeName());
+						Assert.isTrue(maxLength >= minLength, "@Size attribute 'max' must be greater than 'min' for field '" + fieldName + "' in " + entity.getFullyQualifiedTypeName());
 						if (initializer.length() + 2 < minLength) {
 							initializer = String.format("%1$-" + (minLength - 2) + "s", initializer).replace(' ', 'x');
 						}

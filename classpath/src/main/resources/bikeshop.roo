@@ -17,7 +17,7 @@ enum constant --name Stem
 enum constant --name Derailleur
 enum constant --name Fork
 
-entity jpa --class ~.domain.Product --equals
+entity jpa --class ~.domain.Product --equals --testAutomatically
 field string --fieldName name --sizeMax 25 --notNull
 field string --fieldName description --sizeMax 250
 field enum --fieldName productType --type ~.reference.ProductType --notNull
@@ -25,7 +25,7 @@ field date --fieldName releaseDate --type java.util.Date
 field number --fieldName weight --type java.math.BigDecimal --decimalMin 0.0 --decimalMax 9.99
 field file --fieldName image --contentType JPG
 
-entity jpa --class ~.domain.Supplier --equals
+entity jpa --class ~.domain.Supplier --equals --testAutomatically
 field string --fieldName name --sizeMax 25 --notNull
 field string --fieldName address --sizeMax 100 --notNull
 field string --fieldName description 
