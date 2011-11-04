@@ -22,6 +22,7 @@ import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.process.manager.MutableFile;
+import org.springframework.roo.project.ContextualPath;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
@@ -293,7 +294,8 @@ public class CreatorOperationsImpl implements CreatorOperations {
 	 * @param pom the POM to write (required)
 	 */
 	private void writePomFile(final Document pom) {
-		final MutableFile pomFile = fileManager.createFile(pathResolver.getFocusedIdentifier(Path.ROOT, POM_XML));
+		final ContextualPath rootPath = ContextualPath.getInstance(Path.ROOT, "");
+		final MutableFile pomFile = fileManager.createFile(pathResolver.getIdentifier(rootPath, POM_XML));
 		XmlUtils.writeXml(pomFile.getOutputStream(), pom);
 	}
 

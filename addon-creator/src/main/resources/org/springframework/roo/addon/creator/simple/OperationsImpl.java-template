@@ -13,7 +13,7 @@ import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
-import org.springframework.roo.support.util.TemplateUtils;
+import org.springframework.roo.support.util.FileUtils;
 
 /**
  * Implementation of {@link __APP_NAME__Operations} interface.
@@ -23,6 +23,7 @@ import org.springframework.roo.support.util.TemplateUtils;
 @Component
 @Service
 public class __APP_NAME__OperationsImpl implements __APP_NAME__Operations {
+
 	private static final char SEPARATOR = File.separatorChar;
 
 	/**
@@ -40,23 +41,23 @@ public class __APP_NAME__OperationsImpl implements __APP_NAME__Operations {
 	 */
 	@Reference private ProjectOperations projectOperations;
 
-	 /** {@inheritDoc} */
+	/** {@inheritDoc} */
 	public boolean isInstallTagsCommandAvailable() {
-		return projectOperations.isProjectAvailable() && fileManager.exists(projectOperations.getProjectMetadata().getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF" + SEPARATOR + "tags"));
+		return projectOperations.isFocusedProjectAvailable() && fileManager.exists(projectOperations.getPathResolver().getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF" + SEPARATOR + "tags"));
 	}
 
-	 /** {@inheritDoc} */
+	/** {@inheritDoc} */
 	public String getProperty(String propertyName) {
 		Assert.hasText(propertyName, "Property name required");
 		return System.getProperty(propertyName);
 	}
 
-	 /** {@inheritDoc} */
+	/** {@inheritDoc} */
 	public void installTags() {
 		// Use PathResolver to get canonical resource names for a given artifact
-		PathResolver pathResolver = projectOperations.getProjectMetadata().getPathResolver();
-		createOrReplaceFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF" + SEPARATOR + "tags" + SEPARATOR + "util"), "info.tagx");
-		createOrReplaceFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF" + SEPARATOR + "tags" + SEPARATOR + "form"), "show.tagx");
+		PathResolver pathResolver = projectOperations.getPathResolver();
+		createOrReplaceFile(pathResolver.getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF" + SEPARATOR + "tags" + SEPARATOR + "util"), "info.tagx");
+		createOrReplaceFile(pathResolver.getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF" + SEPARATOR + "tags" + SEPARATOR + "form"), "show.tagx");
 	}
 	
 	/**
@@ -74,8 +75,8 @@ public class __APP_NAME__OperationsImpl implements __APP_NAME__Operations {
 		MutableFile mutableFile = fileManager.exists(targetFile) ? fileManager.updateFile(targetFile) : fileManager.createFile(targetFile);
 		try {
 			// Use FileCopyUtils for copying resources from your add-on to the target project
-			// Use TemplateUtils to open an InputStream to a resource located in your bundle
-			FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), fileName), mutableFile.getOutputStream());
+			// Use FileUtils to open an InputStream to a resource located in your bundle
+			FileCopyUtils.copy(FileUtils.getInputStream(getClass(), fileName), mutableFile.getOutputStream());
 		} catch (IOException e) {
 			throw new IllegalStateException(e);
 		}

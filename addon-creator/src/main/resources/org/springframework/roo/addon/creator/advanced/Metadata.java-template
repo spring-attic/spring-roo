@@ -17,7 +17,7 @@ import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.Path;
+import org.springframework.roo.project.ContextualPath;
 import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
 
@@ -28,9 +28,31 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.1.0
  */
 public class __APP_NAME__Metadata extends AbstractItdTypeDetailsProvidingMetadataItem {
+
+    // Constants
 	private static final String PROVIDES_TYPE_STRING = __APP_NAME__Metadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
 
+    public static final String getMetadataIdentiferType() {
+        return PROVIDES_TYPE;
+    }
+    
+    public static final String createIdentifier(JavaType javaType, ContextualPath path) {
+        return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
+    }
+
+    public static final JavaType getJavaType(String metadataIdentificationString) {
+        return PhysicalTypeIdentifierNamingUtils.getJavaType(PROVIDES_TYPE_STRING, metadataIdentificationString);
+    }
+
+    public static final ContextualPath getPath(String metadataIdentificationString) {
+        return PhysicalTypeIdentifierNamingUtils.getPath(PROVIDES_TYPE_STRING, metadataIdentificationString);
+    }
+
+    public static boolean isValid(String metadataIdentificationString) {
+        return PhysicalTypeIdentifierNamingUtils.isValid(PROVIDES_TYPE_STRING, metadataIdentificationString);
+    }
+    
 	public __APP_NAME__Metadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
@@ -122,25 +144,5 @@ public class __APP_NAME__Metadata extends AbstractItdTypeDetailsProvidingMetadat
 		tsc.append("governor", governorPhysicalTypeMetadata.getId());
 		tsc.append("itdTypeDetails", itdTypeDetails);
 		return tsc.toString();
-	}
-
-	public static final String getMetadataIdentiferType() {
-		return PROVIDES_TYPE;
-	}
-	
-	public static final String createIdentifier(JavaType javaType, Path path) {
-		return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
-	}
-
-	public static final JavaType getJavaType(String metadataIdentificationString) {
-		return PhysicalTypeIdentifierNamingUtils.getJavaType(PROVIDES_TYPE_STRING, metadataIdentificationString);
-	}
-
-	public static final Path getPath(String metadataIdentificationString) {
-		return PhysicalTypeIdentifierNamingUtils.getPath(PROVIDES_TYPE_STRING, metadataIdentificationString);
-	}
-
-	public static boolean isValid(String metadataIdentificationString) {
-		return PhysicalTypeIdentifierNamingUtils.isValid(PROVIDES_TYPE_STRING, metadataIdentificationString);
 	}
 }
