@@ -19,6 +19,7 @@ import org.springframework.roo.support.util.FileUtils;
  */
 public abstract class FileConverter implements Converter<File> {
 
+	private static final String HOME_DIRECTORY_SYMBOL = "~";
 	// Constants
 	private static final String home = System.getProperty("user.home");
 
@@ -81,10 +82,10 @@ public abstract class FileConverter implements Converter<File> {
 			// Input was originally as a fully-qualified path, so we just keep the completion in that form
 			return completion;
 		}
-		if (originalUserInput.startsWith("~")) {
-			// Input originally started with a ~, so replace the user's home directory with a ~ again
+		if (originalUserInput.startsWith(HOME_DIRECTORY_SYMBOL)) {
+			// Input originally started with this symbol, so replace the user's home directory with it again
 			Assert.notNull(home, "Home directory could not be determined from system properties");
-			return "~" + completion.substring(home.length());
+			return HOME_DIRECTORY_SYMBOL + completion.substring(home.length());
 		}
 		// The path was working directory specific, so strip the working directory given the user never typed it
 		return completion.substring(getWorkingDirectoryAsString().length());
@@ -104,8 +105,8 @@ public abstract class FileConverter implements Converter<File> {
 			// Input is already in a fully-qualified path form
 			return userInput;
 		}
-		if (userInput.startsWith("~")) {
-			// Input starts with a ~, so replace with the user's home directory
+		if (userInput.startsWith(HOME_DIRECTORY_SYMBOL)) {
+			// Replace this symbol with the user's actual home directory
 			Assert.notNull(home, "Home directory could not be determined from system properties");
 			if (userInput.length() > 1) {
 				return home + userInput.substring(1);

@@ -1,8 +1,6 @@
 package org.springframework.roo.project.converter;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -12,11 +10,15 @@ import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.shell.Completion;
 import org.springframework.roo.shell.Converter;
 import org.springframework.roo.shell.MethodTarget;
+import org.springframework.roo.support.util.StringUtils;
 
 @Component
 @Service
 public class PomConverter implements Converter<Pom>{
 
+	// Constants
+	private static final String ROOT_MODULE_SYMBOL = "~";
+	
 	// Fields
 	@Reference private PomManagementService pomManagementService;
 
@@ -24,30 +26,26 @@ public class PomConverter implements Converter<Pom>{
 		return Pom.class.isAssignableFrom(type);
 	}
 
-	public Pom convertFromText(String value, final Class<?> targetType, final String optionContext) {
-		if ("~".equals(value)) {
-			value = "";
+	public Pom convertFromText(final String value, final Class<?> targetType, final String optionContext) {
+		final String moduleName;
+		if (ROOT_MODULE_SYMBOL.equals(value)) {
+			moduleName = "";
+		} else {
+			moduleName = value;
 		}
-		final Map<String, Pom> abbreviationMap = new HashMap<String, Pom>();
-		for (final Pom pom : pomManagementService.getPoms()) {
-			abbreviationMap.put(pom.getModuleName(), pom);
-		}
-		return abbreviationMap.get(value);
+		return pomManagementService.getPomFromModuleName(moduleName);
 	}
 
 	public boolean getAllPossibleValues(final List<Completion> completions, final Class<?> targetType, final String existingData, final String optionContext, final MethodTarget target) {
-		Pom focusedModule = pomManagementService.getFocusedModule();
+		final Pom focusedModule = pomManagementService.getFocusedModule();
 		if (focusedModule == null) {
 			return false;
 		}
-		String focusedModuleName = focusedModule.getModuleName();
+		final String focusedModuleName = focusedModule.getModuleName();
 		for (final Pom pom : pomManagementService.getPoms()) {
-			String moduleName = pom.getModuleName();
-			if (moduleName.equals("")) {
-				moduleName = "~";
-			}
-			if (!moduleName.equals(focusedModuleName)) {
-				completions.add(new Completion(moduleName));
+			final String nonEmptyModuleName = StringUtils.defaultIfEmpty(pom.getModuleName(), ROOT_MODULE_SYMBOL);
+			if (!nonEmptyModuleName.equals(focusedModuleName)) {
+				completions.add(new Completion(nonEmptyModuleName));
 			}
 		}
 		return false;

@@ -1,5 +1,6 @@
 package org.springframework.roo.classpath.converters;
 
+import static org.springframework.roo.classpath.converters.JavaPackageConverter.TOP_LEVEL_PACKAGE_SYMBOL;
 import static org.springframework.roo.project.ContextualPath.MODULE_PATH_SEPARATOR;
 
 import org.apache.felix.scr.annotations.Component;
@@ -81,7 +82,7 @@ public class LastUsedImpl implements LastUsed {
 			}
 		}
 
-		String path = moduleName + fullyQualifiedName.replace(topLevelPackage.getFullyQualifiedPackageName(), "~");
+		String path = moduleName + fullyQualifiedName.replace(topLevelPackage.getFullyQualifiedPackageName(), TOP_LEVEL_PACKAGE_SYMBOL);
 		shell.setPromptPath(path, StringUtils.hasText(moduleName));
 
 	}

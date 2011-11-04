@@ -22,8 +22,8 @@ import org.springframework.roo.shell.Converter;
 import org.springframework.roo.shell.MethodTarget;
 
 /**
- * A {@link Converter} for {@link JavaPackage}s, with support for using "~" to
- * denote the user's top-level package.
+ * A {@link Converter} for {@link JavaPackage}s, with support for using
+ * {@value #TOP_LEVEL_PACKAGE_SYMBOL} to denote the user's top-level package.
  *
  * @author Ben Alex
  * @since 1.0
@@ -35,10 +35,8 @@ public class JavaPackageConverter implements Converter<JavaPackage> {
 	/**
 	 * The shell character that represents the current project or module's top
 	 * level Java package.
-	 * 
-	 * TODO move (if appropriate) and reuse
 	 */
-	private static final String TOP_LEVEL_PACKAGE_SYMBOL = "~";
+	public static final String TOP_LEVEL_PACKAGE_SYMBOL = "~";
 	
 	// Fields
 	@Reference FileManager fileManager;

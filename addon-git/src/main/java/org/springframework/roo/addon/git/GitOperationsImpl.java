@@ -36,7 +36,8 @@ import org.springframework.roo.support.util.FileUtils;
 public class GitOperationsImpl implements GitOperations {
 
 	// Constants
-	private static final Logger logger = Logger.getLogger(GitOperationsImpl.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(GitOperationsImpl.class.getName());
+	private static final String REVISION_STRING_DELIMITER = "~";
 
 	// Fields
 	@Reference private FileManager fileManager;
@@ -64,7 +65,7 @@ public class GitOperationsImpl implements GitOperations {
 			Status status = git.status().call();
 			if (status.getChanged().size() > 0 || status.getAdded().size() > 0 || status.getModified().size() > 0 || status.getRemoved().size() > 0) {
 				RevCommit rev = git.commit().setAll(true).setCommitter(person).setAuthor(person).setMessage(message).call();
-				logger.info("Git commit " + rev.getName() + " [" + message + "]");
+				LOGGER.info("Git commit " + rev.getName() + " [" + message + "]");
 			}
 		} catch (Exception e) {
 			throw new IllegalStateException("Could not commit changes to local Git repository", e);
@@ -75,7 +76,7 @@ public class GitOperationsImpl implements GitOperations {
 		Git git = new Git(getRepository());
 		try {
 			for (PushResult result : git.push().setPushAll().call()) {
-				logger.info(result.getMessages());
+				LOGGER.info(result.getMessages());
 			}
 		} catch (Exception e) {
 			throw new IllegalStateException("Unable to perform push operation ", e);
@@ -87,15 +88,15 @@ public class GitOperationsImpl implements GitOperations {
 		Git git = new Git(repository);
 		try {
 			int counter = 0;
-			logger.warning("---------- Start Git log ----------");
+			LOGGER.warning("---------- Start Git log ----------");
 			for (RevCommit commit : git.log().call()) {
-				logger.info("commit id: " + commit.getName());
-				logger.info("message:   " + commit.getFullMessage());
-				logger.info("");
+				LOGGER.info("commit id: " + commit.getName());
+				LOGGER.info("message:   " + commit.getFullMessage());
+				LOGGER.info("");
 				if (++counter >= maxHistory)
 					break;
 			}
-			logger.warning("---------- End Git log ----------");
+			LOGGER.warning("---------- End Git log ----------");
 		} catch (Exception e) {
 			throw new IllegalStateException("Could not parse git log", e);
 		}
@@ -103,7 +104,7 @@ public class GitOperationsImpl implements GitOperations {
 
 	public void reset(final int noOfCommitsToRevert, final String message) {
 		Repository repository = getRepository();
-		RevCommit commit = findCommit(Constants.HEAD + "~" + noOfCommitsToRevert, repository);
+		RevCommit commit = findCommit(Constants.HEAD + REVISION_STRING_DELIMITER + noOfCommitsToRevert, repository);
 		if (commit == null) {
 			return;
 		}
@@ -113,14 +114,14 @@ public class GitOperationsImpl implements GitOperations {
 			git.reset().setRef(commit.getName()).setMode(ResetType.HARD).call();
 			// Commit changes
 			commitAllChanges(message);
-			logger.info("Reset of last " + (noOfCommitsToRevert + 1) + " successful.");
+			LOGGER.info("Reset of last " + (noOfCommitsToRevert + 1) + " successful.");
 		} catch (Exception e) {
 			throw new IllegalStateException("Reset did not succeed.", e);
 		}
 	}
 
 	public void revertLastCommit(final String message) {
-		revertCommit(Constants.HEAD + "~0", message);
+		revertCommit(Constants.HEAD + REVISION_STRING_DELIMITER + "0", message);
 	}
 
 	public void revertCommit(final String revstr, final String message) {
@@ -135,7 +136,7 @@ public class GitOperationsImpl implements GitOperations {
 			git.revert().include(commit).call();
 			// Commit changes
 			commitAllChanges(message);
-			logger.info("Revert of commit " + revstr + " successful.");
+			LOGGER.info("Revert of commit " + revstr + " successful.");
 		} catch (Exception e) {
 			throw new IllegalStateException("Revert of commit " + revstr + " did not succeed.", e);
 		}
@@ -147,9 +148,9 @@ public class GitOperationsImpl implements GitOperations {
 		try {
 			commit = walk.parseCommit(repository.resolve(revstr));
 		} catch (MissingObjectException e1) {
-			logger.warning("Could not find commit with id: " + revstr);
+			LOGGER.warning("Could not find commit with id: " + revstr);
 		} catch (IncorrectObjectTypeException e1) {
-			logger.warning("The provided rev is not a commit: " + revstr);
+			LOGGER.warning("The provided rev is not a commit: " + revstr);
 		} catch (Exception ignore) {} finally {
 			walk.release();
 		}
@@ -168,7 +169,7 @@ public class GitOperationsImpl implements GitOperations {
 
 	public void setup() {
 		if (hasDotGit()) {
-			logger.info("Git is already configured");
+			LOGGER.info("Git is already configured");
 			return;
 		}
 		if (person == null) {

@@ -7,6 +7,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+import static org.springframework.roo.classpath.converters.JavaPackageConverter.TOP_LEVEL_PACKAGE_SYMBOL;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,7 +32,9 @@ import org.springframework.roo.shell.Completion;
  */
 public class JavaPackageConverterTest {
 	
+	// Constants
 	private static final String TOP_LEVEL_PACKAGE = "com.example";
+	
 	// Fixture
 	private JavaPackageConverter converter;
 	private @Mock LastUsed mockLastUsed;
@@ -118,13 +121,13 @@ public class JavaPackageConverterTest {
 	
 	@Test
 	public void testConvertFromTextThatStartsWithTopLevelPackageSymbolPlusNoDot() {
-		assertConvertFromValidText("~Domain", null, TOP_LEVEL_PACKAGE + ".domain");
+		assertConvertFromValidText(TOP_LEVEL_PACKAGE_SYMBOL + "Domain", null, TOP_LEVEL_PACKAGE + ".domain");
 		verifyNoMoreInteractions(mockLastUsed);
 	}
 	
 	@Test
 	public void testConvertFromTextThatIsTopLevelPackageSymbol() {
-		assertConvertFromValidText("~", null, TOP_LEVEL_PACKAGE);
+		assertConvertFromValidText(TOP_LEVEL_PACKAGE_SYMBOL, null, TOP_LEVEL_PACKAGE);
 		verifyNoMoreInteractions(mockLastUsed);
 	}
 	
