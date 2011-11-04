@@ -40,8 +40,19 @@ public @interface CliOption {
 	String specifiedDefaultValue() default "__NULL__";
 
 	/**
-	 * @return the name of a context which will be available to the {@link Converter} and {@link jline.Completor}
-	 * when being asked to process the option (defaults to an empty String, meaning no option context is set)
+	 * Returns a string providing context-specific information (e.g. a comma-delimited
+	 * set of keywords) to the {@link Converter} that handles the annotated parameter's type.
+	 * <p>
+	 * For example, if a method parameter "thing" of type "Thing" is annotated as
+	 * follows:
+	 * <pre>@CliOption(..., optionContext = "foo,bar", ...) Thing thing</pre>
+	 * ... then the {@link Converter} that converts the text entered by the user
+	 * into an instance of Thing will be passed "foo,bar" as the value of the
+	 * <code>optionContext</code> parameter in its public methods. This allows
+	 * the behaviour of that Converter to be individually customised for each
+	 * {@link CliOption} of each {@link CliCommand}.
+	 *
+	 * @return a non-<code>null</code> string (can be empty)
 	 */
 	String optionContext() default "";
 
