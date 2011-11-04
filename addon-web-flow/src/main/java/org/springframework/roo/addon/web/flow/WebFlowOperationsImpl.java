@@ -135,9 +135,9 @@ public class WebFlowOperationsImpl implements WebFlowOperations {
 
 		projectOperations.addDependencies(projectOperations.getFocusedModuleName(), dependencies);
 		
-		List<Element> repositories = XmlUtils.findElements("/configuration/springWebFlow/repositories/repository", configuration);
-		for (Element r : repositories) {
-			projectOperations.addRepository(projectOperations.getFocusedModuleName(), new Repository(r));
+		List<Element> repositoriesElement = XmlUtils.findElements("/configuration/springWebFlow/repositories/repository", configuration);
+		for (Element repositoryElement : repositoriesElement) {
+			projectOperations.addRepository(projectOperations.getFocusedModuleName(), new Repository(repositoryElement));
 		}
 		projectOperations.updateProjectType(projectOperations.getFocusedModuleName(), ProjectType.WAR);
 	}

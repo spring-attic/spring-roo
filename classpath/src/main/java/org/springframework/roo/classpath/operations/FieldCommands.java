@@ -131,30 +131,6 @@ public class FieldCommands implements CommandMarker {
 		insertField(fieldDetails, permitReservedWords, transientModifier);
 	}
 
-	private void insertField(final FieldDetails fieldDetails, final boolean permitReservedWords, final boolean transientModifier) {
-		if (!permitReservedWords) {
-			ReservedWords.verifyReservedWordsNotPresent(fieldDetails.getFieldName());
-			if (fieldDetails.getColumn() != null) {
-				ReservedWords.verifyReservedWordsNotPresent(fieldDetails.getColumn());
-			}
-		}
-
-		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
-		fieldDetails.decorateAnnotationsList(annotations);
-		String initializer = null;
-		if (fieldDetails instanceof CollectionField) {
-			CollectionField collectionField = (CollectionField) fieldDetails;
-			initializer = "new " + collectionField.getInitializer() + "()";
-		}
-		int modifier = Modifier.PRIVATE;
-		if (transientModifier) modifier += Modifier.TRANSIENT;
-
-		FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(fieldDetails.getPhysicalTypeIdentifier(), modifier, annotations, fieldDetails.getFieldName(), fieldDetails.getFieldType());
-		fieldBuilder.setFieldInitializer(initializer);
-
-		typeManagementService.addField(fieldBuilder.build());
-	}
-
 	@CliCommand(value = "field number", help = "Adds a private numeric field to an existing Java source file")
 	public void addFieldNumber(
 		@CliOption(key = { "", "fieldName" }, mandatory = true, help = "The name of the field to add") final JavaSymbolName fieldName,
@@ -383,7 +359,7 @@ public class FieldCommands implements CommandMarker {
 		} else if (classOrInterfaceTypeDetails.getPhysicalTypeCategory() == PhysicalTypeCategory.ENUMERATION) {
 			cardinality = null;
 		} else if (persistentAnnotation != null){
-			// yes, we can deal with that
+			// Yes, we can deal with that
 		} else {
 			throw new IllegalStateException("The field set command is only applicable to enum, JPA @Entity or Spring Data @Persistence elements");
 		}
@@ -463,6 +439,30 @@ public class FieldCommands implements CommandMarker {
 		EmbeddedField fieldDetails = new EmbeddedField(physicalTypeIdentifier, fieldType, fieldName);
 
 		insertField(fieldDetails, permitReservedWords, false);
+	}
+
+	private void insertField(final FieldDetails fieldDetails, final boolean permitReservedWords, final boolean transientModifier) {
+		if (!permitReservedWords) {
+			ReservedWords.verifyReservedWordsNotPresent(fieldDetails.getFieldName());
+			if (fieldDetails.getColumn() != null) {
+				ReservedWords.verifyReservedWordsNotPresent(fieldDetails.getColumn());
+			}
+		}
+
+		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+		fieldDetails.decorateAnnotationsList(annotations);
+		String initializer = null;
+		if (fieldDetails instanceof CollectionField) {
+			CollectionField collectionField = (CollectionField) fieldDetails;
+			initializer = "new " + collectionField.getInitializer() + "()";
+		}
+		int modifier = Modifier.PRIVATE;
+		if (transientModifier) modifier += Modifier.TRANSIENT;
+
+		FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(fieldDetails.getPhysicalTypeIdentifier(), modifier, annotations, fieldDetails.getFieldName(), fieldDetails.getFieldType());
+		fieldBuilder.setFieldInitializer(initializer);
+
+		typeManagementService.addField(fieldBuilder.build());
 	}
 
 	private boolean isDateField(final JavaType fieldType) {

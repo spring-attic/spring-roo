@@ -132,7 +132,7 @@ public final class BeanInfoUtils {
 	 * Returns the accessor name for the given field name and field type.
 	 *
 	 * @param fieldName the field name used to determine the accessor name
-	 * @param fieldType the field type
+	 * @param isBooleanPrimitive whether the field is a boolean primitive
 	 * @return the accessor method name
 	 */
 	public static JavaSymbolName getAccessorMethodName(final JavaSymbolName fieldName, final boolean isBooleanPrimitive) {
