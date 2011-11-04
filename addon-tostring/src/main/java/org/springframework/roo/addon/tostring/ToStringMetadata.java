@@ -139,7 +139,7 @@ public class ToStringMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 				accessorText = accessorName + "() == null ? \"null\" : " + accessorName + "().getTime()";
 			}
 
-			builder.append("        ").append("sb.append(\"").append(fieldName).append(": \").append(").append(accessorText).append(")");
+			builder.append("        sb.append(\"").append(fieldName).append(": \").append(").append(accessorText).append(")");
 			builder.append(index < toStringAccessors.size() ? ".append(\", \");" : ";").append(StringUtils.LINE_SEPARATOR);
 		}
 		builder.insert(0, StringUtils.LINE_SEPARATOR).insert(0, "StringBuilder sb = new StringBuilder();").append("        return sb.toString();");
