@@ -62,7 +62,9 @@ public class ToStringMetadataProvider extends AbstractMemberDiscoveringItdMetada
 			return null;
 		}
 
-		return new ToStringMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, locatedAccessors);
+		final MethodMetadata identifierAccessor = persistenceMemberLocator.getIdentifierAccessor(javaType);
+
+		return new ToStringMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, locatedAccessors, identifierAccessor);
 	}
 
 	@Override

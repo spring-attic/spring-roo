@@ -5,9 +5,8 @@ import static org.springframework.roo.model.JdkJavaType.ARRAYS;
 import static org.springframework.roo.model.JdkJavaType.CALENDAR;
 
 import java.lang.reflect.Modifier;
-import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
@@ -41,6 +40,7 @@ public class ToStringMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 	// Fields
 	private final ToStringAnnotationValues annotationValues;
 	private final List<MethodMetadata> locatedAccessors;
+	private final MethodMetadata identifierAccessor;
 
 	/**
 	 * Constructor
@@ -50,8 +50,9 @@ public class ToStringMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 	 * @param governorPhysicalTypeMetadata
 	 * @param annotationValues
 	 * @param locatedAccessors
+	 * @param identifierAccessor 
 	 */
-	public ToStringMetadata(final String identifier, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final ToStringAnnotationValues annotationValues, final List<MethodMetadata> locatedAccessors) {
+	public ToStringMetadata(final String identifier, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final ToStringAnnotationValues annotationValues, final List<MethodMetadata> locatedAccessors, final MethodMetadata identifierAccessor) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
 		Assert.notNull(annotationValues, "Annotation values required");
@@ -59,6 +60,7 @@ public class ToStringMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 
 		this.annotationValues = annotationValues;
 		this.locatedAccessors = locatedAccessors;
+		this.identifierAccessor = identifierAccessor;
 
 		// Generate the toString() method
 		builder.addMethod(getToStringMethod());
@@ -87,17 +89,46 @@ public class ToStringMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 		if (governorHasMethod(methodName)) {
 			return null;
 		}
-		final ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
 
+		final List<MethodMetadata> toStringAccessors = getToStringAccessors();
+		if (toStringAccessors.isEmpty()) {
+			return null;
+		}
+
+		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+		bodyBuilder.appendFormalLine(getToStringMethodBody(toStringAccessors));
+
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, STRING, bodyBuilder);
+		return methodBuilder.build();
+	}
+
+	private List<MethodMetadata> getToStringAccessors() {
 		final List<?> excludeFieldsList = CollectionUtils.arrayToList(annotationValues.getExcludeFields());
-		final Map<String, String> map = new LinkedHashMap<String, String>();
-		for (MethodMetadata accessor : locatedAccessors) {
-			String accessorName = accessor.getMethodName().getSymbolName();
+		final List<MethodMetadata> toStringAccessors = new LinkedList<MethodMetadata>();
+		for (final MethodMetadata accessor : locatedAccessors) {
 			String fieldName = BeanInfoUtils.getPropertyNameForJavaBeanMethod(accessor).getSymbolName();
 			if (excludeFieldsList.contains(StringUtils.uncapitalize(fieldName))) {
 				continue;
 			}
+			if (accessor.hasSameName(identifierAccessor)) {
+				toStringAccessors.add(0, accessor);
+			} else {
+				toStringAccessors.add(accessor);
+			}
+		}
+		return toStringAccessors;
+	}
 
+	private String getToStringMethodBody(final List<MethodMetadata> toStringAccessors) {
+		final ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
+
+		int index = 0;
+		final StringBuilder builder = new StringBuilder();
+		for (final MethodMetadata accessor : toStringAccessors) {
+			index++;
+
+			String accessorName = accessor.getMethodName().getSymbolName();
+			String fieldName = BeanInfoUtils.getPropertyNameForJavaBeanMethod(accessor).getSymbolName();
 			String accessorText = accessorName + "()";
 			if (accessor.getReturnType().isCommonCollectionType()) {
 				accessorText = accessorName + "() == null ? \"null\" : " + accessorName + "().size()";
@@ -108,32 +139,12 @@ public class ToStringMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 				accessorText = accessorName + "() == null ? \"null\" : " + accessorName + "().getTime()";
 			}
 
-			map.put(fieldName, accessorText);
+			builder.append("        ").append("sb.append(\"").append(fieldName).append(": \").append(").append(accessorText).append(")");
+			builder.append(index < toStringAccessors.size() ? ".append(\", \");" : ";").append(StringUtils.LINE_SEPARATOR);
 		}
+		builder.insert(0, StringUtils.LINE_SEPARATOR).insert(0, "StringBuilder sb = new StringBuilder();").append("        return sb.toString();");
 
-		if (map.isEmpty()) {
-			return null;
-		}
-
-		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		bodyBuilder.appendFormalLine("StringBuilder sb = new StringBuilder();");
-
-		int index = 0;
-		int size = map.size();
-		for (Map.Entry<String, String> entry : map.entrySet()) {
-			index++;
-			StringBuilder builder = new StringBuilder();
-			builder.append("sb.append(\"").append(entry.getKey()).append(": \").append(").append(entry.getValue()).append(")");
-			if (index < size) {
-				builder.append(".append(\", \")");
-			}
-			builder.append(";");
-			bodyBuilder.appendFormalLine(builder.toString());
-		}
-		bodyBuilder.appendFormalLine("return sb.toString();");
-
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, STRING, bodyBuilder);
-		return methodBuilder.build();
+		return builder.toString();
 	}
 
 	@Override
