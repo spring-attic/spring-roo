@@ -76,7 +76,9 @@ public class JavaTypeConverter implements Converter<JavaType> {
 			module = projectOperations.getPomManagementService().getPomFromModuleName(moduleName);
 			topLevelPath = typeLocationService.getTopLevelPackageForModule(module);
 			value = value.substring(value.indexOf(MODULE_PATH_SEPARATOR) + 1, value.length()).trim();
-			projectOperations.getPomManagementService().setFocusedModule(module);
+			if (optionContext.contains("update")) {
+				projectOperations.getPomManagementService().setFocusedModule(module);
+			}
 		} else {
 			topLevelPath = typeLocationService.getTopLevelPackageForModule(projectOperations.getFocusedModule());
 		}
