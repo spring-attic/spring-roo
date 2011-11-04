@@ -1,5 +1,6 @@
 package org.springframework.roo.classpath.converters;
 
+import static org.springframework.roo.classpath.converters.JavaPackageConverter.TOP_LEVEL_PACKAGE_SYMBOL;
 import static org.springframework.roo.project.ContextualPath.MODULE_PATH_SEPARATOR;
 
 import java.math.BigDecimal;
@@ -32,7 +33,9 @@ import org.springframework.roo.support.util.AnsiEscapeCode;
 import org.springframework.roo.support.util.StringUtils;
 
 /**
- * Provides conversion to and from {@link JavaType}, with full support for using "~" as denoting the user's top-level package.
+ * Provides conversion to and from {@link JavaType}, with full support for using
+ * {@value JavaPackageConverter#TOP_LEVEL_PACKAGE_SYMBOL} as denoting the user's
+ * top-level package.
  *
  * @author Ben Alex
  * @since 1.0
@@ -40,6 +43,18 @@ import org.springframework.roo.support.util.StringUtils;
 @Component
 @Service
 public class JavaTypeConverter implements Converter<JavaType> {
+
+	/**
+	 * If this String appears in an option context, this converter will return
+	 * {@link JavaType}s appearing in any module of the user's project.
+	 */
+	public static final String PROJECT = "project";
+
+	/**
+	 * If this String appears in an option context, this converter will update
+	 * the last used type and the focussed module as applicable.
+	 */
+	public static final String UPDATE = "update";
 
 	private static final List<String> NUMBER_PRIMITIVES = Arrays.asList("byte", "short", "int", "long", "float", "double");
 
@@ -113,7 +128,7 @@ public class JavaTypeConverter implements Converter<JavaType> {
 			newValue = newValue.substring(0, index).toLowerCase() + "." + typeName;
 		}
 		JavaType result = new JavaType(newValue);
-		if (optionContext.contains("update")) {
+		if (optionContext.contains(UPDATE)) {
 			lastUsed.setType(result, module);
 		}
 		return result;
@@ -121,7 +136,7 @@ public class JavaTypeConverter implements Converter<JavaType> {
 
 	private String locateNew(final String value, final String topLevelPath) {
 		String newValue = value;
-		if (value.startsWith("~")) {
+		if (value.startsWith(TOP_LEVEL_PACKAGE_SYMBOL)) {
 			if (value.length() > 1) {
 				newValue = (value.charAt(1) == '.' ? topLevelPath : topLevelPath + ".") + value.substring(1);
 			} else {
@@ -136,7 +151,7 @@ public class JavaTypeConverter implements Converter<JavaType> {
 
 	private String locateExisting(final String value, String topLevelPath) {
 		String newValue = value;
-		if (value.startsWith("~")) {
+		if (value.startsWith(TOP_LEVEL_PACKAGE_SYMBOL)) {
 			boolean found = false;
 			while (!found) {
 				if (value.length() > 1) {
@@ -174,7 +189,7 @@ public class JavaTypeConverter implements Converter<JavaType> {
 			existingData = "";
 		}
 
-		if (optionContext == null || "".equals(optionContext) || optionContext.contains("project")) {
+		if (optionContext == null || "".equals(optionContext) || optionContext.contains(PROJECT)) {
 			completeProjectSpecificPaths(completions, existingData);
 		}
 
@@ -270,7 +285,7 @@ public class JavaTypeConverter implements Converter<JavaType> {
 		}
 
 		String newValue = existingData;
-		if (existingData.startsWith("~")) {
+		if (existingData.startsWith(TOP_LEVEL_PACKAGE_SYMBOL)) {
 			if (existingData.length() > 1) {
 				newValue = (existingData.charAt(1) == '.' ? topLevelPath : topLevelPath + ".") + existingData.substring(1);
 			} else {
@@ -306,7 +321,7 @@ public class JavaTypeConverter implements Converter<JavaType> {
 
 		for (String type : typeLocationService.getTypesForModule(focusedModulePath)) {
 			if (type.startsWith(newValue)) {
-				type = StringUtils.replaceFirst(type, topLevelPath, "~");
+				type = StringUtils.replaceFirst(type, topLevelPath, TOP_LEVEL_PACKAGE_SYMBOL);
 				completions.add(new Completion(prefix + type, formattedPrefix + type, heading, 1));
 			}
 		}
