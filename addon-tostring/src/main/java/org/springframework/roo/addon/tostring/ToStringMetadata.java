@@ -5,7 +5,7 @@ import static org.springframework.roo.model.JdkJavaType.ARRAYS;
 import static org.springframework.roo.model.JdkJavaType.CALENDAR;
 
 import java.lang.reflect.Modifier;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
@@ -104,7 +104,7 @@ public class ToStringMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 
 	private List<MethodMetadata> getToStringAccessors() {
 		final List<?> excludeFieldsList = CollectionUtils.arrayToList(annotationValues.getExcludeFields());
-		final List<MethodMetadata> toStringAccessors = new LinkedList<MethodMetadata>();
+		final List<MethodMetadata> toStringAccessors = new ArrayList<MethodMetadata>();
 		for (final MethodMetadata accessor : locatedAccessors) {
 			String fieldName = BeanInfoUtils.getPropertyNameForJavaBeanMethod(accessor).getSymbolName();
 			if (excludeFieldsList.contains(StringUtils.uncapitalize(fieldName))) {
