@@ -113,7 +113,12 @@ public class TypeLocationServiceImpl implements TypeLocationService {
 		Assert.hasText(fileCanonicalPath, "File canonical path required");
 		// Determine the JavaType for this file
 		String relativePath = "";
-		for (PathInformation pathInformation : pomManagementService.getModuleForFileIdentifier(fileCanonicalPath).getPathInformation()) {
+		final Pom moduleForFileIdentifier = pomManagementService.getModuleForFileIdentifier(fileCanonicalPath);
+		if (moduleForFileIdentifier == null) {
+			return relativePath;
+		}
+		
+		for (PathInformation pathInformation : moduleForFileIdentifier.getPathInformation()) {
 			final String moduleCanonicalPath = FileUtils.ensureTrailingSeparator(FileUtils.getCanonicalPath(pathInformation.getLocation()));
 			if (fileCanonicalPath.startsWith(moduleCanonicalPath)) {
 				relativePath = File.separator + StringUtils.replaceFirst(fileCanonicalPath, moduleCanonicalPath, "");
