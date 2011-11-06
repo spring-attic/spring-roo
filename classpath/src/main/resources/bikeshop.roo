@@ -17,15 +17,16 @@ enum constant --name Stem
 enum constant --name Derailleur
 enum constant --name Fork
 
-entity jpa --class ~.domain.Product --equals --testAutomatically
+entity jpa --class ~.domain.Product --activeRecord false --equals --testAutomatically
 field string --fieldName name --sizeMax 25 --notNull
 field string --fieldName description --sizeMax 250
 field enum --fieldName productType --type ~.reference.ProductType --notNull
 field date --fieldName releaseDate --type java.util.Date
 field number --fieldName weight --type java.math.BigDecimal --decimalMin 0.0 --decimalMax 9.99
 field file --fieldName image --contentType JPG
+repository jpa --interface ~.domain.ProductRepository 
 
-entity jpa --class ~.domain.Supplier --equals --testAutomatically
+entity jpa --class ~.domain.Supplier --activeRecord false --equals --testAutomatically
 field string --fieldName name --sizeMax 25 --notNull
 field string --fieldName address --sizeMax 100 --notNull
 field string --fieldName description 
@@ -33,6 +34,7 @@ field number --type int --fieldName supplierNumber --min 1 --max 99
 field date --fieldName inceptionDate --type java.util.Date --past
 field string --fieldName email --regexp "[a-zA-Z0-9]+@[a-zA-Z0-9]+\.[a-zA-Z0-9]+"
 field set --fieldName products --type ~.domain.Product --mappedBy supplier --notNull false --cardinality ONE_TO_MANY --fetch EAGER
+repository jpa --interface ~.domain.SupplierRepository
 
 field reference --fieldName supplier --class ~.domain.Product --type ~.domain.Supplier --notNull
 
