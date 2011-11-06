@@ -45,6 +45,7 @@ import static org.springframework.roo.classpath.customdata.CustomDataKeys.ONE_TO
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.ONE_TO_ONE_FIELD;
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.PERSIST_METHOD;
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.REMOVE_METHOD;
+import static org.springframework.roo.model.JavaType.BOOLEAN_OBJECT;
 import static org.springframework.roo.model.JavaType.BOOLEAN_PRIMITIVE;
 import static org.springframework.roo.model.JavaType.STRING;
 import static org.springframework.roo.model.JdkJavaType.ARRAY_LIST;
@@ -485,12 +486,12 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 			final Integer sizeMinValue = getSizeMinOrMax(field, "min");
 			final BigDecimal sizeMaxValue = NumberUtils.min(getSizeMinOrMax(field, "max"), getColumnLength(field));
 			final boolean required = action != Action.VIEW && (!isNullable(field) || minValue != null || maxValue != null || sizeMinValue != null || sizeMaxValue != null);
-			final boolean isTextarea = (sizeMinValue != null && sizeMinValue.intValue() > 30) || (sizeMaxValue != null && sizeMaxValue.intValue() > 30);
+			final boolean isTextarea = (sizeMinValue != null && sizeMinValue.intValue() > 30) || (sizeMaxValue != null && sizeMaxValue.intValue() > 30) || field.getCustomData().keySet().contains(CustomDataKeys.LOB_FIELD);
 
 			// Field label
 			bodyBuilder.appendFormalLine("HtmlOutputText " + fieldLabelId + " = " + getComponentCreation("HtmlOutputText"));
 			bodyBuilder.appendFormalLine(fieldLabelId + ".setId(\"" + fieldLabelId + "\");");
-			bodyBuilder.appendFormalLine(fieldLabelId + ".setValue(\"" + fieldName + ": " + (required ? "* " : "  ") + "\");");
+			bodyBuilder.appendFormalLine(fieldLabelId + ".setValue(\"" + field.getFieldName().getReadableSymbolName() + ": " + (required ? "* " : "  ") + "\");");
 			bodyBuilder.appendFormalLine(getAddToPanelText(fieldLabelId));
 			bodyBuilder.appendFormalLine("");
 
@@ -547,7 +548,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 						bodyBuilder.appendFormalLine(fieldValueId + ".setAuto(true);");
 					}
 				}
-			} else if (fieldType.equals(JavaType.BOOLEAN_OBJECT) || fieldType.equals(JavaType.BOOLEAN_PRIMITIVE)) {
+			} else if (fieldType.equals(BOOLEAN_OBJECT) || fieldType.equals(BOOLEAN_PRIMITIVE)) {
 				if (action == Action.VIEW) {
 					bodyBuilder.appendFormalLine(htmlOutputTextStr);
 					bodyBuilder.appendFormalLine(getSetValueExpression(fieldValueId, fieldName));
@@ -951,6 +952,10 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 			return null;
 		}
 
+		final ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
+		imports.addImport(LIST);
+		imports.addImport(ARRAY_LIST);
+
 		final List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("query"));
 		final JavaType returnType = new JavaType(LIST.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, Arrays.asList(autoCompleteField.getFieldType()));
 
@@ -980,8 +985,13 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 			return null;
 		}
 
+		final ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
+		imports.addImport(LIST);
+		imports.addImport(ARRAY_LIST);
+
 		final List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("query"));
 		final MemberTypeAdditions findAllMethod = jsfFieldHolder.getCrudAdditions().get(FIND_ALL_METHOD);
+		findAllMethod.copyAdditionsTo(builder, governorTypeDetails);
 		final String simpleTypeName = field.getFieldType().getSimpleTypeName();
 
 		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
@@ -1072,6 +1082,10 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		if (governorHasMethod(methodName)) {
 			return null;
 		}
+
+		final ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
+		imports.addImport(FACES_MESSAGE);
+		imports.addImport(FACES_CONTEXT);
 
 		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine(removeMethod.getMethodCall() + ";");

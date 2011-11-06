@@ -156,12 +156,12 @@ public class JsfApplicationBeanMetadata extends AbstractItdTypeDetailsProvidingM
 			bodyBuilder.appendFormalLine("submenu = new Submenu();");
 			bodyBuilder.appendFormalLine("submenu.setId(\"" + StringUtils.uncapitalize(entity.getSimpleTypeName()) + "Submenu\");");
 			bodyBuilder.appendFormalLine("submenu.setLabel(\"" + entityLabel + "\");");
-			// bodyBuilder.appendFormalLine("submenu.setIcon(\"ui-icon ui-icon-document\");");
 
 			bodyBuilder.appendFormalLine("item = new MenuItem();");
 			bodyBuilder.appendFormalLine("item.setId(\"create" + entity.getSimpleTypeName() + "MenuItem\");");
 			bodyBuilder.appendFormalLine("item.setValueExpression(\"value\", expressionFactory.createValueExpression(elContext, \"#{messages.label_create}\", String.class));");
 			bodyBuilder.appendFormalLine("item.setActionExpression(expressionFactory.createMethodExpression(elContext, \"#{" + beanName + "." + DISPLAY_CREATE_DIALOG + "}\", String.class, new Class[0]));");
+			bodyBuilder.appendFormalLine("item.setIcon(\"ui-icon ui-icon-document\");");
 			bodyBuilder.appendFormalLine("item.setAjax(false);");
 			bodyBuilder.appendFormalLine("item.setAsync(false);");
 			bodyBuilder.appendFormalLine("item.setUpdate(\"data\");");
@@ -171,6 +171,7 @@ public class JsfApplicationBeanMetadata extends AbstractItdTypeDetailsProvidingM
 			bodyBuilder.appendFormalLine("item.setId(\"list" + entity.getSimpleTypeName() + "MenuItem\");");
 			bodyBuilder.appendFormalLine("item.setValueExpression(\"value\", expressionFactory.createValueExpression(elContext, \"#{messages.label_list}\", String.class));");
 			bodyBuilder.appendFormalLine("item.setActionExpression(expressionFactory.createMethodExpression(elContext, \"#{" + beanName + "." + DISPLAY_LIST + "}\", String.class, new Class[0]));");
+			bodyBuilder.appendFormalLine("item.setIcon(\"ui-icon ui-icon-folder-open\");");
 			bodyBuilder.appendFormalLine("item.setAjax(false);");
 			bodyBuilder.appendFormalLine("item.setAsync(false);");
 			bodyBuilder.appendFormalLine("item.setUpdate(\"data\");");
