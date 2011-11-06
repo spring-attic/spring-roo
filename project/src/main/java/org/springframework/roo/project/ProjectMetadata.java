@@ -8,30 +8,16 @@ import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
 
 /**
- * Represents a project.
+ * The metadata for a Maven module within the user's project. A multi-module
+ * project will have several instances of this class.
  *
- * <p>
- * Each ROO instance has a single project active at any time. Different project add-ons are expected
- * to subclass this {@link ProjectMetadata} and implement the abstract methods.
- *
- * <p>
- * The {@link ProjectMetadata} offers convenience methods for acquiring the project name,
- * top level project package name, registered dependencies and path name resolution services.
- *
- * <p>
- * Concrete subclasses should register the correct dependencies the particular project build
- * system requires, plus read those files whenever they change. Subclasses should also provide a valid
- * {@link PathResolver} implementation that understands the target project layout.
- *
- * @author Ben Alex
- * @author Stefan Schmidt
- * @author Alan Stewart
  * @since 1.0
  */
 public class ProjectMetadata extends AbstractMetadataItem {
 
 	// Constants
-	private static final String PROJECT_MID_PREFIX = MetadataIdentificationUtils.create(ProjectMetadata.class.getName(), "the_project");
+	static final String MODULE_SEPARATOR = "?";
+	static final String PROJECT_MID_PREFIX = MetadataIdentificationUtils.create(ProjectMetadata.class.getName(), "the_project");
 
 	/**
 	 * Returns the metadata ID for the project-level metadata of the given module.
@@ -42,7 +28,7 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	public static String getProjectIdentifier(final String moduleName) {
 		final StringBuilder sb = new StringBuilder(PROJECT_MID_PREFIX);
 		if (StringUtils.hasText(moduleName)) {
-			sb.append("?").append(moduleName);
+			sb.append(MODULE_SEPARATOR).append(moduleName);
 		}
 		return sb.toString();
 	}
@@ -52,8 +38,8 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	}
 
 	public static String getModuleName(final String metadataIdentificationString) {
-		if (metadataIdentificationString.contains("?")) {
-			return metadataIdentificationString.substring(metadataIdentificationString.lastIndexOf('?') + 1, metadataIdentificationString.length());
+		if (metadataIdentificationString.contains(MODULE_SEPARATOR)) {
+			return StringUtils.substringAfterLast(metadataIdentificationString, MODULE_SEPARATOR);
 		}
 		return "";
 	}

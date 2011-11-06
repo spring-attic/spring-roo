@@ -83,7 +83,7 @@ public class MetadataCommands implements CommandMarker {
 	}
 
 	@CliCommand(value="metadata for type", help="Shows detailed metadata for the indicated type")
-	public String metadataForType(@CliOption(key={"", "type"}, mandatory=true, help="The Java type name to display metadata for") final JavaType javaType) {
+	public String metadataForType(@CliOption(key = {"", "type"}, mandatory = true, help = "The Java type for which to display metadata") final JavaType javaType) {
 		String id = typeLocationService.getPhysicalTypeIdentifier(javaType);
 		if (id == null) {
 			return "Cannot locate source for " + javaType.getFullyQualifiedTypeName();
