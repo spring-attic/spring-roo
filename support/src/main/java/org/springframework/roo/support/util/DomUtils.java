@@ -291,6 +291,5 @@ public final class DomUtils {
 	/**
 	 * Constructor is private to prevent instantiation
 	 */
-	private DomUtils() {
-	}
+	private DomUtils() {}
 }

@@ -14,12 +14,13 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 /**
- * Utilities related to round tripping XML documents
+ * Utilities related to round-tripping XML documents
  *
  * @author Stefan Schmidt
  * @since 1.1
  */
-public abstract class XmlRoundTripUtils {
+public final class XmlRoundTripUtils {
+
 	private static MessageDigest digest;
 
 	static {
@@ -202,4 +203,9 @@ public abstract class XmlRoundTripUtils {
 	private static String base64(final byte[] data) {
 		return Base64.encodeBytes(data);
 	}
+	
+	/**
+	 * Constructor is private to prevent instantiation
+	 */
+	private XmlRoundTripUtils() {}
 }

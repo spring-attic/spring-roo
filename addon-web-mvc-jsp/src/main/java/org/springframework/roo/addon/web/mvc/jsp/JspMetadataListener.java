@@ -52,6 +52,7 @@ import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.FileUtils;
+import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.XmlUtils;
 
 /**
@@ -228,12 +229,12 @@ public class JspMetadataListener implements MetadataProvider, MetadataNotificati
 				if (typePersistenceMetadataDetails != null) {
 					for (FieldMetadata f : typePersistenceMetadataDetails.getRooIdentifierFields()) {
 						String sb = f.getFieldName().getReadableSymbolName();
-						properties.put(XmlUtils.convertId(resourceId + "." + javaTypePersistenceMetadataDetails.getIdentifierField().getFieldName().getSymbolName() + "." + f.getFieldName().getSymbolName().toLowerCase()), (sb == null || sb.length() == 0) ? fieldName.getSymbolName() : sb);
+						properties.put(XmlUtils.convertId(resourceId + "." + javaTypePersistenceMetadataDetails.getIdentifierField().getFieldName().getSymbolName() + "." + f.getFieldName().getSymbolName().toLowerCase()), StringUtils.hasText(sb) ? sb : fieldName.getSymbolName());
 					}
 				}
 			} else if (!method.getMethodName().equals(javaTypePersistenceMetadataDetails.getIdentifierAccessorMethod().getMethodName()) || (javaTypePersistenceMetadataDetails.getVersionAccessorMethod() != null && !method.getMethodName().equals(javaTypePersistenceMetadataDetails.getVersionAccessorMethod().getMethodName()))) {
 				String sb = fieldName.getReadableSymbolName();
-				properties.put(fieldResourceId, (sb == null || sb.length() == 0) ? fieldName.getSymbolName() : sb);
+				properties.put(fieldResourceId, StringUtils.hasText(sb) ? sb : fieldName.getSymbolName());
 			}
 		}
 

@@ -206,6 +206,7 @@ public class JspOperationsImpl extends AbstractOperations implements JspOperatio
 	 *
 	 * @param viewName the bare logical name of the new view (required, e.g. "index")
 	 * @param folderName the folder in which to create the view; must be empty or start with a slash
+	 * @param title the title
 	 * @param category the menu category in which to list the new view (required)
 	 * @param registerStaticController whether to register a static controller in the Spring MVC configuration file
 	 */
