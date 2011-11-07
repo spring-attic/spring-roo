@@ -60,8 +60,8 @@ public class JmsOperationsImpl implements JmsOperations {
 	@Reference private FileManager fileManager;
 	@Reference private ProjectOperations projectOperations;
 	@Reference private PropFileOperations propFileOperations;
-	@Reference private TypeManagementService typeManagementService;
 	@Reference private TypeLocationService typeLocationService;
+	@Reference private TypeManagementService typeManagementService;
 
 	public boolean isInstallJmsAvailable() {
 		return projectOperations.isFocusedProjectAvailable() && !hasJmsContext();

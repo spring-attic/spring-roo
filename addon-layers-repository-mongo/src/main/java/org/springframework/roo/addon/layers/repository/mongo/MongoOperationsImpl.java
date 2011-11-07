@@ -59,14 +59,14 @@ import org.w3c.dom.Element;
 public class MongoOperationsImpl implements MongoOperations {
 
 	// Fields
+	@Reference private DataOnDemandOperations dataOnDemandOperations;
 	@Reference private FileManager fileManager;
+	@Reference private IntegrationTestOperations integrationTestOperations;
+	@Reference private PathResolver pathResolver;
 	@Reference private ProjectOperations projectOperations;
+	@Reference private PropFileOperations propFileOperations;
 	@Reference private TypeLocationService typeLocationService;
 	@Reference private TypeManagementService typeManagementService;
-	@Reference private PathResolver pathResolver;
-	@Reference private PropFileOperations propFileOperations;
-	@Reference private IntegrationTestOperations integrationTestOperations;
-	@Reference private DataOnDemandOperations dataOnDemandOperations;
 
 	public boolean isSetupCommandAvailable() {
 		return projectOperations.isFocusedProjectAvailable();

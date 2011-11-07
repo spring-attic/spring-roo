@@ -30,8 +30,12 @@ import org.springframework.roo.shell.MethodTarget;
 @Component
 @Service
 public class CloudDeployableFileConverter implements Converter<CloudDeployableFile> {
+	
+	// Constants
 	private static final Logger logger = Logger.getLogger(CloudDeployableFileConverter.class.getName());
 	private static final String CREATE_OPTION = "CREATE";
+	
+	// Fields
 	@Reference private FileManager fileManager;
 	@Reference private ProjectOperations projectOperations;
 

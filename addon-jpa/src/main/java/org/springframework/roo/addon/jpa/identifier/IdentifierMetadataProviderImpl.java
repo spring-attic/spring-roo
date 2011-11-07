@@ -31,8 +31,8 @@ import org.springframework.roo.project.ProjectOperations;
 public class IdentifierMetadataProviderImpl extends AbstractIdentifierServiceAwareMetadataProvider implements IdentifierMetadataProvider {
 
 	// Fields
-	@Reference private ProjectOperations projectOperations;
 	@Reference private ConfigurableMetadataProvider configurableMetadataProvider;
+	@Reference private ProjectOperations projectOperations;
 	@Reference private SerializableMetadataProvider serializableMetadataProvider;
 
 	protected void activate(final ComponentContext context) {

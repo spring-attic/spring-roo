@@ -75,8 +75,8 @@ public class JspMetadataListener implements MetadataProvider, MetadataNotificati
 	@Reference private MenuOperations menuOperations;
 	@Reference private MetadataDependencyRegistry metadataDependencyRegistry;
 	@Reference private MetadataService metadataService;
-	@Reference private PropFileOperations propFileOperations;
 	@Reference private ProjectOperations projectOperations;
+	@Reference private PropFileOperations propFileOperations;
 	@Reference private TilesOperations tilesOperations;
 	@Reference private TypeLocationService typeLocationService;
 	@Reference private WebMetadataService webMetadataService;

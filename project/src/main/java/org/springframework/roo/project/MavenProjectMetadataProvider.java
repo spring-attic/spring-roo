@@ -57,8 +57,6 @@ public class MavenProjectMetadataProvider implements MetadataProvider, FileEvent
 			return null;
 		}
 
-		final ProjectMetadata result = new ProjectMetadata(pom);
-
 		JavaPackage topLevelPackage = new JavaPackage(pom.getGroupId());
 		// Update UAA with the project name
 		uaaRegistrationService.registerProject(UaaRegistrationService.SPRING_ROO, topLevelPackage.getFullyQualifiedPackageName());
@@ -100,7 +98,7 @@ public class MavenProjectMetadataProvider implements MetadataProvider, FileEvent
 			}
 		}
 		
-		return result;
+		return new ProjectMetadata(pom);
 	}
 
 	public void onFileEvent(final FileEvent fileEvent) {

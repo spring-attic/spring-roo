@@ -79,9 +79,9 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 	@Reference private IntegrationTestOperations integrationTestOperations;
 	@Reference private PathResolver pathResolver;
 	@Reference private ProjectOperations projectOperations;
+	@Reference private Shell shell;
 	@Reference private TypeLocationService typeLocationService;
 	@Reference private TypeManagementService typeManagementService;
-	@Reference private Shell shell;
 
 	private Map<JavaType, List<Identifier>> identifierResults;
 

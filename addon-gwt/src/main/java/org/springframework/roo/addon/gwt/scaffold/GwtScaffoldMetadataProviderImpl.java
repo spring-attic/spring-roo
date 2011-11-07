@@ -70,8 +70,8 @@ public class GwtScaffoldMetadataProviderImpl implements GwtScaffoldMetadataProvi
 	@Reference protected GwtFileManager gwtFileManager;
 	@Reference protected GwtTemplateService gwtTemplateService;
 	@Reference protected GwtTypeService gwtTypeService;
-	@Reference protected MetadataService metadataService;
 	@Reference protected MetadataDependencyRegistry metadataDependencyRegistry;
+	@Reference protected MetadataService metadataService;
 	@Reference protected ProjectOperations projectOperations;
 	@Reference protected TypeLocationService typeLocationService;
 

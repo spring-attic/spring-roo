@@ -36,6 +36,12 @@ public interface LastUsed {
 	 */
 	JavaPackage getJavaPackage();
 
+	/**
+	 * Sets the last used type and the module to which it belongs
+	 * 
+	 * @param javaType
+	 * @param module
+	 */
 	void setType(JavaType javaType, Pom module);
 
 }

@@ -2,7 +2,6 @@ package org.springframework.roo.addon.jpa;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.roo.addon.jpa.JdbcDatabase.H2_IN_MEMORY;
@@ -23,7 +22,6 @@ import org.springframework.roo.addon.propfiles.PropFileOperations;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
-import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.StringUtils;
 
@@ -161,9 +159,6 @@ public class JpaOperationsImplTest {
 		when(mockFileManager.exists(PERSISTENCE_PATH)).thenReturn(false);	// i.e. no existing persistence.xml
 		when(mockPropFileOperations.loadProperties(JPA_DIALECTS_FILE, JpaOperationsImpl.class)).thenReturn(dialects);
 
-		final ProjectMetadata mockProjectMetadata = mock(ProjectMetadata.class);
-		when(mockProjectOperations.getProjectMetadata("")).thenReturn(mockProjectMetadata);
-		
 		final OrmProvider ormProvider = HIBERNATE;
 		final JdbcDatabase jdbcDatabase = H2_IN_MEMORY;
 		dialects.put(ormProvider.name() + "." + jdbcDatabase.name(), DB_DIALECT);

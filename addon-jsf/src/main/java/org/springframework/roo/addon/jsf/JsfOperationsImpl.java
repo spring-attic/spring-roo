@@ -77,9 +77,9 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 	@Reference private MetadataService metadataService;
 	@Reference private PathResolver pathResolver;
 	@Reference private ProjectOperations projectOperations;
+	@Reference private Shell shell;
 	@Reference private TypeLocationService typeLocationService;
 	@Reference private TypeManagementService typeManagementService;
-	@Reference private Shell shell;
 
 	public boolean isSetupAvailable() {
 		return projectOperations.isFocusedProjectAvailable();
@@ -312,7 +312,7 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 			return;
 		}
 
-		Document document;
+		final Document document;
 		if (hasWebXml) {
 			document = XmlUtils.readXml(fileManager.getInputStream(webXmlPath));
 		} else {
@@ -320,7 +320,7 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 			String projectName = projectOperations.getFocusedModule().getName();
 			WebXmlUtils.setDisplayName(projectName, document, null);
 			WebXmlUtils.setDescription("Roo generated " + projectName + " application", document, null);
-	}
+		}
 		if (theme != null) {
 			changeTheme(theme, document);
 		}

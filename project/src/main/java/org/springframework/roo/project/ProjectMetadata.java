@@ -8,8 +8,8 @@ import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
 
 /**
- * The metadata for a Maven module within the user's project. A multi-module
- * project will have several instances of this class.
+ * The metadata for a module within the user's project. A simple project will
+ * have one instance of this class, whereas a multi-module project will have several.
  *
  * @since 1.0
  */
@@ -50,11 +50,11 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	/**
 	 * Constructor
 	 *
-	 * @param pom (required)
+	 * @param pom the POM for this module of the project (required)
 	 */
 	public ProjectMetadata(final Pom pom) {
 		super(getProjectIdentifier(pom.getModuleName()));
-		Assert.notNull(pom, "POMs required");
+		Assert.notNull(pom, "POM is required");
 		this.pom = pom;
 	}
 

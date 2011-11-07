@@ -53,11 +53,11 @@ public class WebJsonOperationsImpl implements WebJsonOperations {
 	// Fields
 	@Reference private FileManager fileManager;
 	@Reference private MetadataService metadataService;
+	@Reference private PathResolver pathResolver;
+	@Reference private ProjectOperations projectOperations;
 	@Reference private TypeLocationService typeLocationService;
 	@Reference private TypeManagementService typeManagementService;
 	@Reference private WebMvcOperations mvcOperations;
-	@Reference private PathResolver pathResolver;
-	@Reference private ProjectOperations projectOperations;
 
 	public boolean isSetupAvailable() {
 		String mvcConfig = pathResolver.getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/spring/webmvc-config.xml");

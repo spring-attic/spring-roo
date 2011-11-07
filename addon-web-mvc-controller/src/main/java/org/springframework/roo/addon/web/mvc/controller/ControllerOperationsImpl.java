@@ -60,13 +60,13 @@ public class ControllerOperationsImpl implements ControllerOperations {
 
 	// Fields
 	@Reference private FileManager fileManager;
-	@Reference private MetadataService metadataService;
-	@Reference private ProjectOperations projectOperations;
-	@Reference private WebMvcOperations webMvcOperations;
 	@Reference private MetadataDependencyRegistry dependencyRegistry;
+	@Reference private MetadataService metadataService;
 	@Reference private PathResolver pathResolver;
+	@Reference private ProjectOperations projectOperations;
 	@Reference private TypeLocationService typeLocationService;
 	@Reference private TypeManagementService typeManagementService;
+	@Reference private WebMvcOperations webMvcOperations;
 
 	public boolean isNewControllerAvailable() {
 		return projectOperations.isFocusedProjectAvailable();

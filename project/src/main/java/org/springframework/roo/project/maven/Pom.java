@@ -25,6 +25,13 @@ import org.springframework.roo.support.util.CollectionUtils;
 import org.springframework.roo.support.util.FileUtils;
 import org.springframework.roo.support.util.StringUtils;
 
+/**
+ * A Maven project object model (POM).
+ *
+ * @author James Tyrrell
+ * @author Andrew Swan
+ * @since 1.2.0
+ */
 public class Pom {
 
 	// Constants

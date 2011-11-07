@@ -83,11 +83,11 @@ public class GwtOperationsImpl implements GwtOperations {
 	@Reference protected GwtTemplateService gwtTemplateService;
 	@Reference protected GwtTypeService gwtTypeService;
 	@Reference protected MetadataService metadataService;
-	@Reference protected WebMvcOperations webMvcOperations;
 	@Reference protected PersistenceMemberLocator persistenceMemberLocator;
 	@Reference protected ProjectOperations projectOperations;
 	@Reference protected TypeLocationService typeLocationService;
 	@Reference protected TypeManagementService typeManagementService;
+	@Reference protected WebMvcOperations webMvcOperations;
 
 	private ComponentContext context;
 	private Boolean wasGaeEnabled;

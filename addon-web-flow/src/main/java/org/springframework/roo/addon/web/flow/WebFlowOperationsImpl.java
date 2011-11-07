@@ -40,12 +40,12 @@ public class WebFlowOperationsImpl implements WebFlowOperations {
 
 	// Fields
 	@Reference private FileManager fileManager;
+	@Reference private JspOperations jspOperations;
+	@Reference private MenuOperations menuOperations;
 	@Reference private PathResolver pathResolver;
 	@Reference private ProjectOperations projectOperations;
-	@Reference private MenuOperations menuOperations;
-	@Reference private WebMvcOperations webMvcOperations;
-	@Reference private JspOperations jspOperations;
 	@Reference private TilesOperations tilesOperations;
+	@Reference private WebMvcOperations webMvcOperations;
 
 	public boolean isInstallWebFlowAvailable() {
 		return projectOperations.isFocusedProjectAvailable();

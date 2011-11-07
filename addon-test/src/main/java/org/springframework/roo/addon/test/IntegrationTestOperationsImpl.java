@@ -55,8 +55,8 @@ public class IntegrationTestOperationsImpl implements IntegrationTestOperations 
 	
 	// Fields
 	@Reference private DataOnDemandOperations dataOnDemandOperations;
-	@Reference private MetadataService metadataService;
 	@Reference private MemberDetailsScanner memberDetailsScanner;
+	@Reference private MetadataService metadataService;
 	@Reference private ProjectOperations projectOperations;
 	@Reference private TypeLocationService typeLocationService;
 	@Reference private TypeManagementService typeManagementService;

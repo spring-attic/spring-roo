@@ -46,7 +46,6 @@ import org.springframework.roo.metadata.MetadataItem;
 import org.springframework.roo.model.EnumDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
 
@@ -74,7 +73,6 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 	 * @param entityPhysicalType the entity's physical type (required)
 	 * @param parentEntity can be <code>null</code> if none of the governor's
 	 * ancestors provide {@link JpaEntityMetadata}
-	 * @param project the user's project (required)
 	 * @param entityMemberDetails details of the entity's members (required)
 	 * @param identifier information about the entity's identifier field in the
 	 * event that the annotation doesn't provide such information; can be
@@ -83,7 +81,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 	 * account the presence of a {@link RooJpaActiveRecord} and/or {@link RooJpaEntity}
 	 * annotation (required)
 	 */
-	public JpaEntityMetadata(final String metadataId, final JavaType itdName, final PhysicalTypeMetadata entityPhysicalType, final JpaEntityMetadata parentEntity, final ProjectMetadata project, final MemberDetails entityMemberDetails, final Identifier identifier, final JpaEntityAnnotationValues annotationValues, final boolean isGaeEnabled, final boolean isDatabaseDotComEnabled) {
+	public JpaEntityMetadata(final String metadataId, final JavaType itdName, final PhysicalTypeMetadata entityPhysicalType, final JpaEntityMetadata parentEntity, final MemberDetails entityMemberDetails, final Identifier identifier, final JpaEntityAnnotationValues annotationValues, final boolean isGaeEnabled, final boolean isDatabaseDotComEnabled) {
 		super(metadataId, itdName, entityPhysicalType);
 		Assert.notNull(annotationValues, "Annotation values are required");
 		Assert.notNull(entityMemberDetails, "Entity MemberDetails are required");

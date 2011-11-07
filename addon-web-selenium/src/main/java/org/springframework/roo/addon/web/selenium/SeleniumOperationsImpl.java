@@ -68,14 +68,14 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 
 	// Fields
 	@Reference private FileManager fileManager;
-	@Reference private MetadataService metadataService;
-	@Reference private MenuOperations menuOperations;
 	@Reference private MemberDetailsScanner memberDetailsScanner;
-	@Reference private ProjectOperations projectOperations;
-	@Reference private WebMetadataService webMetadataService;
+	@Reference private MenuOperations menuOperations;
+	@Reference private MetadataService metadataService;
 	@Reference private PathResolver pathResolver;
 	@Reference private PersistenceMemberLocator persistenceMemberLocator;
+	@Reference private ProjectOperations projectOperations;
 	@Reference private TypeLocationService typeLocationService;
+	@Reference private WebMetadataService webMetadataService;
 	
 	public boolean isProjectAvailable() {
 		return projectOperations.isFocusedProjectAvailable() && fileManager.exists(pathResolver.getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/web.xml"));

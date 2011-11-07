@@ -59,8 +59,8 @@ public class DefaultPhysicalTypeMetadataProvider implements PhysicalTypeMetadata
 	@Reference private MetadataDependencyRegistry metadataDependencyRegistry;
 	@Reference private MetadataService metadataService;
 	@Reference private ProjectOperations projectOperations;
-	@Reference private TypeParsingService typeParsingService;
 	@Reference private TypeLocationService typeLocationService;
+	@Reference private TypeParsingService typeParsingService;
 
 	// Mutex
 	private final Object lock = new Object();

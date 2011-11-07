@@ -45,10 +45,10 @@ import org.springframework.roo.support.util.StringUtils;
 public class GwtProxyMetadataProviderImpl extends AbstractHashCodeTrackingMetadataNotifier implements GwtProxyMetadataProvider {
 
 	// Fields
+	@Reference protected GwtFileManager gwtFileManager;
 	@Reference protected GwtTypeService gwtTypeService;
 	@Reference protected ProjectOperations projectOperations;
 	@Reference protected TypeLocationService typeLocationService;
-	@Reference protected GwtFileManager gwtFileManager;
 
 	protected void activate(final ComponentContext context) {
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());

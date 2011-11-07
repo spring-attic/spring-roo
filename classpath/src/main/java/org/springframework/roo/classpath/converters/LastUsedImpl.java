@@ -32,8 +32,8 @@ public class LastUsedImpl implements LastUsed {
 	@Reference private ProjectOperations projectOperations;
 
 	private JavaPackage javaPackage;
-	private JavaType javaType;
 	private JavaPackage topLevelPackage;
+	private JavaType javaType;
 	private Pom module;
 
 	public void setPackage(final JavaPackage javaPackage) {

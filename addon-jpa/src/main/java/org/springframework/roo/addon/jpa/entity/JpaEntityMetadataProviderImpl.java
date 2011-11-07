@@ -205,7 +205,7 @@ public class JpaEntityMetadataProviderImpl extends AbstractIdentifierServiceAwar
 			isDatabaseDotComEnabled = projectOperations.isDatabaseDotComEnabled(moduleName);
 		}
 
-		return new JpaEntityMetadata(metadataId, aspectName, governorPhysicalType, parentEntity, projectOperations.getProjectMetadata(moduleName), governorMemberDetails, identifier, jpaEntityAnnotationValues, isGaeEnabled, isDatabaseDotComEnabled);
+		return new JpaEntityMetadata(metadataId, aspectName, governorPhysicalType, parentEntity, governorMemberDetails, identifier, jpaEntityAnnotationValues, isGaeEnabled, isDatabaseDotComEnabled);
 	}
 
 	/**

@@ -84,13 +84,13 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
 	private static final int LAYER_POSITION = LayerType.HIGHEST.getPosition();
 
 	// Fields
-	@Reference protected MetadataService metadataService;
-	@Reference protected ProjectOperations projectOperations;
-	@Reference protected TypeParsingService typeParsingService;
-	@Reference protected TypeLocationService typeLocationService;
-	@Reference protected GwtTypeService gwtTypeService;
-	@Reference protected LayerService layerService;
-	@Reference protected PersistenceMemberLocator persistenceMemberLocator;
+	@Reference GwtTypeService gwtTypeService;
+	@Reference LayerService layerService;
+	@Reference MetadataService metadataService;
+	@Reference PersistenceMemberLocator persistenceMemberLocator;
+	@Reference ProjectOperations projectOperations;
+	@Reference TypeLocationService typeLocationService;
+	@Reference TypeParsingService typeParsingService;
 
 	public GwtTemplateDataHolder getMirrorTemplateTypeDetails(final ClassOrInterfaceTypeDetails mirroredType, final Map<JavaSymbolName, GwtProxyProperty> clientSideTypeMap, final ProjectMetadata projectMetadata) {
 		ClassOrInterfaceTypeDetails proxy = gwtTypeService.lookupProxyFromEntity(mirroredType);
