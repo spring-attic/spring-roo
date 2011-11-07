@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Locale;
 
 import javax.annotation.PostConstruct;
-import javax.faces.application.Application;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.SessionScoped;
 import javax.faces.context.FacesContext;
@@ -32,23 +31,26 @@ public class LocaleBean {
 
     public SelectItem[] getLocales() {
         List<SelectItem> items = new ArrayList<SelectItem>();
-        Application application = FacesContext.getCurrentInstance().getApplication();
-        Iterator<Locale> supportedLocales = application.getSupportedLocales();
+        Iterator<Locale> supportedLocales = FacesContext.getCurrentInstance().getApplication().getSupportedLocales();
         while (supportedLocales.hasNext()) {
             Locale locale = supportedLocales.next();
             items.add(new SelectItem(locale.toString(), locale.getDisplayName()));
         }
-        SelectItem[] locales = new SelectItem[items.size()];
-        items.toArray(locales);
-        return locales;
+        return items.toArray(new SelectItem[] {});
     }
 
     public String getSelectedLocale() {
         return getLocale().toString();
     }
 
-    public void setSelectedLocale() {
-        String localeString = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("locale");
-        locale = new Locale(localeString);
+    public void setSelectedLocale(String localeString) {
+        Iterator<Locale> supportedLocales = FacesContext.getCurrentInstance().getApplication().getSupportedLocales();
+        while (supportedLocales.hasNext()) {
+            Locale locale = supportedLocales.next();
+            if (locale.toString().equals(localeString)) {
+                this.locale = locale;
+                break;
+            }
+        }
     }
 }

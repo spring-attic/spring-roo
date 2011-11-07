@@ -48,6 +48,7 @@ import static org.springframework.roo.classpath.customdata.CustomDataKeys.REMOVE
 import static org.springframework.roo.model.JavaType.BOOLEAN_OBJECT;
 import static org.springframework.roo.model.JavaType.BOOLEAN_PRIMITIVE;
 import static org.springframework.roo.model.JavaType.STRING;
+import static org.springframework.roo.model.JavaType.VOID_PRIMITIVE;
 import static org.springframework.roo.model.JdkJavaType.ARRAY_LIST;
 import static org.springframework.roo.model.JdkJavaType.BYTE_ARRAY_INPUT_STREAM;
 import static org.springframework.roo.model.JdkJavaType.DATE;
@@ -1118,7 +1119,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 			bodyBuilder.appendFormalLine(fieldName.getSymbolName() + " = null;");
 		}
 		bodyBuilder.appendFormalLine(CREATE_DIALOG_VISIBLE + " = false;");
-		return getMethod(PUBLIC, methodName, JavaType.VOID_PRIMITIVE, null, null, bodyBuilder);
+		return getMethod(PUBLIC, methodName, VOID_PRIMITIVE, null, null, bodyBuilder);
 	}
 
 	private MethodMetadata getHandleDialogCloseMethod() {
@@ -1136,7 +1137,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("reset();");
 
-		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterType), parameterNames, bodyBuilder);
+		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), PUBLIC, methodName, VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterType), parameterNames, bodyBuilder);
 		return methodBuilder.build();
 	}
 

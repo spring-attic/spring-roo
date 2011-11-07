@@ -53,6 +53,8 @@ public class JsfApplicationBeanMetadata extends AbstractItdTypeDetailsProvidingM
 	private static final String PROVIDES_TYPE_STRING = JsfApplicationBeanMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
 	private static final JavaSymbolName MENU_MODEL = new JavaSymbolName("menuModel");
+	private static final String CREATE_ICON = "ui-icon ui-icon-document";
+	private static final String LIST_ICON = "ui-icon ui-folder-open";
 
 	// Fields
 	private Set<ClassOrInterfaceTypeDetails> managedBeans;
@@ -99,8 +101,7 @@ public class JsfApplicationBeanMetadata extends AbstractItdTypeDetailsProvidingM
 		if (hasScopeAnnotation()) {
 			return null;
 		}
-		AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(REQUEST_SCOPED);
-		return annotationBuilder.build();
+		return new AnnotationMetadataBuilder(REQUEST_SCOPED).build();
 	}
 
 	private boolean hasScopeAnnotation() {
@@ -161,7 +162,7 @@ public class JsfApplicationBeanMetadata extends AbstractItdTypeDetailsProvidingM
 			bodyBuilder.appendFormalLine("item.setId(\"create" + entity.getSimpleTypeName() + "MenuItem\");");
 			bodyBuilder.appendFormalLine("item.setValueExpression(\"value\", expressionFactory.createValueExpression(elContext, \"#{messages.label_create}\", String.class));");
 			bodyBuilder.appendFormalLine("item.setActionExpression(expressionFactory.createMethodExpression(elContext, \"#{" + beanName + "." + DISPLAY_CREATE_DIALOG + "}\", String.class, new Class[0]));");
-			bodyBuilder.appendFormalLine("item.setIcon(\"ui-icon ui-icon-document\");");
+			bodyBuilder.appendFormalLine("item.setIcon(\"" + CREATE_ICON + "\");");
 			bodyBuilder.appendFormalLine("item.setAjax(false);");
 			bodyBuilder.appendFormalLine("item.setAsync(false);");
 			bodyBuilder.appendFormalLine("item.setUpdate(\"data\");");
@@ -171,7 +172,7 @@ public class JsfApplicationBeanMetadata extends AbstractItdTypeDetailsProvidingM
 			bodyBuilder.appendFormalLine("item.setId(\"list" + entity.getSimpleTypeName() + "MenuItem\");");
 			bodyBuilder.appendFormalLine("item.setValueExpression(\"value\", expressionFactory.createValueExpression(elContext, \"#{messages.label_list}\", String.class));");
 			bodyBuilder.appendFormalLine("item.setActionExpression(expressionFactory.createMethodExpression(elContext, \"#{" + beanName + "." + DISPLAY_LIST + "}\", String.class, new Class[0]));");
-			bodyBuilder.appendFormalLine("item.setIcon(\"ui-icon ui-icon-folder-open\");");
+			bodyBuilder.appendFormalLine("item.setIcon(\"" + LIST_ICON + "\");");
 			bodyBuilder.appendFormalLine("item.setAjax(false);");
 			bodyBuilder.appendFormalLine("item.setAsync(false);");
 			bodyBuilder.appendFormalLine("item.setUpdate(\"data\");");

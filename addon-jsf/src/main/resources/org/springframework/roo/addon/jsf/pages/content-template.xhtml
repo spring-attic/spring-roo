@@ -18,10 +18,10 @@
                 <h:outputFormat id="noRecordsFound" value="#{messages.label_no_records_found}" rendered="#{!__BEAN_NAME__.dataVisible}">
                    <f:param value="__DOMAIN_TYPE_PLURAL__" />
                 </h:outputFormat>
-                <p:dataTable id="list" value="#{__BEAN_NAME__.all__DOMAIN_TYPE_PLURAL__}" var="__LC_DOMAIN_TYPE__" rendered="#{__BEAN_NAME__.dataVisible}" resizableColumns="false" paginator="true" paginatorTemplate=" {CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}" rowsPerPageTemplate="5,10,15" rows="10">
+                <p:dataTable id="list" value="#{__BEAN_NAME__.all__DOMAIN_TYPE_PLURAL__}" var="__LC_DOMAIN_TYPE__" rendered="#{__BEAN_NAME__.dataVisible}" resizableColumns="false" paginator="true" paginatorTemplate=" {CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}" rowsPerPageTemplate="5,10,25,50" rows="10">
                     <p:columns value="#{__BEAN_NAME__.columns}" var="column" columnIndexVar="colIndex">
                         <f:facet name="header">
-                            <h:outputText value="#{column}" />
+                            <h:outputText value="#{applicationBean.getColumnName(column)}" />
                         </f:facet>
                         <h:outputText value="#{__LC_DOMAIN_TYPE__[column]}" />
                     </p:columns>
