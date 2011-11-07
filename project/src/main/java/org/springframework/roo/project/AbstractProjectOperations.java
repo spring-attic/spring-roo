@@ -49,8 +49,8 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 	@Reference FileManager fileManager;
 	@Reference MetadataService metadataService;
 	@Reference PathResolver pathResolver;
+	@Reference protected PomManagementService pomManagementService;
 	@Reference protected Shell shell;
-	@Reference PomManagementService pomManagementService;
 
 	/**
 	 * Generates a message about the addition of the given items to the POM
@@ -109,6 +109,10 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 		shell.setPromptPath(module.getModuleName());
 		pomManagementService.setFocusedModule(module);
 	}
+	
+	public Collection<Pom> getPoms() {
+		return pomManagementService.getPoms();
+	}
 
 	public final Pom getPomFromModuleName(final String moduleName) {
 		return getProjectMetadata(moduleName).getPom();
@@ -116,10 +120,6 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 
 	public PathResolver getPathResolver() {
 		return pathResolver;
-	}
-
-	public PomManagementService getPomManagementService() {
-		return pomManagementService;
 	}
 
 	public void addModuleDependency(final String moduleName) {
@@ -190,7 +190,7 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 	public String getProjectName(final String moduleName) {
 		Pom pom = getPomFromModuleName(moduleName);
 		Assert.notNull(pom, "A pom with module name '" + moduleName + "' could not be found");
-		return pom.getName();
+		return pom.getDisplayName();
 	}
 
 	public final void addDependency(final String moduleName, final String groupId, final String artifactId, final String version, DependencyScope scope, final String classifier) {
@@ -397,7 +397,7 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 
 		final List<String> newPlugins = new ArrayList<String>();
 		for (final Plugin plugin : plugins) {
-			if (plugin != null && !pom.isBuildPluginRegistered(plugin)) {
+			if (plugin != null && !pom.isPluginRegistered(plugin.getGAV())) {
 				pluginsElement.appendChild(plugin.getElement(document));
 				newPlugins.add(plugin.getSimpleDescription());
 			}
@@ -833,5 +833,13 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 
 	public JavaPackage getFocusedTopLevelPackage() {
 		return getTopLevelPackage(getFocusedModuleName());
+	}
+	
+	public Pom getModuleForFileIdentifier(final String fileIdentifier) {
+		return pomManagementService.getModuleForFileIdentifier(fileIdentifier);
+	}
+	
+	public Collection<String> getModuleNames() {
+		return pomManagementService.getModuleNames();
 	}
 }

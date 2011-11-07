@@ -43,7 +43,6 @@ import org.springframework.roo.project.Filter;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.Plugin;
-import org.springframework.roo.project.PomManagementService;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.Property;
 import org.springframework.roo.project.Repository;
@@ -91,7 +90,6 @@ public class JpaOperationsImpl implements JpaOperations {
 	// Fields (package access so unit tests can inject mocks)
 	@Reference FileManager fileManager;
 	@Reference PathResolver pathResolver;
-	@Reference PomManagementService pomManagementService;
 	@Reference ProjectOperations projectOperations;
 	@Reference PropFileOperations propFileOperations;
 	@Reference TypeLocationService typeLocationService;
@@ -111,7 +109,7 @@ public class JpaOperationsImpl implements JpaOperations {
 
 	public SortedSet<String> getDatabaseProperties() {
 		if (fileManager.exists(getDatabasePropertiesPath())) {
-			return propFileOperations.getPropertyKeys(Path.SPRING_CONFIG_ROOT.contextualize(projectOperations.getPomManagementService().getFocusedModuleName()), "database.properties", true);
+			return propFileOperations.getPropertyKeys(Path.SPRING_CONFIG_ROOT.contextualize(projectOperations.getFocusedModuleName()), "database.properties", true);
 		}
 		return getPropertiesFromDataNucleusConfiguration();
 	}
@@ -1078,7 +1076,7 @@ public class JpaOperationsImpl implements JpaOperations {
 	}
 
 	public boolean isJpaInstalledInProject() {
-		for (final Pom pom : pomManagementService.getPoms()) {
+		for (final Pom pom : projectOperations.getPoms()) {
 			final ContextualPath srcMainResources = ContextualPath.getInstance(Path.SRC_MAIN_RESOURCES, pom.getModuleName());
 			final String persistenceUnitFile = pathResolver.getIdentifier(srcMainResources, PERSISTENCE_XML);
 			if (fileManager.exists(persistenceUnitFile)) {

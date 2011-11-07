@@ -70,8 +70,8 @@ public class MailOperationsImpl implements MailOperations {
 	@Reference private PathResolver pathResolver;
 	@Reference private ProjectOperations projectOperations;
 	@Reference private PropFileOperations propFileOperations;
-	@Reference private TypeManagementService typeManagementService;
 	@Reference private TypeLocationService typeLocationService;
+	@Reference private TypeManagementService typeManagementService;
 
 	public boolean isInstallEmailAvailable() {
 		return projectOperations.isFocusedProjectAvailable();
@@ -232,7 +232,7 @@ public class MailOperationsImpl implements MailOperations {
 		}
 
 		if (props.size() > 0) {
-			propFileOperations.addProperties(Path.SPRING_CONFIG_ROOT.contextualize(projectOperations.getPomManagementService().getFocusedModuleName()), "email.properties", props, true, true);
+			propFileOperations.addProperties(Path.SPRING_CONFIG_ROOT.contextualize(projectOperations.getFocusedModuleName()), "email.properties", props, true, true);
 		}
 	}
 

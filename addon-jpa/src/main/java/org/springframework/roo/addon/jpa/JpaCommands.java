@@ -29,7 +29,7 @@ import org.springframework.roo.classpath.operations.InheritanceType;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.ReservedWords;
 import org.springframework.roo.project.Path;
-import org.springframework.roo.project.PomManagementService;
+import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
@@ -59,10 +59,10 @@ public class JpaCommands implements CommandMarker {
 	private static final AnnotationMetadataBuilder ROO_DISPLAY_STRING_BUILDER = new AnnotationMetadataBuilder(ROO_DISPLAY_STRING);
 
 	// Fields
-	@Reference private JpaOperations jpaOperations;
 	@Reference private EqualsOperations equalsOperations;
 	@Reference private IntegrationTestOperations integrationTestOperations;
-	@Reference private PomManagementService pomManagementService;
+	@Reference private JpaOperations jpaOperations;
+	@Reference private ProjectOperations projectOperations;
 	@Reference private PropFileOperations propFileOperations;
 	@Reference private StaticFieldConverter staticFieldConverter;
 
@@ -124,7 +124,7 @@ public class JpaCommands implements CommandMarker {
 			return;
 		}
 
-		jpaOperations.configureJpa(ormProvider, jdbcDatabase, jndi, applicationId, hostName, databaseName, userName, password, transactionManager, persistenceUnit, pomManagementService.getFocusedModuleName());
+		jpaOperations.configureJpa(ormProvider, jdbcDatabase, jndi, applicationId, hostName, databaseName, userName, password, transactionManager, persistenceUnit, projectOperations.getFocusedModuleName());
 	}
 
 	@Deprecated
@@ -154,14 +154,14 @@ public class JpaCommands implements CommandMarker {
 		@CliOption(key = "key", mandatory = true, help = "The property key that should be changed") final String key,
 		@CliOption(key = "value", mandatory = true, help = "The new vale for this property key") final String value) {
 
-		propFileOperations.changeProperty(Path.SPRING_CONFIG_ROOT.contextualize(pomManagementService.getFocusedModuleName()), "database.properties", key, value);
+		propFileOperations.changeProperty(Path.SPRING_CONFIG_ROOT.contextualize(projectOperations.getFocusedModuleName()), "database.properties", key, value);
 	}
 
 	@CliCommand(value = "database properties remove", help = "Removes a particular database property")
 	public void databaseRemove(
 		@CliOption(key = { "", "key" }, mandatory = true, help = "The property key that should be removed") final String key) {
 
-		propFileOperations.removeProperty(Path.SPRING_CONFIG_ROOT.contextualize(pomManagementService.getFocusedModuleName()), "database.properties", key);
+		propFileOperations.removeProperty(Path.SPRING_CONFIG_ROOT.contextualize(projectOperations.getFocusedModuleName()), "database.properties", key);
 	}
 
 	@CliCommand(value = "entity jpa", help = "Creates a new JPA persistent entity in SRC_MAIN_JAVA")

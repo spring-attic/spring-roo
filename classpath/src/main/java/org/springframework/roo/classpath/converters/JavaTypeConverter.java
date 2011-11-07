@@ -88,11 +88,11 @@ public class JavaTypeConverter implements Converter<JavaType> {
 
 		if (value.contains(MODULE_PATH_SEPARATOR)) {
 			String moduleName = value.substring(0, value.indexOf(MODULE_PATH_SEPARATOR));
-			module = projectOperations.getPomManagementService().getPomFromModuleName(moduleName);
+			module = projectOperations.getPomFromModuleName(moduleName);
 			topLevelPath = typeLocationService.getTopLevelPackageForModule(module);
 			value = value.substring(value.indexOf(MODULE_PATH_SEPARATOR) + 1, value.length()).trim();
 			if (optionContext.contains("update")) {
-				projectOperations.getPomManagementService().setFocusedModule(module);
+				projectOperations.setModule(module);
 			}
 		} else {
 			topLevelPath = typeLocationService.getTopLevelPackageForModule(projectOperations.getFocusedModule());
@@ -110,7 +110,7 @@ public class JavaTypeConverter implements Converter<JavaType> {
 		if (StringUtils.hasText(newValue)) {
 			String physicalTypeIdentifier = typeLocationService.getPhysicalTypeIdentifier(new JavaType(newValue));
 			if (StringUtils.hasText(physicalTypeIdentifier)) {
-				module = projectOperations.getPomManagementService().getPomFromModuleName(PhysicalTypeIdentifier.getPath(physicalTypeIdentifier).getModule());
+				module = projectOperations.getPomFromModuleName(PhysicalTypeIdentifier.getPath(physicalTypeIdentifier).getModule());
 			}
 		}
 
@@ -120,7 +120,7 @@ public class JavaTypeConverter implements Converter<JavaType> {
 			newValue = (lastUsed.getJavaPackage() == null ? lastUsed.getTopLevelPackage().getFullyQualifiedPackageName() : lastUsed.getJavaPackage().getFullyQualifiedPackageName()) + "." + newValue;
 		}
 
-		// Automatically capitalize the first letter of the last name segment (ie capitalize the type name, but not the package)
+		// Automatically capitalise the first letter of the last name segment (i.e. capitalise the type name, but not the package)
 		int index = newValue.lastIndexOf(".");
 		if (index > -1 && !newValue.endsWith(".")) {
 			String typeName = newValue.substring(index + 1);
@@ -301,7 +301,7 @@ public class JavaTypeConverter implements Converter<JavaType> {
 			formattedPrefix = AnsiEscapeCode.decorate(focusedModuleName + MODULE_PATH_SEPARATOR, AnsiEscapeCode.FG_CYAN);
 		}
 
-		for (String moduleName : projectOperations.getPomManagementService().getModuleNames()) {
+		for (String moduleName : projectOperations.getModuleNames()) {
 			if (!moduleName.equals(focusedModuleName)) {
 				Completion completion = new Completion(moduleName + MODULE_PATH_SEPARATOR, AnsiEscapeCode.decorate(moduleName + MODULE_PATH_SEPARATOR, AnsiEscapeCode.FG_CYAN), "Modules", 0);
 				completions.add(completion);

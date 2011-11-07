@@ -5,7 +5,7 @@ import java.util.List;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.springframework.roo.project.PomManagementService;
+import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.shell.Completion;
 import org.springframework.roo.shell.Converter;
@@ -20,7 +20,7 @@ public class PomConverter implements Converter<Pom>{
 	private static final String ROOT_MODULE_SYMBOL = "~";
 	
 	// Fields
-	@Reference private PomManagementService pomManagementService;
+	@Reference private ProjectOperations projectOperations;
 
 	public boolean supports(final Class<?> type, final String optionContext) {
 		return Pom.class.isAssignableFrom(type);
@@ -33,16 +33,16 @@ public class PomConverter implements Converter<Pom>{
 		} else {
 			moduleName = value;
 		}
-		return pomManagementService.getPomFromModuleName(moduleName);
+		return projectOperations.getPomFromModuleName(moduleName);
 	}
 
 	public boolean getAllPossibleValues(final List<Completion> completions, final Class<?> targetType, final String existingData, final String optionContext, final MethodTarget target) {
-		final Pom focusedModule = pomManagementService.getFocusedModule();
+		final Pom focusedModule = projectOperations.getFocusedModule();
 		if (focusedModule == null) {
 			return false;
 		}
 		final String focusedModuleName = focusedModule.getModuleName();
-		for (final Pom pom : pomManagementService.getPoms()) {
+		for (final Pom pom : projectOperations.getPoms()) {
 			final String nonEmptyModuleName = StringUtils.defaultIfEmpty(pom.getModuleName(), ROOT_MODULE_SYMBOL);
 			if (!nonEmptyModuleName.equals(focusedModuleName)) {
 				completions.add(new Completion(nonEmptyModuleName));

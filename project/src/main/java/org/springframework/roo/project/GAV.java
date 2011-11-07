@@ -11,7 +11,7 @@ import org.springframework.roo.support.util.StringUtils;
  * @author Andrew Swan
  * @since 1.2.0
  */
-public class GAV {
+public class GAV implements Comparable<GAV> {
 
 	/**
 	 * Returns an instance based on the given concatenated Maven coordinates
@@ -36,9 +36,9 @@ public class GAV {
 	/**
 	 * Constructor
 	 *
-	 * @param groupId
-	 * @param artifactId
-	 * @param version
+	 * @param groupId must be a valid Maven ID
+	 * @param artifactId must be a valid Maven ID
+	 * @param version cannot be blank
 	 */
 	public GAV(final String groupId, final String artifactId, final String version) {
 		// Check
@@ -68,5 +68,27 @@ public class GAV {
 	public String toString() {
 		// For debugging
 		return StringUtils.arrayToDelimitedString(":", groupId, artifactId, version);
+	}
+
+	public int compareTo(final GAV other) {
+		Assert.notNull(other, "Cannot compare " + this + " to null");
+		int result = groupId.compareTo(other.getGroupId());
+		if (result == 0) {
+			result = artifactId.compareTo(other.getArtifactId());
+		}
+		if (result == 0) {
+			result = version.compareTo(other.getVersion());
+		}
+		return result;
+	}
+	
+	@Override
+	public boolean equals(final Object other) {
+		return other == this || (other instanceof GAV && compareTo((GAV) other) == 0);
+	}
+	
+	@Override
+	public int hashCode() {
+		return artifactId.hashCode();
 	}
 }

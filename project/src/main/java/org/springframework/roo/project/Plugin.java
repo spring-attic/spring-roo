@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.CollectionUtils;
 import org.springframework.roo.support.util.DomUtils;
 import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.XmlUtils;
@@ -144,12 +145,10 @@ public class Plugin implements Comparable<Plugin> {
 	}
 
 	// Fields
-	private final String groupId;
-	private final String artifactId;
-	private final String version;
+	private final GAV gav;
 	private final Configuration configuration;
-	private final List<Dependency> dependencies;
-	private final List<Execution> executions;
+	private final List<Dependency> dependencies = new ArrayList<Dependency>();
+	private final List<Execution> executions = new ArrayList<Execution>();
 
 	/**
 	 * Constructor from a POM-style XML element that defines a Maven <plugin>.
@@ -185,19 +184,11 @@ public class Plugin implements Comparable<Plugin> {
 		Assert.notNull(groupId, "Group ID required");
 		Assert.notNull(artifactId, "Artifact ID required");
 		Assert.notNull(version, "Version required");
-		this.artifactId = artifactId;
+		this.gav = new GAV(groupId, artifactId, version);
 		this.configuration = configuration;
-		this.groupId = groupId;
-		this.version = version;
 		// Defensively copy the given nullable collections
-		this.dependencies = new ArrayList<Dependency>();
-		if (dependencies != null) {
-			this.dependencies.addAll(dependencies);
-		}
-		this.executions = new ArrayList<Execution>();
-		if (executions != null) {
-			this.executions.addAll(executions);
-		}
+		CollectionUtils.populate(this.dependencies, dependencies);
+		CollectionUtils.populate(this.executions, executions);
 	}
 
 	/**
@@ -206,15 +197,15 @@ public class Plugin implements Comparable<Plugin> {
 	 * @return
 	 */
 	public String getGroupId() {
-		return groupId;
+		return gav.getGroupId();
 	}
 
 	public String getArtifactId() {
-		return artifactId;
+		return gav.getArtifactId();
 	}
 
 	public String getVersion() {
-		return version;
+		return gav.getVersion();
 	}
 
 	/**
@@ -239,12 +230,8 @@ public class Plugin implements Comparable<Plugin> {
 	@Override
 	public int hashCode() {
 		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((groupId == null) ? 0 : groupId.hashCode());
-		result = prime * result + ((artifactId == null) ? 0 : artifactId.hashCode());
-		result = prime * result + ((version == null) ? 0 : version.hashCode());
-		result = prime * result + ((configuration == null) ? 0 : configuration.hashCode());
-		return result;
+		int result = prime * 1 + gav.hashCode();
+		return prime * result + ((configuration == null) ? 0 : configuration.hashCode());
 	}
 
 	@Override
@@ -256,13 +243,7 @@ public class Plugin implements Comparable<Plugin> {
 		if (o == null) {
 			throw new NullPointerException();
 		}
-		int result = groupId.compareTo(o.groupId);
-		if (result == 0) {
-			result = artifactId.compareTo(o.artifactId);
-		}
-		if (result == 0) {
-			result = version.compareTo(o.version);
-		}
+		int result = gav.compareTo(o.getGAV());
 		if (result == 0 && configuration != null && o.configuration != null) {
 			result = configuration.compareTo(o.configuration);
 		}
@@ -273,15 +254,13 @@ public class Plugin implements Comparable<Plugin> {
 	 * @return a simple description, as would be used for console output
 	 */
 	public String getSimpleDescription() {
-		return groupId + ":" + artifactId + ":" + version;
+		return gav.toString();
 	}
 
 	@Override
 	public String toString() {
 		ToStringCreator tsc = new ToStringCreator(this);
-		tsc.append("groupId", groupId);
-		tsc.append("artifactId", artifactId);
-		tsc.append("version", version);
+		tsc.append("gav", gav);
 		if (configuration != null) {
 			tsc.append("configuration", configuration);
 		}
@@ -301,9 +280,9 @@ public class Plugin implements Comparable<Plugin> {
 		final Element pluginElement = document.createElement("plugin");
 
 		// Basic coordinates
-		pluginElement.appendChild(XmlUtils.createTextElement(document, "groupId", this.groupId));
-		pluginElement.appendChild(XmlUtils.createTextElement(document, "artifactId", this.artifactId));
-		pluginElement.appendChild(XmlUtils.createTextElement(document, "version", this.version));
+		pluginElement.appendChild(XmlUtils.createTextElement(document, "groupId", getGroupId()));
+		pluginElement.appendChild(XmlUtils.createTextElement(document, "artifactId", getArtifactId()));
+		pluginElement.appendChild(XmlUtils.createTextElement(document, "version", getVersion()));
 
 		// Configuration
 		if (this.configuration != null) {
@@ -328,5 +307,14 @@ public class Plugin implements Comparable<Plugin> {
 		}
 
 		return pluginElement;
+	}
+
+	/**
+	 * Returns the Maven-style coordinates of this plugin
+	 * 
+	 * @return a non-<code>null</code> set of coordinates
+	 */
+	public GAV getGAV() {
+		return gav;
 	}
 }

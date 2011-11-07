@@ -4,6 +4,7 @@ import static org.springframework.roo.support.util.FileUtils.CURRENT_DIRECTORY;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -11,6 +12,9 @@ import java.util.Map;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.ReferenceCardinality;
+import org.apache.felix.scr.annotations.ReferencePolicy;
+import org.apache.felix.scr.annotations.ReferenceStrategy;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.file.monitor.event.FileDetails;
@@ -22,16 +26,27 @@ import org.springframework.roo.support.util.StringUtils;
 
 @Component(immediate = true)
 @Service
+@Reference(name = "pathResolvingStrategy", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC, referenceInterface = PathResolvingStrategy.class, cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE)
 public class DefaultPathResolvingStrategy implements PathResolvingStrategy {
 
 	// Fields
-	@Reference private PomManagementService pomManagementService;
-
+	private final Collection<PathResolvingStrategy> otherPathResolvingStrategies = new ArrayList<PathResolvingStrategy>();
+	
 	private final List<PathInformation> pathOrder = new ArrayList<PathInformation>();
 	private final Map<Path, PathInformation> pathCache = new LinkedHashMap<Path, PathInformation>();
 	private final Map<Path, PathInformation> pathInformation = new HashMap<Path, PathInformation>();
 	
 	private String rootPath;
+	
+	protected void bindPathResolvingStrategy(final PathResolvingStrategy pathResolvingStrategy) {
+		if (pathResolvingStrategy != this) {
+			otherPathResolvingStrategies.add(pathResolvingStrategy);
+		}
+	}
+	
+	protected void unbindPathResolvingStrategy(final PathResolvingStrategy pathResolvingStrategy) {
+		otherPathResolvingStrategies.remove(pathResolvingStrategy);
+	}
 
 	protected void activate(final ComponentContext context) {
 		final File projectDirectory = new File(StringUtils.defaultIfEmpty(OSGiUtils.getRooWorkingDirectory(context), CURRENT_DIRECTORY));
@@ -39,7 +54,7 @@ public class DefaultPathResolvingStrategy implements PathResolvingStrategy {
 		populatePathsMap(projectDirectory);
 		initialisePathCollections();
 	}
-
+	
 	private void populatePathsMap(final File projectDirectory) {
 		pathInformation.put(Path.SRC_MAIN_JAVA, new PathInformation(Path.SRC_MAIN_JAVA.contextualize(), true, new File(projectDirectory, "src/main/java")));
 		pathInformation.put(Path.SRC_MAIN_RESOURCES, new PathInformation(Path.SRC_MAIN_RESOURCES.contextualize(), true, new File(projectDirectory, "src/main/resources")));
@@ -51,7 +66,12 @@ public class DefaultPathResolvingStrategy implements PathResolvingStrategy {
 	}
 
 	public boolean isActive() {
-		return pomManagementService.getRootPom() == null;
+		for (final PathResolvingStrategy otherStrategy : otherPathResolvingStrategies) {
+			if (otherStrategy.isActive()) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	public String getIdentifier(final ContextualPath path, final String relativePath) {

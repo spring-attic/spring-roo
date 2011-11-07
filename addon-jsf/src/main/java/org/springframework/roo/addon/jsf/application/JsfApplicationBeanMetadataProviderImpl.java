@@ -80,7 +80,7 @@ public class JsfApplicationBeanMetadataProviderImpl extends AbstractItdMetadataP
 		ProjectMetadata projectMetadata = projectOperations.getFocusedProjectMetadata();
 		Assert.notNull(projectMetadata, "Project metadata required");
 
-		return new JsfApplicationBeanMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, managedBeans, projectMetadata.getPom().getName());
+		return new JsfApplicationBeanMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, managedBeans, projectMetadata.getPom().getDisplayName());
 	}
 
 	public String getItdUniquenessFilenameSuffix() {

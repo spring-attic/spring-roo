@@ -317,7 +317,7 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 			document = XmlUtils.readXml(fileManager.getInputStream(webXmlPath));
 		} else {
 			document = getDocumentTemplate("WEB-INF/web-template.xml");
-			String projectName = projectOperations.getFocusedModule().getName();
+			String projectName = projectOperations.getFocusedModule().getDisplayName();
 			WebXmlUtils.setDisplayName(projectName, document, null);
 			WebXmlUtils.setDescription("Roo generated " + projectName + " application", document, null);
 		}

@@ -6,7 +6,7 @@ import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.project.maven.Pom;
 
 /**
- * Specifies methods for various project-related operations.
+ * Methods for various project-related operations.
  * 
  * @author Ben Alex
  * @since 1.0
@@ -41,6 +41,21 @@ public interface ProjectOperations {
 	 * @return the focused {@link ProjectMetadata} object;
 	 */
 	ProjectMetadata getFocusedProjectMetadata();
+
+	/**
+	 * Returns the module to which the given file belongs
+	 * 
+	 * @param fileIdentifier the canonical path to look up
+	 * @return see above
+	 */
+	Pom getModuleForFileIdentifier(String fileIdentifier);
+
+	/**
+	 * Returns the names of each module in the user's project
+	 * 
+	 * @return a non-<code>null</code> list
+	 */
+	Collection<String> getModuleNames();
 	
 	/**
 	 * Convenience method to return the {@link PathResolver} from the project's {@link ProjectMetadata}.
@@ -519,10 +534,10 @@ public interface ProjectOperations {
 	void setModule(Pom module);
 
 	/**
-	 * Returns the {@link Pom} of the currently focussed module, or if no module
-	 * has the focus, the root {@link Pom}.
+	 * Returns the {@link Pom} of the currently focussed module,
+	 * or if no module has the focus, the root {@link Pom}.
 	 * 
-	 * @return <code>null</code> if none of the above Poms exist
+	 * @return <code>null</code> if none of the above descriptors exist
 	 */
 	Pom getFocusedModule();
 
@@ -539,12 +554,13 @@ public interface ProjectOperations {
 	 * @return
 	 */
 	Pom getPomFromModuleName(String moduleName);
-
+	
 	/**
-	 *
-	 * @return
+	 * Returns the {@link Pom}s for all modules of the user's project
+	 * 
+	 * @return a non-<code>null</code> collection
 	 */
-	PomManagementService getPomManagementService();
+	Collection<Pom> getPoms();
 
 	/**
 	 *

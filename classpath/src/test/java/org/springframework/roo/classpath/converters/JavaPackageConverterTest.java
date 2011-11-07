@@ -19,7 +19,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.model.JavaPackage;
-import org.springframework.roo.project.PomManagementService;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.shell.Completion;
@@ -38,7 +37,6 @@ public class JavaPackageConverterTest {
 	// Fixture
 	private JavaPackageConverter converter;
 	private @Mock LastUsed mockLastUsed;
-	private @Mock PomManagementService mockPomManagementService;
 	private @Mock ProjectOperations mockProjectOperations;
 	private @Mock TypeLocationService mockTypeLocationService;
 	
@@ -47,7 +45,6 @@ public class JavaPackageConverterTest {
 		MockitoAnnotations.initMocks(this);
 		this.converter = new JavaPackageConverter();
 		this.converter.lastUsed = mockLastUsed;
-		this.converter.pomManagementService = mockPomManagementService;
 		this.converter.projectOperations = mockProjectOperations;
 		this.converter.typeLocationService = mockTypeLocationService;
 	}
@@ -162,7 +159,7 @@ public class JavaPackageConverterTest {
 		// Set up
 		final Pom mockPom1 = setUpMockPom("/path/to/pom/1", "com.example.domain.Choice", "com.example.domain.Vote");
 		final Pom mockPom2 = setUpMockPom("/path/to/pom/2", "com.example.web.ChoiceController", "com.example.web.VoteController");
-		when(mockPomManagementService.getPoms()).thenReturn(Arrays.asList(mockPom1, mockPom2));
+		when(mockProjectOperations.getPoms()).thenReturn(Arrays.asList(mockPom1, mockPom2));
 		
 		// Invoke and check
 		assertGetAllPossibleValues(true, new Completion("com.example.domain"), new Completion("com.example.web"));

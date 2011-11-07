@@ -51,15 +51,15 @@ public class PomManagementServiceImpl implements PomManagementService {
 	@Reference Shell shell;
 
 	private final Set<String> toBeParsed = new HashSet<String>();
-	private final Map<String, Pom> pomMap = new HashMap<String, Pom>();
+	private final Map<String, Pom> pomMap = new LinkedHashMap<String, Pom>();	// linked to preserve sort order
 	private String focusedModulePath;
-	private String rootPath;
+	private String projectRootDirectory;
 
 	// ------------------------ OSGi lifecycle callbacks -----------------------
 
 	protected void activate(final ComponentContext context) {
 		final File projectDirectory = new File(StringUtils.defaultIfEmpty(OSGiUtils.getRooWorkingDirectory(context), CURRENT_DIRECTORY));
-		rootPath = FileUtils.getCanonicalPath(projectDirectory);
+		projectRootDirectory = FileUtils.getCanonicalPath(projectDirectory);
 	}
 	
 	// --------------------- PomManagementService methods ----------------------
@@ -94,12 +94,7 @@ public class PomManagementServiceImpl implements PomManagementService {
 		return null;
 	}
 
-	private String getModuleName(final String pomRoot) {
-		final String moduleName = FileUtils.ensureTrailingSeparator(pomRoot).replace(FileUtils.ensureTrailingSeparator(rootPath), "");
-		return FileUtils.removeTrailingSeparator(moduleName);
-	}
-
-	public Set<String> getModuleNames() {
+	public Collection<String> getModuleNames() {
 		final Set<String> moduleNames = new HashSet<String>();
 		for (final Pom module : pomMap.values()) {
 		 	moduleNames.add(module.getModuleName());
@@ -109,7 +104,7 @@ public class PomManagementServiceImpl implements PomManagementService {
 
 	public Pom getRootPom() {
 		updatePomCache();
-		return pomMap.get(rootPath + File.separator + DEFAULT_POM_NAME);
+		return pomMap.get(projectRootDirectory + File.separator + DEFAULT_POM_NAME);
 	}
 
 	public Pom getFocusedModule() {
@@ -169,6 +164,7 @@ public class PomManagementServiceImpl implements PomManagementService {
 					resolvePoms(rootElement, pathToChangedPom, pomModuleMap);
 					final String moduleName = getModuleName(FileUtils.getFirstDirectory(pathToChangedPom));
 					final Pom pom = pomFactory.getInstance(rootElement, pathToChangedPom, moduleName);
+					Assert.notNull(pom, "POM is null for module = '" + moduleName + "' and path = '" + pathToChangedPom + "'");
 					pomMap.put(pathToChangedPom, pom);
 					newPoms.add(pom);
 					iter.remove();
@@ -178,6 +174,13 @@ public class PomManagementServiceImpl implements PomManagementService {
 		return newPoms;
 	}
 
+	private String getModuleName(final String pomDirectory) {
+		final String normalisedRootPath = FileUtils.ensureTrailingSeparator(projectRootDirectory);
+		final String normalisedPomDirectory = FileUtils.ensureTrailingSeparator(pomDirectory);
+		final String moduleName = StringUtils.removePrefix(normalisedPomDirectory, normalisedRootPath);
+		return FileUtils.removeTrailingSeparator(moduleName);
+	}
+	
 	private void resolvePoms(final Element pomRoot, final String pomPath, final Map<String, String> pomSet) {
 		pomSet.put(pomPath, pomSet.get(pomPath));	// ensures this key exists
 

@@ -20,12 +20,12 @@ import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.support.util.StringUtils;
 
 /**
- * Unit test of {@link MavenProjectMetadataProvider}
+ * Unit test of {@link MavenOperationsImpl}
  *
  * @author Andrew Swan
  * @since 1.2.0
  */
-public class MavenProjectMetadataProviderTest {
+public class MavenOperationsImplTest {
 
 	// Constants
 	private static final String ARTIFACT_ID = "foo-lib";
@@ -36,12 +36,12 @@ public class MavenProjectMetadataProviderTest {
 	private static final String VERSION = "1.0.Final";
 
 	// Fixture
+	private MavenOperationsImpl projectOperations;
 	@Mock private FileManager mockFileManager;
 	@Mock private MetadataService mockMetadataService;
-	@Mock private ProjectMetadata mockProjectMetadata;
 	@Mock private PathResolver mockPathResolver;
 	@Mock private PomManagementService mockPomManagementService;
-	private MavenOperationsImpl projectOperations;
+	@Mock private ProjectMetadata mockProjectMetadata;
 	
 	@Before
 	public void setUp() {

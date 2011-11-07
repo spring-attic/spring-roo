@@ -14,7 +14,6 @@ import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.process.manager.FileManager;
-import org.springframework.roo.project.PomManagementService;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.shell.Completion;
@@ -41,7 +40,6 @@ public class JavaPackageConverter implements Converter<JavaPackage> {
 	// Fields
 	@Reference FileManager fileManager;
 	@Reference LastUsed lastUsed;
-	@Reference PomManagementService pomManagementService;
 	@Reference ProjectOperations projectOperations;
 	@Reference TypeLocationService typeLocationService;
 
@@ -100,7 +98,7 @@ public class JavaPackageConverter implements Converter<JavaPackage> {
 
 	private Collection<Completion> getCompletionsForAllKnownPackages() {
 		final Collection<Completion> completions = new LinkedHashSet<Completion>();
-		for (final Pom pom : pomManagementService.getPoms()) {
+		for (final Pom pom : projectOperations.getPoms()) {
 			for (final String type : typeLocationService.getTypesForModule(pom.getPath())) {
 				completions.add(new Completion(type.substring(0, type.lastIndexOf('.'))));
 			}

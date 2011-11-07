@@ -1,6 +1,7 @@
 package org.springframework.roo.project;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
@@ -10,6 +11,7 @@ import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -27,6 +29,7 @@ import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.project.maven.PomFactory;
+import org.springframework.roo.shell.Shell;
 import org.springframework.roo.support.osgi.OSGiUtils;
 import org.w3c.dom.Element;
 
@@ -48,6 +51,7 @@ public class PomManagementServiceImplTest {
 	@Mock private MetadataDependencyRegistry mockMetadataDependencyRegistry;
 	@Mock private MetadataService mockMetadataService;
 	@Mock private PomFactory mockPomFactory;
+	@Mock private Shell mockShell;
 	
 	@Before
 	public void setUp() {
@@ -55,9 +59,10 @@ public class PomManagementServiceImplTest {
 		this.service = new PomManagementServiceImpl();
 		this.service.fileManager = mockFileManager;
 		this.service.fileMonitorService = mockFileMonitorService;
-		this.service.metadataService = mockMetadataService;
 		this.service.metadataDependencyRegistry = mockMetadataDependencyRegistry;
+		this.service.metadataService = mockMetadataService;
 		this.service.pomFactory = mockPomFactory;
+		this.service.shell = mockShell;
 	}
 	
 	/**
@@ -102,8 +107,10 @@ public class PomManagementServiceImplTest {
 	}
 	
 	private String getCanonicalPath(final String relativePath) {
+		final URL resource = getClass().getResource(relativePath);
+		assertNotNull("Can't find '" + relativePath + "' on the classpath of " + getClass().getName(), resource);
 		try {
-			return new File(getClass().getResource(relativePath).toURI()).getCanonicalPath();
+			return new File(resource.toURI()).getCanonicalPath();
 		} catch (final Exception e) {
 			throw new AssertionFailedError(e.getMessage());
 		}
@@ -143,8 +150,7 @@ public class PomManagementServiceImplTest {
 		// Set up
 		setUpWorkingDirectory("single");
 		final String canonicalPath = getCanonicalPath("single/pom.xml");
-		final Collection<String> dirtyFiles = Arrays.asList(canonicalPath);
-		when(mockFileMonitorService.getDirtyFiles(PomManagementServiceImpl.class.getName())).thenReturn(dirtyFiles);
+		when(mockFileMonitorService.getDirtyFiles(PomManagementServiceImpl.class.getName())).thenReturn(Arrays.asList(canonicalPath));
 		final Pom mockPom = getMockPom(ROOT_MODULE_NAME, canonicalPath);
 		
 		// Invoke

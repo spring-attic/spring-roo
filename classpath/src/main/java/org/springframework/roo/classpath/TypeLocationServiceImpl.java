@@ -30,7 +30,6 @@ import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.ContextualPath;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathInformation;
-import org.springframework.roo.project.PomManagementService;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.shell.NaturalOrderComparator;
@@ -60,9 +59,8 @@ public class TypeLocationServiceImpl implements TypeLocationService {
 	@Reference private FileMonitorService fileMonitorService;
 	@Reference private MetadataService metadataService;
 	@Reference private ProjectOperations projectOperations;
-	@Reference private TypeResolutionService typeResolutionService;
-	@Reference private PomManagementService pomManagementService;
 	@Reference private TypeCache typeCache;
+	@Reference private TypeResolutionService typeResolutionService;
 
 	private final Map<JavaType, Set<String>> annotationToMidMap = new HashMap<JavaType, Set<String>>();
 	private final Map<Object, Set<String>> tagToMidMap = new HashMap<Object, Set<String>>();
@@ -113,7 +111,7 @@ public class TypeLocationServiceImpl implements TypeLocationService {
 		Assert.hasText(fileCanonicalPath, "File canonical path required");
 		// Determine the JavaType for this file
 		String relativePath = "";
-		final Pom moduleForFileIdentifier = pomManagementService.getModuleForFileIdentifier(fileCanonicalPath);
+		final Pom moduleForFileIdentifier = projectOperations.getModuleForFileIdentifier(fileCanonicalPath);
 		if (moduleForFileIdentifier == null) {
 			return relativePath;
 		}
@@ -148,7 +146,7 @@ public class TypeLocationServiceImpl implements TypeLocationService {
 				return null;
 			}
 			JavaType javaType = new JavaType(javaPackage.getFullyQualifiedPackageName() + "." + simpleTypeName);
-			Pom module = pomManagementService.getModuleForFileIdentifier(fileCanonicalPath);
+			Pom module = projectOperations.getModuleForFileIdentifier(fileCanonicalPath);
 			Assert.notNull(module, "The module for the file '" + fileCanonicalPath + "' could not be located");
 			typeCache.cacheTypeAgainstModule(module, javaType);
 
@@ -396,7 +394,7 @@ public class TypeLocationServiceImpl implements TypeLocationService {
 		}
 		String reducedPath = FileUtils.ensureTrailingSeparator(typePath.replace(typeRelativePath, ""));
 		String mid = null;
-		for (final Pom pom : pomManagementService.getPoms()) {
+		for (final Pom pom : projectOperations.getPoms()) {
 			for (Path path : Arrays.asList(Path.SRC_MAIN_JAVA, Path.SRC_TEST_JAVA)) {
 				PathInformation pathInformation = pom.getPathInformation(path);
 				String pathLocation = FileUtils.ensureTrailingSeparator(pathInformation.getLocationPath());
@@ -427,7 +425,7 @@ public class TypeLocationServiceImpl implements TypeLocationService {
 		}
 		String reducedPath = FileUtils.ensureTrailingSeparator(typeFilePath.replace(typeRelativePath, ""));
 		String mid = null;
-		for (final Pom pom : pomManagementService.getPoms()) {
+		for (final Pom pom : projectOperations.getPoms()) {
 			PathInformation pathInformation = pom.getPathInformation(path.getPath());
 			String pathLocation = FileUtils.ensureTrailingSeparator(pathInformation.getLocationPath());
 			if (pathLocation.startsWith(reducedPath)) {
@@ -469,7 +467,7 @@ public class TypeLocationServiceImpl implements TypeLocationService {
 	}
 
 	private void initTypeMap() {
-		for (final Pom pom : pomManagementService.getPoms()) {
+		for (final Pom pom : projectOperations.getPoms()) {
 			for (Path path : Arrays.asList(Path.SRC_MAIN_JAVA, Path.SRC_TEST_JAVA)) {
 				String pathToResolve = FileUtils.ensureTrailingSeparator(pom.getPathInformation(path).getLocationPath()) + "**" + File.separatorChar + "*.java";
 				for (FileDetails file : fileManager.findMatchingAntPath(pathToResolve)) {
@@ -604,13 +602,13 @@ public class TypeLocationServiceImpl implements TypeLocationService {
 
 		for (String existingTypePath : discoverTypes()) {
 			if (existingTypePath.endsWith(relativePath)) {
-				typeCache.cacheTypeAgainstModule(pomManagementService.getPomFromModuleName(path.getModule()), javaType);
+				typeCache.cacheTypeAgainstModule(projectOperations.getPomFromModuleName(path.getModule()), javaType);
 				typeCache.cacheFilePathAgainstTypeIdentifier(existingTypePath, physicalTypeIdentifier);
 				return existingTypePath;
 			}
 		}
 
-		Pom pom = pomManagementService.getPomFromModuleName(path.getModule());
+		Pom pom = projectOperations.getPomFromModuleName(path.getModule());
 		if (pom != null) {
 			String filePath = pom.getPathLocation(path.getPath()) + relativePath;
 			typeCache.cacheTypeAgainstModule(pom, javaType);
@@ -619,5 +617,4 @@ public class TypeLocationServiceImpl implements TypeLocationService {
 		}
 		return null;
 	}
-
 }

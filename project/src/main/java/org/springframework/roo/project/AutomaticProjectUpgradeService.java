@@ -26,7 +26,6 @@ public class AutomaticProjectUpgradeService implements MetadataNotificationListe
 
 	// Fields
 	@Reference private MetadataDependencyRegistry metadataDependencyRegistry;
-	@Reference private PomManagementService pomManagementService;
 	@Reference private ProjectOperations projectOperations;
 
 	private VersionInfo bundleVersionInfo;
@@ -85,7 +84,7 @@ public class AutomaticProjectUpgradeService implements MetadataNotificationListe
 				return;
 			}
 
-			for (final Pom pom : pomManagementService.getPoms()) {
+			for (final Pom pom : projectOperations.getPoms()) {
 				Set<Property> results = pom.getPropertiesExcludingValue(new Property("roo.version"));
 				for (Property existingProperty : results) {
 					VersionInfo rooVersion = extractVersionInfoFromString(existingProperty.getValue());
