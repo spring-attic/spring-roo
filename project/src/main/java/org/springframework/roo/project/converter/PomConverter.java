@@ -17,10 +17,10 @@ import org.springframework.roo.support.util.StringUtils;
 public class PomConverter implements Converter<Pom>{
 
 	// Constants
-	private static final String ROOT_MODULE_SYMBOL = "~";
+	static final String ROOT_MODULE_SYMBOL = "~";
 	
 	// Fields
-	@Reference private ProjectOperations projectOperations;
+	@Reference ProjectOperations projectOperations;
 
 	public boolean supports(final Class<?> type, final String optionContext) {
 		return Pom.class.isAssignableFrom(type);
@@ -37,17 +37,13 @@ public class PomConverter implements Converter<Pom>{
 	}
 
 	public boolean getAllPossibleValues(final List<Completion> completions, final Class<?> targetType, final String existingData, final String optionContext, final MethodTarget target) {
-		final Pom focusedModule = projectOperations.getFocusedModule();
-		if (focusedModule == null) {
-			return false;
-		}
-		final String focusedModuleName = focusedModule.getModuleName();
-		for (final Pom pom : projectOperations.getPoms()) {
-			final String nonEmptyModuleName = StringUtils.defaultIfEmpty(pom.getModuleName(), ROOT_MODULE_SYMBOL);
-			if (!nonEmptyModuleName.equals(focusedModuleName)) {
+		final String focusedModuleName = projectOperations.getFocusedModuleName();
+		for (final String moduleName : projectOperations.getModuleNames()) {
+			if (!moduleName.equals(focusedModuleName)) {
+				final String nonEmptyModuleName = StringUtils.defaultIfEmpty(moduleName, ROOT_MODULE_SYMBOL);
 				completions.add(new Completion(nonEmptyModuleName));
 			}
 		}
-		return false;
+		return true;
 	}
 }
