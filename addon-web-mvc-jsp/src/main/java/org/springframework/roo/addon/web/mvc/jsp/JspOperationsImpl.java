@@ -104,7 +104,6 @@ public class JspOperationsImpl extends AbstractOperations implements JspOperatio
 	@Reference private WebMvcOperations webMvcOperations;
 
 	public boolean isControllerAvailable() {
-
 		return fileManager.exists(pathResolver.getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/views")) && !fileManager.exists(pathResolver.getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/faces-config.xml"));
 	}
 
@@ -131,7 +130,6 @@ public class JspOperationsImpl extends AbstractOperations implements JspOperatio
 		updateConfiguration();
 
 		// Install styles
-
 		copyDirectoryContents("images/*.*", pathResolver.getIdentifier(webappPath, "images"), false);
 
 		// Install styles

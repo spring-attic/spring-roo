@@ -76,13 +76,13 @@ public class JavaSymbolName implements Comparable<JavaSymbolName> {
 	 * @return a camel case string in human readable form
 	 */
 	public static String getReadableSymbolName(final String camelCase) {
-	  final Pattern p = Pattern.compile("[A-Z][^A-Z]*");
+		final Pattern p = Pattern.compile("[A-Z][^A-Z]*");
 		final Matcher m = p.matcher(StringUtils.capitalize(camelCase));
-		final StringBuilder string = new StringBuilder();
+		final StringBuilder builder = new StringBuilder();
 		while (m.find()) {
-			string.append(m.group()).append(" ");
+			builder.append(m.group()).append(" ");
 		}
-		return string.toString().trim();
+		return builder.toString().trim();
 	}
 
 	/**
