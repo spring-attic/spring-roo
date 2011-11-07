@@ -1,5 +1,7 @@
 package org.springframework.roo.project;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
@@ -118,5 +120,28 @@ public class MavenOperationsImplTest {
 		// Check
 		final String expectedPom = POM_AFTER_DEPENDENCY_REMOVED.replace("\n", StringUtils.LINE_SEPARATOR);
 		verify(mockFileManager).createOrUpdateTextFileIfRequired(eq(POM_PATH), eq(expectedPom), (String) any(), eq(false));
+	}
+	
+	@Test
+	public void testGetFocusedModuleWhenNoModulesExist() {
+		// Set up
+		when(mockPomManagementService.getFocusedModuleName()).thenReturn("");
+		when(mockMetadataService.get(ProjectMetadata.getProjectIdentifier(""))).thenReturn(null);
+		
+		// Invoke and check
+		assertNull(projectOperations.getFocusedModule());
+	}
+	
+	@Test
+	public void testGetFocusedModuleWhenChildModuleHasFocus() {
+		// Set up
+		when(mockPomManagementService.getFocusedModuleName()).thenReturn("child");
+		final Pom mockChildPom = mock(Pom.class);
+		final ProjectMetadata mockChildMetadata = mock(ProjectMetadata.class);
+		when(mockChildMetadata.getPom()).thenReturn(mockChildPom);
+		when(mockMetadataService.get(ProjectMetadata.getProjectIdentifier("child"))).thenReturn(mockChildMetadata);
+		
+		// Invoke and check
+		assertEquals(mockChildPom, projectOperations.getFocusedModule());
 	}
 }

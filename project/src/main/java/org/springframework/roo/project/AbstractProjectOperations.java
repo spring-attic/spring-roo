@@ -96,7 +96,11 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 	}
 
 	public Pom getFocusedModule() {
-		return getFocusedProjectMetadata().getPom();
+		final ProjectMetadata focusedProjectMetadata = getFocusedProjectMetadata();
+		if (focusedProjectMetadata == null) {
+			return null;
+		}
+		return focusedProjectMetadata.getPom();
 	}
 
 	public String getFocusedModuleName() {

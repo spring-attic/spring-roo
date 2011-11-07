@@ -29,16 +29,18 @@ public interface ProjectOperations {
 	boolean isFocusedProjectAvailable();
 	
 	/**
-	 * Returns the {@link ProjectMetadata} for the project.
+	 * Returns the {@link ProjectMetadata} for the given module.
 	 * 
-	 * @param moduleName the name of the module to act upon (required)
-	 * @return the {@link ProjectMetadata} object;
+	 * @param moduleName the module whose metadata is being requested (can be
+	 * empty to signify the root or only module)
+	 * @return <code>null</code> if the metadata is not available
 	 */
 	ProjectMetadata getProjectMetadata(String moduleName);
 
 	/**
+	 * Returns the metadata for the currently focussed module.
 	 *
-	 * @return the focused {@link ProjectMetadata} object;
+	 * @return <code>null</code> if no project metadata is available
 	 */
 	ProjectMetadata getFocusedProjectMetadata();
 
