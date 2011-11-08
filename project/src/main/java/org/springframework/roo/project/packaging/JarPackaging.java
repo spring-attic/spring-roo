@@ -51,7 +51,8 @@ public class JarPackaging extends CorePackagingProvider {
 	}
 
 	@Override
-	protected void createOtherArtifacts(final JavaPackage topLevelPackage, final String module) {
-		applicationContextOperations.createMiddleTierApplicationContext(topLevelPackage, module);
+	protected void createOtherArtifacts(final JavaPackage topLevelPackage, final String module, final ProjectOperations projectOperations) {
+		final String fullyQualifiedModuleName = getFullyQualifiedModuleName(module, projectOperations);
+		applicationContextOperations.createMiddleTierApplicationContext(topLevelPackage, fullyQualifiedModuleName);
 	}
 }

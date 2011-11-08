@@ -1,5 +1,6 @@
 package org.springframework.roo.project.packaging;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
@@ -75,7 +76,7 @@ public abstract class AbstractPackagingProvider implements PackagingProvider {
 	public String createArtifacts(final JavaPackage topLevelPackage, final String nullableProjectName, final String javaVersion, final GAV parentPom, final String module, final ProjectOperations projectOperations) {
 		final String pomPath = createPom(topLevelPackage, nullableProjectName, javaVersion, parentPom, module, projectOperations);
 		fileManager.scan();	// TODO not sure why or if this is necessary; find out and document/remove it
-		createOtherArtifacts(topLevelPackage, module);
+		createOtherArtifacts(topLevelPackage, module, projectOperations);
 		return pomPath;
 	}
 
@@ -232,11 +233,12 @@ public abstract class AbstractPackagingProvider implements PackagingProvider {
 	 * by {@link #createPom}).
 	 * <p>
 	 * This implementation sets up the Log4j configuration file for the root module.
-	 * @param topLevelPackage 
 	 * 
-	 * @param module 
+	 * @param topLevelPackage 
+	 * @param module the unqualified name of the module being created (empty means the root or only module)
+	 * @param projectOperations can't be injected as it would create a circular dependency
 	 */
-	protected void createOtherArtifacts(final JavaPackage topLevelPackage, final String module) {
+	protected void createOtherArtifacts(final JavaPackage topLevelPackage, final String module, final ProjectOperations projectOperations) {
 		if (StringUtils.isBlank(module)) {
 			setUpLog4jConfiguration();
 		}
@@ -259,5 +261,24 @@ public abstract class AbstractPackagingProvider implements PackagingProvider {
 	 */
 	String getPomTemplate() {
 		return pomTemplate;
+	}
+	
+	/**
+	 * Returns the fully-qualified name of the given module, relative to the
+	 * currently focused module.
+	 * 
+	 * @param moduleName can be blank for the root or only module
+	 * @param projectOperations
+	 * @return
+	 */
+	protected final String getFullyQualifiedModuleName(final String moduleName, final ProjectOperations projectOperations) {
+		if (StringUtils.isBlank(moduleName)) {
+			return "";
+		}
+		final String focusedModuleName = projectOperations.getFocusedModuleName();
+		if (StringUtils.isBlank(focusedModuleName)) {
+			return moduleName;
+		}
+		return focusedModuleName + File.separator + moduleName;
 	}
 }
