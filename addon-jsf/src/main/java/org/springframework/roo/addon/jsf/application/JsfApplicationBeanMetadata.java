@@ -1,5 +1,7 @@
 package org.springframework.roo.addon.jsf.application;
 
+import static org.springframework.roo.addon.jsf.model.JsfJavaType.APPLICATION;
+import static org.springframework.roo.addon.jsf.model.JsfJavaType.APPLICATION_SCOPED;
 import static org.springframework.roo.addon.jsf.model.JsfJavaType.DISPLAY_CREATE_DIALOG;
 import static org.springframework.roo.addon.jsf.model.JsfJavaType.DISPLAY_LIST;
 import static org.springframework.roo.addon.jsf.model.JsfJavaType.EL_CONTEXT;
@@ -54,7 +56,7 @@ public class JsfApplicationBeanMetadata extends AbstractItdTypeDetailsProvidingM
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
 	private static final JavaSymbolName MENU_MODEL = new JavaSymbolName("menuModel");
 	private static final String CREATE_ICON = "ui-icon ui-icon-document";
-	private static final String LIST_ICON = "ui-icon ui-folder-open";
+	private static final String LIST_ICON = "ui-icon ui-icon-folder-open";
 
 	// Fields
 	private Set<ClassOrInterfaceTypeDetails> managedBeans;
@@ -107,7 +109,8 @@ public class JsfApplicationBeanMetadata extends AbstractItdTypeDetailsProvidingM
 	private boolean hasScopeAnnotation() {
 		return (governorTypeDetails.getAnnotation(SESSION_SCOPED) != null
 			|| governorTypeDetails.getAnnotation(VIEW_SCOPED) != null
-			|| governorTypeDetails.getAnnotation(REQUEST_SCOPED) != null);
+			|| governorTypeDetails.getAnnotation(REQUEST_SCOPED) != null
+			|| governorTypeDetails.getAnnotation(APPLICATION_SCOPED) != null);
 	}
 
 	private MethodMetadata getInitMethod() {
@@ -118,6 +121,7 @@ public class JsfApplicationBeanMetadata extends AbstractItdTypeDetailsProvidingM
 
 		ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
 		imports.addImport(EL_CONTEXT);
+		imports.addImport(APPLICATION);
 		imports.addImport(EXPRESSION_FACTORY);
 		imports.addImport(FACES_CONTEXT);
 		imports.addImport(PRIMEFACES_MENU_ITEM);
@@ -127,7 +131,8 @@ public class JsfApplicationBeanMetadata extends AbstractItdTypeDetailsProvidingM
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
 		bodyBuilder.appendFormalLine("FacesContext facesContext = FacesContext.getCurrentInstance();");
-		bodyBuilder.appendFormalLine("ExpressionFactory expressionFactory = facesContext.getApplication().getExpressionFactory();");
+		bodyBuilder.appendFormalLine("Application application = facesContext.getApplication();");
+		bodyBuilder.appendFormalLine("ExpressionFactory expressionFactory = application.getExpressionFactory();");
 		bodyBuilder.appendFormalLine("ELContext elContext = facesContext.getELContext();");
 		bodyBuilder.appendFormalLine("");
 

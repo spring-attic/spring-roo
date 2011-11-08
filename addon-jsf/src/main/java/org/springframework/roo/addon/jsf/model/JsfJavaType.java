@@ -21,6 +21,8 @@ public class JsfJavaType {
 	public static final JavaType EXPRESSION_FACTORY = new JavaType("javax.el.ExpressionFactory");
 	
 	// javax.faces
+	public static final JavaType APPLICATION = new JavaType("javax.faces.application.Application");
+	public static final JavaType APPLICATION_SCOPED = new JavaType("javax.faces.bean.ApplicationScoped");
 	public static final JavaType CONVERTER = new JavaType("javax.faces.convert.Converter");
 	public static final JavaType DATE_TIME_CONVERTER =  new JavaType("javax.faces.convert.DateTimeConverter");
 	public static final JavaType DOUBLE_RANGE_VALIDATOR = new JavaType("javax.faces.validator.DoubleRangeValidator");

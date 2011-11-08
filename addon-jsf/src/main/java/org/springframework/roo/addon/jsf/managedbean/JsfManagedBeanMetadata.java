@@ -2,6 +2,8 @@ package org.springframework.roo.addon.jsf.managedbean;
 
 import static java.lang.reflect.Modifier.PRIVATE;
 import static java.lang.reflect.Modifier.PUBLIC;
+import static org.springframework.roo.addon.jsf.model.JsfJavaType.APPLICATION;
+import static org.springframework.roo.addon.jsf.model.JsfJavaType.APPLICATION_SCOPED;
 import static org.springframework.roo.addon.jsf.model.JsfJavaType.DATE_TIME_CONVERTER;
 import static org.springframework.roo.addon.jsf.model.JsfJavaType.DISPLAY_CREATE_DIALOG;
 import static org.springframework.roo.addon.jsf.model.JsfJavaType.DISPLAY_LIST;
@@ -302,7 +304,10 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 	}
 
 	private boolean hasScopeAnnotation() {
-		return (governorTypeDetails.getAnnotation(SESSION_SCOPED) != null || governorTypeDetails.getAnnotation(VIEW_SCOPED) != null || governorTypeDetails.getAnnotation(REQUEST_SCOPED) != null);
+		return (governorTypeDetails.getAnnotation(SESSION_SCOPED) != null
+			|| governorTypeDetails.getAnnotation(VIEW_SCOPED) != null
+			|| governorTypeDetails.getAnnotation(REQUEST_SCOPED) != null
+			|| governorTypeDetails.getAnnotation(APPLICATION_SCOPED) != null);
 	}
 
 	private JavaType getListType(final JavaType parameterType) {
@@ -462,6 +467,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 
 		final ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
 		imports.addImport(EL_CONTEXT);
+		imports.addImport(APPLICATION);
 		imports.addImport(EXPRESSION_FACTORY);
 		imports.addImport(FACES_CONTEXT);
 		imports.addImport(HTML_PANEL_GRID);
@@ -469,7 +475,8 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 
 		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("FacesContext facesContext = FacesContext.getCurrentInstance();");
-		bodyBuilder.appendFormalLine("ExpressionFactory expressionFactory = facesContext.getApplication().getExpressionFactory();");
+		bodyBuilder.appendFormalLine("Application application = facesContext.getApplication();");
+		bodyBuilder.appendFormalLine("ExpressionFactory expressionFactory = application.getExpressionFactory();");
 		bodyBuilder.appendFormalLine("ELContext elContext = facesContext.getELContext();");
 		bodyBuilder.appendFormalLine("");
 		bodyBuilder.appendFormalLine("HtmlPanelGrid " + HTML_PANEL_GRID_ID + " = " + getComponentCreation("HtmlPanelGrid"));
@@ -580,19 +587,23 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 					imports.addImport(DATE_TIME_CONVERTER);
 
 					bodyBuilder.appendFormalLine(htmlOutputTextStr);
-					bodyBuilder.appendFormalLine(getSetValueExpression(fieldValueId, fieldName));
-					bodyBuilder.appendFormalLine("DateTimeConverter " + converterName + " = new DateTimeConverter();");
+					bodyBuilder.appendFormalLine(getSetValueExpression(fieldValueId, fieldName, simpleTypeName));
+					bodyBuilder.appendFormalLine("DateTimeConverter " + converterName + " = (DateTimeConverter) application.createConverter(DateTimeConverter.CONVERTER_ID);");
+					// TODO Get working: bodyBuilder.appendFormalLine(converterName + ".setPattern(((SimpleDateFormat) DateFormat.getDateInstance(DateFormat.SHORT)).toPattern());");
 					bodyBuilder.appendFormalLine(converterName + ".setPattern(\"dd/MM/yyyy\");");
 					bodyBuilder.appendFormalLine(fieldValueId + ".setConverter(" + converterName + ");");
 				} else {
 					imports.addImport(PRIMEFACES_CALENDAR);
 					imports.addImport(DATE);
+					// imports.addImport(DATE_FORMAT);
+					// imports.addImport(SIMPLE_DATE_FORMAT);
 
 					bodyBuilder.appendFormalLine("Calendar " + fieldValueId + " = " + getComponentCreation("Calendar"));
 					bodyBuilder.appendFormalLine(componentIdStr);
 					bodyBuilder.appendFormalLine(getSetValueExpression(fieldValueId, fieldName, "Date"));
 					bodyBuilder.appendFormalLine(fieldValueId + ".setNavigator(true);");
 					bodyBuilder.appendFormalLine(fieldValueId + ".setEffect(\"slideDown\");");
+					// TODO Get working: bodyBuilder.appendFormalLine(fieldValueId + ".setPattern(((SimpleDateFormat) DateFormat.getDateInstance(DateFormat.SHORT)).toPattern());");
 					bodyBuilder.appendFormalLine(fieldValueId + ".setPattern(\"dd/MM/yyyy\");");
 					bodyBuilder.appendFormalLine(requiredStr);
 					if (MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), PAST) != null) {
@@ -695,7 +706,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 						bodyBuilder.appendFormalLine(componentIdStr);
 						bodyBuilder.appendFormalLine(fieldValueId + ".setConverter(new " + converterType.getSimpleTypeName() + "());");
 						bodyBuilder.appendFormalLine(fieldValueId + ".setValueExpression(\"value\", expressionFactory.createValueExpression(elContext, \"#{" + beanName + "." + getSelectedFieldName(fieldName) + "}\", List.class));");
-						bodyBuilder.appendFormalLine("UISelectItems " + fieldValueId + "Items = (UISelectItems) facesContext.getApplication().createComponent(UISelectItems.COMPONENT_TYPE);");
+						bodyBuilder.appendFormalLine("UISelectItems " + fieldValueId + "Items = (UISelectItems) application.createComponent(UISelectItems.COMPONENT_TYPE);");
 						if (action == Action.VIEW) {
 							bodyBuilder.appendFormalLine(fieldValueId + ".setReadonly(true);");
 							bodyBuilder.appendFormalLine(fieldValueId + ".setDisabled(true);");
@@ -717,7 +728,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 						bodyBuilder.appendFormalLine(fieldValueId + ".setReadonly(true);");
 						bodyBuilder.appendFormalLine(fieldValueId + ".setDisabled(true);");
 						bodyBuilder.appendFormalLine(fieldValueId + ".setValueExpression(\"value\", expressionFactory.createValueExpression(elContext, \"#{" + beanName + "." + getSelectedFieldName(fieldName) + "}\", List.class));");
-						bodyBuilder.appendFormalLine("UISelectItems " + fieldValueId + "Items = (UISelectItems) facesContext.getApplication().createComponent(UISelectItems.COMPONENT_TYPE);");
+						bodyBuilder.appendFormalLine("UISelectItems " + fieldValueId + "Items = (UISelectItems) application.createComponent(UISelectItems.COMPONENT_TYPE);");
 						bodyBuilder.appendFormalLine(fieldValueId + "Items.setValueExpression(\"value\", expressionFactory.createValueExpression(elContext, \"#{" + beanName + "." + entityName.getSymbolName() + "." + fieldName + "}\", " + simpleTypeName + ".class));");
 						bodyBuilder.appendFormalLine(fieldValueId + "Items.setValueExpression(\"var\", expressionFactory.createValueExpression(elContext, \"" + genericTypeFieldName + "\", String.class));");
 						bodyBuilder.appendFormalLine(fieldValueId + "Items.setValueExpression(\"itemLabel\", expressionFactory.createValueExpression(elContext, \"#{" + genericTypeFieldName + "}\", String.class));");
@@ -733,7 +744,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 						bodyBuilder.appendFormalLine("UISelectItem " + fieldValueId + "Item;");
 						bodyBuilder.appendFormalLine("for (" + gerericTypeSimpleTypeName + " " + StringUtils.uncapitalize(gerericTypeSimpleTypeName) + " : " + gerericTypeSimpleTypeName + ".values()) {");
 						bodyBuilder.indent();
-						bodyBuilder.appendFormalLine(fieldValueId + "Item = (UISelectItem) facesContext.getApplication().createComponent(UISelectItem.COMPONENT_TYPE);");
+						bodyBuilder.appendFormalLine(fieldValueId + "Item = (UISelectItem) application.createComponent(UISelectItem.COMPONENT_TYPE);");
 						bodyBuilder.appendFormalLine(fieldValueId + "Item.setItemLabel(" + StringUtils.uncapitalize(gerericTypeSimpleTypeName) + ".name());");
 						bodyBuilder.appendFormalLine(fieldValueId + "Item.setItemValue(" + StringUtils.uncapitalize(gerericTypeSimpleTypeName) + ");");
 						bodyBuilder.appendFormalLine(getAddChildToComponent(fieldValueId, fieldValueId + "Item"));
@@ -803,8 +814,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 
 		bodyBuilder.appendFormalLine("return " + HTML_PANEL_GRID_ID + ";");
 
-		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), PUBLIC, methodName, HTML_PANEL_GRID, new ArrayList<AnnotatedJavaType>(), new ArrayList<JavaSymbolName>(), bodyBuilder);
-		return methodBuilder.build();
+		return new MethodMetadataBuilder(getId(), PUBLIC, methodName, HTML_PANEL_GRID, new ArrayList<AnnotatedJavaType>(), new ArrayList<JavaSymbolName>(), bodyBuilder).build();
 	}
 
 	private void setRegexPatternValidationString(final FieldMetadata field, final String fieldValueId, final InvocableMemberBodyBuilder bodyBuilder) {
@@ -1146,7 +1156,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 	}
 
 	private String getComponentCreation(final String componentName) {
-		return new StringBuilder().append("(").append(componentName).append(") facesContext.getApplication().createComponent(").append(componentName).append(".COMPONENT_TYPE);").toString();
+		return new StringBuilder().append("(").append(componentName).append(") application.createComponent(").append(componentName).append(".COMPONENT_TYPE);").toString();
 	}
 
 	private String getSetValueExpression(final String inputFieldVar, final String fieldName, final String className) {

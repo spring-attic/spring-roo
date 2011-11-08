@@ -23,6 +23,7 @@ import java.sql.Clob;
 import java.sql.Ref;
 import java.sql.Struct;
 import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -74,6 +75,7 @@ public final class JdkJavaType {
 	
 	// java.text
 	public static final JavaType DATE_FORMAT = new JavaType(DateFormat.class);
+	public static final JavaType SIMPLE_DATE_FORMAT = new JavaType(SimpleDateFormat.class);
 
 	// java.util
 	public static final JavaType ARRAY_LIST = new JavaType(ArrayList.class);

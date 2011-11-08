@@ -43,7 +43,11 @@ public class LocaleBean {
         return getLocale().toString();
     }
 
-    public void setSelectedLocale(String localeString) {
+    public void setSelectedLocale() {
+        setSelectedLocale(FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("locale"));
+    }
+    
+   public void setSelectedLocale(String localeString) {
         Iterator<Locale> supportedLocales = FacesContext.getCurrentInstance().getApplication().getSupportedLocales();
         while (supportedLocales.hasNext()) {
             Locale locale = supportedLocales.next();
