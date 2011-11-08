@@ -6,7 +6,7 @@ import java.util.Locale;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.addon.web.mvc.jsp.i18n.AbstractLanguage;
-import org.springframework.roo.support.util.TemplateUtils;
+import org.springframework.roo.support.util.FileUtils;
 
 /** 
  * __APP_NAME__ language support.
@@ -25,10 +25,10 @@ public class __APP_NAME__Language extends AbstractLanguage {
 	}
 
 	public InputStream getFlagGraphic() {
-		return TemplateUtils.getTemplate(getClass(), "__FLAG_FILE__");
+		return FileUtils.getInputStream(getClass(), "__FLAG_FILE__");
 	}
 
 	public InputStream getMessageBundle() {
-		return TemplateUtils.getTemplate(getClass(), "__MESSAGE_BUNDLE__");
+		return FileUtils.getInputStream(getClass(), "__MESSAGE_BUNDLE__");
 	}
 }
