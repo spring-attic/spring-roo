@@ -12,6 +12,20 @@ import org.springframework.roo.project.maven.Pom;
  * @since 1.0
  */
 public interface ProjectOperations {
+	
+	/**
+	 * Indicates whether the user can create a new project module
+	 * 
+	 * @return see above
+	 */
+	boolean isModuleCreationAllowed();
+	
+	/**
+	 * Indicates whether the user can change the focused module
+	 * 
+	 * @return see above
+	 */
+	boolean isModuleFocusAllowed();
 
 	/** 
 	 * Indicates whether a module with the given name is available.

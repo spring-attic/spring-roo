@@ -62,12 +62,22 @@ public class MavenCommands implements CommandMarker {
 	public boolean isDependencyModificationAllowed() {
 		return mavenOperations.isFocusedProjectAvailable();
 	}
-
+	
+	@CliAvailabilityIndicator(MODULE_FOCUS_COMMAND)
+	public boolean isModuleFocusAllowed() {
+		return mavenOperations.isModuleFocusAllowed();
+	}
+	
 	@CliCommand(value = MODULE_FOCUS_COMMAND, help = "Changes focus to a different project module")
 	public void focusModule(
 		@CliOption(key = "moduleName", mandatory = true, optionContext = "update,project", help = "The module to focus on") final Pom module) {
 		
 		mavenOperations.setModule(module);
+	}
+	
+	@CliAvailabilityIndicator(MODULE_CREATE_COMMAND)
+	public boolean isModuleCreationAllowed() {
+		return mavenOperations.isModuleCreationAllowed();
 	}
 
 	@CliCommand(value = MODULE_CREATE_COMMAND, help = "Creates a new Maven module")

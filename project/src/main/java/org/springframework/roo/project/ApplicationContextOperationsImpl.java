@@ -31,7 +31,7 @@ public class ApplicationContextOperationsImpl implements ApplicationContextOpera
 
 	public void createMiddleTierApplicationContext(final JavaPackage topLevelPackage, final String moduleName) {
 		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier(moduleName));
-		Assert.notNull(projectMetadata, "Project metadata required");
+		Assert.notNull(projectMetadata, "Project metadata required for module '" + moduleName + "'");
 		final Document document = XmlUtils.readXml(FileUtils.getInputStream(getClass(), "applicationContext-template.xml"));
 		final Element root = document.getDocumentElement();
 		DomUtils.findFirstElementByName("context:component-scan", root).setAttribute("base-package", topLevelPackage.getFullyQualifiedPackageName());

@@ -47,11 +47,11 @@ public class MavenProjectMetadataProvider implements MetadataProvider, FileEvent
 	@Reference private UaaRegistrationService uaaRegistrationService;
 	@Reference private UaaDetectedProducts uaaDetectedProducts;
 
-	public MetadataItem get(final String metadataIdentificationString) {
-		Assert.isTrue(ProjectMetadata.isValid(metadataIdentificationString), "Unexpected metadata request '" + metadataIdentificationString + "' for this provider");
+	public MetadataItem get(final String metadataId) {
+		Assert.isTrue(ProjectMetadata.isValid(metadataId), "Unexpected metadata request '" + metadataId + "' for this provider");
 		// Just rebuild on demand. We always do this as we expect MetadataService to cache on our behalf
 
-		Pom pom = pomManagementService.getPomFromModuleName(ProjectMetadata.getModuleName(metadataIdentificationString));
+		Pom pom = pomManagementService.getPomFromModuleName(ProjectMetadata.getModuleName(metadataId));
 		// Read the file, if it is available
 		if (pom == null || !fileManager.exists(pom.getPath())) {
 			return null;

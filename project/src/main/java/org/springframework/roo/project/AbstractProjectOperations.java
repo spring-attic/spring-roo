@@ -846,4 +846,12 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 	public Collection<String> getModuleNames() {
 		return pomManagementService.getModuleNames();
 	}
+	
+	public boolean isModuleFocusAllowed() {
+		return getModuleNames().size() > 1;
+	}
+	
+	public boolean isModuleCreationAllowed() {
+		return isProjectAvailable("");
+	}
 }
