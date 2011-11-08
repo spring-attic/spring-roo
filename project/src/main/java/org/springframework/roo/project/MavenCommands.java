@@ -70,7 +70,7 @@ public class MavenCommands implements CommandMarker {
 	
 	@CliCommand(value = MODULE_FOCUS_COMMAND, help = "Changes focus to a different project module")
 	public void focusModule(
-		@CliOption(key = "moduleName", mandatory = true, optionContext = "update,project", help = "The module to focus on") final Pom module) {
+		@CliOption(key = "moduleName", mandatory = true, help = "The module to focus on") final Pom module) {
 		
 		mavenOperations.setModule(module);
 	}

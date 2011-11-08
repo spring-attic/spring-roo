@@ -5,8 +5,10 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.springframework.roo.project.converter.PomConverter.INCLUDE_CURRENT_MODULE;
 import static org.springframework.roo.project.converter.PomConverter.ROOT_MODULE_SYMBOL;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -29,8 +31,10 @@ import org.springframework.roo.shell.Completion;
  */
 public class PomConverterTest {
 
-	private static final String ROOT_MODULE = "";
+	// Constants
 	private static final String CHILD_MODULE = "child";
+	private static final String ROOT_MODULE = "";
+	
 	// Fixture
 	private PomConverter converter;
 	@Mock private ProjectOperations mockProjectOperations;
@@ -53,37 +57,57 @@ public class PomConverterTest {
 	}
 	
 	@Test
-	public void testGetCompletionsWhenNoModulesExist() {
-		assertCompletions(ROOT_MODULE, Collections.<String>emptyList());
+	public void testGetCompletionsExcludingCurrentWhenNoModulesExist() {
+		assertCompletions(null, ROOT_MODULE, Collections.<String>emptyList());
 	}
 
 	@Test
-	public void testGetCompletionsWhenOnlyRootModuleExists() {
-		assertCompletions(ROOT_MODULE, Arrays.asList(ROOT_MODULE));
+	public void testGetCompletionsExcludingCurrentWhenOnlyRootModuleExists() {
+		assertCompletions(null, ROOT_MODULE, Arrays.asList(ROOT_MODULE));
 	}
 
 	@Test
-	public void testGetCompletionsWhenChildModuleExistsAndRootIsFocused() {
-		assertCompletions(ROOT_MODULE, Arrays.asList(ROOT_MODULE, CHILD_MODULE), CHILD_MODULE);
+	public void testGetCompletionsExcludingCurrentWhenChildModuleExistsAndRootIsFocused() {
+		assertCompletions(null, ROOT_MODULE, Arrays.asList(ROOT_MODULE, CHILD_MODULE), CHILD_MODULE);
 	}
 	
 	@Test
-	public void testGetCompletionsWhenChildModuleExistsAndChildIsFocused() {
-		assertCompletions(CHILD_MODULE, Arrays.asList(ROOT_MODULE, CHILD_MODULE), ROOT_MODULE_SYMBOL);
+	public void testGetCompletionsExcludingCurrentWhenChildModuleExistsAndChildIsFocused() {
+		assertCompletions(null, CHILD_MODULE, Arrays.asList(ROOT_MODULE, CHILD_MODULE), ROOT_MODULE_SYMBOL);
 	}
 	
-	private void assertCompletions(final String focusedModuleName, final Collection<String> moduleNames, final String... expectedCompletions) {
+	@Test
+	public void testGetCompletionsIncludingCurrentWhenNoModulesExist() {
+		assertCompletions(INCLUDE_CURRENT_MODULE, ROOT_MODULE, Collections.<String>emptyList());
+	}
+
+	@Test
+	public void testGetCompletionsIncludingCurrentWhenOnlyRootModuleExists() {
+		assertCompletions(INCLUDE_CURRENT_MODULE, ROOT_MODULE, Arrays.asList(ROOT_MODULE), ROOT_MODULE_SYMBOL);
+	}
+
+	@Test
+	public void testGetCompletionsIncludingCurrentWhenChildModuleExistsAndRootIsFocused() {
+		assertCompletions(INCLUDE_CURRENT_MODULE, ROOT_MODULE, Arrays.asList(ROOT_MODULE, CHILD_MODULE), ROOT_MODULE_SYMBOL, CHILD_MODULE);
+	}
+	
+	@Test
+	public void testGetCompletionsIncludingCurrentWhenChildModuleExistsAndChildIsFocused() {
+		assertCompletions(INCLUDE_CURRENT_MODULE, CHILD_MODULE, Arrays.asList(ROOT_MODULE, CHILD_MODULE), ROOT_MODULE_SYMBOL, CHILD_MODULE);
+	}
+	
+	private void assertCompletions(final String optionContext, final String focusedModuleName, final Collection<String> moduleNames, final String... expectedCompletions) {
 		// Set up
 		when(mockProjectOperations.getFocusedModuleName()).thenReturn(focusedModuleName);
 		when(mockProjectOperations.getModuleNames()).thenReturn(moduleNames);
 		final List<Completion> completions = new ArrayList<Completion>();
 		
 		// Invoke
-		final boolean allValuesComplete = this.converter.getAllPossibleValues(completions, null, null, null, null);
+		final boolean allValuesComplete = this.converter.getAllPossibleValues(completions, null, null, optionContext, null);
 		
 		// Check
 		assertTrue(allValuesComplete);
-		assertEquals(expectedCompletions.length, completions.size());
+		assertEquals("Expected " + Arrays.toString(expectedCompletions) + " but was " + completions, expectedCompletions.length, completions.size());
 		for (int i = 0; i < expectedCompletions.length; i++) {
 			assertEquals(expectedCompletions[i], completions.get(i).getValue());
 		}
@@ -99,7 +123,7 @@ public class PomConverterTest {
 	@Test
 	public void testConvertOtherModuleName() {
 		final Pom mockPom = mock(Pom.class);
-		final String moduleName = "foo";
+		final String moduleName = "foo" + File.separator + "bar";
 		when(mockProjectOperations.getPomFromModuleName(moduleName)).thenReturn(mockPom);
 		assertEquals(mockPom, this.converter.convertFromText(moduleName, null, null));
 	}

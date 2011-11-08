@@ -14,20 +14,30 @@ import org.springframework.roo.metadata.MetadataLogger;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.metadata.MetadataTimingStatistic;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.project.ProjectMetadata;
+import org.springframework.roo.project.ProjectOperations;
+import org.springframework.roo.project.converter.PomConverter;
+import org.springframework.roo.project.maven.Pom;
+import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
 import org.springframework.roo.shell.CommandMarker;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.ObjectUtils;
 
 @Component
 @Service
 public class MetadataCommands implements CommandMarker {
 
+	// Constants
+	private static final String METADATA_FOR_MODULE_COMMAND = "metadata for module";
+	
 	// Fields
 	@Reference private MetadataService metadataService;
 	@Reference private MetadataDependencyRegistry metadataDependencyRegistry;
 	@Reference private MemberDetailsScanner memberDetailsScanner;
 	@Reference private MetadataLogger metadataLogger;
+	@Reference private ProjectOperations projectOperations;
 	@Reference private TypeLocationService typeLocationService;
 
 	@CliCommand(value="metadata trace", help="Traces metadata event delivery notifications")
@@ -108,5 +118,22 @@ public class MetadataCommands implements CommandMarker {
 		metadataService.setMaxCapacity(maxCapacity);
 		// Show them that the change has taken place
 		return metadataTimings();
+	}
+	
+	// TODO availability indicators for other commands as required
+	
+	@CliAvailabilityIndicator(METADATA_FOR_MODULE_COMMAND)
+	public boolean isModuleMetadataAvailable() {
+		return projectOperations.getFocusedModule() != null;
+	}
+	
+	@CliCommand(value = METADATA_FOR_MODULE_COMMAND, help = "Shows the ProjectMetadata for the indicated project module")
+	public String metadataForModule(@CliOption(key = "module", mandatory = false, optionContext = PomConverter.INCLUDE_CURRENT_MODULE, help = "The module for which to retrieve the metadata (defaults to the focused module)") final Pom pom) {
+		final Pom targetPom = ObjectUtils.defaultIfNull(pom, projectOperations.getFocusedModule());
+		if (targetPom == null) {
+			return "This project has no modules";
+		}
+		final String projectMID = ProjectMetadata.getProjectIdentifier(targetPom.getModuleName());
+		return metadataService.get(projectMID).toString();
 	}
 }
