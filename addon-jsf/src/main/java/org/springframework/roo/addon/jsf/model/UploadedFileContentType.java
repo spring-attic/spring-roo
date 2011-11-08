@@ -1,6 +1,5 @@
 package org.springframework.roo.addon.jsf.model;
 
-
 /**
  * The Internet media type or content-type of an uploaded file. 
  * 
