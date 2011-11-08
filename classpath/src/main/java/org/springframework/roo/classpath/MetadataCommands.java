@@ -120,15 +120,13 @@ public class MetadataCommands implements CommandMarker {
 		return metadataTimings();
 	}
 	
-	// TODO availability indicators for other commands as required
-	
 	@CliAvailabilityIndicator(METADATA_FOR_MODULE_COMMAND)
 	public boolean isModuleMetadataAvailable() {
 		return projectOperations.getFocusedModule() != null;
 	}
 	
 	@CliCommand(value = METADATA_FOR_MODULE_COMMAND, help = "Shows the ProjectMetadata for the indicated project module")
-	public String metadataForModule(@CliOption(key = "module", mandatory = false, optionContext = PomConverter.INCLUDE_CURRENT_MODULE, help = "The module for which to retrieve the metadata (defaults to the focused module)") final Pom pom) {
+	public String metadataForModule(@CliOption(key = {"", "module"}, mandatory = false, optionContext = PomConverter.INCLUDE_CURRENT_MODULE, help = "The module for which to retrieve the metadata (defaults to the focused module)") final Pom pom) {
 		final Pom targetPom = ObjectUtils.defaultIfNull(pom, projectOperations.getFocusedModule());
 		if (targetPom == null) {
 			return "This project has no modules";
