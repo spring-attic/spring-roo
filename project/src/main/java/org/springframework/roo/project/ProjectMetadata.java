@@ -22,7 +22,8 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	/**
 	 * Returns the metadata ID for the project-level metadata of the given module.
 	 * 
-	 * @param moduleName can be blank for the root or only module
+	 * @param moduleName the fully-qualified module name, separated by
+	 * {@link java.io.File#separator}; can be blank for the root or only module
 	 * @return a non-blank MID
 	 */
 	public static String getProjectIdentifier(final String moduleName) {

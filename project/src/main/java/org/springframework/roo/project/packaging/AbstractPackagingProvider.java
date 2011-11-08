@@ -94,12 +94,14 @@ public abstract class AbstractPackagingProvider implements PackagingProvider {
 	 * </ul>
 	 *
 	 * This method makes as few assumptions about the POM template as possible,
-	 * to make life easier for authors of new {@link PackagingProvider}s.
+	 * to make life easier for anyone writing a {@link PackagingProvider}.
 	 *
 	 * @param topLevelPackage the new project or module's top-level Java package (required)
 	 * @param projectName the project name provided by the user (can be blank)
 	 * @param javaVersion the Java version to substitute into the POM (required)
 	 * @param parentPom the Maven coordinates of the parent POM (can be <code>null</code>)
+	 * @param module the unqualified name of the Maven module to which the new POM belongs
+	 * @param projectOperations cannot be injected otherwise it's a circular dependency
 	 * @return the path of the newly created POM
 	 */
 	protected String createPom(final JavaPackage topLevelPackage, final String projectName, final String javaVersion, final GAV parentPom, final String module, final ProjectOperations projectOperations) {

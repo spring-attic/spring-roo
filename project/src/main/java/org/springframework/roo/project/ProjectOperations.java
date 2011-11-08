@@ -560,13 +560,15 @@ public interface ProjectOperations {
 	/**
 	 * Returns the name of the currently focussed module.
 	 *
-	 * @return an empty string if no module has the focus
+	 * @return an empty string if no module has the focus, otherwise a
+	 * fully-qualified name separated by {@link java.io.File#separator}
 	 */
 	String getFocusedModuleName();
 
 	/**
-	 *
-	 * @param moduleName the name of the module to act upon (required)
+	 * Returns the given module's {@link Pom}
+	 * 
+	 * @param moduleName the fully-qualified name of the module (required)
 	 * @return
 	 */
 	Pom getPomFromModuleName(String moduleName);
