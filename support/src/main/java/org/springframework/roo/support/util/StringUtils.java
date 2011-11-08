@@ -124,6 +124,29 @@ public final class StringUtils {
 	public static boolean hasText(final String str) {
 		return hasText((CharSequence) str);
 	}
+	
+	/**
+	 * Indicates whether the given substring occurs within the given string.
+	 * Inspired by the eponymous method in commons-lang.
+	 * <pre>
+   		StringUtils.contains(null, *)     = false
+		StringUtils.contains(*, null)     = false
+		StringUtils.contains("", "")      = true
+		StringUtils.contains("abc", "")   = true
+		StringUtils.contains("abc", "a")  = true
+		StringUtils.contains("abc", "z")  = false</pre>
+	 * 
+	 * @param string the string to look within (can be <code>null</code>)
+	 * @param substring the string to look for (can be <code>null</code>)
+	 * @return see above
+	 * @since 1.2.0
+	 */
+	public static boolean contains(final String string, final String substring) {
+		if (string == null || substring == null) {
+			return false;
+		}
+		return string.contains(substring);
+	}
 
 	/**
 	 * Check whether the given CharSequence contains any whitespace characters.

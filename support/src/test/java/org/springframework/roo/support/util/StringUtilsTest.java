@@ -463,4 +463,22 @@ public class StringUtilsTest {
 			assertEquals(scenario[2], StringUtils.substringAfterLast(scenario[0], scenario[1]));
 		}
 	}
+	
+	private static final String[][] CONTAINS_SCENARIOS = {
+		{null, "anything", "false"},
+		{"anything", null, "false"},
+		{"", "", "true"},
+		{"abc", "", "true"},
+		{"abc", "a", "true"},
+		{"abc", "b", "true"},
+		{"abc", "c", "true"},
+		{"abc", "z", "false"}
+	};
+	
+	@Test
+	public void testContains() {
+		for (final String[] scenario : CONTAINS_SCENARIOS) {
+			assertEquals("Failed on scenario " + Arrays.toString(scenario), Boolean.valueOf(scenario[2]), StringUtils.contains(scenario[0], scenario[1]));
+		}
+	}
 }
