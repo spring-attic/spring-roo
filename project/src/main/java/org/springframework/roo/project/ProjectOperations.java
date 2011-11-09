@@ -43,6 +43,22 @@ public interface ProjectOperations {
 	boolean isFocusedProjectAvailable();
 	
 	/**
+	 * Indicates whether the supplied feature is installed in any module of a project.
+	 *  
+	 * @param featureName the name of the feature (see {@link FeatureNames} for available features)
+	 * @return true if the feature is installed in any module, otherwise false
+	 */
+	boolean isFeatureInstalled(String featureName);
+	
+	/**
+	 * Indicates whether the supplied feature is installed in the focused module.
+	 *  
+	 * @param featureName the name of the feature (see {@link FeatureNames} for available features)
+	 * @return true if the feature is installed in the focused module, otherwise false
+	 */
+	boolean isFeatureInstalledInFocusedModule(String featureName);
+
+	/**
 	 * Returns the {@link ProjectMetadata} for the given module.
 	 * 
 	 * @param moduleName the module whose metadata is being requested (can be
@@ -492,30 +508,6 @@ public interface ProjectOperations {
 	 * @param resource the resource to remove (required)
 	 */
 	void removeResource(String moduleName, Resource resource);
-
-	/**
-	 * Determines whether the Database.com Maven dependency exists in the pom.
-	 *
-	 * @param moduleName the name of the module to act upon (required)
-	 * @return true if the com.force.sdk is present in the pom.xml, otherwise false
-	 */
-	boolean isDatabaseDotComEnabled(String moduleName);
-
-	/**
-	 * Determines whether the Google App Engine Maven plugin exists in the pom.
-	 *
-	 * @param moduleName the name of the module to act upon (required)
-	 * @return true if the maven-gae-plugin is present in the pom.xml, otherwise false
-	 */
-	boolean isGaeEnabled(String moduleName);
-
-	/**
-	 * Determines whether the GWT Maven plugin exists in the pom.
-	 *
-	 * @param moduleName the name of the module to act upon (required)
-	 * @return true if the gwt-maven-plugin is present in the pom.xml, otherwise false
-	 */
-	boolean isGwtEnabled(String moduleName);
 
 	/**
 	 *

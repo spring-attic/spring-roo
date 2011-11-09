@@ -2,6 +2,7 @@ package org.springframework.roo.addon.gwt;
 
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.project.Feature;
 
 /**
  * Provides GWT operations.
@@ -10,13 +11,7 @@ import org.springframework.roo.model.JavaType;
  * @author James Tyrrell
  * @since 1.1
  */
-public interface GwtOperations {
-
-	boolean isSetupAvailable();
-
-	boolean isGwtEnabled();
-
-	boolean isGaeEnabled();
+public interface GwtOperations extends Feature {
 
 	void setup();
 

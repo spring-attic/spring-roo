@@ -6,12 +6,17 @@ import static org.springframework.roo.support.util.AnsiEscapeCode.decorate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.ReferenceCardinality;
+import org.apache.felix.scr.annotations.ReferencePolicy;
+import org.apache.felix.scr.annotations.ReferenceStrategy;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.process.manager.FileManager;
@@ -37,6 +42,7 @@ import org.w3c.dom.Element;
  */
 @SuppressWarnings("deprecation")
 @Component(componentAbstract = true)
+@Reference(name = "feature", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC, referenceInterface = Feature.class, cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE)
 public abstract class AbstractProjectOperations implements ProjectOperations {
 
 	// Constants
@@ -51,6 +57,7 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 	@Reference PathResolver pathResolver;
 	@Reference protected PomManagementService pomManagementService;
 	@Reference protected Shell shell;
+	private final Map<String, Feature> features = new HashMap<String, Feature>();
 
 	/**
 	 * Generates a message about the addition of the given items to the POM
@@ -77,6 +84,39 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 	 */
 	static String highlight(final String text) {
 		return decorate(text, FG_CYAN);
+	}
+	
+	protected void bindFeature(final Feature feature) {
+		if (feature != null) {
+			features.put(feature.getName(), feature);
+		}
+	}
+
+	protected void unbindFeature(final Feature feature) {
+		if (feature != null) {
+			features.remove(feature.getName());
+		}
+	}
+
+	public boolean isFeatureInstalled(String featureName) {
+		Feature feature = features.get(featureName);
+		if (feature == null) {
+			return false;
+		}
+		for (String moduleName : getModuleNames()) {
+			if (feature.isInstalledInModule(moduleName)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public boolean isFeatureInstalledInFocusedModule(String featureName) {
+		Feature feature = features.get(featureName);
+		if (feature == null) {
+			return false;
+		}
+		return feature.isInstalledInModule(getFocusedModuleName());
 	}
 
 	public final boolean isProjectAvailable(final String moduleName) {
@@ -119,7 +159,8 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 	}
 
 	public final Pom getPomFromModuleName(final String moduleName) {
-		return getProjectMetadata(moduleName).getPom();
+		final ProjectMetadata projectMetadata = getProjectMetadata(moduleName);
+		return projectMetadata == null ? null : projectMetadata.getPom();
 	}
 
 	public PathResolver getPathResolver() {
@@ -131,7 +172,9 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 			return;
 		}
 		Pom focusedModule = getFocusedModule();
-		if (StringUtils.hasText(moduleName) && StringUtils.hasText(focusedModule.getModuleName()) && !moduleName.equals(getFocusedModule().getModuleName())) {
+		Assert.notNull(focusedModule, "Focused module for '" + moduleName + "' is not available");
+		
+		if (StringUtils.hasText(moduleName) && StringUtils.hasText(focusedModule.getModuleName()) && !moduleName.equals(focusedModule.getModuleName())) {
 			Pom externalModule = getProjectMetadata(moduleName).getPom();
 			if (externalModule != null) {
 				if (!externalModule.getPath().equals(focusedModule.getPath())) {
@@ -159,36 +202,6 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 			return new JavaPackage(pom.getGroupId());
 		}
 		return null;
-	}
-
-	/**
-	 * Determines whether the GWT Maven plugin exists in the pom.
-	 * 
-	 * @return true if the gwt-maven-plugin is present in the pom.xml, otherwise false
-	 */
-	public boolean isGwtEnabled(final String moduleName) {
-		Pom pom = getPomFromModuleName(moduleName);
-		return pom != null && pom.isGwtEnabled();
-	}
-
-	/**
-	 * Determines whether the Google App Engine Maven plugin exists in the pom.
-	 * 
-	 * @return true if the maven-gae-plugin is present in the pom.xml, otherwise false
-	 */
-	public boolean isGaeEnabled(final String moduleName) {
-		Pom pom = getPomFromModuleName(moduleName);
-		return pom != null && pom.isGaeEnabled();
-	}
-
-	/**
-	 * Determines whether the Database.com Maven dependency exists in the pom.
-	 * 
-	 * @return true if the com.force.sdk is present in the pom.xml, otherwise false
-	 */
-	public boolean isDatabaseDotComEnabled(final String moduleName) {
-		Pom pom = getPomFromModuleName(moduleName);
-		return pom != null && pom.isDatabaseDotComEnabled();
 	}
 
 	public String getProjectName(final String moduleName) {
@@ -635,7 +648,6 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 
 		final Document document = XmlUtils.readXml(fileManager.getInputStream(pom.getPath()));
 		final Element root = document.getDocumentElement();
-
 		final String descriptionOfChange;
 		final Element existing = XmlUtils.findFirstElement("/project/properties/" + property.getName(), root);
 		if (existing == null) {
@@ -663,9 +675,8 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 
 		final Document document = XmlUtils.readXml(fileManager.getInputStream(pom.getPath()));
 		final Element root = document.getDocumentElement();
-
-		String descriptionOfChange = "";
 		final Element propertiesElement = XmlUtils.findFirstElement("/project/properties", root);
+		String descriptionOfChange = "";
 		for (final Element candidate : XmlUtils.findElements("/project/properties/*", document.getDocumentElement())) {
 			if (property.equals(new Property(candidate))) {
 				propertiesElement.removeChild(candidate);
@@ -690,9 +701,8 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 
 		final Document document = XmlUtils.readXml(fileManager.getInputStream(pom.getPath()));
 		final Element root = document.getDocumentElement();
-
-		final Element buildElement = XmlUtils.findFirstElement("/project/build", root);
 		final String descriptionOfChange;
+		final Element buildElement = XmlUtils.findFirstElement("/project/build", root);
 		final Element existingFilter = XmlUtils.findFirstElement("filters/filter['" + filter.getValue() + "']", buildElement);
 		if (existingFilter == null) {
 			// No such filter; add it
@@ -772,7 +782,6 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 
 		final Document document = XmlUtils.readXml(fileManager.getInputStream(pom.getPath()));
 		final Element root = document.getDocumentElement();
-
 		final Element resourcesElement = XmlUtils.findFirstElement("/project/build/resources", root);
 		if (resourcesElement == null) {
 			return;
@@ -848,7 +857,7 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 	}
 	
 	public boolean isModuleFocusAllowed() {
-		return getModuleNames().size() > 1;
+		return !getModuleNames().isEmpty();
 	}
 	
 	public boolean isModuleCreationAllowed() {

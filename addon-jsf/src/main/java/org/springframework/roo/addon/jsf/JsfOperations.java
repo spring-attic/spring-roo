@@ -4,6 +4,7 @@ import org.springframework.roo.addon.jsf.model.UploadedFileContentType;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.project.Feature;
 
 /**
  * Provides JSF managed-bean operations.
@@ -11,13 +12,9 @@ import org.springframework.roo.model.JavaType;
  * @author Alan Stewart
  * @since 1.2.0
  */
-public interface JsfOperations {
+public interface JsfOperations extends Feature {
 
-	boolean isSetupAvailable();
-
-	boolean isScaffoldAvailable();
-
-	boolean isMediaAdditionAvailable();
+	boolean isScaffoldOrMediaAdditionAvailable();
 
 	void setup(JsfImplementation jsfImplementation, Theme theme);
 

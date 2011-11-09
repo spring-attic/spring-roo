@@ -24,18 +24,22 @@ import org.springframework.roo.support.logging.HandlerUtils;
 @Component
 @Service
 public class JspCommands implements CommandMarker {
-	private final Logger log =  HandlerUtils.getLogger(JspCommands.class);
+	
+	// Constants
+	private static Logger logger = HandlerUtils.getLogger(JspCommands.class);
+	
+	// Fields
 	@Reference private JspOperations jspOperations;
 	@Reference private PathResolver pathResolver;
-
-	@CliAvailabilityIndicator({ "web mvc controller", "controller class", "web mvc install view", "web mvc view", "web mvc update tags" })
-	public boolean isControllerClassAvailable() {
-		return jspOperations.isControllerAvailable();
-	}
 
 	@CliAvailabilityIndicator({ "web mvc setup" })
 	public boolean isProjectAvailable() {
 		return jspOperations.isSetupAvailable();
+	}
+
+	@CliAvailabilityIndicator({ "web mvc controller", "controller class", "web mvc install view", "web mvc view", "web mvc update tags" })
+	public boolean isControllerClassAvailable() {
+		return jspOperations.isControllerAvailable();
 	}
 
 	@CliCommand(value = "web mvc setup", help = "Setup a basic project structure for a Spring MVC / JSP application")
@@ -68,8 +72,9 @@ public class JspCommands implements CommandMarker {
 	@CliCommand(value = "web mvc language", help = "Install new internationalization bundle for MVC scaffolded UI.")
 	public void language(
 		@CliOption(key = { "", "code" }, mandatory = true, help = "The language code for the desired bundle") final I18n i18n) {
+		
 		if (i18n == null) {
-			log.warning("Could not parse language code");
+			logger.warning("Could not parse language code");
 			return;
 		}
 		jspOperations.installI18n(i18n, pathResolver.getFocusedPath(Path.SRC_MAIN_WEBAPP));
@@ -81,7 +86,7 @@ public class JspCommands implements CommandMarker {
 		@CliOption(key = { "", "code" }, mandatory = true, help = "The language code for the desired bundle") final I18n i18n) {
 
 		if (i18n == null) {
-			log.warning("Could not parse language code");
+			logger.warning("Could not parse language code");
 			return;
 		}
 		jspOperations.installI18n(i18n, pathResolver.getFocusedPath(Path.SRC_MAIN_WEBAPP));
@@ -101,7 +106,8 @@ public class JspCommands implements CommandMarker {
 		@CliOption(key = "path", mandatory = true, help = "The path the static view to create in (required, ie '/foo/blah')") final String path,
 		@CliOption(key = "viewName", mandatory = true, help = "The view name the mapping this view should adopt (required, ie 'index')") final String viewName,
 		@CliOption(key = "title", mandatory = true, help = "The title of the view") final String title) {
-		log.warning("This command has been deprecated and will be disabled soon! Please use 'web mvc setup' followed by 'web mvc install view' instead.");
+		
+		logger.warning("This command has been deprecated and will be disabled soon! Please use 'web mvc setup' followed by 'web mvc install view' instead.");
 		view(path, viewName, title);
 	}
 

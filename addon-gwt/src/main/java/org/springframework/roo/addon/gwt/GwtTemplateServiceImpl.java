@@ -53,6 +53,7 @@ import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.ContextualPath;
+import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
@@ -367,7 +368,7 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
 					dataDictionary.setVariable("sharedScaffoldPackage", GwtPath.SHARED_SCAFFOLD.packageName(projectOperations.getTopLevelPackage(projectMetadata.getModuleName())));
 				}
 
-				if (projectOperations.isGaeEnabled(projectMetadata.getModuleName())) {
+				if (projectOperations.isFeatureInstalledInFocusedModule(FeatureNames.GAE)) {
 					dataDictionary.showSection("gae");
 				}
 				break;

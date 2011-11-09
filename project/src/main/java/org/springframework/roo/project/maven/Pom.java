@@ -86,7 +86,7 @@ public class Pom {
 	 */
 	public Pom(final String groupId, final String artifactId, final String version, final String packaging, final Collection<? extends Dependency> dependencies, final Parent parent, final Collection<? extends Module> modules, final Collection<? extends Property> pomProperties, final String name, final Collection<? extends Repository> repositories, final Collection<? extends Repository> pluginRepositories, final String sourceDirectory, final String testSourceDirectory, final Collection<? extends Filter> filters, final Collection<? extends Plugin> buildPlugins, final Collection<? extends Resource> resources, final String path, final String moduleName) {
 		Assert.hasText(path, "Invalid path '" + path + "'");
-		
+
 		this.gav = new GAV(groupId, artifactId, version);
 		this.moduleName = StringUtils.trimToEmpty(moduleName);
 		this.name = StringUtils.trimToEmpty(name);
@@ -490,20 +490,6 @@ public class Pom {
 	}
 
 	/**
-	 * Indicates whether the Database.com dependency is registered.
-	 *
-	 * @return see above
-	 */
-	public boolean isDatabaseDotComEnabled() {
-		for (final Dependency dependency : getDependencies()) {
-			if ("com.force.sdk".equals(dependency.getGroupId())) {
-				return true;
-			}
-		}
-		return false;
-	}
-	
-	/**
 	 * Indicates whether the given dependency is registered, by checking the
 	 * result of {@link Dependency#equals(Object)}.
 	 *
@@ -526,34 +512,6 @@ public class Pom {
 	}
 
 	/**
-	 * Indicates whether Google App Engine is enabled for this module.
-	 *
-	 * @return see above
-	 */
-	public boolean isGaeEnabled() {
-		for (final Plugin buildPlugin : getBuildPlugins()) {
-			if ("maven-gae-plugin".equals(buildPlugin.getArtifactId())) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	/**
-	 * Indicates whether the Google Web Toolkit is enabled for this module.
-	 *
-	 * @return see above
-	 */
-	public boolean isGwtEnabled() {
-		for (final Plugin buildPlugin : getBuildPlugins()) {
-			if ("gwt-maven-plugin".equals(buildPlugin.getArtifactId())) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	/**
 	 * Indicates whether a plugin with the given coordinates is registered
 	 * 
 	 * @param coordinates the coordinates to match upon; can be <code>null</code>
@@ -565,7 +523,7 @@ public class Pom {
 				return true;
 			}
 		}
-		return false;		
+		return false;
 	}
 
 	/**

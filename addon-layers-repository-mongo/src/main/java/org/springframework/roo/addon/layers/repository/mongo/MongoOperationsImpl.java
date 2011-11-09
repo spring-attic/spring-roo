@@ -36,6 +36,7 @@ import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.project.Dependency;
+import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
@@ -68,18 +69,21 @@ public class MongoOperationsImpl implements MongoOperations {
 	@Reference private TypeLocationService typeLocationService;
 	@Reference private TypeManagementService typeManagementService;
 
-	public boolean isSetupCommandAvailable() {
-		return projectOperations.isFocusedProjectAvailable();
+	public String getName() {
+		return FeatureNames.MONGO;
 	}
 
-	public boolean isRepositoryCommandAvailable() {
+	public boolean isInstalledInModule(String moduleName) {
 		return projectOperations.isFocusedProjectAvailable() && fileManager.exists(pathResolver.getFocusedIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext-mongo.xml"));
 	}
 
-	public void setupRepository(final JavaType interfaceType, final JavaType classType, final JavaType domainType) {
+	public void setupRepository(final JavaType interfaceType, JavaType classType, final JavaType domainType) {
 		Assert.notNull(interfaceType, "Interface type required");
-		Assert.notNull(classType, "Class type required");
 		Assert.notNull(domainType, "Domain type required");
+
+		if (classType == null) {
+			classType = new JavaType(interfaceType.getFullyQualifiedTypeName() + "Impl");
+		}
 
 		String interfaceIdentifier = pathResolver.getFocusedCanonicalPath(Path.SRC_MAIN_JAVA, interfaceType);
 		String classIdentifier = pathResolver.getFocusedCanonicalPath(Path.SRC_MAIN_JAVA, classType);
@@ -142,7 +146,6 @@ public class MongoOperationsImpl implements MongoOperations {
 				String input = FileCopyUtils.copyToString(new InputStreamReader(inputStream));
 				input = input.replace("TO_BE_CHANGED_BY_ADDON", projectOperations.getTopLevelPackage(moduleName).getFullyQualifiedPackageName());
 				FileCopyUtils.copy(input.getBytes(), mutableFile.getOutputStream());
-				inputStream.close();
 			} catch (IOException e) {
 				throw new IllegalStateException("Unable to create file " + appCtxId);
 			}

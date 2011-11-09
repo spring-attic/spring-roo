@@ -39,6 +39,7 @@ import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.project.ContextualPath;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.DependencyScope;
+import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.Filter;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
@@ -95,12 +96,13 @@ public class JpaOperationsImpl implements JpaOperations {
 	@Reference TypeLocationService typeLocationService;
 	@Reference TypeManagementService typeManagementService;
 
-	public boolean isJpaInstallationPossible() {
-		return projectOperations.isFocusedProjectAvailable() && !fileManager.exists(getPersistencePathOfFocussedModule());
+	public String getName() {
+		return FeatureNames.JPA;
 	}
 
-	public boolean isJpaInstalled() {
-		return projectOperations.isFocusedProjectAvailable() && fileManager.exists(getPersistencePathOfFocussedModule());
+	public boolean isInstalledInModule(String moduleName) {
+		ContextualPath resourcesPath = ContextualPath.getInstance(Path.SRC_MAIN_RESOURCES, moduleName);
+		return projectOperations.isFocusedProjectAvailable() && fileManager.exists(projectOperations.getPathResolver().getIdentifier(resourcesPath, PERSISTENCE_XML));
 	}
 
 	public boolean hasDatabaseProperties() {
@@ -108,7 +110,7 @@ public class JpaOperationsImpl implements JpaOperations {
 	}
 
 	public SortedSet<String> getDatabaseProperties() {
-		if (fileManager.exists(getDatabasePropertiesPath())) {
+		if (hasDatabaseProperties()) {
 			return propFileOperations.getPropertyKeys(Path.SPRING_CONFIG_ROOT.contextualize(projectOperations.getFocusedModuleName()), "database.properties", true);
 		}
 		return getPropertiesFromDataNucleusConfiguration();
@@ -148,10 +150,6 @@ public class JpaOperationsImpl implements JpaOperations {
 		updateFilters(configuration, ormProvider, jdbcDatabase, databaseXPath, providersXPath, moduleName);
 		updateResources(configuration, ormProvider, jdbcDatabase, databaseXPath, providersXPath, moduleName);
 		updateBuildPlugins(configuration, ormProvider, jdbcDatabase, databaseXPath, providersXPath, moduleName);
-	}
-
-	public boolean isPersistentClassAvailable() {
-		return projectOperations.isFocusedProjectAvailable() && fileManager.exists(pathResolver.getFocusedIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml"));
 	}
 
 	public void newEntity(final JavaType name, final boolean createAbstract, final JavaType superclass, final List<AnnotationMetadataBuilder> annotations) {
@@ -956,7 +954,7 @@ public class JpaOperationsImpl implements JpaOperations {
 		final List<Dependency> dependencies = new ArrayList<Dependency>();
 		for (final Element dependencyElement : XmlUtils.findElements(xPathExpression + "/dependencies/dependency", configuration)) {
 			final Dependency dependency = new Dependency(dependencyElement);
-			if (dependency.getGroupId().equals("com.google.appengine") && dependency.getArtifactId().equals("appengine-api-1.0-sdk") && projectOperations.isGwtEnabled(moduleName)) {
+			if (dependency.getGroupId().equals("com.google.appengine") && dependency.getArtifactId().equals("appengine-api-1.0-sdk") && projectOperations.isFeatureInstalledInFocusedModule(FeatureNames.GWT)) {
 				continue;
 			}
 			dependencies.add(dependency);

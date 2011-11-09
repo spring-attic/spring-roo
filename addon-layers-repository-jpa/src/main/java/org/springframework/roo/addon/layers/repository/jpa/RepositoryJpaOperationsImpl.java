@@ -22,7 +22,9 @@ import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.process.manager.MutableFile;
+import org.springframework.roo.project.ContextualPath;
 import org.springframework.roo.project.Dependency;
+import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
@@ -48,14 +50,22 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
 	@Reference private ProjectOperations projectOperations;
 	@Reference private TypeManagementService typeManagementService;
 
-	public boolean isRepositoryCommandAvailable() {
-		return projectOperations.isFocusedProjectAvailable() && fileManager.exists(pathResolver.getFocusedIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml"));
+	public String getName() {
+		return FeatureNames.JPA;
 	}
 
-	public void setupRepository(final JavaType interfaceType, final JavaType classType, final JavaType domainType) {
+	public boolean isInstalledInModule(String moduleName) {
+		ContextualPath resourcesPath = ContextualPath.getInstance(Path.SRC_MAIN_RESOURCES, moduleName);
+		return projectOperations.isFocusedProjectAvailable() && fileManager.exists(projectOperations.getPathResolver().getIdentifier(resourcesPath, "META-INF/persistence.xml"));
+	}
+
+	public void setupRepository(final JavaType interfaceType, JavaType classType, final JavaType domainType) {
 		Assert.notNull(interfaceType, "Interface type required");
-		Assert.notNull(classType, "Class type required");
 		Assert.notNull(domainType, "Domain type required");
+
+		if (classType == null) {
+			classType = new JavaType(interfaceType.getFullyQualifiedTypeName() + "Impl");
+		}
 
 		String interfaceIdentifier = pathResolver.getFocusedCanonicalPath(Path.SRC_MAIN_JAVA, interfaceType);
 		String classIdentifier = pathResolver.getFocusedCanonicalPath(Path.SRC_MAIN_JAVA, classType);

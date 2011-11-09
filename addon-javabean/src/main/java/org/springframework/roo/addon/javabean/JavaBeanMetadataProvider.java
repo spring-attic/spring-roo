@@ -23,6 +23,7 @@ import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.ContextualPath;
+import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.StringUtils;
@@ -68,7 +69,7 @@ public class JavaBeanMetadataProvider extends AbstractItdMetadataProvider {
 		}
 		// If the project isn't valid do not continue
 		if (projectOperations.isProjectAvailable(ProjectMetadata.getModuleName(upstreamDependency))) {
-			boolean isGaeEnabled = projectOperations.isGaeEnabled(ProjectMetadata.getModuleName(upstreamDependency));
+			boolean isGaeEnabled = projectOperations.isFeatureInstalled(FeatureNames.GAE);
 			// We need to determine if the persistence state has changed, we do this by comparing the last known state to the current state
 			boolean hasGaeStateChanged = wasGaeEnabled == null || isGaeEnabled != wasGaeEnabled;
 			if (hasGaeStateChanged) {
@@ -101,7 +102,7 @@ public class JavaBeanMetadataProvider extends AbstractItdMetadataProvider {
 	private JavaSymbolName getIdentifierAccessorMethodName(final FieldMetadata field, final String metadataIdentificationString) {
 		ContextualPath path = PhysicalTypeIdentifier.getPath(field.getDeclaredByMetadataId());
 		final String moduleNme = path.getModule();
-		if (projectOperations.isProjectAvailable(moduleNme) || !projectOperations.isGaeEnabled(moduleNme)) {
+		if (projectOperations.isProjectAvailable(moduleNme) || !projectOperations.isFeatureInstalled(FeatureNames.GAE)) {
 			return null;
 		}
 		// We are not interested if the field is annotated with @javax.persistence.Transient

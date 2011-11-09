@@ -43,6 +43,7 @@ import org.springframework.roo.classpath.itd.MemberHoldingTypeDetailsMetadataIte
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.ContextualPath;
+import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
@@ -144,7 +145,7 @@ public class JpaActiveRecordMetadataProviderImpl extends AbstractItdMetadataProv
 		if (projectOperations.isProjectAvailable(moduleName)) {
 			// If the project itself changes, we want a chance to refresh this item
 			metadataDependencyRegistry.registerDependency(ProjectMetadata.getProjectIdentifier(moduleName), metadataId);
-			isGaeEnabled = projectOperations.isGaeEnabled(moduleName);
+			isGaeEnabled = projectOperations.isFeatureInstalledInFocusedModule(FeatureNames.GAE);
 		}
 		return new JpaActiveRecordMetadata(metadataId, aspectName, governorPhysicalType, parent, crudAnnotationValues, pluralMetadata.getPlural(), idFields.get(0), entityName, isGaeEnabled);
 	}

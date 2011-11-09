@@ -40,6 +40,7 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.ReservedWords;
 import org.springframework.roo.project.ContextualPath;
 import org.springframework.roo.project.Dependency;
+import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
@@ -81,16 +82,17 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 	@Reference private TypeLocationService typeLocationService;
 	@Reference private TypeManagementService typeManagementService;
 
-	public boolean isSetupAvailable() {
-		return projectOperations.isFocusedProjectAvailable();
+	public String getName() {
+		return FeatureNames.JSF;
 	}
 
-	public boolean isScaffoldAvailable() {
-		return fileManager.exists(getWebXmlFile()) && !fileManager.exists(projectOperations.getPathResolver().getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/spring/webmvc-config.xml"));
+	public boolean isInstalledInModule(String moduleName) {
+		ContextualPath webAppPath = ContextualPath.getInstance(Path.SRC_MAIN_WEBAPP, moduleName);
+		return fileManager.exists(pathResolver.getIdentifier(webAppPath, "WEB-INF/faces-config.xml")) || fileManager.exists(pathResolver.getIdentifier(webAppPath, "templates/layout.xhtml"));
 	}
-
-	public boolean isMediaAdditionAvailable() {
-		return hasFacesConfig();
+	
+	public boolean isScaffoldOrMediaAdditionAvailable() {
+		return isInstalledInModule(projectOperations.getFocusedModuleName()) && fileManager.exists(getWebXmlFile());
 	}
 
 	public void setup(JsfImplementation jsfImplementation, final Theme theme) {

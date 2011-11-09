@@ -58,6 +58,7 @@ import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.ContextualPath;
+import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
@@ -201,8 +202,8 @@ public class JpaEntityMetadataProviderImpl extends AbstractIdentifierServiceAwar
 		if (projectOperations.isProjectAvailable(moduleName)) {
 			// If the project itself changes, we want a chance to refresh this item
 			metadataDependencyRegistry.registerDependency(ProjectMetadata.getProjectIdentifier(moduleName), metadataId);
-			isGaeEnabled = projectOperations.isGaeEnabled(moduleName);
-			isDatabaseDotComEnabled = projectOperations.isDatabaseDotComEnabled(moduleName);
+			isGaeEnabled = projectOperations.isFeatureInstalledInFocusedModule(FeatureNames.GAE);
+			isDatabaseDotComEnabled = projectOperations.isFeatureInstalledInFocusedModule(FeatureNames.DATABASE_DOT_COM);
 		}
 
 		return new JpaEntityMetadata(metadataId, aspectName, governorPhysicalType, parentEntity, governorMemberDetails, identifier, jpaEntityAnnotationValues, isGaeEnabled, isDatabaseDotComEnabled);

@@ -42,11 +42,13 @@ import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Dependency;
+import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.Plugin;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.Repository;
+import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.support.osgi.OSGiUtils;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.DomUtils;
@@ -96,16 +98,21 @@ public class GwtOperationsImpl implements GwtOperations {
 		this.context = context;
 	}
 
-	public boolean isSetupAvailable() {
-		return !isGwtEnabled() && fileManager.exists(projectOperations.getPathResolver().getFocusedIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml"));
+	public String getName() {
+		return FeatureNames.GWT;
 	}
 
-	public boolean isGwtEnabled() {
-		return projectOperations.isFocusedProjectAvailable() && projectOperations.isGwtEnabled(projectOperations.getFocusedModuleName());
-	}
-
-	public boolean isGaeEnabled() {
-		return projectOperations.isFocusedProjectAvailable() && projectOperations.isGaeEnabled(projectOperations.getFocusedModuleName());
+	public boolean isInstalledInModule(String moduleName) {
+		Pom pom = projectOperations.getPomFromModuleName(moduleName);
+		if (pom == null) {
+			return false;
+		}
+		for (final Plugin buildPlugin : pom.getBuildPlugins()) {
+			if ("gwt-maven-plugin".equals(buildPlugin.getArtifactId())) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public void setup() {
@@ -168,7 +175,7 @@ public class GwtOperationsImpl implements GwtOperations {
 		updateWebXml();
 
 		// Update gwt-maven-plugin and others
-		updateBuildPlugins(projectOperations.isGaeEnabled(projectOperations.getFocusedModuleName()));
+		updateBuildPlugins(projectOperations.isFeatureInstalledInFocusedModule(FeatureNames.GAE));
 	}
 
 	public void proxyAll(final JavaPackage proxyPackage) {
@@ -238,9 +245,9 @@ public class GwtOperationsImpl implements GwtOperations {
 	}
 
 	public void updateGaeConfiguration() {
-		boolean isGaeEnabled = projectOperations.isGaeEnabled(projectOperations.getFocusedModuleName());
+		boolean isGaeEnabled = projectOperations.isFeatureInstalledInFocusedModule(FeatureNames.GAE);
 		boolean hasGaeStateChanged = wasGaeEnabled == null || isGaeEnabled != wasGaeEnabled;
-		if (!projectOperations.isGwtEnabled(projectOperations.getFocusedModuleName()) || !hasGaeStateChanged) {
+		if (!isInstalledInModule(projectOperations.getFocusedModuleName()) || !hasGaeStateChanged) {
 			return;
 		}
 		
@@ -455,7 +462,7 @@ public class GwtOperationsImpl implements GwtOperations {
 		Element root = webXml.getDocumentElement();
 
 		WebXmlUtils.addServlet("requestFactory", projectOperations.getTopLevelPackage(projectOperations.getFocusedModuleName()) + ".server.CustomRequestFactoryServlet", "/gwtRequest", null, webXml, null);
-		if (projectOperations.isGaeEnabled(projectOperations.getFocusedModuleName())) {
+		if (projectOperations.isFeatureInstalledInFocusedModule(FeatureNames.GAE)) {
 			WebXmlUtils.addFilter("GaeAuthFilter", GwtPath.SERVER_GAE.packageName(projectOperations.getTopLevelPackage(projectOperations.getFocusedModuleName())) + ".GaeAuthFilter", "/gwtRequest/*", webXml, "This filter makes GAE authentication services visible to a RequestFactory client.");
 			String displayName = "Redirect to the login page if needed before showing any html pages";
 			WebXmlUtils.WebResourceCollection webResourceCollection = new WebXmlUtils.WebResourceCollection("Login required", null, Collections.singletonList("*.html"), new ArrayList<String>());
@@ -498,7 +505,7 @@ public class GwtOperationsImpl implements GwtOperations {
 
 	private void copyDirectoryContents(final GwtPath gwtPath) {
 		String sourceAntPath = gwtPath.getSourceAntPath();
-		if (sourceAntPath.contains("gae") && !projectOperations.isGaeEnabled(projectOperations.getFocusedModuleName())) {
+		if (sourceAntPath.contains("gae") && !projectOperations.isFeatureInstalledInFocusedModule(FeatureNames.GAE)) {
 			return;
 		}
 		String targetDirectory = gwtPath.canonicalFileSystemPath(projectOperations);
@@ -582,7 +589,7 @@ public class GwtOperationsImpl implements GwtOperations {
 		input = input.replace("__SEGMENT_PACKAGE__", segmentPackage);
 		input = input.replace("__PROJECT_NAME__", projectOperations.getProjectName(projectOperations.getFocusedModuleName()));
 
-		if (projectOperations.isGaeEnabled(projectOperations.getFocusedModuleName())) {
+		if (projectOperations.isFeatureInstalledInFocusedModule(FeatureNames.GAE)) {
 			input = input.replace("__GAE_IMPORT__", "import " + topLevelPackage + ".client.scaffold.gae.*;\n");
 			input = input.replace("__GAE_HOOKUP__", getGaeHookup());
 			input = input.replace("__GAE_REQUEST_TRANSPORT__", ", new GaeAuthRequestTransport(eventBus)");

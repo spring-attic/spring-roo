@@ -5,6 +5,7 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
@@ -23,15 +24,16 @@ public class GwtCommands implements CommandMarker {
 
 	// Fields
 	@Reference protected GwtOperations gwtOperations;
+	@Reference private ProjectOperations projectOperations;
 
 	@CliAvailabilityIndicator({ "web gwt setup", "gwt setup" })
-	public boolean isSetupAvailable() {
-		return gwtOperations.isSetupAvailable();
+	public boolean isSetupGwtAvailable() {
+		return !gwtOperations.isInstalledInModule(projectOperations.getFocusedModuleName());
 	}
 
-	@CliAvailabilityIndicator({ "web gwt proxy all", "web gwt proxy type", "web gwt request all", "web gwt request", "web gwt all", "web gwt scaffold ", "web gwt proxy request all", "web gwt proxy request type", "web gwt gae update" })
-	public boolean isGwtEnabled() {
-		return gwtOperations.isGwtEnabled();
+	@CliAvailabilityIndicator({ "web gwt proxy all", "web gwt proxy type", "web gwt request all", "web gwt request type", "web gwt all", "web gwt scaffold ", "web gwt proxy request all", "web gwt proxy request type", "web gwt gae update" })
+	public boolean isGwtInstalled() {
+		return !isSetupGwtAvailable();
 	}
 
 	@CliCommand(value = "web gwt setup", help = "Install Google Web Toolkit (GWT) into your project")

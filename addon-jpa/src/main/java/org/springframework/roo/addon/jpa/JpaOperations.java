@@ -5,6 +5,7 @@ import java.util.SortedSet;
 
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.project.Feature;
 
 /**
  * Provides JPA configuration and entity operations.
@@ -13,30 +14,9 @@ import org.springframework.roo.model.JavaType;
  * @author Alan Stewart
  * @since 1.0
  */
-public interface JpaOperations {
+public interface JpaOperations extends Feature {
 	
 	boolean hasDatabaseProperties();
-
-	/**
-	 * Indicates whether JPA can be installed in the currently focussed module.
-	 * 
-	 * @return <code>false</code> if no module has the focus
-	 */
-	boolean isJpaInstallationPossible();
-
-	/**
-	 * Indicates whether JPA is installed in the currently focussed module.
-	 * 
-	 * @return <code>false</code> if no module has the focus
-	 */
-	boolean isJpaInstalled();
-
-	/**
-	 * Indicates whether JPA is installed anywhere in the user project.
-	 * 
-	 * @return see above
-	 */
-	boolean isJpaInstalledInProject();
 
 	/**
 	 * This method is responsible for managing all JPA related artifacts (META-INF/persistence.xml, applicationContext.xml, database.properties and the project pom.xml)
@@ -54,15 +34,8 @@ public interface JpaOperations {
 	 * @param moduleName
 	 */
 	void configureJpa(OrmProvider ormProvider, JdbcDatabase database, String jndi, String applicationId, String hostName, String databaseName, String userName, String password, String transactionManager, String persistenceUnit, String moduleName);
-	
+
 	SortedSet<String> getDatabaseProperties();
-	
-	/**
-	 * Checks for the existence the META-INF/persistence.xml
-	 *
-	 * @return true if the META-INF/persistence.xml exists, otherwise false
-	 */
-	boolean isPersistentClassAvailable();
 
 	/**
 	 * Creates a new entity.

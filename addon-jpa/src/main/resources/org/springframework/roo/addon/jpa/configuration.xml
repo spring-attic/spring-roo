@@ -328,17 +328,17 @@
                 <dependency>
                     <groupId>org.datanucleus</groupId>
                     <artifactId>datanucleus-core</artifactId>
-                    <version>3.0.2</version>
+                    <version>3.0.3</version>
                 </dependency>
                 <dependency>
                     <groupId>org.datanucleus</groupId>
                     <artifactId>datanucleus-api-jpa</artifactId>
-                    <version>3.0.2</version>
+                    <version>3.0.3</version>
                 </dependency>
                 <dependency>
                     <groupId>org.datanucleus</groupId>
                     <artifactId>datanucleus-rdbms</artifactId>
-                    <version>3.0.2</version>
+                    <version>3.0.3</version>
                 </dependency>
             </dependencies>
             <plugins>

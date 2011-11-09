@@ -45,6 +45,7 @@ import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.ContextualPath;
+import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
@@ -132,7 +133,7 @@ public class IntegrationTestMetadataProviderImpl extends AbstractItdMetadataProv
 	private void handleGenericChangeToProject(final String moduleName) {
 		final ProjectMetadata projectMetadata = projectOperations.getProjectMetadata(moduleName);
 		if (projectMetadata != null && projectMetadata.isValid()) {
-			final boolean isGaeEnabled = projectOperations.isGaeEnabled(moduleName);
+			final boolean isGaeEnabled = projectOperations.isFeatureInstalledInFocusedModule(FeatureNames.GAE);
 			// We need to determine if the persistence state has changed, we do this by comparing the last known state to the current state
 			final boolean hasGaeStateChanged = wasGaeEnabled == null || isGaeEnabled != wasGaeEnabled;
 			if (hasGaeStateChanged) {
@@ -218,7 +219,7 @@ public class IntegrationTestMetadataProviderImpl extends AbstractItdMetadataProv
 		managedEntityTypes.put(entity, metadataIdentificationString);
 
 		String moduleName = PhysicalTypeIdentifierNamingUtils.getPath(metadataIdentificationString).getModule();
-		boolean isGaeEnabled = projectOperations.isProjectAvailable(moduleName) && projectOperations.isGaeEnabled(moduleName);
+		boolean isGaeEnabled = projectOperations.isProjectAvailable(moduleName) && projectOperations.isFeatureInstalledInFocusedModule(FeatureNames.GAE);
 
 		return new IntegrationTestMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, dataOnDemandMetadata, identifierAccessorMethod, versionAccessorMethod, countMethodAdditions, findMethodAdditions, findAllMethodAdditions, findEntriesMethod, flushMethodAdditions, mergeMethodAdditions, persistMethodAdditions, removeMethodAdditions, transactionManager, hasEmbeddedIdentifier, entityHasSuperclass, isGaeEnabled);
 	}

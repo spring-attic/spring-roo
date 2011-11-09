@@ -3,6 +3,7 @@ package org.springframework.roo.addon.web.mvc.jsp;
 import org.springframework.roo.addon.web.mvc.jsp.i18n.I18n;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.ContextualPath;
+import org.springframework.roo.project.Feature;
 import org.w3c.dom.Document;
 
 /**
@@ -11,11 +12,11 @@ import org.w3c.dom.Document;
  * @author Stefan Schmidt
  * @author Ben Alex
  */
-public interface JspOperations {
-
-	boolean isControllerAvailable();
+public interface JspOperations extends Feature {
 
 	boolean isSetupAvailable();
+	
+	boolean isControllerAvailable();
 
 	boolean isInstallLanguageCommandAvailable();
 

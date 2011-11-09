@@ -7,6 +7,7 @@ import org.springframework.roo.addon.jsf.model.UploadedFileContentType;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
@@ -21,21 +22,19 @@ import org.springframework.roo.shell.CommandMarker;
 @Component
 @Service
 public class JsfCommands implements CommandMarker {
+	
+	// Fields
 	@Reference private JsfOperations jsfOperations;
+	@Reference ProjectOperations projectOperations;
 
 	@CliAvailabilityIndicator({ "web jsf setup" })
-	public boolean isSetupAvailable() {
-		return jsfOperations.isSetupAvailable();
+	public boolean isJsfSetupAvailable() {
+		return !jsfOperations.isInstalledInModule(projectOperations.getFocusedModuleName()) && !projectOperations.isFeatureInstalledInFocusedModule("MVC");
 	}
 
-	@CliAvailabilityIndicator({ "web jsf all", "web jsf scaffold" })
-	public boolean isJsfAvailable() {
-		return jsfOperations.isScaffoldAvailable();
-	}
-	
-	@CliAvailabilityIndicator({ "web jsf media" })
-	public boolean isMediaAdditionAvailable() {
-		return jsfOperations.isMediaAdditionAvailable();
+	@CliAvailabilityIndicator({ "web jsf all", "web jsf scaffold", "web jsf media" })
+	public boolean isJsfInstalled() {
+		return jsfOperations.isScaffoldOrMediaAdditionAvailable();
 	}
 
 	@CliCommand(value = "web jsf setup", help = "Set up JSF environment")

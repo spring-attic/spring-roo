@@ -3,6 +3,7 @@ package org.springframework.roo.addon.layers.repository.mongo;
 import java.math.BigInteger;
 
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.project.Feature;
 
 /**
  * Operations for Spring Data MongoDB repository add-on.
@@ -10,21 +11,7 @@ import org.springframework.roo.model.JavaType;
  * @author Stefan Schmidt
  * @since 1.2.0
  */
-public interface MongoOperations {
-
-	/**
-	 * Indicate if the 'mongo setup' command should be available for this project.
-	 *
-	 * @return true if command should be made available
-	 */
-	boolean isSetupCommandAvailable();
-
-	/**
-	 * Indicate if the 'repository mongo' command should be available for this project.
-	 *
-	 * @return true if command should be made available
-	 */
-	boolean isRepositoryCommandAvailable();
+public interface MongoOperations extends Feature {
 
 	/**
 	 * Setup current project for Spring Data MongoDB configuration.

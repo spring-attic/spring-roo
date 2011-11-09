@@ -40,6 +40,7 @@ import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.ContextualPath;
 import org.springframework.roo.project.Dependency;
+import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
@@ -103,20 +104,29 @@ public class JspOperationsImpl extends AbstractOperations implements JspOperatio
 	@Reference private UaaRegistrationService uaaRegistrationService;
 	@Reference private WebMvcOperations webMvcOperations;
 
-	public boolean isControllerAvailable() {
-		return fileManager.exists(pathResolver.getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/views")) && !fileManager.exists(pathResolver.getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/faces-config.xml"));
+	public String getName() {
+		return FeatureNames.MVC;
 	}
 
-	private boolean isProjectAvailable() {
-		return projectOperations.isFocusedProjectAvailable();
+	public boolean isInstalledInModule(String moduleName) {
+		ContextualPath webAppPath = ContextualPath.getInstance(Path.SRC_MAIN_WEBAPP, moduleName);
+		return fileManager.exists(projectOperations.getPathResolver().getIdentifier(webAppPath, "WEB-INF/spring/webmvc-config.xml"));
 	}
-
+	
 	public boolean isSetupAvailable() {
-		return isProjectAvailable() && !isControllerAvailable();
+		return isProjectAvailable() && !isControllerAvailable() && !projectOperations.isFeatureInstalledInFocusedModule(FeatureNames.JSF);
+	}
+
+	public boolean isControllerAvailable() {
+		return fileManager.exists(pathResolver.getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/views")) && !projectOperations.isFeatureInstalledInFocusedModule(FeatureNames.JSF);
 	}
 
 	public boolean isInstallLanguageCommandAvailable() {
 		return isProjectAvailable() && fileManager.exists(pathResolver.getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/views/footer.jspx"));
+	}
+
+	private boolean isProjectAvailable() {
+		return projectOperations.isFocusedProjectAvailable();
 	}
 
 	public void installCommonViewArtefacts(final ContextualPath webappPath) {

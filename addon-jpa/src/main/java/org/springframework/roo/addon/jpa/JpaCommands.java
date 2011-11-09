@@ -77,23 +77,18 @@ public class JpaCommands implements CommandMarker {
 	}
 
 	@CliAvailabilityIndicator({ "jpa setup", "persistence setup" })
-	public boolean isInstallJpaAvailable() {
-		return jpaOperations.isJpaInstallationPossible() || jpaOperations.isJpaInstalled();
+	public boolean isSetupJpaAvailable() {
+		return projectOperations.isFocusedProjectAvailable();
 	}
 
-	@CliAvailabilityIndicator("database properties list")
-	public boolean isJpaInstalled() {
-		return jpaOperations.isJpaInstalled();
-	}
-
-	@CliAvailabilityIndicator({ "database properties remove", "database properties set" })
+	@CliAvailabilityIndicator({ "database properties list", "database properties remove", "database properties set" })
 	public boolean hasDatabaseProperties() {
-		return isJpaInstalled() && jpaOperations.hasDatabaseProperties();
+		return isSetupJpaAvailable() && jpaOperations.hasDatabaseProperties();
 	}
 
 	@CliAvailabilityIndicator( { "entity jpa", "embeddable" })
 	public boolean isPersistentClassAvailable() {
-		return jpaOperations.isPersistentClassAvailable();
+		return jpaOperations.isInstalledInModule(projectOperations.getFocusedModuleName());
 	}
 
 	@CliCommand(value = "jpa setup", help = "Install or updates a JPA persistence provider in your project")

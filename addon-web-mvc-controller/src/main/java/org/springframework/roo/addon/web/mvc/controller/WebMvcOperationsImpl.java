@@ -9,7 +9,6 @@ import java.util.List;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.springframework.roo.addon.jpa.JpaOperations;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
@@ -17,6 +16,7 @@ import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.DependencyScope;
 import org.springframework.roo.project.DependencyType;
+import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
@@ -52,7 +52,6 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
 
 	// Fields
 	@Reference private FileManager fileManager;
-	@Reference private JpaOperations jpaOperations;
 	@Reference private PathResolver pathResolver;
 	@Reference private ProjectOperations projectOperations;
 
@@ -159,7 +158,7 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
 		WebXmlUtils.addContextParam(new WebXmlUtils.WebXmlParam("contextConfigLocation", "classpath*:META-INF/spring/applicationContext*.xml"), document, null);
 		WebXmlUtils.addFilter(CHARACTER_ENCODING_FILTER_NAME, "org.springframework.web.filter.CharacterEncodingFilter", "/*", document, null, new WebXmlUtils.WebXmlParam("encoding", "UTF-8"), new WebXmlUtils.WebXmlParam("forceEncoding", "true"));
 		WebXmlUtils.addFilter(HTTP_METHOD_FILTER_NAME, "org.springframework.web.filter.HiddenHttpMethodFilter", "/*", document, null);
-		if (jpaOperations.isJpaInstalledInProject()) {
+		if (projectOperations.isFeatureInstalled(FeatureNames.JPA)) {
 			WebXmlUtils.addFilter(OPEN_ENTITYMANAGER_IN_VIEW_FILTER_NAME, "org.springframework.orm.jpa.support.OpenEntityManagerInViewFilter", "/*", document, null);
 		}
 		WebXmlUtils.addListener("org.springframework.web.context.ContextLoaderListener", document, "Creates the Spring Container shared by all Servlets and Filters");
@@ -218,7 +217,7 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
 		}
 
 		// Add MVC dependencies.
-		boolean isGaeEnabled = projectOperations.isGaeEnabled(projectOperations.getFocusedModuleName());
+		boolean isGaeEnabled = projectOperations.isFeatureInstalledInFocusedModule(FeatureNames.GAE);
 		Element configuration = XmlUtils.getConfiguration(getClass());
 
 		List<Dependency> dependencies = new ArrayList<Dependency>();
