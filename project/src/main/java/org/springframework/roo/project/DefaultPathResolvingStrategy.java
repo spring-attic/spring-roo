@@ -181,40 +181,27 @@ public class DefaultPathResolvingStrategy implements PathResolvingStrategy {
 		return parentFile.getRelativeSegment(identifier);
 	}
 
-	public String getIdentifier(final Path path, final String relativePath) {
-		Assert.notNull(path, "Path required");
-		Assert.notNull(relativePath, "Relative path cannot be null, although it can be empty");
-		final PathInformation pi = pathCache.get(path);
-		Assert.notNull(pi, "Path '" + path + "' is unknown to the path resolver");
-		final File newPath = new File(pi.getLocation(), relativePath);
-		return FileUtils.getCanonicalPath(newPath);
-	}
-
 	public String getRoot() {
 		return rootPath;
 	}
 
 	public String getCanonicalPath(final ContextualPath path, final JavaType javaType) {
-		return null;	// TODO JTT to review
-	}
-
-	public String getCanonicalPath(final Path path, final JavaType javaType) {
-		return null;	// TODO JTT to review
+		return null;
 	}
 
 	public String getFocusedIdentifier(final Path path, final String relativePath) {
-		return null;	// TODO JTT to review
+		return null;
 	}
 
 	public String getFocusedRoot(final Path path) {
-		return null;	// TODO JTT to review
+		return null;
 	}
 
 	public ContextualPath getFocusedPath(final Path path) {
-		return null;	// TODO JTT to review
+		return null;
 	}
 
 	public String getFocusedCanonicalPath(final Path path, final JavaType javaType) {
-		return null;	// TODO JTT to review
+		return null;
 	}
 }
