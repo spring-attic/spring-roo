@@ -6,7 +6,6 @@ import java.util.Set;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.springframework.roo.addon.web.mvc.controller.ControllerOperations;
 import org.springframework.roo.addon.web.mvc.controller.scaffold.WebScaffoldAnnotationValues;
 import org.springframework.roo.classpath.PhysicalTypeDetails;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
@@ -28,7 +27,7 @@ import org.springframework.uaa.client.util.Assert;
  * @author Stefan Schmidt
  * @since 1.2.0
  */
-@Component(immediate = true)
+@Component
 @Service
 public class WebFinderOperationsImpl implements WebFinderOperations {
 
@@ -36,11 +35,6 @@ public class WebFinderOperationsImpl implements WebFinderOperations {
 	@Reference private MetadataService metadataService;
 	@Reference private TypeLocationService typeLocationService;
 	@Reference private TypeManagementService typeManagementService;
-	@Reference private ControllerOperations controllerOperations;
-
-	public boolean isCommandAvailable() {
-		return controllerOperations.isScaffoldAvailable();
-	}
 
 	public void annotateAll() {
 		// First, find all entities with finders.
@@ -70,7 +64,6 @@ public class WebFinderOperationsImpl implements WebFinderOperations {
 		Assert.notNull(entityType, "Entity type required");
 		
 		String id = typeLocationService.getPhysicalTypeIdentifier(controllerType);
-
 		if (id == null) {
 			throw new IllegalArgumentException("Cannot locate source for '" + controllerType.getFullyQualifiedTypeName() + "'");
 		}
@@ -82,6 +75,7 @@ public class WebFinderOperationsImpl implements WebFinderOperations {
 		if (!webScaffoldAnnotationValues.isAnnotationFound() || !webScaffoldAnnotationValues.getFormBackingObject().equals(entityType)) {
 			throw new IllegalArgumentException("Aborting, this controller type does not manage the " + entityType.getSimpleTypeName() + " form backing type.");
 		}
+		
 		PhysicalTypeDetails ptd = ptm.getMemberHoldingTypeDetails();
 		Assert.notNull(ptd, "Java source code details unavailable for type " + PhysicalTypeIdentifier.getFriendlyName(id));
 		ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = (ClassOrInterfaceTypeDetails) ptd;

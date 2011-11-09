@@ -46,7 +46,7 @@ import org.w3c.dom.Element;
  * @author Stefan Schmidt
  * @since 1.2.0
  */
-@Component(immediate = true)
+@Component
 @Service
 public class WebJsonOperationsImpl implements WebJsonOperations {
 
@@ -59,17 +59,9 @@ public class WebJsonOperationsImpl implements WebJsonOperations {
 	@Reference private TypeManagementService typeManagementService;
 	@Reference private WebMvcOperations mvcOperations;
 
-	public boolean isSetupAvailable() {
-		String mvcConfig = pathResolver.getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/spring/webmvc-config.xml");
-		return !fileManager.exists(mvcConfig);
-	}
-
-	public boolean isCommandAvailable() {
-		return !isSetupAvailable();
-	}
-
 	public void setup() {
 		mvcOperations.installMinimalWebArtifacts();
+
 		// Verify that the web.xml already exists
 		String webXmlPath = pathResolver.getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/web.xml");
 		Assert.isTrue(fileManager.exists(webXmlPath), "'" + webXmlPath + "' does not exist");

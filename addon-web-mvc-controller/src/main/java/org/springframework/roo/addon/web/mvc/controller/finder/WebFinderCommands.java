@@ -3,6 +3,7 @@ package org.springframework.roo.addon.web.mvc.controller.finder;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.springframework.roo.addon.web.mvc.controller.ControllerOperations;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
@@ -15,27 +16,29 @@ import org.springframework.roo.shell.CommandMarker;
  * @author Stefan Schmidt
  * @since 1.2.0
  */
-@Component(immediate = true)
+@Component
 @Service
 public class WebFinderCommands implements CommandMarker {
 
-	@Reference private WebFinderOperations operations;
+	// Fields
+	@Reference private WebFinderOperations webFinderOperations;
+	@Reference private ControllerOperations controllerOperations;
 
 	@CliAvailabilityIndicator({ "web mvc finder add", "web mvc finder all" })
 	public boolean isCommandAvailable() {
-		return operations.isCommandAvailable();
+		return controllerOperations.isScaffoldAvailable();
 	}
 
+	@CliCommand(value = "web mvc finder all", help = "Adds  @RooWebFinder annotation to existing MVC controllers")
+	public void all() {
+		webFinderOperations.annotateAll();
+	}
+	
 	@CliCommand(value = "web mvc finder add", help = "Adds @RooWebFinder annotation to MVC controller type")
 	public void add(
 		@CliOption(key = "formBackingType", mandatory = true, help = "The finder-enabled type") final JavaType finderType,
 		@CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*", optionContext = "update,project", help = "The controller java type to apply this annotation to") final JavaType controllerType) {
 
-		operations.annotateType(controllerType, finderType);
-	}
-
-	@CliCommand(value = "web mvc finder all", help = "Adds  @RooWebFinder annotation to existing MVC controllers")
-	public void all() {
-		operations.annotateAll();
+		webFinderOperations.annotateType(controllerType, finderType);
 	}
 }

@@ -34,8 +34,8 @@ import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.ContextualPath;
+import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
@@ -59,7 +59,6 @@ public class ControllerOperationsImpl implements ControllerOperations {
 	private static final Logger LOG = HandlerUtils.getLogger(ControllerOperationsImpl.class);
 
 	// Fields
-	@Reference private FileManager fileManager;
 	@Reference private MetadataDependencyRegistry dependencyRegistry;
 	@Reference private MetadataService metadataService;
 	@Reference private PathResolver pathResolver;
@@ -73,7 +72,7 @@ public class ControllerOperationsImpl implements ControllerOperations {
 	}
 
 	public boolean isScaffoldAvailable() {
-		return fileManager.exists(pathResolver.getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/spring/webmvc-config.xml")) && !fileManager.exists(pathResolver.getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/faces-config.xml"));
+		return projectOperations.isFeatureInstalledInFocusedModule(FeatureNames.MVC) && !projectOperations.isFeatureInstalledInFocusedModule(FeatureNames.JSF);
 	}
 
 	public void setup() {
