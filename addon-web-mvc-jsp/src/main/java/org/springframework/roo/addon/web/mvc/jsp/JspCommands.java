@@ -101,7 +101,7 @@ public class JspCommands implements CommandMarker {
 		@CliOption(key = "path", mandatory = true, help = "The path the static view to create in (required, ie '/foo/blah')") final String path,
 		@CliOption(key = "viewName", mandatory = true, help = "The view name the mapping this view should adopt (required, ie 'index')") final String viewName,
 		@CliOption(key = "title", mandatory = true, help = "The title of the view") final String title) {
-		log.warning("This command has been depricated and will be disabled soon! Please use 'web mvc setup' followed by 'web mvc install view' instead.");
+		log.warning("This command has been deprecated and will be disabled soon! Please use 'web mvc setup' followed by 'web mvc install view' instead.");
 		view(path, viewName, title);
 	}
 
