@@ -19,7 +19,7 @@ public interface DbreOperations {
 	 *
 	 * @return true if the DBRE commands are available to use, otherwise false
 	 */
-	boolean isDbreAvailable();
+	boolean isDbreInstallationPossible();
 
 	/**
 	 * Displays the metadata for the indicated schema on the screen, or writes it to

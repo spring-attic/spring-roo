@@ -39,7 +39,7 @@ public class ServiceOperationsImpl implements ServiceOperations {
 	@Reference private ProjectOperations projectOperations;
 	@Reference private TypeManagementService typeManagementService;
 
-	public boolean isServiceCommandAvailable() {
+	public boolean isServiceInstallationPossible() {
 		return projectOperations.isFocusedProjectAvailable();
 	}
 

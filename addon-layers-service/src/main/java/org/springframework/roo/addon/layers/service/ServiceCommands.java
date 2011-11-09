@@ -24,7 +24,7 @@ public class ServiceCommands implements CommandMarker {
 
 	@CliAvailabilityIndicator("service")
 	public boolean isServiceCommandAvailable() {
-		return serviceOperations.isServiceCommandAvailable();
+		return serviceOperations.isServiceInstallationPossible();
 	}
 
 	@CliCommand(value = "service", help = "Adds @RooService annotation to target type")

@@ -14,6 +14,8 @@ import org.springframework.roo.project.Feature;
  */
 public interface JsfOperations extends Feature {
 
+	boolean isJsfInstallationPossible();
+
 	boolean isScaffoldOrMediaAdditionAvailable();
 
 	void setup(JsfImplementation jsfImplementation, Theme theme);

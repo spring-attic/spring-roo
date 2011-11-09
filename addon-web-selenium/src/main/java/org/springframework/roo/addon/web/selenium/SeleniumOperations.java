@@ -10,7 +10,7 @@ import org.springframework.roo.model.JavaType;
  */
 public interface SeleniumOperations {
 
-	boolean isProjectAvailable();
+	boolean isSeleniumInstallationPossible();
 
 	/**
 	 * Creates a new Selenium testcase

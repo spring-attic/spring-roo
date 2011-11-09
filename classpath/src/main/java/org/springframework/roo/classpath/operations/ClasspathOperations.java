@@ -11,6 +11,8 @@ import org.springframework.roo.project.ContextualPath;
  * @since 1.2.0
  */
 public interface ClasspathOperations {
+	
+	boolean isProjectAvailable();
 
 	/**
 	 * Changes the focus to the given type.

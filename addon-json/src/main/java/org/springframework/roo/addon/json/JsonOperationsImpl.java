@@ -31,7 +31,7 @@ public class JsonOperationsImpl implements JsonOperations {
 	@Reference private TypeLocationService typeLocationService;
 	@Reference private TypeManagementService typeManagementService;
 
-	public boolean isCommandAvailable() {
+	public boolean isJsonInstallationPossible() {
 		return projectOperations.isFocusedProjectAvailable();
 	}
 

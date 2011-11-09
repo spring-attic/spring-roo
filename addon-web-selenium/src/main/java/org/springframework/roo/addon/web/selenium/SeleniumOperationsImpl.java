@@ -77,7 +77,7 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 	@Reference private TypeLocationService typeLocationService;
 	@Reference private WebMetadataService webMetadataService;
 	
-	public boolean isProjectAvailable() {
+	public boolean isSeleniumInstallationPossible() {
 		return projectOperations.isFocusedProjectAvailable() && fileManager.exists(pathResolver.getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/web.xml"));
 	}
 

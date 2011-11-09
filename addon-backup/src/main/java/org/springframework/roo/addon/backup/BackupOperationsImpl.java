@@ -45,12 +45,12 @@ public class BackupOperationsImpl implements BackupOperations {
 	@Reference private FileManager fileManager;
 	@Reference private ProjectOperations projectOperations;
 
-	public boolean isBackupAvailable() {
+	public boolean isBackupPossible() {
 		return projectOperations.isFocusedProjectAvailable();
 	}
 
 	public String backup() {
-		Assert.isTrue(isBackupAvailable(), "Project metadata unavailable");
+		Assert.isTrue(isBackupPossible(), "Project metadata unavailable");
 
 		DateFormat df = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss");
 

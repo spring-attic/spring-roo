@@ -113,10 +113,9 @@ public class JspOperationsImpl extends AbstractOperations implements JspOperatio
 		return fileManager.exists(projectOperations.getPathResolver().getIdentifier(webAppPath, "WEB-INF/spring/webmvc-config.xml"));
 	}
 	
-	public boolean isSetupAvailable() {
+	public boolean isMvcInstallationPossible() {
 		return isProjectAvailable() && !isControllerAvailable() && !projectOperations.isFeatureInstalledInFocusedModule(FeatureNames.JSF);
 	}
-
 	public boolean isControllerAvailable() {
 		return fileManager.exists(pathResolver.getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/views")) && !projectOperations.isFeatureInstalledInFocusedModule(FeatureNames.JSF);
 	}

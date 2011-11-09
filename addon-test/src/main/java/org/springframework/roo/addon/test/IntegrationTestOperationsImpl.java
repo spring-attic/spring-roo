@@ -33,6 +33,7 @@ import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.ContextualPath;
+import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
@@ -61,8 +62,8 @@ public class IntegrationTestOperationsImpl implements IntegrationTestOperations 
 	@Reference private TypeLocationService typeLocationService;
 	@Reference private TypeManagementService typeManagementService;
 
-	public boolean isPersistentClassAvailable() {
-		return projectOperations.isFocusedProjectAvailable();
+	public boolean isIntegrationTestInstallationPossible() {
+		return projectOperations.isFocusedProjectAvailable() && projectOperations.isFeatureInstalledInFocusedModule(FeatureNames.JPA);
 	}
 
 	public void newIntegrationTest(final JavaType entity) {
@@ -77,7 +78,7 @@ public class IntegrationTestOperationsImpl implements IntegrationTestOperations 
 		Assert.isTrue(!Modifier.isAbstract(classOrInterfaceTypeDetails.getModifier()), "Type " + entity.getFullyQualifiedTypeName() + " is abstract");
 
 		ContextualPath path = PhysicalTypeIdentifier.getPath(classOrInterfaceTypeDetails.getDeclaredByMetadataId());
-		dataOnDemandOperations.newDod(entity, new JavaType(entity.getFullyQualifiedTypeName() + "DataOnDemand"), Path.SRC_TEST_JAVA.contextualize(path.getModule()));
+		dataOnDemandOperations.newDod(entity, new JavaType(entity.getFullyQualifiedTypeName() + "DataOnDemand"));
 		
 		JavaType name = new JavaType(entity + "IntegrationTest");
 		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(name, Path.SRC_TEST_JAVA.contextualize(path.getModule()));

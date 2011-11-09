@@ -67,12 +67,12 @@ public class ControllerOperationsImpl implements ControllerOperations {
 	@Reference private TypeManagementService typeManagementService;
 	@Reference private WebMvcOperations webMvcOperations;
 
-	public boolean isNewControllerAvailable() {
-		return projectOperations.isFocusedProjectAvailable();
+	public boolean isControllerInstallationPossible() {
+		return projectOperations.isFocusedProjectAvailable() && projectOperations.isFeatureInstalledInFocusedModule(FeatureNames.MVC) && !projectOperations.isFeatureInstalledInFocusedModule(FeatureNames.JSF);
 	}
 
-	public boolean isScaffoldAvailable() {
-		return projectOperations.isFeatureInstalledInFocusedModule(FeatureNames.MVC) && !projectOperations.isFeatureInstalledInFocusedModule(FeatureNames.JSF);
+	public boolean isNewControllerAvailable() {
+		return projectOperations.isFocusedProjectAvailable();
 	}
 
 	public void setup() {

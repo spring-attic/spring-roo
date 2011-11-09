@@ -32,7 +32,7 @@ public class FinderCommands implements CommandMarker {
 
 	@CliAvailabilityIndicator({ "finder list", "finder add" })
 	public boolean isFinderCommandAvailable() {
-		return finderOperations.isFinderCommandAvailable();
+		return finderOperations.isFinderInstallationPossible();
 	}
 
 	@CliCommand(value = "finder list", help = "List all finders for a given target (must be an entity)")

@@ -10,7 +10,7 @@ import org.springframework.roo.model.JavaType;
  */
 public interface JmsOperations {
 
-	boolean isInstallJmsAvailable();
+	boolean isJmsInstallationPossible();
 
 	boolean isManageJmsAvailable();
 

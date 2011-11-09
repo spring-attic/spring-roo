@@ -4,8 +4,6 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.FeatureNames;
-import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
@@ -21,12 +19,11 @@ import org.springframework.roo.shell.CommandMarker;
 public class RepositoryJpaCommands implements CommandMarker {
 
 	// Fields
-	@Reference private ProjectOperations projectOperations;
 	@Reference private RepositoryJpaOperations repositoryJpaOperations;
 
 	@CliAvailabilityIndicator("repository jpa")
 	public boolean isRepositoryCommandAvailable() {
-		return repositoryJpaOperations.isInstalledInModule(projectOperations.getFocusedModuleName()) && !projectOperations.isFeatureInstalledInFocusedModule(FeatureNames.MONGO);
+		return repositoryJpaOperations.isRepositoryInstallationPossible();
 	}
 
 	@CliCommand(value = "repository jpa", help = "Adds @RooJpaRepository annotation to target type")

@@ -36,7 +36,7 @@ public class Op4jOperationsImpl implements Op4jOperations {
 	@Reference private TypeLocationService typeLocationService;
 	@Reference private TypeManagementService typeManagementService;
 
-	public boolean isOp4jAvailable() {
+	public boolean isOp4jInstallationPossible() {
 		return projectOperations.isFocusedProjectAvailable();
 	}
 

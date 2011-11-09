@@ -20,22 +20,22 @@ import org.springframework.roo.shell.CommandMarker;
 public class Op4jCommands implements CommandMarker {
 
 	// Fields
-	@Reference private Op4jOperations operations;
+	@Reference private Op4jOperations op4jOperations;
 
 	@CliAvailabilityIndicator({ "op4j setup", "Op4j add" })
 	public boolean isOp4jAvailable() {
-		return operations.isOp4jAvailable();
+		return op4jOperations.isOp4jInstallationPossible();
 	}
 
 	@CliCommand(value = "op4j add", help = "Some helpful description")
 	public void add(
 		@CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*", optionContext = "update,project", help = "The java type to apply the RooOp4j annotation to") final JavaType target) {
 
-		operations.annotateType(target);
+		op4jOperations.annotateType(target);
 	}
 
 	@CliCommand(value = "op4j setup", help = "Setup Op4j addon")
 	public void setup() {
-		operations.setup();
+		op4jOperations.setup();
 	}
 }

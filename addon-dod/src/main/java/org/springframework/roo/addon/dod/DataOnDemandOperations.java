@@ -1,7 +1,6 @@
 package org.springframework.roo.addon.dod;
 
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.ContextualPath;
 
 /**
  * Creates a new data-on-demand class for an entity.
@@ -16,14 +15,13 @@ public interface DataOnDemandOperations {
 	 *
 	 * @return true if the META-INF/persistence.xml exists, otherwise false
 	 */
-	boolean isPersistentClassAvailable();
+	boolean isDataOnDemandInstallationPossible();
 
 	/**
 	 * Creates a new data-on-demand (DoD) provider for the entity. Silently returns if the DoD class already exists.
 	 *
 	 * @param entity to produce a DoD provider for (required)
 	 * @param name the name of the new DoD class (required)
-	 * @param path the location for the new DoD class (required)
 	 */
-	void newDod(JavaType entity, JavaType name, ContextualPath path);
+	void newDod(JavaType entity, JavaType name);
 }

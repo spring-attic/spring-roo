@@ -10,7 +10,7 @@ public interface SecurityOperations {
 
 	String SECURITY_FILTER_NAME = "springSecurityFilterChain";
 
-	boolean isInstallSecurityAvailable();
+	boolean isSecurityInstallationPossible();
 
 	void installSecurity();
 }

@@ -14,7 +14,7 @@ public interface IntegrationTestOperations {
 	 *
 	 * @return true if the META-INF/persistence.xml exists, otherwise false
 	 */
-	boolean isPersistentClassAvailable();
+	boolean isIntegrationTestInstallationPossible();
 
 	/**
 	 * Creates an integration test for the entity. Automatically produces a data-on-demand (DoD) class if one does not exist.

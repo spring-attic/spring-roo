@@ -6,8 +6,6 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.FeatureNames;
-import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
@@ -25,16 +23,15 @@ public class MongoCommands implements CommandMarker {
 
 	// Fields
 	@Reference private MongoOperations mongoOperations;
-	@Reference private ProjectOperations projectOperations;
 
 	@CliAvailabilityIndicator("mongo setup")
-	public boolean isMongoSetupCommandAvailable() {
-		return projectOperations.isFocusedProjectAvailable() && !projectOperations.isFeatureInstalledInFocusedModule(FeatureNames.JPA);
+	public boolean isMongoSetupAvailable() {
+		return mongoOperations.isMongoInstallationPossible();
 	}
 
 	@CliAvailabilityIndicator({ "repository mongo", "entity mongo" })
 	public boolean isRepositoryCommandAvailable() {
-		return mongoOperations.isInstalledInModule(projectOperations.getFocusedModuleName()) && !projectOperations.isFeatureInstalledInFocusedModule(FeatureNames.JPA);
+		return mongoOperations.isRepositoryInstallationPossible();
 	}
 
 	@CliCommand(value = "mongo setup", help = "Configures the project for MongoDB peristence.")
@@ -46,7 +43,7 @@ public class MongoCommands implements CommandMarker {
 		@CliOption(key = "host", mandatory = false, help = "Host for the database (defaults to '127.0.0.1')") final String host,
 		@CliOption(key = "cloudFoundry", mandatory = false, specifiedDefaultValue="true", unspecifiedDefaultValue="false", help = "Deploy to CloudFoundry (defaults to 'false')") final boolean cloudFoundry) {
 
-		mongoOperations.setup(username, password, name, port, host, cloudFoundry, projectOperations.getFocusedModuleName());
+		mongoOperations.setup(username, password, name, port, host, cloudFoundry);
 	}
 
 	@CliCommand(value = "repository mongo", help = "Adds @RooMongoRepository annotation to target type")

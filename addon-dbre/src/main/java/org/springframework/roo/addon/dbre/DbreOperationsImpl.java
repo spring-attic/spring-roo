@@ -17,6 +17,7 @@ import org.springframework.roo.addon.dbre.model.DbreModelService;
 import org.springframework.roo.addon.dbre.model.Schema;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.process.manager.FileManager;
+import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
@@ -47,8 +48,8 @@ public class DbreOperationsImpl implements DbreOperations {
 	@Reference private PathResolver pathResolver;
 	@Reference private ProjectOperations projectOperations;
 
-	public boolean isDbreAvailable() {
-		return projectOperations.isFocusedProjectAvailable() && (fileManager.exists(pathResolver.getFocusedIdentifier(Path.SPRING_CONFIG_ROOT, "database.properties")) || fileManager.exists(projectOperations.getPathResolver().getFocusedIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml")));
+	public boolean isDbreInstallationPossible() {
+		return projectOperations.isFocusedProjectAvailable() && (fileManager.exists(pathResolver.getFocusedIdentifier(Path.SPRING_CONFIG_ROOT, "database.properties")) || projectOperations.isFeatureInstalled(FeatureNames.JPA));
 	}
 
 	public void displayDatabaseMetadata(final Set<Schema> schemas, final File file, final boolean view) {

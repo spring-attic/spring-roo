@@ -10,5 +10,7 @@ import org.springframework.roo.project.Feature;
  */
 public interface RepositoryJpaOperations extends Feature {
 
+	boolean isRepositoryInstallationPossible();
+
 	void setupRepository(JavaType interfaceType, JavaType classType, JavaType domainType);
 }

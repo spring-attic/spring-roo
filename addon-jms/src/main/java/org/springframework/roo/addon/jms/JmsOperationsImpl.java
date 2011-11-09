@@ -63,7 +63,7 @@ public class JmsOperationsImpl implements JmsOperations {
 	@Reference private TypeLocationService typeLocationService;
 	@Reference private TypeManagementService typeManagementService;
 
-	public boolean isInstallJmsAvailable() {
+	public boolean isJmsInstallationPossible() {
 		return projectOperations.isFocusedProjectAvailable() && !hasJmsContext();
 	}
 
@@ -76,7 +76,7 @@ public class JmsOperationsImpl implements JmsOperations {
 	}
 
 	public void installJms(final JmsProvider jmsProvider, final String name, final JmsDestinationType destinationType) {
-		Assert.isTrue(isInstallJmsAvailable(), "Project not available");
+		Assert.isTrue(isJmsInstallationPossible(), "Project not available");
 		Assert.notNull(jmsProvider, "JMS provider required");
 
 		String jmsContextPath = projectOperations.getPathResolver().getFocusedIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext-jms.xml");

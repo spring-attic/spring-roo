@@ -8,7 +8,7 @@ package org.springframework.roo.addon.web.flow;
  */
 public interface WebFlowOperations {
 
-	boolean isInstallWebFlowAvailable();
+	boolean isWebFlowInstallationPossible();
 
 	boolean isManageWebFlowAvailable();
 

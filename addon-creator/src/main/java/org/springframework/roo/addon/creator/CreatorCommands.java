@@ -27,7 +27,7 @@ public class CreatorCommands implements CommandMarker {
 
 	@CliAvailabilityIndicator({ "addon create i18n", "addon create simple", "addon create advanced" })
 	public boolean isCreateAddonAvailable() {
-		return creatorOperations.isCommandAvailable();
+		return creatorOperations.isAddonCreatePossible();
 	}
 
 	@CliCommand(value = "addon create i18n", help = "Create a new Internationalization add-on for Spring Roo")

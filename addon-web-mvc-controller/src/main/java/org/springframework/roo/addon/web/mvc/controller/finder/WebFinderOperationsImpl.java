@@ -6,6 +6,7 @@ import java.util.Set;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.springframework.roo.addon.web.mvc.controller.ControllerOperations;
 import org.springframework.roo.addon.web.mvc.controller.scaffold.WebScaffoldAnnotationValues;
 import org.springframework.roo.classpath.PhysicalTypeDetails;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
@@ -32,9 +33,13 @@ import org.springframework.uaa.client.util.Assert;
 public class WebFinderOperationsImpl implements WebFinderOperations {
 
 	// Fields
+	@Reference private ControllerOperations controllerOperations;
 	@Reference private MetadataService metadataService;
 	@Reference private TypeLocationService typeLocationService;
 	@Reference private TypeManagementService typeManagementService;
+
+	public boolean isWebFinderInstallationPossible() {
+		return controllerOperations.isControllerInstallationPossible();	}
 
 	public void annotateAll() {
 		// First, find all entities with finders.

@@ -34,7 +34,7 @@ public class LoggingOperationsImpl implements LoggingOperations {
 	@Reference private PathResolver pathResolver;
 	@Reference private ProjectOperations projectOperations;
 
-	public boolean isConfigureLoggingAvailable() {
+	public boolean isLoggingInstallationPossible() {
 		return projectOperations.isFocusedProjectAvailable();
 	}
 

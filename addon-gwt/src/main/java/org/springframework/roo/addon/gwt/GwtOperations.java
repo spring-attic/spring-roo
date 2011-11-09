@@ -13,6 +13,10 @@ import org.springframework.roo.project.Feature;
  */
 public interface GwtOperations extends Feature {
 
+	boolean isGwtInstallationPossible();
+
+	boolean isScaffoldAvailable();
+
 	void setup();
 
 	void proxyAll(JavaPackage proxyPackage);

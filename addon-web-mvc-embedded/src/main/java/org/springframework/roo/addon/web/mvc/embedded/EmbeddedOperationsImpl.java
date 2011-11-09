@@ -35,7 +35,7 @@ public class EmbeddedOperationsImpl implements EmbeddedOperations {
 	private final Object mutex = new Object();
 	private final Set<EmbeddedProvider> providers = new HashSet<EmbeddedProvider>();
 
-	public boolean isCommandAvailable() {
+	public boolean isEmbeddedInstallationPoosible() {
 		return projectOperations.isFocusedProjectAvailable();
 	}
 

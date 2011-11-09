@@ -14,6 +14,20 @@ import org.springframework.roo.project.Feature;
 public interface MongoOperations extends Feature {
 
 	/**
+	 * Indicate if the 'mongo setup' command should be available for this project.
+	 *
+	 * @return true if command should be made available
+	 */
+	boolean isMongoInstallationPossible();
+
+	/**
+	 * Indicate if the 'repository mongo' command should be available for this project.
+	 *
+	 * @return true if command should be made available
+	 */
+	boolean isRepositoryInstallationPossible();
+
+	/**
 	 * Setup current project for Spring Data MongoDB configuration.
 	 *
 	 * @param username (optional)
@@ -23,7 +37,7 @@ public interface MongoOperations extends Feature {
 	 * @param host (optional, defaults to 127.0.0.1)
 	 * @param cloudFoundry indicate if project should be deployable on VMware CloudFoundry (optional, defaults to false)
 	 */
-	void setup(String username, String password, String name, String port, String host, boolean cloudFoundry, String moduleName);
+	void setup(String username, String password, String name, String port, String host, boolean cloudFoundry);
 	
 	/**
 	 * Creates a new Repository interface for Spring Data JPA MongoDB integration.

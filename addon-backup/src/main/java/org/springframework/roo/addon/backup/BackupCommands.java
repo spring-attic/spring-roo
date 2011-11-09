@@ -22,7 +22,7 @@ public class BackupCommands implements CommandMarker {
 
 	@CliAvailabilityIndicator("backup")
 	public boolean isBackupCommandAvailable() {
-		return backupOperations.isBackupAvailable();
+		return backupOperations.isBackupPossible();
 	}
 
 	@CliCommand(value = "backup", help = "Backup your project to a zip file")

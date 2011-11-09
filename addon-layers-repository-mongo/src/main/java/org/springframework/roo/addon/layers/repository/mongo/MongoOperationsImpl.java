@@ -77,6 +77,14 @@ public class MongoOperationsImpl implements MongoOperations {
 		return projectOperations.isFocusedProjectAvailable() && fileManager.exists(pathResolver.getFocusedIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext-mongo.xml"));
 	}
 
+	public boolean isMongoInstallationPossible() {
+		return projectOperations.isFocusedProjectAvailable() && !projectOperations.isFeatureInstalledInFocusedModule(FeatureNames.JPA);
+	}
+
+	public boolean isRepositoryInstallationPossible() {
+		return isInstalledInModule(projectOperations.getFocusedModuleName()) && !projectOperations.isFeatureInstalledInFocusedModule(FeatureNames.JPA);
+	}
+
 	public void setupRepository(final JavaType interfaceType, JavaType classType, final JavaType domainType) {
 		Assert.notNull(interfaceType, "Interface type required");
 		Assert.notNull(domainType, "Domain type required");
@@ -127,11 +135,12 @@ public class MongoOperationsImpl implements MongoOperations {
 
 		if (testAutomatically) {
 			integrationTestOperations.newIntegrationTest(classType, false);
-			dataOnDemandOperations.newDod(classType, new JavaType(classType.getFullyQualifiedTypeName() + "DataOnDemand"), pathResolver.getFocusedPath(Path.SRC_TEST_JAVA));
+			dataOnDemandOperations.newDod(classType, new JavaType(classType.getFullyQualifiedTypeName() + "DataOnDemand"));
 		}
 	}
 
-	public void setup(final String username, final String password, final String name, final String port, final String host, final boolean cloudFoundry, final String moduleName) {
+	public void setup(final String username, final String password, final String name, final String port, final String host, final boolean cloudFoundry) {
+		String moduleName = projectOperations.getFocusedModuleName();
 		writeProperties(username, password, name, port, host, moduleName);
 		manageDependencies(moduleName);
 		manageAppCtx(username, password, name, cloudFoundry, moduleName);

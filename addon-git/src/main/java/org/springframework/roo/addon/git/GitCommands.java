@@ -17,16 +17,18 @@ import org.springframework.roo.shell.CommandMarker;
 @Component
 @Service
 public class GitCommands implements CommandMarker {
+
+	// Fields
 	@Reference private GitOperations gitOperations;
+
+	@CliAvailabilityIndicator("git setup")
+	public boolean isGitSetupAvailable() {
+		return gitOperations.isGitInstallationPossible();
+	}
 
 	@CliAvailabilityIndicator({ "git config", "git commit all", "git revert last", "git revert commit", "git log" })
 	public boolean isCommandAvailable() {
 		return gitOperations.isGitCommandAvailable();
-	}
-
-	@CliAvailabilityIndicator("git setup")
-	public boolean isSetupCommandAvailable() {
-		return gitOperations.isSetupCommandAvailable();
 	}
 
 	@CliCommand(value = "git setup", help = "Setup Git revision control")

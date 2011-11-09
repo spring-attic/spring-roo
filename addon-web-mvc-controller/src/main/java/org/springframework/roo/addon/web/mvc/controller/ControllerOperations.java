@@ -13,6 +13,8 @@ import org.springframework.roo.model.JavaType;
  */
 public interface ControllerOperations {
 
+	boolean isControllerInstallationPossible();
+
 	/**
 	 * Creates Spring MVC controllers for all JPA entities in the project.
 	 *
@@ -24,8 +26,6 @@ public interface ControllerOperations {
 
 	@Deprecated
 	boolean isNewControllerAvailable();
-
-	boolean isScaffoldAvailable();
 
 	/**
 	 * Creates a new Spring MVC controller which will be automatically scaffolded.

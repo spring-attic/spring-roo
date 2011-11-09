@@ -24,7 +24,7 @@ public class JsonCommands implements CommandMarker {
 
 	@CliAvailabilityIndicator({ "json setup", "json add", "json all" })
 	public boolean isPropertyAvailable() {
-		return jsonOperations.isCommandAvailable();
+		return jsonOperations.isJsonInstallationPossible();
 	}
 
 	@CliCommand(value = "json add", help = "Adds @RooJson annotation to target type")

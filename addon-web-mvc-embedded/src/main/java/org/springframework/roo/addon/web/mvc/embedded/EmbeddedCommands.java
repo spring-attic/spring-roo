@@ -47,7 +47,7 @@ public class EmbeddedCommands implements CommandMarker {
 
 	@CliAvailabilityIndicator({ "web mvc embed generic", "web mvc embed wave", "web mvc embed map", "web mvc embed document", "web mvc embed video", "web mvc embed photos", "web mvc embed stream video", "web mvc embed finances", "web mvc embed twitter" })
 	public boolean isPropertyAvailable() {
-		return embeddedOperations.isCommandAvailable();
+		return embeddedOperations.isEmbeddedInstallationPoosible();
 	}
 
 	@CliCommand(value = "web mvc embed generic", help = "Embed media by URL into your WEB MVC application")

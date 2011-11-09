@@ -45,12 +45,12 @@ public class GitOperationsImpl implements GitOperations {
 
 	private PersonIdent person;
 
-	public boolean isGitCommandAvailable() {
-		return hasDotGit();
+	public boolean isGitInstallationPossible() {
+		return !hasDotGit();
 	}
 
-	public boolean isSetupCommandAvailable() {
-		return !hasDotGit();
+	public boolean isGitCommandAvailable() {
+		return hasDotGit();
 	}
 
 	public boolean isAutomaticCommit() {

@@ -24,7 +24,7 @@ public class SeleniumCommands implements CommandMarker {
 
 	@CliAvailabilityIndicator({ "selenium test" })
 	public boolean isJdkFieldManagementAvailable() {
-		return seleniumOperations.isProjectAvailable();
+		return seleniumOperations.isSeleniumInstallationPossible();
 	}
 
 	@CliCommand(value = "selenium test", help = "Creates a new Selenium test for a particular controller")

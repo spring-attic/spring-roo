@@ -9,7 +9,7 @@ import org.springframework.roo.model.JavaType;
  */
 public interface ServiceOperations {
 
-	boolean isServiceCommandAvailable();
+	boolean isServiceInstallationPossible();
 
 	void setupService(JavaType interfaceType, JavaType classType, JavaType domainType);
 }

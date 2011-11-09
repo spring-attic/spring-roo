@@ -30,6 +30,7 @@ import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.model.SpringJavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Dependency;
+import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
@@ -58,6 +59,10 @@ public class WebJsonOperationsImpl implements WebJsonOperations {
 	@Reference private TypeLocationService typeLocationService;
 	@Reference private TypeManagementService typeManagementService;
 	@Reference private WebMvcOperations mvcOperations;
+
+	public boolean isWebJsonInstallationPossible() {
+		return !projectOperations.isFeatureInstalledInFocusedModule(FeatureNames.MVC);
+	}
 
 	public void setup() {
 		mvcOperations.installMinimalWebArtifacts();

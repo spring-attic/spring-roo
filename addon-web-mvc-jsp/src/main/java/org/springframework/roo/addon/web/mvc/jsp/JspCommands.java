@@ -34,7 +34,7 @@ public class JspCommands implements CommandMarker {
 
 	@CliAvailabilityIndicator({ "web mvc setup" })
 	public boolean isProjectAvailable() {
-		return jspOperations.isSetupAvailable();
+		return jspOperations.isMvcInstallationPossible();
 	}
 
 	@CliAvailabilityIndicator({ "web mvc controller", "controller class", "web mvc install view", "web mvc view", "web mvc update tags" })

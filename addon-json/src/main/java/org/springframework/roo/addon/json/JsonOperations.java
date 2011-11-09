@@ -11,11 +11,11 @@ import org.springframework.roo.model.JavaType;
 public interface JsonOperations {
 
 	/**
-	 * Indicates whether this commands for this addon should be available
+	 * Indicates whether this commands for this add-on should be available.
 	 *
 	 * @return true if commands are available
 	 */
-	boolean isCommandAvailable();
+	boolean isJsonInstallationPossible();
 
 	/**
 	 * Annotate a given {@link JavaType} with @{@link RooJson} annotation.

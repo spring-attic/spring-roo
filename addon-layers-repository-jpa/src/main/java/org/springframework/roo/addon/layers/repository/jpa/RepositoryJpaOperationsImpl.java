@@ -59,6 +59,10 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
 		return projectOperations.isFocusedProjectAvailable() && fileManager.exists(projectOperations.getPathResolver().getIdentifier(resourcesPath, "META-INF/persistence.xml"));
 	}
 
+	public boolean isRepositoryInstallationPossible() {
+		return isInstalledInModule(projectOperations.getFocusedModuleName()) && !projectOperations.isFeatureInstalledInFocusedModule(FeatureNames.MONGO);
+	}
+
 	public void setupRepository(final JavaType interfaceType, JavaType classType, final JavaType domainType) {
 		Assert.notNull(interfaceType, "Interface type required");
 		Assert.notNull(domainType, "Domain type required");

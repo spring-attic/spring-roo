@@ -38,7 +38,7 @@ public class JmsCommands implements CommandMarker {
 
 	@CliAvailabilityIndicator("jms setup")
 	public boolean isInstallJmsAvailable() {
-		return jmsOperations.isInstallJmsAvailable();
+		return jmsOperations.isJmsInstallationPossible();
 	}
 
 	@CliCommand(value = "jms setup", help = "Install a JMS provider into your project")

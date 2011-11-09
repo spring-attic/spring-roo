@@ -115,6 +115,14 @@ public class GwtOperationsImpl implements GwtOperations {
 		return false;
 	}
 
+	public boolean isGwtInstallationPossible() {
+		return projectOperations.isFocusedProjectAvailable() && !projectOperations.isFeatureInstalledInFocusedModule(FeatureNames.JSF);
+	}
+
+	public boolean isScaffoldAvailable() {
+		return isGwtInstallationPossible() && isInstalledInModule(projectOperations.getFocusedModuleName());
+	}
+
 	public void setup() {
 		// Install web pieces if not already installed
 		if (!fileManager.exists(projectOperations.getPathResolver().getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/web.xml"))) {

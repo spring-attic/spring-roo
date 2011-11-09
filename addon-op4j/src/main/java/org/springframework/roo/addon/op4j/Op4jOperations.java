@@ -10,7 +10,7 @@ import org.springframework.roo.model.JavaType;
  */
 public interface Op4jOperations {
 
-	boolean isOp4jAvailable();
+	boolean isOp4jInstallationPossible();
 
 	void annotateType(JavaType type);
 

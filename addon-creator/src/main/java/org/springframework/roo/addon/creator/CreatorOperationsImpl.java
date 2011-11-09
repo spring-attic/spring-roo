@@ -92,7 +92,7 @@ public class CreatorOperationsImpl implements CreatorOperations {
 		}
 	}
 
-	public boolean isCommandAvailable() {
+	public boolean isAddonCreatePossible() {
 		return !projectOperations.isFocusedProjectAvailable();
 	}
 

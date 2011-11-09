@@ -46,7 +46,7 @@ public class ControllerCommands implements CommandMarker {
 	
 	@CliAvailabilityIndicator({ "web mvc all", "web mvc scaffold" }) 
 	public boolean isScaffoldAvailable() {
-		return controllerOperations.isScaffoldAvailable();
+		return controllerOperations.isControllerInstallationPossible();
 	}
 
 	@Deprecated
@@ -58,7 +58,7 @@ public class ControllerCommands implements CommandMarker {
 	@CliCommand(value = "web mvc all", help = "Scaffold Spring MVC controllers for all project entities without an existing controller")
 	public void webMvcAll(
 		@CliOption(key = "package", mandatory = true, optionContext = "update", help = "The package in which new controllers will be placed") final JavaPackage javaPackage) {
-		Assert.isTrue(projectOperations.isFocusedProjectAvailable(), "Could not obtain ProjectMetadata");
+		
 		if (!javaPackage.getFullyQualifiedPackageName().startsWith(projectOperations.getTopLevelPackage(projectOperations.getFocusedModuleName()).getFullyQualifiedPackageName())) {
 			logger.warning("Your controller was created outside of the project's top level package and is therefore not included in the preconfigured component scanning. Please adjust your component scanning manually in webmvc-config.xml");
 		}

@@ -12,7 +12,7 @@ import org.springframework.roo.model.JavaPackage;
  */
 public interface CreatorOperations {
 
-	boolean isCommandAvailable();
+	boolean isAddonCreatePossible();
 
 	void createI18nAddon(JavaPackage topLevelPackage, String language, Locale locale, File messageBundle, File flagGraphic, String description, String projectName);
 

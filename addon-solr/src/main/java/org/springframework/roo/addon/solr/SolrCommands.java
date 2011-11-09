@@ -20,33 +20,33 @@ import org.springframework.roo.shell.CommandMarker;
 public class SolrCommands implements CommandMarker {
 
 	// Fields
-	@Reference private SolrOperations searchOperations;
+	@Reference private SolrOperations solrOperations;
 
 	@CliAvailabilityIndicator({ "solr setup" })
 	public boolean setupCommandAvailable() {
-		return searchOperations.isInstallSearchAvailable();
+		return solrOperations.isSolrInstallationPossible();
 	}
 
 	@CliAvailabilityIndicator({ "solr add", "solr all" })
 	public boolean solrCommandAvailable() {
-		return searchOperations.isSearchAvailable();
+		return solrOperations.isSearchAvailable();
 	}
 
 	@CliCommand(value = "solr setup", help = "Install support for Solr search integration")
 	public void setup(
 		@CliOption(key = { "searchServerUrl" }, mandatory = false, unspecifiedDefaultValue = "http://localhost:8983/solr", specifiedDefaultValue = "http://localhost:8983/solr", help = "The URL of the Solr search server") final String searchServerUrl) {
 
-		searchOperations.setupConfig(searchServerUrl);
+		solrOperations.setupConfig(searchServerUrl);
 	}
 
 	@CliCommand(value = "solr add", help = "Make target type searchable")
 	public void setup(
 		@CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*", optionContext = "update,project", help = "The type to be made searchable") final JavaType javaType) {
-		 searchOperations.addSearch(javaType);
+		 solrOperations.addSearch(javaType);
 	}
 
 	@CliCommand(value = "solr all", help = "Make all eligible project types searchable")
 	public void setup() {
-		searchOperations.addAll();
+		solrOperations.addAll();
 	}
 }

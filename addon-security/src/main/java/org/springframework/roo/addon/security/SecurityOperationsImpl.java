@@ -46,7 +46,7 @@ public class SecurityOperationsImpl implements SecurityOperations {
 	@Reference private ProjectOperations projectOperations;
 	@Reference private TilesOperations tilesOperations;
 
-	public boolean isInstallSecurityAvailable() {
+	public boolean isSecurityInstallationPossible() {
 		// Do not permit installation unless they have a web project (as per ROO-342)
 		// and only permit installation if they don't already have some version of Spring Security installed
 		return projectOperations.isFocusedProjectAvailable() && fileManager.exists(pathResolver.getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/web.xml")) && projectOperations.getFocusedModule().getDependenciesExcludingVersion(new Dependency("org.springframework.security", "spring-security-core", SECURITY_VERSION)).isEmpty();

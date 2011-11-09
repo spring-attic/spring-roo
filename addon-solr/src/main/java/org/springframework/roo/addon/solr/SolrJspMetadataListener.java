@@ -103,7 +103,6 @@ public class SolrJspMetadataListener implements MetadataProvider, MetadataNotifi
 		copyArtifacts("form/fields/search-field.tagx", "WEB-INF/tags/form/fields/search-field.tagx");
 
 		ContextualPath path = WebScaffoldMetadata.getPath(webScaffoldMetadata.getId());
-		
 		xmlRoundTripFileManager.writeToDiskIfNecessary(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP.contextualize(path.getModule()), "WEB-INF/views/" + webScaffoldMetadata.getAnnotationValues().getPath() + "/search.jspx"), getSearchDocument(webScaffoldMetadata));
 		
 		String folderName = webScaffoldMetadata.getAnnotationValues().getPath();

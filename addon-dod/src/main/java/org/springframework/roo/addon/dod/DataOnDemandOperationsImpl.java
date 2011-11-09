@@ -27,6 +27,8 @@ import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.ContextualPath;
+import org.springframework.roo.project.FeatureNames;
+import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
 
@@ -47,13 +49,15 @@ public class DataOnDemandOperationsImpl implements DataOnDemandOperations {
 	@Reference private TypeLocationService typeLocationService;
 	@Reference private TypeManagementService typeManagementService;
 
-	public boolean isPersistentClassAvailable() {
-		return projectOperations.isFocusedProjectAvailable();
+	public boolean isDataOnDemandInstallationPossible() {
+		return projectOperations.isFocusedProjectAvailable() && projectOperations.isFeatureInstalledInFocusedModule(FeatureNames.JPA);
 	}
 
-	public void newDod(final JavaType entity, final JavaType name, final ContextualPath path) {
+	public void newDod(final JavaType entity, final JavaType name) {
 		Assert.notNull(entity, "Entity to produce a data on demand provider for is required");
 		Assert.notNull(name, "Name of the new data on demand provider is required");
+
+		final ContextualPath path = ContextualPath.getInstance(Path.SRC_TEST_JAVA, projectOperations.getFocusedModuleName());
 		Assert.notNull(path, "Location of the new data on demand provider is required");
 
 		// Verify the requested entity actually exists as a class and is not abstract

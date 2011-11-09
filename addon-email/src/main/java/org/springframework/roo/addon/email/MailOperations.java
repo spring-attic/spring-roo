@@ -16,7 +16,7 @@ public interface MailOperations {
 	 *
 	 * @return see above
 	 */
-	boolean isInstallEmailAvailable();
+	boolean isEmailInstallationPossible();
 
 	/**
 	 * Indicates whether the commands relating to mail templates are available

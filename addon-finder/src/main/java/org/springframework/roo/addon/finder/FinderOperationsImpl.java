@@ -33,9 +33,8 @@ import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.ContextualPath;
-import org.springframework.roo.project.Path;
+import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
@@ -55,7 +54,6 @@ public class FinderOperationsImpl implements FinderOperations {
 
 	// Fields
 	@Reference private DynamicFinderServices dynamicFinderServices;
-	@Reference private FileManager fileManager;
 	@Reference private MemberDetailsScanner memberDetailsScanner;
 	@Reference private MetadataService metadataService;
 	@Reference private PersistenceMemberLocator persistenceMemberLocator;
@@ -63,8 +61,8 @@ public class FinderOperationsImpl implements FinderOperations {
 	@Reference private TypeManagementService typeManagementService;
 	@Reference private TypeLocationService typeLocationService;
 
-	public boolean isFinderCommandAvailable() {
-		return projectOperations.isFocusedProjectAvailable() && fileManager.exists(projectOperations.getPathResolver().getFocusedIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml"));
+	public boolean isFinderInstallationPossible() {
+		return projectOperations.isFocusedProjectAvailable() && projectOperations.isFeatureInstalledInFocusedModule(FeatureNames.JPA);
 	}
 
 	public SortedSet<String> listFindersFor(final JavaType typeName, final Integer depth) {

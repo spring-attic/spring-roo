@@ -22,7 +22,7 @@ public class SecurityCommands implements CommandMarker {
 
 	@CliAvailabilityIndicator("security setup")
 	public boolean isInstallSecurityAvailable() {
-		return securityOperations.isInstallSecurityAvailable();
+		return securityOperations.isSecurityInstallationPossible();
 	}
 
 	@CliCommand(value = "security setup", help = "Install Spring Security into your project")

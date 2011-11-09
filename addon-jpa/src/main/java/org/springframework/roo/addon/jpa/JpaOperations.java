@@ -16,7 +16,21 @@ import org.springframework.roo.project.Feature;
  */
 public interface JpaOperations extends Feature {
 	
+	/**
+	 * Indicates whether JPA can be installed in the currently focused module.
+	 * 
+	 * @return <code>false</code> if no module has the focus
+	 */
+	boolean isJpaInstallationPossible();
+	
 	boolean hasDatabaseProperties();
+
+	/**
+	 * Checks for the existence the META-INF/persistence.xml
+	 *
+	 * @return true if the META-INF/persistence.xml exists, otherwise false
+	 */
+	boolean isPersistentClassAvailable();
 
 	/**
 	 * This method is responsible for managing all JPA related artifacts (META-INF/persistence.xml, applicationContext.xml, database.properties and the project pom.xml)

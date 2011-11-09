@@ -23,7 +23,7 @@ public class WebFlowCommands implements CommandMarker {
 
 	@CliAvailabilityIndicator("web flow")
 	public boolean isInstallWebFlowAvailable() {
-		return webFlowOperations.isInstallWebFlowAvailable();
+		return webFlowOperations.isWebFlowInstallationPossible();
 	}
 
 	@CliCommand(value = "web flow", help = "Install Spring Web Flow configuration artifacts into your project")

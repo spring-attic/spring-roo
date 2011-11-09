@@ -6,7 +6,6 @@ import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.classpath.details.BeanInfoUtils;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.ReservedWords;
-import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
@@ -25,16 +24,10 @@ public class IntegrationTestCommands implements CommandMarker {
 
 	// Fields
 	@Reference private IntegrationTestOperations integrationTestOperations;
-	@Reference private ProjectOperations projectOperations;
 
-	@CliAvailabilityIndicator( { "test integration" })
+	@CliAvailabilityIndicator( { "test integration", "test mock", "test stub" })
 	public boolean isPersistentClassAvailable() {
-		return integrationTestOperations.isPersistentClassAvailable();
-	}
-
-	@CliAvailabilityIndicator({ "test mock", "test stub" })
-	public boolean isAvailable() {
-		return projectOperations.isFocusedProjectAvailable();
+		return integrationTestOperations.isIntegrationTestInstallationPossible();
 	}
 
 	@CliCommand(value = "test integration", help = "Creates a new integration test for the specified entity")

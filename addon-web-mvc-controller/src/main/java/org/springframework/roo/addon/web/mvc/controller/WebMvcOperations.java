@@ -18,7 +18,7 @@ public interface WebMvcOperations {
 	String HTTP_METHOD_FILTER_NAME = "HttpMethodFilter";
 
 	void installMinimalWebArtifacts();
-	
+
 	void installAllWebMvcArtifacts();
 
 	/**

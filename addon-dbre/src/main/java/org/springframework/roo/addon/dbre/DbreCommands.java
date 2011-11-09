@@ -28,7 +28,7 @@ public class DbreCommands implements CommandMarker {
 
 	@CliAvailabilityIndicator({ "database introspect", "database reverse engineer" })
 	public boolean isDbreAvailable() {
-		return dbreOperations.isDbreAvailable();
+		return dbreOperations.isDbreInstallationPossible();
 	}
 
 	@CliCommand(value = "database introspect", help = "Displays database metadata")

@@ -15,6 +15,7 @@ import org.springframework.roo.addon.web.mvc.jsp.tiles.TilesOperations;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Dependency;
+import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
@@ -47,12 +48,12 @@ public class WebFlowOperationsImpl implements WebFlowOperations {
 	@Reference private TilesOperations tilesOperations;
 	@Reference private WebMvcOperations webMvcOperations;
 
-	public boolean isInstallWebFlowAvailable() {
+	public boolean isWebFlowInstallationPossible() {
 		return projectOperations.isFocusedProjectAvailable();
 	}
 
 	public boolean isManageWebFlowAvailable() {
-		return isInstallWebFlowAvailable() && fileManager.exists(pathResolver.getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/spring/webflow-config.xml"));
+		return isWebFlowInstallationPossible() && projectOperations.isFeatureInstalledInFocusedModule(FeatureNames.MVC);
 	}
 
 	/**
@@ -88,7 +89,7 @@ public class WebFlowOperationsImpl implements WebFlowOperations {
 
 		JavaSymbolName flowMenuCategory = new JavaSymbolName("Flows");
 		JavaSymbolName flowMenuName = new JavaSymbolName(flowId.replace("/", "_"));
-		menuOperations.addMenuItem(flowMenuCategory, flowMenuName, flowMenuName.getReadableSymbolName(), "webflow_menu_enter", "/" + flowId, null);
+		menuOperations.addMenuItem(flowMenuCategory, flowMenuName, flowMenuName.getReadableSymbolName(), "webflow_menu_enter", "/" + flowId, pathResolver.getFocusedPath(Path.SRC_MAIN_WEBAPP));
 
 		tilesOperations.addViewDefinition(flowId, pathResolver.getFocusedPath(Path.SRC_MAIN_WEBAPP), flowId + "/*", TilesOperations.DEFAULT_TEMPLATE, webRelativeFlowPath + "/{1}.jspx");
 

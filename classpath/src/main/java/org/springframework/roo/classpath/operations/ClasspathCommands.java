@@ -6,7 +6,6 @@ import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.ContextualPath;
-import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
@@ -25,11 +24,10 @@ public class ClasspathCommands implements CommandMarker {
 
 	// Fields
 	@Reference private ClasspathOperations classpathOperations;
-	@Reference private ProjectOperations projectOperations;
 
 	@CliAvailabilityIndicator( { "class", "interface", "enum type", "enum constant" })
 	public boolean isProjectAvailable() {
-		return projectOperations.isFocusedProjectAvailable();
+		return classpathOperations.isProjectAvailable();
 	}
 
 	@CliCommand(value = "focus", help = "Changes focus to a different type")

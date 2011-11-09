@@ -73,7 +73,7 @@ public class MailOperationsImpl implements MailOperations {
 	@Reference private TypeLocationService typeLocationService;
 	@Reference private TypeManagementService typeManagementService;
 
-	public boolean isInstallEmailAvailable() {
+	public boolean isEmailInstallationPossible() {
 		return projectOperations.isFocusedProjectAvailable();
 	}
 

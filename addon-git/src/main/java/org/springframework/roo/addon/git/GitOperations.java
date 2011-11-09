@@ -9,6 +9,26 @@ package org.springframework.roo.addon.git;
 public interface GitOperations {
 
 	/**
+	 * Check if Git setup command is available in Shell.
+	 *
+	 * @return availability
+	 */
+	boolean isGitInstallationPossible();
+
+	/**
+	 * Check if Git commands are available in Shell. Depends on presence of
+	 * .git repository.
+	 *
+	 * @return availability
+	 */
+	boolean isGitCommandAvailable();
+
+	/**
+	 * Initial setup of git repository in target project.
+	 */
+	void setup();
+
+	/**
 	 * Triggers commit for all changes in the Git tree.
 	 * (works like 'git commmit -a -m {message}')
 	 *
@@ -57,26 +77,6 @@ public interface GitOperations {
 	 * @param value The config value.
 	 */
 	void setConfig(String category, String key, String value);
-
-	/**
-	 * Initial setup of git repository in target project.
-	 */
-	void setup();
-
-	/**
-	 * Check if Git commands are available in Shell. Depends on presence of
-	 * .git repository.
-	 *
-	 * @return availability
-	 */
-	boolean isGitCommandAvailable();
-
-	/**
-	 * Check if Git setup command is available in Shell.
-	 *
-	 * @return availability
-	 */
-	boolean isSetupCommandAvailable();
 
 	/**
 	 * Check if automatic commit is enabled for successful Roo commands.

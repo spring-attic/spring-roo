@@ -36,7 +36,7 @@ public class LoggingCommands implements CommandMarker {
 
 	@CliAvailabilityIndicator("logging setup")
 	public boolean isConfigureLoggingAvailable() {
-		return loggingOperations.isConfigureLoggingAvailable();
+		return loggingOperations.isLoggingInstallationPossible();
 	}
 
 	@CliCommand(value = "logging setup", help = "Configure logging in your project")

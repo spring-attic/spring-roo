@@ -3,7 +3,6 @@ package org.springframework.roo.addon.web.mvc.controller.finder;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.springframework.roo.addon.web.mvc.controller.ControllerOperations;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
@@ -22,11 +21,10 @@ public class WebFinderCommands implements CommandMarker {
 
 	// Fields
 	@Reference private WebFinderOperations webFinderOperations;
-	@Reference private ControllerOperations controllerOperations;
 
 	@CliAvailabilityIndicator({ "web mvc finder add", "web mvc finder all" })
 	public boolean isCommandAvailable() {
-		return controllerOperations.isScaffoldAvailable();
+		return webFinderOperations.isWebFinderInstallationPossible();
 	}
 
 	@CliCommand(value = "web mvc finder all", help = "Adds  @RooWebFinder annotation to existing MVC controllers")

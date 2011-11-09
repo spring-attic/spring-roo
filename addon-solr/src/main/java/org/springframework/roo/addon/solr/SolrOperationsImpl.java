@@ -23,6 +23,7 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.project.Dependency;
+import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
@@ -52,8 +53,8 @@ public class SolrOperationsImpl implements SolrOperations {
 	@Reference private TypeLocationService typeLocationService;
 	@Reference private TypeManagementService typeManagementService;
 
-	public boolean isInstallSearchAvailable() {
-		return projectOperations.isFocusedProjectAvailable() && !solrPropsInstalled() && fileManager.exists(projectOperations.getPathResolver().getFocusedIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml"));
+	public boolean isSolrInstallationPossible() {
+		return projectOperations.isFocusedProjectAvailable() && !solrPropsInstalled() && projectOperations.isFeatureInstalled(FeatureNames.JPA);
 	}
 
 	public boolean isSearchAvailable() {

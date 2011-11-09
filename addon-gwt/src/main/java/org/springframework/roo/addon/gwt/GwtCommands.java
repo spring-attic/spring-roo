@@ -5,7 +5,6 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
@@ -24,16 +23,15 @@ public class GwtCommands implements CommandMarker {
 
 	// Fields
 	@Reference protected GwtOperations gwtOperations;
-	@Reference private ProjectOperations projectOperations;
 
 	@CliAvailabilityIndicator({ "web gwt setup", "gwt setup" })
-	public boolean isSetupGwtAvailable() {
-		return !gwtOperations.isInstalledInModule(projectOperations.getFocusedModuleName());
+	public boolean isGwtSetupAvailable() {
+		return gwtOperations.isGwtInstallationPossible();
 	}
 
 	@CliAvailabilityIndicator({ "web gwt proxy all", "web gwt proxy type", "web gwt request all", "web gwt request type", "web gwt all", "web gwt scaffold ", "web gwt proxy request all", "web gwt proxy request type", "web gwt gae update" })
-	public boolean isGwtInstalled() {
-		return !isSetupGwtAvailable();
+	public boolean isScaffoldAvailable() {
+		return gwtOperations.isScaffoldAvailable();
 	}
 
 	@CliCommand(value = "web gwt setup", help = "Install Google Web Toolkit (GWT) into your project")
@@ -50,6 +48,7 @@ public class GwtCommands implements CommandMarker {
 	@CliCommand(value = "web gwt proxy all", help = "Locates all entities in the project and creates GWT proxies")
 	public void proxyAll(
 		@CliOption(key = "package", mandatory = true, optionContext = "update", help = "The package in which created proxies will be placed") final JavaPackage javaPackage) {
+
 		gwtOperations.proxyAll(javaPackage);
 	}
 
@@ -57,12 +56,14 @@ public class GwtCommands implements CommandMarker {
 	public void proxyType(
 		@CliOption(key = "package", mandatory = true, optionContext = "update", help = "The package in which created proxies will be placed") final JavaPackage javaPackage,
 		@CliOption(key = "type", mandatory = true, help = "The type to base the created request on") final JavaType type) {
+
 		gwtOperations.proxyType(javaPackage, type);
 	}
 
 	@CliCommand(value = "web gwt request all", help = "Locates all entities in the project and creates GWT requests")
 	public void requestAll(
 		@CliOption(key = "package", mandatory = true, optionContext = "update", help = "The package in which created requests will be placed") final JavaPackage javaPackage) {
+
 		gwtOperations.requestAll(javaPackage);
 	}
 
@@ -70,12 +71,14 @@ public class GwtCommands implements CommandMarker {
 	public void requestType(
 		@CliOption(key = "package", mandatory = true, optionContext = "update", help = "The package in which created requests will be placed") final JavaPackage javaPackage,
 		@CliOption(key = "type", mandatory = true, help = "The type to base the created request on") final JavaType type) {
+
 		gwtOperations.requestType(javaPackage, type);
 	}
 
 	@CliCommand(value = "web gwt proxy request all", help = "Locates all entities in the project and creates GWT requests and proxies")
 	public void proxyAndRequestAll(
 		@CliOption(key = "package", mandatory = true, optionContext = "update", help = "The package in which created proxies and requests will be placed") final JavaPackage javaPackage) {
+
 		gwtOperations.proxyAndRequestAll(javaPackage);
 	}
 
@@ -83,6 +86,7 @@ public class GwtCommands implements CommandMarker {
 	public void proxyAndRequestType(
 		@CliOption(key = "package", mandatory = true, optionContext = "update", help = "The package in which created proxies and requests will be placed") final JavaPackage javaPackage,
 		@CliOption(key = "type", mandatory = true, help = "The type to base the created proxy and request on") final JavaType type) {
+
 		gwtOperations.proxyAndRequestType(javaPackage, type);
 	}
 
@@ -90,6 +94,7 @@ public class GwtCommands implements CommandMarker {
 	public void scaffoldAll(
 		@CliOption(key = "proxyPackage", mandatory = true, optionContext = "update", help = "The package in which created proxies will be placed") final JavaPackage proxyPackage,
 		@CliOption(key = "requestPackage", mandatory = true, optionContext = "update", help = "The package in which created requests will be placed") final JavaPackage requestPackage) {
+
 		gwtOperations.scaffoldAll(proxyPackage, requestPackage);
 	}
 
@@ -98,6 +103,7 @@ public class GwtCommands implements CommandMarker {
 		@CliOption(key = "proxyPackage", mandatory = true, optionContext = "update", help = "The package in which created proxies will be placed") final JavaPackage proxyPackage,
 		@CliOption(key = "requestPackage", mandatory = true, optionContext = "update", help = "The package in which created requests will be placed") final JavaPackage requestPackage,
 		@CliOption(key = "type", mandatory = true, help = "The type to base the created scaffold on") final JavaType type) {
+
 		gwtOperations.scaffoldType(proxyPackage, requestPackage, type);
 	}
 

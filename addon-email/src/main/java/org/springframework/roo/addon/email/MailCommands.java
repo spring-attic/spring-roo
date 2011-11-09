@@ -36,7 +36,7 @@ public class MailCommands implements CommandMarker {
 
 	@CliAvailabilityIndicator("email sender setup")
 	public boolean isInstallEmailAvailable() {
-		return mailOperations.isInstallEmailAvailable();
+		return mailOperations.isEmailInstallationPossible();
 	}
 
 	/**

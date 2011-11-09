@@ -10,7 +10,7 @@ import org.springframework.roo.model.JavaType;
  */
 public interface SolrOperations {
 
-	boolean isInstallSearchAvailable();
+	boolean isSolrInstallationPossible();
 
 	boolean isSearchAvailable();
 

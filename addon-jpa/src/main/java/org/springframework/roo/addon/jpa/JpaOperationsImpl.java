@@ -102,11 +102,19 @@ public class JpaOperationsImpl implements JpaOperations {
 
 	public boolean isInstalledInModule(String moduleName) {
 		ContextualPath resourcesPath = ContextualPath.getInstance(Path.SRC_MAIN_RESOURCES, moduleName);
-		return projectOperations.isFocusedProjectAvailable() && fileManager.exists(projectOperations.getPathResolver().getIdentifier(resourcesPath, PERSISTENCE_XML));
+		return isJpaInstallationPossible() && fileManager.exists(projectOperations.getPathResolver().getIdentifier(resourcesPath, PERSISTENCE_XML));
+	}
+
+	public boolean isJpaInstallationPossible() {
+		return projectOperations.isFocusedProjectAvailable();
 	}
 
 	public boolean hasDatabaseProperties() {
 		return fileManager.exists(getDatabasePropertiesPath());
+	}
+
+	public boolean isPersistentClassAvailable() {
+		return isInstalledInModule(projectOperations.getFocusedModuleName());
 	}
 
 	public SortedSet<String> getDatabaseProperties() {

@@ -14,14 +14,16 @@ import org.w3c.dom.Document;
  */
 public interface JspOperations extends Feature {
 
-	boolean isSetupAvailable();
+	boolean isMvcInstallationPossible();
 	
 	boolean isControllerAvailable();
 
 	boolean isInstallLanguageCommandAvailable();
 
 	/**
-	 * installs all common view artifacts needed for MVC scaffolding
+	 * Installs all common view artifacts needed for MVC scaffolding
+	 * 
+	 * @param webappPath
 	 */
 	void installCommonViewArtefacts(ContextualPath webappPath);
 
@@ -35,6 +37,7 @@ public interface JspOperations extends Feature {
 	 *
 	 * @param controller the controller class to create (required)
 	 * @param preferredMapping the mapping this controller should adopt (optional; if unspecified it will be based on the controller name)
+	 * @param webappPath
 	 */
 	void createManualController(JavaType controller, String preferredMapping, ContextualPath webappPath);
 	
@@ -42,6 +45,7 @@ public interface JspOperations extends Feature {
 	 * Installs additional languages into Web MVC app.
 	 *
 	 * @param language the language
+	 * @param webappPath
 	 */
 	void installI18n(I18n language, ContextualPath webappPath);
 	
@@ -52,6 +56,7 @@ public interface JspOperations extends Feature {
 	 * @param title the title of the view (required)
 	 * @param category the menu category name (required)
 	 * @param viewName the mapping this view should adopt (required, ie 'index')
+	 * @param webappPath
 	 */
 	void installView(String path, String viewName, String title, String category, ContextualPath webappPath);
 	
@@ -61,8 +66,9 @@ public interface JspOperations extends Feature {
 	 * @param path the static view to create in (required, ie '/foo')
 	 * @param viewName the mapping this view should adopt (required, ie 'index')
 	 * @param title the title of the view (required)
-	 *  @param category the menu category name (required)
+	 * @param category the menu category name (required)
 	 * @param document the jspx document to use for the view
+	 * @param webappPath
 	 */
 	void installView(String path, String viewName, String title, String category, Document document, ContextualPath webappPath);
 	
@@ -70,6 +76,7 @@ public interface JspOperations extends Feature {
 	 * Replaces an existing tag library with the latest version (set backup flag to backup your application first)
 	 *
 	 * @param backup indicates wether your application should be backed up prior to replacing the tagx library
+	 * @param webappPath
 	 */
 	void updateTags(boolean backup, ContextualPath webappPath);
 }

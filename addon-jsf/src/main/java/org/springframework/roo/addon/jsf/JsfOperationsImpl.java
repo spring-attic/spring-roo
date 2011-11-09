@@ -71,7 +71,7 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 
 	// Constants
 	private static final String PRIMEFACES_XPATH = "/configuration/jsf-libraries/jsf-library[@id = 'PRIMEFACES']";
-	private static final String PRIMEFACES_THEMES_VERSION = "1.0.1";
+	private static final String PRIMEFACES_THEMES_VERSION = "1.0.2";
 
 	// Fields
 	@Reference private MetadataDependencyRegistry metadataDependencyRegistry;
@@ -91,6 +91,10 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 		return fileManager.exists(pathResolver.getIdentifier(webAppPath, "WEB-INF/faces-config.xml")) || fileManager.exists(pathResolver.getIdentifier(webAppPath, "templates/layout.xhtml"));
 	}
 	
+	public boolean isJsfInstallationPossible() {
+		return projectOperations.isFocusedProjectAvailable() && !projectOperations.isFeatureInstalledInFocusedModule(FeatureNames.MVC);
+	}
+
 	public boolean isScaffoldOrMediaAdditionAvailable() {
 		return isInstalledInModule(projectOperations.getFocusedModuleName()) && fileManager.exists(getWebXmlFile());
 	}

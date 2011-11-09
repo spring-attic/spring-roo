@@ -11,6 +11,8 @@ import org.springframework.roo.model.JavaType;
  */
 public interface WebJsonOperations {
 
+	boolean isWebJsonInstallationPossible();
+
 	void setup();
 
 	void annotateType(JavaType type, JavaType jsonType);
