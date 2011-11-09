@@ -142,10 +142,6 @@ public class DefaultPathResolvingStrategy implements PathResolvingStrategy {
 		return getPaths(null);
 	}
 
-	public List<ContextualPath> getNonSourcePaths() {
-		return getPaths(false);
-	}
-
 	public List<ContextualPath> getSourcePaths() {
 		return getPaths(true);
 	}

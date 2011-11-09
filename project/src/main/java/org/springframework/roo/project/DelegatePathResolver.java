@@ -81,10 +81,6 @@ public class DelegatePathResolver implements PathResolver {
 		return getStrategy().getSourcePaths();
 	}
 
-	public List<ContextualPath> getNonSourcePaths() {
-		return getStrategy().getNonSourcePaths();
-	}
-
 	public List<ContextualPath> getPaths() {
 		return getStrategy().getPaths();
 	}

@@ -5,6 +5,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
+import java.util.Arrays;
+import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -30,6 +32,9 @@ public class MavenPathResolvingStrategyTest {
 	// Fixture
 	private MavenPathResolvingStrategy strategy;
 	@Mock private PomManagementService mockPomManagementService;
+	@Mock private ContextualPath mockSourcePath;
+	@Mock private ContextualPath mockNonSourcePath;
+
 
 	@Before
 	public void setUp() throws Exception {
@@ -91,5 +96,44 @@ public class MavenPathResolvingStrategyTest {
 		when(mockPomManagementService.getFocusedModule()).thenReturn(mockParentPom);
 		final String expectedIdentifier = FileUtils.getSystemDependentPath(POM_PATH, NEW_MODULE, PATH_RELATIVE_TO_POM) + File.separator;
 		assertIdentifier(null, NEW_MODULE, "", expectedIdentifier);
+	}
+	
+	private PathInformation getMockModulePath(final boolean isSource, final ContextualPath contextualPath) {
+		final PathInformation mockModulePath = mock(PathInformation.class);
+		when(mockModulePath.isSource()).thenReturn(isSource);
+		when(mockModulePath.getContextualPath()).thenReturn(contextualPath);
+		return mockModulePath;
+	}
+	
+	private void setUpModulePaths() {
+		final PathInformation mockModuleSourcePath = getMockModulePath(true, mockSourcePath);
+		final PathInformation mockModuleNonSourcePath = getMockModulePath(false, mockNonSourcePath);
+		final Pom mockPom = mock(Pom.class);
+		when(mockPom.getPathInformation()).thenReturn(Arrays.asList(mockModuleSourcePath, mockModuleNonSourcePath));
+		when(mockPomManagementService.getPoms()).thenReturn(Arrays.asList(mockPom));
+	}
+	
+	@Test
+	public void testGetAllPaths() {
+		// Set up
+		setUpModulePaths();
+		
+		// Invoke
+		final List<ContextualPath> modulePathIds = strategy.getPaths();
+		
+		// Check
+		assertEquals(Arrays.asList(mockSourcePath, mockNonSourcePath), modulePathIds);
+	}
+	
+	@Test
+	public void testGetSourcePaths() {
+		// Set up
+		setUpModulePaths();
+		
+		// Invoke
+		final List<ContextualPath> modulePathIds = strategy.getSourcePaths();
+		
+		// Check
+		assertEquals(Arrays.asList(mockSourcePath), modulePathIds);
 	}
 }

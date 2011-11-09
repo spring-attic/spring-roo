@@ -78,28 +78,23 @@ public class MavenPathResolvingStrategy implements PathResolvingStrategy {
 	/**
 	 * Obtains the {@link ContextualPath}s.
 	 *
-	 * @param sourcePaths <code>true</code> to return only source paths,
-	 * <code>false</code> to return only non-source paths, or <code>null</code>
-	 * to return all paths
+	 * @param sourceOnly <code>true</code> to return only source paths,
+	 * <code>false</code> to return all paths
 	 * @return a list of the matching paths (never null)
 	 */
-	private List<ContextualPath> getPaths(final Boolean sourcePaths) {
-		final List<ContextualPath> result = new ArrayList<ContextualPath>();
+	private List<ContextualPath> getPaths(final boolean sourceOnly) {
+		final List<ContextualPath> pathIds = new ArrayList<ContextualPath>();
 		for (final Pom pom : pomManagementService.getPoms()) {
-			for (final PathInformation pi : pom.getPathInformation()) {
-				if (sourcePaths == null || sourcePaths.equals(pi.isSource())) {
-					result.add(pi.getContextualPath());
+			for (final PathInformation modulePath : pom.getPathInformation()) {
+				if (!sourceOnly || modulePath.isSource()) {
+					pathIds.add(modulePath.getContextualPath());
 				}
 			}
 		}
-		return result;
+		return pathIds;
 	}
 
 	public List<ContextualPath> getPaths() {
-		return getPaths(null);
-	}
-
-	public List<ContextualPath> getNonSourcePaths() {
 		return getPaths(false);
 	}
 

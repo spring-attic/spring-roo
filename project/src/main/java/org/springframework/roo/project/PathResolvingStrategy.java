@@ -79,21 +79,6 @@ public interface PathResolvingStrategy {
 	List<ContextualPath> getSourcePaths();
 
 	/**
-	 * Similar to {@link #getSourcePaths()}, but only returns {@link ContextualPath}s that do not contain source code.
-	 *
-	 * <p>
-	 * By default this method will return, in the following order:
-	 * <ul>
-	 * <li>{@link Path#SRC_MAIN_WEBAPP}</li>
-	 * <li>{@link Path#ROOT}</li>
-	 * </ul>
-	 *
-	 * @return the paths which are not compiled, in an order defined by the implementation (never null
-	 * and never empty).
-	 */
-	List<ContextualPath> getNonSourcePaths();
-
-	/**
 	 * Returns all known project paths.
 	 *
 	 * @return a non-<code>null</code> list (might be empty)
