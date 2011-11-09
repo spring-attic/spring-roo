@@ -61,7 +61,11 @@ public class WebJsonOperationsImpl implements WebJsonOperations {
 	@Reference private WebMvcOperations mvcOperations;
 
 	public boolean isWebJsonInstallationPossible() {
-		return !projectOperations.isFeatureInstalledInFocusedModule(FeatureNames.MVC);
+		return !projectOperations.isFeatureInstalledInFocusedModule(FeatureNames.MVC) && !projectOperations.isFeatureInstalledInFocusedModule(FeatureNames.JSF);
+	}
+
+	public boolean isWebJsonCommandAvailable() {
+		return projectOperations.isFeatureInstalledInFocusedModule(FeatureNames.MVC) && !projectOperations.isFeatureInstalledInFocusedModule(FeatureNames.JSF);
 	}
 
 	public void setup() {

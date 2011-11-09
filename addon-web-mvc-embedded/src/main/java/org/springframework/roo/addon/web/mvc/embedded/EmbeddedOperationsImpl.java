@@ -12,6 +12,7 @@ import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.ReferenceStrategy;
 import org.apache.felix.scr.annotations.Service;
+import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.logging.HandlerUtils;
 
@@ -35,8 +36,8 @@ public class EmbeddedOperationsImpl implements EmbeddedOperations {
 	private final Object mutex = new Object();
 	private final Set<EmbeddedProvider> providers = new HashSet<EmbeddedProvider>();
 
-	public boolean isEmbeddedInstallationPoosible() {
-		return projectOperations.isFocusedProjectAvailable();
+	public boolean isEmbeddedInstallationPossible() {
+		return projectOperations.isFocusedProjectAvailable() && !projectOperations.isFeatureInstalledInFocusedModule(FeatureNames.JSF);
 	}
 
 	public boolean embed(final String url, final String viewName) {

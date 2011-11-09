@@ -49,11 +49,7 @@ public class WebFlowOperationsImpl implements WebFlowOperations {
 	@Reference private WebMvcOperations webMvcOperations;
 
 	public boolean isWebFlowInstallationPossible() {
-		return projectOperations.isFocusedProjectAvailable();
-	}
-
-	public boolean isManageWebFlowAvailable() {
-		return isWebFlowInstallationPossible() && projectOperations.isFeatureInstalledInFocusedModule(FeatureNames.MVC);
+		return isWebFlowInstallationPossible() && projectOperations.isFeatureInstalledInFocusedModule(FeatureNames.MVC) && !projectOperations.isFeatureInstalledInFocusedModule(FeatureNames.JSF);
 	}
 
 	/**

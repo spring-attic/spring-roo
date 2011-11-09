@@ -30,7 +30,7 @@ public class WebJsonCommands implements CommandMarker {
 
 	@CliAvailabilityIndicator({ "web mvc json add", "web mvc json all" })
 	public boolean isCommandAvailable() {
-		return !isSetupAvailable();
+		return webJsonOperations.isWebJsonCommandAvailable();
 	}
 
 	@CliCommand(value = "web mvc json setup", help = "Setup Spring MVC for Json support.")

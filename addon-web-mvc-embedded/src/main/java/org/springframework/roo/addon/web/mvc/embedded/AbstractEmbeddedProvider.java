@@ -35,7 +35,6 @@ public abstract class AbstractEmbeddedProvider implements EmbeddedProvider {
 	// Constants
 	private static final Logger logger = Logger.getLogger(AbstractEmbeddedProvider.class.getName());
 
-
 	// Fields
 	@Reference private FileManager fileManager;
 	@Reference private UrlInputStreamService httpService;

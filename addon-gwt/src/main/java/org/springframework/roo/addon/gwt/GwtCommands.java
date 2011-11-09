@@ -29,7 +29,7 @@ public class GwtCommands implements CommandMarker {
 		return gwtOperations.isGwtInstallationPossible();
 	}
 
-	@CliAvailabilityIndicator({ "web gwt proxy all", "web gwt proxy type", "web gwt request all", "web gwt request type", "web gwt all", "web gwt scaffold ", "web gwt proxy request all", "web gwt proxy request type", "web gwt gae update" })
+	@CliAvailabilityIndicator({ "web gwt proxy all", "web gwt proxy type", "web gwt request all", "web gwt request type", "web gwt all", "web gwt scaffold", "web gwt proxy request all", "web gwt proxy request type", "web gwt gae update" })
 	public boolean isScaffoldAvailable() {
 		return gwtOperations.isScaffoldAvailable();
 	}
