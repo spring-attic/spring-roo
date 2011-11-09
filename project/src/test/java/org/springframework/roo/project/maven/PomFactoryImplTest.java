@@ -2,6 +2,8 @@ package org.springframework.roo.project.maven;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.springframework.roo.project.Path.DEFAULT_SOURCE_DIRECTORY;
+import static org.springframework.roo.project.Path.DEFAULT_TEST_SOURCE_DIRECTORY;
 
 import java.io.File;
 import java.net.URL;
@@ -85,8 +87,8 @@ public class PomFactoryImplTest {
 		
 		// Check
 		assertGav(pom, "com.example", "minimal-app", "2.0");
-		assertEquals(Pom.DEFAULT_SOURCE_DIRECTORY, pom.getSourceDirectory());
-		assertEquals(Pom.DEFAULT_TEST_SOURCE_DIRECTORY, pom.getTestSourceDirectory());
+		assertEquals(DEFAULT_SOURCE_DIRECTORY, pom.getSourceDirectory());
+		assertEquals(DEFAULT_TEST_SOURCE_DIRECTORY, pom.getTestSourceDirectory());
 	}
 	
 	@Test
@@ -126,8 +128,8 @@ public class PomFactoryImplTest {
 		// Check
 		assertGav(pom, "com.example", "parent-app", "3.0");
 		assertEquals("pom", pom.getPackaging());
-		assertEquals(Pom.DEFAULT_SOURCE_DIRECTORY, pom.getSourceDirectory());
-		assertEquals(Pom.DEFAULT_TEST_SOURCE_DIRECTORY, pom.getTestSourceDirectory());
+		assertEquals(DEFAULT_SOURCE_DIRECTORY, pom.getSourceDirectory());
+		assertEquals(DEFAULT_TEST_SOURCE_DIRECTORY, pom.getTestSourceDirectory());
 		final Collection<Module> modules = pom.getModules();
 		assertEquals(2, modules.size());
 		final Iterator<Module> moduleIterator = modules.iterator();

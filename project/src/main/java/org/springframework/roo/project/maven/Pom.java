@@ -1,5 +1,12 @@
 package org.springframework.roo.project.maven;
 
+import static org.springframework.roo.project.Path.DEFAULT_RESOURCES_DIRECTORY;
+import static org.springframework.roo.project.Path.DEFAULT_SOURCE_DIRECTORY;
+import static org.springframework.roo.project.Path.DEFAULT_SPRING_CONFIG_ROOT;
+import static org.springframework.roo.project.Path.DEFAULT_TEST_RESOURCES_DIRECTORY;
+import static org.springframework.roo.project.Path.DEFAULT_TEST_SOURCE_DIRECTORY;
+import static org.springframework.roo.project.Path.DEFAULT_WAR_SOURCE_DIRECTORY;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -36,12 +43,6 @@ public class Pom {
 
 	// Constants
 	private static final String DEFAULT_PACKAGING = "jar";	// Maven behaviour
-	public static final String DEFAULT_RESOURCES_DIRECTORY = "src/main/resources";
-	public static final String DEFAULT_SOURCE_DIRECTORY = "src/main/java";
-	public static final String DEFAULT_SPRING_CONFIG_ROOT = DEFAULT_RESOURCES_DIRECTORY + "/META-INF/spring";
-	public static final String DEFAULT_TEST_RESOURCES_DIRECTORY = "src/test/resources";
-	public static final String DEFAULT_TEST_SOURCE_DIRECTORY = "src/test/java";
-	public static final String DEFAULT_WAR_SOURCE_DIRECTORY = "src/main/webapp";
 
 	// Fields
 	private final GAV gav;
@@ -132,9 +133,9 @@ public class Pom {
 				testSourceDirectory = DEFAULT_TEST_SOURCE_DIRECTORY;
 			}
 			sb.append(testSourceDirectory);
-		}  else if (path.equals(Path.SRC_TEST_RESOURCES)) {
+		} else if (path.equals(Path.SRC_TEST_RESOURCES)) {
 			sb.append(DEFAULT_TEST_RESOURCES_DIRECTORY);
-		}  else if (path.equals(Path.SRC_MAIN_WEBAPP)) {
+		} else if (path.equals(Path.SRC_MAIN_WEBAPP)) {
 			sb.append(DEFAULT_WAR_SOURCE_DIRECTORY);
 		} else if (path.equals(Path.SPRING_CONFIG_ROOT)) {
 			sb.append(DEFAULT_SPRING_CONFIG_ROOT);

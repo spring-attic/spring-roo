@@ -1,12 +1,5 @@
 package org.springframework.roo.project;
 
-import static org.springframework.roo.project.maven.Pom.DEFAULT_RESOURCES_DIRECTORY;
-import static org.springframework.roo.project.maven.Pom.DEFAULT_SOURCE_DIRECTORY;
-import static org.springframework.roo.project.maven.Pom.DEFAULT_SPRING_CONFIG_ROOT;
-import static org.springframework.roo.project.maven.Pom.DEFAULT_TEST_RESOURCES_DIRECTORY;
-import static org.springframework.roo.project.maven.Pom.DEFAULT_TEST_SOURCE_DIRECTORY;
-import static org.springframework.roo.project.maven.Pom.DEFAULT_WAR_SOURCE_DIRECTORY;
-
 import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.support.util.StringUtils;
 
@@ -75,6 +68,14 @@ public enum Path {
 			return DEFAULT_SPRING_CONFIG_ROOT;
 		}
 	};
+	
+	// Constants
+	public static final String DEFAULT_RESOURCES_DIRECTORY = "src/main/resources";
+	public static final String DEFAULT_SOURCE_DIRECTORY = "src/main/java";
+	public static final String DEFAULT_SPRING_CONFIG_ROOT = DEFAULT_RESOURCES_DIRECTORY + "/META-INF/spring";
+	public static final String DEFAULT_TEST_RESOURCES_DIRECTORY = "src/test/resources";
+	public static final String DEFAULT_TEST_SOURCE_DIRECTORY = "src/test/java";
+	public static final String DEFAULT_WAR_SOURCE_DIRECTORY = "src/main/webapp";
 
 	public ContextualPath contextualize() {
 		return ContextualPath.getInstance(this);
