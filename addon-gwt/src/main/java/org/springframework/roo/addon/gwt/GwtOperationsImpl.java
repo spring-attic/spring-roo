@@ -195,7 +195,7 @@ public class GwtOperationsImpl implements GwtOperations {
 
 	public void proxyType(final JavaPackage proxyPackage, final JavaType type) {
 		ClassOrInterfaceTypeDetails entity = typeLocationService.getTypeDetails(type);
-		if (entity != null) {
+		if (entity != null && !Modifier.isAbstract(entity.getModifier())) {
 			createProxy(entity, proxyPackage);
 		}
 		copyDirectoryContents(GwtPath.LOCATOR);
@@ -209,7 +209,7 @@ public class GwtOperationsImpl implements GwtOperations {
 
 	public void requestType(final JavaPackage requestPackage, final JavaType type) {
 		ClassOrInterfaceTypeDetails entity = typeLocationService.getTypeDetails(type);
-		if (entity != null) {
+		if (entity != null && !Modifier.isAbstract(entity.getModifier())) {
 			createRequest(entity, requestPackage);
 		}
 	}
@@ -390,7 +390,7 @@ public class GwtOperationsImpl implements GwtOperations {
 	 */
 	private void updateEclipsePlugin() {
 		// Load the POM
-		final String pom = projectOperations.getPathResolver().getFocusedIdentifier(Path.ROOT, "pom.xml");
+		final String pom = getPomPath();
 		final Document document = XmlUtils.readXml(fileManager.getInputStream(pom));
 		final Element root = document.getDocumentElement();
 
@@ -421,7 +421,7 @@ public class GwtOperationsImpl implements GwtOperations {
 	 */
 	private void updateBuildOutputDirectory() {
 		// Read the POM
-		final String pom = projectOperations.getPathResolver().getFocusedIdentifier(Path.ROOT, "pom.xml");
+		final String pom = getPomPath();
 		final Document document = XmlUtils.readXml(fileManager.getInputStream(pom));
 		final Element root = document.getDocumentElement();
 
@@ -434,6 +434,10 @@ public class GwtOperationsImpl implements GwtOperations {
 		outputDirectoryElement.setTextContent(OUTPUT_DIRECTORY);
 
 		fileManager.createOrUpdateTextFileIfRequired(pom, XmlUtils.nodeToString(document), false);
+	}
+
+	private String getPomPath() {
+		return projectOperations.getPathResolver().getFocusedIdentifier(Path.ROOT, "pom.xml");
 	}
 
 	private void updateRepositories(final Element configuration) {
