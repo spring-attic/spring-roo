@@ -7,6 +7,7 @@ import org.springframework.roo.addon.jsf.model.UploadedFileContentType;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
@@ -29,7 +30,7 @@ public class JsfCommands implements CommandMarker {
 
 	@CliAvailabilityIndicator({ "web jsf setup" })
 	public boolean isJsfSetupAvailable() {
-		return !jsfOperations.isInstalledInModule(projectOperations.getFocusedModuleName()) && !projectOperations.isFeatureInstalledInFocusedModule("MVC");
+		return !jsfOperations.isInstalledInModule(projectOperations.getFocusedModuleName()) && !projectOperations.isFeatureInstalledInFocusedModule(FeatureNames.MVC);
 	}
 
 	@CliAvailabilityIndicator({ "web jsf all", "web jsf scaffold", "web jsf media" })
