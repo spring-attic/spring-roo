@@ -59,6 +59,7 @@ import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileUtils;
+import org.springframework.roo.support.util.IOUtils;
 import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
@@ -164,6 +165,7 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
 	}
 
 	public String buildUiXml(final String templateContents, final String destFile, final List<MethodMetadata> proxyMethods) {
+		FileReader fileReader = null;
 		try {
 			DocumentBuilder builder = XmlUtils.getDocumentBuilder();
 			builder.setEntityResolver(new EntityResolver() {
@@ -187,10 +189,9 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
 			}
 
 			is = new InputSource();
-			FileReader fileReader = new FileReader(destFile);
+			fileReader = new FileReader(destFile);
 			is.setCharacterStream(fileReader);
 			Document existingDocument = builder.parse(is);
-			fileReader.close();
 
 			// Look for the element holder denoted by the 'debugId' attribute first
 			Element existingHoldingElement = XmlUtils.findFirstElement("//*[@debugId='" + "boundElementHolder" + "']", existingDocument.getDocumentElement());
@@ -267,6 +268,8 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
 			return transformXml(templateDocument);
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
+		} finally {
+			IOUtils.closeQuietly(fileReader);
 		}
 	}
 

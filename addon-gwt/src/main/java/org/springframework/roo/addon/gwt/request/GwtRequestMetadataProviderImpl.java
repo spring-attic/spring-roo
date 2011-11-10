@@ -122,6 +122,9 @@ public class GwtRequestMetadataProviderImpl extends AbstractHashCodeTrackingMeta
 
 	private List<String> getMethodExclusions(final ClassOrInterfaceTypeDetails request) {
 		List<String> exclusionList = GwtUtils.getAnnotationValues(request, ROO_GWT_REQUEST, "exclude");
+		exclusionList.add("equals");
+		exclusionList.add("hashCode");
+
 		ClassOrInterfaceTypeDetails proxy = gwtTypeService.lookupProxyFromRequest(request);
 		if (proxy != null) {
 			Boolean ignoreProxyExclusions = GwtUtils.getBooleanAnnotationValue(request, ROO_GWT_REQUEST, "ignoreProxyExclusions", false);
@@ -233,7 +236,6 @@ public class GwtRequestMetadataProviderImpl extends AbstractHashCodeTrackingMeta
 	}
 
 	public void notify(final String upstreamDependency, String downstreamDependency) {
-
 		if (MetadataIdentificationUtils.isIdentifyingClass(downstreamDependency)) {
 			Assert.isTrue(MetadataIdentificationUtils.getMetadataClass(upstreamDependency).equals(MetadataIdentificationUtils.getMetadataClass(PhysicalTypeIdentifier.getMetadataIdentiferType())), "Expected class-level notifications only for PhysicalTypeIdentifier (not '" + upstreamDependency + "')");
 			

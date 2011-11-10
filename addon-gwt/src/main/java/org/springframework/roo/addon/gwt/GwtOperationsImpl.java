@@ -195,7 +195,7 @@ public class GwtOperationsImpl implements GwtOperations {
 
 	public void proxyType(final JavaPackage proxyPackage, final JavaType type) {
 		ClassOrInterfaceTypeDetails entity = typeLocationService.getTypeDetails(type);
-		if (entity != null && !Modifier.isAbstract(entity.getModifier())) {
+		if (entity != null) {
 			createProxy(entity, proxyPackage);
 		}
 		copyDirectoryContents(GwtPath.LOCATOR);
@@ -209,7 +209,7 @@ public class GwtOperationsImpl implements GwtOperations {
 
 	public void requestType(final JavaPackage requestPackage, final JavaType type) {
 		ClassOrInterfaceTypeDetails entity = typeLocationService.getTypeDetails(type);
-		if (entity != null && !Modifier.isAbstract(entity.getModifier())) {
+		if (entity != null) {
 			createRequest(entity, requestPackage);
 		}
 	}

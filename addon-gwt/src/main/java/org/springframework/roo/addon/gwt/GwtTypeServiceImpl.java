@@ -294,9 +294,7 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 	}
 
 	public Set<String> getSourcePaths(final String gwtModuleCanonicalPath, final String moduleName) {
-
 		Document gwtXmlDoc = getGwtXmlDocument(gwtModuleCanonicalPath);
-
 		Element gwtXmlRoot = gwtXmlDoc.getDocumentElement();
 		Set<String> sourcePaths = new HashSet<String>();
 		List<Element> sourcePathElements = XmlUtils.findElements("/module/source", gwtXmlRoot);
