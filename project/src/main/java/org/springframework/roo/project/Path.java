@@ -24,6 +24,12 @@ public enum Path {
 	 * The module sub-path containing production Java source code.
 	 */
 	SRC_MAIN_JAVA (true, "src/main/java") {
+		
+		@Override
+		public boolean appliesTo(final String packaging) {
+			return !isWrapperArtifact(packaging);
+		}
+		
 		@Override
 		public String getPathRelativeToPom(final Pom pom) {
 			if (pom != null && StringUtils.hasText(pom.getSourceDirectory())) {
@@ -36,12 +42,24 @@ public enum Path {
 	/**
 	 * The module sub-path containing production resource files.
 	 */
-	SRC_MAIN_RESOURCES (false, "src/main/resources"),
+	SRC_MAIN_RESOURCES (false, "src/main/resources") {
+		
+		@Override
+		public boolean appliesTo(final String packaging) {
+			return !isWrapperArtifact(packaging);
+		}
+	},
 	
 	/**
 	 * The module sub-path containing test Java source code.
 	 */
 	SRC_TEST_JAVA (true, "src/test/java") {
+		
+		@Override
+		public boolean appliesTo(final String packaging) {
+			return !isWrapperArtifact(packaging);
+		}
+		
 		@Override
 		public String getPathRelativeToPom(final Pom pom) {
 			if (pom != null && StringUtils.hasText(pom.getTestSourceDirectory())) {
@@ -54,22 +72,46 @@ public enum Path {
 	/**
 	 * The module sub-path containing test resource files.
 	 */
-	SRC_TEST_RESOURCES (false, "src/test/resources"),
+	SRC_TEST_RESOURCES (false, "src/test/resources") {
+		@Override
+		public boolean appliesTo(final String packaging) {
+			return !isWrapperArtifact(packaging);
+		}
+	},
 	
 	/**
 	 * The module sub-path containing web resource files.
 	 */
-	SRC_MAIN_WEBAPP (false, "src/main/webapp"),
+	SRC_MAIN_WEBAPP (false, "src/main/webapp") {
+		@Override
+		public boolean appliesTo(final String packaging) {
+			return "war".equalsIgnoreCase(packaging);
+		}
+	},
 	
 	/**
 	 * The module's root directory.
 	 */
-	ROOT (false, ""),
+	ROOT (false, "") {
+		@Override
+		public boolean appliesTo(final String packaging) {
+			return true;
+		}
+	},
 	
 	/**
 	 * The module's base directory for production Spring-related resource files.
 	 */
-	SPRING_CONFIG_ROOT (false, "src/main/resources/META-INF/spring");
+	SPRING_CONFIG_ROOT (false, "src/main/resources/META-INF/spring") {
+		@Override
+		public boolean appliesTo(String packaging) {
+			return !isWrapperArtifact(packaging);
+		}
+	};
+	
+	private static boolean isWrapperArtifact(final String packaging) {
+		return "pom".equalsIgnoreCase(packaging) || "ear".equalsIgnoreCase(packaging);
+	}
 	
 	// Fields
 	private final boolean javaSource;
@@ -88,6 +130,15 @@ public enum Path {
 		this.defaultLocation = defaultLocation;
 		this.javaSource = javaSource;
 	}
+	
+	/**
+	 * Indicates whether this sub-path is applicable to a Maven artifact with
+	 * the given packaging
+	 * 
+	 * @param packaging the Maven packaging type, e.g. "jar" (required)
+	 * @return see above
+	 */
+	public abstract boolean appliesTo(final String packaging);
 
 	/**
 	 * Returns the {@link ContextualPath} for this path in the given module

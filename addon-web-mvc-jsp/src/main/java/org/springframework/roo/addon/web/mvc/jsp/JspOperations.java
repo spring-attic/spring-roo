@@ -21,11 +21,19 @@ public interface JspOperations extends Feature {
 	boolean isInstallLanguageCommandAvailable();
 
 	/**
-	 * Installs all common view artifacts needed for MVC scaffolding
-	 * 
-	 * @param webappPath
+	 * Installs the common view artifacts needed for MVC scaffolding into the
+	 * currently focused module.
 	 */
-	void installCommonViewArtefacts(ContextualPath webappPath);
+	void installCommonViewArtefacts();
+	
+	/**
+	 * Installs all common view artifacts needed for MVC scaffolding into the
+	 * given module.
+	 * 
+	 * @param moduleName the name of the module into which to install the
+	 * artifacts; can be empty for the root or only module
+	 */
+	void installCommonViewArtefacts(String moduleName);
 
 	/**
 	 * Creates a new Spring MVC controller.

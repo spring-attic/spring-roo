@@ -71,12 +71,12 @@ public class ProjectPathMonitoringInitializer implements MetadataNotificationLis
 		}
 	}
 
-	private File ensureDirectoryExists(final String fileIdentifier) {
-		final File file = new File(fileIdentifier);
+	private File ensureDirectoryExists(final String directoryPath) {
+		final File file = new File(directoryPath);
 		if (file.exists()) {
-			Assert.isTrue(file.isDirectory(), "Path '" + fileIdentifier + "' must not exist or be a directory");
+			Assert.isTrue(file.isDirectory(), "Path '" + directoryPath + "' exists but is not a directory");
 		} else {
-			// Create directory, but no notifications, as that will happen once we start monitoring it below
+			// Create the directory, but no notifications, as that will happen once the caller starts monitoring it
 			new CreateDirectory(undoManager, filenameResolver, file);
 		}
 		return file;

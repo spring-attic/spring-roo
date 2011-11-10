@@ -98,12 +98,14 @@ public class Pom {
 		CollectionUtils.populate(this.repositories, repositories);
 		CollectionUtils.populate(this.resources, resources);
 		
-		cachePathInformation(Path.values());
+		cachePathInformation(this.packaging);
 	}
 
-	private void cachePathInformation(final Path... paths) {
-		for (final Path path : paths) {
-			pathCache.put(path, path.getModulePath(this));
+	private void cachePathInformation(final String packaging) {
+		for (final Path path : Path.values()) {
+			if (path.appliesTo(packaging)) {
+				pathCache.put(path, path.getModulePath(this));
+			}
 		}
 	}
 	
@@ -237,18 +239,30 @@ public class Pom {
 		return pathCache.get(path.getPath());
 	}
 
+	/**
+	 * Returns the {@link PathInformation} for the given {@link Path} of this
+	 * module
+	 * 
+	 * @param path the sub-path for which to return the {@link PathInformation}
+	 * @return <code>null</code> if this module has no such sub-path
+	 */
 	public PathInformation getPathInformation(final Path path) {
 		return pathCache.get(path);
 	}
 
 	/**
-	 * Returns the canonical path of the given logical {@link Path} within this module, plus a trailing separator
+	 * Returns the canonical path of the given logical {@link Path} within this
+	 * module, plus a trailing separator if found
 	 * 
 	 * @param path the logical path for which to get the canonical location (required)
-	 * @return a valid canonical path
+	 * @return <code>null</code> if this module has no such path
 	 */
 	public String getPathLocation(final Path path) {
-		return FileUtils.ensureTrailingSeparator(getPathInformation(path).getLocationPath());
+		final PathInformation modulePath = getPathInformation(path);
+		if (modulePath == null) {
+			return null;
+		}
+		return FileUtils.ensureTrailingSeparator(modulePath.getLocationPath());
 	}
 
 	public Set<Repository> getPluginRepositories() {

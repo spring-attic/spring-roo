@@ -28,7 +28,6 @@ import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.ContextualPath;
-import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathInformation;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.maven.Pom;
@@ -392,20 +391,19 @@ public class TypeLocationServiceImpl implements TypeLocationService {
 		if (typePath == null) {
 			return null;
 		}
-		String reducedPath = FileUtils.ensureTrailingSeparator(typePath.replace(typeRelativePath, ""));
-		String mid = null;
+		final String reducedPath = FileUtils.ensureTrailingSeparator(typePath.replace(typeRelativePath, ""));
 		for (final Pom pom : projectOperations.getPoms()) {
-			for (Path path : Arrays.asList(Path.SRC_MAIN_JAVA, Path.SRC_TEST_JAVA)) {
-				PathInformation pathInformation = pom.getPathInformation(path);
-				String pathLocation = FileUtils.ensureTrailingSeparator(pathInformation.getLocationPath());
-				if (pathLocation.startsWith(reducedPath)) {
-					mid = PhysicalTypeIdentifier.createIdentifier(type, pathInformation.getContextualPath());
-					projectOperations.addModuleDependency(pathInformation.getContextualPath().getModule());
-					break;
+			for (final PathInformation pathInformation : pom.getPathInformation()) {
+				if (pathInformation.isSource()) {
+					String pathLocation = FileUtils.ensureTrailingSeparator(pathInformation.getLocationPath());
+					if (pathLocation.startsWith(reducedPath)) {
+						projectOperations.addModuleDependency(pathInformation.getContextualPath().getModule());
+						return PhysicalTypeIdentifier.createIdentifier(type, pathInformation.getContextualPath());
+					}
 				}
 			}
 		}
-		return mid;
+		return null;
 	}
 
 	public String getPhysicalTypeIdentifier(final JavaType type, final ContextualPath path) {
@@ -468,10 +466,12 @@ public class TypeLocationServiceImpl implements TypeLocationService {
 
 	private void initTypeMap() {
 		for (final Pom pom : projectOperations.getPoms()) {
-			for (Path path : Arrays.asList(Path.SRC_MAIN_JAVA, Path.SRC_TEST_JAVA)) {
-				String pathToResolve = FileUtils.ensureTrailingSeparator(pom.getPathInformation(path).getLocationPath()) + "**" + File.separatorChar + "*.java";
-				for (FileDetails file : fileManager.findMatchingAntPath(pathToResolve)) {
-					cacheType(file.getCanonicalPath());
+			for (PathInformation path : pom.getPathInformation()) {
+				if (path.isSource()) {
+					final String allJavaFiles = FileUtils.ensureTrailingSeparator(path.getLocationPath()) + "**" + File.separatorChar + "*.java";
+					for (final FileDetails file : fileManager.findMatchingAntPath(allJavaFiles)) {
+						cacheType(file.getCanonicalPath());
+					}
 				}
 			}
 		}
@@ -593,27 +593,30 @@ public class TypeLocationServiceImpl implements TypeLocationService {
 		return getPhysicalTypeCanonicalPath(physicalTypeIdentifier);
 	}
 
-	public String getPhysicalTypeCanonicalPath(final String physicalTypeIdentifier) {
-		Assert.isTrue(PhysicalTypeIdentifier.isValid(physicalTypeIdentifier), "Physical type identifier is invalid");
-		ContextualPath path = PhysicalTypeIdentifier.getPath(physicalTypeIdentifier);
-		JavaType javaType = PhysicalTypeIdentifier.getJavaType(physicalTypeIdentifier);
+	public String getPhysicalTypeCanonicalPath(final String physicalTypeId) {
+		Assert.isTrue(PhysicalTypeIdentifier.isValid(physicalTypeId), "Physical type identifier is invalid");
+		ContextualPath modulePathId = PhysicalTypeIdentifier.getPath(physicalTypeId);
+		JavaType javaType = PhysicalTypeIdentifier.getJavaType(physicalTypeId);
 
 		String relativePath = javaType.getFullyQualifiedTypeName().replace('.', File.separatorChar) + ".java";
 
 		for (String existingTypePath : discoverTypes()) {
 			if (existingTypePath.endsWith(relativePath)) {
-				typeCache.cacheTypeAgainstModule(projectOperations.getPomFromModuleName(path.getModule()), javaType);
-				typeCache.cacheFilePathAgainstTypeIdentifier(existingTypePath, physicalTypeIdentifier);
+				typeCache.cacheTypeAgainstModule(projectOperations.getPomFromModuleName(modulePathId.getModule()), javaType);
+				typeCache.cacheFilePathAgainstTypeIdentifier(existingTypePath, physicalTypeId);
 				return existingTypePath;
 			}
 		}
 
-		Pom pom = projectOperations.getPomFromModuleName(path.getModule());
+		final Pom pom = projectOperations.getPomFromModuleName(modulePathId.getModule());
 		if (pom != null) {
-			String filePath = pom.getPathLocation(path.getPath()) + relativePath;
-			typeCache.cacheTypeAgainstModule(pom, javaType);
-			typeCache.cacheFilePathAgainstTypeIdentifier(filePath, physicalTypeIdentifier);
-			return filePath;
+			final String moduleDirectory = pom.getPathLocation(modulePathId.getPath());
+			if (moduleDirectory != null) {
+				String filePath = moduleDirectory + relativePath;
+				typeCache.cacheTypeAgainstModule(pom, javaType);
+				typeCache.cacheFilePathAgainstTypeIdentifier(filePath, physicalTypeId);
+				return filePath;
+			}
 		}
 		return null;
 	}

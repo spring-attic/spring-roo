@@ -67,6 +67,10 @@ import org.w3c.dom.Node;
 @Service
 public class JspOperationsImpl extends AbstractOperations implements JspOperations {
 
+	// Constants
+	private static final JavaType HTTP_SERVLET_REQUEST = new JavaType("javax.servlet.http.HttpServletRequest");
+	private static final JavaType HTTP_SERVLET_RESPONSE = new JavaType("javax.servlet.http.HttpServletResponse");
+
 	/**
 	 * Returns the folder name and mapping value for the given preferred maaping
 	 *
@@ -128,9 +132,9 @@ public class JspOperationsImpl extends AbstractOperations implements JspOperatio
 		return projectOperations.isFocusedProjectAvailable();
 	}
 
-	public void installCommonViewArtefacts(final ContextualPath webappPath) {
+	public void installCommonViewArtefacts(final String moduleName) {
 		Assert.isTrue(isProjectAvailable(), "Project metadata required");
-
+		final ContextualPath webappPath = Path.SRC_MAIN_WEBAPP.getModulePathId(moduleName);
 		if (!isControllerAvailable()) {
 			webMvcOperations.installAllWebMvcArtifacts();
 		}
@@ -221,7 +225,7 @@ public class JspOperationsImpl extends AbstractOperations implements JspOperatio
 		// Probe if common web artifacts exist, and install them if needed
 		final PathResolver pathResolver = projectOperations.getPathResolver();
 		if (!fileManager.exists(pathResolver.getIdentifier(webappPath, "WEB-INF/layouts/default.jspx"))) {
-			installCommonViewArtefacts(webappPath);
+			installCommonViewArtefacts(webappPath.getModule());
 		}
 		
 		final String lcViewName = viewName.getSymbolName().toLowerCase();
@@ -350,8 +354,8 @@ public class JspOperationsImpl extends AbstractOperations implements JspOperatio
 		final AnnotationMetadataBuilder idParamAnnotation = new AnnotationMetadataBuilder(PATH_VARIABLE);
 		postParamTypes.add(new AnnotatedJavaType(new JavaType("java.lang.Long"), idParamAnnotation.build()));
 		postParamTypes.add(new AnnotatedJavaType(MODEL_MAP));
-		postParamTypes.add(new AnnotatedJavaType(new JavaType("javax.servlet.http.HttpServletRequest")));
-		postParamTypes.add(new AnnotatedJavaType(new JavaType("javax.servlet.http.HttpServletResponse")));
+		postParamTypes.add(new AnnotatedJavaType(HTTP_SERVLET_REQUEST));
+		postParamTypes.add(new AnnotatedJavaType(HTTP_SERVLET_RESPONSE));
 
 		final List<JavaSymbolName> postParamNames = new ArrayList<JavaSymbolName>();
 		postParamNames.add(new JavaSymbolName("id"));
@@ -371,8 +375,8 @@ public class JspOperationsImpl extends AbstractOperations implements JspOperatio
 
 		final List<AnnotatedJavaType> getParamTypes = new ArrayList<AnnotatedJavaType>();
 		getParamTypes.add(new AnnotatedJavaType(MODEL_MAP));
-		getParamTypes.add(new AnnotatedJavaType(new JavaType("javax.servlet.http.HttpServletRequest")));
-		getParamTypes.add(new AnnotatedJavaType(new JavaType("javax.servlet.http.HttpServletResponse")));
+		getParamTypes.add(new AnnotatedJavaType(HTTP_SERVLET_REQUEST));
+		getParamTypes.add(new AnnotatedJavaType(HTTP_SERVLET_RESPONSE));
 
 		final List<JavaSymbolName> getParamNames = new ArrayList<JavaSymbolName>();
 		getParamNames.add(new JavaSymbolName("modelMap"));
@@ -487,5 +491,9 @@ public class JspOperationsImpl extends AbstractOperations implements JspOperatio
 			viewName = viewName.substring(0, viewName.indexOf(".") - 1);
 		}
 		return viewName;
+	}
+
+	public void installCommonViewArtefacts() {
+		installCommonViewArtefacts(projectOperations.getFocusedModuleName());
 	}
 }

@@ -44,7 +44,7 @@ public class JspCommands implements CommandMarker {
 
 	@CliCommand(value = "web mvc setup", help = "Setup a basic project structure for a Spring MVC / JSP application")
 	public void webMvcSetup() {
-		jspOperations.installCommonViewArtefacts(pathResolver.getFocusedPath(Path.SRC_MAIN_WEBAPP));
+		jspOperations.installCommonViewArtefacts();
 	}
 
 	@CliCommand(value = "web mvc controller", help = "Create a new manual Controller (ie where you write the methods)")

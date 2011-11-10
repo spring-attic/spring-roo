@@ -132,7 +132,7 @@ public class JspMetadataListener implements MetadataProvider, MetadataNotificati
 		ContextualPath webappPath = ContextualPath.getInstance(Path.SRC_MAIN_WEBAPP, path.getModule());
 
 		if (!fileManager.exists(pathResolver.getIdentifier(webappPath, WEB_INF_VIEWS))) {
-			jspOperations.installCommonViewArtefacts(webappPath);
+			jspOperations.installCommonViewArtefacts(path.getModule());
 		}
 
 		installImage(webappPath, "images/show.png");

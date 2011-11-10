@@ -106,7 +106,7 @@ public class WebFlowOperationsImpl implements WebFlowOperations {
 			webMvcOperations.installAllWebMvcArtifacts();
 		}
 		
-		jspOperations.installCommonViewArtefacts(pathResolver.getFocusedPath(Path.SRC_MAIN_WEBAPP));
+		jspOperations.installCommonViewArtefacts();
 
 		new XmlTemplate(fileManager).update(webMvcConfigPath, new DomElementCallback() {
 			public boolean doWithElement(final Document document, final Element root) {

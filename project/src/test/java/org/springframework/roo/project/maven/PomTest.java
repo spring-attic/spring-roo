@@ -1,6 +1,12 @@
 package org.springframework.roo.project.maven;
 
 import static org.junit.Assert.assertEquals;
+import static org.springframework.roo.project.Path.ROOT;
+import static org.springframework.roo.project.Path.SPRING_CONFIG_ROOT;
+import static org.springframework.roo.project.Path.SRC_MAIN_JAVA;
+import static org.springframework.roo.project.Path.SRC_MAIN_RESOURCES;
+import static org.springframework.roo.project.Path.SRC_TEST_JAVA;
+import static org.springframework.roo.project.Path.SRC_TEST_RESOURCES;
 import static org.springframework.roo.project.maven.Pom.DEFAULT_PACKAGING;
 
 import java.io.File;
@@ -34,10 +40,11 @@ public class PomTest {
 	public void testGetModulePathsForMinimalJarPom() {
 		// Set up
 		final Pom pom = getMinimalPom();
+		final Path[] expectedPaths = { SRC_MAIN_JAVA, SRC_MAIN_RESOURCES, SRC_TEST_JAVA, SRC_TEST_RESOURCES, ROOT, SPRING_CONFIG_ROOT };
 		
 		// Invoke and check
-		assertEquals(Path.values().length, pom.getPathInformation().size());
-		for (final Path path : Path.values()) {
+		assertEquals(expectedPaths.length, pom.getPathInformation().size());
+		for (final Path path : expectedPaths) {
 			final PathInformation modulePath = pom.getPathInformation(path);
 			assertEquals(new File(PROJECT_ROOT, path.getDefaultLocation()), modulePath.getLocation());
 			assertEquals(path.isJavaSource(), modulePath.isSource());
