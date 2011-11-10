@@ -66,6 +66,8 @@ public class JavaType implements Comparable<JavaType> {
 	public static final JavaSymbolName WILDCARD_EXTENDS = new JavaSymbolName("_ROO_WILDCARD_EXTENDS_"); // List<? extends YY>
 	public static final JavaSymbolName WILDCARD_SUPER = new JavaSymbolName("_ROO_WILDCARD_SUPER_"); // List<? super XXXX>
 	public static final JavaSymbolName WILDCARD_NEITHER = new JavaSymbolName("_ROO_WILDCARD_NEITHER_"); // List<?>
+	
+	private static final String[] CORE_TYPE_PREFIXES = { "java.", "javax." };
 
 	// The fully-qualified names of common collection types
 	private static final Set<String> COMMON_COLLECTION_TYPES = new HashSet<String>();
@@ -410,6 +412,20 @@ public class JavaType implements Comparable<JavaType> {
 
 	public boolean isCommonCollectionType() {
 		return COMMON_COLLECTION_TYPES.contains(this.fullyQualifiedTypeName);
+	}
+	
+	/**
+	 * Indicates whether this type is part of core Java.
+	 * 
+	 * @return see above
+	 */
+	public boolean isCoreType() {
+		for (final String coreTypePrefix : CORE_TYPE_PREFIXES) {
+			if (this.fullyQualifiedTypeName.startsWith(coreTypePrefix)) {
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	/**

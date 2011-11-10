@@ -55,4 +55,14 @@ public class JavaTypeTest {
 	public void testCollectionTypesAreMultiValued() {
 		assertTrue(JavaType.listOf(JavaType.INT_OBJECT).isMultiValued());
 	}
+	
+	@Test
+	public void testCoreTypeIsCoreType() {
+		assertTrue(JavaType.STRING.isCoreType());
+	}
+	
+	@Test
+	public void testUserTypeIsNonCoreType() {
+		assertFalse(new JavaType("com.example.Thing").isCoreType());
+	}
 }
