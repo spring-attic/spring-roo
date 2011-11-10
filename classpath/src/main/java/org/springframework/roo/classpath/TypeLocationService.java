@@ -101,11 +101,11 @@ public interface TypeLocationService {
 	String getPhysicalTypeIdentifier(String fileIdentifier);
 
 	/**
-	 * Resolves the canonical file path to for the provided physical type identifier. If the physical type identifier doesn't
-	 * represent a valid type an exception is thrown.
+	 * Returns the canonical file path to the given physical type.
 	 *
-	 * @param physicalTypeIdentifier the physical type identifier (required)
-	 * @return the resolved path
+	 * @param physicalTypeIdentifier the physical type's identifier (required)
+	 * @return the resolved path, or <code>null</code> if the given id doesn't
+	 * represent an existing type
 	 */
 	String getPhysicalTypeCanonicalPath(String physicalTypeIdentifier);
 

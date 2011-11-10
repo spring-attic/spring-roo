@@ -122,9 +122,11 @@ public interface PathResolver {
 	String getFocusedRoot(Path path);
 
 	/**
-	 *
-	 * @param path
-	 * @return
+	 * Returns the {@link ContextualPath} for the given {@link Path} within the
+	 * currently focused module.
+	 * 
+	 * @param path the path within the currently focused module (required)
+	 * @return a non-<code>null</code> instance
 	 */
 	ContextualPath getFocusedPath(Path path);
 }

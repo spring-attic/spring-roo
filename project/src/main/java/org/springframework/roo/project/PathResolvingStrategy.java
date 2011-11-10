@@ -105,9 +105,7 @@ public interface PathResolvingStrategy {
 	String getFocusedRoot(Path path);
 
 	/**
-	 *
-	 * @param path
-	 * @return
+	 * @see PathResolver#getFocusedPath(Path)
 	 */
 	ContextualPath getFocusedPath(Path path);
 
