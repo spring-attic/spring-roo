@@ -129,8 +129,7 @@ public class EqualsMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		bodyBuilder.appendFormalLine("}");
 		bodyBuilder.appendFormalLine(typeName + " rhs = (" + typeName + ") " + OBJECT_NAME + ";");
 
-		final StringBuilder builder = new StringBuilder();
-		builder.append("return new EqualsBuilder()");
+		final StringBuilder builder = new StringBuilder("return new EqualsBuilder()");
 		if (annotationValues.isAppendSuper()) {
 			builder.append(".appendSuper(super.equals(" + OBJECT_NAME + "))");
 		}
@@ -141,8 +140,7 @@ public class EqualsMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 
 		bodyBuilder.appendFormalLine(builder.toString());
 
-		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, EQUALS_METHOD_NAME, BOOLEAN_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterType), parameterNames, bodyBuilder);
-		return methodBuilder.build();
+		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, EQUALS_METHOD_NAME, BOOLEAN_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterType), parameterNames, bodyBuilder).build();
 	}
 
 	/**
@@ -161,8 +159,7 @@ public class EqualsMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		// Create the method
 		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
-		final StringBuilder builder = new StringBuilder();
-		builder.append("return new HashCodeBuilder()");
+		final StringBuilder builder = new StringBuilder("return new HashCodeBuilder()");
 		if (annotationValues.isAppendSuper()) {
 			builder.append(".appendSuper(super.hashCode())");
 		}
@@ -173,8 +170,7 @@ public class EqualsMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 
 		bodyBuilder.appendFormalLine(builder.toString());
 
-		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, HASH_CODE_METHOD_NAME, INT_PRIMITIVE, bodyBuilder);
-		return methodBuilder.build();
+		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, HASH_CODE_METHOD_NAME, INT_PRIMITIVE, bodyBuilder).build();
 	}
 
 	@Override
