@@ -31,4 +31,9 @@ public @interface RooToString {
 	 * @return an array of fields to exclude in the toString method
 	 */
 	String[] excludeFields() default "";
+	
+	/**
+	 * @return the result of the toString method output truncated to the specified length (defaults to 25)
+	 */
+	int maxLength() default 25;
 }

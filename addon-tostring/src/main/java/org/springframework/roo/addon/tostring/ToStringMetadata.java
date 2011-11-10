@@ -85,6 +85,7 @@ public class ToStringMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 
 		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		String[] excludeFields = annotationValues.getExcludeFields();
+		String str;
 		if (excludeFields != null && excludeFields.length > 0) {
 			StringBuilder builder = new StringBuilder("new String[] { ");
 			for (int i = 0; i < excludeFields.length; i++) {
@@ -94,9 +95,17 @@ public class ToStringMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 				builder.append("\"").append(excludeFields[i]).append("\"");
 			}
 			builder.append(" }");
-			bodyBuilder.appendFormalLine("return new ReflectionToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE).setExcludeFieldNames(" + builder.toString() + ").toString();");
+			str = "new ReflectionToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE).setExcludeFieldNames(" + builder.toString() + ").toString();";
 		} else {
-			bodyBuilder.appendFormalLine("return ReflectionToStringBuilder.toString(this, ToStringStyle.SHORT_PREFIX_STYLE);");
+			str = "ReflectionToStringBuilder.toString(this, ToStringStyle.SHORT_PREFIX_STYLE);";
+		}
+
+		final int maxLength = annotationValues.getMaxLength();
+		if (maxLength > 1) {
+			bodyBuilder.appendFormalLine("String str = " + str);
+			bodyBuilder.appendFormalLine("return str != null && str.length() > " + maxLength + " ? str.substring(0, " + maxLength + ") + \"...\" : str;");
+		} else {
+			bodyBuilder.appendFormalLine("return " + str);
 		}
 
 		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, STRING, bodyBuilder).build();
