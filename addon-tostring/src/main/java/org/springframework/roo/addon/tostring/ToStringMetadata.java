@@ -97,7 +97,6 @@ public class ToStringMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 			bodyBuilder.appendFormalLine("return new ReflectionToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE).setExcludeFieldNames(" + builder.toString() + ").toString();");
 		} else {
 			bodyBuilder.appendFormalLine("return ReflectionToStringBuilder.toString(this, ToStringStyle.SHORT_PREFIX_STYLE);");
-
 		}
 
 		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, STRING, bodyBuilder).build();
