@@ -159,15 +159,19 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 		int eventsPublished = 0;
 		for (final MonitoringRequest request : requests) {
 			final List<FileEvent> eventsToPublish = new ArrayList<FileEvent>();
-			if (priorExecution.containsKey(request)) {	// by AIS: nothing is published if there's no prior execution - is this correct?
-				// Need to perform a comparison, as we have data from a previous execution
-				final Map<File, Long> priorFiles = priorExecution.get(request);
-
-				// Handle files apparently updated, created, or deleted since the last execution
-				eventsToPublish.addAll(getFileUpdateEvents(request, priorFiles));
-				eventsToPublish.addAll(getFileCreationEvents(request, priorFiles));
-				eventsToPublish.addAll(getFileDeletionEvents(request, priorFiles));
+			
+			// See when each file was last checked
+			Map<File, Long> priorFiles = priorExecution.get(request);
+			if (priorFiles == null) {
+				priorFiles = new HashMap<File, Long>();
+				priorExecution.put(request, priorFiles);
 			}
+
+			// Handle files apparently updated, created, or deleted since the last execution
+			eventsToPublish.addAll(getFileUpdateEvents(request, priorFiles));
+			eventsToPublish.addAll(getFileCreationEvents(request, priorFiles));
+			eventsToPublish.addAll(getFileDeletionEvents(request, priorFiles));
+			
 			publish(eventsToPublish);
 			eventsPublished += eventsToPublish.size();
 		}
