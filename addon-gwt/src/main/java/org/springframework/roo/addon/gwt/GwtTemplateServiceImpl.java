@@ -15,6 +15,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -341,7 +342,7 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
 					}
 					String proxySimpleName = proxy.getName().getSimpleTypeName();
 					ClassOrInterfaceTypeDetails entity = gwtTypeService.lookupEntityFromProxy(proxy);
-					if (entity != null) {
+					if (entity != null && !Modifier.isAbstract(entity.getModifier())) {
 						String entitySimpleName = entity.getName().getSimpleTypeName();
 						TemplateDataDictionary section = dataDictionary.addSection("entities");
 						section.setVariable("entitySimpleName", entitySimpleName);
@@ -359,7 +360,7 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
 						continue;
 					}
 					ClassOrInterfaceTypeDetails entity = gwtTypeService.lookupEntityFromProxy(proxy);
-					if (entity != null) {
+					if (entity != null && !Modifier.isAbstract(entity.getModifier())) {
 						String entitySimpleName = entity.getName().getSimpleTypeName();
 						ClassOrInterfaceTypeDetails request = gwtTypeService.lookupRequestFromProxy(proxy);
 						if (request != null) {

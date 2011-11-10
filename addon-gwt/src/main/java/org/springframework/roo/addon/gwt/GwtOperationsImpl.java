@@ -79,6 +79,7 @@ public class GwtOperationsImpl implements GwtOperations {
 	private static final String GWT_PROJECT_NATURE = "com.google.gwt.eclipse.core.gwtNature";
 	private static final String MAVEN_ECLIPSE_PLUGIN = "/project/build/plugins/plugin[artifactId = 'maven-eclipse-plugin']";
 	private static final String OUTPUT_DIRECTORY = "${project.build.directory}/${project.build.finalName}/WEB-INF/classes";
+	private static final JavaSymbolName VALUE = new JavaSymbolName("value");
 
 	// Fields
 	@Reference protected FileManager fileManager;
@@ -241,7 +242,7 @@ public class GwtOperationsImpl implements GwtOperations {
 		proxyType(proxyPackage, type);
 		requestType(requestPackage, type);
 		ClassOrInterfaceTypeDetails entity = typeLocationService.getTypeDetails(type);
-		if (entity != null) {
+		if (entity != null && !Modifier.isAbstract(entity.getModifier())) {
 			ClassOrInterfaceTypeDetails proxy = gwtTypeService.lookupProxyFromEntity(entity);
 			ClassOrInterfaceTypeDetails request = gwtTypeService.lookupRequestFromEntity(entity);
 			if (proxy == null || request == null) {
@@ -296,9 +297,10 @@ public class GwtOperationsImpl implements GwtOperations {
 
 	private void createProxy(final ClassOrInterfaceTypeDetails entity, final JavaPackage destinationPackage) {
 		ClassOrInterfaceTypeDetails existingProxy = gwtTypeService.lookupProxyFromEntity(entity);
-		if (existingProxy != null) {
+		if (existingProxy != null || Modifier.isAbstract(entity.getModifier())) {
 			return;
 		}
+		
 		JavaType proxyName = new JavaType(destinationPackage.getFullyQualifiedPackageName() + "." + entity.getName().getSimpleTypeName() + "Proxy");
 		ClassOrInterfaceTypeDetailsBuilder builder = new ClassOrInterfaceTypeDetailsBuilder(PhysicalTypeIdentifier.createIdentifier(proxyName));
 		builder.setName(proxyName);
@@ -306,7 +308,7 @@ public class GwtOperationsImpl implements GwtOperations {
 		builder.setPhysicalTypeCategory(PhysicalTypeCategory.INTERFACE);
 		builder.setModifier(Modifier.PUBLIC);
 		List<AnnotationAttributeValue<?>> attributeValues = new ArrayList<AnnotationAttributeValue<?>>();
-		StringAttributeValue stringAttributeValue = new StringAttributeValue(new JavaSymbolName("value"), entity.getName().getFullyQualifiedTypeName());
+		StringAttributeValue stringAttributeValue = new StringAttributeValue(VALUE, entity.getName().getFullyQualifiedTypeName());
 		attributeValues.add(stringAttributeValue);
 		String locator = projectOperations.getTopLevelPackage(projectOperations.getFocusedModuleName()) + ".server.locator." + entity.getName().getSimpleTypeName() + "Locator";
 		StringAttributeValue locatorAttributeValue = new StringAttributeValue(new JavaSymbolName("locator"), locator);
@@ -316,11 +318,11 @@ public class GwtOperationsImpl implements GwtOperations {
 		List<StringAttributeValue> readOnlyValues = new ArrayList<StringAttributeValue>();
 		FieldMetadata versionField = persistenceMemberLocator.getVersionField(entity.getName());
 		if (versionField != null) {
-			readOnlyValues.add(new StringAttributeValue(new JavaSymbolName("value"), versionField.getFieldName().getSymbolName()));
+			readOnlyValues.add(new StringAttributeValue(VALUE, versionField.getFieldName().getSymbolName()));
 		}
 		List<FieldMetadata> idFields = persistenceMemberLocator.getIdentifierFields(entity.getName());
 		if (idFields != null && !idFields.isEmpty()) {
-			readOnlyValues.add(new StringAttributeValue(new JavaSymbolName("value"), idFields.get(0).getFieldName().getSymbolName()));
+			readOnlyValues.add(new StringAttributeValue(VALUE, idFields.get(0).getFieldName().getSymbolName()));
 		}
 		ArrayAttributeValue<StringAttributeValue> readOnlyAttribute = new ArrayAttributeValue<StringAttributeValue>(new JavaSymbolName("readOnly"), readOnlyValues);
 		attributeValues.add(readOnlyAttribute);
@@ -331,7 +333,7 @@ public class GwtOperationsImpl implements GwtOperations {
 
 	private void createRequest(final ClassOrInterfaceTypeDetails entity, final JavaPackage destinationPackage) {
 		ClassOrInterfaceTypeDetails existingProxy = gwtTypeService.lookupRequestFromEntity(entity);
-		if (existingProxy != null) {
+		if (existingProxy != null || Modifier.isAbstract(entity.getModifier())) {
 			return;
 		}
 		JavaType proxyName = new JavaType(destinationPackage.getFullyQualifiedPackageName() + "." + entity.getName().getSimpleTypeName() + "Request");
@@ -341,15 +343,17 @@ public class GwtOperationsImpl implements GwtOperations {
 		builder.setPhysicalTypeCategory(PhysicalTypeCategory.INTERFACE);
 		builder.setModifier(Modifier.PUBLIC);
 		List<AnnotationAttributeValue<?>> attributeValues = new ArrayList<AnnotationAttributeValue<?>>();
-		StringAttributeValue stringAttributeValue = new StringAttributeValue(new JavaSymbolName("value"), entity.getName().getFullyQualifiedTypeName());
+		StringAttributeValue stringAttributeValue = new StringAttributeValue(VALUE, entity.getName().getFullyQualifiedTypeName());
 		attributeValues.add(stringAttributeValue);
 		builder.updateTypeAnnotation(new AnnotationMetadataBuilder(GwtUtils.SERVICE_NAME, attributeValues));
 		List<StringAttributeValue> toExclude = new ArrayList<StringAttributeValue>();
-		toExclude.add(new StringAttributeValue(new JavaSymbolName("value"), "entityManager"));
-		toExclude.add(new StringAttributeValue(new JavaSymbolName("value"), "toString"));
-		toExclude.add(new StringAttributeValue(new JavaSymbolName("value"), "merge"));
-		toExclude.add(new StringAttributeValue(new JavaSymbolName("value"), "flush"));
-		toExclude.add(new StringAttributeValue(new JavaSymbolName("value"), "clear"));
+		toExclude.add(new StringAttributeValue(VALUE, "entityManager"));
+		toExclude.add(new StringAttributeValue(VALUE, "toString"));
+		toExclude.add(new StringAttributeValue(VALUE, "equals"));
+		toExclude.add(new StringAttributeValue(VALUE, "hashCode"));
+		toExclude.add(new StringAttributeValue(VALUE, "merge"));
+		toExclude.add(new StringAttributeValue(VALUE, "flush"));
+		toExclude.add(new StringAttributeValue(VALUE, "clear"));
 		ArrayAttributeValue<StringAttributeValue> exclude = new ArrayAttributeValue<StringAttributeValue>(new JavaSymbolName("exclude"), toExclude);
 		attributeValues.add(exclude);
 		builder.updateTypeAnnotation(new AnnotationMetadataBuilder(ROO_GWT_REQUEST, attributeValues));

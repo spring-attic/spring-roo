@@ -99,7 +99,6 @@ public enum GwtType {
 			default:
 				return new ArrayList<GwtType>();
 		}
-
 	}
 
 	public List<JavaSymbolName> resolveWatchedFieldNames(final GwtType type) {

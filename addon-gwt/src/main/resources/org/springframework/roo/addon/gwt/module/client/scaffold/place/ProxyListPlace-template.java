@@ -39,20 +39,14 @@ public class ProxyListPlace extends Place {
 
 	@Override
 	public boolean equals(Object obj) {
+		if (!(obj instanceof ProxyListPlace)) {
+			return false;
+		}
 		if (this == obj) {
 			return true;
 		}
-		if (obj == null) {
-			return false;
-		}
-		if (getClass() != obj.getClass()) {
-			return false;
-		}
 		ProxyListPlace other = (ProxyListPlace) obj;
-		if (!proxyType.equals(other.proxyType)) {
-			return false;
-		}
-		return true;
+		return proxyType.equals(other.proxyType);
 	}
 
 	public Class<? extends EntityProxy> getProxyClass() {

@@ -24,7 +24,6 @@ import java.util.Set;
 public abstract class AbstractProxyEditActivity<P extends EntityProxy> implements Activity, ProxyEditView.Delegate {
 	protected final ProxyEditView<P, ?> view;
 	private final PlaceController placeController;
-
 	private RequestFactoryEditorDriver<P, ?> editorDriver;
 	private boolean waiting;
 

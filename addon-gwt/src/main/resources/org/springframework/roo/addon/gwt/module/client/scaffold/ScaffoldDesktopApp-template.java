@@ -22,7 +22,6 @@ import com.google.web.bindery.requestfactory.gwt.client.RequestFactoryLogHandler
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 __GAE_IMPORT__
 
 /**

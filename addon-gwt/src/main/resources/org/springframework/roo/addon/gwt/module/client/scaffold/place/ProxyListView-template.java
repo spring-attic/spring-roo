@@ -22,7 +22,7 @@ public interface ProxyListView<P extends EntityProxy> extends IsWidget {
 	 * @param <R> the type of the records to display
 	 */
 	interface Delegate<R extends EntityProxy> {
-		
+
 		void createClicked();
 	}
 

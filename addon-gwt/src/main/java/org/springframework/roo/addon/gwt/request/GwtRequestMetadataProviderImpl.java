@@ -122,8 +122,6 @@ public class GwtRequestMetadataProviderImpl extends AbstractHashCodeTrackingMeta
 
 	private List<String> getMethodExclusions(final ClassOrInterfaceTypeDetails request) {
 		List<String> exclusionList = GwtUtils.getAnnotationValues(request, ROO_GWT_REQUEST, "exclude");
-		exclusionList.add("equals");
-		exclusionList.add("hashCode");
 
 		ClassOrInterfaceTypeDetails proxy = gwtTypeService.lookupProxyFromRequest(request);
 		if (proxy != null) {

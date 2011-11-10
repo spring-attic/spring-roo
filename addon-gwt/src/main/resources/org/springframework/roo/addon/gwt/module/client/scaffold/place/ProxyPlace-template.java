@@ -72,15 +72,13 @@ public class ProxyPlace extends Place {
 
 	@Override
 	public boolean equals(Object obj) {
+		if (!(obj instanceof ProxyPlace)) {
+			return false;
+		}
 		if (this == obj) {
 			return true;
 		}
-		if (obj == null) {
-			return false;
-		}
-		if (getClass() != obj.getClass()) {
-			return false;
-		}
+
 		ProxyPlace other = (ProxyPlace) obj;
 		if (operation != other.operation) {
 			return false;

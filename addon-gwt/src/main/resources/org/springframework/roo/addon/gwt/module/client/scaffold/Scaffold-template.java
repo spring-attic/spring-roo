@@ -13,7 +13,6 @@ public class Scaffold implements EntryPoint {
 
 	public void onModuleLoad() {
 		/* Get and run platform specific app */
-
 		injectorWrapper.getInjector().getScaffoldApp().run();
 	}
 }

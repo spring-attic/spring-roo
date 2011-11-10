@@ -19,7 +19,6 @@ public class GaeLoginWidgetDriver {
 
 	public void setWidget(final LoginWidget widget) {
 		GaeUserServiceRequest request = requests.userServiceRequest();
-
 		request.createLogoutURL(Location.getHref()).to(new Receiver<String>() {
 			public void onSuccess(String response) {
 				widget.setLogoutUrl(response);

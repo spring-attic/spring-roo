@@ -11,7 +11,7 @@ import com.google.web.bindery.requestfactory.shared.Service;
  */
 @Service(value = UserServiceWrapper.class, locator = UserServiceLocator.class)
 public interface GaeUserServiceRequest extends RequestContext {
-	
+
 	Request<String> createLoginURL(String destinationURL);
 
 	Request<String> createLogoutURL(String destinationURL);

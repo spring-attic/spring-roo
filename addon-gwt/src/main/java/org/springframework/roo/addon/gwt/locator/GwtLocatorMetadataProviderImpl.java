@@ -70,7 +70,6 @@ public class GwtLocatorMetadataProviderImpl implements GwtLocatorMetadataProvide
 	}
 
 	public MetadataItem get(final String metadataIdentificationString) {
-
 		ClassOrInterfaceTypeDetails proxy = getGovernor(metadataIdentificationString);
 		if (proxy == null) {
 			return null;
@@ -87,7 +86,7 @@ public class GwtLocatorMetadataProviderImpl implements GwtLocatorMetadataProvide
 		}
 
 		ClassOrInterfaceTypeDetails entity = gwtTypeService.lookupEntityFromProxy(proxy);
-		if (entity == null) {
+		if (entity == null || Modifier.isAbstract(entity.getModifier())) {
 			return null;
 		}
 
