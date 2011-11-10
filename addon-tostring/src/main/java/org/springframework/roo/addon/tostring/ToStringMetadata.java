@@ -99,10 +99,10 @@ public class ToStringMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 			str = "ReflectionToStringBuilder.toString(this, ToStringStyle.SHORT_PREFIX_STYLE);";
 		}
 
-		final int maxLength = annotationValues.getMaxLength();
-		if (maxLength > 1) {
+		final int length = annotationValues.getLength();
+		if (length > 1) {
 			bodyBuilder.appendFormalLine("String str = " + str);
-			bodyBuilder.appendFormalLine("return str != null && str.length() > " + maxLength + " ? str.substring(0, " + maxLength + ") + \"...\" : str;");
+			bodyBuilder.appendFormalLine("return str != null && str.length() > " + length + " ? str.substring(0, " + length + ") + \"...\" : str;");
 		} else {
 			bodyBuilder.appendFormalLine("return " + str);
 		}

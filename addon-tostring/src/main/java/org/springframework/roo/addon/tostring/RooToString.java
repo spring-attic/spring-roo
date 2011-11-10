@@ -35,5 +35,5 @@ public @interface RooToString {
 	/**
 	 * @return the result of the toString method output truncated to the specified length (defaults to 25)
 	 */
-	int maxLength() default 25;
+	int length() default 25;
 }

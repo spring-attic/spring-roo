@@ -17,7 +17,7 @@ public class ToStringAnnotationValues extends AbstractAnnotationValues {
 	// From annotation
 	@AutoPopulate private String toStringMethod = "toString";
 	@AutoPopulate private String[] excludeFields;
-	@AutoPopulate private int maxLength = 25;
+	@AutoPopulate private int length = 25;
 
 	/**
 	 * Constructor
@@ -37,7 +37,7 @@ public class ToStringAnnotationValues extends AbstractAnnotationValues {
 		return excludeFields;
 	}
 
-	public int getMaxLength() {
-		return maxLength;
+	public int getLength() {
+		return length;
 	}
 }
