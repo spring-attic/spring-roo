@@ -4,9 +4,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.springframework.roo.project.DefaultPathResolvingStrategy.ROOT_MODULE;
+import static org.springframework.roo.project.AbstractPathResolvingStrategy.ROOT_MODULE;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
 import org.junit.Before;
@@ -23,6 +24,17 @@ import org.springframework.roo.support.util.FileUtils;
  * @since 1.2.0
  */
 public class DefaultPathResolvingStrategyTest {
+	
+	// Constants
+	private static final String WORKING_DIRECTORY;
+	
+	static {
+		try {
+			WORKING_DIRECTORY = new File(".").getCanonicalPath();
+		} catch (final IOException e) {
+			throw new IllegalStateException(e);
+		}
+	}
 
 	// Fixture
 	private DefaultPathResolvingStrategy pathResolvingStrategy;
@@ -79,7 +91,7 @@ public class DefaultPathResolvingStrategyTest {
 			final Path subPath = Path.values()[i];
 			assertEquals(ROOT_MODULE, modulePathId.getModule());
 			assertEquals(subPath, modulePathId.getPath());
-			assertEquals(new File(FileUtils.CURRENT_DIRECTORY, subPath.getDefaultLocation()), modulePath.getLocation());
+			assertEquals(new File(WORKING_DIRECTORY, subPath.getDefaultLocation()), modulePath.getLocation());
 		}
 	}
 }

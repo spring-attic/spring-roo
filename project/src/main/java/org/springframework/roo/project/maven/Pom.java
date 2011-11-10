@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.springframework.roo.project.ContextualPath;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.Filter;
 import org.springframework.roo.project.GAV;
@@ -233,10 +232,6 @@ public class Pom {
 
 	public List<PathInformation> getPathInformation() {
 		return new ArrayList<PathInformation>(pathCache.values());
-	}
-	
-	public PathInformation getPathInformation(final ContextualPath path) {
-		return pathCache.get(path.getPath());
 	}
 
 	/**

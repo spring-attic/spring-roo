@@ -37,7 +37,7 @@ public interface PathResolver {
 	ContextualPath getPath(String identifier);
 	
 	/**
-	 * Returns a canonical path that represents the root of the presented {@link Path}.
+	 * Returns the canonical path of the root of the given {@link ContextualPath}.
 	 *
 	 * @param path to lookup (required)
 	 * @return <code>null</code> if the root path cannot be determined

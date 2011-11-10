@@ -164,7 +164,7 @@ public enum Path {
 	 * Returns the {@link PathInformation} of this {@link Path} within the root
 	 * module, when no POM exists to customise its location.
 	 * 
-	 * @param pom the POM of the module in question (required)
+	 * @param projectDirectory the root directory of the user project
 	 * @return a non-<code>null</code> instance
 	 */
 	public PathInformation getRootModulePath(final String projectDirectory) {
