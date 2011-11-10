@@ -10,6 +10,7 @@ import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
+import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.ContextualPath;
 
@@ -42,7 +43,8 @@ public class ToStringMetadataProvider extends AbstractMemberDiscoveringItdMetada
 			return null;
 		}
 
-		if (getMemberDetails(governorPhysicalTypeMetadata) == null) {
+		final MemberDetails memberDetails = getMemberDetails(governorPhysicalTypeMetadata);
+		if (memberDetails == null || memberDetails.getFields().isEmpty()) {
 			return null;
 		}
 

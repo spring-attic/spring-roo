@@ -87,11 +87,11 @@ public class ToStringMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 		String[] excludeFields = annotationValues.getExcludeFields();
 		if (excludeFields != null && excludeFields.length > 0) {
 			StringBuilder builder = new StringBuilder("new String[] { ");
-			for (int i = 0, n = excludeFields.length; i < n; i++) {
-				builder.append("\"").append(excludeFields[i]).append("\"");
-				if (i < n - 1) {
+			for (int i = 0; i < excludeFields.length; i++) {
+				if (i > 0) {
 					builder.append(", ");
 				}
+				builder.append("\"").append(excludeFields[i]).append("\"");
 			}
 			builder.append(" }");
 			bodyBuilder.appendFormalLine("return new ReflectionToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE).setExcludeFieldNames(" + builder.toString() + ").toString();");
