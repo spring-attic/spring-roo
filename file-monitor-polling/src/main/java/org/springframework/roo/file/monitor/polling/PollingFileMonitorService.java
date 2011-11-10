@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -76,12 +77,12 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 
 	public List<FileDetails> getMonitored() {
 		synchronized (lock) {
-			List<FileDetails> monitored = new ArrayList<FileDetails>();
+			final List<FileDetails> monitored = new ArrayList<FileDetails>();
 			if (requests.isEmpty()) {
 				return monitored;
 			}
 
-			for (MonitoringRequest request : requests) {
+			for (final MonitoringRequest request : requests) {
 				if (priorExecution.containsKey(request)) {
 					final Map<File, Long> priorFiles = priorExecution.get(request);
 					for (final Entry<File, Long> entry : priorFiles.entrySet()) {
@@ -107,7 +108,7 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 				changesSinceLastRequest = new LinkedHashSet<String>(allFiles);
 				changeMap.put(requestingClass, new LinkedHashSet<String>());
 			} else {
-				Set<String> copyOfChangesSinceLastRequest = new LinkedHashSet<String>(changesSinceLastRequest);
+				final Set<String> copyOfChangesSinceLastRequest = new LinkedHashSet<String>(changesSinceLastRequest);
 				changesSinceLastRequest.removeAll(copyOfChangesSinceLastRequest);
 				changesSinceLastRequest = copyOfChangesSinceLastRequest;
 			}
@@ -119,11 +120,11 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 		String requestCanonicalPath;
 		try {
 			requestCanonicalPath = request.getFile().getCanonicalPath();
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			return false;
 		}
 		if (request instanceof DirectoryMonitoringRequest) {
-			DirectoryMonitoringRequest dmr = (DirectoryMonitoringRequest) request;
+			final DirectoryMonitoringRequest dmr = (DirectoryMonitoringRequest) request;
 			if (dmr.isWatchSubtree()) {
 				if (!filePath.startsWith(requestCanonicalPath)) {
 					return false; // Not within this directory or a sub-directory
@@ -143,102 +144,97 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 
 	public int scanNotified() {
 		synchronized (lock) {
-			if (requests.isEmpty() || !isDirty()) {
-				// There are no changes we can notify, so immediately return
+			if (noRequestsOrChanges()) {
 				return 0;
 			}
-
-			int changes = 0;
-
-			for (MonitoringRequest request : requests) {
-				List<FileEvent> eventsToPublish = new ArrayList<FileEvent>();
-				if (priorExecution.containsKey(request)) {
-					// Need to perform a comparison, as we have data from a previous execution
-					Map<File,Long> priorFiles = priorExecution.get(request);
-
-					// Handle files apparently updated since last execution
-					Set<String> toRemove = new HashSet<String>();
-					for (String filePath : notifyChanged) {
-						// Skip this notification if it doesn't fall under the present monitoring request
-						if (!isWithin(request, filePath)) {
-							continue;
-						}
-						// Record to remove this one, as we've definitely processed it
-						toRemove.add(filePath);
-						// Skip this file if it doesn't exist
-						File thisFile = new File(filePath);
-						if (!thisFile.exists()) {
-							continue;
-						}
-						// Record the notification
-						eventsToPublish.add(new FileEvent(new FileDetails(thisFile, thisFile.lastModified()), FileOperation.UPDATED, null));
-						// Update the prior execution map so it isn't notified again next round
-						priorFiles.put(thisFile, thisFile.lastModified());
-						// Also remove it from the created list, if it's in there
-						if (notifyCreated.contains(filePath)) {
-							notifyCreated.remove(filePath);
-						}
-					}
-					for (String remove : toRemove) {
-						notifyChanged.remove(remove);
-					}
-
-					// Handle files apparently created since last execution
-					toRemove = new HashSet<String>();
-					for (String filePath : notifyCreated) {
-						// Skip this notification if it doesn't fall under the present monitoring request
-						if (!isWithin(request, filePath)) {
-							continue;
-						}
-						// Record to remove this one, as we've definitely processed it
-						toRemove.add(filePath);
-						// Skip this file if it doesn't exist
-						File thisFile = new File(filePath);
-						if (!thisFile.exists()) {
-							continue;
-						}
-						// Record the notification
-						eventsToPublish.add(new FileEvent(new FileDetails(thisFile, thisFile.lastModified()), FileOperation.CREATED, null));
-						// Update the prior execution map so it isn't notified again next round
-						priorFiles.put(thisFile, thisFile.lastModified());
-					}
-					for (String remove : toRemove) {
-						notifyCreated.remove(remove);
-					}
-
-					// Handle files apparently deleted since last execution
-					toRemove = new HashSet<String>();
-					for (String filePath : notifyDeleted) {
-						// Skip this notification if it doesn't fall under the present monitoring request
-						if (!isWithin(request, filePath)) {
-							continue;
-						}
-						// Record to remove this one, as we've definitely processed it
-						toRemove.add(filePath);
-						// Skip this file if it suddenly exists again (it shouldn't be in the notify deleted in this case!)
-						File thisFile = new File(filePath);
-						if (thisFile.exists()) {
-							continue;
-						}
-						// Record the notification
-						eventsToPublish.add(new FileEvent(new FileDetails(thisFile, null), FileOperation.DELETED, null));
-						// Update the prior execution map so it isn't notified again next round
-						priorFiles.remove(thisFile);
-					}
-					for (String remove : toRemove) {
-						notifyDeleted.remove(remove);
-					}
-				}
-
-				publish(eventsToPublish);
-
-				changes += eventsToPublish.size();
-			}
-
-			return changes;
+			return publishRequestedFileEvents();
 		}
 	}
+	
+	private boolean noRequestsOrChanges() {
+		return requests.isEmpty() || !isDirty();
+	}
 
+	private int publishRequestedFileEvents() {
+		int eventsPublished = 0;
+		for (final MonitoringRequest request : requests) {
+			final List<FileEvent> eventsToPublish = new ArrayList<FileEvent>();
+			if (priorExecution.containsKey(request)) {	// by AIS: nothing is published if there's no prior execution - is this correct?
+				// Need to perform a comparison, as we have data from a previous execution
+				final Map<File, Long> priorFiles = priorExecution.get(request);
+
+				// Handle files apparently updated, created, or deleted since the last execution
+				eventsToPublish.addAll(getFileUpdateEvents(request, priorFiles));
+				eventsToPublish.addAll(getFileCreationEvents(request, priorFiles));
+				eventsToPublish.addAll(getFileDeletionEvents(request, priorFiles));
+			}
+			publish(eventsToPublish);
+			eventsPublished += eventsToPublish.size();
+		}
+		return eventsPublished;
+	}
+
+	private List<FileEvent> getFileUpdateEvents(final MonitoringRequest request, final Map<File, Long> priorFiles) {
+		final List<FileEvent> updateEvents = new ArrayList<FileEvent>();
+		for (final Iterator<String> iter = notifyChanged.iterator(); iter.hasNext();) {
+			final String filePath = iter.next();
+			if (isWithin(request, filePath)) {
+				iter.remove();	// we've processed it
+				// Skip this file if it doesn't exist
+				final File thisFile = new File(filePath);
+				if (thisFile.exists()) {
+					// Record the notification
+					updateEvents.add(new FileEvent(new FileDetails(thisFile, thisFile.lastModified()), FileOperation.UPDATED, null));
+					// Update the prior execution map so it isn't notified again next round
+					priorFiles.put(thisFile, thisFile.lastModified());
+					// Also remove it from the created list, if it's in there
+					if (notifyCreated.contains(filePath)) {
+						notifyCreated.remove(filePath);
+					}
+				}
+			}
+		}
+		return updateEvents;
+	}
+	
+	private List<FileEvent> getFileCreationEvents(final MonitoringRequest request, final Map<File, Long> priorFiles) {
+		final List<FileEvent> createEvents = new ArrayList<FileEvent>();
+		for (final Iterator<String> iter = notifyCreated.iterator(); iter.hasNext();) {
+			final String filePath = iter.next();
+			if (isWithin(request, filePath)) {
+				iter.remove();	// we've processed it
+				// Skip this file if it doesn't exist
+				final File thisFile = new File(filePath);
+				if (thisFile.exists()) {
+					// Record the notification
+					createEvents.add(new FileEvent(new FileDetails(thisFile, thisFile.lastModified()), FileOperation.CREATED, null));
+					// Update the prior execution map so it isn't notified again next round
+					priorFiles.put(thisFile, thisFile.lastModified());
+				}
+			}
+		}
+		return createEvents;
+	}
+	
+	private List<FileEvent> getFileDeletionEvents(final MonitoringRequest request, final Map<File, Long> priorFiles) {
+		final List<FileEvent> deleteEvents = new ArrayList<FileEvent>();
+		for (final Iterator<String> iter = notifyDeleted.iterator(); iter.hasNext();) {
+			final String filePath = iter.next();
+			if (isWithin(request, filePath)) {
+				iter.remove();	// we've processed it
+				// Skip this file if it suddenly exists again (it shouldn't be in the notify deleted in this case!)
+				final File thisFile = new File(filePath);
+				if (!thisFile.exists()) {
+					// Record the notification
+					deleteEvents.add(new FileEvent(new FileDetails(thisFile, null), FileOperation.DELETED, null));
+					// Update the prior execution map so it isn't notified again next round
+					priorFiles.remove(thisFile);
+				}
+			}
+		}
+		return deleteEvents;
+	}
+	
 	public int scanAll() {
 		synchronized (lock) {
 			if (requests.isEmpty()) {
@@ -247,7 +243,7 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 
 			int changes = 0;
 
-			for (MonitoringRequest request : requests) {
+			for (final MonitoringRequest request : requests) {
 				boolean includeSubtree = false;
 				if (request instanceof DirectoryMonitoringRequest) {
 					includeSubtree = ((DirectoryMonitoringRequest)request).isWatchSubtree();
@@ -258,14 +254,14 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 				}
 
 				// Build contents of the monitored location
-				Map<File,Long> currentExecution = new HashMap<File,Long>();
+				final Map<File,Long> currentExecution = new HashMap<File,Long>();
 				computeEntries(currentExecution, request.getFile(), includeSubtree);
 
-				List<FileEvent> eventsToPublish = new ArrayList<FileEvent>();
+				final List<FileEvent> eventsToPublish = new ArrayList<FileEvent>();
 
 				if (priorExecution.containsKey(request)) {
 					// Need to perform a comparison, as we have data from a previous execution
-					Map<File,Long> priorFiles = priorExecution.get(request);
+					final Map<File,Long> priorFiles = priorExecution.get(request);
 
 					// Locate created and modified files
 					for (final Entry<File, Long> entry : currentExecution.entrySet()) {
@@ -277,18 +273,18 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 							try {
 								// If this file was already going to be notified, there is no need to do it twice
 								notifyCreated.remove(thisFile.getCanonicalPath());
-							} catch (IOException ignored) {}
+							} catch (final IOException ignored) {}
 							continue;
 						}
 
-						Long previousTimestamp = priorFiles.get(thisFile);
+						final Long previousTimestamp = priorFiles.get(thisFile);
 						if (!currentTimestamp.equals(previousTimestamp)) {
 							// Modified
 							eventsToPublish.add(new FileEvent(new FileDetails(thisFile, currentTimestamp), FileOperation.UPDATED, null));
 							try {
 								// If this file was already going to be notified, there is no need to do it twice
 								notifyChanged.remove(thisFile.getCanonicalPath());
-							} catch (IOException ignored) {}
+							} catch (final IOException ignored) {}
 						}
 					}
 
@@ -300,7 +296,7 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 						try {
 							// If this file was already going to be notified, there is no need to do it twice
 							notifyDeleted.remove(deletedFile.getCanonicalPath());
-						} catch (IOException ignored) {}
+						} catch (final IOException ignored) {}
 					}
 				} else {
 					// No data from previous execution, so it's a newly-monitored location
@@ -317,8 +313,8 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 				notifyDeleted.clear();
 
 				// Explicitly handle any undiscovered update notifications, as this indicates an identical millisecond update occurred
-				for (String canonicalPath : notifyChanged) {
-					File file = new File(canonicalPath);
+				for (final String canonicalPath : notifyChanged) {
+					final File file = new File(canonicalPath);
 					eventsToPublish.add(new FileEvent(new FileDetails(file, file.lastModified()), FileOperation.UPDATED, null));
 				}
 				notifyChanged.clear();
@@ -346,9 +342,9 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 		if (fileEventListeners.isEmpty() || eventsToPublish.isEmpty()) {
 			return;
 		}
-		for (FileEvent event : eventsToPublish) {
+		for (final FileEvent event : eventsToPublish) {
 			updateChanges(event.getFileDetails().getCanonicalPath(), event.getOperation() == FileOperation.DELETED);
-			for (FileEventListener l : fileEventListeners) {
+			for (final FileEventListener l : fileEventListeners) {
 				l.onFileEvent(event);
 			}
 		}
@@ -380,12 +376,12 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 
 		try {
 			updateAllFiles(currentFile.getCanonicalPath(), false);
-		} catch (IOException ignored) {}
+		} catch (final IOException ignored) {}
 
 		if (currentFile.isDirectory()) {
-			File[] files = currentFile.listFiles();
+			final File[] files = currentFile.listFiles();
 			if (files == null || files.length == 0) return;
-			for (File file : files) {
+			for (final File file : files) {
 				if (file.isFile() || includeSubtree) {
 					computeEntries(map, file, includeSubtree);
 				}
@@ -400,11 +396,11 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 			// Ensure existing monitoring requests don't overlap with this new request;
 			// amend existing requests or ignore new request as appropriate
 			if (request instanceof DirectoryMonitoringRequest) {
-				DirectoryMonitoringRequest dmr = (DirectoryMonitoringRequest) request;
+				final DirectoryMonitoringRequest dmr = (DirectoryMonitoringRequest) request;
 				if (dmr.isWatchSubtree()) {
-					for (MonitoringRequest existing : requests) {
+					for (final MonitoringRequest existing : requests) {
 						if (existing instanceof DirectoryMonitoringRequest) {
-							DirectoryMonitoringRequest existingDmr = (DirectoryMonitoringRequest) existing;
+							final DirectoryMonitoringRequest existingDmr = (DirectoryMonitoringRequest) existing;
 							if (existingDmr.isWatchSubtree()) {
 								// We have a new request and an existing request, both for directories, and both which monitor sub-trees
 								String existingDmrPath;
@@ -412,7 +408,7 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 								try {
 									existingDmrPath = existingDmr.getFile().getCanonicalPath();
 									newDmrPath = dmr.getFile().getCanonicalPath();
-								} catch (IOException ioe) {
+								} catch (final IOException ioe) {
 									throw new IllegalStateException("Unable to resolve canonical name", ioe);
 								}
 								// If the new request is a sub-directory of the existing request, ignore the new request as it's unnecessary
@@ -440,7 +436,7 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 
 			// Advise of the cessation to monitoring
 			if (priorExecution.containsKey(request)) {
-				List<FileEvent> eventsToPublish = new ArrayList<FileEvent>();
+				final List<FileEvent> eventsToPublish = new ArrayList<FileEvent>();
 
 				final Map<File, Long> priorFiles = priorExecution.get(request);
 				for (final Entry<File, Long> entry : priorFiles.entrySet()) {
@@ -459,7 +455,7 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 
 	public SortedSet<FileDetails> findMatchingAntPath(final String antPath) {
 		Assert.hasText(antPath, "Ant path required");
-		SortedSet<FileDetails> result = new TreeSet<FileDetails>();
+		final SortedSet<FileDetails> result = new TreeSet<FileDetails>();
 		// Now we need to compute the starting directory by reference to the first * in the Ant Path
 		int index = antPath.indexOf("*");
 		// Conditionals are based on an index of 0 (not -1) to ensure the detected character is not the only character in the string
@@ -468,7 +464,7 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 		index = newPath.lastIndexOf(File.separatorChar);
 		Assert.isTrue(index > 0, "'" + antPath + "' fails to include any '" + File.separatorChar + "' directory separator");
 		newPath = newPath.substring(0, index);
-		File somePath = new File(newPath);
+		final File somePath = new File(newPath);
 		if (!somePath.exists()) {
 			// Path at the start of the Ant expression doesn't exist, so there's no way we'll find anything via a search
 			return result;
@@ -491,16 +487,16 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 		Assert.hasText(antPath, "Ant path required");
 		Assert.notNull(result, "Result required");
 
-		File[] listFiles = currentDirectory.listFiles();
+		final File[] listFiles = currentDirectory.listFiles();
 		if (listFiles == null || listFiles.length == 0) {
 			return;
 		}
-		for (File f : listFiles) {
+		for (final File f : listFiles) {
 			try {
 				if (FileUtils.matchesAntPath(antPath, f.getCanonicalPath())) {
 					result.add(new FileDetails(f, f.lastModified()));
 				}
-			} catch (IOException ignored) {}
+			} catch (final IOException ignored) {}
 
 			if (f.isDirectory()) {
 				recursiveAntMatch(antPath, f, result);
@@ -517,7 +513,7 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 	 */
 	private boolean isNotificationUnderKnownMonitoringRequest(final String fileCanonicalPath) {
 		synchronized (lock) {
-			for (MonitoringRequest request : requests) {
+			for (final MonitoringRequest request : requests) {
 				if (isWithin(request, fileCanonicalPath)) {
 					return true;
 				}
@@ -527,7 +523,7 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 	}
 
 	private void updateChanges(final String fileCanonicalPath, final boolean remove) {
-		for (String requestingClass : changeMap.keySet()) {
+		for (final String requestingClass : changeMap.keySet()) {
 			if (remove) {
 				changeMap.get(requestingClass).remove(fileCanonicalPath);
 			} else {
