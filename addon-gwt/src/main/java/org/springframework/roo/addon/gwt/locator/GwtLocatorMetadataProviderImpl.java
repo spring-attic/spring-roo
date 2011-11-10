@@ -39,7 +39,7 @@ import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.model.SpringJavaType;
-import org.springframework.roo.project.ContextualPath;
+import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
@@ -185,7 +185,7 @@ public class GwtLocatorMetadataProviderImpl implements GwtLocatorMetadataProvide
 				ClassOrInterfaceTypeDetails proxy = gwtTypeService.lookupProxyFromRequest(cid);
 				if (proxy != null) {
 					JavaType typeName = PhysicalTypeIdentifier.getJavaType(proxy.getDeclaredByMetadataId());
-					ContextualPath typePath = PhysicalTypeIdentifier.getPath(proxy.getDeclaredByMetadataId());
+					LogicalPath typePath = PhysicalTypeIdentifier.getPath(proxy.getDeclaredByMetadataId());
 					downstreamDependency = GwtLocatorMetadata.createIdentifier(typeName, typePath);
 					processed = true;
 				}
@@ -201,7 +201,7 @@ public class GwtLocatorMetadataProviderImpl implements GwtLocatorMetadataProvide
 							if (mirrorName != null && cid.getName().getFullyQualifiedTypeName().equals(attributeValue.getValue())) {
 								found = true;
 								JavaType typeName = PhysicalTypeIdentifier.getJavaType(classOrInterfaceTypeDetails.getDeclaredByMetadataId());
-								ContextualPath typePath = PhysicalTypeIdentifier.getPath(classOrInterfaceTypeDetails.getDeclaredByMetadataId());
+								LogicalPath typePath = PhysicalTypeIdentifier.getPath(classOrInterfaceTypeDetails.getDeclaredByMetadataId());
 								downstreamDependency = GwtLocatorMetadata.createIdentifier(typeName, typePath);
 								break;
 							}
@@ -214,7 +214,7 @@ public class GwtLocatorMetadataProviderImpl implements GwtLocatorMetadataProvide
 			} else if (!processed) {
 				// A physical Java type has changed, and determine what the corresponding local metadata identification string would have been
 				JavaType typeName = PhysicalTypeIdentifier.getJavaType(upstreamDependency);
-				ContextualPath typePath = PhysicalTypeIdentifier.getPath(upstreamDependency);
+				LogicalPath typePath = PhysicalTypeIdentifier.getPath(upstreamDependency);
 				downstreamDependency = GwtLocatorMetadata.createIdentifier(typeName, typePath);
 			}
 
@@ -237,7 +237,7 @@ public class GwtLocatorMetadataProviderImpl implements GwtLocatorMetadataProvide
 
 	private ClassOrInterfaceTypeDetails getGovernor(final String metadataIdentificationString) {
 		JavaType governorTypeName = GwtLocatorMetadata.getJavaType(metadataIdentificationString);
-		ContextualPath governorTypePath = GwtLocatorMetadata.getPath(metadataIdentificationString);
+		LogicalPath governorTypePath = GwtLocatorMetadata.getPath(metadataIdentificationString);
 
 		String physicalTypeId = PhysicalTypeIdentifier.createIdentifier(governorTypeName, governorTypePath);
 		return typeLocationService.getTypeDetails(physicalTypeId);

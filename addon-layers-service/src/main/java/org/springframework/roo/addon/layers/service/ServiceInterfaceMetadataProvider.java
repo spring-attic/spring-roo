@@ -23,7 +23,7 @@ import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.metadata.MetadataProvider;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.ContextualPath;
+import org.springframework.roo.project.LogicalPath;
 
 /**
  * {@link MetadataProvider} providing {@link ServiceInterfaceMetadata}
@@ -101,7 +101,7 @@ public class ServiceInterfaceMetadataProvider extends AbstractMemberDiscoveringI
 			if (domainTypeId == null) {
 				return null;
 			}
-			ContextualPath path = PhysicalTypeIdentifier.getPath(domainTypeId);
+			LogicalPath path = PhysicalTypeIdentifier.getPath(domainTypeId);
 			String pluralId = PluralMetadata.createIdentifier(type, path);
 			PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(pluralId);
 			if (pluralMetadata == null) {
@@ -125,14 +125,14 @@ public class ServiceInterfaceMetadataProvider extends AbstractMemberDiscoveringI
 	}
 
 	@Override
-	protected String createLocalIdentifier(final JavaType javaType, final ContextualPath path) {
+	protected String createLocalIdentifier(final JavaType javaType, final LogicalPath path) {
 		return ServiceInterfaceMetadata.createIdentifier(javaType, path);
 	}
 
 	@Override
 	protected String getGovernorPhysicalTypeIdentifier(final String metadataIdentificationString) {
 		JavaType javaType = ServiceInterfaceMetadata.getJavaType(metadataIdentificationString);
-		ContextualPath path = ServiceInterfaceMetadata.getPath(metadataIdentificationString);
+		LogicalPath path = ServiceInterfaceMetadata.getPath(metadataIdentificationString);
 		return PhysicalTypeIdentifier.createIdentifier(javaType, path);
 	}
 }

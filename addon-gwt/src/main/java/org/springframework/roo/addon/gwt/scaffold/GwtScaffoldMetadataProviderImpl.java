@@ -36,7 +36,7 @@ import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
-import org.springframework.roo.project.ContextualPath;
+import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
@@ -188,7 +188,7 @@ public class GwtScaffoldMetadataProviderImpl implements GwtScaffoldMetadataProvi
 
 	private ClassOrInterfaceTypeDetails getGovernor(final String metadataIdentificationString) {
 		JavaType governorTypeName = GwtScaffoldMetadata.getJavaType(metadataIdentificationString);
-		ContextualPath governorTypePath = GwtScaffoldMetadata.getPath(metadataIdentificationString);
+		LogicalPath governorTypePath = GwtScaffoldMetadata.getPath(metadataIdentificationString);
 
 		String physicalTypeId = PhysicalTypeIdentifier.createIdentifier(governorTypeName, governorTypePath);
 		return typeLocationService.getTypeDetails(physicalTypeId);
@@ -225,7 +225,7 @@ public class GwtScaffoldMetadataProviderImpl implements GwtScaffoldMetadataProvi
 			}
 			// A physical Java type has changed, and determine what the corresponding local metadata identification string would have been
 			JavaType typeName = PhysicalTypeIdentifier.getJavaType(upstreamDependency);
-			ContextualPath typePath = PhysicalTypeIdentifier.getPath(upstreamDependency);
+			LogicalPath typePath = PhysicalTypeIdentifier.getPath(upstreamDependency);
 			downstreamDependency = createLocalIdentifier(typeName, typePath);
 
 		}
@@ -242,7 +242,7 @@ public class GwtScaffoldMetadataProviderImpl implements GwtScaffoldMetadataProvi
 		metadataService.evictAndGet(downstreamDependency);
 	}
 
-	private String createLocalIdentifier(final JavaType javaType, final ContextualPath path) {
+	private String createLocalIdentifier(final JavaType javaType, final LogicalPath path) {
 		return GwtScaffoldMetadata.createIdentifier(javaType, path);
 	}
 

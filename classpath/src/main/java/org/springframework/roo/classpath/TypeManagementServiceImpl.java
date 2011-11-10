@@ -10,7 +10,7 @@ import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.process.manager.FileManager;
-import org.springframework.roo.project.ContextualPath;
+import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
 
@@ -73,7 +73,7 @@ public class TypeManagementServiceImpl implements TypeManagementService {
 			}
 		}
 
-		ContextualPath path = PhysicalTypeIdentifier.getPath(classOrInterfaceTypeDetailsBuilder.getDeclaredByMetadataId());
+		LogicalPath path = PhysicalTypeIdentifier.getPath(classOrInterfaceTypeDetailsBuilder.getDeclaredByMetadataId());
 
 		if (jsr303Required) {
 			// It's more likely the version below represents a later version than any specified in the user's own dependency list
@@ -86,7 +86,7 @@ public class TypeManagementServiceImpl implements TypeManagementService {
 	public void createOrUpdateTypeOnDisk(final ClassOrInterfaceTypeDetails cit) {
 		Assert.notNull(fileManager, "File manager required");
 		Assert.notNull(cit, "Class or interface type details required");
-		ContextualPath path = PhysicalTypeIdentifier.getPath(cit.getDeclaredByMetadataId());
+		LogicalPath path = PhysicalTypeIdentifier.getPath(cit.getDeclaredByMetadataId());
 		ClassOrInterfaceTypeDetailsBuilder builder = new ClassOrInterfaceTypeDetailsBuilder(PhysicalTypeIdentifier.createIdentifier(cit.getName(), path), cit);
 
 		String fileIdentifier = typeLocationService.getPhysicalTypeCanonicalPath(builder.getDeclaredByMetadataId());

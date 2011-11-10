@@ -26,7 +26,7 @@ import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.ReservedWords;
-import org.springframework.roo.project.ContextualPath;
+import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
@@ -70,7 +70,7 @@ public class ClasspathOperationsImpl implements ClasspathOperations {
 		Assert.notNull(ptm, "Class " + PhysicalTypeIdentifier.getFriendlyName(physicalTypeIdentifier) + " does not exist");
 	}
 
-	public void createClass(final JavaType name, final boolean rooAnnotations, final ContextualPath path, final JavaType superclass, final boolean createAbstract, final boolean permitReservedWords) {
+	public void createClass(final JavaType name, final boolean rooAnnotations, final LogicalPath path, final JavaType superclass, final boolean createAbstract, final boolean permitReservedWords) {
 		if (!permitReservedWords) {
 			ReservedWords.verifyReservedWordsNotPresent(name);
 		}
@@ -106,7 +106,7 @@ public class ClasspathOperationsImpl implements ClasspathOperations {
 		typeManagementService.createOrUpdateTypeOnDisk(typeDetailsBuilder.build());
 	}
 
-	public void createInterface(final JavaType name, final ContextualPath path, final boolean permitReservedWords) {
+	public void createInterface(final JavaType name, final LogicalPath path, final boolean permitReservedWords) {
 		if (!permitReservedWords) {
 			ReservedWords.verifyReservedWordsNotPresent(name);
 		}
@@ -116,7 +116,7 @@ public class ClasspathOperationsImpl implements ClasspathOperations {
 		typeManagementService.createOrUpdateTypeOnDisk(typeDetailsBuilder.build());
 	}
 
-	public void createEnum(final JavaType name, final ContextualPath path, final boolean permitReservedWords) {
+	public void createEnum(final JavaType name, final LogicalPath path, final boolean permitReservedWords) {
 		if (!permitReservedWords) {
 			ReservedWords.verifyReservedWordsNotPresent(name);
 		}

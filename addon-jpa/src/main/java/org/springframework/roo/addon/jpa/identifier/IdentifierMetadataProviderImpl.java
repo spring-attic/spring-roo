@@ -16,7 +16,7 @@ import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.ContextualPath;
+import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
 
@@ -60,7 +60,7 @@ public class IdentifierMetadataProviderImpl extends AbstractIdentifierServiceAwa
 		JavaType javaType = IdentifierMetadata.getJavaType(metadataIdentificationString);
 		List<Identifier> identifierServiceResult = getIdentifiersForType(javaType);
 
-		ContextualPath path = PhysicalTypeIdentifierNamingUtils.getPath(metadataIdentificationString);
+		LogicalPath path = PhysicalTypeIdentifierNamingUtils.getPath(metadataIdentificationString);
 		if (projectOperations.isProjectAvailable(path.getModule())) {
 			// If the project itself changes, we want a chance to refresh this item
 			metadataDependencyRegistry.registerDependency(ProjectMetadata.getProjectIdentifier(path.getModule()), metadataIdentificationString);
@@ -76,12 +76,12 @@ public class IdentifierMetadataProviderImpl extends AbstractIdentifierServiceAwa
 	@Override
 	protected String getGovernorPhysicalTypeIdentifier(final String metadataIdentificationString) {
 		JavaType javaType = IdentifierMetadata.getJavaType(metadataIdentificationString);
-		ContextualPath path = IdentifierMetadata.getPath(metadataIdentificationString);
+		LogicalPath path = IdentifierMetadata.getPath(metadataIdentificationString);
 		return PhysicalTypeIdentifier.createIdentifier(javaType, path);
 	}
 
 	@Override
-	protected String createLocalIdentifier(final JavaType javaType, final ContextualPath path) {
+	protected String createLocalIdentifier(final JavaType javaType, final LogicalPath path) {
 		return IdentifierMetadata.createIdentifier(javaType, path);
 	}
 

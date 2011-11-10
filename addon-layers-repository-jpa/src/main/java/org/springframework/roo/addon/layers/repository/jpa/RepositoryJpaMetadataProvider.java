@@ -15,7 +15,7 @@ import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem
 import org.springframework.roo.classpath.layers.LayerTypeMatcher;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.ContextualPath;
+import org.springframework.roo.project.LogicalPath;
 /**
  * Provides the metadata for an ITD that implements a Spring Data JPA repository
  *
@@ -72,14 +72,14 @@ public class RepositoryJpaMetadataProvider extends AbstractItdMetadataProvider {
 	}
 
 	@Override
-	protected String createLocalIdentifier(final JavaType javaType, final ContextualPath path) {
+	protected String createLocalIdentifier(final JavaType javaType, final LogicalPath path) {
 		return RepositoryJpaMetadata.createIdentifier(javaType, path);
 	}
 
 	@Override
 	protected String getGovernorPhysicalTypeIdentifier(final String metadataIdentificationString) {
 		final JavaType javaType = RepositoryJpaMetadata.getJavaType(metadataIdentificationString);
-		final ContextualPath path = RepositoryJpaMetadata.getPath(metadataIdentificationString);
+		final LogicalPath path = RepositoryJpaMetadata.getPath(metadataIdentificationString);
 		return PhysicalTypeIdentifier.createIdentifier(javaType, path);
 	}
 }

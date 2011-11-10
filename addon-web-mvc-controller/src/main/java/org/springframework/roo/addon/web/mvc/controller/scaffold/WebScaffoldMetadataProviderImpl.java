@@ -27,7 +27,7 @@ import org.springframework.roo.classpath.layers.MemberTypeAdditions;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.ContextualPath;
+import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.support.util.CollectionUtils;
 
 /**
@@ -153,12 +153,12 @@ public class WebScaffoldMetadataProviderImpl extends AbstractMemberDiscoveringIt
 	@Override
 	protected String getGovernorPhysicalTypeIdentifier(final String metadataIdentificationString) {
 		JavaType javaType = WebScaffoldMetadata.getJavaType(metadataIdentificationString);
-		ContextualPath path = WebScaffoldMetadata.getPath(metadataIdentificationString);
+		LogicalPath path = WebScaffoldMetadata.getPath(metadataIdentificationString);
 		return PhysicalTypeIdentifier.createIdentifier(javaType, path);
 	}
 
 	@Override
-	protected String createLocalIdentifier(final JavaType javaType, final ContextualPath path) {
+	protected String createLocalIdentifier(final JavaType javaType, final LogicalPath path) {
 		return WebScaffoldMetadata.createIdentifier(javaType, path);
 	}
 

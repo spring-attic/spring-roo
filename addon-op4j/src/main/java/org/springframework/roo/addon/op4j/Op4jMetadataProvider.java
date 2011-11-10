@@ -10,7 +10,7 @@ import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.ContextualPath;
+import org.springframework.roo.project.LogicalPath;
 /**
  * Provides {@link Op4jMetadata}.
  *
@@ -43,12 +43,12 @@ public class Op4jMetadataProvider extends AbstractItdMetadataProvider {
 	@Override
 	protected String getGovernorPhysicalTypeIdentifier(final String metadataIdentificationString) {
 		JavaType javaType = Op4jMetadata.getJavaType(metadataIdentificationString);
-		ContextualPath path = Op4jMetadata.getPath(metadataIdentificationString);
+		LogicalPath path = Op4jMetadata.getPath(metadataIdentificationString);
 		return PhysicalTypeIdentifier.createIdentifier(javaType, path);
 	}
 
 	@Override
-	protected String createLocalIdentifier(final JavaType javaType, final ContextualPath path) {
+	protected String createLocalIdentifier(final JavaType javaType, final LogicalPath path) {
 		return Op4jMetadata.createIdentifier(javaType, path);
 	}
 

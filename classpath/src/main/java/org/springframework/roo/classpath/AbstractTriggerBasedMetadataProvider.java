@@ -12,7 +12,7 @@ import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.metadata.MetadataItem;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.ContextualPath;
+import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.support.util.Assert;
 
 /**
@@ -82,7 +82,7 @@ public abstract class AbstractTriggerBasedMetadataProvider<M extends MetadataIte
 
 	private PhysicalTypeMetadata getGovernorMetadata(final String metadataId) {
 		final JavaType domainType = PhysicalTypeIdentifierNamingUtils.getJavaType(metadataTypeId, metadataId);
-		final ContextualPath path = PhysicalTypeIdentifierNamingUtils.getPath(metadataTypeId, metadataId);
+		final LogicalPath path = PhysicalTypeIdentifierNamingUtils.getPath(metadataTypeId, metadataId);
 		final String physicalTypeMetadataId = PhysicalTypeIdentifier.createIdentifier(domainType, path);
 		return (PhysicalTypeMetadata) metadataService.get(physicalTypeMetadataId);
 	}

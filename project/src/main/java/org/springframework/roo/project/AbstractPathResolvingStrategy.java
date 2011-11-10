@@ -39,26 +39,26 @@ public abstract class AbstractPathResolvingStrategy implements PathResolvingStra
 	
 	public String getFriendlyName(final String identifier) {
 		Assert.notNull(identifier, "Identifier required");
-		final ContextualPath p = getPath(identifier);
+		final LogicalPath p = getPath(identifier);
 		if (p == null) {
 			return identifier;
 		}
 		return p.getName() + getRelativeSegment(identifier);
 	}
 	
-	public ContextualPath getPath(final String identifier) {
-		final PathInformation parent = getApplicablePathInformation(identifier);
+	public LogicalPath getPath(final String identifier) {
+		final PhysicalPath parent = getApplicablePathInformation(identifier);
 		if (parent == null) {
 			return null;
 		}
 		return parent.getContextualPath();
 	}
 	
-	public Collection<ContextualPath> getPaths() {
+	public Collection<LogicalPath> getPaths() {
 		return getPaths(false);
 	}
 	
-	public Collection<ContextualPath> getSourcePaths() {
+	public Collection<LogicalPath> getSourcePaths() {
 		return getPaths(true);
 	}
 	
@@ -69,10 +69,10 @@ public abstract class AbstractPathResolvingStrategy implements PathResolvingStra
 	 * Java source code, or <code>false</code> to return all paths
 	 * @return the matching paths (never <code>null</code>)
 	 */
-	protected abstract Collection<ContextualPath> getPaths(boolean sourceOnly);
+	protected abstract Collection<LogicalPath> getPaths(boolean sourceOnly);
 	
 	public String getRelativeSegment(final String identifier) {
-		final PathInformation parent = getApplicablePathInformation(identifier);
+		final PhysicalPath parent = getApplicablePathInformation(identifier);
 		if (parent == null) {
 			return null;
 		}
@@ -80,7 +80,7 @@ public abstract class AbstractPathResolvingStrategy implements PathResolvingStra
 		return parentFile.getRelativeSegment(identifier);
 	}
 	
-	protected abstract PathInformation getApplicablePathInformation(String identifier);
+	protected abstract PhysicalPath getApplicablePathInformation(String identifier);
 
 	public String getRoot() {
 		return rootPath;

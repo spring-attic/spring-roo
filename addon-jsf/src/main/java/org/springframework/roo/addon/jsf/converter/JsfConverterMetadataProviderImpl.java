@@ -26,7 +26,7 @@ import org.springframework.roo.classpath.layers.LayerType;
 import org.springframework.roo.classpath.layers.MemberTypeAdditions;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.ContextualPath;
+import org.springframework.roo.project.LogicalPath;
 
 /**
  * Implementation of {@link JsfConverterMetadataProvider}.
@@ -138,12 +138,12 @@ public class JsfConverterMetadataProviderImpl extends AbstractMemberDiscoveringI
 	@Override
 	protected String getGovernorPhysicalTypeIdentifier(final String metadataIdentificationString) {
 		final JavaType javaType = JsfConverterMetadata.getJavaType(metadataIdentificationString);
-		final ContextualPath path = JsfConverterMetadata.getPath(metadataIdentificationString);
+		final LogicalPath path = JsfConverterMetadata.getPath(metadataIdentificationString);
 		return PhysicalTypeIdentifier.createIdentifier(javaType, path);
 	}
 
 	@Override
-	protected String createLocalIdentifier(final JavaType javaType, final ContextualPath path) {
+	protected String createLocalIdentifier(final JavaType javaType, final LogicalPath path) {
 		return JsfConverterMetadata.createIdentifier(javaType, path);
 	}
 

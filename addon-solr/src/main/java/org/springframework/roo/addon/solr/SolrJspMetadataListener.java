@@ -32,7 +32,7 @@ import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
-import org.springframework.roo.project.ContextualPath;
+import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.support.util.Assert;
@@ -77,7 +77,7 @@ public class SolrJspMetadataListener implements MetadataProvider, MetadataNotifi
 
 	public MetadataItem get(final String metadataIdentificationString) {
 		javaType = SolrJspMetadata.getJavaType(metadataIdentificationString);
-		ContextualPath path = SolrJspMetadata.getPath(metadataIdentificationString);
+		LogicalPath path = SolrJspMetadata.getPath(metadataIdentificationString);
 		String solrWebSearchMetadataKeyString = SolrWebSearchMetadata.createIdentifier(javaType, path);
 		SolrWebSearchMetadata webSearchMetadata = (SolrWebSearchMetadata) metadataService.get(solrWebSearchMetadataKeyString);
 		if (webSearchMetadata == null || !webSearchMetadata.isValid()) {
@@ -102,7 +102,7 @@ public class SolrJspMetadataListener implements MetadataProvider, MetadataNotifi
 		copyArtifacts("form/fields/search-facet.tagx", "WEB-INF/tags/form/fields/search-facet.tagx");
 		copyArtifacts("form/fields/search-field.tagx", "WEB-INF/tags/form/fields/search-field.tagx");
 
-		ContextualPath path = WebScaffoldMetadata.getPath(webScaffoldMetadata.getId());
+		LogicalPath path = WebScaffoldMetadata.getPath(webScaffoldMetadata.getId());
 		xmlRoundTripFileManager.writeToDiskIfNecessary(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP.getModulePathId(path.getModule()), "WEB-INF/views/" + webScaffoldMetadata.getAnnotationValues().getPath() + "/search.jspx"), getSearchDocument(webScaffoldMetadata));
 		
 		String folderName = webScaffoldMetadata.getAnnotationValues().getPath();
@@ -189,7 +189,7 @@ public class SolrJspMetadataListener implements MetadataProvider, MetadataNotifi
 
 			// A physical Java type has changed, and determine what the corresponding local metadata identification string would have been
 			JavaType javaType = SolrWebSearchMetadata.getJavaType(upstreamDependency);
-			ContextualPath path = SolrWebSearchMetadata.getPath(upstreamDependency);
+			LogicalPath path = SolrWebSearchMetadata.getPath(upstreamDependency);
 			downstreamDependency = SolrJspMetadata.createIdentifier(javaType, path);
 
 			// We only need to proceed if the downstream dependency relationship is not already registered

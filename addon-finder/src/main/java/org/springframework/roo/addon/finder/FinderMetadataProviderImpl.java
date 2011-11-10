@@ -20,7 +20,7 @@ import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.ContextualPath;
+import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.support.util.Assert;
 
 /**
@@ -56,7 +56,7 @@ public class FinderMetadataProviderImpl extends AbstractMemberDiscoveringItdMeta
 
 		// Work out the MIDs of the other metadata we depend on
 		JavaType javaType = FinderMetadata.getJavaType(metadataIdentificationString);
-		ContextualPath path = FinderMetadata.getPath(metadataIdentificationString);
+		LogicalPath path = FinderMetadata.getPath(metadataIdentificationString);
 		String jpaActiveRecordMetadataKey = JpaActiveRecordMetadata.createIdentifier(javaType, path);
 
 		// We need to lookup the metadata we depend on
@@ -110,12 +110,12 @@ public class FinderMetadataProviderImpl extends AbstractMemberDiscoveringItdMeta
 	@Override
 	protected String getGovernorPhysicalTypeIdentifier(final String metadataIdentificationString) {
 		JavaType javaType = FinderMetadata.getJavaType(metadataIdentificationString);
-		ContextualPath path = FinderMetadata.getPath(metadataIdentificationString);
+		LogicalPath path = FinderMetadata.getPath(metadataIdentificationString);
 		return PhysicalTypeIdentifier.createIdentifier(javaType, path);
 	}
 
 	@Override
-	protected String createLocalIdentifier(final JavaType javaType, final ContextualPath path) {
+	protected String createLocalIdentifier(final JavaType javaType, final LogicalPath path) {
 		return FinderMetadata.createIdentifier(javaType, path);
 	}
 

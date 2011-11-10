@@ -2,13 +2,13 @@ package org.springframework.roo.classpath;
 
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.ContextualPath;
+import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.support.util.Assert;
 
 /**
  * Produces metadata identification strings that represent a {@link JavaType} 
- * located in a particular {@link ContextualPath}.
+ * located in a particular {@link LogicalPath}.
  * 
  * <p>
  * The metadata identification strings separate the path name from the fully qualified
@@ -35,7 +35,7 @@ public final class PhysicalTypeIdentifierNamingUtils {
 	 * @param path the path to that type within the project (required)
 	 * @return a non-blank ID
 	 */
-	public static String createIdentifier(final String metadataClass, final JavaType projectType, final ContextualPath path) {
+	public static String createIdentifier(final String metadataClass, final JavaType projectType, final LogicalPath path) {
 		Assert.notNull(projectType, "Java type required");
 		Assert.notNull(path, "Path required");
 		return MetadataIdentificationUtils.create(metadataClass, path.getName() + PATH_SUFFIX + projectType.getFullyQualifiedTypeName());
@@ -60,18 +60,18 @@ public final class PhysicalTypeIdentifierNamingUtils {
 	 * @param metadataId the ID of the metadata instance (must identify an instance of the given metadata class)
 	 * @return a non-<code>null</code> path
 	 */
-	public static ContextualPath getPath(final String providesType, final String metadataIdentificationString) {
+	public static LogicalPath getPath(final String providesType, final String metadataIdentificationString) {
 		Assert.isTrue(isValid(providesType, metadataIdentificationString), "Metadata identification string '" + metadataIdentificationString + "' does not appear to be a valid physical type identifier");
 		String instance = MetadataIdentificationUtils.getMetadataInstance(metadataIdentificationString);
 		int index = instance.indexOf("?");
-		return ContextualPath.getInstance(instance.substring(0, index));
+		return LogicalPath.getInstance(instance.substring(0, index));
 	}
 
-	public static ContextualPath getPath(final String metadataIdentificationString) {
+	public static LogicalPath getPath(final String metadataIdentificationString) {
 		Assert.isTrue(metadataIdentificationString.contains("#"), "Metadata identification string '" + metadataIdentificationString + "' does not appear to be a valid identifier");
 		String instance = MetadataIdentificationUtils.getMetadataInstance(metadataIdentificationString);
 		int index = instance.indexOf("?");
-		return ContextualPath.getInstance(instance.substring(0, index));
+		return LogicalPath.getInstance(instance.substring(0, index));
 	}
 
 	public static JavaType getJavaType(final String metadataIdentificationString) {

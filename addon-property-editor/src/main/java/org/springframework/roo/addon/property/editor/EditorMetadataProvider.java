@@ -12,7 +12,7 @@ import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.ContextualPath;
+import org.springframework.roo.project.LogicalPath;
 
 /**
  * Provides {@link EditorMetadata}.
@@ -51,7 +51,7 @@ public class EditorMetadataProvider extends AbstractItdMetadataProvider {
 		if (typeMid == null) {
 			return null;
 		}
-		ContextualPath path = EditorMetadata.getPath(typeMid);
+		LogicalPath path = EditorMetadata.getPath(typeMid);
 		String jpaActiveRecordMetadataKey = JpaActiveRecordMetadata.createIdentifier(javaType, path);
 
 		// We need to lookup the metadata we depend on
@@ -87,12 +87,12 @@ public class EditorMetadataProvider extends AbstractItdMetadataProvider {
 	@Override
 	protected String getGovernorPhysicalTypeIdentifier(final String metadataIdentificationString) {
 		JavaType javaType = EditorMetadata.getJavaType(metadataIdentificationString);
-		ContextualPath path = EditorMetadata.getPath(metadataIdentificationString);
+		LogicalPath path = EditorMetadata.getPath(metadataIdentificationString);
 		return PhysicalTypeIdentifier.createIdentifier(javaType, path);
 	}
 
 	@Override
-	protected String createLocalIdentifier(final JavaType javaType, final ContextualPath path) {
+	protected String createLocalIdentifier(final JavaType javaType, final LogicalPath path) {
 		return EditorMetadata.createIdentifier(javaType, path);
 	}
 

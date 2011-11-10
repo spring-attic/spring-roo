@@ -41,7 +41,7 @@ import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem
 import org.springframework.roo.classpath.itd.MemberHoldingTypeDetailsMetadataItem;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.ContextualPath;
+import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
@@ -119,7 +119,7 @@ public class JpaActiveRecordMetadataProviderImpl extends AbstractItdMetadataProv
 		}
 		// We also need the plural
 		final JavaType entity = JpaActiveRecordMetadata.getJavaType(metadataId);
-		final ContextualPath path = JpaActiveRecordMetadata.getPath(metadataId);
+		final LogicalPath path = JpaActiveRecordMetadata.getPath(metadataId);
 		final String pluralId = PluralMetadata.createIdentifier(entity, path);
 		final PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(pluralId);
 		if (pluralMetadata == null) {
@@ -153,12 +153,12 @@ public class JpaActiveRecordMetadataProviderImpl extends AbstractItdMetadataProv
 	@Override
 	protected String getGovernorPhysicalTypeIdentifier(final String metadataIdentificationString) {
 		JavaType javaType = JpaActiveRecordMetadata.getJavaType(metadataIdentificationString);
-		ContextualPath path = JpaActiveRecordMetadata.getPath(metadataIdentificationString);
+		LogicalPath path = JpaActiveRecordMetadata.getPath(metadataIdentificationString);
 		return PhysicalTypeIdentifier.createIdentifier(javaType, path);
 	}
 
 	@Override
-	protected String createLocalIdentifier(final JavaType javaType, final ContextualPath path) {
+	protected String createLocalIdentifier(final JavaType javaType, final LogicalPath path) {
 		return JpaActiveRecordMetadata.createIdentifier(javaType, path);
 	}
 

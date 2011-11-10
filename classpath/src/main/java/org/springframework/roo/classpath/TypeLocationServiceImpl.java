@@ -27,8 +27,8 @@ import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
-import org.springframework.roo.project.ContextualPath;
-import org.springframework.roo.project.PathInformation;
+import org.springframework.roo.project.LogicalPath;
+import org.springframework.roo.project.PhysicalPath;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.shell.NaturalOrderComparator;
@@ -115,7 +115,7 @@ public class TypeLocationServiceImpl implements TypeLocationService {
 			return relativePath;
 		}
 		
-		for (PathInformation pathInformation : moduleForFileIdentifier.getPathInformation()) {
+		for (PhysicalPath pathInformation : moduleForFileIdentifier.getPathInformation()) {
 			final String moduleCanonicalPath = FileUtils.ensureTrailingSeparator(FileUtils.getCanonicalPath(pathInformation.getLocation()));
 			if (fileCanonicalPath.startsWith(moduleCanonicalPath)) {
 				relativePath = File.separator + StringUtils.replaceFirst(fileCanonicalPath, moduleCanonicalPath, "");
@@ -153,9 +153,9 @@ public class TypeLocationServiceImpl implements TypeLocationService {
 			String reducedPath = fileCanonicalPath.replace(relativeTypePath, "");
 			reducedPath = FileUtils.removeTrailingSeparator(reducedPath);
 
-			for (PathInformation pathInformation : module.getPathInformation()) {
+			for (PhysicalPath pathInformation : module.getPathInformation()) {
 				if (pathInformation.getLocationPath().startsWith(reducedPath)) {
-					ContextualPath path = pathInformation.getContextualPath();
+					LogicalPath path = pathInformation.getContextualPath();
 					physicalTypeIdentifier = MetadataIdentificationUtils.create(PhysicalTypeIdentifier.class.getName(), path.getName() + "?" + javaType.getFullyQualifiedTypeName());
 					break;
 				}
@@ -393,7 +393,7 @@ public class TypeLocationServiceImpl implements TypeLocationService {
 		}
 		final String reducedPath = FileUtils.ensureTrailingSeparator(typePath.replace(typeRelativePath, ""));
 		for (final Pom pom : projectOperations.getPoms()) {
-			for (final PathInformation pathInformation : pom.getPathInformation()) {
+			for (final PhysicalPath pathInformation : pom.getPathInformation()) {
 				if (pathInformation.isSource()) {
 					String pathLocation = FileUtils.ensureTrailingSeparator(pathInformation.getLocationPath());
 					if (pathLocation.startsWith(reducedPath)) {
@@ -406,7 +406,7 @@ public class TypeLocationServiceImpl implements TypeLocationService {
 		return null;
 	}
 
-	public String getPhysicalTypeIdentifier(final JavaType type, final ContextualPath path) {
+	public String getPhysicalTypeIdentifier(final JavaType type, final LogicalPath path) {
 		Assert.notNull(type, "Java type required");
 		Assert.notNull(type, "Contextual path required");
 
@@ -424,7 +424,7 @@ public class TypeLocationServiceImpl implements TypeLocationService {
 		String reducedPath = FileUtils.ensureTrailingSeparator(typeFilePath.replace(typeRelativePath, ""));
 		String mid = null;
 		for (final Pom pom : projectOperations.getPoms()) {
-			PathInformation pathInformation = pom.getPathInformation(path.getPath());
+			PhysicalPath pathInformation = pom.getPathInformation(path.getPath());
 			String pathLocation = FileUtils.ensureTrailingSeparator(pathInformation.getLocationPath());
 			if (pathLocation.startsWith(reducedPath)) {
 				mid = PhysicalTypeIdentifier.createIdentifier(type, pathInformation.getContextualPath());
@@ -466,7 +466,7 @@ public class TypeLocationServiceImpl implements TypeLocationService {
 
 	private void initTypeMap() {
 		for (final Pom pom : projectOperations.getPoms()) {
-			for (PathInformation path : pom.getPathInformation()) {
+			for (PhysicalPath path : pom.getPathInformation()) {
 				if (path.isSource()) {
 					final String allJavaFiles = FileUtils.ensureTrailingSeparator(path.getLocationPath()) + "**" + File.separatorChar + "*.java";
 					for (final FileDetails file : fileManager.findMatchingAntPath(allJavaFiles)) {
@@ -581,12 +581,12 @@ public class TypeLocationServiceImpl implements TypeLocationService {
 		return topLevelPackage;
 	}
 
-	public ContextualPath getTypePath(final JavaType javaType) {
+	public LogicalPath getTypePath(final JavaType javaType) {
 		Assert.notNull(javaType, "Java type required");
 		return PhysicalTypeIdentifier.getPath(getPhysicalTypeIdentifier(javaType));
 	}
 
-	public String getPhysicalTypeCanonicalPath(final JavaType javaType, final ContextualPath path) {
+	public String getPhysicalTypeCanonicalPath(final JavaType javaType, final LogicalPath path) {
 		Assert.notNull(javaType, "Java type required");
 		Assert.notNull(path, "Path required");
 		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(javaType, path);
@@ -595,7 +595,7 @@ public class TypeLocationServiceImpl implements TypeLocationService {
 
 	public String getPhysicalTypeCanonicalPath(final String physicalTypeId) {
 		Assert.isTrue(PhysicalTypeIdentifier.isValid(physicalTypeId), "Physical type identifier is invalid");
-		ContextualPath modulePathId = PhysicalTypeIdentifier.getPath(physicalTypeId);
+		LogicalPath modulePathId = PhysicalTypeIdentifier.getPath(physicalTypeId);
 		JavaType javaType = PhysicalTypeIdentifier.getJavaType(physicalTypeId);
 
 		String relativePath = javaType.getFullyQualifiedTypeName().replace('.', File.separatorChar) + ".java";

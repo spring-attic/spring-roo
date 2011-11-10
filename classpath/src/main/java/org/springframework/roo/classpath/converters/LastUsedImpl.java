@@ -1,7 +1,7 @@
 package org.springframework.roo.classpath.converters;
 
 import static org.springframework.roo.classpath.converters.JavaPackageConverter.TOP_LEVEL_PACKAGE_SYMBOL;
-import static org.springframework.roo.project.ContextualPath.MODULE_PATH_SEPARATOR;
+import static org.springframework.roo.project.LogicalPath.MODULE_PATH_SEPARATOR;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;

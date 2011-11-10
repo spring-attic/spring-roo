@@ -3,17 +3,17 @@ package org.springframework.roo.project;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.springframework.roo.project.ContextualPath.MODULE_PATH_SEPARATOR;
+import static org.springframework.roo.project.LogicalPath.MODULE_PATH_SEPARATOR;
 
 import org.junit.Test;
 
 /**
- * Unit test of {@link ContextualPath}
+ * Unit test of {@link LogicalPath}
  *
  * @author Andrew Swan
  * @since 1.2.0
  */
-public class ContextualPathTest {
+public class LogicalPathTest {
 	
 	// Constants
 	private static final Path PATH = Path.SRC_TEST_JAVA;	// arbitrary; can't be mocked
@@ -43,14 +43,14 @@ public class ContextualPathTest {
 	@Test
 	public void testGetInstanceFromPath() {
 		// Invoke
-		final ContextualPath instance = ContextualPath.getInstance(PATH);
+		final LogicalPath instance = LogicalPath.getInstance(PATH);
 		
 		// Check
 		assertContextualPath(instance, PATH.toString(), "");
 	}
 	
 	/**
-	 * Asserts that calling {@link ContextualPath#getInstance(Path, String)}
+	 * Asserts that calling {@link LogicalPath#getInstance(Path, String)}
 	 * with the given module name results in the expected behaviour
 	 * 
 	 * @param inputModuleName
@@ -61,7 +61,7 @@ public class ContextualPathTest {
 		// Set up
 		
 		// Invoke
-		final ContextualPath instance = ContextualPath.getInstance(PATH, inputModuleName);
+		final LogicalPath instance = LogicalPath.getInstance(PATH, inputModuleName);
 		
 		// Check
 		assertContextualPath(instance, expectedInstanceName, expectedModuleName);
@@ -74,7 +74,7 @@ public class ContextualPathTest {
 	 * @param expectedInstanceName
 	 * @param expectedModuleName
 	 */
-	private void assertContextualPath(final ContextualPath instance, final String expectedInstanceName, final String expectedModuleName) {
+	private void assertContextualPath(final LogicalPath instance, final String expectedInstanceName, final String expectedModuleName) {
 		assertEquals(expectedInstanceName, instance.getName());
 		assertEquals(expectedModuleName, instance.getModule());
 		assertEquals(PATH, instance.getPath());
@@ -84,8 +84,8 @@ public class ContextualPathTest {
 	@Test
 	public void testSamePathsInSameModuleAreEqual() {
 		// Set up
-		final ContextualPath instance1 = ContextualPath.getInstance(PATH, MODULE_NAME);
-		final ContextualPath instance2 = ContextualPath.getInstance(PATH, MODULE_NAME);
+		final LogicalPath instance1 = LogicalPath.getInstance(PATH, MODULE_NAME);
+		final LogicalPath instance2 = LogicalPath.getInstance(PATH, MODULE_NAME);
 		
 		// Invoke
 		final boolean equal = instance1.equals(instance2) && instance2.equals(instance1);
@@ -97,8 +97,8 @@ public class ContextualPathTest {
 	@Test
 	public void testSamePathsInDifferentModulesAreNotEqual() {
 		// Set up
-		final ContextualPath instance1 = ContextualPath.getInstance(PATH, "module1");
-		final ContextualPath instance2 = ContextualPath.getInstance(PATH, "module2");
+		final LogicalPath instance1 = LogicalPath.getInstance(PATH, "module1");
+		final LogicalPath instance2 = LogicalPath.getInstance(PATH, "module2");
 		
 		// Invoke
 		final boolean equal = instance1.equals(instance2) || instance2.equals(instance1);
@@ -109,13 +109,13 @@ public class ContextualPathTest {
 	
 	@Test
 	public void testDoesNotEqualOtherType() {
-		assertFalse(ContextualPath.getInstance(PATH).equals(PATH));
+		assertFalse(LogicalPath.getInstance(PATH).equals(PATH));
 	}
 	
 	@Test
 	public void testGetInstanceFromPathNameOnly() {
 		// Invoke
-		final ContextualPath instance = ContextualPath.getInstance(PATH.name());
+		final LogicalPath instance = LogicalPath.getInstance(PATH.name());
 		
 		// Check
 		assertContextualPath(instance, PATH.name(), "");
@@ -124,7 +124,7 @@ public class ContextualPathTest {
 	@Test
 	public void testGetInstanceFromCombinedPathAndModuleName() {
 		// Invoke
-		final ContextualPath instance = ContextualPath.getInstance(MODULE_PLUS_PATH);
+		final LogicalPath instance = LogicalPath.getInstance(MODULE_PLUS_PATH);
 		
 		// Check
 		assertContextualPath(instance, MODULE_PLUS_PATH, MODULE_NAME);
@@ -132,36 +132,36 @@ public class ContextualPathTest {
 	
 	@Test(expected = NullPointerException.class)
 	public void testCompareToNull() {
-		ContextualPath.getInstance(PATH).compareTo(null);
+		LogicalPath.getInstance(PATH).compareTo(null);
 	}
 	
 	@Test(expected = IllegalArgumentException.class)
 	public void testGetInstanceFromNullString() {
-		ContextualPath.getInstance((String) null);
+		LogicalPath.getInstance((String) null);
 	}
 	
 	@Test(expected = IllegalArgumentException.class)
 	public void testGetInstanceFromEmptyString() {
-		ContextualPath.getInstance("");
+		LogicalPath.getInstance("");
 	}	
 	
 	@Test(expected = IllegalArgumentException.class)
 	public void testGetInstanceFromBlankString() {
-		ContextualPath.getInstance(" ");
+		LogicalPath.getInstance(" ");
 	}
 	
 	@Test
 	public void testModuleRootIsNotProjectRoot() {
-		assertFalse(ContextualPath.getInstance(Path.ROOT, "web").isProjectRoot());
+		assertFalse(LogicalPath.getInstance(Path.ROOT, "web").isProjectRoot());
 	}
 	
 	@Test
 	public void testNonRootPathIsNotProjectRoot() {
-		assertFalse(ContextualPath.getInstance(Path.SRC_MAIN_RESOURCES, null).isProjectRoot());
+		assertFalse(LogicalPath.getInstance(Path.SRC_MAIN_RESOURCES, null).isProjectRoot());
 	}
 	
 	@Test
 	public void testProjectRootIsProjectRoot() {
-		assertTrue(ContextualPath.getInstance(Path.ROOT, null).isProjectRoot());
+		assertTrue(LogicalPath.getInstance(Path.ROOT, null).isProjectRoot());
 	}
 }

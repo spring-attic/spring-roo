@@ -53,7 +53,7 @@ import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
-import org.springframework.roo.project.ContextualPath;
+import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectMetadata;
@@ -299,7 +299,7 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
 			Template template = templateLoader.getTemplate(templateFile);
 			Assert.notNull(template, "Tenmplate required for '" + templateFile + "'");
 			templateContents = template.renderToString(dataDictionary);
-			ContextualPath contextualPath = projectOperations.getPathResolver().getFocusedPath(Path.SRC_MAIN_JAVA);
+			LogicalPath contextualPath = projectOperations.getPathResolver().getFocusedPath(Path.SRC_MAIN_JAVA);
 			String templateId = PhysicalTypeIdentifier.createIdentifier(templateType, contextualPath);
 			return typeParsingService.getTypeFromString(templateContents, templateId, templateType);
 		} catch (Exception e) {

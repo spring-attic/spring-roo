@@ -38,7 +38,7 @@ import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.ReservedWords;
-import org.springframework.roo.project.ContextualPath;
+import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.Path;
@@ -87,7 +87,7 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 	}
 
 	public boolean isInstalledInModule(String moduleName) {
-		ContextualPath webAppPath = ContextualPath.getInstance(Path.SRC_MAIN_WEBAPP, moduleName);
+		LogicalPath webAppPath = LogicalPath.getInstance(Path.SRC_MAIN_WEBAPP, moduleName);
 		return fileManager.exists(pathResolver.getIdentifier(webAppPath, "WEB-INF/faces-config.xml")) || fileManager.exists(pathResolver.getIdentifier(webAppPath, "templates/layout.xhtml"));
 	}
 	
@@ -254,7 +254,7 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 			}
 
 			JavaType entity = cid.getName();
-			ContextualPath path = PhysicalTypeIdentifier.getPath(cid.getDeclaredByMetadataId());
+			LogicalPath path = PhysicalTypeIdentifier.getPath(cid.getDeclaredByMetadataId());
 
 			// Check to see if this persistent type has a JSF metadata listening to it
 			String downstreamJsfMetadataId = JsfManagedBeanMetadata.createIdentifier(entity, path);

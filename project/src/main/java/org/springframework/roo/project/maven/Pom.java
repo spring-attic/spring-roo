@@ -13,7 +13,7 @@ import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.Filter;
 import org.springframework.roo.project.GAV;
 import org.springframework.roo.project.Path;
-import org.springframework.roo.project.PathInformation;
+import org.springframework.roo.project.PhysicalPath;
 import org.springframework.roo.project.Plugin;
 import org.springframework.roo.project.Property;
 import org.springframework.roo.project.Repository;
@@ -37,7 +37,7 @@ public class Pom {
 
 	// Fields
 	private final GAV gav;
-	private final Map<Path, PathInformation> pathCache = new LinkedHashMap<Path, PathInformation>();
+	private final Map<Path, PhysicalPath> pathCache = new LinkedHashMap<Path, PhysicalPath>();
 	private final Parent parent;
 	private final Set<Dependency> dependencies = new LinkedHashSet<Dependency>();
 	private final Set<Filter> filters = new LinkedHashSet<Filter>();
@@ -230,18 +230,18 @@ public class Pom {
 		return path;
 	}
 
-	public List<PathInformation> getPathInformation() {
-		return new ArrayList<PathInformation>(pathCache.values());
+	public List<PhysicalPath> getPathInformation() {
+		return new ArrayList<PhysicalPath>(pathCache.values());
 	}
 
 	/**
-	 * Returns the {@link PathInformation} for the given {@link Path} of this
+	 * Returns the {@link PhysicalPath} for the given {@link Path} of this
 	 * module
 	 * 
-	 * @param path the sub-path for which to return the {@link PathInformation}
+	 * @param path the sub-path for which to return the {@link PhysicalPath}
 	 * @return <code>null</code> if this module has no such sub-path
 	 */
-	public PathInformation getPathInformation(final Path path) {
+	public PhysicalPath getPathInformation(final Path path) {
 		return pathCache.get(path);
 	}
 
@@ -253,7 +253,7 @@ public class Pom {
 	 * @return <code>null</code> if this module has no such path
 	 */
 	public String getPathLocation(final Path path) {
-		final PathInformation modulePath = getPathInformation(path);
+		final PhysicalPath modulePath = getPathInformation(path);
 		if (modulePath == null) {
 			return null;
 		}

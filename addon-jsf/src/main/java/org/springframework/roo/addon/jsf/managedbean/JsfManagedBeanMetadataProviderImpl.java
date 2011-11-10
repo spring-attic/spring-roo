@@ -55,7 +55,7 @@ import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.CustomDataBuilder;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.ContextualPath;
+import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.support.util.Assert;
 
 /**
@@ -153,7 +153,7 @@ public class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDiscoverin
 		managedBeanMidToEntityMap.put(metadataId, entity);
 
 		String physicalTypeIdentifier = typeLocationService.getPhysicalTypeIdentifier(entity);
-		ContextualPath path = PhysicalTypeIdentifier.getPath(physicalTypeIdentifier);
+		LogicalPath path = PhysicalTypeIdentifier.getPath(physicalTypeIdentifier);
 		final PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(entity, path));
 		Assert.notNull(pluralMetadata, "Could not determine plural for '" + entity.getSimpleTypeName() + "'");
 		final String plural = pluralMetadata.getPlural();
@@ -227,7 +227,7 @@ public class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDiscoverin
 										genericTypeBeanName = (String) beanNameAttribute.getValue();
 										ClassOrInterfaceTypeDetails genericTypeDetails = typeLocationService.getTypeDetails(genericType);
 										Assert.notNull(genericTypeDetails, "The type '" + genericType + "' could not be resolved");
-										ContextualPath path = PhysicalTypeIdentifier.getPath(genericTypeDetails.getDeclaredByMetadataId());
+										LogicalPath path = PhysicalTypeIdentifier.getPath(genericTypeDetails.getDeclaredByMetadataId());
 										final PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(genericType, path));
 										genericTypePlural = pluralMetadata.getPlural();
 										break genericTypeLoop; // Only support one generic type parameter
@@ -326,12 +326,12 @@ public class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDiscoverin
 	@Override
 	protected String getGovernorPhysicalTypeIdentifier(final String metadataIdentificationString) {
 		final JavaType javaType = JsfManagedBeanMetadata.getJavaType(metadataIdentificationString);
-		final ContextualPath path = JsfManagedBeanMetadata.getPath(metadataIdentificationString);
+		final LogicalPath path = JsfManagedBeanMetadata.getPath(metadataIdentificationString);
 		return PhysicalTypeIdentifier.createIdentifier(javaType, path);
 	}
 
 	@Override
-	protected String createLocalIdentifier(final JavaType javaType, final ContextualPath path) {
+	protected String createLocalIdentifier(final JavaType javaType, final LogicalPath path) {
 		return JsfManagedBeanMetadata.createIdentifier(javaType, path);
 	}
 

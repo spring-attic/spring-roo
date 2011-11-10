@@ -57,15 +57,15 @@ public class DelegatePathResolver implements PathResolver {
 		return chosenStrategy;
 	}
 
-	public String getIdentifier(final ContextualPath path, final String relativePath) {
+	public String getIdentifier(final LogicalPath path, final String relativePath) {
 		return getStrategy().getIdentifier(path, relativePath);
 	}
 
-	public ContextualPath getPath(final String identifier) {
+	public LogicalPath getPath(final String identifier) {
 		return getStrategy().getPath(identifier);
 	}
 
-	public String getRoot(final ContextualPath path) {
+	public String getRoot(final LogicalPath path) {
 		return getStrategy().getRoot(path);
 	}
 
@@ -77,11 +77,11 @@ public class DelegatePathResolver implements PathResolver {
 		return getStrategy().getFriendlyName(identifier);
 	}
 	
-	public Collection<ContextualPath> getPaths() {
+	public Collection<LogicalPath> getPaths() {
 		return getStrategy().getPaths();
 	}
 
-	public Collection<ContextualPath> getSourcePaths() {
+	public Collection<LogicalPath> getSourcePaths() {
 		return getStrategy().getSourcePaths();
 	}
 
@@ -89,7 +89,7 @@ public class DelegatePathResolver implements PathResolver {
 		return getStrategy().getRoot();
 	}
 
-	public String getCanonicalPath(final ContextualPath path, final JavaType javaType) {
+	public String getCanonicalPath(final LogicalPath path, final JavaType javaType) {
 		return getStrategy().getCanonicalPath(path, javaType);
 	}
 
@@ -105,7 +105,7 @@ public class DelegatePathResolver implements PathResolver {
 		return getStrategy().getFocusedRoot(path);
 	}
 
-	public ContextualPath getFocusedPath(final Path path) {
+	public LogicalPath getFocusedPath(final Path path) {
 		return getStrategy().getFocusedPath(path);
 	}
 }

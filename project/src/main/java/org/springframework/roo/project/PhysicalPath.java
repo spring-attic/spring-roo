@@ -7,47 +7,56 @@ import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileUtils;
 
 /**
- * Used by {@link DelegatePathResolver} to permit subclasses to register path details.
+ * The physical location of a given {@link LogicalPath} within the user's project.
+ * <p>
+ * Renamed from <code>PathInformation</code> in version 1.2.0.
  * 
  * @author Ben Alex
  * @since 1.0
  */
-public class PathInformation {
+public class PhysicalPath {
 
 	// Fields
-	private final ContextualPath contextualPath;
-	private final boolean source;
+	private final LogicalPath contextualPath;
 	private final File location;
 	
 	/**
 	 * Constructor
 	 *
 	 * @param contextualPath (required)
-	 * @param source whether this path contains source code
 	 * @param location the physical location of this path (required)
 	 */
-	public PathInformation(final ContextualPath contextualPath, final boolean source, final File location) {
+	public PhysicalPath(final LogicalPath contextualPath, final File location) {
 		Assert.notNull(contextualPath, "Module path required");
 		Assert.notNull(location, "Location required");
 		this.contextualPath = contextualPath;
-		this.source = source;
 		this.location = location;
 	}
 
-	public ContextualPath getContextualPath() {
+	public LogicalPath getContextualPath() {
 		return contextualPath;
 	}
 
+	/**
+	 * Indicates whether this path contains Java source code
+	 * 
+	 * @return see above
+	 */
 	public boolean isSource() {
-		return source;
+		return contextualPath.getPath().isJavaSource();
 	}
 
+	/**
+	 * Returns the physical location of this path
+	 * 
+	 * @return a non-<code>null</code> location
+	 */
 	public File getLocation() {
 		return location;
 	}
 
 	/**
-	 * Returns the canonical path of this {@link PathInformation}
+	 * Returns the canonical path of this {@link PhysicalPath}
 	 * 
 	 * @return a non-blank canonical path
 	 */
@@ -63,7 +72,6 @@ public class PathInformation {
 	public final String toString() {
 		ToStringCreator tsc = new ToStringCreator(this);
 		tsc.append("contextualPath", contextualPath);
-		tsc.append("source", source);
 		tsc.append("location", location);
 		return tsc.toString();
 	}

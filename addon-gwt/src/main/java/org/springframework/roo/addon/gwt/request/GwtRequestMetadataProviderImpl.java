@@ -39,7 +39,7 @@ import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.metadata.MetadataItem;
 import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.ContextualPath;
+import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
@@ -151,7 +151,7 @@ public class GwtRequestMetadataProviderImpl extends AbstractHashCodeTrackingMeta
 
 	private ClassOrInterfaceTypeDetails getGovernor(final String metadataIdentificationString) {
 		JavaType governorTypeName = GwtRequestMetadata.getJavaType(metadataIdentificationString);
-		ContextualPath governorTypePath = GwtRequestMetadata.getPath(metadataIdentificationString);
+		LogicalPath governorTypePath = GwtRequestMetadata.getPath(metadataIdentificationString);
 		String physicalTypeId = PhysicalTypeIdentifier.createIdentifier(governorTypeName, governorTypePath);
 		return typeLocationService.getTypeDetails(physicalTypeId);
 	}
@@ -186,7 +186,7 @@ public class GwtRequestMetadataProviderImpl extends AbstractHashCodeTrackingMeta
 				for (ClassAttributeValue classAttributeValue : domainTypesAnnotation.getValue()) {
 					if (classAttributeValue.getValue().equals(entity.getName())) {
 						annotationMetadataBuilder.addStringAttribute("value", serviceLayer.getName().getFullyQualifiedTypeName());
-						ContextualPath path = PhysicalTypeIdentifier.getPath(request.getDeclaredByMetadataId());
+						LogicalPath path = PhysicalTypeIdentifier.getPath(request.getDeclaredByMetadataId());
 						annotationMetadataBuilder.addStringAttribute("locator", projectOperations.getTopLevelPackage(path.getModule()) + ".server.locator.GwtServiceLocator");
 					}
 				}
@@ -248,7 +248,7 @@ public class GwtRequestMetadataProviderImpl extends AbstractHashCodeTrackingMeta
 					final ClassOrInterfaceTypeDetails entity = gwtTypeService.lookupEntityFromRequest(request);
 					if (entity != null && layerTypes.contains(entity.getName())) {
 						JavaType typeName = PhysicalTypeIdentifier.getJavaType(request.getDeclaredByMetadataId());
-						ContextualPath typePath = PhysicalTypeIdentifier.getPath(request.getDeclaredByMetadataId());
+						LogicalPath typePath = PhysicalTypeIdentifier.getPath(request.getDeclaredByMetadataId());
 						downstreamDependency = GwtRequestMetadata.createIdentifier(typeName, typePath);
 						processed = true;
 						break;
@@ -266,7 +266,7 @@ public class GwtRequestMetadataProviderImpl extends AbstractHashCodeTrackingMeta
 							if (mirrorName != null && cid.getName().getFullyQualifiedTypeName().equals(mirrorName)) {
 								found = true;
 								JavaType typeName = PhysicalTypeIdentifier.getJavaType(classOrInterfaceTypeDetails.getDeclaredByMetadataId());
-								ContextualPath typePath = PhysicalTypeIdentifier.getPath(classOrInterfaceTypeDetails.getDeclaredByMetadataId());
+								LogicalPath typePath = PhysicalTypeIdentifier.getPath(classOrInterfaceTypeDetails.getDeclaredByMetadataId());
 								downstreamDependency = GwtRequestMetadata.createIdentifier(typeName, typePath);
 								break;
 							}
@@ -279,7 +279,7 @@ public class GwtRequestMetadataProviderImpl extends AbstractHashCodeTrackingMeta
 			} else if (!processed) {
 				// A physical Java type has changed, and determine what the corresponding local metadata identification string would have been
 				JavaType typeName = PhysicalTypeIdentifier.getJavaType(upstreamDependency);
-				ContextualPath typePath = PhysicalTypeIdentifier.getPath(upstreamDependency);
+				LogicalPath typePath = PhysicalTypeIdentifier.getPath(upstreamDependency);
 				downstreamDependency = GwtRequestMetadata.createIdentifier(typeName, typePath);
 			}
 

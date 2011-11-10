@@ -31,8 +31,8 @@ public class MavenPathResolvingStrategyTest {
 	// Fixture
 	private MavenPathResolvingStrategy strategy;
 	@Mock private PomManagementService mockPomManagementService;
-	@Mock private ContextualPath mockSourcePath;
-	@Mock private ContextualPath mockNonSourcePath;
+	@Mock private LogicalPath mockSourcePath;
+	@Mock private LogicalPath mockNonSourcePath;
 
 
 	@Before
@@ -42,8 +42,8 @@ public class MavenPathResolvingStrategyTest {
 		strategy.pomManagementService = mockPomManagementService;
 	}
 	
-	private ContextualPath getMockContextualPath(final String module, final Pom pom) {
-		final ContextualPath mockContextualPath = mock(ContextualPath.class);
+	private LogicalPath getMockContextualPath(final String module, final Pom pom) {
+		final LogicalPath mockContextualPath = mock(LogicalPath.class);
 		when(mockContextualPath.getModule()).thenReturn(module);
 		when(mockContextualPath.getPathRelativeToPom(pom)).thenReturn(PATH_RELATIVE_TO_POM);
 		return mockContextualPath;
@@ -56,17 +56,17 @@ public class MavenPathResolvingStrategyTest {
 	}
 	
 	/**
-	 * Asserts that calling {@link MavenPathResolvingStrategy#getIdentifier(ContextualPath, String)}
+	 * Asserts that calling {@link MavenPathResolvingStrategy#getIdentifier(LogicalPath, String)}
 	 * with the given parameters results in the given expected identifier.
 	 *
 	 * @param pom the POM that the mock {@link PomManagementService} should return for the given module name (can be <code>null</code>)
-	 * @param module the module to be returned by the {@link ContextualPath}
+	 * @param module the module to be returned by the {@link LogicalPath}
 	 * @param relativePath cannot be <code>null</code>
 	 * @param expectedIdentifier
 	 */
 	private void assertIdentifier(final Pom pom, final String module, final String relativePath, final String expectedIdentifier) {
 		// Set up
-		final ContextualPath mockContextualPath = getMockContextualPath(module, pom);
+		final LogicalPath mockContextualPath = getMockContextualPath(module, pom);
 		when(mockPomManagementService.getPomFromModuleName(module)).thenReturn(pom);
 		
 		// Invoke
@@ -97,16 +97,16 @@ public class MavenPathResolvingStrategyTest {
 		assertIdentifier(null, NEW_MODULE, "", expectedIdentifier);
 	}
 	
-	private PathInformation getMockModulePath(final boolean isSource, final ContextualPath contextualPath) {
-		final PathInformation mockModulePath = mock(PathInformation.class);
+	private PhysicalPath getMockModulePath(final boolean isSource, final LogicalPath contextualPath) {
+		final PhysicalPath mockModulePath = mock(PhysicalPath.class);
 		when(mockModulePath.isSource()).thenReturn(isSource);
 		when(mockModulePath.getContextualPath()).thenReturn(contextualPath);
 		return mockModulePath;
 	}
 	
 	private void setUpModulePaths() {
-		final PathInformation mockModuleSourcePath = getMockModulePath(true, mockSourcePath);
-		final PathInformation mockModuleNonSourcePath = getMockModulePath(false, mockNonSourcePath);
+		final PhysicalPath mockModuleSourcePath = getMockModulePath(true, mockSourcePath);
+		final PhysicalPath mockModuleNonSourcePath = getMockModulePath(false, mockNonSourcePath);
 		final Pom mockPom = mock(Pom.class);
 		when(mockPom.getPathInformation()).thenReturn(Arrays.asList(mockModuleSourcePath, mockModuleNonSourcePath));
 		when(mockPomManagementService.getPoms()).thenReturn(Arrays.asList(mockPom));

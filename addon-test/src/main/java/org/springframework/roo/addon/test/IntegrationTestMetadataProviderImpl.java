@@ -44,7 +44,7 @@ import org.springframework.roo.classpath.layers.MethodParameter;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.ContextualPath;
+import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
@@ -267,12 +267,12 @@ public class IntegrationTestMetadataProviderImpl extends AbstractItdMetadataProv
 	@Override
 	protected String getGovernorPhysicalTypeIdentifier(final String metadataIdentificationString) {
 		final JavaType javaType = IntegrationTestMetadata.getJavaType(metadataIdentificationString);
-		final ContextualPath path = IntegrationTestMetadata.getPath(metadataIdentificationString);
+		final LogicalPath path = IntegrationTestMetadata.getPath(metadataIdentificationString);
 		return PhysicalTypeIdentifier.createIdentifier(javaType, path);
 	}
 
 	@Override
-	protected String createLocalIdentifier(final JavaType javaType, final ContextualPath path) {
+	protected String createLocalIdentifier(final JavaType javaType, final LogicalPath path) {
 		return IntegrationTestMetadata.createIdentifier(javaType, path);
 	}
 

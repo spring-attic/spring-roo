@@ -34,7 +34,7 @@ import org.springframework.roo.metadata.MetadataItem;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
-import org.springframework.roo.project.ContextualPath;
+import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
@@ -125,7 +125,7 @@ public class GwtProxyMetadataProviderImpl extends AbstractHashCodeTrackingMetada
 
 	private ClassOrInterfaceTypeDetails getGovernor(final String metadataIdentificationString) {
 		JavaType governorTypeName = GwtProxyMetadata.getJavaType(metadataIdentificationString);
-		ContextualPath governorTypePath = GwtProxyMetadata.getPath(metadataIdentificationString);
+		LogicalPath governorTypePath = GwtProxyMetadata.getPath(metadataIdentificationString);
 
 		String physicalTypeId = PhysicalTypeIdentifier.createIdentifier(governorTypeName, governorTypePath);
 		return typeLocationService.getTypeDetails(physicalTypeId);
@@ -196,7 +196,7 @@ public class GwtProxyMetadataProviderImpl extends AbstractHashCodeTrackingMetada
 							if (mirrorName != null && cid.getName().getFullyQualifiedTypeName().equals(attributeValue.getValue())) {
 								found = true;
 								JavaType typeName = PhysicalTypeIdentifier.getJavaType(classOrInterfaceTypeDetails.getDeclaredByMetadataId());
-								ContextualPath typePath = PhysicalTypeIdentifier.getPath(classOrInterfaceTypeDetails.getDeclaredByMetadataId());
+								LogicalPath typePath = PhysicalTypeIdentifier.getPath(classOrInterfaceTypeDetails.getDeclaredByMetadataId());
 								downstreamDependency = GwtProxyMetadata.createIdentifier(typeName, typePath);
 								break;
 							}
@@ -209,7 +209,7 @@ public class GwtProxyMetadataProviderImpl extends AbstractHashCodeTrackingMetada
 			} else {
 				// A physical Java type has changed, and determine what the corresponding local metadata identification string would have been
 				JavaType typeName = PhysicalTypeIdentifier.getJavaType(upstreamDependency);
-				ContextualPath typePath = PhysicalTypeIdentifier.getPath(upstreamDependency);
+				LogicalPath typePath = PhysicalTypeIdentifier.getPath(upstreamDependency);
 				downstreamDependency = GwtProxyMetadata.createIdentifier(typeName, typePath);
 			}
 

@@ -45,7 +45,7 @@ import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.process.manager.FileManager;
-import org.springframework.roo.project.ContextualPath;
+import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
@@ -122,14 +122,14 @@ public class JspMetadataListener implements MetadataProvider, MetadataNotificati
 			return null;
 		}
 		ClassOrInterfaceTypeDetails formBackingTypeDetails = typeLocationService.getTypeDetails(formBackingType);
-		ContextualPath formBackingTypePath = PhysicalTypeIdentifier.getPath(formBackingTypeDetails.getDeclaredByMetadataId());
+		LogicalPath formBackingTypePath = PhysicalTypeIdentifier.getPath(formBackingTypeDetails.getDeclaredByMetadataId());
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.createIdentifier(formBackingType, formBackingTypePath), JspMetadata.createIdentifier(formBackingType, formBackingTypePath));
-		ContextualPath path = JspMetadata.getPath(metadataIdentificationString);
+		LogicalPath path = JspMetadata.getPath(metadataIdentificationString);
 
 		// Install web artifacts only if Spring MVC config is missing
 		// TODO: Remove this call when 'controller' commands are gone
 		PathResolver pathResolver = projectOperations.getPathResolver();
-		ContextualPath webappPath = ContextualPath.getInstance(Path.SRC_MAIN_WEBAPP, path.getModule());
+		LogicalPath webappPath = LogicalPath.getInstance(Path.SRC_MAIN_WEBAPP, path.getModule());
 
 		if (!fileManager.exists(pathResolver.getIdentifier(webappPath, WEB_INF_VIEWS))) {
 			jspOperations.installCommonViewArtefacts(path.getModule());
@@ -288,11 +288,11 @@ public class JspMetadataListener implements MetadataProvider, MetadataNotificati
 			// A physical Java type has changed, and determine what the corresponding local metadata identification string would have been
 			if (WebScaffoldMetadata.isValid(upstreamDependency)) {
 				JavaType javaType = WebScaffoldMetadata.getJavaType(upstreamDependency);
-				ContextualPath path = WebScaffoldMetadata.getPath(upstreamDependency);
+				LogicalPath path = WebScaffoldMetadata.getPath(upstreamDependency);
 				downstreamDependency = JspMetadata.createIdentifier(javaType, path);
 			} else if (WebFinderMetadata.isValid(upstreamDependency)) {
 				JavaType javaType = WebFinderMetadata.getJavaType(upstreamDependency);
-				ContextualPath path = WebFinderMetadata.getPath(upstreamDependency);
+				LogicalPath path = WebFinderMetadata.getPath(upstreamDependency);
 				downstreamDependency = JspMetadata.createIdentifier(javaType, path);
 			}
 
@@ -334,7 +334,7 @@ public class JspMetadataListener implements MetadataProvider, MetadataNotificati
 		return JspMetadata.getMetadataIdentiferType();
 	}
 
-	private void installImage(final ContextualPath path, final String imagePath) {
+	private void installImage(final LogicalPath path, final String imagePath) {
 		PathResolver pathResolver = projectOperations.getPathResolver();
 		String imageFile = pathResolver.getIdentifier(path, imagePath);
 		if (!fileManager.exists(imageFile)) {

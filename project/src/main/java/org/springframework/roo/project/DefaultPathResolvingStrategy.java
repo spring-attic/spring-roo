@@ -26,7 +26,7 @@ public class DefaultPathResolvingStrategy extends AbstractPathResolvingStrategy 
 
 	// Fields
 	private final Collection<PathResolvingStrategy> otherPathResolvingStrategies = new ArrayList<PathResolvingStrategy>();
-	private final Map<Path, PathInformation> rootModulePaths = new LinkedHashMap<Path, PathInformation>();
+	private final Map<Path, PhysicalPath> rootModulePaths = new LinkedHashMap<Path, PhysicalPath>();
 	
 	// ------------ OSGi component methods ----------------
 	
@@ -51,27 +51,27 @@ public class DefaultPathResolvingStrategy extends AbstractPathResolvingStrategy 
 		}
 	}
 
-	List<PathInformation> getPathInformation() {
-		return new ArrayList<PathInformation>(rootModulePaths.values());
+	List<PhysicalPath> getPathInformation() {
+		return new ArrayList<PhysicalPath>(rootModulePaths.values());
 	}
 	
 	// ------------ PathResolvingStrategy methods ----------------
 
-	public String getIdentifier(final ContextualPath path, final String relativePath) {
+	public String getIdentifier(final LogicalPath path, final String relativePath) {
 		return FileUtils.ensureTrailingSeparator(rootModulePaths.get(path.getPath()).getLocationPath()) + relativePath;
 	}
 
-	public String getRoot(final ContextualPath contextualPath) {
+	public String getRoot(final LogicalPath contextualPath) {
 		Assert.notNull(contextualPath, "Path required");
-		final PathInformation pathInfo = rootModulePaths.get(contextualPath.getPath());
+		final PhysicalPath pathInfo = rootModulePaths.get(contextualPath.getPath());
 		Assert.notNull(pathInfo, "Unable to determine information for path '" + contextualPath + "'");
 		final File root = pathInfo.getLocation();
 		return FileUtils.getCanonicalPath(root);
 	}
 
-	protected Collection<ContextualPath> getPaths(final boolean sourceOnly) {
-		final List<ContextualPath> result = new ArrayList<ContextualPath>();
-		for (final PathInformation modulePath : rootModulePaths.values()) {
+	protected Collection<LogicalPath> getPaths(final boolean sourceOnly) {
+		final List<LogicalPath> result = new ArrayList<LogicalPath>();
+		for (final PhysicalPath modulePath : rootModulePaths.values()) {
 			if (!sourceOnly || modulePath.isSource()) {
 				result.add(modulePath.getContextualPath());
 			}
@@ -80,15 +80,15 @@ public class DefaultPathResolvingStrategy extends AbstractPathResolvingStrategy 
 	}
 
 	/**
-	 * Locates the first {@link PathInformation} which can be construed as a parent
+	 * Locates the first {@link PhysicalPath} which can be construed as a parent
 	 * of the presented identifier.
 	 *
 	 * @param identifier to locate the parent of (required)
 	 * @return the first matching parent, or null if not found
 	 */
-	protected PathInformation getApplicablePathInformation(final String identifier) {
+	protected PhysicalPath getApplicablePathInformation(final String identifier) {
 		Assert.notNull(identifier, "Identifier required");
-		for (final PathInformation pi : rootModulePaths.values()) {
+		for (final PhysicalPath pi : rootModulePaths.values()) {
 			final FileDetails possibleParent = new FileDetails(pi.getLocation(), null);
 			if (possibleParent.isParentOf(identifier)) {
 				return pi;
@@ -97,7 +97,7 @@ public class DefaultPathResolvingStrategy extends AbstractPathResolvingStrategy 
 		return null;
 	}
 
-	public String getCanonicalPath(final ContextualPath path, final JavaType javaType) {
+	public String getCanonicalPath(final LogicalPath path, final JavaType javaType) {
 		return null;
 	}
 
@@ -109,7 +109,7 @@ public class DefaultPathResolvingStrategy extends AbstractPathResolvingStrategy 
 		return null;
 	}
 
-	public ContextualPath getFocusedPath(final Path path) {
+	public LogicalPath getFocusedPath(final Path path) {
 		return null;
 	}
 

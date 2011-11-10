@@ -13,13 +13,13 @@ import org.springframework.roo.model.JavaType;
 public interface PathResolvingStrategy {
 
 	/**
-	 * Produces a canonical path for the presented {@link ContextualPath} and relative path.
+	 * Produces a canonical path for the presented {@link LogicalPath} and relative path.
 	 *
 	 * @param path to use (required)
 	 * @param relativePath to use (cannot be null, but may be empty if referring to the path itself)
 	 * @return the canonical path to the file (never null)
 	 */
-	String getIdentifier(ContextualPath path, String relativePath);
+	String getIdentifier(LogicalPath path, String relativePath);
 
 	/**
 	 * Attempts to determine which {@link Path} the specified canonical path falls under.
@@ -27,12 +27,12 @@ public interface PathResolvingStrategy {
 	 * @param identifier to lookup (required)
 	 * @return the {@link Path}, or null if the identifier refers to a location not under a know path.
 	 */
-	ContextualPath getPath(String identifier);
+	LogicalPath getPath(String identifier);
 
 	/**
-	 * @see PathResolver#getRoot(ContextualPath)
+	 * @see PathResolver#getRoot(LogicalPath)
 	 */
-	String getRoot(ContextualPath path);
+	String getRoot(LogicalPath path);
 
 	/**
 	 * Attempts to determine which {@link Path} the specified canonical path falls under,
@@ -58,12 +58,12 @@ public interface PathResolvingStrategy {
 	/**
 	 * @see PathResolver#getPaths()
 	 */
-	Collection<ContextualPath> getPaths();
+	Collection<LogicalPath> getPaths();
 
 	/**
 	 * @see PathResolver#getSourcePaths()
 	 */
-	Collection<ContextualPath> getSourcePaths();
+	Collection<LogicalPath> getSourcePaths();
 
 	/**
 	 * Indicates whether this strategy is active. The {@link PathResolver} will
@@ -84,7 +84,7 @@ public interface PathResolvingStrategy {
 	 * @param javaType the type t
 	 * @return
 	 */
-	String getCanonicalPath(ContextualPath path, JavaType javaType);
+	String getCanonicalPath(LogicalPath path, JavaType javaType);
 
 	/**
 	 *
@@ -104,7 +104,7 @@ public interface PathResolvingStrategy {
 	/**
 	 * @see PathResolver#getFocusedPath(Path)
 	 */
-	ContextualPath getFocusedPath(Path path);
+	LogicalPath getFocusedPath(Path path);
 
 	/**
 	 *

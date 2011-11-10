@@ -36,7 +36,7 @@ import org.springframework.roo.classpath.details.annotations.AnnotationMetadataB
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.process.manager.MutableFile;
-import org.springframework.roo.project.ContextualPath;
+import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.DependencyScope;
 import org.springframework.roo.project.FeatureNames;
@@ -101,7 +101,7 @@ public class JpaOperationsImpl implements JpaOperations {
 	}
 
 	public boolean isInstalledInModule(String moduleName) {
-		ContextualPath resourcesPath = ContextualPath.getInstance(Path.SRC_MAIN_RESOURCES, moduleName);
+		LogicalPath resourcesPath = LogicalPath.getInstance(Path.SRC_MAIN_RESOURCES, moduleName);
 		return isJpaInstallationPossible() && fileManager.exists(projectOperations.getPathResolver().getIdentifier(resourcesPath, PERSISTENCE_XML));
 	}
 
@@ -1083,7 +1083,7 @@ public class JpaOperationsImpl implements JpaOperations {
 
 	public boolean isJpaInstalledInProject() {
 		for (final Pom pom : projectOperations.getPoms()) {
-			final ContextualPath srcMainResources = ContextualPath.getInstance(Path.SRC_MAIN_RESOURCES, pom.getModuleName());
+			final LogicalPath srcMainResources = LogicalPath.getInstance(Path.SRC_MAIN_RESOURCES, pom.getModuleName());
 			final String persistenceUnitFile = pathResolver.getIdentifier(srcMainResources, PERSISTENCE_XML);
 			if (fileManager.exists(persistenceUnitFile)) {
 				return true;

@@ -63,7 +63,7 @@ import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.JdkJavaType;
-import org.springframework.roo.project.ContextualPath;
+import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.CollectionUtils;
@@ -233,7 +233,7 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 
 		ClassOrInterfaceTypeDetails javaTypeDetails = typeLocationService.getTypeDetails(javaType);
 		Assert.notNull(javaType, "Class or interface type details isn't available for type '" + javaType + "'");
-		ContextualPath contextualPath = PhysicalTypeIdentifier.getPath(javaTypeDetails.getDeclaredByMetadataId());
+		LogicalPath contextualPath = PhysicalTypeIdentifier.getPath(javaTypeDetails.getDeclaredByMetadataId());
 		String pluralMetadataKey = PluralMetadata.createIdentifier(javaType, contextualPath);
 		PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(pluralMetadataKey);
 		if (pluralMetadata != null) {
@@ -334,7 +334,7 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 		SortedSet<FinderMetadataDetails> finderMetadataDetails = new TreeSet<FinderMetadataDetails>();
 		ClassOrInterfaceTypeDetails javaTypeDetails = typeLocationService.getTypeDetails(javaType);
 		Assert.notNull(javaType, "Class or interface type details isn't available for type '" + javaType + "'");
-		ContextualPath contextualPath = PhysicalTypeIdentifier.getPath(javaTypeDetails.getDeclaredByMetadataId());
+		LogicalPath contextualPath = PhysicalTypeIdentifier.getPath(javaTypeDetails.getDeclaredByMetadataId());
 		String finderMetadataKey = FinderMetadata.createIdentifier(javaType, contextualPath);
 		registerDependency(finderMetadataKey, metadataIdentificationString);
 		FinderMetadata finderMetadata = (FinderMetadata) metadataService.get(finderMetadataKey);
@@ -402,7 +402,7 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 								pathMap.put(type.getFullyQualifiedTypeName(), pathString);
 								return pathString;
 							}
-							ContextualPath coitdPath = PhysicalTypeIdentifier.getPath(coitd.getDeclaredByMetadataId());
+							LogicalPath coitdPath = PhysicalTypeIdentifier.getPath(coitd.getDeclaredByMetadataId());
 							webScaffoldMetadataKey = WebScaffoldMetadata.createIdentifier(coitd.getName(), coitdPath);
 							webScaffoldMetadata = (WebScaffoldMetadata) metadataService.get(webScaffoldMetadataKey);
 							break;

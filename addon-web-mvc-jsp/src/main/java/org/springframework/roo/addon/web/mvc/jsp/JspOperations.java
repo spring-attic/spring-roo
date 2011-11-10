@@ -2,7 +2,7 @@ package org.springframework.roo.addon.web.mvc.jsp;
 
 import org.springframework.roo.addon.web.mvc.jsp.i18n.I18n;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.ContextualPath;
+import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Feature;
 import org.w3c.dom.Document;
 
@@ -47,7 +47,7 @@ public interface JspOperations extends Feature {
 	 * @param preferredMapping the mapping this controller should adopt (optional; if unspecified it will be based on the controller name)
 	 * @param webappPath
 	 */
-	void createManualController(JavaType controller, String preferredMapping, ContextualPath webappPath);
+	void createManualController(JavaType controller, String preferredMapping, LogicalPath webappPath);
 	
 	/**
 	 * Installs additional languages into Web MVC app.
@@ -55,7 +55,7 @@ public interface JspOperations extends Feature {
 	 * @param language the language
 	 * @param webappPath
 	 */
-	void installI18n(I18n language, ContextualPath webappPath);
+	void installI18n(I18n language, LogicalPath webappPath);
 	
 	/**
 	 * Creates a new Spring MVC static view.
@@ -66,7 +66,7 @@ public interface JspOperations extends Feature {
 	 * @param viewName the mapping this view should adopt (required, ie 'index')
 	 * @param webappPath
 	 */
-	void installView(String path, String viewName, String title, String category, ContextualPath webappPath);
+	void installView(String path, String viewName, String title, String category, LogicalPath webappPath);
 	
 	/**
 	 * Installs a new Spring MVC static view.
@@ -78,7 +78,7 @@ public interface JspOperations extends Feature {
 	 * @param document the jspx document to use for the view
 	 * @param webappPath
 	 */
-	void installView(String path, String viewName, String title, String category, Document document, ContextualPath webappPath);
+	void installView(String path, String viewName, String title, String category, Document document, LogicalPath webappPath);
 	
 	/**
 	 * Replaces an existing tag library with the latest version (set backup flag to backup your application first)
@@ -86,5 +86,5 @@ public interface JspOperations extends Feature {
 	 * @param backup indicates wether your application should be backed up prior to replacing the tagx library
 	 * @param webappPath
 	 */
-	void updateTags(boolean backup, ContextualPath webappPath);
+	void updateTags(boolean backup, LogicalPath webappPath);
 }

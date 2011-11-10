@@ -12,7 +12,7 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.process.manager.ActiveProcessManager;
 import org.springframework.roo.process.manager.ProcessManager;
-import org.springframework.roo.project.ContextualPath;
+import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.support.logging.HandlerUtils;
@@ -60,7 +60,7 @@ public class OsOperationsImpl implements OsOperations {
 	}
 
 	private String getProjectRoot() {
-		return pathResolver.getRoot(ContextualPath.getInstance(Path.ROOT));
+		return pathResolver.getRoot(LogicalPath.getInstance(Path.ROOT));
 	}
 
 	private static class LoggingInputStream extends Thread {

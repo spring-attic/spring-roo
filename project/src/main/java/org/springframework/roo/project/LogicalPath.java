@@ -5,29 +5,33 @@ import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
 
 /**
- * A {@link Path} optionally within the context of a project module.
+ * A given {@link Path} within the context of a specific project module.
+ * <p>
+ * To obtain the physical location on the file system, pass an instance of this
+ * class to the {@link PathResolver}.
  *
  * @author James Tyrrell
  * @since 1.2.0
  */
-public class ContextualPath {
+public class LogicalPath {
 
 	/**
 	 * The character that appears between the module name and the path name in
-	 * the textual representation of a {@link ContextualPath}. This cannot be
+	 * the textual representation of a {@link LogicalPath}. This cannot be
 	 * any character that could feasibly occur in a module name or {@link Path}
 	 * name.
 	 */
 	public static final String MODULE_PATH_SEPARATOR = "|";
 
 	/**
-	 * Creates an instance with no owning module.
+	 * Creates an instance with a blank module name (signifying the root or only
+	 * module).
 	 *
 	 * @param path the path to set (required)
 	 * @return a non-<code>null</code> instance
 	 */
-	public static ContextualPath getInstance(final Path path) {
-		return new ContextualPath(null, path);
+	public static LogicalPath getInstance(final Path path) {
+		return new LogicalPath(null, path);
 	}
 
 	/**
@@ -37,27 +41,27 @@ public class ContextualPath {
 	 * @param module can be blank for none
 	 * @return a non-<code>null</code> instance
 	 */
-	public static ContextualPath getInstance(final Path path, final String module) {
-		return new ContextualPath(module, path);
+	public static LogicalPath getInstance(final Path path, final String module) {
+		return new LogicalPath(module, path);
 	}
 
 	/**
-	 * Creates a {@link ContextualPath} by parsing the given concatenation of
+	 * Creates a {@link LogicalPath} by parsing the given concatenation of
 	 * optional module name and mandatory path name.
 	 *
 	 * @param modulePlusPath a string consisting of an optional module name plus
 	 * the {@link #MODULE_PATH_SEPARATOR} plus the path, or more precisely:
 	 * <code>[<i>module_name</i>{@value #MODULE_PATH_SEPARATOR}]<i>path</i></code>
 	 */
-	public static ContextualPath getInstance(final String modulePlusPath) {
+	public static LogicalPath getInstance(final String modulePlusPath) {
 		Assert.hasText(modulePlusPath, "Context path required");
 		final int separatorIndex = modulePlusPath.indexOf(MODULE_PATH_SEPARATOR);
 		if (separatorIndex == -1) {
-			return new ContextualPath(null, Path.valueOf(modulePlusPath));
+			return new LogicalPath(null, Path.valueOf(modulePlusPath));
 		}
 		final Path path = Path.valueOf(modulePlusPath.substring(separatorIndex + 1, modulePlusPath.length()));
 		final String module = modulePlusPath.substring(0, separatorIndex);
-		return new ContextualPath(module, path);
+		return new LogicalPath(module, path);
 	}
 
 	// Fields
@@ -70,14 +74,14 @@ public class ContextualPath {
 	 * @param module the module containing the given path (can be blank)
 	 * @param path the path within the module, if any (required)
 	 */
-	private ContextualPath(final String module, final Path path) {
+	private LogicalPath(final String module, final Path path) {
 		Assert.notNull(path, "Path required");
 		this.module = StringUtils.trimToEmpty(module);
 		this.path = path;
 	}
 
 	/**
-	 * Returns the display name of this {@link ContextualPath}.
+	 * Returns the display name of this {@link LogicalPath}.
 	 *
 	 * @return a non-blank name
 	 */
@@ -91,7 +95,7 @@ public class ContextualPath {
 	}
 
 	/**
-	 * Returns the path component of this {@link ContextualPath}
+	 * Returns the path component of this {@link LogicalPath}
 	 *
 	 * @return a non-<code>null</code> path
 	 */
@@ -115,10 +119,10 @@ public class ContextualPath {
 
 	@Override
 	public boolean equals(final Object obj) {
-		return obj instanceof ContextualPath && this.compareTo((ContextualPath) obj) == 0;
+		return obj instanceof LogicalPath && this.compareTo((LogicalPath) obj) == 0;
 	}
 
-	public int compareTo(final ContextualPath o) {
+	public int compareTo(final LogicalPath o) {
 		if (o == null) {
 			throw new NullPointerException();
 		}

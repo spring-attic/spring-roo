@@ -12,9 +12,9 @@ import static org.springframework.roo.project.maven.Pom.DEFAULT_PACKAGING;
 import java.io.File;
 
 import org.junit.Test;
-import org.springframework.roo.project.ContextualPath;
+import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Path;
-import org.springframework.roo.project.PathInformation;
+import org.springframework.roo.project.PhysicalPath;
 
 /**
  * Unit test of the {@link Pom} class
@@ -45,10 +45,10 @@ public class PomTest {
 		// Invoke and check
 		assertEquals(expectedPaths.length, pom.getPathInformation().size());
 		for (final Path path : expectedPaths) {
-			final PathInformation modulePath = pom.getPathInformation(path);
+			final PhysicalPath modulePath = pom.getPathInformation(path);
 			assertEquals(new File(PROJECT_ROOT, path.getDefaultLocation()), modulePath.getLocation());
 			assertEquals(path.isJavaSource(), modulePath.isSource());
-			final ContextualPath moduelPathId = modulePath.getContextualPath();
+			final LogicalPath moduelPathId = modulePath.getContextualPath();
 			assertEquals(path, moduelPathId.getPath());
 			assertEquals(ROOT_MODULE, moduelPathId.getModule());
 		}

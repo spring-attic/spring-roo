@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.SortedSet;
 
-import org.springframework.roo.project.ContextualPath;
+import org.springframework.roo.project.LogicalPath;
 
 /**
  * Provides an interface to {@link PropFileOperationsImpl}.
@@ -27,7 +27,7 @@ public interface PropFileOperations {
 	 * @param sorted indicates if the resulting properties should be sorted alphabetically
 	 * @param value the property value to set into the property key (required)
 	 */
-	void changeProperty(ContextualPath propertyFilePath, String propertyFilename, String key, String value, boolean sorted);
+	void changeProperty(LogicalPath propertyFilePath, String propertyFilename, String key, String value, boolean sorted);
 
 	/**
 	 * Changes the specified property, throwing an exception if the file does not exist.
@@ -37,7 +37,7 @@ public interface PropFileOperations {
 	 * @param key the property key to update (required)
 	 * @param value the property value to set into the property key (required)
 	 */
-	void changeProperty(ContextualPath propertyFilePath, String propertyFilename, String key, String value);
+	void changeProperty(LogicalPath propertyFilePath, String propertyFilename, String key, String value);
 	
 	/**
 	 * Adds a property only if the given key (and value) does not exist already.
@@ -47,7 +47,7 @@ public interface PropFileOperations {
 	 * @param key the property key to update (required)
 	 * @param value the property value to set into the property key (required)
 	 */
-	void addPropertyIfNotExists(ContextualPath propertyFilePath, String propertyFilename, String key, String value);
+	void addPropertyIfNotExists(LogicalPath propertyFilePath, String propertyFilename, String key, String value);
 	
 	/**
 	 * Adds the contents of the properties map to the given properties file.
@@ -58,7 +58,7 @@ public interface PropFileOperations {
 	 * @param sorted indicates if the resulting properties should be sorted alphabetically
 	 * @param changeExisting indicates if an existing value for a given key should be replaced or not
 	 */
-	void addProperties(ContextualPath propertyFilePath, String propertyFilename, Map<String, String> properties, boolean sorted, boolean changeExisting);
+	void addProperties(LogicalPath propertyFilePath, String propertyFilename, Map<String, String> properties, boolean sorted, boolean changeExisting);
 	
 	/**
 	 * Adds a property only if the given key (and value) does not exist already.
@@ -69,7 +69,7 @@ public interface PropFileOperations {
 	 * @param value the property value to set into the property key (required)
 	 * @param sorted indicates if the resulting properties should be sorted alphabetically
 	 */
-	void addPropertyIfNotExists(ContextualPath propertyFilePath, String propertyFilename, String key, String value, boolean sorted);
+	void addPropertyIfNotExists(LogicalPath propertyFilePath, String propertyFilename, String key, String value, boolean sorted);
 
 	/**
 	 * Removes the specified property, throwing an exception if the file does not exist.
@@ -78,7 +78,7 @@ public interface PropFileOperations {
 	 * @param propertyFilename the name of the property file within the specified path (required)
 	 * @param key the property key to remove (required)
 	 */
-	void removeProperty(ContextualPath propertyFilePath, String propertyFilename, String key);
+	void removeProperty(LogicalPath propertyFilePath, String propertyFilename, String key);
 
 	/**
 	 * Retrieves the specified property, returning null if the property or file does not exist.
@@ -88,7 +88,7 @@ public interface PropFileOperations {
 	 * @param key the property key to retrieve (required)
 	 * @return the property value (may return null if the property file or requested property does not exist)
 	 */
-	String getProperty(ContextualPath propertyFilePath, String propertyFilename, String key);
+	String getProperty(LogicalPath propertyFilePath, String propertyFilename, String key);
 
 	/**
 	 * Retrieves all property keys from the specified property, throwing an exception if the file does not exist.
@@ -98,7 +98,7 @@ public interface PropFileOperations {
 	 * @param includeValues if true, appends (" = theValue") to each returned string
 	 * @return the keys (may return null if the property file does not exist)
 	 */
-	SortedSet<String> getPropertyKeys(ContextualPath propertyFilePath, String propertyFilename, boolean includeValues);
+	SortedSet<String> getPropertyKeys(LogicalPath propertyFilePath, String propertyFilename, boolean includeValues);
 
 	/**
 	 * Retrieves all property key/value pairs from the specified property, throwing an exception if the file does not exist.
@@ -107,7 +107,7 @@ public interface PropFileOperations {
 	 * @param propertyFilename the name of the property file within the specified path (required)
 	 * @return the key/value pairs (may return null if the property file does not exist)
 	 */
-	Map<String, String> getProperties(ContextualPath propertyFilePath, String propertyFilename);
+	Map<String, String> getProperties(LogicalPath propertyFilePath, String propertyFilename);
 	
 	/**
 	 * Loads the properties from the given stream, closing it on completion

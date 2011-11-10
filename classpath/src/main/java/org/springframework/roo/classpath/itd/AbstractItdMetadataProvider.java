@@ -26,7 +26,7 @@ import org.springframework.roo.metadata.MetadataNotificationListener;
 import org.springframework.roo.metadata.MetadataProvider;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
-import org.springframework.roo.project.ContextualPath;
+import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.support.util.Assert;
 
@@ -121,7 +121,7 @@ public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTracki
 
 		// A physical Java type has changed, and determine what the corresponding local metadata identification string would have been
 		JavaType javaType = PhysicalTypeIdentifier.getJavaType(upstreamDependency);
-		ContextualPath path = PhysicalTypeIdentifier.getPath(upstreamDependency);
+		LogicalPath path = PhysicalTypeIdentifier.getPath(upstreamDependency);
 		return createLocalIdentifier(javaType, path);
 	}
 
@@ -166,7 +166,7 @@ public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTracki
 	 * @param path the path (required)
 	 * @return an instance-specific identifier that is compatible with {@link #getProvidesType()} (never null or empty)
 	 */
-	protected abstract String createLocalIdentifier(JavaType javaType, ContextualPath path);
+	protected abstract String createLocalIdentifier(JavaType javaType, LogicalPath path);
 	
 	/**
 	 * Called whenever there is a requirement to convert a local metadata identification string (ie an instance identifier
@@ -204,7 +204,7 @@ public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTracki
 		ClassOrInterfaceTypeDetails superCid = child.getSuperclass();
 		while (parentMetadata == null && superCid != null) {
 			final String superCidPhysicalTypeIdentifier = superCid.getDeclaredByMetadataId();
-			final ContextualPath path = PhysicalTypeIdentifier.getPath(superCidPhysicalTypeIdentifier);
+			final LogicalPath path = PhysicalTypeIdentifier.getPath(superCidPhysicalTypeIdentifier);
 			final String superCidLocalIdentifier = createLocalIdentifier(superCid.getName(), path);
 			parentMetadata = (T) metadataService.get(superCidLocalIdentifier);
 			superCid = superCid.getSuperclass();
@@ -417,7 +417,7 @@ public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTracki
 	public final String getIdForPhysicalJavaType(final String physicalJavaTypeIdentifier) {
 		Assert.isTrue(MetadataIdentificationUtils.getMetadataClass(physicalJavaTypeIdentifier).equals(MetadataIdentificationUtils.getMetadataClass(PhysicalTypeIdentifier.getMetadataIdentiferType())), "Expected a valid physical Java type instance identifier (not '" + physicalJavaTypeIdentifier + "')");
 		JavaType javaType = PhysicalTypeIdentifier.getJavaType(physicalJavaTypeIdentifier);
-		ContextualPath path = PhysicalTypeIdentifier.getPath(physicalJavaTypeIdentifier);
+		LogicalPath path = PhysicalTypeIdentifier.getPath(physicalJavaTypeIdentifier);
 		return createLocalIdentifier(javaType, path);
 	}
 
@@ -453,7 +453,7 @@ public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTracki
 
 		// Extract out the metadata provider class (we need this later to extract just the Path it is located in)
 		String providesType = MetadataIdentificationUtils.getMetadataClass(memberHoldingTypeDetails.getDeclaredByMetadataId());
-		ContextualPath path = PhysicalTypeIdentifierNamingUtils.getPath(providesType, memberHoldingTypeDetails.getDeclaredByMetadataId());
+		LogicalPath path = PhysicalTypeIdentifierNamingUtils.getPath(providesType, memberHoldingTypeDetails.getDeclaredByMetadataId());
 		// Produce the local MID we're going to use to make the request
 		return createLocalIdentifier(governorType, path);
 	}

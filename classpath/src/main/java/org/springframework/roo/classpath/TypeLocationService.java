@@ -6,7 +6,7 @@ import java.util.Set;
 
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.ContextualPath;
+import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.maven.Pom;
 
@@ -126,7 +126,7 @@ public interface TypeLocationService {
 	 * @param path the type type's path
 	 * @return the resolved path
 	 */
-	String getPhysicalTypeCanonicalPath(JavaType javaType, ContextualPath path);
+	String getPhysicalTypeCanonicalPath(JavaType javaType, LogicalPath path);
 
 	/**
 	 * Indicates whether the passed in type has changed since last invocation by the requesting class.
@@ -143,7 +143,7 @@ public interface TypeLocationService {
 	 * @param path
 	 * @return
 	 */
-	String getPhysicalTypeIdentifier(JavaType type, ContextualPath path);
+	String getPhysicalTypeIdentifier(JavaType type, LogicalPath path);
 
 	/**
 	 *
@@ -171,5 +171,5 @@ public interface TypeLocationService {
 	 * @param javaType
 	 * @return
 	 */
-	ContextualPath getTypePath(JavaType javaType);
+	LogicalPath getTypePath(JavaType javaType);
 }

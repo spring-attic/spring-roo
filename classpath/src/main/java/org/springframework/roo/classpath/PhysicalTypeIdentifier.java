@@ -2,7 +2,7 @@ package org.springframework.roo.classpath;
 
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.ContextualPath;
+import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.support.util.Assert;
 
@@ -42,7 +42,7 @@ public final class PhysicalTypeIdentifier {
 	 * @since 1.2.0
 	 */
 	public static String createIdentifier(final JavaType javaType) {
-		return createIdentifier(javaType, ContextualPath.getInstance(Path.SRC_MAIN_JAVA));
+		return createIdentifier(javaType, LogicalPath.getInstance(Path.SRC_MAIN_JAVA));
 	}
 
 	/**
@@ -52,7 +52,7 @@ public final class PhysicalTypeIdentifier {
 	 * @param path the path in which it's located (required)
 	 * @return a non-blank ID
 	 */
-	public static String createIdentifier(final JavaType javaType, final ContextualPath path) {
+	public static String createIdentifier(final JavaType javaType, final LogicalPath path) {
 		return PhysicalTypeIdentifierNamingUtils.createIdentifier(PHYSICAL_METADATA_TYPE, javaType, path);
 	}
 
@@ -72,7 +72,7 @@ public final class PhysicalTypeIdentifier {
 	 * @param metadataId the metadata ID to parse (must identify an instance of {@link PhysicalTypeIdentifier#PHYSICAL_METADATA_TYPE})
 	 * @return a non-<code>null</code> path
 	 */
-	public static ContextualPath getPath(final String metadataId) {
+	public static LogicalPath getPath(final String metadataId) {
 		return PhysicalTypeIdentifierNamingUtils.getPath(PHYSICAL_METADATA_TYPE, metadataId);
 	}
 

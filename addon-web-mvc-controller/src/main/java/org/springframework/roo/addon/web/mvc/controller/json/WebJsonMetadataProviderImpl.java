@@ -30,7 +30,7 @@ import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem
 import org.springframework.roo.classpath.layers.MemberTypeAdditions;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.ContextualPath;
+import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
 
@@ -135,7 +135,7 @@ public class WebJsonMetadataProviderImpl extends AbstractMemberDiscoveringItdMet
 		if (jsonTypeDetails == null) {
 			return null;
 		}
-		ContextualPath jsonObjectPath = PhysicalTypeIdentifier.getPath(jsonTypeDetails.getDeclaredByMetadataId());
+		LogicalPath jsonObjectPath = PhysicalTypeIdentifier.getPath(jsonTypeDetails.getDeclaredByMetadataId());
 		JsonMetadata jsonMetadata = (JsonMetadata) metadataService.get(JsonMetadata.createIdentifier(jsonObject, jsonObjectPath));
 		if (jsonMetadata == null) {
 			return null;
@@ -188,12 +188,12 @@ public class WebJsonMetadataProviderImpl extends AbstractMemberDiscoveringItdMet
 	@Override
 	protected String getGovernorPhysicalTypeIdentifier(final String metadataIdentificationString) {
 		JavaType javaType = WebJsonMetadata.getJavaType(metadataIdentificationString);
-		ContextualPath path = WebJsonMetadata.getPath(metadataIdentificationString);
+		LogicalPath path = WebJsonMetadata.getPath(metadataIdentificationString);
 		return PhysicalTypeIdentifier.createIdentifier(javaType, path);
 	}
 
 	@Override
-	protected String createLocalIdentifier(final JavaType javaType, final ContextualPath path) {
+	protected String createLocalIdentifier(final JavaType javaType, final LogicalPath path) {
 		return WebJsonMetadata.createIdentifier(javaType, path);
 	}
 

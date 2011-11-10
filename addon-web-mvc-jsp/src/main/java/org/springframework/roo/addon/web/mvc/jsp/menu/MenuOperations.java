@@ -3,7 +3,7 @@ package org.springframework.roo.addon.web.mvc.jsp.menu;
 import java.util.List;
 
 import org.springframework.roo.model.JavaSymbolName;
-import org.springframework.roo.project.ContextualPath;
+import org.springframework.roo.project.LogicalPath;
 
 /**
  * Interface to {@link MenuOperations}.
@@ -33,7 +33,7 @@ public interface MenuOperations {
 	 * @param idPrefix the prefix to be used for this menu item (optional, MenuOperations.DEFAULT_MENU_ITEM_PREFIX is default)
 	 * @param contextualPath
 	 */
-	void addMenuItem(JavaSymbolName menuCategoryName, JavaSymbolName menuItemId, String menuItemLabel, String globalMessageCode, String link, String idPrefix, ContextualPath contextualPath);
+	void addMenuItem(JavaSymbolName menuCategoryName, JavaSymbolName menuItemId, String menuItemLabel, String globalMessageCode, String link, String idPrefix, LogicalPath contextualPath);
 
 	/**
 	 * Allows for the addition of menu categories and menu items. If a category or menu item with the
@@ -58,7 +58,7 @@ public interface MenuOperations {
 	 * @param idPrefix
 	 * @param contextualPath
 	 */
-	void addMenuItem(JavaSymbolName menuCategoryName, JavaSymbolName menuItemId, String globalMessageCode, String link, String idPrefix, ContextualPath contextualPath);
+	void addMenuItem(JavaSymbolName menuCategoryName, JavaSymbolName menuItemId, String globalMessageCode, String link, String idPrefix, LogicalPath contextualPath);
 	/**
 	 * Attempts to locate a unused finder menu items and remove them.
 	 *
@@ -66,7 +66,7 @@ public interface MenuOperations {
 	 * @param allowedFinderMenuIds Finder menu ids currently installed
 	 * @param contextualPath
 	 */
-	void cleanUpFinderMenuItems(JavaSymbolName menuCategoryName, List<String> allowedFinderMenuIds, ContextualPath contextualPath);
+	void cleanUpFinderMenuItems(JavaSymbolName menuCategoryName, List<String> allowedFinderMenuIds, LogicalPath contextualPath);
 
 	/**
 	 * Attempts to locate a menu item and remove it.
@@ -76,5 +76,5 @@ public interface MenuOperations {
 	 * @param idPrefix the prefix to be used for this menu item (optional, MenuOperations.DEFAULT_MENU_ITEM_PREFIX is default)
 	 * @param contextualPath
 	 */
-	void cleanUpMenuItem(JavaSymbolName menuCategoryName, JavaSymbolName menuItemName, String idPrefix, ContextualPath contextualPath);
+	void cleanUpMenuItem(JavaSymbolName menuCategoryName, JavaSymbolName menuItemName, String idPrefix, LogicalPath contextualPath);
 }

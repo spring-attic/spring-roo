@@ -32,7 +32,7 @@ import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
-import org.springframework.roo.project.ContextualPath;
+import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectOperations;
@@ -280,7 +280,7 @@ public class JmsOperationsImpl implements JmsOperations {
 	private String getPhysicalLocationCanonicalPath(final String physicalTypeIdentifier) {
 		Assert.isTrue(PhysicalTypeIdentifier.isValid(physicalTypeIdentifier), "Physical type identifier is invalid");
 		final JavaType javaType = PhysicalTypeIdentifier.getJavaType(physicalTypeIdentifier);
-		final ContextualPath path = PhysicalTypeIdentifier.getPath(physicalTypeIdentifier);
+		final LogicalPath path = PhysicalTypeIdentifier.getPath(physicalTypeIdentifier);
 		final String relativePath = javaType.getFullyQualifiedTypeName().replace('.', File.separatorChar) + ".java";
 		return projectOperations.getPathResolver().getIdentifier(path, relativePath);
 	}

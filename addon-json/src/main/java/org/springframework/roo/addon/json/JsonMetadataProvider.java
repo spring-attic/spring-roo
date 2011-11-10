@@ -12,7 +12,7 @@ import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.ContextualPath;
+import org.springframework.roo.project.LogicalPath;
 
 /**
  * Provides {@link JsonMetadata}.
@@ -38,7 +38,7 @@ public class JsonMetadataProvider extends AbstractItdMetadataProvider {
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(final String metadataIdentificationString, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final String itdFilename) {
 		// Acquire bean info (we need getters details, specifically)
 		JavaType javaType = JsonMetadata.getJavaType(metadataIdentificationString);
-		ContextualPath path = JsonMetadata.getPath(metadataIdentificationString);
+		LogicalPath path = JsonMetadata.getPath(metadataIdentificationString);
 
 		// We need to parse the annotation, if it is not present we will simply get the default annotation values
 		JsonAnnotationValues annotationValues = new JsonAnnotationValues(governorPhysicalTypeMetadata);
@@ -59,13 +59,13 @@ public class JsonMetadataProvider extends AbstractItdMetadataProvider {
 	@Override
 	protected String getGovernorPhysicalTypeIdentifier(final String metadataIdentificationString) {
 		JavaType javaType = JsonMetadata.getJavaType(metadataIdentificationString);
-		ContextualPath path = JsonMetadata.getPath(metadataIdentificationString);
+		LogicalPath path = JsonMetadata.getPath(metadataIdentificationString);
 		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(javaType, path);
 		return physicalTypeIdentifier;
 	}
 
 	@Override
-	protected String createLocalIdentifier(final JavaType javaType, final ContextualPath path) {
+	protected String createLocalIdentifier(final JavaType javaType, final LogicalPath path) {
 		return JsonMetadata.createIdentifier(javaType, path);
 	}
 

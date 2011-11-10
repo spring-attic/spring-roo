@@ -64,7 +64,7 @@ public class DefaultPathResolvingStrategyTest {
 	public void testGetRootOfPath() {
 		// Set up
 		this.pathResolvingStrategy.activate(getMockComponentContext(null));
-		final ContextualPath mockContextualPath = mock(ContextualPath.class);
+		final LogicalPath mockContextualPath = mock(LogicalPath.class);
 		when(mockContextualPath.getPath()).thenReturn(Path.SRC_MAIN_JAVA);
 		
 		// Invoke
@@ -81,13 +81,13 @@ public class DefaultPathResolvingStrategyTest {
 		this.pathResolvingStrategy.activate(getMockComponentContext(null));
 		
 		// Invoke
-		final List<PathInformation> modulePaths = this.pathResolvingStrategy.getPathInformation();
+		final List<PhysicalPath> modulePaths = this.pathResolvingStrategy.getPathInformation();
 		
 		// Check
 		assertEquals(Path.values().length, modulePaths.size());
 		for (int i = 0; i < modulePaths.size(); i++) {
-			final PathInformation modulePath = modulePaths.get(i);
-			final ContextualPath modulePathId = modulePath.getContextualPath();
+			final PhysicalPath modulePath = modulePaths.get(i);
+			final LogicalPath modulePathId = modulePath.getContextualPath();
 			final Path subPath = Path.values()[i];
 			assertEquals(ROOT_MODULE, modulePathId.getModule());
 			assertEquals(subPath, modulePathId.getPath());

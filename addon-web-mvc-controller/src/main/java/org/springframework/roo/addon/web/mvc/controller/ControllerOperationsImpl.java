@@ -34,7 +34,7 @@ import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.ContextualPath;
+import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
@@ -86,8 +86,8 @@ public class ControllerOperationsImpl implements ControllerOperations {
 			}
 
 			JavaType javaType = cid.getName();
-			ContextualPath path = PhysicalTypeIdentifier.getPath(cid.getDeclaredByMetadataId());
-			path = ContextualPath.getInstance(path.getPath(), projectOperations.getFocusedModuleName());
+			LogicalPath path = PhysicalTypeIdentifier.getPath(cid.getDeclaredByMetadataId());
+			path = LogicalPath.getInstance(path.getPath(), projectOperations.getFocusedModuleName());
 
 			// Check to see if this persistent type has a web scaffold metadata listening to it
 			String downstreamWebScaffoldMetadataId = WebScaffoldMetadata.createIdentifier(javaType, path);
@@ -122,7 +122,7 @@ public class ControllerOperationsImpl implements ControllerOperations {
 
 		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = null;
 		if (existingController == null) {
-			ContextualPath controllerPath = pathResolver.getFocusedPath(Path.SRC_MAIN_JAVA);
+			LogicalPath controllerPath = pathResolver.getFocusedPath(Path.SRC_MAIN_JAVA);
 			String resourceIdentifier = typeLocationService.getPhysicalTypeCanonicalPath(controller, controllerPath);
 			String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(controller, pathResolver.getPath(resourceIdentifier));
 			

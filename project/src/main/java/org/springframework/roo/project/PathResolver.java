@@ -26,7 +26,7 @@ public interface PathResolver {
 	 * @param relativePath to use (cannot be null, but may be empty if referring to the path itself)
 	 * @return the canonical path to the file (never null)
 	 */
-	String getIdentifier(ContextualPath path, String relativePath);
+	String getIdentifier(LogicalPath path, String relativePath);
 	
 	/**
 	 * Attempts to determine which {@link Path} the specified canonical path falls under.
@@ -34,15 +34,15 @@ public interface PathResolver {
 	 * @param identifier to lookup (required)
 	 * @return the {@link Path}, or null if the identifier refers to a location not under a know path.
 	 */
-	ContextualPath getPath(String identifier);
+	LogicalPath getPath(String identifier);
 	
 	/**
-	 * Returns the canonical path of the root of the given {@link ContextualPath}.
+	 * Returns the canonical path of the root of the given {@link LogicalPath}.
 	 *
 	 * @param path to lookup (required)
 	 * @return <code>null</code> if the root path cannot be determined
 	 */
-	String getRoot(ContextualPath path);
+	String getRoot(LogicalPath path);
 	
 	/**
 	 * Attempts to determine which {@link Path} the specified canonical path falls under,
@@ -70,15 +70,15 @@ public interface PathResolver {
 	 *
 	 * @return a non-<code>null</code> list
 	 */
-	Collection<ContextualPath> getPaths();
+	Collection<LogicalPath> getPaths();
 
 	/**
-	 * Returns the {@link ContextualPath}s of user project directories that can
+	 * Returns the {@link LogicalPath}s of user project directories that can
 	 * contain Java source code.
 	 *
 	 * @return a non-<code>null</code> list
 	 */
-	Collection<ContextualPath> getSourcePaths();
+	Collection<LogicalPath> getSourcePaths();
 
 	/**
 	 *
@@ -92,7 +92,7 @@ public interface PathResolver {
 	 * @param javaType
 	 * @return
 	 */
-	String getCanonicalPath(ContextualPath path, JavaType javaType);
+	String getCanonicalPath(LogicalPath path, JavaType javaType);
 
 	/**
 	 * Returns the canonical path of the given {@link JavaType} in the given
@@ -122,11 +122,11 @@ public interface PathResolver {
 	String getFocusedRoot(Path path);
 
 	/**
-	 * Returns the {@link ContextualPath} for the given {@link Path} within the
+	 * Returns the {@link LogicalPath} for the given {@link Path} within the
 	 * currently focused module.
 	 * 
 	 * @param path the path within the currently focused module (required)
 	 * @return a non-<code>null</code> instance
 	 */
-	ContextualPath getFocusedPath(Path path);
+	LogicalPath getFocusedPath(Path path);
 }

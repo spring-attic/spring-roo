@@ -22,7 +22,7 @@ import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.process.manager.MutableFile;
-import org.springframework.roo.project.ContextualPath;
+import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.Path;
@@ -55,7 +55,7 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
 	}
 
 	public boolean isInstalledInModule(String moduleName) {
-		ContextualPath resourcesPath = ContextualPath.getInstance(Path.SRC_MAIN_RESOURCES, moduleName);
+		LogicalPath resourcesPath = LogicalPath.getInstance(Path.SRC_MAIN_RESOURCES, moduleName);
 		return projectOperations.isFocusedProjectAvailable() && fileManager.exists(projectOperations.getPathResolver().getIdentifier(resourcesPath, "META-INF/persistence.xml"));
 	}
 

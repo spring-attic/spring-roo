@@ -25,21 +25,21 @@ public class MavenPathResolvingStrategy extends AbstractPathResolvingStrategy {
 	// ------------ PathResolvingStrategy methods ----------------
 
 	/**
-	 * Locates the first {@link PathInformation} which can be construed as a parent
+	 * Locates the first {@link PhysicalPath} which can be construed as a parent
 	 * of the presented identifier.
 	 *
 	 * @param identifier to locate the parent of (required)
 	 * @return the first matching parent, or null if not found
 	 */
-	protected PathInformation getApplicablePathInformation(final String identifier) {
+	protected PhysicalPath getApplicablePathInformation(final String identifier) {
 		Assert.notNull(identifier, "Identifier required");
-		PathInformation pathInformation = null;
+		PhysicalPath pathInformation = null;
 		int longest = 0;
 		for (final Pom pom : pomManagementService.getPoms()) {
 			if (removeTrailingSeparator(identifier).startsWith(removeTrailingSeparator(pom.getRoot())) && removeTrailingSeparator(pom.getRoot()).length() > longest) {
 				longest = removeTrailingSeparator(pom.getRoot()).length();
 				int nextLongest = 0;
-				for (final PathInformation pi : pom.getPathInformation()) {
+				for (final PhysicalPath pi : pom.getPathInformation()) {
 					final String possibleParent = new FileDetails(pi.getLocation(), null).getCanonicalPath();
 					if (removeTrailingSeparator(identifier).startsWith(possibleParent) && possibleParent.length() > nextLongest) {
 						nextLongest = possibleParent.length();
@@ -51,7 +51,7 @@ public class MavenPathResolvingStrategy extends AbstractPathResolvingStrategy {
 		return pathInformation;
 	}
 	
-	public String getCanonicalPath(final ContextualPath path, final JavaType javaType) {
+	public String getCanonicalPath(final LogicalPath path, final JavaType javaType) {
 		final String relativePath = javaType.getFullyQualifiedTypeName().replace('.', File.separatorChar) + ".java";
 		return getIdentifier(path, relativePath);
 	}
@@ -61,10 +61,10 @@ public class MavenPathResolvingStrategy extends AbstractPathResolvingStrategy {
 	}
 
 	public String getFocusedIdentifier(final Path path, final String relativePath) {
-		return getIdentifier(ContextualPath.getInstance(path, pomManagementService.getFocusedModuleName()), relativePath);
+		return getIdentifier(LogicalPath.getInstance(path, pomManagementService.getFocusedModuleName()), relativePath);
 	}
 	
-	public ContextualPath getFocusedPath(final Path path) {
+	public LogicalPath getFocusedPath(final Path path) {
 		return pomManagementService.getFocusedModule().getPathInformation(path).getContextualPath();
 	}
 
@@ -72,7 +72,7 @@ public class MavenPathResolvingStrategy extends AbstractPathResolvingStrategy {
 		return pomManagementService.getFocusedModule().getPathLocation(path);
 	}
 	
-	public String getIdentifier(final ContextualPath contextualPath, final String relativePath) {
+	public String getIdentifier(final LogicalPath contextualPath, final String relativePath) {
 		Assert.notNull(contextualPath, "Path required");
 		Assert.notNull(relativePath, "Relative path cannot be null, although it can be empty");
 		
@@ -90,17 +90,17 @@ public class MavenPathResolvingStrategy extends AbstractPathResolvingStrategy {
 		return new File(pom.getRoot());
 	}
 	
-	private File getPath(final ContextualPath contextualPath) {
+	private File getPath(final LogicalPath contextualPath) {
 		final Pom pom = pomManagementService.getPomFromModuleName(contextualPath.getModule());
 		final File moduleRoot = getModuleRoot(contextualPath.getModule(), pom);
 		final String pathRelativeToPom = contextualPath.getPathRelativeToPom(pom);
 		return new File(moduleRoot, pathRelativeToPom);
 	}
 	
-	protected Collection<ContextualPath> getPaths(final boolean sourceOnly) {
-		final Collection<ContextualPath> pathIds = new ArrayList<ContextualPath>();
+	protected Collection<LogicalPath> getPaths(final boolean sourceOnly) {
+		final Collection<LogicalPath> pathIds = new ArrayList<LogicalPath>();
 		for (final Pom pom : pomManagementService.getPoms()) {
-			for (final PathInformation modulePath : pom.getPathInformation()) {
+			for (final PhysicalPath modulePath : pom.getPathInformation()) {
 				if (!sourceOnly || modulePath.isSource()) {
 					pathIds.add(modulePath.getContextualPath());
 				}
@@ -109,7 +109,7 @@ public class MavenPathResolvingStrategy extends AbstractPathResolvingStrategy {
 		return pathIds;
 	}
 
-	public String getRoot(final ContextualPath modulePathId) {
+	public String getRoot(final LogicalPath modulePathId) {
 		final Pom pom = pomManagementService.getPomFromModuleName(modulePathId.getModule());
 		return pom.getPathInformation(modulePathId.getPath()).getLocationPath();
 	}

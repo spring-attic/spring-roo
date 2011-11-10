@@ -21,7 +21,7 @@ import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.ContextualPath;
+import org.springframework.roo.project.LogicalPath;
 
 /**
  * Implementation of {@link WebFinderMetadataProvider}.
@@ -80,12 +80,12 @@ public class WebFinderMetadataProviderImpl extends AbstractItdMetadataProvider i
 	@Override
 	protected String getGovernorPhysicalTypeIdentifier(final String metadataIdentificationString) {
 		JavaType javaType = WebFinderMetadata.getJavaType(metadataIdentificationString);
-		ContextualPath path = WebFinderMetadata.getPath(metadataIdentificationString);
+		LogicalPath path = WebFinderMetadata.getPath(metadataIdentificationString);
 		return PhysicalTypeIdentifier.createIdentifier(javaType, path);
 	}
 
 	@Override
-	protected String createLocalIdentifier(final JavaType javaType, final ContextualPath path) {
+	protected String createLocalIdentifier(final JavaType javaType, final LogicalPath path) {
 		return WebFinderMetadata.createIdentifier(javaType, path);
 	}
 

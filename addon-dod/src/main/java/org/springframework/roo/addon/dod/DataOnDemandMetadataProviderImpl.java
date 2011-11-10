@@ -49,7 +49,7 @@ import org.springframework.roo.classpath.layers.MethodParameter;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.ContextualPath;
+import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.shell.NaturalOrderComparator;
 
 /**
@@ -339,12 +339,12 @@ public class DataOnDemandMetadataProviderImpl extends AbstractMemberDiscoveringI
 	@Override
 	protected String getGovernorPhysicalTypeIdentifier(final String metadataIdentificationString) {
 		JavaType javaType = DataOnDemandMetadata.getJavaType(metadataIdentificationString);
-		ContextualPath path = DataOnDemandMetadata.getPath(metadataIdentificationString);
+		LogicalPath path = DataOnDemandMetadata.getPath(metadataIdentificationString);
 		return PhysicalTypeIdentifier.createIdentifier(javaType, path);
 	}
 
 	@Override
-	protected String createLocalIdentifier(final JavaType javaType, final ContextualPath path) {
+	protected String createLocalIdentifier(final JavaType javaType, final LogicalPath path) {
 		return DataOnDemandMetadata.createIdentifier(javaType, path);
 	}
 

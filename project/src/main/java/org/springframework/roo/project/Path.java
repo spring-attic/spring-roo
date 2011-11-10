@@ -141,13 +141,13 @@ public enum Path {
 	public abstract boolean appliesTo(final String packaging);
 
 	/**
-	 * Returns the {@link ContextualPath} for this path in the given module
+	 * Returns the {@link LogicalPath} for this path in the given module
 	 * 
 	 * @param moduleName can be blank for the root or only module
 	 * @return a non-<code>null</code> instance
 	 */
-	public ContextualPath getModulePathId(final String moduleName) {
-		return ContextualPath.getInstance(this, moduleName);
+	public LogicalPath getModulePathId(final String moduleName) {
+		return LogicalPath.getInstance(this, moduleName);
 	}
 	
 	/**
@@ -161,29 +161,29 @@ public enum Path {
 	}
 	
 	/**
-	 * Returns the {@link PathInformation} of this {@link Path} within the root
+	 * Returns the {@link PhysicalPath} of this {@link Path} within the root
 	 * module, when no POM exists to customise its location.
 	 * 
 	 * @param projectDirectory the root directory of the user project
 	 * @return a non-<code>null</code> instance
 	 */
-	public PathInformation getRootModulePath(final String projectDirectory) {
+	public PhysicalPath getRootModulePath(final String projectDirectory) {
 		return getModulePath("", projectDirectory, null);
 	}
 	
 	/**
-	 * Returns the {@link PathInformation} of this {@link Path} within the
+	 * Returns the {@link PhysicalPath} of this {@link Path} within the
 	 * module to which the given POM belongs.
 	 * 
 	 * @param pom the POM of the module in question (required)
 	 * @return a non-<code>null</code> instance
 	 */
-	public PathInformation getModulePath(final Pom pom) {
+	public PhysicalPath getModulePath(final Pom pom) {
 		return getModulePath(pom.getModuleName(), FileUtils.getFirstDirectory(pom.getPath()), pom);
 	}
 	
-	private PathInformation getModulePath(final String moduleName, final String moduleRoot, final Pom pom) {
-		return new PathInformation(getModulePathId(moduleName), javaSource, new File(moduleRoot, getPathRelativeToPom(pom)));
+	private PhysicalPath getModulePath(final String moduleName, final String moduleRoot, final Pom pom) {
+		return new PhysicalPath(getModulePathId(moduleName), new File(moduleRoot, getPathRelativeToPom(pom)));
 	}
 
 	/**

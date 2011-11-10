@@ -2,7 +2,7 @@ package org.springframework.roo.classpath.operations;
 
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.ContextualPath;
+import org.springframework.roo.project.LogicalPath;
 
 /**
  * Classpath-related operations
@@ -31,7 +31,7 @@ public interface ClasspathOperations {
 	 * @param createAbstract whether the generated class should be marked as abstract
 	 * @param permitReservedWords whether reserved words are ignored by Roo
 	 */
-	void createClass(final JavaType name, final boolean rooAnnotations,	final ContextualPath path, final JavaType superclass,	final boolean createAbstract, final boolean permitReservedWords);
+	void createClass(final JavaType name, final boolean rooAnnotations,	final LogicalPath path, final JavaType superclass,	final boolean createAbstract, final boolean permitReservedWords);
 
 	/**
 	 * Creates a new Java interface source file in any project path.
@@ -40,7 +40,7 @@ public interface ClasspathOperations {
 	 * @param path the source directory in which to create the interface
 	 * @param permitReservedWords whether reserved words are ignored by Roo
 	 */
-	void createInterface(final JavaType name, final ContextualPath path, final boolean permitReservedWords);
+	void createInterface(final JavaType name, final LogicalPath path, final boolean permitReservedWords);
 
 	/**
 	 * Creates a new Java enum source file in any project path.
@@ -49,7 +49,7 @@ public interface ClasspathOperations {
 	 * @param path the source directory in which to create the enum
 	 * @param permitReservedWords whether reserved words are ignored by Roo
 	 */
-	void createEnum(final JavaType name, final ContextualPath path, final boolean permitReservedWords);
+	void createEnum(final JavaType name, final LogicalPath path, final boolean permitReservedWords);
 
 	/**
 	 * Inserts a new enum constant into an enum.

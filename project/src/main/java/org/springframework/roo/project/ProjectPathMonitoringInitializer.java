@@ -58,7 +58,7 @@ public class ProjectPathMonitoringInitializer implements MetadataNotificationLis
 	}
 	
 	private void monitorNonRootPaths() {
-		for (final ContextualPath contextualPath : pathResolver.getPaths()) {
+		for (final LogicalPath contextualPath : pathResolver.getPaths()) {
 			if (!contextualPath.isProjectRoot()) {
 				final String canonicalPath = pathResolver.getRoot(contextualPath);
 				// The path can be blank if a sub-folder contains a POM that doesn't belong to a module

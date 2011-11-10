@@ -5,7 +5,7 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.ContextualPath;
+import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
@@ -40,7 +40,7 @@ public class ClasspathCommands implements CommandMarker {
 	public void createClass(
 		@CliOption(key = "class", optionContext = "update,project", mandatory = true, help = "The name of the class to create") final JavaType name,
 		@CliOption(key = "rooAnnotations", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Whether the generated class should have common Roo annotations") final boolean rooAnnotations,
-		@CliOption(key = "path", mandatory = false, unspecifiedDefaultValue = "FOCUSED|SRC_MAIN_JAVA", specifiedDefaultValue = "FOCUSED|SRC_MAIN_JAVA", help = "Source directory to create the class in") final ContextualPath path,
+		@CliOption(key = "path", mandatory = false, unspecifiedDefaultValue = "FOCUSED|SRC_MAIN_JAVA", specifiedDefaultValue = "FOCUSED|SRC_MAIN_JAVA", help = "Source directory to create the class in") final LogicalPath path,
 		@CliOption(key = "extends", mandatory = false, unspecifiedDefaultValue = "java.lang.Object", help = "The superclass (defaults to java.lang.Object)") final JavaType superclass,
 		@CliOption(key = "abstract", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Whether the generated class should be marked as abstract") final boolean createAbstract,
 		@CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") final boolean permitReservedWords) {
@@ -51,7 +51,7 @@ public class ClasspathCommands implements CommandMarker {
 	@CliCommand(value = "interface", help = "Creates a new Java interface source file in any project path")
 	public void createInterface(
 		@CliOption(key = "class", optionContext = "update,project", mandatory = true, help = "The name of the interface to create") final JavaType name,
-		@CliOption(key = "path", mandatory = false, unspecifiedDefaultValue = "FOCUSED|SRC_MAIN_JAVA", specifiedDefaultValue = "FOCUSED|SRC_MAIN_JAVA", help = "Source directory to create the interface in") final ContextualPath path,
+		@CliOption(key = "path", mandatory = false, unspecifiedDefaultValue = "FOCUSED|SRC_MAIN_JAVA", specifiedDefaultValue = "FOCUSED|SRC_MAIN_JAVA", help = "Source directory to create the interface in") final LogicalPath path,
 		@CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") final boolean permitReservedWords) {
 
 		classpathOperations.createInterface(name, path, permitReservedWords);
@@ -60,7 +60,7 @@ public class ClasspathCommands implements CommandMarker {
 	@CliCommand(value = "enum type", help = "Creates a new Java enum source file in any project path")
 	public void createEnum(
 		@CliOption(key = "class", optionContext = "update,project", mandatory = true, help = "The name of the enum to create") final JavaType name,
-		@CliOption(key = "path", mandatory = false, unspecifiedDefaultValue = "FOCUSED|SRC_MAIN_JAVA", specifiedDefaultValue = "FOCUSED|SRC_MAIN_JAVA", help = "Source directory to create the enum in") final ContextualPath path,
+		@CliOption(key = "path", mandatory = false, unspecifiedDefaultValue = "FOCUSED|SRC_MAIN_JAVA", specifiedDefaultValue = "FOCUSED|SRC_MAIN_JAVA", help = "Source directory to create the enum in") final LogicalPath path,
 		@CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") final boolean permitReservedWords) {
 
 		classpathOperations.createEnum(name, path, permitReservedWords);

@@ -33,7 +33,7 @@ import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.ContextualPath;
+import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.logging.HandlerUtils;
@@ -75,7 +75,7 @@ public class FinderOperationsImpl implements FinderOperations {
 
 		// Go and get the entity metadata, as any type with finders has to be an entity
 		JavaType javaType = PhysicalTypeIdentifier.getJavaType(id);
-		ContextualPath path = PhysicalTypeIdentifier.getPath(id);
+		LogicalPath path = PhysicalTypeIdentifier.getPath(id);
 		String entityMid = JpaActiveRecordMetadata.createIdentifier(javaType, path);
 
 		// Get the entity metadata
@@ -146,7 +146,7 @@ public class FinderOperationsImpl implements FinderOperations {
 
 		// Go and get the entity metadata, as any type with finders has to be an entity
 		JavaType javaType = PhysicalTypeIdentifier.getJavaType(id);
-		ContextualPath path = PhysicalTypeIdentifier.getPath(id);
+		LogicalPath path = PhysicalTypeIdentifier.getPath(id);
 		String entityMid = JpaActiveRecordMetadata.createIdentifier(javaType, path);
 
 		// Get the entity metadata

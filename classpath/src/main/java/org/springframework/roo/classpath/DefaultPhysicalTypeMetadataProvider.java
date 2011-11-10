@@ -25,7 +25,7 @@ import org.springframework.roo.metadata.MetadataItem;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
-import org.springframework.roo.project.ContextualPath;
+import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
@@ -132,7 +132,7 @@ public class DefaultPhysicalTypeMetadataProvider implements PhysicalTypeMetadata
 			} else {
 				// We have a dependency on the superclass, but no metadata is available
 				// We're left with no choice but to register for every physical type change, in the hope we discover our parent someday
-				for (ContextualPath sourcePath : projectOperations.getPathResolver().getSourcePaths()) {
+				for (LogicalPath sourcePath : projectOperations.getPathResolver().getSourcePaths()) {
 					String possibleSuperclass = PhysicalTypeIdentifier.createIdentifier(details.getExtendsTypes().get(0), sourcePath);
 					metadataDependencyRegistry.registerDependency(possibleSuperclass, result.getId());
 				}

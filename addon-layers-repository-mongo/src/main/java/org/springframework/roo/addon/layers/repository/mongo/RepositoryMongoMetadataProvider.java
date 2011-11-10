@@ -14,7 +14,7 @@ import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem
 import org.springframework.roo.classpath.layers.LayerTypeMatcher;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.ContextualPath;
+import org.springframework.roo.project.LogicalPath;
 
 /**
  * Provides the metadata for an ITD that implements a Spring Data Mongo repository
@@ -69,14 +69,14 @@ public class RepositoryMongoMetadataProvider extends AbstractItdMetadataProvider
 	}
 
 	@Override
-	protected String createLocalIdentifier(final JavaType javaType, final ContextualPath path) {
+	protected String createLocalIdentifier(final JavaType javaType, final LogicalPath path) {
 		return RepositoryMongoMetadata.createIdentifier(javaType, path);
 	}
 
 	@Override
 	protected String getGovernorPhysicalTypeIdentifier(final String metadataIdentificationString) {
 		final JavaType javaType = RepositoryMongoMetadata.getJavaType(metadataIdentificationString);
-		final ContextualPath path = RepositoryMongoMetadata.getPath(metadataIdentificationString);
+		final LogicalPath path = RepositoryMongoMetadata.getPath(metadataIdentificationString);
 		return PhysicalTypeIdentifier.createIdentifier(javaType, path);
 	}
 }

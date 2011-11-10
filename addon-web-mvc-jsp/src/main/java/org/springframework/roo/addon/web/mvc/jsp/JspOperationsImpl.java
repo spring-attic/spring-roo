@@ -38,7 +38,7 @@ import org.springframework.roo.classpath.operations.AbstractOperations;
 import org.springframework.roo.model.EnumDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.ContextualPath;
+import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.Path;
@@ -113,7 +113,7 @@ public class JspOperationsImpl extends AbstractOperations implements JspOperatio
 	}
 
 	public boolean isInstalledInModule(String moduleName) {
-		ContextualPath webAppPath = ContextualPath.getInstance(Path.SRC_MAIN_WEBAPP, moduleName);
+		LogicalPath webAppPath = LogicalPath.getInstance(Path.SRC_MAIN_WEBAPP, moduleName);
 		return fileManager.exists(projectOperations.getPathResolver().getIdentifier(webAppPath, "WEB-INF/spring/webmvc-config.xml"));
 	}
 	
@@ -134,7 +134,7 @@ public class JspOperationsImpl extends AbstractOperations implements JspOperatio
 
 	public void installCommonViewArtefacts(final String moduleName) {
 		Assert.isTrue(isProjectAvailable(), "Project metadata required");
-		final ContextualPath webappPath = Path.SRC_MAIN_WEBAPP.getModulePathId(moduleName);
+		final LogicalPath webappPath = Path.SRC_MAIN_WEBAPP.getModulePathId(moduleName);
 		if (!isControllerAvailable()) {
 			webMvcOperations.installAllWebMvcArtifacts();
 		}
@@ -180,15 +180,15 @@ public class JspOperationsImpl extends AbstractOperations implements JspOperatio
 		}
 	}
 
-	public void installView(final String path, final String viewName, final String title, final String category, final ContextualPath webappPath) {
+	public void installView(final String path, final String viewName, final String title, final String category, final LogicalPath webappPath) {
 		installView(path, viewName, title, category, null, true, webappPath);
 	}
 
-	public void installView(final String path, final String viewName, final String title, final String category, final Document document, final ContextualPath webappPath) {
+	public void installView(final String path, final String viewName, final String title, final String category, final Document document, final LogicalPath webappPath) {
 		installView(path, viewName, title, category, document, true, webappPath);
 	}
 
-	private void installView(final String path, final String viewName, final String title, final String category, Document document, final boolean registerStaticController, final ContextualPath webappPath) {
+	private void installView(final String path, final String viewName, final String title, final String category, Document document, final boolean registerStaticController, final LogicalPath webappPath) {
 		Assert.hasText(path, "Path required");
 		Assert.hasText(viewName, "View name required");
 		Assert.hasText(title, "Title required");
@@ -221,7 +221,7 @@ public class JspOperationsImpl extends AbstractOperations implements JspOperatio
 	 * @param category the menu category in which to list the new view (required)
 	 * @param registerStaticController whether to register a static controller in the Spring MVC configuration file
 	 */
-	private void installView(final JavaSymbolName viewName, final String folderName, final String title, final String category, final boolean registerStaticController, final ContextualPath webappPath) {
+	private void installView(final JavaSymbolName viewName, final String folderName, final String title, final String category, final boolean registerStaticController, final LogicalPath webappPath) {
 		// Probe if common web artifacts exist, and install them if needed
 		final PathResolver pathResolver = projectOperations.getPathResolver();
 		if (!fileManager.exists(pathResolver.getIdentifier(webappPath, "WEB-INF/layouts/default.jspx"))) {
@@ -253,7 +253,7 @@ public class JspOperationsImpl extends AbstractOperations implements JspOperatio
 	 * @param relativeUrl the relative URL to handle (required); a leading slash
 	 * will be added if required
 	 */
-	private void registerStaticSpringMvcController(final String relativeUrl, final ContextualPath webappPath) {
+	private void registerStaticSpringMvcController(final String relativeUrl, final LogicalPath webappPath) {
 		final String mvcConfig = projectOperations.getPathResolver().getIdentifier(webappPath, "WEB-INF/spring/webmvc-config.xml");
 		if (fileManager.exists(mvcConfig)) {
 			final Document document = XmlUtils.readXml(fileManager.getInputStream(mvcConfig));
@@ -271,7 +271,7 @@ public class JspOperationsImpl extends AbstractOperations implements JspOperatio
 		}
 	}
 	
-	public void updateTags(final boolean backup, final ContextualPath webappPath) {
+	public void updateTags(final boolean backup, final LogicalPath webappPath) {
 		if (backup) {
 			backupOperations.backup();
 		}
@@ -292,7 +292,7 @@ public class JspOperationsImpl extends AbstractOperations implements JspOperatio
 	 * @param controller the controller class to create (required)
 	 * @param preferredMapping the mapping this controller should adopt (optional; if unspecified it will be based on the controller name)
 	 */
-	public void createManualController(final JavaType controller, final String preferredMapping, final ContextualPath webappPath) {
+	public void createManualController(final JavaType controller, final String preferredMapping, final LogicalPath webappPath) {
 		Assert.notNull(controller, "Controller Java Type required");
 
 		// Create annotation @RequestMapping("/myobject/**")
@@ -421,7 +421,7 @@ public class JspOperationsImpl extends AbstractOperations implements JspOperatio
 		fileManager.createOrUpdateTextFileIfRequired(mvcConfig, XmlUtils.nodeToString(mvcConfigDocument), true);
 	}
 
-	public void installI18n(final I18n i18n, final ContextualPath webappPath) {
+	public void installI18n(final I18n i18n, final LogicalPath webappPath) {
 		Assert.notNull(i18n, "Language choice required");
 
 		if (i18n.getLocale() == null) {

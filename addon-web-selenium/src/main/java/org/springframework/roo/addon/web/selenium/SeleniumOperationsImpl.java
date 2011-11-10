@@ -39,7 +39,7 @@ import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
-import org.springframework.roo.project.ContextualPath;
+import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.Plugin;
@@ -91,7 +91,7 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 		Assert.notNull(controller, "Controller type required");
 		ClassOrInterfaceTypeDetails controllerTypeDetails = typeLocationService.getTypeDetails(controller);
 		Assert.notNull(controllerTypeDetails, "Class or interface type details for type '" + controller + "' could not be resolved");
-		ContextualPath path = PhysicalTypeIdentifier.getPath(controllerTypeDetails.getDeclaredByMetadataId());
+		LogicalPath path = PhysicalTypeIdentifier.getPath(controllerTypeDetails.getDeclaredByMetadataId());
 		String webScaffoldMetadataIdentifier = WebScaffoldMetadata.createIdentifier(controller, path);
 		WebScaffoldMetadata webScaffoldMetadata = (WebScaffoldMetadata) metadataService.get(webScaffoldMetadataIdentifier);
 		Assert.notNull(webScaffoldMetadata, "Web controller '" + controller.getFullyQualifiedTypeName() + "' does not appear to be an automatic, scaffolded controller");
