@@ -242,7 +242,7 @@ database.driverClassName=org.hsqldb.jdbcDriver
     <title>Entity JPA command</title>
 
     <para>Using the <link linkend="command-index-entity-jpa"><link
-    linkend="command-index-entity">entity</link> jpa</link> coxmmand you can
+    linkend="command-index-entity">entity</link> jpa</link> command you can
     create simple Java beans which are annotated with JPA annotations. There
     are several optional attributes which can be used as part of this command
     but in its simplest form it will generate the following artifacts:</para>
