@@ -110,15 +110,8 @@ public class MavenPathResolvingStrategy extends AbstractPathResolvingStrategy {
 	}
 
 	public String getRoot(final ContextualPath modulePathId) {
-		Assert.notNull(modulePathId, "Path required");
-		final Pom focusedModule = pomManagementService.getFocusedModule();	// TODO why look at the focused module instead of the given one?
-		if (focusedModule == null) {
-			return null;
-		}
-		final PathInformation pathInfo = focusedModule.getPathInformation(modulePathId.getPath());
-		Assert.notNull(pathInfo, "Unable to determine information for path '" + modulePathId + "'");
-		final File root = pathInfo.getLocation();
-		return FileUtils.getCanonicalPath(root);
+		final Pom pom = pomManagementService.getPomFromModuleName(modulePathId.getModule());
+		return pom.getPathInformation(modulePathId.getPath()).getLocationPath();
 	}
 	
 	public boolean isActive() {

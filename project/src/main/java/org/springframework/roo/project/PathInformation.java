@@ -46,6 +46,11 @@ public class PathInformation {
 		return location;
 	}
 
+	/**
+	 * Returns the canonical path of this {@link PathInformation}
+	 * 
+	 * @return a non-blank canonical path
+	 */
 	public String getLocationPath() {
 		return FileUtils.getCanonicalPath(location);
 	}
