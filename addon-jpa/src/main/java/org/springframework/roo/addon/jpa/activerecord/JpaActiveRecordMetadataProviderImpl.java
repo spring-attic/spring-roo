@@ -27,7 +27,6 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.configurable.ConfigurableMetadataProvider;
-import org.springframework.roo.addon.displaystring.DisplayStringMetadataProvider;
 import org.springframework.roo.addon.jpa.entity.JpaEntityAnnotationValues;
 import org.springframework.roo.addon.plural.PluralMetadata;
 import org.springframework.roo.addon.plural.PluralMetadataProvider;
@@ -62,7 +61,6 @@ public class JpaActiveRecordMetadataProviderImpl extends AbstractItdMetadataProv
 	// Fields
 	@Reference private ConfigurableMetadataProvider configurableMetadataProvider;
 	@Reference private CustomDataKeyDecorator customDataKeyDecorator;
-	@Reference private DisplayStringMetadataProvider displayStringMetadataProvider;
 	@Reference private PluralMetadataProvider pluralMetadataProvider;
 	@Reference private ProjectOperations projectOperations;
 
@@ -71,7 +69,6 @@ public class JpaActiveRecordMetadataProviderImpl extends AbstractItdMetadataProv
 		addMetadataTrigger(ROO_JPA_ACTIVE_RECORD);
 		configurableMetadataProvider.addMetadataTrigger(ROO_JPA_ACTIVE_RECORD);
 		pluralMetadataProvider.addMetadataTrigger(ROO_JPA_ACTIVE_RECORD);
-		displayStringMetadataProvider.addMetadataTrigger(ROO_JPA_ACTIVE_RECORD);
 		registerMatchers();
 	}
 
@@ -80,7 +77,6 @@ public class JpaActiveRecordMetadataProviderImpl extends AbstractItdMetadataProv
 		removeMetadataTrigger(ROO_JPA_ACTIVE_RECORD);
 		configurableMetadataProvider.removeMetadataTrigger(ROO_JPA_ACTIVE_RECORD);
 		pluralMetadataProvider.removeMetadataTrigger(ROO_JPA_ACTIVE_RECORD);
-		displayStringMetadataProvider.removeMetadataTrigger(ROO_JPA_ACTIVE_RECORD);
 		customDataKeyDecorator.unregisterMatchers(getClass());
 	}
 

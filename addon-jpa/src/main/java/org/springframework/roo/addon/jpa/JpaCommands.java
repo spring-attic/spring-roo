@@ -2,7 +2,6 @@ package org.springframework.roo.addon.jpa;
 
 import static org.springframework.roo.model.GoogleJavaType.GAE_DATASTORE_KEY;
 import static org.springframework.roo.model.JavaType.LONG_OBJECT;
-import static org.springframework.roo.model.RooJavaType.ROO_DISPLAY_STRING;
 import static org.springframework.roo.model.RooJavaType.ROO_EQUALS;
 import static org.springframework.roo.model.RooJavaType.ROO_JAVA_BEAN;
 import static org.springframework.roo.model.RooJavaType.ROO_JPA_ACTIVE_RECORD;
@@ -19,7 +18,6 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
-import org.springframework.roo.addon.equals.EqualsOperations;
 import org.springframework.roo.addon.jpa.entity.RooJpaEntity;
 import org.springframework.roo.addon.propfiles.PropFileOperations;
 import org.springframework.roo.addon.test.IntegrationTestOperations;
@@ -56,10 +54,8 @@ public class JpaCommands implements CommandMarker {
 	private static final AnnotationMetadataBuilder ROO_SERIALIZABLE_BUILDER = new AnnotationMetadataBuilder(ROO_SERIALIZABLE);
 	private static final AnnotationMetadataBuilder ROO_TO_STRING_BUILDER = new AnnotationMetadataBuilder(ROO_TO_STRING);
 	private static final AnnotationMetadataBuilder ROO_JAVA_BEAN_BUILDER = new AnnotationMetadataBuilder(ROO_JAVA_BEAN);
-	private static final AnnotationMetadataBuilder ROO_DISPLAY_STRING_BUILDER = new AnnotationMetadataBuilder(ROO_DISPLAY_STRING);
 
 	// Fields
-	@Reference private EqualsOperations equalsOperations;
 	@Reference private IntegrationTestOperations integrationTestOperations;
 	@Reference private JpaOperations jpaOperations;
 	@Reference private ProjectOperations projectOperations;
@@ -176,7 +172,7 @@ public class JpaCommands implements CommandMarker {
 		@CliOption(key = "versionType", mandatory = false, optionContext = "java-lang,project", unspecifiedDefaultValue = "java.lang.Integer", help = "The data type that will be used for the JPA version field (defaults to java.lang.Integer)") final JavaType versionType,
 		@CliOption(key = "inheritanceType", mandatory = false, help = "The JPA @Inheritance value (apply to base class)") final InheritanceType inheritanceType,
 		@CliOption(key = "mappedSuperclass", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Apply @MappedSuperclass for this entity") final boolean mappedSuperclass,
-		@CliOption(key = "equals", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Whether the generated class should implement equals and hashCode methods") final boolean equals,
+		@CliOption(key = "equals", mandatory = false, unspecifiedDefaultValue = "true", specifiedDefaultValue = "true", help = "Whether the generated class should implement equals and hashCode methods") final boolean equals,
 		@CliOption(key = "serializable", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Whether the generated class should implement java.io.Serializable") final boolean serializable,
 		@CliOption(key = "persistenceUnit", mandatory = false, help = "The persistence unit name to be used in the persistence.xml file") final String persistenceUnit,
 		@CliOption(key = "transactionManager", mandatory = false, help = "The transaction manager name") final String transactionManager,
@@ -208,11 +204,9 @@ public class JpaCommands implements CommandMarker {
 		final List<AnnotationMetadataBuilder> annotationBuilder = new ArrayList<AnnotationMetadataBuilder>();
 		annotationBuilder.add(ROO_JAVA_BEAN_BUILDER);
 		annotationBuilder.add(ROO_TO_STRING_BUILDER);
-		annotationBuilder.add(ROO_DISPLAY_STRING_BUILDER);
 		annotationBuilder.add(getEntityAnnotationBuilder(table, schema, catalog, identifierField, identifierColumn, identifierType, versionField, versionColumn, versionType, inheritanceType, mappedSuperclass, persistenceUnit, transactionManager, entityName, activeRecord));
 		if (equals) {
 			annotationBuilder.add(ROO_EQUALS_BUILDER);
-			equalsOperations.updateConfiguration();
 		}
 		if (serializable) {
 			annotationBuilder.add(ROO_SERIALIZABLE_BUILDER);
@@ -224,7 +218,6 @@ public class JpaCommands implements CommandMarker {
 		// Create entity identifier class if required
 		if (!(identifierType.getPackage().getFullyQualifiedPackageName().startsWith("java.") || identifierType.equals(GAE_DATASTORE_KEY))) {
 			jpaOperations.newIdentifier(identifierType, identifierField, identifierColumn);
-			equalsOperations.updateConfiguration();
 		}
 
 		if (testAutomatically) {

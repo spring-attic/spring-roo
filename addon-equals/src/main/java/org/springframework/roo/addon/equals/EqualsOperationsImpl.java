@@ -18,11 +18,7 @@ import org.springframework.roo.classpath.details.annotations.ArrayAttributeValue
 import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.Dependency;
-import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.CollectionUtils;
-import org.springframework.roo.support.util.XmlUtils;
-import org.w3c.dom.Element;
 
 /**
  * Implementation of {@link EqualsOperations}.
@@ -35,14 +31,10 @@ import org.w3c.dom.Element;
 public class EqualsOperationsImpl implements EqualsOperations {
 
 	// Fields
-	@Reference private ProjectOperations projectOperations;
 	@Reference private TypeLocationService typeLocationService;
 	@Reference private TypeManagementService typeManagementService;
 
 	public void addEqualsAndHashCodeMethods(final JavaType javaType, final boolean appendSuper, final Set<String> excludeFields) {
-		// Update pom.xml
-		updateConfiguration();
-
 		// Add @RooEquals annotation to class if not yet present
 		ClassOrInterfaceTypeDetails cid = typeLocationService.getTypeDetails(javaType);
 		if (cid == null || cid.getTypeAnnotation(ROO_EQUALS) != null) {
@@ -64,15 +56,5 @@ public class EqualsOperationsImpl implements EqualsOperations {
 		final ClassOrInterfaceTypeDetailsBuilder classOrInterfaceTypeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(cid);
 		classOrInterfaceTypeDetailsBuilder.addAnnotation(annotationBuilder.build());
 		typeManagementService.createOrUpdateTypeOnDisk(classOrInterfaceTypeDetailsBuilder.build());
-	}
-
-	public void updateConfiguration() {
-		// Update pom.xml with commons-lang dependency
-		final Element configuration = XmlUtils.getConfiguration(getClass());
-		final Element dependencyElement = XmlUtils.findFirstElement("/configuration/equals/dependencies/dependency", configuration);
-		if (dependencyElement != null) {
-			final Dependency dependency = new Dependency(dependencyElement);
-			projectOperations.addDependency(projectOperations.getFocusedModuleName(), dependency);
-		}
 	}
 }

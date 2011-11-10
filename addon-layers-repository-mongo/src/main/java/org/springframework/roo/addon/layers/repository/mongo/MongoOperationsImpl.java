@@ -130,7 +130,6 @@ public class MongoOperationsImpl implements MongoOperations {
 			attributes.add(new ClassAttributeValue(new JavaSymbolName("identifierType"), idType));
 		}
 		classTypeBuilder.addAnnotation(new AnnotationMetadataBuilder(RooJavaType.ROO_MONGO_ENTITY, attributes));
-		classTypeBuilder.addAnnotation(new AnnotationMetadataBuilder(RooJavaType.ROO_DISPLAY_STRING));
 		typeManagementService.createOrUpdateTypeOnDisk(classTypeBuilder.build());
 
 		if (testAutomatically) {
@@ -231,6 +230,5 @@ public class MongoOperationsImpl implements MongoOperations {
 		properties.put("mongo.name", name);
 		properties.put("mongo.port", port);
 		properties.put("mongo.host", host);
-		propFileOperations.addProperties(Path.SPRING_CONFIG_ROOT.getModulePathId(projectOperations.getFocusedModuleName()), "database.properties", properties, true, false);
-	}
+		propFileOperations.addProperties(Path.SPRING_CONFIG_ROOT.getModulePathId(projectOperations.getFocusedModuleName()), "database.properties", properties, true, false);	}
 }

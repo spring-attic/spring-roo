@@ -191,7 +191,7 @@ public class ConversionServiceMetadata extends AbstractItdTypeDetailsProvidingMe
 		bodyBuilder.indent();
 		bodyBuilder.appendFormalLine("public String convert(" + targetType.getSimpleTypeName() + " " + targetTypeName + ") {");
 		bodyBuilder.indent();
-		bodyBuilder.appendFormalLine("return " + targetTypeName + ".getDisplayString();");
+		bodyBuilder.appendFormalLine("return " + targetTypeName + ".toString();");
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("}");
 		bodyBuilder.indentRemove();

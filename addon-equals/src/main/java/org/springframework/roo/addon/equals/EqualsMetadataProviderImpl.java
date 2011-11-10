@@ -52,15 +52,13 @@ public class EqualsMetadataProviderImpl extends AbstractMemberDiscoveringItdMeta
 			return null;
 		}
 
-		final String[] excludeFields = annotationValues.getExcludeFields();
-
 		final MemberDetails memberDetails = getMemberDetails(governorPhysicalTypeMetadata);
 		if (memberDetails == null) {
 			return null;
 		}
 
 		final JavaType javaType = governorPhysicalTypeMetadata.getMemberHoldingTypeDetails().getName();
-		final List<FieldMetadata> equalityFields = locateFields(javaType, excludeFields, memberDetails, metadataId);
+		final List<FieldMetadata> equalityFields = locateFields(javaType, annotationValues.getExcludeFields(), memberDetails, metadataId);
 
 		return new EqualsMetadata(metadataId, aspectName, governorPhysicalTypeMetadata, annotationValues, equalityFields);
 	}

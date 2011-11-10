@@ -113,7 +113,7 @@ public class JsfConverterMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		bodyBuilder.appendFormalLine("}");
 		bodyBuilder.appendFormalLine("for (" + simpleTypeName + " " + StringUtils.uncapitalize(simpleTypeName) + " : " + findAllMethod.getMethodCall() + ") {");
 		bodyBuilder.indent();
-		bodyBuilder.appendFormalLine("if (" + StringUtils.uncapitalize(simpleTypeName) + ".getDisplayString().equals(value)) {");
+		bodyBuilder.appendFormalLine("if (" + StringUtils.uncapitalize(simpleTypeName) + ".toString().equals(value)) {");
 		bodyBuilder.indent();
 		bodyBuilder.appendFormalLine("return " + StringUtils.uncapitalize(simpleTypeName) + ";");
 		bodyBuilder.indentRemove();
@@ -143,7 +143,7 @@ public class JsfConverterMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		String simpleTypeName = entity.getSimpleTypeName();
 		
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		bodyBuilder.appendFormalLine("return value instanceof " + simpleTypeName + " ? ((" + simpleTypeName + ") value).getDisplayString() : \"\";");  
+		bodyBuilder.appendFormalLine("return value instanceof " + simpleTypeName + " ? ((" + simpleTypeName + ") value).toString() : \"\";");  
 
 		// Create getAsString method
 		final List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("context"), new JavaSymbolName("component"), new JavaSymbolName("value"));

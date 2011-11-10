@@ -12,7 +12,5 @@ import org.springframework.roo.model.JavaType;
  */
 public interface EqualsOperations {
 
-	void updateConfiguration();
-
 	void addEqualsAndHashCodeMethods(final JavaType javaType, boolean appendSuper, final Set<String> excludeFields);
 }

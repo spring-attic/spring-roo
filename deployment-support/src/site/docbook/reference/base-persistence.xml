@@ -250,11 +250,12 @@ database.driverClassName=org.hsqldb.jdbcDriver
     <para><programlisting>roo&gt; entity jpa --class ~.Person   
 Created SRC_MAIN_JAVA/com/foo
 Created SRC_MAIN_JAVA/com/foo/Person.java
-Created SRC_MAIN_JAVA/com/foo/Person_Roo_Entity.aj
+Created SRC_MAIN_JAVA/com/foo/Person_Roo_Jpa_ActiveRecord.aj
+Created SRC_MAIN_JAVA/com/foo/Person_Roo_Jpa_Entity.aj
 Created SRC_MAIN_JAVA/com/foo/Person_Roo_ToString.aj
 Created SRC_MAIN_JAVA/com/foo/Person_Roo_Configurable.aj
 ~.Person roo&gt;
-</programlisting>As you can see from the Roo shell messages there are 7 files
+</programlisting>As you can see from the Roo shell messages there are 6 files
     generated (also, note that the context has changed to the Person type in
     the Roo shell):</para>
 
@@ -264,7 +265,6 @@ Created SRC_MAIN_JAVA/com/foo/Person_Roo_Configurable.aj
 
         <para><programlisting>@RooJavaBean
 @RooToString
-@RooDisplayString
 @RooJpaActiveRecord
 public class Person {
 }
@@ -291,7 +291,8 @@ public class Person {
         @RooToString annotation. This annotation will generate a toString
         method for the Person type via an ITD. The
         <emphasis>toString</emphasis>() method will contain a concatenated
-        representation of all field names and their values. If you want to
+        representation of all field names and their values using the
+        commons-lang RefectionToStringBuilder by default. If you want to
         provide your own toString() method alongside the Roo generated
         <emphasis>toString</emphasis>() method you can declare the
         <emphasis>toStringMethod</emphasis> attribute in the @RooToString
@@ -299,20 +300,6 @@ public class Person {
         name of the Roo-managed <emphasis>toString</emphasis>() (default name)
         method, thereby allowing your custom toString() method alongside the
         Roo-managed method.</para>
-      </listitem>
-
-      <listitem>
-        <para>Person_Roo_DisplayString.aj</para>
-
-        <para>The third annotation added to the Person type is the
-        @RooDisplayString annotation. This annotation will generate a
-        pretty-print method for the Person type via an ITD. The
-        <emphasis>getDisplayString</emphasis>() method will contain a
-        concatenated representation of certain field values for use in web
-        UIs. If you want to customize and provide your own fields instead of
-        what Roo generates in the <emphasis>getDisplayString</emphasis>()
-        method you can declare the <emphasis>fields</emphasis> attribute in
-        the @RooDisplayString annotation.</para>
       </listitem>
 
       <listitem>
@@ -335,7 +322,7 @@ public class Person {
         annotation triggers the creation of two ITDs: the
         Person_Roo_Jpa_Entity.aj ITD and the Person_Roo_Jpa_ActiveRecord.aj
         ITD. Note that If you do not want ActiveRecord-style methods in your
-        domain object you can just use the @RooJpaEntity annotation. </para>
+        domain object you can just use the @RooJpaEntity annotation.</para>
 
         <para>The JPA @Entity annotation is added to the
         Person_Roo_Jpa_Entity.aj ITD. This annotation marks the Person as

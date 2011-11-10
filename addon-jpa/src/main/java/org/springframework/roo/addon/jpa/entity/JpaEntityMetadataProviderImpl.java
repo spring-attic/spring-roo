@@ -40,9 +40,9 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
-import org.springframework.roo.addon.displaystring.DisplayStringMetadataProvider;
 import org.springframework.roo.addon.jpa.AbstractIdentifierServiceAwareMetadataProvider;
 import org.springframework.roo.addon.jpa.identifier.Identifier;
+import org.springframework.roo.addon.jpa.identifier.IdentifierMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
@@ -103,7 +103,6 @@ public class JpaEntityMetadataProviderImpl extends AbstractIdentifierServiceAwar
 
 	// Fields
 	@Reference private CustomDataKeyDecorator customDataKeyDecorator;
-	@Reference private DisplayStringMetadataProvider displayStringMetadataProvider;
 	@Reference private ProjectOperations projectOperations;
 	
 	// ------------- Mandatory AbstractItdMetadataProvider methods -------------
@@ -137,14 +136,12 @@ public class JpaEntityMetadataProviderImpl extends AbstractIdentifierServiceAwar
 	protected void activate(final ComponentContext context) {
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), PROVIDES_TYPE);
 		addMetadataTriggers(TRIGGER_ANNOTATIONS);
-		displayStringMetadataProvider.addMetadataTrigger(ROO_JPA_ENTITY);
 		registerMatchers();
 	}
 
 	protected void deactivate(final ComponentContext context) {
 		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), PROVIDES_TYPE);
 		removeMetadataTriggers(TRIGGER_ANNOTATIONS);
-		displayStringMetadataProvider.removeMetadataTrigger(ROO_JPA_ENTITY);
 		customDataKeyDecorator.unregisterMatchers(getClass());
 	}
 
@@ -153,8 +150,8 @@ public class JpaEntityMetadataProviderImpl extends AbstractIdentifierServiceAwar
 		customDataKeyDecorator.registerMatchers(
 			getClass(),
 			// Type matchers
-			new MidTypeMatcher(IDENTIFIER_TYPE, "org.springframework.roo.addon.entity.IdentifierMetadata"),
-			new AnnotatedTypeMatcher(PERSISTENT_TYPE, RooJavaType.ROO_JPA_ACTIVE_RECORD, RooJavaType.ROO_JPA_ENTITY),
+			new MidTypeMatcher(IDENTIFIER_TYPE, IdentifierMetadata.class.getName()),
+			new AnnotatedTypeMatcher(PERSISTENT_TYPE, RooJavaType.ROO_JPA_ACTIVE_RECORD, ROO_JPA_ENTITY),
 			// Field matchers
 			JPA_COLUMN_FIELD_MATCHER,
 			JPA_EMBEDDED_FIELD_MATCHER,

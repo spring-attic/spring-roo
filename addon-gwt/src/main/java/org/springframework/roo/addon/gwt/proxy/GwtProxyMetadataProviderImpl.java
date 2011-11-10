@@ -75,7 +75,6 @@ public class GwtProxyMetadataProviderImpl extends AbstractHashCodeTrackingMetada
 		}
 
 		List<String> exclusionList = new ArrayList<String>();
-		exclusionList.add("displayString"); // Exclude getDisplayString() method from addon-displaystring
 		AnnotationAttributeValue<?> excludeAttribute = mirrorAnnotation.getAttribute("exclude");
 		if (excludeAttribute != null && excludeAttribute instanceof ArrayAttributeValue) {
 			@SuppressWarnings("unchecked")
