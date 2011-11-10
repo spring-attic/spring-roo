@@ -250,8 +250,9 @@ database.driverClassName=org.hsqldb.jdbcDriver
     <para><programlisting>roo&gt; entity jpa --class ~.Person   
 Created SRC_MAIN_JAVA/com/foo
 Created SRC_MAIN_JAVA/com/foo/Person.java
-Created SRC_MAIN_JAVA/com/foo/Person_Roo_Jpa_ActiveRecord.aj
+Created SRC_MAIN_JAVA/com/foo/Person_Roo_JavaBean.aj
 Created SRC_MAIN_JAVA/com/foo/Person_Roo_Jpa_Entity.aj
+Created SRC_MAIN_JAVA/com/foo/Person_Roo_Jpa_ActiveRecord.aj
 Created SRC_MAIN_JAVA/com/foo/Person_Roo_ToString.aj
 Created SRC_MAIN_JAVA/com/foo/Person_Roo_Configurable.aj
 ~.Person roo&gt;
