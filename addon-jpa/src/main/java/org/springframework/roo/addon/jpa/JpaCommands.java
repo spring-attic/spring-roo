@@ -149,14 +149,14 @@ public class JpaCommands implements CommandMarker {
 		@CliOption(key = "key", mandatory = true, help = "The property key that should be changed") final String key,
 		@CliOption(key = "value", mandatory = true, help = "The new vale for this property key") final String value) {
 
-		propFileOperations.changeProperty(Path.SPRING_CONFIG_ROOT.contextualize(projectOperations.getFocusedModuleName()), "database.properties", key, value);
+		propFileOperations.changeProperty(Path.SPRING_CONFIG_ROOT.getModulePathId(projectOperations.getFocusedModuleName()), "database.properties", key, value);
 	}
 
 	@CliCommand(value = "database properties remove", help = "Removes a particular database property")
 	public void databaseRemove(
 		@CliOption(key = { "", "key" }, mandatory = true, help = "The property key that should be removed") final String key) {
 
-		propFileOperations.removeProperty(Path.SPRING_CONFIG_ROOT.contextualize(projectOperations.getFocusedModuleName()), "database.properties", key);
+		propFileOperations.removeProperty(Path.SPRING_CONFIG_ROOT.getModulePathId(projectOperations.getFocusedModuleName()), "database.properties", key);
 	}
 
 	@CliCommand(value = "entity jpa", help = "Creates a new JPA persistent entity in SRC_MAIN_JAVA")

@@ -1,7 +1,7 @@
 package org.springframework.roo.project;
 
+import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.apache.felix.scr.annotations.Component;
@@ -76,13 +76,13 @@ public class DelegatePathResolver implements PathResolver {
 	public String getFriendlyName(final String identifier) {
 		return getStrategy().getFriendlyName(identifier);
 	}
-
-	public List<ContextualPath> getSourcePaths() {
-		return getStrategy().getSourcePaths();
+	
+	public Collection<ContextualPath> getPaths() {
+		return getStrategy().getPaths();
 	}
 
-	public List<ContextualPath> getPaths() {
-		return getStrategy().getPaths();
+	public Collection<ContextualPath> getSourcePaths() {
+		return getStrategy().getSourcePaths();
 	}
 
 	public String getRoot() {

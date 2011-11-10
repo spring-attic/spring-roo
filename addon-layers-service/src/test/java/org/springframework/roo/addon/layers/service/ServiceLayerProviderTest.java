@@ -67,8 +67,8 @@ public class ServiceLayerProviderTest {
 		when(mockTargetType.getFullyQualifiedTypeName()).thenReturn("com.example.domain.Person");
 		when(mockIdType.getFullyQualifiedTypeName()).thenReturn(Long.class.getName());
 		when(mockTargetType.getSimpleTypeName()).thenReturn("Person");
-		when(mockTypeLocationService.getTypePath(mockTargetType)).thenReturn(Path.SRC_MAIN_JAVA.contextualize(""));
-		this.pluralId = PluralMetadata.createIdentifier(mockTargetType, Path.SRC_MAIN_JAVA.contextualize());
+		when(mockTypeLocationService.getTypePath(mockTargetType)).thenReturn(Path.SRC_MAIN_JAVA.getModulePathId(""));
+		this.pluralId = PluralMetadata.createIdentifier(mockTargetType, Path.SRC_MAIN_JAVA.getModulePathId(""));
 	}
 
 	/**

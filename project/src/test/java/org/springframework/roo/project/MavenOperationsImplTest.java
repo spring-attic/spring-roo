@@ -50,7 +50,7 @@ public class MavenOperationsImplTest {
 		// Mocks
 		MockitoAnnotations.initMocks(this);
 
-		when(mockPathResolver.getIdentifier(Path.ROOT.contextualize(""), MavenProjectMetadataProvider.POM_RELATIVE_PATH)).thenReturn(POM_PATH);
+		when(mockPathResolver.getIdentifier(Path.ROOT.getModulePathId(""), MavenProjectMetadataProvider.POM_RELATIVE_PATH)).thenReturn(POM_PATH);
 		
 		// Object under test
 		projectOperations = new MavenOperationsImpl();

@@ -81,7 +81,7 @@ public class IntegrationTestOperationsImpl implements IntegrationTestOperations 
 		dataOnDemandOperations.newDod(entity, new JavaType(entity.getFullyQualifiedTypeName() + "DataOnDemand"));
 		
 		JavaType name = new JavaType(entity + "IntegrationTest");
-		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(name, Path.SRC_TEST_JAVA.contextualize(path.getModule()));
+		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(name, Path.SRC_TEST_JAVA.getModulePathId(path.getModule()));
 
 		if (metadataService.get(declaredByMetadataId) != null) {
 			// The file already exists
@@ -119,7 +119,7 @@ public class IntegrationTestOperationsImpl implements IntegrationTestOperations 
 		Assert.notNull(entity, "Entity to produce a mock test for is required");
 
 		JavaType name = new JavaType(entity + "Test");
-		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(name, Path.SRC_TEST_JAVA.contextualize(projectOperations.getFocusedModuleName()));
+		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(name, Path.SRC_TEST_JAVA.getModulePathId(projectOperations.getFocusedModuleName()));
 		
 		if (metadataService.get(declaredByMetadataId) != null) {
 			// The file already exists
@@ -169,7 +169,7 @@ public class IntegrationTestOperationsImpl implements IntegrationTestOperations 
 		Assert.notNull(javaType, "Class to produce a test stub for is required");
 
 		JavaType name = new JavaType(javaType + "Test");
-		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(name, Path.SRC_TEST_JAVA.contextualize(projectOperations.getFocusedModuleName()));
+		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(name, Path.SRC_TEST_JAVA.getModulePathId(projectOperations.getFocusedModuleName()));
 
 		if (metadataService.get(declaredByMetadataId) != null) {
 			// The file already exists

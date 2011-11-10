@@ -1,13 +1,5 @@
 package org.springframework.roo.project.maven;
 
-import static org.springframework.roo.project.Path.DEFAULT_RESOURCES_DIRECTORY;
-import static org.springframework.roo.project.Path.DEFAULT_SOURCE_DIRECTORY;
-import static org.springframework.roo.project.Path.DEFAULT_SPRING_CONFIG_ROOT;
-import static org.springframework.roo.project.Path.DEFAULT_TEST_RESOURCES_DIRECTORY;
-import static org.springframework.roo.project.Path.DEFAULT_TEST_SOURCE_DIRECTORY;
-import static org.springframework.roo.project.Path.DEFAULT_WAR_SOURCE_DIRECTORY;
-
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -42,7 +34,7 @@ import org.springframework.roo.support.util.StringUtils;
 public class Pom {
 
 	// Constants
-	private static final String DEFAULT_PACKAGING = "jar";	// Maven behaviour
+	static final String DEFAULT_PACKAGING = "jar";	// Maven behaviour
 
 	// Fields
 	private final GAV gav;
@@ -60,8 +52,8 @@ public class Pom {
 	private final String name;
 	private final String packaging;
 	private final String path;
-	private final String sourceDirectory;
-	private final String testSourceDirectory;
+	private final String sourceDirectory;	// TODO use pathCache instead
+	private final String testSourceDirectory;	// TODO use pathCache instead
 
 	/**
 	 * Constructor
@@ -94,8 +86,8 @@ public class Pom {
 		this.packaging = StringUtils.defaultIfEmpty(packaging, DEFAULT_PACKAGING);
 		this.parent = parent;
 		this.path = path;
-		this.sourceDirectory = StringUtils.defaultIfEmpty(sourceDirectory, DEFAULT_SOURCE_DIRECTORY);
-		this.testSourceDirectory = StringUtils.defaultIfEmpty(testSourceDirectory, DEFAULT_TEST_SOURCE_DIRECTORY);
+		this.sourceDirectory = StringUtils.defaultIfEmpty(sourceDirectory, Path.SRC_MAIN_JAVA.getDefaultLocation());
+		this.testSourceDirectory = StringUtils.defaultIfEmpty(testSourceDirectory, Path.SRC_TEST_JAVA.getDefaultLocation());
 
 		CollectionUtils.populate(this.buildPlugins, buildPlugins);
 		CollectionUtils.populate(this.dependencies, dependencies);
@@ -105,45 +97,14 @@ public class Pom {
 		CollectionUtils.populate(this.pomProperties, pomProperties);
 		CollectionUtils.populate(this.repositories, repositories);
 		CollectionUtils.populate(this.resources, resources);
-
-		cachePathInformation(Path.SRC_MAIN_JAVA);
-		cachePathInformation(Path.SRC_TEST_JAVA);
-		cachePathInformation(Path.SRC_TEST_RESOURCES);
-		cachePathInformation(Path.SRC_MAIN_RESOURCES);
-		cachePathInformation(Path.SRC_MAIN_WEBAPP);
-		cachePathInformation(Path.SPRING_CONFIG_ROOT);
-		cachePathInformation(Path.ROOT);
+		
+		cachePathInformation(Path.values());
 	}
 
-	private void cachePathInformation(final Path path) {
-		final String moduleRoot = FileUtils.getFirstDirectory(getPath());
-		final StringBuilder sb = new StringBuilder();
-		sb.append(moduleRoot).append(File.separator);
-		if (path.equals(Path.SRC_MAIN_JAVA)) {
-			String sourceDirectory = getSourceDirectory();
-			if (!StringUtils.hasText(sourceDirectory)) {
-				sourceDirectory = DEFAULT_SOURCE_DIRECTORY;
-			}
-			sb.append(sourceDirectory);
-		} else if (path.equals(Path.SRC_MAIN_RESOURCES)) {
-			sb.append(File.separator).append(DEFAULT_RESOURCES_DIRECTORY);
-		} else if (path.equals(Path.SRC_TEST_JAVA)) {
-			String testSourceDirectory = getTestSourceDirectory();
-			if (!StringUtils.hasText(testSourceDirectory)) {
-				testSourceDirectory = DEFAULT_TEST_SOURCE_DIRECTORY;
-			}
-			sb.append(testSourceDirectory);
-		} else if (path.equals(Path.SRC_TEST_RESOURCES)) {
-			sb.append(DEFAULT_TEST_RESOURCES_DIRECTORY);
-		} else if (path.equals(Path.SRC_MAIN_WEBAPP)) {
-			sb.append(DEFAULT_WAR_SOURCE_DIRECTORY);
-		} else if (path.equals(Path.SPRING_CONFIG_ROOT)) {
-			sb.append(DEFAULT_SPRING_CONFIG_ROOT);
-		} else if (path.equals(Path.ROOT)) {
-			// do nothing
+	private void cachePathInformation(final Path... paths) {
+		for (final Path path : paths) {
+			pathCache.put(path, path.getModulePath(this));
 		}
-		final PathInformation pathInformation = new PathInformation(ContextualPath.getInstance(path, moduleName), true, new File(sb.toString()));
-		pathCache.put(path, pathInformation);
 	}
 	
 	/**

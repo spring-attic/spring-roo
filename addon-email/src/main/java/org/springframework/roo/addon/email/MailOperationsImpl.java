@@ -182,7 +182,7 @@ public class MailOperationsImpl implements MailOperations {
 			updateConfiguration(projectOperations.getFocusedModuleName());
 		}
 
-		propFileOperations.addProperties(Path.SPRING_CONFIG_ROOT.contextualize(projectOperations.getFocusedModuleName()), "email.properties", props, true, true);
+		propFileOperations.addProperties(Path.SPRING_CONFIG_ROOT.getModulePathId(projectOperations.getFocusedModuleName()), "email.properties", props, true, true);
 	}
 
 	public void configureTemplateMessage(final String from, final String subject) {
@@ -232,7 +232,7 @@ public class MailOperationsImpl implements MailOperations {
 		}
 
 		if (props.size() > 0) {
-			propFileOperations.addProperties(Path.SPRING_CONFIG_ROOT.contextualize(projectOperations.getFocusedModuleName()), "email.properties", props, true, true);
+			propFileOperations.addProperties(Path.SPRING_CONFIG_ROOT.getModulePathId(projectOperations.getFocusedModuleName()), "email.properties", props, true, true);
 		}
 	}
 

@@ -179,7 +179,7 @@ public class JmsOperationsImpl implements JmsOperations {
 
 			fileManager.createOrUpdateTextFileIfRequired(contextPath, XmlUtils.nodeToString(appContext), false);
 
-			propFileOperations.addPropertyIfNotExists(Path.SPRING_CONFIG_ROOT.contextualize(projectOperations.getFocusedModuleName()), "jms.properties", "executor.poolSize", "10", true);
+			propFileOperations.addPropertyIfNotExists(Path.SPRING_CONFIG_ROOT.getModulePathId(projectOperations.getFocusedModuleName()), "jms.properties", "executor.poolSize", "10", true);
 		}
 	}
 

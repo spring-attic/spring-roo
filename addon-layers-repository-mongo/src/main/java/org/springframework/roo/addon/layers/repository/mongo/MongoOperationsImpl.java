@@ -231,6 +231,6 @@ public class MongoOperationsImpl implements MongoOperations {
 		properties.put("mongo.name", name);
 		properties.put("mongo.port", port);
 		properties.put("mongo.host", host);
-		propFileOperations.addProperties(Path.SPRING_CONFIG_ROOT.contextualize(projectOperations.getFocusedModuleName()), "database.properties", properties, true, false);
+		propFileOperations.addProperties(Path.SPRING_CONFIG_ROOT.getModulePathId(projectOperations.getFocusedModuleName()), "database.properties", properties, true, false);
 	}
 }

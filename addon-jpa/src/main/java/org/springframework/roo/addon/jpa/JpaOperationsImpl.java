@@ -119,7 +119,7 @@ public class JpaOperationsImpl implements JpaOperations {
 
 	public SortedSet<String> getDatabaseProperties() {
 		if (hasDatabaseProperties()) {
-			return propFileOperations.getPropertyKeys(Path.SPRING_CONFIG_ROOT.contextualize(projectOperations.getFocusedModuleName()), "database.properties", true);
+			return propFileOperations.getPropertyKeys(Path.SPRING_CONFIG_ROOT.getModulePathId(projectOperations.getFocusedModuleName()), "database.properties", true);
 		}
 		return getPropertiesFromDataNucleusConfiguration();
 	}

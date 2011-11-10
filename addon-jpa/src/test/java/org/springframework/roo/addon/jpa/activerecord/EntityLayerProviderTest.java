@@ -75,9 +75,9 @@ public class EntityLayerProviderTest {
 		MockitoAnnotations.initMocks(this);
 		when(mockTargetEntity.getFullyQualifiedTypeName()).thenReturn("com.example.Pizza");
 		when(mockIdType.getFullyQualifiedTypeName()).thenReturn(Long.class.getName());
-		when(mockTypeLocationService.getTypePath(mockTargetEntity)).thenReturn(Path.SRC_MAIN_JAVA.contextualize(""));
+		when(mockTypeLocationService.getTypePath(mockTargetEntity)).thenReturn(Path.SRC_MAIN_JAVA.getModulePathId(""));
 
-		this.pluralId = PluralMetadata.createIdentifier(mockTargetEntity, Path.SRC_MAIN_JAVA.contextualize(""));
+		this.pluralId = PluralMetadata.createIdentifier(mockTargetEntity, Path.SRC_MAIN_JAVA.getModulePathId(""));
 		this.layerProvider = new EntityLayerProvider();
 		this.layerProvider.typeLocationService = mockTypeLocationService;
 		this.layerProvider.setJpaActiveRecordMetadataProvider(mockJpaActiveRecordMetadataProvider);

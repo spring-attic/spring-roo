@@ -6,7 +6,6 @@ import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.util.Arrays;
-import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -119,7 +118,7 @@ public class MavenPathResolvingStrategyTest {
 		setUpModulePaths();
 		
 		// Invoke
-		final List<ContextualPath> modulePathIds = strategy.getPaths();
+		final Object modulePathIds = strategy.getPaths();
 		
 		// Check
 		assertEquals(Arrays.asList(mockSourcePath, mockNonSourcePath), modulePathIds);
@@ -131,7 +130,7 @@ public class MavenPathResolvingStrategyTest {
 		setUpModulePaths();
 		
 		// Invoke
-		final List<ContextualPath> modulePathIds = strategy.getSourcePaths();
+		final Object modulePathIds = strategy.getSourcePaths();
 		
 		// Check
 		assertEquals(Arrays.asList(mockSourcePath), modulePathIds);

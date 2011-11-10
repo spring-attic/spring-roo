@@ -52,7 +52,7 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements Ma
 	}
 	
 	public String getProjectRoot() {
-		return pathResolver.getRoot(Path.ROOT.contextualize(pomManagementService.getFocusedModuleName()));
+		return pathResolver.getRoot(Path.ROOT.getModulePathId(pomManagementService.getFocusedModuleName()));
 	}
 	
 	public void createProject(final JavaPackage topLevelPackage, final String projectName, final Integer majorJavaVersion, final GAV parentPom, final PackagingProvider selectedPackagingProvider) {

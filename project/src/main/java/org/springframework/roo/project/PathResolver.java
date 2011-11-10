@@ -1,7 +1,7 @@
 package org.springframework.roo.project;
 
 import java.io.File;
-import java.util.List;
+import java.util.Collection;
 
 import org.springframework.roo.file.monitor.event.FileDetails;
 import org.springframework.roo.model.JavaType;
@@ -64,33 +64,21 @@ public interface PathResolver {
 	 * @return a human-friendly name for the identifier (required)
 	 */
 	String getFriendlyName(String identifier);
-
-	/**
-	 * Indicates all the source code {@link Path}s known to this {@link PathResolver}.
-	 *
-	 * <p>
-	 * Whilst generally add-ons should know which paths contain source and which do not, this method
-	 * abstracts add-ons from direct knowledge of available paths.
-	 *
-	 * <p>
-	 * By default this method will return, in the following order:
-	 * <ul>
-	 * <li>{@link Path#SRC_MAIN_JAVA}</li>
-	 * <li>{@link Path#SRC_MAIN_RESOURCES}</li>
-	 * <li>{@link Path#SRC_TEST_JAVA}</li>
-	 * <li>{@link Path#SRC_TEST_RESOURCES}</li>
-	 * </ul>
-	 *
-	 * @return the paths, in order of compilation priority (never null and never empty)
-	 */
-	List<ContextualPath> getSourcePaths();
 	
 	/**
-	 * Returns all known project paths.
+	 * Returns all known paths within the user project.
 	 *
-	 * @return a non-<code>null</code> list (might be empty)
+	 * @return a non-<code>null</code> list
 	 */
-	List<ContextualPath> getPaths();
+	Collection<ContextualPath> getPaths();
+
+	/**
+	 * Returns the {@link ContextualPath}s of user project directories that can
+	 * contain Java source code.
+	 *
+	 * @return a non-<code>null</code> list
+	 */
+	Collection<ContextualPath> getSourcePaths();
 
 	/**
 	 *

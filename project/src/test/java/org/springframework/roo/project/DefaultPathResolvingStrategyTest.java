@@ -1,8 +1,13 @@
 package org.springframework.roo.project;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.springframework.roo.project.DefaultPathResolvingStrategy.ROOT_MODULE;
+
+import java.io.File;
+import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -56,5 +61,25 @@ public class DefaultPathResolvingStrategyTest {
 		// Check
 		final String srcMainJava = FileUtils.getSystemDependentPath("src", "main", "java");
 		assertTrue("Expected the root to end with '" + srcMainJava + "', but was '" + root + "'", root.endsWith(srcMainJava));
+	}
+	
+	@Test
+	public void testGetModulePaths() {
+		// Set up
+		this.pathResolvingStrategy.activate(getMockComponentContext(null));
+		
+		// Invoke
+		final List<PathInformation> modulePaths = this.pathResolvingStrategy.getPathInformation();
+		
+		// Check
+		assertEquals(Path.values().length, modulePaths.size());
+		for (int i = 0; i < modulePaths.size(); i++) {
+			final PathInformation modulePath = modulePaths.get(i);
+			final ContextualPath modulePathId = modulePath.getContextualPath();
+			final Path subPath = Path.values()[i];
+			assertEquals(ROOT_MODULE, modulePathId.getModule());
+			assertEquals(subPath, modulePathId.getPath());
+			assertEquals(new File(FileUtils.CURRENT_DIRECTORY, subPath.getDefaultLocation()), modulePath.getLocation());
+		}
 	}
 }

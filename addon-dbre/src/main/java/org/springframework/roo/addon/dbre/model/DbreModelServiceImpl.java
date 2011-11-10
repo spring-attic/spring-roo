@@ -145,7 +145,7 @@ public class DbreModelServiceImpl implements DbreModelService {
 
 	private Connection getConnection(final boolean displayAddOns) {
 		if (fileManager.exists(pathResolver.getFocusedIdentifier(Path.SPRING_CONFIG_ROOT, "database.properties"))) {
-			Map<String, String> connectionProperties = propFileOperations.getProperties(Path.SPRING_CONFIG_ROOT.contextualize(projectOperations.getFocusedModuleName()), "database.properties");
+			Map<String, String> connectionProperties = propFileOperations.getProperties(Path.SPRING_CONFIG_ROOT.getModulePathId(projectOperations.getFocusedModuleName()), "database.properties");
 			return connectionProvider.getConnection(connectionProperties, displayAddOns);
 		}
 

@@ -1,6 +1,6 @@
 package org.springframework.roo.project;
 
-import java.util.List;
+import java.util.Collection;
 
 import org.springframework.roo.model.JavaType;
 
@@ -57,33 +57,16 @@ public interface PathResolvingStrategy {
 	 * @return a human-friendly name for the identifier (required)
 	 */
 	String getFriendlyName(String identifier);
+	
+	/**
+	 * @see PathResolver#getPaths()
+	 */
+	Collection<ContextualPath> getPaths();
 
 	/**
-	 * Returns all source code {@link ContextualPath}s known to this strategy.
-	 *
-	 * <p>
-	 * Whilst generally add-ons should know which paths contain source and which do not, this method
-	 * abstracts add-ons from direct knowledge of available paths.
-	 *
-	 * <p>
-	 * By default this method will return, in the following order:
-	 * <ul>
-	 * <li>{@link Path#SRC_MAIN_JAVA}</li>
-	 * <li>{@link Path#SRC_MAIN_RESOURCES}</li>
-	 * <li>{@link Path#SRC_TEST_JAVA}</li>
-	 * <li>{@link Path#SRC_TEST_RESOURCES}</li>
-	 * </ul>
-	 *
-	 * @return the paths, in order of compilation priority (never null and never empty)
+	 * @see PathResolver#getSourcePaths()
 	 */
-	List<ContextualPath> getSourcePaths();
-
-	/**
-	 * Returns all known project paths.
-	 *
-	 * @return a non-<code>null</code> list (might be empty)
-	 */
-	List<ContextualPath> getPaths();
+	Collection<ContextualPath> getSourcePaths();
 
 	/**
 	 * Indicates whether this strategy is active. The {@link PathResolver} will

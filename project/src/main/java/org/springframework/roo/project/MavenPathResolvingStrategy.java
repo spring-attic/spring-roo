@@ -4,7 +4,7 @@ import static org.springframework.roo.support.util.FileUtils.CURRENT_DIRECTORY;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -60,7 +60,7 @@ public class MavenPathResolvingStrategy implements PathResolvingStrategy {
 	}
 
 	public String getFocusedCanonicalPath(final Path path, final JavaType javaType) {
-		return getCanonicalPath(path.contextualize(pomManagementService.getFocusedModuleName()), javaType);
+		return getCanonicalPath(path.getModulePathId(pomManagementService.getFocusedModuleName()), javaType);
 	}
 
 	public String getRoot(final ContextualPath path) {
@@ -82,8 +82,8 @@ public class MavenPathResolvingStrategy implements PathResolvingStrategy {
 	 * <code>false</code> to return all paths
 	 * @return a list of the matching paths (never null)
 	 */
-	private List<ContextualPath> getPaths(final boolean sourceOnly) {
-		final List<ContextualPath> pathIds = new ArrayList<ContextualPath>();
+	private Collection<ContextualPath> getPaths(final boolean sourceOnly) {
+		final Collection<ContextualPath> pathIds = new ArrayList<ContextualPath>();
 		for (final Pom pom : pomManagementService.getPoms()) {
 			for (final PathInformation modulePath : pom.getPathInformation()) {
 				if (!sourceOnly || modulePath.isSource()) {
@@ -94,11 +94,11 @@ public class MavenPathResolvingStrategy implements PathResolvingStrategy {
 		return pathIds;
 	}
 
-	public List<ContextualPath> getPaths() {
+	public Collection<ContextualPath> getPaths() {
 		return getPaths(false);
 	}
 
-	public List<ContextualPath> getSourcePaths() {
+	public Collection<ContextualPath> getSourcePaths() {
 		return getPaths(true);
 	}
 

@@ -35,7 +35,7 @@ public class ApplicationContextOperationsImpl implements ApplicationContextOpera
 		final Document document = XmlUtils.readXml(FileUtils.getInputStream(getClass(), "applicationContext-template.xml"));
 		final Element root = document.getDocumentElement();
 		DomUtils.findFirstElementByName("context:component-scan", root).setAttribute("base-package", topLevelPackage.getFullyQualifiedPackageName());
-		fileManager.createOrUpdateTextFileIfRequired(pathResolver.getIdentifier(Path.SPRING_CONFIG_ROOT.contextualize(moduleName), "applicationContext.xml"), XmlUtils.nodeToString(document), false);
+		fileManager.createOrUpdateTextFileIfRequired(pathResolver.getIdentifier(Path.SPRING_CONFIG_ROOT.getModulePathId(moduleName), "applicationContext.xml"), XmlUtils.nodeToString(document), false);
 		fileManager.scan();
 	}
 }
