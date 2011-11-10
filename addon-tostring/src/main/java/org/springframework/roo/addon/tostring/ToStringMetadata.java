@@ -30,8 +30,8 @@ public class ToStringMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 	// Constants
 	private static final String PROVIDES_TYPE_STRING = ToStringMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
-	private static final JavaType TO_STRING_BUILDER = new JavaType("org.apache.commons.lang.builder.ReflectionToStringBuilder");
-	private static final JavaType TO_STRING_STYLE = new JavaType("org.apache.commons.lang.builder.ToStringStyle");
+	private static final JavaType TO_STRING_BUILDER = new JavaType("org.apache.commons.lang3.builder.ReflectionToStringBuilder");
+	private static final JavaType TO_STRING_STYLE = new JavaType("org.apache.commons.lang3.builder.ToStringStyle");
 
 	// Fields
 	private final ToStringAnnotationValues annotationValues;
@@ -87,14 +87,13 @@ public class ToStringMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 		String[] excludeFields = annotationValues.getExcludeFields();
 		String str;
 		if (excludeFields != null && excludeFields.length > 0) {
-			StringBuilder builder = new StringBuilder("new String[] { ");
+			StringBuilder builder = new StringBuilder();
 			for (int i = 0; i < excludeFields.length; i++) {
 				if (i > 0) {
 					builder.append(", ");
 				}
 				builder.append("\"").append(excludeFields[i]).append("\"");
 			}
-			builder.append(" }");
 			str = "new ReflectionToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE).setExcludeFieldNames(" + builder.toString() + ").toString();";
 		} else {
 			str = "ReflectionToStringBuilder.toString(this, ToStringStyle.SHORT_PREFIX_STYLE);";

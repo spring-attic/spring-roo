@@ -36,8 +36,8 @@ public class EqualsMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	// Constants
 	private static final JavaSymbolName EQUALS_METHOD_NAME = new JavaSymbolName("equals");
 	private static final JavaSymbolName HASH_CODE_METHOD_NAME = new JavaSymbolName("hashCode");
-	private static final JavaType EQUALS_BUILDER = new JavaType("org.apache.commons.lang.builder.EqualsBuilder");
-	private static final JavaType HASH_CODE_BUILDER = new JavaType("org.apache.commons.lang.builder.HashCodeBuilder");
+	private static final JavaType EQUALS_BUILDER = new JavaType("org.apache.commons.lang3.builder.EqualsBuilder");
+	private static final JavaType HASH_CODE_BUILDER = new JavaType("org.apache.commons.lang3.builder.HashCodeBuilder");
 	private static final String OBJECT_NAME = "obj";
 	private static final String PROVIDES_TYPE_STRING = EqualsMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
