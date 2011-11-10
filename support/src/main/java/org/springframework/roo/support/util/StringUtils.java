@@ -136,16 +136,16 @@ public final class StringUtils {
 		StringUtils.contains("abc", "a")  = true
 		StringUtils.contains("abc", "z")  = false</pre>
 	 * 
-	 * @param string the string to look within (can be <code>null</code>)
-	 * @param substring the string to look for (can be <code>null</code>)
+	 * @param str the string to look within (can be <code>null</code>)
+	 * @param substr the string to look for (can be <code>null</code>)
 	 * @return see above
 	 * @since 1.2.0
 	 */
-	public static boolean contains(final String string, final String substring) {
-		if (string == null || substring == null) {
+	public static boolean contains(final String str, final String substr) {
+		if (str == null || substr == null) {
 			return false;
 		}
-		return string.contains(substring);
+		return str.contains(substr);
 	}
 
 	/**
@@ -373,17 +373,17 @@ public final class StringUtils {
 	/**
 	 * Returns the given string repeated the given number of times
 	 *
-	 * @param string the string to repeat (can be null or empty)
+	 * @param str the string to repeat (can be null or empty)
 	 * @param times the number of times to repeat it
 	 * @return <code>null</code> if <code>null</code> is given
 	 */
-	public static String repeat(final String string, final int times) {
-		if (string == null || string.length() == 0) {
-			return string;
+	public static String repeat(final String str, final int times) {
+		if (str == null || str.length() == 0) {
+			return str;
 		}
-		final StringBuilder sb = new StringBuilder(string.length() * times);
+		final StringBuilder sb = new StringBuilder(str.length() * times);
 		for (int i = 0; i < times; i++) {
-			sb.append(string);
+			sb.append(str);
 		}
 		return sb.toString();
 	}
@@ -693,17 +693,17 @@ public final class StringUtils {
 	/**
 	 * Append the given String to the given String array, returning a new array
 	 * consisting of the input array contents plus the given String.
-	 * @param array the array to append to (can be <code>null</code>)
+	 * @param arr the array to append to (can be <code>null</code>)
 	 * @param str the String to append
 	 * @return the new array (never <code>null</code>)
 	 */
-	public static String[] addStringToArray(final String[] array, final String str) {
-		if (ObjectUtils.isEmpty(array)) {
+	public static String[] addStringToArray(final String[] arr, final String str) {
+		if (ObjectUtils.isEmpty(arr)) {
 			return new String[] {str};
 		}
-		String[] newArr = new String[array.length + 1];
-		System.arraycopy(array, 0, newArr, 0, array.length);
-		newArr[array.length] = str;
+		String[] newArr = new String[arr.length + 1];
+		System.arraycopy(arr, 0, newArr, 0, arr.length);
+		newArr[arr.length] = str;
 		return newArr;
 	}
 
@@ -711,20 +711,20 @@ public final class StringUtils {
 	 * Concatenate the given String arrays into one,
 	 * with overlapping array elements included twice.
 	 * <p>The order of elements in the original arrays is preserved.
-	 * @param array1 the first array (can be <code>null</code>)
-	 * @param array2 the second array (can be <code>null</code>)
+	 * @param arr1 the first array (can be <code>null</code>)
+	 * @param arr2 the second array (can be <code>null</code>)
 	 * @return the new array (<code>null</code> if both given arrays were <code>null</code>)
 	 */
-	public static String[] concatenateStringArrays(final String[] array1, final String[] array2) {
-		if (ObjectUtils.isEmpty(array1)) {
-			return array2;
+	public static String[] concatenateStringArrays(final String[] arr1, final String[] arr2) {
+		if (ObjectUtils.isEmpty(arr1)) {
+			return arr2;
 		}
-		if (ObjectUtils.isEmpty(array2)) {
-			return array1;
+		if (ObjectUtils.isEmpty(arr2)) {
+			return arr1;
 		}
-		String[] newArr = new String[array1.length + array2.length];
-		System.arraycopy(array1, 0, newArr, 0, array1.length);
-		System.arraycopy(array2, 0, newArr, array1.length, array2.length);
+		String[] newArr = new String[arr1.length + arr2.length];
+		System.arraycopy(arr1, 0, newArr, 0, arr1.length);
+		System.arraycopy(arr2, 0, newArr, arr1.length, arr2.length);
 		return newArr;
 	}
 
@@ -733,22 +733,22 @@ public final class StringUtils {
 	 * array elements only included once.
 	 * <p>The order of elements in the original arrays is preserved
 	 * (with the exception of overlapping elements, which are only
-	 * included on their first occurence).
-	 * @param array1 the first array (can be <code>null</code>)
-	 * @param array2 the second array (can be <code>null</code>)
+	 * included on their first occurrence).
+	 * @param arr1 the first array (can be <code>null</code>)
+	 * @param arr2 the second array (can be <code>null</code>)
 	 * @return the new array (<code>null</code> if both given arrays were <code>null</code>)
 	 */
-	public static String[] mergeStringArrays(final String[] array1, final String[] array2) {
-		if (ObjectUtils.isEmpty(array1)) {
-			return array2;
+	public static String[] mergeStringArrays(final String[] arr1, final String[] arr2) {
+		if (ObjectUtils.isEmpty(arr1)) {
+			return arr2;
 		}
-		if (ObjectUtils.isEmpty(array2)) {
-			return array1;
+		if (ObjectUtils.isEmpty(arr2)) {
+			return arr1;
 		}
 		List<String> result = new ArrayList<String>();
-		result.addAll(Arrays.asList(array1));
-		for (int i = 0, n = array2.length; i < n; i++) {
-			String str = array2[i];
+		result.addAll(Arrays.asList(arr1));
+		for (int i = 0, n = arr2.length; i < n; i++) {
+			String str = arr2[i];
 			if (!result.contains(str)) {
 				result.add(str);
 			}
@@ -758,29 +758,29 @@ public final class StringUtils {
 
 	/**
 	 * Turn given source String array into sorted array.
-	 * @param array the source array
+	 * @param arr the source array
 	 * @return the sorted array (never <code>null</code>)
 	 */
-	public static String[] sortStringArray(final String[] array) {
-		if (ObjectUtils.isEmpty(array)) {
+	public static String[] sortStringArray(final String[] arr) {
+		if (ObjectUtils.isEmpty(arr)) {
 			return new String[0];
 		}
-		Arrays.sort(array);
-		return array;
+		Arrays.sort(arr);
+		return arr;
 	}
 
 	/**
 	 * Copy the given Collection into a String array.
 	 * The Collection must contain String elements only.
-	 * @param collection the Collection to copy
+	 * @param coll the Collection to copy
 	 * @return the String array (<code>null</code> if the passed-in
 	 * Collection was <code>null</code>)
 	 */
-	public static String[] toStringArray(final Collection<String> collection) {
-		if (collection == null) {
+	public static String[] toStringArray(final Collection<String> coll) {
+		if (coll == null) {
 			return null;
 		}
-		return collection.toArray(new String[collection.size()]);
+		return coll.toArray(new String[coll.size()]);
 	}
 
 	/**
@@ -801,16 +801,16 @@ public final class StringUtils {
 	/**
 	 * Trim the elements of the given String array,
 	 * calling <code>String.trim()</code> on each of them.
-	 * @param array the original String array
+	 * @param arr the original String array
 	 * @return the resulting array (of the same size) with trimmed elements
 	 */
-	public static String[] trimArrayElements(final String[] array) {
-		if (ObjectUtils.isEmpty(array)) {
+	public static String[] trimArrayElements(final String[] arr) {
+		if (ObjectUtils.isEmpty(arr)) {
 			return new String[0];
 		}
-		String[] result = new String[array.length];
-		for (int i = 0, n = array.length; i < n; i++) {
-			String element = array[i];
+		String[] result = new String[arr.length];
+		for (int i = 0, n = arr.length; i < n; i++) {
+			String element = arr[i];
 			result[i] = (element != null ? element.trim() : null);
 		}
 		return result;
@@ -819,16 +819,16 @@ public final class StringUtils {
 	/**
 	 * Remove duplicate Strings from the given array.
 	 * Also sorts the array, as it uses a TreeSet.
-	 * @param array the String array
+	 * @param arr the String array
 	 * @return an array without duplicates, in natural sort order
 	 */
-	public static String[] removeDuplicateStrings(final String[] array) {
-		if (ObjectUtils.isEmpty(array)) {
-			return array;
+	public static String[] removeDuplicateStrings(final String[] arr) {
+		if (ObjectUtils.isEmpty(arr)) {
+			return arr;
 		}
 		Set<String> set = new TreeSet<String>();
-		for (int i = 0, n = array.length; i < n; i++) {
-			set.add(array[i]);
+		for (int i = 0, n = arr.length; i < n; i++) {
+			set.add(arr[i]);
 		}
 		return toStringArray(set);
 	}
@@ -837,21 +837,21 @@ public final class StringUtils {
 	 * Split a String at the first occurrence of the delimiter.
 	 * Does not include the delimiter in the result.
 	 * @param toSplit the string to split
-	 * @param delimiter to split the string up with
+	 * @param delim to split the string up with
 	 * @return a two element array with index 0 being before the delimiter, and
 	 * index 1 being after the delimiter (neither element includes the delimiter);
 	 * or <code>null</code> if the delimiter wasn't found in the given input String
 	 */
-	public static String[] split(final String toSplit, final String delimiter) {
-		if (!hasLength(toSplit) || !hasLength(delimiter)) {
+	public static String[] split(final String toSplit, final String delim) {
+		if (!hasLength(toSplit) || !hasLength(delim)) {
 			return null;
 		}
-		int offset = toSplit.indexOf(delimiter);
+		int offset = toSplit.indexOf(delim);
 		if (offset < 0) {
 			return null;
 		}
 		String beforeDelimiter = toSplit.substring(0, offset);
-		String afterDelimiter = toSplit.substring(offset + delimiter.length());
+		String afterDelimiter = toSplit.substring(offset + delim.length());
 		return new String[] {beforeDelimiter, afterDelimiter};
 	}
 
@@ -861,13 +861,13 @@ public final class StringUtils {
 	 * delimiter providing the key, and the right of the delimiter providing the value.
 	 * <p>Will trim both the key and value before adding them to the
 	 * <code>Properties</code> instance.
-	 * @param array the array to process
-	 * @param delimiter to split each element using (typically the equals symbol)
+	 * @param arr the array to process
+	 * @param delim to split each element using (typically the equals symbol)
 	 * @return a <code>Properties</code> instance representing the array contents,
 	 * or <code>null</code> if the array to process was null or empty
 	 */
-	public static Properties splitArrayElementsIntoProperties(final String[] array, final String delimiter) {
-		return splitArrayElementsIntoProperties(array, delimiter, null);
+	public static Properties splitArrayElementsIntoProperties(final String[] arr, final String delim) {
+		return splitArrayElementsIntoProperties(arr, delim, null);
 	}
 
 	/**
@@ -876,27 +876,27 @@ public final class StringUtils {
 	 * delimiter providing the key, and the right of the delimiter providing the value.
 	 * <p>Will trim both the key and value before adding them to the
 	 * <code>Properties</code> instance.
-	 * @param array the array to process
-	 * @param delimiter to split each element using (typically the equals symbol)
+	 * 
+	 * @param arr the array to process
+	 * @param delim to split each element using (typically the equals symbol)
 	 * @param charsToDelete one or more characters to remove from each element
 	 * prior to attempting the split operation (typically the quotation mark
 	 * symbol), or <code>null</code> if no removal should occur
 	 * @return a <code>Properties</code> instance representing the array contents,
 	 * or <code>null</code> if the array to process was <code>null</code> or empty
 	 */
-	public static Properties splitArrayElementsIntoProperties(
-		final String[] array, final String delimiter, final String charsToDelete) {
-		if (ObjectUtils.isEmpty(array)) {
+	public static Properties splitArrayElementsIntoProperties(final String[] arr, final String delim, final String charsToDelete) {
+		if (ObjectUtils.isEmpty(arr)) {
 			return null;
 		}
 
 		Properties result = new Properties();
-		for (int i = 0, n = array.length; i < n; i++) {
-			String element = array[i];
+		for (int i = 0, n = arr.length; i < n; i++) {
+			String element = arr[i];
 			if (charsToDelete != null) {
-				element = deleteAny(array[i], charsToDelete);
+				element = deleteAny(arr[i], charsToDelete);
 			}
-			String[] splittedElement = split(element, delimiter);
+			String[] splittedElement = split(element, delim);
 			if (splittedElement == null) {
 				continue;
 			}
@@ -912,6 +912,7 @@ public final class StringUtils {
 	 * delimiter characters. Each of those characters can be used to separate
 	 * tokens. A delimiter is always a single character; for multi-character
 	 * delimiters, consider using <code>delimitedListToStringArray</code>
+	 * 
 	 * @param str the String to tokenize
 	 * @param delimiters the delimiter characters, assembled as String
 	 * (each of those characters is individually considered as delimiter).
@@ -943,8 +944,7 @@ public final class StringUtils {
 	 * @see java.lang.String#trim()
 	 * @see #delimitedListToStringArray
 	 */
-	public static String[] tokenizeToStringArray(
-		final String str, final String delimiters, final boolean trimTokens, final boolean ignoreEmptyTokens) {
+	public static String[] tokenizeToStringArray(final String str, final String delimiters, final boolean trimTokens, final boolean ignoreEmptyTokens) {
 		if (str == null) {
 			return null;
 		}
@@ -969,13 +969,13 @@ public final class StringUtils {
 	 * be considered as single delimiter string, rather than as bunch of potential
 	 * delimiter characters - in contrast to <code>tokenizeToStringArray</code>.
 	 * @param str the input String
-	 * @param delimiter the delimiter between elements (this is a single delimiter,
+	 * @param delim the delimiter between elements (this is a single delimiter,
 	 * rather than a bunch individual delimiter characters)
 	 * @return an array of the tokens in the list
 	 * @see #tokenizeToStringArray
 	 */
-	public static String[] delimitedListToStringArray(final String str, final String delimiter) {
-		return delimitedListToStringArray(str, delimiter, null);
+	public static String[] delimitedListToStringArray(final String str, final String delim) {
+		return delimitedListToStringArray(str, delim, null);
 	}
 
 	/**
@@ -1281,90 +1281,90 @@ public final class StringUtils {
 	/**
 	 * Prefixes the given string with the given prefix, if it's not already.
 	 * 
-	 * @param string the string to prefix (can be blank)
+	 * @param str the string to prefix (can be blank)
 	 * @param prefix the prefix to apply (can be blank to do nothing)
 	 * @return <code>null</code> if a <code>null</code> string was given,
 	 * otherwise the prefixed string
 	 * @since 1.2.0
 	 */
-	public static String prefix(final String string, final String prefix) {
-		if (string == null || prefix == null || string.startsWith(prefix)) {
-			return string;
+	public static String prefix(final String str, final String prefix) {
+		if (str == null || prefix == null || str.startsWith(prefix)) {
+			return str;
 		}
-		return prefix + string;
+		return prefix + str;
 	}
 	
 	/**
 	 * Removes the given prefix from the given string, if it exists
 	 * 
-	 * @param string the string to modify (can be blank to do nothing)
+	 * @param str the string to modify (can be blank to do nothing)
 	 * @param prefix the prefix to remove (can be blank to do nothing)
 	 * @return <code>null</code> if a <code>null</code> string was given
 	 * @since 1.2.0
 	 */
-	public static String removePrefix(final String string, final String prefix) {
-		if (!hasText(string) || !hasText(prefix) || !string.startsWith(prefix)) {
-			return string;
+	public static String removePrefix(final String str, final String prefix) {
+		if (!hasText(str) || !hasText(prefix) || !str.startsWith(prefix)) {
+			return str;
 		}
-		return string.substring(prefix.length());
+		return str.substring(prefix.length());
 	}
 	
 	/**
 	 * Removes the given suffix from the given string, if it exists
 	 * 
-	 * @param string the string to modify (can be blank to do nothing)
+	 * @param str the string to modify (can be blank to do nothing)
 	 * @param suffix the suffix to remove (can be blank to do nothing)
 	 * @return <code>null</code> if a <code>null</code> string was given
 	 * @since 1.2.0
 	 */
-	public static String removeSuffix(final String string, final String suffix) {
-		if (!hasText(string) || !hasText(suffix) || !string.endsWith(suffix)) {
-			return string;
+	public static String removeSuffix(final String str, final String suffix) {
+		if (!hasText(str) || !hasText(suffix) || !str.endsWith(suffix)) {
+			return str;
 		}
-		return string.substring(0, string.length() - suffix.length());
+		return str.substring(0, str.length() - suffix.length());
 	}
 
 	/**
 	 * Appends the given suffix to the given string, if not already present
 	 * 
-	 * @param string the string to modify (can be blank to do nothing)
+	 * @param str the string to modify (can be blank to do nothing)
 	 * @param suffix the suffix to append (can be blank to do nothing)
 	 * @return <code>null</code> if a <code>null</code> string was given
 	 * @since 1.2.0
 	 */
-	public static String suffix(final String string, final String suffix) {
-		if (string == null || suffix == null || string.endsWith(suffix)) {
-			return string;
+	public static String suffix(final String str, final String suffix) {
+		if (str == null || suffix == null || str.endsWith(suffix)) {
+			return str;
 		}
-		return string + suffix;
+		return str + suffix;
 	}
 	
 	/**
 	 * Indicates whether the two given strings are equal, including case, where
 	 * <code>null</code> is (only) equal to <code>null</code>.
 	 * 
-	 * @param string1 the first string to compare (can be <code>null</code>)
-	 * @param string2 the second string to compare (can be <code>null</code>)
+	 * @param str1 the first string to compare (can be <code>null</code>)
+	 * @param str2 the second string to compare (can be <code>null</code>)
 	 * @return see above
 	 * @since 1.2.0
 	 */
-	public static boolean equals(final String string1, final String string2) {
-		if (string1 == null) {
-			return string2 == null;
+	public static boolean equals(final String str1, final String str2) {
+		if (str1 == null) {
+			return str2 == null;
 		}
-		return string1.equals(string2);
+		return str1.equals(str2);
 	}
 	
 	/**
 	 * Indicates whether the given text is blank. More fluent than calling
 	 * <code>!StringUtils.hasText(blah)</code>.
 	 * 
-	 * @param text the text to check (can be blank)
+	 * @param str the text to check (can be blank)
 	 * @return the opposite of {@link #hasText(String)}
 	 * @since 1.2.0
 	 */
-	public static boolean isBlank(final String text) {
-		return !hasText(text);
+	public static boolean isBlank(final String str) {
+		return !hasText(str);
 	}
 	
 	/**
