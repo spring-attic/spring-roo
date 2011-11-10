@@ -59,6 +59,9 @@ import org.w3c.dom.Element;
  */
 public class JspViewManager {
 
+	// Constants
+	private static final JavaSymbolName VALUE = new JavaSymbolName("value");
+
 	// Fields
 	private final JavaType formBackingType;
 	private final JavaTypeMetadataDetails formBackingTypeMetadata;
@@ -453,27 +456,27 @@ public class JspViewManager {
 			fieldElement.setAttribute("validationMessageCode", "field_invalid_number");
 		}
 		if ("field:input".equals(fieldElement.getTagName()) && null != (annotationMetadata = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), MIN))) {
-			AnnotationAttributeValue<?> min = annotationMetadata.getAttribute(new JavaSymbolName("value"));
+			AnnotationAttributeValue<?> min = annotationMetadata.getAttribute(VALUE);
 			if (min != null) {
 				fieldElement.setAttribute("min", min.getValue().toString());
 				fieldElement.setAttribute("required", "true");
 			}
 		}
 		if ("field:input".equals(fieldElement.getTagName()) && null != (annotationMetadata = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), MAX)) && !"field:textarea".equals(fieldElement.getTagName())) {
-			AnnotationAttributeValue<?> maxA = annotationMetadata.getAttribute(new JavaSymbolName("value"));
+			AnnotationAttributeValue<?> maxA = annotationMetadata.getAttribute(VALUE);
 			if (maxA != null) {
 				fieldElement.setAttribute("max", maxA.getValue().toString());
 			}
 		}
 		if ("field:input".equals(fieldElement.getTagName()) && null != (annotationMetadata = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), DECIMAL_MIN)) && !"field:textarea".equals(fieldElement.getTagName())) {
-			AnnotationAttributeValue<?> decimalMin = annotationMetadata.getAttribute(new JavaSymbolName("value"));
+			AnnotationAttributeValue<?> decimalMin = annotationMetadata.getAttribute(VALUE);
 			if (decimalMin != null) {
 				fieldElement.setAttribute("decimalMin", decimalMin.getValue().toString());
 				fieldElement.setAttribute("required", "true");
 			}
 		}
 		if ("field:input".equals(fieldElement.getTagName()) && null != (annotationMetadata = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), DECIMAL_MAX))) {
-			AnnotationAttributeValue<?> decimalMax = annotationMetadata.getAttribute(new JavaSymbolName("value"));
+			AnnotationAttributeValue<?> decimalMax = annotationMetadata.getAttribute(VALUE);
 			if (decimalMax != null) {
 				fieldElement.setAttribute("decimalMax", decimalMax.getValue().toString());
 			}

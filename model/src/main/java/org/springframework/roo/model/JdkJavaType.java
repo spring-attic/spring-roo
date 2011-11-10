@@ -14,6 +14,7 @@ import static org.springframework.roo.model.JavaType.SHORT_PRIMITIVE;
 import java.beans.PropertyEditorSupport;
 import java.io.ByteArrayInputStream;
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.security.SecureRandom;
@@ -55,6 +56,7 @@ public final class JdkJavaType {
 	// java.io
 	public static final JavaType BYTE_ARRAY_INPUT_STREAM = new JavaType(ByteArrayInputStream.class);
 	public static final JavaType SERIALIZABLE = new JavaType(Serializable.class);
+	public static final JavaType UNSUPPORTED_ENCODING_EXCEPTION = new JavaType(UnsupportedEncodingException.class);
 
 	// java.lang
 	public static final JavaType SUPPRESS_WARNINGS = new JavaType(SuppressWarnings.class);
