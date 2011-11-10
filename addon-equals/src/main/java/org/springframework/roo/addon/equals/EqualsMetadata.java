@@ -117,7 +117,7 @@ public class EqualsMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 
 		// Create the method
 		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		bodyBuilder.appendFormalLine("if (" + OBJECT_NAME + " == null) {");
+		bodyBuilder.appendFormalLine("if (!(" + OBJECT_NAME + " instanceof " + typeName + ")) {");
 		bodyBuilder.indent();
 		bodyBuilder.appendFormalLine("return false;");
 		bodyBuilder.indentRemove();
@@ -125,11 +125,6 @@ public class EqualsMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		bodyBuilder.appendFormalLine("if (this == " + OBJECT_NAME + ") {");
 		bodyBuilder.indent();
 		bodyBuilder.appendFormalLine("return true;");
-		bodyBuilder.indentRemove();
-		bodyBuilder.appendFormalLine("}");
-		bodyBuilder.appendFormalLine("if (!(" + OBJECT_NAME + " instanceof " + typeName + ")) {");
-		bodyBuilder.indent();
-		bodyBuilder.appendFormalLine("return false;");
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("}");
 		bodyBuilder.appendFormalLine(typeName + " rhs = (" + typeName + ") " + OBJECT_NAME + ";");
