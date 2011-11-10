@@ -33,7 +33,6 @@ public abstract class AbstractPathResolvingStrategy implements PathResolvingStra
 	protected void activate(final ComponentContext context) {
 		final File projectDirectory = new File(StringUtils.defaultIfEmpty(OSGiUtils.getRooWorkingDirectory(context), CURRENT_DIRECTORY));
 		rootPath = FileUtils.getCanonicalPath(projectDirectory);
-		System.out.println("Root path from " + getClass().getName() + " = '" + rootPath + "'");
 	}
 	
 	// ------------ PathResolvingStrategy methods ----------------
