@@ -6,11 +6,6 @@
             <name>Spring Maven MILESTONE Repository</name>
             <url>http://maven.springframework.org/milestone</url>
         </repository>
-        <repository>
-            <id>JBoss Repo</id>
-            <name>JBoss Repo</name>
-            <url>https://repository.jboss.org/nexus/content/repositories/releases</url>
-        </repository>
         <dependencies>
             <dependency org="javax.persistence" name="persistence-api" rev="1.0" />
             <dependency org="javax.validation" name="validation-api" rev="1.0.0.GA" />
