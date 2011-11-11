@@ -43,9 +43,6 @@ public class JsfConverterMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	private static final String PROVIDES_TYPE_STRING = JsfConverterMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
 
-	// Fields
-	private JavaType entity;
-
 	public JsfConverterMetadata(final String identifier, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final JsfConverterAnnotationValues annotationValues, final MethodMetadata identifierAccessor, final MemberTypeAdditions findMethod) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' is invalid");
@@ -57,12 +54,11 @@ public class JsfConverterMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			return;
 		}
 
-		this.entity = annotationValues.getEntity();
-
-		if (findMethod == null) {
+		if (findMethod == null || identifierAccessor == null) {
 			valid = false;
 			return;
 		}
+		
 		if (!isConverterInterfaceIntroduced()) {
 			final ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
 			imports.addImport(CONVERTER);
@@ -70,8 +66,8 @@ public class JsfConverterMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		}
 
 		builder.addAnnotation(getFacesConverterAnnotation());
-		builder.addMethod(getGetAsObjectMethod(identifierAccessor, findMethod));
-		builder.addMethod(getGetAsStringMethod(identifierAccessor));
+		builder.addMethod(getGetAsObjectMethod(findMethod, identifierAccessor));
+		builder.addMethod(getGetAsStringMethod(annotationValues.getEntity(), identifierAccessor));
 
 		// Create a representation of the desired output ITD
 		itdTypeDetails = builder.build();
@@ -93,7 +89,7 @@ public class JsfConverterMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		return isImplementing(governorTypeDetails, CONVERTER);
 	}
 
-	private MethodMetadata getGetAsObjectMethod(final MethodMetadata identifierAccessor, final MemberTypeAdditions findMethod) {
+	private MethodMetadata getGetAsObjectMethod(final MemberTypeAdditions findMethod, final MethodMetadata identifierAccessor) {
 		final JavaSymbolName methodName = new JavaSymbolName("getAsObject");
 		final JavaType[] parameterTypes = { FACES_CONTEXT, UI_COMPONENT, STRING };
 		if (governorHasMethod(methodName, parameterTypes)) {
@@ -123,7 +119,7 @@ public class JsfConverterMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		return methodBuilder.build();
 	}
 
-	private MethodMetadata getGetAsStringMethod(final MethodMetadata identifierAccessor) {
+	private MethodMetadata getGetAsStringMethod(final JavaType entity, final MethodMetadata identifierAccessor) {
 		final JavaSymbolName methodName = new JavaSymbolName("getAsString");
 		final JavaType[] parameterTypes = { FACES_CONTEXT, UI_COMPONENT, OBJECT };
 		if (governorHasMethod(methodName, parameterTypes)) {
