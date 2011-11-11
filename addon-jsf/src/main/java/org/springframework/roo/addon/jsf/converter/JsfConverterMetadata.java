@@ -47,8 +47,6 @@ public class JsfConverterMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' is invalid");
 		Assert.notNull(annotationValues, "Annotation values required");
-		Assert.notNull(identifierAccessor, "Identifier accessor required");
-		Assert.notNull(findMethod, "Find method required");
 
 		if (!isValid()) {
 			return;
