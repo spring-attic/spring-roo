@@ -51,6 +51,7 @@ import org.springframework.roo.project.Repository;
 import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.support.osgi.OSGiUtils;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.CollectionUtils;
 import org.springframework.roo.support.util.DomUtils;
 import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.FileUtils;
@@ -321,7 +322,7 @@ public class GwtOperationsImpl implements GwtOperations {
 			readOnlyValues.add(new StringAttributeValue(VALUE, versionField.getFieldName().getSymbolName()));
 		}
 		List<FieldMetadata> idFields = persistenceMemberLocator.getIdentifierFields(entity.getName());
-		if (idFields != null && !idFields.isEmpty()) {
+		if (!CollectionUtils.isEmpty(idFields)) {
 			readOnlyValues.add(new StringAttributeValue(VALUE, idFields.get(0).getFieldName().getSymbolName()));
 		}
 		ArrayAttributeValue<StringAttributeValue> readOnlyAttribute = new ArrayAttributeValue<StringAttributeValue>(new JavaSymbolName("readOnly"), readOnlyValues);

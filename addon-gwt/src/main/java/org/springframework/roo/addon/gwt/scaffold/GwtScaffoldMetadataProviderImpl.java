@@ -91,7 +91,7 @@ public class GwtScaffoldMetadataProviderImpl implements GwtScaffoldMetadataProvi
 		}
 
 		ClassOrInterfaceTypeDetails proxy = gwtTypeService.lookupProxyFromEntity(mirroredType);
-		if (proxy == null ) {
+		if (proxy == null || proxy.getDeclaredMethods().isEmpty()) {
 			return null;
 		}
 
@@ -100,12 +100,7 @@ public class GwtScaffoldMetadataProviderImpl implements GwtScaffoldMetadataProvi
 			return null;
 		}
 
-		if (proxy.getDeclaredMethods().isEmpty()) {
-			return null;
-		}
-
-		Boolean scaffold = GwtUtils.getBooleanAnnotationValue(proxy, RooJavaType.ROO_GWT_PROXY, "scaffold", false);
-		if (!scaffold) {
+		if (!GwtUtils.getBooleanAnnotationValue(proxy, RooJavaType.ROO_GWT_PROXY, "scaffold", false)) {
 			return null;
 		}
 
@@ -146,7 +141,7 @@ public class GwtScaffoldMetadataProviderImpl implements GwtScaffoldMetadataProvi
 		Map<String, String> xmlToBeWritten = new HashMap<String, String>();
 
 		Map<GwtType, JavaType> mirrorTypeMap = GwtUtils.getMirrorTypeMap(projectOperations, mirroredType.getName());
-	   	mirrorTypeMap.put(GwtType.PROXY, proxy.getName());
+		mirrorTypeMap.put(GwtType.PROXY, proxy.getName());
 		mirrorTypeMap.put(GwtType.REQUEST, request.getName());
 
 		for (Map.Entry<GwtType, JavaType> entry : mirrorTypeMap.entrySet()) {
@@ -199,7 +194,6 @@ public class GwtScaffoldMetadataProviderImpl implements GwtScaffoldMetadataProvi
 	}
 
 	public void notify(String upstreamDependency, String downstreamDependency) {
-
 		if (MetadataIdentificationUtils.isIdentifyingClass(downstreamDependency)) {
 			Assert.isTrue(MetadataIdentificationUtils.getMetadataClass(upstreamDependency).equals(MetadataIdentificationUtils.getMetadataClass(PhysicalTypeIdentifier.getMetadataIdentiferType())), "Expected class-level notifications only for PhysicalTypeIdentifier (not '" + upstreamDependency + "')");
 			ClassOrInterfaceTypeDetails cid = typeLocationService.getTypeDetails(upstreamDependency);
@@ -208,26 +202,26 @@ public class GwtScaffoldMetadataProviderImpl implements GwtScaffoldMetadataProvi
 			}
 
 			if (MemberFindingUtils.getAnnotationOfType(cid.getAnnotations(), RooJavaType.ROO_GWT_PROXY) != null) {
-				ClassOrInterfaceTypeDetails entity = gwtTypeService.lookupEntityFromProxy(cid);
-				if (entity != null) {
-					upstreamDependency = entity.getDeclaredByMetadataId();
+				ClassOrInterfaceTypeDetails entityType = gwtTypeService.lookupEntityFromProxy(cid);
+				if (entityType != null) {
+					upstreamDependency = entityType.getDeclaredByMetadataId();
 				}
 			} else if (MemberFindingUtils.getAnnotationOfType(cid.getAnnotations(), RooJavaType.ROO_GWT_REQUEST) != null) {
-				ClassOrInterfaceTypeDetails entity = gwtTypeService.lookupEntityFromRequest(cid);
-				if (entity != null) {
-					upstreamDependency = entity.getDeclaredByMetadataId();
+				ClassOrInterfaceTypeDetails entityType = gwtTypeService.lookupEntityFromRequest(cid);
+				if (entityType != null) {
+					upstreamDependency = entityType.getDeclaredByMetadataId();
 				}
 			} else if (MemberFindingUtils.getAnnotationOfType(cid.getAnnotations(), RooJavaType.ROO_GWT_LOCATOR) != null) {
-				ClassOrInterfaceTypeDetails entity = gwtTypeService.lookupEntityFromLocator(cid);
-				if (entity != null) {
-					upstreamDependency = entity.getDeclaredByMetadataId();
+				ClassOrInterfaceTypeDetails entityType = gwtTypeService.lookupEntityFromLocator(cid);
+				if (entityType != null) {
+					upstreamDependency = entityType.getDeclaredByMetadataId();
 				}
 			}
+
 			// A physical Java type has changed, and determine what the corresponding local metadata identification string would have been
 			JavaType typeName = PhysicalTypeIdentifier.getJavaType(upstreamDependency);
 			LogicalPath typePath = PhysicalTypeIdentifier.getPath(upstreamDependency);
 			downstreamDependency = createLocalIdentifier(typeName, typePath);
-
 		}
 
 		// We only need to proceed if the downstream dependency relationship is not already registered

@@ -35,8 +35,7 @@ public class {{=className}} {
         return makeCreateActivity();
     }
 
-    throw new IllegalArgumentException("Unknown operation "
-        + place.getOperation());
+    throw new IllegalArgumentException("Unknown operation " + place.getOperation());
   }
 
   @SuppressWarnings("unchecked")
@@ -71,7 +70,7 @@ public class {{=className}} {
         requests,
         ScaffoldApp.isMobile() ? {{=mobileEditView}}.instance() : {{=editView}}.instance(),
         placeController) {
-      
+
       @Override
       protected RequestContext createSaveRequest({{=proxy}} proxy) {
         {{=request}} request = requests.{{=nameUncapitalized}}Request();

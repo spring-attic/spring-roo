@@ -53,8 +53,8 @@ import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
-import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.FeatureNames;
+import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
@@ -460,16 +460,18 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
 			return null;
 		}
 
-		ClassOrInterfaceTypeDetails request = gwtTypeService.lookupRequestFromProxy(proxy);
-
-		MemberTypeAdditions countMethodAdditions = layerService.getMemberTypeAdditions(metadataIdentificationString, CustomDataKeys.COUNT_ALL_METHOD.name(), entity, idType, LAYER_POSITION);
 		final MethodParameter entityParameter = new MethodParameter(entity, "proxy");
+		ClassOrInterfaceTypeDetails request = gwtTypeService.lookupRequestFromProxy(proxy);
+		
 		MemberTypeAdditions persistMethodAdditions = layerService.getMemberTypeAdditions(metadataIdentificationString, CustomDataKeys.PERSIST_METHOD.name(), entity, idType, LAYER_POSITION, entityParameter);
-		MemberTypeAdditions removeMethodAdditions = layerService.getMemberTypeAdditions(metadataIdentificationString, CustomDataKeys.REMOVE_METHOD.name(), entity, idType, LAYER_POSITION, entityParameter);
 		String persistMethodSignature = getRequestMethodCall(request, persistMethodAdditions);
-		String removeMethodSignature = getRequestMethodCall(request, removeMethodAdditions);
 		dataDictionary.setVariable("persistMethodSignature", persistMethodSignature);
+		
+		MemberTypeAdditions removeMethodAdditions = layerService.getMemberTypeAdditions(metadataIdentificationString, CustomDataKeys.REMOVE_METHOD.name(), entity, idType, LAYER_POSITION, entityParameter);
+		String removeMethodSignature = getRequestMethodCall(request, removeMethodAdditions);
 		dataDictionary.setVariable("removeMethodSignature", removeMethodSignature);
+		
+		MemberTypeAdditions countMethodAdditions = layerService.getMemberTypeAdditions(metadataIdentificationString, CustomDataKeys.COUNT_ALL_METHOD.name(), entity, idType, LAYER_POSITION);
 		dataDictionary.setVariable("countEntitiesMethod", countMethodAdditions.getMethodName());
 
 		for (GwtType reference : type.getReferences()) {
@@ -483,7 +485,6 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
 		String plural = pluralMetadata.getPlural();
 
 		String simpleTypeName = mirroredType.getName().getSimpleTypeName();
-
 		dataDictionary.setVariable("className", javaType.getSimpleTypeName());
 		dataDictionary.setVariable("packageName", javaType.getPackage().getFullyQualifiedPackageName());
 		dataDictionary.setVariable("placePackage", GwtPath.SCAFFOLD_PLACE.packageName(projectOperations.getTopLevelPackage(projectMetadata.getModuleName())));
@@ -496,6 +497,7 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
 		dataDictionary.setVariable("proxy", proxyType.getSimpleTypeName());
 		dataDictionary.setVariable("pluralName", plural);
 		dataDictionary.setVariable("proxyRenderer", GwtProxyProperty.getProxyRendererType(projectOperations.getTopLevelPackage(projectMetadata.getModuleName()), proxyType));
+
 		String proxyFields = null;
 		GwtProxyProperty primaryProperty = null;
 		GwtProxyProperty secondaryProperty = null;

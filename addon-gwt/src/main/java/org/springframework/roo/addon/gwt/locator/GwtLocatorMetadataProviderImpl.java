@@ -85,13 +85,14 @@ public class GwtLocatorMetadataProviderImpl implements GwtLocatorMetadataProvide
 			return null;
 		}
 
-		ClassOrInterfaceTypeDetails entity = gwtTypeService.lookupEntityFromProxy(proxy);
-		if (entity == null || Modifier.isAbstract(entity.getModifier())) {
+		ClassOrInterfaceTypeDetails entityType = gwtTypeService.lookupEntityFromProxy(proxy);
+		if (entityType == null || Modifier.isAbstract(entityType.getModifier())) {
 			return null;
 		}
 
-		MethodMetadata identifierAccessor = persistenceMemberLocator.getIdentifierAccessor(entity.getName());
-		MethodMetadata versionAccessor = persistenceMemberLocator.getVersionAccessor(entity.getName());
+		final JavaType entity = entityType.getName();
+		MethodMetadata identifierAccessor = persistenceMemberLocator.getIdentifierAccessor(entity);
+		MethodMetadata versionAccessor = persistenceMemberLocator.getVersionAccessor(entity);
 		if (identifierAccessor == null || versionAccessor == null) {
 			return null;
 		}
@@ -100,20 +101,20 @@ public class GwtLocatorMetadataProviderImpl implements GwtLocatorMetadataProvide
 		String locatorIdentifier = PhysicalTypeIdentifier.createIdentifier(new JavaType(locatorType));
 		ClassOrInterfaceTypeDetailsBuilder locatorBuilder = new ClassOrInterfaceTypeDetailsBuilder(locatorIdentifier);
 		AnnotationMetadataBuilder annotationMetadataBuilder = new AnnotationMetadataBuilder(RooJavaType.ROO_GWT_LOCATOR);
-		annotationMetadataBuilder.addStringAttribute("value", entity.getName().getFullyQualifiedTypeName());
+		annotationMetadataBuilder.addStringAttribute("value", entity.getFullyQualifiedTypeName());
 		locatorBuilder.addAnnotation(annotationMetadataBuilder);
 		annotationMetadataBuilder = new AnnotationMetadataBuilder(SpringJavaType.COMPONENT);
 		locatorBuilder.addAnnotation(annotationMetadataBuilder);
 		locatorBuilder.setName(new JavaType(locatorType));
 		locatorBuilder.setModifier(Modifier.PUBLIC);
 		locatorBuilder.setPhysicalTypeCategory(PhysicalTypeCategory.CLASS);
-		locatorBuilder.addExtendsTypes(new JavaType(GwtUtils.LOCATOR.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, Arrays.asList(entity.getName(), identifierType)));
-		locatorBuilder.addMethod(getCreateMethod(locatorIdentifier, entity.getName()));
-		locatorBuilder.addMethod(getFindMethod(locatorBuilder, locatorIdentifier, entity.getName(), identifierType));
-		locatorBuilder.addMethod(getDomainTypeMethod(locatorIdentifier, entity.getName()));
-		locatorBuilder.addMethod(getIdMethod(locatorIdentifier, entity.getName(), identifierAccessor));
-		locatorBuilder.addMethod(getIdTypeMethod(locatorIdentifier, entity.getName(), identifierType));
-		locatorBuilder.addMethod(getVersionMethod(locatorIdentifier, entity.getName(), versionAccessor));
+		locatorBuilder.addExtendsTypes(new JavaType(GwtUtils.LOCATOR.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, Arrays.asList(entity, identifierType)));
+		locatorBuilder.addMethod(getCreateMethod(locatorIdentifier, entity));
+		locatorBuilder.addMethod(getFindMethod(locatorBuilder, locatorIdentifier, entity, identifierType));
+		locatorBuilder.addMethod(getDomainTypeMethod(locatorIdentifier, entity));
+		locatorBuilder.addMethod(getIdMethod(locatorIdentifier, entity, identifierAccessor));
+		locatorBuilder.addMethod(getIdTypeMethod(locatorIdentifier, entity, identifierType));
+		locatorBuilder.addMethod(getVersionMethod(locatorIdentifier, entity, versionAccessor));
 
 		typeManagementService.createOrUpdateTypeOnDisk(locatorBuilder.build());
 		return null;

@@ -338,11 +338,9 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 		List<MemberHoldingTypeDetails> memberHoldingTypeDetails = memberDetails.getDetails();
 		for (MemberHoldingTypeDetails memberHoldingTypeDetail : memberHoldingTypeDetails) {
 			for (MethodMetadata method : memberDetails.getMethods()) {
-				if (isPublicAccessor(method)) {
-					if (isValidMethodReturnType(method, memberHoldingTypeDetail)) {
-						proxyMethods.remove(method.getMethodName());
-						proxyMethods.put(method.getMethodName(), method);
-					}
+				if (isPublicAccessor(method) && isValidMethodReturnType(method, memberHoldingTypeDetail)) {
+					proxyMethods.remove(method.getMethodName());
+					proxyMethods.put(method.getMethodName(), method);
 				}
 			}
 		}
