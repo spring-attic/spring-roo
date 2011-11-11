@@ -1,6 +1,7 @@
 package org.springframework.roo.addon.jsf.converter;
 
-import static org.springframework.roo.classpath.customdata.CustomDataKeys.FIND_ALL_METHOD;
+import static org.springframework.roo.addon.jsf.converter.JsfConverterMetadata.ID_FIELD_NAME;
+import static org.springframework.roo.classpath.customdata.CustomDataKeys.FIND_METHOD;
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.PERSISTENT_TYPE;
 import static org.springframework.roo.model.RooJavaType.ROO_JSF_CONVERTER;
 
@@ -19,11 +20,13 @@ import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
+import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.layers.LayerService;
 import org.springframework.roo.classpath.layers.LayerType;
 import org.springframework.roo.classpath.layers.MemberTypeAdditions;
+import org.springframework.roo.classpath.layers.MethodParameter;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.LogicalPath;
@@ -110,25 +113,27 @@ public class JsfConverterMetadataProviderImpl extends AbstractMemberDiscoveringI
 		entityToConverterMidMap.put(entity, metadataId);
 		converterMidToEntityMap.put(metadataId, entity);
 
-		final MemberTypeAdditions findAllMethod = getFindAllMethod(entity, metadataId);
+		final MethodMetadata identifierAccessor = persistenceMemberLocator.getIdentifierAccessor(entity);
+		final MemberTypeAdditions findMethod = getFindMethod(entity, metadataId);
 
-		return new JsfConverterMetadata(metadataId, aspectName, governorPhysicalTypeMetadata, annotationValues, findAllMethod);
+		return new JsfConverterMetadata(metadataId, aspectName, governorPhysicalTypeMetadata, annotationValues, identifierAccessor, findMethod);
 	}
 
-	private MemberTypeAdditions getFindAllMethod(final JavaType entity, final String metadataId) {
+	private MemberTypeAdditions getFindMethod(final JavaType entity, final String metadataId) {
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.createIdentifier(entity), metadataId);
 		final List<FieldMetadata> idFields = persistenceMemberLocator.getIdentifierFields(entity);
 		if (idFields.isEmpty()) {
 			return null;
 		}
-		final FieldMetadata identifierField = idFields.get(0);
-		final JavaType identifierType = persistenceMemberLocator.getIdentifierType(entity);
-		if (identifierType == null) {
+		final FieldMetadata idField = idFields.get(0);
+		final JavaType idType = persistenceMemberLocator.getIdentifierType(entity);
+		if (idType == null) {
 			return null;
 		}
-		metadataDependencyRegistry.registerDependency(identifierField.getDeclaredByMetadataId(), metadataId);
+		metadataDependencyRegistry.registerDependency(idField.getDeclaredByMetadataId(), metadataId);
 
-		return layerService.getMemberTypeAdditions(metadataId, FIND_ALL_METHOD.name(), entity, identifierType, LAYER_POSITION);
+		MethodParameter idParameter = new MethodParameter(idType, ID_FIELD_NAME);
+		return layerService.getMemberTypeAdditions(metadataId, FIND_METHOD.name(), entity, idType, LAYER_POSITION, idParameter);
 	}
 
 	public String getItdUniquenessFilenameSuffix() {

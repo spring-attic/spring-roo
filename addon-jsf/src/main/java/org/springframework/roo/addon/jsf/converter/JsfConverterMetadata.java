@@ -6,6 +6,7 @@ import static org.springframework.roo.addon.jsf.model.JsfJavaType.FACES_CONTEXT;
 import static org.springframework.roo.addon.jsf.model.JsfJavaType.FACES_CONVERTER;
 import static org.springframework.roo.addon.jsf.model.JsfJavaType.UI_COMPONENT;
 import static org.springframework.roo.model.JavaType.OBJECT;
+import static org.springframework.roo.model.JavaType.STRING;
 
 import java.util.Arrays;
 import java.util.List;
@@ -24,10 +25,10 @@ import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.ImportRegistrationResolver;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.JdkJavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
-import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Metadata for {@link RooJsfConverter}.
@@ -38,16 +39,19 @@ import org.springframework.roo.support.util.StringUtils;
 public class JsfConverterMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 	// Constants
+	static final String ID_FIELD_NAME = "id";
 	private static final String PROVIDES_TYPE_STRING = JsfConverterMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
 
 	// Fields
 	private JavaType entity;
 
-	public JsfConverterMetadata(final String identifier, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final JsfConverterAnnotationValues annotationValues, final MemberTypeAdditions findAllMethod) {
+	public JsfConverterMetadata(final String identifier, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final JsfConverterAnnotationValues annotationValues, final MethodMetadata identifierAccessor, final MemberTypeAdditions findMethod) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' is invalid");
 		Assert.notNull(annotationValues, "Annotation values required");
+		Assert.notNull(identifierAccessor, "Identifier accessor required");
+		Assert.notNull(findMethod, "Find method required");
 
 		if (!isValid()) {
 			return;
@@ -55,7 +59,7 @@ public class JsfConverterMetadata extends AbstractItdTypeDetailsProvidingMetadat
 
 		this.entity = annotationValues.getEntity();
 
-		if (findAllMethod == null) {
+		if (findMethod == null) {
 			valid = false;
 			return;
 		}
@@ -66,8 +70,8 @@ public class JsfConverterMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		}
 
 		builder.addAnnotation(getFacesConverterAnnotation());
-		builder.addMethod(getGetAsObjectMethod(findAllMethod));
-		builder.addMethod(getGetAsStringMethod(findAllMethod));
+		builder.addMethod(getGetAsObjectMethod(identifierAccessor, findMethod));
+		builder.addMethod(getGetAsStringMethod(identifierAccessor));
 
 		// Create a representation of the desired output ITD
 		itdTypeDetails = builder.build();
@@ -89,38 +93,29 @@ public class JsfConverterMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		return isImplementing(governorTypeDetails, CONVERTER);
 	}
 
-	private MethodMetadata getGetAsObjectMethod(final MemberTypeAdditions findAllMethod) {
+	private MethodMetadata getGetAsObjectMethod(final MethodMetadata identifierAccessor, final MemberTypeAdditions findMethod) {
 		final JavaSymbolName methodName = new JavaSymbolName("getAsObject");
-		final JavaType[] parameterTypes = { FACES_CONTEXT, UI_COMPONENT, JavaType.STRING };
+		final JavaType[] parameterTypes = { FACES_CONTEXT, UI_COMPONENT, STRING };
 		if (governorHasMethod(methodName, parameterTypes)) {
 			return null;
 		}
 
-		findAllMethod.copyAdditionsTo(builder, governorTypeDetails);
+		findMethod.copyAdditionsTo(builder, governorTypeDetails);
+		final JavaType returnType = identifierAccessor.getReturnType();
 
 		final ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
-		imports.addImport(entity);
+		imports.addImport(returnType);
 		imports.addImport(FACES_CONTEXT);
 		imports.addImport(UI_COMPONENT);
 
-		String simpleTypeName = entity.getSimpleTypeName();
-
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		bodyBuilder.appendFormalLine("if (value == null) {");  
+		bodyBuilder.appendFormalLine("if (value == null || value.length() == 0) {");  
 		bodyBuilder.indent();
 		bodyBuilder.appendFormalLine("return null;");
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("}");
-		bodyBuilder.appendFormalLine("for (" + simpleTypeName + " " + StringUtils.uncapitalize(simpleTypeName) + " : " + findAllMethod.getMethodCall() + ") {");
-		bodyBuilder.indent();
-		bodyBuilder.appendFormalLine("if (" + StringUtils.uncapitalize(simpleTypeName) + ".toString().equals(value)) {");
-		bodyBuilder.indent();
-		bodyBuilder.appendFormalLine("return " + StringUtils.uncapitalize(simpleTypeName) + ";");
-		bodyBuilder.indentRemove();
-		bodyBuilder.appendFormalLine("}");
-		bodyBuilder.indentRemove();
-		bodyBuilder.appendFormalLine("}");
-		bodyBuilder.appendFormalLine("return null;");
+		bodyBuilder.appendFormalLine(returnType.getSimpleTypeName() + " " + ID_FIELD_NAME + " = " + getJavaTypeConversionString(returnType) + ";");
+		bodyBuilder.appendFormalLine("return " + findMethod.getMethodCall() + ";");
 
 		// Create getAsObject method
 		final List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("context"), new JavaSymbolName("component"), new JavaSymbolName("value"));
@@ -128,7 +123,7 @@ public class JsfConverterMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		return methodBuilder.build();
 	}
 
-	private MethodMetadata getGetAsStringMethod(final MemberTypeAdditions findAllMethod) {
+	private MethodMetadata getGetAsStringMethod(final MethodMetadata identifierAccessor) {
 		final JavaSymbolName methodName = new JavaSymbolName("getAsString");
 		final JavaType[] parameterTypes = { FACES_CONTEXT, UI_COMPONENT, OBJECT };
 		if (governorHasMethod(methodName, parameterTypes)) {
@@ -141,14 +136,38 @@ public class JsfConverterMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		imports.addImport(UI_COMPONENT);
 
 		String simpleTypeName = entity.getSimpleTypeName();
-		
+
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		bodyBuilder.appendFormalLine("return value instanceof " + simpleTypeName + " ? ((" + simpleTypeName + ") value).toString() : \"\";");  
+		bodyBuilder.appendFormalLine("return value instanceof " + simpleTypeName + " ? ((" + simpleTypeName + ") value)." + identifierAccessor.getMethodName().getSymbolName() + "().toString() : \"\";");  
 
 		// Create getAsString method
 		final List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("context"), new JavaSymbolName("component"), new JavaSymbolName("value"));
 		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), PUBLIC, methodName, JavaType.STRING, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
 		return methodBuilder.build();
+	}
+	
+	private String getJavaTypeConversionString(JavaType javaType) {
+		if (javaType.equals(JavaType.LONG_OBJECT) || javaType.equals(JavaType.LONG_PRIMITIVE)) {
+			return "Long.parseLong(value)";
+		} else if (javaType.equals(JavaType.INT_OBJECT) || javaType.equals(JavaType.INT_PRIMITIVE)) {
+			return "Integer.parseInt(value)";
+		} else if (javaType.equals(JavaType.DOUBLE_OBJECT) || javaType.equals(JavaType.DOUBLE_PRIMITIVE)) {
+			return "Double.parseDouble(value)";
+		} else if (javaType.equals(JavaType.FLOAT_OBJECT) || javaType.equals(JavaType.FLOAT_PRIMITIVE)) {
+			return "Float.parseFloat(value)";
+		} else if (javaType.equals(JavaType.SHORT_OBJECT) || javaType.equals(JavaType.SHORT_PRIMITIVE)) {
+			return "Short.parseShort(value)";
+		} else if (javaType.equals(JavaType.BYTE_OBJECT) || javaType.equals(JavaType.BYTE_PRIMITIVE)) {
+			return "Byte.parseByte(value)";
+		} else if (javaType.equals(JdkJavaType.BIG_DECIMAL)) {
+			return "new BigDecimal(value)";
+		} else if (javaType.equals(JdkJavaType.BIG_INTEGER)) {
+			return "new BigInteger(value)";
+		} else if (javaType.equals(STRING)) {
+			return "value";
+		} else {
+			return "value.toString()";
+		}
 	}
 
 	@Override
