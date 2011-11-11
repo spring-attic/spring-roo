@@ -72,11 +72,11 @@ public class MavenPathResolvingStrategy extends AbstractPathResolvingStrategy {
 		return pomManagementService.getFocusedModule().getPathLocation(path);
 	}
 	
-	public String getIdentifier(final LogicalPath contextualPath, final String relativePath) {
-		Assert.notNull(contextualPath, "Path required");
+	public String getIdentifier(final LogicalPath logicalPath, final String relativePath) {
+		Assert.notNull(logicalPath, "Path required");
 		Assert.notNull(relativePath, "Relative path cannot be null, although it can be empty");
 		
-		String initialPath = FileUtils.getCanonicalPath(getPath(contextualPath));
+		String initialPath = FileUtils.getCanonicalPath(getPath(logicalPath));
 		initialPath = FileUtils.ensureTrailingSeparator(initialPath);
 		return initialPath + FileUtils.removeLeadingAndTrailingSeparators(relativePath);
 	}
@@ -90,10 +90,10 @@ public class MavenPathResolvingStrategy extends AbstractPathResolvingStrategy {
 		return new File(pom.getRoot());
 	}
 	
-	private File getPath(final LogicalPath contextualPath) {
-		final Pom pom = pomManagementService.getPomFromModuleName(contextualPath.getModule());
-		final File moduleRoot = getModuleRoot(contextualPath.getModule(), pom);
-		final String pathRelativeToPom = contextualPath.getPathRelativeToPom(pom);
+	private File getPath(final LogicalPath logicalPath) {
+		final Pom pom = pomManagementService.getPomFromModuleName(logicalPath.getModule());
+		final File moduleRoot = getModuleRoot(logicalPath.getModule(), pom);
+		final String pathRelativeToPom = logicalPath.getPathRelativeToPom(pom);
 		return new File(moduleRoot, pathRelativeToPom);
 	}
 	

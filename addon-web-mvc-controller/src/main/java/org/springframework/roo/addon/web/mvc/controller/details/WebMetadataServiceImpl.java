@@ -233,8 +233,8 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 
 		ClassOrInterfaceTypeDetails javaTypeDetails = typeLocationService.getTypeDetails(javaType);
 		Assert.notNull(javaType, "Class or interface type details isn't available for type '" + javaType + "'");
-		LogicalPath contextualPath = PhysicalTypeIdentifier.getPath(javaTypeDetails.getDeclaredByMetadataId());
-		String pluralMetadataKey = PluralMetadata.createIdentifier(javaType, contextualPath);
+		LogicalPath logicalPath = PhysicalTypeIdentifier.getPath(javaTypeDetails.getDeclaredByMetadataId());
+		String pluralMetadataKey = PluralMetadata.createIdentifier(javaType, logicalPath);
 		PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(pluralMetadataKey);
 		if (pluralMetadata != null) {
 			registerDependency(pluralMetadata.getId(), metadataIdentificationString);
@@ -334,8 +334,8 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 		SortedSet<FinderMetadataDetails> finderMetadataDetails = new TreeSet<FinderMetadataDetails>();
 		ClassOrInterfaceTypeDetails javaTypeDetails = typeLocationService.getTypeDetails(javaType);
 		Assert.notNull(javaType, "Class or interface type details isn't available for type '" + javaType + "'");
-		LogicalPath contextualPath = PhysicalTypeIdentifier.getPath(javaTypeDetails.getDeclaredByMetadataId());
-		String finderMetadataKey = FinderMetadata.createIdentifier(javaType, contextualPath);
+		LogicalPath logicalPath = PhysicalTypeIdentifier.getPath(javaTypeDetails.getDeclaredByMetadataId());
+		String finderMetadataKey = FinderMetadata.createIdentifier(javaType, logicalPath);
 		registerDependency(finderMetadataKey, metadataIdentificationString);
 		FinderMetadata finderMetadata = (FinderMetadata) metadataService.get(finderMetadataKey);
 		if (finderMetadata != null) {

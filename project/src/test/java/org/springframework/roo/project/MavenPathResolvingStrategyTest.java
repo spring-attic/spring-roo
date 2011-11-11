@@ -97,10 +97,10 @@ public class MavenPathResolvingStrategyTest {
 		assertIdentifier(null, NEW_MODULE, "", expectedIdentifier);
 	}
 	
-	private PhysicalPath getMockModulePath(final boolean isSource, final LogicalPath contextualPath) {
+	private PhysicalPath getMockModulePath(final boolean isSource, final LogicalPath logicalPath) {
 		final PhysicalPath mockModulePath = mock(PhysicalPath.class);
 		when(mockModulePath.isSource()).thenReturn(isSource);
-		when(mockModulePath.getContextualPath()).thenReturn(contextualPath);
+		when(mockModulePath.getContextualPath()).thenReturn(logicalPath);
 		return mockModulePath;
 	}
 	

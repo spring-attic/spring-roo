@@ -299,8 +299,8 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
 			Template template = templateLoader.getTemplate(templateFile);
 			Assert.notNull(template, "Tenmplate required for '" + templateFile + "'");
 			templateContents = template.renderToString(dataDictionary);
-			LogicalPath contextualPath = projectOperations.getPathResolver().getFocusedPath(Path.SRC_MAIN_JAVA);
-			String templateId = PhysicalTypeIdentifier.createIdentifier(templateType, contextualPath);
+			LogicalPath logicalPath = projectOperations.getPathResolver().getFocusedPath(Path.SRC_MAIN_JAVA);
+			String templateId = PhysicalTypeIdentifier.createIdentifier(templateType, logicalPath);
 			return typeParsingService.getTypeFromString(templateContents, templateId, templateType);
 		} catch (Exception e) {
 			throw new IllegalStateException(e);

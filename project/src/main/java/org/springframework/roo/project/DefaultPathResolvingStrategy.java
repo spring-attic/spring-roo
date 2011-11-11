@@ -61,10 +61,10 @@ public class DefaultPathResolvingStrategy extends AbstractPathResolvingStrategy 
 		return FileUtils.ensureTrailingSeparator(rootModulePaths.get(path.getPath()).getLocationPath()) + relativePath;
 	}
 
-	public String getRoot(final LogicalPath contextualPath) {
-		Assert.notNull(contextualPath, "Path required");
-		final PhysicalPath pathInfo = rootModulePaths.get(contextualPath.getPath());
-		Assert.notNull(pathInfo, "Unable to determine information for path '" + contextualPath + "'");
+	public String getRoot(final LogicalPath logicalPath) {
+		Assert.notNull(logicalPath, "Path required");
+		final PhysicalPath pathInfo = rootModulePaths.get(logicalPath.getPath());
+		Assert.notNull(pathInfo, "Unable to determine information for path '" + logicalPath + "'");
 		final File root = pathInfo.getLocation();
 		return FileUtils.getCanonicalPath(root);
 	}

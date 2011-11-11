@@ -17,24 +17,24 @@ import org.springframework.roo.support.util.FileUtils;
 public class PhysicalPath {
 
 	// Fields
-	private final LogicalPath contextualPath;
+	private final LogicalPath logicalPath;
 	private final File location;
 	
 	/**
 	 * Constructor
 	 *
-	 * @param contextualPath (required)
+	 * @param logicalPath (required)
 	 * @param location the physical location of this path (required)
 	 */
-	public PhysicalPath(final LogicalPath contextualPath, final File location) {
-		Assert.notNull(contextualPath, "Module path required");
+	public PhysicalPath(final LogicalPath logicalPath, final File location) {
+		Assert.notNull(logicalPath, "Module path required");
 		Assert.notNull(location, "Location required");
-		this.contextualPath = contextualPath;
+		this.logicalPath = logicalPath;
 		this.location = location;
 	}
 
 	public LogicalPath getContextualPath() {
-		return contextualPath;
+		return logicalPath;
 	}
 
 	/**
@@ -43,7 +43,7 @@ public class PhysicalPath {
 	 * @return see above
 	 */
 	public boolean isSource() {
-		return contextualPath.getPath().isJavaSource();
+		return logicalPath.getPath().isJavaSource();
 	}
 
 	/**
@@ -65,13 +65,13 @@ public class PhysicalPath {
 	}
 
 	public Path getPath() {
-		return contextualPath.getPath();
+		return logicalPath.getPath();
 	}
 	
 	@Override
 	public final String toString() {
 		ToStringCreator tsc = new ToStringCreator(this);
-		tsc.append("contextualPath", contextualPath);
+		tsc.append("logicalPath", logicalPath);
 		tsc.append("location", location);
 		return tsc.toString();
 	}

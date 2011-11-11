@@ -25,11 +25,11 @@ public class ContextualPathConverter implements Converter<LogicalPath> {
 	}
 
 	public LogicalPath convertFromText(final String value, final Class<?> targetType, final String optionContext) {
-		LogicalPath contextualPath = LogicalPath.getInstance(value);
-		if (contextualPath.getModule().equals("FOCUSED")) {
-			contextualPath = LogicalPath.getInstance(contextualPath.getPath(), projectOperations.getFocusedModuleName());
+		LogicalPath logicalPath = LogicalPath.getInstance(value);
+		if (logicalPath.getModule().equals("FOCUSED")) {
+			logicalPath = LogicalPath.getInstance(logicalPath.getPath(), projectOperations.getFocusedModuleName());
 		}
-		return contextualPath;
+		return logicalPath;
 	}
 
 	public boolean getAllPossibleValues(final List<Completion> completions, final Class<?> targetType, final String existingData, final String optionContext, final MethodTarget target) {
