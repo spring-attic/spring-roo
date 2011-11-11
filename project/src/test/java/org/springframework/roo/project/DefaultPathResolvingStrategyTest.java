@@ -81,7 +81,7 @@ public class DefaultPathResolvingStrategyTest {
 		this.pathResolvingStrategy.activate(getMockComponentContext(null));
 		
 		// Invoke
-		final List<PhysicalPath> modulePaths = this.pathResolvingStrategy.getPathInformation();
+		final List<PhysicalPath> modulePaths = this.pathResolvingStrategy.getPhysicalPaths();
 		
 		// Check
 		assertEquals(Path.values().length, modulePaths.size());

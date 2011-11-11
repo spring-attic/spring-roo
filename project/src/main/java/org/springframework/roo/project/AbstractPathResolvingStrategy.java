@@ -47,7 +47,7 @@ public abstract class AbstractPathResolvingStrategy implements PathResolvingStra
 	}
 	
 	public LogicalPath getPath(final String identifier) {
-		final PhysicalPath parent = getApplicablePathInformation(identifier);
+		final PhysicalPath parent = getApplicablePhysicalPath(identifier);
 		if (parent == null) {
 			return null;
 		}
@@ -72,7 +72,7 @@ public abstract class AbstractPathResolvingStrategy implements PathResolvingStra
 	protected abstract Collection<LogicalPath> getPaths(boolean sourceOnly);
 	
 	public String getRelativeSegment(final String identifier) {
-		final PhysicalPath parent = getApplicablePathInformation(identifier);
+		final PhysicalPath parent = getApplicablePhysicalPath(identifier);
 		if (parent == null) {
 			return null;
 		}
@@ -80,7 +80,7 @@ public abstract class AbstractPathResolvingStrategy implements PathResolvingStra
 		return parentFile.getRelativeSegment(identifier);
 	}
 	
-	protected abstract PhysicalPath getApplicablePathInformation(String identifier);
+	protected abstract PhysicalPath getApplicablePhysicalPath(String identifier);
 
 	public String getRoot() {
 		return rootPath;

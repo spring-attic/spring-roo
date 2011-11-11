@@ -43,9 +43,9 @@ public class PomTest {
 		final Path[] expectedPaths = { SRC_MAIN_JAVA, SRC_MAIN_RESOURCES, SRC_TEST_JAVA, SRC_TEST_RESOURCES, ROOT, SPRING_CONFIG_ROOT };
 		
 		// Invoke and check
-		assertEquals(expectedPaths.length, pom.getPathInformation().size());
+		assertEquals(expectedPaths.length, pom.getPhysicalPaths().size());
 		for (final Path path : expectedPaths) {
-			final PhysicalPath modulePath = pom.getPathInformation(path);
+			final PhysicalPath modulePath = pom.getPhysicalPath(path);
 			assertEquals(new File(PROJECT_ROOT, path.getDefaultLocation()), modulePath.getLocation());
 			assertEquals(path.isJavaSource(), modulePath.isSource());
 			final LogicalPath moduelPathId = modulePath.getContextualPath();

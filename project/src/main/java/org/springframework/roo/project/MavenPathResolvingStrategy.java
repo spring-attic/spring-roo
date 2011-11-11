@@ -31,24 +31,24 @@ public class MavenPathResolvingStrategy extends AbstractPathResolvingStrategy {
 	 * @param identifier to locate the parent of (required)
 	 * @return the first matching parent, or null if not found
 	 */
-	protected PhysicalPath getApplicablePathInformation(final String identifier) {
+	protected PhysicalPath getApplicablePhysicalPath(final String identifier) {
 		Assert.notNull(identifier, "Identifier required");
-		PhysicalPath pathInformation = null;
+		PhysicalPath physicalPath = null;
 		int longest = 0;
 		for (final Pom pom : pomManagementService.getPoms()) {
 			if (removeTrailingSeparator(identifier).startsWith(removeTrailingSeparator(pom.getRoot())) && removeTrailingSeparator(pom.getRoot()).length() > longest) {
 				longest = removeTrailingSeparator(pom.getRoot()).length();
 				int nextLongest = 0;
-				for (final PhysicalPath pi : pom.getPathInformation()) {
-					final String possibleParent = new FileDetails(pi.getLocation(), null).getCanonicalPath();
+				for (final PhysicalPath thisPhysicalPath : pom.getPhysicalPaths()) {
+					final String possibleParent = new FileDetails(thisPhysicalPath.getLocation(), null).getCanonicalPath();
 					if (removeTrailingSeparator(identifier).startsWith(possibleParent) && possibleParent.length() > nextLongest) {
 						nextLongest = possibleParent.length();
-						pathInformation = pi;
+						physicalPath = thisPhysicalPath;
 					}
 				}
 			}
 		}
-		return pathInformation;
+		return physicalPath;
 	}
 	
 	public String getCanonicalPath(final LogicalPath path, final JavaType javaType) {
@@ -65,7 +65,7 @@ public class MavenPathResolvingStrategy extends AbstractPathResolvingStrategy {
 	}
 	
 	public LogicalPath getFocusedPath(final Path path) {
-		return pomManagementService.getFocusedModule().getPathInformation(path).getContextualPath();
+		return pomManagementService.getFocusedModule().getPhysicalPath(path).getContextualPath();
 	}
 
 	public String getFocusedRoot(final Path path) {
@@ -100,7 +100,7 @@ public class MavenPathResolvingStrategy extends AbstractPathResolvingStrategy {
 	protected Collection<LogicalPath> getPaths(final boolean sourceOnly) {
 		final Collection<LogicalPath> pathIds = new ArrayList<LogicalPath>();
 		for (final Pom pom : pomManagementService.getPoms()) {
-			for (final PhysicalPath modulePath : pom.getPathInformation()) {
+			for (final PhysicalPath modulePath : pom.getPhysicalPaths()) {
 				if (!sourceOnly || modulePath.isSource()) {
 					pathIds.add(modulePath.getContextualPath());
 				}
@@ -111,7 +111,7 @@ public class MavenPathResolvingStrategy extends AbstractPathResolvingStrategy {
 
 	public String getRoot(final LogicalPath modulePathId) {
 		final Pom pom = pomManagementService.getPomFromModuleName(modulePathId.getModule());
-		return pom.getPathInformation(modulePathId.getPath()).getLocationPath();
+		return pom.getPhysicalPath(modulePathId.getPath()).getLocationPath();
 	}
 	
 	public boolean isActive() {

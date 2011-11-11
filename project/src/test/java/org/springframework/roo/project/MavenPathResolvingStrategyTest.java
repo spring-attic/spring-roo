@@ -108,7 +108,7 @@ public class MavenPathResolvingStrategyTest {
 		final PhysicalPath mockModuleSourcePath = getMockModulePath(true, mockSourcePath);
 		final PhysicalPath mockModuleNonSourcePath = getMockModulePath(false, mockNonSourcePath);
 		final Pom mockPom = mock(Pom.class);
-		when(mockPom.getPathInformation()).thenReturn(Arrays.asList(mockModuleSourcePath, mockModuleNonSourcePath));
+		when(mockPom.getPhysicalPaths()).thenReturn(Arrays.asList(mockModuleSourcePath, mockModuleNonSourcePath));
 		when(mockPomManagementService.getPoms()).thenReturn(Arrays.asList(mockPom));
 	}
 	

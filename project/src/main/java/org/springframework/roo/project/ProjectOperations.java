@@ -573,7 +573,8 @@ public interface ProjectOperations {
 	Collection<Pom> getPoms();
 
 	/**
-	 *
+	 * Adds the given module as a dependency of the currently focused module.
+	 * 
 	 * @param moduleName the name of the module to act upon (required)
 	 */
 	void addModuleDependency(String moduleName);

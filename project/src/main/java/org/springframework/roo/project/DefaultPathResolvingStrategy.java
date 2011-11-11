@@ -51,7 +51,7 @@ public class DefaultPathResolvingStrategy extends AbstractPathResolvingStrategy 
 		}
 	}
 
-	List<PhysicalPath> getPathInformation() {
+	List<PhysicalPath> getPhysicalPaths() {
 		return new ArrayList<PhysicalPath>(rootModulePaths.values());
 	}
 	
@@ -86,7 +86,7 @@ public class DefaultPathResolvingStrategy extends AbstractPathResolvingStrategy 
 	 * @param identifier to locate the parent of (required)
 	 * @return the first matching parent, or null if not found
 	 */
-	protected PhysicalPath getApplicablePathInformation(final String identifier) {
+	protected PhysicalPath getApplicablePhysicalPath(final String identifier) {
 		Assert.notNull(identifier, "Identifier required");
 		for (final PhysicalPath pi : rootModulePaths.values()) {
 			final FileDetails possibleParent = new FileDetails(pi.getLocation(), null);

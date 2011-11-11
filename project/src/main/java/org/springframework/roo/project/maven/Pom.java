@@ -97,10 +97,10 @@ public class Pom {
 		CollectionUtils.populate(this.repositories, repositories);
 		CollectionUtils.populate(this.resources, resources);
 		
-		cachePathInformation(this.packaging);
+		cachePhysicalPaths(this.packaging);
 	}
 
-	private void cachePathInformation(final String packaging) {
+	private void cachePhysicalPaths(final String packaging) {
 		for (final Path path : Path.values()) {
 			if (path.appliesTo(packaging)) {
 				pathCache.put(path, path.getModulePath(this));
@@ -230,7 +230,7 @@ public class Pom {
 		return path;
 	}
 
-	public List<PhysicalPath> getPathInformation() {
+	public List<PhysicalPath> getPhysicalPaths() {
 		return new ArrayList<PhysicalPath>(pathCache.values());
 	}
 
@@ -241,7 +241,7 @@ public class Pom {
 	 * @param path the sub-path for which to return the {@link PhysicalPath}
 	 * @return <code>null</code> if this module has no such sub-path
 	 */
-	public PhysicalPath getPathInformation(final Path path) {
+	public PhysicalPath getPhysicalPath(final Path path) {
 		return pathCache.get(path);
 	}
 
@@ -253,7 +253,7 @@ public class Pom {
 	 * @return <code>null</code> if this module has no such path
 	 */
 	public String getPathLocation(final Path path) {
-		final PhysicalPath modulePath = getPathInformation(path);
+		final PhysicalPath modulePath = getPhysicalPath(path);
 		if (modulePath == null) {
 			return null;
 		}
