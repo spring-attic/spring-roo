@@ -16,7 +16,8 @@ import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.uaa.client.util.Assert;
 
 /**
- *
+ * Metadata for {@link RooJpaRepository}.
+ * 
  * @author Stefan Schmidt
  * @author Andrew Swan
  * @since 1.2.0
@@ -29,24 +30,19 @@ public class RepositoryJpaMetadata extends AbstractItdTypeDetailsProvidingMetada
 	private static final String SPRING_JPA_REPOSITORY = "org.springframework.data.jpa.repository.JpaRepository";
 	private static final String SPRING_JPA_SPECIFICATION_EXECUTOR = "org.springframework.data.jpa.repository.JpaSpecificationExecutor";
 
-	// Fields
-	private final RepositoryJpaAnnotationValues annotationValues;
-
 	/**
 	 * Constructor
 	 *
 	 * @param identifier the identifier for this item of metadata (required)
 	 * @param aspectName the Java type of the ITD (required)
 	 * @param governorPhysicalTypeMetadata the governor, which is expected to contain a {@link ClassOrInterfaceTypeDetails} (required)
-	 * @param idType the type of the entity's identifier field (required)
 	 * @param annotationValues (required)
+	 * @param idType the type of the entity's identifier field (required)
 	 */
-	public RepositoryJpaMetadata(final String identifier, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final JavaType idType, final RepositoryJpaAnnotationValues annotationValues) {
+	public RepositoryJpaMetadata(final String identifier, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final RepositoryJpaAnnotationValues annotationValues, final JavaType idType) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.notNull(annotationValues, "Annotation values required");
 		Assert.notNull(idType, "Id type required");
-
-		this.annotationValues = annotationValues;
 
 		// Make the user's Repository interface extend Spring Data's JpaRepository interface if it doesn't already
 		ensureGovernorExtends(new JavaType(SPRING_JPA_REPOSITORY, 0, DataType.TYPE, null, Arrays.asList(annotationValues.getDomainType(), idType)));
@@ -58,10 +54,6 @@ public class RepositoryJpaMetadata extends AbstractItdTypeDetailsProvidingMetada
 
 		// Build the ITD
 		itdTypeDetails = builder.build();
-	}
-
-	public RepositoryJpaAnnotationValues getAnnotationValues() {
-		return annotationValues;
 	}
 
 	public static String getMetadataIdentiferType() {

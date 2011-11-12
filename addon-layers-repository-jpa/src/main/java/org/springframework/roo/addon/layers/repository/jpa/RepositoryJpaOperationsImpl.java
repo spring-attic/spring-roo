@@ -22,9 +22,9 @@ import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.process.manager.MutableFile;
-import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.FeatureNames;
+import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
@@ -73,12 +73,12 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
 
 		String interfaceIdentifier = pathResolver.getFocusedCanonicalPath(Path.SRC_MAIN_JAVA, interfaceType);
 		String classIdentifier = pathResolver.getFocusedCanonicalPath(Path.SRC_MAIN_JAVA, classType);
-		
+
 		if (fileManager.exists(interfaceIdentifier) || fileManager.exists(classIdentifier)) {
 			return; // Type exists already - nothing to do
 		}
 
-		// First build interface type
+		// Build interface type
 		AnnotationMetadataBuilder interfaceAnnotationMetadata = new AnnotationMetadataBuilder(ROO_REPOSITORY_JPA);
 		interfaceAnnotationMetadata.addAttribute(new ClassAttributeValue(new JavaSymbolName("domainType"), domainType));
 		String interfaceMdId = PhysicalTypeIdentifier.createIdentifier(interfaceType, pathResolver.getPath(interfaceIdentifier));
@@ -86,13 +86,7 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
 		interfaceTypeBuilder.addAnnotation(interfaceAnnotationMetadata.build());
 		typeManagementService.createOrUpdateTypeOnDisk(interfaceTypeBuilder.build());
 
-		// Second build the implementing class
-		// String classMdId = PhysicalTypeIdentifier.createIdentifier(classType, projectOperations.getPathResolver().getPath(classIdentifier));
-		// ClassOrInterfaceTypeDetailsBuilder classTypeBuilder = new ClassOrInterfaceTypeDetailsBuilder(classMdId, Modifier.PUBLIC, classType, PhysicalTypeCategory.CLASS);
-		// classTypeBuilder.addImplementsType(interfaceType);
-		// typeManagementService.createOrUpdateTypeOnDisk(classTypeBuilder.build());
-
-		// Third, take care of project configs
+		// Take care of project configs
 		configureProject();
 	}
 
@@ -104,16 +98,15 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
 		for (Element dependencyElement : springDependencies) {
 			dependencies.add(new Dependency(dependencyElement));
 		}
-		
+
 		projectOperations.addDependencies(projectOperations.getFocusedModuleName(), dependencies);
-		
+
 		String appCtxId = pathResolver.getFocusedIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext-jpa.xml");
-		
 		if (fileManager.exists(appCtxId)) {
 			return;
 		} else {
-			InputStream templateInputStream = FileUtils.getInputStream(getClass(), "applicationContext-jpa.xml");
 			try {
+				InputStream templateInputStream = FileUtils.getInputStream(getClass(), "applicationContext-jpa.xml");
 				String input = FileCopyUtils.copyToString(new InputStreamReader(templateInputStream));
 				input = input.replace("TO_BE_CHANGED_BY_ADDON", projectOperations.getFocusedTopLevelPackage().getFullyQualifiedPackageName());
 				MutableFile mutableFile = fileManager.createFile(appCtxId);
