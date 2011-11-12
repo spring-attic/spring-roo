@@ -111,7 +111,7 @@ public class WebJsonOperationsImpl implements WebJsonOperations {
 			JavaType mvcType = null;
 			for (ClassOrInterfaceTypeDetails mvcCod : typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_WEB_SCAFFOLD)) {
 				// We know this physical type exists given type location service just found it.
-				PhysicalTypeMetadata mvcMd = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(mvcCod.getName()));
+				PhysicalTypeMetadata mvcMd = (PhysicalTypeMetadata) metadataService.get(mvcCod.getDeclaredByMetadataId());
 				WebScaffoldAnnotationValues webScaffoldAnnotationValues = new WebScaffoldAnnotationValues(mvcMd);
 				if (webScaffoldAnnotationValues.isAnnotationFound() && webScaffoldAnnotationValues.getFormBackingObject().equals(jsonType)) {
 					mvcType = mvcCod.getName();

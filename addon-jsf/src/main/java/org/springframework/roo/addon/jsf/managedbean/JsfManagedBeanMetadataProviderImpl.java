@@ -251,7 +251,7 @@ public class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDiscoverin
 	 * @return a non-<code>null</code> map (may be empty if the CRUD methods are indeterminable)
 	 */
 	private Map<MethodMetadataCustomDataKey, MemberTypeAdditions> getCrudAdditions(final JavaType entity, final String metadataId) {
-		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.createIdentifier(entity), metadataId);
+		metadataDependencyRegistry.registerDependency(typeLocationService.getPhysicalTypeIdentifier(entity), metadataId);
 		final List<FieldMetadata> idFields = persistenceMemberLocator.getIdentifierFields(entity);
 		if (idFields.isEmpty()) {
 			return Collections.emptyMap();

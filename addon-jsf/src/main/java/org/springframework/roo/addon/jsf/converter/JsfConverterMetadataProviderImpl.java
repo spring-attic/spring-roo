@@ -107,7 +107,7 @@ public class JsfConverterMetadataProviderImpl extends AbstractMemberDiscoveringI
 	}
 
 	private MemberTypeAdditions getFindMethod(final JavaType entity, final String metadataId) {
-		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.createIdentifier(entity), metadataId);
+		metadataDependencyRegistry.registerDependency(typeLocationService.getPhysicalTypeIdentifier(entity), metadataId);
 		final List<FieldMetadata> idFields = persistenceMemberLocator.getIdentifierFields(entity);
 		if (idFields.isEmpty()) {
 			return null;

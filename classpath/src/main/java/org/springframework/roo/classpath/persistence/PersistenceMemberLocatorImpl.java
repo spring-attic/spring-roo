@@ -9,7 +9,6 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.classpath.ItdDiscoveryService;
-import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.customdata.CustomDataKeys;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
@@ -190,7 +189,7 @@ public class PersistenceMemberLocatorImpl implements PersistenceMemberLocator {
 	}
 
 	private MemberDetails getMemberDetails(final JavaType type) {
-		final ClassOrInterfaceTypeDetails physicalTypeMetadata = typeLocationService.getTypeDetails(PhysicalTypeIdentifier.createIdentifier(type));
+		final ClassOrInterfaceTypeDetails physicalTypeMetadata = typeLocationService.getTypeDetails(type);
 		if (physicalTypeMetadata == null ) {
 			return null;
 		}
