@@ -30,5 +30,5 @@ public @interface RooMongoRepository {
 	 *
 	 * @return a non-<code>null</code> entity type
 	 */
-	Class<?> domainType();	// No default => mandatory
+	Class<?> domainType(); // No default => mandatory
 }

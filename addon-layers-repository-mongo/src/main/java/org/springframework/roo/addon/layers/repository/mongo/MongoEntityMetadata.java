@@ -39,7 +39,7 @@ public class MongoEntityMetadata extends AbstractItdTypeDetailsProvidingMetadata
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
 
 	// Fields
-	private final MemberDetails entityMemberDetails;
+	private final MemberDetails memberDetails;
 
 	/**
 	 * Constructor
@@ -50,12 +50,12 @@ public class MongoEntityMetadata extends AbstractItdTypeDetailsProvidingMetadata
 	 * @param idType the type of the entity's identifier field (required)
 	 * @param governorMemberDetails the member details of the entity
 	 */
-	public MongoEntityMetadata(final String identifier, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final JavaType idType, final MemberDetails entityMemberDetails) {
+	public MongoEntityMetadata(final String identifier, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final JavaType idType, final MemberDetails memberDetails) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.notNull(idType, "Id type required");
-		Assert.notNull(entityMemberDetails, "Entity MemberDetails required");
+		Assert.notNull(memberDetails, "Entity MemberDetails required");
 
-		this.entityMemberDetails = entityMemberDetails;
+		this.memberDetails = memberDetails;
 
 		builder.addAnnotation(getTypeAnnotation(SpringJavaType.PERSISTENT));
 
@@ -88,7 +88,7 @@ public class MongoEntityMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		// See if the user provided the field
 		if (!getId().equals(idField.getDeclaredByMetadataId())) {
 			// Locate an existing accessor
-			final MethodMetadata method = entityMemberDetails.getMethod(requiredAccessorName, new ArrayList<JavaType>());
+			final MethodMetadata method = memberDetails.getMethod(requiredAccessorName, new ArrayList<JavaType>());
 			if (method != null) {
 				if (Modifier.isPublic(method.getModifier())) {
 					// Method exists and is public so return it
@@ -116,7 +116,7 @@ public class MongoEntityMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		// See if the user provided the field
 		if (!getId().equals(idField.getDeclaredByMetadataId())) {
 			// Locate an existing mutator
-			final MethodMetadata method = entityMemberDetails.getMethod(requiredMutatorName, parameterTypes);
+			final MethodMetadata method = memberDetails.getMethod(requiredMutatorName, parameterTypes);
 			if (method != null) {
 				if (Modifier.isPublic(method.getModifier())) {
 					// Method exists and is public so return it
@@ -132,8 +132,7 @@ public class MongoEntityMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("this." + idField.getFieldName().getSymbolName() + " = id;");
 
-		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, requiredMutatorName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
-		return methodBuilder.build();
+		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, requiredMutatorName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder).build();
 	}
 
 	public static String getMetadataIdentiferType() {

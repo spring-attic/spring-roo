@@ -1,82 +1,11 @@
 package org.springframework.roo.addon.layers.repository.mongo;
 
-import static org.springframework.roo.model.RooJavaType.ROO_REPOSITORY_MONGO;
-
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
-import org.osgi.service.component.ComponentContext;
-import org.springframework.roo.classpath.PhysicalTypeIdentifier;
-import org.springframework.roo.classpath.PhysicalTypeMetadata;
-import org.springframework.roo.classpath.customdata.taggers.CustomDataKeyDecorator;
-import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
-import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
-import org.springframework.roo.classpath.layers.LayerTypeMatcher;
-import org.springframework.roo.model.JavaSymbolName;
-import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.LogicalPath;
+import org.springframework.roo.classpath.itd.ItdTriggerBasedMetadataProvider;
 
 /**
- * Provides the metadata for an ITD that implements a Spring Data Mongo repository
+ * Provides the metadata for an ITD that implements a Spring Data Mongo repository.
  *
- * @author Stefan Schmidt
+ * @author Alan Stewart
  * @since 1.2.0
  */
-@Component(immediate = true)
-@Service
-public class RepositoryMongoMetadataProvider extends AbstractItdMetadataProvider {
-
-	// Fields
-	@Reference private CustomDataKeyDecorator customDataKeyDecorator;
-
-	@SuppressWarnings("unchecked")
-	protected void activate(final ComponentContext context) {
-		super.setDependsOnGovernorBeingAClass(false);
-		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-		addMetadataTrigger(ROO_REPOSITORY_MONGO);
-		customDataKeyDecorator.registerMatchers(getClass(), new LayerTypeMatcher(ROO_REPOSITORY_MONGO, new JavaSymbolName(RooMongoRepository.DOMAIN_TYPE_ATTRIBUTE)));
-	}
-
-	protected void deactivate(final ComponentContext context) {
-		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-		removeMetadataTrigger(ROO_REPOSITORY_MONGO);
-		customDataKeyDecorator.unregisterMatchers(getClass());
-	}
-
-	@Override
-	protected ItdTypeDetailsProvidingMetadataItem getMetadata(final String metadataId, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final String itdFilename) {
-		final RepositoryMongoAnnotationValues annotationValues = new RepositoryMongoAnnotationValues(governorPhysicalTypeMetadata);
-		final JavaType domainType = annotationValues.getDomainType();
-		if (!annotationValues.isAnnotationFound() || domainType == null) {
-			return null;
-		}
-
-		JavaType idType = persistenceMemberLocator.getIdentifierType(domainType);
-		if (idType == null) {
-			return null;
-		}
-
-		metadataDependencyRegistry.registerDependency(typeLocationService.getPhysicalTypeIdentifier(domainType), metadataId);
-		return new RepositoryMongoMetadata(metadataId, aspectName, governorPhysicalTypeMetadata, idType, annotationValues);
-	}
-
-	public String getItdUniquenessFilenameSuffix() {
-		return "Mongo_Repository";
-	}
-
-	public String getProvidesType() {
-		return RepositoryMongoMetadata.getMetadataIdentiferType();
-	}
-
-	@Override
-	protected String createLocalIdentifier(final JavaType javaType, final LogicalPath path) {
-		return RepositoryMongoMetadata.createIdentifier(javaType, path);
-	}
-
-	@Override
-	protected String getGovernorPhysicalTypeIdentifier(final String metadataIdentificationString) {
-		final JavaType javaType = RepositoryMongoMetadata.getJavaType(metadataIdentificationString);
-		final LogicalPath path = RepositoryMongoMetadata.getPath(metadataIdentificationString);
-		return PhysicalTypeIdentifier.createIdentifier(javaType, path);
-	}
-}
+public interface RepositoryMongoMetadataProvider extends ItdTriggerBasedMetadataProvider {}

@@ -27,36 +27,27 @@ public class RepositoryMongoMetadata extends AbstractItdTypeDetailsProvidingMeta
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
 	private static final String SPRING_DATA_REPOSITORY = "org.springframework.data.repository.PagingAndSortingRepository";
 
-	// Fields
-	private final RepositoryMongoAnnotationValues annotationValues;
-
 	/**
 	 * Constructor
 	 *
 	 * @param identifier the identifier for this item of metadata (required)
 	 * @param aspectName the Java type of the ITD (required)
 	 * @param governorPhysicalTypeMetadata the governor, which is expected to contain a {@link ClassOrInterfaceTypeDetails} (required)
-	 * @param idType the type of the entity's identifier field (required)
 	 * @param annotationValues (required)
+	 * @param identifierType the type of the entity's identifier field (required)
 	 */
-	public RepositoryMongoMetadata(final String identifier, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final JavaType idType, final RepositoryMongoAnnotationValues annotationValues) {
+	public RepositoryMongoMetadata(final String identifier, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final RepositoryMongoAnnotationValues annotationValues, final JavaType identifierType) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.notNull(annotationValues, "Annotation values required");
-		Assert.notNull(idType, "Id type required");
-
-		this.annotationValues = annotationValues;
+		Assert.notNull(identifierType, "Identifier type required");
 
 		// Make the user's Repository interface extend Spring Data's JpaRepository interface if it doesn't already
-		ensureGovernorExtends(new JavaType(SPRING_DATA_REPOSITORY, 0, DataType.TYPE, null, Arrays.asList(annotationValues.getDomainType(), idType)));
+		ensureGovernorExtends(new JavaType(SPRING_DATA_REPOSITORY, 0, DataType.TYPE, null, Arrays.asList(annotationValues.getDomainType(), identifierType)));
 
 		builder.addAnnotation(getTypeAnnotation(SpringJavaType.REPOSITORY));
 
 		// Build the ITD
 		itdTypeDetails = builder.build();
-	}
-
-	public RepositoryMongoAnnotationValues getAnnotationValues() {
-		return annotationValues;
 	}
 
 	public static String getMetadataIdentiferType() {
