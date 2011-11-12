@@ -7,7 +7,7 @@ import org.springframework.roo.project.Path;
 import org.springframework.roo.support.util.Assert;
 
 /**
- * Provides string manipulation functions for {@link PhysicalTypeMetadata}.
+ * Provides string manipulation functions for {@link PhysicalTypeMetadata} IDs.
  *
  * @author Ben Alex
  * @since 1.0
@@ -35,20 +35,24 @@ public final class PhysicalTypeIdentifier {
 	}
 
 	/**
-	 * Creates an identifier from the given arguments
-	 *
-	 * @param javaType, assumed to be in {@link Path#SRC_MAIN_JAVA} (required)
+	 * Creates an identifier for the given {@link JavaType}'s physical type.
+	 * 
+	 * @param javaType the type for which to generate the ID (required)
 	 * @return a non-blank ID
 	 * @since 1.2.0
+	 * @deprecated use {@link #createIdentifier(JavaType, LogicalPath)} if you know
+	 * the path, or {@link TypeLocationService#getPhysicalTypeIdentifier(JavaType)}
+	 * if you don't and you know the type exists
 	 */
+	@Deprecated
 	public static String createIdentifier(final JavaType javaType) {
-		return createIdentifier(javaType, LogicalPath.getInstance(Path.SRC_MAIN_JAVA));
+		return createIdentifier(javaType, LogicalPath.getInstance(Path.SRC_MAIN_JAVA, ""));
 	}
 
 	/**
 	 * Creates a physical type metadata ID for the given user project type
 	 *
-	 * @param javaType the type (required)
+	 * @param javaType the type, which need not exist (required)
 	 * @param path the path in which it's located (required)
 	 * @return a non-blank ID
 	 */

@@ -1,13 +1,12 @@
 package org.springframework.roo.addon.git;
 
+import java.io.File;
+
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.eclipse.jgit.lib.Constants;
 import org.osgi.service.component.ComponentContext;
-import org.springframework.roo.process.manager.FileManager;
-import org.springframework.roo.project.LogicalPath;
-import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.shell.Shell;
 import org.springframework.roo.shell.event.ShellStatus;
@@ -26,9 +25,8 @@ public class GitShellEventListener implements ShellStatusListener {
 
 	// Fields
 	@Reference private GitOperations gitOperations;
-	@Reference private Shell shell;
-	@Reference private FileManager fileManager;
 	@Reference private PathResolver pathResolver;
+	@Reference private Shell shell;
 
 	protected void activate(final ComponentContext context) {
 		shell.addShellStatusListener(this);
@@ -45,6 +43,6 @@ public class GitShellEventListener implements ShellStatusListener {
 	}
 
 	private boolean isGitEnabled() {
-		return fileManager.exists(pathResolver.getIdentifier(LogicalPath.getInstance(Path.ROOT), Constants.DOT_GIT));
+		return new File(pathResolver.getRoot(), Constants.DOT_GIT).isDirectory();
 	}
 }
