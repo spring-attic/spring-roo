@@ -81,8 +81,9 @@ public interface PathResolver {
 	Collection<LogicalPath> getSourcePaths();
 
 	/**
-	 *
-	 * @return
+	 * Returns the canonical path of the user project's root directory
+	 * 
+	 * @return a valid directory path
 	 */
 	String getRoot();
 

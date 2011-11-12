@@ -1,5 +1,6 @@
 package org.springframework.roo.model;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -242,6 +243,18 @@ public class JavaType implements Comparable<JavaType> {
 		if (parameters != null) {
 			this.parameters.addAll(parameters);
 		}
+	}
+	
+	/**
+	 * Returns the name of the source file that contains this type, starting
+	 * from its base package. For example, for a type called "com.example.Foo",
+	 * this method returns "com/example/Foo.java", delimited by the platform-
+	 * specific separator ("/" in this example).
+	 * 
+	 * @return a non-blank path
+	 */
+	public String getRelativeFileName() {
+		return fullyQualifiedTypeName.replace('.', File.separatorChar) + ".java";
 	}
 
 	/**

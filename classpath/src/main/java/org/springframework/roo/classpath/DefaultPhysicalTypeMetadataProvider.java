@@ -106,7 +106,7 @@ public class DefaultPhysicalTypeMetadataProvider implements PhysicalTypeMetadata
 	public MetadataItem get(final String metadataId) {
 		Assert.isTrue(PhysicalTypeIdentifier.isValid(metadataId), "Metadata id '" + metadataId + "' is not valid for this metadata provider");
 		final String canonicalPath = typeLocationService.getPhysicalTypeCanonicalPath(metadataId);
-		if (!StringUtils.hasText(canonicalPath)) {
+		if (StringUtils.isBlank(canonicalPath)) {
 			return null;
 		}
 		metadataDependencyRegistry.deregisterDependencies(metadataId);

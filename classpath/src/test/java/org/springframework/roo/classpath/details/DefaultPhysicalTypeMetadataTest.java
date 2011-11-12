@@ -11,6 +11,8 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.itd.ItdMetadataProvider;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.project.LogicalPath;
+import org.springframework.roo.project.Path;
 
 /**
  * Unit test of {@link DefaultPhysicalTypeMetadata}
@@ -22,7 +24,7 @@ public class DefaultPhysicalTypeMetadataTest {
 	
 	// Constants
 	private static final String CANONICAL_PATH = "/usr/bob/projects/foo/Foo.java";
-	private static final String METADATA_ID = PhysicalTypeIdentifier.createIdentifier(new JavaType("com.example.Bar"));
+	private static final String METADATA_ID = PhysicalTypeIdentifier.createIdentifier(new JavaType("com.example.Bar"), LogicalPath.getInstance(Path.SRC_MAIN_JAVA, ""));
 	
 	// Fixture
 	private DefaultPhysicalTypeMetadata metadata;
