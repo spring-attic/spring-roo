@@ -254,7 +254,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 		final JavaType identifierType = getIdentifierType();
 
 		final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
-		final boolean hasIdClass = !(identifierType.getPackage().getFullyQualifiedPackageName().startsWith("java.") || identifierType.equals(GAE_DATASTORE_KEY));
+		final boolean hasIdClass = !(identifierType.isCoreType() || identifierType.equals(GAE_DATASTORE_KEY));
 		final JavaType annotationType = hasIdClass ? EMBEDDED_ID : ID;
 		annotations.add(new AnnotationMetadataBuilder(annotationType));
 

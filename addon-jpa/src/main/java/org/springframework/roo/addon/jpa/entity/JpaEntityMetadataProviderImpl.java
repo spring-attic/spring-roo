@@ -57,8 +57,8 @@ import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
-import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.FeatureNames;
+import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
@@ -104,7 +104,7 @@ public class JpaEntityMetadataProviderImpl extends AbstractIdentifierServiceAwar
 	// Fields
 	@Reference private CustomDataKeyDecorator customDataKeyDecorator;
 	@Reference private ProjectOperations projectOperations;
-	
+
 	// ------------- Mandatory AbstractItdMetadataProvider methods -------------
 
 	@Override

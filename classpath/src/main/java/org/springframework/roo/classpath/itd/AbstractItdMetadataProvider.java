@@ -209,7 +209,7 @@ public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTracki
 			parentMetadata = (T) metadataService.get(superCidLocalIdentifier);
 			superCid = superCid.getSuperclass();
 		}
-		return parentMetadata;	// could be null
+		return parentMetadata; // Could be null
 	}
 
 	/**

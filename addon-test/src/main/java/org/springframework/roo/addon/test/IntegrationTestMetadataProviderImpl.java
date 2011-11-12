@@ -7,6 +7,7 @@ import static org.springframework.roo.classpath.customdata.CustomDataKeys.FIND_M
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.FLUSH_METHOD;
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.IDENTIFIER_ACCESSOR_METHOD;
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.MERGE_METHOD;
+import static org.springframework.roo.classpath.customdata.CustomDataKeys.PERSISTENT_TYPE;
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.PERSIST_METHOD;
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.REMOVE_METHOD;
 import static org.springframework.roo.model.JavaType.INT_PRIMITIVE;
@@ -44,8 +45,8 @@ import org.springframework.roo.classpath.layers.MethodParameter;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.FeatureNames;
+import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
@@ -165,15 +166,23 @@ public class IntegrationTestMetadataProviderImpl extends AbstractItdMetadataProv
 			return null;
 		}
 
+		final JavaType identifierType = persistenceMemberLocator.getIdentifierType(entity);
+		if (identifierType == null) {
+			return null;
+		}
+
 		final MemberDetails memberDetails = getMemberDetails(entity);
 		if (memberDetails == null) {
 			return null;
 		}
 
-		final JavaType identifierType = persistenceMemberLocator.getIdentifierType(entity);
-		if (identifierType == null) {
+		MemberHoldingTypeDetails persistenceMemberHoldingTypeDetails = MemberFindingUtils.getMostConcreteMemberHoldingTypeDetailsWithTag(memberDetails, PERSISTENT_TYPE);
+		if (persistenceMemberHoldingTypeDetails == null) {
 			return null;
 		}
+
+		// We need to be informed if our dependent metadata changes
+		metadataDependencyRegistry.registerDependency(persistenceMemberHoldingTypeDetails.getDeclaredByMetadataId(), metadataIdentificationString);
 
 		final MethodParameter firstResultParameter = new MethodParameter(INT_PRIMITIVE, "firstResult");
 		final MethodParameter maxResultsParameter = new MethodParameter(INT_PRIMITIVE, "maxResults");
@@ -204,13 +213,6 @@ public class IntegrationTestMetadataProviderImpl extends AbstractItdMetadataProv
 
 		final boolean hasEmbeddedIdentifier = dataOnDemandMetadata.hasEmbeddedIdentifier();
 		final boolean entityHasSuperclass  = getEntitySuperclass(entity) != null;
-
-		for (final MemberHoldingTypeDetails memberHoldingTypeDetails : memberDetails.getDetails()) {
-			if (memberHoldingTypeDetails instanceof ClassOrInterfaceTypeDetails) {
-				metadataDependencyRegistry.registerDependency(memberHoldingTypeDetails.getDeclaredByMetadataId(), metadataIdentificationString);
-				break;
-			}
-		}
 
 		// In order to handle switching between GAE and JPA produced MIDs need to be remembered so they can be regenerated on JPA <-> GAE switch
 		producedMids.add(metadataIdentificationString);

@@ -78,7 +78,6 @@ public class DataOnDemandMetadataProviderImpl extends AbstractMemberDiscoveringI
 	protected void activate(final ComponentContext context) {
 		metadataDependencyRegistry.addNotificationListener(this);
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-
 		// DOD classes are @Configurable because they may need DI of other DOD classes that provide M:1 relationships
 		configurableMetadataProvider.addMetadataTrigger(ROO_DATA_ON_DEMAND);
 		addMetadataTrigger(ROO_DATA_ON_DEMAND);
@@ -139,6 +138,11 @@ public class DataOnDemandMetadataProviderImpl extends AbstractMemberDiscoveringI
 		entityToDodMidMap.put(annotationValues.getEntity(), metadataIdentificationString);
 		dodMidToEntityMap.put(metadataIdentificationString, annotationValues.getEntity());
 
+		final JavaType identifierType = persistenceMemberLocator.getIdentifierType(entity);
+		if (identifierType == null) {
+			return null;
+		}
+
 		final MemberDetails memberDetails = getMemberDetails(entity);
 		if (memberDetails == null) {
 			return null;
@@ -146,11 +150,6 @@ public class DataOnDemandMetadataProviderImpl extends AbstractMemberDiscoveringI
 
 		MemberHoldingTypeDetails persistenceMemberHoldingTypeDetails = MemberFindingUtils.getMostConcreteMemberHoldingTypeDetailsWithTag(memberDetails, PERSISTENT_TYPE);
 		if (persistenceMemberHoldingTypeDetails == null) {
-			return null;
-		}
-
-		JavaType identifierType = persistenceMemberLocator.getIdentifierType(entity);
-		if (identifierType == null) {
 			return null;
 		}
 
