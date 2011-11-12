@@ -40,15 +40,6 @@ public class LogicalPathTest {
 		assertGetInstance(MODULE_NAME, MODULE_NAME, MODULE_NAME + MODULE_PATH_SEPARATOR + PATH.toString());
 	}
 	
-	@Test
-	public void testGetInstanceFromPath() {
-		// Invoke
-		final LogicalPath instance = LogicalPath.getInstance(PATH);
-		
-		// Check
-		assertContextualPath(instance, PATH.toString(), "");
-	}
-	
 	/**
 	 * Asserts that calling {@link LogicalPath#getInstance(Path, String)}
 	 * with the given module name results in the expected behaviour
@@ -109,7 +100,7 @@ public class LogicalPathTest {
 	
 	@Test
 	public void testDoesNotEqualOtherType() {
-		assertFalse(LogicalPath.getInstance(PATH).equals(PATH));
+		assertFalse(LogicalPath.getInstance(PATH, MODULE_NAME).equals(PATH));
 	}
 	
 	@Test
@@ -132,7 +123,7 @@ public class LogicalPathTest {
 	
 	@Test(expected = NullPointerException.class)
 	public void testCompareToNull() {
-		LogicalPath.getInstance(PATH).compareTo(null);
+		LogicalPath.getInstance(PATH, MODULE_NAME).compareTo(null);
 	}
 	
 	@Test(expected = IllegalArgumentException.class)

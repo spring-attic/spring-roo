@@ -24,17 +24,6 @@ public class LogicalPath {
 	public static final String MODULE_PATH_SEPARATOR = "|";
 
 	/**
-	 * Creates an instance with a blank module name (signifying the root or only
-	 * module).
-	 *
-	 * @param path the path to set (required)
-	 * @return a non-<code>null</code> instance
-	 */
-	public static LogicalPath getInstance(final Path path) {
-		return new LogicalPath(null, path);
-	}
-
-	/**
 	 * Creates an instance with the given path in the given module
 	 *
 	 * @param path the path to set (required)
