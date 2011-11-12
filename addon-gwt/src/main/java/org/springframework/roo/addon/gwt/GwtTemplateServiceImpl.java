@@ -124,35 +124,37 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
 		Map<String, String> xmlMap = new HashMap<String, String>();
 		List<ClassOrInterfaceTypeDetails> typeDetails = new ArrayList<ClassOrInterfaceTypeDetails>();
 		for (GwtProxyProperty proxyProperty : clientSideTypeMap.values()) {
-			if (proxyProperty.isCollection() && !proxyProperty.isCollectionOfProxy()) {
-				TemplateDataDictionary dataDictionary = TemplateDictionary.create();
-				dataDictionary.setVariable("packageName", GwtPath.MANAGED_UI.packageName(topLevelPackage));
-				dataDictionary.setVariable("scaffoldUiPackage", GwtPath.SCAFFOLD_UI.packageName(topLevelPackage));
-				JavaType collectionTypeImpl = getCollectionImplementation(proxyProperty.getPropertyType());
-				addImport(dataDictionary, collectionTypeImpl);
-				addImport(dataDictionary, proxyProperty.getPropertyType());
-
-				String collectionType = proxyProperty.getPropertyType().getSimpleTypeName();
-				String boundCollectionType = proxyProperty.getPropertyType().getParameters().get(0).getSimpleTypeName();
-
-				dataDictionary.setVariable("collectionType", collectionType);
-				dataDictionary.setVariable("collectionTypeImpl", collectionTypeImpl.getSimpleTypeName());
-				dataDictionary.setVariable("boundCollectionType", boundCollectionType);
-
-				JavaType collectionEditorType = new JavaType(GwtPath.MANAGED_UI.packageName(topLevelPackage) + "." + boundCollectionType + collectionType + "Editor");
-				typeDetails.add(getTemplateDetails(dataDictionary, "CollectionEditor", collectionEditorType));
-
-				dataDictionary = TemplateDictionary.create();
-				dataDictionary.setVariable("packageName", GwtPath.MANAGED_UI.packageName(topLevelPackage));
-				dataDictionary.setVariable("scaffoldUiPackage", GwtPath.SCAFFOLD_UI.packageName(topLevelPackage));
-				dataDictionary.setVariable("collectionType", collectionType);
-				dataDictionary.setVariable("collectionTypeImpl", collectionTypeImpl.getSimpleTypeName());
-				dataDictionary.setVariable("boundCollectionType", boundCollectionType);
-				addImport(dataDictionary, proxyProperty.getPropertyType());
-
-				String contents = getTemplateContents("CollectionEditor" + "UiXml", dataDictionary);
-				xmlMap.put(GwtPath.MANAGED_UI.canonicalFileSystemPath(projectOperations) + "/" + boundCollectionType + collectionType + "Editor.ui.xml", contents);
+			if (!proxyProperty.isCollection() || proxyProperty.isCollectionOfProxy()) {
+				continue;
 			}
+			
+			TemplateDataDictionary dataDictionary = TemplateDictionary.create();
+			dataDictionary.setVariable("packageName", GwtPath.MANAGED_UI.packageName(topLevelPackage));
+			dataDictionary.setVariable("scaffoldUiPackage", GwtPath.SCAFFOLD_UI.packageName(topLevelPackage));
+			JavaType collectionTypeImpl = getCollectionImplementation(proxyProperty.getPropertyType());
+			addImport(dataDictionary, collectionTypeImpl);
+			addImport(dataDictionary, proxyProperty.getPropertyType());
+
+			String collectionType = proxyProperty.getPropertyType().getSimpleTypeName();
+			String boundCollectionType = proxyProperty.getPropertyType().getParameters().get(0).getSimpleTypeName();
+
+			dataDictionary.setVariable("collectionType", collectionType);
+			dataDictionary.setVariable("collectionTypeImpl", collectionTypeImpl.getSimpleTypeName());
+			dataDictionary.setVariable("boundCollectionType", boundCollectionType);
+
+			JavaType collectionEditorType = new JavaType(GwtPath.MANAGED_UI.packageName(topLevelPackage) + "." + boundCollectionType + collectionType + "Editor");
+			typeDetails.add(getTemplateDetails(dataDictionary, "CollectionEditor", collectionEditorType));
+
+			dataDictionary = TemplateDictionary.create();
+			dataDictionary.setVariable("packageName", GwtPath.MANAGED_UI.packageName(topLevelPackage));
+			dataDictionary.setVariable("scaffoldUiPackage", GwtPath.SCAFFOLD_UI.packageName(topLevelPackage));
+			dataDictionary.setVariable("collectionType", collectionType);
+			dataDictionary.setVariable("collectionTypeImpl", collectionTypeImpl.getSimpleTypeName());
+			dataDictionary.setVariable("boundCollectionType", boundCollectionType);
+			addImport(dataDictionary, proxyProperty.getPropertyType());
+
+			String contents = getTemplateContents("CollectionEditor" + "UiXml", dataDictionary);
+			xmlMap.put(GwtPath.MANAGED_UI.canonicalFileSystemPath(projectOperations) + "/" + boundCollectionType + collectionType + "Editor.ui.xml", contents);
 		}
 
 		return new GwtTemplateDataHolder(templateTypeDetailsMap, xmlTemplates, typeDetails, xmlMap);
@@ -464,14 +466,17 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
 		ClassOrInterfaceTypeDetails request = gwtTypeService.lookupRequestFromProxy(proxy);
 		
 		MemberTypeAdditions persistMethodAdditions = layerService.getMemberTypeAdditions(metadataIdentificationString, CustomDataKeys.PERSIST_METHOD.name(), entity, idType, LAYER_POSITION, entityParameter);
+		Assert.notNull(persistMethodAdditions, "Persist method is not available for entity '" + entity.getFullyQualifiedTypeName() + "'");
 		String persistMethodSignature = getRequestMethodCall(request, persistMethodAdditions);
 		dataDictionary.setVariable("persistMethodSignature", persistMethodSignature);
 		
 		MemberTypeAdditions removeMethodAdditions = layerService.getMemberTypeAdditions(metadataIdentificationString, CustomDataKeys.REMOVE_METHOD.name(), entity, idType, LAYER_POSITION, entityParameter);
+		Assert.notNull(removeMethodAdditions, "Remove method is not available for entity '" + entity.getFullyQualifiedTypeName() + "'");
 		String removeMethodSignature = getRequestMethodCall(request, removeMethodAdditions);
 		dataDictionary.setVariable("removeMethodSignature", removeMethodSignature);
 		
 		MemberTypeAdditions countMethodAdditions = layerService.getMemberTypeAdditions(metadataIdentificationString, CustomDataKeys.COUNT_ALL_METHOD.name(), entity, idType, LAYER_POSITION);
+		Assert.notNull(countMethodAdditions, "Count method is not available for entity '" + entity.getFullyQualifiedTypeName() + "'");
 		dataDictionary.setVariable("countEntitiesMethod", countMethodAdditions.getMethodName());
 
 		for (GwtType reference : type.getReferences()) {
