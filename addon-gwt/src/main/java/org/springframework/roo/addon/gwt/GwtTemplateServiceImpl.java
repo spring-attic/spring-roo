@@ -295,12 +295,11 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
 	}
 
 	public ClassOrInterfaceTypeDetails getTemplateDetails(final TemplateDataDictionary dataDictionary, final String templateFile, final JavaType templateType) {
-		String templateContents;
 		try {
 			TemplateLoader templateLoader = TemplateResourceLoader.create();
 			Template template = templateLoader.getTemplate(templateFile);
 			Assert.notNull(template, "Tenmplate required for '" + templateFile + "'");
-			templateContents = template.renderToString(dataDictionary);
+			String templateContents = template.renderToString(dataDictionary);
 			LogicalPath logicalPath = projectOperations.getPathResolver().getFocusedPath(Path.SRC_MAIN_JAVA);
 			String templateId = PhysicalTypeIdentifier.createIdentifier(templateType, logicalPath);
 			return typeParsingService.getTypeFromString(templateContents, templateId, templateType);
@@ -458,9 +457,7 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
 		JavaType entity = mirroredType.getName();
 		String metadataIdentificationString = mirroredType.getDeclaredByMetadataId();
 		final JavaType idType = persistenceMemberLocator.getIdentifierType(entity);
-		if (idType == null) {
-			return null;
-		}
+		Assert.notNull(idType, "Identifier type is not available for entity '" + entity.getFullyQualifiedTypeName() + "'");
 
 		final MethodParameter entityParameter = new MethodParameter(entity, "proxy");
 		ClassOrInterfaceTypeDetails request = gwtTypeService.lookupRequestFromProxy(proxy);

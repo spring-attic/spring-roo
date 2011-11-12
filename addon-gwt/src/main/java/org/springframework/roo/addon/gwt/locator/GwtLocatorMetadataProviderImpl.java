@@ -103,14 +103,18 @@ public class GwtLocatorMetadataProviderImpl implements GwtLocatorMetadataProvide
 		AnnotationMetadataBuilder annotationMetadataBuilder = new AnnotationMetadataBuilder(RooJavaType.ROO_GWT_LOCATOR);
 		annotationMetadataBuilder.addStringAttribute("value", entity.getFullyQualifiedTypeName());
 		locatorBuilder.addAnnotation(annotationMetadataBuilder);
-		
+
 		locatorBuilder.addAnnotation(new AnnotationMetadataBuilder(SpringJavaType.COMPONENT));
 		locatorBuilder.setName(new JavaType(locatorType));
 		locatorBuilder.setModifier(Modifier.PUBLIC);
 		locatorBuilder.setPhysicalTypeCategory(PhysicalTypeCategory.CLASS);
 		locatorBuilder.addExtendsTypes(new JavaType(GwtUtils.LOCATOR.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, Arrays.asList(entity, identifierType)));
 		locatorBuilder.addMethod(getCreateMethod(locatorIdentifier, entity));
-		locatorBuilder.addMethod(getFindMethod(locatorBuilder, locatorIdentifier, entity, identifierType));
+		
+		MemberTypeAdditions findMethodAdditions = layerService.getMemberTypeAdditions(locatorIdentifier, CustomDataKeys.FIND_METHOD.name(), entity, identifierType, LAYER_POSITION, new MethodParameter(identifierType, "id"));
+		Assert.notNull(findMethodAdditions, "Find method not available for entity '" + entity.getFullyQualifiedTypeName() + "'");
+		locatorBuilder.addMethod(getFindMethod(findMethodAdditions, locatorBuilder, locatorIdentifier, entity, identifierType));
+		
 		locatorBuilder.addMethod(getDomainTypeMethod(locatorIdentifier, entity));
 		locatorBuilder.addMethod(getIdMethod(locatorIdentifier, entity, identifierAccessor));
 		locatorBuilder.addMethod(getIdTypeMethod(locatorIdentifier, entity, identifierType));
@@ -150,9 +154,7 @@ public class GwtLocatorMetadataProviderImpl implements GwtLocatorMetadataProvide
 		return new MethodMetadataBuilder(declaredById, Modifier.PUBLIC, new JavaSymbolName("getIdType"), returnType, invocableMemberBodyBuilder);
 	}
 
-	private MethodMetadataBuilder getFindMethod(final ClassOrInterfaceTypeDetailsBuilder locatorBuilder, final String declaredById, final JavaType targetType, final JavaType idType) {
-		MemberTypeAdditions findMethodAdditions = layerService.getMemberTypeAdditions(declaredById, CustomDataKeys.FIND_METHOD.name(), targetType, idType, LAYER_POSITION, new MethodParameter(idType, "id"));
-		Assert.notNull(findMethodAdditions, "Find method is not available for entity '" + targetType.getFullyQualifiedTypeName() + "'");
+	private MethodMetadataBuilder getFindMethod(final MemberTypeAdditions findMethodAdditions, final ClassOrInterfaceTypeDetailsBuilder locatorBuilder, final String declaredById, final JavaType targetType, final JavaType idType) {
 		InvocableMemberBodyBuilder invocableMemberBodyBuilder = InvocableMemberBodyBuilder.getInstance();
 		invocableMemberBodyBuilder.append("return ").append(findMethodAdditions.getMethodCall()).append(";");
 		findMethodAdditions.copyAdditionsTo(locatorBuilder, locatorBuilder.build());
