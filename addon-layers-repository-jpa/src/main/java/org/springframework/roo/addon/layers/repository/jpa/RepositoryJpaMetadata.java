@@ -37,15 +37,15 @@ public class RepositoryJpaMetadata extends AbstractItdTypeDetailsProvidingMetada
 	 * @param aspectName the Java type of the ITD (required)
 	 * @param governorPhysicalTypeMetadata the governor, which is expected to contain a {@link ClassOrInterfaceTypeDetails} (required)
 	 * @param annotationValues (required)
-	 * @param idType the type of the entity's identifier field (required)
+	 * @param identifierType the type of the entity's identifier field (required)
 	 */
-	public RepositoryJpaMetadata(final String identifier, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final RepositoryJpaAnnotationValues annotationValues, final JavaType idType) {
+	public RepositoryJpaMetadata(final String identifier, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final RepositoryJpaAnnotationValues annotationValues, final JavaType identifierType) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.notNull(annotationValues, "Annotation values required");
-		Assert.notNull(idType, "Id type required");
+		Assert.notNull(identifierType, "Id type required");
 
 		// Make the user's Repository interface extend Spring Data's JpaRepository interface if it doesn't already
-		ensureGovernorExtends(new JavaType(SPRING_JPA_REPOSITORY, 0, DataType.TYPE, null, Arrays.asList(annotationValues.getDomainType(), idType)));
+		ensureGovernorExtends(new JavaType(SPRING_JPA_REPOSITORY, 0, DataType.TYPE, null, Arrays.asList(annotationValues.getDomainType(), identifierType)));
 
 		// ... and likewise extend JpaSpecificationExecutor<Foo>, to allow query by specification
 		ensureGovernorExtends(new JavaType(SPRING_JPA_SPECIFICATION_EXECUTOR, 0, DataType.TYPE, null, Arrays.asList(annotationValues.getDomainType())));

@@ -37,13 +37,12 @@ public class RepositoryJpaMetadataProviderImpl extends AbstractMemberDiscovering
 	private final Map<JavaType, String> domainTypeToRepositoryMidMap = new LinkedHashMap<JavaType, String>();
 	private final Map<String, JavaType> repositoryMidToDomainTypeMap = new LinkedHashMap<String, JavaType>();
 
-	@SuppressWarnings("unchecked")
 	protected void activate(final ComponentContext context) {
 		super.setDependsOnGovernorBeingAClass(false);
 		metadataDependencyRegistry.addNotificationListener(this);
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		addMetadataTrigger(ROO_REPOSITORY_JPA);
-		customDataKeyDecorator.registerMatchers(getClass(), new LayerTypeMatcher(ROO_REPOSITORY_JPA, new JavaSymbolName(RooJpaRepository.DOMAIN_TYPE_ATTRIBUTE)));
+		registerMatchers();
 	}
 
 	protected void deactivate(final ComponentContext context) {
@@ -51,6 +50,11 @@ public class RepositoryJpaMetadataProviderImpl extends AbstractMemberDiscovering
 		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		removeMetadataTrigger(ROO_REPOSITORY_JPA);
 		customDataKeyDecorator.unregisterMatchers(getClass());
+	}
+
+	@SuppressWarnings("unchecked")
+	private void registerMatchers() {
+		customDataKeyDecorator.registerMatchers(getClass(), new LayerTypeMatcher(ROO_REPOSITORY_JPA, new JavaSymbolName(RooJpaRepository.DOMAIN_TYPE_ATTRIBUTE)));
 	}
 
 	@Override
@@ -77,7 +81,6 @@ public class RepositoryJpaMetadataProviderImpl extends AbstractMemberDiscovering
 	@Override
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(final String metadataIdentificationString, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final String itdFilename) {
 		final RepositoryJpaAnnotationValues annotationValues = new RepositoryJpaAnnotationValues(governorPhysicalTypeMetadata);
-
 		final JavaType domainType = annotationValues.getDomainType();
 		final JavaType identifierType = persistenceMemberLocator.getIdentifierType(domainType);
 		if (identifierType == null) {
