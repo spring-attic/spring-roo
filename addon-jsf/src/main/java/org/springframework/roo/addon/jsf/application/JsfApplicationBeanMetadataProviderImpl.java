@@ -38,7 +38,7 @@ public class JsfApplicationBeanMetadataProviderImpl extends AbstractItdMetadataP
 	@Reference private ProjectOperations projectOperations;
 
 	// Stores the MID (as accepted by this JsfApplicationBeanMetadataProvider) for the one (and only one) application-wide menu bean
-	private String menuBeanMid;
+	private String applicationBeanMid;
 
 	protected void activate(final ComponentContext context) {
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
@@ -59,7 +59,7 @@ public class JsfApplicationBeanMetadataProviderImpl extends AbstractItdMetadataP
 		if (MetadataIdentificationUtils.getMetadataClass(upstreamDependency).equals(MetadataIdentificationUtils.getMetadataClass(JsfManagedBeanMetadata.getMetadataIdentiferType()))) {
 			// A JsfManagedBeanMetadata upstream MID has changed or become available for the first time
 			// It's OK to return null if we don't yet know the MID because its JavaType has never been found
-			return menuBeanMid;
+			return applicationBeanMid;
 		}
 
 		// It wasn't a JsfManagedBeanMetadata, so we can let the superclass handle it
@@ -69,7 +69,7 @@ public class JsfApplicationBeanMetadataProviderImpl extends AbstractItdMetadataP
 
 	@Override
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(final String metadataIdentificationString, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final String itdFilename) {
-		menuBeanMid = metadataIdentificationString;
+		applicationBeanMid = metadataIdentificationString;
 
 		// To get here we know the governor is the MenuBean so let's go ahead and create its ITD
 		Set<ClassOrInterfaceTypeDetails> managedBeans = typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(ROO_JSF_MANAGED_BEAN);

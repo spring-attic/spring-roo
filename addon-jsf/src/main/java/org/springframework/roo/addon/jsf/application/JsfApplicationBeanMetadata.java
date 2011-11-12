@@ -71,6 +71,11 @@ public class JsfApplicationBeanMetadata extends AbstractItdTypeDetailsProvidingM
 			return;
 		}
 
+		if (managedBeans.isEmpty()) {
+			valid = false;
+			return;
+		}
+		
 		this.managedBeans = managedBeans;
 
 		// Add @ManagedBean annotation if required
@@ -142,7 +147,7 @@ public class JsfApplicationBeanMetadata extends AbstractItdTypeDetailsProvidingM
 
 		for (ClassOrInterfaceTypeDetails managedBean : managedBeans) {
 			AnnotationMetadata annotation = MemberFindingUtils.getAnnotationOfType(managedBean.getAnnotations(), ROO_JSF_MANAGED_BEAN);
-			if (annotation ==  null) {
+			if (annotation == null) {
 				continue;
 			}
 
@@ -154,7 +159,7 @@ public class JsfApplicationBeanMetadata extends AbstractItdTypeDetailsProvidingM
 			AnnotationAttributeValue<?> entityAttributeValue = annotation.getAttribute(new JavaSymbolName("entity"));
 			JavaType entity = (JavaType) entityAttributeValue.getValue();
 			String entityLabel = entity.getSimpleTypeName().length() > 26 ? entity.getSimpleTypeName().substring(0, 23) + "..." : entity.getSimpleTypeName();
-			
+
 			AnnotationAttributeValue<?> beanNameAttributeValue = annotation.getAttribute(new JavaSymbolName("beanName"));
 			String beanName = (String) beanNameAttributeValue.getValue();
 

@@ -6,7 +6,6 @@ import static org.springframework.roo.classpath.customdata.CustomDataKeys.FIND_A
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.FIND_ENTRIES_METHOD;
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.FIND_METHOD;
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.MERGE_METHOD;
-import static org.springframework.roo.classpath.customdata.CustomDataKeys.PERSISTENT_TYPE;
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.PERSIST_METHOD;
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.REMOVE_METHOD;
 import static org.springframework.roo.model.JavaType.BOOLEAN_OBJECT;
@@ -40,7 +39,6 @@ import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
-import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
@@ -115,7 +113,7 @@ public class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDiscoverin
 	}
 
 	@Override
-	protected ItdTypeDetailsProvidingMetadataItem getMetadata(final String metadataId, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final String itdFilename) {
+	protected ItdTypeDetailsProvidingMetadataItem getMetadata(final String metadataIdentificationString, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final String itdFilename) {
 		// We need to parse the annotation, which we expect to be present
 		final JsfManagedBeanAnnotationValues annotationValues = new JsfManagedBeanAnnotationValues(governorPhysicalTypeMetadata);
 		final JavaType entity = annotationValues.getEntity();
@@ -128,29 +126,18 @@ public class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDiscoverin
 			return null;
 		}
 
-		final MemberHoldingTypeDetails persistenceMemberHoldingTypeDetails = MemberFindingUtils.getMostConcreteMemberHoldingTypeDetailsWithTag(memberDetails, PERSISTENT_TYPE);
-		if (persistenceMemberHoldingTypeDetails == null) {
-			return null;
-		}
-
-		// We need to be informed if our dependent metadata changes
-		metadataDependencyRegistry.registerDependency(persistenceMemberHoldingTypeDetails.getDeclaredByMetadataId(), metadataId);
-
 		final MethodMetadata identifierAccessor = persistenceMemberLocator.getIdentifierAccessor(entity);
 		final MethodMetadata versionAccessor = persistenceMemberLocator.getVersionAccessor(entity);
-		final Set<JsfFieldHolder> locatedFields = locateFields(entity, memberDetails, metadataId, identifierAccessor, versionAccessor);
-		if (locatedFields.isEmpty()) {
-			return null;
-		}
+		final Set<JsfFieldHolder> locatedFields = locateFields(entity, memberDetails, metadataIdentificationString, identifierAccessor, versionAccessor);
 
 		// Remember that this entity JavaType matches up with this metadata identification string
 		// Start by clearing any previous association
-		final JavaType oldEntity = managedBeanMidToEntityMap.get(metadataId);
+		final JavaType oldEntity = managedBeanMidToEntityMap.get(metadataIdentificationString);
 		if (oldEntity != null) {
 			entityToManagedBeanMidMap.remove(oldEntity);
 		}
-		entityToManagedBeanMidMap.put(entity, metadataId);
-		managedBeanMidToEntityMap.put(metadataId, entity);
+		entityToManagedBeanMidMap.put(entity, metadataIdentificationString);
+		managedBeanMidToEntityMap.put(metadataIdentificationString, entity);
 
 		String physicalTypeIdentifier = typeLocationService.getPhysicalTypeIdentifier(entity);
 		LogicalPath path = PhysicalTypeIdentifier.getPath(physicalTypeIdentifier);
@@ -158,9 +145,9 @@ public class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDiscoverin
 		Assert.notNull(pluralMetadata, "Could not determine plural for '" + entity.getSimpleTypeName() + "'");
 		final String plural = pluralMetadata.getPlural();
 
-		final Map<MethodMetadataCustomDataKey, MemberTypeAdditions> crudAdditions = getCrudAdditions(entity, metadataId);
+		final Map<MethodMetadataCustomDataKey, MemberTypeAdditions> crudAdditions = getCrudAdditions(entity, metadataIdentificationString);
 
-		return new JsfManagedBeanMetadata(metadataId, aspectName, governorPhysicalTypeMetadata, annotationValues, plural, crudAdditions, locatedFields, identifierAccessor);
+		return new JsfManagedBeanMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, plural, crudAdditions, locatedFields, identifierAccessor);
 	}
 
 	/**

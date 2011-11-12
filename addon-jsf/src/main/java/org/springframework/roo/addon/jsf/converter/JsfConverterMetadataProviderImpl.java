@@ -2,7 +2,6 @@ package org.springframework.roo.addon.jsf.converter;
 
 import static org.springframework.roo.addon.jsf.converter.JsfConverterMetadata.ID_FIELD_NAME;
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.FIND_METHOD;
-import static org.springframework.roo.classpath.customdata.CustomDataKeys.PERSISTENT_TYPE;
 import static org.springframework.roo.model.RooJavaType.ROO_JSF_CONVERTER;
 
 import java.util.LinkedHashMap;
@@ -18,7 +17,6 @@ import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
-import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadataProvider;
@@ -27,7 +25,6 @@ import org.springframework.roo.classpath.layers.LayerService;
 import org.springframework.roo.classpath.layers.LayerType;
 import org.springframework.roo.classpath.layers.MemberTypeAdditions;
 import org.springframework.roo.classpath.layers.MethodParameter;
-import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.LogicalPath;
 
@@ -86,7 +83,7 @@ public class JsfConverterMetadataProviderImpl extends AbstractMemberDiscoveringI
 	}
 
 	@Override
-	protected ItdTypeDetailsProvidingMetadataItem getMetadata(final String metadataId, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final String itdFilename) {
+	protected ItdTypeDetailsProvidingMetadataItem getMetadata(final String metadataIdentificationString, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final String itdFilename) {
 		// We need to parse the annotation, which we expect to be present
 		final JsfConverterAnnotationValues annotationValues = new JsfConverterAnnotationValues(governorPhysicalTypeMetadata);
 		final JavaType entity = annotationValues.getEntity();
@@ -94,29 +91,19 @@ public class JsfConverterMetadataProviderImpl extends AbstractMemberDiscoveringI
 			return null;
 		}
 
-		// Lookup the entity's metadata
-		final MemberDetails memberDetails = getMemberDetails(entity);
-		final MemberHoldingTypeDetails persistenceMemberHoldingTypeDetails = MemberFindingUtils.getMostConcreteMemberHoldingTypeDetailsWithTag(memberDetails, PERSISTENT_TYPE);
-		if (persistenceMemberHoldingTypeDetails == null) {
-			return null;
-		}
-
-		// We need to be informed if our dependent metadata changes
-		metadataDependencyRegistry.registerDependency(persistenceMemberHoldingTypeDetails.getDeclaredByMetadataId(), metadataId);
-
 		// Remember that this entity JavaType matches up with this metadata identification string
 		// Start by clearing any previous association
-		final JavaType oldEntity = converterMidToEntityMap.get(metadataId);
+		final JavaType oldEntity = converterMidToEntityMap.get(metadataIdentificationString);
 		if (oldEntity != null) {
 			entityToConverterMidMap.remove(oldEntity);
 		}
-		entityToConverterMidMap.put(entity, metadataId);
-		converterMidToEntityMap.put(metadataId, entity);
+		entityToConverterMidMap.put(entity, metadataIdentificationString);
+		converterMidToEntityMap.put(metadataIdentificationString, entity);
 
+		final MemberTypeAdditions findMethod = getFindMethod(entity, metadataIdentificationString);
 		final MethodMetadata identifierAccessor = persistenceMemberLocator.getIdentifierAccessor(entity);
-		final MemberTypeAdditions findMethod = getFindMethod(entity, metadataId);
 
-		return new JsfConverterMetadata(metadataId, aspectName, governorPhysicalTypeMetadata, annotationValues, identifierAccessor, findMethod);
+		return new JsfConverterMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, findMethod, identifierAccessor);
 	}
 
 	private MemberTypeAdditions getFindMethod(final JavaType entity, final String metadataId) {
