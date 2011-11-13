@@ -413,7 +413,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 		identifierAnnotations.add(identifierBuilder);
 
 		// Produce identifier itself
-		final String declaredByMetadataId = typeLocationService.getPhysicalTypeIdentifier(identifierType);
+		final String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(identifierType, pathResolver.getFocusedPath(Path.SRC_MAIN_JAVA));
 		final ClassOrInterfaceTypeDetailsBuilder identifierTypeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC | Modifier.FINAL, identifierType, PhysicalTypeCategory.CLASS);
 		identifierTypeDetailsBuilder.setAnnotations(identifierAnnotations);
 		typeManagementService.createOrUpdateTypeOnDisk(identifierTypeDetailsBuilder.build());
