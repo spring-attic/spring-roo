@@ -34,12 +34,7 @@ import org.springframework.roo.support.util.StringUtils;
  * Monitors for *.java files and produces a {@link PhysicalTypeMetadata} for each,
  * also providing type creation and deleting methods.
  *
- * <p>
- * This implementation does not support {@link org.springframework.roo.project.ClasspathProvidingProjectMetadata}. Whilst the
- * project metadata may implement this interface, the {@link #findIdentifier(JavaType)} will ignore
- * such paths in the current release.
- *
- * Prior to 1.2.0 the default implementation of PhysicalTypeMetadataProvider was JavaParserMetadataProvider.
+ * Prior to 1.2.0, the default implementation of PhysicalTypeMetadataProvider was JavaParserMetadataProvider.
  *
  * @author Ben Alex
  * @author James Tyrrell

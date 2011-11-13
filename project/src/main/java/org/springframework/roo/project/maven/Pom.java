@@ -246,10 +246,10 @@ public class Pom {
 	}
 
 	/**
-	 * Returns the canonical path of the given logical {@link Path} within this
-	 * module, plus a trailing separator if found
+	 * Returns the canonical path of the given {@link Path} within this module,
+	 * plus a trailing separator if found
 	 * 
-	 * @param path the logical path for which to get the canonical location (required)
+	 * @param path the path for which to get the canonical location (required)
 	 * @return <code>null</code> if this module has no such path
 	 */
 	public String getPathLocation(final Path path) {
