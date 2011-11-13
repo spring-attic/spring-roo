@@ -1,6 +1,6 @@
-project --topLevelPackage com.springsource.petclinic
+project --topLevelPackage com.springsource.petclinic --packaging POM
 
-module create --moduleName jpa --topLevelPackage com.springsource.petclinic
+module create --moduleName core --topLevelPackage com.example.petclinic
 
 jpa setup --provider HIBERNATE --database HYPERSONIC_IN_MEMORY
 
@@ -55,20 +55,26 @@ finder add --finderName findVisitsByVisitDateBetween
 finder add --finderName findVisitsByDescriptionLike
 
 module focus --moduleName ~
-module create --moduleName web --topLevelPackage com.springsource.petclinic
+module create --moduleName ui --topLevelPackage com.example.petclinic.ui
+module create --moduleName mvc --topLevelPackage com.example.petclinic.ui.mvc
 
 web mvc setup
-web mvc all --package ~.web
+web mvc all --package ~
 web mvc finder all
 
 web mvc language --code de
 web mvc language --code es
 
-selenium test --controller ~.web.OwnerController
-selenium test --controller ~.web.PetController
-selenium test --controller ~.web.VetController
-selenium test --controller ~.web.VisitController
+selenium test --controller ~.OwnerController
+selenium test --controller ~.PetController
+selenium test --controller ~.VetController
+selenium test --controller ~.VisitController
 
 module focus --moduleName ~
 
 logging setup --level INFO
+
+module focus --moduleName ui
+module create --moduleName faces --topLevelPackage com.example.petclinic.ui.jsf
+web jsf setup 
+web jsf all --package ~
