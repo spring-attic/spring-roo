@@ -15,7 +15,7 @@ import org.springframework.roo.shell.MethodTarget;
 
 @Component
 @Service
-public class ContextualPathConverter implements Converter<LogicalPath> {
+public class LogicalPathConverter implements Converter<LogicalPath> {
 
 	// Fields
 	@Reference ProjectOperations projectOperations;

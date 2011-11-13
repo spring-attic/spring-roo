@@ -43,7 +43,7 @@ public class LogicalPath {
 	 * <code>[<i>module_name</i>{@value #MODULE_PATH_SEPARATOR}]<i>path</i></code>
 	 */
 	public static LogicalPath getInstance(final String modulePlusPath) {
-		Assert.hasText(modulePlusPath, "Context path required");
+		Assert.hasText(modulePlusPath, "Module path required");
 		final int separatorIndex = modulePlusPath.indexOf(MODULE_PATH_SEPARATOR);
 		if (separatorIndex == -1) {
 			return new LogicalPath(null, Path.valueOf(modulePlusPath));
