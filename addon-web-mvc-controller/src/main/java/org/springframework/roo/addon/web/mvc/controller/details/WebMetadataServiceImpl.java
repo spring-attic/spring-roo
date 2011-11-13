@@ -267,7 +267,7 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 	}
 
 	public boolean isApplicationType(final JavaType javaType) {
-		return javaType != null && !javaType.isCoreType() && metadataService.get(PhysicalTypeIdentifier.createIdentifier(javaType)) != null;
+		return typeLocationService.isInProject(javaType);
 	}
 
 	public Map<JavaSymbolName, DateTimeFormatDetails> getDatePatterns(final JavaType javaType, final MemberDetails memberDetails, final String metadataIdentificationString) {

@@ -73,7 +73,7 @@ public class DefaultPathResolvingStrategy extends AbstractPathResolvingStrategy 
 		final List<LogicalPath> result = new ArrayList<LogicalPath>();
 		for (final PhysicalPath modulePath : rootModulePaths.values()) {
 			if (!sourceOnly || modulePath.isSource()) {
-				result.add(modulePath.getContextualPath());
+				result.add(modulePath.getLogicalPath());
 			}
 		}
 		return result;

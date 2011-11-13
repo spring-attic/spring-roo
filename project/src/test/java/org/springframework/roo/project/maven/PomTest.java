@@ -48,7 +48,7 @@ public class PomTest {
 			final PhysicalPath modulePath = pom.getPhysicalPath(path);
 			assertEquals(new File(PROJECT_ROOT, path.getDefaultLocation()), modulePath.getLocation());
 			assertEquals(path.isJavaSource(), modulePath.isSource());
-			final LogicalPath moduelPathId = modulePath.getContextualPath();
+			final LogicalPath moduelPathId = modulePath.getLogicalPath();
 			assertEquals(path, moduelPathId.getPath());
 			assertEquals(ROOT_MODULE, moduelPathId.getModule());
 		}

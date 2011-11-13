@@ -224,7 +224,7 @@ public class JspMetadataListener implements MetadataProvider, MetadataNotificati
 				continue;
 			}
 			String fieldResourceId = XmlUtils.convertId(resourceId + "." + fieldName.getSymbolName().toLowerCase());
-			if (webMetadataService.isApplicationType(method.getReturnType()) && webMetadataService.isRooIdentifier(method.getReturnType(), webMetadataService.getMemberDetails(method.getReturnType()))) {
+			if (typeLocationService.isInProject(method.getReturnType()) && webMetadataService.isRooIdentifier(method.getReturnType(), webMetadataService.getMemberDetails(method.getReturnType()))) {
 				JavaTypePersistenceMetadataDetails typePersistenceMetadataDetails = webMetadataService.getJavaTypePersistenceMetadataDetails(method.getReturnType(), webMetadataService.getMemberDetails(method.getReturnType()), metadataIdentificationString);
 				if (typePersistenceMetadataDetails != null) {
 					for (FieldMetadata f : typePersistenceMetadataDetails.getRooIdentifierFields()) {

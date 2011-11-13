@@ -65,7 +65,7 @@ public class MavenPathResolvingStrategy extends AbstractPathResolvingStrategy {
 	}
 	
 	public LogicalPath getFocusedPath(final Path path) {
-		return pomManagementService.getFocusedModule().getPhysicalPath(path).getContextualPath();
+		return pomManagementService.getFocusedModule().getPhysicalPath(path).getLogicalPath();
 	}
 
 	public String getFocusedRoot(final Path path) {
@@ -102,7 +102,7 @@ public class MavenPathResolvingStrategy extends AbstractPathResolvingStrategy {
 		for (final Pom pom : pomManagementService.getPoms()) {
 			for (final PhysicalPath modulePath : pom.getPhysicalPaths()) {
 				if (!sourceOnly || modulePath.isSource()) {
-					pathIds.add(modulePath.getContextualPath());
+					pathIds.add(modulePath.getLogicalPath());
 				}
 			}
 		}

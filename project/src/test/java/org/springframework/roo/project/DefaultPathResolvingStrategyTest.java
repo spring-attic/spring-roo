@@ -87,7 +87,7 @@ public class DefaultPathResolvingStrategyTest {
 		assertEquals(Path.values().length, modulePaths.size());
 		for (int i = 0; i < modulePaths.size(); i++) {
 			final PhysicalPath modulePath = modulePaths.get(i);
-			final LogicalPath modulePathId = modulePath.getContextualPath();
+			final LogicalPath modulePathId = modulePath.getLogicalPath();
 			final Path subPath = Path.values()[i];
 			assertEquals(ROOT_MODULE, modulePathId.getModule());
 			assertEquals(subPath, modulePathId.getPath());

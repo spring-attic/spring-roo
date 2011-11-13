@@ -128,6 +128,10 @@ public class DefaultClassOrInterfaceTypeDetails extends AbstractMemberHoldingTyp
 	}
 
 	public JavaType getName() {
+		return getType();
+	}
+	
+	public JavaType getType() {
 		return name;
 	}
 

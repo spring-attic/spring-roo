@@ -40,7 +40,7 @@ public class DefaultItdTypeDetailsTest extends ItdTypeDetailsTestCase {
 		when(mockPackage.getFullyQualifiedPackageName()).thenReturn("com.foo.bar");
 		final JavaType mockGovernorType = mock(JavaType.class);
 		when(mockGovernorType.getPackage()).thenReturn(mockPackage);
-		when(mockGovernor.getName()).thenReturn(mockGovernorType);
+		when(mockGovernor.getType()).thenReturn(mockGovernorType);
 		final CustomData mockCustomData = mock(CustomData.class);
 		final JavaType mockAspectType = mock(JavaType.class);
 		when(mockAspectType.getPackage()).thenReturn(mockPackage);
@@ -69,7 +69,7 @@ public class DefaultItdTypeDetailsTest extends ItdTypeDetailsTestCase {
 		assertEquals(mockCustomData, itd.getCustomData());
 		assertEquals(declaredByMetadataId, itd.getDeclaredByMetadataId());
 		assertEquals(modifier, itd.getModifier());
-		assertEquals(mockGovernorType, itd.getName());
+		assertEquals(mockGovernorType, itd.getType());
 		assertEquals(DefaultItdTypeDetails.PHYSICAL_TYPE_CATEGORY, itd.getPhysicalTypeCategory());
 		assertEquals(privilegedAspect, itd.isPrivilegedAspect());
 		assertEquals(mockGovernor, itd.getGovernor());

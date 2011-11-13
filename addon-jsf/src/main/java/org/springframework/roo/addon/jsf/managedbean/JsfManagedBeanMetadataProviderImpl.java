@@ -202,7 +202,7 @@ public class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDiscoverin
 			if (!enumerated) {
 				if (fieldType.isCommonCollectionType()) {
 					genericTypeLoop: for (JavaType parameter : fieldType.getParameters()) {
-						if (isApplicationType(parameter)) {
+						if (typeLocationService.isInProject(parameter)) {
 							for (ClassOrInterfaceTypeDetails managedBean : managedBeans) {
 								AnnotationMetadata managedBeanAnnotation = managedBean.getAnnotation(ROO_JSF_MANAGED_BEAN);
 								AnnotationAttributeValue<?> entityAttribute = managedBeanAnnotation.getAttribute("entity");
@@ -228,7 +228,7 @@ public class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDiscoverin
 						}
 					}
 				} else {
-					if (isApplicationType(fieldType) && !field.getCustomData().keySet().contains(CustomDataKeys.EMBEDDED_FIELD)) {
+					if (typeLocationService.isInProject(fieldType) && !field.getCustomData().keySet().contains(CustomDataKeys.EMBEDDED_FIELD)) {
 						applicationTypeMemberDetails = getMemberDetails(fieldType);
 						crudAdditions.putAll(getCrudAdditions(fieldType, metadataId));
 					}
@@ -280,10 +280,6 @@ public class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDiscoverin
 		return additions;
 	}
 
-	private boolean isApplicationType(final JavaType fieldType) {
-		return metadataService.get(PhysicalTypeIdentifier.createIdentifier(fieldType)) != null;
-	}
-	
 	private boolean isEnum(final JavaType fieldType) {
 		ClassOrInterfaceTypeDetails cid = typeLocationService.getTypeDetails(fieldType);
 		return cid != null && cid.getPhysicalTypeCategory() == PhysicalTypeCategory.ENUMERATION;

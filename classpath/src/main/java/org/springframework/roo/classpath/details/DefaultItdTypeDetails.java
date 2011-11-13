@@ -115,7 +115,11 @@ public class DefaultItdTypeDetails extends AbstractMemberHoldingTypeDetails impl
 	}
 
 	public JavaType getName() {
-		return governor.getName();
+		return getType();
+	}
+	
+	public JavaType getType() {
+		return governor.getType();
 	}
 
 	public ClassOrInterfaceTypeDetails getGovernor() {

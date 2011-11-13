@@ -84,15 +84,8 @@ public class TypeManagementServiceImpl implements TypeManagementService {
 	}
 
 	public void createOrUpdateTypeOnDisk(final ClassOrInterfaceTypeDetails cit) {
-		Assert.notNull(fileManager, "File manager required");
-		Assert.notNull(cit, "Class or interface type details required");
-		LogicalPath path = PhysicalTypeIdentifier.getPath(cit.getDeclaredByMetadataId());
-		ClassOrInterfaceTypeDetailsBuilder builder = new ClassOrInterfaceTypeDetailsBuilder(PhysicalTypeIdentifier.createIdentifier(cit.getName(), path), cit);
-
-		String fileIdentifier = typeLocationService.getPhysicalTypeCanonicalPath(builder.getDeclaredByMetadataId());
-		Assert.hasText(fileIdentifier, "File identifier required");
-
-		final String newContents = typeParsingService.getCompilationUnitContents(builder.build());
-		fileManager.createOrUpdateTextFileIfRequired(fileIdentifier, newContents, true);
+		final String fileCanonicalPath = typeLocationService.getPhysicalTypeCanonicalPath(cit.getDeclaredByMetadataId());
+		final String newContents = typeParsingService.getCompilationUnitContents(cit);
+		fileManager.createOrUpdateTextFileIfRequired(fileCanonicalPath, newContents, true);
 	}
 }

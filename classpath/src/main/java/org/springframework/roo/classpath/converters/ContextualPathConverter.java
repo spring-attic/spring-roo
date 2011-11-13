@@ -35,7 +35,7 @@ public class ContextualPathConverter implements Converter<LogicalPath> {
 	public boolean getAllPossibleValues(final List<Completion> completions, final Class<?> targetType, final String existingData, final String optionContext, final MethodTarget target) {
 		for (final Pom pom : projectOperations.getPoms()) {
 			for (final PhysicalPath physicalPath : pom.getPhysicalPaths()) {
-				completions.add(new Completion(physicalPath.getContextualPath().getName()));
+				completions.add(new Completion(physicalPath.getLogicalPath().getName()));
 			}
 		}
 		return false;

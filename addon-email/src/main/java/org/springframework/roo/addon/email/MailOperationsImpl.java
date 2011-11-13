@@ -18,7 +18,6 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.addon.propfiles.PropFileOperations;
-import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.TypeManagementService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
@@ -255,7 +254,7 @@ public class MailOperationsImpl implements MailOperations {
 		annotations.add(new AnnotationMetadataBuilder(AUTOWIRED));
 
 		// Obtain the physical type and its mutable class details
-		final String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(targetType);
+		final String declaredByMetadataId = typeLocationService.getPhysicalTypeIdentifier(targetType);
 		ClassOrInterfaceTypeDetails existing = typeLocationService.getTypeDetails(targetType);
 		if (existing == null) {
 			log.warning("Aborting: Unable to find metadata for target type '" + targetType.getFullyQualifiedTypeName() + "'");

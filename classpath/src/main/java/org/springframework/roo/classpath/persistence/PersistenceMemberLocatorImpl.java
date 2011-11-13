@@ -189,14 +189,14 @@ public class PersistenceMemberLocatorImpl implements PersistenceMemberLocator {
 	}
 
 	private MemberDetails getMemberDetails(final JavaType type) {
-		final ClassOrInterfaceTypeDetails physicalTypeMetadata = typeLocationService.getTypeDetails(type);
-		if (physicalTypeMetadata == null ) {
+		final ClassOrInterfaceTypeDetails typeDetails = typeLocationService.getTypeDetails(type);
+		if (typeDetails == null) {
 			return null;
 		}
-		return memberDetailsScanner.getMemberDetails(getClass().getName(),  physicalTypeMetadata);
+		return memberDetailsScanner.getMemberDetails(getClass().getName(), typeDetails);
 	}
 
 	private MemberDetails getMemberDetails(final ClassOrInterfaceTypeDetails typeDetails) {
-		return memberDetailsScanner.getMemberDetails(getClass().getName(),  typeDetails);
+		return memberDetailsScanner.getMemberDetails(getClass().getName(), typeDetails);
 	}
 }

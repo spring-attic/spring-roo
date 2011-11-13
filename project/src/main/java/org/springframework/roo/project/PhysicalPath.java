@@ -33,7 +33,7 @@ public class PhysicalPath {
 		this.location = location;
 	}
 
-	public LogicalPath getContextualPath() {
+	public LogicalPath getLogicalPath() {
 		return logicalPath;
 	}
 

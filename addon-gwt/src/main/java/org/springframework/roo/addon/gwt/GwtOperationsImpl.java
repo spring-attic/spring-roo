@@ -43,6 +43,7 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.FeatureNames;
+import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.Plugin;
 import org.springframework.roo.project.ProjectMetadata;
@@ -302,16 +303,18 @@ public class GwtOperationsImpl implements GwtOperations {
 			return;
 		}
 		
-		JavaType proxyName = new JavaType(destinationPackage.getFullyQualifiedPackageName() + "." + entity.getName().getSimpleTypeName() + "Proxy");
-		ClassOrInterfaceTypeDetailsBuilder builder = new ClassOrInterfaceTypeDetailsBuilder(PhysicalTypeIdentifier.createIdentifier(proxyName));
-		builder.setName(proxyName);
+		final JavaType proxyType = new JavaType(destinationPackage.getFullyQualifiedPackageName() + "." + entity.getName().getSimpleTypeName() + "Proxy");
+		final String focusedModule = projectOperations.getFocusedModuleName();
+		final LogicalPath proxyLogicalPath = LogicalPath.getInstance(Path.SRC_MAIN_JAVA, focusedModule);
+		ClassOrInterfaceTypeDetailsBuilder builder = new ClassOrInterfaceTypeDetailsBuilder(PhysicalTypeIdentifier.createIdentifier(proxyType, proxyLogicalPath));
+		builder.setName(proxyType);
 		builder.setExtendsTypes(Collections.singletonList(GwtUtils.ENTITY_PROXY));
 		builder.setPhysicalTypeCategory(PhysicalTypeCategory.INTERFACE);
 		builder.setModifier(Modifier.PUBLIC);
 		List<AnnotationAttributeValue<?>> attributeValues = new ArrayList<AnnotationAttributeValue<?>>();
 		StringAttributeValue stringAttributeValue = new StringAttributeValue(VALUE, entity.getName().getFullyQualifiedTypeName());
 		attributeValues.add(stringAttributeValue);
-		String locator = projectOperations.getTopLevelPackage(projectOperations.getFocusedModuleName()) + ".server.locator." + entity.getName().getSimpleTypeName() + "Locator";
+		String locator = projectOperations.getTopLevelPackage(focusedModule) + ".server.locator." + entity.getName().getSimpleTypeName() + "Locator";
 		StringAttributeValue locatorAttributeValue = new StringAttributeValue(new JavaSymbolName("locator"), locator);
 		attributeValues.add(locatorAttributeValue);
 		builder.updateTypeAnnotation(new AnnotationMetadataBuilder(GwtUtils.PROXY_FOR_NAME, attributeValues));
@@ -337,9 +340,10 @@ public class GwtOperationsImpl implements GwtOperations {
 		if (existingProxy != null || Modifier.isAbstract(entity.getModifier())) {
 			return;
 		}
-		JavaType proxyName = new JavaType(destinationPackage.getFullyQualifiedPackageName() + "." + entity.getName().getSimpleTypeName() + "Request");
-		ClassOrInterfaceTypeDetailsBuilder builder = new ClassOrInterfaceTypeDetailsBuilder(PhysicalTypeIdentifier.createIdentifier(proxyName));
-		builder.setName(proxyName);
+		final JavaType proxyType = new JavaType(destinationPackage.getFullyQualifiedPackageName() + "." + entity.getName().getSimpleTypeName() + "Request");
+		final LogicalPath focusedSrcMainJava = LogicalPath.getInstance(Path.SRC_MAIN_JAVA, projectOperations.getFocusedModuleName());
+		final ClassOrInterfaceTypeDetailsBuilder builder = new ClassOrInterfaceTypeDetailsBuilder(PhysicalTypeIdentifier.createIdentifier(proxyType, focusedSrcMainJava));
+		builder.setName(proxyType);
 		builder.setExtendsTypes(Collections.singletonList(GwtUtils.REQUEST_CONTEXT));
 		builder.setPhysicalTypeCategory(PhysicalTypeCategory.INTERFACE);
 		builder.setModifier(Modifier.PUBLIC);

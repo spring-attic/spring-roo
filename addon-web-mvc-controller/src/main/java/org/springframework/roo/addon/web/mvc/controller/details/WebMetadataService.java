@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 
+import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.customdata.tagkeys.MethodMetadataCustomDataKey;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.layers.MemberTypeAdditions;
@@ -30,6 +31,9 @@ public interface WebMetadataService {
 
 	boolean isRooIdentifier(JavaType javaType, MemberDetails memberDetails);
 
+	/**
+	 * @deprecated use {@link TypeLocationService#isInProject(JavaType)} instead
+	 */
 	boolean isApplicationType(JavaType javaType);
 
 	Map<JavaSymbolName, DateTimeFormatDetails> getDatePatterns(JavaType javaType, MemberDetails memberDetails, String metadataIdentificationString);

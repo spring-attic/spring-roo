@@ -65,7 +65,7 @@ public class ClasspathOperationsImpl implements ClasspathOperations {
 
 	public void focus(final JavaType type) {
 		Assert.notNull(type, "Specify the type to focus on");
-		final String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(type);
+		final String physicalTypeIdentifier = typeLocationService.getPhysicalTypeIdentifier(type);
 		final PhysicalTypeMetadata ptm = (PhysicalTypeMetadata) metadataService.get(physicalTypeIdentifier);
 		Assert.notNull(ptm, "Class " + PhysicalTypeIdentifier.getFriendlyName(physicalTypeIdentifier) + " does not exist");
 	}
@@ -120,9 +120,8 @@ public class ClasspathOperationsImpl implements ClasspathOperations {
 		if (!permitReservedWords) {
 			ReservedWords.verifyReservedWordsNotPresent(name);
 		}
-
-		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(name, path);
-		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC, name, PhysicalTypeCategory.ENUMERATION);
+		final String physicalTypeId = PhysicalTypeIdentifier.createIdentifier(name, path);
+		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(physicalTypeId, Modifier.PUBLIC, name, PhysicalTypeCategory.ENUMERATION);
 		typeManagementService.createOrUpdateTypeOnDisk(typeDetailsBuilder.build());
 	}
 

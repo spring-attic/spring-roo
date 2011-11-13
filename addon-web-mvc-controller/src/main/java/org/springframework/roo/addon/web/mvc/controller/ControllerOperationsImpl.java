@@ -1,5 +1,6 @@
 package org.springframework.roo.addon.web.mvc.controller;
 
+import static org.springframework.roo.classpath.customdata.CustomDataKeys.PERSISTENT_TYPE;
 import static org.springframework.roo.model.RooJavaType.ROO_WEB_SCAFFOLD;
 import static org.springframework.roo.model.SpringJavaType.CONTROLLER;
 import static org.springframework.roo.model.SpringJavaType.REQUEST_MAPPING;
@@ -20,7 +21,6 @@ import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.TypeManagementService;
-import org.springframework.roo.classpath.customdata.CustomDataKeys;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
@@ -34,8 +34,8 @@ import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.FeatureNames;
+import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
@@ -80,30 +80,27 @@ public class ControllerOperationsImpl implements ControllerOperations {
 	}
 
 	public void generateAll(final JavaPackage javaPackage) {
-		for (ClassOrInterfaceTypeDetails cid : typeLocationService.findClassesOrInterfaceDetailsWithTag(CustomDataKeys.PERSISTENT_TYPE)) {
-			if (Modifier.isAbstract(cid.getModifier())) {
+		for (ClassOrInterfaceTypeDetails entityDetails : typeLocationService.findClassesOrInterfaceDetailsWithTag(PERSISTENT_TYPE)) {
+			if (Modifier.isAbstract(entityDetails.getModifier())) {
 				continue;
 			}
 
-			JavaType javaType = cid.getName();
-			LogicalPath path = PhysicalTypeIdentifier.getPath(cid.getDeclaredByMetadataId());
-			path = LogicalPath.getInstance(path.getPath(), projectOperations.getFocusedModuleName());
+			final JavaType entityType = entityDetails.getType();
+			final LogicalPath entityPath = PhysicalTypeIdentifier.getPath(entityDetails.getDeclaredByMetadataId());
 
 			// Check to see if this persistent type has a web scaffold metadata listening to it
-			String downstreamWebScaffoldMetadataId = WebScaffoldMetadata.createIdentifier(javaType, path);
-			if (dependencyRegistry.getDownstream(cid.getDeclaredByMetadataId()).contains(downstreamWebScaffoldMetadataId)) {
+			String downstreamWebScaffoldMetadataId = WebScaffoldMetadata.createIdentifier(entityType, entityPath);
+			if (dependencyRegistry.getDownstream(entityDetails.getDeclaredByMetadataId()).contains(downstreamWebScaffoldMetadataId)) {
 				// There is already a controller for this entity
 				continue;
 			}
 
-			PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(javaType, path));
-			if (pluralMetadata == null) {
-				continue;
-			}
-
 			// To get here, there is no listening controller, so add one
-			JavaType controller = new JavaType(javaPackage.getFullyQualifiedPackageName() + "." + javaType.getSimpleTypeName() + "Controller");
-			createAutomaticController(controller, javaType, new HashSet<String>(), pluralMetadata.getPlural().toLowerCase());
+			final PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(entityType, entityPath));
+			if (pluralMetadata != null) {
+				final JavaType controller = new JavaType(javaPackage.getFullyQualifiedPackageName() + "." + entityType.getSimpleTypeName() + "Controller");
+				createAutomaticController(controller, entityType, new HashSet<String>(), pluralMetadata.getPlural().toLowerCase());
+			}
 		}
 	}
 

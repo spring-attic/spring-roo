@@ -40,6 +40,7 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.model.SpringJavaType;
 import org.springframework.roo.project.LogicalPath;
+import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
@@ -80,8 +81,8 @@ public class GwtLocatorMetadataProviderImpl implements GwtLocatorMetadataProvide
 			return null;
 		}
 
-		String locatorType = GwtUtils.getStringValue(proxyAnnotation.getAttribute("locator"));
-		if (!StringUtils.hasText(locatorType)) {
+		final String locatorType = GwtUtils.getStringValue(proxyAnnotation.getAttribute("locator"));
+		if (StringUtils.isBlank(locatorType)) {
 			return null;
 		}
 
@@ -98,8 +99,9 @@ public class GwtLocatorMetadataProviderImpl implements GwtLocatorMetadataProvide
 		}
 
 		final JavaType identifierType = GwtUtils.convertPrimitiveType(identifierAccessor.getReturnType(), true);
-		String locatorIdentifier = PhysicalTypeIdentifier.createIdentifier(new JavaType(locatorType));
-		ClassOrInterfaceTypeDetailsBuilder locatorBuilder = new ClassOrInterfaceTypeDetailsBuilder(locatorIdentifier);
+		final LogicalPath focusedSrcMainJava = LogicalPath.getInstance(Path.SRC_MAIN_JAVA, projectOperations.getFocusedModuleName());
+		final String locatorPhysicalTypeId = PhysicalTypeIdentifier.createIdentifier(new JavaType(locatorType), focusedSrcMainJava);
+		ClassOrInterfaceTypeDetailsBuilder locatorBuilder = new ClassOrInterfaceTypeDetailsBuilder(locatorPhysicalTypeId);
 		AnnotationMetadataBuilder annotationMetadataBuilder = new AnnotationMetadataBuilder(RooJavaType.ROO_GWT_LOCATOR);
 		annotationMetadataBuilder.addStringAttribute("value", entity.getFullyQualifiedTypeName());
 		locatorBuilder.addAnnotation(annotationMetadataBuilder);
@@ -109,16 +111,16 @@ public class GwtLocatorMetadataProviderImpl implements GwtLocatorMetadataProvide
 		locatorBuilder.setModifier(Modifier.PUBLIC);
 		locatorBuilder.setPhysicalTypeCategory(PhysicalTypeCategory.CLASS);
 		locatorBuilder.addExtendsTypes(new JavaType(GwtUtils.LOCATOR.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, Arrays.asList(entity, identifierType)));
-		locatorBuilder.addMethod(getCreateMethod(locatorIdentifier, entity));
+		locatorBuilder.addMethod(getCreateMethod(locatorPhysicalTypeId, entity));
 		
-		MemberTypeAdditions findMethodAdditions = layerService.getMemberTypeAdditions(locatorIdentifier, CustomDataKeys.FIND_METHOD.name(), entity, identifierType, LAYER_POSITION, new MethodParameter(identifierType, "id"));
+		MemberTypeAdditions findMethodAdditions = layerService.getMemberTypeAdditions(locatorPhysicalTypeId, CustomDataKeys.FIND_METHOD.name(), entity, identifierType, LAYER_POSITION, new MethodParameter(identifierType, "id"));
 		Assert.notNull(findMethodAdditions, "Find method not available for entity '" + entity.getFullyQualifiedTypeName() + "'");
-		locatorBuilder.addMethod(getFindMethod(findMethodAdditions, locatorBuilder, locatorIdentifier, entity, identifierType));
+		locatorBuilder.addMethod(getFindMethod(findMethodAdditions, locatorBuilder, locatorPhysicalTypeId, entity, identifierType));
 		
-		locatorBuilder.addMethod(getDomainTypeMethod(locatorIdentifier, entity));
-		locatorBuilder.addMethod(getIdMethod(locatorIdentifier, entity, identifierAccessor));
-		locatorBuilder.addMethod(getIdTypeMethod(locatorIdentifier, entity, identifierType));
-		locatorBuilder.addMethod(getVersionMethod(locatorIdentifier, entity, versionAccessor));
+		locatorBuilder.addMethod(getDomainTypeMethod(locatorPhysicalTypeId, entity));
+		locatorBuilder.addMethod(getIdMethod(locatorPhysicalTypeId, entity, identifierAccessor));
+		locatorBuilder.addMethod(getIdTypeMethod(locatorPhysicalTypeId, entity, identifierType));
+		locatorBuilder.addMethod(getVersionMethod(locatorPhysicalTypeId, entity, versionAccessor));
 
 		typeManagementService.createOrUpdateTypeOnDisk(locatorBuilder.build());
 		return null;

@@ -168,9 +168,13 @@ public class JpaActiveRecordMetadataProviderImpl extends AbstractItdMetadataProv
 
 	public JpaCrudAnnotationValues getAnnotationValues(final JavaType javaType) {
 		Assert.notNull(javaType, "JavaType required");
-		final MemberHoldingTypeDetailsMetadataItem<?> governor = (MemberHoldingTypeDetailsMetadataItem<?>) metadataService.get(PhysicalTypeIdentifier.createIdentifier(javaType));
+		final String physicalTypeId = typeLocationService.getPhysicalTypeIdentifier(javaType);
+		if (StringUtils.isBlank(physicalTypeId)) {
+			return null;
+		}
+		final MemberHoldingTypeDetailsMetadataItem<?> governor = (MemberHoldingTypeDetailsMetadataItem<?>) metadataService.get(physicalTypeId);
 		if (MemberFindingUtils.getAnnotationOfType(governor, ROO_JPA_ACTIVE_RECORD) == null) {
-			// The type can't be found or it's not annotated with @RooJpaActiveRecord
+			// The type is not annotated with @RooJpaActiveRecord
 			return null;
 		}
 		return new JpaCrudAnnotationValues(governor);

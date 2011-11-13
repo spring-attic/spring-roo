@@ -3,7 +3,6 @@ package org.springframework.roo.classpath;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.LogicalPath;
-import org.springframework.roo.project.Path;
 import org.springframework.roo.support.util.Assert;
 
 /**
@@ -35,24 +34,12 @@ public final class PhysicalTypeIdentifier {
 	}
 
 	/**
-	 * Creates an identifier for the given {@link JavaType}'s physical type.
-	 * 
-	 * @param javaType the type for which to generate the ID (required)
-	 * @return a non-blank ID
-	 * @since 1.2.0
-	 * @deprecated use {@link #createIdentifier(JavaType, LogicalPath)} if you know
-	 * the path, or {@link TypeLocationService#getPhysicalTypeIdentifier(JavaType)}
-	 * if you don't and you know the type exists
-	 */
-	@Deprecated
-	public static String createIdentifier(final JavaType javaType) {
-		return createIdentifier(javaType, LogicalPath.getInstance(Path.SRC_MAIN_JAVA, ""));
-	}
-
-	/**
-	 * Creates a physical type metadata ID for the given user project type
+	 * Creates a physical type metadata ID for the given user project type,
+	 * which need not exist. If you know the {@link JavaType} exists but don't
+	 * know its {@link LogicalPath}, you can use
+	 * {@link TypeLocationService#getPhysicalTypeIdentifier(JavaType)} instead.
 	 *
-	 * @param javaType the type, which need not exist (required)
+	 * @param javaType the type for which to create the identifier (required)
 	 * @param path the path in which it's located (required)
 	 * @return a non-blank ID
 	 */
@@ -63,11 +50,12 @@ public final class PhysicalTypeIdentifier {
 	/**
 	 * Parses the given metadata ID for the user project type to which it relates.
 	 * 
-	 * @param metadataId the metadata ID to parse (must identify an instance of {@link PhysicalTypeIdentifier#PHYSICAL_METADATA_TYPE})
+	 * @param physicalTypeId the metadata ID to parse (must identify an instance of {@link PhysicalTypeIdentifier#PHYSICAL_METADATA_TYPE})
 	 * @return a non-<code>null</code> type
 	 */
-	public static JavaType getJavaType(final String metadataId) {
-		return PhysicalTypeIdentifierNamingUtils.getJavaType(PHYSICAL_METADATA_TYPE, metadataId);
+	public static JavaType getJavaType(final String physicalTypeId) {
+		Assert.isTrue(PhysicalTypeIdentifier.isValid(physicalTypeId), "Physical type identifier is invalid");
+		return PhysicalTypeIdentifierNamingUtils.getJavaType(PHYSICAL_METADATA_TYPE, physicalTypeId);
 	}
 
 	/**

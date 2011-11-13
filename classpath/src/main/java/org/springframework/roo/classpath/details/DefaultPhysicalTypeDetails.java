@@ -18,14 +18,14 @@ public class DefaultPhysicalTypeDetails extends AbstractCustomDataAccessorProvid
 
 	// Fields
 	private final PhysicalTypeCategory physicalTypeCategory;
-	private final JavaType name;
+	private final JavaType javaType;
 
-	public DefaultPhysicalTypeDetails(final PhysicalTypeCategory physicalTypeCategory, final JavaType name) {
+	public DefaultPhysicalTypeDetails(final PhysicalTypeCategory physicalTypeCategory, final JavaType javaType) {
 		super(CustomDataImpl.NONE);
+		Assert.notNull(javaType, "Java type required");
 		Assert.notNull(physicalTypeCategory, "Physical type category required");
-		Assert.notNull(name, "Name required");
+		this.javaType = javaType;
 		this.physicalTypeCategory = physicalTypeCategory;
-		this.name = name;
 	}
 
 	public PhysicalTypeCategory getPhysicalTypeCategory() {
@@ -33,6 +33,10 @@ public class DefaultPhysicalTypeDetails extends AbstractCustomDataAccessorProvid
 	}
 
 	public JavaType getName() {
-		return name;
+		return getType();
+	}
+	
+	public JavaType getType() {
+		return javaType;
 	}
 }

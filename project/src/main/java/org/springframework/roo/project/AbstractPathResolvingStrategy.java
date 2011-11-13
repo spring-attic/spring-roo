@@ -51,7 +51,7 @@ public abstract class AbstractPathResolvingStrategy implements PathResolvingStra
 		if (parent == null) {
 			return null;
 		}
-		return parent.getContextualPath();
+		return parent.getLogicalPath();
 	}
 	
 	public Collection<LogicalPath> getPaths() {
