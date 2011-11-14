@@ -32,7 +32,7 @@ public class ToStringMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
 	private static final JavaType TO_STRING_BUILDER = new JavaType("org.apache.commons.lang3.builder.ReflectionToStringBuilder");
 	private static final JavaType TO_STRING_STYLE = new JavaType("org.apache.commons.lang3.builder.ToStringStyle");
-	private static final String STYLE = "ToStringStyle.SIMPLE_STYLE";
+	private static final String STYLE = "SHORT_PREFIX_STYLE";
 
 	// Fields
 	private final ToStringAnnotationValues annotationValues;
@@ -95,18 +95,11 @@ public class ToStringMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 				}
 				builder.append("\"").append(excludeFields[i]).append("\"");
 			}
-			str = "new ReflectionToStringBuilder(this, " + STYLE + ").setExcludeFieldNames(" + builder.toString() + ").toString();";
+			str = "new ReflectionToStringBuilder(this, ToStringStyle." + STYLE + ").setExcludeFieldNames(" + builder.toString() + ").toString();";
 		} else {
-			str = "ReflectionToStringBuilder.toString(this, " + STYLE + ");";
+			str = "ReflectionToStringBuilder.toString(this, ToStringStyle." + STYLE + ");";
 		}
-
-		final int length = annotationValues.getLength();
-		if (length > 1) {
-			bodyBuilder.appendFormalLine("String str = " + str);
-			bodyBuilder.appendFormalLine("return str != null && str.length() > " + length + " ? str.substring(0, " + length + ") + \"...\" : str;");
-		} else {
-			bodyBuilder.appendFormalLine("return " + str);
-		}
+		bodyBuilder.appendFormalLine("return " + str);
 
 		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, STRING, bodyBuilder).build();
 	}

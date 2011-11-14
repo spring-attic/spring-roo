@@ -17,7 +17,6 @@ public class ToStringAnnotationValues extends AbstractAnnotationValues {
 	// From annotation
 	@AutoPopulate private String toStringMethod = "toString";
 	@AutoPopulate private String[] excludeFields;
-	@AutoPopulate private int length = 25;
 
 	/**
 	 * Constructor
@@ -35,9 +34,5 @@ public class ToStringAnnotationValues extends AbstractAnnotationValues {
 
 	public String[] getExcludeFields() {
 		return excludeFields;
-	}
-
-	public int getLength() {
-		return length;
 	}
 }

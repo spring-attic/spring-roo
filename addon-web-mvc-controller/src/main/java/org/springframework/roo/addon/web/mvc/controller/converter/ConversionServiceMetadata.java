@@ -44,17 +44,7 @@ public class ConversionServiceMetadata extends AbstractItdTypeDetailsProvidingMe
 
 	// Constants
 	private static final JavaType BASE_64 = new JavaType("org.apache.commons.codec.binary.Base64");
-
-	/**
-	 * Constructor for testing
-	 *
-	 * @param identifier
-	 * @param aspectName
-	 * @param governorPhysicalTypeMetadata
-	 */
-	ConversionServiceMetadata(final String identifier, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata) {
-		super(identifier, aspectName, governorPhysicalTypeMetadata);
-	}
+	private static final String CONVERTER = "Converter";
 
 	/**
 	 * Production constructor
@@ -67,12 +57,12 @@ public class ConversionServiceMetadata extends AbstractItdTypeDetailsProvidingMe
 	 * @param relevantDomainTypes the types for which to generate converters (required)
 	 * @param compositePrimaryKeyTypes (required)
 	 */
-	public ConversionServiceMetadata(final String identifier, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final Map<JavaType, MemberTypeAdditions> findMethods, final Map<JavaType, JavaType> idTypes, final Set<JavaType> relevantDomainTypes, final Map<JavaType, Map<Object, JavaSymbolName>> compositePrimaryKeyTypes) {
+	public ConversionServiceMetadata(final String identifier, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final Map<JavaType, MemberTypeAdditions> findMethods, final Map<JavaType, JavaType> idTypes, final Set<JavaType> relevantDomainTypes, final Map<JavaType, Map<Object, JavaSymbolName>> compositePrimaryKeyTypes, final Map<JavaType, List<MethodMetadata>> toStringMethods) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
-		Assert.notNull(relevantDomainTypes, "List of domain types required");
 		Assert.notNull(compositePrimaryKeyTypes, "List of PK types required");
 		Assert.notNull(idTypes, "List of ID types required");
-		Assert.isTrue(relevantDomainTypes.size() == idTypes.size(), "Expected " + relevantDomainTypes.size() + " ID types, but was " + idTypes.size());
+		Assert.isTrue(relevantDomainTypes != null && relevantDomainTypes.size() == idTypes.size(), "Expected " + relevantDomainTypes.size() + " ID types, but was " + idTypes.size());
+		Assert.notNull(toStringMethods, "ToString methods required");
 
 		if (!isValid() || (relevantDomainTypes.isEmpty() && compositePrimaryKeyTypes.isEmpty())) {
 			valid = false;
@@ -94,13 +84,13 @@ public class ConversionServiceMetadata extends AbstractItdTypeDetailsProvidingMe
 			}
 			methodNames.add(simpleName);
 			JavaSymbolName toIdMethodName = new JavaSymbolName("get" + simpleName + "ToStringConverter");
-			MethodMetadata toIdMethod = getToStringConverterMethod(formBackingObject, toIdMethodName);
+			MethodMetadata toIdMethod = getToStringConverterMethod(formBackingObject, toIdMethodName, toStringMethods.get(formBackingObject));
 			if (toIdMethod != null) {
 				builder.addMethod(toIdMethod);
 				installMethodBuilder.getBodyBuilder().appendFormalLine("registry.addConverter(" + toIdMethodName.getSymbolName() + "());");
 			}
 
-			JavaSymbolName toTypeMethodName = new JavaSymbolName("getIdTo" + simpleName + "Converter");
+			JavaSymbolName toTypeMethodName = new JavaSymbolName("getIdTo" + simpleName + CONVERTER);
 			MethodMetadata toTypeMethod = getToTypeConverterMethod(formBackingObject, toTypeMethodName, findMethods.get(formBackingObject), idTypes.get(formBackingObject));
 			if (toTypeMethod != null) {
 				builder.addMethod(toTypeMethod);
@@ -109,7 +99,7 @@ public class ConversionServiceMetadata extends AbstractItdTypeDetailsProvidingMe
 
 			// Only allow conversion if ID type is not String already.
 			if (!idTypes.get(formBackingObject).equals(JavaType.STRING)) {
-				JavaSymbolName stringToTypeMethodName = new JavaSymbolName("getStringTo" + simpleName + "Converter");
+				JavaSymbolName stringToTypeMethodName = new JavaSymbolName("getStringTo" + simpleName + CONVERTER);
 				MethodMetadata stringToTypeMethod = getStringToTypeConverterMethod(formBackingObject, stringToTypeMethodName, idTypes.get(formBackingObject));
 				if (stringToTypeMethod != null) {
 					builder.addMethod(stringToTypeMethod);
@@ -138,7 +128,7 @@ public class ConversionServiceMetadata extends AbstractItdTypeDetailsProvidingMe
 	private List<MethodMetadata> getCompositePkConverters(final JavaType targetType, final Map<Object, JavaSymbolName> jsonMethodNames) {
 		List<MethodMetadata> converterMethods = new ArrayList<MethodMetadata>();
 
-		JavaSymbolName methodName = new JavaSymbolName("getJsonTo" + targetType.getSimpleTypeName() + "Converter");
+		JavaSymbolName methodName = new JavaSymbolName("getJsonTo" + targetType.getSimpleTypeName() + CONVERTER);
 		JavaType base64 = BASE_64;
 		String base64Name = base64.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
 		String typeName = targetType.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
@@ -179,7 +169,7 @@ public class ConversionServiceMetadata extends AbstractItdTypeDetailsProvidingMe
 		return converterMethods;
 	}
 
-	private MethodMetadata getToStringConverterMethod(final JavaType targetType, final JavaSymbolName methodName) {
+	private MethodMetadata getToStringConverterMethod(final JavaType targetType, final JavaSymbolName methodName, List<MethodMetadata> toStringMethods) {
 		if (governorHasMethod(methodName)) {
 			return null;
 		}
@@ -191,7 +181,15 @@ public class ConversionServiceMetadata extends AbstractItdTypeDetailsProvidingMe
 		bodyBuilder.indent();
 		bodyBuilder.appendFormalLine("public String convert(" + targetType.getSimpleTypeName() + " " + targetTypeName + ") {");
 		bodyBuilder.indent();
-		bodyBuilder.appendFormalLine("return " + targetTypeName + ".toString();");
+		StringBuilder sb = new StringBuilder("return new StringBuilder()");
+		for (int i = 0; i < toStringMethods.size(); i++) {
+			if (i > 0) {
+				sb.append(".append(\" \")");
+			}
+			sb.append(".append(").append(targetTypeName).append(".").append(toStringMethods.get(i).getMethodName().getSymbolName()).append("())");
+		}
+		sb.append(".toString();");
+		bodyBuilder.appendFormalLine(sb.toString()); 
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("}");
 		bodyBuilder.indentRemove();
