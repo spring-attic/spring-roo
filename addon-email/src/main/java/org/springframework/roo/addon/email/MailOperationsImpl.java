@@ -3,6 +3,7 @@ package org.springframework.roo.addon.email;
 import static org.springframework.roo.addon.email.MailProtocol.SMTP;
 import static org.springframework.roo.model.SpringJavaType.ASYNC;
 import static org.springframework.roo.model.SpringJavaType.AUTOWIRED;
+import static org.springframework.roo.model.SpringJavaType.JAVA_MAIL_SENDER_IMPL;
 import static org.springframework.roo.model.SpringJavaType.MAIL_SENDER;
 import static org.springframework.roo.model.SpringJavaType.SIMPLE_MAIL_MESSAGE;
 
@@ -100,14 +101,14 @@ public class MailOperationsImpl implements MailOperations {
 		boolean installDependencies = true;
 		final Map<String, String> props = new HashMap<String, String>();
 
-		Element mailBean = XmlUtils.findFirstElement("/beans/bean[@class = 'org.springframework.mail.javamail.JavaMailSenderImpl']", root);
+		Element mailBean = XmlUtils.findFirstElement("/beans/bean[@class = '" + JAVA_MAIL_SENDER_IMPL.getFullyQualifiedTypeName() + "']", root);
 		if (mailBean != null) {
 			root.removeChild(mailBean);
 			installDependencies = false;
 		}
 
 		mailBean = document.createElement("bean");
-		mailBean.setAttribute("class", "org.springframework.mail.javamail.JavaMailSenderImpl");
+		mailBean.setAttribute("class", JAVA_MAIL_SENDER_IMPL.getFullyQualifiedTypeName());
 		mailBean.setAttribute("id", "mailSender");
 
 		final Element property = document.createElement("property");
@@ -195,7 +196,7 @@ public class MailOperationsImpl implements MailOperations {
 			Element smmBean = getSimpleMailMessageBean(root);
 			if (smmBean == null) {
 				smmBean = document.createElement("bean");
-				smmBean.setAttribute("class", "org.springframework.mail.SimpleMailMessage");
+				smmBean.setAttribute("class", SIMPLE_MAIL_MESSAGE.getFullyQualifiedTypeName());
 				smmBean.setAttribute("id", "templateMessage");
 			}
 
@@ -243,7 +244,7 @@ public class MailOperationsImpl implements MailOperations {
 	 * @return <code>null</code> if there is no such bean
 	 */
 	private Element getSimpleMailMessageBean(final Element root) {
-		return XmlUtils.findFirstElement("/beans/bean[@class = 'org.springframework.mail.SimpleMailMessage']", root);
+		return XmlUtils.findFirstElement("/beans/bean[@class = '" + SIMPLE_MAIL_MESSAGE.getFullyQualifiedTypeName() + "']", root);
 	}
 
 	public void injectEmailTemplate(final JavaType targetType, final JavaSymbolName fieldName, final boolean async) {
@@ -293,7 +294,7 @@ public class MailOperationsImpl implements MailOperations {
 
 		if (getSimpleMailMessageBean(root) == null) {
 			// There's no SimpleMailMessage bean; use a local variable
-			bodyBuilder.appendFormalLine("org.springframework.mail.SimpleMailMessage " + LOCAL_MESSAGE_VARIABLE	+ " = new org.springframework.mail.SimpleMailMessage();");
+			bodyBuilder.appendFormalLine(SIMPLE_MAIL_MESSAGE.getFullyQualifiedTypeName() + " " + LOCAL_MESSAGE_VARIABLE	+ " = new " + SIMPLE_MAIL_MESSAGE.getFullyQualifiedTypeName() + "();");
 			// Set the from address
 			parameters.add(STRING, new JavaSymbolName("mailFrom"));
 			bodyBuilder.appendFormalLine(LOCAL_MESSAGE_VARIABLE	+ ".setFrom(mailFrom);");
@@ -306,7 +307,7 @@ public class MailOperationsImpl implements MailOperations {
 			final FieldMetadataBuilder smmFieldBuilder = new FieldMetadataBuilder(targetClassMID, PRIVATE_TRANSIENT, smmAnnotations, new JavaSymbolName(TEMPLATE_MESSAGE_FIELD), SIMPLE_MAIL_MESSAGE);
 			classOrInterfaceTypeDetailsBuilder.addField(smmFieldBuilder.build());
 			// Use the injected bean as a template (for thread safety)
-			bodyBuilder.appendFormalLine("org.springframework.mail.SimpleMailMessage " + LOCAL_MESSAGE_VARIABLE	+ " = new org.springframework.mail.SimpleMailMessage(" + TEMPLATE_MESSAGE_FIELD + ");");
+			bodyBuilder.appendFormalLine(SIMPLE_MAIL_MESSAGE.getFullyQualifiedTypeName() + " " + LOCAL_MESSAGE_VARIABLE	+ " = new " + SIMPLE_MAIL_MESSAGE.getFullyQualifiedTypeName() + "(" + TEMPLATE_MESSAGE_FIELD + ");");
 		}
 
 		// Set the to address

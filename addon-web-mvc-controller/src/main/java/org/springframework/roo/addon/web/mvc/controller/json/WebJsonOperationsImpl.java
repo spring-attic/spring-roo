@@ -1,7 +1,9 @@
 package org.springframework.roo.addon.web.mvc.controller.json;
 
+import static org.springframework.roo.model.SpringJavaType.CHARACTER_ENCODING_FILTER;
 import static org.springframework.roo.model.SpringJavaType.CONTEXT_LOADER_LISTENER;
 import static org.springframework.roo.model.SpringJavaType.DISPATCHER_SERVLET;
+import static org.springframework.roo.model.SpringJavaType.HIDDEN_HTTP_METHOD_FILTER;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -81,8 +83,8 @@ public class WebJsonOperationsImpl implements WebJsonOperations {
 		Document document = XmlUtils.readXml(fileManager.getInputStream(webXmlPath));
 
 		WebXmlUtils.addContextParam(new WebXmlUtils.WebXmlParam("contextConfigLocation", "classpath*:META-INF/spring/applicationContext*.xml"), document, null);
-		WebXmlUtils.addFilter(WebMvcOperations.CHARACTER_ENCODING_FILTER_NAME, "org.springframework.web.filter.CharacterEncodingFilter", "/*", document, null, new WebXmlUtils.WebXmlParam("encoding", "UTF-8"), new WebXmlUtils.WebXmlParam("forceEncoding", "true"));
-		WebXmlUtils.addFilter(WebMvcOperations.HTTP_METHOD_FILTER_NAME, "org.springframework.web.filter.HiddenHttpMethodFilter", "/*", document, null);
+		WebXmlUtils.addFilter(WebMvcOperations.CHARACTER_ENCODING_FILTER_NAME, CHARACTER_ENCODING_FILTER.getFullyQualifiedTypeName(), "/*", document, null, new WebXmlUtils.WebXmlParam("encoding", "UTF-8"), new WebXmlUtils.WebXmlParam("forceEncoding", "true"));
+		WebXmlUtils.addFilter(WebMvcOperations.HTTP_METHOD_FILTER_NAME, HIDDEN_HTTP_METHOD_FILTER.getFullyQualifiedTypeName(), "/*", document, null);
 		WebXmlUtils.addListener(CONTEXT_LOADER_LISTENER.getFullyQualifiedTypeName(), document, "Creates the Spring Container shared by all Servlets and Filters");
 		WebXmlUtils.addServlet(projectOperations.getFocusedProjectName(), DISPATCHER_SERVLET.getFullyQualifiedTypeName(), "/", 1, document, "Handles Spring requests", new WebXmlUtils.WebXmlParam("contextConfigLocation", "WEB-INF/spring/webmvc-config.xml"));
 

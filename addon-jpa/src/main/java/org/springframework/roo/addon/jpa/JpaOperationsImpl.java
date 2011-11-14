@@ -7,6 +7,9 @@ import static org.springframework.roo.model.RooJavaType.ROO_IDENTIFIER;
 import static org.springframework.roo.model.RooJavaType.ROO_JAVA_BEAN;
 import static org.springframework.roo.model.RooJavaType.ROO_SERIALIZABLE;
 import static org.springframework.roo.model.RooJavaType.ROO_TO_STRING;
+import static org.springframework.roo.model.SpringJavaType.JPA_TRANSACTION_MANAGER;
+import static org.springframework.roo.model.SpringJavaType.LOCAL_CONTAINER_ENTITY_MANAGER_FACTORY_BEAN;
+import static org.springframework.roo.model.SpringJavaType.LOCAL_ENTITY_MANAGER_FACTORY_BEAN;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -36,11 +39,11 @@ import org.springframework.roo.classpath.details.annotations.AnnotationMetadataB
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.process.manager.MutableFile;
-import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.DependencyScope;
 import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.Filter;
+import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.Plugin;
@@ -299,7 +302,7 @@ public class JpaOperationsImpl implements JpaOperations {
 		if (transactionManagerElement == null) {
 			transactionManagerElement = appCtx.createElement("bean");
 			transactionManagerElement.setAttribute("id", transactionManager);
-			transactionManagerElement.setAttribute("class", "org.springframework.orm.jpa.JpaTransactionManager");
+			transactionManagerElement.setAttribute("class", JPA_TRANSACTION_MANAGER.getFullyQualifiedTypeName());
 			transactionManagerElement.appendChild(createRefElement("entityManagerFactory", "entityManagerFactory", appCtx));
 			root.appendChild(transactionManagerElement);
 		}
@@ -324,11 +327,11 @@ public class JpaOperationsImpl implements JpaOperations {
 
 		switch (jdbcDatabase) {
 			case GOOGLE_APP_ENGINE:
-				entityManagerFactory.setAttribute("class", "org.springframework.orm.jpa.LocalEntityManagerFactoryBean");
+				entityManagerFactory.setAttribute("class", LOCAL_ENTITY_MANAGER_FACTORY_BEAN.getFullyQualifiedTypeName());
 				entityManagerFactory.appendChild(createPropertyElement("persistenceUnitName", StringUtils.defaultIfEmpty(persistenceUnit, GAE_PERSISTENCE_UNIT_NAME), appCtx));
 				break;
 			default:
-				entityManagerFactory.setAttribute("class", "org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean");
+				entityManagerFactory.setAttribute("class", LOCAL_CONTAINER_ENTITY_MANAGER_FACTORY_BEAN.getFullyQualifiedTypeName());
 				entityManagerFactory.appendChild(createPropertyElement("persistenceUnitName", StringUtils.defaultIfEmpty(persistenceUnit, DEFAULT_PERSISTENCE_UNIT), appCtx));
 				if (ormProvider != OrmProvider.DATANUCLEUS) {
 					entityManagerFactory.appendChild(createRefElement("dataSource", "dataSource", appCtx));

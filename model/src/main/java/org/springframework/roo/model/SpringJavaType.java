@@ -18,6 +18,7 @@ public final class SpringJavaType {
 	public static final JavaType ASYNC = new JavaType("org.springframework.scheduling.annotation.Async");
 	public static final JavaType AUTOWIRED = new JavaType("org.springframework.beans.factory.annotation.Autowired");
 	public static final JavaType BINDING_RESULT = new JavaType("org.springframework.validation.BindingResult");
+	public static final JavaType CHARACTER_ENCODING_FILTER = new JavaType("org.springframework.web.filter.CharacterEncodingFilter");
 	public static final JavaType COMPONENT = new JavaType("org.springframework.stereotype.Component");
 	public static final JavaType CONFIGURABLE = new JavaType("org.springframework.beans.factory.annotation.Configurable");
 	public static final JavaType CONTEXT_CONFIGURATION = new JavaType("org.springframework.test.context.ContextConfiguration");
@@ -30,10 +31,15 @@ public final class SpringJavaType {
 	public static final JavaType DISPATCHER_SERVLET = new JavaType("org.springframework.web.servlet.DispatcherServlet");
 	public static final JavaType FLOW_HANDLER_MAPPING = new JavaType("org.springframework.webflow.mvc.servlet.FlowHandlerMapping");
 	public static final JavaType FORMATTER_REGISTRY = new JavaType("org.springframework.format.FormatterRegistry");
+	public static final JavaType HIDDEN_HTTP_METHOD_FILTER = new JavaType("org.springframework.web.filter.HiddenHttpMethodFilter");
 	public static final JavaType HTTP_HEADERS = new JavaType("org.springframework.http.HttpHeaders");
 	public static final JavaType HTTP_STATUS = new JavaType("org.springframework.http.HttpStatus");
+	public static final JavaType JAVA_MAIL_SENDER_IMPL = new JavaType("org.springframework.mail.javamail.JavaMailSenderImpl");
 	public static final JavaType JMS_OPERATIONS = new JavaType("org.springframework.jms.core.JmsOperations");
 	public static final JavaType JMS_TEMPLATE = new JavaType("org.springframework.jms.core.JmsTemplate");
+	public static final JavaType JPA_TRANSACTION_MANAGER = new JavaType("org.springframework.orm.jpa.JpaTransactionManager");
+	public static final JavaType LOCAL_CONTAINER_ENTITY_MANAGER_FACTORY_BEAN = new JavaType("org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean");
+	public static final JavaType LOCAL_ENTITY_MANAGER_FACTORY_BEAN = new JavaType("org.springframework.orm.jpa.LocalEntityManagerFactoryBean");
 	public static final JavaType LOCALE_CONTEXT_HOLDER = new JavaType("org.springframework.context.i18n.LocaleContextHolder");
 	public static final JavaType MAIL_SENDER = new JavaType("org.springframework.mail.MailSender");
 	public static final JavaType MOCK_STATIC_ENTITY_METHODS = new JavaType("org.springframework.mock.staticmock.MockStaticEntityMethods");

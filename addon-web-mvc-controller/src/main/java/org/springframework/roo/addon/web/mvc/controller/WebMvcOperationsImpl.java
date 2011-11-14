@@ -1,9 +1,11 @@
 package org.springframework.roo.addon.web.mvc.controller;
 
+import static org.springframework.roo.model.SpringJavaType.CHARACTER_ENCODING_FILTER;
 import static org.springframework.roo.model.SpringJavaType.CONTEXT_LOADER_LISTENER;
 import static org.springframework.roo.model.SpringJavaType.CONVERSION_SERVICE_EXPOSING_INTERCEPTOR;
 import static org.springframework.roo.model.SpringJavaType.DISPATCHER_SERVLET;
 import static org.springframework.roo.model.SpringJavaType.FLOW_HANDLER_MAPPING;
+import static org.springframework.roo.model.SpringJavaType.HIDDEN_HTTP_METHOD_FILTER;
 import static org.springframework.roo.model.SpringJavaType.OPEN_ENTITY_MANAGER_IN_VIEW_FILTER;
 
 import java.io.IOException;
@@ -162,8 +164,8 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
 
 		WebXmlUtils.addContextParam(new WebXmlUtils.WebXmlParam("defaultHtmlEscape", "true"), document, "Enable escaping of form submission contents");
 		WebXmlUtils.addContextParam(new WebXmlUtils.WebXmlParam("contextConfigLocation", "classpath*:META-INF/spring/applicationContext*.xml"), document, null);
-		WebXmlUtils.addFilter(CHARACTER_ENCODING_FILTER_NAME, "org.springframework.web.filter.CharacterEncodingFilter", "/*", document, null, new WebXmlUtils.WebXmlParam("encoding", "UTF-8"), new WebXmlUtils.WebXmlParam("forceEncoding", "true"));
-		WebXmlUtils.addFilter(HTTP_METHOD_FILTER_NAME, "org.springframework.web.filter.HiddenHttpMethodFilter", "/*", document, null);
+		WebXmlUtils.addFilter(CHARACTER_ENCODING_FILTER_NAME, CHARACTER_ENCODING_FILTER.getFullyQualifiedTypeName(), "/*", document, null, new WebXmlUtils.WebXmlParam("encoding", "UTF-8"), new WebXmlUtils.WebXmlParam("forceEncoding", "true"));
+		WebXmlUtils.addFilter(HTTP_METHOD_FILTER_NAME, HIDDEN_HTTP_METHOD_FILTER.getFullyQualifiedTypeName(), "/*", document, null);
 		if (projectOperations.isFeatureInstalled(FeatureNames.JPA)) {
 			WebXmlUtils.addFilter(OPEN_ENTITYMANAGER_IN_VIEW_FILTER_NAME, OPEN_ENTITY_MANAGER_IN_VIEW_FILTER.getFullyQualifiedTypeName(), "/*", document, null);
 		}
