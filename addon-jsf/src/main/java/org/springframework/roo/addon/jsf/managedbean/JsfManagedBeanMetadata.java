@@ -124,7 +124,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 	private static final JavaSymbolName DATA_VISIBLE = new JavaSymbolName("dataVisible");
 	private static final JavaSymbolName COLUMNS = new JavaSymbolName("columns");
 	private static final String HTML_PANEL_GRID_ID = "htmlPanelGrid";
-	
+
 	// Fields
 	private Set<JsfFieldHolder> locatedFields;
 	private JavaType entity;
@@ -207,7 +207,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 
 		methods.add(getEntityAccessorMethod());
 		methods.add(getMutatorMethod(entityName, entity));
-		
+
 		addOtherFieldsAndMethods();
 
 		methods.add(getOnEditMethod());
@@ -332,12 +332,11 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("columns = new ArrayList<String>();");
 		for (final JsfFieldHolder jsfFieldHolder : locatedFields) {
-			FieldMetadata field = jsfFieldHolder.getField();
-			if (field.getCustomData() != null && field.getCustomData().keySet().contains(JsfManagedBeanMetadataProvider.LIST_VIEW_FIELD_CUSTOM_DATA_KEY)) {
-				bodyBuilder.appendFormalLine("columns.add(\"" + field.getFieldName().getSymbolName() + "\");");
+			if (jsfFieldHolder.isListViewField()) {
+				bodyBuilder.appendFormalLine("columns.add(\"" + jsfFieldHolder.getField().getFieldName().getSymbolName() + "\");");
 			}
 		}
-
+		
 		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), PUBLIC, methodName, JavaType.VOID_PRIMITIVE, new ArrayList<AnnotatedJavaType>(), new ArrayList<JavaSymbolName>(), bodyBuilder);
 		methodBuilder.addAnnotation(new AnnotationMetadataBuilder(POST_CONSTRUCT));
 		return methodBuilder.build();
@@ -382,8 +381,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		}
 
 		bodyBuilder.appendFormalLine("return null;");
-		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), PUBLIC, methodName, JavaType.STRING, new ArrayList<AnnotatedJavaType>(), new ArrayList<JavaSymbolName>(), bodyBuilder);
-		return methodBuilder.build();
+		return new MethodMetadataBuilder(getId(), PUBLIC, methodName, JavaType.STRING, new ArrayList<AnnotatedJavaType>(), new ArrayList<JavaSymbolName>(), bodyBuilder).build();
 	}
 
 	private MethodMetadata getFindAllEntitiesMethod(final JavaSymbolName allEntitiesFieldName, final MemberTypeAdditions findAllMethod) {
@@ -399,13 +397,12 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		bodyBuilder.appendFormalLine(DATA_VISIBLE + " = !" + allEntitiesFieldName.getSymbolName() + ".isEmpty();");
 		bodyBuilder.appendFormalLine("return null;");
 
-		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), PUBLIC, methodName, JavaType.STRING, new ArrayList<AnnotatedJavaType>(), new ArrayList<JavaSymbolName>(), bodyBuilder);
-		return methodBuilder.build();
+		return new MethodMetadataBuilder(getId(), PUBLIC, methodName, JavaType.STRING, new ArrayList<AnnotatedJavaType>(), new ArrayList<JavaSymbolName>(), bodyBuilder).build();
 	}
 
 	private MethodMetadata getPanelGridAccessorMethod(final Action action) {
 		final String fieldName = StringUtils.toLowerCase(action.name()) + "PanelGrid";
-		final JavaSymbolName methodName = BeanInfoUtils.getAccessorMethodName(new JavaSymbolName(fieldName), false);
+		final JavaSymbolName methodName = BeanInfoUtils.getAccessorMethodName(new JavaSymbolName(fieldName), HTML_PANEL_GRID);
 		if (governorHasMethod(methodName)) {
 			return null;
 		}
@@ -431,8 +428,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		bodyBuilder.appendFormalLine("}");
 		bodyBuilder.appendFormalLine("return " + fieldName + ";");
 
-		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), PUBLIC, methodName, HTML_PANEL_GRID, new ArrayList<AnnotatedJavaType>(), new ArrayList<JavaSymbolName>(), bodyBuilder);
-		return methodBuilder.build();
+		return new MethodMetadataBuilder(getId(), PUBLIC, methodName, HTML_PANEL_GRID, new ArrayList<AnnotatedJavaType>(), new ArrayList<JavaSymbolName>(), bodyBuilder).build();
 	}
 
 	private MethodMetadata getPanelGridMutatorMethod(final Action action) {
@@ -774,7 +770,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 						bodyBuilder.appendFormalLine(getSetCompleteMethod(fieldValueId, fieldName));
 						bodyBuilder.appendFormalLine(fieldValueId + ".setDropdown(true);");
 						bodyBuilder.appendFormalLine(fieldValueId + ".setValueExpression(\"var\", expressionFactory.createValueExpression(elContext, \"" + fieldName + "\", String.class));");
-						bodyBuilder.appendFormalLine(fieldValueId + ".setValueExpression(\"itemLabel\", expressionFactory.createValueExpression(elContext, \"#{" + fieldName + "}\", String.class));");
+						bodyBuilder.appendFormalLine(fieldValueId + ".setValueExpression(\"itemLabel\", expressionFactory.createValueExpression(elContext, \"" + getAutoCcompleteItemLabelValue(jsfFieldHolder, fieldName) + "\", String.class));");
 						bodyBuilder.appendFormalLine(fieldValueId + ".setValueExpression(\"itemValue\", expressionFactory.createValueExpression(elContext, \"#{" + fieldName + "}\", " + simpleTypeName + ".class));");
 						bodyBuilder.appendFormalLine(fieldValueId + ".setConverter(new " + converterType.getSimpleTypeName() + "());");
 						bodyBuilder.appendFormalLine(requiredStr);
@@ -815,6 +811,14 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		bodyBuilder.appendFormalLine("return " + HTML_PANEL_GRID_ID + ";");
 
 		return new MethodMetadataBuilder(getId(), PUBLIC, methodName, HTML_PANEL_GRID, new ArrayList<AnnotatedJavaType>(), new ArrayList<JavaSymbolName>(), bodyBuilder).build();
+	}
+	
+	private String getAutoCcompleteItemLabelValue(JsfFieldHolder jsfFieldHolder, final String fieldName) {
+		StringBuilder sb = new StringBuilder();
+		for (FieldMetadata applicationTypeField : jsfFieldHolder.getApplicationTypeFields()) {
+			sb.append("#{").append(fieldName).append(".").append(applicationTypeField.getFieldName().getSymbolName()).append("} ");
+		}
+		return sb.length() > 0 ? sb.toString().trim() : fieldName;
 	}
 
 	private void setRegexPatternValidationString(final FieldMetadata field, final String fieldValueId, final InvocableMemberBodyBuilder bodyBuilder) {
@@ -1009,7 +1013,19 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		bodyBuilder.appendFormalLine("List<" + simpleTypeName + "> suggestions = new ArrayList<" + simpleTypeName + ">();");
 		bodyBuilder.appendFormalLine("for (" + simpleTypeName + " " + StringUtils.uncapitalize(simpleTypeName) + " : " + findAllMethod.getMethodCall() + ") {");
 		bodyBuilder.indent();
-		bodyBuilder.appendFormalLine("if (" + StringUtils.uncapitalize(simpleTypeName) + ".toString().toLowerCase().startsWith(query.toLowerCase())) {");
+
+		StringBuilder sb = new StringBuilder();
+		final List<FieldMetadata> applicationTypeFields = jsfFieldHolder.getApplicationTypeFields();
+		for (int i = 0; i < applicationTypeFields.size(); i++) {
+			JavaSymbolName accessorMethodName = BeanInfoUtils.getAccessorMethodName(applicationTypeFields.get(i));
+			if (i > 0) {
+				sb.append(" + ").append(" \" \" ").append(" + ");
+			}
+			sb.append(StringUtils.uncapitalize(simpleTypeName)).append(".").append(accessorMethodName).append("()");
+		}
+		bodyBuilder.appendFormalLine("String " + StringUtils.uncapitalize(simpleTypeName) + "Str = " + sb.toString().trim() + ";");
+
+		bodyBuilder.appendFormalLine("if (" + StringUtils.uncapitalize(simpleTypeName) + "Str.toLowerCase().startsWith(query.toLowerCase())) {");
 		bodyBuilder.indent();
 		bodyBuilder.appendFormalLine("suggestions.add(" + StringUtils.uncapitalize(simpleTypeName) + ");");
 		bodyBuilder.indentRemove();

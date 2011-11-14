@@ -124,20 +124,22 @@ public final class BeanInfoUtils {
 	 * @return the accessor method name
 	 */
 	public static JavaSymbolName getAccessorMethodName(final FieldMetadata field) {
-		Assert.notNull(field, "Field metadata required");
-		return getAccessorMethodName(field.getFieldName(), field.getFieldType().equals(JavaType.BOOLEAN_PRIMITIVE));
+		Assert.notNull(field, "Field required");
+		return getAccessorMethodName(field.getFieldName(), field.getFieldType());
 	}
 
 	/**
 	 * Returns the accessor name for the given field name and field type.
 	 *
 	 * @param fieldName the field name used to determine the accessor name
-	 * @param isBooleanPrimitive whether the field is a boolean primitive
+	 * @param fieldType the field type
 	 * @return the accessor method name
 	 */
-	public static JavaSymbolName getAccessorMethodName(final JavaSymbolName fieldName, final boolean isBooleanPrimitive) {
+	public static JavaSymbolName getAccessorMethodName(final JavaSymbolName fieldName, final JavaType fieldType) {
 		Assert.notNull(fieldName, "Field name required");
-		return isBooleanPrimitive ? new JavaSymbolName("is" + StringUtils.capitalize(fieldName.getSymbolName())) : new JavaSymbolName("get" + StringUtils.capitalize(fieldName.getSymbolName()));
+		Assert.notNull(fieldType, "Field type required");
+		final String capitalizedFieldName = StringUtils.capitalize(fieldName.getSymbolName());
+		return fieldType.equals(JavaType.BOOLEAN_PRIMITIVE) ? new JavaSymbolName("is" + capitalizedFieldName) : new JavaSymbolName("get" + capitalizedFieldName);
 	}
 
 	/**

@@ -176,12 +176,20 @@ public abstract class AbstractItdTypeDetailsProvidingMetadataItem extends Abstra
 		return fieldBuilder.build();
 	}
 
-	protected MethodMetadata getAccessorMethod(final JavaSymbolName fieldName, final JavaType fieldType) {
-		return getAccessorMethod(fieldName, fieldType, InvocableMemberBodyBuilder.getInstance().appendFormalLine("return " + fieldName.getSymbolName() + ";"));
+	protected MethodMetadata getAccessorMethod(final FieldMetadata field) {
+		return getAccessorMethod(field, InvocableMemberBodyBuilder.getInstance().appendFormalLine("return " + field.getFieldName().getSymbolName() + ";"));
 	}
 
-	protected MethodMetadata getAccessorMethod(final JavaSymbolName fieldName, final JavaType fieldType, final InvocableMemberBodyBuilder bodyBuilder) {
-		return getMethod(PUBLIC, BeanInfoUtils.getAccessorMethodName(fieldName, fieldType.equals(JavaType.BOOLEAN_PRIMITIVE)), fieldType, null, null, bodyBuilder);
+	protected MethodMetadata getAccessorMethod(JavaSymbolName fieldName, JavaType fieldType) {
+		return getAccessorMethod(fieldName, fieldType, InvocableMemberBodyBuilder.getInstance().appendFormalLine("return " + fieldName + ";"));
+	}
+
+	protected MethodMetadata getAccessorMethod(final FieldMetadata field, final InvocableMemberBodyBuilder bodyBuilder) {
+		return getMethod(PUBLIC, BeanInfoUtils.getAccessorMethodName(field), field.getFieldType(), null, null, bodyBuilder);
+	}
+
+	protected MethodMetadata getAccessorMethod(JavaSymbolName fieldName, JavaType fieldType, final InvocableMemberBodyBuilder bodyBuilder) {
+		return getMethod(PUBLIC, BeanInfoUtils.getAccessorMethodName(fieldName, fieldType), fieldType, null, null, bodyBuilder);
 	}
 
 	protected MethodMetadata getMutatorMethod(final JavaSymbolName fieldName, final JavaType parameterType) {
@@ -207,8 +215,7 @@ public abstract class AbstractItdTypeDetailsProvidingMetadataItem extends Abstra
 		if (method != null) return null;
 
 		addToImports(parameterTypes);
-		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), modifier, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
-		return methodBuilder.build();
+		return new MethodMetadataBuilder(getId(), modifier, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder).build();
 	}
 
 	private void addToImports(final List<JavaType> parameterTypes) {

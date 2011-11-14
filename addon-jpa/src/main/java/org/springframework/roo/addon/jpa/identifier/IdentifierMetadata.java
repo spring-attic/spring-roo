@@ -241,7 +241,7 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 			if (accessor != null) {
 				Assert.isTrue(Modifier.isPublic(accessor.getModifier()), "User provided field but failed to provide a public '" + requiredAccessorName.getSymbolName() + "()' method in '" + destination.getFullyQualifiedTypeName() + "'");
 			} else {
-				accessor = getAccessorMethod(field.getFieldName(), field.getFieldType());
+				accessor = getAccessorMethod(field);
 			}
 			accessors.add(accessor);
 		}

@@ -707,7 +707,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		builder.addField(field);
 
 		// Check for an existing accessor in the governor
-		builder.addMethod(getAccessorMethod(field.getFieldName(), field.getFieldType()));
+		builder.addMethod(getAccessorMethod(field));
 
 		// Check for an existing mutator in the governor
 		builder.addMethod(getMutatorMethod(field.getFieldName(), field.getFieldType()));

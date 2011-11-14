@@ -14,6 +14,7 @@ import static org.springframework.roo.model.JavaType.BYTE_ARRAY_PRIMITIVE;
 import static org.springframework.roo.model.JavaType.INT_PRIMITIVE;
 import static org.springframework.roo.model.RooJavaType.ROO_JSF_MANAGED_BEAN;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -37,7 +38,6 @@ import org.springframework.roo.classpath.customdata.tagkeys.MethodMetadataCustom
 import org.springframework.roo.classpath.details.BeanInfoUtils;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
-import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadata;
@@ -50,7 +50,6 @@ import org.springframework.roo.classpath.layers.LayerType;
 import org.springframework.roo.classpath.layers.MemberTypeAdditions;
 import org.springframework.roo.classpath.layers.MethodParameter;
 import org.springframework.roo.classpath.scanner.MemberDetails;
-import org.springframework.roo.model.CustomDataBuilder;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.LogicalPath;
@@ -69,7 +68,9 @@ public class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDiscoverin
 	// Constants
 	private static final int LAYER_POSITION = LayerType.HIGHEST.getPosition();
 	// -- The maximum number of entity fields to show in a list view.
-	private static final int MAX_LIST_VIEW_FIELDS = 4;
+	private static final int MAX_LIST_VIEW_FIELDS = 7;
+	// -- The maximum number of fields to form a String to show in a drop down field.
+	private static final int MAX_DROP_DOWN_FIELDS = 4;
 
 	// Fields
 	@Reference private ConfigurableMetadataProvider configurableMetadataProvider;
@@ -181,44 +182,44 @@ public class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDiscoverin
 			}
 			metadataDependencyRegistry.registerDependency(field.getDeclaredByMetadataId(), metadataId);
 
+			final JavaType fieldType = field.getFieldType();
+
 			// Check field is to be displayed in the entity's list view
-			if (listViewFields < MAX_LIST_VIEW_FIELDS && isDisplayableInListView(field)) {
+			boolean listViewField = false;
+			if (listViewFields < MAX_LIST_VIEW_FIELDS && isFieldOfInterest(field)) {
 				listViewFields++;
-				final CustomDataBuilder customDataBuilder = new CustomDataBuilder();
-				customDataBuilder.put(JsfManagedBeanMetadataProvider.LIST_VIEW_FIELD_CUSTOM_DATA_KEY, "true");
-				final FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(field);
-				fieldBuilder.append(customDataBuilder.build());
-				field = fieldBuilder.build();
+				listViewField = true;
 			}
 
-			final JavaType fieldType = field.getFieldType();
 			final boolean enumerated = field.getCustomData().keySet().contains(CustomDataKeys.ENUMERATED_FIELD) || isEnum(fieldType);
 			JavaType genericType = null;
 			String genericTypeBeanName = null;
 			String genericTypePlural = null;
-			MemberDetails applicationTypeMemberDetails = null;
+			boolean applicationType = false;
 			final Map<MethodMetadataCustomDataKey, MemberTypeAdditions> crudAdditions = new LinkedHashMap<MethodMetadataCustomDataKey, MemberTypeAdditions>();
+			final List<FieldMetadata> applicationTypeFieldNames = new ArrayList<FieldMetadata>();
 			
 			if (!enumerated) {
 				if (fieldType.isCommonCollectionType()) {
 					genericTypeLoop: for (JavaType parameter : fieldType.getParameters()) {
-						if (typeLocationService.isInProject(parameter)) {
-							for (ClassOrInterfaceTypeDetails managedBean : managedBeans) {
-								AnnotationMetadata managedBeanAnnotation = managedBean.getAnnotation(ROO_JSF_MANAGED_BEAN);
-								AnnotationAttributeValue<?> entityAttribute = managedBeanAnnotation.getAttribute("entity");
-								if (entityAttribute != null) {
-									JavaType attrValue = (JavaType) entityAttribute.getValue();
-									if (attrValue.equals(parameter)) {
-										AnnotationAttributeValue<?> beanNameAttribute = managedBeanAnnotation.getAttribute("beanName");
-										genericType = parameter;
-										genericTypeBeanName = (String) beanNameAttribute.getValue();
-										ClassOrInterfaceTypeDetails genericTypeDetails = typeLocationService.getTypeDetails(genericType);
-										Assert.notNull(genericTypeDetails, "The type '" + genericType + "' could not be resolved");
-										LogicalPath path = PhysicalTypeIdentifier.getPath(genericTypeDetails.getDeclaredByMetadataId());
-										final PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(genericType, path));
-										genericTypePlural = pluralMetadata.getPlural();
-										break genericTypeLoop; // Only support one generic type parameter
-									}
+						if (!typeLocationService.isInProject(parameter)) {
+							continue;
+						}
+						for (ClassOrInterfaceTypeDetails managedBean : managedBeans) {
+							AnnotationMetadata managedBeanAnnotation = managedBean.getAnnotation(ROO_JSF_MANAGED_BEAN);
+							AnnotationAttributeValue<?> entityAttribute = managedBeanAnnotation.getAttribute("entity");
+							if (entityAttribute != null) {
+								JavaType attrValue = (JavaType) entityAttribute.getValue();
+								if (attrValue.equals(parameter)) {
+									AnnotationAttributeValue<?> beanNameAttribute = managedBeanAnnotation.getAttribute("beanName");
+									genericType = parameter;
+									genericTypeBeanName = (String) beanNameAttribute.getValue();
+									ClassOrInterfaceTypeDetails genericTypeDetails = typeLocationService.getTypeDetails(genericType);
+									Assert.notNull(genericTypeDetails, "The type '" + genericType + "' could not be resolved");
+									LogicalPath path = PhysicalTypeIdentifier.getPath(genericTypeDetails.getDeclaredByMetadataId());
+									final PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(genericType, path));
+									genericTypePlural = pluralMetadata.getPlural();
+									break genericTypeLoop; // Only support one generic type parameter
 								}
 							}
 							// Generic type is not an entity - test for an enum
@@ -229,13 +230,21 @@ public class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDiscoverin
 					}
 				} else {
 					if (typeLocationService.isInProject(fieldType) && !field.getCustomData().keySet().contains(CustomDataKeys.EMBEDDED_FIELD)) {
-						applicationTypeMemberDetails = getMemberDetails(fieldType);
+						applicationType = true;
+						int dropDownFields = 0;
+						for (FieldMetadata applicationTypeField : getMemberDetails(fieldType).getFields()) {
+							if (dropDownFields < MAX_DROP_DOWN_FIELDS && isFieldOfInterest(applicationTypeField)) {
+								dropDownFields++;
+								applicationTypeFieldNames.add(applicationTypeField);
+							}
+						}
+
 						crudAdditions.putAll(getCrudAdditions(fieldType, metadataId));
 					}
 				}
 			}
 
-			final JsfFieldHolder jsfFieldHolder = new JsfFieldHolder(field, enumerated, genericType, genericTypePlural, genericTypeBeanName, applicationTypeMemberDetails, crudAdditions);
+			final JsfFieldHolder jsfFieldHolder = new JsfFieldHolder(field, enumerated, listViewField, genericType, genericTypePlural, genericTypeBeanName, applicationType, applicationTypeFieldNames, crudAdditions);
 			locatedFields.add(jsfFieldHolder);
 		}
 
@@ -285,21 +294,13 @@ public class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDiscoverin
 		return cid != null && cid.getPhysicalTypeCategory() == PhysicalTypeCategory.ENUMERATION;
 	}
 
-	/**
-	 * Indicates whether the given field is for display in the entity's list view.
-	 *
-	 * @param field the field to check (required)
-	 * @return see above
-	 */
-	private boolean isDisplayableInListView(final FieldMetadata field) {
+	private boolean isFieldOfInterest(final FieldMetadata field) {
 		final JavaType fieldType = field.getFieldType();
-		return !fieldType.isCommonCollectionType()
-			&& !fieldType.isArray()
-			// Boolean values would not be meaningful in this presentation
-			&& !fieldType.equals(BOOLEAN_PRIMITIVE)
-			&& !fieldType.equals(BOOLEAN_OBJECT)
+		return !fieldType.isCommonCollectionType() && !fieldType.isArray() // Exclude collections and arrays
+			&& !typeLocationService.isInProject(fieldType) // Exclude references to other domain objects as they are too verbose
+			&& !fieldType.equals(BOOLEAN_PRIMITIVE) && !fieldType.equals(BOOLEAN_OBJECT) // Boolean values would not be meaningful in this presentation
 			&& !fieldType.equals(BYTE_ARRAY_PRIMITIVE)
-			&& !field.getCustomData().keySet().contains(EMBEDDED_FIELD);
+			&& !field.getCustomData().keySet().contains(EMBEDDED_FIELD); // Not interested in embedded types
 	}
 
 	public String getItdUniquenessFilenameSuffix() {
