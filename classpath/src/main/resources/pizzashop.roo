@@ -1,5 +1,5 @@
 // Create a new project
-project com.springsource.pizzashop
+project --topLevelPackage com.springsource.pizzashop
 
 // Setup JPA persistence using EclipseLink and H2
 jpa setup --provider ECLIPSELINK --database H2_IN_MEMORY

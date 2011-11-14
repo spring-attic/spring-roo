@@ -1,5 +1,7 @@
 package org.springframework.roo.addon.web.mvc.controller.json;
 
+import static org.springframework.roo.model.SpringJavaType.CONTEXT_LOADER_LISTENER;
+
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
@@ -80,12 +82,11 @@ public class WebJsonOperationsImpl implements WebJsonOperations {
 		WebXmlUtils.addContextParam(new WebXmlUtils.WebXmlParam("contextConfigLocation", "classpath*:META-INF/spring/applicationContext*.xml"), document, null);
 		WebXmlUtils.addFilter(WebMvcOperations.CHARACTER_ENCODING_FILTER_NAME, "org.springframework.web.filter.CharacterEncodingFilter", "/*", document, null, new WebXmlUtils.WebXmlParam("encoding", "UTF-8"), new WebXmlUtils.WebXmlParam("forceEncoding", "true"));
 		WebXmlUtils.addFilter(WebMvcOperations.HTTP_METHOD_FILTER_NAME, "org.springframework.web.filter.HiddenHttpMethodFilter", "/*", document, null);
-		WebXmlUtils.addListener("org.springframework.web.context.ContextLoaderListener", document, "Creates the Spring Container shared by all Servlets and Filters");
-		WebXmlUtils.addServlet("app", "org.springframework.web.servlet.DispatcherServlet", "/", 1, document, "Handles Spring requests", new WebXmlUtils.WebXmlParam("contextConfigLocation", "/WEB-INF/spring/webmvc-config.xml"));
+		WebXmlUtils.addListener(CONTEXT_LOADER_LISTENER.getFullyQualifiedTypeName(), document, "Creates the Spring Container shared by all Servlets and Filters");
 
 		fileManager.createOrUpdateTextFileIfRequired(webXmlPath, XmlUtils.nodeToString(document), false);
 
-		updateConfiguration();
+		updateConfiguration(); 
 	}
 
 	public void annotateType(final JavaType type, final JavaType jsonEntity) {
@@ -146,6 +147,7 @@ public class WebJsonOperationsImpl implements WebJsonOperations {
 		if (pluralMetadata == null) {
 			return;
 		}
+		
 		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(type, pathResolver.getFocusedPath(Path.SRC_MAIN_JAVA));
 		ClassOrInterfaceTypeDetailsBuilder classOrInterfaceTypeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC, type, PhysicalTypeCategory.CLASS);
 		classOrInterfaceTypeDetailsBuilder.addAnnotation(getAnnotation(jsonEntity));

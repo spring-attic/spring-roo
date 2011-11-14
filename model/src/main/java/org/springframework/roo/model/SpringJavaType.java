@@ -21,10 +21,14 @@ public final class SpringJavaType {
 	public static final JavaType COMPONENT = new JavaType("org.springframework.stereotype.Component");
 	public static final JavaType CONFIGURABLE = new JavaType("org.springframework.beans.factory.annotation.Configurable");
 	public static final JavaType CONTEXT_CONFIGURATION = new JavaType("org.springframework.test.context.ContextConfiguration");
+	public static final JavaType CONTEXT_LOADER_LISTENER = new JavaType("org.springframework.web.context.ContextLoaderListener");
 	public static final JavaType CONTROLLER = new JavaType("org.springframework.stereotype.Controller");
 	public static final JavaType CONVERSION_SERVICE = new JavaType("org.springframework.core.convert.ConversionService");
+	public static final JavaType CONVERSION_SERVICE_EXPOSING_INTERCEPTOR = new JavaType("org.springframework.web.servlet.handler.ConversionServiceExposingInterceptor");
 	public static final JavaType DATA_ID = new JavaType("org.springframework.data.annotation.Id");
 	public static final JavaType DATE_TIME_FORMAT = new JavaType("org.springframework.format.annotation.DateTimeFormat");
+	public static final JavaType DISPATCHER_SERVLET = new JavaType("org.springframework.web.servlet.DispatcherServlet");
+	public static final JavaType FLOW_HANDLER_MAPPING = new JavaType("org.springframework.webflow.mvc.servlet.FlowHandlerMapping");
 	public static final JavaType FORMATTER_REGISTRY = new JavaType("org.springframework.format.FormatterRegistry");
 	public static final JavaType HTTP_HEADERS = new JavaType("org.springframework.http.HttpHeaders");
 	public static final JavaType HTTP_STATUS = new JavaType("org.springframework.http.HttpStatus");
@@ -37,6 +41,7 @@ public final class SpringJavaType {
 	public static final JavaType MODEL_ATTRIBUTE = new JavaType("org.springframework.web.bind.annotation.ModelAttribute");
 	public static final JavaType MODEL_MAP = new JavaType("org.springframework.ui.ModelMap");
 	public static final JavaType NUMBER_FORMAT = new JavaType("org.springframework.format.annotation.NumberFormat");
+	public static final JavaType OPEN_ENTITY_MANAGER_IN_VIEW_FILTER = new JavaType("org.springframework.orm.jpa.support.OpenEntityManagerInViewFilter");
 	public static final JavaType PATH_VARIABLE = new JavaType("org.springframework.web.bind.annotation.PathVariable");
 	public static final JavaType PERSISTENT = new JavaType("org.springframework.data.annotation.Persistent");
 	public static final JavaType PROPAGATION = new JavaType("org.springframework.transaction.annotation.Propagation");

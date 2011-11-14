@@ -1,5 +1,11 @@
 package org.springframework.roo.addon.web.mvc.controller;
 
+import static org.springframework.roo.model.SpringJavaType.CONTEXT_LOADER_LISTENER;
+import static org.springframework.roo.model.SpringJavaType.CONVERSION_SERVICE_EXPOSING_INTERCEPTOR;
+import static org.springframework.roo.model.SpringJavaType.DISPATCHER_SERVLET;
+import static org.springframework.roo.model.SpringJavaType.FLOW_HANDLER_MAPPING;
+import static org.springframework.roo.model.SpringJavaType.OPEN_ENTITY_MANAGER_IN_VIEW_FILTER;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -107,10 +113,10 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
 		Element root = document.getDocumentElement();
 
 		if (XmlUtils.findFirstElement("/beans/bean[@id='" + CONVERSION_SERVICE_EXPOSING_INTERCEPTOR_NAME + "']", root) == null) {
-			Element conversionServiceExposingInterceptor = new XmlElementBuilder("bean", document).addAttribute("class", "org.springframework.web.servlet.handler.ConversionServiceExposingInterceptor").addAttribute("id", CONVERSION_SERVICE_EXPOSING_INTERCEPTOR_NAME).addChild(new XmlElementBuilder("constructor-arg", document).addAttribute("ref", CONVERSION_SERVICE_BEAN_NAME).build()).build();
+			Element conversionServiceExposingInterceptor = new XmlElementBuilder("bean", document).addAttribute("class", CONVERSION_SERVICE_EXPOSING_INTERCEPTOR.getFullyQualifiedTypeName()).addAttribute("id", CONVERSION_SERVICE_EXPOSING_INTERCEPTOR_NAME).addChild(new XmlElementBuilder("constructor-arg", document).addAttribute("ref", CONVERSION_SERVICE_BEAN_NAME).build()).build();
 			root.appendChild(conversionServiceExposingInterceptor);
 		}
-		Element flowHandlerMapping = XmlUtils.findFirstElement("/beans/bean[@class='org.springframework.webflow.mvc.servlet.FlowHandlerMapping']", root);
+		Element flowHandlerMapping = XmlUtils.findFirstElement("/beans/bean[@class='" + FLOW_HANDLER_MAPPING.getFullyQualifiedTypeName() + "']", root);
 		if (flowHandlerMapping != null) {
 			if (XmlUtils.findFirstElement("property[@name='interceptors']/array/ref[@bean='" + CONVERSION_SERVICE_EXPOSING_INTERCEPTOR_NAME + "']", flowHandlerMapping) == null) {
 				Element interceptors = new XmlElementBuilder("property", document).addAttribute("name", "interceptors").addChild(new XmlElementBuilder("array", document).addChild(new XmlElementBuilder("ref", document).addAttribute("bean", CONVERSION_SERVICE_EXPOSING_INTERCEPTOR_NAME).build()).build()).build();
@@ -159,10 +165,10 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
 		WebXmlUtils.addFilter(CHARACTER_ENCODING_FILTER_NAME, "org.springframework.web.filter.CharacterEncodingFilter", "/*", document, null, new WebXmlUtils.WebXmlParam("encoding", "UTF-8"), new WebXmlUtils.WebXmlParam("forceEncoding", "true"));
 		WebXmlUtils.addFilter(HTTP_METHOD_FILTER_NAME, "org.springframework.web.filter.HiddenHttpMethodFilter", "/*", document, null);
 		if (projectOperations.isFeatureInstalled(FeatureNames.JPA)) {
-			WebXmlUtils.addFilter(OPEN_ENTITYMANAGER_IN_VIEW_FILTER_NAME, "org.springframework.orm.jpa.support.OpenEntityManagerInViewFilter", "/*", document, null);
+			WebXmlUtils.addFilter(OPEN_ENTITYMANAGER_IN_VIEW_FILTER_NAME, OPEN_ENTITY_MANAGER_IN_VIEW_FILTER.getFullyQualifiedTypeName(), "/*", document, null);
 		}
-		WebXmlUtils.addListener("org.springframework.web.context.ContextLoaderListener", document, "Creates the Spring Container shared by all Servlets and Filters");
-		WebXmlUtils.addServlet(projectOperations.getProjectName(projectOperations.getFocusedModuleName()), "org.springframework.web.servlet.DispatcherServlet", "/", 1, document, "Handles Spring requests", new WebXmlUtils.WebXmlParam("contextConfigLocation", "WEB-INF/spring/webmvc-config.xml"));
+		WebXmlUtils.addListener(CONTEXT_LOADER_LISTENER.getFullyQualifiedTypeName(), document, "Creates the Spring Container shared by all Servlets and Filters");
+		WebXmlUtils.addServlet(projectOperations.getFocusedProjectName(), DISPATCHER_SERVLET.getFullyQualifiedTypeName(), "/", 1, document, "Handles Spring requests", new WebXmlUtils.WebXmlParam("contextConfigLocation", "WEB-INF/spring/webmvc-config.xml"));
 		WebXmlUtils.setSessionTimeout(10, document, null);
 		WebXmlUtils.addExceptionType("java.lang.Exception", "/uncaughtException", document, null);
 		WebXmlUtils.addErrorCode(new Integer(404), "/resourceNotFound", document, null);

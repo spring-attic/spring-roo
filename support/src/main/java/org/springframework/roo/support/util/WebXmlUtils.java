@@ -212,7 +212,7 @@ public final class WebXmlUtils {
 		if (listener == null) {
 			listener = new XmlElementBuilder("listener", webXml).addChild(new XmlElementBuilder("listener-class", webXml).setText(className).build()).build();
 			insertBetween(listener, "filter-mapping[last()]", "servlet", webXml);
-			if (comment != null && comment.length() > 0) {
+			if (StringUtils.hasText(comment)) {
 				addCommentBefore(listener, comment, webXml);
 			}
 		}
