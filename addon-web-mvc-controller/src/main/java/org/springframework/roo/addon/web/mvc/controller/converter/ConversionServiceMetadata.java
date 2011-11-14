@@ -129,8 +129,7 @@ public class ConversionServiceMetadata extends AbstractItdTypeDetailsProvidingMe
 		List<MethodMetadata> converterMethods = new ArrayList<MethodMetadata>();
 
 		JavaSymbolName methodName = new JavaSymbolName("getJsonTo" + targetType.getSimpleTypeName() + CONVERTER);
-		JavaType base64 = BASE_64;
-		String base64Name = base64.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
+		String base64Name = BASE_64.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
 		String typeName = targetType.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
 
 		if (MemberFindingUtils.getDeclaredMethod(governorTypeDetails, methodName, new ArrayList<JavaType>()) == null) {

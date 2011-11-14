@@ -36,6 +36,7 @@ public final class CustomDataKeys {
 	public static final FieldMetadataCustomDataKey ONE_TO_ONE_FIELD = new FieldMetadataCustomDataKey("ONE_TO_ONE_FIELD");
 	public static final FieldMetadataCustomDataKey LOB_FIELD = new FieldMetadataCustomDataKey("LOB_FIELD");
 	public static final FieldMetadataCustomDataKey COLUMN_FIELD = new FieldMetadataCustomDataKey("COLUMN_FIELD");
+	public static final FieldMetadataCustomDataKey SERIAL_VERSION_UUID_FIELD = new FieldMetadataCustomDataKey("SERIAL_VERSION_UUID_FIELD");
 
 	public static final MethodMetadataCustomDataKey IDENTIFIER_ACCESSOR_METHOD = new MethodMetadataCustomDataKey("IDENTIFIER_ACCESSOR_METHOD");
 	public static final MethodMetadataCustomDataKey IDENTIFIER_MUTATOR_METHOD = new MethodMetadataCustomDataKey("IDENTIFIER_MUTATOR_METHOD");

@@ -224,7 +224,7 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 		final List<String> dynamicFinderNames = memberDetails.getDynamicFinderNames();
 
 		return new JavaTypePersistenceMetadataDetails(idType, idField, idAccessor, versionAccessor, persistMethod, mergeMethod, removeMethod, findAllMethod,
-				findMethod, countMethod, findEntriesMethod, dynamicFinderNames, isRooIdentifier(javaType, memberDetails), persistenceMemberLocator.getEmbeddedIdentifierFields(javaType));
+			findMethod, countMethod, findEntriesMethod, dynamicFinderNames, isRooIdentifier(javaType, memberDetails), persistenceMemberLocator.getEmbeddedIdentifierFields(javaType));
 	}
 
 	private String getPlural(final JavaType javaType, final String metadataIdentificationString) {

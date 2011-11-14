@@ -214,13 +214,14 @@ public class JspViewManager {
 
 		// Handle Roo identifiers
 		if (!formBackingTypePersistenceMetadata.getRooIdentifierFields().isEmpty()) {
-			formCreate.setAttribute("compositePkField", formBackingTypePersistenceMetadata.getIdentifierField().getFieldName().getSymbolName());
+			final String identifierFieldName = formBackingTypePersistenceMetadata.getIdentifierField().getFieldName().getSymbolName();
+			formCreate.setAttribute("compositePkField", identifierFieldName);
 			for (FieldMetadata embeddedField : formBackingTypePersistenceMetadata.getRooIdentifierFields()) {
 				FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(embeddedField);
-				fieldBuilder.setFieldName(new JavaSymbolName(formBackingTypePersistenceMetadata.getIdentifierField().getFieldName().getSymbolName() + "." + embeddedField.getFieldName().getSymbolName()));
+				fieldBuilder.setFieldName(new JavaSymbolName(identifierFieldName + "." + embeddedField.getFieldName().getSymbolName()));
 				for (int i = 0; i < fieldCopy.size(); i++) {
 					// Make sure form fields are not presented twice.
-					if (fieldCopy.get(i).getFieldName().equals(embeddedField.getFieldName())) {
+					if (fieldCopy.get(i).getFieldName().equals(embeddedField.getFieldName())) { 
 						fieldCopy.remove(i);
 						break;
 					}

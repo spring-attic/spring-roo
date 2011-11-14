@@ -145,7 +145,7 @@ public class PersistenceMemberLocatorImpl implements PersistenceMemberLocator {
 			final MemberDetails memberDetails = getMemberDetails(embeddedIdFields.get(0).getFieldType());
 			if (memberDetails != null) {
 				for (final FieldMetadata field : memberDetails.getFields()) {
-					if (!field.getCustomData().keySet().contains("SERIAL_VERSION_UUID_FIELD")) {
+					if (!field.getCustomData().keySet().contains(CustomDataKeys.SERIAL_VERSION_UUID_FIELD)) {
 						domainTypeEmbeddedIdFieldsCache.get(type).add(field);
 					}
 				}

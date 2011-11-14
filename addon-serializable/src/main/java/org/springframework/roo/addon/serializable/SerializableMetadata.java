@@ -8,6 +8,7 @@ import static org.springframework.roo.model.JdkJavaType.SERIALIZABLE;
 
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
+import org.springframework.roo.classpath.customdata.CustomDataKeys;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
@@ -88,7 +89,9 @@ public class SerializableMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	 * @return a non-<code>null</code> field
 	 */
 	private FieldMetadata createSerialVersionField() {
-		return new FieldMetadataBuilder(getId(), PRIVATE | STATIC | FINAL, SERIAL_VERSION_FIELD, LONG_PRIMITIVE, DEFAULT_SERIAL_VERSION).build();
+		final FieldMetadataBuilder field = new FieldMetadataBuilder(getId(), PRIVATE | STATIC | FINAL, SERIAL_VERSION_FIELD, LONG_PRIMITIVE, DEFAULT_SERIAL_VERSION);
+		field.getCustomData().put(CustomDataKeys.SERIAL_VERSION_UUID_FIELD, true);
+		return field.build();
 	}
 
 	@Override
