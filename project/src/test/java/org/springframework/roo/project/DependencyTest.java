@@ -3,6 +3,8 @@ package org.springframework.roo.project;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.springframework.roo.project.DependencyScope.PROVIDED;
+import static org.springframework.roo.project.DependencyType.ZIP;
 
 import org.junit.Test;
 import org.w3c.dom.Element;
@@ -118,5 +120,15 @@ public class DependencyTest extends XmlTestCase {
 
 		// Check
 		assertFalse(same);
+	}
+	
+	@Test
+	public void testConstructWithCustomTypeAndScope() {
+		// Set up
+		final Dependency dependency = new Dependency(DEPENDENCY_GROUP_ID, DEPENDENCY_ARTIFACT_ID, DEPENDENCY_VERSION, ZIP, PROVIDED);
+		
+		// Invoke and check
+		assertEquals(ZIP, dependency.getType());
+		assertEquals(PROVIDED, dependency.getScope());
 	}
 }

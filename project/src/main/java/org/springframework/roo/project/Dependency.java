@@ -70,7 +70,7 @@ public class Dependency implements Comparable<Dependency> {
 	}
 
 	/**
-	 * Constructs a JAR dependency with the given scope.
+	 * Constructs a dependency with the given type and scope.
 	 *
 	 * @param groupId the group ID (required)
 	 * @param artifactId the artifact ID (required)
@@ -79,7 +79,7 @@ public class Dependency implements Comparable<Dependency> {
 	 * @param scope the dependency scope (required)
 	 */
 	public Dependency(final String groupId, final String artifactId, final String version, final DependencyType type, final DependencyScope scope) {
-		this(groupId, artifactId, version, DependencyType.JAR, scope, "");
+		this(groupId, artifactId, version, type, scope, "");
 	}
 
 	/**
