@@ -59,6 +59,7 @@ public final class JdkJavaType {
 	public static final JavaType UNSUPPORTED_ENCODING_EXCEPTION = new JavaType(UnsupportedEncodingException.class);
 
 	// java.lang
+	public static final JavaType EXCEPTION = new JavaType(Exception.class);
 	public static final JavaType SUPPRESS_WARNINGS = new JavaType(SuppressWarnings.class);
 	
 	// java.math

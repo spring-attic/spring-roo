@@ -122,7 +122,7 @@ public class ControllerOperationsImpl implements ControllerOperations {
 			LogicalPath controllerPath = pathResolver.getFocusedPath(Path.SRC_MAIN_JAVA);
 			String resourceIdentifier = typeLocationService.getPhysicalTypeCanonicalPath(controller, controllerPath);
 			String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(controller, pathResolver.getPath(resourceIdentifier));
-			
+
 			// Create annotation @RequestMapping("/myobject/**")
 			List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 			requestMappingAttributes.add(new StringAttributeValue(VALUE, "/" + path));

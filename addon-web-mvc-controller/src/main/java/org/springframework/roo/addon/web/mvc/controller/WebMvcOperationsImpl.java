@@ -1,5 +1,6 @@
 package org.springframework.roo.addon.web.mvc.controller;
 
+import static org.springframework.roo.model.JdkJavaType.EXCEPTION;
 import static org.springframework.roo.model.SpringJavaType.CHARACTER_ENCODING_FILTER;
 import static org.springframework.roo.model.SpringJavaType.CONTEXT_LOADER_LISTENER;
 import static org.springframework.roo.model.SpringJavaType.CONVERSION_SERVICE_EXPOSING_INTERCEPTOR;
@@ -57,6 +58,8 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
 	private static final String CONVERSION_SERVICE_SIMPLE_TYPE = "ApplicationConversionServiceFactoryBean";
 	private static final String CONVERSION_SERVICE_BEAN_NAME = "applicationConversionService";
 	private static final String CONVERSION_SERVICE_EXPOSING_INTERCEPTOR_NAME = "conversionServiceExposingInterceptor";
+	private static final String WEB_XML = "WEB-INF/web.xml";
+	private static final String WEBMVC_CONFIG_XML = "WEB-INF/spring/webmvc-config.xml";
 
 	// Fields
 	@Reference private FileManager fileManager;
@@ -76,7 +79,7 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
 	}
 
 	public void installConversionService(final JavaPackage destinationPackage) {
-		String webMvcConfigPath = pathResolver.getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/spring/webmvc-config.xml");
+		String webMvcConfigPath = pathResolver.getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, WEBMVC_CONFIG_XML);
 		Assert.isTrue(fileManager.exists(webMvcConfigPath), "'" + webMvcConfigPath + "' does not exist");
 
 		Document document = XmlUtils.readXml(fileManager.getInputStream(webMvcConfigPath));
@@ -133,10 +136,10 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
 		Assert.isTrue(projectOperations.isFocusedProjectAvailable(), "Project metadata required");
 
 		// Verify the servlet application context already exists
-		String servletCtxFilename = "WEB-INF/spring/webmvc-config.xml";
+		String servletCtxFilename = WEBMVC_CONFIG_XML;
 		Assert.isTrue(fileManager.exists(pathResolver.getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, servletCtxFilename)), "'" + servletCtxFilename + "' does not exist");
 
-		String webXmlPath = pathResolver.getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/web.xml");
+		String webXmlPath = pathResolver.getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, WEB_XML);
 		if (fileManager.exists(webXmlPath)) {
 			// File exists, so nothing to do
 			return;
@@ -157,7 +160,7 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
 		Assert.isTrue(projectOperations.isFocusedProjectAvailable(), "Project metadata required");
 
 		// Verify that the web.xml already exists
-		String webXmlPath = pathResolver.getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/web.xml");
+		String webXmlPath = pathResolver.getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, WEB_XML);
 		Assert.isTrue(fileManager.exists(webXmlPath), "'" + webXmlPath + "' does not exist");
 
 		Document document = XmlUtils.readXml(fileManager.getInputStream(webXmlPath));
@@ -170,9 +173,9 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
 			WebXmlUtils.addFilter(OPEN_ENTITYMANAGER_IN_VIEW_FILTER_NAME, OPEN_ENTITY_MANAGER_IN_VIEW_FILTER.getFullyQualifiedTypeName(), "/*", document, null);
 		}
 		WebXmlUtils.addListener(CONTEXT_LOADER_LISTENER.getFullyQualifiedTypeName(), document, "Creates the Spring Container shared by all Servlets and Filters");
-		WebXmlUtils.addServlet(projectOperations.getFocusedProjectName(), DISPATCHER_SERVLET.getFullyQualifiedTypeName(), "/", 1, document, "Handles Spring requests", new WebXmlUtils.WebXmlParam("contextConfigLocation", "WEB-INF/spring/webmvc-config.xml"));
+		WebXmlUtils.addServlet(projectOperations.getFocusedProjectName(), DISPATCHER_SERVLET.getFullyQualifiedTypeName(), "/", 1, document, "Handles Spring requests", new WebXmlUtils.WebXmlParam("contextConfigLocation", WEBMVC_CONFIG_XML));
 		WebXmlUtils.setSessionTimeout(10, document, null);
-		WebXmlUtils.addExceptionType("java.lang.Exception", "/uncaughtException", document, null);
+		WebXmlUtils.addExceptionType(EXCEPTION.getFullyQualifiedTypeName(), "/uncaughtException", document, null);
 		WebXmlUtils.addErrorCode(new Integer(404), "/resourceNotFound", document, null);
 
 		fileManager.createOrUpdateTextFileIfRequired(webXmlPath, XmlUtils.nodeToString(document), false);
@@ -184,15 +187,15 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
 		// Verify the middle tier application context already exists
 		Assert.isTrue(fileManager.exists(pathResolver.getFocusedIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext.xml")), "Application context does not exist");
 
-		String webConfigFile = pathResolver.getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/spring/webmvc-config.xml");
-		final InputStream in;
+		String webConfigFile = pathResolver.getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, WEBMVC_CONFIG_XML);
+		final InputStream inputStream;
 		if (!fileManager.exists(webConfigFile)) {
-			in = FileUtils.getInputStream(getClass(), "webmvc-config.xml");
-			Assert.notNull(in, "Could not acquire web.xml template");
+			inputStream = FileUtils.getInputStream(getClass(), "webmvc-config.xml");
+			Assert.notNull(inputStream, "Could not acquire web.xml template");
 		} else {
-			in = fileManager.getInputStream(webConfigFile);
+			inputStream = fileManager.getInputStream(webConfigFile);
 		}
-		final Document document = XmlUtils.readXml(in);
+		final Document document = XmlUtils.readXml(inputStream);
 
 		Element root = (Element) document.getFirstChild();
 		DomUtils.findFirstElementByName("context:component-scan", root).setAttribute("base-package", projectOperations.getTopLevelPackage(projectOperations.getFocusedModuleName()).getFullyQualifiedPackageName());
@@ -202,7 +205,7 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
 
 	private void updateConfiguration() {
 		// Update webmvc-config.xml if needed.
-		String webConfigFile = pathResolver.getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/spring/webmvc-config.xml");
+		String webConfigFile = pathResolver.getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, WEBMVC_CONFIG_XML);
 		Assert.isTrue(fileManager.exists(webConfigFile), "Aborting: Unable to find " + webConfigFile);
 		InputStream webMvcConfigInputStream = null;
 		try {
@@ -245,7 +248,7 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
 	}
 
 	private boolean isConversionServiceConfigured() {
-		String webMvcConfigPath = pathResolver.getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/spring/webmvc-config.xml");
+		String webMvcConfigPath = pathResolver.getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, WEBMVC_CONFIG_XML);
 		Assert.isTrue(fileManager.exists(webMvcConfigPath), webMvcConfigPath + " doesn't exist");
 
 		MutableFile mutableFile = fileManager.updateFile(webMvcConfigPath);
