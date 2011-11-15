@@ -55,7 +55,7 @@ finder add --finderName findVisitsByVisitDateBetween
 finder add --finderName findVisitsByDescriptionLike
 
 module focus --moduleName ~
-module create --moduleName ui --topLevelPackage com.example.petclinic.ui
+module create --moduleName ui --topLevelPackage com.example.petclinic.ui --packaging POM
 module create --moduleName mvc --topLevelPackage com.example.petclinic.ui.mvc
 
 web mvc setup
@@ -70,11 +70,5 @@ selenium test --controller ~.PetController
 selenium test --controller ~.VetController
 selenium test --controller ~.VisitController
 
-module focus --moduleName ~
-
+module focus --moduleName ui/mvc
 logging setup --level INFO
-
-module focus --moduleName ui
-module create --moduleName faces --topLevelPackage com.example.petclinic.ui.jsf
-web jsf setup 
-web jsf all --package ~
