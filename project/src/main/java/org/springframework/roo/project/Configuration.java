@@ -5,7 +5,7 @@ import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Element;
 
 /**
- * Immutable representation of an configuration specification for a (maven) build plugin
+ * Immutable representation of an configuration specification for a (Maven) build plugin
  *
  * @author Alan Stewart
  * @since 1.1

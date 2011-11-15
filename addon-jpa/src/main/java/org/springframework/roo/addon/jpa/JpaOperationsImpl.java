@@ -595,7 +595,7 @@ public class JpaOperationsImpl implements JpaOperations {
 			case ORACLE:
 			case DB2_EXPRESS_C:
 			case DB2_400:
-				LOGGER.warning("The " + jdbcDatabase.name() + " JDBC driver is not available in public maven repositories. Please adjust the pom.xml dependency to suit your needs");
+				LOGGER.warning("The " + jdbcDatabase.name() + " JDBC driver is not available in public Maven repositories. Please adjust the pom.xml dependency to suit your needs");
 				break;
 			case POSTGRES:
 			case DERBY_EMBEDDED:
