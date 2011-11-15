@@ -1,5 +1,7 @@
 package org.springframework.roo.project.maven;
 
+import static org.springframework.roo.project.Path.ROOT;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -10,6 +12,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.springframework.roo.project.Dependency;
+import org.springframework.roo.project.DependencyScope;
+import org.springframework.roo.project.DependencyType;
 import org.springframework.roo.project.Filter;
 import org.springframework.roo.project.GAV;
 import org.springframework.roo.project.Path;
@@ -37,7 +41,7 @@ public class Pom {
 
 	// Fields
 	private final GAV gav;
-	private final Map<Path, PhysicalPath> pathCache = new LinkedHashMap<Path, PhysicalPath>();
+	private final Map<Path, PhysicalPath> pathLocations = new LinkedHashMap<Path, PhysicalPath>();
 	private final Parent parent;
 	private final Set<Dependency> dependencies = new LinkedHashSet<Dependency>();
 	private final Set<Filter> filters = new LinkedHashSet<Filter>();
@@ -60,7 +64,7 @@ public class Pom {
 	 * @param groupId the Maven groupId, explicit or inherited (required)
 	 * @param artifactId the Maven artifactId (required)
 	 * @param version the version of the artifact being built (required)
-	 * @param packaging the Maven packaging (can be blank for the default)
+	 * @param packaging the Maven packaging (required)
 	 * @param dependencies (can be <code>null</code> for none)
 	 * @param parent the POM's parent declaration (can be <code>null</code> for none)
 	 * @param modules the modules defined by this POM (only applies when packaging is "pom"; can be <code>null</code> for none)
@@ -75,14 +79,16 @@ public class Pom {
 	 * @param resources any build resources defined in the POM (can be <code>null</code> for none)
 	 * @param path the canonical path of this POM (required)
 	 * @param moduleName the Maven name of this module (blank for the project's root or only POM) 
+	 * @param paths the {@link Path}s required for this module, in addition to the root (can be <code>null</code>)
 	 */
-	public Pom(final String groupId, final String artifactId, final String version, final String packaging, final Collection<? extends Dependency> dependencies, final Parent parent, final Collection<? extends Module> modules, final Collection<? extends Property> pomProperties, final String name, final Collection<? extends Repository> repositories, final Collection<? extends Repository> pluginRepositories, final String sourceDirectory, final String testSourceDirectory, final Collection<? extends Filter> filters, final Collection<? extends Plugin> buildPlugins, final Collection<? extends Resource> resources, final String path, final String moduleName) {
+	public Pom(final String groupId, final String artifactId, final String version, final String packaging, final Collection<? extends Dependency> dependencies, final Parent parent, final Collection<? extends Module> modules, final Collection<? extends Property> pomProperties, final String name, final Collection<? extends Repository> repositories, final Collection<? extends Repository> pluginRepositories, final String sourceDirectory, final String testSourceDirectory, final Collection<? extends Filter> filters, final Collection<? extends Plugin> buildPlugins, final Collection<? extends Resource> resources, final String path, final String moduleName, final Collection<Path> paths) {
+		Assert.hasText(packaging, "Invalid packaging '" + packaging + "'");
 		Assert.hasText(path, "Invalid path '" + path + "'");
 
 		this.gav = new GAV(groupId, artifactId, version);
 		this.moduleName = StringUtils.trimToEmpty(moduleName);
 		this.name = StringUtils.trimToEmpty(name);
-		this.packaging = StringUtils.defaultIfEmpty(packaging, DEFAULT_PACKAGING);
+		this.packaging = packaging;
 		this.parent = parent;
 		this.path = path;
 		this.sourceDirectory = StringUtils.defaultIfEmpty(sourceDirectory, Path.SRC_MAIN_JAVA.getDefaultLocation());
@@ -97,15 +103,26 @@ public class Pom {
 		CollectionUtils.populate(this.repositories, repositories);
 		CollectionUtils.populate(this.resources, resources);
 		
-		cachePhysicalPaths(this.packaging);
+		cachePhysicalPaths(paths);
 	}
 
-	private void cachePhysicalPaths(final String packaging) {
-		for (final Path path : Path.values()) {
-			if (path.appliesTo(packaging)) {
-				pathCache.put(path, path.getModulePath(this));
-			}
+	private void cachePhysicalPaths(final Collection<Path> paths) {
+		final Collection<Path> pathsToCache = CollectionUtils.populate(new HashSet<Path>(), paths);
+		if (!pathsToCache.contains(ROOT)) {
+			pathsToCache.add(ROOT);
 		}
+		for (final Path path : pathsToCache) {
+			pathLocations.put(path, path.getModulePath(this));
+		}
+	}
+	
+	/**
+	 * Returns this module as a Dependency with the given scope
+	 * 
+	 * @return a non-<code>null</code> instance
+	 */
+	public Dependency asDependency(final DependencyScope scope) {
+		return new Dependency(getGroupId(), getArtifactId(), getVersion(), DependencyType.valueOfTypeCode(packaging), scope);
 	}
 	
 	/**
@@ -231,7 +248,7 @@ public class Pom {
 	}
 
 	public List<PhysicalPath> getPhysicalPaths() {
-		return new ArrayList<PhysicalPath>(pathCache.values());
+		return new ArrayList<PhysicalPath>(pathLocations.values());
 	}
 
 	/**
@@ -242,7 +259,7 @@ public class Pom {
 	 * @return <code>null</code> if this module has no such sub-path
 	 */
 	public PhysicalPath getPhysicalPath(final Path path) {
-		return pathCache.get(path);
+		return pathLocations.get(path);
 	}
 
 	/**

@@ -1,6 +1,13 @@
 package org.springframework.roo.project.packaging;
 
+import static org.springframework.roo.project.Path.SPRING_CONFIG_ROOT;
+import static org.springframework.roo.project.Path.SRC_MAIN_JAVA;
+import static org.springframework.roo.project.Path.SRC_MAIN_RESOURCES;
+import static org.springframework.roo.project.Path.SRC_TEST_JAVA;
+import static org.springframework.roo.project.Path.SRC_TEST_RESOURCES;
+
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import org.apache.felix.scr.annotations.Component;
@@ -8,6 +15,7 @@ import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.GAV;
+import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectOperations;
 
 /**
@@ -18,7 +26,7 @@ import org.springframework.roo.project.ProjectOperations;
  */
 @Component
 @Service
-public class JarPackaging extends CorePackagingProvider {
+public class JarPackaging extends AbstractCorePackagingProvider {
 	
 	// Constants
 	public static final String NAME = "jar";
@@ -32,10 +40,6 @@ public class JarPackaging extends CorePackagingProvider {
 	 */
 	public JarPackaging() {
 		super(NAME, "jar-pom-template.xml");
-	}
-	
-	public String getId() {
-		return "jar";
 	}
 	
 	public boolean isDefault() {
@@ -52,7 +56,12 @@ public class JarPackaging extends CorePackagingProvider {
 
 	@Override
 	protected void createOtherArtifacts(final JavaPackage topLevelPackage, final String module, final ProjectOperations projectOperations) {
+		super.createOtherArtifacts(topLevelPackage, module, projectOperations);
 		final String fullyQualifiedModuleName = getFullyQualifiedModuleName(module, projectOperations);
 		applicationContextOperations.createMiddleTierApplicationContext(topLevelPackage, fullyQualifiedModuleName);
+	}
+
+	public Collection<Path> getPaths() {
+		return Arrays.asList(SRC_MAIN_JAVA, SRC_MAIN_RESOURCES, SRC_TEST_JAVA, SRC_TEST_RESOURCES, SPRING_CONFIG_ROOT);
 	}
 }

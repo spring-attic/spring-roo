@@ -181,7 +181,7 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 			if (externalModule != null) {
 				if (!externalModule.getPath().equals(focusedModule.getPath())) {
 					detectCircularDependency(focusedModule, externalModule);
-					Dependency dependency = new Dependency(externalModule.getGroupId(), externalModule.getArtifactId(), externalModule.getVersion());
+					final Dependency dependency = externalModule.asDependency(DependencyScope.COMPILE);
 					if (getFocusedModule().getDependenciesExcludingVersion(dependency).isEmpty()) {
 						addDependency(getFocusedModuleName(), dependency);
 					}

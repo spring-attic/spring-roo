@@ -24,6 +24,7 @@ import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
 /**
  * Convenient superclass for core or third-party addons to implement a {@link PackagingProvider}.
@@ -39,6 +40,11 @@ public abstract class AbstractPackagingProvider implements PackagingProvider {
 	// Constants
 	protected static final Logger LOGGER = HandlerUtils.getLogger(PackagingProvider.class);
 	private static final String JAVA_VERSION_PLACEHOLDER = "JAVA_VERSION";
+
+	/**
+	 * The name of the POM property that stores the packaging provider's ID.
+	 */
+	public static final String ROO_PACKAGING_PROVIDER_PROPERTY = "roo.packaging.provider";
 
 	// Fields
 	@Reference protected ApplicationContextOperations applicationContextOperations;
@@ -69,7 +75,7 @@ public abstract class AbstractPackagingProvider implements PackagingProvider {
 		this.pomTemplate = pomTemplate;
 	}
 	
-	public String getId() {
+	public final String getId() {
 		return id;
 	}
 
@@ -133,6 +139,7 @@ public abstract class AbstractPackagingProvider implements PackagingProvider {
 
 		// packaging
 		DomUtils.createChildIfNotExists("packaging", root, pom).setTextContent(this.name);
+		setPackagingProviderId(pom);
 
 		// Java versions
 		final List<Element> versionElements = XmlUtils.findElements("//*[.='" + JAVA_VERSION_PLACEHOLDER + "']", root);
@@ -144,6 +151,19 @@ public abstract class AbstractPackagingProvider implements PackagingProvider {
 		final String pomPath = pathResolver.getIdentifier(Path.ROOT.getModulePathId(module), "pom.xml");
 		fileManager.createOrUpdateTextFileIfRequired(pomPath, XmlUtils.nodeToString(pom), true);
 		return pomPath;
+	}
+
+	/**
+	 * Stores the ID of this {@link PackagingProvider} as a POM property called
+	 * {@value #ROO_PACKAGING_PROVIDER_PROPERTY}. Subclasses can override this
+	 * method, but be aware that Roo needs some way of working out from a given
+	 * <code>pom.xml</code> file which {@link PackagingProvider} should be used.
+	 * 
+	 * @param pom the DOM document for the POM being created
+	 */
+	protected void setPackagingProviderId(final Document pom) {
+		final Node propertiesElement = DomUtils.createChildIfNotExists("properties", pom.getDocumentElement(), pom);
+		DomUtils.createChildIfNotExists(ROO_PACKAGING_PROVIDER_PROPERTY, propertiesElement, pom).setTextContent(getId());
 	}
 
 	/**

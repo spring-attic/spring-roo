@@ -1,7 +1,10 @@
 package org.springframework.roo.project.packaging;
 
+import java.util.Collection;
+
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.project.GAV;
+import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectOperations;
 
 /**
@@ -54,4 +57,12 @@ public interface PackagingProvider {
 	 * @return see above
 	 */
 	boolean isDefault();
+
+	/**
+	 * Returns the {@link Path}s to be created for this module, in addition to
+	 * {@link Path#ROOT}.
+	 * 
+	 * @return 
+	 */
+	Collection<Path> getPaths();
 }

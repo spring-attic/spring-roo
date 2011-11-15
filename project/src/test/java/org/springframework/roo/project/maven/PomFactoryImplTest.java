@@ -2,8 +2,11 @@ package org.springframework.roo.project.maven;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.springframework.roo.project.Path.SRC_MAIN_JAVA;
 import static org.springframework.roo.project.Path.SRC_TEST_JAVA;
+import static org.springframework.roo.project.maven.Pom.DEFAULT_PACKAGING;
 
 import java.io.File;
 import java.net.URL;
@@ -12,7 +15,11 @@ import java.util.Iterator;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.springframework.roo.project.Dependency;
+import org.springframework.roo.project.packaging.PackagingProvider;
+import org.springframework.roo.project.packaging.PackagingProviderRegistry;
 import org.springframework.roo.support.util.Pair;
 import org.springframework.uaa.client.util.XmlUtils;
 import org.w3c.dom.Document;
@@ -30,11 +37,14 @@ public class PomFactoryImplTest {
 	private static final String MODULE_NAME = "my-module";
 	
 	// Fixture
-	private PomFactory factory;
+	private PomFactoryImpl factory;
+	@Mock private PackagingProviderRegistry mockPackagingProviderRegistry;
 
 	@Before
 	public void setUp() throws Exception {
+		MockitoAnnotations.initMocks(this);
 		this.factory = new PomFactoryImpl();
+		this.factory.packagingProviderRegistry = mockPackagingProviderRegistry;
 	}
 	
 	/**
@@ -82,6 +92,9 @@ public class PomFactoryImplTest {
 	
 	@Test
 	public void testGetMinimalInstance() throws Exception {
+		// Set up
+		setUpMockPackagingProvider(DEFAULT_PACKAGING);
+		
 		// Invoke
 		final Pom pom = invokeFactory("minimal-pom.xml");
 		
@@ -90,9 +103,17 @@ public class PomFactoryImplTest {
 		assertEquals(SRC_MAIN_JAVA.getDefaultLocation(), pom.getSourceDirectory());
 		assertEquals(SRC_TEST_JAVA.getDefaultLocation(), pom.getTestSourceDirectory());
 	}
+
+	private void setUpMockPackagingProvider(final String providerId) {
+		final PackagingProvider mockPackagingProvider = mock(PackagingProvider.class);
+		when(mockPackagingProviderRegistry.getPackagingProvider(providerId)).thenReturn(mockPackagingProvider);
+	}
 	
 	@Test
 	public void testGetInstanceWithDependency() throws Exception {
+		// Set up
+		setUpMockPackagingProvider(DEFAULT_PACKAGING);
+		
 		// Invoke
 		final Pom pom = invokeFactory("pom-with-dependencies.xml");
 		
@@ -108,6 +129,9 @@ public class PomFactoryImplTest {
 
 	@Test
 	public void testGetInstanceWithInheritedGroupId() throws Exception {
+		// Set up
+		setUpMockPackagingProvider(DEFAULT_PACKAGING);
+		
 		// Invoke
 		final Pom pom = invokeFactory("inherited-groupId-pom.xml");
 		
@@ -120,6 +144,7 @@ public class PomFactoryImplTest {
 	@Test
 	public void testGetInstanceWithPomPackaging() throws Exception {
 		// Set up
+		setUpMockPackagingProvider("pom");
 		final String pomFileName = "parent-pom.xml";
 		
 		// Invoke
