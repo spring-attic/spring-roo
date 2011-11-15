@@ -144,4 +144,22 @@ public class MavenOperationsImplTest {
 		// Invoke and check
 		assertEquals(mockChildPom, projectOperations.getFocusedModule());
 	}
+	
+	@Test
+	public void testCannotFocusModuleWhenOneOrLessModulesExist() {
+		assertModuleFocusAllowed(false, "");
+	}
+	
+	@Test
+	public void testCannotFocusModuleWhenMoreThanOneModuleExists() {
+		assertModuleFocusAllowed(true, "", "core");
+	}
+	
+	private void assertModuleFocusAllowed(final boolean expectedResult, final String... moduleNames) {
+		// Set up
+		when(mockPomManagementService.getModuleNames()).thenReturn(Arrays.asList(moduleNames));
+		
+		// Invoke and check
+		assertEquals(expectedResult, projectOperations.isModuleFocusAllowed());		
+	}
 }

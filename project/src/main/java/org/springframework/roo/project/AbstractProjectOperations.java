@@ -859,7 +859,7 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 	}
 	
 	public boolean isModuleFocusAllowed() {
-		return !getModuleNames().isEmpty();
+		return getModuleNames().size() > 1;
 	}
 	
 	public boolean isModuleCreationAllowed() {
