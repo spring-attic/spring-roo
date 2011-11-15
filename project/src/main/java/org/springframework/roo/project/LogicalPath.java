@@ -122,6 +122,15 @@ public class LogicalPath {
 	public final String toString() {
 		return getName();
 	}
+	
+	/**
+	 * Indicates whether this is the root of the owning module.
+	 * 
+	 * @return see above
+	 */
+	public boolean isModuleRoot() {
+		return path == Path.ROOT;
+	}
 
 	/**
 	 * Indicates whether this is the root of the entire user project.
@@ -129,7 +138,7 @@ public class LogicalPath {
 	 * @return see above
 	 */
 	public boolean isProjectRoot() {
-		return path == Path.ROOT && StringUtils.isBlank(module);
+		return isModuleRoot() && StringUtils.isBlank(module);
 	}
 
 	/**

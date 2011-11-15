@@ -155,4 +155,19 @@ public class LogicalPathTest {
 	public void testProjectRootIsProjectRoot() {
 		assertTrue(LogicalPath.getInstance(Path.ROOT, null).isProjectRoot());
 	}
+	
+	@Test
+	public void testNonRootPathIsNotModuleRoot() {
+		assertFalse(LogicalPath.getInstance(Path.SRC_MAIN_JAVA, "").isModuleRoot());
+	}
+	
+	@Test
+	public void testProjectRootIsModuleRoot() {
+		assertTrue(LogicalPath.getInstance(Path.ROOT, "").isModuleRoot());
+	}
+	
+	@Test
+	public void testSubModuleRootIsModuleRoot() {
+		assertTrue(LogicalPath.getInstance(Path.ROOT, "foo").isModuleRoot());
+	}
 }
