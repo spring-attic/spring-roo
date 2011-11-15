@@ -28,9 +28,9 @@ public class DependencyTypeTest {
 	}
 	
 	@Test
-	public void testValueOfKnownCode() {
+	public void testValueOfKnownCodes() {
 		for (final DependencyType dependencyType : DependencyType.values()) {
-			assertEquals(dependencyType, DependencyType.valueOfTypeCode(dependencyType.name()));
+			assertEquals(dependencyType, DependencyType.valueOfTypeCode(dependencyType.name().toLowerCase()));
 		}
 	}
 }

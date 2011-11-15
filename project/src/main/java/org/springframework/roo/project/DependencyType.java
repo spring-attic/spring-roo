@@ -45,7 +45,7 @@ public enum DependencyType {
 			return JAR;
 		}
 		try {
-			return valueOf(typeCode);
+			return valueOf(typeCode.toUpperCase());
 		} catch (final IllegalArgumentException invalidCode) {
 			return OTHER;
 		}
