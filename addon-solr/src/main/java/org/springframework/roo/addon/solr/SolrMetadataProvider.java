@@ -84,7 +84,7 @@ public class SolrMetadataProvider extends AbstractMemberDiscoveringItdMetadataPr
 		Map<MethodMetadata, FieldMetadata> accessorDetails = new LinkedHashMap<MethodMetadata, FieldMetadata>();
 		for (MethodMetadata method : memberDetails.getMethods()) {
 			if (BeanInfoUtils.isAccessorMethod(method) && !method.getMethodName().getSymbolName().startsWith("is")) {
-				FieldMetadata fieldMetadata = BeanInfoUtils.getFieldForPropertyName(memberDetails, BeanInfoUtils.getPropertyNameForJavaBeanMethod(method));
+				FieldMetadata fieldMetadata = BeanInfoUtils.getFieldForJavaBeanMethod(memberDetails, method);
 				if (fieldMetadata != null) {
 					accessorDetails.put(method, fieldMetadata);
 				}

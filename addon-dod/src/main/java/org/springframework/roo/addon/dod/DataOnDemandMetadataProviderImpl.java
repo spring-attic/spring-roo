@@ -47,7 +47,6 @@ import org.springframework.roo.classpath.layers.LayerType;
 import org.springframework.roo.classpath.layers.MemberTypeAdditions;
 import org.springframework.roo.classpath.layers.MethodParameter;
 import org.springframework.roo.classpath.scanner.MemberDetails;
-import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.shell.NaturalOrderComparator;
@@ -200,8 +199,7 @@ public class DataOnDemandMetadataProviderImpl extends AbstractMemberDiscoveringI
 				continue;
 			}
 
-			JavaSymbolName propertyName = BeanInfoUtils.getPropertyNameForJavaBeanMethod(method);
-			FieldMetadata field = BeanInfoUtils.getFieldForPropertyName(memberDetails, propertyName);
+			FieldMetadata field = BeanInfoUtils.getFieldForJavaBeanMethod(memberDetails, method);
 			if (field == null) {
 				continue;
 			}

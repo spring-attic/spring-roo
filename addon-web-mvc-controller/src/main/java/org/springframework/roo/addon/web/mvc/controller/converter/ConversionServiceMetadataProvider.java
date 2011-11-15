@@ -165,7 +165,8 @@ public class ConversionServiceMetadataProvider extends AbstractItdMetadataProvid
 		if (method.getCustomData().keySet().contains(CustomDataKeys.IDENTIFIER_ACCESSOR_METHOD) || method.getCustomData().keySet().contains(CustomDataKeys.VERSION_ACCESSOR_METHOD)) {
 			return false; // Only interested in methods which are not accessors for persistence id or version fields
 		}
-		FieldMetadata field = BeanInfoUtils.getFieldForPropertyName(memberDetails, BeanInfoUtils.getPropertyNameForJavaBeanMethod(method));
+		
+		FieldMetadata field = BeanInfoUtils.getFieldForJavaBeanMethod(memberDetails, method);
 		if (field == null) {
 			return false;
 		}

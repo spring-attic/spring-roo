@@ -106,31 +106,28 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 		specialTypes.put(javaType, javaTypeMetadataDetails);
 
 		for (final MethodMetadata method : memberDetails.getMethods()) {
-			// Not interested in non accessor methods
-			if (!BeanInfoUtils.isAccessorMethod(method)) {
+			// Not interested in non-accessor methods or persistence identifiers and version fields
+			if (!BeanInfoUtils.isAccessorMethod(method) || method.hasSameName(identifierAccessor, versionAccessor)) {
 				continue;
 			}
-			// Not interested in persistence identifiers and version fields
-			if (isPersistenceIdentifierOrVersionMethod(method, identifierAccessor, versionAccessor)) {
-				continue;
-			}
+
 			// Not interested in fields that are JPA transient fields or immutable fields
-			FieldMetadata field = BeanInfoUtils.getFieldForPropertyName(memberDetails, BeanInfoUtils.getPropertyNameForJavaBeanMethod(method));
+			FieldMetadata field = BeanInfoUtils.getFieldForJavaBeanMethod(memberDetails, method);
 			if (field == null || field.getCustomData().keySet().contains(CustomDataKeys.TRANSIENT_FIELD) || !BeanInfoUtils.hasAccessorAndMutator(field, memberDetails)) {
 				continue;
 			}
-			JavaType type = method.getReturnType();
-			if (type.isCommonCollectionType()) {
-				for (JavaType genericType: type.getParameters()) {
+			JavaType returnType = method.getReturnType();
+			if (returnType.isCommonCollectionType()) {
+				for (JavaType genericType: returnType.getParameters()) {
 					if (isApplicationType(genericType)) {
 						MemberDetails genericTypeMemberDetails = getMemberDetails(genericType);
 						specialTypes.put(genericType, getJavaTypeMetadataDetails(genericType, genericTypeMemberDetails, metadataIdentificationString));
 					}
 				}
 			} else {
-				if (isApplicationType(type) && !field.getCustomData().keySet().contains(EMBEDDED_FIELD)) {
-					MemberDetails typeMemberDetails = getMemberDetails(type);
-					specialTypes.put(type, getJavaTypeMetadataDetails(type, typeMemberDetails, metadataIdentificationString));
+				if (isApplicationType(returnType) && !field.getCustomData().keySet().contains(EMBEDDED_FIELD)) {
+					MemberDetails typeMemberDetails = getMemberDetails(returnType);
+					specialTypes.put(returnType, getJavaTypeMetadataDetails(returnType, typeMemberDetails, metadataIdentificationString));
 				}
 			}
 		}
@@ -145,7 +142,7 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 		for (MethodMetadata method : memberDetails.getMethods()) {
 			JavaType type = method.getReturnType();
 			if (BeanInfoUtils.isAccessorMethod(method) && isApplicationType(type)) {
-				FieldMetadata field = BeanInfoUtils.getFieldForPropertyName(memberDetails, BeanInfoUtils.getPropertyNameForJavaBeanMethod(method));
+				FieldMetadata field = BeanInfoUtils.getFieldForJavaBeanMethod(memberDetails, method);
 				if (field != null && MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), NOT_NULL) != null) {
 					MemberDetails typeMemberDetails = getMemberDetails(type);
 					if (getJavaTypePersistenceMetadataDetails(type, typeMemberDetails, metadataIdentificationString) != null) {
@@ -169,20 +166,18 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 
 		for (MethodMetadata method : methods) {
 			// Only interested in accessors
-			if (!BeanInfoUtils.isAccessorMethod(method)) {
+			if (!BeanInfoUtils.isAccessorMethod(method) || method.hasSameName(identifierAccessor, versionAccessor)) {
 				continue;
 			}
-			if (isPersistenceIdentifierOrVersionMethod(method, identifierAccessor, versionAccessor)) {
-				continue;
-			}
-			JavaSymbolName propertyName = BeanInfoUtils.getPropertyNameForJavaBeanMethod(method);
-			FieldMetadata field = BeanInfoUtils.getFieldForPropertyName(memberDetails, propertyName);
+
+			FieldMetadata field = BeanInfoUtils.getFieldForJavaBeanMethod(memberDetails, method);
 			if (field == null || !BeanInfoUtils.hasAccessorAndMutator(field, memberDetails)) {
 				continue;
 			}
+			JavaSymbolName fieldName = field.getFieldName();
 			registerDependency(method.getDeclaredByMetadataId(), metadataIdentificationString);
-			if (!fields.containsKey(propertyName)) {
-				fields.put(propertyName, field);
+			if (!fields.containsKey(fieldName)) {
+				fields.put(fieldName, field);
 			}
 		}
 		return Collections.unmodifiableList(new ArrayList<FieldMetadata>(fields.values()));
@@ -286,16 +281,15 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 				continue;
 			}
 			// Not interested in fields that are not exposed via a mutator and accessor and in identifiers and version fields
-			if (isPersistenceIdentifierOrVersionMethod(method, identifierAccessor, versionAccessor)) {
+			if (method.hasSameName(identifierAccessor, versionAccessor)) {
 				continue;
 			}
-			JavaType type = method.getReturnType();
-			JavaSymbolName fieldName = BeanInfoUtils.getPropertyNameForJavaBeanMethod(method);
-			FieldMetadata field = BeanInfoUtils.getFieldForPropertyName(memberDetails, fieldName);
+			FieldMetadata field = BeanInfoUtils.getFieldForJavaBeanMethod(memberDetails, method);
 			if (field == null || !BeanInfoUtils.hasAccessorAndMutator(field, memberDetails)) {
 				continue;
 			}
-			if (!JdkJavaType.isDateField(type)) {
+			JavaType returnType = method.getReturnType();
+			if (!JdkJavaType.isDateField(returnType)) {
 				continue;
 			}
 			AnnotationMetadata annotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), DATE_TIME_FORMAT);
@@ -362,11 +356,6 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 			}
 		}
 		return Collections.unmodifiableSortedSet(finderMetadataDetails);
-	}
-
-	private boolean isPersistenceIdentifierOrVersionMethod(final MethodMetadata method, final MethodMetadata idMethod, final MethodMetadata versionMethod) {
-		Assert.notNull(method, "Method metadata required");
-		return (idMethod != null && method.getMethodName().equals(idMethod.getMethodName())) || (versionMethod != null && method.getMethodName().equals(versionMethod.getMethodName()));
 	}
 
 	public JavaTypeMetadataDetails getJavaTypeMetadataDetails(final JavaType javaType, final MemberDetails memberDetails, final String metadataIdentificationString) {

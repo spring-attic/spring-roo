@@ -150,7 +150,11 @@ public class SolrJspMetadataListener implements MetadataProvider, MetadataNotifi
 				if (method.getMethodName().equals(identifierAccessor.getMethodName()) || method.getMethodName().equals(versionAccessor.getMethodName())) {
 					continue;
 				}
-				FieldMetadata field = BeanInfoUtils.getFieldForPropertyName(memberDetails, BeanInfoUtils.getPropertyNameForJavaBeanMethod(method));
+				if (method.hasSameName(identifierAccessor, versionAccessor)) {
+					continue;
+				}
+
+				FieldMetadata field = BeanInfoUtils.getFieldForJavaBeanMethod(memberDetails, method);
 				if (field == null) {
 					continue;
 				}

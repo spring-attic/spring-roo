@@ -218,11 +218,12 @@ public class JspMetadataListener implements MetadataProvider, MetadataNotificati
 			if (!BeanInfoUtils.isAccessorMethod(method)) {
 				continue;
 			}
-			JavaSymbolName fieldName = BeanInfoUtils.getPropertyNameForJavaBeanMethod(method);
-			FieldMetadata field = BeanInfoUtils.getFieldForPropertyName(memberDetails, fieldName);
+
+			FieldMetadata field = BeanInfoUtils.getFieldForJavaBeanMethod(memberDetails, method);
 			if (field == null) {
 				continue;
 			}
+			JavaSymbolName fieldName = field.getFieldName();
 			String fieldResourceId = XmlUtils.convertId(resourceId + "." + fieldName.getSymbolName().toLowerCase());
 			if (typeLocationService.isInProject(method.getReturnType()) && webMetadataService.isRooIdentifier(method.getReturnType(), webMetadataService.getMemberDetails(method.getReturnType()))) {
 				JavaTypePersistenceMetadataDetails typePersistenceMetadataDetails = webMetadataService.getJavaTypePersistenceMetadataDetails(method.getReturnType(), webMetadataService.getMemberDetails(method.getReturnType()), metadataIdentificationString);
