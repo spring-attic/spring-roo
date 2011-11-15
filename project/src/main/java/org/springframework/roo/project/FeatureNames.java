@@ -15,6 +15,7 @@ public final class FeatureNames {
 	public static final String JSF = "jsf";
 	public static final String MONGO = "mongo";
 	public static final String MVC = "mvc";
+	public static final String NEO4J = "ne04j";
 
 	/**
 	 * Constructor is private to prevent instantiation

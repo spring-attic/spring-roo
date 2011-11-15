@@ -291,14 +291,14 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 			}
 			JavaType type = method.getReturnType();
 			JavaSymbolName fieldName = BeanInfoUtils.getPropertyNameForJavaBeanMethod(method);
-			FieldMetadata fieldMetadata = BeanInfoUtils.getFieldForPropertyName(memberDetails, fieldName);
-			if (fieldMetadata == null || !BeanInfoUtils.hasAccessorAndMutator(fieldMetadata, memberDetails)) {
+			FieldMetadata field = BeanInfoUtils.getFieldForPropertyName(memberDetails, fieldName);
+			if (field == null || !BeanInfoUtils.hasAccessorAndMutator(field, memberDetails)) {
 				continue;
 			}
 			if (!JdkJavaType.isDateField(type)) {
 				continue;
 			}
-			AnnotationMetadata annotation = MemberFindingUtils.getAnnotationOfType(fieldMetadata.getAnnotations(), DATE_TIME_FORMAT);
+			AnnotationMetadata annotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), DATE_TIME_FORMAT);
 			JavaSymbolName patternSymbol = new JavaSymbolName("pattern");
 			JavaSymbolName styleSymbol = new JavaSymbolName("style");
 			DateTimeFormatDetails dateTimeFormat = null;
@@ -310,18 +310,18 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 				}
 			}
 			if (dateTimeFormat != null) {
-				registerDependency(fieldMetadata.getDeclaredByMetadataId(), metadataIdentificationString);
-				dates.put(fieldMetadata.getFieldName(), dateTimeFormat);
+				registerDependency(field.getDeclaredByMetadataId(), metadataIdentificationString);
+				dates.put(field.getFieldName(), dateTimeFormat);
 				if (javaTypePersistenceMetadataDetails != null) {
 					for (String finder : javaTypePersistenceMetadataDetails.getFinderNames()) {
-						if (finder.contains(StringUtils.capitalize(fieldMetadata.getFieldName().getSymbolName()) + "Between")) {
-							dates.put(new JavaSymbolName("min" + StringUtils.capitalize(fieldMetadata.getFieldName().getSymbolName())), dateTimeFormat);
-							dates.put(new JavaSymbolName("max" + StringUtils.capitalize(fieldMetadata.getFieldName().getSymbolName())), dateTimeFormat);
+						if (finder.contains(StringUtils.capitalize(field.getFieldName().getSymbolName()) + "Between")) {
+							dates.put(new JavaSymbolName("min" + StringUtils.capitalize(field.getFieldName().getSymbolName())), dateTimeFormat);
+							dates.put(new JavaSymbolName("max" + StringUtils.capitalize(field.getFieldName().getSymbolName())), dateTimeFormat);
 						}
 					}
 				}
 			} else {
-				logger.warning("It is recommended to use @DateTimeFormat(style=\"M-\") on " + fieldMetadata.getFieldType().getFullyQualifiedTypeName() + "." + fieldMetadata.getFieldName() + " to use automatic date conversion in Spring MVC");
+				logger.warning("It is recommended to use @DateTimeFormat(style=\"M-\") on " + field.getFieldType().getFullyQualifiedTypeName() + "." + field.getFieldName() + " to use automatic date conversion in Spring MVC");
 			}
 		}
 		return Collections.unmodifiableMap(dates);
@@ -366,7 +366,6 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 
 	private boolean isPersistenceIdentifierOrVersionMethod(final MethodMetadata method, final MethodMetadata idMethod, final MethodMetadata versionMethod) {
 		Assert.notNull(method, "Method metadata required");
-
 		return (idMethod != null && method.getMethodName().equals(idMethod.getMethodName())) || (versionMethod != null && method.getMethodName().equals(versionMethod.getMethodName()));
 	}
 

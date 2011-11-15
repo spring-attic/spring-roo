@@ -26,8 +26,8 @@ import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
-import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.FeatureNames;
+import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
@@ -50,7 +50,7 @@ public class DataOnDemandOperationsImpl implements DataOnDemandOperations {
 	@Reference private TypeManagementService typeManagementService;
 
 	public boolean isDataOnDemandInstallationPossible() {
-		return projectOperations.isFocusedProjectAvailable() && projectOperations.isFeatureInstalledInFocusedModule(FeatureNames.JPA);
+		return projectOperations.isFocusedProjectAvailable() && projectOperations.isFeatureInstalledInFocusedModule(FeatureNames.JPA, FeatureNames.MONGO);
 	}
 
 	public void newDod(final JavaType entity, final JavaType name) {

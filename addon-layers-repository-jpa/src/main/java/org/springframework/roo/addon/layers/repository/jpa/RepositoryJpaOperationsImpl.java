@@ -86,7 +86,13 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
 		interfaceTypeBuilder.addAnnotation(interfaceAnnotationMetadata.build());
 		typeManagementService.createOrUpdateTypeOnDisk(interfaceTypeBuilder.build());
 
-		// Take care of project configs
+		// Second build the implementing class TODO Why is this commented out?
+		// String classMdId = PhysicalTypeIdentifier.createIdentifier(classType, projectOperations.getPathResolver().getPath(classIdentifier));
+		// ClassOrInterfaceTypeDetailsBuilder classTypeBuilder = new ClassOrInterfaceTypeDetailsBuilder(classMdId, Modifier.PUBLIC, classType, PhysicalTypeCategory.CLASS);
+		// classTypeBuilder.addImplementsType(interfaceType);
+		// typeManagementService.createOrUpdateTypeOnDisk(classTypeBuilder.build());
+
+		// Take care of project configuration
 		configureProject();
 	}
 

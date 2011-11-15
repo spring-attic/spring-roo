@@ -41,7 +41,7 @@ public class RepositoryMongoMetadata extends AbstractItdTypeDetailsProvidingMeta
 		Assert.notNull(annotationValues, "Annotation values required");
 		Assert.notNull(identifierType, "Identifier type required");
 
-		// Make the user's Repository interface extend Spring Data's JpaRepository interface if it doesn't already
+		// Make the user's Repository interface extend Spring Data's Repository interface if it doesn't already
 		ensureGovernorExtends(new JavaType(SPRING_DATA_REPOSITORY, 0, DataType.TYPE, null, Arrays.asList(annotationValues.getDomainType(), identifierType)));
 
 		builder.addAnnotation(getTypeAnnotation(SpringJavaType.REPOSITORY));

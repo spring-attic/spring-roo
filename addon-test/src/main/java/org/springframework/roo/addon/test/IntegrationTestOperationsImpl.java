@@ -32,8 +32,8 @@ import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.FeatureNames;
+import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
@@ -63,7 +63,7 @@ public class IntegrationTestOperationsImpl implements IntegrationTestOperations 
 	@Reference private TypeManagementService typeManagementService;
 
 	public boolean isIntegrationTestInstallationPossible() {
-		return projectOperations.isFocusedProjectAvailable() && projectOperations.isFeatureInstalledInFocusedModule(FeatureNames.JPA);
+		return projectOperations.isFocusedProjectAvailable() && projectOperations.isFeatureInstalledInFocusedModule(FeatureNames.JPA, FeatureNames.MONGO);
 	}
 
 	public void newIntegrationTest(final JavaType entity) {
