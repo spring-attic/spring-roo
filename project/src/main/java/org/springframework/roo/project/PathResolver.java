@@ -102,6 +102,7 @@ public interface PathResolver {
 	 * @param path
 	 * @param javaType
 	 * @return
+	 * @since 1.2.0
 	 */
 	String getFocusedCanonicalPath(Path path, JavaType javaType);
 
@@ -112,6 +113,7 @@ public interface PathResolver {
 	 * @param path
 	 * @param relativePath
 	 * @return a canonical path
+	 * @since 1.2.0
 	 */
 	String getFocusedIdentifier(Path path, String relativePath);
 
@@ -119,6 +121,7 @@ public interface PathResolver {
 	 *
 	 * @param path
 	 * @return
+	 * @since 1.2.0
 	 */
 	String getFocusedRoot(Path path);
 
@@ -128,6 +131,7 @@ public interface PathResolver {
 	 * 
 	 * @param path the path within the currently focused module (required)
 	 * @return a non-<code>null</code> instance
+	 * @since 1.2.0
 	 */
 	LogicalPath getFocusedPath(Path path);
 }

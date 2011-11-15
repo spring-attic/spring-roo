@@ -30,8 +30,8 @@ public class PackagingProviderRegistryTest {
 	// Fixture
 	private PackagingProviderRegistryImpl registry;
 	@Mock private CorePackagingProvider mockCoreJarPackaging;
-	@Mock private PackagingProvider mockCustomJarPackaging;
 	@Mock private CorePackagingProvider mockWarPackaging;
+	@Mock private PackagingProvider mockCustomJarPackaging;
 
 	@Before
 	public void setUp() {
