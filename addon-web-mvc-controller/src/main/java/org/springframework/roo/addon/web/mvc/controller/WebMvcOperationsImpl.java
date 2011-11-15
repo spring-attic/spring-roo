@@ -183,24 +183,27 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
 
 	private void createWebApplicationContext() {
 		Assert.isTrue(projectOperations.isFocusedProjectAvailable(), "Project metadata required");
+		final String webConfigFile = pathResolver.getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, WEBMVC_CONFIG_XML);
+		final Document document = readOrCreateSpringWebConfigFile(webConfigFile);
+		setBasePackageForComponentScan(document);
+		fileManager.createOrUpdateTextFileIfRequired(webConfigFile, XmlUtils.nodeToString(document), true);
+	}
 
-		// Verify the middle tier application context already exists
-		Assert.isTrue(fileManager.exists(pathResolver.getFocusedIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext.xml")), "Application context does not exist");
+	private void setBasePackageForComponentScan(final Document document) {
+		final Element componentScanElement = DomUtils.findFirstElementByName("context:component-scan", (Element) document.getFirstChild());
+		final JavaPackage topLevelPackage = projectOperations.getTopLevelPackage(projectOperations.getFocusedModuleName());
+		componentScanElement.setAttribute("base-package", topLevelPackage.getFullyQualifiedPackageName());
+	}
 
-		String webConfigFile = pathResolver.getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, WEBMVC_CONFIG_XML);
+	private Document readOrCreateSpringWebConfigFile(final String webConfigFile) {
 		final InputStream inputStream;
-		if (!fileManager.exists(webConfigFile)) {
+		if (fileManager.exists(webConfigFile)) {
+			inputStream = fileManager.getInputStream(webConfigFile);
+		} else {
 			inputStream = FileUtils.getInputStream(getClass(), "webmvc-config.xml");
 			Assert.notNull(inputStream, "Could not acquire web.xml template");
-		} else {
-			inputStream = fileManager.getInputStream(webConfigFile);
 		}
-		final Document document = XmlUtils.readXml(inputStream);
-
-		Element root = (Element) document.getFirstChild();
-		DomUtils.findFirstElementByName("context:component-scan", root).setAttribute("base-package", projectOperations.getTopLevelPackage(projectOperations.getFocusedModuleName()).getFullyQualifiedPackageName());
-		
-		fileManager.createOrUpdateTextFileIfRequired(webConfigFile, XmlUtils.nodeToString(document), true);
+		return XmlUtils.readXml(inputStream);
 	}
 
 	private void updateConfiguration() {
