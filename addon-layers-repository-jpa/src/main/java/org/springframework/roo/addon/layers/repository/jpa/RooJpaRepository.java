@@ -31,5 +31,5 @@ public @interface RooJpaRepository {
 	 *
 	 * @return a non-<code>null</code> entity type
 	 */
-	Class<?> domainType();	// no default => mandatory
+	Class<?> domainType(); // No default => mandatory
 }

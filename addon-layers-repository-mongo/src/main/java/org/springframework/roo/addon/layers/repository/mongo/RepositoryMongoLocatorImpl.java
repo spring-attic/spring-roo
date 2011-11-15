@@ -27,7 +27,7 @@ public class RepositoryMongoLocatorImpl implements RepositoryMongoLocator {
 
 	// Fields
 	@Reference private TypeLocationService typeLocationService;
-	private final HashMap<JavaType, HashSet<ClassOrInterfaceTypeDetails>> cacheMap = new HashMap<JavaType, HashSet<ClassOrInterfaceTypeDetails>>();
+	private final Map<JavaType, Set<ClassOrInterfaceTypeDetails>> cacheMap = new HashMap<JavaType, Set<ClassOrInterfaceTypeDetails>>();
 
 	public Collection<ClassOrInterfaceTypeDetails> getRepositories(final JavaType domainType) {
 		if (!cacheMap.containsKey(domainType)) {

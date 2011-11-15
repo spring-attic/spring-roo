@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.Set;
+import java.util.SortedSet;
 import java.util.TreeSet;
 
 import org.apache.felix.scr.annotations.Component;
@@ -28,7 +28,7 @@ import org.springframework.roo.support.util.Assert;
 public class LayerServiceImpl implements LayerService {
 
 	// Fields
-	private final Set<LayerProvider> providers = new TreeSet<LayerProvider>(new DescendingLayerComparator());
+	private final SortedSet<LayerProvider> providers = new TreeSet<LayerProvider>(new DescendingLayerComparator());
 
 	// Mutex
 	private final Object mutex = new Object();
