@@ -880,10 +880,19 @@ public class JpaOperationsImpl implements JpaOperations {
 	private void updateEclipsePlugin(final boolean addGaeSettingsToPlugin) {
 		final String pom = pathResolver.getFocusedIdentifier(Path.ROOT, POM_XML);
 		final Document document = XmlUtils.readXml(fileManager.getInputStream(pom));
-		final Element root = document.getDocumentElement();
 		final Collection<String> changes = new ArrayList<String>();
 
-		// Manage GAE buildCommand
+		manageGaeBuildCommand(addGaeSettingsToPlugin, document, changes);
+		manageGaeProjectNature(addGaeSettingsToPlugin, document, changes);
+
+		if (!changes.isEmpty()) {
+			final String changesMessage = StringUtils.collectionToDelimitedString(changes, "; ");
+			fileManager.createOrUpdateTextFileIfRequired(pom, XmlUtils.nodeToString(document), changesMessage, false);
+		}
+	}
+	
+	private void manageGaeBuildCommand(final boolean addGaeSettingsToPlugin, final Document document, final Collection<String> changes) {
+		final Element root = document.getDocumentElement();
 		final Element additionalBuildcommandsElement = XmlUtils.findFirstElement("/project/build/plugins/plugin[artifactId = 'maven-eclipse-plugin']/configuration/additionalBuildcommands", root);
 		Assert.notNull(additionalBuildcommandsElement, "additionalBuildCommands element of the maven-eclipse-plugin required");
 		final String gaeBuildCommandName = "com.google.appengine.eclipse.core.enhancerbuilder";
@@ -899,8 +908,10 @@ public class JpaOperationsImpl implements JpaOperations {
 			additionalBuildcommandsElement.removeChild(gaeBuildCommandElement);
 			changes.add("removed GAE buildCommand from maven-eclipse-plugin");
 		}
+	}
 
-		// Manage GAE projectnature
+	private void manageGaeProjectNature(final boolean addGaeSettingsToPlugin, final Document document, final Collection<String> changes) {
+		final Element root = document.getDocumentElement();
 		final Element additionalProjectnaturesElement = XmlUtils.findFirstElement("/project/build/plugins/plugin[artifactId = 'maven-eclipse-plugin']/configuration/additionalProjectnatures", root);
 		Assert.notNull(additionalProjectnaturesElement, "additionalProjectnatures element of the maven-eclipse-plugin required");
 		final String gaeProjectnatureName = "com.google.appengine.eclipse.core.gaeNature";
@@ -912,11 +923,6 @@ public class JpaOperationsImpl implements JpaOperations {
 		} else if (!addGaeSettingsToPlugin && gaeProjectnatureElement != null) {
 			additionalProjectnaturesElement.removeChild(gaeProjectnatureElement);
 			changes.add("removed GAE projectnature from maven-eclipse-plugin");
-		}
-
-		if (!changes.isEmpty()) {
-			final String changesMessage = StringUtils.collectionToDelimitedString(changes, "; ");
-			fileManager.createOrUpdateTextFileIfRequired(pom, XmlUtils.nodeToString(document), changesMessage, false);
 		}
 	}
 
