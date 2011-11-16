@@ -506,7 +506,6 @@ public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTracki
 		if (classOrInterfaceTypeDetails == null) {
 			return null;
 		}
-
 		return memberDetailsScanner.getMemberDetails(getClass().getName(), classOrInterfaceTypeDetails);
 	}
 }

@@ -126,6 +126,15 @@ public class MemberTypeAdditions {
 	}
 
 	/**
+	 * Returns the ClassOrInterfaceTypeDetailsBuilder
+	 * 
+	 * @return the classOrInterfaceDetailsBuilder 
+	 */
+	public ClassOrInterfaceTypeDetailsBuilder getClassOrInterfaceDetailsBuilder() {
+		return classOrInterfaceDetailsBuilder;
+	}
+
+	/**
 	 * Returns the bare name of the invoked method
 	 *
 	 * @return a non-blank name
@@ -147,7 +156,8 @@ public class MemberTypeAdditions {
 	@Override
 	public String toString() {
 		final ToStringCreator tsc = new ToStringCreator(this);
-		tsc.append("memberHoldingTypeDetails", classOrInterfaceDetailsBuilder);
+		tsc.append("classOrInterfaceDetailsBuilder", classOrInterfaceDetailsBuilder);
+		tsc.append("methodName", methodName);
 		tsc.append("methodCall", methodCall);
 		return tsc.toString();
 	}

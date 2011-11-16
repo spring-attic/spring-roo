@@ -8,7 +8,7 @@ import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 
 /**
- * {@link FieldMetadata}-specific  implementation of {@link IdentifiableAnnotatedJavaStructureCustomDataKey}.
+ * {@link FieldMetadata}-specific implementation of {@link IdentifiableAnnotatedJavaStructureCustomDataKey}.
  *
  * @author James Tyrrell
  * @since 1.1.3
