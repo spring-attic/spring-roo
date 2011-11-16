@@ -197,7 +197,7 @@ public class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDiscoverin
 			String genericTypePlural = null;
 			boolean applicationType = false;
 			final Map<MethodMetadataCustomDataKey, MemberTypeAdditions> crudAdditions = new LinkedHashMap<MethodMetadataCustomDataKey, MemberTypeAdditions>();
-			final List<FieldMetadata> applicationTypeFieldNames = new ArrayList<FieldMetadata>();
+			final List<FieldMetadata> applicationTypeFields = new ArrayList<FieldMetadata>();
 			
 			if (!enumerated) {
 				if (fieldType.isCommonCollectionType()) {
@@ -232,11 +232,30 @@ public class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDiscoverin
 					if (typeLocationService.isInProject(fieldType) && !field.getCustomData().keySet().contains(CustomDataKeys.EMBEDDED_FIELD)) {
 						applicationType = true;
 						int dropDownFields = 0;
-						for (FieldMetadata applicationTypeField : getMemberDetails(fieldType).getFields()) {
+						MemberDetails applicationTypeMemberDetails = getMemberDetails(fieldType);
+						final MethodMetadata applicationTypeIdentifierAccessor = persistenceMemberLocator.getIdentifierAccessor(entity);
+						final MethodMetadata applicationTypeVersionAccessor = persistenceMemberLocator.getVersionAccessor(entity);
+
+						for (final MethodMetadata applicationTypeMethod : applicationTypeMemberDetails.getMethods()) {
+							if (!BeanInfoUtils.isAccessorMethod(applicationTypeMethod)) {
+								continue;
+							}
+							if (applicationTypeMethod.hasSameName(applicationTypeIdentifierAccessor, applicationTypeVersionAccessor)) {
+								continue;
+							}
+							FieldMetadata applicationTypeField = BeanInfoUtils.getFieldForJavaBeanMethod(applicationTypeMemberDetails, applicationTypeMethod);
+							if (applicationTypeField == null) {
+								continue;
+							}
+
 							if (dropDownFields < MAX_DROP_DOWN_FIELDS && isFieldOfInterest(applicationTypeField)) {
 								dropDownFields++;
-								applicationTypeFieldNames.add(applicationTypeField);
+								applicationTypeFields.add(applicationTypeField);
 							}
+						}
+						
+						if (applicationTypeFields.isEmpty()) {
+							applicationTypeFields.add(BeanInfoUtils.getFieldForJavaBeanMethod(applicationTypeMemberDetails, applicationTypeIdentifierAccessor));
 						}
 
 						crudAdditions.putAll(getCrudAdditions(fieldType, metadataId));
@@ -244,7 +263,7 @@ public class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDiscoverin
 				}
 			}
 
-			final JsfFieldHolder jsfFieldHolder = new JsfFieldHolder(field, enumerated, listViewField, genericType, genericTypePlural, genericTypeBeanName, applicationType, applicationTypeFieldNames, crudAdditions);
+			final JsfFieldHolder jsfFieldHolder = new JsfFieldHolder(field, enumerated, listViewField, genericType, genericTypePlural, genericTypeBeanName, applicationType, applicationTypeFields, crudAdditions);
 			locatedFields.add(jsfFieldHolder);
 		}
 

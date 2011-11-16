@@ -56,7 +56,7 @@ public class JsfConverterMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			valid = false;
 			return;
 		}
-		
+
 		if (!isConverterInterfaceIntroduced()) {
 			final ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
 			imports.addImport(CONVERTER);

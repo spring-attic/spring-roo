@@ -156,7 +156,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		final MemberTypeAdditions mergeMethod = crudAdditions.get(MERGE_METHOD);
 		final MemberTypeAdditions persistMethod = crudAdditions.get(PERSIST_METHOD);
 		final MemberTypeAdditions removeMethod = crudAdditions.get(REMOVE_METHOD);
-		if (identifierAccessor == null || findAllMethod == null || mergeMethod == null || persistMethod == null || removeMethod == null || locatedFields.isEmpty() || entity == null) {
+		if (identifierAccessor == null || findAllMethod == null || mergeMethod == null || persistMethod == null || removeMethod == null || entity == null) {
 			valid = false;
 			return;
 		}
@@ -461,17 +461,32 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 			return null;
 		}
 
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId());
+		methodBuilder.setModifier(PUBLIC);
+		methodBuilder.setMethodName(methodName);
+		methodBuilder.setReturnType(HTML_PANEL_GRID);
+		methodBuilder.setParameterTypes(new ArrayList<AnnotatedJavaType>());
+		methodBuilder.setParameterNames(new ArrayList<JavaSymbolName>());
+
 		final ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
-		imports.addImport(EL_CONTEXT);
-		imports.addImport(APPLICATION);
-		imports.addImport(EXPRESSION_FACTORY);
 		imports.addImport(FACES_CONTEXT);
+		imports.addImport(APPLICATION);
 		imports.addImport(HTML_PANEL_GRID);
-		imports.addImport(HTML_OUTPUT_TEXT);
 
 		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("FacesContext facesContext = FacesContext.getCurrentInstance();");
 		bodyBuilder.appendFormalLine("Application application = facesContext.getApplication();");
+
+		if (locatedFields.isEmpty()) {
+			bodyBuilder.appendFormalLine("return " + getComponentCreation("HtmlPanelGrid"));
+			methodBuilder.setBodyBuilder(bodyBuilder);
+			return methodBuilder.build();
+		}
+
+		imports.addImport(EL_CONTEXT);
+		imports.addImport(EXPRESSION_FACTORY);
+		imports.addImport(HTML_OUTPUT_TEXT);
+
 		bodyBuilder.appendFormalLine("ExpressionFactory expressionFactory = application.getExpressionFactory();");
 		bodyBuilder.appendFormalLine("ELContext elContext = facesContext.getELContext();");
 		bodyBuilder.appendFormalLine("");
@@ -1023,7 +1038,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 			}
 			sb.append(StringUtils.uncapitalize(simpleTypeName)).append(".").append(accessorMethodName).append("()");
 		}
-		bodyBuilder.appendFormalLine("String " + StringUtils.uncapitalize(simpleTypeName) + "Str = " + sb.toString().trim() + ";");
+		bodyBuilder.appendFormalLine("String " + StringUtils.uncapitalize(simpleTypeName) + "Str = String.valueOf(" + sb.toString().trim() + ");");
 
 		bodyBuilder.appendFormalLine("if (" + StringUtils.uncapitalize(simpleTypeName) + "Str.toLowerCase().startsWith(query.toLowerCase())) {");
 		bodyBuilder.indent();
