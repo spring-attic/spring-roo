@@ -17,7 +17,7 @@ import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.logging.HandlerUtils;
 
 /**
- * Implementation of operations that are available via the Roo shell.
+ * Implementation of {@link EmbeddedOperations).
  *
  * @author Stefan Schmidt
  * @since 1.1

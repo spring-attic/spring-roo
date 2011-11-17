@@ -3,7 +3,7 @@ package org.springframework.roo.addon.web.selenium;
 import org.springframework.roo.model.JavaType;
 
 /**
- * Interface to {@link SeleniumOperationsImpl}.
+ * Provides Selenium operations.
  *
  * @author Ben Alex
  * @since 1.0

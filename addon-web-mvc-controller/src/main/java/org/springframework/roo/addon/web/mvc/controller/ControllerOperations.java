@@ -6,7 +6,7 @@ import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaType;
 
 /**
- * Interface to {@link ControllerOperationsImpl}.
+ * Provides Controller configuration operations.
  *
  * @author Ben Alex
  * @author Stefan Schmidt

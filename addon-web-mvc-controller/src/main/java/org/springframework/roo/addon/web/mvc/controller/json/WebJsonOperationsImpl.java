@@ -47,7 +47,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 /**
- * Implements {@link WebJsonOperations}.
+ * Implementation of {@link WebJsonOperations}.
  *
  * @author Stefan Schmidt
  * @since 1.2.0

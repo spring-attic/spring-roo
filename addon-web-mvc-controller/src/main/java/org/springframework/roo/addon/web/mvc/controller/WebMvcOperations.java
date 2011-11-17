@@ -3,7 +3,7 @@ package org.springframework.roo.addon.web.mvc.controller;
 import org.springframework.roo.model.JavaPackage;
 
 /**
- * Interface for {@link WebMvcOperationsImpl}.
+ * Provides operations to create various view layer resources.
  *
  * @author Stefan Schmidt
  * @author Ben Alex

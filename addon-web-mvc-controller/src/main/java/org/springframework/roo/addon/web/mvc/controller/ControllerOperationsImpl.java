@@ -44,7 +44,7 @@ import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
 
 /**
- * Provides Controller configuration operations.
+ * Implementation of {@link ControllerOperations}.
  *
  * @author Stefan Schmidt
  * @since 1.0

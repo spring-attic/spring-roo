@@ -23,7 +23,7 @@ import org.springframework.roo.model.RooJavaType;
 import org.springframework.uaa.client.util.Assert;
 
 /**
- * Implements {@link WebFinderOperations}
+ * Implementation of {@link WebFinderOperations}
  *
  * @author Stefan Schmidt
  * @since 1.2.0

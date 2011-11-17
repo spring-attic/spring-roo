@@ -3,7 +3,7 @@ package org.springframework.roo.addon.web.mvc.controller.finder;
 import org.springframework.roo.model.JavaType;
 
 /**
- *  Operations for Web MVC finder functionality.
+ * Provides operations for Web MVC finder functionality.
  *
  * @author Stefan Schmidt
  * @since 1.2.0

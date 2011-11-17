@@ -54,7 +54,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 /**
- * Provides property file configuration operations.
+ * Implementation of {@link SeleniumOperations}.
  *
  * @author Stefan Schmidt
  * @since 1.0

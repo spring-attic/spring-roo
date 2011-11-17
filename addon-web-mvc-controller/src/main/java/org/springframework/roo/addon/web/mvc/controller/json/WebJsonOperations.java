@@ -4,7 +4,7 @@ import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaType;
 
 /**
- * Operations for Web MVC Json functionality.
+ * Provides operations for Web MVC Json functionality.
  *
  * @author Stefan Schmidt
  * @since 1.2.0

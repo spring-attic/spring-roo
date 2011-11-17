@@ -44,7 +44,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
 /**
- * Provides operations to create various view layer resources.
+ * Implementation of {@link WebMvcOperations}.
  *
  * @author Stefan Schmidt
  * @author Ben Alex

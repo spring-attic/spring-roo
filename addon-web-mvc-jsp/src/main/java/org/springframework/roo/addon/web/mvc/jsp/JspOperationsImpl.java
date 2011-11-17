@@ -38,9 +38,9 @@ import org.springframework.roo.classpath.operations.AbstractOperations;
 import org.springframework.roo.model.EnumDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.FeatureNames;
+import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
@@ -57,7 +57,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 /**
- * Provides operations to create various view layer resources.
+ * Implementation of {@link JspOperations}.
  *
  * @author Stefan Schmidt
  * @author Jeremy Grelle

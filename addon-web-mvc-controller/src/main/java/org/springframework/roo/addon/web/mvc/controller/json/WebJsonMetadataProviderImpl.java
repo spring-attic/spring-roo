@@ -153,7 +153,6 @@ public class WebJsonMetadataProviderImpl extends AbstractMemberDiscoveringItdMet
 		metadataDependencyRegistry.registerDependency(backingMemberHoldingTypeDetails.getDeclaredByMetadataId(), metadataId);
 
 		final Set<FinderMetadataDetails> finderDetails = webMetadataService.getDynamicFinderMethodsAndFields(jsonObject, formBackingObjectMemberDetails, metadataId);
-
 		final Map<MethodMetadataCustomDataKey, MemberTypeAdditions> persistenceAdditions = webMetadataService.getCrudAdditions(jsonObject, metadataId);
 		final JavaTypePersistenceMetadataDetails javaTypePersistenceMetadataDetails = webMetadataService.getJavaTypePersistenceMetadataDetails(jsonObject, getMemberDetails(jsonObject), metadataId);
 		PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(jsonObject, typeLocationService.getTypePath(jsonObject)));
