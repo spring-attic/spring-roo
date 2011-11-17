@@ -44,9 +44,8 @@ public interface MongoOperations extends Feature {
 	 *
 	 * @param interfaceType (required)
 	 * @param classType (optional)
-	 * @param domainType (required)
 	 */
-	void setupRepository(JavaType interfaceType, JavaType classType, JavaType domainType);
+	void setupRepository(JavaType interfaceType, JavaType classType);
 
 	/**
 	 * Creates a new domain type ready for backing a Spring Data MongoDB repository

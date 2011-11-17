@@ -85,22 +85,17 @@ public class MongoOperationsImpl implements MongoOperations {
 		return isInstalledInModule(projectOperations.getFocusedModuleName()) && !projectOperations.isFeatureInstalledInFocusedModule(FeatureNames.JPA);
 	}
 
-	public void setupRepository(final JavaType interfaceType, JavaType classType, final JavaType domainType) {
+	public void setupRepository(final JavaType interfaceType, final JavaType domainType) {
 		Assert.notNull(interfaceType, "Interface type required");
 		Assert.notNull(domainType, "Domain type required");
 
-		if (classType == null) {
-			classType = new JavaType(interfaceType.getFullyQualifiedTypeName() + "Impl");
-		}
-
 		String interfaceIdentifier = pathResolver.getFocusedCanonicalPath(Path.SRC_MAIN_JAVA, interfaceType);
-		String classIdentifier = pathResolver.getFocusedCanonicalPath(Path.SRC_MAIN_JAVA, classType);
 
-		if (fileManager.exists(interfaceIdentifier) || fileManager.exists(classIdentifier)) {
+		if (fileManager.exists(interfaceIdentifier)) {
 			return; // Type exists already - nothing to do
 		}
 
-		// First build interface type
+		// Build interface type
 		AnnotationMetadataBuilder interfaceAnnotationMetadata = new AnnotationMetadataBuilder(ROO_REPOSITORY_MONGO);
 		interfaceAnnotationMetadata.addAttribute(new ClassAttributeValue(new JavaSymbolName("domainType"), domainType));
 		String interfaceMdId = PhysicalTypeIdentifier.createIdentifier(interfaceType, pathResolver.getPath(interfaceIdentifier));

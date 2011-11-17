@@ -29,9 +29,8 @@ public class RepositoryJpaCommands implements CommandMarker {
 	@CliCommand(value = "repository jpa", help = "Adds @RooJpaRepository annotation to target type")
 	public void repository(
 		@CliOption(key = "interface", mandatory = true, help = "The java interface to apply this annotation to") final JavaType interfaceType,
-		@CliOption(key = "class", mandatory = false, help = "Implementation class for the specified interface") final JavaType classType,
 		@CliOption(key = "entity", unspecifiedDefaultValue = "*", optionContext = "update,project", mandatory = false, help = "The domain entity this repository should expose") final JavaType domainType) {
 
-		repositoryJpaOperations.setupRepository(interfaceType, classType, domainType);
+		repositoryJpaOperations.setupRepository(interfaceType, domainType);
 	}
 }

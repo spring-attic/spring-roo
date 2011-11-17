@@ -12,5 +12,5 @@ public interface RepositoryJpaOperations extends Feature {
 
 	boolean isRepositoryInstallationPossible();
 
-	void setupRepository(JavaType interfaceType, JavaType classType, JavaType domainType);
+	void setupRepository(JavaType interfaceType, JavaType classType);
 }

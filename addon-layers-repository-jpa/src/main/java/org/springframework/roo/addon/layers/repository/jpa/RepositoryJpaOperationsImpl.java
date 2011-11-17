@@ -63,18 +63,13 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
 		return isInstalledInModule(projectOperations.getFocusedModuleName()) && !projectOperations.isFeatureInstalledInFocusedModule(FeatureNames.MONGO);
 	}
 
-	public void setupRepository(final JavaType interfaceType, JavaType classType, final JavaType domainType) {
+	public void setupRepository(final JavaType interfaceType, final JavaType domainType) {
 		Assert.notNull(interfaceType, "Interface type required");
 		Assert.notNull(domainType, "Domain type required");
 
-		if (classType == null) {
-			classType = new JavaType(interfaceType.getFullyQualifiedTypeName() + "Impl");
-		}
-
 		String interfaceIdentifier = pathResolver.getFocusedCanonicalPath(Path.SRC_MAIN_JAVA, interfaceType);
-		String classIdentifier = pathResolver.getFocusedCanonicalPath(Path.SRC_MAIN_JAVA, classType);
 
-		if (fileManager.exists(interfaceIdentifier) || fileManager.exists(classIdentifier)) {
+		if (fileManager.exists(interfaceIdentifier)) {
 			return; // Type exists already - nothing to do
 		}
 
@@ -85,12 +80,6 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
 		ClassOrInterfaceTypeDetailsBuilder interfaceTypeBuilder = new ClassOrInterfaceTypeDetailsBuilder(interfaceMdId, Modifier.PUBLIC, interfaceType, PhysicalTypeCategory.INTERFACE);
 		interfaceTypeBuilder.addAnnotation(interfaceAnnotationMetadata.build());
 		typeManagementService.createOrUpdateTypeOnDisk(interfaceTypeBuilder.build());
-
-		// Second build the implementing class TODO Why is this commented out?
-		// String classMdId = PhysicalTypeIdentifier.createIdentifier(classType, projectOperations.getPathResolver().getPath(classIdentifier));
-		// ClassOrInterfaceTypeDetailsBuilder classTypeBuilder = new ClassOrInterfaceTypeDetailsBuilder(classMdId, Modifier.PUBLIC, classType, PhysicalTypeCategory.CLASS);
-		// classTypeBuilder.addImplementsType(interfaceType);
-		// typeManagementService.createOrUpdateTypeOnDisk(classTypeBuilder.build());
 
 		// Take care of project configuration
 		configureProject();
