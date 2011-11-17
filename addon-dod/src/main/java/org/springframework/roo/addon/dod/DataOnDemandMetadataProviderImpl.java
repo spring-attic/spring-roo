@@ -183,6 +183,7 @@ public class DataOnDemandMetadataProviderImpl extends AbstractMemberDiscoveringI
 
 	private Map<FieldMetadata, DataOnDemandMetadata> getLocatedFields(final MemberDetails memberDetails, final String metadataIdentificationString) {
 		Map<FieldMetadata, DataOnDemandMetadata> locatedFields = new LinkedHashMap<FieldMetadata, DataOnDemandMetadata>();
+		Set<ClassOrInterfaceTypeDetails> dataOnDemandTypes = typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(ROO_DATA_ON_DEMAND);
 
 		List<MethodMetadata> mutatorMethods = memberDetails.getMethods();
 		// To avoid unnecessary rewriting of the DoD ITD we sort the mutators by method name to provide a consistent ordering
@@ -224,7 +225,7 @@ public class DataOnDemandMetadataProviderImpl extends AbstractMemberDiscoveringI
 			}
 
 			// Look up collaborating metadata
-			DataOnDemandMetadata collaboratingMetadata = locateCollaboratingMetadata(metadataIdentificationString, field);
+			DataOnDemandMetadata collaboratingMetadata = locateCollaboratingMetadata(metadataIdentificationString, field, dataOnDemandTypes);
 			locatedFields.put(field, collaboratingMetadata);
 		}
 
@@ -288,28 +289,18 @@ public class DataOnDemandMetadataProviderImpl extends AbstractMemberDiscoveringI
 	 *
 	 * @param metadataIdentificationString
 	 * @param field
+	 * @param dataOnDemandTypes 
 	 * @return <code>null</code> if it's not an n:1 or 1:1 field, or the DoD metadata is simply not available
 	 */
-	private DataOnDemandMetadata locateCollaboratingMetadata(final String metadataIdentificationString, final FieldMetadata field) {
+	private DataOnDemandMetadata locateCollaboratingMetadata(final String metadataIdentificationString, final FieldMetadata field, Set<ClassOrInterfaceTypeDetails> dataOnDemandTypes) {
 		// Check field type to ensure it is a persistent type and is not abstract
 		final JavaType fieldType = field.getFieldType();
-		MemberDetails memberDetails = getMemberDetails(fieldType);
-		if (memberDetails == null) {
-			return null;
-		}
-
-		MemberHoldingTypeDetails persistenceMemberHoldingTypeDetails = MemberFindingUtils.getMostConcreteMemberHoldingTypeDetailsWithTag(memberDetails, PERSISTENT_TYPE);
-		if (persistenceMemberHoldingTypeDetails == null) {
-			return null;
-		}
-
-		// Check field for @ManyToOne or @OneToOne annotation
 		if (!field.getCustomData().keySet().contains(MANY_TO_ONE_FIELD) && !field.getCustomData().keySet().contains(ONE_TO_ONE_FIELD)) {
 			return null;
 		}
 
 		String otherProvider = null;
-		for (ClassOrInterfaceTypeDetails cid : typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(ROO_DATA_ON_DEMAND)) {
+		for (ClassOrInterfaceTypeDetails cid : dataOnDemandTypes) {
 			AnnotationMetadata annotationMetadata = MemberFindingUtils.getAnnotationOfType(cid.getAnnotations(), ROO_DATA_ON_DEMAND);
 			AnnotationAttributeValue<JavaType> annotationAttributeValue = annotationMetadata.getAttribute("entity");
 			if (annotationAttributeValue != null && annotationAttributeValue.getValue().equals(fieldType)) {
@@ -319,12 +310,9 @@ public class DataOnDemandMetadataProviderImpl extends AbstractMemberDiscoveringI
 		}
 
 		if (otherProvider == null || otherProvider.equals(metadataIdentificationString)) {
-			 // No other provider or ignore self-references
+			// No other provider or ignore self-references
 			return null;
 		}
-		
-		// The field points to a single instance of another domain entity - register for changes to it
-		metadataDependencyRegistry.registerDependency(persistenceMemberHoldingTypeDetails.getDeclaredByMetadataId(), metadataIdentificationString);
 		metadataDependencyRegistry.registerDependency(otherProvider, metadataIdentificationString);
 
 		return (DataOnDemandMetadata) metadataService.get(otherProvider);
