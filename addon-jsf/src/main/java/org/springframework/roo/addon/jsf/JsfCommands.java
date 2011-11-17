@@ -37,7 +37,7 @@ public class JsfCommands implements CommandMarker {
 
 	@CliCommand(value = "web jsf setup", help = "Set up JSF environment")
 	public void webJsfSetup(
-		@CliOption(key = "implementation", mandatory = false, help = "The JSF implementation to use") final JsfImplementation jsfImplementation,
+		@CliOption(key = "implementation", mandatory = true, help = "The JSF implementation to use") final JsfImplementation jsfImplementation,
 		@CliOption(key = "theme", mandatory = false, help = "The name of the theme") final Theme theme) {
 
 		jsfOperations.setup(jsfImplementation, theme);

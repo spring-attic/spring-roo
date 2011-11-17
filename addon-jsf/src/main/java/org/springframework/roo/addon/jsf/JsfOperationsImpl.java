@@ -70,6 +70,7 @@ import org.w3c.dom.Element;
 public class JsfOperationsImpl extends AbstractOperations implements JsfOperations {
 
 	// Constants
+	private static final String MYFACES_LISTENER = "org.apache.myfaces.webapp.StartupServletContextListener";
 	private static final String PRIMEFACES_XPATH = "/configuration/jsf-libraries/jsf-library[@id = 'PRIMEFACES']";
 	private static final String PRIMEFACES_THEMES_VERSION = "1.0.2";
 
@@ -99,13 +100,11 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 		return isInstalledInModule(projectOperations.getFocusedModuleName()) && fileManager.exists(getWebXmlFile());
 	}
 
-	public void setup(JsfImplementation jsfImplementation, final Theme theme) {
-		if (jsfImplementation == null) {
-			jsfImplementation = JsfImplementation.ORACLE_MOJARRA;
-		}
+	public void setup(final JsfImplementation jsfImplementation, final Theme theme) {
+		Assert.notNull(jsfImplementation, "JSF implementation required");
 
 		updateConfiguration(jsfImplementation);
-		createOrUpdateWebXml(theme);
+		createOrUpdateWebXml(jsfImplementation, theme);
 
 		PathResolver pathResolver = projectOperations.getPathResolver();
 		copyDirectoryContents("index.html", pathResolver.getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, ""), false);
@@ -311,15 +310,11 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 		return projectOperations.getPathResolver().getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/web.xml");
 	}
 
-	private void createOrUpdateWebXml(final Theme theme) {
+	private void createOrUpdateWebXml(final JsfImplementation jsfImplementation, final Theme theme) {
 		String webXmlPath = getWebXmlFile();
-		boolean hasWebXml = fileManager.exists(webXmlPath);
-		if (hasWebXml && theme == null) {
-			return;
-		}
 
 		final Document document;
-		if (hasWebXml) {
+		if (fileManager.exists(webXmlPath)) {
 			document = XmlUtils.readXml(fileManager.getInputStream(webXmlPath));
 		} else {
 			document = getDocumentTemplate("WEB-INF/web-template.xml");
@@ -327,11 +322,36 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 			WebXmlUtils.setDisplayName(projectName, document, null);
 			WebXmlUtils.setDescription("Roo generated " + projectName + " application", document, null);
 		}
+		
+		addOrRemoveMyFacesListener(jsfImplementation, document);
 		if (theme != null) {
 			changeTheme(theme, document);
 		}
 
-		fileManager.createOrUpdateTextFileIfRequired(getWebXmlFile(), XmlUtils.nodeToString(document), false);
+		fileManager.createOrUpdateTextFileIfRequired(webXmlPath, XmlUtils.nodeToString(document), false);
+	}
+
+	private void addOrRemoveMyFacesListener(final JsfImplementation jsfImplementation, final Document document) {
+		Assert.notNull(jsfImplementation, "JSF implementation required");
+		Assert.notNull(document, "web.xml document required");
+
+		final Element root = document.getDocumentElement();
+		final Element webAppElement = XmlUtils.findFirstElement("/web-app", root);
+		Element listenerElement = XmlUtils.findFirstElement("listener[listener-class = '" + MYFACES_LISTENER + "']", webAppElement);
+		switch (jsfImplementation) {
+			case ORACLE_MOJARRA:
+				if (listenerElement != null) {
+					webAppElement.removeChild(listenerElement);
+					DomUtils.removeTextNodes(webAppElement);
+				}
+				break;
+			case APACHE_MYFACES:
+				if (listenerElement == null) {
+					WebXmlUtils.addListener(MYFACES_LISTENER, document, "");
+					DomUtils.removeTextNodes(webAppElement);
+				}
+				break;
+		}
 	}
 
 	private void changeTheme(final Theme theme, final Document document) {
@@ -381,7 +401,7 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 
 	private void updateConfiguration(final JsfImplementation jsfImplementation) {
 		// Update pom.xml with JSF/Primefaces dependencies and repositories
-		Element configuration = XmlUtils.getConfiguration(getClass());
+		final Element configuration = XmlUtils.getConfiguration(getClass());
 		final String jsfImplementationXPath = getJsfImplementationXPath(getUnwantedJsfImplementations(jsfImplementation));
 
 		updateDependencies(configuration, jsfImplementation, jsfImplementationXPath);
