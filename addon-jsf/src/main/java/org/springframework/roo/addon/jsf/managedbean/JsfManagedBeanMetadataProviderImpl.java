@@ -1,5 +1,13 @@
 package org.springframework.roo.addon.jsf.managedbean;
 
+import static org.springframework.roo.addon.jsf.managedbean.JsfManagedBeanMetadata.APPLICATION_TYPE_FIELDS_KEY;
+import static org.springframework.roo.addon.jsf.managedbean.JsfManagedBeanMetadata.APPLICATION_TYPE_KEY;
+import static org.springframework.roo.addon.jsf.managedbean.JsfManagedBeanMetadata.CRUD_ADDITIONS_KEY;
+import static org.springframework.roo.addon.jsf.managedbean.JsfManagedBeanMetadata.ENUMERATED_KEY;
+import static org.springframework.roo.addon.jsf.managedbean.JsfManagedBeanMetadata.LIST_VIEW_FIELD_KEY;
+import static org.springframework.roo.addon.jsf.managedbean.JsfManagedBeanMetadata.PARAMETER_TYPE_KEY;
+import static org.springframework.roo.addon.jsf.managedbean.JsfManagedBeanMetadata.PARAMETER_TYPE_MANAGED_BEAN_NAME_KEY;
+import static org.springframework.roo.addon.jsf.managedbean.JsfManagedBeanMetadata.PARAMETER_TYPE_PLURAL_KEY;
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.COUNT_ALL_METHOD;
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.EMBEDDED_FIELD;
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.FIND_ALL_METHOD;
@@ -28,7 +36,6 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.configurable.ConfigurableMetadataProvider;
-import org.springframework.roo.addon.jsf.model.JsfFieldHolder;
 import org.springframework.roo.addon.plural.PluralMetadata;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
@@ -38,10 +45,10 @@ import org.springframework.roo.classpath.customdata.tagkeys.MethodMetadataCustom
 import org.springframework.roo.classpath.details.BeanInfoUtils;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
+import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadata;
-import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
@@ -50,6 +57,7 @@ import org.springframework.roo.classpath.layers.LayerType;
 import org.springframework.roo.classpath.layers.MemberTypeAdditions;
 import org.springframework.roo.classpath.layers.MethodParameter;
 import org.springframework.roo.classpath.scanner.MemberDetails;
+import org.springframework.roo.model.CustomDataBuilder;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.LogicalPath;
@@ -68,7 +76,7 @@ public class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDiscoverin
 	// Constants
 	private static final int LAYER_POSITION = LayerType.HIGHEST.getPosition();
 	// -- The maximum number of entity fields to show in a list view.
-	private static final int MAX_LIST_VIEW_FIELDS = 7;
+	private static final int MAX_LIST_VIEW_FIELDS = 5;
 	// -- The maximum number of fields to form a String to show in a drop down field.
 	private static final int MAX_DROP_DOWN_FIELDS = 4;
 
@@ -129,7 +137,7 @@ public class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDiscoverin
 
 		final MethodMetadata identifierAccessor = persistenceMemberLocator.getIdentifierAccessor(entity);
 		final MethodMetadata versionAccessor = persistenceMemberLocator.getVersionAccessor(entity);
-		final Set<JsfFieldHolder> locatedFields = locateFields(entity, memberDetails, metadataIdentificationString, identifierAccessor, versionAccessor);
+		final Set<FieldMetadata> locatedFields = locateFields(entity, memberDetails, metadataIdentificationString, identifierAccessor, versionAccessor);
 
 		// Remember that this entity JavaType matches up with this metadata identification string
 		// Start by clearing any previous association
@@ -164,9 +172,9 @@ public class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDiscoverin
 	 * @param identifierAccessor
 	 * @return a non-<code>null</code> iterable collection
 	 */
-	private Set<JsfFieldHolder> locateFields(final JavaType entity, final MemberDetails memberDetails, final String metadataId, final MethodMetadata identifierAccessor, final MethodMetadata versionAccessor) {
-		final Set<JsfFieldHolder> locatedFields = new LinkedHashSet<JsfFieldHolder>();
-		Set<ClassOrInterfaceTypeDetails> managedBeans = typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(ROO_JSF_MANAGED_BEAN);
+	private Set<FieldMetadata> locateFields(final JavaType entity, final MemberDetails memberDetails, final String metadataId, final MethodMetadata identifierAccessor, final MethodMetadata versionAccessor) {
+		final Set<FieldMetadata> locatedFields = new LinkedHashSet<FieldMetadata>();
+		Set<ClassOrInterfaceTypeDetails> managedBeanTypes = typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(ROO_JSF_MANAGED_BEAN);
 
 		int listViewFields = 0;
 		for (final MethodMetadata method : memberDetails.getMethods()) {
@@ -182,60 +190,55 @@ public class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDiscoverin
 			}
 			metadataDependencyRegistry.registerDependency(field.getDeclaredByMetadataId(), metadataId);
 
+			CustomDataBuilder customDataBuilder = new CustomDataBuilder(field.getCustomData());
 			final JavaType fieldType = field.getFieldType();
+			ClassOrInterfaceTypeDetails fieldTypeCid = typeLocationService.getTypeDetails(fieldType);
 
 			// Check field is to be displayed in the entity's list view
-			boolean listViewField = false;
-			if (listViewFields < MAX_LIST_VIEW_FIELDS && isFieldOfInterest(field)) {
+			if (listViewFields < MAX_LIST_VIEW_FIELDS && isFieldOfInterest(field) && fieldTypeCid == null) {
 				listViewFields++;
-				listViewField = true;
+				customDataBuilder.put(LIST_VIEW_FIELD_KEY, field);
 			}
 
-			final boolean enumerated = field.getCustomData().keySet().contains(CustomDataKeys.ENUMERATED_FIELD) || isEnum(fieldType);
-			JavaType genericType = null;
-			String genericTypeBeanName = null;
-			String genericTypePlural = null;
-			boolean applicationType = false;
-			final Map<MethodMetadataCustomDataKey, MemberTypeAdditions> crudAdditions = new LinkedHashMap<MethodMetadataCustomDataKey, MemberTypeAdditions>();
-			final List<FieldMetadata> applicationTypeFields = new ArrayList<FieldMetadata>();
-			
-			if (!enumerated) {
+			final boolean enumerated = field.getCustomData().keySet().contains(CustomDataKeys.ENUMERATED_FIELD) || isEnum(fieldTypeCid);
+			if (enumerated) {
+				customDataBuilder.put(ENUMERATED_KEY, null);
+			} else {
 				if (fieldType.isCommonCollectionType()) {
-					genericTypeLoop: for (JavaType parameter : fieldType.getParameters()) {
-						if (!typeLocationService.isInProject(parameter)) {
+					parameterTypeLoop: for (JavaType parameter : fieldType.getParameters()) {
+						ClassOrInterfaceTypeDetails parameterTypeCid = typeLocationService.getTypeDetails(parameter);
+						if (parameterTypeCid == null) {
 							continue;
 						}
-						for (ClassOrInterfaceTypeDetails managedBean : managedBeans) {
-							AnnotationMetadata managedBeanAnnotation = managedBean.getAnnotation(ROO_JSF_MANAGED_BEAN);
-							AnnotationAttributeValue<?> entityAttribute = managedBeanAnnotation.getAttribute("entity");
-							if (entityAttribute != null) {
-								JavaType attrValue = (JavaType) entityAttribute.getValue();
-								if (attrValue.equals(parameter)) {
-									AnnotationAttributeValue<?> beanNameAttribute = managedBeanAnnotation.getAttribute("beanName");
-									genericType = parameter;
-									genericTypeBeanName = (String) beanNameAttribute.getValue();
-									ClassOrInterfaceTypeDetails genericTypeDetails = typeLocationService.getTypeDetails(genericType);
-									Assert.notNull(genericTypeDetails, "The type '" + genericType + "' could not be resolved");
-									LogicalPath path = PhysicalTypeIdentifier.getPath(genericTypeDetails.getDeclaredByMetadataId());
-									final PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(genericType, path));
-									genericTypePlural = pluralMetadata.getPlural();
-									break genericTypeLoop; // Only support one generic type parameter
+
+						for (ClassOrInterfaceTypeDetails managedBeanType : managedBeanTypes) {
+							AnnotationMetadata managedBeanAnnotation = managedBeanType.getAnnotation(ROO_JSF_MANAGED_BEAN);
+							if (((JavaType) managedBeanAnnotation.getAttribute("entity").getValue()).equals(parameter)) {
+								customDataBuilder.put(PARAMETER_TYPE_KEY, parameter);
+								customDataBuilder.put(PARAMETER_TYPE_MANAGED_BEAN_NAME_KEY, managedBeanAnnotation.getAttribute("beanName").getValue());
+
+								LogicalPath logicalPath = PhysicalTypeIdentifier.getPath(parameterTypeCid.getDeclaredByMetadataId());
+								final PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(parameter, logicalPath));
+								if (pluralMetadata != null) {
+									customDataBuilder.put(PARAMETER_TYPE_PLURAL_KEY, pluralMetadata.getPlural());
 								}
+								break parameterTypeLoop; // Only support one generic type parameter
 							}
-							// Generic type is not an entity - test for an enum
-							if (isEnum(parameter)) {
-								genericType = parameter;
+							// Parameter type is not an entity - test for an enum
+							if (isEnum(parameterTypeCid)) {
+								customDataBuilder.put(PARAMETER_TYPE_KEY, parameter);
 							}
 						}
 					}
 				} else {
-					if (typeLocationService.isInProject(fieldType) && !field.getCustomData().keySet().contains(CustomDataKeys.EMBEDDED_FIELD)) {
-						applicationType = true;
-						int dropDownFields = 0;
-						MemberDetails applicationTypeMemberDetails = getMemberDetails(fieldType);
+					if (fieldTypeCid != null && !customDataBuilder.keySet().contains(CustomDataKeys.EMBEDDED_FIELD)) {
+						customDataBuilder.put(APPLICATION_TYPE_KEY, null);
 						final MethodMetadata applicationTypeIdentifierAccessor = persistenceMemberLocator.getIdentifierAccessor(entity);
 						final MethodMetadata applicationTypeVersionAccessor = persistenceMemberLocator.getVersionAccessor(entity);
+						final List<FieldMetadata> applicationTypeFields = new ArrayList<FieldMetadata>();
 
+						int dropDownFields = 0;
+						final MemberDetails applicationTypeMemberDetails = getMemberDetails(fieldType);
 						for (final MethodMetadata applicationTypeMethod : applicationTypeMemberDetails.getMethods()) {
 							if (!BeanInfoUtils.isAccessorMethod(applicationTypeMethod)) {
 								continue;
@@ -253,23 +256,23 @@ public class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDiscoverin
 								applicationTypeFields.add(applicationTypeField);
 							}
 						}
-						
 						if (applicationTypeFields.isEmpty()) {
 							applicationTypeFields.add(BeanInfoUtils.getFieldForJavaBeanMethod(applicationTypeMemberDetails, applicationTypeIdentifierAccessor));
 						}
-
-						crudAdditions.putAll(getCrudAdditions(fieldType, metadataId));
+						customDataBuilder.put(APPLICATION_TYPE_FIELDS_KEY, applicationTypeFields);
+						customDataBuilder.put(CRUD_ADDITIONS_KEY, getCrudAdditions(fieldType, metadataId));
 					}
 				}
 			}
 
-			final JsfFieldHolder jsfFieldHolder = new JsfFieldHolder(field, enumerated, listViewField, genericType, genericTypePlural, genericTypeBeanName, applicationType, applicationTypeFields, crudAdditions);
-			locatedFields.add(jsfFieldHolder);
+			FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(field);
+			fieldBuilder.setCustomData(customDataBuilder);
+			locatedFields.add(fieldBuilder.build());
 		}
 
 		return locatedFields;
 	}
-	
+
 	/**
 	 * Returns the additions to make to the generated ITD in order to invoke the
 	 * various CRUD methods of the given entity
@@ -308,18 +311,16 @@ public class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDiscoverin
 		return additions;
 	}
 
-	private boolean isEnum(final JavaType fieldType) {
-		ClassOrInterfaceTypeDetails cid = typeLocationService.getTypeDetails(fieldType);
-		return cid != null && cid.getPhysicalTypeCategory() == PhysicalTypeCategory.ENUMERATION;
-	}
-
 	private boolean isFieldOfInterest(final FieldMetadata field) {
 		final JavaType fieldType = field.getFieldType();
 		return !fieldType.isCommonCollectionType() && !fieldType.isArray() // Exclude collections and arrays
-			&& !typeLocationService.isInProject(fieldType) // Exclude references to other domain objects as they are too verbose
 			&& !fieldType.equals(BOOLEAN_PRIMITIVE) && !fieldType.equals(BOOLEAN_OBJECT) // Boolean values would not be meaningful in this presentation
 			&& !fieldType.equals(BYTE_ARRAY_PRIMITIVE)
 			&& !field.getCustomData().keySet().contains(EMBEDDED_FIELD); // Not interested in embedded types
+	}
+
+	private boolean isEnum(ClassOrInterfaceTypeDetails cid) {
+		return cid != null && cid.getPhysicalTypeCategory() == PhysicalTypeCategory.ENUMERATION;
 	}
 
 	public String getItdUniquenessFilenameSuffix() {
