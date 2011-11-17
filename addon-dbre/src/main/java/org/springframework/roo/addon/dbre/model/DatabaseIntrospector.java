@@ -89,6 +89,9 @@ public class DatabaseIntrospector extends AbstractIntrospector {
 			if ("Oracle".equalsIgnoreCase(databaseMetaData.getDatabaseProductName()) && tableName.startsWith("BIN$")) {
 				ignore = true;
 			}
+			if ("MySQL".equalsIgnoreCase(databaseMetaData.getDatabaseProductName()) && tableName.equals("SEQUENCE")) {
+				ignore = true;
+			}
 		} catch (SQLException ignored) {}
 		return ignore;
 	}
