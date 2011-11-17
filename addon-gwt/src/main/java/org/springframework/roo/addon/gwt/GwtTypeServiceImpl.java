@@ -237,7 +237,6 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 	}
 
 	public String getGwtModuleXml(final String moduleName) {
-
 		String gwtModuleXml = projectOperations.getPathResolver().getFocusedRoot(Path.SRC_MAIN_JAVA) + projectOperations.getTopLevelPackage(moduleName).getFullyQualifiedPackageName().replace('.', File.separatorChar) + File.separator + "*.gwt.xml";
 		Set<String> paths = new LinkedHashSet<String>();
 		for (FileDetails fileDetails : fileManager.findMatchingAntPath(gwtModuleXml)) {
@@ -356,7 +355,6 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 		setRequestMethod(requestMethods, governorTypeDetails, memberDetails, CustomDataKeys.FIND_METHOD);
 		setRequestMethod(requestMethods, governorTypeDetails, memberDetails, CustomDataKeys.FIND_ALL_METHOD);
 		setRequestMethod(requestMethods, governorTypeDetails, memberDetails, CustomDataKeys.FIND_ENTRIES_METHOD);
-		System.out.println("********** populated request methods");
 		return requestMethods;
 	}
 
