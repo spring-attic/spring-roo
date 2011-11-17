@@ -148,8 +148,8 @@ public class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDiscoverin
 		entityToManagedBeanMidMap.put(entity, metadataIdentificationString);
 		managedBeanMidToEntityMap.put(metadataIdentificationString, entity);
 
-		String physicalTypeIdentifier = typeLocationService.getPhysicalTypeIdentifier(entity);
-		LogicalPath path = PhysicalTypeIdentifier.getPath(physicalTypeIdentifier);
+		final String physicalTypeIdentifier = typeLocationService.getPhysicalTypeIdentifier(entity);
+		final LogicalPath path = PhysicalTypeIdentifier.getPath(physicalTypeIdentifier);
 		final PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(entity, path));
 		Assert.notNull(pluralMetadata, "Could not determine plural for '" + entity.getSimpleTypeName() + "'");
 		final String plural = pluralMetadata.getPlural();
@@ -174,7 +174,7 @@ public class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDiscoverin
 	 */
 	private Set<FieldMetadata> locateFields(final JavaType entity, final MemberDetails memberDetails, final String metadataId, final MethodMetadata identifierAccessor, final MethodMetadata versionAccessor) {
 		final Set<FieldMetadata> locatedFields = new LinkedHashSet<FieldMetadata>();
-		Set<ClassOrInterfaceTypeDetails> managedBeanTypes = typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(ROO_JSF_MANAGED_BEAN);
+		final Set<ClassOrInterfaceTypeDetails> managedBeanTypes = typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(ROO_JSF_MANAGED_BEAN);
 
 		int listViewFields = 0;
 		for (final MethodMetadata method : memberDetails.getMethods()) {
@@ -184,15 +184,15 @@ public class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDiscoverin
 			if (method.hasSameName(identifierAccessor, versionAccessor)) {
 				continue;
 			}
-			FieldMetadata field = BeanInfoUtils.getFieldForPropertyName(memberDetails, BeanInfoUtils.getPropertyNameForJavaBeanMethod(method));
+			final FieldMetadata field = BeanInfoUtils.getFieldForPropertyName(memberDetails, BeanInfoUtils.getPropertyNameForJavaBeanMethod(method));
 			if (field == null) {
 				continue;
 			}
 			metadataDependencyRegistry.registerDependency(field.getDeclaredByMetadataId(), metadataId);
 
-			CustomDataBuilder customDataBuilder = new CustomDataBuilder(field.getCustomData());
+			final CustomDataBuilder customDataBuilder = new CustomDataBuilder(field.getCustomData());
 			final JavaType fieldType = field.getFieldType();
-			ClassOrInterfaceTypeDetails fieldTypeCid = typeLocationService.getTypeDetails(fieldType);
+			final ClassOrInterfaceTypeDetails fieldTypeCid = typeLocationService.getTypeDetails(fieldType);
 
 			// Check field is to be displayed in the entity's list view
 			if (listViewFields < MAX_LIST_VIEW_FIELDS && isFieldOfInterest(field) && fieldTypeCid == null) {
@@ -206,18 +206,18 @@ public class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDiscoverin
 			} else {
 				if (fieldType.isCommonCollectionType()) {
 					parameterTypeLoop: for (JavaType parameter : fieldType.getParameters()) {
-						ClassOrInterfaceTypeDetails parameterTypeCid = typeLocationService.getTypeDetails(parameter);
+						final ClassOrInterfaceTypeDetails parameterTypeCid = typeLocationService.getTypeDetails(parameter);
 						if (parameterTypeCid == null) {
 							continue;
 						}
 
-						for (ClassOrInterfaceTypeDetails managedBeanType : managedBeanTypes) {
+						for (final ClassOrInterfaceTypeDetails managedBeanType : managedBeanTypes) {
 							AnnotationMetadata managedBeanAnnotation = managedBeanType.getAnnotation(ROO_JSF_MANAGED_BEAN);
 							if (((JavaType) managedBeanAnnotation.getAttribute("entity").getValue()).equals(parameter)) {
 								customDataBuilder.put(PARAMETER_TYPE_KEY, parameter);
 								customDataBuilder.put(PARAMETER_TYPE_MANAGED_BEAN_NAME_KEY, managedBeanAnnotation.getAttribute("beanName").getValue());
 
-								LogicalPath logicalPath = PhysicalTypeIdentifier.getPath(parameterTypeCid.getDeclaredByMetadataId());
+								final LogicalPath logicalPath = PhysicalTypeIdentifier.getPath(parameterTypeCid.getDeclaredByMetadataId());
 								final PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(parameter, logicalPath));
 								if (pluralMetadata != null) {
 									customDataBuilder.put(PARAMETER_TYPE_PLURAL_KEY, pluralMetadata.getPlural());
@@ -246,12 +246,11 @@ public class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDiscoverin
 							if (applicationTypeMethod.hasSameName(applicationTypeIdentifierAccessor, applicationTypeVersionAccessor)) {
 								continue;
 							}
-							FieldMetadata applicationTypeField = BeanInfoUtils.getFieldForJavaBeanMethod(applicationTypeMemberDetails, applicationTypeMethod);
+							final FieldMetadata applicationTypeField = BeanInfoUtils.getFieldForJavaBeanMethod(applicationTypeMemberDetails, applicationTypeMethod);
 							if (applicationTypeField == null) {
 								continue;
 							}
-
-							if (dropDownFields < MAX_DROP_DOWN_FIELDS && isFieldOfInterest(applicationTypeField)) {
+							if (dropDownFields < MAX_DROP_DOWN_FIELDS && isFieldOfInterest(applicationTypeField) && !typeLocationService.isInProject(applicationTypeField.getFieldType())) {
 								dropDownFields++;
 								applicationTypeFields.add(applicationTypeField);
 							}
@@ -265,7 +264,7 @@ public class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDiscoverin
 				}
 			}
 
-			FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(field);
+			final FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(field);
 			fieldBuilder.setCustomData(customDataBuilder);
 			locatedFields.add(fieldBuilder.build());
 		}
