@@ -691,12 +691,12 @@ public class JpaOperationsImpl implements JpaOperations {
 	}
 
 	private void updatePomProperties(final Element configuration, final OrmProvider ormProvider, final JdbcDatabase jdbcDatabase, final String moduleName) {
-		final List<Element> databaseProperties = XmlUtils.findElements(getDbXPath(jdbcDatabase) + "/properties/*", configuration);
+		final List<Element> databaseProperties = XmlUtils.findElements(jdbcDatabase.getConfigPrefix() + "/properties/*", configuration);
 		for (final Element property : databaseProperties) {
 			projectOperations.addProperty(moduleName, new Property(property));
 		}
 
-		final List<Element> providerProperties = XmlUtils.findElements(getProviderXPath(ormProvider) + "/properties/*", configuration);
+		final List<Element> providerProperties = XmlUtils.findElements(ormProvider.getConfigPrefix() + "/properties/*", configuration);
 		for (final Element property : providerProperties) {
 			projectOperations.addProperty(moduleName, new Property(property));
 		}
@@ -715,12 +715,12 @@ public class JpaOperationsImpl implements JpaOperations {
 	private void updateDependencies(final Element configuration, final OrmProvider ormProvider, final JdbcDatabase jdbcDatabase, final String databaseXPath, final String providersXPath, final String moduleName) {
 		final List<Dependency> requiredDependencies = new ArrayList<Dependency>();
 
-		final List<Element> databaseDependencies = XmlUtils.findElements(getDbXPath(jdbcDatabase) + "/dependencies/dependency", configuration);
+		final List<Element> databaseDependencies = XmlUtils.findElements(jdbcDatabase.getConfigPrefix() + "/dependencies/dependency", configuration);
 		for (final Element dependencyElement : databaseDependencies) {
 			requiredDependencies.add(new Dependency(dependencyElement));
 		}
 
-		final List<Element> ormDependencies = XmlUtils.findElements(getProviderXPath(ormProvider) + "/dependencies/dependency", configuration);
+		final List<Element> ormDependencies = XmlUtils.findElements(ormProvider.getConfigPrefix() + "/dependencies/dependency", configuration);
 		for (final Element dependencyElement : ormDependencies) {
 			requiredDependencies.add(new Dependency(dependencyElement));
 		}
@@ -755,12 +755,12 @@ public class JpaOperationsImpl implements JpaOperations {
 	private void updateRepositories(final Element configuration, final OrmProvider ormProvider, final JdbcDatabase jdbcDatabase, final String moduleName) {
 		final List<Repository> repositories = new ArrayList<Repository>();
 
-		final List<Element> databaseRepositories = XmlUtils.findElements(getDbXPath(jdbcDatabase) + "/repositories/repository", configuration);
+		final List<Element> databaseRepositories = XmlUtils.findElements(jdbcDatabase.getConfigPrefix() + "/repositories/repository", configuration);
 		for (final Element repositoryElement : databaseRepositories) {
 			repositories.add(new Repository(repositoryElement));
 		}
 
-		final List<Element> ormRepositories = XmlUtils.findElements(getProviderXPath(ormProvider) + "/repositories/repository", configuration);
+		final List<Element> ormRepositories = XmlUtils.findElements(ormProvider.getConfigPrefix() + "/repositories/repository", configuration);
 		for (final Element repositoryElement : ormRepositories) {
 			repositories.add(new Repository(repositoryElement));
 		}
@@ -777,12 +777,12 @@ public class JpaOperationsImpl implements JpaOperations {
 	private void updatePluginRepositories(final Element configuration, final OrmProvider ormProvider, final JdbcDatabase jdbcDatabase, final String moduleName) {
 		final List<Repository> pluginRepositories = new ArrayList<Repository>();
 
-		final List<Element> databasePluginRepositories = XmlUtils.findElements(getDbXPath(jdbcDatabase) + "/pluginRepositories/pluginRepository", configuration);
+		final List<Element> databasePluginRepositories = XmlUtils.findElements(jdbcDatabase.getConfigPrefix() + "/pluginRepositories/pluginRepository", configuration);
 		for (final Element pluginRepositoryElement : databasePluginRepositories) {
 			pluginRepositories.add(new Repository(pluginRepositoryElement));
 		}
 
-		final List<Element> ormPluginRepositories = XmlUtils.findElements(getProviderXPath(ormProvider) + "/pluginRepositories/pluginRepository", configuration);
+		final List<Element> ormPluginRepositories = XmlUtils.findElements(ormProvider.getConfigPrefix() + "/pluginRepositories/pluginRepository", configuration);
 		for (final Element pluginRepositoryElement : ormPluginRepositories) {
 			pluginRepositories.add(new Repository(pluginRepositoryElement));
 		}
@@ -803,12 +803,12 @@ public class JpaOperationsImpl implements JpaOperations {
 		// Add required filters
 		final List<Filter> filters = new ArrayList<Filter>();
 
-		final List<Element> databaseFilters = XmlUtils.findElements(getDbXPath(jdbcDatabase) + "/filters/filter", configuration);
+		final List<Element> databaseFilters = XmlUtils.findElements(jdbcDatabase.getConfigPrefix() + "/filters/filter", configuration);
 		for (final Element filterElement : databaseFilters) {
 			filters.add(new Filter(filterElement));
 		}
 
-		final List<Element> ormFilters = XmlUtils.findElements(getProviderXPath(ormProvider) + "/filters/filter", configuration);
+		final List<Element> ormFilters = XmlUtils.findElements(ormProvider.getConfigPrefix() + "/filters/filter", configuration);
 		for (final Element filterElement : ormFilters) {
 			filters.add(new Filter(filterElement));
 		}
@@ -830,12 +830,12 @@ public class JpaOperationsImpl implements JpaOperations {
 		// Add required resources
 		final List<Resource> resources = new ArrayList<Resource>();
 
-		final List<Element> databaseResources = XmlUtils.findElements(getDbXPath(jdbcDatabase) + "/resources/resource", configuration);
+		final List<Element> databaseResources = XmlUtils.findElements(jdbcDatabase.getConfigPrefix() + "/resources/resource", configuration);
 		for (final Element resourceElement : databaseResources) {
 			resources.add(new Resource(resourceElement));
 		}
 
-		final List<Element> ormResources = XmlUtils.findElements(getProviderXPath(ormProvider) + "/resources/resource", configuration);
+		final List<Element> ormResources = XmlUtils.findElements(ormProvider.getConfigPrefix() + "/resources/resource", configuration);
 		for (final Element resourceElement : ormResources) {
 			resources.add(new Resource(resourceElement));
 		}
@@ -849,12 +849,12 @@ public class JpaOperationsImpl implements JpaOperations {
 		// Identify the required plugins
 		final List<Plugin> requiredPlugins = new ArrayList<Plugin>();
 
-		final List<Element> databasePlugins = XmlUtils.findElements(getDbXPath(jdbcDatabase) + "/plugins/plugin", configuration);
+		final List<Element> databasePlugins = XmlUtils.findElements(jdbcDatabase.getConfigPrefix() + "/plugins/plugin", configuration);
 		for (final Element pluginElement : databasePlugins) {
 			requiredPlugins.add(new Plugin(pluginElement));
 		}
 
-		final List<Element> ormPlugins = XmlUtils.findElements(getProviderXPath(ormProvider) + "/plugins/plugin", configuration);
+		final List<Element> ormPlugins = XmlUtils.findElements(ormProvider.getConfigPrefix() + "/plugins/plugin", configuration);
 		for (final Element pluginElement : ormPlugins) {
 			requiredPlugins.add(new Plugin(pluginElement));
 		}
@@ -1003,37 +1003,29 @@ public class JpaOperationsImpl implements JpaOperations {
 		return resources;
 	}
 
-	private String getDbXPath(final JdbcDatabase jdbcDatabase) {
-		return "/configuration/databases/database[@id = '" + jdbcDatabase.getKey() + "']";
-	}
-
 	private String getDbXPath(final List<JdbcDatabase> databases) {
 		final StringBuilder builder = new StringBuilder("/configuration/databases/database[");
-		for (int i = 0, n = databases.size(); i < n; i++) {
+		for (int i = 0; i < databases.size(); i++) {
+			if (i > 0) {
+				builder.append(" or ");
+			}
 			builder.append("@id = '");
 			builder.append(databases.get(i).getKey());
 			builder.append("'");
-			if (i < n - 1) {
-				builder.append(" or ");
-			}
 		}
 		builder.append("]");
 		return builder.toString();
 	}
 
-	private String getProviderXPath(final OrmProvider provider) {
-		return "/configuration/ormProviders/provider[@id = '" + provider.name() + "']";
-	}
-
 	private String getProviderXPath(final List<OrmProvider> ormProviders) {
 		final StringBuilder builder = new StringBuilder("/configuration/ormProviders/provider[");
-		for (int i = 0, n = ormProviders.size(); i < n; i++) {
+		for (int i = 0; i < ormProviders.size(); i++) {
+			if (i > 0) {
+				builder.append(" or ");
+			}
 			builder.append("@id = '");
 			builder.append(ormProviders.get(i).name());
 			builder.append("'");
-			if (i < n - 1) {
-				builder.append(" or ");
-			}
 		}
 		builder.append("]");
 		return builder.toString();

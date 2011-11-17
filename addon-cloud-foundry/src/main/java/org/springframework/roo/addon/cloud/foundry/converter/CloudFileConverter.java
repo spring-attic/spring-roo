@@ -12,6 +12,7 @@ import org.springframework.roo.addon.cloud.foundry.model.CloudFile;
 import org.springframework.roo.shell.Completion;
 import org.springframework.roo.shell.Converter;
 import org.springframework.roo.shell.MethodTarget;
+import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Provides conversion to and from Cloud Foundry model classes.
@@ -26,7 +27,7 @@ public class CloudFileConverter implements Converter<CloudFile> {
 	@Reference private CloudFoundrySession session;
 
 	public CloudFile convertFromText(final String value, final Class<?> requiredType, final String optionContext) {
-		if (value == null || "".equals(value)) {
+		if (StringUtils.isBlank(value)) {
 			return null;
 		}
 		return new CloudFile(value);

@@ -59,6 +59,10 @@ public enum JdbcDatabase {
 	public String getConnectionString() {
 		return connectionString;
 	}
+	
+	public String getConfigPrefix() {
+		return "/configuration/databases/database[@id='" + key + "']";
+	}
 
 	@Override
 	public String toString() {

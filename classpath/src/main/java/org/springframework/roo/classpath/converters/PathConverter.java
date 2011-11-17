@@ -8,6 +8,7 @@ import org.springframework.roo.project.Path;
 import org.springframework.roo.shell.Completion;
 import org.springframework.roo.shell.Converter;
 import org.springframework.roo.shell.MethodTarget;
+import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Provides conversion to and from {@link Path}.
@@ -21,7 +22,7 @@ public class PathConverter implements Converter<Path> {
 
 	// TODO: Allow context to limit to source paths only, limit to resource paths only 
 	public Path convertFromText(final String value, final Class<?> requiredType, final String optionContext) {
-		if (value == null || "".equals(value)) {
+		if (StringUtils.isBlank(value)) {
 			return null;
 		}
 		

@@ -259,9 +259,9 @@ public class SimpleParser implements Parser {
 	private Set<CliOption> getCliOptions(final Annotation[][] parameterAnnotations) {
 		Set<CliOption> cliOptions = new LinkedHashSet<CliOption>();
 		for (Annotation[] annotations : parameterAnnotations) {
-			for (Annotation a : annotations) {
-				if (a instanceof CliOption) {
-					CliOption cliOption = (CliOption) a;
+			for (Annotation annotation : annotations) {
+				if (annotation instanceof CliOption) {
+					CliOption cliOption = (CliOption) annotation;
 					cliOptions.add(cliOption);
 				}
 			}

@@ -8,6 +8,7 @@ import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.shell.Completion;
 import org.springframework.roo.shell.Converter;
 import org.springframework.roo.shell.MethodTarget;
+import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Provides conversion to and from {@link JavaSymbolName}.
@@ -20,7 +21,7 @@ import org.springframework.roo.shell.MethodTarget;
 public class JavaSymbolNameConverter implements Converter<JavaSymbolName> {
 
 	public JavaSymbolName convertFromText(final String value, final Class<?> requiredType, final String optionContext) {
-		if (value == null || "".equals(value)) {
+		if (StringUtils.isBlank(value)) {
 			return null;
 		}
 

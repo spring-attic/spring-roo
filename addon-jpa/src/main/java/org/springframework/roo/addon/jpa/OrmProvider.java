@@ -33,6 +33,10 @@ public enum OrmProvider {
 	public String getAdapter() {
 		return adapter;
 	}
+	
+	public String getConfigPrefix() {
+		return "/configuration/ormProviders/provider[@id='" + name() + "']";
+	}
 
 	@Override
 	public String toString() {

@@ -9,6 +9,7 @@ import org.springframework.roo.addon.cloud.foundry.CloudFoundrySession;
 import org.springframework.roo.shell.Completion;
 import org.springframework.roo.shell.Converter;
 import org.springframework.roo.shell.MethodTarget;
+import org.springframework.roo.support.util.StringUtils;
 
 import com.vmware.appcloud.client.CloudService;
 
@@ -25,7 +26,7 @@ public class CloudServiceConverter implements Converter<CloudService> {
 	@Reference private CloudFoundrySession session;
 
 	public CloudService convertFromText(final String value, final Class<?> requiredType, final String optionContext) {
-		if (value == null || "".equals(value)) {
+		if (StringUtils.isBlank(value)) {
 			return null;
 		}
 		return session.getProvisionedService(value);

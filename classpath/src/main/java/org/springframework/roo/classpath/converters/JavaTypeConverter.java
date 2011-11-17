@@ -65,7 +65,7 @@ public class JavaTypeConverter implements Converter<JavaType> {
 	@Reference private TypeLocationService typeLocationService;
 
 	public JavaType convertFromText(String value, final Class<?> requiredType, final String optionContext) {
-		if (value == null || "".equals(value)) {
+		if (StringUtils.isBlank(value)) {
 			return null;
 		}
 

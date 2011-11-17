@@ -10,6 +10,7 @@ import org.springframework.roo.addon.cloud.foundry.model.CloudControllerUrl;
 import org.springframework.roo.shell.Completion;
 import org.springframework.roo.shell.Converter;
 import org.springframework.roo.shell.MethodTarget;
+import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Provides conversion to and from Cloud Foundry model classes.
@@ -24,7 +25,7 @@ public class CloudControllerUrlConverter implements Converter<CloudControllerUrl
 	@Reference private CloudFoundrySession session;
 
 	public CloudControllerUrl convertFromText(final String value, final Class<?> requiredType, final String optionContext) {
-		if (value == null || "".equals(value)) {
+		if (StringUtils.isBlank(value)) {
 			return null;
 		}
 		return new CloudControllerUrl(value);

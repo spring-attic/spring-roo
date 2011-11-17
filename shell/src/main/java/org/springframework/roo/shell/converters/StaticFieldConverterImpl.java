@@ -10,6 +10,7 @@ import org.springframework.roo.shell.Completion;
 import org.springframework.roo.shell.Converter;
 import org.springframework.roo.shell.MethodTarget;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.StringUtils;
 
 /**
  * A simple {@link Converter} for those classes which provide public static fields to represent possible
@@ -44,7 +45,7 @@ public class StaticFieldConverterImpl implements StaticFieldConverter {
 	}
 
 	public Object convertFromText(final String value, final Class<?> requiredType, final String optionContext) {
-		if (value == null || "".equals(value)) {
+		if (StringUtils.isBlank(value)) {
 			return null;
 		}
 		Map<String,Field> ffields = fields.get(requiredType);

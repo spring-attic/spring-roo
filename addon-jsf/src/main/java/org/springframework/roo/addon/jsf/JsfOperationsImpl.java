@@ -38,9 +38,9 @@ import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.ReservedWords;
-import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.FeatureNames;
+import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
@@ -399,7 +399,7 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 	private void updateDependencies(final Element configuration, final JsfImplementation jsfImplementation, final String jsfImplementationXPath) {
 		final List<Dependency> requiredDependencies = new ArrayList<Dependency>();
 
-		final List<Element> jsfImplementationDependencies = XmlUtils.findElements(getJsfImplementationXPath(jsfImplementation) + "/dependencies/dependency", configuration);
+		final List<Element> jsfImplementationDependencies = XmlUtils.findElements(jsfImplementation.getConfigPrefix() + "/dependencies/dependency", configuration);
 		for (Element dependencyElement : jsfImplementationDependencies) {
 			requiredDependencies.add(new Dependency(dependencyElement));
 		}
@@ -428,7 +428,7 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 	private void updateRepositories(final Element configuration, final JsfImplementation jsfImplementation, final String jsfImplementationXPath) {
 		List<Repository> repositories = new ArrayList<Repository>();
 
-		List<Element> jsfRepositories = XmlUtils.findElements(getJsfImplementationXPath(jsfImplementation) +"/repositories/repository", configuration);
+		List<Element> jsfRepositories = XmlUtils.findElements(jsfImplementation.getConfigPrefix() +"/repositories/repository", configuration);
 		for (Element repositoryElement : jsfRepositories) {
 			repositories.add(new Repository(repositoryElement));
 		}
@@ -474,19 +474,15 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 
 	private String getJsfImplementationXPath(final List<JsfImplementation> jsfImplementations) {
 		StringBuilder builder = new StringBuilder("/configuration/jsf-implementations/jsf-implementation[");
-		for (int i = 0, n = jsfImplementations.size(); i < n; i++) {
+		for (int i = 0; i < jsfImplementations.size(); i++) {
+			if (i > 0) {
+				builder.append(" or ");
+			}
 			builder.append("@id = '");
 			builder.append(jsfImplementations.get(i).name());
 			builder.append("'");
-			if (i < n - 1) {
-				builder.append(" or ");
-			}
 		}
 		builder.append("]");
 		return builder.toString();
-	}
-
-	private String getJsfImplementationXPath(final JsfImplementation jsfImplementation) {
-		return "/configuration/jsf-implementations/jsf-implementation[@id = '" + jsfImplementation.name() + "']";
 	}
 }

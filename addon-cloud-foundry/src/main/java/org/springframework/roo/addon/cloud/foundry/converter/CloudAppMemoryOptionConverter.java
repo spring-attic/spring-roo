@@ -10,6 +10,7 @@ import org.springframework.roo.addon.cloud.foundry.model.CloudAppMemoryOption;
 import org.springframework.roo.shell.Completion;
 import org.springframework.roo.shell.Converter;
 import org.springframework.roo.shell.MethodTarget;
+import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Provides conversion to and from Cloud Foundry model classes.
@@ -25,7 +26,7 @@ public class CloudAppMemoryOptionConverter implements Converter<CloudAppMemoryOp
 	@Reference private CloudFoundrySession session;
 
 	public CloudAppMemoryOption convertFromText(final String value, final Class<?> requiredType, final String optionContext) {
-		if (value == null || "".equals(value)) {
+		if (StringUtils.isBlank(value)) {
 			return null;
 		}
 		return new CloudAppMemoryOption(Integer.valueOf(value.replace(MEMORY_OPTION_SUFFIX, "")));

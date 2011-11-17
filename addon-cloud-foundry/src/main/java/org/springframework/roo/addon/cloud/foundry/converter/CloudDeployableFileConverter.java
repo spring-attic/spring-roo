@@ -19,6 +19,7 @@ import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.shell.Completion;
 import org.springframework.roo.shell.Converter;
 import org.springframework.roo.shell.MethodTarget;
+import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Provides conversion to and from Cloud Foundry model classes.
@@ -40,7 +41,7 @@ public class CloudDeployableFileConverter implements Converter<CloudDeployableFi
 	@Reference private ProjectOperations projectOperations;
 
 	public CloudDeployableFile convertFromText(String value, final Class<?> requiredType, final String optionContext) {
-		if (value == null || "".equals(value)) {
+		if (StringUtils.isBlank(value)) {
 			return null;
 		}
 		if (CREATE_OPTION.equals(value)) {
