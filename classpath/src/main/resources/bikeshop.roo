@@ -38,7 +38,7 @@ repository jpa --interface ~.domain.SupplierRepository
 
 field reference --fieldName supplier --class ~.domain.Product --type ~.domain.Supplier --notNull
 
-web jsf setup 
+web jsf setup --implementation ORACLE_MOJARRA 
 web jsf all --package ~.web
 
 logging setup --level INFO
