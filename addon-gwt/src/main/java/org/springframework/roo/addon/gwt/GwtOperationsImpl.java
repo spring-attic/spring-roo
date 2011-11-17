@@ -1,5 +1,11 @@
 package org.springframework.roo.addon.gwt;
 
+import static org.springframework.roo.addon.gwt.GwtJavaType.ENTITY_PROXY;
+import static org.springframework.roo.addon.gwt.GwtJavaType.OLD_ENTITY_PROXY;
+import static org.springframework.roo.addon.gwt.GwtJavaType.OLD_REQUEST_CONTEXT;
+import static org.springframework.roo.addon.gwt.GwtJavaType.PROXY_FOR_NAME;
+import static org.springframework.roo.addon.gwt.GwtJavaType.REQUEST_CONTEXT;
+import static org.springframework.roo.addon.gwt.GwtJavaType.SERVICE_NAME;
 import static org.springframework.roo.model.RooJavaType.ROO_GWT_MIRRORED_FROM;
 import static org.springframework.roo.model.RooJavaType.ROO_GWT_PROXY;
 import static org.springframework.roo.model.RooJavaType.ROO_GWT_REQUEST;
@@ -147,7 +153,7 @@ public class GwtOperationsImpl implements GwtOperations {
 
 		for (ClassOrInterfaceTypeDetails proxyOrRequest : typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(ROO_GWT_MIRRORED_FROM)) {
 			ClassOrInterfaceTypeDetailsBuilder builder = new ClassOrInterfaceTypeDetailsBuilder(proxyOrRequest);
-			if (proxyOrRequest.extendsType(GwtUtils.ENTITY_PROXY) || proxyOrRequest.extendsType(GwtUtils.OLD_ENTITY_PROXY)) {
+			if (proxyOrRequest.extendsType(ENTITY_PROXY) || proxyOrRequest.extendsType(OLD_ENTITY_PROXY)) {
 				AnnotationMetadata annotationMetadata = MemberFindingUtils.getAnnotationOfType(proxyOrRequest.getAnnotations(), ROO_GWT_MIRRORED_FROM);
 				if (annotationMetadata != null) {
 					AnnotationMetadataBuilder annotationMetadataBuilder = new AnnotationMetadataBuilder(annotationMetadata);
@@ -156,7 +162,7 @@ public class GwtOperationsImpl implements GwtOperations {
 					builder.addAnnotation(annotationMetadataBuilder);
 					typeManagementService.createOrUpdateTypeOnDisk(builder.build());
 				}
-			} else if (proxyOrRequest.extendsType(GwtUtils.REQUEST_CONTEXT) || proxyOrRequest.extendsType(GwtUtils.OLD_REQUEST_CONTEXT)) {
+			} else if (proxyOrRequest.extendsType(REQUEST_CONTEXT) || proxyOrRequest.extendsType(OLD_REQUEST_CONTEXT)) {
 				AnnotationMetadata annotationMetadata = MemberFindingUtils.getAnnotationOfType(proxyOrRequest.getAnnotations(), ROO_GWT_MIRRORED_FROM);
 				if (annotationMetadata != null) {
 					AnnotationMetadataBuilder annotationMetadataBuilder = new AnnotationMetadataBuilder(annotationMetadata);
@@ -308,7 +314,7 @@ public class GwtOperationsImpl implements GwtOperations {
 		final LogicalPath proxyLogicalPath = LogicalPath.getInstance(Path.SRC_MAIN_JAVA, focusedModule);
 		ClassOrInterfaceTypeDetailsBuilder builder = new ClassOrInterfaceTypeDetailsBuilder(PhysicalTypeIdentifier.createIdentifier(proxyType, proxyLogicalPath));
 		builder.setName(proxyType);
-		builder.setExtendsTypes(Collections.singletonList(GwtUtils.ENTITY_PROXY));
+		builder.setExtendsTypes(Collections.singletonList(ENTITY_PROXY));
 		builder.setPhysicalTypeCategory(PhysicalTypeCategory.INTERFACE);
 		builder.setModifier(Modifier.PUBLIC);
 		List<AnnotationAttributeValue<?>> attributeValues = new ArrayList<AnnotationAttributeValue<?>>();
@@ -317,7 +323,7 @@ public class GwtOperationsImpl implements GwtOperations {
 		String locator = projectOperations.getTopLevelPackage(focusedModule) + ".server.locator." + entity.getName().getSimpleTypeName() + "Locator";
 		StringAttributeValue locatorAttributeValue = new StringAttributeValue(new JavaSymbolName("locator"), locator);
 		attributeValues.add(locatorAttributeValue);
-		builder.updateTypeAnnotation(new AnnotationMetadataBuilder(GwtUtils.PROXY_FOR_NAME, attributeValues));
+		builder.updateTypeAnnotation(new AnnotationMetadataBuilder(PROXY_FOR_NAME, attributeValues));
 		attributeValues.remove(locatorAttributeValue);
 		List<StringAttributeValue> readOnlyValues = new ArrayList<StringAttributeValue>();
 		FieldMetadata versionField = persistenceMemberLocator.getVersionField(entity.getName());
@@ -344,13 +350,13 @@ public class GwtOperationsImpl implements GwtOperations {
 		final LogicalPath focusedSrcMainJava = LogicalPath.getInstance(Path.SRC_MAIN_JAVA, projectOperations.getFocusedModuleName());
 		final ClassOrInterfaceTypeDetailsBuilder builder = new ClassOrInterfaceTypeDetailsBuilder(PhysicalTypeIdentifier.createIdentifier(proxyType, focusedSrcMainJava));
 		builder.setName(proxyType);
-		builder.setExtendsTypes(Collections.singletonList(GwtUtils.REQUEST_CONTEXT));
+		builder.setExtendsTypes(Collections.singletonList(REQUEST_CONTEXT));
 		builder.setPhysicalTypeCategory(PhysicalTypeCategory.INTERFACE);
 		builder.setModifier(Modifier.PUBLIC);
 		List<AnnotationAttributeValue<?>> attributeValues = new ArrayList<AnnotationAttributeValue<?>>();
 		StringAttributeValue stringAttributeValue = new StringAttributeValue(VALUE, entity.getName().getFullyQualifiedTypeName());
 		attributeValues.add(stringAttributeValue);
-		builder.updateTypeAnnotation(new AnnotationMetadataBuilder(GwtUtils.SERVICE_NAME, attributeValues));
+		builder.updateTypeAnnotation(new AnnotationMetadataBuilder(SERVICE_NAME, attributeValues));
 		List<StringAttributeValue> toExclude = new ArrayList<StringAttributeValue>();
 		toExclude.add(new StringAttributeValue(VALUE, "entityManager"));
 		toExclude.add(new StringAttributeValue(VALUE, "toString"));

@@ -1,5 +1,8 @@
 package org.springframework.roo.addon.gwt.proxy;
 
+import static org.springframework.roo.addon.gwt.GwtJavaType.ENTITY_PROXY;
+import static org.springframework.roo.addon.gwt.GwtJavaType.OLD_ENTITY_PROXY;
+
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -136,12 +139,12 @@ public class GwtProxyMetadataProviderImpl extends AbstractHashCodeTrackingMetada
 		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(proxy);
 
 		// Only inherit from EntityProxy if extension is not already defined
-		if (!typeDetailsBuilder.getExtendsTypes().contains(GwtUtils.OLD_ENTITY_PROXY) && !typeDetailsBuilder.getExtendsTypes().contains(GwtUtils.ENTITY_PROXY)) {
-			typeDetailsBuilder.addExtendsTypes(GwtUtils.ENTITY_PROXY);
+		if (!typeDetailsBuilder.getExtendsTypes().contains(OLD_ENTITY_PROXY) && !typeDetailsBuilder.getExtendsTypes().contains(ENTITY_PROXY)) {
+			typeDetailsBuilder.addExtendsTypes(ENTITY_PROXY);
 		}
 
-		if (!typeDetailsBuilder.getExtendsTypes().contains(GwtUtils.ENTITY_PROXY)) {
-			typeDetailsBuilder.addExtendsTypes(GwtUtils.ENTITY_PROXY);
+		if (!typeDetailsBuilder.getExtendsTypes().contains(ENTITY_PROXY)) {
+			typeDetailsBuilder.addExtendsTypes(ENTITY_PROXY);
 		}
 
 		String destinationMetadataId = proxy.getDeclaredByMetadataId();

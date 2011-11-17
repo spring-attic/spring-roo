@@ -1,9 +1,10 @@
 package org.springframework.roo.addon.gwt;
 
-import static org.springframework.roo.addon.gwt.GwtUtils.ACCEPTS_ONE_WIDGET;
-import static org.springframework.roo.addon.gwt.GwtUtils.EVENT_BUS;
-import static org.springframework.roo.addon.gwt.GwtUtils.PLACE;
-import static org.springframework.roo.addon.gwt.GwtUtils.RECEIVER;
+import static org.springframework.roo.addon.gwt.GwtJavaType.ACCEPTS_ONE_WIDGET;
+import static org.springframework.roo.addon.gwt.GwtJavaType.ENTITY_PROXY;
+import static org.springframework.roo.addon.gwt.GwtJavaType.EVENT_BUS;
+import static org.springframework.roo.addon.gwt.GwtJavaType.PLACE;
+import static org.springframework.roo.addon.gwt.GwtJavaType.RECEIVER;
 import static org.springframework.roo.model.JdkJavaType.COLLECTION;
 
 import java.util.ArrayList;
@@ -141,7 +142,7 @@ public enum GwtType {
 				watchedMethods.put(new JavaSymbolName("start"), Arrays.asList(ACCEPTS_ONE_WIDGET, EVENT_BUS));
 				break;
 			case DETAIL_ACTIVITY:
-				watchedMethods.put(new JavaSymbolName("find"), Arrays.asList(GwtUtils.getReceiverType(GwtUtils.ENTITY_PROXY)));
+				watchedMethods.put(new JavaSymbolName("find"), Arrays.asList(GwtUtils.getReceiverType(ENTITY_PROXY)));
 				watchedMethods.put(new JavaSymbolName("deleteClicked"), new ArrayList<JavaType>());
 				break;
 			case MOBILE_LIST_VIEW:

@@ -1,5 +1,14 @@
 package org.springframework.roo.addon.gwt;
 
+import static org.springframework.roo.addon.gwt.GwtJavaType.PROXY_FOR;
+import static org.springframework.roo.addon.gwt.GwtJavaType.PROXY_FOR_NAME;
+import static org.springframework.roo.addon.gwt.GwtJavaType.RECEIVER;
+import static org.springframework.roo.addon.gwt.GwtJavaType.SERVICE;
+import static org.springframework.roo.addon.gwt.GwtJavaType.SERVICE_NAME;
+import static org.springframework.roo.model.RooJavaType.ROO_GWT_MIRRORED_FROM;
+import static org.springframework.roo.model.RooJavaType.ROO_GWT_PROXY;
+import static org.springframework.roo.model.RooJavaType.ROO_GWT_REQUEST;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -28,30 +37,12 @@ import org.springframework.roo.project.ProjectOperations;
 public final class GwtUtils {
 
 	public static final String PROXY_REQUEST_WARNING = "// WARNING: THIS FILE IS MANAGED BY SPRING ROO.\n\n";
-
-	// JavaTypes
-	public static final JavaType ACCEPTS_ONE_WIDGET = new JavaType("com.google.gwt.user.client.ui.AcceptsOneWidget");
-	public static final JavaType ENTITY_PROXY = new JavaType("com.google.web.bindery.requestfactory.shared.EntityProxy");
-	public static final JavaType EVENT_BUS = new JavaType("com.google.gwt.event.shared.EventBus");
-	public static final JavaType INSTANCE_REQUEST = new JavaType("com.google.web.bindery.requestfactory.shared.InstanceRequest");
-	public static final JavaType LOCATOR = new JavaType("com.google.web.bindery.requestfactory.shared.Locator");
-	public static final JavaType OLD_ENTITY_PROXY = new JavaType("com.google.gwt.requestfactory.shared.EntityProxy");
-	public static final JavaType OLD_REQUEST_CONTEXT = new JavaType("com.google.gwt.requestfactory.shared.RequestContext");
-	public static final JavaType PLACE = new JavaType("com.google.gwt.place.shared.Place");
-	public static final JavaType PROXY_FOR = new JavaType("com.google.web.bindery.requestfactory.shared.ProxyFor");
-	public static final JavaType PROXY_FOR_NAME = new JavaType("com.google.web.bindery.requestfactory.shared.ProxyForName");
-	public static final JavaType RECEIVER = new JavaType("com.google.web.bindery.requestfactory.shared.Receiver");
-	public static final JavaType REQUEST = new JavaType("com.google.web.bindery.requestfactory.shared.Request");
-	public static final JavaType REQUEST_CONTEXT = new JavaType("com.google.web.bindery.requestfactory.shared.RequestContext");
-	public static final JavaType SERVICE = new JavaType("com.google.web.bindery.requestfactory.shared.Service");
-	public static final JavaType SERVICE_NAME = new JavaType("com.google.web.bindery.requestfactory.shared.ServiceName");
-
 	public static final JavaType[] PROXY_ANNOTATIONS = { PROXY_FOR, PROXY_FOR_NAME };
 	public static final JavaType[] REQUEST_ANNOTATIONS = { SERVICE, SERVICE_NAME };
-	public static final JavaType[] ROO_PROXY_REQUEST_ANNOTATIONS = {RooJavaType.ROO_GWT_PROXY, RooJavaType.ROO_GWT_REQUEST, RooJavaType.ROO_GWT_MIRRORED_FROM};
+	public static final JavaType[] ROO_PROXY_REQUEST_ANNOTATIONS = { ROO_GWT_PROXY, ROO_GWT_REQUEST, ROO_GWT_MIRRORED_FROM };
 
 	/**
-	 * Returns the {@link #WEB_RECEIVER} Java type, generically typed to the
+	 * Returns the {@link #RECEIVER} Java type, generically typed to the
 	 * given type.
 	 *
 	 * @param genericType (required)

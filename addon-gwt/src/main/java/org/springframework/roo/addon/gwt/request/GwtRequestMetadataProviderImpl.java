@@ -1,5 +1,9 @@
 package org.springframework.roo.addon.gwt.request;
 
+import static org.springframework.roo.addon.gwt.GwtJavaType.INSTANCE_REQUEST;
+import static org.springframework.roo.addon.gwt.GwtJavaType.OLD_REQUEST_CONTEXT;
+import static org.springframework.roo.addon.gwt.GwtJavaType.REQUEST;
+import static org.springframework.roo.addon.gwt.GwtJavaType.REQUEST_CONTEXT;
 import static org.springframework.roo.model.RooJavaType.ROO_GWT_PROXY;
 import static org.springframework.roo.model.RooJavaType.ROO_GWT_REQUEST;
 import static org.springframework.roo.model.RooJavaType.ROO_SERVICE;
@@ -165,12 +169,12 @@ public class GwtRequestMetadataProviderImpl extends AbstractHashCodeTrackingMeta
 		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(request);
 
 		// Only inherit from RequestContext if extension is not already defined
-		if (!typeDetailsBuilder.getExtendsTypes().contains(GwtUtils.OLD_REQUEST_CONTEXT) && !typeDetailsBuilder.getExtendsTypes().contains(GwtUtils.REQUEST_CONTEXT)) {
-			typeDetailsBuilder.addExtendsTypes(GwtUtils.REQUEST_CONTEXT);
+		if (!typeDetailsBuilder.getExtendsTypes().contains(OLD_REQUEST_CONTEXT) && !typeDetailsBuilder.getExtendsTypes().contains(REQUEST_CONTEXT)) {
+			typeDetailsBuilder.addExtendsTypes(REQUEST_CONTEXT);
 		}
 
-		if (!typeDetailsBuilder.getExtendsTypes().contains(GwtUtils.REQUEST_CONTEXT)) {
-			typeDetailsBuilder.addExtendsTypes(GwtUtils.REQUEST_CONTEXT);
+		if (!typeDetailsBuilder.getExtendsTypes().contains(REQUEST_CONTEXT)) {
+			typeDetailsBuilder.addExtendsTypes(REQUEST_CONTEXT);
 		}
 
 		ClassOrInterfaceTypeDetails entity = gwtTypeService.lookupEntityFromRequest(request);
@@ -213,10 +217,10 @@ public class GwtRequestMetadataProviderImpl extends AbstractHashCodeTrackingMeta
 		JavaType methodReturnType;
 		if (entity.getName().equals(service.getName()) && !Modifier.isStatic(methodMetadata.getModifier())) {
 			methodReturnTypeArgs = Arrays.asList(proxy.getName(), methodMetadata.getReturnType());
-			methodReturnType = new JavaType(GwtUtils.INSTANCE_REQUEST.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, methodReturnTypeArgs);
+			methodReturnType = new JavaType(INSTANCE_REQUEST.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, methodReturnTypeArgs);
 		} else {
 			methodReturnTypeArgs = Collections.singletonList(methodMetadata.getReturnType());
-			methodReturnType = new JavaType(GwtUtils.REQUEST.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, methodReturnTypeArgs);
+			methodReturnType = new JavaType(REQUEST.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, methodReturnTypeArgs);
 		}
 		return getRequestMethod(request, methodMetadata, methodReturnType);
 	}

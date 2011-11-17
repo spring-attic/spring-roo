@@ -1,5 +1,6 @@
 package org.springframework.roo.addon.gwt.locator;
 
+import static org.springframework.roo.addon.gwt.GwtJavaType.LOCATOR;
 import static org.springframework.roo.model.JavaType.CLASS;
 
 import java.lang.reflect.Modifier;
@@ -110,7 +111,7 @@ public class GwtLocatorMetadataProviderImpl implements GwtLocatorMetadataProvide
 		locatorBuilder.setName(new JavaType(locatorType));
 		locatorBuilder.setModifier(Modifier.PUBLIC);
 		locatorBuilder.setPhysicalTypeCategory(PhysicalTypeCategory.CLASS);
-		locatorBuilder.addExtendsTypes(new JavaType(GwtUtils.LOCATOR.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, Arrays.asList(entity, identifierType)));
+		locatorBuilder.addExtendsTypes(new JavaType(LOCATOR.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, Arrays.asList(entity, identifierType)));
 		locatorBuilder.addMethod(getCreateMethod(locatorPhysicalTypeId, entity));
 		
 		MemberTypeAdditions findMethodAdditions = layerService.getMemberTypeAdditions(locatorPhysicalTypeId, CustomDataKeys.FIND_METHOD.name(), entity, identifierType, LAYER_POSITION, new MethodParameter(identifierType, "id"));

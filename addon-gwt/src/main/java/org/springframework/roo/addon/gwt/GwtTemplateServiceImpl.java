@@ -1,5 +1,6 @@
 package org.springframework.roo.addon.gwt;
 
+import static org.springframework.roo.addon.gwt.GwtJavaType.INSTANCE_REQUEST;
 import static org.springframework.roo.model.JdkJavaType.ARRAY_LIST;
 import static org.springframework.roo.model.JdkJavaType.HASH_SET;
 import static org.springframework.roo.model.JdkJavaType.LIST;
@@ -440,7 +441,7 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
 		MethodMetadata requestMethod = MemberFindingUtils.getMethod(request, methodName);
 		String requestMethodCall = memberTypeAdditions.getMethodName();
 		if (requestMethod != null) {
-			if (GwtUtils.INSTANCE_REQUEST.getFullyQualifiedTypeName().equals(requestMethod.getReturnType().getFullyQualifiedTypeName())) {
+			if (INSTANCE_REQUEST.getFullyQualifiedTypeName().equals(requestMethod.getReturnType().getFullyQualifiedTypeName())) {
 				requestMethodCall = requestMethodCall + "().using";
 			}
 		}

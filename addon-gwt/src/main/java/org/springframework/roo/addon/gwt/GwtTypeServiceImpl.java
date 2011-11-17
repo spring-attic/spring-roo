@@ -356,6 +356,7 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 		setRequestMethod(requestMethods, governorTypeDetails, memberDetails, CustomDataKeys.FIND_METHOD);
 		setRequestMethod(requestMethods, governorTypeDetails, memberDetails, CustomDataKeys.FIND_ALL_METHOD);
 		setRequestMethod(requestMethods, governorTypeDetails, memberDetails, CustomDataKeys.FIND_ENTRIES_METHOD);
+		System.out.println("********** populated request methods");
 		return requestMethods;
 	}
 
