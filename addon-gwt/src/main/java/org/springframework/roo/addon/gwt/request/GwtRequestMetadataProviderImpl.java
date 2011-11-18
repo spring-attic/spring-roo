@@ -74,78 +74,78 @@ public class GwtRequestMetadataProviderImpl extends AbstractHashCodeTrackingMeta
 
 	public MetadataItem get(final String metadataIdentificationString) {
 		// Abort early if we can't continue
-		ProjectMetadata projectMetadata = projectOperations.getProjectMetadata(PhysicalTypeIdentifierNamingUtils.getPath(metadataIdentificationString).getModule());
+		final ProjectMetadata projectMetadata = projectOperations.getProjectMetadata(PhysicalTypeIdentifierNamingUtils.getPath(metadataIdentificationString).getModule());
 		if (projectMetadata == null) {
 			return null;
 		}
 
-		ClassOrInterfaceTypeDetails request = getGovernor(metadataIdentificationString);
+		final ClassOrInterfaceTypeDetails request = getGovernor(metadataIdentificationString);
 		if (request == null) {
 			return null;
 		}
 
-		AnnotationMetadata mirrorAnnotation = MemberFindingUtils.getAnnotationOfType(request.getAnnotations(), ROO_GWT_REQUEST);
+		final AnnotationMetadata mirrorAnnotation = MemberFindingUtils.getAnnotationOfType(request.getAnnotations(), ROO_GWT_REQUEST);
 		if (mirrorAnnotation == null) {
 			return null;
 		}
 
-		JavaType targetType = GwtUtils.lookupRequestTargetType(request);
+		final JavaType targetType = GwtUtils.lookupRequestTargetType(request);
 		if (targetType == null) {
 			return null;
 		}
 
-		ClassOrInterfaceTypeDetails target = typeLocationService.getTypeDetails(targetType);
+		final ClassOrInterfaceTypeDetails target = typeLocationService.getTypeDetails(targetType);
 		if (target == null || Modifier.isAbstract(target.getModifier())) {
 			return null;
 		}
 
-		MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(getClass().getName(), target);
+		final MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(getClass().getName(), target);
 		if (memberDetails == null) {
 			return null;
 		}
 
-		List<String> exclusionsList = getMethodExclusions(request);
+		final List<String> exclusionsList = getMethodExclusions(request);
 
-		List<MethodMetadata> requestMethods = new ArrayList<MethodMetadata>();
-		for (MethodMetadata methodMetadata : memberDetails.getMethods()) {
+		final List<MethodMetadata> requestMethods = new ArrayList<MethodMetadata>();
+		for (final MethodMetadata methodMetadata : memberDetails.getMethods()) {
 			if (Modifier.isPublic(methodMetadata.getModifier()) && !exclusionsList.contains(methodMetadata.getMethodName().getSymbolName())) {
-				JavaType returnType = gwtTypeService.getGwtSideLeafType(methodMetadata.getReturnType(), target.getName(), true, true);
+				final JavaType returnType = gwtTypeService.getGwtSideLeafType(methodMetadata.getReturnType(), target.getName(), true, true);
 				if (returnType == null) {
 					continue;
 				}
-				MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(methodMetadata);
+				final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(methodMetadata);
 				methodBuilder.setReturnType(returnType);
 				methodBuilder.setBodyBuilder(null);
 				requestMethods.add(methodBuilder.build());
 			}
 		}
-		GwtRequestMetadata gwtRequestMetadata = new GwtRequestMetadata(metadataIdentificationString, updateRequest(request, requestMethods));
+		final GwtRequestMetadata gwtRequestMetadata = new GwtRequestMetadata(metadataIdentificationString, updateRequest(request, requestMethods));
 		notifyIfRequired(gwtRequestMetadata);
 		return gwtRequestMetadata;
 	}
 
 	private List<String> getMethodExclusions(final ClassOrInterfaceTypeDetails request) {
-		List<String> exclusionList = GwtUtils.getAnnotationValues(request, ROO_GWT_REQUEST, "exclude");
+		final List<String> exclusionList = GwtUtils.getAnnotationValues(request, ROO_GWT_REQUEST, "exclude");
 
-		ClassOrInterfaceTypeDetails proxy = gwtTypeService.lookupProxyFromRequest(request);
+		final ClassOrInterfaceTypeDetails proxy = gwtTypeService.lookupProxyFromRequest(request);
 		if (proxy != null) {
-			Boolean ignoreProxyExclusions = GwtUtils.getBooleanAnnotationValue(request, ROO_GWT_REQUEST, "ignoreProxyExclusions", false);
+			final Boolean ignoreProxyExclusions = GwtUtils.getBooleanAnnotationValue(request, ROO_GWT_REQUEST, "ignoreProxyExclusions", false);
 			if (!ignoreProxyExclusions) {
-				for (String exclusion : GwtUtils.getAnnotationValues(proxy, ROO_GWT_PROXY, "exclude")) {
+				for (final String exclusion : GwtUtils.getAnnotationValues(proxy, ROO_GWT_PROXY, "exclude")) {
 					exclusionList.add("set" + StringUtils.capitalize(exclusion));
 					exclusionList.add("get" + StringUtils.capitalize(exclusion));
 				}
 				exclusionList.addAll(GwtUtils.getAnnotationValues(proxy, ROO_GWT_PROXY, "exclude"));
 			}
-			Boolean ignoreProxyReadOnly = GwtUtils.getBooleanAnnotationValue(request, ROO_GWT_REQUEST, "ignoreProxyReadOnly", false);
+			final Boolean ignoreProxyReadOnly = GwtUtils.getBooleanAnnotationValue(request, ROO_GWT_REQUEST, "ignoreProxyReadOnly", false);
 			if (!ignoreProxyReadOnly) {
-				for (String exclusion : GwtUtils.getAnnotationValues(proxy, ROO_GWT_PROXY, "readOnly")) {
+				for (final String exclusion : GwtUtils.getAnnotationValues(proxy, ROO_GWT_PROXY, "readOnly")) {
 					exclusionList.add("set" + StringUtils.capitalize(exclusion));
 				}
 			}
-			Boolean dontIncludeProxyMethods = GwtUtils.getBooleanAnnotationValue(proxy, ROO_GWT_REQUEST, "ignoreProxyReadOnly", true);
+			final Boolean dontIncludeProxyMethods = GwtUtils.getBooleanAnnotationValue(proxy, ROO_GWT_REQUEST, "ignoreProxyReadOnly", true);
 			if (dontIncludeProxyMethods) {
-				for (MethodMetadata methodMetadata : proxy.getDeclaredMethods())  {
+				for (final MethodMetadata methodMetadata : proxy.getDeclaredMethods())  {
 					exclusionList.add(methodMetadata.getMethodName().getSymbolName());
 				}
 			}
@@ -154,19 +154,19 @@ public class GwtRequestMetadataProviderImpl extends AbstractHashCodeTrackingMeta
 	}
 
 	private ClassOrInterfaceTypeDetails getGovernor(final String metadataIdentificationString) {
-		JavaType governorTypeName = GwtRequestMetadata.getJavaType(metadataIdentificationString);
-		LogicalPath governorTypePath = GwtRequestMetadata.getPath(metadataIdentificationString);
-		String physicalTypeId = PhysicalTypeIdentifier.createIdentifier(governorTypeName, governorTypePath);
+		final JavaType governorTypeName = GwtRequestMetadata.getJavaType(metadataIdentificationString);
+		final LogicalPath governorTypePath = GwtRequestMetadata.getPath(metadataIdentificationString);
+		final String physicalTypeId = PhysicalTypeIdentifier.createIdentifier(governorTypeName, governorTypePath);
 		return typeLocationService.getTypeDetails(physicalTypeId);
 	}
 
 	public String updateRequest(final ClassOrInterfaceTypeDetails request, final List<MethodMetadata> requestMethods) {
-		List<MethodMetadataBuilder> methods = new ArrayList<MethodMetadataBuilder>();
-		for (MethodMetadata method : requestMethods) {
+		final List<MethodMetadataBuilder> methods = new ArrayList<MethodMetadataBuilder>();
+		for (final MethodMetadata method : requestMethods) {
 			methods.add(getRequestMethod(request, method));
 		}
 
-		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(request);
+		final ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(request);
 
 		// Only inherit from RequestContext if extension is not already defined
 		if (!typeDetailsBuilder.getExtendsTypes().contains(OLD_REQUEST_CONTEXT) && !typeDetailsBuilder.getExtendsTypes().contains(REQUEST_CONTEXT)) {
@@ -177,20 +177,20 @@ public class GwtRequestMetadataProviderImpl extends AbstractHashCodeTrackingMeta
 			typeDetailsBuilder.addExtendsTypes(REQUEST_CONTEXT);
 		}
 
-		ClassOrInterfaceTypeDetails entity = gwtTypeService.lookupEntityFromRequest(request);
-		AnnotationMetadata annotationMetadata = GwtUtils.getFirstAnnotation(request, GwtUtils.REQUEST_ANNOTATIONS);
+		final ClassOrInterfaceTypeDetails entity = gwtTypeService.lookupEntityFromRequest(request);
+		final AnnotationMetadata annotationMetadata = GwtUtils.getFirstAnnotation(request, GwtUtils.REQUEST_ANNOTATIONS);
 		if (annotationMetadata != null && entity != null) {
-			AnnotationMetadataBuilder annotationMetadataBuilder = new AnnotationMetadataBuilder(annotationMetadata);
+			final AnnotationMetadataBuilder annotationMetadataBuilder = new AnnotationMetadataBuilder(annotationMetadata);
 			annotationMetadataBuilder.addStringAttribute("value", entity.getName().getFullyQualifiedTypeName());
 			annotationMetadataBuilder.removeAttribute("locator");
-			Set<ClassOrInterfaceTypeDetails> services = typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(ROO_SERVICE);
-			for (ClassOrInterfaceTypeDetails serviceLayer : services) {
-				AnnotationMetadata serviceAnnotation = serviceLayer.getTypeAnnotation(ROO_SERVICE);
-				AnnotationAttributeValue<List<ClassAttributeValue>> domainTypesAnnotation = serviceAnnotation.getAttribute("domainTypes");
-				for (ClassAttributeValue classAttributeValue : domainTypesAnnotation.getValue()) {
+			final Set<ClassOrInterfaceTypeDetails> services = typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(ROO_SERVICE);
+			for (final ClassOrInterfaceTypeDetails serviceLayer : services) {
+				final AnnotationMetadata serviceAnnotation = serviceLayer.getTypeAnnotation(ROO_SERVICE);
+				final AnnotationAttributeValue<List<ClassAttributeValue>> domainTypesAnnotation = serviceAnnotation.getAttribute("domainTypes");
+				for (final ClassAttributeValue classAttributeValue : domainTypesAnnotation.getValue()) {
 					if (classAttributeValue.getValue().equals(entity.getName())) {
 						annotationMetadataBuilder.addStringAttribute("value", serviceLayer.getName().getFullyQualifiedTypeName());
-						LogicalPath path = PhysicalTypeIdentifier.getPath(request.getDeclaredByMetadataId());
+						final LogicalPath path = PhysicalTypeIdentifier.getPath(request.getDeclaredByMetadataId());
 						annotationMetadataBuilder.addStringAttribute("locator", projectOperations.getTopLevelPackage(path.getModule()) + ".server.locator.GwtServiceLocator");
 					}
 				}
@@ -203,12 +203,12 @@ public class GwtRequestMetadataProviderImpl extends AbstractHashCodeTrackingMeta
 	}
 
 	private MethodMetadataBuilder getRequestMethod(final ClassOrInterfaceTypeDetails request, final MethodMetadata methodMetadata) {
-		ClassOrInterfaceTypeDetails proxy = gwtTypeService.lookupProxyFromRequest(request);
-		ClassOrInterfaceTypeDetails service = gwtTypeService.lookupTargetServiceFromRequest(request);
+		final ClassOrInterfaceTypeDetails proxy = gwtTypeService.lookupProxyFromRequest(request);
+		final ClassOrInterfaceTypeDetails service = gwtTypeService.lookupTargetServiceFromRequest(request);
 		if (proxy == null || service == null) {
 			return null;
 		}
-		ClassOrInterfaceTypeDetails entity = gwtTypeService.lookupEntityFromProxy(proxy);
+		final ClassOrInterfaceTypeDetails entity = gwtTypeService.lookupEntityFromProxy(proxy);
 		if (entity == null) {
 			return null;
 		}
@@ -226,12 +226,12 @@ public class GwtRequestMetadataProviderImpl extends AbstractHashCodeTrackingMeta
 	}
 
 	private MethodMetadataBuilder getRequestMethod(final ClassOrInterfaceTypeDetails request, final MethodMetadata methodMetadata, final JavaType methodReturnType) {
-		List<AnnotatedJavaType> paramaterTypes = new ArrayList<AnnotatedJavaType>();
-		ClassOrInterfaceTypeDetails mirroredTypeDetails = gwtTypeService.lookupEntityFromRequest(request);
+		final List<AnnotatedJavaType> paramaterTypes = new ArrayList<AnnotatedJavaType>();
+		final ClassOrInterfaceTypeDetails mirroredTypeDetails = gwtTypeService.lookupEntityFromRequest(request);
 		if (mirroredTypeDetails == null) {
 			return null;
 		}
-		for (AnnotatedJavaType parameterType : methodMetadata.getParameterTypes()) {
+		for (final AnnotatedJavaType parameterType : methodMetadata.getParameterTypes()) {
 			paramaterTypes.add(new AnnotatedJavaType(gwtTypeService.getGwtSideLeafType(parameterType.getJavaType(), mirroredTypeDetails.getName(), true, false)));
 		}
 		return new MethodMetadataBuilder(request.getDeclaredByMetadataId(), Modifier.ABSTRACT, methodMetadata.getMethodName(), methodReturnType, paramaterTypes, methodMetadata.getParameterNames(), new InvocableMemberBodyBuilder());
@@ -241,7 +241,7 @@ public class GwtRequestMetadataProviderImpl extends AbstractHashCodeTrackingMeta
 		if (MetadataIdentificationUtils.isIdentifyingClass(downstreamDependency)) {
 			Assert.isTrue(MetadataIdentificationUtils.getMetadataClass(upstreamDependency).equals(MetadataIdentificationUtils.getMetadataClass(PhysicalTypeIdentifier.getMetadataIdentiferType())), "Expected class-level notifications only for PhysicalTypeIdentifier (not '" + upstreamDependency + "')");
 			
-			ClassOrInterfaceTypeDetails cid = typeLocationService.getTypeDetails(upstreamDependency);
+			final ClassOrInterfaceTypeDetails cid = typeLocationService.getTypeDetails(upstreamDependency);
 			if (cid == null) {
 				return;
 			}
@@ -251,8 +251,8 @@ public class GwtRequestMetadataProviderImpl extends AbstractHashCodeTrackingMeta
 				for (final ClassOrInterfaceTypeDetails request : typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(ROO_GWT_REQUEST)) {
 					final ClassOrInterfaceTypeDetails entity = gwtTypeService.lookupEntityFromRequest(request);
 					if (entity != null && layerTypes.contains(entity.getName())) {
-						JavaType typeName = PhysicalTypeIdentifier.getJavaType(request.getDeclaredByMetadataId());
-						LogicalPath typePath = PhysicalTypeIdentifier.getPath(request.getDeclaredByMetadataId());
+						final JavaType typeName = PhysicalTypeIdentifier.getJavaType(request.getDeclaredByMetadataId());
+						final LogicalPath typePath = PhysicalTypeIdentifier.getPath(request.getDeclaredByMetadataId());
 						downstreamDependency = GwtRequestMetadata.createIdentifier(typeName, typePath);
 						processed = true;
 						break;
@@ -261,16 +261,16 @@ public class GwtRequestMetadataProviderImpl extends AbstractHashCodeTrackingMeta
 			}
 			if (!processed && MemberFindingUtils.getAnnotationOfType(cid.getAnnotations(), ROO_GWT_REQUEST) == null) {
 				boolean found = false;
-				for (ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails : typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(ROO_GWT_REQUEST)) {
-					AnnotationMetadata annotationMetadata = GwtUtils.getFirstAnnotation(classOrInterfaceTypeDetails, GwtUtils.REQUEST_ANNOTATIONS);
+				for (final ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails : typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(ROO_GWT_REQUEST)) {
+					final AnnotationMetadata annotationMetadata = GwtUtils.getFirstAnnotation(classOrInterfaceTypeDetails, GwtUtils.REQUEST_ANNOTATIONS);
 					if (annotationMetadata != null) {
-						AnnotationAttributeValue<?> attributeValue = annotationMetadata.getAttribute("value");
+						final AnnotationAttributeValue<?> attributeValue = annotationMetadata.getAttribute("value");
 						if (attributeValue != null) {
-							String mirrorName = GwtUtils.getStringValue(attributeValue);
+							final String mirrorName = GwtUtils.getStringValue(attributeValue);
 							if (mirrorName != null && cid.getName().getFullyQualifiedTypeName().equals(mirrorName)) {
 								found = true;
-								JavaType typeName = PhysicalTypeIdentifier.getJavaType(classOrInterfaceTypeDetails.getDeclaredByMetadataId());
-								LogicalPath typePath = PhysicalTypeIdentifier.getPath(classOrInterfaceTypeDetails.getDeclaredByMetadataId());
+								final JavaType typeName = PhysicalTypeIdentifier.getJavaType(classOrInterfaceTypeDetails.getDeclaredByMetadataId());
+								final LogicalPath typePath = PhysicalTypeIdentifier.getPath(classOrInterfaceTypeDetails.getDeclaredByMetadataId());
 								downstreamDependency = GwtRequestMetadata.createIdentifier(typeName, typePath);
 								break;
 							}
@@ -282,8 +282,8 @@ public class GwtRequestMetadataProviderImpl extends AbstractHashCodeTrackingMeta
 				}
 			} else if (!processed) {
 				// A physical Java type has changed, and determine what the corresponding local metadata identification string would have been
-				JavaType typeName = PhysicalTypeIdentifier.getJavaType(upstreamDependency);
-				LogicalPath typePath = PhysicalTypeIdentifier.getPath(upstreamDependency);
+				final JavaType typeName = PhysicalTypeIdentifier.getJavaType(upstreamDependency);
+				final LogicalPath typePath = PhysicalTypeIdentifier.getPath(upstreamDependency);
 				downstreamDependency = GwtRequestMetadata.createIdentifier(typeName, typePath);
 			}
 
