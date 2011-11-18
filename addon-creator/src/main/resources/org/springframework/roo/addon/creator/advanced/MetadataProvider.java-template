@@ -8,7 +8,7 @@ import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.ContextualPath;
+import org.springframework.roo.project.LogicalPath;
 
 /**
  * Provides {@link __APP_NAME__Metadata}. This type is called by Roo to retrieve the metadata for this add-on.
@@ -60,11 +60,11 @@ public final class __APP_NAME__MetadataProvider extends AbstractItdMetadataProvi
 
 	protected String getGovernorPhysicalTypeIdentifier(String metadataIdentificationString) {
 		JavaType javaType = __APP_NAME__Metadata.getJavaType(metadataIdentificationString);
-		ContextualPath path = __APP_NAME__Metadata.getPath(metadataIdentificationString);
+		LogicalPath path = __APP_NAME__Metadata.getPath(metadataIdentificationString);
 		return PhysicalTypeIdentifier.createIdentifier(javaType, path);
 	}
 	
-	protected String createLocalIdentifier(JavaType javaType, ContextualPath path) {
+	protected String createLocalIdentifier(JavaType javaType, LogicalPath path) {
 		return __APP_NAME__Metadata.createIdentifier(javaType, path);
 	}
 
