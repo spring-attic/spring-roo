@@ -60,7 +60,7 @@ public class Database {
 	public Table getTable(final String name, final String schemaName) {
 		for (Table table : tables) {
 			if (table.getName().equals(name)) {
-				if (!StringUtils.hasText(schemaName) || DbreModelService.NO_SCHEMA_REQUIRED.equals(schemaName) || table.getSchema().getName().equals(schemaName)) {
+				if (StringUtils.isBlank(schemaName) || DbreModelService.NO_SCHEMA_REQUIRED.equals(schemaName) || table.getSchema().getName().equals(schemaName)) {
 					return table;
 				}
 			}

@@ -126,7 +126,7 @@ public class DefaultFileManager implements FileManager, UndoListener {
 	}
 
 	public void delete(final String fileIdentifier, final String reasonForDeletion) {
-		if (!StringUtils.hasText(fileIdentifier)) {
+		if (StringUtils.isBlank(fileIdentifier)) {
 			return;
 		}
 

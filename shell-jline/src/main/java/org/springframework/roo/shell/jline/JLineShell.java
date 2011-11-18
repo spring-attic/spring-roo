@@ -271,7 +271,7 @@ public abstract class JLineShell extends AbstractShell implements CommandMarker,
 		if (Shell.WINDOW_TITLE_SLOT.equals(slot)) {
 			if (reader != null && reader.getTerminal().isANSISupported()) {
 				// We can probably update the window title, as requested
-				if (!StringUtils.hasText(message)) {
+				if (StringUtils.isBlank(message)) {
 					System.out.println("No text");
 				}
 

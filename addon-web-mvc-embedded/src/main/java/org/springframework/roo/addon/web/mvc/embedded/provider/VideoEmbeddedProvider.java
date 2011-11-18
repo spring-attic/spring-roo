@@ -74,7 +74,7 @@ public class VideoEmbeddedProvider extends AbstractEmbeddedProvider {
 			return false;
 		}
 		final String id = options.get("id");
-		if (!StringUtils.hasText(id)) {
+		if (StringUtils.isBlank(id)) {
 			return false;
 		}
 		installTagx("video");

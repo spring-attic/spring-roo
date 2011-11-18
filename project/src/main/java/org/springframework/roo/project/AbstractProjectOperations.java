@@ -170,7 +170,7 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 	}
 
 	public void addModuleDependency(final String moduleName) {
-		if (!StringUtils.hasText(moduleName)) {
+		if (StringUtils.isBlank(moduleName)) {
 			return;
 		}
 		Pom focusedModule = getFocusedModule();

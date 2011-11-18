@@ -137,7 +137,7 @@ public class SimpleParser implements Parser {
 				}
 
 				// Ensure the user specified a value if the value is mandatory
-				if (!StringUtils.hasText(value) && cliOption.mandatory()) {
+				if (StringUtils.isBlank(value) && cliOption.mandatory()) {
 					if ("".equals(cliOption.key()[0])) {
 						StringBuilder message = new StringBuilder("You must specify a default option ");
 						if (cliOption.key().length > 1) {
@@ -693,7 +693,7 @@ public class SimpleParser implements Parser {
 							// Only include in the candidates those results which are compatible with the present buffer
 							for (Completion currentValue : allValues) {
 								// We only provide a suggestion if the lastOptionValue == ""
-								if (!StringUtils.hasText(lastOptionValue)) {
+								if (StringUtils.isBlank(lastOptionValue)) {
 									// We should add the result, as they haven't typed anything yet
 									results.add(new Completion(prefix + currentValue.getValue() + suffix, currentValue.getFormattedValue(), currentValue.getHeading(), currentValue.getOrder()));
 								} else {

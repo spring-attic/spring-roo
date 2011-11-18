@@ -68,7 +68,7 @@ public class JsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 	public JavaSymbolName getToJsonMethodName() {
 		String methodLabel = annotationValues.getToJsonMethod();
-		if (!StringUtils.hasText(methodLabel)) {
+		if (StringUtils.isBlank(methodLabel)) {
 			return null;
 		}
 		return new JavaSymbolName(methodLabel);
@@ -98,7 +98,7 @@ public class JsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 	public JavaSymbolName getToJsonArrayMethodName() {
 		String methodLabel = annotationValues.getToJsonArrayMethod();
-		if (!StringUtils.hasText(methodLabel)) {
+		if (StringUtils.isBlank(methodLabel)) {
 			return null;
 		}
 		return new JavaSymbolName(methodLabel);
@@ -132,7 +132,7 @@ public class JsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 	public JavaSymbolName getFromJsonArrayMethodName() {
 		String methodLabel = annotationValues.getFromJsonArrayMethod();
-		if (!StringUtils.hasText(methodLabel)) {
+		if (StringUtils.isBlank(methodLabel)) {
 			return null;
 		}
 
@@ -170,7 +170,7 @@ public class JsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 	public JavaSymbolName getFromJsonMethodName() {
 		String methodLabel = annotationValues.getFromJsonMethod();
-		if (!StringUtils.hasText(methodLabel)) {
+		if (StringUtils.isBlank(methodLabel)) {
 			return null;
 		}
 

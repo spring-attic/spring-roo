@@ -111,7 +111,7 @@ public class CloudCredentials {
 	}
 
 	public static CloudCredentials decode(final String encoded) {
-		if (!StringUtils.hasText(encoded)) {
+		if (StringUtils.isBlank(encoded)) {
 			throw new IllegalStateException("Stored login invalid; cannot continue");
 		}
 		final Map<String, String> map = new HashMap<String, String>();

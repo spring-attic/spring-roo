@@ -45,7 +45,7 @@ public class HintOperationsImpl implements HintOperations {
 	@Reference private ProjectOperations projectOperations;
 
 	public String hint(String topic) {
-		if (!StringUtils.hasText(topic)) {
+		if (StringUtils.isBlank(topic)) {
 			topic = determineTopic();
 		}
 		try {

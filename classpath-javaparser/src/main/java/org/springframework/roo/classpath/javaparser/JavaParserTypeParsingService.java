@@ -93,7 +93,7 @@ public class JavaParserTypeParsingService implements TypeParsingService {
 	}
 
 	public ClassOrInterfaceTypeDetails getTypeFromString(final String fileContents, final String declaredByMetadataId, final JavaType typeName) {
-		if (!StringUtils.hasText(fileContents)) {
+		if (StringUtils.isBlank(fileContents)) {
 			return null;
 		}
 

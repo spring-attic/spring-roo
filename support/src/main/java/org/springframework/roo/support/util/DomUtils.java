@@ -182,7 +182,7 @@ public final class DomUtils {
 					break;
 				case Node.CDATA_SECTION_NODE:
 				case Node.TEXT_NODE:
-					if (!StringUtils.hasText(child.getNodeValue())) {
+					if (StringUtils.isBlank(child.getNodeValue())) {
 						node.removeChild(child);
 					}
 					break;

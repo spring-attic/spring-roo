@@ -92,7 +92,7 @@ public class DbreModelServiceImpl implements DbreModelService {
 		}
 
 		String dbreXmlPath = getDbreXmlPath();
-		if (!StringUtils.hasText(dbreXmlPath) || !fileManager.exists(dbreXmlPath)) {
+		if (StringUtils.isBlank(dbreXmlPath) || !fileManager.exists(dbreXmlPath)) {
 			return null;
 		}
 

@@ -68,7 +68,7 @@ public class ToStringMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 	 */
 	public MethodMetadata getToStringMethod() {
 		String toStringMethod = annotationValues.getToStringMethod();
-		if (!StringUtils.hasText(toStringMethod)) {
+		if (StringUtils.isBlank(toStringMethod)) {
 			return null;
 		}
 

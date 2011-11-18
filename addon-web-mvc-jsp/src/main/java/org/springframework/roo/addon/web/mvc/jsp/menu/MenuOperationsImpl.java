@@ -58,7 +58,7 @@ public class MenuOperationsImpl implements MenuOperations {
 
 		Map<String, String> properties = new LinkedHashMap<String, String>();
 
-		if (!StringUtils.hasText(idPrefix)) {
+		if (StringUtils.isBlank(idPrefix)) {
 			idPrefix = DEFAULT_MENU_ITEM_PREFIX;
 		}
 
@@ -127,7 +127,7 @@ public class MenuOperationsImpl implements MenuOperations {
 		Assert.notNull(menuCategoryName, "Menu category identifier required");
 		Assert.notNull(menuItemName, "Menu item id required");
 
-		if (!StringUtils.hasText(idPrefix)) {
+		if (StringUtils.isBlank(idPrefix)) {
 			idPrefix = DEFAULT_MENU_ITEM_PREFIX;
 		}
 
@@ -149,7 +149,7 @@ public class MenuOperationsImpl implements MenuOperations {
 		try {
 			return XmlUtils.readXml(getMenuFileInputStream(logicalPath));
 		} catch (Exception e) {
-			throw new IllegalArgumentException("Unable to parse menu.jspx" + (!StringUtils.hasText(e.getMessage()) ? "" : " (" + e.getMessage() + ")"), e);
+			throw new IllegalArgumentException("Unable to parse menu.jspx" + (StringUtils.isBlank(e.getMessage()) ? "" : " (" + e.getMessage() + ")"), e);
 		}
 	}
 

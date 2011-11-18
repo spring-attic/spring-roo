@@ -276,7 +276,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 			}
 		} else {
 			final String versionFieldValue = (String) versionFieldAttribute.getValue();
-			if (hasVersionField(table) && (!StringUtils.hasText(versionFieldValue) || VERSION.equals(versionFieldValue))) {
+			if (hasVersionField(table) && (StringUtils.isBlank(versionFieldValue) || VERSION.equals(versionFieldValue))) {
 				attributesToDeleteIfPresent.add(new JavaSymbolName(VERSION_FIELD));
 			}
 		}

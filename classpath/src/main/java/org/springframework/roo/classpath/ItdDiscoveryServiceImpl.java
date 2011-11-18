@@ -41,7 +41,7 @@ public class ItdDiscoveryServiceImpl implements ItdDiscoveryService {
 	}
 
 	public void removeItdTypeDetails(final String itdTypeDetailsId) {
-		if (!StringUtils.hasText(itdTypeDetailsId)) {
+		if (StringUtils.isBlank(itdTypeDetailsId)) {
 			return;
 		}
 		String type = itdIdToTypeMap.get(itdTypeDetailsId);

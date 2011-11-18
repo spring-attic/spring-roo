@@ -105,14 +105,14 @@ public class CloudFoundrySessionImpl implements CloudFoundrySession, Transmissio
 	private CloudCredentials getLoginCredentials(String cloudControllerUrl, String email, String password) {
 		cloudControllerUrl = StringUtils.defaultIfEmpty(cloudControllerUrl, UaaAwareAppCloudClient.CLOUD_FOUNDRY_URL);
 
-		if (!StringUtils.hasText(email)) {
+		if (StringUtils.isBlank(email)) {
 			email = getStoredEmailAddress(cloudControllerUrl);
-			if (!StringUtils.hasText(email)) {
+			if (StringUtils.isBlank(email)) {
 				return null;
 			}
 		}
 
-		if (!StringUtils.hasText(password)) {
+		if (StringUtils.isBlank(password)) {
 			password = preferences.getStoredPassword(cloudControllerUrl, email);
 		}
 

@@ -149,7 +149,7 @@ public class JpaOperationsImpl implements JpaOperations {
 		manageGaeXml(ormProvider, jdbcDatabase, applicationId, moduleName);
 		updateDbdcConfigProperties(ormProvider, jdbcDatabase, hostName, userName, password, StringUtils.defaultIfEmpty(persistenceUnit, DEFAULT_PERSISTENCE_UNIT), moduleName);
 
-		if (!StringUtils.hasText(jndi)) {
+		if (StringUtils.isBlank(jndi)) {
 			updateDatabaseProperties(ormProvider, jdbcDatabase, hostName, databaseName, userName, password, moduleName);
 		}
 
@@ -244,7 +244,7 @@ public class JpaOperationsImpl implements JpaOperations {
 			if (dataSourceJndi != null) {
 				root.removeChild(dataSourceJndi);
 			}
-		} else if (!StringUtils.hasText(jndi) && dataSource == null) {
+		} else if (StringUtils.isBlank(jndi) && dataSource == null) {
 			dataSource = appCtx.createElement("bean");
 			dataSource.setAttribute("class", "org.apache.commons.dbcp.BasicDataSource");
 			dataSource.setAttribute("destroy-method", "close");
@@ -490,7 +490,7 @@ public class JpaOperationsImpl implements JpaOperations {
 				connectionString += dbDelimiter + databaseName;
 			}
 		}
-		if (!StringUtils.hasText(hostName)) {
+		if (StringUtils.isBlank(hostName)) {
 			hostName = "localhost";
 		}
 		return connectionString.replace("HOST_NAME", hostName);

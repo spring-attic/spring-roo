@@ -135,7 +135,7 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 	}
 
 	private MethodMetadata getJsonShowMethod(final FieldMetadata identifierField, final MemberTypeAdditions findMethod) {
-		if (!StringUtils.hasText(annotationValues.getShowJsonMethod()) || identifierField == null || findMethod == null) {
+		if (StringUtils.isBlank(annotationValues.getShowJsonMethod()) || identifierField == null || findMethod == null) {
 			return null;
 		}
 
@@ -185,7 +185,7 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 	}
 
 	private MethodMetadata getJsonCreateMethod(final MemberTypeAdditions persistMethod) {
-		if (!StringUtils.hasText(annotationValues.getCreateFromJsonMethod()) || persistMethod == null) {
+		if (StringUtils.isBlank(annotationValues.getCreateFromJsonMethod()) || persistMethod == null) {
 			return null;
 		}
 		JavaSymbolName methodName = new JavaSymbolName(annotationValues.getCreateFromJsonMethod());
@@ -223,7 +223,7 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 	}
 
 	private MethodMetadata getCreateFromJsonArrayMethod(final MemberTypeAdditions persistMethod) {
-		if (!StringUtils.hasText(annotationValues.getCreateFromJsonArrayMethod()) || persistMethod == null) {
+		if (StringUtils.isBlank(annotationValues.getCreateFromJsonArrayMethod()) || persistMethod == null) {
 			return null;
 		}
 		JavaSymbolName methodName = new JavaSymbolName(annotationValues.getCreateFromJsonArrayMethod());
@@ -268,7 +268,7 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 	}
 
 	private MethodMetadata getJsonListMethod(final MemberTypeAdditions findAllMethod) {
-		if (!StringUtils.hasText(annotationValues.getListJsonMethod()) || findAllMethod == null) {
+		if (StringUtils.isBlank(annotationValues.getListJsonMethod()) || findAllMethod == null) {
 			return null;
 		}
 		JavaSymbolName methodName = new JavaSymbolName(annotationValues.getListJsonMethod());
@@ -305,7 +305,7 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 	}
 
 	private MethodMetadata getJsonUpdateMethod(final MemberTypeAdditions mergeMethod) {
-		if (!StringUtils.hasText(annotationValues.getUpdateFromJsonMethod()) || mergeMethod == null) {
+		if (StringUtils.isBlank(annotationValues.getUpdateFromJsonMethod()) || mergeMethod == null) {
 			return null;
 		}
 		JavaSymbolName methodName = new JavaSymbolName(annotationValues.getUpdateFromJsonMethod());
@@ -349,7 +349,7 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 	}
 
 	private MethodMetadata getUpdateFromJsonArrayMethod(final MemberTypeAdditions mergeMethod) {
-		if (!StringUtils.hasText(annotationValues.getUpdateFromJsonArrayMethod()) || mergeMethod == null) {
+		if (StringUtils.isBlank(annotationValues.getUpdateFromJsonArrayMethod()) || mergeMethod == null) {
 			return null;
 		}
 		JavaSymbolName methodName = new JavaSymbolName(annotationValues.getUpdateFromJsonArrayMethod());
@@ -399,7 +399,7 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 	}
 
 	private MethodMetadata getJsonDeleteMethod(final MemberTypeAdditions removeMethod, final FieldMetadata identifierField, final MemberTypeAdditions findMethod) {
-		if (!StringUtils.hasText(annotationValues.getDeleteFromJsonMethod()) || removeMethod == null || identifierField == null || findMethod == null) {
+		if (StringUtils.isBlank(annotationValues.getDeleteFromJsonMethod()) || removeMethod == null || identifierField == null || findMethod == null) {
 			return null;
 		}
 		JavaSymbolName methodName = new JavaSymbolName(annotationValues.getDeleteFromJsonMethod());

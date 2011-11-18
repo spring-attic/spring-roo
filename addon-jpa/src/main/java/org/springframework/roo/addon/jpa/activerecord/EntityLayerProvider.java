@@ -48,7 +48,7 @@ public class EntityLayerProvider extends CoreLayerProvider {
 
 		// Check the entity has a plural form
 		final String plural = getPlural(targetEntity);
-		if (!StringUtils.hasText(plural)) {
+		if (StringUtils.isBlank(plural)) {
 			return null;
 		}
 
@@ -62,7 +62,7 @@ public class EntityLayerProvider extends CoreLayerProvider {
 
 		// It's an entity layer method; see if it's specified by the annotation
 		final String methodName = method.getName(annotationValues, targetEntity, plural);
-		if (!StringUtils.hasText(methodName)) {
+		if (StringUtils.isBlank(methodName)) {
 			return null;
 		}
 

@@ -498,7 +498,7 @@ public final class XmlUtils {
 	 * @throws IllegalArgumentException if the element is null, has no text or contains illegal characters
 	 */
 	public static void assertElementLegal(final String element) {
-		if (!StringUtils.hasText(element)) {
+		if (StringUtils.isBlank(element)) {
 			throw new IllegalArgumentException("Element required");
 		}
 

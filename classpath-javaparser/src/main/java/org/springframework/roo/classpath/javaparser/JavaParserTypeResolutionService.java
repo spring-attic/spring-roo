@@ -48,7 +48,7 @@ public class JavaParserTypeResolutionService implements TypeResolutionService{
 		try {
 			File file = new File(fileIdentifier);
 			String typeContents = FileUtils.read(file);
-			if (!StringUtils.hasText(typeContents)) {
+			if (StringUtils.isBlank(typeContents)) {
 				return null;
 			}
 			CompilationUnit compilationUnit = JavaParser.parse(new ByteArrayInputStream(typeContents.getBytes()));

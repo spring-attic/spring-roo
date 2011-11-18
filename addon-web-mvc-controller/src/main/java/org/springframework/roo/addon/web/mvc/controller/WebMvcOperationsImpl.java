@@ -264,7 +264,7 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
 
 	private boolean isConversionServiceConfigured(final Element root, final Element annotationDrivenElement) {
 		String beanName = annotationDrivenElement.getAttribute("conversion-service");
-		if (!StringUtils.hasText(beanName)) {
+		if (StringUtils.isBlank(beanName)) {
 			return false;
 		}
 

@@ -101,7 +101,7 @@ public class ControllerCommands implements CommandMarker {
 			}
 		}
 
-		if (!StringUtils.hasText(path)) {
+		if (StringUtils.isBlank(path)) {
 			LogicalPath targetPath = PhysicalTypeIdentifier.getPath(classOrInterfaceTypeDetails.getDeclaredByMetadataId());
 			PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(backingType, targetPath));
 			Assert.notNull(pluralMetadata, "Could not determine plural for '" + backingType.getSimpleTypeName() + "'");

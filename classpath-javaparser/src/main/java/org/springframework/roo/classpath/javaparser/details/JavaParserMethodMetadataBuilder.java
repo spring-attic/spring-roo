@@ -255,7 +255,7 @@ public class JavaParserMethodMetadataBuilder implements Builder<MethodMetadata>{
 		}
 
 		// Set the body
-		if (!StringUtils.hasText(method.getBody())) {
+		if (StringUtils.isBlank(method.getBody())) {
 			// Never set the body if an abstract method
 			if (!Modifier.isAbstract(method.getModifier()) && !PhysicalTypeCategory.INTERFACE.equals(compilationUnitServices.getPhysicalTypeCategory())) {
 				d.setBody(new BlockStmt());

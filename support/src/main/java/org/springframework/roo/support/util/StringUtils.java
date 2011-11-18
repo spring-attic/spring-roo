@@ -1357,7 +1357,7 @@ public final class StringUtils {
 	
 	/**
 	 * Indicates whether the given text is blank. More fluent than calling
-	 * <code>!StringUtils.hasText(blah)</code>.
+	 * <code>StringUtils.isBlank(blah)</code>.
 	 * 
 	 * @param str the text to check (can be blank)
 	 * @return the opposite of {@link #hasText(String)}

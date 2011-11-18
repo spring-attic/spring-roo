@@ -213,11 +213,11 @@ public class MongoOperationsImpl implements MongoOperations {
 	}
 
 	private void writeProperties(String username, String password, String name, String port, String host, final String moduleName) {
-		if (!StringUtils.hasText(username)) username = "";
-		if (!StringUtils.hasText(password)) password = "";
-		if (!StringUtils.hasText(name)) name = projectOperations.getProjectName(moduleName);
-		if (!StringUtils.hasText(port)) port = "27017";
-		if (!StringUtils.hasText(host)) host = "127.0.0.1";
+		if (StringUtils.isBlank(username)) username = "";
+		if (StringUtils.isBlank(password)) password = "";
+		if (StringUtils.isBlank(name)) name = projectOperations.getProjectName(moduleName);
+		if (StringUtils.isBlank(port)) port = "27017";
+		if (StringUtils.isBlank(host)) host = "127.0.0.1";
 
 		Map<String, String> properties = new HashMap<String, String>();
 		properties.put("mongo.username", username);

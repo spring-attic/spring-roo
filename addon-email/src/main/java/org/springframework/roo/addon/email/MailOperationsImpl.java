@@ -326,7 +326,7 @@ public class MailOperationsImpl implements MailOperations {
 		if (async) {
 			if (DomUtils.findFirstElementByName("task:annotation-driven", root) == null) {
 				// Add asynchronous email support to the application
-				if (!StringUtils.hasText(root.getAttribute("xmlns:task"))) {
+				if (StringUtils.isBlank(root.getAttribute("xmlns:task"))) {
 					// Add the "task" namespace to the Spring config file
 					root.setAttribute("xmlns:task", SPRING_TASK_NS);
 					root.setAttribute("xsi:schemaLocation", root.getAttribute("xsi:schemaLocation") + "  " + SPRING_TASK_NS + " " + SPRING_TASK_XSD);

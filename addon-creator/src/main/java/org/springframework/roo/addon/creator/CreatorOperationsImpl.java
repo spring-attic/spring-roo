@@ -87,7 +87,7 @@ public class CreatorOperationsImpl implements CreatorOperations {
 
 	protected void activate(final ComponentContext context) {
 		iconSetUrl = context.getBundleContext().getProperty("creator.i18n.iconset.url");
-		if (!StringUtils.hasText(iconSetUrl)) {
+		if (StringUtils.isBlank(iconSetUrl)) {
 			iconSetUrl = ICON_SET_URL;
 		}
 	}
@@ -127,7 +127,7 @@ public class CreatorOperationsImpl implements CreatorOperations {
 
 	public void createWrapperAddon(final JavaPackage topLevelPackage, final String groupId, final String artifactId, final String version, final String vendorName, final String lincenseUrl, final String docUrl, final String osgiImports, final String description, String projectName) {
 		Assert.notNull(topLevelPackage, "Top Level Package required");
-		if (!StringUtils.hasText(projectName)) {
+		if (StringUtils.isBlank(projectName)) {
 			projectName = topLevelPackage.getFullyQualifiedPackageName().replace(".", "-");
 		}
 		Document pom = XmlUtils.readXml(FileUtils.getInputStream(getClass(), "wrapper/roo-addon-wrapper-template.xml"));
@@ -163,7 +163,7 @@ public class CreatorOperationsImpl implements CreatorOperations {
 		Assert.notNull(locale, "Locale required");
 		Assert.notNull(messageBundle, "Message Bundle required");
 
-		if (!StringUtils.hasText(language)) {
+		if (StringUtils.isBlank(language)) {
 			language = "";
 			InputStreamReader is = new InputStreamReader(FileUtils.getInputStream(getClass(), Type.I18N.name().toLowerCase() +  "/iso3166.txt"));
 			BufferedReader br = new BufferedReader(is);
@@ -198,7 +198,7 @@ public class CreatorOperationsImpl implements CreatorOperations {
 		String languageName = b.toString();
 		String packagePath = topLevelPackage.getFullyQualifiedPackageName().replace('.', separatorChar);
 
-		if (!StringUtils.hasText(description)) {
+		if (StringUtils.isBlank(description)) {
 			description = languageName + " language support for Spring Roo Web MVC JSP Scaffolding";
 		}
 		if (!description.contains("#mvc") || !description.contains("#localization") || !description.contains("locale:")) {
@@ -260,7 +260,7 @@ public class CreatorOperationsImpl implements CreatorOperations {
 	 * package is used for the project name
 	 */
 	private void createProject(final JavaPackage topLevelPackage, final Type type, final String description, String projectName) {
-		if (!StringUtils.hasText(projectName)) {
+		if (StringUtils.isBlank(projectName)) {
 			projectName = topLevelPackage.getFullyQualifiedPackageName().replace(".", "-");
 		}
 
@@ -300,7 +300,7 @@ public class CreatorOperationsImpl implements CreatorOperations {
 	}
 
 	private void install(final String targetFilename, final JavaPackage topLevelPackage, final Path path, final Type type, String projectName) {
-		if (!StringUtils.hasText(projectName)) {
+		if (StringUtils.isBlank(projectName)) {
 			projectName = topLevelPackage.getFullyQualifiedPackageName().replace(".", "-");
 		}
 		String topLevelPackageName = topLevelPackage.getFullyQualifiedPackageName();

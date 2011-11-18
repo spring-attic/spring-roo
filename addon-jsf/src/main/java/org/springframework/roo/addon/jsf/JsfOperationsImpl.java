@@ -152,7 +152,7 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 		AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(ROO_JSF_MANAGED_BEAN);
 		annotationBuilder.addClassAttribute("entity", entity);
 		
-		if (!StringUtils.hasText(beanName)) {
+		if (StringUtils.isBlank(beanName)) {
 			beanName = StringUtils.uncapitalize(managedBean.getSimpleTypeName());
 		}
 		annotationBuilder.addStringAttribute("beanName", beanName);

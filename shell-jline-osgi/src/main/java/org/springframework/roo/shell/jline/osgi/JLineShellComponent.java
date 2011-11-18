@@ -84,7 +84,7 @@ public class JLineShellComponent extends JLineShell {
 	private String getLatestFavouriteTweet() {
 		// Access Twitter's REST API
 		String string = sendGetRequest("http://api.twitter.com/1/favorites.json", "id=SpringRoo&count=5");
-		if (!StringUtils.hasText(string)) {
+		if (StringUtils.isBlank(string)) {
 			return null;
 		}
 		// Parse the returned JSON. This is a once off operation so we can used JSONValue.parse without penalty

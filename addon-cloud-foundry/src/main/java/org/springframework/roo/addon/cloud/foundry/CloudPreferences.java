@@ -132,7 +132,7 @@ public class CloudPreferences {
 	 * @return a non-<code>null</code> set
 	 */
 	private Set<CloudCredentials> decodeLoginPrefEntries(final String encodedEntries) {
-		if (!StringUtils.hasText(encodedEntries)) {
+		if (StringUtils.isBlank(encodedEntries)) {
 			return Collections.emptySet();
 		}
 		final Set<CloudCredentials> set = new HashSet<CloudCredentials>();

@@ -45,7 +45,7 @@ public class FinderCommands implements CommandMarker {
 		Assert.isTrue(depth <= 3, "Depth must not be greater than 3");
 
 		SortedSet<String> finders = finderOperations.listFindersFor(typeName, depth);
-		if (!StringUtils.hasText(filter)) {
+		if (StringUtils.isBlank(filter)) {
 			return finders;
 		}
 

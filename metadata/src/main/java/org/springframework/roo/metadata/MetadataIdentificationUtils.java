@@ -128,7 +128,7 @@ public final class MetadataIdentificationUtils {
 	 * @return the metadata identification string (may be null if the input was invalid)
 	 */
 	public static String create(final String fullyQualifiedClassName) {
-		if (!StringUtils.hasText(fullyQualifiedClassName) || fullyQualifiedClassName.contains(INSTANCE_DELIMITER)) {
+		if (StringUtils.isBlank(fullyQualifiedClassName) || fullyQualifiedClassName.contains(INSTANCE_DELIMITER)) {
 			return null;
 		}
 		return MID_PREFIX + fullyQualifiedClassName;
@@ -143,7 +143,7 @@ public final class MetadataIdentificationUtils {
 	 * metadata class name is not well-formed
 	 */
 	public static String create(final String fullyQualifiedMetadataClass, final String instanceIdentificationKey) {
-		if (!StringUtils.hasText(instanceIdentificationKey) || !StringUtils.hasText(fullyQualifiedMetadataClass) || fullyQualifiedMetadataClass.contains(INSTANCE_DELIMITER)) {
+		if (StringUtils.isBlank(instanceIdentificationKey) || StringUtils.isBlank(fullyQualifiedMetadataClass) || fullyQualifiedMetadataClass.contains(INSTANCE_DELIMITER)) {
 			return null;
 		}
 		final StringBuilder mid = new StringBuilder();

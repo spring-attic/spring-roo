@@ -60,7 +60,7 @@ public class JavaBeanMetadataProvider extends AbstractItdMetadataProvider {
 	@Override
 	protected void notifyForGenericListener(final String upstreamDependency) {
 		// If the upstream dependency is null or invalid do not continue
-		if (!StringUtils.hasText(upstreamDependency) || !MetadataIdentificationUtils.isValid(upstreamDependency)) {
+		if (StringUtils.isBlank(upstreamDependency) || !MetadataIdentificationUtils.isValid(upstreamDependency)) {
 			return;
 		}
 		// If the upstream dependency isn't ProjectMetadata do not continue

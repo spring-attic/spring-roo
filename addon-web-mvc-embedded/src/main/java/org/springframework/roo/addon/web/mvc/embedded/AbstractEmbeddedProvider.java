@@ -72,7 +72,7 @@ public abstract class AbstractEmbeddedProvider implements EmbeddedProvider {
 	public void installJspx(String viewName, String title, final Element contentElement) {
 		Assert.hasText(viewName, "View name required");
 		Assert.notNull(contentElement, "Content element required");
-		if (!StringUtils.hasText(title)) {
+		if (StringUtils.isBlank(title)) {
 			title = getTitle(viewName);
 		}
 		viewName = getViewName(viewName, "default");
