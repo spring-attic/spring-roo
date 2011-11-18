@@ -130,11 +130,14 @@ public class CreatorOperationsImpl implements CreatorOperations {
 		if (StringUtils.isBlank(projectName)) {
 			projectName = topLevelPackage.getFullyQualifiedPackageName().replace(".", "-");
 		}
+		final String wrapperGroupId = topLevelPackage.getFullyQualifiedPackageName();
 		Document pom = XmlUtils.readXml(FileUtils.getInputStream(getClass(), "wrapper/roo-addon-wrapper-template.xml"));
 		Element root = pom.getDocumentElement();
 
 		XmlUtils.findRequiredElement("/project/name", root).setTextContent(projectName);
-		XmlUtils.findRequiredElement("/project/groupId", root).setTextContent(topLevelPackage.getFullyQualifiedPackageName());
+		XmlUtils.findRequiredElement("/project/groupId", root).setTextContent(wrapperGroupId);
+		XmlUtils.findRequiredElement("/project/artifactId", root).setTextContent(wrapperGroupId + "." + artifactId);
+		XmlUtils.findRequiredElement("/project/version", root).setTextContent(version + ".0001");
 		XmlUtils.findRequiredElement("/project/dependencies/dependency/groupId", root).setTextContent(groupId);
 		XmlUtils.findRequiredElement("/project/dependencies/dependency/artifactId", root).setTextContent(artifactId);
 		XmlUtils.findRequiredElement("/project/dependencies/dependency/version", root).setTextContent(version);

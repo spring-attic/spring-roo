@@ -2,9 +2,9 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>TO_BE_CHANGED_BY_ADDON</groupId>
-    <artifactId>${project.groupId}.${pkgArtifactId}</artifactId>
+    <artifactId>TO_BE_CHANGED_BY_ADDON</artifactId>
     <packaging>bundle</packaging>
-    <version>${osgiVersion}</version>
+    <version>TO_BE_CHANGED_BY_ADDON</version>
     <name>Spring Roo - Wrapping - ${pkgArtifactId}</name>
     <description>This bundle wraps the standard Maven artifact: ${pkgArtifactId}-${pkgVersion}.</description>
     <properties>
