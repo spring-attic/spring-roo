@@ -72,23 +72,19 @@ public class GwtRequestMetadataProviderImpl extends AbstractHashCodeTrackingMeta
 		return GwtRequestMetadata.getMetadataIdentifierType();
 	}
 
-	public MetadataItem get(final String metadataIdentificationString) {
+	public MetadataItem get(final String requestMetadataId) {
 		// Abort early if we can't continue
-		final ProjectMetadata projectMetadata = projectOperations.getProjectMetadata(PhysicalTypeIdentifierNamingUtils.getPath(metadataIdentificationString).getModule());
+		final ProjectMetadata projectMetadata = projectOperations.getProjectMetadata(PhysicalTypeIdentifierNamingUtils.getPath(requestMetadataId).getModule());
 		if (projectMetadata == null) {
 			return null;
 		}
 
-		final ClassOrInterfaceTypeDetails request = getGovernor(metadataIdentificationString);
-		if (request == null) {
+		final ClassOrInterfaceTypeDetails request = getGovernor(requestMetadataId);
+		if (request == null || request.getAnnotation(ROO_GWT_REQUEST) == null) {
 			return null;
 		}
 
-		final AnnotationMetadata mirrorAnnotation = MemberFindingUtils.getAnnotationOfType(request.getAnnotations(), ROO_GWT_REQUEST);
-		if (mirrorAnnotation == null) {
-			return null;
-		}
-
+		// Target type can be an Active Record entity, a service, etc.
 		final JavaType targetType = GwtUtils.lookupRequestTargetType(request);
 		if (targetType == null) {
 			return null;
@@ -99,29 +95,32 @@ public class GwtRequestMetadataProviderImpl extends AbstractHashCodeTrackingMeta
 			return null;
 		}
 
-		final MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(getClass().getName(), target);
-		if (memberDetails == null) {
+		final MemberDetails targetDetails = memberDetailsScanner.getMemberDetails(getClass().getName(), target);
+		if (targetDetails == null) {
 			return null;
 		}
 
-		final List<String> exclusionsList = getMethodExclusions(request);
-
-		final List<MethodMetadata> requestMethods = new ArrayList<MethodMetadata>();
-		for (final MethodMetadata methodMetadata : memberDetails.getMethods()) {
-			if (Modifier.isPublic(methodMetadata.getModifier()) && !exclusionsList.contains(methodMetadata.getMethodName().getSymbolName())) {
-				final JavaType returnType = gwtTypeService.getGwtSideLeafType(methodMetadata.getReturnType(), target.getName(), true, true);
-				if (returnType == null) {
-					continue;
-				}
-				final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(methodMetadata);
-				methodBuilder.setReturnType(returnType);
-				methodBuilder.setBodyBuilder(null);
-				requestMethods.add(methodBuilder.build());
-			}
-		}
-		final GwtRequestMetadata gwtRequestMetadata = new GwtRequestMetadata(metadataIdentificationString, updateRequest(request, requestMethods));
+		final List<MethodMetadata> requestMethods = getRequestMethods(getMethodExclusions(request), target.getType(), targetDetails);
+		
+		final GwtRequestMetadata gwtRequestMetadata = new GwtRequestMetadata(requestMetadataId, writeRequestInterface(request, requestMethods));
 		notifyIfRequired(gwtRequestMetadata);
 		return gwtRequestMetadata;
+	}
+
+	private List<MethodMetadata> getRequestMethods(final List<String> excludedMethods, final JavaType targetType, final MemberDetails targetDetails) {
+		final List<MethodMetadata> requestMethods = new ArrayList<MethodMetadata>();
+		for (final MethodMetadata methodMetadata : targetDetails.getMethods()) {
+			if (Modifier.isPublic(methodMetadata.getModifier()) && !excludedMethods.contains(methodMetadata.getMethodName().getSymbolName())) {
+				final JavaType returnType = gwtTypeService.getGwtSideLeafType(methodMetadata.getReturnType(), targetType, true, true);
+				if (returnType != null) {
+					final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(methodMetadata);
+					methodBuilder.setReturnType(returnType);
+					methodBuilder.setBodyBuilder(null);
+					requestMethods.add(methodBuilder.build());
+				}
+			}
+		}
+		return requestMethods;
 	}
 
 	private List<String> getMethodExclusions(final ClassOrInterfaceTypeDetails request) {
@@ -160,7 +159,14 @@ public class GwtRequestMetadataProviderImpl extends AbstractHashCodeTrackingMeta
 		return typeLocationService.getTypeDetails(physicalTypeId);
 	}
 
-	public String updateRequest(final ClassOrInterfaceTypeDetails request, final List<MethodMetadata> requestMethods) {
+	/**
+	 * Creates or updates the entity-specific request interface with
+	 * 
+	 * @param request
+	 * @param requestMethods the methods to declare in the interface (required)
+	 * @return the Java source code for the request interface
+	 */
+	private String writeRequestInterface(final ClassOrInterfaceTypeDetails request, final List<MethodMetadata> requestMethods) {
 		final List<MethodMetadataBuilder> methods = new ArrayList<MethodMetadataBuilder>();
 		for (final MethodMetadata method : requestMethods) {
 			methods.add(getRequestMethod(request, method));

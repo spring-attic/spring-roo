@@ -19,5 +19,13 @@ public interface GwtFileManager {
 
 	void write(List<ClassOrInterfaceTypeDetails> typeDetails, boolean includeWarning);
 
+	/**
+	 * Writes the given Java type to disk in the user project
+	 * 
+	 * @param typeDetails the type to write (required)
+	 * @param warning any warning to appear at the top of the source file
+	 * (cannot be <code>null</code>; include a trailing newline if not empty)
+	 * @return the contents of the type (minus the warning)
+	 */
 	String write(ClassOrInterfaceTypeDetails typeDetails, String warning);
 }

@@ -72,34 +72,28 @@ public final class GwtUtils {
 		return new JavaType(typeName);
 	}
 
-	public static JavaType lookupProxyTargetType(final ClassOrInterfaceTypeDetails cid) {
-		return lookupTargetType(cid, true);
+	public static JavaType lookupProxyTargetType(final ClassOrInterfaceTypeDetails proxyType) {
+		return lookupTargetType(proxyType, PROXY_FOR, PROXY_FOR_NAME);
 	}
 
-	public static JavaType lookupRequestTargetType(final ClassOrInterfaceTypeDetails cid) {
-		return lookupTargetType(cid, false);
+	public static JavaType lookupRequestTargetType(final ClassOrInterfaceTypeDetails requestType) {
+		return lookupTargetType(requestType, SERVICE, SERVICE_NAME);
 	}
 
-	public static JavaType lookupTargetType(final ClassOrInterfaceTypeDetails cid, final boolean proxy) {
-		JavaType stringBasedAnnotation = SERVICE_NAME;
-		JavaType classBasedAnnotation = SERVICE;
-		if (proxy) {
-			stringBasedAnnotation = PROXY_FOR_NAME;
-			classBasedAnnotation = PROXY_FOR;
-		}
-		AnnotationMetadata serviceNameAnnotation = MemberFindingUtils.getAnnotationOfType(cid.getAnnotations(), stringBasedAnnotation);
-		if (serviceNameAnnotation != null) {
-			AnnotationAttributeValue<String> serviceNameAttributeValue = serviceNameAnnotation.getAttribute("value");
-			if (serviceNameAttributeValue != null) {
-				return new JavaType(serviceNameAttributeValue.getValue());
+	private static JavaType lookupTargetType(final ClassOrInterfaceTypeDetails annotatedType, final JavaType classBasedAnnotationType, final JavaType stringBasedAnnotationType) {
+		final AnnotationMetadata stringBasedAnnotation = annotatedType.getAnnotation(stringBasedAnnotationType);
+		if (stringBasedAnnotation != null) {
+			final AnnotationAttributeValue<String> targetTypeAttributeValue = stringBasedAnnotation.getAttribute("value");
+			if (targetTypeAttributeValue != null) {
+				return new JavaType(targetTypeAttributeValue.getValue());
 			}
 		}
 
-		serviceNameAnnotation = MemberFindingUtils.getAnnotationOfType(cid.getAnnotations(), classBasedAnnotation);
-		if (serviceNameAnnotation != null) {
-			AnnotationAttributeValue<JavaType> serviceAttributeValue = serviceNameAnnotation.getAttribute("value");
-			if (serviceAttributeValue != null) {
-				return serviceAttributeValue.getValue();
+		final AnnotationMetadata classBasedAnnotation = annotatedType.getAnnotation(classBasedAnnotationType);
+		if (classBasedAnnotation != null) {
+			final AnnotationAttributeValue<JavaType> targetTypeAttributeValue = classBasedAnnotation.getAttribute("value");
+			if (targetTypeAttributeValue != null) {
+				return targetTypeAttributeValue.getValue();
 			}
 		}
 
