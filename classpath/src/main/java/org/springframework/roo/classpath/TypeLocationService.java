@@ -114,14 +114,12 @@ public interface TypeLocationService {
 	String getTopLevelPackageForModule(Pom module);
 
 	/**
-	 * Attempts to find the {@link ClassOrInterfaceTypeDetails} for the requested {@link JavaType}, assuming
-	 * it is a class or interface that exists at this time and can be parsed.
-	 * If these assumption are not met, an exception will be thrown.
+	 * Returns the details of the given Java type from within the user project.
 	 *
-	 * @param requiredClassOrInterface that should be parsed (required)
-	 * @return the ClassOrInterfaceTypeDetails (never returns null)
+	 * @param javaType the type to look for (required)
+	 * @return <code>null</code> if the type doesn't exist in the project
 	 */
-	ClassOrInterfaceTypeDetails getTypeDetails(JavaType requiredClassOrInterface);
+	ClassOrInterfaceTypeDetails getTypeDetails(JavaType javaType);
 
 	/**
 	 * Resolves the {@link ClassOrInterfaceTypeDetails} to for the provided physical type identifier. If the physical
