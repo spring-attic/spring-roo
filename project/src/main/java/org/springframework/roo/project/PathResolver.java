@@ -88,10 +88,13 @@ public interface PathResolver {
 	String getRoot();
 
 	/**
-	 *
-	 * @param path
-	 * @param javaType
-	 * @return
+	 * Returns the canonical path to the given {@link JavaType} within the given
+	 * {@link LogicalPath}
+	 * 
+	 * @param path the path to the type's base package (required)
+	 * @param javaType the type for which to get the path (required)
+	 * @return a valid canonical path (N.B. this file might not exist)
+	 * @since 1.2.0
 	 */
 	String getCanonicalPath(LogicalPath path, JavaType javaType);
 
