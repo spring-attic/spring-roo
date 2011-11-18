@@ -165,8 +165,7 @@ public class TypeLocationServiceImpl implements TypeLocationService {
 		Assert.notNull(module, "The module for the file '" + fileCanonicalPath + "' could not be located");
 		typeCache.cacheTypeAgainstModule(module, javaType);
 
-		final String relativeTypePath = javaType.getFullyQualifiedTypeName().replace('.', File.separatorChar) + ".java";
-		String reducedPath = fileCanonicalPath.replace(relativeTypePath, "");
+		String reducedPath = fileCanonicalPath.replace(javaType.getRelativeFileName(), "");
 		reducedPath = FileUtils.removeTrailingSeparator(reducedPath);
 
 		for (final PhysicalPath physicalPath : module.getPhysicalPaths()) {

@@ -52,8 +52,7 @@ public class MavenPathResolvingStrategy extends AbstractPathResolvingStrategy {
 	}
 	
 	public String getCanonicalPath(final LogicalPath path, final JavaType javaType) {
-		final String relativePath = javaType.getFullyQualifiedTypeName().replace('.', File.separatorChar) + ".java";
-		return getIdentifier(path, relativePath);
+		return getIdentifier(path, javaType.getRelativeFileName());
 	}
 	
 	public String getFocusedCanonicalPath(final Path path, final JavaType javaType) {

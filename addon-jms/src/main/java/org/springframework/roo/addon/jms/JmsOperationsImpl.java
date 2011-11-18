@@ -8,7 +8,6 @@ import static org.springframework.roo.model.SpringJavaType.ASYNC;
 import static org.springframework.roo.model.SpringJavaType.AUTOWIRED;
 import static org.springframework.roo.model.SpringJavaType.JMS_OPERATIONS;
 
-import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -32,8 +31,8 @@ import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
-import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Dependency;
+import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
@@ -281,7 +280,6 @@ public class JmsOperationsImpl implements JmsOperations {
 		Assert.isTrue(PhysicalTypeIdentifier.isValid(physicalTypeIdentifier), "Physical type identifier is invalid");
 		final JavaType javaType = PhysicalTypeIdentifier.getJavaType(physicalTypeIdentifier);
 		final LogicalPath path = PhysicalTypeIdentifier.getPath(physicalTypeIdentifier);
-		final String relativePath = javaType.getFullyQualifiedTypeName().replace('.', File.separatorChar) + ".java";
-		return projectOperations.getPathResolver().getIdentifier(path, relativePath);
+		return projectOperations.getPathResolver().getIdentifier(path, javaType.getRelativeFileName());
 	}
 }
