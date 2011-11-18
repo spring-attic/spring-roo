@@ -51,17 +51,17 @@ import org.springframework.roo.support.util.FileUtils;
  * @since 1.0
  */
 public class PollingFileMonitorService implements NotifiableFileMonitorService {
+	
+	// Fields
+	private final Map<MonitoringRequest, Map<File, Long>> priorExecution = new WeakHashMap<MonitoringRequest, Map<File, Long>>();
+	private final Map<String, Set<String>> changeMap = new HashMap<String, Set<String>>();
+	private final Object lock = new Object();
 	private final Set<FileEventListener> fileEventListeners = new HashSet<FileEventListener>();
 	private final Set<MonitoringRequest> requests = new LinkedHashSet<MonitoringRequest>();
-	private final Map<MonitoringRequest, Map<File, Long>> priorExecution = new WeakHashMap<MonitoringRequest, Map<File, Long>>();
+	private final Set<String> allFiles = new HashSet<String>();
 	private final Set<String> notifyChanged = new HashSet<String>();
 	private final Set<String> notifyCreated = new HashSet<String>();
 	private final Set<String> notifyDeleted = new HashSet<String>();
-	private final Map<String, Set<String>> changeMap = new HashMap<String, Set<String>>();
-	private final Set<String> allFiles = new HashSet<String>();
-
-	// Mutex
-	private final Object lock = new Object();
 
 	public final void add(final FileEventListener e) {
 		synchronized (lock) {
@@ -103,16 +103,14 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 
 	public Collection<String> getDirtyFiles(final String requestingClass) {
 		synchronized (lock) {
-			Collection<String> changesSinceLastRequest = changeMap.get(requestingClass);
+			final Collection<String> changesSinceLastRequest = changeMap.get(requestingClass);
 			if (changesSinceLastRequest == null) {
-				changesSinceLastRequest = new LinkedHashSet<String>(allFiles);
 				changeMap.put(requestingClass, new LinkedHashSet<String>());
-			} else {
-				final Set<String> copyOfChangesSinceLastRequest = new LinkedHashSet<String>(changesSinceLastRequest);
-				changesSinceLastRequest.removeAll(copyOfChangesSinceLastRequest);
-				changesSinceLastRequest = copyOfChangesSinceLastRequest;
-			}
-			return changesSinceLastRequest;
+				return new LinkedHashSet<String>(allFiles);
+			} 
+			final Collection<String> copyOfChangesSinceLastRequest = new LinkedHashSet<String>(changesSinceLastRequest);
+			changesSinceLastRequest.clear();
+			return copyOfChangesSinceLastRequest;
 		}
 	}
 
