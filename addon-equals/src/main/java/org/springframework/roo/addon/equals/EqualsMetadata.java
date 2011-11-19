@@ -17,7 +17,6 @@ import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
-import org.springframework.roo.model.ImportRegistrationResolver;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.LogicalPath;
@@ -110,8 +109,7 @@ public class EqualsMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 
 		final List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName(OBJECT_NAME));
 
-		final ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
-		imports.addImport(EQUALS_BUILDER);
+		builder.getImportRegistrationResolver().addImport(EQUALS_BUILDER);
 
 		final String typeName = destination.getSimpleTypeName();
 
@@ -153,8 +151,7 @@ public class EqualsMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 			return null;
 		}
 
-		final ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
-		imports.addImport(HASH_CODE_BUILDER);
+		builder.getImportRegistrationResolver().addImport(HASH_CODE_BUILDER);
 
 		// Create the method
 		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();

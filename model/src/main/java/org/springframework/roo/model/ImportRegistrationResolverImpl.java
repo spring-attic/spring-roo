@@ -134,6 +134,20 @@ public class ImportRegistrationResolverImpl implements ImportRegistrationResolve
 		}
 	}
 
+	public void addImports(final JavaType... typesToImport) {
+		for (final JavaType typeToImport : typesToImport) {
+			addImport(typeToImport);
+		}
+	}
+	
+	public void addImports(List<JavaType> typesToImport) {
+		if (typesToImport != null) {
+			for (final JavaType typeToImport : typesToImport) {
+				addImport(typeToImport);
+			}
+		}
+	}
+
 	public JavaPackage getCompilationUnitPackage() {
 		return compilationUnitPackage;
 	}
@@ -219,11 +233,5 @@ public class ImportRegistrationResolverImpl implements ImportRegistrationResolve
 			}
 		}
 		return javaLangTypes.contains(javaType.getFullyQualifiedTypeName());
-	}
-
-	public void addImports(final JavaType... typesToImport) {
-		for (final JavaType typeToImport : typesToImport) {
-			addImport(typeToImport);
-		}
 	}
 }

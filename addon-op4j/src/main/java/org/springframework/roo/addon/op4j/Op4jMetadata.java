@@ -16,7 +16,6 @@ import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.DataType;
-import org.springframework.roo.model.ImportRegistrationResolver;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.LogicalPath;
@@ -55,18 +54,14 @@ public class Op4jMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 	private ClassOrInterfaceTypeDetails getInnerType() {
 		List<FieldMetadataBuilder> fields = new ArrayList<FieldMetadataBuilder>();
-		int fieldModifier = Modifier.PUBLIC | Modifier.STATIC | Modifier.FINAL;
+
+		builder.getImportRegistrationResolver().addImports(OP4J_GET, JAVA_RUN_TYPE_TYPES);
+
 		String targetName = super.destination.getSimpleTypeName();
-
-		ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
-		imports.addImport(OP4J_GET);
-		imports.addImport(JAVA_RUN_TYPE_TYPES);
 		String initializer = "Get.attrOf(Types.forClass(" + targetName + ".class),\"" + targetName.toLowerCase() + "\")";
-
 		final List<JavaType> parameters = Arrays.asList(OBJECT, this.destination);
-
 		JavaType function = new JavaType("org.op4j.functions.Function", 0, DataType.TYPE, null, parameters);
-
+		int fieldModifier = Modifier.PUBLIC | Modifier.STATIC | Modifier.FINAL;
 		FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), fieldModifier, new JavaSymbolName(targetName.toUpperCase()), function, initializer);
 		fields.add(fieldBuilder);
 

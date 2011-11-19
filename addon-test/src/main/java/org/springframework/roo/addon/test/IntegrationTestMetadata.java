@@ -26,7 +26,6 @@ import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.classpath.layers.MemberTypeAdditions;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.EnumDetails;
-import org.springframework.roo.model.ImportRegistrationResolver;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.JdkJavaType;
@@ -141,8 +140,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 			builder.addField(fieldBuilder.build());
 		}
 
-		ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
-		imports.addImport(ASSERT);
+		builder.getImportRegistrationResolver().addImport(ASSERT);
 	}
 
 	private void addOptionalIntegrationTestClassIntroductions() {
@@ -245,8 +243,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 			return method;
 		}
 
-		ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
-		imports.addImport(new JavaType(identifierAccessorMethod.getReturnType().getFullyQualifiedTypeName()));
+		builder.getImportRegistrationResolver().addImport(identifierAccessorMethod.getReturnType());
 
 		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 		annotations.add(new AnnotationMetadataBuilder(TEST));
@@ -284,8 +281,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 			return method;
 		}
 
-		ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
-		imports.addImport(LIST);
+		builder.getImportRegistrationResolver().addImport(LIST);
 
 		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 		annotations.add(new AnnotationMetadataBuilder(TEST));
@@ -323,8 +319,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 			return method;
 		}
 
-		ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
-		imports.addImport(LIST);
+		builder.getImportRegistrationResolver().addImport(LIST);
 
 		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 		annotations.add(new AnnotationMetadataBuilder(TEST));
@@ -364,10 +359,8 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 			return method;
 		}
 
-		ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
-		imports.addImport(new JavaType(identifierAccessorMethod.getReturnType().getFullyQualifiedTypeName()));
 		JavaType versionType = versionAccessorMethod.getReturnType();
-		imports.addImport(versionType);
+		builder.getImportRegistrationResolver().addImports(identifierAccessorMethod.getReturnType(), versionType);
 
 		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 		annotations.add(new AnnotationMetadataBuilder(TEST));
@@ -413,10 +406,8 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 			return method;
 		}
 
-		ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
-		imports.addImport(identifierAccessorMethod.getReturnType());
 		JavaType versionType = versionAccessorMethod.getReturnType();
-		imports.addImport(versionType);
+		builder.getImportRegistrationResolver().addImports(identifierAccessorMethod.getReturnType(), versionType);
 
 		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 		annotations.add(new AnnotationMetadataBuilder(TEST));
@@ -516,8 +507,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 			return method;
 		}
 
-		ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
-		imports.addImport(new JavaType(identifierAccessorMethod.getReturnType().getFullyQualifiedTypeName()));
+		builder.getImportRegistrationResolver().addImport(identifierAccessorMethod.getReturnType());
 
 		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 		annotations.add(new AnnotationMetadataBuilder(TEST));

@@ -22,7 +22,6 @@ import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMeta
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.classpath.layers.MemberTypeAdditions;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
-import org.springframework.roo.model.ImportRegistrationResolver;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.JdkJavaType;
@@ -58,8 +57,7 @@ public class JsfConverterMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		}
 
 		if (!isConverterInterfaceIntroduced()) {
-			final ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
-			imports.addImport(CONVERTER);
+			builder.getImportRegistrationResolver().addImport(CONVERTER);
 			builder.addImplementsType(CONVERTER);
 		}
 
@@ -97,10 +95,7 @@ public class JsfConverterMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		findMethod.copyAdditionsTo(builder, governorTypeDetails);
 		final JavaType returnType = identifierAccessor.getReturnType();
 
-		final ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
-		imports.addImport(returnType);
-		imports.addImport(FACES_CONTEXT);
-		imports.addImport(UI_COMPONENT);
+		builder.getImportRegistrationResolver().addImports(returnType, FACES_CONTEXT, UI_COMPONENT);
 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("if (value == null || value.length() == 0) {");  
@@ -124,10 +119,7 @@ public class JsfConverterMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			return null;
 		}
 
-		final ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
-		imports.addImport(entity);
-		imports.addImport(FACES_CONTEXT);
-		imports.addImport(UI_COMPONENT);
+		builder.getImportRegistrationResolver().addImports(entity, FACES_CONTEXT, UI_COMPONENT);
 
 		String simpleTypeName = entity.getSimpleTypeName();
 

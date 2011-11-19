@@ -1,5 +1,6 @@
 package org.springframework.roo.model;
 
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -78,6 +79,16 @@ public interface ImportRegistrationResolver {
 	 */
 	void addImports(JavaType... typesToImport);
 	
+	/**
+	 * Explicitly registers the given imports. Note that no verification will be
+	 * performed to ensure an import is legal or does not conflict with an
+	 * existing import (use {@link #isAdditionLegal(JavaType)} for verification).
+	 *
+	 * @param typesToImport any <code>null</code> elements will be ignored
+	 * @since 1.2.0
+	 */
+	void addImports(List<JavaType> typesToImport);
+
 	/**
 	 * Provides access to the registered imports.
 	 *

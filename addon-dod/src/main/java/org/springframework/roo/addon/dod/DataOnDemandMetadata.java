@@ -54,7 +54,6 @@ import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.classpath.layers.MemberTypeAdditions;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.DataType;
-import org.springframework.roo.model.ImportRegistrationResolver;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.JdkJavaType;
@@ -206,9 +205,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			}
 
 			// Candidate not found, so let's create one
-			ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
-			imports.addImport(RANDOM);
-			imports.addImport(SECURE_RANDOM);
+			builder.getImportRegistrationResolver().addImports(RANDOM, SECURE_RANDOM);
 
 			FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId());
 			fieldBuilder.setModifier(Modifier.PRIVATE);
@@ -307,8 +304,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		}
 
 		// Create method
-		ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
-		imports.addImport(entity);
+		builder.getImportRegistrationResolver().addImport(entity);
 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine(entity.getSimpleTypeName() + " obj = new " + entity.getSimpleTypeName() + "();");
@@ -350,11 +346,10 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		}
 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
 
 		// Create constructor for embedded id class
 		JavaType embeddedIdFieldType = embeddedIdHolder.getEmbeddedIdField().getFieldType();
-		imports.addImport(embeddedIdFieldType);
+		builder.getImportRegistrationResolver().addImport(embeddedIdFieldType);
 
 		StringBuilder sb = new StringBuilder();
 		List<FieldMetadata> identifierFields = embeddedIdHolder.getIdFields();
@@ -365,7 +360,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			FieldMetadata field = identifierFields.get(i);
 			String fieldName = field.getFieldName().getSymbolName();
 			JavaType fieldType = field.getFieldType();
-			imports.addImport(fieldType);
+			builder.getImportRegistrationResolver().addImport(fieldType);
 			String initializer =  getFieldInitializer(field, null);
 			bodyBuilder.append(getFieldValidationBody(field, initializer, null, true));
 			sb.append(fieldName);
@@ -390,11 +385,10 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		}
 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
 
 		// Create constructor for embedded class
 		JavaType embeddedFieldType = embeddedHolder.getEmbeddedField().getFieldType();
-		imports.addImport(embeddedFieldType);
+		builder.getImportRegistrationResolver().addImport(embeddedFieldType);
 		bodyBuilder.appendFormalLine(embeddedFieldType.getSimpleTypeName() + " embeddedClass = new " + embeddedFieldType.getSimpleTypeName() + "();");
 		for (FieldMetadata field : embeddedHolder.getFields()) {
 			bodyBuilder.appendFormalLine(field.getFieldName().getSymbolNameTurnedIntoMutatorMethodName() + "(embeddedClass, index);");
@@ -550,8 +544,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	}
 
 	private String getTypeStr(final JavaType fieldType) {
-		ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
-		imports.addImport(fieldType);
+		builder.getImportRegistrationResolver().addImport(fieldType);
 
 		String arrayStr = fieldType.isArray() ? "[]" : "";
 		String typeStr = fieldType.getSimpleTypeName();
@@ -770,8 +763,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("return false;");
 
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(parameterType), parameterNames, bodyBuilder);
-		return methodBuilder.build();
+		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(parameterType), parameterNames, bodyBuilder).build();
 	}
 
 	/**
@@ -798,8 +790,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		bodyBuilder.appendFormalLine("return " + findMethod.getMethodCall() + ";");
 
 		findMethod.copyAdditionsTo(builder, governorTypeDetails);
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, entity, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
-		return methodBuilder.build();
+		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, entity, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder).build();
 	}
 
 	/**
@@ -828,8 +819,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		bodyBuilder.appendFormalLine("return " + findMethod.getMethodCall() + ";");
 
 		findMethod.copyAdditionsTo(builder, governorTypeDetails);
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, entity, AnnotatedJavaType.convertFromJavaTypes(parameterType), parameterNames, bodyBuilder);
-		return methodBuilder.build();
+		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, entity, AnnotatedJavaType.convertFromJavaTypes(parameterType), parameterNames, bodyBuilder).build();
 	}
 
 	/**
@@ -855,11 +845,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		}
 
 		// Create the method body
-		final ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
-		imports.addImport(ARRAY_LIST);
-		imports.addImport(ITERATOR);
-		imports.addImport(CONSTRAINT_VIOLATION_EXCEPTION);
-		imports.addImport(CONSTRAINT_VIOLATION);
+		builder.getImportRegistrationResolver().addImports(ARRAY_LIST, ITERATOR, CONSTRAINT_VIOLATION_EXCEPTION, CONSTRAINT_VIOLATION);
 
 		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		final String dataField = getDataField().getFieldName().getSymbolName();
@@ -934,25 +920,22 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		String initializer = "null";
 		String fieldInitializer = field.getFieldInitializer();
 		Set<Object> fieldCustomDataKeys = field.getCustomData().keySet();
-		ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
 
 		// Date fields included for DataNucleus (
 		if (fieldType.equals(DATE)) {
 			if (MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), PAST) != null) {
-				imports.addImport(DATE);
+				builder.getImportRegistrationResolver().addImport(DATE);
 				initializer = "new Date(new Date().getTime() - 10000000L)";
 			} else if (MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), FUTURE) != null) {
-				imports.addImport(DATE);
+				builder.getImportRegistrationResolver().addImport(DATE);
 				initializer = "new Date(new Date().getTime() + 10000000L)";
 			} else {
-				imports.addImport(CALENDAR);
-				imports.addImport(GREGORIAN_CALENDAR);
+				builder.getImportRegistrationResolver().addImports(CALENDAR, GREGORIAN_CALENDAR);
 				initializer = "new GregorianCalendar(Calendar.getInstance().get(Calendar.YEAR), Calendar.getInstance().get(Calendar.MONTH), Calendar.getInstance().get(Calendar.DAY_OF_MONTH), Calendar.getInstance().get(Calendar.HOUR_OF_DAY), Calendar.getInstance().get(Calendar.MINUTE), Calendar.getInstance().get(Calendar.SECOND) + new Double(Math.random() * 1000).intValue()).getTime()";
 			}
 		} else if (fieldType.equals(CALENDAR)) {
-			imports.addImport(CALENDAR);
-			imports.addImport(GREGORIAN_CALENDAR);
-
+			builder.getImportRegistrationResolver().addImports(CALENDAR, GREGORIAN_CALENDAR);
+			
 			String calendarString = "new GregorianCalendar(Calendar.getInstance().get(Calendar.YEAR), Calendar.getInstance().get(Calendar.MONTH), Calendar.getInstance().get(Calendar.DAY_OF_MONTH)";
 			if (MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), PAST) != null) {
 				initializer = calendarString + " - 1)";
@@ -1059,10 +1042,10 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		} else if (fieldType.equals(new JavaType(JavaType.CHAR_OBJECT.getFullyQualifiedTypeName(), 1, DataType.PRIMITIVE, null, null))) {
 			initializer = StringUtils.defaultIfEmpty(fieldInitializer, "{ 'Y', 'N' }");
 		} else if (fieldType.equals(BIG_DECIMAL)) {
-			imports.addImport(BIG_DECIMAL);
+			builder.getImportRegistrationResolver().addImport(BIG_DECIMAL);
 			initializer = BIG_DECIMAL.getSimpleTypeName() + ".valueOf(index)";
 		} else if (fieldType.equals(BIG_INTEGER)) {
-			imports.addImport(BIG_INTEGER);
+			builder.getImportRegistrationResolver().addImport(BIG_INTEGER);
 			initializer = BIG_INTEGER.getSimpleTypeName() + ".valueOf(index)";
 		} else if (fieldType.equals(JavaType.BYTE_OBJECT)) {
 			initializer = "new Byte(" + StringUtils.defaultIfEmpty(fieldInitializer, "\"1\"") + ")";
@@ -1074,10 +1057,10 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			// Avoid circular references (ROO-562)
 			initializer = "obj";
 		} else if (fieldCustomDataKeys.contains(CustomDataKeys.ENUMERATED_FIELD)) {
-			imports.addImport(field.getFieldType());
-			initializer = field.getFieldType().getSimpleTypeName() + ".class.getEnumConstants()[0]";
+			builder.getImportRegistrationResolver().addImport(fieldType);
+			initializer = fieldType.getSimpleTypeName() + ".class.getEnumConstants()[0]";
 		} else if (collaboratingMetadata != null && collaboratingMetadata.getEntityType() != null) {
-			requiredDataOnDemandCollaborators.add(field.getFieldType());
+			requiredDataOnDemandCollaborators.add(fieldType);
 
 			String collaboratingFieldName = getCollaboratingFieldName(field.getFieldType()).getSymbolName();
 			// Decide if we're dealing with a one-to-one and therefore should _try_ to keep the same id (ROO-568)

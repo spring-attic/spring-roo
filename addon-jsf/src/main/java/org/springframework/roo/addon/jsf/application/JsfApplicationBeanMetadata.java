@@ -35,7 +35,6 @@ import org.springframework.roo.classpath.details.annotations.AnnotationMetadataB
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
-import org.springframework.roo.model.ImportRegistrationResolver;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.LogicalPath;
@@ -124,14 +123,7 @@ public class JsfApplicationBeanMetadata extends AbstractItdTypeDetailsProvidingM
 			return null;
 		}
 
-		ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
-		imports.addImport(EL_CONTEXT);
-		imports.addImport(APPLICATION);
-		imports.addImport(EXPRESSION_FACTORY);
-		imports.addImport(FACES_CONTEXT);
-		imports.addImport(PRIMEFACES_MENU_ITEM);
-		imports.addImport(PRIMEFACES_SUB_MENU);
-		imports.addImport(PRIMEFACES_DEFAULT_MENU_MODEL);
+		builder.getImportRegistrationResolver().addImports(EL_CONTEXT, APPLICATION, EXPRESSION_FACTORY, FACES_CONTEXT, PRIMEFACES_MENU_ITEM, PRIMEFACES_SUB_MENU, PRIMEFACES_DEFAULT_MENU_MODEL);
 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 

@@ -53,7 +53,6 @@ import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMeta
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.EnumDetails;
-import org.springframework.roo.model.ImportRegistrationResolver;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.JdkJavaType;
@@ -374,8 +373,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		joinTableBuilder.setAttributes(joinTableAnnotationAttributes);
 		annotations.add(joinTableBuilder);
 
-		FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), Modifier.PRIVATE, annotations, fieldName, fieldType);
-		return fieldBuilder.build();
+		return new FieldMetadataBuilder(getId(), Modifier.PRIVATE, annotations, fieldName, fieldType).build();
 	}
 
 	private FieldMetadata getManyToManyInverseSideField(final JavaSymbolName fieldName, final JavaSymbolName mappedByFieldName, final Table owningSideTable, final CascadeAction onUpdate, final CascadeAction onDelete) {
@@ -392,8 +390,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		addCascadeType(manyToManyBuilder, onUpdate, onDelete);
 		annotations.add(manyToManyBuilder);
 
-		FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), Modifier.PRIVATE, annotations, fieldName, fieldType);
-		return fieldBuilder.build();
+		return new FieldMetadataBuilder(getId(), Modifier.PRIVATE, annotations, fieldName, fieldType).build();
 	}
 
 	private FieldMetadata getOneToOneMappedByField(final JavaSymbolName fieldName, final JavaType fieldType, final JavaSymbolName mappedByFieldName, final CascadeAction onUpdate, final CascadeAction onDelete) {
@@ -403,8 +400,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		addCascadeType(oneToOneBuilder, onUpdate, onDelete);
 		annotations.add(oneToOneBuilder);
 
-		FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), Modifier.PRIVATE, annotations, fieldName, fieldType);
-		return fieldBuilder.build();
+		return new FieldMetadataBuilder(getId(), Modifier.PRIVATE, annotations, fieldName, fieldType).build();
 	}
 
 	private FieldMetadata getOneToOneOrManyToOneField(final JavaSymbolName fieldName, final JavaType fieldType, final ForeignKey foreignKey, final JavaType annotationType, final boolean referencedColumn) {
@@ -427,8 +423,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 			annotations.add(getJoinColumnsAnnotation(references, fieldType));
 		}
 
-		FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), Modifier.PRIVATE, annotations, fieldName, fieldType);
-		return fieldBuilder.build();
+		return new FieldMetadataBuilder(getId(), Modifier.PRIVATE, annotations, fieldName, fieldType).build();
 	}
 
 	private void excludeFieldsInToStringAnnotation(final String fieldName) {
@@ -555,8 +550,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 			hasCascadeType = false;
 		}
 		if (hasCascadeType) {
-			final ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
-			imports.addImport(CASCADE_TYPE);
+			builder.getImportRegistrationResolver().addImport(CASCADE_TYPE);
 		}
 	}
 
@@ -695,8 +689,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 			annotations.add(new AnnotationMetadataBuilder(LOB));
 		}
 
-		FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), Modifier.PRIVATE, annotations, fieldName, fieldType);
-		return fieldBuilder.build();
+		return new FieldMetadataBuilder(getId(), Modifier.PRIVATE, annotations, fieldName, fieldType).build();
 	}
 
 	private void addToBuilder(final FieldMetadata field) {

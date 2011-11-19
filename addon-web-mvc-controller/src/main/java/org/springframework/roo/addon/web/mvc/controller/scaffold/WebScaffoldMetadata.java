@@ -59,7 +59,6 @@ import org.springframework.roo.classpath.layers.MemberTypeAdditions;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.EnumDetails;
-import org.springframework.roo.model.ImportRegistrationResolver;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.LogicalPath;
@@ -573,8 +572,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		final List<JavaType> parameterTypes = Arrays.asList(JavaType.STRING, HTTP_SERVLET_REQUEST);
 		final List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("pathSegment"), new JavaSymbolName("httpServletRequest"));
 
-		final ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
-		imports.addImport(UNSUPPORTED_ENCODING_EXCEPTION);
+		builder.getImportRegistrationResolver().addImport(UNSUPPORTED_ENCODING_EXCEPTION);
 
 		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("String enc = httpServletRequest.getCharacterEncoding();");

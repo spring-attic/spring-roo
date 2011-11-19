@@ -191,8 +191,7 @@ public class JpaActiveRecordMetadata extends AbstractItdTypeDetailsProvidingMeta
 			}
 			annotations.add(annotationBuilder);
 
-			final FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), Modifier.TRANSIENT, annotations, fieldSymbolName, ENTITY_MANAGER);
-			return fieldBuilder.build();
+			return new FieldMetadataBuilder(getId(), Modifier.TRANSIENT, annotations, fieldSymbolName, ENTITY_MANAGER).build();
 		}
 	}
 
@@ -405,8 +404,7 @@ public class JpaActiveRecordMetadata extends AbstractItdTypeDetailsProvidingMeta
 		bodyBuilder.appendFormalLine("return em;");
 		final int modifier = Modifier.PUBLIC | Modifier.STATIC | Modifier.FINAL;
 
-		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), modifier, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), new ArrayList<JavaSymbolName>(), bodyBuilder);
-		return methodBuilder.build();
+		return new MethodMetadataBuilder(getId(), modifier, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), new ArrayList<JavaSymbolName>(), bodyBuilder).build();
 	}
 
 	/**

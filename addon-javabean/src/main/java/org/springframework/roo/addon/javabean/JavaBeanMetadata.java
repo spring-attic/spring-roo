@@ -188,27 +188,11 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 	}
 
 	private InvocableMemberBodyBuilder getGaeAccessorBody(final FieldMetadata field, final JavaSymbolName hiddenIdFieldName) {
-		InvocableMemberBodyBuilder bodyBuilder;
-
-		if (field.getFieldType().isCommonCollectionType()) {
-			bodyBuilder = getEntityCollectionAccessorBody(field, hiddenIdFieldName);
-		} else {
-			bodyBuilder = getSingularEntityAccessor(field, hiddenIdFieldName);
-		}
-
-		return bodyBuilder;
+		return field.getFieldType().isCommonCollectionType() ? getEntityCollectionAccessorBody(field, hiddenIdFieldName) : getSingularEntityAccessor(field, hiddenIdFieldName);
 	}
 
 	private InvocableMemberBodyBuilder getGaeMutatorBody(final FieldMetadata field, final JavaSymbolName hiddenIdFieldName) {
-		InvocableMemberBodyBuilder bodyBuilder;
-
-		if (field.getFieldType().isCommonCollectionType()) {
-			bodyBuilder = getEntityCollectionMutatorBody(field, hiddenIdFieldName);
-		} else {
-			bodyBuilder = getSingularEntityMutator(field, hiddenIdFieldName);
-		}
-
-		return bodyBuilder;
+		return field.getFieldType().isCommonCollectionType() ? getEntityCollectionMutatorBody(field, hiddenIdFieldName) : getSingularEntityMutator(field, hiddenIdFieldName);
 	}
 
 	private void processGaeAnnotations(final FieldMetadata field) {
@@ -222,14 +206,12 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 	}
 
 	private FieldMetadata getSingularEntityIdField(final JavaSymbolName fieldName) {
-		FieldMetadataBuilder fieldMetadataBuilder = new FieldMetadataBuilder(getId(), Modifier.PRIVATE, fieldName, LONG_OBJECT, null);
-		return fieldMetadataBuilder.build();
+		return new FieldMetadataBuilder(getId(), Modifier.PRIVATE, fieldName, LONG_OBJECT, null).build();
 	}
 
 	private FieldMetadata getMultipleEntityIdField(final JavaSymbolName fieldName) {
 		builder.getImportRegistrationResolver().addImport(HASH_SET);
-		FieldMetadataBuilder fieldMetadataBuilder = new FieldMetadataBuilder(getId(), Modifier.PRIVATE, fieldName, new JavaType(SET.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, Collections.singletonList(GAE_DATASTORE_KEY)), "new HashSet<Key>()");
-		return fieldMetadataBuilder.build();
+		return new FieldMetadataBuilder(getId(), Modifier.PRIVATE, fieldName, new JavaType(SET.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, Collections.singletonList(GAE_DATASTORE_KEY)), "new HashSet<Key>()").build();
 	}
 
 	private JavaSymbolName getIdentifierMethodName(final FieldMetadata fieldMetadata) {
@@ -299,9 +281,7 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 			instantiableCollection = collectionType.getNameIncludingTypeParameters().replace(collectionType.getPackage().getFullyQualifiedPackageName() + ".", "");
 		}
 
-		builder.getImportRegistrationResolver().addImport(collectionType);
-		builder.getImportRegistrationResolver().addImport(LIST);
-		builder.getImportRegistrationResolver().addImport(ARRAY_LIST);
+		builder.getImportRegistrationResolver().addImports(collectionType, LIST, ARRAY_LIST);
 
 		String identifierMethodName = getIdentifierMethodName(field).getSymbolName();
 

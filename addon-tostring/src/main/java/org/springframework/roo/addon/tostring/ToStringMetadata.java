@@ -11,7 +11,6 @@ import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
-import org.springframework.roo.model.ImportRegistrationResolver;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.LogicalPath;
@@ -80,9 +79,7 @@ public class ToStringMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 			return null;
 		}
 
-		final ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
-		imports.addImport(TO_STRING_BUILDER);
-		imports.addImport(TO_STRING_STYLE);
+		builder.getImportRegistrationResolver().addImports(TO_STRING_BUILDER, TO_STRING_STYLE);
 
 		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		String[] excludeFields = annotationValues.getExcludeFields();

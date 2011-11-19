@@ -3,6 +3,7 @@ package org.springframework.roo.classpath.itd;
 import static java.lang.reflect.Modifier.PRIVATE;
 import static java.lang.reflect.Modifier.PUBLIC;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -20,7 +21,6 @@ import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.metadata.AbstractMetadataItem;
-import org.springframework.roo.model.ImportRegistrationResolver;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.support.style.ToStringCreator;
@@ -220,12 +220,13 @@ public abstract class AbstractItdTypeDetailsProvidingMetadataItem extends Abstra
 
 	private void addToImports(final List<JavaType> parameterTypes) {
 		if (parameterTypes != null) {
-			final ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
+			final List<JavaType> typesToImport = new ArrayList<JavaType>();
 			for (JavaType parameterType : parameterTypes) {
 				if (!parameterType.getFullyQualifiedTypeName().startsWith("java.lang")) {
-					imports.addImport(parameterType);
+					typesToImport.add(parameterType);
 				}
 			}
+			builder.getImportRegistrationResolver().addImports(typesToImport);
 		}
 	}
 
