@@ -4,7 +4,7 @@
         <plugin>
             <groupId>org.codehaus.mojo</groupId>
             <artifactId>selenium-maven-plugin</artifactId>
-            <version>2.0</version>
+            <version>2.1</version>
             <configuration>
                 <browser>*firefox</browser>
                 <suite>src/main/webapp/selenium/test-suite.xhtml</suite>
@@ -15,7 +15,7 @@
                 <dependency>
                     <groupId>org.seleniumhq.selenium</groupId>
                     <artifactId>selenium-server</artifactId>
-                    <version>2.6.0</version>
+                    <version>2.9.0</version>
                 </dependency>
             </dependencies>
         </plugin>
