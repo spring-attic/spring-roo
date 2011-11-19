@@ -7,6 +7,8 @@ import java.util.List;
 import org.springframework.roo.classpath.details.AbstractMemberHoldingTypeDetailsBuilder;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
+import org.springframework.roo.classpath.details.FieldMetadata;
+import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
@@ -126,15 +128,6 @@ public class MemberTypeAdditions {
 	}
 
 	/**
-	 * Returns the ClassOrInterfaceTypeDetailsBuilder
-	 * 
-	 * @return the classOrInterfaceDetailsBuilder 
-	 */
-	public ClassOrInterfaceTypeDetailsBuilder getClassOrInterfaceDetailsBuilder() {
-		return classOrInterfaceDetailsBuilder;
-	}
-
-	/**
 	 * Returns the bare name of the invoked method
 	 *
 	 * @return a non-blank name
@@ -151,6 +144,33 @@ public class MemberTypeAdditions {
 	 */
 	public String getMethodCall() {
 		return methodCall;
+	}
+	
+	/**
+	 * Returns the field on which this method is invoked
+	 * 
+	 * @return <code>null</code> if it's a static method call
+	 * @throws IllegalStateException if there's more than one field in the builder
+	 */
+	public FieldMetadata getInvokedField() {
+		final List<FieldMetadataBuilder> declaredFields = classOrInterfaceDetailsBuilder.getDeclaredFields();
+		switch (declaredFields.size()) {
+			case 0:
+				return null;
+			case 1:
+				return declaredFields.get(0).build();
+			default:
+				throw new IllegalStateException("Multiple fields introduced for " + this);
+		}
+	}
+	
+	/**
+	 * Indicates whether this is a static method call
+	 * 
+	 * @return see above
+	 */
+	public boolean isStatic() {
+		return getInvokedField() == null;
 	}
 
 	@Override

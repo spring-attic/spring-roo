@@ -377,7 +377,7 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 		map.put(currentFile, currentFile.lastModified());
 
 		try {
-			updateAllFiles(currentFile.getCanonicalPath(), false);
+			allFiles.add(currentFile.getCanonicalPath());
 		} catch (final IOException ignored) {}
 
 		if (currentFile.isDirectory()) {
@@ -536,18 +536,6 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 			allFiles.remove(fileCanonicalPath);
 		} else {
 			allFiles.add(fileCanonicalPath);
-		}
-	}
-
-	private void updateAllFiles(final String fileCanonicalPath, final boolean remove) {
-		if (remove) {
-			allFiles.remove(fileCanonicalPath);
-			updateChanges(fileCanonicalPath, remove);
-		} else {
-			allFiles.add(fileCanonicalPath);
-			if (!allFiles.contains(fileCanonicalPath)) {
-				updateChanges(fileCanonicalPath, remove);
-			}
 		}
 	}
 
