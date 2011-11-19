@@ -108,8 +108,7 @@ public class JsfConverterMetadata extends AbstractItdTypeDetailsProvidingMetadat
 
 		// Create getAsObject method
 		final List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("context"), new JavaSymbolName("component"), new JavaSymbolName("value"));
-		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), PUBLIC, methodName, OBJECT, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
-		return methodBuilder.build();
+		return new MethodMetadataBuilder(getId(), PUBLIC, methodName, OBJECT, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder).build();
 	}
 
 	private MethodMetadata getGetAsStringMethod(final JavaType entity, final MethodMetadata identifierAccessor) {

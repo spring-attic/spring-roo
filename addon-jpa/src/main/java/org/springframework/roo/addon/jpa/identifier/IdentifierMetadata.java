@@ -131,8 +131,7 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 					setDateAnnotations(identifier.getColumnDefinition(), annotations);
 				}
 
-				FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), Modifier.PRIVATE, annotations, identifier.getFieldName(), identifier.getFieldType());
-				FieldMetadata idField = fieldBuilder.build();
+				FieldMetadata idField = new FieldMetadataBuilder(getId(), Modifier.PRIVATE, annotations, identifier.getFieldName(), identifier.getFieldType()).build();
 
 				// Only add field to ITD if not declared on governor
 				if (!hasField(declaredFields, idField)) {

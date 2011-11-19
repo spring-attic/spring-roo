@@ -201,8 +201,7 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 
 		bodyBuilder.appendFormalLine("return q;");
 
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC | Modifier.STATIC, finderName, typedQueryType, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
-		return methodBuilder.build();
+		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC | Modifier.STATIC, finderName, typedQueryType, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder).build();
 	}
 
 	@Override

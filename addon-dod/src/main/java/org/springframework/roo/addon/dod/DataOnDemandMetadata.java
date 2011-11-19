@@ -278,10 +278,8 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 				// Must make the field
 				List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 				annotations.add(new AnnotationMetadataBuilder(AUTOWIRED));
-				FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), Modifier.PRIVATE, annotations, fieldSymbolName, collaboratorType);
-				FieldMetadata field = fieldBuilder.build();
-				builder.addField(field);
-				fields.add(field.getFieldName());
+				builder.addField(new FieldMetadataBuilder(getId(), Modifier.PRIVATE, annotations, fieldSymbolName, collaboratorType).build());
+				fields.add(fieldSymbolName);
 			}
 		}
 	}
@@ -397,8 +395,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 
 		List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("obj"), INDEX);
 
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
-		return methodBuilder.build();
+		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder).build();
 	}
 
 	private JavaSymbolName getEmbeddedFieldMutatorMethodName(final FieldMetadata embeddedField) {

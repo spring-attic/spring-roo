@@ -172,8 +172,7 @@ public abstract class AbstractItdTypeDetailsProvidingMetadataItem extends Abstra
 		if (field != null) return null;
 
 		addToImports(Arrays.asList(fieldType));
-		final FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), modifier, fieldName, fieldType, fieldInitializer);
-		return fieldBuilder.build();
+		return new FieldMetadataBuilder(getId(), modifier, fieldName, fieldType, fieldInitializer).build();
 	}
 
 	protected MethodMetadata getAccessorMethod(final FieldMetadata field) {

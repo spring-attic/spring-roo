@@ -614,8 +614,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 			bodyBuilder.appendFormalLine("uiModel.addAttribute(\"" + entityName + "_" + javaSymbolNameDateTimeFormatDetailsEntry.getKey().getSymbolName().toLowerCase() + "_date_format\", " + pattern + ");");
 		}
 
-		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), 0, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
-		return methodBuilder.build();
+		return new MethodMetadataBuilder(getId(), 0, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder).build();
 	}
 
 	private boolean methodExists(final JavaSymbolName methodName) {

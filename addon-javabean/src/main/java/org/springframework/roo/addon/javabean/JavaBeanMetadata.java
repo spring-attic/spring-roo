@@ -144,11 +144,10 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 			InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 			bodyBuilder.appendFormalLine("return this." + field.getFieldName().getSymbolName() + ";");
 
-			MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, field.getFieldType(), bodyBuilder);
-			result = methodBuilder.build();
+			return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, field.getFieldType(), bodyBuilder).build();
 		}
 
-		return result;
+		return null;
 	}
 
 	/**
@@ -180,11 +179,10 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 			InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 			bodyBuilder.appendFormalLine("this." + field.getFieldName().getSymbolName() + " = " + field.getFieldName().getSymbolName() + ";");
 
-			MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterType), parameterNames, bodyBuilder);
-			result = methodBuilder.build();
+			return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterType), parameterNames, bodyBuilder).build();
 		}
 
-		return result;
+		return null;
 	}
 
 	private InvocableMemberBodyBuilder getGaeAccessorBody(final FieldMetadata field, final JavaSymbolName hiddenIdFieldName) {

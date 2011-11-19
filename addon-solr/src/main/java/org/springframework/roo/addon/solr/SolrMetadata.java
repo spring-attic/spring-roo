@@ -150,8 +150,7 @@ public class SolrMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 		final List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName(javaBeanFieldName));
 
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC | Modifier.STATIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterType), parameterNames, bodyBuilder);
-		return methodBuilder.build();
+		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC | Modifier.STATIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterType), parameterNames, bodyBuilder).build();
 	}
 
 	private MethodMetadata getIndexEntitiesMethod(final Map<MethodMetadata, FieldMetadata> accessorDetails, final MethodMetadata identifierAccessor, final FieldMetadata versionField) {
@@ -279,8 +278,7 @@ public class SolrMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		bodyBuilder.appendFormalLine("String searchString = \"" + destination.getSimpleTypeName() + "_solrsummary_t:\" + queryString;");
 		bodyBuilder.appendFormalLine("return search(new SolrQuery(searchString.toLowerCase()));");
 
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC | Modifier.STATIC, methodName, queryResponse, AnnotatedJavaType.convertFromJavaTypes(parameterType), parameterNames, bodyBuilder);
-		return methodBuilder.build();
+		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC | Modifier.STATIC, methodName, queryResponse, AnnotatedJavaType.convertFromJavaTypes(parameterType), parameterNames, bodyBuilder).build();
 	}
 
 	private MethodMetadata getSearchMethod() {
@@ -304,8 +302,7 @@ public class SolrMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		bodyBuilder.appendFormalLine("}");
 		bodyBuilder.appendFormalLine("return new " + getSimpleName(queryResponse) + "();");
 
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC | Modifier.STATIC, methodName, queryResponse, AnnotatedJavaType.convertFromJavaTypes(parameterType), parameterNames, bodyBuilder);
-		return methodBuilder.build();
+		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC | Modifier.STATIC, methodName, queryResponse, AnnotatedJavaType.convertFromJavaTypes(parameterType), parameterNames, bodyBuilder).build();
 	}
 
 	private MethodMetadata getSolrServerMethod() {
@@ -319,8 +316,7 @@ public class SolrMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		bodyBuilder.appendFormalLine("if (_solrServer == null) throw new IllegalStateException(\"Solr server has not been injected (is the Spring Aspects JAR configured as an AJC/AJDT aspects library?)\");");
 		bodyBuilder.appendFormalLine("return _solrServer;");
 
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC | Modifier.STATIC | Modifier.FINAL, methodName, returnType, bodyBuilder);
-		return methodBuilder.build();
+		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC | Modifier.STATIC | Modifier.FINAL, methodName, returnType, bodyBuilder).build();
 	}
 
 	private String getSimpleName(final JavaType type) {

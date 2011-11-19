@@ -478,8 +478,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		addCascadeType(oneToManyBuilder, onUpdate, onDelete);
 		annotations.add(oneToManyBuilder);
 
-		FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), Modifier.PRIVATE, annotations, fieldName, fieldType);
-		return fieldBuilder.build();
+		return new FieldMetadataBuilder(getId(), Modifier.PRIVATE, annotations, fieldName, fieldType).build();
 	}
 
 	private AnnotationMetadataBuilder getJoinColumnAnnotation(final Reference reference, final boolean referencedColumn) {

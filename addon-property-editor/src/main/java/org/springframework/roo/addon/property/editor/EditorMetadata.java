@@ -72,8 +72,7 @@ public class EditorMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 			return userField;
 		}
 
-		FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), Modifier.PRIVATE, fieldName, fieldType, "new " + fieldType + "()");
-		return fieldBuilder.build();
+		return new FieldMetadataBuilder(getId(), Modifier.PRIVATE, fieldName, fieldType, "new " + fieldType + "()").build();
 	}
 
 	private MethodMetadata getGetAsTextMethod(final JavaType javaType, final MethodMetadata identifierAccessorMethod) {
@@ -99,8 +98,7 @@ public class EditorMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		bodyBuilder.appendFormalLine("}");
 		bodyBuilder.appendFormalLine("return (String) typeConverter.convertIfNecessary(((" + javaType.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ") obj)." + identifierAccessorMethod.getMethodName() + "(), String.class);");
 
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
-		return methodBuilder.build();
+		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder).build();
 	}
 
 	private MethodMetadata getSetAsTextMethod(final JavaType javaType, final JavaType idType, final MethodMetadata findMethod) {
@@ -137,8 +135,7 @@ public class EditorMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		bodyBuilder.newLine();
 		bodyBuilder.appendFormalLine("setValue(" + javaType.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "." + findMethod.getMethodName() + "(identifier));");
 
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(parameterType), parameterNames, bodyBuilder);
-		return methodBuilder.build();
+		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(parameterType), parameterNames, bodyBuilder).build();
 	}
 
 	@Override
