@@ -302,7 +302,7 @@ public class JspMetadataListener implements MetadataProvider, MetadataNotificati
 			if (metadataDependencyRegistry.getDownstream(upstreamDependency).contains(downstreamDependency)) {
 				return;
 			}
-		} else {
+		} else if (MetadataIdentificationUtils.isIdentifyingInstance(upstreamDependency)) {
 			// This is the generic fallback listener, ie from MetadataDependencyRegistry.addListener(this) in the activate() method
 
 			// Get the metadata that just changed
@@ -328,7 +328,9 @@ public class JspMetadataListener implements MetadataProvider, MetadataNotificati
 			return;
 		}
 
-		metadataService.evictAndGet(downstreamDependency);
+		if (MetadataIdentificationUtils.isIdentifyingInstance(downstreamDependency)) {
+			metadataService.evictAndGet(downstreamDependency);
+		}
 	}
 
 	public String getProvidesType() {
