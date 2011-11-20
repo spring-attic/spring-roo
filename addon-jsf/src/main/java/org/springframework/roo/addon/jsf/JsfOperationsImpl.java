@@ -46,6 +46,7 @@ import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.ProjectType;
 import org.springframework.roo.project.Repository;
+import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.shell.Shell;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.DomUtils;
@@ -101,19 +102,17 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 	}
 
 	public void setup(final JsfImplementation jsfImplementation, final Theme theme) {
-		Assert.notNull(jsfImplementation, "JSF implementation required");
-
 		updateConfiguration(jsfImplementation);
 		createOrUpdateWebXml(jsfImplementation, theme);
 
-		PathResolver pathResolver = projectOperations.getPathResolver();
-		copyDirectoryContents("index.html", pathResolver.getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, ""), false);
-		copyDirectoryContents("viewExpired.xhtml", pathResolver.getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, ""), false);
-		copyDirectoryContents("resources/images/*.*", pathResolver.getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, "resources/images"), false);
-		copyDirectoryContents("resources/css/*.css", pathResolver.getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, "resources/css"), false);
-		copyDirectoryContents("resources/js/*.js", pathResolver.getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, "resources/js"), false);
-		copyDirectoryContents("templates/*.xhtml", pathResolver.getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, "templates"), false);
-		copyDirectoryContents("pages/main.xhtml", pathResolver.getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, "pages"), false);
+		final LogicalPath webappPath = Path.SRC_MAIN_WEBAPP.getModulePathId(projectOperations.getFocusedModuleName());
+		copyDirectoryContents("index.html", pathResolver.getIdentifier(webappPath, ""), false);
+		copyDirectoryContents("viewExpired.xhtml", pathResolver.getIdentifier(webappPath, ""), false);
+		copyDirectoryContents("resources/images/*.*", pathResolver.getIdentifier(webappPath, "resources/images"), false);
+		copyDirectoryContents("resources/css/*.css", pathResolver.getIdentifier(webappPath, "resources/css"), false);
+		copyDirectoryContents("resources/js/*.js", pathResolver.getIdentifier(webappPath, "resources/js"), false);
+		copyDirectoryContents("templates/*.xhtml", pathResolver.getIdentifier(webappPath, "templates"), false);
+		copyDirectoryContents("pages/main.xhtml", pathResolver.getIdentifier(webappPath, "pages"), false);
 
 		projectOperations.updateProjectType(projectOperations.getFocusedModuleName(), ProjectType.WAR);
 
@@ -128,12 +127,16 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 	}
 
 	public void createManagedBean(final JavaType managedBean, final JavaType entity, String beanName, final boolean includeOnMenu, final boolean createConverter) {
-		installFacesConfig(managedBean.getPackage());
-		installI18n(managedBean.getPackage());
-		installBean("ApplicationBean-template.java", managedBean.getPackage());
-		installBean("LocaleBean-template.java", new JavaPackage(managedBean.getPackage().getFullyQualifiedPackageName() + ".util"));
-		installBean("ViewExpiredExceptionExceptionHandlerFactory-template.java", new JavaPackage(managedBean.getPackage().getFullyQualifiedPackageName() + ".util"));
-		installBean("ViewExpiredExceptionExceptionHandler-template.java", new JavaPackage(managedBean.getPackage().getFullyQualifiedPackageName() + ".util"));
+		final JavaPackage managedBeanPackage = managedBean.getPackage();
+		installFacesConfig(managedBeanPackage);
+		installI18n(managedBeanPackage);
+		installBean("ApplicationBean-template.java", managedBeanPackage);
+
+		final String managedBeanTypeName = managedBeanPackage.getFullyQualifiedPackageName();
+		final JavaPackage utilPackage = new JavaPackage(managedBeanTypeName + ".util");
+		installBean("LocaleBean-template.java", utilPackage);
+		installBean("ViewExpiredExceptionExceptionHandlerFactory-template.java", utilPackage);
+		installBean("ViewExpiredExceptionExceptionHandler-template.java", utilPackage);
 
 		if (fileManager.exists(typeLocationService.getPhysicalTypeCanonicalPath(managedBean, pathResolver.getFocusedPath(Path.SRC_MAIN_JAVA)))) {
 			// Type exists already - nothing to do
@@ -144,9 +147,7 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 		Assert.notNull(entityTypeDetails, "The type '" + entity + "' could not be resolved");
 
 		PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(entity, PhysicalTypeIdentifier.getPath(entityTypeDetails.getDeclaredByMetadataId())));
-		if (pluralMetadata == null) {
-			return;
-		}
+		Assert.notNull(pluralMetadata, "The plural for type '" + entity + "' could not be resolved");
 
 		// Create type annotation for new managed bean
 		AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(ROO_JSF_MANAGED_BEAN);
@@ -161,10 +162,11 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 			annotationBuilder.addBooleanAttribute("includeOnMenu", includeOnMenu);
 		}
 		
-		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(managedBean, pathResolver.getFocusedPath(Path.SRC_MAIN_JAVA));
+		LogicalPath managedBeanPath = pathResolver.getFocusedPath(Path.SRC_MAIN_JAVA);
+		String resourceIdentifier = typeLocationService.getPhysicalTypeCanonicalPath(managedBean, managedBeanPath);
+		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(managedBean, pathResolver.getPath(resourceIdentifier));
 		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC, managedBean, PhysicalTypeCategory.CLASS);
 		typeDetailsBuilder.addAnnotation(annotationBuilder);
-
 		typeManagementService.createOrUpdateTypeOnDisk(typeDetailsBuilder.build());
 
 		shell.flash(Level.FINE, "Created " + managedBean.getFullyQualifiedTypeName(), JsfOperationsImpl.class.getName());
@@ -174,7 +176,7 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 
 		if (createConverter) {
 			// Create a javax.faces.convert.Converter class for the entity
-			createConverter(new JavaPackage(managedBean.getPackage().getFullyQualifiedPackageName() + ".converter"), entity);
+			createConverter(new JavaPackage(managedBeanTypeName + ".converter"), entity);
 		}
 	}
 
@@ -247,16 +249,16 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 	}
 
 	private void generateManagedBeans(final JavaPackage destinationPackage) {
-		for (ClassOrInterfaceTypeDetails cid : typeLocationService.findClassesOrInterfaceDetailsWithTag(CustomDataKeys.PERSISTENT_TYPE)) {
+		for (final ClassOrInterfaceTypeDetails cid : typeLocationService.findClassesOrInterfaceDetailsWithTag(CustomDataKeys.PERSISTENT_TYPE)) {
 			if (Modifier.isAbstract(cid.getModifier())) {
 				continue;
 			}
 
-			JavaType entity = cid.getName();
-			LogicalPath path = PhysicalTypeIdentifier.getPath(cid.getDeclaredByMetadataId());
+			final JavaType entity = cid.getName();
+			final LogicalPath path = PhysicalTypeIdentifier.getPath(cid.getDeclaredByMetadataId());
 
 			// Check to see if this persistent type has a JSF metadata listening to it
-			String downstreamJsfMetadataId = JsfManagedBeanMetadata.createIdentifier(entity, path);
+			final String downstreamJsfMetadataId = JsfManagedBeanMetadata.createIdentifier(entity, path);
 			if (metadataDependencyRegistry.getDownstream(cid.getDeclaredByMetadataId()).contains(downstreamJsfMetadataId)) {
 				// There is already a JSF managed bean for this entity
 				continue;
@@ -323,7 +325,9 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 			WebXmlUtils.setDescription("Roo generated " + projectName + " application", document, null);
 		}
 		
-		addOrRemoveMyFacesListener(jsfImplementation, document);
+		if (jsfImplementation != null) {
+			addOrRemoveMyFacesListener(jsfImplementation, document);
+		}
 		if (theme != null) {
 			changeTheme(theme, document);
 		}
@@ -399,13 +403,31 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 		return projectOperations.getPathResolver().getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/faces-config.xml");
 	}
 
-	private void updateConfiguration(final JsfImplementation jsfImplementation) {
+	private void updateConfiguration(JsfImplementation jsfImplementation) {
 		// Update pom.xml with JSF/Primefaces dependencies and repositories
 		final Element configuration = XmlUtils.getConfiguration(getClass());
-		final String jsfImplementationXPath = getJsfImplementationXPath(getUnwantedJsfImplementations(jsfImplementation));
 
+		if (jsfImplementation == null) {
+			// JSF implementation was not specified by user so first query POM to determine if there is an existing JSF dependency and use it, otherwise default to Oracle Mojarra
+			jsfImplementation = getExistingOrDefaultJsfImplementation(configuration);
+		}
+
+		final String jsfImplementationXPath = getJsfImplementationXPath(getUnwantedJsfImplementations(jsfImplementation));
 		updateDependencies(configuration, jsfImplementation, jsfImplementationXPath);
 		updateRepositories(configuration, jsfImplementation, jsfImplementationXPath);
+	}
+
+	private JsfImplementation getExistingOrDefaultJsfImplementation(final Element configuration) {
+		final Pom pom = projectOperations.getPomFromModuleName(projectOperations.getFocusedModuleName());
+		JsfImplementation existingJsfImplementation = null;
+		for (JsfImplementation value : JsfImplementation.values()) {
+			final Element jsfDependencyElement = XmlUtils.findFirstElement(getJsfImplementationXPath() + "[@id = '" + value.name() + "']/dependencies/dependency", configuration);
+			if (jsfDependencyElement != null && pom.isDependencyRegistered(new Dependency(jsfDependencyElement))) {
+				existingJsfImplementation = value;
+				break;
+			}
+		}
+		return existingJsfImplementation == null ? JsfImplementation.ORACLE_MOJARRA : existingJsfImplementation;
 	}
 
 	private List<Dependency> getDependencies(final String xPathExpression, final Element configuration) {
@@ -493,7 +515,7 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 	}
 
 	private String getJsfImplementationXPath(final List<JsfImplementation> jsfImplementations) {
-		StringBuilder builder = new StringBuilder("/configuration/jsf-implementations/jsf-implementation[");
+		StringBuilder builder = new StringBuilder(getJsfImplementationXPath()).append("[");
 		for (int i = 0; i < jsfImplementations.size(); i++) {
 			if (i > 0) {
 				builder.append(" or ");
@@ -504,5 +526,9 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 		}
 		builder.append("]");
 		return builder.toString();
+	}
+
+	private String getJsfImplementationXPath() {
+		return "/configuration/jsf-implementations/jsf-implementation";
 	}
 }
