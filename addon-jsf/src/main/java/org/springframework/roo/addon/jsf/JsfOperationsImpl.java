@@ -1,9 +1,7 @@
 package org.springframework.roo.addon.jsf;
 
-import static org.springframework.roo.model.JpaJavaType.LOB;
 import static org.springframework.roo.model.RooJavaType.ROO_JSF_CONVERTER;
 import static org.springframework.roo.model.RooJavaType.ROO_JSF_MANAGED_BEAN;
-import static org.springframework.roo.model.RooJavaType.ROO_UPLOADED_FILE;
 
 import java.io.File;
 import java.io.IOException;
@@ -19,7 +17,6 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.addon.jsf.managedbean.JsfManagedBeanMetadata;
-import org.springframework.roo.addon.jsf.model.UploadedFileContentType;
 import org.springframework.roo.addon.plural.PluralMetadata;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
@@ -28,16 +25,13 @@ import org.springframework.roo.classpath.TypeManagementService;
 import org.springframework.roo.classpath.customdata.CustomDataKeys;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
-import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.operations.AbstractOperations;
-import org.springframework.roo.classpath.operations.jsr303.FieldDetails;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.model.ReservedWords;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.LogicalPath;
@@ -178,35 +172,6 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 			// Create a javax.faces.convert.Converter class for the entity
 			createConverter(new JavaPackage(managedBeanTypeName + ".converter"), entity);
 		}
-	}
-
-	public void addFileUploadField(final JavaSymbolName fieldName, final JavaType typeName, final UploadedFileContentType contentType, final Boolean autoUpload, final String column, final Boolean notNull, final boolean permitReservedWords) {
-		ClassOrInterfaceTypeDetails entityTypeDetails = typeLocationService.getTypeDetails(typeName);
-		Assert.notNull(entityTypeDetails, "The type '" + typeName + "' could not be resolved");
-		String physicalTypeIdentifier = entityTypeDetails.getDeclaredByMetadataId();
-		FieldDetails fieldDetails = new FieldDetails(physicalTypeIdentifier, JavaType.BYTE_ARRAY_PRIMITIVE, fieldName);
-
-		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
-		AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(ROO_UPLOADED_FILE);
-		annotationBuilder.addStringAttribute("contentType", contentType.getContentType());
-		if (autoUpload) {
-			annotationBuilder.addBooleanAttribute("autoUpload", autoUpload);
-		}
-		annotations.add(annotationBuilder);
-		annotations.add(new AnnotationMetadataBuilder(LOB));
-
-		fieldDetails.decorateAnnotationsList(annotations);
-
-		if (!permitReservedWords) {
-			ReservedWords.verifyReservedWordsNotPresent(fieldDetails.getFieldName());
-			if (fieldDetails.getColumn() != null) {
-				ReservedWords.verifyReservedWordsNotPresent(fieldDetails.getColumn());
-			}
-		}
-
-		FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(fieldDetails.getPhysicalTypeIdentifier(), Modifier.PRIVATE, annotations, fieldDetails.getFieldName(), fieldDetails.getFieldType());
-
-		typeManagementService.addField(fieldBuilder.build());
 	}
 
 	public void addMediaSuurce(final String url, MediaPlayer mediaPlayer) {

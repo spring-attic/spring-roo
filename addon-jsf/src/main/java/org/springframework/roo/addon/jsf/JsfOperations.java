@@ -1,8 +1,6 @@
 package org.springframework.roo.addon.jsf;
 
-import org.springframework.roo.addon.jsf.model.UploadedFileContentType;
 import org.springframework.roo.model.JavaPackage;
-import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Feature;
 
@@ -23,8 +21,6 @@ public interface JsfOperations extends Feature {
 	void generateAll(JavaPackage destinationPackage);
 
 	void createManagedBean(JavaType managedBean, JavaType entity, String beanName, boolean includeOnMenu, boolean createConverter);
-
-	void addFileUploadField(JavaSymbolName fieldName, JavaType typeName, UploadedFileContentType contentType, Boolean autoUpload, String column, Boolean notNull, boolean permitReservedWords);
 
 	void addMediaSuurce(String url, MediaPlayer mediaPlayer);
 }

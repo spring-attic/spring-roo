@@ -19,7 +19,7 @@ import org.springframework.roo.support.util.StringUtils;
 
 @Component(immediate = true)
 @Service
-public class JavaParserTypeResolutionService implements TypeResolutionService{
+public class JavaParserTypeResolutionService implements TypeResolutionService {
 
 	public final JavaType getJavaType(final String fileIdentifier) {
 		Assert.hasText(fileIdentifier, "Compilation unit path required");

@@ -1,10 +1,10 @@
 package org.springframework.roo.classpath.operations;
 
-import static org.springframework.roo.model.JdkJavaType.CALENDAR;
-import static org.springframework.roo.model.JdkJavaType.DATE;
 import static org.springframework.roo.model.JdkJavaType.SET;
 import static org.springframework.roo.model.JpaJavaType.EMBEDDABLE;
 import static org.springframework.roo.model.JpaJavaType.ENTITY;
+import static org.springframework.roo.model.JpaJavaType.LOB;
+import static org.springframework.roo.model.RooJavaType.ROO_UPLOADED_FILE;
 import static org.springframework.roo.model.SpringJavaType.PERSISTENT;
 
 import java.lang.reflect.Modifier;
@@ -44,6 +44,7 @@ import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.JdkJavaType;
 import org.springframework.roo.model.ReservedWords;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
@@ -102,6 +103,11 @@ public class FieldCommands implements CommandMarker {
 	@CliAvailabilityIndicator({ "field reference", "field set" })
 	public boolean isJpaFieldManagementAvailable() {
 		// In a separate method in case we decide to check for JPA registration in the future
+		return projectOperations.isFocusedProjectAvailable();
+	}
+	
+	@CliAvailabilityIndicator({ "field file" })
+	public boolean isUploadedFileFieldAvailable() {
 		return projectOperations.isFocusedProjectAvailable();
 	}
 
@@ -244,7 +250,7 @@ public class FieldCommands implements CommandMarker {
 		if (nullRequired != null) fieldDetails.setNullRequired(nullRequired);
 		if (future != null) fieldDetails.setFuture(future);
 		if (past != null) fieldDetails.setPast(past);
-		if (isDateField(fieldType)) fieldDetails.setPersistenceType(persistenceType != null ? persistenceType : DateFieldPersistenceType.JPA_TIMESTAMP);
+		if (JdkJavaType.isDateField(fieldType)) fieldDetails.setPersistenceType(persistenceType != null ? persistenceType : DateFieldPersistenceType.JPA_TIMESTAMP);
 		if (column != null) fieldDetails.setColumn(column);
 		if (comment != null) fieldDetails.setComment(comment);
 		if (dateFormat != null) fieldDetails.setDateFormat(dateFormat);
@@ -421,7 +427,7 @@ public class FieldCommands implements CommandMarker {
 		ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = typeLocationService.getTypeDetails(fieldType);
 		Assert.notNull(classOrInterfaceTypeDetails, "The specified target '--type' does not exist or can not be found. Please create this type first.");
 		Assert.notNull(classOrInterfaceTypeDetails.getAnnotation(EMBEDDABLE), "The field embedded command is only applicable to JPA @Embeddable field types.");
-		
+
 		// Check if the requested entity is a JPA @Entity
 		ClassOrInterfaceTypeDetails javaTypeDetails = typeLocationService.getTypeDetails(typeName);
 		Assert.notNull(javaTypeDetails, "The type specified, '" + typeName + "'doesn't exist");
@@ -441,13 +447,43 @@ public class FieldCommands implements CommandMarker {
 		insertField(fieldDetails, permitReservedWords, false);
 	}
 
-	private void insertField(final FieldDetails fieldDetails, final boolean permitReservedWords, final boolean transientModifier) {
-		if (!permitReservedWords) {
-			ReservedWords.verifyReservedWordsNotPresent(fieldDetails.getFieldName());
-			if (fieldDetails.getColumn() != null) {
-				ReservedWords.verifyReservedWordsNotPresent(fieldDetails.getColumn());
-			}
+	@CliCommand(value = "field file", help ="Adds a field for storing uploaded file contents")
+	public void addFileUploadField(
+		@CliOption(key = { "", "fieldName" }, mandatory = true, help = "The name of the file upload field to add") final JavaSymbolName fieldName,
+		@CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*", optionContext = "update,project", help = "The name of the class to receive this field") final JavaType typeName,
+		@CliOption(key = "contentType", mandatory = true, help = "The content type of the file") final UploadedFileContentType contentType,
+		@CliOption(key = "autoUpload", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Whether the file is uploaded automatically when selected") final boolean autoUpload,
+		@CliOption(key = "column", mandatory = false, help = "The JPA @Column name") final String column,
+		@CliOption(key = "notNull", mandatory = false, specifiedDefaultValue = "true", help = "Whether this value cannot be null") final Boolean notNull,
+		@CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") final boolean permitReservedWords) {
+
+		ClassOrInterfaceTypeDetails javaTypeDetails = typeLocationService.getTypeDetails(typeName);
+		Assert.notNull(javaTypeDetails, "The type specified, '" + typeName + "'doesn't exist");
+
+		String physicalTypeIdentifier = javaTypeDetails.getDeclaredByMetadataId();
+		FieldDetails fieldDetails = new FieldDetails(physicalTypeIdentifier, JavaType.BYTE_ARRAY_PRIMITIVE, fieldName);
+		if (notNull != null) fieldDetails.setNotNull(notNull);
+		if (column != null) fieldDetails.setColumn(column);
+
+		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+		AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(ROO_UPLOADED_FILE);
+		annotationBuilder.addStringAttribute("contentType", contentType.getContentType());
+		if (autoUpload) {
+			annotationBuilder.addBooleanAttribute("autoUpload", autoUpload);
 		}
+		annotations.add(annotationBuilder);
+		annotations.add(new AnnotationMetadataBuilder(LOB));
+
+		fieldDetails.decorateAnnotationsList(annotations);
+
+		verifyReservedWordsNotPresent(fieldDetails, permitReservedWords);
+
+		FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(fieldDetails.getPhysicalTypeIdentifier(), Modifier.PRIVATE, annotations, fieldDetails.getFieldName(), fieldDetails.getFieldType());
+		typeManagementService.addField(fieldBuilder.build());
+	}
+
+	private void insertField(final FieldDetails fieldDetails, final boolean permitReservedWords, final boolean transientModifier) {
+		verifyReservedWordsNotPresent(fieldDetails, permitReservedWords);
 
 		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 		fieldDetails.decorateAnnotationsList(annotations);
@@ -461,11 +497,15 @@ public class FieldCommands implements CommandMarker {
 
 		FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(fieldDetails.getPhysicalTypeIdentifier(), modifier, annotations, fieldDetails.getFieldName(), fieldDetails.getFieldType());
 		fieldBuilder.setFieldInitializer(initializer);
-
 		typeManagementService.addField(fieldBuilder.build());
 	}
 
-	private boolean isDateField(final JavaType fieldType) {
-		return fieldType.equals(DATE) || fieldType.equals(CALENDAR);
+	private void verifyReservedWordsNotPresent(final FieldDetails fieldDetails, final boolean permitReservedWords) {
+		if (!permitReservedWords) {
+			ReservedWords.verifyReservedWordsNotPresent(fieldDetails.getFieldName());
+			if (fieldDetails.getColumn() != null) {
+				ReservedWords.verifyReservedWordsNotPresent(fieldDetails.getColumn());
+			}
+		}
 	}
 }

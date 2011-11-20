@@ -1,20 +1,20 @@
 package org.springframework.roo.addon.jsf.application;
 
-import static org.springframework.roo.addon.jsf.model.JsfJavaType.APPLICATION;
-import static org.springframework.roo.addon.jsf.model.JsfJavaType.APPLICATION_SCOPED;
-import static org.springframework.roo.addon.jsf.model.JsfJavaType.DISPLAY_CREATE_DIALOG;
-import static org.springframework.roo.addon.jsf.model.JsfJavaType.DISPLAY_LIST;
-import static org.springframework.roo.addon.jsf.model.JsfJavaType.EL_CONTEXT;
-import static org.springframework.roo.addon.jsf.model.JsfJavaType.EXPRESSION_FACTORY;
-import static org.springframework.roo.addon.jsf.model.JsfJavaType.FACES_CONTEXT;
-import static org.springframework.roo.addon.jsf.model.JsfJavaType.MANAGED_BEAN;
-import static org.springframework.roo.addon.jsf.model.JsfJavaType.PRIMEFACES_DEFAULT_MENU_MODEL;
-import static org.springframework.roo.addon.jsf.model.JsfJavaType.PRIMEFACES_MENU_ITEM;
-import static org.springframework.roo.addon.jsf.model.JsfJavaType.PRIMEFACES_MENU_MODEL;
-import static org.springframework.roo.addon.jsf.model.JsfJavaType.PRIMEFACES_SUB_MENU;
-import static org.springframework.roo.addon.jsf.model.JsfJavaType.REQUEST_SCOPED;
-import static org.springframework.roo.addon.jsf.model.JsfJavaType.SESSION_SCOPED;
-import static org.springframework.roo.addon.jsf.model.JsfJavaType.VIEW_SCOPED;
+import static org.springframework.roo.addon.jsf.JsfJavaType.APPLICATION;
+import static org.springframework.roo.addon.jsf.JsfJavaType.APPLICATION_SCOPED;
+import static org.springframework.roo.addon.jsf.JsfJavaType.DISPLAY_CREATE_DIALOG;
+import static org.springframework.roo.addon.jsf.JsfJavaType.DISPLAY_LIST;
+import static org.springframework.roo.addon.jsf.JsfJavaType.EL_CONTEXT;
+import static org.springframework.roo.addon.jsf.JsfJavaType.EXPRESSION_FACTORY;
+import static org.springframework.roo.addon.jsf.JsfJavaType.FACES_CONTEXT;
+import static org.springframework.roo.addon.jsf.JsfJavaType.MANAGED_BEAN;
+import static org.springframework.roo.addon.jsf.JsfJavaType.PRIMEFACES_DEFAULT_MENU_MODEL;
+import static org.springframework.roo.addon.jsf.JsfJavaType.PRIMEFACES_MENU_ITEM;
+import static org.springframework.roo.addon.jsf.JsfJavaType.PRIMEFACES_MENU_MODEL;
+import static org.springframework.roo.addon.jsf.JsfJavaType.PRIMEFACES_SUB_MENU;
+import static org.springframework.roo.addon.jsf.JsfJavaType.REQUEST_SCOPED;
+import static org.springframework.roo.addon.jsf.JsfJavaType.SESSION_SCOPED;
+import static org.springframework.roo.addon.jsf.JsfJavaType.VIEW_SCOPED;
 import static org.springframework.roo.model.JdkJavaType.POST_CONSTRUCT;
 import static org.springframework.roo.model.RooJavaType.ROO_JSF_MANAGED_BEAN;
 

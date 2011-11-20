@@ -1,10 +1,10 @@
 package org.springframework.roo.addon.jsf.converter;
 
 import static java.lang.reflect.Modifier.PUBLIC;
-import static org.springframework.roo.addon.jsf.model.JsfJavaType.CONVERTER;
-import static org.springframework.roo.addon.jsf.model.JsfJavaType.FACES_CONTEXT;
-import static org.springframework.roo.addon.jsf.model.JsfJavaType.FACES_CONVERTER;
-import static org.springframework.roo.addon.jsf.model.JsfJavaType.UI_COMPONENT;
+import static org.springframework.roo.addon.jsf.JsfJavaType.CONVERTER;
+import static org.springframework.roo.addon.jsf.JsfJavaType.FACES_CONTEXT;
+import static org.springframework.roo.addon.jsf.JsfJavaType.FACES_CONVERTER;
+import static org.springframework.roo.addon.jsf.JsfJavaType.UI_COMPONENT;
 import static org.springframework.roo.model.JavaType.OBJECT;
 import static org.springframework.roo.model.JavaType.STRING;
 

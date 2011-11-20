@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.jsf.model;
+package org.springframework.roo.classpath.operations;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

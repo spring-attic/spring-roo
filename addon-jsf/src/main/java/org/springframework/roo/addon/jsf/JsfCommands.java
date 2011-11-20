@@ -3,10 +3,8 @@ package org.springframework.roo.addon.jsf;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.springframework.roo.addon.jsf.model.UploadedFileContentType;
 import org.springframework.roo.classpath.converters.JavaTypeConverter;
 import org.springframework.roo.model.JavaPackage;
-import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
@@ -68,18 +66,5 @@ public class JsfCommands implements CommandMarker {
 		@CliOption(key = "player", mandatory = false, help = "The name of the media player") final MediaPlayer mediaPlayer) {
 
 		jsfOperations.addMediaSuurce(url, mediaPlayer);
-	}
-
-	@CliCommand(value = "field file", help ="Adds a field for storing uploaded file contents")
-	public void addFileUploadField(
-		@CliOption(key = { "", "fieldName" }, mandatory = true, help = "The name of the file upload field to add") final JavaSymbolName fieldName,
-		@CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*", optionContext = "update,project", help = "The name of the class to receive this field") final JavaType typeName,
-		@CliOption(key = "contentType", mandatory = true, help = "The content type of the file") final UploadedFileContentType contentType,
-		@CliOption(key = "autoUpload", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Whether the file is uploaded automatically when selected") final boolean autoUpload,
-		@CliOption(key = "column", mandatory = false, help = "The JPA @Column name") final String column,
-		@CliOption(key = "notNull", mandatory = false, specifiedDefaultValue = "true", help = "Whether this value cannot be null") final Boolean notNull,
-		@CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") final boolean permitReservedWords) {
-
-		jsfOperations.addFileUploadField(fieldName, typeName, contentType, autoUpload, column, notNull, permitReservedWords);
 	}
 }
