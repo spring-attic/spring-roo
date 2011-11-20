@@ -37,7 +37,7 @@ public class JsfCommands implements CommandMarker {
 
 	@CliCommand(value = "web jsf setup", help = "Set up JSF environment")
 	public void webJsfSetup(
-		@CliOption(key = "implementation", mandatory = true, help = "The JSF implementation to use") final JsfImplementation jsfImplementation,
+		@CliOption(key = "implementation", mandatory = false, help = "The JSF implementation to use") final JsfImplementation jsfImplementation,
 		@CliOption(key = "theme", mandatory = false, help = "The name of the theme") final Theme theme) {
 
 		jsfOperations.setup(jsfImplementation, theme);
@@ -53,7 +53,7 @@ public class JsfCommands implements CommandMarker {
 	@CliCommand(value = "web jsf scaffold", help = "Create JSF managed bean for an entity")
 	public void webJsfScaffold(
 		@CliOption(key = { "class", "" }, mandatory = true, help = "The path and name of the JSF managed bean to be created") final JavaType managedBean,
-		@CliOption(key = "entity", mandatory = false, unspecifiedDefaultValue = "*", optionContext = "update,project", help = "The entity which this JSF managed bean class will create and modify as required") final JavaType entity,
+		@CliOption(key = "entity", mandatory = false, unspecifiedDefaultValue = "*", optionContext = "JavaTypeConverter.PROJECT", help = "The entity which this JSF managed bean class will create and modify as required") final JavaType entity,
 		@CliOption(key = "beanName", mandatory = false, help = "The name of the managed bean to use in the 'name' attribute of the @ManagedBean annotation") final String beanName,
 		@CliOption(key = "includeOnMenu", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "true", help = "Include this entity on the generated JSF menu") final boolean includeOnMenu,
 		@CliOption(key = "createConverter", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "true", help = "Create JSF converter for the entity") final boolean createConverter) {
