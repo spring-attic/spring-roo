@@ -21,6 +21,8 @@ import org.springframework.roo.model.JavaType;
  * @since 1.0
  */
 public class EnumField extends FieldDetails {
+
+	// Fields
 	private EnumType enumType;
 
 	public EnumField(final String physicalTypeIdentifier, final JavaType fieldType, final JavaSymbolName fieldName) {

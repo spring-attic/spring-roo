@@ -15,6 +15,7 @@ import org.springframework.roo.model.JavaType;
 
 public class UploadedFileField extends FieldDetails {
 
+	// Fields
 	private UploadedFileContentType contentType;
 	private boolean autoUpload;
 

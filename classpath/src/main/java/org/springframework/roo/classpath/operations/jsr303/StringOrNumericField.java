@@ -20,7 +20,6 @@ public class StringOrNumericField extends FieldDetails {
 	// Constants
 	protected static final Logger LOGGER = HandlerUtils.getLogger(StringOrNumericField.class);
 
-
 	/** Whether the JSR 303 @DecimalMin annotation will be added */
 	private String decimalMin;
 

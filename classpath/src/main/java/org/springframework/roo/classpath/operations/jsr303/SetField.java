@@ -42,7 +42,6 @@ import org.springframework.roo.model.JavaType;
  */
 public class SetField extends CollectionField {
 
-
 	// Fields
 	/** Whether the JSR 220 @OneToMany.mappedBy annotation attribute will be added */
 	private JavaSymbolName mappedBy;
