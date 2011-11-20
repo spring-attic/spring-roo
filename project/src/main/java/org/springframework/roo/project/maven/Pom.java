@@ -37,7 +37,7 @@ import org.springframework.roo.support.util.StringUtils;
 public class Pom {
 
 	// Constants
-	static final String DEFAULT_PACKAGING = "jar";	// Maven behaviour
+	static final String DEFAULT_PACKAGING = "jar"; // Maven behaviour
 
 	// Fields
 	private final GAV gav;
@@ -55,8 +55,8 @@ public class Pom {
 	private final String name;
 	private final String packaging;
 	private final String path;
-	private final String sourceDirectory;	// TODO use pathCache instead
-	private final String testSourceDirectory;	// TODO use pathCache instead
+	private final String sourceDirectory; // TODO use pathCache instead
+	private final String testSourceDirectory; // TODO use pathCache instead
 
 	/**
 	 * Constructor
@@ -102,7 +102,7 @@ public class Pom {
 		CollectionUtils.populate(this.pomProperties, pomProperties);
 		CollectionUtils.populate(this.repositories, repositories);
 		CollectionUtils.populate(this.resources, resources);
-		
+
 		cachePhysicalPaths(paths);
 	}
 

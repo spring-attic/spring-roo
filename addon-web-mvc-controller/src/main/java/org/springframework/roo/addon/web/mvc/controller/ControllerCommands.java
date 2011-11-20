@@ -58,7 +58,7 @@ public class ControllerCommands implements CommandMarker {
 	@CliCommand(value = "web mvc all", help = "Scaffold Spring MVC controllers for all project entities without an existing controller")
 	public void webMvcAll(
 		@CliOption(key = "package", mandatory = true, optionContext = "update", help = "The package in which new controllers will be placed") final JavaPackage javaPackage) {
-		
+
 		if (!javaPackage.getFullyQualifiedPackageName().startsWith(projectOperations.getTopLevelPackage(projectOperations.getFocusedModuleName()).getFullyQualifiedPackageName())) {
 			logger.warning("Your controller was created outside of the project's top level package and is therefore not included in the preconfigured component scanning. Please adjust your component scanning manually in webmvc-config.xml");
 		}
@@ -71,13 +71,6 @@ public class ControllerCommands implements CommandMarker {
 		@CliOption(key = "backingType", mandatory = false, optionContext = JavaTypeConverter.PROJECT, unspecifiedDefaultValue = "*", help = "The name of the form backing type which the controller exposes to the web tier") final JavaType backingType,
 		@CliOption(key = "path", mandatory = false, help = "The base path under which the controller listens for RESTful requests (defaults to the simple name of the form backing object)") String path,
 		@CliOption(key = "disallowedOperations", mandatory = false, help = "A comma separated list of operations (only create, update, delete allowed) that should not be generated in the controller") final String disallowedOperations) {
-
-		String targetMid = typeLocationService.getPhysicalTypeIdentifier(backingType);
-		if (targetMid == null) {
-			logger.warning("The specified entity can not be resolved to a type in your project");
-			return;
-		}
-
 
 		ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = typeLocationService.getTypeDetails(backingType);
 		if (classOrInterfaceTypeDetails == null) {
@@ -120,6 +113,7 @@ public class ControllerCommands implements CommandMarker {
 	@CliCommand(value = "controller all", help = "Scaffold controllers for all project entities without an existing controller - deprecated, use 'web mvc setup' + 'web mvc all' instead")
 	public void generateAll(
 		@CliOption(key = "package", mandatory = true, optionContext = "update", help = "The package in which new controllers will be placed") final JavaPackage javaPackage) {
+
 		logger.warning("This command has been deprecated and will be disabled soon! Please use 'web mvc setup' followed by 'web mvc all --package ' instead.");
 		controllerOperations.setup();
 		webMvcAll(javaPackage);
@@ -132,6 +126,7 @@ public class ControllerCommands implements CommandMarker {
 		@CliOption(key = "entity", mandatory = false, optionContext = "update,project", unspecifiedDefaultValue = "*", help = "The name of the entity object which the controller exposes to the web tier") final JavaType entity,
 		@CliOption(key = "path", mandatory = false, help = "The base path under which the controller listens for RESTful requests (defaults to the simple name of the form backing object)") final String path,
 		@CliOption(key = "disallowedOperations", mandatory = false, help = "A comma separated list of operations (only create, update, delete allowed) that should not be generated in the controller") final String disallowedOperations) {
+
 		logger.warning("This command has been deprecated and will be disabled soon! Please use 'web mvc setup' followed by 'web mvc scaffold' instead.");
 		controllerOperations.setup();
 		webMvcScaffold(controller, entity, path, disallowedOperations);

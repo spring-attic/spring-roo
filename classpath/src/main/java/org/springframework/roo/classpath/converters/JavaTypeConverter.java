@@ -114,7 +114,6 @@ public class JavaTypeConverter implements Converter<JavaType> {
 			}
 		}
 
-
 		// If the user did not provide a java type name containing a dot, it's taken as relative to the current package directory
 		if (!newValue.contains(".")) {
 			newValue = (lastUsed.getJavaPackage() == null ? lastUsed.getTopLevelPackage().getFullyQualifiedPackageName() : lastUsed.getJavaPackage().getFullyQualifiedPackageName()) + "." + newValue;
@@ -185,11 +184,9 @@ public class JavaTypeConverter implements Converter<JavaType> {
 	}
 
 	public boolean getAllPossibleValues(final List<Completion> completions, final Class<?> requiredType, String existingData, final String optionContext, final MethodTarget target) {
-		if (existingData == null) {
-			existingData = "";
-		}
+		existingData = StringUtils.trimToEmpty(existingData);
 
-		if (optionContext == null || "".equals(optionContext) || optionContext.contains(PROJECT)) {
+		if (StringUtils.isBlank(optionContext) || optionContext.contains(PROJECT)) {
 			completeProjectSpecificPaths(completions, existingData);
 		}
 
@@ -206,7 +203,7 @@ public class JavaTypeConverter implements Converter<JavaType> {
 	private void completeJavaSpecificPaths(final List<Completion> completions, final String existingData, String optionContext) {
 		SortedSet<String> types = new TreeSet<String>();
 
-		if (optionContext == null || "".equals(optionContext)) {
+		if (StringUtils.isBlank(optionContext)) {
 			optionContext = "java-all";
 		}
 
