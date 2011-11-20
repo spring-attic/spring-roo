@@ -95,7 +95,7 @@ import org.springframework.roo.classpath.details.annotations.AnnotationMetadataB
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.classpath.layers.MemberTypeAdditions;
-import org.springframework.roo.classpath.operations.UploadedFileContentType;
+import org.springframework.roo.classpath.operations.jsr303.UploadedFileContentType;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.CustomData;
 import org.springframework.roo.model.DataType;

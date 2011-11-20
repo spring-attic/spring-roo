@@ -1,4 +1,4 @@
-package org.springframework.roo.classpath.operations;
+package org.springframework.roo.classpath.operations.jsr303;
 
 /**
  * The Internet media type or content-type of an uploaded file. 

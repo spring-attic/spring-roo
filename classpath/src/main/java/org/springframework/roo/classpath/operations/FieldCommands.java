@@ -3,12 +3,11 @@ package org.springframework.roo.classpath.operations;
 import static org.springframework.roo.model.JdkJavaType.SET;
 import static org.springframework.roo.model.JpaJavaType.EMBEDDABLE;
 import static org.springframework.roo.model.JpaJavaType.ENTITY;
-import static org.springframework.roo.model.JpaJavaType.LOB;
-import static org.springframework.roo.model.RooJavaType.ROO_UPLOADED_FILE;
 import static org.springframework.roo.model.SpringJavaType.PERSISTENT;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -38,6 +37,8 @@ import org.springframework.roo.classpath.operations.jsr303.NumericField;
 import org.springframework.roo.classpath.operations.jsr303.ReferenceField;
 import org.springframework.roo.classpath.operations.jsr303.SetField;
 import org.springframework.roo.classpath.operations.jsr303.StringField;
+import org.springframework.roo.classpath.operations.jsr303.UploadedFileContentType;
+import org.springframework.roo.classpath.operations.jsr303.UploadedFileField;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
 import org.springframework.roo.metadata.MetadataService;
@@ -95,7 +96,7 @@ public class FieldCommands implements CommandMarker {
 		staticFieldConverter.remove(DateTime.class);
 	}
 
-	@CliAvailabilityIndicator({ "field other", "field number", "field string", "field date", "field boolean", "field enum", "field embedded" })
+	@CliAvailabilityIndicator({ "field other", "field number", "field string", "field date", "field boolean", "field enum", "field embedded", "field file" })
 	public boolean isJdkFieldManagementAvailable() {
 		return projectOperations.isFocusedProjectAvailable();
 	}
@@ -103,11 +104,6 @@ public class FieldCommands implements CommandMarker {
 	@CliAvailabilityIndicator({ "field reference", "field set" })
 	public boolean isJpaFieldManagementAvailable() {
 		// In a separate method in case we decide to check for JPA registration in the future
-		return projectOperations.isFocusedProjectAvailable();
-	}
-	
-	@CliAvailabilityIndicator({ "field file" })
-	public boolean isUploadedFileFieldAvailable() {
 		return projectOperations.isFocusedProjectAvailable();
 	}
 
@@ -374,10 +370,7 @@ public class FieldCommands implements CommandMarker {
 		Assert.notNull(javaTypeDetails, "The type specified, '" + typeName + "'doesn't exist");
 
 		String physicalTypeIdentifier = javaTypeDetails.getDeclaredByMetadataId();
-
-		List<JavaType> params = new ArrayList<JavaType>();
-		params.add(fieldType);
-		SetField fieldDetails = new SetField(physicalTypeIdentifier, new JavaType(SET.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, params), fieldName, fieldType, cardinality);
+		SetField fieldDetails = new SetField(physicalTypeIdentifier, new JavaType(SET.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, Arrays.asList(fieldType)), fieldName, fieldType, cardinality);
 		if (notNull != null) fieldDetails.setNotNull(notNull);
 		if (nullRequired != null) fieldDetails.setNullRequired(nullRequired);
 		if (sizeMin != null) fieldDetails.setSizeMin(sizeMin);
@@ -447,7 +440,7 @@ public class FieldCommands implements CommandMarker {
 		insertField(fieldDetails, permitReservedWords, false);
 	}
 
-	@CliCommand(value = "field file", help ="Adds a field for storing uploaded file contents")
+	@CliCommand(value = "field file", help ="Adds a byte array field for storing uploaded file contents")
 	public void addFileUploadField(
 		@CliOption(key = { "", "fieldName" }, mandatory = true, help = "The name of the file upload field to add") final JavaSymbolName fieldName,
 		@CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*", optionContext = "update,project", help = "The name of the class to receive this field") final JavaType typeName,
@@ -461,29 +454,21 @@ public class FieldCommands implements CommandMarker {
 		Assert.notNull(javaTypeDetails, "The type specified, '" + typeName + "'doesn't exist");
 
 		String physicalTypeIdentifier = javaTypeDetails.getDeclaredByMetadataId();
-		FieldDetails fieldDetails = new FieldDetails(physicalTypeIdentifier, JavaType.BYTE_ARRAY_PRIMITIVE, fieldName);
+		UploadedFileField fieldDetails = new UploadedFileField(physicalTypeIdentifier, fieldName, contentType);
+		fieldDetails.setAutoUpload(autoUpload);
 		if (notNull != null) fieldDetails.setNotNull(notNull);
 		if (column != null) fieldDetails.setColumn(column);
 
-		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
-		AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(ROO_UPLOADED_FILE);
-		annotationBuilder.addStringAttribute("contentType", contentType.getContentType());
-		if (autoUpload) {
-			annotationBuilder.addBooleanAttribute("autoUpload", autoUpload);
-		}
-		annotations.add(annotationBuilder);
-		annotations.add(new AnnotationMetadataBuilder(LOB));
-
-		fieldDetails.decorateAnnotationsList(annotations);
-
-		verifyReservedWordsNotPresent(fieldDetails, permitReservedWords);
-
-		FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(fieldDetails.getPhysicalTypeIdentifier(), Modifier.PRIVATE, annotations, fieldDetails.getFieldName(), fieldDetails.getFieldType());
-		typeManagementService.addField(fieldBuilder.build());
+		insertField(fieldDetails, permitReservedWords, false);
 	}
 
 	private void insertField(final FieldDetails fieldDetails, final boolean permitReservedWords, final boolean transientModifier) {
-		verifyReservedWordsNotPresent(fieldDetails, permitReservedWords);
+		if (!permitReservedWords) {
+			ReservedWords.verifyReservedWordsNotPresent(fieldDetails.getFieldName());
+			if (fieldDetails.getColumn() != null) {
+				ReservedWords.verifyReservedWordsNotPresent(fieldDetails.getColumn());
+			}
+		}
 
 		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 		fieldDetails.decorateAnnotationsList(annotations);
@@ -498,14 +483,5 @@ public class FieldCommands implements CommandMarker {
 		FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(fieldDetails.getPhysicalTypeIdentifier(), modifier, annotations, fieldDetails.getFieldName(), fieldDetails.getFieldType());
 		fieldBuilder.setFieldInitializer(initializer);
 		typeManagementService.addField(fieldBuilder.build());
-	}
-
-	private void verifyReservedWordsNotPresent(final FieldDetails fieldDetails, final boolean permitReservedWords) {
-		if (!permitReservedWords) {
-			ReservedWords.verifyReservedWordsNotPresent(fieldDetails.getFieldName());
-			if (fieldDetails.getColumn() != null) {
-				ReservedWords.verifyReservedWordsNotPresent(fieldDetails.getColumn());
-			}
-		}
 	}
 }

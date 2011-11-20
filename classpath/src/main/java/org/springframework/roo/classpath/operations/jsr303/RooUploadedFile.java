@@ -1,4 +1,4 @@
-package org.springframework.roo.classpath.operations;
+package org.springframework.roo.classpath.operations.jsr303;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
