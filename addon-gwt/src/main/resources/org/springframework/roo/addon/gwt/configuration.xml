@@ -26,9 +26,9 @@
                 <version>20090211</version>
             </dependency>
             <dependency>
-                <groupId>com.googlecode.gwt.inject</groupId>
+                <groupId>com.google.gwt.inject</groupId>
                 <artifactId>gin</artifactId>
-                <version>1.5</version>
+                <version>1.5.0</version>
             </dependency>
             <dependency>
                 <groupId>javax.validation</groupId>
