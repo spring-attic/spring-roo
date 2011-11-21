@@ -299,8 +299,8 @@ public class GwtOperationsImpl implements GwtOperations {
 		String gwtConfig = gwtTypeService.getGwtModuleXml(projectOperations.getFocusedModuleName());
 		gwtConfig = FileUtils.removeTrailingSeparator(gwtConfig).substring(0, gwtConfig.lastIndexOf(File.separator));
 		final String moduleRoot = projectOperations.getPathResolver().getFocusedRoot(Path.SRC_MAIN_JAVA);
-		final String topLevelPackage = gwtConfig.replaceAll(FileUtils.ensureTrailingSeparator(moduleRoot), "").replaceAll(File.separator, ".");
-		final String sourcePath = packageName.replaceAll(topLevelPackage + ".", "");
+		final String topLevelPackage = gwtConfig.replace(FileUtils.ensureTrailingSeparator(moduleRoot), "").replace(File.separator, ".");
+		final String sourcePath = packageName.replace(topLevelPackage + ".", "");
 		gwtTypeService.addSourcePath(sourcePath, projectOperations.getFocusedModuleName());
 	}
 
