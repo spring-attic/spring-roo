@@ -50,16 +50,16 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 
 	// Instance fields
 	protected final Logger logger = HandlerUtils.getLogger(getClass());
-    protected boolean inBlockComment;
-    protected ExitShellRequest exitShellRequest;
+	protected boolean inBlockComment;
+	protected ExitShellRequest exitShellRequest;
 
-    /**
-     * Returns any classpath resources with the given path
-     *
-     * @param path the path for which to search (never null)
-     * @return <code>null</code> if the search can't be performed
-     * @since 1.2.0
-     */
+	/**
+	 * Returns any classpath resources with the given path
+	 * 
+	 * @param path the path for which to search (never null)
+	 * @return <code>null</code> if the search can't be performed
+	 * @since 1.2.0
+	 */
 	protected abstract Collection<URL> findResources(String path);
 
 	protected abstract String getHomeAsString();
@@ -70,7 +70,7 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 
 	@CliCommand(value = { "script" }, help = "Parses the specified resource file and executes its commands")
 	public void script(
-		@CliOption(key = { "", "file" }, help = "The file to locate and execute", mandatory = true) final File script,
+		@CliOption(key = { "", "file" }, help = "The file to locate and execute", mandatory = true) final File script, 
 		@CliOption(key = "lineNumbers", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Display line numbers when executing the script") final boolean lineNumbers) {
 
 		Assert.notNull(script, "Script file to parse is required");
@@ -103,14 +103,14 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 			throw new IllegalStateException(e);
 		} finally {
 			IOUtils.closeQuietly(inputStream, in);
-			double executionDurationInSeconds = (System.nanoTime() - startedNanoseconds)/1000000000D;
-			logger.fine("Script required " + MathUtils.round(executionDurationInSeconds, 3)  + " seconds to execute");
+			double executionDurationInSeconds = (System.nanoTime() - startedNanoseconds) / 1000000000D;
+			logger.fine("Script required " + MathUtils.round(executionDurationInSeconds, 3) + " seconds to execute");
 		}
 	}
 
 	/**
 	 * Opens the given script for reading
-	 *
+	 * 
 	 * @param script the script to read (required)
 	 * @return a non-<code>null</code> input stream
 	 */
@@ -146,25 +146,25 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 
 	public boolean executeCommand(String line) {
 		// Another command was attempted
-    	setShellStatus(ShellStatus.Status.PARSING);
+		setShellStatus(ShellStatus.Status.PARSING);
 
-    	final ExecutionStrategy executionStrategy = getExecutionStrategy();
-    	boolean flashedMessage = false;
-    	while (executionStrategy == null || !executionStrategy.isReadyForCommands()) {
-    		// Wait
-    		try {
+		final ExecutionStrategy executionStrategy = getExecutionStrategy();
+		boolean flashedMessage = false;
+		while (executionStrategy == null || !executionStrategy.isReadyForCommands()) {
+			// Wait
+			try {
 				Thread.sleep(500);
 			} catch (InterruptedException ignore) {}
 			if (!flashedMessage) {
 				flash(Level.INFO, "Please wait - still loading", MY_SLOT);
 				flashedMessage = true;
 			}
-    	}
-    	if (flashedMessage) {
+		}
+		if (flashedMessage) {
 			flash(Level.INFO, "", MY_SLOT);
-    	}
+		}
 
-    	ParseResult parseResult = null;
+		ParseResult parseResult = null;
 		try {
 			// We support simple block comments; ie a single pair per line
 			if (!inBlockComment && line.contains("/*") && line.contains("*/")) {
@@ -221,11 +221,11 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 			setShellStatus(Status.EXECUTION_SUCCESS, line, parseResult);
 			return true;
 		} catch (RuntimeException e) {
-	    	setShellStatus(Status.EXECUTION_FAILED, line, parseResult);
+			setShellStatus(Status.EXECUTION_FAILED, line, parseResult);
 			// We rely on execution strategy to log it
-	    	try {
-	    		logCommandIfRequired(line, false);
-	    	} catch (Exception ignored) {}
+			try {
+				logCommandIfRequired(line, false);
+			} catch (Exception ignored) {}
 			return false;
 		} finally {
 			setShellStatus(Status.USER_INPUT);
@@ -305,7 +305,7 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 
 	@CliCommand(value = { "system properties" }, help = "Shows the shell's properties")
 	public String props() {
-		final Set<String> data = new TreeSet<String>();	// for repeatability
+		final Set<String> data = new TreeSet<String>(); // For repeatability
 		for (final Entry<Object, Object> entry : System.getProperties().entrySet()) {
 			data.add(entry.getKey() + " = " + entry.getValue());
 		}
@@ -318,7 +318,7 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 		return DateFormat.getDateTimeInstance(DateFormat.FULL, DateFormat.FULL).format(new Date());
 	}
 
-	@CliCommand(value={"flash test"}, help="Tests message flashing")
+	@CliCommand(value = { "flash test" }, help = "Tests message flashing")
 	public void flashCustom() throws Exception {
 		flash(Level.FINE, "Hello world", "a");
 		Thread.sleep(150);
@@ -343,7 +343,7 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 		flash(Level.FINE, "", "b");
 	}
 
-	@CliCommand(value={"version"}, help="Displays shell version")
+	@CliCommand(value = { "version" }, help = "Displays shell version")
 	public String version(@CliOption(key="", help="Special version flags") final String extra) {
     	StringBuilder sb = new StringBuilder();
 
