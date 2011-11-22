@@ -7,7 +7,6 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.apache.felix.scr.annotations.Component;
@@ -38,7 +37,6 @@ import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.LogicalPath;
-import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
@@ -108,15 +106,15 @@ public class GwtProxyMetadataProviderImpl extends AbstractHashCodeTrackingMetada
 			return null;
 		}
 
-		ProjectMetadata projectMetadata = projectOperations.getProjectMetadata(PhysicalTypeIdentifier.getPath(proxy.getDeclaredByMetadataId()).getModule());
-		Map<JavaSymbolName, MethodMetadata> proxyMethods = gwtTypeService.getProxyMethods(mirroredDetails);
+		final String moduleName = projectOperations.getProjectMetadata(PhysicalTypeIdentifier.getPath(proxy.getDeclaredByMetadataId()).getModule()).getModuleName();
+		List<MethodMetadata> proxyMethods = gwtTypeService.getProxyMethods(mirroredDetails);
 		List<MethodMetadata> convertedProxyMethods = new ArrayList<MethodMetadata>();
-		for (MethodMetadata method : proxyMethods.values()) {
+		for (MethodMetadata method : proxyMethods) {
 			JavaType gwtType = gwtTypeService.getGwtSideLeafType(method.getReturnType(), mirroredDetails.getName(), false, true);
 			MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(method);
 			methodBuilder.setReturnType(gwtType);
 			MethodMetadata convertedMethod = methodBuilder.build();
-			Set<String> sourcePaths = gwtTypeService.getSourcePaths(projectMetadata.getModuleName());
+			Set<String> sourcePaths = gwtTypeService.getSourcePaths(moduleName);
 			if (gwtTypeService.isMethodReturnTypesInSourcePath(convertedMethod, mirroredDetails, sourcePaths)) {
 				convertedProxyMethods.add(methodBuilder.build());
 			}

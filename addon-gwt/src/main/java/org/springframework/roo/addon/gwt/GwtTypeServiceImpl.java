@@ -207,6 +207,7 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 	}
 
 	public ClassOrInterfaceTypeDetails lookupXFromEntity(final ClassOrInterfaceTypeDetails entity, final JavaType... annotations) {
+		Assert.notNull(entity, "Entity not found");
 		Set<ClassOrInterfaceTypeDetails> cids = typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(annotations);
 		for (ClassOrInterfaceTypeDetails cid : cids) {
 			AnnotationMetadata annotationMetadata = GwtUtils.getFirstAnnotation(cid, annotations);
@@ -331,15 +332,17 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 		return gwtXmlDoc;
 	}
 
-	public Map<JavaSymbolName, MethodMetadata> getProxyMethods(final ClassOrInterfaceTypeDetails governorTypeDetails) {
-		Map<JavaSymbolName, MethodMetadata> proxyMethods = new LinkedHashMap<JavaSymbolName, MethodMetadata>();
+	public List<MethodMetadata> getProxyMethods(final ClassOrInterfaceTypeDetails governorTypeDetails) {
+		List<MethodMetadata> proxyMethods = new ArrayList<MethodMetadata>();
 		MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(GwtTypeServiceImpl.class.getName(), governorTypeDetails);
-		List<MemberHoldingTypeDetails> memberHoldingTypeDetails = memberDetails.getDetails();
-		for (MemberHoldingTypeDetails memberHoldingTypeDetail : memberHoldingTypeDetails) {
+		for (MemberHoldingTypeDetails memberHoldingTypeDetails : memberDetails.getDetails()) {
 			for (MethodMetadata method : memberDetails.getMethods()) {
-				if (isPublicAccessor(method) && isValidMethodReturnType(method, memberHoldingTypeDetail)) {
-					proxyMethods.remove(method.getMethodName());
-					proxyMethods.put(method.getMethodName(), method);
+				if (!proxyMethods.contains(method) && isPublicAccessor(method) && isValidMethodReturnType(method, memberHoldingTypeDetails)) {
+					if (method.getCustomData().keySet().contains(CustomDataKeys.IDENTIFIER_ACCESSOR_METHOD)) {
+						proxyMethods.add(0, method);
+					} else {
+						proxyMethods.add(method);
+					}
 				}
 			}
 		}
