@@ -682,4 +682,82 @@ public class Choice {
     to the <link linkend="base-layers">application layering chapter</link> for
     details.</para>
   </section>
+  
+  <section xml:id="architecture-maven">
+    <title>Maven</title>
+
+    <para>Roo supports a number of Maven packaging types out of the box, such as
+    <code>jar</code>, <code>war</code>, <code>pom</code>, and <code>bundle</code>.
+    These are provided via Roo's <code>PackagingProvider</code> interface. If you
+    wish to customise the POMs or other artifacts that Roo generates for a given
+    packaging type when creating a project or module, either for one of the above
+    packaging types or a completely different one, you can implement your own
+    <code>PackagingProvider</code> that creates exactly the files you want with
+    the contents you want. The procedure for doing this is as follows:
+    <itemizedlist>
+        <listitem>In a new directory, start Roo and run "addon create simple" to create a simple addon.</listitem>
+        <listitem>Delete:
+            <itemizedlist>
+                <listitem>the four .java files created in src/main/java</listitem>
+                <listitem>the two .tagx files created in src/main/resources</listitem>
+            </itemizedlist>
+        </listitem>
+        <listitem>Create your custom packaging class (e.g. <code>MyPackaging.java</code>) in your preferred package</listitem>
+        <listitem>Pick a unique ID for the Roo shell to use when referring to your
+            PackagingProvider (e.g. "custom-jar"). Do not use any of the core Maven
+            packaging type names, as these are reserved for use by Roo.</listitem>
+        <listitem>Make your packaging class implement the <code>o.s.r.project.packaging.PackagingProvider</code> interface, either by:
+            <itemizedlist>
+                <listitem>Implementing <code>PackagingProvider</code> directly, with
+                    full control over (but no assistance with) artifact generation, or</listitem>
+                <listitem>Extending <code>o.s.r.project.packaging.AbstractPackagingProvider</code>
+                    to have Roo create the POM from a template you specify, with various
+                    substitutions made automatically (e.g. groupId and artifactId).
+                    This approach requires you to:
+                    <itemizedlist>
+                        <listitem>Create your custom POM template in <code>src/main/resources</code>
+                            plus whatever package you chose above</listitem>
+                        <listitem>Create a public no-arg constructor that calls the <code>AbstractPackagingProvider</code>
+                            constructor with the following arguments:
+                            <itemizedlist>
+                                <listitem>The unique ID of your custom packaging type (see above)</listitem>
+                                <listitem>The Maven name of your packaging type (typically jar/war/ear/etc,
+                                    but could be something else if you've extended Maven to support
+                                    custom packaging types)</listitem>
+                                <listitem>The path to your POM template relative to your concrete
+                                    <code>PackagingProvider</code> (e.g. "my-pom-template.xml"
+                                    if it's in the same package). Note that this POM can contain as
+                                    much or as little content as you like, with the following caveats:
+                                    <itemizedlist>
+                                        <listitem>It must have the standard Maven "project" root element
+                                            with all the usual namespace details</listitem>
+                                        <listitem>If you extend AbstractPackagingProvider, that class will
+                                            ensure that the POM's coordinates can be resolved either from a
+                                            "parent" element or from explicit "groupId", "artifactId", and
+                                            "version" elements</listitem>
+                                    </itemizedlist>
+                                </listitem>
+                            </itemizedlist>
+                        </listitem>
+                    </itemizedlist>
+                </listitem>
+            </itemizedlist>
+        </listitem>
+        <listitem>Add the Felix annotations @Component and @Service to your concrete
+            PackagingProvider, so that it's detected by Roo's <code>PackagingProviderRegistry</code>
+        </listitem>
+        <listitem>Build and install the addon in the usual way, i.e.
+            <itemizedlist>
+                <listitem>Run "mvn install" in the addon directory to create the OSGi bundle</listitem>
+                <listitem>Change to the directory of the project that will be using the custom packaging provider</listitem>
+                <listitem>Run "osgi start --url file:///path/to/addon/project/target/com.example.foo-0.1.0.BUILD-SNAPSHOT.jar"</listitem>
+                <listitem>Run "osgi scr list"; your custom PackagingProvider component should appear somewhere in the list</listitem>
+            </itemizedlist>
+        </listitem>
+        <listitem>Whenever you run the "project" or "module create" commands, your
+            custom PackagingProvider's ID should appear in the list of possible
+            completions for the "--packaging" option</listitem>
+    </itemizedlist>
+    </para>
+  </section>
 </chapter>
