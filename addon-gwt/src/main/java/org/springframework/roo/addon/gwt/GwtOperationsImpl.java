@@ -540,7 +540,7 @@ public class GwtOperationsImpl implements GwtOperations {
 		if (sourceAntPath.contains("gae") && !projectOperations.isFeatureInstalledInFocusedModule(FeatureNames.GAE)) {
 			return;
 		}
-		final String targetDirectory = gwtPath.canonicalFileSystemPath(projectOperations);
+		final String targetDirectory = gwtPath == GwtPath.WEB ? projectOperations.getPathResolver().getFocusedRoot(Path.SRC_MAIN_WEBAPP) : projectOperations.getPathResolver().getFocusedIdentifier(Path.SRC_MAIN_JAVA, gwtPath.getPackagePath(projectOperations.getFocusedTopLevelPackage()));
 		updateFile(sourceAntPath, targetDirectory, gwtPath.segmentPackage(), false);
 	}
 

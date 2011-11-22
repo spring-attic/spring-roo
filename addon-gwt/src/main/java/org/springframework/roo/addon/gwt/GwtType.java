@@ -16,9 +16,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.roo.model.DataType;
+import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.ProjectOperations;
 
 public enum GwtType {
 
@@ -164,7 +164,7 @@ public enum GwtType {
 		return watchedMethods;
 	}
 
-	public void dynamicallyResolveMethodsToWatch(final JavaType proxy, final Map<JavaSymbolName, GwtProxyProperty> proxyFieldTypeMap, final ProjectOperations projectOperations) {
+	public void dynamicallyResolveMethodsToWatch(final JavaType proxy, final Map<JavaSymbolName, GwtProxyProperty> proxyFieldTypeMap, final JavaPackage topLevelPackage) {
 		watchedMethods = resolveMethodsToWatch(this);
 		switch (this) {
 			case DETAILS_VIEW:
@@ -202,11 +202,11 @@ public enum GwtType {
 						watchedMethods.put(new JavaSymbolName(property.getSetValuePickerMethodName()), params);
 					}
 				}
-				watchedMethods.put(new JavaSymbolName("render"), Collections.singletonList(new JavaType(projectOperations.getFocusedTopLevelPackage().getFullyQualifiedPackageName() + ".client.scaffold.place.ProxyListPlace")));
+				watchedMethods.put(new JavaSymbolName("render"), Collections.singletonList(new JavaType(topLevelPackage.getFullyQualifiedPackageName() + ".client.scaffold.place.ProxyListPlace")));
 				break;
 			case ACTIVITIES_MAPPER:
 				List<JavaType> params = new ArrayList<JavaType>();
-				params.add(new JavaType(projectOperations.getFocusedTopLevelPackage().getFullyQualifiedPackageName() + ".client.scaffold.place.ProxyPlace"));
+				params.add(new JavaType(topLevelPackage.getFullyQualifiedPackageName() + ".client.scaffold.place.ProxyPlace"));
 				watchedMethods.put(new JavaSymbolName("makeEditActivity"), params);
 				watchedMethods.put(new JavaSymbolName("coerceId"), params);
 				watchedMethods.put(new JavaSymbolName("makeCreateActivity"), new ArrayList<JavaType>());

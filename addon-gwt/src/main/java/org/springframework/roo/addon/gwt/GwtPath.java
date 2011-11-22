@@ -3,8 +3,6 @@ package org.springframework.roo.addon.gwt;
 import java.io.File;
 
 import org.springframework.roo.model.JavaPackage;
-import org.springframework.roo.project.Path;
-import org.springframework.roo.project.ProjectOperations;
 
 public enum GwtPath {
 	CLIENT("/client", "module/client/" + GwtPath.templateSelector),
@@ -48,14 +46,10 @@ public enum GwtPath {
 		return sourceAntPath;
 	}
 
-	public String canonicalFileSystemPath(final ProjectOperations projectOperations) {
-		String packagePath = projectOperations.getFocusedTopLevelPackage().getFullyQualifiedPackageName().replace('.', File.separatorChar) + getSegmentName().replace('/', File.separatorChar);
-		if (WEB.equals(this)) {
-			return projectOperations.getPathResolver().getFocusedRoot(Path.SRC_MAIN_WEBAPP);
-		}
-		return projectOperations.getPathResolver().getFocusedIdentifier(Path.SRC_MAIN_JAVA, packagePath);
+	public String getPackagePath(final JavaPackage focusedTopLevelPackage) {
+		return focusedTopLevelPackage.getFullyQualifiedPackageName().replace('.', File.separatorChar) + getSegmentName().replace('/', File.separatorChar);
 	}
-
+	
 	public String segmentPackage() {
 		if (WEB.equals(this)) {
 			return "";

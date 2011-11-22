@@ -99,19 +99,20 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
 	public GwtTemplateDataHolder getMirrorTemplateTypeDetails(final ClassOrInterfaceTypeDetails mirroredType, final Map<JavaSymbolName, GwtProxyProperty> clientSideTypeMap, final ProjectMetadata projectMetadata) {
 		ClassOrInterfaceTypeDetails proxy = gwtTypeService.lookupProxyFromEntity(mirroredType);
 		ClassOrInterfaceTypeDetails request = gwtTypeService.lookupRequestFromEntity(mirroredType);
-		Map<GwtType, JavaType> mirrorTypeMap = GwtUtils.getMirrorTypeMap(projectOperations, mirroredType.getName());
+		final JavaPackage focusedTopLevelPackage = projectOperations.getFocusedTopLevelPackage();
+		Map<GwtType, JavaType> mirrorTypeMap = GwtUtils.getMirrorTypeMap(mirroredType.getName(), focusedTopLevelPackage);
 		mirrorTypeMap.put(GwtType.PROXY, proxy.getName());
 		mirrorTypeMap.put(GwtType.REQUEST, request.getName());
 
 		Map<GwtType, ClassOrInterfaceTypeDetails> templateTypeDetailsMap = new HashMap<GwtType, ClassOrInterfaceTypeDetails>();
-		Map<GwtType, String> xmlTemplates = new HashMap<GwtType, String>();
+		Map<GwtType, String> xmlTemplates = new LinkedHashMap<GwtType, String>();
 		for (GwtType gwtType : GwtType.getMirrorTypes()) {
 			if (gwtType.getTemplate() == null) {
 				continue;
 			}
 			TemplateDataDictionary dataDictionary = buildMirrorDataDictionary(gwtType, mirroredType, proxy, mirrorTypeMap, clientSideTypeMap, projectMetadata);
 			gwtType.dynamicallyResolveFieldsToWatch(clientSideTypeMap);
-			gwtType.dynamicallyResolveMethodsToWatch(mirroredType.getName(), clientSideTypeMap, projectOperations);
+			gwtType.dynamicallyResolveMethodsToWatch(mirroredType.getName(), clientSideTypeMap, focusedTopLevelPackage);
 			templateTypeDetailsMap.put(gwtType, getTemplateDetails(dataDictionary, gwtType.getTemplate(), mirrorTypeMap.get(gwtType)));
 
 			if (gwtType.isCreateUiXml()) {
@@ -120,9 +121,9 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
 				xmlTemplates.put(gwtType, contents);
 			}
 		}
-		String moduleName = PhysicalTypeIdentifier.getPath(proxy.getDeclaredByMetadataId()).getModule();
-		JavaPackage topLevelPackage = projectOperations.getTopLevelPackage(moduleName);
-		Map<String, String> xmlMap = new HashMap<String, String>();
+		final String moduleName = PhysicalTypeIdentifier.getPath(proxy.getDeclaredByMetadataId()).getModule();
+		final JavaPackage topLevelPackage = projectOperations.getTopLevelPackage(moduleName);
+		final Map<String, String> xmlMap = new LinkedHashMap<String, String>();
 		List<ClassOrInterfaceTypeDetails> typeDetails = new ArrayList<ClassOrInterfaceTypeDetails>();
 		for (GwtProxyProperty proxyProperty : clientSideTypeMap.values()) {
 			if (!proxyProperty.isCollection() || proxyProperty.isCollectionOfProxy()) {
@@ -155,7 +156,8 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
 			addImport(dataDictionary, proxyProperty.getPropertyType());
 
 			String contents = getTemplateContents("CollectionEditor" + "UiXml", dataDictionary);
-			xmlMap.put(GwtPath.MANAGED_UI.canonicalFileSystemPath(projectOperations) + "/" + boundCollectionType + collectionType + "Editor.ui.xml", contents);
+			String packagePath = projectOperations.getPathResolver().getFocusedIdentifier(Path.SRC_MAIN_JAVA, GwtPath.MANAGED_UI.getPackagePath(focusedTopLevelPackage));
+			xmlMap.put(packagePath + "/" + boundCollectionType + collectionType + "Editor.ui.xml", contents);
 		}
 
 		return new GwtTemplateDataHolder(templateTypeDetailsMap, xmlTemplates, typeDetails, xmlMap);
@@ -183,19 +185,19 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
 				}
 			});
 
-			InputSource is = new InputSource();
-			is.setCharacterStream(new StringReader(templateContents));
+			InputSource source = new InputSource();
+			source.setCharacterStream(new StringReader(templateContents));
 
-			Document templateDocument = builder.parse(is);
+			Document templateDocument = builder.parse(source);
 
 			if (!new File(destFile).exists()) {
 				return transformXml(templateDocument);
 			}
 
-			is = new InputSource();
+			source = new InputSource();
 			fileReader = new FileReader(destFile);
-			is.setCharacterStream(fileReader);
-			Document existingDocument = builder.parse(is);
+			source.setCharacterStream(fileReader);
+			Document existingDocument = builder.parse(source);
 
 			// Look for the element holder denoted by the 'debugId' attribute first
 			Element existingHoldingElement = XmlUtils.findFirstElement("//*[@debugId='" + "boundElementHolder" + "']", existingDocument.getDocumentElement());
@@ -456,25 +458,26 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
 
 		// Get my locator and
 		JavaType entity = mirroredType.getName();
+		final String entityName = entity.getFullyQualifiedTypeName();
 		String metadataIdentificationString = mirroredType.getDeclaredByMetadataId();
 		final JavaType idType = persistenceMemberLocator.getIdentifierType(entity);
-		Assert.notNull(idType, "Identifier type is not available for entity '" + entity.getFullyQualifiedTypeName() + "'");
+		Assert.notNull(idType, "Identifier type is not available for entity '" + entityName + "'");
 
 		final MethodParameter entityParameter = new MethodParameter(entity, "proxy");
 		ClassOrInterfaceTypeDetails request = gwtTypeService.lookupRequestFromProxy(proxy);
 		
 		MemberTypeAdditions persistMethodAdditions = layerService.getMemberTypeAdditions(metadataIdentificationString, CustomDataKeys.PERSIST_METHOD.name(), entity, idType, LAYER_POSITION, entityParameter);
-		Assert.notNull(persistMethodAdditions, "Persist method is not available for entity '" + entity.getFullyQualifiedTypeName() + "'");
+		Assert.notNull(persistMethodAdditions, "Persist method is not available for entity '" + entityName + "'");
 		String persistMethodSignature = getRequestMethodCall(request, persistMethodAdditions);
 		dataDictionary.setVariable("persistMethodSignature", persistMethodSignature);
 		
 		MemberTypeAdditions removeMethodAdditions = layerService.getMemberTypeAdditions(metadataIdentificationString, CustomDataKeys.REMOVE_METHOD.name(), entity, idType, LAYER_POSITION, entityParameter);
-		Assert.notNull(removeMethodAdditions, "Remove method is not available for entity '" + entity.getFullyQualifiedTypeName() + "'");
+		Assert.notNull(removeMethodAdditions, "Remove method is not available for entity '" + entityName + "'");
 		String removeMethodSignature = getRequestMethodCall(request, removeMethodAdditions);
 		dataDictionary.setVariable("removeMethodSignature", removeMethodSignature);
 		
 		MemberTypeAdditions countMethodAdditions = layerService.getMemberTypeAdditions(metadataIdentificationString, CustomDataKeys.COUNT_ALL_METHOD.name(), entity, idType, LAYER_POSITION);
-		Assert.notNull(countMethodAdditions, "Count method is not available for entity '" + entity.getFullyQualifiedTypeName() + "'");
+		Assert.notNull(countMethodAdditions, "Count method is not available for entity '" + entityName + "'");
 		dataDictionary.setVariable("countEntitiesMethod", countMethodAdditions.getMethodName());
 
 		for (GwtType reference : type.getReferences()) {
@@ -487,19 +490,21 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
 		PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(pluralMetadataKey);
 		String plural = pluralMetadata.getPlural();
 
-		String simpleTypeName = mirroredType.getName().getSimpleTypeName();
+		final String simpleTypeName = mirroredType.getName().getSimpleTypeName();
+		final String moduleName = projectMetadata.getModuleName();
+		final JavaPackage topLevelPackage = projectOperations.getTopLevelPackage(moduleName);
 		dataDictionary.setVariable("className", javaType.getSimpleTypeName());
 		dataDictionary.setVariable("packageName", javaType.getPackage().getFullyQualifiedPackageName());
-		dataDictionary.setVariable("placePackage", GwtPath.SCAFFOLD_PLACE.packageName(projectOperations.getTopLevelPackage(projectMetadata.getModuleName())));
-		dataDictionary.setVariable("scaffoldUiPackage", GwtPath.SCAFFOLD_UI.packageName(projectOperations.getTopLevelPackage(projectMetadata.getModuleName())));
-		dataDictionary.setVariable("sharedScaffoldPackage", GwtPath.SHARED_SCAFFOLD.packageName(projectOperations.getTopLevelPackage(projectMetadata.getModuleName())));
-		dataDictionary.setVariable("uiPackage", GwtPath.MANAGED_UI.packageName(projectOperations.getTopLevelPackage(projectMetadata.getModuleName())));
+		dataDictionary.setVariable("placePackage", GwtPath.SCAFFOLD_PLACE.packageName(topLevelPackage));
+		dataDictionary.setVariable("scaffoldUiPackage", GwtPath.SCAFFOLD_UI.packageName(topLevelPackage));
+		dataDictionary.setVariable("sharedScaffoldPackage", GwtPath.SHARED_SCAFFOLD.packageName(topLevelPackage));
+		dataDictionary.setVariable("uiPackage", GwtPath.MANAGED_UI.packageName(topLevelPackage));
 		dataDictionary.setVariable("name", simpleTypeName);
 		dataDictionary.setVariable("pluralName", plural);
 		dataDictionary.setVariable("nameUncapitalized", StringUtils.uncapitalize(simpleTypeName));
 		dataDictionary.setVariable("proxy", proxyType.getSimpleTypeName());
 		dataDictionary.setVariable("pluralName", plural);
-		dataDictionary.setVariable("proxyRenderer", GwtProxyProperty.getProxyRendererType(projectOperations.getTopLevelPackage(projectMetadata.getModuleName()), proxyType));
+		dataDictionary.setVariable("proxyRenderer", GwtProxyProperty.getProxyRendererType(topLevelPackage, proxyType));
 
 		String proxyFields = null;
 		GwtProxyProperty primaryProperty = null;
@@ -668,7 +673,7 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
 	private void addImport(final TemplateDataDictionary dataDictionary, final JavaType type) {
 		dataDictionary.addSection("imports").setVariable("import", type.getFullyQualifiedTypeName());
 		for (JavaType param : type.getParameters()) {
-			addImport(dataDictionary, param);
+			addImport(dataDictionary, param.getFullyQualifiedTypeName());
 		}
 	}
 

@@ -4,7 +4,6 @@ import java.io.File;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +13,7 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.gwt.GwtFileManager;
+import org.springframework.roo.addon.gwt.GwtPath;
 import org.springframework.roo.addon.gwt.GwtProxyProperty;
 import org.springframework.roo.addon.gwt.GwtTemplateDataHolder;
 import org.springframework.roo.addon.gwt.GwtTemplateService;
@@ -33,10 +33,12 @@ import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.metadata.MetadataItem;
 import org.springframework.roo.metadata.MetadataService;
+import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.LogicalPath;
+import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
@@ -137,10 +139,11 @@ public class GwtScaffoldMetadataProviderImpl implements GwtScaffoldMetadataProvi
 		}
 
 		GwtTemplateDataHolder templateDataHolder = gwtTemplateService.getMirrorTemplateTypeDetails(mirroredType, clientSideTypeMap, projectOperations.getProjectMetadata(moduleName));
-		Map<GwtType, List<ClassOrInterfaceTypeDetails>> typesToBeWritten = new HashMap<GwtType, List<ClassOrInterfaceTypeDetails>>();
-		Map<String, String> xmlToBeWritten = new HashMap<String, String>();
+		Map<GwtType, List<ClassOrInterfaceTypeDetails>> typesToBeWritten = new LinkedHashMap<GwtType, List<ClassOrInterfaceTypeDetails>>();
+		Map<String, String> xmlToBeWritten = new LinkedHashMap<String, String>();
 
-		Map<GwtType, JavaType> mirrorTypeMap = GwtUtils.getMirrorTypeMap(projectOperations, mirroredType.getName());
+		final JavaPackage focusedTopLevelPackage = projectOperations.getFocusedTopLevelPackage();
+		Map<GwtType, JavaType> mirrorTypeMap = GwtUtils.getMirrorTypeMap(mirroredType.getName(), focusedTopLevelPackage);
 		mirrorTypeMap.put(GwtType.PROXY, proxy.getName());
 		mirrorTypeMap.put(GwtType.REQUEST, request.getName());
 
@@ -151,14 +154,15 @@ public class GwtScaffoldMetadataProviderImpl implements GwtScaffoldMetadataProvi
 				continue;
 			}
 			gwtType.dynamicallyResolveFieldsToWatch(clientSideTypeMap);
-			gwtType.dynamicallyResolveMethodsToWatch(proxy.getName(), clientSideTypeMap, projectOperations);
+			gwtType.dynamicallyResolveMethodsToWatch(proxy.getName(), clientSideTypeMap, focusedTopLevelPackage);
 
 			List<MemberHoldingTypeDetails> extendsTypes = gwtTypeService.getExtendsTypes(templateDataHolder.getTemplateTypeDetailsMap().get(gwtType));
-
 			typesToBeWritten.put(gwtType, gwtTypeService.buildType(gwtType, templateDataHolder.getTemplateTypeDetailsMap().get(gwtType), extendsTypes));
 
 			if (gwtType.isCreateUiXml()) {
-				String destFile = gwtType.getPath().canonicalFileSystemPath(projectOperations) + File.separatorChar + javaType.getSimpleTypeName() + ".ui.xml";
+				final GwtPath gwtPath = gwtType.getPath();
+				final String targetDirectory = gwtPath == GwtPath.WEB ? projectOperations.getPathResolver().getFocusedRoot(Path.SRC_MAIN_WEBAPP) : projectOperations.getPathResolver().getFocusedIdentifier(Path.SRC_MAIN_JAVA, gwtPath.getPackagePath(focusedTopLevelPackage));
+				String destFile = targetDirectory + File.separatorChar + javaType.getSimpleTypeName() + ".ui.xml";
 				String contents = gwtTemplateService.buildUiXml(templateDataHolder.getXmlTemplates().get(gwtType), destFile, new ArrayList<MethodMetadata>(proxy.getDeclaredMethods()));
 				xmlToBeWritten.put(destFile, contents);
 			}

@@ -24,9 +24,9 @@ import org.springframework.roo.classpath.details.annotations.BooleanAttributeVal
 import org.springframework.roo.classpath.details.annotations.ClassAttributeValue;
 import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
 import org.springframework.roo.model.DataType;
+import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
-import org.springframework.roo.project.ProjectOperations;
 
 /**
  * Utility methods used in the GWT Add-On.
@@ -52,16 +52,16 @@ public final class GwtUtils {
 		return new JavaType(RECEIVER.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, Collections.singletonList(genericType));
 	}
 
-	public static Map<GwtType, JavaType> getMirrorTypeMap(final ProjectOperations projectOperations, final JavaType governorType) {
+	public static Map<GwtType, JavaType> getMirrorTypeMap(final JavaType governorType, final JavaPackage topLevelPackage) {
 		Map<GwtType, JavaType> mirrorTypeMap = new HashMap<GwtType, JavaType>();
 		for (GwtType mirrorType : GwtType.values()) {
-			mirrorTypeMap.put(mirrorType, convertGovernorTypeNameIntoKeyTypeName(governorType, mirrorType, projectOperations));
+			mirrorTypeMap.put(mirrorType, convertGovernorTypeNameIntoKeyTypeName(governorType, mirrorType, topLevelPackage));
 		}
 		return mirrorTypeMap;
 	}
 
-	public static JavaType convertGovernorTypeNameIntoKeyTypeName(final JavaType governorType, final GwtType type, final ProjectOperations projectOperations) {
-		String destinationPackage = type.getPath().packageName(projectOperations.getFocusedTopLevelPackage());
+	public static JavaType convertGovernorTypeNameIntoKeyTypeName(final JavaType governorType, final GwtType type, final JavaPackage topLevelPackage) {
+		String destinationPackage = type.getPath().packageName(topLevelPackage);
 		String typeName;
 		if (type.isMirrorType()) {
 			String simple = governorType.getSimpleTypeName();
