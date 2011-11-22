@@ -50,7 +50,7 @@ import org.springframework.roo.support.util.Assert;
 public class FinderOperationsImpl implements FinderOperations {
 
 	// Constants
-	private static final Logger logger = HandlerUtils.getLogger(FinderOperationsImpl.class);
+	private static final Logger LOGGER = HandlerUtils.getLogger(FinderOperationsImpl.class);
 
 	// Fields
 	@Reference private DynamicFinderServices dynamicFinderServices;
@@ -140,7 +140,7 @@ public class FinderOperationsImpl implements FinderOperations {
 
 		String id = typeLocationService.getPhysicalTypeIdentifier(typeName);
 		if (id == null) {
-			logger.warning("Cannot locate source for '" + typeName.getFullyQualifiedTypeName() + "'");
+			LOGGER.warning("Cannot locate source for '" + typeName.getFullyQualifiedTypeName() + "'");
 			return;
 		}
 
@@ -152,7 +152,7 @@ public class FinderOperationsImpl implements FinderOperations {
 		// Get the entity metadata
 		JpaActiveRecordMetadata jpaActiveRecordMetadata = (JpaActiveRecordMetadata) metadataService.get(entityMid);
 		if (jpaActiveRecordMetadata == null) {
-			logger.warning("Cannot provide finders because '" + typeName.getFullyQualifiedTypeName() + "' is not an entity - " + entityMid);
+			LOGGER.warning("Cannot provide finders because '" + typeName.getFullyQualifiedTypeName() + "' is not an entity - " + entityMid);
 			return;
 		}
 
@@ -166,14 +166,14 @@ public class FinderOperationsImpl implements FinderOperations {
 		List<? extends AnnotationMetadata> annotations = classOrInterfaceTypeDetails.getAnnotations();
 		AnnotationMetadata jpaActiveRecordAnnotation = MemberFindingUtils.getAnnotationOfType(annotations, ROO_JPA_ACTIVE_RECORD);
 		if (jpaActiveRecordAnnotation == null) {
-			logger.warning("Unable to find the entity annotation on '" + typeName.getFullyQualifiedTypeName() + "'");
+			LOGGER.warning("Unable to find the entity annotation on '" + typeName.getFullyQualifiedTypeName() + "'");
 			return;
 		}
 
 		// Confirm they typed a valid finder name
 		MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(getClass().getName(), classOrInterfaceTypeDetails);
 		if (dynamicFinderServices.getQueryHolder(memberDetails, finderName, jpaActiveRecordMetadata.getPlural(), jpaActiveRecordMetadata.getEntityName()) == null) {
-			logger.warning("Finder name '" + finderName.getSymbolName() + "' either does not exist or contains an error");
+			LOGGER.warning("Finder name '" + finderName.getSymbolName() + "' either does not exist or contains an error");
 			return;
 		}
 
@@ -187,13 +187,13 @@ public class FinderOperationsImpl implements FinderOperations {
 		if (val != null) {
 			// Ensure we have an array of strings
 			if (!(val instanceof ArrayAttributeValue<?>)) {
-				logger.warning(getErrorMsg());
+				LOGGER.warning(getErrorMsg());
 				return;
 			}
 			ArrayAttributeValue<?> arrayVal = (ArrayAttributeValue<?>) val;
 			for (Object o : arrayVal.getValue()) {
 				if (!(o instanceof StringAttributeValue)) {
-					logger.warning(getErrorMsg());
+					LOGGER.warning(getErrorMsg());
 					return;
 				}
 				StringAttributeValue sv = (StringAttributeValue) o;

@@ -57,13 +57,13 @@ import org.w3c.dom.Element;
 public class MailOperationsImpl implements MailOperations {
 
 	// Constants
+	private static final Logger LOGGER = HandlerUtils.getLogger(MailOperationsImpl.class);
 	private static final int PRIVATE_TRANSIENT = Modifier.PRIVATE | Modifier.TRANSIENT;
 	private static final AnnotatedJavaType STRING = new AnnotatedJavaType(JavaType.STRING);
 	private static final String LOCAL_MESSAGE_VARIABLE = "mailMessage";
 	private static final String SPRING_TASK_NS = "http://www.springframework.org/schema/task";
 	private static final String SPRING_TASK_XSD = "http://www.springframework.org/schema/task/spring-task-3.0.xsd";
 	private static final String TEMPLATE_MESSAGE_FIELD = "templateMessage";
-	private static final Logger log = HandlerUtils.getLogger(MailOperationsImpl.class);
 
 	// Fields
 	@Reference private FileManager fileManager;
@@ -258,7 +258,7 @@ public class MailOperationsImpl implements MailOperations {
 		final String declaredByMetadataId = typeLocationService.getPhysicalTypeIdentifier(targetType);
 		ClassOrInterfaceTypeDetails existing = typeLocationService.getTypeDetails(targetType);
 		if (existing == null) {
-			log.warning("Aborting: Unable to find metadata for target type '" + targetType.getFullyQualifiedTypeName() + "'");
+			LOGGER.warning("Aborting: Unable to find metadata for target type '" + targetType.getFullyQualifiedTypeName() + "'");
 			return;
 		}
 		final ClassOrInterfaceTypeDetailsBuilder classOrInterfaceTypeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(existing);

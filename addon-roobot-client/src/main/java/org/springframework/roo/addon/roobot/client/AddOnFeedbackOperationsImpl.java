@@ -12,6 +12,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.roobot.client.model.Rating;
 import org.springframework.roo.felix.BundleSymbolicName;
+import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.osgi.BundleFindingUtils;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.uaa.UaaRegistrationService;
@@ -29,7 +30,7 @@ import org.springframework.roo.url.stream.UrlInputStreamService;
 public class AddOnFeedbackOperationsImpl implements AddOnFeedbackOperations {
 
 	// Constants
-	private static final Logger logger = Logger.getLogger(AddOnFeedbackOperationsImpl.class.getName());
+	private static final Logger LOGGER = HandlerUtils.getLogger(AddOnFeedbackOperationsImpl.class);
 
 	// Fields
 	@Reference private UaaRegistrationService registrationService;
@@ -64,7 +65,7 @@ public class AddOnFeedbackOperationsImpl implements AddOnFeedbackOperations {
 		// Fail early if we're not allowed GET this URL due to UAA restrictions
 		String failureMessage = urlInputStreamService.getUrlCannotBeOpenedMessage(httpUrl);
 		if (failureMessage != null) {
-			logger.warning(failureMessage);
+			LOGGER.warning(failureMessage);
 			return;
 		}
 
@@ -84,6 +85,6 @@ public class AddOnFeedbackOperationsImpl implements AddOnFeedbackOperations {
 		// Push the feedback up to the server now if possible
 		registrationService.requestTransmission();
 
-		logger.info("Thanks for sharing your feedback.");
+		LOGGER.info("Thanks for sharing your feedback.");
 	}
 }

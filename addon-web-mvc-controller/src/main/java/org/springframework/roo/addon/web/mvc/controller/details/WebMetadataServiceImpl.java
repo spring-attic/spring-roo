@@ -80,7 +80,7 @@ import org.springframework.roo.support.util.StringUtils;
 public class WebMetadataServiceImpl implements WebMetadataService {
 
 	// Constants
-	private static final Logger logger = HandlerUtils.getLogger(WebMetadataServiceImpl.class);
+	private static final Logger LOGGER = HandlerUtils.getLogger(WebMetadataServiceImpl.class);
 	private static final MethodParameter FIRST_RESULT_PARAMETER = new MethodParameter(JavaType.INT_PRIMITIVE, "firstResult");
 	private static final MethodParameter MAX_RESULTS_PARAMETER = new MethodParameter(JavaType.INT_PRIMITIVE, "sizeNo");
 	private static final int LAYER_POSITION = LayerType.HIGHEST.getPosition();
@@ -315,7 +315,7 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 					}
 				}
 			} else {
-				logger.warning("It is recommended to use @DateTimeFormat(style=\"M-\") on " + field.getFieldType().getFullyQualifiedTypeName() + "." + field.getFieldName() + " to use automatic date conversion in Spring MVC");
+				LOGGER.warning("It is recommended to use @DateTimeFormat(style=\"M-\") on " + field.getFieldType().getFullyQualifiedTypeName() + "." + field.getFieldName() + " to use automatic date conversion in Spring MVC");
 			}
 		}
 		return Collections.unmodifiableMap(dates);

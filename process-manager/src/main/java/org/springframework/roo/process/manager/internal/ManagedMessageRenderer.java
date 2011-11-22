@@ -10,7 +10,7 @@ import org.springframework.roo.support.util.Assert;
 public class ManagedMessageRenderer {
 
 	// Constants
-	private static final Logger logger = HandlerUtils.getLogger(ManagedMessageRenderer.class);
+	private static final Logger LOGGER = HandlerUtils.getLogger(ManagedMessageRenderer.class);
 
 	// Fields
 	private final FilenameResolver filenameResolver;
@@ -61,6 +61,6 @@ public class ManagedMessageRenderer {
 			message.append(descriptionOfChange);
 			message.append("]");
 		}
-		logger.fine(message.toString());
+		LOGGER.fine(message.toString());
 	}
 }

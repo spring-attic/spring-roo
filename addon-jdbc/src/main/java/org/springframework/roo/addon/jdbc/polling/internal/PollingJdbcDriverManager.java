@@ -35,7 +35,7 @@ import org.springframework.roo.support.util.Assert;
 public class PollingJdbcDriverManager implements JdbcDriverManager {
 
 	// Constants
-	private static final Logger logger = HandlerUtils.getLogger(PollingJdbcDriverManager.class);
+	private static final Logger LOGGER = HandlerUtils.getLogger(PollingJdbcDriverManager.class);
 
 	// Fields
 	@Reference private AddOnSearch addOnSearch;
@@ -78,11 +78,11 @@ public class PollingJdbcDriverManager implements JdbcDriverManager {
 
 			// Render to screen if required
 			if (matches == null) {
-				logger.info("Spring Roo automatic add-on discovery service currently unavailable");
+				LOGGER.info("Spring Roo automatic add-on discovery service currently unavailable");
 			} else if (matches == 0) {
-				logger.info("addon search --requiresDescription \"" + searchTerms + "\" found no matches");
+				LOGGER.info("addon search --requiresDescription \"" + searchTerms + "\" found no matches");
 			} else if (matches > 0) {
-				logger.info("Located add-on" + (matches == 1 ? "" : "s") + " that may offer this JDBC driver");
+				LOGGER.info("Located add-on" + (matches == 1 ? "" : "s") + " that may offer this JDBC driver");
 				addOnSearch.searchAddOns(true, searchTerms, false, 1, 99, false, false, false, null);
 			}
 

@@ -33,7 +33,7 @@ import org.w3c.dom.Element;
 public abstract class AbstractEmbeddedProvider implements EmbeddedProvider {
 
 	// Constants
-	private static final Logger logger = Logger.getLogger(AbstractEmbeddedProvider.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(AbstractEmbeddedProvider.class.getName());
 
 	// Fields
 	@Reference private FileManager fileManager;
@@ -88,7 +88,7 @@ public abstract class AbstractEmbeddedProvider implements EmbeddedProvider {
 			jspOperations.installView("/embed", viewName, title, "Embedded", document, pathResolver.getFocusedPath(Path.SRC_MAIN_WEBAPP));
 
 		} else {
-			logger.warning("Could not install jspx with name " + viewName + " because it exists already. Use the --viewName attribute to specify unique name.");
+			LOGGER.warning("Could not install jspx with name " + viewName + " because it exists already. Use the --viewName attribute to specify unique name.");
 		}
 	}
 
@@ -114,7 +114,7 @@ public abstract class AbstractEmbeddedProvider implements EmbeddedProvider {
 				}
 				result = sb.toString();
 			} catch (IOException e) {
-				logger.warning("Unable to connect to " + urlStr);
+				LOGGER.warning("Unable to connect to " + urlStr);
 			} finally {
 				IOUtils.closeQuietly(rd);
 			}

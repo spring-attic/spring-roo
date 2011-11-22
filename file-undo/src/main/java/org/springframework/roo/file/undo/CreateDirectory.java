@@ -20,7 +20,7 @@ import org.springframework.roo.support.util.FileUtils;
 public class CreateDirectory implements UndoableOperation {
 
 	// Constants
-	private static final Logger logger = HandlerUtils.getLogger(CreateDirectory.class);
+	private static final Logger LOGGER = HandlerUtils.getLogger(CreateDirectory.class);
 
 	// Fields
 	private final FilenameResolver filenameResolver;
@@ -48,7 +48,7 @@ public class CreateDirectory implements UndoableOperation {
 
 		Assert.state(this.actual.mkdirs(), "Could not create directory '" + actual + "'");
 		undoManager.add(this);
-		logger.fine("Created " + filenameResolver.getMeaningfulName(actual));
+		LOGGER.fine("Created " + filenameResolver.getMeaningfulName(actual));
 	}
 
 	public void reset() {}
@@ -56,9 +56,9 @@ public class CreateDirectory implements UndoableOperation {
 	public boolean undo() {
 		boolean success = FileUtils.deleteRecursively(deleteFrom);
 		if (success) {
-			logger.fine("Undo create " + filenameResolver.getMeaningfulName(actual));
+			LOGGER.fine("Undo create " + filenameResolver.getMeaningfulName(actual));
 		} else {
-			logger.fine("Undo failed " + filenameResolver.getMeaningfulName(actual));
+			LOGGER.fine("Undo failed " + filenameResolver.getMeaningfulName(actual));
 		}
 		return success;
 	}

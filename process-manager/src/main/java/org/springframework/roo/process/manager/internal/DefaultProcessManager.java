@@ -35,7 +35,7 @@ import org.springframework.roo.support.util.ExceptionUtils;
 public class DefaultProcessManager extends AbstractProcessManagerStatusPublisher implements ProcessManager {
 
 	// Constants
-	private static final Logger logger = HandlerUtils.getLogger(DefaultProcessManager.class);
+	private static final Logger LOGGER = HandlerUtils.getLogger(DefaultProcessManager.class);
 
 	// Fields
 	@Reference private UndoManager undoManager;
@@ -156,7 +156,7 @@ public class DefaultProcessManager extends AbstractProcessManagerStatusPublisher
 	private void logException(final Throwable t) {
 		Throwable root = ExceptionUtils.extractRootCause(t);
 		if (developmentMode) {
-			logger.log(Level.FINE, root.getMessage(), root);
+			LOGGER.log(Level.FINE, root.getMessage(), root);
 		} else {
 			String message = root.getMessage();
 			if (message == null || "".equals(message)) {
@@ -167,7 +167,7 @@ public class DefaultProcessManager extends AbstractProcessManagerStatusPublisher
 					message = root.getClass().getSimpleName();
 				}
 			}
-			logger.log(Level.FINE, message);
+			LOGGER.log(Level.FINE, message);
 		}
 	}
 
@@ -250,7 +250,7 @@ public class DefaultProcessManager extends AbstractProcessManagerStatusPublisher
 				lastPollDuration = 1; // Ensure it correctly reflects that it has ever run
 			}
 		} catch (Throwable t) {
-			logger.log(Level.SEVERE, t.getMessage(), t);
+			LOGGER.log(Level.SEVERE, t.getMessage(), t);
 		}
 	}
 

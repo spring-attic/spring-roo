@@ -16,7 +16,7 @@ import org.springframework.roo.support.util.Assert;
 public class CreateFile implements UndoableOperation {
 
 	// Constants
-	private static final Logger logger = HandlerUtils.getLogger(CreateFile.class);
+	private static final Logger LOGGER = HandlerUtils.getLogger(CreateFile.class);
 
 	// Fields
 	private final FilenameResolver filenameResolver;
@@ -42,9 +42,9 @@ public class CreateFile implements UndoableOperation {
 	public boolean undo() {
 		boolean success = this.actual.delete();
 		if (success) {
-			logger.fine("Undo create " + filenameResolver.getMeaningfulName(actual));
+			LOGGER.fine("Undo create " + filenameResolver.getMeaningfulName(actual));
 		} else {
-			logger.fine("Undo failed " + filenameResolver.getMeaningfulName(actual));
+			LOGGER.fine("Undo failed " + filenameResolver.getMeaningfulName(actual));
 		}
 		return success;
 	}

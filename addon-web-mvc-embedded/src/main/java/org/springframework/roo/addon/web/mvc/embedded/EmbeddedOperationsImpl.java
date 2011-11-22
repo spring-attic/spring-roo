@@ -28,7 +28,7 @@ import org.springframework.roo.support.logging.HandlerUtils;
 public class EmbeddedOperationsImpl implements EmbeddedOperations {
 
 	// Constants
-	private static final Logger logger = HandlerUtils.getLogger(EmbeddedOperationsImpl.class);
+	private static final Logger LOGGER = HandlerUtils.getLogger(EmbeddedOperationsImpl.class);
 
 	// Fields
 	@Reference private ProjectOperations projectOperations;
@@ -46,7 +46,7 @@ public class EmbeddedOperationsImpl implements EmbeddedOperations {
 				return true;
 			}
 		}
-		logger.warning("Could not find a matching provider for this URL");
+		LOGGER.warning("Could not find a matching provider for this URL");
 		return false;
 	}
 
@@ -56,7 +56,7 @@ public class EmbeddedOperationsImpl implements EmbeddedOperations {
 				return true;
 			}
 		}
-		logger.warning("Could not find a matching implementation for this 'web mvc embed' type");
+		LOGGER.warning("Could not find a matching implementation for this 'web mvc embed' type");
 		return false;
 	}
 

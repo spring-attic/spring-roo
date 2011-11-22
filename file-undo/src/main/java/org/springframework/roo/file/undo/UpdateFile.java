@@ -17,7 +17,7 @@ import org.springframework.roo.support.util.FileCopyUtils;
 public class UpdateFile implements UndoableOperation {
 
 	// Constants
-	private static final Logger logger = HandlerUtils.getLogger(UpdateFile.class);
+	private static final Logger LOGGER = HandlerUtils.getLogger(UpdateFile.class);
 
 	// Fields
 	private final FilenameResolver filenameResolver;
@@ -52,24 +52,24 @@ public class UpdateFile implements UndoableOperation {
 		// Fix for ROO-1555
 		try {
 			if (backup.delete()) {
-				logger.finest("Reset manage " + filenameResolver.getMeaningfulName(backup));
+				LOGGER.finest("Reset manage " + filenameResolver.getMeaningfulName(backup));
 			} else {
 				backup.deleteOnExit();
-				logger.fine("Reset failed " + filenameResolver.getMeaningfulName(backup));
+				LOGGER.fine("Reset failed " + filenameResolver.getMeaningfulName(backup));
 			}
 		} catch (Throwable e) {
 			backup.deleteOnExit();
-			logger.fine("Reset failed " + filenameResolver.getMeaningfulName(backup));
+			LOGGER.fine("Reset failed " + filenameResolver.getMeaningfulName(backup));
 		}
 	}
 
 	public boolean undo() {
 		try {
 			FileCopyUtils.copy(backup, actual);
-			logger.fine("Undo manage " + filenameResolver.getMeaningfulName(actual));
+			LOGGER.fine("Undo manage " + filenameResolver.getMeaningfulName(actual));
 			return true;
 		} catch (IOException ioe) {
-			logger.fine("Undo failed " + filenameResolver.getMeaningfulName(actual));
+			LOGGER.fine("Undo failed " + filenameResolver.getMeaningfulName(actual));
 			return false;
 		}
 	}

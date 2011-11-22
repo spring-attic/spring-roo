@@ -28,7 +28,7 @@ import org.springframework.roo.support.util.IOUtils;
 public class OsOperationsImpl implements OsOperations {
 
 	// Constants
-	private static final Logger logger = HandlerUtils.getLogger(OsOperationsImpl.class);
+	private static final Logger LOGGER = HandlerUtils.getLogger(OsOperationsImpl.class);
 
 	// Fields
 	@Reference private PathResolver pathResolver;
@@ -50,7 +50,7 @@ public class OsOperationsImpl implements OsOperations {
 
 		try {
 			if (p.waitFor() != 0) {
-				logger.warning("The command '" + command + "' did not complete successfully");
+				LOGGER.warning("The command '" + command + "' did not complete successfully");
 			}
 		} catch (InterruptedException e) {
 			throw new IllegalStateException(e);
@@ -78,17 +78,17 @@ public class OsOperationsImpl implements OsOperations {
 			try {
 				while ((line = reader.readLine()) != null) {
 					if (line.startsWith("[ERROR]")) {
-						logger.severe(line);
+						LOGGER.severe(line);
 					} else if (line.startsWith("[WARNING]")) {
-						logger.warning(line);
+						LOGGER.warning(line);
 					} else {
-						logger.info(line);
+						LOGGER.info(line);
 					}
 				}
 			} catch (IOException e) {
 				if (e.getMessage().contains("No such file or directory") || // For *nix/Mac
 					e.getMessage().contains("CreateProcess error=2")) { // For Windows
-					logger.severe("Could not locate executable; please ensure command is in your path");
+					LOGGER.severe("Could not locate executable; please ensure command is in your path");
 				}
 			} finally {
 				IOUtils.closeQuietly(reader);

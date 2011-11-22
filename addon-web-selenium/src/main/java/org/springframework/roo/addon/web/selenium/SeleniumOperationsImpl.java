@@ -64,7 +64,7 @@ import org.w3c.dom.Node;
 public class SeleniumOperationsImpl implements SeleniumOperations {
 
 	// Constants
-	private static final Logger logger = HandlerUtils.getLogger(SeleniumOperationsImpl.class);
+	private static final Logger LOGGER = HandlerUtils.getLogger(SeleniumOperationsImpl.class);
 
 	// Fields
 	@Reference private FileManager fileManager;
@@ -98,7 +98,7 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 
 		// We abort the creation of a selenium test if the controller does not allow the creation of new instances for the form backing object
 		if (!webScaffoldMetadata.getAnnotationValues().isCreate()) {
-			logger.warning("The controller you specified does not allow the creation of new instances of the form backing object. No Selenium tests created.");
+			LOGGER.warning("The controller you specified does not allow the creation of new instances of the form backing object. No Selenium tests created.");
 			return;
 		}
 

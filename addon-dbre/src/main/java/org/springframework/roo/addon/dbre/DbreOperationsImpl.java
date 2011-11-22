@@ -40,7 +40,7 @@ import org.w3c.dom.Element;
 public class DbreOperationsImpl implements DbreOperations {
 
 	// Constants
-	private static final Logger logger = HandlerUtils.getLogger(DbreOperationsImpl.class);
+	private static final Logger LOGGER = HandlerUtils.getLogger(DbreOperationsImpl.class);
 
 	// Fields
 	@Reference private DbreModelService dbreModelService;
@@ -79,16 +79,16 @@ public class DbreOperationsImpl implements DbreOperations {
 
 	private void outputSchemaXml(final Database database, final Set<Schema> schemas, final File file, final boolean displayOnly) {
 		if (database == null) {
-			logger.warning("Cannot obtain database information for schema(s) '" + StringUtils.collectionToCommaDelimitedString(schemas) + "'");
+			LOGGER.warning("Cannot obtain database information for schema(s) '" + StringUtils.collectionToCommaDelimitedString(schemas) + "'");
 		} else if (!database.hasTables()) {
-			logger.warning("Schema(s) '" + StringUtils.collectionToCommaDelimitedString(schemas) + "' do not exist or does not have any tables. Note that the schema names of some databases are case-sensitive");
+			LOGGER.warning("Schema(s) '" + StringUtils.collectionToCommaDelimitedString(schemas) + "' do not exist or does not have any tables. Note that the schema names of some databases are case-sensitive");
 		} else {
 			try {
 				if (displayOnly) {
 					Document document = DatabaseXmlUtils.getDatabaseDocument(database);
 					OutputStream outputStream = file != null ? new FileOutputStream(file) : new ByteArrayOutputStream();
 					XmlUtils.writeXml(outputStream, document);
-					logger.info(file != null ? "Database metadata written to file " + file.getAbsolutePath() : outputStream.toString());
+					LOGGER.info(file != null ? "Database metadata written to file " + file.getAbsolutePath() : outputStream.toString());
 				} else {
 					dbreModelService.writeDatabase(database);
 				}

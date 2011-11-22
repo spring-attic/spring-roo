@@ -19,6 +19,7 @@ import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.shell.Completion;
 import org.springframework.roo.shell.Converter;
 import org.springframework.roo.shell.MethodTarget;
+import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.StringUtils;
 
 /**
@@ -31,11 +32,11 @@ import org.springframework.roo.support.util.StringUtils;
 @Component
 @Service
 public class CloudDeployableFileConverter implements Converter<CloudDeployableFile> {
-	
+
 	// Constants
-	private static final Logger logger = Logger.getLogger(CloudDeployableFileConverter.class.getName());
+	private static final Logger LOGGER = HandlerUtils.getLogger(CloudDeployableFileConverter.class);
 	private static final String CREATE_OPTION = "CREATE";
-	
+
 	// Fields
 	@Reference private FileManager fileManager;
 	@Reference private ProjectOperations projectOperations;
@@ -69,7 +70,7 @@ public class CloudDeployableFileConverter implements Converter<CloudDeployableFi
 		}
 		String path = projectOperations.getFocusedModule().getRoot() + value;
 		if (!new File(path).exists())  {
-			logger.severe("The file at path '" + path + "' doesn't exist; cannot continue");
+			LOGGER.severe("The file at path '" + path + "' doesn't exist; cannot continue");
 			return null;
 		}
 		FileDetails fileToDeploy = fileManager.readFile(projectOperations.getFocusedModule().getRoot() + value);
@@ -82,14 +83,14 @@ public class CloudDeployableFileConverter implements Converter<CloudDeployableFi
 
 	public boolean getAllPossibleValues(final List<Completion> completions, final Class<?> requiredType, final String existingData, final String optionContext, final MethodTarget target) {
 		if (projectOperations.getPathResolver() == null) {
-			logger.warning("A project has not been created please specify the full path of the file you wish to deploy");
+			LOGGER.warning("A project has not been created please specify the full path of the file you wish to deploy");
 			return false;
 		}
 		String rootPath = projectOperations.getFocusedModule().getRoot();
 		Set<FileDetails> fileDetails = fileManager.findMatchingAntPath(rootPath + File.separator + "**" + File.separator + "*.war");
 
 		if (fileDetails.isEmpty()) {
-			logger.warning("No deployable files found in the project directory. Please use the '" + CREATE_OPTION + "' option to build the war.");
+			LOGGER.warning("No deployable files found in the project directory. Please use the '" + CREATE_OPTION + "' option to build the war.");
 			completions.add(new Completion(CREATE_OPTION));
 		}
 		for (FileDetails fileDetail : fileDetails) {

@@ -49,10 +49,9 @@ import org.w3c.dom.Element;
 public class SimpleParser implements Parser {
 
 	// Constants
-	private static final Logger logger = HandlerUtils.getLogger(SimpleParser.class);
+	private static final Logger LOGGER = HandlerUtils.getLogger(SimpleParser.class);
+	private static final Comparator<Object> COMPARATOR = new NaturalOrderComparator<Object>();
 
-	private static final Comparator<Object> comparator = new NaturalOrderComparator<Object>();
-	
 	// Fields
 	private final Object mutex = this;
 	private final Set<Converter<?>> converters = new HashSet<Converter<?>>();
@@ -75,14 +74,14 @@ public class SimpleParser implements Parser {
 				// by seeing the command is simply unavailable at this point in time
 				CollectionUtils.populate(matchingTargets, locateTargets(input, true, false));
 				if (matchingTargets.isEmpty()) {
-					commandNotFound(logger, input);
+					commandNotFound(LOGGER, input);
 				} else {
-					logger.warning("Command '" + input + "' was found but is not currently available (type 'help' then ENTER to learn about this command)");
+					LOGGER.warning("Command '" + input + "' was found but is not currently available (type 'help' then ENTER to learn about this command)");
 				}
 				return null;
 			}
 			if (matchingTargets.size() > 1) {
-				logger.warning("Ambigious command '" + input + "' (for assistance press " + AbstractShell.completionKeys + " or type \"hint\" then hit ENTER)");
+				LOGGER.warning("Ambigious command '" + input + "' (for assistance press " + AbstractShell.completionKeys + " or type \"hint\" then hit ENTER)");
 				return null;
 			}
 			MethodTarget methodTarget = matchingTargets.iterator().next();
@@ -102,7 +101,7 @@ public class SimpleParser implements Parser {
 			try {
 				options = ParserUtils.tokenize(methodTarget.getRemainingBuffer());
 			} catch (IllegalArgumentException e) {
-				logger.warning(ExceptionUtils.extractRootCause(e).getMessage());
+				LOGGER.warning(ExceptionUtils.extractRootCause(e).getMessage());
 				return null;
 			}
 
@@ -115,7 +114,7 @@ public class SimpleParser implements Parser {
 					if (SimpleParser.class.isAssignableFrom(requiredType)) {
 						result = this;
 					} else {
-						logger.warning("Parameter type '" + requiredType + "' is not system provided");
+						LOGGER.warning("Parameter type '" + requiredType + "' is not system provided");
 						return null;
 					}
 					arguments.add(result);
@@ -128,7 +127,7 @@ public class SimpleParser implements Parser {
 				for (String possibleKey : cliOption.key()) {
 					if (options.containsKey(possibleKey)) {
 						if (sourcedFrom != null) {
-							logger.warning("You cannot specify option '" + possibleKey + "' when you have also specified '" + sourcedFrom + "' in the same command");
+							LOGGER.warning("You cannot specify option '" + possibleKey + "' when you have also specified '" + sourcedFrom + "' in the same command");
 							return null;
 						}
 						sourcedFrom = possibleKey;
@@ -144,9 +143,9 @@ public class SimpleParser implements Parser {
 							message.append("(otherwise known as option '").append(cliOption.key()[1]).append("') ");
 						}
 						message.append("for this command");
-						logger.warning(message.toString());
+						LOGGER.warning(message.toString());
 					} else {
-						logger.warning("You must specify option '" + cliOption.key()[0] + "' for this command");
+						LOGGER.warning("You must specify option '" + cliOption.key()[0] + "' for this command");
 					}
 					return null;
 				}
@@ -164,7 +163,7 @@ public class SimpleParser implements Parser {
 				// Special token that denotes a null value is sought (useful for default values)
 				if ("__NULL__".equals(value)) {
 					if (requiredType.isPrimitive()) {
-						logger.warning("Nulls cannot be presented to primitive type " + requiredType.getSimpleName() + " for option '" + StringUtils.arrayToCommaDelimitedString(cliOption.key()) + "'");
+						LOGGER.warning("Nulls cannot be presented to primitive type " + requiredType.getSimpleName() + " for option '" + StringUtils.arrayToCommaDelimitedString(cliOption.key()) + "'");
 						return null;
 					}
 					arguments.add(null);
@@ -200,9 +199,9 @@ public class SimpleParser implements Parser {
 					}
 					arguments.add(result);
 				} catch (RuntimeException e) {
-					logger.warning(e.getClass().getName() + ": Failed to convert '" + value + "' to type " + requiredType.getSimpleName() + " for option '" + StringUtils.arrayToCommaDelimitedString(cliOption.key()) + "'");
+					LOGGER.warning(e.getClass().getName() + ": Failed to convert '" + value + "' to type " + requiredType.getSimpleName() + " for option '" + StringUtils.arrayToCommaDelimitedString(cliOption.key()) + "'");
 					if (e.getMessage() != null && e.getMessage().length() > 0) {
-						logger.warning(e.getMessage());
+						LOGGER.warning(e.getMessage());
 					}
 					return null;
 				} finally {
@@ -221,7 +220,7 @@ public class SimpleParser implements Parser {
 					message.append("Options ").append(StringUtils.collectionToDelimitedString(unavailableOptions, ", ", "'", "'")).append(" are not available for this command. ");
 				}
 				message.append("Use tab assist or the \"help\" command to see the legal options");
-				logger.warning(message.toString());
+				LOGGER.warning(message.toString());
 				return null;
 			}
 
@@ -393,7 +392,7 @@ public class SimpleParser implements Parser {
 	}
 
 	public int complete(String buffer, int cursor, final List<String> candidates) {
-		List<Completion> completions = new ArrayList<Completion>();
+		final List<Completion> completions = new ArrayList<Completion>();
 		int result = completeAdvanced(buffer, cursor, completions);
 		for (final Completion completion : completions) {
 			candidates.add(completion.getValue());
@@ -423,7 +422,7 @@ public class SimpleParser implements Parser {
 
 			// Start by locating a method that matches
 			final Collection<MethodTarget> targets = locateTargets(translated, false, true);
-			SortedSet<Completion> results = new TreeSet<Completion>(comparator);
+			SortedSet<Completion> results = new TreeSet<Completion>(COMPARATOR);
 
 			if (targets.isEmpty()) {
 				// Nothing matches the buffer they've presented
@@ -736,7 +735,7 @@ public class SimpleParser implements Parser {
 									help.append("; default if option not present: '").append(option.unspecifiedDefaultValue()).append("'");
 								}
 							}
-							logger.info(help.toString());
+							LOGGER.info(help.toString());
 
 							if (results.size() == 1) {
 								String suggestion = results.iterator().next().getValue().trim();
@@ -777,7 +776,7 @@ public class SimpleParser implements Parser {
 			}
 
 			// Compute the sections we'll be outputting, and get them into a nice order
-			SortedMap<String, Object> sections = new TreeMap<String, Object>(comparator);
+			SortedMap<String, Object> sections = new TreeMap<String, Object>(COMPARATOR);
 			next_target: for (Object target : commands) {
 				Method[] methods = target.getClass().getMethods();
 				for (Method m : methods) {
@@ -808,7 +807,7 @@ public class SimpleParser implements Parser {
 			for (final Entry<String, Object> entry : sections.entrySet()) {
 				final String section = entry.getKey();
 				final Object target = entry.getValue();
-				SortedMap<String, Element> individualCommands = new TreeMap<String, Element>(comparator);
+				SortedMap<String, Element> individualCommands = new TreeMap<String, Element>(COMPARATOR);
 
 				Method[] methods = target.getClass().getMethods();
 				for (Method m : methods) {
@@ -994,7 +993,7 @@ public class SimpleParser implements Parser {
 				// Only a single argument, so default to the normal help operation
 			}
 
-			SortedSet<String> result = new TreeSet<String>(comparator);
+			SortedSet<String> result = new TreeSet<String>(COMPARATOR);
 			for (MethodTarget mt : matchingTargets) {
 				CliCommand cmd = mt.getMethod().getAnnotation(CliCommand.class);
 				if (cmd != null) {
@@ -1012,14 +1011,14 @@ public class SimpleParser implements Parser {
 				sb.append(s).append(StringUtils.LINE_SEPARATOR);
 			}
 
-			logger.info(sb.toString());
-			logger.warning("** Type 'hint' (without the quotes) and hit ENTER for step-by-step guidance **" + StringUtils.LINE_SEPARATOR);
+			LOGGER.info(sb.toString());
+			LOGGER.warning("** Type 'hint' (without the quotes) and hit ENTER for step-by-step guidance **" + StringUtils.LINE_SEPARATOR);
 		}
 	}
 
 	public Set<String> getEveryCommand() {
 		synchronized (mutex) {
-			SortedSet<String> result = new TreeSet<String>(comparator);
+			SortedSet<String> result = new TreeSet<String>(COMPARATOR);
 			for (Object o : commands) {
 				Method[] methods = o.getClass().getMethods();
 				for (Method m : methods) {

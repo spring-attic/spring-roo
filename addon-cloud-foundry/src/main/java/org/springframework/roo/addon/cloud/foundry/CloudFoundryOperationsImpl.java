@@ -14,6 +14,7 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.shell.osgi.AbstractFlashingObject;
+import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.StringUtils;
 
 import com.vmware.appcloud.client.AppCloudClient;
@@ -40,7 +41,7 @@ import com.vmware.appcloud.client.ServiceConfiguration;
 public class CloudFoundryOperationsImpl extends AbstractFlashingObject implements CloudFoundryOperations {
 
 	// Constants
-	private static final Logger logger = Logger.getLogger(CloudFoundryOperationsImpl.class.getName());
+	private static final Logger LOGGER = HandlerUtils.getLogger(CloudFoundryOperationsImpl.class);
 
 	// Fields
 	@Reference private CloudFoundrySession session;
@@ -52,20 +53,20 @@ public class CloudFoundryOperationsImpl extends AbstractFlashingObject implement
 			public void execute() throws Exception {
 				CloudInfo cloudInfo = client.getCloudInfo();
 				if (cloudInfo == null || cloudInfo.getUsage() == null || cloudInfo.getLimits() == null) {
-					logger.warning("Information could not be retrieved");
+					LOGGER.warning("Information could not be retrieved");
 					return;
 				}
-				logger.info("\n");
-				logger.info(cloudInfo.getDescription());
-				logger.info("For support visit " + cloudInfo.getSupport());
-				logger.info("\n");
-				logger.info("Target:\t " + client.getCloudControllerUrl() + " (" + cloudInfo.getVersion() + ")");
-				logger.info("\n");
-				logger.info("User:\t " + cloudInfo.getUser());
-				logger.info("Usage:\t Memory (" + cloudInfo.getUsage().getTotalMemory() + "MB of " + cloudInfo.getLimits().getMaxTotalMemory() + "MB total)");
-				logger.info("\t Services (" + cloudInfo.getUsage().getServices() + " of " + cloudInfo.getLimits().getMaxServices() + " total)");
-				logger.info("\t Apps (" + cloudInfo.getUsage().getApps() + " of " + cloudInfo.getLimits().getMaxApps() + " total)");
-				logger.info("\n");
+				LOGGER.info("\n");
+				LOGGER.info(cloudInfo.getDescription());
+				LOGGER.info("For support visit " + cloudInfo.getSupport());
+				LOGGER.info("\n");
+				LOGGER.info("Target:\t " + client.getCloudControllerUrl() + " (" + cloudInfo.getVersion() + ")");
+				LOGGER.info("\n");
+				LOGGER.info("User:\t " + cloudInfo.getUser());
+				LOGGER.info("Usage:\t Memory (" + cloudInfo.getUsage().getTotalMemory() + "MB of " + cloudInfo.getLimits().getMaxTotalMemory() + "MB total)");
+				LOGGER.info("\t Services (" + cloudInfo.getUsage().getServices() + " of " + cloudInfo.getLimits().getMaxServices() + " total)");
+				LOGGER.info("\t Apps (" + cloudInfo.getUsage().getApps() + " of " + cloudInfo.getLimits().getMaxApps() + " total)");
+				LOGGER.info("\n");
 			}
 		});
 	}
@@ -98,24 +99,24 @@ public class CloudFoundryOperationsImpl extends AbstractFlashingObject implement
 				List<ServiceConfiguration> globalServices = client.getServiceConfigurations();
 				List<CloudService> localServices = client.getServices();
 				if (globalServices.isEmpty()) {
-					logger.info("There are currently no services available.");
+					LOGGER.info("There are currently no services available.");
 				} else {
 					ShellTableRenderer table = new ShellTableRenderer("System Services", "Service", "Version", "Description");
 					for (ServiceConfiguration service : globalServices) {
 						table.addRow(service.getVendor(), service.getVersion(), service.getDescription());
 					}
-					logger.info(table.getOutput());
+					LOGGER.info(table.getOutput());
 				}
 
 				if (localServices.isEmpty()) {
-					logger.info("There are currently no provisioned services.");
+					LOGGER.info("There are currently no provisioned services.");
 				} else {
 					ShellTableRenderer table = new ShellTableRenderer("Provisioned Services", "Name", "Service");
 
 					for (CloudService service : localServices) {
 						table.addRow(service.getName(), service.getVendor());
 					}
-					logger.info(table.getOutput());
+					LOGGER.info(table.getOutput());
 				}
 			}
 		});
@@ -182,7 +183,7 @@ public class CloudFoundryOperationsImpl extends AbstractFlashingObject implement
 			public void execute() throws Exception {
 				List<CloudApplication> applications = client.getApplications();
 				if (applications.isEmpty()) {
-					logger.info("No applications available.");
+					LOGGER.info("No applications available.");
 					return;
 				}
 				ShellTableRenderer table = new ShellTableRenderer("Applications", "Name", "Status", "Instances", "Services", "URLs");
@@ -200,19 +201,19 @@ public class CloudFoundryOperationsImpl extends AbstractFlashingObject implement
 					}
 					table.addRow(application.getName(), application.getState().name(), String.valueOf(application.getInstances()), services.toString(), uris.toString());
 				}
-				logger.info(table.getOutput());
+				LOGGER.info(table.getOutput());
 			}
 		});
 	}
 
 	public void push(final String appName, final Integer instances, Integer memory, final String path, final List<String> urls) {
 		if (path == null) {
-			logger.severe("The file path cannot be null; cannot continue");
+			LOGGER.severe("The file path cannot be null; cannot continue");
 			return;
 		}
 		File fileToDeploy = new File(path);
 		if (!fileToDeploy.exists()) {
-			logger.severe("The file at path '" + path + "' doesn't exist; cannot continue");
+			LOGGER.severe("The file at path '" + path + "' doesn't exist; cannot continue");
 			return;
 		}
 		if (memory == null) {
@@ -253,7 +254,7 @@ public class CloudFoundryOperationsImpl extends AbstractFlashingObject implement
 			@Override
 			public void execute() throws Exception {
 				if (getApplication(appName).getState() == CloudApplication.AppState.STARTED) {
-					logger.info("Application '" + appName + "' is already running.");
+					LOGGER.info("Application '" + appName + "' is already running.");
 					displaySuccessMessage = false;
 					return;
 				}
@@ -269,7 +270,7 @@ public class CloudFoundryOperationsImpl extends AbstractFlashingObject implement
 			@Override
 			public void execute() throws Exception {
 				if (getApplication(appName).getState() == CloudApplication.AppState.STOPPED) {
-					logger.info("Application '" + appName + "' is not running.");
+					LOGGER.info("Application '" + appName + "' is not running.");
 					displaySuccessMessage = false;
 					return;
 				}
@@ -312,7 +313,7 @@ public class CloudFoundryOperationsImpl extends AbstractFlashingObject implement
 				if (instances == null) {
 					InstancesInfo instancesInfo = client.getApplicationInstances(appName);
 					if (instancesInfo.getInstances().isEmpty()) {
-						logger.info("No running instances for '" + appName + "'");
+						LOGGER.info("No running instances for '" + appName + "'");
 					}
 				} else {
 					client.updateApplicationInstances(appName, instances);
@@ -330,7 +331,7 @@ public class CloudFoundryOperationsImpl extends AbstractFlashingObject implement
 				}
 				ShellTableRenderer shellTable = new ShellTableRenderer("Application Memory", "Name", "Memory");
 				shellTable.addRow(appName, getApplication(appName).getMemory() + "MB");
-				logger.info(shellTable.getOutput());
+				LOGGER.info(shellTable.getOutput());
 			}
 		});
 	}
@@ -341,18 +342,18 @@ public class CloudFoundryOperationsImpl extends AbstractFlashingObject implement
 			public void execute() throws Exception {
 				CrashesInfo crashes = client.getCrashes(appName);
 				if (crashes == null) {
-					logger.severe(this.failureMessage);
+					LOGGER.severe(this.failureMessage);
 					return;
 				}
 				if (crashes.getCrashes().isEmpty()) {
-					logger.info("The application '" + appName + "' has never crashed");
+					LOGGER.info("The application '" + appName + "' has never crashed");
 					return;
 				}
 				ShellTableRenderer table = new ShellTableRenderer("Crashes", "Name", "Id", "Since");
 				for (CrashInfo crash : crashes.getCrashes()) {
 					table.addRow(appName, crash.getInstance(), SimpleDateFormat.getDateTimeInstance().format(crash.getSince()));
 				}
-				logger.info(table.getOutput());
+				LOGGER.info(table.getOutput());
 			}
 		});
 	}
@@ -375,16 +376,16 @@ public class CloudFoundryOperationsImpl extends AbstractFlashingObject implement
 				String stderrLog = client.getFile(appName, instanceIndex, "logs/stderr.log");
 				String stdoutlog = client.getFile(appName, instanceIndex, "logs/stdout.log");
 
-				logger.info("\n");
-				logger.info("==== logs/stderr.log ====");
-				logger.info("\n");
-				logger.info(stderrLog);
+				LOGGER.info("\n");
+				LOGGER.info("==== logs/stderr.log ====");
+				LOGGER.info("\n");
+				LOGGER.info(stderrLog);
 
-				logger.info("\n");
-				logger.info("==== logs/stdout.log ====");
-				logger.info("\n");
-				logger.info(stdoutlog);
-				logger.info("\n");
+				LOGGER.info("\n");
+				LOGGER.info("==== logs/stdout.log ====");
+				LOGGER.info("\n");
+				LOGGER.info(stdoutlog);
+				LOGGER.info("\n");
 			}
 		});
 	}
@@ -398,7 +399,7 @@ public class CloudFoundryOperationsImpl extends AbstractFlashingObject implement
 					instanceIndex = 1;
 				}
 				String file = client.getFile(appName, instanceIndex, path);
-				logger.info(file);
+				LOGGER.info(file);
 			}
 		});
 	}
@@ -409,7 +410,7 @@ public class CloudFoundryOperationsImpl extends AbstractFlashingObject implement
 			public void execute() throws Exception {
 				ApplicationStats stats = client.getApplicationStats(appName);
 				if (stats.getRecords().isEmpty()) {
-					logger.info("There is currently no stats for the application '" + appName + "'");
+					LOGGER.info("There is currently no stats for the application '" + appName + "'");
 					return;
 				}
 				ShellTableRenderer table = new ShellTableRenderer("App. Stats", "Instance", "CPU (Cores)", "Memory (limit)", "Disk (limit)", "Uptime");
@@ -431,7 +432,7 @@ public class CloudFoundryOperationsImpl extends AbstractFlashingObject implement
 					String formattedUptime = formatDurationInSeconds(uptime);
 					table.addRow(instance, cpu, memory, disk, formattedUptime);
 				}
-				logger.info(table.getOutput());
+				LOGGER.info(table.getOutput());
 			}
 		});
 	}
@@ -480,7 +481,7 @@ public class CloudFoundryOperationsImpl extends AbstractFlashingObject implement
 			public void execute() throws Exception {
 				for (CloudApplication cloudApplication : client.getApplications()) {
 					if (cloudApplication.getName().equals(newAppName)) {
-						logger.severe("An application of that name already exists, please choose another name");
+						LOGGER.severe("An application of that name already exists, please choose another name");
 						displaySuccessMessage = false;
 						return;
 					}
@@ -569,7 +570,7 @@ public class CloudFoundryOperationsImpl extends AbstractFlashingObject implement
 			timer.scheduleAtFixedRate(timerTask, 0, 100);
 			command.execute();
 			if (StringUtils.hasText(command.getSuccessMessage()) && command.isDisplaySuccessMessage()) {
-				logger.info(command.getSuccessMessage());
+				LOGGER.info(command.getSuccessMessage());
 			}
 		} catch (Exception e) {
 			throw new IllegalStateException(command.getFailureMessage() + " - " + e.getMessage(), e);

@@ -87,7 +87,7 @@ import org.xml.sax.SAXException;
 public class GwtTypeServiceImpl implements GwtTypeService {
 
 	// Constants
-	private static final Logger logger = HandlerUtils.getLogger(GwtTypeServiceImpl.class);
+	private static final Logger LOGGER = HandlerUtils.getLogger(GwtTypeServiceImpl.class);
 
 	// Fields
 	@Reference protected FileManager fileManager;
@@ -554,7 +554,7 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 	private void displayWarning(final String warning) {
 		if (!warnings.contains(warning)) {
 			warnings.add(warning);
-			logger.severe(warning);
+			LOGGER.severe(warning);
 			warningTimer.schedule(new TimerTask() {
 				@Override
 				public void run() {

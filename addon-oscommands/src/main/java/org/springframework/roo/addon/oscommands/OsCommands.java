@@ -24,7 +24,7 @@ import org.springframework.roo.support.util.StringUtils;
 public class OsCommands implements CommandMarker {
 
 	// Constants
-	private static final Logger logger = HandlerUtils.getLogger(OsCommands.class);
+	private static final Logger LOGGER = HandlerUtils.getLogger(OsCommands.class);
 
 	// Fields
 	@Reference private OsOperations osOperations;
@@ -42,7 +42,7 @@ public class OsCommands implements CommandMarker {
 			try {
 				osOperations.executeCommand(command);
 			} catch (IOException e) {
-				logger.severe("Unable to execute command " + command + " [" + e.getMessage() + "]");
+				LOGGER.severe("Unable to execute command " + command + " [" + e.getMessage() + "]");
 			}
 		}
 	}

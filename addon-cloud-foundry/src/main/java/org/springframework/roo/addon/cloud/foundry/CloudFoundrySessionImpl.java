@@ -13,6 +13,7 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.classpath.preferences.PreferencesService;
+import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.StringUtils;
 import org.springframework.uaa.client.TransmissionAwareUaaService;
 import org.springframework.uaa.client.TransmissionEventListener;
@@ -29,7 +30,7 @@ import com.vmware.appcloud.client.ServiceConfiguration;
 public class CloudFoundrySessionImpl implements CloudFoundrySession, TransmissionEventListener {
 
 	// Constants
-	private static final Logger logger = Logger.getLogger(CloudFoundryOperationsImpl.class.getName());
+	private static final Logger LOGGER = HandlerUtils.getLogger(CloudFoundryOperationsImpl.class);
 
 	// Fields
 	@Reference AppCloudClientFactory appCloudClientFactory;
@@ -77,7 +78,7 @@ public class CloudFoundrySessionImpl implements CloudFoundrySession, Transmissio
 	public void login(final String email, final String password, final String cloudControllerUrl) {
 		final CloudCredentials credentials = getLoginCredentials(cloudControllerUrl, email, password);
 		if (credentials == null) {
-			logger.info("Login failed");
+			LOGGER.info("Login failed");
 			return;
 		}
 
@@ -86,10 +87,10 @@ public class CloudFoundrySessionImpl implements CloudFoundrySession, Transmissio
 		if (StringUtils.hasText(email) && StringUtils.hasText(password)) {
 			// The user provided fresh credentials
 			preferences.storeCredentials(credentials);
-			logger.info("Credentials saved.");
+			LOGGER.info("Credentials saved.");
 		}
 		
-		logger.info("Logged in successfully with email address '" + credentials.getEmail() + "'");
+		LOGGER.info("Logged in successfully with email address '" + credentials.getEmail() + "'");
 	}
 	
 	/**
@@ -135,10 +136,10 @@ public class CloudFoundrySessionImpl implements CloudFoundrySession, Transmissio
 			case 1:
 				return storedEmails.iterator().next();
 			case 0:
-				logger.warning("An email address is required.");
+				LOGGER.warning("An email address is required.");
 				return null;
 			default:
-				logger.warning("Multiple email addresses are stored for the cloud controller URL '" + cloudControllerUrl + "'. Please specify an email address.");
+				LOGGER.warning("Multiple email addresses are stored for the cloud controller URL '" + cloudControllerUrl + "'. Please specify an email address.");
 				return null;
 		}
 	}
