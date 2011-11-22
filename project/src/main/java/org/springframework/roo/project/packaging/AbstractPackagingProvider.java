@@ -39,7 +39,9 @@ public abstract class AbstractPackagingProvider implements PackagingProvider {
 
 	// Constants
 	protected static final Logger LOGGER = HandlerUtils.getLogger(PackagingProvider.class);
+	private static final String DEFAULT_VERSION = "0.1.0.BUILD-SNAPSHOT";
 	private static final String JAVA_VERSION_PLACEHOLDER = "JAVA_VERSION";
+	private static final String VERSION_ELEMENT = "version";
 
 	/**
 	 * The name of the POM property that stores the packaging provider's ID.
@@ -129,13 +131,19 @@ public abstract class AbstractPackagingProvider implements PackagingProvider {
 			DomUtils.removeElements("name", root);
 		}
 
-		// parent and groupId
+		// groupId and parent
 		setGroupIdAndParent(getGroupId(topLevelPackage), parentPom, root, pom);
 
 		// artifactId
 		final String artifactId = getArtifactId(projectName, module, topLevelPackage);
 		Assert.hasText(artifactId, "Maven artifactIds cannot be blank");
 		DomUtils.createChildIfNotExists("artifactId", root, pom).setTextContent(artifactId.trim());
+		
+		// version
+		final Element existingVersionElement = DomUtils.getChildElementByTagName(root, VERSION_ELEMENT);
+		if (existingVersionElement == null) {
+			DomUtils.createChildElement(VERSION_ELEMENT, root, pom).setTextContent(DEFAULT_VERSION);
+		}
 
 		// packaging
 		DomUtils.createChildIfNotExists("packaging", root, pom).setTextContent(this.name);
@@ -230,10 +238,10 @@ public abstract class AbstractPackagingProvider implements PackagingProvider {
 			DomUtils.removeTextNodes(root);
 			projectGroupIdElement.setTextContent(projectGroupId);
 		} else {
-			// Parent groupId, artifactId, and version
+			// Parent's groupId, artifactId, and version
 			DomUtils.createChildIfNotExists("groupId", parentPomElement, pom).setTextContent(parentPom.getGroupId());
 			DomUtils.createChildIfNotExists("artifactId", parentPomElement, pom).setTextContent(parentPom.getArtifactId());
-			DomUtils.createChildIfNotExists("version", parentPomElement, pom).setTextContent(parentPom.getVersion());
+			DomUtils.createChildIfNotExists(VERSION_ELEMENT, parentPomElement, pom).setTextContent(parentPom.getVersion());
 
 			// Project groupId (if necessary)
 			if (projectGroupId.equals(parentPom.getGroupId())) {
