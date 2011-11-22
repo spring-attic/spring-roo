@@ -7,11 +7,10 @@ import jline.Completor;
 
 import org.springframework.roo.shell.Completion;
 import org.springframework.roo.shell.Parser;
-import org.springframework.roo.shell.SimpleParser;
 import org.springframework.roo.support.util.Assert;
 
 /**
- * An implementation of JLine's {@link Completor} interface that delegates to ROO's {@link SimpleParser}.
+ * An implementation of JLine's {@link Completor} interface that delegates to a {@link Parser}.
  *
  * @author Ben Alex
  * @since 1.0
@@ -19,11 +18,11 @@ import org.springframework.roo.support.util.Assert;
 public class JLineCompletorAdapter implements Completor {
 
 	// Fields
-	private final Parser simpleParser;
+	private final Parser parser;
 
-	public JLineCompletorAdapter(final Parser simpleParser) {
-		Assert.notNull(simpleParser, "Simple Parser required");
-		this.simpleParser = simpleParser;
+	public JLineCompletorAdapter(final Parser parser) {
+		Assert.notNull(parser, "Parser required");
+		this.parser = parser;
 	}
 
 	@SuppressWarnings("all")
@@ -32,7 +31,7 @@ public class JLineCompletorAdapter implements Completor {
 		try {
 			JLineLogHandler.cancelRedrawProhibition();
 			List<Completion> completions = new ArrayList<Completion>();
-			result = simpleParser.completeAdvanced(buffer, cursor, completions);
+			result = parser.completeAdvanced(buffer, cursor, completions);
 			for (Completion completion : completions) {
 				candidates.add(new jline.Completion(completion.getValue(), completion.getFormattedValue(), completion.getHeading()));
 			}
