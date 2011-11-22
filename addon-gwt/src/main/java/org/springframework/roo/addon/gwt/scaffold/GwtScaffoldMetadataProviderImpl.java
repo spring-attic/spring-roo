@@ -138,7 +138,7 @@ public class GwtScaffoldMetadataProviderImpl implements GwtScaffoldMetadataProvi
 			clientSideTypeMap.put(propertyName, gwtProxyProperty);
 		}
 
-		GwtTemplateDataHolder templateDataHolder = gwtTemplateService.getMirrorTemplateTypeDetails(mirroredType, clientSideTypeMap, projectOperations.getProjectMetadata(moduleName));
+		GwtTemplateDataHolder templateDataHolder = gwtTemplateService.getMirrorTemplateTypeDetails(mirroredType, clientSideTypeMap, projectMetadata.getModuleName());
 		Map<GwtType, List<ClassOrInterfaceTypeDetails>> typesToBeWritten = new LinkedHashMap<GwtType, List<ClassOrInterfaceTypeDetails>>();
 		Map<String, String> xmlToBeWritten = new LinkedHashMap<String, String>();
 
@@ -194,7 +194,7 @@ public class GwtScaffoldMetadataProviderImpl implements GwtScaffoldMetadataProvi
 	}
 
 	private void buildType(final GwtType type, final ProjectMetadata projectMetadata) {
-		gwtTypeService.buildType(type, gwtTemplateService.getStaticTemplateTypeDetails(type, projectMetadata), projectMetadata.getModuleName());
+		gwtTypeService.buildType(type, gwtTemplateService.getStaticTemplateTypeDetails(type, projectMetadata.getModuleName()), projectMetadata.getModuleName());
 	}
 
 	public void notify(String upstreamDependency, String downstreamDependency) {

@@ -274,7 +274,7 @@ public class GwtOperationsImpl implements GwtOperations {
 		// Update the GaeHelper type
 		updateGaeHelper();
 
-		gwtTypeService.buildType(GwtType.APP_REQUEST_FACTORY, gwtTemplateService.getStaticTemplateTypeDetails(GwtType.APP_REQUEST_FACTORY, projectOperations.getFocusedProjectMetadata()), projectOperations.getFocusedModuleName());
+		gwtTypeService.buildType(GwtType.APP_REQUEST_FACTORY, gwtTemplateService.getStaticTemplateTypeDetails(GwtType.APP_REQUEST_FACTORY, projectOperations.getFocusedProjectMetadata().getModuleName()), projectOperations.getFocusedModuleName());
 
 		// Ensure the gwt-maven-plugin appropriate to a GAE enabled or disabled environment is updated
 		updateBuildPlugins(isGaeEnabled);

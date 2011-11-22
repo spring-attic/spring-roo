@@ -6,7 +6,6 @@ import java.util.Map;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.model.JavaSymbolName;
-import org.springframework.roo.project.ProjectMetadata;
 
 /**
  * Interface for {@link GwtTemplateServiceImpl}.
@@ -16,9 +15,9 @@ import org.springframework.roo.project.ProjectMetadata;
  */
 public interface GwtTemplateService {
 
-	GwtTemplateDataHolder getMirrorTemplateTypeDetails(ClassOrInterfaceTypeDetails governorTypeDetails, Map<JavaSymbolName, GwtProxyProperty> clientSideTypeMap, ProjectMetadata projectMetadata);
+	GwtTemplateDataHolder getMirrorTemplateTypeDetails(ClassOrInterfaceTypeDetails governorTypeDetails, Map<JavaSymbolName, GwtProxyProperty> clientSideTypeMap, String moduleName);
 
-	List<ClassOrInterfaceTypeDetails> getStaticTemplateTypeDetails(GwtType type, ProjectMetadata projectMetadata);
+	List<ClassOrInterfaceTypeDetails> getStaticTemplateTypeDetails(GwtType type, String moduleName);
 
 	String buildUiXml(String templateContents, String destFile, List<MethodMetadata> proxyMethods);
 }
