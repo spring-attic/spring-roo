@@ -39,11 +39,11 @@ import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
+import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.Plugin;
-import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
@@ -78,7 +78,7 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 	@Reference private WebMetadataService webMetadataService;
 	
 	public boolean isSeleniumInstallationPossible() {
-		return projectOperations.isFocusedProjectAvailable() && fileManager.exists(pathResolver.getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/web.xml"));
+		return projectOperations.isFocusedProjectAvailable() && projectOperations.isFeatureInstalled(FeatureNames.MVC);
 	}
 
 	/**
@@ -89,8 +89,10 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 	 */
 	public void generateTest(final JavaType controller, String name, String serverURL) {
 		Assert.notNull(controller, "Controller type required");
+
 		ClassOrInterfaceTypeDetails controllerTypeDetails = typeLocationService.getTypeDetails(controller);
 		Assert.notNull(controllerTypeDetails, "Class or interface type details for type '" + controller + "' could not be resolved");
+
 		LogicalPath path = PhysicalTypeIdentifier.getPath(controllerTypeDetails.getDeclaredByMetadataId());
 		String webScaffoldMetadataIdentifier = WebScaffoldMetadata.createIdentifier(controller, path);
 		WebScaffoldMetadata webScaffoldMetadata = (WebScaffoldMetadata) metadataService.get(webScaffoldMetadataIdentifier);
@@ -107,7 +109,6 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 		}
 
 		JavaType formBackingType = webScaffoldMetadata.getAnnotationValues().getFormBackingObject();
-
 		String relativeTestFilePath = "selenium/test-" + formBackingType.getSimpleTypeName().toLowerCase() + ".xhtml";
 		String seleniumPath = pathResolver.getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, relativeTestFilePath);
 
@@ -134,9 +135,11 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 
 		// Add composite PK identifier fields if needed
 		for (FieldMetadata field : persistenceMemberLocator.getEmbeddedIdentifierFields(formBackingType)) {
-			if (!field.getFieldType().isCommonCollectionType() && !isSpecialType(field.getFieldType())) {
+			final JavaType fieldType = field.getFieldType();
+			if (!fieldType.isCommonCollectionType() && !isSpecialType(fieldType)) {
 				FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(field);
-				fieldBuilder.setFieldName(new JavaSymbolName(field.getFieldName().getSymbolName() + "." + field.getFieldName().getSymbolName()));
+				final String fieldName = field.getFieldName().getSymbolName();
+				fieldBuilder.setFieldName(new JavaSymbolName(fieldName + "." + fieldName));
 				tbody.appendChild(typeCommand(document, fieldBuilder.build()));
 			}
 		}
@@ -144,7 +147,8 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 		// Add all other fields
 		List<FieldMetadata> fields = webMetadataService.getScaffoldEligibleFieldMetadata(formBackingType, memberDetails, null);
 		for (FieldMetadata field : fields) {
-			if (!field.getFieldType().isCommonCollectionType() && !isSpecialType(field.getFieldType())) {
+			final JavaType fieldType = field.getFieldType();
+			if (!fieldType.isCommonCollectionType() && !isSpecialType(fieldType)) {
 				tbody.appendChild(typeCommand(document, field));
 			}
 		}
@@ -153,7 +157,8 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 
 		// Add verifications for all other fields
 		for (FieldMetadata field : fields) {
-			if (!field.getFieldType().isCommonCollectionType() && !isSpecialType(field.getFieldType())) {
+			final JavaType fieldType = field.getFieldType();
+			if (!fieldType.isCommonCollectionType() && !isSpecialType(fieldType)) {
 				tbody.appendChild(verifyTextCommand(document, formBackingType, field));
 			}
 		}
@@ -170,18 +175,15 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 		String relativeTestFilePath = "selenium/test-suite.xhtml";
 		String seleniumPath = pathResolver.getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, relativeTestFilePath);
 
-		final InputStream in;
+		final InputStream inputStream;
 		if (fileManager.exists(seleniumPath)) {
-			in = fileManager.getInputStream(seleniumPath);
+			inputStream = fileManager.getInputStream(seleniumPath);
 		} else {
-			in = FileUtils.getInputStream(getClass(), "selenium-test-suite-template.xhtml");
-			Assert.notNull(in, "Could not acquire selenium test suite template");
+			inputStream = FileUtils.getInputStream(getClass(), "selenium-test-suite-template.xhtml");
+			Assert.notNull(inputStream, "Could not acquire selenium test suite template");
 		}
-		final Document suite = XmlUtils.readXml(in);
 
-		ProjectMetadata projectMetadata = projectOperations.getProjectMetadata(projectOperations.getFocusedModuleName());
-		Assert.notNull(projectMetadata, "Unable to obtain project metadata");
-
+		final Document suite = XmlUtils.readXml(inputStream);
 		Element root = (Element) suite.getLastChild();
 
 		XmlUtils.findRequiredElement("/html/head/title", root).setTextContent("Test suite for " + projectOperations.getProjectName(projectOperations.getFocusedModuleName()) + "project");
@@ -263,6 +265,21 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 		return tr;
 	}
 
+	private Node openCommand(final Document document, final String linkTarget) {
+		Node tr = document.createElement("tr");
+
+		Node td1 = tr.appendChild(document.createElement("td"));
+		td1.setTextContent("open");
+
+		Node td2 = tr.appendChild(document.createElement("td"));
+		td2.setTextContent(linkTarget + (linkTarget.contains("?") ? "&" : "?") + "lang=" + Locale.getDefault());
+
+		Node td3 = tr.appendChild(document.createElement("td"));
+		td3.setTextContent(" ");
+
+		return tr;
+	}
+
 	private String convertToInitializer(final FieldMetadata field) {
 		String initializer = " ";
 		short index = 1;
@@ -327,24 +344,7 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 		return initializer;
 	}
 
-	private Node openCommand(final Document document, final String linkTarget) {
-		Node tr = document.createElement("tr");
-
-		Node td1 = tr.appendChild(document.createElement("td"));
-		td1.setTextContent("open");
-
-		Node td2 = tr.appendChild(document.createElement("td"));
-		td2.setTextContent(linkTarget + (linkTarget.contains("?") ? "&" : "?") + "lang=" + Locale.getDefault());
-
-		Node td3 = tr.appendChild(document.createElement("td"));
-		td3.setTextContent(" ");
-
-		return tr;
-	}
-
 	private boolean isSpecialType(final JavaType javaType) {
-		String physicalTypeIdentifier = typeLocationService.getPhysicalTypeIdentifier(javaType);
-		// We are only interested if the type is part of our application and if no editor exists for it already
-		return physicalTypeIdentifier == null || metadataService.get(physicalTypeIdentifier) != null;
+		return typeLocationService.isInProject(javaType);
 	}
 }
