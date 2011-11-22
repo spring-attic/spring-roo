@@ -300,8 +300,7 @@ public class JavaTypeConverter implements Converter<JavaType> {
 
 		for (String moduleName : projectOperations.getModuleNames()) {
 			if (!moduleName.equals(focusedModuleName)) {
-				Completion completion = new Completion(moduleName + MODULE_PATH_SEPARATOR, AnsiEscapeCode.decorate(moduleName + MODULE_PATH_SEPARATOR, AnsiEscapeCode.FG_CYAN), "Modules", 0);
-				completions.add(completion);
+				completions.add(new Completion(moduleName + MODULE_PATH_SEPARATOR, AnsiEscapeCode.decorate(moduleName + MODULE_PATH_SEPARATOR, AnsiEscapeCode.FG_CYAN), "Modules", 0));
 			}
 		}
 

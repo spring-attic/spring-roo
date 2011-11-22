@@ -32,7 +32,7 @@ public class JLineCompletorAdapter implements Completor {
 		try {
 			JLineLogHandler.cancelRedrawProhibition();
 			List<Completion> completions = new ArrayList<Completion>();
-			result = simpleParser.complete(buffer, cursor, completions);
+			result = simpleParser.completeAdvanced(buffer, cursor, completions);
 			for (Completion completion : completions) {
 				candidates.add(new jline.Completion(completion.getValue(), completion.getFormattedValue(), completion.getHeading()));
 			}

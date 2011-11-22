@@ -392,7 +392,16 @@ public class SimpleParser implements Parser {
 		return null; // Not a match
 	}
 
-	public int complete(String buffer, int cursor, final List<Completion> candidates) {
+	public int complete(String buffer, int cursor, final List<String> candidates) {
+		List<Completion> completions = new ArrayList<Completion>();
+		int result = completeAdvanced(buffer, cursor, completions);
+		for (final Completion completion : completions) {
+			candidates.add(completion.getValue());
+		}
+		return result;
+	}
+
+	public int completeAdvanced(String buffer, int cursor, final List<Completion> candidates) {
 		synchronized (mutex) {
 			Assert.notNull(buffer, "Buffer required");
 			Assert.notNull(candidates, "Candidates list required");
