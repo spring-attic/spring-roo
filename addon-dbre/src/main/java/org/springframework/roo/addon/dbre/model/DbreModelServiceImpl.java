@@ -82,7 +82,6 @@ public class DbreModelServiceImpl implements DbreModelService {
 			for (Database database : cachedIntrospections) {
 				if (database.equals(lastDatabase)) {
 					return lastDatabase;
-
 				}
 			}
 		}
