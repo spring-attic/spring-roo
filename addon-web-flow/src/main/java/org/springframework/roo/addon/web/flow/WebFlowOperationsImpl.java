@@ -49,7 +49,7 @@ public class WebFlowOperationsImpl implements WebFlowOperations {
 	@Reference private WebMvcOperations webMvcOperations;
 
 	public boolean isWebFlowInstallationPossible() {
-		return isWebFlowInstallationPossible() && projectOperations.isFeatureInstalledInFocusedModule(FeatureNames.MVC) && !projectOperations.isFeatureInstalledInFocusedModule(FeatureNames.JSF);
+		return projectOperations.isFeatureInstalledInFocusedModule(FeatureNames.MVC) && !projectOperations.isFeatureInstalledInFocusedModule(FeatureNames.JSF);
 	}
 
 	/**
@@ -123,20 +123,21 @@ public class WebFlowOperationsImpl implements WebFlowOperations {
 
 	private void updateConfiguration() {
 		Element configuration = XmlUtils.getConfiguration(getClass());
+		final String focusedModuleName = projectOperations.getFocusedModuleName();
 
-		List<Dependency> dependencies = new ArrayList<Dependency>();
-		List<Element> webFlowDependencies = XmlUtils.findElements("/configuration/springWebFlow/dependencies/dependency", configuration);
-		for (Element d : webFlowDependencies) {
-			dependencies.add(new Dependency(d));
+		final List<Dependency> dependencyElements = new ArrayList<Dependency>();
+		for (final Element webFlowDependencyElement : XmlUtils.findElements("/configuration/springWebFlow/dependencies/dependency", configuration)) {
+			dependencyElements.add(new Dependency(webFlowDependencyElement));
 		}
+		projectOperations.addDependencies(focusedModuleName, dependencyElements);
 
-		projectOperations.addDependencies(projectOperations.getFocusedModuleName(), dependencies);
-		
-		List<Element> repositoriesElement = XmlUtils.findElements("/configuration/springWebFlow/repositories/repository", configuration);
-		for (Element repositoryElement : repositoriesElement) {
-			projectOperations.addRepository(projectOperations.getFocusedModuleName(), new Repository(repositoryElement));
+		final List<Repository> repositoryElements = new ArrayList<Repository>();
+		for (final Element repositoryElement : XmlUtils.findElements("/configuration/springWebFlow/repositories/repository", configuration)) {
+			repositoryElements.add(new Repository(repositoryElement));
 		}
-		projectOperations.updateProjectType(projectOperations.getFocusedModuleName(), ProjectType.WAR);
+		projectOperations.addRepositories(focusedModuleName, repositoryElements);
+
+		projectOperations.updateProjectType(focusedModuleName, ProjectType.WAR);
 	}
 
 	private String getFlowId(String flowName) {
