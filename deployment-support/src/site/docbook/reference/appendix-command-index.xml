@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <appendix xmlns="http://docbook.org/ns/docbook" version="5.0" xml:id="command-index">
     <title>Command Index</title>
-    <para>This appendix was automatically built from Roo 1.2.0.M1 [rev 1fa252f].</para>
+    <para>This appendix was automatically built from Roo 1.2.0.RC1 [rev c82bf58].</para>
     <para>Commands are listed in alphabetic order, and are shown in monospaced font with any mandatory options you must specify when using the command. Most commands accept a large number of options, and all of the possible options for each command are presented in this appendix.</para>
     <section xml:id="command-index-add-on-commands">
         <title>Add On Commands</title>
@@ -286,7 +286,7 @@
                 <varlistentry>
                     <term>--path</term>
                     <listitem>
-                        <para>Source directory to create the class in; default: 'SRC_MAIN_JAVA'</para>
+                        <para>Source directory to create the class in; default: 'FOCUSED|SRC_MAIN_JAVA'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -348,7 +348,7 @@
                 <varlistentry>
                     <term>--path</term>
                     <listitem>
-                        <para>Source directory to create the enum in; default: 'SRC_MAIN_JAVA'</para>
+                        <para>Source directory to create the enum in; default: 'FOCUSED|SRC_MAIN_JAVA'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -386,7 +386,7 @@
                 <varlistentry>
                     <term>--path</term>
                     <listitem>
-                        <para>Source directory to create the interface in; default: 'SRC_MAIN_JAVA'</para>
+                        <para>Source directory to create the interface in; default: 'FOCUSED|SRC_MAIN_JAVA'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -959,163 +959,30 @@
             </variablelist>
         </section>
     </section>
-    <section xml:id="command-index-entity-commands">
-        <title>Entity Commands</title>
-        <para>Entity Commands are contained in org.springframework.roo.addon.entity.EntityCommands.</para>
-        <section xml:id="command-index-embeddable">
-            <title>embeddable</title>
-            <para>Creates a new Java class source file with the JPA @Embeddable annotation in SRC_MAIN_JAVA</para>
-            <programlisting><![CDATA[embeddable --class]]></programlisting>
+    <section xml:id="command-index-equals-commands">
+        <title>Equals Commands</title>
+        <para>Equals Commands are contained in org.springframework.roo.addon.equals.EqualsCommands.</para>
+        <section xml:id="command-index-equals">
+            <title>equals</title>
+            <para>Add equals and hashCode methods to a class</para>
+            <programlisting><![CDATA[equals]]></programlisting>
             <variablelist>
                 <varlistentry>
                     <term>--class</term>
                     <listitem>
-                        <para>The name of the class to create; no default value (mandatory) </para>
+                        <para>The name of the class; default if option not present: '*'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
-                    <term>--serializable</term>
+                    <term>--appendSuper</term>
                     <listitem>
-                        <para>Whether the generated class should implement java.io.Serializable; default if option present: 'true'; default if option not present: 'false'</para>
+                        <para>Whether to call the super class equals and hashCode methods; default if option present: 'true'; default if option not present: 'false'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
-                    <term>--permitReservedWords</term>
+                    <term>--excludeFields</term>
                     <listitem>
-                        <para>Indicates whether reserved words are ignored by Roo; default if option present: 'true'; default if option not present: 'false'</para>
-                    </listitem>
-                </varlistentry>
-            </variablelist>
-        </section>
-        <section xml:id="command-index-entity">
-            <title>entity</title>
-            <para>Creates a new JPA persistent entity in SRC_MAIN_JAVA</para>
-            <programlisting><![CDATA[entity --class]]></programlisting>
-            <variablelist>
-                <varlistentry>
-                    <term>--class</term>
-                    <listitem>
-                        <para>Name of the entity to create; no default value (mandatory) </para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term>--extends</term>
-                    <listitem>
-                        <para>The superclass (defaults to java.lang.Object); default if option not present: 'java.lang.Object'</para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term>--abstract</term>
-                    <listitem>
-                        <para>Whether the generated class should be marked as abstract; default if option present: 'true'; default if option not present: 'false'</para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term>--testAutomatically</term>
-                    <listitem>
-                        <para>Create automatic integration tests for this entity; default if option present: 'true'; default if option not present: 'false'</para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term>--table</term>
-                    <listitem>
-                        <para>The JPA table name to use for this entity; no default value</para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term>--schema</term>
-                    <listitem>
-                        <para>The JPA table schema name to use for this entity; no default value</para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term>--catalog</term>
-                    <listitem>
-                        <para>The JPA table catalog name to use for this entity; no default value</para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term>--identifierField</term>
-                    <listitem>
-                        <para>The JPA identifier field name to use for this entity; no default value</para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term>--identifierColumn</term>
-                    <listitem>
-                        <para>The JPA identifier field column to use for this entity; no default value</para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term>--identifierType</term>
-                    <listitem>
-                        <para>The data type that will be used for the JPA identifier field (defaults to java.lang.Long); default: 'java.lang.Long'</para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term>--versionField</term>
-                    <listitem>
-                        <para>The JPA version field name to use for this entity; no default value</para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term>--versionColumn</term>
-                    <listitem>
-                        <para>The JPA version field column to use for this entity; no default value</para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term>--versionType</term>
-                    <listitem>
-                        <para>The data type that will be used for the JPA version field (defaults to java.lang.Integer); default if option not present: 'java.lang.Integer'</para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term>--inheritanceType</term>
-                    <listitem>
-                        <para>The JPA @Inheritance value; no default value</para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term>--mappedSuperclass</term>
-                    <listitem>
-                        <para>Apply @MappedSuperclass for this entity; default if option present: 'true'; default if option not present: 'false'</para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term>--serializable</term>
-                    <listitem>
-                        <para>Whether the generated class should implement java.io.Serializable; default if option present: 'true'; default if option not present: 'false'</para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term>--persistenceUnit</term>
-                    <listitem>
-                        <para>The persistence unit name to be used in the persistence.xml file; no default value</para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term>--transactionManager</term>
-                    <listitem>
-                        <para>The transaction manager name; no default value</para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term>--permitReservedWords</term>
-                    <listitem>
-                        <para>Indicates whether reserved words are ignored by Roo; default if option present: 'true'; default if option not present: 'false'</para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term>--entityName</term>
-                    <listitem>
-                        <para>The name used to refer to the entity in queries; no default value</para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term>--activeRecord</term>
-                    <listitem>
-                        <para>Generate CRUD active record methods for this entity; default: 'true'</para>
+                        <para>The fields to exclude in the equals and hashcode methods. Multiple field names must be a double-quoted list separated by spaces</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -1457,25 +1324,25 @@
                 <varlistentry>
                     <term>--notNull</term>
                     <listitem>
-                        <para>Whether this value cannot be null; default if option present: 'true'</para>
+                        <para>Whether this value cannot be null; default if option present: 'true'; default if option not present: 'false'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--nullRequired</term>
                     <listitem>
-                        <para>Whether this value must be null; default if option present: 'true'</para>
+                        <para>Whether this value must be null; default if option present: 'true'; default if option not present: 'false'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--assertFalse</term>
                     <listitem>
-                        <para>Whether this value must assert false; default if option present: 'true'</para>
+                        <para>Whether this value must assert false; default if option present: 'true'; default if option not present: 'false'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--assertTrue</term>
                     <listitem>
-                        <para>Whether this value must assert true; default if option present: 'true'</para>
+                        <para>Whether this value must assert true; default if option present: 'true'; default if option not present: 'false'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -1548,25 +1415,25 @@
                 <varlistentry>
                     <term>--notNull</term>
                     <listitem>
-                        <para>Whether this value cannot be null; default if option present: 'true'</para>
+                        <para>Whether this value cannot be null; default if option present: 'true'; default if option not present: 'false'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--nullRequired</term>
                     <listitem>
-                        <para>Whether this value must be null; default if option present: 'true'</para>
+                        <para>Whether this value must be null; default if option present: 'true'; default if option not present: 'false'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--future</term>
                     <listitem>
-                        <para>Whether this value must be in the future; default if option present: 'true'</para>
+                        <para>Whether this value must be in the future; default if option present: 'true'; default if option not present: 'false'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--past</term>
                     <listitem>
-                        <para>Whether this value must be in the past; default if option present: 'true'</para>
+                        <para>Whether this value must be in the past; default if option present: 'true'; default if option not present: 'false'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -1682,13 +1549,13 @@
                 <varlistentry>
                     <term>--notNull</term>
                     <listitem>
-                        <para>Whether this value cannot be null; default if option present: 'true'</para>
+                        <para>Whether this value cannot be null; default if option present: 'true'; default if option not present: 'false'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--nullRequired</term>
                     <listitem>
-                        <para>Whether this value must be null; default if option present: 'true'</para>
+                        <para>Whether this value must be null; default if option present: 'true'; default if option not present: 'false'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -1707,6 +1574,55 @@
                     <term>--transient</term>
                     <listitem>
                         <para>Indicates to mark the field as transient; default if option present: 'true'; default if option not present: 'false'</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--permitReservedWords</term>
+                    <listitem>
+                        <para>Indicates whether reserved words are ignored by Roo; default if option present: 'true'; default if option not present: 'false'</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-field-file">
+            <title>field file</title>
+            <para>Adds a byte array field for storing uploaded file contents (JSF-scaffolded UIs only)</para>
+            <programlisting><![CDATA[field file --fieldName --contentType]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--fieldName</term>
+                    <listitem>
+                        <para>The name of the file upload field to add; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--class</term>
+                    <listitem>
+                        <para>The name of the class to receive this field; default if option not present: '*'</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--contentType</term>
+                    <listitem>
+                        <para>The content type of the file; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--autoUpload</term>
+                    <listitem>
+                        <para>Whether the file is uploaded automatically when selected; default if option present: 'true'; default if option not present: 'false'</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--column</term>
+                    <listitem>
+                        <para>The JPA @Column name; no default value</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--notNull</term>
+                    <listitem>
+                        <para>Whether this value cannot be null; default if option present: 'true'; default if option not present: 'false'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -1743,13 +1659,13 @@
                 <varlistentry>
                     <term>--notNull</term>
                     <listitem>
-                        <para>Whether this value cannot be null; default if option present: 'true'</para>
+                        <para>Whether this value cannot be null; default if option present: 'true'; default if option not present: 'false'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--nullRequired</term>
                     <listitem>
-                        <para>Whether this value must be null; default if option present: 'true'</para>
+                        <para>Whether this value must be null; default if option present: 'true'; default if option not present: 'false'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -1858,13 +1774,13 @@
                 <varlistentry>
                     <term>--notNull</term>
                     <listitem>
-                        <para>Whether this value cannot be null; default if option present: 'true'</para>
+                        <para>Whether this value cannot be null; default if option present: 'true'; default if option not present: 'false'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--nullRequired</term>
                     <listitem>
-                        <para>Whether this value must be null; default if option present: 'true'</para>
+                        <para>Whether this value must be null; default if option present: 'true'; default if option not present: 'false'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -1925,13 +1841,13 @@
                 <varlistentry>
                     <term>--notNull</term>
                     <listitem>
-                        <para>Whether this value cannot be null; default if option present: 'true'</para>
+                        <para>Whether this value cannot be null; default if option present: 'true'; default if option not present: 'false'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--nullRequired</term>
                     <listitem>
-                        <para>Whether this value must be null; default if option present: 'true'</para>
+                        <para>Whether this value must be null; default if option present: 'true'; default if option not present: 'false'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -2010,13 +1926,13 @@
                 <varlistentry>
                     <term>--notNull</term>
                     <listitem>
-                        <para>Whether this value cannot be null; default if option present: 'true'</para>
+                        <para>Whether this value cannot be null; default if option present: 'true'; default if option not present: 'false'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--nullRequired</term>
                     <listitem>
-                        <para>Whether this value must be null; default if option present: 'true'</para>
+                        <para>Whether this value must be null; default if option present: 'true'; default if option not present: 'false'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -2083,13 +1999,13 @@
                 <varlistentry>
                     <term>--notNull</term>
                     <listitem>
-                        <para>Whether this value cannot be null; default if option present: 'true'</para>
+                        <para>Whether this value cannot be null; default if option present: 'true'; default if option not present: 'false'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--nullRequired</term>
                     <listitem>
-                        <para>Whether this value must be null; default if option present: 'true'</para>
+                        <para>Whether this value must be null; default if option present: 'true'; default if option not present: 'false'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -2532,13 +2448,13 @@
         <para>Jms Commands are contained in org.springframework.roo.addon.jms.JmsCommands.</para>
         <section xml:id="command-index-field-jms-template">
             <title>field jms template</title>
-            <para>insert a JmsTemplate field into an existing type</para>
+            <para>Insert a JmsOperations field into an existing type</para>
             <programlisting><![CDATA[field jms template]]></programlisting>
             <variablelist>
                 <varlistentry>
                     <term>--fieldName</term>
                     <listitem>
-                        <para>The name of the field to add; default: 'jmsTemplate'</para>
+                        <para>The name of the field to add; default: 'jmsOperations'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -2557,7 +2473,7 @@
         </section>
         <section xml:id="command-index-jms-listener-class">
             <title>jms listener class</title>
-            <para>Create a new class which is a asynchronous JMS consumer</para>
+            <para>Create an asynchronous JMS consumer</para>
             <programlisting><![CDATA[jms listener class --class]]></programlisting>
             <variablelist>
                 <varlistentry>
@@ -2582,7 +2498,7 @@
         </section>
         <section xml:id="command-index-jms-setup">
             <title>jms setup</title>
-            <para>Install a JMS provider in your project</para>
+            <para>Install a JMS provider into your project</para>
             <programlisting><![CDATA[jms setup --provider]]></programlisting>
             <variablelist>
                 <varlistentry>
@@ -2643,6 +2559,170 @@
                     <term>--value</term>
                     <listitem>
                         <para>The new vale for this property key; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-embeddable">
+            <title>embeddable</title>
+            <para>Creates a new Java class source file with the JPA @Embeddable annotation in SRC_MAIN_JAVA</para>
+            <programlisting><![CDATA[embeddable --class]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--class</term>
+                    <listitem>
+                        <para>The name of the class to create; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--serializable</term>
+                    <listitem>
+                        <para>Whether the generated class should implement java.io.Serializable; default if option present: 'true'; default if option not present: 'false'</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--permitReservedWords</term>
+                    <listitem>
+                        <para>Indicates whether reserved words are ignored by Roo; default if option present: 'true'; default if option not present: 'false'</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-entity-jpa">
+            <title>entity jpa</title>
+            <para>Creates a new JPA persistent entity in SRC_MAIN_JAVA</para>
+            <programlisting><![CDATA[entity jpa --class]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--class</term>
+                    <listitem>
+                        <para>Name of the entity to create; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--extends</term>
+                    <listitem>
+                        <para>The superclass (defaults to java.lang.Object); default if option not present: 'java.lang.Object'</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--abstract</term>
+                    <listitem>
+                        <para>Whether the generated class should be marked as abstract; default if option present: 'true'; default if option not present: 'false'</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--testAutomatically</term>
+                    <listitem>
+                        <para>Create automatic integration tests for this entity; default if option present: 'true'; default if option not present: 'false'</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--table</term>
+                    <listitem>
+                        <para>The JPA table name to use for this entity; no default value</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--schema</term>
+                    <listitem>
+                        <para>The JPA table schema name to use for this entity; no default value</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--catalog</term>
+                    <listitem>
+                        <para>The JPA table catalog name to use for this entity; no default value</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--identifierField</term>
+                    <listitem>
+                        <para>The JPA identifier field name to use for this entity; no default value</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--identifierColumn</term>
+                    <listitem>
+                        <para>The JPA identifier field column to use for this entity; no default value</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--identifierType</term>
+                    <listitem>
+                        <para>The data type that will be used for the JPA identifier field (defaults to java.lang.Long); default: 'java.lang.Long'</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--versionField</term>
+                    <listitem>
+                        <para>The JPA version field name to use for this entity; no default value</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--versionColumn</term>
+                    <listitem>
+                        <para>The JPA version field column to use for this entity; no default value</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--versionType</term>
+                    <listitem>
+                        <para>The data type that will be used for the JPA version field (defaults to java.lang.Integer); default if option not present: 'java.lang.Integer'</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--inheritanceType</term>
+                    <listitem>
+                        <para>The JPA @Inheritance value (apply to base class); no default value</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--mappedSuperclass</term>
+                    <listitem>
+                        <para>Apply @MappedSuperclass for this entity; default if option present: 'true'; default if option not present: 'false'</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--equals</term>
+                    <listitem>
+                        <para>Whether the generated class should implement equals and hashCode methods; default if option present: 'true'; default if option not present: 'false'</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--serializable</term>
+                    <listitem>
+                        <para>Whether the generated class should implement java.io.Serializable; default if option present: 'true'; default if option not present: 'false'</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--persistenceUnit</term>
+                    <listitem>
+                        <para>The persistence unit name to be used in the persistence.xml file; no default value</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--transactionManager</term>
+                    <listitem>
+                        <para>The transaction manager name; no default value</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--permitReservedWords</term>
+                    <listitem>
+                        <para>Indicates whether reserved words are ignored by Roo; default if option present: 'true'; default if option not present: 'false'</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--entityName</term>
+                    <listitem>
+                        <para>The name used to refer to the entity in queries; no default value</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--activeRecord</term>
+                    <listitem>
+                        <para>Generate CRUD active record methods for this entity; default: 'true'</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -2777,6 +2857,98 @@
                     <term>--persistenceUnit</term>
                     <listitem>
                         <para>The persistence unit name to be used in the persistence.xml file; no default value</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+    </section>
+    <section xml:id="command-index-jsf-commands">
+        <title>Jsf Commands</title>
+        <para>Jsf Commands are contained in org.springframework.roo.addon.jsf.JsfCommands.</para>
+        <section xml:id="command-index-web-jsf-all">
+            <title>web jsf all</title>
+            <para>Create JSF managed beans for all entities</para>
+            <programlisting><![CDATA[web jsf all --package]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--package</term>
+                    <listitem>
+                        <para>The package in which new JSF managed beans will be placed; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-web-jsf-media">
+            <title>web jsf media</title>
+            <para>Add a cross-browser generic player to embed multimedia content</para>
+            <programlisting><![CDATA[web jsf media --url]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--url</term>
+                    <listitem>
+                        <para>The url of the media source; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--player</term>
+                    <listitem>
+                        <para>The name of the media player; no default value</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-web-jsf-scaffold">
+            <title>web jsf scaffold</title>
+            <para>Create JSF managed bean for an entity</para>
+            <programlisting><![CDATA[web jsf scaffold --class]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--class</term>
+                    <listitem>
+                        <para>The path and name of the JSF managed bean to be created; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--entity</term>
+                    <listitem>
+                        <para>The entity which this JSF managed bean class will create and modify as required; default if option not present: '*'</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--beanName</term>
+                    <listitem>
+                        <para>The name of the managed bean to use in the 'name' attribute of the @ManagedBean annotation; no default value</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--includeOnMenu</term>
+                    <listitem>
+                        <para>Include this entity on the generated JSF menu; default: 'true'</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--createConverter</term>
+                    <listitem>
+                        <para>Create JSF converter for the entity; default: 'true'</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-web-jsf-setup">
+            <title>web jsf setup</title>
+            <para>Set up JSF environment</para>
+            <programlisting><![CDATA[web jsf setup]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--implementation</term>
+                    <listitem>
+                        <para>The JSF implementation to use; no default value</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--theme</term>
+                    <listitem>
+                        <para>The name of the theme; no default value</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -3146,6 +3318,100 @@
                 </varlistentry>
             </variablelist>
         </section>
+        <section xml:id="command-index-maven-repository-add">
+            <title>maven repository add</title>
+            <para>Adds a new repository to the Maven project object model (POM)</para>
+            <programlisting><![CDATA[maven repository add --id --url]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--id</term>
+                    <listitem>
+                        <para>The ID of the repository; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--name</term>
+                    <listitem>
+                        <para>The name of the repository; no default value</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--url</term>
+                    <listitem>
+                        <para>The URL of the repository; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-maven-repository-remove">
+            <title>maven repository remove</title>
+            <para>Removes an existing repository from the Maven project object model (POM)</para>
+            <programlisting><![CDATA[maven repository remove --id --url]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--id</term>
+                    <listitem>
+                        <para>The ID of the repository; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--url</term>
+                    <listitem>
+                        <para>The URL of the repository; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-module-create">
+            <title>module create</title>
+            <para>Creates a new Maven module</para>
+            <programlisting><![CDATA[module create --moduleName --topLevelPackage]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--moduleName</term>
+                    <listitem>
+                        <para>The name of the module; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--topLevelPackage</term>
+                    <listitem>
+                        <para>The uppermost package name (this becomes the &lt;groupId&gt; in Maven and also the '~' value when using Roo's shell); no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--java</term>
+                    <listitem>
+                        <para>Forces a particular major version of Java to be used (will be auto-detected if unspecified; specify 5 or 6 or 7 only); no default value</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--parent</term>
+                    <listitem>
+                        <para>The Maven coordinates of the parent POM, in the form "groupId:artifactId:version"; no default value</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--packaging</term>
+                    <listitem>
+                        <para>The Maven packaging of this module; default if option not present: 'jar'</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-module-focus">
+            <title>module focus</title>
+            <para>Changes focus to a different project module</para>
+            <programlisting><![CDATA[module focus --moduleName]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--moduleName</term>
+                    <listitem>
+                        <para>The module to focus on; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
         <section xml:id="command-index-perform-assembly">
             <title>perform assembly</title>
             <para>Executes the assembly goal via Maven</para>
@@ -3212,6 +3478,18 @@
                         <para>Forces a particular major version of Java to be used (will be auto-detected if unspecified; specify 5 or 6 or 7 only); no default value</para>
                     </listitem>
                 </varlistentry>
+                <varlistentry>
+                    <term>--parent</term>
+                    <listitem>
+                        <para>The Maven coordinates of the parent POM, in the form "groupId:artifactId:version"; no default value</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--packaging</term>
+                    <listitem>
+                        <para>The Maven packaging of this project; default if option not present: 'jar'</para>
+                    </listitem>
+                </varlistentry>
             </variablelist>
         </section>
     </section>
@@ -3244,6 +3522,19 @@
                 </varlistentry>
             </variablelist>
         </section>
+        <section xml:id="command-index-metadata-for-module">
+            <title>metadata for module</title>
+            <para>Shows the ProjectMetadata for the indicated project module</para>
+            <programlisting><![CDATA[metadata for module]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--module</term>
+                    <listitem>
+                        <para>The module for which to retrieve the metadata (defaults to the focused module); no default value</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
         <section xml:id="command-index-metadata-for-type">
             <title>metadata for type</title>
             <para>Shows detailed metadata for the indicated type</para>
@@ -3252,7 +3543,7 @@
                 <varlistentry>
                     <term>--type</term>
                     <listitem>
-                        <para>The Java type name to display metadata for; no default value (mandatory) </para>
+                        <para>The Java type for which to display metadata; no default value (mandatory) </para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -3350,19 +3641,13 @@
         </section>
         <section xml:id="command-index-repository-mongo">
             <title>repository mongo</title>
-            <para>Adds @RooRepositoryMongo annotation to target type</para>
+            <para>Adds @RooMongoRepository annotation to target type</para>
             <programlisting><![CDATA[repository mongo --interface]]></programlisting>
             <variablelist>
                 <varlistentry>
                     <term>--interface</term>
                     <listitem>
                         <para>The java interface to apply this annotation to; no default value (mandatory) </para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term>--class</term>
-                    <listitem>
-                        <para>Implementation class for the specified interface; no default value</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -3611,19 +3896,13 @@
         <para>Repository Jpa Commands are contained in org.springframework.roo.addon.layers.repository.jpa.RepositoryJpaCommands.</para>
         <section xml:id="command-index-repository-jpa">
             <title>repository jpa</title>
-            <para>Adds @RooRepositoryJpa annotation to target type</para>
+            <para>Adds @RooJpaRepository annotation to target type</para>
             <programlisting><![CDATA[repository jpa --interface]]></programlisting>
             <variablelist>
                 <varlistentry>
                     <term>--interface</term>
                     <listitem>
                         <para>The java interface to apply this annotation to; no default value (mandatory) </para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term>--class</term>
-                    <listitem>
-                        <para>Implementation class for the specified interface; no default value</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -3756,7 +4035,7 @@
                 <varlistentry>
                     <term>--searchServerUrl</term>
                     <listitem>
-                        <para>The Url of the Solr search server; default: 'http://localhost:8983/solr'</para>
+                        <para>The URL of the Solr search server; default: 'http://localhost:8983/solr'</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
