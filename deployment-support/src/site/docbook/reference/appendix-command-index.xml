@@ -3737,20 +3737,20 @@
                 <varlistentry>
                     <term>--class</term>
                     <listitem>
-                        <para>The target type which is made searchable; default if option not present: '*'</para>
+                        <para>The type to be made searchable; default if option not present: '*'</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
         </section>
         <section xml:id="command-index-solr-all">
             <title>solr all</title>
-            <para>Make all elegible project types searchable</para>
+            <para>Make all eligible project types searchable</para>
             <programlisting><![CDATA[solr all]]></programlisting>
             <para>This command does not accept any options.</para>
         </section>
         <section xml:id="command-index-solr-setup">
             <title>solr setup</title>
-            <para>Install a support for Solr search integration</para>
+            <para>Install support for Solr search integration</para>
             <programlisting><![CDATA[solr setup]]></programlisting>
             <variablelist>
                 <varlistentry>
