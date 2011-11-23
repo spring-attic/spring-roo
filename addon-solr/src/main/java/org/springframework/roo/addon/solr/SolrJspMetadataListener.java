@@ -84,16 +84,15 @@ public class SolrJspMetadataListener implements MetadataProvider, MetadataNotifi
 			return null;
 		}
 
-
 		webScaffoldMetadata = (WebScaffoldMetadata) metadataService.get(WebScaffoldMetadata.createIdentifier(javaType, path));
 		Assert.notNull(webScaffoldMetadata, "Web scaffold metadata required");
 
 		formbackingObject = webScaffoldMetadata.getAnnotationValues().getFormBackingObject();
 		jpaActiveRecordMetadata = (JpaActiveRecordMetadata) metadataService.get(JpaActiveRecordMetadata.createIdentifier(formbackingObject, path));
 		Assert.notNull(jpaActiveRecordMetadata, "Could not determine entity metadata for type: " + javaType.getFullyQualifiedTypeName());
-		
+
 		installMvcArtifacts(webScaffoldMetadata);
-		
+
 		return new SolrJspMetadata(metadataIdentificationString, webSearchMetadata);
 	}
 	
@@ -134,7 +133,6 @@ public class SolrJspMetadataListener implements MetadataProvider, MetadataNotifi
 		StringBuilder facetFields = new StringBuilder();
 		int fieldCounter = 0;
 
-		
 		ClassOrInterfaceTypeDetails formbackingClassOrInterfaceDetails = typeLocationService.getTypeDetails(formbackingObject);
 		Assert.notNull(formbackingClassOrInterfaceDetails, "Unable to obtain physical type metadata for type " + formbackingObject.getFullyQualifiedTypeName());
 		MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(getClass().getName(), formbackingClassOrInterfaceDetails);

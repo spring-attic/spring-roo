@@ -143,6 +143,17 @@ public abstract class AbstractItdTypeDetailsProvidingMetadataItem extends Abstra
 	}
 
 	/**
+	 * Indicates whether the governor has a method with the given method name regardless of method parameters.
+	 * 
+	 * @param methodName the name of the method for which to search
+	 * @return see above
+	 * @since 1.2.0
+	 */
+	protected boolean governorHasMethodWithSameName(final JavaSymbolName methodName) {
+		return MemberFindingUtils.getDeclaredMethod(governorTypeDetails, methodName) != null;
+	}
+
+	/**
 	 * Returns the given method of the governor.
 	 *
 	 * @param methodName the name of the method for which to search

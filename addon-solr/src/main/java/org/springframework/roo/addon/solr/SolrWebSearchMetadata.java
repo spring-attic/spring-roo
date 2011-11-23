@@ -69,8 +69,9 @@ public class SolrWebSearchMetadata extends AbstractItdTypeDetailsProvidingMetada
 		Assert.notNull(targetObject, "Could not aquire form backing object for the '" + webScaffoldAnnotationValues.getGovernorTypeDetails().getName().getFullyQualifiedTypeName() + "' controller");
 
 		JavaSymbolName methodName = new JavaSymbolName(solrWebSearchAnnotationValues.getSearchMethod());
-		MethodMetadata method = methodExists(methodName);
-		if (method != null) return method;
+		if (governorHasMethodWithSameName(methodName)) {
+			return null;
+		}
 
 		List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
 		List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
@@ -110,16 +111,16 @@ public class SolrWebSearchMetadata extends AbstractItdTypeDetailsProvidingMetada
 		bodyBuilder.appendFormalLine("}");
 		bodyBuilder.appendFormalLine("return \"" + webScaffoldAnnotationValues.getPath() + "/search\";");
 
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.STRING, parameterTypes, parameterNames, bodyBuilder);
+		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.STRING, parameterTypes, parameterNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
 		return methodBuilder.build();
 	}
 
 	private MethodMetadata getAutocompleteMethod(final SolrWebSearchAnnotationValues solrWebSearchAnnotationValues, final SolrSearchAnnotationValues searchAnnotationValues, final WebScaffoldAnnotationValues webScaffoldAnnotationValues) {
 		JavaSymbolName methodName = new JavaSymbolName(solrWebSearchAnnotationValues.getAutoCompleteMethod());
-
-		MethodMetadata method = methodExists(methodName);
-		if (method != null) return method;
+		if (governorHasMethodWithSameName(methodName)) {
+			return null;
+		}
 
 		List<AnnotationAttributeValue<?>> reqMapAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 		reqMapAttributes.add(new StringAttributeValue(new JavaSymbolName("params"), "autocomplete"));
@@ -169,7 +170,7 @@ public class SolrWebSearchMetadata extends AbstractItdTypeDetailsProvidingMetada
 		bodyBuilder.appendFormalLine("dojo.append(\"]}\");");
 		bodyBuilder.appendFormalLine("return dojo.toString();");
 
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.STRING, parameterTypes, parameterNames, bodyBuilder);
+		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.STRING, parameterTypes, parameterNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
 		return methodBuilder.build();
 	}
@@ -181,18 +182,6 @@ public class SolrWebSearchMetadata extends AbstractItdTypeDetailsProvidingMetada
 		}
 		attributeValue.add(new StringAttributeValue(new JavaSymbolName("value"), paramName));
 		return new AnnotationMetadataBuilder(REQUEST_PARAM, attributeValue).build();
-	}
-
-	private MethodMetadata methodExists(final JavaSymbolName methodName) {
-		// We have no access to method parameter information, so we scan by name alone and treat any match as authoritative
-		// We do not scan the superclass, as the caller is expected to know we'll only scan the current class
-		for (MethodMetadata method : governorTypeDetails.getDeclaredMethods()) {
-			if (method.getMethodName().equals(methodName)) {
-				// Found a method of the expected name; we won't check method parameters though
-				return method;
-			}
-		}
-		return null;
 	}
 
 	@Override

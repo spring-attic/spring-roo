@@ -44,7 +44,6 @@ import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.customdata.tagkeys.MethodMetadataCustomDataKey;
 import org.springframework.roo.classpath.details.ConstructorMetadata;
 import org.springframework.roo.classpath.details.ConstructorMetadataBuilder;
-import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
@@ -211,7 +210,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 			return null;
 		}
 		final JavaSymbolName methodName = new JavaSymbolName("delete");
-		if (methodExists(methodName)) {
+		if (governorHasMethodWithSameName(methodName)) {
 			return null;
 		}
 
@@ -266,7 +265,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 	 */
 	private MethodMetadata getListMethod(final MemberTypeAdditions findAllAdditions, final MemberTypeAdditions countAllAdditions, final MemberTypeAdditions findEntriesAdditions) {
 		final JavaSymbolName methodName = new JavaSymbolName("list");
-		if (methodExists(methodName)) {
+		if (governorHasMethodWithSameName(methodName)) {
 			return null;
 		}
 
@@ -321,7 +320,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		}
 
 		final JavaSymbolName methodName = new JavaSymbolName("show");
-		if (methodExists(methodName)) {
+		if (governorHasMethodWithSameName(methodName)) {
 			return null;
 		}
 
@@ -359,7 +358,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		}
 
 		final JavaSymbolName methodName = new JavaSymbolName("create");
-		if (methodExists(methodName)) {
+		if (governorHasMethodWithSameName(methodName)) {
 			return null;
 		}
 
@@ -395,7 +394,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 
 	private MethodMetadata getCreateFormMethod(final List<JavaTypeMetadataDetails> dependentTypes) {
 		final JavaSymbolName methodName = new JavaSymbolName("createForm");
-		if (methodExists(methodName)) {
+		if (governorHasMethodWithSameName(methodName)) {
 			return null;
 		}
 
@@ -455,7 +454,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 			return null;
 		}
 		final JavaSymbolName methodName = new JavaSymbolName("update");
-		if (methodExists(methodName)) {
+		if (governorHasMethodWithSameName(methodName)) {
 			return null;
 		}
 
@@ -495,7 +494,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 			return null;
 		}
 		final JavaSymbolName methodName = new JavaSymbolName("updateForm");
-		if (methodExists(methodName)) {
+		if (governorHasMethodWithSameName(methodName)) {
 			return null;
 		}
 
@@ -545,8 +544,8 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 			}
 
 			final JavaSymbolName methodName = new JavaSymbolName("populate" + javaTypeMd.getPlural());
-			if (methodExists(methodName)) {
-				continue;
+			if (governorHasMethodWithSameName(methodName)) {
+				return null;
 			}
 
 			final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
@@ -565,7 +564,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 
 	private MethodMetadata getEncodeUrlPathSegmentMethod() {
 		final JavaSymbolName methodName = new JavaSymbolName("encodeUrlPathSegment");
-		if (methodExists(methodName)) {
+		if (governorHasMethodWithSameName(methodName)) {
 			return null;
 		}
 
@@ -593,7 +592,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 
 	private MethodMetadata getDateTimeFormatHelperMethod() {
 		final JavaSymbolName methodName = new JavaSymbolName("addDateTimeFormatPatterns");
-		if (methodExists(methodName)) {
+		if (governorHasMethodWithSameName(methodName)) {
 			return null;
 		}
 
@@ -615,10 +614,6 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		}
 
 		return new MethodMetadataBuilder(getId(), 0, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder).build();
-	}
-
-	private boolean methodExists(final JavaSymbolName methodName) {
-		return MemberFindingUtils.getDeclaredMethod(governorTypeDetails, methodName) != null;
 	}
 
 	@Override

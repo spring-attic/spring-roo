@@ -84,21 +84,22 @@ public class SolrMetadataProvider extends AbstractMemberDiscoveringItdMetadataPr
 		Map<MethodMetadata, FieldMetadata> accessorDetails = new LinkedHashMap<MethodMetadata, FieldMetadata>();
 		for (MethodMetadata method : memberDetails.getMethods()) {
 			if (BeanInfoUtils.isAccessorMethod(method) && !method.getMethodName().getSymbolName().startsWith("is")) {
-				FieldMetadata fieldMetadata = BeanInfoUtils.getFieldForJavaBeanMethod(memberDetails, method);
-				if (fieldMetadata != null) {
-					accessorDetails.put(method, fieldMetadata);
+				FieldMetadata field = BeanInfoUtils.getFieldForJavaBeanMethod(memberDetails, method);
+				if (field != null) {
+					accessorDetails.put(method, field);
 				}
 				// Track any changes to that method (eg it goes away)
 				metadataDependencyRegistry.registerDependency(method.getDeclaredByMetadataId(), metadataIdentificationString);
 			}
 		}
-		final MethodMetadata idAccessor = persistenceMemberLocator.getIdentifierAccessor(javaType);
-		if (idAccessor == null) {
+		final MethodMetadata identifierAccessor = persistenceMemberLocator.getIdentifierAccessor(javaType);
+		if (identifierAccessor == null) {
 			return null;
 		}
 		
 		final FieldMetadata versionField = persistenceMemberLocator.getVersionField(javaType);
-		return new SolrMetadata(metadataIdentificationString, aspectName, annotationValues, governorPhysicalTypeMetadata, idAccessor, versionField, accessorDetails, beanPlural);
+		
+		return new SolrMetadata(metadataIdentificationString, aspectName, annotationValues, governorPhysicalTypeMetadata, identifierAccessor, versionField, accessorDetails, beanPlural);
 	}
 
 	@Override
