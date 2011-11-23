@@ -1,5 +1,6 @@
 package org.springframework.roo.addon.dbre;
 
+import static org.springframework.roo.addon.dbre.model.DbreModelService.DBRE_XML;
 import static org.springframework.roo.model.JavaType.OBJECT;
 import static org.springframework.roo.model.RooJavaType.ROO_DB_MANAGED;
 import static org.springframework.roo.model.RooJavaType.ROO_IDENTIFIER;
@@ -84,7 +85,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 	private Map<JavaType, List<Identifier>> identifierResults;
 
 	public void onFileEvent(final FileEvent fileEvent) {
-		if (fileEvent.getFileDetails().getCanonicalPath().endsWith(DbreModelService.DBRE_XML)) {
+		if (fileEvent.getFileDetails().getCanonicalPath().endsWith(DBRE_XML)) {
 			final FileOperation operation = fileEvent.getOperation();
 			if (operation == FileOperation.UPDATED || operation == FileOperation.CREATED) {
 				deserializeDatabase();

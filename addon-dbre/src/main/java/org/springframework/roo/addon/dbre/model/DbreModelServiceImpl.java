@@ -134,12 +134,12 @@ public class DbreModelServiceImpl implements DbreModelService {
 	private String getDbreXmlPath() {
 		for (String moduleName : projectOperations.getModuleNames()) {
 			LogicalPath logicalPath = LogicalPath.getInstance(Path.SRC_MAIN_RESOURCES, moduleName);
-			String dbreXmlPath = projectOperations.getPathResolver().getIdentifier(logicalPath, DbreModelService.DBRE_XML);
+			String dbreXmlPath = projectOperations.getPathResolver().getIdentifier(logicalPath, DBRE_XML);
 			if (fileManager.exists(dbreXmlPath)) {
 				return dbreXmlPath;
 			}
 		}
-		return projectOperations.getPathResolver().getFocusedIdentifier(Path.SRC_MAIN_RESOURCES, DbreModelService.DBRE_XML);
+		return projectOperations.getPathResolver().getFocusedIdentifier(Path.SRC_MAIN_RESOURCES, DBRE_XML);
 	}
 
 	private void cacheDatabase(final Database database) {
