@@ -26,9 +26,10 @@ public class DatabaseContentHandler extends DefaultHandler {
 	private final Set<Table> tables = new LinkedHashSet<Table>();
 	private final Stack<Object> stack = new Stack<Object>();
 	private Database database;
+	private String moduleName;
 	private JavaPackage destinationPackage;
-	private boolean activeRecord;
 	private boolean includeNonPortableAttributes;
+	private boolean activeRecord;
 	private boolean testAutomatically;
 
 	/**
@@ -82,11 +83,14 @@ public class DatabaseContentHandler extends DefaultHandler {
 					((ForeignKey) stack.peek()).setForeignSchemaName(option.getValue());
 				}
 			}
-			if (option.getKey().equals("activeRecord")) {
-				activeRecord = Boolean.parseBoolean(option.getValue());
+			if (option.getKey().equals("moduleName")) {
+				moduleName = option.getValue();
 			}
 			if (option.getKey().equals("includeNonPortableAttributes")) {
 				includeNonPortableAttributes = Boolean.parseBoolean(option.getValue());
+			}
+			if (option.getKey().equals("activeRecord")) {
+				activeRecord = Boolean.parseBoolean(option.getValue());
 			}
 			if (option.getKey().equals("testAutomatically")) {
 				testAutomatically = Boolean.parseBoolean(option.getValue());
@@ -111,9 +115,10 @@ public class DatabaseContentHandler extends DefaultHandler {
 			((Index) stack.peek()).addColumn((IndexColumn) tmp);
 		} else if (qName.equals("database")) {
 			database = new Database(tables);
-			database.setActiveRecord(activeRecord);
+			database.setModuleName(moduleName);
 			database.setDestinationPackage(destinationPackage);
 			database.setIncludeNonPortableAttributes(includeNonPortableAttributes);
+			database.setActiveRecord(activeRecord);
 			database.setTestAutomatically(testAutomatically);
 		} else {
 			stack.push(tmp);

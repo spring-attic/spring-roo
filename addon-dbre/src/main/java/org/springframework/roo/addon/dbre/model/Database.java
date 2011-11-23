@@ -22,12 +22,12 @@ public class Database {
 
 	/** All tables. */
 	private final Set<Table> tables;
+	
+	/** The module where the entities are created */
+	private String moduleName;
 
 	/** The JavaPackage where entities are created */
 	private JavaPackage destinationPackage;
-
-	/** Whether to create integration tests */
-	private boolean testAutomatically;
 
 	/** Whether or not to included non-portable JPA attributes in the @Column annotation */
 	private boolean includeNonPortableAttributes;
@@ -37,6 +37,9 @@ public class Database {
 
 	// Whether to generate active record CRUD methods for each entity
 	private boolean activeRecord;
+
+	/** Whether to create integration tests */
+	private boolean testAutomatically;
 
 	/**
 	 * Constructor
@@ -68,6 +71,22 @@ public class Database {
 		return null;
 	}
 
+	public String getModuleName() {
+		return moduleName;
+	}
+
+	public void setModuleName(String moduleName) {
+		this.moduleName = moduleName;
+	}
+
+	public JavaPackage getDestinationPackage() {
+		return destinationPackage;
+	}
+
+	public void setDestinationPackage(final JavaPackage destinationPackage) {
+		this.destinationPackage = destinationPackage;
+	}
+
 	/**
 	 * Indicates whether active record CRUD methods should be generated for each entity
 	 *
@@ -86,14 +105,6 @@ public class Database {
 	 */
 	public void setActiveRecord(final boolean activeRecord) {
 		this.activeRecord = activeRecord;
-	}
-
-	public JavaPackage getDestinationPackage() {
-		return destinationPackage;
-	}
-
-	public void setDestinationPackage(final JavaPackage destinationPackage) {
-		this.destinationPackage = destinationPackage;
 	}
 
 	public boolean isTestAutomatically() {

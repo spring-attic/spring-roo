@@ -49,7 +49,7 @@ public class DbreOperationsImpl implements DbreOperations {
 	@Reference private ProjectOperations projectOperations;
 
 	public boolean isDbreInstallationPossible() {
-		return projectOperations.isFocusedProjectAvailable() && (fileManager.exists(pathResolver.getFocusedIdentifier(Path.SPRING_CONFIG_ROOT, "database.properties")) || projectOperations.isFeatureInstalled(FeatureNames.JPA));
+		return projectOperations.isFocusedProjectAvailable() && projectOperations.isFeatureInstalledInFocusedModule(FeatureNames.JPA);
 	}
 
 	public void displayDatabaseMetadata(final Set<Schema> schemas, final File file, final boolean view) {
@@ -64,6 +64,7 @@ public class DbreOperationsImpl implements DbreOperations {
 	public void reverseEngineerDatabase(final Set<Schema> schemas, final JavaPackage destinationPackage, final boolean testAutomatically, final boolean view, final Set<String> includeTables, final Set<String> excludeTables, final boolean includeNonPortableAttributes, final boolean activeRecord) {
 		// Force it to refresh the database from the actual JDBC connection
 		final Database database = dbreModelService.refreshDatabase(schemas, view, includeTables, excludeTables);
+		database.setModuleName(projectOperations.getFocusedModuleName());
 		database.setActiveRecord(activeRecord);
 		database.setDestinationPackage(destinationPackage);
 		database.setIncludeNonPortableAttributes(includeNonPortableAttributes);

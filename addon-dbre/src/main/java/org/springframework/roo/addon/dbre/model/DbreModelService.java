@@ -53,13 +53,6 @@ public interface DbreModelService {
 	void writeDatabase(Database database);
 
 	/**
-	 * Returns the identifier for the DBRE XML file.
-	 *
-	 * @return a String representing the path of the DBRE XML file
-	 */
-	String getDbreXmlPath();
-
-	/**
 	 * Retrieves the database metadata from a JDBC connection.
 	 *
 	 * @param schemas the schema(s) to query (required)

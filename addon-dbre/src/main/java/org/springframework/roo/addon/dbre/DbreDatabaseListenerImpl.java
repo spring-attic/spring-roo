@@ -49,7 +49,6 @@ import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Path;
-import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.shell.Shell;
 import org.springframework.roo.support.util.Assert;
@@ -77,7 +76,6 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 	@Reference private DbreModelService dbreModelService;
 	@Reference private FileManager fileManager;
 	@Reference private IntegrationTestOperations integrationTestOperations;
-	@Reference private PathResolver pathResolver;
 	@Reference private ProjectOperations projectOperations;
 	@Reference private Shell shell;
 	@Reference private TypeLocationService typeLocationService;
@@ -86,8 +84,9 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 	private Map<JavaType, List<Identifier>> identifierResults;
 
 	public void onFileEvent(final FileEvent fileEvent) {
-		if (fileEvent.getFileDetails().getCanonicalPath().equals(dbreModelService.getDbreXmlPath())) {
-			if (fileEvent.getOperation() == FileOperation.UPDATED || fileEvent.getOperation() == FileOperation.CREATED) {
+		if (fileEvent.getFileDetails().getCanonicalPath().endsWith(DbreModelService.DBRE_XML)) {
+			final FileOperation operation = fileEvent.getOperation();
+			if (operation == FileOperation.UPDATED || operation == FileOperation.CREATED) {
 				deserializeDatabase();
 			}
 		}
@@ -341,7 +340,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 		extendsTypes.add(superclass);
 
 		// Create entity class
-		final String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(javaType, pathResolver.getFocusedPath(Path.SRC_MAIN_JAVA));
+		final String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(javaType, projectOperations.getPathResolver().getFocusedPath(Path.SRC_MAIN_JAVA));
 		final ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC, javaType, PhysicalTypeCategory.CLASS);
 		typeDetailsBuilder.setExtendsTypes(extendsTypes);
 		typeDetailsBuilder.setAnnotations(annotations);
@@ -413,7 +412,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 		identifierAnnotations.add(identifierBuilder);
 
 		// Produce identifier itself
-		final String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(identifierType, pathResolver.getFocusedPath(Path.SRC_MAIN_JAVA));
+		final String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(identifierType,  projectOperations.getPathResolver().getFocusedPath(Path.SRC_MAIN_JAVA));
 		final ClassOrInterfaceTypeDetailsBuilder identifierTypeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC | Modifier.FINAL, identifierType, PhysicalTypeCategory.CLASS);
 		identifierTypeDetailsBuilder.setAnnotations(identifierAnnotations);
 		typeManagementService.createOrUpdateTypeOnDisk(identifierTypeDetailsBuilder.build());

@@ -128,6 +128,12 @@ public abstract class DatabaseXmlUtils {
 
 		final List<Element> optionElements = XmlUtils.findElements("option", databaseElement);
 		for (final Element optionElement : optionElements) {
+			if (optionElement.getAttribute("key").equals("moduleName")) {
+				database.setModuleName(optionElement.getAttribute("value"));
+			}
+			if (optionElement.getAttribute("key").equals("activeRecord")) {
+				database.setActiveRecord(Boolean.parseBoolean(optionElement.getAttribute("value")));
+			}
 			if (optionElement.getAttribute("key").equals("testAutomatically")) {
 				database.setTestAutomatically(Boolean.parseBoolean(optionElement.getAttribute("value")));
 			}
@@ -151,6 +157,7 @@ public abstract class DatabaseXmlUtils {
 			databaseElement.setAttribute("package", database.getDestinationPackage().getFullyQualifiedPackageName());
 		}
 
+		databaseElement.appendChild(createOptionElement("moduleName", database.getModuleName(), document));
 		addBooleanOptionElement(document, databaseElement, "activeRecord", database.isActiveRecord());
 		addBooleanOptionElement(document, databaseElement, "includeNonPortableAttributes", database.isIncludeNonPortableAttributes());
 		addBooleanOptionElement(document, databaseElement, "testAutomatically", database.isTestAutomatically());
@@ -207,7 +214,7 @@ public abstract class DatabaseXmlUtils {
 	}
 
 	/**
-	 * Adds an <option key="foo" value="blah"> element as a child of the given parent element
+	 * Adds an <option key="foo" value="true"> element as a child of the given parent element
 	 *
 	 * @param document the XML document containing the parent and child (required)
 	 * @param parent the parent element to which to add a child (required)
