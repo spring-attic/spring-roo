@@ -93,6 +93,10 @@ public class SolrMetadataProvider extends AbstractMemberDiscoveringItdMetadataPr
 			}
 		}
 		final MethodMetadata idAccessor = persistenceMemberLocator.getIdentifierAccessor(javaType);
+		if (idAccessor == null) {
+			return null;
+		}
+		
 		final FieldMetadata versionField = persistenceMemberLocator.getVersionField(javaType);
 		return new SolrMetadata(metadataIdentificationString, aspectName, annotationValues, governorPhysicalTypeMetadata, idAccessor, versionField, accessorDetails, beanPlural);
 	}
