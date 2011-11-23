@@ -101,7 +101,6 @@ public class GwtRequestMetadataProviderImpl extends AbstractHashCodeTrackingMeta
 		}
 
 		final List<MethodMetadata> requestMethods = getRequestMethods(getMethodExclusions(request), target.getType(), targetDetails);
-		
 		final GwtRequestMetadata gwtRequestMetadata = new GwtRequestMetadata(requestMetadataId, writeRequestInterface(request, requestMethods));
 		notifyIfRequired(gwtRequestMetadata);
 		return gwtRequestMetadata;

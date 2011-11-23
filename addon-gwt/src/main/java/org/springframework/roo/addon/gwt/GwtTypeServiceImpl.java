@@ -62,6 +62,7 @@ import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.process.manager.FileManager;
+import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.logging.HandlerUtils;
@@ -208,8 +209,7 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 
 	public ClassOrInterfaceTypeDetails lookupXFromEntity(final ClassOrInterfaceTypeDetails entity, final JavaType... annotations) {
 		Assert.notNull(entity, "Entity not found");
-		Set<ClassOrInterfaceTypeDetails> cids = typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(annotations);
-		for (ClassOrInterfaceTypeDetails cid : cids) {
+		for (ClassOrInterfaceTypeDetails cid : typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(annotations)) {
 			AnnotationMetadata annotationMetadata = GwtUtils.getFirstAnnotation(cid, annotations);
 			if (annotationMetadata != null) {
 				AnnotationAttributeValue<?> attributeValue = annotationMetadata.getAttribute("value");
@@ -238,8 +238,9 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 	}
 
 	public String getGwtModuleXml(final String moduleName) {
-		String gwtModuleXml = projectOperations.getPathResolver().getFocusedRoot(Path.SRC_MAIN_JAVA) + projectOperations.getTopLevelPackage(moduleName).getFullyQualifiedPackageName().replace('.', File.separatorChar) + File.separator + "*.gwt.xml";
-		Set<String> paths = new LinkedHashSet<String>();
+		final LogicalPath logicalPath = LogicalPath.getInstance(Path.SRC_MAIN_JAVA, moduleName);
+		final String gwtModuleXml = projectOperations.getPathResolver().getRoot(logicalPath) + File.separatorChar + projectOperations.getTopLevelPackage(moduleName).getFullyQualifiedPackageName().replace('.', File.separatorChar) + File.separator + "*.gwt.xml";
+		final Set<String> paths = new LinkedHashSet<String>();
 		for (FileDetails fileDetails : fileManager.findMatchingAntPath(gwtModuleXml)) {
 			paths.add(fileDetails.getCanonicalPath());
 		}
@@ -254,7 +255,7 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 
 	public void buildType(final GwtType type, final List<ClassOrInterfaceTypeDetails> templateTypeDetails, final String moduleName) {
 		if (GwtType.LIST_PLACE_RENDERER.equals(type)) {
-			HashMap<JavaSymbolName, List<JavaType>> watchedMethods = new HashMap<JavaSymbolName, List<JavaType>>();
+			Map<JavaSymbolName, List<JavaType>> watchedMethods = new HashMap<JavaSymbolName, List<JavaType>>();
 			watchedMethods.put(new JavaSymbolName("render"), Collections.singletonList(new JavaType(projectOperations.getTopLevelPackage(moduleName).getFullyQualifiedPackageName() + ".client.scaffold.place.ProxyListPlace")));
 			type.setWatchedMethods(watchedMethods);
 		} else {
@@ -264,14 +265,13 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 		type.resolveWatchedFieldNames(type);
 		List<ClassOrInterfaceTypeDetails> typesToBeWritten = new ArrayList<ClassOrInterfaceTypeDetails>();
 		for (ClassOrInterfaceTypeDetails templateTypeDetail : templateTypeDetails) {
-			typesToBeWritten.addAll(buildType(type, templateTypeDetail, getExtendsTypes(templateTypeDetail)));
+			typesToBeWritten.addAll(buildType(type, templateTypeDetail, getExtendsTypes(templateTypeDetail), moduleName));
 		}
 		gwtFileManager.write(typesToBeWritten, type.isOverwriteConcrete());
 	}
 
 	public Set<String> getSourcePaths(final String moduleName) {
-		String gwtModuleXml = getGwtModuleXml(moduleName);
-		return getSourcePaths(gwtModuleXml, moduleName);
+		return getSourcePaths(getGwtModuleXml(moduleName), moduleName);
 	}
 
 	public void addSourcePath(String sourcePath, String moduleName) {
@@ -318,18 +318,15 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 			}
 		});
 
-		Document gwtXmlDoc;
 		InputStream inputStream = null;
 		try {
 			inputStream = fileManager.getInputStream(gwtModuleCanonicalPath);
-			gwtXmlDoc = builder.parse(inputStream);
+			return builder.parse(inputStream);
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
 		} finally {
 			IOUtils.closeQuietly(inputStream);
 		}
-
-		return gwtXmlDoc;
 	}
 
 	public List<MethodMetadata> getProxyMethods(final ClassOrInterfaceTypeDetails governorTypeDetails) {
@@ -414,12 +411,12 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 		return isDomainObject(type, ptmd);
 	}
 
-	private ClassOrInterfaceTypeDetailsBuilder createAbstractBuilder(final ClassOrInterfaceTypeDetailsBuilder concreteClass, final List<MemberHoldingTypeDetails> extendsTypesDetails) {
+	private ClassOrInterfaceTypeDetailsBuilder createAbstractBuilder(final ClassOrInterfaceTypeDetailsBuilder concreteClass, final List<MemberHoldingTypeDetails> extendsTypesDetails, final String moduleName) {
 		JavaType concreteType = concreteClass.getName();
 		String abstractName = concreteType.getSimpleTypeName() + "_Roo_Gwt";
 		abstractName = concreteType.getPackage().getFullyQualifiedPackageName() + '.' + abstractName;
 		JavaType abstractType = new JavaType(abstractName);
-		String abstractId = PhysicalTypeIdentifier.createIdentifier(abstractType, projectOperations.getPathResolver().getFocusedPath(Path.SRC_MAIN_JAVA));
+		String abstractId = PhysicalTypeIdentifier.createIdentifier(abstractType, LogicalPath.getInstance(Path.SRC_MAIN_JAVA, moduleName));
 		ClassOrInterfaceTypeDetailsBuilder builder = new ClassOrInterfaceTypeDetailsBuilder(abstractId);
 		builder.setPhysicalTypeCategory(PhysicalTypeCategory.CLASS);
 		builder.setName(abstractType);
@@ -433,7 +430,6 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 				abstractConstructor.setModifier(constructorMetadata.getModifier());
 
 				Map<JavaSymbolName, JavaType> typeMap = resolveTypes(extendsTypeDetails.getName(), concreteClass.getExtendsTypes().get(0));
-
 				for (AnnotatedJavaType type : constructorMetadata.getParameterTypes()) {
 					JavaType newType = type.getJavaType();
 					if (type.getJavaType().getParameters().size() > 0) {
@@ -472,14 +468,14 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 		return builder;
 	}
 
-	public List<ClassOrInterfaceTypeDetails> buildType(final GwtType destType, final ClassOrInterfaceTypeDetails templateClass, final List<MemberHoldingTypeDetails> extendsTypes) {
+	public List<ClassOrInterfaceTypeDetails> buildType(final GwtType destType, final ClassOrInterfaceTypeDetails templateClass, final List<MemberHoldingTypeDetails> extendsTypes, final String moduleName) {
 		try {
 			// A type may consist of a concrete type which depend on
 			List<ClassOrInterfaceTypeDetails> types = new ArrayList<ClassOrInterfaceTypeDetails>();
 			ClassOrInterfaceTypeDetailsBuilder templateClassBuilder = new ClassOrInterfaceTypeDetailsBuilder(templateClass);
 
 			if (destType.isCreateAbstract()) {
-				ClassOrInterfaceTypeDetailsBuilder abstractClassBuilder = createAbstractBuilder(templateClassBuilder, extendsTypes);
+				ClassOrInterfaceTypeDetailsBuilder abstractClassBuilder = createAbstractBuilder(templateClassBuilder, extendsTypes, moduleName);
 
 				ArrayList<FieldMetadataBuilder> fieldsToRemove = new ArrayList<FieldMetadataBuilder>();
 				for (JavaSymbolName fieldName : destType.getWatchedFieldNames()) {

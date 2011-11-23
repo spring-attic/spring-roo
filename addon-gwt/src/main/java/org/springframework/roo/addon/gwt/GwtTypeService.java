@@ -20,7 +20,7 @@ public interface GwtTypeService {
 
 	List<MemberHoldingTypeDetails> getExtendsTypes(ClassOrInterfaceTypeDetails childType);
 
-	List<ClassOrInterfaceTypeDetails> buildType(GwtType destType, ClassOrInterfaceTypeDetails templateClass, List<MemberHoldingTypeDetails> extendsTypes);
+	List<ClassOrInterfaceTypeDetails> buildType(GwtType destType, ClassOrInterfaceTypeDetails templateClass, List<MemberHoldingTypeDetails> extendsTypes, String moduleName);
 
 	void buildType(GwtType destType, List<ClassOrInterfaceTypeDetails> templateTypeDetails, String moduleName);
 

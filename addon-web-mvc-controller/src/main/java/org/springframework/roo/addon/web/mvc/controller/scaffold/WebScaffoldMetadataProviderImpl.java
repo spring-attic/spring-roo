@@ -18,6 +18,7 @@ import org.springframework.roo.addon.web.mvc.controller.details.WebMetadataServi
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.customdata.tagkeys.MethodMetadataCustomDataKey;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
@@ -87,9 +88,9 @@ public class WebScaffoldMetadataProviderImpl extends AbstractMemberDiscoveringIt
 	 * @return see above
 	 */
 	private String getWebScaffoldMidIfLayerComponent(final JavaType governor) {
-		final MemberHoldingTypeDetails governorDetails = typeLocationService.getTypeDetails(governor);
-		if (governorDetails != null) {
-			for (final JavaType type : governorDetails.getLayerEntities()) {
+		final ClassOrInterfaceTypeDetails governorTypeDetails = typeLocationService.getTypeDetails(governor);
+		if (governorTypeDetails != null) {
+			for (final JavaType type : governorTypeDetails.getLayerEntities()) {
 				final String localMid = entityToWebScaffoldMidMap.get(type);
 				if (localMid != null) {
 					/*

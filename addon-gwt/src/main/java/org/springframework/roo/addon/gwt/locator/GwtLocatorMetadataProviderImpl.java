@@ -41,7 +41,6 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.model.SpringJavaType;
 import org.springframework.roo.project.LogicalPath;
-import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
@@ -100,8 +99,7 @@ public class GwtLocatorMetadataProviderImpl implements GwtLocatorMetadataProvide
 		}
 
 		final JavaType identifierType = GwtUtils.convertPrimitiveType(identifierAccessor.getReturnType(), true);
-		final LogicalPath focusedSrcMainJava = LogicalPath.getInstance(Path.SRC_MAIN_JAVA, projectOperations.getFocusedModuleName());
-		final String locatorPhysicalTypeId = PhysicalTypeIdentifier.createIdentifier(new JavaType(locatorType), focusedSrcMainJava);
+		final String locatorPhysicalTypeId = PhysicalTypeIdentifier.createIdentifier(new JavaType(locatorType), PhysicalTypeIdentifier.getPath(proxy.getDeclaredByMetadataId()));
 		ClassOrInterfaceTypeDetailsBuilder locatorBuilder = new ClassOrInterfaceTypeDetailsBuilder(locatorPhysicalTypeId);
 		AnnotationMetadataBuilder annotationMetadataBuilder = new AnnotationMetadataBuilder(RooJavaType.ROO_GWT_LOCATOR);
 		annotationMetadataBuilder.addStringAttribute("value", entity.getFullyQualifiedTypeName());
@@ -245,7 +243,6 @@ public class GwtLocatorMetadataProviderImpl implements GwtLocatorMetadataProvide
 	private ClassOrInterfaceTypeDetails getGovernor(final String metadataIdentificationString) {
 		JavaType governorTypeName = GwtLocatorMetadata.getJavaType(metadataIdentificationString);
 		LogicalPath governorTypePath = GwtLocatorMetadata.getPath(metadataIdentificationString);
-
 		String physicalTypeId = PhysicalTypeIdentifier.createIdentifier(governorTypeName, governorTypePath);
 		return typeLocationService.getTypeDetails(physicalTypeId);
 	}

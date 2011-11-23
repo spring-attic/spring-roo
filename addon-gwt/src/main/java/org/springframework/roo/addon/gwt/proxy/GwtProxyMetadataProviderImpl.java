@@ -106,15 +106,15 @@ public class GwtProxyMetadataProviderImpl extends AbstractHashCodeTrackingMetada
 			return null;
 		}
 
-		final String moduleName = projectOperations.getProjectMetadata(PhysicalTypeIdentifier.getPath(proxy.getDeclaredByMetadataId()).getModule()).getModuleName();
+		final String moduleName = PhysicalTypeIdentifier.getPath(proxy.getDeclaredByMetadataId()).getModule();
 		List<MethodMetadata> proxyMethods = gwtTypeService.getProxyMethods(mirroredDetails);
 		List<MethodMetadata> convertedProxyMethods = new ArrayList<MethodMetadata>();
+		Set<String> sourcePaths = gwtTypeService.getSourcePaths(moduleName);
 		for (MethodMetadata method : proxyMethods) {
 			JavaType gwtType = gwtTypeService.getGwtSideLeafType(method.getReturnType(), mirroredDetails.getName(), false, true);
 			MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(method);
 			methodBuilder.setReturnType(gwtType);
 			MethodMetadata convertedMethod = methodBuilder.build();
-			Set<String> sourcePaths = gwtTypeService.getSourcePaths(moduleName);
 			if (gwtTypeService.isMethodReturnTypesInSourcePath(convertedMethod, mirroredDetails, sourcePaths)) {
 				convertedProxyMethods.add(methodBuilder.build());
 			}

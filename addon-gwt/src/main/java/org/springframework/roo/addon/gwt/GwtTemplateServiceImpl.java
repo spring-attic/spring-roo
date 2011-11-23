@@ -97,8 +97,8 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
 	public GwtTemplateDataHolder getMirrorTemplateTypeDetails(final ClassOrInterfaceTypeDetails mirroredType, final Map<JavaSymbolName, GwtProxyProperty> clientSideTypeMap, final String moduleName) {
 		ClassOrInterfaceTypeDetails proxy = gwtTypeService.lookupProxyFromEntity(mirroredType);
 		ClassOrInterfaceTypeDetails request = gwtTypeService.lookupRequestFromEntity(mirroredType);
-		final JavaPackage focusedTopLevelPackage = projectOperations.getFocusedTopLevelPackage();
-		Map<GwtType, JavaType> mirrorTypeMap = GwtUtils.getMirrorTypeMap(mirroredType.getName(), focusedTopLevelPackage);
+		final JavaPackage topLevelPackage = projectOperations.getTopLevelPackage(moduleName);
+		Map<GwtType, JavaType> mirrorTypeMap = GwtUtils.getMirrorTypeMap(mirroredType.getName(), topLevelPackage);
 		mirrorTypeMap.put(GwtType.PROXY, proxy.getName());
 		mirrorTypeMap.put(GwtType.REQUEST, request.getName());
 
@@ -110,8 +110,8 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
 			}
 			TemplateDataDictionary dataDictionary = buildMirrorDataDictionary(gwtType, mirroredType, proxy, mirrorTypeMap, clientSideTypeMap, moduleName);
 			gwtType.dynamicallyResolveFieldsToWatch(clientSideTypeMap);
-			gwtType.dynamicallyResolveMethodsToWatch(mirroredType.getName(), clientSideTypeMap, focusedTopLevelPackage);
-			templateTypeDetailsMap.put(gwtType, getTemplateDetails(dataDictionary, gwtType.getTemplate(), mirrorTypeMap.get(gwtType)));
+			gwtType.dynamicallyResolveMethodsToWatch(mirroredType.getName(), clientSideTypeMap, topLevelPackage);
+			templateTypeDetailsMap.put(gwtType, getTemplateDetails(dataDictionary, gwtType.getTemplate(), mirrorTypeMap.get(gwtType), moduleName));
 
 			if (gwtType.isCreateUiXml()) {
 				dataDictionary = buildMirrorDataDictionary(gwtType, mirroredType, proxy, mirrorTypeMap, clientSideTypeMap, moduleName);
@@ -119,7 +119,7 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
 				xmlTemplates.put(gwtType, contents);
 			}
 		}
-		final JavaPackage topLevelPackage = projectOperations.getTopLevelPackage(PhysicalTypeIdentifier.getPath(proxy.getDeclaredByMetadataId()).getModule());
+		
 		final Map<String, String> xmlMap = new LinkedHashMap<String, String>();
 		List<ClassOrInterfaceTypeDetails> typeDetails = new ArrayList<ClassOrInterfaceTypeDetails>();
 		for (GwtProxyProperty proxyProperty : clientSideTypeMap.values()) {
@@ -142,7 +142,7 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
 			dataDictionary.setVariable("boundCollectionType", boundCollectionType);
 
 			JavaType collectionEditorType = new JavaType(GwtPath.MANAGED_UI.packageName(topLevelPackage) + "." + boundCollectionType + collectionType + "Editor");
-			typeDetails.add(getTemplateDetails(dataDictionary, "CollectionEditor", collectionEditorType));
+			typeDetails.add(getTemplateDetails(dataDictionary, "CollectionEditor", collectionEditorType, moduleName));
 
 			dataDictionary = TemplateDictionary.create();
 			dataDictionary.setVariable("packageName", GwtPath.MANAGED_UI.packageName(topLevelPackage));
@@ -153,7 +153,7 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
 			addImport(dataDictionary, proxyProperty.getPropertyType());
 
 			String contents = getTemplateContents("CollectionEditor" + "UiXml", dataDictionary);
-			String packagePath = projectOperations.getPathResolver().getFocusedIdentifier(Path.SRC_MAIN_JAVA, GwtPath.MANAGED_UI.getPackagePath(focusedTopLevelPackage));
+			String packagePath = projectOperations.getPathResolver().getFocusedIdentifier(Path.SRC_MAIN_JAVA, GwtPath.MANAGED_UI.getPackagePath(topLevelPackage));
 			xmlMap.put(packagePath + "/" + boundCollectionType + collectionType + "Editor.ui.xml", contents);
 		}
 
@@ -163,7 +163,7 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
 	public List<ClassOrInterfaceTypeDetails> getStaticTemplateTypeDetails(final GwtType type, final String moduleName) {
 		List<ClassOrInterfaceTypeDetails> templateTypeDetails = new ArrayList<ClassOrInterfaceTypeDetails>();
 		TemplateDataDictionary dataDictionary = buildDictionary(type, moduleName);
-		templateTypeDetails.add(getTemplateDetails(dataDictionary, type.getTemplate(), getDestinationJavaType(type, moduleName)));
+		templateTypeDetails.add(getTemplateDetails(dataDictionary, type.getTemplate(), getDestinationJavaType(type, moduleName), moduleName));
 		return templateTypeDetails;
 	}
 
@@ -294,14 +294,13 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
 		}
 	}
 
-	public ClassOrInterfaceTypeDetails getTemplateDetails(final TemplateDataDictionary dataDictionary, final String templateFile, final JavaType templateType) {
+	public ClassOrInterfaceTypeDetails getTemplateDetails(final TemplateDataDictionary dataDictionary, final String templateFile, final JavaType templateType, final String moduleName) {
 		try {
 			TemplateLoader templateLoader = TemplateResourceLoader.create();
 			Template template = templateLoader.getTemplate(templateFile);
 			Assert.notNull(template, "Tenmplate required for '" + templateFile + "'");
 			String templateContents = template.renderToString(dataDictionary);
-			LogicalPath logicalPath = projectOperations.getPathResolver().getFocusedPath(Path.SRC_MAIN_JAVA);
-			String templateId = PhysicalTypeIdentifier.createIdentifier(templateType, logicalPath);
+			String templateId = PhysicalTypeIdentifier.createIdentifier(templateType, LogicalPath.getInstance(Path.SRC_MAIN_JAVA, moduleName));
 			return typeParsingService.getTypeFromString(templateContents, templateId, templateType);
 		} catch (Exception e) {
 			throw new IllegalStateException(e);

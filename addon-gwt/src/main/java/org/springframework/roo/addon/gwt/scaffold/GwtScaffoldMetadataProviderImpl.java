@@ -39,7 +39,7 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Path;
-import org.springframework.roo.project.ProjectMetadata;
+import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
@@ -107,18 +107,17 @@ public class GwtScaffoldMetadataProviderImpl implements GwtScaffoldMetadataProvi
 		}
 
 		String moduleName = PhysicalTypeIdentifier.getPath(proxy.getDeclaredByMetadataId()).getModule();
-		ProjectMetadata projectMetadata = projectOperations.getProjectMetadata(moduleName);
-
-		buildType(GwtType.APP_ENTITY_TYPES_PROCESSOR, projectMetadata);
-		buildType(GwtType.APP_REQUEST_FACTORY, projectMetadata);
-		buildType(GwtType.LIST_PLACE_RENDERER, projectMetadata);
-		buildType(GwtType.MASTER_ACTIVITIES, projectMetadata);
-		buildType(GwtType.LIST_PLACE_RENDERER, projectMetadata);
-		buildType(GwtType.DETAILS_ACTIVITIES, projectMetadata);
-		buildType(GwtType.MOBILE_ACTIVITIES, projectMetadata);
+		buildType(GwtType.APP_ENTITY_TYPES_PROCESSOR, moduleName);
+		buildType(GwtType.APP_REQUEST_FACTORY, moduleName);
+		buildType(GwtType.LIST_PLACE_RENDERER, moduleName);
+		buildType(GwtType.MASTER_ACTIVITIES, moduleName);
+		buildType(GwtType.LIST_PLACE_RENDERER, moduleName);
+		buildType(GwtType.DETAILS_ACTIVITIES, moduleName);
+		buildType(GwtType.MOBILE_ACTIVITIES, moduleName);
 
 		GwtScaffoldMetadata gwtScaffoldMetadata = new GwtScaffoldMetadata(metadataIdentificationString);
 
+		final JavaPackage topLevelPackage = projectOperations.getTopLevelPackage(moduleName);
 		Map<JavaSymbolName, GwtProxyProperty> clientSideTypeMap = new LinkedHashMap<JavaSymbolName, GwtProxyProperty>();
 		for (MethodMetadata proxyMethod : proxy.getDeclaredMethods()) {
 			if (!proxyMethod.getMethodName().getSymbolName().startsWith("get")) {
@@ -134,16 +133,15 @@ public class GwtScaffoldMetadataProviderImpl implements GwtScaffoldMetadataProvi
 			FieldMetadata field = proxy.getDeclaredField(propertyName);
 			List<AnnotationMetadata> annotations = field != null ? field.getAnnotations() : Collections.<AnnotationMetadata> emptyList();
 
-			GwtProxyProperty gwtProxyProperty = new GwtProxyProperty(projectOperations.getTopLevelPackage(moduleName), ptmd, propertyType, propertyName.getSymbolName(), annotations, proxyMethod.getMethodName().getSymbolName());
+			GwtProxyProperty gwtProxyProperty = new GwtProxyProperty(topLevelPackage, ptmd, propertyType, propertyName.getSymbolName(), annotations, proxyMethod.getMethodName().getSymbolName());
 			clientSideTypeMap.put(propertyName, gwtProxyProperty);
 		}
 
-		GwtTemplateDataHolder templateDataHolder = gwtTemplateService.getMirrorTemplateTypeDetails(mirroredType, clientSideTypeMap, projectMetadata.getModuleName());
+		GwtTemplateDataHolder templateDataHolder = gwtTemplateService.getMirrorTemplateTypeDetails(mirroredType, clientSideTypeMap, moduleName);
 		Map<GwtType, List<ClassOrInterfaceTypeDetails>> typesToBeWritten = new LinkedHashMap<GwtType, List<ClassOrInterfaceTypeDetails>>();
 		Map<String, String> xmlToBeWritten = new LinkedHashMap<String, String>();
 
-		final JavaPackage focusedTopLevelPackage = projectOperations.getFocusedTopLevelPackage();
-		Map<GwtType, JavaType> mirrorTypeMap = GwtUtils.getMirrorTypeMap(mirroredType.getName(), focusedTopLevelPackage);
+		Map<GwtType, JavaType> mirrorTypeMap = GwtUtils.getMirrorTypeMap(mirroredType.getName(), topLevelPackage);
 		mirrorTypeMap.put(GwtType.PROXY, proxy.getName());
 		mirrorTypeMap.put(GwtType.REQUEST, request.getName());
 
@@ -154,14 +152,18 @@ public class GwtScaffoldMetadataProviderImpl implements GwtScaffoldMetadataProvi
 				continue;
 			}
 			gwtType.dynamicallyResolveFieldsToWatch(clientSideTypeMap);
-			gwtType.dynamicallyResolveMethodsToWatch(proxy.getName(), clientSideTypeMap, focusedTopLevelPackage);
+			gwtType.dynamicallyResolveMethodsToWatch(proxy.getName(), clientSideTypeMap, topLevelPackage);
 
 			List<MemberHoldingTypeDetails> extendsTypes = gwtTypeService.getExtendsTypes(templateDataHolder.getTemplateTypeDetailsMap().get(gwtType));
-			typesToBeWritten.put(gwtType, gwtTypeService.buildType(gwtType, templateDataHolder.getTemplateTypeDetailsMap().get(gwtType), extendsTypes));
+			typesToBeWritten.put(gwtType, gwtTypeService.buildType(gwtType, templateDataHolder.getTemplateTypeDetailsMap().get(gwtType), extendsTypes, moduleName));
 
 			if (gwtType.isCreateUiXml()) {
 				final GwtPath gwtPath = gwtType.getPath();
-				final String targetDirectory = gwtPath == GwtPath.WEB ? projectOperations.getPathResolver().getFocusedRoot(Path.SRC_MAIN_WEBAPP) : projectOperations.getPathResolver().getFocusedIdentifier(Path.SRC_MAIN_JAVA, gwtPath.getPackagePath(focusedTopLevelPackage));
+				final PathResolver pathResolver = projectOperations.getPathResolver();
+				final String webappPath =  pathResolver.getIdentifier(LogicalPath.getInstance(Path.SRC_MAIN_WEBAPP, moduleName), moduleName);
+				final String packagePath = pathResolver.getIdentifier(LogicalPath.getInstance(Path.SRC_MAIN_JAVA, moduleName), gwtPath.getPackagePath(topLevelPackage));
+
+				final String targetDirectory = gwtPath == GwtPath.WEB ? webappPath : packagePath;
 				String destFile = targetDirectory + File.separatorChar + javaType.getSimpleTypeName() + ".ui.xml";
 				String contents = gwtTemplateService.buildUiXml(templateDataHolder.getXmlTemplates().get(gwtType), destFile, new ArrayList<MethodMetadata>(proxy.getDeclaredMethods()));
 				xmlToBeWritten.put(destFile, contents);
@@ -193,8 +195,8 @@ public class GwtScaffoldMetadataProviderImpl implements GwtScaffoldMetadataProvi
 		return typeLocationService.getTypeDetails(physicalTypeId);
 	}
 
-	private void buildType(final GwtType type, final ProjectMetadata projectMetadata) {
-		gwtTypeService.buildType(type, gwtTemplateService.getStaticTemplateTypeDetails(type, projectMetadata.getModuleName()), projectMetadata.getModuleName());
+	private void buildType(final GwtType type, final String moduleName) {
+		gwtTypeService.buildType(type, gwtTemplateService.getStaticTemplateTypeDetails(type, moduleName), moduleName);
 	}
 
 	public void notify(String upstreamDependency, String downstreamDependency) {

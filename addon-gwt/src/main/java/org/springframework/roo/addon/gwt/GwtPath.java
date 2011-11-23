@@ -46,8 +46,8 @@ public enum GwtPath {
 		return sourceAntPath;
 	}
 
-	public String getPackagePath(final JavaPackage focusedTopLevelPackage) {
-		return focusedTopLevelPackage.getFullyQualifiedPackageName().replace('.', File.separatorChar) + getSegmentName().replace('/', File.separatorChar);
+	public String getPackagePath(final JavaPackage topLevelPackage) {
+		return topLevelPackage.getFullyQualifiedPackageName().replace('.', File.separatorChar) + getSegmentName().replace('/', File.separatorChar);
 	}
 	
 	public String segmentPackage() {

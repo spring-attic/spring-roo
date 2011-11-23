@@ -64,16 +64,19 @@ public class WebJsonMetadataProviderImpl extends AbstractMemberDiscoveringItdMet
 
 	@Override
 	protected String getLocalMidToRequest(final ItdTypeDetails itdTypeDetails) {
-		final MemberHoldingTypeDetails governorDetails = typeLocationService.getTypeDetails(itdTypeDetails.getName());
+		final ClassOrInterfaceTypeDetails governorTypeDetails = typeLocationService.getTypeDetails(itdTypeDetails.getName());
+		if (governorTypeDetails == null) {
+			return null;
+		}
 
 		// Check whether a relevant layer component has appeared, changed, or disappeared
-		final String localMidForLayerManagedEntity = getWebJsonMidIfLayerComponent(governorDetails);
+		final String localMidForLayerManagedEntity = getWebJsonMidIfLayerComponent(governorTypeDetails);
 		if (StringUtils.hasText(localMidForLayerManagedEntity)) {
 			return localMidForLayerManagedEntity;
 		}
 
 		// Check whether the relevant MVC controller has appeared, changed, or disappeared
-		return getWebJsonMidIfMvcController(governorDetails);
+		return getWebJsonMidIfMvcController(governorTypeDetails);
 	}
 
 	/**
@@ -82,10 +85,10 @@ public class WebJsonMetadataProviderImpl extends AbstractMemberDiscoveringItdMet
 	 * manages, in case this is a new layer component that the JSON ITD needs to
 	 * use.
 	 *
-	 * @param governorDetails the type to check (required)
+	 * @param governorTypeDetails the type to check (required)
 	 */
-	private String getWebJsonMidIfLayerComponent(final MemberHoldingTypeDetails governorDetails) {
-		for (final JavaType domainType : governorDetails.getLayerEntities()) {
+	private String getWebJsonMidIfLayerComponent(final ClassOrInterfaceTypeDetails governorTypeDetails) {
+		for (final JavaType domainType : governorTypeDetails.getLayerEntities()) {
 			final String webJsonMetadataId = managedEntityTypes.get(domainType);
 			if (webJsonMetadataId != null) {
 				return webJsonMetadataId;
@@ -101,18 +104,16 @@ public class WebJsonMetadataProviderImpl extends AbstractMemberDiscoveringItdMet
 	 * handling multiple ITDs introducing the same field (in our case the layer
 	 * component) into one Java class.
 	 *
-	 * @param governorDetails the type to check (required)
+	 * @param governorTypeDetails the type to check (required)
 	 */
-	private String getWebJsonMidIfMvcController(final MemberHoldingTypeDetails governorDetails) {
-		final AnnotationMetadata controllerAnnotation = governorDetails.getAnnotation(ROO_WEB_SCAFFOLD);
+	private String getWebJsonMidIfMvcController(final ClassOrInterfaceTypeDetails governorTypeDetails) {
+		final AnnotationMetadata controllerAnnotation = governorTypeDetails.getAnnotation(ROO_WEB_SCAFFOLD);
 		if (controllerAnnotation != null) {
 			final JavaType formBackingType = (JavaType) controllerAnnotation.getAttribute("formBackingObject").getValue();
 			final String webJsonMetadataId = managedEntityTypes.get(formBackingType);
 			if (webJsonMetadataId != null) {
 				/*
-				 * We've been notified of a change to an MVC controller for
-				 * whose backing object we produce WebJsonMetadata; refresh that
-				 * MD to ensure our ITD does or does not introduce any required
+				 * We've been notified of a change to an MVC controller for whose backing object we produce WebJsonMetadata; refresh that MD to ensure our ITD does or does not introduce any required
 				 * layer components, as appropriate.
 				 */
 				metadataService.get(webJsonMetadataId);
