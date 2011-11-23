@@ -33,20 +33,21 @@ public class SolrCommands implements CommandMarker {
 	}
 
 	@CliCommand(value = "solr setup", help = "Install support for Solr search integration")
-	public void setup(
+	public void solrSetup(
 		@CliOption(key = { "searchServerUrl" }, mandatory = false, unspecifiedDefaultValue = "http://localhost:8983/solr", specifiedDefaultValue = "http://localhost:8983/solr", help = "The URL of the Solr search server") final String searchServerUrl) {
 
 		solrOperations.setupConfig(searchServerUrl);
 	}
 
 	@CliCommand(value = "solr add", help = "Make target type searchable")
-	public void setup(
+	public void solrAdd(
 		@CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*", optionContext = "update,project", help = "The type to be made searchable") final JavaType javaType) {
-		 solrOperations.addSearch(javaType);
+
+		solrOperations.addSearch(javaType);
 	}
 
 	@CliCommand(value = "solr all", help = "Make all eligible project types searchable")
-	public void setup() {
+	public void solrAll() {
 		solrOperations.addAll();
 	}
 }

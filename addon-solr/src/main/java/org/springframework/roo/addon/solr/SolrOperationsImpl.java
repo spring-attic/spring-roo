@@ -62,7 +62,7 @@ public class SolrOperationsImpl implements SolrOperations {
 	}
 
 	private boolean solrPropsInstalled() {
-		return fileManager.exists(projectOperations.getPathResolver().getFocusedIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/spring/solr.properties"));
+		return fileManager.exists(projectOperations.getPathResolver().getFocusedIdentifier(Path.SPRING_CONFIG_ROOT, "solr.properties"));
 	}
 
 	public void setupConfig(final String solrServerUrl) {
@@ -151,9 +151,8 @@ public class SolrOperationsImpl implements SolrOperations {
 
 	private void addSolrSearchableAnnotation(final ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails) {
 		if (classOrInterfaceTypeDetails.getTypeAnnotation(ROO_SOLR_SEARCHABLE) == null) {
-			AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(ROO_SOLR_SEARCHABLE);
 			ClassOrInterfaceTypeDetailsBuilder classOrInterfaceTypeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(classOrInterfaceTypeDetails);
-			classOrInterfaceTypeDetailsBuilder.addAnnotation(annotationBuilder);
+			classOrInterfaceTypeDetailsBuilder.addAnnotation(new AnnotationMetadataBuilder(ROO_SOLR_SEARCHABLE));
 			typeManagementService.createOrUpdateTypeOnDisk(classOrInterfaceTypeDetailsBuilder.build());
 		}
 	}
