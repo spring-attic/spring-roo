@@ -52,7 +52,6 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 
 	// Fields
 	private boolean publicNoArgConstructor;
-	private List<FieldMetadata> fields;
 	// See {@link IdentifierService} for further information (populated via {@link IdentifierMetadataProviderImpl}); may be null
 	private List<Identifier> identifierServiceResult;
 
@@ -71,13 +70,13 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 		builder.addAnnotation(getEmbeddableAnnotation());
 
 		// Add declared fields and accessors and mutators
-		fields = getFields();
-		for (FieldMetadata field : fields) {
+		List<FieldMetadataBuilder> fields = getFieldBuilders();
+		for (FieldMetadataBuilder field : fields) {
 			builder.addField(field);
 		}
 
 		// Obtain a parameterised constructor
-		builder.addConstructor(getParameterizedConstructor());
+		builder.addConstructor(getParameterizedConstructor(fields));
 
 		// Obtain a no-arg constructor, if one is appropriate to provide
 		if (annotationValues.isNoArgConstructor()) {
@@ -85,12 +84,12 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 		}
 
 		if (annotationValues.isGettersByDefault()) {
-			for (MethodMetadataBuilder accessor : getAccessors()) {
+			for (MethodMetadataBuilder accessor : getAccessors(fields)) {
 				builder.addMethod(accessor);
 			}
 		}
 		if (annotationValues.isSettersByDefault()) {
-			for (MethodMetadataBuilder mutator : getMutators()) {
+			for (MethodMetadataBuilder mutator : getMutators(fields)) {
 				builder.addMethod(mutator);
 			}
 		}
@@ -118,7 +117,7 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 	 *
 	 * @return fields (never returns null)
 	 */
-	private List<FieldMetadata> getFields() {
+	private List<FieldMetadataBuilder> getFieldBuilders() {
 		// Locate all declared fields
 		List<? extends FieldMetadata> declaredFields = governorTypeDetails.getDeclaredFields();
 
@@ -157,8 +156,12 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 			fields.removeAll(transientAnnotatedFields);
 		}
 
+		List<FieldMetadataBuilder> fieldBuilders = new ArrayList<FieldMetadataBuilder>();
 		if (!fields.isEmpty()) {
-			return fields;
+			for (FieldMetadata field : fields) {
+				fieldBuilders.add(new FieldMetadataBuilder(field));
+			}
+			return fieldBuilders;
 		}
 
 		// We need to create a default identifier field
@@ -170,10 +173,9 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 		columnBuilder.addBooleanAttribute("nullable", false);
 		annotations.add(columnBuilder);
 
-		FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), Modifier.PRIVATE, annotations, new JavaSymbolName("id"), LONG_OBJECT);
-		fields.add(fieldBuilder.build());
+		fieldBuilders.add(new FieldMetadataBuilder(getId(), Modifier.PRIVATE, annotations, new JavaSymbolName("id"), LONG_OBJECT));
 
-		return fields;
+		return fieldBuilders;
 	}
 
 	private AnnotationMetadataBuilder getColumnBuilder(final Identifier identifier) {
@@ -226,26 +228,25 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 	 * Locates the accessor methods.
 	 *
 	 * <p>
-	 * If {@link #getFields()} returns fields created by this ITD, public accessors will automatically be produced in the declaring class.
+	 * If {@link #getFieldBuilders()} returns fields created by this ITD, public accessors will automatically be produced in the declaring class.
+	 * @param fields 
 	 *
 	 * @return the accessors (never returns null)
 	 */
-	private List<MethodMetadataBuilder> getAccessors() {
-		Assert.notNull(fields, "Fields required");
+	private List<MethodMetadataBuilder> getAccessors(List<FieldMetadataBuilder> fields) {
 		List<MethodMetadataBuilder> accessors = new ArrayList<MethodMetadataBuilder>();
 
 		// Compute the names of the accessors that will be produced
-		for (FieldMetadata field : fields) {
-			JavaSymbolName requiredAccessorName = BeanInfoUtils.getAccessorMethodName(field);
+		for (FieldMetadataBuilder field : fields) {
+			JavaSymbolName requiredAccessorName = BeanInfoUtils.getAccessorMethodName(field.getFieldName(), field.getFieldType());
 			MethodMetadata accessor = getGovernorMethod(requiredAccessorName);
-			if (accessor != null) {
-				Assert.isTrue(Modifier.isPublic(accessor.getModifier()), "User provided field but failed to provide a public '" + requiredAccessorName.getSymbolName() + "()' method in '" + destination.getFullyQualifiedTypeName() + "'");
+			if (accessor == null) {
+				accessors.add(getAccessorMethod(field.getFieldName(), field.getFieldType()));
 			} else {
-				accessor = getAccessorMethod(field).build();
+				Assert.isTrue(Modifier.isPublic(accessor.getModifier()), "User provided field but failed to provide a public '" + requiredAccessorName.getSymbolName() + "()' method in '" + destination.getFullyQualifiedTypeName() + "'");
+				accessors.add(new MethodMetadataBuilder(accessor));
 			}
-			accessors.add(new MethodMetadataBuilder(accessor));
 		}
-
 		return accessors;
 	}
 
@@ -253,40 +254,39 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 	 * Locates the mutator methods.
 	 *
 	 * <p>
-	 * If {@link #getFields()} returns fields created by this ITD, public mutators will automatically be produced in the declaring class.
+	 * If {@link #getFieldBuilders()} returns fields created by this ITD, public mutators will automatically be produced in the declaring class.
+	 * @param fields 
 	 *
 	 * @return the mutators (never returns null)
 	 */
-	private List<MethodMetadataBuilder> getMutators() {
-		Assert.notNull(fields, "Fields required");
+	private List<MethodMetadataBuilder> getMutators(List<FieldMetadataBuilder> fields) {
 		List<MethodMetadataBuilder> mutators = new ArrayList<MethodMetadataBuilder>();
 
 		// Compute the names of the mutators that will be produced
-		for (FieldMetadata field : fields) {
-			JavaSymbolName requiredMutatorName = BeanInfoUtils.getMutatorMethodName(field);
+		for (FieldMetadataBuilder field : fields) {
+			JavaSymbolName requiredMutatorName = BeanInfoUtils.getMutatorMethodName(field.getFieldName());
 			final JavaType parameterType = field.getFieldType();
 			MethodMetadata mutator = getGovernorMethod(requiredMutatorName, parameterType);
 			if (mutator == null) {
-				mutator = getMutatorMethod(field.getFieldName(), field.getFieldType()).build();
+				mutators.add(getMutatorMethod(field.getFieldName(), field.getFieldType()));
 			} else {
 				Assert.isTrue(Modifier.isPublic(mutator.getModifier()), "User provided field but failed to provide a public '" + requiredMutatorName + "(" + field.getFieldName().getSymbolName() + ")' method in '" + destination.getFullyQualifiedTypeName() + "'");
+				mutators.add(new MethodMetadataBuilder(mutator));
 			}
-			mutators.add(new MethodMetadataBuilder(mutator));
 		}
-
 		return mutators;
 	}
 
 	/**
 	 * Locates the parameterised constructor consisting of the id fields for this class.
+	 * @param fields 
 	 *
 	 * @return the constructor, never null.
 	 */
-	private ConstructorMetadata getParameterizedConstructor() {
-		Assert.notNull(fields, "Fields required");
+	private ConstructorMetadataBuilder getParameterizedConstructor(List<FieldMetadataBuilder> fields) {
 		// Search for an existing constructor
 		List<JavaType> parameterTypes = new ArrayList<JavaType>();
-		for (FieldMetadata field : fields) {
+		for (FieldMetadataBuilder field : fields) {
 			parameterTypes.add(field.getFieldType());
 		}
 
@@ -301,7 +301,7 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("super();");
-		for (FieldMetadata field : fields) {
+		for (FieldMetadataBuilder field : fields) {
 			String fieldName = field.getFieldName().getSymbolName();
 			bodyBuilder.appendFormalLine("this." + fieldName + " = " + fieldName + ";");
 			parameterNames.add(field.getFieldName());
@@ -313,7 +313,7 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 		constructorBuilder.setParameterTypes(AnnotatedJavaType.convertFromJavaTypes(parameterTypes));
 		constructorBuilder.setParameterNames(parameterNames);
 		constructorBuilder.setBodyBuilder(bodyBuilder);
-		return constructorBuilder.build();
+		return constructorBuilder;
 	}
 
 	/**
@@ -330,7 +330,7 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 	 *
 	 * @return the constructor (may return null if no constructor is to be produced)
 	 */
-	private ConstructorMetadata getNoArgConstructor() {
+	private ConstructorMetadataBuilder getNoArgConstructor() {
 		// Search for an existing constructor
 		List<JavaType> parameterTypes = new ArrayList<JavaType>();
 		ConstructorMetadata result = governorTypeDetails.getDeclaredConstructor(parameterTypes);
@@ -347,7 +347,7 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 		constructorBuilder.setModifier(publicNoArgConstructor ? Modifier.PUBLIC : Modifier.PRIVATE);
 		constructorBuilder.setParameterTypes(AnnotatedJavaType.convertFromJavaTypes(parameterTypes));
 		constructorBuilder.setBodyBuilder(bodyBuilder);
-		return constructorBuilder.build();
+		return constructorBuilder;
 	}
 
 	public static String getMetadataIdentifierType() {

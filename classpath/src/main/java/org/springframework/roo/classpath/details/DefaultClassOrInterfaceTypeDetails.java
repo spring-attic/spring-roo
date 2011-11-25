@@ -187,7 +187,20 @@ public class DefaultClassOrInterfaceTypeDetails extends AbstractMemberHoldingTyp
 		}
 		return false;
 	}
+	@SuppressWarnings("unchecked")
+	public List<String> getDynamicFinderNames() {
+		final List<String> dynamicFinders = new ArrayList<String>();
+		final Object finders = getCustomData().get(CustomDataKeys.DYNAMIC_FINDER_NAMES);
+		if (finders instanceof Collection) {
+			dynamicFinders.addAll((Collection<String>) finders);
+		}
+		return dynamicFinders;
+	}
 
+	public boolean declaresField(final JavaSymbolName fieldName) {
+		return getDeclaredField(fieldName) != null;
+	}
+	
 	@Override
 	public String toString() {
 		ToStringCreator tsc = new ToStringCreator(this);
@@ -205,19 +218,5 @@ public class DefaultClassOrInterfaceTypeDetails extends AbstractMemberHoldingTyp
 		tsc.append("annotations", getAnnotations());
 		tsc.append("customData", getCustomData());
 		return tsc.toString();
-	}
-
-	@SuppressWarnings("unchecked")
-	public List<String> getDynamicFinderNames() {
-		final List<String> dynamicFinders = new ArrayList<String>();
-		final Object finders = getCustomData().get(CustomDataKeys.DYNAMIC_FINDER_NAMES);
-		if (finders instanceof Collection) {
-			dynamicFinders.addAll((Collection<String>) finders);
-		}
-		return dynamicFinders;
-	}
-
-	public boolean declaresField(final JavaSymbolName fieldName) {
-		return getDeclaredField(fieldName) != null;
 	}
 }

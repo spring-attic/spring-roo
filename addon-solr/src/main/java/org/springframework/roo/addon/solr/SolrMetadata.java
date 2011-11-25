@@ -110,14 +110,13 @@ public class SolrMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		return annotationValues;
 	}
 
-	private FieldMetadata getSolrServerField() {
+	private FieldMetadataBuilder getSolrServerField() {
 		JavaSymbolName fieldName = new JavaSymbolName("solrServer");
-		FieldMetadata field = governorTypeDetails.getDeclaredField(fieldName);
-		if (field != null) {
+		if (governorTypeDetails.getDeclaredField(fieldName) != null) {
 			return null;
 		}
 
-		return new FieldMetadataBuilder(getId(), Modifier.TRANSIENT, Arrays.asList(new AnnotationMetadataBuilder(AUTOWIRED)), fieldName, SOLR_SERVER).build();
+		return new FieldMetadataBuilder(getId(), Modifier.TRANSIENT, Arrays.asList(new AnnotationMetadataBuilder(AUTOWIRED)), fieldName, SOLR_SERVER);
 	}
 
 	private MethodMetadataBuilder getPostPersistOrUpdateMethod() {

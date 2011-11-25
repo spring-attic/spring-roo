@@ -195,13 +195,13 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 		}
 	}
 
-	private FieldMetadata getSingularEntityIdField(final JavaSymbolName fieldName) {
-		return new FieldMetadataBuilder(getId(), Modifier.PRIVATE, fieldName, LONG_OBJECT, null).build();
+	private FieldMetadataBuilder getSingularEntityIdField(final JavaSymbolName fieldName) {
+		return new FieldMetadataBuilder(getId(), Modifier.PRIVATE, fieldName, LONG_OBJECT, null);
 	}
 
-	private FieldMetadata getMultipleEntityIdField(final JavaSymbolName fieldName) {
+	private FieldMetadataBuilder getMultipleEntityIdField(final JavaSymbolName fieldName) {
 		builder.getImportRegistrationResolver().addImport(HASH_SET);
-		return new FieldMetadataBuilder(getId(), Modifier.PRIVATE, fieldName, new JavaType(SET.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, Collections.singletonList(GAE_DATASTORE_KEY)), "new HashSet<Key>()").build();
+		return new FieldMetadataBuilder(getId(), Modifier.PRIVATE, fieldName, new JavaType(SET.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, Collections.singletonList(GAE_DATASTORE_KEY)), "new HashSet<Key>()");
 	}
 
 	private JavaSymbolName getIdentifierMethodName(final FieldMetadata fieldMetadata) {

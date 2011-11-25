@@ -37,7 +37,7 @@ import org.springframework.roo.support.util.Assert;
  */
 public class AnnotationMetadataBuilder implements Builder<AnnotationMetadata> {
 
-	// Constants for valueless JPA annotations (using literal class names so as not to make Roo depend on JPA)
+	// Constants for JPA annotations (using literal class names so as not to make Roo depend on JPA)
 	public static final AnnotationMetadata JPA_COLUMN_ANNOTATION = getInstance(COLUMN);
 	public static final AnnotationMetadata JPA_EMBEDDED_ANNOTATION = getInstance(EMBEDDED);
 	public static final AnnotationMetadata JPA_EMBEDDED_ID_ANNOTATION = getInstance(EMBEDDED_ID);

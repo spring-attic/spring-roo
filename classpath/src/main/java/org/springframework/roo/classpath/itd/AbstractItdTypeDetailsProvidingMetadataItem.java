@@ -166,7 +166,7 @@ public abstract class AbstractItdTypeDetailsProvidingMetadataItem extends Abstra
 		return MemberFindingUtils.getDeclaredMethod(governorTypeDetails, methodName, parameterTypes);
 	}
 
-	protected FieldMetadata getField(final JavaSymbolName fieldName, final JavaType fieldType) {
+	protected FieldMetadataBuilder getField(final JavaSymbolName fieldName, final JavaType fieldType) {
 		return getField(PRIVATE, fieldName, fieldType, null);
 	}
 
@@ -178,19 +178,18 @@ public abstract class AbstractItdTypeDetailsProvidingMetadataItem extends Abstra
 	 * @param fieldInitializer the string to initialize the field with
 	 * @return null if the field exists on the governor, otherwise a new field with the given field name and type
 	 */
-	protected FieldMetadata getField(final int modifier, final JavaSymbolName fieldName, final JavaType fieldType, final String fieldInitializer) {
-		final FieldMetadata field = governorTypeDetails.getField(fieldName);
-		if (field != null) return null;
+	protected FieldMetadataBuilder getField(final int modifier, final JavaSymbolName fieldName, final JavaType fieldType, final String fieldInitializer) {
+		if (governorTypeDetails.getField(fieldName) != null) return null;
 
 		addToImports(Arrays.asList(fieldType));
-		return new FieldMetadataBuilder(getId(), modifier, fieldName, fieldType, fieldInitializer).build();
+		return new FieldMetadataBuilder(getId(), modifier, fieldName, fieldType, fieldInitializer);
 	}
 
 	protected MethodMetadataBuilder getAccessorMethod(final FieldMetadata field) {
 		return getAccessorMethod(field, InvocableMemberBodyBuilder.getInstance().appendFormalLine("return " + field.getFieldName().getSymbolName() + ";"));
 	}
 
-	protected MethodMetadataBuilder getAccessorMethod(JavaSymbolName fieldName, JavaType fieldType) {
+	protected MethodMetadataBuilder getAccessorMethod(final JavaSymbolName fieldName, final JavaType fieldType) {
 		return getAccessorMethod(fieldName, fieldType, InvocableMemberBodyBuilder.getInstance().appendFormalLine("return " + fieldName + ";"));
 	}
 
@@ -248,7 +247,7 @@ public abstract class AbstractItdTypeDetailsProvidingMetadataItem extends Abstra
 	 * @since 1.2.0
 	 */
 	protected final void ensureGovernorExtends(final JavaType javaType) {
-		if (!governorPhysicalTypeMetadata.getMemberHoldingTypeDetails().extendsType(javaType)) {
+		if (!governorTypeDetails.extendsType(javaType)) {
 			builder.addExtendsTypes(javaType);
 		}
 	}

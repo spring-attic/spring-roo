@@ -428,12 +428,12 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 	 *
 	 * @return <code>null</code> if no constructor is to be produced
 	 */
-	private ConstructorMetadata getNoArgConstructor() {
+	private ConstructorMetadataBuilder getNoArgConstructor() {
 		// Search for an existing constructor
 		final ConstructorMetadata existingExplicitConstructor = governorTypeDetails.getDeclaredConstructor(null);
 		if (existingExplicitConstructor != null) {
 			// Found an existing no-arg constructor on this class, so return it
-			return existingExplicitConstructor;
+			return new ConstructorMetadataBuilder(existingExplicitConstructor);
 		}
 
 		// To get this far, the user did not define a no-arg constructor
@@ -449,7 +449,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 		final ConstructorMetadataBuilder constructorBuilder = new ConstructorMetadataBuilder(getId());
 		constructorBuilder.setBodyBuilder(bodyBuilder);
 		constructorBuilder.setModifier(Modifier.PUBLIC);
-		return constructorBuilder.build();
+		return constructorBuilder;
 	}
 
 	/**

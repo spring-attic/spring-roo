@@ -205,7 +205,7 @@ public class ClassOrInterfaceTypeDetailsBuilder extends AbstractMemberHoldingTyp
 					continue fieldAdditions;
 				}
 			}
-			targetBuilder.addField(field.build());
+			targetBuilder.addField(field);
 		}
 
 		// Copy methods

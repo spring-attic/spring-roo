@@ -184,7 +184,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	/**
 	 * @return the "rnd" field to use, which is either provided by the user or produced on demand (never returns null)
 	 */
-	public FieldMetadata getRndField() {
+	private FieldMetadataBuilder getRndField() {
 		int index = -1;
 		while (true) {
 			// Compute the required field name
@@ -203,7 +203,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 				}
 				// If we got this far, we found a valid candidate
 				// We don't check if there is a corresponding initializer, but we assume the user knows what they're doing and have made one
-				return candidate;
+				return new FieldMetadataBuilder(candidate);
 			}
 
 			// Candidate not found, so let's create one
@@ -214,14 +214,14 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			fieldBuilder.setFieldName(fieldSymbolName);
 			fieldBuilder.setFieldType(RANDOM);
 			fieldBuilder.setFieldInitializer("new SecureRandom()");
-			return fieldBuilder.build();
+			return fieldBuilder;
 		}
 	}
 
 	/**
 	 * @return the "data" field to use, which is either provided by the user or produced on demand (never returns null)
 	 */
-	private FieldMetadata getDataField() {
+	private FieldMetadataBuilder getDataField() {
 		int index = -1;
 		while (true) {
 			// Compute the required field name
@@ -246,7 +246,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 
 				// If we got this far, we found a valid candidate
 				// We don't check if there is a corresponding initializer, but we assume the user knows what they're doing and have made one
-				return candidate;
+				return new FieldMetadataBuilder(candidate);
 			}
 
 			// Candidate not found, so let's create one
@@ -254,7 +254,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			fieldBuilder.setModifier(Modifier.PRIVATE);
 			fieldBuilder.setFieldName(fieldSymbolName);
 			fieldBuilder.setFieldType(new JavaType(LIST.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, parameterTypes));
-			return fieldBuilder.build();
+			return fieldBuilder;
 		}
 	}
 
@@ -280,7 +280,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 				// Must make the field
 				List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 				annotations.add(new AnnotationMetadataBuilder(AUTOWIRED));
-				builder.addField(new FieldMetadataBuilder(getId(), Modifier.PRIVATE, annotations, fieldSymbolName, collaboratorType).build());
+				builder.addField(new FieldMetadataBuilder(getId(), Modifier.PRIVATE, annotations, fieldSymbolName, collaboratorType));
 				fields.add(fieldSymbolName);
 			}
 		}
@@ -332,7 +332,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 
 		bodyBuilder.appendFormalLine("return obj;");
 
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, entity, AnnotatedJavaType.convertFromJavaTypes(parameterType), parameterNames, bodyBuilder);
+		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, entity, AnnotatedJavaType.convertFromJavaTypes(parameterType), parameterNames, bodyBuilder);
 		builder.addMethod(methodBuilder);
 		newTransientEntityMethod = methodBuilder.build();
 	}
@@ -598,7 +598,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	}
 
 	private String getDecimalMinAndDecimalMaxBody(final FieldMetadata field, final AnnotationMetadata decimalMinAnnotation, final AnnotationMetadata decimalMaxAnnotation, final String suffix) {
-		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
 		String fieldName = field.getFieldName().getSymbolName();
 		JavaType fieldType = field.getFieldType();
@@ -656,7 +656,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	}
 
 	private String getColumnPrecisionAndScaleBody(final FieldMetadata field, final Map<String, Object> values, final String suffix) {
-		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
 		if (values == null || !values.containsKey("precision")) {
 			return bodyBuilder.getOutput();
@@ -687,7 +687,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	}
 
 	private String getMinAndMaxBody(final FieldMetadata field, final String suffix) {
-		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
 		String fieldName = field.getFieldName().getSymbolName();
 		JavaType fieldType = field.getFieldType();
@@ -755,10 +755,10 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 
 	private void setModifyMethod() {
 		// Method definition to find or build
-		JavaSymbolName methodName = new JavaSymbolName("modify" + entity.getSimpleTypeName());
+		final JavaSymbolName methodName = new JavaSymbolName("modify" + entity.getSimpleTypeName());
 		final JavaType parameterType = entity;
-		List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("obj"));
-		JavaType returnType = JavaType.BOOLEAN_PRIMITIVE;
+		final List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("obj"));
+		final JavaType returnType = JavaType.BOOLEAN_PRIMITIVE;
 
 		// Locate user-defined method
 		MethodMetadata userMethod = getGovernorMethod(methodName, parameterType);
@@ -772,7 +772,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("return false;");
 
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(parameterType), parameterNames, bodyBuilder);
+		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(parameterType), parameterNames, bodyBuilder);
 		builder.addMethod(methodBuilder);
 		modifyMethod = methodBuilder.build();
 	}
@@ -808,7 +808,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 
 		findMethod.copyAdditionsTo(builder, governorTypeDetails);
 
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, entity, bodyBuilder);
+		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, entity, bodyBuilder);
 		builder.addMethod(methodBuilder);
 		randomPersistentEntityMethod = methodBuilder.build();
 	}
@@ -845,7 +845,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 
 		findMethod.copyAdditionsTo(builder, governorTypeDetails);
 
-		MethodMetadataBuilder methodBuilder =  new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, entity, AnnotatedJavaType.convertFromJavaTypes(parameterType), parameterNames, bodyBuilder);
+		final MethodMetadataBuilder methodBuilder =  new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, entity, AnnotatedJavaType.convertFromJavaTypes(parameterType), parameterNames, bodyBuilder);
 		builder.addMethod(methodBuilder);
 		specificPersistentEntityMethod = methodBuilder.build();
 	}

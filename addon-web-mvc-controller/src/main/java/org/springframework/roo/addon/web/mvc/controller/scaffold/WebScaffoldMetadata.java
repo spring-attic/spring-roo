@@ -184,23 +184,22 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		return annotationValues;
 	}
 
-	private ConstructorMetadata getConstructor() {
+	private ConstructorMetadataBuilder getConstructor() {
 		final ConstructorMetadata constructor = governorTypeDetails.getDeclaredConstructor(Arrays.asList(CONVERSION_SERVICE));
 		if (constructor != null) {
-			return constructor;
+			return null;
 		}
 
 		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("this." + CS_FIELD + " = " + CS_FIELD + ";");
 
 		final ConstructorMetadataBuilder constructorBuilder = new ConstructorMetadataBuilder(getId());
-		final AnnotationMetadataBuilder autowired = new AnnotationMetadataBuilder(AUTOWIRED);
-		constructorBuilder.addAnnotation(autowired.build());
+		constructorBuilder.addAnnotation(new AnnotationMetadataBuilder(AUTOWIRED));
 		constructorBuilder.addParameterType(AnnotatedJavaType.convertFromJavaType(CONVERSION_SERVICE));
 		constructorBuilder.addParameterName(CS_FIELD);
 		constructorBuilder.setModifier(Modifier.PUBLIC);
 		constructorBuilder.setBodyBuilder(bodyBuilder);
-		return constructorBuilder.build();
+		return constructorBuilder;
 	}
 
 	private MethodMetadataBuilder getDeleteMethod(final MemberTypeAdditions deleteMethodAdditions, final MemberTypeAdditions findMethod) {

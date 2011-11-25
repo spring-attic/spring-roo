@@ -61,7 +61,7 @@ public class EditorMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		itdTypeDetails = builder.build();
 	}
 
-	private FieldMetadata getField() {
+	private FieldMetadataBuilder getField() {
 		JavaSymbolName fieldName = new JavaSymbolName("typeConverter");
 
 		// Locate user-defined field
@@ -69,10 +69,10 @@ public class EditorMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		final JavaType fieldType = SpringJavaType.SIMPLE_TYPE_CONVERTER;
 		if (userField != null) {
 			Assert.isTrue(userField.getFieldType().equals(fieldType), "Field '" + fieldName + "' on '" + destination + "' must be of type '" + fieldType.getNameIncludingTypeParameters() + "'");
-			return userField;
+			return new FieldMetadataBuilder(userField);
 		}
 
-		return new FieldMetadataBuilder(getId(), Modifier.PRIVATE, fieldName, fieldType, "new " + fieldType + "()").build();
+		return new FieldMetadataBuilder(getId(), Modifier.PRIVATE, fieldName, fieldType, "new " + fieldType + "()");
 	}
 
 	private MethodMetadataBuilder getGetAsTextMethod(final JavaType javaType, final MethodMetadata identifierAccessorMethod) {

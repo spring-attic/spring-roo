@@ -77,7 +77,6 @@ public class EditorMetadataProvider extends AbstractItdMetadataProvider {
 			return null;
 		}
 		
-		
 		final MethodMetadata findMethod = jpaActiveRecordMetadata.getFindMethod();
 		
 		return new EditorMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, javaType, identifierType, identifierAccessor, findMethod);

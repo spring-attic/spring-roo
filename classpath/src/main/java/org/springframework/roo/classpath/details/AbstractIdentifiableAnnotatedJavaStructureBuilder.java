@@ -49,10 +49,10 @@ public abstract class AbstractIdentifiableAnnotatedJavaStructureBuilder<T extend
 		return addAnnotation(new AnnotationMetadataBuilder(annotationMetadata));
 	}
 
-	public final boolean addAnnotation(final AnnotationMetadataBuilder annotationMetadata) {
-		if (annotationMetadata == null) return false;
-		onAddAnnotation(annotationMetadata);
-		return annotations.add(annotationMetadata);
+	public final boolean addAnnotation(final AnnotationMetadataBuilder annotationBuilder) {
+		if (annotationBuilder == null) return false;
+		onAddAnnotation(annotationBuilder);
+		return annotations.add(annotationBuilder);
 	}
 
 	protected void onAddAnnotation(final AnnotationMetadataBuilder annotationMetadata) {}
@@ -63,8 +63,8 @@ public abstract class AbstractIdentifiableAnnotatedJavaStructureBuilder<T extend
 
 	public final List<AnnotationMetadata> buildAnnotations() {
 		List<AnnotationMetadata> result = new ArrayList<AnnotationMetadata>();
-		for (AnnotationMetadataBuilder builder : annotations) {
-			result.add(builder.build());
+		for (AnnotationMetadataBuilder annotationBuilder : annotations) {
+			result.add(annotationBuilder.build());
 		}
 		return result;
 	}
@@ -74,11 +74,11 @@ public abstract class AbstractIdentifiableAnnotatedJavaStructureBuilder<T extend
 	}
 
 	public final void setAnnotations(final Collection<AnnotationMetadata> annotations) {
-		List<AnnotationMetadataBuilder> annotationMetadataBuilders = new ArrayList<AnnotationMetadataBuilder>();
+		List<AnnotationMetadataBuilder> annotationBuilders = new ArrayList<AnnotationMetadataBuilder>();
 		for (AnnotationMetadata annotationMetadata : annotations) {
-			annotationMetadataBuilders.add(new AnnotationMetadataBuilder(annotationMetadata));
+			annotationBuilders.add(new AnnotationMetadataBuilder(annotationMetadata));
 		}
-		setAnnotations(annotationMetadataBuilders);
+		setAnnotations(annotationBuilders);
 	}
 
 	public void removeAnnotation(final JavaType annotationType) {

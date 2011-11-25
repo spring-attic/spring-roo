@@ -65,7 +65,7 @@ public class IdentifierMetadataProviderImpl extends AbstractIdentifierServiceAwa
 			// If the project itself changes, we want a chance to refresh this item
 			metadataDependencyRegistry.registerDependency(ProjectMetadata.getProjectIdentifier(path.getModule()), metadataIdentificationString);
 		}
-		
+
 		return new IdentifierMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, identifierServiceResult);
 	}
 

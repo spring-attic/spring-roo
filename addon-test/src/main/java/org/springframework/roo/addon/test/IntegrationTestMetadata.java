@@ -137,7 +137,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 			List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 			annotations.add(new AnnotationMetadataBuilder(AUTOWIRED));
 			FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), Modifier.PRIVATE, annotations, new JavaSymbolName("dod"), dodGovernor);
-			builder.addField(fieldBuilder.build());
+			builder.addField(fieldBuilder);
 		}
 
 		builder.getImportRegistrationResolver().addImport(ASSERT);
@@ -153,7 +153,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 			// Add the field via the ITD
 			String initializer = "new LocalServiceTestHelper(new com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig())";
 			FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), Modifier.PRIVATE | Modifier.STATIC | Modifier.FINAL, new JavaSymbolName("helper"), helperType, initializer);
-			builder.addField(fieldBuilder.build());
+			builder.addField(fieldBuilder);
 		}
 
 		// Prepare setUp method signature

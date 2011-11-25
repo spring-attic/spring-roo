@@ -9,7 +9,6 @@ import static org.springframework.roo.model.JdkJavaType.SERIALIZABLE;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.customdata.CustomDataKeys;
-import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.details.ItdTypeDetailsBuilder;
@@ -88,12 +87,20 @@ public class SerializableMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	 * 
 	 * @return a non-<code>null</code> field
 	 */
-	private FieldMetadata createSerialVersionField() {
-		final FieldMetadataBuilder field = new FieldMetadataBuilder(getId(), PRIVATE | STATIC | FINAL, SERIAL_VERSION_FIELD, LONG_PRIMITIVE, DEFAULT_SERIAL_VERSION);
-		field.getCustomData().put(CustomDataKeys.SERIAL_VERSION_UUID_FIELD, true);
-		return field.build();
+	private FieldMetadataBuilder createSerialVersionField() {
+		final FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), PRIVATE | STATIC | FINAL, SERIAL_VERSION_FIELD, LONG_PRIMITIVE, DEFAULT_SERIAL_VERSION);
+		fieldBuilder.getCustomData().put(CustomDataKeys.SERIAL_VERSION_UUID_FIELD, true);
+		return fieldBuilder;
 	}
-
+	/**
+	 * For unit testing
+	 * 
+	 * @return
+	 */
+	ItdTypeDetails getItdTypeDetails() {
+		return this.itdTypeDetails;
+	}
+	
 	@Override
 	public String toString() {
 		ToStringCreator tsc = new ToStringCreator(this);
@@ -104,14 +111,5 @@ public class SerializableMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		tsc.append("governor", governorPhysicalTypeMetadata.getId());
 		tsc.append("itdTypeDetails", itdTypeDetails);
 		return tsc.toString();
-	}
-
-	/**
-	 * For unit testing
-	 * 
-	 * @return
-	 */
-	ItdTypeDetails getItdTypeDetails() {
-		return this.itdTypeDetails;
 	}
 }

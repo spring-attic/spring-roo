@@ -85,6 +85,7 @@ import org.springframework.roo.classpath.customdata.CustomDataKeys;
 import org.springframework.roo.classpath.customdata.tagkeys.MethodMetadataCustomDataKey;
 import org.springframework.roo.classpath.details.BeanInfoUtils;
 import org.springframework.roo.classpath.details.FieldMetadata;
+import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
@@ -140,7 +141,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 	private String beanName;
 	private String plural;
 	private JavaSymbolName entityName;
-	private final List<FieldMetadata> builderFields = new ArrayList<FieldMetadata>();
+	private final List<FieldMetadataBuilder> builderFields = new ArrayList<FieldMetadataBuilder>();
 	private final List<MethodMetadataBuilder> builderMethods = new ArrayList<MethodMetadataBuilder>();
 
 	private enum Action {
@@ -230,8 +231,8 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		builderMethods.add(getHandleDialogCloseMethod());
 
 		// Add builderFields first to builder followed by builderMethods
-		for (FieldMetadata field : builderFields) {
-			builder.addField(field);
+		for (FieldMetadataBuilder fieldBuilder : builderFields) {
+			builder.addField(fieldBuilder);
 		}
 		for (MethodMetadataBuilder method : builderMethods) {
 			builder.addMethod(method);
@@ -318,7 +319,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		return new JavaType(LIST.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, Arrays.asList(parameterType));
 	}
 
-	private FieldMetadata getPanelGridField(final Action panelType) {
+	private FieldMetadataBuilder getPanelGridField(final Action panelType) {
 		return getField(new JavaSymbolName(StringUtils.toLowerCase(panelType.name()) + "PanelGrid"), HTML_PANEL_GRID);
 	}
 

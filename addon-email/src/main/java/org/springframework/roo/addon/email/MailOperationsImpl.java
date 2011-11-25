@@ -264,7 +264,7 @@ public class MailOperationsImpl implements MailOperations {
 
 		// Add the MailSender field
 		final FieldMetadataBuilder mailSenderFieldBuilder = new FieldMetadataBuilder(declaredByMetadataId, PRIVATE_TRANSIENT, annotations, fieldName, MAIL_SENDER);
-		classOrInterfaceTypeDetailsBuilder.addField(mailSenderFieldBuilder.build());
+		classOrInterfaceTypeDetailsBuilder.addField(mailSenderFieldBuilder);
 
 		// Add the "sendMessage" method
 		classOrInterfaceTypeDetailsBuilder.addMethod(getSendMethod(fieldName, async, declaredByMetadataId, classOrInterfaceTypeDetailsBuilder));
@@ -304,7 +304,7 @@ public class MailOperationsImpl implements MailOperations {
 			// A SimpleMailMessage bean exists; auto-wire it into the entity and use it as a template
 			final List<AnnotationMetadataBuilder> smmAnnotations = Arrays.asList(new AnnotationMetadataBuilder(AUTOWIRED));
 			final FieldMetadataBuilder smmFieldBuilder = new FieldMetadataBuilder(targetClassMID, PRIVATE_TRANSIENT, smmAnnotations, new JavaSymbolName(TEMPLATE_MESSAGE_FIELD), SIMPLE_MAIL_MESSAGE);
-			classOrInterfaceTypeDetailsBuilder.addField(smmFieldBuilder.build());
+			classOrInterfaceTypeDetailsBuilder.addField(smmFieldBuilder);
 			// Use the injected bean as a template (for thread safety)
 			bodyBuilder.appendFormalLine(SIMPLE_MAIL_MESSAGE.getFullyQualifiedTypeName() + " " + LOCAL_MESSAGE_VARIABLE	+ " = new " + SIMPLE_MAIL_MESSAGE.getFullyQualifiedTypeName() + "(" + TEMPLATE_MESSAGE_FIELD + ");");
 		}

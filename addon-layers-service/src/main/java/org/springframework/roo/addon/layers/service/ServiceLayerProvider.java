@@ -75,12 +75,6 @@ public class ServiceLayerProvider extends CoreLayerProvider {
 					// The service implements the method; get the additions to be made by the caller
 					final MemberTypeAdditions methodAdditions = getMethodAdditions(callerMID, methodName, serviceInterface.getName(), parameterList.getValues());
 
-					// Register the caller for updates of this service
-//					metadataDependencyRegistry.registerDependency(serviceInterface.getDeclaredByMetadataId(), callerMID);
-
-					// Register the caller for updates of the pluralisation of the entity
-//					metadataDependencyRegistry.registerDependency(pluralId, callerMID);
-
 					// Return these additions
 					return methodAdditions;
 				}
@@ -102,14 +96,12 @@ public class ServiceLayerProvider extends CoreLayerProvider {
 	 * @return a non-<code>null</code> set of additions
 	 */
 	private MemberTypeAdditions getMethodAdditions(final String callerMID, final String methodName, final JavaType serviceInterface, final List<JavaSymbolName> parameterNames) {
-
 		// The method is supported by this service interface; make a builder
 		final ClassOrInterfaceTypeDetailsBuilder classBuilder = new ClassOrInterfaceTypeDetailsBuilder(callerMID);
 
 		// Add an autowired field of the type of this service
-		final AnnotationMetadataBuilder annotation = new AnnotationMetadataBuilder(AUTOWIRED);
 		final String fieldName = StringUtils.uncapitalize(serviceInterface.getSimpleTypeName());
-		classBuilder.addField(new FieldMetadataBuilder(callerMID, 0, Arrays.asList(annotation), new JavaSymbolName(fieldName), serviceInterface).build());
+		classBuilder.addField(new FieldMetadataBuilder(callerMID, 0, Arrays.asList( new AnnotationMetadataBuilder(AUTOWIRED)), new JavaSymbolName(fieldName), serviceInterface));
 
 		// Generate an additions object that includes a call to the method
 		return MemberTypeAdditions.getInstance(classBuilder, fieldName, methodName, parameterNames);

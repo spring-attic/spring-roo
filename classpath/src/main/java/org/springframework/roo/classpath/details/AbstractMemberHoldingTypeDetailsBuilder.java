@@ -207,25 +207,52 @@ public abstract class AbstractMemberHoldingTypeDetailsBuilder<T extends MemberHo
 		}
 	}
 
-	public final boolean addConstructor(final ConstructorMetadataBuilder constructor) {
-		if (constructor == null || !getDeclaredByMetadataId().equals(constructor.getDeclaredByMetadataId())) {
+	public final boolean addConstructor(final ConstructorMetadata constructor) {
+		if (constructor == null) {
 			return false;
 		}
-		onAddConstructor(constructor);
-		return declaredConstructors.add(constructor);
+		return addConstructor(new ConstructorMetadataBuilder(constructor));
 	}
 
-	protected void onAddConstructor(final ConstructorMetadataBuilder constructor) {}
-
-	public final boolean addField(final FieldMetadataBuilder field) {
-		if (field == null || !getDeclaredByMetadataId().equals(field.getDeclaredByMetadataId())) {
+	public final boolean addConstructor(final ConstructorMetadataBuilder constructorBuilder) {
+		if (constructorBuilder == null || !getDeclaredByMetadataId().equals(constructorBuilder.getDeclaredByMetadataId())) {
 			return false;
 		}
-		onAddField(field);
-		return declaredFields.add(field);
+		onAddConstructor(constructorBuilder);
+		return declaredConstructors.add(constructorBuilder);
 	}
 
-	protected void onAddField(final FieldMetadataBuilder field) {}
+	protected void onAddConstructor(final ConstructorMetadataBuilder constructorBuilder) {}
+
+	public final boolean addField(final FieldMetadata field) {
+		if (field == null) {
+			return false;
+		}
+		return addField(new FieldMetadataBuilder(field));
+	}
+
+	public final boolean addField(final FieldMetadataBuilder fieldBuilder) {
+		if (fieldBuilder == null || !getDeclaredByMetadataId().equals(fieldBuilder.getDeclaredByMetadataId())) {
+			return false;
+		}
+		onAddField(fieldBuilder);
+		return declaredFields.add(fieldBuilder);
+	}
+
+	protected void onAddField(final FieldMetadataBuilder fieldBuilder) {}
+
+	/**
+	 * Adds the given method to this builder
+	 *
+	 * @param method the method to add; can be <code>null</code>
+	 * @return <code>true</code> if the state of this builder changed
+	 */
+	public final boolean addMethod(final MethodMetadata method) {
+		if (method == null) {
+			return false;
+		}
+		return addMethod(new MethodMetadataBuilder(method));
+	}
 
 	/**
 	 * Adds the given method to this builder
@@ -249,33 +276,6 @@ public abstract class AbstractMemberHoldingTypeDetailsBuilder<T extends MemberHo
 	 * @param methodBuilder the method being added; never <code>null</code>
 	 */
 	protected void onAddMethod(final MethodMetadataBuilder methodBuilder) {}
-
-	public final boolean addConstructor(final ConstructorMetadata constructor) {
-		if (constructor == null) {
-			return false;
-		}
-		return addConstructor(new ConstructorMetadataBuilder(constructor));
-	}
-
-	public final boolean addField(final FieldMetadata field) {
-		if (field == null) {
-			return false;
-		}
-		return addField(new FieldMetadataBuilder(field));
-	}
-
-	/**
-	 * Adds the given method to this builder
-	 *
-	 * @param method the method to add; can be <code>null</code>
-	 * @return <code>true</code> if the state of this builder changed
-	 */
-	public final boolean addMethod(final MethodMetadata method) {
-		if (method == null) {
-			return false;
-		}
-		return addMethod(new MethodMetadataBuilder(method));
-	}
 
 	public final boolean addInnerType(final ClassOrInterfaceTypeDetails innerType) {
 		if (innerType == null) {
