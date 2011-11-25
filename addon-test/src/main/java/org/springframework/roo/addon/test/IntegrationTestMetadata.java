@@ -171,7 +171,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 
 			MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC | Modifier.STATIC, setUpMethodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(SETUP_PARAMETERS), new ArrayList<JavaSymbolName>(), bodyBuilder);
 			methodBuilder.setAnnotations(annotations);
-			builder.addMethod(methodBuilder.build());
+			builder.addMethod(methodBuilder);
 		}
 
 		// Prepare tearDown method signature
@@ -189,14 +189,14 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 
 			MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC | Modifier.STATIC, tearDownMethodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(TEARDOWN_PARAMETERS), new ArrayList<JavaSymbolName>(), bodyBuilder);
 			methodBuilder.setAnnotations(annotations);
-			builder.addMethod(methodBuilder.build());
+			builder.addMethod(methodBuilder);
 		}
 	}
 
 	/**
 	 * @return a test for the count method, if available and requested (may return null)
 	 */
-	private MethodMetadata getCountMethodTest(final MemberTypeAdditions countMethod) {
+	private MethodMetadataBuilder getCountMethodTest(final MemberTypeAdditions countMethod) {
 		if (!annotationValues.isCount() || countMethod == null) {
 			// User does not want this method
 			return null;
@@ -204,11 +204,8 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 
 		// Prepare method signature
 		JavaSymbolName methodName = new JavaSymbolName("test" + StringUtils.capitalize(countMethod.getMethodName()));
-		final JavaType[] parameters = {};
-
-		MethodMetadata method = getGovernorMethod(methodName, parameters);
-		if (method != null) {
-			return method;
+		if (governorHasMethod(methodName)) {
+			return null;
 		}
 
 		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
@@ -221,15 +218,15 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 
 		countMethod.copyAdditionsTo(builder, governorTypeDetails);
 
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameters), new ArrayList<JavaSymbolName>(), bodyBuilder);
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
-		return methodBuilder.build();
+		return methodBuilder;
 	}
 
 	/**
 	 * @return a test for the find (by ID) method, if available and requested (may return null)
 	 */
-	private MethodMetadata getFindMethodTest(final MemberTypeAdditions findMethod, final MethodMetadata identifierAccessorMethod) {
+	private MethodMetadataBuilder getFindMethodTest(final MemberTypeAdditions findMethod, final MethodMetadata identifierAccessorMethod) {
 		if (!annotationValues.isFind() || findMethod == null || identifierAccessorMethod == null) {
 			// User does not want this method
 			return null;
@@ -237,10 +234,8 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 
 		// Prepare method signature
 		JavaSymbolName methodName = new JavaSymbolName("test" + StringUtils.capitalize(findMethod.getMethodName()));
-		final JavaType[] parameters = {};
-		MethodMetadata method = getGovernorMethod(methodName, parameters);
-		if (method != null) {
-			return method;
+		if (governorHasMethod(methodName)) {
+			return null;
 		}
 
 		builder.getImportRegistrationResolver().addImport(identifierAccessorMethod.getReturnType());
@@ -259,15 +254,15 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 
 		findMethod.copyAdditionsTo(builder, governorTypeDetails);
 
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameters), new ArrayList<JavaSymbolName>(), bodyBuilder);
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
-		return methodBuilder.build();
+		return methodBuilder;
 	}
 
 	/**
 	 * @return a test for the find all  method, if available and requested (may return null)
 	 */
-	private MethodMetadata getFindAllMethodTest(final MemberTypeAdditions findAllMethod, final MemberTypeAdditions countMethod) {
+	private MethodMetadataBuilder getFindAllMethodTest(final MemberTypeAdditions findAllMethod, final MemberTypeAdditions countMethod) {
 		if (!annotationValues.isFindAll() || findAllMethod == null || countMethod == null) {
 			// User does not want this method, or core dependencies are missing
 			return null;
@@ -275,10 +270,8 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 
 		// Prepare method signature
 		JavaSymbolName methodName = new JavaSymbolName("test" + StringUtils.capitalize(findAllMethod.getMethodName()));
-		final JavaType[] parameters = {};
-		MethodMetadata method = getGovernorMethod(methodName, parameters);
-		if (method != null) {
-			return method;
+		if (governorHasMethod(methodName)) {
+			return null;
 		}
 
 		builder.getImportRegistrationResolver().addImport(LIST);
@@ -297,15 +290,15 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		findAllMethod.copyAdditionsTo(builder, governorTypeDetails);
 		countMethod.copyAdditionsTo(builder, governorTypeDetails);
 
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameters), new ArrayList<JavaSymbolName>(), bodyBuilder);
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
-		return methodBuilder.build();
+		return methodBuilder;
 	}
 
 	/**
 	 * @return a test for the find entries method, if available and requested (may return null)
 	 */
-	private MethodMetadata getFindEntriesMethodTest(final MemberTypeAdditions countMethod, final MemberTypeAdditions findEntriesMethod) {
+	private MethodMetadataBuilder getFindEntriesMethodTest(final MemberTypeAdditions countMethod, final MemberTypeAdditions findEntriesMethod) {
 		if (!annotationValues.isFindEntries() || countMethod == null || findEntriesMethod == null) {
 			// User does not want this method, or core dependencies are missing
 			return null;
@@ -313,10 +306,8 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 
 		// Prepare method signature
 		JavaSymbolName methodName = new JavaSymbolName("test" + StringUtils.capitalize(findEntriesMethod.getMethodName()));
-		final JavaType[] parameters = {};
-		MethodMetadata method = getGovernorMethod(methodName, parameters);
-		if (method != null) {
-			return method;
+		if (governorHasMethod(methodName)) {
+			return null;
 		}
 
 		builder.getImportRegistrationResolver().addImport(LIST);
@@ -337,15 +328,15 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		findEntriesMethod.copyAdditionsTo(builder, governorTypeDetails);
 		countMethod.copyAdditionsTo(builder, governorTypeDetails);
 
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameters), new ArrayList<JavaSymbolName>(), bodyBuilder);
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
-		return methodBuilder.build();
+		return methodBuilder;
 	}
 
 	/**
 	 * @return a test for the flush method, if available and requested (may return null)
 	 */
-	private MethodMetadata getFlushMethodTest(final MethodMetadata versionAccessorMethod, final MethodMetadata identifierAccessorMethod, final MemberTypeAdditions flushMethod, final MemberTypeAdditions findMethod) {
+	private MethodMetadataBuilder getFlushMethodTest(final MethodMetadata versionAccessorMethod, final MethodMetadata identifierAccessorMethod, final MemberTypeAdditions flushMethod, final MemberTypeAdditions findMethod) {
 		if (!annotationValues.isFlush() || versionAccessorMethod == null || identifierAccessorMethod == null || flushMethod == null || findMethod == null) {
 			// User does not want this method, or core dependencies are missing
 			return null;
@@ -353,10 +344,8 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 
 		// Prepare method signature
 		JavaSymbolName methodName = new JavaSymbolName("test" + StringUtils.capitalize(flushMethod.getMethodName()));
-		final JavaType[] parameters = {};
-		MethodMetadata method = getGovernorMethod(methodName, parameters);
-		if (method != null) {
-			return method;
+		if (governorHasMethod(methodName)) {
+			return null;
 		}
 
 		JavaType versionType = versionAccessorMethod.getReturnType();
@@ -384,15 +373,15 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		flushMethod.copyAdditionsTo(builder, governorTypeDetails);
 		findMethod.copyAdditionsTo(builder, governorTypeDetails);
 
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameters), new ArrayList<JavaSymbolName>(), bodyBuilder);
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
-		return methodBuilder.build();
+		return methodBuilder;
 	}
 
 	/**
 	 * @return a test for the merge method, if available and requested (may return null)
 	 */
-	private MethodMetadata getMergeMethodTest(final MemberTypeAdditions mergeMethod, final MemberTypeAdditions findMethod, final MemberTypeAdditions flushMethod, final MethodMetadata versionAccessorMethod, final MethodMetadata identifierAccessorMethod) {
+	private MethodMetadataBuilder getMergeMethodTest(final MemberTypeAdditions mergeMethod, final MemberTypeAdditions findMethod, final MemberTypeAdditions flushMethod, final MethodMetadata versionAccessorMethod, final MethodMetadata identifierAccessorMethod) {
 		if (!annotationValues.isMerge() || mergeMethod == null || versionAccessorMethod == null || findMethod == null || identifierAccessorMethod == null) {
 			// User does not want this method, or core dependencies are missing
 			return null;
@@ -400,10 +389,8 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 
 		// Prepare method signature
 		JavaSymbolName methodName = new JavaSymbolName("test" + StringUtils.capitalize(mergeMethod.getMethodName()) + "Update");
-		final JavaType[] parameterTypes = {};
-		MethodMetadata method = getGovernorMethod(methodName, parameterTypes);
-		if (method != null) {
-			return method;
+		if (governorHasMethod(methodName)) {
+			return null;
 		}
 
 		JavaType versionType = versionAccessorMethod.getReturnType();
@@ -441,15 +428,15 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		mergeMethod.copyAdditionsTo(builder, governorTypeDetails);
 		findMethod.copyAdditionsTo(builder, governorTypeDetails);
 
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), new ArrayList<JavaSymbolName>(), bodyBuilder);
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
-		return methodBuilder.build();
+		return methodBuilder;
 	}
 
 	/**
 	 * @return a test for the persist method, if available and requested (may return null)
 	 */
-	private MethodMetadata getPersistMethodTest(final MemberTypeAdditions persistMethod, final MemberTypeAdditions flushMethod, final MethodMetadata identifierAccessorMethod) {
+	private MethodMetadataBuilder getPersistMethodTest(final MemberTypeAdditions persistMethod, final MemberTypeAdditions flushMethod, final MethodMetadata identifierAccessorMethod) {
 		if (!annotationValues.isPersist() || persistMethod == null || identifierAccessorMethod == null) {
 			// User does not want this method
 			return null;
@@ -457,10 +444,8 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 
 		// Prepare method signature
 		JavaSymbolName methodName = new JavaSymbolName("test" + StringUtils.capitalize(persistMethod.getMethodName()));
-		final JavaType[] parameterTypes = {};
-		MethodMetadata method = getGovernorMethod(methodName, parameterTypes);
-		if (method != null) {
-			return method;
+		if (governorHasMethod(methodName)) {
+			return null;
 		}
 
 		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
@@ -485,15 +470,15 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 
 		persistMethod.copyAdditionsTo(builder, governorTypeDetails);
 
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), new ArrayList<JavaSymbolName>(), bodyBuilder);
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
-		return methodBuilder.build();
+		return methodBuilder;
 	}
 
 	/**
 	 * @return a test for the persist method, if available and requested (may return null)
 	 */
-	private MethodMetadata getRemoveMethodTest(final MemberTypeAdditions removeMethod, final MemberTypeAdditions findMethod, final MemberTypeAdditions flushMethod, final MethodMetadata identifierAccessorMethod) {
+	private MethodMetadataBuilder getRemoveMethodTest(final MemberTypeAdditions removeMethod, final MemberTypeAdditions findMethod, final MemberTypeAdditions flushMethod, final MethodMetadata identifierAccessorMethod) {
 		if (!annotationValues.isRemove() || removeMethod == null || findMethod == null || identifierAccessorMethod == null) {
 			// User does not want this method or one of its core dependencies
 			return null;
@@ -501,10 +486,8 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 
 		// Prepare method signature
 		JavaSymbolName methodName = new JavaSymbolName("test" + StringUtils.capitalize(removeMethod.getMethodName()));
-		final JavaType[] parameterTypes = {};
-		MethodMetadata method = getGovernorMethod(methodName, parameterTypes);
-		if (method != null) {
-			return method;
+		if (governorHasMethod(methodName)) {
+			return null;
 		}
 
 		builder.getImportRegistrationResolver().addImport(identifierAccessorMethod.getReturnType());
@@ -538,9 +521,9 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		removeMethod.copyAdditionsTo(builder, governorTypeDetails);
 		findMethod.copyAdditionsTo(builder, governorTypeDetails);
 
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), new ArrayList<JavaSymbolName>(), bodyBuilder);
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
-		return methodBuilder.build();
+		return methodBuilder;
 	}
 
 	@Override

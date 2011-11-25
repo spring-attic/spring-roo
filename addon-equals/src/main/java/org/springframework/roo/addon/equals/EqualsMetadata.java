@@ -11,7 +11,6 @@ import java.util.List;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.FieldMetadata;
-import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
@@ -101,7 +100,7 @@ public class EqualsMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	 *
 	 * @return <code>null</code> if no generation is required
 	 */
-	private MethodMetadata getEqualsMethod() {
+	private MethodMetadataBuilder getEqualsMethod() {
 		final JavaType parameterType = OBJECT;
 		if (getGovernorMethod(EQUALS_METHOD_NAME, parameterType) != null) {
 			return null;
@@ -138,7 +137,7 @@ public class EqualsMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 
 		bodyBuilder.appendFormalLine(builder.toString());
 
-		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, EQUALS_METHOD_NAME, BOOLEAN_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterType), parameterNames, bodyBuilder).build();
+		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, EQUALS_METHOD_NAME, BOOLEAN_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterType), parameterNames, bodyBuilder);
 	}
 
 	/**
@@ -146,7 +145,7 @@ public class EqualsMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	 *
 	 * @return <code>null</code> if no generation is required
 	 */
-	private MethodMetadata getHashCodeMethod() {
+	private MethodMetadataBuilder getHashCodeMethod() {
 		if (getGovernorMethod(HASH_CODE_METHOD_NAME) != null) {
 			return null;
 		}
@@ -167,7 +166,7 @@ public class EqualsMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 
 		bodyBuilder.appendFormalLine(builder.toString());
 
-		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, HASH_CODE_METHOD_NAME, INT_PRIMITIVE, bodyBuilder).build();
+		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, HASH_CODE_METHOD_NAME, INT_PRIMITIVE, bodyBuilder);
 	}
 
 	@Override

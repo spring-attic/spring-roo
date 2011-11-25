@@ -12,7 +12,6 @@ import java.util.List;
 
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
-import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
@@ -74,7 +73,7 @@ public class JsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		return new JavaSymbolName(methodLabel);
 	}
 
-	private MethodMetadata getToJsonMethod() {
+	private MethodMetadataBuilder getToJsonMethod() {
 		// Compute the relevant method name
 		JavaSymbolName methodName = getToJsonMethodName();
 		if (methodName == null) {
@@ -93,7 +92,7 @@ public class JsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, STRING, bodyBuilder);
 		methodBuilder.putCustomData(CustomDataJsonTags.TO_JSON_METHOD, null);
-		return methodBuilder.build();
+		return methodBuilder;
 	}
 
 	public JavaSymbolName getToJsonArrayMethodName() {
@@ -104,7 +103,7 @@ public class JsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		return new JavaSymbolName(methodLabel);
 	}
 
-	private MethodMetadata getToJsonArrayMethod() {
+	private MethodMetadataBuilder getToJsonArrayMethod() {
 		// Compute the relevant method name
 		JavaSymbolName methodName = getToJsonArrayMethodName();
 		if (methodName == null) {
@@ -127,7 +126,7 @@ public class JsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC | Modifier.STATIC, methodName, STRING, AnnotatedJavaType.convertFromJavaTypes(parameterType), parameterNames, bodyBuilder);
 		methodBuilder.putCustomData(CustomDataJsonTags.TO_JSON_ARRAY_METHOD, null);
-		return methodBuilder.build();
+		return methodBuilder;
 	}
 
 	public JavaSymbolName getFromJsonArrayMethodName() {
@@ -139,7 +138,7 @@ public class JsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		return new JavaSymbolName(methodLabel.replace("<TypeNamePlural>", typeNamePlural));
 	}
 
-	private MethodMetadata getFromJsonArrayMethod() {
+	private MethodMetadataBuilder getFromJsonArrayMethod() {
 		// Compute the relevant method name
 		JavaSymbolName methodName = getFromJsonArrayMethodName();
 		if (methodName == null) {
@@ -165,7 +164,7 @@ public class JsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC | Modifier.STATIC, methodName, collection, AnnotatedJavaType.convertFromJavaTypes(parameterType), parameterNames, bodyBuilder);
 		methodBuilder.putCustomData(CustomDataJsonTags.FROM_JSON_ARRAY_METHOD, null);
-		return methodBuilder.build();
+		return methodBuilder;
 	}
 
 	public JavaSymbolName getFromJsonMethodName() {
@@ -178,7 +177,7 @@ public class JsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		return new JavaSymbolName(methodLabel.replace("<TypeName>", destination.getSimpleTypeName()));
 	}
 
-	private MethodMetadata getFromJsonMethod() {
+	private MethodMetadataBuilder getFromJsonMethod() {
 		JavaSymbolName methodName = getFromJsonMethodName();
 		if (methodName == null) {
 			return null;
@@ -197,7 +196,7 @@ public class JsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC | Modifier.STATIC, methodName, destination,  AnnotatedJavaType.convertFromJavaTypes(parameterType), parameterNames, bodyBuilder);
 		methodBuilder.putCustomData(CustomDataJsonTags.FROM_JSON_METHOD, null);
-		return methodBuilder.build();
+		return methodBuilder;
 	}
 
 	@Override

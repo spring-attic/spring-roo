@@ -13,7 +13,6 @@ import java.util.List;
 import org.springframework.roo.addon.web.mvc.controller.scaffold.WebScaffoldAnnotationValues;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
-import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
@@ -64,7 +63,7 @@ public class SolrWebSearchMetadata extends AbstractItdTypeDetailsProvidingMetada
 		itdTypeDetails = builder.build();
 	}
 
-	private MethodMetadata getSearchMethod(final SolrWebSearchAnnotationValues solrWebSearchAnnotationValues, final SolrSearchAnnotationValues searchAnnotationValues, final WebScaffoldAnnotationValues webScaffoldAnnotationValues) {
+	private MethodMetadataBuilder getSearchMethod(final SolrWebSearchAnnotationValues solrWebSearchAnnotationValues, final SolrSearchAnnotationValues searchAnnotationValues, final WebScaffoldAnnotationValues webScaffoldAnnotationValues) {
 		JavaType targetObject = webScaffoldAnnotationValues.getFormBackingObject();
 		Assert.notNull(targetObject, "Could not aquire form backing object for the '" + webScaffoldAnnotationValues.getGovernorTypeDetails().getName().getFullyQualifiedTypeName() + "' controller");
 
@@ -113,10 +112,10 @@ public class SolrWebSearchMetadata extends AbstractItdTypeDetailsProvidingMetada
 
 		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.STRING, parameterTypes, parameterNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
-		return methodBuilder.build();
+		return methodBuilder;
 	}
 
-	private MethodMetadata getAutocompleteMethod(final SolrWebSearchAnnotationValues solrWebSearchAnnotationValues, final SolrSearchAnnotationValues searchAnnotationValues, final WebScaffoldAnnotationValues webScaffoldAnnotationValues) {
+	private MethodMetadataBuilder getAutocompleteMethod(final SolrWebSearchAnnotationValues solrWebSearchAnnotationValues, final SolrSearchAnnotationValues searchAnnotationValues, final WebScaffoldAnnotationValues webScaffoldAnnotationValues) {
 		JavaSymbolName methodName = new JavaSymbolName(solrWebSearchAnnotationValues.getAutoCompleteMethod());
 		if (governorHasMethodWithSameName(methodName)) {
 			return null;
@@ -172,7 +171,7 @@ public class SolrWebSearchMetadata extends AbstractItdTypeDetailsProvidingMetada
 
 		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.STRING, parameterTypes, parameterNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
-		return methodBuilder.build();
+		return methodBuilder;
 	}
 
 	private AnnotationMetadata getRequestParamAnnotation(final String paramName, final boolean required) {

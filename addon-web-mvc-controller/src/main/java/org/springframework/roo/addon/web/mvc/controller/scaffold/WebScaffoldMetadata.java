@@ -44,7 +44,6 @@ import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.customdata.tagkeys.MethodMetadataCustomDataKey;
 import org.springframework.roo.classpath.details.ConstructorMetadata;
 import org.springframework.roo.classpath.details.ConstructorMetadataBuilder;
-import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
@@ -167,7 +166,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 			deleteMethod.copyAdditionsTo(builder, governorTypeDetails);
 		}
 		if (!specialDomainTypes.isEmpty()) {
-			for (final MethodMetadata method : getPopulateMethods()) {
+			for (final MethodMetadataBuilder method : getPopulateMethods()) {
 				builder.addMethod(method);
 			}
 		}
@@ -204,7 +203,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		return constructorBuilder.build();
 	}
 
-	private MethodMetadata getDeleteMethod(final MemberTypeAdditions deleteMethodAdditions, final MemberTypeAdditions findMethod) {
+	private MethodMetadataBuilder getDeleteMethod(final MemberTypeAdditions deleteMethodAdditions, final MemberTypeAdditions findMethod) {
 		final JavaTypePersistenceMetadataDetails javaTypePersistenceMetadataHolder = javaTypeMetadataHolder.getPersistenceDetails();
 		if (javaTypePersistenceMetadataHolder == null) {
 			return null;
@@ -251,7 +250,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 
 		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.STRING, parameterTypes, parameterNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
-		return methodBuilder.build();
+		return methodBuilder;
 	}
 
 	/**
@@ -263,7 +262,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 	 * @param findEntriesAdditions
 	 * @return <code>null</code> if no such method is to be introduced
 	 */
-	private MethodMetadata getListMethod(final MemberTypeAdditions findAllAdditions, final MemberTypeAdditions countAllAdditions, final MemberTypeAdditions findEntriesAdditions) {
+	private MethodMetadataBuilder getListMethod(final MemberTypeAdditions findAllAdditions, final MemberTypeAdditions countAllAdditions, final MemberTypeAdditions findEntriesAdditions) {
 		final JavaSymbolName methodName = new JavaSymbolName("list");
 		if (governorHasMethodWithSameName(methodName)) {
 			return null;
@@ -310,10 +309,10 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 
 		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.STRING, parameterTypes, parameterNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
-		return methodBuilder.build();
+		return methodBuilder;
 	}
 
-	private MethodMetadata getShowMethod(final MemberTypeAdditions findMethod) {
+	private MethodMetadataBuilder getShowMethod(final MemberTypeAdditions findMethod) {
 		final JavaTypePersistenceMetadataDetails javaTypePersistenceMetadataHolder = javaTypeMetadataHolder.getPersistenceDetails();
 		if (javaTypePersistenceMetadataHolder == null) {
 			return null;
@@ -348,10 +347,10 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 
 		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.STRING, parameterTypes, parameterNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
-		return methodBuilder.build();
+		return methodBuilder;
 	}
 
-	private MethodMetadata getCreateMethod(final MemberTypeAdditions persistMethod) {
+	private MethodMetadataBuilder getCreateMethod(final MemberTypeAdditions persistMethod) {
 		final JavaTypePersistenceMetadataDetails javaTypePersistenceMetadataHolder = javaTypeMetadataHolder.getPersistenceDetails();
 		if (javaTypePersistenceMetadataHolder == null || javaTypePersistenceMetadataHolder.getIdentifierAccessorMethod() == null) {
 			return null;
@@ -389,10 +388,10 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 
 		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.STRING, parameterTypes, parameterNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
-		return methodBuilder.build();
+		return methodBuilder;
 	}
 
-	private MethodMetadata getCreateFormMethod(final List<JavaTypeMetadataDetails> dependentTypes) {
+	private MethodMetadataBuilder getCreateFormMethod(final List<JavaTypeMetadataDetails> dependentTypes) {
 		final JavaSymbolName methodName = new JavaSymbolName("createForm");
 		if (governorHasMethodWithSameName(methodName)) {
 			return null;
@@ -445,10 +444,10 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 
 		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.STRING, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
-		return methodBuilder.build();
+		return methodBuilder;
 	}
 
-	private MethodMetadata getUpdateMethod(final MemberTypeAdditions updateMethod) {
+	private MethodMetadataBuilder getUpdateMethod(final MemberTypeAdditions updateMethod) {
 		final JavaTypePersistenceMetadataDetails javaTypePersistenceMetadataHolder = javaTypeMetadataHolder.getPersistenceDetails();
 		if (javaTypePersistenceMetadataHolder == null || javaTypePersistenceMetadataHolder.getMergeMethod() == null) {
 			return null;
@@ -485,10 +484,10 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 
 		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.STRING, parameterTypes, parameterNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
-		return methodBuilder.build();
+		return methodBuilder;
 	}
 
-	private MethodMetadata getUpdateFormMethod(final MemberTypeAdditions findMethod) {
+	private MethodMetadataBuilder getUpdateFormMethod(final MemberTypeAdditions findMethod) {
 		final JavaTypePersistenceMetadataDetails javaTypePersistenceMetadataHolder = javaTypeMetadataHolder.getPersistenceDetails();
 		if (javaTypePersistenceMetadataHolder == null) {
 			return null;
@@ -522,11 +521,11 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 
 		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.STRING, parameterTypes, parameterNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
-		return methodBuilder.build();
+		return methodBuilder;
 	}
 
-	private List<MethodMetadata> getPopulateMethods() {
-		final List<MethodMetadata> methods = new ArrayList<MethodMetadata>();
+	private List<MethodMetadataBuilder> getPopulateMethods() {
+		final List<MethodMetadataBuilder> methods = new ArrayList<MethodMetadataBuilder>();
 		if (!annotationValues.isPopulateMethods()) {
 			return methods;
 		}
@@ -557,12 +556,12 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 
 			final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, returnType, bodyBuilder);
 			methodBuilder.setAnnotations(annotations);
-			methods.add(methodBuilder.build());
+			methods.add(methodBuilder);
 		}
 		return methods;
 	}
 
-	private MethodMetadata getEncodeUrlPathSegmentMethod() {
+	private MethodMetadataBuilder getEncodeUrlPathSegmentMethod() {
 		final JavaSymbolName methodName = new JavaSymbolName("encodeUrlPathSegment");
 		if (governorHasMethodWithSameName(methodName)) {
 			return null;
@@ -587,10 +586,10 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		bodyBuilder.appendFormalLine("} catch (" + UNSUPPORTED_ENCODING_EXCEPTION.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + " uee) {}");
 		bodyBuilder.appendFormalLine("return pathSegment;");
 
-		return new MethodMetadataBuilder(getId(), 0, methodName, JavaType.STRING, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder).build();
+		return new MethodMetadataBuilder(getId(), 0, methodName, JavaType.STRING, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
 	}
 
-	private MethodMetadata getDateTimeFormatHelperMethod() {
+	private MethodMetadataBuilder getDateTimeFormatHelperMethod() {
 		final JavaSymbolName methodName = new JavaSymbolName("addDateTimeFormatPatterns");
 		if (governorHasMethodWithSameName(methodName)) {
 			return null;
@@ -613,7 +612,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 			bodyBuilder.appendFormalLine("uiModel.addAttribute(\"" + entityName + "_" + javaSymbolNameDateTimeFormatDetailsEntry.getKey().getSymbolName().toLowerCase() + "_date_format\", " + pattern + ");");
 		}
 
-		return new MethodMetadataBuilder(getId(), 0, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder).build();
+		return new MethodMetadataBuilder(getId(), 0, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
 	}
 
 	@Override

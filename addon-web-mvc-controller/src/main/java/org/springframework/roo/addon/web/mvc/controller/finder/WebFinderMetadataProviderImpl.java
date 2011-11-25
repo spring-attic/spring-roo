@@ -64,12 +64,11 @@ public class WebFinderMetadataProviderImpl extends AbstractItdMetadataProvider i
 		// We need to be informed if our dependent metadata changes
 		metadataDependencyRegistry.registerDependency(formBackingTypeDetails.getDeclaredByMetadataId(), metadataIdentificationString);
 
-		final MemberDetails memberDetails = getMemberDetails(governorPhysicalTypeMetadata);
 		final MemberDetails formBackingObjectMemberDetails = getMemberDetails(formBackingTypeDetails);
 		final Set<FinderMetadataDetails> dynamicFinderMethods = webMetadataService.getDynamicFinderMethodsAndFields(formBackingType, formBackingObjectMemberDetails, metadataIdentificationString);
 		final SortedMap<JavaType, JavaTypeMetadataDetails> relatedApplicationTypeMetadata = webMetadataService.getRelatedApplicationTypeMetadata(formBackingType, formBackingObjectMemberDetails, metadataIdentificationString);
 
-		return new WebFinderMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, memberDetails, relatedApplicationTypeMetadata, dynamicFinderMethods);
+		return new WebFinderMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, relatedApplicationTypeMetadata, dynamicFinderMethods);
 	}
 
 	public String getItdUniquenessFilenameSuffix() {

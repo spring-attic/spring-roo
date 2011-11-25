@@ -75,7 +75,7 @@ public class EditorMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		return new FieldMetadataBuilder(getId(), Modifier.PRIVATE, fieldName, fieldType, "new " + fieldType + "()").build();
 	}
 
-	private MethodMetadata getGetAsTextMethod(final JavaType javaType, final MethodMetadata identifierAccessorMethod) {
+	private MethodMetadataBuilder getGetAsTextMethod(final JavaType javaType, final MethodMetadata identifierAccessorMethod) {
 		JavaType returnType = JavaType.STRING;
 		JavaSymbolName methodName = new JavaSymbolName("getAsText");
 		final JavaType[] parameterTypes = {};
@@ -84,7 +84,7 @@ public class EditorMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		MethodMetadata userMethod = getGovernorMethod(methodName, parameterTypes);
 		if (userMethod != null) {
 			Assert.isTrue(userMethod.getReturnType().equals(returnType), "Method '" + methodName + "' on '" + destination + "' must return '" + returnType.getNameIncludingTypeParameters() + "'");
-			return userMethod;
+			return new MethodMetadataBuilder(userMethod);
 		}
 
 		List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
@@ -98,10 +98,10 @@ public class EditorMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		bodyBuilder.appendFormalLine("}");
 		bodyBuilder.appendFormalLine("return (String) typeConverter.convertIfNecessary(((" + javaType.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ") obj)." + identifierAccessorMethod.getMethodName() + "(), String.class);");
 
-		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder).build();
+		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
 	}
 
-	private MethodMetadata getSetAsTextMethod(final JavaType javaType, final JavaType idType, final MethodMetadata findMethod) {
+	private MethodMetadataBuilder getSetAsTextMethod(final JavaType javaType, final JavaType idType, final MethodMetadata findMethod) {
 		final JavaType parameterType = JavaType.STRING;
 		List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("text"));
 
@@ -112,7 +112,7 @@ public class EditorMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		MethodMetadata userMethod = getGovernorMethod(methodName, parameterType);
 		if (userMethod != null) {
 			Assert.isTrue(userMethod.getReturnType().equals(returnType), "Method '" + methodName + "' on '" + destination + "' must return '" + returnType.getNameIncludingTypeParameters() + "'");
-			return userMethod;
+			return new MethodMetadataBuilder(userMethod);
 		}
 
 		String identifierTypeName = idType.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
@@ -135,7 +135,7 @@ public class EditorMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		bodyBuilder.newLine();
 		bodyBuilder.appendFormalLine("setValue(" + javaType.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "." + findMethod.getMethodName() + "(identifier));");
 
-		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(parameterType), parameterNames, bodyBuilder).build();
+		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(parameterType), parameterNames, bodyBuilder);
 	}
 
 	@Override

@@ -85,7 +85,7 @@ public class JsfConverterMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		return isImplementing(governorTypeDetails, CONVERTER);
 	}
 
-	private MethodMetadata getGetAsObjectMethod(final MemberTypeAdditions findMethod, final MethodMetadata identifierAccessor) {
+	private MethodMetadataBuilder getGetAsObjectMethod(final MemberTypeAdditions findMethod, final MethodMetadata identifierAccessor) {
 		final JavaSymbolName methodName = new JavaSymbolName("getAsObject");
 		final JavaType[] parameterTypes = { FACES_CONTEXT, UI_COMPONENT, STRING };
 		if (governorHasMethod(methodName, parameterTypes)) {
@@ -108,10 +108,10 @@ public class JsfConverterMetadata extends AbstractItdTypeDetailsProvidingMetadat
 
 		// Create getAsObject method
 		final List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("context"), new JavaSymbolName("component"), new JavaSymbolName("value"));
-		return new MethodMetadataBuilder(getId(), PUBLIC, methodName, OBJECT, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder).build();
+		return new MethodMetadataBuilder(getId(), PUBLIC, methodName, OBJECT, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
 	}
 
-	private MethodMetadata getGetAsStringMethod(final JavaType entity, final MethodMetadata identifierAccessor) {
+	private MethodMetadataBuilder getGetAsStringMethod(final JavaType entity, final MethodMetadata identifierAccessor) {
 		final JavaSymbolName methodName = new JavaSymbolName("getAsString");
 		final JavaType[] parameterTypes = { FACES_CONTEXT, UI_COMPONENT, OBJECT };
 		if (governorHasMethod(methodName, parameterTypes)) {
@@ -127,8 +127,7 @@ public class JsfConverterMetadata extends AbstractItdTypeDetailsProvidingMetadat
 
 		// Create getAsString method
 		final List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("context"), new JavaSymbolName("component"), new JavaSymbolName("value"));
-		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), PUBLIC, methodName, JavaType.STRING, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
-		return methodBuilder.build();
+		return new MethodMetadataBuilder(getId(), PUBLIC, methodName, JavaType.STRING, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
 	}
 	
 	private String getJavaTypeConversionString(JavaType javaType) {

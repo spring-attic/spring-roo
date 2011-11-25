@@ -82,7 +82,7 @@ public class MongoEntityMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		return fieldBuilder.build();
 	}
 
-	private MethodMetadata getIdentifierAccessor(final FieldMetadata idField) {
+	private MethodMetadataBuilder getIdentifierAccessor(final FieldMetadata idField) {
 		JavaSymbolName requiredAccessorName = BeanInfoUtils.getAccessorMethodName(idField);
 
 		// See if the user provided the field
@@ -92,7 +92,7 @@ public class MongoEntityMetadata extends AbstractItdTypeDetailsProvidingMetadata
 			if (method != null) {
 				if (Modifier.isPublic(method.getModifier())) {
 					// Method exists and is public so return it
-					return method;
+					return new MethodMetadataBuilder(method);
 				}
 
 				// Method is not public so make the required accessor name unique
@@ -104,10 +104,10 @@ public class MongoEntityMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("return this." + idField.getFieldName().getSymbolName() + ";");
 
-		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, requiredAccessorName, idField.getFieldType(), bodyBuilder).build();
+		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, requiredAccessorName, idField.getFieldType(), bodyBuilder);
 	}
 
-	private MethodMetadata getIdentifierMutator(final FieldMetadata idField) {
+	private MethodMetadataBuilder getIdentifierMutator(final FieldMetadata idField) {
 		JavaSymbolName requiredMutatorName = BeanInfoUtils.getMutatorMethodName(idField);
 
 		final List<JavaType> parameterTypes = Arrays.asList(idField.getFieldType());
@@ -120,7 +120,7 @@ public class MongoEntityMetadata extends AbstractItdTypeDetailsProvidingMetadata
 			if (method != null) {
 				if (Modifier.isPublic(method.getModifier())) {
 					// Method exists and is public so return it
-					return method;
+					return new MethodMetadataBuilder(method);
 				}
 
 				// Method is not public so make the required mutator name unique
@@ -132,7 +132,7 @@ public class MongoEntityMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("this." + idField.getFieldName().getSymbolName() + " = id;");
 
-		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, requiredMutatorName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder).build();
+		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, requiredMutatorName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
 	}
 
 	public static String getMetadataIdentiferType() {

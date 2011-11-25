@@ -76,8 +76,11 @@ public class EditorMetadataProvider extends AbstractItdMetadataProvider {
 		if (identifierAccessor == null) {
 			return null;
 		}
-
-		return new EditorMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, javaType, identifierType, identifierAccessor, jpaActiveRecordMetadata.getFindMethod());
+		
+		
+		final MethodMetadata findMethod = jpaActiveRecordMetadata.getFindMethod();
+		
+		return new EditorMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, javaType, identifierType, identifierAccessor, findMethod);
 	}
 
 	public String getItdUniquenessFilenameSuffix() {

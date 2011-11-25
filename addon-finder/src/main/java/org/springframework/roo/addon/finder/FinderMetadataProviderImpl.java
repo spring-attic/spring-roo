@@ -13,15 +13,14 @@ import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.jpa.activerecord.JpaActiveRecordMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
-import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
+import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.LogicalPath;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Implementation of {@link FinderMetadataProvider}.
@@ -61,20 +60,27 @@ public class FinderMetadataProviderImpl extends AbstractMemberDiscoveringItdMeta
 
 		// We need to lookup the metadata we depend on
 		JpaActiveRecordMetadata jpaActiveRecordMetadata = (JpaActiveRecordMetadata) metadataService.get(jpaActiveRecordMetadataKey);
-		if (jpaActiveRecordMetadata == null || !jpaActiveRecordMetadata.isValid() || jpaActiveRecordMetadata.getEntityManagerMethod() == null) {
+		if (jpaActiveRecordMetadata == null || !jpaActiveRecordMetadata.isValid()) {
+			return null;
+		}
+		final MethodMetadata entityManagerMethod = jpaActiveRecordMetadata.getEntityManagerMethod();
+		if (entityManagerMethod == null) {
 			return null;
 		}
 
-		ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = governorPhysicalTypeMetadata.getMemberHoldingTypeDetails();
-		Assert.notNull(classOrInterfaceTypeDetails, "Governor failed to provide class type details, in violation of superclass contract");
-
 		MemberDetails memberDetails = getMemberDetails(governorPhysicalTypeMetadata);
+		if (memberDetails == null) {
+			return null;
+		}
+		
+		final String plural = jpaActiveRecordMetadata.getPlural();
+		final String entityName = jpaActiveRecordMetadata.getEntityName();
 
 		// Using SortedMap to ensure that the ITD emits finders in the same order each time
 		SortedMap<JavaSymbolName, QueryHolder> queryHolders = new TreeMap<JavaSymbolName, QueryHolder>();
 		for (String methodName : jpaActiveRecordMetadata.getDynamicFinders()) {
 			JavaSymbolName finderName = new JavaSymbolName(methodName);
-			QueryHolder queryHolder = dynamicFinderServices.getQueryHolder(memberDetails, finderName, jpaActiveRecordMetadata.getPlural(), jpaActiveRecordMetadata.getEntityName());
+			QueryHolder queryHolder = dynamicFinderServices.getQueryHolder(memberDetails, finderName, plural, entityName);
 			if (queryHolder != null) {
 				queryHolders.put(finderName, queryHolder);
 			}
@@ -95,7 +101,7 @@ public class FinderMetadataProviderImpl extends AbstractMemberDiscoveringItdMeta
 		metadataDependencyRegistry.registerDependency(jpaActiveRecordMetadataKey, metadataIdentificationString);
 
 		// We make the queryHolders immutable in case FinderMetadata in the future makes it available through an accessor etc
-		return new FinderMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, jpaActiveRecordMetadata.getEntityManagerMethod(), Collections.unmodifiableSortedMap(queryHolders));
+		return new FinderMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, entityManagerMethod, Collections.unmodifiableSortedMap(queryHolders));
 	}
 
 	@Override

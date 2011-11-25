@@ -164,7 +164,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 	 *
 	 * @return the accessor (never returns null)
 	 */
-	private MethodMetadata getIdentifierAccessor() {
+	private MethodMetadataBuilder getIdentifierAccessor() {
 		if (parentEntity != null) {
 			return parentEntity.getIdentifierAccessor();
 		}
@@ -180,7 +180,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 			if (method != null) {
 				if (Modifier.isPublic(method.getModifier())) {
 					// Method exists and is public so return it
-					return method;
+					return new MethodMetadataBuilder(method);
 				}
 
 				// Method is not public so make the required accessor name unique
@@ -192,7 +192,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("return this." + id.getFieldName().getSymbolName() + ";");
 
-		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, requiredAccessorName, id.getFieldType(), bodyBuilder).build();
+		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, requiredAccessorName, id.getFieldType(), bodyBuilder);
 	}
 
 	private String getIdentifierColumn() {
@@ -340,7 +340,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 	 *
 	 * @return the mutator (never returns null)
 	 */
-	private MethodMetadata getIdentifierMutator() {
+	private MethodMetadataBuilder getIdentifierMutator() {
 		// TODO: This is a temporary workaround to support web data binding approaches; to be reviewed more thoroughly in future
 		if (parentEntity != null) {
 			return parentEntity.getIdentifierMutator();
@@ -360,7 +360,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 			if (method != null) {
 				if (Modifier.isPublic(method.getModifier())) {
 					// Method exists and is public so return it
-					return method;
+					return new MethodMetadataBuilder(method);
 				}
 
 				// Method is not public so make the required mutator name unique
@@ -372,7 +372,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("this." + id.getFieldName().getSymbolName() + " = id;");
 
-		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, requiredMutatorName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder).build();
+		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, requiredMutatorName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
 	}
 
 	/**
@@ -492,7 +492,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 	 *
 	 * @return the version accessor (may return null if there is no version field declared in this class)
 	 */
-	private MethodMetadata getVersionAccessor() {
+	private MethodMetadataBuilder getVersionAccessor() {
 		final FieldMetadata version = getVersionField();
 		if (version == null) {
 			// There's no version field, so there certainly won't be an accessor for it
@@ -517,7 +517,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 			if (method != null) {
 				if (Modifier.isPublic(method.getModifier())) {
 					// Method exists and is public so return it
-					return method;
+					return new MethodMetadataBuilder(method);
 				}
 
 				// Method is not public so make the required accessor name unique
@@ -529,7 +529,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("return this." + version.getFieldName().getSymbolName() + ";");
 
-		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, requiredAccessorName, version.getFieldType(), bodyBuilder).build();
+		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, requiredAccessorName, version.getFieldType(), bodyBuilder);
 	}
 
 	/**
@@ -596,7 +596,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 	 *
 	 * @return the mutator (may return null if there is no version field declared in this class)
 	 */
-	private MethodMetadata getVersionMutator() {
+	private MethodMetadataBuilder getVersionMutator() {
 		// TODO: This is a temporary workaround to support web data binding approaches; to be reviewed more thoroughly in future
 		if (parentEntity != null) {
 			return parentEntity.getVersionMutator();
@@ -622,7 +622,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 			if (method != null) {
 				if (Modifier.isPublic(method.getModifier())) {
 					// Method exists and is public so return it
-					return method;
+					return new MethodMetadataBuilder(method);
 				}
 
 				// Method is not public so make the required mutator name unique
@@ -634,6 +634,6 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("this." + version.getFieldName().getSymbolName() + " = version;");
 
-		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, requiredMutatorName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder).build();
+		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, requiredMutatorName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
 	}
 }

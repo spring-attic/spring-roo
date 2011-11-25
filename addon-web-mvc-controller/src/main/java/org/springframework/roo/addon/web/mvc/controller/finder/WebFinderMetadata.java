@@ -25,7 +25,6 @@ import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
-import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
@@ -37,7 +36,6 @@ import org.springframework.roo.classpath.details.annotations.EnumAttributeValue;
 import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
-import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.EnumDetails;
 import org.springframework.roo.model.JavaSymbolName;
@@ -63,7 +61,6 @@ public class WebFinderMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 	private JavaType formBackingType;
 	private JavaTypeMetadataDetails javaTypeMetadataHolder;
 	private Map<JavaType, JavaTypeMetadataDetails> specialDomainTypes;
-	private MemberDetails memberDetails;
 	private String controllerPath;
 	private WebScaffoldAnnotationValues annotationValues;
 
@@ -74,17 +71,15 @@ public class WebFinderMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 	 * @param aspectName
 	 * @param governorPhysicalTypeMetadata
 	 * @param annotationValues
-	 * @param memberDetails
 	 * @param specialDomainTypes
 	 * @param dynamicFinderMethods
 	 */
-	public WebFinderMetadata(final String identifier, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final WebScaffoldAnnotationValues annotationValues, final MemberDetails memberDetails, final SortedMap<JavaType, JavaTypeMetadataDetails> specialDomainTypes, final Set<FinderMetadataDetails> dynamicFinderMethods) {
+	public WebFinderMetadata(final String identifier, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final WebScaffoldAnnotationValues annotationValues, final SortedMap<JavaType, JavaTypeMetadataDetails> specialDomainTypes, final Set<FinderMetadataDetails> dynamicFinderMethods) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
 		Assert.notNull(annotationValues, "Annotation values required");
 		Assert.notNull(specialDomainTypes, "Special domain type map required");
 		Assert.notNull(dynamicFinderMethods, "Dynamoic finder methods required");
-		Assert.notNull(memberDetails, "Member details required");
 
 		if (!isValid()) {
 			return;
@@ -94,7 +89,6 @@ public class WebFinderMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 		this.controllerPath = annotationValues.getPath();
 		this.formBackingType = annotationValues.getFormBackingObject();
 		this.specialDomainTypes = specialDomainTypes;
-		this.memberDetails = memberDetails;
 
 		if (dynamicFinderMethods.isEmpty()) {
 			valid = false;
@@ -116,7 +110,7 @@ public class WebFinderMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 		return annotationValues;
 	}
 
-	private MethodMetadata getFinderFormMethod(final FinderMetadataDetails finder) {
+	private MethodMetadataBuilder getFinderFormMethod(final FinderMetadataDetails finder) {
 		Assert.notNull(finder, "Method metadata required for finder");
 		JavaSymbolName finderFormMethodName = new JavaSymbolName(finder.getFinderMethodMetadata().getMethodName().getSymbolName() + "Form");
 
@@ -155,7 +149,7 @@ public class WebFinderMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 			parameterNames.add(new JavaSymbolName("uiModel"));
 		}
 
-		if (methodExists(finderFormMethodName, parameterTypes)) {
+		if (getGovernorMethod(finderFormMethodName, parameterTypes) != null) {
 			return null;
 		}
 
@@ -171,10 +165,10 @@ public class WebFinderMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, finderFormMethodName, JavaType.STRING, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
-		return methodBuilder.build();
+		return methodBuilder;
 	}
 
-	private MethodMetadata getFinderMethod(final FinderMetadataDetails finderMetadataDetails) {
+	private MethodMetadataBuilder getFinderMethod(final FinderMetadataDetails finderMetadataDetails) {
 		Assert.notNull(finderMetadataDetails, "Method metadata required for finder");
 		JavaSymbolName finderMethodName = new JavaSymbolName(finderMetadataDetails.getFinderMethodMetadata().getMethodName().getSymbolName());
 
@@ -218,7 +212,7 @@ public class WebFinderMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 		}
 
 		parameterTypes.add(new AnnotatedJavaType(MODEL));
-		if (methodExists(finderMethodName, AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes))) {
+		if (getGovernorMethod(finderMethodName, AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes)) != null) {
 			return null;
 		}
 
@@ -241,11 +235,7 @@ public class WebFinderMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, finderMethodName, JavaType.STRING, parameterTypes, newParamNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
-		return methodBuilder.build();
-	}
-
-	private boolean methodExists(final JavaSymbolName methodName, final List<JavaType> parameterTypes) {
-		return memberDetails.getMethod(methodName, parameterTypes, getId()) != null;
+		return methodBuilder;
 	}
 
 	private String uncapitalize(final String term) {

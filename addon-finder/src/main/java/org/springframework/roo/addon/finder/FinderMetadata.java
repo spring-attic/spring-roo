@@ -58,9 +58,9 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		this.queryHolders = queryHolders;
 
 		for (JavaSymbolName finderName : queryHolders.keySet()) {
-			MethodMetadata methodMetadata = getDynamicFinderMethod(finderName);
-			builder.addMethod(methodMetadata);
-			dynamicFinderMethods.add(methodMetadata);
+			MethodMetadataBuilder methodBuilder = getDynamicFinderMethod(finderName);
+			builder.addMethod(methodBuilder);
+			dynamicFinderMethods.add(methodBuilder.build());
 		}
 
 		// Create a representation of the desired output ITD
@@ -89,7 +89,7 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	 * @param finderName the dynamic finder method name
 	 * @return the user-defined method, or an ITD-generated method (never returns null)
 	 */
-	public MethodMetadata getDynamicFinderMethod(final JavaSymbolName finderName) {
+	private MethodMetadataBuilder getDynamicFinderMethod(final JavaSymbolName finderName) {
 		Assert.notNull(finderName, "Dynamic finder method name is required");
 		Assert.isTrue(queryHolders.containsKey(finderName), "Undefined method name '" + finderName.getSymbolName() + "'");
 
@@ -98,7 +98,7 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		for (MethodMetadata method : governorTypeDetails.getDeclaredMethods()) {
 			if (method.getMethodName().equals(finderName)) {
 				// Found a method of the expected name; we won't check method parameters though
-				return method;
+				return new MethodMetadataBuilder(method);
 			}
 		}
 
@@ -201,7 +201,7 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 
 		bodyBuilder.appendFormalLine("return q;");
 
-		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC | Modifier.STATIC, finderName, typedQueryType, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder).build();
+		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC | Modifier.STATIC, finderName, typedQueryType, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
 	}
 
 	@Override

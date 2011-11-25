@@ -24,6 +24,7 @@ import org.springframework.roo.classpath.details.ConstructorMetadataBuilder;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.MethodMetadata;
+import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
@@ -84,12 +85,12 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 		}
 
 		if (annotationValues.isGettersByDefault()) {
-			for (MethodMetadata accessor : getAccessors()) {
+			for (MethodMetadataBuilder accessor : getAccessors()) {
 				builder.addMethod(accessor);
 			}
 		}
 		if (annotationValues.isSettersByDefault()) {
-			for (MethodMetadata mutator : getMutators()) {
+			for (MethodMetadataBuilder mutator : getMutators()) {
 				builder.addMethod(mutator);
 			}
 		}
@@ -229,9 +230,9 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 	 *
 	 * @return the accessors (never returns null)
 	 */
-	private List<MethodMetadata> getAccessors() {
+	private List<MethodMetadataBuilder> getAccessors() {
 		Assert.notNull(fields, "Fields required");
-		List<MethodMetadata> accessors = new ArrayList<MethodMetadata>();
+		List<MethodMetadataBuilder> accessors = new ArrayList<MethodMetadataBuilder>();
 
 		// Compute the names of the accessors that will be produced
 		for (FieldMetadata field : fields) {
@@ -240,9 +241,9 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 			if (accessor != null) {
 				Assert.isTrue(Modifier.isPublic(accessor.getModifier()), "User provided field but failed to provide a public '" + requiredAccessorName.getSymbolName() + "()' method in '" + destination.getFullyQualifiedTypeName() + "'");
 			} else {
-				accessor = getAccessorMethod(field);
+				accessor = getAccessorMethod(field).build();
 			}
-			accessors.add(accessor);
+			accessors.add(new MethodMetadataBuilder(accessor));
 		}
 
 		return accessors;
@@ -256,9 +257,9 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 	 *
 	 * @return the mutators (never returns null)
 	 */
-	private List<MethodMetadata> getMutators() {
+	private List<MethodMetadataBuilder> getMutators() {
 		Assert.notNull(fields, "Fields required");
-		List<MethodMetadata> mutators = new ArrayList<MethodMetadata>();
+		List<MethodMetadataBuilder> mutators = new ArrayList<MethodMetadataBuilder>();
 
 		// Compute the names of the mutators that will be produced
 		for (FieldMetadata field : fields) {
@@ -266,11 +267,11 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 			final JavaType parameterType = field.getFieldType();
 			MethodMetadata mutator = getGovernorMethod(requiredMutatorName, parameterType);
 			if (mutator == null) {
-				mutator = getMutatorMethod(field.getFieldName(), field.getFieldType());
+				mutator = getMutatorMethod(field.getFieldName(), field.getFieldType()).build();
 			} else {
 				Assert.isTrue(Modifier.isPublic(mutator.getModifier()), "User provided field but failed to provide a public '" + requiredMutatorName + "(" + field.getFieldName().getSymbolName() + ")' method in '" + destination.getFullyQualifiedTypeName() + "'");
 			}
-			mutators.add(mutator);
+			mutators.add(new MethodMetadataBuilder(mutator));
 		}
 
 		return mutators;

@@ -24,7 +24,6 @@ import org.springframework.roo.classpath.TypeManagementService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
-import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
@@ -281,7 +280,7 @@ public class MailOperationsImpl implements MailOperations {
 	 * @param mutableTypeDetails the type to which the method is being added (required)
 	 * @return a non-<code>null</code> method
 	 */
-	private MethodMetadata getSendMethod(final JavaSymbolName mailSenderName, final boolean async, final String targetClassMID, final ClassOrInterfaceTypeDetailsBuilder classOrInterfaceTypeDetailsBuilder) {
+	private MethodMetadataBuilder getSendMethod(final JavaSymbolName mailSenderName, final boolean async, final String targetClassMID, final ClassOrInterfaceTypeDetailsBuilder classOrInterfaceTypeDetailsBuilder) {
 		final String contextPath = getApplicationContextPath();
 		final Document document = XmlUtils.readXml(fileManager.getInputStream(contextPath));
 		final Element root = document.getDocumentElement();
@@ -340,7 +339,7 @@ public class MailOperationsImpl implements MailOperations {
 			}
 			methodBuilder.addAnnotation(new AnnotationMetadataBuilder(ASYNC));
 		}
-		return methodBuilder.build();
+		return methodBuilder;
 	}
 
 	private void updateConfiguration(final String moduleName) {

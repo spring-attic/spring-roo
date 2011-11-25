@@ -230,25 +230,25 @@ public abstract class AbstractMemberHoldingTypeDetailsBuilder<T extends MemberHo
 	/**
 	 * Adds the given method to this builder
 	 *
-	 * @param method the method builder to add; ignored if <code>null</code> or
+	 * @param methodBuilder the method builder to add; ignored if <code>null</code> or
 	 * if its MID doesn't match this builder's MID
 	 * @return true if the state of this builder changed
 	 */
-	public final boolean addMethod(final MethodMetadataBuilder method) {
-		if (method == null || !getDeclaredByMetadataId().equals(method.getDeclaredByMetadataId())) {
+	public final boolean addMethod(final MethodMetadataBuilder methodBuilder) {
+		if (methodBuilder == null || !getDeclaredByMetadataId().equals(methodBuilder.getDeclaredByMetadataId())) {
 			return false;
 		}
-		onAddMethod(method);
-		return declaredMethods.add(method);
+		onAddMethod(methodBuilder);
+		return declaredMethods.add(methodBuilder);
 	}
 
 	/**
 	 * Subclasses can perform their own actions upon a method builder being
 	 * added. This implementation does nothing.
 	 *
-	 * @param method the method being added; never <code>null</code>
+	 * @param methodBuilder the method being added; never <code>null</code>
 	 */
-	protected void onAddMethod(final MethodMetadataBuilder method) {}
+	protected void onAddMethod(final MethodMetadataBuilder methodBuilder) {}
 
 	public final boolean addConstructor(final ConstructorMetadata constructor) {
 		if (constructor == null) {
@@ -278,36 +278,36 @@ public abstract class AbstractMemberHoldingTypeDetailsBuilder<T extends MemberHo
 	}
 
 	public final boolean addInnerType(final ClassOrInterfaceTypeDetails innerType) {
-        if (innerType == null) {
-            return false;
-        }
-        return addInnerType(new ClassOrInterfaceTypeDetailsBuilder(innerType));
-    }
+		if (innerType == null) {
+			return false;
+		}
+		return addInnerType(new ClassOrInterfaceTypeDetailsBuilder(innerType));
+	}
 
-    public final boolean addInnerType(final ClassOrInterfaceTypeDetailsBuilder innerType) {
+	public final boolean addInnerType(final ClassOrInterfaceTypeDetailsBuilder innerType) {
 		/* There was originally a check to see if the declaredMIDs matched, but this doesn't really make much sense.
 		 * We need to come up with a better model for inner types. I thought about adding an enclosingType attribute
 		 * but this prototype just felt like a hack. In the short term I have just disabled the MID comparison as I
 		 * think this is fairly reasonable until this is given some more time. JTT - 24/08/11
 		 */
-        if (innerType == null) {
-            return false;
-        }
-        onAddInnerType(innerType);
-        return declaredInnerTypes.add(innerType);
-    }
+		if (innerType == null) {
+			return false;
+		}
+		onAddInnerType(innerType);
+		return declaredInnerTypes.add(innerType);
+	}
 
-    protected void onAddInnerType(final ClassOrInterfaceTypeDetailsBuilder innerType) {}
+	protected void onAddInnerType(final ClassOrInterfaceTypeDetailsBuilder innerType) {}
 
-    public final boolean addInitializer(final InitializerMetadataBuilder initializer) {
-        if (initializer == null || !getDeclaredByMetadataId().equals(initializer.getDeclaredByMetadataId())) {
-            return false;
-        }
-        onAddInitializer(initializer);
-        return declaredInitializers.add(initializer);
-    }
+	public final boolean addInitializer(final InitializerMetadataBuilder initializer) {
+		if (initializer == null || !getDeclaredByMetadataId().equals(initializer.getDeclaredByMetadataId())) {
+			return false;
+		}
+		onAddInitializer(initializer);
+		return declaredInitializers.add(initializer);
+	}
 
-    protected void onAddInitializer(final InitializerMetadataBuilder initializer) {}
+	protected void onAddInitializer(final InitializerMetadataBuilder initializer) {}
 
 	public final boolean addImplementsType(final JavaType implementsType) {
 		if (implementsType == null) return false;
@@ -349,7 +349,7 @@ public abstract class AbstractMemberHoldingTypeDetailsBuilder<T extends MemberHo
 		return result;
 	}
 
-    public final List<ClassOrInterfaceTypeDetails> buildInnerTypes() {
+	public final List<ClassOrInterfaceTypeDetails> buildInnerTypes() {
 		final List<ClassOrInterfaceTypeDetails> result = new ArrayList<ClassOrInterfaceTypeDetails>();
 		for (final ClassOrInterfaceTypeDetailsBuilder builder : declaredInnerTypes) {
 			result.add(builder.build());
@@ -357,7 +357,7 @@ public abstract class AbstractMemberHoldingTypeDetailsBuilder<T extends MemberHo
 		return result;
 	}
 
-    public final List<InitializerMetadata> buildInitializers() {
+	public final List<InitializerMetadata> buildInitializers() {
 		final List<InitializerMetadata> result = new ArrayList<InitializerMetadata>();
 		for (final InitializerMetadataBuilder builder : declaredInitializers) {
 			result.add(builder.build());
@@ -365,13 +365,13 @@ public abstract class AbstractMemberHoldingTypeDetailsBuilder<T extends MemberHo
 		return result;
 	}
 
-    /**
-     * Removes the given methods from this builder
-     *
-     * @param methodsToRemove can be <code>null</code> for none
-     * @return true if this builder changed as a result
-     * @see List#removeAll(Collection)
-     */
+	/**
+	 * Removes the given methods from this builder
+	 * 
+	 * @param methodsToRemove can be <code>null</code> for none
+	 * @return true if this builder changed as a result
+	 * @see List#removeAll(Collection)
+	 */
 	public boolean removeAll(final Collection<? extends MethodMetadataBuilder> methodsToRemove) {
 		if (methodsToRemove == null) {
 			return false;

@@ -6,7 +6,6 @@ import java.lang.reflect.Modifier;
 
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
-import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
@@ -65,7 +64,7 @@ public class ToStringMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 	 *
 	 * @return the "toString" method declared on this type or that will be introduced (or null if undeclared and not introduced)
 	 */
-	public MethodMetadata getToStringMethod() {
+	private MethodMetadataBuilder getToStringMethod() {
 		String toStringMethod = annotationValues.getToStringMethod();
 		if (StringUtils.isBlank(toStringMethod)) {
 			return null;
@@ -98,7 +97,7 @@ public class ToStringMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 		}
 		bodyBuilder.appendFormalLine("return " + str);
 
-		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, STRING, bodyBuilder).build();
+		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, STRING, bodyBuilder);
 	}
 
 	@Override

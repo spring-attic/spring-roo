@@ -26,7 +26,6 @@ import org.springframework.roo.classpath.details.BeanInfoUtils;
 import org.springframework.roo.classpath.details.DeclaredFieldAnnotationDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
-import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
@@ -87,8 +86,8 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 		// Add getters and setters
 		for (final Entry<FieldMetadata, JavaSymbolName> entry : declaredFields.entrySet()) {
 			final FieldMetadata field = entry.getKey();
-			MethodMetadata accessorMethod = getDeclaredGetter(field);
-			MethodMetadata mutatorMethod = getDeclaredSetter(field);
+			MethodMetadataBuilder accessorMethod = getDeclaredGetter(field);
+			MethodMetadataBuilder mutatorMethod = getDeclaredSetter(field);
 
 			// Check to see if GAE is interested
 			if (entry.getValue() != null) {
@@ -104,13 +103,8 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 
 				processGaeAnnotations(field);
 
-				MethodMetadataBuilder accessorMethodBuilder = new MethodMetadataBuilder(accessorMethod);
-				accessorMethodBuilder.setBodyBuilder(getGaeAccessorBody(field, hiddenIdFieldName));
-				accessorMethod = accessorMethodBuilder.build();
-
-				MethodMetadataBuilder mutatorMethodBuilder = new MethodMetadataBuilder(mutatorMethod);
-				mutatorMethodBuilder.setBodyBuilder(getGaeMutatorBody(field, hiddenIdFieldName));
-				mutatorMethod = mutatorMethodBuilder.build();
+				accessorMethod.setBodyBuilder(getGaeAccessorBody(field, hiddenIdFieldName));
+				mutatorMethod.setBodyBuilder(getGaeMutatorBody(field, hiddenIdFieldName));
 			}
 
 			builder.addMethod(accessorMethod);
@@ -127,16 +121,15 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 	 * @param field that already exists on the type either directly or via introduction (required; must be declared by this type to be located)
 	 * @return the method corresponding to an accessor, or null if not found
 	 */
-	public MethodMetadata getDeclaredGetter(final FieldMetadata field) {
+	private MethodMetadataBuilder getDeclaredGetter(final FieldMetadata field) {
 		Assert.notNull(field, "Field required");
 
 		// Compute the mutator method name
 		JavaSymbolName methodName = BeanInfoUtils.getAccessorMethodName(field);
 
 		// See if the type itself declared the accessor
-		MethodMetadata result = getGovernorMethod(methodName);
-		if (result != null) {
-			return result;
+		if (governorHasMethod(methodName)) {
+			return null;
 		}
 
 		// Decide whether we need to produce the accessor method (see ROO-619 for reason we allow a getter for a final field)
@@ -144,7 +137,7 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 			InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 			bodyBuilder.appendFormalLine("return this." + field.getFieldName().getSymbolName() + ";");
 
-			return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, field.getFieldType(), bodyBuilder).build();
+			return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, field.getFieldType(), bodyBuilder);
 		}
 
 		return null;
@@ -156,7 +149,7 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 	 * @param field that already exists on the type either directly or via introduction (required; must be declared by this type to be located)
 	 * @return the method corresponding to a mutator, or null if not found
 	 */
-	public MethodMetadata getDeclaredSetter(final FieldMetadata field) {
+	private MethodMetadataBuilder getDeclaredSetter(final FieldMetadata field) {
 		Assert.notNull(field, "Field required");
 
 		// Compute the mutator method name
@@ -166,9 +159,8 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 		final JavaType parameterType = field.getFieldType();
 
 		// See if the type itself declared the mutator
-		MethodMetadata result = getGovernorMethod(methodName, parameterType);
-		if (result != null) {
-			return result;
+		if (governorHasMethod(methodName, parameterType)) {
+			return null;
 		}
 
 		// Compute the mutator method parameter names
@@ -179,7 +171,7 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 			InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 			bodyBuilder.appendFormalLine("this." + field.getFieldName().getSymbolName() + " = " + field.getFieldName().getSymbolName() + ";");
 
-			return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterType), parameterNames, bodyBuilder).build();
+			return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterType), parameterNames, bodyBuilder);
 		}
 
 		return null;

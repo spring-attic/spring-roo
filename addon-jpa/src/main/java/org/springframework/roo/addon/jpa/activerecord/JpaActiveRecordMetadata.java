@@ -198,9 +198,9 @@ public class JpaActiveRecordMetadata extends AbstractItdTypeDetailsProvidingMeta
 	/**
 	 * @return the persist method (may return null)
 	 */
-	private MethodMetadata getPersistMethod() {
+	private MethodMetadataBuilder getPersistMethod() {
 		if (parent != null) {
-			final MethodMetadata found = parent.getPersistMethod();
+			final MethodMetadataBuilder found = parent.getPersistMethod();
 			if (found != null) {
 				return found;
 			}
@@ -214,9 +214,9 @@ public class JpaActiveRecordMetadata extends AbstractItdTypeDetailsProvidingMeta
 	/**
 	 * @return the remove method (may return null)
 	 */
-	private MethodMetadata getRemoveMethod() {
+	private MethodMetadataBuilder getRemoveMethod() {
 		if (parent != null) {
-			final MethodMetadata found = parent.getRemoveMethod();
+			final MethodMetadataBuilder found = parent.getRemoveMethod();
 			if (found != null) {
 				return found;
 			}
@@ -230,9 +230,9 @@ public class JpaActiveRecordMetadata extends AbstractItdTypeDetailsProvidingMeta
 	/**
 	 * @return the flush method (never returns null)
 	 */
-	private MethodMetadata getFlushMethod() {
+	private MethodMetadataBuilder getFlushMethod() {
 		if (parent != null) {
-			final MethodMetadata found = parent.getFlushMethod();
+			final MethodMetadataBuilder found = parent.getFlushMethod();
 			if (found != null) {
 				return found;
 			}
@@ -246,9 +246,9 @@ public class JpaActiveRecordMetadata extends AbstractItdTypeDetailsProvidingMeta
 	/**
 	 * @return the clear method (never returns null)
 	 */
-	private MethodMetadata getClearMethod() {
+	private MethodMetadataBuilder getClearMethod() {
 		if (parent != null) {
-			final MethodMetadata found = parent.getClearMethod();
+			final MethodMetadataBuilder found = parent.getClearMethod();
 			if (found != null) {
 				return found;
 			}
@@ -262,21 +262,21 @@ public class JpaActiveRecordMetadata extends AbstractItdTypeDetailsProvidingMeta
 	/**
 	 * @return the merge method (never returns null)
 	 */
-	private MethodMetadata getMergeMethod() {
+	private MethodMetadataBuilder getMergeMethod() {
 		if ("".equals(crudAnnotationValues.getMergeMethod())) {
 			return null;
 		}
 		return getDelegateMethod(new JavaSymbolName(crudAnnotationValues.getMergeMethod()), "merge");
 	}
 
-	private MethodMetadata getDelegateMethod(final JavaSymbolName methodName, final String methodDelegateName) {
+	private MethodMetadataBuilder getDelegateMethod(final JavaSymbolName methodName, final String methodDelegateName) {
 		// Method definition to find or build
 		final JavaType[] parameterTypes = {};
 
 		// Locate user-defined method
 		final MethodMetadata userMethod = getGovernorMethod(methodName, parameterTypes);
 		if (userMethod != null) {
-			return userMethod;
+			return new MethodMetadataBuilder(userMethod);
 		}
 
 		// Create the method
@@ -325,7 +325,7 @@ public class JpaActiveRecordMetadata extends AbstractItdTypeDetailsProvidingMeta
 
 		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), new ArrayList<JavaSymbolName>(), bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
-		return methodBuilder.build();
+		return methodBuilder;
 	}
 
 	private void addTransactionalAnnotation(final List<AnnotationMetadataBuilder> annotations, final boolean isPersistMethod) {

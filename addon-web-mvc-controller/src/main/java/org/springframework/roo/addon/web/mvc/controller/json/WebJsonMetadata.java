@@ -33,7 +33,6 @@ import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.customdata.tagkeys.MethodMetadataCustomDataKey;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
-import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
@@ -134,15 +133,15 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 		itdTypeDetails = builder.build();
 	}
 
-	private MethodMetadata getJsonShowMethod(final FieldMetadata identifierField, final MemberTypeAdditions findMethod) {
+	private MethodMetadataBuilder getJsonShowMethod(final FieldMetadata identifierField, final MemberTypeAdditions findMethod) {
 		if (StringUtils.isBlank(annotationValues.getShowJsonMethod()) || identifierField == null || findMethod == null) {
 			return null;
 		}
-
 		JavaSymbolName methodName = new JavaSymbolName(annotationValues.getShowJsonMethod());
-		if (methodExists(methodName)) {
+		if (governorHasMethodWithSameName(methodName)) {
 			return null;
 		}
+
 		JavaSymbolName toJsonMethodName = jsonMetadata.getToJsonMethodName();
 
 		List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
@@ -179,19 +178,21 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 		if (introduceLayerComponents) {
 			findMethod.copyAdditionsTo(builder, governorTypeDetails);
 		}
+
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, RESPONSE_ENTITY_STRING, parameterTypes, parameterNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
-		return methodBuilder.build();
+		return methodBuilder;
 	}
 
-	private MethodMetadata getJsonCreateMethod(final MemberTypeAdditions persistMethod) {
+	private MethodMetadataBuilder getJsonCreateMethod(final MemberTypeAdditions persistMethod) {
 		if (StringUtils.isBlank(annotationValues.getCreateFromJsonMethod()) || persistMethod == null) {
 			return null;
 		}
 		JavaSymbolName methodName = new JavaSymbolName(annotationValues.getCreateFromJsonMethod());
-		if (methodExists(methodName)) {
+		if (governorHasMethodWithSameName(methodName)) {
 			return null;
 		}
+
 		JavaSymbolName fromJsonMethodName = jsonMetadata.getFromJsonMethodName();
 
 		AnnotationMetadataBuilder requestBodyAnnotation = new AnnotationMetadataBuilder(REQUEST_BODY);
@@ -217,19 +218,21 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 		if (introduceLayerComponents) {
 			persistMethod.copyAdditionsTo(builder, governorTypeDetails);
 		}
+
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, RESPONSE_ENTITY_STRING, parameterTypes, parameterNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
-		return methodBuilder.build();
+		return methodBuilder;
 	}
 
-	private MethodMetadata getCreateFromJsonArrayMethod(final MemberTypeAdditions persistMethod) {
+	private MethodMetadataBuilder getCreateFromJsonArrayMethod(final MemberTypeAdditions persistMethod) {
 		if (StringUtils.isBlank(annotationValues.getCreateFromJsonArrayMethod()) || persistMethod == null) {
 			return null;
 		}
 		JavaSymbolName methodName = new JavaSymbolName(annotationValues.getCreateFromJsonArrayMethod());
-		if (methodExists(methodName)) {
+		if (governorHasMethodWithSameName(methodName)) {
 			return null;
 		}
+
 		JavaSymbolName fromJsonArrayMethodName = jsonMetadata.getFromJsonArrayMethodName();
 
 		AnnotationMetadataBuilder requestBodyAnnotation = new AnnotationMetadataBuilder(REQUEST_BODY);
@@ -262,19 +265,21 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 		if (introduceLayerComponents) {
 			persistMethod.copyAdditionsTo(builder, governorTypeDetails);
 		}
+
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, RESPONSE_ENTITY_STRING, parameterTypes, parameterNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
-		return methodBuilder.build();
+		return methodBuilder;
 	}
 
-	private MethodMetadata getJsonListMethod(final MemberTypeAdditions findAllMethod) {
+	private MethodMetadataBuilder getJsonListMethod(final MemberTypeAdditions findAllMethod) {
 		if (StringUtils.isBlank(annotationValues.getListJsonMethod()) || findAllMethod == null) {
 			return null;
 		}
 		JavaSymbolName methodName = new JavaSymbolName(annotationValues.getListJsonMethod());
-		if (methodExists(methodName)) {
+		if (governorHasMethodWithSameName(methodName)) {
 			return null;
 		}
+
 		JavaSymbolName toJsonArrayMethodName = jsonMetadata.getToJsonArrayMethodName();
 
 		List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
@@ -299,19 +304,21 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 		if (introduceLayerComponents) {
 			findAllMethod.copyAdditionsTo(builder, governorTypeDetails);
 		}
+
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, RESPONSE_ENTITY_STRING, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
-		return methodBuilder.build();
+		return methodBuilder;
 	}
 
-	private MethodMetadata getJsonUpdateMethod(final MemberTypeAdditions mergeMethod) {
+	private MethodMetadataBuilder getJsonUpdateMethod(final MemberTypeAdditions mergeMethod) {
 		if (StringUtils.isBlank(annotationValues.getUpdateFromJsonMethod()) || mergeMethod == null) {
 			return null;
 		}
 		JavaSymbolName methodName = new JavaSymbolName(annotationValues.getUpdateFromJsonMethod());
-		if (methodExists(methodName)) {
+		if (governorHasMethodWithSameName(methodName)) {
 			return null;
 		}
+
 		JavaSymbolName fromJsonMethodName = jsonMetadata.getFromJsonMethodName();
 
 		AnnotationMetadataBuilder requestBodyAnnotation = new AnnotationMetadataBuilder(REQUEST_BODY);
@@ -343,19 +350,21 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 		if (introduceLayerComponents) {
 			mergeMethod.copyAdditionsTo(builder, governorTypeDetails);
 		}
+
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, RESPONSE_ENTITY_STRING, parameterTypes, parameterNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
-		return methodBuilder.build();
+		return methodBuilder;
 	}
 
-	private MethodMetadata getUpdateFromJsonArrayMethod(final MemberTypeAdditions mergeMethod) {
+	private MethodMetadataBuilder getUpdateFromJsonArrayMethod(final MemberTypeAdditions mergeMethod) {
 		if (StringUtils.isBlank(annotationValues.getUpdateFromJsonArrayMethod()) || mergeMethod == null) {
 			return null;
 		}
 		JavaSymbolName methodName = new JavaSymbolName(annotationValues.getUpdateFromJsonArrayMethod());
-		if (methodExists(methodName)) {
+		if (governorHasMethodWithSameName(methodName)) {
 			return null;
 		}
+
 		JavaSymbolName fromJsonArrayMethodName = jsonMetadata.getFromJsonArrayMethodName();
 
 		AnnotationMetadataBuilder requestBodyAnnotation = new AnnotationMetadataBuilder(REQUEST_BODY);
@@ -393,17 +402,18 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 		if (introduceLayerComponents) {
 			mergeMethod.copyAdditionsTo(builder, governorTypeDetails);
 		}
+
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, RESPONSE_ENTITY_STRING, parameterTypes, parameterNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
-		return methodBuilder.build();
+		return methodBuilder;
 	}
 
-	private MethodMetadata getJsonDeleteMethod(final MemberTypeAdditions removeMethod, final FieldMetadata identifierField, final MemberTypeAdditions findMethod) {
+	private MethodMetadataBuilder getJsonDeleteMethod(final MemberTypeAdditions removeMethod, final FieldMetadata identifierField, final MemberTypeAdditions findMethod) {
 		if (StringUtils.isBlank(annotationValues.getDeleteFromJsonMethod()) || removeMethod == null || identifierField == null || findMethod == null) {
 			return null;
 		}
 		JavaSymbolName methodName = new JavaSymbolName(annotationValues.getDeleteFromJsonMethod());
-		if (methodExists(methodName)) {
+		if (governorHasMethodWithSameName(methodName)) {
 			return null;
 		}
 
@@ -444,15 +454,15 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 		}
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, RESPONSE_ENTITY_STRING, parameterTypes, parameterNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
-		return methodBuilder.build();
+		return methodBuilder;
 	}
 
-	private MethodMetadata getFinderJsonMethod(final FinderMetadataDetails finderDetails, final String plural) {
+	private MethodMetadataBuilder getFinderJsonMethod(final FinderMetadataDetails finderDetails, final String plural) {
 		if (finderDetails == null || jsonMetadata.getToJsonArrayMethodName() == null) {
 			return null;
 		}
 		JavaSymbolName finderMethodName = new JavaSymbolName("json" + StringUtils.capitalize(finderDetails.getFinderMethodMetadata().getMethodName().getSymbolName()));
-		if (methodExists(finderMethodName)) {
+		if (governorHasMethodWithSameName(finderMethodName)) {
 			return null;
 		}
 
@@ -512,15 +522,11 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, finderMethodName, RESPONSE_ENTITY_STRING, parameterTypes, newParamNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
-		return methodBuilder.build();
+		return methodBuilder;
 	}
 
 	private String getShortName(final JavaType type) {
 		return type.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
-	}
-
-	private boolean methodExists(final JavaSymbolName methodName) {
-		return MemberFindingUtils.getDeclaredMethod(governorTypeDetails, methodName) != null;
 	}
 
 	@Override

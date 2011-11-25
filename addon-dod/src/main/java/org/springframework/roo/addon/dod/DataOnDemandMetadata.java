@@ -92,6 +92,10 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	private MethodMetadata identifierAccessor;
 	private JavaType identifierType;
 	private JavaType entity;
+	private MethodMetadata newTransientEntityMethod;
+	private MethodMetadata specificPersistentEntityMethod;
+	private MethodMetadata randomPersistentEntityMethod;
+	private MethodMetadata modifyMethod;
 
 	/**
 	 * Constructor
@@ -146,8 +150,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		builder.addField(getDataField());
 
 		addCollaboratingDoDFieldsToBuilder();
-
-		builder.addMethod(getNewTransientEntityMethod());
+		setNewTransientEntityMethod();
 
 		builder.addMethod(getEmbeddedIdMutatorMethod());
 
@@ -157,10 +160,9 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		}
 
 		addFieldMutatorMethodsToBuilder();
-
-		builder.addMethod(getSpecificPersistentEntityMethod());
-		builder.addMethod(getRandomPersistentEntityMethod());
-		builder.addMethod(getModifyMethod());
+		setSpecificPersistentEntityMethod();
+		setRandomPersistentEntityMethod();
+		setModifyMethod();
 		builder.addMethod(getInitMethod(findEntriesMethodAdditions, persistMethodAdditions, flushMethod));
 
 		itdTypeDetails = builder.build();
@@ -288,6 +290,10 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	 * @return the "getNewTransientEntity(int index):Entity" method (never returns null)
 	 */
 	public MethodMetadata getNewTransientEntityMethod() {
+		return newTransientEntityMethod;
+	}
+
+	private void setNewTransientEntityMethod() {
 		// Method definition to find or build
 		JavaSymbolName methodName = new JavaSymbolName("getNewTransient" + entity.getSimpleTypeName());
 
@@ -298,7 +304,8 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		MethodMetadata userMethod = getGovernorMethod(methodName, parameterType);
 		if (userMethod != null) {
 			Assert.isTrue(userMethod.getReturnType().equals(entity), "Method '" + methodName + "' on '" + destination + "' must return '" + entity.getNameIncludingTypeParameters() + "'");
-			return userMethod;
+			newTransientEntityMethod = userMethod;
+			return;
 		}
 
 		// Create method
@@ -325,10 +332,12 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 
 		bodyBuilder.appendFormalLine("return obj;");
 
-		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, entity, AnnotatedJavaType.convertFromJavaTypes(parameterType), parameterNames, bodyBuilder).build();
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, entity, AnnotatedJavaType.convertFromJavaTypes(parameterType), parameterNames, bodyBuilder);
+		builder.addMethod(methodBuilder);
+		newTransientEntityMethod = methodBuilder.build();
 	}
 
-	private MethodMetadata getEmbeddedIdMutatorMethod() {
+	private MethodMetadataBuilder getEmbeddedIdMutatorMethod() {
 		if (!hasEmbeddedIdentifier()) {
 			return null;
 		}
@@ -369,10 +378,10 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 
 		List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("obj"), INDEX);
 
-		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder).build();
+		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
 	}
 
-	private MethodMetadata getEmbeddedClassMutatorMethod(final EmbeddedHolder embeddedHolder) {
+	private MethodMetadataBuilder getEmbeddedClassMutatorMethod(final EmbeddedHolder embeddedHolder) {
 		JavaSymbolName methodName = getEmbeddedFieldMutatorMethodName(embeddedHolder.getEmbeddedField());
 		final JavaType[] parameterTypes = { entity, JavaType.INT_PRIMITIVE };
 
@@ -395,7 +404,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 
 		List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("obj"), INDEX);
 
-		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder).build();
+		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
 	}
 
 	private JavaSymbolName getEmbeddedFieldMutatorMethodName(final FieldMetadata embeddedField) {
@@ -417,24 +426,23 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 
 			JavaSymbolName embeddedClassMethodName = new JavaSymbolName(field.getFieldName().getSymbolNameTurnedIntoMutatorMethodName());
 			MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, embeddedClassMethodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
-			MethodMetadata fieldInitializerMethod = methodBuilder.build();
 			if (getGovernorMethod(embeddedClassMethodName, parameterTypes) != null) {
 				// Method found in governor so do not create method in ITD
 				continue;
 			}
 
-			builder.addMethod(fieldInitializerMethod);
+			builder.addMethod(methodBuilder);
 		}
 	}
 
 	private void addFieldMutatorMethodsToBuilder() {
-		for (MethodMetadata fieldInitializerMethod : getFieldMutatorMethods()) {
+		for (MethodMetadataBuilder fieldInitializerMethod : getFieldMutatorMethods()) {
 			builder.addMethod(fieldInitializerMethod);
 		}
 	}
 
-	private List<MethodMetadata> getFieldMutatorMethods() {
-		List<MethodMetadata> fieldMutatorMethods = new ArrayList<MethodMetadata>();
+	private List<MethodMetadataBuilder> getFieldMutatorMethods() {
+		List<MethodMetadataBuilder> fieldMutatorMethods = new ArrayList<MethodMetadataBuilder>();
 
 		List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("obj"), INDEX);
 		final JavaType[] parameterTypes = { entity, JavaType.INT_PRIMITIVE };
@@ -456,8 +464,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 			bodyBuilder.append(getFieldValidationBody(field, initializer, mutatorName, false));
 
-			MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, mutatorName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
-			fieldMutatorMethods.add(methodBuilder.build());
+			fieldMutatorMethods.add(new MethodMetadataBuilder(getId(), Modifier.PUBLIC, mutatorName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder));
 		}
 
 		return fieldMutatorMethods;
@@ -743,6 +750,10 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	 * @return the "modifyEntity(Entity):boolean" method (never returns null)
 	 */
 	public MethodMetadata getModifyMethod() {
+		return modifyMethod;
+	}
+
+	private void setModifyMethod() {
 		// Method definition to find or build
 		JavaSymbolName methodName = new JavaSymbolName("modify" + entity.getSimpleTypeName());
 		final JavaType parameterType = entity;
@@ -753,30 +764,39 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		MethodMetadata userMethod = getGovernorMethod(methodName, parameterType);
 		if (userMethod != null) {
 			Assert.isTrue(userMethod.getReturnType().equals(returnType), "Method '" + methodName + "' on '" + destination + "' must return '" + returnType.getNameIncludingTypeParameters() + "'");
-			return userMethod;
+			modifyMethod = userMethod;
+			return;
 		}
 
 		// Create method
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("return false;");
 
-		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(parameterType), parameterNames, bodyBuilder).build();
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(parameterType), parameterNames, bodyBuilder);
+		builder.addMethod(methodBuilder);
+		modifyMethod = methodBuilder.build();
 	}
 
 	/**
 	 * @return the "getRandomEntity():Entity" method (never returns null)
 	 */
 	public MethodMetadata getRandomPersistentEntityMethod() {
+		return randomPersistentEntityMethod;
+	}
+
+	/**
+	 * @return the "getRandomEntity():Entity" method (never returns null)
+	 */
+	private void setRandomPersistentEntityMethod() {
 		// Method definition to find or build
 		JavaSymbolName methodName = new JavaSymbolName("getRandom" + entity.getSimpleTypeName());
-		final JavaType[] parameterTypes = {};
-		List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
 
 		// Locate user-defined method
-		MethodMetadata userMethod = getGovernorMethod(methodName, parameterTypes);
+		MethodMetadata userMethod = getGovernorMethod(methodName);
 		if (userMethod != null) {
 			Assert.isTrue(userMethod.getReturnType().equals(entity), "Method '" + methodName + "' on '" + destination + "' must return '" + entity.getNameIncludingTypeParameters() + "'");
-			return userMethod;
+			randomPersistentEntityMethod = userMethod;
+			return;
 		}
 
 		// Create method
@@ -787,13 +807,20 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		bodyBuilder.appendFormalLine("return " + findMethod.getMethodCall() + ";");
 
 		findMethod.copyAdditionsTo(builder, governorTypeDetails);
-		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, entity, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder).build();
+
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, entity, bodyBuilder);
+		builder.addMethod(methodBuilder);
+		randomPersistentEntityMethod = methodBuilder.build();
 	}
 
 	/**
 	 * @return the "getSpecificEntity(int):Entity" method (never returns null)
 	 */
-	public MethodMetadata getSpecificPersistentEntityMethod() {
+	private MethodMetadata getSpecificPersistentEntityMethod() {
+		return specificPersistentEntityMethod;
+	}
+
+	private void setSpecificPersistentEntityMethod() {
 		// Method definition to find or build
 		JavaSymbolName methodName = new JavaSymbolName("getSpecific" + entity.getSimpleTypeName());
 		final JavaType parameterType = JavaType.INT_PRIMITIVE;
@@ -803,7 +830,8 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		MethodMetadata userMethod = getGovernorMethod(methodName, parameterType);
 		if (userMethod != null) {
 			Assert.isTrue(userMethod.getReturnType().equals(entity), "Method '" + methodName + "' on '" + destination + "' must return '" + entity.getNameIncludingTypeParameters() + "'");
-			return userMethod;
+			specificPersistentEntityMethod = userMethod;
+			return;
 		}
 
 		// Create method
@@ -816,7 +844,10 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		bodyBuilder.appendFormalLine("return " + findMethod.getMethodCall() + ";");
 
 		findMethod.copyAdditionsTo(builder, governorTypeDetails);
-		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, entity, AnnotatedJavaType.convertFromJavaTypes(parameterType), parameterNames, bodyBuilder).build();
+
+		MethodMetadataBuilder methodBuilder =  new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, entity, AnnotatedJavaType.convertFromJavaTypes(parameterType), parameterNames, bodyBuilder);
+		builder.addMethod(methodBuilder);
+		specificPersistentEntityMethod = methodBuilder.build();
 	}
 
 	/**
@@ -827,7 +858,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	 * @param flushAdditions (required)
 	 * @return never <code>null</code>
 	 */
-	private MethodMetadata getInitMethod(final MemberTypeAdditions findEntriesMethodAdditions, final MemberTypeAdditions persistMethodAdditions, final MemberTypeAdditions flushAdditions) {
+	private MethodMetadataBuilder getInitMethod(final MemberTypeAdditions findEntriesMethodAdditions, final MemberTypeAdditions persistMethodAdditions, final MemberTypeAdditions flushAdditions) {
 		// Method definition to find or build
 		final JavaSymbolName methodName = new JavaSymbolName("init");
 		final JavaType[] parameterTypes = {};
@@ -838,7 +869,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		final MethodMetadata userMethod = getGovernorMethod(methodName, parameterTypes);
 		if (userMethod != null) {
 			Assert.isTrue(userMethod.getReturnType().equals(returnType), "Method '" + methodName + "' on '" + destination + "' must return '" + returnType.getNameIncludingTypeParameters() + "'");
-			return userMethod;
+			return new MethodMetadataBuilder(userMethod);
 		}
 
 		// Create the method body
@@ -860,7 +891,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		bodyBuilder.appendFormalLine(dataField + " = new ArrayList<" + getDataField().getFieldType().getParameters().get(0).getNameIncludingTypeParameters() + ">();");
 		bodyBuilder.appendFormalLine("for (int i = 0; i < " + annotationValues.getQuantity() + "; i++) {");
 		bodyBuilder.indent();
-		bodyBuilder.appendFormalLine(entity.getSimpleTypeName() + " obj = " + getNewTransientEntityMethod().getMethodName() + "(i);");
+		bodyBuilder.appendFormalLine(entity.getSimpleTypeName() + " obj = " + newTransientEntityMethod.getMethodName() + "(i);");
 		bodyBuilder.appendFormalLine("try {");
 		bodyBuilder.indent();
 		bodyBuilder.appendFormalLine(persistMethodAdditions.getMethodCall() + ";");
@@ -887,7 +918,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		bodyBuilder.appendFormalLine("}");
 
 		// Create the method
-		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder).build();
+		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
 	}
 
 	public boolean hasEmbeddedIdentifier() {

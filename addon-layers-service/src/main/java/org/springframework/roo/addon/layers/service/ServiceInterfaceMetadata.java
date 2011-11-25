@@ -6,7 +6,6 @@ import java.util.Map.Entry;
 
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
-import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
@@ -81,21 +80,14 @@ public class ServiceInterfaceMetadata extends AbstractItdTypeDetailsProvidingMet
 	 * @return <code>null</code> if the method isn't required or is already
 	 * declared in the governor
 	 */
-	private MethodMetadata getMethod(final ServiceLayerMethod method, final JavaType domainType, final JavaType idType, final String plural) {
+	private MethodMetadataBuilder getMethod(final ServiceLayerMethod method, final JavaType domainType, final JavaType idType, final String plural) {
 		final JavaSymbolName methodName = method.getSymbolName(annotationValues, domainType, plural);
 		if (methodName != null && governorDetails.isMethodDeclaredByAnother(methodName, method.getParameterTypes(domainType, idType), getId())) {
 			// We don't want this method, or the governor already declares it
 			return null;
 		}
-		return new MethodMetadataBuilder(
-				getId(),
-				PUBLIC_ABSTRACT,
-				methodName,
-				method.getReturnType(domainType),
-				AnnotatedJavaType.convertFromJavaTypes(method.getParameterTypes(domainType, idType)),
-				method.getParameterNames(domainType, idType),
-				BODY)
-		.build();
+		
+		return new MethodMetadataBuilder(getId(), PUBLIC_ABSTRACT, methodName, method.getReturnType(domainType), AnnotatedJavaType.convertFromJavaTypes(method.getParameterTypes(domainType, idType)), method.getParameterNames(domainType, idType), BODY);
 	}
 
 	public ServiceAnnotationValues getServiceAnnotationValues() {
