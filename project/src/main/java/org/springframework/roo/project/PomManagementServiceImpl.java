@@ -242,7 +242,7 @@ public class PomManagementServiceImpl implements PomManagementService {
 		final StringBuilder sb = new StringBuilder();
 		for (int i = backCount; i < relativePathSegments.length; i++) {
 			sb.append(relativePathSegments[i]);
-			sb.append("/");
+			sb.append(File.separatorChar);
 		}
 
 		while (backCount > 0) {
