@@ -50,6 +50,10 @@ public class JpaActiveRecordMetadata extends AbstractItdTypeDetailsProvidingMeta
 	private static final String PROVIDES_TYPE_STRING = JpaActiveRecordMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
 	private static final JavaType COUNT_RETURN_TYPE = JavaType.LONG_PRIMITIVE;
+	
+	// Fields
+	private MethodMetadata entityManagerMethod;
+	private MethodMetadata findMethod;
 
 	public static String getMetadataIdentifierType() {
 		return PROVIDES_TYPE;
@@ -114,19 +118,19 @@ public class JpaActiveRecordMetadata extends AbstractItdTypeDetailsProvidingMeta
 		// Determine the entity's "entityManager" field, which is guaranteed to be accessible to the ITD.
 		builder.addField(getEntityManagerField());
 
+		// Add static methods
+		setEntityManagerMethod();
+		builder.addMethod(getCountMethod());
+		builder.addMethod(getFindAllMethod());
+		setFindMethod();
+		builder.addMethod(getFindEntriesMethod());
+
 		// Add helper methods
 		builder.addMethod(getPersistMethod());
 		builder.addMethod(getRemoveMethod());
 		builder.addMethod(getFlushMethod());
 		builder.addMethod(getClearMethod());
 		builder.addMethod(getMergeMethod());
-
-		// Add static methods
-		builder.addMethod(getEntityManagerMethod());
-		builder.addMethod(getCountMethod());
-		builder.addMethod(getFindAllMethod());
-		builder.addMethod(getFindMethod());
-		builder.addMethod(getFindEntriesMethod());
 
 		builder.putCustomData(CustomDataKeys.DYNAMIC_FINDER_NAMES, getDynamicFinders());
 
@@ -347,9 +351,14 @@ public class JpaActiveRecordMetadata extends AbstractItdTypeDetailsProvidingMeta
 	 * @return the static utility entityManager() method used by other methods to obtain entity manager and available as a utility for user code (never returns nulls)
 	 */
 	public MethodMetadata getEntityManagerMethod() {
+		return entityManagerMethod;
+	}
+
+	private void setEntityManagerMethod() {
 		if (parent != null) {
 			// The parent is required to guarantee this is available
-			return parent.getEntityManagerMethod();
+			entityManagerMethod = parent.getEntityManagerMethod();
+			return;
 		}
 
 		// Method definition to find or build
@@ -361,7 +370,8 @@ public class JpaActiveRecordMetadata extends AbstractItdTypeDetailsProvidingMeta
 		final MethodMetadata userMethod = getGovernorMethod(methodName, parameterTypes);
 		if (userMethod != null) {
 			Assert.isTrue(userMethod.getReturnType().equals(returnType), "Method '" + methodName + "' on '" + destination + "' must return '" + returnType.getNameIncludingTypeParameters() + "'");
-			return userMethod;
+			entityManagerMethod = userMethod;
+			return;
 		}
 
 		// Create method
@@ -404,7 +414,9 @@ public class JpaActiveRecordMetadata extends AbstractItdTypeDetailsProvidingMeta
 		bodyBuilder.appendFormalLine("return em;");
 		final int modifier = Modifier.PUBLIC | Modifier.STATIC | Modifier.FINAL;
 
-		return new MethodMetadataBuilder(getId(), modifier, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), new ArrayList<JavaSymbolName>(), bodyBuilder).build();
+		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), modifier, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), new ArrayList<JavaSymbolName>(), bodyBuilder);
+		builder.addMethod(methodBuilder);
+		entityManagerMethod = methodBuilder.build();
 	}
 
 	/**
@@ -478,8 +490,15 @@ public class JpaActiveRecordMetadata extends AbstractItdTypeDetailsProvidingMeta
 	 * @return the find (by ID) method (may return null)
 	 */
 	public MethodMetadata getFindMethod() {
+		return findMethod;
+	}
+
+	/**
+	 * @return the find (by ID) method (may return null)
+	 */
+	private void setFindMethod() {
 		if ("".equals(crudAnnotationValues.getFindMethod())) {
-			return null;
+			return;
 		}
 
 		// Method definition to find or build
@@ -493,7 +512,8 @@ public class JpaActiveRecordMetadata extends AbstractItdTypeDetailsProvidingMeta
 		final MethodMetadata userMethod = getGovernorMethod(methodName, parameterType);
 		if (userMethod != null) {
 			Assert.isTrue(userMethod.getReturnType().equals(returnType), "Method '" + methodName + "' on '" + returnType + "' must return '" + returnType.getNameIncludingTypeParameters() + "'");
-			return userMethod;
+			findMethod = userMethod;
+			return;
 		}
 
 		// Create method
@@ -514,7 +534,8 @@ public class JpaActiveRecordMetadata extends AbstractItdTypeDetailsProvidingMeta
 
 		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC | Modifier.STATIC, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(parameterType), parameterNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
-		return methodBuilder.build();
+		builder.addMethod(methodBuilder);
+		findMethod = methodBuilder.build();
 	}
 
 	/**

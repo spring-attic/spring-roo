@@ -13,7 +13,6 @@ import java.lang.annotation.Target;
 * turn is required by MVC controllers. Importantly, such code does NOT depend on any singletons and is intended
 * to safely serialise. In the current release this code will be emitted to an ITD.
 *
-*
 * <p>
 * There are two cases in which ROO will not emit one or more of the above artifacts:
 *
@@ -24,7 +23,6 @@ import java.lang.annotation.Target;
 *
 * @author Stefan Schmidt
 * @since 1.0
-*
 */
 @Retention(RetentionPolicy.SOURCE)
 @Target(ElementType.TYPE)

@@ -273,8 +273,8 @@ public class JavaParserClassOrInterfaceTypeDetailsBuilder implements Builder<Cla
 				if (member instanceof FieldDeclaration) {
 					final FieldDeclaration castMember = (FieldDeclaration) member;
 					for (final VariableDeclarator var : castMember.getVariables()) {
-						final FieldMetadata fieldMetadata = JavaParserFieldMetadataBuilder.getInstance(declaredByMetadataId, castMember, var, compilationUnitServices, typeParameterNames).build();
-						classOrInterfaceTypeDetailsBuilder.addField(fieldMetadata);
+						final FieldMetadata field = JavaParserFieldMetadataBuilder.getInstance(declaredByMetadataId, castMember, var, compilationUnitServices, typeParameterNames).build();
+						classOrInterfaceTypeDetailsBuilder.addField(field);
 					}
 				}
 				if (member instanceof MethodDeclaration) {
@@ -284,8 +284,8 @@ public class JavaParserClassOrInterfaceTypeDetailsBuilder implements Builder<Cla
 				}
 				if (member instanceof ConstructorDeclaration) {
 					final ConstructorDeclaration castMember = (ConstructorDeclaration) member;
-					final ConstructorMetadata constructorMetadata = JavaParserConstructorMetadataBuilder.getInstance(declaredByMetadataId, castMember, compilationUnitServices, typeParameterNames).build();
-					classOrInterfaceTypeDetailsBuilder.addConstructor(constructorMetadata);
+					final ConstructorMetadata constructor = JavaParserConstructorMetadataBuilder.getInstance(declaredByMetadataId, castMember, compilationUnitServices, typeParameterNames).build();
+					classOrInterfaceTypeDetailsBuilder.addConstructor(constructor);
 				}
 				if (member instanceof TypeDeclaration) {
 					final TypeDeclaration castMember = (TypeDeclaration) member;

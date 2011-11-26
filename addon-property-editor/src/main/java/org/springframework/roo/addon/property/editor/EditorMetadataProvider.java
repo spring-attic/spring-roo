@@ -45,19 +45,16 @@ public class EditorMetadataProvider extends AbstractItdMetadataProvider {
 		}
 
 		// Lookup the form backing object's metadata
-
 		JavaType javaType = annotationValues.getEditedType();
-		String typeMid = typeLocationService.getPhysicalTypeIdentifier(javaType);
-		if (typeMid == null) {
+		if (!typeLocationService.isInProject(javaType)) {
 			return null;
 		}
-		LogicalPath path = EditorMetadata.getPath(typeMid);
+
+		LogicalPath path = EditorMetadata.getPath(metadataIdentificationString);
 		String jpaActiveRecordMetadataKey = JpaActiveRecordMetadata.createIdentifier(javaType, path);
 
 		// We need to lookup the metadata we depend on
 		JpaActiveRecordMetadata jpaActiveRecordMetadata = (JpaActiveRecordMetadata) metadataService.get(jpaActiveRecordMetadataKey);
-
-		// We need to abort if we couldn't find dependent metadata
 		if (jpaActiveRecordMetadata == null || !jpaActiveRecordMetadata.isValid()) {
 			return null;
 		}
@@ -76,9 +73,9 @@ public class EditorMetadataProvider extends AbstractItdMetadataProvider {
 		if (identifierAccessor == null) {
 			return null;
 		}
-		
+
 		final MethodMetadata findMethod = jpaActiveRecordMetadata.getFindMethod();
-		
+
 		return new EditorMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, javaType, identifierType, identifierAccessor, findMethod);
 	}
 

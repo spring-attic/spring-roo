@@ -63,7 +63,7 @@ public class JavaParserMethodMetadataBuilder implements Builder<MethodMetadata>{
 		Assert.notNull(methodDeclaration, "Method declaration is mandatory");
 		Assert.notNull(compilationUnitServices, "Compilation unit services are required");
 
-        this.declaredByMetadataId = declaredByMetadataId;
+		this.declaredByMetadataId = declaredByMetadataId;
 
 		// Convert Java Parser modifier into JDK modifier
 		this.modifier = JavaParserUtils.getJdkModifier(methodDeclaration.getModifiers());
@@ -88,11 +88,10 @@ public class JavaParserMethodMetadataBuilder implements Builder<MethodMetadata>{
 
 		// Get the body
 		this.body = methodDeclaration.getBody() == null ? null : methodDeclaration.getBody().toString();
-
-        if (this.body != null) {
-            this.body = StringUtils.replaceFirst(this.body, "{", "");
-            this.body = this.body.substring(0, this.body.lastIndexOf("}"));
-        }
+		if (this.body != null) {
+			this.body = StringUtils.replaceFirst(this.body, "{", "");
+			this.body = this.body.substring(0, this.body.lastIndexOf("}"));
+		}
 
 		// Lookup the parameters and their names
 		if (methodDeclaration.getParameters() != null) {
@@ -108,7 +107,7 @@ public class JavaParserMethodMetadataBuilder implements Builder<MethodMetadata>{
 					}
 				}
 				AnnotatedJavaType param = new AnnotatedJavaType(parameterType, annotations);
-                param.setVarArgs(p.isVarArgs());
+				param.setVarArgs(p.isVarArgs());
 				parameterTypes.add(param);
 				parameterNames.add(new JavaSymbolName(p.getId().getName()));
 			}
@@ -239,7 +238,7 @@ public class JavaParserMethodMetadataBuilder implements Builder<MethodMetadata>{
 
 			// Create a Java Parser method parameter and add it to the list of parameters
 			Parameter p = new Parameter(parameterType, new VariableDeclaratorId(parameterName));
-            p.setVarArgs(methodParameter.isVarArgs());
+			p.setVarArgs(methodParameter.isVarArgs());
 			p.setAnnotations(parameterAnnotations);
 			parameters.add(p);
 		}
