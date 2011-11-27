@@ -153,6 +153,7 @@ public class JspOperationsImpl extends AbstractOperations implements JspOperatio
 		copyDirectoryContents("tiles/default.jspx", pathResolver.getIdentifier(webappPath, "WEB-INF/layouts/"), false);
 		copyDirectoryContents("tiles/layouts.xml", pathResolver.getIdentifier(webappPath, "WEB-INF/layouts/"), false);
 		copyDirectoryContents("tiles/header.jspx", pathResolver.getIdentifier(webappPath, "WEB-INF/views/"), false);
+		copyDirectoryContents("tiles/menu.jspx", pathResolver.getIdentifier(webappPath, "WEB-INF/views/"), false);
 		copyDirectoryContents("tiles/footer.jspx", pathResolver.getIdentifier(webappPath, "WEB-INF/views/"), false);
 		copyDirectoryContents("tiles/views.xml", pathResolver.getIdentifier(webappPath, "WEB-INF/views/"), false);
 
