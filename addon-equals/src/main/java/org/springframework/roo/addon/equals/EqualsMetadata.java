@@ -102,7 +102,7 @@ public class EqualsMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	 */
 	private MethodMetadataBuilder getEqualsMethod() {
 		final JavaType parameterType = OBJECT;
-		if (getGovernorMethod(EQUALS_METHOD_NAME, parameterType) != null) {
+		if (governorHasMethod(EQUALS_METHOD_NAME, parameterType)) {
 			return null;
 		}
 
@@ -146,7 +146,7 @@ public class EqualsMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	 * @return <code>null</code> if no generation is required
 	 */
 	private MethodMetadataBuilder getHashCodeMethod() {
-		if (getGovernorMethod(HASH_CODE_METHOD_NAME) != null) {
+		if (governorHasMethod(HASH_CODE_METHOD_NAME)) {
 			return null;
 		}
 
