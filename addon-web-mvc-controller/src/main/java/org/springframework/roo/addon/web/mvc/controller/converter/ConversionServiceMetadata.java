@@ -259,10 +259,15 @@ public class ConversionServiceMetadata extends AbstractItdTypeDetailsProvidingMe
 	}
 
 	private MethodMetadataBuilder getToTypeConverterMethod(final JavaType targetType, final JavaSymbolName methodName, final MemberTypeAdditions findMethod, final JavaType idType) {
-		if (findMethod == null || governorHasMethod(methodName)) {
+		MethodMetadata toTypeConverterMethod = getGovernorMethod(methodName);
+		if (findMethod == null) {
 			return null;
 		}
+		if (toTypeConverterMethod != null) {
+			return new MethodMetadataBuilder(toTypeConverterMethod);
+		}
 
+		findMethod.copyAdditionsTo(builder, governorTypeDetails);
 		final JavaType converterJavaType = SpringJavaType.getConverterType(idType, targetType);
 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
@@ -275,7 +280,6 @@ public class ConversionServiceMetadata extends AbstractItdTypeDetailsProvidingMe
 		bodyBuilder.appendFormalLine("}");
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("};");
-		findMethod.copyAdditionsTo(builder, governorTypeDetails);
 
 		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, converterJavaType, bodyBuilder);
 	}
