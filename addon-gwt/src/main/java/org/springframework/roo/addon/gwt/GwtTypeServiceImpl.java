@@ -425,12 +425,12 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 		builder.add(concreteClass.getRegisteredImports());
 
 		for (MemberHoldingTypeDetails extendsTypeDetails : extendsTypesDetails) {
-			for (ConstructorMetadata constructorMetadata : extendsTypeDetails.getDeclaredConstructors()) {
+			for (ConstructorMetadata constructor : extendsTypeDetails.getDeclaredConstructors()) {
 				ConstructorMetadataBuilder abstractConstructor = new ConstructorMetadataBuilder(abstractId);
-				abstractConstructor.setModifier(constructorMetadata.getModifier());
+				abstractConstructor.setModifier(constructor.getModifier());
 
 				Map<JavaSymbolName, JavaType> typeMap = resolveTypes(extendsTypeDetails.getName(), concreteClass.getExtendsTypes().get(0));
-				for (AnnotatedJavaType type : constructorMetadata.getParameterTypes()) {
+				for (AnnotatedJavaType type : constructor.getParameterTypes()) {
 					JavaType newType = type.getJavaType();
 					if (type.getJavaType().getParameters().size() > 0) {
 						ArrayList<JavaType> parameterTypes = new ArrayList<JavaType>();
@@ -444,7 +444,7 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 					}
 					abstractConstructor.getParameterTypes().add(new AnnotatedJavaType(newType));
 				}
-				abstractConstructor.setParameterNames(constructorMetadata.getParameterNames());
+				abstractConstructor.setParameterNames(constructor.getParameterNames());
 
 				InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 				bodyBuilder.newLine().indent().append("super(");

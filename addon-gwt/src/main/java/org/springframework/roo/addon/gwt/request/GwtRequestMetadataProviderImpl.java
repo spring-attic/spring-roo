@@ -143,8 +143,8 @@ public class GwtRequestMetadataProviderImpl extends AbstractHashCodeTrackingMeta
 			}
 			final Boolean dontIncludeProxyMethods = GwtUtils.getBooleanAnnotationValue(proxy, ROO_GWT_REQUEST, "ignoreProxyReadOnly", true);
 			if (dontIncludeProxyMethods) {
-				for (final MethodMetadata methodMetadata : proxy.getDeclaredMethods())  {
-					exclusionList.add(methodMetadata.getMethodName().getSymbolName());
+				for (final MethodMetadata method : proxy.getDeclaredMethods())  {
+					exclusionList.add(method.getMethodName().getSymbolName());
 				}
 			}
 		}
@@ -230,16 +230,16 @@ public class GwtRequestMetadataProviderImpl extends AbstractHashCodeTrackingMeta
 		return getRequestMethod(request, methodMetadata, methodReturnType);
 	}
 
-	private MethodMetadataBuilder getRequestMethod(final ClassOrInterfaceTypeDetails request, final MethodMetadata methodMetadata, final JavaType methodReturnType) {
+	private MethodMetadataBuilder getRequestMethod(final ClassOrInterfaceTypeDetails request, final MethodMetadata method, final JavaType methodReturnType) {
 		final List<AnnotatedJavaType> paramaterTypes = new ArrayList<AnnotatedJavaType>();
 		final ClassOrInterfaceTypeDetails mirroredTypeDetails = gwtTypeService.lookupEntityFromRequest(request);
 		if (mirroredTypeDetails == null) {
 			return null;
 		}
-		for (final AnnotatedJavaType parameterType : methodMetadata.getParameterTypes()) {
+		for (final AnnotatedJavaType parameterType : method.getParameterTypes()) {
 			paramaterTypes.add(new AnnotatedJavaType(gwtTypeService.getGwtSideLeafType(parameterType.getJavaType(), mirroredTypeDetails.getName(), true, false)));
 		}
-		return new MethodMetadataBuilder(request.getDeclaredByMetadataId(), Modifier.ABSTRACT, methodMetadata.getMethodName(), methodReturnType, paramaterTypes, methodMetadata.getParameterNames(), new InvocableMemberBodyBuilder());
+		return new MethodMetadataBuilder(request.getDeclaredByMetadataId(), Modifier.ABSTRACT, method.getMethodName(), methodReturnType, paramaterTypes, method.getParameterNames(), new InvocableMemberBodyBuilder());
 	}
 
 	public void notify(final String upstreamDependency, String downstreamDependency) {

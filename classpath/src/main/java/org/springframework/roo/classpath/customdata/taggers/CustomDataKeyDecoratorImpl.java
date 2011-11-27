@@ -48,20 +48,20 @@ public class CustomDataKeyDecoratorImpl implements CustomDataKeyDecorator {
 
 		// Locate any requests that we add custom data to identifiable java structures
 		for (FieldMatcher fieldTagger : getFieldTaggers()) {
-			for (FieldMetadata fieldMetadata : fieldTagger.matches(memberDetails.getDetails())) {
-				memberDetailsBuilder.tag(fieldMetadata, fieldTagger.getCustomDataKey(), fieldTagger.getTagValue(fieldMetadata));
+			for (FieldMetadata field : fieldTagger.matches(memberDetails.getDetails())) {
+				memberDetailsBuilder.tag(field, fieldTagger.getCustomDataKey(), fieldTagger.getTagValue(field));
 			}
 		}
 
 		for (MethodMatcher methodTagger : getMethodTaggers()) {
-			for (MethodMetadata methodMetadata : methodTagger.matches(memberDetails.getDetails(), pluralMap)) {
-				memberDetailsBuilder.tag(methodMetadata, methodTagger.getCustomDataKey(), methodTagger.getTagValue(methodMetadata));
+			for (MethodMetadata method : methodTagger.matches(memberDetails.getDetails(), pluralMap)) {
+				memberDetailsBuilder.tag(method, methodTagger.getCustomDataKey(), methodTagger.getTagValue(method));
 			}
 		}
 
 		for (ConstructorMatcher constructorTagger : getConstructorTaggers()) {
-			for (ConstructorMetadata constructorMetadata : constructorTagger.matches(memberDetails.getDetails())) {
-				memberDetailsBuilder.tag(constructorMetadata, constructorTagger.getCustomDataKey(), constructorTagger.getTagValue(constructorMetadata));
+			for (ConstructorMetadata constructor : constructorTagger.matches(memberDetails.getDetails())) {
+				memberDetailsBuilder.tag(constructor, constructorTagger.getCustomDataKey(), constructorTagger.getTagValue(constructor));
 			}
 		}
 

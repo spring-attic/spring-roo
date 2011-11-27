@@ -36,9 +36,9 @@ public class FieldMetadataCustomDataKey extends IdentifiableAnnotatedJavaStructu
 	}
 
 	@Override
-	public boolean meets(final FieldMetadata fieldMetadata) {
+	public boolean meets(final FieldMetadata field) {
 		// TODO: Add in validation logic for fieldType, fieldName, fieldInitializer
-		return super.meets(fieldMetadata);
+		return super.meets(field);
 	}
 
 	public JavaType getFieldType() {

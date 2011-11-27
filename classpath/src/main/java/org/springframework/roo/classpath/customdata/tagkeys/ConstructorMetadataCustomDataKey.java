@@ -25,7 +25,7 @@ public class ConstructorMetadataCustomDataKey extends InvocableMemberMetadataCus
 	}
 
 	@Override
-	public boolean meets(final ConstructorMetadata constructorMetadata) {
-		return super.meets(constructorMetadata);
+	public boolean meets(final ConstructorMetadata constructor) {
+		return super.meets(constructor);
 	}
 }

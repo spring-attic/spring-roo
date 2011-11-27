@@ -204,8 +204,8 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 		return new FieldMetadataBuilder(getId(), Modifier.PRIVATE, fieldName, new JavaType(SET.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, Collections.singletonList(GAE_DATASTORE_KEY)), "new HashSet<Key>()");
 	}
 
-	private JavaSymbolName getIdentifierMethodName(final FieldMetadata fieldMetadata) {
-		JavaSymbolName identifierAccessorMethodName = declaredFields.get(fieldMetadata);
+	private JavaSymbolName getIdentifierMethodName(final FieldMetadata field) {
+		JavaSymbolName identifierAccessorMethodName = declaredFields.get(field);
 		return identifierAccessorMethodName != null ? identifierAccessorMethodName : new JavaSymbolName("getId");
 	}
 

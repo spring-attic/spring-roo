@@ -54,19 +54,19 @@ public class TypeManagementServiceImpl implements TypeManagementService {
 		createOrUpdateTypeOnDisk(classOrInterfaceTypeDetailsBuilder.build());
 	}
 
-	public void addField(final FieldMetadata fieldMetadata) {
-		Assert.notNull(fieldMetadata, "Field metadata not provided");
+	public void addField(final FieldMetadata field) {
+		Assert.notNull(field, "Field metadata not provided");
 
 		// Obtain the physical type and ITD mutable details
-		PhysicalTypeMetadata ptm = (PhysicalTypeMetadata) metadataService.get(fieldMetadata.getDeclaredByMetadataId());
-		Assert.notNull(ptm, "Java source code unavailable for type " + PhysicalTypeIdentifier.getFriendlyName(fieldMetadata.getDeclaredByMetadataId()));
+		PhysicalTypeMetadata ptm = (PhysicalTypeMetadata) metadataService.get(field.getDeclaredByMetadataId());
+		Assert.notNull(ptm, "Java source code unavailable for type " + PhysicalTypeIdentifier.getFriendlyName(field.getDeclaredByMetadataId()));
 		PhysicalTypeDetails ptd = ptm.getMemberHoldingTypeDetails();
-		Assert.notNull(ptd, "Java source code details unavailable for type " + PhysicalTypeIdentifier.getFriendlyName(fieldMetadata.getDeclaredByMetadataId()));
+		Assert.notNull(ptd, "Java source code details unavailable for type " + PhysicalTypeIdentifier.getFriendlyName(field.getDeclaredByMetadataId()));
 		ClassOrInterfaceTypeDetailsBuilder classOrInterfaceTypeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder((ClassOrInterfaceTypeDetails) ptd);
 
 		// Automatically add JSR 303 (Bean Validation API) support if there is no current JSR 303 support but a JSR 303 annotation is present
 		boolean jsr303Required = false;
-		for (AnnotationMetadata annotation : fieldMetadata.getAnnotations()) {
+		for (AnnotationMetadata annotation : field.getAnnotations()) {
 			if (annotation.getAnnotationType().getFullyQualifiedTypeName().startsWith("javax.validation")) {
 				jsr303Required = true;
 				break;
@@ -79,7 +79,7 @@ public class TypeManagementServiceImpl implements TypeManagementService {
 			// It's more likely the version below represents a later version than any specified in the user's own dependency list
 			projectOperations.addDependency(path.getModule(), "javax.validation", "validation-api", "1.0.0.GA");
 		}
-		classOrInterfaceTypeDetailsBuilder.addField(fieldMetadata);
+		classOrInterfaceTypeDetailsBuilder.addField(field);
 		createOrUpdateTypeOnDisk(classOrInterfaceTypeDetailsBuilder.build());
 	}
 

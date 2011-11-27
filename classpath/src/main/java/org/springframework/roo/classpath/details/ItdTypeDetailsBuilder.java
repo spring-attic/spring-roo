@@ -124,12 +124,12 @@ public class ItdTypeDetailsBuilder extends AbstractMemberHoldingTypeDetailsBuild
 		if (declaredFieldAnnotationDetails == null) {
 			return;
 		}
-		JavaType declaredBy = PhysicalTypeIdentifier.getJavaType(declaredFieldAnnotationDetails.getFieldMetadata().getDeclaredByMetadataId());
-		boolean hasAnnotation = MemberFindingUtils.getAnnotationOfType(declaredFieldAnnotationDetails.getFieldMetadata().getAnnotations(), declaredFieldAnnotationDetails.getFieldAnnotation().getAnnotationType()) != null;
+		JavaType declaredBy = PhysicalTypeIdentifier.getJavaType(declaredFieldAnnotationDetails.getField().getDeclaredByMetadataId());
+		boolean hasAnnotation = MemberFindingUtils.getAnnotationOfType(declaredFieldAnnotationDetails.getField().getAnnotations(), declaredFieldAnnotationDetails.getFieldAnnotation().getAnnotationType()) != null;
 		if (!declaredFieldAnnotationDetails.isRemoveAnnotation()) {
-			Assert.isTrue(!hasAnnotation, "Field annotation '@" + declaredFieldAnnotationDetails.getFieldAnnotation().getAnnotationType().getSimpleTypeName() + "' is already present on the target field '" + declaredBy.getFullyQualifiedTypeName() + "." + declaredFieldAnnotationDetails.getFieldMetadata().getFieldName().getSymbolName() + "' (ITD target '" + aspect.getFullyQualifiedTypeName() + "')");
+			Assert.isTrue(!hasAnnotation, "Field annotation '@" + declaredFieldAnnotationDetails.getFieldAnnotation().getAnnotationType().getSimpleTypeName() + "' is already present on the target field '" + declaredBy.getFullyQualifiedTypeName() + "." + declaredFieldAnnotationDetails.getField().getFieldName().getSymbolName() + "' (ITD target '" + aspect.getFullyQualifiedTypeName() + "')");
 		} else {
-			Assert.isTrue(hasAnnotation, "Field annotation '@" + declaredFieldAnnotationDetails.getFieldAnnotation().getAnnotationType().getSimpleTypeName() + "' cannot be removed as it is not present on the target field '" + declaredBy.getFullyQualifiedTypeName() + "." + declaredFieldAnnotationDetails.getFieldMetadata().getFieldName().getSymbolName() + "' (ITD target '" + aspect.getFullyQualifiedTypeName() + "')");
+			Assert.isTrue(hasAnnotation, "Field annotation '@" + declaredFieldAnnotationDetails.getFieldAnnotation().getAnnotationType().getSimpleTypeName() + "' cannot be removed as it is not present on the target field '" + declaredBy.getFullyQualifiedTypeName() + "." + declaredFieldAnnotationDetails.getField().getFieldName().getSymbolName() + "' (ITD target '" + aspect.getFullyQualifiedTypeName() + "')");
 		}
 		fieldAnnotations.add(declaredFieldAnnotationDetails);
 	}

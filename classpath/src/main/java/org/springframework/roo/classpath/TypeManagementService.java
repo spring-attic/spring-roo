@@ -37,9 +37,9 @@ public interface TypeManagementService {
 	 * <p>
 	 * An exception is thrown if the class does not exist, cannot be modified or a field with the requested name is already declared.
 	 *
-	 * @param fieldMetadata the field to add (required)
+	 * @param field the field to add (required)
 	 */
-	void addField(FieldMetadata fieldMetadata);
+	void addField(FieldMetadata field);
 
 	/**
 	 * Creates a physical type with the contents based on the {@link ClassOrInterfaceTypeDetails} passed in at the

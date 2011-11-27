@@ -165,14 +165,13 @@ public class JpaOperationsImpl implements JpaOperations {
 
 	public void newEntity(final JavaType name, final boolean createAbstract, final JavaType superclass, final List<AnnotationMetadataBuilder> annotations) {
 		Assert.notNull(name, "Entity name required");
-		
-		final String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(name, pathResolver.getFocusedPath(Path.SRC_MAIN_JAVA));
 
 		int modifier = Modifier.PUBLIC;
 		if (createAbstract) {
 			modifier |= Modifier.ABSTRACT;
 		}
 
+		final String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(name, pathResolver.getFocusedPath(Path.SRC_MAIN_JAVA));
 		final ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, modifier, name, PhysicalTypeCategory.CLASS);
 
 		if (!superclass.equals(OBJECT)) {

@@ -125,16 +125,16 @@ public class MethodMatcher implements Matcher<MethodMetadata> {
 		Set<JavaSymbolName> methodNames = new HashSet<JavaSymbolName>();
 		JavaSymbolName userDefinedMethodName = getUserDefinedMethod(memberHoldingTypeDetailsList, pluralMap);
 		if (userDefinedMethodName == null) {
-			for (FieldMetadata fieldMetadata : fields) {
-				methodNames.add(new JavaSymbolName(getPrefix() + StringUtils.capitalize(fieldMetadata.getFieldName().getSymbolName())));
+			for (FieldMetadata field : fields) {
+				methodNames.add(new JavaSymbolName(getPrefix() + StringUtils.capitalize(field.getFieldName().getSymbolName())));
 			}
 		} else {
 			methodNames.add(new JavaSymbolName(userDefinedMethodName.getSymbolName() + additionalSuffix));
 		}
 		for (MemberHoldingTypeDetails memberHoldingTypeDetails : memberHoldingTypeDetailsList) {
-			for (MethodMetadata methodMetadata : memberHoldingTypeDetails.getDeclaredMethods()) {
-				if (methodNames.contains(methodMetadata.getMethodName())) {
-					methods.add(methodMetadata);
+			for (MethodMetadata method : memberHoldingTypeDetails.getDeclaredMethods()) {
+				if (methodNames.contains(method.getMethodName())) {
+					methods.add(method);
 				}
 			}
 		}

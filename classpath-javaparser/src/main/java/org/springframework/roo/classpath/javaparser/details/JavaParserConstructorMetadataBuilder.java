@@ -113,18 +113,17 @@ public class JavaParserConstructorMetadataBuilder implements Builder<Constructor
 				this.annotations.add(JavaParserAnnotationMetadataBuilder.getInstance(annotation, compilationUnitServices).build());
 			}
 		}
-
 	}
 
 	public ConstructorMetadata build() {
-		ConstructorMetadataBuilder constructorMetadataBuilder = new ConstructorMetadataBuilder(declaredByMetadataId);
-		constructorMetadataBuilder.setAnnotations(annotations);
-		constructorMetadataBuilder.setBodyBuilder(InvocableMemberBodyBuilder.getInstance().append(body));
-		constructorMetadataBuilder.setModifier(modifier);
-		constructorMetadataBuilder.setParameterNames(parameterNames);
-		constructorMetadataBuilder.setParameterTypes(parameterTypes);
-		constructorMetadataBuilder.setThrowsTypes(throwsTypes);
-		return constructorMetadataBuilder.build();
+		ConstructorMetadataBuilder constructorBuilder = new ConstructorMetadataBuilder(declaredByMetadataId);
+		constructorBuilder.setAnnotations(annotations);
+		constructorBuilder.setBodyBuilder(InvocableMemberBodyBuilder.getInstance().append(body));
+		constructorBuilder.setModifier(modifier);
+		constructorBuilder.setParameterNames(parameterNames);
+		constructorBuilder.setParameterTypes(parameterTypes);
+		constructorBuilder.setThrowsTypes(throwsTypes);
+		return constructorBuilder.build();
 	}
 
 	public static void addConstructor(final CompilationUnitServices compilationUnitServices, final List<BodyDeclaration> members, final ConstructorMetadata constructor, final Set<JavaSymbolName> typeParameters) {

@@ -13,7 +13,7 @@ import org.springframework.roo.support.util.Assert;
 public class DeclaredFieldAnnotationDetails {
 
 	// Fields
-	private final FieldMetadata fieldMetadata;
+	private final FieldMetadata field;
 	private final AnnotationMetadata fieldAnnotation;
 	private final boolean removeAnnotation;
 
@@ -22,17 +22,17 @@ public class DeclaredFieldAnnotationDetails {
 	 * of new Annotations which should be introduced by an AspectJ ITD. The added annotations can not already be present
 	 * in {@link FieldMetadata}.
 	 *
-	 * @param fieldMetadata FieldMetadata of existing field (may not be null)
+	 * @param field FieldMetadata of existing field (may not be null)
 	 * @param fieldAnnotation Annotation to be added to field via an ITD (may not be null)
 	 * @param removeAnnotation if true, will cause the specified annotation to be REMOVED via AspectJ's "-" syntax (usually would be false)
 	 */
-	public DeclaredFieldAnnotationDetails(final FieldMetadata fieldMetadata, final AnnotationMetadata fieldAnnotation, final boolean removeAnnotation) {
-		Assert.notNull(fieldMetadata, "Field metadata required");
+	public DeclaredFieldAnnotationDetails(final FieldMetadata field, final AnnotationMetadata fieldAnnotation, final boolean removeAnnotation) {
+		Assert.notNull(field, "Field metadata required");
 		Assert.notNull(fieldAnnotation, "Field annotation required");
 		if (removeAnnotation) {
-			Assert.isTrue(fieldAnnotation.getAttributeNames().isEmpty(), "Field annotation '@" + fieldAnnotation.getAnnotationType().getSimpleTypeName() + "' (on the target field '" + fieldMetadata.getFieldType().getFullyQualifiedTypeName() + "." + fieldMetadata.getFieldName().getSymbolName() + ") must not have any attributes when requesting its removal");
+			Assert.isTrue(fieldAnnotation.getAttributeNames().isEmpty(), "Field annotation '@" + fieldAnnotation.getAnnotationType().getSimpleTypeName() + "' (on the target field '" + field.getFieldType().getFullyQualifiedTypeName() + "." + field.getFieldName().getSymbolName() + ") must not have any attributes when requesting its removal");
 		}
-		this.fieldMetadata = fieldMetadata;
+		this.field = field;
 		this.fieldAnnotation = fieldAnnotation;
 		this.removeAnnotation = removeAnnotation;
 	}
@@ -40,15 +40,15 @@ public class DeclaredFieldAnnotationDetails {
 	/**
 	 * Overloaded constructor which is used in the most typical case of ADDING an annotation to a field, not removing one.
 	 *
-	 * @param fieldMetadata FieldMetadata of existing field (may not be null)
+	 * @param field FieldMetadata of existing field (may not be null)
 	 * @param fieldAnnotation Annotation to be added to field via an ITD (may not be null)
 	 */
-	public DeclaredFieldAnnotationDetails(final FieldMetadata fieldMetadata, final AnnotationMetadata fieldAnnotation) {
-		this(fieldMetadata, fieldAnnotation, false);
+	public DeclaredFieldAnnotationDetails(final FieldMetadata field, final AnnotationMetadata fieldAnnotation) {
+		this(field, fieldAnnotation, false);
 	}
 
-	public FieldMetadata getFieldMetadata() {
-		return fieldMetadata;
+	public FieldMetadata getField() {
+		return field;
 	}
 
 	public AnnotationMetadata getFieldAnnotation() {

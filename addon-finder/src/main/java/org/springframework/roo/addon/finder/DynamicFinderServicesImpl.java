@@ -248,9 +248,9 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
 
 	private List<MethodMetadata> getLocatedMutators(final MemberDetails memberDetails) {
 		List<MethodMetadata> locatedMutators = new ArrayList<MethodMetadata>();
-		for (MethodMetadata methodMetadata : memberDetails.getMethods()) {
-			if (isMethodOfInterest(methodMetadata)) {
-				locatedMutators.add(methodMetadata);
+		for (MethodMetadata method : memberDetails.getMethods()) {
+			if (isMethodOfInterest(method)) {
+				locatedMutators.add(method);
 			}
 		}
 		return locatedMutators;
@@ -276,8 +276,8 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
 		}
 
 		SortedSet<FieldToken> fieldTokens = new TreeSet<FieldToken>();
-		for (MethodMetadata methodMetadata : getLocatedMutators(memberDetails)) {
-			FieldMetadata field = BeanInfoUtils.getFieldForPropertyName(memberDetails, methodMetadata.getParameterNames().get(0));
+		for (MethodMetadata method : getLocatedMutators(memberDetails)) {
+			FieldMetadata field = BeanInfoUtils.getFieldForPropertyName(memberDetails, method.getParameterNames().get(0));
 
 			// If we did find a field matching the first parameter name of the mutator method we can add it to the finder ITD
 			if (field != null) {
