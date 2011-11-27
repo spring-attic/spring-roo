@@ -94,12 +94,15 @@ public class JavaSymbolName implements Comparable<JavaSymbolName> {
 	 * @since 1.2.0
 	 */
 	public static JavaSymbolName getReservedWordSafeName(final JavaType javaType) {
-		String entityNameString = Introspector.decapitalize(StringUtils.capitalize(javaType.getSimpleTypeName()));
-		while (ReservedWords.RESERVED_JAVA_KEYWORDS.contains(entityNameString)) {
-			// Prefixing can create names that don't work in the Derby DB
-			entityNameString += "_";
+		final String simpleTypeName = javaType.getSimpleTypeName();
+		String str = Introspector.decapitalize(StringUtils.capitalize(simpleTypeName));
+		while (ReservedWords.RESERVED_JAVA_KEYWORDS.contains(str)) {
+			str += "_"; // Prefixing can create names that don't work in the Derby DB
 		}
-		return new JavaSymbolName(entityNameString);
+		if (str.equals(simpleTypeName)) { // ROO-2929
+			str += "_";
+		}
+		return new JavaSymbolName(str);
 	}
 
 	/**
