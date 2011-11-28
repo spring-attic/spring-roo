@@ -83,9 +83,9 @@ public class TypeManagementServiceImpl implements TypeManagementService {
 		createOrUpdateTypeOnDisk(classOrInterfaceTypeDetailsBuilder.build());
 	}
 
-	public void createOrUpdateTypeOnDisk(final ClassOrInterfaceTypeDetails cit) {
-		final String fileCanonicalPath = typeLocationService.getPhysicalTypeCanonicalPath(cit.getDeclaredByMetadataId());
-		final String newContents = typeParsingService.getCompilationUnitContents(cit);
+	public void createOrUpdateTypeOnDisk(final ClassOrInterfaceTypeDetails cid) {
+		final String fileCanonicalPath = typeLocationService.getPhysicalTypeCanonicalPath(cid.getDeclaredByMetadataId());
+		final String newContents = typeParsingService.getCompilationUnitContents(cid);
 		fileManager.createOrUpdateTextFileIfRequired(fileCanonicalPath, newContents, true);
 	}
 }

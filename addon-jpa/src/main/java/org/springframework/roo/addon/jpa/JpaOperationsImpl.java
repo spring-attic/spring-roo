@@ -189,7 +189,7 @@ public class JpaOperationsImpl implements JpaOperations {
 
 	public void newEmbeddableClass(final JavaType name, final boolean serializable) {
 		Assert.notNull(name, "Embeddable name required");
-		
+
 		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(name, pathResolver.getFocusedPath(Path.SRC_MAIN_JAVA));
 
 		final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();

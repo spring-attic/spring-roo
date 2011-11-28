@@ -59,23 +59,23 @@ public class JavaParserTypeParsingService implements TypeParsingService {
 	@Reference MetadataService metadataService;
 	@Reference TypeLocationService typeLocationService;
 
-	public final String getCompilationUnitContents(final ClassOrInterfaceTypeDetails cit) {
-		Assert.notNull(cit, "Class or interface type details are required");
+	public final String getCompilationUnitContents(final ClassOrInterfaceTypeDetails cid) {
+		Assert.notNull(cid, "Class or interface type details are required");
 		// Create a compilation unit to store the type to be created
 		final CompilationUnit compilationUnit = new CompilationUnit();
 
 		// NB: this import list is replaced at the end of this method by a sorted version
 		compilationUnit.setImports(new ArrayList<ImportDeclaration>());
 
-		if (!cit.getName().isDefaultPackage()) {
-			compilationUnit.setPackage(new PackageDeclaration(ASTHelper.createNameExpr(cit.getName().getPackage().getFullyQualifiedPackageName())));
+		if (!cid.getName().isDefaultPackage()) {
+			compilationUnit.setPackage(new PackageDeclaration(ASTHelper.createNameExpr(cid.getName().getPackage().getFullyQualifiedPackageName())));
 		}
 
 		// Add the class of interface declaration to the compilation unit
 		final List<TypeDeclaration> types = new ArrayList<TypeDeclaration>();
 		compilationUnit.setTypes(types);
 
-		updateOutput(compilationUnit, null, cit, null);
+		updateOutput(compilationUnit, null, cid, null);
 
 		return compilationUnit.toString();
 	}
@@ -116,13 +116,13 @@ public class JavaParserTypeParsingService implements TypeParsingService {
 	 *
 	 * @param compilationUnit the work-in-progress compilation unit (required)
 	 * @param enclosingCompilationUnitServices
-	 * @param cit the new class to add (required)
+	 * @param cid the new class to add (required)
 	 * @param parent the class body declarations a subclass should be added to (may be null, which denotes a top-level type within the compilation unit)
 	 */
-	private void updateOutput(final CompilationUnit compilationUnit, CompilationUnitServices enclosingCompilationUnitServices, final ClassOrInterfaceTypeDetails cit, final List<BodyDeclaration> parent) {
+	private void updateOutput(final CompilationUnit compilationUnit, CompilationUnitServices enclosingCompilationUnitServices, final ClassOrInterfaceTypeDetails cid, final List<BodyDeclaration> parent) {
 		// Append the new imports this class declares
-		Assert.notNull(compilationUnit.getImports(), "Compilation unit imports should be non-null when producing type '" + cit.getName() + "'");
-		for (ImportMetadata importType : cit.getRegisteredImports()) {
+		Assert.notNull(compilationUnit.getImports(), "Compilation unit imports should be non-null when producing type '" + cid.getName() + "'");
+		for (ImportMetadata importType : cid.getRegisteredImports()) {
 			if (!importType.isAsterisk()) {
 				NameExpr typeToImportExpr;
 				if (importType.getImportType().getEnclosingType() == null) {
@@ -137,33 +137,33 @@ public class JavaParserTypeParsingService implements TypeParsingService {
 		}
 
 		// Create a class or interface declaration to represent this actual type
-		int javaParserModifier = JavaParserUtils.getJavaParserModifier(cit.getModifier());
+		int javaParserModifier = JavaParserUtils.getJavaParserModifier(cid.getModifier());
 		TypeDeclaration typeDeclaration;
 		ClassOrInterfaceDeclaration classOrInterfaceDeclaration;
 
 		// Implements handling
 		List<ClassOrInterfaceType> implementsList = new ArrayList<ClassOrInterfaceType>();
-		for (JavaType current : cit.getImplementsTypes()) {
-			implementsList.add(JavaParserUtils.getResolvedName(cit.getName(), current, compilationUnit));
+		for (JavaType current : cid.getImplementsTypes()) {
+			implementsList.add(JavaParserUtils.getResolvedName(cid.getName(), current, compilationUnit));
 		}
 
-		if (cit.getPhysicalTypeCategory() == PhysicalTypeCategory.INTERFACE || cit.getPhysicalTypeCategory() == PhysicalTypeCategory.CLASS) {
-			boolean isInterface = cit.getPhysicalTypeCategory() == PhysicalTypeCategory.INTERFACE;
+		if (cid.getPhysicalTypeCategory() == PhysicalTypeCategory.INTERFACE || cid.getPhysicalTypeCategory() == PhysicalTypeCategory.CLASS) {
+			boolean isInterface = cid.getPhysicalTypeCategory() == PhysicalTypeCategory.INTERFACE;
 
 			if (parent == null) {
 				// Top level type
-				typeDeclaration = new ClassOrInterfaceDeclaration(javaParserModifier, isInterface, cit.getName().getNameIncludingTypeParameters().replace(cit.getName().getPackage().getFullyQualifiedPackageName() + ".", ""));
+				typeDeclaration = new ClassOrInterfaceDeclaration(javaParserModifier, isInterface, cid.getName().getNameIncludingTypeParameters().replace(cid.getName().getPackage().getFullyQualifiedPackageName() + ".", ""));
 				classOrInterfaceDeclaration = (ClassOrInterfaceDeclaration) typeDeclaration;
 			} else {
 				// Inner type
-				typeDeclaration = new ClassOrInterfaceDeclaration(javaParserModifier, isInterface, cit.getName().getSimpleTypeName());
+				typeDeclaration = new ClassOrInterfaceDeclaration(javaParserModifier, isInterface, cid.getName().getSimpleTypeName());
 				classOrInterfaceDeclaration = (ClassOrInterfaceDeclaration) typeDeclaration;
 
-				if (cit.getName().getParameters().size() > 0) {
+				if (cid.getName().getParameters().size() > 0) {
 					classOrInterfaceDeclaration.setTypeParameters(new ArrayList<TypeParameter>());
 
-					for (JavaType param : cit.getName().getParameters()) {
-						NameExpr pNameExpr = JavaParserUtils.importTypeIfRequired(cit.getName(), compilationUnit.getImports(), param);
+					for (JavaType param : cid.getName().getParameters()) {
+						NameExpr pNameExpr = JavaParserUtils.importTypeIfRequired(cid.getName(), compilationUnit.getImports(), param);
 						String tempName = StringUtils.replaceFirst(pNameExpr.toString(), param.getArgName() + " extends ", "");
 						pNameExpr = new NameExpr(tempName);
 						ClassOrInterfaceType pResolvedName = JavaParserUtils.getClassOrInterfaceType(pNameExpr);
@@ -174,9 +174,9 @@ public class JavaParserTypeParsingService implements TypeParsingService {
 
 			// Superclass handling
 			List<ClassOrInterfaceType> extendsList = new ArrayList<ClassOrInterfaceType>();
-			for (JavaType current : cit.getExtendsTypes()) {
+			for (JavaType current : cid.getExtendsTypes()) {
 				if (!OBJECT.equals(current)) {
-					extendsList.add(JavaParserUtils.getResolvedName(cit.getName(), current, compilationUnit));
+					extendsList.add(JavaParserUtils.getResolvedName(cid.getName(), current, compilationUnit));
 				}
 			}
 			if (extendsList.size() > 0) {
@@ -188,14 +188,14 @@ public class JavaParserTypeParsingService implements TypeParsingService {
 				classOrInterfaceDeclaration.setImplements(implementsList);
 			}
 		} else {
-			typeDeclaration = new EnumDeclaration(javaParserModifier, cit.getName().getSimpleTypeName());
+			typeDeclaration = new EnumDeclaration(javaParserModifier, cid.getName().getSimpleTypeName());
 		}
 		typeDeclaration.setMembers(new ArrayList<BodyDeclaration>());
 
-		Assert.notNull(typeDeclaration.getName(), "Missing type declaration name for '" + cit.getName() + "'");
+		Assert.notNull(typeDeclaration.getName(), "Missing type declaration name for '" + cid.getName() + "'");
 
 		// If adding a new top-level type, must add it to the compilation unit types
-		Assert.notNull(compilationUnit.getTypes(), "Compilation unit types must not be null when attempting to add '" + cit.getName() + "'");
+		Assert.notNull(compilationUnit.getTypes(), "Compilation unit types must not be null when attempting to add '" + cid.getName() + "'");
 
 		if (parent == null) {
 			// Top-level class
@@ -214,7 +214,7 @@ public class JavaParserTypeParsingService implements TypeParsingService {
 				}
 
 				public JavaPackage getCompilationUnitPackage() {
-					return cit.getName().getPackage();
+					return cid.getName().getPackage();
 				}
 
 				public List<TypeDeclaration> getInnerTypes() {
@@ -222,11 +222,11 @@ public class JavaParserTypeParsingService implements TypeParsingService {
 				}
 
 				public JavaType getEnclosingTypeName() {
-					return cit.getName();
+					return cid.getName();
 				}
 
 				public PhysicalTypeCategory getPhysicalTypeCategory() {
-					return cit.getPhysicalTypeCategory();
+					return cid.getPhysicalTypeCategory();
 				}
 			};
 		}
@@ -247,29 +247,29 @@ public class JavaParserTypeParsingService implements TypeParsingService {
 			}
 
 			public JavaType getEnclosingTypeName() {
-				return cit.getName();
+				return cid.getName();
 			}
 
 			public PhysicalTypeCategory getPhysicalTypeCategory() {
-				return cit.getPhysicalTypeCategory();
+				return cid.getPhysicalTypeCategory();
 			}
 		};
 
 		// Add type annotations
 		List<AnnotationExpr> annotations = new ArrayList<AnnotationExpr>();
 		typeDeclaration.setAnnotations(annotations);
-		for (AnnotationMetadata candidate : cit.getAnnotations()) {
+		for (AnnotationMetadata candidate : cid.getAnnotations()) {
 			JavaParserAnnotationMetadataBuilder.addAnnotationToList(compilationUnitServices, annotations, candidate);
 		}
 
 		// Add enum constants and interfaces
-		if (typeDeclaration instanceof EnumDeclaration && cit.getEnumConstants().size() > 0) {
+		if (typeDeclaration instanceof EnumDeclaration && cid.getEnumConstants().size() > 0) {
 			EnumDeclaration enumDeclaration = (EnumDeclaration) typeDeclaration;
 
 			List<EnumConstantDeclaration> constants = new ArrayList<EnumConstantDeclaration>();
 			enumDeclaration.setEntries(constants);
 
-			for (JavaSymbolName constant : cit.getEnumConstants()) {
+			for (JavaSymbolName constant : cid.getEnumConstants()) {
 				addEnumConstant(constants, constant);
 			}
 
@@ -280,22 +280,22 @@ public class JavaParserTypeParsingService implements TypeParsingService {
 		}
 
 		// Add fields
-		for (FieldMetadata candidate : cit.getDeclaredFields()) {
+		for (FieldMetadata candidate : cid.getDeclaredFields()) {
 			JavaParserFieldMetadataBuilder.addField(compilationUnitServices, typeDeclaration.getMembers(), candidate);
 		}
 
 		// Add constructors
-		for (ConstructorMetadata candidate : cit.getDeclaredConstructors()) {
+		for (ConstructorMetadata candidate : cid.getDeclaredConstructors()) {
 			JavaParserConstructorMetadataBuilder.addConstructor(compilationUnitServices, typeDeclaration.getMembers(), candidate, null);
 		}
 
 		// Add methods
-		for (MethodMetadata candidate : cit.getDeclaredMethods()) {
+		for (MethodMetadata candidate : cid.getDeclaredMethods()) {
 			JavaParserMethodMetadataBuilder.addMethod(compilationUnitServices, typeDeclaration.getMembers(), candidate, null);
 		}
 
 		// Add inner types
-		for (ClassOrInterfaceTypeDetails candidate : cit.getDeclaredInnerTypes()) {
+		for (ClassOrInterfaceTypeDetails candidate : cid.getDeclaredInnerTypes()) {
 			updateOutput(compilationUnit, compilationUnitServices, candidate, typeDeclaration.getMembers());
 		}
 
@@ -311,15 +311,15 @@ public class JavaParserTypeParsingService implements TypeParsingService {
 				importPackage = importType.getPackage();
 			}
 
-			if (importPackage.equals(cit.getName().getPackage()) && importDeclaration.isAsterisk()) {
+			if (importPackage.equals(cid.getName().getPackage()) && importDeclaration.isAsterisk()) {
 				continue;
 			}
 
-			if (importPackage.equals(cit.getName().getPackage()) && importType != null && importType.getEnclosingType() == null) {
+			if (importPackage.equals(cid.getName().getPackage()) && importType != null && importType.getEnclosingType() == null) {
 				continue;
 			}
 
-			if (importType != null && importType.equals(cit.getName())) {
+			if (importType != null && importType.equals(cid.getName())) {
 				continue;
 			}
 

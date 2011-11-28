@@ -15,7 +15,7 @@ import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 import org.osgi.service.startlevel.StartLevel;
 
-@SuppressWarnings({ "unchecked", "rawtypes" })
+@SuppressWarnings({ "unchecked", "rawtypes" }) // **** CHANGE FROM ORIGINAL FELIX VERSION ****
 public class AutoProcessor
 {
     /**
@@ -65,7 +65,7 @@ public class AutoProcessor
      * @param configMap Map of configuration properties.
      * @param context The system bundle context.
     **/
-    public static void process(Map configMap, final BundleContext context)
+	public static void process(Map configMap, BundleContext context)
     {
         configMap = (configMap == null) ? new HashMap() : configMap;
         processAutoDeploy(configMap, context);
@@ -78,7 +78,7 @@ public class AutoProcessor
      * specified deploy actions.
      * </p>
      */
-	private static void processAutoDeploy(final Map configMap, final BundleContext context)
+    private static void processAutoDeploy(Map configMap, BundleContext context)
     {
         // Determine if auto deploy actions to perform.
         String action = (String) configMap.get(AUTO_DEPLOY_ACTION_PROPERY);
@@ -168,7 +168,7 @@ public class AutoProcessor
                     }
                     // If the bundle is already installed, then update it
                     // if the 'update' action is present.
-                    else if (actionList.contains(AUTO_DEPLOY_UPDATE_VALUE))
+                    else if ((b != null) && actionList.contains(AUTO_DEPLOY_UPDATE_VALUE))
                     {
                         b.update();
                     }
@@ -238,7 +238,7 @@ public class AutoProcessor
      * specified configuration properties.
      * </p>
      */
-    private static void processAutoProperties(final Map configMap, final BundleContext context)
+    private static void processAutoProperties(Map configMap, BundleContext context)
     {
         // Retrieve the Start Level service, since it will be needed
         // to set the start level of the installed bundles.
@@ -327,7 +327,7 @@ if (ex.getCause() != null)
         }
     }
 
-    private static String nextLocation(final StringTokenizer st)
+    private static String nextLocation(StringTokenizer st)
     {
         String retVal = null;
 
@@ -383,7 +383,7 @@ if (ex.getCause() != null)
         return retVal;
     }
 
-    private static boolean isFragment(final Bundle bundle)
+    private static boolean isFragment(Bundle bundle)
     {
         return bundle.getHeaders().get(Constants.FRAGMENT_HOST) != null;
     }
