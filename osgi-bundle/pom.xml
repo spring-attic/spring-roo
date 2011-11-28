@@ -87,7 +87,7 @@
             </plugin>
 			<plugin>
 				<artifactId>maven-antrun-plugin</artifactId>
-				<version>1.6</version>
+				<version>1.7</version>
 				<executions>
 					<execution>
 						<!-- copies the JARs we have built locally (eg bootstrap JAR) that noone else depends on into the target/all -->
