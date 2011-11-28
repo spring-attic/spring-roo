@@ -86,7 +86,7 @@ public class JpaActiveRecordMetadata extends AbstractItdTypeDetailsProvidingMeta
 	/**
 	 * Constructor
 	 *
-	 * @param metadataId (required)
+	 * @param metadataIdentificationString (required)
 	 * @param aspectName (required)
 	 * @param governorPhysicalTypeMetadata (required)
 	 * @param parent can be <code>null</code>
@@ -96,13 +96,13 @@ public class JpaActiveRecordMetadata extends AbstractItdTypeDetailsProvidingMeta
 	 * @param identifierField the entity's identifier field (required)
 	 * @param entityName the JPA entity name (required)
 	 */
-	public JpaActiveRecordMetadata(final String metadataId, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final JpaActiveRecordMetadata parent, final JpaCrudAnnotationValues crudAnnotationValues, final String plural, final FieldMetadata identifierField, final String entityName, final boolean isGaeEnabled) {
-		super(metadataId, aspectName, governorPhysicalTypeMetadata);
-		Assert.isTrue(isValid(metadataId), "Metadata identification string '" + metadataId + "' does not appear to be a valid");
+	public JpaActiveRecordMetadata(final String metadataIdentificationString, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final JpaActiveRecordMetadata parent, final JpaCrudAnnotationValues crudAnnotationValues, final String plural, final FieldMetadata identifierField, final String entityName, final boolean isGaeEnabled) {
+		super(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata);
+		Assert.isTrue(isValid(metadataIdentificationString), "Metadata identification string '" + metadataIdentificationString + "' does not appear to be a valid");
 		Assert.notNull(crudAnnotationValues, "CRUD-related annotation values required");
-		Assert.notNull(identifierField, "Identifier required for '" + metadataId + "'");
-		Assert.hasText(entityName, "Entity name required for '" + metadataId + "'");
-		Assert.hasText(plural, "Plural required for '" + metadataId + "'");
+		Assert.notNull(identifierField, "Identifier required for '" + metadataIdentificationString + "'");
+		Assert.hasText(entityName, "Entity name required for '" + metadataIdentificationString + "'");
+		Assert.hasText(plural, "Plural required for '" + metadataIdentificationString + "'");
 
 		if (!isValid()) {
 			return;

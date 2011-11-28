@@ -375,7 +375,7 @@ public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTracki
 	/**
 	 * Deletes the given ITD, either now or later.
 	 * 
-	 * @param metadataId the ITD's metadata ID
+	 * @param metadataIdentificationString the ITD's metadata ID
 	 * @param itdFilename the ITD's filename
 	 * @param reason the reason for deletion; ignored if now is <code>false</code>
 	 * @param now whether to delete the ITD immediately; <code>false</code>
@@ -384,13 +384,13 @@ public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTracki
 	 * some ancestor metadata has changed to that effect), otherwise there will
 	 * be spurious console messages about the ITD being deleted and created
 	 */
-	private void deleteItd(final String metadataId, final String itdFilename, final String reason, final boolean now) {
+	private void deleteItd(final String metadataIdentificationString, final String itdFilename, final String reason, final boolean now) {
 		if (now) {
 			fileManager.delete(itdFilename, reason);
 		} else {
 			fileManager.createOrUpdateTextFileIfRequired(itdFilename, "", false);
 		}
-		itdDiscoveryService.removeItdTypeDetails(metadataId);
+		itdDiscoveryService.removeItdTypeDetails(metadataIdentificationString);
 		// TODO do we need to notify downstream dependencies that this ITD has gone away?
 	}
 	

@@ -19,13 +19,13 @@ public class DefaultPhysicalTypeMetadata extends AbstractMetadataItem implements
 	/**
 	 * Constructor
 	 *
-	 * @param metadataId the ID to assign this {@link org.springframework.roo.metadata.MetadataItem} (must satisfy {@link PhysicalTypeIdentifier#isValid(String)})
+	 * @param metadataIdentificationString the ID to assign this {@link org.springframework.roo.metadata.MetadataItem} (must satisfy {@link PhysicalTypeIdentifier#isValid(String)})
 	 * @param physicalLocationCanonicalPath the canonical path of the file containing this Java type (required)
 	 * @param classOrInterfaceTypeDetails the details of this type (required)
 	 */
-	public DefaultPhysicalTypeMetadata(final String metadataId, final String physicalLocationCanonicalPath, final ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails) {
-		super(metadataId);
-		Assert.isTrue(PhysicalTypeIdentifier.isValid(metadataId), "Metadata id '" + metadataId + "' is not a valid physical type identifier");
+	public DefaultPhysicalTypeMetadata(final String metadataIdentificationString, final String physicalLocationCanonicalPath, final ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails) {
+		super(metadataIdentificationString);
+		Assert.isTrue(PhysicalTypeIdentifier.isValid(metadataIdentificationString), "Metadata id '" + metadataIdentificationString + "' is not a valid physical type identifier");
 		Assert.hasText(physicalLocationCanonicalPath, "Physical location canonical path required");
 		Assert.notNull(classOrInterfaceTypeDetails, "Class or interface type details required");
 		this.classOrInterfaceTypeDetails = classOrInterfaceTypeDetails;

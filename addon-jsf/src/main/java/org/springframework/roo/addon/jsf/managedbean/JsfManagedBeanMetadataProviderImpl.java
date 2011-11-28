@@ -172,7 +172,7 @@ public class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDiscoverin
 	 * @param identifierAccessor
 	 * @return a non-<code>null</code> iterable collection
 	 */
-	private Set<FieldMetadata> locateFields(final JavaType entity, final MemberDetails memberDetails, final String metadataId, final MethodMetadata identifierAccessor, final MethodMetadata versionAccessor) {
+	private Set<FieldMetadata> locateFields(final JavaType entity, final MemberDetails memberDetails, final String metadataIdentificationString, final MethodMetadata identifierAccessor, final MethodMetadata versionAccessor) {
 		final Set<FieldMetadata> locatedFields = new LinkedHashSet<FieldMetadata>();
 		final Set<ClassOrInterfaceTypeDetails> managedBeanTypes = typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(ROO_JSF_MANAGED_BEAN);
 
@@ -188,7 +188,7 @@ public class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDiscoverin
 			if (field == null) {
 				continue;
 			}
-			metadataDependencyRegistry.registerDependency(field.getDeclaredByMetadataId(), metadataId);
+			metadataDependencyRegistry.registerDependency(field.getDeclaredByMetadataId(), metadataIdentificationString);
 
 			final CustomDataBuilder customDataBuilder = new CustomDataBuilder(field.getCustomData());
 			final JavaType fieldType = field.getFieldType();
@@ -259,7 +259,7 @@ public class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDiscoverin
 							applicationTypeFields.add(BeanInfoUtils.getFieldForJavaBeanMethod(applicationTypeMemberDetails, applicationTypeIdentifierAccessor));
 						}
 						customDataBuilder.put(APPLICATION_TYPE_FIELDS_KEY, applicationTypeFields);
-						customDataBuilder.put(CRUD_ADDITIONS_KEY, getCrudAdditions(fieldType, metadataId));
+						customDataBuilder.put(CRUD_ADDITIONS_KEY, getCrudAdditions(fieldType, metadataIdentificationString));
 					}
 				}
 			}
@@ -277,11 +277,11 @@ public class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDiscoverin
 	 * various CRUD methods of the given entity
 	 *
 	 * @param entity the target entity type (required)
-	 * @param metadataId the ID of the metadata that's being created (required)
+	 * @param metadataIdentificationString the ID of the metadata that's being created (required)
 	 * @return a non-<code>null</code> map (may be empty if the CRUD methods are indeterminable)
 	 */
-	private Map<MethodMetadataCustomDataKey, MemberTypeAdditions> getCrudAdditions(final JavaType entity, final String metadataId) {
-		metadataDependencyRegistry.registerDependency(typeLocationService.getPhysicalTypeIdentifier(entity), metadataId);
+	private Map<MethodMetadataCustomDataKey, MemberTypeAdditions> getCrudAdditions(final JavaType entity, final String metadataIdentificationString) {
+		metadataDependencyRegistry.registerDependency(typeLocationService.getPhysicalTypeIdentifier(entity), metadataIdentificationString);
 		final List<FieldMetadata> idFields = persistenceMemberLocator.getIdentifierFields(entity);
 		if (idFields.isEmpty()) {
 			return Collections.emptyMap();
@@ -291,7 +291,7 @@ public class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDiscoverin
 		if (identifierType == null) {
 			return Collections.emptyMap();
 		}
-		metadataDependencyRegistry.registerDependency(identifierField.getDeclaredByMetadataId(), metadataId);
+		metadataDependencyRegistry.registerDependency(identifierField.getDeclaredByMetadataId(), metadataIdentificationString);
 
 		final JavaSymbolName entityName = JavaSymbolName.getReservedWordSafeName(entity);
 		final MethodParameter entityParameter = new MethodParameter(entity, entityName);
@@ -300,13 +300,13 @@ public class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDiscoverin
 		final MethodParameter maxResultsParameter = new MethodParameter(INT_PRIMITIVE, "sizeNo");
 
 		final Map<MethodMetadataCustomDataKey, MemberTypeAdditions> additions = new HashMap<MethodMetadataCustomDataKey, MemberTypeAdditions>();
-		additions.put(COUNT_ALL_METHOD, layerService.getMemberTypeAdditions(metadataId, COUNT_ALL_METHOD.name(), entity, identifierType, LAYER_POSITION));
-		additions.put(FIND_ALL_METHOD, layerService.getMemberTypeAdditions(metadataId, FIND_ALL_METHOD.name(), entity, identifierType, LAYER_POSITION));
-		additions.put(FIND_ENTRIES_METHOD, layerService.getMemberTypeAdditions(metadataId, FIND_ENTRIES_METHOD.name(), entity, identifierType, LAYER_POSITION, firstResultParameter, maxResultsParameter));
-		additions.put(FIND_METHOD, layerService.getMemberTypeAdditions(metadataId, FIND_METHOD.name(), entity, identifierType, LAYER_POSITION, idParameter));
-		additions.put(MERGE_METHOD, layerService.getMemberTypeAdditions(metadataId, MERGE_METHOD.name(), entity, identifierType, LAYER_POSITION, entityParameter));
-		additions.put(PERSIST_METHOD, layerService.getMemberTypeAdditions(metadataId, PERSIST_METHOD.name(), entity, identifierType, LAYER_POSITION, entityParameter));
-		additions.put(REMOVE_METHOD, layerService.getMemberTypeAdditions(metadataId, REMOVE_METHOD.name(), entity, identifierType, LAYER_POSITION, entityParameter));
+		additions.put(COUNT_ALL_METHOD, layerService.getMemberTypeAdditions(metadataIdentificationString, COUNT_ALL_METHOD.name(), entity, identifierType, LAYER_POSITION));
+		additions.put(FIND_ALL_METHOD, layerService.getMemberTypeAdditions(metadataIdentificationString, FIND_ALL_METHOD.name(), entity, identifierType, LAYER_POSITION));
+		additions.put(FIND_ENTRIES_METHOD, layerService.getMemberTypeAdditions(metadataIdentificationString, FIND_ENTRIES_METHOD.name(), entity, identifierType, LAYER_POSITION, firstResultParameter, maxResultsParameter));
+		additions.put(FIND_METHOD, layerService.getMemberTypeAdditions(metadataIdentificationString, FIND_METHOD.name(), entity, identifierType, LAYER_POSITION, idParameter));
+		additions.put(MERGE_METHOD, layerService.getMemberTypeAdditions(metadataIdentificationString, MERGE_METHOD.name(), entity, identifierType, LAYER_POSITION, entityParameter));
+		additions.put(PERSIST_METHOD, layerService.getMemberTypeAdditions(metadataIdentificationString, PERSIST_METHOD.name(), entity, identifierType, LAYER_POSITION, entityParameter));
+		additions.put(REMOVE_METHOD, layerService.getMemberTypeAdditions(metadataIdentificationString, REMOVE_METHOD.name(), entity, identifierType, LAYER_POSITION, entityParameter));
 		return additions;
 	}
 

@@ -183,10 +183,10 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 		return Collections.unmodifiableList(new ArrayList<FieldMetadata>(fields.values()));
 	}
 
-	public JavaTypePersistenceMetadataDetails getJavaTypePersistenceMetadataDetails(final JavaType javaType, final MemberDetails memberDetails, final String metadataId) {
+	public JavaTypePersistenceMetadataDetails getJavaTypePersistenceMetadataDetails(final JavaType javaType, final MemberDetails memberDetails, final String metadataIdentificationString) {
 		Assert.notNull(javaType, "Java type required");
 		Assert.notNull(memberDetails, "Member details required");
-		Assert.hasText(metadataId, "Metadata id required");
+		Assert.hasText(metadataIdentificationString, "Metadata id required");
 
 		final MethodMetadata idAccessor = memberDetails.getMostConcreteMethodWithTag(IDENTIFIER_ACCESSOR_METHOD);
 		if (idAccessor == null) {
@@ -203,19 +203,19 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 			return null;
 		}
 
-		registerDependency(idAccessor.getDeclaredByMetadataId(), metadataId);
-		registerDependency(idField.getDeclaredByMetadataId(), metadataId);
+		registerDependency(idAccessor.getDeclaredByMetadataId(), metadataIdentificationString);
+		registerDependency(idField.getDeclaredByMetadataId(), metadataIdentificationString);
 
 		final MethodParameter entityParameter = new MethodParameter(javaType, JavaSymbolName.getReservedWordSafeName(javaType));
 		final MethodParameter idParameter = new MethodParameter(idType, "id");
 		final MethodMetadata versionAccessor = memberDetails.getMostConcreteMethodWithTag(VERSION_ACCESSOR_METHOD);
-		final MemberTypeAdditions persistMethod = layerService.getMemberTypeAdditions(metadataId, PERSIST_METHOD.name(), javaType, idType, LAYER_POSITION, entityParameter);
-		final MemberTypeAdditions removeMethod = layerService.getMemberTypeAdditions(metadataId, REMOVE_METHOD.name(), javaType, idType, LAYER_POSITION, entityParameter);
-		final MemberTypeAdditions mergeMethod = layerService.getMemberTypeAdditions(metadataId, MERGE_METHOD.name(), javaType, idType, LAYER_POSITION, entityParameter);
-		final MemberTypeAdditions findAllMethod = layerService.getMemberTypeAdditions(metadataId, FIND_ALL_METHOD.name(), javaType, idType, LAYER_POSITION);
-		final MemberTypeAdditions findMethod = layerService.getMemberTypeAdditions(metadataId, FIND_METHOD.name(), javaType, idType, LAYER_POSITION, idParameter);
-		final MemberTypeAdditions countMethod = layerService.getMemberTypeAdditions(metadataId, COUNT_ALL_METHOD.name(), javaType, idType, LAYER_POSITION);
-		final MemberTypeAdditions findEntriesMethod = layerService.getMemberTypeAdditions(metadataId, FIND_ENTRIES_METHOD.name(), javaType, idType, LAYER_POSITION, FIRST_RESULT_PARAMETER, MAX_RESULTS_PARAMETER);
+		final MemberTypeAdditions persistMethod = layerService.getMemberTypeAdditions(metadataIdentificationString, PERSIST_METHOD.name(), javaType, idType, LAYER_POSITION, entityParameter);
+		final MemberTypeAdditions removeMethod = layerService.getMemberTypeAdditions(metadataIdentificationString, REMOVE_METHOD.name(), javaType, idType, LAYER_POSITION, entityParameter);
+		final MemberTypeAdditions mergeMethod = layerService.getMemberTypeAdditions(metadataIdentificationString, MERGE_METHOD.name(), javaType, idType, LAYER_POSITION, entityParameter);
+		final MemberTypeAdditions findAllMethod = layerService.getMemberTypeAdditions(metadataIdentificationString, FIND_ALL_METHOD.name(), javaType, idType, LAYER_POSITION);
+		final MemberTypeAdditions findMethod = layerService.getMemberTypeAdditions(metadataIdentificationString, FIND_METHOD.name(), javaType, idType, LAYER_POSITION, idParameter);
+		final MemberTypeAdditions countMethod = layerService.getMemberTypeAdditions(metadataIdentificationString, COUNT_ALL_METHOD.name(), javaType, idType, LAYER_POSITION);
+		final MemberTypeAdditions findEntriesMethod = layerService.getMemberTypeAdditions(metadataIdentificationString, FIND_ENTRIES_METHOD.name(), javaType, idType, LAYER_POSITION, FIRST_RESULT_PARAMETER, MAX_RESULTS_PARAMETER);
 		final List<String> dynamicFinderNames = memberDetails.getDynamicFinderNames();
 
 		return new JavaTypePersistenceMetadataDetails(idType, idField, idAccessor, versionAccessor, persistMethod, mergeMethod, removeMethod, findAllMethod,

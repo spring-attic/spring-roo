@@ -97,14 +97,14 @@ public class JpaActiveRecordMetadataProviderImpl extends AbstractItdMetadataProv
 	}
 
 	@Override
-	protected ItdTypeDetailsProvidingMetadataItem getMetadata(final String metadataId, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalType, final String itdFilename) {
+	protected ItdTypeDetailsProvidingMetadataItem getMetadata(final String metadataIdentificationString, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalType, final String itdFilename) {
 		// Get the CRUD-related annotation values
 		final JpaCrudAnnotationValues crudAnnotationValues = new JpaCrudAnnotationValues(governorPhysicalType);
 		// Get the purely JPA-related annotation values, from @RooJpaEntity if present, otherwise from @RooJpaActiveRecord
 		JpaEntityAnnotationValues jpaEntityAnnotationValues = new JpaEntityAnnotationValues(governorPhysicalType, ROO_JPA_ENTITY);
 		if (!jpaEntityAnnotationValues.isAnnotationFound()) {
 			jpaEntityAnnotationValues = new JpaEntityAnnotationValues(governorPhysicalType, ROO_JPA_ACTIVE_RECORD);
-			Assert.state(jpaEntityAnnotationValues.isAnnotationFound(), "No @RooJpaEntity or @RooJpaActiveRecord on " + metadataId);
+			Assert.state(jpaEntityAnnotationValues.isAnnotationFound(), "No @RooJpaEntity or @RooJpaActiveRecord on " + metadataIdentificationString);
 		}
 
 		// Look up the inheritance hierarchy for existing JpaActiveRecordMetadata
@@ -118,15 +118,15 @@ public class JpaActiveRecordMetadataProviderImpl extends AbstractItdMetadataProv
 			}
 		}
 		// We also need the plural
-		final JavaType entity = JpaActiveRecordMetadata.getJavaType(metadataId);
-		final LogicalPath path = JpaActiveRecordMetadata.getPath(metadataId);
+		final JavaType entity = JpaActiveRecordMetadata.getJavaType(metadataIdentificationString);
+		final LogicalPath path = JpaActiveRecordMetadata.getPath(metadataIdentificationString);
 		final String pluralId = PluralMetadata.createIdentifier(entity, path);
 		final PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(pluralId);
 		if (pluralMetadata == null) {
 			// Can't acquire the plural
 			return null;
 		}
-		metadataDependencyRegistry.registerDependency(pluralId, metadataId);
+		metadataDependencyRegistry.registerDependency(pluralId, metadataIdentificationString);
 
 		final List<FieldMetadata> idFields = persistenceMemberLocator.getIdentifierFields(entity);
 		if (idFields.size() != 1) {
@@ -140,10 +140,10 @@ public class JpaActiveRecordMetadataProviderImpl extends AbstractItdMetadataProv
 		String moduleName = path.getModule();
 		if (projectOperations.isProjectAvailable(moduleName)) {
 			// If the project itself changes, we want a chance to refresh this item
-			metadataDependencyRegistry.registerDependency(ProjectMetadata.getProjectIdentifier(moduleName), metadataId);
+			metadataDependencyRegistry.registerDependency(ProjectMetadata.getProjectIdentifier(moduleName), metadataIdentificationString);
 			isGaeEnabled = projectOperations.isFeatureInstalledInFocusedModule(FeatureNames.GAE);
 		}
-		return new JpaActiveRecordMetadata(metadataId, aspectName, governorPhysicalType, parent, crudAnnotationValues, pluralMetadata.getPlural(), idFields.get(0), entityName, isGaeEnabled);
+		return new JpaActiveRecordMetadata(metadataIdentificationString, aspectName, governorPhysicalType, parent, crudAnnotationValues, pluralMetadata.getPlural(), idFields.get(0), entityName, isGaeEnabled);
 	}
 
 	public String getItdUniquenessFilenameSuffix() {

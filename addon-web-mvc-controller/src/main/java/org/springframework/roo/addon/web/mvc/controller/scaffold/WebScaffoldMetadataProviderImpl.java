@@ -105,7 +105,7 @@ public class WebScaffoldMetadataProviderImpl extends AbstractMemberDiscoveringIt
 	}
 
 	@Override
-	protected ItdTypeDetailsProvidingMetadataItem getMetadata(final String metadataId, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalType, final String itdFilename) {
+	protected ItdTypeDetailsProvidingMetadataItem getMetadata(final String metadataIdentificationString, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalType, final String itdFilename) {
 		// We need to parse the annotation, which we expect to be present
 		final WebScaffoldAnnotationValues annotationValues = new WebScaffoldAnnotationValues(governorPhysicalType);
 		final JavaType formBackingType = annotationValues.getFormBackingObject();
@@ -123,28 +123,28 @@ public class WebScaffoldMetadataProviderImpl extends AbstractMemberDiscoveringIt
 			return null;
 		}
 
-		final Map<MethodMetadataCustomDataKey, MemberTypeAdditions> crudAdditions = webMetadataService.getCrudAdditions(formBackingType, metadataId);
+		final Map<MethodMetadataCustomDataKey, MemberTypeAdditions> crudAdditions = webMetadataService.getCrudAdditions(formBackingType, metadataIdentificationString);
 		if (CollectionUtils.isEmpty(crudAdditions)) {
 			return null;
 		}
 
 		// We need to be informed if our dependent metadata changes
-		metadataDependencyRegistry.registerDependency(formBackingMemberHoldingTypeDetails.getDeclaredByMetadataId(), metadataId);
+		metadataDependencyRegistry.registerDependency(formBackingMemberHoldingTypeDetails.getDeclaredByMetadataId(), metadataIdentificationString);
 
 		// Remember that this entity JavaType matches up with this metadata identification string
 		// Start by clearing any previous association
-		final JavaType oldEntity = webScaffoldMidToEntityMap.get(metadataId);
+		final JavaType oldEntity = webScaffoldMidToEntityMap.get(metadataIdentificationString);
 		if (oldEntity != null) {
 			entityToWebScaffoldMidMap.remove(oldEntity);
 		}
-		entityToWebScaffoldMidMap.put(formBackingType, metadataId);
-		webScaffoldMidToEntityMap.put(metadataId, formBackingType);
+		entityToWebScaffoldMidMap.put(formBackingType, metadataIdentificationString);
+		webScaffoldMidToEntityMap.put(metadataIdentificationString, formBackingType);
 
-		final SortedMap<JavaType, JavaTypeMetadataDetails> relatedApplicationTypeMetadata = webMetadataService.getRelatedApplicationTypeMetadata(formBackingType, formBackingObjectMemberDetails, metadataId);
-		final List<JavaTypeMetadataDetails> dependentApplicationTypeMetadata = webMetadataService.getDependentApplicationTypeMetadata(formBackingType, formBackingObjectMemberDetails, metadataId);
-		final Map<JavaSymbolName, DateTimeFormatDetails> datePatterns = webMetadataService.getDatePatterns(formBackingType, formBackingObjectMemberDetails, metadataId);
+		final SortedMap<JavaType, JavaTypeMetadataDetails> relatedApplicationTypeMetadata = webMetadataService.getRelatedApplicationTypeMetadata(formBackingType, formBackingObjectMemberDetails, metadataIdentificationString);
+		final List<JavaTypeMetadataDetails> dependentApplicationTypeMetadata = webMetadataService.getDependentApplicationTypeMetadata(formBackingType, formBackingObjectMemberDetails, metadataIdentificationString);
+		final Map<JavaSymbolName, DateTimeFormatDetails> datePatterns = webMetadataService.getDatePatterns(formBackingType, formBackingObjectMemberDetails, metadataIdentificationString);
 
-		return new WebScaffoldMetadata(metadataId, aspectName, governorPhysicalType, annotationValues, relatedApplicationTypeMetadata, dependentApplicationTypeMetadata, datePatterns, crudAdditions);
+		return new WebScaffoldMetadata(metadataIdentificationString, aspectName, governorPhysicalType, annotationValues, relatedApplicationTypeMetadata, dependentApplicationTypeMetadata, datePatterns, crudAdditions);
 	}
 
 	public String getItdUniquenessFilenameSuffix() {

@@ -33,20 +33,20 @@ public class LayerServiceImpl implements LayerService {
 	// Mutex
 	private final Object mutex = new Object();
 
-	public MemberTypeAdditions getMemberTypeAdditions(final String metadataId, final String methodIdentifier, final JavaType targetEntity, final JavaType idType, final int layerPosition, final Collection<? extends MethodParameter> methodParameters) {
+	public MemberTypeAdditions getMemberTypeAdditions(final String metadataIdentificationString, final String methodIdentifier, final JavaType targetEntity, final JavaType idType, final int layerPosition, final Collection<? extends MethodParameter> methodParameters) {
 		final MethodParameter[] methodParametersArray = methodParameters.toArray(new MethodParameter[methodParameters.size()]);
-		return getMemberTypeAdditions(metadataId, methodIdentifier, targetEntity, idType, layerPosition, methodParametersArray);
+		return getMemberTypeAdditions(metadataIdentificationString, methodIdentifier, targetEntity, idType, layerPosition, methodParametersArray);
 	}
 
-	public MemberTypeAdditions getMemberTypeAdditions(final String metadataId, final String methodIdentifier, final JavaType targetEntity, final JavaType idType, final int layerPosition,	final MethodParameter... methodParameters) {
-		Assert.hasText(metadataId, "metadataId is required");
+	public MemberTypeAdditions getMemberTypeAdditions(final String metadataIdentificationString, final String methodIdentifier, final JavaType targetEntity, final JavaType idType, final int layerPosition,	final MethodParameter... methodParameters) {
+		Assert.hasText(metadataIdentificationString, "metadataIdentificationString is required");
 		Assert.hasText(methodIdentifier, "methodIdentifier is required");
 		Assert.notNull(targetEntity, "targetEntity is required");
 		for (LayerProvider provider : new ArrayList<LayerProvider>(providers)) {
 			if (provider.getLayerPosition() >= layerPosition) {
 				continue;
 			}
-			MemberTypeAdditions additions = provider.getMemberTypeAdditions(metadataId, methodIdentifier, targetEntity, idType, methodParameters);
+			MemberTypeAdditions additions = provider.getMemberTypeAdditions(metadataIdentificationString, methodIdentifier, targetEntity, idType, methodParameters);
 			if (additions != null) {
 				return additions;
 			}

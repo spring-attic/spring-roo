@@ -68,7 +68,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 	/**
 	 * Constructor
 	 *
-	 * @param metadataId the JPA_ID of this {@link MetadataItem}
+	 * @param metadataIdentificationString the JPA_ID of this {@link MetadataItem}
 	 * @param itdName the ITD's {@link JavaType} (required)
 	 * @param entityPhysicalType the entity's physical type (required)
 	 * @param parentEntity can be <code>null</code> if none of the governor's
@@ -81,8 +81,8 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 	 * account the presence of a {@link RooJpaActiveRecord} and/or {@link RooJpaEntity}
 	 * annotation (required)
 	 */
-	public JpaEntityMetadata(final String metadataId, final JavaType itdName, final PhysicalTypeMetadata entityPhysicalType, final JpaEntityMetadata parentEntity, final MemberDetails entityMemberDetails, final Identifier identifier, final JpaEntityAnnotationValues annotationValues, final boolean isGaeEnabled, final boolean isDatabaseDotComEnabled) {
-		super(metadataId, itdName, entityPhysicalType);
+	public JpaEntityMetadata(final String metadataIdentificationString, final JavaType itdName, final PhysicalTypeMetadata entityPhysicalType, final JpaEntityMetadata parentEntity, final MemberDetails entityMemberDetails, final Identifier identifier, final JpaEntityAnnotationValues annotationValues, final boolean isGaeEnabled, final boolean isDatabaseDotComEnabled) {
+		super(metadataIdentificationString, itdName, entityPhysicalType);
 		Assert.notNull(annotationValues, "Annotation values are required");
 		Assert.notNull(entityMemberDetails, "Entity MemberDetails are required");
 

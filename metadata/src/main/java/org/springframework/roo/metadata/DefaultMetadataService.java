@@ -281,8 +281,8 @@ public class DefaultMetadataService extends AbstractMetadataCache implements Met
 		}
 	}
 
-	public MetadataItem evictAndGet(final String metadataId) {
-		return getInternal(metadataId, true, false);
+	public MetadataItem evictAndGet(final String metadataIdentificationString) {
+		return getInternal(metadataIdentificationString, true, false);
 	}
 
 	@Override

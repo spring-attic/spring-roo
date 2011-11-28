@@ -106,8 +106,8 @@ public class JsfConverterMetadataProviderImpl extends AbstractMemberDiscoveringI
 		return new JsfConverterMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, findMethod, identifierAccessor);
 	}
 
-	private MemberTypeAdditions getFindMethod(final JavaType entity, final String metadataId) {
-		metadataDependencyRegistry.registerDependency(typeLocationService.getPhysicalTypeIdentifier(entity), metadataId);
+	private MemberTypeAdditions getFindMethod(final JavaType entity, final String metadataIdentificationString) {
+		metadataDependencyRegistry.registerDependency(typeLocationService.getPhysicalTypeIdentifier(entity), metadataIdentificationString);
 		final List<FieldMetadata> idFields = persistenceMemberLocator.getIdentifierFields(entity);
 		if (idFields.isEmpty()) {
 			return null;
@@ -117,10 +117,10 @@ public class JsfConverterMetadataProviderImpl extends AbstractMemberDiscoveringI
 		if (idType == null) {
 			return null;
 		}
-		metadataDependencyRegistry.registerDependency(idField.getDeclaredByMetadataId(), metadataId);
+		metadataDependencyRegistry.registerDependency(idField.getDeclaredByMetadataId(), metadataIdentificationString);
 
 		MethodParameter idParameter = new MethodParameter(idType, ID_FIELD_NAME);
-		return layerService.getMemberTypeAdditions(metadataId, FIND_METHOD.name(), entity, idType, LAYER_POSITION, idParameter);
+		return layerService.getMemberTypeAdditions(metadataIdentificationString, FIND_METHOD.name(), entity, idType, LAYER_POSITION, idParameter);
 	}
 
 	public String getItdUniquenessFilenameSuffix() {

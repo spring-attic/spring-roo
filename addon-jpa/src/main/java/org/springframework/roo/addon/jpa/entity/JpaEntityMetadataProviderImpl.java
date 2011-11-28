@@ -94,7 +94,7 @@ public class JpaEntityMetadataProviderImpl extends AbstractIdentifierServiceAwar
 	private static final JavaType[] TRIGGER_ANNOTATIONS = {
 		// We trigger off RooJpaEntity in case the user doesn't want Active Record methods
 		ROO_JPA_ENTITY,
-		// We trigger off RooEntity so that existing projects don't need to add RooJpaEntity
+		// We trigger off RooJpaActiveRecord so that existing projects don't need to add RooJpaEntity
 		ROO_JPA_ACTIVE_RECORD,
 	};
 
@@ -176,7 +176,7 @@ public class JpaEntityMetadataProviderImpl extends AbstractIdentifierServiceAwar
 	// ---------------- The meat of this provider starts here ------------------
 
 	@Override
-	protected ItdTypeDetailsProvidingMetadataItem getMetadata(final String metadataId, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalType, final String itdFilename) {
+	protected ItdTypeDetailsProvidingMetadataItem getMetadata(final String metadataIdentificationString, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalType, final String itdFilename) {
 		// Find out the entity-level JPA details from the trigger annotation
 		final JpaEntityAnnotationValues jpaEntityAnnotationValues = getJpaEntityAnnotationValues(governorPhysicalType);
 
@@ -191,19 +191,19 @@ public class JpaEntityMetadataProviderImpl extends AbstractIdentifierServiceAwar
 		final MemberDetails governorMemberDetails = getMemberDetails(governorPhysicalType);
 
 		// Get the governor's ID field, if any
-		final Identifier identifier = getIdentifier(metadataId);
+		final Identifier identifier = getIdentifier(metadataIdentificationString);
 
 		boolean isGaeEnabled = false;
 		boolean isDatabaseDotComEnabled = false;
-		final String moduleName = PhysicalTypeIdentifierNamingUtils.getPath(metadataId).getModule();
+		final String moduleName = PhysicalTypeIdentifierNamingUtils.getPath(metadataIdentificationString).getModule();
 		if (projectOperations.isProjectAvailable(moduleName)) {
 			// If the project itself changes, we want a chance to refresh this item
-			metadataDependencyRegistry.registerDependency(ProjectMetadata.getProjectIdentifier(moduleName), metadataId);
+			metadataDependencyRegistry.registerDependency(ProjectMetadata.getProjectIdentifier(moduleName), metadataIdentificationString);
 			isGaeEnabled = projectOperations.isFeatureInstalledInFocusedModule(FeatureNames.GAE);
 			isDatabaseDotComEnabled = projectOperations.isFeatureInstalledInFocusedModule(FeatureNames.DATABASE_DOT_COM);
 		}
 
-		return new JpaEntityMetadata(metadataId, aspectName, governorPhysicalType, parentEntity, governorMemberDetails, identifier, jpaEntityAnnotationValues, isGaeEnabled, isDatabaseDotComEnabled);
+		return new JpaEntityMetadata(metadataIdentificationString, aspectName, governorPhysicalType, parentEntity, governorMemberDetails, identifier, jpaEntityAnnotationValues, isGaeEnabled, isDatabaseDotComEnabled);
 	}
 
 	/**
@@ -225,11 +225,11 @@ public class JpaEntityMetadataProviderImpl extends AbstractIdentifierServiceAwar
 	/**
 	 * Returns the {@link Identifier} for the entity identified by the given metadata ID.
 	 *
-	 * @param metadataId
+	 * @param metadataIdentificationString
 	 * @return <code>null</code> if there isn't one
 	 */
-	private Identifier getIdentifier(final String metadataId) {
-		final JavaType entity = getType(metadataId);
+	private Identifier getIdentifier(final String metadataIdentificationString) {
+		final JavaType entity = getType(metadataIdentificationString);
 		final List<Identifier> identifiers = getIdentifiersForType(entity);
 		if (CollectionUtils.isEmpty(identifiers)) {
 			return null;

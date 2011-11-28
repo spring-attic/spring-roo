@@ -63,15 +63,15 @@ public abstract class AbstractTriggerBasedMetadataProvider<M extends MetadataIte
 		this.triggers.remove(trigger);
 	}
 
-	public MetadataItem get(final String metadataId) {
-		assertCorrectMetadataTypeIsBeingRequested(metadataId);
+	public MetadataItem get(final String metadataIdentificationString) {
+		assertCorrectMetadataTypeIsBeingRequested(metadataIdentificationString);
 
-		final PhysicalTypeMetadata governorMetadata = getGovernorMetadata(metadataId);
+		final PhysicalTypeMetadata governorMetadata = getGovernorMetadata(metadataIdentificationString);
 		if (!shouldProduceMetadataFor(governorMetadata)) {
 			return null;
 		}
 
-		final MetadataItem metadata = getMetadata(metadataId, governorMetadata);
+		final MetadataItem metadata = getMetadata(metadataIdentificationString, governorMetadata);
 		
 		return convertInvalidToNull(metadata);
 	}
@@ -107,11 +107,11 @@ public abstract class AbstractTriggerBasedMetadataProvider<M extends MetadataIte
 	/**
 	 * Subclasses should generate the metadata for the given governor, if possible.
 	 * 
-	 * @param metadataId the ID of the metadata to produce (a valid metadata instance ID)
+	 * @param metadataIdentificationString the ID of the metadata to produce (a valid metadata instance ID)
 	 * @param governor the user project type that contained one or more of the trigger annotations (never <code>null</code>)
 	 * @return <code>null</code> or an invalid {@link MetadataItem} if the metadata could not be produced
 	 */
-	protected abstract M getMetadata(String metadataId, PhysicalTypeMetadata governor);
+	protected abstract M getMetadata(String metadataIdentificationString, PhysicalTypeMetadata governor);
 	
 	private MetadataItem convertInvalidToNull(final MetadataItem metadata) {
 		if (metadata == null || !metadata.isValid()) {

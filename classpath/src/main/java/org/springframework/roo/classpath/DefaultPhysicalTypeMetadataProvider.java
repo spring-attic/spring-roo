@@ -98,23 +98,23 @@ public class DefaultPhysicalTypeMetadataProvider implements PhysicalTypeMetadata
 		}
 	}
 
-	public MetadataItem get(final String metadataId) {
-		Assert.isTrue(PhysicalTypeIdentifier.isValid(metadataId), "Metadata id '" + metadataId + "' is not valid for this metadata provider");
-		final String canonicalPath = typeLocationService.getPhysicalTypeCanonicalPath(metadataId);
+	public MetadataItem get(final String metadataIdentificationString) {
+		Assert.isTrue(PhysicalTypeIdentifier.isValid(metadataIdentificationString), "Metadata id '" + metadataIdentificationString + "' is not valid for this metadata provider");
+		final String canonicalPath = typeLocationService.getPhysicalTypeCanonicalPath(metadataIdentificationString);
 		if (StringUtils.isBlank(canonicalPath)) {
 			return null;
 		}
-		metadataDependencyRegistry.deregisterDependencies(metadataId);
+		metadataDependencyRegistry.deregisterDependencies(metadataIdentificationString);
 		if (!fileManager.exists(canonicalPath)) {
 			// Couldn't find the file, so return null to distinguish from a file that was found but could not be parsed
 			return null;
 		}
-		final JavaType javaType = PhysicalTypeIdentifier.getJavaType(metadataId);
-		final ClassOrInterfaceTypeDetails typeDetails = typeParsingService.getTypeAtLocation(canonicalPath, metadataId, javaType);
+		final JavaType javaType = PhysicalTypeIdentifier.getJavaType(metadataIdentificationString);
+		final ClassOrInterfaceTypeDetails typeDetails = typeParsingService.getTypeAtLocation(canonicalPath, metadataIdentificationString, javaType);
 		if (typeDetails == null) {
 			return null;
 		}
-		final PhysicalTypeMetadata result = new DefaultPhysicalTypeMetadata(metadataId, canonicalPath, typeDetails);
+		final PhysicalTypeMetadata result = new DefaultPhysicalTypeMetadata(metadataIdentificationString, canonicalPath, typeDetails);
 		final ClassOrInterfaceTypeDetails details = result.getMemberHoldingTypeDetails();
 		if (details != null && details.getPhysicalTypeCategory() == PhysicalTypeCategory.CLASS && details.getExtendsTypes().size() == 1) {
 			// This is a class, and it extends another class
@@ -148,7 +148,7 @@ public class DefaultPhysicalTypeMetadataProvider implements PhysicalTypeMetadata
 			}
 		}
 
-		return new DefaultPhysicalTypeMetadata(metadataId, canonicalPath, (ClassOrInterfaceTypeDetails) memberDetails.getDetails().get(0));
+		return new DefaultPhysicalTypeMetadata(metadataIdentificationString, canonicalPath, (ClassOrInterfaceTypeDetails) memberDetails.getDetails().get(0));
 	}
 }
 

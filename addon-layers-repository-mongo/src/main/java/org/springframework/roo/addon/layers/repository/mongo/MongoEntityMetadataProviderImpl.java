@@ -61,7 +61,7 @@ public class MongoEntityMetadataProviderImpl extends AbstractItdMetadataProvider
 	}
 
 	@Override
-	protected ItdTypeDetailsProvidingMetadataItem getMetadata(final String metadataId, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final String itdFilename) {
+	protected ItdTypeDetailsProvidingMetadataItem getMetadata(final String metadataIdentificationString, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final String itdFilename) {
 		final MongoEntityAnnotationValues annotationValues = new MongoEntityAnnotationValues(governorPhysicalTypeMetadata);
 		final JavaType identifierType = annotationValues.getIdentifierType();
 		if (!annotationValues.isAnnotationFound() || identifierType == null) {
@@ -71,7 +71,7 @@ public class MongoEntityMetadataProviderImpl extends AbstractItdMetadataProvider
 		// Get the governor's member details
 		final MemberDetails memberDetails = getMemberDetails(governorPhysicalTypeMetadata);
 
-		return new MongoEntityMetadata(metadataId, aspectName, governorPhysicalTypeMetadata, identifierType, memberDetails);
+		return new MongoEntityMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, identifierType, memberDetails);
 	}
 
 	public String getItdUniquenessFilenameSuffix() {
