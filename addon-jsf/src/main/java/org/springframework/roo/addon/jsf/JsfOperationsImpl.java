@@ -65,6 +65,9 @@ import org.w3c.dom.Element;
 public class JsfOperationsImpl extends AbstractOperations implements JsfOperations {
 
 	// Constants
+	private static final String JSF_IMPLEMENTATION_XPATH = "/configuration/jsf-implementations/jsf-implementation";
+	private static final String DEPENDENCY_XPATH = "/dependencies/dependency";
+	private static final String REPOSITORY_XPATH = "/repositories/repository";
 	private static final String MYFACES_LISTENER = "org.apache.myfaces.webapp.StartupServletContextListener";
 	private static final String PRIMEFACES_XPATH = "/configuration/jsf-libraries/jsf-library[@id = 'PRIMEFACES']";
 	private static final String PRIMEFACES_THEMES_VERSION = "1.0.2";
@@ -386,7 +389,7 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 		final Pom pom = projectOperations.getPomFromModuleName(projectOperations.getFocusedModuleName());
 		JsfImplementation existingJsfImplementation = null;
 		for (JsfImplementation value : JsfImplementation.values()) {
-			final Element jsfDependencyElement = XmlUtils.findFirstElement(getJsfImplementationXPath() + "[@id = '" + value.name() + "']/dependencies/dependency", configuration);
+			final Element jsfDependencyElement = XmlUtils.findFirstElement(JSF_IMPLEMENTATION_XPATH + "[@id = '" + value.name() + "']" + DEPENDENCY_XPATH, configuration);
 			if (jsfDependencyElement != null && pom.isDependencyRegistered(new Dependency(jsfDependencyElement))) {
 				existingJsfImplementation = value;
 				break;
@@ -397,7 +400,7 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 
 	private List<Dependency> getDependencies(final String xPathExpression, final Element configuration) {
 		final List<Dependency> dependencies = new ArrayList<Dependency>();
-		for (Element dependencyElement : XmlUtils.findElements(xPathExpression + "/dependencies/dependency", configuration)) {
+		for (Element dependencyElement : XmlUtils.findElements(xPathExpression + DEPENDENCY_XPATH, configuration)) {
 			dependencies.add(new Dependency(dependencyElement));
 		}
 		return dependencies;
@@ -406,17 +409,17 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 	private void updateDependencies(final Element configuration, final JsfImplementation jsfImplementation, final String jsfImplementationXPath) {
 		final List<Dependency> requiredDependencies = new ArrayList<Dependency>();
 
-		final List<Element> jsfImplementationDependencies = XmlUtils.findElements(jsfImplementation.getConfigPrefix() + "/dependencies/dependency", configuration);
+		final List<Element> jsfImplementationDependencies = XmlUtils.findElements(jsfImplementation.getConfigPrefix() + DEPENDENCY_XPATH, configuration);
 		for (Element dependencyElement : jsfImplementationDependencies) {
 			requiredDependencies.add(new Dependency(dependencyElement));
 		}
 
-		final List<Element> jsfLibraryDependencies = XmlUtils.findElements(PRIMEFACES_XPATH + "/dependencies/dependency", configuration);
+		final List<Element> jsfLibraryDependencies = XmlUtils.findElements(PRIMEFACES_XPATH + DEPENDENCY_XPATH, configuration);
 		for (Element dependencyElement : jsfLibraryDependencies) {
 			requiredDependencies.add(new Dependency(dependencyElement));
 		}
 
-		final List<Element> jsfDependencies = XmlUtils.findElements("/configuration/jsf/dependencies/dependency", configuration);
+		final List<Element> jsfDependencies = XmlUtils.findElements("/configuration/jsf" + DEPENDENCY_XPATH, configuration);
 		for (Element dependencyElement : jsfDependencies) {
 			requiredDependencies.add(new Dependency(dependencyElement));
 		}
@@ -435,12 +438,12 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 	private void updateRepositories(final Element configuration, final JsfImplementation jsfImplementation, final String jsfImplementationXPath) {
 		List<Repository> repositories = new ArrayList<Repository>();
 
-		List<Element> jsfRepositories = XmlUtils.findElements(jsfImplementation.getConfigPrefix() +"/repositories/repository", configuration);
+		List<Element> jsfRepositories = XmlUtils.findElements(jsfImplementation.getConfigPrefix() + REPOSITORY_XPATH, configuration);
 		for (Element repositoryElement : jsfRepositories) {
 			repositories.add(new Repository(repositoryElement));
 		}
 
-		List<Element> jsfLibraryRepositories = XmlUtils.findElements(PRIMEFACES_XPATH + "/repositories/repository", configuration);
+		List<Element> jsfLibraryRepositories = XmlUtils.findElements(PRIMEFACES_XPATH + REPOSITORY_XPATH, configuration);
 		for (Element repositoryElement : jsfLibraryRepositories) {
 			repositories.add(new Repository(repositoryElement));
 		}
@@ -480,7 +483,7 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 	}
 
 	private String getJsfImplementationXPath(final List<JsfImplementation> jsfImplementations) {
-		StringBuilder builder = new StringBuilder(getJsfImplementationXPath()).append("[");
+		StringBuilder builder = new StringBuilder(JSF_IMPLEMENTATION_XPATH).append("[");
 		for (int i = 0; i < jsfImplementations.size(); i++) {
 			if (i > 0) {
 				builder.append(" or ");
@@ -491,9 +494,5 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 		}
 		builder.append("]");
 		return builder.toString();
-	}
-
-	private String getJsfImplementationXPath() {
-		return "/configuration/jsf-implementations/jsf-implementation";
 	}
 }
