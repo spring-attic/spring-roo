@@ -12,11 +12,11 @@ enum constant --name Cardiology
 enum constant --name Dentistry
 enum constant --name Nutrition
 
-entity jpa --class ~.domain.Pet --testAutomatically
-entity jpa --class ~.domain.Visit --testAutomatically
+entity jpa --class ~.domain.Pet
+entity jpa --class ~.domain.Visit
 entity jpa --class ~.domain.AbstractPerson --abstract
-entity jpa --class ~.domain.Vet --extends ~.domain.AbstractPerson --testAutomatically
-entity jpa --class ~.domain.Owner --extends ~.domain.AbstractPerson --testAutomatically
+entity jpa --class ~.domain.Vet --extends ~.domain.AbstractPerson
+entity jpa --class ~.domain.Owner --extends ~.domain.AbstractPerson
 
 field string --fieldName firstName --sizeMin 3 --sizeMax 30 --class ~.domain.AbstractPerson
 field string --fieldName lastName --notNull --sizeMin 3 --sizeMax 30
@@ -51,6 +51,11 @@ finder add --finderName findPetsByTypeAndNameLike
 finder add --finderName findVisitsByDescriptionAndVisitDate --class ~.domain.Visit
 finder add --finderName findVisitsByVisitDateBetween
 finder add --finderName findVisitsByDescriptionLike
+
+test integration --entity ~.domain.Vet
+test integration --entity ~.domain.Owner
+test integration --entity ~.domain.Pet
+test integration --entity ~.domain.Visit
 
 web mvc setup
 web mvc all --package ~.web

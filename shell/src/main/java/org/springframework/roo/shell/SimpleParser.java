@@ -53,7 +53,7 @@ public class SimpleParser implements Parser {
 	private static final Comparator<Object> COMPARATOR = new NaturalOrderComparator<Object>();
 
 	// Fields
-	private final Object mutex = this;
+	private final Object mutex = new Object();
 	private final Set<Converter<?>> converters = new HashSet<Converter<?>>();
 	private final Set<CommandMarker> commands = new HashSet<CommandMarker>();
 	private final Map<String, MethodTarget> availabilityIndicators = new HashMap<String, MethodTarget>();
