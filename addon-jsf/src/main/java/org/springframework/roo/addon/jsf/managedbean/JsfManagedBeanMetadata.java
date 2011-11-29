@@ -374,12 +374,11 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 
 			final String fieldName = field.getFieldName().getSymbolName();
 			final JavaType parameterType = (JavaType) customData.get(PARAMETER_TYPE_KEY);
-			final String parameterTypeManagedBeanName = (String) customData.get(PARAMETER_TYPE_MANAGED_BEAN_NAME_KEY);
-			final String parameterTypePlural = (String) customData.get(PARAMETER_TYPE_PLURAL_KEY);
+			final String entityAccessorMethodCall = entityName.getSymbolName() + ".get" + StringUtils.capitalize(fieldName) + "()";
 
-			bodyBuilder.appendFormalLine("if (" + entityName.getSymbolName() + " != null && " + entityName.getSymbolName() + ".get" + (StringUtils.hasText(parameterTypeManagedBeanName) ? parameterTypePlural : StringUtils.capitalize(fieldName)) + "() != null) {");
+			bodyBuilder.appendFormalLine("if (" + entityName.getSymbolName() + " != null && " + entityAccessorMethodCall + " != null) {");
 			bodyBuilder.indent();
-			bodyBuilder.appendFormalLine(getSelectedFieldName(fieldName) + " = new ArrayList<" + parameterType.getSimpleTypeName() + ">(" + entityName.getSymbolName() + ".get" + StringUtils.capitalize(fieldName) + "());");
+			bodyBuilder.appendFormalLine(getSelectedFieldName(fieldName) + " = new ArrayList<" + parameterType.getSimpleTypeName() + ">(" + entityAccessorMethodCall + ");");
 			bodyBuilder.indentRemove();
 			bodyBuilder.appendFormalLine("}");
 		}
@@ -1127,10 +1126,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 				continue;
 			}
 
-			final String parameterTypeManagedBeanName = (String) customData.get(PARAMETER_TYPE_MANAGED_BEAN_NAME_KEY);
-			final String parameterTypePlural = (String) customData.get(PARAMETER_TYPE_PLURAL_KEY);
-			final JavaSymbolName fieldName = new JavaSymbolName(getSelectedFieldName(StringUtils.hasText(parameterTypeManagedBeanName) ? parameterTypePlural : field.getFieldName().getSymbolName()));
-			bodyBuilder.appendFormalLine(fieldName.getSymbolName() + " = null;");
+			bodyBuilder.appendFormalLine(getSelectedFieldName(field.getFieldName().getSymbolName()) + " = null;");
 		}
 		bodyBuilder.appendFormalLine(CREATE_DIALOG_VISIBLE + " = false;");
 		return getMethod(PUBLIC, methodName, VOID_PRIMITIVE, null, null, bodyBuilder);
