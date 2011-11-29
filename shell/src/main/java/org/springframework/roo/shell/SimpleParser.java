@@ -200,7 +200,7 @@ public class SimpleParser implements Parser {
 					arguments.add(result);
 				} catch (RuntimeException e) {
 					LOGGER.warning(e.getClass().getName() + ": Failed to convert '" + value + "' to type " + requiredType.getSimpleName() + " for option '" + StringUtils.arrayToCommaDelimitedString(cliOption.key()) + "'");
-					if (e.getMessage() != null && e.getMessage().length() > 0) {
+					if (StringUtils.hasText(e.getMessage())) {
 						LOGGER.warning(e.getMessage());
 					}
 					return null;

@@ -36,7 +36,7 @@ public class OsCommands implements CommandMarker {
 
 	@CliCommand(value = "!", help = "Allows execution of operating system (OS) commands.")
 	public void command(
-		@CliOption(key = { "", "command" }, mandatory = false, specifiedDefaultValue = "*", unspecifiedDefaultValue = "*", help = "The command to execute") final String command) {
+		@CliOption(key = { "", "command" }, mandatory = false, specifiedDefaultValue = "", unspecifiedDefaultValue = "", help = "The command to execute") final String command) {
 
 		if (StringUtils.hasText(command)) {
 			try {
