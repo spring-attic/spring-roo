@@ -2,6 +2,7 @@ package org.springframework.roo.addon.dod;
 
 import java.util.List;
 
+import org.springframework.roo.classpath.details.BeanInfoUtils;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.support.util.Assert;
@@ -29,7 +30,7 @@ public class EmbeddedHolder {
 	}
 
 	public JavaSymbolName getEmbeddedMutatorMethodName() {
-		return new JavaSymbolName(embeddedField.getFieldName().getSymbolNameTurnedIntoMutatorMethodName());
+		return BeanInfoUtils.getMutatorMethodName(embeddedField);
 	}
 
 	public List<FieldMetadata> getFields() {

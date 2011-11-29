@@ -49,6 +49,16 @@ public class StringUtilsTest {
 	}
 
 	@Test
+	public void testCountOccurrences() {
+		assertEquals(4, StringUtils.countOccurrencesOf("Alan Keith Stewart - Triathlete", " "));
+	}
+	
+	@Test
+	public void testCountOccurrencesNull() {
+		assertEquals(0, StringUtils.countOccurrencesOf("Alan Keith Stewart - Triathlete", null));
+	}
+
+	@Test
 	public void testRepeatNull() {
 		assertNull(StringUtils.repeat(null, 27));
 	}

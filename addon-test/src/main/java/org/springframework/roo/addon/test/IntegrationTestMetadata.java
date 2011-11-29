@@ -211,10 +211,12 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 		annotations.add(new AnnotationMetadataBuilder(TEST));
 
+		final String entityName = annotationValues.getEntity().getSimpleTypeName();
+
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		bodyBuilder.appendFormalLine("Assert.assertNotNull(\"Data on demand for '" + annotationValues.getEntity().getSimpleTypeName() + "' failed to initialize correctly\", dod." + dataOnDemandMetadata.getRandomPersistentEntityMethod().getMethodName().getSymbolName() + "());");
+		bodyBuilder.appendFormalLine("Assert.assertNotNull(\"Data on demand for '" + entityName + "' failed to initialize correctly\", dod." + dataOnDemandMetadata.getRandomPersistentEntityMethod().getMethodName().getSymbolName() + "());");
 		bodyBuilder.appendFormalLine("long count = " + countMethod.getMethodCall() + ";");
-		bodyBuilder.appendFormalLine("Assert.assertTrue(\"Counter for '" + annotationValues.getEntity().getSimpleTypeName() + "' incorrectly reported there were no entries\", count > 0);");
+		bodyBuilder.appendFormalLine("Assert.assertTrue(\"Counter for '" + entityName + "' incorrectly reported there were no entries\", count > 0);");
 
 		countMethod.copyAdditionsTo(builder, governorTypeDetails);
 
@@ -243,14 +245,16 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 		annotations.add(new AnnotationMetadataBuilder(TEST));
 
+		final String entityName = annotationValues.getEntity().getSimpleTypeName();
+
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		bodyBuilder.appendFormalLine(annotationValues.getEntity().getSimpleTypeName() + " obj = dod." + dataOnDemandMetadata.getRandomPersistentEntityMethod().getMethodName().getSymbolName() + "();");
-		bodyBuilder.appendFormalLine("Assert.assertNotNull(\"Data on demand for '" + annotationValues.getEntity().getSimpleTypeName() + "' failed to initialize correctly\", obj);");
+		bodyBuilder.appendFormalLine(entityName + " obj = dod." + dataOnDemandMetadata.getRandomPersistentEntityMethod().getMethodName().getSymbolName() + "();");
+		bodyBuilder.appendFormalLine("Assert.assertNotNull(\"Data on demand for '" + entityName + "' failed to initialize correctly\", obj);");
 		bodyBuilder.appendFormalLine(identifierAccessorMethod.getReturnType().getSimpleTypeName() + " id = obj." + identifierAccessorMethod.getMethodName().getSymbolName() + "();");
-		bodyBuilder.appendFormalLine("Assert.assertNotNull(\"Data on demand for '" + annotationValues.getEntity().getSimpleTypeName() + "' failed to provide an identifier\", id);");
+		bodyBuilder.appendFormalLine("Assert.assertNotNull(\"Data on demand for '" + entityName + "' failed to provide an identifier\", id);");
 		bodyBuilder.appendFormalLine("obj = " + findMethod.getMethodCall() + ";");
-		bodyBuilder.appendFormalLine("Assert.assertNotNull(\"Find method for '" + annotationValues.getEntity().getSimpleTypeName() + "' illegally returned null for id '\" + id + \"'\", obj);");
-		bodyBuilder.appendFormalLine("Assert.assertEquals(\"Find method for '" + annotationValues.getEntity().getSimpleTypeName() + "' returned the incorrect identifier\", id, obj." + identifierAccessorMethod.getMethodName().getSymbolName() + "());");
+		bodyBuilder.appendFormalLine("Assert.assertNotNull(\"Find method for '" + entityName + "' illegally returned null for id '\" + id + \"'\", obj);");
+		bodyBuilder.appendFormalLine("Assert.assertEquals(\"Find method for '" + entityName + "' returned the incorrect identifier\", id, obj." + identifierAccessorMethod.getMethodName().getSymbolName() + "());");
 
 		findMethod.copyAdditionsTo(builder, governorTypeDetails);
 
@@ -279,13 +283,15 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 		annotations.add(new AnnotationMetadataBuilder(TEST));
 
+		final String entityName = annotationValues.getEntity().getSimpleTypeName();
+
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		bodyBuilder.appendFormalLine("Assert.assertNotNull(\"Data on demand for '" + annotationValues.getEntity().getSimpleTypeName() + "' failed to initialize correctly\", dod." + dataOnDemandMetadata.getRandomPersistentEntityMethod().getMethodName().getSymbolName() + "());");
+		bodyBuilder.appendFormalLine("Assert.assertNotNull(\"Data on demand for '" + entityName + "' failed to initialize correctly\", dod." + dataOnDemandMetadata.getRandomPersistentEntityMethod().getMethodName().getSymbolName() + "());");
 		bodyBuilder.appendFormalLine("long count = " + countMethod.getMethodCall() + ";");
-		bodyBuilder.appendFormalLine("Assert.assertTrue(\"Too expensive to perform a find all test for '" + annotationValues.getEntity().getSimpleTypeName() + "', as there are \" + count + \" entries; set the findAllMaximum to exceed this value or set findAll=false on the integration test annotation to disable the test\", count < " + annotationValues.getFindAllMaximum() + ");");
-		bodyBuilder.appendFormalLine("List<" + annotationValues.getEntity().getSimpleTypeName() + "> result = " + findAllMethod.getMethodCall() + ";");
-		bodyBuilder.appendFormalLine("Assert.assertNotNull(\"Find all method for '" + annotationValues.getEntity().getSimpleTypeName() + "' illegally returned null\", result);");
-		bodyBuilder.appendFormalLine("Assert.assertTrue(\"Find all method for '" + annotationValues.getEntity().getSimpleTypeName() + "' failed to return any data\", result.size() > 0);");
+		bodyBuilder.appendFormalLine("Assert.assertTrue(\"Too expensive to perform a find all test for '" + entityName + "', as there are \" + count + \" entries; set the findAllMaximum to exceed this value or set findAll=false on the integration test annotation to disable the test\", count < " + annotationValues.getFindAllMaximum() + ");");
+		bodyBuilder.appendFormalLine("List<" + entityName + "> result = " + findAllMethod.getMethodCall() + ";");
+		bodyBuilder.appendFormalLine("Assert.assertNotNull(\"Find all method for '" + entityName + "' illegally returned null\", result);");
+		bodyBuilder.appendFormalLine("Assert.assertTrue(\"Find all method for '" + entityName + "' failed to return any data\", result.size() > 0);");
 
 		findAllMethod.copyAdditionsTo(builder, governorTypeDetails);
 		countMethod.copyAdditionsTo(builder, governorTypeDetails);
@@ -315,15 +321,17 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 		annotations.add(new AnnotationMetadataBuilder(TEST));
 
+		final String entityName = annotationValues.getEntity().getSimpleTypeName();
+
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		bodyBuilder.appendFormalLine("Assert.assertNotNull(\"Data on demand for '" + annotationValues.getEntity().getSimpleTypeName() + "' failed to initialize correctly\", dod." + dataOnDemandMetadata.getRandomPersistentEntityMethod().getMethodName().getSymbolName() + "());");
+		bodyBuilder.appendFormalLine("Assert.assertNotNull(\"Data on demand for '" + entityName + "' failed to initialize correctly\", dod." + dataOnDemandMetadata.getRandomPersistentEntityMethod().getMethodName().getSymbolName() + "());");
 		bodyBuilder.appendFormalLine("long count = " + countMethod.getMethodCall() + ";");
 		bodyBuilder.appendFormalLine("if (count > 20) count = 20;");
 		bodyBuilder.appendFormalLine("int firstResult = 0;");
 		bodyBuilder.appendFormalLine("int maxResults = (int) count;");
-		bodyBuilder.appendFormalLine("List<" + annotationValues.getEntity().getSimpleTypeName() + "> result = " + findEntriesMethod.getMethodCall() + ";");
-		bodyBuilder.appendFormalLine("Assert.assertNotNull(\"Find entries method for '" + annotationValues.getEntity().getSimpleTypeName() + "' illegally returned null\", result);");
-		bodyBuilder.appendFormalLine("Assert.assertEquals(\"Find entries method for '" + annotationValues.getEntity().getSimpleTypeName() + "' returned an incorrect number of entries\", count, result.size());");
+		bodyBuilder.appendFormalLine("List<" + entityName + "> result = " + findEntriesMethod.getMethodCall() + ";");
+		bodyBuilder.appendFormalLine("Assert.assertNotNull(\"Find entries method for '" + entityName + "' illegally returned null\", result);");
+		bodyBuilder.appendFormalLine("Assert.assertEquals(\"Find entries method for '" + entityName + "' returned an incorrect number of entries\", count, result.size());");
 
 		findEntriesMethod.copyAdditionsTo(builder, governorTypeDetails);
 		countMethod.copyAdditionsTo(builder, governorTypeDetails);
@@ -354,21 +362,23 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 		annotations.add(new AnnotationMetadataBuilder(TEST));
 
+		final String entityName = annotationValues.getEntity().getSimpleTypeName();
+
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		bodyBuilder.appendFormalLine(annotationValues.getEntity().getSimpleTypeName() + " obj = dod." + dataOnDemandMetadata.getRandomPersistentEntityMethod().getMethodName().getSymbolName() + "();");
-		bodyBuilder.appendFormalLine("Assert.assertNotNull(\"Data on demand for '" + annotationValues.getEntity().getSimpleTypeName() + "' failed to initialize correctly\", obj);");
+		bodyBuilder.appendFormalLine(entityName + " obj = dod." + dataOnDemandMetadata.getRandomPersistentEntityMethod().getMethodName().getSymbolName() + "();");
+		bodyBuilder.appendFormalLine("Assert.assertNotNull(\"Data on demand for '" + entityName + "' failed to initialize correctly\", obj);");
 		bodyBuilder.appendFormalLine(identifierAccessorMethod.getReturnType().getSimpleTypeName() + " id = obj." + identifierAccessorMethod.getMethodName().getSymbolName() + "();");
-		bodyBuilder.appendFormalLine("Assert.assertNotNull(\"Data on demand for '" + annotationValues.getEntity().getSimpleTypeName() + "' failed to provide an identifier\", id);");
+		bodyBuilder.appendFormalLine("Assert.assertNotNull(\"Data on demand for '" + entityName + "' failed to provide an identifier\", id);");
 		bodyBuilder.appendFormalLine("obj = " + findMethod.getMethodCall() + ";");
-		bodyBuilder.appendFormalLine("Assert.assertNotNull(\"Find method for '" + annotationValues.getEntity().getSimpleTypeName() + "' illegally returned null for id '\" + id + \"'\", obj);");
+		bodyBuilder.appendFormalLine("Assert.assertNotNull(\"Find method for '" + entityName + "' illegally returned null for id '\" + id + \"'\", obj);");
 		bodyBuilder.appendFormalLine("boolean modified =  dod." + dataOnDemandMetadata.getModifyMethod().getMethodName().getSymbolName() + "(obj);");
 
 		bodyBuilder.appendFormalLine(versionAccessorMethod.getReturnType().getSimpleTypeName() + " currentVersion = obj." + versionAccessorMethod.getMethodName().getSymbolName() + "();");
 		bodyBuilder.appendFormalLine(flushMethod.getMethodCall() + ";");
 		if (JdkJavaType.isDateField(versionType)) {
-			bodyBuilder.appendFormalLine("Assert.assertTrue(\"Version for '" + annotationValues.getEntity().getSimpleTypeName() + "' failed to increment on flush directive\", (currentVersion != null && obj." + versionAccessorMethod.getMethodName().getSymbolName() + "().after(currentVersion)) || !modified);");
+			bodyBuilder.appendFormalLine("Assert.assertTrue(\"Version for '" + entityName + "' failed to increment on flush directive\", (currentVersion != null && obj." + versionAccessorMethod.getMethodName().getSymbolName() + "().after(currentVersion)) || !modified);");
 		} else {
-			bodyBuilder.appendFormalLine("Assert.assertTrue(\"Version for '" + annotationValues.getEntity().getSimpleTypeName() + "' failed to increment on flush directive\", (currentVersion != null && obj." + versionAccessorMethod.getMethodName().getSymbolName() + "() > currentVersion) || !modified);");
+			bodyBuilder.appendFormalLine("Assert.assertTrue(\"Version for '" + entityName + "' failed to increment on flush directive\", (currentVersion != null && obj." + versionAccessorMethod.getMethodName().getSymbolName() + "() > currentVersion) || !modified);");
 		}
 		flushMethod.copyAdditionsTo(builder, governorTypeDetails);
 		findMethod.copyAdditionsTo(builder, governorTypeDetails);
@@ -451,13 +461,15 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 		annotations.add(new AnnotationMetadataBuilder(TEST));
 
+		final String entityName = annotationValues.getEntity().getSimpleTypeName();
+		
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		bodyBuilder.appendFormalLine("Assert.assertNotNull(\"Data on demand for '" + annotationValues.getEntity().getSimpleTypeName() + "' failed to initialize correctly\", dod." + dataOnDemandMetadata.getRandomPersistentEntityMethod().getMethodName().getSymbolName() + "());");
-		bodyBuilder.appendFormalLine(annotationValues.getEntity().getSimpleTypeName() + " obj = dod." + dataOnDemandMetadata.getNewTransientEntityMethod().getMethodName().getSymbolName() + "(Integer.MAX_VALUE);");
-		bodyBuilder.appendFormalLine("Assert.assertNotNull(\"Data on demand for '" + annotationValues.getEntity().getSimpleTypeName() + "' failed to provide a new transient entity\", obj);");
+		bodyBuilder.appendFormalLine("Assert.assertNotNull(\"Data on demand for '" + entityName + "' failed to initialize correctly\", dod." + dataOnDemandMetadata.getRandomPersistentEntityMethod().getMethodName().getSymbolName() + "());");
+		bodyBuilder.appendFormalLine(entityName + " obj = dod." + dataOnDemandMetadata.getNewTransientEntityMethod().getMethodName().getSymbolName() + "(Integer.MAX_VALUE);");
+		bodyBuilder.appendFormalLine("Assert.assertNotNull(\"Data on demand for '" + entityName + "' failed to provide a new transient entity\", obj);");
 
 		if (!hasEmbeddedIdentifier) {
-			bodyBuilder.appendFormalLine("Assert.assertNull(\"Expected '" + annotationValues.getEntity().getSimpleTypeName() + "' identifier to be null\", obj." + identifierAccessorMethod.getMethodName().getSymbolName() + "());");
+			bodyBuilder.appendFormalLine("Assert.assertNull(\"Expected '" + entityName + "' identifier to be null\", obj." + identifierAccessorMethod.getMethodName().getSymbolName() + "());");
 		}
 
 		bodyBuilder.appendFormalLine(persistMethod.getMethodCall() + ";");
@@ -466,7 +478,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 			flushMethod.copyAdditionsTo(builder, governorTypeDetails);
 		}
 
-		bodyBuilder.appendFormalLine("Assert.assertNotNull(\"Expected '" + annotationValues.getEntity().getSimpleTypeName() + "' identifier to no longer be null\", obj." + identifierAccessorMethod.getMethodName().getSymbolName() + "());");
+		bodyBuilder.appendFormalLine("Assert.assertNotNull(\"Expected '" + entityName + "' identifier to no longer be null\", obj." + identifierAccessorMethod.getMethodName().getSymbolName() + "());");
 
 		persistMethod.copyAdditionsTo(builder, governorTypeDetails);
 
@@ -503,11 +515,13 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 			annotations.add(transactionalBuilder);
 		}
 
+		final String entityName = annotationValues.getEntity().getSimpleTypeName();
+
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		bodyBuilder.appendFormalLine(annotationValues.getEntity().getSimpleTypeName() + " obj = dod." + dataOnDemandMetadata.getRandomPersistentEntityMethod().getMethodName().getSymbolName() + "();");
-		bodyBuilder.appendFormalLine("Assert.assertNotNull(\"Data on demand for '" + annotationValues.getEntity().getSimpleTypeName() + "' failed to initialize correctly\", obj);");
+		bodyBuilder.appendFormalLine(entityName + " obj = dod." + dataOnDemandMetadata.getRandomPersistentEntityMethod().getMethodName().getSymbolName() + "();");
+		bodyBuilder.appendFormalLine("Assert.assertNotNull(\"Data on demand for '" + entityName + "' failed to initialize correctly\", obj);");
 		bodyBuilder.appendFormalLine(identifierAccessorMethod.getReturnType().getSimpleTypeName() + " id = obj." + identifierAccessorMethod.getMethodName().getSymbolName() + "();");
-		bodyBuilder.appendFormalLine("Assert.assertNotNull(\"Data on demand for '" + annotationValues.getEntity().getSimpleTypeName() + "' failed to provide an identifier\", id);");
+		bodyBuilder.appendFormalLine("Assert.assertNotNull(\"Data on demand for '" + entityName + "' failed to provide an identifier\", id);");
 		bodyBuilder.appendFormalLine("obj = " + findMethod.getMethodCall() + ";");
 		bodyBuilder.appendFormalLine(removeMethod.getMethodCall() + ";");
 
@@ -516,7 +530,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 			flushMethod.copyAdditionsTo(builder, governorTypeDetails);
 		}
 
-		bodyBuilder.appendFormalLine("Assert.assertNull(\"Failed to remove '" + annotationValues.getEntity().getSimpleTypeName() + "' with identifier '\" + id + \"'\", " + findMethod.getMethodCall() + ");");
+		bodyBuilder.appendFormalLine("Assert.assertNull(\"Failed to remove '" + entityName + "' with identifier '\" + id + \"'\", " + findMethod.getMethodCall() + ");");
 
 		removeMethod.copyAdditionsTo(builder, governorTypeDetails);
 		findMethod.copyAdditionsTo(builder, governorTypeDetails);

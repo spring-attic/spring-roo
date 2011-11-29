@@ -359,7 +359,7 @@ public final class StringUtils {
 	 * @param sub string to search for. Return 0 if this is null.
 	 */
 	public static int countOccurrencesOf(final String str, final String sub) {
-		if (str == null || sub == null || str.length() == 0 || sub.length() == 0) {
+		if (!hasLength(str) || !hasLength(sub)) {
 			return 0;
 		}
 		int count = 0, pos = 0, idx = 0;
@@ -378,7 +378,7 @@ public final class StringUtils {
 	 * @return <code>null</code> if <code>null</code> is given
 	 */
 	public static String repeat(final String str, final int times) {
-		if (str == null || str.length() == 0) {
+		if (!hasLength(str)) {
 			return str;
 		}
 		final StringBuilder sb = new StringBuilder(str.length() * times);

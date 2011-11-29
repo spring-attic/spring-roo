@@ -65,7 +65,7 @@ public class JavaSymbolName implements Comparable<JavaSymbolName> {
 
 	public static boolean isLegalJavaName(final String name) {
 		try {
-		  assertJavaNameLegal(name);
+			assertJavaNameLegal(name);
 		} catch (IllegalArgumentException e) {
 			return false;
 		}
@@ -172,13 +172,6 @@ public class JavaSymbolName implements Comparable<JavaSymbolName> {
 	 */
 	public String getSymbolNameCapitalisedFirstLetter() {
 		return StringUtils.capitalize(symbolName);
-	}
-
-	/**
-	 * @return the name of a setter for the symbol
-	 */
-	public String getSymbolNameTurnedIntoMutatorMethodName() {
-		return "set" + getSymbolNameCapitalisedFirstLetter();
 	}
 
 	@Override
