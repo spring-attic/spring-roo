@@ -631,9 +631,12 @@ public class JpaOperationsImpl implements JpaOperations {
 		}
 
 		final String jndiPath = getJndiPropertiesPath();
-		final boolean jndiExists = fileManager.exists(jndiPath);
-		final Properties props = readProperties(jndiPath, jndiExists, "jndi-template.properties");
-		writeProperties(jndiPath, jndiExists, props);
+		if (fileManager.exists(jndiPath)) {
+			return;
+		}
+
+		final Properties props = readProperties(jndiPath, false, "jndi-template.properties");
+		writeProperties(jndiPath, false, props);
 		LOGGER.warning("Please update your JNDI details in src/main/resources/META-INF/spring/jndi.properties.");
 	}
 
