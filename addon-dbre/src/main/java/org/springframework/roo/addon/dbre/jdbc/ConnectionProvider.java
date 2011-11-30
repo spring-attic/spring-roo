@@ -49,7 +49,7 @@ public interface ConnectionProvider {
 	 * @return a new connection
 	 * @throws RuntimeException if there is a problem acquiring a connection
 	 */
-	Connection getConnection(String jndiDataSource, Map<String, String> map, boolean displayAddOns) throws RuntimeException;
+	Connection getConnectionViaJndiDataSource(String jndiDataSource, Map<String, String> map, boolean displayAddOns) throws RuntimeException;
 
 	/**
 	 * Closes the given {@link Connection}.

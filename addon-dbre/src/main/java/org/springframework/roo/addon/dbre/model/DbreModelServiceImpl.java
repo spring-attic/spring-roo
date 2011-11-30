@@ -153,7 +153,7 @@ public class DbreModelServiceImpl implements DbreModelService {
 		final String jndiDataSource = getJndiDataSourceName();
 		if (StringUtils.hasText(jndiDataSource)) {
 			Map<String, String> props = propFileOperations.getProperties(Path.SPRING_CONFIG_ROOT.getModulePathId(projectOperations.getFocusedModuleName()), "jndi.properties");
-			return connectionProvider.getConnection(jndiDataSource, props, displayAddOns);
+			return connectionProvider.getConnectionViaJndiDataSource(jndiDataSource, props, displayAddOns);
 		} else if (fileManager.exists(projectOperations.getPathResolver().getFocusedIdentifier(Path.SPRING_CONFIG_ROOT, dbProps))) {
 			Map<String, String> props = propFileOperations.getProperties(Path.SPRING_CONFIG_ROOT.getModulePathId(projectOperations.getFocusedModuleName()), dbProps);
 			return connectionProvider.getConnection(props, displayAddOns);

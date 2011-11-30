@@ -58,7 +58,7 @@ public class ConnectionProviderImpl implements ConnectionProvider {
 		return getConnection(getProps(map), displayAddOns);
 	}
 
-	public Connection getConnection(final String jndiDataSource, final Map<String, String> map, final boolean displayAddOns) throws RuntimeException {
+	public Connection getConnectionViaJndiDataSource(final String jndiDataSource, final Map<String, String> map, final boolean displayAddOns) throws RuntimeException {
 		try {
 			InitialContext context = new InitialContext(getProps(map));
 			DataSource dataSource = (DataSource) context.lookup(jndiDataSource);
