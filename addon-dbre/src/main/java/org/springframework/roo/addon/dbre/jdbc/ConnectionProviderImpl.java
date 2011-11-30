@@ -6,6 +6,9 @@ import java.sql.SQLException;
 import java.util.Map;
 import java.util.Properties;
 
+import javax.naming.InitialContext;
+import javax.sql.DataSource;
+
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -15,7 +18,7 @@ import org.springframework.roo.support.util.CollectionUtils;
 
 /**
  * Implementation of {@link ConnectionProvider}.
- *
+ * 
  * @author Alan Stewart
  * @since 1.1
  */
@@ -52,17 +55,32 @@ public class ConnectionProviderImpl implements ConnectionProvider {
 	}
 
 	public Connection getConnection(final Map<String, String> map, final boolean displayAddOns) throws RuntimeException {
-		Assert.isTrue(!CollectionUtils.isEmpty(map), "Connection properties map must not be null or empty");
-		Properties props = new Properties();
-		props.putAll(map);
-		return getConnection(props, displayAddOns);
+		return getConnection(getProps(map), displayAddOns);
+	}
+
+	public Connection getConnection(final String jndiDataSource, final Map<String, String> map, final boolean displayAddOns) throws RuntimeException {
+		try {
+			InitialContext context = new InitialContext(getProps(map));
+			DataSource dataSource = (DataSource) context.lookup(jndiDataSource);
+			return dataSource.getConnection();
+		} catch (Exception e) {
+			throw new IllegalStateException("Unable to get connection from driver: " + e.getMessage(), e);
+		}
 	}
 
 	public void closeConnection(final Connection connection) {
 		if (connection != null) {
 			try {
 				connection.close();
-			} catch (SQLException ignored) {}
+			} catch (SQLException ignored) {
+			}
 		}
+	}
+
+	private Properties getProps(final Map<String, String> map) {
+		Assert.isTrue(!CollectionUtils.isEmpty(map), "Connection properties map must not be null or empty");
+		Properties props = new Properties();
+		props.putAll(map);
+		return props;
 	}
 }

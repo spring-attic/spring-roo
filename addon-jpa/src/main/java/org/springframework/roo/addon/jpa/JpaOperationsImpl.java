@@ -11,6 +11,7 @@ import static org.springframework.roo.model.SpringJavaType.JPA_TRANSACTION_MANAG
 import static org.springframework.roo.model.SpringJavaType.LOCAL_CONTAINER_ENTITY_MANAGER_FACTORY_BEAN;
 import static org.springframework.roo.model.SpringJavaType.LOCAL_ENTITY_MANAGER_FACTORY_BEAN;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -18,9 +19,13 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
+import java.util.Enumeration;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.logging.Logger;
@@ -51,7 +56,6 @@ import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.Property;
 import org.springframework.roo.project.Repository;
 import org.springframework.roo.project.Resource;
-import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.DomUtils;
@@ -147,10 +151,12 @@ public class JpaOperationsImpl implements JpaOperations {
 		updateApplicationContext(ormProvider, jdbcDatabase, jndi, transactionManager, persistenceUnit);
 		updatePersistenceXml(ormProvider, jdbcDatabase, hostName, databaseName, userName, password, persistenceUnit, moduleName);
 		manageGaeXml(ormProvider, jdbcDatabase, applicationId, moduleName);
-		updateDbdcConfigProperties(ormProvider, jdbcDatabase, hostName, userName, password, StringUtils.defaultIfEmpty(persistenceUnit, DEFAULT_PERSISTENCE_UNIT), moduleName);
+		updateDatabaseDotComConfigProperties(ormProvider, jdbcDatabase, hostName, userName, password, StringUtils.defaultIfEmpty(persistenceUnit, DEFAULT_PERSISTENCE_UNIT), moduleName);
 
 		if (StringUtils.isBlank(jndi)) {
 			updateDatabaseProperties(ormProvider, jdbcDatabase, hostName, databaseName, userName, password, moduleName);
+		} else {
+			updateJndiProperties();
 		}
 
 		updateLog4j(ormProvider);
@@ -224,7 +230,19 @@ public class JpaOperationsImpl implements JpaOperations {
 	}
 
 	private String getDatabasePropertiesPath() {
-		return pathResolver.getFocusedIdentifier(Path.SPRING_CONFIG_ROOT, "database.properties");
+		String path = pathResolver.getFocusedIdentifier(Path.SPRING_CONFIG_ROOT, "database.properties");
+		if (StringUtils.isBlank(path)) {
+			path = System.getProperty("java.io.tmpdir") + "database.properties"; // For unit testing, as path will be null otherwise
+		}
+		return path;
+	}
+	
+	private String getJndiPropertiesPath() {
+		String path = pathResolver.getFocusedIdentifier(Path.SPRING_CONFIG_ROOT, "jndi.properties");
+		if (StringUtils.isBlank(path)) {
+			path = System.getProperty("java.io.tmpdir") + "jndi.properties"; // For unit testing, as path will be null otherwise
+		}
+		return path;
 	}
 
 	private void updateApplicationContext(final OrmProvider ormProvider, final JdbcDatabase jdbcDatabase, final String jndi, String transactionManager, final String persistenceUnit) {
@@ -550,8 +568,13 @@ public class JpaOperationsImpl implements JpaOperations {
 			}
 			return;
 		}
+		
+		final String jndiPath = getJndiPropertiesPath();
+		if (fileManager.exists(jndiPath)) {
+			fileManager.delete(jndiPath, "JNDI is not used");
+		}
 
-		final Properties props = getProperties(databasePath, databaseExists, "database-template.properties");
+		final Properties props = readProperties(databasePath, databaseExists, "database-template.properties");
 
 		final String connectionString = getConnectionString(jdbcDatabase, hostName, databaseName, moduleName);
 		if (jdbcDatabase.getKey().equals("HYPERSONIC") || jdbcDatabase == JdbcDatabase.H2_IN_MEMORY || jdbcDatabase == JdbcDatabase.SYBASE) {
@@ -562,7 +585,7 @@ public class JpaOperationsImpl implements JpaOperations {
 		String url = props.getProperty(DATABASE_URL);
 		String uname = props.getProperty(DATABASE_USERNAME);
 		String pwd = props.getProperty(DATABASE_PASSWORD);
-		
+
 		boolean hasChanged = (driver == null || !driver.equals(jdbcDatabase.getDriverClassName()));
 		hasChanged |= (url == null || !url.equals(connectionString));
 		hasChanged |= (uname == null || !uname.equals(StringUtils.trimToEmpty(userName)));
@@ -578,16 +601,7 @@ public class JpaOperationsImpl implements JpaOperations {
 		props.put(DATABASE_USERNAME, StringUtils.trimToEmpty(userName));
 		props.put(DATABASE_PASSWORD, StringUtils.trimToEmpty(password));
 
-		OutputStream outputStream = null;
-		try {
-			final MutableFile mutableFile = databaseExists ? fileManager.updateFile(databasePath) : fileManager.createFile(databasePath);
-			outputStream = mutableFile.getOutputStream();
-			props.store(outputStream, "Updated at " + new Date());
-		} catch (final IOException e) {
-			throw new IllegalStateException(e);
-		} finally {
-			IOUtils.closeQuietly(outputStream);
-		}
+		writeProperties(databasePath, databaseExists, props);
 
 		// Log message to console
 		switch (jdbcDatabase) {
@@ -607,7 +621,20 @@ public class JpaOperationsImpl implements JpaOperations {
 		}
 	}
 
-	private void updateDbdcConfigProperties(final OrmProvider ormProvider, final JdbcDatabase jdbcDatabase, final String hostName, final String userName, final String password, final String persistenceUnit, final String moduleName) {
+	private void updateJndiProperties() {
+		final String databasePath = getDatabasePropertiesPath();
+		if (fileManager.exists(databasePath)) {
+			fileManager.delete(databasePath, "JNDI is used");
+		}
+
+		final String jndiPath = getJndiPropertiesPath();
+		final boolean jndiExists = fileManager.exists(jndiPath);
+		final Properties props = readProperties(jndiPath, jndiExists, "jndi-template.properties");
+		writeProperties(jndiPath, jndiExists, props);
+		LOGGER.warning("Please update your JNDI details in src/main/resources/META-INF/spring/jndi.properties.");
+	}
+
+	private void updateDatabaseDotComConfigProperties(final OrmProvider ormProvider, final JdbcDatabase jdbcDatabase, final String hostName, final String userName, final String password, final String persistenceUnit, final String moduleName) {
 		final String configPath = pathResolver.getFocusedIdentifier(Path.SRC_MAIN_RESOURCES, persistenceUnit + ".properties");
 		final boolean configExists = fileManager.exists(configPath);
 
@@ -619,7 +646,7 @@ public class JpaOperationsImpl implements JpaOperations {
 		}
 
 		final String connectionString = getConnectionString(jdbcDatabase, hostName, null /*databaseName*/, moduleName).replace("USER_NAME", StringUtils.defaultIfEmpty(userName, "${userName}")).replace("PASSWORD", StringUtils.defaultIfEmpty(password, "${password}"));
-		final Properties props = getProperties(configPath, configExists, "database-dot-com-template.properties");
+		final Properties props = readProperties(configPath, configExists, "database-dot-com-template.properties");
 
 		final boolean hasChanged = !props.get("url").equals(StringUtils.trimToEmpty(connectionString));
 		if (!hasChanged) {
@@ -628,22 +655,13 @@ public class JpaOperationsImpl implements JpaOperations {
 
 		props.put("url", StringUtils.trimToEmpty(connectionString));
 
-		OutputStream outputStream = null;
-		try {
-			final MutableFile mutableFile = configExists ? fileManager.updateFile(configPath) : fileManager.createFile(configPath);
-			outputStream = mutableFile.getOutputStream();
-			props.store(outputStream, "Updated at " + new Date());
-		} catch (final IOException e) {
-			throw new IllegalStateException(e);
-		} finally {
-			IOUtils.closeQuietly(outputStream);
-		}
+		writeProperties(configPath, configExists, props);
 
 		LOGGER.warning("Please update your database details in src/main/resources/" + persistenceUnit + ".properties.");
 	}
 
-	private Properties getProperties(final String path, final boolean exists, final String templateFilename) {
-		final Properties props = new Properties();
+	private Properties readProperties(final String path, final boolean exists, final String templateFilename) {
+		final Properties props = new LinkedProperties();
 		InputStream inputStream = null;
 		try {
 			if (exists) {
@@ -659,6 +677,19 @@ public class JpaOperationsImpl implements JpaOperations {
 			IOUtils.closeQuietly(inputStream);
 		}
 		return props;
+	}
+
+	private void writeProperties(final String path, final boolean exists, final Properties props) {
+		OutputStream outputStream = null;
+		try {
+			final MutableFile mutableFile = exists ? fileManager.updateFile(path) : fileManager.createFile(path);
+			outputStream = mutableFile == null ? new FileOutputStream(path) : mutableFile.getOutputStream();
+			props.store(outputStream, "Updated at " + new Date());
+		} catch (final IOException e) {
+			throw new IllegalStateException(e);
+		} finally {
+			IOUtils.closeQuietly(outputStream);
+		}
 	}
 
 	private void updateLog4j(final OrmProvider ormProvider) {
@@ -1080,15 +1111,18 @@ public class JpaOperationsImpl implements JpaOperations {
 		}
 		return properties;
 	}
+	
+	static class LinkedProperties extends Properties {
+		private static final long serialVersionUID = -8828266911075836165L;
+		private final Set<Object> keys = new LinkedHashSet<Object>();
 
-	public boolean isJpaInstalledInProject() {
-		for (final Pom pom : projectOperations.getPoms()) {
-			final LogicalPath srcMainResources = LogicalPath.getInstance(Path.SRC_MAIN_RESOURCES, pom.getModuleName());
-			final String persistenceUnitFile = pathResolver.getIdentifier(srcMainResources, PERSISTENCE_XML);
-			if (fileManager.exists(persistenceUnitFile)) {
-				return true;
-			}
+		public Enumeration<Object> keys() {
+			return Collections.<Object> enumeration(keys);
 		}
-		return false;
+
+		public Object put(Object key, Object value) {
+			keys.add(key);
+			return super.put(key, value);
+		}
 	}
 }

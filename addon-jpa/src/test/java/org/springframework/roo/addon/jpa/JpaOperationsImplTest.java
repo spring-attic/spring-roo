@@ -121,7 +121,18 @@ public class JpaOperationsImplTest {
 	private static final String EXPECTED_APPLICATION_CONTEXT =
 		"<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
 		"<beans>\n" +
-		"    <jee:jndi-lookup id=\"dataSource\" jndi-name=\"myDataSource\"/>\n" +
+		"    <bean class=\"org.apache.commons.dbcp.BasicDataSource\" destroy-method=\"close\" id=\"dataSource\">\n" +
+		"        <property name=\"driverClassName\" value=\"${database.driverClassName}\"/>\n" +
+		"        <property name=\"url\" value=\"${database.url}\"/>\n" +
+		"        <property name=\"username\" value=\"${database.username}\"/>\n" +
+		"        <property name=\"password\" value=\"${database.password}\"/>\n" +
+		"        <property name=\"testOnBorrow\" value=\"true\"/>\n" +
+		"        <property name=\"testOnReturn\" value=\"true\"/>\n" +
+		"        <property name=\"testWhileIdle\" value=\"true\"/>\n" +
+		"        <property name=\"timeBetweenEvictionRunsMillis\" value=\"1800000\"/>\n" +
+		"        <property name=\"numTestsPerEvictionRun\" value=\"3\"/>\n" +
+		"        <property name=\"minEvictableIdleTimeMillis\" value=\"1800000\"/>\n" +
+		"    </bean>\n" +
 		"    <bean class=\"org.springframework.orm.jpa.JpaTransactionManager\" id=\"myTransactionManager\">\n" +
 		"        <property name=\"entityManagerFactory\" ref=\"entityManagerFactory\"/>\n" +
 		"    </bean>\n" +
@@ -131,6 +142,20 @@ public class JpaOperationsImplTest {
 		"        <property name=\"dataSource\" ref=\"dataSource\"/>\n" +
 		"    </bean>\n" +
 		"</beans>\n";
+
+	private static final String EXPECTED_JNDI_APPLICATION_CONTEXT =
+			"<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
+			"<beans>\n" +
+			"    <jee:jndi-lookup id=\"dataSource\" jndi-name=\"myDataSource\"/>\n" +
+			"    <bean class=\"org.springframework.orm.jpa.JpaTransactionManager\" id=\"myTransactionManager\">\n" +
+			"        <property name=\"entityManagerFactory\" ref=\"entityManagerFactory\"/>\n" +
+			"    </bean>\n" +
+			"    <tx:annotation-driven mode=\"aspectj\" transaction-manager=\"myTransactionManager\"/>\n" +
+			"    <bean class=\"org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean\" id=\"entityManagerFactory\">\n" +
+			"        <property name=\"persistenceUnitName\" value=\"myPersistenceUnit\"/>\n" +
+			"        <property name=\"dataSource\" ref=\"dataSource\"/>\n" +
+			"    </bean>\n" +
+			"</beans>\n";
 
 	private static final String EXPECTED_PERSISTENCE_XML_FOR_H2_IN_MEMORY_AND_HIBERNATE =
 		"<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
@@ -164,10 +189,31 @@ public class JpaOperationsImplTest {
 		dialects.put(ormProvider.name() + "." + jdbcDatabase.name(), DB_DIALECT);
 
 		// Invoke
-		this.jpaOperations.configureJpa(ormProvider, jdbcDatabase, DB_JNDI_NAME, null, DB_HOST_NAME, DB_NAME, DB_USER_NAME, DB_PASSWORD, TRANSACTION_MANAGER, PERSISTENCE_UNIT, "");
-		
+		this.jpaOperations.configureJpa(ormProvider, jdbcDatabase, null, null, DB_HOST_NAME, DB_NAME, DB_USER_NAME, DB_PASSWORD, TRANSACTION_MANAGER, PERSISTENCE_UNIT, "");
+
 		// Check
 		verifyFileUpdate(EXPECTED_APPLICATION_CONTEXT, APPLICATION_CONTEXT_PATH);
+		verifyFileUpdate(EXPECTED_PERSISTENCE_XML_FOR_H2_IN_MEMORY_AND_HIBERNATE, PERSISTENCE_PATH);
+	}
+
+	@Test
+	public void testConfigureJpaForH2InMemoryAndHibernateAndJndiForNewProject() {
+		// Set up
+		when(mockFileManager.getInputStream(POM_PATH)).thenReturn(getPomInputStream(POM), getPomInputStream(POM));
+		when(mockFileManager.getInputStream(APPLICATION_CONTEXT_PATH)).thenReturn(getAppContextInputStream(APP_CONTEXT));
+		when(mockPathResolver.getFocusedIdentifier(Path.SRC_MAIN_RESOURCES, PERSISTENCE_XML)).thenReturn(PERSISTENCE_PATH);
+		when(mockFileManager.exists(PERSISTENCE_PATH)).thenReturn(false);	// i.e. no existing persistence.xml
+		when(mockPropFileOperations.loadProperties(JPA_DIALECTS_FILE, JpaOperationsImpl.class)).thenReturn(dialects);
+
+		final OrmProvider ormProvider = HIBERNATE;
+		final JdbcDatabase jdbcDatabase = H2_IN_MEMORY;
+		dialects.put(ormProvider.name() + "." + jdbcDatabase.name(), DB_DIALECT);
+
+		// Invoke
+		this.jpaOperations.configureJpa(ormProvider, jdbcDatabase, DB_JNDI_NAME, null, DB_HOST_NAME, DB_NAME, DB_USER_NAME, DB_PASSWORD, TRANSACTION_MANAGER, PERSISTENCE_UNIT, "");
+
+		// Check
+		verifyFileUpdate(EXPECTED_JNDI_APPLICATION_CONTEXT, APPLICATION_CONTEXT_PATH);
 		verifyFileUpdate(EXPECTED_PERSISTENCE_XML_FOR_H2_IN_MEMORY_AND_HIBERNATE, PERSISTENCE_PATH);
 	}
 

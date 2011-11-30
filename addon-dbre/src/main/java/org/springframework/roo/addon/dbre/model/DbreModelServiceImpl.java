@@ -149,13 +149,26 @@ public class DbreModelServiceImpl implements DbreModelService {
 	}
 
 	private Connection getConnection(final boolean displayAddOns) {
-		if (fileManager.exists( projectOperations.getPathResolver().getFocusedIdentifier(Path.SPRING_CONFIG_ROOT, "database.properties"))) {
-			Map<String, String> connectionProperties = propFileOperations.getProperties(Path.SPRING_CONFIG_ROOT.getModulePathId(projectOperations.getFocusedModuleName()), "database.properties");
-			return connectionProvider.getConnection(connectionProperties, displayAddOns);
+		final String dbProps = "database.properties";
+		final String jndiDataSource = getJndiDataSourceName();
+		if (StringUtils.hasText(jndiDataSource)) {
+			Map<String, String> props = propFileOperations.getProperties(Path.SPRING_CONFIG_ROOT.getModulePathId(projectOperations.getFocusedModuleName()), "jndi.properties");
+			return connectionProvider.getConnection(jndiDataSource, props, displayAddOns);
+		} else if (fileManager.exists(projectOperations.getPathResolver().getFocusedIdentifier(Path.SPRING_CONFIG_ROOT, dbProps))) {
+			Map<String, String> props = propFileOperations.getProperties(Path.SPRING_CONFIG_ROOT.getModulePathId(projectOperations.getFocusedModuleName()), dbProps);
+			return connectionProvider.getConnection(props, displayAddOns);
 		}
 
 		Properties connectionProperties = getConnectionPropertiesFromDataNucleusConfiguration();
 		return connectionProvider.getConnection(connectionProperties, displayAddOns);
+	}
+	
+	private String getJndiDataSourceName() {
+		final String contextPath = projectOperations.getPathResolver().getFocusedIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext.xml");
+		final Document appCtx = XmlUtils.readXml(fileManager.getInputStream(contextPath));
+		final Element root = appCtx.getDocumentElement();
+		final Element dataSourceJndi = XmlUtils.findFirstElement("/beans/jndi-lookup[@id = 'dataSource']", root);
+		return dataSourceJndi != null ? dataSourceJndi.getAttribute("jndi-name") : null;
 	}
 
 	private Properties getConnectionPropertiesFromDataNucleusConfiguration() {
