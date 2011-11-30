@@ -11,6 +11,7 @@ import static org.springframework.roo.model.SpringJavaType.JPA_TRANSACTION_MANAG
 import static org.springframework.roo.model.SpringJavaType.LOCAL_CONTAINER_ENTITY_MANAGER_FACTORY_BEAN;
 import static org.springframework.roo.model.SpringJavaType.LOCAL_ENTITY_MANAGER_FACTORY_BEAN;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -82,6 +83,7 @@ public class JpaOperationsImpl implements JpaOperations {
 	// Constants
 	private static final Dependency JSTL_IMPL_DEPENDENCY = new Dependency("org.glassfish.web", "jstl-impl", "1.2");
 	private static final Logger LOGGER = HandlerUtils.getLogger(JpaOperationsImpl.class);
+	private static final String DATABASE_PROPERTIES_FILE = "database.properties";
 	private static final String DATABASE_URL = "database.url";
 	private static final String DATABASE_DRIVER = "database.driverClassName";
 	private static final String DATABASE_USERNAME = "database.username";
@@ -126,7 +128,7 @@ public class JpaOperationsImpl implements JpaOperations {
 
 	public SortedSet<String> getDatabaseProperties() {
 		if (hasDatabaseProperties()) {
-			return propFileOperations.getPropertyKeys(Path.SPRING_CONFIG_ROOT.getModulePathId(projectOperations.getFocusedModuleName()), "database.properties", true);
+			return propFileOperations.getPropertyKeys(Path.SPRING_CONFIG_ROOT.getModulePathId(projectOperations.getFocusedModuleName()), DATABASE_PROPERTIES_FILE, true);
 		}
 		return getPropertiesFromDataNucleusConfiguration();
 	}
@@ -230,17 +232,18 @@ public class JpaOperationsImpl implements JpaOperations {
 	}
 
 	private String getDatabasePropertiesPath() {
-		String path = pathResolver.getFocusedIdentifier(Path.SPRING_CONFIG_ROOT, "database.properties");
-		if (StringUtils.isBlank(path)) {
-			path = System.getProperty("java.io.tmpdir") + "database.properties"; // For unit testing, as path will be null otherwise
-		}
-		return path;
+		return getPropertiesPath(DATABASE_PROPERTIES_FILE);
 	}
 	
 	private String getJndiPropertiesPath() {
-		String path = pathResolver.getFocusedIdentifier(Path.SPRING_CONFIG_ROOT, "jndi.properties");
+		return getPropertiesPath("jndi.properties");
+	}
+	
+	private String getPropertiesPath(String propertiesFile) {
+		String path = pathResolver.getFocusedIdentifier(Path.SPRING_CONFIG_ROOT, propertiesFile);
 		if (StringUtils.isBlank(path)) {
-			path = System.getProperty("java.io.tmpdir") + "jndi.properties"; // For unit testing, as path will be null otherwise
+			final String tmpDir = System.getProperty("java.io.tmpdir");
+			path = tmpDir + (!tmpDir.endsWith(File.separator) ? File.separator : "") + propertiesFile; // For unit testing, as path will be null otherwise
 		}
 		return path;
 	}
