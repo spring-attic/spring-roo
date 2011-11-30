@@ -72,8 +72,7 @@ public class ConnectionProviderImpl implements ConnectionProvider {
 		if (connection != null) {
 			try {
 				connection.close();
-			} catch (SQLException ignored) {
-			}
+			} catch (SQLException ignored) {}
 		}
 	}
 
