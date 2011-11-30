@@ -162,9 +162,9 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 		LogicalPath managedBeanPath = pathResolver.getFocusedPath(Path.SRC_MAIN_JAVA);
 		String resourceIdentifier = typeLocationService.getPhysicalTypeCanonicalPath(managedBean, managedBeanPath);
 		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(managedBean, pathResolver.getPath(resourceIdentifier));
-		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC, managedBean, PhysicalTypeCategory.CLASS);
-		typeDetailsBuilder.addAnnotation(annotationBuilder);
-		typeManagementService.createOrUpdateTypeOnDisk(typeDetailsBuilder.build());
+		ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC, managedBean, PhysicalTypeCategory.CLASS);
+		cidBuilder.addAnnotation(annotationBuilder);
+		typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
 
 		shell.flash(Level.FINE, "Created " + managedBean.getFullyQualifiedTypeName(), JsfOperationsImpl.class.getName());
 		shell.flash(Level.FINE, "", JsfOperationsImpl.class.getName());
@@ -267,10 +267,10 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 		AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(ROO_JSF_CONVERTER);
 		annotationBuilder.addClassAttribute("entity", entity);
 		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(converterType, pathResolver.getFocusedPath(Path.SRC_MAIN_JAVA));
-		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC, converterType, PhysicalTypeCategory.CLASS);
-		typeDetailsBuilder.addAnnotation(annotationBuilder);
+		ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC, converterType, PhysicalTypeCategory.CLASS);
+		cidBuilder.addAnnotation(annotationBuilder);
 
-		typeManagementService.createOrUpdateTypeOnDisk(typeDetailsBuilder.build());
+		typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
 
 		shell.flash(Level.FINE, "Created " + converterType.getFullyQualifiedTypeName(), JsfOperationsImpl.class.getName());
 		shell.flash(Level.FINE, "", JsfOperationsImpl.class.getName());

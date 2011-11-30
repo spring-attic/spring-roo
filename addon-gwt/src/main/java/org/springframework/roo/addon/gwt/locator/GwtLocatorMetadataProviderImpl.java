@@ -100,28 +100,28 @@ public class GwtLocatorMetadataProviderImpl implements GwtLocatorMetadataProvide
 
 		final JavaType identifierType = GwtUtils.convertPrimitiveType(identifierAccessor.getReturnType(), true);
 		final String locatorPhysicalTypeId = PhysicalTypeIdentifier.createIdentifier(new JavaType(locatorType), PhysicalTypeIdentifier.getPath(proxy.getDeclaredByMetadataId()));
-		ClassOrInterfaceTypeDetailsBuilder locatorBuilder = new ClassOrInterfaceTypeDetailsBuilder(locatorPhysicalTypeId);
+		ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(locatorPhysicalTypeId);
 		AnnotationMetadataBuilder annotationMetadataBuilder = new AnnotationMetadataBuilder(RooJavaType.ROO_GWT_LOCATOR);
 		annotationMetadataBuilder.addStringAttribute("value", entity.getFullyQualifiedTypeName());
-		locatorBuilder.addAnnotation(annotationMetadataBuilder);
+		cidBuilder.addAnnotation(annotationMetadataBuilder);
 
-		locatorBuilder.addAnnotation(new AnnotationMetadataBuilder(SpringJavaType.COMPONENT));
-		locatorBuilder.setName(new JavaType(locatorType));
-		locatorBuilder.setModifier(Modifier.PUBLIC);
-		locatorBuilder.setPhysicalTypeCategory(PhysicalTypeCategory.CLASS);
-		locatorBuilder.addExtendsTypes(new JavaType(LOCATOR.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, Arrays.asList(entity, identifierType)));
-		locatorBuilder.addMethod(getCreateMethod(locatorPhysicalTypeId, entity));
+		cidBuilder.addAnnotation(new AnnotationMetadataBuilder(SpringJavaType.COMPONENT));
+		cidBuilder.setName(new JavaType(locatorType));
+		cidBuilder.setModifier(Modifier.PUBLIC);
+		cidBuilder.setPhysicalTypeCategory(PhysicalTypeCategory.CLASS);
+		cidBuilder.addExtendsTypes(new JavaType(LOCATOR.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, Arrays.asList(entity, identifierType)));
+		cidBuilder.addMethod(getCreateMethod(locatorPhysicalTypeId, entity));
 		
 		MemberTypeAdditions findMethodAdditions = layerService.getMemberTypeAdditions(locatorPhysicalTypeId, CustomDataKeys.FIND_METHOD.name(), entity, identifierType, LAYER_POSITION, new MethodParameter(identifierType, "id"));
 		Assert.notNull(findMethodAdditions, "Find method not available for entity '" + entity.getFullyQualifiedTypeName() + "'");
-		locatorBuilder.addMethod(getFindMethod(findMethodAdditions, locatorBuilder, locatorPhysicalTypeId, entity, identifierType));
+		cidBuilder.addMethod(getFindMethod(findMethodAdditions, cidBuilder, locatorPhysicalTypeId, entity, identifierType));
 		
-		locatorBuilder.addMethod(getDomainTypeMethod(locatorPhysicalTypeId, entity));
-		locatorBuilder.addMethod(getIdMethod(locatorPhysicalTypeId, entity, identifierAccessor));
-		locatorBuilder.addMethod(getIdTypeMethod(locatorPhysicalTypeId, entity, identifierType));
-		locatorBuilder.addMethod(getVersionMethod(locatorPhysicalTypeId, entity, versionAccessor));
+		cidBuilder.addMethod(getDomainTypeMethod(locatorPhysicalTypeId, entity));
+		cidBuilder.addMethod(getIdMethod(locatorPhysicalTypeId, entity, identifierAccessor));
+		cidBuilder.addMethod(getIdTypeMethod(locatorPhysicalTypeId, entity, identifierType));
+		cidBuilder.addMethod(getVersionMethod(locatorPhysicalTypeId, entity, versionAccessor));
 
-		typeManagementService.createOrUpdateTypeOnDisk(locatorBuilder.build());
+		typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
 		return null;
 	}
 
@@ -197,16 +197,16 @@ public class GwtLocatorMetadataProviderImpl implements GwtLocatorMetadataProvide
 			}
 			if (!processed && MemberFindingUtils.getAnnotationOfType(cid.getAnnotations(), RooJavaType.ROO_GWT_PROXY) == null) {
 				boolean found = false;
-				for (ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails : typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_GWT_PROXY)) {
-					AnnotationMetadata annotationMetadata = GwtUtils.getFirstAnnotation(classOrInterfaceTypeDetails, GwtUtils.ROO_PROXY_REQUEST_ANNOTATIONS);
+				for (ClassOrInterfaceTypeDetails proxyCid : typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_GWT_PROXY)) {
+					AnnotationMetadata annotationMetadata = GwtUtils.getFirstAnnotation(proxyCid, GwtUtils.ROO_PROXY_REQUEST_ANNOTATIONS);
 					if (annotationMetadata != null) {
 						AnnotationAttributeValue<?> attributeValue = annotationMetadata.getAttribute("value");
 						if (attributeValue != null) {
 							String mirrorName = GwtUtils.getStringValue(attributeValue);
 							if (mirrorName != null && cid.getName().getFullyQualifiedTypeName().equals(attributeValue.getValue())) {
 								found = true;
-								JavaType typeName = PhysicalTypeIdentifier.getJavaType(classOrInterfaceTypeDetails.getDeclaredByMetadataId());
-								LogicalPath typePath = PhysicalTypeIdentifier.getPath(classOrInterfaceTypeDetails.getDeclaredByMetadataId());
+								JavaType typeName = PhysicalTypeIdentifier.getJavaType(proxyCid.getDeclaredByMetadataId());
+								LogicalPath typePath = PhysicalTypeIdentifier.getPath(proxyCid.getDeclaredByMetadataId());
 								downstreamDependency = GwtLocatorMetadata.createIdentifier(typeName, typePath);
 								break;
 							}

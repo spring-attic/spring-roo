@@ -282,9 +282,9 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 		}
 
 		// Update the annotation on disk
-		final ClassOrInterfaceTypeDetailsBuilder classOrInterfaceTypeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(managedEntity);
-		classOrInterfaceTypeDetailsBuilder.updateTypeAnnotation(jpaAnnotationBuilder.build(), attributesToDeleteIfPresent);
-		typeManagementService.createOrUpdateTypeOnDisk(classOrInterfaceTypeDetailsBuilder.build());
+		final ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(managedEntity);
+		cidBuilder.updateTypeAnnotation(jpaAnnotationBuilder.build(), attributesToDeleteIfPresent);
+		typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
 		return table;
 	}
 
@@ -342,11 +342,11 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 
 		// Create entity class
 		final String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(javaType, projectOperations.getPathResolver().getFocusedPath(Path.SRC_MAIN_JAVA));
-		final ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC, javaType, PhysicalTypeCategory.CLASS);
-		typeDetailsBuilder.setExtendsTypes(extendsTypes);
-		typeDetailsBuilder.setAnnotations(annotations);
+		final ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC, javaType, PhysicalTypeCategory.CLASS);
+		cidBuilder.setExtendsTypes(extendsTypes);
+		cidBuilder.setAnnotations(annotations);
 
-		final ClassOrInterfaceTypeDetails entity = typeDetailsBuilder.build();
+		final ClassOrInterfaceTypeDetails entity = cidBuilder.build();
 		typeManagementService.createOrUpdateTypeOnDisk(entity);
 
 		shell.flash(Level.FINE, "Created " + javaType.getFullyQualifiedTypeName(), DbreDatabaseListenerImpl.class.getName());
@@ -414,9 +414,9 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 
 		// Produce identifier itself
 		final String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(identifierType,  projectOperations.getPathResolver().getFocusedPath(Path.SRC_MAIN_JAVA));
-		final ClassOrInterfaceTypeDetailsBuilder identifierTypeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC | Modifier.FINAL, identifierType, PhysicalTypeCategory.CLASS);
-		identifierTypeDetailsBuilder.setAnnotations(identifierAnnotations);
-		typeManagementService.createOrUpdateTypeOnDisk(identifierTypeDetailsBuilder.build());
+		final ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC | Modifier.FINAL, identifierType, PhysicalTypeCategory.CLASS);
+		cidBuilder.setAnnotations(identifierAnnotations);
+		typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
 
 		shell.flash(Level.FINE, "Created " + identifierType.getFullyQualifiedTypeName(), DbreDatabaseListenerImpl.class.getName());
 		shell.flash(Level.FINE, "", DbreDatabaseListenerImpl.class.getName());

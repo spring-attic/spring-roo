@@ -38,12 +38,12 @@ public class JsonOperationsImpl implements JsonOperations {
 	public void annotateType(final JavaType javaType, final String rootName, final boolean deepSerialize) {
 		Assert.notNull(javaType, "Java type required");
 
-		ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = typeLocationService.getTypeDetails(javaType);
-		if (classOrInterfaceTypeDetails == null) {
+		ClassOrInterfaceTypeDetails cid = typeLocationService.getTypeDetails(javaType);
+		if (cid == null) {
 			throw new IllegalArgumentException("Cannot locate source for '" + javaType.getFullyQualifiedTypeName() + "'");
 		}
 
-		if (MemberFindingUtils.getAnnotationOfType(classOrInterfaceTypeDetails.getAnnotations(), RooJavaType.ROO_JSON) == null) {
+		if (MemberFindingUtils.getAnnotationOfType(cid.getAnnotations(), RooJavaType.ROO_JSON) == null) {
 			AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(RooJavaType.ROO_JSON);
 			if (rootName != null && rootName.length() > 0) {
 				annotationBuilder.addStringAttribute("rootName", rootName);
@@ -51,9 +51,9 @@ public class JsonOperationsImpl implements JsonOperations {
 			if (deepSerialize) {
 				annotationBuilder.addBooleanAttribute("deepSerialize", true);
 			}
-			ClassOrInterfaceTypeDetailsBuilder classOrInterfaceTypeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(classOrInterfaceTypeDetails);
-			classOrInterfaceTypeDetailsBuilder.addAnnotation(annotationBuilder);
-			typeManagementService.createOrUpdateTypeOnDisk(classOrInterfaceTypeDetailsBuilder.build());
+			ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(cid);
+			cidBuilder.addAnnotation(annotationBuilder);
+			typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
 		}
 	}
 

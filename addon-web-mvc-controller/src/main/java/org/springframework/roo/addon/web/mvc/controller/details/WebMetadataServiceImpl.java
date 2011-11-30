@@ -377,8 +377,8 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 		}
 		String webScaffoldMetadataKey = null;
 		WebScaffoldMetadata webScaffoldMetadata = null;
-		for (ClassOrInterfaceTypeDetails coitd: typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(ROO_WEB_SCAFFOLD)) {
-			for (AnnotationMetadata annotation: coitd.getAnnotations()) {
+		for (ClassOrInterfaceTypeDetails cid: typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(ROO_WEB_SCAFFOLD)) {
+			for (AnnotationMetadata annotation: cid.getAnnotations()) {
 				if (annotation.getAnnotationType().equals(ROO_WEB_SCAFFOLD)) {
 					AnnotationAttributeValue<?> formBackingObject = annotation.getAttribute(new JavaSymbolName("formBackingObject"));
 					if (formBackingObject instanceof ClassAttributeValue) {
@@ -390,8 +390,8 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 								pathMap.put(type.getFullyQualifiedTypeName(), pathString);
 								return pathString;
 							}
-							LogicalPath coitdPath = PhysicalTypeIdentifier.getPath(coitd.getDeclaredByMetadataId());
-							webScaffoldMetadataKey = WebScaffoldMetadata.createIdentifier(coitd.getName(), coitdPath);
+							LogicalPath cidPath = PhysicalTypeIdentifier.getPath(cid.getDeclaredByMetadataId());
+							webScaffoldMetadataKey = WebScaffoldMetadata.createIdentifier(cid.getName(), cidPath);
 							webScaffoldMetadata = (WebScaffoldMetadata) metadataService.get(webScaffoldMetadataKey);
 							break;
 						}
@@ -415,9 +415,9 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 	}
 
 	public MemberDetails getMemberDetails(final JavaType javaType) {
-		ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = typeLocationService.getTypeDetails(javaType);
-		Assert.notNull(classOrInterfaceTypeDetails, "Unable to obtain physical type metadata for type " + javaType.getFullyQualifiedTypeName());
-		return memberDetailsScanner.getMemberDetails(WebMetadataServiceImpl.class.getName(), classOrInterfaceTypeDetails);
+		ClassOrInterfaceTypeDetails cid = typeLocationService.getTypeDetails(javaType);
+		Assert.notNull(cid, "Unable to obtain physical type metadata for type " + javaType.getFullyQualifiedTypeName());
+		return memberDetailsScanner.getMemberDetails(WebMetadataServiceImpl.class.getName(), cid);
 	}
 
 	public Map<MethodMetadataCustomDataKey, MemberTypeAdditions> getCrudAdditions(final JavaType domainType, final String metadataId) {

@@ -8,7 +8,7 @@ import org.springframework.roo.project.maven.Pom;
 
 public interface TypeCache {
 
-	void cacheType(String typeFilePath, ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails);
+	void cacheType(String typeFilePath, ClassOrInterfaceTypeDetails cid);
 
 	void cacheFilePathAgainstTypeIdentifier(String typeFilePath, String typeIdentifier);
 

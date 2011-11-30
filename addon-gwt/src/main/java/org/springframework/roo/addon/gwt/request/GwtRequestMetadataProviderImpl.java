@@ -171,15 +171,15 @@ public class GwtRequestMetadataProviderImpl extends AbstractHashCodeTrackingMeta
 			methods.add(getRequestMethod(request, method));
 		}
 
-		final ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(request);
+		final ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(request);
 
 		// Only inherit from RequestContext if extension is not already defined
-		if (!typeDetailsBuilder.getExtendsTypes().contains(OLD_REQUEST_CONTEXT) && !typeDetailsBuilder.getExtendsTypes().contains(REQUEST_CONTEXT)) {
-			typeDetailsBuilder.addExtendsTypes(REQUEST_CONTEXT);
+		if (!cidBuilder.getExtendsTypes().contains(OLD_REQUEST_CONTEXT) && !cidBuilder.getExtendsTypes().contains(REQUEST_CONTEXT)) {
+			cidBuilder.addExtendsTypes(REQUEST_CONTEXT);
 		}
 
-		if (!typeDetailsBuilder.getExtendsTypes().contains(REQUEST_CONTEXT)) {
-			typeDetailsBuilder.addExtendsTypes(REQUEST_CONTEXT);
+		if (!cidBuilder.getExtendsTypes().contains(REQUEST_CONTEXT)) {
+			cidBuilder.addExtendsTypes(REQUEST_CONTEXT);
 		}
 
 		final ClassOrInterfaceTypeDetails entity = gwtTypeService.lookupEntityFromRequest(request);
@@ -200,11 +200,11 @@ public class GwtRequestMetadataProviderImpl extends AbstractHashCodeTrackingMeta
 					}
 				}
 			}
-			typeDetailsBuilder.removeAnnotation(annotationMetadata.getAnnotationType());
-			typeDetailsBuilder.updateTypeAnnotation(annotationMetadataBuilder);
+			cidBuilder.removeAnnotation(annotationMetadata.getAnnotationType());
+			cidBuilder.updateTypeAnnotation(annotationMetadataBuilder);
 		}
-		typeDetailsBuilder.setDeclaredMethods(methods);
-		return gwtFileManager.write(typeDetailsBuilder.build(), GwtUtils.PROXY_REQUEST_WARNING);
+		cidBuilder.setDeclaredMethods(methods);
+		return gwtFileManager.write(cidBuilder.build(), GwtUtils.PROXY_REQUEST_WARNING);
 	}
 
 	private MethodMetadataBuilder getRequestMethod(final ClassOrInterfaceTypeDetails request, final MethodMetadata methodMetadata) {
@@ -266,16 +266,16 @@ public class GwtRequestMetadataProviderImpl extends AbstractHashCodeTrackingMeta
 			}
 			if (!processed && MemberFindingUtils.getAnnotationOfType(cid.getAnnotations(), ROO_GWT_REQUEST) == null) {
 				boolean found = false;
-				for (final ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails : typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(ROO_GWT_REQUEST)) {
-					final AnnotationMetadata annotationMetadata = GwtUtils.getFirstAnnotation(classOrInterfaceTypeDetails, GwtUtils.REQUEST_ANNOTATIONS);
+				for (final ClassOrInterfaceTypeDetails requestCid : typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(ROO_GWT_REQUEST)) {
+					final AnnotationMetadata annotationMetadata = GwtUtils.getFirstAnnotation(requestCid, GwtUtils.REQUEST_ANNOTATIONS);
 					if (annotationMetadata != null) {
 						final AnnotationAttributeValue<?> attributeValue = annotationMetadata.getAttribute("value");
 						if (attributeValue != null) {
 							final String mirrorName = GwtUtils.getStringValue(attributeValue);
 							if (mirrorName != null && cid.getName().getFullyQualifiedTypeName().equals(mirrorName)) {
 								found = true;
-								final JavaType typeName = PhysicalTypeIdentifier.getJavaType(classOrInterfaceTypeDetails.getDeclaredByMetadataId());
-								final LogicalPath typePath = PhysicalTypeIdentifier.getPath(classOrInterfaceTypeDetails.getDeclaredByMetadataId());
+								final JavaType typeName = PhysicalTypeIdentifier.getJavaType(requestCid.getDeclaredByMetadataId());
+								final LogicalPath typePath = PhysicalTypeIdentifier.getPath(requestCid.getDeclaredByMetadataId());
 								downstreamDependency = GwtRequestMetadata.createIdentifier(typeName, typePath);
 								break;
 							}

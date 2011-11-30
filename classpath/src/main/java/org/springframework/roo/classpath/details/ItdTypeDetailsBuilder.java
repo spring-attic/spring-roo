@@ -145,11 +145,11 @@ public class ItdTypeDetailsBuilder extends AbstractMemberHoldingTypeDetailsBuild
 	}
 
 	@Override
-	public void onAddInnerType(final ClassOrInterfaceTypeDetailsBuilder classOrInterfaceTypeDetails) {
-		if (classOrInterfaceTypeDetails == null) {
+	public void onAddInnerType(final ClassOrInterfaceTypeDetailsBuilder cid) {
+		if (cid == null) {
 			return;
 		}
-		Assert.isTrue(Modifier.isStatic(classOrInterfaceTypeDetails.getModifier()), "Currently only static inner types are supported by AspectJ");
+		Assert.isTrue(Modifier.isStatic(cid.getModifier()), "Currently only static inner types are supported by AspectJ");
 	}
 
 	@Deprecated

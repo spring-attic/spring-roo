@@ -61,12 +61,12 @@ public class DataOnDemandOperationsImpl implements DataOnDemandOperations {
 		Assert.notNull(path, "Location of the new data on demand provider is required");
 
 		// Verify the requested entity actually exists as a class and is not abstract
-		ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = getEntity(entity);
-		Assert.isTrue(classOrInterfaceTypeDetails.getPhysicalTypeCategory() == PhysicalTypeCategory.CLASS, "Type " + entity.getFullyQualifiedTypeName() + " is not a class");
-		Assert.isTrue(!Modifier.isAbstract(classOrInterfaceTypeDetails.getModifier()), "Type " + entity.getFullyQualifiedTypeName() + " is abstract");
+		ClassOrInterfaceTypeDetails cid = getEntity(entity);
+		Assert.isTrue(cid.getPhysicalTypeCategory() == PhysicalTypeCategory.CLASS, "Type " + entity.getFullyQualifiedTypeName() + " is not a class");
+		Assert.isTrue(!Modifier.isAbstract(cid.getModifier()), "Type " + entity.getFullyQualifiedTypeName() + " is abstract");
 
 		// Check if the requested entity is a JPA @Entity
-		MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(DataOnDemandOperationsImpl.class.getName(), classOrInterfaceTypeDetails);
+		MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(DataOnDemandOperationsImpl.class.getName(), cid);
 		AnnotationMetadata entityAnnotation = memberDetails.getAnnotation(ENTITY);
 		AnnotationMetadata persistentAnnotation = memberDetails.getAnnotation(PERSISTENT);
 		Assert.isTrue(entityAnnotation != null || persistentAnnotation != null, "Type " + entity.getFullyQualifiedTypeName() + " must be a persistent type");
@@ -84,10 +84,10 @@ public class DataOnDemandOperationsImpl implements DataOnDemandOperations {
 		dodConfig.add(new ClassAttributeValue(new JavaSymbolName("entity"), entity));
 		annotations.add(new AnnotationMetadataBuilder(RooJavaType.ROO_DATA_ON_DEMAND, dodConfig));
 
-		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC, name, PhysicalTypeCategory.CLASS);
-		typeDetailsBuilder.setAnnotations(annotations);
+		ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC, name, PhysicalTypeCategory.CLASS);
+		cidBuilder.setAnnotations(annotations);
 
-		typeManagementService.createOrUpdateTypeOnDisk(typeDetailsBuilder.build());
+		typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
 	}
 
 	/**

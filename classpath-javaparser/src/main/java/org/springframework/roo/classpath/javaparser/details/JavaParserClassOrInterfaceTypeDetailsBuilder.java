@@ -145,7 +145,7 @@ public class JavaParserClassOrInterfaceTypeDetailsBuilder implements Builder<Cla
 		// Revert back to the original type name (thus avoiding unnecessary inferences about java.lang types; see ROO-244)
 		name = new JavaType(newName.getFullyQualifiedTypeName(), newName.getEnclosingType(), newName.getArray(), newName.getDataType(), newName.getArgName(), newName.getParameters());
 
-		final ClassOrInterfaceTypeDetailsBuilder classOrInterfaceTypeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId);
+		final ClassOrInterfaceTypeDetailsBuilder cidBuilder= new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId);
 
 		physicalTypeCategory = PhysicalTypeCategory.CLASS;
 		if (typeDeclaration instanceof ClassOrInterfaceDeclaration) {
@@ -161,8 +161,8 @@ public class JavaParserClassOrInterfaceTypeDetailsBuilder implements Builder<Cla
 
 		Assert.notNull(physicalTypeCategory, UNSUPPORTED_MESSAGE_PREFIX + " (" + typeDeclaration.getClass().getSimpleName() + " for " + name + ")");
 
-		classOrInterfaceTypeDetailsBuilder.setName(name);
-		classOrInterfaceTypeDetailsBuilder.setPhysicalTypeCategory(physicalTypeCategory);
+		cidBuilder.setName(name);
+		cidBuilder.setPhysicalTypeCategory(physicalTypeCategory);
 
 		imports = compilationUnit.getImports();
 		if (imports == null) {
@@ -183,12 +183,12 @@ public class JavaParserClassOrInterfaceTypeDetailsBuilder implements Builder<Cla
 				final JavaType type = new JavaType(fullName);
 				final JavaPackage typePackage = type.getPackage();
 				final ImportMetadataBuilder newImport = new ImportMetadataBuilder(declaredByMetadataId, 0, typePackage, type, importDeclaration.isStatic(), importDeclaration.isAsterisk());
-				classOrInterfaceTypeDetailsBuilder.add(newImport.build());
+				cidBuilder.add(newImport.build());
 			}
 		}
 
 		// Convert Java Parser modifier into JDK modifier
-		classOrInterfaceTypeDetailsBuilder.setModifier(JavaParserUtils.getJdkModifier(typeDeclaration.getModifiers()));
+		cidBuilder.setModifier(JavaParserUtils.getJdkModifier(typeDeclaration.getModifiers()));
 
 		// Type parameters
 		final Set<JavaSymbolName> typeParameterNames = new HashSet<JavaSymbolName>();
@@ -209,11 +209,11 @@ public class JavaParserClassOrInterfaceTypeDetailsBuilder implements Builder<Cla
 			if (extendsList != null) {
 				for (final ClassOrInterfaceType candidate : extendsList) {
 					final JavaType javaType = JavaParserUtils.getJavaTypeNow(compilationUnitServices, candidate, typeParameterNames);
-					classOrInterfaceTypeDetailsBuilder.addExtendsTypes(javaType);
+					cidBuilder.addExtendsTypes(javaType);
 				}
 			}
 
-			final List<JavaType> extendsTypes = classOrInterfaceTypeDetailsBuilder.getExtendsTypes();
+			final List<JavaType> extendsTypes = cidBuilder.getExtendsTypes();
 			// Obtain the superclass, if this is a class and one is available
 			if (physicalTypeCategory == PhysicalTypeCategory.CLASS && extendsTypes.size() == 1) {
 				final JavaType superclass = extendsTypes.get(0);
@@ -223,7 +223,7 @@ public class JavaParserClassOrInterfaceTypeDetailsBuilder implements Builder<Cla
 					superPtm = (PhysicalTypeMetadata) metadataService.get(superclassId);
 				}
 				if (superPtm != null && superPtm.getMemberHoldingTypeDetails() != null) {
-					classOrInterfaceTypeDetailsBuilder.setSuperclass(superPtm.getMemberHoldingTypeDetails());
+					cidBuilder.setSuperclass(superPtm.getMemberHoldingTypeDetails());
 				}
 			}
 
@@ -231,7 +231,7 @@ public class JavaParserClassOrInterfaceTypeDetailsBuilder implements Builder<Cla
 			if (implementsList != null) {
 				for (final ClassOrInterfaceType candidate : implementsList) {
 					final JavaType javaType = JavaParserUtils.getJavaTypeNow(compilationUnitServices, candidate, typeParameterNames);
-					classOrInterfaceTypeDetailsBuilder.addImplementsType(javaType);
+					cidBuilder.addImplementsType(javaType);
 				}
 			}
 
@@ -243,7 +243,7 @@ public class JavaParserClassOrInterfaceTypeDetailsBuilder implements Builder<Cla
 			final List<EnumConstantDeclaration> constants = enumClazz.getEntries();
 			if (constants != null) {
 				for (final EnumConstantDeclaration enumConstants : constants) {
-					classOrInterfaceTypeDetailsBuilder.addEnumConstant(new JavaSymbolName(enumConstants.getName()));
+					cidBuilder.addEnumConstant(new JavaSymbolName(enumConstants.getName()));
 				}
 			}
 
@@ -255,7 +255,7 @@ public class JavaParserClassOrInterfaceTypeDetailsBuilder implements Builder<Cla
 		if (annotationsList != null) {
 			for (final AnnotationExpr candidate : annotationsList) {
 				final AnnotationMetadata md = JavaParserAnnotationMetadataBuilder.getInstance(candidate, compilationUnitServices).build();
-				classOrInterfaceTypeDetailsBuilder.addAnnotation(md);
+				cidBuilder.addAnnotation(md);
 			}
 		}
 
@@ -274,29 +274,29 @@ public class JavaParserClassOrInterfaceTypeDetailsBuilder implements Builder<Cla
 					final FieldDeclaration castMember = (FieldDeclaration) member;
 					for (final VariableDeclarator var : castMember.getVariables()) {
 						final FieldMetadata field = JavaParserFieldMetadataBuilder.getInstance(declaredByMetadataId, castMember, var, compilationUnitServices, typeParameterNames).build();
-						classOrInterfaceTypeDetailsBuilder.addField(field);
+						cidBuilder.addField(field);
 					}
 				}
 				if (member instanceof MethodDeclaration) {
 					final MethodDeclaration castMember = (MethodDeclaration) member;
 					final MethodMetadata method = JavaParserMethodMetadataBuilder.getInstance(declaredByMetadataId, castMember, compilationUnitServices, typeParameterNames).build();
-					classOrInterfaceTypeDetailsBuilder.addMethod(method);
+					cidBuilder.addMethod(method);
 				}
 				if (member instanceof ConstructorDeclaration) {
 					final ConstructorDeclaration castMember = (ConstructorDeclaration) member;
 					final ConstructorMetadata constructor = JavaParserConstructorMetadataBuilder.getInstance(declaredByMetadataId, castMember, compilationUnitServices, typeParameterNames).build();
-					classOrInterfaceTypeDetailsBuilder.addConstructor(constructor);
+					cidBuilder.addConstructor(constructor);
 				}
 				if (member instanceof TypeDeclaration) {
 					final TypeDeclaration castMember = (TypeDeclaration) member;
 					final JavaType innerType = new JavaType(castMember.getName(), name);
 					final String innerTypeMetadataId = PhysicalTypeIdentifier.createIdentifier(innerType, PhysicalTypeIdentifier.getPath(declaredByMetadataId));
-					final ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = new JavaParserClassOrInterfaceTypeDetailsBuilder(compilationUnit, compilationUnitServices, castMember, innerTypeMetadataId, innerType, metadataService, typeLocationService).build();
-					classOrInterfaceTypeDetailsBuilder.addInnerType(classOrInterfaceTypeDetails);
+					final ClassOrInterfaceTypeDetails cid = new JavaParserClassOrInterfaceTypeDetailsBuilder(compilationUnit, compilationUnitServices, castMember, innerTypeMetadataId, innerType, metadataService, typeLocationService).build();
+					cidBuilder.addInnerType(cid);
 				}
 			}
 		}
 
-		return classOrInterfaceTypeDetailsBuilder.build();
+		return cidBuilder.build();
 	}
 }

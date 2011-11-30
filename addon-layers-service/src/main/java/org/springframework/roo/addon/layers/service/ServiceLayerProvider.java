@@ -97,14 +97,14 @@ public class ServiceLayerProvider extends CoreLayerProvider {
 	 */
 	private MemberTypeAdditions getMethodAdditions(final String callerMID, final String methodName, final JavaType serviceInterface, final List<JavaSymbolName> parameterNames) {
 		// The method is supported by this service interface; make a builder
-		final ClassOrInterfaceTypeDetailsBuilder classBuilder = new ClassOrInterfaceTypeDetailsBuilder(callerMID);
+		final ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(callerMID);
 
 		// Add an autowired field of the type of this service
 		final String fieldName = StringUtils.uncapitalize(serviceInterface.getSimpleTypeName());
-		classBuilder.addField(new FieldMetadataBuilder(callerMID, 0, Arrays.asList( new AnnotationMetadataBuilder(AUTOWIRED)), new JavaSymbolName(fieldName), serviceInterface));
+		cidBuilder.addField(new FieldMetadataBuilder(callerMID, 0, Arrays.asList( new AnnotationMetadataBuilder(AUTOWIRED)), new JavaSymbolName(fieldName), serviceInterface));
 
 		// Generate an additions object that includes a call to the method
-		return MemberTypeAdditions.getInstance(classBuilder, fieldName, methodName, parameterNames);
+		return MemberTypeAdditions.getInstance(cidBuilder, fieldName, methodName, parameterNames);
 	}
 
 	public int getLayerPosition() {

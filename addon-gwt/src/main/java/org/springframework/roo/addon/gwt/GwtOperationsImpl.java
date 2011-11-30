@@ -153,24 +153,24 @@ public class GwtOperationsImpl implements GwtOperations {
 		}
 
 		for (final ClassOrInterfaceTypeDetails proxyOrRequest : typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(ROO_GWT_MIRRORED_FROM)) {
-			final ClassOrInterfaceTypeDetailsBuilder builder = new ClassOrInterfaceTypeDetailsBuilder(proxyOrRequest);
+			final ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(proxyOrRequest);
 			if (proxyOrRequest.extendsType(ENTITY_PROXY) || proxyOrRequest.extendsType(OLD_ENTITY_PROXY)) {
 				final AnnotationMetadata annotationMetadata = MemberFindingUtils.getAnnotationOfType(proxyOrRequest.getAnnotations(), ROO_GWT_MIRRORED_FROM);
 				if (annotationMetadata != null) {
 					final AnnotationMetadataBuilder annotationMetadataBuilder = new AnnotationMetadataBuilder(annotationMetadata);
 					annotationMetadataBuilder.setAnnotationType(ROO_GWT_PROXY);
-					builder.removeAnnotation(ROO_GWT_MIRRORED_FROM);
-					builder.addAnnotation(annotationMetadataBuilder);
-					typeManagementService.createOrUpdateTypeOnDisk(builder.build());
+					cidBuilder.removeAnnotation(ROO_GWT_MIRRORED_FROM);
+					cidBuilder.addAnnotation(annotationMetadataBuilder);
+					typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
 				}
 			} else if (proxyOrRequest.extendsType(REQUEST_CONTEXT) || proxyOrRequest.extendsType(OLD_REQUEST_CONTEXT)) {
 				final AnnotationMetadata annotationMetadata = MemberFindingUtils.getAnnotationOfType(proxyOrRequest.getAnnotations(), ROO_GWT_MIRRORED_FROM);
 				if (annotationMetadata != null) {
 					final AnnotationMetadataBuilder annotationMetadataBuilder = new AnnotationMetadataBuilder(annotationMetadata);
 					annotationMetadataBuilder.setAnnotationType(ROO_GWT_REQUEST);
-					builder.removeAnnotation(ROO_GWT_MIRRORED_FROM);
-					builder.addAnnotation(annotationMetadataBuilder);
-					typeManagementService.createOrUpdateTypeOnDisk(builder.build());
+					cidBuilder.removeAnnotation(ROO_GWT_MIRRORED_FROM);
+					cidBuilder.addAnnotation(annotationMetadataBuilder);
+					typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
 				}
 			}
 		}
@@ -313,18 +313,18 @@ public class GwtOperationsImpl implements GwtOperations {
 		final JavaType proxyType = new JavaType(destinationPackage.getFullyQualifiedPackageName() + "." + entity.getName().getSimpleTypeName() + "Proxy");
 		final String focusedModule = projectOperations.getFocusedModuleName();
 		final LogicalPath proxyLogicalPath = LogicalPath.getInstance(Path.SRC_MAIN_JAVA, focusedModule);
-		final ClassOrInterfaceTypeDetailsBuilder builder = new ClassOrInterfaceTypeDetailsBuilder(PhysicalTypeIdentifier.createIdentifier(proxyType, proxyLogicalPath));
-		builder.setName(proxyType);
-		builder.setExtendsTypes(Collections.singletonList(ENTITY_PROXY));
-		builder.setPhysicalTypeCategory(PhysicalTypeCategory.INTERFACE);
-		builder.setModifier(Modifier.PUBLIC);
+		final ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(PhysicalTypeIdentifier.createIdentifier(proxyType, proxyLogicalPath));
+		cidBuilder.setName(proxyType);
+		cidBuilder.setExtendsTypes(Collections.singletonList(ENTITY_PROXY));
+		cidBuilder.setPhysicalTypeCategory(PhysicalTypeCategory.INTERFACE);
+		cidBuilder.setModifier(Modifier.PUBLIC);
 		final List<AnnotationAttributeValue<?>> attributeValues = new ArrayList<AnnotationAttributeValue<?>>();
 		final StringAttributeValue stringAttributeValue = new StringAttributeValue(VALUE, entity.getName().getFullyQualifiedTypeName());
 		attributeValues.add(stringAttributeValue);
 		final String locator = projectOperations.getTopLevelPackage(focusedModule) + ".server.locator." + entity.getName().getSimpleTypeName() + "Locator";
 		final StringAttributeValue locatorAttributeValue = new StringAttributeValue(new JavaSymbolName("locator"), locator);
 		attributeValues.add(locatorAttributeValue);
-		builder.updateTypeAnnotation(new AnnotationMetadataBuilder(PROXY_FOR_NAME, attributeValues));
+		cidBuilder.updateTypeAnnotation(new AnnotationMetadataBuilder(PROXY_FOR_NAME, attributeValues));
 		attributeValues.remove(locatorAttributeValue);
 		final List<StringAttributeValue> readOnlyValues = new ArrayList<StringAttributeValue>();
 		final FieldMetadata versionField = persistenceMemberLocator.getVersionField(entity.getName());
@@ -337,8 +337,8 @@ public class GwtOperationsImpl implements GwtOperations {
 		}
 		final ArrayAttributeValue<StringAttributeValue> readOnlyAttribute = new ArrayAttributeValue<StringAttributeValue>(new JavaSymbolName("readOnly"), readOnlyValues);
 		attributeValues.add(readOnlyAttribute);
-		builder.updateTypeAnnotation(new AnnotationMetadataBuilder(ROO_GWT_PROXY, attributeValues));
-		typeManagementService.createOrUpdateTypeOnDisk(builder.build());
+		cidBuilder.updateTypeAnnotation(new AnnotationMetadataBuilder(ROO_GWT_PROXY, attributeValues));
+		typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
 		addPackageToGwtXml(destinationPackage.getFullyQualifiedPackageName());
 	}
 	
@@ -349,23 +349,23 @@ public class GwtOperationsImpl implements GwtOperations {
 		}
 		final JavaType requestType = new JavaType(destinationPackage.getFullyQualifiedPackageName() + "." + entity.getType().getSimpleTypeName() + "Request");
 		final LogicalPath focusedSrcMainJava = LogicalPath.getInstance(Path.SRC_MAIN_JAVA, projectOperations.getFocusedModuleName());
-		final ClassOrInterfaceTypeDetailsBuilder builder = new ClassOrInterfaceTypeDetailsBuilder(PhysicalTypeIdentifier.createIdentifier(requestType, focusedSrcMainJava));
-		builder.setName(requestType);
-		builder.setExtendsTypes(Collections.singletonList(REQUEST_CONTEXT));
-		builder.setPhysicalTypeCategory(PhysicalTypeCategory.INTERFACE);
-		builder.setModifier(Modifier.PUBLIC);
-		annotateRequestInterface(entity, builder);
-		typeManagementService.createOrUpdateTypeOnDisk(builder.build());
+		final ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(PhysicalTypeIdentifier.createIdentifier(requestType, focusedSrcMainJava));
+		cidBuilder.setName(requestType);
+		cidBuilder.setExtendsTypes(Collections.singletonList(REQUEST_CONTEXT));
+		cidBuilder.setPhysicalTypeCategory(PhysicalTypeCategory.INTERFACE);
+		cidBuilder.setModifier(Modifier.PUBLIC);
+		annotateRequestInterface(entity, cidBuilder);
+		typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
 		addPackageToGwtXml(destinationPackage.getFullyQualifiedPackageName());
 	}
 
-	private void annotateRequestInterface(final ClassOrInterfaceTypeDetails entity, final ClassOrInterfaceTypeDetailsBuilder builder) {
+	private void annotateRequestInterface(final ClassOrInterfaceTypeDetails entity, final ClassOrInterfaceTypeDetailsBuilder cidBuilder) {
 		final List<AnnotationAttributeValue<?>> attributeValues = new ArrayList<AnnotationAttributeValue<?>>();
 		
 		// @ServiceName annotation
 		final StringAttributeValue stringAttributeValue = new StringAttributeValue(VALUE, entity.getType().getFullyQualifiedTypeName());
 		attributeValues.add(stringAttributeValue);
-		builder.updateTypeAnnotation(new AnnotationMetadataBuilder(SERVICE_NAME, attributeValues));
+		cidBuilder.updateTypeAnnotation(new AnnotationMetadataBuilder(SERVICE_NAME, attributeValues));
 		
 		// @RooGwtRequest annotation
 		final List<StringAttributeValue> toExclude = new ArrayList<StringAttributeValue>();
@@ -374,7 +374,7 @@ public class GwtOperationsImpl implements GwtOperations {
 		}
 		final ArrayAttributeValue<StringAttributeValue> exclude = new ArrayAttributeValue<StringAttributeValue>(new JavaSymbolName("exclude"), toExclude);
 		attributeValues.add(exclude);
-		builder.updateTypeAnnotation(new AnnotationMetadataBuilder(ROO_GWT_REQUEST, attributeValues));
+		cidBuilder.updateTypeAnnotation(new AnnotationMetadataBuilder(ROO_GWT_REQUEST, attributeValues));
 	}
 
 	private void createScaffold(final ClassOrInterfaceTypeDetails proxy) {
@@ -382,17 +382,17 @@ public class GwtOperationsImpl implements GwtOperations {
 		if (annotationMetadata != null) {
 			final AnnotationAttributeValue<Boolean> booleanAttributeValue = annotationMetadata.getAttribute("scaffold");
 			if (booleanAttributeValue == null || !booleanAttributeValue.getValue()) {
-				final ClassOrInterfaceTypeDetailsBuilder proxyBuilder = new ClassOrInterfaceTypeDetailsBuilder(proxy);
+				final ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(proxy);
 				final AnnotationMetadataBuilder annotationMetadataBuilder = new AnnotationMetadataBuilder(annotationMetadata);
 				annotationMetadataBuilder.addBooleanAttribute("scaffold", true);
-				for (final AnnotationMetadataBuilder existingAnnotation : proxyBuilder.getAnnotations()) {
+				for (final AnnotationMetadataBuilder existingAnnotation : cidBuilder.getAnnotations()) {
 					if (existingAnnotation.getAnnotationType().equals(annotationMetadata.getAnnotationType())) {
-						proxyBuilder.getAnnotations().remove(existingAnnotation);
-						proxyBuilder.getAnnotations().add(annotationMetadataBuilder);
+						cidBuilder.getAnnotations().remove(existingAnnotation);
+						cidBuilder.getAnnotations().add(annotationMetadataBuilder);
 						break;
 					}
 				}
-				typeManagementService.createOrUpdateTypeOnDisk(proxyBuilder.build());
+				typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
 			}
 		}
 	}

@@ -18,10 +18,10 @@ public interface TypeManagementService {
 	 * <p>
 	 * An exception is thrown if the class already exists.
 	 *
-	 * @param classOrInterfaceTypeDetails the {@link ClassOrInterfaceTypeDetails} to create (required)
+	 * @param cid the {@link ClassOrInterfaceTypeDetails} to create (required)
 	 */
 	@Deprecated
-	void generateClassFile(ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails);
+	void generateClassFile(ClassOrInterfaceTypeDetails cid);
 
 	/**
 	 * Adds a new enum constant to an existing class.
@@ -45,7 +45,7 @@ public interface TypeManagementService {
 	 * Creates a physical type with the contents based on the {@link ClassOrInterfaceTypeDetails} passed in at the
 	 * location denoted by the passed in path.  This method expects the passed in file location to be correct.
 	 *
-	 * @param classOrInterfaceTypeDetails {@link ClassOrInterfaceTypeDetails} to base the file contents on (required)
+	 * @param cid {@link ClassOrInterfaceTypeDetails} to base the file contents on (required)
 	 */
-	void createOrUpdateTypeOnDisk(ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails);
+	void createOrUpdateTypeOnDisk(ClassOrInterfaceTypeDetails cid);
 }

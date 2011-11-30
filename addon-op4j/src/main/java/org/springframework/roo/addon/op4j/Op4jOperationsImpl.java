@@ -43,16 +43,16 @@ public class Op4jOperationsImpl implements Op4jOperations {
 	public void annotateType(final JavaType javaType) {
 		Assert.notNull(javaType, "Java type required");
 
-		ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = typeLocationService.getTypeDetails(javaType);
-		if (classOrInterfaceTypeDetails == null) {
+		ClassOrInterfaceTypeDetails cid = typeLocationService.getTypeDetails(javaType);
+		if (cid == null) {
 			throw new IllegalArgumentException("Cannot locate source for '" + javaType.getFullyQualifiedTypeName() + "'");
 		}
 
-		if (MemberFindingUtils.getAnnotationOfType(classOrInterfaceTypeDetails.getAnnotations(), ROO_OP4J) == null) {
+		if (MemberFindingUtils.getAnnotationOfType(cid.getAnnotations(), ROO_OP4J) == null) {
 			AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(ROO_OP4J);
-			ClassOrInterfaceTypeDetailsBuilder classOrInterfaceTypeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(classOrInterfaceTypeDetails);
-			classOrInterfaceTypeDetailsBuilder.addAnnotation(annotationBuilder);
-			typeManagementService.createOrUpdateTypeOnDisk(classOrInterfaceTypeDetails);
+			ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(cid);
+			cidBuilder.addAnnotation(annotationBuilder);
+			typeManagementService.createOrUpdateTypeOnDisk(cid);
 		}
 	}
 

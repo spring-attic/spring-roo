@@ -326,10 +326,10 @@ public class JspOperationsImpl extends AbstractOperations implements JspOperatio
 		final AnnotationMetadataBuilder controllerAnnotation = new AnnotationMetadataBuilder(CONTROLLER, controllerAttributes);
 		typeAnnotations.add(controllerAnnotation);
 
-		final ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC, controller, PhysicalTypeCategory.CLASS);
-		typeDetailsBuilder.setAnnotations(typeAnnotations);
-		typeDetailsBuilder.setDeclaredMethods(methods);
-		typeManagementService.createOrUpdateTypeOnDisk(typeDetailsBuilder.build());
+		final ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC, controller, PhysicalTypeCategory.CLASS);
+		cidBuilder.setAnnotations(typeAnnotations);
+		cidBuilder.setDeclaredMethods(methods);
+		typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
 
 		installView(folderName, "/index", new JavaSymbolName(controller.getSimpleTypeName()).getReadableSymbolName() + " View", "Controller", null, false, webappPath);
 	}

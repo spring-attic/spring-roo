@@ -77,9 +77,9 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
 		AnnotationMetadataBuilder interfaceAnnotationMetadata = new AnnotationMetadataBuilder(ROO_REPOSITORY_JPA);
 		interfaceAnnotationMetadata.addAttribute(new ClassAttributeValue(new JavaSymbolName("domainType"), domainType));
 		String interfaceMdId = PhysicalTypeIdentifier.createIdentifier(interfaceType, pathResolver.getPath(interfaceIdentifier));
-		ClassOrInterfaceTypeDetailsBuilder interfaceTypeBuilder = new ClassOrInterfaceTypeDetailsBuilder(interfaceMdId, Modifier.PUBLIC, interfaceType, PhysicalTypeCategory.INTERFACE);
-		interfaceTypeBuilder.addAnnotation(interfaceAnnotationMetadata.build());
-		typeManagementService.createOrUpdateTypeOnDisk(interfaceTypeBuilder.build());
+		ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(interfaceMdId, Modifier.PUBLIC, interfaceType, PhysicalTypeCategory.INTERFACE);
+		cidBuilder.addAnnotation(interfaceAnnotationMetadata.build());
+		typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
 
 		// Take care of project configuration
 		configureProject();

@@ -134,15 +134,15 @@ public class GwtProxyMetadataProviderImpl extends AbstractHashCodeTrackingMetada
 
 	private String updateProxy(final ClassOrInterfaceTypeDetails proxy, final List<MethodMetadata> proxyMethods, final List<String> exclusionList, final List<String> readOnlyList) {
 		// Create a new ClassOrInterfaceTypeDetailsBuilder for the Proxy, will be overridden if the Proxy has already been created
-		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(proxy);
+		ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(proxy);
 
 		// Only inherit from EntityProxy if extension is not already defined
-		if (!typeDetailsBuilder.getExtendsTypes().contains(OLD_ENTITY_PROXY) && !typeDetailsBuilder.getExtendsTypes().contains(ENTITY_PROXY)) {
-			typeDetailsBuilder.addExtendsTypes(ENTITY_PROXY);
+		if (!cidBuilder.getExtendsTypes().contains(OLD_ENTITY_PROXY) && !cidBuilder.getExtendsTypes().contains(ENTITY_PROXY)) {
+			cidBuilder.addExtendsTypes(ENTITY_PROXY);
 		}
 
-		if (!typeDetailsBuilder.getExtendsTypes().contains(ENTITY_PROXY)) {
-			typeDetailsBuilder.addExtendsTypes(ENTITY_PROXY);
+		if (!cidBuilder.getExtendsTypes().contains(ENTITY_PROXY)) {
+			cidBuilder.addExtendsTypes(ENTITY_PROXY);
 		}
 
 		String destinationMetadataId = proxy.getDeclaredByMetadataId();
@@ -174,8 +174,8 @@ public class GwtProxyMetadataProviderImpl extends AbstractHashCodeTrackingMetada
 			methods.add(abstractMutatorMethodBuilder);
 		}
 
-		typeDetailsBuilder.setDeclaredMethods(methods);
-		return gwtFileManager.write(typeDetailsBuilder.build(), GwtUtils.PROXY_REQUEST_WARNING);
+		cidBuilder.setDeclaredMethods(methods);
+		return gwtFileManager.write(cidBuilder.build(), GwtUtils.PROXY_REQUEST_WARNING);
 	}
 
 	public void notify(final String upstreamDependency, String downstreamDependency) {
@@ -188,16 +188,16 @@ public class GwtProxyMetadataProviderImpl extends AbstractHashCodeTrackingMetada
 			}
 			if (MemberFindingUtils.getAnnotationOfType(cid.getAnnotations(), RooJavaType.ROO_GWT_PROXY) == null) {
 				boolean found = false;
-				for (ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails : typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_GWT_PROXY)) {
-					AnnotationMetadata annotationMetadata = GwtUtils.getFirstAnnotation(classOrInterfaceTypeDetails, GwtUtils.ROO_PROXY_REQUEST_ANNOTATIONS);
+				for (ClassOrInterfaceTypeDetails proxyCid : typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_GWT_PROXY)) {
+					AnnotationMetadata annotationMetadata = GwtUtils.getFirstAnnotation(proxyCid, GwtUtils.ROO_PROXY_REQUEST_ANNOTATIONS);
 					if (annotationMetadata != null) {
 						AnnotationAttributeValue<?> attributeValue = annotationMetadata.getAttribute("value");
 						if (attributeValue != null) {
 							String mirrorName = GwtUtils.getStringValue(attributeValue);
 							if (mirrorName != null && cid.getName().getFullyQualifiedTypeName().equals(attributeValue.getValue())) {
 								found = true;
-								JavaType typeName = PhysicalTypeIdentifier.getJavaType(classOrInterfaceTypeDetails.getDeclaredByMetadataId());
-								LogicalPath typePath = PhysicalTypeIdentifier.getPath(classOrInterfaceTypeDetails.getDeclaredByMetadataId());
+								JavaType typeName = PhysicalTypeIdentifier.getJavaType(proxyCid.getDeclaredByMetadataId());
+								LogicalPath typePath = PhysicalTypeIdentifier.getPath(proxyCid.getDeclaredByMetadataId());
 								downstreamDependency = GwtProxyMetadata.createIdentifier(typeName, typePath);
 								break;
 							}

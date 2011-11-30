@@ -56,9 +56,9 @@ public abstract class AbstractMemberHoldingTypeDetails extends AbstractIdentifia
 
 	public ClassOrInterfaceTypeDetails getDeclaredInnerType(final JavaType typeName) {
 		Assert.notNull(typeName, "Name of inner type required");
-		for (final ClassOrInterfaceTypeDetails coitd : getDeclaredInnerTypes()) {
-			if (coitd.getName().getSimpleTypeName().equals(typeName.getSimpleTypeName())) {
-				return coitd;
+		for (final ClassOrInterfaceTypeDetails cid : getDeclaredInnerTypes()) {
+			if (cid.getName().getSimpleTypeName().equals(typeName.getSimpleTypeName())) {
+				return cid;
 			}
 		}
 		return null;

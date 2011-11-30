@@ -258,8 +258,8 @@ public class IntegrationTestMetadataProviderImpl extends AbstractItdMetadataProv
 		final PhysicalTypeDetails ptd = ptm.getMemberHoldingTypeDetails();
 		Assert.notNull(ptd, "Java source code details unavailable for type " + PhysicalTypeIdentifier.getFriendlyName(physicalTypeIdentifier));
 		Assert.isInstanceOf(ClassOrInterfaceTypeDetails.class, ptd, "Java source code is immutable for type " + PhysicalTypeIdentifier.getFriendlyName(physicalTypeIdentifier));
-		final ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = (ClassOrInterfaceTypeDetails) ptd;
-		return classOrInterfaceTypeDetails.getSuperclass();
+		final ClassOrInterfaceTypeDetails cid = (ClassOrInterfaceTypeDetails) ptd;
+		return cid.getSuperclass();
 	}
 
 	public String getItdUniquenessFilenameSuffix() {

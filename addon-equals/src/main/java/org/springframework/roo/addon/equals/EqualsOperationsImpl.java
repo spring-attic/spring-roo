@@ -53,8 +53,8 @@ public class EqualsOperationsImpl implements EqualsOperations {
 			annotationBuilder.addAttribute(new ArrayAttributeValue<StringAttributeValue>(new JavaSymbolName("excludeFields"), attributes));
 		}
 
-		final ClassOrInterfaceTypeDetailsBuilder classOrInterfaceTypeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(cid);
-		classOrInterfaceTypeDetailsBuilder.addAnnotation(annotationBuilder.build());
-		typeManagementService.createOrUpdateTypeOnDisk(classOrInterfaceTypeDetailsBuilder.build());
+		final ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(cid);
+		cidBuilder.addAnnotation(annotationBuilder.build());
+		typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
 	}
 }

@@ -77,14 +77,14 @@ public class RepositoryJpaLayerProvider extends CoreLayerProvider {
 	 */
 	private MemberTypeAdditions getMethodAdditions(final String callerMID, final RepositoryJpaLayerMethod method, final JavaType repositoryType, final List<JavaSymbolName> parameterNames) {
 		// Create a builder to hold the repository field to be copied into the caller
-		final ClassOrInterfaceTypeDetailsBuilder classBuilder = new ClassOrInterfaceTypeDetailsBuilder(callerMID);
+		final ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(callerMID);
 		final AnnotationMetadataBuilder autowiredAnnotation = new AnnotationMetadataBuilder(AUTOWIRED);
 		final String repositoryFieldName = StringUtils.uncapitalize(repositoryType.getSimpleTypeName());
-		classBuilder.addField(new FieldMetadataBuilder(callerMID, 0, Arrays.asList(autowiredAnnotation), new JavaSymbolName(repositoryFieldName), repositoryType));
+		cidBuilder.addField(new FieldMetadataBuilder(callerMID, 0, Arrays.asList(autowiredAnnotation), new JavaSymbolName(repositoryFieldName), repositoryType));
 
 		// Create the additions to invoke the given method on this field
 		final String methodCall = repositoryFieldName + "." + method.getCall(parameterNames);
-		return new MemberTypeAdditions(classBuilder, method.getName(), methodCall);
+		return new MemberTypeAdditions(cidBuilder, method.getName(), methodCall);
 	}
 
 	public int getLayerPosition() {

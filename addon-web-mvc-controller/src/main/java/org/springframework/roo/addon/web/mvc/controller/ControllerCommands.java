@@ -72,8 +72,8 @@ public class ControllerCommands implements CommandMarker {
 		@CliOption(key = "path", mandatory = false, help = "The base path under which the controller listens for RESTful requests (defaults to the simple name of the form backing object)") String path,
 		@CliOption(key = "disallowedOperations", mandatory = false, help = "A comma separated list of operations (only create, update, delete allowed) that should not be generated in the controller") final String disallowedOperations) {
 
-		ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = typeLocationService.getTypeDetails(backingType);
-		if (classOrInterfaceTypeDetails == null) {
+		ClassOrInterfaceTypeDetails cid = typeLocationService.getTypeDetails(backingType);
+		if (cid == null) {
 			logger.warning("The specified entity can not be resolved to a type in your project");
 			return;
 		}
@@ -95,7 +95,7 @@ public class ControllerCommands implements CommandMarker {
 		}
 
 		if (StringUtils.isBlank(path)) {
-			LogicalPath targetPath = PhysicalTypeIdentifier.getPath(classOrInterfaceTypeDetails.getDeclaredByMetadataId());
+			LogicalPath targetPath = PhysicalTypeIdentifier.getPath(cid.getDeclaredByMetadataId());
 			PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(backingType, targetPath));
 			Assert.notNull(pluralMetadata, "Could not determine plural for '" + backingType.getSimpleTypeName() + "'");
 			path = pluralMetadata.getPlural().toLowerCase();

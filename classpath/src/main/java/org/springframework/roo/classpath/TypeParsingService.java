@@ -39,8 +39,8 @@ public interface TypeParsingService {
 	 * time this is useful is when an add-on wishes to emulate an ITD-like model for an external system that
 	 * cannot support ITDs and may wish to insert a custom header etc before writing it to disk.
 	 *
-	 * @param classOrInterfaceTypeDetails a parsed representation of a class or interface (required)
+	 * @param cid a parsed representation of a class or interface (required)
 	 * @return a valid Java compilation unit for the passed object (never null or empty)
 	 */
-	String getCompilationUnitContents(ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails);
+	String getCompilationUnitContents(ClassOrInterfaceTypeDetails cid);
 }

@@ -82,18 +82,18 @@ public class ClasspathOperationsImpl implements ClasspathOperations {
 			modifier |= Modifier.ABSTRACT;
 		}
 
-		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, modifier, name, PhysicalTypeCategory.CLASS);
+		ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, modifier, name, PhysicalTypeCategory.CLASS);
 
 		if (!superclass.equals(OBJECT)) {
 			ClassOrInterfaceTypeDetails superclassClassOrInterfaceTypeDetails = typeLocationService.getTypeDetails(superclass);
 			if (superclassClassOrInterfaceTypeDetails != null) {
-				typeDetailsBuilder.setSuperclass(new ClassOrInterfaceTypeDetailsBuilder(superclassClassOrInterfaceTypeDetails));
+				cidBuilder.setSuperclass(new ClassOrInterfaceTypeDetailsBuilder(superclassClassOrInterfaceTypeDetails));
 			}
 		}
 
 		List<JavaType> extendsTypes = new ArrayList<JavaType>();
 		extendsTypes.add(superclass);
-		typeDetailsBuilder.setExtendsTypes(extendsTypes);
+		cidBuilder.setExtendsTypes(extendsTypes);
 
 		if (rooAnnotations) {
 			final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
@@ -101,9 +101,9 @@ public class ClasspathOperationsImpl implements ClasspathOperations {
 			annotations.add(new AnnotationMetadataBuilder(ROO_TO_STRING));
 			annotations.add(new AnnotationMetadataBuilder(ROO_EQUALS));
 			annotations.add(new AnnotationMetadataBuilder(ROO_SERIALIZABLE));
-			typeDetailsBuilder.setAnnotations(annotations);
+			cidBuilder.setAnnotations(annotations);
 		}
-		typeManagementService.createOrUpdateTypeOnDisk(typeDetailsBuilder.build());
+		typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
 	}
 
 	public void createInterface(final JavaType name, final LogicalPath path, final boolean permitReservedWords) {
@@ -112,8 +112,8 @@ public class ClasspathOperationsImpl implements ClasspathOperations {
 		}
 
 		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(name, path);
-		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC, name, PhysicalTypeCategory.INTERFACE);
-		typeManagementService.createOrUpdateTypeOnDisk(typeDetailsBuilder.build());
+		ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC, name, PhysicalTypeCategory.INTERFACE);
+		typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
 	}
 
 	public void createEnum(final JavaType name, final LogicalPath path, final boolean permitReservedWords) {
@@ -121,8 +121,8 @@ public class ClasspathOperationsImpl implements ClasspathOperations {
 			ReservedWords.verifyReservedWordsNotPresent(name);
 		}
 		final String physicalTypeId = PhysicalTypeIdentifier.createIdentifier(name, path);
-		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(physicalTypeId, Modifier.PUBLIC, name, PhysicalTypeCategory.ENUMERATION);
-		typeManagementService.createOrUpdateTypeOnDisk(typeDetailsBuilder.build());
+		ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(physicalTypeId, Modifier.PUBLIC, name, PhysicalTypeCategory.ENUMERATION);
+		typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
 	}
 
 	public void enumConstant(final JavaType name, final JavaSymbolName fieldName, final boolean permitReservedWords) {

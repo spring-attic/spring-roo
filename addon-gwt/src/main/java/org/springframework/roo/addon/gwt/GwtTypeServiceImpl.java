@@ -417,12 +417,12 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 		abstractName = concreteType.getPackage().getFullyQualifiedPackageName() + '.' + abstractName;
 		JavaType abstractType = new JavaType(abstractName);
 		String abstractId = PhysicalTypeIdentifier.createIdentifier(abstractType, LogicalPath.getInstance(Path.SRC_MAIN_JAVA, moduleName));
-		ClassOrInterfaceTypeDetailsBuilder builder = new ClassOrInterfaceTypeDetailsBuilder(abstractId);
-		builder.setPhysicalTypeCategory(PhysicalTypeCategory.CLASS);
-		builder.setName(abstractType);
-		builder.setModifier(Modifier.ABSTRACT | Modifier.PUBLIC);
-		builder.getExtendsTypes().addAll(concreteClass.getExtendsTypes());
-		builder.add(concreteClass.getRegisteredImports());
+		ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(abstractId);
+		cidBuilder.setPhysicalTypeCategory(PhysicalTypeCategory.CLASS);
+		cidBuilder.setName(abstractType);
+		cidBuilder.setModifier(Modifier.ABSTRACT | Modifier.PUBLIC);
+		cidBuilder.getExtendsTypes().addAll(concreteClass.getExtendsTypes());
+		cidBuilder.add(concreteClass.getRegisteredImports());
 
 		for (MemberHoldingTypeDetails extendsTypeDetails : extendsTypesDetails) {
 			for (ConstructorMetadata constructor : extendsTypeDetails.getDeclaredConstructors()) {
@@ -462,10 +462,10 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 
 				bodyBuilder.newLine().indentRemove();
 				abstractConstructor.setBodyBuilder(bodyBuilder);
-				builder.getDeclaredConstructors().add(abstractConstructor);
+				cidBuilder.getDeclaredConstructors().add(abstractConstructor);
 			}
 		}
-		return builder;
+		return cidBuilder;
 	}
 
 	public List<ClassOrInterfaceTypeDetails> buildType(final GwtType destType, final ClassOrInterfaceTypeDetails templateClass, final List<MemberHoldingTypeDetails> extendsTypes, final String moduleName) {
@@ -512,21 +512,21 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 				templateClassBuilder.removeAll(methodsToRemove);
 
 				for (JavaType innerTypeName : destType.getWatchedInnerTypes()) {
-					for (ClassOrInterfaceTypeDetailsBuilder innerType : templateClassBuilder.getDeclaredInnerTypes()) {
-						if (innerType.getName().getFullyQualifiedTypeName().equals(innerTypeName.getFullyQualifiedTypeName())) {
-							ClassOrInterfaceTypeDetailsBuilder builder = new ClassOrInterfaceTypeDetailsBuilder(abstractClassBuilder.getDeclaredByMetadataId(), innerType.build());
-							builder.setName(new JavaType(innerType.getName().getSimpleTypeName() + "_Roo_Gwt", 0, DataType.TYPE, null, innerType.getName().getParameters()));
+					for (ClassOrInterfaceTypeDetailsBuilder innerTypeBuilder : templateClassBuilder.getDeclaredInnerTypes()) {
+						if (innerTypeBuilder.getName().getFullyQualifiedTypeName().equals(innerTypeName.getFullyQualifiedTypeName())) {
+							ClassOrInterfaceTypeDetailsBuilder builder = new ClassOrInterfaceTypeDetailsBuilder(abstractClassBuilder.getDeclaredByMetadataId(), innerTypeBuilder.build());
+							builder.setName(new JavaType(innerTypeBuilder.getName().getSimpleTypeName() + "_Roo_Gwt", 0, DataType.TYPE, null, innerTypeBuilder.getName().getParameters()));
 
-							templateClassBuilder.getDeclaredInnerTypes().remove(innerType);
-							if (innerType.getPhysicalTypeCategory().equals(PhysicalTypeCategory.INTERFACE)) {
-								ClassOrInterfaceTypeDetailsBuilder innerTypeBuilder = new ClassOrInterfaceTypeDetailsBuilder(innerType.build());
+							templateClassBuilder.getDeclaredInnerTypes().remove(innerTypeBuilder);
+							if (innerTypeBuilder.getPhysicalTypeCategory().equals(PhysicalTypeCategory.INTERFACE)) {
+								ClassOrInterfaceTypeDetailsBuilder interfaceInnerTypeBuilder = new ClassOrInterfaceTypeDetailsBuilder(innerTypeBuilder.build());
 								abstractClassBuilder.addInnerType(builder);
-								templateClassBuilder.getDeclaredInnerTypes().remove(innerType);
-								innerTypeBuilder.clearDeclaredMethods();
-								innerTypeBuilder.getDeclaredInnerTypes().clear();
-								innerTypeBuilder.getExtendsTypes().clear();
-								innerTypeBuilder.getExtendsTypes().add(new JavaType(builder.getName().getSimpleTypeName(), 0, DataType.TYPE, null, Collections.singletonList(new JavaType("V", 0, DataType.VARIABLE, null, new ArrayList<JavaType>()))));
-								templateClassBuilder.getDeclaredInnerTypes().add(innerTypeBuilder);
+								templateClassBuilder.getDeclaredInnerTypes().remove(innerTypeBuilder);
+								interfaceInnerTypeBuilder.clearDeclaredMethods();
+								interfaceInnerTypeBuilder.getDeclaredInnerTypes().clear();
+								interfaceInnerTypeBuilder.getExtendsTypes().clear();
+								interfaceInnerTypeBuilder.getExtendsTypes().add(new JavaType(builder.getName().getSimpleTypeName(), 0, DataType.TYPE, null, Collections.singletonList(new JavaType("V", 0, DataType.VARIABLE, null, new ArrayList<JavaType>()))));
+								templateClassBuilder.getDeclaredInnerTypes().add(interfaceInnerTypeBuilder);
 							}
 							break;
 						}
@@ -535,10 +535,8 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 
 				abstractClassBuilder.setImplementsTypes(templateClass.getImplementsTypes());
 				templateClassBuilder.getImplementsTypes().clear();
-
 				templateClassBuilder.getExtendsTypes().clear();
 				templateClassBuilder.getExtendsTypes().add(abstractClassBuilder.getName());
-
 				types.add(abstractClassBuilder.build());
 			}
 

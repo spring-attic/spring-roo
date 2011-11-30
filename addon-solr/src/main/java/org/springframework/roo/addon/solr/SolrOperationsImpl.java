@@ -138,22 +138,22 @@ public class SolrOperationsImpl implements SolrOperations {
 	public void addSearch(final JavaType javaType) {
 		Assert.notNull(javaType, "Java type required");
 
-		ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = typeLocationService.getTypeDetails(javaType);
-		if (classOrInterfaceTypeDetails == null) {
+		ClassOrInterfaceTypeDetails cid = typeLocationService.getTypeDetails(javaType);
+		if (cid == null) {
 			throw new IllegalArgumentException("Cannot locate source for '" + javaType.getFullyQualifiedTypeName() + "'");
 		}
 
-		if (Modifier.isAbstract(classOrInterfaceTypeDetails.getModifier())) {
+		if (Modifier.isAbstract(cid.getModifier())) {
 			throw new IllegalStateException("The class specified is an abstract type. Can only add solr search for concrete types.");
 		}
-		addSolrSearchableAnnotation(classOrInterfaceTypeDetails);
+		addSolrSearchableAnnotation(cid);
 	}
 
-	private void addSolrSearchableAnnotation(final ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails) {
-		if (classOrInterfaceTypeDetails.getTypeAnnotation(ROO_SOLR_SEARCHABLE) == null) {
-			ClassOrInterfaceTypeDetailsBuilder classOrInterfaceTypeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(classOrInterfaceTypeDetails);
-			classOrInterfaceTypeDetailsBuilder.addAnnotation(new AnnotationMetadataBuilder(ROO_SOLR_SEARCHABLE));
-			typeManagementService.createOrUpdateTypeOnDisk(classOrInterfaceTypeDetailsBuilder.build());
+	private void addSolrSearchableAnnotation(final ClassOrInterfaceTypeDetails cid) {
+		if (cid.getTypeAnnotation(ROO_SOLR_SEARCHABLE) == null) {
+			ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(cid);
+			cidBuilder.addAnnotation(new AnnotationMetadataBuilder(ROO_SOLR_SEARCHABLE));
+			typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
 		}
 	}
 }

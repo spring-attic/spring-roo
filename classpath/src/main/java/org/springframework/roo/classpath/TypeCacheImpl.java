@@ -26,18 +26,18 @@ public class TypeCacheImpl implements TypeCache {
 	private final Map<String, Set<String>> moduleFilePathToTypeNamesMap = new HashMap<String, Set<String>>();
 	private final Map<String, Set<String>> simpleTypeNameTypesMap = new HashMap<String, Set<String>>();
 
-	public void cacheType(final String typeFilePath, final ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails) {
+	public void cacheType(final String typeFilePath, final ClassOrInterfaceTypeDetails cid) {
 		Assert.hasText(typeFilePath, "Module name required");
-		Assert.notNull(classOrInterfaceTypeDetails, "Type details required");
+		Assert.notNull(cid, "Type details required");
 
-		midToTypeDetailsMap.put(classOrInterfaceTypeDetails.getDeclaredByMetadataId(), classOrInterfaceTypeDetails);
-		typeFilePathToMidMap.put(typeFilePath, classOrInterfaceTypeDetails.getDeclaredByMetadataId());
-		typeIdentifierToFilePathMap.put(classOrInterfaceTypeDetails.getDeclaredByMetadataId(), typeFilePath);
-		types.add(classOrInterfaceTypeDetails.getName());
+		midToTypeDetailsMap.put(cid.getDeclaredByMetadataId(), cid);
+		typeFilePathToMidMap.put(typeFilePath, cid.getDeclaredByMetadataId());
+		typeIdentifierToFilePathMap.put(cid.getDeclaredByMetadataId(), typeFilePath);
+		types.add(cid.getName());
 
-		String fullyQualifiedTypeName = classOrInterfaceTypeDetails.getName().getFullyQualifiedTypeName();
-		String simpleTypeName = classOrInterfaceTypeDetails.getName().getSimpleTypeName();
-		typeNameToMidMap.put(fullyQualifiedTypeName, classOrInterfaceTypeDetails.getDeclaredByMetadataId());
+		String fullyQualifiedTypeName = cid.getName().getFullyQualifiedTypeName();
+		String simpleTypeName = cid.getName().getSimpleTypeName();
+		typeNameToMidMap.put(fullyQualifiedTypeName, cid.getDeclaredByMetadataId());
 		if (!simpleTypeNameTypesMap.containsKey(simpleTypeName)) {
 			simpleTypeNameTypesMap.put(simpleTypeName, new HashSet<String>());
 		}

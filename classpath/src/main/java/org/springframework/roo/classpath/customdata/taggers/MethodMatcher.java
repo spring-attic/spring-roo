@@ -146,8 +146,8 @@ public class MethodMatcher implements Matcher<MethodMetadata> {
 			return null;
 		}
 		String suffix = suffixPlural || suffixSingular ? getSuffix(memberHoldingTypeDetailsList, suffixSingular, pluralMap) : "";
-		ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = getMostConcreteClassOrInterfaceTypeDetails(memberHoldingTypeDetailsList);
-		for (AnnotationMetadata annotationMetadata : classOrInterfaceTypeDetails.getAnnotations()) {
+		ClassOrInterfaceTypeDetails cid = getMostConcreteClassOrInterfaceTypeDetails(memberHoldingTypeDetailsList);
+		for (AnnotationMetadata annotationMetadata : cid.getAnnotations()) {
 			if (annotationMetadata.getAnnotationType().getFullyQualifiedTypeName().equals(catalystAnnotationType.getFullyQualifiedTypeName())) {
 				AnnotationAttributeValue<?> annotationAttributeValue = annotationMetadata.getAttribute(userDefinedNameAttribute);
 				if (annotationAttributeValue != null && StringUtils.hasText(annotationAttributeValue.getValue().toString())) {
@@ -160,24 +160,24 @@ public class MethodMatcher implements Matcher<MethodMetadata> {
 	}
 
 	private ClassOrInterfaceTypeDetails getMostConcreteClassOrInterfaceTypeDetails(final List<MemberHoldingTypeDetails> memberHoldingTypeDetailsList) {
-		ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = null;
+		ClassOrInterfaceTypeDetails cid = null;
 		// The last ClassOrInterfaceTypeDetails is the most concrete as dictated by the logic in MemberDetailsScannerImpl
 		for (MemberHoldingTypeDetails memberHoldingTypeDetails : memberHoldingTypeDetailsList) {
 			if (memberHoldingTypeDetails instanceof ClassOrInterfaceTypeDetails) {
-				classOrInterfaceTypeDetails = (ClassOrInterfaceTypeDetails) memberHoldingTypeDetails;
+				cid = (ClassOrInterfaceTypeDetails) memberHoldingTypeDetails;
 			}
 		}
-		Assert.notNull(classOrInterfaceTypeDetails, "No concrete type found; cannot continue");
-		return classOrInterfaceTypeDetails;
+		Assert.notNull(cid, "No concrete type found; cannot continue");
+		return cid;
 	}
 
 	private String getSuffix(final List<MemberHoldingTypeDetails> memberHoldingTypeDetailsList, final boolean singular, final Map<String, String> pluralMap) {
-		ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = getMostConcreteClassOrInterfaceTypeDetails(memberHoldingTypeDetailsList);
+		ClassOrInterfaceTypeDetails cid = getMostConcreteClassOrInterfaceTypeDetails(memberHoldingTypeDetailsList);
 		if (singular) {
-			return classOrInterfaceTypeDetails.getName().getSimpleTypeName();
+			return cid.getName().getSimpleTypeName();
 		}
-		String plural = pluralMap.get(classOrInterfaceTypeDetails.getDeclaredByMetadataId());
-		for (AnnotationMetadata annotationMetadata : classOrInterfaceTypeDetails.getAnnotations()) {
+		String plural = pluralMap.get(cid.getDeclaredByMetadataId());
+		for (AnnotationMetadata annotationMetadata : cid.getAnnotations()) {
 			if (annotationMetadata.getAnnotationType().getFullyQualifiedTypeName().equals(ROO_PLURAL.getFullyQualifiedTypeName())) {
 				AnnotationAttributeValue<?> annotationAttributeValue = annotationMetadata.getAttribute(new JavaSymbolName("value"));
 				if (annotationAttributeValue != null) {

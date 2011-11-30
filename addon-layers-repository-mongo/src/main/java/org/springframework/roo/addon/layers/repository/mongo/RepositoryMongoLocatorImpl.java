@@ -39,10 +39,10 @@ public class RepositoryMongoLocatorImpl implements RepositoryMongoLocator {
 			return existing;
 		}
 		Map<String, ClassOrInterfaceTypeDetails> toReturn = new HashMap<String, ClassOrInterfaceTypeDetails>();
-		for (ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails : located) {
-			RepositoryMongoAnnotationValues annotationValues = new RepositoryMongoAnnotationValues(new DefaultPhysicalTypeMetadata(classOrInterfaceTypeDetails.getDeclaredByMetadataId(), typeLocationService.getPhysicalTypeCanonicalPath(classOrInterfaceTypeDetails.getDeclaredByMetadataId()), classOrInterfaceTypeDetails));
+		for (ClassOrInterfaceTypeDetails cid : located) {
+			RepositoryMongoAnnotationValues annotationValues = new RepositoryMongoAnnotationValues(new DefaultPhysicalTypeMetadata(cid.getDeclaredByMetadataId(), typeLocationService.getPhysicalTypeCanonicalPath(cid.getDeclaredByMetadataId()), cid));
 			if (annotationValues.getDomainType() != null && annotationValues.getDomainType().equals(domainType)) {
-				toReturn.put(classOrInterfaceTypeDetails.getDeclaredByMetadataId(), classOrInterfaceTypeDetails);
+				toReturn.put(cid.getDeclaredByMetadataId(), cid);
 			}
 		}
 		return toReturn.values();

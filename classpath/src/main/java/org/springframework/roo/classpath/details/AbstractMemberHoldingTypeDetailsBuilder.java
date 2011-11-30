@@ -351,8 +351,8 @@ public abstract class AbstractMemberHoldingTypeDetailsBuilder<T extends MemberHo
 
 	public final List<ClassOrInterfaceTypeDetails> buildInnerTypes() {
 		final List<ClassOrInterfaceTypeDetails> result = new ArrayList<ClassOrInterfaceTypeDetails>();
-		for (final ClassOrInterfaceTypeDetailsBuilder builder : declaredInnerTypes) {
-			result.add(builder.build());
+		for (final ClassOrInterfaceTypeDetailsBuilder cidBuilder : declaredInnerTypes) {
+			result.add(cidBuilder.build());
 		}
 		return result;
 	}

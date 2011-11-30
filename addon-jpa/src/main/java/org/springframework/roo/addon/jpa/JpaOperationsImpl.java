@@ -180,19 +180,19 @@ public class JpaOperationsImpl implements JpaOperations {
 		}
 
 		final String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(name, pathResolver.getFocusedPath(Path.SRC_MAIN_JAVA));
-		final ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, modifier, name, PhysicalTypeCategory.CLASS);
+		final ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, modifier, name, PhysicalTypeCategory.CLASS);
 
 		if (!superclass.equals(OBJECT)) {
 			final ClassOrInterfaceTypeDetails superclassClassOrInterfaceTypeDetails = typeLocationService.getTypeDetails(superclass);
 			if (superclassClassOrInterfaceTypeDetails != null) {
-				typeDetailsBuilder.setSuperclass(new ClassOrInterfaceTypeDetailsBuilder(superclassClassOrInterfaceTypeDetails));
+				cidBuilder.setSuperclass(new ClassOrInterfaceTypeDetailsBuilder(superclassClassOrInterfaceTypeDetails));
 			}
 		}
 
-		typeDetailsBuilder.setExtendsTypes(Arrays.asList(superclass));
-		typeDetailsBuilder.setAnnotations(annotations);
+		cidBuilder.setExtendsTypes(Arrays.asList(superclass));
+		cidBuilder.setAnnotations(annotations);
 
-		typeManagementService.createOrUpdateTypeOnDisk(typeDetailsBuilder.build());
+		typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
 	}
 
 	public void newEmbeddableClass(final JavaType name, final boolean serializable) {
@@ -210,10 +210,10 @@ public class JpaOperationsImpl implements JpaOperations {
 		}
 
 		int modifier = Modifier.PUBLIC;
-		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, modifier, name, PhysicalTypeCategory.CLASS);
-		typeDetailsBuilder.setAnnotations(annotations);
+		ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, modifier, name, PhysicalTypeCategory.CLASS);
+		cidBuilder.setAnnotations(annotations);
 
-		typeManagementService.createOrUpdateTypeOnDisk(typeDetailsBuilder.build());
+		typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
 	}
 
 	public void newIdentifier(final JavaType identifierType, final String identifierField, final String identifierColumn) {
@@ -221,10 +221,10 @@ public class JpaOperationsImpl implements JpaOperations {
 		
 		final String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(identifierType, pathResolver.getFocusedPath(Path.SRC_MAIN_JAVA));
 		final List<AnnotationMetadataBuilder> identifierAnnotations = Arrays.asList(new AnnotationMetadataBuilder(ROO_TO_STRING), new AnnotationMetadataBuilder(ROO_EQUALS), new AnnotationMetadataBuilder(ROO_IDENTIFIER));
-		final ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC | Modifier.FINAL, identifierType, PhysicalTypeCategory.CLASS);
-		typeDetailsBuilder.setAnnotations(identifierAnnotations);
+		final ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC | Modifier.FINAL, identifierType, PhysicalTypeCategory.CLASS);
+		cidBuilder.setAnnotations(identifierAnnotations);
 
-		typeManagementService.createOrUpdateTypeOnDisk(typeDetailsBuilder.build());
+		typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
 	}
 	
 	private String getPersistencePathOfFocussedModule() {

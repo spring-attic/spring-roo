@@ -122,19 +122,19 @@ public class JmsOperationsImpl implements JmsOperations {
 		Assert.isTrue(targetTypeDetails != null, "Cannot locate source for '" + targetType.getFullyQualifiedTypeName() + "'");
 
 		final String declaredByMetadataId = targetTypeDetails.getDeclaredByMetadataId();
-		final ClassOrInterfaceTypeDetailsBuilder targetTypeBuilder = new ClassOrInterfaceTypeDetailsBuilder(targetTypeDetails);
+		final ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(targetTypeDetails);
 		
 		// Create the field
-		addJmsOperationsField(fieldName, declaredByMetadataId, targetTypeBuilder);
+		cidBuilder.addField(new FieldMetadataBuilder(declaredByMetadataId, PRIVATE | TRANSIENT, Arrays.asList(new AnnotationMetadataBuilder(AUTOWIRED)), fieldName, JMS_OPERATIONS));
 
 		// Create the method
-		targetTypeBuilder.addMethod(createSendMessageMethod(fieldName, declaredByMetadataId, asynchronous));
+		cidBuilder.addMethod(createSendMessageMethod(fieldName, declaredByMetadataId, asynchronous));
 
 		if (asynchronous) {
 			ensureSpringAsynchronousSupportEnabled();
 		}
 
-		typeManagementService.createOrUpdateTypeOnDisk(targetTypeBuilder.build());
+		typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
 	}
 
 	/**
@@ -182,14 +182,6 @@ public class JmsOperationsImpl implements JmsOperations {
 		}
 	}
 
-	private void addJmsOperationsField(final JavaSymbolName fieldName,
-			final String declaredByMetadataId,
-			final ClassOrInterfaceTypeDetailsBuilder targetTypeBuilder) {
-		final List<AnnotationMetadataBuilder> annotations = Arrays.asList(new AnnotationMetadataBuilder(AUTOWIRED));
-		final FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(declaredByMetadataId, PRIVATE | TRANSIENT, annotations, fieldName, JMS_OPERATIONS);
-		targetTypeBuilder.addField(fieldBuilder);
-	}
-
 	public void addJmsListener(final JavaType targetType, final String name, final JmsDestinationType destinationType) {
 		Assert.notNull(targetType, "Java type required");
 
@@ -204,8 +196,8 @@ public class JmsOperationsImpl implements JmsOperations {
 		bodyBuilder.appendFormalLine("System.out.println(\"JMS message received: \" + message);");
 		methods.add(new MethodMetadataBuilder(declaredByMetadataId, PUBLIC, new JavaSymbolName("onMessage"), JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder));
 
-		final ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, PUBLIC, targetType, PhysicalTypeCategory.CLASS);
-		typeDetailsBuilder.setDeclaredMethods(methods);
+		final ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, PUBLIC, targetType, PhysicalTypeCategory.CLASS);
+		cidBuilder.setDeclaredMethods(methods);
 
 		// Determine the canonical filename
 		final String physicalLocationCanonicalPath = getPhysicalLocationCanonicalPath(declaredByMetadataId);
@@ -213,7 +205,7 @@ public class JmsOperationsImpl implements JmsOperations {
 		// Check the file doesn't already exist
 		Assert.isTrue(!fileManager.exists(physicalLocationCanonicalPath), projectOperations.getPathResolver().getFriendlyName(physicalLocationCanonicalPath) + " already exists");
 
-		typeManagementService.createOrUpdateTypeOnDisk(typeDetailsBuilder.build());
+		typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
 
 		String jmsContextPath = projectOperations.getPathResolver().getFocusedIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext-jms.xml");
 		Document document = XmlUtils.readXml(fileManager.getInputStream(jmsContextPath));

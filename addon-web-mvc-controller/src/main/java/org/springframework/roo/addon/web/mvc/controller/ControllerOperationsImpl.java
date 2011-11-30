@@ -117,7 +117,7 @@ public class ControllerOperationsImpl implements ControllerOperations {
 
 		List<AnnotationMetadataBuilder> annotations = null;
 
-		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = null;
+		ClassOrInterfaceTypeDetailsBuilder cidBuilder = null;
 		if (existingController == null) {
 			LogicalPath controllerPath = pathResolver.getFocusedPath(Path.SRC_MAIN_JAVA);
 			String resourceIdentifier = typeLocationService.getPhysicalTypeCanonicalPath(controller, controllerPath);
@@ -135,16 +135,16 @@ public class ControllerOperationsImpl implements ControllerOperations {
 
 			// Create annotation @RooWebScaffold(path = "/test", formBackingObject = MyObject.class)
 			annotations.add(getRooWebScaffoldAnnotation(entity, disallowedOperations, path, PATH));
-			typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC, controller, PhysicalTypeCategory.CLASS);
+			cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC, controller, PhysicalTypeCategory.CLASS);
 		} else {
-			typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(existingController);
-			annotations = typeDetailsBuilder.getAnnotations();
+			cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(existingController);
+			annotations = cidBuilder.getAnnotations();
 			if (MemberFindingUtils.getAnnotationOfType(existingController.getAnnotations(), ROO_WEB_SCAFFOLD) == null) {
 				annotations.add(getRooWebScaffoldAnnotation(entity, disallowedOperations, path, PATH));
 			}
 		}
-		typeDetailsBuilder.setAnnotations(annotations);
-		typeManagementService.createOrUpdateTypeOnDisk(typeDetailsBuilder.build());
+		cidBuilder.setAnnotations(annotations);
+		typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
 	}
 
 	/**
@@ -154,13 +154,13 @@ public class ControllerOperationsImpl implements ControllerOperations {
 	 * @return <code>null</code> if there is no such controller
 	 */
 	private ClassOrInterfaceTypeDetails getExistingController(final String path) {
-		for (final ClassOrInterfaceTypeDetails coitd : typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(REQUEST_MAPPING)) {
-			final StringAttributeValue mappingAttribute = (StringAttributeValue) MemberFindingUtils.getAnnotationOfType(coitd.getAnnotations(), REQUEST_MAPPING).getAttribute(VALUE);
+		for (final ClassOrInterfaceTypeDetails cid : typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(REQUEST_MAPPING)) {
+			final StringAttributeValue mappingAttribute = (StringAttributeValue) MemberFindingUtils.getAnnotationOfType(cid.getAnnotations(), REQUEST_MAPPING).getAttribute(VALUE);
 			if (mappingAttribute != null) {
 				final String mapping = mappingAttribute.getValue();
 				if (StringUtils.hasText(mapping) && mapping.equalsIgnoreCase("/" + path)) {
-					LOG.info("Introducing into existing controller '" + coitd.getName().getFullyQualifiedTypeName() + "' mapped to '/" + path);
-					return coitd;
+					LOG.info("Introducing into existing controller '" + cid.getName().getFullyQualifiedTypeName() + "' mapped to '/" + path);
+					return cid;
 				}
 			}
 		}

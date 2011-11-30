@@ -74,12 +74,12 @@ public class IntegrationTestOperationsImpl implements IntegrationTestOperations 
 		Assert.notNull(entity, "Entity to produce an integration test for is required");
 
 		// Verify the requested entity actually exists as a class and is not abstract
-		ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = getEntity(entity);
-		Assert.isTrue(!Modifier.isAbstract(classOrInterfaceTypeDetails.getModifier()), "Type " + entity.getFullyQualifiedTypeName() + " is abstract");
+		ClassOrInterfaceTypeDetails cid = getEntity(entity);
+		Assert.isTrue(!Modifier.isAbstract(cid.getModifier()), "Type " + entity.getFullyQualifiedTypeName() + " is abstract");
 
-		LogicalPath path = PhysicalTypeIdentifier.getPath(classOrInterfaceTypeDetails.getDeclaredByMetadataId());
+		LogicalPath path = PhysicalTypeIdentifier.getPath(cid.getDeclaredByMetadataId());
 		dataOnDemandOperations.newDod(entity, new JavaType(entity.getFullyQualifiedTypeName() + "DataOnDemand"));
-		
+
 		JavaType name = new JavaType(entity + "IntegrationTest");
 		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(name, Path.SRC_TEST_JAVA.getModulePathId(path.getModule()));
 
@@ -103,11 +103,11 @@ public class IntegrationTestOperationsImpl implements IntegrationTestOperations 
 		methodBuilder.setAnnotations(methodAnnotations);
 		methods.add(methodBuilder);
 
-		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC, name, PhysicalTypeCategory.CLASS);
-		typeDetailsBuilder.setAnnotations(annotations);
-		typeDetailsBuilder.setDeclaredMethods(methods);
+		ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC, name, PhysicalTypeCategory.CLASS);
+		cidBuilder.setAnnotations(annotations);
+		cidBuilder.setDeclaredMethods(methods);
 
-		typeManagementService.createOrUpdateTypeOnDisk(typeDetailsBuilder.build());
+		typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
 	}
 
 	/**
@@ -140,9 +140,9 @@ public class IntegrationTestOperationsImpl implements IntegrationTestOperations 
 		// Get the entity so we can hopefully make a demo method that will be usable
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
-		ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = typeLocationService.getTypeDetails(entity);
-		if (classOrInterfaceTypeDetails != null) {
-			MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(IntegrationTestOperationsImpl.class.getName(), classOrInterfaceTypeDetails);
+		ClassOrInterfaceTypeDetails cid = typeLocationService.getTypeDetails(entity);
+		if (cid != null) {
+			MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(IntegrationTestOperationsImpl.class.getName(), cid);
 			List<MethodMetadata> countMethods = memberDetails.getMethodsWithTag(CustomDataKeys.COUNT_ALL_METHOD);
 			if (countMethods.size() == 1) {
 				String countMethod = entity.getSimpleTypeName() + "." + countMethods.get(0).getMethodName().getSymbolName() + "()";
@@ -158,11 +158,11 @@ public class IntegrationTestOperationsImpl implements IntegrationTestOperations 
 		methodBuilder.setAnnotations(methodAnnotations);
 		methods.add(methodBuilder);
 
-		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC, name, PhysicalTypeCategory.CLASS);
-		typeDetailsBuilder.setAnnotations(annotations);
-		typeDetailsBuilder.setDeclaredMethods(methods);
+		ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC, name, PhysicalTypeCategory.CLASS);
+		cidBuilder.setAnnotations(annotations);
+		cidBuilder.setDeclaredMethods(methods);
 
-		typeManagementService.createOrUpdateTypeOnDisk(typeDetailsBuilder.build());
+		typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
 	}
 
 	public void newTestStub(final JavaType javaType) {
@@ -207,7 +207,7 @@ public class IntegrationTestOperationsImpl implements IntegrationTestOperations 
 
 		// Only create test class if there are test methods present
 		if (!methods.isEmpty()) {
-			ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC, name, PhysicalTypeCategory.CLASS);
+			ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC, name, PhysicalTypeCategory.CLASS);
 
 			// Create instance of entity to test
 			FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(declaredByMetadataId);
@@ -217,11 +217,11 @@ public class IntegrationTestOperationsImpl implements IntegrationTestOperations 
 			fieldBuilder.setFieldInitializer("new " + javaType.getFullyQualifiedTypeName() + "()");
 			List<FieldMetadataBuilder> fields = new ArrayList<FieldMetadataBuilder>();
 			fields.add(fieldBuilder);
-			typeDetailsBuilder.setDeclaredFields(fields);
+			cidBuilder.setDeclaredFields(fields);
 
-			typeDetailsBuilder.setDeclaredMethods(methods);
+			cidBuilder.setDeclaredMethods(methods);
 
-			typeManagementService.createOrUpdateTypeOnDisk(typeDetailsBuilder.build());
+			typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
 		}
 	}
 
@@ -230,8 +230,8 @@ public class IntegrationTestOperationsImpl implements IntegrationTestOperations 
 	 * @return the type details (never null; throws an exception if it cannot be obtained or parsed)
 	 */
 	private ClassOrInterfaceTypeDetails getEntity(final JavaType entity) {
-		ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = typeLocationService.getTypeDetails(entity);
-		Assert.notNull(classOrInterfaceTypeDetails, "Java source code details unavailable for type " + classOrInterfaceTypeDetails);
-		return classOrInterfaceTypeDetails;
+		ClassOrInterfaceTypeDetails cid = typeLocationService.getTypeDetails(entity);
+		Assert.notNull(cid, "Java source code details unavailable for type " + cid);
+		return cid;
 	}
 }

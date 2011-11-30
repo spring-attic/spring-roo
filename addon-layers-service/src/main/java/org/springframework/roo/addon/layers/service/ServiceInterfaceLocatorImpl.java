@@ -35,11 +35,11 @@ public class ServiceInterfaceLocatorImpl implements ServiceInterfaceLocator {
 	public Collection<ClassOrInterfaceTypeDetails> getServiceInterfaces(final JavaType domainType) {
 		Set<ClassOrInterfaceTypeDetails> located = typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_SERVICE);
 		Map<String, ClassOrInterfaceTypeDetails> toReturn = new HashMap<String, ClassOrInterfaceTypeDetails>();
-		for (ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails : located) {
-			ServiceAnnotationValues annotationValues = new ServiceAnnotationValues(new DefaultPhysicalTypeMetadata(classOrInterfaceTypeDetails.getDeclaredByMetadataId(), typeLocationService.getPhysicalTypeCanonicalPath(classOrInterfaceTypeDetails.getDeclaredByMetadataId()), classOrInterfaceTypeDetails));
+		for (ClassOrInterfaceTypeDetails cid : located) {
+			ServiceAnnotationValues annotationValues = new ServiceAnnotationValues(new DefaultPhysicalTypeMetadata(cid.getDeclaredByMetadataId(), typeLocationService.getPhysicalTypeCanonicalPath(cid.getDeclaredByMetadataId()), cid));
 			for (JavaType javaType : annotationValues.getDomainTypes()) {
 				if (javaType != null && javaType.equals(domainType)) {
-					toReturn.put(classOrInterfaceTypeDetails.getDeclaredByMetadataId(), classOrInterfaceTypeDetails);
+					toReturn.put(cid.getDeclaredByMetadataId(), cid);
 				}
 			}
 		}

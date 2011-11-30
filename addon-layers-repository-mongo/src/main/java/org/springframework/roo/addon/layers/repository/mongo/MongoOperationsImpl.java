@@ -99,11 +99,11 @@ public class MongoOperationsImpl implements MongoOperations {
 		AnnotationMetadataBuilder interfaceAnnotationMetadata = new AnnotationMetadataBuilder(ROO_REPOSITORY_MONGO);
 		interfaceAnnotationMetadata.addAttribute(new ClassAttributeValue(new JavaSymbolName("domainType"), domainType));
 		String interfaceMdId = PhysicalTypeIdentifier.createIdentifier(interfaceType, pathResolver.getPath(interfaceIdentifier));
-		ClassOrInterfaceTypeDetailsBuilder interfaceTypeBuilder = new ClassOrInterfaceTypeDetailsBuilder(interfaceMdId, Modifier.PUBLIC, interfaceType, PhysicalTypeCategory.INTERFACE);
-		interfaceTypeBuilder.addAnnotation(interfaceAnnotationMetadata.build());
+		ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(interfaceMdId, Modifier.PUBLIC, interfaceType, PhysicalTypeCategory.INTERFACE);
+		cidBuilder.addAnnotation(interfaceAnnotationMetadata.build());
 		JavaType listType = new JavaType(List.class.getName(), 0, DataType.TYPE, null, Arrays.asList(domainType));
-		interfaceTypeBuilder.addMethod(new MethodMetadataBuilder(interfaceMdId, 0, new JavaSymbolName("findAll"), listType, new InvocableMemberBodyBuilder()));
-		typeManagementService.createOrUpdateTypeOnDisk(interfaceTypeBuilder.build());
+		cidBuilder.addMethod(new MethodMetadataBuilder(interfaceMdId, 0, new JavaSymbolName("findAll"), listType, new InvocableMemberBodyBuilder()));
+		typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
 	}
 
 	public void createType(final JavaType classType, final JavaType idType, final boolean testAutomatically) {
@@ -116,16 +116,16 @@ public class MongoOperationsImpl implements MongoOperations {
 		}
 
 		String classMdId = PhysicalTypeIdentifier.createIdentifier(classType, pathResolver.getPath(classIdentifier));
-		ClassOrInterfaceTypeDetailsBuilder classTypeBuilder = new ClassOrInterfaceTypeDetailsBuilder(classMdId, Modifier.PUBLIC, classType, PhysicalTypeCategory.CLASS);
-		classTypeBuilder.addAnnotation(new AnnotationMetadataBuilder(RooJavaType.ROO_JAVA_BEAN));
-		classTypeBuilder.addAnnotation(new AnnotationMetadataBuilder(RooJavaType.ROO_TO_STRING));
+		ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(classMdId, Modifier.PUBLIC, classType, PhysicalTypeCategory.CLASS);
+		cidBuilder.addAnnotation(new AnnotationMetadataBuilder(RooJavaType.ROO_JAVA_BEAN));
+		cidBuilder.addAnnotation(new AnnotationMetadataBuilder(RooJavaType.ROO_TO_STRING));
 
 		List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
 		if (!idType.equals(JdkJavaType.BIG_INTEGER)) {
 			attributes.add(new ClassAttributeValue(new JavaSymbolName("identifierType"), idType));
 		}
-		classTypeBuilder.addAnnotation(new AnnotationMetadataBuilder(RooJavaType.ROO_MONGO_ENTITY, attributes));
-		typeManagementService.createOrUpdateTypeOnDisk(classTypeBuilder.build());
+		cidBuilder.addAnnotation(new AnnotationMetadataBuilder(RooJavaType.ROO_MONGO_ENTITY, attributes));
+		typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
 
 		if (testAutomatically) {
 			integrationTestOperations.newIntegrationTest(classType, false);

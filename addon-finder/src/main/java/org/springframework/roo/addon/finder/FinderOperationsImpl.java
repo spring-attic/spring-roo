@@ -157,13 +157,13 @@ public class FinderOperationsImpl implements FinderOperations {
 		}
 
 		// We know the file exists, as there's already entity metadata for it
-		ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = typeLocationService.getTypeDetails(id);
-		if (classOrInterfaceTypeDetails == null) {
+		ClassOrInterfaceTypeDetails cid = typeLocationService.getTypeDetails(id);
+		if (cid == null) {
 			throw new IllegalArgumentException("Cannot locate source for '" + javaType.getFullyQualifiedTypeName() + "'");
 		}
 
 		// We know there should be an existing RooEntity annotation
-		List<? extends AnnotationMetadata> annotations = classOrInterfaceTypeDetails.getAnnotations();
+		List<? extends AnnotationMetadata> annotations = cid.getAnnotations();
 		AnnotationMetadata jpaActiveRecordAnnotation = MemberFindingUtils.getAnnotationOfType(annotations, ROO_JPA_ACTIVE_RECORD);
 		if (jpaActiveRecordAnnotation == null) {
 			LOGGER.warning("Unable to find the entity annotation on '" + typeName.getFullyQualifiedTypeName() + "'");
@@ -171,7 +171,7 @@ public class FinderOperationsImpl implements FinderOperations {
 		}
 
 		// Confirm they typed a valid finder name
-		MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(getClass().getName(), classOrInterfaceTypeDetails);
+		MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(getClass().getName(), cid);
 		if (dynamicFinderServices.getQueryHolder(memberDetails, finderName, jpaActiveRecordMetadata.getPlural(), jpaActiveRecordMetadata.getEntityName()) == null) {
 			LOGGER.warning("Finder name '" + finderName.getSymbolName() + "' either does not exist or contains an error");
 			return;
@@ -212,10 +212,10 @@ public class FinderOperationsImpl implements FinderOperations {
 		// Now let's add the "finders" attribute
 		attributes.add(new ArrayAttributeValue<StringAttributeValue>(new JavaSymbolName("finders"), desiredFinders));
 
-		ClassOrInterfaceTypeDetailsBuilder classOrInterfaceTypeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(classOrInterfaceTypeDetails);
+		ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(cid);
 		AnnotationMetadataBuilder annotation = new AnnotationMetadataBuilder(ROO_JPA_ACTIVE_RECORD, attributes);
-		classOrInterfaceTypeDetailsBuilder.updateTypeAnnotation(annotation.build(), new HashSet<JavaSymbolName>());
-		typeManagementService.createOrUpdateTypeOnDisk(classOrInterfaceTypeDetailsBuilder.build());
+		cidBuilder.updateTypeAnnotation(annotation.build(), new HashSet<JavaSymbolName>());
+		typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
 	}
 
 	private String getErrorMsg() {

@@ -40,10 +40,10 @@ public class RepositoryJpaLocatorImpl implements RepositoryJpaLocator {
 			return existing;
 		}
 		Map<String, ClassOrInterfaceTypeDetails> toReturn = new HashMap<String, ClassOrInterfaceTypeDetails>();
-		for (ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails : located) {
-			RepositoryJpaAnnotationValues annotationValues = new RepositoryJpaAnnotationValues(new DefaultPhysicalTypeMetadata(classOrInterfaceTypeDetails.getDeclaredByMetadataId(), typeLocationService.getPhysicalTypeCanonicalPath(classOrInterfaceTypeDetails.getDeclaredByMetadataId()), classOrInterfaceTypeDetails));
+		for (ClassOrInterfaceTypeDetails cid : located) {
+			RepositoryJpaAnnotationValues annotationValues = new RepositoryJpaAnnotationValues(new DefaultPhysicalTypeMetadata(cid.getDeclaredByMetadataId(), typeLocationService.getPhysicalTypeCanonicalPath(cid.getDeclaredByMetadataId()), cid));
 			if (annotationValues.getDomainType() != null && annotationValues.getDomainType().equals(domainType)) {
-				toReturn.put(classOrInterfaceTypeDetails.getDeclaredByMetadataId(), classOrInterfaceTypeDetails);
+				toReturn.put(cid.getDeclaredByMetadataId(), cid);
 			}
 		}
 		return toReturn.values();

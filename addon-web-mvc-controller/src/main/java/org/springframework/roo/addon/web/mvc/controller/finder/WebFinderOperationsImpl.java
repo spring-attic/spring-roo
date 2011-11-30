@@ -83,11 +83,11 @@ public class WebFinderOperationsImpl implements WebFinderOperations {
 		
 		PhysicalTypeDetails ptd = ptm.getMemberHoldingTypeDetails();
 		Assert.notNull(ptd, "Java source code details unavailable for type " + PhysicalTypeIdentifier.getFriendlyName(id));
-		ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = (ClassOrInterfaceTypeDetails) ptd;
-		if (null == MemberFindingUtils.getAnnotationOfType(classOrInterfaceTypeDetails.getAnnotations(), RooJavaType.ROO_WEB_FINDER)) {
-			ClassOrInterfaceTypeDetailsBuilder classOrInterfaceTypeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(classOrInterfaceTypeDetails);
-			classOrInterfaceTypeDetailsBuilder.addAnnotation(new AnnotationMetadataBuilder(RooJavaType.ROO_WEB_FINDER));
-			typeManagementService.createOrUpdateTypeOnDisk(classOrInterfaceTypeDetailsBuilder.build());
+		ClassOrInterfaceTypeDetails cid = (ClassOrInterfaceTypeDetails) ptd;
+		if (null == MemberFindingUtils.getAnnotationOfType(cid.getAnnotations(), RooJavaType.ROO_WEB_FINDER)) {
+			ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(cid);
+			cidBuilder.addAnnotation(new AnnotationMetadataBuilder(RooJavaType.ROO_WEB_FINDER));
+			typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
 		}
 	}
 }

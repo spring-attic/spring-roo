@@ -148,33 +148,33 @@ public class MemberDetailsBuilder {
 
 		public MemberHoldingTypeDetails build() {
 			if (existing instanceof ItdTypeDetails) {
-				ItdTypeDetailsBuilder builder = new ItdTypeDetailsBuilder((ItdTypeDetails) existing);
+				ItdTypeDetailsBuilder itdBuilder = new ItdTypeDetailsBuilder((ItdTypeDetails) existing);
 				// Push in all members that may have been modified
-				builder.setDeclaredFields(this.getDeclaredFields());
-				builder.setDeclaredMethods(this.getDeclaredMethods());
-				builder.setAnnotations(this.getAnnotations());
-				builder.setCustomData(this.getCustomData());
-				builder.setDeclaredConstructors(this.getDeclaredConstructors());
-				builder.setDeclaredInitializers(this.getDeclaredInitializers());
-				builder.setDeclaredInnerTypes(this.getDeclaredInnerTypes());
-				builder.setExtendsTypes(this.getExtendsTypes());
-				builder.setImplementsTypes(this.getImplementsTypes());
-				builder.setModifier(this.getModifier());
-				return builder.build();
+				itdBuilder.setDeclaredFields(this.getDeclaredFields());
+				itdBuilder.setDeclaredMethods(this.getDeclaredMethods());
+				itdBuilder.setAnnotations(this.getAnnotations());
+				itdBuilder.setCustomData(this.getCustomData());
+				itdBuilder.setDeclaredConstructors(this.getDeclaredConstructors());
+				itdBuilder.setDeclaredInitializers(this.getDeclaredInitializers());
+				itdBuilder.setDeclaredInnerTypes(this.getDeclaredInnerTypes());
+				itdBuilder.setExtendsTypes(this.getExtendsTypes());
+				itdBuilder.setImplementsTypes(this.getImplementsTypes());
+				itdBuilder.setModifier(this.getModifier());
+				return itdBuilder.build();
 			} else if (existing instanceof ClassOrInterfaceTypeDetails) {
-				ClassOrInterfaceTypeDetailsBuilder builder = new ClassOrInterfaceTypeDetailsBuilder((ClassOrInterfaceTypeDetails) existing);
+				ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder((ClassOrInterfaceTypeDetails) existing);
 				// Push in all members that may
-				builder.setDeclaredFields(this.getDeclaredFields());
-				builder.setDeclaredMethods(this.getDeclaredMethods());
-				builder.setAnnotations(this.getAnnotations());
-				builder.setCustomData(this.getCustomData());
-				builder.setDeclaredConstructors(this.getDeclaredConstructors());
-				builder.setDeclaredInitializers(this.getDeclaredInitializers());
-				builder.setDeclaredInnerTypes(this.getDeclaredInnerTypes());
-				builder.setExtendsTypes(this.getExtendsTypes());
-				builder.setImplementsTypes(this.getImplementsTypes());
-				builder.setModifier(this.getModifier());
-				return builder.build();
+				cidBuilder.setDeclaredFields(this.getDeclaredFields());
+				cidBuilder.setDeclaredMethods(this.getDeclaredMethods());
+				cidBuilder.setAnnotations(this.getAnnotations());
+				cidBuilder.setCustomData(this.getCustomData());
+				cidBuilder.setDeclaredConstructors(this.getDeclaredConstructors());
+				cidBuilder.setDeclaredInitializers(this.getDeclaredInitializers());
+				cidBuilder.setDeclaredInnerTypes(this.getDeclaredInnerTypes());
+				cidBuilder.setExtendsTypes(this.getExtendsTypes());
+				cidBuilder.setImplementsTypes(this.getImplementsTypes());
+				cidBuilder.setModifier(this.getModifier());
+				return cidBuilder.build();
 			} else {
 				throw new IllegalStateException("Unknown instance of MemberHoldingTypeDetails");
 			}

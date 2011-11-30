@@ -132,18 +132,18 @@ public class WebJsonOperationsImpl implements WebJsonOperations {
 	}
 
 	private void appendToExistingType(final JavaType type, final JavaType jsonEntity) {
-		ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = typeLocationService.getTypeDetails(type);
-		if (classOrInterfaceTypeDetails == null) {
+		ClassOrInterfaceTypeDetails cid = typeLocationService.getTypeDetails(type);
+		if (cid == null) {
 			throw new IllegalArgumentException("Cannot locate source for '" + type.getFullyQualifiedTypeName() + "'");
 		}
 
-		if (MemberFindingUtils.getAnnotationOfType(classOrInterfaceTypeDetails.getAnnotations(), RooJavaType.ROO_WEB_JSON) != null) {
+		if (MemberFindingUtils.getAnnotationOfType(cid.getAnnotations(), RooJavaType.ROO_WEB_JSON) != null) {
 			return;
 		}
 
-		ClassOrInterfaceTypeDetailsBuilder classOrInterfaceTypeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(classOrInterfaceTypeDetails);
-		classOrInterfaceTypeDetailsBuilder.addAnnotation(getAnnotation(jsonEntity));
-		typeManagementService.createOrUpdateTypeOnDisk(classOrInterfaceTypeDetailsBuilder.build());
+		ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(cid);
+		cidBuilder.addAnnotation(getAnnotation(jsonEntity));
+		typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
 	}
 
 	private void createNewType(final JavaType type, final JavaType jsonEntity) {
@@ -153,13 +153,13 @@ public class WebJsonOperationsImpl implements WebJsonOperations {
 		}
 		
 		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(type, pathResolver.getFocusedPath(Path.SRC_MAIN_JAVA));
-		ClassOrInterfaceTypeDetailsBuilder classOrInterfaceTypeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC, type, PhysicalTypeCategory.CLASS);
-		classOrInterfaceTypeDetailsBuilder.addAnnotation(getAnnotation(jsonEntity));
-		classOrInterfaceTypeDetailsBuilder.addAnnotation(new AnnotationMetadataBuilder(SpringJavaType.CONTROLLER));
+		ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC, type, PhysicalTypeCategory.CLASS);
+		cidBuilder.addAnnotation(getAnnotation(jsonEntity));
+		cidBuilder.addAnnotation(new AnnotationMetadataBuilder(SpringJavaType.CONTROLLER));
 		AnnotationMetadataBuilder requestMapping = new AnnotationMetadataBuilder(SpringJavaType.REQUEST_MAPPING);
 		requestMapping.addAttribute(new StringAttributeValue(new JavaSymbolName("value"), "/" + pluralMetadata.getPlural().toLowerCase()));
-		classOrInterfaceTypeDetailsBuilder.addAnnotation(requestMapping);
-		typeManagementService.createOrUpdateTypeOnDisk(classOrInterfaceTypeDetailsBuilder.build());
+		cidBuilder.addAnnotation(requestMapping);
+		typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
 	}
 
 	private AnnotationMetadataBuilder getAnnotation(final JavaType type) {

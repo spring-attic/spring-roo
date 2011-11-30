@@ -487,25 +487,25 @@ public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTracki
 			return null;
 		}
 
-		final ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = physicalTypeMetadata.getMemberHoldingTypeDetails();
-		if (classOrInterfaceTypeDetails == null) {
+		final ClassOrInterfaceTypeDetails cid = physicalTypeMetadata.getMemberHoldingTypeDetails();
+		if (cid == null) {
 			// Abort if the type's class details aren't available (parse error etc)
 			return null;
 		}
-		return memberDetailsScanner.getMemberDetails(getClass().getName(), classOrInterfaceTypeDetails);
+		return memberDetailsScanner.getMemberDetails(getClass().getName(), cid);
 	}
 
 	/**
 	 * Returns details of the given class or interface type's members
 	 *
-	 * @param classOrInterfaceTypeDetails the physical type for which to get the
+	 * @param cid the physical type for which to get the
 	 * members (can be <code>null</code>)
 	 * @return <code>null</code> if the member details are unavailable
 	 */
-	protected MemberDetails getMemberDetails(final ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails) {
-		if (classOrInterfaceTypeDetails == null) {
+	protected MemberDetails getMemberDetails(final ClassOrInterfaceTypeDetails cid) {
+		if (cid == null) {
 			return null;
 		}
-		return memberDetailsScanner.getMemberDetails(getClass().getName(), classOrInterfaceTypeDetails);
+		return memberDetailsScanner.getMemberDetails(getClass().getName(), cid);
 	}
 }
