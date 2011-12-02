@@ -58,6 +58,7 @@ public class ItdSourceFileComposer {
 
 		// Create my own resolver, so we can add items to it as we process
 		resolver = new ImportRegistrationResolverImpl(itdTypeDetails.getAspect().getPackage());
+		resolver.addImport(introductionTo); // ROO-2932
 
 		for (final JavaType registeredImport : itdTypeDetails.getRegisteredImports()) {
 			// Do a sanity check in case the user misused it
