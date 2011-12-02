@@ -21,6 +21,7 @@ import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.metadata.AbstractMetadataItem;
+import org.springframework.roo.model.ImportRegistrationResolverImpl;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.support.style.ToStringCreator;
@@ -231,7 +232,7 @@ public abstract class AbstractItdTypeDetailsProvidingMetadataItem extends Abstra
 		if (parameterTypes != null) {
 			final List<JavaType> typesToImport = new ArrayList<JavaType>();
 			for (JavaType parameterType : parameterTypes) {
-				if (!parameterType.getFullyQualifiedTypeName().startsWith("java.lang")) {
+				if (!ImportRegistrationResolverImpl.isPartOfJavaLangPackage(parameterType)) {
 					typesToImport.add(parameterType);
 				}
 			}

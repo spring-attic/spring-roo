@@ -117,12 +117,9 @@ public abstract class ClassUtils {
 			primitiveTypeNameMap.put(primitiveType.getName(), primitiveType);
 		}
 
-		registerCommonClasses(Boolean[].class, Byte[].class, Character[].class, Double[].class,
-				Float[].class, Integer[].class, Long[].class, Short[].class);
-		registerCommonClasses(Number.class, Number[].class, String.class, String[].class,
-				Object.class, Object[].class, Class.class, Class[].class);
-		registerCommonClasses(Throwable.class, Exception.class, RuntimeException.class,
-				Error.class, StackTraceElement.class, StackTraceElement[].class);
+		registerCommonClasses(Boolean[].class, Byte[].class, Character[].class, Double[].class, Float[].class, Integer[].class, Long[].class, Short[].class);
+		registerCommonClasses(Number.class, Number[].class, String.class, String[].class, Object.class, Object[].class, Class.class, Class[].class);
+		registerCommonClasses(Throwable.class, Exception.class, RuntimeException.class, Error.class, StackTraceElement.class, StackTraceElement[].class);
 	}
 
 	/**
@@ -150,8 +147,7 @@ public abstract class ClassUtils {
 		ClassLoader cl = null;
 		try {
 			cl = Thread.currentThread().getContextClassLoader();
-		}
-		catch (Throwable ex) {
+		} catch (Throwable ex) {
 			// Cannot access thread context ClassLoader - falling back to system class loader...
 		}
 		if (cl == null) {
@@ -175,9 +171,7 @@ public abstract class ClassUtils {
 			currentThread.setContextClassLoader(classLoaderToUse);
 			return threadContextClassLoader;
 		}
-		else {
-			return null;
-		}
+		return null;
 	}
 
 	/**
@@ -250,15 +244,13 @@ public abstract class ClassUtils {
 		}
 		try {
 			return classLoaderToUse.loadClass(name);
-		}
-		catch (ClassNotFoundException ex) {
+		} catch (ClassNotFoundException ex) {
 			int lastDotIndex = name.lastIndexOf('.');
 			if (lastDotIndex != -1) {
 				String innerClassName = name.substring(0, lastDotIndex) + '$' + name.substring(lastDotIndex + 1);
 				try {
 					return classLoaderToUse.loadClass(innerClassName);
-				}
-				catch (ClassNotFoundException ex2) {
+				} catch (ClassNotFoundException ex2) {
 					// swallow - let original exception get through
 				}
 			}
@@ -283,13 +275,10 @@ public abstract class ClassUtils {
 	public static Class<?> resolveClassName(final String className, final ClassLoader classLoader) throws IllegalArgumentException {
 		try {
 			return forName(className, classLoader);
-		}
-		catch (ClassNotFoundException ex) {
+		} catch (ClassNotFoundException ex) {
 			throw new IllegalArgumentException("Cannot find class [" + className + "]", ex);
-		}
-		catch (LinkageError ex) {
-			throw new IllegalArgumentException(
-					"Error loading class [" + className + "]: problem with class file or dependent class.", ex);
+		} catch (LinkageError ex) {
+			throw new IllegalArgumentException("Error loading class [" + className + "]: problem with class file or dependent class.", ex);
 		}
 	}
 
@@ -340,8 +329,7 @@ public abstract class ClassUtils {
 		try {
 			forName(className, classLoader);
 			return true;
-		}
-		catch (Throwable ex) {
+		} catch (Throwable ex) {
 			// Class or one of its dependencies is not present...
 			return false;
 		}
@@ -478,8 +466,7 @@ public abstract class ClassUtils {
 		Assert.notNull(clazz, "Class must not be null");
 		if (clazz.isArray()) {
 			return getQualifiedNameForArray(clazz);
-		}
-		else {
+		} else {
 			return clazz.getName();
 		}
 	}
@@ -534,11 +521,9 @@ public abstract class ClassUtils {
 				}
 			}
 			return result.toString();
-		}
-		else if (clazz.isArray()) {
+		} else if (clazz.isArray()) {
 			return getQualifiedNameForArray(clazz);
-		}
-		else {
+		} else {
 			return clazz.getName();
 		}
 	}
@@ -579,8 +564,7 @@ public abstract class ClassUtils {
 		Assert.notNull(clazz, "Class must not be null");
 		try {
 			return clazz.getConstructor(parameterTypes);
-		}
-		catch (NoSuchMethodException ex) {
+		} catch (NoSuchMethodException ex) {
 			return null;
 		}
 	}
@@ -613,8 +597,7 @@ public abstract class ClassUtils {
 		Assert.notNull(methodName, "Method name must not be null");
 		try {
 			return clazz.getMethod(methodName, parameterTypes);
-		}
-		catch (NoSuchMethodException ex) {
+		} catch (NoSuchMethodException ex) {
 			return null;
 		}
 	}
@@ -691,8 +674,7 @@ public abstract class ClassUtils {
 	 */
 	public static Method getMostSpecificMethod(final Method method, final Class<?> targetClass) {
 		Method specificMethod = null;
-		if (method != null && isOverridable(method, targetClass) &&
-				targetClass != null && !targetClass.equals(method.getDeclaringClass())) {
+		if (method != null && isOverridable(method, targetClass) && targetClass != null && !targetClass.equals(method.getDeclaringClass())) {
 			specificMethod = ReflectionUtils.findMethod(targetClass, method.getName(), method.getParameterTypes());
 		}
 		return (specificMethod != null ? specificMethod : method);
@@ -727,8 +709,7 @@ public abstract class ClassUtils {
 		try {
 			Method method = clazz.getMethod(methodName, args);
 			return Modifier.isStatic(method.getModifiers()) ? method : null;
-		}
-		catch (NoSuchMethodException ex) {
+		} catch (NoSuchMethodException ex) {
 			return null;
 		}
 	}
@@ -801,8 +782,7 @@ public abstract class ClassUtils {
 	public static boolean isAssignable(final Class<?> lhsType, final Class<?> rhsType) {
 		Assert.notNull(lhsType, "Left-hand side type must not be null");
 		Assert.notNull(rhsType, "Right-hand side type must not be null");
-		return (lhsType.isAssignableFrom(rhsType) ||
-				lhsType.equals(primitiveWrapperTypeMap.get(rhsType)));
+		return (lhsType.isAssignableFrom(rhsType) || lhsType.equals(primitiveWrapperTypeMap.get(rhsType)));
 	}
 
 	/**
@@ -916,7 +896,7 @@ public abstract class ClassUtils {
 			return "[]";
 		}
 		StringBuilder sb = new StringBuilder("[");
-		for (Iterator<Class<?>> it = classes.iterator(); it.hasNext(); ) {
+		for (Iterator<Class<?>> it = classes.iterator(); it.hasNext();) {
 			Class<?> clazz = it.next();
 			sb.append(clazz.getName());
 			if (it.hasNext()) {

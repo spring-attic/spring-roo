@@ -234,4 +234,15 @@ public class ImportRegistrationResolverImpl implements ImportRegistrationResolve
 		}
 		return javaLangTypes.contains(javaType.getFullyQualifiedTypeName());
 	}
+	
+	/**
+	 * Determines whether the presented java type is in the java.lang package or not.
+	 *
+	 * @param javaType the Java type (required)
+	 * @return whether the type is declared as part of java.lang
+	 */
+	public static boolean isPartOfJavaLangPackage(final JavaType javaType) {
+		Assert.notNull(javaType, "Java type required");
+		return javaType.getPackage().getFullyQualifiedPackageName().startsWith("java.lang");
+	}
 }

@@ -805,11 +805,13 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			return;
 		}
 
+		builder.getImportRegistrationResolver().addImport(identifierType);
+
 		// Create method
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("init();");
 		bodyBuilder.appendFormalLine(entity.getSimpleTypeName() + " obj = " + getDataFieldName().getSymbolName() + ".get(" + getRndField().getFieldName().getSymbolName() + ".nextInt(" + getDataField().getFieldName().getSymbolName() + ".size()));");
-		bodyBuilder.appendFormalLine(identifierType.getFullyQualifiedTypeName() + " id = " + "obj." + identifierAccessor.getMethodName().getSymbolName() + "();");
+		bodyBuilder.appendFormalLine(identifierType.getSimpleTypeName() + " id = " + "obj." + identifierAccessor.getMethodName().getSymbolName() + "();");
 		bodyBuilder.appendFormalLine("return " + findMethod.getMethodCall() + ";");
 
 		findMethod.copyAdditionsTo(builder, governorTypeDetails);
@@ -840,13 +842,15 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			return;
 		}
 
+		builder.getImportRegistrationResolver().addImport(identifierType);
+
 		// Create method
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("init();");
 		bodyBuilder.appendFormalLine("if (index < 0) index = 0;");
 		bodyBuilder.appendFormalLine("if (index > (" + getDataField().getFieldName().getSymbolName() + ".size() - 1)) index = " + getDataField().getFieldName().getSymbolName() + ".size() - 1;");
 		bodyBuilder.appendFormalLine(entity.getSimpleTypeName() + " obj = " + getDataFieldName().getSymbolName() + ".get(index);");
-		bodyBuilder.appendFormalLine(identifierType.getFullyQualifiedTypeName() + " id = " + "obj." + identifierAccessor.getMethodName().getSymbolName() + "();");
+		bodyBuilder.appendFormalLine(identifierType.getSimpleTypeName() + " id = " + "obj." + identifierAccessor.getMethodName().getSymbolName() + "();");
 		bodyBuilder.appendFormalLine("return " + findMethod.getMethodCall() + ";");
 
 		findMethod.copyAdditionsTo(builder, governorTypeDetails);

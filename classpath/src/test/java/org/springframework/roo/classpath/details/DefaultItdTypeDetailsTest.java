@@ -25,6 +25,8 @@ public class DefaultItdTypeDetailsTest extends ItdTypeDetailsTestCase {
 		"\n" +
 		"package com.foo.bar;\n" +
 		"\n" +
+		"import null;\n" +
+		"\n" +
 		"aspect Person_Roo_Extra {\n" +
 		"    \n" +
 		"}\n";
@@ -47,6 +49,7 @@ public class DefaultItdTypeDetailsTest extends ItdTypeDetailsTestCase {
 		when(mockAspectType.isDefaultPackage()).thenReturn(false);
 		when(mockAspectType.getSimpleTypeName()).thenReturn("Person_Roo_Extra");
 		final String declaredByMetadataId = "MID:foo#bar";
+		
 
 		// Invoke
 		final DefaultItdTypeDetails itd = new DefaultItdTypeDetails(mockCustomData, declaredByMetadataId, modifier, mockGovernor, mockAspectType, privilegedAspect, null, null, null, null, null, null, null, null, null, null);

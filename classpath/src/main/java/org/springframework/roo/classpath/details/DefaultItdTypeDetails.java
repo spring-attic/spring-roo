@@ -200,7 +200,7 @@ public class DefaultItdTypeDetails extends AbstractMemberHoldingTypeDetails impl
 	private int includeCustomDataHash(final Collection<? extends CustomDataAccessor> coll) {
 		int result = 1;
 		for (final CustomDataAccessor accessor : coll) {
-			result = result * accessor.getCustomData().hashCode();
+			result *= accessor.getCustomData().hashCode();
 		}
 		return result;
 	}

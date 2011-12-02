@@ -45,6 +45,7 @@ import org.springframework.roo.file.monitor.event.FileEventListener;
 import org.springframework.roo.file.monitor.event.FileOperation;
 import org.springframework.roo.metadata.AbstractHashCodeTrackingMetadataNotifier;
 import org.springframework.roo.metadata.MetadataItem;
+import org.springframework.roo.model.ImportRegistrationResolverImpl;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
@@ -552,7 +553,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 				if (identifierTypeAttribute != null) {
 					// The identifierType attribute exists, so get its value
 					final JavaType identifierType = (JavaType) identifierTypeAttribute.getValue();
-					if (identifierType != null && !identifierType.getFullyQualifiedTypeName().startsWith("java.lang")) {
+					if (identifierType != null && !ImportRegistrationResolverImpl.isPartOfJavaLangPackage(identifierType)) {
 						return identifierType;
 					}
 				}
