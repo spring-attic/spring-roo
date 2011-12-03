@@ -172,18 +172,19 @@ public class JspMetadataListener implements MetadataProvider, MetadataNotificati
 		xmlRoundTripFileManager.writeToDiskIfNecessary(showPath, viewManager.getShowDocument());
 		tilesOperations.addViewDefinition(controllerPath, webappPath, controllerPath + "/" + "show", TilesOperations.DEFAULT_TEMPLATE, WEB_INF_VIEWS + controllerPath + "/show.jspx");
 
-		JavaSymbolName categoryName = new JavaSymbolName(formBackingType.getSimpleTypeName());
+		final Map<String, String> properties = new LinkedHashMap<String, String>();
 
-		Map<String, String> properties = new LinkedHashMap<String, String>();
+		final JavaSymbolName categoryName = new JavaSymbolName(formBackingType.getSimpleTypeName());
 		properties.put("menu_category_" + categoryName.getSymbolName().toLowerCase() + "_label", categoryName.getReadableSymbolName());
+
+		JavaSymbolName newMenuItemId = new JavaSymbolName("new");
+		properties.put("menu_item_" + categoryName.getSymbolName().toLowerCase() + "_" + newMenuItemId.getSymbolName().toLowerCase() + "_label", new JavaSymbolName(formBackingType.getSimpleTypeName()).getReadableSymbolName());
 
 		if (webScaffoldMetadata.getAnnotationValues().isCreate()) {
 			String listPath = destinationDirectory + "/create.jspx";
 			xmlRoundTripFileManager.writeToDiskIfNecessary(listPath, viewManager.getCreateDocument());
-			JavaSymbolName menuItemId = new JavaSymbolName("new");
 			// Add 'create new' menu item
-			menuOperations.addMenuItem(categoryName, menuItemId, "global_menu_new", "/" + controllerPath + "?form", MenuOperations.DEFAULT_MENU_ITEM_PREFIX, webappPath);
-			properties.put("menu_item_" + categoryName.getSymbolName().toLowerCase() + "_" + menuItemId.getSymbolName().toLowerCase() + "_label", new JavaSymbolName(formBackingType.getSimpleTypeName()).getReadableSymbolName());
+			menuOperations.addMenuItem(categoryName, newMenuItemId, "global_menu_new", "/" + controllerPath + "?form", MenuOperations.DEFAULT_MENU_ITEM_PREFIX, webappPath);
 			tilesOperations.addViewDefinition(controllerPath, webappPath, controllerPath + "/" + "create", TilesOperations.DEFAULT_TEMPLATE, WEB_INF_VIEWS + controllerPath + "/create.jspx");
 		} else {
 			menuOperations.cleanUpMenuItem(categoryName, new JavaSymbolName("new"), MenuOperations.DEFAULT_MENU_ITEM_PREFIX, webappPath);
@@ -241,9 +242,9 @@ public class JspMetadataListener implements MetadataProvider, MetadataNotificati
 
 		if (javaTypePersistenceMetadataDetails.getFindAllMethod() != null) {
 			// Add 'list all' menu item
-			JavaSymbolName menuItemId = new JavaSymbolName("list");
-			menuOperations.addMenuItem(categoryName, menuItemId, "global_menu_list", "/" + controllerPath + "?page=1&size=${empty param.size ? 10 : param.size}", MenuOperations.DEFAULT_MENU_ITEM_PREFIX, webappPath);
-			properties.put("menu_item_" + categoryName.getSymbolName().toLowerCase() + "_" + menuItemId.getSymbolName().toLowerCase() + "_label",  new JavaSymbolName(plural).getReadableSymbolName());
+			JavaSymbolName listMenuItemId = new JavaSymbolName("list");
+			menuOperations.addMenuItem(categoryName, listMenuItemId, "global_menu_list", "/" + controllerPath + "?page=1&size=${empty param.size ? 10 : param.size}", MenuOperations.DEFAULT_MENU_ITEM_PREFIX, webappPath);
+			properties.put("menu_item_" + categoryName.getSymbolName().toLowerCase() + "_" + listMenuItemId.getSymbolName().toLowerCase() + "_label",  new JavaSymbolName(plural).getReadableSymbolName());
 		} else {
 			menuOperations.cleanUpMenuItem(categoryName, new JavaSymbolName("list"), MenuOperations.DEFAULT_MENU_ITEM_PREFIX, webappPath);
 		}
