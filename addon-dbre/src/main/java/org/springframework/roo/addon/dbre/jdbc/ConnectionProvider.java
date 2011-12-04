@@ -41,7 +41,7 @@ public interface ConnectionProvider {
 	Connection getConnection(Map<String, String> map, boolean displayAddOns) throws RuntimeException;
 	
 	/**
-	 * Returns a JDBC {@link Connection} configured with the specified JNDI {@ link DataSource} name.
+	 * Returns a JDBC {@link Connection} configured with the specified JNDI {@link DataSource} name.
 	 *
 	 * @param jndiDataSource the data source name (required)
 	 * @param map the JNDI properties (required)

@@ -94,6 +94,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	private MethodMetadata specificPersistentEntityMethod;
 	private MethodMetadata randomPersistentEntityMethod;
 	private MethodMetadata modifyMethod;
+	private JavaSymbolName rndFieldName;
 	private JavaSymbolName dataFieldName;
 
 	/**
@@ -190,17 +191,22 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(COMPONENT);
 		return annotationBuilder.build();
 	}
-
+	
 	/**
 	 * @return the "rnd" field to use, which is either provided by the user or produced on demand (never returns null)
 	 */
+	private JavaSymbolName getRndFieldName() {
+		return rndFieldName;
+	}
+	
 	private FieldMetadataBuilder getRndField() {
 		int index = -1;
 		while (true) {
 			// Compute the required field name
 			index++;
-			JavaSymbolName fieldSymbolName = new JavaSymbolName(StringUtils.repeat("_", index) + "rnd");
-			FieldMetadata candidate = governorTypeDetails.getField(fieldSymbolName);
+			JavaSymbolName fieldName = new JavaSymbolName("rnd" + StringUtils.repeat("_", index));
+			rndFieldName = fieldName;
+			FieldMetadata candidate = governorTypeDetails.getField(fieldName);
 			if (candidate != null) {
 				// Verify if candidate is suitable
 				if (!Modifier.isPrivate(candidate.getModifier())) {
@@ -221,7 +227,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 
 			FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId());
 			fieldBuilder.setModifier(Modifier.PRIVATE);
-			fieldBuilder.setFieldName(fieldSymbolName);
+			fieldBuilder.setFieldName(fieldName);
 			fieldBuilder.setFieldType(RANDOM);
 			fieldBuilder.setFieldInitializer("new SecureRandom()");
 			return fieldBuilder;
@@ -439,7 +445,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 
 			JavaSymbolName embeddedClassMethodName = BeanInfoUtils.getMutatorMethodName(field.getFieldName());
 			MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, embeddedClassMethodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
-			if (getGovernorMethod(embeddedClassMethodName, parameterTypes) != null) {
+			if (governorHasMethod(embeddedClassMethodName, parameterTypes)) {
 				// Method found in governor so do not create method in ITD
 				continue;
 			}
@@ -458,7 +464,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			JavaSymbolName mutatorName = BeanInfoUtils.getMutatorMethodName(field);
 
 			// Locate user-defined method
-			if (getGovernorMethod(mutatorName, parameterTypes) != null) {
+			if (governorHasMethod(mutatorName, parameterTypes)) {
 				// Method found in governor so do not create method in ITD
 				continue;
 			}
@@ -810,7 +816,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		// Create method
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("init();");
-		bodyBuilder.appendFormalLine(entity.getSimpleTypeName() + " obj = " + getDataFieldName().getSymbolName() + ".get(" + getRndField().getFieldName().getSymbolName() + ".nextInt(" + getDataField().getFieldName().getSymbolName() + ".size()));");
+		bodyBuilder.appendFormalLine(entity.getSimpleTypeName() + " obj = " + getDataFieldName().getSymbolName() + ".get(" + getRndFieldName().getSymbolName() + ".nextInt(" + getDataField().getFieldName().getSymbolName() + ".size()));");
 		bodyBuilder.appendFormalLine(identifierType.getSimpleTypeName() + " id = " + "obj." + identifierAccessor.getMethodName().getSymbolName() + "();");
 		bodyBuilder.appendFormalLine("return " + findMethod.getMethodCall() + ";");
 
@@ -848,7 +854,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("init();");
 		bodyBuilder.appendFormalLine("if (index < 0) index = 0;");
-		bodyBuilder.appendFormalLine("if (index > (" + getDataField().getFieldName().getSymbolName() + ".size() - 1)) index = " + getDataField().getFieldName().getSymbolName() + ".size() - 1;");
+		bodyBuilder.appendFormalLine("if (index > (" + getDataFieldName().getSymbolName() + ".size() - 1)) index = " + getDataFieldName().getSymbolName() + ".size() - 1;");
 		bodyBuilder.appendFormalLine(entity.getSimpleTypeName() + " obj = " + getDataFieldName().getSymbolName() + ".get(index);");
 		bodyBuilder.appendFormalLine(identifierType.getSimpleTypeName() + " id = " + "obj." + identifierAccessor.getMethodName().getSymbolName() + "();");
 		bodyBuilder.appendFormalLine("return " + findMethod.getMethodCall() + ";");
@@ -901,7 +907,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		bodyBuilder.appendFormalLine(dataField + " = new ArrayList<" + entity.getSimpleTypeName() + ">();");
 		bodyBuilder.appendFormalLine("for (int i = 0; i < " + quantity + "; i++) {");
 		bodyBuilder.indent();
-		bodyBuilder.appendFormalLine(entity.getSimpleTypeName() + " obj = " + newTransientEntityMethod.getMethodName() + "(i);");
+		bodyBuilder.appendFormalLine(entity.getSimpleTypeName() + " obj = " + newTransientEntityMethod.getMethodName().getSymbolName() + "(i);");
 		bodyBuilder.appendFormalLine("try {");
 		bodyBuilder.indent();
 		bodyBuilder.appendFormalLine(persistMethodAdditions.getMethodCall() + ";");

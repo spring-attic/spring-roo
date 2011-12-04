@@ -306,32 +306,32 @@ public class Dependency implements Comparable<Dependency> {
 	 */
 	public Element getElement(final Document document) {
 		final Element dependencyElement = document.createElement("dependency");
-		dependencyElement.appendChild(XmlUtils.createTextElement(document, "groupId", this.groupId));
-		dependencyElement.appendChild(XmlUtils.createTextElement(document, "artifactId", this.artifactId));
-		dependencyElement.appendChild(XmlUtils.createTextElement(document, "version", this.version));
+		dependencyElement.appendChild(XmlUtils.createTextElement(document, "groupId", groupId));
+		dependencyElement.appendChild(XmlUtils.createTextElement(document, "artifactId", artifactId));
+		dependencyElement.appendChild(XmlUtils.createTextElement(document, "version", version));
 
-		if (this.type != null && this.type != DependencyType.JAR) {
+		if (type != null && type != DependencyType.JAR) {
 			// Keep the XML short, we don't need "JAR" given it's the default
-			final Element typeElement = XmlUtils.createTextElement(document, "type", this.type.toString().toLowerCase());
+			final Element typeElement = XmlUtils.createTextElement(document, "type", type.toString().toLowerCase());
 			dependencyElement.appendChild(typeElement);
 		}
 
 		// Keep the XML short, we don't need "compile" given it's the default
-		if (this.scope != null && this.scope != DependencyScope.COMPILE) {
-			dependencyElement.appendChild(XmlUtils.createTextElement(document, "scope", this.scope.toString().toLowerCase()));
-			if (this.scope == DependencyScope.SYSTEM && StringUtils.hasText(this.systemPath)) {
-				dependencyElement.appendChild(XmlUtils.createTextElement(document, "systemPath", this.systemPath));
+		if (scope != null && scope != DependencyScope.COMPILE) {
+			dependencyElement.appendChild(XmlUtils.createTextElement(document, "scope", scope.toString().toLowerCase()));
+			if (scope == DependencyScope.SYSTEM && StringUtils.hasText(systemPath)) {
+				dependencyElement.appendChild(XmlUtils.createTextElement(document, "systemPath",systemPath));
 			}
 		}
 
-		if (StringUtils.hasText(this.classifier)) {
-			dependencyElement.appendChild(XmlUtils.createTextElement(document, "classifier", this.classifier));
+		if (StringUtils.hasText(classifier)) {
+			dependencyElement.appendChild(XmlUtils.createTextElement(document, "classifier", classifier));
 		}
 
 		// Add exclusions if any
-		if (!this.exclusions.isEmpty()) {
+		if (!exclusions.isEmpty()) {
 			final Element exclusionsElement = DomUtils.createChildElement("exclusions", dependencyElement, document);
-			for (final Dependency exclusion : this.exclusions) {
+			for (final Dependency exclusion : exclusions) {
 				final Element exclusionElement = DomUtils.createChildElement("exclusion", exclusionsElement, document);
 				exclusionElement.appendChild(XmlUtils.createTextElement(document, "groupId", exclusion.getGroupId()));
 				exclusionElement.appendChild(XmlUtils.createTextElement(document, "artifactId", exclusion.getArtifactId()));
