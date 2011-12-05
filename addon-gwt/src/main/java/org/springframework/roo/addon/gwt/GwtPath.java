@@ -3,8 +3,10 @@ package org.springframework.roo.addon.gwt;
 import java.io.File;
 
 import org.springframework.roo.model.JavaPackage;
+import org.springframework.roo.support.util.Assert;
 
 public enum GwtPath {
+	
 	CLIENT("/client", "module/client/" + GwtPath.templateSelector),
 	GWT_ROOT("/", "module/" + GwtPath.templateSelector),
 	LOCATOR("/server/locator", "module/server/locator/" + GwtPath.templateSelector),
@@ -28,17 +30,33 @@ public enum GwtPath {
 	MANAGED_ACTIVITY("/client/managed/activity", "module/client/managed/activity/" + GwtPath.templateSelector),
 	SCAFFOLD_ACTIVITY("/client/scaffold/activity", "module/client/scaffold/activity/" + GwtPath.templateSelector);
 
+	// Constants
 	private static final String wildCardSelector = "*";
 	private static final String templateSelector = "*-template.*";
+	
+	// Fields
 	private final String segmentName;
 	private final String sourceAntPath;
 
+	/**
+	 * Constructor
+	 *
+	 * @param segmentName
+	 * @param sourceAntPath the Ant-style path to the source files for this
+	 * {@link GwtPath}, relative to the package in which this enum is located (required)
+	 */
 	GwtPath(final String segmentName, final String sourceAntPath) {
+		Assert.hasText(sourceAntPath, "Source Ant path is required");
 		this.segmentName = segmentName;
 		this.sourceAntPath = sourceAntPath;
 	}
 
-	private String getSegmentName() {
+	/**
+	 * Package access for benefit of unit test
+	 * 
+	 * @return
+	 */
+	String getSegmentName() {
 		return segmentName;
 	}
 
@@ -47,20 +65,20 @@ public enum GwtPath {
 	}
 
 	public String getPackagePath(final JavaPackage topLevelPackage) {
-		return topLevelPackage.getFullyQualifiedPackageName().replace('.', File.separatorChar) + getSegmentName().replace('/', File.separatorChar);
+		return topLevelPackage.getFullyQualifiedPackageName().replace('.', File.separatorChar) + segmentName.replace('/', File.separatorChar);
 	}
 	
 	public String segmentPackage() {
 		if (WEB.equals(this)) {
 			return "";
 		}
-		return getSegmentName().substring(1).replace('/', '.');
+		return segmentName.substring(1).replace('/', '.');
 	}
 
 	public String packageName(final JavaPackage topLevelPackage) {
 		if (WEB.equals(this)) {
 			return "";
 		}
-		return topLevelPackage.getFullyQualifiedPackageName() + getSegmentName().replace('/', '.');
+		return topLevelPackage.getFullyQualifiedPackageName() + segmentName.replace('/', '.');
 	}
 }
