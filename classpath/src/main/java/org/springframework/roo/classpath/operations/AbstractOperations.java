@@ -29,7 +29,7 @@ import org.w3c.dom.Document;
 public abstract class AbstractOperations {
 
 	// Constants
-	protected static Logger logger = HandlerUtils.getLogger(AbstractOperations.class);
+	protected static Logger LOGGER = HandlerUtils.getLogger(AbstractOperations.class);
 
 	// Fields
 	@Reference protected FileManager fileManager;

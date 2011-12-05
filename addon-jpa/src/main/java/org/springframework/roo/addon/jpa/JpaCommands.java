@@ -49,7 +49,7 @@ import org.springframework.roo.support.util.Assert;
 public class JpaCommands implements CommandMarker {
 
 	// Constants
-	private static Logger logger = HandlerUtils.getLogger(JpaCommands.class);
+	private static Logger LOGGER = HandlerUtils.getLogger(JpaCommands.class);
 	private static final AnnotationMetadataBuilder ROO_EQUALS_BUILDER = new AnnotationMetadataBuilder(ROO_EQUALS);
 	private static final AnnotationMetadataBuilder ROO_SERIALIZABLE_BUILDER = new AnnotationMetadataBuilder(ROO_SERIALIZABLE);
 	private static final AnnotationMetadataBuilder ROO_TO_STRING_BUILDER = new AnnotationMetadataBuilder(ROO_TO_STRING);
@@ -101,17 +101,17 @@ public class JpaCommands implements CommandMarker {
 		@CliOption(key = "persistenceUnit", mandatory = false, help = "The persistence unit name to be used in the persistence.xml file") final String persistenceUnit) {
 
 		if (jdbcDatabase == JdbcDatabase.GOOGLE_APP_ENGINE && ormProvider != OrmProvider.DATANUCLEUS) {
-			logger.warning("Provider must be " + OrmProvider.DATANUCLEUS.name() + " for the Google App Engine");
+			LOGGER.warning("Provider must be " + OrmProvider.DATANUCLEUS.name() + " for the Google App Engine");
 			return;
 		}
 
 		if (jdbcDatabase == JdbcDatabase.DATABASE_DOT_COM && ormProvider != OrmProvider.DATANUCLEUS) {
-			logger.warning("Provider must be " + OrmProvider.DATANUCLEUS.name() + " for Database.com");
+			LOGGER.warning("Provider must be " + OrmProvider.DATANUCLEUS.name() + " for Database.com");
 			return;
 		}
 
 		if (jdbcDatabase == JdbcDatabase.FIREBIRD && !isJdk6OrHigher()) {
-			logger.warning("JDK must be 1.6 or higher to use Firebird");
+			LOGGER.warning("JDK must be 1.6 or higher to use Firebird");
 			return;
 		}
 

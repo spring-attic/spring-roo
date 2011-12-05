@@ -26,7 +26,7 @@ import org.springframework.roo.support.logging.HandlerUtils;
 public class JspCommands implements CommandMarker {
 	
 	// Constants
-	private static Logger logger = HandlerUtils.getLogger(JspCommands.class);
+	private static Logger LOGGER = HandlerUtils.getLogger(JspCommands.class);
 	
 	// Fields
 	@Reference private JspOperations jspOperations;
@@ -74,7 +74,7 @@ public class JspCommands implements CommandMarker {
 		@CliOption(key = { "", "code" }, mandatory = true, help = "The language code for the desired bundle") final I18n i18n) {
 		
 		if (i18n == null) {
-			logger.warning("Could not parse language code");
+			LOGGER.warning("Could not parse language code");
 			return;
 		}
 		jspOperations.installI18n(i18n, pathResolver.getFocusedPath(Path.SRC_MAIN_WEBAPP));
@@ -86,7 +86,7 @@ public class JspCommands implements CommandMarker {
 		@CliOption(key = { "", "code" }, mandatory = true, help = "The language code for the desired bundle") final I18n i18n) {
 
 		if (i18n == null) {
-			logger.warning("Could not parse language code");
+			LOGGER.warning("Could not parse language code");
 			return;
 		}
 		jspOperations.installI18n(i18n, pathResolver.getFocusedPath(Path.SRC_MAIN_WEBAPP));
@@ -107,7 +107,7 @@ public class JspCommands implements CommandMarker {
 		@CliOption(key = "viewName", mandatory = true, help = "The view name the mapping this view should adopt (required, ie 'index')") final String viewName,
 		@CliOption(key = "title", mandatory = true, help = "The title of the view") final String title) {
 		
-		logger.warning("This command has been deprecated and will be disabled soon! Please use 'web mvc setup' followed by 'web mvc install view' instead.");
+		LOGGER.warning("This command has been deprecated and will be disabled soon! Please use 'web mvc setup' followed by 'web mvc install view' instead.");
 		view(path, viewName, title);
 	}
 

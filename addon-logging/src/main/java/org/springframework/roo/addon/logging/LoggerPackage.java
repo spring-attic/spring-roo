@@ -5,7 +5,7 @@ import java.util.Arrays;
 import org.springframework.roo.support.style.ToStringCreator;
 
 /**
- * Provides information related to the configuration of the logger.
+ * Provides information related to the configuration of the LOGGER.
  *
  * @author Stefan Schmidt
  * @since 1.0

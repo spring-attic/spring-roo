@@ -1,7 +1,7 @@
 package org.springframework.roo.addon.logging;
 
 /**
- * Provides information related to the log level configuration of the logger.
+ * Provides information related to the log level configuration of the LOGGER.
  *
  * @author Stefan Schmidt
  * @since 1.0

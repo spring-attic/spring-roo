@@ -52,13 +52,9 @@ public class BackupOperationsImpl implements BackupOperations {
 	public String backup() {
 		Assert.isTrue(isBackupPossible(), "Project metadata unavailable");
 
-		DateFormat df = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss");
-
-		if (File.separatorChar == '\\') {
-			// Windows, so make a date format that can legally form part of a filename (ROO-277)
-			df = new SimpleDateFormat("yyyy-MM-dd_HH.mm.ss");
-		}
-
+		// For Windows, make a date format that can legally form part of a filename (ROO-277)
+		final String pattern = File.separatorChar == '\\' ? "yyyy-MM-dd_HH.mm.ss" : "yyyy-MM-dd_HH:mm:ss";
+		final DateFormat df = new SimpleDateFormat(pattern);
 		long start = System.nanoTime();
 
 		ZipOutputStream zos = null;
@@ -80,7 +76,7 @@ public class BackupOperationsImpl implements BackupOperations {
 	}
 
 	private void zip(final File directory, final File base, final ZipOutputStream zos) throws IOException {
-		File[] files = directory.listFiles(new FilenameFilter() {
+		final File[] files = directory.listFiles(new FilenameFilter() {
 			public boolean accept(final File dir, final String name) {
 				// Don't use this directory if it's "target" under base
 				if (dir.equals(base) && name.equals("target")) {
@@ -102,21 +98,21 @@ public class BackupOperationsImpl implements BackupOperations {
 		for (int i = 0, n = files.length; i < n; i++) {
 			if (files[i].isDirectory()) {
 				if (files[i].listFiles().length == 0) {
-					ZipEntry dirEntry = new ZipEntry(files[i].getPath().substring(base.getPath().length() + 1) + System.getProperty("file.separator"));
+					ZipEntry dirEntry = new ZipEntry(files[i].getPath().substring(base.getPath().length() + 1) + File.separatorChar);
 					zos.putNextEntry(dirEntry);
 				}
 				zip(files[i], base, zos);
 			} else {
-				InputStream in = null;
+				InputStream inputStream = null;
 				try {
-					in = new BufferedInputStream(new FileInputStream(files[i]));
+					inputStream = new BufferedInputStream(new FileInputStream(files[i]));
 					ZipEntry entry = new ZipEntry(files[i].getPath().substring(base.getPath().length() + 1));
 					zos.putNextEntry(entry);
-					while (-1 != (read = in.read(buffer))) {
+					while ((read = inputStream.read(buffer)) != -1) {
 						zos.write(buffer, 0, read);
 					}
 				} finally {
-					IOUtils.closeQuietly(in);
+					IOUtils.closeQuietly(inputStream);
 				}
 			}
 		}

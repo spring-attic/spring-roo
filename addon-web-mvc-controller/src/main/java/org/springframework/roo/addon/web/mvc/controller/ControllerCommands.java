@@ -36,7 +36,7 @@ import org.springframework.roo.support.util.StringUtils;
 public class ControllerCommands implements CommandMarker {
 
 	// Constants
-	private static Logger logger = HandlerUtils.getLogger(ControllerCommands.class);
+	private static Logger LOGGER = HandlerUtils.getLogger(ControllerCommands.class);
 
 	// Fields
 	@Reference private ControllerOperations controllerOperations;
@@ -60,7 +60,7 @@ public class ControllerCommands implements CommandMarker {
 		@CliOption(key = "package", mandatory = true, optionContext = "update", help = "The package in which new controllers will be placed") final JavaPackage javaPackage) {
 
 		if (!javaPackage.getFullyQualifiedPackageName().startsWith(projectOperations.getTopLevelPackage(projectOperations.getFocusedModuleName()).getFullyQualifiedPackageName())) {
-			logger.warning("Your controller was created outside of the project's top level package and is therefore not included in the preconfigured component scanning. Please adjust your component scanning manually in webmvc-config.xml");
+			LOGGER.warning("Your controller was created outside of the project's top level package and is therefore not included in the preconfigured component scanning. Please adjust your component scanning manually in webmvc-config.xml");
 		}
 		controllerOperations.generateAll(javaPackage);
 	}
@@ -74,12 +74,12 @@ public class ControllerCommands implements CommandMarker {
 
 		ClassOrInterfaceTypeDetails cid = typeLocationService.getTypeDetails(backingType);
 		if (cid == null) {
-			logger.warning("The specified entity can not be resolved to a type in your project");
+			LOGGER.warning("The specified entity can not be resolved to a type in your project");
 			return;
 		}
 
 		if (controller.getSimpleTypeName().equalsIgnoreCase(backingType.getSimpleTypeName())) {
-			logger.warning("Controller class name needs to be different from the class name of the form backing object (suggestion: '" + backingType.getSimpleTypeName() + "Controller')");
+			LOGGER.warning("Controller class name needs to be different from the class name of the form backing object (suggestion: '" + backingType.getSimpleTypeName() + "Controller')");
 			return;
 		}
 
@@ -87,7 +87,7 @@ public class ControllerCommands implements CommandMarker {
 		if (!"".equals(disallowedOperations)) {
 			for (String operation : StringUtils.commaDelimitedListToSet(disallowedOperations)) {
 				if (!("create".equals(operation) || "update".equals(operation) || "delete".equals(operation))) {
-					logger.warning("-disallowedOperations options can only contain 'create', 'update', 'delete': -disallowedOperations update,delete");
+					LOGGER.warning("-disallowedOperations options can only contain 'create', 'update', 'delete': -disallowedOperations update,delete");
 					return;
 				}
 				disallowedOperationSet.add(operation.toLowerCase());
@@ -100,7 +100,7 @@ public class ControllerCommands implements CommandMarker {
 			Assert.notNull(pluralMetadata, "Could not determine plural for '" + backingType.getSimpleTypeName() + "'");
 			path = pluralMetadata.getPlural().toLowerCase();
 		} else if (path.equals("/") || path.equals("/*")) {
-			logger.warning("Your application already contains a mapping to '/' or '/*' by default. Please provide a different path.");
+			LOGGER.warning("Your application already contains a mapping to '/' or '/*' by default. Please provide a different path.");
 			return;
 		} else if (path.startsWith("/")) {
 			path = path.substring(1);
@@ -114,7 +114,7 @@ public class ControllerCommands implements CommandMarker {
 	public void generateAll(
 		@CliOption(key = "package", mandatory = true, optionContext = "update", help = "The package in which new controllers will be placed") final JavaPackage javaPackage) {
 
-		logger.warning("This command has been deprecated and will be disabled soon! Please use 'web mvc setup' followed by 'web mvc all --package ' instead.");
+		LOGGER.warning("This command has been deprecated and will be disabled soon! Please use 'web mvc setup' followed by 'web mvc all --package ' instead.");
 		controllerOperations.setup();
 		webMvcAll(javaPackage);
 	}
@@ -127,7 +127,7 @@ public class ControllerCommands implements CommandMarker {
 		@CliOption(key = "path", mandatory = false, help = "The base path under which the controller listens for RESTful requests (defaults to the simple name of the form backing object)") final String path,
 		@CliOption(key = "disallowedOperations", mandatory = false, help = "A comma separated list of operations (only create, update, delete allowed) that should not be generated in the controller") final String disallowedOperations) {
 
-		logger.warning("This command has been deprecated and will be disabled soon! Please use 'web mvc setup' followed by 'web mvc scaffold' instead.");
+		LOGGER.warning("This command has been deprecated and will be disabled soon! Please use 'web mvc setup' followed by 'web mvc scaffold' instead.");
 		controllerOperations.setup();
 		webMvcScaffold(controller, entity, path, disallowedOperations);
 	}

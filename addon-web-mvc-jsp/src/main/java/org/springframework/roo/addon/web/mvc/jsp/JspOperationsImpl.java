@@ -426,7 +426,7 @@ public class JspOperationsImpl extends AbstractOperations implements JspOperatio
 		Assert.notNull(i18n, "Language choice required");
 
 		if (i18n.getLocale() == null) {
-			logger.warning("could not parse language choice");
+			LOGGER.warning("could not parse language choice");
 			return;
 		}
 

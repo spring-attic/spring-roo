@@ -36,9 +36,13 @@ import org.springframework.roo.support.util.StringUtils;
 @Component(immediate = true)
 @Reference(name = "shell", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC, referenceInterface = Shell.class, cardinality = ReferenceCardinality.OPTIONAL_UNARY)
 public class JdkDelegatingLogListener extends AbstractFlashingObject implements LogListener {
-	@Reference private LogReaderService logReaderService;
-	private final static Logger logger = HandlerUtils.getLogger(JdkDelegatingLogListener.class);
+	
+	// Constants
+	private final static Logger LOGGER = HandlerUtils.getLogger(JdkDelegatingLogListener.class);
 	public static final String DO_NOT_LOG = "#DO_NOT_LOG";
+
+	// Fields
+	@Reference private LogReaderService logReaderService;
 
 	@SuppressWarnings("unchecked")
 	protected void activate(final ComponentContext context) {
@@ -89,9 +93,9 @@ public class JdkDelegatingLogListener extends AbstractFlashingObject implements 
 		} else {
 			// Important log message, so log it via JDK
 			if (removeDoNotLogTag) {
-				logger.log(jdkLevel, buildMessage(entry) + cleanThrowable(entry.getException()));
+				LOGGER.log(jdkLevel, buildMessage(entry) + cleanThrowable(entry.getException()));
 			} else {
-				logger.log(jdkLevel, buildMessage(entry), entry.getException());
+				LOGGER.log(jdkLevel, buildMessage(entry), entry.getException());
 			}
 		}
 	}

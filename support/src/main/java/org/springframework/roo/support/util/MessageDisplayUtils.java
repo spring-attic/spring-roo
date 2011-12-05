@@ -19,10 +19,12 @@ import org.springframework.roo.support.logging.HandlerUtils;
  * @since 1.1.1
  */
 public abstract class MessageDisplayUtils {
-	private static Logger logger = HandlerUtils.getLogger(MessageDisplayUtils.class);
+
+	// Constants
+	private static Logger LOGGER = HandlerUtils.getLogger(MessageDisplayUtils.class);
 
 	/**
-	 * Displays the requested file via the logger API.
+	 * Displays the requested file via the LOGGER API.
 	 *
 	 * <p>
 	 * Each file must available from the classloader of the "owner". It must also be in the same
@@ -35,10 +37,7 @@ public abstract class MessageDisplayUtils {
 	 * @param important if true, it will display with a higher importance color where possible
 	 */
 	public static void displayFile(final String fileName, final Class<?> owner, final boolean important) {
-		Level level = Level.FINE;
-		if (important) {
-			level = Level.SEVERE;
-		}
+		Level level = important ? Level.SEVERE : Level.FINE;
 		String owningPackage = owner.getPackage().getName().replace('.', '/');
 		String fullResourceName = "/" + owningPackage + "/" + fileName;
 		InputStream inputStream = owner.getClassLoader().getResourceAsStream(fullResourceName);
@@ -47,7 +46,7 @@ public abstract class MessageDisplayUtils {
 		}
 		try {
 			String message = FileCopyUtils.copyToString(new InputStreamReader(new BufferedInputStream(inputStream)));
-			logger.log(level, message);
+			LOGGER.log(level, message);
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
 		} finally {

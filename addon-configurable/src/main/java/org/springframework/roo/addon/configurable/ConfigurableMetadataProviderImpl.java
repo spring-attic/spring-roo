@@ -11,6 +11,7 @@ import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.LogicalPath;
+
 /**
  * Implementation of {@link ConfigurableMetadataProvider}.
  *
