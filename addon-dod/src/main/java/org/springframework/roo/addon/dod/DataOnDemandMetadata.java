@@ -340,7 +340,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 
 		// Create a mutator method call for each embedded class
 		for (EmbeddedHolder embeddedHolder : embeddedHolders) {
-			bodyBuilder.appendFormalLine(getEmbeddedFieldMutatorMethodName(embeddedHolder.getEmbeddedField()) + "(obj, index);");
+			bodyBuilder.appendFormalLine(getEmbeddedFieldMutatorMethodName(embeddedHolder.getEmbeddedField().getFieldName()) + "(obj, index);");
 		}
 
 		// Create mutator method calls for each entity field
@@ -401,7 +401,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	}
 
 	private MethodMetadataBuilder getEmbeddedClassMutatorMethod(final EmbeddedHolder embeddedHolder) {
-		JavaSymbolName methodName = getEmbeddedFieldMutatorMethodName(embeddedHolder.getEmbeddedField());
+		JavaSymbolName methodName = getEmbeddedFieldMutatorMethodName(embeddedHolder.getEmbeddedField().getFieldName());
 		final JavaType[] parameterTypes = { entity, JavaType.INT_PRIMITIVE };
 
 		// Locate user-defined method
@@ -417,7 +417,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		builder.getImportRegistrationResolver().addImport(embeddedFieldType);
 		bodyBuilder.appendFormalLine(embeddedFieldType.getSimpleTypeName() + " embeddedClass = new " + embeddedFieldType.getSimpleTypeName() + "();");
 		for (FieldMetadata field : embeddedHolder.getFields()) {
-			bodyBuilder.appendFormalLine(BeanInfoUtils.getMutatorMethodName(field.getFieldName()).getSymbolName() + "(embeddedClass, index);");
+			bodyBuilder.appendFormalLine(BeanInfoUtils.getMutatorMethodName(getEmbeddedFieldMutatorMethodName(embeddedHolder.getEmbeddedField().getFieldName(), field.getFieldName())).getSymbolName() + "(embeddedClass, index);");
 		}
 		bodyBuilder.appendFormalLine("obj." + embeddedHolder.getEmbeddedMutatorMethodName() + "(embeddedClass);");
 
@@ -426,8 +426,12 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
 	}
 
-	private JavaSymbolName getEmbeddedFieldMutatorMethodName(final FieldMetadata embeddedField) {
-		return BeanInfoUtils.getMutatorMethodName(embeddedField.getFieldName());
+	private JavaSymbolName getEmbeddedFieldMutatorMethodName(final JavaSymbolName embeddedFieldName, final JavaSymbolName fieldName) {
+		return new JavaSymbolName(embeddedFieldName.getSymbolName() + StringUtils.capitalize(fieldName.getSymbolName()));
+	}
+
+	private JavaSymbolName getEmbeddedFieldMutatorMethodName(final JavaSymbolName embeddedFieldName) {
+		return BeanInfoUtils.getMutatorMethodName(embeddedFieldName);
 	}
 
 	private void addEmbeddedClassFieldMutatorMethodsToBuilder(final EmbeddedHolder embeddedHolder) {
@@ -442,7 +446,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			JavaSymbolName fieldMutatorMethodName = BeanInfoUtils.getMutatorMethodName(field.getFieldName());
 			bodyBuilder.append(getFieldValidationBody(field, initializer, fieldMutatorMethodName, false));
 
-			JavaSymbolName embeddedClassMethodName = BeanInfoUtils.getMutatorMethodName(field.getFieldName());
+			JavaSymbolName embeddedClassMethodName = BeanInfoUtils.getMutatorMethodName(getEmbeddedFieldMutatorMethodName(embeddedHolder.getEmbeddedField().getFieldName(), field.getFieldName()));
 			if (governorHasMethod(embeddedClassMethodName, parameterTypes)) {
 				// Method found in governor so do not create method in ITD
 				continue;
