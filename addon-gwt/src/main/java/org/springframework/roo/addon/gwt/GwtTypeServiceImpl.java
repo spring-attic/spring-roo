@@ -293,7 +293,7 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 		fileManager.createOrUpdateTextFileIfRequired(gwtXmlPath, XmlUtils.nodeToString(gwtXmlDoc), "Added source paths to gwt.xml file", true);
 	}
 
-	public Set<String> getSourcePaths(final String gwtModuleCanonicalPath, final String moduleName) {
+	private Set<String> getSourcePaths(final String gwtModuleCanonicalPath, final String moduleName) {
 		Document gwtXmlDoc = getGwtXmlDocument(gwtModuleCanonicalPath);
 		Element gwtXmlRoot = gwtXmlDoc.getDocumentElement();
 		Set<String> sourcePaths = new HashSet<String>();
@@ -369,7 +369,7 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 		requestMethods.add(methodBuilder.build());
 	}
 
-	public boolean isValidMethodReturnType(final MethodMetadata method, final MemberHoldingTypeDetails memberHoldingTypeDetail) {
+	private boolean isValidMethodReturnType(final MethodMetadata method, final MemberHoldingTypeDetails memberHoldingTypeDetail) {
 		JavaType returnType = method.getReturnType();
 		if (isPrimitive(returnType)) {
 			displayWarning("The primitive field type, " + method.getReturnType().getSimpleTypeName().toLowerCase() + " of '" + method.getMethodName().getSymbolName() + "' in type " + memberHoldingTypeDetail.getName().getSimpleTypeName() + " is not currently support by GWT and will not be added to the scaffolded application.");

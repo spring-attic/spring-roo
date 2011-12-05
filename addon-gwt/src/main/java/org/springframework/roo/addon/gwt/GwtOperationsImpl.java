@@ -300,7 +300,7 @@ public class GwtOperationsImpl implements GwtOperations {
 		gwtConfig = FileUtils.removeTrailingSeparator(gwtConfig).substring(0, gwtConfig.lastIndexOf(File.separator));
 		final String moduleRoot = projectOperations.getPathResolver().getFocusedRoot(Path.SRC_MAIN_JAVA);
 		final String topLevelPackage = gwtConfig.replace(FileUtils.ensureTrailingSeparator(moduleRoot), "").replace(File.separator, ".");
-		final String sourcePath = packageName.replace(topLevelPackage + ".", "");
+		final String sourcePath = packageName.replace(topLevelPackage + ".", "").replace(".", "/");
 		gwtTypeService.addSourcePath(sourcePath, projectOperations.getFocusedModuleName());
 	}
 
