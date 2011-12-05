@@ -577,8 +577,8 @@ field enum --fieldName species --type ~.shared.domain.Species</programlisting>
 
     <para><emphasis role="bold">Known GWT Issues</emphasis></para>
 
-    <para>Whilst a number of issues have been resolved in the GWT 2.1.1 there
-    are still two problems you will most likely come across.</para>
+    <para>Whilst a number of issues have been resolved in GWT 2.1.1, there
+    are still a few problems you will most likely come across:</para>
 
     <itemizedlist>
       <listitem>
