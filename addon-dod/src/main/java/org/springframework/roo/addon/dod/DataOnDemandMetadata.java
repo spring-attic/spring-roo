@@ -269,7 +269,6 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 
 				// If we got this far, we found a valid candidate
 				// We don't check if there is a corresponding initializer, but we assume the user knows what they're doing and have made one
-				
 				return new FieldMetadataBuilder(candidate);
 			}
 
@@ -444,13 +443,12 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			bodyBuilder.append(getFieldValidationBody(field, initializer, fieldMutatorMethodName, false));
 
 			JavaSymbolName embeddedClassMethodName = BeanInfoUtils.getMutatorMethodName(field.getFieldName());
-			MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, embeddedClassMethodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
 			if (governorHasMethod(embeddedClassMethodName, parameterTypes)) {
 				// Method found in governor so do not create method in ITD
 				continue;
 			}
 
-			builder.addMethod(methodBuilder);
+			builder.addMethod(new MethodMetadataBuilder(getId(), Modifier.PUBLIC, embeddedClassMethodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder));
 		}
 	}
 
@@ -853,8 +851,16 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		// Create method
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("init();");
-		bodyBuilder.appendFormalLine("if (index < 0) index = 0;");
-		bodyBuilder.appendFormalLine("if (index > (" + getDataFieldName().getSymbolName() + ".size() - 1)) index = " + getDataFieldName().getSymbolName() + ".size() - 1;");
+		bodyBuilder.appendFormalLine("if (index < 0) {");
+		bodyBuilder.indent();
+		bodyBuilder.appendFormalLine("index = 0;");
+		bodyBuilder.indentRemove();
+		bodyBuilder.appendFormalLine("}");
+		bodyBuilder.appendFormalLine("if (index > (" + getDataFieldName().getSymbolName() + ".size() - 1)) {");
+		bodyBuilder.indent();
+		bodyBuilder.appendFormalLine("index = " + getDataFieldName().getSymbolName() + ".size() - 1;");
+		bodyBuilder.indentRemove();
+		bodyBuilder.appendFormalLine("}");
 		bodyBuilder.appendFormalLine(entity.getSimpleTypeName() + " obj = " + getDataFieldName().getSymbolName() + ".get(index);");
 		bodyBuilder.appendFormalLine(identifierType.getSimpleTypeName() + " id = " + "obj." + identifierAccessor.getMethodName().getSymbolName() + "();");
 		bodyBuilder.appendFormalLine("return " + findMethod.getMethodCall() + ";");
@@ -897,7 +903,11 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		bodyBuilder.appendFormalLine("int to = 10;");
 		bodyBuilder.appendFormalLine(dataField + " = " + findEntriesMethodAdditions.getMethodCall() + ";");
 		findEntriesMethodAdditions.copyAdditionsTo(builder, governorTypeDetails);
-		bodyBuilder.appendFormalLine("if (" + dataField + " == null) throw new IllegalStateException(\"Find entries implementation for '" + entity.getSimpleTypeName() + "' illegally returned null\");");
+		bodyBuilder.appendFormalLine("if (" + dataField + " == null) {");
+		bodyBuilder.indent();
+		bodyBuilder.appendFormalLine("throw new IllegalStateException(\"Find entries implementation for '" + entity.getSimpleTypeName() + "' illegally returned null\");");
+		bodyBuilder.indentRemove();
+		bodyBuilder.appendFormalLine("}");
 		bodyBuilder.appendFormalLine("if (!" + dataField + ".isEmpty()) {");
 		bodyBuilder.indent();
 		bodyBuilder.appendFormalLine("return;");
@@ -916,9 +926,9 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		bodyBuilder.appendFormalLine("} catch (ConstraintViolationException e) {");
 		bodyBuilder.indent();
 		bodyBuilder.appendFormalLine("StringBuilder msg = new StringBuilder();");
-		bodyBuilder.appendFormalLine("for (Iterator<ConstraintViolation<?>> it = e.getConstraintViolations().iterator(); it.hasNext();) {");
+		bodyBuilder.appendFormalLine("for (Iterator<ConstraintViolation<?>> iter = e.getConstraintViolations().iterator(); iter.hasNext();) {");
 		bodyBuilder.indent();
-		bodyBuilder.appendFormalLine("ConstraintViolation<?> cv = it.next();");
+		bodyBuilder.appendFormalLine("ConstraintViolation<?> cv = iter.next();");
 		bodyBuilder.appendFormalLine("msg.append(\"[\").append(cv.getConstraintDescriptor()).append(\":\").append(cv.getMessage()).append(\"=\").append(cv.getInvalidValue()).append(\"]\");");
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("}");
