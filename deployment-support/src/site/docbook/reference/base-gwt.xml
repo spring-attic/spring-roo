@@ -556,16 +556,16 @@ field enum --fieldName species --type ~.shared.domain.Species</programlisting>
   </section>
 
   <section>
-    <title>Migrating an Roo GWT project (1.1 -&gt; 1.1.1+)</title>
+    <title>Migrating a Roo GWT project (1.1 -&gt; 1.1.1+)</title>
 
     <para>Unfortunately a number of breaking API changes in GWT happened with
-    the release of GWT 2.1.1. Like any application built with an external
-    library you will need to refactor your application to deal with these
+    the release of GWT 2.1.1. Like any application built against an external
+    library, you will need to refactor your application to deal with these
     changes.</para>
 
     <para>The transition to the new abstract-concrete model and its associated
-    benefits is not an automatic one. To take advantage of the new
-    abstract-construct model in GWT add-on you will need to inherit from the
+    benefits is not automatic. To take advantage of the new abstract-concrete
+    model used by the GWT add-on, you will need to inherit from the
     respective *_Roo_Gwt files and optionally remove the methods in the
     concrete type that have been declared in the *_Roo_Gwt file.</para>
 
