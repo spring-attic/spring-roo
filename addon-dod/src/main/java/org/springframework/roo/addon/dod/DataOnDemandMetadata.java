@@ -417,7 +417,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		builder.getImportRegistrationResolver().addImport(embeddedFieldType);
 		bodyBuilder.appendFormalLine(embeddedFieldType.getSimpleTypeName() + " embeddedClass = new " + embeddedFieldType.getSimpleTypeName() + "();");
 		for (FieldMetadata field : embeddedHolder.getFields()) {
-			bodyBuilder.appendFormalLine(BeanInfoUtils.getMutatorMethodName(getEmbeddedFieldMutatorMethodName(embeddedHolder.getEmbeddedField().getFieldName(), field.getFieldName())).getSymbolName() + "(embeddedClass, index);");
+			bodyBuilder.appendFormalLine(getEmbeddedFieldMutatorMethodName(embeddedHolder.getEmbeddedField().getFieldName(), field.getFieldName()).getSymbolName() + "(embeddedClass, index);");
 		}
 		bodyBuilder.appendFormalLine("obj." + embeddedHolder.getEmbeddedMutatorMethodName() + "(embeddedClass);");
 
@@ -427,11 +427,11 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	}
 
 	private JavaSymbolName getEmbeddedFieldMutatorMethodName(final JavaSymbolName embeddedFieldName, final JavaSymbolName fieldName) {
-		return new JavaSymbolName(embeddedFieldName.getSymbolName() + StringUtils.capitalize(fieldName.getSymbolName()));
+		return getEmbeddedFieldMutatorMethodName(new JavaSymbolName(embeddedFieldName.getSymbolName() + StringUtils.capitalize(fieldName.getSymbolName())));
 	}
 
-	private JavaSymbolName getEmbeddedFieldMutatorMethodName(final JavaSymbolName embeddedFieldName) {
-		return BeanInfoUtils.getMutatorMethodName(embeddedFieldName);
+	private JavaSymbolName getEmbeddedFieldMutatorMethodName(final JavaSymbolName fieldName) {
+		return BeanInfoUtils.getMutatorMethodName(fieldName);
 	}
 
 	private void addEmbeddedClassFieldMutatorMethodsToBuilder(final EmbeddedHolder embeddedHolder) {
@@ -446,7 +446,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			JavaSymbolName fieldMutatorMethodName = BeanInfoUtils.getMutatorMethodName(field.getFieldName());
 			bodyBuilder.append(getFieldValidationBody(field, initializer, fieldMutatorMethodName, false));
 
-			JavaSymbolName embeddedClassMethodName = BeanInfoUtils.getMutatorMethodName(getEmbeddedFieldMutatorMethodName(embeddedHolder.getEmbeddedField().getFieldName(), field.getFieldName()));
+			JavaSymbolName embeddedClassMethodName = getEmbeddedFieldMutatorMethodName(embeddedHolder.getEmbeddedField().getFieldName(), field.getFieldName());
 			if (governorHasMethod(embeddedClassMethodName, parameterTypes)) {
 				// Method found in governor so do not create method in ITD
 				continue;
