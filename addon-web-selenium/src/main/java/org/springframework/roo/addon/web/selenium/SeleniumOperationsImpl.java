@@ -309,10 +309,10 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 				cal.add(Calendar.YEAR, -1);
 				cal.add(Calendar.MONTH, -1);
 				cal.add(Calendar.DAY_OF_MONTH, -1);
-			} else if (null != MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), FUTURE)) {
-				cal.add(Calendar.YEAR, +1);
-				cal.add(Calendar.MONTH, +1);
-				cal.add(Calendar.DAY_OF_MONTH, +1);
+			} else if (MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), FUTURE) != null) {
+				cal.add(Calendar.YEAR, 1);
+				cal.add(Calendar.MONTH, 1);
+				cal.add(Calendar.DAY_OF_MONTH, 1);
 			}
 			if (style != null) {
 				if (style.startsWith("-")) {
