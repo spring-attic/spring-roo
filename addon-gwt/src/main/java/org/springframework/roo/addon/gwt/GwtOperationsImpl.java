@@ -62,6 +62,7 @@ import org.springframework.roo.support.util.CollectionUtils;
 import org.springframework.roo.support.util.DomUtils;
 import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.FileUtils;
+import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.WebXmlUtils;
 import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlUtils;
@@ -295,13 +296,13 @@ public class GwtOperationsImpl implements GwtOperations {
 		}
 	}
 
-	private void addPackageToGwtXml(final String packageName) {
+	private void addPackageToGwtXml(final JavaPackage sourcePackage) {
 		String gwtConfig = gwtTypeService.getGwtModuleXml(projectOperations.getFocusedModuleName());
 		gwtConfig = FileUtils.removeTrailingSeparator(gwtConfig).substring(0, gwtConfig.lastIndexOf(File.separator));
 		final String moduleRoot = projectOperations.getPathResolver().getFocusedRoot(Path.SRC_MAIN_JAVA);
 		final String topLevelPackage = gwtConfig.replace(FileUtils.ensureTrailingSeparator(moduleRoot), "").replace(File.separator, ".");
-		final String sourcePath = packageName.replace(topLevelPackage + ".", "").replace(".", "/");
-		gwtTypeService.addSourcePath(sourcePath, projectOperations.getFocusedModuleName());
+		final String relativePackage = StringUtils.removePrefix(sourcePackage.getFullyQualifiedPackageName(), topLevelPackage + ".");
+		gwtTypeService.addSourcePath(relativePackage.replace(".", PATH_DELIMITER), projectOperations.getFocusedModuleName());
 	}
 
 	private void createProxy(final ClassOrInterfaceTypeDetails entity, final JavaPackage destinationPackage) {
@@ -339,7 +340,7 @@ public class GwtOperationsImpl implements GwtOperations {
 		attributeValues.add(readOnlyAttribute);
 		cidBuilder.updateTypeAnnotation(new AnnotationMetadataBuilder(ROO_GWT_PROXY, attributeValues));
 		typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
-		addPackageToGwtXml(destinationPackage.getFullyQualifiedPackageName());
+		addPackageToGwtXml(destinationPackage);
 	}
 	
 	private void createRequestInterface(final ClassOrInterfaceTypeDetails entity, final JavaPackage destinationPackage) {
@@ -356,7 +357,7 @@ public class GwtOperationsImpl implements GwtOperations {
 		cidBuilder.setModifier(Modifier.PUBLIC);
 		annotateRequestInterface(entity, cidBuilder);
 		typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
-		addPackageToGwtXml(destinationPackage.getFullyQualifiedPackageName());
+		addPackageToGwtXml(destinationPackage);
 	}
 
 	private void annotateRequestInterface(final ClassOrInterfaceTypeDetails entity, final ClassOrInterfaceTypeDetailsBuilder cidBuilder) {

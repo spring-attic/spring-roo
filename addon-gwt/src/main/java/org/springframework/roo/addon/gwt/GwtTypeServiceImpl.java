@@ -13,6 +13,7 @@ import java.io.InputStream;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -58,6 +59,7 @@ import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
 import org.springframework.roo.file.monitor.event.FileDetails;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.DataType;
+import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
@@ -89,6 +91,7 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 
 	// Constants
 	private static final Logger LOGGER = HandlerUtils.getLogger(GwtTypeServiceImpl.class);
+	private static final String PATH = "path";
 
 	// Fields
 	@Reference protected FileManager fileManager;
@@ -270,40 +273,40 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 		gwtFileManager.write(typesToBeWritten, type.isOverwriteConcrete());
 	}
 
-	public Set<String> getSourcePaths(final String moduleName) {
-		return getSourcePaths(getGwtModuleXml(moduleName), moduleName);
+	public Collection<JavaPackage> getSourcePackages(final String moduleName) {
+		final Document gwtXmlDoc = getGwtXmlDocument(getGwtModuleXml(moduleName));
+		final Element gwtXmlRoot = gwtXmlDoc.getDocumentElement();
+		final JavaPackage topLevelPackage = projectOperations.getTopLevelPackage(moduleName);
+		final Collection<JavaPackage> sourcePackages = new HashSet<JavaPackage>();
+		for (final Element sourcePathElement : XmlUtils.findElements("/module/source", gwtXmlRoot)) {
+			final String relativePackage = sourcePathElement.getAttribute(PATH).replace(GwtOperations.PATH_DELIMITER, ".");
+			sourcePackages.add(new JavaPackage(topLevelPackage + "." + relativePackage));
+		}
+		return sourcePackages;
 	}
 
-	public void addSourcePath(String sourcePath, String moduleName) {
-		String gwtXmlPath = getGwtModuleXml(moduleName);
+	public void addSourcePath(final String sourcePath, final String moduleName) {
+		final String gwtXmlPath = getGwtModuleXml(moduleName);
 		Assert.hasText(gwtXmlPath, "gwt.xml could not be found for module '" + moduleName + "'");
-		Document gwtXmlDoc = getGwtXmlDocument(gwtXmlPath);
-
-		Element gwtXmlRoot = gwtXmlDoc.getDocumentElement();
-		List<Element> sourceElements = XmlUtils.findElements("/module/source", gwtXmlRoot);
-		for (Element sourceElement : sourceElements) {
-			if (sourcePath.startsWith(sourceElement.getAttribute("path"))) {
-				return;
+		final Document gwtXmlDoc = getGwtXmlDocument(gwtXmlPath);
+		final Element gwtXmlRoot = gwtXmlDoc.getDocumentElement();
+		final List<Element> sourceElements = XmlUtils.findElements("/module/source", gwtXmlRoot);
+		if (!anyExistingSourcePathsIncludePath(sourcePath, sourceElements)) {
+			final Element firstSourceElement = sourceElements.get(0);
+			final Element newSourceElement = gwtXmlDoc.createElement("source");
+			newSourceElement.setAttribute(PATH, sourcePath);
+			gwtXmlRoot.insertBefore(newSourceElement, firstSourceElement);
+			fileManager.createOrUpdateTextFileIfRequired(gwtXmlPath, XmlUtils.nodeToString(gwtXmlDoc), "Added source paths to gwt.xml file", true);
+		}
+	}
+	
+	private boolean anyExistingSourcePathsIncludePath(final String sourcePath, final Iterable<Element> sourceElements) {
+		for (final Element sourceElement : sourceElements) {
+			if (sourcePath.startsWith(sourceElement.getAttribute(PATH))) {
+				return true;
 			}
 		}
-		Element firstSourceElement = sourceElements.get(0);
-		Element sourceElement = gwtXmlDoc.createElement("source");
-		sourceElement.setAttribute("path", sourcePath);
-		gwtXmlRoot.insertBefore(sourceElement, firstSourceElement);
-		fileManager.createOrUpdateTextFileIfRequired(gwtXmlPath, XmlUtils.nodeToString(gwtXmlDoc), "Added source paths to gwt.xml file", true);
-	}
-
-	private Set<String> getSourcePaths(final String gwtModuleCanonicalPath, final String moduleName) {
-		Document gwtXmlDoc = getGwtXmlDocument(gwtModuleCanonicalPath);
-		Element gwtXmlRoot = gwtXmlDoc.getDocumentElement();
-		Set<String> sourcePaths = new HashSet<String>();
-		List<Element> sourcePathElements = XmlUtils.findElements("/module/source", gwtXmlRoot);
-		for (Element sourcePathElement : sourcePathElements) {
-			String path = projectOperations.getTopLevelPackage(moduleName) + "." + sourcePathElement.getAttribute("path").replace("/", ".");
-			sourcePaths.add(path);
-		}
-
-		return sourcePaths;
+		return false;
 	}
 
 	public Document getGwtXmlDocument(String gwtModuleCanonicalPath) {
@@ -389,23 +392,28 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 		return true;
 	}
 
-	public boolean isMethodReturnTypesInSourcePath(final MethodMetadata method, final MemberHoldingTypeDetails memberHoldingTypeDetail, final Set<String> sourcePaths) {
-		JavaType propertyType = method.getReturnType();
-		boolean inSourcePath = false;
-		for (String sourcePath : sourcePaths) {
-			boolean collectionTypeInSourcePath = isCollectionType(propertyType) && propertyType.getParameters().size() == 1 && propertyType.getParameters().get(0).getPackage().getFullyQualifiedPackageName().startsWith(sourcePath);
-			if (propertyType.getPackage().getFullyQualifiedPackageName().startsWith(sourcePath) || collectionTypeInSourcePath) {
-				inSourcePath = true;
-				break;
-			}
-		}
-		if (!inSourcePath && !isCommonType(propertyType) && !JavaType.VOID_PRIMITIVE.getFullyQualifiedTypeName().equals(propertyType.getFullyQualifiedTypeName())) {
-			displayWarning("The path to type " + propertyType.getFullyQualifiedTypeName() + " which is used in type " + memberHoldingTypeDetail.getName() + " by the field '" + method.getMethodName().getSymbolName() + "' needs to be added to the module's gwt.xml file in order to be used in a Proxy.");
+	public boolean isMethodReturnTypeInSourcePath(final MethodMetadata method, final MemberHoldingTypeDetails memberHoldingTypeDetail, final Iterable<JavaPackage> sourcePackages) {
+		final JavaType returnType = method.getReturnType();
+		final boolean inSourcePath = isTypeInAnySourcePackage(returnType, sourcePackages);
+		if (!inSourcePath && !isCommonType(returnType) && !JavaType.VOID_PRIMITIVE.getFullyQualifiedTypeName().equals(returnType.getFullyQualifiedTypeName())) {
+			displayWarning("The path to type " + returnType.getFullyQualifiedTypeName() + " which is used in type " + memberHoldingTypeDetail.getName() + " by the field '" + method.getMethodName().getSymbolName() + "' needs to be added to the module's gwt.xml file in order to be used in a Proxy.");
 			return false;
 		}
 		return true;
 	}
-
+	
+	private boolean isTypeInAnySourcePackage(final JavaType type, final Iterable<JavaPackage> sourcePackages) {
+		for (final JavaPackage sourcePackage : sourcePackages) {
+			if (type.getPackage().isWithin(sourcePackage)) {
+				return true;	// It's a project type
+			}
+			if (isCollectionType(type) && type.getParameters().size() == 1 && type.getParameters().get(0).getPackage().isWithin(sourcePackage)) {
+				return true;	// It's a collection of a project type
+			}
+		}
+		return false;
+	}
+	
 	public boolean isDomainObject(final JavaType type) {
 		ClassOrInterfaceTypeDetails ptmd = typeLocationService.getTypeDetails(type);
 		return isDomainObject(type, ptmd);

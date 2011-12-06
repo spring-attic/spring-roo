@@ -12,6 +12,12 @@ import org.springframework.roo.project.Feature;
  * @since 1.1
  */
 public interface GwtOperations extends Feature {
+	
+	/**
+	 * The delimiter for multi-level paths specified by a "<source path="..." />
+	 * element in a module's *.gwt.xml file.
+	 */
+	String PATH_DELIMITER = "/";
 
 	boolean isGwtInstallationPossible();
 

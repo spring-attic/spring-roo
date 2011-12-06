@@ -6,8 +6,8 @@ import static org.springframework.roo.addon.gwt.GwtJavaType.OLD_ENTITY_PROXY;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -33,6 +33,7 @@ import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.metadata.AbstractHashCodeTrackingMetadataNotifier;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.metadata.MetadataItem;
+import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
@@ -109,13 +110,13 @@ public class GwtProxyMetadataProviderImpl extends AbstractHashCodeTrackingMetada
 		final String moduleName = PhysicalTypeIdentifier.getPath(proxy.getDeclaredByMetadataId()).getModule();
 		List<MethodMetadata> proxyMethods = gwtTypeService.getProxyMethods(mirroredDetails);
 		List<MethodMetadata> convertedProxyMethods = new ArrayList<MethodMetadata>();
-		Set<String> sourcePaths = gwtTypeService.getSourcePaths(moduleName);
+		final Collection<JavaPackage> sourcePackages = gwtTypeService.getSourcePackages(moduleName);
 		for (MethodMetadata method : proxyMethods) {
 			JavaType gwtType = gwtTypeService.getGwtSideLeafType(method.getReturnType(), mirroredDetails.getName(), false, true);
 			MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(method);
 			methodBuilder.setReturnType(gwtType);
 			MethodMetadata convertedMethod = methodBuilder.build();
-			if (gwtTypeService.isMethodReturnTypesInSourcePath(convertedMethod, mirroredDetails, sourcePaths)) {
+			if (gwtTypeService.isMethodReturnTypeInSourcePath(convertedMethod, mirroredDetails, sourcePackages)) {
 				convertedProxyMethods.add(methodBuilder.build());
 			}
 		}
