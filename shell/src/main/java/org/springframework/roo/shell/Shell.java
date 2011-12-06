@@ -87,12 +87,12 @@ public interface Shell extends ShellStatusProvider, ShellPromptAccessor {
 	 */
 	void setPromptPath(String path);
 
+	void setPromptPath(String path, boolean overrideStyle);
+
 	/**
 	 * Returns the home directory of the current running shell instance
 	 *
 	 * @return the home directory of the current shell instance
 	 */
 	File getHome();
-
-	void setPromptPath(String path, boolean overrideStyle);
 }

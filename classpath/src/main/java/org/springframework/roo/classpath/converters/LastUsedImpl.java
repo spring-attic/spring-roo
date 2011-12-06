@@ -72,19 +72,14 @@ public class LastUsedImpl implements LastUsed {
 			return;
 		}
 
-		topLevelPackage =  new JavaPackage(typeLocationService.getTopLevelPackageForModule(projectOperations.getFocusedModule()));
-
 		String moduleName = "";
-		if (module != null) {
-
-			if (StringUtils.hasText(module.getModuleName())) {
-				moduleName = AnsiEscapeCode.decorate(module.getModuleName() + MODULE_PATH_SEPARATOR, AnsiEscapeCode.FG_CYAN);
-			}
+		if (module != null && StringUtils.hasText(module.getModuleName())) {
+			moduleName = AnsiEscapeCode.decorate(module.getModuleName() + MODULE_PATH_SEPARATOR, AnsiEscapeCode.FG_CYAN);
 		}
 
+		topLevelPackage =  new JavaPackage(typeLocationService.getTopLevelPackageForModule(projectOperations.getFocusedModule()));
 		String path = moduleName + fullyQualifiedName.replace(topLevelPackage.getFullyQualifiedPackageName(), TOP_LEVEL_PACKAGE_SYMBOL);
 		shell.setPromptPath(path, StringUtils.hasText(moduleName));
-
 	}
 
 	public JavaPackage getTopLevelPackage() {
