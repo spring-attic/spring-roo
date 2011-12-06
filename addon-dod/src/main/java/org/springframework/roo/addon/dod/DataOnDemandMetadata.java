@@ -77,8 +77,13 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	// Constants
 	private static final String PROVIDES_TYPE_STRING = DataOnDemandMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
-	private static final JavaSymbolName INDEX = new JavaSymbolName("index");
 	private static final JavaSymbolName VALUE = new JavaSymbolName("value");
+	private static final String OBJ_VAR = "obj";
+	private static final String INDEX_VAR = "index";
+	private static final JavaSymbolName OBJ_SYMBOL = new JavaSymbolName(OBJ_VAR);
+	private static final JavaSymbolName INDEX_SYMBOL = new JavaSymbolName(INDEX_VAR);
+	private static final JavaSymbolName MIN_SYMBOL = new JavaSymbolName("min");
+	private static final JavaSymbolName MAX_SYMBOL = new JavaSymbolName("max");
 
 	// Fields
 	private EmbeddedIdHolder embeddedIdHolder;
@@ -317,7 +322,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		JavaSymbolName methodName = new JavaSymbolName("getNewTransient" + entity.getSimpleTypeName());
 
 		final JavaType parameterType = JavaType.INT_PRIMITIVE;
-		List<JavaSymbolName> parameterNames = Arrays.asList(INDEX);
+		List<JavaSymbolName> parameterNames = Arrays.asList(INDEX_SYMBOL);
 
 		// Locate user-defined method
 		MethodMetadata userMethod = getGovernorMethod(methodName, parameterType);
@@ -331,25 +336,25 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		builder.getImportRegistrationResolver().addImport(entity);
 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		bodyBuilder.appendFormalLine(entity.getSimpleTypeName() + " obj = new " + entity.getSimpleTypeName() + "();");
+		bodyBuilder.appendFormalLine(entity.getSimpleTypeName() + " " + OBJ_VAR + " = new " + entity.getSimpleTypeName() + "();");
 
 		// Create the composite key embedded id method call if required
 		if (hasEmbeddedIdentifier()) {
-			bodyBuilder.appendFormalLine(getEmbeddedIdMutatorMethodName() + "(obj, index);");
+			bodyBuilder.appendFormalLine(getEmbeddedIdMutatorMethodName() + "(" + OBJ_VAR + ", " + INDEX_VAR + ");");
 		}
 
 		// Create a mutator method call for each embedded class
 		for (EmbeddedHolder embeddedHolder : embeddedHolders) {
-			bodyBuilder.appendFormalLine(getEmbeddedFieldMutatorMethodName(embeddedHolder.getEmbeddedField().getFieldName()) + "(obj, index);");
+			bodyBuilder.appendFormalLine(getEmbeddedFieldMutatorMethodName(embeddedHolder.getEmbeddedField().getFieldName()) + "(" + OBJ_VAR + ", " + INDEX_VAR + ");");
 		}
 
 		// Create mutator method calls for each entity field
 		for (FieldMetadata field : fieldInitializers.keySet()) {
 			JavaSymbolName mutatorName = BeanInfoUtils.getMutatorMethodName(field);
-			bodyBuilder.appendFormalLine(mutatorName.getSymbolName() + "(obj, index);");
+			bodyBuilder.appendFormalLine(mutatorName.getSymbolName() + "(" + OBJ_VAR + ", " + INDEX_VAR + ");");
 		}
 
-		bodyBuilder.appendFormalLine("return obj;");
+		bodyBuilder.appendFormalLine("return " + OBJ_VAR + ";");
 
 		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, entity, AnnotatedJavaType.convertFromJavaTypes(parameterType), parameterNames, bodyBuilder);
 		builder.addMethod(methodBuilder);
@@ -393,9 +398,9 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		}
 		bodyBuilder.appendFormalLine("");
 		bodyBuilder.appendFormalLine(embeddedIdFieldType.getSimpleTypeName() + " embeddedIdClass = new " + embeddedIdFieldType.getSimpleTypeName() + "(" + sb.toString() + ");");
-		bodyBuilder.appendFormalLine("obj." + embeddedIdMutator + "(embeddedIdClass);");
+		bodyBuilder.appendFormalLine(OBJ_VAR + "." + embeddedIdMutator + "(embeddedIdClass);");
 
-		List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("obj"), INDEX);
+		List<JavaSymbolName> parameterNames = Arrays.asList(OBJ_SYMBOL, INDEX_SYMBOL);
 
 		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
 	}
@@ -417,11 +422,11 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		builder.getImportRegistrationResolver().addImport(embeddedFieldType);
 		bodyBuilder.appendFormalLine(embeddedFieldType.getSimpleTypeName() + " embeddedClass = new " + embeddedFieldType.getSimpleTypeName() + "();");
 		for (FieldMetadata field : embeddedHolder.getFields()) {
-			bodyBuilder.appendFormalLine(getEmbeddedFieldMutatorMethodName(embeddedHolder.getEmbeddedField().getFieldName(), field.getFieldName()).getSymbolName() + "(embeddedClass, index);");
+			bodyBuilder.appendFormalLine(getEmbeddedFieldMutatorMethodName(embeddedHolder.getEmbeddedField().getFieldName(), field.getFieldName()).getSymbolName() + "(embeddedClass, " + INDEX_VAR + ");");
 		}
-		bodyBuilder.appendFormalLine("obj." + embeddedHolder.getEmbeddedMutatorMethodName() + "(embeddedClass);");
+		bodyBuilder.appendFormalLine(OBJ_VAR + "." + embeddedHolder.getEmbeddedMutatorMethodName() + "(embeddedClass);");
 
-		List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("obj"), INDEX);
+		List<JavaSymbolName> parameterNames = Arrays.asList(OBJ_SYMBOL, INDEX_SYMBOL);
 
 		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
 	}
@@ -437,7 +442,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	private void addEmbeddedClassFieldMutatorMethodsToBuilder(final EmbeddedHolder embeddedHolder) {
 		final JavaType embeddedFieldType = embeddedHolder.getEmbeddedField().getFieldType();
 		final JavaType[] parameterTypes = { embeddedFieldType, JavaType.INT_PRIMITIVE };
-		final List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("obj"), INDEX);
+		final List<JavaSymbolName> parameterNames = Arrays.asList(OBJ_SYMBOL, INDEX_SYMBOL);
 
 		for (FieldMetadata field : embeddedHolder.getFields()) {
 			InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
@@ -458,7 +463,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 
 	private List<MethodMetadataBuilder> getFieldMutatorMethods() {
 		final List<MethodMetadataBuilder> fieldMutatorMethods = new ArrayList<MethodMetadataBuilder>();
-		final List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("obj"), INDEX);
+		final List<JavaSymbolName> parameterNames = Arrays.asList(OBJ_SYMBOL, INDEX_SYMBOL);
 		final JavaType[] parameterTypes = { entity, JavaType.INT_PRIMITIVE };
 
 		for (Map.Entry<FieldMetadata, String> entry : fieldInitializers.entrySet()) {
@@ -510,8 +515,8 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 
 			// Check for @Size or @Column with length attribute
 			AnnotationMetadata sizeAnnotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), SIZE);
-			if (sizeAnnotation != null && sizeAnnotation.getAttribute(new JavaSymbolName("max")) != null) {
-				Integer maxValue = (Integer) sizeAnnotation.getAttribute(new JavaSymbolName("max")).getValue();
+			if (sizeAnnotation != null && sizeAnnotation.getAttribute(MAX_SYMBOL) != null) {
+				Integer maxValue = (Integer) sizeAnnotation.getAttribute(MAX_SYMBOL).getValue();
 				bodyBuilder.appendFormalLine("if (" + fieldName + ".length() > " + maxValue + ") {");
 				bodyBuilder.indent();
 				if (isUnique) {
@@ -555,7 +560,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		}
 
 		if (mutatorName != null) {
-			bodyBuilder.appendFormalLine("obj." + mutatorName.getSymbolName() + "(" + fieldName + ");");
+			bodyBuilder.appendFormalLine(OBJ_VAR + "." + mutatorName.getSymbolName() + "(" + fieldName + ");");
 		}
 
 		return bodyBuilder.getOutput();
@@ -771,7 +776,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		// Method definition to find or build
 		final JavaSymbolName methodName = new JavaSymbolName("modify" + entity.getSimpleTypeName());
 		final JavaType parameterType = entity;
-		final List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("obj"));
+		final List<JavaSymbolName> parameterNames = Arrays.asList(OBJ_SYMBOL);
 		final JavaType returnType = JavaType.BOOLEAN_PRIMITIVE;
 
 		// Locate user-defined method
@@ -818,8 +823,8 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		// Create method
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("init();");
-		bodyBuilder.appendFormalLine(entity.getSimpleTypeName() + " obj = " + getDataFieldName().getSymbolName() + ".get(" + getRndFieldName().getSymbolName() + ".nextInt(" + getDataField().getFieldName().getSymbolName() + ".size()));");
-		bodyBuilder.appendFormalLine(identifierType.getSimpleTypeName() + " id = " + "obj." + identifierAccessor.getMethodName().getSymbolName() + "();");
+		bodyBuilder.appendFormalLine(entity.getSimpleTypeName() + " " + OBJ_VAR + " = " + getDataFieldName().getSymbolName() + ".get(" + getRndFieldName().getSymbolName() + ".nextInt(" + getDataField().getFieldName().getSymbolName() + ".size()));");
+		bodyBuilder.appendFormalLine(identifierType.getSimpleTypeName() + " id = " + OBJ_VAR + "." + identifierAccessor.getMethodName().getSymbolName() + "();");
 		bodyBuilder.appendFormalLine("return " + findMethod.getMethodCall() + ";");
 
 		findMethod.copyAdditionsTo(builder, governorTypeDetails);
@@ -840,7 +845,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		// Method definition to find or build
 		JavaSymbolName methodName = new JavaSymbolName("getSpecific" + entity.getSimpleTypeName());
 		final JavaType parameterType = JavaType.INT_PRIMITIVE;
-		List<JavaSymbolName> parameterNames = Arrays.asList(INDEX);
+		List<JavaSymbolName> parameterNames = Arrays.asList(INDEX_SYMBOL);
 
 		// Locate user-defined method
 		MethodMetadata userMethod = getGovernorMethod(methodName, parameterType);
@@ -855,18 +860,18 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		// Create method
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("init();");
-		bodyBuilder.appendFormalLine("if (index < 0) {");
+		bodyBuilder.appendFormalLine("if (" + INDEX_VAR + " < 0) {");
 		bodyBuilder.indent();
-		bodyBuilder.appendFormalLine("index = 0;");
+		bodyBuilder.appendFormalLine(INDEX_VAR + " = 0;");
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("}");
-		bodyBuilder.appendFormalLine("if (index > (" + getDataFieldName().getSymbolName() + ".size() - 1)) {");
+		bodyBuilder.appendFormalLine("if (" + INDEX_VAR + " > (" + getDataFieldName().getSymbolName() + ".size() - 1)) {");
 		bodyBuilder.indent();
-		bodyBuilder.appendFormalLine("index = " + getDataFieldName().getSymbolName() + ".size() - 1;");
+		bodyBuilder.appendFormalLine(INDEX_VAR + " = " + getDataFieldName().getSymbolName() + ".size() - 1;");
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("}");
-		bodyBuilder.appendFormalLine(entity.getSimpleTypeName() + " obj = " + getDataFieldName().getSymbolName() + ".get(index);");
-		bodyBuilder.appendFormalLine(identifierType.getSimpleTypeName() + " id = " + "obj." + identifierAccessor.getMethodName().getSymbolName() + "();");
+		bodyBuilder.appendFormalLine(entity.getSimpleTypeName() + " " + OBJ_VAR + " = " + getDataFieldName().getSymbolName() + ".get(" + INDEX_VAR + ");");
+		bodyBuilder.appendFormalLine(identifierType.getSimpleTypeName() + " id = " + OBJ_VAR + "." + identifierAccessor.getMethodName().getSymbolName() + "();");
 		bodyBuilder.appendFormalLine("return " + findMethod.getMethodCall() + ";");
 
 		findMethod.copyAdditionsTo(builder, governorTypeDetails);
@@ -921,7 +926,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		bodyBuilder.appendFormalLine(dataField + " = new ArrayList<" + entity.getSimpleTypeName() + ">();");
 		bodyBuilder.appendFormalLine("for (int i = 0; i < " + quantity + "; i++) {");
 		bodyBuilder.indent();
-		bodyBuilder.appendFormalLine(entity.getSimpleTypeName() + " obj = " + newTransientEntityMethod.getMethodName().getSymbolName() + "(i);");
+		bodyBuilder.appendFormalLine(entity.getSimpleTypeName() + " " + OBJ_VAR + " = " + newTransientEntityMethod.getMethodName().getSymbolName() + "(i);");
 		bodyBuilder.appendFormalLine("try {");
 		bodyBuilder.indent();
 		bodyBuilder.appendFormalLine(persistMethodAdditions.getMethodCall() + ";");
@@ -943,7 +948,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			bodyBuilder.appendFormalLine(flushAdditions.getMethodCall() + ";");
 			flushAdditions.copyAdditionsTo(builder, governorTypeDetails);
 		}
-		bodyBuilder.appendFormalLine(dataField + ".add(obj);");
+		bodyBuilder.appendFormalLine(dataField + ".add(" + OBJ_VAR + ");");
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("}");
 
@@ -994,18 +999,18 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			}
 
 			if (MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), VALIDATOR_CONSTRAINTS_EMAIL) != null || fieldName.toLowerCase().contains("email")) {
-				initializer = "\"foo\" + index + \"@bar.com\"";
+				initializer = "\"foo\" + " + INDEX_VAR + " + \"@bar.com\"";
 			} else {
 				int maxLength = Integer.MAX_VALUE;
 
 				// Check for @Size
 				AnnotationMetadata sizeAnnotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), SIZE);
 				if (sizeAnnotation != null) {
-					AnnotationAttributeValue<?> maxValue = sizeAnnotation.getAttribute(new JavaSymbolName("max"));
+					AnnotationAttributeValue<?> maxValue = sizeAnnotation.getAttribute(MAX_SYMBOL);
 					if (maxValue != null) {
 						maxLength = ((Integer) maxValue.getValue()).intValue();
 					}
-					AnnotationAttributeValue<?> minValue = sizeAnnotation.getAttribute(new JavaSymbolName("min"));
+					AnnotationAttributeValue<?> minValue = sizeAnnotation.getAttribute(MIN_SYMBOL);
 					if (minValue != null) {
 						int minLength = ((Integer) minValue.getValue()).intValue();
 						Assert.isTrue(maxLength >= minLength, "@Size attribute 'max' must be greater than 'min' for field '" + fieldName + "' in " + entity.getFullyQualifiedTypeName());
@@ -1027,16 +1032,16 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 					initializer = "\"\"";
 					break;
 				case 1:
-					initializer = "String.valueOf(index)";
+					initializer = "String.valueOf(" + INDEX_VAR + ")";
 					break;
 				case 2:
-					initializer = "\"" + initializer.charAt(0) + "\" + index";
+					initializer = "\"" + initializer.charAt(0) + "\" + " + INDEX_VAR;
 					break;
 				default:
 					if (initializer.length() + 2 > maxLength) {
-						initializer = "\"" + initializer.substring(0, maxLength - 2) + "_\" + index";
+						initializer = "\"" + initializer.substring(0, maxLength - 2) + "_\" + " + INDEX_VAR;
 					} else {
-						initializer = "\"" + initializer + "_\" + index";
+						initializer = "\"" + initializer + "_\" + " + INDEX_VAR;
 					}
 				}
 			}
@@ -1047,35 +1052,35 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		} else if (fieldType.equals(JavaType.BOOLEAN_PRIMITIVE)) {
 			initializer = StringUtils.defaultIfEmpty(fieldInitializer, "true");
 		} else if (fieldType.equals(JavaType.INT_OBJECT)) {
-			initializer = StringUtils.defaultIfEmpty(fieldInitializer, "new Integer(index)");
+			initializer = StringUtils.defaultIfEmpty(fieldInitializer, "new Integer(" + INDEX_VAR + ")");
 		} else if (fieldType.equals(JavaType.INT_PRIMITIVE)) {
-			initializer = StringUtils.defaultIfEmpty(fieldInitializer, "index");
+			initializer = StringUtils.defaultIfEmpty(fieldInitializer, INDEX_VAR);
 		} else if (fieldType.equals(new JavaType(JavaType.INT_OBJECT.getFullyQualifiedTypeName(), 1, DataType.PRIMITIVE, null, null))) {
-			initializer = StringUtils.defaultIfEmpty(fieldInitializer, "{ index, index }");
+			initializer = StringUtils.defaultIfEmpty(fieldInitializer, "{ " + INDEX_VAR + ", " + INDEX_VAR + " }");
 		} else if (fieldType.equals(JavaType.DOUBLE_OBJECT)) {
-			initializer = StringUtils.defaultIfEmpty(fieldInitializer, "new Integer(index).doubleValue()"); // Auto-boxed
+			initializer = StringUtils.defaultIfEmpty(fieldInitializer, "new Integer(" + INDEX_VAR + ").doubleValue()"); // Auto-boxed
 		} else if (fieldType.equals(JavaType.DOUBLE_PRIMITIVE)) {
-			initializer = StringUtils.defaultIfEmpty(fieldInitializer, "new Integer(index).doubleValue()");
+			initializer = StringUtils.defaultIfEmpty(fieldInitializer, "new Integer(" + INDEX_VAR + ").doubleValue()");
 		} else if (fieldType.equals(new JavaType(JavaType.DOUBLE_OBJECT.getFullyQualifiedTypeName(), 1, DataType.PRIMITIVE, null, null))) {
-			initializer = StringUtils.defaultIfEmpty(fieldInitializer, "{ new Integer(index).doubleValue(), new Integer(index).doubleValue() }");
+			initializer = StringUtils.defaultIfEmpty(fieldInitializer, "{ new Integer(" + INDEX_VAR + ").doubleValue(), new Integer(" + INDEX_VAR + ").doubleValue() }");
 		} else if (fieldType.equals(JavaType.FLOAT_OBJECT)) {
-			initializer = StringUtils.defaultIfEmpty(fieldInitializer, "new Integer(index).floatValue()"); // Auto-boxed
+			initializer = StringUtils.defaultIfEmpty(fieldInitializer, "new Integer(" + INDEX_VAR + ").floatValue()"); // Auto-boxed
 		} else if (fieldType.equals(JavaType.FLOAT_PRIMITIVE)) {
-			initializer = StringUtils.defaultIfEmpty(fieldInitializer, "new Integer(index).floatValue()");
+			initializer = StringUtils.defaultIfEmpty(fieldInitializer, "new Integer(" + INDEX_VAR + ").floatValue()");
 		} else if (fieldType.equals(new JavaType(JavaType.FLOAT_OBJECT.getFullyQualifiedTypeName(), 1, DataType.PRIMITIVE, null, null))) {
-			initializer = StringUtils.defaultIfEmpty(fieldInitializer, "{ new Integer(index).floatValue(), new Integer(index).floatValue() }");
+			initializer = StringUtils.defaultIfEmpty(fieldInitializer, "{ new Integer(" + INDEX_VAR + ").floatValue(), new Integer(" + INDEX_VAR + ").floatValue() }");
 		} else if (fieldType.equals(JavaType.LONG_OBJECT)) {
-			initializer = StringUtils.defaultIfEmpty(fieldInitializer, "new Integer(index).longValue()"); // Auto-boxed
+			initializer = StringUtils.defaultIfEmpty(fieldInitializer, "new Integer(" + INDEX_VAR + ").longValue()"); // Auto-boxed
 		} else if (fieldType.equals(JavaType.LONG_PRIMITIVE)) {
-			initializer = StringUtils.defaultIfEmpty(fieldInitializer, "new Integer(index).longValue()");
+			initializer = StringUtils.defaultIfEmpty(fieldInitializer, "new Integer(" + INDEX_VAR + ").longValue()");
 		} else if (fieldType.equals(new JavaType(JavaType.LONG_OBJECT.getFullyQualifiedTypeName(), 1, DataType.PRIMITIVE, null, null))) {
-			initializer = StringUtils.defaultIfEmpty(fieldInitializer, "{ new Integer(index).longValue(), new Integer(index).longValue() }");
+			initializer = StringUtils.defaultIfEmpty(fieldInitializer, "{ new Integer(" + INDEX_VAR + ").longValue(), new Integer(" + INDEX_VAR + ").longValue() }");
 		} else if (fieldType.equals(JavaType.SHORT_OBJECT)) {
-			initializer = StringUtils.defaultIfEmpty(fieldInitializer, "new Integer(index).shortValue()"); // Auto-boxed
+			initializer = StringUtils.defaultIfEmpty(fieldInitializer, "new Integer(" + INDEX_VAR + ").shortValue()"); // Auto-boxed
 		} else if (fieldType.equals(JavaType.SHORT_PRIMITIVE)) {
-			initializer = StringUtils.defaultIfEmpty(fieldInitializer, "new Integer(index).shortValue()");
+			initializer = StringUtils.defaultIfEmpty(fieldInitializer, "new Integer(" + INDEX_VAR + ").shortValue()");
 		} else if (fieldType.equals(new JavaType(JavaType.SHORT_OBJECT.getFullyQualifiedTypeName(), 1, DataType.PRIMITIVE, null, null))) {
-			initializer = StringUtils.defaultIfEmpty(fieldInitializer, "{ new Integer(index).shortValue(), new Integer(index).shortValue() }");
+			initializer = StringUtils.defaultIfEmpty(fieldInitializer, "{ new Integer(" + INDEX_VAR + ").shortValue(), new Integer(" + INDEX_VAR + ").shortValue() }");
 		} else if (fieldType.equals(JavaType.CHAR_OBJECT)) {
 			initializer = StringUtils.defaultIfEmpty(fieldInitializer, "new Character('N')");
 		} else if (fieldType.equals(JavaType.CHAR_PRIMITIVE)) {
@@ -1084,19 +1089,19 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			initializer = StringUtils.defaultIfEmpty(fieldInitializer, "{ 'Y', 'N' }");
 		} else if (fieldType.equals(BIG_DECIMAL)) {
 			builder.getImportRegistrationResolver().addImport(BIG_DECIMAL);
-			initializer = BIG_DECIMAL.getSimpleTypeName() + ".valueOf(index)";
+			initializer = BIG_DECIMAL.getSimpleTypeName() + ".valueOf(" + INDEX_VAR + ")";
 		} else if (fieldType.equals(BIG_INTEGER)) {
 			builder.getImportRegistrationResolver().addImport(BIG_INTEGER);
-			initializer = BIG_INTEGER.getSimpleTypeName() + ".valueOf(index)";
+			initializer = BIG_INTEGER.getSimpleTypeName() + ".valueOf(" + INDEX_VAR + ")";
 		} else if (fieldType.equals(JavaType.BYTE_OBJECT)) {
 			initializer = "new Byte(" + StringUtils.defaultIfEmpty(fieldInitializer, "\"1\"") + ")";
 		} else if (fieldType.equals(JavaType.BYTE_PRIMITIVE)) {
 			initializer = "new Byte(" + StringUtils.defaultIfEmpty(fieldInitializer, "\"1\"") + ").byteValue()";
 		} else if (fieldType.equals(JavaType.BYTE_ARRAY_PRIMITIVE)) {
-			initializer = StringUtils.defaultIfEmpty(fieldInitializer, "String.valueOf(index).getBytes()");
+			initializer = StringUtils.defaultIfEmpty(fieldInitializer, "String.valueOf(" + INDEX_VAR + ").getBytes()");
 		} else if (fieldType.equals(entity)) {
 			// Avoid circular references (ROO-562)
-			initializer = "obj";
+			initializer = OBJ_VAR;
 		} else if (fieldCustomDataKeys.contains(CustomDataKeys.ENUMERATED_FIELD)) {
 			builder.getImportRegistrationResolver().addImport(fieldType);
 			initializer = fieldType.getSimpleTypeName() + ".class.getEnumConstants()[0]";
@@ -1106,7 +1111,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			String collaboratingFieldName = getCollaboratingFieldName(field.getFieldType()).getSymbolName();
 			// Decide if we're dealing with a one-to-one and therefore should _try_ to keep the same id (ROO-568)
 			if (fieldCustomDataKeys.contains(CustomDataKeys.ONE_TO_ONE_FIELD)) {
-				initializer = collaboratingFieldName + "." + collaboratingMetadata.getSpecificPersistentEntityMethod().getMethodName().getSymbolName() + "(index)";
+				initializer = collaboratingFieldName + "." + collaboratingMetadata.getSpecificPersistentEntityMethod().getMethodName().getSymbolName() + "(" + INDEX_VAR + ")";
 			} else {
 				initializer = collaboratingFieldName + "." + collaboratingMetadata.getRandomPersistentEntityMethod().getMethodName().getSymbolName() + "()";
 			}
