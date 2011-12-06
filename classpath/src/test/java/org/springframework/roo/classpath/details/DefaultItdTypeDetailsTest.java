@@ -5,9 +5,12 @@ import static org.junit.Assert.assertFalse;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.Arrays;
+
 import org.junit.Test;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.model.CustomData;
+import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaType;
 
@@ -25,7 +28,7 @@ public class DefaultItdTypeDetailsTest extends ItdTypeDetailsTestCase {
 		"\n" +
 		"package com.foo.bar;\n" +
 		"\n" +
-		"import null;\n" +
+		"import com.foo.bar.Person;\n" +
 		"\n" +
 		"aspect Person_Roo_Extra {\n" +
 		"    \n" +
@@ -36,23 +39,36 @@ public class DefaultItdTypeDetailsTest extends ItdTypeDetailsTestCase {
 		// Set up
 		final boolean privilegedAspect = false;
 		final int modifier = 42;
+
 		final ClassOrInterfaceTypeDetails mockGovernor = mock(ClassOrInterfaceTypeDetails.class);
 		when(mockGovernor.getPhysicalTypeCategory()).thenReturn(PhysicalTypeCategory.CLASS);
+
 		final JavaPackage mockPackage = mock(JavaPackage.class);
 		when(mockPackage.getFullyQualifiedPackageName()).thenReturn("com.foo.bar");
+
 		final JavaType mockGovernorType = mock(JavaType.class);
 		when(mockGovernorType.getPackage()).thenReturn(mockPackage);
 		when(mockGovernor.getType()).thenReturn(mockGovernorType);
+		when(mockGovernorType.getSimpleTypeName()).thenReturn("Person");
+		when(mockGovernorType.getFullyQualifiedTypeName()).thenReturn("com.foo.bar.Person");
+		when(mockGovernorType.getDataType()).thenReturn(DataType.TYPE);
+
 		final CustomData mockCustomData = mock(CustomData.class);
+
 		final JavaType mockAspectType = mock(JavaType.class);
 		when(mockAspectType.getPackage()).thenReturn(mockPackage);
 		when(mockAspectType.isDefaultPackage()).thenReturn(false);
 		when(mockAspectType.getSimpleTypeName()).thenReturn("Person_Roo_Extra");
+
+		final JavaType mockImportType = mock(JavaType.class);
+		when(mockImportType.getSimpleTypeName()).thenReturn("Person");
+		when(mockImportType.getFullyQualifiedTypeName()).thenReturn("com.foo.bar.Person");
+		when(mockImportType.getDataType()).thenReturn(DataType.TYPE);
+
 		final String declaredByMetadataId = "MID:foo#bar";
-		
 
 		// Invoke
-		final DefaultItdTypeDetails itd = new DefaultItdTypeDetails(mockCustomData, declaredByMetadataId, modifier, mockGovernor, mockAspectType, privilegedAspect, null, null, null, null, null, null, null, null, null, null);
+		final DefaultItdTypeDetails itd = new DefaultItdTypeDetails(mockCustomData, declaredByMetadataId, modifier, mockGovernor, mockAspectType, privilegedAspect, Arrays.asList(mockImportType), null, null, null, null, null, null, null, null, null);
 
 		// Check
 		assertEquals(0, itd.getAnnotations().size());
@@ -66,7 +82,7 @@ public class DefaultItdTypeDetailsTest extends ItdTypeDetailsTestCase {
 		assertEquals(0, itd.getImplementsTypes().size());
 		assertEquals(0, itd.getInnerTypes().size());
 		assertEquals(0, itd.getMethodAnnotations().size());
-		assertEquals(0, itd.getRegisteredImports().size());
+		assertEquals(1, itd.getRegisteredImports().size());
 
 		assertEquals(mockAspectType, itd.getAspect());
 		assertEquals(mockCustomData, itd.getCustomData());

@@ -49,12 +49,11 @@ public class ItdSourceFileComposer {
 	 */
 	public ItdSourceFileComposer(final ItdTypeDetails itdTypeDetails) {
 		Assert.notNull(itdTypeDetails, "ITD type details required");
+		Assert.notNull(itdTypeDetails.getName(), "Introduction to is required");
 
 		this.itdTypeDetails = itdTypeDetails;
-		Assert.notNull(itdTypeDetails.getName(), "Introduction to is required");
-		this.introductionTo = itdTypeDetails.getName();
-
-		this.aspect = itdTypeDetails.getAspect();
+		introductionTo = itdTypeDetails.getName();
+		aspect = itdTypeDetails.getAspect();
 
 		// Create my own resolver, so we can add items to it as we process
 		resolver = new ImportRegistrationResolverImpl(itdTypeDetails.getAspect().getPackage());
