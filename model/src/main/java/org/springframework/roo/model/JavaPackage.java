@@ -83,4 +83,21 @@ public class JavaPackage implements Comparable<JavaPackage> {
 		final List<String> elements = getElements();
 		return elements.get(elements.size() - 1);
 	}
+
+	/**
+	 * Indicates whether this package is anywhere within the given package, in
+	 * other words is the same package or is a sub-package of the given one. For
+	 * example:
+	 * <ul>
+	 * <li>com.foo is within com.foo</li>
+	 * <li>com.foo.bar is within com.foo</li>
+	 * <li>com.foo is not within com.foo.bar</li>
+	 * </ul>
+	 * 
+	 * @param otherPackage the package to check against (can be <code>null</code>)
+	 * @return <code>false</code> if a <code>null</code> package is given
+	 */
+	public boolean isWithin(final JavaPackage otherPackage) {
+		return otherPackage != null && fullyQualifiedPackageName.startsWith(otherPackage.getFullyQualifiedPackageName());
+	}
 }

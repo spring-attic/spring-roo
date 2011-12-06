@@ -1,6 +1,8 @@
 package org.springframework.roo.model;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
 import java.util.List;
@@ -15,10 +17,14 @@ import org.junit.Test;
  */
 public class JavaPackageTest {
 
+	// Constants
+	private static final JavaPackage CHILD = new JavaPackage("com.foo.bar");
+	private static final JavaPackage PARENT = new JavaPackage("com.foo");
+
 	@Test
 	public void testGetElementsOfMultiLevelPackage() {
 		// Set up
-		final JavaPackage javaPackage = new JavaPackage("com.foo.bar");
+		final JavaPackage javaPackage = CHILD;
 
 		// Invoke
 		final List<String> elements = javaPackage.getElements();
@@ -39,5 +45,25 @@ public class JavaPackageTest {
 		// Check
 		assertEquals(Arrays.asList("me"), elements);
 		assertEquals("me", javaPackage.getLastElement());
+	}
+	
+	@Test
+	public void testPackageIsNotWithinNullPackage() {
+		assertFalse(PARENT.isWithin(null));
+	}
+	
+	@Test
+	public void testPackageIsWithinSelf() {
+		assertTrue(PARENT.isWithin(PARENT));
+	}
+	
+	@Test
+	public void testChildPackageIsWithinParent() {
+		assertTrue(CHILD.isWithin(PARENT));
+	}
+	
+	@Test
+	public void testParentPackageIsNotWithinChild() {
+		assertFalse(PARENT.isWithin(CHILD));
 	}
 }
