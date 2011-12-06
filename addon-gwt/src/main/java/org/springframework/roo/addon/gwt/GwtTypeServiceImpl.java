@@ -299,7 +299,7 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 		Set<String> sourcePaths = new HashSet<String>();
 		List<Element> sourcePathElements = XmlUtils.findElements("/module/source", gwtXmlRoot);
 		for (Element sourcePathElement : sourcePathElements) {
-			String path = projectOperations.getTopLevelPackage(moduleName) + "." + sourcePathElement.getAttribute("path");
+			String path = projectOperations.getTopLevelPackage(moduleName) + "." + sourcePathElement.getAttribute("path").replace("/", ".");
 			sourcePaths.add(path);
 		}
 
