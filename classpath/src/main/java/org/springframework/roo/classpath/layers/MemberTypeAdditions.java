@@ -153,6 +153,9 @@ public class MemberTypeAdditions {
 	 * @throws IllegalStateException if there's more than one field in the builder
 	 */
 	public FieldMetadata getInvokedField() {
+		if (classOrInterfaceDetailsBuilder == null) {
+			return null;
+		}
 		final List<FieldMetadataBuilder> declaredFields = classOrInterfaceDetailsBuilder.getDeclaredFields();
 		switch (declaredFields.size()) {
 			case 0:

@@ -1,6 +1,7 @@
 package org.springframework.roo.classpath.layers;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,5 +47,14 @@ public class MemberTypeAdditionsTest {
 			parameterSymbols.add(new JavaSymbolName(parameterName));
 		}
 		assertEquals(expectedMethodCall, MemberTypeAdditions.buildMethodCall(target, method, parameterSymbols.iterator()));
+	}
+	
+	@Test
+	public void testGetInvokedFieldWhenBuilderIsNull() {
+		// Set up
+		final MemberTypeAdditions memberTypeAdditions = new MemberTypeAdditions(null, "foo", "foo()");
+		
+		// Invoke and check
+		assertNull(memberTypeAdditions.getInvokedField());
 	}
 }
