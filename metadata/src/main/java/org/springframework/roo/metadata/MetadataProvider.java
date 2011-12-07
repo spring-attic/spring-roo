@@ -10,14 +10,13 @@ package org.springframework.roo.metadata;
 public interface MetadataProvider {
 
 	/**
-	 * Indicates the {@link MetadataItem} the provider offers metadata for.
-	 * The returned type is a {@link MetadataIdentificationUtils#isIdentifyingClass(String)}.
-	 *
+	 * Returns the class-level id of the type of metadata being provided.
 	 * <p>
-	 * The value returned by this method must remain identical for the entire lifecycle of a particular
-	 * {@link MetadataProvider} instance. It cannot change once it has been returned.
+	 * The value returned by this method must remain identical for the entire
+	 * lifecycle of a particular {@link MetadataProvider} instance. It cannot
+	 * change once it has been returned.
 	 *
-	 * @return the metadata identification class this provider is authoritative for (never null)
+	 * @return a value that satisfies {@link MetadataIdentificationUtils#isIdentifyingClass(String)}.
 	 */
 	String getProvidesType();
 
