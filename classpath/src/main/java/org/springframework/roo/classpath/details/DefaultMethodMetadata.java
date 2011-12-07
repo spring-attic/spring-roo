@@ -64,4 +64,8 @@ public class DefaultMethodMetadata extends AbstractInvocableMemberMetadata imple
 		tsc.append("body", getBody());
 		return tsc.toString();
 	}
+
+	public boolean isStatic() {
+		return Modifier.isStatic(getModifier());
+	}
 }

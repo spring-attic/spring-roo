@@ -31,4 +31,12 @@ public interface MethodMetadata extends InvocableMemberMetadata {
 	 * @since 1.2.0
 	 */
 	boolean hasSameName(final MethodMetadata... otherMethods);
+	
+	/**
+	 * Indicates whether this method is static
+	 * 
+	 * @return see above
+	 * @since 1.2.0
+	 */
+	boolean isStatic();
 }

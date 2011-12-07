@@ -1,5 +1,9 @@
 package org.springframework.roo.classpath.details;
 
+import static org.springframework.roo.classpath.PhysicalTypeCategory.CLASS;
+import static org.springframework.roo.classpath.PhysicalTypeCategory.ENUMERATION;
+import static org.springframework.roo.classpath.PhysicalTypeCategory.INTERFACE;
+
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -113,7 +117,7 @@ public class DefaultClassOrInterfaceTypeDetails extends AbstractMemberHoldingTyp
 			this.implementsTypes = implementsTypes;
 		}
 
-		if (enumConstants != null && physicalTypeCategory == PhysicalTypeCategory.ENUMERATION) {
+		if (enumConstants != null && physicalTypeCategory == ENUMERATION) {
 			this.enumConstants = enumConstants;
 		}
 
@@ -218,5 +222,9 @@ public class DefaultClassOrInterfaceTypeDetails extends AbstractMemberHoldingTyp
 		tsc.append("annotations", getAnnotations());
 		tsc.append("customData", getCustomData());
 		return tsc.toString();
+	}
+
+	public boolean isAbstract() {
+		return physicalTypeCategory == INTERFACE || (physicalTypeCategory == CLASS && Modifier.isAbstract(getModifier()));
 	}
 }

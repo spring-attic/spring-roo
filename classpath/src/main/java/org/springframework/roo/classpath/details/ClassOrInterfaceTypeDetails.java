@@ -43,4 +43,11 @@ public interface ClassOrInterfaceTypeDetails extends MemberHoldingTypeDetails {
 	 * @return <code>false</code> if a <code>null</code> field name is given
 	 */
 	boolean declaresField(JavaSymbolName fieldName);
+	
+	/**
+	 * Indicates whether this class, interface, or enum is abstract
+	 * 
+	 * @return see above
+	 */
+	boolean isAbstract();
 }
