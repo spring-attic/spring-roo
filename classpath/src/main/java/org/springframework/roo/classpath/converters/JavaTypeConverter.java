@@ -52,7 +52,7 @@ public class JavaTypeConverter implements Converter<JavaType> {
 
 	/**
 	 * If this String appears in an option context, this converter will update
-	 * the last used type and the focussed module as applicable.
+	 * the last used type and the focused module as applicable.
 	 */
 	public static final String UPDATE = "update";
 
@@ -91,7 +91,7 @@ public class JavaTypeConverter implements Converter<JavaType> {
 			module = projectOperations.getPomFromModuleName(moduleName);
 			topLevelPath = typeLocationService.getTopLevelPackageForModule(module);
 			value = value.substring(value.indexOf(MODULE_PATH_SEPARATOR) + 1, value.length()).trim();
-			if (optionContext.contains("update")) {
+			if (optionContext.contains(UPDATE)) {
 				projectOperations.setModule(module);
 			}
 		} else {
@@ -170,12 +170,12 @@ public class JavaTypeConverter implements Converter<JavaType> {
 					topLevelPath = topLevelPath.substring(0, topLevelPath.lastIndexOf('.'));
 				}
 			}
-			if (found) {
-				lastUsed.setTopLevelPackage(new JavaPackage(topLevelPath));
-			} else {
+			if (!found) {
 				return null;
 			}
 		}
+
+		lastUsed.setTopLevelPackage(new JavaPackage(topLevelPath));
 		return newValue;
 	}
 
