@@ -25,7 +25,6 @@ import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.details.BeanInfoUtils;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
-import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
@@ -207,17 +206,17 @@ public class GwtScaffoldMetadataProviderImpl implements GwtScaffoldMetadataProvi
 				return;
 			}
 
-			if (MemberFindingUtils.getAnnotationOfType(cid.getAnnotations(), RooJavaType.ROO_GWT_PROXY) != null) {
+			if (cid.getAnnotation(RooJavaType.ROO_GWT_PROXY) != null) {
 				ClassOrInterfaceTypeDetails entityType = gwtTypeService.lookupEntityFromProxy(cid);
 				if (entityType != null) {
 					upstreamDependency = entityType.getDeclaredByMetadataId();
 				}
-			} else if (MemberFindingUtils.getAnnotationOfType(cid.getAnnotations(), RooJavaType.ROO_GWT_REQUEST) != null) {
+			} else if (cid.getAnnotation(RooJavaType.ROO_GWT_REQUEST) != null) {
 				ClassOrInterfaceTypeDetails entityType = gwtTypeService.lookupEntityFromRequest(cid);
 				if (entityType != null) {
 					upstreamDependency = entityType.getDeclaredByMetadataId();
 				}
-			} else if (MemberFindingUtils.getAnnotationOfType(cid.getAnnotations(), RooJavaType.ROO_GWT_LOCATOR) != null) {
+			} else if (cid.getAnnotation(RooJavaType.ROO_GWT_LOCATOR) != null) {
 				ClassOrInterfaceTypeDetails entityType = gwtTypeService.lookupEntityFromLocator(cid);
 				if (entityType != null) {
 					upstreamDependency = entityType.getDeclaredByMetadataId();

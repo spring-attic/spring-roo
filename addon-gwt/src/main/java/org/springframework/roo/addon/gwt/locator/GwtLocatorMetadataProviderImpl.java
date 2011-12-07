@@ -19,7 +19,6 @@ import org.springframework.roo.classpath.TypeManagementService;
 import org.springframework.roo.classpath.customdata.CustomDataKeys;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
-import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
@@ -186,7 +185,7 @@ public class GwtLocatorMetadataProviderImpl implements GwtLocatorMetadataProvide
 				return;
 			}
 			boolean processed = false;
-			if (MemberFindingUtils.getAnnotationOfType(cid.getAnnotations(), RooJavaType.ROO_GWT_REQUEST) != null) {
+			if (cid.getAnnotation(RooJavaType.ROO_GWT_REQUEST) != null) {
 				ClassOrInterfaceTypeDetails proxy = gwtTypeService.lookupProxyFromRequest(cid);
 				if (proxy != null) {
 					JavaType typeName = PhysicalTypeIdentifier.getJavaType(proxy.getDeclaredByMetadataId());
@@ -195,7 +194,7 @@ public class GwtLocatorMetadataProviderImpl implements GwtLocatorMetadataProvide
 					processed = true;
 				}
 			}
-			if (!processed && MemberFindingUtils.getAnnotationOfType(cid.getAnnotations(), RooJavaType.ROO_GWT_PROXY) == null) {
+			if (!processed && cid.getAnnotation(RooJavaType.ROO_GWT_PROXY) == null) {
 				boolean found = false;
 				for (ClassOrInterfaceTypeDetails proxyCid : typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_GWT_PROXY)) {
 					AnnotationMetadata annotationMetadata = GwtUtils.getFirstAnnotation(proxyCid, GwtUtils.ROO_PROXY_REQUEST_ANNOTATIONS);
