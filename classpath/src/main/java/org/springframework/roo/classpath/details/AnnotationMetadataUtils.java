@@ -14,7 +14,6 @@ import org.springframework.roo.classpath.details.annotations.NestedAnnotationAtt
 import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
 import org.springframework.roo.model.EnumDetails;
 import org.springframework.roo.model.ImportRegistrationResolver;
-import org.springframework.roo.model.ImportRegistrationResolverImpl;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.support.util.Assert;
@@ -101,7 +100,7 @@ public abstract class AnnotationMetadataUtils {
 			attributeValue = "'" + ((CharAttributeValue) value).getValue().toString() + "'";
 		} else if (value instanceof ClassAttributeValue) {
 			JavaType clazz = ((ClassAttributeValue) value).getValue();
-			if (resolver == null || ImportRegistrationResolverImpl.isPartOfJavaLang(clazz.getSimpleTypeName()) || resolver.isFullyQualifiedFormRequiredAfterAutoImport(clazz)) {
+			if (resolver == null || resolver.isFullyQualifiedFormRequiredAfterAutoImport(clazz)) {
 				attributeValue = clazz.getFullyQualifiedTypeName() + ".class";
 			} else {
 				attributeValue = clazz.getSimpleTypeName() + ".class";

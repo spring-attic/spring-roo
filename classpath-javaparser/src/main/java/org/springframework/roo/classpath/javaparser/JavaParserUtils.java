@@ -31,10 +31,10 @@ import java.util.List;
 import java.util.Set;
 
 import org.springframework.roo.model.DataType;
-import org.springframework.roo.model.ImportRegistrationResolverImpl;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.JdkJavaType;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
 
@@ -361,7 +361,6 @@ public final class JavaParserUtils  {
 				}
 
 				// This name expression (which contains a dot) had its qualifier imported, so let's use the import
-
 			} else {
 				// First letter is lowercase, so the reference already includes a package
 				return new JavaType(qne.toString());
@@ -389,7 +388,7 @@ public final class JavaParserUtils  {
 
 		ImportDeclaration importDeclaration = getImportDeclarationFor(compilationUnitServices, nameToFind);
 		if (importDeclaration == null) {
-			if (ImportRegistrationResolverImpl.isPartOfJavaLang(nameToFind.getName())) {
+			if (JdkJavaType.isPartOfJavaLang(nameToFind.getName())) {
 				return new JavaType("java.lang." + nameToFind.getName());
 			}
 			String name = compilationUnitPackage.getFullyQualifiedPackageName().equals("") ? nameToFind.getName() : compilationUnitPackage.getFullyQualifiedPackageName() + "." + nameToFind.getName();
@@ -663,13 +662,13 @@ public final class JavaParserUtils  {
 			}
 		}
 
-		if (addImport && ImportRegistrationResolverImpl.isPartOfJavaLang(typeToImport.getSimpleTypeName())) {
+		if (addImport && JdkJavaType.isPartOfJavaLang(typeToImport.getSimpleTypeName())) {
 			// This simple type name would be part of java.lang if left as the simple name. We want a fully-qualified name.
 			addImport = false;
 			useSimpleTypeName = false;
 		}
 
-		if (ImportRegistrationResolverImpl.isPartOfJavaLangPackage(typeToImport)) {
+		if (JdkJavaType.isPartOfJavaLang(typeToImport)) {
 			// So we would have imported, but we don't need to
 			addImport = false;
 

@@ -338,7 +338,7 @@ public class JavaType implements Comparable<JavaType> {
 			// It wasn't a WILDCARD_NEITHER, so we might need to continue with more details
 			if (dataType == DataType.TYPE || !staticForm) {
 				if (resolver != null) {
-					if (resolver.isFullyQualifiedFormRequiredAfterAutoImport(this) && !ImportRegistrationResolverImpl.isPartOfJavaLang(this)) {
+					if (resolver.isFullyQualifiedFormRequiredAfterAutoImport(this)) {
 						sb.append(fullyQualifiedTypeName);
 					} else {
 						sb.append(getSimpleTypeName());

@@ -77,11 +77,11 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	// Constants
 	private static final String PROVIDES_TYPE_STRING = DataOnDemandMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
-	private static final JavaSymbolName VALUE = new JavaSymbolName("value");
 	private static final String OBJ_VAR = "obj";
 	private static final String INDEX_VAR = "index";
 	private static final JavaSymbolName OBJ_SYMBOL = new JavaSymbolName(OBJ_VAR);
 	private static final JavaSymbolName INDEX_SYMBOL = new JavaSymbolName(INDEX_VAR);
+	private static final JavaSymbolName VALUE = new JavaSymbolName("value");
 	private static final JavaSymbolName MIN_SYMBOL = new JavaSymbolName("min");
 	private static final JavaSymbolName MAX_SYMBOL = new JavaSymbolName("max");
 
@@ -144,15 +144,15 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		entity = annotationValues.getEntity();
 
 		// Calculate and store field initializers
-		for (Map.Entry<FieldMetadata, DataOnDemandMetadata> entry : locatedFields.entrySet()) {
+		for (final Map.Entry<FieldMetadata, DataOnDemandMetadata> entry : locatedFields.entrySet()) {
 			final FieldMetadata field = entry.getKey();
-			String initializer = getFieldInitializer(field, entry.getValue());
+			final String initializer = getFieldInitializer(field, entry.getValue());
 			fieldInitializers.put(field, initializer);
 		}
 
-		for (EmbeddedHolder embeddedHolder: embeddedHolders) {
-			Map<FieldMetadata, String> initializers = new LinkedHashMap<FieldMetadata, String>();
-			for (FieldMetadata field : embeddedHolder.getFields()) {
+		for (final EmbeddedHolder embeddedHolder: embeddedHolders) {
+			final Map<FieldMetadata, String> initializers = new LinkedHashMap<FieldMetadata, String>();
+			for (final FieldMetadata field : embeddedHolder.getFields()) {
 				initializers.put(field, getFieldInitializer(field, null));
 			}
 			embeddedFieldInitializers.put(embeddedHolder.getEmbeddedField(), initializers);
@@ -167,12 +167,12 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 
 		builder.addMethod(getEmbeddedIdMutatorMethod());
 
-		for (EmbeddedHolder embeddedHolder : embeddedHolders) {
+		for (final EmbeddedHolder embeddedHolder : embeddedHolders) {
 			builder.addMethod(getEmbeddedClassMutatorMethod(embeddedHolder));
 			addEmbeddedClassFieldMutatorMethodsToBuilder(embeddedHolder);
 		}
 
-		for (MethodMetadataBuilder fieldInitializerMethod : getFieldMutatorMethods()) {
+		for (final MethodMetadataBuilder fieldInitializerMethod : getFieldMutatorMethods()) {
 			builder.addMethod(fieldInitializerMethod);
 		}
 
@@ -445,10 +445,10 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		final List<JavaSymbolName> parameterNames = Arrays.asList(OBJ_SYMBOL, INDEX_SYMBOL);
 
 		for (FieldMetadata field : embeddedHolder.getFields()) {
-			InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-
 			String initializer = getFieldInitializer(field, null);
 			JavaSymbolName fieldMutatorMethodName = BeanInfoUtils.getMutatorMethodName(field.getFieldName());
+
+			InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 			bodyBuilder.append(getFieldValidationBody(field, initializer, fieldMutatorMethodName, false));
 
 			JavaSymbolName embeddedClassMethodName = getEmbeddedFieldMutatorMethodName(embeddedHolder.getEmbeddedField().getFieldName(), field.getFieldName());
@@ -468,7 +468,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 
 		for (Map.Entry<FieldMetadata, String> entry : fieldInitializers.entrySet()) {
 			FieldMetadata field = entry.getKey();
-			JavaSymbolName mutatorName = BeanInfoUtils.getMutatorMethodName(field);
+			JavaSymbolName mutatorName = BeanInfoUtils.getMutatorMethodName(field.getFieldName());
 
 			// Locate user-defined method
 			if (governorHasMethod(mutatorName, parameterTypes)) {
@@ -490,8 +490,6 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	}
 
 	private String getFieldValidationBody(final FieldMetadata field, final String initializer, final JavaSymbolName mutatorName, final boolean isFieldOfEmbeddableType) {
-		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-
 		String fieldName = field.getFieldName().getSymbolName();
 		JavaType fieldType = field.getFieldType();
 
@@ -504,6 +502,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			suffix = "D";
 		}
 
+		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine(getTypeStr(fieldType) + " " + fieldName + " = " + initializer + ";");
 
 		if (fieldType.equals(JavaType.STRING)) {
@@ -591,15 +590,14 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	}
 
 	private String getDigitsBody(final FieldMetadata field, final AnnotationMetadata digitsAnnotation, final String suffix) {
-		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-
-		Integer integerValue = (Integer) digitsAnnotation.getAttribute(new JavaSymbolName("integer")).getValue();
-		Integer fractionValue = (Integer) digitsAnnotation.getAttribute(new JavaSymbolName("fraction")).getValue();
-
 		String fieldName = field.getFieldName().getSymbolName();
 		JavaType fieldType = field.getFieldType();
 
+		Integer integerValue = (Integer) digitsAnnotation.getAttribute(new JavaSymbolName("integer")).getValue();
+		Integer fractionValue = (Integer) digitsAnnotation.getAttribute(new JavaSymbolName("fraction")).getValue();
 		BigDecimal maxValue = new BigDecimal(StringUtils.padRight("9", integerValue, '9') + "." + StringUtils.padRight("9", fractionValue, '9'));
+
+		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		if (fieldType.equals(BIG_DECIMAL)) {
 			bodyBuilder.appendFormalLine("if (" + fieldName + ".compareTo(new " + BIG_DECIMAL.getSimpleTypeName() + "(\"" + maxValue + "\")) == 1) {");
 			bodyBuilder.indent();
@@ -617,10 +615,10 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	}
 
 	private String getDecimalMinAndDecimalMaxBody(final FieldMetadata field, final AnnotationMetadata decimalMinAnnotation, final AnnotationMetadata decimalMaxAnnotation, final String suffix) {
-		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-
 		String fieldName = field.getFieldName().getSymbolName();
 		JavaType fieldType = field.getFieldType();
+
+		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
 		if (decimalMinAnnotation != null && decimalMaxAnnotation == null) {
 			String minValue = (String) decimalMinAnnotation.getAttribute(VALUE).getValue();
@@ -675,20 +673,19 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	}
 
 	private String getColumnPrecisionAndScaleBody(final FieldMetadata field, final Map<String, Object> values, final String suffix) {
-		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-
 		if (values == null || !values.containsKey("precision")) {
-			return bodyBuilder.getOutput();
+			return InvocableMemberBodyBuilder.getInstance().getOutput();
 		}
-
-		Integer precision = (Integer) values.get("precision");
-		Integer scale = (Integer) values.get("scale");
-		scale = scale == null ? 0 : scale;
 
 		String fieldName = field.getFieldName().getSymbolName();
 		JavaType fieldType = field.getFieldType();
 
+		Integer precision = (Integer) values.get("precision");
+		Integer scale = (Integer) values.get("scale");
+		scale = scale == null ? 0 : scale;
 		BigDecimal maxValue = new BigDecimal(StringUtils.padRight("9", (precision - scale), '9') + "." + StringUtils.padRight("9", scale, '9'));
+
+		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		if (fieldType.equals(BIG_DECIMAL)) {
 			bodyBuilder.appendFormalLine("if (" + fieldName + ".compareTo(new " + BIG_DECIMAL.getSimpleTypeName() + "(\"" + maxValue + "\")) == 1) {");
 			bodyBuilder.indent();
@@ -706,10 +703,10 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	}
 
 	private String getMinAndMaxBody(final FieldMetadata field, final String suffix) {
-		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-
 		String fieldName = field.getFieldName().getSymbolName();
 		JavaType fieldType = field.getFieldType();
+
+		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
 		AnnotationMetadata minAnnotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), MIN);
 		AnnotationMetadata maxAnnotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), MAX);
@@ -906,12 +903,14 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		// Create the method body
 		builder.getImportRegistrationResolver().addImports(ARRAY_LIST, ITERATOR, CONSTRAINT_VIOLATION_EXCEPTION, CONSTRAINT_VIOLATION);
 
+		findEntriesMethodAdditions.copyAdditionsTo(builder, governorTypeDetails);
+		persistMethodAdditions.copyAdditionsTo(builder, governorTypeDetails);
+
 		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		final String dataField = getDataFieldName().getSymbolName();
 		bodyBuilder.appendFormalLine("int from = 0;");
 		bodyBuilder.appendFormalLine("int to = 10;");
 		bodyBuilder.appendFormalLine(dataField + " = " + findEntriesMethodAdditions.getMethodCall() + ";");
-		findEntriesMethodAdditions.copyAdditionsTo(builder, governorTypeDetails);
 		bodyBuilder.appendFormalLine("if (" + dataField + " == null) {");
 		bodyBuilder.indent();
 		bodyBuilder.appendFormalLine("throw new IllegalStateException(\"Find entries implementation for '" + entity.getSimpleTypeName() + "' illegally returned null\");");
@@ -930,7 +929,6 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		bodyBuilder.appendFormalLine("try {");
 		bodyBuilder.indent();
 		bodyBuilder.appendFormalLine(persistMethodAdditions.getMethodCall() + ";");
-		persistMethodAdditions.copyAdditionsTo(builder, governorTypeDetails);
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("} catch (ConstraintViolationException e) {");
 		bodyBuilder.indent();
@@ -981,7 +979,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			}
 		} else if (fieldType.equals(CALENDAR)) {
 			builder.getImportRegistrationResolver().addImports(CALENDAR, GREGORIAN_CALENDAR);
-			
+
 			String calendarString = "new GregorianCalendar(Calendar.getInstance().get(Calendar.YEAR), Calendar.getInstance().get(Calendar.MONTH), Calendar.getInstance().get(Calendar.DAY_OF_MONTH)";
 			if (MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), PAST) != null) {
 				initializer = calendarString + " - 1)";

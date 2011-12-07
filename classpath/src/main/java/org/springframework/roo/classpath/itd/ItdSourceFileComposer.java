@@ -144,6 +144,7 @@ public class ItdSourceFileComposer {
 		}
 
 		content = true;
+
 		for (final AnnotationMetadata typeAnnotation : typeAnnotations) {
 			this.appendIndent();
 			this.append("declare @type: ");
@@ -163,6 +164,7 @@ public class ItdSourceFileComposer {
 		}
 
 		content = true;
+
 		for (final DeclaredFieldAnnotationDetails fieldDetails : fieldAnnotations) {
 			this.appendIndent();
 			this.append("declare @field: * ");
@@ -187,6 +189,7 @@ public class ItdSourceFileComposer {
 		}
 
 		content = true;
+
 		for (final DeclaredMethodAnnotationDetails methodDetails : methodAnnotations) {
 			this.appendIndent();
 			this.append("declare @method: ");
@@ -219,6 +222,7 @@ public class ItdSourceFileComposer {
 		}
 
 		content = true;
+
 		for (final JavaType extendsType : extendsTypes) {
 			this.appendIndent();
 			this.append("declare parents: ");
@@ -242,6 +246,7 @@ public class ItdSourceFileComposer {
 		}
 
 		content = true;
+
 		for (final JavaType extendsType : implementsTypes) {
 			this.appendIndent();
 			this.append("declare parents: ");
@@ -341,7 +346,7 @@ public class ItdSourceFileComposer {
 				this.newLine(false);
 			}
 
-			// Append "<modifier> <fieldtype> <fieldName>" portion
+			// Append "<modifier> <fieldType> <fieldName>" portion
 			this.appendIndent();
 			if (field.getModifier() != 0) {
 				this.append(Modifier.toString(field.getModifier()));
@@ -470,7 +475,7 @@ public class ItdSourceFileComposer {
 				this.newLine(false);
 			}
 
-			// Append "<modifier> <returntype> <methodName>" portion
+			// Append "<modifier> <returnType> <methodName>" portion
 			this.appendIndent();
 			if (method.getModifier() != 0) {
 				this.append(Modifier.toString(method.getModifier()));
@@ -512,7 +517,7 @@ public class ItdSourceFileComposer {
 				this.append(") throws ");
 				for (int i = 0; i < throwsTypes.size(); i++) {
 					this.append(throwsTypes.get(i).getNameIncludingTypeParameters(false, resolver));
-					if (throwsTypes.size() > (i+1)) {
+					if (throwsTypes.size() > (i + 1)) {
 						this.append(", ");
 					}
 				}

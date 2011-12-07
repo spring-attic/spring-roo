@@ -40,6 +40,8 @@ import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
+import org.springframework.roo.support.util.Assert;
+
 /**
  * Constants for JDK {@link JavaType}s.
  *
@@ -50,6 +52,10 @@ import javax.annotation.PostConstruct;
  */
 public final class JdkJavaType {
 	
+	// Constants
+	private static final List<String> javaLangSimpleTypeNames = new ArrayList<String>();
+	private static final List<String> javaLangTypes = new ArrayList<String>();
+
 	// java.beans
 	public static final JavaType PROPERTY_EDITOR_SUPPORT = new JavaType(PropertyEditorSupport.class);
 	
@@ -115,9 +121,126 @@ public final class JdkJavaType {
 		return javaType.equals(DATE) || javaType.equals(CALENDAR);
 	}
 
+	static {
+		javaLangSimpleTypeNames.add("Appendable");
+		javaLangSimpleTypeNames.add("CharSequence");
+		javaLangSimpleTypeNames.add("Cloneable");
+		javaLangSimpleTypeNames.add("Comparable");
+		javaLangSimpleTypeNames.add("Iterable");
+		javaLangSimpleTypeNames.add("Readable");
+		javaLangSimpleTypeNames.add("Runnable");
+		javaLangSimpleTypeNames.add("Boolean");
+		javaLangSimpleTypeNames.add("Byte");
+		javaLangSimpleTypeNames.add("Character");
+		javaLangSimpleTypeNames.add("Class");
+		javaLangSimpleTypeNames.add("ClassLoader");
+		javaLangSimpleTypeNames.add("Compiler");
+		javaLangSimpleTypeNames.add("Double");
+		javaLangSimpleTypeNames.add("Enum");
+		javaLangSimpleTypeNames.add("Float");
+		javaLangSimpleTypeNames.add("InheritableThreadLocal");
+		javaLangSimpleTypeNames.add("Integer");
+		javaLangSimpleTypeNames.add("Long");
+		javaLangSimpleTypeNames.add("Math");
+		javaLangSimpleTypeNames.add("Number");
+		javaLangSimpleTypeNames.add("Object");
+		javaLangSimpleTypeNames.add("Package");
+		javaLangSimpleTypeNames.add("Process");
+		javaLangSimpleTypeNames.add("ProcessBuilder");
+		javaLangSimpleTypeNames.add("Runtime");
+		javaLangSimpleTypeNames.add("RuntimePermission");
+		javaLangSimpleTypeNames.add("SecurityManager");
+		javaLangSimpleTypeNames.add("Short");
+		javaLangSimpleTypeNames.add("StackTraceElement");
+		javaLangSimpleTypeNames.add("StrictMath");
+		javaLangSimpleTypeNames.add("String");
+		javaLangSimpleTypeNames.add("StringBuffer");
+		javaLangSimpleTypeNames.add("StringBuilder");
+		javaLangSimpleTypeNames.add("System");
+		javaLangSimpleTypeNames.add("Thread");
+		javaLangSimpleTypeNames.add("ThreadGroup");
+		javaLangSimpleTypeNames.add("ThreadLocal");
+		javaLangSimpleTypeNames.add("Throwable");
+		javaLangSimpleTypeNames.add("Void");
+		javaLangSimpleTypeNames.add("ArithmeticException");
+		javaLangSimpleTypeNames.add("ArrayIndexOutOfBoundsException");
+		javaLangSimpleTypeNames.add("ArrayStoreException");
+		javaLangSimpleTypeNames.add("ClassCastException");
+		javaLangSimpleTypeNames.add("ClassNotFoundException");
+		javaLangSimpleTypeNames.add("CloneNotSupportedException");
+		javaLangSimpleTypeNames.add("EnumConstantNotPresentException");
+		javaLangSimpleTypeNames.add("Exception");
+		javaLangSimpleTypeNames.add("IllegalAccessException");
+		javaLangSimpleTypeNames.add("IllegalArgumentException");
+		javaLangSimpleTypeNames.add("IllegalMonitorStateException");
+		javaLangSimpleTypeNames.add("IllegalStateException");
+		javaLangSimpleTypeNames.add("IllegalThreadStateException");
+		javaLangSimpleTypeNames.add("IndexOutOfBoundsException");
+		javaLangSimpleTypeNames.add("InstantiationException");
+		javaLangSimpleTypeNames.add("InterruptedException");
+		javaLangSimpleTypeNames.add("NegativeArraySizeException");
+		javaLangSimpleTypeNames.add("NoSuchFieldException");
+		javaLangSimpleTypeNames.add("NoSuchMethodException");
+		javaLangSimpleTypeNames.add("NullPointerException");
+		javaLangSimpleTypeNames.add("NumberFormatException");
+		javaLangSimpleTypeNames.add("RuntimeException");
+		javaLangSimpleTypeNames.add("SecurityException");
+		javaLangSimpleTypeNames.add("StringIndexOutOfBoundsException");
+		javaLangSimpleTypeNames.add("TypeNotPresentException");
+		javaLangSimpleTypeNames.add("UnsupportedOperationException");
+		javaLangSimpleTypeNames.add("AbstractMethodError");
+		javaLangSimpleTypeNames.add("AssertionError");
+		javaLangSimpleTypeNames.add("ClassCircularityError");
+		javaLangSimpleTypeNames.add("ClassFormatError");
+		javaLangSimpleTypeNames.add("Error");
+		javaLangSimpleTypeNames.add("ExceptionInInitializerError");
+		javaLangSimpleTypeNames.add("IllegalAccessError");
+		javaLangSimpleTypeNames.add("IncompatibleClassChangeError");
+		javaLangSimpleTypeNames.add("InstantiationError");
+		javaLangSimpleTypeNames.add("InternalError");
+		javaLangSimpleTypeNames.add("LinkageError");
+		javaLangSimpleTypeNames.add("NoClassDefFoundError");
+		javaLangSimpleTypeNames.add("NoSuchFieldError");
+		javaLangSimpleTypeNames.add("NoSuchMethodError");
+		javaLangSimpleTypeNames.add("OutOfMemoryError");
+		javaLangSimpleTypeNames.add("StackOverflowError");
+		javaLangSimpleTypeNames.add("ThreadDeath");
+		javaLangSimpleTypeNames.add("UnknownError");
+		javaLangSimpleTypeNames.add("UnsatisfiedLinkError");
+		javaLangSimpleTypeNames.add("UnsupportedClassVersionError");
+		javaLangSimpleTypeNames.add("VerifyError");
+		javaLangSimpleTypeNames.add("VirtualMachineError");
+	}
+
+	/**
+	 * Determines whether the presented simple type name is part of java.lang or not.
+	 * 
+	 * @param simpleTypeName the simple type name (required)
+	 * @return whether the type is declared as part of java.lang
+	 */
+	public static boolean isPartOfJavaLang(final String simpleTypeName) {
+		Assert.hasText(simpleTypeName, "Simple type name required");
+		return javaLangSimpleTypeNames.contains(simpleTypeName);
+	}
+
+	/**
+	 * Determines whether the presented java type is in the java.lang package or not.
+	 * 
+	 * @param javaType the Java type (required)
+	 * @return whether the type is declared as part of java.lang
+	 */
+	public static boolean isPartOfJavaLang(final JavaType javaType) {
+		Assert.notNull(javaType, "Java type required");
+		if (javaLangTypes.isEmpty()) {
+			for (String javaLangSimpleTypeName : javaLangSimpleTypeNames) {
+				javaLangTypes.add("java.lang." + javaLangSimpleTypeName);
+			}
+		}
+		return javaLangTypes.contains(javaType.getFullyQualifiedTypeName());
+	}
+
 	/**
 	 * Constructor is private to prevent instantiation
 	 */
-	private JdkJavaType() {
-	}
+	private JdkJavaType() {}
 }
