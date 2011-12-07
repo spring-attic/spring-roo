@@ -64,17 +64,19 @@ public class MavenPathResolvingStrategy extends AbstractPathResolvingStrategy {
 	}
 	
 	public LogicalPath getFocusedPath(final Path path) {
-		return pomManagementService.getFocusedModule().getPhysicalPath(path).getLogicalPath();
+		final PhysicalPath physicalPath = pomManagementService.getFocusedModule().getPhysicalPath(path);
+		Assert.notNull(physicalPath, "Physical path for '" + path.name() + "' not found");
+		return physicalPath.getLogicalPath();
 	}
 
 	public String getFocusedRoot(final Path path) {
 		return pomManagementService.getFocusedModule().getPathLocation(path);
 	}
-	
+
 	public String getIdentifier(final LogicalPath logicalPath, final String relativePath) {
 		Assert.notNull(logicalPath, "Path required");
 		Assert.notNull(relativePath, "Relative path cannot be null, although it can be empty");
-		
+
 		String initialPath = FileUtils.getCanonicalPath(getPath(logicalPath));
 		initialPath = FileUtils.ensureTrailingSeparator(initialPath);
 		return initialPath + FileUtils.removeLeadingAndTrailingSeparators(relativePath);
