@@ -1,6 +1,7 @@
 package org.springframework.roo.classpath.details;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -377,6 +378,15 @@ public abstract class AbstractMemberHoldingTypeDetailsBuilder<T extends MemberHo
 			return false;
 		}
 		return this.declaredMethods.removeAll(methodsToRemove);
+	}
+	
+	/**
+	 * Ensures that the type being built does not extend any of the given types
+	 * 
+	 * @param superTypes the types to remove as supertypes
+	 */
+	public void removeExtendsTypes(final JavaType... superTypes) {
+		extendsTypes.removeAll(Arrays.asList(superTypes));
 	}
 
 	/**
