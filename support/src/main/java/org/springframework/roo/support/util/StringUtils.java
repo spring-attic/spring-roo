@@ -129,7 +129,7 @@ public final class StringUtils {
 	 * Indicates whether the given substring occurs within the given string.
 	 * Inspired by the eponymous method in commons-lang.
 	 * <pre>
-   		StringUtils.contains(null, *)     = false
+		StringUtils.contains(null, *)     = false
 		StringUtils.contains(*, null)     = false
 		StringUtils.contains("", "")      = true
 		StringUtils.contains("abc", "")   = true

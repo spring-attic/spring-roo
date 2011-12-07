@@ -181,15 +181,15 @@ public abstract class JLineShell extends AbstractShell implements CommandMarker,
 	public void setPromptPath(final String path, final boolean overrideStyle) {
 		if (reader.getTerminal().isANSISupported()) {
 			ANSIBuffer ansi = JLineLogHandler.getANSIBuffer();
-			if ("".equals(path) || path == null) {
-				shellPrompt = ansi.yellow("roo> ").toString();
+			if (path == null || "".equals(path)) {
+				shellPrompt = ansi.yellow(ROO_PROMPT).toString();
 			} else {
 				if (overrideStyle) {
 					ansi.append(path);
 				} else {
 					ansi.cyan(path);
 				}
-				shellPrompt = ansi.yellow(" roo> ").toString();
+				shellPrompt = ansi.yellow(" " + ROO_PROMPT).toString();
 			}
 		} else {
 			// The superclass will do for this non-ANSI terminal
@@ -221,7 +221,7 @@ public abstract class JLineShell extends AbstractShell implements CommandMarker,
 		addShellStatusListener(statusListener);
 
 		return new ConsoleReader(new FileInputStream(FileDescriptor.in), new PrintWriter(new OutputStreamWriter(ansiOut,
-		// Default to Cp850 encoding for Windows console output (ROO-439)
+			// Default to Cp850 encoding for Windows console output (ROO-439)
 			System.getProperty("jline.WindowsTerminal.output.encoding", "Cp850"))), null, ansiTerminal);
 	}
 

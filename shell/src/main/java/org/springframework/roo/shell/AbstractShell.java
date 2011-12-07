@@ -42,11 +42,12 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 
 	// Constants
 	private static final String MY_SLOT = AbstractShell.class.getName();
+	protected static final String ROO_PROMPT = "roo> ";
 
 	// Public static fields; don't rename, make final, or make non-public, as
 	// they are part of the public API, e.g. are changed by STS.
 	public static String completionKeys = "TAB";
-	public static String shellPrompt = "roo> ";
+	public static String shellPrompt = ROO_PROMPT;
 
 	// Instance fields
 	protected final Logger logger = HandlerUtils.getLogger(getClass());
@@ -277,10 +278,10 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 	 * @param path to set (can be null or empty; must NOT be formatted in any special way eg ANSI codes)
 	 */
 	public void setPromptPath(final String path) {
-		if ("".equals(path) || path == null) {
-			shellPrompt = "roo> ";
+		if (path == null || "".equals(path)) {
+			shellPrompt = ROO_PROMPT;
 		} else {
-			shellPrompt = path + " roo> ";
+			shellPrompt = path + " " + ROO_PROMPT;
 		}
 	}
 
@@ -354,7 +355,7 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 	}
 
 	@CliCommand(value = { "version" }, help = "Displays shell version")
-	public String version(@CliOption(key="", help="Special version flags") final String extra) {
+	public String version(@CliOption(key = "", help = "Special version flags") final String extra) {
 		StringBuilder sb = new StringBuilder();
 
 		if ("jaime".equals(extra)) {

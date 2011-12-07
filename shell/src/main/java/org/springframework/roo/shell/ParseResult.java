@@ -23,7 +23,7 @@ public class ParseResult {
 	// Fields
 	private final Method method;
 	private final Object instance;
-	private final Object[] arguments; // may be null if no arguments needed
+	private final Object[] arguments; // May be null if no arguments needed
 
 	public ParseResult(final Method method, final Object instance, final Object[] arguments) {
 		Assert.notNull(method, "Method required");

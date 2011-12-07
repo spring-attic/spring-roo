@@ -299,6 +299,11 @@ public class StringUtilsTest {
 	}
 	
 	@Test
+	public void testSingleSpaceStringIsBlank() {
+		assertTrue(StringUtils.isBlank(" "));
+	}
+	
+	@Test
 	public void testWhitespaceIsBlank() {
 		assertTrue(StringUtils.isBlank("\n\r\t "));
 	}
@@ -490,5 +495,23 @@ public class StringUtilsTest {
 		for (final String[] scenario : CONTAINS_SCENARIOS) {
 			assertEquals("Failed on scenario " + Arrays.toString(scenario), Boolean.valueOf(scenario[2]), StringUtils.contains(scenario[0], scenario[1]));
 		}
+	}
+	
+	@Test
+	public void testTrimToEmpty() {
+		String path = " ";
+		assertEquals(" roo>", StringUtils.trimToEmpty(path) + " roo>");
+	}
+	
+	@Test
+	public void testTrimToEmpty2() {
+		String path = null;
+		assertEquals(" roo>", StringUtils.trimToEmpty(path) + " roo>");
+	}
+
+	@Test
+	public void testTrimToEmpty3() {
+		String path = "core";
+		assertEquals("core roo>", StringUtils.trimToEmpty(path) + " roo>");
 	}
 }

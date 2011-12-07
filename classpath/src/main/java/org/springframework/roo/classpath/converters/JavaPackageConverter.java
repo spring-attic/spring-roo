@@ -82,7 +82,7 @@ public class JavaPackageConverter implements Converter<JavaPackage> {
 		if (projectOperations.isFocusedProjectAvailable()) {
 			return typeLocationService.getTopLevelPackageForModule(projectOperations.getFocusedModule());
 		}
-		return "";	// shouldn't happen if there's a project, i.e. most of the time
+		return ""; // Shouldn't happen if there's a project, i.e. most of the time
 	}
 
 	public boolean supports(final Class<?> requiredType, final String optionContext) {
