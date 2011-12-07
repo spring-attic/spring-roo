@@ -89,7 +89,7 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
 		Element configuration = XmlUtils.getConfiguration(getClass());
 
 		List<Dependency> dependencies = new ArrayList<Dependency>();
-		List<Element> springDependencies = XmlUtils.findElements("/configuration/repository/dependencies/dependency", configuration);
+		List<Element> springDependencies = XmlUtils.findElements("/configuration/spring-data-jpa/dependencies/dependency", configuration);
 		for (Element dependencyElement : springDependencies) {
 			dependencies.add(new Dependency(dependencyElement));
 		}
