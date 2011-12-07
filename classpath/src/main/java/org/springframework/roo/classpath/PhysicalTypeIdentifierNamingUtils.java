@@ -67,11 +67,29 @@ public final class PhysicalTypeIdentifierNamingUtils {
 		return LogicalPath.getInstance(instance.substring(0, index));
 	}
 
-	public static LogicalPath getPath(final String metadataIdentificationString) {
-		Assert.isTrue(metadataIdentificationString.contains("#"), "Metadata identification string '" + metadataIdentificationString + "' does not appear to be a valid identifier");
-		String instance = MetadataIdentificationUtils.getMetadataInstance(metadataIdentificationString);
-		int index = instance.indexOf("?");
-		return LogicalPath.getInstance(instance.substring(0, index));
+	/**
+	 * Returns the name of the project module that contains the metadata item
+	 * with the given id.
+	 * 
+	 * @param metadataId must be a valid metadata instance id
+	 * @return a non-<code>null</code> module name (blank means the root or only module)
+	 * @since 1.2.0
+	 */
+	public static String getModule(final String metadataId) {
+		return getPath(metadataId).getModule();
+	}
+	
+	/**
+	 * Returns the {@link LogicalPath} of the metadata item with the given id.
+	 * 
+	 * @param metadataId must be a valid metadata instance id
+	 * @return a non-<code>null</code> path
+	 */
+	public static LogicalPath getPath(final String metadataId) {
+		Assert.isTrue(MetadataIdentificationUtils.isIdentifyingInstance(metadataId), "Metadata id '" + metadataId + "' does not appear to be a valid identifier");
+		final String instanceKey = MetadataIdentificationUtils.getMetadataInstance(metadataId);
+		int index = instanceKey.indexOf("?");
+		return LogicalPath.getInstance(instanceKey.substring(0, index));
 	}
 
 	public static JavaType getJavaType(final String metadataIdentificationString) {
