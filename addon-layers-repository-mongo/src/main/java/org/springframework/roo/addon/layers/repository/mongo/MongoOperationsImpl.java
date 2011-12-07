@@ -59,6 +59,9 @@ import org.w3c.dom.Element;
 @Service
 public class MongoOperationsImpl implements MongoOperations {
 
+	// Constants
+	private static final String MONGO_XML = "applicationContext-mongo.xml";
+
 	// Fields
 	@Reference private DataOnDemandOperations dataOnDemandOperations;
 	@Reference private FileManager fileManager;
@@ -74,7 +77,7 @@ public class MongoOperationsImpl implements MongoOperations {
 	}
 
 	public boolean isInstalledInModule(String moduleName) {
-		return projectOperations.isFocusedProjectAvailable() && fileManager.exists(pathResolver.getFocusedIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext-mongo.xml"));
+		return projectOperations.isFocusedProjectAvailable() && fileManager.exists(pathResolver.getFocusedIdentifier(Path.SPRING_CONFIG_ROOT, MONGO_XML));
 	}
 
 	public boolean isMongoInstallationPossible() {
@@ -141,10 +144,10 @@ public class MongoOperationsImpl implements MongoOperations {
 	}
 
 	private void manageAppCtx(final String username, final String password, final String name, final boolean cloudFoundry, final String moduleName) {
-		String appCtxId = pathResolver.getFocusedIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext-mongo.xml");
+		String appCtxId = pathResolver.getFocusedIdentifier(Path.SPRING_CONFIG_ROOT, MONGO_XML);
 		if (!fileManager.exists(appCtxId)) {
 			try {
-				InputStream inputStream = FileUtils.getInputStream(getClass(), "applicationContext-mongo.xml");
+				InputStream inputStream = FileUtils.getInputStream(getClass(), MONGO_XML);
 				MutableFile mutableFile = fileManager.createFile(appCtxId);
 				String input = FileCopyUtils.copyToString(new InputStreamReader(inputStream));
 				input = input.replace("TO_BE_CHANGED_BY_ADDON", projectOperations.getTopLevelPackage(moduleName).getFullyQualifiedPackageName());
@@ -153,8 +156,9 @@ public class MongoOperationsImpl implements MongoOperations {
 				throw new IllegalStateException("Unable to create file " + appCtxId);
 			}
 		}
-		Document doc = XmlUtils.readXml(fileManager.getInputStream(appCtxId));
-		Element root = doc.getDocumentElement();
+
+		Document document = XmlUtils.readXml(fileManager.getInputStream(appCtxId));
+		Element root = document.getDocumentElement();
 		Element mongoSetup = XmlUtils.findFirstElement("/beans/db-factory", root);
 		Element mongoCloudSetup = XmlUtils.findFirstElement("/beans/mongo-db-factory", root);
 		if (!cloudFoundry) {
@@ -162,7 +166,7 @@ public class MongoOperationsImpl implements MongoOperations {
 				root.removeChild(mongoCloudSetup);
 			}
 			if (mongoSetup == null) {
-				mongoSetup = doc.createElement("mongo:db-factory");
+				mongoSetup = document.createElement("mongo:db-factory");
 				root.appendChild(mongoSetup);
 			}
 			if (StringUtils.hasText(name)) {
@@ -185,29 +189,29 @@ public class MongoOperationsImpl implements MongoOperations {
 				mongoCloudSetup = XmlUtils.findFirstElement("/beans/mongo-db-factory", root);
 			}
 			if (mongoCloudSetup == null) {
-				mongoCloudSetup = doc.createElement("cloud:mongo-db-factory");
+				mongoCloudSetup = document.createElement("cloud:mongo-db-factory");
 				mongoCloudSetup.setAttribute("id", "mongoDbFactory");
 				root.appendChild(mongoCloudSetup);
 			}
 		}
-		fileManager.createOrUpdateTextFileIfRequired(appCtxId, XmlUtils.nodeToString(doc), false);
+		fileManager.createOrUpdateTextFileIfRequired(appCtxId, XmlUtils.nodeToString(document), false);
 	}
 
 	private void manageDependencies(final String moduleName) {
 		Element configuration = XmlUtils.getConfiguration(getClass());
 
 		List<Dependency> dependencies = new ArrayList<Dependency>();
-		List<Element> springDependencies = XmlUtils.findElements("/configuration/repository/dependencies/dependency", configuration);
+		List<Element> springDependencies = XmlUtils.findElements("/configuration/spring-data-mongodb/dependencies/dependency", configuration);
 		for (Element dependencyElement : springDependencies) {
 			dependencies.add(new Dependency(dependencyElement));
 		}
 
 		List<Repository> repositories = new ArrayList<Repository>();
-		List<Element> repositoryElements = XmlUtils.findElements("/configuration/repository/repository", configuration);
+		List<Element> repositoryElements = XmlUtils.findElements("/configuration/spring-data-mongodb/repositories/repository", configuration);
 		for (Element repositoryElement : repositoryElements) {
 			repositories.add(new Repository(repositoryElement));
 		}
-		
+
 		projectOperations.addRepositories(moduleName, repositories);
 		projectOperations.addDependencies(moduleName, dependencies);
 	}
@@ -219,11 +223,12 @@ public class MongoOperationsImpl implements MongoOperations {
 		if (StringUtils.isBlank(port)) port = "27017";
 		if (StringUtils.isBlank(host)) host = "127.0.0.1";
 
-		Map<String, String> properties = new HashMap<String, String>();
+		final Map<String, String> properties = new HashMap<String, String>();
 		properties.put("mongo.username", username);
 		properties.put("mongo.password", password);
 		properties.put("mongo.name", name);
 		properties.put("mongo.port", port);
 		properties.put("mongo.host", host);
-		propFileOperations.addProperties(Path.SPRING_CONFIG_ROOT.getModulePathId(projectOperations.getFocusedModuleName()), "database.properties", properties, true, false);	}
+		propFileOperations.addProperties(Path.SPRING_CONFIG_ROOT.getModulePathId(projectOperations.getFocusedModuleName()), "database.properties", properties, true, false);
+	}
 }

@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <configuration>
-    <repository>
-        <repository>
-            <id>spring-maven-snapshot</id>
-            <name>Spring Maven MILESTONE Repository</name>
-            <url>http://maven.springframework.org/milestone</url>
-        </repository>
+    <spring-data-mongodb>
+        <repositories>
+            <repository>
+                <id>spring-maven-snapshot</id>
+                <name>Spring Maven MILESTONE Repository</name>
+                <url>http://maven.springframework.org/milestone</url>
+            </repository>
+        </repositories>
         <dependencies>
             <dependency org="javax.persistence" name="persistence-api" rev="1.0" />
             <dependency org="javax.validation" name="validation-api" rev="1.0.0.GA" />
@@ -13,5 +15,5 @@
             <dependency org="org.cloudfoundry" name="cloudfoundry-runtime" rev="0.8.0" />
             <dependency org="org.springframework.data" name="spring-data-mongodb" rev="1.0.0.M5" />
         </dependencies>
-    </repository>
+    </spring-data-mongodb>
 </configuration>
