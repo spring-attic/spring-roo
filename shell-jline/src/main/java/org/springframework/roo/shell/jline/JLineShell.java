@@ -172,6 +172,12 @@ public abstract class JLineShell extends AbstractShell implements CommandMarker,
 		}
 	}
 
+	@Override
+	public void setPromptPath(final String path) {
+		setPromptPath(path, false);
+	}
+
+	@Override
 	public void setPromptPath(final String path, final boolean overrideStyle) {
 		if (reader.getTerminal().isANSISupported()) {
 			ANSIBuffer ansi = JLineLogHandler.getANSIBuffer();
@@ -192,11 +198,6 @@ public abstract class JLineShell extends AbstractShell implements CommandMarker,
 
 		// The shellPrompt is now correct; let's ensure it now gets used
 		reader.setDefaultPrompt(JLineShell.shellPrompt);
-	}
-
-	@Override
-	public void setPromptPath(final String path) {
-		setPromptPath(path, false);
 	}
 
 	private ConsoleReader createAnsiWindowsReader() throws Exception {

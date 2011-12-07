@@ -284,6 +284,16 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 		}
 	}
 
+	/**
+	 * Default implementation of {@link Shell#setPromptPath(String, boolean))} method to satisfy STS compatibility.
+	 * 
+	 * @param path to set (can be null or empty)
+	 * @param overrideStyle
+	 */
+	public void setPromptPath(String path, boolean overrideStyle) {
+		setPromptPath(path);
+	}
+
 	public ExitShellRequest getExitShellRequest() {
 		return exitShellRequest;
 	}
@@ -345,34 +355,34 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 
 	@CliCommand(value = { "version" }, help = "Displays shell version")
 	public String version(@CliOption(key="", help="Special version flags") final String extra) {
-    	StringBuilder sb = new StringBuilder();
+		StringBuilder sb = new StringBuilder();
 
-    	if ("jaime".equals(extra)) {
-    		sb.append("               /\\ /l").append(LINE_SEPARATOR);
-    		sb.append("               ((.Y(!").append(LINE_SEPARATOR);
-    		sb.append("                \\ |/").append(LINE_SEPARATOR);
-    		sb.append("                /  6~6,").append(LINE_SEPARATOR);
-    		sb.append("                \\ _    +-.").append(LINE_SEPARATOR);
-    		sb.append("                 \\`-=--^-' \\").append(LINE_SEPARATOR);
-    		sb.append("                  \\   \\     |\\--------------------------+").append(LINE_SEPARATOR);
-    		sb.append("                 _/    \\    |  Thanks for loading Roo!  |").append(LINE_SEPARATOR);
-    		sb.append("                (  .    Y   +---------------------------+").append(LINE_SEPARATOR);
-    		sb.append("               /\"\\ `---^--v---.").append(LINE_SEPARATOR);
-    		sb.append("              / _ `---\"T~~\\/~\\/").append(LINE_SEPARATOR);
-    		sb.append("             / \" ~\\.      !").append(LINE_SEPARATOR);
-    		sb.append("       _    Y      Y.~~~ /'").append(LINE_SEPARATOR);
-    		sb.append("      Y^|   |      | Roo 7").append(LINE_SEPARATOR);
-    		sb.append("      | l   |     / .   /'").append(LINE_SEPARATOR);
-    		sb.append("      | `L  | Y .^/   ~T").append(LINE_SEPARATOR);
-    		sb.append("      |  l  ! | |/  | |               ____  ____  ____").append(LINE_SEPARATOR);
-    		sb.append("      | .`\\/' | Y   | !              / __ \\/ __ \\/ __ \\").append(LINE_SEPARATOR);
-    		sb.append("      l  \"~   j l   j L______       / /_/ / / / / / / /").append(LINE_SEPARATOR);
-    		sb.append("       \\,____{ __\"\" ~ __ ,\\_,\\_    / _, _/ /_/ / /_/ /").append(LINE_SEPARATOR);
-    		sb.append("    ~~~~~~~~~~~~~~~~~~~~~~~~~~~   /_/ |_|\\____/\\____/").append(" ").append(versionInfo()).append(LINE_SEPARATOR);
-    		return sb.toString();
-    	}
+		if ("jaime".equals(extra)) {
+			sb.append("               /\\ /l").append(LINE_SEPARATOR);
+			sb.append("               ((.Y(!").append(LINE_SEPARATOR);
+			sb.append("                \\ |/").append(LINE_SEPARATOR);
+			sb.append("                /  6~6,").append(LINE_SEPARATOR);
+			sb.append("                \\ _    +-.").append(LINE_SEPARATOR);
+			sb.append("                 \\`-=--^-' \\").append(LINE_SEPARATOR);
+			sb.append("                  \\   \\     |\\--------------------------+").append(LINE_SEPARATOR);
+			sb.append("                 _/    \\    |  Thanks for loading Roo!  |").append(LINE_SEPARATOR);
+			sb.append("                (  .    Y   +---------------------------+").append(LINE_SEPARATOR);
+			sb.append("               /\"\\ `---^--v---.").append(LINE_SEPARATOR);
+			sb.append("              / _ `---\"T~~\\/~\\/").append(LINE_SEPARATOR);
+			sb.append("             / \" ~\\.      !").append(LINE_SEPARATOR);
+			sb.append("       _    Y      Y.~~~ /'").append(LINE_SEPARATOR);
+			sb.append("      Y^|   |      | Roo 7").append(LINE_SEPARATOR);
+			sb.append("      | l   |     / .   /'").append(LINE_SEPARATOR);
+			sb.append("      | `L  | Y .^/   ~T").append(LINE_SEPARATOR);
+			sb.append("      |  l  ! | |/  | |               ____  ____  ____").append(LINE_SEPARATOR);
+			sb.append("      | .`\\/' | Y   | !              / __ \\/ __ \\/ __ \\").append(LINE_SEPARATOR);
+			sb.append("      l  \"~   j l   j L______       / /_/ / / / / / / /").append(LINE_SEPARATOR);
+			sb.append("       \\,____{ __\"\" ~ __ ,\\_,\\_    / _, _/ /_/ / /_/ /").append(LINE_SEPARATOR);
+			sb.append("    ~~~~~~~~~~~~~~~~~~~~~~~~~~~   /_/ |_|\\____/\\____/").append(" ").append(versionInfo()).append(LINE_SEPARATOR);
+			return sb.toString();
+		}
 
-    	sb.append("    ____  ____  ____  ").append(LINE_SEPARATOR);
+		sb.append("    ____  ____  ____  ").append(LINE_SEPARATOR);
 		sb.append("   / __ \\/ __ \\/ __ \\ ").append(LINE_SEPARATOR);
 		sb.append("  / /_/ / / / / / / / ").append(LINE_SEPARATOR);
 		sb.append(" / _, _/ /_/ / /_/ /  ").append(LINE_SEPARATOR);
