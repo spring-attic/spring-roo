@@ -117,7 +117,7 @@
             <dependency>
                 <groupId>com.google.appengine</groupId>
                 <artifactId>appengine-api-1.0-sdk</artifactId>
-                <version>1.5.5</version>
+                <version>1.6.0</version>
             </dependency>
         </dependencies>
         <plugins>
@@ -150,7 +150,7 @@
                     <server>com.google.appengine.tools.development.gwt.AppEngineLauncher</server>
                     <extraJvmArgs>"-javaagent:${gae.home}/lib/agent/appengine-agent.jar" -Xmx1024m</extraJvmArgs>
                     <copyWebapp>true</copyWebapp>
-                    <appEngineVersion>1.5.5</appEngineVersion>
+                    <appEngineVersion>1.6.0</appEngineVersion>
                 </configuration>
                 <executions>
                     <execution>
