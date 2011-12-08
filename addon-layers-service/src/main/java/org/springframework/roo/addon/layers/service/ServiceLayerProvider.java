@@ -50,8 +50,7 @@ public class ServiceLayerProvider extends CoreLayerProvider {
 		Assert.notNull(methodParameters, "Method param names and types required (may be empty)");
 
 		// Check whether this is even a known service layer method
-		final PairList<JavaType, JavaSymbolName> parameterList = new PairList<JavaType, JavaSymbolName>(methodParameters);
-		final List<JavaType> parameterTypes = parameterList.getKeys();
+		final List<JavaType> parameterTypes = new PairList<JavaType, JavaSymbolName>(methodParameters).getKeys();
 		final ServiceLayerMethod method = ServiceLayerMethod.valueOf(methodIdentifier, parameterTypes, targetEntity, idType);
 		if (method == null) {
 			return null;
@@ -73,7 +72,7 @@ public class ServiceLayerProvider extends CoreLayerProvider {
 				final String methodName = method.getName(annotationValues, targetEntity, pluralMetadata.getPlural());
 				if (StringUtils.hasText(methodName)) {
 					// The service implements the method; get the additions to be made by the caller
-					final MemberTypeAdditions methodAdditions = getMethodAdditions(callerMID, methodName, serviceInterface.getName(), parameterList.getValues());
+					final MemberTypeAdditions methodAdditions = getMethodAdditions(callerMID, methodName, serviceInterface.getName(), Arrays.asList(methodParameters));
 
 					// Return these additions
 					return methodAdditions;
@@ -95,16 +94,16 @@ public class ServiceLayerProvider extends CoreLayerProvider {
 	 * caller to the method
 	 * @return a non-<code>null</code> set of additions
 	 */
-	private MemberTypeAdditions getMethodAdditions(final String callerMID, final String methodName, final JavaType serviceInterface, final List<JavaSymbolName> parameterNames) {
+	private MemberTypeAdditions getMethodAdditions(final String callerMID, final String methodName, final JavaType serviceInterface, final List<MethodParameter> parameters) {
 		// The method is supported by this service interface; make a builder
 		final ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(callerMID);
 
 		// Add an autowired field of the type of this service
 		final String fieldName = StringUtils.uncapitalize(serviceInterface.getSimpleTypeName());
-		cidBuilder.addField(new FieldMetadataBuilder(callerMID, 0, Arrays.asList( new AnnotationMetadataBuilder(AUTOWIRED)), new JavaSymbolName(fieldName), serviceInterface));
+		cidBuilder.addField(new FieldMetadataBuilder(callerMID, 0, Arrays.asList(new AnnotationMetadataBuilder(AUTOWIRED)), new JavaSymbolName(fieldName), serviceInterface));
 
 		// Generate an additions object that includes a call to the method
-		return MemberTypeAdditions.getInstance(cidBuilder, fieldName, methodName, parameterNames);
+		return MemberTypeAdditions.getInstance(cidBuilder, fieldName, methodName, false, parameters);
 	}
 
 	public int getLayerPosition() {

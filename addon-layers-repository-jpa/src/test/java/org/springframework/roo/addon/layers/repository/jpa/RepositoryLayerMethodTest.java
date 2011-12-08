@@ -12,7 +12,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.roo.model.JavaSymbolName;
+import org.springframework.roo.classpath.layers.MethodParameter;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.support.util.StringUtils;
 
@@ -54,7 +54,7 @@ public class RepositoryLayerMethodTest {
 	@Test
 	public void testCallFlushMethod() {
 		// Invoke
-		final String methodCall = RepositoryJpaLayerMethod.FLUSH.getCall(Collections.<JavaSymbolName>emptyList());
+		final String methodCall = RepositoryJpaLayerMethod.FLUSH.getCall(Collections.<MethodParameter>emptyList());
 
 		// Check
 		assertEquals("flush()", methodCall);

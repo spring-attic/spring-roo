@@ -1,6 +1,8 @@
 package org.springframework.roo.classpath.layers;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
@@ -12,6 +14,7 @@ import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.CollectionUtils;
 import org.springframework.roo.support.util.StringUtils;
 
 /**
@@ -27,13 +30,15 @@ import org.springframework.roo.support.util.StringUtils;
 public class MemberTypeAdditions {
 
 	// Fields
+	private final boolean isStatic;
 	private final ClassOrInterfaceTypeDetailsBuilder classOrInterfaceDetailsBuilder;
+	private final List<MethodParameter> methodParameters;
 	private final String methodName;
 	private final String methodCall;
 
 	/**
-	 * Factory method that builds the method call for you from the given target,
-	 * method, and array of parameter names.
+	 * Factory method that builds the method call from the given target, method,
+	 * and array of parameter names.
 	 *
 	 * @param builder stores any changes the caller should make in order to make
 	 * the given method call, e.g. the field that is the method target (required)
@@ -41,16 +46,17 @@ public class MemberTypeAdditions {
 	 * being invoked (if not blank, must be a valid Java name)
 	 * @param methodName the name of the method being invoked (must be a valid
 	 * Java name)
+	 * @param isStatic whether the invoked method is static
 	 * @param parameterNames the names of any parameters passed to the method
 	 * (required)
 	 */
-	public static MemberTypeAdditions getInstance(final ClassOrInterfaceTypeDetailsBuilder builder, final String targetName, final String methodName, final JavaSymbolName... parameterNames) {
-		return getInstance(builder, targetName, methodName, Arrays.asList(parameterNames));
+	public static MemberTypeAdditions getInstance(final ClassOrInterfaceTypeDetailsBuilder builder, final String targetName, final String methodName, final boolean isStatic, final MethodParameter... parameters) {
+		return getInstance(builder, targetName, methodName, isStatic, Arrays.asList(parameters));
 	}
 
 	/**
-	 * Factory method that builds the method call for you from the given target,
-	 * method, and list of parameter names.
+	 * Factory method that builds the method call from the given target, method,
+	 * and list of parameter names.
 	 *
 	 * @param builder stores any changes the caller should make in order to make
 	 * the given method call, e.g. the field that is the method target (required)
@@ -58,11 +64,12 @@ public class MemberTypeAdditions {
 	 * being invoked (if not blank, must be a valid Java name)
 	 * @param methodName the name of the method being invoked (must be a valid
 	 * Java name)
+	 * @param isStatic whether the invoked method is static
 	 * @param parameterNames the names of any parameters passed to the method
 	 * (required)
 	 */
-	public static MemberTypeAdditions getInstance(final ClassOrInterfaceTypeDetailsBuilder builder, final String targetName, final String methodName, final List<JavaSymbolName> parameterNames) {
-		return new MemberTypeAdditions(builder, methodName, buildMethodCall(targetName, methodName, parameterNames.iterator()));
+	public static MemberTypeAdditions getInstance(final ClassOrInterfaceTypeDetailsBuilder builder, final String targetName, final String methodName, final boolean isStatic, final List<MethodParameter> parameters) {
+		return new MemberTypeAdditions(builder, methodName, buildMethodCall(targetName, methodName, parameters), isStatic, parameters);
 	}
 
 	/**
@@ -75,7 +82,7 @@ public class MemberTypeAdditions {
 	 * @param parameterNames the names of any parameters passed to the method
 	 * @return a non-blank Java snippet
 	 */
-	static String buildMethodCall(final String targetName, final String methodName, final Iterator<JavaSymbolName> parameterNames) {
+	static String buildMethodCall(final String targetName, final String methodName, final Collection<MethodParameter> parameters) {
 		JavaSymbolName.assertJavaNameLegal(methodName);
 		final StringBuilder methodCall = new StringBuilder();
 		if (StringUtils.hasText(targetName)) {
@@ -85,9 +92,10 @@ public class MemberTypeAdditions {
 		}
 		methodCall.append(methodName);
 		methodCall.append("(");
-		while (parameterNames.hasNext()) {
-			methodCall.append(parameterNames.next().getSymbolName());
-			if (parameterNames.hasNext()) {
+		for (final Iterator<MethodParameter> iter = parameters.iterator(); iter.hasNext();) {
+			final MethodParameter parameter = iter.next();
+			methodCall.append(parameter.getValue());
+			if (iter.hasNext()) {
 				methodCall.append(", ");
 			}
 		}
@@ -96,7 +104,7 @@ public class MemberTypeAdditions {
 	}
 
 	/**
-	 * Constructor that accepts a pre-built method call
+	 * Constructor that takes a pre-built method call.
 	 *
 	 * @param builder stores any changes the caller should make in order to make
 	 * the given method call, e.g. the field that is the method target; can be
@@ -106,13 +114,18 @@ public class MemberTypeAdditions {
 	 * @param methodCall a valid Java snippet that calls the method,
 	 * including any required target and parameters, for example "foo.bar(baz)"
 	 * (required)
+	 * @param isStatic whether the invoked method is static
+	 * @param methodParameters the parameters taken by the invoked method (can be <code>null</code>)
 	 */
-	public MemberTypeAdditions(final ClassOrInterfaceTypeDetailsBuilder builder, final String methodName, final String methodCall) {
+	public MemberTypeAdditions(final ClassOrInterfaceTypeDetailsBuilder builder, final String methodName, final String methodCall, final boolean isStatic, final List<MethodParameter> methodParameters) {
 		Assert.hasText(methodName, "Invalid method name '" + methodName + "'");
 		Assert.hasText(methodCall, "Invalid method signature '" + methodCall + "'");
 		this.classOrInterfaceDetailsBuilder = builder;
-		this.methodName = methodName;
 		this.methodCall = methodCall;
+		this.methodName = methodName;
+		this.methodParameters = new ArrayList<MethodParameter>();
+		CollectionUtils.populate(this.methodParameters, methodParameters);
+		this.isStatic = isStatic;
 	}
 
 	/**
@@ -147,6 +160,15 @@ public class MemberTypeAdditions {
 	}
 	
 	/**
+	 * Returns the parameters taken by the invoked method
+	 * 
+	 * @return a non-<code>null</code> copy of this list
+	 */
+	public List<MethodParameter> getMethodParameters() {
+		return new ArrayList<MethodParameter>(methodParameters);
+	}
+	
+	/**
 	 * Returns the field on which this method is invoked
 	 * 
 	 * @return <code>null</code> if it's a static method call
@@ -173,7 +195,7 @@ public class MemberTypeAdditions {
 	 * @return see above
 	 */
 	public boolean isStatic() {
-		return getInvokedField() == null;
+		return isStatic;
 	}
 
 	@Override

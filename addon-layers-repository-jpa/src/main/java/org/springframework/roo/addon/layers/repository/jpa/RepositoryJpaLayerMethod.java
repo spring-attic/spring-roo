@@ -16,6 +16,7 @@ import java.util.List;
 
 import org.springframework.roo.classpath.customdata.tagkeys.MethodMetadataCustomDataKey;
 import org.springframework.roo.classpath.layers.LayerType;
+import org.springframework.roo.classpath.layers.MethodParameter;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.support.util.Assert;
@@ -37,7 +38,7 @@ import org.springframework.roo.support.util.Assert;
  *     List<T>      findAll()
  *     *org.springframework.data.domain.Page<T> findAll(org.springframework.data.domain.Pageable)
  *     *List<T>     findAll(org.springframework.data.domain.Sort)
- *     *T           findOne(ID) TODO
+ *     T            findOne(ID)
  *     void         flush()
  *     *List<T>     save(Iterable<? extends T>)
  *     T            save(T)
@@ -52,7 +53,7 @@ public enum RepositoryJpaLayerMethod {
 	COUNT ("count", COUNT_ALL_METHOD) {
 
 		@Override
-		public String getCall(final List<JavaSymbolName> parameterNames) {
+		public String getCall(final List<MethodParameter> parameters) {
 			return "count()";
 		}
 
@@ -68,8 +69,8 @@ public enum RepositoryJpaLayerMethod {
 	DELETE ("delete", REMOVE_METHOD) {
 
 		@Override
-		public String getCall(final List<JavaSymbolName> parameterNames) {
-			return "delete(" + parameterNames.get(0).getSymbolName() + ")";
+		public String getCall(final List<MethodParameter> parameters) {
+			return "delete(" + parameters.get(0).getValue() + ")";
 		}
 
 		@Override
@@ -86,15 +87,15 @@ public enum RepositoryJpaLayerMethod {
 		}
 
 		@Override
-		public String getCall(final List<JavaSymbolName> parameterNames) {
-			return "findOne(" + parameterNames.get(0).getSymbolName() + ")";
+		public String getCall(final List<MethodParameter> parameters) {
+			return "findOne(" + parameters.get(0).getValue() + ")";
 		}
 	},
 
 	FIND_ALL ("findAll", FIND_ALL_METHOD) {
 
 		@Override
-		public String getCall(final List<JavaSymbolName> parameterNames) {
+		public String getCall(final List<MethodParameter> parameters) {
 			return "findAll()";
 		}
 
@@ -112,9 +113,9 @@ public enum RepositoryJpaLayerMethod {
 	FIND_ENTRIES ("findEntries", FIND_ENTRIES_METHOD) {
 
 		@Override
-		public String getCall(final List<JavaSymbolName> parameterNames) {
-			final JavaSymbolName firstResultParameter = parameterNames.get(0);
-			final JavaSymbolName maxResultsParameter = parameterNames.get(1);
+		public String getCall(final List<MethodParameter> parameters) {
+			final JavaSymbolName firstResultParameter = parameters.get(0).getValue();
+			final JavaSymbolName maxResultsParameter = parameters.get(1).getValue();
 			final String pageNumberExpression = firstResultParameter + " / " + maxResultsParameter;
 			return "findAll(new org.springframework.data.domain.PageRequest(" + pageNumberExpression + ", " + maxResultsParameter + ")).getContent()";
 		}
@@ -128,7 +129,7 @@ public enum RepositoryJpaLayerMethod {
 	FLUSH ("flush", FLUSH_METHOD) {
 
 		@Override
-		public String getCall(final List<JavaSymbolName> parameterNames) {
+		public String getCall(final List<MethodParameter> parameters) {
 			return "flush()";
 		}
 
@@ -146,8 +147,8 @@ public enum RepositoryJpaLayerMethod {
 	SAVE ("save", MERGE_METHOD, PERSIST_METHOD) {
 
 		@Override
-		public String getCall(final List<JavaSymbolName> parameterNames) {
-			return "save(" + parameterNames.get(0).getSymbolName() + ")";
+		public String getCall(final List<MethodParameter> parameters) {
+			return "save(" + parameters.get(0).getValue() + ")";
 		}
 
 		@Override
@@ -198,11 +199,11 @@ public enum RepositoryJpaLayerMethod {
 	/**
 	 * Returns a Java snippet that invokes this method (minus the target)
 	 *
-	 * @param parameterNames the parameter names used by the caller; can be
+	 * @param parameters the parameters used by the caller; can be
 	 * <code>null</code>
 	 * @return a non-blank Java snippet
 	 */
-	public abstract String getCall(List<JavaSymbolName> parameterNames);
+	public abstract String getCall(List<MethodParameter> parameters);
 
 	/**
 	 * Returns the name of this method

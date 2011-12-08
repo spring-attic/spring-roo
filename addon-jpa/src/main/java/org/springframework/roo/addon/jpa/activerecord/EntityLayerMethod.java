@@ -1,13 +1,15 @@
 package org.springframework.roo.addon.jpa.activerecord;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
 import org.springframework.roo.classpath.customdata.CustomDataKeys;
 import org.springframework.roo.classpath.customdata.tagkeys.MethodMetadataCustomDataKey;
-import org.springframework.roo.model.JavaSymbolName;
+import org.springframework.roo.classpath.layers.MethodParameter;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
@@ -220,24 +222,22 @@ enum EntityLayerMethod {
 	 * if any
 	 *
 	 * @param annotationValues the CRUD-related values of the {@link RooJpaActiveRecord}
-	 * annotation
-	 * on the entity type
+	 * annotation on the entity type
 	 * @param targetEntity the type of entity being managed (required)
 	 * @param plural the plural form of the entity (required)
-	 * @param parameterNames the caller's names for the method's parameters
-	 * (required, must be modifiable)
+	 * @param callerParameters the caller's method's parameters (required)
 	 * @return a non-blank Java snippet
 	 */
-	public String getCall(final JpaCrudAnnotationValues annotationValues, final JavaType targetEntity, final String plural, final List<JavaSymbolName> parameterNames) {
+	public String getCall(final JpaCrudAnnotationValues annotationValues, final JavaType targetEntity, final String plural, final List<MethodParameter> callerParameters) {
 		final String target;
 		if (this.isStatic) {
 			target = targetEntity.getSimpleTypeName();
 		}
 		else {
-			target = parameterNames.get(0).getSymbolName();
-			parameterNames.remove(0);
+			target = callerParameters.get(0).getValue().getSymbolName();
 		}
-		return getCall(target, getName(annotationValues, targetEntity, plural), parameterNames.iterator());
+		final List<MethodParameter> parameters = getParameters(callerParameters);
+		return getCall(target, getName(annotationValues, targetEntity, plural), parameters.iterator());
 	}
 
 	/**
@@ -248,29 +248,42 @@ enum EntityLayerMethod {
 	 * @param parameterNames the names of the parameters (from the caller's POV)
 	 * @return a non-blank Java snippet ending in ")"
 	 */
-	private String getCall(final String targetName, final String methodName, final Iterator<JavaSymbolName> parameterNames) {
+	private String getCall(final String targetName, final String methodName, final Iterator<MethodParameter> parameters) {
 		final StringBuilder methodCall = new StringBuilder();
 		methodCall.append(targetName);
 		methodCall.append(".");
 		methodCall.append(methodName);
 		methodCall.append("(");
-		while (parameterNames.hasNext()) {
-			methodCall.append(parameterNames.next().getSymbolName());
-			if (parameterNames.hasNext()) {
+		while (parameters.hasNext()) {
+			methodCall.append(parameters.next().getValue().getSymbolName());
+			if (parameters.hasNext()) {
 				methodCall.append(", ");
 			}
 		}
 		methodCall.append(")");
 		return methodCall.toString();
 	}
+	
+	/**
+	 * Returns the parameters to be passed when this method is invoked
+	 * 
+	 * @param callerParameters the parameters provided by the caller (required)
+	 * @return a non-<code>null</code> List
+	 */
+	public List<MethodParameter> getParameters(final Collection<MethodParameter> callerParameters) {
+		final List<MethodParameter> parameters = new ArrayList<MethodParameter>(callerParameters);
+		if (!this.isStatic) {
+			parameters.remove(0);	// the instance doesn't need itself as a parameter
+		}
+		return parameters;
+	}
 
 	/**
-	 * Indicates whether this method is static; only for use of unit tests, as
-	 * it breaks encapsulation
+	 * Indicates whether this method is static
 	 *
 	 * @return
 	 */
-	boolean isStatic() {
+	public boolean isStatic() {
 		return isStatic;
 	}
 }

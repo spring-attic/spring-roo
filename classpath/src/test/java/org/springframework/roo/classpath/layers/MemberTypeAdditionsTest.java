@@ -3,11 +3,10 @@ package org.springframework.roo.classpath.layers;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 
 import org.junit.Test;
-import org.springframework.roo.model.JavaSymbolName;
+import org.springframework.roo.model.JavaType;
 
 /**
  * Unit test of {@link MemberTypeAdditions}
@@ -29,7 +28,9 @@ public class MemberTypeAdditionsTest {
 
 	@Test
 	public void testGetMethodCallWithBlankTargetAndTwoParameters() {
-		assertMethodCall("matchmakingService.marry(julia, zemiro)", "matchmakingService", "marry", "julia", "zemiro");
+		final MethodParameter firstNameParameter = new MethodParameter(JavaType.STRING, "firstName");
+		final MethodParameter lastNameParameter = new MethodParameter(JavaType.STRING, "lastName");
+		assertMethodCall("matchmakingService.marry(firstName, lastName)", "matchmakingService", "marry", firstNameParameter, lastNameParameter);
 	}
 
 	/**
@@ -41,18 +42,14 @@ public class MemberTypeAdditionsTest {
 	 * @param method
 	 * @param parameterNames
 	 */
-	private void assertMethodCall(final String expectedMethodCall, final String target, final String method, final String... parameterNames) {
-		final List<JavaSymbolName> parameterSymbols = new ArrayList<JavaSymbolName>();
-		for (final String parameterName : parameterNames) {
-			parameterSymbols.add(new JavaSymbolName(parameterName));
-		}
-		assertEquals(expectedMethodCall, MemberTypeAdditions.buildMethodCall(target, method, parameterSymbols.iterator()));
+	private void assertMethodCall(final String expectedMethodCall, final String target, final String method, final MethodParameter... parameters) {
+		assertEquals(expectedMethodCall, MemberTypeAdditions.buildMethodCall(target, method, Arrays.asList(parameters)));
 	}
 	
 	@Test
 	public void testGetInvokedFieldWhenBuilderIsNull() {
 		// Set up
-		final MemberTypeAdditions memberTypeAdditions = new MemberTypeAdditions(null, "foo", "foo()");
+		final MemberTypeAdditions memberTypeAdditions = new MemberTypeAdditions(null, "foo", "foo()", false, null);
 		
 		// Invoke and check
 		assertNull(memberTypeAdditions.getInvokedField());

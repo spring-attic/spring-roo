@@ -14,6 +14,13 @@ public @interface RooGwtRequest {
 	 */
 	String value();
 
+	/**
+	 * Entity methods to exclude from the request interface.
+	 * 
+	 * @return
+	 * @deprecated ignored by the GWT addon
+	 */
+	@Deprecated
 	String[] exclude() default {};
 
 	boolean ignoreProxyExclusions() default false;

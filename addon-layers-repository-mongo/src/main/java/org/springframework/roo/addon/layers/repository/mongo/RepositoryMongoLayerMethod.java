@@ -15,6 +15,7 @@ import java.util.List;
 
 import org.springframework.roo.classpath.customdata.tagkeys.MethodMetadataCustomDataKey;
 import org.springframework.roo.classpath.layers.LayerType;
+import org.springframework.roo.classpath.layers.MethodParameter;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.support.util.Assert;
@@ -40,7 +41,7 @@ public enum RepositoryMongoLayerMethod {
 		}
 
 		@Override
-		public String getCall(final List<JavaSymbolName> parameterNames) {
+		public String getCall(final List<MethodParameter> parameters) {
 			return "count()";
 		}
 
@@ -66,8 +67,8 @@ public enum RepositoryMongoLayerMethod {
 		}
 
 		@Override
-		public String getCall(final List<JavaSymbolName> parameterNames) {
-			return "delete(" + parameterNames.get(0).getSymbolName() + ")";
+		public String getCall(final List<MethodParameter> parameters) {
+			return "delete(" + parameters.get(0).getValue() + ")";
 		}
 
 		@Override
@@ -94,8 +95,8 @@ public enum RepositoryMongoLayerMethod {
 		}
 
 		@Override
-		public String getCall(final List<JavaSymbolName> parameterNames) {
-			return "findOne(" + parameterNames.get(0).getSymbolName() + ")";
+		public String getCall(final List<MethodParameter> parameters) {
+			return "findOne(" + parameters.get(0).getValue() + ")";
 		}
 	},
 
@@ -112,7 +113,7 @@ public enum RepositoryMongoLayerMethod {
 		}
 
 		@Override
-		public String getCall(final List<JavaSymbolName> parameterNames) {
+		public String getCall(final List<MethodParameter> parameters) {
 			return "findAll()";
 		}
 
@@ -140,9 +141,9 @@ public enum RepositoryMongoLayerMethod {
 		}
 
 		@Override
-		public String getCall(final List<JavaSymbolName> parameterNames) {
-			final JavaSymbolName firstResultParameter = parameterNames.get(0);
-			final JavaSymbolName maxResultsParameter = parameterNames.get(1);
+		public String getCall(final List<MethodParameter> parameters) {
+			final JavaSymbolName firstResultParameter = parameters.get(0).getValue();
+			final JavaSymbolName maxResultsParameter = parameters.get(1).getValue();
 			final String pageNumberExpression = firstResultParameter + " / " + maxResultsParameter;
 			return "findAll(new org.springframework.data.domain.PageRequest(" + pageNumberExpression + ", " + maxResultsParameter + ")).getContent()";
 		}
@@ -169,8 +170,8 @@ public enum RepositoryMongoLayerMethod {
 		}
 
 		@Override
-		public String getCall(final List<JavaSymbolName> parameterNames) {
-			return "save(" + parameterNames.get(0).getSymbolName() + ")";
+		public String getCall(final List<MethodParameter> parameters) {
+			return "save(" + parameters.get(0).getValue() + ")";
 		}
 
 		@Override
@@ -221,11 +222,11 @@ public enum RepositoryMongoLayerMethod {
 	/**
 	 * Returns a Java snippet that invokes this method (minus the target)
 	 *
-	 * @param parameterNames the parameter names used by the caller; can be
+	 * @param parameters the parameters used by the caller; can be
 	 * <code>null</code>
 	 * @return a non-blank Java snippet
 	 */
-	public abstract String getCall(List<JavaSymbolName> parameterNames);
+	public abstract String getCall(List<MethodParameter> parameters);
 
 	/**
 	 * Returns the name of this method

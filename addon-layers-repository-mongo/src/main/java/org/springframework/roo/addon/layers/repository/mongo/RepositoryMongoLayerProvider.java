@@ -44,8 +44,7 @@ public class RepositoryMongoLayerProvider extends CoreLayerProvider {
 		Assert.notNull(idType, "Enitity Id type required");
 
 		// Look for a repository layer method with this ID and parameter types
-		final PairList<JavaType, JavaSymbolName> parameterList = new PairList<JavaType, JavaSymbolName>(callerParameters);
-		final List<JavaType> parameterTypes = parameterList.getKeys();
+		final List<JavaType> parameterTypes = new PairList<JavaType, JavaSymbolName>(callerParameters).getKeys();
 		final RepositoryMongoLayerMethod method = RepositoryMongoLayerMethod.valueOf(methodIdentifier, parameterTypes, targetEntity, idType);
 		if (method == null) {
 			return null;
@@ -61,7 +60,7 @@ public class RepositoryMongoLayerProvider extends CoreLayerProvider {
 		final ClassOrInterfaceTypeDetails repository = repositories.iterator().next();
 
 		// Return the additions the caller needs to make
-		return getMethodAdditions(callerMID, method, repository.getName(), parameterList.getValues());
+		return getMethodAdditions(callerMID, method, repository.getName(), Arrays.asList(callerParameters));
 	}
 
 	/**
@@ -74,7 +73,7 @@ public class RepositoryMongoLayerProvider extends CoreLayerProvider {
 	 * @param parameterNames the parameter names used by the caller
 	 * @return a non-<code>null</code> set of additions
 	 */
-	private MemberTypeAdditions getMethodAdditions(final String callerMID, final RepositoryMongoLayerMethod method, final JavaType repositoryType, final List<JavaSymbolName> parameterNames) {
+	private MemberTypeAdditions getMethodAdditions(final String callerMID, final RepositoryMongoLayerMethod method, final JavaType repositoryType, final List<MethodParameter> parameters) {
 		// Create a builder to hold the repository field to be copied into the caller
 		final ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(callerMID);
 		final AnnotationMetadataBuilder autowiredAnnotation = new AnnotationMetadataBuilder(AUTOWIRED);
@@ -82,8 +81,8 @@ public class RepositoryMongoLayerProvider extends CoreLayerProvider {
 		cidBuilder.addField(new FieldMetadataBuilder(callerMID, 0, Arrays.asList(autowiredAnnotation), new JavaSymbolName(repositoryFieldName), repositoryType));
 
 		// Create the additions to invoke the given method on this field
-		final String methodCall = repositoryFieldName + "." + method.getCall(parameterNames);
-		return new MemberTypeAdditions(cidBuilder, method.getName(), methodCall);
+		final String methodCall = repositoryFieldName + "." + method.getCall(parameters);
+		return new MemberTypeAdditions(cidBuilder, method.getName(), methodCall, false, parameters);
 	}
 
 	public int getLayerPosition() {

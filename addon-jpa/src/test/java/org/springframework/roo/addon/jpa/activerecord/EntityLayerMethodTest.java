@@ -15,6 +15,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.roo.classpath.layers.MethodParameter;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 
@@ -45,101 +46,90 @@ public class EntityLayerMethodTest {
 		when(mockTargetEntity.getSimpleTypeName()).thenReturn("Person");
 		when(mockIdType.getFullyQualifiedTypeName()).thenReturn(Long.class.getName());
 	}
-
-	/**
-	 * Returns a list of mock {@link JavaSymbolName}s with the given names
-	 *
-	 * @param parameters
-	 * @return a non-<code>null</code> list
-	 */
-	private List<JavaSymbolName> getMockParameterNames(final String... parameters) {
-		final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
-		for (final String parameterName : parameters) {
+	
+	private void assertMethodCall(final String expectedMethodCall, final EntityLayerMethod method, final String... parameterNames) {
+		final List<MethodParameter> parameters = new ArrayList<MethodParameter>();
+		for (final String parameterName : parameterNames) {
 			final JavaSymbolName mockSymbol = mock(JavaSymbolName.class);
 			when(mockSymbol.getSymbolName()).thenReturn(parameterName);
-			parameterNames.add(mockSymbol);
+			// We can use any parameter type here, as it's ignored in production
+			parameters.add(new MethodParameter(JavaType.OBJECT, mockSymbol));
 		}
-		return parameterNames;
+
+		// Invoke and check
+		assertEquals(expectedMethodCall, method.getCall(mockAnnotationValues, mockTargetEntity, PLURAL, parameters));
 	}
 
 	@Test
 	public void testCallCountAllMethod() {
 		// Set up
 		when(mockAnnotationValues.getCountMethod()).thenReturn("total");
-		final List<JavaSymbolName> parameterNames = getMockParameterNames();
 
 		// Invoke and check
-		assertEquals("Person.totalPeople()", EntityLayerMethod.COUNT_ALL.getCall(mockAnnotationValues, mockTargetEntity, PLURAL, parameterNames));
+		assertMethodCall("Person.totalPeople()", EntityLayerMethod.COUNT_ALL);
 	}
 
 	@Test
 	public void testCallClearMethod() {
 		// Set up
 		when(mockAnnotationValues.getClearMethod()).thenReturn("erase");
-		final List<JavaSymbolName> parameterNames = getMockParameterNames();
 
 		// Invoke and check
-		assertEquals("Person.erase()", EntityLayerMethod.CLEAR.getCall(mockAnnotationValues, mockTargetEntity, PLURAL, parameterNames));
+		assertMethodCall("Person.erase()", EntityLayerMethod.CLEAR);
 	}
 
 	@Test
 	public void testCallFindAllMethod() {
 		// Set up
 		when(mockAnnotationValues.getFindAllMethod()).thenReturn("seekAll");
-		final List<JavaSymbolName> parameterNames = getMockParameterNames();
 
 		// Invoke and check
-		assertEquals("Person.seekAllPeople()", EntityLayerMethod.FIND_ALL.getCall(mockAnnotationValues, mockTargetEntity, PLURAL, parameterNames));
+		assertMethodCall("Person.seekAllPeople()", EntityLayerMethod.FIND_ALL);
 	}
 
 	@Test
 	public void testCallFindEntriesMethod() {
 		// Set up
 		when(mockAnnotationValues.getFindEntriesMethod()).thenReturn("lookFor");
-		final List<JavaSymbolName> parameterNames = getMockParameterNames("x", "y");
 
 		// Invoke and check
-		assertEquals("Person.lookForPersonEntries(x, y)", EntityLayerMethod.FIND_ENTRIES.getCall(mockAnnotationValues, mockTargetEntity, PLURAL, parameterNames));
+		assertMethodCall("Person.lookForPersonEntries(x, y)", EntityLayerMethod.FIND_ENTRIES, "x", "y");
 	}
 
 	@Test
 	public void testCallFlushMethod() {
 		// Set up
 		when(mockAnnotationValues.getFlushMethod()).thenReturn("bloosh");
-		final List<JavaSymbolName> parameterNames = getMockParameterNames("person");
 
 		// Invoke and check
-		assertEquals("person.bloosh()", EntityLayerMethod.FLUSH.getCall(mockAnnotationValues, mockTargetEntity, PLURAL, parameterNames));
+		assertMethodCall("person.bloosh()", EntityLayerMethod.FLUSH, "person");
 	}
 
 	@Test
 	public void testCallMergeMethod() {
 		// Set up
 		when(mockAnnotationValues.getMergeMethod()).thenReturn("blend");
-		final List<JavaSymbolName> parameterNames = getMockParameterNames("person");
 
 		// Invoke and check
-		assertEquals("person.blend()", EntityLayerMethod.MERGE.getCall(mockAnnotationValues, mockTargetEntity, PLURAL, parameterNames));
+		assertMethodCall("person.blend()", EntityLayerMethod.MERGE, "person");
 	}
 
 	@Test
 	public void testCallPersistMethod() {
 		// Set up
 		when(mockAnnotationValues.getPersistMethod()).thenReturn("store");
-		final List<JavaSymbolName> parameterNames = getMockParameterNames("person");
 
 		// Invoke and check
-		assertEquals("person.store()", EntityLayerMethod.PERSIST.getCall(mockAnnotationValues, mockTargetEntity, PLURAL, parameterNames));
+		assertMethodCall("person.store()", EntityLayerMethod.PERSIST, "person");
 	}
 
 	@Test
 	public void testCallRemoveMethod() {
 		// Set up
 		when(mockAnnotationValues.getRemoveMethod()).thenReturn("trash");
-		final List<JavaSymbolName> parameterNames = getMockParameterNames("person");
 
 		// Invoke and check
-		assertEquals("person.trash()", EntityLayerMethod.REMOVE.getCall(mockAnnotationValues, mockTargetEntity, PLURAL, parameterNames));
+		assertMethodCall("person.trash()", EntityLayerMethod.REMOVE, "person");
 	}
 
 	@Test

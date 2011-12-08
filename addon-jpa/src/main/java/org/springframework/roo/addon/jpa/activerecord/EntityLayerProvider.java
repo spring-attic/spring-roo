@@ -1,5 +1,6 @@
 package org.springframework.roo.addon.jpa.activerecord;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.felix.scr.annotations.Component;
@@ -35,7 +36,7 @@ public class EntityLayerProvider extends CoreLayerProvider {
 	@Reference private MetadataService metadataService;
 	@Reference TypeLocationService typeLocationService;
 
-	public MemberTypeAdditions getMemberTypeAdditions(final String callerMID, final String methodIdentifier, final JavaType targetEntity, final JavaType idType, final MethodParameter... methodParameters) {
+	public MemberTypeAdditions getMemberTypeAdditions(final String callerMID, final String methodIdentifier, final JavaType targetEntity, final JavaType idType, final MethodParameter... callerParameters) {
 		Assert.isTrue(StringUtils.hasText(callerMID), "Metadata identifier required");
 		Assert.hasText(methodIdentifier, "Method identifier required");
 		Assert.notNull(targetEntity, "Target enitity type required");
@@ -52,9 +53,8 @@ public class EntityLayerProvider extends CoreLayerProvider {
 			return null;
 		}
 
-		// Look for an entity layer method with this ID and parameter types
-		final PairList<JavaType, JavaSymbolName> parameterList = new PairList<JavaType, JavaSymbolName>(methodParameters);
-		final List<JavaType> parameterTypes = parameterList.getKeys();
+		// Look for an entity layer method with this ID and types of parameter
+		final List<JavaType> parameterTypes = new PairList<JavaType, JavaSymbolName>(callerParameters).getKeys();
 		final EntityLayerMethod method = EntityLayerMethod.valueOf(methodIdentifier, parameterTypes, targetEntity, idType);
 		if (method == null) {
 			return null;
@@ -67,7 +67,9 @@ public class EntityLayerProvider extends CoreLayerProvider {
 		}
 
 		// We have everything needed to generate a method call
-		return new MemberTypeAdditions(null, methodName, method.getCall(annotationValues, targetEntity, plural, parameterList.getValues()));
+		final List<MethodParameter> callerParameterList = Arrays.asList(callerParameters);
+		final String methodCall = method.getCall(annotationValues, targetEntity, plural, callerParameterList);
+		return new MemberTypeAdditions(null, methodName, methodCall, method.isStatic(), method.getParameters(callerParameterList));
 	}
 
 	/**

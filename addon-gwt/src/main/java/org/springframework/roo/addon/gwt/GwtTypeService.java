@@ -25,8 +25,6 @@ public interface GwtTypeService {
 
 	void buildType(GwtType destType, List<ClassOrInterfaceTypeDetails> templateTypeDetails, String moduleName);
 
-	List<MethodMetadata> getRequestMethods(ClassOrInterfaceTypeDetails governorTypeDetails);
-
 	List<MethodMetadata> getProxyMethods(ClassOrInterfaceTypeDetails governorTypeDetails);
 
 	boolean isDomainObject(JavaType type);
@@ -76,4 +74,15 @@ public interface GwtTypeService {
 	 * @param moduleName the project module whose gwt.xml file is to be updated
 	 */
 	void addSourcePath(String sourcePath, String moduleName);
+
+	/**
+	 * Returns the project type in the given module that implements
+	 * {@link com.google.web.bindery.requestfactory.shared.ServiceLocator}.
+	 * There is no guarantee that this type actually exists.
+	 * 
+	 * @param moduleName the module in which to find the locator (can't be <code>null</code>)
+	 * @return a non-<code>null</code> type
+	 * @since 1.2.0
+	 */
+	JavaType getServiceLocator(String moduleName);
 }

@@ -45,7 +45,6 @@ import org.springframework.roo.classpath.details.ConstructorMetadata;
 import org.springframework.roo.classpath.details.ConstructorMetadataBuilder;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.IdentifiableAnnotatedJavaStructure;
-import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
@@ -94,13 +93,13 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 	private static final String PATH = "path";
 
 	// Fields
-	@Reference protected FileManager fileManager;
-	@Reference protected GwtFileManager gwtFileManager;
-	@Reference protected MemberDetailsScanner memberDetailsScanner;
-	@Reference protected MetadataService metadataService;
-	@Reference protected PersistenceMemberLocator persistenceMemberLocator;
-	@Reference protected ProjectOperations projectOperations;
-	@Reference protected TypeLocationService typeLocationService;
+	@Reference private FileManager fileManager;
+	@Reference private GwtFileManager gwtFileManager;
+	@Reference private MemberDetailsScanner memberDetailsScanner;
+	@Reference private MetadataService metadataService;
+	@Reference private PersistenceMemberLocator persistenceMemberLocator;
+	@Reference private ProjectOperations projectOperations;
+	@Reference private TypeLocationService typeLocationService;
 
 	private final Set<String> warnings = new LinkedHashSet<String>();
 	private final Timer warningTimer = new Timer();
@@ -194,12 +193,12 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 		return lookupTargetFromX(request, GwtUtils.REQUEST_ANNOTATIONS);
 	}
 
-	public ClassOrInterfaceTypeDetails lookupTargetFromX(final ClassOrInterfaceTypeDetails typeDetails, final JavaType... annotations) {
-		AnnotationMetadata annotation = GwtUtils.getFirstAnnotation(typeDetails, annotations);
-		Assert.notNull(annotation, "Type '" + typeDetails.getName() + "' isn't annotated with '" + StringUtils.collectionToCommaDelimitedString(Arrays.asList(annotations)) + "'");
+	public ClassOrInterfaceTypeDetails lookupTargetFromX(final ClassOrInterfaceTypeDetails annotatedType, final JavaType... annotations) {
+		AnnotationMetadata annotation = GwtUtils.getFirstAnnotation(annotatedType, annotations);
+		Assert.notNull(annotation, "Type '" + annotatedType.getName() + "' isn't annotated with '" + StringUtils.collectionToCommaDelimitedString(Arrays.asList(annotations)) + "'");
 		AnnotationAttributeValue<?> attributeValue = annotation.getAttribute("value");
-		JavaType serviceNameType = new JavaType(GwtUtils.getStringValue(attributeValue));
-		return typeLocationService.getTypeDetails(serviceNameType);
+		final JavaType targetType = new JavaType(GwtUtils.getStringValue(attributeValue));
+		return typeLocationService.getTypeDetails(targetType);
 	}
 
 	public ClassOrInterfaceTypeDetails lookupRequestFromEntity(final ClassOrInterfaceTypeDetails entity) {
@@ -347,29 +346,6 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 			}
 		}
 		return proxyMethods;
-	}
-
-	public List<MethodMetadata> getRequestMethods(final ClassOrInterfaceTypeDetails governorTypeDetails) {
-		List<MethodMetadata> requestMethods = new ArrayList<MethodMetadata>();
-		MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(GwtTypeServiceImpl.class.getName(), governorTypeDetails);
-		setRequestMethod(requestMethods, governorTypeDetails, memberDetails, CustomDataKeys.PERSIST_METHOD);
-		setRequestMethod(requestMethods, governorTypeDetails, memberDetails, CustomDataKeys.REMOVE_METHOD);
-		setRequestMethod(requestMethods, governorTypeDetails, memberDetails, CustomDataKeys.COUNT_ALL_METHOD);
-		setRequestMethod(requestMethods, governorTypeDetails, memberDetails, CustomDataKeys.FIND_METHOD);
-		setRequestMethod(requestMethods, governorTypeDetails, memberDetails, CustomDataKeys.FIND_ALL_METHOD);
-		setRequestMethod(requestMethods, governorTypeDetails, memberDetails, CustomDataKeys.FIND_ENTRIES_METHOD);
-		return requestMethods;
-	}
-
-	private void setRequestMethod(final List<MethodMetadata> requestMethods, final ClassOrInterfaceTypeDetails governorTypeDetails, final MemberDetails memberDetails, final Object tagKey) {
-		MethodMetadata method = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, tagKey);
-		if (method == null) {
-			return;
-		}
-		JavaType gwtType = getGwtSideLeafType(method.getReturnType(), governorTypeDetails.getName(), true, true);
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(method);
-		methodBuilder.setReturnType(gwtType);
-		requestMethods.add(methodBuilder.build());
 	}
 
 	private boolean isValidMethodReturnType(final MethodMetadata method, final MemberHoldingTypeDetails memberHoldingTypeDetail) {
@@ -663,5 +639,9 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 			builder.setModifier(Modifier.PROTECTED);
 		}
 		return builder;
+	}
+
+	public JavaType getServiceLocator(final String moduleName) {
+		return new JavaType(projectOperations.getTopLevelPackage(moduleName) + ".server.locator.GwtServiceLocator");
 	}
 }
