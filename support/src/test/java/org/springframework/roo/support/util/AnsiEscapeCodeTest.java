@@ -6,6 +6,7 @@ import static org.junit.Assert.assertNull;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.junit.Before;
 import org.junit.Test;
 
 /**
@@ -15,6 +16,11 @@ import org.junit.Test;
  * @since 1.2.0
  */
 public class AnsiEscapeCodeTest {
+	
+	@Before
+	public void init() {
+		System.setProperty("ansi.shell", Boolean.TRUE.toString());
+	}
 
 	@Test
 	public void testCodesAreUnique() {

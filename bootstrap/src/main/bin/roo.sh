@@ -49,16 +49,16 @@ case "`uname`" in
 esac
 
 if [ "$cygwin" = "true" ]; then
-	export ROO_HOME=`cygpath -wp "$ROO_HOME"`
-	export ROO_CP=`cygpath -wp "$ROO_CP"`
-	export ROO_OSGI_FRAMEWORK_STORAGE=`cygpath -wp "$ROO_OSGI_FRAMEWORK_STORAGE"`
-	export ROO_AUTO_DEPLOY_DIRECTORY=`cygpath -wp "$ROO_AUTO_DEPLOY_DIRECTORY"`
-	export ROO_CONFIG_FILE_PROPERTIES=`cygpath -wp "$ROO_CONFIG_FILE_PROPERTIES"`
-	# echo "Modified ROO_HOME: $ROO_HOME"
-	# echo "Modified ROO_CP: $ROO_CP"
-	# echo "Modified ROO_OSGI_FRAMEWORK_STORAGE: $ROO_OSGI_FRAMEWORK_STORAGE"
-	# echo "Modified ROO_AUTO_DEPLOY_DIRECTORY: $ROO_AUTO_DEPLOY_DIRECTORY"
-	# echo "Modified ROO_CONFIG_FILE_PROPERTIES: $ROO_CONFIG_FILE_PROPERTIES"
+    export ROO_HOME=`cygpath -wp "$ROO_HOME"`
+    export ROO_CP=`cygpath -wp "$ROO_CP"`
+    export ROO_OSGI_FRAMEWORK_STORAGE=`cygpath -wp "$ROO_OSGI_FRAMEWORK_STORAGE"`
+    export ROO_AUTO_DEPLOY_DIRECTORY=`cygpath -wp "$ROO_AUTO_DEPLOY_DIRECTORY"`
+    export ROO_CONFIG_FILE_PROPERTIES=`cygpath -wp "$ROO_CONFIG_FILE_PROPERTIES"`
+    # echo "Modified ROO_HOME: $ROO_HOME"
+    # echo "Modified ROO_CP: $ROO_CP"
+    # echo "Modified ROO_OSGI_FRAMEWORK_STORAGE: $ROO_OSGI_FRAMEWORK_STORAGE"
+    # echo "Modified ROO_AUTO_DEPLOY_DIRECTORY: $ROO_AUTO_DEPLOY_DIRECTORY"
+    # echo "Modified ROO_CONFIG_FILE_PROPERTIES: $ROO_CONFIG_FILE_PROPERTIES"
 fi
 
 # make sure to disable the flash message feature for the default OSX terminal, we recommend to use a ANSI compliant terminal such as iTerm if flash message support is desired
@@ -67,7 +67,8 @@ if [ "$TERM_PROGRAM" = "Apple_Terminal" ]; then
 	APPLE_TERMINAL=true
 fi
 
+ANSI_SHELL="-Dansi.shell=true"
 # Hop, hop, hop...
-java -Dis.apple.terminal=$APPLE_TERMINAL $ROO_OPTS -Droo.args="$*" -DdevelopmentMode=false -Dorg.osgi.framework.storage="$ROO_OSGI_FRAMEWORK_STORAGE" -Dfelix.auto.deploy.dir="$ROO_AUTO_DEPLOY_DIRECTORY" -Dfelix.config.properties="file:$ROO_CONFIG_FILE_PROPERTIES" -cp "$ROO_CP" org.springframework.roo.bootstrap.Main
+java -Dis.apple.terminal=$APPLE_TERMINAL $ROO_OPTS $ANSI_SHELL -Droo.args="$*" -DdevelopmentMode=false -Dorg.osgi.framework.storage="$ROO_OSGI_FRAMEWORK_STORAGE" -Dfelix.auto.deploy.dir="$ROO_AUTO_DEPLOY_DIRECTORY" -Dfelix.config.properties="file:$ROO_CONFIG_FILE_PROPERTIES" -cp "$ROO_CP" org.springframework.roo.bootstrap.Main
 EXITED=$?
 # echo Roo exited with code $EXITED

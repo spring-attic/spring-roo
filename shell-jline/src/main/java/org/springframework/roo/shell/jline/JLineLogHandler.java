@@ -158,11 +158,9 @@ public class JLineLogHandler extends Handler {
 			}
 
 			eventString = " " + getFormatter().format(event).replace(StringUtils.LINE_SEPARATOR, StringUtils.LINE_SEPARATOR + lineSeparatorAndIndentingString.toString());
-
 			if (eventString.endsWith(lineSeparatorAndIndentingString.toString())) {
 				eventString = eventString.substring(0, eventString.length() - lineSeparatorAndIndentingString.length());
 			}
-
 		} else {
 			threadName = "";
 			eventString = getFormatter().format(event);
