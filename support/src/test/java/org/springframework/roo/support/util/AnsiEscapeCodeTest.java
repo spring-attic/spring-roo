@@ -19,7 +19,7 @@ public class AnsiEscapeCodeTest {
 	
 	@Before
 	public void init() {
-		System.setProperty("ansi.shell", Boolean.TRUE.toString());
+		System.setProperty("roo.console.ansi", Boolean.TRUE.toString());
 	}
 
 	@Test

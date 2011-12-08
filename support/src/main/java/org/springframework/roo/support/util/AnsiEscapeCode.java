@@ -25,7 +25,7 @@ public enum AnsiEscapeCode {
 	UNDERSCORE(4);
 
 	// Constant for the escape character
-	private static final Boolean ANSI_SHELL = Boolean.getBoolean("ansi.shell");
+	private static final boolean ANSI_SUPPORTED = Boolean.getBoolean("roo.console.ansi");
 	private static final char ESC = 27;
 
 	/**
@@ -42,13 +42,13 @@ public enum AnsiEscapeCode {
 		}
 
 		final StringBuilder sb = new StringBuilder();
-		if (ANSI_SHELL) {
+		if (ANSI_SUPPORTED) {
 			for (final AnsiEscapeCode code : codes) {
 				sb.append(code.code);
 			}
 		}
 		sb.append(text);
-		if (codes != null && codes.length > 0 && ANSI_SHELL) {
+		if (codes != null && codes.length > 0 && ANSI_SUPPORTED) {
 			sb.append(OFF.code);
 		}
 		return sb.toString();
