@@ -225,7 +225,7 @@ public class CreatorOperationsImpl implements CreatorOperations {
 		String destinationFile = pathResolver.getFocusedIdentifier(Path.SRC_MAIN_JAVA, packagePath + separatorChar + languageName + "Language.java");
 
 		if (!fileManager.exists(destinationFile)) {
-			InputStream templateInputStream = FileUtils.getInputStream(getClass(), Type.I18N.name().toLowerCase() +  "/Language.java-template");
+			InputStream templateInputStream = FileUtils.getInputStream(getClass(), Type.I18N.name().toLowerCase() +  separatorChar + "Language.java-template");
 			try {
 				// Read template and insert the user's package
 				String input = FileCopyUtils.copyToString(new InputStreamReader(templateInputStream));
@@ -268,7 +268,7 @@ public class CreatorOperationsImpl implements CreatorOperations {
 		}
 
 		// Load the POM template
-		final String pomTemplate = type.name().toLowerCase() + "/roo-addon-" + type.name().toLowerCase() + "-template.xml";
+		final String pomTemplate = type.name().toLowerCase() + separatorChar + "roo-addon-" + type.name().toLowerCase() + "-template.xml";
 		final Document pom = XmlUtils.readXml(FileUtils.getInputStream(getClass(), pomTemplate));
 		final Element root = pom.getDocumentElement();
 
@@ -324,7 +324,7 @@ public class CreatorOperationsImpl implements CreatorOperations {
 		}
 
 		if (!fileManager.exists(destinationFile)) {
-			InputStream templateInputStream = FileUtils.getInputStream(getClass(), type.name().toLowerCase() + "/" + targetFilename + "-template");
+			InputStream templateInputStream = FileUtils.getInputStream(getClass(), type.name().toLowerCase() + separatorChar + targetFilename + "-template");
 			try {
 				// Read template and insert the user's package
 				String input = FileCopyUtils.copyToString(new InputStreamReader(templateInputStream));
@@ -371,7 +371,7 @@ public class CreatorOperationsImpl implements CreatorOperations {
 				if (entry.getName().equals(expectedEntryName)) {
 					int size;
 					byte[] buffer = new byte[2048];
-					MutableFile target = fileManager.createFile(pathResolver.getFocusedIdentifier(Path.SRC_MAIN_RESOURCES, packagePath + "/" + countryCode + ".png"));
+					MutableFile target = fileManager.createFile(pathResolver.getFocusedIdentifier(Path.SRC_MAIN_RESOURCES, packagePath + separatorChar + countryCode + ".png"));
 					BufferedOutputStream bos = null;
 					try {
 						bos = new BufferedOutputStream(target.getOutputStream(), buffer.length);

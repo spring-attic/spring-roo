@@ -1,5 +1,6 @@
 package org.springframework.roo.addon.web.flow;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -95,7 +96,7 @@ public class WebFlowOperationsImpl implements WebFlowOperations {
 
 	private void installWebFlowConfiguration() {
 		String resolvedSpringConfigPath = pathResolver.getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/spring");
-		if (fileManager.exists(resolvedSpringConfigPath + "/webflow-config.xml")) {
+		if (fileManager.exists(resolvedSpringConfigPath + File.separator + "webflow-config.xml")) {
 			return;
 		}
 
@@ -150,7 +151,7 @@ public class WebFlowOperationsImpl implements WebFlowOperations {
 
 	private void copyTemplate(final String templateFileName, final String resolvedTargetDirectoryPath) {
 		try {
-			FileCopyUtils.copy(FileUtils.getInputStream(getClass(), templateFileName), fileManager.createFile(resolvedTargetDirectoryPath + "/" + templateFileName).getOutputStream());
+			FileCopyUtils.copy(FileUtils.getInputStream(getClass(), templateFileName), fileManager.createFile(resolvedTargetDirectoryPath + File.separator + templateFileName).getOutputStream());
 		} catch (IOException e) {
 			throw new IllegalStateException("Encountered an error during copying of resources for Web Flow addon.", e);
 		}
