@@ -22,6 +22,7 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Metadata for {@link RooPlural}.
@@ -164,5 +165,34 @@ public class PluralMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		tsc.append("cachedLookups", cache == null ? "[None]" : cache.keySet().toString());
 		tsc.append("itdTypeDetails", itdTypeDetails);
 		return tsc.toString();
+	}
+	
+	@Override
+	public boolean equals(final Object obj) {
+		// We override equals because we overrode hashCode, see that method
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (!(obj instanceof PluralMetadata)) {
+			return false;
+		}
+		final PluralMetadata other = (PluralMetadata) obj;
+		return StringUtils.equals(this.value, other.getPlural());
+	}
+
+	@Override
+	public int hashCode() {
+		/*
+		 * We override hashCode because the superclass' implementation compares
+		 * the contents of the ITD builder, and this class never modifies that
+		 * builder; meaning that all instances have the same hash code.
+		 * ITD-generating metadata providers like this one rely on the hash code
+		 * changing when the underlying metadata (in our case the plural)
+		 * changes.
+		 */
+		return value == null ? 0 : value.hashCode();
 	}
 }
