@@ -293,8 +293,9 @@ public final class FileUtils {
 	public static String getPath(final Class<?> loadingClass, final String relativeFilename) {
 		Assert.notNull(loadingClass, "Loading class required");
 		Assert.hasText(relativeFilename, "Filename required");
-		Assert.isTrue(!relativeFilename.startsWith(File.separator), "Filename shouldn't start with a slash");
-		return File.separator + loadingClass.getPackage().getName().replace('.', File.separatorChar) + File.separator + relativeFilename;
+		Assert.isTrue(!relativeFilename.startsWith("/"), "Filename shouldn't start with a slash");
+		// Slashes instead of File.separatorChar is correct here, as these are classloader paths (not file system paths)
+		return "/" + loadingClass.getPackage().getName().replace('.', '/') + "/" + relativeFilename;
 	}
 	
 	/**
