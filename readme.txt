@@ -32,6 +32,8 @@ Next double-check you meet the installation requirements:
  * A proper installation of Java 6 or above
  * Maven 3.0.1+ properly installed and working with your Java 6+
  * Internet access so that Maven can download required dependencies
+ * A Git *command line* client installed (required by Roo's Maven build for
+   inserting the current revision number into OSGi bundle manifests)
 
 Next you need to setup an environment variable called MAVEN_OPTS.
 If you already have a MAVEN_OPTS, just check it has the memory sizes
