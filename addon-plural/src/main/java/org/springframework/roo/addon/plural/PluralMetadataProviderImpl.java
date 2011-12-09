@@ -12,6 +12,10 @@ import org.springframework.roo.project.LogicalPath;
 
 /**
  * Implementation of {@link PluralMetadataProvider}.
+ * <p>
+ * It's odd that this class extends {@link AbstractItdMetadataProvider}, as it
+ * doesn't produce an ITD, it just provides a plural String via
+ * {@link PluralMetadata#getPlural()}. We should probably refactor it.
  *
  * @author Ben Alex
  * @since 1.0
@@ -32,7 +36,8 @@ public class PluralMetadataProviderImpl extends AbstractItdMetadataProvider impl
 
 	@Override
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(final String metadataIdentificationString, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final String itdFilename) {
-		return new PluralMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata);
+		final PluralAnnotationValues pluralAnnotationValues = new PluralAnnotationValues(governorPhysicalTypeMetadata);
+		return new PluralMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, pluralAnnotationValues);
 	}
 
 	public String getItdUniquenessFilenameSuffix() {

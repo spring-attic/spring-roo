@@ -13,8 +13,6 @@ import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
-import org.springframework.roo.classpath.details.annotations.populator.AutoPopulate;
-import org.springframework.roo.classpath.details.annotations.populator.AutoPopulationUtils;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.JavaSymbolName;
@@ -26,6 +24,10 @@ import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Metadata for {@link RooPlural}.
+ * <p>
+ * Note that although this class extends {@link AbstractItdTypeDetailsProvidingMetadataItem},
+ * it never adds anything to the ITD builder, hence it never generates an ITD
+ * source file.
  *
  * @author Ben Alex
  * @since 1.0
@@ -37,7 +39,7 @@ public class PluralMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
 
 	/**
-	 * Creates a plural identifier for the given type.
+	 * Creates a plural identifier for the given type in the given path.
 	 *
 	 * @param javaType the type for which to create the identifier (required)
 	 * @param path the path containing the type (required)
@@ -63,33 +65,26 @@ public class PluralMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		return PhysicalTypeIdentifierNamingUtils.isValid(PROVIDES_TYPE_STRING, metadataIdentificationString);
 	}
 	
-	// From annotation
-	@AutoPopulate private String value = "";
-
-	// Cache
+	// Fields
 	private Map<String, String> cache;
+	private String plural;
 
-	public PluralMetadata(final String identifier, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata) {
+	public PluralMetadata(final String identifier, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final PluralAnnotationValues pluralAnnotation) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata id '" + identifier + "' is invalid");
 
 		if (!isValid()) {
 			return;
 		}
-
-		// Process values from the annotation, if present
-		AnnotationMetadata annotation = governorTypeDetails.getAnnotation(ROO_PLURAL);
-		if (annotation != null) {
-			AutoPopulationUtils.populate(this, annotation);
+		
+		this.plural = getPlural(pluralAnnotation);
+	}
+	
+	private String getPlural(final PluralAnnotationValues pluralAnnotation) {
+		if (StringUtils.hasText(pluralAnnotation.getValue())) {
+			return pluralAnnotation.getValue();
 		}
-
-		// Compute the plural form, if needed
-		if ("".equals(this.value)) {
-			value = getInflectorPlural(destination.getSimpleTypeName(), Locale.ENGLISH);
-		}
-
-		// Create a representation of the desired output ITD
-		itdTypeDetails = builder.build();
+		return getInflectorPlural(destination.getSimpleTypeName(), Locale.ENGLISH);
 	}
 
 	/**
@@ -113,7 +108,7 @@ public class PluralMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	 * @return the plural of the type name
 	 */
 	public String getPlural() {
-		return value;
+		return plural;
 	}
 
 	/**
@@ -163,7 +158,6 @@ public class PluralMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		tsc.append("governor", governorPhysicalTypeMetadata.getId());
 		tsc.append("plural", getPlural());
 		tsc.append("cachedLookups", cache == null ? "[None]" : cache.keySet().toString());
-		tsc.append("itdTypeDetails", itdTypeDetails);
 		return tsc.toString();
 	}
 	
@@ -180,7 +174,7 @@ public class PluralMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 			return false;
 		}
 		final PluralMetadata other = (PluralMetadata) obj;
-		return StringUtils.equals(this.value, other.getPlural());
+		return StringUtils.equals(this.plural, other.getPlural());
 	}
 
 	@Override
@@ -193,6 +187,6 @@ public class PluralMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		 * changing when the underlying metadata (in our case the plural)
 		 * changes.
 		 */
-		return value == null ? 0 : value.hashCode();
+		return plural == null ? 0 : plural.hashCode();
 	}
 }
