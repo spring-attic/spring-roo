@@ -23,7 +23,7 @@ import org.springframework.roo.support.util.loader.Loader;
 public class FileUtilsTest {
 	
 	private static final String MISSING_FILE = "no-such-file.txt";
-	private static final String TEST_FILE = "sub/file-utils-test.txt";
+	private static final String TEST_FILE = "sub" + File.separator + "file-utils-test.txt";
 
 	@Test(expected = NullPointerException.class)
 	public void testGetSystemDependentPathFromNullArray() {
@@ -171,7 +171,7 @@ public class FileUtilsTest {
 
 	@Test
 	public void testGetPath() {
-		assertEquals("/org/springframework/roo/support/util/loader/sub/file-utils-test.txt", FileUtils.getPath(Loader.class, TEST_FILE));
+		assertEquals(File.separator + "org" + File.separator + "springframework" + File.separator + "roo" + File.separator + "support" + File.separator + "util" + File.separator + "loader" + File.separator + "sub" + File.separator + "file-utils-test.txt", FileUtils.getPath(Loader.class, TEST_FILE));
 	}
 	
 	@Test
