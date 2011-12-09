@@ -216,6 +216,6 @@ public class FileUtilsTest {
 	
 	@Test
 	public void testBackOneDirectory() {
-		assertEquals("foo/bar", FileUtils.backOneDirectory("foo/bar/baz/"));
+		assertEquals("foo" + File.separator + "bar", FileUtils.backOneDirectory("foo" + File.separator + "bar" + File.separator + "baz" + File.separator));
 	}
 }
