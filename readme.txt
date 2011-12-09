@@ -2,7 +2,7 @@
 SPRING ROO - DEVELOPER INSTRUCTIONS
 ======================================================================
 
-Thanks for checkout out Spring Roo from Git. These instructions detail
+Thanks for checking out Spring Roo from Git. These instructions detail
 how to get started with your freshly checked-out source tree.
 
 These instructions are aimed at experienced developers looking to
