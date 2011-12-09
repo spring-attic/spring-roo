@@ -20,7 +20,6 @@ import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.LogicalPath;
-import org.springframework.roo.project.Path;
 import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
 
@@ -36,6 +35,33 @@ public class PluralMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	private static final String PROVIDES_TYPE_STRING = PluralMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
 
+	/**
+	 * Creates a plural identifier for the given type.
+	 *
+	 * @param javaType the type for which to create the identifier (required)
+	 * @param path the path containing the type (required)
+	 * @return a valid plural metadata instance ID
+	 */
+	public static String createIdentifier(final JavaType javaType, final LogicalPath path) {
+		return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
+	}
+
+	public static JavaType getJavaType(final String metadataIdentificationString) {
+		return PhysicalTypeIdentifierNamingUtils.getJavaType(PROVIDES_TYPE_STRING, metadataIdentificationString);
+	}
+
+	public static String getMetadataIdentiferType() {
+		return PROVIDES_TYPE;
+	}
+
+	public static LogicalPath getPath(final String metadataIdentificationString) {
+		return PhysicalTypeIdentifierNamingUtils.getPath(PROVIDES_TYPE_STRING, metadataIdentificationString);
+	}
+
+	public static boolean isValid(final String metadataIdentificationString) {
+		return PhysicalTypeIdentifierNamingUtils.isValid(PROVIDES_TYPE_STRING, metadataIdentificationString);
+	}
+	
 	// From annotation
 	@AutoPopulate private String value = "";
 
@@ -44,7 +70,7 @@ public class PluralMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 
 	public PluralMetadata(final String identifier, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
-		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
+		Assert.isTrue(isValid(identifier), "Metadata id '" + identifier + "' is invalid");
 
 		if (!isValid()) {
 			return;
@@ -138,34 +164,5 @@ public class PluralMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		tsc.append("cachedLookups", cache == null ? "[None]" : cache.keySet().toString());
 		tsc.append("itdTypeDetails", itdTypeDetails);
 		return tsc.toString();
-	}
-
-	public static String getMetadataIdentiferType() {
-		return PROVIDES_TYPE;
-	}
-
-	/**
-	 * Creates a plural identifier for the given type, assumed to be located in
-	 * {@link Path#SRC_MAIN_JAVA}
-	 *
-	 * @param javaType (required)
-	 * @param path
-	 * @return a non-<code>null</code> ID
-	 */
-	
-	public static String createIdentifier(final JavaType javaType, final LogicalPath path) {
-		return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
-	}
-
-	public static JavaType getJavaType(final String metadataIdentificationString) {
-		return PhysicalTypeIdentifierNamingUtils.getJavaType(PROVIDES_TYPE_STRING, metadataIdentificationString);
-	}
-
-	public static LogicalPath getPath(final String metadataIdentificationString) {
-		return PhysicalTypeIdentifierNamingUtils.getPath(PROVIDES_TYPE_STRING, metadataIdentificationString);
-	}
-
-	public static boolean isValid(final String metadataIdentificationString) {
-		return PhysicalTypeIdentifierNamingUtils.isValid(PROVIDES_TYPE_STRING, metadataIdentificationString);
 	}
 }
