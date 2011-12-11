@@ -28,15 +28,15 @@
                         <f:facet name="header">
                             <h:outputText value="Actions" />
                         </f:facet>
-                        <p:commandButton id="viewButton" image="ui-icon-zoomin" update="viewDialog" oncomplete="viewDialog.show()" title="#{messages.label_view}">
+                        <p:commandButton id="viewButton" icon="ui-icon-zoomin" update="viewDialog" oncomplete="viewDialog.show()" title="#{messages.label_view}">
                             <f:setPropertyActionListener value="#{__LC_DOMAIN_TYPE__}" target="#{__BEAN_NAME__.__LC_DOMAIN_TYPE__}" />
                         </p:commandButton>
                         <p:tooltip for="viewButton" value="#{messages.label_view}" showEffect="fade" hideEffect="fade" />
-                        <p:commandButton id="editButton" image="ui-icon-pencil" action="#{__BEAN_NAME__.onEdit}" update="editDialog" oncomplete="editDialog.show()" title="#{messages.label_edit}">
+                        <p:commandButton id="editButton" icon="ui-icon-pencil" action="#{__BEAN_NAME__.onEdit}" update="editDialog" oncomplete="editDialog.show()" title="#{messages.label_edit}">
                             <f:setPropertyActionListener value="#{__LC_DOMAIN_TYPE__}" target="#{__BEAN_NAME__.__LC_DOMAIN_TYPE__}" />
                         </p:commandButton>
                         <p:tooltip for="editButton" value="#{messages.label_edit}" showEffect="fade" hideEffect="fade" />
-                        <p:commandButton id="deleteButton" image="ui-icon-trash" oncomplete="deleteDialog.show()" title="#{messages.label_delete}" >
+                        <p:commandButton id="deleteButton" icon="ui-icon-trash" oncomplete="deleteDialog.show()" title="#{messages.label_delete}" >
                             <f:setPropertyActionListener value="#{__LC_DOMAIN_TYPE__}" target="#{__BEAN_NAME__.__LC_DOMAIN_TYPE__}" />
                         </p:commandButton>
                         <p:tooltip for="deleteButton" value="#{messages.label_delete}" showEffect="fade" hideEffect="fade" />
