@@ -85,11 +85,16 @@ changing the key ID at the end). Most public key servers share keys,
 so you don't need to send your public key to multiple key servers.
 
 Finally, every time you build you will be prompted for the password of
-your key. You have three options:
+your key. You have several options:
 
  * Type the password in every time
  * Include a -Dgpg.passphrase=thephrase argument when calling "mvn"
  * Edit ~/.bashrc and add -Dgpg.passphrase=thephrase to MAVEN_OPTS
+ * Edit your active Maven profile to include a "gpg.passphrase" property:
+     <profiles>
+         <profile>
+             <properties>
+                 <gpg.passphrase>roorules</gpg.passphrase>
 
 Of course the most secure option is to type the password every time.
 However, if you're doing a lot of builds you might prefer automation.
