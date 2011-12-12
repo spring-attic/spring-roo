@@ -1,5 +1,7 @@
 package org.springframework.roo.project;
 
+import java.io.File;
+
 import org.springframework.roo.metadata.AbstractMetadataItem;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.project.maven.Pom;
@@ -23,13 +25,14 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	 * Returns the metadata ID for the project-level metadata of the given module.
 	 * 
 	 * @param moduleName the fully-qualified module name, separated by
-	 * {@link java.io.File#separator}; can be blank for the root or only module
+	 * {@link File#separator} and/or "/" if different; can be blank for the root
+	 * or only module
 	 * @return a non-blank MID
 	 */
 	public static String getProjectIdentifier(final String moduleName) {
 		final StringBuilder sb = new StringBuilder(PROJECT_MID_PREFIX);
 		if (StringUtils.hasText(moduleName)) {
-			sb.append(MODULE_SEPARATOR).append(moduleName);
+			sb.append(MODULE_SEPARATOR).append(moduleName.replace("/", File.separator));
 		}
 		return sb.toString();
 	}
