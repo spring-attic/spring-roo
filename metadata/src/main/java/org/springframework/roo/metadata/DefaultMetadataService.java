@@ -296,6 +296,6 @@ public class DefaultMetadataService extends AbstractMetadataCache implements Met
 		tsc.append("cacheEvictions", cacheEvictions);
 		tsc.append("cacheCurrentSize", getCacheSize());
 		tsc.append("cacheMaximumSize", getMaxCapacity());
-		return tsc.toString().replaceFirst("@[0-9a-f]{8}", ":");
+		return tsc.toString().replaceFirst("@[0-9a-f]+", ":");
 	}
 }

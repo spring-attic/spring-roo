@@ -73,7 +73,7 @@ public class MavenPathResolvingStrategyTest {
 		final String identifier = strategy.getIdentifier(mockContextualPath, relativePath);
 		
 		// Check
-		assertEquals(expectedIdentifier, identifier);
+		assertEquals(expectedIdentifier, identifier.replaceFirst("[A-Z]:", ""));
 	}
 
 	@Test

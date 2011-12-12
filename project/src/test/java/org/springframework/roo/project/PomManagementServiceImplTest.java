@@ -31,6 +31,7 @@ import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.project.maven.PomFactory;
 import org.springframework.roo.shell.Shell;
 import org.springframework.roo.support.osgi.OSGiUtils;
+import org.springframework.roo.support.util.FileUtils;
 import org.w3c.dom.Element;
 
 /**
@@ -107,8 +108,9 @@ public class PomManagementServiceImplTest {
 	}
 	
 	private String getCanonicalPath(final String relativePath) {
-		final URL resource = getClass().getResource(relativePath);
-		assertNotNull("Can't find '" + relativePath + "' on the classpath of " + getClass().getName(), resource);
+		final String systemDependentPath = relativePath.replace("/", File.separator);
+		final URL resource = getClass().getResource(systemDependentPath);
+		assertNotNull("Can't find '" + systemDependentPath + "' on the classpath of " + getClass().getName(), resource);
 		try {
 			return new File(resource.toURI()).getCanonicalPath();
 		} catch (final Exception e) {
@@ -194,9 +196,9 @@ public class PomManagementServiceImplTest {
 	public void testGetPomsOfMultiModuleProjectWhenChildIsDirty() throws Exception {
 		// Set up
 		setUpWorkingDirectory("multi");
-		final String rootPom = "multi/pom.xml";
+		final String rootPom = FileUtils.getSystemDependentPath("multi", "pom.xml");
 		final String rootPomCanonicalPath = getCanonicalPath(rootPom);
-		final String childPom = "multi/foo-child/pom.xml";
+		final String childPom = FileUtils.getSystemDependentPath("multi", "foo-child", "pom.xml");
 		final String childPomCanonicalPath = getCanonicalPath(childPom);
 		final Collection<String> dirtyFiles = Arrays.asList(childPomCanonicalPath);
 		when(mockFileMonitorService.getDirtyFiles(PomManagementServiceImpl.class.getName())).thenReturn(dirtyFiles);

@@ -29,9 +29,11 @@ public final class FileUtils {
 	 * platforms that Roo supports.
 	 */
 	public static final String CURRENT_DIRECTORY = ".";
+	
+	private static final String WINDOWS_DRIVE_PREFIX = "^[A-Za-z]:";
 
 	// Doesn't check for backslash after the colon, since Java has no issues with paths like c:/Windows
-	private static final Pattern WINDOWS_DRIVE_PATH = Pattern.compile("^[A-Za-z]:.*");
+	private static final Pattern WINDOWS_DRIVE_PATH = Pattern.compile(WINDOWS_DRIVE_PREFIX + ".*");
 	
 	private static final PathMatcher PATH_MATCHER;
 	

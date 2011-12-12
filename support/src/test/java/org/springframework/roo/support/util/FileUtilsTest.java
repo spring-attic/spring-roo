@@ -171,7 +171,7 @@ public class FileUtilsTest {
 
 	@Test
 	public void testGetPath() {
-		assertEquals(File.separator + "org" + File.separator + "springframework" + File.separator + "roo" + File.separator + "support" + File.separator + "util" + File.separator + "loader" + File.separator + "sub" + File.separator + "file-utils-test.txt", FileUtils.getPath(Loader.class, TEST_FILE));
+		assertEquals("/org/springframework/roo/support/util/loader/sub/file-utils-test.txt", FileUtils.getPath(Loader.class, "sub/file-utils-test.txt"));
 	}
 	
 	@Test

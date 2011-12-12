@@ -40,7 +40,7 @@ public class PomManagementServiceImpl implements PomManagementService {
 
 	// Constants
 	private static final String DEFAULT_POM_NAME = "pom.xml";
-	private static final String DEFAULT_RELATIVE_PATH = "../" + DEFAULT_POM_NAME;
+	private static final String DEFAULT_RELATIVE_PATH = ".." + File.separator + DEFAULT_POM_NAME;
 	
 	// Fields
 	@Reference FileManager fileManager;

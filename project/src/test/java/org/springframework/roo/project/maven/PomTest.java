@@ -14,6 +14,7 @@ import org.springframework.roo.project.DependencyType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PhysicalPath;
+import org.springframework.roo.support.util.FileUtils;
 import org.springframework.roo.support.util.StringUtils;
 
 /**
@@ -27,7 +28,7 @@ public class PomTest {
 	// Constants
 	private static final String ARTIFACT_ID = "my-app";
 	private static final String GROUP_ID = "com.example";
-	private static final String PROJECT_ROOT = "/users/jbloggs/projects/clinic";
+	private static final String PROJECT_ROOT = File.separator + FileUtils.getSystemDependentPath("users", "jbloggs", "projects", "clinic");
 	private static final String ROOT_MODULE = "";
 	private static final String VERSION = "1.0.1.RELEASE";
 	private static final String WAR = "war";
@@ -73,6 +74,6 @@ public class PomTest {
 	}
 
 	private Pom getMinimalPom(final String packaging) {
- 		return new Pom(GROUP_ID, ARTIFACT_ID, VERSION, packaging, null, null, null, null, null, null, null, null, null, null, null, null, PROJECT_ROOT + "/pom.xml", ROOT_MODULE, null);
+ 		return new Pom(GROUP_ID, ARTIFACT_ID, VERSION, packaging, null, null, null, null, null, null, null, null, null, null, null, null, PROJECT_ROOT + File.separator + "pom.xml", ROOT_MODULE, null);
 	}
 }
