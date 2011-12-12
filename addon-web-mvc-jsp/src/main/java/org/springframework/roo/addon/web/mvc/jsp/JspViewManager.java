@@ -7,6 +7,7 @@ import static org.springframework.roo.model.JavaType.FLOAT_OBJECT;
 import static org.springframework.roo.model.JavaType.INT_OBJECT;
 import static org.springframework.roo.model.JavaType.LONG_OBJECT;
 import static org.springframework.roo.model.JavaType.SHORT_OBJECT;
+import static org.springframework.roo.model.JavaType.STRING;
 import static org.springframework.roo.model.JdkJavaType.BIG_DECIMAL;
 import static org.springframework.roo.model.JdkJavaType.BIG_INTEGER;
 import static org.springframework.roo.model.JdkJavaType.CALENDAR;
@@ -451,7 +452,7 @@ public class JspViewManager {
 		AnnotationMetadata annotationMetadata;
 		if (field.getFieldType().equals(INT_OBJECT) || field.getFieldType().getFullyQualifiedTypeName().equals(int.class.getName()) || field.getFieldType().equals(SHORT_OBJECT) || field.getFieldType().getFullyQualifiedTypeName().equals(short.class.getName()) || field.getFieldType().equals(LONG_OBJECT) || field.getFieldType().getFullyQualifiedTypeName().equals(long.class.getName()) || field.getFieldType().equals(BIG_INTEGER)) {
 			fieldElement.setAttribute("validationMessageCode", "field_invalid_integer");
-		} else if (uncapitalize(field.getFieldName().getSymbolName()).contains("email")) {
+		} else if (isEmailField(field)) {
 			fieldElement.setAttribute("validationMessageCode", "field_invalid_email");
 		} else if (field.getFieldType().equals(DOUBLE_OBJECT) || field.getFieldType().getFullyQualifiedTypeName().equals(double.class.getName()) || field.getFieldType().equals(FLOAT_OBJECT) || field.getFieldType().getFullyQualifiedTypeName().equals(float.class.getName()) || field.getFieldType().equals(BIG_DECIMAL)) {
 			fieldElement.setAttribute("validationMessageCode", "field_invalid_number");
@@ -516,6 +517,10 @@ public class JspViewManager {
 		if (field.getFieldName().getSymbolName().contains(".")) {
 			fieldElement.setAttribute("disableFormBinding", "true");
 		}
+	}
+
+	private boolean isEmailField(final FieldMetadata field) {
+		return STRING.equals(field.getFieldType()) && uncapitalize(field.getFieldName().getSymbolName()).contains("email");
 	}
 
 	private String uncapitalize(final String term) {
