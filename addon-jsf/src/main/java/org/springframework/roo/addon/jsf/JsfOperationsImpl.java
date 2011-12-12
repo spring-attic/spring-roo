@@ -66,10 +66,10 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 
 	// Constants
 	private static final String JSF_IMPLEMENTATION_XPATH = "/configuration/jsf-implementations/jsf-implementation";
+	private static final String JSF_LIBRARY_XPATH = "/configuration/jsf-libraries/jsf-library";
 	private static final String DEPENDENCY_XPATH = "/dependencies/dependency";
 	private static final String REPOSITORY_XPATH = "/repositories/repository";
 	private static final String MYFACES_LISTENER = "org.apache.myfaces.webapp.StartupServletContextListener";
-	private static final String PRIMEFACES_XPATH = "/configuration/jsf-libraries/jsf-library[@id = 'PRIMEFACES']";
 	private static final String PRIMEFACES_THEMES_VERSION = "1.0.2";
 
 	// Fields
@@ -98,8 +98,8 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 		return isInstalledInModule(projectOperations.getFocusedModuleName()) && fileManager.exists(getWebXmlFile());
 	}
 
-	public void setup(final JsfImplementation jsfImplementation, final Theme theme) {
-		updateConfiguration(jsfImplementation);
+	public void setup(final JsfImplementation jsfImplementation, final JsfLibrary jsfLibrary, final Theme theme) {
+		updateConfiguration(jsfImplementation, jsfLibrary);
 		createOrUpdateWebXml(jsfImplementation, theme);
 
 		final LogicalPath webappPath = Path.SRC_MAIN_WEBAPP.getModulePathId(projectOperations.getFocusedModuleName());
@@ -149,16 +149,16 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 		// Create type annotation for new managed bean
 		AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(ROO_JSF_MANAGED_BEAN);
 		annotationBuilder.addClassAttribute("entity", entity);
-		
+
 		if (StringUtils.isBlank(beanName)) {
 			beanName = StringUtils.uncapitalize(managedBean.getSimpleTypeName());
 		}
 		annotationBuilder.addStringAttribute("beanName", beanName);
-		
+
 		if (!includeOnMenu) {
 			annotationBuilder.addBooleanAttribute("includeOnMenu", includeOnMenu);
 		}
-		
+
 		LogicalPath managedBeanPath = pathResolver.getFocusedPath(Path.SRC_MAIN_JAVA);
 		String resourceIdentifier = typeLocationService.getPhysicalTypeCanonicalPath(managedBean, managedBeanPath);
 		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(managedBean, pathResolver.getPath(resourceIdentifier));
@@ -297,7 +297,7 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 			addOrRemoveMyFacesListener(jsfImplementation, document);
 		}
 		if (theme != null) {
-			changeTheme(theme, document);
+			changePrimeFacesTheme(theme, document);
 		}
 
 		fileManager.createOrUpdateTextFileIfRequired(webXmlPath, XmlUtils.nodeToString(document), false);
@@ -326,7 +326,7 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 		}
 	}
 
-	private void changeTheme(final Theme theme, final Document document) {
+	private void changePrimeFacesTheme(final Theme theme, final Document document) {
 		Assert.notNull(theme, "Theme required");
 		Assert.notNull(document, "web.xml document required");
 
@@ -371,7 +371,7 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 		return projectOperations.getPathResolver().getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/faces-config.xml");
 	}
 
-	private void updateConfiguration(JsfImplementation jsfImplementation) {
+	private void updateConfiguration(JsfImplementation jsfImplementation, JsfLibrary jsfLibrary) {
 		// Update pom.xml with JSF/Primefaces dependencies and repositories
 		final Element configuration = XmlUtils.getConfiguration(getClass());
 
@@ -380,9 +380,13 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 			jsfImplementation = getExistingOrDefaultJsfImplementation(configuration);
 		}
 
-		final String jsfImplementationXPath = getJsfImplementationXPath(getUnwantedJsfImplementations(jsfImplementation));
-		updateDependencies(configuration, jsfImplementation, jsfImplementationXPath);
-		updateRepositories(configuration, jsfImplementation, jsfImplementationXPath);
+		if (jsfLibrary == null) {
+			// JSF component libraru was not specified by user so first query POM to determine if there is an existing JSF dependency and use it, otherwise default to PrimeFaces
+			jsfLibrary = getExistingOrDefaultJsfLibrary(configuration);
+		}
+
+		updateDependencies(configuration, jsfImplementation, jsfLibrary);
+		updateRepositories(configuration, jsfImplementation, jsfLibrary);
 	}
 
 	private JsfImplementation getExistingOrDefaultJsfImplementation(final Element configuration) {
@@ -398,6 +402,19 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 		return existingJsfImplementation == null ? JsfImplementation.ORACLE_MOJARRA : existingJsfImplementation;
 	}
 
+	private JsfLibrary getExistingOrDefaultJsfLibrary(final Element configuration) {
+		final Pom pom = projectOperations.getPomFromModuleName(projectOperations.getFocusedModuleName());
+		JsfLibrary existingJsfImplementation = null;
+		for (JsfLibrary value : JsfLibrary.values()) {
+			final Element jsfDependencyElement = XmlUtils.findFirstElement(JSF_LIBRARY_XPATH + "[@id = '" + value.name() + "']" + DEPENDENCY_XPATH, configuration);
+			if (jsfDependencyElement != null && pom.isDependencyRegistered(new Dependency(jsfDependencyElement))) {
+				existingJsfImplementation = value;
+				break;
+			}
+		}
+		return existingJsfImplementation == null ? JsfLibrary.PRIMEFACES : existingJsfImplementation;
+	}
+
 	private List<Dependency> getDependencies(final String xPathExpression, final Element configuration) {
 		final List<Dependency> dependencies = new ArrayList<Dependency>();
 		for (Element dependencyElement : XmlUtils.findElements(xPathExpression + DEPENDENCY_XPATH, configuration)) {
@@ -406,45 +423,55 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 		return dependencies;
 	}
 
-	private void updateDependencies(final Element configuration, final JsfImplementation jsfImplementation, final String jsfImplementationXPath) {
-		final List<Dependency> requiredDependencies = new ArrayList<Dependency>();
+	private void updateDependencies(final Element configuration, final JsfImplementation jsfImplementation, final JsfLibrary jsfLibrary) {
+		final List<Dependency> requiredDependencyElements = new ArrayList<Dependency>();
 
-		final List<Element> jsfImplementationDependencies = XmlUtils.findElements(jsfImplementation.getConfigPrefix() + DEPENDENCY_XPATH, configuration);
-		for (Element dependencyElement : jsfImplementationDependencies) {
-			requiredDependencies.add(new Dependency(dependencyElement));
+		final List<Element> jsfImplementationDependencyElements = XmlUtils.findElements(jsfImplementation.getConfigPrefix() + DEPENDENCY_XPATH, configuration);
+		for (Element dependencyElement : jsfImplementationDependencyElements) {
+			requiredDependencyElements.add(new Dependency(dependencyElement));
 		}
 
-		final List<Element> jsfLibraryDependencies = XmlUtils.findElements(PRIMEFACES_XPATH + DEPENDENCY_XPATH, configuration);
-		for (Element dependencyElement : jsfLibraryDependencies) {
-			requiredDependencies.add(new Dependency(dependencyElement));
+		final List<Element> jsfLibraryDependencyElements = XmlUtils.findElements(jsfLibrary.getConfigPrefix() + DEPENDENCY_XPATH, configuration);
+		for (Element dependencyElement : jsfLibraryDependencyElements) {
+			requiredDependencyElements.add(new Dependency(dependencyElement));
 		}
 
-		final List<Element> jsfDependencies = XmlUtils.findElements("/configuration/jsf" + DEPENDENCY_XPATH, configuration);
-		for (Element dependencyElement : jsfDependencies) {
-			requiredDependencies.add(new Dependency(dependencyElement));
+		final List<Element> jsfDependencyElements = XmlUtils.findElements("/configuration/jsf" + DEPENDENCY_XPATH, configuration);
+		for (Element dependencyElement : jsfDependencyElements) {
+			requiredDependencyElements.add(new Dependency(dependencyElement));
 		}
 
 		// Remove redundant dependencies
-		final List<Dependency> redundantDependencies = new ArrayList<Dependency>();
-		redundantDependencies.addAll(getDependencies(jsfImplementationXPath, configuration));
+		final List<Dependency> redundantDependencyElements = new ArrayList<Dependency>();
+
+		final List<JsfImplementation> unwantedJsfImplementations = getUnwantedJsfImplementations(jsfImplementation);
+		if (!unwantedJsfImplementations.isEmpty()) {
+			redundantDependencyElements.addAll(getDependencies(getJsfImplementationXPath(unwantedJsfImplementations), configuration));
+		}
+
+		final List<JsfLibrary> unwantedJsfLibraries = getUnwantedJsfLibraries(jsfLibrary);
+		if (!unwantedJsfLibraries.isEmpty()) {
+			redundantDependencyElements.addAll(getDependencies(getJsfLibraryXPath(unwantedJsfLibraries), configuration));
+		}
+
 		// Don't remove any we actually need
-		redundantDependencies.removeAll(requiredDependencies);
+		redundantDependencyElements.removeAll(requiredDependencyElements);
 
 		// Update the POM
-		projectOperations.addDependencies(projectOperations.getFocusedModuleName(), requiredDependencies);
-		projectOperations.removeDependencies(projectOperations.getFocusedModuleName(), redundantDependencies);
+		projectOperations.addDependencies(projectOperations.getFocusedModuleName(), requiredDependencyElements);
+		projectOperations.removeDependencies(projectOperations.getFocusedModuleName(), redundantDependencyElements);
 	}
 
-	private void updateRepositories(final Element configuration, final JsfImplementation jsfImplementation, final String jsfImplementationXPath) {
+	private void updateRepositories(final Element configuration, final JsfImplementation jsfImplementation, final JsfLibrary jsfLibrary) {
 		List<Repository> repositories = new ArrayList<Repository>();
 
-		List<Element> jsfRepositories = XmlUtils.findElements(jsfImplementation.getConfigPrefix() + REPOSITORY_XPATH, configuration);
-		for (Element repositoryElement : jsfRepositories) {
+		List<Element> jsfRepositoryElements = XmlUtils.findElements(jsfImplementation.getConfigPrefix() + REPOSITORY_XPATH, configuration);
+		for (Element repositoryElement : jsfRepositoryElements) {
 			repositories.add(new Repository(repositoryElement));
 		}
 
-		List<Element> jsfLibraryRepositories = XmlUtils.findElements(PRIMEFACES_XPATH + REPOSITORY_XPATH, configuration);
-		for (Element repositoryElement : jsfLibraryRepositories) {
+		List<Element> jsfLibraryRepositoryElements = XmlUtils.findElements(jsfLibrary.getConfigPrefix() + REPOSITORY_XPATH, configuration);
+		for (Element repositoryElement : jsfLibraryRepositoryElements) {
 			repositories.add(new Repository(repositoryElement));
 		}
 
@@ -455,6 +482,12 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 		final List<JsfImplementation> unwantedJsfImplementations = new ArrayList<JsfImplementation>(Arrays.asList(JsfImplementation.values()));
 		unwantedJsfImplementations.remove(jsfImplementation);
 		return unwantedJsfImplementations;
+	}
+
+	private List<JsfLibrary> getUnwantedJsfLibraries(final JsfLibrary jsfLibrary) {
+		final List<JsfLibrary> unwantedJsfLibraries = new ArrayList<JsfLibrary>(Arrays.asList(JsfLibrary.values()));
+		unwantedJsfLibraries.remove(jsfLibrary);
+		return unwantedJsfLibraries;
 	}
 
 	private void installBean(final String templateName, final JavaPackage destinationPackage) {
@@ -495,4 +528,18 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 		builder.append("]");
 		return builder.toString();
 	}
+	
+	private String getJsfLibraryXPath(final List<JsfLibrary> jsfLibraries) {
+		StringBuilder builder = new StringBuilder(JSF_LIBRARY_XPATH).append("[");
+		for (int i = 0; i < jsfLibraries.size(); i++) {
+			if (i > 0) {
+				builder.append(" or ");
+			}
+			builder.append("@id = '");
+			builder.append(jsfLibraries.get(i).name());
+			builder.append("'");
+		}
+		builder.append("]");
+		return builder.toString();
+	}	
 }

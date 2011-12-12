@@ -16,7 +16,7 @@ public interface JsfOperations extends Feature {
 
 	boolean isScaffoldOrMediaAdditionAvailable();
 
-	void setup(JsfImplementation jsfImplementation, Theme theme);
+	void setup(JsfImplementation jsfImplementation, JsfLibrary jsfLibrary, Theme theme);
 
 	void generateAll(JavaPackage destinationPackage);
 

@@ -37,9 +37,10 @@ public class JsfCommands implements CommandMarker {
 	@CliCommand(value = "web jsf setup", help = "Set up JSF environment")
 	public void webJsfSetup(
 		@CliOption(key = "implementation", mandatory = false, help = "The JSF implementation to use") final JsfImplementation jsfImplementation,
+		@CliOption(key = "library", mandatory = false, help = "The JSF component library to use") final JsfLibrary jsfLibrary,
 		@CliOption(key = "theme", mandatory = false, help = "The name of the theme") final Theme theme) {
 
-		jsfOperations.setup(jsfImplementation, theme);
+		jsfOperations.setup(jsfImplementation, jsfLibrary, theme);
 	}
 
 	@CliCommand(value = "web jsf all", help = "Create JSF managed beans for all entities")
