@@ -543,7 +543,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 
 			final JavaSymbolName methodName = new JavaSymbolName("populate" + javaTypeMd.getPlural());
 			if (governorHasMethodWithSameName(methodName)) {
-				return null;
+				continue;
 			}
 
 			final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
