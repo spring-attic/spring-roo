@@ -1,5 +1,6 @@
 package org.springframework.roo.addon.web.mvc.controller.json;
 
+import static java.lang.reflect.Modifier.PUBLIC;
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.FIND_ALL_METHOD;
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.FIND_METHOD;
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.MERGE_METHOD;
@@ -18,7 +19,6 @@ import static org.springframework.roo.model.SpringJavaType.REQUEST_PARAM;
 import static org.springframework.roo.model.SpringJavaType.RESPONSE_BODY;
 import static org.springframework.roo.model.SpringJavaType.RESPONSE_ENTITY;
 
-import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -64,6 +64,7 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 
 	// Constants
 	private static final JavaType RESPONSE_ENTITY_STRING = new JavaType(RESPONSE_ENTITY.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, Arrays.asList(JavaType.STRING));
+	private static final String CONTENT_TYPE = "application/text";
 	private static final String PROVIDES_TYPE_STRING = WebJsonMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
 
@@ -104,7 +105,6 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 		this.jsonEnabledType = annotationValues.getJsonObject();
 		this.entityName = JavaSymbolName.getReservedWordSafeName(jsonEnabledType).getSymbolName();
 		this.introduceLayerComponents = introduceLayerComponents;
-
 		this.jsonMetadata = jsonMetadata;
 
 		MemberTypeAdditions findMethod = persistenceAdditions.get(FIND_METHOD);
@@ -167,7 +167,7 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 		String responseEntityShortName = getShortName(RESPONSE_ENTITY);
 		String httpStatusShortName = getShortName(HTTP_STATUS);
 		bodyBuilder.appendFormalLine(httpHeadersShortName + " headers = new " + httpHeadersShortName + "();");
-		bodyBuilder.appendFormalLine("headers.add(\"Content-Type\", \"application/text; charset=utf-8\");");
+		bodyBuilder.appendFormalLine("headers.add(\"Content-Type\", \"" + CONTENT_TYPE + "; charset=utf-8\");");
 		bodyBuilder.appendFormalLine("if (" + beanShortName.toLowerCase() + " == null) {");
 		bodyBuilder.indent();
 		bodyBuilder.appendFormalLine("return new " + responseEntityShortName + "<String>(headers, " + httpStatusShortName + ".NOT_FOUND);");
@@ -179,7 +179,7 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 			findMethod.copyAdditionsTo(builder, governorTypeDetails);
 		}
 
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, RESPONSE_ENTITY_STRING, parameterTypes, parameterNames, bodyBuilder);
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), PUBLIC, methodName, RESPONSE_ENTITY_STRING, parameterTypes, parameterNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
 		return methodBuilder;
 	}
@@ -212,14 +212,14 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 		bodyBuilder.appendFormalLine(persistMethod.getMethodCall() + ";");
 		String httpHeadersShortName = getShortName(HTTP_HEADERS);
 		bodyBuilder.appendFormalLine(httpHeadersShortName + " headers = new " + httpHeadersShortName + "();");
-		bodyBuilder.appendFormalLine("headers.add(\"Content-Type\", \"application/text\");");
+		bodyBuilder.appendFormalLine("headers.add(\"Content-Type\", \"" + CONTENT_TYPE + "\");");
 		bodyBuilder.appendFormalLine("return new ResponseEntity<String>(headers, " + HTTP_STATUS.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ".CREATED);");
 
 		if (introduceLayerComponents) {
 			persistMethod.copyAdditionsTo(builder, governorTypeDetails);
 		}
 
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, RESPONSE_ENTITY_STRING, parameterTypes, parameterNames, bodyBuilder);
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), PUBLIC, methodName, RESPONSE_ENTITY_STRING, parameterTypes, parameterNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
 		return methodBuilder;
 	}
@@ -259,14 +259,14 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 		bodyBuilder.appendFormalLine("}");
 		String httpHeadersShortName = getShortName(HTTP_HEADERS);
 		bodyBuilder.appendFormalLine(httpHeadersShortName + " headers = new " + httpHeadersShortName + "();");
-		bodyBuilder.appendFormalLine("headers.add(\"Content-Type\", \"application/text\");");
+		bodyBuilder.appendFormalLine("headers.add(\"Content-Type\", \"" + CONTENT_TYPE + "\");");
 		bodyBuilder.appendFormalLine("return new ResponseEntity<String>(headers, " + HTTP_STATUS.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ".CREATED);");
 
 		if (introduceLayerComponents) {
 			persistMethod.copyAdditionsTo(builder, governorTypeDetails);
 		}
 
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, RESPONSE_ENTITY_STRING, parameterTypes, parameterNames, bodyBuilder);
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), PUBLIC, methodName, RESPONSE_ENTITY_STRING, parameterTypes, parameterNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
 		return methodBuilder;
 	}
@@ -296,7 +296,7 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 		String responseEntityShortName = getShortName(RESPONSE_ENTITY);
 		String httpStatusShortName = getShortName(HTTP_STATUS);
 		bodyBuilder.appendFormalLine(httpHeadersShortName + " headers = new " + httpHeadersShortName + "();");
-		bodyBuilder.appendFormalLine("headers.add(\"Content-Type\", \"application/text; charset=utf-8\");");
+		bodyBuilder.appendFormalLine("headers.add(\"Content-Type\", \"" + CONTENT_TYPE + "; charset=utf-8\");");
 		JavaType list = new JavaType(List.class.getName(), 0, DataType.TYPE, null, Arrays.asList(jsonEnabledType));
 		bodyBuilder.appendFormalLine(list.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + " result = " + findAllMethod.getMethodCall() + ";");
 		bodyBuilder.appendFormalLine("return new " + responseEntityShortName + "<String>(" + entityName + "." + toJsonArrayMethodName.getSymbolName() + "(result), headers, " +  httpStatusShortName + ".OK);");
@@ -305,7 +305,7 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 			findAllMethod.copyAdditionsTo(builder, governorTypeDetails);
 		}
 
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, RESPONSE_ENTITY_STRING, bodyBuilder);
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), PUBLIC, methodName, RESPONSE_ENTITY_STRING, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
 		return methodBuilder;
 	}
@@ -338,7 +338,7 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 		String beanSymbolName = JavaSymbolName.getReservedWordSafeName(jsonEnabledType).getSymbolName();
 		String httpHeadersShortName = getShortName(HTTP_HEADERS);
 		bodyBuilder.appendFormalLine(httpHeadersShortName + " headers = new " + httpHeadersShortName + "();");
-		bodyBuilder.appendFormalLine("headers.add(\"Content-Type\", \"application/text\");");
+		bodyBuilder.appendFormalLine("headers.add(\"Content-Type\", \"" + CONTENT_TYPE + "\");");
 		bodyBuilder.appendFormalLine(beanShortName + " " + beanSymbolName + " = " + beanShortName + "." + fromJsonMethodName.getSymbolName() + "(json);");
 		bodyBuilder.appendFormalLine("if (" + mergeMethod.getMethodCall() + " == null) {");
 		bodyBuilder.indent();
@@ -351,7 +351,7 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 			mergeMethod.copyAdditionsTo(builder, governorTypeDetails);
 		}
 
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, RESPONSE_ENTITY_STRING, parameterTypes, parameterNames, bodyBuilder);
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), PUBLIC, methodName, RESPONSE_ENTITY_STRING, parameterTypes, parameterNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
 		return methodBuilder;
 	}
@@ -387,7 +387,7 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 		params.add(jsonEnabledType);
 		String httpHeadersShortName = getShortName(HTTP_HEADERS);
 		bodyBuilder.appendFormalLine(httpHeadersShortName + " headers = new " + httpHeadersShortName + "();");
-		bodyBuilder.appendFormalLine("headers.add(\"Content-Type\", \"application/text\");");
+		bodyBuilder.appendFormalLine("headers.add(\"Content-Type\", \"" + CONTENT_TYPE + "\");");
 		bodyBuilder.appendFormalLine("for (" + beanName + " " + entityName + ": " + beanName + "." + fromJsonArrayMethodName.getSymbolName() + "(json)) {");
 		bodyBuilder.indent();
 		bodyBuilder.appendFormalLine("if (" + mergeMethod.getMethodCall() + " == null) {");
@@ -403,7 +403,7 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 			mergeMethod.copyAdditionsTo(builder, governorTypeDetails);
 		}
 
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, RESPONSE_ENTITY_STRING, parameterTypes, parameterNames, bodyBuilder);
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), PUBLIC, methodName, RESPONSE_ENTITY_STRING, parameterTypes, parameterNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
 		return methodBuilder;
 	}
@@ -439,7 +439,7 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 		bodyBuilder.appendFormalLine(beanShortName + " " + beanShortNameField + " = " + findMethod.getMethodCall() + ";");
 		String httpHeadersShortName = getShortName(HTTP_HEADERS);
 		bodyBuilder.appendFormalLine(httpHeadersShortName + " headers = new " + httpHeadersShortName + "();");
-		bodyBuilder.appendFormalLine("headers.add(\"Content-Type\", \"application/text\");");
+		bodyBuilder.appendFormalLine("headers.add(\"Content-Type\", \"" + CONTENT_TYPE + "\");");
 		bodyBuilder.appendFormalLine("if (" + beanShortNameField + " == null) {");
 		bodyBuilder.indent();
 		bodyBuilder.appendFormalLine("return new " + getShortName(RESPONSE_ENTITY) + "<String>(headers, " + getShortName(HTTP_STATUS) + ".NOT_FOUND);");
@@ -452,7 +452,7 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 			removeMethod.copyAdditionsTo(builder, governorTypeDetails);
 			findMethod.copyAdditionsTo(builder, governorTypeDetails);
 		}
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, RESPONSE_ENTITY_STRING, parameterTypes, parameterNames, bodyBuilder);
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), PUBLIC, methodName, RESPONSE_ENTITY_STRING, parameterTypes, parameterNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
 		return methodBuilder;
 	}
@@ -517,10 +517,10 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 		String responseEntityShortName = getShortName(RESPONSE_ENTITY);
 		String httpStatusShortName = getShortName(HTTP_STATUS);
 		bodyBuilder.appendFormalLine(httpHeadersShortName + " headers = new " + httpHeadersShortName + "();");
-		bodyBuilder.appendFormalLine("headers.add(\"Content-Type\", \"application/text; charset=utf-8\");");
+		bodyBuilder.appendFormalLine("headers.add(\"Content-Type\", \"" + CONTENT_TYPE + "; charset=utf-8\");");
 		bodyBuilder.appendFormalLine("return new " + responseEntityShortName + "<String>(" + shortBeanName + "." + jsonMetadata.getToJsonArrayMethodName().getSymbolName().toString() + "(" + shortBeanName + "." + finderDetails.getFinderMethodMetadata().getMethodName().getSymbolName() + "(" + methodParams.toString() + ").getResultList()), headers, " +  httpStatusShortName + ".OK);");
 
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, finderMethodName, RESPONSE_ENTITY_STRING, parameterTypes, newParamNames, bodyBuilder);
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), PUBLIC, finderMethodName, RESPONSE_ENTITY_STRING, parameterTypes, newParamNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
 		return methodBuilder;
 	}
