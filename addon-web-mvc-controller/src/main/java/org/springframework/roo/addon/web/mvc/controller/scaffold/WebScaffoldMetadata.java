@@ -7,6 +7,7 @@ import static org.springframework.roo.classpath.customdata.CustomDataKeys.FIND_M
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.MERGE_METHOD;
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.PERSIST_METHOD;
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.REMOVE_METHOD;
+import static org.springframework.roo.model.JavaType.BOOLEAN_PRIMITIVE;
 import static org.springframework.roo.model.JavaType.INT_OBJECT;
 import static org.springframework.roo.model.JavaType.STRING;
 import static org.springframework.roo.model.JdkJavaType.ARRAYS;
@@ -44,6 +45,7 @@ import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.customdata.tagkeys.MethodMetadataCustomDataKey;
 import org.springframework.roo.classpath.details.ConstructorMetadata;
 import org.springframework.roo.classpath.details.ConstructorMetadataBuilder;
+import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
@@ -73,10 +75,12 @@ import org.springframework.roo.support.util.Assert;
 public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 	// Constants
+	private static final JavaSymbolName CS_FIELD = new JavaSymbolName("conversionService");
+	private static final JavaSymbolName REQUEST_PARAMETER = new JavaSymbolName("request");
+	private static final JavaType HTTP_SERVLET_REQUEST = new JavaType("javax.servlet.http.HttpServletRequest");
+	private static final AnnotatedJavaType HTTP_SERVLET_REQUEST_ANNOTATED = AnnotatedJavaType.convertFromJavaType(HTTP_SERVLET_REQUEST);
 	private static final String PROVIDES_TYPE_STRING = WebScaffoldMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
-	private static final JavaSymbolName CS_FIELD = new JavaSymbolName("conversionService");
-	private static final JavaType HTTP_SERVLET_REQUEST = new JavaType("javax.servlet.http.HttpServletRequest");
 
 	// Fields
 	private boolean compositePk;
@@ -164,9 +168,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 			deleteMethod.copyAdditionsTo(builder, governorTypeDetails);
 		}
 		if (annotationValues.isPopulateMethods()) {
-			for (final JavaTypeMetadataDetails domainType : specialDomainTypes.values()) {
-				builder.addMethod(getPopulateMethod(domainType));
-			}
+			addPopulateMethods(specialDomainTypes.values());
 		}
 		if (!dateTypes.isEmpty()) {
 			builder.addMethod(getDateTimeFormatHelperMethod());
@@ -176,6 +178,20 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		}
 
 		this.itdTypeDetails = builder.build();
+	}
+
+	private void addPopulateMethods(final Iterable<JavaTypeMetadataDetails> specialDomainTypes) {
+		MethodMetadata isFormRequestMethod = null;
+		for (final JavaTypeMetadataDetails domainType : specialDomainTypes) {
+			final MethodMetadataBuilder populateMethod = getPopulateMethod(domainType);
+			if (populateMethod != null) {
+				builder.addMethod(populateMethod);
+				if (isFormRequestMethod == null) {
+					isFormRequestMethod = getIsFormRequestMethod();
+				}
+			}
+		}
+		builder.addMethod(isFormRequestMethod);
 	}
 
 	public WebScaffoldAnnotationValues getAnnotationValues() {
@@ -530,7 +546,12 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		final JavaTypePersistenceMetadataDetails persistenceDetails = domainType.getPersistenceDetails();
 		if (persistenceDetails != null && persistenceDetails.getFindAllMethod() != null) {
+			bodyBuilder.appendFormalLine("if (isFormRequest(request)) {");
+			bodyBuilder.indent();
 			bodyBuilder.appendFormalLine("return " + persistenceDetails.getFindAllMethod().getMethodCall() + ";");
+			bodyBuilder.indentRemove();
+			bodyBuilder.appendFormalLine("}");
+			bodyBuilder.appendFormalLine("return null;");
 			persistenceDetails.getFindAllMethod().copyAdditionsTo(builder, governorTypeDetails);
 		} else if (domainType.isEnumType()) {
 			final String enumTypeName = domainType.getJavaType().getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
@@ -545,10 +566,31 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		annotations.add(new AnnotationMetadataBuilder(MODEL_ATTRIBUTE, attributes));
 
 		final JavaType returnType = new JavaType(COLLECTION.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, Arrays.asList(domainType.getJavaType()));
-
-		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, returnType, bodyBuilder);
+		
+		final List<AnnotatedJavaType> parameterTypes = Arrays.asList(HTTP_SERVLET_REQUEST_ANNOTATED);
+		final List<JavaSymbolName> parameterNames = Arrays.asList(REQUEST_PARAMETER);
+		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, returnType, parameterTypes, parameterNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
 		return methodBuilder;
+	}
+	
+	/**
+	 * Generates a package-private helper method that indicates whether a given
+	 * HttpServletRequest is requesting a create/update form.
+	 *
+	 * @return a non-<code>null</code> method
+	 */
+	private MethodMetadata getIsFormRequestMethod() {
+		/*
+			boolean PetController.isFormRequest(HttpServletRequest request) {
+				return "GET".equals(request.getMethod()) && request.getParameter("form") != null;
+			}
+		 */
+		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+		bodyBuilder.appendFormalLine("return \"GET\".equals(request.getMethod()) && request.getParameter(\"form\") != null;");
+		final List<AnnotatedJavaType> parameterTypes = Arrays.asList(HTTP_SERVLET_REQUEST_ANNOTATED);
+		final List<JavaSymbolName> parameterNames = Arrays.asList(REQUEST_PARAMETER);
+		return new MethodMetadataBuilder(getId(), 0, new JavaSymbolName("isFormRequest"), BOOLEAN_PRIMITIVE, parameterTypes, parameterNames, bodyBuilder).build();
 	}
 
 	private MethodMetadataBuilder getEncodeUrlPathSegmentMethod() {
