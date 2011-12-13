@@ -83,7 +83,6 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 	private JavaType formBackingType;
 	private JavaTypeMetadataDetails javaTypeMetadataHolder;
 	private Map<JavaSymbolName, DateTimeFormatDetails> dateTypes;
-	private Map<JavaType, JavaTypeMetadataDetails> specialDomainTypes;
 	private String controllerPath;
 	private String entityName;
 	private WebScaffoldAnnotationValues annotationValues;
@@ -117,7 +116,6 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		this.formBackingType = annotationValues.getFormBackingObject();	// must happen before it's used below
 		this.entityName = JavaSymbolName.getReservedWordSafeName(formBackingType).getSymbolName();
 		this.javaTypeMetadataHolder = specialDomainTypes.get(formBackingType);
-		this.specialDomainTypes = specialDomainTypes;
 
 		Assert.notNull(javaTypeMetadataHolder, "Metadata holder required for form backing type: " + formBackingType);
 
@@ -165,9 +163,9 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 			builder.addMethod(getDeleteMethod(deleteMethod, findMethod));
 			deleteMethod.copyAdditionsTo(builder, governorTypeDetails);
 		}
-		if (!specialDomainTypes.isEmpty()) {
-			for (final MethodMetadataBuilder method : getPopulateMethods()) {
-				builder.addMethod(method);
+		if (annotationValues.isPopulateMethods()) {
+			for (final JavaTypeMetadataDetails domainType : specialDomainTypes.values()) {
+				builder.addMethod(getPopulateMethod(domainType));
 			}
 		}
 		if (!dateTypes.isEmpty()) {
@@ -523,41 +521,34 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		return methodBuilder;
 	}
 
-	private List<MethodMetadataBuilder> getPopulateMethods() {
-		final List<MethodMetadataBuilder> methods = new ArrayList<MethodMetadataBuilder>();
-		if (!annotationValues.isPopulateMethods()) {
-			return methods;
+	private MethodMetadataBuilder getPopulateMethod(final JavaTypeMetadataDetails domainType) {
+		final JavaSymbolName methodName = new JavaSymbolName("populate" + domainType.getPlural());
+		if (governorHasMethodWithSameName(methodName)) {
+			return null;
 		}
-		for (final JavaType type : specialDomainTypes.keySet()) {
-			final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-			final JavaTypeMetadataDetails javaTypeMd = specialDomainTypes.get(type);
-			final JavaTypePersistenceMetadataDetails javaTypePersistenceMd = javaTypeMd.getPersistenceDetails();
-			if (javaTypePersistenceMd != null && javaTypePersistenceMd.getFindAllMethod() != null) {
-				bodyBuilder.appendFormalLine("return " + javaTypePersistenceMd.getFindAllMethod().getMethodCall() + ";");
-				javaTypePersistenceMd.getFindAllMethod().copyAdditionsTo(builder, governorTypeDetails);
-			} else if (javaTypeMd.isEnumType()) {
-				bodyBuilder.appendFormalLine("return " + ARRAYS.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ".asList(" + type.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ".class.getEnumConstants());");
-			} else {
-				continue;
-			}
-
-			final JavaSymbolName methodName = new JavaSymbolName("populate" + javaTypeMd.getPlural());
-			if (governorHasMethodWithSameName(methodName)) {
-				continue;
-			}
-
-			final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
-			final List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
-			attributes.add(new StringAttributeValue(new JavaSymbolName("value"), javaTypeMd.getPlural().toLowerCase()));
-			annotations.add(new AnnotationMetadataBuilder(MODEL_ATTRIBUTE, attributes));
-
-			final JavaType returnType = new JavaType(COLLECTION.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, Arrays.asList(type));
-
-			final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, returnType, bodyBuilder);
-			methodBuilder.setAnnotations(annotations);
-			methods.add(methodBuilder);
+		
+		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+		final JavaTypePersistenceMetadataDetails persistenceDetails = domainType.getPersistenceDetails();
+		if (persistenceDetails != null && persistenceDetails.getFindAllMethod() != null) {
+			bodyBuilder.appendFormalLine("return " + persistenceDetails.getFindAllMethod().getMethodCall() + ";");
+			persistenceDetails.getFindAllMethod().copyAdditionsTo(builder, governorTypeDetails);
+		} else if (domainType.isEnumType()) {
+			final String enumTypeName = domainType.getJavaType().getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
+			bodyBuilder.appendFormalLine("return " + ARRAYS.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ".asList(" + enumTypeName + ".values());");
+		} else {
+			return null;
 		}
-		return methods;
+
+		final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+		final List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
+		attributes.add(new StringAttributeValue(new JavaSymbolName("value"), domainType.getPlural().toLowerCase()));
+		annotations.add(new AnnotationMetadataBuilder(MODEL_ATTRIBUTE, attributes));
+
+		final JavaType returnType = new JavaType(COLLECTION.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, Arrays.asList(domainType.getJavaType()));
+
+		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, returnType, bodyBuilder);
+		methodBuilder.setAnnotations(annotations);
+		return methodBuilder;
 	}
 
 	private MethodMetadataBuilder getEncodeUrlPathSegmentMethod() {
