@@ -123,7 +123,7 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 		generateManagedBeans(destinationPackage);
 	}
 
-	public void createManagedBean(final JavaType managedBean, final JavaType entity, String beanName, final boolean includeOnMenu, final boolean createConverter) {
+	public void createManagedBean(final JavaType managedBean, final JavaType entity, String beanName, final boolean includeOnMenu) {
 		final JavaPackage managedBeanPackage = managedBean.getPackage();
 		installFacesConfig(managedBeanPackage);
 		installI18n(managedBeanPackage);
@@ -171,10 +171,8 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 
 		copyEntityTypePage(entity, beanName, pluralMetadata.getPlural());
 
-		if (createConverter) {
-			// Create a javax.faces.convert.Converter class for the entity
-			createConverter(new JavaPackage(managedBeanTypeName + ".converter"), entity);
-		}
+		// Create a javax.faces.convert.Converter class for the entity
+		createConverter(new JavaPackage(managedBeanTypeName + ".converter"), entity);
 	}
 
 	public void addMediaSuurce(final String url, MediaPlayer mediaPlayer) {
@@ -235,7 +233,7 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 			// To get here, there is no listening managed bean, so add one
 			final JavaType managedBean = new JavaType(destinationPackage.getFullyQualifiedPackageName() + "." + entity.getSimpleTypeName() + "Bean");
 			final String beanName = StringUtils.uncapitalize(managedBean.getSimpleTypeName());
-			createManagedBean(managedBean, entity, beanName, true, true);
+			createManagedBean(managedBean, entity, beanName, true);
 		}
 	}
 

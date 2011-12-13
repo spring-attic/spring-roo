@@ -55,10 +55,9 @@ public class JsfCommands implements CommandMarker {
 		@CliOption(key = { "class", "" }, mandatory = true, help = "The path and name of the JSF managed bean to be created") final JavaType managedBean,
 		@CliOption(key = "entity", mandatory = false, unspecifiedDefaultValue = "*", optionContext = JavaTypeConverter.PROJECT, help = "The entity which this JSF managed bean class will create and modify as required") final JavaType entity,
 		@CliOption(key = "beanName", mandatory = false, help = "The name of the managed bean to use in the 'name' attribute of the @ManagedBean annotation") final String beanName,
-		@CliOption(key = "includeOnMenu", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "true", help = "Include this entity on the generated JSF menu") final boolean includeOnMenu,
-		@CliOption(key = "createConverter", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "true", help = "Create JSF converter for the entity") final boolean createConverter) {
+		@CliOption(key = "includeOnMenu", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "true", help = "Include this entity on the generated JSF menu") final boolean includeOnMenu) {
 
-		jsfOperations.createManagedBean(managedBean, entity, beanName, includeOnMenu, createConverter);
+		jsfOperations.createManagedBean(managedBean, entity, beanName, includeOnMenu);
 	}
 
 	@CliCommand(value = "web jsf media", help = "Add a cross-browser generic player to embed multimedia content")

@@ -20,7 +20,7 @@ public interface JsfOperations extends Feature {
 
 	void generateAll(JavaPackage destinationPackage);
 
-	void createManagedBean(JavaType managedBean, JavaType entity, String beanName, boolean includeOnMenu, boolean createConverter);
+	void createManagedBean(JavaType managedBean, JavaType entity, String beanName, boolean includeOnMenu);
 
 	void addMediaSuurce(String url, MediaPlayer mediaPlayer);
 }
