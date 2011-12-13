@@ -534,7 +534,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 			final JavaTypePersistenceMetadataDetails javaTypePersistenceMd = javaTypeMd.getPersistenceDetails();
 			if (javaTypePersistenceMd != null && javaTypePersistenceMd.getFindAllMethod() != null) {
 				bodyBuilder.appendFormalLine("return " + javaTypePersistenceMd.getFindAllMethod().getMethodCall() + ";");
-				javaTypePersistenceMd.getFindMethod().copyAdditionsTo(builder, governorTypeDetails);
+				javaTypePersistenceMd.getFindAllMethod().copyAdditionsTo(builder, governorTypeDetails);
 			} else if (javaTypeMd.isEnumType()) {
 				bodyBuilder.appendFormalLine("return " + ARRAYS.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ".asList(" + type.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ".class.getEnumConstants());");
 			} else {
