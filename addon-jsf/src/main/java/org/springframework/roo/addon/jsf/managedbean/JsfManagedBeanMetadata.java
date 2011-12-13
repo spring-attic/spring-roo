@@ -555,6 +555,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 					bodyBuilder.appendFormalLine(fieldValueId + ".setFileUploadListener(expressionFactory.createMethodExpression(elContext, \"#{" + beanName + "." + getFileUploadMethodName(fieldName) + "}\", void.class, new Class[] { FileUploadEvent.class }));");
 					bodyBuilder.appendFormalLine(fieldValueId + ".setMode(\"advanced\");");
 					bodyBuilder.appendFormalLine(fieldValueId + ".setAllowTypes(\"/(\\\\.|\\\\/)(" + getAllowTypeRegex(allowedType) + ")$/\");");
+					bodyBuilder.appendFormalLine(fieldValueId + ".setUpdate(\"messages\");");
 
 					final AnnotationAttributeValue<?> autoUploadAttr = annotation.getAttribute("autoUpload");
 					if (autoUploadAttr != null && (Boolean) autoUploadAttr.getValue()) {
@@ -948,9 +949,8 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 
 		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine(entityName + ".set" + StringUtils.capitalize(fieldName) + "(event.getFile().getContents());");
-		bodyBuilder.appendFormalLine("FacesContext facesContext = FacesContext.getCurrentInstance();");
 		bodyBuilder.appendFormalLine("FacesMessage facesMessage = new FacesMessage(\"Successful\", event.getFile().getFileName() + \" is uploaded.\");");
-		bodyBuilder.appendFormalLine("facesContext.addMessage(null, facesMessage);");
+		bodyBuilder.appendFormalLine("FacesContext.getCurrentInstance().addMessage(null, facesMessage);");
 
 		return new MethodMetadataBuilder(getId(), PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterType), parameterNames, bodyBuilder);
 	}

@@ -8,7 +8,7 @@
       xmlns:p="http://primefaces.org/ui">
 <ui:composition template="../templates/layout.xhtml">
     <ui:define name="content">
-        <p:growl id="growl" showDetail="false" />
+        <p:growl id="messages" showDetail="false" />
         <h:form prependId="false">
             <p:panel id="data" toggleable="true" toggleSpeed="250">
                 <f:facet name="header">
@@ -48,7 +48,7 @@
             <p:ajax event="close" update="data" listener="#{__BEAN_NAME__.handleDialogClose}" />
             <h:form id="createForm" enctype="multipart/form-data">
                 <h:panelGrid id="createPanelGrid" columns="3" binding="#{__BEAN_NAME__.createPanelGrid}" styleClass="dialog" columnClasses="col1,col2,col3" />
-                <p:commandButton value="#{messages.label_save}" action="#{__BEAN_NAME__.persist}" update="createPanelGrid growl" />
+                <p:commandButton value="#{messages.label_save}" action="#{__BEAN_NAME__.persist}" update="createPanelGrid messages" />
                 <p:commandButton value="#{messages.label_close}" onclick="createDialog.hide()" type="button" />
             </h:form>
         </p:dialog>
@@ -56,7 +56,7 @@
             <p:ajax event="close" update="data" listener="#{__BEAN_NAME__.handleDialogClose}" />
             <h:form id="editForm" enctype="multipart/form-data">
                 <h:panelGrid id="editPanelGrid" columns="3" binding="#{__BEAN_NAME__.editPanelGrid}" styleClass="dialog" columnClasses="col1,col2,col3" />
-                <p:commandButton value="#{messages.label_save}" action="#{__BEAN_NAME__.persist}" update="editPanelGrid growl" />
+                <p:commandButton value="#{messages.label_save}" action="#{__BEAN_NAME__.persist}" update="editPanelGrid messages" />
                 <p:commandButton value="#{messages.label_close}" onclick="editDialog.hide()" type="button" />
             </h:form>
         </p:dialog>
