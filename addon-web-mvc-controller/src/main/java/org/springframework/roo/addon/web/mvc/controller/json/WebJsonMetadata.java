@@ -64,7 +64,7 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 
 	// Constants
 	private static final JavaType RESPONSE_ENTITY_STRING = new JavaType(RESPONSE_ENTITY.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, Arrays.asList(JavaType.STRING));
-	private static final String CONTENT_TYPE = "application/text";
+	private static final String CONTENT_TYPE = "application/json";
 	private static final String PROVIDES_TYPE_STRING = WebJsonMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
 
