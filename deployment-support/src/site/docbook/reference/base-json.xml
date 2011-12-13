@@ -50,10 +50,10 @@
   library.</para>
 
   <section>
-    <title>Adding Json Functionality to Domain Types</title>
+    <title>Adding JSON Functionality to Domain Types</title>
 
-    <para>The add-on offers an annotation as well as two commands which
-    support the integration of JSON support into the projects domain
+    <para>The add-on offers an annotation as well as two commands that
+    support the integration of JSON support into the project's domain
     layer:</para>
 
     <orderedlist>
@@ -100,8 +100,8 @@
 
       <listitem>
         <para>The <link linkend="command-index-json-add">json add</link>
-        command used from the Roo shell will introdroduce the @RooJson
-        annotation into the specified target type.</para>
+        Roo shell command will introduce the @RooJson annotation into the
+        specified target type.</para>
       </listitem>
 
       <listitem>
@@ -113,10 +113,10 @@
   </section>
 
   <section>
-    <title>Json REST Interface in Spring MVC controllers</title>
+    <title>JSON REST Interface in Spring MVC controllers</title>
 
-    <para>Once your domain types are annotated with the @RooJson annotation
-    you can create Spring MVC scaffolding for your json enabled types.</para>
+    <para>Once your domain types are annotated with the @RooJson annotation,
+    you can create Spring MVC scaffolding for your JSON enabled types.</para>
 
     <orderedlist>
       <listitem>
@@ -130,12 +130,12 @@
 @ResponseBody
 public String <emphasis role="bold">listJson</emphasis>() {
     return Owner.toJsonArray(Owner.findAllOwners());
-}</programlisting>As you can see this method takes advantage of Springs
-              request mappings and will respond to HTTP GET requests which
-              contain a 'Accept=application/json' header. The @ResponseBody
+}</programlisting>As you can see this method takes advantage of Spring's
+              request mappings and will respond to HTTP GET requests that
+              contain an 'Accept=application/json' header. The @ResponseBody
               annotation is used to serialize the JSON document.</para>
 
-              <para>To test the functionality with curl you can try out the
+              <para>To test the functionality with curl, you can try out the
               Roo pet clinic sample script (run roo&gt; script clinic.roo;
               then quit the Roo shell and start Tomcat 'mvn
               tomcat:run'):</para>
@@ -152,10 +152,10 @@ public Object <emphasis role="bold">showJson</emphasis>(@PathVariable("id") Long
         return new ResponseEntity&lt;String&gt;(HttpStatus.NOT_FOUND);
     }
     return owner.toJson();
-}</programlisting>This method accepts a HTTP GET request with a <link
+}</programlisting>This method accepts an HTTP GET request with a <link
               xlink:href="http://static.springsource.org/spring/docs/3.0.x/spring-framework-reference/html/mvc.html#mvc-ann-requestparam">@PathVariable</link>
               for the requested Owner ID. The owner is serialized and returned
-              as JSON document if found, otherwise a HTTP 404 (NOT FOUND)
+              as a JSON document if found, otherwise an HTTP 404 (NOT FOUND)
               status code is returned. The accompanying curl command is as
               follows:</para>
 
@@ -167,10 +167,10 @@ public Object <emphasis role="bold">showJson</emphasis>(@PathVariable("id") Long
 public ResponseEntity&lt;String&gt; <emphasis role="bold">createFromJson</emphasis>(@RequestBody String json) {
     Owner.fromJsonToOwner(json).persist();
     return new ResponseEntity&lt;String&gt;(HttpStatus.CREATED);
-}</programlisting>This method accepts a JSON document sent via HTTP POST
-              converts it into an Owner instance and persists that new
-              instance before returning a HTTP 201 (CREATED) status code. The
-              accompanying curl command is as follows:</para>
+}</programlisting>This method accepts a JSON document sent via HTTP POST,
+              converts it into an Owner instance, persists that new instance,
+              and returns an HTTP 201 (CREATED) status code. The accompanying
+              curl command is as follows:</para>
 
               <programlisting>curl -i -X POST -H Accept:application/json -H Content-Type:application/json 
      -d '{"address":"The Boulevard","birthDay":861372000000,"city":"Springfield",
@@ -190,7 +190,7 @@ public ResponseEntity&lt;String&gt; <emphasis role="bold">createFromJsonArray</e
     return new ResponseEntity&lt;String&gt;(HttpStatus.CREATED);
 }</programlisting>This method accepts a document containing a JSON array sent
               via HTTP POST and converts the array into Owner instances which
-              are then persisted. The method returns a HTTP 201 (CREATED)
+              are then persisted. The method returns an HTTP 201 (CREATED)
               status code. The accompanying curl command is as follows:</para>
 
               <programlisting>curl -i -X POST -H Accept:application/json -H Content-Type:application/json 
@@ -215,9 +215,9 @@ public ResponseEntity&lt;String&gt; <emphasis role="bold">updateFromJson</emphas
     return new ResponseEntity&lt;String&gt;(HttpStatus.OK);
 }</programlisting>This method accepts a JSON document sent via HTTP PUT and
               converts it into an Owner instance before attempting to merge it
-              with an existing record. If the xisting record is not found a
+              with an existing record. If the existing record is not found, an
               HTTP 404 (NOT FOUND) status code is sent to the client,
-              otherwise a HTTP 200 (OK) status code is sent. The accompanying
+              otherwise an HTTP 200 (OK) status code is sent. The accompanying
               curl command is as follows:</para>
 
               <programlisting>curl -i -X PUT -H Accept:application/json -H Content-Type:application/json 
@@ -241,7 +241,7 @@ public ResponseEntity&lt;String&gt; <emphasis role="bold">updateFromJsonArray</e
     return new ResponseEntity&lt;String&gt;(HttpStatus.OK);
 }</programlisting>This method accepts a document containing a JSON array sent
               via HTTP PUT and converts the array into Owner instances which
-              are then merged. The method returns a HTTP 201 (CREATED) status
+              are then merged. The method returns an HTTP 201 (CREATED) status
               code. The accompanying curl command is as follows:</para>
 
               <programlisting>curl -i -X PUT -H Accept:application/json -H Content-Type:application/json 
@@ -263,7 +263,7 @@ public ResponseEntity&lt;String&gt; <emphasis role="bold">deleteFromJson</emphas
     }
     owner.remove();
     return new ResponseEntity&lt;String&gt;(HttpStatus.OK);
-}</programlisting>This method accepts a HTTP DELETE request with a
+}</programlisting>This method accepts an HTTP DELETE request with a
               @PathVariable identifying the Owner record marked for deletion.
               HTTP status code 200 (OK) is returned if an Owner record with
               the given ID was found, otherwise HTTOP status code 404 (NOT
@@ -284,7 +284,7 @@ public ResponseEntity&lt;String&gt; <emphasis role="bold">deleteFromJson</emphas
 public String <emphasis role="bold">jsonFindVisitsByDescriptionAndVisitDate</emphasis>(@RequestParam("description") String desc, 
         @RequestParam("visitDate") @DateTimeFormat(style = "M-") Date visitDate, Model model) {
     return Visit.toJsonArray(Visit.findVisitsByDescriptionAndVisitDate(desc, visitDate).getResultList());
-}</programlisting>This method accepts a HTTP GET request with a number of
+}</programlisting>This method accepts an HTTP GET request with a number of
               request parameters which define the finder method as well as the
               finder method arguments. The accompanying curl command is as
               follows:</para>
@@ -297,31 +297,28 @@ public String <emphasis role="bold">jsonFindVisitsByDescriptionAndVisitDate</emp
 
       <listitem>
         <para>The <link linkend="command-index-web-mvc-json-setup">web mvc
-        json setup</link> command used from the Roo shell configures the
-        current project to support JSON integration using Spring MVC.</para>
+        json setup</link> Roo shell command configures the current project to
+        support JSON integration using Spring MVC.</para>
       </listitem>
 
       <listitem>
         <para>The <link linkend="command-index-web-mvc-json-add">web mvc json
-        add</link> command used from the Roo shell will introdroduce the
-        <emphasis role="bold">@RooWebJson</emphasis> annotation into the
-        specified target type.</para>
+        add</link> Roo shell command introduces the <emphasis role="bold">@RooWebJson</emphasis>
+        annotation into the specified target type.</para>
       </listitem>
 
       <listitem>
         <para>The <link linkend="command-index-web-mvc-json-all">web mvc json
-        all</link> command used from the Roo shell will find all JSON enabled
-        types (<emphasis role="bold">@RooJson</emphasis>) in the project and
-        create Spring MVC controllers for each (if a controller does not
-        already exist), or add <emphasis role="bold">@RooWebJson</emphasis> to
-        existing controllers (should they exist already).</para>
+        all</link> Roo shell command finds all JSON-enabled types
+        (<emphasis role="bold">@RooJson</emphasis>) in the project and creates
+        Spring MVC controllers for each (if a controller does not already exist),
+        or adds <emphasis role="bold">@RooWebJson</emphasis> to existing
+        controllers (should they already exist).</para>
       </listitem>
     </orderedlist>
 
-    <para>If you need help configuring the serialization or deserialization
-    process of JSON documents which is handled by the FlexJson library please
-    refer to their <link
-    xlink:href="http://flexjson.sourceforge.net/">reference
-    documentation</link>.</para>
+    <para>If you need help configuring how FlexJson serializes or deserializes
+    JSON documents, please refer to their
+    <link xlink:href="http://flexjson.sourceforge.net/">reference documentation</link>.</para>
   </section>
 </chapter>
