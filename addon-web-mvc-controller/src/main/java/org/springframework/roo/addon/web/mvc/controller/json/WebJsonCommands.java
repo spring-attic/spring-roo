@@ -33,7 +33,7 @@ public class WebJsonCommands implements CommandMarker {
 		return webJsonOperations.isWebJsonCommandAvailable();
 	}
 
-	@CliCommand(value = "web mvc json setup", help = "Setup Spring MVC for Json support.")
+	@CliCommand(value = "web mvc json setup", help = "Set up Spring MVC to support JSON")
 	public void setup() {
 		webJsonOperations.setup();
 	}
