@@ -12,10 +12,22 @@ import org.springframework.roo.model.JavaType;
 public class ImportMetadataBuilder extends AbstractIdentifiableJavaStructureBuilder<ImportMetadata> {
 
 	// Fields
+	private boolean isAsterisk;
+	private boolean isStatic;
 	private JavaPackage importPackage;
 	private JavaType importType;
-	private boolean isStatic = false;
-	private boolean isAsterisk = false;
+	
+	/**
+	 * Builds an import of the given {@link JavaType} for use by the given caller.
+	 * 
+	 * @param callerMID the metadata ID of the compilation unit to receive the import (required)
+	 * @param typeToImport the type to import (required)
+	 * @return a non-<code>null</code>, non-static, non-wildcard import
+	 * @since 1.2.0
+	 */
+	public static ImportMetadata getImport(final String callerMID, final JavaType typeToImport) {
+		return new ImportMetadataBuilder(callerMID, 0, typeToImport.getPackage(), typeToImport, false, false).build();
+	}
 
 	public ImportMetadataBuilder(final String declaredbyMetadataId) {
 		super(declaredbyMetadataId);
