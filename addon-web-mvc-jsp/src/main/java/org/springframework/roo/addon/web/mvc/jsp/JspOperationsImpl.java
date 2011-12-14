@@ -304,9 +304,6 @@ public class JspOperationsImpl extends AbstractOperations implements JspOperatio
 		final String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(controller, projectOperations.getPathResolver().getPath(resourceIdentifier));
 		final List<MethodMetadataBuilder> methods = new ArrayList<MethodMetadataBuilder>();
 
-		// Add HTTP get method
-		methods.add(getHttpGetMethod(declaredByMetadataId));
-
 		// Add HTTP post method
 		methods.add(getHttpPostMethod(declaredByMetadataId));
 
@@ -367,26 +364,6 @@ public class JspOperationsImpl extends AbstractOperations implements JspOperatio
 		final MethodMetadataBuilder postMethodBuilder = new MethodMetadataBuilder(declaredByMetadataId, Modifier.PUBLIC, new JavaSymbolName("post"), JavaType.VOID_PRIMITIVE, postParamTypes, postParamNames, new InvocableMemberBodyBuilder());
 		postMethodBuilder.setAnnotations(postMethodAnnotations);
 		return postMethodBuilder;
-	}
-
-	private MethodMetadataBuilder getHttpGetMethod(final String declaredByMetadataId) {
-		final List<AnnotationMetadataBuilder> getMethodAnnotations = new ArrayList<AnnotationMetadataBuilder>();
-		final List<AnnotationAttributeValue<?>> getMethodAttributes = new ArrayList<AnnotationAttributeValue<?>>();
-		getMethodAnnotations.add(new AnnotationMetadataBuilder(REQUEST_MAPPING, getMethodAttributes));
-
-		final List<AnnotatedJavaType> getParamTypes = new ArrayList<AnnotatedJavaType>();
-		getParamTypes.add(new AnnotatedJavaType(MODEL_MAP));
-		getParamTypes.add(new AnnotatedJavaType(HTTP_SERVLET_REQUEST));
-		getParamTypes.add(new AnnotatedJavaType(HTTP_SERVLET_RESPONSE));
-
-		final List<JavaSymbolName> getParamNames = new ArrayList<JavaSymbolName>();
-		getParamNames.add(new JavaSymbolName("modelMap"));
-		getParamNames.add(new JavaSymbolName("request"));
-		getParamNames.add(new JavaSymbolName("response"));
-
-		final MethodMetadataBuilder getMethodBuilder = new MethodMetadataBuilder(declaredByMetadataId, Modifier.PUBLIC, new JavaSymbolName("get"), JavaType.VOID_PRIMITIVE, getParamTypes, getParamNames, new InvocableMemberBodyBuilder());
-		getMethodBuilder.setAnnotations(getMethodAnnotations);
-		return getMethodBuilder;
 	}
 
 	/**
