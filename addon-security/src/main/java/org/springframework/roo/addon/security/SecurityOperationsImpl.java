@@ -38,7 +38,7 @@ import org.w3c.dom.Element;
 public class SecurityOperationsImpl implements SecurityOperations {
 
 	// Constants
-	private static final String SECURITY_VERSION = "3.0.5.RELEASE";
+	private static final String SECURITY_VERSION = "3.1.0.RELEASE";
 
 	// Fields
 	@Reference private FileManager fileManager;
