@@ -21,7 +21,17 @@ import org.springframework.roo.model.JavaType;
  */
 public interface WebMetadataService {
 
-	SortedMap<JavaType, JavaTypeMetadataDetails> getRelatedApplicationTypeMetadata(JavaType javaType, MemberDetails memberDetails, String metadataIdentificationString);
+	/**
+	 * Returns details of the Java types that are related to the given type
+	 * 
+	 * @param baseType the type for which to obtain related types
+	 * @param baseTypeDetails the details of the given type
+	 * @param metadataId the ID of the {@link org.springframework.roo.metadata.MetadataItem}
+	 * consuming the returned details; required for registering the necessary
+	 * metadata dependencies
+	 * @return a non-<code>null</code> map that includes the given type
+	 */
+	SortedMap<JavaType, JavaTypeMetadataDetails> getRelatedApplicationTypeMetadata(JavaType baseType, MemberDetails baseTypeDetails, String metadataId);
 
 	List<JavaTypeMetadataDetails> getDependentApplicationTypeMetadata(JavaType javaType, MemberDetails memberDetails, String metadataIdentificationString);
 

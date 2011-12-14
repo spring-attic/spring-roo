@@ -1,6 +1,7 @@
 package org.springframework.roo.classpath.scanner;
 
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.roo.classpath.PhysicalTypeDetails;
 import org.springframework.roo.classpath.details.ConstructorMetadata;
@@ -10,6 +11,7 @@ import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
+import org.springframework.roo.classpath.persistence.PersistenceMemberLocator;
 import org.springframework.roo.metadata.MetadataItem;
 import org.springframework.roo.metadata.MetadataProvider;
 import org.springframework.roo.model.CustomData;
@@ -147,7 +149,26 @@ public interface MemberDetails {
 	 * @return the most concrete tagged method or <code>null</code> if not found
 	 * @since 1.2.0
 	 */
-	MethodMetadata getMostConcreteMethodWithTag(final Object tagKey);
+	MethodMetadata getMostConcreteMethodWithTag(Object tagKey);
+	
+	/**
+	 * Returns the type of this class' persistent fields, including those in
+	 * collections, but excluding:
+	 * <ul>
+	 * <li>the ID field</li>
+	 * <li>the version field</li>
+	 * <li>JPA-transient fields</li>
+	 * <li>immutable fields (i.e. that don't have both a getter and a setter)</li>
+	 * <li>embedded ID fields</li>
+	 * <li>the collection types themselves</li>
+	 * </ul>
+	 * 
+	 * @param thisType the owning Java type (required)
+	 * @param persistenceMemberLocator for finding the ID and version fields (required)
+	 * @return a non-<code>null</code> set with stable iteration order
+	 * @since 1.2.0
+	 */
+	Set<JavaType> getPersistentFieldTypes(JavaType thisType, PersistenceMemberLocator persistenceMemberLocator);
 
 	/**
 	 * Indicates whether a method specified by the method attributes is present and isn't declared by the passed in MID.
@@ -158,7 +179,7 @@ public interface MemberDetails {
 	 * @return see above
 	 * @since 1.2.0
 	 */
-	boolean isMethodDeclaredByAnother(final JavaSymbolName methodName, final List<JavaType> parameterTypes, final String declaredByMetadataId);
+	boolean isMethodDeclaredByAnother(JavaSymbolName methodName, List<JavaType> parameterTypes, String declaredByMetadataId);
 
 	/**
 	 * Indicates whether the requesting MID is annotated with the specified annotation.

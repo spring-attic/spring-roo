@@ -1,7 +1,6 @@
 package org.springframework.roo.addon.web.mvc.controller.details;
 
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.COUNT_ALL_METHOD;
-import static org.springframework.roo.classpath.customdata.CustomDataKeys.EMBEDDED_FIELD;
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.FIND_ALL_METHOD;
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.FIND_ENTRIES_METHOD;
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.FIND_METHOD;
@@ -38,7 +37,6 @@ import org.springframework.roo.addon.web.mvc.controller.scaffold.WebScaffoldMeta
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.TypeLocationService;
-import org.springframework.roo.classpath.customdata.CustomDataKeys;
 import org.springframework.roo.classpath.customdata.tagkeys.MethodMetadataCustomDataKey;
 import org.springframework.roo.classpath.details.BeanInfoUtils;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
@@ -93,45 +91,22 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 	@Reference private PersistenceMemberLocator persistenceMemberLocator;
 	@Reference private TypeLocationService typeLocationService;
 
-	public SortedMap<JavaType, JavaTypeMetadataDetails> getRelatedApplicationTypeMetadata(final JavaType javaType, final MemberDetails memberDetails, final String metadataIdentificationString) {
-		Assert.notNull(javaType, "Java type required");
-		Assert.notNull(memberDetails, "Member details required");
-		Assert.isTrue(isApplicationType(javaType), "The supplied type " + javaType + " is not a type which is present in this application");
-
-		MethodMetadata identifierAccessor = persistenceMemberLocator.getIdentifierAccessor(javaType);
-		MethodMetadata versionAccessor = persistenceMemberLocator.getVersionAccessor(javaType);
-
-		SortedMap<JavaType, JavaTypeMetadataDetails> specialTypes = new TreeMap<JavaType, JavaTypeMetadataDetails>();
-		JavaTypeMetadataDetails javaTypeMetadataDetails = getJavaTypeMetadataDetails(javaType, memberDetails, metadataIdentificationString);
-		specialTypes.put(javaType, javaTypeMetadataDetails);
-
-		for (final MethodMetadata method : memberDetails.getMethods()) {
-			// Not interested in non-accessor methods or persistence identifiers and version fields
-			if (!BeanInfoUtils.isAccessorMethod(method) || method.hasSameName(identifierAccessor, versionAccessor)) {
-				continue;
-			}
-
-			// Not interested in fields that are JPA transient fields or immutable fields
-			FieldMetadata field = BeanInfoUtils.getFieldForJavaBeanMethod(memberDetails, method);
-			if (field == null || field.getCustomData().keySet().contains(CustomDataKeys.TRANSIENT_FIELD) || !BeanInfoUtils.hasAccessorAndMutator(field, memberDetails)) {
-				continue;
-			}
-			JavaType returnType = method.getReturnType();
-			if (returnType.isCommonCollectionType()) {
-				for (JavaType genericType: returnType.getParameters()) {
-					if (isApplicationType(genericType)) {
-						MemberDetails genericTypeMemberDetails = getMemberDetails(genericType);
-						specialTypes.put(genericType, getJavaTypeMetadataDetails(genericType, genericTypeMemberDetails, metadataIdentificationString));
-					}
-				}
-			} else {
-				if (isApplicationType(returnType) && !field.getCustomData().keySet().contains(EMBEDDED_FIELD)) {
-					MemberDetails typeMemberDetails = getMemberDetails(returnType);
-					specialTypes.put(returnType, getJavaTypeMetadataDetails(returnType, typeMemberDetails, metadataIdentificationString));
-				}
+	public SortedMap<JavaType, JavaTypeMetadataDetails> getRelatedApplicationTypeMetadata(final JavaType baseType, final MemberDetails baseTypeDetails, final String metadataIdentificationString) {
+		Assert.notNull(baseType, "Java type required");
+		Assert.notNull(baseTypeDetails, "Member details required");
+		Assert.isTrue(isApplicationType(baseType), "The type " + baseType + " does not belong to this application");
+		
+		final SortedMap<JavaType, JavaTypeMetadataDetails> specialTypes = new TreeMap<JavaType, JavaTypeMetadataDetails>();
+		specialTypes.put(baseType, getJavaTypeMetadataDetails(baseType, baseTypeDetails, metadataIdentificationString));
+		
+		for (final JavaType fieldType : baseTypeDetails.getPersistentFieldTypes(baseType, persistenceMemberLocator)) {
+			if (isApplicationType(fieldType)) {
+				final MemberDetails fieldTypeDetails = getMemberDetails(fieldType);
+				specialTypes.put(fieldType, getJavaTypeMetadataDetails(fieldType, fieldTypeDetails, metadataIdentificationString));
 			}
 		}
-		return Collections.unmodifiableSortedMap(specialTypes);
+
+		return specialTypes;
 	}
 
 	public List<JavaTypeMetadataDetails> getDependentApplicationTypeMetadata(final JavaType javaType, final MemberDetails memberDetails, final String metadataIdentificationString) {

@@ -1,16 +1,23 @@
 package org.springframework.roo.classpath.scanner;
 
+import static org.springframework.roo.classpath.customdata.CustomDataKeys.EMBEDDED_FIELD;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
+import org.springframework.roo.classpath.customdata.CustomDataKeys;
+import org.springframework.roo.classpath.details.BeanInfoUtils;
 import org.springframework.roo.classpath.details.ConstructorMetadata;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
+import org.springframework.roo.classpath.persistence.PersistenceMemberLocator;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.support.util.Assert;
@@ -143,5 +150,35 @@ public class MemberDetailsImpl implements MemberDetails {
 			}
 		}
 		return false;
+	}
+	
+	public Set<JavaType> getPersistentFieldTypes(final JavaType thisType, final PersistenceMemberLocator persistenceMemberLocator) {
+		final MethodMetadata identifierAccessor = persistenceMemberLocator.getIdentifierAccessor(thisType);
+		final MethodMetadata versionAccessor = persistenceMemberLocator.getVersionAccessor(thisType);
+		
+		final Set<JavaType> fieldTypes = new LinkedHashSet<JavaType>();
+		for (final MethodMetadata method : getMethods()) {
+			// Not interested in non-accessor methods or persistence identifiers and version fields
+			if (!BeanInfoUtils.isAccessorMethod(method) || method.hasSameName(identifierAccessor, versionAccessor)) {
+				continue;
+			}
+
+			// Not interested in fields that are JPA transient fields or immutable fields
+			final FieldMetadata field = BeanInfoUtils.getFieldForJavaBeanMethod(this, method);
+			if (field == null || field.getCustomData().keySet().contains(CustomDataKeys.TRANSIENT_FIELD) || !BeanInfoUtils.hasAccessorAndMutator(field, this)) {
+				continue;
+			}
+			final JavaType returnType = method.getReturnType();
+			if (returnType.isCommonCollectionType()) {
+				for (final JavaType genericType : returnType.getParameters()) {
+					fieldTypes.add(genericType);
+				}
+			} else {
+				if (!field.getCustomData().keySet().contains(EMBEDDED_FIELD)) {
+					fieldTypes.add(returnType);
+				}
+			}
+		}
+		return fieldTypes;
 	}
 }
