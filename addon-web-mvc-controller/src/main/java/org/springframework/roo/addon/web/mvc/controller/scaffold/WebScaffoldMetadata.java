@@ -32,6 +32,7 @@ import static org.springframework.roo.model.SpringJavaType.WEB_UTILS;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -102,8 +103,9 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 	 * @param dependentTypes
 	 * @param dateTypes
 	 * @param crudAdditions
+	 * @param editableFieldTypes 
 	 */
-	public WebScaffoldMetadata(final String identifier, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalType, final WebScaffoldAnnotationValues annotationValues, final SortedMap<JavaType, JavaTypeMetadataDetails> specialDomainTypes, final List<JavaTypeMetadataDetails> dependentTypes, final Map<JavaSymbolName, DateTimeFormatDetails> dateTypes, final Map<MethodMetadataCustomDataKey, MemberTypeAdditions> crudAdditions) {
+	public WebScaffoldMetadata(final String identifier, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalType, final WebScaffoldAnnotationValues annotationValues, final SortedMap<JavaType, JavaTypeMetadataDetails> specialDomainTypes, final List<JavaTypeMetadataDetails> dependentTypes, final Map<JavaSymbolName, DateTimeFormatDetails> dateTypes, final Map<MethodMetadataCustomDataKey, MemberTypeAdditions> crudAdditions, final Collection<JavaType> editableFieldTypes) {
 		super(identifier, aspectName, governorPhysicalType);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' is invalid");
 		Assert.notNull(annotationValues, "Annotation values required");
@@ -168,7 +170,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 			deleteMethod.copyAdditionsTo(builder, governorTypeDetails);
 		}
 		if (annotationValues.isPopulateMethods()) {
-			addPopulateMethods(specialDomainTypes.values());
+			addPopulateMethods(specialDomainTypes.values(), editableFieldTypes);
 		}
 		if (!dateTypes.isEmpty()) {
 			builder.addMethod(getDateTimeFormatHelperMethod());
@@ -180,14 +182,16 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		this.itdTypeDetails = builder.build();
 	}
 
-	private void addPopulateMethods(final Iterable<JavaTypeMetadataDetails> specialDomainTypes) {
+	private void addPopulateMethods(final Iterable<JavaTypeMetadataDetails> specialDomainTypes, final Collection<JavaType> editableFieldTypes) {
 		MethodMetadata isFormRequestMethod = null;
 		for (final JavaTypeMetadataDetails domainType : specialDomainTypes) {
-			final MethodMetadataBuilder populateMethod = getPopulateMethod(domainType);
-			if (populateMethod != null) {
-				builder.addMethod(populateMethod);
-				if (isFormRequestMethod == null) {
-					isFormRequestMethod = getIsFormRequestMethod();
+			if (editableFieldTypes.contains(domainType.getJavaType())) {
+				final MethodMetadataBuilder populateMethod = getPopulateMethod(domainType);
+				if (populateMethod != null) {
+					builder.addMethod(populateMethod);
+					if (isFormRequestMethod == null) {
+						isFormRequestMethod = getIsFormRequestMethod();
+					}
 				}
 			}
 		}

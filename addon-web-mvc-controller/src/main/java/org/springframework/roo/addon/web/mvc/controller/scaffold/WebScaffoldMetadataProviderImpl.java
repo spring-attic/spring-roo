@@ -3,6 +3,7 @@ package org.springframework.roo.addon.web.mvc.controller.scaffold;
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.PERSISTENT_TYPE;
 import static org.springframework.roo.model.RooJavaType.ROO_WEB_SCAFFOLD;
 
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -143,8 +144,9 @@ public class WebScaffoldMetadataProviderImpl extends AbstractMemberDiscoveringIt
 		final SortedMap<JavaType, JavaTypeMetadataDetails> relatedApplicationTypeMetadata = webMetadataService.getRelatedApplicationTypeMetadata(formBackingType, formBackingObjectMemberDetails, metadataIdentificationString);
 		final List<JavaTypeMetadataDetails> dependentApplicationTypeMetadata = webMetadataService.getDependentApplicationTypeMetadata(formBackingType, formBackingObjectMemberDetails, metadataIdentificationString);
 		final Map<JavaSymbolName, DateTimeFormatDetails> datePatterns = webMetadataService.getDatePatterns(formBackingType, formBackingObjectMemberDetails, metadataIdentificationString);
-
-		return new WebScaffoldMetadata(metadataIdentificationString, aspectName, governorPhysicalType, annotationValues, relatedApplicationTypeMetadata, dependentApplicationTypeMetadata, datePatterns, crudAdditions);
+		final Collection<JavaType> editableFieldTypes = formBackingObjectMemberDetails.getPersistentFieldTypes(formBackingType, persistenceMemberLocator);
+		
+		return new WebScaffoldMetadata(metadataIdentificationString, aspectName, governorPhysicalType, annotationValues, relatedApplicationTypeMetadata, dependentApplicationTypeMetadata, datePatterns, crudAdditions, editableFieldTypes);
 	}
 
 	public String getItdUniquenessFilenameSuffix() {
