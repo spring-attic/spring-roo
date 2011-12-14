@@ -8,6 +8,8 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.addon.plural.PluralMetadata;
 import org.springframework.roo.classpath.TypeLocationService;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
+import org.springframework.roo.classpath.details.ImportMetadataBuilder;
 import org.springframework.roo.classpath.layers.CoreLayerProvider;
 import org.springframework.roo.classpath.layers.LayerType;
 import org.springframework.roo.classpath.layers.MemberTypeAdditions;
@@ -69,7 +71,11 @@ public class EntityLayerProvider extends CoreLayerProvider {
 		// We have everything needed to generate a method call
 		final List<MethodParameter> callerParameterList = Arrays.asList(callerParameters);
 		final String methodCall = method.getCall(annotationValues, targetEntity, plural, callerParameterList);
-		return new MemberTypeAdditions(null, methodName, methodCall, method.isStatic(), method.getParameters(callerParameterList));
+		final ClassOrInterfaceTypeDetailsBuilder additionsBuilder = new ClassOrInterfaceTypeDetailsBuilder(callerMID);
+		if (method.isStatic()) {
+			additionsBuilder.add(ImportMetadataBuilder.getImport(callerMID, targetEntity));
+		}
+		return new MemberTypeAdditions(additionsBuilder, methodName, methodCall, method.isStatic(), method.getParameters(callerParameterList));
 	}
 
 	/**
