@@ -395,4 +395,12 @@ public abstract class AbstractMemberHoldingTypeDetailsBuilder<T extends MemberHo
 	public void clearDeclaredMethods() {
 		this.declaredMethods.clear();
 	}
+
+	/**
+	 * Adds the given imports to this builder if not already present
+	 * 
+	 * @param imports the imports to add; can be <code>null</code>
+	 * @since 1.2.0
+	 */
+	public abstract void addImports(Collection<ImportMetadata> imports);
 }

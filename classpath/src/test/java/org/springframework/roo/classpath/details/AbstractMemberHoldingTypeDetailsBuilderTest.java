@@ -6,6 +6,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 
 import org.junit.Before;
@@ -37,6 +38,9 @@ public class AbstractMemberHoldingTypeDetailsBuilderTest {
 			// This method can be spied upon, see the StackOverflow link above
 			return null;
 		}
+
+		@Override
+		public void addImports(Collection<ImportMetadata> imports) {}
 	}
 
 	// Constants

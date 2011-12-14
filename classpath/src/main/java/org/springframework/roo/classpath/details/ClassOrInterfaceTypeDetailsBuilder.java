@@ -271,5 +271,15 @@ public class ClassOrInterfaceTypeDetailsBuilder extends AbstractMemberHoldingTyp
 				targetBuilder.addImplementsType(type);
 			}
 		}
+		
+		// Copy imports
+		targetBuilder.addImports(getRegisteredImports());
+	}
+
+	@Override
+	public void addImports(final Collection<ImportMetadata> imports) {
+		if (imports != null) {
+			this.registeredImports.addAll(imports);
+		}
 	}
 }

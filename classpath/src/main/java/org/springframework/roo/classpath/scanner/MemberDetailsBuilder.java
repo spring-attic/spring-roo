@@ -12,6 +12,7 @@ import org.springframework.roo.classpath.details.ConstructorMetadata;
 import org.springframework.roo.classpath.details.ConstructorMetadataBuilder;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
+import org.springframework.roo.classpath.details.ImportMetadata;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.details.ItdTypeDetailsBuilder;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
@@ -139,6 +140,8 @@ public class MemberDetailsBuilder {
 	}
 
 	static class TypeDetailsBuilder extends AbstractMemberHoldingTypeDetailsBuilder<MemberHoldingTypeDetails> {
+		
+		// Fields
 		private final MemberHoldingTypeDetails existing;
 
 		protected TypeDetailsBuilder(final MemberHoldingTypeDetails existing) {
@@ -225,6 +228,11 @@ public class MemberDetailsBuilder {
 					break;
 				}
 			}
+		}
+
+		@Override
+		public void addImports(final Collection<ImportMetadata> imports) {
+			throw new UnsupportedOperationException();	// No known use case
 		}
 	}
 }

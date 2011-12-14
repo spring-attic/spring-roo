@@ -2,6 +2,7 @@ package org.springframework.roo.classpath.details;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
@@ -156,5 +157,14 @@ public class ItdTypeDetailsBuilder extends AbstractMemberHoldingTypeDetailsBuild
 	// Should use addAnnotation() instead
 	public void addTypeAnnotation(final AnnotationMetadata annotationMetadata) {
 		addAnnotation(annotationMetadata);
+	}
+
+	@Override
+	public void addImports(final Collection<ImportMetadata> imports) {
+		if (imports != null) {
+			for (final ImportMetadata anImport : imports) {
+				importRegistrationResolver.addImport(anImport.getImportType());
+			}
+		}
 	}
 }
