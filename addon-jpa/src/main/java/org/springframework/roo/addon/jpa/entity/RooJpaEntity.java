@@ -1,6 +1,10 @@
 package org.springframework.roo.addon.jpa.entity;
 
 import java.io.Serializable;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 import org.springframework.roo.addon.jpa.activerecord.RooJpaActiveRecord;
 
@@ -11,6 +15,8 @@ import org.springframework.roo.addon.jpa.activerecord.RooJpaActiveRecord;
  * @author Andrew Swan
  * @since 1.2.0
  */
+@Retention(RetentionPolicy.SOURCE)
+@Target(ElementType.TYPE)
 public @interface RooJpaEntity {
 
 	// Constants for the non-blank default attribute values
