@@ -171,7 +171,7 @@ public class JmsOperationsImpl implements JmsOperations {
 		if (DomUtils.findFirstElementByName("task:annotation-driven", root) == null) {
 			if (root.getAttribute("xmlns:task").length() == 0) {
 				root.setAttribute("xmlns:task", "http://www.springframework.org/schema/task");
-				root.setAttribute("xsi:schemaLocation", root.getAttribute("xsi:schemaLocation") + "  http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-3.0.xsd");
+				root.setAttribute("xsi:schemaLocation", root.getAttribute("xsi:schemaLocation") + "  http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-3.1.xsd");
 			}
 			root.appendChild(new XmlElementBuilder("task:annotation-driven", appContext).addAttribute("executor", "asyncExecutor").addAttribute("mode", "aspectj").build());
 			root.appendChild(new XmlElementBuilder("task:executor", appContext).addAttribute("id", "asyncExecutor").addAttribute("pool-size", "${executor.poolSize}").build());

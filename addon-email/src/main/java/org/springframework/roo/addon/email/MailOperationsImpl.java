@@ -61,7 +61,7 @@ public class MailOperationsImpl implements MailOperations {
 	private static final AnnotatedJavaType STRING = new AnnotatedJavaType(JavaType.STRING);
 	private static final String LOCAL_MESSAGE_VARIABLE = "mailMessage";
 	private static final String SPRING_TASK_NS = "http://www.springframework.org/schema/task";
-	private static final String SPRING_TASK_XSD = "http://www.springframework.org/schema/task/spring-task-3.0.xsd";
+	private static final String SPRING_TASK_XSD = "http://www.springframework.org/schema/task/spring-task-3.1.xsd";
 	private static final String TEMPLATE_MESSAGE_FIELD = "templateMessage";
 
 	// Fields
