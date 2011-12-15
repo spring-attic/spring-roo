@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <appendix xmlns="http://docbook.org/ns/docbook" version="5.0" xml:id="command-index">
     <title>Command Index</title>
-    <para>This appendix was automatically built from Roo 1.2.0.RC1 [rev c82bf58].</para>
+    <para>This appendix was automatically built from Roo 1.2.0.RELEASE [rev dfa43aa].</para>
     <para>Commands are listed in alphabetic order, and are shown in monospaced font with any mandatory options you must specify when using the command. Most commands accept a large number of options, and all of the possible options for each command are presented in this appendix.</para>
     <section xml:id="command-index-add-on-commands">
         <title>Add On Commands</title>
@@ -2926,12 +2926,6 @@
                         <para>Include this entity on the generated JSF menu; default: 'true'</para>
                     </listitem>
                 </varlistentry>
-                <varlistentry>
-                    <term>--createConverter</term>
-                    <listitem>
-                        <para>Create JSF converter for the entity; default: 'true'</para>
-                    </listitem>
-                </varlistentry>
             </variablelist>
         </section>
         <section xml:id="command-index-web-jsf-setup">
@@ -2943,6 +2937,12 @@
                     <term>--implementation</term>
                     <listitem>
                         <para>The JSF implementation to use; no default value</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--library</term>
+                    <listitem>
+                        <para>The JSF component library to use; no default value</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -3670,7 +3670,7 @@
                 <varlistentry>
                     <term>--command</term>
                     <listitem>
-                        <para>The command to execute; default: '*'</para>
+                        <para>The command to execute; default: ''</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -4172,7 +4172,7 @@
         </section>
         <section xml:id="command-index-web-mvc-json-setup">
             <title>web mvc json setup</title>
-            <para>Setup Spring MVC for Json support.</para>
+            <para>Set up Spring MVC to support JSON</para>
             <programlisting><![CDATA[web mvc json setup]]></programlisting>
             <para>This command does not accept any options.</para>
         </section>
