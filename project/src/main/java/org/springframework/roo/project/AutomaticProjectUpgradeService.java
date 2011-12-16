@@ -9,6 +9,7 @@ import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.MetadataNotificationListener;
 import org.springframework.roo.project.maven.Pom;
+import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Automatically upgrades a Spring Roo annotation JAR to the current version of Roo.
@@ -23,11 +24,11 @@ public class AutomaticProjectUpgradeService implements MetadataNotificationListe
 
 	// Constants
 	private static final String MY_BUNDLE_SYMBOLIC_NAME = AutomaticProjectUpgradeService.class.getPackage().getName();
+	private static final String SPRING_VERSION = "3.1.0.RELEASE";
 
 	// Fields
 	@Reference private MetadataDependencyRegistry metadataDependencyRegistry;
 	@Reference private ProjectOperations projectOperations;
-
 	private VersionInfo bundleVersionInfo;
 
 	protected void activate(final ComponentContext componentContext) {
@@ -51,12 +52,12 @@ public class AutomaticProjectUpgradeService implements MetadataNotificationListe
 
 	/**
 	 * Extracts the version information from the string. Never throws an exception.
-	 *
+	 * 
 	 * @param version to extract from (can be null or empty)
 	 * @return the version information or null if it was not in a normal form
 	 */
 	private VersionInfo extractVersionInfoFromString(final String version) {
-		if (version == null || version.length() == 0) {
+		if (StringUtils.isBlank(version)) {
 			return null;
 		}
 
@@ -85,12 +86,25 @@ public class AutomaticProjectUpgradeService implements MetadataNotificationListe
 			}
 
 			for (final Pom pom : projectOperations.getPoms()) {
-				Set<Property> results = pom.getPropertiesExcludingValue(new Property("roo.version"));
-				for (Property existingProperty : results) {
+				Set<Property> rooVersionResults = pom.getPropertiesExcludingValue(new Property("roo.version"));
+				for (Property existingProperty : rooVersionResults) {
 					VersionInfo rooVersion = extractVersionInfoFromString(existingProperty.getValue());
 					if (rooVersion != null) {
 						if (rooVersion.compareTo(bundleVersionInfo) < 0) {
 							Property newProperty = new Property(existingProperty.getName(), bundleVersionInfo.toString());
+							projectOperations.addProperty(moduleName, newProperty);
+							break;
+						}
+					}
+				}
+
+				Set<Property> springVersionResults = pom.getPropertiesExcludingValue(new Property("spring.version"));
+				for (Property existingProperty : springVersionResults) {
+					VersionInfo springVersion = extractVersionInfoFromString(existingProperty.getValue());
+					if (springVersion != null) {
+						VersionInfo latestSpringVersion = extractVersionInfoFromString(SPRING_VERSION);
+						if (springVersion.compareTo(latestSpringVersion) < 0) {
+							Property newProperty = new Property(existingProperty.getName(), latestSpringVersion.toString());
 							projectOperations.addProperty(moduleName, newProperty);
 							break;
 						}
@@ -110,7 +124,7 @@ public class AutomaticProjectUpgradeService implements MetadataNotificationListe
 
 		public int compareTo(final VersionInfo v) {
 			if (v == null) {
-				throw new NullPointerException();
+				throw new NullPointerException("VersionInfo is null");
 			}
 			int result = major.compareTo(v.major);
 			if (result != 0) {
@@ -133,7 +147,7 @@ public class AutomaticProjectUpgradeService implements MetadataNotificationListe
 
 		@Override
 		public String toString() {
-			return major + "." + minor+ "." + patch + "." + qualifier;
+			return major + "." + minor + "." + patch + "." + qualifier;
 		}
 	}
 }
