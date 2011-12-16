@@ -808,7 +808,7 @@
             <extension>
                 <groupId>org.springframework.build.aws</groupId>
                 <artifactId>org.springframework.build.aws.maven</artifactId>
-                <version>${spring.version}</version>
+                <version>3.1.0.RELEASE</version>
             </extension>
         </extensions>
         <plugins>
@@ -953,6 +953,6 @@
     </build>
     <properties>
         <powermock.version>1.4.10</powermock.version>
-        <spring.version>3.1.0.RELEASE</spring.version>
+        <spring.version>3.0.6.RELEASE</spring.version>
     </properties>
 </project>
