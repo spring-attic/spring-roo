@@ -2,7 +2,7 @@
 <configuration>
     <springWebFlow>
         <dependencies>
-            <dependency org="org.springframework.webflow" name="spring-webflow" rev="2.2.1.RELEASE" />
+            <dependency org="org.springframework.webflow" name="spring-webflow" rev="2.3.0.RELEASE" />
         </dependencies>
     </springWebFlow>
 </configuration>
