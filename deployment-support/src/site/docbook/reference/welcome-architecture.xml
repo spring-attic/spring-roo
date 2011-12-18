@@ -684,80 +684,228 @@ public class Choice {
   </section>
   
   <section xml:id="architecture-maven">
-    <title>Maven</title>
-
-    <para>Roo supports a number of Maven packaging types out of the box, such as
-    <code>jar</code>, <code>war</code>, <code>pom</code>, and <code>bundle</code>.
-    These are provided via Roo's <code>PackagingProvider</code> interface. If you
-    wish to customise the POMs or other artifacts that Roo generates for a given
-    packaging type when creating a project or module, either for one of the above
-    packaging types or a completely different one, you can implement your own
-    <code>PackagingProvider</code> that creates exactly the files you want with
-    the contents you want. The procedure for doing this is as follows:
-    <itemizedlist>
-        <listitem>In a new directory, start Roo and run "addon create simple" to create a simple addon.</listitem>
-        <listitem>Delete:
-            <itemizedlist>
-                <listitem>the four .java files created in src/main/java</listitem>
-                <listitem>the two .tagx files created in src/main/resources</listitem>
-            </itemizedlist>
-        </listitem>
-        <listitem>Create your custom packaging class (e.g. <code>MyPackaging.java</code>) in your preferred package</listitem>
-        <listitem>Pick a unique ID for the Roo shell to use when referring to your
-            PackagingProvider (e.g. "custom-jar"). Do not use any of the core Maven
-            packaging type names, as these are reserved for use by Roo.</listitem>
-        <listitem>Make your packaging class implement the <code>o.s.r.project.packaging.PackagingProvider</code> interface, either by:
-            <itemizedlist>
-                <listitem>Implementing <code>PackagingProvider</code> directly, with
-                    full control over (but no assistance with) artifact generation, or</listitem>
-                <listitem>Extending <code>o.s.r.project.packaging.AbstractPackagingProvider</code>
-                    to have Roo create the POM from a template you specify, with various
-                    substitutions made automatically (e.g. groupId and artifactId).
-                    This approach requires you to:
-                    <itemizedlist>
-                        <listitem>Create your custom POM template in <code>src/main/resources</code>
-                            plus whatever package you chose above</listitem>
-                        <listitem>Create a public no-arg constructor that calls the <code>AbstractPackagingProvider</code>
-                            constructor with the following arguments:
-                            <itemizedlist>
-                                <listitem>The unique ID of your custom packaging type (see above)</listitem>
-                                <listitem>The Maven name of your packaging type (typically jar/war/ear/etc,
-                                    but could be something else if you've extended Maven to support
-                                    custom packaging types)</listitem>
-                                <listitem>The path to your POM template relative to your concrete
-                                    <code>PackagingProvider</code> (e.g. "my-pom-template.xml"
-                                    if it's in the same package). Note that this POM can contain as
-                                    much or as little content as you like, with the following caveats:
-                                    <itemizedlist>
-                                        <listitem>It must have the standard Maven "project" root element
-                                            with all the usual namespace details</listitem>
-                                        <listitem>If you extend AbstractPackagingProvider, that class will
-                                            ensure that the POM's coordinates can be resolved either from a
-                                            "parent" element or from explicit "groupId", "artifactId", and
-                                            "version" elements</listitem>
-                                    </itemizedlist>
-                                </listitem>
-                            </itemizedlist>
-                        </listitem>
-                    </itemizedlist>
-                </listitem>
-            </itemizedlist>
-        </listitem>
-        <listitem>Add the Felix annotations @Component and @Service to your concrete
-            PackagingProvider, so that it's detected by Roo's <code>PackagingProviderRegistry</code>
-        </listitem>
-        <listitem>Build and install the addon in the usual way, i.e.
-            <itemizedlist>
-                <listitem>Run "mvn install" in the addon directory to create the OSGi bundle</listitem>
-                <listitem>Change to the directory of the project that will be using the custom packaging provider</listitem>
-                <listitem>Run "osgi start --url file:///path/to/addon/project/target/com.example.foo-0.1.0.BUILD-SNAPSHOT.jar"</listitem>
-                <listitem>Run "osgi scr list"; your custom PackagingProvider component should appear somewhere in the list</listitem>
-            </itemizedlist>
-        </listitem>
-        <listitem>Whenever you run the "project" or "module create" commands, your
-            custom PackagingProvider's ID should appear in the list of possible
-            completions for the "--packaging" option</listitem>
-    </itemizedlist>
-    </para>
+      <title>Maven</title>
+      <section xml:id="architecture-maven-packaging">
+        <title>Packaging</title>
+        <para>Roo supports a number of Maven packaging types out of the box, such as
+        <code>jar</code>, <code>war</code>, <code>pom</code>, and <code>bundle</code>.
+        These are provided via Roo's <code>PackagingProvider</code> interface. If you
+        wish to customise the POMs or other artifacts that Roo generates for a given
+        packaging type when creating a project or module, either for one of the above
+        packaging types or a completely different one, you can implement your own
+        <code>PackagingProvider</code> that creates exactly the files you want with
+        the contents you want. The procedure for doing this is as follows:
+        <itemizedlist>
+            <listitem><para>In a new directory, start Roo and run "addon create simple" to create a simple addon.</para></listitem>
+            <listitem>
+                <para>Delete:</para>
+                <itemizedlist>
+                    <listitem><para>the four .java files created in <code>src/main/java</code></para></listitem>
+                    <listitem><para>the two .tagx files created in <code>src/main/resources</code></para></listitem>
+                </itemizedlist>
+            </listitem>
+            <listitem><para>Create your custom packaging class (e.g. <code>MyPackaging.java</code>) in your preferred package.</para></listitem>
+            <listitem><para>Pick a unique ID for the Roo shell to use when referring to your
+                PackagingProvider (e.g. "custom-jar"). Do not use any of the core Maven
+                packaging type names, as these are reserved for use by Roo.</para></listitem>
+            <listitem><para>Make your packaging class implement the <code>o.s.r.project.packaging.PackagingProvider</code> interface, either by:</para>
+                <itemizedlist>
+                    <listitem><para>Implementing <code>PackagingProvider</code> directly, with
+                        full control over (but no assistance with) artifact generation, or</para></listitem>
+                    <listitem><para>Extending <code>o.s.r.project.packaging.AbstractPackagingProvider</code>
+                        to have Roo create the POM from a template you specify, with various
+                        substitutions made automatically (e.g. groupId and artifactId).
+                        This approach requires you to:</para>
+                        <itemizedlist>
+                            <listitem><para>Create your custom POM template in <code>src/main/resources</code>
+                                plus whatever package you chose above.</para></listitem>
+                            <listitem><para>Create a public no-arg constructor that calls the <code>AbstractPackagingProvider</code>
+                                constructor with the following arguments:</para>
+                                <itemizedlist>
+                                    <listitem><para>The unique ID of your custom packaging type (see above).</para></listitem>
+                                    <listitem><para>The Maven name of your packaging type (typically jar/war/ear/etc,
+                                        but could be something else if you've extended Maven to support
+                                        custom packaging types).</para></listitem>
+                                    <listitem><para>The path to your POM template relative to your concrete
+                                        <code>PackagingProvider</code> (e.g. "my-pom-template.xml"
+                                        if it's in the same package). Note that this POM can contain as
+                                        much or as little content as you like, with the following caveats:</para>
+                                        <itemizedlist>
+                                            <listitem><para>It must have the standard Maven "project" root element
+                                                with all the usual namespace details.</para></listitem>
+                                            <listitem><para>If you extend <code>AbstractPackagingProvider</code>,
+                                                that class will ensure that the POM's coordinates can be resolved
+                                                either from a "parent" element or from explicit "groupId",
+                                                "artifactId", and "version" elements.</para></listitem>
+                                        </itemizedlist>
+                                    </listitem>
+                                </itemizedlist>
+                            </listitem>
+                        </itemizedlist>
+                    </listitem>
+                </itemizedlist>
+            </listitem>
+            <listitem><para>Add the Felix annotations @Component and @Service to your concrete
+                PackagingProvider, so that it's detected by Roo's <code>PackagingProviderRegistry</code>.</para>
+            </listitem>
+            <listitem><para>Build and install the addon in the usual way, i.e.:</para>
+                <itemizedlist>
+                    <listitem><para>Run "<code>mvn install</code>" in the addon directory to create the OSGi bundle.</para></listitem>
+                    <listitem><para>Change to the directory of the project that will be using the custom packaging provider.</para></listitem>
+                    <listitem><para>Run "<code>osgi start --url file:///path/to/addon/project/target/com.example.foo-0.1.0.BUILD-SNAPSHOT.jar</code>"</para></listitem>
+                    <listitem><para>Run "<code>osgi scr list</code>"; your custom PackagingProvider component should appear somewhere in the list.</para></listitem>
+                </itemizedlist>
+            </listitem>
+            <listitem><para>Whenever you run the "project" or "module create" commands, your
+                custom PackagingProvider's ID should appear in the list of possible
+                completions for the "--packaging" option</para></listitem>
+        </itemizedlist>
+        </para>
+      </section>
+      <section xml:id="architecture-maven-multi-module">
+        <title>Multi-Module Support</title>
+        <para>Since version 1.2.0, Roo supports
+        <link xlink:href="http://www.sonatype.com/books/mvnref-book/reference/pom-relationships-sect-pom-best-practice.html">multi-module Maven projects</link>,
+        i.e. those containing multiple projects in a nested directory structure,
+        each with their own POM. The non-leaf POMs have "pom" packaging and the
+        leaf POMs usually have an artifact creation packaging (jar, war, etc).
+        If you're not familiar with multi-module projects and want to see how
+        they're structured, there's an embedded <code>multimodule.roo</code> script
+        that generates a simple multi-module project; used as follows:</para>
+        <itemizedlist>
+            <listitem><para>At your operating system prompt, type "<code>roo script multimodule.roo</code>".</para></listitem>
+            <listitem><para>Change into the "ui/mvc"" directory.</para></listitem>
+            <listitem><para>Run "<code>mvn tomcat:run</code>" or "<code>mvn jetty:run</code>".</para></listitem>
+            <listitem><para>Point your browser to <code>http://localhost:8080/mvc</code>.</para></listitem>
+        </itemizedlist>
+        <para>The rest of this section assumes that you are familiar with multi-module projects,
+        in particular the difference between POM inheritance (one POM has another
+        as its parent) and project nesting (one project is in a sub-directory of
+        another, i.e. is a module of that parent project).</para>
+        
+        <section xml:id="architecture-maven-multi-module-features">
+            <title>Features</title>
+            <para>Roo's multi-module support has the following features (a
+            formal list of Roo's Maven-related commands appears in
+            <link linkend="command-index-maven-commands">Appendix C</link>):
+                <itemizedlist>
+                    <listitem>
+                        <para>Roo now has the concept of a module, which in
+                        practice means a directory tree whose root contains a Maven
+                        POM. A project consists of zero or more modules. When
+                        you run Roo from the operating system prompt, you do so
+                        from the directory of the root module.</para>
+                        <para>Once any modules exist, one of them always has the
+                        "focus", in other words will be used as the context for
+                        any shell commands that interact with the user project
+                        (as opposed to housekeeping commands such as
+                        "<code>osgi ps</code>"). For example, running the
+                        "<code>web flow</code>" command will add Spring Web Flow
+                        support to the currently focused module.</para>
+                    </listitem>
+                    <listitem>
+                        <para>The "<code>module focus</code>" command, available
+                        once the project contains more than one module, changes
+                        the currently focused module. Tab completion is available,
+                        with the module name "~" signifying the root module.</para>
+                    </listitem>
+                    <listitem xml:id="architecture-maven-multi-module-create">
+                        <para>The "<code>module create</code>" command creates a
+                        new module as a sub-directory of the currently focused
+                        module. The latter module's POM will be updated to ensure
+                        it has "pom" packaging, allowing the Maven reactor to
+                        properly recurse the module tree at build time. Note that
+                        the newly created POM will by default <emphasis>not</emphasis>
+                        inherit from the parent module's POM. If the new module's
+                        POM should have a parent, specify it via the "<code>module
+                        create</code>" command's optional "<code>parent</code>"
+                        parameter. The parent POM need not be located within the
+                        user project. A typical use case is that a development
+                        team might have a standard base POM from which all their
+                        projects inherit, or a standard web POM from which all
+                        their web modules inherit. As with the "<code>project</code>"
+                        command, the new module's Maven packaging can be specified
+                        via the optional "<code>packaging</code>" parameter.
+                        Custom packaging behaviour is supported, as described
+                        <link linkend="architecture-maven-packaging">above</link>.</para>
+                    </listitem>
+                </itemizedlist>
+            </para>
+        </section>
+        <section xml:id="architecture-maven-multi-module-limitations">
+            <title>Limitations</title>
+            <para>Roo's multi-module support has the following limitations:
+                <itemizedlist>
+                    <listitem>
+                        <para>Limited automatic creation of dependencies between
+                        modules. If your project needs any inter-module
+                        dependencies beyond those added by Roo, simply create
+                        them using the "<link linkend="command-index-dependency-add"
+                        ><code>dependency add</code></link>" command.</para>
+                    </listitem>
+                    <listitem>
+                        <para>No command for removing a module; this is in line
+                        with the absence of commands for removing other project
+                        artifacts such as classes, enums, JSPs, and POMs. In any
+                        event, it's simple enough to do manually; just delete the
+                        directory, delete the relevant "<code>&lt;module&gt;</code>"
+                        element from the parent module's POM, and delete the
+                        module as a dependency from any other modules' POMs.</para>
+                    </listitem>
+                    <listitem>
+                        <para>One area where there's considerable scope for
+                        improvement is in the management of dependencies in
+                        general. In an ideal Maven project, dependency information
+                        in the form of both "<code>dependencyManagement</code>"
+                        entries and live "<code>dependency</code>" elements
+                        themselves would be pushed as far up the POM inheritance
+                        hierarchy as possible, in order to minimise duplication
+                        and reduce the incidence of version conflicts. As it
+                        stands, Roo adds and removes dependencies to and from
+                        the currently focused module in response to shell
+                        commands, regardless of what dependencies are in effect
+                        for other modules in the project.</para>
+                    </listitem>
+                    <listitem>
+                        <para>Likewise, plugin management is currently quite
+                        basic. Roo adds/removes plugins to the POM of the
+                        currently focused module with no attempt to rationalise
+                        them in concert with the POMs of other modules (for
+                        example, two Spring MVC modules will independently have
+                        the Jetty plugin declared in their own POMs rather than
+                        having this plugin declared in the lowest common ancestor
+                        POM). As with dependencies (see above), this is an area
+                        in which Roo could conceivably take some of the load off
+                        developers.</para>
+                    </listitem>
+                    <listitem>
+                        <para>There's no Roo command for changing a module’s
+                        packaging between two arbitrary values, as this could
+                        require too many other changes to the user’s project.
+                        However, Roo does change a module's packaging in two
+                        specific circumstances:</para>
+                        <itemizedlist>
+                            <listitem>
+                                <para>Adding a module to the currently focused
+                                module changes the latter's packaging to "pom",
+                                as described above under the "<code>module create</code>"
+                                command.</para>
+                            </listitem>
+                            <listitem>
+                                <para>Adding web support to a module changes its
+                                packaging to "war".</para>
+                            </listitem>
+                        </itemizedlist>
+                    </listitem>
+                    <listitem>
+                        <para>Roo does not create any parent-child relationships
+                        between different modules’ Spring application contexts;
+                        the user can always create these relationships manually,
+                        and Roo will not remove them.</para>
+                    </listitem>
+                </itemizedlist>
+            </para>
+        </section>
+      </section>
   </section>
 </chapter>
