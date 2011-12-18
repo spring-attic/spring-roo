@@ -57,12 +57,17 @@ public class JavaTypeConverter implements Converter<JavaType> {
 	public static final String UPDATE = "update";
 
 	private static final List<String> NUMBER_PRIMITIVES = Arrays.asList("byte", "short", "int", "long", "float", "double");
+	
+	/**
+	 * The value that converts to the most recently used {@link JavaType}.
+	 */
+	static final String LAST_USED_INDICATOR = "*";
 
 	// Fields
-	@Reference protected LastUsed lastUsed;
-	@Reference protected FileManager fileManager;
-	@Reference protected ProjectOperations projectOperations;
-	@Reference private TypeLocationService typeLocationService;
+	@Reference LastUsed lastUsed;
+	@Reference FileManager fileManager;
+	@Reference ProjectOperations projectOperations;
+	@Reference TypeLocationService typeLocationService;
 
 	public JavaType convertFromText(String value, final Class<?> requiredType, final String optionContext) {
 		if (StringUtils.isBlank(value)) {
@@ -74,7 +79,7 @@ public class JavaTypeConverter implements Converter<JavaType> {
 			return getNumberPrimitiveType(value);
 		}
 
-		if ("*".equals(value)) {
+		if (LAST_USED_INDICATOR.equals(value)) {
 			JavaType result = lastUsed.getJavaType();
 			if (result == null) {
 				throw new IllegalStateException("Unknown type; please indicate the type as a command option (ie --xxxx)");
@@ -91,7 +96,7 @@ public class JavaTypeConverter implements Converter<JavaType> {
 			module = projectOperations.getPomFromModuleName(moduleName);
 			topLevelPath = typeLocationService.getTopLevelPackageForModule(module);
 			value = value.substring(value.indexOf(MODULE_PATH_SEPARATOR) + 1, value.length()).trim();
-			if (optionContext.contains(UPDATE)) {
+			if (StringUtils.contains(optionContext, UPDATE)) {
 				projectOperations.setModule(module);
 			}
 		} else {
@@ -127,7 +132,7 @@ public class JavaTypeConverter implements Converter<JavaType> {
 			newValue = newValue.substring(0, index).toLowerCase() + "." + typeName;
 		}
 		JavaType result = new JavaType(newValue);
-		if (optionContext.contains(UPDATE)) {
+		if (StringUtils.contains(optionContext, UPDATE)) {
 			lastUsed.setType(result, module);
 		}
 		return result;
@@ -190,7 +195,7 @@ public class JavaTypeConverter implements Converter<JavaType> {
 			completeProjectSpecificPaths(completions, existingData);
 		}
 
-		if (optionContext != null && optionContext.contains("java")) {
+		if (StringUtils.contains(optionContext, "java")) {
 			completeJavaSpecificPaths(completions, existingData, optionContext);
 		}
 
