@@ -47,7 +47,7 @@ public interface MenuOperations {
 	 *
 	 * 	 * <p>
 	 * The recommended category identifier naming convention is <i>menu_category_the-name_label</i> where
-	 * intention represents a further identifier to diffentiate between different categories provided
+	 * intention represents a further identifier to differentiate between different categories provided
 	 * by the same addon. Similarly, the recommended menu item identifier naming convention is
 	 * <i>menu_item_the-name_the-category_label</i>.
 	 *
