@@ -4,6 +4,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.springframework.roo.model.JavaType.BYTE_ARRAY_PRIMITIVE;
+import static org.springframework.roo.model.JavaType.INT_OBJECT;
+import static org.springframework.roo.model.JavaType.STRING;
+import static org.springframework.roo.model.JavaType.listOf;
 
 import org.junit.Test;
 
@@ -43,26 +47,41 @@ public class JavaTypeTest {
 	
 	@Test
 	public void testSingleValuedTypeIsNotMultiValued() {
-		assertFalse(JavaType.STRING.isMultiValued());
+		assertFalse(STRING.isMultiValued());
 	}
 	
 	@Test
 	public void testArrayTypeIsMultiValued() {
-		assertTrue(JavaType.BYTE_ARRAY_PRIMITIVE.isMultiValued());
+		assertTrue(BYTE_ARRAY_PRIMITIVE.isMultiValued());
 	}
 	
 	@Test
 	public void testCollectionTypesAreMultiValued() {
-		assertTrue(JavaType.listOf(JavaType.INT_OBJECT).isMultiValued());
+		assertTrue(listOf(INT_OBJECT).isMultiValued());
 	}
 	
 	@Test
 	public void testCoreTypeIsCoreType() {
-		assertTrue(JavaType.STRING.isCoreType());
+		assertTrue(STRING.isCoreType());
 	}
 	
 	@Test
 	public void testUserTypeIsNonCoreType() {
 		assertFalse(new JavaType("com.example.Thing").isCoreType());
+	}
+	
+	@Test
+	public void testGetBaseTypeForNonCollectionType() {
+		assertEquals(STRING, STRING.getBaseType());
+	}
+	
+	@Test
+	public void testGetBaseTypeForParameterisedCollectionType() {
+		assertEquals(STRING, JavaType.listOf(STRING).getBaseType());
+	}
+	
+	@Test
+	public void testGetBaseTypeForUnparameterisedCollectionType() {
+		assertNull(JdkJavaType.LIST.getBaseType());
 	}
 }

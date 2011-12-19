@@ -500,6 +500,23 @@ public class JavaType implements Comparable<JavaType> {
 	public JavaSymbolName getArgName() {
 		return argName;
 	}
+	
+	/**
+	 * Returns this type's base type, being <code>this</code> for single-valued
+	 * types, otherwise the element type for collection types.
+	 * 
+	 * @return <code>null</code> for an untyped collection
+	 * @since 1.2.1
+	 */
+	public JavaType getBaseType() {
+		if (isCommonCollectionType()) {
+			if (this.parameters.isEmpty()) {
+				return null;
+			}
+			return parameters.get(0);
+		}
+		return this;
+	}
 
 	public DataType getDataType() {
 		return dataType;
