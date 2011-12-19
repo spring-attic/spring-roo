@@ -122,7 +122,7 @@ public class Pom {
 	 * @return a non-<code>null</code> instance
 	 */
 	public Dependency asDependency(final DependencyScope scope) {
-		return new Dependency(getGroupId(), getArtifactId(), getVersion(), DependencyType.valueOfTypeCode(packaging), scope);
+		return new Dependency(gav, DependencyType.valueOfTypeCode(packaging), scope);
 	}
 	
 	/**
@@ -560,5 +560,16 @@ public class Pom {
 	public String toString() {
 		// For debugging
 		return gav + " at " + path;
+	}
+
+	/**
+	 * Indicates whether it's valid to add the given {@link Dependency} to this POM.
+	 * 
+	 * @param newDependency the {@link Dependency} to check (can be <code>null</code>)
+	 * @return see above
+	 * @since 1.2.1
+	 */
+	public boolean canAddDependency(final Dependency newDependency) {
+		return newDependency != null && !isDependencyRegistered(newDependency) && !Dependency.isHigherLevel(newDependency.getType().toString(), this.packaging);
 	}
 }
