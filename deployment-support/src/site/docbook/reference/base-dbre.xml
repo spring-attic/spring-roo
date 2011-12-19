@@ -252,35 +252,8 @@ JDBC driver not available for 'com.mysql.jdbc.Driver'</programlisting></para>
         option should only be used in specialised use cases only, such as
         those with database triggers.</para>
 
-        <para>You can use the --includeTables and --excludeTables option to
-        specify tables that you want or do not want reverse engineered
-        respectively. The options can take one or more table names. If more
-        than one table is required, the tables must be enclosed in double
-        quotes and each separated by a space. Wild-card searching is also
-        permitted using the asterisk (*) character to match one or more
-        characters or the '?' character to match exactly one character. For
-        example:</para>
-
-        <para><programlisting>roo&gt; database reverse engineer --schema order --package ~.domain --includeTables "foo* bar?"</programlisting></para>
-
-        <para>This will reverse engineer all tables who table whose name
-        starts with 'foo' and any table called bar with one extra character,
-        such as 'bar1' or 'bars'.</para>
-
-        <para><programlisting>roo&gt; database reverse engineer --schema order --package ~.domain --excludeTables "foo* bar?"</programlisting></para>
-
-        <para>This will reverse engineer all tables
-        <emphasis>except</emphasis> any table whose name starts with 'foo' and
-        any table called bar with one extra character, such as 'bar1' or
-        'bars'.</para>
-
-        <para><emphasis role="bold">Note</emphasis>: excluding tables not only
-        prevent entities from being created but associations are also not
-        created in other entities. This is done to prevent compile errors in
-        the source code.</para>
-
-        <para>You can also generate non-portable JPA @Column attributes, such
-        as 'columnDefinition' by specifying the --includeNonPortableAttributes
+        <para>You can generate non-portable JPA @Column attributes, such as
+        'columnDefinition' by specifying the --includeNonPortableAttributes
         option.</para>
 
         <para>Since the DBRE Add-on provides incremental database reverse
@@ -289,6 +262,53 @@ JDBC driver not available for 'com.mysql.jdbc.Driver'</programlisting></para>
         be added if new columns are added to a table, or fields will be
         removed if columns are deleted. Entities are also deleted in certain
         circumstances if their corresponding tables are dropped.</para>
+
+        <para>Examples of the database reverse engineer command:</para>
+
+        <itemizedlist>
+          <listitem>
+            <para><programlisting>roo&gt; database reverse engineer --schema order --package ~.domain --excludeTables "foo* bar?"</programlisting></para>
+
+            <para>This will reverse engineer all tables
+            <emphasis>except</emphasis> any table whose name starts with 'foo'
+            and any table called bar with one extra character, such as 'bar1'
+            or 'bars'.</para>
+
+            <para>You can use the --includeTables and --excludeTables option
+            to specify tables that you want or do not want reverse engineered
+            respectively. The options can take one or more table names. If
+            more than one table is required, the tables must be enclosed in
+            double quotes and each separated by a space. Wild-card searching
+            is also permitted using the asterisk (*) character to match one or
+            more characters or the '?' character to match exactly one
+            character. For example:</para>
+
+            <para><emphasis role="bold">Note</emphasis>: excluding tables not
+            only prevent entities from being created but associations are also
+            not created in other entities. This is done to prevent compile
+            errors in the source code.</para>
+          </listitem>
+
+          <listitem>
+            <para><programlisting>roo&gt; database reverse engineer --schema order --package ~.domain --includeTables "foo* bar?"</programlisting></para>
+
+            <para>This will reverse engineer all tables who table whose name
+            starts with 'foo' and any table called bar with one extra
+            character, such as 'bar1' or 'bars'.</para>
+          </listitem>
+
+          <listitem>
+            <para>You can also reverse engineer more than one schema by
+            specifying a doubled-quoted space-separated list of schemas.
+            Reverse engineering of foreign-key releationships between tables
+            in different schemas is supported. For example:</para>
+
+            <para><programlisting>roo&gt; database reverse engineer --schema "schema1 schema2 schema3" --package ~.domain</programlisting></para>
+
+            <para>This will reverse engineer all tables from schemas
+            "schema1", "schema2", and "schema3".</para>
+          </listitem>
+        </itemizedlist>
       </listitem>
     </orderedlist>
   </section>
@@ -418,17 +438,14 @@ public class LineItem {
 public class LineItemPK {
 }</programlisting></para>
 
-      <para>Roo will automatically create the entity ITD containing a field
-      annotated with @EmbeddedId with type LineItemPK as follows:</para>
+      <para>Roo will automatically create the JPA entity ITD containing a
+      field annotated with @EmbeddedId with type LineItemPK as follows:</para>
 
-      <para><programlisting>privileged aspect LineItem_Roo_Entity {
+      <para><programlisting>privileged aspect LineItem_Roo_JpaEntity {
     
     declare @type: LineItem: @Entity;
     
     declare @type: LineItem: @Table(name = "line_item", schema = "order");
-    
-    @PersistenceContext
-    transient EntityManager LineItem.entityManager;
     
     @EmbeddedId
     private LineItemPK LineItem.id;

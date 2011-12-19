@@ -278,15 +278,15 @@ public class PersonController {}</programlisting>If you don't define a custom
       </listitem>
 
       <listitem>
-        <para><programlisting>roo&gt; <emphasis role="bold">web mvc class</emphasis> --class com.foo.web.CarController --preferredMapping /public/car
+        <para><programlisting>roo&gt; <emphasis role="bold">web mvc controller</emphasis> --class com.foo.web.CarController --preferredMapping /public/car
 Created SRC_MAIN_JAVA/com/foo/web/CarController.java
 Created SRC_MAIN_WEBAPP/WEB-INF/views/public/car
 Created SRC_MAIN_WEBAPP/WEB-INF/views/public/car/index.jspx
 Managed SRC_MAIN_WEBAPP/WEB-INF/i18n/application.properties
 Managed SRC_MAIN_WEBAPP/WEB-INF/views/menu.jspx
 Created SRC_MAIN_WEBAPP/WEB-INF/views/public/car/views.xml
-</programlisting>The controller class command is different from the other two
-        controller commands shown above. It does <emphasis>not</emphasis>
+</programlisting>The web mvc controller command is different from the other
+        two controller commands shown above. It does <emphasis>not</emphasis>
         generate an ITD with update, create, delete and other methods to
         integrate with a specific form backing entity. Instead, this command
         will create a simple controller to help you get started for developing

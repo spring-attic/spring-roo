@@ -342,9 +342,10 @@ Created SRC_MAIN_JAVA/com/springsource/roo/pizzashop/domain/Topping.java
 Created SRC_TEST_JAVA/com/springsource/roo/pizzashop/domain
 Created SRC_TEST_JAVA/com/springsource/roo/pizzashop/domain/ToppingDataOnDemand.java
 Created SRC_TEST_JAVA/com/springsource/roo/pizzashop/domain/ToppingIntegrationTest.java
-Created SRC_MAIN_JAVA/com/springsource/roo/pizzashop/domain/Topping_Roo_Entity.aj
-Created SRC_MAIN_JAVA/com/springsource/roo/pizzashop/domain/Topping_Roo_ToString.aj
 Created SRC_MAIN_JAVA/com/springsource/roo/pizzashop/domain/Topping_Roo_Configurable.aj
+Created SRC_MAIN_JAVA/com/springsource/roo/pizzashop/domain/Topping_Roo_JpaEntity.aj
+Created SRC_MAIN_JAVA/com/springsource/roo/pizzashop/domain/Topping_Roo_JpaActiveRecord.aj
+Created SRC_MAIN_JAVA/com/springsource/roo/pizzashop/domain/Topping_Roo_ToString.aj
 Created SRC_TEST_JAVA/com/springsource/roo/pizzashop/domain/ToppingIntegrationTest_Roo_Configurable.aj
 Created SRC_TEST_JAVA/com/springsource/roo/pizzashop/domain/ToppingDataOnDemand_Roo_DataOnDemand.aj
 Created SRC_TEST_JAVA/com/springsource/roo/pizzashop/domain/ToppingIntegrationTest_Roo_IntegrationTest.aj
