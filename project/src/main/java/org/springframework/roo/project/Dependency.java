@@ -1,6 +1,7 @@
 package org.springframework.roo.project;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -31,6 +32,23 @@ import org.w3c.dom.NodeList;
  * @since 1.0
  */
 public class Dependency implements Comparable<Dependency> {
+	
+	// Known dependency types in increasing containment order
+	private static final List<String> TYPE_HIERARCHY = Arrays.asList("jar", "war", "ear", "pom");
+	
+	/**
+	 * Indicates whether one dependency type is at a higher logical level than another.
+	 * 
+	 * @param type1 the first dependency type to compare (required)
+	 * @param type2 the second dependency type to compare (required)
+	 * @return <code>false</code> if they are at the same level or the first is
+	 * at a lower level
+	 */
+	public static boolean isHigherLevel(final String type1, final String type2) {
+		final int type1Index = TYPE_HIERARCHY.indexOf(type1.toLowerCase());
+		final int type2Index = TYPE_HIERARCHY.indexOf(type2.toLowerCase());
+		return type2Index >= 0 && type1Index > type2Index;
+	}
 
 	// Fields
 	// -- Identifying

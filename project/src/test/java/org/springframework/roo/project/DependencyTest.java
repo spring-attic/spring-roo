@@ -135,6 +135,36 @@ public class DependencyTest extends XmlTestCase {
 	}
 	
 	@Test
+	public void testPomIsHigherThanWar() {
+		assertTrue(Dependency.isHigherLevel("ear", "war"));
+	}
+	
+	@Test
+	public void testEarIsHigherThanWar() {
+		assertTrue(Dependency.isHigherLevel("ear", "war"));
+	}
+	
+	@Test
+	public void testEarIsHigherThanJar() {
+		assertTrue(Dependency.isHigherLevel("ear", "jar"));
+	}
+	
+	@Test
+	public void testWarIsHigherThanJar() {
+		assertTrue(Dependency.isHigherLevel("war", "jar"));
+	}
+	
+	@Test
+	public void testJarIsNotHigherThanWar() {
+		assertFalse(Dependency.isHigherLevel("jar", "war"));
+	}
+	
+	@Test
+	public void testJarIsNotHigherThanItself() {
+		assertFalse(Dependency.isHigherLevel("jar", "jar"));
+	}
+	
+	@Test
 	public void testConstructFromGav() {
 		// Set up
 		final GAV mockGav = mock(GAV.class);
