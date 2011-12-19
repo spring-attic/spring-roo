@@ -3,6 +3,8 @@ package org.springframework.roo.project;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.springframework.roo.project.DependencyScope.PROVIDED;
 import static org.springframework.roo.project.DependencyType.ZIP;
 
@@ -130,5 +132,24 @@ public class DependencyTest extends XmlTestCase {
 		// Invoke and check
 		assertEquals(ZIP, dependency.getType());
 		assertEquals(PROVIDED, dependency.getScope());
+	}
+	
+	@Test
+	public void testConstructFromGav() {
+		// Set up
+		final GAV mockGav = mock(GAV.class);
+		when(mockGav.getGroupId()).thenReturn(DEPENDENCY_GROUP_ID);
+		when(mockGav.getArtifactId()).thenReturn(DEPENDENCY_ARTIFACT_ID);
+		when(mockGav.getVersion()).thenReturn(DEPENDENCY_VERSION);
+
+		// Invoke
+		final Dependency dependency = new Dependency(mockGav, DependencyType.ZIP, DependencyScope.SYSTEM);
+		
+		// Check
+		assertEquals(DEPENDENCY_GROUP_ID, dependency.getGroupId());
+		assertEquals(DEPENDENCY_ARTIFACT_ID, dependency.getArtifactId());
+		assertEquals(DEPENDENCY_VERSION, dependency.getVersion());
+		assertEquals(DependencyScope.SYSTEM, dependency.getScope());
+		assertEquals(DependencyType.ZIP, dependency.getType());
 	}
 }

@@ -43,6 +43,18 @@ public class Dependency implements Comparable<Dependency> {
 	private final List<Dependency> exclusions = new ArrayList<Dependency>();
 	private final String version;
 	private final String systemPath;
+	
+	/**
+	 * Constructor for a dependency with the given attributes.
+	 *
+	 * @param gav the coordinates to use (required)
+	 * @param type the dependency type (required)
+	 * @param scope the dependency scope (required)
+	 * @since 1.2.1
+	 */
+	public Dependency(final GAV gav, final DependencyType type, final DependencyScope scope) {
+		this(gav.getGroupId(), gav.getArtifactId(), gav.getVersion(), type, scope);
+	}
 
 	/**
 	 * Creates an immutable {@link Dependency}.
