@@ -1,5 +1,6 @@
 package org.springframework.roo.project;
 
+import static org.springframework.roo.project.DependencyScope.COMPILE;
 import static org.springframework.roo.support.util.AnsiEscapeCode.FG_CYAN;
 import static org.springframework.roo.support.util.AnsiEscapeCode.decorate;
 
@@ -49,6 +50,7 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 	static final String ADDED = "added";
 	static final String CHANGED = "changed";
 	static final String REMOVED = "removed";
+	static final String SKIPPED = "skipped";
 	static final String UPDATED = "updated";
 
 	// Fields
@@ -169,32 +171,30 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 		return pathResolver;
 	}
 
-	public void addModuleDependency(final String moduleName) {
-		if (StringUtils.isBlank(moduleName)) {
-			return;
+	public void addModuleDependency(final String moduleToDependUpon) {
+		if (StringUtils.isBlank(moduleToDependUpon)) {
+			return;	// No need to ever add a dependency upon the root POM
 		}
-		Pom focusedModule = getFocusedModule();
-		Assert.notNull(focusedModule, "Focused module for '" + moduleName + "' is not available");
-		
-		if (StringUtils.hasText(moduleName) && StringUtils.hasText(focusedModule.getModuleName()) && !moduleName.equals(focusedModule.getModuleName())) {
-			Pom externalModule = getProjectMetadata(moduleName).getPom();
-			if (externalModule != null) {
-				if (!externalModule.getPath().equals(focusedModule.getPath())) {
-					detectCircularDependency(focusedModule, externalModule);
-					final Dependency dependency = externalModule.asDependency(DependencyScope.COMPILE);
-					if (getFocusedModule().getDependenciesExcludingVersion(dependency).isEmpty()) {
-						addDependency(getFocusedModuleName(), dependency);
+		final Pom focusedModule = getFocusedModule();
+		if (StringUtils.hasText(focusedModule.getModuleName()) && !moduleToDependUpon.equals(focusedModule.getModuleName())) {
+			final ProjectMetadata dependencyProject = getProjectMetadata(moduleToDependUpon);
+			if (dependencyProject != null) {
+				final Pom dependencyPom = dependencyProject.getPom();
+				if (!dependencyPom.getPath().equals(focusedModule.getPath())) {
+					final Dependency dependency = dependencyPom.asDependency(COMPILE);
+					if (!focusedModule.hasDependencyExcludingVersion(dependency)) {
+						addDependency(focusedModule.getModuleName(), dependency);
+						detectCircularDependency(focusedModule, dependencyPom);
 					}
 				}
 			}
 		}
 	}
 
+	// TODO doesn't seem to work
 	private void detectCircularDependency(final Pom module1, final Pom module2) {
-		if (module1.isDependencyRegistered(new Dependency(module2.getGroupId(), module2.getArtifactId(), module2.getVersion()))) {
-			if (module2.isDependencyRegistered(new Dependency(module1.getGroupId(), module1.getArtifactId(), module1.getVersion()))) {
-				throw new IllegalStateException("Circular dependency detected, '" + module1.getModuleName() + "' depends on '" + module2.getModuleName() + "' and vice versa");
-			}
+		if (module1.isDependencyRegistered(module2.asDependency(COMPILE)) && module2.isDependencyRegistered(module1.asDependency(COMPILE))) {
+			throw new IllegalStateException("Circular dependency detected, '" + module1.getModuleName() + "' depends on '" + module2.getModuleName() + "' and vice versa");
 		}
 	}
 
@@ -218,7 +218,7 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 		Assert.notNull(artifactId, "Artifact ID required");
 		Assert.hasText(version, "Version required");
 		if (scope == null) {
-			scope = DependencyScope.COMPILE;
+			scope = COMPILE;
 		}
 		Dependency dependency = new Dependency(groupId, artifactId, version, DependencyType.JAR, scope, classifier);
 		addDependency(moduleName, dependency);
@@ -229,7 +229,7 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 	}
 
 	public final void addDependency(final String moduleName, final String groupId, final String artifactId, final String version) {
-		addDependency(moduleName, groupId, artifactId, version, DependencyScope.COMPILE);
+		addDependency(moduleName, groupId, artifactId, version, COMPILE);
 	}
 
 	public final void removeDependency(final String moduleName, final String groupId, final String artifactId, final String version, final String classifier) {
@@ -237,7 +237,7 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 		Assert.notNull(groupId, "Group ID required");
 		Assert.notNull(artifactId, "Artifact ID required");
 		Assert.hasText(version, "Version required");
-		Dependency dependency = new Dependency(groupId, artifactId, version, DependencyType.JAR, DependencyScope.COMPILE, classifier);
+		Dependency dependency = new Dependency(groupId, artifactId, version, DependencyType.JAR, COMPILE, classifier);
 		removeDependency(moduleName, dependency);
 	}
 
@@ -245,16 +245,11 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 		removeDependency(moduleName, groupId, artifactId, version, "");
 	}
 
-	public void addDependencies(final String moduleName, final Collection<? extends Dependency> dependencies) {
-		Assert.isTrue(isProjectAvailable(moduleName), "Dependency modification prohibited at this time");
-		Assert.notNull(dependencies, "Dependencies required");
-
-		if (CollectionUtils.isEmpty(dependencies)) {
-			return;
-		}
+	public void addDependencies(final String moduleName, final Collection<? extends Dependency> newDependencies) {
+		Assert.isTrue(isProjectAvailable(moduleName), "Dependency modification prohibited; no such module '" + moduleName + "'");
 		final Pom pom = getPomFromModuleName(moduleName);
-		Assert.notNull(pom, "The pom is not available, so dependency addition cannot be performed");
-		if (pom.isAllDependenciesRegistered(dependencies)) {
+		Assert.notNull(pom, "The pom is not available, so dependencies cannot be added");
+		if (pom.isAllDependenciesRegistered(newDependencies)) {
 			return;
 		}
 
@@ -262,10 +257,11 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 		final Element dependenciesElement = DomUtils.createChildIfNotExists("dependencies", document.getDocumentElement(), document);
 		final List<Element> existingDependencyElements = XmlUtils.findElements("dependency", dependenciesElement);
 
-		final List<String> newDependencies = new ArrayList<String>();
+		final List<String> addedDependencies = new ArrayList<String>();
 		final List<String> removedDependencies = new ArrayList<String>();
-		for (final Dependency newDependency : dependencies) {
-			if (newDependency != null && !pom.isDependencyRegistered(newDependency)) {
+		final List<String> skippedDependencies = new ArrayList<String>();
+		for (final Dependency newDependency : newDependencies) {
+			if (pom.canAddDependency(newDependency)) {
 				// Look for any existing instances of this dependency
 				boolean inserted = false;
 				for (final Element existingDependencyElement : existingDependencyElements) {
@@ -278,7 +274,7 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 							inserted = true;
 							if (!newDependency.getVersion().equals(existingDependency.getVersion())) {
 								// It's a genuine version change => mention the old and new versions in the message
-								newDependencies.add(newDependency.getSimpleDescription());
+								addedDependencies.add(newDependency.getSimpleDescription());
 								removedDependencies.add(existingDependency.getSimpleDescription());
 							}
 						}
@@ -290,16 +286,29 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 				if (!inserted) {
 					// We didn't encounter any existing dependencies with the same coordinates; add it now
 					dependenciesElement.appendChild(newDependency.getElement(document));
-					newDependencies.add(newDependency.getSimpleDescription());
+					addedDependencies.add(newDependency.getSimpleDescription());
 				}
+			} else {
+				skippedDependencies.add(newDependency.getSimpleDescription());
 			}
 		}
-		if (!newDependencies.isEmpty()) {
-			final String addMessage = getDescriptionOfChange(ADDED, newDependencies, "dependency", "dependencies");
-			final String removeMessage = getDescriptionOfChange(REMOVED, removedDependencies, "dependency", "dependencies");
-			final String message = StringUtils.hasText(removeMessage) ? addMessage + "; " + removeMessage : addMessage;
+		if (!newDependencies.isEmpty() || !skippedDependencies.isEmpty()) {
+			final String message = getPomUpdateMessage(addedDependencies, removedDependencies, skippedDependencies);
 			fileManager.createOrUpdateTextFileIfRequired(pom.getPath(), XmlUtils.nodeToString(document), message, false);
 		}
+	}
+	
+	private String getPomUpdateMessage(final Collection<String> addedDependencies, final Collection<String> removedDependencies, final Collection<String> skippedDependencies) {
+		final List<String> changes = new ArrayList<String>();
+		changes.add(getDescriptionOfChange(ADDED, addedDependencies, "dependency", "dependencies"));
+		changes.add(getDescriptionOfChange(REMOVED, removedDependencies, "dependency", "dependencies"));
+		changes.add(getDescriptionOfChange(SKIPPED, skippedDependencies, "dependency", "dependencies"));
+		for (final Iterator<String> iter = changes.iterator(); iter.hasNext();) {
+			if (StringUtils.isBlank(iter.next())) {
+				iter.remove();
+			}
+		}
+		return StringUtils.collectionToDelimitedString(changes, ";");
 	}
 
 	public void addDependency(final String moduleName, final Dependency dependency) {
