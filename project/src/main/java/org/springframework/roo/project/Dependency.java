@@ -43,6 +43,7 @@ public class Dependency implements Comparable<Dependency> {
 	 * @param type2 the second dependency type to compare (required)
 	 * @return <code>false</code> if they are at the same level or the first is
 	 * at a lower level
+	 * @since 1.2.1
 	 */
 	public static boolean isHigherLevel(final String type1, final String type2) {
 		final int type1Index = TYPE_HIERARCHY.indexOf(type1.toLowerCase());

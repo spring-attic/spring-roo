@@ -38,7 +38,7 @@ import org.w3c.dom.Element;
 public class SecurityOperationsImpl implements SecurityOperations {
 
 	// Constants
-	private static final String SECURITY_VERSION = "3.1.0.RELEASE";
+	private static final Dependency SPRING_SECURITY = new Dependency("org.springframework.security", "spring-security-core", "3.1.0.RELEASE");
 
 	// Fields
 	@Reference private FileManager fileManager;
@@ -47,9 +47,9 @@ public class SecurityOperationsImpl implements SecurityOperations {
 	@Reference private TilesOperations tilesOperations;
 
 	public boolean isSecurityInstallationPossible() {
-		// Do not permit installation unless they have a web project (as per ROO-342)
-		// and only permit installation if they don't already have some version of Spring Security installed
-		return projectOperations.isFocusedProjectAvailable() && fileManager.exists(pathResolver.getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/web.xml")) && projectOperations.getFocusedModule().getDependenciesExcludingVersion(new Dependency("org.springframework.security", "spring-security-core", SECURITY_VERSION)).isEmpty();
+		// Permit installation if they have a web project (as per ROO-342) and
+		// no version of Spring Security is already installed.
+		return projectOperations.isFocusedProjectAvailable() && fileManager.exists(pathResolver.getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/web.xml")) && !projectOperations.getFocusedModule().hasDependencyExcludingVersion(SPRING_SECURITY);
 	}
 
 	public void installSecurity() {

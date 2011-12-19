@@ -166,22 +166,34 @@ public class Pom {
 	}
 
 	/**
-	 * Locates any dependencies which match the presented dependency, excluding the version number.
-	 * This is useful for upgrade use cases, where it is necessary to locate any dependencies with
-	 * the same group, artifact and type identifications so that they can be removed.
+	 * Locates any dependencies which match the presented dependency, excluding
+	 * the version number. This is useful for upgrade use cases, where it is
+	 * necessary to remove any dependencies with the same group id, artifact id,
+	 * and type as the dependency being upgraded to.
 	 *
-	 * @param dependency to locate (required; note the version number is ignored in comparisons)
+	 * @param dependency to locate (can be <code>null</code>)
 	 * @return any matching dependencies (never returns null, but may return an empty {@link Set})
 	 */
 	public Set<Dependency> getDependenciesExcludingVersion(final Dependency dependency) {
-		Assert.notNull(dependency, "Dependency to locate is required");
 		final Set<Dependency> result = new HashSet<Dependency>();
 		for (final Dependency d : dependencies) {
-			if (dependency.getArtifactId().equals(d.getArtifactId()) && dependency.getGroupId().equals(d.getGroupId()) && dependency.getType().equals(d.getType())) {
+			if (dependency != null && dependency.getArtifactId().equals(d.getArtifactId()) && dependency.getGroupId().equals(d.getGroupId()) && dependency.getType().equals(d.getType())) {
 				result.add(d);
 			}
 		}
 		return result;
+	}
+	
+	/**
+	 * Indicates whether this {@link Pom} has the given {@link Dependency},
+	 * ignoring the version number.
+	 * 
+	 * @param dependency the {@link Dependency} to check for (can be <code>null</code>)
+	 * @return <code>false</code> if a <code>null</code> dependency is given
+	 * @since 1.2.1
+	 */
+	public boolean hasDependencyExcludingVersion(final Dependency dependency) {
+		return !getDependenciesExcludingVersion(dependency).isEmpty();
 	}
 
 	/**
