@@ -52,6 +52,16 @@ public class JavaTypeMetadataDetails {
 	public boolean isEnumType() {
 		return isEnumType;
 	}
+	
+	/**
+	 * Indicates whether this {@link JavaType} is persisted by the application.
+	 * 
+	 * @return <code>false</code> if for example it's an enum type
+	 * @since 1.2.1
+	 */
+	public boolean isPersistent() {
+		return isApplicationType && persistenceDetails != null;
+	}
 
 	public boolean isApplicationType() {
 		return isApplicationType;
