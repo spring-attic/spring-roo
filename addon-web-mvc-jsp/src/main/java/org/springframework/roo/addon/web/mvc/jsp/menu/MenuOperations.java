@@ -19,11 +19,12 @@ public interface MenuOperations {
 	String FINDER_MENU_ITEM_PREFIX = "fi_";
 
 	/**
-	 * Allows for the addition of menu categories and menu items. If a category or menu item with the
-	 * given identifier exists then it will <b>not</b> be overwritten or replaced.
+	 * Allows for the addition of menu categories and menu items. If a category
+	 * or menu item with the given identifier exists, it will <b>not</b> be 
+	 * overwritten or replaced.
 	 * <p>
-	 * Addons can determine their own category and menu item identifiers so that there are no clashes
-	 * with other addons.
+	 * Addons should determine their own category and menu item identifiers that
+	 * do not clash with other addons.
 	 *
 	 * @param menuCategoryName the identifier for the menu category (required)
 	 * @param menuItemId the menu item identifier (required)
@@ -36,16 +37,16 @@ public interface MenuOperations {
 	void addMenuItem(JavaSymbolName menuCategoryName, JavaSymbolName menuItemId, String menuItemLabel, String globalMessageCode, String link, String idPrefix, LogicalPath logicalPath);
 
 	/**
-	 * Allows for the addition of menu categories and menu items. If a category or menu item with the
-	 * given identifier exists then it will <b>not</b> be overwritten or replaced.
+	 * Allows for the addition of menu categories and menu items. If a category
+	 * or menu item with the given identifier exists, it will <b>not</b> be 
+	 * overwritten or replaced.
 	 * <p>
-	 * Addons can determine their own category and menu item identifiers so that there are no clashes
-	 * with other addons.
+	 * Addons should determine their own category and menu item identifiers that
+	 * do not clash with other addons.
 	 * <p>
-	 * This method will <i>not</i> write i18n message codes. This means the caller will manage the properties himself
-	 * - allowing for better efficiency.
-	 *
-	 * 	 * <p>
+	 * This method will <i>not</i> write i18n message codes. This means the
+	 * caller will manage the properties himself, allowing for better efficiency.
+	 * <p>
 	 * The recommended category identifier naming convention is <i>menu_category_the-name_label</i> where
 	 * intention represents a further identifier to differentiate between different categories provided
 	 * by the same addon. Similarly, the recommended menu item identifier naming convention is
@@ -59,6 +60,7 @@ public interface MenuOperations {
 	 * @param logicalPath
 	 */
 	void addMenuItem(JavaSymbolName menuCategoryName, JavaSymbolName menuItemId, String globalMessageCode, String link, String idPrefix, LogicalPath logicalPath);
+	
 	/**
 	 * Attempts to locate a unused finder menu items and remove them.
 	 *
