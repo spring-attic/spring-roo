@@ -459,6 +459,16 @@ public class JavaType implements Comparable<JavaType> {
 	public boolean isArray() {
 		return arrayDimensions > 0;
 	}
+	
+	/**
+	 * Indicates whether this type is any kind of boolean.
+	 * 
+	 * @return see above
+	 * @since 1.2.1
+	 */
+	public boolean isBoolean() {
+		return equals(BOOLEAN_OBJECT) || equals(BOOLEAN_PRIMITIVE);
+	}
 
 	public int getArray() {
 		return arrayDimensions;

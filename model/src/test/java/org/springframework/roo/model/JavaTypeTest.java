@@ -4,8 +4,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.springframework.roo.model.JavaType.BOOLEAN_OBJECT;
+import static org.springframework.roo.model.JavaType.BOOLEAN_PRIMITIVE;
 import static org.springframework.roo.model.JavaType.BYTE_ARRAY_PRIMITIVE;
 import static org.springframework.roo.model.JavaType.INT_OBJECT;
+import static org.springframework.roo.model.JavaType.OBJECT;
 import static org.springframework.roo.model.JavaType.STRING;
 import static org.springframework.roo.model.JavaType.listOf;
 
@@ -83,5 +86,20 @@ public class JavaTypeTest {
 	@Test
 	public void testGetBaseTypeForUnparameterisedCollectionType() {
 		assertNull(JdkJavaType.LIST.getBaseType());
+	}
+	
+	@Test
+	public void testBooleanObjectIsBoolean() {
+		assertTrue(BOOLEAN_OBJECT.isBoolean());
+	}
+	
+	@Test
+	public void testBooleanPrimitiveIsBoolean() {
+		assertTrue(BOOLEAN_PRIMITIVE.isBoolean());
+	}
+	
+	@Test
+	public void testObjectIsNotBoolean() {
+		assertFalse(OBJECT.isBoolean());
 	}
 }
