@@ -8,7 +8,7 @@
          xmlns:ns="http://docbook.org/ns/docbook">
   <title>JavaServer Faces (JSF) Add-On</title>
 
-  <para>The JSF add-on allow you to conveniently scaffold JSF managed beans
+  <para>The JSF add-on allows you to conveniently scaffold JSF managed beans
   and XHTML views for an existing domain model. Currently this domain model is
   derived from the Roo supported JPA integration through the entity jpa and
   related field commands. The following features are included:</para>
