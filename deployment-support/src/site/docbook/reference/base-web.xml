@@ -16,10 +16,10 @@
       xlink:href="http://en.wikipedia.org/wiki/Internet_Explorer_6#Criticism">fast
       declining user base</link> Spring Roo does not support IE6. Your mileage
       may vary - there will likely be issues with CSS support.</para>
-    </sidebar>The Web MVC addons allow you to conveniently scaffold Spring MVC
-  controllers and JSP(X) views for an existing domain model. Currently this
-  domain model is derived from the Roo supported JPA integration through the
-  entity jpa and related field commands. As shown in the <link
+    </sidebar>The Web MVC add-ons allow you to conveniently scaffold Spring
+  MVC controllers and JSP(X) views for an existing domain model. Currently
+  this domain model is derived from the Roo supported JPA integration through
+  the entity jpa and related field commands. As shown in the <link
   linkend="intro">Introduction</link> and the <link
   linkend="beginning">Beginning With Roo: The Tutorial</link> the Web MVC
   scaffolding can deliver a fully functional Web frontend to your domain
@@ -44,7 +44,7 @@
     </listitem>
 
     <listitem>
-      <para>automatic URL rewriting to provide best-practice RESTful
+      <para>Automatic URL rewriting to provide best-practice RESTful
       URIs</para>
     </listitem>
 
@@ -79,7 +79,7 @@
     </listitem>
 
     <listitem>
-      <para>Generated Controllers offer best-practice use of Spring framework
+      <para>Generated controllers offer best-practice use of Spring framework
       MVC support</para>
     </listitem>
   </itemizedlist>
