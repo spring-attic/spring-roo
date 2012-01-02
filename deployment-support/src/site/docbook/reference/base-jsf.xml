@@ -192,19 +192,27 @@
     deleted or the includeOnMenu attribute is set to false, the menu
     selections are removed.</para>
   </section>
-  
-    <section>
+
+  <section>
     <title>Roo bikeshop example</title>
-    <para>The Roo distribution contains a script called bikeshop.roo that demonstrates the JSF add-on capability.</para>
+
+    <para>The Roo distribution contains a script called bikeshop.roo that
+    demonstrates the JSF add-on capability.</para>
+
     <para>In the Roo shell, type:</para>
-            <para><programlisting>roo&gt; script bikeshop.roo</programlisting></para>
-            <para>When complete, exit the shell and run Jetty as follows:</para>
-               <para><programlisting>mvn jetty:run-exploded</programlisting></para>
-<para>View the application at http://localhost:8080/bikeshop:</para>
+
+    <para><programlisting>roo&gt; script bikeshop.roo</programlisting></para>
+
+    <para>When complete, exit the shell and run Jetty as follows:</para>
+
+    <para><programlisting>mvn jetty:run-exploded</programlisting></para>
+
+    <para>View the application at http://localhost:8080/bikeshop:</para>
+
     <mediaobject>
       <imageobject>
         <imagedata fileref="images/jsf-bikeshop.png"></imagedata>
       </imageobject>
     </mediaobject>
-    </section>
+  </section>
 </chapter>
