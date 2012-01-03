@@ -26,6 +26,7 @@ import org.json.simple.JSONValue;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.shell.ExecutionStrategy;
 import org.springframework.roo.shell.Parser;
+import org.springframework.roo.shell.Tailor;
 import org.springframework.roo.shell.jline.JLineShell;
 import org.springframework.roo.support.osgi.OSGiUtils;
 import org.springframework.roo.support.util.IOUtils;
@@ -47,6 +48,7 @@ public class JLineShellComponent extends JLineShell {
 	@Reference private ExecutionStrategy executionStrategy;
 	@Reference private Parser parser;
 	@Reference private UrlInputStreamService urlInputStreamService;
+	@Reference private Tailor tailor;
 	private ComponentContext context;
 
 	protected void activate(final ComponentContext context) {
@@ -72,6 +74,11 @@ public class JLineShellComponent extends JLineShell {
 	}
 
 	@Override
+	protected Tailor getTailor() {
+		return tailor;
+	}
+
+	@Override
 	protected Parser getParser() {
 		return parser;
 	}
@@ -84,7 +91,7 @@ public class JLineShellComponent extends JLineShell {
 	private String getLatestFavouriteTweet() {
 		// Access Twitter's REST API
 		String string = sendGetRequest("http://api.twitter.com/1/favorites.json", "id=SpringRoo&count=5");
-		if (StringUtils.isBlank(string)) {
+		if (!StringUtils.isBlank(string)) {
 			return null;
 		}
 		// Parse the returned JSON. This is a once off operation so we can used JSONValue.parse without penalty

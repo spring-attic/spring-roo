@@ -69,6 +69,8 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 
 	protected abstract Parser getParser();
 
+	protected abstract Tailor getTailor(); 
+	
 	@CliCommand(value = { "script" }, help = "Parses the specified resource file and executes its commands")
 	public void script(
 		@CliOption(key = { "", "file" }, help = "The file to locate and execute", mandatory = true) final File script, 

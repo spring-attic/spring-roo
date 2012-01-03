@@ -72,6 +72,7 @@
         <module>addon-layers-repository-jpa</module>
 		<module>addon-layers-repository-mongo</module>
 		<module>addon-oscommands</module>
+		<module>addon-tailor</module>		
         <module>annotations</module>
     </modules>
     <organization>
@@ -799,6 +800,11 @@
             <dependency>
                 <groupId>org.springframework.roo</groupId>
                 <artifactId>org.springframework.roo.addon.oscommands</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.roo</groupId>
+                <artifactId>org.springframework.roo.addon.tailor</artifactId>
                 <version>${project.version}</version>
             </dependency>
         </dependencies>

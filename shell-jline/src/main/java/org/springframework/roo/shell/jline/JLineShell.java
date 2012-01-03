@@ -13,6 +13,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Handler;
@@ -28,11 +29,13 @@ import org.springframework.roo.shell.AbstractShell;
 import org.springframework.roo.shell.CommandMarker;
 import org.springframework.roo.shell.ExitShellRequest;
 import org.springframework.roo.shell.Shell;
+import org.springframework.roo.shell.Tailor;
 import org.springframework.roo.shell.event.ShellStatus;
 import org.springframework.roo.shell.event.ShellStatus.Status;
 import org.springframework.roo.shell.event.ShellStatusListener;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.ClassUtils;
+import org.springframework.roo.support.util.CollectionUtils;
 import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.IOUtils;
 import org.springframework.roo.support.util.OsUtils;
@@ -70,7 +73,7 @@ public abstract class JLineShell extends AbstractShell implements CommandMarker,
 	/** key: row number, value: eraseLineFromPosition */
 	private final Map<Integer, Integer> rowErasureMap = new HashMap<Integer, Integer>();
 	private boolean shutdownHookFired = false; // ROO-1599
-
+	
 	public void run() {
 		try {
 			if (JANSI_AVAILABLE && OsUtils.isWindows()) {
@@ -158,6 +161,30 @@ public abstract class JLineShell extends AbstractShell implements CommandMarker,
 			promptLoop();
 		}
 	}
+
+	/**
+	 * Executes the single command. 
+	 * There is possibility to adjust command by implementation of {@link Tailor} interface. 
+	 * The output of Tailor can be one or many commands that are executed one by one.
+	 * @param line - command line 
+	 */
+	@Override
+	public boolean executeCommand(String line) {
+		List<String> commands = null;
+		if (getTailor() != null) {
+			commands = getTailor().sew(line);
+		}
+		if (CollectionUtils.isEmpty(commands)){
+			return super.executeCommand(line);
+		}
+		for (String command : commands){
+			logger.info("Tailored: " + command);
+			if (!super.executeCommand(command)){
+				return false;
+			}
+		}
+		return true;
+	} 
 
 	public String getStartupNotifications() {
 		return null;
