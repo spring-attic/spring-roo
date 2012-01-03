@@ -163,7 +163,7 @@
     referred to by other beans and in XHTML pages.</para>
 
     <para>As mentioned before, the includeOnMenu attribute when set to false
-    prevents the 'create' and 'list' menu selections for the entity from
+    prevents the 'Create' and 'List all' menu selections for the entity from
     showing in the UI's menu.</para>
   </section>
 
@@ -185,16 +185,16 @@
     <para>Whenever a managed bean is created for the first time, Roo will
     install a class containing the @RooJsfApplicationBean annotation. The ITD
     generated from this annotation contains the PrimeFaces menu with the
-    'create' and 'list' operationsfor each entity. Whenever a managed bean is
-    created, provding the @RooJsfManagedBean includeOnMenu attribute is either
-    not specifed or set to 'true', new menu selections are automatically added
-    to the *__Roo_ApplicationBean.aj ITD. Similarly, when a managaed bean is
-    deleted or the includeOnMenu attribute is set to false, the menu
-    selections are removed.</para>
+    'Create' and 'List all' operations for each entity. Whenever a managed
+    bean is created, provding the @RooJsfManagedBean includeOnMenu attribute
+    is either not specifed or set to 'true', new menu selections are
+    automatically added to the *__Roo_ApplicationBean.aj ITD. Similarly, when
+    a managaed bean is deleted or the includeOnMenu attribute is set to false,
+    the menu selections are removed.</para>
   </section>
 
   <section>
-    <title>Roo bikeshop example</title>
+    <title>The bikeshop example</title>
 
     <para>The Roo distribution contains a script called bikeshop.roo that
     demonstrates the JSF add-on capability.</para>
