@@ -11,33 +11,36 @@ import org.springframework.roo.shell.MethodTarget;
 
 /**
  * {@link Converter} for {@link PgpKeyId}.
- *
+ * 
  * @author Ben Alex
  * @since 1.1
- *
  */
 @Component
 @Service
 public class PgpKeyIdConverter implements Converter<PgpKeyId> {
 
-	@Reference private PgpService pgpService;
+    @Reference private PgpService pgpService;
 
-	public PgpKeyId convertFromText(final String value, final Class<?> requiredType, final String optionContext) {
-		return new PgpKeyId(value.trim());
-	}
+    public PgpKeyId convertFromText(final String value,
+            final Class<?> requiredType, final String optionContext) {
+        return new PgpKeyId(value.trim());
+    }
 
-	public boolean getAllPossibleValues(final List<Completion> completions, final Class<?> requiredType, final String originalUserInput, final String optionContext, final MethodTarget target) {
-		for (PgpKeyId candidate : pgpService.getDiscoveredKeyIds()) {
-			String id = candidate.getId();
-			if (id.toUpperCase().startsWith(originalUserInput.toUpperCase())) {
-				completions.add(new Completion(id));
-			}
-		}
+    public boolean getAllPossibleValues(final List<Completion> completions,
+            final Class<?> requiredType, final String originalUserInput,
+            final String optionContext, final MethodTarget target) {
+        for (PgpKeyId candidate : pgpService.getDiscoveredKeyIds()) {
+            String id = candidate.getId();
+            if (id.toUpperCase().startsWith(originalUserInput.toUpperCase())) {
+                completions.add(new Completion(id));
+            }
+        }
 
-		return false;
-	}
+        return false;
+    }
 
-	public boolean supports(final Class<?> requiredType, final String optionContext) {
-		return PgpKeyId.class.isAssignableFrom(requiredType);
-	}
+    public boolean supports(final Class<?> requiredType,
+            final String optionContext) {
+        return PgpKeyId.class.isAssignableFrom(requiredType);
+    }
 }

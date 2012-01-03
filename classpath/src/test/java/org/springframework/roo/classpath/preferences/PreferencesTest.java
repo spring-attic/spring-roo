@@ -11,40 +11,41 @@ import org.mockito.MockitoAnnotations;
 
 /**
  * Unit test of the {@link Preferences} class.
- *
+ * 
  * @author Andrew Swan
  * @since 1.2.0
  */
 public class PreferencesTest {
-	
-	// Constants
-	private static final String INVALID_KEY = "this-key-does-not-exist";
-	
-	// Fixture
-	@Mock private java.util.prefs.Preferences mockPreferences;
-	private Preferences preferences;
-	
-	@Before
-	public void setUp() {
-		MockitoAnnotations.initMocks(this);
-		preferences = new Preferences(mockPreferences);
-	}
 
-	@Test
-	public void testGetByteArrayWithNullKey() {
-		assertNull(preferences.getByteArray(null));
-	}
-	
-	@Test
-	public void testGetByteArrayWithUnknownKeyAndNoDefault() {
-		// Set up
-		final byte[] expectedValue = {1, 2, 3};	// arbitrary
-		when(mockPreferences.getByteArray(INVALID_KEY, new byte[0])).thenReturn(expectedValue);
-		
-		// Invoke
-		final byte[] actualValue = preferences.getByteArray(INVALID_KEY);
-		
-		// Check
-		assertSame(expectedValue, actualValue);
-	}
+    // Constants
+    private static final String INVALID_KEY = "this-key-does-not-exist";
+
+    // Fixture
+    @Mock private java.util.prefs.Preferences mockPreferences;
+    private Preferences preferences;
+
+    @Before
+    public void setUp() {
+        MockitoAnnotations.initMocks(this);
+        preferences = new Preferences(mockPreferences);
+    }
+
+    @Test
+    public void testGetByteArrayWithNullKey() {
+        assertNull(preferences.getByteArray(null));
+    }
+
+    @Test
+    public void testGetByteArrayWithUnknownKeyAndNoDefault() {
+        // Set up
+        final byte[] expectedValue = { 1, 2, 3 }; // arbitrary
+        when(mockPreferences.getByteArray(INVALID_KEY, new byte[0]))
+                .thenReturn(expectedValue);
+
+        // Invoke
+        final byte[] actualValue = preferences.getByteArray(INVALID_KEY);
+
+        // Check
+        assertSame(expectedValue, actualValue);
+    }
 }

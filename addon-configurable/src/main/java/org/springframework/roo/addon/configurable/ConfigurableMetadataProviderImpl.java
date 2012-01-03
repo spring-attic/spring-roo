@@ -14,46 +14,60 @@ import org.springframework.roo.project.LogicalPath;
 
 /**
  * Implementation of {@link ConfigurableMetadataProvider}.
- *
+ * 
  * @author Ben Alex
  * @since 1.0
  */
 @Component(immediate = true)
 @Service
-public class ConfigurableMetadataProviderImpl extends AbstractItdMetadataProvider implements ConfigurableMetadataProvider {
+public class ConfigurableMetadataProviderImpl extends
+        AbstractItdMetadataProvider implements ConfigurableMetadataProvider {
 
-	protected void activate(final ComponentContext context) {
-		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-		addMetadataTrigger(ROO_CONFIGURABLE);
-	}
+    protected void activate(final ComponentContext context) {
+        metadataDependencyRegistry.registerDependency(
+                PhysicalTypeIdentifier.getMetadataIdentiferType(),
+                getProvidesType());
+        addMetadataTrigger(ROO_CONFIGURABLE);
+    }
 
-	protected void deactivate(final ComponentContext context) {
-		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-		removeMetadataTrigger(ROO_CONFIGURABLE);
-	}
+    protected void deactivate(final ComponentContext context) {
+        metadataDependencyRegistry.deregisterDependency(
+                PhysicalTypeIdentifier.getMetadataIdentiferType(),
+                getProvidesType());
+        removeMetadataTrigger(ROO_CONFIGURABLE);
+    }
 
-	@Override
-	protected ItdTypeDetailsProvidingMetadataItem getMetadata(final String metadataIdentificationString, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final String itdFilename) {
-		return new ConfigurableMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata);
-	}
+    @Override
+    protected ItdTypeDetailsProvidingMetadataItem getMetadata(
+            final String metadataIdentificationString,
+            final JavaType aspectName,
+            final PhysicalTypeMetadata governorPhysicalTypeMetadata,
+            final String itdFilename) {
+        return new ConfigurableMetadata(metadataIdentificationString,
+                aspectName, governorPhysicalTypeMetadata);
+    }
 
-	public String getItdUniquenessFilenameSuffix() {
-		return "Configurable";
-	}
+    public String getItdUniquenessFilenameSuffix() {
+        return "Configurable";
+    }
 
-	@Override
-	protected String getGovernorPhysicalTypeIdentifier(final String metadataIdentificationString) {
-		JavaType javaType = ConfigurableMetadata.getJavaType(metadataIdentificationString);
-		LogicalPath path = ConfigurableMetadata.getPath(metadataIdentificationString);
-		return PhysicalTypeIdentifier.createIdentifier(javaType, path);
-	}
+    @Override
+    protected String getGovernorPhysicalTypeIdentifier(
+            final String metadataIdentificationString) {
+        JavaType javaType = ConfigurableMetadata
+                .getJavaType(metadataIdentificationString);
+        LogicalPath path = ConfigurableMetadata
+                .getPath(metadataIdentificationString);
+        return PhysicalTypeIdentifier.createIdentifier(javaType, path);
+    }
 
-	@Override
-	protected String createLocalIdentifier(final JavaType javaType, final LogicalPath path) {
-		return ConfigurableMetadata.createIdentifier(javaType, path);
-	}
+    @Override
+    protected String createLocalIdentifier(final JavaType javaType,
+            final LogicalPath path) {
+        return ConfigurableMetadata.createIdentifier(javaType, path);
+    }
 
-	public String getProvidesType() {
-		return ConfigurableMetadata.getMetadataIdentiferType();
-	}
+    public String getProvidesType() {
+        return ConfigurableMetadata.getMetadataIdentiferType();
+    }
 }

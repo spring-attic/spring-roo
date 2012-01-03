@@ -18,7 +18,7 @@ import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Records the last Java package and type used.
- *
+ * 
  * @author Ben Alex
  * @since 1.0
  */
@@ -26,75 +26,84 @@ import org.springframework.roo.support.util.StringUtils;
 @Service
 public class LastUsedImpl implements LastUsed {
 
-	// Fields
-	@Reference private Shell shell;
-	@Reference private TypeLocationService typeLocationService;
-	@Reference private ProjectOperations projectOperations;
+    // Fields
+    @Reference private Shell shell;
+    @Reference private TypeLocationService typeLocationService;
+    @Reference private ProjectOperations projectOperations;
 
-	private JavaPackage javaPackage;
-	private JavaPackage topLevelPackage;
-	private JavaType javaType;
-	private Pom module;
+    private JavaPackage javaPackage;
+    private JavaPackage topLevelPackage;
+    private JavaType javaType;
+    private Pom module;
 
-	public void setPackage(final JavaPackage javaPackage) {
-		Assert.notNull(javaPackage, "JavaPackage required");
-		if (javaPackage.getFullyQualifiedPackageName().startsWith("java.")) {
-			return;
-		}
-		this.javaType = null;
-		this.javaPackage = javaPackage;
-		setPromptPath(javaPackage.getFullyQualifiedPackageName());
-	}
+    public void setPackage(final JavaPackage javaPackage) {
+        Assert.notNull(javaPackage, "JavaPackage required");
+        if (javaPackage.getFullyQualifiedPackageName().startsWith("java.")) {
+            return;
+        }
+        this.javaType = null;
+        this.javaPackage = javaPackage;
+        setPromptPath(javaPackage.getFullyQualifiedPackageName());
+    }
 
-	public void setType(final JavaType javaType) {
-		Assert.notNull(javaType, "JavaType required");
-		if (javaType.getPackage().getFullyQualifiedPackageName().startsWith("java.")) {
-			return;
-		}
-		this.javaType = javaType;
-		this.javaPackage = javaType.getPackage();
-		setPromptPath(javaType.getFullyQualifiedTypeName());
-	}
+    public void setType(final JavaType javaType) {
+        Assert.notNull(javaType, "JavaType required");
+        if (javaType.getPackage().getFullyQualifiedPackageName()
+                .startsWith("java.")) {
+            return;
+        }
+        this.javaType = javaType;
+        this.javaPackage = javaType.getPackage();
+        setPromptPath(javaType.getFullyQualifiedTypeName());
+    }
 
-	public void setType(final JavaType javaType, final Pom module) {
-		Assert.notNull(javaType, "JavaType required");
-		if (javaType.getPackage().getFullyQualifiedPackageName().startsWith("java.")) {
-			return;
-		}
-		this.module = module;
-		this.javaType = javaType;
-		this.javaPackage = javaType.getPackage();
-		setPromptPath(javaType.getFullyQualifiedTypeName());
-	}
+    public void setType(final JavaType javaType, final Pom module) {
+        Assert.notNull(javaType, "JavaType required");
+        if (javaType.getPackage().getFullyQualifiedPackageName()
+                .startsWith("java.")) {
+            return;
+        }
+        this.module = module;
+        this.javaType = javaType;
+        this.javaPackage = javaType.getPackage();
+        setPromptPath(javaType.getFullyQualifiedTypeName());
+    }
 
-	private void setPromptPath(final String fullyQualifiedName) {
-		if (topLevelPackage == null) {
-			return;
-		}
+    private void setPromptPath(final String fullyQualifiedName) {
+        if (topLevelPackage == null) {
+            return;
+        }
 
-		String moduleName = "";
-		if (module != null && StringUtils.hasText(module.getModuleName())) {
-			moduleName = AnsiEscapeCode.decorate(module.getModuleName() + MODULE_PATH_SEPARATOR, AnsiEscapeCode.FG_CYAN);
-		}
+        String moduleName = "";
+        if (module != null && StringUtils.hasText(module.getModuleName())) {
+            moduleName = AnsiEscapeCode.decorate(module.getModuleName()
+                    + MODULE_PATH_SEPARATOR, AnsiEscapeCode.FG_CYAN);
+        }
 
-		topLevelPackage =  new JavaPackage(typeLocationService.getTopLevelPackageForModule(projectOperations.getFocusedModule()));
-		String path = moduleName + fullyQualifiedName.replace(topLevelPackage.getFullyQualifiedPackageName(), TOP_LEVEL_PACKAGE_SYMBOL);
-		shell.setPromptPath(path, StringUtils.hasText(moduleName));
-	}
+        topLevelPackage = new JavaPackage(
+                typeLocationService
+                        .getTopLevelPackageForModule(projectOperations
+                                .getFocusedModule()));
+        String path = moduleName
+                + fullyQualifiedName.replace(
+                        topLevelPackage.getFullyQualifiedPackageName(),
+                        TOP_LEVEL_PACKAGE_SYMBOL);
+        shell.setPromptPath(path, StringUtils.hasText(moduleName));
+    }
 
-	public JavaPackage getTopLevelPackage() {
-		return topLevelPackage;
-	}
+    public JavaPackage getTopLevelPackage() {
+        return topLevelPackage;
+    }
 
-	public void setTopLevelPackage(final JavaPackage topLevelPackage) {
-		this.topLevelPackage = topLevelPackage;
-	}
+    public void setTopLevelPackage(final JavaPackage topLevelPackage) {
+        this.topLevelPackage = topLevelPackage;
+    }
 
-	public JavaType getJavaType() {
-		return javaType;
-	}
+    public JavaType getJavaType() {
+        return javaType;
+    }
 
-	public JavaPackage getJavaPackage() {
-		return javaPackage;
-	}
+    public JavaPackage getJavaPackage() {
+        return javaPackage;
+    }
 }

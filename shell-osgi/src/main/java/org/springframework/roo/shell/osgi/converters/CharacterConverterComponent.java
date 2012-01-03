@@ -6,10 +6,11 @@ import org.springframework.roo.shell.converters.CharacterConverter;
 
 /**
  * OSGi component launcher for {@link CharacterConverter}.
- *
+ * 
  * @author Ben Alex
  * @since 1.1
  */
 @Component
 @Service
-public class CharacterConverterComponent extends CharacterConverter {}
+public class CharacterConverterComponent extends CharacterConverter {
+}

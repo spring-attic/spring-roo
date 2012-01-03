@@ -14,37 +14,39 @@ import org.springframework.uaa.client.UaaService;
 
 /**
  * Unit test of {@link AppCloudClientFactoryImpl}
- *
+ * 
  * @author Andrew Swan
  * @since 1.2.0
  */
 public class AppCloudClientFactoryImplTest {
-	
-	// Fixture
-	private AppCloudClientFactoryImpl factory;
-	@Mock private UaaService mockUaaService;
 
-	/**
-	 * @throws java.lang.Exception
-	 */
-	@Before
-	public void setUp() throws Exception {
-		MockitoAnnotations.initMocks(this);
-		this.factory = new AppCloudClientFactoryImpl();
-		this.factory.uaaService = mockUaaService;
-	}
+    // Fixture
+    private AppCloudClientFactoryImpl factory;
+    @Mock private UaaService mockUaaService;
 
-	@Test
-	public void testGetInstance() throws Exception {
-		// Set up
-		final CloudCredentials mockCredentials = mock(CloudCredentials.class);
-		final URL url = new URL("http://www.springsource.org");	// final, can't be mocked
-		when(mockCredentials.getUrlObject()).thenReturn(url);
-		
-		// Invoke
-		final UaaAwareAppCloudClient instance = this.factory.getUaaAwareInstance(mockCredentials);
-		
-		// Check
-		assertNotNull(instance);
-	}
+    /**
+     * @throws java.lang.Exception
+     */
+    @Before
+    public void setUp() throws Exception {
+        MockitoAnnotations.initMocks(this);
+        this.factory = new AppCloudClientFactoryImpl();
+        this.factory.uaaService = mockUaaService;
+    }
+
+    @Test
+    public void testGetInstance() throws Exception {
+        // Set up
+        final CloudCredentials mockCredentials = mock(CloudCredentials.class);
+        final URL url = new URL("http://www.springsource.org"); // final, can't
+                                                                // be mocked
+        when(mockCredentials.getUrlObject()).thenReturn(url);
+
+        // Invoke
+        final UaaAwareAppCloudClient instance = this.factory
+                .getUaaAwareInstance(mockCredentials);
+
+        // Check
+        assertNotNull(instance);
+    }
 }

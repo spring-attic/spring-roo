@@ -6,30 +6,34 @@ import org.springframework.roo.classpath.details.IdentifiableAnnotatedJavaStruct
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 
 /**
- * {@link IdentifiableAnnotatedJavaStructure}-specific implementation of {@link IdentifiableJavaStructureCustomDataKey}.
- *
+ * {@link IdentifiableAnnotatedJavaStructure}-specific implementation of
+ * {@link IdentifiableJavaStructureCustomDataKey}.
+ * 
  * @author James Tyrrell
  * @since 1.1.3
  */
-public abstract class IdentifiableAnnotatedJavaStructureCustomDataKey<T extends IdentifiableAnnotatedJavaStructure> extends IdentifiableJavaStructureCustomDataKey<T> {
-	private List<AnnotationMetadata> annotations;
+public abstract class IdentifiableAnnotatedJavaStructureCustomDataKey<T extends IdentifiableAnnotatedJavaStructure>
+        extends IdentifiableJavaStructureCustomDataKey<T> {
+    private List<AnnotationMetadata> annotations;
 
-	protected IdentifiableAnnotatedJavaStructureCustomDataKey(final Integer modifier, final List<AnnotationMetadata> annotations) {
-		super(modifier);
-		this.annotations = annotations;
-	}
+    protected IdentifiableAnnotatedJavaStructureCustomDataKey(
+            final Integer modifier, final List<AnnotationMetadata> annotations) {
+        super(modifier);
+        this.annotations = annotations;
+    }
 
-	protected IdentifiableAnnotatedJavaStructureCustomDataKey() {
-		super();
-	}
+    protected IdentifiableAnnotatedJavaStructureCustomDataKey() {
+        super();
+    }
 
-	public List<AnnotationMetadata> getAnnotations() {
-		return annotations;
-	}
+    public List<AnnotationMetadata> getAnnotations() {
+        return annotations;
+    }
 
-	@Override
-	public boolean meets(final T identifiableAnnotatedJavaStructure) throws IllegalStateException {
-		// TODO: Add in validation logic for annotations
-		return super.meets(identifiableAnnotatedJavaStructure);
-	}
+    @Override
+    public boolean meets(final T identifiableAnnotatedJavaStructure)
+            throws IllegalStateException {
+        // TODO: Add in validation logic for annotations
+        return super.meets(identifiableAnnotatedJavaStructure);
+    }
 }

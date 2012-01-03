@@ -9,31 +9,32 @@ import org.springframework.roo.classpath.details.annotations.populator.AutoPopul
 
 /**
  * Represents a parsed {@link RooEquals} annotation.
- *
+ * 
  * @author Alan Stewart
  * @since 1.2.0
  */
 public class EqualsAnnotationValues extends AbstractAnnotationValues {
 
-	// From annotation
-	@AutoPopulate private boolean appendSuper;
-	@AutoPopulate private String[] excludeFields;
+    // From annotation
+    @AutoPopulate private boolean appendSuper;
+    @AutoPopulate private String[] excludeFields;
 
-	/**
-	 * Constructor
-	 *
-	 * @param governorPhysicalTypeMetadata
-	 */
-	public EqualsAnnotationValues(final PhysicalTypeMetadata governorPhysicalTypeMetadata) {
-		super(governorPhysicalTypeMetadata, ROO_EQUALS);
-		AutoPopulationUtils.populate(this, annotationMetadata);
-	}
+    /**
+     * Constructor
+     * 
+     * @param governorPhysicalTypeMetadata
+     */
+    public EqualsAnnotationValues(
+            final PhysicalTypeMetadata governorPhysicalTypeMetadata) {
+        super(governorPhysicalTypeMetadata, ROO_EQUALS);
+        AutoPopulationUtils.populate(this, annotationMetadata);
+    }
 
-	public boolean isAppendSuper() {
-		return appendSuper;
-	}
+    public boolean isAppendSuper() {
+        return appendSuper;
+    }
 
-	public String[] getExcludeFields() {
-		return excludeFields;
-	}
+    public String[] getExcludeFields() {
+        return excludeFields;
+    }
 }

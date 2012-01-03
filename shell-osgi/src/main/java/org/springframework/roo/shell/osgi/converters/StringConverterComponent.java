@@ -6,10 +6,11 @@ import org.springframework.roo.shell.converters.StringConverter;
 
 /**
  * OSGi component launcher for {@link StringConverter}.
- *
+ * 
  * @author Ben Alex
  * @since 1.1
  */
 @Service
 @Component
-public class StringConverterComponent extends StringConverter {}
+public class StringConverterComponent extends StringConverter {
+}

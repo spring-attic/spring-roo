@@ -19,123 +19,139 @@ import org.springframework.roo.project.maven.Pom;
 
 /**
  * Unit test of {@link JavaTypeConverter}
- *
+ * 
  * @author Andrew Swan
  * @since 1.2.0
  */
 public class JavaTypeConverterTest {
 
-	// Fixture
-	private JavaTypeConverter converter;
-	@Mock FileManager mockFileManager;
-	@Mock LastUsed mockLastUsed;
-	@Mock ProjectOperations mockProjectOperations;
-	@Mock TypeLocationService mockTypeLocationService;
-	
-	@Before
-	public void setUp() throws Exception {
-		MockitoAnnotations.initMocks(this);
-		this.converter = new JavaTypeConverter();
-		this.converter.fileManager = mockFileManager;
-		this.converter.lastUsed = mockLastUsed;
-		this.converter.projectOperations = mockProjectOperations;
-		this.converter.typeLocationService = mockTypeLocationService;
-	}
+    // Fixture
+    private JavaTypeConverter converter;
+    @Mock FileManager mockFileManager;
+    @Mock LastUsed mockLastUsed;
+    @Mock ProjectOperations mockProjectOperations;
+    @Mock TypeLocationService mockTypeLocationService;
 
-	@Test
-	public void testSupportsJavaType() {
-		assertTrue(converter.supports(JavaType.class, null));
-	}
-	
-	@Test
-	public void testConvertNullString() {
-		assertNull(converter.convertFromText(null, null, null));
-	}
-	
-	@Test
-	public void testConvertEmptyString() {
-		assertNull(converter.convertFromText("", null, null));
-	}
-	
-	@Test
-	public void testConvertWhitespace() {
-		assertNull(converter.convertFromText(" \n\r\t", null, null));
-	}
-	
-	@Test
-	public void testConvertToPrimitiveByte() {
-		assertEquals(JavaType.BYTE_PRIMITIVE, converter.convertFromText("byte", null, null));
-	}
+    @Before
+    public void setUp() throws Exception {
+        MockitoAnnotations.initMocks(this);
+        this.converter = new JavaTypeConverter();
+        this.converter.fileManager = mockFileManager;
+        this.converter.lastUsed = mockLastUsed;
+        this.converter.projectOperations = mockProjectOperations;
+        this.converter.typeLocationService = mockTypeLocationService;
+    }
 
-	@Test
-	public void testConvertToPrimitiveDouble() {
-		assertEquals(JavaType.DOUBLE_PRIMITIVE, converter.convertFromText("double", null, null));
-	}
+    @Test
+    public void testSupportsJavaType() {
+        assertTrue(converter.supports(JavaType.class, null));
+    }
 
-	@Test
-	public void testConvertToPrimitiveFloat() {
-		assertEquals(JavaType.FLOAT_PRIMITIVE, converter.convertFromText("float", null, null));
-	}
+    @Test
+    public void testConvertNullString() {
+        assertNull(converter.convertFromText(null, null, null));
+    }
 
-	@Test
-	public void testConvertToPrimitiveInt() {
-		assertEquals(JavaType.INT_PRIMITIVE, converter.convertFromText("int", null, null));
-	}
+    @Test
+    public void testConvertEmptyString() {
+        assertNull(converter.convertFromText("", null, null));
+    }
 
-	@Test
-	public void testConvertToPrimitiveLong() {
-		assertEquals(JavaType.LONG_PRIMITIVE, converter.convertFromText("long", null, null));
-	}
+    @Test
+    public void testConvertWhitespace() {
+        assertNull(converter.convertFromText(" \n\r\t", null, null));
+    }
 
-	@Test
-	public void testConvertToPrimitiveShort() {
-		assertEquals(JavaType.SHORT_PRIMITIVE, converter.convertFromText("short", null, null));
-	}
-	
-	@Test
-	public void testConvertAsteriskWhenLastUsedTypeIsKnown() {
-		// Set up
-		final JavaType mockLastUsedType = mock(JavaType.class);
-		when(mockLastUsed.getJavaType()).thenReturn(mockLastUsedType);
-		
-		// Invoke and check
-		assertEquals(mockLastUsedType, converter.convertFromText(JavaTypeConverter.LAST_USED_INDICATOR, null, null));
-	}
-	
-	@Test(expected = IllegalStateException.class)
-	public void testConvertAsteriskWhenLastUsedTypeIsUnknown() {
-		converter.convertFromText(JavaTypeConverter.LAST_USED_INDICATOR, null, null);
-	}
+    @Test
+    public void testConvertToPrimitiveByte() {
+        assertEquals(JavaType.BYTE_PRIMITIVE,
+                converter.convertFromText("byte", null, null));
+    }
 
-	@Test
-	public void testConvertTopLevelPackageWithOneModulePrefix() {
-		// Set up
-		final String moduleName = "web";
-		final Pom mockWebPom = mock(Pom.class);
-		when(mockProjectOperations.getPomFromModuleName(moduleName)).thenReturn(mockWebPom);
-		final String topLevelPackage = "com.example.app.mvc";
-		when(mockTypeLocationService.getTopLevelPackageForModule(mockWebPom)).thenReturn(topLevelPackage);
-		
-		// Invoke
-		final JavaType result = converter.convertFromText(moduleName + MODULE_PATH_SEPARATOR + topLevelPackage, null, null);
-		
-		// Check
-		assertNull(result);
-	}
-	
-	@Test
-	public void testConvertFullyQualifiedValueWithOneModulePrefix() {
-		// Set up
-		final String moduleName = "web";
-		final Pom mockWebPom = mock(Pom.class);
-		when(mockProjectOperations.getPomFromModuleName(moduleName)).thenReturn(mockWebPom);
-		final String topLevelPackage = "com.example.app.mvc";
-		when(mockTypeLocationService.getTopLevelPackageForModule(mockWebPom)).thenReturn(topLevelPackage);
-		
-		// Invoke
-		final JavaType result = converter.convertFromText(moduleName + MODULE_PATH_SEPARATOR + topLevelPackage + ".pet.PetController", null, null);
-		
-		// Check
-		assertEquals("com.example.app.mvc.pet.PetController", result.getFullyQualifiedTypeName());
-	}
+    @Test
+    public void testConvertToPrimitiveDouble() {
+        assertEquals(JavaType.DOUBLE_PRIMITIVE,
+                converter.convertFromText("double", null, null));
+    }
+
+    @Test
+    public void testConvertToPrimitiveFloat() {
+        assertEquals(JavaType.FLOAT_PRIMITIVE,
+                converter.convertFromText("float", null, null));
+    }
+
+    @Test
+    public void testConvertToPrimitiveInt() {
+        assertEquals(JavaType.INT_PRIMITIVE,
+                converter.convertFromText("int", null, null));
+    }
+
+    @Test
+    public void testConvertToPrimitiveLong() {
+        assertEquals(JavaType.LONG_PRIMITIVE,
+                converter.convertFromText("long", null, null));
+    }
+
+    @Test
+    public void testConvertToPrimitiveShort() {
+        assertEquals(JavaType.SHORT_PRIMITIVE,
+                converter.convertFromText("short", null, null));
+    }
+
+    @Test
+    public void testConvertAsteriskWhenLastUsedTypeIsKnown() {
+        // Set up
+        final JavaType mockLastUsedType = mock(JavaType.class);
+        when(mockLastUsed.getJavaType()).thenReturn(mockLastUsedType);
+
+        // Invoke and check
+        assertEquals(mockLastUsedType, converter.convertFromText(
+                JavaTypeConverter.LAST_USED_INDICATOR, null, null));
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void testConvertAsteriskWhenLastUsedTypeIsUnknown() {
+        converter.convertFromText(JavaTypeConverter.LAST_USED_INDICATOR, null,
+                null);
+    }
+
+    @Test
+    public void testConvertTopLevelPackageWithOneModulePrefix() {
+        // Set up
+        final String moduleName = "web";
+        final Pom mockWebPom = mock(Pom.class);
+        when(mockProjectOperations.getPomFromModuleName(moduleName))
+                .thenReturn(mockWebPom);
+        final String topLevelPackage = "com.example.app.mvc";
+        when(mockTypeLocationService.getTopLevelPackageForModule(mockWebPom))
+                .thenReturn(topLevelPackage);
+
+        // Invoke
+        final JavaType result = converter.convertFromText(moduleName
+                + MODULE_PATH_SEPARATOR + topLevelPackage, null, null);
+
+        // Check
+        assertNull(result);
+    }
+
+    @Test
+    public void testConvertFullyQualifiedValueWithOneModulePrefix() {
+        // Set up
+        final String moduleName = "web";
+        final Pom mockWebPom = mock(Pom.class);
+        when(mockProjectOperations.getPomFromModuleName(moduleName))
+                .thenReturn(mockWebPom);
+        final String topLevelPackage = "com.example.app.mvc";
+        when(mockTypeLocationService.getTopLevelPackageForModule(mockWebPom))
+                .thenReturn(topLevelPackage);
+
+        // Invoke
+        final JavaType result = converter.convertFromText(moduleName
+                + MODULE_PATH_SEPARATOR + topLevelPackage
+                + ".pet.PetController", null, null);
+
+        // Check
+        assertEquals("com.example.app.mvc.pet.PetController",
+                result.getFullyQualifiedTypeName());
+    }
 }

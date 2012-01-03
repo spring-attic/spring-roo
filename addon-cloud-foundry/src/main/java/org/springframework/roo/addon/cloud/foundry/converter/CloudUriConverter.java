@@ -14,7 +14,7 @@ import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Provides conversion to and from Cloud Foundry model classes.
- *
+ * 
  * @author James Tyrrell
  * @author Andrew Swan
  * @since 1.2.0
@@ -22,27 +22,32 @@ import org.springframework.roo.support.util.StringUtils;
 @Component
 @Service
 public class CloudUriConverter implements Converter<CloudUri> {
-	@Reference private CloudFoundrySession session;
+    @Reference private CloudFoundrySession session;
 
-	public CloudUri convertFromText(final String value, final Class<?> requiredType, final String optionContext) {
-		if (StringUtils.isBlank(value)) {
-			return null;
-		}
-		return new CloudUri(value);
-	}
+    public CloudUri convertFromText(final String value,
+            final Class<?> requiredType, final String optionContext) {
+        if (StringUtils.isBlank(value)) {
+            return null;
+        }
+        return new CloudUri(value);
+    }
 
-	public boolean supports(final Class<?> requiredType, final String optionContext) {
-		return CloudUri.class.isAssignableFrom(requiredType);
-	}
+    public boolean supports(final Class<?> requiredType,
+            final String optionContext) {
+        return CloudUri.class.isAssignableFrom(requiredType);
+    }
 
-	public boolean getAllPossibleValues(final List<Completion> completions, final Class<?> requiredType, final String existingData, final String optionContext, final MethodTarget target) {
-		final String appName = ConverterUtils.getOptionValue("appName", target.getRemainingBuffer());
-		final List<String> uris = session.getBoundUrlMap().get(appName);
-		if (uris != null) {
-			for (String uri : uris) {
-				completions.add(new Completion(uri));
-			}
-		}
-		return false;
-	}
+    public boolean getAllPossibleValues(final List<Completion> completions,
+            final Class<?> requiredType, final String existingData,
+            final String optionContext, final MethodTarget target) {
+        final String appName = ConverterUtils.getOptionValue("appName",
+                target.getRemainingBuffer());
+        final List<String> uris = session.getBoundUrlMap().get(appName);
+        if (uris != null) {
+            for (String uri : uris) {
+                completions.add(new Completion(uri));
+            }
+        }
+        return false;
+    }
 }

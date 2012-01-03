@@ -26,222 +26,240 @@ import org.springframework.roo.support.util.Assert;
 
 /**
  * Builder for {@link AnnotationMetadata}.
- *
  * <p>
  * The "add" method will replace any existing annotation attribute with the same
  * name, taking care to preserve its location.
- *
+ * 
  * @author Ben Alex
  * @author Andrew Swan
  * @since 1.1
  */
 public class AnnotationMetadataBuilder implements Builder<AnnotationMetadata> {
 
-	// Constants for JPA annotations (using literal class names so as not to make Roo depend on JPA)
-	public static final AnnotationMetadata JPA_COLUMN_ANNOTATION = getInstance(COLUMN);
-	public static final AnnotationMetadata JPA_EMBEDDED_ANNOTATION = getInstance(EMBEDDED);
-	public static final AnnotationMetadata JPA_EMBEDDED_ID_ANNOTATION = getInstance(EMBEDDED_ID);
-	public static final AnnotationMetadata JPA_ENUMERATED_ANNOTATION = getInstance(ENUMERATED);
-	public static final AnnotationMetadata JPA_ID_ANNOTATION = getInstance(ID);
-	public static final AnnotationMetadata JPA_LOB_ANNOTATION = getInstance(LOB);
-	public static final AnnotationMetadata JPA_MANY_TO_MANY_ANNOTATION = getInstance(MANY_TO_MANY);
-	public static final AnnotationMetadata JPA_MANY_TO_ONE_ANNOTATION = getInstance(MANY_TO_ONE);
-	public static final AnnotationMetadata JPA_ONE_TO_MANY_ANNOTATION = getInstance(ONE_TO_MANY);
-	public static final AnnotationMetadata JPA_ONE_TO_ONE_ANNOTATION = getInstance(ONE_TO_ONE);
-	public static final AnnotationMetadata JPA_TRANSIENT_ANNOTATION = getInstance(TRANSIENT);
-	public static final AnnotationMetadata JPA_VERSION_ANNOTATION = getInstance(VERSION);
+    // Constants for JPA annotations (using literal class names so as not to
+    // make Roo depend on JPA)
+    public static final AnnotationMetadata JPA_COLUMN_ANNOTATION = getInstance(COLUMN);
+    public static final AnnotationMetadata JPA_EMBEDDED_ANNOTATION = getInstance(EMBEDDED);
+    public static final AnnotationMetadata JPA_EMBEDDED_ID_ANNOTATION = getInstance(EMBEDDED_ID);
+    public static final AnnotationMetadata JPA_ENUMERATED_ANNOTATION = getInstance(ENUMERATED);
+    public static final AnnotationMetadata JPA_ID_ANNOTATION = getInstance(ID);
+    public static final AnnotationMetadata JPA_LOB_ANNOTATION = getInstance(LOB);
+    public static final AnnotationMetadata JPA_MANY_TO_MANY_ANNOTATION = getInstance(MANY_TO_MANY);
+    public static final AnnotationMetadata JPA_MANY_TO_ONE_ANNOTATION = getInstance(MANY_TO_ONE);
+    public static final AnnotationMetadata JPA_ONE_TO_MANY_ANNOTATION = getInstance(ONE_TO_MANY);
+    public static final AnnotationMetadata JPA_ONE_TO_ONE_ANNOTATION = getInstance(ONE_TO_ONE);
+    public static final AnnotationMetadata JPA_TRANSIENT_ANNOTATION = getInstance(TRANSIENT);
+    public static final AnnotationMetadata JPA_VERSION_ANNOTATION = getInstance(VERSION);
 
-	/**
-	 * Returns the metadata for the existing annotation, with no attribute
-	 * values
-	 *
-	 * @param annotationType the fully-qualified name of the annotation type (required)
-	 * @return a non-<code>null</code> instance
-	 * @since 1.2.0
-	 */
-	public static AnnotationMetadata getInstance(final String annotationType) {
-		return new AnnotationMetadataBuilder(annotationType).build();
-	}
+    /**
+     * Returns the metadata for the existing annotation, with no attribute
+     * values
+     * 
+     * @param annotationType the fully-qualified name of the annotation type
+     *            (required)
+     * @return a non-<code>null</code> instance
+     * @since 1.2.0
+     */
+    public static AnnotationMetadata getInstance(final String annotationType) {
+        return new AnnotationMetadataBuilder(annotationType).build();
+    }
 
-	public static AnnotationMetadata getInstance(final JavaType annotationType) {
-		return new AnnotationMetadataBuilder(annotationType).build();
-	}
+    public static AnnotationMetadata getInstance(final JavaType annotationType) {
+        return new AnnotationMetadataBuilder(annotationType).build();
+    }
 
+    public static AnnotationMetadataBuilder getInstance(
+            final JavaType annotationType,
+            final Collection<AnnotationAttributeValue<?>> attributeValues) {
+        return new AnnotationMetadataBuilder(annotationType, attributeValues);
+    }
 
-	public static AnnotationMetadataBuilder getInstance(final JavaType annotationType, final Collection<AnnotationAttributeValue<?>> attributeValues) {
-		return new AnnotationMetadataBuilder(annotationType, attributeValues);
-	}
+    /**
+     * Returns the metadata for the existing annotation, with no attribute
+     * values
+     * 
+     * @param annotationType the annotation type (required)
+     * @return a non-<code>null</code> instance
+     * @since 1.2.0
+     */
+    public static AnnotationMetadata getInstance(final Class<?> annotationType) {
+        return new AnnotationMetadataBuilder(annotationType).build();
+    }
 
-	/**
-	 * Returns the metadata for the existing annotation, with no attribute
-	 * values
-	 *
-	 * @param annotationType the annotation type (required)
-	 * @return a non-<code>null</code> instance
-	 * @since 1.2.0
-	 */
-	public static AnnotationMetadata getInstance(final Class<?> annotationType) {
-		return new AnnotationMetadataBuilder(annotationType).build();
-	}
+    // Fields
+    private JavaType annotationType;
+    private final Map<String, AnnotationAttributeValue<?>> attributeValues = new LinkedHashMap<String, AnnotationAttributeValue<?>>();
 
-	// Fields
-	private JavaType annotationType;
-	private final Map<String, AnnotationAttributeValue<?>> attributeValues = new LinkedHashMap<String, AnnotationAttributeValue<?>>();
+    /**
+     * Constructor. The caller must set the annotation type via
+     * {@link #setAnnotationType(JavaType)} before calling {@link #build()}
+     */
+    public AnnotationMetadataBuilder() {
+    }
 
-	/**
-	 * Constructor. The caller must set the annotation type via
-	 * {@link #setAnnotationType(JavaType)} before calling {@link #build()}
-	 */
-	public AnnotationMetadataBuilder() {
-	}
+    /**
+     * Constructor for using an existing {@link AnnotationMetadata} as a
+     * baseline for building a new instance.
+     * 
+     * @param existing required
+     */
+    public AnnotationMetadataBuilder(final AnnotationMetadata existing) {
+        Assert.notNull(existing);
+        this.annotationType = existing.getAnnotationType();
+        for (JavaSymbolName attributeName : existing.getAttributeNames()) {
+            attributeValues.put(attributeName.getSymbolName(),
+                    existing.getAttribute(attributeName));
+        }
+    }
 
-	/**
-	 * Constructor for using an existing {@link AnnotationMetadata} as a
-	 * baseline for building a new instance.
-	 *
-	 * @param existing required
-	 */
-	public AnnotationMetadataBuilder(final AnnotationMetadata existing) {
-		Assert.notNull(existing);
-		this.annotationType = existing.getAnnotationType();
-		for (JavaSymbolName attributeName : existing.getAttributeNames()) {
-			attributeValues.put(attributeName.getSymbolName(), existing.getAttribute(attributeName));
-		}
-	}
+    /**
+     * Constructor for no initial attribute values
+     * 
+     * @param annotationType the annotation class (required)
+     * @since 1.2.0
+     */
+    public AnnotationMetadataBuilder(final Class<?> annotationType) {
+        this(new JavaType(annotationType));
+    }
 
-	/**
-	 * Constructor for no initial attribute values
-	 *
-	 * @param annotationType the annotation class (required)
-	 * @since 1.2.0
-	 */
-	public AnnotationMetadataBuilder(final Class<?> annotationType) {
-		this(new JavaType(annotationType));
-	}
+    /**
+     * Constructor for no initial attribute values
+     * 
+     * @param annotationType the fully-qualified name of the annotation type
+     *            (required)
+     */
+    public AnnotationMetadataBuilder(final String annotationType) {
+        this(new JavaType(annotationType));
+    }
 
-	/**
-	 * Constructor for no initial attribute values
-	 *
-	 * @param annotationType the fully-qualified name of the annotation type (required)
-	 */
-	public AnnotationMetadataBuilder(final String annotationType) {
-		this(new JavaType(annotationType));
-	}
+    /**
+     * Constructor for no initial attribute values
+     * 
+     * @param annotationType
+     */
+    public AnnotationMetadataBuilder(final JavaType annotationType) {
+        this.annotationType = annotationType;
+    }
 
-	/**
-	 * Constructor for no initial attribute values
-	 *
-	 * @param annotationType
-	 */
-	public AnnotationMetadataBuilder(final JavaType annotationType) {
-		this.annotationType = annotationType;
-	}
+    /**
+     * Constructor that accepts an optional list of values
+     * 
+     * @param annotationType
+     * @param attributeValues can be <code>null</code>
+     */
+    public AnnotationMetadataBuilder(final JavaType annotationType,
+            final Collection<AnnotationAttributeValue<?>> attributeValues) {
+        this.annotationType = annotationType;
+        setAttributes(attributeValues);
+    }
 
-	/**
-	 * Constructor that accepts an optional list of values
-	 *
-	 * @param annotationType
-	 * @param attributeValues can be <code>null</code>
-	 */
-	public AnnotationMetadataBuilder(final JavaType annotationType, final Collection<AnnotationAttributeValue<?>> attributeValues) {
-		this.annotationType = annotationType;
-		setAttributes(attributeValues);
-	}
+    public void addBooleanAttribute(final String key, final boolean value) {
+        addAttribute(new BooleanAttributeValue(new JavaSymbolName(key), value));
+    }
 
-	public void addBooleanAttribute(final String key, final boolean value) {
-		addAttribute(new BooleanAttributeValue(new JavaSymbolName(key), value));
-	}
+    public void addCharAttribute(final String key, final char value) {
+        addAttribute(new CharAttributeValue(new JavaSymbolName(key), value));
+    }
 
-	public void addCharAttribute(final String key, final char value) {
-		addAttribute(new CharAttributeValue(new JavaSymbolName(key), value));
-	}
+    public void addClassAttribute(final String key,
+            final String fullyQualifiedTypeName) {
+        addAttribute(new ClassAttributeValue(new JavaSymbolName(key),
+                new JavaType(fullyQualifiedTypeName)));
+    }
 
-	public void addClassAttribute(final String key, final String fullyQualifiedTypeName) {
-		addAttribute(new ClassAttributeValue(new JavaSymbolName(key), new JavaType(fullyQualifiedTypeName)));
-	}
+    /**
+     * Adds an attribute with the given {@link JavaType} as its value
+     * 
+     * @param key the attribute name (required)
+     * @param javaType the value (required)
+     */
+    public void addClassAttribute(final String key, final JavaType javaType) {
+        addAttribute(new ClassAttributeValue(new JavaSymbolName(key), javaType));
+    }
 
-	/**
-	 * Adds an attribute with the given {@link JavaType} as its value
-	 *
-	 * @param key the attribute name (required)
-	 * @param javaType the value (required)
-	 */
-	public void addClassAttribute(final String key, final JavaType javaType) {
-		addAttribute(new ClassAttributeValue(new JavaSymbolName(key), javaType));
-	}
+    public void addDoubleAttribute(final String key, final double value,
+            final boolean floatingPrecisionOnly) {
+        addAttribute(new DoubleAttributeValue(new JavaSymbolName(key), value,
+                floatingPrecisionOnly));
+    }
 
-	public void addDoubleAttribute(final String key, final double value, final boolean floatingPrecisionOnly) {
-		addAttribute(new DoubleAttributeValue(new JavaSymbolName(key), value, floatingPrecisionOnly));
-	}
+    public void addEnumAttribute(final String key,
+            final String fullyQualifiedTypeName, final String enumConstant) {
+        EnumDetails details = new EnumDetails(new JavaType(
+                fullyQualifiedTypeName), new JavaSymbolName(enumConstant));
+        addAttribute(new EnumAttributeValue(new JavaSymbolName(key), details));
+    }
 
-	public void addEnumAttribute(final String key, final String fullyQualifiedTypeName, final String enumConstant) {
-		EnumDetails details = new EnumDetails(new JavaType(fullyQualifiedTypeName), new JavaSymbolName(enumConstant));
-		addAttribute(new EnumAttributeValue(new JavaSymbolName(key), details));
-	}
+    public void addEnumAttribute(final String key, final JavaType javaType,
+            final String enumConstant) {
+        EnumDetails details = new EnumDetails(javaType, new JavaSymbolName(
+                enumConstant));
+        addAttribute(new EnumAttributeValue(new JavaSymbolName(key), details));
+    }
 
-	public void addEnumAttribute(final String key, final JavaType javaType, final String enumConstant) {
-		EnumDetails details = new EnumDetails(javaType, new JavaSymbolName(enumConstant));
-		addAttribute(new EnumAttributeValue(new JavaSymbolName(key), details));
-	}
+    public void addEnumAttribute(final String key, final JavaType javaType,
+            final JavaSymbolName enumConstant) {
+        EnumDetails details = new EnumDetails(javaType, enumConstant);
+        addAttribute(new EnumAttributeValue(new JavaSymbolName(key), details));
+    }
 
-	public void addEnumAttribute(final String key, final JavaType javaType, final JavaSymbolName enumConstant) {
-		EnumDetails details = new EnumDetails(javaType, enumConstant);
-		addAttribute(new EnumAttributeValue(new JavaSymbolName(key), details));
-	}
+    public void addEnumAttribute(final String key, final EnumDetails details) {
+        addAttribute(new EnumAttributeValue(new JavaSymbolName(key), details));
+    }
 
-	public void addEnumAttribute(final String key, final EnumDetails details) {
-		addAttribute(new EnumAttributeValue(new JavaSymbolName(key), details));
-	}
+    public void addIntegerAttribute(final String key, final int value) {
+        addAttribute(new IntegerAttributeValue(new JavaSymbolName(key), value));
+    }
 
-	public void addIntegerAttribute(final String key, final int value) {
-		addAttribute(new IntegerAttributeValue(new JavaSymbolName(key), value));
-	}
+    public void addLongAttribute(final String key, final long value) {
+        addAttribute(new LongAttributeValue(new JavaSymbolName(key), value));
+    }
 
-	public void addLongAttribute(final String key, final long value) {
-		addAttribute(new LongAttributeValue(new JavaSymbolName(key), value));
-	}
+    public void addStringAttribute(final String key, final String value) {
+        addAttribute(new StringAttributeValue(new JavaSymbolName(key), value));
+    }
 
-	public void addStringAttribute(final String key, final String value) {
-		addAttribute(new StringAttributeValue(new JavaSymbolName(key), value));
-	}
+    public void addAttribute(final AnnotationAttributeValue<?> value) {
+        // Locate existing attribute with this key and replace it
+        attributeValues.put(value.getName().getSymbolName(), value);
+    }
 
-	public void addAttribute(final AnnotationAttributeValue<?> value) {
-		// Locate existing attribute with this key and replace it
-		attributeValues.put(value.getName().getSymbolName(), value);
-	}
+    public void removeAttribute(final String key) {
+        // Locate existing attribute with this key and replace it
+        attributeValues.remove(key);
+    }
 
-	public void removeAttribute(final String key) {
-		// Locate existing attribute with this key and replace it
-		attributeValues.remove(key);
-	}
+    public JavaType getAnnotationType() {
+        return annotationType;
+    }
 
-	public JavaType getAnnotationType() {
-		return annotationType;
-	}
+    public void setAnnotationType(final JavaType annotationType) {
+        this.annotationType = annotationType;
+    }
 
-	public void setAnnotationType(final JavaType annotationType) {
-		this.annotationType = annotationType;
-	}
+    public Map<String, AnnotationAttributeValue<?>> getAttributes() {
+        return attributeValues;
+    }
 
-	public Map<String, AnnotationAttributeValue<?>> getAttributes() {
-		return attributeValues;
-	}
+    /**
+     * Sets the attribute values
+     * 
+     * @param attributeValue's the values to set; can be <code>null</code> for
+     *            none
+     */
+    public void setAttributes(
+            final Collection<AnnotationAttributeValue<?>> attributeValues) {
+        this.attributeValues.clear();
+        if (attributeValues != null) {
+            for (AnnotationAttributeValue<?> attributeValue : attributeValues) {
+                addAttribute(attributeValue);
+            }
+        }
+    }
 
-	/**
-	 * Sets the attribute values
-	 *
-	 * @param attributeValue's the values to set; can be <code>null</code> for none
-	 */
-	public void setAttributes(final Collection<AnnotationAttributeValue<?>> attributeValues) {
-		this.attributeValues.clear();
-		if (attributeValues != null) {
-			for (AnnotationAttributeValue<?> attributeValue : attributeValues) {
-				addAttribute(attributeValue);
-			}
-		}
-	}
-
-	public AnnotationMetadata build() {
-		return new DefaultAnnotationMetadata(getAnnotationType(), new ArrayList<AnnotationAttributeValue<?>>(getAttributes().values()));
-	}
+    public AnnotationMetadata build() {
+        return new DefaultAnnotationMetadata(getAnnotationType(),
+                new ArrayList<AnnotationAttributeValue<?>>(getAttributes()
+                        .values()));
+    }
 }

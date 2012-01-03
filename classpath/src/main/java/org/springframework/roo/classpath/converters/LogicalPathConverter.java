@@ -17,27 +17,33 @@ import org.springframework.roo.shell.MethodTarget;
 @Service
 public class LogicalPathConverter implements Converter<LogicalPath> {
 
-	// Fields
-	@Reference ProjectOperations projectOperations;
+    // Fields
+    @Reference ProjectOperations projectOperations;
 
-	public boolean supports(final Class<?> requiredType, final String optionContext) {
-		return LogicalPath.class.isAssignableFrom(requiredType);
-	}
+    public boolean supports(final Class<?> requiredType,
+            final String optionContext) {
+        return LogicalPath.class.isAssignableFrom(requiredType);
+    }
 
-	public LogicalPath convertFromText(final String value, final Class<?> targetType, final String optionContext) {
-		LogicalPath logicalPath = LogicalPath.getInstance(value);
-		if (logicalPath.getModule().equals("FOCUSED")) {
-			logicalPath = LogicalPath.getInstance(logicalPath.getPath(), projectOperations.getFocusedModuleName());
-		}
-		return logicalPath;
-	}
+    public LogicalPath convertFromText(final String value,
+            final Class<?> targetType, final String optionContext) {
+        LogicalPath logicalPath = LogicalPath.getInstance(value);
+        if (logicalPath.getModule().equals("FOCUSED")) {
+            logicalPath = LogicalPath.getInstance(logicalPath.getPath(),
+                    projectOperations.getFocusedModuleName());
+        }
+        return logicalPath;
+    }
 
-	public boolean getAllPossibleValues(final List<Completion> completions, final Class<?> targetType, final String existingData, final String optionContext, final MethodTarget target) {
-		for (final Pom pom : projectOperations.getPoms()) {
-			for (final PhysicalPath physicalPath : pom.getPhysicalPaths()) {
-				completions.add(new Completion(physicalPath.getLogicalPath().getName()));
-			}
-		}
-		return false;
-	}
+    public boolean getAllPossibleValues(final List<Completion> completions,
+            final Class<?> targetType, final String existingData,
+            final String optionContext, final MethodTarget target) {
+        for (final Pom pom : projectOperations.getPoms()) {
+            for (final PhysicalPath physicalPath : pom.getPhysicalPaths()) {
+                completions.add(new Completion(physicalPath.getLogicalPath()
+                        .getName()));
+            }
+        }
+        return false;
+    }
 }

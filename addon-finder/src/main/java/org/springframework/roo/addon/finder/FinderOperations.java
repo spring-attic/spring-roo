@@ -7,15 +7,15 @@ import org.springframework.roo.model.JavaType;
 
 /**
  * Provides Finder add-on operations.
- *
+ * 
  * @author Ben Alex
  * @since 1.0
  */
 public interface FinderOperations {
 
-	boolean isFinderInstallationPossible();
+    boolean isFinderInstallationPossible();
 
-	SortedSet<String> listFindersFor(JavaType typeName, Integer depth);
+    SortedSet<String> listFindersFor(JavaType typeName, Integer depth);
 
-	void installFinder(JavaType typeName, JavaSymbolName finderName);
+    void installFinder(JavaType typeName, JavaSymbolName finderName);
 }

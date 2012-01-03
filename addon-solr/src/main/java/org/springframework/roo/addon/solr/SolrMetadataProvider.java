@@ -28,117 +28,154 @@ import org.springframework.roo.project.LogicalPath;
 
 /**
  * Provides {@link SolrMetadata}.
- *
+ * 
  * @author Stefan Schmidt
  * @since 1.1
  */
 @Component(immediate = true)
 @Service
-public class SolrMetadataProvider extends AbstractMemberDiscoveringItdMetadataProvider {
+public class SolrMetadataProvider extends
+        AbstractMemberDiscoveringItdMetadataProvider {
 
-	// Fields
-	@Reference private JpaActiveRecordMetadataProvider jpaActiveRecordMetadataProvider;
+    // Fields
+    @Reference private JpaActiveRecordMetadataProvider jpaActiveRecordMetadataProvider;
 
-	protected void activate(final ComponentContext context) {
-		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-		jpaActiveRecordMetadataProvider.addMetadataTrigger(ROO_SOLR_SEARCHABLE);
-		addMetadataTrigger(ROO_SOLR_SEARCHABLE);
-	}
+    protected void activate(final ComponentContext context) {
+        metadataDependencyRegistry.registerDependency(
+                PhysicalTypeIdentifier.getMetadataIdentiferType(),
+                getProvidesType());
+        jpaActiveRecordMetadataProvider.addMetadataTrigger(ROO_SOLR_SEARCHABLE);
+        addMetadataTrigger(ROO_SOLR_SEARCHABLE);
+    }
 
-	protected void deactivate(final ComponentContext context) {
-		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-		jpaActiveRecordMetadataProvider.removeMetadataTrigger(ROO_SOLR_SEARCHABLE);
-		removeMetadataTrigger(ROO_SOLR_SEARCHABLE);
-	}
+    protected void deactivate(final ComponentContext context) {
+        metadataDependencyRegistry.deregisterDependency(
+                PhysicalTypeIdentifier.getMetadataIdentiferType(),
+                getProvidesType());
+        jpaActiveRecordMetadataProvider
+                .removeMetadataTrigger(ROO_SOLR_SEARCHABLE);
+        removeMetadataTrigger(ROO_SOLR_SEARCHABLE);
+    }
 
-	@Override
-	protected ItdTypeDetailsProvidingMetadataItem getMetadata(final String metadataIdentificationString, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final String itdFilename) {
-		// We need to parse the annotation, which we expect to be present
-		SolrSearchAnnotationValues annotationValues = new SolrSearchAnnotationValues(governorPhysicalTypeMetadata);
-		if (!annotationValues.isAnnotationFound() || annotationValues.searchMethod == null) {
-			return null;
-		}
+    @Override
+    protected ItdTypeDetailsProvidingMetadataItem getMetadata(
+            final String metadataIdentificationString,
+            final JavaType aspectName,
+            final PhysicalTypeMetadata governorPhysicalTypeMetadata,
+            final String itdFilename) {
+        // We need to parse the annotation, which we expect to be present
+        SolrSearchAnnotationValues annotationValues = new SolrSearchAnnotationValues(
+                governorPhysicalTypeMetadata);
+        if (!annotationValues.isAnnotationFound()
+                || annotationValues.searchMethod == null) {
+            return null;
+        }
 
-		// Acquire bean info (we need getters details, specifically)
-		JavaType javaType = SolrMetadata.getJavaType(metadataIdentificationString);
-		LogicalPath path = SolrMetadata.getPath(metadataIdentificationString);
-		String jpaActiveRecordMetadataKey = JpaActiveRecordMetadata.createIdentifier(javaType, path);
+        // Acquire bean info (we need getters details, specifically)
+        JavaType javaType = SolrMetadata
+                .getJavaType(metadataIdentificationString);
+        LogicalPath path = SolrMetadata.getPath(metadataIdentificationString);
+        String jpaActiveRecordMetadataKey = JpaActiveRecordMetadata
+                .createIdentifier(javaType, path);
 
-		// We want to be notified if the getter info changes in any way
-		metadataDependencyRegistry.registerDependency(jpaActiveRecordMetadataKey, metadataIdentificationString);
-		JpaActiveRecordMetadata jpaActiveRecordMetadata = (JpaActiveRecordMetadata) metadataService.get(jpaActiveRecordMetadataKey);
+        // We want to be notified if the getter info changes in any way
+        metadataDependencyRegistry.registerDependency(
+                jpaActiveRecordMetadataKey, metadataIdentificationString);
+        JpaActiveRecordMetadata jpaActiveRecordMetadata = (JpaActiveRecordMetadata) metadataService
+                .get(jpaActiveRecordMetadataKey);
 
-		// Abort if we don't have getter information available
-		if (jpaActiveRecordMetadata == null || !jpaActiveRecordMetadata.isValid()) {
-			return null;
-		}
+        // Abort if we don't have getter information available
+        if (jpaActiveRecordMetadata == null
+                || !jpaActiveRecordMetadata.isValid()) {
+            return null;
+        }
 
-		// Otherwise go off and create the Solr metadata
-		String beanPlural = javaType.getSimpleTypeName() + "s";
-		PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(javaType, path));
-		if (pluralMetadata != null && pluralMetadata.isValid()) {
-			beanPlural = pluralMetadata.getPlural();
-		}
+        // Otherwise go off and create the Solr metadata
+        String beanPlural = javaType.getSimpleTypeName() + "s";
+        PluralMetadata pluralMetadata = (PluralMetadata) metadataService
+                .get(PluralMetadata.createIdentifier(javaType, path));
+        if (pluralMetadata != null && pluralMetadata.isValid()) {
+            beanPlural = pluralMetadata.getPlural();
+        }
 
-		MemberDetails memberDetails = getMemberDetails(governorPhysicalTypeMetadata);
-		Map<MethodMetadata, FieldMetadata> accessorDetails = new LinkedHashMap<MethodMetadata, FieldMetadata>();
-		for (MethodMetadata method : memberDetails.getMethods()) {
-			if (BeanInfoUtils.isAccessorMethod(method) && !method.getMethodName().getSymbolName().startsWith("is")) {
-				FieldMetadata field = BeanInfoUtils.getFieldForJavaBeanMethod(memberDetails, method);
-				if (field != null) {
-					accessorDetails.put(method, field);
-				}
-				// Track any changes to that method (eg it goes away)
-				metadataDependencyRegistry.registerDependency(method.getDeclaredByMetadataId(), metadataIdentificationString);
-			}
-		}
-		final MethodMetadata identifierAccessor = persistenceMemberLocator.getIdentifierAccessor(javaType);
-		if (identifierAccessor == null) {
-			return null;
-		}
-		
-		final FieldMetadata versionField = persistenceMemberLocator.getVersionField(javaType);
-		
-		return new SolrMetadata(metadataIdentificationString, aspectName, annotationValues, governorPhysicalTypeMetadata, identifierAccessor, versionField, accessorDetails, beanPlural);
-	}
+        MemberDetails memberDetails = getMemberDetails(governorPhysicalTypeMetadata);
+        Map<MethodMetadata, FieldMetadata> accessorDetails = new LinkedHashMap<MethodMetadata, FieldMetadata>();
+        for (MethodMetadata method : memberDetails.getMethods()) {
+            if (BeanInfoUtils.isAccessorMethod(method)
+                    && !method.getMethodName().getSymbolName().startsWith("is")) {
+                FieldMetadata field = BeanInfoUtils.getFieldForJavaBeanMethod(
+                        memberDetails, method);
+                if (field != null) {
+                    accessorDetails.put(method, field);
+                }
+                // Track any changes to that method (eg it goes away)
+                metadataDependencyRegistry.registerDependency(
+                        method.getDeclaredByMetadataId(),
+                        metadataIdentificationString);
+            }
+        }
+        final MethodMetadata identifierAccessor = persistenceMemberLocator
+                .getIdentifierAccessor(javaType);
+        if (identifierAccessor == null) {
+            return null;
+        }
 
-	@Override
-	protected String getLocalMidToRequest(final ItdTypeDetails itdTypeDetails) {
-		// Determine if this ITD presents a method we're interested in (namely accessors)
-		for (MethodMetadata method : itdTypeDetails.getDeclaredMethods()) {
-			if (BeanInfoUtils.isAccessorMethod(method) && !method.getMethodName().getSymbolName().startsWith("is")) {
-				// We care about this ITD, so formally request an update so we can scan for it and process it
+        final FieldMetadata versionField = persistenceMemberLocator
+                .getVersionField(javaType);
 
-				// Determine the governor for this ITD, and the Path the ITD is stored within
-				JavaType governorType = itdTypeDetails.getName();
-				String providesType = MetadataIdentificationUtils.getMetadataClass(itdTypeDetails.getDeclaredByMetadataId());
-				LogicalPath itdPath = PhysicalTypeIdentifierNamingUtils.getPath(providesType, itdTypeDetails.getDeclaredByMetadataId());
-				
-				//  Produce the local MID we're going to use and make the request
-				return createLocalIdentifier(governorType, itdPath);
-			}
-		}
+        return new SolrMetadata(metadataIdentificationString, aspectName,
+                annotationValues, governorPhysicalTypeMetadata,
+                identifierAccessor, versionField, accessorDetails, beanPlural);
+    }
 
-		return null;
-	}
+    @Override
+    protected String getLocalMidToRequest(final ItdTypeDetails itdTypeDetails) {
+        // Determine if this ITD presents a method we're interested in (namely
+        // accessors)
+        for (MethodMetadata method : itdTypeDetails.getDeclaredMethods()) {
+            if (BeanInfoUtils.isAccessorMethod(method)
+                    && !method.getMethodName().getSymbolName().startsWith("is")) {
+                // We care about this ITD, so formally request an update so we
+                // can scan for it and process it
 
-	public String getItdUniquenessFilenameSuffix() {
-		return "SolrSearch";
-	}
+                // Determine the governor for this ITD, and the Path the ITD is
+                // stored within
+                JavaType governorType = itdTypeDetails.getName();
+                String providesType = MetadataIdentificationUtils
+                        .getMetadataClass(itdTypeDetails
+                                .getDeclaredByMetadataId());
+                LogicalPath itdPath = PhysicalTypeIdentifierNamingUtils
+                        .getPath(providesType,
+                                itdTypeDetails.getDeclaredByMetadataId());
 
-	@Override
-	protected String getGovernorPhysicalTypeIdentifier(final String metadataIdentificationString) {
-		JavaType javaType = SolrMetadata.getJavaType(metadataIdentificationString);
-		LogicalPath path = SolrMetadata.getPath(metadataIdentificationString);
-		return PhysicalTypeIdentifier.createIdentifier(javaType, path);
-	}
+                // Produce the local MID we're going to use and make the request
+                return createLocalIdentifier(governorType, itdPath);
+            }
+        }
 
-	@Override
-	protected String createLocalIdentifier(final JavaType javaType, final LogicalPath path) {
-		return SolrMetadata.createIdentifier(javaType, path);
-	}
+        return null;
+    }
 
-	public String getProvidesType() {
-		return SolrMetadata.getMetadataIdentiferType();
-	}
+    public String getItdUniquenessFilenameSuffix() {
+        return "SolrSearch";
+    }
+
+    @Override
+    protected String getGovernorPhysicalTypeIdentifier(
+            final String metadataIdentificationString) {
+        JavaType javaType = SolrMetadata
+                .getJavaType(metadataIdentificationString);
+        LogicalPath path = SolrMetadata.getPath(metadataIdentificationString);
+        return PhysicalTypeIdentifier.createIdentifier(javaType, path);
+    }
+
+    @Override
+    protected String createLocalIdentifier(final JavaType javaType,
+            final LogicalPath path) {
+        return SolrMetadata.createIdentifier(javaType, path);
+    }
+
+    public String getProvidesType() {
+        return SolrMetadata.getMetadataIdentiferType();
+    }
 }

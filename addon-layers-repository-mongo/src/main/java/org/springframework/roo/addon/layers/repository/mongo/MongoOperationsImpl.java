@@ -51,7 +51,7 @@ import org.w3c.dom.Element;
 
 /**
  * The {@link MongoOperations} implementation.
- *
+ * 
  * @author Stefan Schmidt
  * @since 1.2.0
  */
@@ -59,176 +59,235 @@ import org.w3c.dom.Element;
 @Service
 public class MongoOperationsImpl implements MongoOperations {
 
-	// Constants
-	private static final String MONGO_XML = "applicationContext-mongo.xml";
+    // Constants
+    private static final String MONGO_XML = "applicationContext-mongo.xml";
 
-	// Fields
-	@Reference private DataOnDemandOperations dataOnDemandOperations;
-	@Reference private FileManager fileManager;
-	@Reference private IntegrationTestOperations integrationTestOperations;
-	@Reference private PathResolver pathResolver;
-	@Reference private ProjectOperations projectOperations;
-	@Reference private PropFileOperations propFileOperations;
-	@Reference private TypeLocationService typeLocationService;
-	@Reference private TypeManagementService typeManagementService;
+    // Fields
+    @Reference private DataOnDemandOperations dataOnDemandOperations;
+    @Reference private FileManager fileManager;
+    @Reference private IntegrationTestOperations integrationTestOperations;
+    @Reference private PathResolver pathResolver;
+    @Reference private ProjectOperations projectOperations;
+    @Reference private PropFileOperations propFileOperations;
+    @Reference private TypeLocationService typeLocationService;
+    @Reference private TypeManagementService typeManagementService;
 
-	public String getName() {
-		return FeatureNames.MONGO;
-	}
+    public String getName() {
+        return FeatureNames.MONGO;
+    }
 
-	public boolean isInstalledInModule(String moduleName) {
-		return projectOperations.isFocusedProjectAvailable() && fileManager.exists(pathResolver.getFocusedIdentifier(Path.SPRING_CONFIG_ROOT, MONGO_XML));
-	}
+    public boolean isInstalledInModule(String moduleName) {
+        return projectOperations.isFocusedProjectAvailable()
+                && fileManager.exists(pathResolver.getFocusedIdentifier(
+                        Path.SPRING_CONFIG_ROOT, MONGO_XML));
+    }
 
-	public boolean isMongoInstallationPossible() {
-		return projectOperations.isFocusedProjectAvailable() && !projectOperations.isFeatureInstalledInFocusedModule(FeatureNames.JPA);
-	}
+    public boolean isMongoInstallationPossible() {
+        return projectOperations.isFocusedProjectAvailable()
+                && !projectOperations
+                        .isFeatureInstalledInFocusedModule(FeatureNames.JPA);
+    }
 
-	public boolean isRepositoryInstallationPossible() {
-		return isInstalledInModule(projectOperations.getFocusedModuleName()) && !projectOperations.isFeatureInstalledInFocusedModule(FeatureNames.JPA);
-	}
+    public boolean isRepositoryInstallationPossible() {
+        return isInstalledInModule(projectOperations.getFocusedModuleName())
+                && !projectOperations
+                        .isFeatureInstalledInFocusedModule(FeatureNames.JPA);
+    }
 
-	public void setupRepository(final JavaType interfaceType, final JavaType domainType) {
-		Assert.notNull(interfaceType, "Interface type required");
-		Assert.notNull(domainType, "Domain type required");
+    public void setupRepository(final JavaType interfaceType,
+            final JavaType domainType) {
+        Assert.notNull(interfaceType, "Interface type required");
+        Assert.notNull(domainType, "Domain type required");
 
-		String interfaceIdentifier = pathResolver.getFocusedCanonicalPath(Path.SRC_MAIN_JAVA, interfaceType);
+        String interfaceIdentifier = pathResolver.getFocusedCanonicalPath(
+                Path.SRC_MAIN_JAVA, interfaceType);
 
-		if (fileManager.exists(interfaceIdentifier)) {
-			return; // Type exists already - nothing to do
-		}
+        if (fileManager.exists(interfaceIdentifier)) {
+            return; // Type exists already - nothing to do
+        }
 
-		// Build interface type
-		AnnotationMetadataBuilder interfaceAnnotationMetadata = new AnnotationMetadataBuilder(ROO_REPOSITORY_MONGO);
-		interfaceAnnotationMetadata.addAttribute(new ClassAttributeValue(new JavaSymbolName("domainType"), domainType));
-		String interfaceMdId = PhysicalTypeIdentifier.createIdentifier(interfaceType, pathResolver.getPath(interfaceIdentifier));
-		ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(interfaceMdId, Modifier.PUBLIC, interfaceType, PhysicalTypeCategory.INTERFACE);
-		cidBuilder.addAnnotation(interfaceAnnotationMetadata.build());
-		JavaType listType = new JavaType(List.class.getName(), 0, DataType.TYPE, null, Arrays.asList(domainType));
-		cidBuilder.addMethod(new MethodMetadataBuilder(interfaceMdId, 0, new JavaSymbolName("findAll"), listType, new InvocableMemberBodyBuilder()));
-		typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
-	}
+        // Build interface type
+        AnnotationMetadataBuilder interfaceAnnotationMetadata = new AnnotationMetadataBuilder(
+                ROO_REPOSITORY_MONGO);
+        interfaceAnnotationMetadata.addAttribute(new ClassAttributeValue(
+                new JavaSymbolName("domainType"), domainType));
+        String interfaceMdId = PhysicalTypeIdentifier.createIdentifier(
+                interfaceType, pathResolver.getPath(interfaceIdentifier));
+        ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(
+                interfaceMdId, Modifier.PUBLIC, interfaceType,
+                PhysicalTypeCategory.INTERFACE);
+        cidBuilder.addAnnotation(interfaceAnnotationMetadata.build());
+        JavaType listType = new JavaType(List.class.getName(), 0,
+                DataType.TYPE, null, Arrays.asList(domainType));
+        cidBuilder.addMethod(new MethodMetadataBuilder(interfaceMdId, 0,
+                new JavaSymbolName("findAll"), listType,
+                new InvocableMemberBodyBuilder()));
+        typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
+    }
 
-	public void createType(final JavaType classType, final JavaType idType, final boolean testAutomatically) {
-		Assert.notNull(classType, "Class type required");
-		Assert.notNull(idType, "Identifier type required");
-		
-		String classIdentifier = typeLocationService.getPhysicalTypeCanonicalPath(classType, pathResolver.getFocusedPath(Path.SRC_MAIN_JAVA));
-		if (fileManager.exists(classIdentifier)) {
-			return; // Type exists already - nothing to do
-		}
+    public void createType(final JavaType classType, final JavaType idType,
+            final boolean testAutomatically) {
+        Assert.notNull(classType, "Class type required");
+        Assert.notNull(idType, "Identifier type required");
 
-		String classMdId = PhysicalTypeIdentifier.createIdentifier(classType, pathResolver.getPath(classIdentifier));
-		ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(classMdId, Modifier.PUBLIC, classType, PhysicalTypeCategory.CLASS);
-		cidBuilder.addAnnotation(new AnnotationMetadataBuilder(RooJavaType.ROO_JAVA_BEAN));
-		cidBuilder.addAnnotation(new AnnotationMetadataBuilder(RooJavaType.ROO_TO_STRING));
+        String classIdentifier = typeLocationService
+                .getPhysicalTypeCanonicalPath(classType,
+                        pathResolver.getFocusedPath(Path.SRC_MAIN_JAVA));
+        if (fileManager.exists(classIdentifier)) {
+            return; // Type exists already - nothing to do
+        }
 
-		List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
-		if (!idType.equals(JdkJavaType.BIG_INTEGER)) {
-			attributes.add(new ClassAttributeValue(new JavaSymbolName("identifierType"), idType));
-		}
-		cidBuilder.addAnnotation(new AnnotationMetadataBuilder(RooJavaType.ROO_MONGO_ENTITY, attributes));
-		typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
+        String classMdId = PhysicalTypeIdentifier.createIdentifier(classType,
+                pathResolver.getPath(classIdentifier));
+        ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(
+                classMdId, Modifier.PUBLIC, classType,
+                PhysicalTypeCategory.CLASS);
+        cidBuilder.addAnnotation(new AnnotationMetadataBuilder(
+                RooJavaType.ROO_JAVA_BEAN));
+        cidBuilder.addAnnotation(new AnnotationMetadataBuilder(
+                RooJavaType.ROO_TO_STRING));
 
-		if (testAutomatically) {
-			integrationTestOperations.newIntegrationTest(classType, false);
-			dataOnDemandOperations.newDod(classType, new JavaType(classType.getFullyQualifiedTypeName() + "DataOnDemand"));
-		}
-	}
+        List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
+        if (!idType.equals(JdkJavaType.BIG_INTEGER)) {
+            attributes.add(new ClassAttributeValue(new JavaSymbolName(
+                    "identifierType"), idType));
+        }
+        cidBuilder.addAnnotation(new AnnotationMetadataBuilder(
+                RooJavaType.ROO_MONGO_ENTITY, attributes));
+        typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
 
-	public void setup(final String username, final String password, final String name, final String port, final String host, final boolean cloudFoundry) {
-		String moduleName = projectOperations.getFocusedModuleName();
-		writeProperties(username, password, name, port, host, moduleName);
-		manageDependencies(moduleName);
-		manageAppCtx(username, password, name, cloudFoundry, moduleName);
-	}
+        if (testAutomatically) {
+            integrationTestOperations.newIntegrationTest(classType, false);
+            dataOnDemandOperations.newDod(classType,
+                    new JavaType(classType.getFullyQualifiedTypeName()
+                            + "DataOnDemand"));
+        }
+    }
 
-	private void manageAppCtx(final String username, final String password, final String name, final boolean cloudFoundry, final String moduleName) {
-		String appCtxId = pathResolver.getFocusedIdentifier(Path.SPRING_CONFIG_ROOT, MONGO_XML);
-		if (!fileManager.exists(appCtxId)) {
-			try {
-				InputStream inputStream = FileUtils.getInputStream(getClass(), MONGO_XML);
-				MutableFile mutableFile = fileManager.createFile(appCtxId);
-				String input = FileCopyUtils.copyToString(new InputStreamReader(inputStream));
-				input = input.replace("TO_BE_CHANGED_BY_ADDON", projectOperations.getTopLevelPackage(moduleName).getFullyQualifiedPackageName());
-				FileCopyUtils.copy(input.getBytes(), mutableFile.getOutputStream());
-			} catch (IOException e) {
-				throw new IllegalStateException("Unable to create file " + appCtxId);
-			}
-		}
+    public void setup(final String username, final String password,
+            final String name, final String port, final String host,
+            final boolean cloudFoundry) {
+        String moduleName = projectOperations.getFocusedModuleName();
+        writeProperties(username, password, name, port, host, moduleName);
+        manageDependencies(moduleName);
+        manageAppCtx(username, password, name, cloudFoundry, moduleName);
+    }
 
-		Document document = XmlUtils.readXml(fileManager.getInputStream(appCtxId));
-		Element root = document.getDocumentElement();
-		Element mongoSetup = XmlUtils.findFirstElement("/beans/db-factory", root);
-		Element mongoCloudSetup = XmlUtils.findFirstElement("/beans/mongo-db-factory", root);
-		if (!cloudFoundry) {
-			if (mongoCloudSetup != null) {
-				root.removeChild(mongoCloudSetup);
-			}
-			if (mongoSetup == null) {
-				mongoSetup = document.createElement("mongo:db-factory");
-				root.appendChild(mongoSetup);
-			}
-			if (StringUtils.hasText(name)) {
-				mongoSetup.setAttribute("dbname", "${mongo.database}");
-			}
-			if (StringUtils.hasText(username)) {
-				mongoSetup.setAttribute("username", "${mongo.username}");
-			}
-			if (StringUtils.hasText(password)) {
-				mongoSetup.setAttribute("password", "${mongo.password}");
-			}
-			mongoSetup.setAttribute("host", "${mongo.host}");
-			mongoSetup.setAttribute("port", "${mongo.port}");
-			mongoSetup.setAttribute("id", "mongoDbFactory");
-		} else {
-			if (mongoSetup != null) {
-				root.removeChild(mongoSetup);
-			}
-			if (mongoCloudSetup == null) {
-				mongoCloudSetup = XmlUtils.findFirstElement("/beans/mongo-db-factory", root);
-			}
-			if (mongoCloudSetup == null) {
-				mongoCloudSetup = document.createElement("cloud:mongo-db-factory");
-				mongoCloudSetup.setAttribute("id", "mongoDbFactory");
-				root.appendChild(mongoCloudSetup);
-			}
-		}
-		fileManager.createOrUpdateTextFileIfRequired(appCtxId, XmlUtils.nodeToString(document), false);
-	}
+    private void manageAppCtx(final String username, final String password,
+            final String name, final boolean cloudFoundry,
+            final String moduleName) {
+        String appCtxId = pathResolver.getFocusedIdentifier(
+                Path.SPRING_CONFIG_ROOT, MONGO_XML);
+        if (!fileManager.exists(appCtxId)) {
+            try {
+                InputStream inputStream = FileUtils.getInputStream(getClass(),
+                        MONGO_XML);
+                MutableFile mutableFile = fileManager.createFile(appCtxId);
+                String input = FileCopyUtils
+                        .copyToString(new InputStreamReader(inputStream));
+                input = input.replace("TO_BE_CHANGED_BY_ADDON",
+                        projectOperations.getTopLevelPackage(moduleName)
+                                .getFullyQualifiedPackageName());
+                FileCopyUtils.copy(input.getBytes(),
+                        mutableFile.getOutputStream());
+            }
+            catch (IOException e) {
+                throw new IllegalStateException("Unable to create file "
+                        + appCtxId);
+            }
+        }
 
-	private void manageDependencies(final String moduleName) {
-		Element configuration = XmlUtils.getConfiguration(getClass());
+        Document document = XmlUtils.readXml(fileManager
+                .getInputStream(appCtxId));
+        Element root = document.getDocumentElement();
+        Element mongoSetup = XmlUtils.findFirstElement("/beans/db-factory",
+                root);
+        Element mongoCloudSetup = XmlUtils.findFirstElement(
+                "/beans/mongo-db-factory", root);
+        if (!cloudFoundry) {
+            if (mongoCloudSetup != null) {
+                root.removeChild(mongoCloudSetup);
+            }
+            if (mongoSetup == null) {
+                mongoSetup = document.createElement("mongo:db-factory");
+                root.appendChild(mongoSetup);
+            }
+            if (StringUtils.hasText(name)) {
+                mongoSetup.setAttribute("dbname", "${mongo.database}");
+            }
+            if (StringUtils.hasText(username)) {
+                mongoSetup.setAttribute("username", "${mongo.username}");
+            }
+            if (StringUtils.hasText(password)) {
+                mongoSetup.setAttribute("password", "${mongo.password}");
+            }
+            mongoSetup.setAttribute("host", "${mongo.host}");
+            mongoSetup.setAttribute("port", "${mongo.port}");
+            mongoSetup.setAttribute("id", "mongoDbFactory");
+        }
+        else {
+            if (mongoSetup != null) {
+                root.removeChild(mongoSetup);
+            }
+            if (mongoCloudSetup == null) {
+                mongoCloudSetup = XmlUtils.findFirstElement(
+                        "/beans/mongo-db-factory", root);
+            }
+            if (mongoCloudSetup == null) {
+                mongoCloudSetup = document
+                        .createElement("cloud:mongo-db-factory");
+                mongoCloudSetup.setAttribute("id", "mongoDbFactory");
+                root.appendChild(mongoCloudSetup);
+            }
+        }
+        fileManager.createOrUpdateTextFileIfRequired(appCtxId,
+                XmlUtils.nodeToString(document), false);
+    }
 
-		List<Dependency> dependencies = new ArrayList<Dependency>();
-		List<Element> springDependencies = XmlUtils.findElements("/configuration/spring-data-mongodb/dependencies/dependency", configuration);
-		for (Element dependencyElement : springDependencies) {
-			dependencies.add(new Dependency(dependencyElement));
-		}
+    private void manageDependencies(final String moduleName) {
+        Element configuration = XmlUtils.getConfiguration(getClass());
 
-		List<Repository> repositories = new ArrayList<Repository>();
-		List<Element> repositoryElements = XmlUtils.findElements("/configuration/spring-data-mongodb/repositories/repository", configuration);
-		for (Element repositoryElement : repositoryElements) {
-			repositories.add(new Repository(repositoryElement));
-		}
+        List<Dependency> dependencies = new ArrayList<Dependency>();
+        List<Element> springDependencies = XmlUtils.findElements(
+                "/configuration/spring-data-mongodb/dependencies/dependency",
+                configuration);
+        for (Element dependencyElement : springDependencies) {
+            dependencies.add(new Dependency(dependencyElement));
+        }
 
-		projectOperations.addRepositories(moduleName, repositories);
-		projectOperations.addDependencies(moduleName, dependencies);
-	}
+        List<Repository> repositories = new ArrayList<Repository>();
+        List<Element> repositoryElements = XmlUtils.findElements(
+                "/configuration/spring-data-mongodb/repositories/repository",
+                configuration);
+        for (Element repositoryElement : repositoryElements) {
+            repositories.add(new Repository(repositoryElement));
+        }
 
-	private void writeProperties(String username, String password, String name, String port, String host, final String moduleName) {
-		if (StringUtils.isBlank(username)) username = "";
-		if (StringUtils.isBlank(password)) password = "";
-		if (StringUtils.isBlank(name)) name = projectOperations.getProjectName(moduleName);
-		if (StringUtils.isBlank(port)) port = "27017";
-		if (StringUtils.isBlank(host)) host = "127.0.0.1";
+        projectOperations.addRepositories(moduleName, repositories);
+        projectOperations.addDependencies(moduleName, dependencies);
+    }
 
-		final Map<String, String> properties = new HashMap<String, String>();
-		properties.put("mongo.username", username);
-		properties.put("mongo.password", password);
-		properties.put("mongo.name", name);
-		properties.put("mongo.port", port);
-		properties.put("mongo.host", host);
-		propFileOperations.addProperties(Path.SPRING_CONFIG_ROOT.getModulePathId(projectOperations.getFocusedModuleName()), "database.properties", properties, true, false);
-	}
+    private void writeProperties(String username, String password, String name,
+            String port, String host, final String moduleName) {
+        if (StringUtils.isBlank(username))
+            username = "";
+        if (StringUtils.isBlank(password))
+            password = "";
+        if (StringUtils.isBlank(name))
+            name = projectOperations.getProjectName(moduleName);
+        if (StringUtils.isBlank(port))
+            port = "27017";
+        if (StringUtils.isBlank(host))
+            host = "127.0.0.1";
+
+        final Map<String, String> properties = new HashMap<String, String>();
+        properties.put("mongo.username", username);
+        properties.put("mongo.password", password);
+        properties.put("mongo.name", name);
+        properties.put("mongo.port", port);
+        properties.put("mongo.host", host);
+        propFileOperations.addProperties(Path.SPRING_CONFIG_ROOT
+                .getModulePathId(projectOperations.getFocusedModuleName()),
+                "database.properties", properties, true, false);
+    }
 }

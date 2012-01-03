@@ -9,7 +9,7 @@ import org.springframework.roo.shell.CommandMarker;
 
 /**
  * Commands for the 'backup' add-on to be used by the ROO shell.
- *
+ * 
  * @author Stefan Schmidt
  * @since 1.0
  */
@@ -17,16 +17,16 @@ import org.springframework.roo.shell.CommandMarker;
 @Service
 public class BackupCommands implements CommandMarker {
 
-	// Fields
-	@Reference private BackupOperations backupOperations;
+    // Fields
+    @Reference private BackupOperations backupOperations;
 
-	@CliAvailabilityIndicator("backup")
-	public boolean isBackupCommandAvailable() {
-		return backupOperations.isBackupPossible();
-	}
+    @CliAvailabilityIndicator("backup")
+    public boolean isBackupCommandAvailable() {
+        return backupOperations.isBackupPossible();
+    }
 
-	@CliCommand(value = "backup", help = "Backup your project to a zip file")
-	public String backup() {
-		return backupOperations.backup();
-	}
+    @CliCommand(value = "backup", help = "Backup your project to a zip file")
+    public String backup() {
+        return backupOperations.backup();
+    }
 }

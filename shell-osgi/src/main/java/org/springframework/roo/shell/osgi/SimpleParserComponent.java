@@ -21,95 +21,106 @@ import org.springframework.roo.support.api.AddOnSearch;
 
 /**
  * OSGi component launcher for {@link SimpleParser}.
- *
+ * 
  * @author Ben Alex
  * @since 1.1
  */
 @Component
-@Service(value = Parser.class) // Important, as auto-detection includes CommandMarker which is unacceptable as we'd have a circular dependency to ourself
+@Service(value = Parser.class)
+// Important, as auto-detection includes CommandMarker which is unacceptable as
+// we'd have a circular dependency to ourself
 @References(value = {
-	@Reference(name = "converter", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC, referenceInterface = Converter.class, cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE),
-	@Reference(name = "command", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC, referenceInterface = CommandMarker.class, cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE),
-	@Reference(name = "addOnSearch", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC, referenceInterface = AddOnSearch.class, cardinality = ReferenceCardinality.OPTIONAL_UNARY)
-})
-public class SimpleParserComponent extends SimpleParser implements CommandMarker {
-	private AddOnSearch addOnSearch;
+        @Reference(name = "converter", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC, referenceInterface = Converter.class, cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE),
+        @Reference(name = "command", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC, referenceInterface = CommandMarker.class, cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE),
+        @Reference(name = "addOnSearch", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC, referenceInterface = AddOnSearch.class, cardinality = ReferenceCardinality.OPTIONAL_UNARY) })
+public class SimpleParserComponent extends SimpleParser implements
+        CommandMarker {
+    private AddOnSearch addOnSearch;
 
-	@Override
-	protected void commandNotFound(final Logger logger, final String buffer) {
-		logger.warning("Command '" + buffer + "' not found (for assistance press " + AbstractShell.completionKeys + " or type \"hint\" then hit ENTER)");
+    @Override
+    protected void commandNotFound(final Logger logger, final String buffer) {
+        logger.warning("Command '" + buffer
+                + "' not found (for assistance press "
+                + AbstractShell.completionKeys
+                + " or type \"hint\" then hit ENTER)");
 
-		if (addOnSearch == null) {
-			return;
-		}
+        if (addOnSearch == null) {
+            return;
+        }
 
-		// Decide which command they asked for
-		String command = buffer.trim();
+        // Decide which command they asked for
+        String command = buffer.trim();
 
-		// Truncate from the first option, if any was given
-		int firstDash = buffer.indexOf("--");
-		if (firstDash > 1) {
-			command = buffer.substring(0, firstDash - 1).trim();
-		}
+        // Truncate from the first option, if any was given
+        int firstDash = buffer.indexOf("--");
+        if (firstDash > 1) {
+            command = buffer.substring(0, firstDash - 1).trim();
+        }
 
-		// Do a silent (console message free) lookup of matches
-		Integer matches = null;
-		matches = addOnSearch.searchAddOns(false, null, false, 1, 99, false, false, false, command);
+        // Do a silent (console message free) lookup of matches
+        Integer matches = null;
+        matches = addOnSearch.searchAddOns(false, null, false, 1, 99, false,
+                false, false, command);
 
-		// Render to screen if required
-		if (matches == null) {
-			logger.info("Spring Roo automatic add-on discovery service currently unavailable");
-		} else if (matches == 0) {
-			logger.info("addon search --requiresCommand \"" + command + "\" found no matches");
-		} else if (matches > 0) {
-			logger.info("Located add-on" + (matches == 1 ? "" : "s") + " that may offer this command");
-			addOnSearch.searchAddOns(true, null, false, 1, 99, false, false, false, command);
-		}
-	}
+        // Render to screen if required
+        if (matches == null) {
+            logger.info("Spring Roo automatic add-on discovery service currently unavailable");
+        }
+        else if (matches == 0) {
+            logger.info("addon search --requiresCommand \"" + command
+                    + "\" found no matches");
+        }
+        else if (matches > 0) {
+            logger.info("Located add-on" + (matches == 1 ? "" : "s")
+                    + " that may offer this command");
+            addOnSearch.searchAddOns(true, null, false, 1, 99, false, false,
+                    false, command);
+        }
+    }
 
-	protected void bindAddOnSearch(final AddOnSearch s) {
-		this.addOnSearch = s;
-	}
+    protected void bindAddOnSearch(final AddOnSearch s) {
+        this.addOnSearch = s;
+    }
 
-	protected void unbindAddOnSearch(final AddOnSearch s) {
-		this.addOnSearch = null;
-	}
+    protected void unbindAddOnSearch(final AddOnSearch s) {
+        this.addOnSearch = null;
+    }
 
-	protected void bindConverter(final Converter<?> c) {
-		add(c);
-	}
+    protected void bindConverter(final Converter<?> c) {
+        add(c);
+    }
 
-	protected void unbindConverter(final Converter<?> c) {
-		remove(c);
-	}
+    protected void unbindConverter(final Converter<?> c) {
+        remove(c);
+    }
 
-	protected void bindCommand(final CommandMarker c) {
-		add(c);
-	}
+    protected void bindCommand(final CommandMarker c) {
+        add(c);
+    }
 
-	protected void unbindCommand(final CommandMarker c) {
-		remove(c);
-	}
+    protected void unbindCommand(final CommandMarker c) {
+        remove(c);
+    }
 
-	protected void activate(final ComponentContext context) {
-		bindCommand(this);
-	}
+    protected void activate(final ComponentContext context) {
+        bindCommand(this);
+    }
 
-	protected void deactivate(final ComponentContext context) {
-		unbindCommand(this);
-	}
+    protected void deactivate(final ComponentContext context) {
+        unbindCommand(this);
+    }
 
-	@Override
-	@CliCommand(value = "reference guide", help = "Writes the reference guide XML fragments (in DocBook format) into the current working directory")
-	public void helpReferenceGuide() {
-		super.helpReferenceGuide();
-	}
+    @Override
+    @CliCommand(value = "reference guide", help = "Writes the reference guide XML fragments (in DocBook format) into the current working directory")
+    public void helpReferenceGuide() {
+        super.helpReferenceGuide();
+    }
 
-	@Override
-	@CliCommand(value = "help", help = "Shows system help")
-	public void obtainHelp(
-		@CliOption(key = { "", "command" }, optionContext = "availableCommands", help = "Command name to provide help for") final String buffer) {
+    @Override
+    @CliCommand(value = "help", help = "Shows system help")
+    public void obtainHelp(
+            @CliOption(key = { "", "command" }, optionContext = "availableCommands", help = "Command name to provide help for") final String buffer) {
 
-		super.obtainHelp(buffer);
-	}
+        super.obtainHelp(buffer);
+    }
 }

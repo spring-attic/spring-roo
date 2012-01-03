@@ -22,94 +22,110 @@ import org.springframework.roo.support.util.Assert;
 
 /**
  * Metadata for {@link RooSerializable}.
- *
+ * 
  * @author Alan Stewart
  * @since 1.1
  */
-public class SerializableMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
+public class SerializableMetadata extends
+        AbstractItdTypeDetailsProvidingMetadataItem {
 
-	// Constants
-	static final JavaSymbolName SERIAL_VERSION_FIELD = new JavaSymbolName("serialVersionUID");
-	private static final String DEFAULT_SERIAL_VERSION = "1L";
-	private static final String PROVIDES_TYPE_STRING = SerializableMetadata.class.getName();
-	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
+    // Constants
+    static final JavaSymbolName SERIAL_VERSION_FIELD = new JavaSymbolName(
+            "serialVersionUID");
+    private static final String DEFAULT_SERIAL_VERSION = "1L";
+    private static final String PROVIDES_TYPE_STRING = SerializableMetadata.class
+            .getName();
+    private static final String PROVIDES_TYPE = MetadataIdentificationUtils
+            .create(PROVIDES_TYPE_STRING);
 
-	public static String getMetadataIdentiferType() {
-		return PROVIDES_TYPE;
-	}
+    public static String getMetadataIdentiferType() {
+        return PROVIDES_TYPE;
+    }
 
-	public static String createIdentifier(final JavaType javaType, final LogicalPath path) {
-		return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
-	}
+    public static String createIdentifier(final JavaType javaType,
+            final LogicalPath path) {
+        return PhysicalTypeIdentifierNamingUtils.createIdentifier(
+                PROVIDES_TYPE_STRING, javaType, path);
+    }
 
-	public static JavaType getJavaType(final String metadataIdentificationString) {
-		return PhysicalTypeIdentifierNamingUtils.getJavaType(PROVIDES_TYPE_STRING, metadataIdentificationString);
-	}
+    public static JavaType getJavaType(final String metadataIdentificationString) {
+        return PhysicalTypeIdentifierNamingUtils.getJavaType(
+                PROVIDES_TYPE_STRING, metadataIdentificationString);
+    }
 
-	public static LogicalPath getPath(final String metadataIdentificationString) {
-		return PhysicalTypeIdentifierNamingUtils.getPath(PROVIDES_TYPE_STRING, metadataIdentificationString);
-	}
+    public static LogicalPath getPath(final String metadataIdentificationString) {
+        return PhysicalTypeIdentifierNamingUtils.getPath(PROVIDES_TYPE_STRING,
+                metadataIdentificationString);
+    }
 
-	public static boolean isValid(final String metadataIdentificationString) {
-		return PhysicalTypeIdentifierNamingUtils.isValid(PROVIDES_TYPE_STRING, metadataIdentificationString);
-	}
-	
-	/**
-	 * Constructor
-	 *
-	 * @param identifier
-	 * @param aspectName
-	 * @param governorPhysicalTypeMetadata
-	 */
-	public SerializableMetadata(final String identifier, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata) {
-		super(identifier, aspectName, governorPhysicalTypeMetadata);
-		Assert.isTrue(isValid(identifier), "Metadata id '" + identifier + "' is invalid");
+    public static boolean isValid(final String metadataIdentificationString) {
+        return PhysicalTypeIdentifierNamingUtils.isValid(PROVIDES_TYPE_STRING,
+                metadataIdentificationString);
+    }
 
-		if (isValid()) {
-			ensureGovernorImplements(SERIALIZABLE);
-			addSerialVersionUIDFieldIfRequired();
-			buildItd();
-		}
-	}
+    /**
+     * Constructor
+     * 
+     * @param identifier
+     * @param aspectName
+     * @param governorPhysicalTypeMetadata
+     */
+    public SerializableMetadata(final String identifier,
+            final JavaType aspectName,
+            final PhysicalTypeMetadata governorPhysicalTypeMetadata) {
+        super(identifier, aspectName, governorPhysicalTypeMetadata);
+        Assert.isTrue(isValid(identifier), "Metadata id '" + identifier
+                + "' is invalid");
 
-	/**
-	 * Adds a "serialVersionUID" field to the {@link ItdTypeDetailsBuilder} if
-	 * the governor doesn't already contain it.
-	 */
-	private void addSerialVersionUIDFieldIfRequired() {
-		if (!governorTypeDetails.declaresField(SERIAL_VERSION_FIELD)) {
-			builder.addField(createSerialVersionField());
-		}
-	}
+        if (isValid()) {
+            ensureGovernorImplements(SERIALIZABLE);
+            addSerialVersionUIDFieldIfRequired();
+            buildItd();
+        }
+    }
 
-	/**
-	 * Generates a field to store the serialization ID
-	 * 
-	 * @return a non-<code>null</code> field
-	 */
-	private FieldMetadataBuilder createSerialVersionField() {
-		final FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), PRIVATE | STATIC | FINAL, SERIAL_VERSION_FIELD, LONG_PRIMITIVE, DEFAULT_SERIAL_VERSION);
-		fieldBuilder.getCustomData().put(CustomDataKeys.SERIAL_VERSION_UUID_FIELD, true);
-		return fieldBuilder;
-	}
-	/**
-	 * For unit testing
-	 * 
-	 * @return
-	 */
-	ItdTypeDetails getItdTypeDetails() {
-		return this.itdTypeDetails;
-	}
-	
-	@Override
-	public String toString() {
-		ToStringCreator tsc = new ToStringCreator(this);
-		tsc.append("identifier", getId());
-		tsc.append("valid", valid);
-		tsc.append("aspectName", aspectName);
-		tsc.append("destinationType", destination);
-		tsc.append("governor", governorPhysicalTypeMetadata.getId());
-		tsc.append("itdTypeDetails", itdTypeDetails);
-		return tsc.toString();
-	}
+    /**
+     * Adds a "serialVersionUID" field to the {@link ItdTypeDetailsBuilder} if
+     * the governor doesn't already contain it.
+     */
+    private void addSerialVersionUIDFieldIfRequired() {
+        if (!governorTypeDetails.declaresField(SERIAL_VERSION_FIELD)) {
+            builder.addField(createSerialVersionField());
+        }
+    }
+
+    /**
+     * Generates a field to store the serialization ID
+     * 
+     * @return a non-<code>null</code> field
+     */
+    private FieldMetadataBuilder createSerialVersionField() {
+        final FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(
+                getId(), PRIVATE | STATIC | FINAL, SERIAL_VERSION_FIELD,
+                LONG_PRIMITIVE, DEFAULT_SERIAL_VERSION);
+        fieldBuilder.getCustomData().put(
+                CustomDataKeys.SERIAL_VERSION_UUID_FIELD, true);
+        return fieldBuilder;
+    }
+
+    /**
+     * For unit testing
+     * 
+     * @return
+     */
+    ItdTypeDetails getItdTypeDetails() {
+        return this.itdTypeDetails;
+    }
+
+    @Override
+    public String toString() {
+        ToStringCreator tsc = new ToStringCreator(this);
+        tsc.append("identifier", getId());
+        tsc.append("valid", valid);
+        tsc.append("aspectName", aspectName);
+        tsc.append("destinationType", destination);
+        tsc.append("governor", governorPhysicalTypeMetadata.getId());
+        tsc.append("itdTypeDetails", itdTypeDetails);
+        return tsc.toString();
+    }
 }

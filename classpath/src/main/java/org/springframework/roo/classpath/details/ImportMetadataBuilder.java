@@ -5,84 +5,94 @@ import org.springframework.roo.model.JavaType;
 
 /**
  * Builder for {@link ImportMetadata}.
- *
+ * 
  * @author James Tyrrell
  * @since 1.1.1
  */
-public class ImportMetadataBuilder extends AbstractIdentifiableJavaStructureBuilder<ImportMetadata> {
+public class ImportMetadataBuilder extends
+        AbstractIdentifiableJavaStructureBuilder<ImportMetadata> {
 
-	// Fields
-	private boolean isAsterisk;
-	private boolean isStatic;
-	private JavaPackage importPackage;
-	private JavaType importType;
-	
-	/**
-	 * Builds an import of the given {@link JavaType} for use by the given caller.
-	 * 
-	 * @param callerMID the metadata ID of the compilation unit to receive the import (required)
-	 * @param typeToImport the type to import (required)
-	 * @return a non-<code>null</code>, non-static, non-wildcard import
-	 * @since 1.2.0
-	 */
-	public static ImportMetadata getImport(final String callerMID, final JavaType typeToImport) {
-		return new ImportMetadataBuilder(callerMID, 0, typeToImport.getPackage(), typeToImport, false, false).build();
-	}
+    // Fields
+    private boolean isAsterisk;
+    private boolean isStatic;
+    private JavaPackage importPackage;
+    private JavaType importType;
 
-	public ImportMetadataBuilder(final String declaredbyMetadataId) {
-		super(declaredbyMetadataId);
-	}
+    /**
+     * Builds an import of the given {@link JavaType} for use by the given
+     * caller.
+     * 
+     * @param callerMID the metadata ID of the compilation unit to receive the
+     *            import (required)
+     * @param typeToImport the type to import (required)
+     * @return a non-<code>null</code>, non-static, non-wildcard import
+     * @since 1.2.0
+     */
+    public static ImportMetadata getImport(final String callerMID,
+            final JavaType typeToImport) {
+        return new ImportMetadataBuilder(callerMID, 0,
+                typeToImport.getPackage(), typeToImport, false, false).build();
+    }
 
-	public ImportMetadataBuilder(final ImportMetadata existing) {
-		super(existing);
-		this.importPackage = existing.getImportPackage();
-		this.importType = existing.getImportType();
-		this.isStatic = existing.isStatic();
-		this.isAsterisk = existing.isAsterisk();
-	}
+    public ImportMetadataBuilder(final String declaredbyMetadataId) {
+        super(declaredbyMetadataId);
+    }
 
-	public ImportMetadataBuilder(final String declaredbyMetadataId, final int modifier, final JavaPackage importPackage, final JavaType importType, final boolean isStatic, final boolean isAsterisk) {
-		this(declaredbyMetadataId);
-		setModifier(modifier);
-		this.importPackage = importPackage;
-		this.importType = importType;
-		this.isStatic = isStatic;
-		this.isAsterisk = isAsterisk;
-	}
+    public ImportMetadataBuilder(final ImportMetadata existing) {
+        super(existing);
+        this.importPackage = existing.getImportPackage();
+        this.importType = existing.getImportType();
+        this.isStatic = existing.isStatic();
+        this.isAsterisk = existing.isAsterisk();
+    }
 
-	public ImportMetadata build() {
-		return new DefaultImportMetadata(getCustomData().build(), getDeclaredByMetadataId(), getModifier(), importPackage, importType, isStatic, isAsterisk);
-	}
+    public ImportMetadataBuilder(final String declaredbyMetadataId,
+            final int modifier, final JavaPackage importPackage,
+            final JavaType importType, final boolean isStatic,
+            final boolean isAsterisk) {
+        this(declaredbyMetadataId);
+        setModifier(modifier);
+        this.importPackage = importPackage;
+        this.importType = importType;
+        this.isStatic = isStatic;
+        this.isAsterisk = isAsterisk;
+    }
 
-	public JavaPackage getImportPackage() {
-		return importPackage;
-	}
+    public ImportMetadata build() {
+        return new DefaultImportMetadata(getCustomData().build(),
+                getDeclaredByMetadataId(), getModifier(), importPackage,
+                importType, isStatic, isAsterisk);
+    }
 
-	public void setImportPackage(final JavaPackage importPackage) {
-		this.importPackage = importPackage;
-	}
+    public JavaPackage getImportPackage() {
+        return importPackage;
+    }
 
-	public JavaType getImportType() {
-		return importType;
-	}
+    public void setImportPackage(final JavaPackage importPackage) {
+        this.importPackage = importPackage;
+    }
 
-	public void setImportType(final JavaType importType) {
-		this.importType = importType;
-	}
+    public JavaType getImportType() {
+        return importType;
+    }
 
-	public boolean isStatic() {
-		return isStatic;
-	}
+    public void setImportType(final JavaType importType) {
+        this.importType = importType;
+    }
 
-	public void setStatic(final boolean aStatic) {
-		isStatic = aStatic;
-	}
+    public boolean isStatic() {
+        return isStatic;
+    }
 
-	public boolean isAsterisk() {
-		return isAsterisk;
-	}
+    public void setStatic(final boolean aStatic) {
+        isStatic = aStatic;
+    }
 
-	public void setAsterisk(final boolean asterisk) {
-		isAsterisk = asterisk;
-	}
+    public boolean isAsterisk() {
+        return isAsterisk;
+    }
+
+    public void setAsterisk(final boolean asterisk) {
+        isAsterisk = asterisk;
+    }
 }

@@ -25,81 +25,117 @@ import org.springframework.roo.support.util.Assert;
 
 /**
  * Implementation of {@link JsfApplicationBeanMetadataProvider}.
- *
+ * 
  * @author Alan Stewart
  * @since 1.2.0
  */
 @Component(immediate = true)
 @Service
-public class JsfApplicationBeanMetadataProviderImpl extends AbstractItdMetadataProvider implements JsfApplicationBeanMetadataProvider {
-	
-	// Fields
-	@Reference private ConfigurableMetadataProvider configurableMetadataProvider;
-	@Reference private ProjectOperations projectOperations;
+public class JsfApplicationBeanMetadataProviderImpl extends
+        AbstractItdMetadataProvider implements
+        JsfApplicationBeanMetadataProvider {
 
-	// Stores the MID (as accepted by this JsfApplicationBeanMetadataProvider) for the one (and only one) application-wide menu bean
-	private String applicationBeanMid;
+    // Fields
+    @Reference private ConfigurableMetadataProvider configurableMetadataProvider;
+    @Reference private ProjectOperations projectOperations;
 
-	protected void activate(final ComponentContext context) {
-		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-		metadataDependencyRegistry.registerDependency(JsfManagedBeanMetadata.getMetadataIdentiferType(), getProvidesType());
-		addMetadataTrigger(ROO_JSF_APPLICATION_BEAN);
-		configurableMetadataProvider.addMetadataTrigger(ROO_JSF_APPLICATION_BEAN);
-	}
+    // Stores the MID (as accepted by this JsfApplicationBeanMetadataProvider)
+    // for the one (and only one) application-wide menu bean
+    private String applicationBeanMid;
 
-	protected void deactivate(final ComponentContext context) {
-		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-		metadataDependencyRegistry.deregisterDependency(JsfManagedBeanMetadata.getMetadataIdentiferType(), getProvidesType());
-		removeMetadataTrigger(ROO_JSF_APPLICATION_BEAN);
-		configurableMetadataProvider.removeMetadataTrigger(ROO_JSF_APPLICATION_BEAN);
-	}
+    protected void activate(final ComponentContext context) {
+        metadataDependencyRegistry.registerDependency(
+                PhysicalTypeIdentifier.getMetadataIdentiferType(),
+                getProvidesType());
+        metadataDependencyRegistry.registerDependency(
+                JsfManagedBeanMetadata.getMetadataIdentiferType(),
+                getProvidesType());
+        addMetadataTrigger(ROO_JSF_APPLICATION_BEAN);
+        configurableMetadataProvider
+                .addMetadataTrigger(ROO_JSF_APPLICATION_BEAN);
+    }
 
-	@Override
-	protected String resolveDownstreamDependencyIdentifier(final String upstreamDependency) {
-		if (MetadataIdentificationUtils.getMetadataClass(upstreamDependency).equals(MetadataIdentificationUtils.getMetadataClass(JsfManagedBeanMetadata.getMetadataIdentiferType()))) {
-			// A JsfManagedBeanMetadata upstream MID has changed or become available for the first time
-			// It's OK to return null if we don't yet know the MID because its JavaType has never been found
-			return applicationBeanMid;
-		}
+    protected void deactivate(final ComponentContext context) {
+        metadataDependencyRegistry.deregisterDependency(
+                PhysicalTypeIdentifier.getMetadataIdentiferType(),
+                getProvidesType());
+        metadataDependencyRegistry.deregisterDependency(
+                JsfManagedBeanMetadata.getMetadataIdentiferType(),
+                getProvidesType());
+        removeMetadataTrigger(ROO_JSF_APPLICATION_BEAN);
+        configurableMetadataProvider
+                .removeMetadataTrigger(ROO_JSF_APPLICATION_BEAN);
+    }
 
-		// It wasn't a JsfManagedBeanMetadata, so we can let the superclass handle it
-		// (it's expected it would be a PhysicalTypeIdentifier notification, as that's the only other thing we registered to receive)
-		return super.resolveDownstreamDependencyIdentifier(upstreamDependency);
-	}
+    @Override
+    protected String resolveDownstreamDependencyIdentifier(
+            final String upstreamDependency) {
+        if (MetadataIdentificationUtils.getMetadataClass(upstreamDependency)
+                .equals(MetadataIdentificationUtils
+                        .getMetadataClass(JsfManagedBeanMetadata
+                                .getMetadataIdentiferType()))) {
+            // A JsfManagedBeanMetadata upstream MID has changed or become
+            // available for the first time
+            // It's OK to return null if we don't yet know the MID because its
+            // JavaType has never been found
+            return applicationBeanMid;
+        }
 
-	@Override
-	protected ItdTypeDetailsProvidingMetadataItem getMetadata(final String metadataIdentificationString, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final String itdFilename) {
-		applicationBeanMid = metadataIdentificationString;
+        // It wasn't a JsfManagedBeanMetadata, so we can let the superclass
+        // handle it
+        // (it's expected it would be a PhysicalTypeIdentifier notification, as
+        // that's the only other thing we registered to receive)
+        return super.resolveDownstreamDependencyIdentifier(upstreamDependency);
+    }
 
-		// To get here we know the governor is the MenuBean so let's go ahead and create its ITD
-		Set<ClassOrInterfaceTypeDetails> managedBeans = typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(ROO_JSF_MANAGED_BEAN);
-		for (ClassOrInterfaceTypeDetails managedBean : managedBeans) {
-			metadataDependencyRegistry.registerDependency(managedBean.getDeclaredByMetadataId(), metadataIdentificationString);
-		}
+    @Override
+    protected ItdTypeDetailsProvidingMetadataItem getMetadata(
+            final String metadataIdentificationString,
+            final JavaType aspectName,
+            final PhysicalTypeMetadata governorPhysicalTypeMetadata,
+            final String itdFilename) {
+        applicationBeanMid = metadataIdentificationString;
 
-		ProjectMetadata projectMetadata = projectOperations.getFocusedProjectMetadata();
-		Assert.notNull(projectMetadata, "Project metadata required");
+        // To get here we know the governor is the MenuBean so let's go ahead
+        // and create its ITD
+        Set<ClassOrInterfaceTypeDetails> managedBeans = typeLocationService
+                .findClassesOrInterfaceDetailsWithAnnotation(ROO_JSF_MANAGED_BEAN);
+        for (ClassOrInterfaceTypeDetails managedBean : managedBeans) {
+            metadataDependencyRegistry.registerDependency(
+                    managedBean.getDeclaredByMetadataId(),
+                    metadataIdentificationString);
+        }
 
-		return new JsfApplicationBeanMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, managedBeans, projectMetadata.getPom().getDisplayName());
-	}
+        ProjectMetadata projectMetadata = projectOperations
+                .getFocusedProjectMetadata();
+        Assert.notNull(projectMetadata, "Project metadata required");
 
-	public String getItdUniquenessFilenameSuffix() {
-		return "ApplicationBean";
-	}
+        return new JsfApplicationBeanMetadata(metadataIdentificationString,
+                aspectName, governorPhysicalTypeMetadata, managedBeans,
+                projectMetadata.getPom().getDisplayName());
+    }
 
-	@Override
-	protected String getGovernorPhysicalTypeIdentifier(final String metadataIdentificationString) {
-		JavaType javaType = JsfApplicationBeanMetadata.getJavaType(metadataIdentificationString);
-		LogicalPath path = JsfApplicationBeanMetadata.getPath(metadataIdentificationString);
-		return PhysicalTypeIdentifier.createIdentifier(javaType, path);
-	}
+    public String getItdUniquenessFilenameSuffix() {
+        return "ApplicationBean";
+    }
 
-	@Override
-	protected String createLocalIdentifier(final JavaType javaType, final LogicalPath path) {
-		return JsfApplicationBeanMetadata.createIdentifier(javaType, path);
-	}
+    @Override
+    protected String getGovernorPhysicalTypeIdentifier(
+            final String metadataIdentificationString) {
+        JavaType javaType = JsfApplicationBeanMetadata
+                .getJavaType(metadataIdentificationString);
+        LogicalPath path = JsfApplicationBeanMetadata
+                .getPath(metadataIdentificationString);
+        return PhysicalTypeIdentifier.createIdentifier(javaType, path);
+    }
 
-	public String getProvidesType() {
-		return JsfApplicationBeanMetadata.getMetadataIdentiferType();
-	}
+    @Override
+    protected String createLocalIdentifier(final JavaType javaType,
+            final LogicalPath path) {
+        return JsfApplicationBeanMetadata.createIdentifier(javaType, path);
+    }
+
+    public String getProvidesType() {
+        return JsfApplicationBeanMetadata.getMetadataIdentiferType();
+    }
 }

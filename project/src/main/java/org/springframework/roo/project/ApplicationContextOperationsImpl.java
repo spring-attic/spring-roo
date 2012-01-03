@@ -15,27 +15,38 @@ import org.w3c.dom.Element;
 
 /**
  * Provides Spring application context-related operations.
- *
+ * 
  * @author Ben Alex
  * @author Stefan Schmidt
  * @since 1.0
  */
 @Component
 @Service
-public class ApplicationContextOperationsImpl implements ApplicationContextOperations {
+public class ApplicationContextOperationsImpl implements
+        ApplicationContextOperations {
 
-	// Fields
-	@Reference private FileManager fileManager;
-	@Reference private MetadataService metadataService;
-	@Reference private PathResolver pathResolver;
+    // Fields
+    @Reference private FileManager fileManager;
+    @Reference private MetadataService metadataService;
+    @Reference private PathResolver pathResolver;
 
-	public void createMiddleTierApplicationContext(final JavaPackage topLevelPackage, final String moduleName) {
-		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier(moduleName));
-		Assert.notNull(projectMetadata, "Project metadata required for module '" + moduleName + "'");
-		final Document document = XmlUtils.readXml(FileUtils.getInputStream(getClass(), "applicationContext-template.xml"));
-		final Element root = document.getDocumentElement();
-		DomUtils.findFirstElementByName("context:component-scan", root).setAttribute("base-package", topLevelPackage.getFullyQualifiedPackageName());
-		fileManager.createOrUpdateTextFileIfRequired(pathResolver.getIdentifier(Path.SPRING_CONFIG_ROOT.getModulePathId(moduleName), "applicationContext.xml"), XmlUtils.nodeToString(document), false);
-		fileManager.scan();
-	}
+    public void createMiddleTierApplicationContext(
+            final JavaPackage topLevelPackage, final String moduleName) {
+        ProjectMetadata projectMetadata = (ProjectMetadata) metadataService
+                .get(ProjectMetadata.getProjectIdentifier(moduleName));
+        Assert.notNull(projectMetadata,
+                "Project metadata required for module '" + moduleName + "'");
+        final Document document = XmlUtils.readXml(FileUtils.getInputStream(
+                getClass(), "applicationContext-template.xml"));
+        final Element root = document.getDocumentElement();
+        DomUtils.findFirstElementByName("context:component-scan", root)
+                .setAttribute("base-package",
+                        topLevelPackage.getFullyQualifiedPackageName());
+        fileManager.createOrUpdateTextFileIfRequired(pathResolver
+                .getIdentifier(
+                        Path.SPRING_CONFIG_ROOT.getModulePathId(moduleName),
+                        "applicationContext.xml"), XmlUtils
+                .nodeToString(document), false);
+        fileManager.scan();
+    }
 }

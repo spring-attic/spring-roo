@@ -2,15 +2,15 @@ package org.springframework.roo.addon.security;
 
 /**
  * Interface for {@link SecurityOperationsImpl}.
- *
+ * 
  * @author Ben Alex
  * @since 1.0
  */
 public interface SecurityOperations {
 
-	String SECURITY_FILTER_NAME = "springSecurityFilterChain";
+    String SECURITY_FILTER_NAME = "springSecurityFilterChain";
 
-	boolean isSecurityInstallationPossible();
+    boolean isSecurityInstallationPossible();
 
-	void installSecurity();
+    void installSecurity();
 }

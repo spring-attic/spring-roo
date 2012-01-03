@@ -17,112 +17,134 @@ import org.springframework.roo.support.util.FileUtils;
 @Service
 public class MavenPathResolvingStrategy extends AbstractPathResolvingStrategy {
 
-	// Fields
-	@Reference protected PomManagementService pomManagementService;
+    // Fields
+    @Reference protected PomManagementService pomManagementService;
 
-	// ------------ OSGi component methods ----------------
-	
-	// ------------ PathResolvingStrategy methods ----------------
+    // ------------ OSGi component methods ----------------
 
-	/**
-	 * Locates the first {@link PhysicalPath} which can be construed as a parent
-	 * of the presented identifier.
-	 *
-	 * @param identifier to locate the parent of (required)
-	 * @return the first matching parent, or null if not found
-	 */
-	protected PhysicalPath getApplicablePhysicalPath(final String identifier) {
-		Assert.notNull(identifier, "Identifier required");
-		PhysicalPath physicalPath = null;
-		int longest = 0;
-		for (final Pom pom : pomManagementService.getPoms()) {
-			if (removeTrailingSeparator(identifier).startsWith(removeTrailingSeparator(pom.getRoot())) && removeTrailingSeparator(pom.getRoot()).length() > longest) {
-				longest = removeTrailingSeparator(pom.getRoot()).length();
-				int nextLongest = 0;
-				for (final PhysicalPath thisPhysicalPath : pom.getPhysicalPaths()) {
-					final String possibleParent = new FileDetails(thisPhysicalPath.getLocation(), null).getCanonicalPath();
-					if (removeTrailingSeparator(identifier).startsWith(possibleParent) && possibleParent.length() > nextLongest) {
-						nextLongest = possibleParent.length();
-						physicalPath = thisPhysicalPath;
-					}
-				}
-			}
-		}
-		return physicalPath;
-	}
-	
-	public String getCanonicalPath(final LogicalPath path, final JavaType javaType) {
-		return getIdentifier(path, javaType.getRelativeFileName());
-	}
-	
-	public String getFocusedCanonicalPath(final Path path, final JavaType javaType) {
-		return getCanonicalPath(path.getModulePathId(pomManagementService.getFocusedModuleName()), javaType);
-	}
+    // ------------ PathResolvingStrategy methods ----------------
 
-	public String getFocusedIdentifier(final Path path, final String relativePath) {
-		return getIdentifier(LogicalPath.getInstance(path, pomManagementService.getFocusedModuleName()), relativePath);
-	}
-	
-	public LogicalPath getFocusedPath(final Path path) {
-		final PhysicalPath physicalPath = pomManagementService.getFocusedModule().getPhysicalPath(path);
-		Assert.notNull(physicalPath, "Physical path for '" + path.name() + "' not found");
-		return physicalPath.getLogicalPath();
-	}
+    /**
+     * Locates the first {@link PhysicalPath} which can be construed as a parent
+     * of the presented identifier.
+     * 
+     * @param identifier to locate the parent of (required)
+     * @return the first matching parent, or null if not found
+     */
+    protected PhysicalPath getApplicablePhysicalPath(final String identifier) {
+        Assert.notNull(identifier, "Identifier required");
+        PhysicalPath physicalPath = null;
+        int longest = 0;
+        for (final Pom pom : pomManagementService.getPoms()) {
+            if (removeTrailingSeparator(identifier).startsWith(
+                    removeTrailingSeparator(pom.getRoot()))
+                    && removeTrailingSeparator(pom.getRoot()).length() > longest) {
+                longest = removeTrailingSeparator(pom.getRoot()).length();
+                int nextLongest = 0;
+                for (final PhysicalPath thisPhysicalPath : pom
+                        .getPhysicalPaths()) {
+                    final String possibleParent = new FileDetails(
+                            thisPhysicalPath.getLocation(), null)
+                            .getCanonicalPath();
+                    if (removeTrailingSeparator(identifier).startsWith(
+                            possibleParent)
+                            && possibleParent.length() > nextLongest) {
+                        nextLongest = possibleParent.length();
+                        physicalPath = thisPhysicalPath;
+                    }
+                }
+            }
+        }
+        return physicalPath;
+    }
 
-	public String getFocusedRoot(final Path path) {
-		return pomManagementService.getFocusedModule().getPathLocation(path);
-	}
+    public String getCanonicalPath(final LogicalPath path,
+            final JavaType javaType) {
+        return getIdentifier(path, javaType.getRelativeFileName());
+    }
 
-	public String getIdentifier(final LogicalPath logicalPath, final String relativePath) {
-		Assert.notNull(logicalPath, "Path required");
-		Assert.notNull(relativePath, "Relative path cannot be null, although it can be empty");
+    public String getFocusedCanonicalPath(final Path path,
+            final JavaType javaType) {
+        return getCanonicalPath(path.getModulePathId(pomManagementService
+                .getFocusedModuleName()), javaType);
+    }
 
-		String initialPath = FileUtils.getCanonicalPath(getPath(logicalPath));
-		initialPath = FileUtils.ensureTrailingSeparator(initialPath);
-		return initialPath + FileUtils.removeLeadingAndTrailingSeparators(relativePath);
-	}
-	
-	private File getModuleRoot(final String module, final Pom pom) {
-		if (pom == null) {
-			// No POM exists for this module; we must be creating it
-			return new File(pomManagementService.getFocusedModule().getRoot(), module);
-		}
-		// This is a known module; use its known root path
-		return new File(pom.getRoot());
-	}
-	
-	private File getPath(final LogicalPath logicalPath) {
-		final Pom pom = pomManagementService.getPomFromModuleName(logicalPath.getModule());
-		final File moduleRoot = getModuleRoot(logicalPath.getModule(), pom);
-		final String pathRelativeToPom = logicalPath.getPathRelativeToPom(pom);
-		return new File(moduleRoot, pathRelativeToPom);
-	}
-	
-	protected Collection<LogicalPath> getPaths(final boolean sourceOnly) {
-		final Collection<LogicalPath> pathIds = new ArrayList<LogicalPath>();
-		for (final Pom pom : pomManagementService.getPoms()) {
-			for (final PhysicalPath modulePath : pom.getPhysicalPaths()) {
-				if (!sourceOnly || modulePath.isSource()) {
-					pathIds.add(modulePath.getLogicalPath());
-				}
-			}
-		}
-		return pathIds;
-	}
+    public String getFocusedIdentifier(final Path path,
+            final String relativePath) {
+        return getIdentifier(
+                LogicalPath.getInstance(path,
+                        pomManagementService.getFocusedModuleName()),
+                relativePath);
+    }
 
-	public String getRoot(final LogicalPath modulePathId) {
-		final Pom pom = pomManagementService.getPomFromModuleName(modulePathId.getModule());
-		return pom.getPhysicalPath(modulePathId.getPath()).getLocationPath();
-	}
-	
-	public boolean isActive() {
-		return pomManagementService.getRootPom() != null;
-	}
+    public LogicalPath getFocusedPath(final Path path) {
+        final PhysicalPath physicalPath = pomManagementService
+                .getFocusedModule().getPhysicalPath(path);
+        Assert.notNull(physicalPath, "Physical path for '" + path.name()
+                + "' not found");
+        return physicalPath.getLogicalPath();
+    }
 
-	private String removeTrailingSeparator(final String pomPath) {
-		if (pomPath.endsWith(File.separator)) {
-			return pomPath.substring(0, pomPath.length() - 1);
-		}
-		return pomPath + File.separator;
-	}
+    public String getFocusedRoot(final Path path) {
+        return pomManagementService.getFocusedModule().getPathLocation(path);
+    }
+
+    public String getIdentifier(final LogicalPath logicalPath,
+            final String relativePath) {
+        Assert.notNull(logicalPath, "Path required");
+        Assert.notNull(relativePath,
+                "Relative path cannot be null, although it can be empty");
+
+        String initialPath = FileUtils.getCanonicalPath(getPath(logicalPath));
+        initialPath = FileUtils.ensureTrailingSeparator(initialPath);
+        return initialPath
+                + FileUtils.removeLeadingAndTrailingSeparators(relativePath);
+    }
+
+    private File getModuleRoot(final String module, final Pom pom) {
+        if (pom == null) {
+            // No POM exists for this module; we must be creating it
+            return new File(pomManagementService.getFocusedModule().getRoot(),
+                    module);
+        }
+        // This is a known module; use its known root path
+        return new File(pom.getRoot());
+    }
+
+    private File getPath(final LogicalPath logicalPath) {
+        final Pom pom = pomManagementService.getPomFromModuleName(logicalPath
+                .getModule());
+        final File moduleRoot = getModuleRoot(logicalPath.getModule(), pom);
+        final String pathRelativeToPom = logicalPath.getPathRelativeToPom(pom);
+        return new File(moduleRoot, pathRelativeToPom);
+    }
+
+    protected Collection<LogicalPath> getPaths(final boolean sourceOnly) {
+        final Collection<LogicalPath> pathIds = new ArrayList<LogicalPath>();
+        for (final Pom pom : pomManagementService.getPoms()) {
+            for (final PhysicalPath modulePath : pom.getPhysicalPaths()) {
+                if (!sourceOnly || modulePath.isSource()) {
+                    pathIds.add(modulePath.getLogicalPath());
+                }
+            }
+        }
+        return pathIds;
+    }
+
+    public String getRoot(final LogicalPath modulePathId) {
+        final Pom pom = pomManagementService.getPomFromModuleName(modulePathId
+                .getModule());
+        return pom.getPhysicalPath(modulePathId.getPath()).getLocationPath();
+    }
+
+    public boolean isActive() {
+        return pomManagementService.getRootPom() != null;
+    }
+
+    private String removeTrailingSeparator(final String pomPath) {
+        if (pomPath.endsWith(File.separator)) {
+            return pomPath.substring(0, pomPath.length() - 1);
+        }
+        return pomPath + File.separator;
+    }
 }

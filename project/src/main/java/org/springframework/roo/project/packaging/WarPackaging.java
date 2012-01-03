@@ -15,7 +15,7 @@ import org.springframework.roo.project.Path;
 
 /**
  * The core {@link PackagingProvider} for web modules.
- *
+ * 
  * @author Andrew Swan
  * @since 1.2.0
  */
@@ -23,11 +23,12 @@ import org.springframework.roo.project.Path;
 @Service
 public class WarPackaging extends AbstractCorePackagingProvider {
 
-	public WarPackaging() {
-		super("war", "war-pom-template.xml");
-	}
+    public WarPackaging() {
+        super("war", "war-pom-template.xml");
+    }
 
-	public Collection<Path> getPaths() {
-		return Arrays.asList(SRC_MAIN_JAVA, SRC_TEST_JAVA, SRC_TEST_RESOURCES, SPRING_CONFIG_ROOT, SRC_MAIN_WEBAPP);
-	}
+    public Collection<Path> getPaths() {
+        return Arrays.asList(SRC_MAIN_JAVA, SRC_TEST_JAVA, SRC_TEST_RESOURCES,
+                SPRING_CONFIG_ROOT, SRC_MAIN_WEBAPP);
+    }
 }

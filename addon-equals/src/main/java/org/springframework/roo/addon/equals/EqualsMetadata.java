@@ -25,159 +25,187 @@ import org.springframework.roo.support.util.CollectionUtils;
 
 /**
  * Metadata for {@link RooEquals}.
- *
+ * 
  * @author Alan Stewart
  * @since 1.2.0
  */
 public class EqualsMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
-	// Constants
-	private static final JavaSymbolName EQUALS_METHOD_NAME = new JavaSymbolName("equals");
-	private static final JavaSymbolName HASH_CODE_METHOD_NAME = new JavaSymbolName("hashCode");
-	private static final JavaType EQUALS_BUILDER = new JavaType("org.apache.commons.lang3.builder.EqualsBuilder");
-	private static final JavaType HASH_CODE_BUILDER = new JavaType("org.apache.commons.lang3.builder.HashCodeBuilder");
-	private static final String OBJECT_NAME = "obj";
-	private static final String PROVIDES_TYPE_STRING = EqualsMetadata.class.getName();
-	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
+    // Constants
+    private static final JavaSymbolName EQUALS_METHOD_NAME = new JavaSymbolName(
+            "equals");
+    private static final JavaSymbolName HASH_CODE_METHOD_NAME = new JavaSymbolName(
+            "hashCode");
+    private static final JavaType EQUALS_BUILDER = new JavaType(
+            "org.apache.commons.lang3.builder.EqualsBuilder");
+    private static final JavaType HASH_CODE_BUILDER = new JavaType(
+            "org.apache.commons.lang3.builder.HashCodeBuilder");
+    private static final String OBJECT_NAME = "obj";
+    private static final String PROVIDES_TYPE_STRING = EqualsMetadata.class
+            .getName();
+    private static final String PROVIDES_TYPE = MetadataIdentificationUtils
+            .create(PROVIDES_TYPE_STRING);
 
-	/**
-	 * Returns the class-level ID of this type of metadata
-	 * 
-	 * @return a valid class-level MID
-	 */
-	public static String getMetadataIdentiferType() {
-		return PROVIDES_TYPE;
-	}
+    /**
+     * Returns the class-level ID of this type of metadata
+     * 
+     * @return a valid class-level MID
+     */
+    public static String getMetadataIdentiferType() {
+        return PROVIDES_TYPE;
+    }
 
-	public static String createIdentifier(final JavaType javaType, final LogicalPath path) {
-		return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
-	}
+    public static String createIdentifier(final JavaType javaType,
+            final LogicalPath path) {
+        return PhysicalTypeIdentifierNamingUtils.createIdentifier(
+                PROVIDES_TYPE_STRING, javaType, path);
+    }
 
-	public static JavaType getJavaType(final String metadataIdentificationString) {
-		return PhysicalTypeIdentifierNamingUtils.getJavaType(PROVIDES_TYPE_STRING, metadataIdentificationString);
-	}
+    public static JavaType getJavaType(final String metadataIdentificationString) {
+        return PhysicalTypeIdentifierNamingUtils.getJavaType(
+                PROVIDES_TYPE_STRING, metadataIdentificationString);
+    }
 
-	public static LogicalPath getPath(final String metadataIdentificationString) {
-		return PhysicalTypeIdentifierNamingUtils.getPath(PROVIDES_TYPE_STRING, metadataIdentificationString);
-	}
+    public static LogicalPath getPath(final String metadataIdentificationString) {
+        return PhysicalTypeIdentifierNamingUtils.getPath(PROVIDES_TYPE_STRING,
+                metadataIdentificationString);
+    }
 
-	public static boolean isValid(final String metadataIdentificationString) {
-		return PhysicalTypeIdentifierNamingUtils.isValid(PROVIDES_TYPE_STRING, metadataIdentificationString);
-	}
-	
-	// Fields
-	private final EqualsAnnotationValues annotationValues;
-	private final List<FieldMetadata> locatedFields;
+    public static boolean isValid(final String metadataIdentificationString) {
+        return PhysicalTypeIdentifierNamingUtils.isValid(PROVIDES_TYPE_STRING,
+                metadataIdentificationString);
+    }
 
-	/**
-	 * Constructor
-	 *
-	 * @param identifier the ID of this piece of metadata (required)
-	 * @param aspectName the name of the ITD to generate (required)
-	 * @param governorPhysicalTypeMetadata the details of the governor (required)
-	 * @param annotationValues the values of the @RooEquals annotation (required)
-	 * @param equalityFields the fields to be compared by the <code>equals</code> method (can be <code>null</code> or empty)
-	 */
-	public EqualsMetadata(final String identifier, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final EqualsAnnotationValues annotationValues, final List<FieldMetadata> equalityFields) {
-		super(identifier, aspectName, governorPhysicalTypeMetadata);
-		Assert.isTrue(isValid(identifier), "Metadata id '" + identifier + "' is invalid");
-		Assert.notNull(annotationValues, "Annotation values required");
+    // Fields
+    private final EqualsAnnotationValues annotationValues;
+    private final List<FieldMetadata> locatedFields;
 
-		this.annotationValues = annotationValues;
-		this.locatedFields = equalityFields;
+    /**
+     * Constructor
+     * 
+     * @param identifier the ID of this piece of metadata (required)
+     * @param aspectName the name of the ITD to generate (required)
+     * @param governorPhysicalTypeMetadata the details of the governor
+     *            (required)
+     * @param annotationValues the values of the @RooEquals annotation
+     *            (required)
+     * @param equalityFields the fields to be compared by the
+     *            <code>equals</code> method (can be <code>null</code> or empty)
+     */
+    public EqualsMetadata(final String identifier, final JavaType aspectName,
+            final PhysicalTypeMetadata governorPhysicalTypeMetadata,
+            final EqualsAnnotationValues annotationValues,
+            final List<FieldMetadata> equalityFields) {
+        super(identifier, aspectName, governorPhysicalTypeMetadata);
+        Assert.isTrue(isValid(identifier), "Metadata id '" + identifier
+                + "' is invalid");
+        Assert.notNull(annotationValues, "Annotation values required");
 
-		if (!CollectionUtils.isEmpty(equalityFields)) {
-			builder.addMethod(getEqualsMethod());
-			builder.addMethod(getHashCodeMethod());
-		}
+        this.annotationValues = annotationValues;
+        this.locatedFields = equalityFields;
 
-		// Create a representation of the desired output ITD
-		itdTypeDetails = builder.build();
-	}
+        if (!CollectionUtils.isEmpty(equalityFields)) {
+            builder.addMethod(getEqualsMethod());
+            builder.addMethod(getHashCodeMethod());
+        }
 
-	/**
-	 * Returns the <code>equals</code> method to be generated
-	 *
-	 * @return <code>null</code> if no generation is required
-	 */
-	private MethodMetadataBuilder getEqualsMethod() {
-		final JavaType parameterType = OBJECT;
-		if (governorHasMethod(EQUALS_METHOD_NAME, parameterType)) {
-			return null;
-		}
+        // Create a representation of the desired output ITD
+        itdTypeDetails = builder.build();
+    }
 
-		final List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName(OBJECT_NAME));
+    /**
+     * Returns the <code>equals</code> method to be generated
+     * 
+     * @return <code>null</code> if no generation is required
+     */
+    private MethodMetadataBuilder getEqualsMethod() {
+        final JavaType parameterType = OBJECT;
+        if (governorHasMethod(EQUALS_METHOD_NAME, parameterType)) {
+            return null;
+        }
 
-		builder.getImportRegistrationResolver().addImport(EQUALS_BUILDER);
+        final List<JavaSymbolName> parameterNames = Arrays
+                .asList(new JavaSymbolName(OBJECT_NAME));
 
-		final String typeName = destination.getSimpleTypeName();
+        builder.getImportRegistrationResolver().addImport(EQUALS_BUILDER);
 
-		// Create the method
-		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		bodyBuilder.appendFormalLine("if (!(" + OBJECT_NAME + " instanceof " + typeName + ")) {");
-		bodyBuilder.indent();
-		bodyBuilder.appendFormalLine("return false;");
-		bodyBuilder.indentRemove();
-		bodyBuilder.appendFormalLine("}");
-		bodyBuilder.appendFormalLine("if (this == " + OBJECT_NAME + ") {");
-		bodyBuilder.indent();
-		bodyBuilder.appendFormalLine("return true;");
-		bodyBuilder.indentRemove();
-		bodyBuilder.appendFormalLine("}");
-		bodyBuilder.appendFormalLine(typeName + " rhs = (" + typeName + ") " + OBJECT_NAME + ";");
+        final String typeName = destination.getSimpleTypeName();
 
-		final StringBuilder builder = new StringBuilder("return new EqualsBuilder()");
-		if (annotationValues.isAppendSuper()) {
-			builder.append(".appendSuper(super.equals(" + OBJECT_NAME + "))");
-		}
-		for (final FieldMetadata field : locatedFields) {
-			builder.append(".append(" + field.getFieldName() + ", rhs." + field.getFieldName() +")");
-		}
-		builder.append(".isEquals();");
+        // Create the method
+        final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+        bodyBuilder.appendFormalLine("if (!(" + OBJECT_NAME + " instanceof "
+                + typeName + ")) {");
+        bodyBuilder.indent();
+        bodyBuilder.appendFormalLine("return false;");
+        bodyBuilder.indentRemove();
+        bodyBuilder.appendFormalLine("}");
+        bodyBuilder.appendFormalLine("if (this == " + OBJECT_NAME + ") {");
+        bodyBuilder.indent();
+        bodyBuilder.appendFormalLine("return true;");
+        bodyBuilder.indentRemove();
+        bodyBuilder.appendFormalLine("}");
+        bodyBuilder.appendFormalLine(typeName + " rhs = (" + typeName + ") "
+                + OBJECT_NAME + ";");
 
-		bodyBuilder.appendFormalLine(builder.toString());
+        final StringBuilder builder = new StringBuilder(
+                "return new EqualsBuilder()");
+        if (annotationValues.isAppendSuper()) {
+            builder.append(".appendSuper(super.equals(" + OBJECT_NAME + "))");
+        }
+        for (final FieldMetadata field : locatedFields) {
+            builder.append(".append(" + field.getFieldName() + ", rhs."
+                    + field.getFieldName() + ")");
+        }
+        builder.append(".isEquals();");
 
-		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, EQUALS_METHOD_NAME, BOOLEAN_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterType), parameterNames, bodyBuilder);
-	}
+        bodyBuilder.appendFormalLine(builder.toString());
 
-	/**
-	 * Returns the <code>hashCode</code> method to be generated
-	 *
-	 * @return <code>null</code> if no generation is required
-	 */
-	private MethodMetadataBuilder getHashCodeMethod() {
-		if (governorHasMethod(HASH_CODE_METHOD_NAME)) {
-			return null;
-		}
+        return new MethodMetadataBuilder(getId(), Modifier.PUBLIC,
+                EQUALS_METHOD_NAME, BOOLEAN_PRIMITIVE,
+                AnnotatedJavaType.convertFromJavaTypes(parameterType),
+                parameterNames, bodyBuilder);
+    }
 
-		builder.getImportRegistrationResolver().addImport(HASH_CODE_BUILDER);
+    /**
+     * Returns the <code>hashCode</code> method to be generated
+     * 
+     * @return <code>null</code> if no generation is required
+     */
+    private MethodMetadataBuilder getHashCodeMethod() {
+        if (governorHasMethod(HASH_CODE_METHOD_NAME)) {
+            return null;
+        }
 
-		// Create the method
-		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+        builder.getImportRegistrationResolver().addImport(HASH_CODE_BUILDER);
 
-		final StringBuilder builder = new StringBuilder("return new HashCodeBuilder()");
-		if (annotationValues.isAppendSuper()) {
-			builder.append(".appendSuper(super.hashCode())");
-		}
-		for (final FieldMetadata field : locatedFields) {
-			builder.append(".append(" + field.getFieldName() +")");
-		}
-		builder.append(".toHashCode();");
+        // Create the method
+        final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
-		bodyBuilder.appendFormalLine(builder.toString());
+        final StringBuilder builder = new StringBuilder(
+                "return new HashCodeBuilder()");
+        if (annotationValues.isAppendSuper()) {
+            builder.append(".appendSuper(super.hashCode())");
+        }
+        for (final FieldMetadata field : locatedFields) {
+            builder.append(".append(" + field.getFieldName() + ")");
+        }
+        builder.append(".toHashCode();");
 
-		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, HASH_CODE_METHOD_NAME, INT_PRIMITIVE, bodyBuilder);
-	}
+        bodyBuilder.appendFormalLine(builder.toString());
 
-	@Override
-	public String toString() {
-		final ToStringCreator tsc = new ToStringCreator(this);
-		tsc.append("identifier", getId());
-		tsc.append("valid", valid);
-		tsc.append("aspectName", aspectName);
-		tsc.append("destinationType", destination);
-		tsc.append("governor", governorPhysicalTypeMetadata.getId());
-		tsc.append("itdTypeDetails", itdTypeDetails);
-		return tsc.toString();
-	}
+        return new MethodMetadataBuilder(getId(), Modifier.PUBLIC,
+                HASH_CODE_METHOD_NAME, INT_PRIMITIVE, bodyBuilder);
+    }
+
+    @Override
+    public String toString() {
+        final ToStringCreator tsc = new ToStringCreator(this);
+        tsc.append("identifier", getId());
+        tsc.append("valid", valid);
+        tsc.append("aspectName", aspectName);
+        tsc.append("destinationType", destination);
+        tsc.append("governor", governorPhysicalTypeMetadata.getId());
+        tsc.append("itdTypeDetails", itdTypeDetails);
+        return tsc.toString();
+    }
 }

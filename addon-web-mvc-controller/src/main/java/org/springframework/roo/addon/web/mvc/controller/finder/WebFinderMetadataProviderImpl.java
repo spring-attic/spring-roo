@@ -25,69 +25,100 @@ import org.springframework.roo.project.LogicalPath;
 
 /**
  * Implementation of {@link WebFinderMetadataProvider}.
- *
+ * 
  * @author Stefan Schmidt
  * @since 1.1.3
  */
 @Component(immediate = true)
 @Service
-public class WebFinderMetadataProviderImpl extends AbstractItdMetadataProvider implements WebFinderMetadataProvider {
+public class WebFinderMetadataProviderImpl extends AbstractItdMetadataProvider
+        implements WebFinderMetadataProvider {
 
-	// Fields
-	@Reference private WebMetadataService webMetadataService;
+    // Fields
+    @Reference private WebMetadataService webMetadataService;
 
-	protected void activate(final ComponentContext context) {
-		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-		addMetadataTrigger(ROO_WEB_FINDER);
-	}
+    protected void activate(final ComponentContext context) {
+        metadataDependencyRegistry.registerDependency(
+                PhysicalTypeIdentifier.getMetadataIdentiferType(),
+                getProvidesType());
+        addMetadataTrigger(ROO_WEB_FINDER);
+    }
 
-	protected void deactivate(final ComponentContext context) {
-		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-		removeMetadataTrigger(ROO_WEB_FINDER);
-	}
+    protected void deactivate(final ComponentContext context) {
+        metadataDependencyRegistry.deregisterDependency(
+                PhysicalTypeIdentifier.getMetadataIdentiferType(),
+                getProvidesType());
+        removeMetadataTrigger(ROO_WEB_FINDER);
+    }
 
-	@Override
-	protected ItdTypeDetailsProvidingMetadataItem getMetadata(final String metadataIdentificationString, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final String itdFilename) {
-		// We need to parse the annotation, which we expect to be present
-		final WebScaffoldAnnotationValues annotationValues = new WebScaffoldAnnotationValues(governorPhysicalTypeMetadata);
-		if (!annotationValues.isAnnotationFound() || !annotationValues.isExposeFinders() || annotationValues.getFormBackingObject() == null || governorPhysicalTypeMetadata.getMemberHoldingTypeDetails() == null) {
-			return null;
-		}
+    @Override
+    protected ItdTypeDetailsProvidingMetadataItem getMetadata(
+            final String metadataIdentificationString,
+            final JavaType aspectName,
+            final PhysicalTypeMetadata governorPhysicalTypeMetadata,
+            final String itdFilename) {
+        // We need to parse the annotation, which we expect to be present
+        final WebScaffoldAnnotationValues annotationValues = new WebScaffoldAnnotationValues(
+                governorPhysicalTypeMetadata);
+        if (!annotationValues.isAnnotationFound()
+                || !annotationValues.isExposeFinders()
+                || annotationValues.getFormBackingObject() == null
+                || governorPhysicalTypeMetadata.getMemberHoldingTypeDetails() == null) {
+            return null;
+        }
 
-		// Lookup the form backing object's metadata
-		final JavaType formBackingType = annotationValues.getFormBackingObject();
-		final ClassOrInterfaceTypeDetails formBackingTypeDetails = typeLocationService.getTypeDetails(formBackingType);
-		if (formBackingTypeDetails == null || !formBackingTypeDetails.getCustomData().keySet().contains(CustomDataKeys.PERSISTENT_TYPE)) {
-			return null;
-		}
+        // Lookup the form backing object's metadata
+        final JavaType formBackingType = annotationValues
+                .getFormBackingObject();
+        final ClassOrInterfaceTypeDetails formBackingTypeDetails = typeLocationService
+                .getTypeDetails(formBackingType);
+        if (formBackingTypeDetails == null
+                || !formBackingTypeDetails.getCustomData().keySet()
+                        .contains(CustomDataKeys.PERSISTENT_TYPE)) {
+            return null;
+        }
 
-		// We need to be informed if our dependent metadata changes
-		metadataDependencyRegistry.registerDependency(formBackingTypeDetails.getDeclaredByMetadataId(), metadataIdentificationString);
+        // We need to be informed if our dependent metadata changes
+        metadataDependencyRegistry.registerDependency(
+                formBackingTypeDetails.getDeclaredByMetadataId(),
+                metadataIdentificationString);
 
-		final MemberDetails formBackingObjectMemberDetails = getMemberDetails(formBackingTypeDetails);
-		final Set<FinderMetadataDetails> dynamicFinderMethods = webMetadataService.getDynamicFinderMethodsAndFields(formBackingType, formBackingObjectMemberDetails, metadataIdentificationString);
-		final SortedMap<JavaType, JavaTypeMetadataDetails> relatedApplicationTypeMetadata = webMetadataService.getRelatedApplicationTypeMetadata(formBackingType, formBackingObjectMemberDetails, metadataIdentificationString);
+        final MemberDetails formBackingObjectMemberDetails = getMemberDetails(formBackingTypeDetails);
+        final Set<FinderMetadataDetails> dynamicFinderMethods = webMetadataService
+                .getDynamicFinderMethodsAndFields(formBackingType,
+                        formBackingObjectMemberDetails,
+                        metadataIdentificationString);
+        final SortedMap<JavaType, JavaTypeMetadataDetails> relatedApplicationTypeMetadata = webMetadataService
+                .getRelatedApplicationTypeMetadata(formBackingType,
+                        formBackingObjectMemberDetails,
+                        metadataIdentificationString);
 
-		return new WebFinderMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, relatedApplicationTypeMetadata, dynamicFinderMethods);
-	}
+        return new WebFinderMetadata(metadataIdentificationString, aspectName,
+                governorPhysicalTypeMetadata, annotationValues,
+                relatedApplicationTypeMetadata, dynamicFinderMethods);
+    }
 
-	public String getItdUniquenessFilenameSuffix() {
-		return "Controller_Finder";
-	}
+    public String getItdUniquenessFilenameSuffix() {
+        return "Controller_Finder";
+    }
 
-	@Override
-	protected String getGovernorPhysicalTypeIdentifier(final String metadataIdentificationString) {
-		JavaType javaType = WebFinderMetadata.getJavaType(metadataIdentificationString);
-		LogicalPath path = WebFinderMetadata.getPath(metadataIdentificationString);
-		return PhysicalTypeIdentifier.createIdentifier(javaType, path);
-	}
+    @Override
+    protected String getGovernorPhysicalTypeIdentifier(
+            final String metadataIdentificationString) {
+        JavaType javaType = WebFinderMetadata
+                .getJavaType(metadataIdentificationString);
+        LogicalPath path = WebFinderMetadata
+                .getPath(metadataIdentificationString);
+        return PhysicalTypeIdentifier.createIdentifier(javaType, path);
+    }
 
-	@Override
-	protected String createLocalIdentifier(final JavaType javaType, final LogicalPath path) {
-		return WebFinderMetadata.createIdentifier(javaType, path);
-	}
+    @Override
+    protected String createLocalIdentifier(final JavaType javaType,
+            final LogicalPath path) {
+        return WebFinderMetadata.createIdentifier(javaType, path);
+    }
 
-	public String getProvidesType() {
-		return WebFinderMetadata.getMetadataIdentiferType();
-	}
+    public String getProvidesType() {
+        return WebFinderMetadata.getMetadataIdentiferType();
+    }
 }

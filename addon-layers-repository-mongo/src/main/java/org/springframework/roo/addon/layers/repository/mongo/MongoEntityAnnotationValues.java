@@ -10,31 +10,32 @@ import org.springframework.roo.model.RooJavaType;
 
 /**
  * The values of a {@link RooMongoRepository} annotation.
- *
+ * 
  * @author Stefan Schmidt
  * @since 1.2.0
  */
 public class MongoEntityAnnotationValues extends AbstractAnnotationValues {
 
-	// Fields
-	@AutoPopulate private JavaType identifierType = JdkJavaType.BIG_INTEGER;
+    // Fields
+    @AutoPopulate private JavaType identifierType = JdkJavaType.BIG_INTEGER;
 
-	/**
-	 * Constructor
-	 *
-	 * @param governorPhysicalTypeMetadata the metadata to parse (required)
-	 */
-	public MongoEntityAnnotationValues(final PhysicalTypeMetadata governorPhysicalTypeMetadata) {
-		super(governorPhysicalTypeMetadata, RooJavaType.ROO_MONGO_ENTITY);
-		AutoPopulationUtils.populate(this, annotationMetadata);
-	}
+    /**
+     * Constructor
+     * 
+     * @param governorPhysicalTypeMetadata the metadata to parse (required)
+     */
+    public MongoEntityAnnotationValues(
+            final PhysicalTypeMetadata governorPhysicalTypeMetadata) {
+        super(governorPhysicalTypeMetadata, RooJavaType.ROO_MONGO_ENTITY);
+        AutoPopulationUtils.populate(this, annotationMetadata);
+    }
 
-	/**
-	 * Returns the Identifier type for this domain entity
-	 *
-	 * @return a non-<code>null</code> type
-	 */
-	public JavaType getIdentifierType() {
-		return identifierType;
-	}
+    /**
+     * Returns the Identifier type for this domain entity
+     * 
+     * @return a non-<code>null</code> type
+     */
+    public JavaType getIdentifierType() {
+        return identifierType;
+    }
 }

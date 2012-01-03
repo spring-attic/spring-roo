@@ -16,63 +16,78 @@ import org.springframework.roo.project.LogicalPath;
 
 /**
  * Provides {@link ToStringMetadata}.
- *
+ * 
  * @author Ben Alex
  * @since 1.0
  */
 @Component(immediate = true)
 @Service
-public class ToStringMetadataProvider extends AbstractMemberDiscoveringItdMetadataProvider {
+public class ToStringMetadataProvider extends
+        AbstractMemberDiscoveringItdMetadataProvider {
 
-	protected void activate(final ComponentContext context) {
-		metadataDependencyRegistry.addNotificationListener(this);
-		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-		addMetadataTrigger(ROO_TO_STRING);
-	}
+    protected void activate(final ComponentContext context) {
+        metadataDependencyRegistry.addNotificationListener(this);
+        metadataDependencyRegistry.registerDependency(
+                PhysicalTypeIdentifier.getMetadataIdentiferType(),
+                getProvidesType());
+        addMetadataTrigger(ROO_TO_STRING);
+    }
 
-	protected void deactivate(final ComponentContext context) {
-		metadataDependencyRegistry.removeNotificationListener(this);
-		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-		removeMetadataTrigger(ROO_TO_STRING);
-	}
+    protected void deactivate(final ComponentContext context) {
+        metadataDependencyRegistry.removeNotificationListener(this);
+        metadataDependencyRegistry.deregisterDependency(
+                PhysicalTypeIdentifier.getMetadataIdentiferType(),
+                getProvidesType());
+        removeMetadataTrigger(ROO_TO_STRING);
+    }
 
-	@Override
-	protected ItdTypeDetailsProvidingMetadataItem getMetadata(final String metadataIdentificationString, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final String itdFilename) {
-		final ToStringAnnotationValues annotationValues = new ToStringAnnotationValues(governorPhysicalTypeMetadata);
-		if (!annotationValues.isAnnotationFound()) {
-			return null;
-		}
+    @Override
+    protected ItdTypeDetailsProvidingMetadataItem getMetadata(
+            final String metadataIdentificationString,
+            final JavaType aspectName,
+            final PhysicalTypeMetadata governorPhysicalTypeMetadata,
+            final String itdFilename) {
+        final ToStringAnnotationValues annotationValues = new ToStringAnnotationValues(
+                governorPhysicalTypeMetadata);
+        if (!annotationValues.isAnnotationFound()) {
+            return null;
+        }
 
-		final MemberDetails memberDetails = getMemberDetails(governorPhysicalTypeMetadata);
-		if (memberDetails == null || memberDetails.getFields().isEmpty()) {
-			return null;
-		}
+        final MemberDetails memberDetails = getMemberDetails(governorPhysicalTypeMetadata);
+        if (memberDetails == null || memberDetails.getFields().isEmpty()) {
+            return null;
+        }
 
-		return new ToStringMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues);
-	}
+        return new ToStringMetadata(metadataIdentificationString, aspectName,
+                governorPhysicalTypeMetadata, annotationValues);
+    }
 
-	@Override
-	protected String getLocalMidToRequest(final ItdTypeDetails itdTypeDetails) {
-		return getLocalMid(itdTypeDetails);
-	}
+    @Override
+    protected String getLocalMidToRequest(final ItdTypeDetails itdTypeDetails) {
+        return getLocalMid(itdTypeDetails);
+    }
 
-	public String getItdUniquenessFilenameSuffix() {
-		return "ToString";
-	}
+    public String getItdUniquenessFilenameSuffix() {
+        return "ToString";
+    }
 
-	@Override
-	protected String getGovernorPhysicalTypeIdentifier(final String metadataIdentificationString) {
-		JavaType javaType = ToStringMetadata.getJavaType(metadataIdentificationString);
-		LogicalPath path = ToStringMetadata.getPath(metadataIdentificationString);
-		return PhysicalTypeIdentifier.createIdentifier(javaType, path);
-	}
+    @Override
+    protected String getGovernorPhysicalTypeIdentifier(
+            final String metadataIdentificationString) {
+        JavaType javaType = ToStringMetadata
+                .getJavaType(metadataIdentificationString);
+        LogicalPath path = ToStringMetadata
+                .getPath(metadataIdentificationString);
+        return PhysicalTypeIdentifier.createIdentifier(javaType, path);
+    }
 
-	@Override
-	protected String createLocalIdentifier(final JavaType javaType, final LogicalPath path) {
-		return ToStringMetadata.createIdentifier(javaType, path);
-	}
+    @Override
+    protected String createLocalIdentifier(final JavaType javaType,
+            final LogicalPath path) {
+        return ToStringMetadata.createIdentifier(javaType, path);
+    }
 
-	public String getProvidesType() {
-		return ToStringMetadata.getMetadataIdentiferType();
-	}
+    public String getProvidesType() {
+        return ToStringMetadata.getMetadataIdentiferType();
+    }
 }

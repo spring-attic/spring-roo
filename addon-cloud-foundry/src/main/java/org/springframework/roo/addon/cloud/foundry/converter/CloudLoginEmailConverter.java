@@ -14,7 +14,7 @@ import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Provides conversion to and from Cloud Foundry model classes.
- *
+ * 
  * @author James Tyrrell
  * @author Andrew Swan
  * @since 1.2.0
@@ -22,23 +22,27 @@ import org.springframework.roo.support.util.StringUtils;
 @Component
 @Service
 public class CloudLoginEmailConverter implements Converter<Object> {
-	@Reference private CloudFoundrySession session;
+    @Reference private CloudFoundrySession session;
 
-	public Object convertFromText(final String value, final Class<?> requiredType, final String optionContext) {
-		if (StringUtils.isBlank(value)) {
-			return null;
-		}
-		return new CloudLoginEmail(value);
-	}
+    public Object convertFromText(final String value,
+            final Class<?> requiredType, final String optionContext) {
+        if (StringUtils.isBlank(value)) {
+            return null;
+        }
+        return new CloudLoginEmail(value);
+    }
 
-	public boolean supports(final Class<?> requiredType, final String optionContext) {
-		return CloudLoginEmail.class.isAssignableFrom(requiredType);
-	}
+    public boolean supports(final Class<?> requiredType,
+            final String optionContext) {
+        return CloudLoginEmail.class.isAssignableFrom(requiredType);
+    }
 
-	public boolean getAllPossibleValues(final List<Completion> completions, final Class<?> requiredType, final String existingData, final String optionContext, final MethodTarget target) {
-		for (String storedEmail : session.getStoredEmails()) {
-			completions.add(new Completion(storedEmail));
-		}
-		return false;
-	}
+    public boolean getAllPossibleValues(final List<Completion> completions,
+            final Class<?> requiredType, final String existingData,
+            final String optionContext, final MethodTarget target) {
+        for (String storedEmail : session.getStoredEmails()) {
+            completions.add(new Completion(storedEmail));
+        }
+        return false;
+    }
 }

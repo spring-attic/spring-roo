@@ -12,7 +12,7 @@ import org.springframework.roo.support.util.Assert;
 
 /**
  * A {@link Converter} for {@link PackagingProvider}s
- *
+ * 
  * @author Andrew Swan
  * @since 1.2.0
  */
@@ -20,23 +20,30 @@ import org.springframework.roo.support.util.Assert;
 @Service
 public class PackagingProviderConverter implements Converter<PackagingProvider> {
 
-	// Fields
-	@Reference PackagingProviderRegistry packagingProviderRegistry;
+    // Fields
+    @Reference PackagingProviderRegistry packagingProviderRegistry;
 
-	public boolean supports(final Class<?> type, final String optionContext) {
-		return PackagingProvider.class.isAssignableFrom(type);
-	}
+    public boolean supports(final Class<?> type, final String optionContext) {
+        return PackagingProvider.class.isAssignableFrom(type);
+    }
 
-	public PackagingProvider convertFromText(final String value, final Class<?> targetType, final String optionContext) {
-		final PackagingProvider packagingProvider = packagingProviderRegistry.getPackagingProvider(value);
-		Assert.notNull(packagingProvider, "Unsupported packaging id '" + value + "'");
-		return packagingProvider;
-	}
+    public PackagingProvider convertFromText(final String value,
+            final Class<?> targetType, final String optionContext) {
+        final PackagingProvider packagingProvider = packagingProviderRegistry
+                .getPackagingProvider(value);
+        Assert.notNull(packagingProvider, "Unsupported packaging id '" + value
+                + "'");
+        return packagingProvider;
+    }
 
-	public boolean getAllPossibleValues(final List<Completion> completions, final Class<?> targetType, final String existingData, final String optionContext, final MethodTarget target) {
-		for (final PackagingProvider packagingProvider : packagingProviderRegistry.getAllPackagingProviders()) {
-			completions.add(new Completion(packagingProvider.getId().toUpperCase()));
-		}
-		return true;
-	}
+    public boolean getAllPossibleValues(final List<Completion> completions,
+            final Class<?> targetType, final String existingData,
+            final String optionContext, final MethodTarget target) {
+        for (final PackagingProvider packagingProvider : packagingProviderRegistry
+                .getAllPackagingProviders()) {
+            completions.add(new Completion(packagingProvider.getId()
+                    .toUpperCase()));
+        }
+        return true;
+    }
 }

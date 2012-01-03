@@ -4,15 +4,15 @@ import org.springframework.roo.model.JavaType;
 
 /**
  * Provides operations for Web MVC finder functionality.
- *
+ * 
  * @author Stefan Schmidt
  * @since 1.2.0
  */
 public interface WebFinderOperations {
 
-	boolean isWebFinderInstallationPossible();
+    boolean isWebFinderInstallationPossible();
 
-	void annotateAll();
+    void annotateAll();
 
-	void annotateType(JavaType controllerType, JavaType entityType);
+    void annotateType(JavaType controllerType, JavaType entityType);
 }

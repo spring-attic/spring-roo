@@ -34,7 +34,7 @@ import org.springframework.roo.support.util.Assert;
 
 /**
  * Implementation of {@link DataOnDemandOperations}.
- *
+ * 
  * @author Alan Stewart
  * @since 1.1.3
  */
@@ -42,61 +42,85 @@ import org.springframework.roo.support.util.Assert;
 @Service
 public class DataOnDemandOperationsImpl implements DataOnDemandOperations {
 
-	// Fields
-	@Reference private MetadataService metadataService;
-	@Reference private MemberDetailsScanner memberDetailsScanner;
-	@Reference private ProjectOperations projectOperations;
-	@Reference private TypeLocationService typeLocationService;
-	@Reference private TypeManagementService typeManagementService;
+    // Fields
+    @Reference private MetadataService metadataService;
+    @Reference private MemberDetailsScanner memberDetailsScanner;
+    @Reference private ProjectOperations projectOperations;
+    @Reference private TypeLocationService typeLocationService;
+    @Reference private TypeManagementService typeManagementService;
 
-	public boolean isDataOnDemandInstallationPossible() {
-		return projectOperations.isFocusedProjectAvailable() && projectOperations.isFeatureInstalledInFocusedModule(FeatureNames.JPA, FeatureNames.MONGO);
-	}
+    public boolean isDataOnDemandInstallationPossible() {
+        return projectOperations.isFocusedProjectAvailable()
+                && projectOperations.isFeatureInstalledInFocusedModule(
+                        FeatureNames.JPA, FeatureNames.MONGO);
+    }
 
-	public void newDod(final JavaType entity, final JavaType name) {
-		Assert.notNull(entity, "Entity to produce a data on demand provider for is required");
-		Assert.notNull(name, "Name of the new data on demand provider is required");
+    public void newDod(final JavaType entity, final JavaType name) {
+        Assert.notNull(entity,
+                "Entity to produce a data on demand provider for is required");
+        Assert.notNull(name,
+                "Name of the new data on demand provider is required");
 
-		final LogicalPath path = LogicalPath.getInstance(Path.SRC_TEST_JAVA, projectOperations.getFocusedModuleName());
-		Assert.notNull(path, "Location of the new data on demand provider is required");
+        final LogicalPath path = LogicalPath.getInstance(Path.SRC_TEST_JAVA,
+                projectOperations.getFocusedModuleName());
+        Assert.notNull(path,
+                "Location of the new data on demand provider is required");
 
-		// Verify the requested entity actually exists as a class and is not abstract
-		ClassOrInterfaceTypeDetails cid = getEntity(entity);
-		Assert.isTrue(cid.getPhysicalTypeCategory() == PhysicalTypeCategory.CLASS, "Type " + entity.getFullyQualifiedTypeName() + " is not a class");
-		Assert.isTrue(!Modifier.isAbstract(cid.getModifier()), "Type " + entity.getFullyQualifiedTypeName() + " is abstract");
+        // Verify the requested entity actually exists as a class and is not
+        // abstract
+        ClassOrInterfaceTypeDetails cid = getEntity(entity);
+        Assert.isTrue(
+                cid.getPhysicalTypeCategory() == PhysicalTypeCategory.CLASS,
+                "Type " + entity.getFullyQualifiedTypeName()
+                        + " is not a class");
+        Assert.isTrue(!Modifier.isAbstract(cid.getModifier()),
+                "Type " + entity.getFullyQualifiedTypeName() + " is abstract");
 
-		// Check if the requested entity is a JPA @Entity
-		MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(DataOnDemandOperationsImpl.class.getName(), cid);
-		AnnotationMetadata entityAnnotation = memberDetails.getAnnotation(ENTITY);
-		AnnotationMetadata persistentAnnotation = memberDetails.getAnnotation(PERSISTENT);
-		Assert.isTrue(entityAnnotation != null || persistentAnnotation != null, "Type " + entity.getFullyQualifiedTypeName() + " must be a persistent type");
+        // Check if the requested entity is a JPA @Entity
+        MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(
+                DataOnDemandOperationsImpl.class.getName(), cid);
+        AnnotationMetadata entityAnnotation = memberDetails
+                .getAnnotation(ENTITY);
+        AnnotationMetadata persistentAnnotation = memberDetails
+                .getAnnotation(PERSISTENT);
+        Assert.isTrue(entityAnnotation != null || persistentAnnotation != null,
+                "Type " + entity.getFullyQualifiedTypeName()
+                        + " must be a persistent type");
 
-		// Everything is OK to proceed
-		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(name, path);
+        // Everything is OK to proceed
+        String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(
+                name, path);
 
-		if (metadataService.get(declaredByMetadataId) != null) {
-			// The file already exists
-			return;
-		}
+        if (metadataService.get(declaredByMetadataId) != null) {
+            // The file already exists
+            return;
+        }
 
-		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
-		List<AnnotationAttributeValue<?>> dodConfig = new ArrayList<AnnotationAttributeValue<?>>();
-		dodConfig.add(new ClassAttributeValue(new JavaSymbolName("entity"), entity));
-		annotations.add(new AnnotationMetadataBuilder(RooJavaType.ROO_DATA_ON_DEMAND, dodConfig));
+        List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+        List<AnnotationAttributeValue<?>> dodConfig = new ArrayList<AnnotationAttributeValue<?>>();
+        dodConfig.add(new ClassAttributeValue(new JavaSymbolName("entity"),
+                entity));
+        annotations.add(new AnnotationMetadataBuilder(
+                RooJavaType.ROO_DATA_ON_DEMAND, dodConfig));
 
-		ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC, name, PhysicalTypeCategory.CLASS);
-		cidBuilder.setAnnotations(annotations);
+        ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(
+                declaredByMetadataId, Modifier.PUBLIC, name,
+                PhysicalTypeCategory.CLASS);
+        cidBuilder.setAnnotations(annotations);
 
-		typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
-	}
+        typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
+    }
 
-	/**
-	 * @param entity the entity to lookup required
-	 * @return the type details (never null; throws an exception if it cannot be obtained or parsed)
-	 */
-	private ClassOrInterfaceTypeDetails getEntity(final JavaType entity) {
-		ClassOrInterfaceTypeDetails cid = typeLocationService.getTypeDetails(entity);
-		Assert.notNull(cid, "Java source code details unavailable for type '" + entity + "'");
-		return cid;
-	}
+    /**
+     * @param entity the entity to lookup required
+     * @return the type details (never null; throws an exception if it cannot be
+     *         obtained or parsed)
+     */
+    private ClassOrInterfaceTypeDetails getEntity(final JavaType entity) {
+        ClassOrInterfaceTypeDetails cid = typeLocationService
+                .getTypeDetails(entity);
+        Assert.notNull(cid, "Java source code details unavailable for type '"
+                + entity + "'");
+        return cid;
+    }
 }

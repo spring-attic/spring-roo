@@ -11,27 +11,30 @@ import org.osgi.service.component.ComponentContext;
 
 /**
  * Unit test of {@link OSGiUtils}
- *
+ * 
  * @author Andrew Swan
  * @since 1.2.0
  */
 public class OSGiUtilsTest {
 
-	// Constants
-	private static final String ROO_WORKING_DIRECTORY = "/some/file/path";
+    // Constants
+    private static final String ROO_WORKING_DIRECTORY = "/some/file/path";
 
-	@Test
-	public void testGetRooWorkingDirectory() {
-		// Set up
-		final BundleContext mockBundleContext = mock(BundleContext.class);
-		when(mockBundleContext.getProperty(ROO_WORKING_DIRECTORY_PROPERTY)).thenReturn(ROO_WORKING_DIRECTORY);
-		final ComponentContext mockComponentContext = mock(ComponentContext.class);
-		when(mockComponentContext.getBundleContext()).thenReturn(mockBundleContext);
-		
-		// Invoke
-		final String rooWorkingDirectory = OSGiUtils.getRooWorkingDirectory(mockComponentContext);
-		
-		// Check
-		assertEquals(ROO_WORKING_DIRECTORY, rooWorkingDirectory);
-	}
+    @Test
+    public void testGetRooWorkingDirectory() {
+        // Set up
+        final BundleContext mockBundleContext = mock(BundleContext.class);
+        when(mockBundleContext.getProperty(ROO_WORKING_DIRECTORY_PROPERTY))
+                .thenReturn(ROO_WORKING_DIRECTORY);
+        final ComponentContext mockComponentContext = mock(ComponentContext.class);
+        when(mockComponentContext.getBundleContext()).thenReturn(
+                mockBundleContext);
+
+        // Invoke
+        final String rooWorkingDirectory = OSGiUtils
+                .getRooWorkingDirectory(mockComponentContext);
+
+        // Check
+        assertEquals(ROO_WORKING_DIRECTORY, rooWorkingDirectory);
+    }
 }

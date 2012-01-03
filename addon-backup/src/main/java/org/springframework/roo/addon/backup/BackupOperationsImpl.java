@@ -28,7 +28,7 @@ import org.springframework.roo.support.util.IOUtils;
 
 /**
  * Operations for the 'backup' add-on.
- *
+ * 
  * @author Stefan Schmidt
  * @author Ben Alex
  * @author Alan Stewart
@@ -38,83 +38,100 @@ import org.springframework.roo.support.util.IOUtils;
 @Service
 public class BackupOperationsImpl implements BackupOperations {
 
-	// Constants
-	private static final Logger LOGGER = HandlerUtils.getLogger(BackupOperationsImpl.class);
+    // Constants
+    private static final Logger LOGGER = HandlerUtils
+            .getLogger(BackupOperationsImpl.class);
 
-	// Fields
-	@Reference private FileManager fileManager;
-	@Reference private ProjectOperations projectOperations;
+    // Fields
+    @Reference private FileManager fileManager;
+    @Reference private ProjectOperations projectOperations;
 
-	public boolean isBackupPossible() {
-		return projectOperations.isFocusedProjectAvailable();
-	}
+    public boolean isBackupPossible() {
+        return projectOperations.isFocusedProjectAvailable();
+    }
 
-	public String backup() {
-		Assert.isTrue(isBackupPossible(), "Project metadata unavailable");
+    public String backup() {
+        Assert.isTrue(isBackupPossible(), "Project metadata unavailable");
 
-		// For Windows, make a date format that can legally form part of a filename (ROO-277)
-		final String pattern = File.separatorChar == '\\' ? "yyyy-MM-dd_HH.mm.ss" : "yyyy-MM-dd_HH:mm:ss";
-		final DateFormat df = new SimpleDateFormat(pattern);
-		long start = System.nanoTime();
+        // For Windows, make a date format that can legally form part of a
+        // filename (ROO-277)
+        final String pattern = File.separatorChar == '\\' ? "yyyy-MM-dd_HH.mm.ss"
+                : "yyyy-MM-dd_HH:mm:ss";
+        final DateFormat df = new SimpleDateFormat(pattern);
+        long start = System.nanoTime();
 
-		ZipOutputStream zos = null;
-		try {
-			File projectDirectory = new File(projectOperations.getPathResolver().getFocusedIdentifier(Path.ROOT, "."));
-			MutableFile file = fileManager.createFile(FileUtils.getCanonicalPath(new File(projectDirectory, projectOperations.getFocusedProjectName() + "_" + df.format(new Date()) + ".zip")));
-			zos = new ZipOutputStream(file.getOutputStream());
-			zip(projectDirectory, projectDirectory, zos);
-		} catch (FileNotFoundException e) {
-			LOGGER.fine("Could not determine project directory");
-		} catch (IOException e) {
-			LOGGER.fine("Could not create backup archive");
-		} finally {
-			IOUtils.closeQuietly(zos);
-		}
+        ZipOutputStream zos = null;
+        try {
+            File projectDirectory = new File(projectOperations
+                    .getPathResolver().getFocusedIdentifier(Path.ROOT, "."));
+            MutableFile file = fileManager.createFile(FileUtils
+                    .getCanonicalPath(new File(projectDirectory,
+                            projectOperations.getFocusedProjectName() + "_"
+                                    + df.format(new Date()) + ".zip")));
+            zos = new ZipOutputStream(file.getOutputStream());
+            zip(projectDirectory, projectDirectory, zos);
+        }
+        catch (FileNotFoundException e) {
+            LOGGER.fine("Could not determine project directory");
+        }
+        catch (IOException e) {
+            LOGGER.fine("Could not create backup archive");
+        }
+        finally {
+            IOUtils.closeQuietly(zos);
+        }
 
-		long milliseconds = (System.nanoTime() - start) / 1000000;
-		return "Backup completed in " + milliseconds + " ms";
-	}
+        long milliseconds = (System.nanoTime() - start) / 1000000;
+        return "Backup completed in " + milliseconds + " ms";
+    }
 
-	private void zip(final File directory, final File base, final ZipOutputStream zos) throws IOException {
-		final File[] files = directory.listFiles(new FilenameFilter() {
-			public boolean accept(final File dir, final String name) {
-				// Don't use this directory if it's "target" under base
-				if (dir.equals(base) && name.equals("target")) {
-					return false;
-				}
+    private void zip(final File directory, final File base,
+            final ZipOutputStream zos) throws IOException {
+        final File[] files = directory.listFiles(new FilenameFilter() {
+            public boolean accept(final File dir, final String name) {
+                // Don't use this directory if it's "target" under base
+                if (dir.equals(base) && name.equals("target")) {
+                    return false;
+                }
 
-				// Skip existing backup files
-				if (dir.equals(base) && name.endsWith(".zip")) {
-					return false;
-				}
+                // Skip existing backup files
+                if (dir.equals(base) && name.endsWith(".zip")) {
+                    return false;
+                }
 
-				// Skip files that start with "."
-				return !name.startsWith(".");
-			}
-		});
+                // Skip files that start with "."
+                return !name.startsWith(".");
+            }
+        });
 
-		byte[] buffer = new byte[8192];
-		int read = 0;
-		for (int i = 0, n = files.length; i < n; i++) {
-			if (files[i].isDirectory()) {
-				if (files[i].listFiles().length == 0) {
-					ZipEntry dirEntry = new ZipEntry(files[i].getPath().substring(base.getPath().length() + 1) + File.separatorChar);
-					zos.putNextEntry(dirEntry);
-				}
-				zip(files[i], base, zos);
-			} else {
-				InputStream inputStream = null;
-				try {
-					inputStream = new BufferedInputStream(new FileInputStream(files[i]));
-					ZipEntry entry = new ZipEntry(files[i].getPath().substring(base.getPath().length() + 1));
-					zos.putNextEntry(entry);
-					while ((read = inputStream.read(buffer)) != -1) {
-						zos.write(buffer, 0, read);
-					}
-				} finally {
-					IOUtils.closeQuietly(inputStream);
-				}
-			}
-		}
-	}
+        byte[] buffer = new byte[8192];
+        int read = 0;
+        for (int i = 0, n = files.length; i < n; i++) {
+            if (files[i].isDirectory()) {
+                if (files[i].listFiles().length == 0) {
+                    ZipEntry dirEntry = new ZipEntry(files[i].getPath()
+                            .substring(base.getPath().length() + 1)
+                            + File.separatorChar);
+                    zos.putNextEntry(dirEntry);
+                }
+                zip(files[i], base, zos);
+            }
+            else {
+                InputStream inputStream = null;
+                try {
+                    inputStream = new BufferedInputStream(new FileInputStream(
+                            files[i]));
+                    ZipEntry entry = new ZipEntry(files[i].getPath().substring(
+                            base.getPath().length() + 1));
+                    zos.putNextEntry(entry);
+                    while ((read = inputStream.read(buffer)) != -1) {
+                        zos.write(buffer, 0, read);
+                    }
+                }
+                finally {
+                    IOUtils.closeQuietly(inputStream);
+                }
+            }
+        }
+    }
 }

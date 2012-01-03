@@ -6,10 +6,11 @@ import org.springframework.roo.shell.converters.DoubleConverter;
 
 /**
  * OSGi component launcher for {@link DoubleConverter}.
- *
+ * 
  * @author Ben Alex
  * @since 1.1
  */
 @Component
 @Service
-public class DoubleConverterComponent extends DoubleConverter {}
+public class DoubleConverterComponent extends DoubleConverter {
+}

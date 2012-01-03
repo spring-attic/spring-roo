@@ -15,31 +15,36 @@ import com.vmware.appcloud.client.ServiceConfiguration;
 
 /**
  * Provides conversion to and from Cloud Foundry model classes.
- *
+ * 
  * @author James Tyrrell
  * @author Andrew Swan
  * @since 1.2.0
  */
 @Component
 @Service
-public class ServiceConfigurationConverter implements Converter<ServiceConfiguration> {
-	@Reference private CloudFoundrySession session;
+public class ServiceConfigurationConverter implements
+        Converter<ServiceConfiguration> {
+    @Reference private CloudFoundrySession session;
 
-	public ServiceConfiguration convertFromText(final String value, final Class<?> requiredType, final String optionContext) {
-		if (StringUtils.isBlank(value)) {
-			return null;
-		}
-		return session.getService(value);
-	}
+    public ServiceConfiguration convertFromText(final String value,
+            final Class<?> requiredType, final String optionContext) {
+        if (StringUtils.isBlank(value)) {
+            return null;
+        }
+        return session.getService(value);
+    }
 
-	public boolean supports(final Class<?> requiredType, final String optionContext) {
-		return ServiceConfiguration.class.isAssignableFrom(requiredType);
-	}
+    public boolean supports(final Class<?> requiredType,
+            final String optionContext) {
+        return ServiceConfiguration.class.isAssignableFrom(requiredType);
+    }
 
-	public boolean getAllPossibleValues(final List<Completion> completions, final Class<?> requiredType, final String existingData, final String optionContext, final MethodTarget target) {
-		for (String serviceType : session.getServiceTypes()) {
-			completions.add(new Completion(serviceType));
-		}
-		return false;
-	}
+    public boolean getAllPossibleValues(final List<Completion> completions,
+            final Class<?> requiredType, final String existingData,
+            final String optionContext, final MethodTarget target) {
+        for (String serviceType : session.getServiceTypes()) {
+            completions.add(new Completion(serviceType));
+        }
+        return false;
+    }
 }

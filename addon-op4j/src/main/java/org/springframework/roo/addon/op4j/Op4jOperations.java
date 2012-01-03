@@ -4,15 +4,15 @@ import org.springframework.roo.model.JavaType;
 
 /**
  * Interface of Op4j commands that are available via the Roo shell.
- *
+ * 
  * @author Stefan Schmidt
  * @since 1.1
  */
 public interface Op4jOperations {
 
-	boolean isOp4jInstallationPossible();
+    boolean isOp4jInstallationPossible();
 
-	void annotateType(JavaType type);
+    void annotateType(JavaType type);
 
-	void setup();
+    void setup();
 }

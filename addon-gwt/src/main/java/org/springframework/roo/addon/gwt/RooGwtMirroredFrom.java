@@ -9,17 +9,17 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.SOURCE)
 public @interface RooGwtMirroredFrom {
 
-	String value();
+    String value();
 
-	String[] exclude() default {};
+    String[] exclude() default {};
 
-	String[] readOnly() default {};
+    String[] readOnly() default {};
 
-	boolean ignoreProxyExclusions() default false;
+    boolean ignoreProxyExclusions() default false;
 
-	boolean ignoreProxyReadOnly() default false;
+    boolean ignoreProxyReadOnly() default false;
 
-	boolean dontIncludeProxyMethods() default true;
+    boolean dontIncludeProxyMethods() default true;
 
-	boolean scaffold() default false;
+    boolean scaffold() default false;
 }

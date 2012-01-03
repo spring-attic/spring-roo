@@ -14,32 +14,39 @@ import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Provides conversion to and from Cloud Foundry model classes.
- *
+ * 
  * @author James Tyrrell
  * @author Andrew Swan
  * @since 1.2.0
  */
 @Component
 @Service
-public class CloudAppMemoryOptionConverter implements Converter<CloudAppMemoryOption> {
-	private static final String MEMORY_OPTION_SUFFIX = "MB";
-	@Reference private CloudFoundrySession session;
+public class CloudAppMemoryOptionConverter implements
+        Converter<CloudAppMemoryOption> {
+    private static final String MEMORY_OPTION_SUFFIX = "MB";
+    @Reference private CloudFoundrySession session;
 
-	public CloudAppMemoryOption convertFromText(final String value, final Class<?> requiredType, final String optionContext) {
-		if (StringUtils.isBlank(value)) {
-			return null;
-		}
-		return new CloudAppMemoryOption(Integer.valueOf(value.replace(MEMORY_OPTION_SUFFIX, "")));
-	}
+    public CloudAppMemoryOption convertFromText(final String value,
+            final Class<?> requiredType, final String optionContext) {
+        if (StringUtils.isBlank(value)) {
+            return null;
+        }
+        return new CloudAppMemoryOption(Integer.valueOf(value.replace(
+                MEMORY_OPTION_SUFFIX, "")));
+    }
 
-	public boolean supports(final Class<?> requiredType, final String optionContext) {
-		return CloudAppMemoryOption.class.isAssignableFrom(requiredType);
-	}
+    public boolean supports(final Class<?> requiredType,
+            final String optionContext) {
+        return CloudAppMemoryOption.class.isAssignableFrom(requiredType);
+    }
 
-	public boolean getAllPossibleValues(final List<Completion> completions, final Class<?> requiredType, final String existingData, final String optionContext, final MethodTarget target) {
-		for (Integer memoryOption : session.getApplicationMemoryOptions()) {
-			completions.add(new Completion(memoryOption + MEMORY_OPTION_SUFFIX));
-		}
-		return false;
-	}
+    public boolean getAllPossibleValues(final List<Completion> completions,
+            final Class<?> requiredType, final String existingData,
+            final String optionContext, final MethodTarget target) {
+        for (Integer memoryOption : session.getApplicationMemoryOptions()) {
+            completions
+                    .add(new Completion(memoryOption + MEMORY_OPTION_SUFFIX));
+        }
+        return false;
+    }
 }

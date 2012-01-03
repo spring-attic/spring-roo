@@ -7,12 +7,12 @@ package org.springframework.roo.addon.tailor.config;
  */
 public interface TailorConfigurationFactory {
 
-	/**
-	 * Creates tailor configuration
-	 * 
-	 * @param name - configuration name
-	 * @return - tailor configuration
-	 */
-	TailorConfiguration createTailorConfiguration();
-	
+    /**
+     * Creates tailor configuration
+     * 
+     * @param name - configuration name
+     * @return - tailor configuration
+     */
+    TailorConfiguration createTailorConfiguration();
+
 }

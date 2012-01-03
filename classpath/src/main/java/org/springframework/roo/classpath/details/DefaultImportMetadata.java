@@ -7,51 +7,55 @@ import org.springframework.roo.support.style.ToStringCreator;
 
 /**
  * Default implementation of {@link ImportMetadata}.
- *
+ * 
  * @author James Tyrrell
  * @since 1.1.1
  */
-public class DefaultImportMetadata extends AbstractIdentifiableJavaStructureProvider implements ImportMetadata {
+public class DefaultImportMetadata extends
+        AbstractIdentifiableJavaStructureProvider implements ImportMetadata {
 
-	// Fields
-	private boolean isStatic = false;
-	private final JavaPackage importPackage;
-	private final JavaType importType;
-	private boolean isAsterisk = false;
+    // Fields
+    private boolean isStatic = false;
+    private final JavaPackage importPackage;
+    private final JavaType importType;
+    private boolean isAsterisk = false;
 
-	// Package protected to mandate the use of ImportMetadataBuilder
-	DefaultImportMetadata(final CustomData customData, final String declaredByMetadataId, final int modifier, final JavaPackage importPackage, final JavaType importType, final boolean isStatic, final boolean isAsterisk) {
-		super(customData, declaredByMetadataId, modifier);
-		this.importPackage = importPackage;
-		this.importType = importType;
-		this.isStatic = isStatic;
-		this.isAsterisk = isAsterisk;
-	}
+    // Package protected to mandate the use of ImportMetadataBuilder
+    DefaultImportMetadata(final CustomData customData,
+            final String declaredByMetadataId, final int modifier,
+            final JavaPackage importPackage, final JavaType importType,
+            final boolean isStatic, final boolean isAsterisk) {
+        super(customData, declaredByMetadataId, modifier);
+        this.importPackage = importPackage;
+        this.importType = importType;
+        this.isStatic = isStatic;
+        this.isAsterisk = isAsterisk;
+    }
 
-	public JavaPackage getImportPackage() {
-		return importPackage;
-	}
+    public JavaPackage getImportPackage() {
+        return importPackage;
+    }
 
-	public JavaType getImportType() {
-		return importType;
-	}
+    public JavaType getImportType() {
+        return importType;
+    }
 
-	public boolean isStatic() {
-		return isStatic;
-	}
+    public boolean isStatic() {
+        return isStatic;
+    }
 
-	public boolean isAsterisk() {
-		return isAsterisk;
-	}
+    public boolean isAsterisk() {
+        return isAsterisk;
+    }
 
-	@Override
-	public String toString() {
-		ToStringCreator tsc = new ToStringCreator(this);
-		tsc.append("declaredByMetadataId", getDeclaredByMetadataId());
-		tsc.append("typePackage", importPackage);
-		tsc.append("type", importType);
-		tsc.append("isStatic", isStatic);
-		tsc.append("isAsterisk", isAsterisk);
-		return tsc.toString();
-	}
+    @Override
+    public String toString() {
+        ToStringCreator tsc = new ToStringCreator(this);
+        tsc.append("declaredByMetadataId", getDeclaredByMetadataId());
+        tsc.append("typePackage", importPackage);
+        tsc.append("type", importType);
+        tsc.append("isStatic", isStatic);
+        tsc.append("isAsterisk", isAsterisk);
+        return tsc.toString();
+    }
 }

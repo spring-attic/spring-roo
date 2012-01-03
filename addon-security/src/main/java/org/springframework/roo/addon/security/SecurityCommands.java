@@ -9,7 +9,7 @@ import org.springframework.roo.shell.CommandMarker;
 
 /**
  * Commands for the security add-on to be used by the ROO shell.
- *
+ * 
  * @author Ben Alex
  * @since 1.0
  */
@@ -17,16 +17,16 @@ import org.springframework.roo.shell.CommandMarker;
 @Service
 public class SecurityCommands implements CommandMarker {
 
-	// Fields
-	@Reference private SecurityOperations securityOperations;
+    // Fields
+    @Reference private SecurityOperations securityOperations;
 
-	@CliAvailabilityIndicator("security setup")
-	public boolean isInstallSecurityAvailable() {
-		return securityOperations.isSecurityInstallationPossible();
-	}
+    @CliAvailabilityIndicator("security setup")
+    public boolean isInstallSecurityAvailable() {
+        return securityOperations.isSecurityInstallationPossible();
+    }
 
-	@CliCommand(value = "security setup", help = "Install Spring Security into your project")
-	public void installSecurity() {
-		securityOperations.installSecurity();
-	}
+    @CliCommand(value = "security setup", help = "Install Spring Security into your project")
+    public void installSecurity() {
+        securityOperations.installSecurity();
+    }
 }

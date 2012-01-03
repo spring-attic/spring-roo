@@ -47,231 +47,333 @@ import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Metadata for finder functionality provided via {@link RooWebScaffold}.
- *
+ * 
  * @author Stefan Schmidt
  * @since 1.1.3
  */
-public class WebFinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
+public class WebFinderMetadata extends
+        AbstractItdTypeDetailsProvidingMetadataItem {
 
-	// Constants
-	private static final String PROVIDES_TYPE_STRING = WebFinderMetadata.class.getName();
-	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
+    // Constants
+    private static final String PROVIDES_TYPE_STRING = WebFinderMetadata.class
+            .getName();
+    private static final String PROVIDES_TYPE = MetadataIdentificationUtils
+            .create(PROVIDES_TYPE_STRING);
 
-	// Fields
-	private JavaType formBackingType;
-	private JavaTypeMetadataDetails javaTypeMetadataHolder;
-	private Map<JavaType, JavaTypeMetadataDetails> specialDomainTypes;
-	private String controllerPath;
-	private WebScaffoldAnnotationValues annotationValues;
+    // Fields
+    private JavaType formBackingType;
+    private JavaTypeMetadataDetails javaTypeMetadataHolder;
+    private Map<JavaType, JavaTypeMetadataDetails> specialDomainTypes;
+    private String controllerPath;
+    private WebScaffoldAnnotationValues annotationValues;
 
-	/**
-	 * Constructor
-	 *
-	 * @param identifier
-	 * @param aspectName
-	 * @param governorPhysicalTypeMetadata
-	 * @param annotationValues
-	 * @param specialDomainTypes
-	 * @param dynamicFinderMethods
-	 */
-	public WebFinderMetadata(final String identifier, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final WebScaffoldAnnotationValues annotationValues, final SortedMap<JavaType, JavaTypeMetadataDetails> specialDomainTypes, final Set<FinderMetadataDetails> dynamicFinderMethods) {
-		super(identifier, aspectName, governorPhysicalTypeMetadata);
-		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
-		Assert.notNull(annotationValues, "Annotation values required");
-		Assert.notNull(specialDomainTypes, "Special domain type map required");
-		Assert.notNull(dynamicFinderMethods, "Dynamoic finder methods required");
+    /**
+     * Constructor
+     * 
+     * @param identifier
+     * @param aspectName
+     * @param governorPhysicalTypeMetadata
+     * @param annotationValues
+     * @param specialDomainTypes
+     * @param dynamicFinderMethods
+     */
+    public WebFinderMetadata(
+            final String identifier,
+            final JavaType aspectName,
+            final PhysicalTypeMetadata governorPhysicalTypeMetadata,
+            final WebScaffoldAnnotationValues annotationValues,
+            final SortedMap<JavaType, JavaTypeMetadataDetails> specialDomainTypes,
+            final Set<FinderMetadataDetails> dynamicFinderMethods) {
+        super(identifier, aspectName, governorPhysicalTypeMetadata);
+        Assert.isTrue(isValid(identifier), "Metadata identification string '"
+                + identifier + "' does not appear to be a valid");
+        Assert.notNull(annotationValues, "Annotation values required");
+        Assert.notNull(specialDomainTypes, "Special domain type map required");
+        Assert.notNull(dynamicFinderMethods, "Dynamoic finder methods required");
 
-		if (!isValid()) {
-			return;
-		}
+        if (!isValid()) {
+            return;
+        }
 
-		this.annotationValues = annotationValues;
-		this.controllerPath = annotationValues.getPath();
-		this.formBackingType = annotationValues.getFormBackingObject();
-		this.specialDomainTypes = specialDomainTypes;
+        this.annotationValues = annotationValues;
+        this.controllerPath = annotationValues.getPath();
+        this.formBackingType = annotationValues.getFormBackingObject();
+        this.specialDomainTypes = specialDomainTypes;
 
-		if (dynamicFinderMethods.isEmpty()) {
-			valid = false;
-			return;
-		}
+        if (dynamicFinderMethods.isEmpty()) {
+            valid = false;
+            return;
+        }
 
-		javaTypeMetadataHolder = specialDomainTypes.get(formBackingType);
-		Assert.notNull(javaTypeMetadataHolder, "Metadata holder required for form backing type: " + formBackingType);
+        javaTypeMetadataHolder = specialDomainTypes.get(formBackingType);
+        Assert.notNull(javaTypeMetadataHolder,
+                "Metadata holder required for form backing type: "
+                        + formBackingType);
 
-		for (FinderMetadataDetails finder : dynamicFinderMethods) {
-			builder.addMethod(getFinderFormMethod(finder));
-			builder.addMethod(getFinderMethod(finder));
-		}
+        for (FinderMetadataDetails finder : dynamicFinderMethods) {
+            builder.addMethod(getFinderFormMethod(finder));
+            builder.addMethod(getFinderMethod(finder));
+        }
 
-		itdTypeDetails = builder.build();
-	}
+        itdTypeDetails = builder.build();
+    }
 
-	public WebScaffoldAnnotationValues getAnnotationValues() {
-		return annotationValues;
-	}
+    public WebScaffoldAnnotationValues getAnnotationValues() {
+        return annotationValues;
+    }
 
-	private MethodMetadataBuilder getFinderFormMethod(final FinderMetadataDetails finder) {
-		Assert.notNull(finder, "Method metadata required for finder");
-		JavaSymbolName finderFormMethodName = new JavaSymbolName(finder.getFinderMethodMetadata().getMethodName().getSymbolName() + "Form");
+    private MethodMetadataBuilder getFinderFormMethod(
+            final FinderMetadataDetails finder) {
+        Assert.notNull(finder, "Method metadata required for finder");
+        JavaSymbolName finderFormMethodName = new JavaSymbolName(finder
+                .getFinderMethodMetadata().getMethodName().getSymbolName()
+                + "Form");
 
-		List<JavaType> parameterTypes = new ArrayList<JavaType>();
-		List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
-		List<JavaType> types = AnnotatedJavaType.convertFromAnnotatedJavaTypes(finder.getFinderMethodMetadata().getParameterTypes());
+        List<JavaType> parameterTypes = new ArrayList<JavaType>();
+        List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+        List<JavaType> types = AnnotatedJavaType
+                .convertFromAnnotatedJavaTypes(finder.getFinderMethodMetadata()
+                        .getParameterTypes());
 
-		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+        InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
-		boolean needmodel = false;
-		for (JavaType javaType : types) {
-			JavaTypeMetadataDetails typeMd = specialDomainTypes.get(javaType);
-			JavaTypePersistenceMetadataDetails javaTypePersistenceMetadataHolder = null;
-			if (javaType.isCommonCollectionType()) {
-				JavaTypeMetadataDetails paramTypeMd = specialDomainTypes.get(javaType.getParameters().get(0));
-				if (paramTypeMd != null && paramTypeMd.isApplicationType()) {
-					javaTypePersistenceMetadataHolder = paramTypeMd.getPersistenceDetails();
-				}
-			} else if (typeMd != null && typeMd.isEnumType()) {
-				bodyBuilder.appendFormalLine("uiModel.addAttribute(\"" + typeMd.getPlural().toLowerCase() + "\", java.util.Arrays.asList(" + javaType.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ".class.getEnumConstants()));");
-			} else if (typeMd != null && typeMd.isApplicationType()) {
-				javaTypePersistenceMetadataHolder = typeMd.getPersistenceDetails();
-			}
-			if (typeMd != null && javaTypePersistenceMetadataHolder != null && javaTypePersistenceMetadataHolder.getFindAllMethod() != null) {
-				bodyBuilder.appendFormalLine("uiModel.addAttribute(\"" + typeMd.getPlural().toLowerCase() + "\", " + javaTypePersistenceMetadataHolder.getFindAllMethod().getMethodCall() + ");");
-			}
-			needmodel = true;
-		}
-		if (types.contains(DATE) || types.contains(CALENDAR)) {
-			bodyBuilder.appendFormalLine("addDateTimeFormatPatterns(uiModel);");
-		}
-		bodyBuilder.appendFormalLine("return \"" + controllerPath + "/" + finder.getFinderMethodMetadata().getMethodName().getSymbolName() + "\";");
+        boolean needmodel = false;
+        for (JavaType javaType : types) {
+            JavaTypeMetadataDetails typeMd = specialDomainTypes.get(javaType);
+            JavaTypePersistenceMetadataDetails javaTypePersistenceMetadataHolder = null;
+            if (javaType.isCommonCollectionType()) {
+                JavaTypeMetadataDetails paramTypeMd = specialDomainTypes
+                        .get(javaType.getParameters().get(0));
+                if (paramTypeMd != null && paramTypeMd.isApplicationType()) {
+                    javaTypePersistenceMetadataHolder = paramTypeMd
+                            .getPersistenceDetails();
+                }
+            }
+            else if (typeMd != null && typeMd.isEnumType()) {
+                bodyBuilder.appendFormalLine("uiModel.addAttribute(\""
+                        + typeMd.getPlural().toLowerCase()
+                        + "\", java.util.Arrays.asList("
+                        + javaType.getNameIncludingTypeParameters(false,
+                                builder.getImportRegistrationResolver())
+                        + ".class.getEnumConstants()));");
+            }
+            else if (typeMd != null && typeMd.isApplicationType()) {
+                javaTypePersistenceMetadataHolder = typeMd
+                        .getPersistenceDetails();
+            }
+            if (typeMd != null
+                    && javaTypePersistenceMetadataHolder != null
+                    && javaTypePersistenceMetadataHolder.getFindAllMethod() != null) {
+                bodyBuilder.appendFormalLine("uiModel.addAttribute(\""
+                        + typeMd.getPlural().toLowerCase()
+                        + "\", "
+                        + javaTypePersistenceMetadataHolder.getFindAllMethod()
+                                .getMethodCall() + ");");
+            }
+            needmodel = true;
+        }
+        if (types.contains(DATE) || types.contains(CALENDAR)) {
+            bodyBuilder.appendFormalLine("addDateTimeFormatPatterns(uiModel);");
+        }
+        bodyBuilder.appendFormalLine("return \""
+                + controllerPath
+                + "/"
+                + finder.getFinderMethodMetadata().getMethodName()
+                        .getSymbolName() + "\";");
 
-		if (needmodel) {
-			parameterTypes.add(MODEL);
-			parameterNames.add(new JavaSymbolName("uiModel"));
-		}
+        if (needmodel) {
+            parameterTypes.add(MODEL);
+            parameterNames.add(new JavaSymbolName("uiModel"));
+        }
 
-		if (getGovernorMethod(finderFormMethodName, parameterTypes) != null) {
-			return null;
-		}
+        if (getGovernorMethod(finderFormMethodName, parameterTypes) != null) {
+            return null;
+        }
 
-		List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
-		List<StringAttributeValue> arrayValues = new ArrayList<StringAttributeValue>();
-		arrayValues.add(new StringAttributeValue(new JavaSymbolName("value"), "find=" + finder.getFinderMethodMetadata().getMethodName().getSymbolName().replaceFirst("find" + javaTypeMetadataHolder.getPlural(), "")));
-		arrayValues.add(new StringAttributeValue(new JavaSymbolName("value"), "form"));
-		requestMappingAttributes.add(new ArrayAttributeValue<StringAttributeValue>(new JavaSymbolName("params"), arrayValues));
-		requestMappingAttributes.add(new EnumAttributeValue(new JavaSymbolName("method"), new EnumDetails(REQUEST_METHOD, new JavaSymbolName("GET"))));
-		AnnotationMetadataBuilder requestMapping = new AnnotationMetadataBuilder(REQUEST_MAPPING, requestMappingAttributes);
-		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
-		annotations.add(requestMapping);
+        List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
+        List<StringAttributeValue> arrayValues = new ArrayList<StringAttributeValue>();
+        arrayValues.add(new StringAttributeValue(new JavaSymbolName("value"),
+                "find="
+                        + finder.getFinderMethodMetadata()
+                                .getMethodName()
+                                .getSymbolName()
+                                .replaceFirst(
+                                        "find"
+                                                + javaTypeMetadataHolder
+                                                        .getPlural(), "")));
+        arrayValues.add(new StringAttributeValue(new JavaSymbolName("value"),
+                "form"));
+        requestMappingAttributes
+                .add(new ArrayAttributeValue<StringAttributeValue>(
+                        new JavaSymbolName("params"), arrayValues));
+        requestMappingAttributes.add(new EnumAttributeValue(new JavaSymbolName(
+                "method"), new EnumDetails(REQUEST_METHOD, new JavaSymbolName(
+                "GET"))));
+        AnnotationMetadataBuilder requestMapping = new AnnotationMetadataBuilder(
+                REQUEST_MAPPING, requestMappingAttributes);
+        List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+        annotations.add(requestMapping);
 
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, finderFormMethodName, JavaType.STRING, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
-		methodBuilder.setAnnotations(annotations);
-		return methodBuilder;
-	}
+        MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(
+                getId(), Modifier.PUBLIC, finderFormMethodName,
+                JavaType.STRING,
+                AnnotatedJavaType.convertFromJavaTypes(parameterTypes),
+                parameterNames, bodyBuilder);
+        methodBuilder.setAnnotations(annotations);
+        return methodBuilder;
+    }
 
-	private MethodMetadataBuilder getFinderMethod(final FinderMetadataDetails finderMetadataDetails) {
-		Assert.notNull(finderMetadataDetails, "Method metadata required for finder");
-		JavaSymbolName finderMethodName = new JavaSymbolName(finderMetadataDetails.getFinderMethodMetadata().getMethodName().getSymbolName());
+    private MethodMetadataBuilder getFinderMethod(
+            final FinderMetadataDetails finderMetadataDetails) {
+        Assert.notNull(finderMetadataDetails,
+                "Method metadata required for finder");
+        JavaSymbolName finderMethodName = new JavaSymbolName(
+                finderMetadataDetails.getFinderMethodMetadata().getMethodName()
+                        .getSymbolName());
 
-		List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
-		List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+        List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+        List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
 
-		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		StringBuilder methodParams = new StringBuilder();
+        InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+        StringBuilder methodParams = new StringBuilder();
 
-		boolean dateFieldPresent = false;
-		for (FieldMetadata field: finderMetadataDetails.getFinderMethodParamFields()) {
-			JavaSymbolName fieldName = field.getFieldName();
-			List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
-			List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
-			attributes.add(new StringAttributeValue(new JavaSymbolName("value"), uncapitalize(fieldName.getSymbolName())));
-			if (field.getFieldType().equals(JavaType.BOOLEAN_PRIMITIVE) || field.getFieldType().equals(JavaType.BOOLEAN_OBJECT)) {
-				attributes.add(new BooleanAttributeValue(new JavaSymbolName("required"), false));
-			}
-			AnnotationMetadataBuilder requestParamAnnotation = new AnnotationMetadataBuilder(REQUEST_PARAM, attributes);
-			annotations.add(requestParamAnnotation.build());
-			if (field.getFieldType().equals(DATE) || field.getFieldType().equals(CALENDAR)) {
-				dateFieldPresent = true;
-				AnnotationMetadata annotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), DATE_TIME_FORMAT);
-				if (annotation != null) {
-					DATE_TIME_FORMAT.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
-					annotations.add(annotation);
-				}
-			}
-			parameterNames.add(fieldName);
-			parameterTypes.add(new AnnotatedJavaType(field.getFieldType(), annotations));
+        boolean dateFieldPresent = false;
+        for (FieldMetadata field : finderMetadataDetails
+                .getFinderMethodParamFields()) {
+            JavaSymbolName fieldName = field.getFieldName();
+            List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
+            List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
+            attributes.add(new StringAttributeValue(
+                    new JavaSymbolName("value"), uncapitalize(fieldName
+                            .getSymbolName())));
+            if (field.getFieldType().equals(JavaType.BOOLEAN_PRIMITIVE)
+                    || field.getFieldType().equals(JavaType.BOOLEAN_OBJECT)) {
+                attributes.add(new BooleanAttributeValue(new JavaSymbolName(
+                        "required"), false));
+            }
+            AnnotationMetadataBuilder requestParamAnnotation = new AnnotationMetadataBuilder(
+                    REQUEST_PARAM, attributes);
+            annotations.add(requestParamAnnotation.build());
+            if (field.getFieldType().equals(DATE)
+                    || field.getFieldType().equals(CALENDAR)) {
+                dateFieldPresent = true;
+                AnnotationMetadata annotation = MemberFindingUtils
+                        .getAnnotationOfType(field.getAnnotations(),
+                                DATE_TIME_FORMAT);
+                if (annotation != null) {
+                    DATE_TIME_FORMAT.getNameIncludingTypeParameters(false,
+                            builder.getImportRegistrationResolver());
+                    annotations.add(annotation);
+                }
+            }
+            parameterNames.add(fieldName);
+            parameterTypes.add(new AnnotatedJavaType(field.getFieldType(),
+                    annotations));
 
-			if (field.getFieldType().equals(JavaType.BOOLEAN_OBJECT)) {
-				methodParams.append(fieldName + " == null ? Boolean.FALSE : " + fieldName + ", ");
-			} else {
-				methodParams.append(fieldName + ", ");
-			}
-		}
+            if (field.getFieldType().equals(JavaType.BOOLEAN_OBJECT)) {
+                methodParams.append(fieldName + " == null ? Boolean.FALSE : "
+                        + fieldName + ", ");
+            }
+            else {
+                methodParams.append(fieldName + ", ");
+            }
+        }
 
-		if (methodParams.length() > 0) {
-			methodParams.delete(methodParams.length() - 2, methodParams.length());
-		}
+        if (methodParams.length() > 0) {
+            methodParams.delete(methodParams.length() - 2,
+                    methodParams.length());
+        }
 
-		parameterTypes.add(new AnnotatedJavaType(MODEL));
-		if (getGovernorMethod(finderMethodName, AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes)) != null) {
-			return null;
-		}
+        parameterTypes.add(new AnnotatedJavaType(MODEL));
+        if (getGovernorMethod(finderMethodName,
+                AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes)) != null) {
+            return null;
+        }
 
-		List<JavaSymbolName> newParamNames = new ArrayList<JavaSymbolName>();
-		newParamNames.addAll(parameterNames);
-		newParamNames.add(new JavaSymbolName("uiModel"));
+        List<JavaSymbolName> newParamNames = new ArrayList<JavaSymbolName>();
+        newParamNames.addAll(parameterNames);
+        newParamNames.add(new JavaSymbolName("uiModel"));
 
-		List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
-		requestMappingAttributes.add(new StringAttributeValue(new JavaSymbolName("params"), "find=" + finderMetadataDetails.getFinderMethodMetadata().getMethodName().getSymbolName().replaceFirst("find" + javaTypeMetadataHolder.getPlural(), "")));
-		requestMappingAttributes.add(new EnumAttributeValue(new JavaSymbolName("method"), new EnumDetails(REQUEST_METHOD, new JavaSymbolName("GET"))));
-		AnnotationMetadataBuilder requestMapping = new AnnotationMetadataBuilder(REQUEST_MAPPING, requestMappingAttributes);
-		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
-		annotations.add(requestMapping);
+        List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
+        requestMappingAttributes.add(new StringAttributeValue(
+                new JavaSymbolName("params"), "find="
+                        + finderMetadataDetails
+                                .getFinderMethodMetadata()
+                                .getMethodName()
+                                .getSymbolName()
+                                .replaceFirst(
+                                        "find"
+                                                + javaTypeMetadataHolder
+                                                        .getPlural(), "")));
+        requestMappingAttributes.add(new EnumAttributeValue(new JavaSymbolName(
+                "method"), new EnumDetails(REQUEST_METHOD, new JavaSymbolName(
+                "GET"))));
+        AnnotationMetadataBuilder requestMapping = new AnnotationMetadataBuilder(
+                REQUEST_MAPPING, requestMappingAttributes);
+        List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+        annotations.add(requestMapping);
 
-		bodyBuilder.appendFormalLine("uiModel.addAttribute(\"" + javaTypeMetadataHolder.getPlural().toLowerCase() + "\", " + formBackingType.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "." + finderMetadataDetails.getFinderMethodMetadata().getMethodName().getSymbolName() + "(" + methodParams.toString() + ").getResultList());");
-		if (dateFieldPresent) {
-			bodyBuilder.appendFormalLine("addDateTimeFormatPatterns(uiModel);");
-		}
-		bodyBuilder.appendFormalLine("return \"" + controllerPath + "/list\";");
+        bodyBuilder.appendFormalLine("uiModel.addAttribute(\""
+                + javaTypeMetadataHolder.getPlural().toLowerCase()
+                + "\", "
+                + formBackingType.getNameIncludingTypeParameters(false,
+                        builder.getImportRegistrationResolver())
+                + "."
+                + finderMetadataDetails.getFinderMethodMetadata()
+                        .getMethodName().getSymbolName() + "("
+                + methodParams.toString() + ").getResultList());");
+        if (dateFieldPresent) {
+            bodyBuilder.appendFormalLine("addDateTimeFormatPatterns(uiModel);");
+        }
+        bodyBuilder.appendFormalLine("return \"" + controllerPath + "/list\";");
 
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, finderMethodName, JavaType.STRING, parameterTypes, newParamNames, bodyBuilder);
-		methodBuilder.setAnnotations(annotations);
-		return methodBuilder;
-	}
+        MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(
+                getId(), Modifier.PUBLIC, finderMethodName, JavaType.STRING,
+                parameterTypes, newParamNames, bodyBuilder);
+        methodBuilder.setAnnotations(annotations);
+        return methodBuilder;
+    }
 
-	private String uncapitalize(final String term) {
-		// [ROO-1790] this is needed to adhere to the JavaBean naming conventions (see JavaBean spec section 8.8)
-		return Introspector.decapitalize(StringUtils.capitalize(term));
-	}
+    private String uncapitalize(final String term) {
+        // [ROO-1790] this is needed to adhere to the JavaBean naming
+        // conventions (see JavaBean spec section 8.8)
+        return Introspector.decapitalize(StringUtils.capitalize(term));
+    }
 
-	@Override
-	public String toString() {
-		ToStringCreator tsc = new ToStringCreator(this);
-		tsc.append("identifier", getId());
-		tsc.append("valid", valid);
-		tsc.append("aspectName", aspectName);
-		tsc.append("destinationType", destination);
-		tsc.append("governor", governorPhysicalTypeMetadata.getId());
-		tsc.append("itdTypeDetails", itdTypeDetails);
-		return tsc.toString();
-	}
+    @Override
+    public String toString() {
+        ToStringCreator tsc = new ToStringCreator(this);
+        tsc.append("identifier", getId());
+        tsc.append("valid", valid);
+        tsc.append("aspectName", aspectName);
+        tsc.append("destinationType", destination);
+        tsc.append("governor", governorPhysicalTypeMetadata.getId());
+        tsc.append("itdTypeDetails", itdTypeDetails);
+        return tsc.toString();
+    }
 
-	public static String getMetadataIdentiferType() {
-		return PROVIDES_TYPE;
-	}
+    public static String getMetadataIdentiferType() {
+        return PROVIDES_TYPE;
+    }
 
-	public static String createIdentifier(final JavaType javaType, final LogicalPath path) {
-		return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
-	}
+    public static String createIdentifier(final JavaType javaType,
+            final LogicalPath path) {
+        return PhysicalTypeIdentifierNamingUtils.createIdentifier(
+                PROVIDES_TYPE_STRING, javaType, path);
+    }
 
-	public static JavaType getJavaType(final String metadataIdentificationString) {
-		return PhysicalTypeIdentifierNamingUtils.getJavaType(PROVIDES_TYPE_STRING, metadataIdentificationString);
-	}
+    public static JavaType getJavaType(final String metadataIdentificationString) {
+        return PhysicalTypeIdentifierNamingUtils.getJavaType(
+                PROVIDES_TYPE_STRING, metadataIdentificationString);
+    }
 
-	public static LogicalPath getPath(final String metadataIdentificationString) {
-		return PhysicalTypeIdentifierNamingUtils.getPath(PROVIDES_TYPE_STRING, metadataIdentificationString);
-	}
+    public static LogicalPath getPath(final String metadataIdentificationString) {
+        return PhysicalTypeIdentifierNamingUtils.getPath(PROVIDES_TYPE_STRING,
+                metadataIdentificationString);
+    }
 
-	public static boolean isValid(final String metadataIdentificationString) {
-		return PhysicalTypeIdentifierNamingUtils.isValid(PROVIDES_TYPE_STRING, metadataIdentificationString);
-	}
+    public static boolean isValid(final String metadataIdentificationString) {
+        return PhysicalTypeIdentifierNamingUtils.isValid(PROVIDES_TYPE_STRING,
+                metadataIdentificationString);
+    }
 }

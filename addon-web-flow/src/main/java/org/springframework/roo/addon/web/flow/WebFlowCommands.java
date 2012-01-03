@@ -10,7 +10,7 @@ import org.springframework.roo.shell.CommandMarker;
 
 /**
  * Commands for the 'web flow' add-on to be used by the Roo shell.
- *
+ * 
  * @author Stefan Schmidt
  * @since 1.0
  */
@@ -18,18 +18,18 @@ import org.springframework.roo.shell.CommandMarker;
 @Service
 public class WebFlowCommands implements CommandMarker {
 
-	// Fields
-	@Reference private WebFlowOperations webFlowOperations;
+    // Fields
+    @Reference private WebFlowOperations webFlowOperations;
 
-	@CliAvailabilityIndicator("web flow")
-	public boolean isInstallWebFlowAvailable() {
-		return webFlowOperations.isWebFlowInstallationPossible();
-	}
+    @CliAvailabilityIndicator("web flow")
+    public boolean isInstallWebFlowAvailable() {
+        return webFlowOperations.isWebFlowInstallationPossible();
+    }
 
-	@CliCommand(value = "web flow", help = "Install Spring Web Flow configuration artifacts into your project")
-	public void installWebFlow(
-		@CliOption(key = { "flowName" }, mandatory = false, help = "The name for your web flow") final String flowName) {
+    @CliCommand(value = "web flow", help = "Install Spring Web Flow configuration artifacts into your project")
+    public void installWebFlow(
+            @CliOption(key = { "flowName" }, mandatory = false, help = "The name for your web flow") final String flowName) {
 
-		webFlowOperations.installWebFlow(flowName);
-	}
+        webFlowOperations.installWebFlow(flowName);
+    }
 }

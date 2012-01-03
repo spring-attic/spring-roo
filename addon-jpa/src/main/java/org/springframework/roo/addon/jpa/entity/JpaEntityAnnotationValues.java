@@ -12,86 +12,92 @@ import org.springframework.roo.model.JavaType;
 /**
  * The purely JPA-related values of a single {@link RooJpaEntity} or
  * {@link RooJpaActiveRecord} annotation.
- *
+ * 
  * @author Andrew Swan
  * @since 1.2.0
  */
 public class JpaEntityAnnotationValues extends AbstractAnnotationValues {
 
-	// Fields (one for each attribute of the RooJpaEntity annotation)
-	@AutoPopulate private boolean mappedSuperclass;
-	
-	@AutoPopulate private JavaType identifierType;
-	@AutoPopulate private JavaType versionType = JavaType.INT_OBJECT;
-	
-	@AutoPopulate private String catalog = "";
-	@AutoPopulate private String entityName = "";
-	@AutoPopulate private String identifierColumn = "";
-	@AutoPopulate private String identifierField = "";
-	@AutoPopulate private String inheritanceType = "";
-	@AutoPopulate private String schema = "";
-	@AutoPopulate private String table = "";
-	@AutoPopulate private String versionColumn = "";
-	@AutoPopulate private String versionField = VERSION_FIELD_DEFAULT;
+    // Fields (one for each attribute of the RooJpaEntity annotation)
+    @AutoPopulate private boolean mappedSuperclass;
 
-	/**
-	 * Constructor for reading the values of the given annotation
-	 *
-	 * @param annotatedType the type from which to read the values (required)
-	 * @param triggerAnnotation the type of annotation from which to read the
-	 * values (required)
-	 * @since 1.2.0
-	 */
-	public JpaEntityAnnotationValues(final MemberHoldingTypeDetailsMetadataItem<?> annotatedType, final JavaType annotationType) {
-		super(annotatedType, annotationType);
-		AutoPopulationUtils.populate(this, annotationMetadata);	// TODO move to superclass for this and all sibling classes?
-	}
+    @AutoPopulate private JavaType identifierType;
+    @AutoPopulate private JavaType versionType = JavaType.INT_OBJECT;
 
-	public String getCatalog() {
-		return catalog;
-	}
+    @AutoPopulate private String catalog = "";
+    @AutoPopulate private String entityName = "";
+    @AutoPopulate private String identifierColumn = "";
+    @AutoPopulate private String identifierField = "";
+    @AutoPopulate private String inheritanceType = "";
+    @AutoPopulate private String schema = "";
+    @AutoPopulate private String table = "";
+    @AutoPopulate private String versionColumn = "";
+    @AutoPopulate private String versionField = VERSION_FIELD_DEFAULT;
 
-	public String getEntityName() {
-		return entityName;
-	}
+    /**
+     * Constructor for reading the values of the given annotation
+     * 
+     * @param annotatedType the type from which to read the values (required)
+     * @param triggerAnnotation the type of annotation from which to read the
+     *            values (required)
+     * @since 1.2.0
+     */
+    public JpaEntityAnnotationValues(
+            final MemberHoldingTypeDetailsMetadataItem<?> annotatedType,
+            final JavaType annotationType) {
+        super(annotatedType, annotationType);
+        AutoPopulationUtils.populate(this, annotationMetadata); // TODO move to
+                                                                // superclass
+                                                                // for this and
+                                                                // all sibling
+                                                                // classes?
+    }
 
-	public String getIdentifierColumn() {
-		return identifierColumn;
-	}
+    public String getCatalog() {
+        return catalog;
+    }
 
-	public String getIdentifierField() {
-		return identifierField;
-	}
+    public String getEntityName() {
+        return entityName;
+    }
 
-	public JavaType getIdentifierType() {
-		return identifierType;
-	}
+    public String getIdentifierColumn() {
+        return identifierColumn;
+    }
 
-	public String getInheritanceType() {
-		return inheritanceType;
-	}
+    public String getIdentifierField() {
+        return identifierField;
+    }
 
-	public String getSchema() {
-		return schema;
-	}
+    public JavaType getIdentifierType() {
+        return identifierType;
+    }
 
-	public String getTable() {
-		return table;
-	}
+    public String getInheritanceType() {
+        return inheritanceType;
+    }
 
-	public String getVersionColumn() {
-		return versionColumn;
-	}
+    public String getSchema() {
+        return schema;
+    }
 
-	public String getVersionField() {
-		return versionField;
-	}
+    public String getTable() {
+        return table;
+    }
 
-	public JavaType getVersionType() {
-		return versionType;
-	}
+    public String getVersionColumn() {
+        return versionColumn;
+    }
 
-	public boolean isMappedSuperclass() {
-		return mappedSuperclass;
-	}
+    public String getVersionField() {
+        return versionField;
+    }
+
+    public JavaType getVersionType() {
+        return versionType;
+    }
+
+    public boolean isMappedSuperclass() {
+        return mappedSuperclass;
+    }
 }

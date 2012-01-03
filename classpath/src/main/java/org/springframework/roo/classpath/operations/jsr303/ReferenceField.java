@@ -21,94 +21,107 @@ import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 
 /**
- * Properties used by the many-to-one side of a relationship (called a "reference").
- *
+ * Properties used by the many-to-one side of a relationship (called a
+ * "reference").
  * <p>
- * For example, an Order-LineItem link would have the LineItem contain a "reference" back to Order.
- *
+ * For example, an Order-LineItem link would have the LineItem contain a
+ * "reference" back to Order.
  * <p>
- * Limited support for collection mapping is provided. This reflects the pragmatic goals of ROO and the fact a user can
- * edit the generated files by hand anyway.
- *
+ * Limited support for collection mapping is provided. This reflects the
+ * pragmatic goals of ROO and the fact a user can edit the generated files by
+ * hand anyway.
  * <p>
- * This field is intended for use with JSR 220 and will create a @ManyToOne and @JoinColumn annotation.
- *
+ * This field is intended for use with JSR 220 and will create a @ManyToOne and @JoinColumn
+ * annotation.
+ * 
  * @author Ben Alex
  * @since 1.0
  */
 public class ReferenceField extends FieldDetails {
 
-	// Fields
-	private String joinColumnName;
-	private String referencedColumnName;
-	private Fetch fetch;
-	private final Cardinality cardinality;
+    // Fields
+    private String joinColumnName;
+    private String referencedColumnName;
+    private Fetch fetch;
+    private final Cardinality cardinality;
 
-	public ReferenceField(final String physicalTypeIdentifier, final JavaType fieldType, final JavaSymbolName fieldName, final Cardinality cardinality) {
-		super(physicalTypeIdentifier, fieldType, fieldName);
-		this.cardinality = cardinality;
-	}
+    public ReferenceField(final String physicalTypeIdentifier,
+            final JavaType fieldType, final JavaSymbolName fieldName,
+            final Cardinality cardinality) {
+        super(physicalTypeIdentifier, fieldType, fieldName);
+        this.cardinality = cardinality;
+    }
 
-	public String getJoinColumnName() {
-		return joinColumnName;
-	}
+    public String getJoinColumnName() {
+        return joinColumnName;
+    }
 
-	public void setJoinColumnName(final String joinColumnName) {
-		this.joinColumnName = joinColumnName;
-	}
+    public void setJoinColumnName(final String joinColumnName) {
+        this.joinColumnName = joinColumnName;
+    }
 
-	public String getReferencedColumnName() {
-		return referencedColumnName;
-	}
+    public String getReferencedColumnName() {
+        return referencedColumnName;
+    }
 
-	public void setReferencedColumnName(final String referencedColumnName) {
-		this.referencedColumnName = referencedColumnName;
-	}
+    public void setReferencedColumnName(final String referencedColumnName) {
+        this.referencedColumnName = referencedColumnName;
+    }
 
-	public Fetch getFetch() {
-		return fetch;
-	}
+    public Fetch getFetch() {
+        return fetch;
+    }
 
-	public void setFetch(final Fetch fetch) {
-		this.fetch = fetch;
-	}
+    public void setFetch(final Fetch fetch) {
+        this.fetch = fetch;
+    }
 
-	@Override
-	public void decorateAnnotationsList(final List<AnnotationMetadataBuilder> annotations) {
-		super.decorateAnnotationsList(annotations);
-		List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
+    @Override
+    public void decorateAnnotationsList(
+            final List<AnnotationMetadataBuilder> annotations) {
+        super.decorateAnnotationsList(annotations);
+        List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
 
-		if (fetch != null) {
-			JavaSymbolName value = new JavaSymbolName("EAGER");
-			if (fetch == Fetch.LAZY) {
-				value = new JavaSymbolName("LAZY");
-			}
-			attributes.add(new EnumAttributeValue(new JavaSymbolName("fetch"), new EnumDetails(FETCH_TYPE, value)));
-		}
+        if (fetch != null) {
+            JavaSymbolName value = new JavaSymbolName("EAGER");
+            if (fetch == Fetch.LAZY) {
+                value = new JavaSymbolName("LAZY");
+            }
+            attributes.add(new EnumAttributeValue(new JavaSymbolName("fetch"),
+                    new EnumDetails(FETCH_TYPE, value)));
+        }
 
-		switch (cardinality) {
-			case ONE_TO_MANY:
-				annotations.add(new AnnotationMetadataBuilder(ONE_TO_MANY, attributes));
-				break;
-			case MANY_TO_MANY:
-				annotations.add(new AnnotationMetadataBuilder(MANY_TO_MANY, attributes));
-				break;
-			case ONE_TO_ONE:
-				annotations.add(new AnnotationMetadataBuilder(ONE_TO_ONE, attributes));
-				break;
-			default:
-				annotations.add(new AnnotationMetadataBuilder(MANY_TO_ONE, attributes));
-				break;
-		}
+        switch (cardinality) {
+        case ONE_TO_MANY:
+            annotations.add(new AnnotationMetadataBuilder(ONE_TO_MANY,
+                    attributes));
+            break;
+        case MANY_TO_MANY:
+            annotations.add(new AnnotationMetadataBuilder(MANY_TO_MANY,
+                    attributes));
+            break;
+        case ONE_TO_ONE:
+            annotations.add(new AnnotationMetadataBuilder(ONE_TO_ONE,
+                    attributes));
+            break;
+        default:
+            annotations.add(new AnnotationMetadataBuilder(MANY_TO_ONE,
+                    attributes));
+            break;
+        }
 
-		if (joinColumnName != null) {
-			List<AnnotationAttributeValue<?>> joinColumnAttrs = new ArrayList<AnnotationAttributeValue<?>>();
-			joinColumnAttrs.add(new StringAttributeValue(new JavaSymbolName("name"), joinColumnName));
+        if (joinColumnName != null) {
+            List<AnnotationAttributeValue<?>> joinColumnAttrs = new ArrayList<AnnotationAttributeValue<?>>();
+            joinColumnAttrs.add(new StringAttributeValue(new JavaSymbolName(
+                    "name"), joinColumnName));
 
-			if (referencedColumnName != null) {
-				joinColumnAttrs.add(new StringAttributeValue(new JavaSymbolName("referencedColumnName"), referencedColumnName));
-			}
-			annotations.add(new AnnotationMetadataBuilder(JOIN_COLUMN, joinColumnAttrs));
-		}
-	}
+            if (referencedColumnName != null) {
+                joinColumnAttrs.add(new StringAttributeValue(
+                        new JavaSymbolName("referencedColumnName"),
+                        referencedColumnName));
+            }
+            annotations.add(new AnnotationMetadataBuilder(JOIN_COLUMN,
+                    joinColumnAttrs));
+        }
+    }
 }

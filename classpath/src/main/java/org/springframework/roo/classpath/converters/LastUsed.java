@@ -6,42 +6,45 @@ import org.springframework.roo.project.maven.Pom;
 
 /**
  * Interface for {@link LastUsedImpl}.
- *
+ * 
  * @author Ben Alex
  * @since 1.1
  */
 public interface LastUsed {
 
-	/**
-	 * Sets the package, and clears the type field. Ignores attempts to set to java.*.
-	 */
-	void setPackage(JavaPackage javaPackage);
+    /**
+     * Sets the package, and clears the type field. Ignores attempts to set to
+     * java.*.
+     */
+    void setPackage(JavaPackage javaPackage);
 
-	/**
-	 * Sets the type, and also sets the package field. Ignores attempts to set to java.*.
-	 */
-	void setType(JavaType javaType);
+    /**
+     * Sets the type, and also sets the package field. Ignores attempts to set
+     * to java.*.
+     */
+    void setType(JavaType javaType);
 
-	JavaPackage getTopLevelPackage();
+    JavaPackage getTopLevelPackage();
 
-	void setTopLevelPackage(JavaPackage topLevelPackage);
+    void setTopLevelPackage(JavaPackage topLevelPackage);
 
-	/**
-	 * @return the type or null
-	 */
-	JavaType getJavaType();
+    /**
+     * @return the type or null
+     */
+    JavaType getJavaType();
 
-	/**
-	 * @return the package, either explicitly set or via a type set (may also be null if never set)
-	 */
-	JavaPackage getJavaPackage();
+    /**
+     * @return the package, either explicitly set or via a type set (may also be
+     *         null if never set)
+     */
+    JavaPackage getJavaPackage();
 
-	/**
-	 * Sets the last used type and the module to which it belongs
-	 * 
-	 * @param javaType
-	 * @param module
-	 */
-	void setType(JavaType javaType, Pom module);
+    /**
+     * Sets the last used type and the module to which it belongs
+     * 
+     * @param javaType
+     * @param module
+     */
+    void setType(JavaType javaType, Pom module);
 
 }

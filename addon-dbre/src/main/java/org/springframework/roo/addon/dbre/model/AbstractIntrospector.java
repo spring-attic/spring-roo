@@ -8,16 +8,16 @@ import org.springframework.roo.support.util.Assert;
 
 /**
  * Abstract base class for obtaining {@link DatabaseMetaData}.
- *
+ * 
  * @author Alan Stewart
  * @since 1.1.2
  */
 public abstract class AbstractIntrospector {
-	protected DatabaseMetaData databaseMetaData;
+    protected DatabaseMetaData databaseMetaData;
 
-	AbstractIntrospector(final Connection connection) throws SQLException {
-		Assert.notNull(connection, "Connection required");
-		databaseMetaData = connection.getMetaData();
-		Assert.notNull(databaseMetaData, "Database metadata is null");
-	}
+    AbstractIntrospector(final Connection connection) throws SQLException {
+        Assert.notNull(connection, "Connection required");
+        databaseMetaData = connection.getMetaData();
+        Assert.notNull(databaseMetaData, "Database metadata is null");
+    }
 }

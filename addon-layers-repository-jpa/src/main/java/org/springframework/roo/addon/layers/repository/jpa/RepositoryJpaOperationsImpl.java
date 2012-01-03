@@ -36,7 +36,7 @@ import org.w3c.dom.Element;
 
 /**
  * The {@link RepositoryJpaOperations} implementation.
- *
+ * 
  * @author Stefan Schmidt
  * @since 1.2.0
  */
@@ -44,71 +44,96 @@ import org.w3c.dom.Element;
 @Service
 public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
 
-	// Fields
-	@Reference private FileManager fileManager;
-	@Reference private PathResolver pathResolver;
-	@Reference private ProjectOperations projectOperations;
-	@Reference private TypeManagementService typeManagementService;
+    // Fields
+    @Reference private FileManager fileManager;
+    @Reference private PathResolver pathResolver;
+    @Reference private ProjectOperations projectOperations;
+    @Reference private TypeManagementService typeManagementService;
 
-	public String getName() {
-		return FeatureNames.JPA;
-	}
+    public String getName() {
+        return FeatureNames.JPA;
+    }
 
-	public boolean isInstalledInModule(String moduleName) {
-		LogicalPath resourcesPath = LogicalPath.getInstance(Path.SRC_MAIN_RESOURCES, moduleName);
-		return projectOperations.isFocusedProjectAvailable() && fileManager.exists(projectOperations.getPathResolver().getIdentifier(resourcesPath, "META-INF/persistence.xml"));
-	}
+    public boolean isInstalledInModule(String moduleName) {
+        LogicalPath resourcesPath = LogicalPath.getInstance(
+                Path.SRC_MAIN_RESOURCES, moduleName);
+        return projectOperations.isFocusedProjectAvailable()
+                && fileManager.exists(projectOperations.getPathResolver()
+                        .getIdentifier(resourcesPath,
+                                "META-INF/persistence.xml"));
+    }
 
-	public boolean isRepositoryInstallationPossible() {
-		return isInstalledInModule(projectOperations.getFocusedModuleName()) && !projectOperations.isFeatureInstalledInFocusedModule(FeatureNames.MONGO);
-	}
+    public boolean isRepositoryInstallationPossible() {
+        return isInstalledInModule(projectOperations.getFocusedModuleName())
+                && !projectOperations
+                        .isFeatureInstalledInFocusedModule(FeatureNames.MONGO);
+    }
 
-	public void setupRepository(final JavaType interfaceType, final JavaType domainType) {
-		Assert.notNull(interfaceType, "Interface type required");
-		Assert.notNull(domainType, "Domain type required");
+    public void setupRepository(final JavaType interfaceType,
+            final JavaType domainType) {
+        Assert.notNull(interfaceType, "Interface type required");
+        Assert.notNull(domainType, "Domain type required");
 
-		String interfaceIdentifier = pathResolver.getFocusedCanonicalPath(Path.SRC_MAIN_JAVA, interfaceType);
+        String interfaceIdentifier = pathResolver.getFocusedCanonicalPath(
+                Path.SRC_MAIN_JAVA, interfaceType);
 
-		if (fileManager.exists(interfaceIdentifier)) {
-			return; // Type exists already - nothing to do
-		}
+        if (fileManager.exists(interfaceIdentifier)) {
+            return; // Type exists already - nothing to do
+        }
 
-		// Build interface type
-		AnnotationMetadataBuilder interfaceAnnotationMetadata = new AnnotationMetadataBuilder(ROO_REPOSITORY_JPA);
-		interfaceAnnotationMetadata.addAttribute(new ClassAttributeValue(new JavaSymbolName("domainType"), domainType));
-		String interfaceMdId = PhysicalTypeIdentifier.createIdentifier(interfaceType, pathResolver.getPath(interfaceIdentifier));
-		ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(interfaceMdId, Modifier.PUBLIC, interfaceType, PhysicalTypeCategory.INTERFACE);
-		cidBuilder.addAnnotation(interfaceAnnotationMetadata.build());
-		typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
+        // Build interface type
+        AnnotationMetadataBuilder interfaceAnnotationMetadata = new AnnotationMetadataBuilder(
+                ROO_REPOSITORY_JPA);
+        interfaceAnnotationMetadata.addAttribute(new ClassAttributeValue(
+                new JavaSymbolName("domainType"), domainType));
+        String interfaceMdId = PhysicalTypeIdentifier.createIdentifier(
+                interfaceType, pathResolver.getPath(interfaceIdentifier));
+        ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(
+                interfaceMdId, Modifier.PUBLIC, interfaceType,
+                PhysicalTypeCategory.INTERFACE);
+        cidBuilder.addAnnotation(interfaceAnnotationMetadata.build());
+        typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
 
-		// Take care of project configuration
-		configureProject();
-	}
+        // Take care of project configuration
+        configureProject();
+    }
 
-	private void configureProject() {
-		Element configuration = XmlUtils.getConfiguration(getClass());
+    private void configureProject() {
+        Element configuration = XmlUtils.getConfiguration(getClass());
 
-		List<Dependency> dependencies = new ArrayList<Dependency>();
-		List<Element> springDependencies = XmlUtils.findElements("/configuration/spring-data-jpa/dependencies/dependency", configuration);
-		for (Element dependencyElement : springDependencies) {
-			dependencies.add(new Dependency(dependencyElement));
-		}
+        List<Dependency> dependencies = new ArrayList<Dependency>();
+        List<Element> springDependencies = XmlUtils.findElements(
+                "/configuration/spring-data-jpa/dependencies/dependency",
+                configuration);
+        for (Element dependencyElement : springDependencies) {
+            dependencies.add(new Dependency(dependencyElement));
+        }
 
-		projectOperations.addDependencies(projectOperations.getFocusedModuleName(), dependencies);
+        projectOperations.addDependencies(
+                projectOperations.getFocusedModuleName(), dependencies);
 
-		String appCtxId = pathResolver.getFocusedIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext-jpa.xml");
-		if (fileManager.exists(appCtxId)) {
-			return;
-		} else {
-			try {
-				InputStream templateInputStream = FileUtils.getInputStream(getClass(), "applicationContext-jpa.xml");
-				String input = FileCopyUtils.copyToString(new InputStreamReader(templateInputStream));
-				input = input.replace("TO_BE_CHANGED_BY_ADDON", projectOperations.getFocusedTopLevelPackage().getFullyQualifiedPackageName());
-				MutableFile mutableFile = fileManager.createFile(appCtxId);
-				FileCopyUtils.copy(input.getBytes(), mutableFile.getOutputStream());
-			} catch (IOException e) {
-				throw new IllegalStateException("Unable to create '" + appCtxId + "'", e);
-			}
-		}
-	}
+        String appCtxId = pathResolver.getFocusedIdentifier(
+                Path.SPRING_CONFIG_ROOT, "applicationContext-jpa.xml");
+        if (fileManager.exists(appCtxId)) {
+            return;
+        }
+        else {
+            try {
+                InputStream templateInputStream = FileUtils.getInputStream(
+                        getClass(), "applicationContext-jpa.xml");
+                String input = FileCopyUtils
+                        .copyToString(new InputStreamReader(templateInputStream));
+                input = input.replace("TO_BE_CHANGED_BY_ADDON",
+                        projectOperations.getFocusedTopLevelPackage()
+                                .getFullyQualifiedPackageName());
+                MutableFile mutableFile = fileManager.createFile(appCtxId);
+                FileCopyUtils.copy(input.getBytes(),
+                        mutableFile.getOutputStream());
+            }
+            catch (IOException e) {
+                throw new IllegalStateException("Unable to create '" + appCtxId
+                        + "'", e);
+            }
+        }
+    }
 }

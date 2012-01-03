@@ -11,7 +11,7 @@ import org.springframework.roo.shell.CommandMarker;
 
 /**
  * Shell commands that create domain services.
- *
+ * 
  * @author Stefan Schmidt
  * @since 1.2.0
  */
@@ -19,23 +19,24 @@ import org.springframework.roo.shell.CommandMarker;
 @Service
 public class ServiceCommands implements CommandMarker {
 
-	// Fields
-	@Reference private ServiceOperations serviceOperations;
+    // Fields
+    @Reference private ServiceOperations serviceOperations;
 
-	@CliAvailabilityIndicator("service")
-	public boolean isServiceCommandAvailable() {
-		return serviceOperations.isServiceInstallationPossible();
-	}
+    @CliAvailabilityIndicator("service")
+    public boolean isServiceCommandAvailable() {
+        return serviceOperations.isServiceInstallationPossible();
+    }
 
-	@CliCommand(value = "service", help = "Adds @RooService annotation to target type")
-	public void service(
-		@CliOption(key = "interface", mandatory = true, help = "The java interface to apply this annotation to") final JavaType interfaceType,
-		@CliOption(key = "class", mandatory = false, help = "Implementation class for the specified interface") JavaType classType,
-		@CliOption(key = "entity", unspecifiedDefaultValue = "*", optionContext = "update,project", mandatory = false, help = "The domain entity this service should expose") final JavaType domainType) {
+    @CliCommand(value = "service", help = "Adds @RooService annotation to target type")
+    public void service(
+            @CliOption(key = "interface", mandatory = true, help = "The java interface to apply this annotation to") final JavaType interfaceType,
+            @CliOption(key = "class", mandatory = false, help = "Implementation class for the specified interface") JavaType classType,
+            @CliOption(key = "entity", unspecifiedDefaultValue = "*", optionContext = "update,project", mandatory = false, help = "The domain entity this service should expose") final JavaType domainType) {
 
-		if (classType == null) {
-			classType = new JavaType(interfaceType.getFullyQualifiedTypeName() + "Impl");
-		}
-		serviceOperations.setupService(interfaceType, classType, domainType);
-	}
+        if (classType == null) {
+            classType = new JavaType(interfaceType.getFullyQualifiedTypeName()
+                    + "Impl");
+        }
+        serviceOperations.setupService(interfaceType, classType, domainType);
+    }
 }

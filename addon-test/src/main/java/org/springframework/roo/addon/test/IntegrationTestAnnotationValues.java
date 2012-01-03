@@ -9,71 +9,72 @@ import org.springframework.roo.model.RooJavaType;
 
 /**
  * Represents a parsed {@link RooIntegrationTest} annotation.
- *
+ * 
  * @author Ben Alex
  * @since 1.0
  */
 public class IntegrationTestAnnotationValues extends AbstractAnnotationValues {
 
-	// From annotation
-	@AutoPopulate private JavaType entity;
-	@AutoPopulate private boolean count = true; 
-	@AutoPopulate private boolean find = true; 
-	@AutoPopulate private boolean findEntries = true; 
-	@AutoPopulate private boolean findAll = true;
-	@AutoPopulate private int findAllMaximum = 250;
-	@AutoPopulate private boolean flush = true; 
-	@AutoPopulate private boolean persist = true; 
-	@AutoPopulate private boolean remove = true; 
-	@AutoPopulate private boolean merge = true; 
-	@AutoPopulate private boolean transactional = true; 
+    // From annotation
+    @AutoPopulate private JavaType entity;
+    @AutoPopulate private boolean count = true;
+    @AutoPopulate private boolean find = true;
+    @AutoPopulate private boolean findEntries = true;
+    @AutoPopulate private boolean findAll = true;
+    @AutoPopulate private int findAllMaximum = 250;
+    @AutoPopulate private boolean flush = true;
+    @AutoPopulate private boolean persist = true;
+    @AutoPopulate private boolean remove = true;
+    @AutoPopulate private boolean merge = true;
+    @AutoPopulate private boolean transactional = true;
 
-	public IntegrationTestAnnotationValues(final PhysicalTypeMetadata governorPhysicalTypeMetadata) {
-		super(governorPhysicalTypeMetadata, RooJavaType.ROO_INTEGRATION_TEST);
-		AutoPopulationUtils.populate(this, annotationMetadata);
-	}
+    public IntegrationTestAnnotationValues(
+            final PhysicalTypeMetadata governorPhysicalTypeMetadata) {
+        super(governorPhysicalTypeMetadata, RooJavaType.ROO_INTEGRATION_TEST);
+        AutoPopulationUtils.populate(this, annotationMetadata);
+    }
 
-	public JavaType getEntity() {
-		return entity;
-	}
+    public JavaType getEntity() {
+        return entity;
+    }
 
-	public boolean isCount() {
-		return count;
-	}
+    public boolean isCount() {
+        return count;
+    }
 
-	public boolean isFind() {
-		return find;
-	}
+    public boolean isFind() {
+        return find;
+    }
 
-	public boolean isFindEntries() {
-		return findEntries;
-	}
+    public boolean isFindEntries() {
+        return findEntries;
+    }
 
-	public boolean isFindAll() {
-		return findAll;
-	}
+    public boolean isFindAll() {
+        return findAll;
+    }
 
-	public int getFindAllMaximum() {
-		return findAllMaximum;
-	}
+    public int getFindAllMaximum() {
+        return findAllMaximum;
+    }
 
-	public boolean isFlush() {
-		return flush;
-	}
+    public boolean isFlush() {
+        return flush;
+    }
 
-	public boolean isPersist() {
-		return persist;
-	}
+    public boolean isPersist() {
+        return persist;
+    }
 
-	public boolean isRemove() {
-		return remove;
-	}
+    public boolean isRemove() {
+        return remove;
+    }
 
-	public boolean isMerge() {
-		return merge;
-	}
+    public boolean isMerge() {
+        return merge;
+    }
 
-	public boolean isTransactional() {
-		return transactional;
-	}
+    public boolean isTransactional() {
+        return transactional;
+    }
 }

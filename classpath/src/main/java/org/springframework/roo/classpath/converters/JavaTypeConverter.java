@@ -36,7 +36,7 @@ import org.springframework.roo.support.util.StringUtils;
  * Provides conversion to and from {@link JavaType}, with full support for using
  * {@value JavaPackageConverter#TOP_LEVEL_PACKAGE_SYMBOL} as denoting the user's
  * top-level package.
- *
+ * 
  * @author Ben Alex
  * @since 1.0
  */
@@ -44,305 +44,376 @@ import org.springframework.roo.support.util.StringUtils;
 @Service
 public class JavaTypeConverter implements Converter<JavaType> {
 
-	/**
-	 * If this String appears in an option context, this converter will return
-	 * {@link JavaType}s appearing in any module of the user's project.
-	 */
-	public static final String PROJECT = "project";
+    /**
+     * If this String appears in an option context, this converter will return
+     * {@link JavaType}s appearing in any module of the user's project.
+     */
+    public static final String PROJECT = "project";
 
-	/**
-	 * If this String appears in an option context, this converter will update
-	 * the last used type and the focused module as applicable.
-	 */
-	public static final String UPDATE = "update";
+    /**
+     * If this String appears in an option context, this converter will update
+     * the last used type and the focused module as applicable.
+     */
+    public static final String UPDATE = "update";
 
-	private static final List<String> NUMBER_PRIMITIVES = Arrays.asList("byte", "short", "int", "long", "float", "double");
-	
-	/**
-	 * The value that converts to the most recently used {@link JavaType}.
-	 */
-	static final String LAST_USED_INDICATOR = "*";
+    private static final List<String> NUMBER_PRIMITIVES = Arrays.asList("byte",
+            "short", "int", "long", "float", "double");
 
-	// Fields
-	@Reference LastUsed lastUsed;
-	@Reference FileManager fileManager;
-	@Reference ProjectOperations projectOperations;
-	@Reference TypeLocationService typeLocationService;
+    /**
+     * The value that converts to the most recently used {@link JavaType}.
+     */
+    static final String LAST_USED_INDICATOR = "*";
 
-	public JavaType convertFromText(String value, final Class<?> requiredType, final String optionContext) {
-		if (StringUtils.isBlank(value)) {
-			return null;
-		}
+    // Fields
+    @Reference LastUsed lastUsed;
+    @Reference FileManager fileManager;
+    @Reference ProjectOperations projectOperations;
+    @Reference TypeLocationService typeLocationService;
 
-		// Check for number primitives
-		if (NUMBER_PRIMITIVES.contains(value)) {
-			return getNumberPrimitiveType(value);
-		}
+    public JavaType convertFromText(String value, final Class<?> requiredType,
+            final String optionContext) {
+        if (StringUtils.isBlank(value)) {
+            return null;
+        }
 
-		if (LAST_USED_INDICATOR.equals(value)) {
-			JavaType result = lastUsed.getJavaType();
-			if (result == null) {
-				throw new IllegalStateException("Unknown type; please indicate the type as a command option (ie --xxxx)");
-			}
-			return result;
-		}
+        // Check for number primitives
+        if (NUMBER_PRIMITIVES.contains(value)) {
+            return getNumberPrimitiveType(value);
+        }
 
-		String topLevelPath;
+        if (LAST_USED_INDICATOR.equals(value)) {
+            JavaType result = lastUsed.getJavaType();
+            if (result == null) {
+                throw new IllegalStateException(
+                        "Unknown type; please indicate the type as a command option (ie --xxxx)");
+            }
+            return result;
+        }
 
-		Pom module = projectOperations.getFocusedModule();
+        String topLevelPath;
 
-		if (value.contains(MODULE_PATH_SEPARATOR)) {
-			String moduleName = value.substring(0, value.indexOf(MODULE_PATH_SEPARATOR));
-			module = projectOperations.getPomFromModuleName(moduleName);
-			topLevelPath = typeLocationService.getTopLevelPackageForModule(module);
-			value = value.substring(value.indexOf(MODULE_PATH_SEPARATOR) + 1, value.length()).trim();
-			if (StringUtils.contains(optionContext, UPDATE)) {
-				projectOperations.setModule(module);
-			}
-		} else {
-			topLevelPath = typeLocationService.getTopLevelPackageForModule(projectOperations.getFocusedModule());
-		}
+        Pom module = projectOperations.getFocusedModule();
 
-		if (value.equals(topLevelPath)) {
-			return null;
-		}
+        if (value.contains(MODULE_PATH_SEPARATOR)) {
+            String moduleName = value.substring(0,
+                    value.indexOf(MODULE_PATH_SEPARATOR));
+            module = projectOperations.getPomFromModuleName(moduleName);
+            topLevelPath = typeLocationService
+                    .getTopLevelPackageForModule(module);
+            value = value.substring(value.indexOf(MODULE_PATH_SEPARATOR) + 1,
+                    value.length()).trim();
+            if (StringUtils.contains(optionContext, UPDATE)) {
+                projectOperations.setModule(module);
+            }
+        }
+        else {
+            topLevelPath = typeLocationService
+                    .getTopLevelPackageForModule(projectOperations
+                            .getFocusedModule());
+        }
 
-		String newValue = locateExisting(value, topLevelPath);
-		if (newValue == null) {
-			newValue = locateNew(value, topLevelPath);
-		}
+        if (value.equals(topLevelPath)) {
+            return null;
+        }
 
-		if (StringUtils.hasText(newValue)) {
-			String physicalTypeIdentifier = typeLocationService.getPhysicalTypeIdentifier(new JavaType(newValue));
-			if (StringUtils.hasText(physicalTypeIdentifier)) {
-				module = projectOperations.getPomFromModuleName(PhysicalTypeIdentifier.getPath(physicalTypeIdentifier).getModule());
-			}
-		}
+        String newValue = locateExisting(value, topLevelPath);
+        if (newValue == null) {
+            newValue = locateNew(value, topLevelPath);
+        }
 
-		// If the user did not provide a java type name containing a dot, it's taken as relative to the current package directory
-		if (!newValue.contains(".")) {
-			newValue = (lastUsed.getJavaPackage() == null ? lastUsed.getTopLevelPackage().getFullyQualifiedPackageName() : lastUsed.getJavaPackage().getFullyQualifiedPackageName()) + "." + newValue;
-		}
+        if (StringUtils.hasText(newValue)) {
+            String physicalTypeIdentifier = typeLocationService
+                    .getPhysicalTypeIdentifier(new JavaType(newValue));
+            if (StringUtils.hasText(physicalTypeIdentifier)) {
+                module = projectOperations
+                        .getPomFromModuleName(PhysicalTypeIdentifier.getPath(
+                                physicalTypeIdentifier).getModule());
+            }
+        }
 
-		// Automatically capitalise the first letter of the last name segment (i.e. capitalise the type name, but not the package)
-		int index = newValue.lastIndexOf(".");
-		if (index > -1 && !newValue.endsWith(".")) {
-			String typeName = newValue.substring(index + 1);
-			typeName = StringUtils.capitalize(typeName);
-			newValue = newValue.substring(0, index).toLowerCase() + "." + typeName;
-		}
-		JavaType result = new JavaType(newValue);
-		if (StringUtils.contains(optionContext, UPDATE)) {
-			lastUsed.setType(result, module);
-		}
-		return result;
-	}
+        // If the user did not provide a java type name containing a dot, it's
+        // taken as relative to the current package directory
+        if (!newValue.contains(".")) {
+            newValue = (lastUsed.getJavaPackage() == null ? lastUsed
+                    .getTopLevelPackage().getFullyQualifiedPackageName()
+                    : lastUsed.getJavaPackage().getFullyQualifiedPackageName())
+                    + "." + newValue;
+        }
 
-	private String locateNew(final String value, final String topLevelPath) {
-		String newValue = value;
-		if (value.startsWith(TOP_LEVEL_PACKAGE_SYMBOL)) {
-			if (value.length() > 1) {
-				newValue = (value.charAt(1) == '.' ? topLevelPath : topLevelPath + ".") + value.substring(1);
-			} else {
-				newValue = topLevelPath + ".";
-			}
-		}
+        // Automatically capitalise the first letter of the last name segment
+        // (i.e. capitalise the type name, but not the package)
+        int index = newValue.lastIndexOf(".");
+        if (index > -1 && !newValue.endsWith(".")) {
+            String typeName = newValue.substring(index + 1);
+            typeName = StringUtils.capitalize(typeName);
+            newValue = newValue.substring(0, index).toLowerCase() + "."
+                    + typeName;
+        }
+        JavaType result = new JavaType(newValue);
+        if (StringUtils.contains(optionContext, UPDATE)) {
+            lastUsed.setType(result, module);
+        }
+        return result;
+    }
 
-		lastUsed.setTopLevelPackage(new JavaPackage(topLevelPath));
+    private String locateNew(final String value, final String topLevelPath) {
+        String newValue = value;
+        if (value.startsWith(TOP_LEVEL_PACKAGE_SYMBOL)) {
+            if (value.length() > 1) {
+                newValue = (value.charAt(1) == '.' ? topLevelPath
+                        : topLevelPath + ".") + value.substring(1);
+            }
+            else {
+                newValue = topLevelPath + ".";
+            }
+        }
 
-		return newValue;
-	}
+        lastUsed.setTopLevelPackage(new JavaPackage(topLevelPath));
 
-	private String locateExisting(final String value, String topLevelPath) {
-		String newValue = value;
-		if (value.startsWith(TOP_LEVEL_PACKAGE_SYMBOL)) {
-			boolean found = false;
-			while (!found) {
-				if (value.length() > 1) {
-					newValue = (value.charAt(1) == '.' ? topLevelPath : topLevelPath + ".") + value.substring(1);
-				} else {
-					newValue = topLevelPath + ".";
-				}
-				String physicalTypeIdentifier = typeLocationService.getPhysicalTypeIdentifier(new JavaType(newValue));
-				if (physicalTypeIdentifier != null) {
-					topLevelPath = typeLocationService.getTopLevelPackageForModule(projectOperations.getPomFromModuleName(PhysicalTypeIdentifier.getPath(physicalTypeIdentifier).getModule()));
-					found = true;
-				} else {
-					int index = topLevelPath.lastIndexOf('.');
-					if (index == -1) {
-						break;
-					}
-					topLevelPath = topLevelPath.substring(0, topLevelPath.lastIndexOf('.'));
-				}
-			}
-			if (!found) {
-				return null;
-			}
-		}
+        return newValue;
+    }
 
-		lastUsed.setTopLevelPackage(new JavaPackage(topLevelPath));
-		return newValue;
-	}
+    private String locateExisting(final String value, String topLevelPath) {
+        String newValue = value;
+        if (value.startsWith(TOP_LEVEL_PACKAGE_SYMBOL)) {
+            boolean found = false;
+            while (!found) {
+                if (value.length() > 1) {
+                    newValue = (value.charAt(1) == '.' ? topLevelPath
+                            : topLevelPath + ".") + value.substring(1);
+                }
+                else {
+                    newValue = topLevelPath + ".";
+                }
+                String physicalTypeIdentifier = typeLocationService
+                        .getPhysicalTypeIdentifier(new JavaType(newValue));
+                if (physicalTypeIdentifier != null) {
+                    topLevelPath = typeLocationService
+                            .getTopLevelPackageForModule(projectOperations
+                                    .getPomFromModuleName(PhysicalTypeIdentifier
+                                            .getPath(physicalTypeIdentifier)
+                                            .getModule()));
+                    found = true;
+                }
+                else {
+                    int index = topLevelPath.lastIndexOf('.');
+                    if (index == -1) {
+                        break;
+                    }
+                    topLevelPath = topLevelPath.substring(0,
+                            topLevelPath.lastIndexOf('.'));
+                }
+            }
+            if (!found) {
+                return null;
+            }
+        }
 
-	public boolean supports(final Class<?> requiredType, final String optionContext) {
-		return JavaType.class.isAssignableFrom(requiredType);
-	}
+        lastUsed.setTopLevelPackage(new JavaPackage(topLevelPath));
+        return newValue;
+    }
 
-	public boolean getAllPossibleValues(final List<Completion> completions, final Class<?> requiredType, String existingData, final String optionContext, final MethodTarget target) {
-		existingData = StringUtils.trimToEmpty(existingData);
+    public boolean supports(final Class<?> requiredType,
+            final String optionContext) {
+        return JavaType.class.isAssignableFrom(requiredType);
+    }
 
-		if (StringUtils.isBlank(optionContext) || optionContext.contains(PROJECT)) {
-			completeProjectSpecificPaths(completions, existingData);
-		}
+    public boolean getAllPossibleValues(final List<Completion> completions,
+            final Class<?> requiredType, String existingData,
+            final String optionContext, final MethodTarget target) {
+        existingData = StringUtils.trimToEmpty(existingData);
 
-		if (StringUtils.contains(optionContext, "java")) {
-			completeJavaSpecificPaths(completions, existingData, optionContext);
-		}
+        if (StringUtils.isBlank(optionContext)
+                || optionContext.contains(PROJECT)) {
+            completeProjectSpecificPaths(completions, existingData);
+        }
 
-		return false;
-	}
+        if (StringUtils.contains(optionContext, "java")) {
+            completeJavaSpecificPaths(completions, existingData, optionContext);
+        }
 
-	/**
-	 * Adds common "java." types to the completions. For now we just provide them statically.
-	 */
-	private void completeJavaSpecificPaths(final List<Completion> completions, final String existingData, String optionContext) {
-		SortedSet<String> types = new TreeSet<String>();
+        return false;
+    }
 
-		if (StringUtils.isBlank(optionContext)) {
-			optionContext = "java-all";
-		}
+    /**
+     * Adds common "java." types to the completions. For now we just provide
+     * them statically.
+     */
+    private void completeJavaSpecificPaths(final List<Completion> completions,
+            final String existingData, String optionContext) {
+        SortedSet<String> types = new TreeSet<String>();
 
-		if (optionContext.contains("java-all") || optionContext.contains("java-lang")) {
-			// lang - other
-			types.add(Boolean.class.getName());
-			types.add(String.class.getName());
-		}
+        if (StringUtils.isBlank(optionContext)) {
+            optionContext = "java-all";
+        }
 
-		if (optionContext.contains("java-all") || optionContext.contains("java-lang") || optionContext.contains("java-number")) {
-			// lang - numeric
-			types.add(Number.class.getName());
-			types.add(Short.class.getName());
-			types.add(Byte.class.getName());
-			types.add(Integer.class.getName());
-			types.add(Long.class.getName());
-			types.add(Float.class.getName());
-			types.add(Double.class.getName());
-			types.add(Byte.TYPE.getName());
-			types.add(Short.TYPE.getName());
-			types.add(Integer.TYPE.getName());
-			types.add(Long.TYPE.getName());
-			types.add(Float.TYPE.getName());
-			types.add(Double.TYPE.getName());
-		}
+        if (optionContext.contains("java-all")
+                || optionContext.contains("java-lang")) {
+            // lang - other
+            types.add(Boolean.class.getName());
+            types.add(String.class.getName());
+        }
 
-		if (optionContext.contains("java-all") || optionContext.contains("java-number")) {
-			// misc
-			types.add(BigDecimal.class.getName());
-			types.add(BigInteger.class.getName());
-		}
+        if (optionContext.contains("java-all")
+                || optionContext.contains("java-lang")
+                || optionContext.contains("java-number")) {
+            // lang - numeric
+            types.add(Number.class.getName());
+            types.add(Short.class.getName());
+            types.add(Byte.class.getName());
+            types.add(Integer.class.getName());
+            types.add(Long.class.getName());
+            types.add(Float.class.getName());
+            types.add(Double.class.getName());
+            types.add(Byte.TYPE.getName());
+            types.add(Short.TYPE.getName());
+            types.add(Integer.TYPE.getName());
+            types.add(Long.TYPE.getName());
+            types.add(Float.TYPE.getName());
+            types.add(Double.TYPE.getName());
+        }
 
-		if (optionContext.contains("java-all") || optionContext.contains("java-util") || optionContext.contains("java-collections")) {
-			// util
-			types.add(Collection.class.getName());
-			types.add(List.class.getName());
-			types.add(Queue.class.getName());
-			types.add(Set.class.getName());
-			types.add(SortedSet.class.getName());
-			types.add(Map.class.getName());
-		}
+        if (optionContext.contains("java-all")
+                || optionContext.contains("java-number")) {
+            // misc
+            types.add(BigDecimal.class.getName());
+            types.add(BigInteger.class.getName());
+        }
 
-		if (optionContext.contains("java-all") || optionContext.contains("java-util") || optionContext.contains("java-date")) {
-			// util
-			types.add(Date.class.getName());
-			types.add(Calendar.class.getName());
-		}
+        if (optionContext.contains("java-all")
+                || optionContext.contains("java-util")
+                || optionContext.contains("java-collections")) {
+            // util
+            types.add(Collection.class.getName());
+            types.add(List.class.getName());
+            types.add(Queue.class.getName());
+            types.add(Set.class.getName());
+            types.add(SortedSet.class.getName());
+            types.add(Map.class.getName());
+        }
 
-		for (String type : types) {
-			if (type.startsWith(existingData) || existingData.startsWith(type)) {
-				completions.add(new Completion(type));
-			}
-		}
-	}
+        if (optionContext.contains("java-all")
+                || optionContext.contains("java-util")
+                || optionContext.contains("java-date")) {
+            // util
+            types.add(Date.class.getName());
+            types.add(Calendar.class.getName());
+        }
 
-	private void completeProjectSpecificPaths(final List<Completion> completions, String existingData) {
-		String topLevelPath = "";
+        for (String type : types) {
+            if (type.startsWith(existingData) || existingData.startsWith(type)) {
+                completions.add(new Completion(type));
+            }
+        }
+    }
 
-		if (!projectOperations.isFocusedProjectAvailable()) {
-			return;
-		}
+    private void completeProjectSpecificPaths(
+            final List<Completion> completions, String existingData) {
+        String topLevelPath = "";
 
-		topLevelPath = typeLocationService.getTopLevelPackageForModule(projectOperations.getFocusedModule());
+        if (!projectOperations.isFocusedProjectAvailable()) {
+            return;
+        }
 
-		Pom focusedModule = projectOperations.getFocusedModule();
-		String focusedModulePath = projectOperations.getFocusedModule().getPath();
-		String focusedModuleName = focusedModule.getModuleName();
-		boolean intraModule = false;
-		if (existingData.contains(MODULE_PATH_SEPARATOR)) {
-			focusedModuleName = existingData.substring(0, existingData.indexOf(MODULE_PATH_SEPARATOR));
-			focusedModule = projectOperations.getPomFromModuleName(focusedModuleName);
-			focusedModulePath = focusedModule.getPath();
-			existingData = existingData.substring(existingData.indexOf(MODULE_PATH_SEPARATOR) + 1, existingData.length());
-			topLevelPath = typeLocationService.getTopLevelPackageForModule(focusedModule);
-			intraModule = true;
-		}
+        topLevelPath = typeLocationService
+                .getTopLevelPackageForModule(projectOperations
+                        .getFocusedModule());
 
-		String newValue = existingData;
-		if (existingData.startsWith(TOP_LEVEL_PACKAGE_SYMBOL)) {
-			if (existingData.length() > 1) {
-				newValue = (existingData.charAt(1) == '.' ? topLevelPath : topLevelPath + ".") + existingData.substring(1);
-			} else {
-				newValue = topLevelPath + ".";
-			}
-		}
+        Pom focusedModule = projectOperations.getFocusedModule();
+        String focusedModulePath = projectOperations.getFocusedModule()
+                .getPath();
+        String focusedModuleName = focusedModule.getModuleName();
+        boolean intraModule = false;
+        if (existingData.contains(MODULE_PATH_SEPARATOR)) {
+            focusedModuleName = existingData.substring(0,
+                    existingData.indexOf(MODULE_PATH_SEPARATOR));
+            focusedModule = projectOperations
+                    .getPomFromModuleName(focusedModuleName);
+            focusedModulePath = focusedModule.getPath();
+            existingData = existingData.substring(
+                    existingData.indexOf(MODULE_PATH_SEPARATOR) + 1,
+                    existingData.length());
+            topLevelPath = typeLocationService
+                    .getTopLevelPackageForModule(focusedModule);
+            intraModule = true;
+        }
 
-		String prefix = "";
-		String formattedPrefix = "";
+        String newValue = existingData;
+        if (existingData.startsWith(TOP_LEVEL_PACKAGE_SYMBOL)) {
+            if (existingData.length() > 1) {
+                newValue = (existingData.charAt(1) == '.' ? topLevelPath
+                        : topLevelPath + ".") + existingData.substring(1);
+            }
+            else {
+                newValue = topLevelPath + ".";
+            }
+        }
 
-		if (!focusedModulePath.equals(projectOperations.getFocusedModule().getPath())) {
-			prefix = focusedModuleName + MODULE_PATH_SEPARATOR;
-			formattedPrefix = AnsiEscapeCode.decorate(focusedModuleName + MODULE_PATH_SEPARATOR, AnsiEscapeCode.FG_CYAN);
-		}
+        String prefix = "";
+        String formattedPrefix = "";
 
-		for (String moduleName : projectOperations.getModuleNames()) {
-			if (!moduleName.equals(focusedModuleName)) {
-				completions.add(new Completion(moduleName + MODULE_PATH_SEPARATOR, AnsiEscapeCode.decorate(moduleName + MODULE_PATH_SEPARATOR, AnsiEscapeCode.FG_CYAN), "Modules", 0));
-			}
-		}
+        if (!focusedModulePath.equals(projectOperations.getFocusedModule()
+                .getPath())) {
+            prefix = focusedModuleName + MODULE_PATH_SEPARATOR;
+            formattedPrefix = AnsiEscapeCode.decorate(focusedModuleName
+                    + MODULE_PATH_SEPARATOR, AnsiEscapeCode.FG_CYAN);
+        }
 
-		String heading = "";
-		if (!intraModule) {
-			heading = focusedModuleName;
-		}
-		if (typeLocationService.getTypesForModule(focusedModulePath).isEmpty()) {
-			completions.add(new Completion(prefix + focusedModule.getGroupId(), formattedPrefix + focusedModule.getGroupId(), heading, 1));
-			return;
-		}  else {
-			completions.add(new Completion(prefix + topLevelPath, formattedPrefix + topLevelPath, heading, 1));
-		}
+        for (String moduleName : projectOperations.getModuleNames()) {
+            if (!moduleName.equals(focusedModuleName)) {
+                completions.add(new Completion(moduleName
+                        + MODULE_PATH_SEPARATOR, AnsiEscapeCode.decorate(
+                        moduleName + MODULE_PATH_SEPARATOR,
+                        AnsiEscapeCode.FG_CYAN), "Modules", 0));
+            }
+        }
 
-		for (String type : typeLocationService.getTypesForModule(focusedModulePath)) {
-			if (type.startsWith(newValue)) {
-				type = StringUtils.replaceFirst(type, topLevelPath, TOP_LEVEL_PACKAGE_SYMBOL);
-				completions.add(new Completion(prefix + type, formattedPrefix + type, heading, 1));
-			}
-		}
-	}
+        String heading = "";
+        if (!intraModule) {
+            heading = focusedModuleName;
+        }
+        if (typeLocationService.getTypesForModule(focusedModulePath).isEmpty()) {
+            completions.add(new Completion(prefix + focusedModule.getGroupId(),
+                    formattedPrefix + focusedModule.getGroupId(), heading, 1));
+            return;
+        }
+        else {
+            completions.add(new Completion(prefix + topLevelPath,
+                    formattedPrefix + topLevelPath, heading, 1));
+        }
 
-	private JavaType getNumberPrimitiveType(final String value) {
-		if ("byte".equals(value)) {
-			return JavaType.BYTE_PRIMITIVE;
-		} else if ("short".equals(value)) {
-			return JavaType.SHORT_PRIMITIVE;
-		} else if ("int".equals(value)) {
-			return JavaType.INT_PRIMITIVE;
-		} else if ("long".equals(value)) {
-			return JavaType.LONG_PRIMITIVE;
-		} else if ("float".equals(value)) {
-			return JavaType.FLOAT_PRIMITIVE;
-		} else if ("double".equals(value)) {
-			return JavaType.DOUBLE_PRIMITIVE;
-		} else {
-			return null;
-		}
-	}
+        for (String type : typeLocationService
+                .getTypesForModule(focusedModulePath)) {
+            if (type.startsWith(newValue)) {
+                type = StringUtils.replaceFirst(type, topLevelPath,
+                        TOP_LEVEL_PACKAGE_SYMBOL);
+                completions.add(new Completion(prefix + type, formattedPrefix
+                        + type, heading, 1));
+            }
+        }
+    }
+
+    private JavaType getNumberPrimitiveType(final String value) {
+        if ("byte".equals(value)) {
+            return JavaType.BYTE_PRIMITIVE;
+        }
+        else if ("short".equals(value)) {
+            return JavaType.SHORT_PRIMITIVE;
+        }
+        else if ("int".equals(value)) {
+            return JavaType.INT_PRIMITIVE;
+        }
+        else if ("long".equals(value)) {
+            return JavaType.LONG_PRIMITIVE;
+        }
+        else if ("float".equals(value)) {
+            return JavaType.FLOAT_PRIMITIVE;
+        }
+        else if ("double".equals(value)) {
+            return JavaType.DOUBLE_PRIMITIVE;
+        }
+        else {
+            return null;
+        }
+    }
 }

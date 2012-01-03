@@ -11,71 +11,76 @@ import org.springframework.roo.support.util.StringUtils;
 
 /**
  * The metadata for a module within the user's project. A simple project will
- * have one instance of this class, whereas a multi-module project will have several.
- *
+ * have one instance of this class, whereas a multi-module project will have
+ * several.
+ * 
  * @since 1.0
  */
 public class ProjectMetadata extends AbstractMetadataItem {
 
-	// Constants
-	static final String MODULE_SEPARATOR = "?";
-	static final String PROJECT_MID_PREFIX = MetadataIdentificationUtils.create(ProjectMetadata.class.getName(), "the_project");
+    // Constants
+    static final String MODULE_SEPARATOR = "?";
+    static final String PROJECT_MID_PREFIX = MetadataIdentificationUtils
+            .create(ProjectMetadata.class.getName(), "the_project");
 
-	/**
-	 * Returns the metadata ID for the project-level metadata of the given module.
-	 * 
-	 * @param moduleName the fully-qualified module name, separated by
-	 * {@link File#separator} and/or "/" if different; can be blank for the root
-	 * or only module
-	 * @return a non-blank MID
-	 */
-	public static String getProjectIdentifier(final String moduleName) {
-		final StringBuilder sb = new StringBuilder(PROJECT_MID_PREFIX);
-		if (StringUtils.hasText(moduleName)) {
-			sb.append(MODULE_SEPARATOR).append(moduleName.replace("/", File.separator));
-		}
-		return sb.toString();
-	}
+    /**
+     * Returns the metadata ID for the project-level metadata of the given
+     * module.
+     * 
+     * @param moduleName the fully-qualified module name, separated by
+     *            {@link File#separator} and/or "/" if different; can be blank
+     *            for the root or only module
+     * @return a non-blank MID
+     */
+    public static String getProjectIdentifier(final String moduleName) {
+        final StringBuilder sb = new StringBuilder(PROJECT_MID_PREFIX);
+        if (StringUtils.hasText(moduleName)) {
+            sb.append(MODULE_SEPARATOR).append(
+                    moduleName.replace("/", File.separator));
+        }
+        return sb.toString();
+    }
 
-	public static boolean isValid(final String metadataIdentificationString) {
-		return metadataIdentificationString.startsWith(PROJECT_MID_PREFIX);
-	}
+    public static boolean isValid(final String metadataIdentificationString) {
+        return metadataIdentificationString.startsWith(PROJECT_MID_PREFIX);
+    }
 
-	public static String getModuleName(final String metadataIdentificationString) {
-		if (metadataIdentificationString.contains(MODULE_SEPARATOR)) {
-			return StringUtils.substringAfterLast(metadataIdentificationString, MODULE_SEPARATOR);
-		}
-		return "";
-	}
-	
-	// Fields
-	private final Pom pom;
+    public static String getModuleName(final String metadataIdentificationString) {
+        if (metadataIdentificationString.contains(MODULE_SEPARATOR)) {
+            return StringUtils.substringAfterLast(metadataIdentificationString,
+                    MODULE_SEPARATOR);
+        }
+        return "";
+    }
 
-	/**
-	 * Constructor
-	 *
-	 * @param pom the POM for this module of the project (required)
-	 */
-	public ProjectMetadata(final Pom pom) {
-		super(getProjectIdentifier(pom.getModuleName()));
-		Assert.notNull(pom, "POM is required");
-		this.pom = pom;
-	}
+    // Fields
+    private final Pom pom;
 
-	public Pom getPom() {
-		return pom;
-	}
+    /**
+     * Constructor
+     * 
+     * @param pom the POM for this module of the project (required)
+     */
+    public ProjectMetadata(final Pom pom) {
+        super(getProjectIdentifier(pom.getModuleName()));
+        Assert.notNull(pom, "POM is required");
+        this.pom = pom;
+    }
 
-	public String getModuleName() {
-		return pom.getModuleName();
-	}
+    public Pom getPom() {
+        return pom;
+    }
 
-	@Override
-	public final String toString() {
-		final ToStringCreator tsc = new ToStringCreator(this);
-		tsc.append("identifier", getId());
-		tsc.append("valid", isValid());
-		tsc.append("pom", pom);
-		return tsc.toString();
-	}
+    public String getModuleName() {
+        return pom.getModuleName();
+    }
+
+    @Override
+    public final String toString() {
+        final ToStringCreator tsc = new ToStringCreator(this);
+        tsc.append("identifier", getId());
+        tsc.append("valid", isValid());
+        tsc.append("pom", pom);
+        return tsc.toString();
+    }
 }

@@ -9,22 +9,23 @@ import org.springframework.roo.support.util.Assert;
 
 /**
  * A request to monitor a particular file.
- *
+ * 
  * @author Ben Alex
  * @since 1.0
  */
 public class FileMonitoringRequest extends MonitoringRequest {
 
-	public FileMonitoringRequest(final File file, final Collection<FileOperation> notifyOn) {
-		super(file, notifyOn);
-		Assert.isTrue(file.isFile(), "File '" + file + "' must be a file");
-	}
+    public FileMonitoringRequest(final File file,
+            final Collection<FileOperation> notifyOn) {
+        super(file, notifyOn);
+        Assert.isTrue(file.isFile(), "File '" + file + "' must be a file");
+    }
 
-	@Override
-	public String toString() {
-		ToStringCreator tsc = new ToStringCreator(this);
-		tsc.append("resource", getFile());
-		tsc.append("notifyOn", getNotifyOn());
-		return tsc.toString();
-	}
+    @Override
+    public String toString() {
+        ToStringCreator tsc = new ToStringCreator(this);
+        tsc.append("resource", getFile());
+        tsc.append("notifyOn", getNotifyOn());
+        return tsc.toString();
+    }
 }

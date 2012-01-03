@@ -6,10 +6,11 @@ import org.springframework.roo.shell.converters.DateConverter;
 
 /**
  * OSGi component launcher for {@link DateConverter}.
- *
+ * 
  * @author Ben Alex
  * @since 1.1
  */
 @Component
 @Service
-public class DateConverterComponent extends DateConverter {}
+public class DateConverterComponent extends DateConverter {
+}

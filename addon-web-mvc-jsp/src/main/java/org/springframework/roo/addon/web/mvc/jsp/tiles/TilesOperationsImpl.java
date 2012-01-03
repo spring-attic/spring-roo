@@ -29,7 +29,7 @@ import org.xml.sax.SAXException;
 
 /**
  * Provides operations to manage tiles view definitions.
- *
+ * 
  * @author Stefan Schmidt
  * @since 1.0
  */
@@ -37,154 +37,190 @@ import org.xml.sax.SAXException;
 @Service
 public class TilesOperationsImpl implements TilesOperations {
 
-	// Fields
-	@Reference private FileManager fileManager;
-	@Reference private PathResolver pathResolver;
+    // Fields
+    @Reference private FileManager fileManager;
+    @Reference private PathResolver pathResolver;
 
-	public void addViewDefinition(final String folderName, final LogicalPath path, final String tilesViewName, final String tilesTemplateName, final String viewLocation) {
-		Assert.hasText(tilesViewName, "View name required");
-		Assert.hasText(tilesTemplateName, "Template name required");
-		Assert.hasText(viewLocation, "View location required");
+    public void addViewDefinition(final String folderName,
+            final LogicalPath path, final String tilesViewName,
+            final String tilesTemplateName, final String viewLocation) {
+        Assert.hasText(tilesViewName, "View name required");
+        Assert.hasText(tilesTemplateName, "Template name required");
+        Assert.hasText(viewLocation, "View location required");
 
-		final String viewsDefinitionFile = getTilesConfigFile(folderName, path);
+        final String viewsDefinitionFile = getTilesConfigFile(folderName, path);
 
-		final String unprefixedViewName = StringUtils.removePrefix(tilesViewName, "/");
-		final Element root = getViewsElement(viewsDefinitionFile);
-		final Element existingDefinition = XmlUtils.findFirstElement("/tiles-definitions/definition[@name = '" + unprefixedViewName + "']", root);
-		if (existingDefinition != null) {
-			// A definition with this name does already exist - nothing to do
-			return;
-		}
+        final String unprefixedViewName = StringUtils.removePrefix(
+                tilesViewName, "/");
+        final Element root = getViewsElement(viewsDefinitionFile);
+        final Element existingDefinition = XmlUtils.findFirstElement(
+                "/tiles-definitions/definition[@name = '" + unprefixedViewName
+                        + "']", root);
+        if (existingDefinition != null) {
+            // A definition with this name does already exist - nothing to do
+            return;
+        }
 
-		final Element newDefinition = root.getOwnerDocument().createElement("definition");
-		newDefinition.setAttribute("name", unprefixedViewName);
-		newDefinition.setAttribute("extends", tilesTemplateName);
+        final Element newDefinition = root.getOwnerDocument().createElement(
+                "definition");
+        newDefinition.setAttribute("name", unprefixedViewName);
+        newDefinition.setAttribute("extends", tilesTemplateName);
 
-		final Element putAttribute = root.getOwnerDocument().createElement("put-attribute");
-		putAttribute.setAttribute("name", "body");
-		putAttribute.setAttribute("value", viewLocation);
+        final Element putAttribute = root.getOwnerDocument().createElement(
+                "put-attribute");
+        putAttribute.setAttribute("name", "body");
+        putAttribute.setAttribute("value", viewLocation);
 
-		newDefinition.appendChild(putAttribute);
-		root.appendChild(newDefinition);
+        newDefinition.appendChild(putAttribute);
+        root.appendChild(newDefinition);
 
-		writeToDiskIfNecessary(viewsDefinitionFile, root);
-	}
+        writeToDiskIfNecessary(viewsDefinitionFile, root);
+    }
 
-	public void removeViewDefinition(final String name, final String folderName, final LogicalPath path) {
-		Assert.hasText(name, "View name required");
+    public void removeViewDefinition(final String name,
+            final String folderName, final LogicalPath path) {
+        Assert.hasText(name, "View name required");
 
-		final String viewsDefinitionFile = getTilesConfigFile(folderName, path);
+        final String viewsDefinitionFile = getTilesConfigFile(folderName, path);
 
-		final Element root = getViewsElement(viewsDefinitionFile);
+        final Element root = getViewsElement(viewsDefinitionFile);
 
-		// Find menu item under this category if exists
-		final Element element = XmlUtils.findFirstElement("/tiles-definitions/definition[@name = '" + name + "']", root);
-		if (element != null) {
-			element.getParentNode().removeChild(element);
-			writeToDiskIfNecessary(viewsDefinitionFile, root);
-		}
-	}
+        // Find menu item under this category if exists
+        final Element element = XmlUtils.findFirstElement(
+                "/tiles-definitions/definition[@name = '" + name + "']", root);
+        if (element != null) {
+            element.getParentNode().removeChild(element);
+            writeToDiskIfNecessary(viewsDefinitionFile, root);
+        }
+    }
 
-	/**
-	 *
-	 * @param viewsDefinitionFile the canonical path of the file to update
-	 * @param body the element whose parent document is to be written
-	 * @return
-	 */
-	private boolean writeToDiskIfNecessary(final String tilesDefinitionFile, final Element body) {
-		// Build a string representation of the Tiles config file
-		final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-		final Transformer transformer = XmlUtils.createIndentingTransformer();
-		transformer.setOutputProperty(OutputKeys.DOCTYPE_SYSTEM, "http://tiles.apache.org/dtds/tiles-config_2_1.dtd");
-		transformer.setOutputProperty(OutputKeys.DOCTYPE_PUBLIC, "-//Apache Software Foundation//DTD Tiles Configuration 2.1//EN");
-		XmlUtils.writeXml(transformer, byteArrayOutputStream, body.getOwnerDocument());
-		final String viewContent = byteArrayOutputStream.toString();
+    /**
+     * @param viewsDefinitionFile the canonical path of the file to update
+     * @param body the element whose parent document is to be written
+     * @return
+     */
+    private boolean writeToDiskIfNecessary(final String tilesDefinitionFile,
+            final Element body) {
+        // Build a string representation of the Tiles config file
+        final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        final Transformer transformer = XmlUtils.createIndentingTransformer();
+        transformer.setOutputProperty(OutputKeys.DOCTYPE_SYSTEM,
+                "http://tiles.apache.org/dtds/tiles-config_2_1.dtd");
+        transformer
+                .setOutputProperty(OutputKeys.DOCTYPE_PUBLIC,
+                        "-//Apache Software Foundation//DTD Tiles Configuration 2.1//EN");
+        XmlUtils.writeXml(transformer, byteArrayOutputStream,
+                body.getOwnerDocument());
+        final String viewContent = byteArrayOutputStream.toString();
 
-		// If mutableFile becomes non-null, it means we need to use it to write out the contents of jspContent to the file
-		MutableFile mutableFile = null;
-		if (fileManager.exists(tilesDefinitionFile)) {
-			// First verify if the file has even changed
-			final File f = new File(tilesDefinitionFile);
-			String existing = null;
-			try {
-				existing = FileCopyUtils.copyToString(f);
-			} catch (final IOException ignored) {}
+        // If mutableFile becomes non-null, it means we need to use it to write
+        // out the contents of jspContent to the file
+        MutableFile mutableFile = null;
+        if (fileManager.exists(tilesDefinitionFile)) {
+            // First verify if the file has even changed
+            final File f = new File(tilesDefinitionFile);
+            String existing = null;
+            try {
+                existing = FileCopyUtils.copyToString(f);
+            }
+            catch (final IOException ignored) {
+            }
 
-			if (!viewContent.equals(existing)) {
-				mutableFile = fileManager.updateFile(tilesDefinitionFile);
-			}
-		} else {
-			mutableFile = fileManager.createFile(tilesDefinitionFile);
-			Assert.notNull(mutableFile, "Could not create tiles view definition '" + tilesDefinitionFile + "'");
-		}
+            if (!viewContent.equals(existing)) {
+                mutableFile = fileManager.updateFile(tilesDefinitionFile);
+            }
+        }
+        else {
+            mutableFile = fileManager.createFile(tilesDefinitionFile);
+            Assert.notNull(mutableFile,
+                    "Could not create tiles view definition '"
+                            + tilesDefinitionFile + "'");
+        }
 
-		if (mutableFile != null) {
-			try {
-				// We need to write the file out (it's a new file, or the existing file has different contents)
-				FileCopyUtils.copy(viewContent, new OutputStreamWriter(mutableFile.getOutputStream()));
-				
-				// Return and indicate we wrote out the file
-				return true;
-			} catch (final IOException ioe) {
-				throw new IllegalStateException("Could not output '" + mutableFile.getCanonicalPath() + "'", ioe);
-			}
-		}
+        if (mutableFile != null) {
+            try {
+                // We need to write the file out (it's a new file, or the
+                // existing file has different contents)
+                FileCopyUtils.copy(viewContent, new OutputStreamWriter(
+                        mutableFile.getOutputStream()));
 
-		// A file existed, but it contained the same content, so we return false
-		return false;
-	}
+                // Return and indicate we wrote out the file
+                return true;
+            }
+            catch (final IOException ioe) {
+                throw new IllegalStateException("Could not output '"
+                        + mutableFile.getCanonicalPath() + "'", ioe);
+            }
+        }
 
-	/**
-	 * Returns the root element of the given Tiles configuration file
-	 *
-	 * @param viewsDefinitionFile the canonical path of the file to load
-	 * @return the root of a new XML document if that file does not exist
-	 */
-	private Element getViewsElement(final String viewsDefinitionFile) {
-		final Document tilesView;
-		if (fileManager.exists(viewsDefinitionFile)) {
-			final DocumentBuilder builder = XmlUtils.getDocumentBuilder();
-			builder.setEntityResolver(new TilesDtdResolver());
-			try {
-				tilesView = builder.parse(fileManager.getInputStream(viewsDefinitionFile));
-			} catch (final SAXException se) {
-				throw new IllegalStateException("Unable to parse the tiles " + viewsDefinitionFile + " file", se);
-			} catch (final IOException ioe) {
-				throw new IllegalStateException("Unable to read the tiles " + viewsDefinitionFile + " file (reason: " + ioe.getMessage() + ")", ioe);
-			}
-		} else {
-			tilesView = XmlUtils.getDocumentBuilder().newDocument();
-			tilesView.appendChild(tilesView.createElement("tiles-definitions"));
-		}
-		return tilesView.getDocumentElement();
-	}
+        // A file existed, but it contained the same content, so we return false
+        return false;
+    }
 
-	/**
-	 * Returns the canonical path of the "views.xml" Tiles configuration file in
-	 * the given folder.
-	 *
-	 * @param folderName can be blank for the main views file; if not, any
-	 * leading slash is ignored
-	 * @param path
-	 * @return a non-<code>null</code> path
-	 */
-	private String getTilesConfigFile(final String folderName, final LogicalPath path) {
-		final String subPath;
-		if (StringUtils.hasText(folderName) && !"/".equals(folderName)) {
-			subPath = StringUtils.prefix(folderName, "/");
-		} else {
-			subPath = "";
-		}
-		return pathResolver.getIdentifier(path, "WEB-INF/views" + subPath + "/views.xml");
-	}
+    /**
+     * Returns the root element of the given Tiles configuration file
+     * 
+     * @param viewsDefinitionFile the canonical path of the file to load
+     * @return the root of a new XML document if that file does not exist
+     */
+    private Element getViewsElement(final String viewsDefinitionFile) {
+        final Document tilesView;
+        if (fileManager.exists(viewsDefinitionFile)) {
+            final DocumentBuilder builder = XmlUtils.getDocumentBuilder();
+            builder.setEntityResolver(new TilesDtdResolver());
+            try {
+                tilesView = builder.parse(fileManager
+                        .getInputStream(viewsDefinitionFile));
+            }
+            catch (final SAXException se) {
+                throw new IllegalStateException("Unable to parse the tiles "
+                        + viewsDefinitionFile + " file", se);
+            }
+            catch (final IOException ioe) {
+                throw new IllegalStateException("Unable to read the tiles "
+                        + viewsDefinitionFile + " file (reason: "
+                        + ioe.getMessage() + ")", ioe);
+            }
+        }
+        else {
+            tilesView = XmlUtils.getDocumentBuilder().newDocument();
+            tilesView.appendChild(tilesView.createElement("tiles-definitions"));
+        }
+        return tilesView.getDocumentElement();
+    }
 
-	private static class TilesDtdResolver implements EntityResolver {
-		public InputSource resolveEntity(final String publicId, final String systemId) {
-			if (systemId.equals("http://tiles.apache.org/dtds/tiles-config_2_1.dtd")) {
-				return new InputSource(FileUtils.getInputStream(TilesOperationsImpl.class, "tiles-config_2_1.dtd"));
-			}
-			// Use the default behaviour
-			return null;
-		}
-	}
+    /**
+     * Returns the canonical path of the "views.xml" Tiles configuration file in
+     * the given folder.
+     * 
+     * @param folderName can be blank for the main views file; if not, any
+     *            leading slash is ignored
+     * @param path
+     * @return a non-<code>null</code> path
+     */
+    private String getTilesConfigFile(final String folderName,
+            final LogicalPath path) {
+        final String subPath;
+        if (StringUtils.hasText(folderName) && !"/".equals(folderName)) {
+            subPath = StringUtils.prefix(folderName, "/");
+        }
+        else {
+            subPath = "";
+        }
+        return pathResolver.getIdentifier(path, "WEB-INF/views" + subPath
+                + "/views.xml");
+    }
+
+    private static class TilesDtdResolver implements EntityResolver {
+        public InputSource resolveEntity(final String publicId,
+                final String systemId) {
+            if (systemId
+                    .equals("http://tiles.apache.org/dtds/tiles-config_2_1.dtd")) {
+                return new InputSource(FileUtils.getInputStream(
+                        TilesOperationsImpl.class, "tiles-config_2_1.dtd"));
+            }
+            // Use the default behaviour
+            return null;
+        }
+    }
 }

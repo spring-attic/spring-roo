@@ -33,141 +33,163 @@ import org.springframework.roo.project.Path;
 
 /**
  * Unit test of {@link EntityLayerProvider}
- *
+ * 
  * @author Andrew Swan
  * @since 1.2.0
  */
 public class EntityLayerProviderTest {
 
-	// Constants
-	private static final String CALLER_MID = "MID:caller#com.example.MyService";
+    // Constants
+    private static final String CALLER_MID = "MID:caller#com.example.MyService";
 
-	// Maps the supported entity methods to their test parameter names
-	private static final Map<MethodMetadataCustomDataKey, List<String>> METHODS = new HashMap<MethodMetadataCustomDataKey, List<String>>();
+    // Maps the supported entity methods to their test parameter names
+    private static final Map<MethodMetadataCustomDataKey, List<String>> METHODS = new HashMap<MethodMetadataCustomDataKey, List<String>>();
 
-	static {
-		METHODS.put(CLEAR_METHOD, Collections.<String>emptyList());
-		METHODS.put(COUNT_ALL_METHOD, Collections.<String>emptyList());
-		METHODS.put(FIND_ALL_METHOD, Collections.<String>emptyList());
-		METHODS.put(FIND_ENTRIES_METHOD, Arrays.asList("x", "y"));
-		METHODS.put(FIND_METHOD, Arrays.asList("id"));
-		METHODS.put(FLUSH_METHOD, Collections.<String>emptyList());
-		METHODS.put(MERGE_METHOD, Collections.<String>emptyList());
-		METHODS.put(PERSIST_METHOD, Collections.<String>emptyList());
-		METHODS.put(REMOVE_METHOD, Collections.<String>emptyList());
-	}
+    static {
+        METHODS.put(CLEAR_METHOD, Collections.<String> emptyList());
+        METHODS.put(COUNT_ALL_METHOD, Collections.<String> emptyList());
+        METHODS.put(FIND_ALL_METHOD, Collections.<String> emptyList());
+        METHODS.put(FIND_ENTRIES_METHOD, Arrays.asList("x", "y"));
+        METHODS.put(FIND_METHOD, Arrays.asList("id"));
+        METHODS.put(FLUSH_METHOD, Collections.<String> emptyList());
+        METHODS.put(MERGE_METHOD, Collections.<String> emptyList());
+        METHODS.put(PERSIST_METHOD, Collections.<String> emptyList());
+        METHODS.put(REMOVE_METHOD, Collections.<String> emptyList());
+    }
 
-	// Fixture
-	private EntityLayerProvider layerProvider;
-	private String pluralId;
+    // Fixture
+    private EntityLayerProvider layerProvider;
+    private String pluralId;
 
-	@Mock private JpaActiveRecordMetadataProvider mockJpaActiveRecordMetadataProvider;
-	@Mock private JavaType mockTargetEntity;
-	@Mock private JavaType mockIdType;
-	@Mock private JpaCrudAnnotationValues mockAnnotationValues;
-	@Mock private MetadataService mockMetadataService;
-	@Mock private PluralMetadata mockPluralMetadata;
-	@Mock private TypeLocationService mockTypeLocationService;
+    @Mock private JpaActiveRecordMetadataProvider mockJpaActiveRecordMetadataProvider;
+    @Mock private JavaType mockTargetEntity;
+    @Mock private JavaType mockIdType;
+    @Mock private JpaCrudAnnotationValues mockAnnotationValues;
+    @Mock private MetadataService mockMetadataService;
+    @Mock private PluralMetadata mockPluralMetadata;
+    @Mock private TypeLocationService mockTypeLocationService;
 
-	
-	@Before
-	public void setUp() {
-		MockitoAnnotations.initMocks(this);
-		when(mockTargetEntity.getFullyQualifiedTypeName()).thenReturn("com.example.Pizza");
-		when(mockIdType.getFullyQualifiedTypeName()).thenReturn(Long.class.getName());
-		when(mockTypeLocationService.getTypePath(mockTargetEntity)).thenReturn(Path.SRC_MAIN_JAVA.getModulePathId(""));
+    @Before
+    public void setUp() {
+        MockitoAnnotations.initMocks(this);
+        when(mockTargetEntity.getFullyQualifiedTypeName()).thenReturn(
+                "com.example.Pizza");
+        when(mockIdType.getFullyQualifiedTypeName()).thenReturn(
+                Long.class.getName());
+        when(mockTypeLocationService.getTypePath(mockTargetEntity)).thenReturn(
+                Path.SRC_MAIN_JAVA.getModulePathId(""));
 
-		this.pluralId = PluralMetadata.createIdentifier(mockTargetEntity, Path.SRC_MAIN_JAVA.getModulePathId(""));
-		this.layerProvider = new EntityLayerProvider();
-		this.layerProvider.typeLocationService = mockTypeLocationService;
-		this.layerProvider.setJpaActiveRecordMetadataProvider(mockJpaActiveRecordMetadataProvider);
-		this.layerProvider.setMetadataService(mockMetadataService);
-	}
+        this.pluralId = PluralMetadata.createIdentifier(mockTargetEntity,
+                Path.SRC_MAIN_JAVA.getModulePathId(""));
+        this.layerProvider = new EntityLayerProvider();
+        this.layerProvider.typeLocationService = mockTypeLocationService;
+        this.layerProvider
+                .setJpaActiveRecordMetadataProvider(mockJpaActiveRecordMetadataProvider);
+        this.layerProvider.setMetadataService(mockMetadataService);
+    }
 
-	private void setUpMockAnnotationValues() {
-		when(mockJpaActiveRecordMetadataProvider.getAnnotationValues(mockTargetEntity)).thenReturn(mockAnnotationValues);
-	}
+    private void setUpMockAnnotationValues() {
+        when(
+                mockJpaActiveRecordMetadataProvider
+                        .getAnnotationValues(mockTargetEntity)).thenReturn(
+                mockAnnotationValues);
+    }
 
-	private void setUpPlural(final String plural) {
-		when(mockMetadataService.get(pluralId)).thenReturn(mockPluralMetadata);
-		when(mockPluralMetadata.getPlural()).thenReturn(plural);
-	}
+    private void setUpPlural(final String plural) {
+        when(mockMetadataService.get(pluralId)).thenReturn(mockPluralMetadata);
+        when(mockPluralMetadata.getPlural()).thenReturn(plural);
+    }
 
-	@Test
-	public void testGetAdditionsWhenEntityAnnotationValuesNotAvailable() {
-		// Set up
-		when(mockJpaActiveRecordMetadataProvider.getAnnotationValues(mockTargetEntity)).thenReturn(null);
+    @Test
+    public void testGetAdditionsWhenEntityAnnotationValuesNotAvailable() {
+        // Set up
+        when(
+                mockJpaActiveRecordMetadataProvider
+                        .getAnnotationValues(mockTargetEntity))
+                .thenReturn(null);
 
-		// Invoke
-		final MemberTypeAdditions additions = layerProvider.getMemberTypeAdditions(CALLER_MID, FIND_ALL_METHOD.name(), mockTargetEntity, mockIdType);
+        // Invoke
+        final MemberTypeAdditions additions = layerProvider
+                .getMemberTypeAdditions(CALLER_MID, FIND_ALL_METHOD.name(),
+                        mockTargetEntity, mockIdType);
 
-		// Check
-		assertNull(additions);
-	}
+        // Check
+        assertNull(additions);
+    }
 
-	@Test
-	public void testGetAdditionsWhenGovernorPluralMetadataIsNull() {
-		setUpMockAnnotationValues();
-		when(mockMetadataService.get(pluralId)).thenReturn(null);
+    @Test
+    public void testGetAdditionsWhenGovernorPluralMetadataIsNull() {
+        setUpMockAnnotationValues();
+        when(mockMetadataService.get(pluralId)).thenReturn(null);
 
-		// Invoke
-		final MemberTypeAdditions additions = layerProvider.getMemberTypeAdditions(CALLER_MID, FIND_ALL_METHOD.name(), mockTargetEntity, mockIdType);
+        // Invoke
+        final MemberTypeAdditions additions = layerProvider
+                .getMemberTypeAdditions(CALLER_MID, FIND_ALL_METHOD.name(),
+                        mockTargetEntity, mockIdType);
 
-		// Check
-		assertNull(additions);
-	}
+        // Check
+        assertNull(additions);
+    }
 
-	@Test
-	public void testGetAdditionsWhenGovernorPluralIsEmpty() {
-		// Set up
-		setUpMockAnnotationValues();
-		setUpPlural("");
+    @Test
+    public void testGetAdditionsWhenGovernorPluralIsEmpty() {
+        // Set up
+        setUpMockAnnotationValues();
+        setUpPlural("");
 
-		// Invoke
-		final MemberTypeAdditions additions = layerProvider.getMemberTypeAdditions(CALLER_MID, FIND_ALL_METHOD.name(), mockTargetEntity, mockIdType);
+        // Invoke
+        final MemberTypeAdditions additions = layerProvider
+                .getMemberTypeAdditions(CALLER_MID, FIND_ALL_METHOD.name(),
+                        mockTargetEntity, mockIdType);
 
-		// Check
-		assertNull(additions);
-	}
+        // Check
+        assertNull(additions);
+    }
 
-	@Test
-	public void testGetAdditionsForBogusMethod() {
-		// Set up
-		setUpMockAnnotationValues();
-		setUpPlural("anything");
+    @Test
+    public void testGetAdditionsForBogusMethod() {
+        // Set up
+        setUpMockAnnotationValues();
+        setUpPlural("anything");
 
-		// Invoke
-		final MemberTypeAdditions additions = layerProvider.getMemberTypeAdditions(CALLER_MID, "bogus", mockTargetEntity, mockIdType);
+        // Invoke
+        final MemberTypeAdditions additions = layerProvider
+                .getMemberTypeAdditions(CALLER_MID, "bogus", mockTargetEntity,
+                        mockIdType);
 
-		// Check
-		assertNull(additions);
-	}
+        // Check
+        assertNull(additions);
+    }
 
-	@Test
-	public void testGetAdditionsForMethodAnnotatedWithEmptyName() {
-		// Set up
-		setUpMockAnnotationValues();
-		when(mockAnnotationValues.getFindAllMethod()).thenReturn("");
-		setUpPlural("anything");
+    @Test
+    public void testGetAdditionsForMethodAnnotatedWithEmptyName() {
+        // Set up
+        setUpMockAnnotationValues();
+        when(mockAnnotationValues.getFindAllMethod()).thenReturn("");
+        setUpPlural("anything");
 
-		// Invoke
-		final MemberTypeAdditions additions = layerProvider.getMemberTypeAdditions(CALLER_MID, FIND_ALL_METHOD.name(), mockTargetEntity, mockIdType);
+        // Invoke
+        final MemberTypeAdditions additions = layerProvider
+                .getMemberTypeAdditions(CALLER_MID, FIND_ALL_METHOD.name(),
+                        mockTargetEntity, mockIdType);
 
-		// Check
-		assertNull(additions);
-	}
+        // Check
+        assertNull(additions);
+    }
 
-	@Test
-	public void testGetAdditionsForMethodAnnotatedWithNonEmptyName() {
-		// Set up
-		setUpMockAnnotationValues();
-		when(mockAnnotationValues.getFindAllMethod()).thenReturn("getAll");
-		setUpPlural("Pizzas");
+    @Test
+    public void testGetAdditionsForMethodAnnotatedWithNonEmptyName() {
+        // Set up
+        setUpMockAnnotationValues();
+        when(mockAnnotationValues.getFindAllMethod()).thenReturn("getAll");
+        setUpPlural("Pizzas");
 
-		// Invoke
-		final MemberTypeAdditions additions = layerProvider.getMemberTypeAdditions(CALLER_MID, FIND_ALL_METHOD.name(), mockTargetEntity, mockIdType);
+        // Invoke
+        final MemberTypeAdditions additions = layerProvider
+                .getMemberTypeAdditions(CALLER_MID, FIND_ALL_METHOD.name(),
+                        mockTargetEntity, mockIdType);
 
-		// Check
-		assertEquals("getAllPizzas", additions.getMethodName());
-	}
+        // Check
+        assertEquals("getAllPizzas", additions.getMethodName());
+    }
 }

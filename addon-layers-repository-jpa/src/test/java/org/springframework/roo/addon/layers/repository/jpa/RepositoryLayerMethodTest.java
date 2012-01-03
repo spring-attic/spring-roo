@@ -18,45 +18,49 @@ import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Unit test of the {@link RepositoryLayerMethod} enum.
- *
+ * 
  * @author Andrew Swan
  * @since 1.2.0
  */
 public class RepositoryLayerMethodTest {
 
-	// Fixture
-	@Mock private JavaType mockTargetEntity;
-	@Mock private JavaType mockIdType;
+    // Fixture
+    @Mock private JavaType mockTargetEntity;
+    @Mock private JavaType mockIdType;
 
-	@Before
-	public void setUp() {
-		MockitoAnnotations.initMocks(this);
-	}
+    @Before
+    public void setUp() {
+        MockitoAnnotations.initMocks(this);
+    }
 
-	@Test
-	public void testNamesAreUniqueAndNotBlank() {
-		final Set<String> names = new HashSet<String>();
-		for (final RepositoryJpaLayerMethod method : RepositoryJpaLayerMethod.values()) {
-			final String name = method.getName();
-			names.add(name);
-			assertTrue(StringUtils.hasText(name));
-		}
-		assertEquals(RepositoryJpaLayerMethod.values().length, names.size());
-	}
+    @Test
+    public void testNamesAreUniqueAndNotBlank() {
+        final Set<String> names = new HashSet<String>();
+        for (final RepositoryJpaLayerMethod method : RepositoryJpaLayerMethod
+                .values()) {
+            final String name = method.getName();
+            names.add(name);
+            assertTrue(StringUtils.hasText(name));
+        }
+        assertEquals(RepositoryJpaLayerMethod.values().length, names.size());
+    }
 
-	@Test
-	public void testParameterTypesAreNotNull() {
-		for (final RepositoryJpaLayerMethod method : RepositoryJpaLayerMethod.values()) {
-			assertNotNull(method.getParameterTypes(mockTargetEntity, mockIdType));
-		}
-	}
+    @Test
+    public void testParameterTypesAreNotNull() {
+        for (final RepositoryJpaLayerMethod method : RepositoryJpaLayerMethod
+                .values()) {
+            assertNotNull(method
+                    .getParameterTypes(mockTargetEntity, mockIdType));
+        }
+    }
 
-	@Test
-	public void testCallFlushMethod() {
-		// Invoke
-		final String methodCall = RepositoryJpaLayerMethod.FLUSH.getCall(Collections.<MethodParameter>emptyList());
+    @Test
+    public void testCallFlushMethod() {
+        // Invoke
+        final String methodCall = RepositoryJpaLayerMethod.FLUSH
+                .getCall(Collections.<MethodParameter> emptyList());
 
-		// Check
-		assertEquals("flush()", methodCall);
-	}
+        // Check
+        assertEquals("flush()", methodCall);
+    }
 }

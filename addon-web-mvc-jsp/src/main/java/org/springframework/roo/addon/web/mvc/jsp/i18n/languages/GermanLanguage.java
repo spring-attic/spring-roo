@@ -10,7 +10,7 @@ import org.springframework.roo.support.util.FileUtils;
 
 /**
  * German language support.
- *
+ * 
  * @author Stefan Schmidt
  * @since 1.1
  */
@@ -18,19 +18,19 @@ import org.springframework.roo.support.util.FileUtils;
 @Service
 public class GermanLanguage extends AbstractLanguage {
 
-	public Locale getLocale() {
-		return Locale.GERMAN;
-	}
+    public Locale getLocale() {
+        return Locale.GERMAN;
+    }
 
-	public String getLanguage() {
-		return "Deutsch";
-	}
+    public String getLanguage() {
+        return "Deutsch";
+    }
 
-	public InputStream getFlagGraphic() {
-		return FileUtils.getInputStream(getClass(), "de.png");
-	}
+    public InputStream getFlagGraphic() {
+        return FileUtils.getInputStream(getClass(), "de.png");
+    }
 
-	public InputStream getMessageBundle() {
-		return FileUtils.getInputStream(getClass(), "messages_de.properties");
-	}
+    public InputStream getMessageBundle() {
+        return FileUtils.getInputStream(getClass(), "messages_de.properties");
+    }
 }

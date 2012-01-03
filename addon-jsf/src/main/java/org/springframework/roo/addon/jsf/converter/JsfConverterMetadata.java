@@ -31,158 +31,212 @@ import org.springframework.roo.support.util.Assert;
 
 /**
  * Metadata for {@link RooJsfConverter}.
- *
+ * 
  * @author Alan Stewart
  * @since 1.2.0
  */
-public class JsfConverterMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
+public class JsfConverterMetadata extends
+        AbstractItdTypeDetailsProvidingMetadataItem {
 
-	// Constants
-	static final String ID_FIELD_NAME = "id";
-	private static final String PROVIDES_TYPE_STRING = JsfConverterMetadata.class.getName();
-	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
+    // Constants
+    static final String ID_FIELD_NAME = "id";
+    private static final String PROVIDES_TYPE_STRING = JsfConverterMetadata.class
+            .getName();
+    private static final String PROVIDES_TYPE = MetadataIdentificationUtils
+            .create(PROVIDES_TYPE_STRING);
 
-	public JsfConverterMetadata(final String identifier, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final JsfConverterAnnotationValues annotationValues, final MemberTypeAdditions findMethod, final MethodMetadata identifierAccessor) {
-		super(identifier, aspectName, governorPhysicalTypeMetadata);
-		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' is invalid");
-		Assert.notNull(annotationValues, "Annotation values required");
+    public JsfConverterMetadata(final String identifier,
+            final JavaType aspectName,
+            final PhysicalTypeMetadata governorPhysicalTypeMetadata,
+            final JsfConverterAnnotationValues annotationValues,
+            final MemberTypeAdditions findMethod,
+            final MethodMetadata identifierAccessor) {
+        super(identifier, aspectName, governorPhysicalTypeMetadata);
+        Assert.isTrue(isValid(identifier), "Metadata identification string '"
+                + identifier + "' is invalid");
+        Assert.notNull(annotationValues, "Annotation values required");
 
-		if (!isValid()) {
-			return;
-		}
+        if (!isValid()) {
+            return;
+        }
 
-		if (findMethod == null || identifierAccessor == null) {
-			valid = false;
-			return;
-		}
+        if (findMethod == null || identifierAccessor == null) {
+            valid = false;
+            return;
+        }
 
-		if (!isConverterInterfaceIntroduced()) {
-			builder.getImportRegistrationResolver().addImport(CONVERTER);
-			builder.addImplementsType(CONVERTER);
-		}
+        if (!isConverterInterfaceIntroduced()) {
+            builder.getImportRegistrationResolver().addImport(CONVERTER);
+            builder.addImplementsType(CONVERTER);
+        }
 
-		builder.addAnnotation(getFacesConverterAnnotation());
-		builder.addMethod(getGetAsObjectMethod(findMethod, identifierAccessor));
-		builder.addMethod(getGetAsStringMethod(annotationValues.getEntity(), identifierAccessor));
+        builder.addAnnotation(getFacesConverterAnnotation());
+        builder.addMethod(getGetAsObjectMethod(findMethod, identifierAccessor));
+        builder.addMethod(getGetAsStringMethod(annotationValues.getEntity(),
+                identifierAccessor));
 
-		// Create a representation of the desired output ITD
-		itdTypeDetails = builder.build();
-	}
+        // Create a representation of the desired output ITD
+        itdTypeDetails = builder.build();
+    }
 
-	private AnnotationMetadata getFacesConverterAnnotation() {
-		AnnotationMetadata annotation = getTypeAnnotation(FACES_CONVERTER);
-		if (annotation == null) {
-			return null;
-		}
+    private AnnotationMetadata getFacesConverterAnnotation() {
+        AnnotationMetadata annotation = getTypeAnnotation(FACES_CONVERTER);
+        if (annotation == null) {
+            return null;
+        }
 
-		AnnotationMetadataBuilder annotationBuulder = new AnnotationMetadataBuilder(annotation);
-		// annotationBuulder.addClassAttribute("forClass", entity); // TODO The forClass attribute causes issues
-		annotationBuulder.addStringAttribute("value", destination.getFullyQualifiedTypeName());
-		return annotationBuulder.build();
-	}
+        AnnotationMetadataBuilder annotationBuulder = new AnnotationMetadataBuilder(
+                annotation);
+        // annotationBuulder.addClassAttribute("forClass", entity); // TODO The
+        // forClass attribute causes issues
+        annotationBuulder.addStringAttribute("value",
+                destination.getFullyQualifiedTypeName());
+        return annotationBuulder.build();
+    }
 
-	private boolean isConverterInterfaceIntroduced() {
-		return isImplementing(governorTypeDetails, CONVERTER);
-	}
+    private boolean isConverterInterfaceIntroduced() {
+        return isImplementing(governorTypeDetails, CONVERTER);
+    }
 
-	private MethodMetadataBuilder getGetAsObjectMethod(final MemberTypeAdditions findMethod, final MethodMetadata identifierAccessor) {
-		final JavaSymbolName methodName = new JavaSymbolName("getAsObject");
-		final JavaType[] parameterTypes = { FACES_CONTEXT, UI_COMPONENT, STRING };
-		if (governorHasMethod(methodName, parameterTypes)) {
-			return null;
-		}
+    private MethodMetadataBuilder getGetAsObjectMethod(
+            final MemberTypeAdditions findMethod,
+            final MethodMetadata identifierAccessor) {
+        final JavaSymbolName methodName = new JavaSymbolName("getAsObject");
+        final JavaType[] parameterTypes = { FACES_CONTEXT, UI_COMPONENT, STRING };
+        if (governorHasMethod(methodName, parameterTypes)) {
+            return null;
+        }
 
-		findMethod.copyAdditionsTo(builder, governorTypeDetails);
-		final JavaType returnType = identifierAccessor.getReturnType();
+        findMethod.copyAdditionsTo(builder, governorTypeDetails);
+        final JavaType returnType = identifierAccessor.getReturnType();
 
-		builder.getImportRegistrationResolver().addImports(returnType, FACES_CONTEXT, UI_COMPONENT);
+        builder.getImportRegistrationResolver().addImports(returnType,
+                FACES_CONTEXT, UI_COMPONENT);
 
-		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		bodyBuilder.appendFormalLine("if (value == null || value.length() == 0) {");  
-		bodyBuilder.indent();
-		bodyBuilder.appendFormalLine("return null;");
-		bodyBuilder.indentRemove();
-		bodyBuilder.appendFormalLine("}");
-		bodyBuilder.appendFormalLine(returnType.getSimpleTypeName() + " " + ID_FIELD_NAME + " = " + getJavaTypeConversionString(returnType) + ";");
-		bodyBuilder.appendFormalLine("return " + findMethod.getMethodCall() + ";");
+        InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+        bodyBuilder
+                .appendFormalLine("if (value == null || value.length() == 0) {");
+        bodyBuilder.indent();
+        bodyBuilder.appendFormalLine("return null;");
+        bodyBuilder.indentRemove();
+        bodyBuilder.appendFormalLine("}");
+        bodyBuilder.appendFormalLine(returnType.getSimpleTypeName() + " "
+                + ID_FIELD_NAME + " = "
+                + getJavaTypeConversionString(returnType) + ";");
+        bodyBuilder.appendFormalLine("return " + findMethod.getMethodCall()
+                + ";");
 
-		// Create getAsObject method
-		final List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("context"), new JavaSymbolName("component"), new JavaSymbolName("value"));
-		return new MethodMetadataBuilder(getId(), PUBLIC, methodName, OBJECT, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
-	}
+        // Create getAsObject method
+        final List<JavaSymbolName> parameterNames = Arrays.asList(
+                new JavaSymbolName("context"), new JavaSymbolName("component"),
+                new JavaSymbolName("value"));
+        return new MethodMetadataBuilder(getId(), PUBLIC, methodName, OBJECT,
+                AnnotatedJavaType.convertFromJavaTypes(parameterTypes),
+                parameterNames, bodyBuilder);
+    }
 
-	private MethodMetadataBuilder getGetAsStringMethod(final JavaType entity, final MethodMetadata identifierAccessor) {
-		final JavaSymbolName methodName = new JavaSymbolName("getAsString");
-		final JavaType[] parameterTypes = { FACES_CONTEXT, UI_COMPONENT, OBJECT };
-		if (governorHasMethod(methodName, parameterTypes)) {
-			return null;
-		}
+    private MethodMetadataBuilder getGetAsStringMethod(final JavaType entity,
+            final MethodMetadata identifierAccessor) {
+        final JavaSymbolName methodName = new JavaSymbolName("getAsString");
+        final JavaType[] parameterTypes = { FACES_CONTEXT, UI_COMPONENT, OBJECT };
+        if (governorHasMethod(methodName, parameterTypes)) {
+            return null;
+        }
 
-		builder.getImportRegistrationResolver().addImports(entity, FACES_CONTEXT, UI_COMPONENT);
+        builder.getImportRegistrationResolver().addImports(entity,
+                FACES_CONTEXT, UI_COMPONENT);
 
-		String simpleTypeName = entity.getSimpleTypeName();
+        String simpleTypeName = entity.getSimpleTypeName();
 
-		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		bodyBuilder.appendFormalLine("return value instanceof " + simpleTypeName + " ? ((" + simpleTypeName + ") value)." + identifierAccessor.getMethodName().getSymbolName() + "().toString() : \"\";");  
+        InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+        bodyBuilder.appendFormalLine("return value instanceof "
+                + simpleTypeName + " ? ((" + simpleTypeName + ") value)."
+                + identifierAccessor.getMethodName().getSymbolName()
+                + "().toString() : \"\";");
 
-		// Create getAsString method
-		final List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("context"), new JavaSymbolName("component"), new JavaSymbolName("value"));
-		return new MethodMetadataBuilder(getId(), PUBLIC, methodName, JavaType.STRING, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
-	}
-	
-	private String getJavaTypeConversionString(JavaType javaType) {
-		if (javaType.equals(JavaType.LONG_OBJECT) || javaType.equals(JavaType.LONG_PRIMITIVE)) {
-			return "Long.parseLong(value)";
-		} else if (javaType.equals(JavaType.INT_OBJECT) || javaType.equals(JavaType.INT_PRIMITIVE)) {
-			return "Integer.parseInt(value)";
-		} else if (javaType.equals(JavaType.DOUBLE_OBJECT) || javaType.equals(JavaType.DOUBLE_PRIMITIVE)) {
-			return "Double.parseDouble(value)";
-		} else if (javaType.equals(JavaType.FLOAT_OBJECT) || javaType.equals(JavaType.FLOAT_PRIMITIVE)) {
-			return "Float.parseFloat(value)";
-		} else if (javaType.equals(JavaType.SHORT_OBJECT) || javaType.equals(JavaType.SHORT_PRIMITIVE)) {
-			return "Short.parseShort(value)";
-		} else if (javaType.equals(JavaType.BYTE_OBJECT) || javaType.equals(JavaType.BYTE_PRIMITIVE)) {
-			return "Byte.parseByte(value)";
-		} else if (javaType.equals(JdkJavaType.BIG_DECIMAL)) {
-			return "new BigDecimal(value)";
-		} else if (javaType.equals(JdkJavaType.BIG_INTEGER)) {
-			return "new BigInteger(value)";
-		} else if (javaType.equals(STRING)) {
-			return "value";
-		} else {
-			return "value.toString()";
-		}
-	}
+        // Create getAsString method
+        final List<JavaSymbolName> parameterNames = Arrays.asList(
+                new JavaSymbolName("context"), new JavaSymbolName("component"),
+                new JavaSymbolName("value"));
+        return new MethodMetadataBuilder(getId(), PUBLIC, methodName,
+                JavaType.STRING,
+                AnnotatedJavaType.convertFromJavaTypes(parameterTypes),
+                parameterNames, bodyBuilder);
+    }
 
-	@Override
-	public String toString() {
-		final ToStringCreator tsc = new ToStringCreator(this);
-		tsc.append("identifier", getId());
-		tsc.append("valid", valid);
-		tsc.append("aspectName", aspectName);
-		tsc.append("destinationType", destination);
-		tsc.append("governor", governorPhysicalTypeMetadata.getId());
-		tsc.append("itdTypeDetails", itdTypeDetails);
-		return tsc.toString();
-	}
+    private String getJavaTypeConversionString(JavaType javaType) {
+        if (javaType.equals(JavaType.LONG_OBJECT)
+                || javaType.equals(JavaType.LONG_PRIMITIVE)) {
+            return "Long.parseLong(value)";
+        }
+        else if (javaType.equals(JavaType.INT_OBJECT)
+                || javaType.equals(JavaType.INT_PRIMITIVE)) {
+            return "Integer.parseInt(value)";
+        }
+        else if (javaType.equals(JavaType.DOUBLE_OBJECT)
+                || javaType.equals(JavaType.DOUBLE_PRIMITIVE)) {
+            return "Double.parseDouble(value)";
+        }
+        else if (javaType.equals(JavaType.FLOAT_OBJECT)
+                || javaType.equals(JavaType.FLOAT_PRIMITIVE)) {
+            return "Float.parseFloat(value)";
+        }
+        else if (javaType.equals(JavaType.SHORT_OBJECT)
+                || javaType.equals(JavaType.SHORT_PRIMITIVE)) {
+            return "Short.parseShort(value)";
+        }
+        else if (javaType.equals(JavaType.BYTE_OBJECT)
+                || javaType.equals(JavaType.BYTE_PRIMITIVE)) {
+            return "Byte.parseByte(value)";
+        }
+        else if (javaType.equals(JdkJavaType.BIG_DECIMAL)) {
+            return "new BigDecimal(value)";
+        }
+        else if (javaType.equals(JdkJavaType.BIG_INTEGER)) {
+            return "new BigInteger(value)";
+        }
+        else if (javaType.equals(STRING)) {
+            return "value";
+        }
+        else {
+            return "value.toString()";
+        }
+    }
 
-	public static String getMetadataIdentiferType() {
-		return PROVIDES_TYPE;
-	}
+    @Override
+    public String toString() {
+        final ToStringCreator tsc = new ToStringCreator(this);
+        tsc.append("identifier", getId());
+        tsc.append("valid", valid);
+        tsc.append("aspectName", aspectName);
+        tsc.append("destinationType", destination);
+        tsc.append("governor", governorPhysicalTypeMetadata.getId());
+        tsc.append("itdTypeDetails", itdTypeDetails);
+        return tsc.toString();
+    }
 
-	public static String createIdentifier(final JavaType javaType, final LogicalPath path) {
-		return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
-	}
+    public static String getMetadataIdentiferType() {
+        return PROVIDES_TYPE;
+    }
 
-	public static JavaType getJavaType(final String metadataIdentificationString) {
-		return PhysicalTypeIdentifierNamingUtils.getJavaType(PROVIDES_TYPE_STRING, metadataIdentificationString);
-	}
+    public static String createIdentifier(final JavaType javaType,
+            final LogicalPath path) {
+        return PhysicalTypeIdentifierNamingUtils.createIdentifier(
+                PROVIDES_TYPE_STRING, javaType, path);
+    }
 
-	public static LogicalPath getPath(final String metadataIdentificationString) {
-		return PhysicalTypeIdentifierNamingUtils.getPath(PROVIDES_TYPE_STRING, metadataIdentificationString);
-	}
+    public static JavaType getJavaType(final String metadataIdentificationString) {
+        return PhysicalTypeIdentifierNamingUtils.getJavaType(
+                PROVIDES_TYPE_STRING, metadataIdentificationString);
+    }
 
-	public static boolean isValid(final String metadataIdentificationString) {
-		return PhysicalTypeIdentifierNamingUtils.isValid(PROVIDES_TYPE_STRING, metadataIdentificationString);
-	}
+    public static LogicalPath getPath(final String metadataIdentificationString) {
+        return PhysicalTypeIdentifierNamingUtils.getPath(PROVIDES_TYPE_STRING,
+                metadataIdentificationString);
+    }
+
+    public static boolean isValid(final String metadataIdentificationString) {
+        return PhysicalTypeIdentifierNamingUtils.isValid(PROVIDES_TYPE_STRING,
+                metadataIdentificationString);
+    }
 }

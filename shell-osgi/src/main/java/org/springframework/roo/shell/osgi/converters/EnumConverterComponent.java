@@ -6,10 +6,11 @@ import org.springframework.roo.shell.converters.EnumConverter;
 
 /**
  * OSGi component launcher for {@link EnumConverter}.
- *
+ * 
  * @author Ben Alex
  * @since 1.1
  */
 @Component
 @Service
-public class EnumConverterComponent extends EnumConverter {}
+public class EnumConverterComponent extends EnumConverter {
+}

@@ -24,95 +24,126 @@ import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.support.util.CollectionUtils;
 
 /**
- * Implementation of  {@link EqualsMetadataProvider}.
- *
+ * Implementation of {@link EqualsMetadataProvider}.
+ * 
  * @author Alan Stewart
  * @since 1.2.0
  */
 @Component(immediate = true)
 @Service
-public class EqualsMetadataProviderImpl extends AbstractMemberDiscoveringItdMetadataProvider implements EqualsMetadataProvider {
+public class EqualsMetadataProviderImpl extends
+        AbstractMemberDiscoveringItdMetadataProvider implements
+        EqualsMetadataProvider {
 
-	protected void activate(final ComponentContext context) {
-		metadataDependencyRegistry.addNotificationListener(this);
-		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-		addMetadataTrigger(ROO_EQUALS);
-	}
+    protected void activate(final ComponentContext context) {
+        metadataDependencyRegistry.addNotificationListener(this);
+        metadataDependencyRegistry.registerDependency(
+                PhysicalTypeIdentifier.getMetadataIdentiferType(),
+                getProvidesType());
+        addMetadataTrigger(ROO_EQUALS);
+    }
 
-	protected void deactivate(final ComponentContext context) {
-		metadataDependencyRegistry.removeNotificationListener(this);
-		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-		removeMetadataTrigger(ROO_EQUALS);
-	}
+    protected void deactivate(final ComponentContext context) {
+        metadataDependencyRegistry.removeNotificationListener(this);
+        metadataDependencyRegistry.deregisterDependency(
+                PhysicalTypeIdentifier.getMetadataIdentiferType(),
+                getProvidesType());
+        removeMetadataTrigger(ROO_EQUALS);
+    }
 
-	@Override
-	protected ItdTypeDetailsProvidingMetadataItem getMetadata(final String metadataIdentificationString, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final String itdFilename) {
-		final EqualsAnnotationValues annotationValues = new EqualsAnnotationValues(governorPhysicalTypeMetadata);
-		if (!annotationValues.isAnnotationFound()) {
-			return null;
-		}
+    @Override
+    protected ItdTypeDetailsProvidingMetadataItem getMetadata(
+            final String metadataIdentificationString,
+            final JavaType aspectName,
+            final PhysicalTypeMetadata governorPhysicalTypeMetadata,
+            final String itdFilename) {
+        final EqualsAnnotationValues annotationValues = new EqualsAnnotationValues(
+                governorPhysicalTypeMetadata);
+        if (!annotationValues.isAnnotationFound()) {
+            return null;
+        }
 
-		final MemberDetails memberDetails = getMemberDetails(governorPhysicalTypeMetadata);
-		if (memberDetails == null) {
-			return null;
-		}
+        final MemberDetails memberDetails = getMemberDetails(governorPhysicalTypeMetadata);
+        if (memberDetails == null) {
+            return null;
+        }
 
-		final JavaType javaType = governorPhysicalTypeMetadata.getMemberHoldingTypeDetails().getName();
-		final List<FieldMetadata> equalityFields = locateFields(javaType, annotationValues.getExcludeFields(), memberDetails, metadataIdentificationString);
+        final JavaType javaType = governorPhysicalTypeMetadata
+                .getMemberHoldingTypeDetails().getName();
+        final List<FieldMetadata> equalityFields = locateFields(javaType,
+                annotationValues.getExcludeFields(), memberDetails,
+                metadataIdentificationString);
 
-		return new EqualsMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, equalityFields);
-	}
+        return new EqualsMetadata(metadataIdentificationString, aspectName,
+                governorPhysicalTypeMetadata, annotationValues, equalityFields);
+    }
 
-	@Override
-	protected String getLocalMidToRequest(final ItdTypeDetails itdTypeDetails) {
-		return getLocalMid(itdTypeDetails);
-	}
+    @Override
+    protected String getLocalMidToRequest(final ItdTypeDetails itdTypeDetails) {
+        return getLocalMid(itdTypeDetails);
+    }
 
-	private List<FieldMetadata> locateFields(final JavaType javaType, final String[] excludeFields, final MemberDetails memberDetails, final String metadataIdentificationString) {
-		final SortedSet<FieldMetadata> locatedFields = new TreeSet<FieldMetadata>(new Comparator<FieldMetadata>() {
-			public int compare(final FieldMetadata l, final FieldMetadata r) {
-				return l.getFieldName().compareTo(r.getFieldName());
-			}
-		});
+    private List<FieldMetadata> locateFields(final JavaType javaType,
+            final String[] excludeFields, final MemberDetails memberDetails,
+            final String metadataIdentificationString) {
+        final SortedSet<FieldMetadata> locatedFields = new TreeSet<FieldMetadata>(
+                new Comparator<FieldMetadata>() {
+                    public int compare(final FieldMetadata l,
+                            final FieldMetadata r) {
+                        return l.getFieldName().compareTo(r.getFieldName());
+                    }
+                });
 
-		final List<?> excludeFieldsList = CollectionUtils.arrayToList(excludeFields);
-		final FieldMetadata versionField = persistenceMemberLocator.getVersionField(javaType);
+        final List<?> excludeFieldsList = CollectionUtils
+                .arrayToList(excludeFields);
+        final FieldMetadata versionField = persistenceMemberLocator
+                .getVersionField(javaType);
 
-		for (final FieldMetadata field : memberDetails.getFields()) {
-			if (excludeFieldsList.contains(field.getFieldName().getSymbolName())) {
-				continue;
-			}
-			if (Modifier.isStatic(field.getModifier()) || Modifier.isTransient(field.getModifier()) || field.getFieldType().isCommonCollectionType() || field.getFieldType().isArray()) {
-				continue;
-			}
-			if (versionField != null && field.getFieldName().equals(versionField.getFieldName())) {
-				continue;
-			}
+        for (final FieldMetadata field : memberDetails.getFields()) {
+            if (excludeFieldsList
+                    .contains(field.getFieldName().getSymbolName())) {
+                continue;
+            }
+            if (Modifier.isStatic(field.getModifier())
+                    || Modifier.isTransient(field.getModifier())
+                    || field.getFieldType().isCommonCollectionType()
+                    || field.getFieldType().isArray()) {
+                continue;
+            }
+            if (versionField != null
+                    && field.getFieldName().equals(versionField.getFieldName())) {
+                continue;
+            }
 
-			locatedFields.add(field);
-			metadataDependencyRegistry.registerDependency(field.getDeclaredByMetadataId(), metadataIdentificationString);
-		}
+            locatedFields.add(field);
+            metadataDependencyRegistry.registerDependency(
+                    field.getDeclaredByMetadataId(),
+                    metadataIdentificationString);
+        }
 
-		return new ArrayList<FieldMetadata>(locatedFields);
-	}
+        return new ArrayList<FieldMetadata>(locatedFields);
+    }
 
-	public String getItdUniquenessFilenameSuffix() {
-		return "Equals";
-	}
+    public String getItdUniquenessFilenameSuffix() {
+        return "Equals";
+    }
 
-	@Override
-	protected String getGovernorPhysicalTypeIdentifier(final String metadataIdentificationString) {
-		JavaType javaType = EqualsMetadata.getJavaType(metadataIdentificationString);
-		LogicalPath path = EqualsMetadata.getPath(metadataIdentificationString);
-		return PhysicalTypeIdentifier.createIdentifier(javaType, path);
-	}
+    @Override
+    protected String getGovernorPhysicalTypeIdentifier(
+            final String metadataIdentificationString) {
+        JavaType javaType = EqualsMetadata
+                .getJavaType(metadataIdentificationString);
+        LogicalPath path = EqualsMetadata.getPath(metadataIdentificationString);
+        return PhysicalTypeIdentifier.createIdentifier(javaType, path);
+    }
 
-	@Override
-	protected String createLocalIdentifier(final JavaType javaType, final LogicalPath path) {
-		return EqualsMetadata.createIdentifier(javaType, path);
-	}
+    @Override
+    protected String createLocalIdentifier(final JavaType javaType,
+            final LogicalPath path) {
+        return EqualsMetadata.createIdentifier(javaType, path);
+    }
 
-	public String getProvidesType() {
-		return EqualsMetadata.getMetadataIdentiferType();
-	}
+    public String getProvidesType() {
+        return EqualsMetadata.getMetadataIdentiferType();
+    }
 }

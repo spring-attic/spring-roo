@@ -5,6 +5,7 @@ import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.addon.tailor.CommandTransformation;
 import org.springframework.roo.addon.tailor.utils.TailorHelper;
 import org.springframework.roo.support.util.StringUtils;
+
 /**
  * Schedules command for execution
  * 
@@ -14,18 +15,18 @@ import org.springframework.roo.support.util.StringUtils;
 @Service
 public class ExecuteCommand extends AbstractAction {
 
-	@Override
-	public void executeImpl(CommandTransformation trafo, ActionConfig config) {
-		trafo.addOutputCommand(TailorHelper.replaceVars(trafo, config.getCommand()));
-	}
-	
-	public String getDescription(ActionConfig config) {
-		return "Executing command: " + config.getCommand();
-	}
-	
-	public boolean isValid(ActionConfig config) {
-		return config != null 
-			&& StringUtils.hasText(config.getCommand());
-	}
+    @Override
+    public void executeImpl(CommandTransformation trafo, ActionConfig config) {
+        trafo.addOutputCommand(TailorHelper.replaceVars(trafo,
+                config.getCommand()));
+    }
+
+    public String getDescription(ActionConfig config) {
+        return "Executing command: " + config.getCommand();
+    }
+
+    public boolean isValid(ActionConfig config) {
+        return config != null && StringUtils.hasText(config.getCommand());
+    }
 
 }

@@ -4,19 +4,20 @@ import org.springframework.roo.classpath.details.annotations.populator.Annotatio
 
 /**
  * Unit test of {@link WebScaffoldAnnotationValues}
- *
+ * 
  * @author Andrew Swan
  * @since 1.2.0
  */
-public class WebScaffoldAnnotationValuesTest extends AnnotationValuesTestCase<RooWebScaffold, WebScaffoldAnnotationValues> {
+public class WebScaffoldAnnotationValuesTest extends
+        AnnotationValuesTestCase<RooWebScaffold, WebScaffoldAnnotationValues> {
 
-	@Override
-	protected Class<RooWebScaffold> getAnnotationClass() {
-		return RooWebScaffold.class;
-	}
+    @Override
+    protected Class<RooWebScaffold> getAnnotationClass() {
+        return RooWebScaffold.class;
+    }
 
-	@Override
-	protected Class<WebScaffoldAnnotationValues> getValuesClass() {
-		return WebScaffoldAnnotationValues.class;
-	}
+    @Override
+    protected Class<WebScaffoldAnnotationValues> getValuesClass() {
+        return WebScaffoldAnnotationValues.class;
+    }
 }

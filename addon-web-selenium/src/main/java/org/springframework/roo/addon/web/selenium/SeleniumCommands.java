@@ -11,7 +11,7 @@ import org.springframework.roo.shell.CommandMarker;
 
 /**
  * Commands for the 'selenium' add-on to be used by the ROO shell.
- *
+ * 
  * @author Stefan Schmidt
  * @since 1.0
  */
@@ -19,20 +19,20 @@ import org.springframework.roo.shell.CommandMarker;
 @Service
 public class SeleniumCommands implements CommandMarker {
 
-	// Fields
-	@Reference private SeleniumOperations seleniumOperations;
+    // Fields
+    @Reference private SeleniumOperations seleniumOperations;
 
-	@CliAvailabilityIndicator({ "selenium test" })
-	public boolean isJdkFieldManagementAvailable() {
-		return seleniumOperations.isSeleniumInstallationPossible();
-	}
+    @CliAvailabilityIndicator({ "selenium test" })
+    public boolean isJdkFieldManagementAvailable() {
+        return seleniumOperations.isSeleniumInstallationPossible();
+    }
 
-	@CliCommand(value = "selenium test", help = "Creates a new Selenium test for a particular controller")
-	public void generateTest(
-		@CliOption(key = "controller", mandatory = true, help = "Controller to create a Selenium test for") final JavaType controller,
-		@CliOption(key = "name", mandatory = false, help = "Name of the test") final String name,
-		@CliOption(key = "serverUrl", mandatory = false, unspecifiedDefaultValue = "http://localhost:8080/", specifiedDefaultValue = "http://localhost:8080/", help = "URL of the server where the web application is available, including protocol, port and hostname") final String url) {
+    @CliCommand(value = "selenium test", help = "Creates a new Selenium test for a particular controller")
+    public void generateTest(
+            @CliOption(key = "controller", mandatory = true, help = "Controller to create a Selenium test for") final JavaType controller,
+            @CliOption(key = "name", mandatory = false, help = "Name of the test") final String name,
+            @CliOption(key = "serverUrl", mandatory = false, unspecifiedDefaultValue = "http://localhost:8080/", specifiedDefaultValue = "http://localhost:8080/", help = "URL of the server where the web application is available, including protocol, port and hostname") final String url) {
 
-		seleniumOperations.generateTest(controller, name, url);
-	}
+        seleniumOperations.generateTest(controller, name, url);
+    }
 }

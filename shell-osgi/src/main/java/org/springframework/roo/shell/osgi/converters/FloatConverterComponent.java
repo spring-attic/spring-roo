@@ -6,10 +6,11 @@ import org.springframework.roo.shell.converters.FloatConverter;
 
 /**
  * OSGi component launcher for {@link FloatConverter}.
- *
+ * 
  * @author Ben Alex
  * @since 1.1
  */
 @Component
 @Service
-public class FloatConverterComponent extends FloatConverter {}
+public class FloatConverterComponent extends FloatConverter {
+}

@@ -11,7 +11,7 @@ import org.springframework.roo.support.util.FileUtils;
 
 /**
  * {@link FilenameResolver} that delegates to {@link PathResolver}.
- *
+ * 
  * @author Ben Alex
  * @since 1.0
  */
@@ -19,11 +19,11 @@ import org.springframework.roo.support.util.FileUtils;
 @Service
 public class PathResolvingAwareFilenameResolver implements FilenameResolver {
 
-	// Fields
-	@Reference private PathResolver pathResolver;
+    // Fields
+    @Reference private PathResolver pathResolver;
 
-	public String getMeaningfulName(final File file) {
-		Assert.notNull(file, "File required");
-		return pathResolver.getFriendlyName(FileUtils.getCanonicalPath(file));
-	}
+    public String getMeaningfulName(final File file) {
+        Assert.notNull(file, "File required");
+        return pathResolver.getFriendlyName(FileUtils.getCanonicalPath(file));
+    }
 }

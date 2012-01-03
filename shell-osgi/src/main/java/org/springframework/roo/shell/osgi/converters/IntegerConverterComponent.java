@@ -6,10 +6,11 @@ import org.springframework.roo.shell.converters.IntegerConverter;
 
 /**
  * OSGi component launcher for {@link IntegerConverter}.
- *
+ * 
  * @author Ben Alex
  * @since 1.1
  */
 @Component
 @Service
-public class IntegerConverterComponent extends IntegerConverter {}
+public class IntegerConverterComponent extends IntegerConverter {
+}

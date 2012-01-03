@@ -6,40 +6,41 @@ import org.springframework.roo.project.Feature;
 
 /**
  * Provides GWT operations.
- *
+ * 
  * @author Ben Alex
  * @author James Tyrrell
  * @since 1.1
  */
 public interface GwtOperations extends Feature {
-	
-	/**
-	 * The delimiter for multi-level paths specified by a "<source path="..." />
-	 * element in a module's *.gwt.xml file.
-	 */
-	String PATH_DELIMITER = "/";
 
-	boolean isGwtInstallationPossible();
+    /**
+     * The delimiter for multi-level paths specified by a "<source path="..." />
+     * element in a module's *.gwt.xml file.
+     */
+    String PATH_DELIMITER = "/";
 
-	boolean isScaffoldAvailable();
+    boolean isGwtInstallationPossible();
 
-	void setup();
+    boolean isScaffoldAvailable();
 
-	void proxyAll(JavaPackage proxyPackage);
+    void setup();
 
-	void proxyType(JavaPackage proxyPackage, JavaType type);
+    void proxyAll(JavaPackage proxyPackage);
 
-	void requestAll(JavaPackage requestPackage);
+    void proxyType(JavaPackage proxyPackage, JavaType type);
 
-	void requestType(JavaPackage requestPackage, JavaType type);
+    void requestAll(JavaPackage requestPackage);
 
-	void proxyAndRequestAll(JavaPackage proxyAndRequestPackage);
+    void requestType(JavaPackage requestPackage, JavaType type);
 
-	void proxyAndRequestType(JavaPackage proxyAndRequestPackage, JavaType type);
+    void proxyAndRequestAll(JavaPackage proxyAndRequestPackage);
 
-	void scaffoldAll(JavaPackage proxyPackage, JavaPackage requestPackage);
+    void proxyAndRequestType(JavaPackage proxyAndRequestPackage, JavaType type);
 
-	void scaffoldType(JavaPackage proxyPackage, JavaPackage requestPackage, JavaType type);
+    void scaffoldAll(JavaPackage proxyPackage, JavaPackage requestPackage);
 
-	void updateGaeConfiguration();
+    void scaffoldType(JavaPackage proxyPackage, JavaPackage requestPackage,
+            JavaType type);
+
+    void updateGaeConfiguration();
 }

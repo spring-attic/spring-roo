@@ -21,43 +21,56 @@ import org.springframework.roo.support.util.StringUtils;
 @Service
 public class JavaParserTypeResolutionService implements TypeResolutionService {
 
-	public final JavaType getJavaType(final String fileIdentifier) {
-		Assert.hasText(fileIdentifier, "Compilation unit path required");
-		Assert.isTrue(new File(fileIdentifier).exists(), "The file doesn't exist");
-		Assert.isTrue(new File(fileIdentifier).isFile(), "The identifier doesn't represent a file");
-		try {
-			File file = new File(fileIdentifier);
-			String typeContents = FileUtils.read(file);
-			CompilationUnit compilationUnit = JavaParser.parse(new ByteArrayInputStream(typeContents.getBytes()));
-			String typeName = fileIdentifier.substring(fileIdentifier.lastIndexOf(File.separator) + 1, fileIdentifier.lastIndexOf("."));
-			for (TypeDeclaration typeDeclaration : compilationUnit.getTypes()) {
-				if (typeName.equals(typeDeclaration.getName())) {
-					return new JavaType(compilationUnit.getPackage().getName().getName() + "." + typeDeclaration.getName());
-				}
-			}
-			return null;
-		} catch (ParseException e) {
-			throw new IllegalStateException(e);
-		}
-	}
+    public final JavaType getJavaType(final String fileIdentifier) {
+        Assert.hasText(fileIdentifier, "Compilation unit path required");
+        Assert.isTrue(new File(fileIdentifier).exists(),
+                "The file doesn't exist");
+        Assert.isTrue(new File(fileIdentifier).isFile(),
+                "The identifier doesn't represent a file");
+        try {
+            File file = new File(fileIdentifier);
+            String typeContents = FileUtils.read(file);
+            CompilationUnit compilationUnit = JavaParser
+                    .parse(new ByteArrayInputStream(typeContents.getBytes()));
+            String typeName = fileIdentifier.substring(
+                    fileIdentifier.lastIndexOf(File.separator) + 1,
+                    fileIdentifier.lastIndexOf("."));
+            for (TypeDeclaration typeDeclaration : compilationUnit.getTypes()) {
+                if (typeName.equals(typeDeclaration.getName())) {
+                    return new JavaType(compilationUnit.getPackage().getName()
+                            .getName()
+                            + "." + typeDeclaration.getName());
+                }
+            }
+            return null;
+        }
+        catch (ParseException e) {
+            throw new IllegalStateException(e);
+        }
+    }
 
-	public final JavaPackage getPackage(final String fileIdentifier) {
-		Assert.hasText(fileIdentifier, "Compilation unit path required");
-		Assert.isTrue(new File(fileIdentifier).exists(), "The file doesn't exist");
-		Assert.isTrue(new File(fileIdentifier).isFile(), "The identifier doesn't represent a file");
-		try {
-			File file = new File(fileIdentifier);
-			String typeContents = FileUtils.read(file);
-			if (StringUtils.isBlank(typeContents)) {
-				return null;
-			}
-			CompilationUnit compilationUnit = JavaParser.parse(new ByteArrayInputStream(typeContents.getBytes()));
-			if (compilationUnit == null || compilationUnit.getPackage() == null) {
-				return null;
-			}
-			return new JavaPackage(compilationUnit.getPackage().getName().toString());
-		} catch (ParseException e) {
-			throw new IllegalStateException(e);
-		}
-	}
+    public final JavaPackage getPackage(final String fileIdentifier) {
+        Assert.hasText(fileIdentifier, "Compilation unit path required");
+        Assert.isTrue(new File(fileIdentifier).exists(),
+                "The file doesn't exist");
+        Assert.isTrue(new File(fileIdentifier).isFile(),
+                "The identifier doesn't represent a file");
+        try {
+            File file = new File(fileIdentifier);
+            String typeContents = FileUtils.read(file);
+            if (StringUtils.isBlank(typeContents)) {
+                return null;
+            }
+            CompilationUnit compilationUnit = JavaParser
+                    .parse(new ByteArrayInputStream(typeContents.getBytes()));
+            if (compilationUnit == null || compilationUnit.getPackage() == null) {
+                return null;
+            }
+            return new JavaPackage(compilationUnit.getPackage().getName()
+                    .toString());
+        }
+        catch (ParseException e) {
+            throw new IllegalStateException(e);
+        }
+    }
 }

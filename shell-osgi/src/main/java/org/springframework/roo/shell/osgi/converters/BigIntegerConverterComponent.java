@@ -6,10 +6,11 @@ import org.springframework.roo.shell.converters.BigIntegerConverter;
 
 /**
  * OSGi component launcher for {@link BigIntegerConverter}.
- *
+ * 
  * @author Ben Alex
  * @since 1.1
  */
 @Component
 @Service
-public class BigIntegerConverterComponent extends BigIntegerConverter {}
+public class BigIntegerConverterComponent extends BigIntegerConverter {
+}

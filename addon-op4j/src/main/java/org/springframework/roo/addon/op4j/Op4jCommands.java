@@ -11,7 +11,7 @@ import org.springframework.roo.shell.CommandMarker;
 
 /**
  * Commands for addon-op4j.
- *
+ * 
  * @author Stefan Schmidt
  * @since 1.1
  */
@@ -19,23 +19,23 @@ import org.springframework.roo.shell.CommandMarker;
 @Service
 public class Op4jCommands implements CommandMarker {
 
-	// Fields
-	@Reference private Op4jOperations op4jOperations;
+    // Fields
+    @Reference private Op4jOperations op4jOperations;
 
-	@CliAvailabilityIndicator({ "op4j setup", "Op4j add" })
-	public boolean isOp4jAvailable() {
-		return op4jOperations.isOp4jInstallationPossible();
-	}
+    @CliAvailabilityIndicator({ "op4j setup", "Op4j add" })
+    public boolean isOp4jAvailable() {
+        return op4jOperations.isOp4jInstallationPossible();
+    }
 
-	@CliCommand(value = "op4j add", help = "Some helpful description")
-	public void add(
-		@CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*", optionContext = "update,project", help = "The java type to apply the RooOp4j annotation to") final JavaType target) {
+    @CliCommand(value = "op4j add", help = "Some helpful description")
+    public void add(
+            @CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*", optionContext = "update,project", help = "The java type to apply the RooOp4j annotation to") final JavaType target) {
 
-		op4jOperations.annotateType(target);
-	}
+        op4jOperations.annotateType(target);
+    }
 
-	@CliCommand(value = "op4j setup", help = "Setup Op4j addon")
-	public void setup() {
-		op4jOperations.setup();
-	}
+    @CliCommand(value = "op4j setup", help = "Setup Op4j addon")
+    public void setup() {
+        op4jOperations.setup();
+    }
 }

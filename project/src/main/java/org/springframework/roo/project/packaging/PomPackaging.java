@@ -10,7 +10,7 @@ import org.springframework.roo.project.ProjectOperations;
 
 /**
  * The Maven "pom" {@link PackagingProvider}
- *
+ * 
  * @author Andrew Swan
  * @since 1.2.0
  */
@@ -18,19 +18,20 @@ import org.springframework.roo.project.ProjectOperations;
 @Service
 public class PomPackaging extends AbstractCorePackagingProvider {
 
-	/**
-	 * Constructor
-	 */
-	public PomPackaging() {
-		super("pom", "parent-pom-template.xml");
-	}
+    /**
+     * Constructor
+     */
+    public PomPackaging() {
+        super("pom", "parent-pom-template.xml");
+    }
 
-	public Collection<Path> getPaths() {
-		return null;
-	}
-	
-	@Override
-	protected void createOtherArtifacts(final JavaPackage topLevelPackage, final String module, final ProjectOperations projectOperations) {
-		// No artifacts are applicable for POM modules
-	}
+    public Collection<Path> getPaths() {
+        return null;
+    }
+
+    @Override
+    protected void createOtherArtifacts(final JavaPackage topLevelPackage,
+            final String module, final ProjectOperations projectOperations) {
+        // No artifacts are applicable for POM modules
+    }
 }

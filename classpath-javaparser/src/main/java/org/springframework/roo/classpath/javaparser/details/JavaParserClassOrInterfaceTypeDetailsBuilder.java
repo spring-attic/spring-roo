@@ -40,263 +40,333 @@ import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.support.util.Assert;
 
-public class JavaParserClassOrInterfaceTypeDetailsBuilder implements Builder<ClassOrInterfaceTypeDetails>{
+public class JavaParserClassOrInterfaceTypeDetailsBuilder implements
+        Builder<ClassOrInterfaceTypeDetails> {
 
-	// Constants
-	static final String UNSUPPORTED_MESSAGE_PREFIX = "Only enum, class and interface files are supported";
+    // Constants
+    static final String UNSUPPORTED_MESSAGE_PREFIX = "Only enum, class and interface files are supported";
 
-	/**
-	 * Factory method for this builder class
-	 *
-	 * @param compilationUnit
-	 * @param enclosingCompilationUnitServices
-	 * @param typeDeclaration
-	 * @param declaredByMetadataId
-	 * @param typeName
-	 * @param metadataService
-	 * @param typeLocationService
-	 * @return a non-<code>null</code> builder
-	 */
-	public static JavaParserClassOrInterfaceTypeDetailsBuilder getInstance(final CompilationUnit compilationUnit, final CompilationUnitServices enclosingCompilationUnitServices, final TypeDeclaration typeDeclaration, final String declaredByMetadataId, final JavaType typeName, final MetadataService metadataService, final TypeLocationService typeLocationService) {
-		return new JavaParserClassOrInterfaceTypeDetailsBuilder(compilationUnit, enclosingCompilationUnitServices, typeDeclaration, declaredByMetadataId, typeName, metadataService, typeLocationService);
-	}
+    /**
+     * Factory method for this builder class
+     * 
+     * @param compilationUnit
+     * @param enclosingCompilationUnitServices
+     * @param typeDeclaration
+     * @param declaredByMetadataId
+     * @param typeName
+     * @param metadataService
+     * @param typeLocationService
+     * @return a non-<code>null</code> builder
+     */
+    public static JavaParserClassOrInterfaceTypeDetailsBuilder getInstance(
+            final CompilationUnit compilationUnit,
+            final CompilationUnitServices enclosingCompilationUnitServices,
+            final TypeDeclaration typeDeclaration,
+            final String declaredByMetadataId, final JavaType typeName,
+            final MetadataService metadataService,
+            final TypeLocationService typeLocationService) {
+        return new JavaParserClassOrInterfaceTypeDetailsBuilder(
+                compilationUnit, enclosingCompilationUnitServices,
+                typeDeclaration, declaredByMetadataId, typeName,
+                metadataService, typeLocationService);
+    }
 
-	// Fields
-	private final CompilationUnit compilationUnit;
-	private final CompilationUnitServices compilationUnitServices;
-	private final List<TypeDeclaration> innerTypes = new ArrayList<TypeDeclaration>();
-	private final MetadataService metadataService;
-	private final String declaredByMetadataId;
-	private final TypeDeclaration typeDeclaration;
-	private final TypeLocationService typeLocationService;
+    // Fields
+    private final CompilationUnit compilationUnit;
+    private final CompilationUnitServices compilationUnitServices;
+    private final List<TypeDeclaration> innerTypes = new ArrayList<TypeDeclaration>();
+    private final MetadataService metadataService;
+    private final String declaredByMetadataId;
+    private final TypeDeclaration typeDeclaration;
+    private final TypeLocationService typeLocationService;
 
-	private JavaPackage compilationUnitPackage;
-	private JavaType name;
-	private List<ImportDeclaration> imports = new ArrayList<ImportDeclaration>();
-	private PhysicalTypeCategory physicalTypeCategory;
+    private JavaPackage compilationUnitPackage;
+    private JavaType name;
+    private List<ImportDeclaration> imports = new ArrayList<ImportDeclaration>();
+    private PhysicalTypeCategory physicalTypeCategory;
 
-	/**
-	 * Constructor
-	 *
-	 * @param compilationUnit
-	 * @param enclosingCompilationUnitServices
-	 * @param typeDeclaration
-	 * @param declaredByMetadataId
-	 * @param typeName
-	 * @param metadataService
-	 * @param typeLocationService
-	 */
-	private JavaParserClassOrInterfaceTypeDetailsBuilder(final CompilationUnit compilationUnit, final CompilationUnitServices enclosingCompilationUnitServices, final TypeDeclaration typeDeclaration, final String declaredByMetadataId, final JavaType typeName, final MetadataService metadataService, final TypeLocationService typeLocationService) {
-		// Check
-		Assert.notNull(compilationUnit, "Compilation unit required");
-		Assert.hasText(declaredByMetadataId, "Declared by metadata ID required");
-		Assert.notNull(typeDeclaration, "Unable to locate the class or interface declaration");
-		Assert.notNull(typeName, "Name required");
+    /**
+     * Constructor
+     * 
+     * @param compilationUnit
+     * @param enclosingCompilationUnitServices
+     * @param typeDeclaration
+     * @param declaredByMetadataId
+     * @param typeName
+     * @param metadataService
+     * @param typeLocationService
+     */
+    private JavaParserClassOrInterfaceTypeDetailsBuilder(
+            final CompilationUnit compilationUnit,
+            final CompilationUnitServices enclosingCompilationUnitServices,
+            final TypeDeclaration typeDeclaration,
+            final String declaredByMetadataId, final JavaType typeName,
+            final MetadataService metadataService,
+            final TypeLocationService typeLocationService) {
+        // Check
+        Assert.notNull(compilationUnit, "Compilation unit required");
+        Assert.hasText(declaredByMetadataId, "Declared by metadata ID required");
+        Assert.notNull(typeDeclaration,
+                "Unable to locate the class or interface declaration");
+        Assert.notNull(typeName, "Name required");
 
-		// Assign
-		this.compilationUnit = compilationUnit;
-		this.compilationUnitServices = (enclosingCompilationUnitServices == null ? getDefaultCompilationUnitServices() : enclosingCompilationUnitServices);
-		this.declaredByMetadataId = declaredByMetadataId;
-		this.metadataService = metadataService;
-		this.name = typeName;
-		this.typeDeclaration = typeDeclaration;
-		this.typeLocationService = typeLocationService;
-	}
+        // Assign
+        this.compilationUnit = compilationUnit;
+        this.compilationUnitServices = (enclosingCompilationUnitServices == null ? getDefaultCompilationUnitServices()
+                : enclosingCompilationUnitServices);
+        this.declaredByMetadataId = declaredByMetadataId;
+        this.metadataService = metadataService;
+        this.name = typeName;
+        this.typeDeclaration = typeDeclaration;
+        this.typeLocationService = typeLocationService;
+    }
 
-	private CompilationUnitServices getDefaultCompilationUnitServices() {
-		return new CompilationUnitServices() {
-			public List<ImportDeclaration> getImports() {
-				return imports;
-			}
+    private CompilationUnitServices getDefaultCompilationUnitServices() {
+        return new CompilationUnitServices() {
+            public List<ImportDeclaration> getImports() {
+                return imports;
+            }
 
-			public JavaPackage getCompilationUnitPackage() {
-				return compilationUnitPackage;
-			}
+            public JavaPackage getCompilationUnitPackage() {
+                return compilationUnitPackage;
+            }
 
-			public List<TypeDeclaration> getInnerTypes() {
-				return innerTypes;
-			}
+            public List<TypeDeclaration> getInnerTypes() {
+                return innerTypes;
+            }
 
-			public JavaType getEnclosingTypeName() {
-				return name;
-			}
+            public JavaType getEnclosingTypeName() {
+                return name;
+            }
 
-			public PhysicalTypeCategory getPhysicalTypeCategory() {
-				return physicalTypeCategory;
-			}
-		};
-	}
+            public PhysicalTypeCategory getPhysicalTypeCategory() {
+                return physicalTypeCategory;
+            }
+        };
+    }
 
-	public ClassOrInterfaceTypeDetails build() {
-		Assert.notEmpty(compilationUnit.getTypes(), "No types in compilation unit, so unable to continue parsing");
+    public ClassOrInterfaceTypeDetails build() {
+        Assert.notEmpty(compilationUnit.getTypes(),
+                "No types in compilation unit, so unable to continue parsing");
 
-		ClassOrInterfaceDeclaration clazz = null;
-		EnumDeclaration enumClazz = null;
+        ClassOrInterfaceDeclaration clazz = null;
+        EnumDeclaration enumClazz = null;
 
-		StringBuilder sb = new StringBuilder(compilationUnit.getPackage().getName().toString());
-		if (name.getEnclosingType() != null) {
-			sb.append(".").append(name.getEnclosingType().getSimpleTypeName());
-		}
-		compilationUnitPackage = new JavaPackage(sb.toString());
+        StringBuilder sb = new StringBuilder(compilationUnit.getPackage()
+                .getName().toString());
+        if (name.getEnclosingType() != null) {
+            sb.append(".").append(name.getEnclosingType().getSimpleTypeName());
+        }
+        compilationUnitPackage = new JavaPackage(sb.toString());
 
-		// Determine the type name, adding type parameters if possible
-		final JavaType newName = JavaParserUtils.getJavaType(compilationUnitServices, typeDeclaration);
+        // Determine the type name, adding type parameters if possible
+        final JavaType newName = JavaParserUtils.getJavaType(
+                compilationUnitServices, typeDeclaration);
 
-		// Revert back to the original type name (thus avoiding unnecessary inferences about java.lang types; see ROO-244)
-		name = new JavaType(newName.getFullyQualifiedTypeName(), newName.getEnclosingType(), newName.getArray(), newName.getDataType(), newName.getArgName(), newName.getParameters());
+        // Revert back to the original type name (thus avoiding unnecessary
+        // inferences about java.lang types; see ROO-244)
+        name = new JavaType(newName.getFullyQualifiedTypeName(),
+                newName.getEnclosingType(), newName.getArray(),
+                newName.getDataType(), newName.getArgName(),
+                newName.getParameters());
 
-		final ClassOrInterfaceTypeDetailsBuilder cidBuilder= new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId);
+        final ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(
+                declaredByMetadataId);
 
-		physicalTypeCategory = PhysicalTypeCategory.CLASS;
-		if (typeDeclaration instanceof ClassOrInterfaceDeclaration) {
-			clazz = (ClassOrInterfaceDeclaration) typeDeclaration;
-			if (clazz.isInterface()) {
-				physicalTypeCategory = PhysicalTypeCategory.INTERFACE;
-			}
+        physicalTypeCategory = PhysicalTypeCategory.CLASS;
+        if (typeDeclaration instanceof ClassOrInterfaceDeclaration) {
+            clazz = (ClassOrInterfaceDeclaration) typeDeclaration;
+            if (clazz.isInterface()) {
+                physicalTypeCategory = PhysicalTypeCategory.INTERFACE;
+            }
 
-		} else if (typeDeclaration instanceof EnumDeclaration) {
-			enumClazz = (EnumDeclaration) typeDeclaration;
-			physicalTypeCategory = PhysicalTypeCategory.ENUMERATION;
-		}
+        }
+        else if (typeDeclaration instanceof EnumDeclaration) {
+            enumClazz = (EnumDeclaration) typeDeclaration;
+            physicalTypeCategory = PhysicalTypeCategory.ENUMERATION;
+        }
 
-		Assert.notNull(physicalTypeCategory, UNSUPPORTED_MESSAGE_PREFIX + " (" + typeDeclaration.getClass().getSimpleName() + " for " + name + ")");
+        Assert.notNull(physicalTypeCategory, UNSUPPORTED_MESSAGE_PREFIX + " ("
+                + typeDeclaration.getClass().getSimpleName() + " for " + name
+                + ")");
 
-		cidBuilder.setName(name);
-		cidBuilder.setPhysicalTypeCategory(physicalTypeCategory);
+        cidBuilder.setName(name);
+        cidBuilder.setPhysicalTypeCategory(physicalTypeCategory);
 
-		imports = compilationUnit.getImports();
-		if (imports == null) {
-			imports = new ArrayList<ImportDeclaration>();
-			compilationUnit.setImports(imports);
-		}
+        imports = compilationUnit.getImports();
+        if (imports == null) {
+            imports = new ArrayList<ImportDeclaration>();
+            compilationUnit.setImports(imports);
+        }
 
-		// Verify the package declaration appears to be correct
-		Assert.isTrue(compilationUnitPackage.equals(name.getPackage()), "Compilation unit package '" + compilationUnitPackage + "' unexpected for type '" + name.getPackage() + "'");
+        // Verify the package declaration appears to be correct
+        Assert.isTrue(compilationUnitPackage.equals(name.getPackage()),
+                "Compilation unit package '" + compilationUnitPackage
+                        + "' unexpected for type '" + name.getPackage() + "'");
 
-		for (final ImportDeclaration importDeclaration : imports) {
-			if (importDeclaration.getName() instanceof QualifiedNameExpr) {
-				final String qualifier = ((QualifiedNameExpr) importDeclaration.getName()).getQualifier().toString();
-				final String simpleName = importDeclaration.getName().getName();
-				final String fullName = qualifier + "." + simpleName;
-				// We want to calculate these...
+        for (final ImportDeclaration importDeclaration : imports) {
+            if (importDeclaration.getName() instanceof QualifiedNameExpr) {
+                final String qualifier = ((QualifiedNameExpr) importDeclaration
+                        .getName()).getQualifier().toString();
+                final String simpleName = importDeclaration.getName().getName();
+                final String fullName = qualifier + "." + simpleName;
+                // We want to calculate these...
 
-				final JavaType type = new JavaType(fullName);
-				final JavaPackage typePackage = type.getPackage();
-				final ImportMetadataBuilder newImport = new ImportMetadataBuilder(declaredByMetadataId, 0, typePackage, type, importDeclaration.isStatic(), importDeclaration.isAsterisk());
-				cidBuilder.add(newImport.build());
-			}
-		}
+                final JavaType type = new JavaType(fullName);
+                final JavaPackage typePackage = type.getPackage();
+                final ImportMetadataBuilder newImport = new ImportMetadataBuilder(
+                        declaredByMetadataId, 0, typePackage, type,
+                        importDeclaration.isStatic(),
+                        importDeclaration.isAsterisk());
+                cidBuilder.add(newImport.build());
+            }
+        }
 
-		// Convert Java Parser modifier into JDK modifier
-		cidBuilder.setModifier(JavaParserUtils.getJdkModifier(typeDeclaration.getModifiers()));
+        // Convert Java Parser modifier into JDK modifier
+        cidBuilder.setModifier(JavaParserUtils.getJdkModifier(typeDeclaration
+                .getModifiers()));
 
-		// Type parameters
-		final Set<JavaSymbolName> typeParameterNames = new HashSet<JavaSymbolName>();
-		for (final JavaType param : name.getParameters()) {
-			final JavaSymbolName arg = param.getArgName();
-			// Fortunately type names can only appear at the top-level
-			if (arg != null && !JavaType.WILDCARD_NEITHER.equals(arg) && !JavaType.WILDCARD_EXTENDS.equals(arg) && !JavaType.WILDCARD_SUPER.equals(arg)) {
-				typeParameterNames.add(arg);
-			}
-		}
+        // Type parameters
+        final Set<JavaSymbolName> typeParameterNames = new HashSet<JavaSymbolName>();
+        for (final JavaType param : name.getParameters()) {
+            final JavaSymbolName arg = param.getArgName();
+            // Fortunately type names can only appear at the top-level
+            if (arg != null && !JavaType.WILDCARD_NEITHER.equals(arg)
+                    && !JavaType.WILDCARD_EXTENDS.equals(arg)
+                    && !JavaType.WILDCARD_SUPER.equals(arg)) {
+                typeParameterNames.add(arg);
+            }
+        }
 
-		List<ClassOrInterfaceType> implementsList;
-		List<AnnotationExpr> annotationsList = null;
-		List<BodyDeclaration> members = null;
+        List<ClassOrInterfaceType> implementsList;
+        List<AnnotationExpr> annotationsList = null;
+        List<BodyDeclaration> members = null;
 
-		if (clazz != null) {
-			final List<ClassOrInterfaceType> extendsList = clazz.getExtends();
-			if (extendsList != null) {
-				for (final ClassOrInterfaceType candidate : extendsList) {
-					final JavaType javaType = JavaParserUtils.getJavaTypeNow(compilationUnitServices, candidate, typeParameterNames);
-					cidBuilder.addExtendsTypes(javaType);
-				}
-			}
+        if (clazz != null) {
+            final List<ClassOrInterfaceType> extendsList = clazz.getExtends();
+            if (extendsList != null) {
+                for (final ClassOrInterfaceType candidate : extendsList) {
+                    final JavaType javaType = JavaParserUtils.getJavaTypeNow(
+                            compilationUnitServices, candidate,
+                            typeParameterNames);
+                    cidBuilder.addExtendsTypes(javaType);
+                }
+            }
 
-			final List<JavaType> extendsTypes = cidBuilder.getExtendsTypes();
-			// Obtain the superclass, if this is a class and one is available
-			if (physicalTypeCategory == PhysicalTypeCategory.CLASS && extendsTypes.size() == 1) {
-				final JavaType superclass = extendsTypes.get(0);
-				final String superclassId = typeLocationService.getPhysicalTypeIdentifier(superclass);
-				PhysicalTypeMetadata superPtm = null;
-				if (superclassId != null) {
-					superPtm = (PhysicalTypeMetadata) metadataService.get(superclassId);
-				}
-				if (superPtm != null && superPtm.getMemberHoldingTypeDetails() != null) {
-					cidBuilder.setSuperclass(superPtm.getMemberHoldingTypeDetails());
-				}
-			}
+            final List<JavaType> extendsTypes = cidBuilder.getExtendsTypes();
+            // Obtain the superclass, if this is a class and one is available
+            if (physicalTypeCategory == PhysicalTypeCategory.CLASS
+                    && extendsTypes.size() == 1) {
+                final JavaType superclass = extendsTypes.get(0);
+                final String superclassId = typeLocationService
+                        .getPhysicalTypeIdentifier(superclass);
+                PhysicalTypeMetadata superPtm = null;
+                if (superclassId != null) {
+                    superPtm = (PhysicalTypeMetadata) metadataService
+                            .get(superclassId);
+                }
+                if (superPtm != null
+                        && superPtm.getMemberHoldingTypeDetails() != null) {
+                    cidBuilder.setSuperclass(superPtm
+                            .getMemberHoldingTypeDetails());
+                }
+            }
 
-			implementsList = clazz.getImplements();
-			if (implementsList != null) {
-				for (final ClassOrInterfaceType candidate : implementsList) {
-					final JavaType javaType = JavaParserUtils.getJavaTypeNow(compilationUnitServices, candidate, typeParameterNames);
-					cidBuilder.addImplementsType(javaType);
-				}
-			}
+            implementsList = clazz.getImplements();
+            if (implementsList != null) {
+                for (final ClassOrInterfaceType candidate : implementsList) {
+                    final JavaType javaType = JavaParserUtils.getJavaTypeNow(
+                            compilationUnitServices, candidate,
+                            typeParameterNames);
+                    cidBuilder.addImplementsType(javaType);
+                }
+            }
 
-			annotationsList = typeDeclaration.getAnnotations();
-			members = clazz.getMembers();
-		}
+            annotationsList = typeDeclaration.getAnnotations();
+            members = clazz.getMembers();
+        }
 
-		if (enumClazz != null) {
-			final List<EnumConstantDeclaration> constants = enumClazz.getEntries();
-			if (constants != null) {
-				for (final EnumConstantDeclaration enumConstants : constants) {
-					cidBuilder.addEnumConstant(new JavaSymbolName(enumConstants.getName()));
-				}
-			}
+        if (enumClazz != null) {
+            final List<EnumConstantDeclaration> constants = enumClazz
+                    .getEntries();
+            if (constants != null) {
+                for (final EnumConstantDeclaration enumConstants : constants) {
+                    cidBuilder.addEnumConstant(new JavaSymbolName(enumConstants
+                            .getName()));
+                }
+            }
 
-			implementsList = enumClazz.getImplements();
-			annotationsList = enumClazz.getAnnotations();
-			members = enumClazz.getMembers();
-		}
+            implementsList = enumClazz.getImplements();
+            annotationsList = enumClazz.getAnnotations();
+            members = enumClazz.getMembers();
+        }
 
-		if (annotationsList != null) {
-			for (final AnnotationExpr candidate : annotationsList) {
-				final AnnotationMetadata md = JavaParserAnnotationMetadataBuilder.getInstance(candidate, compilationUnitServices).build();
-				cidBuilder.addAnnotation(md);
-			}
-		}
+        if (annotationsList != null) {
+            for (final AnnotationExpr candidate : annotationsList) {
+                final AnnotationMetadata md = JavaParserAnnotationMetadataBuilder
+                        .getInstance(candidate, compilationUnitServices)
+                        .build();
+                cidBuilder.addAnnotation(md);
+            }
+        }
 
-		if (members != null) {
-			// Now we've finished declaring the type, we should introspect for any inner types that can thus be referred to in other body members
-			// We defer this until now because it's illegal to refer to an inner type in the signature of the enclosing type
-			for (final BodyDeclaration bodyDeclaration : members) {
-				if (bodyDeclaration instanceof TypeDeclaration) {
-					// Found a type
-					innerTypes.add((TypeDeclaration) bodyDeclaration);
-				}
-			}
+        if (members != null) {
+            // Now we've finished declaring the type, we should introspect for
+            // any inner types that can thus be referred to in other body
+            // members
+            // We defer this until now because it's illegal to refer to an inner
+            // type in the signature of the enclosing type
+            for (final BodyDeclaration bodyDeclaration : members) {
+                if (bodyDeclaration instanceof TypeDeclaration) {
+                    // Found a type
+                    innerTypes.add((TypeDeclaration) bodyDeclaration);
+                }
+            }
 
-			for (final BodyDeclaration member : members) {
-				if (member instanceof FieldDeclaration) {
-					final FieldDeclaration castMember = (FieldDeclaration) member;
-					for (final VariableDeclarator var : castMember.getVariables()) {
-						final FieldMetadata field = JavaParserFieldMetadataBuilder.getInstance(declaredByMetadataId, castMember, var, compilationUnitServices, typeParameterNames).build();
-						cidBuilder.addField(field);
-					}
-				}
-				if (member instanceof MethodDeclaration) {
-					final MethodDeclaration castMember = (MethodDeclaration) member;
-					final MethodMetadata method = JavaParserMethodMetadataBuilder.getInstance(declaredByMetadataId, castMember, compilationUnitServices, typeParameterNames).build();
-					cidBuilder.addMethod(method);
-				}
-				if (member instanceof ConstructorDeclaration) {
-					final ConstructorDeclaration castMember = (ConstructorDeclaration) member;
-					final ConstructorMetadata constructor = JavaParserConstructorMetadataBuilder.getInstance(declaredByMetadataId, castMember, compilationUnitServices, typeParameterNames).build();
-					cidBuilder.addConstructor(constructor);
-				}
-				if (member instanceof TypeDeclaration) {
-					final TypeDeclaration castMember = (TypeDeclaration) member;
-					final JavaType innerType = new JavaType(castMember.getName(), name);
-					final String innerTypeMetadataId = PhysicalTypeIdentifier.createIdentifier(innerType, PhysicalTypeIdentifier.getPath(declaredByMetadataId));
-					final ClassOrInterfaceTypeDetails cid = new JavaParserClassOrInterfaceTypeDetailsBuilder(compilationUnit, compilationUnitServices, castMember, innerTypeMetadataId, innerType, metadataService, typeLocationService).build();
-					cidBuilder.addInnerType(cid);
-				}
-			}
-		}
+            for (final BodyDeclaration member : members) {
+                if (member instanceof FieldDeclaration) {
+                    final FieldDeclaration castMember = (FieldDeclaration) member;
+                    for (final VariableDeclarator var : castMember
+                            .getVariables()) {
+                        final FieldMetadata field = JavaParserFieldMetadataBuilder
+                                .getInstance(declaredByMetadataId, castMember,
+                                        var, compilationUnitServices,
+                                        typeParameterNames).build();
+                        cidBuilder.addField(field);
+                    }
+                }
+                if (member instanceof MethodDeclaration) {
+                    final MethodDeclaration castMember = (MethodDeclaration) member;
+                    final MethodMetadata method = JavaParserMethodMetadataBuilder
+                            .getInstance(declaredByMetadataId, castMember,
+                                    compilationUnitServices, typeParameterNames)
+                            .build();
+                    cidBuilder.addMethod(method);
+                }
+                if (member instanceof ConstructorDeclaration) {
+                    final ConstructorDeclaration castMember = (ConstructorDeclaration) member;
+                    final ConstructorMetadata constructor = JavaParserConstructorMetadataBuilder
+                            .getInstance(declaredByMetadataId, castMember,
+                                    compilationUnitServices, typeParameterNames)
+                            .build();
+                    cidBuilder.addConstructor(constructor);
+                }
+                if (member instanceof TypeDeclaration) {
+                    final TypeDeclaration castMember = (TypeDeclaration) member;
+                    final JavaType innerType = new JavaType(
+                            castMember.getName(), name);
+                    final String innerTypeMetadataId = PhysicalTypeIdentifier
+                            .createIdentifier(innerType, PhysicalTypeIdentifier
+                                    .getPath(declaredByMetadataId));
+                    final ClassOrInterfaceTypeDetails cid = new JavaParserClassOrInterfaceTypeDetailsBuilder(
+                            compilationUnit, compilationUnitServices,
+                            castMember, innerTypeMetadataId, innerType,
+                            metadataService, typeLocationService).build();
+                    cidBuilder.addInnerType(cid);
+                }
+            }
+        }
 
-		return cidBuilder.build();
-	}
+        return cidBuilder.build();
+    }
 }

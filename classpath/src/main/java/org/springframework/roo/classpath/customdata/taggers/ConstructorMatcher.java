@@ -13,62 +13,72 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.support.util.Assert;
 
 /**
- * {@link ConstructorMetadata}-specific implementation of {@link Matcher}. Currently
- * ConstructorMetadata instances are only matched based on parameter types.
- *
+ * {@link ConstructorMetadata}-specific implementation of {@link Matcher}.
+ * Currently ConstructorMetadata instances are only matched based on parameter
+ * types.
+ * 
  * @author James Tyrrell
  * @since 1.1.3
  */
 public class ConstructorMatcher implements Matcher<ConstructorMetadata> {
 
-	// Fields
-	private final CustomDataKey<ConstructorMetadata> customDataKey;
-	private final List<JavaType> parameterTypes;
+    // Fields
+    private final CustomDataKey<ConstructorMetadata> customDataKey;
+    private final List<JavaType> parameterTypes;
 
-	/**
-	 * Constructor
-	 *
-	 * @param <T> {@link JavaType} or any subclass
-	 * @param customDataKey (required)
-	 * @param parameterTypes
-	 * @since 1.2.0
-	 */
-	public <T extends JavaType> ConstructorMatcher(final CustomDataKey<ConstructorMetadata> customDataKey, final T... parameterTypes) {
-		this(customDataKey, Arrays.asList(parameterTypes));
-	}
+    /**
+     * Constructor
+     * 
+     * @param <T> {@link JavaType} or any subclass
+     * @param customDataKey (required)
+     * @param parameterTypes
+     * @since 1.2.0
+     */
+    public <T extends JavaType> ConstructorMatcher(
+            final CustomDataKey<ConstructorMetadata> customDataKey,
+            final T... parameterTypes) {
+        this(customDataKey, Arrays.asList(parameterTypes));
+    }
 
-	/**
-	 * Constructor
-	 *
-	 * @param customDataKey (required)
-	 * @param parameterTypes can be <code>null</code> for none
-	 */
-	public ConstructorMatcher(final CustomDataKey<ConstructorMetadata> customDataKey, final Collection<? extends JavaType> parameterTypes) {
-		Assert.notNull(customDataKey, "Custom data key is required, e.g. a ConstructorMetadataCustomDataKey");
-		this.customDataKey = customDataKey;
-		this.parameterTypes = new ArrayList<JavaType>();
-		if (parameterTypes != null) {
-			this.parameterTypes.addAll(parameterTypes);
-		}
-	}
+    /**
+     * Constructor
+     * 
+     * @param customDataKey (required)
+     * @param parameterTypes can be <code>null</code> for none
+     */
+    public ConstructorMatcher(
+            final CustomDataKey<ConstructorMetadata> customDataKey,
+            final Collection<? extends JavaType> parameterTypes) {
+        Assert.notNull(customDataKey,
+                "Custom data key is required, e.g. a ConstructorMetadataCustomDataKey");
+        this.customDataKey = customDataKey;
+        this.parameterTypes = new ArrayList<JavaType>();
+        if (parameterTypes != null) {
+            this.parameterTypes.addAll(parameterTypes);
+        }
+    }
 
-	public List<ConstructorMetadata> matches(final List<MemberHoldingTypeDetails> memberHoldingTypeDetailsList) {
-		List<ConstructorMetadata> constructors = new ArrayList<ConstructorMetadata>();
-		for (MemberHoldingTypeDetails memberHoldingTypeDetails : memberHoldingTypeDetailsList) {
-			for (ConstructorMetadata constructor : memberHoldingTypeDetails.getDeclaredConstructors()) {
-				if (parameterTypes.equals(AnnotatedJavaType.convertFromAnnotatedJavaTypes(constructor.getParameterTypes()))) {
-					constructors.add(constructor);
-				}
-			}
-		}
-		return constructors;
-	}
+    public List<ConstructorMetadata> matches(
+            final List<MemberHoldingTypeDetails> memberHoldingTypeDetailsList) {
+        List<ConstructorMetadata> constructors = new ArrayList<ConstructorMetadata>();
+        for (MemberHoldingTypeDetails memberHoldingTypeDetails : memberHoldingTypeDetailsList) {
+            for (ConstructorMetadata constructor : memberHoldingTypeDetails
+                    .getDeclaredConstructors()) {
+                if (parameterTypes.equals(AnnotatedJavaType
+                        .convertFromAnnotatedJavaTypes(constructor
+                                .getParameterTypes()))) {
+                    constructors.add(constructor);
+                }
+            }
+        }
+        return constructors;
+    }
 
-	public CustomDataKey<ConstructorMetadata> getCustomDataKey() {
-		return customDataKey;
-	}
+    public CustomDataKey<ConstructorMetadata> getCustomDataKey() {
+        return customDataKey;
+    }
 
-	public Object getTagValue(final ConstructorMetadata key) {
-		return null;
-	}
+    public Object getTagValue(final ConstructorMetadata key) {
+        return null;
+    }
 }

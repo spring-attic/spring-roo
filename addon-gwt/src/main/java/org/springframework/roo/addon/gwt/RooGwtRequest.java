@@ -9,23 +9,23 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.SOURCE)
 public @interface RooGwtRequest {
 
-	/**
-	 * @return the fully-qualified type name this key instance was mirrored from
-	 */
-	String value();
+    /**
+     * @return the fully-qualified type name this key instance was mirrored from
+     */
+    String value();
 
-	/**
-	 * Entity methods to exclude from the request interface.
-	 * 
-	 * @return
-	 * @deprecated ignored by the GWT addon
-	 */
-	@Deprecated
-	String[] exclude() default {};
+    /**
+     * Entity methods to exclude from the request interface.
+     * 
+     * @return
+     * @deprecated ignored by the GWT addon
+     */
+    @Deprecated
+    String[] exclude() default {};
 
-	boolean ignoreProxyExclusions() default false;
+    boolean ignoreProxyExclusions() default false;
 
-	boolean ignoreProxyReadOnly() default false;
+    boolean ignoreProxyReadOnly() default false;
 
-	boolean dontIncludeProxyMethods() default true;
+    boolean dontIncludeProxyMethods() default true;
 }

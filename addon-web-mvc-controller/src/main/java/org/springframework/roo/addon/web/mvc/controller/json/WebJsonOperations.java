@@ -5,19 +5,19 @@ import org.springframework.roo.model.JavaType;
 
 /**
  * Provides operations for Web MVC Json functionality.
- *
+ * 
  * @author Stefan Schmidt
  * @since 1.2.0
  */
 public interface WebJsonOperations {
 
-	boolean isWebJsonInstallationPossible();
+    boolean isWebJsonInstallationPossible();
 
-	boolean isWebJsonCommandAvailable();
+    boolean isWebJsonCommandAvailable();
 
-	void setup();
+    void setup();
 
-	void annotateType(JavaType type, JavaType jsonType);
+    void annotateType(JavaType type, JavaType jsonType);
 
-	void annotateAll(JavaPackage javaPackage);
+    void annotateAll(JavaPackage javaPackage);
 }

@@ -12,7 +12,7 @@ import org.springframework.roo.shell.CommandMarker;
 
 /**
  * Commands for the Equals add-on to be used by the ROO shell.
- *
+ * 
  * @author Alan Stewart
  * @since 1.2.0
  */
@@ -20,15 +20,16 @@ import org.springframework.roo.shell.CommandMarker;
 @Service
 public class EqualsCommands implements CommandMarker {
 
-	// Fields
-	@Reference private EqualsOperations equalsOperations;
+    // Fields
+    @Reference private EqualsOperations equalsOperations;
 
-	@CliCommand(value = "equals", help = "Add equals and hashCode methods to a class")
-	public void addEquals(
-		@CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*", optionContext = "update,project", help = "The name of the class") final JavaType javaType,
-		@CliOption(key = "appendSuper", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Whether to call the super class equals and hashCode methods") final boolean appendSuper,
-		@CliOption(key = "excludeFields", mandatory = false, specifiedDefaultValue = "", optionContext = "exclude-fields", help = "The fields to exclude in the equals and hashcode methods. Multiple field names must be a double-quoted list separated by spaces") final Set<String> excludeFields) {
+    @CliCommand(value = "equals", help = "Add equals and hashCode methods to a class")
+    public void addEquals(
+            @CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*", optionContext = "update,project", help = "The name of the class") final JavaType javaType,
+            @CliOption(key = "appendSuper", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Whether to call the super class equals and hashCode methods") final boolean appendSuper,
+            @CliOption(key = "excludeFields", mandatory = false, specifiedDefaultValue = "", optionContext = "exclude-fields", help = "The fields to exclude in the equals and hashcode methods. Multiple field names must be a double-quoted list separated by spaces") final Set<String> excludeFields) {
 
-		equalsOperations.addEqualsAndHashCodeMethods(javaType, appendSuper, excludeFields);
-	}
+        equalsOperations.addEqualsAndHashCodeMethods(javaType, appendSuper,
+                excludeFields);
+    }
 }

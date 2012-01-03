@@ -12,47 +12,54 @@ import org.springframework.roo.support.osgi.BundleFindingUtils;
 import org.springframework.uaa.client.UaaService;
 
 /**
- * A {@link ShellStatusListener} which determines the bundle symbolic name an executed shell command
- * was provided by and registers the use of that feature in UAA.
- *
+ * A {@link ShellStatusListener} which determines the bundle symbolic name an
+ * executed shell command was provided by and registers the use of that feature
+ * in UAA.
+ * 
  * @author Ben Alex
  * @since 1.1.1
- *
  */
 @Component(immediate = true)
-public class ShellListeningUaaRegistrationFacility implements ShellStatusListener {
+public class ShellListeningUaaRegistrationFacility implements
+        ShellStatusListener {
 
-	// Fields
-	@Reference private Shell shell;
-	@Reference private UaaRegistrationService uaaRegistrationService;
-	@Reference UaaService uaaService;
-	private BundleContext bundleContext;
+    // Fields
+    @Reference private Shell shell;
+    @Reference private UaaRegistrationService uaaRegistrationService;
+    @Reference UaaService uaaService;
+    private BundleContext bundleContext;
 
-	protected void activate(final ComponentContext context) {
-		this.bundleContext = context.getBundleContext();
-		shell.addShellStatusListener(this);
-	}
+    protected void activate(final ComponentContext context) {
+        this.bundleContext = context.getBundleContext();
+        shell.addShellStatusListener(this);
+    }
 
-	protected void deactivate(final ComponentContext context) {
-		shell.removeShellStatusListener(this);
-	}
+    protected void deactivate(final ComponentContext context) {
+        shell.removeShellStatusListener(this);
+    }
 
-	public void onShellStatusChange(final ShellStatus oldStatus, final ShellStatus newStatus) {
-		// Handle registering use of a BSN
-		ParseResult parseResult = newStatus.getParseResult();
-		if (parseResult == null) {
-			return;
-		}
-		// We use the target instance as opposed to the declaring method as we don't want
-		// the fact an add-on type inherited from another type to prevent using of that add-on
-		// from being detected
-		String typeName = parseResult.getInstance().getClass().getName();
-		String bundleSymbolicName = BundleFindingUtils.findFirstBundleForTypeName(bundleContext, typeName);
-		if (bundleSymbolicName == null) {
-			return;
-		}
+    public void onShellStatusChange(final ShellStatus oldStatus,
+            final ShellStatus newStatus) {
+        // Handle registering use of a BSN
+        ParseResult parseResult = newStatus.getParseResult();
+        if (parseResult == null) {
+            return;
+        }
+        // We use the target instance as opposed to the declaring method as we
+        // don't want
+        // the fact an add-on type inherited from another type to prevent using
+        // of that add-on
+        // from being detected
+        String typeName = parseResult.getInstance().getClass().getName();
+        String bundleSymbolicName = BundleFindingUtils
+                .findFirstBundleForTypeName(bundleContext, typeName);
+        if (bundleSymbolicName == null) {
+            return;
+        }
 
-		// UaaRegistrationService deals with determining if the BSN is public (non-public BSNs are not registered)
-		uaaRegistrationService.registerBundleSymbolicNameUse(bundleSymbolicName, null);
-	}
+        // UaaRegistrationService deals with determining if the BSN is public
+        // (non-public BSNs are not registered)
+        uaaRegistrationService.registerBundleSymbolicNameUse(
+                bundleSymbolicName, null);
+    }
 }

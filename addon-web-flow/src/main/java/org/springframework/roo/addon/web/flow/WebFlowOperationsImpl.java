@@ -30,7 +30,7 @@ import org.w3c.dom.Element;
 
 /**
  * Provides Web Flow configuration operations.
- *
+ * 
  * @author Stefan Schmidt
  * @author Rossen Stoyanchev
  * @since 1.0
@@ -39,120 +39,161 @@ import org.w3c.dom.Element;
 @Service
 public class WebFlowOperationsImpl implements WebFlowOperations {
 
-	// Fields
-	@Reference private FileManager fileManager;
-	@Reference private JspOperations jspOperations;
-	@Reference private MenuOperations menuOperations;
-	@Reference private PathResolver pathResolver;
-	@Reference private ProjectOperations projectOperations;
-	@Reference private TilesOperations tilesOperations;
-	@Reference private WebMvcOperations webMvcOperations;
+    // Fields
+    @Reference private FileManager fileManager;
+    @Reference private JspOperations jspOperations;
+    @Reference private MenuOperations menuOperations;
+    @Reference private PathResolver pathResolver;
+    @Reference private ProjectOperations projectOperations;
+    @Reference private TilesOperations tilesOperations;
+    @Reference private WebMvcOperations webMvcOperations;
 
-	public boolean isWebFlowInstallationPossible() {
-		return projectOperations.isFeatureInstalledInFocusedModule(FeatureNames.MVC) && !projectOperations.isFeatureInstalledInFocusedModule(FeatureNames.JSF);
-	}
+    public boolean isWebFlowInstallationPossible() {
+        return projectOperations
+                .isFeatureInstalledInFocusedModule(FeatureNames.MVC)
+                && !projectOperations
+                        .isFeatureInstalledInFocusedModule(FeatureNames.JSF);
+    }
 
-	/**
-	 * See {@link WebFlowOperations#installWebFlow(String)}.
-	 */
-	public void installWebFlow(final String flowName) {
-		installWebFlowConfiguration();
+    /**
+     * See {@link WebFlowOperations#installWebFlow(String)}.
+     */
+    public void installWebFlow(final String flowName) {
+        installWebFlowConfiguration();
 
-		final String flowId = getFlowId(flowName);
-		String webRelativeFlowPath = "/WEB-INF/views/" + flowId;
-		String resolvedFlowPath = pathResolver.getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, webRelativeFlowPath);
-		String resolvedFlowDefinitionPath = resolvedFlowPath + "/flow.xml";
+        final String flowId = getFlowId(flowName);
+        String webRelativeFlowPath = "/WEB-INF/views/" + flowId;
+        String resolvedFlowPath = pathResolver.getFocusedIdentifier(
+                Path.SRC_MAIN_WEBAPP, webRelativeFlowPath);
+        String resolvedFlowDefinitionPath = resolvedFlowPath + "/flow.xml";
 
-		if (fileManager.exists(resolvedFlowPath)) {
-			throw new IllegalStateException("Flow directory already exists: " + resolvedFlowPath);
-		}
-		fileManager.createDirectory(resolvedFlowPath);
+        if (fileManager.exists(resolvedFlowPath)) {
+            throw new IllegalStateException("Flow directory already exists: "
+                    + resolvedFlowPath);
+        }
+        fileManager.createDirectory(resolvedFlowPath);
 
-		copyTemplate("flow.xml", resolvedFlowPath);
-		copyTemplate("view-state-1.jspx", resolvedFlowPath);
-		copyTemplate("view-state-2.jspx", resolvedFlowPath);
-		copyTemplate("end-state.jspx", resolvedFlowPath);
+        copyTemplate("flow.xml", resolvedFlowPath);
+        copyTemplate("view-state-1.jspx", resolvedFlowPath);
+        copyTemplate("view-state-2.jspx", resolvedFlowPath);
+        copyTemplate("end-state.jspx", resolvedFlowPath);
 
-		new XmlTemplate(fileManager).update(resolvedFlowDefinitionPath, new DomElementCallback() {
-			public boolean doWithElement(final Document document, final Element root) {
-				List<Element> states = XmlUtils.findElements("/flow/view-state|end-state", root);
-				for (Element state : states) {
-					state.setAttribute("view", flowId + "/" + state.getAttribute("id"));
-				}
-				return true;
-			}
-		});
+        new XmlTemplate(fileManager).update(resolvedFlowDefinitionPath,
+                new DomElementCallback() {
+                    public boolean doWithElement(final Document document,
+                            final Element root) {
+                        List<Element> states = XmlUtils.findElements(
+                                "/flow/view-state|end-state", root);
+                        for (Element state : states) {
+                            state.setAttribute("view",
+                                    flowId + "/" + state.getAttribute("id"));
+                        }
+                        return true;
+                    }
+                });
 
-		JavaSymbolName flowMenuCategory = new JavaSymbolName("Flows");
-		JavaSymbolName flowMenuName = new JavaSymbolName(flowId.replace("/", "_"));
-		menuOperations.addMenuItem(flowMenuCategory, flowMenuName, flowMenuName.getReadableSymbolName(), "webflow_menu_enter", "/" + flowId, null, pathResolver.getFocusedPath(Path.SRC_MAIN_WEBAPP));
+        JavaSymbolName flowMenuCategory = new JavaSymbolName("Flows");
+        JavaSymbolName flowMenuName = new JavaSymbolName(flowId.replace("/",
+                "_"));
+        menuOperations.addMenuItem(flowMenuCategory, flowMenuName,
+                flowMenuName.getReadableSymbolName(), "webflow_menu_enter", "/"
+                        + flowId, null,
+                pathResolver.getFocusedPath(Path.SRC_MAIN_WEBAPP));
 
-		tilesOperations.addViewDefinition(flowId, pathResolver.getFocusedPath(Path.SRC_MAIN_WEBAPP), flowId + "/*", TilesOperations.DEFAULT_TEMPLATE, webRelativeFlowPath + "/{1}.jspx");
+        tilesOperations.addViewDefinition(flowId,
+                pathResolver.getFocusedPath(Path.SRC_MAIN_WEBAPP), flowId
+                        + "/*", TilesOperations.DEFAULT_TEMPLATE,
+                webRelativeFlowPath + "/{1}.jspx");
 
-		updateConfiguration();
-		webMvcOperations.registerWebFlowConversionServiceExposingInterceptor();
-	}
+        updateConfiguration();
+        webMvcOperations.registerWebFlowConversionServiceExposingInterceptor();
+    }
 
-	private void installWebFlowConfiguration() {
-		String resolvedSpringConfigPath = pathResolver.getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/spring");
-		if (fileManager.exists(resolvedSpringConfigPath + "/webflow-config.xml")) {
-			return;
-		}
+    private void installWebFlowConfiguration() {
+        String resolvedSpringConfigPath = pathResolver.getFocusedIdentifier(
+                Path.SRC_MAIN_WEBAPP, "WEB-INF/spring");
+        if (fileManager
+                .exists(resolvedSpringConfigPath + "/webflow-config.xml")) {
+            return;
+        }
 
-		copyTemplate("webflow-config.xml", resolvedSpringConfigPath);
+        copyTemplate("webflow-config.xml", resolvedSpringConfigPath);
 
-		String webMvcConfigPath = resolvedSpringConfigPath + "/webmvc-config.xml";
-		if (!fileManager.exists(webMvcConfigPath)) {
-			webMvcOperations.installAllWebMvcArtifacts();
-		}
-		
-		jspOperations.installCommonViewArtefacts();
+        String webMvcConfigPath = resolvedSpringConfigPath
+                + "/webmvc-config.xml";
+        if (!fileManager.exists(webMvcConfigPath)) {
+            webMvcOperations.installAllWebMvcArtifacts();
+        }
 
-		new XmlTemplate(fileManager).update(webMvcConfigPath, new DomElementCallback() {
-			public boolean doWithElement(final Document document, final Element root) {
-				if (null == XmlUtils.findFirstElement("/beans/import[@resource='webflow-config.xml']", root)) {
-					Element importSWF = document.createElement("import");
-					importSWF.setAttribute("resource", "webflow-config.xml");
-					root.appendChild(importSWF);
-					return true;
-				}
-				return false;
-			}
-		});
-	}
+        jspOperations.installCommonViewArtefacts();
 
-	private void updateConfiguration() {
-		Element configuration = XmlUtils.getConfiguration(getClass());
-		final String focusedModuleName = projectOperations.getFocusedModuleName();
+        new XmlTemplate(fileManager).update(webMvcConfigPath,
+                new DomElementCallback() {
+                    public boolean doWithElement(final Document document,
+                            final Element root) {
+                        if (null == XmlUtils
+                                .findFirstElement(
+                                        "/beans/import[@resource='webflow-config.xml']",
+                                        root)) {
+                            Element importSWF = document
+                                    .createElement("import");
+                            importSWF.setAttribute("resource",
+                                    "webflow-config.xml");
+                            root.appendChild(importSWF);
+                            return true;
+                        }
+                        return false;
+                    }
+                });
+    }
 
-		final List<Dependency> dependencyElements = new ArrayList<Dependency>();
-		for (final Element webFlowDependencyElement : XmlUtils.findElements("/configuration/springWebFlow/dependencies/dependency", configuration)) {
-			dependencyElements.add(new Dependency(webFlowDependencyElement));
-		}
-		projectOperations.addDependencies(focusedModuleName, dependencyElements);
+    private void updateConfiguration() {
+        Element configuration = XmlUtils.getConfiguration(getClass());
+        final String focusedModuleName = projectOperations
+                .getFocusedModuleName();
 
-		final List<Repository> repositoryElements = new ArrayList<Repository>();
-		for (final Element repositoryElement : XmlUtils.findElements("/configuration/springWebFlow/repositories/repository", configuration)) {
-			repositoryElements.add(new Repository(repositoryElement));
-		}
-		projectOperations.addRepositories(focusedModuleName, repositoryElements);
+        final List<Dependency> dependencyElements = new ArrayList<Dependency>();
+        for (final Element webFlowDependencyElement : XmlUtils.findElements(
+                "/configuration/springWebFlow/dependencies/dependency",
+                configuration)) {
+            dependencyElements.add(new Dependency(webFlowDependencyElement));
+        }
+        projectOperations
+                .addDependencies(focusedModuleName, dependencyElements);
 
-		projectOperations.updateProjectType(focusedModuleName, ProjectType.WAR);
-	}
+        final List<Repository> repositoryElements = new ArrayList<Repository>();
+        for (final Element repositoryElement : XmlUtils.findElements(
+                "/configuration/springWebFlow/repositories/repository",
+                configuration)) {
+            repositoryElements.add(new Repository(repositoryElement));
+        }
+        projectOperations
+                .addRepositories(focusedModuleName, repositoryElements);
 
-	private String getFlowId(String flowName) {
-		flowName = StringUtils.defaultIfEmpty(flowName, "sample-flow");
-		if (flowName.startsWith("/")) {
-			flowName = flowName.substring(1);
-		}
-		return flowName.replaceAll("[^a-zA-Z/_]", "");
-	}
+        projectOperations.updateProjectType(focusedModuleName, ProjectType.WAR);
+    }
 
-	private void copyTemplate(final String templateFileName, final String resolvedTargetDirectoryPath) {
-		try {
-			FileCopyUtils.copy(FileUtils.getInputStream(getClass(), templateFileName), fileManager.createFile(resolvedTargetDirectoryPath + "/" + templateFileName).getOutputStream());
-		} catch (IOException e) {
-			throw new IllegalStateException("Encountered an error during copying of resources for Web Flow addon.", e);
-		}
-	}
+    private String getFlowId(String flowName) {
+        flowName = StringUtils.defaultIfEmpty(flowName, "sample-flow");
+        if (flowName.startsWith("/")) {
+            flowName = flowName.substring(1);
+        }
+        return flowName.replaceAll("[^a-zA-Z/_]", "");
+    }
+
+    private void copyTemplate(final String templateFileName,
+            final String resolvedTargetDirectoryPath) {
+        try {
+            FileCopyUtils.copy(
+                    FileUtils.getInputStream(getClass(), templateFileName),
+                    fileManager.createFile(
+                            resolvedTargetDirectoryPath + "/"
+                                    + templateFileName).getOutputStream());
+        }
+        catch (IOException e) {
+            throw new IllegalStateException(
+                    "Encountered an error during copying of resources for Web Flow addon.",
+                    e);
+        }
+    }
 }

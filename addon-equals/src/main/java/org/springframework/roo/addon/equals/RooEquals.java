@@ -7,7 +7,7 @@ import java.lang.annotation.Target;
 
 /**
  * Creates equals and hashCode methods.
- *
+ * 
  * @author Alan Stewart
  * @since 1.2.0
  */
@@ -15,10 +15,10 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.SOURCE)
 public @interface RooEquals {
 
-	boolean appendSuper() default false;
+    boolean appendSuper() default false;
 
-	/**
-	 * @return an array of fields exclude in the equals and hashCode methods
-	 */
-	String[] excludeFields() default "";
+    /**
+     * @return an array of fields exclude in the equals and hashCode methods
+     */
+    String[] excludeFields() default "";
 }

@@ -10,7 +10,7 @@ import org.springframework.roo.project.maven.Pom;
 
 /**
  * Implementation of {@link DatabaseDotComOperations}.
- *
+ * 
  * @author Alan Stewart
  * @since 1.2.0
  */
@@ -18,23 +18,23 @@ import org.springframework.roo.project.maven.Pom;
 @Service
 public class DatabaseDotComOperationsImpl implements DatabaseDotComOperations {
 
-	// Fields
-	@Reference private ProjectOperations projectOperations;
+    // Fields
+    @Reference private ProjectOperations projectOperations;
 
-	public String getName() {
-		return FeatureNames.DATABASE_DOT_COM;
-	}
+    public String getName() {
+        return FeatureNames.DATABASE_DOT_COM;
+    }
 
-	public boolean isInstalledInModule(String moduleName) {
-		Pom pom = projectOperations.getPomFromModuleName(moduleName);
-		if (pom == null) {
-			return false;
-		}
-		for (final Plugin buildPlugin : pom.getBuildPlugins()) {
-			if ("com.force.sdk".equals(buildPlugin.getArtifactId())) {
-				return true;
-			}
-		}
-		return false;
-	}
+    public boolean isInstalledInModule(String moduleName) {
+        Pom pom = projectOperations.getPomFromModuleName(moduleName);
+        if (pom == null) {
+            return false;
+        }
+        for (final Plugin buildPlugin : pom.getBuildPlugins()) {
+            if ("com.force.sdk".equals(buildPlugin.getArtifactId())) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

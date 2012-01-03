@@ -4,15 +4,15 @@ import java.util.Map;
 
 /**
  * Provides operations for the web mvc embed addon.
- *
+ * 
  * @author Stefan Schmidt
  * @since 1.1
  */
 public interface EmbeddedOperations {
 
-	boolean isEmbeddedInstallationPossible();
+    boolean isEmbeddedInstallationPossible();
 
-	boolean embed(String url, String viewName);
+    boolean embed(String url, String viewName);
 
-	boolean install(String viewName, Map<String, String> options);
+    boolean install(String viewName, Map<String, String> options);
 }

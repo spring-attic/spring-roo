@@ -10,7 +10,7 @@ import org.springframework.roo.support.util.FileUtils;
 
 /**
  * Italian language support.
- *
+ * 
  * @author Stefan Schmidt
  * @since 1.1
  */
@@ -18,19 +18,19 @@ import org.springframework.roo.support.util.FileUtils;
 @Service
 public class ItalianLanguage extends AbstractLanguage {
 
-	public Locale getLocale() {
-		return Locale.ITALIAN;
-	}
+    public Locale getLocale() {
+        return Locale.ITALIAN;
+    }
 
-	public String getLanguage() {
-		return "Italiano";
-	}
+    public String getLanguage() {
+        return "Italiano";
+    }
 
-	public InputStream getFlagGraphic() {
-		return FileUtils.getInputStream(getClass(), "it.png");
-	}
+    public InputStream getFlagGraphic() {
+        return FileUtils.getInputStream(getClass(), "it.png");
+    }
 
-	public InputStream getMessageBundle() {
-		return FileUtils.getInputStream(getClass(), "messages_it.properties");
-	}
+    public InputStream getMessageBundle() {
+        return FileUtils.getInputStream(getClass(), "messages_it.properties");
+    }
 }

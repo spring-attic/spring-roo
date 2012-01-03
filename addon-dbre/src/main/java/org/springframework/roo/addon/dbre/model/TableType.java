@@ -2,18 +2,19 @@ package org.springframework.roo.addon.dbre.model;
 
 /**
  * SQL table types.
- *
+ * 
  * @author Alan Stewart
  * @since 1.1
  */
 public enum TableType {
-	TABLE, VIEW, ALIAS, SYNONYM, UNKNOWN;
+    TABLE, VIEW, ALIAS, SYNONYM, UNKNOWN;
 
-	public static TableType getTableType(final String typeName) {
-		try {
-			return TableType.valueOf(typeName);
-		} catch (IllegalArgumentException e) {
-			return UNKNOWN;
-		}
-	}
+    public static TableType getTableType(final String typeName) {
+        try {
+            return TableType.valueOf(typeName);
+        }
+        catch (IllegalArgumentException e) {
+            return UNKNOWN;
+        }
+    }
 }

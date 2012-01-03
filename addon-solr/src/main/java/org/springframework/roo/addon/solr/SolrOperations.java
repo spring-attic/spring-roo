@@ -4,19 +4,19 @@ import org.springframework.roo.model.JavaType;
 
 /**
  * Provides Solr Search configuration operations.
- *
+ * 
  * @author Stefan Schmidt
  * @since 1.1
  */
 public interface SolrOperations {
 
-	boolean isSolrInstallationPossible();
+    boolean isSolrInstallationPossible();
 
-	boolean isSearchAvailable();
+    boolean isSearchAvailable();
 
-	void setupConfig(String solrServerUrl);
+    void setupConfig(String solrServerUrl);
 
-	void addSearch(JavaType javaType);
+    void addSearch(JavaType javaType);
 
-	void addAll();
+    void addAll();
 }

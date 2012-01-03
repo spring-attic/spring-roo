@@ -18,7 +18,7 @@ import org.springframework.roo.support.util.Assert;
 
 /**
  * Implementation of addon-json operations interface.
- *
+ * 
  * @author Stefan Schmidt
  * @since 1.1
  */
@@ -26,48 +26,55 @@ import org.springframework.roo.support.util.Assert;
 @Service
 public class JsonOperationsImpl implements JsonOperations {
 
-	// Fields
-	@Reference private ProjectOperations projectOperations;
-	@Reference private TypeLocationService typeLocationService;
-	@Reference private TypeManagementService typeManagementService;
+    // Fields
+    @Reference private ProjectOperations projectOperations;
+    @Reference private TypeLocationService typeLocationService;
+    @Reference private TypeManagementService typeManagementService;
 
-	public boolean isJsonInstallationPossible() {
-		return projectOperations.isFocusedProjectAvailable();
-	}
+    public boolean isJsonInstallationPossible() {
+        return projectOperations.isFocusedProjectAvailable();
+    }
 
-	public void annotateType(final JavaType javaType, final String rootName, final boolean deepSerialize) {
-		Assert.notNull(javaType, "Java type required");
+    public void annotateType(final JavaType javaType, final String rootName,
+            final boolean deepSerialize) {
+        Assert.notNull(javaType, "Java type required");
 
-		ClassOrInterfaceTypeDetails cid = typeLocationService.getTypeDetails(javaType);
-		if (cid == null) {
-			throw new IllegalArgumentException("Cannot locate source for '" + javaType.getFullyQualifiedTypeName() + "'");
-		}
+        ClassOrInterfaceTypeDetails cid = typeLocationService
+                .getTypeDetails(javaType);
+        if (cid == null) {
+            throw new IllegalArgumentException("Cannot locate source for '"
+                    + javaType.getFullyQualifiedTypeName() + "'");
+        }
 
-		if (MemberFindingUtils.getAnnotationOfType(cid.getAnnotations(), RooJavaType.ROO_JSON) == null) {
-			AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(RooJavaType.ROO_JSON);
-			if (rootName != null && rootName.length() > 0) {
-				annotationBuilder.addStringAttribute("rootName", rootName);
-			}
-			if (deepSerialize) {
-				annotationBuilder.addBooleanAttribute("deepSerialize", true);
-			}
-			ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(cid);
-			cidBuilder.addAnnotation(annotationBuilder);
-			typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
-		}
-	}
+        if (MemberFindingUtils.getAnnotationOfType(cid.getAnnotations(),
+                RooJavaType.ROO_JSON) == null) {
+            AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(
+                    RooJavaType.ROO_JSON);
+            if (rootName != null && rootName.length() > 0) {
+                annotationBuilder.addStringAttribute("rootName", rootName);
+            }
+            if (deepSerialize) {
+                annotationBuilder.addBooleanAttribute("deepSerialize", true);
+            }
+            ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(
+                    cid);
+            cidBuilder.addAnnotation(annotationBuilder);
+            typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
+        }
+    }
 
-	public void annotateType(final JavaType javaType, final String rootName) {
-		annotateType(javaType, rootName, false);
-	}
+    public void annotateType(final JavaType javaType, final String rootName) {
+        annotateType(javaType, rootName, false);
+    }
 
-	public void annotateAll(final boolean deepSerialize) {
-		for (final JavaType type : typeLocationService.findTypesWithAnnotation(ROO_JAVA_BEAN)) {
-			annotateType(type, "", deepSerialize);
-		}
-	}
+    public void annotateAll(final boolean deepSerialize) {
+        for (final JavaType type : typeLocationService
+                .findTypesWithAnnotation(ROO_JAVA_BEAN)) {
+            annotateType(type, "", deepSerialize);
+        }
+    }
 
-	public void annotateAll() {
-		annotateAll(false);
-	}
+    public void annotateAll() {
+        annotateAll(false);
+    }
 }

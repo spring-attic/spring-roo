@@ -19,7 +19,7 @@ import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Commands for the 'finder' add-on to be used by the ROO shell.
- *
+ * 
  * @author Stefan Schmidt
  * @since 1.0
  */
@@ -27,53 +27,55 @@ import org.springframework.roo.support.util.StringUtils;
 @Service
 public class FinderCommands implements CommandMarker {
 
-	// Fields
-	@Reference private FinderOperations finderOperations;
+    // Fields
+    @Reference private FinderOperations finderOperations;
 
-	@CliAvailabilityIndicator({ "finder list", "finder add" })
-	public boolean isFinderCommandAvailable() {
-		return finderOperations.isFinderInstallationPossible();
-	}
+    @CliAvailabilityIndicator({ "finder list", "finder add" })
+    public boolean isFinderCommandAvailable() {
+        return finderOperations.isFinderInstallationPossible();
+    }
 
-	@CliCommand(value = "finder list", help = "List all finders for a given target (must be an entity)")
-	public SortedSet<String> listFinders(
-		@CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*", optionContext = "update,project", help = "The controller or entity for which the finders are generated") final JavaType typeName,
-		@CliOption(key = { "", "depth" }, mandatory = false, unspecifiedDefaultValue = "1", specifiedDefaultValue = "1", help = "The depth of attribute combinations to be generated for the finders") final Integer depth,
-		@CliOption(key = "filter", mandatory = false, help = "A comma separated list of strings that must be present in a filter to be included") final String filter) {
+    @CliCommand(value = "finder list", help = "List all finders for a given target (must be an entity)")
+    public SortedSet<String> listFinders(
+            @CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*", optionContext = "update,project", help = "The controller or entity for which the finders are generated") final JavaType typeName,
+            @CliOption(key = { "", "depth" }, mandatory = false, unspecifiedDefaultValue = "1", specifiedDefaultValue = "1", help = "The depth of attribute combinations to be generated for the finders") final Integer depth,
+            @CliOption(key = "filter", mandatory = false, help = "A comma separated list of strings that must be present in a filter to be included") final String filter) {
 
-		Assert.isTrue(depth >= 1, "Depth must be at least 1");
-		Assert.isTrue(depth <= 3, "Depth must not be greater than 3");
+        Assert.isTrue(depth >= 1, "Depth must be at least 1");
+        Assert.isTrue(depth <= 3, "Depth must not be greater than 3");
 
-		SortedSet<String> finders = finderOperations.listFindersFor(typeName, depth);
-		if (StringUtils.isBlank(filter)) {
-			return finders;
-		}
+        SortedSet<String> finders = finderOperations.listFindersFor(typeName,
+                depth);
+        if (StringUtils.isBlank(filter)) {
+            return finders;
+        }
 
-		Set<String> requiredEntries = new HashSet<String>();
-		for (String requiredString : StringUtils.commaDelimitedListToSet(filter)) {
-			requiredEntries.add(requiredString.toLowerCase());
-		}
-		if (requiredEntries.isEmpty()) {
-			return finders;
-		}
+        Set<String> requiredEntries = new HashSet<String>();
+        for (String requiredString : StringUtils
+                .commaDelimitedListToSet(filter)) {
+            requiredEntries.add(requiredString.toLowerCase());
+        }
+        if (requiredEntries.isEmpty()) {
+            return finders;
+        }
 
-		SortedSet<String> result = new TreeSet<String>();
-		for (String finder : finders) {
-			required: for (String requiredEntry : requiredEntries) {
-				if (finder.toLowerCase().contains(requiredEntry)) {
-					result.add(finder);
-					break required;
-				}
-			}
-		}
-		return result;
-	}
+        SortedSet<String> result = new TreeSet<String>();
+        for (String finder : finders) {
+            required: for (String requiredEntry : requiredEntries) {
+                if (finder.toLowerCase().contains(requiredEntry)) {
+                    result.add(finder);
+                    break required;
+                }
+            }
+        }
+        return result;
+    }
 
-	@CliCommand(value = "finder add", help = "Install finders in the given target (must be an entity)")
-	public void installFinders(
-		@CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*", optionContext = "update,project", help = "The controller or entity for which the finders are generated") final JavaType typeName,
-		@CliOption(key = { "finderName", "" }, mandatory = true, help = "The finder string as generated with the 'finder list' command") final JavaSymbolName finderName) {
+    @CliCommand(value = "finder add", help = "Install finders in the given target (must be an entity)")
+    public void installFinders(
+            @CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*", optionContext = "update,project", help = "The controller or entity for which the finders are generated") final JavaType typeName,
+            @CliOption(key = { "finderName", "" }, mandatory = true, help = "The finder string as generated with the 'finder list' command") final JavaSymbolName finderName) {
 
-		finderOperations.installFinder(typeName, finderName);
-	}
+        finderOperations.installFinder(typeName, finderName);
+    }
 }

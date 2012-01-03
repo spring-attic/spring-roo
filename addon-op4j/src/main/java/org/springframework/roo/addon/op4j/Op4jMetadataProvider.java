@@ -11,9 +11,10 @@ import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.LogicalPath;
+
 /**
  * Provides {@link Op4jMetadata}.
- *
+ * 
  * @author Stefan Schmidt
  * @since 1.1
  */
@@ -21,38 +22,50 @@ import org.springframework.roo.project.LogicalPath;
 @Service
 public class Op4jMetadataProvider extends AbstractItdMetadataProvider {
 
-	protected void activate(final ComponentContext context) {
-		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-		addMetadataTrigger(ROO_OP4J);
-	}
+    protected void activate(final ComponentContext context) {
+        metadataDependencyRegistry.registerDependency(
+                PhysicalTypeIdentifier.getMetadataIdentiferType(),
+                getProvidesType());
+        addMetadataTrigger(ROO_OP4J);
+    }
 
-	protected void deactivate(final ComponentContext context) {
-		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-		removeMetadataTrigger(ROO_OP4J);
-	}
+    protected void deactivate(final ComponentContext context) {
+        metadataDependencyRegistry.deregisterDependency(
+                PhysicalTypeIdentifier.getMetadataIdentiferType(),
+                getProvidesType());
+        removeMetadataTrigger(ROO_OP4J);
+    }
 
-	@Override
-	protected ItdTypeDetailsProvidingMetadataItem getMetadata(final String metadataIdentificationString, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final String itdFilename) {
-		return new Op4jMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata);
-	}
+    @Override
+    protected ItdTypeDetailsProvidingMetadataItem getMetadata(
+            final String metadataIdentificationString,
+            final JavaType aspectName,
+            final PhysicalTypeMetadata governorPhysicalTypeMetadata,
+            final String itdFilename) {
+        return new Op4jMetadata(metadataIdentificationString, aspectName,
+                governorPhysicalTypeMetadata);
+    }
 
-	public String getItdUniquenessFilenameSuffix() {
-		return "Op4j";
-	}
+    public String getItdUniquenessFilenameSuffix() {
+        return "Op4j";
+    }
 
-	@Override
-	protected String getGovernorPhysicalTypeIdentifier(final String metadataIdentificationString) {
-		JavaType javaType = Op4jMetadata.getJavaType(metadataIdentificationString);
-		LogicalPath path = Op4jMetadata.getPath(metadataIdentificationString);
-		return PhysicalTypeIdentifier.createIdentifier(javaType, path);
-	}
+    @Override
+    protected String getGovernorPhysicalTypeIdentifier(
+            final String metadataIdentificationString) {
+        JavaType javaType = Op4jMetadata
+                .getJavaType(metadataIdentificationString);
+        LogicalPath path = Op4jMetadata.getPath(metadataIdentificationString);
+        return PhysicalTypeIdentifier.createIdentifier(javaType, path);
+    }
 
-	@Override
-	protected String createLocalIdentifier(final JavaType javaType, final LogicalPath path) {
-		return Op4jMetadata.createIdentifier(javaType, path);
-	}
+    @Override
+    protected String createLocalIdentifier(final JavaType javaType,
+            final LogicalPath path) {
+        return Op4jMetadata.createIdentifier(javaType, path);
+    }
 
-	public String getProvidesType() {
-		return Op4jMetadata.getMetadataIdentiferType();
-	}
+    public String getProvidesType() {
+        return Op4jMetadata.getMetadataIdentiferType();
+    }
 }

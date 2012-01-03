@@ -10,7 +10,7 @@ import org.springframework.roo.support.util.FileUtils;
 
 /**
  * Svedish language support.
- *
+ * 
  * @author Stefan Schmidt
  * @since 1.1
  */
@@ -18,19 +18,19 @@ import org.springframework.roo.support.util.FileUtils;
 @Service
 public class SwedishLanguage extends AbstractLanguage {
 
-	public Locale getLocale() {
-		return new Locale("sv");
-	}
+    public Locale getLocale() {
+        return new Locale("sv");
+    }
 
-	public String getLanguage() {
-		return "Svenska";
-	}
+    public String getLanguage() {
+        return "Svenska";
+    }
 
-	public InputStream getFlagGraphic() {
-		return FileUtils.getInputStream(getClass(), "sv.png");
-	}
+    public InputStream getFlagGraphic() {
+        return FileUtils.getInputStream(getClass(), "sv.png");
+    }
 
-	public InputStream getMessageBundle() {
-		return FileUtils.getInputStream(getClass(), "messages_sv.properties");
-	}
+    public InputStream getMessageBundle() {
+        return FileUtils.getInputStream(getClass(), "messages_sv.properties");
+    }
 }

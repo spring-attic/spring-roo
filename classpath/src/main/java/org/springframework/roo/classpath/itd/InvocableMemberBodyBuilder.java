@@ -4,113 +4,119 @@ import org.springframework.roo.classpath.details.InvocableMemberMetadata;
 import org.springframework.roo.support.util.Assert;
 
 /**
- * A simple way of producing method bodies for {@link InvocableMemberMetadata#getBody()}.
- *
+ * A simple way of producing method bodies for
+ * {@link InvocableMemberMetadata#getBody()}.
  * <p>
  * Method bodies immediately assume they are indented two levels.
- *
+ * 
  * @author Ben Alex
  * @since 1.0
  */
 public class InvocableMemberBodyBuilder {
 
-	// Fields
-	private boolean reset;
-	private int indentLevel;
-	private final StringBuilder stringBuilder = new StringBuilder();
+    // Fields
+    private boolean reset;
+    private int indentLevel;
+    private final StringBuilder stringBuilder = new StringBuilder();
 
-	public static InvocableMemberBodyBuilder getInstance() {
-		return new InvocableMemberBodyBuilder();
-	}
+    public static InvocableMemberBodyBuilder getInstance() {
+        return new InvocableMemberBodyBuilder();
+    }
 
-	/**
-	 * Constructor for an empty body
-	 */
-	public InvocableMemberBodyBuilder() {
-		indentLevel++;
-		indentLevel++;
-	}
+    /**
+     * Constructor for an empty body
+     */
+    public InvocableMemberBodyBuilder() {
+        indentLevel++;
+        indentLevel++;
+    }
 
-	/**
-	 * Increases the indent by one level.
-	 */
-	public InvocableMemberBodyBuilder indent() {
-		indentLevel++;
-		return this;
-	}
+    /**
+     * Increases the indent by one level.
+     */
+    public InvocableMemberBodyBuilder indent() {
+        indentLevel++;
+        return this;
+    }
 
-	/**
-	 * Resets the indent to zero.
-	 */
-	public InvocableMemberBodyBuilder reset() {
-		indentLevel = 0;
-		reset = true;
-		return this;
-	}
+    /**
+     * Resets the indent to zero.
+     */
+    public InvocableMemberBodyBuilder reset() {
+        indentLevel = 0;
+        reset = true;
+        return this;
+    }
 
-	/**
-	 * Decreases the indent by one level.
-	 */
-	public InvocableMemberBodyBuilder indentRemove() {
-		indentLevel--;
-		return this;
-	}
+    /**
+     * Decreases the indent by one level.
+     */
+    public InvocableMemberBodyBuilder indentRemove() {
+        indentLevel--;
+        return this;
+    }
 
-	/**
-	 * Prints a blank line, ensuring any indent is included before doing so.
-	 */
-	public InvocableMemberBodyBuilder newLine(final boolean indentBefore) {
-		if (indentBefore) {
-			appendIndent();
-		}
-		// We use \n for consistency with JavaParser's DumpVisitor, which always uses \n
-		stringBuilder.append("\n");
-		// stringBuilder.append(StringUtils.LINE_SEPARATOR);
-		return this;
-	}
+    /**
+     * Prints a blank line, ensuring any indent is included before doing so.
+     */
+    public InvocableMemberBodyBuilder newLine(final boolean indentBefore) {
+        if (indentBefore) {
+            appendIndent();
+        }
+        // We use \n for consistency with JavaParser's DumpVisitor, which always
+        // uses \n
+        stringBuilder.append("\n");
+        // stringBuilder.append(StringUtils.LINE_SEPARATOR);
+        return this;
+    }
 
-	public InvocableMemberBodyBuilder newLine() {
-		newLine(true);
-		return this;
-	}
+    public InvocableMemberBodyBuilder newLine() {
+        newLine(true);
+        return this;
+    }
 
-	/**
-	 * Prints the message, WITHOUT ANY INDENTATION.
-	 */
-	public InvocableMemberBodyBuilder append(final String message) {
-		if (message != null && !"".equals(message)) {
-			stringBuilder.append(message);
-		}
-		return this;
-	}
+    /**
+     * Prints the message, WITHOUT ANY INDENTATION.
+     */
+    public InvocableMemberBodyBuilder append(final String message) {
+        if (message != null && !"".equals(message)) {
+            stringBuilder.append(message);
+        }
+        return this;
+    }
 
-	/**
-	 * Prints the message, after adding indents and returns to a new line. This is the most commonly used method.
-	 */
-	public InvocableMemberBodyBuilder appendFormalLine(final String message) {
-		appendIndent();
-		if (message != null && !"".equals(message)) {
-			stringBuilder.append(message);
-		}
-		return newLine(false);
-	}
+    /**
+     * Prints the message, after adding indents and returns to a new line. This
+     * is the most commonly used method.
+     */
+    public InvocableMemberBodyBuilder appendFormalLine(final String message) {
+        appendIndent();
+        if (message != null && !"".equals(message)) {
+            stringBuilder.append(message);
+        }
+        return newLine(false);
+    }
 
-	/**
-	 * Prints the relevant number of indents.
-	 */
-	public InvocableMemberBodyBuilder appendIndent() {
-		for (int i = 0 ; i < indentLevel; i++) {
-			stringBuilder.append("    ");
-		}
-		return this;
-	}
+    /**
+     * Prints the relevant number of indents.
+     */
+    public InvocableMemberBodyBuilder appendIndent() {
+        for (int i = 0; i < indentLevel; i++) {
+            stringBuilder.append("    ");
+        }
+        return this;
+    }
 
-	public String getOutput() {
-		if (reset) {
-			Assert.isTrue(this.indentLevel == 0, "Indent level must be 0 (not " + indentLevel + ") to terminate following a reset!");
-		} else {
-			Assert.isTrue(this.indentLevel == 2, "Indent level must be 2 (not " + indentLevel + ") to terminate (use reset to indent to level 0)!");
-		}
-		return stringBuilder.toString();
-	}
+    public String getOutput() {
+        if (reset) {
+            Assert.isTrue(this.indentLevel == 0, "Indent level must be 0 (not "
+                    + indentLevel + ") to terminate following a reset!");
+        }
+        else {
+            Assert.isTrue(this.indentLevel == 2, "Indent level must be 2 (not "
+                    + indentLevel
+                    + ") to terminate (use reset to indent to level 0)!");
+        }
+        return stringBuilder.toString();
+    }
 }

@@ -46,7 +46,7 @@ import org.w3c.dom.Element;
 
 /**
  * Provides JMS configuration operations.
- *
+ * 
  * @author Stefan Schmidt
  * @author Alan Stewart
  * @since 1.0
@@ -55,223 +55,313 @@ import org.w3c.dom.Element;
 @Service
 public class JmsOperationsImpl implements JmsOperations {
 
-	// Fields
-	@Reference private FileManager fileManager;
-	@Reference private ProjectOperations projectOperations;
-	@Reference private PropFileOperations propFileOperations;
-	@Reference private TypeLocationService typeLocationService;
-	@Reference private TypeManagementService typeManagementService;
+    // Fields
+    @Reference private FileManager fileManager;
+    @Reference private ProjectOperations projectOperations;
+    @Reference private PropFileOperations propFileOperations;
+    @Reference private TypeLocationService typeLocationService;
+    @Reference private TypeManagementService typeManagementService;
 
-	public boolean isJmsInstallationPossible() {
-		return projectOperations.isFocusedProjectAvailable() && !hasJmsContext();
-	}
+    public boolean isJmsInstallationPossible() {
+        return projectOperations.isFocusedProjectAvailable()
+                && !hasJmsContext();
+    }
 
-	public boolean isManageJmsAvailable() {
-		return projectOperations.isFocusedProjectAvailable() && hasJmsContext();
-	}
+    public boolean isManageJmsAvailable() {
+        return projectOperations.isFocusedProjectAvailable() && hasJmsContext();
+    }
 
-	private boolean hasJmsContext() {
-		return fileManager.exists(projectOperations.getPathResolver().getFocusedIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext-jms.xml"));
-	}
+    private boolean hasJmsContext() {
+        return fileManager.exists(projectOperations.getPathResolver()
+                .getFocusedIdentifier(Path.SPRING_CONFIG_ROOT,
+                        "applicationContext-jms.xml"));
+    }
 
-	public void installJms(final JmsProvider jmsProvider, final String name, final JmsDestinationType destinationType) {
-		Assert.isTrue(isJmsInstallationPossible(), "Project not available");
-		Assert.notNull(jmsProvider, "JMS provider required");
+    public void installJms(final JmsProvider jmsProvider, final String name,
+            final JmsDestinationType destinationType) {
+        Assert.isTrue(isJmsInstallationPossible(), "Project not available");
+        Assert.notNull(jmsProvider, "JMS provider required");
 
-		String jmsContextPath = projectOperations.getPathResolver().getFocusedIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext-jms.xml");
+        String jmsContextPath = projectOperations.getPathResolver()
+                .getFocusedIdentifier(Path.SPRING_CONFIG_ROOT,
+                        "applicationContext-jms.xml");
 
-		final InputStream in;
-		if (fileManager.exists(jmsContextPath)) {
-			in = fileManager.getInputStream(jmsContextPath);
-		} else {
-			in = FileUtils.getInputStream(getClass(), "applicationContext-jms-template.xml");
-			Assert.notNull(in, "Could not acquire applicationContext-jms.xml template");
-		}
-		final Document document = XmlUtils.readXml(in);
+        final InputStream in;
+        if (fileManager.exists(jmsContextPath)) {
+            in = fileManager.getInputStream(jmsContextPath);
+        }
+        else {
+            in = FileUtils.getInputStream(getClass(),
+                    "applicationContext-jms-template.xml");
+            Assert.notNull(in,
+                    "Could not acquire applicationContext-jms.xml template");
+        }
+        final Document document = XmlUtils.readXml(in);
 
-		final Element root = document.getDocumentElement();
+        final Element root = document.getDocumentElement();
 
-		if (StringUtils.hasText(name)) {
-			final Element destination = document.createElement("amq:" + destinationType.name().toLowerCase());
-			destination.setAttribute("physicalName", name);
-			destination.setAttribute("id", name);
-			root.appendChild(destination);
-			addDefaultDestination(document, name);
-		}
+        if (StringUtils.hasText(name)) {
+            final Element destination = document.createElement("amq:"
+                    + destinationType.name().toLowerCase());
+            destination.setAttribute("physicalName", name);
+            destination.setAttribute("id", name);
+            root.appendChild(destination);
+            addDefaultDestination(document, name);
+        }
 
-		Element listenerContainer = XmlUtils.findFirstElement("/beans/listener-container[@destination-type = '" + destinationType.name().toLowerCase() + "']", root);
-		if (listenerContainer == null) {
-			listenerContainer = document.createElement("jms:listener-container");
-			listenerContainer.setAttribute("connection-factory", "jmsFactory");
-			listenerContainer.setAttribute("destination-type", destinationType.name().toLowerCase());
-			root.appendChild(listenerContainer);
-		}
+        Element listenerContainer = XmlUtils.findFirstElement(
+                "/beans/listener-container[@destination-type = '"
+                        + destinationType.name().toLowerCase() + "']", root);
+        if (listenerContainer == null) {
+            listenerContainer = document
+                    .createElement("jms:listener-container");
+            listenerContainer.setAttribute("connection-factory", "jmsFactory");
+            listenerContainer.setAttribute("destination-type", destinationType
+                    .name().toLowerCase());
+            root.appendChild(listenerContainer);
+        }
 
-		DomUtils.removeTextNodes(root);
+        DomUtils.removeTextNodes(root);
 
-		fileManager.createOrUpdateTextFileIfRequired(jmsContextPath, XmlUtils.nodeToString(document), false);
+        fileManager.createOrUpdateTextFileIfRequired(jmsContextPath,
+                XmlUtils.nodeToString(document), false);
 
-		updateConfiguration(jmsProvider);
-	}
+        updateConfiguration(jmsProvider);
+    }
 
-	public void injectJmsTemplate(final JavaType targetType, final JavaSymbolName fieldName, final boolean asynchronous) {
-		Assert.notNull(targetType, "Java type required");
-		Assert.notNull(fieldName, "Field name required");
+    public void injectJmsTemplate(final JavaType targetType,
+            final JavaSymbolName fieldName, final boolean asynchronous) {
+        Assert.notNull(targetType, "Java type required");
+        Assert.notNull(fieldName, "Field name required");
 
-		ClassOrInterfaceTypeDetails targetTypeDetails = typeLocationService.getTypeDetails(targetType);
-		Assert.isTrue(targetTypeDetails != null, "Cannot locate source for '" + targetType.getFullyQualifiedTypeName() + "'");
+        ClassOrInterfaceTypeDetails targetTypeDetails = typeLocationService
+                .getTypeDetails(targetType);
+        Assert.isTrue(targetTypeDetails != null, "Cannot locate source for '"
+                + targetType.getFullyQualifiedTypeName() + "'");
 
-		final String declaredByMetadataId = targetTypeDetails.getDeclaredByMetadataId();
-		final ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(targetTypeDetails);
-		
-		// Create the field
-		cidBuilder.addField(new FieldMetadataBuilder(declaredByMetadataId, PRIVATE | TRANSIENT, Arrays.asList(new AnnotationMetadataBuilder(AUTOWIRED)), fieldName, JMS_OPERATIONS));
+        final String declaredByMetadataId = targetTypeDetails
+                .getDeclaredByMetadataId();
+        final ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(
+                targetTypeDetails);
 
-		// Create the method
-		cidBuilder.addMethod(createSendMessageMethod(fieldName, declaredByMetadataId, asynchronous));
+        // Create the field
+        cidBuilder.addField(new FieldMetadataBuilder(declaredByMetadataId,
+                PRIVATE | TRANSIENT, Arrays
+                        .asList(new AnnotationMetadataBuilder(AUTOWIRED)),
+                fieldName, JMS_OPERATIONS));
 
-		if (asynchronous) {
-			ensureSpringAsynchronousSupportEnabled();
-		}
+        // Create the method
+        cidBuilder.addMethod(createSendMessageMethod(fieldName,
+                declaredByMetadataId, asynchronous));
 
-		typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
-	}
+        if (asynchronous) {
+            ensureSpringAsynchronousSupportEnabled();
+        }
 
-	/**
-	 * Creates the injected method that sends a JMS message
-	 * 
-	 * @param fieldName
-	 * @param declaredByMetadataId
-	 * @param asynchronous whether the JMS message should be sent asynchronously
-	 * @return a non-<code>null</code> builder
-	 */
-	private MethodMetadataBuilder createSendMessageMethod(final JavaSymbolName fieldName, final String declaredByMetadataId, final boolean asynchronous) {
-		final List<JavaType> parameterTypes = Arrays.asList(JavaType.OBJECT);
-		final List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("messageObject"));
+        typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
+    }
 
-		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		bodyBuilder.appendFormalLine(fieldName + ".convertAndSend(messageObject);");
+    /**
+     * Creates the injected method that sends a JMS message
+     * 
+     * @param fieldName
+     * @param declaredByMetadataId
+     * @param asynchronous whether the JMS message should be sent asynchronously
+     * @return a non-<code>null</code> builder
+     */
+    private MethodMetadataBuilder createSendMessageMethod(
+            final JavaSymbolName fieldName, final String declaredByMetadataId,
+            final boolean asynchronous) {
+        final List<JavaType> parameterTypes = Arrays.asList(JavaType.OBJECT);
+        final List<JavaSymbolName> parameterNames = Arrays
+                .asList(new JavaSymbolName("messageObject"));
 
-		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(declaredByMetadataId, PUBLIC, new JavaSymbolName("sendMessage"), JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
-		if (asynchronous) {
-			methodBuilder.addAnnotation(new AnnotationMetadataBuilder(ASYNC));
-		}
-		return methodBuilder;
-	}
+        final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+        bodyBuilder.appendFormalLine(fieldName
+                + ".convertAndSend(messageObject);");
 
-	/**
-	 * Ensures that the Spring config files contain the necessary elements and
-	 * properties to support asynchronous tasks.
-	 */
-	private void ensureSpringAsynchronousSupportEnabled() {
-		final String contextPath = projectOperations.getPathResolver().getFocusedIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext.xml");
-		final Document appContext = XmlUtils.readXml(fileManager.getInputStream(contextPath));
-		final Element root = appContext.getDocumentElement();
+        final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(
+                declaredByMetadataId, PUBLIC,
+                new JavaSymbolName("sendMessage"), JavaType.VOID_PRIMITIVE,
+                AnnotatedJavaType.convertFromJavaTypes(parameterTypes),
+                parameterNames, bodyBuilder);
+        if (asynchronous) {
+            methodBuilder.addAnnotation(new AnnotationMetadataBuilder(ASYNC));
+        }
+        return methodBuilder;
+    }
 
-		if (DomUtils.findFirstElementByName("task:annotation-driven", root) == null) {
-			if (root.getAttribute("xmlns:task").length() == 0) {
-				root.setAttribute("xmlns:task", "http://www.springframework.org/schema/task");
-				root.setAttribute("xsi:schemaLocation", root.getAttribute("xsi:schemaLocation") + "  http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-3.1.xsd");
-			}
-			root.appendChild(new XmlElementBuilder("task:annotation-driven", appContext).addAttribute("executor", "asyncExecutor").addAttribute("mode", "aspectj").build());
-			root.appendChild(new XmlElementBuilder("task:executor", appContext).addAttribute("id", "asyncExecutor").addAttribute("pool-size", "${executor.poolSize}").build());
+    /**
+     * Ensures that the Spring config files contain the necessary elements and
+     * properties to support asynchronous tasks.
+     */
+    private void ensureSpringAsynchronousSupportEnabled() {
+        final String contextPath = projectOperations.getPathResolver()
+                .getFocusedIdentifier(Path.SPRING_CONFIG_ROOT,
+                        "applicationContext.xml");
+        final Document appContext = XmlUtils.readXml(fileManager
+                .getInputStream(contextPath));
+        final Element root = appContext.getDocumentElement();
 
-			fileManager.createOrUpdateTextFileIfRequired(contextPath, XmlUtils.nodeToString(appContext), false);
+        if (DomUtils.findFirstElementByName("task:annotation-driven", root) == null) {
+            if (root.getAttribute("xmlns:task").length() == 0) {
+                root.setAttribute("xmlns:task",
+                        "http://www.springframework.org/schema/task");
+                root.setAttribute(
+                        "xsi:schemaLocation",
+                        root.getAttribute("xsi:schemaLocation")
+                                + "  http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-3.1.xsd");
+            }
+            root.appendChild(new XmlElementBuilder("task:annotation-driven",
+                    appContext).addAttribute("executor", "asyncExecutor")
+                    .addAttribute("mode", "aspectj").build());
+            root.appendChild(new XmlElementBuilder("task:executor", appContext)
+                    .addAttribute("id", "asyncExecutor")
+                    .addAttribute("pool-size", "${executor.poolSize}").build());
 
-			propFileOperations.addPropertyIfNotExists(Path.SPRING_CONFIG_ROOT.getModulePathId(projectOperations.getFocusedModuleName()), "jms.properties", "executor.poolSize", "10", true);
-		}
-	}
+            fileManager.createOrUpdateTextFileIfRequired(contextPath,
+                    XmlUtils.nodeToString(appContext), false);
 
-	public void addJmsListener(final JavaType targetType, final String name, final JmsDestinationType destinationType) {
-		Assert.notNull(targetType, "Java type required");
+            propFileOperations.addPropertyIfNotExists(Path.SPRING_CONFIG_ROOT
+                    .getModulePathId(projectOperations.getFocusedModuleName()),
+                    "jms.properties", "executor.poolSize", "10", true);
+        }
+    }
 
-		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(targetType, projectOperations.getPathResolver().getFocusedPath(Path.SRC_MAIN_JAVA));
+    public void addJmsListener(final JavaType targetType, final String name,
+            final JmsDestinationType destinationType) {
+        Assert.notNull(targetType, "Java type required");
 
-		final List<MethodMetadataBuilder> methods = new ArrayList<MethodMetadataBuilder>();
-		final List<JavaType> parameterTypes = Arrays.asList(OBJECT);
-		final List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("message"));
+        String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(
+                targetType,
+                projectOperations.getPathResolver().getFocusedPath(
+                        Path.SRC_MAIN_JAVA));
 
-		// Create some method content to get people started
-		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		bodyBuilder.appendFormalLine("System.out.println(\"JMS message received: \" + message);");
-		methods.add(new MethodMetadataBuilder(declaredByMetadataId, PUBLIC, new JavaSymbolName("onMessage"), JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder));
+        final List<MethodMetadataBuilder> methods = new ArrayList<MethodMetadataBuilder>();
+        final List<JavaType> parameterTypes = Arrays.asList(OBJECT);
+        final List<JavaSymbolName> parameterNames = Arrays
+                .asList(new JavaSymbolName("message"));
 
-		final ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, PUBLIC, targetType, PhysicalTypeCategory.CLASS);
-		cidBuilder.setDeclaredMethods(methods);
+        // Create some method content to get people started
+        final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+        bodyBuilder
+                .appendFormalLine("System.out.println(\"JMS message received: \" + message);");
+        methods.add(new MethodMetadataBuilder(declaredByMetadataId, PUBLIC,
+                new JavaSymbolName("onMessage"), JavaType.VOID_PRIMITIVE,
+                AnnotatedJavaType.convertFromJavaTypes(parameterTypes),
+                parameterNames, bodyBuilder));
 
-		// Determine the canonical filename
-		final String physicalLocationCanonicalPath = getPhysicalLocationCanonicalPath(declaredByMetadataId);
+        final ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(
+                declaredByMetadataId, PUBLIC, targetType,
+                PhysicalTypeCategory.CLASS);
+        cidBuilder.setDeclaredMethods(methods);
 
-		// Check the file doesn't already exist
-		Assert.isTrue(!fileManager.exists(physicalLocationCanonicalPath), projectOperations.getPathResolver().getFriendlyName(physicalLocationCanonicalPath) + " already exists");
+        // Determine the canonical filename
+        final String physicalLocationCanonicalPath = getPhysicalLocationCanonicalPath(declaredByMetadataId);
 
-		typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
+        // Check the file doesn't already exist
+        Assert.isTrue(
+                !fileManager.exists(physicalLocationCanonicalPath),
+                projectOperations.getPathResolver().getFriendlyName(
+                        physicalLocationCanonicalPath)
+                        + " already exists");
 
-		String jmsContextPath = projectOperations.getPathResolver().getFocusedIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext-jms.xml");
-		Document document = XmlUtils.readXml(fileManager.getInputStream(jmsContextPath));
-		Element root = document.getDocumentElement();
-		
-		Element listenerContainer = DomUtils.findFirstElementByName("jms:listener-container", root);
-		if (listenerContainer != null && destinationType.name().equalsIgnoreCase(listenerContainer.getAttribute("destination-type"))) {
-			listenerContainer = document.createElement("jms:listener-container");
-			listenerContainer.setAttribute("connection-factory", "jmsFactory");
-			listenerContainer.setAttribute("destination-type", destinationType.name().toLowerCase());
-			root.appendChild(listenerContainer);
-		}
+        typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
 
-		if (listenerContainer != null) {
-			final Element jmsListener = document.createElement("jms:listener");
-			jmsListener.setAttribute("ref", StringUtils.uncapitalize(targetType.getSimpleTypeName()));
-			jmsListener.setAttribute("method", "onMessage");
-			jmsListener.setAttribute("destination", name);
+        String jmsContextPath = projectOperations.getPathResolver()
+                .getFocusedIdentifier(Path.SPRING_CONFIG_ROOT,
+                        "applicationContext-jms.xml");
+        Document document = XmlUtils.readXml(fileManager
+                .getInputStream(jmsContextPath));
+        Element root = document.getDocumentElement();
 
-			final Element bean = document.createElement("bean");
-			bean.setAttribute("class", targetType.getFullyQualifiedTypeName());
-			bean.setAttribute("id", StringUtils.uncapitalize(targetType.getSimpleTypeName()));
-			root.appendChild(bean);
+        Element listenerContainer = DomUtils.findFirstElementByName(
+                "jms:listener-container", root);
+        if (listenerContainer != null
+                && destinationType.name().equalsIgnoreCase(
+                        listenerContainer.getAttribute("destination-type"))) {
+            listenerContainer = document
+                    .createElement("jms:listener-container");
+            listenerContainer.setAttribute("connection-factory", "jmsFactory");
+            listenerContainer.setAttribute("destination-type", destinationType
+                    .name().toLowerCase());
+            root.appendChild(listenerContainer);
+        }
 
-			listenerContainer.appendChild(jmsListener);
-		}
+        if (listenerContainer != null) {
+            final Element jmsListener = document.createElement("jms:listener");
+            jmsListener.setAttribute("ref",
+                    StringUtils.uncapitalize(targetType.getSimpleTypeName()));
+            jmsListener.setAttribute("method", "onMessage");
+            jmsListener.setAttribute("destination", name);
 
-		fileManager.createOrUpdateTextFileIfRequired(jmsContextPath, XmlUtils.nodeToString(document), false);
-	}
+            final Element bean = document.createElement("bean");
+            bean.setAttribute("class", targetType.getFullyQualifiedTypeName());
+            bean.setAttribute("id",
+                    StringUtils.uncapitalize(targetType.getSimpleTypeName()));
+            root.appendChild(bean);
 
-	private void updateConfiguration(final JmsProvider jmsProvider) {
-		final Element configuration = XmlUtils.getConfiguration(getClass());
+            listenerContainer.appendChild(jmsListener);
+        }
 
-		final List<Dependency> dependencies = new ArrayList<Dependency>();
+        fileManager.createOrUpdateTextFileIfRequired(jmsContextPath,
+                XmlUtils.nodeToString(document), false);
+    }
 
-		final List<Element> springDependencies = XmlUtils.findElements("/configuration/springJms/dependencies/dependency", configuration);
-		for (final Element dependencyElement : springDependencies) {
-			dependencies.add(new Dependency(dependencyElement));
-		}
+    private void updateConfiguration(final JmsProvider jmsProvider) {
+        final Element configuration = XmlUtils.getConfiguration(getClass());
 
-		final List<Element> jmsDependencies = XmlUtils.findElements("/configuration/jmsProviders/provider[@id = '" + jmsProvider.name() + "']/dependencies/dependency", configuration);
-		for (final Element dependencyElement : jmsDependencies) {
-			dependencies.add(new Dependency(dependencyElement));
-		}
-		
-		projectOperations.addDependencies(projectOperations.getFocusedModuleName(), dependencies);
-	}
+        final List<Dependency> dependencies = new ArrayList<Dependency>();
 
-	private void addDefaultDestination(final Document appCtx, final String name) {
-		// If we do already have a default destination configured then do nothing
-		final Element root = appCtx.getDocumentElement();
-		if (null != XmlUtils.findFirstElement("/beans/bean[@class = 'org.springframework.jms.core.JmsTemplate']/property[@name = 'defaultDestination']", root)) {
-			return;
-		}
-		// Otherwise add it
-		final Element jmsTemplate = XmlUtils.findRequiredElement("/beans/bean[@class = 'org.springframework.jms.core.JmsTemplate']", root);
-		final Element defaultDestination = appCtx.createElement("property");
-		defaultDestination.setAttribute("ref", name);
-		defaultDestination.setAttribute("name", "defaultDestination");
-		jmsTemplate.appendChild(defaultDestination);
-	}
+        final List<Element> springDependencies = XmlUtils.findElements(
+                "/configuration/springJms/dependencies/dependency",
+                configuration);
+        for (final Element dependencyElement : springDependencies) {
+            dependencies.add(new Dependency(dependencyElement));
+        }
 
-	private String getPhysicalLocationCanonicalPath(final String physicalTypeIdentifier) {
-		Assert.isTrue(PhysicalTypeIdentifier.isValid(physicalTypeIdentifier), "Physical type identifier is invalid");
-		final JavaType javaType = PhysicalTypeIdentifier.getJavaType(physicalTypeIdentifier);
-		final LogicalPath path = PhysicalTypeIdentifier.getPath(physicalTypeIdentifier);
-		return projectOperations.getPathResolver().getIdentifier(path, javaType.getRelativeFileName());
-	}
+        final List<Element> jmsDependencies = XmlUtils.findElements(
+                "/configuration/jmsProviders/provider[@id = '"
+                        + jmsProvider.name() + "']/dependencies/dependency",
+                configuration);
+        for (final Element dependencyElement : jmsDependencies) {
+            dependencies.add(new Dependency(dependencyElement));
+        }
+
+        projectOperations.addDependencies(
+                projectOperations.getFocusedModuleName(), dependencies);
+    }
+
+    private void addDefaultDestination(final Document appCtx, final String name) {
+        // If we do already have a default destination configured then do
+        // nothing
+        final Element root = appCtx.getDocumentElement();
+        if (null != XmlUtils
+                .findFirstElement(
+                        "/beans/bean[@class = 'org.springframework.jms.core.JmsTemplate']/property[@name = 'defaultDestination']",
+                        root)) {
+            return;
+        }
+        // Otherwise add it
+        final Element jmsTemplate = XmlUtils
+                .findRequiredElement(
+                        "/beans/bean[@class = 'org.springframework.jms.core.JmsTemplate']",
+                        root);
+        final Element defaultDestination = appCtx.createElement("property");
+        defaultDestination.setAttribute("ref", name);
+        defaultDestination.setAttribute("name", "defaultDestination");
+        jmsTemplate.appendChild(defaultDestination);
+    }
+
+    private String getPhysicalLocationCanonicalPath(
+            final String physicalTypeIdentifier) {
+        Assert.isTrue(PhysicalTypeIdentifier.isValid(physicalTypeIdentifier),
+                "Physical type identifier is invalid");
+        final JavaType javaType = PhysicalTypeIdentifier
+                .getJavaType(physicalTypeIdentifier);
+        final LogicalPath path = PhysicalTypeIdentifier
+                .getPath(physicalTypeIdentifier);
+        return projectOperations.getPathResolver().getIdentifier(path,
+                javaType.getRelativeFileName());
+    }
 }

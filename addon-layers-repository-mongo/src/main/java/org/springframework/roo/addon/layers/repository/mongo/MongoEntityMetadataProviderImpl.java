@@ -29,68 +29,92 @@ import org.springframework.roo.project.LogicalPath;
 
 /**
  * Implementation of {@link MongoEntityMetadataProvider}.
- *
+ * 
  * @author Stefan Schmidt
  * @since 1.2.0
  */
 @Component(immediate = true)
 @Service
-public class MongoEntityMetadataProviderImpl extends AbstractItdMetadataProvider implements MongoEntityMetadataProvider {
+public class MongoEntityMetadataProviderImpl extends
+        AbstractItdMetadataProvider implements MongoEntityMetadataProvider {
 
-	// Constants
-	private static final FieldMatcher ID_FIELD_MATCHER = new FieldMatcher(IDENTIFIER_FIELD, AnnotationMetadataBuilder.getInstance(SpringJavaType.DATA_ID.getFullyQualifiedTypeName()));
-	private static final AnnotatedTypeMatcher PERSISTENT_TYPE_MATCHER = new AnnotatedTypeMatcher(PERSISTENT_TYPE, RooJavaType.ROO_MONGO_ENTITY);
-	private static final MethodMatcher ID_ACCESSOR_MATCHER = new MethodMatcher(Arrays.asList(ID_FIELD_MATCHER), IDENTIFIER_ACCESSOR_METHOD, true);
-	private static final MethodMatcher ID_MUTATOR_MATCHER = new MethodMatcher(Arrays.asList(ID_FIELD_MATCHER), IDENTIFIER_MUTATOR_METHOD, false);
+    // Constants
+    private static final FieldMatcher ID_FIELD_MATCHER = new FieldMatcher(
+            IDENTIFIER_FIELD,
+            AnnotationMetadataBuilder.getInstance(SpringJavaType.DATA_ID
+                    .getFullyQualifiedTypeName()));
+    private static final AnnotatedTypeMatcher PERSISTENT_TYPE_MATCHER = new AnnotatedTypeMatcher(
+            PERSISTENT_TYPE, RooJavaType.ROO_MONGO_ENTITY);
+    private static final MethodMatcher ID_ACCESSOR_MATCHER = new MethodMatcher(
+            Arrays.asList(ID_FIELD_MATCHER), IDENTIFIER_ACCESSOR_METHOD, true);
+    private static final MethodMatcher ID_MUTATOR_MATCHER = new MethodMatcher(
+            Arrays.asList(ID_FIELD_MATCHER), IDENTIFIER_MUTATOR_METHOD, false);
 
-	// Fields
-	@Reference private CustomDataKeyDecorator customDataKeyDecorator;
+    // Fields
+    @Reference private CustomDataKeyDecorator customDataKeyDecorator;
 
-	@SuppressWarnings("unchecked")
-	protected void activate(final ComponentContext context) {
-		super.setDependsOnGovernorBeingAClass(false);
-		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-		addMetadataTrigger(ROO_MONGO_ENTITY);
-		customDataKeyDecorator.registerMatchers(getClass(), PERSISTENT_TYPE_MATCHER, ID_FIELD_MATCHER, ID_ACCESSOR_MATCHER, ID_MUTATOR_MATCHER);
-	}
+    @SuppressWarnings("unchecked")
+    protected void activate(final ComponentContext context) {
+        super.setDependsOnGovernorBeingAClass(false);
+        metadataDependencyRegistry.registerDependency(
+                PhysicalTypeIdentifier.getMetadataIdentiferType(),
+                getProvidesType());
+        addMetadataTrigger(ROO_MONGO_ENTITY);
+        customDataKeyDecorator.registerMatchers(getClass(),
+                PERSISTENT_TYPE_MATCHER, ID_FIELD_MATCHER, ID_ACCESSOR_MATCHER,
+                ID_MUTATOR_MATCHER);
+    }
 
-	protected void deactivate(final ComponentContext context) {
-		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-		removeMetadataTrigger(ROO_MONGO_ENTITY);
-		customDataKeyDecorator.unregisterMatchers(getClass());
-	}
+    protected void deactivate(final ComponentContext context) {
+        metadataDependencyRegistry.deregisterDependency(
+                PhysicalTypeIdentifier.getMetadataIdentiferType(),
+                getProvidesType());
+        removeMetadataTrigger(ROO_MONGO_ENTITY);
+        customDataKeyDecorator.unregisterMatchers(getClass());
+    }
 
-	@Override
-	protected ItdTypeDetailsProvidingMetadataItem getMetadata(final String metadataIdentificationString, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final String itdFilename) {
-		final MongoEntityAnnotationValues annotationValues = new MongoEntityAnnotationValues(governorPhysicalTypeMetadata);
-		final JavaType identifierType = annotationValues.getIdentifierType();
-		if (!annotationValues.isAnnotationFound() || identifierType == null) {
-			return null;
-		}
+    @Override
+    protected ItdTypeDetailsProvidingMetadataItem getMetadata(
+            final String metadataIdentificationString,
+            final JavaType aspectName,
+            final PhysicalTypeMetadata governorPhysicalTypeMetadata,
+            final String itdFilename) {
+        final MongoEntityAnnotationValues annotationValues = new MongoEntityAnnotationValues(
+                governorPhysicalTypeMetadata);
+        final JavaType identifierType = annotationValues.getIdentifierType();
+        if (!annotationValues.isAnnotationFound() || identifierType == null) {
+            return null;
+        }
 
-		// Get the governor's member details
-		final MemberDetails memberDetails = getMemberDetails(governorPhysicalTypeMetadata);
+        // Get the governor's member details
+        final MemberDetails memberDetails = getMemberDetails(governorPhysicalTypeMetadata);
 
-		return new MongoEntityMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, identifierType, memberDetails);
-	}
+        return new MongoEntityMetadata(metadataIdentificationString,
+                aspectName, governorPhysicalTypeMetadata, identifierType,
+                memberDetails);
+    }
 
-	public String getItdUniquenessFilenameSuffix() {
-		return "Mongo_Entity";
-	}
+    public String getItdUniquenessFilenameSuffix() {
+        return "Mongo_Entity";
+    }
 
-	public String getProvidesType() {
-		return MongoEntityMetadata.getMetadataIdentiferType();
-	}
+    public String getProvidesType() {
+        return MongoEntityMetadata.getMetadataIdentiferType();
+    }
 
-	@Override
-	protected String createLocalIdentifier(final JavaType javaType, final LogicalPath path) {
-		return MongoEntityMetadata.createIdentifier(javaType, path);
-	}
+    @Override
+    protected String createLocalIdentifier(final JavaType javaType,
+            final LogicalPath path) {
+        return MongoEntityMetadata.createIdentifier(javaType, path);
+    }
 
-	@Override
-	protected String getGovernorPhysicalTypeIdentifier(final String metadataIdentificationString) {
-		final JavaType javaType = MongoEntityMetadata.getJavaType(metadataIdentificationString);
-		final LogicalPath path = MongoEntityMetadata.getPath(metadataIdentificationString);
-		return PhysicalTypeIdentifier.createIdentifier(javaType, path);
-	}
+    @Override
+    protected String getGovernorPhysicalTypeIdentifier(
+            final String metadataIdentificationString) {
+        final JavaType javaType = MongoEntityMetadata
+                .getJavaType(metadataIdentificationString);
+        final LogicalPath path = MongoEntityMetadata
+                .getPath(metadataIdentificationString);
+        return PhysicalTypeIdentifier.createIdentifier(javaType, path);
+    }
 }

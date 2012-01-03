@@ -20,50 +20,58 @@ import org.springframework.roo.support.util.Assert;
  * A {@link Matcher} used for layering support; identifies layer components
  * (services, repositories, etc) by the presence of a given tag, and sets each
  * such component's {@link CustomDataKeys#LAYER_TYPE} tag to a list of the
- * domain types managed by that component (as a <code>List&lt;{@link JavaType}&gt;</code>).
- *
+ * domain types managed by that component (as a
+ * <code>List&lt;{@link JavaType}&gt;</code>).
+ * 
  * @author Stefan Schmidt
  * @since 1.2.0
  */
 public class LayerTypeMatcher extends AnnotatedTypeMatcher {
 
-	// Fields
-	private final JavaSymbolName domainTypesAttribute;
-	private final JavaType layerAnnotationType;
+    // Fields
+    private final JavaSymbolName domainTypesAttribute;
+    private final JavaType layerAnnotationType;
 
-	/**
-	 * Constructor
-	 *
-	 * @param layerAnnotation the annotation type to match on and read attributes of (required)
-	 * @param domainTypesAttribute the attribute of the above annotation that
-	 * identifies the domain type(s) being managed (required)
-	 */
-	public LayerTypeMatcher(final JavaType layerAnnotation, final JavaSymbolName domainTypesAttribute) {
-		super(CustomDataKeys.LAYER_TYPE, layerAnnotation);
-		Assert.notNull(layerAnnotation, "Layer annotation is required");
-		Assert.notNull(domainTypesAttribute, "Domain types attribute is required");
-		this.domainTypesAttribute = domainTypesAttribute;
-		this.layerAnnotationType = layerAnnotation;
-	}
+    /**
+     * Constructor
+     * 
+     * @param layerAnnotation the annotation type to match on and read
+     *            attributes of (required)
+     * @param domainTypesAttribute the attribute of the above annotation that
+     *            identifies the domain type(s) being managed (required)
+     */
+    public LayerTypeMatcher(final JavaType layerAnnotation,
+            final JavaSymbolName domainTypesAttribute) {
+        super(CustomDataKeys.LAYER_TYPE, layerAnnotation);
+        Assert.notNull(layerAnnotation, "Layer annotation is required");
+        Assert.notNull(domainTypesAttribute,
+                "Domain types attribute is required");
+        this.domainTypesAttribute = domainTypesAttribute;
+        this.layerAnnotationType = layerAnnotation;
+    }
 
-	@Override
-	public Object getTagValue(final MemberHoldingTypeDetails type) {
-		final AnnotationMetadata layerAnnotation = MemberFindingUtils.getAnnotationOfType(type.getAnnotations(), layerAnnotationType);
-		if (layerAnnotation == null || layerAnnotation.getAttribute(domainTypesAttribute) == null) {
-			return null;
-		}
-		final AnnotationAttributeValue<?> value = layerAnnotation.getAttribute(domainTypesAttribute);
-		final List<JavaType> domainTypes = new ArrayList<JavaType>();
-		if (value instanceof ClassAttributeValue) {
-			domainTypes.add(((ClassAttributeValue) value).getValue());
-		} else if (value instanceof ArrayAttributeValue<?>) {
-			final ArrayAttributeValue<?> castValue = (ArrayAttributeValue<?>) value;
-			for (final AnnotationAttributeValue<?> val : castValue.getValue()) {
-				if (val instanceof ClassAttributeValue) {
-					domainTypes.add(((ClassAttributeValue) val).getValue());
-				}
-			}
-		}
-		return domainTypes;
-	}
+    @Override
+    public Object getTagValue(final MemberHoldingTypeDetails type) {
+        final AnnotationMetadata layerAnnotation = MemberFindingUtils
+                .getAnnotationOfType(type.getAnnotations(), layerAnnotationType);
+        if (layerAnnotation == null
+                || layerAnnotation.getAttribute(domainTypesAttribute) == null) {
+            return null;
+        }
+        final AnnotationAttributeValue<?> value = layerAnnotation
+                .getAttribute(domainTypesAttribute);
+        final List<JavaType> domainTypes = new ArrayList<JavaType>();
+        if (value instanceof ClassAttributeValue) {
+            domainTypes.add(((ClassAttributeValue) value).getValue());
+        }
+        else if (value instanceof ArrayAttributeValue<?>) {
+            final ArrayAttributeValue<?> castValue = (ArrayAttributeValue<?>) value;
+            for (final AnnotationAttributeValue<?> val : castValue.getValue()) {
+                if (val instanceof ClassAttributeValue) {
+                    domainTypes.add(((ClassAttributeValue) val).getValue());
+                }
+            }
+        }
+        return domainTypes;
+    }
 }

@@ -12,35 +12,37 @@ import org.springframework.roo.model.RooJavaType;
 
 /**
  * Represents a parsed {@link RooJsfManagedBean} annotation.
- *
+ * 
  * @author Alan Stewart
  * @since 1.2.0
  */
 public class JsfManagedBeanAnnotationValues extends AbstractAnnotationValues {
-	// From annotation
-	@AutoPopulate private JavaType entity;
-	@AutoPopulate private String beanName;
-	@AutoPopulate private boolean includeOnMenu = true;
+    // From annotation
+    @AutoPopulate private JavaType entity;
+    @AutoPopulate private String beanName;
+    @AutoPopulate private boolean includeOnMenu = true;
 
-	public JsfManagedBeanAnnotationValues(final PhysicalTypeMetadata governorPhysicalTypeMetadata) {
-		super(governorPhysicalTypeMetadata, ROO_JSF_MANAGED_BEAN);
-		AutoPopulationUtils.populate(this, annotationMetadata);
-	}
-	
-	public JsfManagedBeanAnnotationValues(final ClassOrInterfaceTypeDetails governorPhysicalTypeDetails) {
-		super(governorPhysicalTypeDetails, RooJavaType.ROO_JSF_MANAGED_BEAN);
-		AutoPopulationUtils.populate(this, annotationMetadata);
-	}
+    public JsfManagedBeanAnnotationValues(
+            final PhysicalTypeMetadata governorPhysicalTypeMetadata) {
+        super(governorPhysicalTypeMetadata, ROO_JSF_MANAGED_BEAN);
+        AutoPopulationUtils.populate(this, annotationMetadata);
+    }
 
-	public JavaType getEntity() {
-		return entity;
-	}
+    public JsfManagedBeanAnnotationValues(
+            final ClassOrInterfaceTypeDetails governorPhysicalTypeDetails) {
+        super(governorPhysicalTypeDetails, RooJavaType.ROO_JSF_MANAGED_BEAN);
+        AutoPopulationUtils.populate(this, annotationMetadata);
+    }
 
-	public String getBeanName() {
-		return beanName;
-	}
+    public JavaType getEntity() {
+        return entity;
+    }
 
-	public boolean isIncludeOnMenu() {
-		return includeOnMenu;
-	}
+    public String getBeanName() {
+        return beanName;
+    }
+
+    public boolean isIncludeOnMenu() {
+        return includeOnMenu;
+    }
 }

@@ -8,7 +8,7 @@ import org.springframework.roo.project.LogicalPath;
 
 /**
  * Metadata for GWT.
- *
+ * 
  * @author Ben Alex
  * @author Alan Stewart
  * @author Ray Cromwell
@@ -17,27 +17,33 @@ import org.springframework.roo.project.LogicalPath;
  */
 public class GwtScaffoldMetadata extends AbstractMetadataItem {
 
-	// Constants
-	private static final String PROVIDES_TYPE_STRING = GwtScaffoldMetadata.class.getName();
-	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
+    // Constants
+    private static final String PROVIDES_TYPE_STRING = GwtScaffoldMetadata.class
+            .getName();
+    private static final String PROVIDES_TYPE = MetadataIdentificationUtils
+            .create(PROVIDES_TYPE_STRING);
 
-	public GwtScaffoldMetadata(final String id) {
-		super(id);
-	}
+    public GwtScaffoldMetadata(final String id) {
+        super(id);
+    }
 
-	public static String getMetadataIdentifierType() {
-		return PROVIDES_TYPE;
-	}
+    public static String getMetadataIdentifierType() {
+        return PROVIDES_TYPE;
+    }
 
-	public static String createIdentifier(final JavaType javaType, final LogicalPath path) {
-		return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
-	}
+    public static String createIdentifier(final JavaType javaType,
+            final LogicalPath path) {
+        return PhysicalTypeIdentifierNamingUtils.createIdentifier(
+                PROVIDES_TYPE_STRING, javaType, path);
+    }
 
-	public static JavaType getJavaType(final String metadataIdentificationString) {
-		return PhysicalTypeIdentifierNamingUtils.getJavaType(PROVIDES_TYPE_STRING, metadataIdentificationString);
-	}
+    public static JavaType getJavaType(final String metadataIdentificationString) {
+        return PhysicalTypeIdentifierNamingUtils.getJavaType(
+                PROVIDES_TYPE_STRING, metadataIdentificationString);
+    }
 
-	public static LogicalPath getPath(final String metadataIdentificationString) {
-		return PhysicalTypeIdentifierNamingUtils.getPath(PROVIDES_TYPE_STRING, metadataIdentificationString);
-	}
+    public static LogicalPath getPath(final String metadataIdentificationString) {
+        return PhysicalTypeIdentifierNamingUtils.getPath(PROVIDES_TYPE_STRING,
+                metadataIdentificationString);
+    }
 }

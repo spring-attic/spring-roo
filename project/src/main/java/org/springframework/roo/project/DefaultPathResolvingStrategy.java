@@ -24,105 +24,117 @@ import org.springframework.roo.support.util.FileUtils;
 @Reference(name = "pathResolvingStrategy", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC, referenceInterface = PathResolvingStrategy.class, cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE)
 public class DefaultPathResolvingStrategy extends AbstractPathResolvingStrategy {
 
-	// Fields
-	private final Collection<PathResolvingStrategy> otherPathResolvingStrategies = new ArrayList<PathResolvingStrategy>();
-	private final Map<Path, PhysicalPath> rootModulePaths = new LinkedHashMap<Path, PhysicalPath>();
-	
-	// ------------ OSGi component methods ----------------
-	
-	protected void bindPathResolvingStrategy(final PathResolvingStrategy pathResolvingStrategy) {
-		if (pathResolvingStrategy != this) {
-			otherPathResolvingStrategies.add(pathResolvingStrategy);
-		}
-	}
-	
-	protected void unbindPathResolvingStrategy(final PathResolvingStrategy pathResolvingStrategy) {
-		otherPathResolvingStrategies.remove(pathResolvingStrategy);
-	}
-	
-	protected void activate(final ComponentContext context) {
-		super.activate(context);
-		populatePaths(getRoot());
-	}
-	
-	private void populatePaths(final String projectDirectory) {
-		for (final Path subPath : Path.values()) {
-			rootModulePaths.put(subPath, subPath.getRootModulePath(projectDirectory));
-		}
-	}
+    // Fields
+    private final Collection<PathResolvingStrategy> otherPathResolvingStrategies = new ArrayList<PathResolvingStrategy>();
+    private final Map<Path, PhysicalPath> rootModulePaths = new LinkedHashMap<Path, PhysicalPath>();
 
-	List<PhysicalPath> getPhysicalPaths() {
-		return new ArrayList<PhysicalPath>(rootModulePaths.values());
-	}
-	
-	// ------------ PathResolvingStrategy methods ----------------
+    // ------------ OSGi component methods ----------------
 
-	public String getIdentifier(final LogicalPath path, final String relativePath) {
-		return FileUtils.ensureTrailingSeparator(rootModulePaths.get(path.getPath()).getLocationPath()) + relativePath;
-	}
+    protected void bindPathResolvingStrategy(
+            final PathResolvingStrategy pathResolvingStrategy) {
+        if (pathResolvingStrategy != this) {
+            otherPathResolvingStrategies.add(pathResolvingStrategy);
+        }
+    }
 
-	public String getRoot(final LogicalPath logicalPath) {
-		Assert.notNull(logicalPath, "Path required");
-		final PhysicalPath pathInfo = rootModulePaths.get(logicalPath.getPath());
-		Assert.notNull(pathInfo, "Unable to determine information for path '" + logicalPath + "'");
-		final File root = pathInfo.getLocation();
-		return FileUtils.getCanonicalPath(root);
-	}
+    protected void unbindPathResolvingStrategy(
+            final PathResolvingStrategy pathResolvingStrategy) {
+        otherPathResolvingStrategies.remove(pathResolvingStrategy);
+    }
 
-	protected Collection<LogicalPath> getPaths(final boolean sourceOnly) {
-		final List<LogicalPath> result = new ArrayList<LogicalPath>();
-		for (final PhysicalPath modulePath : rootModulePaths.values()) {
-			if (!sourceOnly || modulePath.isSource()) {
-				result.add(modulePath.getLogicalPath());
-			}
-		}
-		return result;
-	}
+    protected void activate(final ComponentContext context) {
+        super.activate(context);
+        populatePaths(getRoot());
+    }
 
-	/**
-	 * Locates the first {@link PhysicalPath} which can be construed as a parent
-	 * of the presented identifier.
-	 *
-	 * @param identifier to locate the parent of (required)
-	 * @return the first matching parent, or null if not found
-	 */
-	protected PhysicalPath getApplicablePhysicalPath(final String identifier) {
-		Assert.notNull(identifier, "Identifier required");
-		for (final PhysicalPath pi : rootModulePaths.values()) {
-			final FileDetails possibleParent = new FileDetails(pi.getLocation(), null);
-			if (possibleParent.isParentOf(identifier)) {
-				return pi;
-			}
-		}
-		return null;
-	}
+    private void populatePaths(final String projectDirectory) {
+        for (final Path subPath : Path.values()) {
+            rootModulePaths.put(subPath,
+                    subPath.getRootModulePath(projectDirectory));
+        }
+    }
 
-	public String getCanonicalPath(final LogicalPath path, final JavaType javaType) {
-		return null;
-	}
+    List<PhysicalPath> getPhysicalPaths() {
+        return new ArrayList<PhysicalPath>(rootModulePaths.values());
+    }
 
-	public String getFocusedIdentifier(final Path path, final String relativePath) {
-		return null;
-	}
+    // ------------ PathResolvingStrategy methods ----------------
 
-	public String getFocusedRoot(final Path path) {
-		return null;
-	}
+    public String getIdentifier(final LogicalPath path,
+            final String relativePath) {
+        return FileUtils.ensureTrailingSeparator(rootModulePaths.get(
+                path.getPath()).getLocationPath())
+                + relativePath;
+    }
 
-	public LogicalPath getFocusedPath(final Path path) {
-		return null;
-	}
+    public String getRoot(final LogicalPath logicalPath) {
+        Assert.notNull(logicalPath, "Path required");
+        final PhysicalPath pathInfo = rootModulePaths
+                .get(logicalPath.getPath());
+        Assert.notNull(pathInfo, "Unable to determine information for path '"
+                + logicalPath + "'");
+        final File root = pathInfo.getLocation();
+        return FileUtils.getCanonicalPath(root);
+    }
 
-	public String getFocusedCanonicalPath(final Path path, final JavaType javaType) {
-		return null;
-	}
+    protected Collection<LogicalPath> getPaths(final boolean sourceOnly) {
+        final List<LogicalPath> result = new ArrayList<LogicalPath>();
+        for (final PhysicalPath modulePath : rootModulePaths.values()) {
+            if (!sourceOnly || modulePath.isSource()) {
+                result.add(modulePath.getLogicalPath());
+            }
+        }
+        return result;
+    }
 
-	public boolean isActive() {
-		for (final PathResolvingStrategy otherStrategy : otherPathResolvingStrategies) {
-			if (otherStrategy.isActive()) {
-				return false;
-			}
-		}
-		return true;
-	}
+    /**
+     * Locates the first {@link PhysicalPath} which can be construed as a parent
+     * of the presented identifier.
+     * 
+     * @param identifier to locate the parent of (required)
+     * @return the first matching parent, or null if not found
+     */
+    protected PhysicalPath getApplicablePhysicalPath(final String identifier) {
+        Assert.notNull(identifier, "Identifier required");
+        for (final PhysicalPath pi : rootModulePaths.values()) {
+            final FileDetails possibleParent = new FileDetails(
+                    pi.getLocation(), null);
+            if (possibleParent.isParentOf(identifier)) {
+                return pi;
+            }
+        }
+        return null;
+    }
+
+    public String getCanonicalPath(final LogicalPath path,
+            final JavaType javaType) {
+        return null;
+    }
+
+    public String getFocusedIdentifier(final Path path,
+            final String relativePath) {
+        return null;
+    }
+
+    public String getFocusedRoot(final Path path) {
+        return null;
+    }
+
+    public LogicalPath getFocusedPath(final Path path) {
+        return null;
+    }
+
+    public String getFocusedCanonicalPath(final Path path,
+            final JavaType javaType) {
+        return null;
+    }
+
+    public boolean isActive() {
+        for (final PathResolvingStrategy otherStrategy : otherPathResolvingStrategies) {
+            if (otherStrategy.isActive()) {
+                return false;
+            }
+        }
+        return true;
+    }
 }

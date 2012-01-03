@@ -4,9 +4,10 @@ import org.springframework.roo.classpath.itd.ItdTriggerBasedMetadataProvider;
 
 /**
  * Provides {@link WebScaffoldMetadata}.
- *
+ * 
  * @author Stefan Schmidt
  * @since 1.1
  */
-public interface WebScaffoldMetadataProvider extends ItdTriggerBasedMetadataProvider {
+public interface WebScaffoldMetadataProvider extends
+        ItdTriggerBasedMetadataProvider {
 }

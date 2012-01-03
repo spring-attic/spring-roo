@@ -7,7 +7,7 @@ import java.lang.annotation.Target;
 
 /**
  * Trigger annotation of Op4J add-on
- *
+ * 
  * @author Stefan Schmidt
  * @since 1.1
  */
@@ -15,4 +15,3 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.SOURCE)
 public @interface RooOp4j {
 }
-

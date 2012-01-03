@@ -30,144 +30,186 @@ import org.springframework.roo.model.RooJavaType;
 
 /**
  * Utility methods used in the GWT Add-On.
- *
+ * 
  * @author James Tyrrell
  * @since 1.1.2
  */
 public final class GwtUtils {
 
-	public static final String PROXY_REQUEST_WARNING = "// WARNING: THIS FILE IS MANAGED BY SPRING ROO.\n\n";
-	public static final JavaType[] PROXY_ANNOTATIONS = { PROXY_FOR, PROXY_FOR_NAME };
-	public static final JavaType[] REQUEST_ANNOTATIONS = { SERVICE, SERVICE_NAME };
-	public static final JavaType[] ROO_PROXY_REQUEST_ANNOTATIONS = { ROO_GWT_PROXY, ROO_GWT_REQUEST, ROO_GWT_MIRRORED_FROM };
+    public static final String PROXY_REQUEST_WARNING = "// WARNING: THIS FILE IS MANAGED BY SPRING ROO.\n\n";
+    public static final JavaType[] PROXY_ANNOTATIONS = { PROXY_FOR,
+            PROXY_FOR_NAME };
+    public static final JavaType[] REQUEST_ANNOTATIONS = { SERVICE,
+            SERVICE_NAME };
+    public static final JavaType[] ROO_PROXY_REQUEST_ANNOTATIONS = {
+            ROO_GWT_PROXY, ROO_GWT_REQUEST, ROO_GWT_MIRRORED_FROM };
 
-	/**
-	 * Returns the {@link #RECEIVER} Java type, generically typed to the
-	 * given type.
-	 *
-	 * @param genericType (required)
-	 * @return a non-<code>null</code> type
-	 */
-	public static JavaType getReceiverType(final JavaType genericType) {
-		return new JavaType(RECEIVER.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, Collections.singletonList(genericType));
-	}
+    /**
+     * Returns the {@link #RECEIVER} Java type, generically typed to the given
+     * type.
+     * 
+     * @param genericType (required)
+     * @return a non-<code>null</code> type
+     */
+    public static JavaType getReceiverType(final JavaType genericType) {
+        return new JavaType(RECEIVER.getFullyQualifiedTypeName(), 0,
+                DataType.TYPE, null, Collections.singletonList(genericType));
+    }
 
-	public static Map<GwtType, JavaType> getMirrorTypeMap(final JavaType governorType, final JavaPackage topLevelPackage) {
-		Map<GwtType, JavaType> mirrorTypeMap = new HashMap<GwtType, JavaType>();
-		for (GwtType mirrorType : GwtType.values()) {
-			mirrorTypeMap.put(mirrorType, convertGovernorTypeNameIntoKeyTypeName(governorType, mirrorType, topLevelPackage));
-		}
-		return mirrorTypeMap;
-	}
+    public static Map<GwtType, JavaType> getMirrorTypeMap(
+            final JavaType governorType, final JavaPackage topLevelPackage) {
+        Map<GwtType, JavaType> mirrorTypeMap = new HashMap<GwtType, JavaType>();
+        for (GwtType mirrorType : GwtType.values()) {
+            mirrorTypeMap.put(
+                    mirrorType,
+                    convertGovernorTypeNameIntoKeyTypeName(governorType,
+                            mirrorType, topLevelPackage));
+        }
+        return mirrorTypeMap;
+    }
 
-	public static JavaType convertGovernorTypeNameIntoKeyTypeName(final JavaType governorType, final GwtType type, final JavaPackage topLevelPackage) {
-		String destinationPackage = type.getPath().packageName(topLevelPackage);
-		String typeName;
-		if (type.isMirrorType()) {
-			String simple = governorType.getSimpleTypeName();
-			typeName = destinationPackage + "." + simple + type.getSuffix();
-		} else {
-			typeName = destinationPackage + "." + type.getTemplate();
-		}
-		return new JavaType(typeName);
-	}
+    public static JavaType convertGovernorTypeNameIntoKeyTypeName(
+            final JavaType governorType, final GwtType type,
+            final JavaPackage topLevelPackage) {
+        String destinationPackage = type.getPath().packageName(topLevelPackage);
+        String typeName;
+        if (type.isMirrorType()) {
+            String simple = governorType.getSimpleTypeName();
+            typeName = destinationPackage + "." + simple + type.getSuffix();
+        }
+        else {
+            typeName = destinationPackage + "." + type.getTemplate();
+        }
+        return new JavaType(typeName);
+    }
 
-	public static JavaType lookupProxyTargetType(final ClassOrInterfaceTypeDetails proxyType) {
-		return lookupTargetType(proxyType, PROXY_FOR, PROXY_FOR_NAME);
-	}
+    public static JavaType lookupProxyTargetType(
+            final ClassOrInterfaceTypeDetails proxyType) {
+        return lookupTargetType(proxyType, PROXY_FOR, PROXY_FOR_NAME);
+    }
 
-	public static JavaType lookupRequestTargetType(final ClassOrInterfaceTypeDetails requestType) {
-		return lookupTargetType(requestType, SERVICE, SERVICE_NAME);
-	}
+    public static JavaType lookupRequestTargetType(
+            final ClassOrInterfaceTypeDetails requestType) {
+        return lookupTargetType(requestType, SERVICE, SERVICE_NAME);
+    }
 
-	private static JavaType lookupTargetType(final ClassOrInterfaceTypeDetails annotatedType, final JavaType classBasedAnnotationType, final JavaType stringBasedAnnotationType) {
-		final AnnotationMetadata stringBasedAnnotation = annotatedType.getAnnotation(stringBasedAnnotationType);
-		if (stringBasedAnnotation != null) {
-			final AnnotationAttributeValue<String> targetTypeAttributeValue = stringBasedAnnotation.getAttribute("value");
-			if (targetTypeAttributeValue != null) {
-				return new JavaType(targetTypeAttributeValue.getValue());
-			}
-		}
+    private static JavaType lookupTargetType(
+            final ClassOrInterfaceTypeDetails annotatedType,
+            final JavaType classBasedAnnotationType,
+            final JavaType stringBasedAnnotationType) {
+        final AnnotationMetadata stringBasedAnnotation = annotatedType
+                .getAnnotation(stringBasedAnnotationType);
+        if (stringBasedAnnotation != null) {
+            final AnnotationAttributeValue<String> targetTypeAttributeValue = stringBasedAnnotation
+                    .getAttribute("value");
+            if (targetTypeAttributeValue != null) {
+                return new JavaType(targetTypeAttributeValue.getValue());
+            }
+        }
 
-		final AnnotationMetadata classBasedAnnotation = annotatedType.getAnnotation(classBasedAnnotationType);
-		if (classBasedAnnotation != null) {
-			final AnnotationAttributeValue<JavaType> targetTypeAttributeValue = classBasedAnnotation.getAttribute("value");
-			if (targetTypeAttributeValue != null) {
-				return targetTypeAttributeValue.getValue();
-			}
-		}
+        final AnnotationMetadata classBasedAnnotation = annotatedType
+                .getAnnotation(classBasedAnnotationType);
+        if (classBasedAnnotation != null) {
+            final AnnotationAttributeValue<JavaType> targetTypeAttributeValue = classBasedAnnotation
+                    .getAttribute("value");
+            if (targetTypeAttributeValue != null) {
+                return targetTypeAttributeValue.getValue();
+            }
+        }
 
-		return null;
-	}
+        return null;
+    }
 
-	public static List<String> getAnnotationValues(final ClassOrInterfaceTypeDetails target, final JavaType annotationType, final String attributeName) {
-		List<String> values = new ArrayList<String>();
-		AnnotationMetadata annotation = MemberFindingUtils.getAnnotationOfType(target.getAnnotations(), annotationType);
-		if (annotation == null) {
-			return values;
-		}
-		AnnotationAttributeValue<?> attributeValue = annotation.getAttribute(attributeName);
-		if (attributeValue != null && attributeValue instanceof ArrayAttributeValue) {
-			@SuppressWarnings("unchecked")
-			ArrayAttributeValue<StringAttributeValue> arrayAttributeValue = (ArrayAttributeValue<StringAttributeValue>) attributeValue;
-			for (StringAttributeValue value : arrayAttributeValue.getValue()) {
-				values.add(value.getValue());
-			}
-		} else if (attributeValue != null && attributeValue instanceof StringAttributeValue) {
-			StringAttributeValue stringAttributeVale = (StringAttributeValue) attributeValue;
-			values.add(stringAttributeVale.getValue());
-		}
-		return values;
-	}
+    public static List<String> getAnnotationValues(
+            final ClassOrInterfaceTypeDetails target,
+            final JavaType annotationType, final String attributeName) {
+        List<String> values = new ArrayList<String>();
+        AnnotationMetadata annotation = MemberFindingUtils.getAnnotationOfType(
+                target.getAnnotations(), annotationType);
+        if (annotation == null) {
+            return values;
+        }
+        AnnotationAttributeValue<?> attributeValue = annotation
+                .getAttribute(attributeName);
+        if (attributeValue != null
+                && attributeValue instanceof ArrayAttributeValue) {
+            @SuppressWarnings("unchecked")
+            ArrayAttributeValue<StringAttributeValue> arrayAttributeValue = (ArrayAttributeValue<StringAttributeValue>) attributeValue;
+            for (StringAttributeValue value : arrayAttributeValue.getValue()) {
+                values.add(value.getValue());
+            }
+        }
+        else if (attributeValue != null
+                && attributeValue instanceof StringAttributeValue) {
+            StringAttributeValue stringAttributeVale = (StringAttributeValue) attributeValue;
+            values.add(stringAttributeVale.getValue());
+        }
+        return values;
+    }
 
-	public static boolean getBooleanAnnotationValue(final ClassOrInterfaceTypeDetails target, final JavaType annotationType, final String attributeName, final boolean valueIfNull) {
-		AnnotationMetadata annotation = MemberFindingUtils.getAnnotationOfType(target.getAnnotations(), annotationType);
-		if (annotation == null) {
-			return valueIfNull;
-		}
-		AnnotationAttributeValue<?> attributeValue = annotation.getAttribute(attributeName);
-		if (attributeValue != null && attributeValue instanceof BooleanAttributeValue) {
-			BooleanAttributeValue booleanAttributeValue = (BooleanAttributeValue) attributeValue;
-			return booleanAttributeValue.getValue();
-		}
-		return valueIfNull;
-	}
+    public static boolean getBooleanAnnotationValue(
+            final ClassOrInterfaceTypeDetails target,
+            final JavaType annotationType, final String attributeName,
+            final boolean valueIfNull) {
+        AnnotationMetadata annotation = MemberFindingUtils.getAnnotationOfType(
+                target.getAnnotations(), annotationType);
+        if (annotation == null) {
+            return valueIfNull;
+        }
+        AnnotationAttributeValue<?> attributeValue = annotation
+                .getAttribute(attributeName);
+        if (attributeValue != null
+                && attributeValue instanceof BooleanAttributeValue) {
+            BooleanAttributeValue booleanAttributeValue = (BooleanAttributeValue) attributeValue;
+            return booleanAttributeValue.getValue();
+        }
+        return valueIfNull;
+    }
 
-	public static boolean scaffoldProxy(final ClassOrInterfaceTypeDetails proxy) {
-		return GwtUtils.getBooleanAnnotationValue(proxy, RooJavaType.ROO_GWT_PROXY, "scaffold", false);
-	}
+    public static boolean scaffoldProxy(final ClassOrInterfaceTypeDetails proxy) {
+        return GwtUtils.getBooleanAnnotationValue(proxy,
+                RooJavaType.ROO_GWT_PROXY, "scaffold", false);
+    }
 
-	public static AnnotationMetadata getFirstAnnotation(final ClassOrInterfaceTypeDetails cid, final JavaType... annotationTypes) {
-		for (JavaType annotationType : annotationTypes) {
-			AnnotationMetadata annotationMetadata = MemberFindingUtils.getAnnotationOfType(cid.getAnnotations(), annotationType);
-			if (annotationMetadata != null) {
-				return annotationMetadata;
-			}
-		}
-		return null;
-	}
+    public static AnnotationMetadata getFirstAnnotation(
+            final ClassOrInterfaceTypeDetails cid,
+            final JavaType... annotationTypes) {
+        for (JavaType annotationType : annotationTypes) {
+            AnnotationMetadata annotationMetadata = MemberFindingUtils
+                    .getAnnotationOfType(cid.getAnnotations(), annotationType);
+            if (annotationMetadata != null) {
+                return annotationMetadata;
+            }
+        }
+        return null;
+    }
 
-	public static String getStringValue(final AnnotationAttributeValue<?> attributeValue) {
-		if (attributeValue instanceof StringAttributeValue) {
-			return ((StringAttributeValue)attributeValue).getValue();
-		} else if (attributeValue instanceof ClassAttributeValue) {
-			return ((ClassAttributeValue)attributeValue).getValue().getFullyQualifiedTypeName();
-		}
-		return null;
-	}
+    public static String getStringValue(
+            final AnnotationAttributeValue<?> attributeValue) {
+        if (attributeValue instanceof StringAttributeValue) {
+            return ((StringAttributeValue) attributeValue).getValue();
+        }
+        else if (attributeValue instanceof ClassAttributeValue) {
+            return ((ClassAttributeValue) attributeValue).getValue()
+                    .getFullyQualifiedTypeName();
+        }
+        return null;
+    }
 
-	public static JavaType convertPrimitiveType(final JavaType type, final boolean convertVoid) {
-		if (!convertVoid && JavaType.VOID_PRIMITIVE.equals(type)) {
-			return type;
-		}
-		if (type != null && type.isPrimitive()) {
-			return new JavaType(type.getFullyQualifiedTypeName());
-		}
-		return type;
-	}
+    public static JavaType convertPrimitiveType(final JavaType type,
+            final boolean convertVoid) {
+        if (!convertVoid && JavaType.VOID_PRIMITIVE.equals(type)) {
+            return type;
+        }
+        if (type != null && type.isPrimitive()) {
+            return new JavaType(type.getFullyQualifiedTypeName());
+        }
+        return type;
+    }
 
-	/**
-	 * Constructor is private to prevent instantiation
-	 */
-	private GwtUtils() {}
+    /**
+     * Constructor is private to prevent instantiation
+     */
+    private GwtUtils() {
+    }
 }

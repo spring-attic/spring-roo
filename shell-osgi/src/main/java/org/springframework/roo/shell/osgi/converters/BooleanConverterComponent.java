@@ -6,10 +6,11 @@ import org.springframework.roo.shell.converters.BooleanConverter;
 
 /**
  * OSGi component launcher for {@link BooleanConverter}.
- *
+ * 
  * @author Ben Alex
  * @since 1.1
  */
 @Component
 @Service
-public class BooleanConverterComponent extends BooleanConverter {}
+public class BooleanConverterComponent extends BooleanConverter {
+}

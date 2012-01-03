@@ -14,31 +14,36 @@ import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Provides conversion to and from Cloud Foundry model classes.
- *
+ * 
  * @author James Tyrrell
  * @author Andrew Swan
  * @since 1.2.0
  */
 @Component
 @Service
-public class CloudControllerUrlConverter implements Converter<CloudControllerUrl> {
-	@Reference private CloudFoundrySession session;
+public class CloudControllerUrlConverter implements
+        Converter<CloudControllerUrl> {
+    @Reference private CloudFoundrySession session;
 
-	public CloudControllerUrl convertFromText(final String value, final Class<?> requiredType, final String optionContext) {
-		if (StringUtils.isBlank(value)) {
-			return null;
-		}
-		return new CloudControllerUrl(value);
-	}
+    public CloudControllerUrl convertFromText(final String value,
+            final Class<?> requiredType, final String optionContext) {
+        if (StringUtils.isBlank(value)) {
+            return null;
+        }
+        return new CloudControllerUrl(value);
+    }
 
-	public boolean supports(final Class<?> requiredType, final String optionContext) {
-		return CloudControllerUrl.class.isAssignableFrom(requiredType);
-	}
+    public boolean supports(final Class<?> requiredType,
+            final String optionContext) {
+        return CloudControllerUrl.class.isAssignableFrom(requiredType);
+    }
 
-	public boolean getAllPossibleValues(final List<Completion> completions, final Class<?> requiredType, final String existingData, final String optionContext, final MethodTarget target) {
-		for (String storedUrl : session.getStoredUrls()) {
-			completions.add(new Completion(storedUrl));
-		}
-		return false;
-	}
+    public boolean getAllPossibleValues(final List<Completion> completions,
+            final Class<?> requiredType, final String existingData,
+            final String optionContext, final MethodTarget target) {
+        for (String storedUrl : session.getStoredUrls()) {
+            completions.add(new Completion(storedUrl));
+        }
+        return false;
+    }
 }

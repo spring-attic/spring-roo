@@ -16,271 +16,279 @@ import org.springframework.roo.support.util.Assert;
 
 /**
  * Represents a column in the database model.
- *
+ * 
  * @author Alan Stewart.
  * @since 1.1
  */
 public class Column {
-	private final String name;
-	private final int dataType;
-	private final String typeName;
-	private final int columnSize;
-	private int scale = 0;
-	private String description;
-	private boolean primaryKey;
-	private boolean required;
-	private boolean unique;
-	private boolean autoIncrement;
-	private String jdbcType;
-	private JavaType javaType;
-	private String defaultValue;
+    private final String name;
+    private final int dataType;
+    private final String typeName;
+    private final int columnSize;
+    private int scale = 0;
+    private String description;
+    private boolean primaryKey;
+    private boolean required;
+    private boolean unique;
+    private boolean autoIncrement;
+    private String jdbcType;
+    private JavaType javaType;
+    private String defaultValue;
 
-	Column(final String name, final int dataType, final String typeName, final int columnSize, final int scale) {
-		Assert.hasText(name, "Column name required");
-		this.name = name;
-		this.dataType = dataType;
-		this.typeName = typeName;
-		this.columnSize = columnSize;
-		this.scale = scale;
-		init();
-	}
+    Column(final String name, final int dataType, final String typeName,
+            final int columnSize, final int scale) {
+        Assert.hasText(name, "Column name required");
+        this.name = name;
+        this.dataType = dataType;
+        this.typeName = typeName;
+        this.columnSize = columnSize;
+        this.scale = scale;
+        init();
+    }
 
-	private void init() {
-		switch (dataType) {
-			case Types.CHAR:
-				if (columnSize > 1) {
-					jdbcType = "VARCHAR";
-					javaType = JavaType.STRING;
-				} else {
-					jdbcType = "CHAR";
-					javaType = JavaType.CHAR_OBJECT;
-				}
-				break;
-			case Types.VARCHAR:
-				jdbcType = "VARCHAR";
-				javaType = JavaType.STRING;
-				break;
-			case Types.LONGVARCHAR:
-				jdbcType = "LONGVARCHAR";
-				javaType = JavaType.STRING;
-				break;
-			case Types.NUMERIC:
-				jdbcType = "NUMERIC";
-				javaType = BIG_DECIMAL;
-				break;
-			case Types.DECIMAL:
-				jdbcType = "DECIMAL";
-				javaType = BIG_DECIMAL;
-				break;
-			case Types.BOOLEAN:
-				jdbcType = "BOOLEAN";
-				javaType = JavaType.BOOLEAN_OBJECT;
-				break;
-			case Types.BIT:
-				jdbcType = "BIT";
-				javaType = JavaType.BOOLEAN_OBJECT;
-				break;
-			case Types.TINYINT:
-				jdbcType = "TINYINT";
-				javaType = columnSize > 1 ? JavaType.SHORT_OBJECT : JavaType.BOOLEAN_OBJECT; // ROO-1860
-				break;
-			case Types.SMALLINT:
-				jdbcType = "SMALLINT";
-				javaType = JavaType.SHORT_OBJECT;
-				break;
-			case Types.INTEGER:
-				jdbcType = "INTEGER";
-				javaType = JavaType.INT_OBJECT;
-				break;
-			case Types.BIGINT:
-				jdbcType = "BIGINT";
-				javaType = JavaType.LONG_OBJECT;
-				break;
-			case Types.REAL:
-				jdbcType = "REAL";
-				javaType = JavaType.FLOAT_OBJECT;
-				break;
-			case Types.FLOAT:
-				jdbcType = "FLOAT";
-				javaType = JavaType.DOUBLE_OBJECT;
-				break;
-			case Types.DOUBLE:
-				jdbcType = "DOUBLE";
-				javaType = JavaType.DOUBLE_OBJECT;
-				break;
-			case Types.BINARY:
-				jdbcType = "BINARY";
-				javaType = JavaType.BYTE_ARRAY_PRIMITIVE;
-				break;
-			case Types.VARBINARY:
-				jdbcType = "VARBINARY";
-				javaType = JavaType.BYTE_ARRAY_PRIMITIVE;
-				break;
-			case Types.LONGVARBINARY:
-				jdbcType = "LONGVARBINARY";
-				javaType = JavaType.BYTE_ARRAY_PRIMITIVE;
-				break;
-			case Types.DATE:
-				jdbcType = "DATE";
-				javaType = DATE;
-				break;
-			case Types.TIME:
-				jdbcType = "TIME";
-				javaType = DATE;
-				break;
-			case Types.TIMESTAMP:
-				jdbcType = "TIMESTAMP";
-				javaType = DATE;
-				break;
-			case Types.CLOB:
-				jdbcType = "CLOB";
-				javaType = CLOB;
-				break;
-			case Types.BLOB:
-				jdbcType = "BLOB";
-				javaType = BLOB;
-				break;
-			case Types.ARRAY:
-				jdbcType = "ARRAY";
-				javaType = ARRAY;
-				break;
-			case Types.DISTINCT:
-				jdbcType = "DISTINCT";
-				javaType = JavaType.STRING;
-				break;
-			case Types.REF:
-				jdbcType = "REF";
-				javaType = REF;
-				break;
-			case Types.STRUCT:
-				jdbcType = "STRUCT";
-				javaType = STRUCT;
-				break;
-			case Types.NULL:
-				jdbcType = "NULL";
-				break;
-			case Types.JAVA_OBJECT:
-				jdbcType = "JAVA_OBJECT";
-				javaType = OBJECT;
-				break;
-			case Types.OTHER:
-				jdbcType = "OTHER";
-				javaType = JavaType.STRING;
-				break;
-			default:
-				jdbcType = "VARCHAR";
-				javaType = JavaType.STRING;
-				break;
-		}
-	}
+    private void init() {
+        switch (dataType) {
+        case Types.CHAR:
+            if (columnSize > 1) {
+                jdbcType = "VARCHAR";
+                javaType = JavaType.STRING;
+            }
+            else {
+                jdbcType = "CHAR";
+                javaType = JavaType.CHAR_OBJECT;
+            }
+            break;
+        case Types.VARCHAR:
+            jdbcType = "VARCHAR";
+            javaType = JavaType.STRING;
+            break;
+        case Types.LONGVARCHAR:
+            jdbcType = "LONGVARCHAR";
+            javaType = JavaType.STRING;
+            break;
+        case Types.NUMERIC:
+            jdbcType = "NUMERIC";
+            javaType = BIG_DECIMAL;
+            break;
+        case Types.DECIMAL:
+            jdbcType = "DECIMAL";
+            javaType = BIG_DECIMAL;
+            break;
+        case Types.BOOLEAN:
+            jdbcType = "BOOLEAN";
+            javaType = JavaType.BOOLEAN_OBJECT;
+            break;
+        case Types.BIT:
+            jdbcType = "BIT";
+            javaType = JavaType.BOOLEAN_OBJECT;
+            break;
+        case Types.TINYINT:
+            jdbcType = "TINYINT";
+            javaType = columnSize > 1 ? JavaType.SHORT_OBJECT
+                    : JavaType.BOOLEAN_OBJECT; // ROO-1860
+            break;
+        case Types.SMALLINT:
+            jdbcType = "SMALLINT";
+            javaType = JavaType.SHORT_OBJECT;
+            break;
+        case Types.INTEGER:
+            jdbcType = "INTEGER";
+            javaType = JavaType.INT_OBJECT;
+            break;
+        case Types.BIGINT:
+            jdbcType = "BIGINT";
+            javaType = JavaType.LONG_OBJECT;
+            break;
+        case Types.REAL:
+            jdbcType = "REAL";
+            javaType = JavaType.FLOAT_OBJECT;
+            break;
+        case Types.FLOAT:
+            jdbcType = "FLOAT";
+            javaType = JavaType.DOUBLE_OBJECT;
+            break;
+        case Types.DOUBLE:
+            jdbcType = "DOUBLE";
+            javaType = JavaType.DOUBLE_OBJECT;
+            break;
+        case Types.BINARY:
+            jdbcType = "BINARY";
+            javaType = JavaType.BYTE_ARRAY_PRIMITIVE;
+            break;
+        case Types.VARBINARY:
+            jdbcType = "VARBINARY";
+            javaType = JavaType.BYTE_ARRAY_PRIMITIVE;
+            break;
+        case Types.LONGVARBINARY:
+            jdbcType = "LONGVARBINARY";
+            javaType = JavaType.BYTE_ARRAY_PRIMITIVE;
+            break;
+        case Types.DATE:
+            jdbcType = "DATE";
+            javaType = DATE;
+            break;
+        case Types.TIME:
+            jdbcType = "TIME";
+            javaType = DATE;
+            break;
+        case Types.TIMESTAMP:
+            jdbcType = "TIMESTAMP";
+            javaType = DATE;
+            break;
+        case Types.CLOB:
+            jdbcType = "CLOB";
+            javaType = CLOB;
+            break;
+        case Types.BLOB:
+            jdbcType = "BLOB";
+            javaType = BLOB;
+            break;
+        case Types.ARRAY:
+            jdbcType = "ARRAY";
+            javaType = ARRAY;
+            break;
+        case Types.DISTINCT:
+            jdbcType = "DISTINCT";
+            javaType = JavaType.STRING;
+            break;
+        case Types.REF:
+            jdbcType = "REF";
+            javaType = REF;
+            break;
+        case Types.STRUCT:
+            jdbcType = "STRUCT";
+            javaType = STRUCT;
+            break;
+        case Types.NULL:
+            jdbcType = "NULL";
+            break;
+        case Types.JAVA_OBJECT:
+            jdbcType = "JAVA_OBJECT";
+            javaType = OBJECT;
+            break;
+        case Types.OTHER:
+            jdbcType = "OTHER";
+            javaType = JavaType.STRING;
+            break;
+        default:
+            jdbcType = "VARCHAR";
+            javaType = JavaType.STRING;
+            break;
+        }
+    }
 
-	public String getName() {
-		return name;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public String getEscapedName() {
-		return name.replaceAll("\\\\", "\\\\\\\\");
-	}
+    public String getEscapedName() {
+        return name.replaceAll("\\\\", "\\\\\\\\");
+    }
 
-	public int getDataType() {
-		return dataType;
-	}
+    public int getDataType() {
+        return dataType;
+    }
 
-	public String getTypeName() {
-		return typeName;
-	}
+    public String getTypeName() {
+        return typeName;
+    }
 
-	public int getColumnSize() {
-		return columnSize;
-	}
+    public int getColumnSize() {
+        return columnSize;
+    }
 
-	public int getScale() {
-		return scale;
-	}
+    public int getScale() {
+        return scale;
+    }
 
-	public String getDescription() {
-		return description;
-	}
+    public String getDescription() {
+        return description;
+    }
 
-	public void setDescription(final String description) {
-		this.description = description;
-	}
+    public void setDescription(final String description) {
+        this.description = description;
+    }
 
-	public boolean isPrimaryKey() {
-		return primaryKey;
-	}
+    public boolean isPrimaryKey() {
+        return primaryKey;
+    }
 
-	public void setPrimaryKey(final boolean primaryKey) {
-		this.primaryKey = primaryKey;
-	}
+    public void setPrimaryKey(final boolean primaryKey) {
+        this.primaryKey = primaryKey;
+    }
 
-	public boolean isRequired() {
-		return required;
-	}
+    public boolean isRequired() {
+        return required;
+    }
 
-	public void setRequired(final boolean required) {
-		this.required = required;
-	}
+    public void setRequired(final boolean required) {
+        this.required = required;
+    }
 
-	public boolean isUnique() {
-		return unique;
-	}
+    public boolean isUnique() {
+        return unique;
+    }
 
-	public void setUnique(final boolean unique) {
-		this.unique = unique;
-	}
+    public void setUnique(final boolean unique) {
+        this.unique = unique;
+    }
 
-	public boolean isAutoIncrement() {
-		return autoIncrement;
-	}
+    public boolean isAutoIncrement() {
+        return autoIncrement;
+    }
 
-	public void setAutoIncrement(final boolean autoIncrement) {
-		this.autoIncrement = autoIncrement;
-	}
+    public void setAutoIncrement(final boolean autoIncrement) {
+        this.autoIncrement = autoIncrement;
+    }
 
-	public String getJdbcType() {
-		return jdbcType;
-	}
+    public String getJdbcType() {
+        return jdbcType;
+    }
 
-	public JavaType getJavaType() {
-		return javaType;
-	}
+    public JavaType getJavaType() {
+        return javaType;
+    }
 
-	public String getDefaultValue() {
-		return defaultValue;
-	}
+    public String getDefaultValue() {
+        return defaultValue;
+    }
 
-	public void setDefaultValue(final String defaultValue) {
-		this.defaultValue = defaultValue;
-	}
+    public void setDefaultValue(final String defaultValue) {
+        this.defaultValue = defaultValue;
+    }
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((name == null) ? 0 : name.hashCode());
-		return result;
-	}
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((name == null) ? 0 : name.hashCode());
+        return result;
+    }
 
-	@Override
-	public boolean equals(final Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Column other = (Column) obj;
-		if (name == null) {
-			if (other.name != null)
-				return false;
-		} else if (!name.equals(other.name))
-			return false;
-		return true;
-	}
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        Column other = (Column) obj;
+        if (name == null) {
+            if (other.name != null)
+                return false;
+        }
+        else if (!name.equals(other.name))
+            return false;
+        return true;
+    }
 
-	@Override
-	public String toString() {
-		return String.format("Column [name=%s, dataType=%s, typeName=%s, columnSize=%s, scale=%s, description=%s, primaryKey=%s, required=%s, unique=%s, autoIncrement=%s, jdbcType=%s, javaType=%s, defaultValue=%s]", name, dataType, typeName, columnSize, scale, description, primaryKey, required, unique, autoIncrement, jdbcType, javaType, defaultValue);
-	}
+    @Override
+    public String toString() {
+        return String
+                .format("Column [name=%s, dataType=%s, typeName=%s, columnSize=%s, scale=%s, description=%s, primaryKey=%s, required=%s, unique=%s, autoIncrement=%s, jdbcType=%s, javaType=%s, defaultValue=%s]",
+                        name, dataType, typeName, columnSize, scale,
+                        description, primaryKey, required, unique,
+                        autoIncrement, jdbcType, javaType, defaultValue);
+    }
 }

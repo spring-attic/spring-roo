@@ -10,7 +10,7 @@ import org.springframework.roo.support.util.FileUtils;
 
 /**
  * Dutch language support.
- *
+ * 
  * @author Stefan Schmidt
  * @since 1.1
  */
@@ -18,19 +18,19 @@ import org.springframework.roo.support.util.FileUtils;
 @Service
 public class DuchLanguage extends AbstractLanguage {
 
-	public Locale getLocale() {
-		return new Locale("nl");
-	}
+    public Locale getLocale() {
+        return new Locale("nl");
+    }
 
-	public String getLanguage() {
-		return "Dutch";
-	}
+    public String getLanguage() {
+        return "Dutch";
+    }
 
-	public InputStream getFlagGraphic() {
-		return FileUtils.getInputStream(getClass(), "nl.png");
-	}
+    public InputStream getFlagGraphic() {
+        return FileUtils.getInputStream(getClass(), "nl.png");
+    }
 
-	public InputStream getMessageBundle() {
-		return FileUtils.getInputStream(getClass(), "messages_nl.properties");
-	}
+    public InputStream getMessageBundle() {
+        return FileUtils.getInputStream(getClass(), "messages_nl.properties");
+    }
 }

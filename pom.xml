@@ -121,6 +121,11 @@
             <name>Spring Roo Repository</name>
             <url>http://spring-roo-repository.springsource.org/release</url>
         </pluginRepository>
+        <pluginRepository>
+            <id>maven-java-formatter-plugin</id>
+            <name>Maven2 Java Formatter Plugin repository</name>
+            <url>https://raw.github.com/benalexau/maven-java-formatter-plugin/master/releases/</url>
+        </pluginRepository>
     </pluginRepositories>
     <developers>
         <developer>
@@ -935,6 +940,27 @@
                 <artifactId>maven-deploy-plugin</artifactId>
                 <version>2.7</version>
             </plugin>
+            <plugin>
+                <groupId>com.googlecode.maven-java-formatter-plugin</groupId>
+                <artifactId>maven-java-formatter-plugin</artifactId>
+                <version>0.4.0.e371sr1</version>
+                <configuration>
+                    <configFile>../deployment-support/eclipse-formatter-config.xml</configFile>
+                    <lineEnding>LF</lineEnding>
+                    <excludes>
+                        <exclude>org/springframework/roo/bootstrap/Main.java</exclude>
+                        <exclude>org/springframework/roo/bootstrap/AutoProcessor.java</exclude>
+                        <exclude>org/springframework/roo/support/util/Base64.java</exclude>
+                    </excludes>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>format</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
             <!-- IDE -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -959,6 +985,6 @@
     </build>
     <properties>
         <powermock.version>1.4.10</powermock.version>
-        <spring.version>3.0.6.RELEASE</spring.version>
+        <spring.version>3.1.0.RELEASE</spring.version>
     </properties>
 </project>

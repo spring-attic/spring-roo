@@ -6,10 +6,11 @@ import org.springframework.roo.shell.converters.StaticFieldConverterImpl;
 
 /**
  * OSGi component launcher for {@link StaticFieldConverterImpl}.
- *
+ * 
  * @author Ben Alex
  * @since 1.1
  */
 @Component
 @Service
-public class StaticFieldConverterImplComponent extends StaticFieldConverterImpl {}
+public class StaticFieldConverterImplComponent extends StaticFieldConverterImpl {
+}

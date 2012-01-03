@@ -9,8 +9,8 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 public @interface RooGwtLocator {
 
-	/**
-	 * @return the fully-qualified type name this key instance was mirrored from
-	 */
-	String value();
+    /**
+     * @return the fully-qualified type name this key instance was mirrored from
+     */
+    String value();
 }

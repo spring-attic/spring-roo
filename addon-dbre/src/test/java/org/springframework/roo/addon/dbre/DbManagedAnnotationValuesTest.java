@@ -4,19 +4,20 @@ import org.springframework.roo.classpath.details.annotations.populator.Annotatio
 
 /**
  * Unit test of {@link DbManagedAnnotationValues}
- *
+ * 
  * @author Andrew Swan
  * @since 1.2.0
  */
-public class DbManagedAnnotationValuesTest extends AnnotationValuesTestCase<RooDbManaged, DbManagedAnnotationValues> {
+public class DbManagedAnnotationValuesTest extends
+        AnnotationValuesTestCase<RooDbManaged, DbManagedAnnotationValues> {
 
-	@Override
-	protected Class<RooDbManaged> getAnnotationClass() {
-		return RooDbManaged.class;
-	}
+    @Override
+    protected Class<RooDbManaged> getAnnotationClass() {
+        return RooDbManaged.class;
+    }
 
-	@Override
-	protected Class<DbManagedAnnotationValues> getValuesClass() {
-		return DbManagedAnnotationValues.class;
-	}
+    @Override
+    protected Class<DbManagedAnnotationValues> getValuesClass() {
+        return DbManagedAnnotationValues.class;
+    }
 }

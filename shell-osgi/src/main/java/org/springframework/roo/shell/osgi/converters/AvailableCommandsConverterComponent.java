@@ -7,10 +7,12 @@ import org.springframework.roo.shell.converters.StaticFieldConverterImpl;
 
 /**
  * OSGi component launcher for {@link StaticFieldConverterImpl}.
- *
+ * 
  * @author Ben Alex
  * @since 1.1
  */
 @Component
 @Service
-public class AvailableCommandsConverterComponent extends AvailableCommandsConverter {}
+public class AvailableCommandsConverterComponent extends
+        AvailableCommandsConverter {
+}

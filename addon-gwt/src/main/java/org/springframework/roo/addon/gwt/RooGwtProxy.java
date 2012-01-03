@@ -9,14 +9,14 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.SOURCE)
 public @interface RooGwtProxy {
 
-	/**
-	 * @return the fully-qualified type name this key instance was mirrored from
-	 */
-	String value();
+    /**
+     * @return the fully-qualified type name this key instance was mirrored from
+     */
+    String value();
 
-	String[] readOnly() default {};
+    String[] readOnly() default {};
 
-	String[] exclude() default {};
+    String[] exclude() default {};
 
-	boolean scaffold() default false;
+    boolean scaffold() default false;
 }

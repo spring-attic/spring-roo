@@ -19,12 +19,11 @@ import org.springframework.roo.support.util.StringUtils;
 
 /**
  * A {@link PropertyEditor} for {@link MonitoringRequest}s.
- *
  * <p>
  * The syntax expected by the editor is as follows:
  * <p>
  * <code>fullyQualifiedName + "," + fileOperationCodes + {"," + "**"}<code>
- *
+ * 
  * <p>
  * Where:
  * <ul>
@@ -35,90 +34,110 @@ import org.springframework.roo.support.util.StringUtils;
  * fullyQualifiedName is an existing directory (optional, but can only be used
  * for a directory)</li>
  * </ul>
- *
+ * 
  * @author Ben Alex
  * @since 1.0
  */
 public class MonitoringRequestEditor extends PropertyEditorSupport {
 
-	// Constants
-	private static final FileOperation[] MONITORED_OPERATIONS = { CREATED, RENAMED, UPDATED, DELETED };
-	private static final String SUBTREE_WILDCARD = "**";
+    // Constants
+    private static final FileOperation[] MONITORED_OPERATIONS = { CREATED,
+            RENAMED, UPDATED, DELETED };
+    private static final String SUBTREE_WILDCARD = "**";
 
-	/**
-	 * @return this object in accordance with the string specification given in the JavaDocs (or null if the object null)
-	 */
-	@Override
-	public String getAsText() {
-		MonitoringRequest req = getValue();
-		if (req == null) {
-			return null;
-		}
-		final StringBuilder text = new StringBuilder();
-		try {
-			text.append(req.getFile().getCanonicalPath());
-		} catch (IOException ioe) {
-			throw new IllegalStateException("Failure retrieving path for request '" + req + "'", ioe);
-		}
-		text.append(",");
-		for (final FileOperation fileOperation : MONITORED_OPERATIONS) {
-			if (req.getNotifyOn().contains(fileOperation)) {
-				text.append(fileOperation.name().charAt(0));
-			}
-		}
-		if (req instanceof DirectoryMonitoringRequest) {
-			DirectoryMonitoringRequest dmr = (DirectoryMonitoringRequest) req;
-			if (dmr.isWatchSubtree()) {
-				text.append(",").append(SUBTREE_WILDCARD);
-			}
-		}
-		return text.toString();
-	}
-	
-	@Override
-	public MonitoringRequest getValue() {
-		return (MonitoringRequest) super.getValue();
-	}
+    /**
+     * @return this object in accordance with the string specification given in
+     *         the JavaDocs (or null if the object null)
+     */
+    @Override
+    public String getAsText() {
+        MonitoringRequest req = getValue();
+        if (req == null) {
+            return null;
+        }
+        final StringBuilder text = new StringBuilder();
+        try {
+            text.append(req.getFile().getCanonicalPath());
+        }
+        catch (IOException ioe) {
+            throw new IllegalStateException(
+                    "Failure retrieving path for request '" + req + "'", ioe);
+        }
+        text.append(",");
+        for (final FileOperation fileOperation : MONITORED_OPERATIONS) {
+            if (req.getNotifyOn().contains(fileOperation)) {
+                text.append(fileOperation.name().charAt(0));
+            }
+        }
+        if (req instanceof DirectoryMonitoringRequest) {
+            DirectoryMonitoringRequest dmr = (DirectoryMonitoringRequest) req;
+            if (dmr.isWatchSubtree()) {
+                text.append(",").append(SUBTREE_WILDCARD);
+            }
+        }
+        return text.toString();
+    }
 
-	@Override
-	public void setAsText(final String text) throws IllegalArgumentException {
-		if (StringUtils.isBlank(text)) {
-			setValue(null);
-			return;
-		}
+    @Override
+    public MonitoringRequest getValue() {
+        return (MonitoringRequest) super.getValue();
+    }
 
-		final String[] segments = StringUtils.commaDelimitedListToStringArray(text);
-		Assert.isTrue(segments.length == 2 || segments.length == 3, "Text '" + text + "' is invalid for a MonitoringRequest");
-		final File file = new File(segments[0]);
-		Assert.isTrue(file.exists(), "File '" + file + "' does not exist");
+    @Override
+    public void setAsText(final String text) throws IllegalArgumentException {
+        if (StringUtils.isBlank(text)) {
+            setValue(null);
+            return;
+        }
 
-		final Collection<FileOperation> fileOperations = parseFileOperations(segments[1]);
-		Assert.notEmpty(fileOperations, "One or more valid operation codes ('CRUD') required for file '" + file + "'");
+        final String[] segments = StringUtils
+                .commaDelimitedListToStringArray(text);
+        Assert.isTrue(segments.length == 2 || segments.length == 3, "Text '"
+                + text + "' is invalid for a MonitoringRequest");
+        final File file = new File(segments[0]);
+        Assert.isTrue(file.exists(), "File '" + file + "' does not exist");
 
-		if (file.isFile()) {
-			Assert.isTrue(segments.length == 2, "Can only have two values for file '" + file + "'");
-			setValue(new FileMonitoringRequest(file, fileOperations));
-		} else {
-			setValueToDirectoryMonitoringRequest(segments, file, fileOperations);
-		}
-	}
+        final Collection<FileOperation> fileOperations = parseFileOperations(segments[1]);
+        Assert.notEmpty(fileOperations,
+                "One or more valid operation codes ('CRUD') required for file '"
+                        + file + "'");
 
-	private Collection<FileOperation> parseFileOperations(final String fileOperationCodes) {
-		final Set<FileOperation> fileOperations = new HashSet<FileOperation>();
-		for (final FileOperation fileOperation : MONITORED_OPERATIONS) {
-			if (fileOperationCodes.contains(fileOperation.name().substring(0, 1))) {
-				fileOperations.add(fileOperation);
-			}
-		}
-		return fileOperations;
-	}
+        if (file.isFile()) {
+            Assert.isTrue(segments.length == 2,
+                    "Can only have two values for file '" + file + "'");
+            setValue(new FileMonitoringRequest(file, fileOperations));
+        }
+        else {
+            setValueToDirectoryMonitoringRequest(segments, file, fileOperations);
+        }
+    }
 
-	private void setValueToDirectoryMonitoringRequest(final String[] segments, final File file, final Collection<FileOperation> fileOperations) {
-		if (segments.length == 3) {
-			Assert.isTrue(SUBTREE_WILDCARD.equals(segments[2]), "The third value for directory '" + file + "' can only be '" + SUBTREE_WILDCARD + "' (or completely remove the third parameter if you do not want to watch the subtree)");
-			setValue(new DirectoryMonitoringRequest(file, true, fileOperations));
-		} else {
-			setValue(new DirectoryMonitoringRequest(file, false, fileOperations));
-		}
-	}
+    private Collection<FileOperation> parseFileOperations(
+            final String fileOperationCodes) {
+        final Set<FileOperation> fileOperations = new HashSet<FileOperation>();
+        for (final FileOperation fileOperation : MONITORED_OPERATIONS) {
+            if (fileOperationCodes.contains(fileOperation.name()
+                    .substring(0, 1))) {
+                fileOperations.add(fileOperation);
+            }
+        }
+        return fileOperations;
+    }
+
+    private void setValueToDirectoryMonitoringRequest(final String[] segments,
+            final File file, final Collection<FileOperation> fileOperations) {
+        if (segments.length == 3) {
+            Assert.isTrue(
+                    SUBTREE_WILDCARD.equals(segments[2]),
+                    "The third value for directory '"
+                            + file
+                            + "' can only be '"
+                            + SUBTREE_WILDCARD
+                            + "' (or completely remove the third parameter if you do not want to watch the subtree)");
+            setValue(new DirectoryMonitoringRequest(file, true, fileOperations));
+        }
+        else {
+            setValue(new DirectoryMonitoringRequest(file, false, fileOperations));
+        }
+    }
 }

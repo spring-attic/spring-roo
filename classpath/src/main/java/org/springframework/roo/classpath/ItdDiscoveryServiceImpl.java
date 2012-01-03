@@ -14,7 +14,7 @@ import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Implementation of {@link ItdDiscoveryService}.
- *
+ * 
  * @author James Tyrrell
  * @since 1.2.0
  */
@@ -22,60 +22,73 @@ import org.springframework.roo.support.util.StringUtils;
 @Service
 public class ItdDiscoveryServiceImpl implements ItdDiscoveryService {
 
-	// Fields
-	private final Map<String, Map<String, MemberHoldingTypeDetails>> typeMap = new HashMap<String, Map<String, MemberHoldingTypeDetails>>();
-	private final Map<String, String> itdIdToTypeMap = new HashMap<String, String>();
-	private final Map<String, Set<String>> changeMap = new HashMap<String, Set<String>>();
+    // Fields
+    private final Map<String, Map<String, MemberHoldingTypeDetails>> typeMap = new HashMap<String, Map<String, MemberHoldingTypeDetails>>();
+    private final Map<String, String> itdIdToTypeMap = new HashMap<String, String>();
+    private final Map<String, Set<String>> changeMap = new HashMap<String, Set<String>>();
 
+    public void addItdTypeDetails(final ItdTypeDetails itdTypeDetails) {
+        if (itdTypeDetails == null || itdTypeDetails.getGovernor() == null) {
+            return;
+        }
+        if (typeMap.get(itdTypeDetails.getGovernor().getName()
+                .getFullyQualifiedTypeName()) == null) {
+            typeMap.put(itdTypeDetails.getGovernor().getName()
+                    .getFullyQualifiedTypeName(),
+                    new HashMap<String, MemberHoldingTypeDetails>());
+        }
+        itdIdToTypeMap.put(itdTypeDetails.getDeclaredByMetadataId(),
+                itdTypeDetails.getGovernor().getName()
+                        .getFullyQualifiedTypeName());
+        typeMap.get(
+                itdTypeDetails.getGovernor().getName()
+                        .getFullyQualifiedTypeName()).put(
+                itdTypeDetails.getDeclaredByMetadataId(), itdTypeDetails);
+        updateChanges(itdTypeDetails.getGovernor().getName(), false);
+    }
 
-	public void addItdTypeDetails(final ItdTypeDetails itdTypeDetails) {
-		if (itdTypeDetails == null || itdTypeDetails.getGovernor() == null) {
-			return;
-		}
-		if (typeMap.get(itdTypeDetails.getGovernor().getName().getFullyQualifiedTypeName()) == null) {
-			typeMap.put(itdTypeDetails.getGovernor().getName().getFullyQualifiedTypeName(), new HashMap<String, MemberHoldingTypeDetails>());
-		}
-		itdIdToTypeMap.put(itdTypeDetails.getDeclaredByMetadataId(), itdTypeDetails.getGovernor().getName().getFullyQualifiedTypeName());
-		typeMap.get(itdTypeDetails.getGovernor().getName().getFullyQualifiedTypeName()).put(itdTypeDetails.getDeclaredByMetadataId(), itdTypeDetails);
-		updateChanges(itdTypeDetails.getGovernor().getName(), false);
-	}
+    public void removeItdTypeDetails(final String itdTypeDetailsId) {
+        if (StringUtils.isBlank(itdTypeDetailsId)) {
+            return;
+        }
+        String type = itdIdToTypeMap.get(itdTypeDetailsId);
+        if (type != null) {
+            Map<String, MemberHoldingTypeDetails> typeDetailsHashMap = typeMap
+                    .get(type);
+            if (typeDetailsHashMap != null) {
+                typeDetailsHashMap.remove(itdTypeDetailsId);
+            }
+            updateChanges(new JavaType(type), true);
+        }
+    }
 
-	public void removeItdTypeDetails(final String itdTypeDetailsId) {
-		if (StringUtils.isBlank(itdTypeDetailsId)) {
-			return;
-		}
-		String type = itdIdToTypeMap.get(itdTypeDetailsId);
-		if (type != null) {
-			Map<String, MemberHoldingTypeDetails> typeDetailsHashMap = typeMap.get(type);
-			if (typeDetailsHashMap != null) {
-				typeDetailsHashMap.remove(itdTypeDetailsId);
-			}
-			updateChanges(new JavaType(type), true);
-		}
-	}
+    public boolean haveItdsChanged(final String requestingClass,
+            final JavaType javaType) {
+        Set<String> changesSinceLastRequest = changeMap.get(requestingClass);
+        if (changesSinceLastRequest == null) {
+            changesSinceLastRequest = new LinkedHashSet<String>(
+                    typeMap.keySet());
+            changeMap.put(requestingClass, changesSinceLastRequest);
+        }
+        for (String changedId : changesSinceLastRequest) {
+            if (changedId.equals(javaType.getFullyQualifiedTypeName())) {
+                changesSinceLastRequest.remove(changedId);
+                return true;
+            }
+        }
+        return false;
+    }
 
-	public boolean haveItdsChanged(final String requestingClass, final JavaType javaType) {
-		Set<String> changesSinceLastRequest = changeMap.get(requestingClass);
-		if (changesSinceLastRequest == null) {
-			changesSinceLastRequest = new LinkedHashSet<String>(typeMap.keySet());
-			changeMap.put(requestingClass, changesSinceLastRequest);
-		}
-		for (String changedId : changesSinceLastRequest) {
-			if (changedId.equals(javaType.getFullyQualifiedTypeName())) {
-				changesSinceLastRequest.remove(changedId);
-				return true;
-			}
-		}
-		return false;
-	}
-
-	private void updateChanges(final JavaType javaType, final boolean remove) {
-		for (String requestingClass : changeMap.keySet()) {
-			if (remove) {
-				changeMap.get(requestingClass).remove(javaType.getFullyQualifiedTypeName());
-			} else {
-				changeMap.get(requestingClass).add(javaType.getFullyQualifiedTypeName());
-			}
-		}
-	}
+    private void updateChanges(final JavaType javaType, final boolean remove) {
+        for (String requestingClass : changeMap.keySet()) {
+            if (remove) {
+                changeMap.get(requestingClass).remove(
+                        javaType.getFullyQualifiedTypeName());
+            }
+            else {
+                changeMap.get(requestingClass).add(
+                        javaType.getFullyQualifiedTypeName());
+            }
+        }
+    }
 }

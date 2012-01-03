@@ -6,10 +6,11 @@ import org.springframework.roo.shell.converters.LongConverter;
 
 /**
  * OSGi component launcher for {@link LongConverterComponent}.
- *
+ * 
  * @author Ben Alex
  * @since 1.1
  */
 @Component
 @Service
-public class LongConverterComponent extends LongConverter {}
+public class LongConverterComponent extends LongConverter {
+}

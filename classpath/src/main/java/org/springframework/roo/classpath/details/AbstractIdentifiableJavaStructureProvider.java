@@ -6,35 +6,38 @@ import org.springframework.roo.support.util.Assert;
 
 /**
  * Abstract class for {@link IdentifiableJavaStructure} subclasses.
- *
+ * 
  * @author Ben Alex
  * @since 1.1
  */
-public abstract class AbstractIdentifiableJavaStructureProvider extends AbstractCustomDataAccessorProvider implements IdentifiableJavaStructure {
+public abstract class AbstractIdentifiableJavaStructureProvider extends
+        AbstractCustomDataAccessorProvider implements IdentifiableJavaStructure {
 
-	// Fields
-	private final String declaredByMetadataId;
-	private final int modifier;
+    // Fields
+    private final String declaredByMetadataId;
+    private final int modifier;
 
-	/**
-	 * Constructor
-	 *
-	 * @param customData
-	 * @param declaredByMetadataId
-	 * @param modifier
-	 */
-	protected AbstractIdentifiableJavaStructureProvider(final CustomData customData, final String declaredByMetadataId, final int modifier) {
-		super(customData);
-		Assert.hasText(declaredByMetadataId, "Declared by metadata ID required");
-		this.declaredByMetadataId = declaredByMetadataId;
-		this.modifier = modifier;
-	}
+    /**
+     * Constructor
+     * 
+     * @param customData
+     * @param declaredByMetadataId
+     * @param modifier
+     */
+    protected AbstractIdentifiableJavaStructureProvider(
+            final CustomData customData, final String declaredByMetadataId,
+            final int modifier) {
+        super(customData);
+        Assert.hasText(declaredByMetadataId, "Declared by metadata ID required");
+        this.declaredByMetadataId = declaredByMetadataId;
+        this.modifier = modifier;
+    }
 
-	public final String getDeclaredByMetadataId() {
-		return declaredByMetadataId;
-	}
+    public final String getDeclaredByMetadataId() {
+        return declaredByMetadataId;
+    }
 
-	public final int getModifier() {
-		return modifier;
-	}
+    public final int getModifier() {
+        return modifier;
+    }
 }

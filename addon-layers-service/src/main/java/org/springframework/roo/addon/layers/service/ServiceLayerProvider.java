@@ -28,7 +28,7 @@ import org.springframework.uaa.client.util.Assert;
 /**
  * The {@link org.springframework.roo.classpath.layers.LayerProvider} that
  * provides an application's service layer.
- *
+ * 
  * @author Stefan Schmidt
  * @author Andrew Swan
  * @since 1.2.0
@@ -37,90 +37,115 @@ import org.springframework.uaa.client.util.Assert;
 @Service
 public class ServiceLayerProvider extends CoreLayerProvider {
 
-	// Fields
-	@Reference private MetadataService metadataService;
-	@Reference private ServiceAnnotationValuesFactory serviceAnnotationValuesFactory;
-	@Reference private ServiceInterfaceLocator serviceInterfaceLocator;
-	@Reference TypeLocationService typeLocationService;
+    // Fields
+    @Reference private MetadataService metadataService;
+    @Reference private ServiceAnnotationValuesFactory serviceAnnotationValuesFactory;
+    @Reference private ServiceInterfaceLocator serviceInterfaceLocator;
+    @Reference TypeLocationService typeLocationService;
 
-	public MemberTypeAdditions getMemberTypeAdditions(final String callerMID, final String methodIdentifier, final JavaType targetEntity, final JavaType idType, final MethodParameter... methodParameters) {
-		Assert.isTrue(StringUtils.hasText(callerMID), "Caller's metadata identifier required");
-		Assert.notNull(methodIdentifier, "Method identifier required");
-		Assert.notNull(targetEntity, "Target entity type required");
-		Assert.notNull(methodParameters, "Method param names and types required (may be empty)");
+    public MemberTypeAdditions getMemberTypeAdditions(final String callerMID,
+            final String methodIdentifier, final JavaType targetEntity,
+            final JavaType idType, final MethodParameter... methodParameters) {
+        Assert.isTrue(StringUtils.hasText(callerMID),
+                "Caller's metadata identifier required");
+        Assert.notNull(methodIdentifier, "Method identifier required");
+        Assert.notNull(targetEntity, "Target entity type required");
+        Assert.notNull(methodParameters,
+                "Method param names and types required (may be empty)");
 
-		// Check whether this is even a known service layer method
-		final List<JavaType> parameterTypes = new PairList<JavaType, JavaSymbolName>(methodParameters).getKeys();
-		final ServiceLayerMethod method = ServiceLayerMethod.valueOf(methodIdentifier, parameterTypes, targetEntity, idType);
-		if (method == null) {
-			return null;
-		}
+        // Check whether this is even a known service layer method
+        final List<JavaType> parameterTypes = new PairList<JavaType, JavaSymbolName>(
+                methodParameters).getKeys();
+        final ServiceLayerMethod method = ServiceLayerMethod.valueOf(
+                methodIdentifier, parameterTypes, targetEntity, idType);
+        if (method == null) {
+            return null;
+        }
 
-		// Check the entity has a plural form
-		final String pluralId = PluralMetadata.createIdentifier(targetEntity, typeLocationService.getTypePath(targetEntity));
-		final PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(pluralId);
-		if (pluralMetadata == null || pluralMetadata.getPlural() == null) {
-			return null;
-		}
+        // Check the entity has a plural form
+        final String pluralId = PluralMetadata.createIdentifier(targetEntity,
+                typeLocationService.getTypePath(targetEntity));
+        final PluralMetadata pluralMetadata = (PluralMetadata) metadataService
+                .get(pluralId);
+        if (pluralMetadata == null || pluralMetadata.getPlural() == null) {
+            return null;
+        }
 
-		// Loop through the service interfaces that claim to support the given target entity
-		for (final ClassOrInterfaceTypeDetails serviceInterface : serviceInterfaceLocator.getServiceInterfaces(targetEntity)) {
-			// Get the values of the @RooService annotation for this service interface
-			final ServiceAnnotationValues annotationValues = serviceAnnotationValuesFactory.getInstance(serviceInterface);
-			if (annotationValues != null) {
-				// Check whether this method is implemented by the given service
-				final String methodName = method.getName(annotationValues, targetEntity, pluralMetadata.getPlural());
-				if (StringUtils.hasText(methodName)) {
-					// The service implements the method; get the additions to be made by the caller
-					final MemberTypeAdditions methodAdditions = getMethodAdditions(callerMID, methodName, serviceInterface.getName(), Arrays.asList(methodParameters));
+        // Loop through the service interfaces that claim to support the given
+        // target entity
+        for (final ClassOrInterfaceTypeDetails serviceInterface : serviceInterfaceLocator
+                .getServiceInterfaces(targetEntity)) {
+            // Get the values of the @RooService annotation for this service
+            // interface
+            final ServiceAnnotationValues annotationValues = serviceAnnotationValuesFactory
+                    .getInstance(serviceInterface);
+            if (annotationValues != null) {
+                // Check whether this method is implemented by the given service
+                final String methodName = method.getName(annotationValues,
+                        targetEntity, pluralMetadata.getPlural());
+                if (StringUtils.hasText(methodName)) {
+                    // The service implements the method; get the additions to
+                    // be made by the caller
+                    final MemberTypeAdditions methodAdditions = getMethodAdditions(
+                            callerMID, methodName, serviceInterface.getName(),
+                            Arrays.asList(methodParameters));
 
-					// Return these additions
-					return methodAdditions;
-				}
-			}
-		}
-		// None of the services for this entity were able to provide the method
-		return null;
-	}
+                    // Return these additions
+                    return methodAdditions;
+                }
+            }
+        }
+        // None of the services for this entity were able to provide the method
+        return null;
+    }
 
-	/**
-	 * Returns the additions the caller should make in order to invoke the given
-	 * method for the given domain entity.
-	 *
-	 * @param callerMID the caller's metadata ID (required)
-	 * @param methodName the name of the method being invoked (required)
-	 * @param serviceInterface the domain service type (required)
-	 * @param parameterNames the names of the parameters being passed by the
-	 * caller to the method
-	 * @return a non-<code>null</code> set of additions
-	 */
-	private MemberTypeAdditions getMethodAdditions(final String callerMID, final String methodName, final JavaType serviceInterface, final List<MethodParameter> parameters) {
-		// The method is supported by this service interface; make a builder
-		final ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(callerMID);
+    /**
+     * Returns the additions the caller should make in order to invoke the given
+     * method for the given domain entity.
+     * 
+     * @param callerMID the caller's metadata ID (required)
+     * @param methodName the name of the method being invoked (required)
+     * @param serviceInterface the domain service type (required)
+     * @param parameterNames the names of the parameters being passed by the
+     *            caller to the method
+     * @return a non-<code>null</code> set of additions
+     */
+    private MemberTypeAdditions getMethodAdditions(final String callerMID,
+            final String methodName, final JavaType serviceInterface,
+            final List<MethodParameter> parameters) {
+        // The method is supported by this service interface; make a builder
+        final ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(
+                callerMID);
 
-		// Add an autowired field of the type of this service
-		final String fieldName = StringUtils.uncapitalize(serviceInterface.getSimpleTypeName());
-		cidBuilder.addField(new FieldMetadataBuilder(callerMID, 0, Arrays.asList(new AnnotationMetadataBuilder(AUTOWIRED)), new JavaSymbolName(fieldName), serviceInterface));
+        // Add an autowired field of the type of this service
+        final String fieldName = StringUtils.uncapitalize(serviceInterface
+                .getSimpleTypeName());
+        cidBuilder.addField(new FieldMetadataBuilder(callerMID, 0, Arrays
+                .asList(new AnnotationMetadataBuilder(AUTOWIRED)),
+                new JavaSymbolName(fieldName), serviceInterface));
 
-		// Generate an additions object that includes a call to the method
-		return MemberTypeAdditions.getInstance(cidBuilder, fieldName, methodName, false, parameters);
-	}
+        // Generate an additions object that includes a call to the method
+        return MemberTypeAdditions.getInstance(cidBuilder, fieldName,
+                methodName, false, parameters);
+    }
 
-	public int getLayerPosition() {
-		return LayerType.SERVICE.getPosition();
-	}
+    public int getLayerPosition() {
+        return LayerType.SERVICE.getPosition();
+    }
 
-	// -------------------- Setters for use by unit tests ----------------------
+    // -------------------- Setters for use by unit tests ----------------------
 
-	void setMetadataService(final MetadataService metadataService) {
-		this.metadataService = metadataService;
-	}
+    void setMetadataService(final MetadataService metadataService) {
+        this.metadataService = metadataService;
+    }
 
-	void setServiceAnnotationValuesFactory(final ServiceAnnotationValuesFactory serviceAnnotationValuesFactory) {
-		this.serviceAnnotationValuesFactory = serviceAnnotationValuesFactory;
-	}
+    void setServiceAnnotationValuesFactory(
+            final ServiceAnnotationValuesFactory serviceAnnotationValuesFactory) {
+        this.serviceAnnotationValuesFactory = serviceAnnotationValuesFactory;
+    }
 
-	void setServiceInterfaceLocator(final ServiceInterfaceLocator serviceInterfaceLocator) {
-		this.serviceInterfaceLocator = serviceInterfaceLocator;
-	}
+    void setServiceInterfaceLocator(
+            final ServiceInterfaceLocator serviceInterfaceLocator) {
+        this.serviceInterfaceLocator = serviceInterfaceLocator;
+    }
 }

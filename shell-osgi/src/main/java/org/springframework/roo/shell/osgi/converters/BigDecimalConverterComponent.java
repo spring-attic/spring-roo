@@ -6,10 +6,11 @@ import org.springframework.roo.shell.converters.BigDecimalConverter;
 
 /**
  * OSGi component launcher for {@link BigDecimalConverter}.
- *
+ * 
  * @author Ben Alex
  * @since 1.1
  */
 @Component
 @Service
-public class BigDecimalConverterComponent extends BigDecimalConverter {}
+public class BigDecimalConverterComponent extends BigDecimalConverter {
+}

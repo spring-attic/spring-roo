@@ -4,32 +4,34 @@ import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.support.util.Assert;
 
 /**
- * {@link MethodMetadata}-specific implementation of {@link InvocableMemberMetadataCustomDataKey}.
- *
+ * {@link MethodMetadata}-specific implementation of
+ * {@link InvocableMemberMetadataCustomDataKey}.
+ * 
  * @author James Tyrrell
  * @since 1.1.3
  */
-public class MethodMetadataCustomDataKey extends InvocableMemberMetadataCustomDataKey<MethodMetadata> {
-	
-	// Fields
-	private final String tag;
+public class MethodMetadataCustomDataKey extends
+        InvocableMemberMetadataCustomDataKey<MethodMetadata> {
 
-	/**
-	 * Constructor
-	 *
-	 * @param tag
-	 */
-	public MethodMetadataCustomDataKey(final String tag) {
-		Assert.hasText(tag, "Invalid tag '" + tag + "'");
-		this.tag = tag;
-	}
+    // Fields
+    private final String tag;
 
-	@Override
-	public String toString() {
-		return tag;
-	}
+    /**
+     * Constructor
+     * 
+     * @param tag
+     */
+    public MethodMetadataCustomDataKey(final String tag) {
+        Assert.hasText(tag, "Invalid tag '" + tag + "'");
+        this.tag = tag;
+    }
 
-	public String name() {
-		return tag;
-	}
+    @Override
+    public String toString() {
+        return tag;
+    }
+
+    public String name() {
+        return tag;
+    }
 }

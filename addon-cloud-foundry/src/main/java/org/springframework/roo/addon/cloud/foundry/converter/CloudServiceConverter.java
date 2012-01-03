@@ -15,7 +15,7 @@ import com.vmware.appcloud.client.CloudService;
 
 /**
  * Provides conversion to and from Cloud Foundry model classes.
- *
+ * 
  * @author James Tyrrell
  * @author Andrew Swan
  * @since 1.2.0
@@ -23,23 +23,27 @@ import com.vmware.appcloud.client.CloudService;
 @Component
 @Service
 public class CloudServiceConverter implements Converter<CloudService> {
-	@Reference private CloudFoundrySession session;
+    @Reference private CloudFoundrySession session;
 
-	public CloudService convertFromText(final String value, final Class<?> requiredType, final String optionContext) {
-		if (StringUtils.isBlank(value)) {
-			return null;
-		}
-		return session.getProvisionedService(value);
-	}
+    public CloudService convertFromText(final String value,
+            final Class<?> requiredType, final String optionContext) {
+        if (StringUtils.isBlank(value)) {
+            return null;
+        }
+        return session.getProvisionedService(value);
+    }
 
-	public boolean supports(final Class<?> requiredType, final String optionContext) {
-		return CloudService.class.isAssignableFrom(requiredType);
-	}
+    public boolean supports(final Class<?> requiredType,
+            final String optionContext) {
+        return CloudService.class.isAssignableFrom(requiredType);
+    }
 
-	public boolean getAllPossibleValues(final List<Completion> completions, final Class<?> requiredType, final String existingData, final String optionContext, final MethodTarget target) {
-		for (String provisionedService : session.getProvisionedServices()) {
-			completions.add(new Completion(provisionedService));
-		}
-		return false;
-	}
+    public boolean getAllPossibleValues(final List<Completion> completions,
+            final Class<?> requiredType, final String existingData,
+            final String optionContext, final MethodTarget target) {
+        for (String provisionedService : session.getProvisionedServices()) {
+            completions.add(new Completion(provisionedService));
+        }
+        return false;
+    }
 }

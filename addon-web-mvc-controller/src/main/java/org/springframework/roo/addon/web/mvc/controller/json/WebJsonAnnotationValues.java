@@ -18,66 +18,67 @@ import org.springframework.roo.model.RooJavaType;
 
 /**
  * Represents a parsed {@link RooWebJson} annotation.
- *
+ * 
  * @author Stefan Schmidt
  * @since 1.2.0
  */
 public class WebJsonAnnotationValues extends AbstractAnnotationValues {
 
-	// From annotation
-	@AutoPopulate JavaType jsonObject;
-	@AutoPopulate String showJsonMethod = SHOW_JSON;
-	@AutoPopulate String listJsonMethod = LIST_JSON;
-	@AutoPopulate String createFromJsonMethod = CREATE_FROM_JSON;
-	@AutoPopulate String createFromJsonArrayMethod = CREATE_FROM_JSON_ARRAY;
-	@AutoPopulate String updateFromJsonMethod = UPDATE_FROM_JSON;
-	@AutoPopulate String updateFromJsonArrayMethod = UPDATE_FROM_JSON_ARRAY;
-	@AutoPopulate String deleteFromJsonMethod = DELETE_FROM_JSON_ARRAY;
-	@AutoPopulate boolean exposeFinders = EXPOSE_FINDERS;
+    // From annotation
+    @AutoPopulate JavaType jsonObject;
+    @AutoPopulate String showJsonMethod = SHOW_JSON;
+    @AutoPopulate String listJsonMethod = LIST_JSON;
+    @AutoPopulate String createFromJsonMethod = CREATE_FROM_JSON;
+    @AutoPopulate String createFromJsonArrayMethod = CREATE_FROM_JSON_ARRAY;
+    @AutoPopulate String updateFromJsonMethod = UPDATE_FROM_JSON;
+    @AutoPopulate String updateFromJsonArrayMethod = UPDATE_FROM_JSON_ARRAY;
+    @AutoPopulate String deleteFromJsonMethod = DELETE_FROM_JSON_ARRAY;
+    @AutoPopulate boolean exposeFinders = EXPOSE_FINDERS;
 
-	/**
-	 * Constructor
-	 *
-	 * @param governorPhysicalTypeMetadata
-	 */
-	public WebJsonAnnotationValues(final PhysicalTypeMetadata governorPhysicalTypeMetadata) {
-		super(governorPhysicalTypeMetadata, RooJavaType.ROO_WEB_JSON);
-		AutoPopulationUtils.populate(this, annotationMetadata);
-	}
+    /**
+     * Constructor
+     * 
+     * @param governorPhysicalTypeMetadata
+     */
+    public WebJsonAnnotationValues(
+            final PhysicalTypeMetadata governorPhysicalTypeMetadata) {
+        super(governorPhysicalTypeMetadata, RooJavaType.ROO_WEB_JSON);
+        AutoPopulationUtils.populate(this, annotationMetadata);
+    }
 
-	public JavaType getJsonObject() {
-		return jsonObject;
-	}
+    public JavaType getJsonObject() {
+        return jsonObject;
+    }
 
-	public String getShowJsonMethod() {
-		return showJsonMethod;
-	}
+    public String getShowJsonMethod() {
+        return showJsonMethod;
+    }
 
-	public String getListJsonMethod() {
-		return listJsonMethod;
-	}
+    public String getListJsonMethod() {
+        return listJsonMethod;
+    }
 
-	public String getCreateFromJsonMethod() {
-		return createFromJsonMethod;
-	}
+    public String getCreateFromJsonMethod() {
+        return createFromJsonMethod;
+    }
 
-	public String getCreateFromJsonArrayMethod() {
-		return createFromJsonArrayMethod;
-	}
+    public String getCreateFromJsonArrayMethod() {
+        return createFromJsonArrayMethod;
+    }
 
-	public String getUpdateFromJsonMethod() {
-		return updateFromJsonMethod;
-	}
+    public String getUpdateFromJsonMethod() {
+        return updateFromJsonMethod;
+    }
 
-	public String getUpdateFromJsonArrayMethod() {
-		return updateFromJsonArrayMethod;
-	}
+    public String getUpdateFromJsonArrayMethod() {
+        return updateFromJsonArrayMethod;
+    }
 
-	public String getDeleteFromJsonMethod() {
-		return deleteFromJsonMethod;
-	}
+    public String getDeleteFromJsonMethod() {
+        return deleteFromJsonMethod;
+    }
 
-	public boolean isExposeFinders() {
-		return exposeFinders;
-	}
+    public boolean isExposeFinders() {
+        return exposeFinders;
+    }
 }

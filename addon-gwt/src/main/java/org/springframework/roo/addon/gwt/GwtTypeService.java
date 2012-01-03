@@ -11,78 +11,97 @@ import org.springframework.roo.model.JavaType;
 
 /**
  * Interface for {@link GwtTypeServiceImpl}.
- *
+ * 
  * @author James Tyrrell
  * @since 1.1.2
  */
 public interface GwtTypeService {
 
-	JavaType getGwtSideLeafType(JavaType returnType, JavaType governorType, boolean requestType, boolean convertPrimitive);
+    JavaType getGwtSideLeafType(JavaType returnType, JavaType governorType,
+            boolean requestType, boolean convertPrimitive);
 
-	List<MemberHoldingTypeDetails> getExtendsTypes(ClassOrInterfaceTypeDetails childType);
+    List<MemberHoldingTypeDetails> getExtendsTypes(
+            ClassOrInterfaceTypeDetails childType);
 
-	List<ClassOrInterfaceTypeDetails> buildType(GwtType destType, ClassOrInterfaceTypeDetails templateClass, List<MemberHoldingTypeDetails> extendsTypes, String moduleName);
+    List<ClassOrInterfaceTypeDetails> buildType(GwtType destType,
+            ClassOrInterfaceTypeDetails templateClass,
+            List<MemberHoldingTypeDetails> extendsTypes, String moduleName);
 
-	void buildType(GwtType destType, List<ClassOrInterfaceTypeDetails> templateTypeDetails, String moduleName);
+    void buildType(GwtType destType,
+            List<ClassOrInterfaceTypeDetails> templateTypeDetails,
+            String moduleName);
 
-	List<MethodMetadata> getProxyMethods(ClassOrInterfaceTypeDetails governorTypeDetails);
+    List<MethodMetadata> getProxyMethods(
+            ClassOrInterfaceTypeDetails governorTypeDetails);
 
-	boolean isDomainObject(JavaType type);
+    boolean isDomainObject(JavaType type);
 
-	/**
-	 * Indicates whether the given method's return type resides within any of
-	 * the given GWT source packages
-	 * 
-	 * @param method
-	 * @param memberHoldingTypeDetail
-	 * @param sourcePackages
-	 * @return
-	 */
-	boolean isMethodReturnTypeInSourcePath(MethodMetadata method, MemberHoldingTypeDetails memberHoldingTypeDetail, Iterable<JavaPackage> sourcePackages);
-	
-	/**
-	 * Returns the Java packages within the given module that contain GWT source
-	 * 
-	 * @param moduleName the name of the module (empty for the root or only module)
-	 * @return a non-<code>null</code> collection
-	 */
-	Collection<JavaPackage> getSourcePackages(String moduleName);
+    /**
+     * Indicates whether the given method's return type resides within any of
+     * the given GWT source packages
+     * 
+     * @param method
+     * @param memberHoldingTypeDetail
+     * @param sourcePackages
+     * @return
+     */
+    boolean isMethodReturnTypeInSourcePath(MethodMetadata method,
+            MemberHoldingTypeDetails memberHoldingTypeDetail,
+            Iterable<JavaPackage> sourcePackages);
 
-	ClassOrInterfaceTypeDetails lookupRequestFromProxy(ClassOrInterfaceTypeDetails proxy);
+    /**
+     * Returns the Java packages within the given module that contain GWT source
+     * 
+     * @param moduleName the name of the module (empty for the root or only
+     *            module)
+     * @return a non-<code>null</code> collection
+     */
+    Collection<JavaPackage> getSourcePackages(String moduleName);
 
-	ClassOrInterfaceTypeDetails lookupProxyFromRequest(ClassOrInterfaceTypeDetails request);
+    ClassOrInterfaceTypeDetails lookupRequestFromProxy(
+            ClassOrInterfaceTypeDetails proxy);
 
-	ClassOrInterfaceTypeDetails lookupRequestFromEntity(ClassOrInterfaceTypeDetails entity);
+    ClassOrInterfaceTypeDetails lookupProxyFromRequest(
+            ClassOrInterfaceTypeDetails request);
 
-	ClassOrInterfaceTypeDetails lookupProxyFromEntity(ClassOrInterfaceTypeDetails entity);
+    ClassOrInterfaceTypeDetails lookupRequestFromEntity(
+            ClassOrInterfaceTypeDetails entity);
 
-	ClassOrInterfaceTypeDetails lookupEntityFromProxy(ClassOrInterfaceTypeDetails proxy);
+    ClassOrInterfaceTypeDetails lookupProxyFromEntity(
+            ClassOrInterfaceTypeDetails entity);
 
-	ClassOrInterfaceTypeDetails lookupEntityFromRequest(ClassOrInterfaceTypeDetails request);
+    ClassOrInterfaceTypeDetails lookupEntityFromProxy(
+            ClassOrInterfaceTypeDetails proxy);
 
-	ClassOrInterfaceTypeDetails lookupEntityFromLocator(ClassOrInterfaceTypeDetails request);
+    ClassOrInterfaceTypeDetails lookupEntityFromRequest(
+            ClassOrInterfaceTypeDetails request);
 
-	ClassOrInterfaceTypeDetails lookupTargetServiceFromRequest(ClassOrInterfaceTypeDetails request);
+    ClassOrInterfaceTypeDetails lookupEntityFromLocator(
+            ClassOrInterfaceTypeDetails request);
 
-	String getGwtModuleXml(String moduleName);
+    ClassOrInterfaceTypeDetails lookupTargetServiceFromRequest(
+            ClassOrInterfaceTypeDetails request);
 
-	/**
-	 * Adds the given GWT source path to the given module's gwt.xml file.
-	 * 
-	 * @param sourcePath the path relative to the gwt.xml file, delimited by
-	 * {@link GwtOperations#PATH_DELIMITER}
-	 * @param moduleName the project module whose gwt.xml file is to be updated
-	 */
-	void addSourcePath(String sourcePath, String moduleName);
+    String getGwtModuleXml(String moduleName);
 
-	/**
-	 * Returns the project type in the given module that implements
-	 * {@link com.google.web.bindery.requestfactory.shared.ServiceLocator}.
-	 * There is no guarantee that this type actually exists.
-	 * 
-	 * @param moduleName the module in which to find the locator (can't be <code>null</code>)
-	 * @return a non-<code>null</code> type
-	 * @since 1.2.0
-	 */
-	JavaType getServiceLocator(String moduleName);
+    /**
+     * Adds the given GWT source path to the given module's gwt.xml file.
+     * 
+     * @param sourcePath the path relative to the gwt.xml file, delimited by
+     *            {@link GwtOperations#PATH_DELIMITER}
+     * @param moduleName the project module whose gwt.xml file is to be updated
+     */
+    void addSourcePath(String sourcePath, String moduleName);
+
+    /**
+     * Returns the project type in the given module that implements
+     * {@link com.google.web.bindery.requestfactory.shared.ServiceLocator}.
+     * There is no guarantee that this type actually exists.
+     * 
+     * @param moduleName the module in which to find the locator (can't be
+     *            <code>null</code>)
+     * @return a non-<code>null</code> type
+     * @since 1.2.0
+     */
+    JavaType getServiceLocator(String moduleName);
 }

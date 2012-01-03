@@ -45,180 +45,341 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 /**
- * Metadata listener responsible for installing Web MVC JSP artifacts for the Solr search addon.
- *
+ * Metadata listener responsible for installing Web MVC JSP artifacts for the
+ * Solr search addon.
+ * 
  * @author Stefan Schmidt
  * @since 1.1
  */
 @Component(immediate = true)
 @Service
-public class SolrJspMetadataListener implements MetadataProvider, MetadataNotificationListener {
+public class SolrJspMetadataListener implements MetadataProvider,
+        MetadataNotificationListener {
 
-	// Fields
-	@Reference private MetadataDependencyRegistry metadataDependencyRegistry;
-	@Reference private MetadataService metadataService;
-	@Reference private FileManager fileManager;
-	@Reference private TilesOperations tilesOperations;
-	@Reference private MenuOperations menuOperations;
-	@Reference private MemberDetailsScanner memberDetailsScanner;
-	@Reference private PersistenceMemberLocator persistenceMemberLocator;
-	@Reference private PathResolver pathResolver;
-	@Reference private TypeLocationService typeLocationService;
-	@Reference private XmlRoundTripFileManager xmlRoundTripFileManager;
+    // Fields
+    @Reference private MetadataDependencyRegistry metadataDependencyRegistry;
+    @Reference private MetadataService metadataService;
+    @Reference private FileManager fileManager;
+    @Reference private TilesOperations tilesOperations;
+    @Reference private MenuOperations menuOperations;
+    @Reference private MemberDetailsScanner memberDetailsScanner;
+    @Reference private PersistenceMemberLocator persistenceMemberLocator;
+    @Reference private PathResolver pathResolver;
+    @Reference private TypeLocationService typeLocationService;
+    @Reference private XmlRoundTripFileManager xmlRoundTripFileManager;
 
-	private WebScaffoldMetadata webScaffoldMetadata;
-	private JpaActiveRecordMetadata jpaActiveRecordMetadata;
-	private JavaType javaType;
-	private JavaType formbackingObject;
+    private WebScaffoldMetadata webScaffoldMetadata;
+    private JpaActiveRecordMetadata jpaActiveRecordMetadata;
+    private JavaType javaType;
+    private JavaType formbackingObject;
 
-	protected void activate(final ComponentContext context) {
-		metadataDependencyRegistry.registerDependency(SolrWebSearchMetadata.getMetadataIdentiferType(), getProvidesType());
-	}
+    protected void activate(final ComponentContext context) {
+        metadataDependencyRegistry.registerDependency(
+                SolrWebSearchMetadata.getMetadataIdentiferType(),
+                getProvidesType());
+    }
 
-	public MetadataItem get(final String metadataIdentificationString) {
-		javaType = SolrJspMetadata.getJavaType(metadataIdentificationString);
-		LogicalPath path = SolrJspMetadata.getPath(metadataIdentificationString);
-		String solrWebSearchMetadataKeyString = SolrWebSearchMetadata.createIdentifier(javaType, path);
-		SolrWebSearchMetadata webSearchMetadata = (SolrWebSearchMetadata) metadataService.get(solrWebSearchMetadataKeyString);
-		if (webSearchMetadata == null || !webSearchMetadata.isValid()) {
-			return null;
-		}
+    public MetadataItem get(final String metadataIdentificationString) {
+        javaType = SolrJspMetadata.getJavaType(metadataIdentificationString);
+        LogicalPath path = SolrJspMetadata
+                .getPath(metadataIdentificationString);
+        String solrWebSearchMetadataKeyString = SolrWebSearchMetadata
+                .createIdentifier(javaType, path);
+        SolrWebSearchMetadata webSearchMetadata = (SolrWebSearchMetadata) metadataService
+                .get(solrWebSearchMetadataKeyString);
+        if (webSearchMetadata == null || !webSearchMetadata.isValid()) {
+            return null;
+        }
 
-		webScaffoldMetadata = (WebScaffoldMetadata) metadataService.get(WebScaffoldMetadata.createIdentifier(javaType, path));
-		Assert.notNull(webScaffoldMetadata, "Web scaffold metadata required");
+        webScaffoldMetadata = (WebScaffoldMetadata) metadataService
+                .get(WebScaffoldMetadata.createIdentifier(javaType, path));
+        Assert.notNull(webScaffoldMetadata, "Web scaffold metadata required");
 
-		formbackingObject = webScaffoldMetadata.getAnnotationValues().getFormBackingObject();
-		jpaActiveRecordMetadata = (JpaActiveRecordMetadata) metadataService.get(JpaActiveRecordMetadata.createIdentifier(formbackingObject, path));
-		Assert.notNull(jpaActiveRecordMetadata, "Could not determine entity metadata for type: " + javaType.getFullyQualifiedTypeName());
+        formbackingObject = webScaffoldMetadata.getAnnotationValues()
+                .getFormBackingObject();
+        jpaActiveRecordMetadata = (JpaActiveRecordMetadata) metadataService
+                .get(JpaActiveRecordMetadata.createIdentifier(
+                        formbackingObject, path));
+        Assert.notNull(
+                jpaActiveRecordMetadata,
+                "Could not determine entity metadata for type: "
+                        + javaType.getFullyQualifiedTypeName());
 
-		installMvcArtifacts(webScaffoldMetadata);
+        installMvcArtifacts(webScaffoldMetadata);
 
-		return new SolrJspMetadata(metadataIdentificationString, webSearchMetadata);
-	}
-	
-	public void installMvcArtifacts(final WebScaffoldMetadata webScaffoldMetadata) {
-		copyArtifacts("form/search.tagx", "WEB-INF/tags/form/search.tagx");
-		copyArtifacts("form/fields/search-facet.tagx", "WEB-INF/tags/form/fields/search-facet.tagx");
-		copyArtifacts("form/fields/search-field.tagx", "WEB-INF/tags/form/fields/search-field.tagx");
+        return new SolrJspMetadata(metadataIdentificationString,
+                webSearchMetadata);
+    }
 
-		LogicalPath path = WebScaffoldMetadata.getPath(webScaffoldMetadata.getId());
-		xmlRoundTripFileManager.writeToDiskIfNecessary(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP.getModulePathId(path.getModule()), "WEB-INF/views/" + webScaffoldMetadata.getAnnotationValues().getPath() + "/search.jspx"), getSearchDocument(webScaffoldMetadata));
-		
-		String folderName = webScaffoldMetadata.getAnnotationValues().getPath();
-		tilesOperations.addViewDefinition(folderName, path, folderName + "/search", TilesOperationsImpl.DEFAULT_TEMPLATE, "WEB-INF/views/" + webScaffoldMetadata.getAnnotationValues().getPath() + "/search.jspx");
-		menuOperations.addMenuItem(new JavaSymbolName(formbackingObject.getSimpleTypeName()), new JavaSymbolName("solr"), new JavaSymbolName(jpaActiveRecordMetadata.getPlural()).getReadableSymbolName(), "global.menu.find", "/" + webScaffoldMetadata.getAnnotationValues().getPath() + "?search", "s:", path);
-	}
-	
-	private Document getSearchDocument(final WebScaffoldMetadata webScaffoldMetadata) {
-		// Next install search.jspx
-		Assert.notNull(webScaffoldMetadata, "Web scaffold metadata required");
+    public void installMvcArtifacts(
+            final WebScaffoldMetadata webScaffoldMetadata) {
+        copyArtifacts("form/search.tagx", "WEB-INF/tags/form/search.tagx");
+        copyArtifacts("form/fields/search-facet.tagx",
+                "WEB-INF/tags/form/fields/search-facet.tagx");
+        copyArtifacts("form/fields/search-field.tagx",
+                "WEB-INF/tags/form/fields/search-field.tagx");
 
-		DocumentBuilder builder = XmlUtils.getDocumentBuilder();
-		Document document = builder.newDocument();
+        LogicalPath path = WebScaffoldMetadata.getPath(webScaffoldMetadata
+                .getId());
+        xmlRoundTripFileManager.writeToDiskIfNecessary(pathResolver
+                .getIdentifier(
+                        Path.SRC_MAIN_WEBAPP.getModulePathId(path.getModule()),
+                        "WEB-INF/views/"
+                                + webScaffoldMetadata.getAnnotationValues()
+                                        .getPath() + "/search.jspx"),
+                getSearchDocument(webScaffoldMetadata));
 
-		// Add document namespaces
-		Element div = new XmlElementBuilder("div", document).addAttribute("xmlns:page", "urn:jsptagdir:/WEB-INF/tags/form").addAttribute("xmlns:fields", "urn:jsptagdir:/WEB-INF/tags/form/fields").addAttribute("xmlns:jsp", "http://java.sun.com/JSP/Page").addAttribute("version", "2.0").addChild(new XmlElementBuilder("jsp:output", document).addAttribute("omit-xml-declaration", "yes").build()).build();
-		document.appendChild(div);
+        String folderName = webScaffoldMetadata.getAnnotationValues().getPath();
+        tilesOperations.addViewDefinition(folderName, path, folderName
+                + "/search", TilesOperationsImpl.DEFAULT_TEMPLATE,
+                "WEB-INF/views/"
+                        + webScaffoldMetadata.getAnnotationValues().getPath()
+                        + "/search.jspx");
+        menuOperations.addMenuItem(
+                new JavaSymbolName(formbackingObject.getSimpleTypeName()),
+                new JavaSymbolName("solr"), new JavaSymbolName(
+                        jpaActiveRecordMetadata.getPlural())
+                        .getReadableSymbolName(), "global.menu.find", "/"
+                        + webScaffoldMetadata.getAnnotationValues().getPath()
+                        + "?search", "s:", path);
+    }
 
-		Element pageSearch = new XmlElementBuilder("page:search", document).addAttribute("id", XmlUtils.convertId("ps:" + webScaffoldMetadata.getAnnotationValues().getFormBackingObject().getFullyQualifiedTypeName())).addAttribute("path", webScaffoldMetadata.getAnnotationValues().getPath()).build();
-		pageSearch.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(pageSearch));
+    private Document getSearchDocument(
+            final WebScaffoldMetadata webScaffoldMetadata) {
+        // Next install search.jspx
+        Assert.notNull(webScaffoldMetadata, "Web scaffold metadata required");
 
-		final List<FieldMetadata> idFields = persistenceMemberLocator.getIdentifierFields(formbackingObject);
-		if (idFields.isEmpty()) {
-			return null;
-		}
-		Element resultTable = new XmlElementBuilder("fields:table", document).addAttribute("id", XmlUtils.convertId("rt:" + webScaffoldMetadata.getAnnotationValues().getFormBackingObject().getFullyQualifiedTypeName())).addAttribute("data", "${searchResults}").addAttribute("delete", "false").addAttribute("update", "false").addAttribute("path", webScaffoldMetadata.getAnnotationValues().getPath()).addAttribute("typeIdFieldName", formbackingObject.getSimpleTypeName().toLowerCase() + "." + idFields.get(0).getFieldName().getSymbolName().toLowerCase() + SolrUtils.getSolrDynamicFieldPostFix(idFields.get(0).getFieldType())).build();
-		resultTable.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(resultTable));
+        DocumentBuilder builder = XmlUtils.getDocumentBuilder();
+        Document document = builder.newDocument();
 
-		StringBuilder facetFields = new StringBuilder();
-		int fieldCounter = 0;
+        // Add document namespaces
+        Element div = new XmlElementBuilder("div", document)
+                .addAttribute("xmlns:page", "urn:jsptagdir:/WEB-INF/tags/form")
+                .addAttribute("xmlns:fields",
+                        "urn:jsptagdir:/WEB-INF/tags/form/fields")
+                .addAttribute("xmlns:jsp", "http://java.sun.com/JSP/Page")
+                .addAttribute("version", "2.0")
+                .addChild(
+                        new XmlElementBuilder("jsp:output", document)
+                                .addAttribute("omit-xml-declaration", "yes")
+                                .build()).build();
+        document.appendChild(div);
 
-		ClassOrInterfaceTypeDetails formbackingClassOrInterfaceDetails = typeLocationService.getTypeDetails(formbackingObject);
-		Assert.notNull(formbackingClassOrInterfaceDetails, "Unable to obtain physical type metadata for type " + formbackingObject.getFullyQualifiedTypeName());
-		MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(getClass().getName(), formbackingClassOrInterfaceDetails);
-		final MethodMetadata identifierAccessor = persistenceMemberLocator.getIdentifierAccessor(formbackingObject);
-		final MethodMetadata versionAccessor = persistenceMemberLocator.getVersionAccessor(formbackingObject);
+        Element pageSearch = new XmlElementBuilder("page:search", document)
+                .addAttribute(
+                        "id",
+                        XmlUtils.convertId("ps:"
+                                + webScaffoldMetadata.getAnnotationValues()
+                                        .getFormBackingObject()
+                                        .getFullyQualifiedTypeName()))
+                .addAttribute("path",
+                        webScaffoldMetadata.getAnnotationValues().getPath())
+                .build();
+        pageSearch.setAttribute("z",
+                XmlRoundTripUtils.calculateUniqueKeyFor(pageSearch));
 
-		for (MethodMetadata method : memberDetails.getMethods()) {
-			// Only interested in accessors
-			if (!BeanInfoUtils.isAccessorMethod(method)) {
-				continue;
-			}
-			if (++fieldCounter < 7) {
-				if (method.getMethodName().equals(identifierAccessor.getMethodName()) || method.getMethodName().equals(versionAccessor.getMethodName())) {
-					continue;
-				}
-				if (method.hasSameName(identifierAccessor, versionAccessor)) {
-					continue;
-				}
+        final List<FieldMetadata> idFields = persistenceMemberLocator
+                .getIdentifierFields(formbackingObject);
+        if (idFields.isEmpty()) {
+            return null;
+        }
+        Element resultTable = new XmlElementBuilder("fields:table", document)
+                .addAttribute(
+                        "id",
+                        XmlUtils.convertId("rt:"
+                                + webScaffoldMetadata.getAnnotationValues()
+                                        .getFormBackingObject()
+                                        .getFullyQualifiedTypeName()))
+                .addAttribute("data", "${searchResults}")
+                .addAttribute("delete", "false")
+                .addAttribute("update", "false")
+                .addAttribute("path",
+                        webScaffoldMetadata.getAnnotationValues().getPath())
+                .addAttribute(
+                        "typeIdFieldName",
+                        formbackingObject.getSimpleTypeName().toLowerCase()
+                                + "."
+                                + idFields.get(0).getFieldName()
+                                        .getSymbolName().toLowerCase()
+                                + SolrUtils.getSolrDynamicFieldPostFix(idFields
+                                        .get(0).getFieldType())).build();
+        resultTable.setAttribute("z",
+                XmlRoundTripUtils.calculateUniqueKeyFor(resultTable));
 
-				FieldMetadata field = BeanInfoUtils.getFieldForJavaBeanMethod(memberDetails, method);
-				if (field == null) {
-					continue;
-				}
+        StringBuilder facetFields = new StringBuilder();
+        int fieldCounter = 0;
 
-				facetFields.append(formbackingObject.getSimpleTypeName().toLowerCase()).append(".").append(field.getFieldName()).append(SolrUtils.getSolrDynamicFieldPostFix(field.getFieldType())).append(",");
+        ClassOrInterfaceTypeDetails formbackingClassOrInterfaceDetails = typeLocationService
+                .getTypeDetails(formbackingObject);
+        Assert.notNull(formbackingClassOrInterfaceDetails,
+                "Unable to obtain physical type metadata for type "
+                        + formbackingObject.getFullyQualifiedTypeName());
+        MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(
+                getClass().getName(), formbackingClassOrInterfaceDetails);
+        final MethodMetadata identifierAccessor = persistenceMemberLocator
+                .getIdentifierAccessor(formbackingObject);
+        final MethodMetadata versionAccessor = persistenceMemberLocator
+                .getVersionAccessor(formbackingObject);
 
-				Element columnElement = new XmlElementBuilder("fields:column", document).addAttribute("id", XmlUtils.convertId("c:" + formbackingObject.getFullyQualifiedTypeName() + "." + field.getFieldName().getSymbolName())).addAttribute("property", formbackingObject.getSimpleTypeName().toLowerCase() + "." + field.getFieldName().getSymbolName().toLowerCase() + SolrUtils.getSolrDynamicFieldPostFix(field.getFieldType())).build();
-				columnElement.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(columnElement));
-				resultTable.appendChild(columnElement);
-			}
-		}
+        for (MethodMetadata method : memberDetails.getMethods()) {
+            // Only interested in accessors
+            if (!BeanInfoUtils.isAccessorMethod(method)) {
+                continue;
+            }
+            if (++fieldCounter < 7) {
+                if (method.getMethodName().equals(
+                        identifierAccessor.getMethodName())
+                        || method.getMethodName().equals(
+                                versionAccessor.getMethodName())) {
+                    continue;
+                }
+                if (method.hasSameName(identifierAccessor, versionAccessor)) {
+                    continue;
+                }
 
-		Element searchFacet = new XmlElementBuilder("fields:search-facet", document).addAttribute("id", XmlUtils.convertId("sfacet:" + webScaffoldMetadata.getAnnotationValues().getFormBackingObject().getFullyQualifiedTypeName())).addAttribute("facetFields", facetFields.toString()).build();
-		searchFacet.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(searchFacet));
-		pageSearch.appendChild(searchFacet);
+                FieldMetadata field = BeanInfoUtils.getFieldForJavaBeanMethod(
+                        memberDetails, method);
+                if (field == null) {
+                    continue;
+                }
 
-		Element searchField = new XmlElementBuilder("fields:search-field", document).addAttribute("id", XmlUtils.convertId("sfield:" + webScaffoldMetadata.getAnnotationValues().getFormBackingObject().getFullyQualifiedTypeName())).build();
-		searchField.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(searchField));
+                facetFields
+                        .append(formbackingObject.getSimpleTypeName()
+                                .toLowerCase())
+                        .append(".")
+                        .append(field.getFieldName())
+                        .append(SolrUtils.getSolrDynamicFieldPostFix(field
+                                .getFieldType())).append(",");
 
-		pageSearch.appendChild(searchFacet);
-		pageSearch.appendChild(searchField);
-		pageSearch.appendChild(resultTable);
+                Element columnElement = new XmlElementBuilder("fields:column",
+                        document)
+                        .addAttribute(
+                                "id",
+                                XmlUtils.convertId("c:"
+                                        + formbackingObject
+                                                .getFullyQualifiedTypeName()
+                                        + "."
+                                        + field.getFieldName().getSymbolName()))
+                        .addAttribute(
+                                "property",
+                                formbackingObject.getSimpleTypeName()
+                                        .toLowerCase()
+                                        + "."
+                                        + field.getFieldName().getSymbolName()
+                                                .toLowerCase()
+                                        + SolrUtils
+                                                .getSolrDynamicFieldPostFix(field
+                                                        .getFieldType()))
+                        .build();
+                columnElement.setAttribute("z",
+                        XmlRoundTripUtils.calculateUniqueKeyFor(columnElement));
+                resultTable.appendChild(columnElement);
+            }
+        }
 
-		div.appendChild(pageSearch);
+        Element searchFacet = new XmlElementBuilder("fields:search-facet",
+                document)
+                .addAttribute(
+                        "id",
+                        XmlUtils.convertId("sfacet:"
+                                + webScaffoldMetadata.getAnnotationValues()
+                                        .getFormBackingObject()
+                                        .getFullyQualifiedTypeName()))
+                .addAttribute("facetFields", facetFields.toString()).build();
+        searchFacet.setAttribute("z",
+                XmlRoundTripUtils.calculateUniqueKeyFor(searchFacet));
+        pageSearch.appendChild(searchFacet);
 
-		return document;
-	}
+        Element searchField = new XmlElementBuilder("fields:search-field",
+                document).addAttribute(
+                "id",
+                XmlUtils.convertId("sfield:"
+                        + webScaffoldMetadata.getAnnotationValues()
+                                .getFormBackingObject()
+                                .getFullyQualifiedTypeName())).build();
+        searchField.setAttribute("z",
+                XmlRoundTripUtils.calculateUniqueKeyFor(searchField));
 
-	public String getProvidesType() {
-		return SolrJspMetadata.getMetadataIdentiferType();
-	}
+        pageSearch.appendChild(searchFacet);
+        pageSearch.appendChild(searchField);
+        pageSearch.appendChild(resultTable);
 
-	public void notify(final String upstreamDependency, String downstreamDependency) {
-		if (MetadataIdentificationUtils.isIdentifyingClass(downstreamDependency)) {
-			Assert.isTrue(MetadataIdentificationUtils.getMetadataClass(upstreamDependency).equals(MetadataIdentificationUtils.getMetadataClass(SolrWebSearchMetadata.getMetadataIdentiferType())), "Expected class-level notifications only for Solr web search metadata (not '" + upstreamDependency + "')");
+        div.appendChild(pageSearch);
 
-			// A physical Java type has changed, and determine what the corresponding local metadata identification string would have been
-			JavaType javaType = SolrWebSearchMetadata.getJavaType(upstreamDependency);
-			LogicalPath path = SolrWebSearchMetadata.getPath(upstreamDependency);
-			downstreamDependency = SolrJspMetadata.createIdentifier(javaType, path);
+        return document;
+    }
 
-			// We only need to proceed if the downstream dependency relationship is not already registered
-			// (if it's already registered, the event will be delivered directly later on)
-			if (metadataDependencyRegistry.getDownstream(upstreamDependency).contains(downstreamDependency)) {
-				return;
-			}
-		}
+    public String getProvidesType() {
+        return SolrJspMetadata.getMetadataIdentiferType();
+    }
 
-		// We should now have an instance-specific "downstream dependency" that can be processed by this class
-		Assert.isTrue(MetadataIdentificationUtils.getMetadataClass(downstreamDependency).equals(MetadataIdentificationUtils.getMetadataClass(getProvidesType())), "Unexpected downstream notification for '" + downstreamDependency + "' to this provider (which uses '" + getProvidesType() + "'");
+    public void notify(final String upstreamDependency,
+            String downstreamDependency) {
+        if (MetadataIdentificationUtils
+                .isIdentifyingClass(downstreamDependency)) {
+            Assert.isTrue(
+                    MetadataIdentificationUtils.getMetadataClass(
+                            upstreamDependency).equals(
+                            MetadataIdentificationUtils
+                                    .getMetadataClass(SolrWebSearchMetadata
+                                            .getMetadataIdentiferType())),
+                    "Expected class-level notifications only for Solr web search metadata (not '"
+                            + upstreamDependency + "')");
 
-		metadataService.evict(downstreamDependency);
-		if (get(downstreamDependency) != null) {
-			metadataDependencyRegistry.notifyDownstream(downstreamDependency);
-		}
-	}
+            // A physical Java type has changed, and determine what the
+            // corresponding local metadata identification string would have
+            // been
+            JavaType javaType = SolrWebSearchMetadata
+                    .getJavaType(upstreamDependency);
+            LogicalPath path = SolrWebSearchMetadata
+                    .getPath(upstreamDependency);
+            downstreamDependency = SolrJspMetadata.createIdentifier(javaType,
+                    path);
 
-	private void copyArtifacts(final String relativeTemplateLocation, final String relativeProjectFileLocation) {
-		// First install search.tagx
-		String projectFileLocation = pathResolver.getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, relativeProjectFileLocation);
-		if (!fileManager.exists(projectFileLocation)) {
-			try {
-				FileCopyUtils.copy(FileUtils.getInputStream(getClass(), relativeTemplateLocation), fileManager.createFile(projectFileLocation).getOutputStream());
-			} catch (IOException e) {
-				throw new IllegalStateException("Could not copy " + relativeProjectFileLocation + " into project", e);
-			}
-		}
-	}
+            // We only need to proceed if the downstream dependency relationship
+            // is not already registered
+            // (if it's already registered, the event will be delivered directly
+            // later on)
+            if (metadataDependencyRegistry.getDownstream(upstreamDependency)
+                    .contains(downstreamDependency)) {
+                return;
+            }
+        }
+
+        // We should now have an instance-specific "downstream dependency" that
+        // can be processed by this class
+        Assert.isTrue(
+                MetadataIdentificationUtils.getMetadataClass(
+                        downstreamDependency).equals(
+                        MetadataIdentificationUtils
+                                .getMetadataClass(getProvidesType())),
+                "Unexpected downstream notification for '"
+                        + downstreamDependency
+                        + "' to this provider (which uses '"
+                        + getProvidesType() + "'");
+
+        metadataService.evict(downstreamDependency);
+        if (get(downstreamDependency) != null) {
+            metadataDependencyRegistry.notifyDownstream(downstreamDependency);
+        }
+    }
+
+    private void copyArtifacts(final String relativeTemplateLocation,
+            final String relativeProjectFileLocation) {
+        // First install search.tagx
+        String projectFileLocation = pathResolver.getFocusedIdentifier(
+                Path.SRC_MAIN_WEBAPP, relativeProjectFileLocation);
+        if (!fileManager.exists(projectFileLocation)) {
+            try {
+                FileCopyUtils.copy(FileUtils.getInputStream(getClass(),
+                        relativeTemplateLocation),
+                        fileManager.createFile(projectFileLocation)
+                                .getOutputStream());
+            }
+            catch (IOException e) {
+                throw new IllegalStateException("Could not copy "
+                        + relativeProjectFileLocation + " into project", e);
+            }
+        }
+    }
 }

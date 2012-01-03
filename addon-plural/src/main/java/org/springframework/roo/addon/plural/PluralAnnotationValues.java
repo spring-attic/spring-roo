@@ -7,32 +7,32 @@ import org.springframework.roo.classpath.details.annotations.populator.AutoPopul
 
 /**
  * The values of a {@link RooPlural} annotation.
- *
+ * 
  * @author Andrew Swan
  * @since 1.2.0
  */
 public class PluralAnnotationValues extends AbstractAnnotationValues {
-	
-	// Fields
-	@AutoPopulate private String value = "";
 
-	/**
-	 * Constructor that reads the {@link RooPlural} annotation (if any) on the
-	 * given governor.
-	 *
-	 * @param governor the governor's metadata (required)
-	 */
-	public PluralAnnotationValues(final PhysicalTypeMetadata governor) {
-		super(governor, RooPlural.class);
-		AutoPopulationUtils.populate(this, annotationMetadata);
-	}
+    // Fields
+    @AutoPopulate private String value = "";
 
-	/**
-	 * Returns the plural provided by the annotation
-	 * 
-	 * @return
-	 */
-	public String getValue() {
-		return value;
-	}
+    /**
+     * Constructor that reads the {@link RooPlural} annotation (if any) on the
+     * given governor.
+     * 
+     * @param governor the governor's metadata (required)
+     */
+    public PluralAnnotationValues(final PhysicalTypeMetadata governor) {
+        super(governor, RooPlural.class);
+        AutoPopulationUtils.populate(this, annotationMetadata);
+    }
+
+    /**
+     * Returns the plural provided by the annotation
+     * 
+     * @return
+     */
+    public String getValue() {
+        return value;
+    }
 }

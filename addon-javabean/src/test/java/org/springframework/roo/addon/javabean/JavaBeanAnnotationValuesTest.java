@@ -4,19 +4,20 @@ import org.springframework.roo.classpath.details.annotations.populator.Annotatio
 
 /**
  * Unit test of {@link JavaBeanAnnotationValues}
- *
+ * 
  * @author Andrew Swan
  * @since 1.2.0
  */
-public class JavaBeanAnnotationValuesTest extends AnnotationValuesTestCase<RooJavaBean, JavaBeanAnnotationValues> {
+public class JavaBeanAnnotationValuesTest extends
+        AnnotationValuesTestCase<RooJavaBean, JavaBeanAnnotationValues> {
 
-	@Override
-	protected Class<RooJavaBean> getAnnotationClass() {
-		return RooJavaBean.class;
-	}
+    @Override
+    protected Class<RooJavaBean> getAnnotationClass() {
+        return RooJavaBean.class;
+    }
 
-	@Override
-	protected Class<JavaBeanAnnotationValues> getValuesClass() {
-		return JavaBeanAnnotationValues.class;
-	}
+    @Override
+    protected Class<JavaBeanAnnotationValues> getValuesClass() {
+        return JavaBeanAnnotationValues.class;
+    }
 }

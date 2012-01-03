@@ -16,36 +16,39 @@ import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Unit test of the {@link RepositoryMongoLayerMethod} enum.
- *
+ * 
  * @author Stefan Schmidt
  * @since 1.2.0
  */
 public class RepositoryMongoLayerMethodTest {
 
-	// Fixture
-	@Mock private JavaType mockTargetEntity;
-	@Mock private JavaType mockIdType;
+    // Fixture
+    @Mock private JavaType mockTargetEntity;
+    @Mock private JavaType mockIdType;
 
-	@Before
-	public void setUp() {
-		MockitoAnnotations.initMocks(this);
-	}
+    @Before
+    public void setUp() {
+        MockitoAnnotations.initMocks(this);
+    }
 
-	@Test
-	public void testNamesAreUniqueAndNotBlank() {
-		final Set<String> names = new HashSet<String>();
-		for (final RepositoryMongoLayerMethod method : RepositoryMongoLayerMethod.values()) {
-			final String name = method.getName();
-			names.add(name);
-			assertTrue(StringUtils.hasText(name));
-		}
-		assertEquals(RepositoryMongoLayerMethod.values().length, names.size());
-	}
+    @Test
+    public void testNamesAreUniqueAndNotBlank() {
+        final Set<String> names = new HashSet<String>();
+        for (final RepositoryMongoLayerMethod method : RepositoryMongoLayerMethod
+                .values()) {
+            final String name = method.getName();
+            names.add(name);
+            assertTrue(StringUtils.hasText(name));
+        }
+        assertEquals(RepositoryMongoLayerMethod.values().length, names.size());
+    }
 
-	@Test
-	public void testParameterTypesAreNotNull() {
-		for (final RepositoryMongoLayerMethod method : RepositoryMongoLayerMethod.values()) {
-			assertNotNull(method.getParameterTypes(mockTargetEntity, mockIdType));
-		}
-	}
+    @Test
+    public void testParameterTypesAreNotNull() {
+        for (final RepositoryMongoLayerMethod method : RepositoryMongoLayerMethod
+                .values()) {
+            assertNotNull(method
+                    .getParameterTypes(mockTargetEntity, mockIdType));
+        }
+    }
 }

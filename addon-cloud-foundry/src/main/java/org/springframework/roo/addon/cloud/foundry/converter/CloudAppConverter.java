@@ -14,7 +14,7 @@ import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Provides conversion to and from Cloud Foundry model classes.
- *
+ * 
  * @author James Tyrrell
  * @author Andrew Swan
  * @since 1.2.0
@@ -22,23 +22,27 @@ import org.springframework.roo.support.util.StringUtils;
 @Component
 @Service
 public class CloudAppConverter implements Converter<CloudApp> {
-	@Reference private CloudFoundrySession session;
+    @Reference private CloudFoundrySession session;
 
-	public CloudApp convertFromText(final String value, final Class<?> requiredType, final String optionContext) {
-		if (StringUtils.isBlank(value)) {
-			return null;
-		}
-		return new CloudApp(value);
-	}
+    public CloudApp convertFromText(final String value,
+            final Class<?> requiredType, final String optionContext) {
+        if (StringUtils.isBlank(value)) {
+            return null;
+        }
+        return new CloudApp(value);
+    }
 
-	public boolean supports(final Class<?> requiredType, final String optionContext) {
-		return CloudApp.class.isAssignableFrom(requiredType);
-	}
+    public boolean supports(final Class<?> requiredType,
+            final String optionContext) {
+        return CloudApp.class.isAssignableFrom(requiredType);
+    }
 
-	public boolean getAllPossibleValues(final List<Completion> completions, final Class<?> requiredType, final String existingData, final String optionContext, final MethodTarget target) {
-		for (String appName : session.getApplicationNames()) {
-			completions.add(new Completion(appName));
-		}
-		return false;
-	}
+    public boolean getAllPossibleValues(final List<Completion> completions,
+            final Class<?> requiredType, final String existingData,
+            final String optionContext, final MethodTarget target) {
+        for (String appName : session.getApplicationNames()) {
+            completions.add(new Completion(appName));
+        }
+        return false;
+    }
 }
