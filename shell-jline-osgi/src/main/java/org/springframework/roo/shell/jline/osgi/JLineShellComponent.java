@@ -86,7 +86,12 @@ public class JLineShellComponent extends JLineShell {
 
     @Override
     public String getStartupNotifications() {
-        return getLatestFavouriteTweet();
+        try {
+            return getLatestFavouriteTweet();
+        }
+        catch (Exception e) {
+            return null;
+        }
     }
 
     private String getLatestFavouriteTweet() {
@@ -94,7 +99,7 @@ public class JLineShellComponent extends JLineShell {
         String string = sendGetRequest(
                 "http://api.twitter.com/1/favorites.json",
                 "id=SpringRoo&count=5");
-        if (!StringUtils.isBlank(string)) {
+        if (StringUtils.isBlank(string)) {
             return null;
         }
         // Parse the returned JSON. This is a once off operation so we can used
