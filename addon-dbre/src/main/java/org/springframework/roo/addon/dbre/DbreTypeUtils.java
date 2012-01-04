@@ -266,7 +266,7 @@ public abstract class DbreTypeUtils {
                 continue;
             }
             else if (i > 0 && (c == '_' || c == '-' || c == '\\' || c == '/')
-                    || c == '.') {
+                    || c == '.' || c == ' ') {
                 isDelimChar = true;
                 continue;
             }
