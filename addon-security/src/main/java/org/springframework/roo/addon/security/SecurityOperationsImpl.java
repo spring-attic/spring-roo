@@ -11,6 +11,7 @@ import org.springframework.roo.addon.web.mvc.controller.WebMvcOperations;
 import org.springframework.roo.addon.web.mvc.jsp.tiles.TilesOperations;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Dependency;
+import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
@@ -55,7 +56,9 @@ public class SecurityOperationsImpl implements SecurityOperations {
                 && fileManager.exists(pathResolver.getFocusedIdentifier(
                         Path.SRC_MAIN_WEBAPP, "WEB-INF/web.xml"))
                 && !projectOperations.getFocusedModule()
-                        .hasDependencyExcludingVersion(SPRING_SECURITY);
+                        .hasDependencyExcludingVersion(SPRING_SECURITY)
+                && !projectOperations.isFeatureInstalledInFocusedModule(
+                        FeatureNames.JSF, FeatureNames.GWT);
     }
 
     public void installSecurity() {
