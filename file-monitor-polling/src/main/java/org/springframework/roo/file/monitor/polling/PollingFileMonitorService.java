@@ -131,8 +131,8 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
             final DirectoryMonitoringRequest dmr = (DirectoryMonitoringRequest) request;
             if (dmr.isWatchSubtree()) {
                 if (!filePath.startsWith(requestCanonicalPath)) {
-                    return false; // Not within this directory or a
-                                  // sub-directory
+                 // Not within this directory or as ub-directory
+                    return false; 
                 }
             }
             else {

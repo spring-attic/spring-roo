@@ -36,8 +36,8 @@ public class UaaShellStatusListener implements ShellStatusListener {
         shell.addShellStatusListener(this);
         String originalThreadName = Thread.currentThread().getName();
         try {
-            Thread.currentThread().setName(""); // preventing thread name
-                                                // appearing on JLine console
+            // Preventing thread name appearing on JLine console
+            Thread.currentThread().setName("");
             onShellStatusChange(null, shell.getShellStatus());
         }
         finally {
