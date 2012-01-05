@@ -146,10 +146,8 @@ public class DefaultMetadataLogger implements MetadataLogger {
     private void logToFile(final String line) {
         if (fileLog == null) {
             try {
-                fileLog = new FileWriter("metadata.log", false); // Overwrite
-                                                                 // existing
-                                                                 // (don't
-                                                                 // append)
+                // Overwrite existing (don't append)
+                fileLog = new FileWriter("metadata.log", false);
             }
             catch (IOException ignore) {
             }

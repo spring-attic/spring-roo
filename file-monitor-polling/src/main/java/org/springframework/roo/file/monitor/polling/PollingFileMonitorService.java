@@ -194,7 +194,7 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
                 .hasNext();) {
             final String filePath = iter.next();
             if (isWithin(request, filePath)) {
-                iter.remove(); // we've processed it
+                iter.remove(); // We've processed it
                 // Skip this file if it doesn't exist
                 final File thisFile = new File(filePath);
                 if (thisFile.exists()) {
@@ -222,7 +222,7 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
                 .hasNext();) {
             final String filePath = iter.next();
             if (isWithin(request, filePath)) {
-                iter.remove(); // we've processed it
+                iter.remove(); // We've processed it
                 // Skip this file if it doesn't exist
                 final File thisFile = new File(filePath);
                 if (thisFile.exists()) {
@@ -246,7 +246,7 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
                 .hasNext();) {
             final String filePath = iter.next();
             if (isWithin(request, filePath)) {
-                iter.remove(); // we've processed it
+                iter.remove(); // We've processed it
                 // Skip this file if it suddenly exists again (it shouldn't be
                 // in the notify deleted in this case!)
                 final File thisFile = new File(filePath);

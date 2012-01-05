@@ -38,7 +38,7 @@ public class PreferencesTest {
     @Test
     public void testGetByteArrayWithUnknownKeyAndNoDefault() {
         // Set up
-        final byte[] expectedValue = { 1, 2, 3 }; // arbitrary
+        final byte[] expectedValue = { 1, 2, 3 }; // Arbitrary
         when(mockPreferences.getByteArray(INVALID_KEY, new byte[0]))
                 .thenReturn(expectedValue);
 
