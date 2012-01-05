@@ -52,11 +52,7 @@ public class PomManagementServiceImpl implements PomManagementService {
     @Reference Shell shell;
 
     private final Set<String> toBeParsed = new HashSet<String>();
-    private final Map<String, Pom> pomMap = new LinkedHashMap<String, Pom>(); // linked
-                                                                              // to
-                                                                              // preserve
-                                                                              // sort
-                                                                              // order
+    private final Map<String, Pom> pomMap = new LinkedHashMap<String, Pom>();
     private String focusedModulePath;
     private String projectRootDirectory;
 
