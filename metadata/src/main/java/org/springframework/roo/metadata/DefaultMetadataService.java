@@ -51,26 +51,12 @@ public class DefaultMetadataService extends AbstractMetadataCache implements
     private final Object lock = new Object();
 
     // Request control
-    private final List<String> activeRequests = new ArrayList<String>(); // List
-                                                                         // to
-                                                                         // assist
-                                                                         // output
-                                                                         // "stacks"
-                                                                         // which
-                                                                         // show
-                                                                         // the
-                                                                         // order
-                                                                         // of
-                                                                         // requests
-    private final List<String> keysToRetry = new ArrayList<String>(); // List to
-                                                                      // help us
-                                                                      // verify
-                                                                      // correct
-                                                                      // operation
-                                                                      // through
-                                                                      // logs
-                                                                      // (predictable
-                                                                      // ordering)
+    // List to assist output "stacks"which show the order of requests
+    private final List<String> activeRequests = new ArrayList<String>();
+
+    // List to help us verify correct operation through logs (predictable
+    // ordering)
+    private final List<String> keysToRetry = new ArrayList<String>();
 
     protected void bindMetadataProvider(final MetadataProvider mp) {
         synchronized (lock) {
