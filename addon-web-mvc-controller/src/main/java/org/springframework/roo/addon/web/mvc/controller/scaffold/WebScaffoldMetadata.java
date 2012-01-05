@@ -157,12 +157,7 @@ public class WebScaffoldMetadata extends
         this.annotationValues = annotationValues;
         this.controllerPath = annotationValues.getPath();
         this.dateTypes = dateTypes;
-        this.formBackingType = annotationValues.getFormBackingObject(); // must
-                                                                        // happen
-                                                                        // before
-                                                                        // it's
-                                                                        // used
-                                                                        // below
+        this.formBackingType = annotationValues.getFormBackingObject();
         this.entityName = JavaSymbolName.getReservedWordSafeName(
                 formBackingType).getSymbolName();
         this.javaTypeMetadataHolder = specialDomainTypes.get(formBackingType);
