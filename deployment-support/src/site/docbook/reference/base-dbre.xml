@@ -680,7 +680,7 @@ public class LineItemPK {
       <para>Roo also ensures the entity's identity field is unique. For
       example if the @Id field is called 'id' but you also add a field with
       the same name to the .java file, DBRE will automatically rename the @Id
-      field by prefixing it with an underscore character.</para>
+      field by prefixing it with an underscore character. </para>
     </section>
   </section>
 
@@ -710,9 +710,16 @@ public class LineItemPK {
         java.lang.NoClassDefFoundError: javax/resource/ResourceException' to
         be displayed</emphasis></para>
 
-        <para>This is due to the Firebird JDBC driver not having been
-        installed. The driver must be installed if you have installed Roo for
-        the first time. See <xref linkend="dbre_installation" /></para>
+        <para>This is due to the javax.resource connector jar not installed.
+        Remove the cache directory under your Roo installation directory,
+        start the Roo shell, and run the command:</para>
+
+        <para><programlisting>osgi start --url
+        http://spring-roo-repository.springsource.org/release/org/springframework/roo/wrapping/org.springframework.roo.wrapping.connector/1.0.0010/org.springframework.roo.wrapping.connector-1.0.0010.jar
+        </programlisting></para>
+
+        <para>Re-install the Firebird driver. See <xref
+        linkend="dbre_installation" />.</para>
       </listitem>
 
       <listitem>
