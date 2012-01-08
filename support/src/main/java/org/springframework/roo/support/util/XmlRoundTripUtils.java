@@ -112,35 +112,21 @@ public final class XmlRoundTripUtils {
     private static boolean addOrUpdateElements(final Element original,
             final Element proposed, boolean originalDocumentChanged) {
         NodeList proposedChildren = proposed.getChildNodes();
-        for (int i = 0, n = proposedChildren.getLength(); i < n; i++) { // Check
-                                                                        // proposed
-                                                                        // elements
-                                                                        // and
-                                                                        // compare
-                                                                        // to
-                                                                        // originals
-                                                                        // to
-                                                                        // find
-                                                                        // out
-                                                                        // if we
-                                                                        // need
-                                                                        // to
-                                                                        // add
-                                                                        // or
-                                                                        // replace
-                                                                        // elements
+        // Check proposed elements and compare to originals to find out if we
+        // need to add or replace elements
+        for (int i = 0, n = proposedChildren.getLength(); i < n; i++) {
             Node node = proposedChildren.item(i);
             if (node != null && node.getNodeType() == Node.ELEMENT_NODE) {
                 Element proposedElement = (Element) node;
                 String proposedId = proposedElement.getAttribute("id");
-                if (proposedId.length() != 0) { // Only proposed elements with
-                                                // an id will be considered
+                // Only proposed elements with
+                // an id will be considered
+                if (proposedId.length() != 0) {
                     Element originalElement = XmlUtils.findFirstElement(
                             "//*[@id='" + proposedId + "']", original);
-                    if (null == originalElement) { // Insert proposed element
-                                                   // given the original
-                                                   // document has no element
-                                                   // with a matching id
+                    // Insert proposed element given the original document has
+                    // no element with a matching id
+                    if (null == originalElement) {
                         Element placeHolder = DomUtils.findFirstElementByName(
                                 "util:placeholder", original);
                         if (placeHolder != null) { // Insert right before place
@@ -150,45 +136,34 @@ public final class XmlRoundTripUtils {
                                             proposedElement, false),
                                     placeHolder);
                         }
-                        else { // Find the best place to insert the element
-                            if (proposed.getAttribute("id").length() != 0) { // Try
-                                                                             // to
-                                                                             // find
-                                                                             // the
-                                                                             // id
-                                                                             // of
-                                                                             // the
-                                                                             // proposed
-                                                                             // element's
-                                                                             // parent
-                                                                             // id
-                                                                             // in
-                                                                             // the
-                                                                             // original
-                                                                             // document
+                        // Find the best place to insert the element
+                        else {
+                            // Try to find the id of the proposed element's
+                            // parent id in the original document
+                            if (proposed.getAttribute("id").length() != 0) {
                                 Element originalParent = XmlUtils
                                         .findFirstElement("//*[@id='"
                                                 + proposed.getAttribute("id")
                                                 + "']", original);
-                                if (originalParent != null) { // Found parent
-                                                              // with the same
-                                                              // id, so we can
-                                                              // just add it as
-                                                              // new child
+                                // Found parent with the same id, so we can just
+                                // add it as new child
+                                if (originalParent != null) {
                                     originalParent.appendChild(original
                                             .getOwnerDocument().importNode(
                                                     proposedElement, false));
                                 }
-                                else { // No parent found so we add it as a
-                                       // child of the root element (last
-                                       // resort)
+                                // No parent found so we add it as a
+                                // child of the root element (last
+                                // resort)
+                                else {
                                     original.appendChild(original
                                             .getOwnerDocument().importNode(
                                                     proposedElement, false));
                                 }
                             }
-                            else { // No parent found so we add it as a child of
-                                   // the root element (last resort)
+                            // No parent found so we add it as a child of
+                            // the root element (last resort)
+                            else {
                                 original.appendChild(original
                                         .getOwnerDocument().importNode(
                                                 proposedElement, false));
@@ -196,43 +171,24 @@ public final class XmlRoundTripUtils {
                         }
                         originalDocumentChanged = true;
                     }
-                    else { // We found an element in the original document with
-                           // a matching id
+                    // We found an element in the original document with
+                    // a matching id
+                    else {
                         String originalElementHashCode = originalElement
                                 .getAttribute("z");
-                        if (originalElementHashCode.length() > 0) { // Only act
-                                                                    // if a hash
-                                                                    // code
-                                                                    // exists
+                        // Only actif a hash code exists
+                        if (originalElementHashCode.length() > 0) {
+                            // Only act if hash codes match (no user changes in
+                            // the element) or the user requests for the hash
+                            // code to be regenerated
                             if ("?".equals(originalElementHashCode)
                                     || originalElementHashCode
-                                            .equals(calculateUniqueKeyFor(originalElement))) { // Only
-                                                                                               // act
-                                                                                               // if
-                                                                                               // hash
-                                                                                               // codes
-                                                                                               // match
-                                                                                               // (no
-                                                                                               // user
-                                                                                               // changes
-                                                                                               // in
-                                                                                               // the
-                                                                                               // element)
-                                                                                               // or
-                                                                                               // the
-                                                                                               // user
-                                                                                               // requests
-                                                                                               // for
-                                                                                               // the
-                                                                                               // hash
-                                                                                               // code
-                                                                                               // to
-                                                                                               // be
-                                                                                               // regenerated
+                                            .equals(calculateUniqueKeyFor(originalElement))) {
+                                // Check if the elements have equal contents
                                 if (!equalElements(originalElement,
-                                        proposedElement)) { // Check if the
-                                                            // elements have
-                                                            // equal contents
+                                        proposedElement)) {
+                                    // Replace the original with the proposed
+                                    // element
                                     originalElement
                                             .getParentNode()
                                             .replaceChild(
@@ -240,39 +196,13 @@ public final class XmlRoundTripUtils {
                                                             .importNode(
                                                                     proposedElement,
                                                                     false),
-                                                    originalElement); // replace
-                                                                      // the
-                                                                      // original
-                                                                      // with
-                                                                      // the
-                                                                      // proposed
-                                                                      // element
+                                                    originalElement);
                                     originalDocumentChanged = true;
                                 }
-                                if ("?".equals(originalElementHashCode)) { // Replace
-                                                                           // z
-                                                                           // if
-                                                                           // the
-                                                                           // user
-                                                                           // sets
-                                                                           // its
-                                                                           // value
-                                                                           // to
-                                                                           // '?'
-                                                                           // as
-                                                                           // an
-                                                                           // indication
-                                                                           // that
-                                                                           // roo
-                                                                           // should
-                                                                           // take
-                                                                           // over
-                                                                           // the
-                                                                           // management
-                                                                           // of
-                                                                           // this
-                                                                           // element
-                                                                           // again
+                                // Replace z if the user sets its value to '?'
+                                // as an indication that roo should take over
+                                // the management of this element again
+                                if ("?".equals(originalElementHashCode)) {
                                     originalElement
                                             .setAttribute(
                                                     "z",
@@ -280,30 +210,24 @@ public final class XmlRoundTripUtils {
                                     originalDocumentChanged = true;
                                 }
                             }
-                            else { // If hash codes don't match we will mark the
-                                   // element as z="user-managed"
+                            // If hash codes don't match we will mark the
+                            // element as z="user-managed"
+                            else {
+                                // Mark the element as 'user-managed' if the
+                                // hash codes don't match any more
                                 if (!originalElementHashCode
                                         .equals("user-managed")) {
                                     originalElement.setAttribute("z",
-                                            "user-managed"); // Mark the element
-                                                             // as
-                                                             // 'user-managed'
-                                                             // if the hash
-                                                             // codes don't
-                                                             // match any more
+                                            "user-managed");
                                     originalDocumentChanged = true;
                                 }
                             }
                         }
                     }
                 }
+                // Walk through the document tree recursively
                 originalDocumentChanged = addOrUpdateElements(original,
-                        proposedElement, originalDocumentChanged); // Walk
-                                                                   // through
-                                                                   // the
-                                                                   // document
-                                                                   // tree
-                                                                   // recursively
+                        proposedElement, originalDocumentChanged);
             }
         }
         return originalDocumentChanged;
@@ -312,53 +236,32 @@ public final class XmlRoundTripUtils {
     private static boolean removeElements(final Element original,
             final Element proposed, boolean originalDocumentChanged) {
         NodeList originalChildren = original.getChildNodes();
-        for (int i = 0, n = originalChildren.getLength(); i < n; i++) { // Check
-                                                                        // original
-                                                                        // elements
-                                                                        // and
-                                                                        // compare
-                                                                        // to
-                                                                        // proposed
-                                                                        // to
-                                                                        // find
-                                                                        // out
-                                                                        // if we
-                                                                        // need
-                                                                        // to
-                                                                        // remove
-                                                                        // elements
+        // Check original elements and compare to proposed to find out if we
+        // need to remove elements
+        for (int i = 0, n = originalChildren.getLength(); i < n; i++) {
             Node node = originalChildren.item(i);
             if (node != null && node.getNodeType() == Node.ELEMENT_NODE) {
                 Element originalElement = (Element) node;
                 String originalId = originalElement.getAttribute("id");
-                if (originalId.length() != 0) { // Only proposed elements with
-                                                // an id will be considered
+                if (originalId.length() != 0) {
+                    // Only proposed elements with
+                    // an id will be considered
                     Element proposedElement = XmlUtils.findFirstElement(
                             "//*[@id='" + originalId + "']", proposed);
                     if (null == proposedElement
                             && (originalElement.getAttribute("z").equals(
                                     calculateUniqueKeyFor(originalElement)) || originalElement
-                                    .getAttribute("z").equals("?"))) { // Remove
-                                                                       // original
-                                                                       // element
-                                                                       // given
-                                                                       // the
-                                                                       // proposed
-                                                                       // document
-                                                                       // has no
-                                                                       // element
-                                                                       // with a
-                                                                       // matching
-                                                                       // id
+                                    .getAttribute("z").equals("?"))) {
+                        // Remove original element given the proposed document
+                        // has no element with a matching id
                         originalElement.getParentNode().removeChild(
                                 originalElement);
                         originalDocumentChanged = true;
                     }
                 }
+                // Walk through the document tree recursively
                 originalDocumentChanged = removeElements(originalElement,
-                        proposed, originalDocumentChanged); // Walk through the
-                                                            // document tree
-                                                            // recursively
+                        proposed, originalDocumentChanged);
             }
         }
         return originalDocumentChanged;
