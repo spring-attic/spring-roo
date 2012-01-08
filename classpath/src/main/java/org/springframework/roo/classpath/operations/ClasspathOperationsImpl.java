@@ -44,12 +44,12 @@ import org.springframework.roo.support.util.Assert;
 public class ClasspathOperationsImpl implements ClasspathOperations {
 
     // Fields
-    @Reference private MetadataService metadataService;
-    @Reference private PathResolver pathResolver;
-    @Reference private ProjectOperations projectOperations;
-    @Reference private StaticFieldConverter staticFieldConverter;
-    @Reference private TypeLocationService typeLocationService;
-    @Reference private TypeManagementService typeManagementService;
+    @Reference MetadataService metadataService;
+    @Reference PathResolver pathResolver;
+    @Reference ProjectOperations projectOperations;
+    @Reference StaticFieldConverter staticFieldConverter;
+    @Reference TypeLocationService typeLocationService;
+    @Reference TypeManagementService typeManagementService;
 
     protected void activate(final ComponentContext context) {
         staticFieldConverter.add(InheritanceType.class);
@@ -67,6 +67,8 @@ public class ClasspathOperationsImpl implements ClasspathOperations {
         Assert.notNull(type, "Specify the type to focus on");
         final String physicalTypeIdentifier = typeLocationService
                 .getPhysicalTypeIdentifier(type);
+        Assert.notNull(physicalTypeIdentifier,
+                "Cannot locate the type " + type.getFullyQualifiedTypeName());
         final PhysicalTypeMetadata ptm = (PhysicalTypeMetadata) metadataService
                 .get(physicalTypeIdentifier);
         Assert.notNull(
