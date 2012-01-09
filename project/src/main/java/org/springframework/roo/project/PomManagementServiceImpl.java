@@ -128,16 +128,12 @@ public class PomManagementServiceImpl implements PomManagementService {
     }
 
     public void setFocusedModule(final Pom focusedModule) {
-        setFocusedModule(focusedModule.getPath());
-    }
-
-    public void setFocusedModule(final String focusedModulePath) {
-        Assert.hasText(focusedModulePath, "Module path required");
-        if (focusedModulePath.equals(this.focusedModulePath)) {
+        Assert.notNull(focusedModule, "Module required");
+        if (focusedModule.getPath().equals(this.focusedModulePath)) {
             return;
         }
-        this.focusedModulePath = focusedModulePath;
-        shell.setPromptPath(pomMap.get(focusedModulePath).getModuleName());
+        this.focusedModulePath = focusedModule.getPath();
+        shell.setPromptPath(focusedModule.getModuleName());
     }
 
     private void updatePomCache() {

@@ -51,9 +51,10 @@ import org.springframework.roo.support.util.StringUtils;
 @Component(immediate = true)
 @Service
 public class TypeLocationServiceImpl implements TypeLocationService {
-    
+
     // Constants
-    private static final String JAVA_FILES_ANT_PATH = "**" + File.separatorChar + "*.java";
+    private static final String JAVA_FILES_ANT_PATH = "**" + File.separatorChar
+            + "*.java";
 
     // Fields
     @Reference private FileManager fileManager;

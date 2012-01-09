@@ -53,16 +53,11 @@ interface PomManagementService {
     String getFocusedModuleName();
 
     /**
-     * @param focusedModule the {@link ProjectDescriptor} to focus
-     */
-    void setFocusedModule(Pom focusedModule);
-
-    /**
-     * Changes focus to the module with the given descriptor file
+     * Focuses on the given module.
      * 
-     * @param focusedModule the canonical path of the descriptor file
+     * @param module the module to focus upon (required)
      */
-    void setFocusedModule(String focusedModule);
+    void setFocusedModule(Pom module);
 
     /**
      * @param fileIdentifier the canonical path to lookup

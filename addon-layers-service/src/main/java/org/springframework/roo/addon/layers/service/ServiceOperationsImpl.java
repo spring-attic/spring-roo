@@ -1,14 +1,15 @@
 package org.springframework.roo.addon.layers.service;
 
+import static java.lang.reflect.Modifier.PUBLIC;
+import static org.springframework.roo.classpath.PhysicalTypeCategory.CLASS;
+import static org.springframework.roo.classpath.PhysicalTypeCategory.INTERFACE;
 import static org.springframework.roo.model.RooJavaType.ROO_SERVICE;
 
-import java.lang.reflect.Modifier;
 import java.util.Arrays;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.TypeManagementService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
@@ -46,42 +47,46 @@ public class ServiceOperationsImpl implements ServiceOperations {
     public void setupService(final JavaType interfaceType,
             final JavaType classType, final JavaType domainType) {
         Assert.notNull(interfaceType, "Interface type required");
-        Assert.notNull(classType, "Class type required");
-        Assert.notNull(domainType, "Domain type required");
+        createServiceInterface(interfaceType, domainType);
+        createServiceClass(interfaceType, classType);
+    }
 
-        String interfaceIdentifier = pathResolver.getFocusedCanonicalPath(
-                Path.SRC_MAIN_JAVA, interfaceType);
-        String classIdentifier = pathResolver.getFocusedCanonicalPath(
-                Path.SRC_MAIN_JAVA, classType);
-
-        if (fileManager.exists(interfaceIdentifier)
-                || fileManager.exists(classIdentifier)) {
-            return; // Type exists already - nothing to do
+    private void createServiceInterface(final JavaType interfaceType,
+            final JavaType domainType) {
+        final String interfaceIdentifier = pathResolver
+                .getFocusedCanonicalPath(Path.SRC_MAIN_JAVA, interfaceType);
+        if (fileManager.exists(interfaceIdentifier)) {
+            return; // Type already exists - nothing to do
         }
-
-        // First build interface type
-        AnnotationMetadataBuilder interfaceAnnotationMetadata = new AnnotationMetadataBuilder(
+        Assert.notNull(domainType, "Domain type required");
+        final AnnotationMetadataBuilder interfaceAnnotationMetadata = new AnnotationMetadataBuilder(
                 ROO_SERVICE);
         interfaceAnnotationMetadata
                 .addAttribute(new ArrayAttributeValue<ClassAttributeValue>(
                         new JavaSymbolName("domainTypes"), Arrays
                                 .asList(new ClassAttributeValue(
                                         new JavaSymbolName("foo"), domainType))));
-        String interfaceMdId = PhysicalTypeIdentifier.createIdentifier(
+        final String interfaceMid = PhysicalTypeIdentifier.createIdentifier(
                 interfaceType, pathResolver.getPath(interfaceIdentifier));
-        ClassOrInterfaceTypeDetailsBuilder interfaceTypeBuilder = new ClassOrInterfaceTypeDetailsBuilder(
-                interfaceMdId, Modifier.PUBLIC, interfaceType,
-                PhysicalTypeCategory.INTERFACE);
+        final ClassOrInterfaceTypeDetailsBuilder interfaceTypeBuilder = new ClassOrInterfaceTypeDetailsBuilder(
+                interfaceMid, PUBLIC, interfaceType, INTERFACE);
         interfaceTypeBuilder.addAnnotation(interfaceAnnotationMetadata.build());
         typeManagementService.createOrUpdateTypeOnDisk(interfaceTypeBuilder
                 .build());
+    }
 
-        // Second build the implementing class
-        String classMdId = PhysicalTypeIdentifier.createIdentifier(classType,
-                pathResolver.getPath(classIdentifier));
-        ClassOrInterfaceTypeDetailsBuilder classTypeBuilder = new ClassOrInterfaceTypeDetailsBuilder(
-                classMdId, Modifier.PUBLIC, classType,
-                PhysicalTypeCategory.CLASS);
+    private void createServiceClass(final JavaType interfaceType,
+            final JavaType classType) {
+        Assert.notNull(classType, "Class type required");
+        final String classIdentifier = pathResolver.getFocusedCanonicalPath(
+                Path.SRC_MAIN_JAVA, classType);
+        if (fileManager.exists(classIdentifier)) {
+            return; // Type already exists - nothing to do
+        }
+        final String classMid = PhysicalTypeIdentifier.createIdentifier(
+                classType, pathResolver.getPath(classIdentifier));
+        final ClassOrInterfaceTypeDetailsBuilder classTypeBuilder = new ClassOrInterfaceTypeDetailsBuilder(
+                classMid, PUBLIC, classType, CLASS);
         classTypeBuilder.addImplementsType(interfaceType);
         typeManagementService
                 .createOrUpdateTypeOnDisk(classTypeBuilder.build());

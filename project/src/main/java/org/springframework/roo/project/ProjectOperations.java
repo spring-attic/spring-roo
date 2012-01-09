@@ -575,7 +575,9 @@ public interface ProjectOperations {
     String getFocusedProjectName();
 
     /**
-     * @param module
+     * Sets the currently focused module
+     * 
+     * @param module the module to focus upon (required)
      */
     void setModule(Pom module);
 
