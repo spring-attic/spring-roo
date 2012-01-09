@@ -5,6 +5,7 @@ import java.math.BigInteger;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.springframework.roo.classpath.converters.JavaTypeConverter;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
@@ -50,7 +51,7 @@ public class MongoCommands implements CommandMarker {
     @CliCommand(value = "repository mongo", help = "Adds @RooMongoRepository annotation to target type")
     public void repository(
             @CliOption(key = "interface", mandatory = true, help = "The java interface to apply this annotation to") final JavaType interfaceType,
-            @CliOption(key = "entity", unspecifiedDefaultValue = "*", optionContext = "update,project", mandatory = false, help = "The domain entity this repository should expose") final JavaType domainType) {
+            @CliOption(key = "entity", unspecifiedDefaultValue = "*", optionContext = JavaTypeConverter.PROJECT, mandatory = false, help = "The domain entity this repository should expose") final JavaType domainType) {
 
         mongoOperations.setupRepository(interfaceType, domainType);
     }
