@@ -26,7 +26,7 @@ public class DataOnDemandCommands implements CommandMarker {
     @Reference private DataOnDemandOperations dataOnDemandOperations;
 
     @CliAvailabilityIndicator({ "dod" })
-    public boolean isPersistentClassAvailable() {
+    public boolean isDataOnDemandAvailable() {
         return dataOnDemandOperations.isDataOnDemandInstallationPossible();
     }
 
