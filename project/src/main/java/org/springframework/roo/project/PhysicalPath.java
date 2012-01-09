@@ -20,6 +20,7 @@ public class PhysicalPath {
     // Fields
     private final LogicalPath logicalPath;
     private final File location;
+    private final String canonicalPath;
 
     /**
      * Constructor
@@ -30,6 +31,7 @@ public class PhysicalPath {
     public PhysicalPath(final LogicalPath logicalPath, final File location) {
         Assert.notNull(logicalPath, "Module path required");
         Assert.notNull(location, "Location required");
+        this.canonicalPath = FileUtils.getCanonicalPath(location);
         this.logicalPath = logicalPath;
         this.location = location;
     }
@@ -62,7 +64,7 @@ public class PhysicalPath {
      * @return a non-blank canonical path
      */
     public String getLocationPath() {
-        return FileUtils.getCanonicalPath(location);
+        return canonicalPath;
     }
 
     public Path getPath() {
