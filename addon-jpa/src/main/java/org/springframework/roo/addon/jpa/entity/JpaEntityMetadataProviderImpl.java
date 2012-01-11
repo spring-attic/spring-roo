@@ -253,8 +253,6 @@ public class JpaEntityMetadataProviderImpl extends
                 isDatabaseDotComEnabled);
     }
 
-    // ---------------- The meat of this provider starts here ------------------
-
     public String getProvidesType() {
         return PROVIDES_TYPE;
     }
