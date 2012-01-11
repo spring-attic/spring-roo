@@ -114,7 +114,7 @@ public class JpaOperationsImpl implements JpaOperations {
     static final String PERSISTENCE_XML = "META-INF/persistence.xml";
 
     static final String POM_XML = "pom.xml";
-    
+
     @Reference FileManager fileManager;
     @Reference PathResolver pathResolver;
     @Reference ProjectOperations projectOperations;
