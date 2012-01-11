@@ -18,10 +18,17 @@ import org.springframework.roo.support.util.StringUtils;
  */
 public class ProjectMetadata extends AbstractMetadataItem {
 
-    // Constants
     static final String MODULE_SEPARATOR = "?";
     static final String PROJECT_MID_PREFIX = MetadataIdentificationUtils
             .create(ProjectMetadata.class.getName(), "the_project");
+
+    public static String getModuleName(final String metadataIdentificationString) {
+        if (metadataIdentificationString.contains(MODULE_SEPARATOR)) {
+            return StringUtils.substringAfterLast(metadataIdentificationString,
+                    MODULE_SEPARATOR);
+        }
+        return "";
+    }
 
     /**
      * Returns the metadata ID for the project-level metadata of the given
@@ -45,15 +52,6 @@ public class ProjectMetadata extends AbstractMetadataItem {
         return metadataIdentificationString.startsWith(PROJECT_MID_PREFIX);
     }
 
-    public static String getModuleName(final String metadataIdentificationString) {
-        if (metadataIdentificationString.contains(MODULE_SEPARATOR)) {
-            return StringUtils.substringAfterLast(metadataIdentificationString,
-                    MODULE_SEPARATOR);
-        }
-        return "";
-    }
-
-    // Fields
     private final Pom pom;
 
     /**
@@ -67,12 +65,12 @@ public class ProjectMetadata extends AbstractMetadataItem {
         this.pom = pom;
     }
 
-    public Pom getPom() {
-        return pom;
-    }
-
     public String getModuleName() {
         return pom.getModuleName();
+    }
+
+    public Pom getPom() {
+        return pom;
     }
 
     @Override

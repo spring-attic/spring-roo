@@ -15,14 +15,13 @@ import java.util.Map;
  */
 class AntPatchStringMatcher {
 
-    // Fields
-    private final char[] patArr;
-    private final char[] strArr;
-    private int patIdxStart = 0;
-    private int patIdxEnd;
-    private int strIdxStart = 0;
-    private int strIdxEnd;
     private char ch;
+    private final char[] patArr;
+    private int patIdxEnd;
+    private int patIdxStart = 0;
+    private final char[] strArr;
+    private int strIdxEnd;
+    private int strIdxStart = 0;
     private final Map<String, String> uriTemplateVariables;
 
     /** Constructs a new instance of the <code>AntPatchStringMatcher</code>. */
@@ -38,12 +37,87 @@ class AntPatchStringMatcher {
     private void addTemplateVariable(final int curlyIdxStart,
             final int curlyIdxEnd, final int valIdxStart, final int valIdxEnd) {
         if (uriTemplateVariables != null) {
-            String varName = new String(patArr, curlyIdxStart + 1, curlyIdxEnd
-                    - curlyIdxStart - 1);
-            String varValue = new String(strArr, valIdxStart, valIdxEnd
-                    - valIdxStart + 1);
+            final String varName = new String(patArr, curlyIdxStart + 1,
+                    curlyIdxEnd - curlyIdxStart - 1);
+            final String varValue = new String(strArr, valIdxStart,
+                    (valIdxEnd - valIdxStart) + 1);
             uriTemplateVariables.put(varName, varValue);
         }
+    }
+
+    private boolean allCharsUsed() {
+        return strIdxStart > strIdxEnd;
+    }
+
+    private boolean consecutiveStars(final int patIdxTmp) {
+        if ((patIdxTmp == (patIdxStart + 1)) && (patArr[patIdxStart] == '*')
+                && (patArr[patIdxTmp] == '*')) {
+            // Two stars next to each other, skip the first one.
+            patIdxStart++;
+            return true;
+        }
+        return false;
+    }
+
+    private boolean doShortcut() {
+        if (patIdxEnd != strIdxEnd) {
+            return false; // Pattern and string do not have the same size
+        }
+        for (int i = 0; i <= patIdxEnd; i++) {
+            ch = patArr[i];
+            if (ch != '?') {
+                if (ch != strArr[i]) {
+                    return false;// Character mismatch
+                }
+            }
+        }
+        return true; // String matches against pattern
+    }
+
+    private int findClosingCurly() {
+        for (int i = patIdxStart + 1; i <= patIdxEnd; i++) {
+            if (patArr[i] == '}') {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    private int findNextStarOrCurly() {
+        for (int i = patIdxStart + 1; i <= patIdxEnd; i++) {
+            if ((patArr[i] == '*') || (patArr[i] == '{')) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    private boolean matchAfterLastStarOrCurly() {
+        while (((ch = patArr[patIdxEnd]) != '*') && (ch != '}')
+                && (strIdxStart <= strIdxEnd)) {
+            if (ch != '?') {
+                if (ch != strArr[strIdxEnd]) {
+                    return false;
+                }
+            }
+            patIdxEnd--;
+            strIdxEnd--;
+        }
+        return true;
+    }
+
+    private boolean matchBeforeFirstStarOrCurly() {
+        while (((ch = patArr[patIdxStart]) != '*') && (ch != '{')
+                && (strIdxStart <= strIdxEnd)) {
+            if (ch != '?') {
+                if (ch != strArr[strIdxStart]) {
+                    return false;
+                }
+            }
+            patIdxStart++;
+            strIdxStart++;
+        }
+        return true;
     }
 
     /**
@@ -77,7 +151,7 @@ class AntPatchStringMatcher {
         }
         // Process pattern between stars. padIdxStart and patIdxEnd point always
         // to a '*'.
-        while (patIdxStart != patIdxEnd && strIdxStart <= strIdxEnd) {
+        while ((patIdxStart != patIdxEnd) && (strIdxStart <= strIdxEnd)) {
             int patIdxTmp;
             if (patArr[patIdxStart] == '{') {
                 patIdxTmp = findClosingCurly();
@@ -93,10 +167,10 @@ class AntPatchStringMatcher {
             }
             // Find the pattern between padIdxStart & padIdxTmp in str between
             // strIdxStart & strIdxEnd
-            int patLength = (patIdxTmp - patIdxStart - 1);
-            int strLength = (strIdxEnd - strIdxStart + 1);
+            final int patLength = (patIdxTmp - patIdxStart - 1);
+            final int strLength = ((strIdxEnd - strIdxStart) + 1);
             int foundIdx = -1;
-            strLoop: for (int i = 0; i <= strLength - patLength; i++) {
+            strLoop: for (int i = 0; i <= (strLength - patLength); i++) {
                 for (int j = 0; j < patLength; j++) {
                     ch = patArr[patIdxStart + j + 1];
                     if (ch != '?') {
@@ -121,34 +195,6 @@ class AntPatchStringMatcher {
         return onlyStarsLeft();
     }
 
-    private boolean consecutiveStars(final int patIdxTmp) {
-        if (patIdxTmp == patIdxStart + 1 && patArr[patIdxStart] == '*'
-                && patArr[patIdxTmp] == '*') {
-            // Two stars next to each other, skip the first one.
-            patIdxStart++;
-            return true;
-        }
-        return false;
-    }
-
-    private int findNextStarOrCurly() {
-        for (int i = patIdxStart + 1; i <= patIdxEnd; i++) {
-            if (patArr[i] == '*' || patArr[i] == '{') {
-                return i;
-            }
-        }
-        return -1;
-    }
-
-    private int findClosingCurly() {
-        for (int i = patIdxStart + 1; i <= patIdxEnd; i++) {
-            if (patArr[i] == '}') {
-                return i;
-            }
-        }
-        return -1;
-    }
-
     private boolean onlyStarsLeft() {
         for (int i = patIdxStart; i <= patIdxEnd; i++) {
             if (patArr[i] != '*') {
@@ -158,40 +204,8 @@ class AntPatchStringMatcher {
         return true;
     }
 
-    private boolean allCharsUsed() {
-        return strIdxStart > strIdxEnd;
-    }
-
-    private boolean shortcutPossible() {
-        for (char ch : patArr) {
-            if (ch == '*' || ch == '{' || ch == '}') {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private boolean doShortcut() {
-        if (patIdxEnd != strIdxEnd) {
-            return false; // Pattern and string do not have the same size
-        }
-        for (int i = 0; i <= patIdxEnd; i++) {
-            ch = patArr[i];
-            if (ch != '?') {
-                if (ch != strArr[i]) {
-                    return false;// Character mismatch
-                }
-            }
-        }
-        return true; // String matches against pattern
-    }
-
-    private boolean patternContainsOnlyStar() {
-        return (patIdxEnd == 0 && patArr[0] == '*');
-    }
-
     private boolean patternContainsOneTemplateVariable() {
-        if ((patIdxEnd >= 2 && patArr[0] == '{' && patArr[patIdxEnd] == '}')) {
+        if (((patIdxEnd >= 2) && (patArr[0] == '{') && (patArr[patIdxEnd] == '}'))) {
             for (int i = 1; i < patIdxEnd; i++) {
                 if (patArr[i] == '}') {
                     return false;
@@ -202,30 +216,15 @@ class AntPatchStringMatcher {
         return false;
     }
 
-    private boolean matchBeforeFirstStarOrCurly() {
-        while ((ch = patArr[patIdxStart]) != '*' && ch != '{'
-                && strIdxStart <= strIdxEnd) {
-            if (ch != '?') {
-                if (ch != strArr[strIdxStart]) {
-                    return false;
-                }
-            }
-            patIdxStart++;
-            strIdxStart++;
-        }
-        return true;
+    private boolean patternContainsOnlyStar() {
+        return ((patIdxEnd == 0) && (patArr[0] == '*'));
     }
 
-    private boolean matchAfterLastStarOrCurly() {
-        while ((ch = patArr[patIdxEnd]) != '*' && ch != '}'
-                && strIdxStart <= strIdxEnd) {
-            if (ch != '?') {
-                if (ch != strArr[strIdxEnd]) {
-                    return false;
-                }
+    private boolean shortcutPossible() {
+        for (final char ch : patArr) {
+            if ((ch == '*') || (ch == '{') || (ch == '}')) {
+                return false;
             }
-            patIdxEnd--;
-            strIdxEnd--;
         }
         return true;
     }

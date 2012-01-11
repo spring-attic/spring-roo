@@ -26,24 +26,24 @@ import org.springframework.roo.model.JavaType;
  */
 public class DateField extends FieldDetails {
 
-    /** Whether the JSR 220 @Temporal annotation will be added */
-    private DateFieldPersistenceType persistenceType;
-
-    /** Whether the JSR 303 @Past annotation will be added */
-    private boolean past;
+    private DateTime dateFormat;
 
     /** Whether the JSR 303 @Future annotation will be added */
     private boolean future;
 
-    private DateTime dateFormat;
-
-    private DateTime timeFormat;
+    /** Whether the JSR 303 @Past annotation will be added */
+    private boolean past;
 
     /**
      * Custom date formatting through a DateTime pattern such as yyyy/mm/dd
      * h:mm:ss a.
      */
     private String pattern;
+
+    /** Whether the JSR 220 @Temporal annotation will be added */
+    private DateFieldPersistenceType persistenceType;
+
+    private DateTime timeFormat;
 
     public DateField(final String physicalTypeIdentifier,
             final JavaType fieldType, final JavaSymbolName fieldName) {
@@ -72,22 +72,22 @@ public class DateField extends FieldDetails {
             else if (persistenceType == DateFieldPersistenceType.JPA_TIMESTAMP) {
                 value = "TIMESTAMP";
             }
-            List<AnnotationAttributeValue<?>> attrs = new ArrayList<AnnotationAttributeValue<?>>();
+            final List<AnnotationAttributeValue<?>> attrs = new ArrayList<AnnotationAttributeValue<?>>();
             attrs.add(new EnumAttributeValue(new JavaSymbolName("value"),
                     new EnumDetails(TEMPORAL_TYPE, new JavaSymbolName(value))));
             annotations.add(new AnnotationMetadataBuilder(TEMPORAL, attrs));
         }
         // Always add a DateTimeFormat annotation
-        List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
+        final List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
         if (pattern != null) {
             attributes.add(new StringAttributeValue(new JavaSymbolName(
                     "pattern"), pattern));
         }
         else {
-            String dateStyle = null != dateFormat ? String.valueOf(dateFormat
-                    .getShortKey()) : "S";
-            String timeStyle = null != timeFormat ? String.valueOf(timeFormat
-                    .getShortKey()) : "-";
+            final String dateStyle = null != dateFormat ? String
+                    .valueOf(dateFormat.getShortKey()) : "S";
+            final String timeStyle = null != timeFormat ? String
+                    .valueOf(timeFormat.getShortKey()) : "-";
             attributes.add(new StringAttributeValue(
                     new JavaSymbolName("style"), dateStyle + timeStyle));
         }
@@ -95,24 +95,44 @@ public class DateField extends FieldDetails {
                 attributes));
     }
 
-    public boolean isPast() {
-        return past;
+    public DateTime getDateFormat() {
+        return dateFormat;
     }
 
-    public void setPast(final boolean past) {
-        this.past = past;
+    public String getPattern() {
+        return pattern;
+    }
+
+    public DateFieldPersistenceType getPersistenceType() {
+        return persistenceType;
+    }
+
+    public DateTime getTimeFormat() {
+        return timeFormat;
     }
 
     public boolean isFuture() {
         return future;
     }
 
+    public boolean isPast() {
+        return past;
+    }
+
+    public void setDateFormat(final DateTime dateFormat) {
+        this.dateFormat = dateFormat;
+    }
+
     public void setFuture(final boolean future) {
         this.future = future;
     }
 
-    public DateFieldPersistenceType getPersistenceType() {
-        return persistenceType;
+    public void setPast(final boolean past) {
+        this.past = past;
+    }
+
+    public void setPattern(final String pattern) {
+        this.pattern = pattern;
     }
 
     public void setPersistenceType(
@@ -120,27 +140,7 @@ public class DateField extends FieldDetails {
         this.persistenceType = persistenceType;
     }
 
-    public DateTime getDateFormat() {
-        return dateFormat;
-    }
-
-    public void setDateFormat(final DateTime dateFormat) {
-        this.dateFormat = dateFormat;
-    }
-
-    public DateTime getTimeFormat() {
-        return timeFormat;
-    }
-
     public void setTimeFormat(final DateTime timeFormat) {
         this.timeFormat = timeFormat;
-    }
-
-    public String getPattern() {
-        return pattern;
-    }
-
-    public void setPattern(final String pattern) {
-        this.pattern = pattern;
     }
 }

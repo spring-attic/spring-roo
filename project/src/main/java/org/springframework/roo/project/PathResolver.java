@@ -21,79 +21,6 @@ import org.springframework.roo.model.JavaType;
 public interface PathResolver {
 
     /**
-     * Produces a canonical path for the presented {@link Path} and relative
-     * path.
-     * 
-     * @param path to use (required)
-     * @param relativePath to use (cannot be null, but may be empty if referring
-     *            to the path itself)
-     * @return the canonical path to the file (never null)
-     */
-    String getIdentifier(LogicalPath path, String relativePath);
-
-    /**
-     * Attempts to determine which {@link Path} the specified canonical path
-     * falls under.
-     * 
-     * @param identifier to lookup (required)
-     * @return the {@link Path}, or null if the identifier refers to a location
-     *         not under a know path.
-     */
-    LogicalPath getPath(String identifier);
-
-    /**
-     * Returns the canonical path of the root of the given {@link LogicalPath}.
-     * 
-     * @param path to lookup (required)
-     * @return <code>null</code> if the root path cannot be determined
-     */
-    String getRoot(LogicalPath path);
-
-    /**
-     * Attempts to determine which {@link Path} the specified canonical path
-     * falls under, and then returns the relative portion of the file name.
-     * <p>
-     * See {@link FileDetails#getRelativeSegment(String)} for related
-     * information.
-     * 
-     * @param identifier to resolve (required)
-     * @return the relative segment (which may be an empty string if the
-     *         identifier referred to the {@link Path} directly), or null if the
-     *         identifier does not have a corresponding {@link Path}
-     */
-    String getRelativeSegment(String identifier);
-
-    /**
-     * Converts the presented canonical path into a human-friendly name.
-     * 
-     * @param identifier to resolve (required)
-     * @return a human-friendly name for the identifier (required)
-     */
-    String getFriendlyName(String identifier);
-
-    /**
-     * Returns all known paths within the user project.
-     * 
-     * @return a non-<code>null</code> list
-     */
-    Collection<LogicalPath> getPaths();
-
-    /**
-     * Returns the {@link LogicalPath}s of user project directories that can
-     * contain Java source code.
-     * 
-     * @return a non-<code>null</code> list
-     */
-    Collection<LogicalPath> getSourcePaths();
-
-    /**
-     * Returns the canonical path of the user project's root directory
-     * 
-     * @return a valid directory path
-     */
-    String getRoot();
-
-    /**
      * Returns the canonical path to the given {@link JavaType} within the given
      * {@link LogicalPath}
      * 
@@ -127,13 +54,6 @@ public interface PathResolver {
     String getFocusedIdentifier(Path path, String relativePath);
 
     /**
-     * @param path
-     * @return
-     * @since 1.2.0
-     */
-    String getFocusedRoot(Path path);
-
-    /**
      * Returns the {@link LogicalPath} for the given {@link Path} within the
      * currently focused module.
      * 
@@ -142,4 +62,84 @@ public interface PathResolver {
      * @since 1.2.0
      */
     LogicalPath getFocusedPath(Path path);
+
+    /**
+     * @param path
+     * @return
+     * @since 1.2.0
+     */
+    String getFocusedRoot(Path path);
+
+    /**
+     * Converts the presented canonical path into a human-friendly name.
+     * 
+     * @param identifier to resolve (required)
+     * @return a human-friendly name for the identifier (required)
+     */
+    String getFriendlyName(String identifier);
+
+    /**
+     * Produces a canonical path for the presented {@link Path} and relative
+     * path.
+     * 
+     * @param path to use (required)
+     * @param relativePath to use (cannot be null, but may be empty if referring
+     *            to the path itself)
+     * @return the canonical path to the file (never null)
+     */
+    String getIdentifier(LogicalPath path, String relativePath);
+
+    /**
+     * Attempts to determine which {@link Path} the specified canonical path
+     * falls under.
+     * 
+     * @param identifier to lookup (required)
+     * @return the {@link Path}, or null if the identifier refers to a location
+     *         not under a know path.
+     */
+    LogicalPath getPath(String identifier);
+
+    /**
+     * Returns all known paths within the user project.
+     * 
+     * @return a non-<code>null</code> list
+     */
+    Collection<LogicalPath> getPaths();
+
+    /**
+     * Attempts to determine which {@link Path} the specified canonical path
+     * falls under, and then returns the relative portion of the file name.
+     * <p>
+     * See {@link FileDetails#getRelativeSegment(String)} for related
+     * information.
+     * 
+     * @param identifier to resolve (required)
+     * @return the relative segment (which may be an empty string if the
+     *         identifier referred to the {@link Path} directly), or null if the
+     *         identifier does not have a corresponding {@link Path}
+     */
+    String getRelativeSegment(String identifier);
+
+    /**
+     * Returns the canonical path of the user project's root directory
+     * 
+     * @return a valid directory path
+     */
+    String getRoot();
+
+    /**
+     * Returns the canonical path of the root of the given {@link LogicalPath}.
+     * 
+     * @param path to lookup (required)
+     * @return <code>null</code> if the root path cannot be determined
+     */
+    String getRoot(LogicalPath path);
+
+    /**
+     * Returns the {@link LogicalPath}s of user project directories that can
+     * contain Java source code.
+     * 
+     * @return a non-<code>null</code> list
+     */
+    Collection<LogicalPath> getSourcePaths();
 }

@@ -37,11 +37,14 @@ import org.springframework.uaa.client.util.Assert;
 @Service
 public class ServiceLayerProvider extends CoreLayerProvider {
 
-    // Fields
     @Reference private MetadataService metadataService;
     @Reference private ServiceAnnotationValuesFactory serviceAnnotationValuesFactory;
     @Reference private ServiceInterfaceLocator serviceInterfaceLocator;
     @Reference TypeLocationService typeLocationService;
+
+    public int getLayerPosition() {
+        return LayerType.SERVICE.getPosition();
+    }
 
     public MemberTypeAdditions getMemberTypeAdditions(final String callerMID,
             final String methodIdentifier, final JavaType targetEntity,
@@ -67,7 +70,7 @@ public class ServiceLayerProvider extends CoreLayerProvider {
                 typeLocationService.getTypePath(targetEntity));
         final PluralMetadata pluralMetadata = (PluralMetadata) metadataService
                 .get(pluralId);
-        if (pluralMetadata == null || pluralMetadata.getPlural() == null) {
+        if ((pluralMetadata == null) || (pluralMetadata.getPlural() == null)) {
             return null;
         }
 
@@ -127,10 +130,6 @@ public class ServiceLayerProvider extends CoreLayerProvider {
         // Generate an additions object that includes a call to the method
         return MemberTypeAdditions.getInstance(cidBuilder, fieldName,
                 methodName, false, parameters);
-    }
-
-    public int getLayerPosition() {
-        return LayerType.SERVICE.getPosition();
     }
 
     // -------------------- Setters for use by unit tests ----------------------

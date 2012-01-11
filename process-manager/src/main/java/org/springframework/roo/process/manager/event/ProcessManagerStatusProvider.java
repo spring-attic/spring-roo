@@ -32,6 +32,13 @@ public interface ProcessManagerStatusProvider {
             ProcessManagerStatusListener processManagerStatusListener);
 
     /**
+     * Returns the current {@link ProcessManager}.
+     * 
+     * @return the current status (never null)
+     */
+    ProcessManagerStatus getProcessManagerStatus();
+
+    /**
      * Removes an existing status listener.
      * <p>
      * If the presented status listener is not found, the method returns without
@@ -41,11 +48,4 @@ public interface ProcessManagerStatusProvider {
      */
     void removeProcessManagerStatusListener(
             ProcessManagerStatusListener processManagerStatusListener);
-
-    /**
-     * Returns the current {@link ProcessManager}.
-     * 
-     * @return the current status (never null)
-     */
-    ProcessManagerStatus getProcessManagerStatus();
 }

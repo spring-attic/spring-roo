@@ -11,7 +11,6 @@ import org.springframework.roo.model.JavaSymbolName;
 public class CharAttributeValue extends
         AbstractAnnotationAttributeValue<Character> {
 
-    // Fields
     private final char value;
 
     /**

@@ -21,12 +21,6 @@ public interface PhysicalTypeMetadata extends
         MemberHoldingTypeDetailsMetadataItem<ClassOrInterfaceTypeDetails> {
 
     /**
-     * @return the location of the disk file containing this resource, in
-     *         canonical name format (never null)
-     */
-    String getPhysicalLocationCanonicalPath();
-
-    /**
      * Obtains the canonical file path to where an ITD can be emitted for this
      * physical Java type.
      * 
@@ -61,6 +55,12 @@ public interface PhysicalTypeMetadata extends
      * @return the {@link JavaType} applicable for this ITD (never null)
      */
     JavaType getItdJavaType(ItdMetadataProvider metadataProvider);
+
+    /**
+     * @return the location of the disk file containing this resource, in
+     *         canonical name format (never null)
+     */
+    String getPhysicalLocationCanonicalPath();
 
     /**
      * Returns the Java type for this physical type

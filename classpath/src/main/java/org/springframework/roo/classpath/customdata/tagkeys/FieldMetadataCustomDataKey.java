@@ -16,10 +16,15 @@ import org.springframework.roo.model.JavaType;
  */
 public class FieldMetadataCustomDataKey extends
         IdentifiableAnnotatedJavaStructureCustomDataKey<FieldMetadata> {
-    private JavaType fieldType;
-    private JavaSymbolName fieldName;
     private String fieldInitializer;
+    private JavaSymbolName fieldName;
+    private JavaType fieldType;
     private String name;
+
+    public FieldMetadataCustomDataKey(final Integer modifier,
+            final List<AnnotationMetadata> annotations) {
+        super(modifier, annotations);
+    }
 
     public FieldMetadataCustomDataKey(final Integer modifier,
             final List<AnnotationMetadata> annotations,
@@ -31,14 +36,21 @@ public class FieldMetadataCustomDataKey extends
         this.fieldInitializer = fieldInitializer;
     }
 
-    public FieldMetadataCustomDataKey(final Integer modifier,
-            final List<AnnotationMetadata> annotations) {
-        super(modifier, annotations);
-    }
-
     public FieldMetadataCustomDataKey(final String name) {
         super(null, null);
         this.name = name;
+    }
+
+    public String getFieldInitializer() {
+        return fieldInitializer;
+    }
+
+    public JavaSymbolName getFieldName() {
+        return fieldName;
+    }
+
+    public JavaType getFieldType() {
+        return fieldType;
     }
 
     @Override
@@ -48,24 +60,12 @@ public class FieldMetadataCustomDataKey extends
         return super.meets(field);
     }
 
-    public JavaType getFieldType() {
-        return fieldType;
-    }
-
-    public JavaSymbolName getFieldName() {
-        return fieldName;
-    }
-
-    public String getFieldInitializer() {
-        return fieldInitializer;
+    public String name() {
+        return name;
     }
 
     @Override
     public String toString() {
-        return name;
-    }
-
-    public String name() {
         return name;
     }
 }

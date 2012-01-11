@@ -59,7 +59,6 @@ import org.springframework.roo.support.util.StringUtils;
 public class JpaActiveRecordMetadataProviderImpl extends
         AbstractItdMetadataProvider implements JpaActiveRecordMetadataProvider {
 
-    // Fields
     @Reference private ConfigurableMetadataProvider configurableMetadataProvider;
     @Reference private CustomDataKeyDecorator customDataKeyDecorator;
     @Reference private PluralMetadataProvider pluralMetadataProvider;
@@ -75,6 +74,12 @@ public class JpaActiveRecordMetadataProviderImpl extends
         registerMatchers();
     }
 
+    @Override
+    protected String createLocalIdentifier(final JavaType javaType,
+            final LogicalPath path) {
+        return JpaActiveRecordMetadata.createIdentifier(javaType, path);
+    }
+
     protected void deactivate(final ComponentContext context) {
         metadataDependencyRegistry.deregisterDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
@@ -86,39 +91,35 @@ public class JpaActiveRecordMetadataProviderImpl extends
         customDataKeyDecorator.unregisterMatchers(getClass());
     }
 
-    @SuppressWarnings("unchecked")
-    private void registerMatchers() {
-        customDataKeyDecorator
-                .registerMatchers(getClass(),
-                        new MethodMatcher(CLEAR_METHOD, ROO_JPA_ACTIVE_RECORD,
-                                new JavaSymbolName("clearMethod"),
-                                CLEAR_METHOD_DEFAULT), new MethodMatcher(
-                                COUNT_ALL_METHOD, ROO_JPA_ACTIVE_RECORD,
-                                new JavaSymbolName("countMethod"),
-                                COUNT_METHOD_DEFAULT, true, false),
-                        new MethodMatcher(FIND_ALL_METHOD,
-                                ROO_JPA_ACTIVE_RECORD, new JavaSymbolName(
-                                        "findAllMethod"),
-                                FIND_ALL_METHOD_DEFAULT, true, false),
-                        new MethodMatcher(FIND_ENTRIES_METHOD,
-                                ROO_JPA_ACTIVE_RECORD, new JavaSymbolName(
-                                        "findEntriesMethod"), "find", false,
-                                true, "Entries"), new MethodMatcher(
-                                FIND_METHOD, ROO_JPA_ACTIVE_RECORD,
-                                new JavaSymbolName("findMethod"),
-                                FIND_METHOD_DEFAULT, false, true),
-                        new MethodMatcher(FLUSH_METHOD, ROO_JPA_ACTIVE_RECORD,
-                                new JavaSymbolName("flushMethod"),
-                                FLUSH_METHOD_DEFAULT), new MethodMatcher(
-                                MERGE_METHOD, ROO_JPA_ACTIVE_RECORD,
-                                new JavaSymbolName("mergeMethod"),
-                                MERGE_METHOD_DEFAULT), new MethodMatcher(
-                                PERSIST_METHOD, ROO_JPA_ACTIVE_RECORD,
-                                new JavaSymbolName("persistMethod"),
-                                PERSIST_METHOD_DEFAULT), new MethodMatcher(
-                                REMOVE_METHOD, ROO_JPA_ACTIVE_RECORD,
-                                new JavaSymbolName("removeMethod"),
-                                REMOVE_METHOD_DEFAULT));
+    public JpaCrudAnnotationValues getAnnotationValues(final JavaType javaType) {
+        Assert.notNull(javaType, "JavaType required");
+        final String physicalTypeId = typeLocationService
+                .getPhysicalTypeIdentifier(javaType);
+        if (StringUtils.isBlank(physicalTypeId)) {
+            return null;
+        }
+        final MemberHoldingTypeDetailsMetadataItem<?> governor = (MemberHoldingTypeDetailsMetadataItem<?>) metadataService
+                .get(physicalTypeId);
+        if (MemberFindingUtils.getAnnotationOfType(governor,
+                ROO_JPA_ACTIVE_RECORD) == null) {
+            // The type is not annotated with @RooJpaActiveRecord
+            return null;
+        }
+        return new JpaCrudAnnotationValues(governor);
+    }
+
+    @Override
+    protected String getGovernorPhysicalTypeIdentifier(
+            final String metadataIdentificationString) {
+        final JavaType javaType = JpaActiveRecordMetadata
+                .getJavaType(metadataIdentificationString);
+        final LogicalPath path = JpaActiveRecordMetadata
+                .getPath(metadataIdentificationString);
+        return PhysicalTypeIdentifier.createIdentifier(javaType, path);
+    }
+
+    public String getItdUniquenessFilenameSuffix() {
+        return "Jpa_ActiveRecord";
     }
 
     @Override
@@ -149,9 +150,9 @@ public class JpaActiveRecordMetadataProviderImpl extends
 
         // If the parent is null, but the type has a super class it is likely
         // that the we don't have information to proceed
-        if (parent == null
-                && (governorPhysicalType.getMemberHoldingTypeDetails())
-                        .getSuperclass() != null) {
+        if ((parent == null)
+                && ((governorPhysicalType.getMemberHoldingTypeDetails())
+                        .getSuperclass() != null)) {
             // If the superclass is annotated with the Entity trigger annotation
             // then we can be pretty sure that we don't have enough information
             // to proceed
@@ -188,7 +189,7 @@ public class JpaActiveRecordMetadataProviderImpl extends
 
         boolean isGaeEnabled = false;
 
-        String moduleName = path.getModule();
+        final String moduleName = path.getModule();
         if (projectOperations.isProjectAvailable(moduleName)) {
             // If the project itself changes, we want a chance to refresh this
             // item
@@ -204,44 +205,42 @@ public class JpaActiveRecordMetadataProviderImpl extends
                 isGaeEnabled);
     }
 
-    public String getItdUniquenessFilenameSuffix() {
-        return "Jpa_ActiveRecord";
-    }
-
-    @Override
-    protected String getGovernorPhysicalTypeIdentifier(
-            final String metadataIdentificationString) {
-        JavaType javaType = JpaActiveRecordMetadata
-                .getJavaType(metadataIdentificationString);
-        LogicalPath path = JpaActiveRecordMetadata
-                .getPath(metadataIdentificationString);
-        return PhysicalTypeIdentifier.createIdentifier(javaType, path);
-    }
-
-    @Override
-    protected String createLocalIdentifier(final JavaType javaType,
-            final LogicalPath path) {
-        return JpaActiveRecordMetadata.createIdentifier(javaType, path);
-    }
-
     public String getProvidesType() {
         return JpaActiveRecordMetadata.getMetadataIdentifierType();
     }
 
-    public JpaCrudAnnotationValues getAnnotationValues(final JavaType javaType) {
-        Assert.notNull(javaType, "JavaType required");
-        final String physicalTypeId = typeLocationService
-                .getPhysicalTypeIdentifier(javaType);
-        if (StringUtils.isBlank(physicalTypeId)) {
-            return null;
-        }
-        final MemberHoldingTypeDetailsMetadataItem<?> governor = (MemberHoldingTypeDetailsMetadataItem<?>) metadataService
-                .get(physicalTypeId);
-        if (MemberFindingUtils.getAnnotationOfType(governor,
-                ROO_JPA_ACTIVE_RECORD) == null) {
-            // The type is not annotated with @RooJpaActiveRecord
-            return null;
-        }
-        return new JpaCrudAnnotationValues(governor);
+    @SuppressWarnings("unchecked")
+    private void registerMatchers() {
+        customDataKeyDecorator
+                .registerMatchers(getClass(),
+                        new MethodMatcher(CLEAR_METHOD, ROO_JPA_ACTIVE_RECORD,
+                                new JavaSymbolName("clearMethod"),
+                                CLEAR_METHOD_DEFAULT), new MethodMatcher(
+                                COUNT_ALL_METHOD, ROO_JPA_ACTIVE_RECORD,
+                                new JavaSymbolName("countMethod"),
+                                COUNT_METHOD_DEFAULT, true, false),
+                        new MethodMatcher(FIND_ALL_METHOD,
+                                ROO_JPA_ACTIVE_RECORD, new JavaSymbolName(
+                                        "findAllMethod"),
+                                FIND_ALL_METHOD_DEFAULT, true, false),
+                        new MethodMatcher(FIND_ENTRIES_METHOD,
+                                ROO_JPA_ACTIVE_RECORD, new JavaSymbolName(
+                                        "findEntriesMethod"), "find", false,
+                                true, "Entries"), new MethodMatcher(
+                                FIND_METHOD, ROO_JPA_ACTIVE_RECORD,
+                                new JavaSymbolName("findMethod"),
+                                FIND_METHOD_DEFAULT, false, true),
+                        new MethodMatcher(FLUSH_METHOD, ROO_JPA_ACTIVE_RECORD,
+                                new JavaSymbolName("flushMethod"),
+                                FLUSH_METHOD_DEFAULT), new MethodMatcher(
+                                MERGE_METHOD, ROO_JPA_ACTIVE_RECORD,
+                                new JavaSymbolName("mergeMethod"),
+                                MERGE_METHOD_DEFAULT), new MethodMatcher(
+                                PERSIST_METHOD, ROO_JPA_ACTIVE_RECORD,
+                                new JavaSymbolName("persistMethod"),
+                                PERSIST_METHOD_DEFAULT), new MethodMatcher(
+                                REMOVE_METHOD, ROO_JPA_ACTIVE_RECORD,
+                                new JavaSymbolName("removeMethod"),
+                                REMOVE_METHOD_DEFAULT));
     }
 }

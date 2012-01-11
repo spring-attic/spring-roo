@@ -13,12 +13,24 @@ import org.springframework.roo.support.util.Assert;
  */
 public class BundleSymbolicName implements Comparable<BundleSymbolicName> {
 
-    // Fields
     private final String key;
 
     public BundleSymbolicName(final String key) {
         Assert.hasText(key, "Key required");
         this.key = key;
+    }
+
+    public final int compareTo(final BundleSymbolicName o) {
+        if (o == null) {
+            return -1;
+        }
+        return key.compareTo(o.key);
+    }
+
+    @Override
+    public final boolean equals(final Object obj) {
+        return (obj instanceof BundleSymbolicName)
+                && (compareTo((BundleSymbolicName) obj) == 0);
     }
 
     /**
@@ -29,12 +41,12 @@ public class BundleSymbolicName implements Comparable<BundleSymbolicName> {
      */
     public Long findBundleIdWithoutFail(final BundleContext context) {
         Assert.notNull(context, "Bundle context is unavailable");
-        Bundle[] bundles = context.getBundles();
+        final Bundle[] bundles = context.getBundles();
         if (bundles == null) {
             throw new IllegalStateException(
                     "Bundle IDs cannot be retrieved as BundleContext unavailable");
         }
-        for (Bundle b : bundles) {
+        for (final Bundle b : bundles) {
             if (getKey().equals(b.getSymbolicName())) {
                 return b.getBundleId();
             }
@@ -49,24 +61,12 @@ public class BundleSymbolicName implements Comparable<BundleSymbolicName> {
 
     @Override
     public final int hashCode() {
-        return this.key.hashCode();
-    }
-
-    @Override
-    public final boolean equals(final Object obj) {
-        return obj instanceof BundleSymbolicName
-                && this.compareTo((BundleSymbolicName) obj) == 0;
-    }
-
-    public final int compareTo(final BundleSymbolicName o) {
-        if (o == null)
-            return -1;
-        return this.key.compareTo(o.key);
+        return key.hashCode();
     }
 
     @Override
     public String toString() {
-        ToStringCreator tsc = new ToStringCreator(this);
+        final ToStringCreator tsc = new ToStringCreator(this);
         tsc.append("key", key);
         return tsc.toString();
     }

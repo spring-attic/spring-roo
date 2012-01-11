@@ -17,18 +17,19 @@ import org.springframework.roo.support.util.StringUtils;
 @Service
 public class FocusModule extends AbstractAction {
 
-    @Reference ProjectOperations projectOperations;
-
     private final String baseCommand = "module focus --moduleName ";
 
+    @Reference ProjectOperations projectOperations;
+
     @Override
-    public void executeImpl(CommandTransformation trafo, ActionConfig config) {
+    public void executeImpl(final CommandTransformation trafo,
+            final ActionConfig config) {
         if ("~".equals(config.getModule())) {
             trafo.addOutputCommand(baseCommand, "~");
             return;
         }
         // If not root: Check if module name actually exists
-        for (String moduleName : projectOperations.getModuleNames()) {
+        for (final String moduleName : projectOperations.getModuleNames()) {
             if (moduleName.contains(config.getModule())) {
                 trafo.addOutputCommand(baseCommand, moduleName);
                 return;
@@ -36,12 +37,12 @@ public class FocusModule extends AbstractAction {
         }
     }
 
-    public String getDescription(ActionConfig config) {
+    public String getDescription(final ActionConfig config) {
         return "Focusing module: " + config.getModule();
     }
 
-    public boolean isValid(ActionConfig config) {
-        return config != null && StringUtils.hasText(config.getModule());
+    public boolean isValid(final ActionConfig config) {
+        return (config != null) && StringUtils.hasText(config.getModule());
     }
 
 }

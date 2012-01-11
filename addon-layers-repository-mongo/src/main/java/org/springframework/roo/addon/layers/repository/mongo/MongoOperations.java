@@ -14,6 +14,17 @@ import org.springframework.roo.project.Feature;
 public interface MongoOperations extends Feature {
 
     /**
+     * Creates a new domain type ready for backing a Spring Data MongoDB
+     * repository
+     * 
+     * @param classType (required)
+     * @param idType (optional, defaults to {@link BigInteger}
+     * @param testAutomatically
+     */
+    void createType(JavaType classType, JavaType idType,
+            boolean testAutomatically);
+
+    /**
      * Indicate if the 'mongo setup' command should be available for this
      * project.
      * 
@@ -51,15 +62,4 @@ public interface MongoOperations extends Feature {
      * @param classType (optional)
      */
     void setupRepository(JavaType interfaceType, JavaType classType);
-
-    /**
-     * Creates a new domain type ready for backing a Spring Data MongoDB
-     * repository
-     * 
-     * @param classType (required)
-     * @param idType (optional, defaults to {@link BigInteger}
-     * @param testAutomatically
-     */
-    void createType(JavaType classType, JavaType idType,
-            boolean testAutomatically);
 }

@@ -23,9 +23,11 @@ public interface GwtOperations extends Feature {
 
     boolean isScaffoldAvailable();
 
-    void setup();
-
     void proxyAll(JavaPackage proxyPackage);
+
+    void proxyAndRequestAll(JavaPackage proxyAndRequestPackage);
+
+    void proxyAndRequestType(JavaPackage proxyAndRequestPackage, JavaType type);
 
     void proxyType(JavaPackage proxyPackage, JavaType type);
 
@@ -33,14 +35,12 @@ public interface GwtOperations extends Feature {
 
     void requestType(JavaPackage requestPackage, JavaType type);
 
-    void proxyAndRequestAll(JavaPackage proxyAndRequestPackage);
-
-    void proxyAndRequestType(JavaPackage proxyAndRequestPackage, JavaType type);
-
     void scaffoldAll(JavaPackage proxyPackage, JavaPackage requestPackage);
 
     void scaffoldType(JavaPackage proxyPackage, JavaPackage requestPackage,
             JavaType type);
+
+    void setup();
 
     void updateGaeConfiguration();
 }

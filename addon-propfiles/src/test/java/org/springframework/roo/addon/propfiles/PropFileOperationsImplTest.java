@@ -27,13 +27,13 @@ public class PropFileOperationsImplTest {
 
     @Before
     public void setUp() {
-        this.propFileOperations = new PropFileOperationsImpl();
+        propFileOperations = new PropFileOperationsImpl();
     }
 
     @Test
     public void testLoadPropertiesFromClasspathWhenItExists() {
         // Invoke
-        final Properties properties = this.propFileOperations.loadProperties(
+        final Properties properties = propFileOperations.loadProperties(
                 "bike.properties", PropertiesTestClient.class);
 
         // Check

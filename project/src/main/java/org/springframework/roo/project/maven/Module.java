@@ -10,7 +10,6 @@ import org.springframework.roo.support.util.Assert;
  */
 public class Module {
 
-    // Fields
     private final String name;
     private final String pomPath;
 

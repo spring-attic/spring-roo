@@ -18,16 +18,10 @@ import org.springframework.roo.model.JavaType;
 public abstract class AbstractInvocableMemberMetadataBuilder<T extends InvocableMemberMetadata>
         extends AbstractIdentifiableAnnotatedJavaStructureBuilder<T> {
 
-    // Fields
+    private InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
     private List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
     private List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
     private List<JavaType> throwsTypes = new ArrayList<JavaType>();
-    private InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-
-    protected AbstractInvocableMemberMetadataBuilder(
-            final String declaredbyMetadataId) {
-        super(declaredbyMetadataId);
-    }
 
     protected AbstractInvocableMemberMetadataBuilder(
             final InvocableMemberMetadata existing) {
@@ -38,6 +32,11 @@ public abstract class AbstractInvocableMemberMetadataBuilder<T extends Invocable
                 existing.getParameterTypes());
         this.throwsTypes = new ArrayList<JavaType>(existing.getThrowsTypes());
         bodyBuilder.append(existing.getBody());
+    }
+
+    protected AbstractInvocableMemberMetadataBuilder(
+            final String declaredbyMetadataId) {
+        super(declaredbyMetadataId);
     }
 
     protected AbstractInvocableMemberMetadataBuilder(
@@ -52,6 +51,12 @@ public abstract class AbstractInvocableMemberMetadataBuilder<T extends Invocable
         bodyBuilder.append(existing.getBody());
     }
 
+    public void addParameter(final String parameterName,
+            final JavaType parameterType) {
+        addParameterName(new JavaSymbolName(parameterName));
+        addParameterType(AnnotatedJavaType.convertFromJavaType(parameterType));
+    }
+
     public boolean addParameterName(final JavaSymbolName parameterName) {
         return parameterNames.add(parameterName);
     }
@@ -62,30 +67,6 @@ public abstract class AbstractInvocableMemberMetadataBuilder<T extends Invocable
 
     public boolean addThrowsType(final JavaType throwsType) {
         return throwsTypes.add(throwsType);
-    }
-
-    public List<JavaSymbolName> getParameterNames() {
-        return parameterNames;
-    }
-
-    public void setParameterNames(final List<JavaSymbolName> parameterNames) {
-        this.parameterNames = parameterNames;
-    }
-
-    public List<AnnotatedJavaType> getParameterTypes() {
-        return parameterTypes;
-    }
-
-    public void setParameterTypes(final List<AnnotatedJavaType> parameterTypes) {
-        this.parameterTypes = parameterTypes;
-    }
-
-    public List<JavaType> getThrowsTypes() {
-        return throwsTypes;
-    }
-
-    public void setThrowsTypes(final List<JavaType> throwsTypes) {
-        this.throwsTypes = throwsTypes;
     }
 
     public String getBody() {
@@ -102,13 +83,31 @@ public abstract class AbstractInvocableMemberMetadataBuilder<T extends Invocable
         return bodyBuilder;
     }
 
+    public List<JavaSymbolName> getParameterNames() {
+        return parameterNames;
+    }
+
+    public List<AnnotatedJavaType> getParameterTypes() {
+        return parameterTypes;
+    }
+
+    public List<JavaType> getThrowsTypes() {
+        return throwsTypes;
+    }
+
     public void setBodyBuilder(final InvocableMemberBodyBuilder bodyBuilder) {
         this.bodyBuilder = bodyBuilder;
     }
 
-    public void addParameter(final String parameterName,
-            final JavaType parameterType) {
-        addParameterName(new JavaSymbolName(parameterName));
-        addParameterType(AnnotatedJavaType.convertFromJavaType(parameterType));
+    public void setParameterNames(final List<JavaSymbolName> parameterNames) {
+        this.parameterNames = parameterNames;
+    }
+
+    public void setParameterTypes(final List<AnnotatedJavaType> parameterTypes) {
+        this.parameterTypes = parameterTypes;
+    }
+
+    public void setThrowsTypes(final List<JavaType> throwsTypes) {
+        this.throwsTypes = throwsTypes;
     }
 }

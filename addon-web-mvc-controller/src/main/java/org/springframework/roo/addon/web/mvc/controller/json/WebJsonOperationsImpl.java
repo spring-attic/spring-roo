@@ -56,20 +56,119 @@ import org.w3c.dom.Element;
 @Service
 public class WebJsonOperationsImpl implements WebJsonOperations {
 
-    // Fields
     @Reference private FileManager fileManager;
     @Reference private MetadataService metadataService;
+    @Reference private WebMvcOperations mvcOperations;
     @Reference private PathResolver pathResolver;
     @Reference private ProjectOperations projectOperations;
     @Reference private TypeLocationService typeLocationService;
     @Reference private TypeManagementService typeManagementService;
-    @Reference private WebMvcOperations mvcOperations;
 
-    public boolean isWebJsonInstallationPossible() {
-        return !projectOperations
-                .isFeatureInstalledInFocusedModule(FeatureNames.MVC)
-                && !projectOperations
-                        .isFeatureInstalledInFocusedModule(FeatureNames.JSF);
+    public void annotateAll(JavaPackage javaPackage) {
+        if (javaPackage == null) {
+            javaPackage = projectOperations
+                    .getTopLevelPackage(projectOperations
+                            .getFocusedModuleName());
+        }
+        for (final ClassOrInterfaceTypeDetails cod : typeLocationService
+                .findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_JSON)) {
+            if (Modifier.isAbstract(cod.getModifier())) {
+                continue;
+            }
+            final JavaType jsonType = cod.getName();
+            JavaType mvcType = null;
+            for (final ClassOrInterfaceTypeDetails mvcCod : typeLocationService
+                    .findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_WEB_SCAFFOLD)) {
+                // We know this physical type exists given type location service
+                // just found it.
+                final PhysicalTypeMetadata mvcMd = (PhysicalTypeMetadata) metadataService
+                        .get(mvcCod.getDeclaredByMetadataId());
+                final WebScaffoldAnnotationValues webScaffoldAnnotationValues = new WebScaffoldAnnotationValues(
+                        mvcMd);
+                if (webScaffoldAnnotationValues.isAnnotationFound()
+                        && webScaffoldAnnotationValues.getFormBackingObject()
+                                .equals(jsonType)) {
+                    mvcType = mvcCod.getName();
+                    break;
+                }
+            }
+            if (mvcType == null) {
+                createNewType(
+                        new JavaType(javaPackage.getFullyQualifiedPackageName()
+                                + "." + jsonType.getSimpleTypeName()
+                                + "Controller"), jsonType);
+            }
+            else {
+                appendToExistingType(mvcType, jsonType);
+            }
+        }
+    }
+
+    public void annotateType(final JavaType type, final JavaType jsonEntity) {
+        Assert.notNull(type, "Target type required");
+        Assert.notNull(jsonEntity, "Json entity required");
+        final String id = typeLocationService.getPhysicalTypeIdentifier(type);
+        if (id == null) {
+            createNewType(type, jsonEntity);
+        }
+        else {
+            appendToExistingType(type, jsonEntity);
+        }
+    }
+
+    private void appendToExistingType(final JavaType type,
+            final JavaType jsonEntity) {
+        final ClassOrInterfaceTypeDetails cid = typeLocationService
+                .getTypeDetails(type);
+        if (cid == null) {
+            throw new IllegalArgumentException("Cannot locate source for '"
+                    + type.getFullyQualifiedTypeName() + "'");
+        }
+
+        if (MemberFindingUtils.getAnnotationOfType(cid.getAnnotations(),
+                RooJavaType.ROO_WEB_JSON) != null) {
+            return;
+        }
+
+        final ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(
+                cid);
+        cidBuilder.addAnnotation(getAnnotation(jsonEntity));
+        typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
+    }
+
+    private void createNewType(final JavaType type, final JavaType jsonEntity) {
+        final PluralMetadata pluralMetadata = (PluralMetadata) metadataService
+                .get(PluralMetadata.createIdentifier(jsonEntity,
+                        typeLocationService.getTypePath(jsonEntity)));
+        if (pluralMetadata == null) {
+            return;
+        }
+
+        final String declaredByMetadataId = PhysicalTypeIdentifier
+                .createIdentifier(type,
+                        pathResolver.getFocusedPath(Path.SRC_MAIN_JAVA));
+        final ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(
+                declaredByMetadataId, Modifier.PUBLIC, type,
+                PhysicalTypeCategory.CLASS);
+        cidBuilder.addAnnotation(getAnnotation(jsonEntity));
+        cidBuilder.addAnnotation(new AnnotationMetadataBuilder(
+                SpringJavaType.CONTROLLER));
+        final AnnotationMetadataBuilder requestMapping = new AnnotationMetadataBuilder(
+                SpringJavaType.REQUEST_MAPPING);
+        requestMapping.addAttribute(new StringAttributeValue(
+                new JavaSymbolName("value"), "/"
+                        + pluralMetadata.getPlural().toLowerCase()));
+        cidBuilder.addAnnotation(requestMapping);
+        typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
+    }
+
+    private AnnotationMetadataBuilder getAnnotation(final JavaType type) {
+        // Create annotation @RooWebJson(jsonObject = MyObject.class)
+        final List<AnnotationAttributeValue<?>> rooJsonAttributes = new ArrayList<AnnotationAttributeValue<?>>();
+        rooJsonAttributes.add(new ClassAttributeValue(new JavaSymbolName(
+                "jsonObject"), type));
+        return new AnnotationMetadataBuilder(RooJavaType.ROO_WEB_JSON,
+                rooJsonAttributes);
     }
 
     public boolean isWebJsonCommandAvailable() {
@@ -79,16 +178,23 @@ public class WebJsonOperationsImpl implements WebJsonOperations {
                         .isFeatureInstalledInFocusedModule(FeatureNames.JSF);
     }
 
+    public boolean isWebJsonInstallationPossible() {
+        return !projectOperations
+                .isFeatureInstalledInFocusedModule(FeatureNames.MVC)
+                && !projectOperations
+                        .isFeatureInstalledInFocusedModule(FeatureNames.JSF);
+    }
+
     public void setup() {
         mvcOperations.installMinimalWebArtifacts();
 
         // Verify that the web.xml already exists
-        String webXmlPath = pathResolver.getFocusedIdentifier(
+        final String webXmlPath = pathResolver.getFocusedIdentifier(
                 Path.SRC_MAIN_WEBAPP, "WEB-INF/web.xml");
         Assert.isTrue(fileManager.exists(webXmlPath), "'" + webXmlPath
                 + "' does not exist");
 
-        Document document = XmlUtils.readXml(fileManager
+        final Document document = XmlUtils.readXml(fileManager
                 .getInputStream(webXmlPath));
 
         WebXmlUtils.addContextParam(new WebXmlUtils.WebXmlParam(
@@ -120,120 +226,14 @@ public class WebJsonOperationsImpl implements WebJsonOperations {
         updateConfiguration();
     }
 
-    public void annotateType(final JavaType type, final JavaType jsonEntity) {
-        Assert.notNull(type, "Target type required");
-        Assert.notNull(jsonEntity, "Json entity required");
-        String id = typeLocationService.getPhysicalTypeIdentifier(type);
-        if (id == null) {
-            createNewType(type, jsonEntity);
-        }
-        else {
-            appendToExistingType(type, jsonEntity);
-        }
-    }
-
-    public void annotateAll(JavaPackage javaPackage) {
-        if (javaPackage == null) {
-            javaPackage = projectOperations
-                    .getTopLevelPackage(projectOperations
-                            .getFocusedModuleName());
-        }
-        for (ClassOrInterfaceTypeDetails cod : typeLocationService
-                .findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_JSON)) {
-            if (Modifier.isAbstract(cod.getModifier())) {
-                continue;
-            }
-            JavaType jsonType = cod.getName();
-            JavaType mvcType = null;
-            for (ClassOrInterfaceTypeDetails mvcCod : typeLocationService
-                    .findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_WEB_SCAFFOLD)) {
-                // We know this physical type exists given type location service
-                // just found it.
-                PhysicalTypeMetadata mvcMd = (PhysicalTypeMetadata) metadataService
-                        .get(mvcCod.getDeclaredByMetadataId());
-                WebScaffoldAnnotationValues webScaffoldAnnotationValues = new WebScaffoldAnnotationValues(
-                        mvcMd);
-                if (webScaffoldAnnotationValues.isAnnotationFound()
-                        && webScaffoldAnnotationValues.getFormBackingObject()
-                                .equals(jsonType)) {
-                    mvcType = mvcCod.getName();
-                    break;
-                }
-            }
-            if (mvcType == null) {
-                createNewType(
-                        new JavaType(javaPackage.getFullyQualifiedPackageName()
-                                + "." + jsonType.getSimpleTypeName()
-                                + "Controller"), jsonType);
-            }
-            else {
-                appendToExistingType(mvcType, jsonType);
-            }
-        }
-    }
-
-    private void appendToExistingType(final JavaType type,
-            final JavaType jsonEntity) {
-        ClassOrInterfaceTypeDetails cid = typeLocationService
-                .getTypeDetails(type);
-        if (cid == null) {
-            throw new IllegalArgumentException("Cannot locate source for '"
-                    + type.getFullyQualifiedTypeName() + "'");
-        }
-
-        if (MemberFindingUtils.getAnnotationOfType(cid.getAnnotations(),
-                RooJavaType.ROO_WEB_JSON) != null) {
-            return;
-        }
-
-        ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(
-                cid);
-        cidBuilder.addAnnotation(getAnnotation(jsonEntity));
-        typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
-    }
-
-    private void createNewType(final JavaType type, final JavaType jsonEntity) {
-        PluralMetadata pluralMetadata = (PluralMetadata) metadataService
-                .get(PluralMetadata.createIdentifier(jsonEntity,
-                        typeLocationService.getTypePath(jsonEntity)));
-        if (pluralMetadata == null) {
-            return;
-        }
-
-        String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(
-                type, pathResolver.getFocusedPath(Path.SRC_MAIN_JAVA));
-        ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(
-                declaredByMetadataId, Modifier.PUBLIC, type,
-                PhysicalTypeCategory.CLASS);
-        cidBuilder.addAnnotation(getAnnotation(jsonEntity));
-        cidBuilder.addAnnotation(new AnnotationMetadataBuilder(
-                SpringJavaType.CONTROLLER));
-        AnnotationMetadataBuilder requestMapping = new AnnotationMetadataBuilder(
-                SpringJavaType.REQUEST_MAPPING);
-        requestMapping.addAttribute(new StringAttributeValue(
-                new JavaSymbolName("value"), "/"
-                        + pluralMetadata.getPlural().toLowerCase()));
-        cidBuilder.addAnnotation(requestMapping);
-        typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
-    }
-
-    private AnnotationMetadataBuilder getAnnotation(final JavaType type) {
-        // Create annotation @RooWebJson(jsonObject = MyObject.class)
-        List<AnnotationAttributeValue<?>> rooJsonAttributes = new ArrayList<AnnotationAttributeValue<?>>();
-        rooJsonAttributes.add(new ClassAttributeValue(new JavaSymbolName(
-                "jsonObject"), type));
-        return new AnnotationMetadataBuilder(RooJavaType.ROO_WEB_JSON,
-                rooJsonAttributes);
-    }
-
     private void updateConfiguration() {
-        Element configuration = XmlUtils.getConfiguration(getClass());
+        final Element configuration = XmlUtils.getConfiguration(getClass());
 
-        List<Dependency> dependencies = new ArrayList<Dependency>();
-        List<Element> springDependencies = XmlUtils.findElements(
+        final List<Dependency> dependencies = new ArrayList<Dependency>();
+        final List<Element> springDependencies = XmlUtils.findElements(
                 "/configuration/springWebJson/dependencies/dependency",
                 configuration);
-        for (Element dependencyElement : springDependencies) {
+        for (final Element dependencyElement : springDependencies) {
             dependencies.add(new Dependency(dependencyElement));
         }
         projectOperations.addDependencies(

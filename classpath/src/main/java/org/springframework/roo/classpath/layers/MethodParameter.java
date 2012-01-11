@@ -40,8 +40,10 @@ public class MethodParameter extends Pair<JavaType, JavaSymbolName> {
      * @param type the parameter's type (required)
      * @param name the parameter's name (required)
      */
-    public MethodParameter(final JavaType type, final String name) {
-        this(type, new JavaSymbolName(name));
+    public MethodParameter(final JavaType type, final JavaSymbolName name) {
+        super(type, name);
+        Assert.notNull(type, "Parameter type is required");
+        Assert.notNull(name, "Parameter name is required");
     }
 
     /**
@@ -50,9 +52,7 @@ public class MethodParameter extends Pair<JavaType, JavaSymbolName> {
      * @param type the parameter's type (required)
      * @param name the parameter's name (required)
      */
-    public MethodParameter(final JavaType type, final JavaSymbolName name) {
-        super(type, name);
-        Assert.notNull(type, "Parameter type is required");
-        Assert.notNull(name, "Parameter name is required");
+    public MethodParameter(final JavaType type, final String name) {
+        this(type, new JavaSymbolName(name));
     }
 }

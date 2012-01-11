@@ -11,7 +11,6 @@ import org.springframework.roo.model.JavaSymbolName;
 public class BooleanAttributeValue extends
         AbstractAnnotationAttributeValue<Boolean> {
 
-    // Fields
     private final boolean value;
 
     /**

@@ -12,7 +12,6 @@ import org.springframework.roo.support.util.Assert;
  */
 public class ReservedToken implements Token, Comparable<ReservedToken> {
 
-    // Fields
     private final String value;
 
     /**
@@ -22,41 +21,46 @@ public class ReservedToken implements Token, Comparable<ReservedToken> {
      */
     public ReservedToken(final String token) {
         Assert.hasText(token, "Reserved token required");
-        this.value = token;
+        value = token;
+    }
+
+    public int compareTo(final ReservedToken o) {
+        final int l = o.getValue().length() - getValue().length();
+        return l == 0 ? -1 : l;
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final ReservedToken other = (ReservedToken) obj;
+        if (value == null) {
+            if (other.value != null) {
+                return false;
+            }
+        }
+        else if (!value.equals(other.value)) {
+            return false;
+        }
+        return true;
     }
 
     public String getValue() {
         return value;
     }
 
-    public int compareTo(final ReservedToken o) {
-        int l = o.getValue().length() - this.getValue().length();
-        return l == 0 ? -1 : l;
-    }
-
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((value == null) ? 0 : value.hashCode());
+        result = (prime * result) + ((value == null) ? 0 : value.hashCode());
         return result;
-    }
-
-    @Override
-    public boolean equals(final Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        ReservedToken other = (ReservedToken) obj;
-        if (value == null) {
-            if (other.value != null)
-                return false;
-        }
-        else if (!value.equals(other.value))
-            return false;
-        return true;
     }
 }

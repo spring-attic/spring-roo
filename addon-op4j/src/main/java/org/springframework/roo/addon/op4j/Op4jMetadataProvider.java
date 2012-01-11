@@ -29,11 +29,31 @@ public class Op4jMetadataProvider extends AbstractItdMetadataProvider {
         addMetadataTrigger(ROO_OP4J);
     }
 
+    @Override
+    protected String createLocalIdentifier(final JavaType javaType,
+            final LogicalPath path) {
+        return Op4jMetadata.createIdentifier(javaType, path);
+    }
+
     protected void deactivate(final ComponentContext context) {
         metadataDependencyRegistry.deregisterDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
                 getProvidesType());
         removeMetadataTrigger(ROO_OP4J);
+    }
+
+    @Override
+    protected String getGovernorPhysicalTypeIdentifier(
+            final String metadataIdentificationString) {
+        final JavaType javaType = Op4jMetadata
+                .getJavaType(metadataIdentificationString);
+        final LogicalPath path = Op4jMetadata
+                .getPath(metadataIdentificationString);
+        return PhysicalTypeIdentifier.createIdentifier(javaType, path);
+    }
+
+    public String getItdUniquenessFilenameSuffix() {
+        return "Op4j";
     }
 
     @Override
@@ -44,25 +64,6 @@ public class Op4jMetadataProvider extends AbstractItdMetadataProvider {
             final String itdFilename) {
         return new Op4jMetadata(metadataIdentificationString, aspectName,
                 governorPhysicalTypeMetadata);
-    }
-
-    public String getItdUniquenessFilenameSuffix() {
-        return "Op4j";
-    }
-
-    @Override
-    protected String getGovernorPhysicalTypeIdentifier(
-            final String metadataIdentificationString) {
-        JavaType javaType = Op4jMetadata
-                .getJavaType(metadataIdentificationString);
-        LogicalPath path = Op4jMetadata.getPath(metadataIdentificationString);
-        return PhysicalTypeIdentifier.createIdentifier(javaType, path);
-    }
-
-    @Override
-    protected String createLocalIdentifier(final JavaType javaType,
-            final LogicalPath path) {
-        return Op4jMetadata.createIdentifier(javaType, path);
     }
 
     public String getProvidesType() {

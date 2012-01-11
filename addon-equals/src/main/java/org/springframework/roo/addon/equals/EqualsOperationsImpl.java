@@ -30,16 +30,15 @@ import org.springframework.roo.support.util.CollectionUtils;
 @Service
 public class EqualsOperationsImpl implements EqualsOperations {
 
-    // Fields
     @Reference private TypeLocationService typeLocationService;
     @Reference private TypeManagementService typeManagementService;
 
     public void addEqualsAndHashCodeMethods(final JavaType javaType,
             final boolean appendSuper, final Set<String> excludeFields) {
         // Add @RooEquals annotation to class if not yet present
-        ClassOrInterfaceTypeDetails cid = typeLocationService
+        final ClassOrInterfaceTypeDetails cid = typeLocationService
                 .getTypeDetails(javaType);
-        if (cid == null || cid.getTypeAnnotation(ROO_EQUALS) != null) {
+        if ((cid == null) || (cid.getTypeAnnotation(ROO_EQUALS) != null)) {
             return;
         }
 
@@ -49,8 +48,8 @@ public class EqualsOperationsImpl implements EqualsOperations {
             annotationBuilder.addBooleanAttribute("appendSuper", appendSuper);
         }
         if (!CollectionUtils.isEmpty(excludeFields)) {
-            List<StringAttributeValue> attributes = new ArrayList<StringAttributeValue>();
-            for (String excludeField : excludeFields) {
+            final List<StringAttributeValue> attributes = new ArrayList<StringAttributeValue>();
+            for (final String excludeField : excludeFields) {
                 attributes.add(new StringAttributeValue(new JavaSymbolName(
                         "value"), excludeField));
             }

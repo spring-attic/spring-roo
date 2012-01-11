@@ -30,18 +30,41 @@ import org.springframework.roo.support.util.Assert;
  */
 public class Op4jMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
-    // Constants
-    private static final JavaType KEYS = new JavaType("Keys"); // TODO should be
-                                                               // fully-qualified?
+    // fully-qualified?
     private static final JavaType JAVA_RUN_TYPE_TYPES = new JavaType(
             "org.javaruntype.type.Types");
+    private static final JavaType KEYS = new JavaType("Keys"); // TODO should be
     private static final JavaType OP4J_GET = new JavaType(
             "org.op4j.functions.Get");
-
     private static final String PROVIDES_TYPE_STRING = Op4jMetadata.class
             .getName();
     private static final String PROVIDES_TYPE = MetadataIdentificationUtils
             .create(PROVIDES_TYPE_STRING);
+
+    public static String createIdentifier(final JavaType javaType,
+            final LogicalPath path) {
+        return PhysicalTypeIdentifierNamingUtils.createIdentifier(
+                PROVIDES_TYPE_STRING, javaType, path);
+    }
+
+    public static JavaType getJavaType(final String metadataIdentificationString) {
+        return PhysicalTypeIdentifierNamingUtils.getJavaType(
+                PROVIDES_TYPE_STRING, metadataIdentificationString);
+    }
+
+    public static String getMetadataIdentiferType() {
+        return PROVIDES_TYPE;
+    }
+
+    public static LogicalPath getPath(final String metadataIdentificationString) {
+        return PhysicalTypeIdentifierNamingUtils.getPath(PROVIDES_TYPE_STRING,
+                metadataIdentificationString);
+    }
+
+    public static boolean isValid(final String metadataIdentificationString) {
+        return PhysicalTypeIdentifierNamingUtils.isValid(PROVIDES_TYPE_STRING,
+                metadataIdentificationString);
+    }
 
     public Op4jMetadata(final String identifier, final JavaType aspectName,
             final PhysicalTypeMetadata governorPhysicalTypeMetadata) {
@@ -60,25 +83,25 @@ public class Op4jMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
     }
 
     private ClassOrInterfaceTypeDetails getInnerType() {
-        List<FieldMetadataBuilder> fields = new ArrayList<FieldMetadataBuilder>();
+        final List<FieldMetadataBuilder> fields = new ArrayList<FieldMetadataBuilder>();
 
         builder.getImportRegistrationResolver().addImports(OP4J_GET,
                 JAVA_RUN_TYPE_TYPES);
 
-        String targetName = super.destination.getSimpleTypeName();
-        String initializer = "Get.attrOf(Types.forClass(" + targetName
+        final String targetName = super.destination.getSimpleTypeName();
+        final String initializer = "Get.attrOf(Types.forClass(" + targetName
                 + ".class),\"" + targetName.toLowerCase() + "\")";
-        final List<JavaType> parameters = Arrays.asList(OBJECT,
-                this.destination);
-        JavaType function = new JavaType("org.op4j.functions.Function", 0,
-                DataType.TYPE, null, parameters);
-        int fieldModifier = Modifier.PUBLIC | Modifier.STATIC | Modifier.FINAL;
-        FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(),
-                fieldModifier, new JavaSymbolName(targetName.toUpperCase()),
-                function, initializer);
+        final List<JavaType> parameters = Arrays.asList(OBJECT, destination);
+        final JavaType function = new JavaType("org.op4j.functions.Function",
+                0, DataType.TYPE, null, parameters);
+        final int fieldModifier = Modifier.PUBLIC | Modifier.STATIC
+                | Modifier.FINAL;
+        final FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(
+                getId(), fieldModifier, new JavaSymbolName(
+                        targetName.toUpperCase()), function, initializer);
         fields.add(fieldBuilder);
 
-        ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(
+        final ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(
                 getId(), Modifier.PUBLIC | Modifier.STATIC, KEYS,
                 PhysicalTypeCategory.CLASS);
         cidBuilder.setDeclaredFields(fields);
@@ -87,7 +110,7 @@ public class Op4jMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
     @Override
     public String toString() {
-        ToStringCreator tsc = new ToStringCreator(this);
+        final ToStringCreator tsc = new ToStringCreator(this);
         tsc.append("identifier", getId());
         tsc.append("valid", valid);
         tsc.append("aspectName", aspectName);
@@ -95,30 +118,5 @@ public class Op4jMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
         tsc.append("governor", governorPhysicalTypeMetadata.getId());
         tsc.append("itdTypeDetails", itdTypeDetails);
         return tsc.toString();
-    }
-
-    public static String getMetadataIdentiferType() {
-        return PROVIDES_TYPE;
-    }
-
-    public static String createIdentifier(final JavaType javaType,
-            final LogicalPath path) {
-        return PhysicalTypeIdentifierNamingUtils.createIdentifier(
-                PROVIDES_TYPE_STRING, javaType, path);
-    }
-
-    public static JavaType getJavaType(final String metadataIdentificationString) {
-        return PhysicalTypeIdentifierNamingUtils.getJavaType(
-                PROVIDES_TYPE_STRING, metadataIdentificationString);
-    }
-
-    public static LogicalPath getPath(final String metadataIdentificationString) {
-        return PhysicalTypeIdentifierNamingUtils.getPath(PROVIDES_TYPE_STRING,
-                metadataIdentificationString);
-    }
-
-    public static boolean isValid(final String metadataIdentificationString) {
-        return PhysicalTypeIdentifierNamingUtils.isValid(PROVIDES_TYPE_STRING,
-                metadataIdentificationString);
     }
 }

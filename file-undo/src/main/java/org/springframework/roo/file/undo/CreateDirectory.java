@@ -18,14 +18,12 @@ import org.springframework.roo.support.util.FileUtils;
  */
 public class CreateDirectory implements UndoableOperation {
 
-    // Constants
     private static final Logger LOGGER = HandlerUtils
             .getLogger(CreateDirectory.class);
 
-    // Fields
-    private final FilenameResolver filenameResolver;
     private final File actual;
     private File deleteFrom;
+    private final FilenameResolver filenameResolver;
 
     public CreateDirectory(final UndoManager undoManager,
             final FilenameResolver filenameResolver, final File actual) {
@@ -40,7 +38,7 @@ public class CreateDirectory implements UndoableOperation {
         // Figure out the first directory we should delete from
         deleteFrom = actual;
         while (true) {
-            File parent = deleteFrom.getParentFile();
+            final File parent = deleteFrom.getParentFile();
             if (!parent.exists()) {
                 deleteFrom = parent;
             }
@@ -59,7 +57,7 @@ public class CreateDirectory implements UndoableOperation {
     }
 
     public boolean undo() {
-        boolean success = FileUtils.deleteRecursively(deleteFrom);
+        final boolean success = FileUtils.deleteRecursively(deleteFrom);
         if (success) {
             LOGGER.fine("Undo create "
                     + filenameResolver.getMeaningfulName(actual));

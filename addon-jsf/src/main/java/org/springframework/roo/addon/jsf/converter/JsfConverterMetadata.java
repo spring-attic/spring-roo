@@ -38,12 +38,36 @@ import org.springframework.roo.support.util.Assert;
 public class JsfConverterMetadata extends
         AbstractItdTypeDetailsProvidingMetadataItem {
 
-    // Constants
     static final String ID_FIELD_NAME = "id";
     private static final String PROVIDES_TYPE_STRING = JsfConverterMetadata.class
             .getName();
     private static final String PROVIDES_TYPE = MetadataIdentificationUtils
             .create(PROVIDES_TYPE_STRING);
+
+    public static String createIdentifier(final JavaType javaType,
+            final LogicalPath path) {
+        return PhysicalTypeIdentifierNamingUtils.createIdentifier(
+                PROVIDES_TYPE_STRING, javaType, path);
+    }
+
+    public static JavaType getJavaType(final String metadataIdentificationString) {
+        return PhysicalTypeIdentifierNamingUtils.getJavaType(
+                PROVIDES_TYPE_STRING, metadataIdentificationString);
+    }
+
+    public static String getMetadataIdentiferType() {
+        return PROVIDES_TYPE;
+    }
+
+    public static LogicalPath getPath(final String metadataIdentificationString) {
+        return PhysicalTypeIdentifierNamingUtils.getPath(PROVIDES_TYPE_STRING,
+                metadataIdentificationString);
+    }
+
+    public static boolean isValid(final String metadataIdentificationString) {
+        return PhysicalTypeIdentifierNamingUtils.isValid(PROVIDES_TYPE_STRING,
+                metadataIdentificationString);
+    }
 
     public JsfConverterMetadata(final String identifier,
             final JavaType aspectName,
@@ -60,7 +84,7 @@ public class JsfConverterMetadata extends
             return;
         }
 
-        if (findMethod == null || identifierAccessor == null) {
+        if ((findMethod == null) || (identifierAccessor == null)) {
             valid = false;
             return;
         }
@@ -80,22 +104,18 @@ public class JsfConverterMetadata extends
     }
 
     private AnnotationMetadata getFacesConverterAnnotation() {
-        AnnotationMetadata annotation = getTypeAnnotation(FACES_CONVERTER);
+        final AnnotationMetadata annotation = getTypeAnnotation(FACES_CONVERTER);
         if (annotation == null) {
             return null;
         }
 
-        AnnotationMetadataBuilder annotationBuulder = new AnnotationMetadataBuilder(
+        final AnnotationMetadataBuilder annotationBuulder = new AnnotationMetadataBuilder(
                 annotation);
         // annotationBuulder.addClassAttribute("forClass", entity); // TODO The
         // forClass attribute causes issues
         annotationBuulder.addStringAttribute("value",
                 destination.getFullyQualifiedTypeName());
         return annotationBuulder.build();
-    }
-
-    private boolean isConverterInterfaceIntroduced() {
-        return isImplementing(governorTypeDetails, CONVERTER);
     }
 
     private MethodMetadataBuilder getGetAsObjectMethod(
@@ -113,7 +133,7 @@ public class JsfConverterMetadata extends
         builder.getImportRegistrationResolver().addImports(returnType,
                 FACES_CONTEXT, UI_COMPONENT);
 
-        InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+        final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
         bodyBuilder
                 .appendFormalLine("if (value == null || value.length() == 0) {");
         bodyBuilder.indent();
@@ -146,9 +166,9 @@ public class JsfConverterMetadata extends
         builder.getImportRegistrationResolver().addImports(entity,
                 FACES_CONTEXT, UI_COMPONENT);
 
-        String simpleTypeName = entity.getSimpleTypeName();
+        final String simpleTypeName = entity.getSimpleTypeName();
 
-        InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+        final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
         bodyBuilder.appendFormalLine("return value instanceof "
                 + simpleTypeName + " ? ((" + simpleTypeName + ") value)."
                 + identifierAccessor.getMethodName().getSymbolName()
@@ -164,7 +184,7 @@ public class JsfConverterMetadata extends
                 parameterNames, bodyBuilder);
     }
 
-    private String getJavaTypeConversionString(JavaType javaType) {
+    private String getJavaTypeConversionString(final JavaType javaType) {
         if (javaType.equals(JavaType.LONG_OBJECT)
                 || javaType.equals(JavaType.LONG_PRIMITIVE)) {
             return "Long.parseLong(value)";
@@ -203,6 +223,10 @@ public class JsfConverterMetadata extends
         }
     }
 
+    private boolean isConverterInterfaceIntroduced() {
+        return isImplementing(governorTypeDetails, CONVERTER);
+    }
+
     @Override
     public String toString() {
         final ToStringCreator tsc = new ToStringCreator(this);
@@ -213,30 +237,5 @@ public class JsfConverterMetadata extends
         tsc.append("governor", governorPhysicalTypeMetadata.getId());
         tsc.append("itdTypeDetails", itdTypeDetails);
         return tsc.toString();
-    }
-
-    public static String getMetadataIdentiferType() {
-        return PROVIDES_TYPE;
-    }
-
-    public static String createIdentifier(final JavaType javaType,
-            final LogicalPath path) {
-        return PhysicalTypeIdentifierNamingUtils.createIdentifier(
-                PROVIDES_TYPE_STRING, javaType, path);
-    }
-
-    public static JavaType getJavaType(final String metadataIdentificationString) {
-        return PhysicalTypeIdentifierNamingUtils.getJavaType(
-                PROVIDES_TYPE_STRING, metadataIdentificationString);
-    }
-
-    public static LogicalPath getPath(final String metadataIdentificationString) {
-        return PhysicalTypeIdentifierNamingUtils.getPath(PROVIDES_TYPE_STRING,
-                metadataIdentificationString);
-    }
-
-    public static boolean isValid(final String metadataIdentificationString) {
-        return PhysicalTypeIdentifierNamingUtils.isValid(PROVIDES_TYPE_STRING,
-                metadataIdentificationString);
     }
 }

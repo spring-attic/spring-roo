@@ -32,17 +32,17 @@ public class CloudAppConverter implements Converter<CloudApp> {
         return new CloudApp(value);
     }
 
-    public boolean supports(final Class<?> requiredType,
-            final String optionContext) {
-        return CloudApp.class.isAssignableFrom(requiredType);
-    }
-
     public boolean getAllPossibleValues(final List<Completion> completions,
             final Class<?> requiredType, final String existingData,
             final String optionContext, final MethodTarget target) {
-        for (String appName : session.getApplicationNames()) {
+        for (final String appName : session.getApplicationNames()) {
             completions.add(new Completion(appName));
         }
         return false;
+    }
+
+    public boolean supports(final Class<?> requiredType,
+            final String optionContext) {
+        return CloudApp.class.isAssignableFrom(requiredType);
     }
 }

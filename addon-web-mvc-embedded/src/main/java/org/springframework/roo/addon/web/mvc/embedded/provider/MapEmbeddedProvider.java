@@ -28,9 +28,9 @@ public class MapEmbeddedProvider extends AbstractEmbeddedProvider {
             // Expected format
             // http://maps.google.com/maps?q=sydney,+Australia&.. the q= param
             // needs to be present
-            String qStart = url.substring(url.indexOf("q=") + 2);
+            final String qStart = url.substring(url.indexOf("q=") + 2);
 
-            Map<String, String> options = new HashMap<String, String>();
+            final Map<String, String> options = new HashMap<String, String>();
             options.put("provider", "GOOGLE_MAPS");
             options.put("location", qStart.substring(
                     0,
@@ -43,7 +43,7 @@ public class MapEmbeddedProvider extends AbstractEmbeddedProvider {
 
     public boolean install(final String viewName,
             final Map<String, String> options) {
-        if (options == null || options.size() != 2
+        if ((options == null) || (options.size() != 2)
                 || !options.containsKey("provider")
                 || !options.get("provider").equalsIgnoreCase("GOOGLE_MAPS")
                 || !options.containsKey("location")) {
@@ -53,10 +53,10 @@ public class MapEmbeddedProvider extends AbstractEmbeddedProvider {
         try {
             location = URLDecoder.decode(location, "UTF-8");
         }
-        catch (UnsupportedEncodingException ignore) {
+        catch (final UnsupportedEncodingException ignore) {
         }
         installTagx("map");
-        Element map = new XmlElementBuilder("embed:map", XmlUtils
+        final Element map = new XmlElementBuilder("embed:map", XmlUtils
                 .getDocumentBuilder().newDocument())
                 .addAttribute("id", "map_" + viewName)
                 .addAttribute("location", location).build();

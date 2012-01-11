@@ -7,7 +7,7 @@ package org.springframework.roo.addon.jsf;
  * @since 1.2.0
  */
 public enum JsfImplementation {
-    ORACLE_MOJARRA, APACHE_MYFACES;
+    APACHE_MYFACES, ORACLE_MOJARRA;
 
     public String getConfigPrefix() {
         return "/configuration/jsf-implementations/jsf-implementation[@id='"

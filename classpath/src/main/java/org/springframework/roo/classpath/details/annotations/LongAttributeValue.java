@@ -10,7 +10,6 @@ import org.springframework.roo.model.JavaSymbolName;
  */
 public class LongAttributeValue extends AbstractAnnotationAttributeValue<Long> {
 
-    // Fields
     private final long value;
 
     /**

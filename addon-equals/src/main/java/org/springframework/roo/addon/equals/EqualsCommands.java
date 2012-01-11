@@ -20,7 +20,6 @@ import org.springframework.roo.shell.CommandMarker;
 @Service
 public class EqualsCommands implements CommandMarker {
 
-    // Fields
     @Reference private EqualsOperations equalsOperations;
 
     @CliCommand(value = "equals", help = "Add equals and hashCode methods to a class")

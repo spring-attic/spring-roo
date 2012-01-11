@@ -20,10 +20,7 @@ import org.springframework.roo.support.util.FileUtils;
 public abstract class FileConverter implements Converter<File> {
 
     private static final String HOME_DIRECTORY_SYMBOL = "~";
-    // Constants
     private static final String home = System.getProperty("user.home");
-
-    // Fields
 
     /**
      * @return the "current working directory" this {@link FileConverter} should

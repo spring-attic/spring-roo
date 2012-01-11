@@ -7,17 +7,7 @@ package org.springframework.roo.addon.roobot.client;
  * @since 1.1.2
  */
 public enum AddOnStabilityLevel {
-    RELEASE(0), RELEASE_CANDIDATE(1), MILESTONE(2), ANY(3);
-
-    private int level;
-
-    private AddOnStabilityLevel(final int level) {
-        this.level = level;
-    }
-
-    public int getLevel() {
-        return level;
-    }
+    ANY(3), MILESTONE(2), RELEASE(0), RELEASE_CANDIDATE(1);
 
     public static AddOnStabilityLevel fromLevel(final int level) {
         if (level == ANY.getLevel()) {
@@ -47,5 +37,15 @@ public enum AddOnStabilityLevel {
         else {
             return ANY.getLevel();
         }
+    }
+
+    private int level;
+
+    private AddOnStabilityLevel(final int level) {
+        this.level = level;
+    }
+
+    public int getLevel() {
+        return level;
     }
 }

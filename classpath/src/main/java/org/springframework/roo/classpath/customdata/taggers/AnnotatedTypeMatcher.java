@@ -19,9 +19,8 @@ import org.springframework.roo.support.util.Assert;
  */
 public class AnnotatedTypeMatcher extends TypeMatcher {
 
-    // Fields
-    private final CustomDataKey<MemberHoldingTypeDetails> customDataKey;
     private final List<JavaType> annotationTypesToMatchOn;
+    private final CustomDataKey<MemberHoldingTypeDetails> customDataKey;
 
     /**
      * Constructor
@@ -35,6 +34,14 @@ public class AnnotatedTypeMatcher extends TypeMatcher {
         Assert.notNull(customDataKey, "Custom data key required");
         this.annotationTypesToMatchOn = Arrays.asList(annotationTypesToMatchOn);
         this.customDataKey = customDataKey;
+    }
+
+    public CustomDataKey<MemberHoldingTypeDetails> getCustomDataKey() {
+        return customDataKey;
+    }
+
+    public Object getTagValue(final MemberHoldingTypeDetails key) {
+        return null;
     }
 
     public List<MemberHoldingTypeDetails> matches(
@@ -54,13 +61,5 @@ public class AnnotatedTypeMatcher extends TypeMatcher {
             }
         }
         return new ArrayList<MemberHoldingTypeDetails>(matched.values());
-    }
-
-    public CustomDataKey<MemberHoldingTypeDetails> getCustomDataKey() {
-        return customDataKey;
-    }
-
-    public Object getTagValue(final MemberHoldingTypeDetails key) {
-        return null;
     }
 }

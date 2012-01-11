@@ -14,20 +14,9 @@ import org.junit.Test;
  */
 public class GwtRequestMetadataTest {
 
-    // Constants
     private static final String CONTENTS = "contents";
     private static final String MID_1 = "MID:x#y";
     private static final String MID_2 = "MID:x#z";
-
-    @Test
-    public void testInstanceDoesNotEqualNull() {
-        // Set up
-        final GwtRequestMetadata instance = new GwtRequestMetadata(MID_1,
-                CONTENTS);
-
-        // Invoke and check
-        assertFalse(instance.equals(null));
-    }
 
     @Test
     public void testInstanceDoesNotEqualInstanceOfOtherClass() {
@@ -40,6 +29,16 @@ public class GwtRequestMetadataTest {
     }
 
     @Test
+    public void testInstanceDoesNotEqualNull() {
+        // Set up
+        final GwtRequestMetadata instance = new GwtRequestMetadata(MID_1,
+                CONTENTS);
+
+        // Invoke and check
+        assertFalse(instance.equals(null));
+    }
+
+    @Test
     public void testInstanceEqualsItself() {
         // Set up
         final GwtRequestMetadata instance = new GwtRequestMetadata(MID_1,
@@ -47,19 +46,6 @@ public class GwtRequestMetadataTest {
 
         // Invoke and check
         assertEquals(instance, instance);
-    }
-
-    @Test
-    public void testInstancesWithSameContentsAreEqual() {
-        // Set up
-        final GwtRequestMetadata instance1 = new GwtRequestMetadata(MID_1,
-                CONTENTS);
-        final GwtRequestMetadata instance2 = new GwtRequestMetadata(MID_2,
-                CONTENTS);
-
-        // Invoke and check
-        assertEquals(instance1, instance2);
-        assertEquals(instance2, instance1);
     }
 
     @Test
@@ -76,18 +62,6 @@ public class GwtRequestMetadataTest {
     }
 
     @Test
-    public void testInstancesWithSameContentsHaveSameHashCodes() {
-        // Set up
-        final GwtRequestMetadata instance1 = new GwtRequestMetadata(MID_1,
-                CONTENTS);
-        final GwtRequestMetadata instance2 = new GwtRequestMetadata(MID_2,
-                CONTENTS);
-
-        // Invoke and check
-        assertTrue(instance1.hashCode() == instance2.hashCode());
-    }
-
-    @Test
     public void testInstancesWithDifferentContentsHaveDifferentHashCodes() {
         // Set up
         final GwtRequestMetadata instance1 = new GwtRequestMetadata(MID_1,
@@ -97,5 +71,30 @@ public class GwtRequestMetadataTest {
 
         // Invoke and check
         assertTrue(instance1.hashCode() != instance2.hashCode());
+    }
+
+    @Test
+    public void testInstancesWithSameContentsAreEqual() {
+        // Set up
+        final GwtRequestMetadata instance1 = new GwtRequestMetadata(MID_1,
+                CONTENTS);
+        final GwtRequestMetadata instance2 = new GwtRequestMetadata(MID_2,
+                CONTENTS);
+
+        // Invoke and check
+        assertEquals(instance1, instance2);
+        assertEquals(instance2, instance1);
+    }
+
+    @Test
+    public void testInstancesWithSameContentsHaveSameHashCodes() {
+        // Set up
+        final GwtRequestMetadata instance1 = new GwtRequestMetadata(MID_1,
+                CONTENTS);
+        final GwtRequestMetadata instance2 = new GwtRequestMetadata(MID_2,
+                CONTENTS);
+
+        // Invoke and check
+        assertTrue(instance1.hashCode() == instance2.hashCode());
     }
 }

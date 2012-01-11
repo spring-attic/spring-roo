@@ -35,22 +35,20 @@ import org.springframework.roo.support.util.ExceptionUtils;
 public class DefaultProcessManager extends
         AbstractProcessManagerStatusPublisher implements ProcessManager {
 
-    // Constants
     private static final Logger LOGGER = HandlerUtils
             .getLogger(DefaultProcessManager.class);
 
-    // Fields
-    @Reference private UndoManager undoManager;
-    @Reference private FileMonitorService fileMonitorService;
-    @Reference private StartLevel startLevel;
     private boolean developmentMode = false;
-    private long minimumDelayBetweenPoll = -1; // How many ms must pass at
-                                               // minimum between each poll
-                                               // (negative denotes
-                                               // auto-scaling; 0 = never)
-    private long lastPollTime = 0; // What time the last poll was completed
+    @Reference private FileMonitorService fileMonitorService;
     private long lastPollDuration = 0; // How many ms the last poll actually
-                                       // took
+    // minimum between each poll
+    // (negative denotes
+    // auto-scaling; 0 = never)
+    private long lastPollTime = 0; // What time the last poll was completed
+    private long minimumDelayBetweenPoll = -1; // How many ms must pass at
+    @Reference private StartLevel startLevel;
+    @Reference private UndoManager undoManager;
+    // took
     private String workingDir; // The working directory of the current roo
                                // project
 
@@ -74,7 +72,7 @@ public class DefaultProcessManager extends
                 });
 
         // Now start a thread that will undertake a background poll every second
-        Thread t = new Thread(new Runnable() {
+        final Thread t = new Thread(new Runnable() {
             public void run() {
                 // Unsynchronized lookup of terminated status to avoid anything
                 // blocking the termination of the thread
@@ -87,54 +85,12 @@ public class DefaultProcessManager extends
                     try {
                         Thread.sleep(1000);
                     }
-                    catch (InterruptedException ignoreAndContinue) {
+                    catch (final InterruptedException ignoreAndContinue) {
                     }
                 }
             }
         }, "Spring Roo Process Manager Background Polling Thread");
         t.start();
-    }
-
-    protected void deactivate(final ComponentContext context) {
-        // We have lost a required component (eg UndoManager; ROO-1037)
-        terminate(); // Safe to call even if we'd terminated earlier
-    }
-
-    public void terminate() {
-        synchronized (processManagerStatus) {
-            // To get this far this thread has a lock on process manager status,
-            // so we control process manager and can terminate its background
-            // timer thread
-            if (getProcessManagerStatus() != ProcessManagerStatus.TERMINATED) {
-                // The thread started above will terminate of its own accord,
-                // given we are shutting down
-                setProcessManagerStatus(ProcessManagerStatus.TERMINATED);
-            }
-        }
-    }
-
-    private void completeStartup() {
-        synchronized (processManagerStatus) {
-            if (getProcessManagerStatus() != ProcessManagerStatus.STARTING) {
-                throw new IllegalStateException("Process manager status "
-                        + getProcessManagerStatus() + " but should be STARTING");
-            }
-            setProcessManagerStatus(ProcessManagerStatus.COMPLETING_STARTUP);
-            try {
-                // Register the initial monitoring request
-                doTransactionally(new MonitoringRequestCommand(
-                        fileMonitorService,
-                        MonitoringRequest
-                                .getInitialSubTreeMonitoringRequest(workingDir),
-                        true));
-            }
-            catch (Throwable t) {
-                logException(t);
-            }
-            finally {
-                setProcessManagerStatus(ProcessManagerStatus.AVAILABLE);
-            }
-        }
     }
 
     private boolean backgroundPoll() {
@@ -159,7 +115,7 @@ public class DefaultProcessManager extends
             try {
                 doTransactionally(null);
             }
-            catch (Throwable t) {
+            catch (final Throwable t) {
                 // We don't want a poll failure to cause the background polling
                 // thread to die
                 logException(t);
@@ -171,23 +127,23 @@ public class DefaultProcessManager extends
         return true;
     }
 
-    public <T> T execute(final CommandCallback<T> callback) {
-        Assert.notNull(callback, "Callback required");
+    private void completeStartup() {
         synchronized (processManagerStatus) {
-            // For us to acquire this lock means no other thread has hold of
-            // process manager status
-            Assert.isTrue(
-                    getProcessManagerStatus() == ProcessManagerStatus.AVAILABLE
-                            || getProcessManagerStatus() == ProcessManagerStatus.BUSY_EXECUTING,
-                    "Unable to execute as another thread has set status to "
-                            + getProcessManagerStatus());
-            setProcessManagerStatus(ProcessManagerStatus.BUSY_EXECUTING);
-            try {
-                return doTransactionally(callback);
+            if (getProcessManagerStatus() != ProcessManagerStatus.STARTING) {
+                throw new IllegalStateException("Process manager status "
+                        + getProcessManagerStatus() + " but should be STARTING");
             }
-            catch (RuntimeException e) {
-                logException(e);
-                throw e;
+            setProcessManagerStatus(ProcessManagerStatus.COMPLETING_STARTUP);
+            try {
+                // Register the initial monitoring request
+                doTransactionally(new MonitoringRequestCommand(
+                        fileMonitorService,
+                        MonitoringRequest
+                                .getInitialSubTreeMonitoringRequest(workingDir),
+                        true));
+            }
+            catch (final Throwable t) {
+                logException(t);
             }
             finally {
                 setProcessManagerStatus(ProcessManagerStatus.AVAILABLE);
@@ -195,25 +151,9 @@ public class DefaultProcessManager extends
         }
     }
 
-    private void logException(final Throwable t) {
-        Throwable root = ExceptionUtils.extractRootCause(t);
-        if (developmentMode) {
-            LOGGER.log(Level.FINE, root.getMessage(), root);
-        }
-        else {
-            String message = root.getMessage();
-            if (message == null || "".equals(message)) {
-                StackTraceElement[] trace = root.getStackTrace();
-                if (trace != null && trace.length > 0) {
-                    message = root.getClass().getSimpleName() + " at "
-                            + trace[0].toString();
-                }
-                else {
-                    message = root.getClass().getSimpleName();
-                }
-            }
-            LOGGER.log(Level.FINE, message);
-        }
+    protected void deactivate(final ComponentContext context) {
+        // We have lost a required component (eg UndoManager; ROO-1037)
+        terminate(); // Safe to call even if we'd terminated earlier
     }
 
     private <T> T doTransactionally(final CommandCallback<T> callback) {
@@ -252,7 +192,7 @@ public class DefaultProcessManager extends
             undoManager.reset();
 
         }
-        catch (RuntimeException e) {
+        catch (final RuntimeException e) {
             // Something went wrong, so attempt to undo
             try {
                 setProcessManagerStatus(ProcessManagerStatus.UNDOING);
@@ -269,6 +209,100 @@ public class DefaultProcessManager extends
         }
 
         return result;
+    }
+
+    public <T> T execute(final CommandCallback<T> callback) {
+        Assert.notNull(callback, "Callback required");
+        synchronized (processManagerStatus) {
+            // For us to acquire this lock means no other thread has hold of
+            // process manager status
+            Assert.isTrue(
+                    (getProcessManagerStatus() == ProcessManagerStatus.AVAILABLE)
+                            || (getProcessManagerStatus() == ProcessManagerStatus.BUSY_EXECUTING),
+                    "Unable to execute as another thread has set status to "
+                            + getProcessManagerStatus());
+            setProcessManagerStatus(ProcessManagerStatus.BUSY_EXECUTING);
+            try {
+                return doTransactionally(callback);
+            }
+            catch (final RuntimeException e) {
+                logException(e);
+                throw e;
+            }
+            finally {
+                setProcessManagerStatus(ProcessManagerStatus.AVAILABLE);
+            }
+        }
+    }
+
+    /**
+     * @return how many milliseconds the last poll execution took to complete (0
+     *         = never ran; >0 = last execution time)
+     */
+    public long getLastPollDuration() {
+        return lastPollDuration;
+    }
+
+    /**
+     * @return how many milliseconds must pass between each poll (0 = manual
+     *         only; <0 = auto-scaled; >0 = interval)
+     */
+    public long getMinimumDelayBetweenPoll() {
+        return minimumDelayBetweenPoll;
+    }
+
+    public boolean isDevelopmentMode() {
+        return developmentMode;
+    }
+
+    private void logException(final Throwable t) {
+        final Throwable root = ExceptionUtils.extractRootCause(t);
+        if (developmentMode) {
+            LOGGER.log(Level.FINE, root.getMessage(), root);
+        }
+        else {
+            String message = root.getMessage();
+            if ((message == null) || "".equals(message)) {
+                final StackTraceElement[] trace = root.getStackTrace();
+                if ((trace != null) && (trace.length > 0)) {
+                    message = root.getClass().getSimpleName() + " at "
+                            + trace[0].toString();
+                }
+                else {
+                    message = root.getClass().getSimpleName();
+                }
+            }
+            LOGGER.log(Level.FINE, message);
+        }
+    }
+
+    public void setDevelopmentMode(final boolean developmentMode) {
+        this.developmentMode = developmentMode;
+
+        // To assist with debugging, development mode does not undertake undo
+        // operations
+        undoManager.setUndoEnabled(!developmentMode);
+    }
+
+    /**
+     * @param minimumDelayBetweenPoll how many milliseconds must pass between
+     *            each poll
+     */
+    public void setMinimumDelayBetweenPoll(final long minimumDelayBetweenPoll) {
+        this.minimumDelayBetweenPoll = minimumDelayBetweenPoll;
+    }
+
+    public void terminate() {
+        synchronized (processManagerStatus) {
+            // To get this far this thread has a lock on process manager status,
+            // so we control process manager and can terminate its background
+            // timer thread
+            if (getProcessManagerStatus() != ProcessManagerStatus.TERMINATED) {
+                // The thread started above will terminate of its own accord,
+                // given we are shutting down
+                setProcessManagerStatus(ProcessManagerStatus.TERMINATED);
+            }
+        }
     }
 
     public void timerBasedPoll() {
@@ -293,8 +327,8 @@ public class DefaultProcessManager extends
                     effectiveMinimumDelayBetweenPoll = lastPollDuration;
                 }
             }
-            long started = System.currentTimeMillis();
-            if (started < lastPollTime + effectiveMinimumDelayBetweenPoll) {
+            final long started = System.currentTimeMillis();
+            if (started < (lastPollTime + effectiveMinimumDelayBetweenPoll)) {
                 // Too soon to re-poll
                 return;
             }
@@ -310,44 +344,8 @@ public class DefaultProcessManager extends
                                       // has ever run
             }
         }
-        catch (Throwable t) {
+        catch (final Throwable t) {
             LOGGER.log(Level.SEVERE, t.getMessage(), t);
         }
-    }
-
-    public boolean isDevelopmentMode() {
-        return developmentMode;
-    }
-
-    public void setDevelopmentMode(final boolean developmentMode) {
-        this.developmentMode = developmentMode;
-
-        // To assist with debugging, development mode does not undertake undo
-        // operations
-        this.undoManager.setUndoEnabled(!developmentMode);
-    }
-
-    /**
-     * @param minimumDelayBetweenPoll how many milliseconds must pass between
-     *            each poll
-     */
-    public void setMinimumDelayBetweenPoll(final long minimumDelayBetweenPoll) {
-        this.minimumDelayBetweenPoll = minimumDelayBetweenPoll;
-    }
-
-    /**
-     * @return how many milliseconds must pass between each poll (0 = manual
-     *         only; <0 = auto-scaled; >0 = interval)
-     */
-    public long getMinimumDelayBetweenPoll() {
-        return minimumDelayBetweenPoll;
-    }
-
-    /**
-     * @return how many milliseconds the last poll execution took to complete (0
-     *         = never ran; >0 = last execution time)
-     */
-    public long getLastPollDuration() {
-        return lastPollDuration;
     }
 }

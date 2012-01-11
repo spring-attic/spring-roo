@@ -18,10 +18,9 @@ import org.springframework.roo.support.util.Assert;
  */
 public class DefaultAnnotationMetadata implements AnnotationMetadata {
 
-    // Fields
     private final JavaType annotationType;
-    private final List<AnnotationAttributeValue<?>> attributes;
     private final Map<JavaSymbolName, AnnotationAttributeValue<?>> attributeMap;
+    private final List<AnnotationAttributeValue<?>> attributes;
 
     /**
      * Constructor
@@ -35,14 +34,18 @@ public class DefaultAnnotationMetadata implements AnnotationMetadata {
             final List<AnnotationAttributeValue<?>> attributeValues) {
         Assert.notNull(annotationType, "Annotation type required");
         this.annotationType = annotationType;
-        this.attributes = new ArrayList<AnnotationAttributeValue<?>>();
-        this.attributeMap = new HashMap<JavaSymbolName, AnnotationAttributeValue<?>>();
+        attributes = new ArrayList<AnnotationAttributeValue<?>>();
+        attributeMap = new HashMap<JavaSymbolName, AnnotationAttributeValue<?>>();
         if (attributeValues != null) {
-            this.attributes.addAll(attributeValues);
+            attributes.addAll(attributeValues);
             for (final AnnotationAttributeValue<?> value : attributeValues) {
-                this.attributeMap.put(value.getName(), value);
+                attributeMap.put(value.getName(), value);
             }
         }
+    }
+
+    public JavaType getAnnotationType() {
+        return annotationType;
     }
 
     public AnnotationAttributeValue<?> getAttribute(
@@ -58,14 +61,10 @@ public class DefaultAnnotationMetadata implements AnnotationMetadata {
 
     public List<JavaSymbolName> getAttributeNames() {
         final List<JavaSymbolName> result = new ArrayList<JavaSymbolName>();
-        for (AnnotationAttributeValue<?> value : attributes) {
+        for (final AnnotationAttributeValue<?> value : attributes) {
             result.add(value.getName());
         }
         return result;
-    }
-
-    public JavaType getAnnotationType() {
-        return annotationType;
     }
 
     @Override

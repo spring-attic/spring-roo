@@ -24,18 +24,187 @@ import org.w3c.dom.Element;
  */
 public abstract class DatabaseXmlUtils {
 
-    // Constants
-    public static final String NAME = "name";
-    public static final String LOCAL = "local";
-    public static final String FOREIGN = "foreign";
-    public static final String FOREIGN_TABLE = "foreignTable";
-    public static final String DESCRIPTION = "description";
-    public static final String REFERENCE = "reference";
-    public static final String ON_UPDATE = "onUpdate";
-    public static final String ON_DELETE = "onDelete";
-
     public static enum IndexType {
         INDEX, UNIQUE
+    }
+
+    public static final String DESCRIPTION = "description";
+    public static final String FOREIGN = "foreign";
+    public static final String FOREIGN_TABLE = "foreignTable";
+    public static final String LOCAL = "local";
+    public static final String NAME = "name";
+    public static final String ON_DELETE = "onDelete";
+    public static final String ON_UPDATE = "onUpdate";
+
+    public static final String REFERENCE = "reference";
+
+    /**
+     * Adds an <option key="foo" value="true"> element as a child of the given
+     * parent element
+     * 
+     * @param document the XML document containing the parent and child
+     *            (required)
+     * @param parent the parent element to which to add a child (required)
+     * @param key the option key/name (required)
+     * @param value the option value
+     */
+    private static void addBooleanOptionElement(final Document document,
+            final Element parent, final String key, final boolean value) {
+        parent.appendChild(createOptionElement(key, String.valueOf(value),
+                document));
+    }
+
+    private static void addForeignKeyElements(
+            final Set<ForeignKey> foreignKeys, final boolean exported,
+            final Element tableElement, final Document document) {
+        for (final ForeignKey foreignKey : foreignKeys) {
+            final Element foreignKeyElement = document
+                    .createElement("foreign-key");
+            foreignKeyElement.setAttribute(NAME, foreignKey.getName());
+            foreignKeyElement.setAttribute(FOREIGN_TABLE,
+                    foreignKey.getForeignTableName());
+            foreignKeyElement.setAttribute(ON_DELETE, foreignKey.getOnDelete()
+                    .getCode());
+            foreignKeyElement.setAttribute(ON_UPDATE, foreignKey.getOnUpdate()
+                    .getCode());
+
+            final String foreignSchemaName = foreignKey.getForeignSchemaName();
+            if (!DbreModelService.NO_SCHEMA_REQUIRED.equals(foreignSchemaName)) {
+                foreignKeyElement.appendChild(createOptionElement(
+                        "foreignSchemaName", foreignSchemaName, document));
+            }
+
+            foreignKeyElement.appendChild(createOptionElement("exported",
+                    String.valueOf(exported), document));
+
+            for (final Reference reference : foreignKey.getReferences()) {
+                final Element referenceElement = document
+                        .createElement(REFERENCE);
+                referenceElement.setAttribute(FOREIGN,
+                        reference.getForeignColumnName());
+                referenceElement.setAttribute(LOCAL,
+                        reference.getLocalColumnName());
+                foreignKeyElement.appendChild(referenceElement);
+            }
+            tableElement.appendChild(foreignKeyElement);
+        }
+    }
+
+    private static void addIndices(final Table table,
+            final Element tableElement, final IndexType indexType) {
+        final List<Element> elements = XmlUtils.findElements(indexType.name()
+                .toLowerCase(), tableElement);
+        for (final Element element : elements) {
+            final Index index = new Index(element.getAttribute(NAME));
+            index.setUnique(indexType == IndexType.UNIQUE);
+            final List<Element> indexColumnElements = XmlUtils.findElements(
+                    indexType.name().toLowerCase() + "-column", element);
+            for (final Element indexColumnElement : indexColumnElements) {
+                final IndexColumn indexColumn = new IndexColumn(
+                        indexColumnElement.getAttribute(NAME));
+                index.addColumn(indexColumn);
+            }
+            table.addIndex(index);
+        }
+    }
+
+    private static Element createOptionElement(final String key,
+            final String value, final Document document) {
+        final Element option = document.createElement("option");
+        option.setAttribute("key", key);
+        option.setAttribute("value", value);
+        return option;
+    }
+
+    public static Document getDatabaseDocument(final Database database) {
+        final Document document = XmlUtils.getDocumentBuilder().newDocument();
+        final Comment comment = document
+                .createComment("WARNING: DO NOT EDIT THIS FILE. THIS FILE IS MANAGED BY SPRING ROO.");
+        document.appendChild(comment);
+
+        final Element databaseElement = document.createElement("database");
+        databaseElement.setAttribute(NAME, "deprecated");
+
+        if (database.getDestinationPackage() != null) {
+            databaseElement.setAttribute("package", database
+                    .getDestinationPackage().getFullyQualifiedPackageName());
+        }
+
+        databaseElement.appendChild(createOptionElement("moduleName",
+                database.getModuleName(), document));
+        addBooleanOptionElement(document, databaseElement, "activeRecord",
+                database.isActiveRecord());
+        addBooleanOptionElement(document, databaseElement,
+                "includeNonPortableAttributes",
+                database.isIncludeNonPortableAttributes());
+        addBooleanOptionElement(document, databaseElement, "testAutomatically",
+                database.isTestAutomatically());
+
+        for (final Table table : database.getTables()) {
+            final Element tableElement = document.createElement("table");
+            tableElement.setAttribute(NAME, table.getName());
+            final String schemaName = table.getSchema().getName();
+            if (!DbreModelService.NO_SCHEMA_REQUIRED.equals(schemaName)) {
+                tableElement.setAttribute("alias", schemaName);
+            }
+            if (StringUtils.hasText(table.getDescription())) {
+                tableElement.setAttribute(DESCRIPTION, table.getDescription());
+            }
+
+            for (final Column column : table.getColumns()) {
+                final Element columnElement = document.createElement("column");
+                columnElement.setAttribute(NAME, column.getName());
+                if (StringUtils.hasText(column.getDescription())) {
+                    columnElement.setAttribute(DESCRIPTION,
+                            column.getDescription());
+                }
+
+                columnElement.setAttribute("primaryKey",
+                        String.valueOf(column.isPrimaryKey()));
+                columnElement.setAttribute("required",
+                        String.valueOf(column.isRequired()));
+                columnElement.setAttribute("size",
+                        String.valueOf(column.getColumnSize()));
+                columnElement.setAttribute("scale",
+                        String.valueOf(column.getScale()));
+                columnElement.setAttribute("type", column.getDataType() + ","
+                        + column.getTypeName());
+
+                tableElement.appendChild(columnElement);
+            }
+
+            addForeignKeyElements(table.getImportedKeys(), false, tableElement,
+                    document);
+            addForeignKeyElements(table.getExportedKeys(), true, tableElement,
+                    document);
+
+            for (final Index index : table.getIndices()) {
+                final Element indexElement = document.createElement(index
+                        .isUnique() ? IndexType.UNIQUE.name().toLowerCase()
+                        : IndexType.INDEX.name().toLowerCase());
+                indexElement.setAttribute(NAME, index.getName());
+                for (final IndexColumn indexColumn : index.getColumns()) {
+                    final Element indexColumnElement = document
+                            .createElement((index.isUnique() ? IndexType.UNIQUE
+                                    .name().toLowerCase() : IndexType.INDEX
+                                    .name().toLowerCase())
+                                    + "-column");
+                    indexColumnElement
+                            .setAttribute(NAME, indexColumn.getName());
+                    indexElement.appendChild(indexColumnElement);
+                }
+                tableElement.appendChild(indexElement);
+            }
+
+            databaseElement.appendChild(tableElement);
+        }
+
+        document.appendChild(databaseElement);
+
+        // ROO-2355: transformer.setOutputProperty(OutputKeys.DOCTYPE_SYSTEM,
+        // "http://db.apache.org/torque/dtd/database_3_3.dtd");
+
+        return document;
     }
 
     static Database readDatabase(final InputStream inputStream) {
@@ -179,174 +348,5 @@ public abstract class DatabaseXmlUtils {
         }
 
         return database;
-    }
-
-    public static Document getDatabaseDocument(final Database database) {
-        final Document document = XmlUtils.getDocumentBuilder().newDocument();
-        final Comment comment = document
-                .createComment("WARNING: DO NOT EDIT THIS FILE. THIS FILE IS MANAGED BY SPRING ROO.");
-        document.appendChild(comment);
-
-        final Element databaseElement = document.createElement("database");
-        databaseElement.setAttribute(NAME, "deprecated");
-
-        if (database.getDestinationPackage() != null) {
-            databaseElement.setAttribute("package", database
-                    .getDestinationPackage().getFullyQualifiedPackageName());
-        }
-
-        databaseElement.appendChild(createOptionElement("moduleName",
-                database.getModuleName(), document));
-        addBooleanOptionElement(document, databaseElement, "activeRecord",
-                database.isActiveRecord());
-        addBooleanOptionElement(document, databaseElement,
-                "includeNonPortableAttributes",
-                database.isIncludeNonPortableAttributes());
-        addBooleanOptionElement(document, databaseElement, "testAutomatically",
-                database.isTestAutomatically());
-
-        for (final Table table : database.getTables()) {
-            final Element tableElement = document.createElement("table");
-            tableElement.setAttribute(NAME, table.getName());
-            final String schemaName = table.getSchema().getName();
-            if (!DbreModelService.NO_SCHEMA_REQUIRED.equals(schemaName)) {
-                tableElement.setAttribute("alias", schemaName);
-            }
-            if (StringUtils.hasText(table.getDescription())) {
-                tableElement.setAttribute(DESCRIPTION, table.getDescription());
-            }
-
-            for (final Column column : table.getColumns()) {
-                final Element columnElement = document.createElement("column");
-                columnElement.setAttribute(NAME, column.getName());
-                if (StringUtils.hasText(column.getDescription())) {
-                    columnElement.setAttribute(DESCRIPTION,
-                            column.getDescription());
-                }
-
-                columnElement.setAttribute("primaryKey",
-                        String.valueOf(column.isPrimaryKey()));
-                columnElement.setAttribute("required",
-                        String.valueOf(column.isRequired()));
-                columnElement.setAttribute("size",
-                        String.valueOf(column.getColumnSize()));
-                columnElement.setAttribute("scale",
-                        String.valueOf(column.getScale()));
-                columnElement.setAttribute("type", column.getDataType() + ","
-                        + column.getTypeName());
-
-                tableElement.appendChild(columnElement);
-            }
-
-            addForeignKeyElements(table.getImportedKeys(), false, tableElement,
-                    document);
-            addForeignKeyElements(table.getExportedKeys(), true, tableElement,
-                    document);
-
-            for (final Index index : table.getIndices()) {
-                final Element indexElement = document.createElement(index
-                        .isUnique() ? IndexType.UNIQUE.name().toLowerCase()
-                        : IndexType.INDEX.name().toLowerCase());
-                indexElement.setAttribute(NAME, index.getName());
-                for (final IndexColumn indexColumn : index.getColumns()) {
-                    final Element indexColumnElement = document
-                            .createElement((index.isUnique() ? IndexType.UNIQUE
-                                    .name().toLowerCase() : IndexType.INDEX
-                                    .name().toLowerCase())
-                                    + "-column");
-                    indexColumnElement
-                            .setAttribute(NAME, indexColumn.getName());
-                    indexElement.appendChild(indexColumnElement);
-                }
-                tableElement.appendChild(indexElement);
-            }
-
-            databaseElement.appendChild(tableElement);
-        }
-
-        document.appendChild(databaseElement);
-
-        // ROO-2355: transformer.setOutputProperty(OutputKeys.DOCTYPE_SYSTEM,
-        // "http://db.apache.org/torque/dtd/database_3_3.dtd");
-
-        return document;
-    }
-
-    /**
-     * Adds an <option key="foo" value="true"> element as a child of the given
-     * parent element
-     * 
-     * @param document the XML document containing the parent and child
-     *            (required)
-     * @param parent the parent element to which to add a child (required)
-     * @param key the option key/name (required)
-     * @param value the option value
-     */
-    private static void addBooleanOptionElement(final Document document,
-            final Element parent, final String key, final boolean value) {
-        parent.appendChild(createOptionElement(key, String.valueOf(value),
-                document));
-    }
-
-    private static void addForeignKeyElements(
-            final Set<ForeignKey> foreignKeys, final boolean exported,
-            final Element tableElement, final Document document) {
-        for (final ForeignKey foreignKey : foreignKeys) {
-            final Element foreignKeyElement = document
-                    .createElement("foreign-key");
-            foreignKeyElement.setAttribute(NAME, foreignKey.getName());
-            foreignKeyElement.setAttribute(FOREIGN_TABLE,
-                    foreignKey.getForeignTableName());
-            foreignKeyElement.setAttribute(ON_DELETE, foreignKey.getOnDelete()
-                    .getCode());
-            foreignKeyElement.setAttribute(ON_UPDATE, foreignKey.getOnUpdate()
-                    .getCode());
-
-            final String foreignSchemaName = foreignKey.getForeignSchemaName();
-            if (!DbreModelService.NO_SCHEMA_REQUIRED.equals(foreignSchemaName)) {
-                foreignKeyElement.appendChild(createOptionElement(
-                        "foreignSchemaName", foreignSchemaName, document));
-            }
-
-            foreignKeyElement.appendChild(createOptionElement("exported",
-                    String.valueOf(exported), document));
-
-            for (final Reference reference : foreignKey.getReferences()) {
-                final Element referenceElement = document
-                        .createElement(REFERENCE);
-                referenceElement.setAttribute(FOREIGN,
-                        reference.getForeignColumnName());
-                referenceElement.setAttribute(LOCAL,
-                        reference.getLocalColumnName());
-                foreignKeyElement.appendChild(referenceElement);
-            }
-            tableElement.appendChild(foreignKeyElement);
-        }
-    }
-
-    private static Element createOptionElement(final String key,
-            final String value, final Document document) {
-        final Element option = document.createElement("option");
-        option.setAttribute("key", key);
-        option.setAttribute("value", value);
-        return option;
-    }
-
-    private static void addIndices(final Table table,
-            final Element tableElement, final IndexType indexType) {
-        final List<Element> elements = XmlUtils.findElements(indexType.name()
-                .toLowerCase(), tableElement);
-        for (final Element element : elements) {
-            final Index index = new Index(element.getAttribute(NAME));
-            index.setUnique(indexType == IndexType.UNIQUE);
-            final List<Element> indexColumnElements = XmlUtils.findElements(
-                    indexType.name().toLowerCase() + "-column", element);
-            for (final Element indexColumnElement : indexColumnElements) {
-                final IndexColumn indexColumn = new IndexColumn(
-                        indexColumnElement.getAttribute(NAME));
-                index.addColumn(indexColumn);
-            }
-            table.addIndex(index);
-        }
     }
 }

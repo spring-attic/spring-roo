@@ -25,8 +25,8 @@ public class WaveEmbeddedProvider extends AbstractEmbeddedProvider {
         // Expected format
         // https://wave.google.com/wave/#restored:wave:googlewave.com%252Fw%252B8Hj0sgUxC
         if (url.contains("wave.google.")) {
-            String qStart = url.substring(url.indexOf("%252B") + 5);
-            Map<String, String> options = new HashMap<String, String>();
+            final String qStart = url.substring(url.indexOf("%252B") + 5);
+            final Map<String, String> options = new HashMap<String, String>();
             options.put("provider", "GOOGLE_WAVE");
             options.put("id", qStart.substring(
                     0,
@@ -39,15 +39,15 @@ public class WaveEmbeddedProvider extends AbstractEmbeddedProvider {
 
     public boolean install(final String viewName,
             final Map<String, String> options) {
-        if (options == null || options.size() != 2
+        if ((options == null) || (options.size() != 2)
                 || !options.containsKey("provider")
                 || !options.get("provider").equalsIgnoreCase("GOOGLE_WAVE")
                 || !options.containsKey("id")) {
             return false;
         }
-        String id = options.get("id");
+        final String id = options.get("id");
         installTagx("wave");
-        Element wave = new XmlElementBuilder("embed:wave", XmlUtils
+        final Element wave = new XmlElementBuilder("embed:wave", XmlUtils
                 .getDocumentBuilder().newDocument())
                 .addAttribute("id", "wave_" + id).addAttribute("waveId", id)
                 .build();

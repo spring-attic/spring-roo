@@ -19,13 +19,7 @@ import org.springframework.roo.shell.CommandMarker;
 @Service
 public class JsonCommands implements CommandMarker {
 
-    // Fields
     @Reference private JsonOperations jsonOperations;
-
-    @CliAvailabilityIndicator({ "json setup", "json add", "json all" })
-    public boolean isPropertyAvailable() {
-        return jsonOperations.isJsonInstallationPossible();
-    }
 
     @CliCommand(value = "json add", help = "Adds @RooJson annotation to target type")
     public void add(
@@ -41,5 +35,10 @@ public class JsonCommands implements CommandMarker {
             @CliOption(key = "deepSerialize", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", mandatory = false, help = "Indication if deep serialization should be enabled") final boolean deep) {
 
         jsonOperations.annotateAll(deep);
+    }
+
+    @CliAvailabilityIndicator({ "json setup", "json add", "json all" })
+    public boolean isPropertyAvailable() {
+        return jsonOperations.isJsonInstallationPossible();
     }
 }

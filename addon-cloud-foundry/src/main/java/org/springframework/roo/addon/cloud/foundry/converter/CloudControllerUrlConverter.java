@@ -33,17 +33,17 @@ public class CloudControllerUrlConverter implements
         return new CloudControllerUrl(value);
     }
 
-    public boolean supports(final Class<?> requiredType,
-            final String optionContext) {
-        return CloudControllerUrl.class.isAssignableFrom(requiredType);
-    }
-
     public boolean getAllPossibleValues(final List<Completion> completions,
             final Class<?> requiredType, final String existingData,
             final String optionContext, final MethodTarget target) {
-        for (String storedUrl : session.getStoredUrls()) {
+        for (final String storedUrl : session.getStoredUrls()) {
             completions.add(new Completion(storedUrl));
         }
         return false;
+    }
+
+    public boolean supports(final Class<?> requiredType,
+            final String optionContext) {
+        return CloudControllerUrl.class.isAssignableFrom(requiredType);
     }
 }

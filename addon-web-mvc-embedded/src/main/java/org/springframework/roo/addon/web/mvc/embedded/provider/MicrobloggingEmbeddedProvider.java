@@ -26,7 +26,7 @@ public class MicrobloggingEmbeddedProvider extends AbstractEmbeddedProvider {
     public boolean embed(final String url, final String viewName) {
         // Expected format http://twitter.com/#search?q=@SpringRoo
         if (url.contains("twitter.com")) {
-            Map<String, String> options = new HashMap<String, String>();
+            final Map<String, String> options = new HashMap<String, String>();
             options.put("provider", "TWITTER");
             options.put("searchTerm", url.substring(url.indexOf("q=") + 2));
             return install(viewName, options);
@@ -36,7 +36,7 @@ public class MicrobloggingEmbeddedProvider extends AbstractEmbeddedProvider {
 
     public boolean install(final String viewName,
             final Map<String, String> options) {
-        if (options == null || options.size() != 2
+        if ((options == null) || (options.size() != 2)
                 || !options.containsKey("provider")
                 || !options.get("provider").equalsIgnoreCase("TWITTER")
                 || !options.containsKey("searchTerm")) {
@@ -46,11 +46,11 @@ public class MicrobloggingEmbeddedProvider extends AbstractEmbeddedProvider {
         try {
             searchTerm = URLDecoder.decode(searchTerm, "UTF-8");
         }
-        catch (UnsupportedEncodingException ignore) {
+        catch (final UnsupportedEncodingException ignore) {
         }
         installTagx("microblogging");
-        Element twitter = new XmlElementBuilder("embed:microblogging", XmlUtils
-                .getDocumentBuilder().newDocument())
+        final Element twitter = new XmlElementBuilder("embed:microblogging",
+                XmlUtils.getDocumentBuilder().newDocument())
                 .addAttribute("id", "twitter_" + searchTerm)
                 .addAttribute("searchTerm", searchTerm).build();
         twitter.setAttribute("z",

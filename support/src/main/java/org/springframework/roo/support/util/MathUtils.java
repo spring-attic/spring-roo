@@ -10,8 +10,8 @@ public class MathUtils {
 
     public static double round(final double valueToRound,
             final int numberOfDecimalPlaces) {
-        double multiplicationFactor = Math.pow(10, numberOfDecimalPlaces);
-        double interestedInZeroDPs = valueToRound * multiplicationFactor;
+        final double multiplicationFactor = Math.pow(10, numberOfDecimalPlaces);
+        final double interestedInZeroDPs = valueToRound * multiplicationFactor;
         return Math.round(interestedInZeroDPs) / multiplicationFactor;
     }
 }

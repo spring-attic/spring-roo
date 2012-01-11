@@ -37,10 +37,10 @@ public class DefaultConfigurationLocator implements ConfigurationLocator {
      * Map of all available configurations - dynamically bound by Felix on
      * startup
      */
-    private Map<String, TailorConfiguration> configurations = new LinkedHashMap<String, TailorConfiguration>();
+    private final Map<String, TailorConfiguration> configurations = new LinkedHashMap<String, TailorConfiguration>();
 
-    protected void bindConfig(TailorConfigurationFactory factory) {
-        TailorConfiguration config = factory.createTailorConfiguration();
+    protected void bindConfig(final TailorConfigurationFactory factory) {
+        final TailorConfiguration config = factory.createTailorConfiguration();
         if (config != null) {
             if (configurations.get(config.getName()) != null) {
                 LOGGER.warning("TailorConfiguration duplicate '"
@@ -51,23 +51,22 @@ public class DefaultConfigurationLocator implements ConfigurationLocator {
         }
     }
 
-    protected void unbindConfig(TailorConfigurationFactory factory) {
-        // TODO: It's a little unelegant to call "create" method here again, but
-        // we need the name...
-        TailorConfiguration config = factory.createTailorConfiguration();
-        if (config != null) {
-            configurations.remove(config.getName());
-        }
+    public TailorConfiguration getActiveTailorConfiguration() {
+        return configurations.get(activatedTailorConfigName);
     }
 
-    public void setActiveTailorConfiguration(String name) {
+    public Map<String, TailorConfiguration> getAvailableConfigurations() {
+        return configurations;
+    }
+
+    public void setActiveTailorConfiguration(final String name) {
         if (name == null) {
-            this.activatedTailorConfigName = null;
+            activatedTailorConfigName = null;
             LOGGER.info("Tailor deactivated");
             return;
         }
-        if (this.configurations.get(name) != null) {
-            this.activatedTailorConfigName = name;
+        if (configurations.get(name) != null) {
+            activatedTailorConfigName = name;
         }
         else {
             LOGGER.severe("Couldn't activate tailor configuration '" + name
@@ -75,14 +74,12 @@ public class DefaultConfigurationLocator implements ConfigurationLocator {
         }
     }
 
-    public TailorConfiguration getActiveTailorConfiguration() {
-
-        return this.configurations.get(this.activatedTailorConfigName);
+    protected void unbindConfig(final TailorConfigurationFactory factory) {
+        // TODO: It's a little unelegant to call "create" method here again, but
+        // we need the name...
+        final TailorConfiguration config = factory.createTailorConfiguration();
+        if (config != null) {
+            configurations.remove(config.getName());
+        }
     }
-
-    public Map<String, TailorConfiguration> getAvailableConfigurations() {
-
-        return this.configurations;
-    }
-
 }

@@ -15,17 +15,16 @@ import org.springframework.roo.model.RooJavaType;
  */
 public class IntegrationTestAnnotationValues extends AbstractAnnotationValues {
 
-    // From annotation
-    @AutoPopulate private JavaType entity;
     @AutoPopulate private boolean count = true;
+    @AutoPopulate private JavaType entity;
     @AutoPopulate private boolean find = true;
-    @AutoPopulate private boolean findEntries = true;
     @AutoPopulate private boolean findAll = true;
     @AutoPopulate private int findAllMaximum = 250;
+    @AutoPopulate private boolean findEntries = true;
     @AutoPopulate private boolean flush = true;
+    @AutoPopulate private boolean merge = true;
     @AutoPopulate private boolean persist = true;
     @AutoPopulate private boolean remove = true;
-    @AutoPopulate private boolean merge = true;
     @AutoPopulate private boolean transactional = true;
 
     public IntegrationTestAnnotationValues(
@@ -38,6 +37,10 @@ public class IntegrationTestAnnotationValues extends AbstractAnnotationValues {
         return entity;
     }
 
+    public int getFindAllMaximum() {
+        return findAllMaximum;
+    }
+
     public boolean isCount() {
         return count;
     }
@@ -46,20 +49,20 @@ public class IntegrationTestAnnotationValues extends AbstractAnnotationValues {
         return find;
     }
 
-    public boolean isFindEntries() {
-        return findEntries;
-    }
-
     public boolean isFindAll() {
         return findAll;
     }
 
-    public int getFindAllMaximum() {
-        return findAllMaximum;
+    public boolean isFindEntries() {
+        return findEntries;
     }
 
     public boolean isFlush() {
         return flush;
+    }
+
+    public boolean isMerge() {
+        return merge;
     }
 
     public boolean isPersist() {
@@ -68,10 +71,6 @@ public class IntegrationTestAnnotationValues extends AbstractAnnotationValues {
 
     public boolean isRemove() {
         return remove;
-    }
-
-    public boolean isMerge() {
-        return merge;
     }
 
     public boolean isTransactional() {

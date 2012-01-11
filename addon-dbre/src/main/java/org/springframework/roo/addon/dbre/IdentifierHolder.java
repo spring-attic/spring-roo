@@ -13,10 +13,9 @@ import org.springframework.roo.support.util.Assert;
  */
 public class IdentifierHolder {
 
-    // Fields
-    private final FieldMetadata identifierField;
-    private final boolean embeddedIdField;
     private final List<FieldMetadata> embeddedIdentifierFields;
+    private final boolean embeddedIdField;
+    private final FieldMetadata identifierField;
 
     public IdentifierHolder(final FieldMetadata identifierField,
             final boolean embeddedIdField,
@@ -30,15 +29,15 @@ public class IdentifierHolder {
         this.embeddedIdentifierFields = embeddedIdentifierFields;
     }
 
+    public List<FieldMetadata> getEmbeddedIdentifierFields() {
+        return embeddedIdentifierFields;
+    }
+
     public FieldMetadata getIdentifierField() {
         return identifierField;
     }
 
     public boolean isEmbeddedIdField() {
         return embeddedIdField;
-    }
-
-    public List<FieldMetadata> getEmbeddedIdentifierFields() {
-        return embeddedIdentifierFields;
     }
 }

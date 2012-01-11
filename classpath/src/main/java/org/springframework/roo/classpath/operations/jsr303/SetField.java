@@ -43,15 +43,14 @@ import org.springframework.roo.model.JavaType;
  */
 public class SetField extends CollectionField {
 
-    // Fields
+    private final Cardinality cardinality;
+
+    private Fetch fetch;
     /**
      * Whether the JSR 220 @OneToMany.mappedBy annotation attribute will be
      * added
      */
     private JavaSymbolName mappedBy;
-
-    private final Cardinality cardinality;
-    private Fetch fetch;
 
     public SetField(final String physicalTypeIdentifier,
             final JavaType fieldType, final JavaSymbolName fieldName,
@@ -62,19 +61,11 @@ public class SetField extends CollectionField {
         this.cardinality = cardinality;
     }
 
-    public Fetch getFetch() {
-        return fetch;
-    }
-
-    public void setFetch(final Fetch fetch) {
-        this.fetch = fetch;
-    }
-
     @Override
     public void decorateAnnotationsList(
             final List<AnnotationMetadataBuilder> annotations) {
         super.decorateAnnotationsList(annotations);
-        List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
+        final List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
 
         if (cardinality == null) {
             // Assume set field is an enum
@@ -118,9 +109,13 @@ public class SetField extends CollectionField {
         }
     }
 
+    public Fetch getFetch() {
+        return fetch;
+    }
+
     @Override
     public JavaType getInitializer() {
-        List<JavaType> params = new ArrayList<JavaType>();
+        final List<JavaType> params = new ArrayList<JavaType>();
         params.add(getGenericParameterTypeName());
         return new JavaType(HASH_SET.getFullyQualifiedTypeName(), 0,
                 DataType.TYPE, null, params);
@@ -128,6 +123,10 @@ public class SetField extends CollectionField {
 
     public JavaSymbolName getMappedBy() {
         return mappedBy;
+    }
+
+    public void setFetch(final Fetch fetch) {
+        this.fetch = fetch;
     }
 
     public void setMappedBy(final JavaSymbolName mappedBy) {

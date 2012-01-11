@@ -16,22 +16,12 @@ import java.lang.annotation.Target;
 public @interface RooJson {
 
     /**
-     * Specify name of the "toJson" method to generate. Use a value of "" to
-     * avoid the generation of this method.
+     * Enable deep serialization of object graph
      * 
-     * @return the name of the "toJson" method to generate (defaults to
-     *         "toJson"; mandatory)
+     * @return an indication if deep serialization should be enabled (defaults
+     *         to false; optional)
      */
-    String toJsonMethod() default "toJson";
-
-    /**
-     * Specify name of the "fromJsonTo<TypeName>" method to generate. Use a
-     * value of "" to avoid the generation of this method.
-     * 
-     * @return the name of the "fromJsonTo<TypeName>" method to generate
-     *         (defaults to "fromJsonTo<TypeName>"; mandatory)
-     */
-    String fromJsonMethod() default "fromJsonTo<TypeName>";
+    boolean deepSerialize() default false;
 
     /**
      * Specify name of the "fromJsonArrayTo<TypeNamePlural>" method to generate.
@@ -44,13 +34,13 @@ public @interface RooJson {
     String fromJsonArrayMethod() default "fromJsonArrayTo<TypeNamePlural>";
 
     /**
-     * Specify name of the "toJsonArray" method to generate. Use a value of ""
-     * to avoid the generation of this method.
+     * Specify name of the "fromJsonTo<TypeName>" method to generate. Use a
+     * value of "" to avoid the generation of this method.
      * 
-     * @return the name of the "toJsonArray" method to generate (defaults to
-     *         "toJsonArray"; mandatory)
+     * @return the name of the "fromJsonTo<TypeName>" method to generate
+     *         (defaults to "fromJsonTo<TypeName>"; mandatory)
      */
-    String toJsonArrayMethod() default "toJsonArray";
+    String fromJsonMethod() default "fromJsonTo<TypeName>";
 
     /**
      * Specify the root name of the JSON document.
@@ -60,10 +50,20 @@ public @interface RooJson {
     String rootName() default "";
 
     /**
-     * Enable deep serialization of object graph
+     * Specify name of the "toJsonArray" method to generate. Use a value of ""
+     * to avoid the generation of this method.
      * 
-     * @return an indication if deep serialization should be enabled (defaults
-     *         to false; optional)
+     * @return the name of the "toJsonArray" method to generate (defaults to
+     *         "toJsonArray"; mandatory)
      */
-    boolean deepSerialize() default false;
+    String toJsonArrayMethod() default "toJsonArray";
+
+    /**
+     * Specify name of the "toJson" method to generate. Use a value of "" to
+     * avoid the generation of this method.
+     * 
+     * @return the name of the "toJson" method to generate (defaults to
+     *         "toJson"; mandatory)
+     */
+    String toJsonMethod() default "toJson";
 }

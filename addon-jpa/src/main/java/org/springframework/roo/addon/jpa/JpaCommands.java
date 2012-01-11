@@ -48,18 +48,16 @@ import org.springframework.roo.support.util.Assert;
 @Service
 public class JpaCommands implements CommandMarker {
 
-    // Constants
     private static Logger LOGGER = HandlerUtils.getLogger(JpaCommands.class);
     private static final AnnotationMetadataBuilder ROO_EQUALS_BUILDER = new AnnotationMetadataBuilder(
             ROO_EQUALS);
+    private static final AnnotationMetadataBuilder ROO_JAVA_BEAN_BUILDER = new AnnotationMetadataBuilder(
+            ROO_JAVA_BEAN);
     private static final AnnotationMetadataBuilder ROO_SERIALIZABLE_BUILDER = new AnnotationMetadataBuilder(
             ROO_SERIALIZABLE);
     private static final AnnotationMetadataBuilder ROO_TO_STRING_BUILDER = new AnnotationMetadataBuilder(
             ROO_TO_STRING);
-    private static final AnnotationMetadataBuilder ROO_JAVA_BEAN_BUILDER = new AnnotationMetadataBuilder(
-            ROO_JAVA_BEAN);
 
-    // Fields
     @Reference private IntegrationTestOperations integrationTestOperations;
     @Reference private JpaOperations jpaOperations;
     @Reference private ProjectOperations projectOperations;
@@ -71,25 +69,162 @@ public class JpaCommands implements CommandMarker {
         staticFieldConverter.add(OrmProvider.class);
     }
 
+    @CliCommand(value = "embeddable", help = "Creates a new Java class source file with the JPA @Embeddable annotation in SRC_MAIN_JAVA")
+    public void createEmbeddableClass(
+            @CliOption(key = "class", optionContext = "update,project", mandatory = true, help = "The name of the class to create") final JavaType name,
+            @CliOption(key = "serializable", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Whether the generated class should implement java.io.Serializable") final boolean serializable,
+            @CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") final boolean permitReservedWords) {
+
+        if (!permitReservedWords) {
+            ReservedWords.verifyReservedWordsNotPresent(name);
+        }
+
+        jpaOperations.newEmbeddableClass(name, serializable);
+    }
+
+    @CliCommand(value = "database properties list", help = "Shows database configuration details")
+    public SortedSet<String> databaseProperties() {
+        return jpaOperations.getDatabaseProperties();
+    }
+
+    @CliCommand(value = "database properties remove", help = "Removes a particular database property")
+    public void databaseRemove(
+            @CliOption(key = { "", "key" }, mandatory = true, help = "The property key that should be removed") final String key) {
+
+        propFileOperations.removeProperty(Path.SPRING_CONFIG_ROOT
+                .getModulePathId(projectOperations.getFocusedModuleName()),
+                "database.properties", key);
+    }
+
+    @CliCommand(value = "database properties set", help = "Changes a particular database property")
+    public void databaseSet(
+            @CliOption(key = "key", mandatory = true, help = "The property key that should be changed") final String key,
+            @CliOption(key = "value", mandatory = true, help = "The new vale for this property key") final String value) {
+
+        propFileOperations.changeProperty(Path.SPRING_CONFIG_ROOT
+                .getModulePathId(projectOperations.getFocusedModuleName()),
+                "database.properties", key, value);
+    }
+
     protected void deactivate(final ComponentContext context) {
         staticFieldConverter.remove(JdbcDatabase.class);
         staticFieldConverter.remove(OrmProvider.class);
     }
 
-    @CliAvailabilityIndicator({ "jpa setup", "persistence setup" })
-    public boolean isJpaSetupAvailable() {
-        return jpaOperations.isJpaInstallationPossible();
+    /**
+     * Returns a builder for the entity-related annotation to be added to a
+     * newly created JPA entity
+     * 
+     * @param table
+     * @param schema
+     * @param catalog
+     * @param identifierField
+     * @param identifierColumn
+     * @param identifierType
+     * @param versionField
+     * @param versionColumn
+     * @param versionType
+     * @param inheritanceType
+     * @param mappedSuperclass
+     * @param persistenceUnit
+     * @param transactionManager
+     * @param entityName
+     * @param activeRecord whether to generate active record CRUD methods for
+     *            the entity
+     * @return a non-<code>null</code> builder
+     */
+    private AnnotationMetadataBuilder getEntityAnnotationBuilder(
+            final String table, final String schema, final String catalog,
+            final String identifierField, final String identifierColumn,
+            final JavaType identifierType, final String versionField,
+            final String versionColumn, final JavaType versionType,
+            final InheritanceType inheritanceType,
+            final boolean mappedSuperclass, final String persistenceUnit,
+            final String transactionManager, final String entityName,
+            final boolean activeRecord) {
+        final AnnotationMetadataBuilder entityAnnotationBuilder = new AnnotationMetadataBuilder(
+                getEntityAnnotationType(activeRecord));
+
+        // Attributes that apply to all JPA entities (active record or not)
+        if (catalog != null) {
+            entityAnnotationBuilder.addStringAttribute("catalog", catalog);
+        }
+        if (entityName != null) {
+            entityAnnotationBuilder
+                    .addStringAttribute("entityName", entityName);
+        }
+        if (identifierColumn != null) {
+            entityAnnotationBuilder.addStringAttribute("identifierColumn",
+                    identifierColumn);
+        }
+        if (identifierField != null) {
+            entityAnnotationBuilder.addStringAttribute("identifierField",
+                    identifierField);
+        }
+        if (!LONG_OBJECT.equals(identifierType)) {
+            entityAnnotationBuilder.addClassAttribute("identifierType",
+                    identifierType);
+        }
+        if (inheritanceType != null) {
+            entityAnnotationBuilder.addStringAttribute("inheritanceType",
+                    inheritanceType.name());
+        }
+        if (mappedSuperclass) {
+            entityAnnotationBuilder.addBooleanAttribute("mappedSuperclass",
+                    mappedSuperclass);
+        }
+        if (schema != null) {
+            entityAnnotationBuilder.addStringAttribute("schema", schema);
+        }
+        if (table != null) {
+            entityAnnotationBuilder.addStringAttribute("table", table);
+        }
+        if ((versionColumn != null)
+                && !RooJpaEntity.VERSION_COLUMN_DEFAULT.equals(versionColumn)) {
+            entityAnnotationBuilder.addStringAttribute("versionColumn",
+                    versionColumn);
+        }
+        if ((versionField != null)
+                && !RooJpaEntity.VERSION_FIELD_DEFAULT.equals(versionField)) {
+            entityAnnotationBuilder.addStringAttribute("versionField",
+                    versionField);
+        }
+        if (!JavaType.INT_OBJECT.equals(versionType)) {
+            entityAnnotationBuilder.addClassAttribute("versionType",
+                    versionType);
+        }
+
+        // Attributes that only apply to entities with CRUD active record
+        // methods
+        if (activeRecord) {
+            if (persistenceUnit != null) {
+                entityAnnotationBuilder.addStringAttribute("persistenceUnit",
+                        persistenceUnit);
+            }
+            if (transactionManager != null) {
+                entityAnnotationBuilder.addStringAttribute(
+                        "transactionManager", transactionManager);
+            }
+        }
+
+        return entityAnnotationBuilder;
+    }
+
+    /**
+     * Returns the type of annotation to put on the entity
+     * 
+     * @param activeRecord whether the entity is to have CRUD active record
+     *            methods generated
+     * @return a non-<code>null</code> type
+     */
+    private JavaType getEntityAnnotationType(final boolean activeRecord) {
+        return activeRecord ? ROO_JPA_ACTIVE_RECORD : ROO_JPA_ENTITY;
     }
 
     @CliAvailabilityIndicator({ "database properties list",
             "database properties remove", "database properties set" })
     public boolean hasDatabaseProperties() {
         return isJpaSetupAvailable() && jpaOperations.hasDatabaseProperties();
-    }
-
-    @CliAvailabilityIndicator({ "entity jpa", "embeddable" })
-    public boolean isPersistentClassAvailable() {
-        return jpaOperations.isPersistentClassAvailable();
     }
 
     @CliCommand(value = "jpa setup", help = "Install or updates a JPA persistence provider in your project")
@@ -105,21 +240,21 @@ public class JpaCommands implements CommandMarker {
             @CliOption(key = "transactionManager", mandatory = false, help = "The transaction manager name") final String transactionManager,
             @CliOption(key = "persistenceUnit", mandatory = false, help = "The persistence unit name to be used in the persistence.xml file") final String persistenceUnit) {
 
-        if (jdbcDatabase == JdbcDatabase.GOOGLE_APP_ENGINE
-                && ormProvider != OrmProvider.DATANUCLEUS) {
+        if ((jdbcDatabase == JdbcDatabase.GOOGLE_APP_ENGINE)
+                && (ormProvider != OrmProvider.DATANUCLEUS)) {
             LOGGER.warning("Provider must be " + OrmProvider.DATANUCLEUS.name()
                     + " for the Google App Engine");
             return;
         }
 
-        if (jdbcDatabase == JdbcDatabase.DATABASE_DOT_COM
-                && ormProvider != OrmProvider.DATANUCLEUS) {
+        if ((jdbcDatabase == JdbcDatabase.DATABASE_DOT_COM)
+                && (ormProvider != OrmProvider.DATANUCLEUS)) {
             LOGGER.warning("Provider must be " + OrmProvider.DATANUCLEUS.name()
                     + " for Database.com");
             return;
         }
 
-        if (jdbcDatabase == JdbcDatabase.FIREBIRD && !isJdk6OrHigher()) {
+        if ((jdbcDatabase == JdbcDatabase.FIREBIRD) && !isJdk6OrHigher()) {
             LOGGER.warning("JDK must be 1.6 or higher to use Firebird");
             return;
         }
@@ -149,28 +284,19 @@ public class JpaCommands implements CommandMarker {
                 persistenceUnit);
     }
 
-    @CliCommand(value = "database properties list", help = "Shows database configuration details")
-    public SortedSet<String> databaseProperties() {
-        return jpaOperations.getDatabaseProperties();
+    private boolean isJdk6OrHigher() {
+        final String ver = System.getProperty("java.version");
+        return (ver.indexOf("1.6.") > -1) || (ver.indexOf("1.7.") > -1);
     }
 
-    @CliCommand(value = "database properties set", help = "Changes a particular database property")
-    public void databaseSet(
-            @CliOption(key = "key", mandatory = true, help = "The property key that should be changed") final String key,
-            @CliOption(key = "value", mandatory = true, help = "The new vale for this property key") final String value) {
-
-        propFileOperations.changeProperty(Path.SPRING_CONFIG_ROOT
-                .getModulePathId(projectOperations.getFocusedModuleName()),
-                "database.properties", key, value);
+    @CliAvailabilityIndicator({ "jpa setup", "persistence setup" })
+    public boolean isJpaSetupAvailable() {
+        return jpaOperations.isJpaInstallationPossible();
     }
 
-    @CliCommand(value = "database properties remove", help = "Removes a particular database property")
-    public void databaseRemove(
-            @CliOption(key = { "", "key" }, mandatory = true, help = "The property key that should be removed") final String key) {
-
-        propFileOperations.removeProperty(Path.SPRING_CONFIG_ROOT
-                .getModulePathId(projectOperations.getFocusedModuleName()),
-                "database.properties", key);
+    @CliAvailabilityIndicator({ "entity jpa", "embeddable" })
+    public boolean isPersistentClassAvailable() {
+        return jpaOperations.isPersistentClassAvailable();
     }
 
     @CliCommand(value = "entity jpa", help = "Creates a new JPA persistent entity in SRC_MAIN_JAVA")
@@ -255,133 +381,5 @@ public class JpaCommands implements CommandMarker {
         if (testAutomatically) {
             integrationTestOperations.newIntegrationTest(name);
         }
-    }
-
-    @CliCommand(value = "embeddable", help = "Creates a new Java class source file with the JPA @Embeddable annotation in SRC_MAIN_JAVA")
-    public void createEmbeddableClass(
-            @CliOption(key = "class", optionContext = "update,project", mandatory = true, help = "The name of the class to create") final JavaType name,
-            @CliOption(key = "serializable", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Whether the generated class should implement java.io.Serializable") final boolean serializable,
-            @CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") final boolean permitReservedWords) {
-
-        if (!permitReservedWords) {
-            ReservedWords.verifyReservedWordsNotPresent(name);
-        }
-
-        jpaOperations.newEmbeddableClass(name, serializable);
-    }
-
-    /**
-     * Returns a builder for the entity-related annotation to be added to a
-     * newly created JPA entity
-     * 
-     * @param table
-     * @param schema
-     * @param catalog
-     * @param identifierField
-     * @param identifierColumn
-     * @param identifierType
-     * @param versionField
-     * @param versionColumn
-     * @param versionType
-     * @param inheritanceType
-     * @param mappedSuperclass
-     * @param persistenceUnit
-     * @param transactionManager
-     * @param entityName
-     * @param activeRecord whether to generate active record CRUD methods for
-     *            the entity
-     * @return a non-<code>null</code> builder
-     */
-    private AnnotationMetadataBuilder getEntityAnnotationBuilder(
-            final String table, final String schema, final String catalog,
-            final String identifierField, final String identifierColumn,
-            final JavaType identifierType, final String versionField,
-            final String versionColumn, final JavaType versionType,
-            final InheritanceType inheritanceType,
-            final boolean mappedSuperclass, final String persistenceUnit,
-            final String transactionManager, final String entityName,
-            final boolean activeRecord) {
-        final AnnotationMetadataBuilder entityAnnotationBuilder = new AnnotationMetadataBuilder(
-                getEntityAnnotationType(activeRecord));
-
-        // Attributes that apply to all JPA entities (active record or not)
-        if (catalog != null) {
-            entityAnnotationBuilder.addStringAttribute("catalog", catalog);
-        }
-        if (entityName != null) {
-            entityAnnotationBuilder
-                    .addStringAttribute("entityName", entityName);
-        }
-        if (identifierColumn != null) {
-            entityAnnotationBuilder.addStringAttribute("identifierColumn",
-                    identifierColumn);
-        }
-        if (identifierField != null) {
-            entityAnnotationBuilder.addStringAttribute("identifierField",
-                    identifierField);
-        }
-        if (!LONG_OBJECT.equals(identifierType)) {
-            entityAnnotationBuilder.addClassAttribute("identifierType",
-                    identifierType);
-        }
-        if (inheritanceType != null) {
-            entityAnnotationBuilder.addStringAttribute("inheritanceType",
-                    inheritanceType.name());
-        }
-        if (mappedSuperclass) {
-            entityAnnotationBuilder.addBooleanAttribute("mappedSuperclass",
-                    mappedSuperclass);
-        }
-        if (schema != null) {
-            entityAnnotationBuilder.addStringAttribute("schema", schema);
-        }
-        if (table != null) {
-            entityAnnotationBuilder.addStringAttribute("table", table);
-        }
-        if (versionColumn != null
-                && !RooJpaEntity.VERSION_COLUMN_DEFAULT.equals(versionColumn)) {
-            entityAnnotationBuilder.addStringAttribute("versionColumn",
-                    versionColumn);
-        }
-        if (versionField != null
-                && !RooJpaEntity.VERSION_FIELD_DEFAULT.equals(versionField)) {
-            entityAnnotationBuilder.addStringAttribute("versionField",
-                    versionField);
-        }
-        if (!JavaType.INT_OBJECT.equals(versionType)) {
-            entityAnnotationBuilder.addClassAttribute("versionType",
-                    versionType);
-        }
-
-        // Attributes that only apply to entities with CRUD active record
-        // methods
-        if (activeRecord) {
-            if (persistenceUnit != null) {
-                entityAnnotationBuilder.addStringAttribute("persistenceUnit",
-                        persistenceUnit);
-            }
-            if (transactionManager != null) {
-                entityAnnotationBuilder.addStringAttribute(
-                        "transactionManager", transactionManager);
-            }
-        }
-
-        return entityAnnotationBuilder;
-    }
-
-    /**
-     * Returns the type of annotation to put on the entity
-     * 
-     * @param activeRecord whether the entity is to have CRUD active record
-     *            methods generated
-     * @return a non-<code>null</code> type
-     */
-    private JavaType getEntityAnnotationType(final boolean activeRecord) {
-        return activeRecord ? ROO_JPA_ACTIVE_RECORD : ROO_JPA_ENTITY;
-    }
-
-    private boolean isJdk6OrHigher() {
-        String ver = System.getProperty("java.version");
-        return ver.indexOf("1.6.") > -1 || ver.indexOf("1.7.") > -1;
     }
 }

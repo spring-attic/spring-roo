@@ -17,15 +17,20 @@ import org.springframework.roo.model.RooJavaType;
  */
 public class WebScaffoldAnnotationValues extends AbstractAnnotationValues {
 
-    // From annotation
     @AutoPopulate boolean create = true;
     @AutoPopulate boolean delete = true;
     @AutoPopulate boolean exposeFinders = true;
+    @AutoPopulate JavaType formBackingObject;
+    @AutoPopulate String path;
     @AutoPopulate boolean populateMethods = true;
     @AutoPopulate boolean registerConverters = true;
     @AutoPopulate boolean update = true;
-    @AutoPopulate JavaType formBackingObject;
-    @AutoPopulate String path;
+
+    public WebScaffoldAnnotationValues(
+            final ClassOrInterfaceTypeDetails governorPhysicalTypeDetails) {
+        super(governorPhysicalTypeDetails, RooJavaType.ROO_WEB_SCAFFOLD);
+        AutoPopulationUtils.populate(this, annotationMetadata);
+    }
 
     /**
      * Constructor
@@ -38,42 +43,36 @@ public class WebScaffoldAnnotationValues extends AbstractAnnotationValues {
         AutoPopulationUtils.populate(this, annotationMetadata);
     }
 
-    public WebScaffoldAnnotationValues(
-            ClassOrInterfaceTypeDetails governorPhysicalTypeDetails) {
-        super(governorPhysicalTypeDetails, RooJavaType.ROO_WEB_SCAFFOLD);
-        AutoPopulationUtils.populate(this, annotationMetadata);
+    public JavaType getFormBackingObject() {
+        return formBackingObject;
     }
 
     public String getPath() {
         return path;
     }
 
-    public JavaType getFormBackingObject() {
-        return formBackingObject;
+    public boolean isCreate() {
+        return create;
     }
 
     public boolean isDelete() {
         return delete;
     }
 
-    public boolean isCreate() {
-        return create;
-    }
-
-    public boolean isUpdate() {
-        return update;
-    }
-
     public boolean isExposeFinders() {
         return exposeFinders;
+    }
+
+    public boolean isPopulateMethods() {
+        return populateMethods;
     }
 
     public boolean isRegisterConverters() {
         return registerConverters;
     }
 
-    public boolean isPopulateMethods() {
-        return populateMethods;
+    public boolean isUpdate() {
+        return update;
     }
 
     @Override

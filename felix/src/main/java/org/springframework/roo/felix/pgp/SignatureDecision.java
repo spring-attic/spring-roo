@@ -14,8 +14,8 @@ import org.springframework.roo.support.util.Assert;
  */
 public class SignatureDecision {
     private final PGPSignature pgpSignature;
-    private final PgpKeyId signatureAsHex;
     private final boolean signatureAcceptable;
+    private final PgpKeyId signatureAsHex;
 
     public SignatureDecision(final PGPSignature pgpSignature,
             final PgpKeyId signatureAsHex, final boolean signatureAcceptable) {

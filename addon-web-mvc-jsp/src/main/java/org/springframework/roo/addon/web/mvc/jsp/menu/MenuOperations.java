@@ -25,28 +25,6 @@ public interface MenuOperations {
      * <p>
      * Addons should determine their own category and menu item identifiers that
      * do not clash with other addons.
-     * 
-     * @param menuCategoryName the identifier for the menu category (required)
-     * @param menuItemId the menu item identifier (required)
-     * @param menuItemLabel
-     * @param globalMessageCode message code for the menu item (required)
-     * @param link the menu item link (required)
-     * @param idPrefix the prefix to be used for this menu item (optional,
-     *            MenuOperations.DEFAULT_MENU_ITEM_PREFIX is default)
-     * @param logicalPath
-     */
-    void addMenuItem(JavaSymbolName menuCategoryName,
-            JavaSymbolName menuItemId, String menuItemLabel,
-            String globalMessageCode, String link, String idPrefix,
-            LogicalPath logicalPath);
-
-    /**
-     * Allows for the addition of menu categories and menu items. If a category
-     * or menu item with the given identifier exists, it will <b>not</b> be
-     * overwritten or replaced.
-     * <p>
-     * Addons should determine their own category and menu item identifiers that
-     * do not clash with other addons.
      * <p>
      * This method will <i>not</i> write i18n message codes. This means the
      * caller will manage the properties himself, allowing for better
@@ -68,6 +46,28 @@ public interface MenuOperations {
     void addMenuItem(JavaSymbolName menuCategoryName,
             JavaSymbolName menuItemId, String globalMessageCode, String link,
             String idPrefix, LogicalPath logicalPath);
+
+    /**
+     * Allows for the addition of menu categories and menu items. If a category
+     * or menu item with the given identifier exists, it will <b>not</b> be
+     * overwritten or replaced.
+     * <p>
+     * Addons should determine their own category and menu item identifiers that
+     * do not clash with other addons.
+     * 
+     * @param menuCategoryName the identifier for the menu category (required)
+     * @param menuItemId the menu item identifier (required)
+     * @param menuItemLabel
+     * @param globalMessageCode message code for the menu item (required)
+     * @param link the menu item link (required)
+     * @param idPrefix the prefix to be used for this menu item (optional,
+     *            MenuOperations.DEFAULT_MENU_ITEM_PREFIX is default)
+     * @param logicalPath
+     */
+    void addMenuItem(JavaSymbolName menuCategoryName,
+            JavaSymbolName menuItemId, String menuItemLabel,
+            String globalMessageCode, String link, String idPrefix,
+            LogicalPath logicalPath);
 
     /**
      * Attempts to locate a unused finder menu items and remove them.

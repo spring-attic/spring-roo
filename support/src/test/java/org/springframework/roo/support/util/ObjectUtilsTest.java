@@ -15,23 +15,9 @@ import org.junit.Test;
 public class ObjectUtilsTest {
 
     @Test
-    public void testCompareTwoNulls() {
-        assertEquals(0, ObjectUtils.nullSafeComparison(null, null));
-    }
-
-    @Test
-    public void testCompareNullWithNonNull() {
+    public void testCompareGreaterWithLesser() {
         // Invoke
-        final int result = ObjectUtils.nullSafeComparison(null, "");
-
-        // Check
-        assertTrue(result < 0);
-    }
-
-    @Test
-    public void testCompareNonNullWithNull() {
-        // Invoke
-        final int result = ObjectUtils.nullSafeComparison("", null);
+        final int result = ObjectUtils.nullSafeComparison(300, 200);
 
         // Check
         assertTrue(result > 0);
@@ -47,12 +33,21 @@ public class ObjectUtilsTest {
     }
 
     @Test
-    public void testCompareGreaterWithLesser() {
+    public void testCompareNonNullWithNull() {
         // Invoke
-        final int result = ObjectUtils.nullSafeComparison(300, 200);
+        final int result = ObjectUtils.nullSafeComparison("", null);
 
         // Check
         assertTrue(result > 0);
+    }
+
+    @Test
+    public void testCompareNullWithNonNull() {
+        // Invoke
+        final int result = ObjectUtils.nullSafeComparison(null, "");
+
+        // Check
+        assertTrue(result < 0);
     }
 
     @Test
@@ -61,8 +56,37 @@ public class ObjectUtilsTest {
     }
 
     @Test
-    public void testToStringWithNullObjectAndNullDefault() {
-        assertNull(ObjectUtils.toString(null, null));
+    public void testCompareTwoNulls() {
+        assertEquals(0, ObjectUtils.nullSafeComparison(null, null));
+    }
+
+    @Test
+    public void testDefaultIfNullWhenObjectIsNotNullAndDefaultIsNotNull() {
+        final Integer value = 27;
+        assertEquals(value, ObjectUtils.defaultIfNull(value, value + 1));
+    }
+
+    @Test
+    public void testDefaultIfNullWhenObjectIsNotNullAndDefaultIsNull() {
+        final Object value = 27;
+        assertEquals(value, ObjectUtils.defaultIfNull(value, null));
+    }
+
+    @Test
+    public void testDefaultIfNullWhenObjectIsNullAndDefaultIsNotNull() {
+        final Object defaultValue = 27;
+        assertEquals(defaultValue,
+                ObjectUtils.defaultIfNull(null, defaultValue));
+    }
+
+    @Test
+    public void testDefaultIfNullWhenObjectIsNullAndDefaultIsNull() {
+        assertNull(ObjectUtils.defaultIfNull(null, null));
+    }
+
+    @Test
+    public void testToStringWithNonNullObjectAndNullDefault() {
+        assertEquals("1", ObjectUtils.toString(1, "anything"));
     }
 
     @Test
@@ -76,31 +100,7 @@ public class ObjectUtilsTest {
     }
 
     @Test
-    public void testToStringWithNonNullObjectAndNullDefault() {
-        assertEquals("1", ObjectUtils.toString(1, "anything"));
-    }
-
-    @Test
-    public void testDefaultIfNullWhenObjectIsNullAndDefaultIsNull() {
-        assertNull(ObjectUtils.defaultIfNull(null, null));
-    }
-
-    @Test
-    public void testDefaultIfNullWhenObjectIsNullAndDefaultIsNotNull() {
-        final Object defaultValue = 27;
-        assertEquals(defaultValue,
-                ObjectUtils.defaultIfNull(null, defaultValue));
-    }
-
-    @Test
-    public void testDefaultIfNullWhenObjectIsNotNullAndDefaultIsNull() {
-        final Object value = 27;
-        assertEquals(value, ObjectUtils.defaultIfNull(value, null));
-    }
-
-    @Test
-    public void testDefaultIfNullWhenObjectIsNotNullAndDefaultIsNotNull() {
-        final Integer value = 27;
-        assertEquals(value, ObjectUtils.defaultIfNull(value, value + 1));
+    public void testToStringWithNullObjectAndNullDefault() {
+        assertNull(ObjectUtils.toString(null, null));
     }
 }

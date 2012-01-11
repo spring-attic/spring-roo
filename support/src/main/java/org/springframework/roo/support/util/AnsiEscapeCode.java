@@ -10,7 +10,7 @@ public enum AnsiEscapeCode {
 
     // These int literals are non-public constants in ANSIBuffer.ANSICodes
     BLINK(5), BOLD(1), CONCEALED(8), FG_BLACK(30), FG_BLUE(34), FG_CYAN(36), FG_GREEN(
-            32), FG_MAGENTA(35), FG_RED(31), FG_YELLOW(33), FG_WHITE(37), OFF(0), REVERSE(
+            32), FG_MAGENTA(35), FG_RED(31), FG_WHITE(37), FG_YELLOW(33), OFF(0), REVERSE(
             7), UNDERSCORE(4);
 
     // Constant for the escape character
@@ -28,7 +28,7 @@ public enum AnsiEscapeCode {
      */
     public static String decorate(final String text,
             final AnsiEscapeCode... codes) {
-        if (text == null || "".equals(text)) {
+        if ((text == null) || "".equals(text)) {
             return text;
         }
 
@@ -39,13 +39,12 @@ public enum AnsiEscapeCode {
             }
         }
         sb.append(text);
-        if (codes != null && codes.length > 0 && ANSI_SUPPORTED) {
+        if ((codes != null) && (codes.length > 0) && ANSI_SUPPORTED) {
             sb.append(OFF.code);
         }
         return sb.toString();
     }
 
-    // Fields
     final String code;
 
     /**

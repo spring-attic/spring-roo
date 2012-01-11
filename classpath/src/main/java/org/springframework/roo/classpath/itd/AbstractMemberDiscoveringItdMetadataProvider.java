@@ -45,6 +45,25 @@ public abstract class AbstractMemberDiscoveringItdMetadataProvider extends
         AbstractItdMetadataProvider {
 
     /**
+     * Allows a subclass to assess a recently updated {@link ItdTypeDetails} and
+     * decide whether they are interested in a metadata request being made in
+     * response. Subclasses will generally iterate over the passed ITD details
+     * and search for members of interest. If any members of interest are
+     * located, subclasses will return an instance-specific metadata
+     * identification string (MID) consistent with the subclass'
+     * {@link #getProvidesType()} The requested MID will be cleared from the
+     * cache and formally requested. This process allows subclasses to
+     * effectively discover new ITD members that appear over time without
+     * needing to process every request themselves.
+     * 
+     * @param itdTypeDetails a valid {@link ItdTypeDetails} from which member
+     *            information is available (never null)
+     * @return null if the subclass is not interested in the type, or a MID if
+     *         it is
+     */
+    protected abstract String getLocalMidToRequest(ItdTypeDetails itdTypeDetails);
+
+    /**
      * Receives generic notification events arising from our calling of
      * MetadataDependencyRegistry.addNotificationListener(this). You must still
      * register in the activate method to receive these events, as described in
@@ -81,7 +100,7 @@ public abstract class AbstractMemberDiscoveringItdMetadataProvider extends
 
         // Ask the subclass if they'd like us to request a MetadataItem in
         // response
-        String localMid = getLocalMidToRequest(itdTypeDetails);
+        final String localMid = getLocalMidToRequest(itdTypeDetails);
         if (localMid != null) {
             Assert.isTrue(
                     MetadataIdentificationUtils.isIdentifyingInstance(localMid),
@@ -101,23 +120,4 @@ public abstract class AbstractMemberDiscoveringItdMetadataProvider extends
             metadataService.evictAndGet(localMid);
         }
     }
-
-    /**
-     * Allows a subclass to assess a recently updated {@link ItdTypeDetails} and
-     * decide whether they are interested in a metadata request being made in
-     * response. Subclasses will generally iterate over the passed ITD details
-     * and search for members of interest. If any members of interest are
-     * located, subclasses will return an instance-specific metadata
-     * identification string (MID) consistent with the subclass'
-     * {@link #getProvidesType()} The requested MID will be cleared from the
-     * cache and formally requested. This process allows subclasses to
-     * effectively discover new ITD members that appear over time without
-     * needing to process every request themselves.
-     * 
-     * @param itdTypeDetails a valid {@link ItdTypeDetails} from which member
-     *            information is available (never null)
-     * @return null if the subclass is not interested in the type, or a MID if
-     *         it is
-     */
-    protected abstract String getLocalMidToRequest(ItdTypeDetails itdTypeDetails);
 }

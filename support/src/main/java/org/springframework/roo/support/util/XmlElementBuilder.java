@@ -12,7 +12,6 @@ import org.w3c.dom.Node;
  */
 public class XmlElementBuilder {
 
-    // Fields
     private final Element element;
 
     /**
@@ -49,8 +48,17 @@ public class XmlElementBuilder {
      */
     public XmlElementBuilder addChild(final Node node) {
         Assert.notNull(node, "Node required");
-        this.element.appendChild(node);
+        element.appendChild(node);
         return this;
+    }
+
+    /**
+     * Get the element instance.
+     * 
+     * @return The element.
+     */
+    public Element build() {
+        return element;
     }
 
     /**
@@ -64,14 +72,5 @@ public class XmlElementBuilder {
         Assert.hasText(text, "Text content required");
         element.setTextContent(text);
         return this;
-    }
-
-    /**
-     * Get the element instance.
-     * 
-     * @return The element.
-     */
-    public Element build() {
-        return element;
     }
 }

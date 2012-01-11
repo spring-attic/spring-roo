@@ -12,26 +12,26 @@ import org.springframework.roo.addon.tailor.actions.ActionConfig;
  */
 public class CommandConfiguration {
 
+    private final List<ActionConfig> actions = new ArrayList<ActionConfig>();
+
     /**
      * Name of the command that will trigger this configuration
      */
     private String commandName;
 
-    private List<ActionConfig> actions = new ArrayList<ActionConfig>();
+    public void addAction(final ActionConfig actionConfig) {
+        actions.add(actionConfig);
+    }
+
+    public List<ActionConfig> getActions() {
+        return actions;
+    }
 
     public String getCommandName() {
         return commandName;
     }
 
-    public void setCommandName(String commandName) {
+    public void setCommandName(final String commandName) {
         this.commandName = commandName;
-    }
-
-    public void addAction(ActionConfig actionConfig) {
-        this.actions.add(actionConfig);
-    }
-
-    public List<ActionConfig> getActions() {
-        return actions;
     }
 }

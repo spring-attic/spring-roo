@@ -13,28 +13,9 @@ import org.junit.Test;
  */
 public class StandardMetadataTimingStatisticTest {
 
-    // Constants
     private static final long INVOCATIONS = 5;
 
     private static final String NAME = "MyProcess";
-
-    @Test
-    public void testToStringForLessThanOneMillisecond() {
-        assertToString(NANOSECONDS_IN_MILLISECOND - 1,
-                "999999 ns;     5 call(s): MyProcess");
-    }
-
-    @Test
-    public void testToStringForOneMillisecond() {
-        assertToString(NANOSECONDS_IN_MILLISECOND,
-                "     1 ms;     5 call(s): MyProcess");
-    }
-
-    @Test
-    public void testToStringForTwoMilliseconds() {
-        assertToString(NANOSECONDS_IN_MILLISECOND * 2,
-                "     2 ms;     5 call(s): MyProcess");
-    }
 
     /**
      * Asserts that calling {@link StandardMetadataTimingStatistic#toString()}
@@ -58,5 +39,23 @@ public class StandardMetadataTimingStatisticTest {
             final long nanoseconds) {
         return new StandardMetadataTimingStatistic(NAME, nanoseconds,
                 INVOCATIONS);
+    }
+
+    @Test
+    public void testToStringForLessThanOneMillisecond() {
+        assertToString(NANOSECONDS_IN_MILLISECOND - 1,
+                "999999 ns;     5 call(s): MyProcess");
+    }
+
+    @Test
+    public void testToStringForOneMillisecond() {
+        assertToString(NANOSECONDS_IN_MILLISECOND,
+                "     1 ms;     5 call(s): MyProcess");
+    }
+
+    @Test
+    public void testToStringForTwoMilliseconds() {
+        assertToString(NANOSECONDS_IN_MILLISECOND * 2,
+                "     2 ms;     5 call(s): MyProcess");
     }
 }

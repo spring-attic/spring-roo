@@ -23,14 +23,13 @@ import org.springframework.uaa.client.ProxyService;
 @Service
 public class ProxyConfigurationCommands implements CommandMarker {
 
-    // Fields
     @Reference private ProxyService proxyService;
 
     @CliCommand(value = "proxy configuration", help = "Shows the proxy server configuration")
     public String proxyConfiguration() throws MalformedURLException {
-        Proxy p = proxyService.setupProxy(new URL(
+        final Proxy p = proxyService.setupProxy(new URL(
                 "http://www.springsource.org/roo"));
-        StringBuilder sb = new StringBuilder();
+        final StringBuilder sb = new StringBuilder();
         if (p == null) {
             sb.append(
                     "                     *** Your system has no proxy setup ***")

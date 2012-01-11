@@ -15,11 +15,10 @@ import java.util.TreeSet;
  */
 public abstract class ReservedTokenHolder {
 
-    // Constants
-    public static final SortedSet<ReservedToken> NUMERIC_TOKENS;
-    public static final SortedSet<ReservedToken> BOOLEAN_TOKENS;
-    public static final SortedSet<ReservedToken> STRING_TOKENS;
     public static final SortedSet<ReservedToken> ALL_TOKENS;
+    public static final SortedSet<ReservedToken> BOOLEAN_TOKENS;
+    public static final SortedSet<ReservedToken> NUMERIC_TOKENS;
+    public static final SortedSet<ReservedToken> STRING_TOKENS;
 
     static {
         NUMERIC_TOKENS = Collections.unmodifiableSortedSet(getNumericTokens());
@@ -28,38 +27,8 @@ public abstract class ReservedTokenHolder {
         ALL_TOKENS = Collections.unmodifiableSortedSet(getAllTokens());
     }
 
-    private static SortedSet<ReservedToken> getNumericTokens() {
-        SortedSet<ReservedToken> numericTokens = new TreeSet<ReservedToken>();
-        numericTokens.add(new ReservedToken("Between"));
-        numericTokens.add(new ReservedToken("LessThan"));
-        numericTokens.add(new ReservedToken("LessThanEquals"));
-        numericTokens.add(new ReservedToken("GreaterThan"));
-        numericTokens.add(new ReservedToken("GreaterThanEquals"));
-        numericTokens.add(new ReservedToken("IsNotNull"));
-        numericTokens.add(new ReservedToken("IsNull"));
-        numericTokens.add(new ReservedToken("NotEquals"));
-        numericTokens.add(new ReservedToken("Equals"));
-        return numericTokens;
-    }
-
-    private static SortedSet<ReservedToken> getBooleanTokens() {
-        SortedSet<ReservedToken> booleanTokens = new TreeSet<ReservedToken>();
-        booleanTokens.add(new ReservedToken("Not"));
-        return booleanTokens;
-    }
-
-    private static SortedSet<ReservedToken> getStringTokens() {
-        SortedSet<ReservedToken> stringTokens = new TreeSet<ReservedToken>();
-        stringTokens.add(new ReservedToken("Equals"));
-        stringTokens.add(new ReservedToken("NotEquals"));
-        stringTokens.add(new ReservedToken("Like"));
-        stringTokens.add(new ReservedToken("IsNotNull"));
-        stringTokens.add(new ReservedToken("IsNull"));
-        return stringTokens;
-    }
-
     private static SortedSet<ReservedToken> getAllTokens() {
-        SortedSet<ReservedToken> reservedTokens = new TreeSet<ReservedToken>();
+        final SortedSet<ReservedToken> reservedTokens = new TreeSet<ReservedToken>();
         reservedTokens.add(new ReservedToken("Or"));
         reservedTokens.add(new ReservedToken("And"));
         reservedTokens.add(new ReservedToken("Not"));
@@ -76,5 +45,35 @@ public abstract class ReservedTokenHolder {
         reservedTokens.add(new ReservedToken("GreaterThanEquals"));
         reservedTokens.add(new ReservedToken("Member"));
         return reservedTokens;
+    }
+
+    private static SortedSet<ReservedToken> getBooleanTokens() {
+        final SortedSet<ReservedToken> booleanTokens = new TreeSet<ReservedToken>();
+        booleanTokens.add(new ReservedToken("Not"));
+        return booleanTokens;
+    }
+
+    private static SortedSet<ReservedToken> getNumericTokens() {
+        final SortedSet<ReservedToken> numericTokens = new TreeSet<ReservedToken>();
+        numericTokens.add(new ReservedToken("Between"));
+        numericTokens.add(new ReservedToken("LessThan"));
+        numericTokens.add(new ReservedToken("LessThanEquals"));
+        numericTokens.add(new ReservedToken("GreaterThan"));
+        numericTokens.add(new ReservedToken("GreaterThanEquals"));
+        numericTokens.add(new ReservedToken("IsNotNull"));
+        numericTokens.add(new ReservedToken("IsNull"));
+        numericTokens.add(new ReservedToken("NotEquals"));
+        numericTokens.add(new ReservedToken("Equals"));
+        return numericTokens;
+    }
+
+    private static SortedSet<ReservedToken> getStringTokens() {
+        final SortedSet<ReservedToken> stringTokens = new TreeSet<ReservedToken>();
+        stringTokens.add(new ReservedToken("Equals"));
+        stringTokens.add(new ReservedToken("NotEquals"));
+        stringTokens.add(new ReservedToken("Like"));
+        stringTokens.add(new ReservedToken("IsNotNull"));
+        stringTokens.add(new ReservedToken("IsNull"));
+        return stringTokens;
     }
 }

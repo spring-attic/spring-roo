@@ -33,7 +33,6 @@ public class RepositoryMongoMetadataProviderImpl extends
         AbstractMemberDiscoveringItdMetadataProvider implements
         RepositoryMongoMetadataProvider {
 
-    // Fields
     @Reference private CustomDataKeyDecorator customDataKeyDecorator;
     private final Map<JavaType, String> domainTypeToRepositoryMidMap = new LinkedHashMap<JavaType, String>();
     private final Map<String, JavaType> repositoryMidToDomainTypeMap = new LinkedHashMap<String, JavaType>();
@@ -48,6 +47,12 @@ public class RepositoryMongoMetadataProviderImpl extends
         registerMatchers();
     }
 
+    @Override
+    protected String createLocalIdentifier(final JavaType javaType,
+            final LogicalPath path) {
+        return RepositoryMongoMetadata.createIdentifier(javaType, path);
+    }
+
     protected void deactivate(final ComponentContext context) {
         metadataDependencyRegistry.removeNotificationListener(this);
         metadataDependencyRegistry.deregisterDependency(
@@ -57,19 +62,26 @@ public class RepositoryMongoMetadataProviderImpl extends
         customDataKeyDecorator.unregisterMatchers(getClass());
     }
 
-    @SuppressWarnings("unchecked")
-    private void registerMatchers() {
-        customDataKeyDecorator.registerMatchers(getClass(),
-                new LayerTypeMatcher(ROO_REPOSITORY_MONGO, new JavaSymbolName(
-                        RooMongoRepository.DOMAIN_TYPE_ATTRIBUTE)));
+    @Override
+    protected String getGovernorPhysicalTypeIdentifier(
+            final String metadataIdentificationString) {
+        final JavaType javaType = RepositoryMongoMetadata
+                .getJavaType(metadataIdentificationString);
+        final LogicalPath path = RepositoryMongoMetadata
+                .getPath(metadataIdentificationString);
+        return PhysicalTypeIdentifier.createIdentifier(javaType, path);
+    }
+
+    public String getItdUniquenessFilenameSuffix() {
+        return "Mongo_Repository";
     }
 
     @Override
-    protected String getLocalMidToRequest(ItdTypeDetails itdTypeDetails) {
+    protected String getLocalMidToRequest(final ItdTypeDetails itdTypeDetails) {
         // Determine the governor for this ITD, and whether any metadata is even
         // hoping to hear about changes to that JavaType and its ITDs
-        JavaType governor = itdTypeDetails.getName();
-        String localMid = domainTypeToRepositoryMidMap.get(governor);
+        final JavaType governor = itdTypeDetails.getName();
+        final String localMid = domainTypeToRepositoryMidMap.get(governor);
         if (localMid != null) {
             return localMid;
         }
@@ -122,27 +134,14 @@ public class RepositoryMongoMetadataProviderImpl extends
                 identifierType);
     }
 
-    public String getItdUniquenessFilenameSuffix() {
-        return "Mongo_Repository";
-    }
-
     public String getProvidesType() {
         return RepositoryMongoMetadata.getMetadataIdentiferType();
     }
 
-    @Override
-    protected String createLocalIdentifier(final JavaType javaType,
-            final LogicalPath path) {
-        return RepositoryMongoMetadata.createIdentifier(javaType, path);
-    }
-
-    @Override
-    protected String getGovernorPhysicalTypeIdentifier(
-            final String metadataIdentificationString) {
-        final JavaType javaType = RepositoryMongoMetadata
-                .getJavaType(metadataIdentificationString);
-        final LogicalPath path = RepositoryMongoMetadata
-                .getPath(metadataIdentificationString);
-        return PhysicalTypeIdentifier.createIdentifier(javaType, path);
+    @SuppressWarnings("unchecked")
+    private void registerMatchers() {
+        customDataKeyDecorator.registerMatchers(getClass(),
+                new LayerTypeMatcher(ROO_REPOSITORY_MONGO, new JavaSymbolName(
+                        RooMongoRepository.DOMAIN_TYPE_ATTRIBUTE)));
     }
 }

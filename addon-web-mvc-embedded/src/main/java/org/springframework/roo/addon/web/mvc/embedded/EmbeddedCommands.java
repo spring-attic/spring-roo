@@ -27,7 +27,6 @@ import org.springframework.roo.shell.converters.StaticFieldConverter;
 @Service
 public class EmbeddedCommands implements CommandMarker {
 
-    // Fields
     @Reference private EmbeddedOperations embeddedOperations;
     @Reference private StaticFieldConverter staticFieldConverter;
 
@@ -45,15 +44,6 @@ public class EmbeddedCommands implements CommandMarker {
         staticFieldConverter.remove(PhotoProvider.class);
     }
 
-    @CliAvailabilityIndicator({ "web mvc embed generic", "web mvc embed wave",
-            "web mvc embed map", "web mvc embed document",
-            "web mvc embed video", "web mvc embed photos",
-            "web mvc embed stream video", "web mvc embed finances",
-            "web mvc embed twitter" })
-    public boolean isPropertyAvailable() {
-        return embeddedOperations.isEmbeddedInstallationPossible();
-    }
-
     @CliCommand(value = "web mvc embed generic", help = "Embed media by URL into your WEB MVC application")
     public void embed(
             @CliOption(key = "url", mandatory = true, help = "The url of the source to be embedded") final String url,
@@ -62,36 +52,13 @@ public class EmbeddedCommands implements CommandMarker {
         embeddedOperations.embed(url, viewName);
     }
 
-    @CliCommand(value = "web mvc embed wave", help = "Embed Google wave integration for your WEB MVC application")
-    public void embedWave(
-            @CliOption(key = "waveId", mandatory = true, help = "The key of the wave") final String key,
-            @CliOption(key = "viewName", mandatory = false, help = "The name of the jspx view") final String viewName) {
-
-        Map<String, String> options = new HashMap<String, String>();
-        options.put("provider", "GOOGLE_WAVE");
-        options.put("id", key);
-        embeddedOperations.install(viewName, options);
-    }
-
     @CliCommand(value = "web mvc embed document", help = "Embed a document for your WEB MVC application")
     public void embedDocument(
             @CliOption(key = "provider", mandatory = true, help = "The id of the document") final DocumentProvider provider,
             @CliOption(key = "documentId", mandatory = true, help = "The id of the document") final String id,
             @CliOption(key = "viewName", mandatory = false, help = "The name of the jspx view") final String viewName) {
 
-        Map<String, String> options = new HashMap<String, String>();
-        options.put("provider", provider.name());
-        options.put("id", id);
-        embeddedOperations.install(viewName, options);
-    }
-
-    @CliCommand(value = "web mvc embed video", help = "Embed a video for your WEB MVC application")
-    public void embedVideo(
-            @CliOption(key = "provider", mandatory = true, help = "The id of the video") final VideoProvider provider,
-            @CliOption(key = "videoId", mandatory = true, help = "The id of the video") final String id,
-            @CliOption(key = "viewName", mandatory = false, help = "The name of the jspx view") final String viewName) {
-
-        Map<String, String> options = new HashMap<String, String>();
+        final Map<String, String> options = new HashMap<String, String>();
         options.put("provider", provider.name());
         options.put("id", id);
         embeddedOperations.install(viewName, options);
@@ -102,7 +69,7 @@ public class EmbeddedCommands implements CommandMarker {
             @CliOption(key = "location", mandatory = true, help = "The location of the map (ie \"Sydney, Australia\")") final String location,
             @CliOption(key = "viewName", mandatory = false, help = "The name of the jspx view") final String viewName) {
 
-        Map<String, String> options = new HashMap<String, String>();
+        final Map<String, String> options = new HashMap<String, String>();
         options.put("provider", "GOOGLE_MAPS");
         options.put("location", location);
         embeddedOperations.install(viewName, options);
@@ -115,10 +82,33 @@ public class EmbeddedCommands implements CommandMarker {
             @CliOption(key = "albumId", mandatory = true, help = "The album id") final String albumId,
             @CliOption(key = "viewName", mandatory = false, help = "The name of the jspx view") final String viewName) {
 
-        Map<String, String> options = new HashMap<String, String>();
+        final Map<String, String> options = new HashMap<String, String>();
         options.put("provider", provider.name());
         options.put("userId", userId);
         options.put("albumId", albumId);
+        embeddedOperations.install(viewName, options);
+    }
+
+    @CliCommand(value = "web mvc embed twitter", help = "Embed twitter messages into your WEB MVC application")
+    public void embedTwitter(
+            @CliOption(key = "searchTerm", mandatory = true, help = "The search term to display results for") final String searchTerm,
+            @CliOption(key = "viewName", mandatory = false, help = "The name of the jspx view") final String viewName) {
+
+        final Map<String, String> options = new HashMap<String, String>();
+        options.put("provider", "TWITTER");
+        options.put("searchTerm", searchTerm);
+        embeddedOperations.install(viewName, options);
+    }
+
+    @CliCommand(value = "web mvc embed video", help = "Embed a video for your WEB MVC application")
+    public void embedVideo(
+            @CliOption(key = "provider", mandatory = true, help = "The id of the video") final VideoProvider provider,
+            @CliOption(key = "videoId", mandatory = true, help = "The id of the video") final String id,
+            @CliOption(key = "viewName", mandatory = false, help = "The name of the jspx view") final String viewName) {
+
+        final Map<String, String> options = new HashMap<String, String>();
+        options.put("provider", provider.name());
+        options.put("id", id);
         embeddedOperations.install(viewName, options);
     }
 
@@ -128,9 +118,20 @@ public class EmbeddedCommands implements CommandMarker {
             @CliOption(key = "streamId", mandatory = true, help = "The stream id") final String streamId,
             @CliOption(key = "viewName", mandatory = false, help = "The name of the jspx view") final String viewName) {
 
-        Map<String, String> options = new HashMap<String, String>();
+        final Map<String, String> options = new HashMap<String, String>();
         options.put("provider", provider.name());
         options.put("id", streamId);
+        embeddedOperations.install(viewName, options);
+    }
+
+    @CliCommand(value = "web mvc embed wave", help = "Embed Google wave integration for your WEB MVC application")
+    public void embedWave(
+            @CliOption(key = "waveId", mandatory = true, help = "The key of the wave") final String key,
+            @CliOption(key = "viewName", mandatory = false, help = "The name of the jspx view") final String viewName) {
+
+        final Map<String, String> options = new HashMap<String, String>();
+        options.put("provider", "GOOGLE_WAVE");
+        options.put("id", key);
         embeddedOperations.install(viewName, options);
     }
 
@@ -148,14 +149,12 @@ public class EmbeddedCommands implements CommandMarker {
     // embeddedOperations.install(viewName, options);
     // }
 
-    @CliCommand(value = "web mvc embed twitter", help = "Embed twitter messages into your WEB MVC application")
-    public void embedTwitter(
-            @CliOption(key = "searchTerm", mandatory = true, help = "The search term to display results for") final String searchTerm,
-            @CliOption(key = "viewName", mandatory = false, help = "The name of the jspx view") final String viewName) {
-
-        Map<String, String> options = new HashMap<String, String>();
-        options.put("provider", "TWITTER");
-        options.put("searchTerm", searchTerm);
-        embeddedOperations.install(viewName, options);
+    @CliAvailabilityIndicator({ "web mvc embed generic", "web mvc embed wave",
+            "web mvc embed map", "web mvc embed document",
+            "web mvc embed video", "web mvc embed photos",
+            "web mvc embed stream video", "web mvc embed finances",
+            "web mvc embed twitter" })
+    public boolean isPropertyAvailable() {
+        return embeddedOperations.isEmbeddedInstallationPossible();
     }
 }

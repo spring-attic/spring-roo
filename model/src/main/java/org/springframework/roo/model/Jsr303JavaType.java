@@ -17,10 +17,10 @@ public final class Jsr303JavaType {
             "javax.validation.ConstraintViolation");
     public static final JavaType CONSTRAINT_VIOLATION_EXCEPTION = new JavaType(
             "javax.validation.ConstraintViolationException");
-    public static final JavaType DECIMAL_MIN = new JavaType(
-            "javax.validation.constraints.DecimalMin");
     public static final JavaType DECIMAL_MAX = new JavaType(
             "javax.validation.constraints.DecimalMax");
+    public static final JavaType DECIMAL_MIN = new JavaType(
+            "javax.validation.constraints.DecimalMin");
     public static final JavaType DIGITS = new JavaType(
             "javax.validation.constraints.Digits");
     public static final JavaType FUTURE = new JavaType(

@@ -10,10 +10,10 @@ import java.lang.annotation.Target;
 public @interface CliOption {
 
     /**
-     * @return if true, the user cannot specify this option and it is provided
-     *         by the shell infrastructure (defaults to false)
+     * @return a help message for this option (the default is a blank String,
+     *         which means there is no help)
      */
-    boolean systemProvided() default false;
+    String help() default "";
 
     /**
      * @return the name of the option, which must be unique within this
@@ -27,21 +27,6 @@ public @interface CliOption {
      *         user (defaults to false)
      */
     boolean mandatory() default false;
-
-    /**
-     * @return the default value to use if this option is unspecified by the
-     *         user (defaults to __NULL__, which causes null to be presented to
-     *         any non-primitive parameter)
-     */
-    String unspecifiedDefaultValue() default "__NULL__";
-
-    /**
-     * @return the default value to use if this option is included by the user,
-     *         but they didn't specify an actual value (most commonly used for
-     *         flags; defaults to __NULL__, which causes null to be presented to
-     *         any non-primitive parameter)
-     */
-    String specifiedDefaultValue() default "__NULL__";
 
     /**
      * Returns a string providing context-specific information (e.g. a
@@ -66,8 +51,23 @@ public @interface CliOption {
     String optionContext() default "";
 
     /**
-     * @return a help message for this option (the default is a blank String,
-     *         which means there is no help)
+     * @return the default value to use if this option is included by the user,
+     *         but they didn't specify an actual value (most commonly used for
+     *         flags; defaults to __NULL__, which causes null to be presented to
+     *         any non-primitive parameter)
      */
-    String help() default "";
+    String specifiedDefaultValue() default "__NULL__";
+
+    /**
+     * @return if true, the user cannot specify this option and it is provided
+     *         by the shell infrastructure (defaults to false)
+     */
+    boolean systemProvided() default false;
+
+    /**
+     * @return the default value to use if this option is unspecified by the
+     *         user (defaults to __NULL__, which causes null to be presented to
+     *         any non-primitive parameter)
+     */
+    String unspecifiedDefaultValue() default "__NULL__";
 }

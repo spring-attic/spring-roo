@@ -27,13 +27,13 @@ import org.springframework.roo.shell.osgi.AbstractFlashingObject;
 public class ProcessManagerDiagnosticsListener extends AbstractFlashingObject
         implements ProcessManagerStatusListener, CommandMarker {
 
-    // Fields
-    @Reference private ProcessManagerStatusProvider processManagerStatusProvider;
     private boolean isDebug = false;
+    @Reference private ProcessManagerStatusProvider processManagerStatusProvider;
 
     protected void activate(final ComponentContext context) {
         processManagerStatusProvider.addProcessManagerStatusListener(this);
-        isDebug = System.getProperty("roo-args") != null && isDevelopmentMode();
+        isDebug = (System.getProperty("roo-args") != null)
+                && isDevelopmentMode();
     }
 
     protected void deactivate(final ComponentContext context) {
@@ -51,6 +51,6 @@ public class ProcessManagerDiagnosticsListener extends AbstractFlashingObject
     @CliCommand(value = "process manager debug", help = "Indicates if process manager debugging is desired")
     public void processManagerDebug(
             @CliOption(key = { "", "enabled" }, mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "true", help = "Activates debug mode") final boolean debug) {
-        this.isDebug = debug;
+        isDebug = debug;
     }
 }

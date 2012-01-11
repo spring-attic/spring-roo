@@ -22,7 +22,6 @@ import org.springframework.roo.file.monitor.event.FileOperation;
  */
 public class MonitoringRequestTest {
 
-    // Constants
     private static final FileOperation[] CRUD_OPERATIONS = { CREATED, RENAMED,
             UPDATED, DELETED };
 
@@ -50,15 +49,15 @@ public class MonitoringRequestTest {
     }
 
     @Test
-    public void testGetMonitoringRequestForCurrentDirectoryOnly() {
-        assertMonitorsCurrentDirectory(
-                MonitoringRequest.getInitialMonitoringRequest(null), false);
-    }
-
-    @Test
     public void testGetMonitoringRequestForCurrentDirectoryAndSubTree() {
         assertMonitorsCurrentDirectory(
                 MonitoringRequest.getInitialSubTreeMonitoringRequest(null),
                 true);
+    }
+
+    @Test
+    public void testGetMonitoringRequestForCurrentDirectoryOnly() {
+        assertMonitorsCurrentDirectory(
+                MonitoringRequest.getInitialMonitoringRequest(null), false);
     }
 }

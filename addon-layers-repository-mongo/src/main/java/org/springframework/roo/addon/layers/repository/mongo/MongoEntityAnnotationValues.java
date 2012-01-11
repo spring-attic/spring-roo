@@ -16,7 +16,6 @@ import org.springframework.roo.model.RooJavaType;
  */
 public class MongoEntityAnnotationValues extends AbstractAnnotationValues {
 
-    // Fields
     @AutoPopulate private JavaType identifierType = JdkJavaType.BIG_INTEGER;
 
     /**

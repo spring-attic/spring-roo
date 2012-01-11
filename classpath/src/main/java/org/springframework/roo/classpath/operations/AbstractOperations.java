@@ -28,21 +28,14 @@ import org.w3c.dom.Document;
 @Component(componentAbstract = true)
 public abstract class AbstractOperations {
 
-    // Constants
     protected static Logger LOGGER = HandlerUtils
             .getLogger(AbstractOperations.class);
 
-    // Fields
-    @Reference protected FileManager fileManager;
     protected ComponentContext context;
+    @Reference protected FileManager fileManager;
 
     protected void activate(final ComponentContext context) {
         this.context = context;
-    }
-
-    public Document getDocumentTemplate(final String templateName) {
-        return XmlUtils.readXml(FileUtils.getInputStream(getClass(),
-                templateName));
     }
 
     /**
@@ -65,30 +58,30 @@ public abstract class AbstractOperations {
             fileManager.createDirectory(targetDirectory);
         }
 
-        String path = FileUtils.getPath(getClass(), sourceAntPath);
+        final String path = FileUtils.getPath(getClass(), sourceAntPath);
         final Iterable<URL> urls = OSGiUtils.findEntriesByPattern(
                 context.getBundleContext(), path);
         Assert.notNull(urls,
                 "Could not search bundles for resources for Ant Path '" + path
                         + "'");
         for (final URL url : urls) {
-            String fileName = url.getPath().substring(
+            final String fileName = url.getPath().substring(
                     url.getPath().lastIndexOf("/") + 1);
             if (replace) {
                 BufferedReader in = null;
-                StringBuilder sb = new StringBuilder();
+                final StringBuilder sb = new StringBuilder();
                 try {
                     in = new BufferedReader(new InputStreamReader(url
                             .openConnection().getInputStream()));
                     while (true) {
-                        int ch = in.read();
+                        final int ch = in.read();
                         if (ch < 0) {
                             break;
                         }
                         sb.append((char) ch);
                     }
                 }
-                catch (Exception e) {
+                catch (final Exception e) {
                     throw new IllegalStateException(e);
                 }
                 finally {
@@ -104,7 +97,7 @@ public abstract class AbstractOperations {
                                 .createFile(targetDirectory + fileName)
                                 .getOutputStream());
                     }
-                    catch (IOException e) {
+                    catch (final IOException e) {
                         throw new IllegalStateException(
                                 "Encountered an error during copying of resources for the add-on.",
                                 e);
@@ -112,5 +105,10 @@ public abstract class AbstractOperations {
                 }
             }
         }
+    }
+
+    public Document getDocumentTemplate(final String templateName) {
+        return XmlUtils.readXml(FileUtils.getInputStream(getClass(),
+                templateName));
     }
 }

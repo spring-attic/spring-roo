@@ -26,72 +26,31 @@ public class FileUtilsTest {
     private static final String TEST_FILE = "sub" + File.separator
             + "file-utils-test.txt";
 
-    @Test(expected = NullPointerException.class)
-    public void testGetSystemDependentPathFromNullArray() {
-        FileUtils.getSystemDependentPath((String[]) null);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testGetSystemDependentPathFromNoElements() {
-        FileUtils.getSystemDependentPath();
-    }
-
-    @Test
-    public void testGetSystemDependentPathFromOneElement() {
-        assertEquals("foo", FileUtils.getSystemDependentPath("foo"));
-    }
-
-    @Test
-    public void testGetSystemDependentPathFromMultipleElements() {
-        final String expectedPath = "foo" + File.separator + "bar";
-        assertEquals(expectedPath,
-                FileUtils.getSystemDependentPath("foo", "bar"));
-    }
-
-    @Test
-    public void testGetFileSeparatorAsRegex() throws Exception {
-        // Set up
-        final String regex = FileUtils.getFileSeparatorAsRegex();
-        final String currentDirectory = new File(FileUtils.CURRENT_DIRECTORY)
-                .getCanonicalPath();
-
+    private void assertFirstDirectory(final String path,
+            final String expectedFirstDirectory) {
         // Invoke
-        final String[] pathElements = currentDirectory.split(regex);
+        final String firstDirectory = FileUtils.getFirstDirectory(path);
 
         // Check
-        assertTrue(pathElements.length > 0);
+        assertEquals(expectedFirstDirectory, firstDirectory);
     }
 
     @Test
-    public void testRemoveTrailingSeparatorFromNullPath() {
-        assertNull(FileUtils.removeTrailingSeparator(null));
-    }
-
-    @Test
-    public void testRemoveTrailingSeparatorFromEmptyPath() {
-        assertEquals("", FileUtils.removeTrailingSeparator(""));
-    }
-
-    @Test
-    public void testRemoveTrailingSeparatorFromPathWithLeadingSeparator() {
-        final String path = File.separator + "foo";
-        assertEquals(path, FileUtils.removeTrailingSeparator(path));
-    }
-
-    @Test
-    public void testRemoveTrailingSeparatorFromPathWithMultipleTrailingSeparators() {
-        final String path = "foo" + StringUtils.repeat(File.separator, 3);
-        assertEquals("foo", FileUtils.removeTrailingSeparator(path));
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testEnsureTrailingSeparatorForNullPath() {
-        FileUtils.ensureTrailingSeparator(null);
+    public void testBackOneDirectory() {
+        assertEquals(
+                "foo" + File.separator + "bar",
+                FileUtils.backOneDirectory("foo" + File.separator + "bar"
+                        + File.separator + "baz" + File.separator));
     }
 
     @Test
     public void testEnsureTrailingSeparatorForEmptyPath() {
         assertEquals(File.separator, FileUtils.ensureTrailingSeparator(""));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testEnsureTrailingSeparatorForNullPath() {
+        FileUtils.ensureTrailingSeparator(null);
     }
 
     @Test
@@ -114,11 +73,6 @@ public class FileUtilsTest {
                 FileUtils.ensureTrailingSeparator(path));
     }
 
-    @Test
-    public void testGetCanonicalPathForNullFile() {
-        assertNull(FileUtils.getCanonicalPath(null));
-    }
-
     @Test(expected = IllegalStateException.class)
     public void testGetCanonicalPathForInvalidFile() throws Exception {
         // Set up
@@ -128,6 +82,11 @@ public class FileUtilsTest {
 
         // Invoke
         FileUtils.getCanonicalPath(invalidFile);
+    }
+
+    @Test
+    public void testGetCanonicalPathForNullFile() {
+        assertNull(FileUtils.getCanonicalPath(null));
     }
 
     @Test
@@ -145,67 +104,22 @@ public class FileUtilsTest {
     }
 
     @Test
-    public void testRemoveLeadingAndTrailingSeparatorsFromNullPath() {
-        assertNull(FileUtils.removeLeadingAndTrailingSeparators(null));
-    }
-
-    @Test
-    public void testRemoveLeadingAndTrailingSeparatorsFromEmptyPath() {
-        assertEquals("", FileUtils.removeLeadingAndTrailingSeparators(""));
-    }
-
-    @Test
-    public void testRemoveLeadingAndTrailingSeparatorsFromPlainPath() {
-        final String path = "foo";
-        assertEquals(path, FileUtils.removeLeadingAndTrailingSeparators(path));
-    }
-
-    @Test
-    public void testRemoveLeadingAndTrailingSeparatorsFromPathWithBoth() {
-        // Set up
-        final String separators = StringUtils.repeat(File.separator, 4);
-        final String path = separators + "foo" + separators;
-
-        // Invoke and check
-        assertEquals("foo", FileUtils.removeLeadingAndTrailingSeparators(path));
-    }
-
-    @Test
     public void testGetFile() {
         assertTrue(FileUtils.getFile(Loader.class, TEST_FILE).isFile());
     }
 
     @Test
-    public void testGetPath() {
-        assertEquals(
-                "/org/springframework/roo/support/util/loader/sub/file-utils-test.txt",
-                FileUtils.getPath(Loader.class, "sub/file-utils-test.txt"));
-    }
+    public void testGetFileSeparatorAsRegex() throws Exception {
+        // Set up
+        final String regex = FileUtils.getFileSeparatorAsRegex();
+        final String currentDirectory = new File(FileUtils.CURRENT_DIRECTORY)
+                .getCanonicalPath();
 
-    @Test
-    public void testGetInputStreamOfFileInSubDirectory() throws Exception {
         // Invoke
-        final InputStream inputStream = FileUtils.getInputStream(Loader.class,
-                TEST_FILE);
+        final String[] pathElements = currentDirectory.split(regex);
 
         // Check
-        final String contents = FileCopyUtils
-                .copyToString(new InputStreamReader(inputStream));
-        assertEquals("This file is required for FileUtilsTest.", contents);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testGetInputStreamOfInvalidFile() throws Exception {
-        FileUtils.getInputStream(Loader.class, MISSING_FILE);
-    }
-
-    private void assertFirstDirectory(final String path,
-            final String expectedFirstDirectory) {
-        // Invoke
-        final String firstDirectory = FileUtils.getFirstDirectory(path);
-
-        // Check
-        assertEquals(expectedFirstDirectory, firstDirectory);
+        assertTrue(pathElements.length > 0);
     }
 
     @Test
@@ -227,10 +141,96 @@ public class FileUtilsTest {
     }
 
     @Test
-    public void testBackOneDirectory() {
+    public void testGetInputStreamOfFileInSubDirectory() throws Exception {
+        // Invoke
+        final InputStream inputStream = FileUtils.getInputStream(Loader.class,
+                TEST_FILE);
+
+        // Check
+        final String contents = FileCopyUtils
+                .copyToString(new InputStreamReader(inputStream));
+        assertEquals("This file is required for FileUtilsTest.", contents);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testGetInputStreamOfInvalidFile() throws Exception {
+        FileUtils.getInputStream(Loader.class, MISSING_FILE);
+    }
+
+    @Test
+    public void testGetPath() {
         assertEquals(
-                "foo" + File.separator + "bar",
-                FileUtils.backOneDirectory("foo" + File.separator + "bar"
-                        + File.separator + "baz" + File.separator));
+                "/org/springframework/roo/support/util/loader/sub/file-utils-test.txt",
+                FileUtils.getPath(Loader.class, "sub/file-utils-test.txt"));
+    }
+
+    @Test
+    public void testGetSystemDependentPathFromMultipleElements() {
+        final String expectedPath = "foo" + File.separator + "bar";
+        assertEquals(expectedPath,
+                FileUtils.getSystemDependentPath("foo", "bar"));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testGetSystemDependentPathFromNoElements() {
+        FileUtils.getSystemDependentPath();
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void testGetSystemDependentPathFromNullArray() {
+        FileUtils.getSystemDependentPath((String[]) null);
+    }
+
+    @Test
+    public void testGetSystemDependentPathFromOneElement() {
+        assertEquals("foo", FileUtils.getSystemDependentPath("foo"));
+    }
+
+    @Test
+    public void testRemoveLeadingAndTrailingSeparatorsFromEmptyPath() {
+        assertEquals("", FileUtils.removeLeadingAndTrailingSeparators(""));
+    }
+
+    @Test
+    public void testRemoveLeadingAndTrailingSeparatorsFromNullPath() {
+        assertNull(FileUtils.removeLeadingAndTrailingSeparators(null));
+    }
+
+    @Test
+    public void testRemoveLeadingAndTrailingSeparatorsFromPathWithBoth() {
+        // Set up
+        final String separators = StringUtils.repeat(File.separator, 4);
+        final String path = separators + "foo" + separators;
+
+        // Invoke and check
+        assertEquals("foo", FileUtils.removeLeadingAndTrailingSeparators(path));
+    }
+
+    @Test
+    public void testRemoveLeadingAndTrailingSeparatorsFromPlainPath() {
+        final String path = "foo";
+        assertEquals(path, FileUtils.removeLeadingAndTrailingSeparators(path));
+    }
+
+    @Test
+    public void testRemoveTrailingSeparatorFromEmptyPath() {
+        assertEquals("", FileUtils.removeTrailingSeparator(""));
+    }
+
+    @Test
+    public void testRemoveTrailingSeparatorFromNullPath() {
+        assertNull(FileUtils.removeTrailingSeparator(null));
+    }
+
+    @Test
+    public void testRemoveTrailingSeparatorFromPathWithLeadingSeparator() {
+        final String path = File.separator + "foo";
+        assertEquals(path, FileUtils.removeTrailingSeparator(path));
+    }
+
+    @Test
+    public void testRemoveTrailingSeparatorFromPathWithMultipleTrailingSeparators() {
+        final String path = "foo" + StringUtils.repeat(File.separator, 3);
+        assertEquals("foo", FileUtils.removeTrailingSeparator(path));
     }
 }

@@ -18,7 +18,6 @@ import org.springframework.roo.shell.MethodTarget;
  */
 public class DateConverter implements Converter<Date> {
 
-    // Fields
     private final DateFormat dateFormat;
 
     public DateConverter() {

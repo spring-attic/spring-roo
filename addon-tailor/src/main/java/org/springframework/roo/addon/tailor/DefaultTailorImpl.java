@@ -27,40 +27,19 @@ import org.springframework.roo.support.util.StringUtils;
 @Service
 @Component
 public class DefaultTailorImpl implements Tailor {
-    @Reference private ActionLocator actionLocator;
-    @Reference private ConfigurationLocator configLocator;
-
     private static final Logger LOGGER = HandlerUtils
             .getLogger(DefaultTailorImpl.class);
+    @Reference private ActionLocator actionLocator;
 
-    /**
-     * @Inheritdoc
-     */
-    public List<String> sew(String command) {
-        if (StringUtils.hasText(command)) {
-            CommandTransformation commandTrafo = new CommandTransformation(
-                    command);
-            try {
-                execute(commandTrafo);
-            }
-            catch (RuntimeException e) {
-                commandTrafo.clearCommands();
-                commandTrafo
-                        .addOutputCommand("/* Unable to tailor this command. Please check the command syntax */");
-                logInDevelopmentMode(Level.WARNING, e.toString());
-            }
-            return commandTrafo.getOutputCommands();
-        }
-        return Collections.emptyList();
-    }
+    @Reference private ConfigurationLocator configLocator;
 
-    private void execute(CommandTransformation commandTrafo) {
-        TailorConfiguration configuration = configLocator
+    private void execute(final CommandTransformation commandTrafo) {
+        final TailorConfiguration configuration = configLocator
                 .getActiveTailorConfiguration();
         if (configuration == null) {
             return;
         }
-        CommandConfiguration commandConfig = configuration
+        final CommandConfiguration commandConfig = configuration
                 .getCommandConfigFor(commandTrafo.getInputCommand());
         if (commandConfig == null) {
             return;
@@ -68,9 +47,9 @@ public class DefaultTailorImpl implements Tailor {
         logInDevelopmentMode(Level.INFO,
                 "Tailor: detected " + commandTrafo.getInputCommand());
 
-        for (ActionConfig config : commandConfig.getActions()) {
-            Action component = actionLocator
-                    .getAction(config.getActionTypeId());
+        for (final ActionConfig config : commandConfig.getActions()) {
+            final Action component = actionLocator.getAction(config
+                    .getActionTypeId());
             if (component != null) {
                 logInDevelopmentMode(Level.INFO,
                         "\tTailoring: " + component.getDescription(config));
@@ -85,8 +64,29 @@ public class DefaultTailorImpl implements Tailor {
         }
     }
 
-    protected void logInDevelopmentMode(Level level, String logMsg) {
+    protected void logInDevelopmentMode(final Level level, final String logMsg) {
         LOGGER.log(level, logMsg);
+    }
+
+    /**
+     * @Inheritdoc
+     */
+    public List<String> sew(final String command) {
+        if (StringUtils.hasText(command)) {
+            final CommandTransformation commandTrafo = new CommandTransformation(
+                    command);
+            try {
+                execute(commandTrafo);
+            }
+            catch (final RuntimeException e) {
+                commandTrafo.clearCommands();
+                commandTrafo
+                        .addOutputCommand("/* Unable to tailor this command. Please check the command syntax */");
+                logInDevelopmentMode(Level.WARNING, e.toString());
+            }
+            return commandTrafo.getOutputCommands();
+        }
+        return Collections.emptyList();
     }
 
 }

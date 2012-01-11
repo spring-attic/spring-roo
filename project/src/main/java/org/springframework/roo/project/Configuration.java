@@ -28,7 +28,6 @@ public class Configuration implements Comparable<Configuration> {
         return new Configuration(configurationElement);
     }
 
-    // Fields
     private final Element configuration;
 
     /**
@@ -41,6 +40,19 @@ public class Configuration implements Comparable<Configuration> {
     public Configuration(final Element configuration) {
         Assert.notNull(configuration, "configuration must be specified");
         this.configuration = configuration;
+    }
+
+    public int compareTo(final Configuration o) {
+        if (o == null) {
+            throw new NullPointerException();
+        }
+        return XmlUtils.compareNodes(configuration, o.configuration) ? 0 : 1;
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        return (obj instanceof Configuration)
+                && (compareTo((Configuration) obj) == 0);
     }
 
     /**
@@ -56,21 +68,8 @@ public class Configuration implements Comparable<Configuration> {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result
+        result = (prime * result)
                 + ((configuration == null) ? 0 : configuration.hashCode());
         return result;
-    }
-
-    @Override
-    public boolean equals(final Object obj) {
-        return obj instanceof Configuration
-                && this.compareTo((Configuration) obj) == 0;
-    }
-
-    public int compareTo(final Configuration o) {
-        if (o == null) {
-            throw new NullPointerException();
-        }
-        return XmlUtils.compareNodes(configuration, o.configuration) ? 0 : 1;
     }
 }

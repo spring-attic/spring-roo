@@ -37,7 +37,6 @@ public class JavaPackageConverter implements Converter<JavaPackage> {
      */
     public static final String TOP_LEVEL_PACKAGE_SYMBOL = "~";
 
-    // Fields
     @Reference FileManager fileManager;
     @Reference LastUsed lastUsed;
     @Reference ProjectOperations projectOperations;
@@ -50,7 +49,7 @@ public class JavaPackageConverter implements Converter<JavaPackage> {
         }
         final JavaPackage result = new JavaPackage(
                 convertToFullyQualifiedPackageName(value));
-        if (optionContext != null && optionContext.contains("update")) {
+        if ((optionContext != null) && optionContext.contains("update")) {
             lastUsed.setPackage(result);
         }
         return result;
@@ -62,38 +61,6 @@ public class JavaPackageConverter implements Converter<JavaPackage> {
             return replaceTopLevelPackageSymbol(normalisedText);
         }
         return normalisedText;
-    }
-
-    /**
-     * Replaces the {@link #TOP_LEVEL_PACKAGE_SYMBOL} at the beginning of the
-     * given text with the current project/module's top-level package
-     * 
-     * @param text
-     * @return a well-formed Java package name (might have a trailing dot)
-     */
-    private String replaceTopLevelPackageSymbol(final String text) {
-        final String topLevelPackage = getTopLevelPackage();
-        if (TOP_LEVEL_PACKAGE_SYMBOL.equals(text)) {
-            return topLevelPackage;
-        }
-        final String textWithoutSymbol = removePrefix(text,
-                TOP_LEVEL_PACKAGE_SYMBOL);
-        return topLevelPackage + "." + removePrefix(textWithoutSymbol, ".");
-    }
-
-    private String getTopLevelPackage() {
-        if (projectOperations.isFocusedProjectAvailable()) {
-            return typeLocationService
-                    .getTopLevelPackageForModule(projectOperations
-                            .getFocusedModule());
-        }
-        return ""; // Shouldn't happen if there's a project, i.e. most of the
-                   // time
-    }
-
-    public boolean supports(final Class<?> requiredType,
-            final String optionContext) {
-        return JavaPackage.class.isAssignableFrom(requiredType);
     }
 
     public boolean getAllPossibleValues(final List<Completion> completions,
@@ -115,5 +82,37 @@ public class JavaPackageConverter implements Converter<JavaPackage> {
             }
         }
         return completions;
+    }
+
+    private String getTopLevelPackage() {
+        if (projectOperations.isFocusedProjectAvailable()) {
+            return typeLocationService
+                    .getTopLevelPackageForModule(projectOperations
+                            .getFocusedModule());
+        }
+        return ""; // Shouldn't happen if there's a project, i.e. most of the
+                   // time
+    }
+
+    /**
+     * Replaces the {@link #TOP_LEVEL_PACKAGE_SYMBOL} at the beginning of the
+     * given text with the current project/module's top-level package
+     * 
+     * @param text
+     * @return a well-formed Java package name (might have a trailing dot)
+     */
+    private String replaceTopLevelPackageSymbol(final String text) {
+        final String topLevelPackage = getTopLevelPackage();
+        if (TOP_LEVEL_PACKAGE_SYMBOL.equals(text)) {
+            return topLevelPackage;
+        }
+        final String textWithoutSymbol = removePrefix(text,
+                TOP_LEVEL_PACKAGE_SYMBOL);
+        return topLevelPackage + "." + removePrefix(textWithoutSymbol, ".");
+    }
+
+    public boolean supports(final Class<?> requiredType,
+            final String optionContext) {
+        return JavaPackage.class.isAssignableFrom(requiredType);
     }
 }

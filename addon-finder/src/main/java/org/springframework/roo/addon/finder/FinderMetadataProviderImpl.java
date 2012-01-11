@@ -36,7 +36,6 @@ public class FinderMetadataProviderImpl extends
         AbstractMemberDiscoveringItdMetadataProvider implements
         FinderMetadataProvider {
 
-    // Fields
     @Reference private DynamicFinderServices dynamicFinderServices;
 
     protected void activate(final ComponentContext context) {
@@ -45,6 +44,12 @@ public class FinderMetadataProviderImpl extends
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
                 getProvidesType());
         addMetadataTrigger(ROO_JPA_ACTIVE_RECORD);
+    }
+
+    @Override
+    protected String createLocalIdentifier(final JavaType javaType,
+            final LogicalPath path) {
+        return FinderMetadata.createIdentifier(javaType, path);
     }
 
     protected void deactivate(final ComponentContext context) {
@@ -56,6 +61,25 @@ public class FinderMetadataProviderImpl extends
     }
 
     @Override
+    protected String getGovernorPhysicalTypeIdentifier(
+            final String metadataIdentificationString) {
+        final JavaType javaType = FinderMetadata
+                .getJavaType(metadataIdentificationString);
+        final LogicalPath path = FinderMetadata
+                .getPath(metadataIdentificationString);
+        return PhysicalTypeIdentifier.createIdentifier(javaType, path);
+    }
+
+    public String getItdUniquenessFilenameSuffix() {
+        return "Finder";
+    }
+
+    @Override
+    protected String getLocalMidToRequest(final ItdTypeDetails itdTypeDetails) {
+        return getLocalMid(itdTypeDetails);
+    }
+
+    @Override
     protected ItdTypeDetailsProvidingMetadataItem getMetadata(
             final String metadataIdentificationString,
             final JavaType aspectName,
@@ -64,16 +88,17 @@ public class FinderMetadataProviderImpl extends
         // We know governor type details are non-null and can be safely cast
 
         // Work out the MIDs of the other metadata we depend on
-        JavaType javaType = FinderMetadata
+        final JavaType javaType = FinderMetadata
                 .getJavaType(metadataIdentificationString);
-        LogicalPath path = FinderMetadata.getPath(metadataIdentificationString);
-        String jpaActiveRecordMetadataKey = JpaActiveRecordMetadata
+        final LogicalPath path = FinderMetadata
+                .getPath(metadataIdentificationString);
+        final String jpaActiveRecordMetadataKey = JpaActiveRecordMetadata
                 .createIdentifier(javaType, path);
 
         // We need to lookup the metadata we depend on
-        JpaActiveRecordMetadata jpaActiveRecordMetadata = (JpaActiveRecordMetadata) metadataService
+        final JpaActiveRecordMetadata jpaActiveRecordMetadata = (JpaActiveRecordMetadata) metadataService
                 .get(jpaActiveRecordMetadataKey);
-        if (jpaActiveRecordMetadata == null
+        if ((jpaActiveRecordMetadata == null)
                 || !jpaActiveRecordMetadata.isValid()) {
             return null;
         }
@@ -83,7 +108,7 @@ public class FinderMetadataProviderImpl extends
             return null;
         }
 
-        MemberDetails memberDetails = getMemberDetails(governorPhysicalTypeMetadata);
+        final MemberDetails memberDetails = getMemberDetails(governorPhysicalTypeMetadata);
         if (memberDetails == null) {
             return null;
         }
@@ -93,11 +118,13 @@ public class FinderMetadataProviderImpl extends
 
         // Using SortedMap to ensure that the ITD emits finders in the same
         // order each time
-        SortedMap<JavaSymbolName, QueryHolder> queryHolders = new TreeMap<JavaSymbolName, QueryHolder>();
-        for (String methodName : jpaActiveRecordMetadata.getDynamicFinders()) {
-            JavaSymbolName finderName = new JavaSymbolName(methodName);
-            QueryHolder queryHolder = dynamicFinderServices.getQueryHolder(
-                    memberDetails, finderName, plural, entityName);
+        final SortedMap<JavaSymbolName, QueryHolder> queryHolders = new TreeMap<JavaSymbolName, QueryHolder>();
+        for (final String methodName : jpaActiveRecordMetadata
+                .getDynamicFinders()) {
+            final JavaSymbolName finderName = new JavaSymbolName(methodName);
+            final QueryHolder queryHolder = dynamicFinderServices
+                    .getQueryHolder(memberDetails, finderName, plural,
+                            entityName);
             if (queryHolder != null) {
                 queryHolders.put(finderName, queryHolder);
             }
@@ -105,11 +132,11 @@ public class FinderMetadataProviderImpl extends
 
         // Now determine all the ITDs we're relying on to ensure we are notified
         // if they change
-        for (QueryHolder queryHolder : queryHolders.values()) {
-            for (Token token : queryHolder.getTokens()) {
+        for (final QueryHolder queryHolder : queryHolders.values()) {
+            for (final Token token : queryHolder.getTokens()) {
                 if (token instanceof FieldToken) {
-                    FieldToken fieldToken = (FieldToken) token;
-                    String declaredByMid = fieldToken.getField()
+                    final FieldToken fieldToken = (FieldToken) token;
+                    final String declaredByMid = fieldToken.getField()
                             .getDeclaredByMetadataId();
                     metadataDependencyRegistry.registerDependency(
                             declaredByMid, metadataIdentificationString);
@@ -126,30 +153,6 @@ public class FinderMetadataProviderImpl extends
         return new FinderMetadata(metadataIdentificationString, aspectName,
                 governorPhysicalTypeMetadata, entityManagerMethod,
                 Collections.unmodifiableSortedMap(queryHolders));
-    }
-
-    @Override
-    protected String getLocalMidToRequest(final ItdTypeDetails itdTypeDetails) {
-        return getLocalMid(itdTypeDetails);
-    }
-
-    public String getItdUniquenessFilenameSuffix() {
-        return "Finder";
-    }
-
-    @Override
-    protected String getGovernorPhysicalTypeIdentifier(
-            final String metadataIdentificationString) {
-        JavaType javaType = FinderMetadata
-                .getJavaType(metadataIdentificationString);
-        LogicalPath path = FinderMetadata.getPath(metadataIdentificationString);
-        return PhysicalTypeIdentifier.createIdentifier(javaType, path);
-    }
-
-    @Override
-    protected String createLocalIdentifier(final JavaType javaType,
-            final LogicalPath path) {
-        return FinderMetadata.createIdentifier(javaType, path);
     }
 
     public String getProvidesType() {

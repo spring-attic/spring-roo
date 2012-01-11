@@ -24,19 +24,17 @@ import org.springframework.uaa.client.protobuf.UaaClient.Product;
 @Service
 public class AppCloudClientFactoryImpl implements AppCloudClientFactory {
 
-    // Constants
     private static final String CLOUD_FOUNDRY_PRODUCT_NAME = "Cloud Foundry Java API";
     private static final String DEFAULT_BUNDLE_VERSION = "0.0.0.RELEASE";
 
-    // Fields
-    @Reference UaaService uaaService;
     // TODO is this value ever used, or is it always overwritten by activate()?
     private Product product = VersionHelper.getProduct(
             CLOUD_FOUNDRY_PRODUCT_NAME, DEFAULT_BUNDLE_VERSION);
+    @Reference UaaService uaaService;
 
     protected void activate(final ComponentContext context) {
-        this.product = getCloudFoundryProduct(context.getBundleContext()
-                .getBundle().getHeaders());
+        product = getCloudFoundryProduct(context.getBundleContext().getBundle()
+                .getHeaders());
     }
 
     private Product getCloudFoundryProduct(final Dictionary<?, ?> bundleHeaders) {

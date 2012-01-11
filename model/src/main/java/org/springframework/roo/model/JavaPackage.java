@@ -16,7 +16,6 @@ import org.springframework.roo.support.util.StringUtils;
  */
 public class JavaPackage implements Comparable<JavaPackage> {
 
-    // Fields
     private final String fullyQualifiedPackageName;
 
     /**
@@ -38,35 +37,18 @@ public class JavaPackage implements Comparable<JavaPackage> {
         this.fullyQualifiedPackageName = fullyQualifiedPackageName;
     }
 
-    /**
-     * @return the fully qualified package name (complies with the rules
-     *         specified in the constructor)
-     */
-    public String getFullyQualifiedPackageName() {
-        return fullyQualifiedPackageName;
-    }
-
-    @Override
-    public int hashCode() {
-        return this.fullyQualifiedPackageName.hashCode();
-    }
-
-    @Override
-    public boolean equals(final Object obj) {
-        return obj instanceof JavaPackage
-                && this.compareTo((JavaPackage) obj) == 0;
-    }
-
     public int compareTo(final JavaPackage o) {
-        if (o == null)
+        if (o == null) {
             return -1;
-        return this.fullyQualifiedPackageName.compareTo(o
+        }
+        return fullyQualifiedPackageName.compareTo(o
                 .getFullyQualifiedPackageName());
     }
 
     @Override
-    public String toString() {
-        return fullyQualifiedPackageName;
+    public boolean equals(final Object obj) {
+        return (obj instanceof JavaPackage)
+                && (compareTo((JavaPackage) obj) == 0);
     }
 
     /**
@@ -80,6 +62,14 @@ public class JavaPackage implements Comparable<JavaPackage> {
     }
 
     /**
+     * @return the fully qualified package name (complies with the rules
+     *         specified in the constructor)
+     */
+    public String getFullyQualifiedPackageName() {
+        return fullyQualifiedPackageName;
+    }
+
+    /**
      * Returns the last element of the fully-qualified package name
      * 
      * @return a non-blank element
@@ -87,6 +77,11 @@ public class JavaPackage implements Comparable<JavaPackage> {
     public String getLastElement() {
         final List<String> elements = getElements();
         return elements.get(elements.size() - 1);
+    }
+
+    @Override
+    public int hashCode() {
+        return fullyQualifiedPackageName.hashCode();
     }
 
     /**
@@ -104,8 +99,13 @@ public class JavaPackage implements Comparable<JavaPackage> {
      * @return <code>false</code> if a <code>null</code> package is given
      */
     public boolean isWithin(final JavaPackage otherPackage) {
-        return otherPackage != null
+        return (otherPackage != null)
                 && fullyQualifiedPackageName.startsWith(otherPackage
                         .getFullyQualifiedPackageName());
+    }
+
+    @Override
+    public String toString() {
+        return fullyQualifiedPackageName;
     }
 }

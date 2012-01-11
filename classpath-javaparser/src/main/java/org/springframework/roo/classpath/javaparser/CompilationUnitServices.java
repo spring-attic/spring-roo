@@ -19,14 +19,14 @@ import org.springframework.roo.model.JavaType;
  */
 public interface CompilationUnitServices {
 
-    List<ImportDeclaration> getImports();
-
     JavaPackage getCompilationUnitPackage();
 
     /**
      * @return the enclosing type (never null)
      */
     JavaType getEnclosingTypeName();
+
+    List<ImportDeclaration> getImports();
 
     /**
      * @return the names of each inner type and the enclosing type (never null

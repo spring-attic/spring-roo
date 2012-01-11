@@ -27,14 +27,6 @@ package org.springframework.roo.support.style;
 public interface ToStringStyler {
 
     /**
-     * Style a <code>toString()</code>'ed object before its fields are styled.
-     * 
-     * @param buffer the buffer to print to
-     * @param obj the object to style; can be <code>null</code>
-     */
-    void styleStart(StringBuilder buffer, Object obj);
-
-    /**
      * Style a <code>toString()</code>'ed object after it's fields are styled.
      * 
      * @param buffer the buffer to print to
@@ -52,17 +44,25 @@ public interface ToStringStyler {
     void styleField(StringBuilder buffer, String fieldName, Object value);
 
     /**
+     * Style the field separator.
+     * 
+     * @param buffer buffer to print to
+     */
+    void styleFieldSeparator(StringBuilder buffer);
+
+    /**
+     * Style a <code>toString()</code>'ed object before its fields are styled.
+     * 
+     * @param buffer the buffer to print to
+     * @param obj the object to style; can be <code>null</code>
+     */
+    void styleStart(StringBuilder buffer, Object obj);
+
+    /**
      * Style the given value.
      * 
      * @param buffer the buffer to print to
      * @param value the field value; can be <code>null</code>
      */
     void styleValue(StringBuilder buffer, Object value);
-
-    /**
-     * Style the field separator.
-     * 
-     * @param buffer buffer to print to
-     */
-    void styleFieldSeparator(StringBuilder buffer);
 }

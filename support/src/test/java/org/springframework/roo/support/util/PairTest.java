@@ -24,15 +24,20 @@ public class PairTest {
     }
 
     @Test
+    public void testEqualKeyAndValueAreEqual() {
+        assertEquals(new Pair<Integer, String>(1, "a"),
+                new Pair<Integer, String>(1, "a"));
+    }
+
+    @Test
     public void testInstanceEqualsItself() {
         final Pair<Integer, String> pair = new Pair<Integer, String>(1, "a");
         assertEquals(pair, pair);
     }
 
     @Test
-    public void testEqualKeyAndValueAreEqual() {
-        assertEquals(new Pair<Integer, String>(1, "a"),
-                new Pair<Integer, String>(1, "a"));
+    public void testOtherClassIsNotAPair() {
+        assertFalse(new Pair<Integer, String>(1, "a").equals("foo"));
     }
 
     @Test
@@ -45,10 +50,5 @@ public class PairTest {
     public void testUnequalValueIsNotEqual() {
         assertFalse(new Pair<Integer, String>(1, "a")
                 .equals(new Pair<Integer, String>(1, "b")));
-    }
-
-    @Test
-    public void testOtherClassIsNotAPair() {
-        assertFalse(new Pair<Integer, String>(1, "a").equals("foo"));
     }
 }

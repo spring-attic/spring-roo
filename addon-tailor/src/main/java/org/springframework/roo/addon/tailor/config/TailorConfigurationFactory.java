@@ -14,5 +14,4 @@ public interface TailorConfigurationFactory {
      * @return - tailor configuration
      */
     TailorConfiguration createTailorConfiguration();
-
 }

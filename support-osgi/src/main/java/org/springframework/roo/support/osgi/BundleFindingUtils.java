@@ -27,22 +27,22 @@ public abstract class BundleFindingUtils {
         Assert.notNull(context, "Bundle context required to perform the search");
         Assert.hasText(typeNameInExternalForm,
                 "Resource name to locate is required");
-        String resourceName = "/" + typeNameInExternalForm.replace('.', '/')
-                + ".class";
+        final String resourceName = "/"
+                + typeNameInExternalForm.replace('.', '/') + ".class";
 
-        Bundle[] bundles = context.getBundles();
+        final Bundle[] bundles = context.getBundles();
         if (bundles == null) {
             return null;
         }
 
-        for (Bundle bundle : bundles) {
+        for (final Bundle bundle : bundles) {
             try {
-                URL url = bundle.getEntry(resourceName);
+                final URL url = bundle.getEntry(resourceName);
                 if (url != null) {
                     return bundle.getSymbolicName();
                 }
             }
-            catch (RuntimeException e) {
+            catch (final RuntimeException e) {
                 return null;
             }
         }
@@ -63,22 +63,22 @@ public abstract class BundleFindingUtils {
         Assert.notNull(context, "Bundle context required to perform the search");
         Assert.hasText(typeNameInExternalForm,
                 "Resource name to locate is required");
-        String resourceName = "/" + typeNameInExternalForm.replace('.', '/')
-                + ".class";
+        final String resourceName = "/"
+                + typeNameInExternalForm.replace('.', '/') + ".class";
 
-        Bundle[] bundles = context.getBundles();
+        final Bundle[] bundles = context.getBundles();
         if (bundles == null) {
             return null;
         }
 
-        for (Bundle bundle : bundles) {
+        for (final Bundle bundle : bundles) {
             try {
-                URL url = bundle.getEntry(resourceName);
+                final URL url = bundle.getEntry(resourceName);
                 if (url != null) {
                     return bundle.loadClass(typeNameInExternalForm);
                 }
             }
-            catch (Throwable e) {
+            catch (final Throwable e) {
                 return null;
             }
         }

@@ -13,19 +13,14 @@ import org.springframework.roo.shell.MethodTarget;
 @Component
 public class StringListConverter implements Converter<List<String>> {
 
-    public boolean supports(final Class<?> requiredType,
-            final String optionContext) {
-        return List.class.isAssignableFrom(requiredType);
-    }
-
     public List<String> convertFromText(final String value,
             final Class<?> requiredType, final String optionContext) {
         if (value == null) {
             return null;
         }
-        String[] tokens = value.split(",");
-        List<String> tokenList = new ArrayList<String>();
-        for (String token : tokens) {
+        final String[] tokens = value.split(",");
+        final List<String> tokenList = new ArrayList<String>();
+        for (final String token : tokens) {
             tokenList.add(token.trim());
         }
         return tokenList;
@@ -35,5 +30,10 @@ public class StringListConverter implements Converter<List<String>> {
             final Class<?> requiredType, final String existingData,
             final String optionContext, final MethodTarget target) {
         return false;
+    }
+
+    public boolean supports(final Class<?> requiredType,
+            final String optionContext) {
+        return List.class.isAssignableFrom(requiredType);
     }
 }

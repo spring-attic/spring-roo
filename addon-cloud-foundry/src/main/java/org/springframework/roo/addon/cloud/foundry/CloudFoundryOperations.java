@@ -10,63 +10,27 @@ import java.util.List;
  */
 public interface CloudFoundryOperations {
 
-    void info();
-
-    void register(String email, String password);
-
-    void login(String email, String password, String cloudControllerUrl);
-
-    void services();
-
-    void createService(String service, String name, String bind);
-
-    void deleteService(String service);
+    void apps();
 
     void bindService(String service, String appName);
 
-    void unbindService(String service, String appName);
-
-    void apps();
-
-    void push(String appName, Integer instances, Integer memory, String path,
-            List<String> urls);
-
-    void start(String appName);
-
-    void stop(String appName);
-
-    void restart(String appName);
-
-    void delete(String appName);
-
-    void update(String appName);
-
-    void instances(String appName, String number);
-
-    void mem(String appName, Integer memSize);
+    void clearStoredLoginDetails();
 
     void crashes(String appName);
 
     void crashLogs(String appName, String instance);
 
-    void logs(String appName, String instance);
+    void createService(String service, String name, String bind);
+
+    void delete(String appName);
+
+    void deleteService(String service);
 
     void files(String appName, String path, String instance);
 
-    void stats(String appName);
+    void info();
 
-    void map(String appName, String url);
-
-    void unMap(String appName, String url);
-
-    void renameApp(String appName, String newAppName);
-
-    void clearStoredLoginDetails();
-
-    /**
-     * Initial setup of Cloud Foundry in target project.
-     */
-    void setup();
+    void instances(String appName, String number);
 
     /**
      * Check if Cloud Foundry commands are available in Shell. Depends on the
@@ -82,4 +46,40 @@ public interface CloudFoundryOperations {
      * @return availability
      */
     boolean isSetupCommandAvailable();
+
+    void login(String email, String password, String cloudControllerUrl);
+
+    void logs(String appName, String instance);
+
+    void map(String appName, String url);
+
+    void mem(String appName, Integer memSize);
+
+    void push(String appName, Integer instances, Integer memory, String path,
+            List<String> urls);
+
+    void register(String email, String password);
+
+    void renameApp(String appName, String newAppName);
+
+    void restart(String appName);
+
+    void services();
+
+    /**
+     * Initial setup of Cloud Foundry in target project.
+     */
+    void setup();
+
+    void start(String appName);
+
+    void stats(String appName);
+
+    void stop(String appName);
+
+    void unbindService(String service, String appName);
+
+    void unMap(String appName, String url);
+
+    void update(String appName);
 }

@@ -10,8 +10,6 @@ import org.springframework.roo.model.JavaType;
  */
 public interface SeleniumOperations {
 
-    boolean isSeleniumInstallationPossible();
-
     /**
      * Creates a new Selenium testcase
      * 
@@ -20,4 +18,6 @@ public interface SeleniumOperations {
      * @param serverURL the URL of the Selenium server (optional)
      */
     void generateTest(JavaType controller, String name, String serverURL);
+
+    boolean isSeleniumInstallationPossible();
 }

@@ -19,14 +19,13 @@ import org.springframework.roo.uaa.PublicFeatureResolver;
 @Service
 public class AddOnIndexPublicFeatureResolver implements PublicFeatureResolver {
 
-    // Fields
     @Reference AddOnRooBotOperations rooBotOperations;
 
     public boolean isPublic(final String bundleSymbolicNameOrTypeName) {
         if (bundleSymbolicNameOrTypeName.startsWith("org.springframework.roo")) {
             return true;
         }
-        for (String bsn : rooBotOperations.getAddOnCache(false).keySet()) {
+        for (final String bsn : rooBotOperations.getAddOnCache(false).keySet()) {
             if (bundleSymbolicNameOrTypeName.startsWith(bsn)) {
                 return true;
             }

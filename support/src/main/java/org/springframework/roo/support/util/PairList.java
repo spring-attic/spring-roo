@@ -19,15 +19,10 @@ public class PairList<K, V> extends ArrayList<Pair<K, V>> {
     private static final long serialVersionUID = 5990417235907246300L;
 
     /**
-     * Returns the given array of pairs as a modifiable list
-     * 
-     * @param <K> the type of key
-     * @param <V> the type of value
-     * @param pairs the pairs to put in a list
-     * @return a non-<code>null</code> list
+     * Constructor for an empty list of pairs
      */
-    public PairList(final Pair<K, V>... pairs) {
-        addAll(Arrays.asList(pairs));
+    public PairList() {
+        // Empty
     }
 
     /**
@@ -38,7 +33,7 @@ public class PairList<K, V> extends ArrayList<Pair<K, V>> {
      *            must be non-null and of the same size as the keys)
      */
     public PairList(final List<? extends K> keys, final List<? extends V> values) {
-        Assert.isTrue(!(keys == null ^ values == null),
+        Assert.isTrue(!((keys == null) ^ (values == null)),
                 "Parameter types and names must either both be null or both be not null");
         if (keys == null) {
             Assert.isTrue(values == null,
@@ -58,10 +53,26 @@ public class PairList<K, V> extends ArrayList<Pair<K, V>> {
     }
 
     /**
-     * Constructor for an empty list of pairs
+     * Returns the given array of pairs as a modifiable list
+     * 
+     * @param <K> the type of key
+     * @param <V> the type of value
+     * @param pairs the pairs to put in a list
+     * @return a non-<code>null</code> list
      */
-    public PairList() {
-        // Empty
+    public PairList(final Pair<K, V>... pairs) {
+        addAll(Arrays.asList(pairs));
+    }
+
+    /**
+     * Adds a new pair to this list with the given key and value
+     * 
+     * @param key the key to add; can be <code>null</code>
+     * @param value the value to add; can be <code>null</code>
+     * @return true (as specified by Collection.add(E))
+     */
+    public boolean add(final K key, final V value) {
+        return add(new Pair<K, V>(key, value));
     }
 
     /**
@@ -88,17 +99,6 @@ public class PairList<K, V> extends ArrayList<Pair<K, V>> {
             values.add(pair.getValue());
         }
         return values;
-    }
-
-    /**
-     * Adds a new pair to this list with the given key and value
-     * 
-     * @param key the key to add; can be <code>null</code>
-     * @param value the value to add; can be <code>null</code>
-     * @return true (as specified by Collection.add(E))
-     */
-    public boolean add(final K key, final V value) {
-        return add(new Pair<K, V>(key, value));
     }
 
     @SuppressWarnings("unchecked")

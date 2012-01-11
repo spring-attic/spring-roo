@@ -43,7 +43,6 @@ import org.springframework.roo.support.util.Assert;
 @Service
 public class ClasspathOperationsImpl implements ClasspathOperations {
 
-    // Fields
     @Reference MetadataService metadataService;
     @Reference PathResolver pathResolver;
     @Reference ProjectOperations projectOperations;
@@ -55,12 +54,93 @@ public class ClasspathOperationsImpl implements ClasspathOperations {
         staticFieldConverter.add(InheritanceType.class);
     }
 
+    public void createClass(final JavaType name, final boolean rooAnnotations,
+            final LogicalPath path, final JavaType superclass,
+            final boolean createAbstract, final boolean permitReservedWords) {
+        if (!permitReservedWords) {
+            ReservedWords.verifyReservedWordsNotPresent(name);
+        }
+
+        final String declaredByMetadataId = PhysicalTypeIdentifier
+                .createIdentifier(name, path);
+
+        int modifier = Modifier.PUBLIC;
+        if (createAbstract) {
+            modifier |= Modifier.ABSTRACT;
+        }
+
+        final ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(
+                declaredByMetadataId, modifier, name,
+                PhysicalTypeCategory.CLASS);
+
+        if (!superclass.equals(OBJECT)) {
+            final ClassOrInterfaceTypeDetails superclassClassOrInterfaceTypeDetails = typeLocationService
+                    .getTypeDetails(superclass);
+            if (superclassClassOrInterfaceTypeDetails != null) {
+                cidBuilder
+                        .setSuperclass(new ClassOrInterfaceTypeDetailsBuilder(
+                                superclassClassOrInterfaceTypeDetails));
+            }
+        }
+
+        final List<JavaType> extendsTypes = new ArrayList<JavaType>();
+        extendsTypes.add(superclass);
+        cidBuilder.setExtendsTypes(extendsTypes);
+
+        if (rooAnnotations) {
+            final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+            annotations.add(new AnnotationMetadataBuilder(ROO_JAVA_BEAN));
+            annotations.add(new AnnotationMetadataBuilder(ROO_TO_STRING));
+            annotations.add(new AnnotationMetadataBuilder(ROO_EQUALS));
+            annotations.add(new AnnotationMetadataBuilder(ROO_SERIALIZABLE));
+            cidBuilder.setAnnotations(annotations);
+        }
+        typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
+    }
+
+    public void createEnum(final JavaType name, final LogicalPath path,
+            final boolean permitReservedWords) {
+        if (!permitReservedWords) {
+            ReservedWords.verifyReservedWordsNotPresent(name);
+        }
+        final String physicalTypeId = PhysicalTypeIdentifier.createIdentifier(
+                name, path);
+        final ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(
+                physicalTypeId, Modifier.PUBLIC, name,
+                PhysicalTypeCategory.ENUMERATION);
+        typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
+    }
+
+    public void createInterface(final JavaType name, final LogicalPath path,
+            final boolean permitReservedWords) {
+        if (!permitReservedWords) {
+            ReservedWords.verifyReservedWordsNotPresent(name);
+        }
+
+        final String declaredByMetadataId = PhysicalTypeIdentifier
+                .createIdentifier(name, path);
+        final ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(
+                declaredByMetadataId, Modifier.PUBLIC, name,
+                PhysicalTypeCategory.INTERFACE);
+        typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
+    }
+
     protected void deactivate(final ComponentContext context) {
         staticFieldConverter.remove(InheritanceType.class);
     }
 
-    public boolean isProjectAvailable() {
-        return projectOperations.isFocusedProjectAvailable();
+    public void enumConstant(final JavaType name,
+            final JavaSymbolName fieldName, final boolean permitReservedWords) {
+        if (!permitReservedWords) {
+            // No need to check the "name" as if the class exists it is assumed
+            // it is a legal name
+            ReservedWords.verifyReservedWordsNotPresent(fieldName);
+        }
+
+        final String declaredByMetadataId = PhysicalTypeIdentifier
+                .createIdentifier(name,
+                        pathResolver.getFocusedPath(Path.SRC_MAIN_JAVA));
+        typeManagementService.addEnumConstant(declaredByMetadataId, fieldName);
     }
 
     public void focus(final JavaType type) {
@@ -79,87 +159,7 @@ public class ClasspathOperationsImpl implements ClasspathOperations {
                         + " does not exist");
     }
 
-    public void createClass(final JavaType name, final boolean rooAnnotations,
-            final LogicalPath path, final JavaType superclass,
-            final boolean createAbstract, final boolean permitReservedWords) {
-        if (!permitReservedWords) {
-            ReservedWords.verifyReservedWordsNotPresent(name);
-        }
-
-        String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(
-                name, path);
-
-        int modifier = Modifier.PUBLIC;
-        if (createAbstract) {
-            modifier |= Modifier.ABSTRACT;
-        }
-
-        ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(
-                declaredByMetadataId, modifier, name,
-                PhysicalTypeCategory.CLASS);
-
-        if (!superclass.equals(OBJECT)) {
-            ClassOrInterfaceTypeDetails superclassClassOrInterfaceTypeDetails = typeLocationService
-                    .getTypeDetails(superclass);
-            if (superclassClassOrInterfaceTypeDetails != null) {
-                cidBuilder
-                        .setSuperclass(new ClassOrInterfaceTypeDetailsBuilder(
-                                superclassClassOrInterfaceTypeDetails));
-            }
-        }
-
-        List<JavaType> extendsTypes = new ArrayList<JavaType>();
-        extendsTypes.add(superclass);
-        cidBuilder.setExtendsTypes(extendsTypes);
-
-        if (rooAnnotations) {
-            final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
-            annotations.add(new AnnotationMetadataBuilder(ROO_JAVA_BEAN));
-            annotations.add(new AnnotationMetadataBuilder(ROO_TO_STRING));
-            annotations.add(new AnnotationMetadataBuilder(ROO_EQUALS));
-            annotations.add(new AnnotationMetadataBuilder(ROO_SERIALIZABLE));
-            cidBuilder.setAnnotations(annotations);
-        }
-        typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
-    }
-
-    public void createInterface(final JavaType name, final LogicalPath path,
-            final boolean permitReservedWords) {
-        if (!permitReservedWords) {
-            ReservedWords.verifyReservedWordsNotPresent(name);
-        }
-
-        String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(
-                name, path);
-        ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(
-                declaredByMetadataId, Modifier.PUBLIC, name,
-                PhysicalTypeCategory.INTERFACE);
-        typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
-    }
-
-    public void createEnum(final JavaType name, final LogicalPath path,
-            final boolean permitReservedWords) {
-        if (!permitReservedWords) {
-            ReservedWords.verifyReservedWordsNotPresent(name);
-        }
-        final String physicalTypeId = PhysicalTypeIdentifier.createIdentifier(
-                name, path);
-        ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(
-                physicalTypeId, Modifier.PUBLIC, name,
-                PhysicalTypeCategory.ENUMERATION);
-        typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
-    }
-
-    public void enumConstant(final JavaType name,
-            final JavaSymbolName fieldName, final boolean permitReservedWords) {
-        if (!permitReservedWords) {
-            // No need to check the "name" as if the class exists it is assumed
-            // it is a legal name
-            ReservedWords.verifyReservedWordsNotPresent(fieldName);
-        }
-
-        String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(
-                name, pathResolver.getFocusedPath(Path.SRC_MAIN_JAVA));
-        typeManagementService.addEnumConstant(declaredByMetadataId, fieldName);
+    public boolean isProjectAvailable() {
+        return projectOperations.isFocusedProjectAvailable();
     }
 }

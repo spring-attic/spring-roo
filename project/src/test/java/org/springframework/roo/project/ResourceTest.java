@@ -13,12 +13,10 @@ import org.w3c.dom.Element;
  */
 public class ResourceTest extends XmlTestCase {
 
-    // Constants
-    private static final boolean FILTERING = true;
     private static final String DIRECTORY = "anything";
+    private static final boolean FILTERING = true;
     private static final String INCLUDE_1 = "include1";
     private static final String INCLUDE_2 = "include2";
-
     private static final String EXPECTED_XML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
             + "<resource>\n"
             + "    <directory>"

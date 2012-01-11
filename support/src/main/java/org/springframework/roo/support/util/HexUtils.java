@@ -14,16 +14,12 @@ package org.springframework.roo.support.util;
  */
 public abstract class HexUtils {
 
-    public static String toHex(final byte[] bytes) {
-        return new String(encode(bytes));
-    }
-
     private static final char[] HEX = { '0', '1', '2', '3', '4', '5', '6', '7',
             '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
 
     public static char[] encode(final byte[] bytes) {
         final int nBytes = bytes.length;
-        char[] result = new char[2 * nBytes];
+        final char[] result = new char[2 * nBytes];
         int j = 0;
 
         for (int i = 0; i < nBytes; i++) {
@@ -35,5 +31,9 @@ public abstract class HexUtils {
         }
 
         return result;
+    }
+
+    public static String toHex(final byte[] bytes) {
+        return new String(encode(bytes));
     }
 }

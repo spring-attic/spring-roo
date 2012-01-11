@@ -27,42 +27,13 @@ import org.springframework.uaa.client.UaaService;
 public class JdkUrlInputStreamService extends AbstractFlashingObject implements
         UrlInputStreamService {
 
-    // Fields
-    @Reference private UaaService uaaService;
-    @Reference private ProxyService proxyService;
-
-    public InputStream openConnection(final URL httpUrl) throws IOException {
-        Assert.notNull(httpUrl, "HTTP URL is required");
-        Assert.isTrue(httpUrl.getProtocol().equals("http"),
-                "Only HTTP is supported (not " + httpUrl + ")");
-
-        // Fail if we're banned from accessing this domain
-        Assert.isNull(getUrlCannotBeOpenedMessage(httpUrl),
-                UrlInputStreamUtils.SETUP_UAA_REQUIRED);
-        HttpURLConnection connection = proxyService
-                .prepareHttpUrlConnection(httpUrl);
-        return new ProgressIndicatingInputStream(connection);
-    }
-
-    public String getUrlCannotBeOpenedMessage(final URL httpUrl) {
-        if (uaaService.isCommunicationRestricted(httpUrl)) {
-            if (!uaaService.isUaaTermsOfUseAccepted()) {
-                return UrlInputStreamUtils.SETUP_UAA_REQUIRED;
-            }
-        }
-        // No reason it shouldn't work
-        return null;
-    }
-
     private class ProgressIndicatingInputStream extends InputStream {
-
-        // Fields
         private final InputStream delegate;
-        private final float totalSize;
-        private float readSoFar;
-        private int lastPercentageIndicated = -1;
         private long lastNotified;
+        private int lastPercentageIndicated = -1;
+        private float readSoFar;
         private String text;
+        private final float totalSize;
 
         /**
          * Constructor
@@ -73,20 +44,26 @@ public class JdkUrlInputStreamService extends AbstractFlashingObject implements
         public ProgressIndicatingInputStream(final HttpURLConnection connection)
                 throws IOException {
             Assert.notNull(connection, "URL Connection required");
-            this.totalSize = connection.getContentLength();
-            this.delegate = connection.getInputStream();
-            this.text = connection.getURL().getPath();
-            if ("".equals(this.text)) {
+            totalSize = connection.getContentLength();
+            delegate = connection.getInputStream();
+            text = connection.getURL().getPath();
+            if ("".equals(text)) {
                 // Fall back to the host name
-                this.text = connection.getURL().getHost();
+                text = connection.getURL().getHost();
             }
             else {
                 // We only want the filename
-                int lastSlash = this.text.lastIndexOf("/");
+                final int lastSlash = text.lastIndexOf("/");
                 if (lastSlash > -1) {
-                    this.text = this.text.substring(lastSlash + 1);
+                    text = text.substring(lastSlash + 1);
                 }
             }
+        }
+
+        @Override
+        public void close() throws IOException {
+            flash(Level.FINE, "", MY_SLOT);
+            delegate.close();
         }
 
         @Override
@@ -94,7 +71,7 @@ public class JdkUrlInputStreamService extends AbstractFlashingObject implements
             readSoFar++;
             if (totalSize > 0) {
                 // Total size is known
-                int percentageDownloaded = Math
+                final int percentageDownloaded = Math
                         .round((readSoFar / totalSize) * 100);
                 if (System.currentTimeMillis() > (lastNotified + 1000)) {
                     if (lastPercentageIndicated != percentageDownloaded) {
@@ -115,7 +92,7 @@ public class JdkUrlInputStreamService extends AbstractFlashingObject implements
                 }
             }
 
-            int result = delegate.read();
+            final int result = delegate.read();
             if (result == -1) {
                 if (totalSize > 0) {
                     flash(Level.FINE, "Downloaded 100% of " + text, MY_SLOT);
@@ -130,11 +107,31 @@ public class JdkUrlInputStreamService extends AbstractFlashingObject implements
 
             return result;
         }
+    }
 
-        @Override
-        public void close() throws IOException {
-            flash(Level.FINE, "", MY_SLOT);
-            delegate.close();
+    @Reference private ProxyService proxyService;
+    @Reference private UaaService uaaService;
+
+    public String getUrlCannotBeOpenedMessage(final URL httpUrl) {
+        if (uaaService.isCommunicationRestricted(httpUrl)) {
+            if (!uaaService.isUaaTermsOfUseAccepted()) {
+                return UrlInputStreamUtils.SETUP_UAA_REQUIRED;
+            }
         }
+        // No reason it shouldn't work
+        return null;
+    }
+
+    public InputStream openConnection(final URL httpUrl) throws IOException {
+        Assert.notNull(httpUrl, "HTTP URL is required");
+        Assert.isTrue(httpUrl.getProtocol().equals("http"),
+                "Only HTTP is supported (not " + httpUrl + ")");
+
+        // Fail if we're banned from accessing this domain
+        Assert.isNull(getUrlCannotBeOpenedMessage(httpUrl),
+                UrlInputStreamUtils.SETUP_UAA_REQUIRED);
+        final HttpURLConnection connection = proxyService
+                .prepareHttpUrlConnection(httpUrl);
+        return new ProgressIndicatingInputStream(connection);
     }
 }

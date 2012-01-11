@@ -22,9 +22,9 @@ import org.springframework.roo.support.util.StringUtils;
  */
 public class RepositoryMongoLayerMethodTest {
 
+    @Mock private JavaType mockIdType;
     // Fixture
     @Mock private JavaType mockTargetEntity;
-    @Mock private JavaType mockIdType;
 
     @Before
     public void setUp() {

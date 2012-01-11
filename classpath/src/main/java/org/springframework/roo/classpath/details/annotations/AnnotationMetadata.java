@@ -20,12 +20,6 @@ public interface AnnotationMetadata {
     JavaType getAnnotationType();
 
     /**
-     * @return the attribute names, preferably in the order they are declared in
-     *         the annotation (never null, but may be empty)
-     */
-    List<JavaSymbolName> getAttributeNames();
-
-    /**
      * Acquires an attribute value for the requested name.
      * 
      * @param attributeName
@@ -41,4 +35,10 @@ public interface AnnotationMetadata {
      * @since 1.2.0
      */
     <T> AnnotationAttributeValue<T> getAttribute(String attributeName);
+
+    /**
+     * @return the attribute names, preferably in the order they are declared in
+     *         the annotation (never null, but may be empty)
+     */
+    List<JavaSymbolName> getAttributeNames();
 }

@@ -14,30 +14,6 @@ public class IndexColumn {
         this.name = name;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(final String name) {
-        this.name = name;
-    }
-
-    public int getSize() {
-        return size;
-    }
-
-    public void setSize(final int size) {
-        this.size = size;
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((name == null) ? 0 : name.hashCode());
-        return result;
-    }
-
     @Override
     public boolean equals(final Object obj) {
         if (this == obj) {
@@ -49,7 +25,7 @@ public class IndexColumn {
         if (!(obj instanceof IndexColumn)) {
             return false;
         }
-        IndexColumn other = (IndexColumn) obj;
+        final IndexColumn other = (IndexColumn) obj;
         if (name == null) {
             if (other.name != null) {
                 return false;
@@ -59,6 +35,30 @@ public class IndexColumn {
             return false;
         }
         return true;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public int getSize() {
+        return size;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = (prime * result) + ((name == null) ? 0 : name.hashCode());
+        return result;
+    }
+
+    public void setName(final String name) {
+        this.name = name;
+    }
+
+    public void setSize(final int size) {
+        this.size = size;
     }
 
     @Override

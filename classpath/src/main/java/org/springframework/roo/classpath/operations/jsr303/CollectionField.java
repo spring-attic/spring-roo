@@ -14,11 +14,8 @@ import org.springframework.roo.support.util.Assert;
 
 public abstract class CollectionField extends FieldDetails {
 
-    /**
-     * Whether the JSR 303 @Size annotation will be added; provides the "min"
-     * attribute (defaults to 0)
-     */
-    private Integer sizeMin;
+    /** The generic type that will be used within the collection */
+    private JavaType genericParameterTypeName;
 
     /**
      * Whether the JSR 303 @Size annotation will be added; provides the "max"
@@ -26,8 +23,11 @@ public abstract class CollectionField extends FieldDetails {
      */
     private Integer sizeMax;
 
-    /** The generic type that will be used within the collection */
-    private JavaType genericParameterTypeName;
+    /**
+     * Whether the JSR 303 @Size annotation will be added; provides the "min"
+     * attribute (defaults to 0)
+     */
+    private Integer sizeMin;
 
     public CollectionField(final String physicalTypeIdentifier,
             final JavaType fieldType, final JavaSymbolName fieldName,
@@ -42,8 +42,8 @@ public abstract class CollectionField extends FieldDetails {
     public void decorateAnnotationsList(
             final List<AnnotationMetadataBuilder> annotations) {
         super.decorateAnnotationsList(annotations);
-        if (sizeMin != null || sizeMax != null) {
-            List<AnnotationAttributeValue<?>> attrs = new ArrayList<AnnotationAttributeValue<?>>();
+        if ((sizeMin != null) || (sizeMax != null)) {
+            final List<AnnotationAttributeValue<?>> attrs = new ArrayList<AnnotationAttributeValue<?>>();
             if (sizeMin != null) {
                 attrs.add(new IntegerAttributeValue(new JavaSymbolName("min"),
                         sizeMin));
@@ -56,30 +56,30 @@ public abstract class CollectionField extends FieldDetails {
         }
     }
 
+    public JavaType getGenericParameterTypeName() {
+        return genericParameterTypeName;
+    }
+
     public abstract JavaType getInitializer();
+
+    public Integer getSizeMax() {
+        return sizeMax;
+    }
 
     public Integer getSizeMin() {
         return sizeMin;
     }
 
-    public void setSizeMin(final Integer sizeMin) {
-        this.sizeMin = sizeMin;
-    }
-
-    public Integer getSizeMax() {
-        return sizeMax;
+    public void setGenericParameterTypeName(
+            final JavaType genericParameterTypeName) {
+        this.genericParameterTypeName = genericParameterTypeName;
     }
 
     public void setSizeMax(final Integer sizeMax) {
         this.sizeMax = sizeMax;
     }
 
-    public JavaType getGenericParameterTypeName() {
-        return genericParameterTypeName;
-    }
-
-    public void setGenericParameterTypeName(
-            final JavaType genericParameterTypeName) {
-        this.genericParameterTypeName = genericParameterTypeName;
+    public void setSizeMin(final Integer sizeMin) {
+        this.sizeMin = sizeMin;
     }
 }

@@ -23,13 +23,8 @@ import org.springframework.roo.support.util.FileCopyUtils;
  */
 public class TemplateResourceLoader implements TemplateLoader {
 
-    // Constants
-    private static final String TEMPLATE_DIR = "org/springframework/roo/addon/gwt/scaffold/templates/";
     private static final Map<String, Template> cache = new HashMap<String, Template>();
-
-    // Fields
-    protected final String baseDir;
-    protected final TemplateParser parser;
+    private static final String TEMPLATE_DIR = "org/springframework/roo/addon/gwt/scaffold/templates/";
 
     /**
      * Creates a TemplateLoader for CTemplate language using the default
@@ -54,6 +49,10 @@ public class TemplateResourceLoader implements TemplateLoader {
         return new TemplateResourceLoader(base_path, parser);
     }
 
+    protected final String baseDir;
+
+    protected final TemplateParser parser;
+
     public TemplateResourceLoader(final String baseDir) {
         this(baseDir, null);
     }
@@ -62,10 +61,6 @@ public class TemplateResourceLoader implements TemplateLoader {
             final TemplateParser parser) {
         this.baseDir = baseDir;
         this.parser = parser;
-    }
-
-    public String getTemplateDirectory() {
-        return this.baseDir;
     }
 
     public Template getTemplate(final String resource) throws TemplateException {
@@ -78,12 +73,12 @@ public class TemplateResourceLoader implements TemplateLoader {
             resource += ".xtm";
         }
 
-        String templatePath = baseDir + resource;
+        final String templatePath = baseDir + resource;
         if (cache.containsKey(templatePath)) {
             return cache.get(templatePath);
         }
 
-        InputStream is = getClass().getClassLoader().getResourceAsStream(
+        final InputStream is = getClass().getClassLoader().getResourceAsStream(
                 templatePath);
         Assert.notNull(is, "template path required");
         String contents;
@@ -91,17 +86,21 @@ public class TemplateResourceLoader implements TemplateLoader {
             contents = FileCopyUtils.copyToString(new InputStreamReader(
                     new BufferedInputStream(is)));
         }
-        catch (IOException e) {
+        catch (final IOException e) {
             throw new IllegalStateException(e);
         }
 
-        Template template = parser == null ? new Template(contents, context)
-                : new Template(parser, contents, context);
+        final Template template = parser == null ? new Template(contents,
+                context) : new Template(parser, contents, context);
 
         synchronized (cache) {
             cache.put(templatePath, template);
         }
 
         return template;
+    }
+
+    public String getTemplateDirectory() {
+        return baseDir;
     }
 }

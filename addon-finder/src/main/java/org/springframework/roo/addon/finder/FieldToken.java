@@ -13,7 +13,6 @@ import org.springframework.roo.support.util.Assert;
  */
 public class FieldToken implements Token, Comparable<FieldToken> {
 
-    // Fields
     private final FieldMetadata field;
     private JavaSymbolName fieldName;
 
@@ -25,27 +24,27 @@ public class FieldToken implements Token, Comparable<FieldToken> {
     public FieldToken(final FieldMetadata field) {
         Assert.notNull(field, "FieldMetadata required");
         this.field = field;
-        this.fieldName = field.getFieldName();
+        fieldName = field.getFieldName();
     }
 
-    public String getValue() {
-        return field.getFieldName().getSymbolNameCapitalisedFirstLetter();
-    }
-
-    public JavaSymbolName getFieldName() {
-        return fieldName;
-    }
-
-    public void setFieldName(final JavaSymbolName fieldName) {
-        this.fieldName = fieldName;
+    public int compareTo(final FieldToken o) {
+        final int l = o.getValue().length() - getValue().length();
+        return l == 0 ? -1 : l;
     }
 
     public FieldMetadata getField() {
         return field;
     }
 
-    public int compareTo(final FieldToken o) {
-        int l = o.getValue().length() - this.getValue().length();
-        return l == 0 ? -1 : l;
+    public JavaSymbolName getFieldName() {
+        return fieldName;
+    }
+
+    public String getValue() {
+        return field.getFieldName().getSymbolNameCapitalisedFirstLetter();
+    }
+
+    public void setFieldName(final JavaSymbolName fieldName) {
+        this.fieldName = fieldName;
     }
 }

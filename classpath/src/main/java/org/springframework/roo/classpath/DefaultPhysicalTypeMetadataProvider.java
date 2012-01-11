@@ -46,17 +46,6 @@ import org.springframework.roo.support.util.StringUtils;
 public class DefaultPhysicalTypeMetadataProvider implements
         PhysicalTypeMetadataProvider, FileEventListener {
 
-    // Fields
-    @Reference private FileManager fileManager;
-    @Reference private MetadataDependencyRegistry metadataDependencyRegistry;
-    @Reference private MetadataService metadataService;
-    @Reference private ProjectOperations projectOperations;
-    @Reference private TypeLocationService typeLocationService;
-    @Reference private TypeParsingService typeParsingService;
-
-    // Mutex
-    private final Object lock = new Object();
-
     private final SortedSet<MemberDetailsDecorator> decorators = new TreeSet<MemberDetailsDecorator>(
             new Comparator<MemberDetailsDecorator>() {
                 public int compare(final MemberDetailsDecorator o1,
@@ -65,42 +54,21 @@ public class DefaultPhysicalTypeMetadataProvider implements
                             .compareTo(o2.getClass().getName());
                 }
             });
+    @Reference private FileManager fileManager;
+    // Mutex
+    private final Object lock = new Object();
+    @Reference private MetadataDependencyRegistry metadataDependencyRegistry;
+    @Reference private MetadataService metadataService;
+    @Reference private ProjectOperations projectOperations;
+
+    @Reference private TypeLocationService typeLocationService;
+
+    @Reference private TypeParsingService typeParsingService;
 
     protected void bindMemberHoldingDecorator(
             final MemberDetailsDecorator decorator) {
         synchronized (lock) {
             decorators.add(decorator);
-        }
-    }
-
-    protected void unbindMemberHoldingDecorator(
-            final MemberDetailsDecorator decorator) {
-        synchronized (lock) {
-            decorators.remove(decorator);
-        }
-    }
-
-    public String getProvidesType() {
-        return PhysicalTypeIdentifier.getMetadataIdentiferType();
-    }
-
-    public void onFileEvent(final FileEvent fileEvent) {
-        String fileIdentifier = fileEvent.getFileDetails().getCanonicalPath();
-
-        // Check to see if file is of interest
-        if (fileIdentifier.endsWith(".java")
-                && fileEvent.getOperation() != FileOperation.MONITORING_FINISH
-                && !fileIdentifier.endsWith("package-info.java")) {
-            // Figure out the PhysicalTypeIdentifier
-            String id = typeLocationService
-                    .getPhysicalTypeIdentifier(fileIdentifier);
-            if (id == null) {
-                return;
-            }
-            // Now we've worked out the id, we can publish the event in case
-            // others were interested
-            metadataService.evictAndGet(id);
-            metadataDependencyRegistry.notifyDownstream(id);
         }
     }
 
@@ -133,9 +101,9 @@ public class DefaultPhysicalTypeMetadataProvider implements
                 metadataIdentificationString, canonicalPath, typeDetails);
         final ClassOrInterfaceTypeDetails details = result
                 .getMemberHoldingTypeDetails();
-        if (details != null
-                && details.getPhysicalTypeCategory() == PhysicalTypeCategory.CLASS
-                && details.getExtendsTypes().size() == 1) {
+        if ((details != null)
+                && (details.getPhysicalTypeCategory() == PhysicalTypeCategory.CLASS)
+                && (details.getExtendsTypes().size() == 1)) {
             // This is a class, and it extends another class
             if (details.getSuperclass() != null) {
                 // We have a dependency on the superclass, and there is metadata
@@ -146,7 +114,7 @@ public class DefaultPhysicalTypeMetadataProvider implements
                 // JavaParserMetadataProvider doesn't implement
                 // MetadataNotificationListener, then notify everyone we've
                 // changed)
-                String superclassId = details.getSuperclass()
+                final String superclassId = details.getSuperclass()
                         .getDeclaredByMetadataId();
                 metadataDependencyRegistry.registerDependency(superclassId,
                         result.getId());
@@ -156,9 +124,9 @@ public class DefaultPhysicalTypeMetadataProvider implements
                 // available
                 // We're left with no choice but to register for every physical
                 // type change, in the hope we discover our parent someday
-                for (LogicalPath sourcePath : projectOperations
+                for (final LogicalPath sourcePath : projectOperations
                         .getPathResolver().getSourcePaths()) {
-                    String possibleSuperclass = PhysicalTypeIdentifier
+                    final String possibleSuperclass = PhysicalTypeIdentifier
                             .createIdentifier(details.getExtendsTypes().get(0),
                                     sourcePath);
                     metadataDependencyRegistry.registerDependency(
@@ -173,8 +141,8 @@ public class DefaultPhysicalTypeMetadataProvider implements
         boolean additionalLoopRequired = true;
         while (additionalLoopRequired) {
             additionalLoopRequired = false;
-            for (MemberDetailsDecorator decorator : decorators) {
-                MemberDetails newResult = decorator.decorateTypes(
+            for (final MemberDetailsDecorator decorator : decorators) {
+                final MemberDetails newResult = decorator.decorateTypes(
                         DefaultPhysicalTypeMetadataProvider.class.getName(),
                         memberDetails);
                 Assert.isTrue(newResult != null, "Decorator '"
@@ -190,5 +158,37 @@ public class DefaultPhysicalTypeMetadataProvider implements
         return new DefaultPhysicalTypeMetadata(metadataIdentificationString,
                 canonicalPath, (ClassOrInterfaceTypeDetails) memberDetails
                         .getDetails().get(0));
+    }
+
+    public String getProvidesType() {
+        return PhysicalTypeIdentifier.getMetadataIdentiferType();
+    }
+
+    public void onFileEvent(final FileEvent fileEvent) {
+        final String fileIdentifier = fileEvent.getFileDetails()
+                .getCanonicalPath();
+
+        // Check to see if file is of interest
+        if (fileIdentifier.endsWith(".java")
+                && (fileEvent.getOperation() != FileOperation.MONITORING_FINISH)
+                && !fileIdentifier.endsWith("package-info.java")) {
+            // Figure out the PhysicalTypeIdentifier
+            final String id = typeLocationService
+                    .getPhysicalTypeIdentifier(fileIdentifier);
+            if (id == null) {
+                return;
+            }
+            // Now we've worked out the id, we can publish the event in case
+            // others were interested
+            metadataService.evictAndGet(id);
+            metadataDependencyRegistry.notifyDownstream(id);
+        }
+    }
+
+    protected void unbindMemberHoldingDecorator(
+            final MemberDetailsDecorator decorator) {
+        synchronized (lock) {
+            decorators.remove(decorator);
+        }
     }
 }

@@ -17,6 +17,31 @@ import org.junit.Test;
 public class JavaTypeTest {
 
     @Test
+    public void testArrayTypeIsMultiValued() {
+        assertTrue(BYTE_ARRAY_PRIMITIVE.isMultiValued());
+    }
+
+    @Test
+    public void testBooleanObjectIsBoolean() {
+        assertTrue(BOOLEAN_OBJECT.isBoolean());
+    }
+
+    @Test
+    public void testBooleanPrimitiveIsBoolean() {
+        assertTrue(BOOLEAN_PRIMITIVE.isBoolean());
+    }
+
+    @Test
+    public void testCollectionTypesAreMultiValued() {
+        assertTrue(listOf(INT_OBJECT).isMultiValued());
+    }
+
+    @Test
+    public void testCoreTypeIsCoreType() {
+        assertTrue(STRING.isCoreType());
+    }
+
+    @Test
     public void testEnclosingTypeDetection() {
 
         // No enclosing types
@@ -55,37 +80,6 @@ public class JavaTypeTest {
     }
 
     @Test
-    public void testTypeInRootPackage() {
-        assertEquals("", new JavaType("MyRootClass").getPackage()
-                .getFullyQualifiedPackageName());
-    }
-
-    @Test
-    public void testSingleValuedTypeIsNotMultiValued() {
-        assertFalse(STRING.isMultiValued());
-    }
-
-    @Test
-    public void testArrayTypeIsMultiValued() {
-        assertTrue(BYTE_ARRAY_PRIMITIVE.isMultiValued());
-    }
-
-    @Test
-    public void testCollectionTypesAreMultiValued() {
-        assertTrue(listOf(INT_OBJECT).isMultiValued());
-    }
-
-    @Test
-    public void testCoreTypeIsCoreType() {
-        assertTrue(STRING.isCoreType());
-    }
-
-    @Test
-    public void testUserTypeIsNonCoreType() {
-        assertFalse(new JavaType("com.example.Thing").isCoreType());
-    }
-
-    @Test
     public void testGetBaseTypeForNonCollectionType() {
         assertEquals(STRING, STRING.getBaseType());
     }
@@ -101,17 +95,23 @@ public class JavaTypeTest {
     }
 
     @Test
-    public void testBooleanObjectIsBoolean() {
-        assertTrue(BOOLEAN_OBJECT.isBoolean());
-    }
-
-    @Test
-    public void testBooleanPrimitiveIsBoolean() {
-        assertTrue(BOOLEAN_PRIMITIVE.isBoolean());
-    }
-
-    @Test
     public void testObjectIsNotBoolean() {
         assertFalse(OBJECT.isBoolean());
+    }
+
+    @Test
+    public void testSingleValuedTypeIsNotMultiValued() {
+        assertFalse(STRING.isMultiValued());
+    }
+
+    @Test
+    public void testTypeInRootPackage() {
+        assertEquals("", new JavaType("MyRootClass").getPackage()
+                .getFullyQualifiedPackageName());
+    }
+
+    @Test
+    public void testUserTypeIsNonCoreType() {
+        assertFalse(new JavaType("com.example.Thing").isCoreType());
     }
 }

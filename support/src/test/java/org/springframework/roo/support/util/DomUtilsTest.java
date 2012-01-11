@@ -16,14 +16,13 @@ import org.w3c.dom.Node;
  */
 public class DomUtilsTest {
 
-    // Constants
     private static final String DEFAULT_TEXT = "foo";
     private static final String NODE_TEXT = "bar";
+    private static final String XML_AFTER_REMOVAL = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+            + "<top>    <middle/>\n" + "</top>";
     private static final String XML_BEFORE_REMOVAL = "<top>" + "    <middle>"
             + "        <bottom id=\"1\" />" + "        <bottom id=\"2\" />"
             + "    </middle>" + "</top>";
-    private static final String XML_AFTER_REMOVAL = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-            + "<top>    <middle/>\n" + "</top>";
 
     /**
      * Asserts that the given XML node contains the expected content
@@ -46,17 +45,17 @@ public class DomUtilsTest {
     }
 
     @Test
-    public void testGetTextContentOfNullNode() {
-        assertEquals(DEFAULT_TEXT, DomUtils.getTextContent(null, DEFAULT_TEXT));
-    }
-
-    @Test
     public void testGetTextContentOfNonNullNode() {
         // Set up
         final Node mockNode = mock(Node.class);
         when(mockNode.getTextContent()).thenReturn(NODE_TEXT);
 
         assertEquals(NODE_TEXT, DomUtils.getTextContent(mockNode, DEFAULT_TEXT));
+    }
+
+    @Test
+    public void testGetTextContentOfNullNode() {
+        assertEquals(DEFAULT_TEXT, DomUtils.getTextContent(null, DEFAULT_TEXT));
     }
 
     @Test

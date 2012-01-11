@@ -11,11 +11,6 @@ package org.springframework.roo.classpath.layers;
 public abstract class LayerAdapter implements LayerProvider {
 
     @Override
-    public int hashCode() {
-        return getLayerPosition();
-    }
-
-    @Override
     public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
@@ -26,7 +21,12 @@ public abstract class LayerAdapter implements LayerProvider {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        LayerProvider other = (LayerProvider) obj;
+        final LayerProvider other = (LayerProvider) obj;
         return getLayerPosition() == other.getLayerPosition();
+    }
+
+    @Override
+    public int hashCode() {
+        return getLayerPosition();
     }
 }

@@ -38,21 +38,50 @@ import org.springframework.roo.support.util.StringUtils;
 public class JdkDelegatingLogListener extends AbstractFlashingObject implements
         LogListener {
 
-    // Constants
+    public static final String DO_NOT_LOG = "#DO_NOT_LOG";
     private final static Logger LOGGER = HandlerUtils
             .getLogger(JdkDelegatingLogListener.class);
-    public static final String DO_NOT_LOG = "#DO_NOT_LOG";
 
-    // Fields
+    public static String cleanThrowable(final Throwable throwable) {
+        final StringBuilder result = new StringBuilder();
+        result.append(StringUtils.LINE_SEPARATOR);
+        result.append(throwable.toString().replace(DO_NOT_LOG, ""));
+        result.append(StringUtils.LINE_SEPARATOR);
+        for (final StackTraceElement ste : throwable.getStackTrace()) {
+            result.append(ste);
+            result.append(StringUtils.LINE_SEPARATOR);
+        }
+        return result.toString();
+    }
+
     @Reference private LogReaderService logReaderService;
 
     @SuppressWarnings("unchecked")
     protected void activate(final ComponentContext context) {
         logReaderService.addLogListener(this);
-        Enumeration<LogEntry> latestLogs = logReaderService.getLog();
+        final Enumeration<LogEntry> latestLogs = logReaderService.getLog();
         if (latestLogs.hasMoreElements()) {
             logNow(latestLogs.nextElement(), false);
         }
+    }
+
+    private String buildMessage(final LogEntry entry) {
+        final StringBuilder sb = new StringBuilder();
+        sb.append("[").append(entry.getBundle()).append("] ")
+                .append(entry.getMessage());
+        return sb.toString();
+    }
+
+    private boolean containsDoNotLogTag(final Throwable throwable) {
+        if (throwable == null) {
+            return false;
+        }
+        if (throwable.getMessage().contains(DO_NOT_LOG)) {
+            return true;
+        }
+        final StringWriter sw = new StringWriter();
+        throwable.printStackTrace(new PrintWriter(sw));
+        return sw.toString().contains(DO_NOT_LOG);
     }
 
     protected void deactivate(final ComponentContext context) {
@@ -73,7 +102,7 @@ public class JdkDelegatingLogListener extends AbstractFlashingObject implements
     }
 
     private void logNow(final LogEntry entry, final boolean removeDoNotLogTag) {
-        int osgiLevel = entry.getLevel();
+        final int osgiLevel = entry.getLevel();
         Level jdkLevel = Level.FINEST;
 
         // Convert the OSGi level into a JDK logger level
@@ -111,35 +140,5 @@ public class JdkDelegatingLogListener extends AbstractFlashingObject implements
                 LOGGER.log(jdkLevel, buildMessage(entry), entry.getException());
             }
         }
-    }
-
-    public static String cleanThrowable(final Throwable throwable) {
-        final StringBuilder result = new StringBuilder();
-        result.append(StringUtils.LINE_SEPARATOR);
-        result.append(throwable.toString().replace(DO_NOT_LOG, ""));
-        result.append(StringUtils.LINE_SEPARATOR);
-        for (StackTraceElement ste : throwable.getStackTrace()) {
-            result.append(ste);
-            result.append(StringUtils.LINE_SEPARATOR);
-        }
-        return result.toString();
-    }
-
-    private boolean containsDoNotLogTag(final Throwable throwable) {
-        if (throwable == null)
-            return false;
-        if (throwable.getMessage().contains(DO_NOT_LOG)) {
-            return true;
-        }
-        StringWriter sw = new StringWriter();
-        throwable.printStackTrace(new PrintWriter(sw));
-        return sw.toString().contains(DO_NOT_LOG);
-    }
-
-    private String buildMessage(final LogEntry entry) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("[").append(entry.getBundle()).append("] ")
-                .append(entry.getMessage());
-        return sb.toString();
     }
 }

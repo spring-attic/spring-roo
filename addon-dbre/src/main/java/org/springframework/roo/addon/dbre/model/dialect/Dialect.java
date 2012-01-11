@@ -12,7 +12,7 @@ import org.springframework.roo.addon.dbre.model.Schema;
  */
 public interface Dialect {
 
-    boolean supportsSequences();
-
     String getQuerySequencesString(Schema schema) throws RuntimeException;
+
+    boolean supportsSequences();
 }

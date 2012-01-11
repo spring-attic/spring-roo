@@ -38,7 +38,6 @@ import org.springframework.roo.support.util.Assert;
 public class GwtRequestMetadataNotificationListener implements
         MetadataNotificationListener {
 
-    // Fields
     @Reference GwtTypeService gwtTypeService;
     @Reference MetadataDependencyRegistry metadataDependencyRegistry;
     @Reference MetadataService metadataService;
@@ -50,29 +49,6 @@ public class GwtRequestMetadataNotificationListener implements
 
     protected void deactivate(final ComponentContext context) {
         metadataDependencyRegistry.removeNotificationListener(this);
-    }
-
-    public void notify(final String upstreamMID, final String downstreamMID) {
-        if (!PhysicalTypeIdentifier.isValid(upstreamMID)) {
-            return;
-        }
-
-        final String downstreamInstanceId;
-        if (MetadataIdentificationUtils.isIdentifyingInstance(downstreamMID)) {
-            downstreamInstanceId = downstreamMID;
-        }
-        else {
-            downstreamInstanceId = getDownstreamInstanceId(upstreamMID);
-            if (downstreamInstanceId == null) {
-                return;
-            }
-        }
-
-        // We should now have an instance-specific "downstream dependency" that
-        // can be processed by this class
-        Assert.isTrue(PhysicalTypeIdentifierNamingUtils.isValid(
-                GwtRequestMetadata.class.getName(), downstreamInstanceId));
-        metadataService.evictAndGet(downstreamInstanceId);
     }
 
     private String getDownstreamInstanceId(final String upstreamDependency) {
@@ -95,25 +71,6 @@ public class GwtRequestMetadataNotificationListener implements
             }
         }
 
-        return null;
-    }
-
-    private String getDownstreamOfGwtEntityLayerComponent(
-            final MemberHoldingTypeDetails upstreamType) {
-        final List<JavaType> layerEntities = upstreamType.getLayerEntities();
-        if (!layerEntities.isEmpty()) {
-            // Look for a GWT request that manages one of these entities
-            for (final ClassOrInterfaceTypeDetails request : typeLocationService
-                    .findClassesOrInterfaceDetailsWithAnnotation(ROO_GWT_REQUEST)) {
-                final ClassOrInterfaceTypeDetails entity = gwtTypeService
-                        .lookupEntityFromRequest(request);
-                if (entity != null && layerEntities.contains(entity.getType())) {
-                    // This layer component has an associated GWT request; make
-                    // that request the downstream
-                    return getLocalMid(request.getDeclaredByMetadataId());
-                }
-            }
-        }
         return null;
     }
 
@@ -141,11 +98,54 @@ public class GwtRequestMetadataNotificationListener implements
         return null;
     }
 
+    private String getDownstreamOfGwtEntityLayerComponent(
+            final MemberHoldingTypeDetails upstreamType) {
+        final List<JavaType> layerEntities = upstreamType.getLayerEntities();
+        if (!layerEntities.isEmpty()) {
+            // Look for a GWT request that manages one of these entities
+            for (final ClassOrInterfaceTypeDetails request : typeLocationService
+                    .findClassesOrInterfaceDetailsWithAnnotation(ROO_GWT_REQUEST)) {
+                final ClassOrInterfaceTypeDetails entity = gwtTypeService
+                        .lookupEntityFromRequest(request);
+                if ((entity != null)
+                        && layerEntities.contains(entity.getType())) {
+                    // This layer component has an associated GWT request; make
+                    // that request the downstream
+                    return getLocalMid(request.getDeclaredByMetadataId());
+                }
+            }
+        }
+        return null;
+    }
+
     private String getLocalMid(final String physicalTypeId) {
         final JavaType typeName = PhysicalTypeIdentifier
                 .getJavaType(physicalTypeId);
         final LogicalPath typePath = PhysicalTypeIdentifier
                 .getPath(physicalTypeId);
         return GwtRequestMetadata.createIdentifier(typeName, typePath);
+    }
+
+    public void notify(final String upstreamMID, final String downstreamMID) {
+        if (!PhysicalTypeIdentifier.isValid(upstreamMID)) {
+            return;
+        }
+
+        final String downstreamInstanceId;
+        if (MetadataIdentificationUtils.isIdentifyingInstance(downstreamMID)) {
+            downstreamInstanceId = downstreamMID;
+        }
+        else {
+            downstreamInstanceId = getDownstreamInstanceId(upstreamMID);
+            if (downstreamInstanceId == null) {
+                return;
+            }
+        }
+
+        // We should now have an instance-specific "downstream dependency" that
+        // can be processed by this class
+        Assert.isTrue(PhysicalTypeIdentifierNamingUtils.isValid(
+                GwtRequestMetadata.class.getName(), downstreamInstanceId));
+        metadataService.evictAndGet(downstreamInstanceId);
     }
 }

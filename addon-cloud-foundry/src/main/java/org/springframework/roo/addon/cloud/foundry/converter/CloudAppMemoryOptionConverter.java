@@ -35,18 +35,18 @@ public class CloudAppMemoryOptionConverter implements
                 MEMORY_OPTION_SUFFIX, "")));
     }
 
-    public boolean supports(final Class<?> requiredType,
-            final String optionContext) {
-        return CloudAppMemoryOption.class.isAssignableFrom(requiredType);
-    }
-
     public boolean getAllPossibleValues(final List<Completion> completions,
             final Class<?> requiredType, final String existingData,
             final String optionContext, final MethodTarget target) {
-        for (Integer memoryOption : session.getApplicationMemoryOptions()) {
+        for (final Integer memoryOption : session.getApplicationMemoryOptions()) {
             completions
                     .add(new Completion(memoryOption + MEMORY_OPTION_SUFFIX));
         }
         return false;
+    }
+
+    public boolean supports(final Class<?> requiredType,
+            final String optionContext) {
+        return CloudAppMemoryOption.class.isAssignableFrom(requiredType);
     }
 }

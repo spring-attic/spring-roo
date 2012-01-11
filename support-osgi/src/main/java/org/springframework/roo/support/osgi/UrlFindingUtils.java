@@ -16,45 +16,8 @@ import org.springframework.roo.support.util.Assert;
  */
 public final class UrlFindingUtils {
 
-    // Constants
-    private static final String ROOT_PATH = "/";
     private static final PathMatcher PATH_MATCHER = new AntPathMatcher();
-
-    /**
-     * Searches the bundles in the given context for the given resource.
-     * 
-     * @param context that can be used to obtain bundles to search (can be
-     *            <code>null</code>)
-     * @param resourceName the path of the resource to locate (as per
-     *            {@link Bundle#getEntry}, e.g. "/foo.txt" will find foo.txt in
-     *            the root of each bundle)
-     * @return null if there was a failure or a set containing zero or more
-     *         entries (zero entries means the search was successful but the
-     *         resource was simply not found)
-     * @deprecated sets of URLs are slow and unreliable; use
-     *             {@link OSGiUtils#findEntriesByPath(BundleContext, String)}
-     *             instead
-     */
-    @Deprecated
-    public static Set<URL> findUrls(final BundleContext context,
-            final String resourceName) {
-        Assert.hasText(resourceName, "Resource name to locate is required");
-        final Set<URL> results = new HashSet<URL>();
-        OSGiUtils.execute(new BundleCallback() {
-            public void execute(final Bundle bundle) {
-                try {
-                    final URL url = bundle.getEntry(resourceName);
-                    if (url != null) {
-                        results.add(url);
-                    }
-                }
-                catch (final IllegalStateException e) {
-                    // The bundle has been uninstalled - ignore it
-                }
-            }
-        }, context);
-        return results;
-    }
+    private static final String ROOT_PATH = "/";
 
     /**
      * Returns the URLs of any entries among the given bundles whose URLs match
@@ -90,6 +53,42 @@ public final class UrlFindingUtils {
                                 results.add(url);
                             }
                         }
+                    }
+                }
+                catch (final IllegalStateException e) {
+                    // The bundle has been uninstalled - ignore it
+                }
+            }
+        }, context);
+        return results;
+    }
+
+    /**
+     * Searches the bundles in the given context for the given resource.
+     * 
+     * @param context that can be used to obtain bundles to search (can be
+     *            <code>null</code>)
+     * @param resourceName the path of the resource to locate (as per
+     *            {@link Bundle#getEntry}, e.g. "/foo.txt" will find foo.txt in
+     *            the root of each bundle)
+     * @return null if there was a failure or a set containing zero or more
+     *         entries (zero entries means the search was successful but the
+     *         resource was simply not found)
+     * @deprecated sets of URLs are slow and unreliable; use
+     *             {@link OSGiUtils#findEntriesByPath(BundleContext, String)}
+     *             instead
+     */
+    @Deprecated
+    public static Set<URL> findUrls(final BundleContext context,
+            final String resourceName) {
+        Assert.hasText(resourceName, "Resource name to locate is required");
+        final Set<URL> results = new HashSet<URL>();
+        OSGiUtils.execute(new BundleCallback() {
+            public void execute(final Bundle bundle) {
+                try {
+                    final URL url = bundle.getEntry(resourceName);
+                    if (url != null) {
+                        results.add(url);
                     }
                 }
                 catch (final IllegalStateException e) {

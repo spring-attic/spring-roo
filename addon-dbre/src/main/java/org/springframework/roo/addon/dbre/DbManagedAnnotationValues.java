@@ -15,7 +15,6 @@ import org.springframework.roo.classpath.details.annotations.populator.AutoPopul
  */
 public class DbManagedAnnotationValues extends AbstractAnnotationValues {
 
-    // From annotation
     @AutoPopulate private boolean automaticallyDelete = true;
 
     /**

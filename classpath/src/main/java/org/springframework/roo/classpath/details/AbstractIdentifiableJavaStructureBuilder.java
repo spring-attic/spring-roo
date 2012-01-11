@@ -15,9 +15,20 @@ import org.springframework.roo.support.util.Assert;
 public abstract class AbstractIdentifiableJavaStructureBuilder<T extends IdentifiableJavaStructure>
         extends AbstractCustomDataAccessorBuilder<T> {
 
-    // Fields
     private final String declaredByMetadataId;
     private int modifier;
+
+    /**
+     * Constructor
+     * 
+     * @param existing
+     */
+    protected AbstractIdentifiableJavaStructureBuilder(
+            final IdentifiableJavaStructure existing) {
+        super(existing);
+        this.declaredByMetadataId = existing.getDeclaredByMetadataId();
+        this.modifier = existing.getModifier();
+    }
 
     /**
      * Constructor
@@ -31,18 +42,6 @@ public abstract class AbstractIdentifiableJavaStructureBuilder<T extends Identif
                 "Declared by metadata ID must identify a specific instance (not '"
                         + declaredByMetadataId + "')");
         this.declaredByMetadataId = declaredByMetadataId;
-    }
-
-    /**
-     * Constructor
-     * 
-     * @param existing
-     */
-    protected AbstractIdentifiableJavaStructureBuilder(
-            final IdentifiableJavaStructure existing) {
-        super(existing);
-        this.declaredByMetadataId = existing.getDeclaredByMetadataId();
-        this.modifier = existing.getModifier();
     }
 
     /**

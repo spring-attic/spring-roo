@@ -2,7 +2,6 @@ package org.springframework.roo.addon.cloud.foundry.model;
 
 public class CloudControllerUrl {
 
-    // Fields
     private final String url;
 
     /**

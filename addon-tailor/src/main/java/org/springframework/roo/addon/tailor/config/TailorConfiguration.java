@@ -13,11 +13,9 @@ import java.util.List;
  */
 public class TailorConfiguration {
 
-    private List<CommandConfiguration> commandConfigs = new ArrayList<CommandConfiguration>();
-
-    private String name;
-
+    private final List<CommandConfiguration> commandConfigs = new ArrayList<CommandConfiguration>();
     private String description;
+    private final String name;
 
     /**
      * Constructor
@@ -25,13 +23,17 @@ public class TailorConfiguration {
      * @param name Name of the configuration. Should be unique over all
      *            TailorConfiguration instances in the container
      */
-    public TailorConfiguration(String name) {
+    public TailorConfiguration(final String name) {
         this.name = name;
     }
 
-    public TailorConfiguration(String name, String description) {
+    public TailorConfiguration(final String name, final String description) {
         this.name = name;
         this.description = description;
+    }
+
+    public void addCommandConfig(final CommandConfiguration newConfig) {
+        commandConfigs.add(newConfig);
     }
 
     /**
@@ -41,8 +43,9 @@ public class TailorConfiguration {
      * @return CommandConfiguration for the command in this TailorConfiguration;
      *         null if no configuration present for the command
      */
-    public CommandConfiguration getCommandConfigFor(String fullCommandString) {
-        for (CommandConfiguration config : commandConfigs) {
+    public CommandConfiguration getCommandConfigFor(
+            final String fullCommandString) {
+        for (final CommandConfiguration config : commandConfigs) {
             if (fullCommandString.startsWith(config.getCommandName())) {
                 return config;
             }
@@ -50,20 +53,15 @@ public class TailorConfiguration {
         return null;
     }
 
-    public String getName() {
-        return this.name;
+    public List<CommandConfiguration> getCommandConfigs() {
+        return commandConfigs;
     }
 
     public String getDescription() {
-        return this.description;
+        return description;
     }
 
-    public void addCommandConfig(CommandConfiguration newConfig) {
-        this.commandConfigs.add(newConfig);
+    public String getName() {
+        return name;
     }
-
-    public List<CommandConfiguration> getCommandConfigs() {
-        return this.commandConfigs;
-    }
-
 }

@@ -20,12 +20,7 @@ import org.springframework.roo.support.util.Assert;
 @Service
 public class PackagingProviderConverter implements Converter<PackagingProvider> {
 
-    // Fields
     @Reference PackagingProviderRegistry packagingProviderRegistry;
-
-    public boolean supports(final Class<?> type, final String optionContext) {
-        return PackagingProvider.class.isAssignableFrom(type);
-    }
 
     public PackagingProvider convertFromText(final String value,
             final Class<?> targetType, final String optionContext) {
@@ -45,5 +40,9 @@ public class PackagingProviderConverter implements Converter<PackagingProvider> 
                     .toUpperCase()));
         }
         return true;
+    }
+
+    public boolean supports(final Class<?> type, final String optionContext) {
+        return PackagingProvider.class.isAssignableFrom(type);
     }
 }

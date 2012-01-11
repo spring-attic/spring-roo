@@ -29,21 +29,19 @@ import org.springframework.roo.url.stream.UrlInputStreamService;
 @Service
 public class AddOnFeedbackOperationsImpl implements AddOnFeedbackOperations {
 
-    // Constants
     private static final Logger LOGGER = HandlerUtils
             .getLogger(AddOnFeedbackOperationsImpl.class);
 
-    // Fields
+    private BundleContext bundleContext;
     @Reference private UaaRegistrationService registrationService;
     @Reference private UrlInputStreamService urlInputStreamService;
-    private BundleContext bundleContext;
 
     protected void activate(final ComponentContext context) {
-        this.bundleContext = context.getBundleContext();
+        bundleContext = context.getBundleContext();
     }
 
     protected void deactivate(final ComponentContext context) {
-        this.bundleContext = null;
+        bundleContext = null;
     }
 
     @SuppressWarnings("unchecked")
@@ -51,7 +49,7 @@ public class AddOnFeedbackOperationsImpl implements AddOnFeedbackOperations {
             final Rating rating, String comment) {
         Assert.notNull(bsn, "Bundle symbolic name required");
         Assert.notNull(rating, "Rating required");
-        Assert.isTrue(comment == null || comment.length() <= 140,
+        Assert.isTrue((comment == null) || (comment.length() <= 140),
                 "Comment must be under 140 characters");
         if ("".equals(comment)) {
             comment = null;
@@ -63,12 +61,12 @@ public class AddOnFeedbackOperationsImpl implements AddOnFeedbackOperations {
         try {
             httpUrl = new URL(UaaRegistrationService.EMPTY_FILE_URL);
         }
-        catch (MalformedURLException shouldNeverHappen) {
+        catch (final MalformedURLException shouldNeverHappen) {
             throw new IllegalStateException(shouldNeverHappen);
         }
 
         // Fail early if we're not allowed GET this URL due to UAA restrictions
-        String failureMessage = urlInputStreamService
+        final String failureMessage = urlInputStreamService
                 .getUrlCannotBeOpenedMessage(httpUrl);
         if (failureMessage != null) {
             LOGGER.warning(failureMessage);
@@ -77,7 +75,7 @@ public class AddOnFeedbackOperationsImpl implements AddOnFeedbackOperations {
 
         // To get this far, there is no reason we shouldn't be able to store
         // this user's feedback
-        JSONObject o = new JSONObject();
+        final JSONObject o = new JSONObject();
         o.put("version", UaaRegistrationService.SPRING_ROO.getMajorVersion()
                 + "." + UaaRegistrationService.SPRING_ROO.getMajorVersion()
                 + "." + UaaRegistrationService.SPRING_ROO.getPatchVersion());
@@ -87,7 +85,7 @@ public class AddOnFeedbackOperationsImpl implements AddOnFeedbackOperations {
                                                        // anyway...
         o.put("rating", rating.getKey());
         o.put("comment", comment == null ? "" : JSONObject.escape(comment));
-        String customJson = o.toJSONString();
+        final String customJson = o.toJSONString();
 
         // Register the feedback. Note we record all feedback against the BSN
         // for the RooBot client add-on to assist simple server-side detection.

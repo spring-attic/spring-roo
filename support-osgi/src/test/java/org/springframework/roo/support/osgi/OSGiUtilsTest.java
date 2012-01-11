@@ -17,7 +17,6 @@ import org.osgi.service.component.ComponentContext;
  */
 public class OSGiUtilsTest {
 
-    // Constants
     private static final String ROO_WORKING_DIRECTORY = "/some/file/path";
 
     @Test

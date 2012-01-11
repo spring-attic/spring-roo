@@ -31,11 +31,33 @@ public class JsonMetadataProvider extends AbstractItdMetadataProvider {
         addMetadataTriggers(ROO_JSON, ROO_IDENTIFIER);
     }
 
+    @Override
+    protected String createLocalIdentifier(final JavaType javaType,
+            final LogicalPath path) {
+        return JsonMetadata.createIdentifier(javaType, path);
+    }
+
     protected void deactivate(final ComponentContext context) {
         metadataDependencyRegistry.deregisterDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
                 getProvidesType());
         removeMetadataTriggers(ROO_JSON, ROO_IDENTIFIER);
+    }
+
+    @Override
+    protected String getGovernorPhysicalTypeIdentifier(
+            final String metadataIdentificationString) {
+        final JavaType javaType = JsonMetadata
+                .getJavaType(metadataIdentificationString);
+        final LogicalPath path = JsonMetadata
+                .getPath(metadataIdentificationString);
+        final String physicalTypeIdentifier = PhysicalTypeIdentifier
+                .createIdentifier(javaType, path);
+        return physicalTypeIdentifier;
+    }
+
+    public String getItdUniquenessFilenameSuffix() {
+        return "Json";
     }
 
     @Override
@@ -45,17 +67,18 @@ public class JsonMetadataProvider extends AbstractItdMetadataProvider {
             final PhysicalTypeMetadata governorPhysicalTypeMetadata,
             final String itdFilename) {
         // Acquire bean info (we need getters details, specifically)
-        JavaType javaType = JsonMetadata
+        final JavaType javaType = JsonMetadata
                 .getJavaType(metadataIdentificationString);
-        LogicalPath path = JsonMetadata.getPath(metadataIdentificationString);
+        final LogicalPath path = JsonMetadata
+                .getPath(metadataIdentificationString);
 
         // We need to parse the annotation, if it is not present we will simply
         // get the default annotation values
-        JsonAnnotationValues annotationValues = new JsonAnnotationValues(
+        final JsonAnnotationValues annotationValues = new JsonAnnotationValues(
                 governorPhysicalTypeMetadata);
 
         String plural = javaType.getSimpleTypeName() + "s";
-        PluralMetadata pluralMetadata = (PluralMetadata) metadataService
+        final PluralMetadata pluralMetadata = (PluralMetadata) metadataService
                 .get(PluralMetadata.createIdentifier(javaType, path));
         if (pluralMetadata != null) {
             plural = pluralMetadata.getPlural();
@@ -63,27 +86,6 @@ public class JsonMetadataProvider extends AbstractItdMetadataProvider {
 
         return new JsonMetadata(metadataIdentificationString, aspectName,
                 governorPhysicalTypeMetadata, plural, annotationValues);
-    }
-
-    public String getItdUniquenessFilenameSuffix() {
-        return "Json";
-    }
-
-    @Override
-    protected String getGovernorPhysicalTypeIdentifier(
-            final String metadataIdentificationString) {
-        JavaType javaType = JsonMetadata
-                .getJavaType(metadataIdentificationString);
-        LogicalPath path = JsonMetadata.getPath(metadataIdentificationString);
-        String physicalTypeIdentifier = PhysicalTypeIdentifier
-                .createIdentifier(javaType, path);
-        return physicalTypeIdentifier;
-    }
-
-    @Override
-    protected String createLocalIdentifier(final JavaType javaType,
-            final LogicalPath path) {
-        return JsonMetadata.createIdentifier(javaType, path);
     }
 
     public String getProvidesType() {

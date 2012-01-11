@@ -16,17 +16,18 @@ import org.springframework.roo.support.util.StringUtils;
 public class ExecuteCommand extends AbstractAction {
 
     @Override
-    public void executeImpl(CommandTransformation trafo, ActionConfig config) {
+    public void executeImpl(final CommandTransformation trafo,
+            final ActionConfig config) {
         trafo.addOutputCommand(TailorHelper.replaceVars(trafo,
                 config.getCommand()));
     }
 
-    public String getDescription(ActionConfig config) {
+    public String getDescription(final ActionConfig config) {
         return "Executing command: " + config.getCommand();
     }
 
-    public boolean isValid(ActionConfig config) {
-        return config != null && StringUtils.hasText(config.getCommand());
+    public boolean isValid(final ActionConfig config) {
+        return (config != null) && StringUtils.hasText(config.getCommand());
     }
 
 }

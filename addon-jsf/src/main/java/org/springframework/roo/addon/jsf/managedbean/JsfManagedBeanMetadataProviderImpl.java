@@ -75,18 +75,16 @@ public class JsfManagedBeanMetadataProviderImpl extends
         AbstractMemberDiscoveringItdMetadataProvider implements
         JsfManagedBeanMetadataProvider {
 
-    // Constants
     private static final int LAYER_POSITION = LayerType.HIGHEST.getPosition();
-    // -- The maximum number of entity fields to show in a list view.
-    private static final int MAX_LIST_VIEW_FIELDS = 5;
     // -- The maximum number of fields to form a String to show in a drop down
     // field.
     private static final int MAX_DROP_DOWN_FIELDS = 4;
+    // -- The maximum number of entity fields to show in a list view.
+    private static final int MAX_LIST_VIEW_FIELDS = 5;
 
-    // Fields
     @Reference private ConfigurableMetadataProvider configurableMetadataProvider;
-    @Reference private LayerService layerService;
     private final Map<JavaType, String> entityToManagedBeanMidMap = new LinkedHashMap<JavaType, String>();
+    @Reference private LayerService layerService;
     private final Map<String, JavaType> managedBeanMidToEntityMap = new LinkedHashMap<String, JavaType>();
 
     protected void activate(final ComponentContext context) {
@@ -98,6 +96,12 @@ public class JsfManagedBeanMetadataProviderImpl extends
         configurableMetadataProvider.addMetadataTrigger(ROO_JSF_MANAGED_BEAN);
     }
 
+    @Override
+    protected String createLocalIdentifier(final JavaType javaType,
+            final LogicalPath path) {
+        return JsfManagedBeanMetadata.createIdentifier(javaType, path);
+    }
+
     protected void deactivate(final ComponentContext context) {
         metadataDependencyRegistry.removeNotificationListener(this);
         metadataDependencyRegistry.deregisterDependency(
@@ -106,258 +110,6 @@ public class JsfManagedBeanMetadataProviderImpl extends
         removeMetadataTrigger(ROO_JSF_MANAGED_BEAN);
         configurableMetadataProvider
                 .removeMetadataTrigger(ROO_JSF_MANAGED_BEAN);
-    }
-
-    @Override
-    protected String getLocalMidToRequest(final ItdTypeDetails itdTypeDetails) {
-        // Determine the governor for this ITD, and whether any metadata is even
-        // hoping to hear about changes to that JavaType and its ITDs
-        JavaType governor = itdTypeDetails.getName();
-        String localMid = entityToManagedBeanMidMap.get(governor);
-        if (localMid != null) {
-            return localMid;
-        }
-
-        final MemberHoldingTypeDetails memberHoldingTypeDetails = typeLocationService
-                .getTypeDetails(governor);
-        if (memberHoldingTypeDetails != null) {
-            for (final JavaType type : memberHoldingTypeDetails
-                    .getLayerEntities()) {
-                final String localMidType = entityToManagedBeanMidMap.get(type);
-                if (localMidType != null) {
-                    return localMidType;
-                }
-            }
-        }
-        return null;
-    }
-
-    @Override
-    protected ItdTypeDetailsProvidingMetadataItem getMetadata(
-            final String metadataIdentificationString,
-            final JavaType aspectName,
-            final PhysicalTypeMetadata governorPhysicalTypeMetadata,
-            final String itdFilename) {
-        // We need to parse the annotation, which we expect to be present
-        final JsfManagedBeanAnnotationValues annotationValues = new JsfManagedBeanAnnotationValues(
-                governorPhysicalTypeMetadata);
-        final JavaType entity = annotationValues.getEntity();
-        if (!annotationValues.isAnnotationFound() || entity == null) {
-            return null;
-        }
-
-        final MemberDetails memberDetails = getMemberDetails(entity);
-        if (memberDetails == null) {
-            return null;
-        }
-
-        final MethodMetadata identifierAccessor = persistenceMemberLocator
-                .getIdentifierAccessor(entity);
-        final MethodMetadata versionAccessor = persistenceMemberLocator
-                .getVersionAccessor(entity);
-        final Set<FieldMetadata> locatedFields = locateFields(entity,
-                memberDetails, metadataIdentificationString,
-                identifierAccessor, versionAccessor);
-
-        // Remember that this entity JavaType matches up with this metadata
-        // identification string
-        // Start by clearing any previous association
-        final JavaType oldEntity = managedBeanMidToEntityMap
-                .get(metadataIdentificationString);
-        if (oldEntity != null) {
-            entityToManagedBeanMidMap.remove(oldEntity);
-        }
-        entityToManagedBeanMidMap.put(entity, metadataIdentificationString);
-        managedBeanMidToEntityMap.put(metadataIdentificationString, entity);
-
-        final String physicalTypeIdentifier = typeLocationService
-                .getPhysicalTypeIdentifier(entity);
-        final LogicalPath path = PhysicalTypeIdentifier
-                .getPath(physicalTypeIdentifier);
-        final PluralMetadata pluralMetadata = (PluralMetadata) metadataService
-                .get(PluralMetadata.createIdentifier(entity, path));
-        Assert.notNull(pluralMetadata, "Could not determine plural for '"
-                + entity.getSimpleTypeName() + "'");
-        final String plural = pluralMetadata.getPlural();
-
-        final Map<MethodMetadataCustomDataKey, MemberTypeAdditions> crudAdditions = getCrudAdditions(
-                entity, metadataIdentificationString);
-
-        return new JsfManagedBeanMetadata(metadataIdentificationString,
-                aspectName, governorPhysicalTypeMetadata, annotationValues,
-                plural, crudAdditions, locatedFields, identifierAccessor);
-    }
-
-    /**
-     * Returns an iterable collection of the given entity's fields excluding any
-     * ID or version field; along the way, flags the first
-     * {@value #MAX_LIST_VIEW_FIELDS} non ID/version fields as being displayable
-     * in the list view for this entity type.
-     * 
-     * @param entity the entity for which to find the fields and accessors
-     *            (required)
-     * @param memberDetails the entity's members (required)
-     * @param metadataIdentificationString the ID of the metadata being
-     *            generated (required)
-     * @param versionAccessor
-     * @param identifierAccessor
-     * @return a non-<code>null</code> iterable collection
-     */
-    private Set<FieldMetadata> locateFields(final JavaType entity,
-            final MemberDetails memberDetails,
-            final String metadataIdentificationString,
-            final MethodMetadata identifierAccessor,
-            final MethodMetadata versionAccessor) {
-        final Set<FieldMetadata> locatedFields = new LinkedHashSet<FieldMetadata>();
-        final Set<ClassOrInterfaceTypeDetails> managedBeanTypes = typeLocationService
-                .findClassesOrInterfaceDetailsWithAnnotation(ROO_JSF_MANAGED_BEAN);
-
-        int listViewFields = 0;
-        for (final MethodMetadata method : memberDetails.getMethods()) {
-            if (!BeanInfoUtils.isAccessorMethod(method)) {
-                continue;
-            }
-            if (method.hasSameName(identifierAccessor, versionAccessor)) {
-                continue;
-            }
-            final FieldMetadata field = BeanInfoUtils.getFieldForPropertyName(
-                    memberDetails,
-                    BeanInfoUtils.getPropertyNameForJavaBeanMethod(method));
-            if (field == null) {
-                continue;
-            }
-            metadataDependencyRegistry.registerDependency(
-                    field.getDeclaredByMetadataId(),
-                    metadataIdentificationString);
-
-            final CustomDataBuilder customDataBuilder = new CustomDataBuilder(
-                    field.getCustomData());
-            final JavaType fieldType = field.getFieldType();
-            final ClassOrInterfaceTypeDetails fieldTypeCid = typeLocationService
-                    .getTypeDetails(fieldType);
-
-            // Check field is to be displayed in the entity's list view
-            if (listViewFields < MAX_LIST_VIEW_FIELDS
-                    && isFieldOfInterest(field) && fieldTypeCid == null) {
-                listViewFields++;
-                customDataBuilder.put(LIST_VIEW_FIELD_KEY, field);
-            }
-
-            final boolean enumerated = field.getCustomData().keySet()
-                    .contains(CustomDataKeys.ENUMERATED_FIELD)
-                    || isEnum(fieldTypeCid);
-            if (enumerated) {
-                customDataBuilder.put(ENUMERATED_KEY, null);
-            }
-            else {
-                if (fieldType.isCommonCollectionType()) {
-                    parameterTypeLoop: for (JavaType parameter : fieldType
-                            .getParameters()) {
-                        final ClassOrInterfaceTypeDetails parameterTypeCid = typeLocationService
-                                .getTypeDetails(parameter);
-                        if (parameterTypeCid == null) {
-                            continue;
-                        }
-
-                        for (final ClassOrInterfaceTypeDetails managedBeanType : managedBeanTypes) {
-                            AnnotationMetadata managedBeanAnnotation = managedBeanType
-                                    .getAnnotation(ROO_JSF_MANAGED_BEAN);
-                            if (((JavaType) managedBeanAnnotation.getAttribute(
-                                    "entity").getValue()).equals(parameter)) {
-                                customDataBuilder.put(PARAMETER_TYPE_KEY,
-                                        parameter);
-                                customDataBuilder.put(
-                                        PARAMETER_TYPE_MANAGED_BEAN_NAME_KEY,
-                                        managedBeanAnnotation.getAttribute(
-                                                "beanName").getValue());
-
-                                final LogicalPath logicalPath = PhysicalTypeIdentifier
-                                        .getPath(parameterTypeCid
-                                                .getDeclaredByMetadataId());
-                                final PluralMetadata pluralMetadata = (PluralMetadata) metadataService
-                                        .get(PluralMetadata.createIdentifier(
-                                                parameter, logicalPath));
-                                if (pluralMetadata != null) {
-                                    customDataBuilder.put(
-                                            PARAMETER_TYPE_PLURAL_KEY,
-                                            pluralMetadata.getPlural());
-                                }
-                                break parameterTypeLoop; // Only support one
-                                                         // generic type
-                                                         // parameter
-                            }
-                            // Parameter type is not an entity - test for an
-                            // enum
-                            if (isEnum(parameterTypeCid)) {
-                                customDataBuilder.put(PARAMETER_TYPE_KEY,
-                                        parameter);
-                            }
-                        }
-                    }
-                }
-                else {
-                    if (fieldTypeCid != null
-                            && !customDataBuilder.keySet().contains(
-                                    CustomDataKeys.EMBEDDED_FIELD)) {
-                        customDataBuilder.put(APPLICATION_TYPE_KEY, null);
-                        final MethodMetadata applicationTypeIdentifierAccessor = persistenceMemberLocator
-                                .getIdentifierAccessor(entity);
-                        final MethodMetadata applicationTypeVersionAccessor = persistenceMemberLocator
-                                .getVersionAccessor(entity);
-                        final List<FieldMetadata> applicationTypeFields = new ArrayList<FieldMetadata>();
-
-                        int dropDownFields = 0;
-                        final MemberDetails applicationTypeMemberDetails = getMemberDetails(fieldType);
-                        for (final MethodMetadata applicationTypeMethod : applicationTypeMemberDetails
-                                .getMethods()) {
-                            if (!BeanInfoUtils
-                                    .isAccessorMethod(applicationTypeMethod)) {
-                                continue;
-                            }
-                            if (applicationTypeMethod.hasSameName(
-                                    applicationTypeIdentifierAccessor,
-                                    applicationTypeVersionAccessor)) {
-                                continue;
-                            }
-                            final FieldMetadata applicationTypeField = BeanInfoUtils
-                                    .getFieldForJavaBeanMethod(
-                                            applicationTypeMemberDetails,
-                                            applicationTypeMethod);
-                            if (applicationTypeField == null) {
-                                continue;
-                            }
-                            if (dropDownFields < MAX_DROP_DOWN_FIELDS
-                                    && isFieldOfInterest(applicationTypeField)
-                                    && !typeLocationService
-                                            .isInProject(applicationTypeField
-                                                    .getFieldType())) {
-                                dropDownFields++;
-                                applicationTypeFields.add(applicationTypeField);
-                            }
-                        }
-                        if (applicationTypeFields.isEmpty()) {
-                            applicationTypeFields.add(BeanInfoUtils
-                                    .getFieldForJavaBeanMethod(
-                                            applicationTypeMemberDetails,
-                                            applicationTypeIdentifierAccessor));
-                        }
-                        customDataBuilder.put(APPLICATION_TYPE_FIELDS_KEY,
-                                applicationTypeFields);
-                        customDataBuilder.put(
-                                CRUD_ADDITIONS_KEY,
-                                getCrudAdditions(fieldType,
-                                        metadataIdentificationString));
-                    }
-                }
-            }
-
-            final FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(
-                    field);
-            fieldBuilder.setCustomData(customDataBuilder);
-            locatedFields.add(fieldBuilder.build());
-        }
-
-        return locatedFields;
     }
 
     /**
@@ -427,6 +179,109 @@ public class JsfManagedBeanMetadataProviderImpl extends
         return additions;
     }
 
+    @Override
+    protected String getGovernorPhysicalTypeIdentifier(
+            final String metadataIdentificationString) {
+        final JavaType javaType = JsfManagedBeanMetadata
+                .getJavaType(metadataIdentificationString);
+        final LogicalPath path = JsfManagedBeanMetadata
+                .getPath(metadataIdentificationString);
+        return PhysicalTypeIdentifier.createIdentifier(javaType, path);
+    }
+
+    public String getItdUniquenessFilenameSuffix() {
+        return "ManagedBean";
+    }
+
+    @Override
+    protected String getLocalMidToRequest(final ItdTypeDetails itdTypeDetails) {
+        // Determine the governor for this ITD, and whether any metadata is even
+        // hoping to hear about changes to that JavaType and its ITDs
+        final JavaType governor = itdTypeDetails.getName();
+        final String localMid = entityToManagedBeanMidMap.get(governor);
+        if (localMid != null) {
+            return localMid;
+        }
+
+        final MemberHoldingTypeDetails memberHoldingTypeDetails = typeLocationService
+                .getTypeDetails(governor);
+        if (memberHoldingTypeDetails != null) {
+            for (final JavaType type : memberHoldingTypeDetails
+                    .getLayerEntities()) {
+                final String localMidType = entityToManagedBeanMidMap.get(type);
+                if (localMidType != null) {
+                    return localMidType;
+                }
+            }
+        }
+        return null;
+    }
+
+    @Override
+    protected ItdTypeDetailsProvidingMetadataItem getMetadata(
+            final String metadataIdentificationString,
+            final JavaType aspectName,
+            final PhysicalTypeMetadata governorPhysicalTypeMetadata,
+            final String itdFilename) {
+        // We need to parse the annotation, which we expect to be present
+        final JsfManagedBeanAnnotationValues annotationValues = new JsfManagedBeanAnnotationValues(
+                governorPhysicalTypeMetadata);
+        final JavaType entity = annotationValues.getEntity();
+        if (!annotationValues.isAnnotationFound() || (entity == null)) {
+            return null;
+        }
+
+        final MemberDetails memberDetails = getMemberDetails(entity);
+        if (memberDetails == null) {
+            return null;
+        }
+
+        final MethodMetadata identifierAccessor = persistenceMemberLocator
+                .getIdentifierAccessor(entity);
+        final MethodMetadata versionAccessor = persistenceMemberLocator
+                .getVersionAccessor(entity);
+        final Set<FieldMetadata> locatedFields = locateFields(entity,
+                memberDetails, metadataIdentificationString,
+                identifierAccessor, versionAccessor);
+
+        // Remember that this entity JavaType matches up with this metadata
+        // identification string
+        // Start by clearing any previous association
+        final JavaType oldEntity = managedBeanMidToEntityMap
+                .get(metadataIdentificationString);
+        if (oldEntity != null) {
+            entityToManagedBeanMidMap.remove(oldEntity);
+        }
+        entityToManagedBeanMidMap.put(entity, metadataIdentificationString);
+        managedBeanMidToEntityMap.put(metadataIdentificationString, entity);
+
+        final String physicalTypeIdentifier = typeLocationService
+                .getPhysicalTypeIdentifier(entity);
+        final LogicalPath path = PhysicalTypeIdentifier
+                .getPath(physicalTypeIdentifier);
+        final PluralMetadata pluralMetadata = (PluralMetadata) metadataService
+                .get(PluralMetadata.createIdentifier(entity, path));
+        Assert.notNull(pluralMetadata, "Could not determine plural for '"
+                + entity.getSimpleTypeName() + "'");
+        final String plural = pluralMetadata.getPlural();
+
+        final Map<MethodMetadataCustomDataKey, MemberTypeAdditions> crudAdditions = getCrudAdditions(
+                entity, metadataIdentificationString);
+
+        return new JsfManagedBeanMetadata(metadataIdentificationString,
+                aspectName, governorPhysicalTypeMetadata, annotationValues,
+                plural, crudAdditions, locatedFields, identifierAccessor);
+    }
+
+    public String getProvidesType() {
+        return JsfManagedBeanMetadata.getMetadataIdentiferType();
+    }
+
+    private boolean isEnum(final ClassOrInterfaceTypeDetails cid) {
+        return (cid != null)
+                && (cid.getPhysicalTypeCategory() == PhysicalTypeCategory.ENUMERATION);
+    }
+
     private boolean isFieldOfInterest(final FieldMetadata field) {
         final JavaType fieldType = field.getFieldType();
         return !fieldType.isCommonCollectionType()
@@ -443,32 +298,175 @@ public class JsfManagedBeanMetadataProviderImpl extends
                                                                              // types
     }
 
-    private boolean isEnum(ClassOrInterfaceTypeDetails cid) {
-        return cid != null
-                && cid.getPhysicalTypeCategory() == PhysicalTypeCategory.ENUMERATION;
-    }
+    /**
+     * Returns an iterable collection of the given entity's fields excluding any
+     * ID or version field; along the way, flags the first
+     * {@value #MAX_LIST_VIEW_FIELDS} non ID/version fields as being displayable
+     * in the list view for this entity type.
+     * 
+     * @param entity the entity for which to find the fields and accessors
+     *            (required)
+     * @param memberDetails the entity's members (required)
+     * @param metadataIdentificationString the ID of the metadata being
+     *            generated (required)
+     * @param versionAccessor
+     * @param identifierAccessor
+     * @return a non-<code>null</code> iterable collection
+     */
+    private Set<FieldMetadata> locateFields(final JavaType entity,
+            final MemberDetails memberDetails,
+            final String metadataIdentificationString,
+            final MethodMetadata identifierAccessor,
+            final MethodMetadata versionAccessor) {
+        final Set<FieldMetadata> locatedFields = new LinkedHashSet<FieldMetadata>();
+        final Set<ClassOrInterfaceTypeDetails> managedBeanTypes = typeLocationService
+                .findClassesOrInterfaceDetailsWithAnnotation(ROO_JSF_MANAGED_BEAN);
 
-    public String getItdUniquenessFilenameSuffix() {
-        return "ManagedBean";
-    }
+        int listViewFields = 0;
+        for (final MethodMetadata method : memberDetails.getMethods()) {
+            if (!BeanInfoUtils.isAccessorMethod(method)) {
+                continue;
+            }
+            if (method.hasSameName(identifierAccessor, versionAccessor)) {
+                continue;
+            }
+            final FieldMetadata field = BeanInfoUtils.getFieldForPropertyName(
+                    memberDetails,
+                    BeanInfoUtils.getPropertyNameForJavaBeanMethod(method));
+            if (field == null) {
+                continue;
+            }
+            metadataDependencyRegistry.registerDependency(
+                    field.getDeclaredByMetadataId(),
+                    metadataIdentificationString);
 
-    @Override
-    protected String getGovernorPhysicalTypeIdentifier(
-            final String metadataIdentificationString) {
-        final JavaType javaType = JsfManagedBeanMetadata
-                .getJavaType(metadataIdentificationString);
-        final LogicalPath path = JsfManagedBeanMetadata
-                .getPath(metadataIdentificationString);
-        return PhysicalTypeIdentifier.createIdentifier(javaType, path);
-    }
+            final CustomDataBuilder customDataBuilder = new CustomDataBuilder(
+                    field.getCustomData());
+            final JavaType fieldType = field.getFieldType();
+            final ClassOrInterfaceTypeDetails fieldTypeCid = typeLocationService
+                    .getTypeDetails(fieldType);
 
-    @Override
-    protected String createLocalIdentifier(final JavaType javaType,
-            final LogicalPath path) {
-        return JsfManagedBeanMetadata.createIdentifier(javaType, path);
-    }
+            // Check field is to be displayed in the entity's list view
+            if ((listViewFields < MAX_LIST_VIEW_FIELDS)
+                    && isFieldOfInterest(field) && (fieldTypeCid == null)) {
+                listViewFields++;
+                customDataBuilder.put(LIST_VIEW_FIELD_KEY, field);
+            }
 
-    public String getProvidesType() {
-        return JsfManagedBeanMetadata.getMetadataIdentiferType();
+            final boolean enumerated = field.getCustomData().keySet()
+                    .contains(CustomDataKeys.ENUMERATED_FIELD)
+                    || isEnum(fieldTypeCid);
+            if (enumerated) {
+                customDataBuilder.put(ENUMERATED_KEY, null);
+            }
+            else {
+                if (fieldType.isCommonCollectionType()) {
+                    parameterTypeLoop: for (final JavaType parameter : fieldType
+                            .getParameters()) {
+                        final ClassOrInterfaceTypeDetails parameterTypeCid = typeLocationService
+                                .getTypeDetails(parameter);
+                        if (parameterTypeCid == null) {
+                            continue;
+                        }
+
+                        for (final ClassOrInterfaceTypeDetails managedBeanType : managedBeanTypes) {
+                            final AnnotationMetadata managedBeanAnnotation = managedBeanType
+                                    .getAnnotation(ROO_JSF_MANAGED_BEAN);
+                            if (((JavaType) managedBeanAnnotation.getAttribute(
+                                    "entity").getValue()).equals(parameter)) {
+                                customDataBuilder.put(PARAMETER_TYPE_KEY,
+                                        parameter);
+                                customDataBuilder.put(
+                                        PARAMETER_TYPE_MANAGED_BEAN_NAME_KEY,
+                                        managedBeanAnnotation.getAttribute(
+                                                "beanName").getValue());
+
+                                final LogicalPath logicalPath = PhysicalTypeIdentifier
+                                        .getPath(parameterTypeCid
+                                                .getDeclaredByMetadataId());
+                                final PluralMetadata pluralMetadata = (PluralMetadata) metadataService
+                                        .get(PluralMetadata.createIdentifier(
+                                                parameter, logicalPath));
+                                if (pluralMetadata != null) {
+                                    customDataBuilder.put(
+                                            PARAMETER_TYPE_PLURAL_KEY,
+                                            pluralMetadata.getPlural());
+                                }
+                                break parameterTypeLoop; // Only support one
+                                                         // generic type
+                                                         // parameter
+                            }
+                            // Parameter type is not an entity - test for an
+                            // enum
+                            if (isEnum(parameterTypeCid)) {
+                                customDataBuilder.put(PARAMETER_TYPE_KEY,
+                                        parameter);
+                            }
+                        }
+                    }
+                }
+                else {
+                    if ((fieldTypeCid != null)
+                            && !customDataBuilder.keySet().contains(
+                                    CustomDataKeys.EMBEDDED_FIELD)) {
+                        customDataBuilder.put(APPLICATION_TYPE_KEY, null);
+                        final MethodMetadata applicationTypeIdentifierAccessor = persistenceMemberLocator
+                                .getIdentifierAccessor(entity);
+                        final MethodMetadata applicationTypeVersionAccessor = persistenceMemberLocator
+                                .getVersionAccessor(entity);
+                        final List<FieldMetadata> applicationTypeFields = new ArrayList<FieldMetadata>();
+
+                        int dropDownFields = 0;
+                        final MemberDetails applicationTypeMemberDetails = getMemberDetails(fieldType);
+                        for (final MethodMetadata applicationTypeMethod : applicationTypeMemberDetails
+                                .getMethods()) {
+                            if (!BeanInfoUtils
+                                    .isAccessorMethod(applicationTypeMethod)) {
+                                continue;
+                            }
+                            if (applicationTypeMethod.hasSameName(
+                                    applicationTypeIdentifierAccessor,
+                                    applicationTypeVersionAccessor)) {
+                                continue;
+                            }
+                            final FieldMetadata applicationTypeField = BeanInfoUtils
+                                    .getFieldForJavaBeanMethod(
+                                            applicationTypeMemberDetails,
+                                            applicationTypeMethod);
+                            if (applicationTypeField == null) {
+                                continue;
+                            }
+                            if ((dropDownFields < MAX_DROP_DOWN_FIELDS)
+                                    && isFieldOfInterest(applicationTypeField)
+                                    && !typeLocationService
+                                            .isInProject(applicationTypeField
+                                                    .getFieldType())) {
+                                dropDownFields++;
+                                applicationTypeFields.add(applicationTypeField);
+                            }
+                        }
+                        if (applicationTypeFields.isEmpty()) {
+                            applicationTypeFields.add(BeanInfoUtils
+                                    .getFieldForJavaBeanMethod(
+                                            applicationTypeMemberDetails,
+                                            applicationTypeIdentifierAccessor));
+                        }
+                        customDataBuilder.put(APPLICATION_TYPE_FIELDS_KEY,
+                                applicationTypeFields);
+                        customDataBuilder.put(
+                                CRUD_ADDITIONS_KEY,
+                                getCrudAdditions(fieldType,
+                                        metadataIdentificationString));
+                    }
+                }
+            }
+
+            final FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(
+                    field);
+            fieldBuilder.setCustomData(customDataBuilder);
+            locatedFields.add(fieldBuilder.build());
+        }
+
+        return locatedFields;
     }
 }

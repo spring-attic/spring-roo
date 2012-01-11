@@ -12,13 +12,12 @@ import org.springframework.roo.support.util.Assert;
  */
 public class JavaTypeMetadataDetails {
 
-    // Fields
-    private final JavaType javaType;
-    private final String plural;
-    private final boolean isEnumType;
-    private final boolean isApplicationType;
-    private final JavaTypePersistenceMetadataDetails persistenceDetails;
     private final String controllerPath;
+    private final boolean isApplicationType;
+    private final boolean isEnumType;
+    private final JavaType javaType;
+    private final JavaTypePersistenceMetadataDetails persistenceDetails;
+    private final String plural;
 
     /**
      * Constructor for JavaTypeMetadataDetails.
@@ -47,12 +46,44 @@ public class JavaTypeMetadataDetails {
         this.controllerPath = controllerPath;
     }
 
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof JavaTypeMetadataDetails)) {
+            return false;
+        }
+        return javaType.equals(((JavaTypeMetadataDetails) obj).getJavaType());
+    }
+
+    public String getControllerPath() {
+        return controllerPath;
+    }
+
     public JavaType getJavaType() {
         return javaType;
     }
 
+    public JavaTypePersistenceMetadataDetails getPersistenceDetails() {
+        return persistenceDetails;
+    }
+
     public String getPlural() {
         return plural;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = (prime * result)
+                + ((javaType == null) ? 0 : javaType.hashCode());
+        return result;
+    }
+
+    public boolean isApplicationType() {
+        return isApplicationType;
     }
 
     public boolean isEnumType() {
@@ -66,39 +97,7 @@ public class JavaTypeMetadataDetails {
      * @since 1.2.1
      */
     public boolean isPersistent() {
-        return isApplicationType && persistenceDetails != null;
-    }
-
-    public boolean isApplicationType() {
-        return isApplicationType;
-    }
-
-    public JavaTypePersistenceMetadataDetails getPersistenceDetails() {
-        return persistenceDetails;
-    }
-
-    public String getControllerPath() {
-        return controllerPath;
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result
-                + ((javaType == null) ? 0 : javaType.hashCode());
-        return result;
-    }
-
-    @Override
-    public boolean equals(final Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (!(obj instanceof JavaTypeMetadataDetails)) {
-            return false;
-        }
-        return javaType.equals(((JavaTypeMetadataDetails) obj).getJavaType());
+        return isApplicationType && (persistenceDetails != null);
     }
 
     @Override

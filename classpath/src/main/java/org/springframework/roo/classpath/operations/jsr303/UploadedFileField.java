@@ -15,12 +15,12 @@ import org.springframework.roo.model.JavaType;
 
 public class UploadedFileField extends FieldDetails {
 
-    // Fields
-    private UploadedFileContentType contentType;
     private boolean autoUpload;
+    private final UploadedFileContentType contentType;
 
-    public UploadedFileField(String physicalTypeIdentifier,
-            JavaSymbolName fieldName, UploadedFileContentType contentType) {
+    public UploadedFileField(final String physicalTypeIdentifier,
+            final JavaSymbolName fieldName,
+            final UploadedFileContentType contentType) {
         super(physicalTypeIdentifier, JavaType.BYTE_ARRAY_PRIMITIVE, fieldName);
         this.contentType = contentType;
     }
@@ -30,7 +30,7 @@ public class UploadedFileField extends FieldDetails {
             final List<AnnotationMetadataBuilder> annotations) {
         super.decorateAnnotationsList(annotations);
 
-        List<AnnotationAttributeValue<?>> attrs = new ArrayList<AnnotationAttributeValue<?>>();
+        final List<AnnotationAttributeValue<?>> attrs = new ArrayList<AnnotationAttributeValue<?>>();
         attrs.add(new StringAttributeValue(new JavaSymbolName("contentType"),
                 contentType.getContentType()));
 
@@ -48,7 +48,7 @@ public class UploadedFileField extends FieldDetails {
         return contentType;
     }
 
-    public void setAutoUpload(boolean autoUpload) {
+    public void setAutoUpload(final boolean autoUpload) {
         this.autoUpload = autoUpload;
     }
 }

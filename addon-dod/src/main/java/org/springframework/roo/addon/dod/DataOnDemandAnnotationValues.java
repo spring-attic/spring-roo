@@ -16,7 +16,6 @@ import org.springframework.roo.model.JavaType;
  */
 public class DataOnDemandAnnotationValues extends AbstractAnnotationValues {
 
-    // From annotation
     @AutoPopulate private JavaType entity;
     @AutoPopulate private int quantity = 10;
 

@@ -40,6 +40,35 @@ public interface MetadataService extends MetadataNotificationListener,
         MetadataCache {
 
     /**
+     * Returns the {@link MetadataItem} with the given ID, generating it from
+     * scratch and caching the result. For performance reasons it's preferable
+     * to call {@link #get(String)} if possible, to take advantage of the cache.
+     * 
+     * @param metadataIdentificationString the ID of the {@link MetadataItem} to
+     *            acquire; must identify a metadata instance, i.e. return
+     *            <code>true</code> when passed to
+     *            {@link MetadataIdentificationUtils#isIdentifyingInstance(String)}
+     * @return the metadata, or <code>null</code> if the ID was valid but the
+     *         metadata is not currently available
+     * @throws an exception if the given type of metadata is not supported
+     */
+    MetadataItem evictAndGet(String metadataIdentificationString);
+
+    /**
+     * Returns the {@link MetadataItem} with the given ID, from the cache if
+     * possible.
+     * 
+     * @param metadataIdentificationString the ID of the {@link MetadataItem} to
+     *            acquire; must identify a metadata instance, i.e. return
+     *            <code>true</code> when passed to
+     *            {@link MetadataIdentificationUtils#isIdentifyingInstance(String)}
+     * @return the metadata, or <code>null</code> if the ID was valid but the
+     *         metadata is not currently available
+     * @throws an exception if the given type of metadata is not supported
+     */
+    MetadataItem get(String metadataIdentificationString);
+
+    /**
      * Creates the requested {@link MetadataItem} if possible, returning null if
      * the item cannot be created or found. Implementations will delegate
      * creation events to the respective registered {@link MetadataProvider},
@@ -67,33 +96,4 @@ public interface MetadataService extends MetadataNotificationListener,
      */
     @Deprecated
     MetadataItem get(String metadataIdentificationString, boolean evictCache);
-
-    /**
-     * Returns the {@link MetadataItem} with the given ID, from the cache if
-     * possible.
-     * 
-     * @param metadataIdentificationString the ID of the {@link MetadataItem} to
-     *            acquire; must identify a metadata instance, i.e. return
-     *            <code>true</code> when passed to
-     *            {@link MetadataIdentificationUtils#isIdentifyingInstance(String)}
-     * @return the metadata, or <code>null</code> if the ID was valid but the
-     *         metadata is not currently available
-     * @throws an exception if the given type of metadata is not supported
-     */
-    MetadataItem get(String metadataIdentificationString);
-
-    /**
-     * Returns the {@link MetadataItem} with the given ID, generating it from
-     * scratch and caching the result. For performance reasons it's preferable
-     * to call {@link #get(String)} if possible, to take advantage of the cache.
-     * 
-     * @param metadataIdentificationString the ID of the {@link MetadataItem} to
-     *            acquire; must identify a metadata instance, i.e. return
-     *            <code>true</code> when passed to
-     *            {@link MetadataIdentificationUtils#isIdentifyingInstance(String)}
-     * @return the metadata, or <code>null</code> if the ID was valid but the
-     *         metadata is not currently available
-     * @throws an exception if the given type of metadata is not supported
-     */
-    MetadataItem evictAndGet(String metadataIdentificationString);
 }

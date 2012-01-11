@@ -38,25 +38,52 @@ import org.w3c.dom.Element;
 @Service
 public class PomManagementServiceImpl implements PomManagementService {
 
-    // Constants
+    private static class PomComparator implements Comparator<String> {
+
+        private final Map<String, Pom> pomMap;
+
+        /**
+         * Constructor
+         * 
+         * @param pomMap
+         */
+        private PomComparator(final Map<String, Pom> pomMap) {
+            this.pomMap = pomMap;
+        }
+
+        public int compare(final String s1, final String s2) {
+            final String p1 = pomMap.get(s1).getRoot() + File.separator;
+            final String p2 = pomMap.get(s2).getRoot() + File.separator;
+            if (p1.startsWith(p2)) {
+                return -1;
+            }
+            else if (p2.startsWith(p1)) {
+                return 1;
+            }
+            return 0;
+        }
+    }
+
     private static final String DEFAULT_POM_NAME = "pom.xml";
+
     private static final String DEFAULT_RELATIVE_PATH = ".." + File.separator
             + DEFAULT_POM_NAME;
-
-    // Fields
     @Reference FileManager fileManager;
     @Reference FileMonitorService fileMonitorService;
+    private String focusedModulePath;
     @Reference MetadataDependencyRegistry metadataDependencyRegistry;
     @Reference MetadataService metadataService;
+
     @Reference PomFactory pomFactory;
+    private final Map<String, Pom> pomMap = new LinkedHashMap<String, Pom>();
+    private String projectRootDirectory;
     @Reference Shell shell;
 
-    private final Set<String> toBeParsed = new HashSet<String>();
-    private final Map<String, Pom> pomMap = new LinkedHashMap<String, Pom>();
-    private String focusedModulePath;
-    private String projectRootDirectory;
-
     // ------------------------ OSGi lifecycle callbacks -----------------------
+
+    private final Set<String> toBeParsed = new HashSet<String>();
+
+    // --------------------- PomManagementService methods ----------------------
 
     protected void activate(final ComponentContext context) {
         final File projectDirectory = new File(StringUtils.defaultIfEmpty(
@@ -64,7 +91,38 @@ public class PomManagementServiceImpl implements PomManagementService {
         projectRootDirectory = FileUtils.getCanonicalPath(projectDirectory);
     }
 
-    // --------------------- PomManagementService methods ----------------------
+    /**
+     * For test cases to set up the state of this service
+     * 
+     * @param pom the POM to add (required)
+     */
+    void addPom(final Pom pom) {
+        pomMap.put(pom.getPath(), pom);
+    }
+
+    private void findUnparsedPoms() {
+        for (final String change : fileMonitorService.getDirtyFiles(getClass()
+                .getName())) {
+            if (change.endsWith(DEFAULT_POM_NAME)) {
+                toBeParsed.add(change);
+            }
+        }
+    }
+
+    public Pom getFocusedModule() {
+        updatePomCache();
+        if ((focusedModulePath == null) && (getRootPom() != null)) {
+            focusedModulePath = getRootPom().getPath();
+        }
+        return getPomFromPath(focusedModulePath);
+    }
+
+    public String getFocusedModuleName() {
+        if (getFocusedModule() == null) {
+            return "";
+        }
+        return getFocusedModule().getModuleName();
+    }
 
     public Pom getModuleForFileIdentifier(final String fileIdentifier) {
         updatePomCache();
@@ -84,9 +142,22 @@ public class PomManagementServiceImpl implements PomManagementService {
         return getPomFromPath(pomPath);
     }
 
-    public Pom getPomFromPath(final String pomPath) {
-        updatePomCache();
-        return pomMap.get(pomPath);
+    private String getModuleName(final String pomDirectory) {
+        final String normalisedRootPath = FileUtils
+                .ensureTrailingSeparator(projectRootDirectory);
+        final String normalisedPomDirectory = FileUtils
+                .ensureTrailingSeparator(pomDirectory);
+        final String moduleName = StringUtils.removePrefix(
+                normalisedPomDirectory, normalisedRootPath);
+        return FileUtils.removeTrailingSeparator(moduleName);
+    }
+
+    public Collection<String> getModuleNames() {
+        final Set<String> moduleNames = new HashSet<String>();
+        for (final Pom module : pomMap.values()) {
+            moduleNames.add(module.getModuleName());
+        }
+        return moduleNames;
     }
 
     public Pom getPomFromModuleName(final String moduleName) {
@@ -98,60 +169,20 @@ public class PomManagementServiceImpl implements PomManagementService {
         return null;
     }
 
-    public Collection<String> getModuleNames() {
-        final Set<String> moduleNames = new HashSet<String>();
-        for (final Pom module : pomMap.values()) {
-            moduleNames.add(module.getModuleName());
-        }
-        return moduleNames;
+    public Pom getPomFromPath(final String pomPath) {
+        updatePomCache();
+        return pomMap.get(pomPath);
+    }
+
+    public Collection<Pom> getPoms() {
+        updatePomCache();
+        return new ArrayList<Pom>(pomMap.values());
     }
 
     public Pom getRootPom() {
         updatePomCache();
         return pomMap.get(projectRootDirectory + File.separator
                 + DEFAULT_POM_NAME);
-    }
-
-    public Pom getFocusedModule() {
-        updatePomCache();
-        if (focusedModulePath == null && getRootPom() != null) {
-            focusedModulePath = getRootPom().getPath();
-        }
-        return getPomFromPath(focusedModulePath);
-    }
-
-    public String getFocusedModuleName() {
-        if (getFocusedModule() == null) {
-            return "";
-        }
-        return getFocusedModule().getModuleName();
-    }
-
-    public void setFocusedModule(final Pom focusedModule) {
-        Assert.notNull(focusedModule, "Module required");
-        if (focusedModule.getPath().equals(this.focusedModulePath)) {
-            return;
-        }
-        this.focusedModulePath = focusedModule.getPath();
-        shell.setPromptPath(focusedModule.getModuleName());
-    }
-
-    private void updatePomCache() {
-        findUnparsedPoms();
-        final Collection<Pom> newPoms = parseUnparsedPoms();
-        if (!newPoms.isEmpty()) {
-            sortPomMap();
-        }
-        updateProjectMetadataForModules(newPoms);
-    }
-
-    private void findUnparsedPoms() {
-        for (final String change : fileMonitorService.getDirtyFiles(getClass()
-                .getName())) {
-            if (change.endsWith(DEFAULT_POM_NAME)) {
-                toBeParsed.add(change);
-            }
-        }
     }
 
     private Set<Pom> parseUnparsedPoms() {
@@ -183,46 +214,6 @@ public class PomManagementServiceImpl implements PomManagementService {
         return newPoms;
     }
 
-    private String getModuleName(final String pomDirectory) {
-        final String normalisedRootPath = FileUtils
-                .ensureTrailingSeparator(projectRootDirectory);
-        final String normalisedPomDirectory = FileUtils
-                .ensureTrailingSeparator(pomDirectory);
-        final String moduleName = StringUtils.removePrefix(
-                normalisedPomDirectory, normalisedRootPath);
-        return FileUtils.removeTrailingSeparator(moduleName);
-    }
-
-    private void resolvePoms(final Element pomRoot, final String pomPath,
-            final Map<String, String> pomSet) {
-        pomSet.put(pomPath, pomSet.get(pomPath)); // ensures this key exists
-
-        final Element parentElement = XmlUtils.findFirstElement(
-                "/project/parent", pomRoot);
-        if (parentElement != null) {
-            resolveParentPom(pomPath, pomSet, parentElement);
-        }
-
-        resolveChildModulePoms(pomRoot, pomPath, pomSet);
-    }
-
-    private void resolveParentPom(final String pomPath,
-            final Map<String, String> pomSet, final Element parentElement) {
-        final String relativePath = XmlUtils.getTextContent("/relativePath",
-                parentElement, DEFAULT_RELATIVE_PATH);
-        final String parentPomPath = resolveRelativePath(pomPath, relativePath);
-        final boolean alreadyDiscovered = pomSet.containsKey(parentPomPath);
-        if (!alreadyDiscovered) {
-            pomSet.put(parentPomPath, pomSet.get(parentPomPath));
-            if (new File(parentPomPath).isFile()) {
-                final Document pomDocument = XmlUtils.readXml(fileManager
-                        .getInputStream(parentPomPath));
-                final Element root = pomDocument.getDocumentElement();
-                resolvePoms(root, parentPomPath, pomSet);
-            }
-        }
-    }
-
     private void resolveChildModulePoms(final Element pomRoot,
             final String pomPath, final Map<String, String> pomSet) {
         for (final Element module : XmlUtils.findElements(
@@ -242,6 +233,36 @@ public class PomManagementServiceImpl implements PomManagementService {
                 }
             }
         }
+    }
+
+    private void resolveParentPom(final String pomPath,
+            final Map<String, String> pomSet, final Element parentElement) {
+        final String relativePath = XmlUtils.getTextContent("/relativePath",
+                parentElement, DEFAULT_RELATIVE_PATH);
+        final String parentPomPath = resolveRelativePath(pomPath, relativePath);
+        final boolean alreadyDiscovered = pomSet.containsKey(parentPomPath);
+        if (!alreadyDiscovered) {
+            pomSet.put(parentPomPath, pomSet.get(parentPomPath));
+            if (new File(parentPomPath).isFile()) {
+                final Document pomDocument = XmlUtils.readXml(fileManager
+                        .getInputStream(parentPomPath));
+                final Element root = pomDocument.getDocumentElement();
+                resolvePoms(root, parentPomPath, pomSet);
+            }
+        }
+    }
+
+    private void resolvePoms(final Element pomRoot, final String pomPath,
+            final Map<String, String> pomSet) {
+        pomSet.put(pomPath, pomSet.get(pomPath)); // ensures this key exists
+
+        final Element parentElement = XmlUtils.findFirstElement(
+                "/project/parent", pomRoot);
+        if (parentElement != null) {
+            resolveParentPom(pomPath, pomSet, parentElement);
+        }
+
+        resolveChildModulePoms(pomRoot, pomPath, pomSet);
     }
 
     private String resolveRelativePath(String relativeTo,
@@ -286,6 +307,15 @@ public class PomManagementServiceImpl implements PomManagementService {
         return path;
     }
 
+    public void setFocusedModule(final Pom focusedModule) {
+        Assert.notNull(focusedModule, "Module required");
+        if (focusedModule.getPath().equals(focusedModulePath)) {
+            return;
+        }
+        focusedModulePath = focusedModule.getPath();
+        shell.setPromptPath(focusedModule.getModuleName());
+    }
+
     private void sortPomMap() {
         final List<String> sortedPomPaths = new ArrayList<String>(
                 pomMap.keySet());
@@ -298,53 +328,21 @@ public class PomManagementServiceImpl implements PomManagementService {
         pomMap.putAll(sortedPomMap);
     }
 
+    private void updatePomCache() {
+        findUnparsedPoms();
+        final Collection<Pom> newPoms = parseUnparsedPoms();
+        if (!newPoms.isEmpty()) {
+            sortPomMap();
+        }
+        updateProjectMetadataForModules(newPoms);
+    }
+
     private void updateProjectMetadataForModules(final Iterable<Pom> newPoms) {
         for (final Pom pom : newPoms) {
             final String projectMetadataId = ProjectMetadata
                     .getProjectIdentifier(pom.getModuleName());
             metadataService.evictAndGet(projectMetadataId);
             metadataDependencyRegistry.notifyDownstream(projectMetadataId);
-        }
-    }
-
-    public Collection<Pom> getPoms() {
-        updatePomCache();
-        return new ArrayList<Pom>(pomMap.values());
-    }
-
-    /**
-     * For test cases to set up the state of this service
-     * 
-     * @param pom the POM to add (required)
-     */
-    void addPom(final Pom pom) {
-        pomMap.put(pom.getPath(), pom);
-    }
-
-    private static class PomComparator implements Comparator<String> {
-
-        // Fields
-        private final Map<String, Pom> pomMap;
-
-        /**
-         * Constructor
-         * 
-         * @param pomMap
-         */
-        private PomComparator(final Map<String, Pom> pomMap) {
-            this.pomMap = pomMap;
-        }
-
-        public int compare(final String s1, final String s2) {
-            final String p1 = pomMap.get(s1).getRoot() + File.separator;
-            final String p2 = pomMap.get(s2).getRoot() + File.separator;
-            if (p1.startsWith(p2)) {
-                return -1;
-            }
-            else if (p2.startsWith(p1)) {
-                return 1;
-            }
-            return 0;
         }
     }
 }

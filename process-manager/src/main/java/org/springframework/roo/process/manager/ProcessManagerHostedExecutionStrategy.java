@@ -25,19 +25,12 @@ import org.springframework.roo.support.util.ReflectionUtils;
 @Reference(name = "processManager", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC, referenceInterface = ProcessManager.class, cardinality = ReferenceCardinality.MANDATORY_UNARY)
 public class ProcessManagerHostedExecutionStrategy implements ExecutionStrategy {
 
-    // Fields
     private final Class<?> mutex = ProcessManagerHostedExecutionStrategy.class;
     private ProcessManager processManager;
 
     protected void bindProcessManager(final ProcessManager processManager) {
         synchronized (mutex) {
             this.processManager = processManager;
-        }
-    }
-
-    protected void unbindProcessManager(final ProcessManager processManager) {
-        synchronized (mutex) {
-            this.processManager = null;
         }
     }
 
@@ -64,9 +57,9 @@ public class ProcessManagerHostedExecutionStrategy implements ExecutionStrategy 
                 // if executing a script
                 // TERMINATED added in case of additional commands following a
                 // quit or exit in a script - ROO-2270
-                return processManager.getProcessManagerStatus() == ProcessManagerStatus.AVAILABLE
-                        || processManager.getProcessManagerStatus() == ProcessManagerStatus.BUSY_EXECUTING
-                        || processManager.getProcessManagerStatus() == ProcessManagerStatus.TERMINATED;
+                return (processManager.getProcessManagerStatus() == ProcessManagerStatus.AVAILABLE)
+                        || (processManager.getProcessManagerStatus() == ProcessManagerStatus.BUSY_EXECUTING)
+                        || (processManager.getProcessManagerStatus() == ProcessManagerStatus.TERMINATED);
             }
         }
         return false;
@@ -77,6 +70,12 @@ public class ProcessManagerHostedExecutionStrategy implements ExecutionStrategy 
             if (processManager != null) {
                 processManager.terminate();
             }
+        }
+    }
+
+    protected void unbindProcessManager(final ProcessManager processManager) {
+        synchronized (mutex) {
+            this.processManager = null;
         }
     }
 }

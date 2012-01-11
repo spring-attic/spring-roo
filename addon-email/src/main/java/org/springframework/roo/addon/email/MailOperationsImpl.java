@@ -55,149 +55,23 @@ import org.w3c.dom.Element;
 @Service
 public class MailOperationsImpl implements MailOperations {
 
-    // Constants
+    private static final String LOCAL_MESSAGE_VARIABLE = "mailMessage";
     private static final Logger LOGGER = HandlerUtils
             .getLogger(MailOperationsImpl.class);
     private static final int PRIVATE_TRANSIENT = Modifier.PRIVATE
             | Modifier.TRANSIENT;
-    private static final AnnotatedJavaType STRING = new AnnotatedJavaType(
-            JavaType.STRING);
-    private static final String LOCAL_MESSAGE_VARIABLE = "mailMessage";
     private static final String SPRING_TASK_NS = "http://www.springframework.org/schema/task";
     private static final String SPRING_TASK_XSD = "http://www.springframework.org/schema/task/spring-task-3.1.xsd";
+    private static final AnnotatedJavaType STRING = new AnnotatedJavaType(
+            JavaType.STRING);
     private static final String TEMPLATE_MESSAGE_FIELD = "templateMessage";
 
-    // Fields
     @Reference private FileManager fileManager;
     @Reference private PathResolver pathResolver;
     @Reference private ProjectOperations projectOperations;
     @Reference private PropFileOperations propFileOperations;
     @Reference private TypeLocationService typeLocationService;
     @Reference private TypeManagementService typeManagementService;
-
-    public boolean isEmailInstallationPossible() {
-        return projectOperations.isFocusedProjectAvailable();
-    }
-
-    public boolean isManageEmailAvailable() {
-        return projectOperations.isFocusedProjectAvailable()
-                && fileManager.exists(getApplicationContextPath());
-    }
-
-    /**
-     * Returns the canonical path of the user project's applicationContext.xml
-     * file.
-     * 
-     * @return a non-blank path
-     */
-    private String getApplicationContextPath() {
-        return pathResolver.getFocusedIdentifier(Path.SPRING_CONFIG_ROOT,
-                "applicationContext.xml");
-    }
-
-    public void installEmail(final String hostServer,
-            final MailProtocol protocol, final String port,
-            final String encoding, final String username, final String password) {
-        Assert.hasText(hostServer, "Host server name required");
-
-        final String contextPath = getApplicationContextPath();
-        final Document document = XmlUtils.readXml(fileManager
-                .getInputStream(contextPath));
-        final Element root = document.getDocumentElement();
-
-        boolean installDependencies = true;
-        final Map<String, String> props = new HashMap<String, String>();
-
-        Element mailBean = XmlUtils.findFirstElement("/beans/bean[@class = '"
-                + JAVA_MAIL_SENDER_IMPL.getFullyQualifiedTypeName() + "']",
-                root);
-        if (mailBean != null) {
-            root.removeChild(mailBean);
-            installDependencies = false;
-        }
-
-        mailBean = document.createElement("bean");
-        mailBean.setAttribute("class",
-                JAVA_MAIL_SENDER_IMPL.getFullyQualifiedTypeName());
-        mailBean.setAttribute("id", "mailSender");
-
-        final Element property = document.createElement("property");
-        property.setAttribute("name", "host");
-        property.setAttribute("value", "${email.host}");
-        mailBean.appendChild(property);
-        root.appendChild(mailBean);
-        props.put("email.host", hostServer);
-
-        if (protocol != null) {
-            final Element pElement = document.createElement("property");
-            pElement.setAttribute("value", "${email.protocol}");
-            pElement.setAttribute("name", "protocol");
-            mailBean.appendChild(pElement);
-            props.put("email.protocol", protocol.getProtocol());
-        }
-
-        if (StringUtils.hasText(port)) {
-            final Element pElement = document.createElement("property");
-            pElement.setAttribute("name", "port");
-            pElement.setAttribute("value", "${email.port}");
-            mailBean.appendChild(pElement);
-            props.put("email.port", port);
-        }
-
-        if (StringUtils.hasText(encoding)) {
-            final Element pElement = document.createElement("property");
-            pElement.setAttribute("name", "defaultEncoding");
-            pElement.setAttribute("value", "${email.encoding}");
-            mailBean.appendChild(pElement);
-            props.put("email.encoding", encoding);
-        }
-
-        if (StringUtils.hasText(username)) {
-            final Element pElement = document.createElement("property");
-            pElement.setAttribute("name", "username");
-            pElement.setAttribute("value", "${email.username}");
-            mailBean.appendChild(pElement);
-            props.put("email.username", username);
-        }
-
-        if (StringUtils.hasText(password)) {
-            final Element pElement = document.createElement("property");
-            pElement.setAttribute("name", "password");
-            pElement.setAttribute("value", "${email.password}");
-            mailBean.appendChild(pElement);
-            props.put("email.password", password);
-
-            if (SMTP.equals(protocol)) {
-                final Element javaMailProperties = document
-                        .createElement("property");
-                javaMailProperties.setAttribute("name", "javaMailProperties");
-                final Element securityProps = document.createElement("props");
-                javaMailProperties.appendChild(securityProps);
-                final Element prop = document.createElement("prop");
-                prop.setAttribute("key", "mail.smtp.auth");
-                prop.setTextContent("true");
-                securityProps.appendChild(prop);
-                final Element prop2 = document.createElement("prop");
-                prop2.setAttribute("key", "mail.smtp.starttls.enable");
-                prop2.setTextContent("true");
-                securityProps.appendChild(prop2);
-                mailBean.appendChild(javaMailProperties);
-            }
-        }
-
-        DomUtils.removeTextNodes(root);
-
-        fileManager.createOrUpdateTextFileIfRequired(contextPath,
-                XmlUtils.nodeToString(document), false);
-
-        if (installDependencies) {
-            updateConfiguration(projectOperations.getFocusedModuleName());
-        }
-
-        propFileOperations.addProperties(Path.SPRING_CONFIG_ROOT
-                .getModulePathId(projectOperations.getFocusedModuleName()),
-                "email.properties", props, true, true);
-    }
 
     public void configureTemplateMessage(final String from, final String subject) {
         final String contextPath = getApplicationContextPath();
@@ -258,48 +132,14 @@ public class MailOperationsImpl implements MailOperations {
     }
 
     /**
-     * Finds the SimpleMailMessage bean in the Spring XML file with the given
-     * root element
+     * Returns the canonical path of the user project's applicationContext.xml
+     * file.
      * 
-     * @param root
-     * @return <code>null</code> if there is no such bean
+     * @return a non-blank path
      */
-    private Element getSimpleMailMessageBean(final Element root) {
-        return XmlUtils.findFirstElement("/beans/bean[@class = '"
-                + SIMPLE_MAIL_MESSAGE.getFullyQualifiedTypeName() + "']", root);
-    }
-
-    public void injectEmailTemplate(final JavaType targetType,
-            final JavaSymbolName fieldName, final boolean async) {
-        Assert.notNull(targetType, "Java type required");
-        Assert.notNull(fieldName, "Field name required");
-
-        final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
-        annotations.add(new AnnotationMetadataBuilder(AUTOWIRED));
-
-        // Obtain the physical type and its mutable class details
-        final String declaredByMetadataId = typeLocationService
-                .getPhysicalTypeIdentifier(targetType);
-        ClassOrInterfaceTypeDetails existing = typeLocationService
-                .getTypeDetails(targetType);
-        if (existing == null) {
-            LOGGER.warning("Aborting: Unable to find metadata for target type '"
-                    + targetType.getFullyQualifiedTypeName() + "'");
-            return;
-        }
-        final ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(
-                existing);
-
-        // Add the MailSender field
-        final FieldMetadataBuilder mailSenderFieldBuilder = new FieldMetadataBuilder(
-                declaredByMetadataId, PRIVATE_TRANSIENT, annotations,
-                fieldName, MAIL_SENDER);
-        cidBuilder.addField(mailSenderFieldBuilder);
-
-        // Add the "sendMessage" method
-        cidBuilder.addMethod(getSendMethod(fieldName, async,
-                declaredByMetadataId, cidBuilder));
-        typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
+    private String getApplicationContextPath() {
+        return pathResolver.getFocusedIdentifier(Path.SPRING_CONFIG_ROOT,
+                "applicationContext.xml");
     }
 
     /**
@@ -413,6 +253,164 @@ public class MailOperationsImpl implements MailOperations {
             methodBuilder.addAnnotation(new AnnotationMetadataBuilder(ASYNC));
         }
         return methodBuilder;
+    }
+
+    /**
+     * Finds the SimpleMailMessage bean in the Spring XML file with the given
+     * root element
+     * 
+     * @param root
+     * @return <code>null</code> if there is no such bean
+     */
+    private Element getSimpleMailMessageBean(final Element root) {
+        return XmlUtils.findFirstElement("/beans/bean[@class = '"
+                + SIMPLE_MAIL_MESSAGE.getFullyQualifiedTypeName() + "']", root);
+    }
+
+    public void injectEmailTemplate(final JavaType targetType,
+            final JavaSymbolName fieldName, final boolean async) {
+        Assert.notNull(targetType, "Java type required");
+        Assert.notNull(fieldName, "Field name required");
+
+        final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+        annotations.add(new AnnotationMetadataBuilder(AUTOWIRED));
+
+        // Obtain the physical type and its mutable class details
+        final String declaredByMetadataId = typeLocationService
+                .getPhysicalTypeIdentifier(targetType);
+        final ClassOrInterfaceTypeDetails existing = typeLocationService
+                .getTypeDetails(targetType);
+        if (existing == null) {
+            LOGGER.warning("Aborting: Unable to find metadata for target type '"
+                    + targetType.getFullyQualifiedTypeName() + "'");
+            return;
+        }
+        final ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(
+                existing);
+
+        // Add the MailSender field
+        final FieldMetadataBuilder mailSenderFieldBuilder = new FieldMetadataBuilder(
+                declaredByMetadataId, PRIVATE_TRANSIENT, annotations,
+                fieldName, MAIL_SENDER);
+        cidBuilder.addField(mailSenderFieldBuilder);
+
+        // Add the "sendMessage" method
+        cidBuilder.addMethod(getSendMethod(fieldName, async,
+                declaredByMetadataId, cidBuilder));
+        typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
+    }
+
+    public void installEmail(final String hostServer,
+            final MailProtocol protocol, final String port,
+            final String encoding, final String username, final String password) {
+        Assert.hasText(hostServer, "Host server name required");
+
+        final String contextPath = getApplicationContextPath();
+        final Document document = XmlUtils.readXml(fileManager
+                .getInputStream(contextPath));
+        final Element root = document.getDocumentElement();
+
+        boolean installDependencies = true;
+        final Map<String, String> props = new HashMap<String, String>();
+
+        Element mailBean = XmlUtils.findFirstElement("/beans/bean[@class = '"
+                + JAVA_MAIL_SENDER_IMPL.getFullyQualifiedTypeName() + "']",
+                root);
+        if (mailBean != null) {
+            root.removeChild(mailBean);
+            installDependencies = false;
+        }
+
+        mailBean = document.createElement("bean");
+        mailBean.setAttribute("class",
+                JAVA_MAIL_SENDER_IMPL.getFullyQualifiedTypeName());
+        mailBean.setAttribute("id", "mailSender");
+
+        final Element property = document.createElement("property");
+        property.setAttribute("name", "host");
+        property.setAttribute("value", "${email.host}");
+        mailBean.appendChild(property);
+        root.appendChild(mailBean);
+        props.put("email.host", hostServer);
+
+        if (protocol != null) {
+            final Element pElement = document.createElement("property");
+            pElement.setAttribute("value", "${email.protocol}");
+            pElement.setAttribute("name", "protocol");
+            mailBean.appendChild(pElement);
+            props.put("email.protocol", protocol.getProtocol());
+        }
+
+        if (StringUtils.hasText(port)) {
+            final Element pElement = document.createElement("property");
+            pElement.setAttribute("name", "port");
+            pElement.setAttribute("value", "${email.port}");
+            mailBean.appendChild(pElement);
+            props.put("email.port", port);
+        }
+
+        if (StringUtils.hasText(encoding)) {
+            final Element pElement = document.createElement("property");
+            pElement.setAttribute("name", "defaultEncoding");
+            pElement.setAttribute("value", "${email.encoding}");
+            mailBean.appendChild(pElement);
+            props.put("email.encoding", encoding);
+        }
+
+        if (StringUtils.hasText(username)) {
+            final Element pElement = document.createElement("property");
+            pElement.setAttribute("name", "username");
+            pElement.setAttribute("value", "${email.username}");
+            mailBean.appendChild(pElement);
+            props.put("email.username", username);
+        }
+
+        if (StringUtils.hasText(password)) {
+            final Element pElement = document.createElement("property");
+            pElement.setAttribute("name", "password");
+            pElement.setAttribute("value", "${email.password}");
+            mailBean.appendChild(pElement);
+            props.put("email.password", password);
+
+            if (SMTP.equals(protocol)) {
+                final Element javaMailProperties = document
+                        .createElement("property");
+                javaMailProperties.setAttribute("name", "javaMailProperties");
+                final Element securityProps = document.createElement("props");
+                javaMailProperties.appendChild(securityProps);
+                final Element prop = document.createElement("prop");
+                prop.setAttribute("key", "mail.smtp.auth");
+                prop.setTextContent("true");
+                securityProps.appendChild(prop);
+                final Element prop2 = document.createElement("prop");
+                prop2.setAttribute("key", "mail.smtp.starttls.enable");
+                prop2.setTextContent("true");
+                securityProps.appendChild(prop2);
+                mailBean.appendChild(javaMailProperties);
+            }
+        }
+
+        DomUtils.removeTextNodes(root);
+
+        fileManager.createOrUpdateTextFileIfRequired(contextPath,
+                XmlUtils.nodeToString(document), false);
+
+        if (installDependencies) {
+            updateConfiguration(projectOperations.getFocusedModuleName());
+        }
+
+        propFileOperations.addProperties(Path.SPRING_CONFIG_ROOT
+                .getModulePathId(projectOperations.getFocusedModuleName()),
+                "email.properties", props, true, true);
+    }
+
+    public boolean isEmailInstallationPossible() {
+        return projectOperations.isFocusedProjectAvailable();
+    }
+
+    public boolean isManageEmailAvailable() {
+        return projectOperations.isFocusedProjectAvailable()
+                && fileManager.exists(getApplicationContextPath());
     }
 
     private void updateConfiguration(final String moduleName) {

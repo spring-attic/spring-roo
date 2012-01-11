@@ -39,11 +39,10 @@ import org.springframework.roo.model.JavaType;
  */
 public class ReferenceField extends FieldDetails {
 
-    // Fields
+    private final Cardinality cardinality;
+    private Fetch fetch;
     private String joinColumnName;
     private String referencedColumnName;
-    private Fetch fetch;
-    private final Cardinality cardinality;
 
     public ReferenceField(final String physicalTypeIdentifier,
             final JavaType fieldType, final JavaSymbolName fieldName,
@@ -52,35 +51,11 @@ public class ReferenceField extends FieldDetails {
         this.cardinality = cardinality;
     }
 
-    public String getJoinColumnName() {
-        return joinColumnName;
-    }
-
-    public void setJoinColumnName(final String joinColumnName) {
-        this.joinColumnName = joinColumnName;
-    }
-
-    public String getReferencedColumnName() {
-        return referencedColumnName;
-    }
-
-    public void setReferencedColumnName(final String referencedColumnName) {
-        this.referencedColumnName = referencedColumnName;
-    }
-
-    public Fetch getFetch() {
-        return fetch;
-    }
-
-    public void setFetch(final Fetch fetch) {
-        this.fetch = fetch;
-    }
-
     @Override
     public void decorateAnnotationsList(
             final List<AnnotationMetadataBuilder> annotations) {
         super.decorateAnnotationsList(annotations);
-        List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
+        final List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
 
         if (fetch != null) {
             JavaSymbolName value = new JavaSymbolName("EAGER");
@@ -111,7 +86,7 @@ public class ReferenceField extends FieldDetails {
         }
 
         if (joinColumnName != null) {
-            List<AnnotationAttributeValue<?>> joinColumnAttrs = new ArrayList<AnnotationAttributeValue<?>>();
+            final List<AnnotationAttributeValue<?>> joinColumnAttrs = new ArrayList<AnnotationAttributeValue<?>>();
             joinColumnAttrs.add(new StringAttributeValue(new JavaSymbolName(
                     "name"), joinColumnName));
 
@@ -123,5 +98,29 @@ public class ReferenceField extends FieldDetails {
             annotations.add(new AnnotationMetadataBuilder(JOIN_COLUMN,
                     joinColumnAttrs));
         }
+    }
+
+    public Fetch getFetch() {
+        return fetch;
+    }
+
+    public String getJoinColumnName() {
+        return joinColumnName;
+    }
+
+    public String getReferencedColumnName() {
+        return referencedColumnName;
+    }
+
+    public void setFetch(final Fetch fetch) {
+        this.fetch = fetch;
+    }
+
+    public void setJoinColumnName(final String joinColumnName) {
+        this.joinColumnName = joinColumnName;
+    }
+
+    public void setReferencedColumnName(final String referencedColumnName) {
+        this.referencedColumnName = referencedColumnName;
     }
 }

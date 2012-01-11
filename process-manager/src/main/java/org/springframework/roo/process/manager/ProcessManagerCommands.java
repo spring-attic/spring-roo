@@ -19,7 +19,6 @@ import org.springframework.roo.shell.Shell;
 @Service
 public class ProcessManagerCommands implements CommandMarker {
 
-    // Fields
     @Reference private ProcessManager processManager;
     @Reference private Shell shell;
 
@@ -38,17 +37,32 @@ public class ProcessManagerCommands implements CommandMarker {
         return "Development mode set to " + enabled;
     }
 
+    @CliCommand(value = "poll now", help = "Perform a manual file system poll")
+    public String poll() {
+        final long originalSetting = processManager
+                .getMinimumDelayBetweenPoll();
+        try {
+            processManager.setMinimumDelayBetweenPoll(1);
+            processManager.timerBasedPoll();
+        }
+        finally {
+            // Switch on manual polling again
+            processManager.setMinimumDelayBetweenPoll(originalSetting);
+        }
+        return "Manual poll completed";
+    }
+
     @CliCommand(value = "poll status", help = "Display file system polling information")
     public String pollingInfo() {
-        StringBuilder sb = new StringBuilder("File system polling ");
-        long duration = processManager.getLastPollDuration();
+        final StringBuilder sb = new StringBuilder("File system polling ");
+        final long duration = processManager.getLastPollDuration();
         if (duration == 0) {
             sb.append("never executed; ");
         }
         else {
             sb.append("last took ").append(duration).append(" ms; ");
         }
-        long minimum = processManager.getMinimumDelayBetweenPoll();
+        final long minimum = processManager.getMinimumDelayBetweenPoll();
         if (minimum == 0) {
             sb.append("automatic polling is disabled");
         }
@@ -67,19 +81,5 @@ public class ProcessManagerCommands implements CommandMarker {
             @CliOption(key = { "", "ms" }, mandatory = true, help = "The number of milliseconds between each poll") final long minimumDelayBetweenPoll) {
         processManager.setMinimumDelayBetweenPoll(minimumDelayBetweenPoll);
         return pollingInfo();
-    }
-
-    @CliCommand(value = "poll now", help = "Perform a manual file system poll")
-    public String poll() {
-        long originalSetting = processManager.getMinimumDelayBetweenPoll();
-        try {
-            processManager.setMinimumDelayBetweenPoll(1);
-            processManager.timerBasedPoll();
-        }
-        finally {
-            // Switch on manual polling again
-            processManager.setMinimumDelayBetweenPoll(originalSetting);
-        }
-        return "Manual poll completed";
     }
 }

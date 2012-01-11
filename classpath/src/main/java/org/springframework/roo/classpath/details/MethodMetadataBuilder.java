@@ -18,23 +18,34 @@ import org.springframework.roo.support.style.ToStringCreator;
 public final class MethodMetadataBuilder extends
         AbstractInvocableMemberMetadataBuilder<MethodMetadata> {
 
-    // Fields
     private JavaSymbolName methodName;
     private JavaType returnType;
-
-    public MethodMetadataBuilder(final String declaredbyMetadataId) {
-        super(declaredbyMetadataId);
-    }
 
     public MethodMetadataBuilder(final MethodMetadata existing) {
         super(existing);
         init(existing.getMethodName(), existing.getReturnType());
     }
 
+    public MethodMetadataBuilder(final String declaredbyMetadataId) {
+        super(declaredbyMetadataId);
+    }
+
+    /**
+     * Constructor for a method with no parameters
+     * 
+     * @param declaredbyMetadataId
+     * @param modifier
+     * @param methodName
+     * @param returnType
+     * @param bodyBuilder
+     */
     public MethodMetadataBuilder(final String declaredbyMetadataId,
-            final MethodMetadata existing) {
-        super(declaredbyMetadataId, existing);
-        init(existing.getMethodName(), existing.getReturnType());
+            final int modifier, final JavaSymbolName methodName,
+            final JavaType returnType,
+            final InvocableMemberBodyBuilder bodyBuilder) {
+        this(declaredbyMetadataId, modifier, methodName, returnType,
+                new ArrayList<AnnotatedJavaType>(),
+                new ArrayList<JavaSymbolName>(), bodyBuilder);
     }
 
     /**
@@ -62,22 +73,10 @@ public final class MethodMetadataBuilder extends
         setBodyBuilder(bodyBuilder);
     }
 
-    /**
-     * Constructor for a method with no parameters
-     * 
-     * @param declaredbyMetadataId
-     * @param modifier
-     * @param methodName
-     * @param returnType
-     * @param bodyBuilder
-     */
     public MethodMetadataBuilder(final String declaredbyMetadataId,
-            final int modifier, final JavaSymbolName methodName,
-            final JavaType returnType,
-            final InvocableMemberBodyBuilder bodyBuilder) {
-        this(declaredbyMetadataId, modifier, methodName, returnType,
-                new ArrayList<AnnotatedJavaType>(),
-                new ArrayList<JavaSymbolName>(), bodyBuilder);
+            final MethodMetadata existing) {
+        super(declaredbyMetadataId, existing);
+        init(existing.getMethodName(), existing.getReturnType());
     }
 
     public MethodMetadata build() {
@@ -88,21 +87,21 @@ public final class MethodMetadataBuilder extends
                         .getOutput());
     }
 
+    public JavaSymbolName getMethodName() {
+        return methodName;
+    }
+
+    public JavaType getReturnType() {
+        return returnType;
+    }
+
     private void init(final JavaSymbolName methodName, final JavaType returnType) {
         this.methodName = methodName;
         this.returnType = returnType;
     }
 
-    public JavaSymbolName getMethodName() {
-        return methodName;
-    }
-
     public void setMethodName(final JavaSymbolName methodName) {
         this.methodName = methodName;
-    }
-
-    public JavaType getReturnType() {
-        return returnType;
     }
 
     public void setReturnType(final JavaType returnType) {

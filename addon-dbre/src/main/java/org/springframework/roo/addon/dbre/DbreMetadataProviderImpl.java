@@ -32,7 +32,6 @@ import org.springframework.roo.project.LogicalPath;
 public class DbreMetadataProviderImpl extends AbstractItdMetadataProvider
         implements DbreMetadataProvider {
 
-    // Fields
     @Reference private DbreModelService dbreModelService;
     @Reference private TypeManagementService typeManagementService;
 
@@ -43,6 +42,12 @@ public class DbreMetadataProviderImpl extends AbstractItdMetadataProvider
         addMetadataTrigger(ROO_DB_MANAGED);
     }
 
+    @Override
+    protected String createLocalIdentifier(final JavaType javaType,
+            final LogicalPath path) {
+        return DbreMetadata.createIdentifier(javaType, path);
+    }
+
     protected void deactivate(final ComponentContext context) {
         metadataDependencyRegistry.deregisterDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
@@ -51,18 +56,33 @@ public class DbreMetadataProviderImpl extends AbstractItdMetadataProvider
     }
 
     @Override
-    protected String createLocalIdentifier(final JavaType javaType,
-            final LogicalPath path) {
-        return DbreMetadata.createIdentifier(javaType, path);
-    }
-
-    @Override
     protected String getGovernorPhysicalTypeIdentifier(
             final String metadataIdentificationString) {
-        JavaType javaType = DbreMetadata
+        final JavaType javaType = DbreMetadata
                 .getJavaType(metadataIdentificationString);
-        LogicalPath path = DbreMetadata.getPath(metadataIdentificationString);
+        final LogicalPath path = DbreMetadata
+                .getPath(metadataIdentificationString);
         return PhysicalTypeIdentifier.createIdentifier(javaType, path);
+    }
+
+    private IdentifierHolder getIdentifierHolder(final JavaType javaType) {
+        final List<FieldMetadata> identifierFields = persistenceMemberLocator
+                .getIdentifierFields(javaType);
+        if (identifierFields.isEmpty()) {
+            return null;
+        }
+
+        final FieldMetadata identifierField = identifierFields.get(0);
+        final boolean embeddedIdField = identifierField.getCustomData().get(
+                CustomDataKeys.EMBEDDED_ID_FIELD) != null;
+        final List<FieldMetadata> embeddedIdFields = persistenceMemberLocator
+                .getEmbeddedIdentifierFields(javaType);
+        return new IdentifierHolder(identifierField, embeddedIdField,
+                embeddedIdFields);
+    }
+
+    public String getItdUniquenessFilenameSuffix() {
+        return "DbManaged";
     }
 
     @Override
@@ -86,40 +106,40 @@ public class DbreMetadataProviderImpl extends AbstractItdMetadataProvider
         }
 
         // We know governor type details are non-null and can be safely cast
-        JavaType javaType = governorPhysicalTypeMetadata
+        final JavaType javaType = governorPhysicalTypeMetadata
                 .getMemberHoldingTypeDetails().getName();
-        IdentifierHolder identifierHolder = getIdentifierHolder(javaType);
+        final IdentifierHolder identifierHolder = getIdentifierHolder(javaType);
         if (identifierHolder == null) {
             return null;
         }
 
-        FieldMetadata versionField = getVersionField(javaType,
+        final FieldMetadata versionField = getVersionField(javaType,
                 metadataIdentificationString);
 
         // Search for database-managed entities
-        Iterable<ClassOrInterfaceTypeDetails> managedEntities = typeLocationService
+        final Iterable<ClassOrInterfaceTypeDetails> managedEntities = typeLocationService
                 .findClassesOrInterfaceDetailsWithAnnotation(ROO_DB_MANAGED);
 
         boolean found = false;
-        for (ClassOrInterfaceTypeDetails managedEntity : managedEntities) {
+        for (final ClassOrInterfaceTypeDetails managedEntity : managedEntities) {
             if (managedEntity.getName().equals(javaType)) {
                 found = true;
                 break;
             }
         }
         if (!found) {
-            String mid = typeLocationService
+            final String mid = typeLocationService
                     .getPhysicalTypeIdentifier(javaType);
             metadataDependencyRegistry.registerDependency(mid,
                     metadataIdentificationString);
             return null;
         }
 
-        DbreMetadata dbreMetadata = new DbreMetadata(
+        final DbreMetadata dbreMetadata = new DbreMetadata(
                 metadataIdentificationString, aspectName,
                 governorPhysicalTypeMetadata, annotationValues,
                 identifierHolder, versionField, managedEntities, database);
-        ClassOrInterfaceTypeDetails updatedGovernor = dbreMetadata
+        final ClassOrInterfaceTypeDetails updatedGovernor = dbreMetadata
                 .getUpdatedGovernor();
         if (updatedGovernor != null) {
             typeManagementService.createOrUpdateTypeOnDisk(updatedGovernor);
@@ -127,32 +147,12 @@ public class DbreMetadataProviderImpl extends AbstractItdMetadataProvider
         return dbreMetadata;
     }
 
-    private IdentifierHolder getIdentifierHolder(final JavaType javaType) {
-        List<FieldMetadata> identifierFields = persistenceMemberLocator
-                .getIdentifierFields(javaType);
-        if (identifierFields.isEmpty()) {
-            return null;
-        }
-
-        FieldMetadata identifierField = identifierFields.get(0);
-        boolean embeddedIdField = identifierField.getCustomData().get(
-                CustomDataKeys.EMBEDDED_ID_FIELD) != null;
-        List<FieldMetadata> embeddedIdFields = persistenceMemberLocator
-                .getEmbeddedIdentifierFields(javaType);
-        return new IdentifierHolder(identifierField, embeddedIdField,
-                embeddedIdFields);
+    public String getProvidesType() {
+        return DbreMetadata.getMetadataIdentiferType();
     }
 
     private FieldMetadata getVersionField(final JavaType domainType,
             final String metadataIdentificationString) {
         return persistenceMemberLocator.getVersionField(domainType);
-    }
-
-    public String getItdUniquenessFilenameSuffix() {
-        return "DbManaged";
-    }
-
-    public String getProvidesType() {
-        return DbreMetadata.getMetadataIdentiferType();
     }
 }

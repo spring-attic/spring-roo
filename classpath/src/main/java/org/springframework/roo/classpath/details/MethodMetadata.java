@@ -12,14 +12,14 @@ import org.springframework.roo.model.JavaType;
 public interface MethodMetadata extends InvocableMemberMetadata {
 
     /**
-     * @return the return type (never null, even if void)
-     */
-    JavaType getReturnType();
-
-    /**
      * @return the name of the method (never null)
      */
     JavaSymbolName getMethodName();
+
+    /**
+     * @return the return type (never null, even if void)
+     */
+    JavaType getReturnType();
 
     /**
      * Indicates whether this method has the same name (case-sensitive) as any

@@ -32,40 +32,46 @@ import org.w3c.dom.Element;
 @Component(componentAbstract = true)
 public abstract class AbstractEmbeddedProvider implements EmbeddedProvider {
 
-    // Constants
     private static final Logger LOGGER = Logger
             .getLogger(AbstractEmbeddedProvider.class.getName());
 
-    // Fields
     @Reference private FileManager fileManager;
     @Reference private UrlInputStreamService httpService;
     @Reference private JspOperations jspOperations;
     @Reference private PathResolver pathResolver;
 
     /**
-     * Method to install tagx file into /WEB-INF/tags/embed/ of target project.
+     * Convenience method to create a readable title for a EmbeddedCompletor
+     * enum value
      * 
-     * @param tagName
+     * @param providerName the original String
+     * @return the readable String
      */
-    public void installTagx(String tagName) {
-        Assert.hasText(tagName, "Tag name required");
+    private String getTitle(final String providerName) {
+        final String[] names = providerName.split("_");
+        final StringBuilder sb = new StringBuilder();
+        for (final String name : names) {
+            sb.append(StringUtils.capitalize(name.toLowerCase()));
+            sb.append(" ");
+        }
+        return sb.toString().trim();
+    }
 
-        if (!tagName.endsWith(".tagx")) {
-            tagName = tagName.concat(".tagx");
+    /**
+     * Convenience method to clean view name of a jspx.
+     * 
+     * @param viewName the view name to clean
+     * @param defaultName the default page name
+     * @return the cleaned name
+     */
+    public String getViewName(String viewName, final String defaultName) {
+        if ((viewName == null) || (viewName.length() == 0)) {
+            viewName = defaultName;
         }
-        String tagx = pathResolver.getFocusedIdentifier(Path.SRC_MAIN_WEBAPP,
-                "WEB-INF/tags/embed/" + tagName);
-        if (!fileManager.exists(tagx)) {
-            try {
-                FileCopyUtils
-                        .copy(FileUtils.getInputStream(getClass(), "tags/"
-                                + tagName), fileManager.createFile(tagx)
-                                .getOutputStream());
-            }
-            catch (IOException e) {
-                throw new IllegalStateException("Could not install " + tagx);
-            }
+        if (viewName.endsWith(".jspx")) {
+            viewName = viewName.substring(0, viewName.indexOf(".") - 1);
         }
+        return viewName.toLowerCase();
     }
 
     /**
@@ -84,12 +90,13 @@ public abstract class AbstractEmbeddedProvider implements EmbeddedProvider {
             title = getTitle(viewName);
         }
         viewName = getViewName(viewName, "default");
-        String jspx = pathResolver.getFocusedIdentifier(Path.SRC_MAIN_WEBAPP,
-                "WEB-INF/views/embed/" + viewName + ".jspx");
-        Document document = contentElement.getOwnerDocument();
+        final String jspx = pathResolver.getFocusedIdentifier(
+                Path.SRC_MAIN_WEBAPP, "WEB-INF/views/embed/" + viewName
+                        + ".jspx");
+        final Document document = contentElement.getOwnerDocument();
         if (!fileManager.exists(jspx)) {
             // Add document namespaces
-            Element div = new XmlElementBuilder("div", document)
+            final Element div = new XmlElementBuilder("div", document)
                     .addAttribute("xmlns:util",
                             "urn:jsptagdir:/WEB-INF/tags/util")
                     .addAttribute("xmlns:embed",
@@ -120,6 +127,50 @@ public abstract class AbstractEmbeddedProvider implements EmbeddedProvider {
     }
 
     /**
+     * Method to install tagx file into /WEB-INF/tags/embed/ of target project.
+     * 
+     * @param tagName
+     */
+    public void installTagx(String tagName) {
+        Assert.hasText(tagName, "Tag name required");
+
+        if (!tagName.endsWith(".tagx")) {
+            tagName = tagName.concat(".tagx");
+        }
+        final String tagx = pathResolver.getFocusedIdentifier(
+                Path.SRC_MAIN_WEBAPP, "WEB-INF/tags/embed/" + tagName);
+        if (!fileManager.exists(tagx)) {
+            try {
+                FileCopyUtils
+                        .copy(FileUtils.getInputStream(getClass(), "tags/"
+                                + tagName), fileManager.createFile(tagx)
+                                .getOutputStream());
+            }
+            catch (final IOException e) {
+                throw new IllegalStateException("Could not install " + tagx);
+            }
+        }
+    }
+
+    /**
+     * Helper method to determine if a given provider is supported by this
+     * implementation.
+     * 
+     * @param candidate the provider name
+     * @param completors the completors offered by this implementation
+     * @return true if the provider is supported
+     */
+    public boolean isProviderSupported(final String candidate,
+            final EmbeddedCompletor[] completors) {
+        for (final EmbeddedCompletor completor : completors) {
+            if (completor.name().equalsIgnoreCase(candidate)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Method to send a HTTP GET request through the Roo provided
      * infrastructure.
      * 
@@ -133,17 +184,17 @@ public abstract class AbstractEmbeddedProvider implements EmbeddedProvider {
         if (urlStr.startsWith("http://")) {
             BufferedReader rd = null;
             try {
-                URL url = new URL(urlStr);
+                final URL url = new URL(urlStr);
                 rd = new BufferedReader(new InputStreamReader(
                         httpService.openConnection(url)));
-                StringBuffer sb = new StringBuffer();
+                final StringBuffer sb = new StringBuffer();
                 String line;
                 while ((line = rd.readLine()) != null) {
                     sb.append(line);
                 }
                 result = sb.toString();
             }
-            catch (IOException e) {
+            catch (final IOException e) {
                 LOGGER.warning("Unable to connect to " + urlStr);
             }
             finally {
@@ -151,57 +202,5 @@ public abstract class AbstractEmbeddedProvider implements EmbeddedProvider {
             }
         }
         return result;
-    }
-
-    /**
-     * Convenience method to clean view name of a jspx.
-     * 
-     * @param viewName the view name to clean
-     * @param defaultName the default page name
-     * @return the cleaned name
-     */
-    public String getViewName(String viewName, final String defaultName) {
-        if (viewName == null || viewName.length() == 0) {
-            viewName = defaultName;
-        }
-        if (viewName.endsWith(".jspx")) {
-            viewName = viewName.substring(0, viewName.indexOf(".") - 1);
-        }
-        return viewName.toLowerCase();
-    }
-
-    /**
-     * Helper method to determine if a given provider is supported by this
-     * implementation.
-     * 
-     * @param candidate the provider name
-     * @param completors the completors offered by this implementation
-     * @return true if the provider is supported
-     */
-    public boolean isProviderSupported(final String candidate,
-            final EmbeddedCompletor[] completors) {
-        for (EmbeddedCompletor completor : completors) {
-            if (completor.name().equalsIgnoreCase(candidate)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Convenience method to create a readable title for a EmbeddedCompletor
-     * enum value
-     * 
-     * @param providerName the original String
-     * @return the readable String
-     */
-    private String getTitle(final String providerName) {
-        String[] names = providerName.split("_");
-        StringBuilder sb = new StringBuilder();
-        for (String name : names) {
-            sb.append(StringUtils.capitalize(name.toLowerCase()));
-            sb.append(" ");
-        }
-        return sb.toString().trim();
     }
 }

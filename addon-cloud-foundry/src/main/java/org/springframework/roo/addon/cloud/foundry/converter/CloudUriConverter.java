@@ -32,11 +32,6 @@ public class CloudUriConverter implements Converter<CloudUri> {
         return new CloudUri(value);
     }
 
-    public boolean supports(final Class<?> requiredType,
-            final String optionContext) {
-        return CloudUri.class.isAssignableFrom(requiredType);
-    }
-
     public boolean getAllPossibleValues(final List<Completion> completions,
             final Class<?> requiredType, final String existingData,
             final String optionContext, final MethodTarget target) {
@@ -44,10 +39,15 @@ public class CloudUriConverter implements Converter<CloudUri> {
                 target.getRemainingBuffer());
         final List<String> uris = session.getBoundUrlMap().get(appName);
         if (uris != null) {
-            for (String uri : uris) {
+            for (final String uri : uris) {
                 completions.add(new Completion(uri));
             }
         }
         return false;
+    }
+
+    public boolean supports(final Class<?> requiredType,
+            final String optionContext) {
+        return CloudUri.class.isAssignableFrom(requiredType);
     }
 }

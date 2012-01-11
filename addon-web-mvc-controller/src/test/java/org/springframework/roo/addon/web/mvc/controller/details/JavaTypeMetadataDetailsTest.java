@@ -16,6 +16,17 @@ import org.springframework.roo.model.JavaType;
  */
 public class JavaTypeMetadataDetailsTest {
 
+    /**
+     * Creates a test instance with the given {@link JavaType}
+     * 
+     * @param javaType
+     * @return a non-<code>null</code> instance
+     */
+    private JavaTypeMetadataDetails getTestInstance(final JavaType javaType) {
+        return new JavaTypeMetadataDetails(javaType, "the-plural", false,
+                false, null, "the-controller-path");
+    }
+
     @Test
     public void testInstancesWithDifferentJavaTypesAreNotEqual() {
         // Set up
@@ -42,16 +53,5 @@ public class JavaTypeMetadataDetailsTest {
 
         // Invoke and check
         assertTrue(javaTypeMetadataDetails.equals(otherJavaTypeMetadataDetails));
-    }
-
-    /**
-     * Creates a test instance with the given {@link JavaType}
-     * 
-     * @param javaType
-     * @return a non-<code>null</code> instance
-     */
-    private JavaTypeMetadataDetails getTestInstance(final JavaType javaType) {
-        return new JavaTypeMetadataDetails(javaType, "the-plural", false,
-                false, null, "the-controller-path");
     }
 }

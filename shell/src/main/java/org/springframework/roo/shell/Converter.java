@@ -12,20 +12,6 @@ import java.util.List;
 public interface Converter<T> {
 
     /**
-     * Indicates whether this converter supports the given type in the given
-     * option context
-     * 
-     * @param type the type being checked
-     * @param optionContext a non-<code>null</code> string that customises the
-     *            behaviour of this converter for a given {@link CliOption} of a
-     *            given {@link CliCommand}; the contents will have special
-     *            meaning to this converter (e.g. be a comma-separated list of
-     *            keywords known to this converter)
-     * @return see above
-     */
-    boolean supports(Class<?> type, String optionContext);
-
-    /**
      * Converts from the given String value to type T
      * 
      * @param value the value to convert
@@ -60,4 +46,18 @@ public interface Converter<T> {
     boolean getAllPossibleValues(List<Completion> completions,
             Class<?> targetType, String existingData, String optionContext,
             MethodTarget target);
+
+    /**
+     * Indicates whether this converter supports the given type in the given
+     * option context
+     * 
+     * @param type the type being checked
+     * @param optionContext a non-<code>null</code> string that customises the
+     *            behaviour of this converter for a given {@link CliOption} of a
+     *            given {@link CliCommand}; the contents will have special
+     *            meaning to this converter (e.g. be a comma-separated list of
+     *            keywords known to this converter)
+     * @return see above
+     */
+    boolean supports(Class<?> type, String optionContext);
 }

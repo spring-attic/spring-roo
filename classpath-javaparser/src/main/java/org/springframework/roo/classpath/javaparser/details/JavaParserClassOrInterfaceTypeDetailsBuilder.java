@@ -43,7 +43,6 @@ import org.springframework.roo.support.util.Assert;
 public class JavaParserClassOrInterfaceTypeDetailsBuilder implements
         Builder<ClassOrInterfaceTypeDetails> {
 
-    // Constants
     static final String UNSUPPORTED_MESSAGE_PREFIX = "Only enum, class and interface files are supported";
 
     /**
@@ -71,19 +70,18 @@ public class JavaParserClassOrInterfaceTypeDetailsBuilder implements
                 metadataService, typeLocationService);
     }
 
-    // Fields
     private final CompilationUnit compilationUnit;
+    private JavaPackage compilationUnitPackage;
     private final CompilationUnitServices compilationUnitServices;
+    private final String declaredByMetadataId;
+    private List<ImportDeclaration> imports = new ArrayList<ImportDeclaration>();
     private final List<TypeDeclaration> innerTypes = new ArrayList<TypeDeclaration>();
     private final MetadataService metadataService;
-    private final String declaredByMetadataId;
+
+    private JavaType name;
+    private PhysicalTypeCategory physicalTypeCategory;
     private final TypeDeclaration typeDeclaration;
     private final TypeLocationService typeLocationService;
-
-    private JavaPackage compilationUnitPackage;
-    private JavaType name;
-    private List<ImportDeclaration> imports = new ArrayList<ImportDeclaration>();
-    private PhysicalTypeCategory physicalTypeCategory;
 
     /**
      * Constructor
@@ -112,37 +110,13 @@ public class JavaParserClassOrInterfaceTypeDetailsBuilder implements
 
         // Assign
         this.compilationUnit = compilationUnit;
-        this.compilationUnitServices = (enclosingCompilationUnitServices == null ? getDefaultCompilationUnitServices()
+        compilationUnitServices = (enclosingCompilationUnitServices == null ? getDefaultCompilationUnitServices()
                 : enclosingCompilationUnitServices);
         this.declaredByMetadataId = declaredByMetadataId;
         this.metadataService = metadataService;
-        this.name = typeName;
+        name = typeName;
         this.typeDeclaration = typeDeclaration;
         this.typeLocationService = typeLocationService;
-    }
-
-    private CompilationUnitServices getDefaultCompilationUnitServices() {
-        return new CompilationUnitServices() {
-            public List<ImportDeclaration> getImports() {
-                return imports;
-            }
-
-            public JavaPackage getCompilationUnitPackage() {
-                return compilationUnitPackage;
-            }
-
-            public List<TypeDeclaration> getInnerTypes() {
-                return innerTypes;
-            }
-
-            public JavaType getEnclosingTypeName() {
-                return name;
-            }
-
-            public PhysicalTypeCategory getPhysicalTypeCategory() {
-                return physicalTypeCategory;
-            }
-        };
     }
 
     public ClassOrInterfaceTypeDetails build() {
@@ -152,7 +126,7 @@ public class JavaParserClassOrInterfaceTypeDetailsBuilder implements
         ClassOrInterfaceDeclaration clazz = null;
         EnumDeclaration enumClazz = null;
 
-        StringBuilder sb = new StringBuilder(compilationUnit.getPackage()
+        final StringBuilder sb = new StringBuilder(compilationUnit.getPackage()
                 .getName().toString());
         if (name.getEnclosingType() != null) {
             sb.append(".").append(name.getEnclosingType().getSimpleTypeName());
@@ -231,7 +205,7 @@ public class JavaParserClassOrInterfaceTypeDetailsBuilder implements
         for (final JavaType param : name.getParameters()) {
             final JavaSymbolName arg = param.getArgName();
             // Fortunately type names can only appear at the top-level
-            if (arg != null && !JavaType.WILDCARD_NEITHER.equals(arg)
+            if ((arg != null) && !JavaType.WILDCARD_NEITHER.equals(arg)
                     && !JavaType.WILDCARD_EXTENDS.equals(arg)
                     && !JavaType.WILDCARD_SUPER.equals(arg)) {
                 typeParameterNames.add(arg);
@@ -255,8 +229,8 @@ public class JavaParserClassOrInterfaceTypeDetailsBuilder implements
 
             final List<JavaType> extendsTypes = cidBuilder.getExtendsTypes();
             // Obtain the superclass, if this is a class and one is available
-            if (physicalTypeCategory == PhysicalTypeCategory.CLASS
-                    && extendsTypes.size() == 1) {
+            if ((physicalTypeCategory == PhysicalTypeCategory.CLASS)
+                    && (extendsTypes.size() == 1)) {
                 final JavaType superclass = extendsTypes.get(0);
                 final String superclassId = typeLocationService
                         .getPhysicalTypeIdentifier(superclass);
@@ -265,8 +239,8 @@ public class JavaParserClassOrInterfaceTypeDetailsBuilder implements
                     superPtm = (PhysicalTypeMetadata) metadataService
                             .get(superclassId);
                 }
-                if (superPtm != null
-                        && superPtm.getMemberHoldingTypeDetails() != null) {
+                if ((superPtm != null)
+                        && (superPtm.getMemberHoldingTypeDetails() != null)) {
                     cidBuilder.setSuperclass(superPtm
                             .getMemberHoldingTypeDetails());
                 }
@@ -368,5 +342,29 @@ public class JavaParserClassOrInterfaceTypeDetailsBuilder implements
         }
 
         return cidBuilder.build();
+    }
+
+    private CompilationUnitServices getDefaultCompilationUnitServices() {
+        return new CompilationUnitServices() {
+            public JavaPackage getCompilationUnitPackage() {
+                return compilationUnitPackage;
+            }
+
+            public JavaType getEnclosingTypeName() {
+                return name;
+            }
+
+            public List<ImportDeclaration> getImports() {
+                return imports;
+            }
+
+            public List<TypeDeclaration> getInnerTypes() {
+                return innerTypes;
+            }
+
+            public PhysicalTypeCategory getPhysicalTypeCategory() {
+                return physicalTypeCategory;
+            }
+        };
     }
 }

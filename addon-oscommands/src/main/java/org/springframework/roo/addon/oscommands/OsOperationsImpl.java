@@ -27,55 +27,13 @@ import org.springframework.roo.support.util.IOUtils;
 @Service
 public class OsOperationsImpl implements OsOperations {
 
-    // Constants
-    private static final Logger LOGGER = HandlerUtils
-            .getLogger(OsOperationsImpl.class);
-
-    // Fields
-    @Reference private PathResolver pathResolver;
-    @Reference private ProcessManager processManager;
-
-    public void executeCommand(final String command) throws IOException {
-        File root = new File(getProjectRoot());
-        Assert.isTrue(root.isDirectory() && root.exists(),
-                "Project root does not currently exist as a directory ('"
-                        + root.getCanonicalPath() + "')");
-
-        Thread.currentThread().setName(""); // Prevent thread name from being
-                                            // presented in Roo shell
-        Process p = Runtime.getRuntime().exec(command, null, root);
-        // Ensure separate threads are used for logging, as per ROO-652
-        LoggingInputStream input = new LoggingInputStream(p.getInputStream(),
-                processManager);
-        LoggingInputStream errors = new LoggingInputStream(p.getErrorStream(),
-                processManager);
-
-        p.getOutputStream().close();
-        input.start();
-        errors.start();
-
-        try {
-            if (p.waitFor() != 0) {
-                LOGGER.warning("The command '" + command
-                        + "' did not complete successfully");
-            }
-        }
-        catch (InterruptedException e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
-    private String getProjectRoot() {
-        return pathResolver.getRoot();
-    }
-
     private static class LoggingInputStream extends Thread {
-        private final BufferedReader reader;
         private final ProcessManager processManager;
+        private final BufferedReader reader;
 
         public LoggingInputStream(final InputStream inputStream,
                 final ProcessManager processManager) {
-            this.reader = new BufferedReader(new InputStreamReader(inputStream));
+            reader = new BufferedReader(new InputStreamReader(inputStream));
             this.processManager = processManager;
         }
 
@@ -98,7 +56,7 @@ public class OsOperationsImpl implements OsOperations {
                     }
                 }
             }
-            catch (IOException e) {
+            catch (final IOException e) {
                 if (e.getMessage().contains("No such file or directory") || // For
                                                                             // *nix/Mac
                         e.getMessage().contains("CreateProcess error=2")) { // For
@@ -111,5 +69,45 @@ public class OsOperationsImpl implements OsOperations {
                 ActiveProcessManager.clearActiveProcessManager();
             }
         }
+    }
+
+    private static final Logger LOGGER = HandlerUtils
+            .getLogger(OsOperationsImpl.class);
+    @Reference private PathResolver pathResolver;
+
+    @Reference private ProcessManager processManager;
+
+    public void executeCommand(final String command) throws IOException {
+        final File root = new File(getProjectRoot());
+        Assert.isTrue(root.isDirectory() && root.exists(),
+                "Project root does not currently exist as a directory ('"
+                        + root.getCanonicalPath() + "')");
+
+        Thread.currentThread().setName(""); // Prevent thread name from being
+                                            // presented in Roo shell
+        final Process p = Runtime.getRuntime().exec(command, null, root);
+        // Ensure separate threads are used for logging, as per ROO-652
+        final LoggingInputStream input = new LoggingInputStream(
+                p.getInputStream(), processManager);
+        final LoggingInputStream errors = new LoggingInputStream(
+                p.getErrorStream(), processManager);
+
+        p.getOutputStream().close();
+        input.start();
+        errors.start();
+
+        try {
+            if (p.waitFor() != 0) {
+                LOGGER.warning("The command '" + command
+                        + "' did not complete successfully");
+            }
+        }
+        catch (final InterruptedException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    private String getProjectRoot() {
+        return pathResolver.getRoot();
     }
 }

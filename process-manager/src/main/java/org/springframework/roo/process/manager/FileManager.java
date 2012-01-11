@@ -26,26 +26,16 @@ import org.springframework.roo.file.undo.UndoManager;
 public interface FileManager {
 
     /**
-     * Indicates whether the file identified by the passed canonical path
-     * exists.
-     * 
-     * @param fileIdentifier the file or directory to locate (required, in
-     *            canonical path format)
-     * @return true if the file or directory exists
+     * Discards proposed changes to the disk that an implementation may have
+     * elected to defer.
      */
-    boolean exists(String fileIdentifier);
+    void clear();
 
     /**
-     * Obtains an input stream for the indicated file identifier, which must be
-     * a file (not a directory) and must exist at the time the method is called.
-     * This method is useful if read-only access to a file is required. For
-     * read-write access, use one of the other methods on {@link FileManager}.
-     * 
-     * @param fileIdentifier the file to read (required, in canonical path
-     *            format)
-     * @return the input stream (never null)
+     * Commits actual changes to the disk that an implementation may have
+     * elected to defer.
      */
-    InputStream getInputStream(String fileIdentifier);
+    void commit();
 
     /**
      * Attempts to create a new directory on the disk.
@@ -67,15 +57,6 @@ public interface FileManager {
     FileDetails createDirectory(String fileIdentifier);
 
     /**
-     * Obtains an already-existing file for reading. The path should be in
-     * canonical file name format.
-     * 
-     * @param fileIdentifier the file to read that already exists (required)
-     * @return a representation of the file (or null if the file does not exist)
-     */
-    FileDetails readFile(String fileIdentifier);
-
-    /**
      * Attempts to create a zero-byte file on the disk.
      * <p>
      * The requested fileIdentifier path must not already exist. It should be in
@@ -91,59 +72,6 @@ public interface FileManager {
      * @return a representation of the file (or null if the creation failed)
      */
     MutableFile createFile(String fileIdentifier);
-
-    /**
-     * Attempts to delete a file or directory on the disk. The path should be in
-     * canonical file name format.
-     * <p>
-     * If the path refers to a directory, contents of the directory will be
-     * recursively deleted.
-     * <p>
-     * If a delete fails, an exception will be thrown.
-     * 
-     * @param pathname the file to delete; can be blank to do nothing, otherwise
-     *            should be a valid pathname as per
-     *            {@link java.io.File#File(String)}
-     * @throws IllegalArgumentException if a file is specified but does not
-     *             exist
-     */
-    void delete(String pathname);
-
-    /**
-     * Attempts to delete a file or directory on the disk. The path should be in
-     * canonical file name format.
-     * <p>
-     * If the path refers to a directory, contents of the directory will be
-     * recursively deleted.
-     * <p>
-     * If a delete fails, an exception will be thrown.
-     * 
-     * @param pathname the file to delete; can be blank to do nothing, otherwise
-     *            should be a valid pathname as per
-     *            {@link java.io.File#File(String)}
-     * @param reasonForDeletion the reason why the file is being deleted (can be
-     *            blank)
-     * @since 1.2.0
-     * @throws IllegalArgumentException if a file is specified but does not
-     *             exist
-     */
-    void delete(String pathname, String reasonForDeletion);
-
-    /**
-     * Provides an updatable representation of a file on the disk.
-     * <p>
-     * The file identifier must refer to a file (not directory) that already
-     * exists. A violation of this requirement will result in an exception. The
-     * identifier should be in canonical file name format.
-     * <p>
-     * Refer to the documentation for {@link MutableFile} for important
-     * restrictions on usage.
-     * 
-     * @param fileIdentifier the file to update (must be a file that already
-     *            exists, required)
-     * @return a mutable presentation (never null)
-     */
-    MutableFile updateFile(String fileIdentifier);
 
     /**
      * Provides a simple way to create or update a file, skipping any
@@ -203,6 +131,53 @@ public interface FileManager {
             boolean writeImmediately);
 
     /**
+     * Attempts to delete a file or directory on the disk. The path should be in
+     * canonical file name format.
+     * <p>
+     * If the path refers to a directory, contents of the directory will be
+     * recursively deleted.
+     * <p>
+     * If a delete fails, an exception will be thrown.
+     * 
+     * @param pathname the file to delete; can be blank to do nothing, otherwise
+     *            should be a valid pathname as per
+     *            {@link java.io.File#File(String)}
+     * @throws IllegalArgumentException if a file is specified but does not
+     *             exist
+     */
+    void delete(String pathname);
+
+    /**
+     * Attempts to delete a file or directory on the disk. The path should be in
+     * canonical file name format.
+     * <p>
+     * If the path refers to a directory, contents of the directory will be
+     * recursively deleted.
+     * <p>
+     * If a delete fails, an exception will be thrown.
+     * 
+     * @param pathname the file to delete; can be blank to do nothing, otherwise
+     *            should be a valid pathname as per
+     *            {@link java.io.File#File(String)}
+     * @param reasonForDeletion the reason why the file is being deleted (can be
+     *            blank)
+     * @since 1.2.0
+     * @throws IllegalArgumentException if a file is specified but does not
+     *             exist
+     */
+    void delete(String pathname, String reasonForDeletion);
+
+    /**
+     * Indicates whether the file identified by the passed canonical path
+     * exists.
+     * 
+     * @param fileIdentifier the file or directory to locate (required, in
+     *            canonical path format)
+     * @return true if the file or directory exists
+     */
+    boolean exists(String fileIdentifier);
+
+    /**
      * Delegates to {@link FileMonitorService#findMatchingAntPath(String)}.
      * 
      * @param antPath the Ant path to evaluate, as per the canonical file path
@@ -212,16 +187,25 @@ public interface FileManager {
     SortedSet<FileDetails> findMatchingAntPath(String antPath);
 
     /**
-     * Commits actual changes to the disk that an implementation may have
-     * elected to defer.
+     * Obtains an input stream for the indicated file identifier, which must be
+     * a file (not a directory) and must exist at the time the method is called.
+     * This method is useful if read-only access to a file is required. For
+     * read-write access, use one of the other methods on {@link FileManager}.
+     * 
+     * @param fileIdentifier the file to read (required, in canonical path
+     *            format)
+     * @return the input stream (never null)
      */
-    void commit();
+    InputStream getInputStream(String fileIdentifier);
 
     /**
-     * Discards proposed changes to the disk that an implementation may have
-     * elected to defer.
+     * Obtains an already-existing file for reading. The path should be in
+     * canonical file name format.
+     * 
+     * @param fileIdentifier the file to read that already exists (required)
+     * @return a representation of the file (or null if the file does not exist)
      */
-    void clear();
+    FileDetails readFile(String fileIdentifier);
 
     /**
      * Delegates to {@link FileMonitorService#scanAll()} or
@@ -230,4 +214,20 @@ public interface FileManager {
      * @return the number of changes detected (can be 0 or above)
      */
     int scan();
+
+    /**
+     * Provides an updatable representation of a file on the disk.
+     * <p>
+     * The file identifier must refer to a file (not directory) that already
+     * exists. A violation of this requirement will result in an exception. The
+     * identifier should be in canonical file name format.
+     * <p>
+     * Refer to the documentation for {@link MutableFile} for important
+     * restrictions on usage.
+     * 
+     * @param fileIdentifier the file to update (must be a file that already
+     *            exists, required)
+     * @return a mutable presentation (never null)
+     */
+    MutableFile updateFile(String fileIdentifier);
 }

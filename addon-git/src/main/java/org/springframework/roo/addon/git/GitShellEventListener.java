@@ -23,7 +23,6 @@ import org.springframework.roo.shell.event.ShellStatusListener;
 @Service
 public class GitShellEventListener implements ShellStatusListener {
 
-    // Fields
     @Reference private GitOperations gitOperations;
     @Reference private PathResolver pathResolver;
     @Reference private Shell shell;
@@ -36,16 +35,16 @@ public class GitShellEventListener implements ShellStatusListener {
         shell.removeShellStatusListener(this);
     }
 
+    private boolean isGitEnabled() {
+        return new File(pathResolver.getRoot(), Constants.DOT_GIT)
+                .isDirectory();
+    }
+
     public void onShellStatusChange(final ShellStatus oldStatus,
             final ShellStatus newStatus) {
         if (newStatus.getStatus().equals(Status.EXECUTION_SUCCESS)
                 && isGitEnabled() && gitOperations.isAutomaticCommit()) {
             gitOperations.commitAllChanges(newStatus.getMessage());
         }
-    }
-
-    private boolean isGitEnabled() {
-        return new File(pathResolver.getRoot(), Constants.DOT_GIT)
-                .isDirectory();
     }
 }

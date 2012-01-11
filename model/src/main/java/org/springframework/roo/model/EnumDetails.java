@@ -9,8 +9,8 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.0
  */
 public class EnumDetails {
-    private final JavaType type;
     private final JavaSymbolName field;
+    private final JavaType type;
 
     public EnumDetails(final JavaType type, final JavaSymbolName field) {
         Assert.notNull(type, "Type required");
@@ -19,12 +19,12 @@ public class EnumDetails {
         this.field = field;
     }
 
-    public JavaType getType() {
-        return type;
-    }
-
     public JavaSymbolName getField() {
         return field;
+    }
+
+    public JavaType getType() {
+        return type;
     }
 
     @Override

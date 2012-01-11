@@ -37,7 +37,6 @@ import org.w3c.dom.Element;
 @Service
 public class MenuOperationsImpl implements MenuOperations {
 
-    // Fields
     @Reference private FileManager fileManager;
     @Reference private ProjectOperations projectOperations;
     @Reference private PropFileOperations propFileOperations;
@@ -51,14 +50,6 @@ public class MenuOperationsImpl implements MenuOperations {
                 idPrefix, false, logicalPath);
     }
 
-    public void addMenuItem(final JavaSymbolName menuCategoryName,
-            final JavaSymbolName menuItemId, final String menuItemLabel,
-            final String globalMessageCode, final String link,
-            final String idPrefix, final LogicalPath logicalPath) {
-        addMenuItem(menuCategoryName, menuItemId, menuItemLabel,
-                globalMessageCode, link, idPrefix, true, logicalPath);
-    }
-
     private void addMenuItem(final JavaSymbolName menuCategoryName,
             final JavaSymbolName menuItemId, final String menuItemLabel,
             final String globalMessageCode, final String link, String idPrefix,
@@ -67,21 +58,21 @@ public class MenuOperationsImpl implements MenuOperations {
         Assert.notNull(menuItemId, "Menu item name required");
         Assert.hasText(link, "Link required");
 
-        Map<String, String> properties = new LinkedHashMap<String, String>();
+        final Map<String, String> properties = new LinkedHashMap<String, String>();
 
         if (StringUtils.isBlank(idPrefix)) {
             idPrefix = DEFAULT_MENU_ITEM_PREFIX;
         }
 
-        Document document = getMenuDocument(logicalPath);
+        final Document document = getMenuDocument(logicalPath);
 
         // Make the root element of the menu the one with the menu identifier
         // allowing for different decorations of menu
         Element rootElement = XmlUtils.findFirstElement("//*[@id='_menu']",
                 document.getFirstChild());
         if (rootElement == null) {
-            Element rootMenu = new XmlElementBuilder("menu:menu", document)
-                    .addAttribute("id", "_menu").build();
+            final Element rootMenu = new XmlElementBuilder("menu:menu",
+                    document).addAttribute("id", "_menu").build();
             rootMenu.setAttribute("z",
                     XmlRoundTripUtils.calculateUniqueKeyFor(rootMenu));
             rootElement = (Element) document.getDocumentElement().appendChild(
@@ -136,6 +127,14 @@ public class MenuOperationsImpl implements MenuOperations {
                 getMenuFileName(logicalPath), document);
     }
 
+    public void addMenuItem(final JavaSymbolName menuCategoryName,
+            final JavaSymbolName menuItemId, final String menuItemLabel,
+            final String globalMessageCode, final String link,
+            final String idPrefix, final LogicalPath logicalPath) {
+        addMenuItem(menuCategoryName, menuItemId, menuItemLabel,
+                globalMessageCode, link, idPrefix, true, logicalPath);
+    }
+
     public void cleanUpFinderMenuItems(final JavaSymbolName menuCategoryName,
             final List<String> allowedFinderMenuIds,
             final LogicalPath logicalPath) {
@@ -143,18 +142,20 @@ public class MenuOperationsImpl implements MenuOperations {
         Assert.notNull(allowedFinderMenuIds,
                 "List of allowed menu items required");
 
-        Document document = getMenuDocument(logicalPath);
+        final Document document = getMenuDocument(logicalPath);
 
         // Find any menu items under this category which have an id that starts
         // with the menuItemIdPrefix
-        List<Element> elements = XmlUtils.findElements("//category[@id='c_"
-                + menuCategoryName.getSymbolName().toLowerCase()
-                + "']//item[starts-with(@id, '" + FINDER_MENU_ITEM_PREFIX
-                + "')]", document.getDocumentElement());
+        final List<Element> elements = XmlUtils.findElements(
+                "//category[@id='c_"
+                        + menuCategoryName.getSymbolName().toLowerCase()
+                        + "']//item[starts-with(@id, '"
+                        + FINDER_MENU_ITEM_PREFIX + "')]",
+                document.getDocumentElement());
         if (elements.isEmpty()) {
             return;
         }
-        for (Element element : elements) {
+        for (final Element element : elements) {
             if (!allowedFinderMenuIds.contains(element.getAttribute("id"))
                     && ("?".equals(element.getAttribute("z")) || XmlRoundTripUtils
                             .calculateUniqueKeyFor(element).equals(
@@ -184,10 +185,10 @@ public class MenuOperationsImpl implements MenuOperations {
             idPrefix = DEFAULT_MENU_ITEM_PREFIX;
         }
 
-        Document document = getMenuDocument(logicalPath);
+        final Document document = getMenuDocument(logicalPath);
 
         // Find menu item under this category if exists
-        Element element = XmlUtils.findFirstElement("//category[@id='c_"
+        final Element element = XmlUtils.findFirstElement("//category[@id='c_"
                 + menuCategoryName.getSymbolName().toLowerCase()
                 + "']//item[@id='" + idPrefix
                 + menuCategoryName.getSymbolName().toLowerCase() + "_"
@@ -210,7 +211,7 @@ public class MenuOperationsImpl implements MenuOperations {
         try {
             return XmlUtils.readXml(getMenuFileInputStream(logicalPath));
         }
-        catch (Exception e) {
+        catch (final Exception e) {
             throw new IllegalArgumentException("Unable to parse menu.jspx"
                     + (StringUtils.isBlank(e.getMessage()) ? "" : " ("
                             + e.getMessage() + ")"), e);
@@ -218,21 +219,21 @@ public class MenuOperationsImpl implements MenuOperations {
     }
 
     private InputStream getMenuFileInputStream(final LogicalPath logicalPath) {
-        String menuFileName = getMenuFileName(logicalPath);
+        final String menuFileName = getMenuFileName(logicalPath);
         if (!fileManager.exists(menuFileName)) {
             try {
                 FileCopyUtils.copy(
                         FileUtils.getInputStream(getClass(), "menu.jspx"),
                         fileManager.createFile(menuFileName).getOutputStream());
             }
-            catch (Exception e) {
+            catch (final Exception e) {
                 throw new IllegalStateException(
                         "Encountered an error during copying of menu.jspx for MVC Menu addon.",
                         e);
             }
         }
 
-        PathResolver pathResolver = projectOperations.getPathResolver();
+        final PathResolver pathResolver = projectOperations.getPathResolver();
 
         final String menuPath = pathResolver.getIdentifier(logicalPath,
                 "WEB-INF/tags/menu/menu.tagx");
@@ -243,7 +244,7 @@ public class MenuOperationsImpl implements MenuOperations {
                                 FileUtils.getInputStream(getClass(),
                                         "menu.tagx"))), false);
             }
-            catch (Exception e) {
+            catch (final Exception e) {
                 throw new IllegalStateException(
                         "Encountered an error during copying of menu.tagx for MVC Menu addon.",
                         e);
@@ -259,7 +260,7 @@ public class MenuOperationsImpl implements MenuOperations {
                                 FileUtils.getInputStream(getClass(),
                                         "item.tagx"))), false);
             }
-            catch (Exception e) {
+            catch (final Exception e) {
                 throw new IllegalStateException(
                         "Encountered an error during copying of item.tagx for MVC Menu addon.",
                         e);
@@ -275,7 +276,7 @@ public class MenuOperationsImpl implements MenuOperations {
                                 FileUtils.getInputStream(getClass(),
                                         "category.tagx"))), false);
             }
-            catch (Exception e) {
+            catch (final Exception e) {
                 throw new IllegalStateException(
                         "Encountered an error during copying of category.tagx for MVC Menu addon.",
                         e);

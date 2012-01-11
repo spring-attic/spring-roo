@@ -13,10 +13,8 @@ import java.util.Map;
  */
 public class ShellTableRenderer {
 
-    // Constants
     private static final int COLUMN_PADDING = 5;
 
-    // Fields
     private final Map<Integer, List<String>> columnMap = new HashMap<Integer, List<String>>();
     private final String title;
 
@@ -28,14 +26,14 @@ public class ShellTableRenderer {
      */
     public ShellTableRenderer(final String title, final String... headings) {
         this.title = title;
-        for (String heading : headings) {
+        for (final String heading : headings) {
             addColumn(heading);
         }
     }
 
     public void addColumn(final String heading) {
-        int position = columnMap.isEmpty() ? 0 : columnMap.size();
-        List<String> list = new ArrayList<String>();
+        final int position = columnMap.isEmpty() ? 0 : columnMap.size();
+        final List<String> list = new ArrayList<String>();
         list.add(heading);
         list.add(getUnderline(heading.length()));
         columnMap.put(position, list);
@@ -43,19 +41,19 @@ public class ShellTableRenderer {
 
     public void addRow(final String... values) {
         for (int i = 0; i < columnMap.size(); i++) {
-            String value = values[i];
-            List<String> list = columnMap.get(i);
+            final String value = values[i];
+            final List<String> list = columnMap.get(i);
             list.add(value);
         }
     }
 
     public int getColumnWidth(final int columnNumber) {
-        List<String> stringList = columnMap.get(columnNumber);
+        final List<String> stringList = columnMap.get(columnNumber);
         if (stringList == null) {
             return 0;
         }
         int largestValue = 0;
-        for (String value : stringList) {
+        for (final String value : stringList) {
             if (value.length() > largestValue) {
                 largestValue = value.length();
             }
@@ -64,22 +62,22 @@ public class ShellTableRenderer {
     }
 
     public String getOutput() {
-        StringBuilder table = new StringBuilder();
+        final StringBuilder table = new StringBuilder();
         int i = 0;
         int longestRow = 0;
         while (true) {
-            StringBuilder entry = new StringBuilder();
+            final StringBuilder entry = new StringBuilder();
             boolean timeToStop = false;
             for (int j = 0; j < columnMap.size(); j++) {
-                List<String> list = columnMap.get(j);
+                final List<String> list = columnMap.get(j);
                 if (i >= list.size()) {
                     timeToStop = true;
                     continue;
                 }
-                int columnWidth = getColumnWidth(j);
-                String text = columnMap.get(j).get(i);
+                final int columnWidth = getColumnWidth(j);
+                final String text = columnMap.get(j).get(i);
                 entry.append(text);
-                if (j < columnMap.size() - 1) {
+                if (j < (columnMap.size() - 1)) {
                     entry.append(getPadding(columnWidth - text.length()));
                 }
             }
@@ -93,15 +91,15 @@ public class ShellTableRenderer {
                 break;
             }
         }
-        StringBuilder titleBuilder = new StringBuilder();
+        final StringBuilder titleBuilder = new StringBuilder();
         titleBuilder.append("\n");
-        if (longestRow > title.length() + 2) {
-            int titleLengthPlusPadding = title.length() + 2;
-            String padding = " ";
-            String emphasis = getRepeatingChars('=',
+        if (longestRow > (title.length() + 2)) {
+            final int titleLengthPlusPadding = title.length() + 2;
+            final String padding = " ";
+            final String emphasis = getRepeatingChars('=',
                     (longestRow - titleLengthPlusPadding) / 2);
             String extra = "";
-            if (titleLengthPlusPadding % 2 != 0) {
+            if ((titleLengthPlusPadding % 2) != 0) {
                 extra = "=";
             }
             titleBuilder.append(emphasis).append(padding).append(title)
@@ -119,15 +117,15 @@ public class ShellTableRenderer {
         return getRepeatingChars(' ', paddingRequired);
     }
 
-    private String getUnderline(final int underlineRequired) {
-        return getRepeatingChars('-', underlineRequired);
-    }
-
     private String getRepeatingChars(final char c, final int repeat) {
-        StringBuilder sb = new StringBuilder();
+        final StringBuilder sb = new StringBuilder();
         for (int i = 0; i < repeat; i++) {
             sb.append(c);
         }
         return sb.toString();
+    }
+
+    private String getUnderline(final int underlineRequired) {
+        return getRepeatingChars('-', underlineRequired);
     }
 }

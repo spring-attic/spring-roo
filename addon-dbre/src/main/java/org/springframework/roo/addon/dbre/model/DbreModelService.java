@@ -21,25 +21,6 @@ public interface DbreModelService {
     String NO_SCHEMA_REQUIRED = "no-schema-required";
 
     /**
-     * Determines if the database uses schemas.
-     * <p>
-     * Examples of databases that do not use schemas are MySQL and Firebird.
-     * 
-     * @param displayAddOns display available add-ons if possible (required)
-     * @return true if the database supports schema, otherwise false;
-     * @throws RuntimeException if there is a problem acquiring a connection
-     */
-    boolean supportsSchema(boolean displayAddOns) throws RuntimeException;
-
-    /**
-     * Returns a Set of available database {@link Schema schemas}.
-     * 
-     * @param displayAddOns display available add-ons if possible (required)
-     * @return a Set of schemas.
-     */
-    Set<Schema> getSchemas(boolean displayAddOns);
-
-    /**
      * Reads the database metadata information from either a cache or from the
      * DBRE XML file if possible.
      * 
@@ -51,11 +32,12 @@ public interface DbreModelService {
     Database getDatabase(boolean evictCache);
 
     /**
-     * Serializes the database to the DBRE XML file.
+     * Returns a Set of available database {@link Schema schemas}.
      * 
-     * @param database the database to be written out to disk
+     * @param displayAddOns display available add-ons if possible (required)
+     * @return a Set of schemas.
      */
-    void writeDatabase(Database database);
+    Set<Schema> getSchemas(boolean displayAddOns);
 
     /**
      * Retrieves the database metadata from a JDBC connection.
@@ -69,4 +51,22 @@ public interface DbreModelService {
      */
     Database refreshDatabase(Set<Schema> schemas, boolean view,
             Set<String> includeTables, Set<String> excludeTables);
+
+    /**
+     * Determines if the database uses schemas.
+     * <p>
+     * Examples of databases that do not use schemas are MySQL and Firebird.
+     * 
+     * @param displayAddOns display available add-ons if possible (required)
+     * @return true if the database supports schema, otherwise false;
+     * @throws RuntimeException if there is a problem acquiring a connection
+     */
+    boolean supportsSchema(boolean displayAddOns) throws RuntimeException;
+
+    /**
+     * Serializes the database to the DBRE XML file.
+     * 
+     * @param database the database to be written out to disk
+     */
+    void writeDatabase(Database database);
 }

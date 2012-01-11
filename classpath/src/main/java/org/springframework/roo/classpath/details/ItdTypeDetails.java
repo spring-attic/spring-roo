@@ -18,8 +18,6 @@ import org.springframework.roo.model.JavaType;
  */
 public interface ItdTypeDetails extends MemberHoldingTypeDetails {
 
-    boolean isPrivilegedAspect();
-
     /**
      * Returns the name of type which holds the aspect itself.
      * <p>
@@ -29,12 +27,6 @@ public interface ItdTypeDetails extends MemberHoldingTypeDetails {
      * @return the aspect {@link JavaType} (never null)
      */
     JavaType getAspect();
-
-    /**
-     * @return the explicitly-registered imports this user wishes to have
-     *         defined in the ITD (cannot be null, but may be empty)
-     */
-    Set<JavaType> getRegisteredImports();
 
     /**
      * Lists the field-level annotations.
@@ -49,6 +41,22 @@ public interface ItdTypeDetails extends MemberHoldingTypeDetails {
     List<DeclaredFieldAnnotationDetails> getFieldAnnotations();
 
     /**
+     * Returns the {@link ClassOrInterfaceTypeDetails} representing the governor
+     * of this ITD.
+     * 
+     * @return the governor {@link ClassOrInterfaceTypeDetails} (never null)
+     */
+    ClassOrInterfaceTypeDetails getGovernor();
+
+    /**
+     * Lists the inner types.
+     * 
+     * @return an unmodifiable representation of the inner types (may be empty
+     *         but never null)
+     */
+    List<ClassOrInterfaceTypeDetails> getInnerTypes();
+
+    /**
      * Lists the method-level annotations.
      * <p>
      * This includes those annotations declared on the method, together with
@@ -61,18 +69,10 @@ public interface ItdTypeDetails extends MemberHoldingTypeDetails {
     List<DeclaredMethodAnnotationDetails> getMethodAnnotations();
 
     /**
-     * Lists the inner types.
-     * 
-     * @return an unmodifiable representation of the inner types (may be empty
-     *         but never null)
+     * @return the explicitly-registered imports this user wishes to have
+     *         defined in the ITD (cannot be null, but may be empty)
      */
-    List<ClassOrInterfaceTypeDetails> getInnerTypes();
+    Set<JavaType> getRegisteredImports();
 
-    /**
-     * Returns the {@link ClassOrInterfaceTypeDetails} representing the governor
-     * of this ITD.
-     * 
-     * @return the governor {@link ClassOrInterfaceTypeDetails} (never null)
-     */
-    ClassOrInterfaceTypeDetails getGovernor();
+    boolean isPrivilegedAspect();
 }

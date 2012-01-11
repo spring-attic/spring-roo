@@ -8,12 +8,11 @@ package org.springframework.roo.project.maven;
  */
 public class Parent {
 
-    // Fields
-    private final String groupId;
     private final String artifactId;
-    private final String version;
-    private final String relativePath;
+    private final String groupId;
     private final String pomPath;
+    private final String relativePath;
+    private final String version;
 
     public Parent(final String groupId, final String artifactId,
             final String version, final String relativePath,
@@ -25,23 +24,23 @@ public class Parent {
         this.pomPath = pomPath;
     }
 
-    public String getGroupId() {
-        return groupId;
-    }
-
     public String getArtifactId() {
         return artifactId;
     }
 
-    public String getVersion() {
-        return version;
+    public String getGroupId() {
+        return groupId;
+    }
+
+    public String getPomPath() {
+        return pomPath;
     }
 
     public String getRelativePath() {
         return relativePath;
     }
 
-    public String getPomPath() {
-        return pomPath;
+    public String getVersion() {
+        return version;
     }
 }

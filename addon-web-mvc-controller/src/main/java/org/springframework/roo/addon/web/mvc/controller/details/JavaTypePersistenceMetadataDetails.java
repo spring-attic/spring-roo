@@ -17,24 +17,23 @@ import org.springframework.roo.support.util.Assert;
  */
 public class JavaTypePersistenceMetadataDetails {
 
-    // Fields
-    private final FieldMetadata identifierField;
-    private final JavaType identifierType;
-
     private final MemberTypeAdditions countMethod;
     private final MemberTypeAdditions findAllMethod;
+
     private final MemberTypeAdditions findEntriesMethod;
+    private final List<String> finderNames;
     private final MemberTypeAdditions findMethod;
+    private final MethodMetadata identifierAccessorMethod;
+    private final FieldMetadata identifierField;
+    private final JavaType identifierType;
+    private final boolean isRooIdentifier;
     private final MemberTypeAdditions mergeMethod;
     private final MemberTypeAdditions persistMethod;
-    private final MemberTypeAdditions removeMethod;
-    private final MethodMetadata versionAccessorMethod;
-    private final MethodMetadata identifierAccessorMethod;
 
-    private final boolean isRooIdentifier;
+    private final MemberTypeAdditions removeMethod;
 
     private final List<FieldMetadata> rooIdentifierFields;
-    private final List<String> finderNames;
+    private final MethodMetadata versionAccessorMethod;
 
     /**
      * Constructor for JavaTypePersistenceMetadataDetails
@@ -94,72 +93,13 @@ public class JavaTypePersistenceMetadataDetails {
     }
 
     /**
-     * Identifier Type
+     * Accessor for persistence count method
      * 
-     * @return {@link JavaType} for id field
-     */
-    public JavaType getIdentifierType() {
-        return identifierType;
-    }
-
-    /**
-     * Field metadata for identifier
-     * 
-     * @return the {@link FieldMetadata} for the identifier field presented by
-     *         the persistence MD (never null)
-     */
-    public FieldMetadata getIdentifierField() {
-        return identifierField;
-    }
-
-    /**
-     * Accessor for persistence identifier
-     * 
-     * @return the {@link MethodMetadata} for the identifier accessor method
-     *         presented by the persistence MD (never null)
-     */
-    public MethodMetadata getIdentifierAccessorMethod() {
-        return identifierAccessorMethod;
-    }
-
-    /**
-     * Accessor for persistence version
-     * 
-     * @return the {@link MethodMetadata} for the version accessor method
-     *         presented by the persistence MD (null if not defined)
-     */
-    public MethodMetadata getVersionAccessorMethod() {
-        return versionAccessorMethod;
-    }
-
-    /**
-     * Accessor for persistence persist method
-     * 
-     * @return the {@link MemberTypeAdditions} for the persist method presented
-     *         by the persistence MD (null if not defined)
-     */
-    public MemberTypeAdditions getPersistMethod() {
-        return persistMethod;
-    }
-
-    /**
-     * Accessor for persistence merge method
-     * 
-     * @return the {@link MemberTypeAdditions} for the merge method presented by
+     * @return the {@link MemberTypeAdditions} for the count method presented by
      *         the persistence MD (null if not defined)
      */
-    public MemberTypeAdditions getMergeMethod() {
-        return mergeMethod;
-    }
-
-    /**
-     * Accessor for persistence remove method
-     * 
-     * @return the {@link MemberTypeAdditions} for the remove method presented
-     *         by the persistence MD (null if not defined)
-     */
-    public MemberTypeAdditions getRemoveMethod() {
-        return removeMethod;
+    public MemberTypeAdditions getCountMethod() {
+        return countMethod;
     }
 
     /**
@@ -170,26 +110,6 @@ public class JavaTypePersistenceMetadataDetails {
      */
     public MemberTypeAdditions getFindAllMethod() {
         return findAllMethod;
-    }
-
-    /**
-     * Accessor for persistence find method
-     * 
-     * @return the {@link MemberTypeAdditions} for the find method presented by
-     *         the persistence MD (null if not defined)
-     */
-    public MemberTypeAdditions getFindMethod() {
-        return findMethod;
-    }
-
-    /**
-     * Accessor for persistence count method
-     * 
-     * @return the {@link MemberTypeAdditions} for the count method presented by
-     *         the persistence MD (null if not defined)
-     */
-    public MemberTypeAdditions getCountMethod() {
-        return countMethod;
     }
 
     /**
@@ -212,12 +132,72 @@ public class JavaTypePersistenceMetadataDetails {
     }
 
     /**
-     * Indicate if this type is annotated with @RooIdentifier
+     * Accessor for persistence find method
      * 
-     * @return true if annotation is present
+     * @return the {@link MemberTypeAdditions} for the find method presented by
+     *         the persistence MD (null if not defined)
      */
-    public boolean isRooIdentifier() {
-        return isRooIdentifier;
+    public MemberTypeAdditions getFindMethod() {
+        return findMethod;
+    }
+
+    /**
+     * Accessor for persistence identifier
+     * 
+     * @return the {@link MethodMetadata} for the identifier accessor method
+     *         presented by the persistence MD (never null)
+     */
+    public MethodMetadata getIdentifierAccessorMethod() {
+        return identifierAccessorMethod;
+    }
+
+    /**
+     * Field metadata for identifier
+     * 
+     * @return the {@link FieldMetadata} for the identifier field presented by
+     *         the persistence MD (never null)
+     */
+    public FieldMetadata getIdentifierField() {
+        return identifierField;
+    }
+
+    /**
+     * Identifier Type
+     * 
+     * @return {@link JavaType} for id field
+     */
+    public JavaType getIdentifierType() {
+        return identifierType;
+    }
+
+    /**
+     * Accessor for persistence merge method
+     * 
+     * @return the {@link MemberTypeAdditions} for the merge method presented by
+     *         the persistence MD (null if not defined)
+     */
+    public MemberTypeAdditions getMergeMethod() {
+        return mergeMethod;
+    }
+
+    /**
+     * Accessor for persistence persist method
+     * 
+     * @return the {@link MemberTypeAdditions} for the persist method presented
+     *         by the persistence MD (null if not defined)
+     */
+    public MemberTypeAdditions getPersistMethod() {
+        return persistMethod;
+    }
+
+    /**
+     * Accessor for persistence remove method
+     * 
+     * @return the {@link MemberTypeAdditions} for the remove method presented
+     *         by the persistence MD (null if not defined)
+     */
+    public MemberTypeAdditions getRemoveMethod() {
+        return removeMethod;
     }
 
     /**
@@ -229,5 +209,24 @@ public class JavaTypePersistenceMetadataDetails {
      */
     public List<FieldMetadata> getRooIdentifierFields() {
         return rooIdentifierFields;
+    }
+
+    /**
+     * Accessor for persistence version
+     * 
+     * @return the {@link MethodMetadata} for the version accessor method
+     *         presented by the persistence MD (null if not defined)
+     */
+    public MethodMetadata getVersionAccessorMethod() {
+        return versionAccessorMethod;
+    }
+
+    /**
+     * Indicate if this type is annotated with @RooIdentifier
+     * 
+     * @return true if annotation is present
+     */
+    public boolean isRooIdentifier() {
+        return isRooIdentifier;
     }
 }

@@ -16,7 +16,8 @@ import org.springframework.roo.support.util.StringUtils;
 public class DefaultValue extends AbstractAction {
 
     @Override
-    public void executeImpl(CommandTransformation arg, ActionConfig config) {
+    public void executeImpl(final CommandTransformation arg,
+            final ActionConfig config) {
         // Allow argument name with and without "--" in config
         String argumentName = config.getArgument();
         if (argumentName.startsWith("--")) {
@@ -37,13 +38,13 @@ public class DefaultValue extends AbstractAction {
 
     }
 
-    public String getDescription(ActionConfig config) {
+    public String getDescription(final ActionConfig config) {
         return "Setting default argument: " + config.getArgument() + " = "
                 + config.getDefaultValue();
     }
 
-    public boolean isValid(ActionConfig config) {
-        return config != null && StringUtils.hasText(config.getArgument())
+    public boolean isValid(final ActionConfig config) {
+        return (config != null) && StringUtils.hasText(config.getArgument())
                 && StringUtils.hasText(config.getDefaultValue());
     }
 }

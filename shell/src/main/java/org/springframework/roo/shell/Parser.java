@@ -11,8 +11,6 @@ import java.util.List;
  */
 public interface Parser {
 
-    ParseResult parse(String buffer);
-
     /**
      * Populates a list of completion candidates. This method is required for
      * backward compatibility for STS versions up to 2.8.0.
@@ -33,4 +31,6 @@ public interface Parser {
      * @return
      */
     int completeAdvanced(String buffer, int cursor, List<Completion> candidates);
+
+    ParseResult parse(String buffer);
 }

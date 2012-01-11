@@ -18,19 +18,19 @@ public final class CliOptionContext {
     }
 
     /**
+     * Resets the option context for the current thread.
+     */
+    public static void resetOptionContext() {
+        optionContextHolder.remove();
+    }
+
+    /**
      * Stores the given option context for the current thread.
      * 
      * @param optionContext the option context to store
      */
     public static void setOptionContext(final String optionContext) {
         optionContextHolder.set(optionContext);
-    }
-
-    /**
-     * Resets the option context for the current thread.
-     */
-    public static void resetOptionContext() {
-        optionContextHolder.remove();
     }
 
     /**

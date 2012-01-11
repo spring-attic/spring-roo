@@ -9,27 +9,27 @@ import com.vmware.appcloud.client.ServiceConfiguration;
 
 public interface CloudFoundrySession {
 
-    void login(String email, String password, String cloudControllerUrl);
+    void clearStoredLoginDetails();
 
-    AppCloudClient getClient();
+    List<Integer> getApplicationMemoryOptions();
 
     List<String> getApplicationNames();
 
-    List<String> getServiceTypes();
+    Map<String, List<String>> getBoundUrlMap();
 
-    List<String> getProvisionedServices();
+    AppCloudClient getClient();
 
     CloudService getProvisionedService(String provisionedServiceName);
 
+    List<String> getProvisionedServices();
+
     ServiceConfiguration getService(String serviceVendor);
 
-    Map<String, List<String>> getBoundUrlMap();
-
-    List<Integer> getApplicationMemoryOptions();
+    List<String> getServiceTypes();
 
     List<String> getStoredEmails();
 
     List<String> getStoredUrls();
 
-    void clearStoredLoginDetails();
+    void login(String email, String password, String cloudControllerUrl);
 }

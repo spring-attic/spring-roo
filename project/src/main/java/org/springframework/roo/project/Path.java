@@ -20,13 +20,23 @@ public enum Path {
     // These paths might be in a special order => don't reorder them here
 
     /**
+     * The module's root directory.
+     */
+    ROOT(false, ""),
+
+    /**
+     * The module's base directory for production Spring-related resource files.
+     */
+    SPRING_CONFIG_ROOT(false, "src/main/resources/META-INF/spring"),
+
+    /**
      * The module sub-path containing production Java source code.
      */
     SRC_MAIN_JAVA(true, "src/main/java") {
 
         @Override
         public String getPathRelativeToPom(final Pom pom) {
-            if (pom != null && StringUtils.hasText(pom.getSourceDirectory())) {
+            if ((pom != null) && StringUtils.hasText(pom.getSourceDirectory())) {
                 return pom.getSourceDirectory();
             }
             return getDefaultLocation();
@@ -39,13 +49,18 @@ public enum Path {
     SRC_MAIN_RESOURCES(false, "src/main/resources"),
 
     /**
+     * The module sub-path containing web resource files.
+     */
+    SRC_MAIN_WEBAPP(false, "src/main/webapp"),
+
+    /**
      * The module sub-path containing test Java source code.
      */
     SRC_TEST_JAVA(true, "src/test/java") {
 
         @Override
         public String getPathRelativeToPom(final Pom pom) {
-            if (pom != null
+            if ((pom != null)
                     && StringUtils.hasText(pom.getTestSourceDirectory())) {
                 return pom.getTestSourceDirectory();
             }
@@ -56,26 +71,10 @@ public enum Path {
     /**
      * The module sub-path containing test resource files.
      */
-    SRC_TEST_RESOURCES(false, "src/test/resources"),
+    SRC_TEST_RESOURCES(false, "src/test/resources");
 
-    /**
-     * The module sub-path containing web resource files.
-     */
-    SRC_MAIN_WEBAPP(false, "src/main/webapp"),
-
-    /**
-     * The module's root directory.
-     */
-    ROOT(false, ""),
-
-    /**
-     * The module's base directory for production Spring-related resource files.
-     */
-    SPRING_CONFIG_ROOT(false, "src/main/resources/META-INF/spring");
-
-    // Fields
-    private final boolean javaSource;
     private final String defaultLocation;
+    private final boolean javaSource;
 
     /**
      * Constructor
@@ -92,16 +91,6 @@ public enum Path {
     }
 
     /**
-     * Returns the {@link LogicalPath} for this path in the given module
-     * 
-     * @param moduleName can be blank for the root or only module
-     * @return a non-<code>null</code> instance
-     */
-    public LogicalPath getModulePathId(final String moduleName) {
-        return LogicalPath.getInstance(this, moduleName);
-    }
-
-    /**
      * Returns the default location of this path relative to the module's root
      * directory
      * 
@@ -109,17 +98,6 @@ public enum Path {
      */
     public String getDefaultLocation() {
         return defaultLocation;
-    }
-
-    /**
-     * Returns the {@link PhysicalPath} of this {@link Path} within the root
-     * module, when no POM exists to customise its location.
-     * 
-     * @param projectDirectory the root directory of the user project
-     * @return a non-<code>null</code> instance
-     */
-    public PhysicalPath getRootModulePath(final String projectDirectory) {
-        return getModulePath("", projectDirectory, null);
     }
 
     /**
@@ -141,6 +119,16 @@ public enum Path {
     }
 
     /**
+     * Returns the {@link LogicalPath} for this path in the given module
+     * 
+     * @param moduleName can be blank for the root or only module
+     * @return a non-<code>null</code> instance
+     */
+    public LogicalPath getModulePathId(final String moduleName) {
+        return LogicalPath.getInstance(this, moduleName);
+    }
+
+    /**
      * Returns the physical path of this logical {@link Path} relative to the
      * given POM. This implementation simply delegates to
      * {@link #getDefaultLocation()}; individual enum values can override this.
@@ -150,6 +138,17 @@ public enum Path {
      */
     public String getPathRelativeToPom(final Pom pom) {
         return getDefaultLocation();
+    }
+
+    /**
+     * Returns the {@link PhysicalPath} of this {@link Path} within the root
+     * module, when no POM exists to customise its location.
+     * 
+     * @param projectDirectory the root directory of the user project
+     * @return a non-<code>null</code> instance
+     */
+    public PhysicalPath getRootModulePath(final String projectDirectory) {
+        return getModulePath("", projectDirectory, null);
     }
 
     /**

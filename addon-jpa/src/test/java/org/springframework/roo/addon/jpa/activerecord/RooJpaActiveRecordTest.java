@@ -18,20 +18,6 @@ import org.springframework.roo.support.util.ObjectUtils;
  */
 public class RooJpaActiveRecordTest {
 
-    /*
-     * Since annotations can't share code with each other (e.g. by inheritance),
-     * we have manually redeclared all of the RooJpaEntity methods in the
-     * RooEntity annotation. This test ensures that we haven't missed any out.
-     */
-    @Test
-    public void testAllRooJpaEntityMethodsExistInRooEntity() {
-        final List<Method> rooEntityMethods = Arrays
-                .asList(RooJpaActiveRecord.class.getMethods());
-        for (final Method jpaEntityMethod : RooJpaEntity.class.getMethods()) {
-            assertMethodExists(jpaEntityMethod, rooEntityMethods);
-        }
-    }
-
     /**
      * Asserts that a method with the same name, return type, and default value
      * as the given target method exists within the given candidate methods.
@@ -57,5 +43,19 @@ public class RooJpaActiveRecordTest {
                 + targetMethod.getReturnType().getSimpleName() + " "
                 + targetMethod.getName() + "() default "
                 + targetMethod.getDefaultValue() + "\"");
+    }
+
+    /*
+     * Since annotations can't share code with each other (e.g. by inheritance),
+     * we have manually redeclared all of the RooJpaEntity methods in the
+     * RooEntity annotation. This test ensures that we haven't missed any out.
+     */
+    @Test
+    public void testAllRooJpaEntityMethodsExistInRooEntity() {
+        final List<Method> rooEntityMethods = Arrays
+                .asList(RooJpaActiveRecord.class.getMethods());
+        for (final Method jpaEntityMethod : RooJpaEntity.class.getMethods()) {
+            assertMethodExists(jpaEntityMethod, rooEntityMethods);
+        }
     }
 }

@@ -13,11 +13,10 @@ import org.springframework.roo.classpath.itd.MemberHoldingTypeDetailsMetadataIte
  */
 public class IdentifierAnnotationValues extends AbstractAnnotationValues {
 
-    // From annotation
     @AutoPopulate private boolean dbManaged;
     @AutoPopulate private boolean gettersByDefault = true;
-    @AutoPopulate private boolean settersByDefault;
     @AutoPopulate private boolean noArgConstructor = true;
+    @AutoPopulate private boolean settersByDefault;
 
     /**
      * Constructor that reads the {@link RooIdentifier} annotation on the given
@@ -50,20 +49,20 @@ public class IdentifierAnnotationValues extends AbstractAnnotationValues {
     }
 
     /**
-     * Indicates whether to generate setters for the id fields
-     * 
-     * @return
-     */
-    public boolean isSettersByDefault() {
-        return settersByDefault;
-    }
-
-    /**
      * Indicates whether to generate a no-argument constructor for the class
      * 
      * @return
      */
     public boolean isNoArgConstructor() {
         return noArgConstructor;
+    }
+
+    /**
+     * Indicates whether to generate setters for the id fields
+     * 
+     * @return
+     */
+    public boolean isSettersByDefault() {
+        return settersByDefault;
     }
 }

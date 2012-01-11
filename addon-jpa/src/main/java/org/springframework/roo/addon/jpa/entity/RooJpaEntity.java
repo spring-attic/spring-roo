@@ -19,7 +19,6 @@ import org.springframework.roo.addon.jpa.activerecord.RooJpaActiveRecord;
 @Target(ElementType.TYPE)
 public @interface RooJpaEntity {
 
-    // Constants for the non-blank default attribute values
     String ID_FIELD_DEFAULT = "id";
     String VERSION_COLUMN_DEFAULT = "version";
     String VERSION_FIELD_DEFAULT = "version";

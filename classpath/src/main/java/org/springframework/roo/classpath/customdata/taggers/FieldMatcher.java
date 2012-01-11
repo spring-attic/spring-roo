@@ -49,7 +49,6 @@ import org.springframework.roo.support.util.Assert;
  */
 public class FieldMatcher implements Matcher<FieldMetadata> {
 
-    // Constants
     public static final FieldMatcher JPA_COLUMN = new FieldMatcher(
             COLUMN_FIELD, JPA_COLUMN_ANNOTATION);
     public static final FieldMatcher JPA_EMBEDDED = new FieldMatcher(
@@ -75,9 +74,8 @@ public class FieldMatcher implements Matcher<FieldMetadata> {
     public static final FieldMatcher JPA_VERSION = new FieldMatcher(
             VERSION_FIELD, JPA_VERSION_ANNOTATION);
 
-    // Fields
-    private final CustomDataKey<FieldMetadata> customDataKey;
     private final List<AnnotationMetadata> annotations;
+    private final CustomDataKey<FieldMetadata> customDataKey;
 
     /**
      * Constructor for matching on any of the given annotations
@@ -109,35 +107,21 @@ public class FieldMatcher implements Matcher<FieldMetadata> {
         }
     }
 
-    public List<FieldMetadata> matches(
-            final List<MemberHoldingTypeDetails> memberHoldingTypeDetailsList) {
-        List<FieldMetadata> fields = new ArrayList<FieldMetadata>();
-        for (MemberHoldingTypeDetails memberHoldingTypeDetails : memberHoldingTypeDetailsList) {
-            for (FieldMetadata field : memberHoldingTypeDetails
-                    .getDeclaredFields()) {
-                if (getMatchingAnnotation(field) != null) {
-                    fields.add(field);
-                }
-            }
-        }
-        return fields;
-    }
-
-    public Object getTagValue(final FieldMetadata field) {
-        return getAttributeMap(field);
-    }
-
     private Map<String, Object> getAttributeMap(final FieldMetadata field) {
-        Map<String, Object> map = new HashMap<String, Object>();
-        AnnotationMetadata annotationMetadata = getMatchingAnnotation(field);
+        final Map<String, Object> map = new HashMap<String, Object>();
+        final AnnotationMetadata annotationMetadata = getMatchingAnnotation(field);
         if (annotationMetadata != null) {
-            for (JavaSymbolName attributeName : annotationMetadata
+            for (final JavaSymbolName attributeName : annotationMetadata
                     .getAttributeNames()) {
                 map.put(attributeName.getSymbolName(), annotationMetadata
                         .getAttribute(attributeName).getValue());
             }
         }
         return map;
+    }
+
+    public CustomDataKey<FieldMetadata> getCustomDataKey() {
+        return customDataKey;
     }
 
     /**
@@ -149,7 +133,7 @@ public class FieldMatcher implements Matcher<FieldMetadata> {
      */
     private AnnotationMetadata getMatchingAnnotation(final FieldMetadata field) {
         for (final AnnotationMetadata fieldAnnotation : field.getAnnotations()) {
-            for (AnnotationMetadata matchingAnnotation : annotations) {
+            for (final AnnotationMetadata matchingAnnotation : annotations) {
                 if (fieldAnnotation
                         .getAnnotationType()
                         .getFullyQualifiedTypeName()
@@ -162,7 +146,21 @@ public class FieldMatcher implements Matcher<FieldMetadata> {
         return null;
     }
 
-    public CustomDataKey<FieldMetadata> getCustomDataKey() {
-        return customDataKey;
+    public Object getTagValue(final FieldMetadata field) {
+        return getAttributeMap(field);
+    }
+
+    public List<FieldMetadata> matches(
+            final List<MemberHoldingTypeDetails> memberHoldingTypeDetailsList) {
+        final List<FieldMetadata> fields = new ArrayList<FieldMetadata>();
+        for (final MemberHoldingTypeDetails memberHoldingTypeDetails : memberHoldingTypeDetailsList) {
+            for (final FieldMetadata field : memberHoldingTypeDetails
+                    .getDeclaredFields()) {
+                if (getMatchingAnnotation(field) != null) {
+                    fields.add(field);
+                }
+            }
+        }
+        return fields;
     }
 }

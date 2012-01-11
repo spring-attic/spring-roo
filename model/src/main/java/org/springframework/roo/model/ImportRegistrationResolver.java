@@ -14,9 +14,65 @@ import java.util.Set;
 public interface ImportRegistrationResolver {
 
     /**
+     * Explicitly registers an import. Note that no verification will be
+     * performed to ensure an import is legal or does not conflict with an
+     * existing import (use {@link #isAdditionLegal(JavaType)} for
+     * verification).
+     * 
+     * @param typeToImport to register (can be <code>null</code> to do nothing)
+     */
+    void addImport(JavaType typeToImport);
+
+    /**
+     * Explicitly registers the given imports. Note that no verification will be
+     * performed to ensure an import is legal or does not conflict with an
+     * existing import (use {@link #isAdditionLegal(JavaType)} for
+     * verification).
+     * 
+     * @param typesToImport any <code>null</code> elements will be ignored
+     * @since 1.2.0
+     */
+    void addImports(JavaType... typesToImport);
+
+    /**
+     * Explicitly registers the given imports. Note that no verification will be
+     * performed to ensure an import is legal or does not conflict with an
+     * existing import (use {@link #isAdditionLegal(JavaType)} for
+     * verification).
+     * 
+     * @param typesToImport any <code>null</code> elements will be ignored
+     * @since 1.2.0
+     */
+    void addImports(List<JavaType> typesToImport);
+
+    /**
      * @return the package this compilation unit belongs to (never null)
      */
     JavaPackage getCompilationUnitPackage();
+
+    /**
+     * Provides access to the registered imports.
+     * 
+     * @return an unmodifiable representation of all registered imports (never
+     *         null, but may be empty)
+     */
+    Set<JavaType> getRegisteredImports();
+
+    /**
+     * Indicates whether the presented {@link JavaType} can be legally presented
+     * to {@link #addImport(JavaType)}. It is considered legal only if the
+     * presented {@link JavaType} is of type {@link DataType#TYPE}, there is not
+     * an existing conflicting registered import, and the proposed type is not
+     * within the default package. Note it is legal to add types from the same
+     * package as the compilation unit, and indeed may be required by
+     * implementations that are otherwise unaware of all the types available in
+     * a particular package.
+     * 
+     * @param javaType
+     * @return true is the presented type can be legally presented to
+     *         {@link #addImport(JavaType)}, otherwise false.
+     */
+    boolean isAdditionLegal(JavaType javaType);
 
     /**
      * Determines whether the presented {@link JavaType} must be used in a
@@ -52,60 +108,4 @@ public interface ImportRegistrationResolver {
      *         form can be used
      */
     boolean isFullyQualifiedFormRequiredAfterAutoImport(JavaType javaType);
-
-    /**
-     * Indicates whether the presented {@link JavaType} can be legally presented
-     * to {@link #addImport(JavaType)}. It is considered legal only if the
-     * presented {@link JavaType} is of type {@link DataType#TYPE}, there is not
-     * an existing conflicting registered import, and the proposed type is not
-     * within the default package. Note it is legal to add types from the same
-     * package as the compilation unit, and indeed may be required by
-     * implementations that are otherwise unaware of all the types available in
-     * a particular package.
-     * 
-     * @param javaType
-     * @return true is the presented type can be legally presented to
-     *         {@link #addImport(JavaType)}, otherwise false.
-     */
-    boolean isAdditionLegal(JavaType javaType);
-
-    /**
-     * Explicitly registers an import. Note that no verification will be
-     * performed to ensure an import is legal or does not conflict with an
-     * existing import (use {@link #isAdditionLegal(JavaType)} for
-     * verification).
-     * 
-     * @param typeToImport to register (can be <code>null</code> to do nothing)
-     */
-    void addImport(JavaType typeToImport);
-
-    /**
-     * Explicitly registers the given imports. Note that no verification will be
-     * performed to ensure an import is legal or does not conflict with an
-     * existing import (use {@link #isAdditionLegal(JavaType)} for
-     * verification).
-     * 
-     * @param typesToImport any <code>null</code> elements will be ignored
-     * @since 1.2.0
-     */
-    void addImports(JavaType... typesToImport);
-
-    /**
-     * Explicitly registers the given imports. Note that no verification will be
-     * performed to ensure an import is legal or does not conflict with an
-     * existing import (use {@link #isAdditionLegal(JavaType)} for
-     * verification).
-     * 
-     * @param typesToImport any <code>null</code> elements will be ignored
-     * @since 1.2.0
-     */
-    void addImports(List<JavaType> typesToImport);
-
-    /**
-     * Provides access to the registered imports.
-     * 
-     * @return an unmodifiable representation of all registered imports (never
-     *         null, but may be empty)
-     */
-    Set<JavaType> getRegisteredImports();
 }

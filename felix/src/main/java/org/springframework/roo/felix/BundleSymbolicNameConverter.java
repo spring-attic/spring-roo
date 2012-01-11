@@ -25,23 +25,23 @@ import org.springframework.roo.shell.MethodTarget;
 public class BundleSymbolicNameConverter implements
         Converter<BundleSymbolicName> {
 
+    private ComponentContext context;
     // Handler service field is solely to ensure it starts before
     // BundleSymbolicNameConverter
     @Reference protected HttpPgpUrlStreamHandlerService handlerService;
     @Reference private RepositoryAdmin repositoryAdmin;
-    private ComponentContext context;
 
     protected void activate(final ComponentContext context) {
         this.context = context;
     }
 
-    protected void deactivate(final ComponentContext context) {
-        this.context = null;
-    }
-
     public BundleSymbolicName convertFromText(final String value,
             final Class<?> requiredType, final String optionContext) {
         return new BundleSymbolicName(value.trim());
+    }
+
+    protected void deactivate(final ComponentContext context) {
+        this.context = null;
     }
 
     public boolean getAllPossibleValues(final List<Completion> completions,
@@ -63,11 +63,11 @@ public class BundleSymbolicNameConverter implements
         }
 
         if (local) {
-            Bundle[] bundles = this.context.getBundleContext().getBundles();
+            final Bundle[] bundles = context.getBundleContext().getBundles();
             if (bundles != null) {
-                for (Bundle bundle : bundles) {
-                    String bsn = bundle.getSymbolicName();
-                    if (bsn != null && bsn.startsWith(originalUserInput)) {
+                for (final Bundle bundle : bundles) {
+                    final String bsn = bundle.getSymbolicName();
+                    if ((bsn != null) && bsn.startsWith(originalUserInput)) {
                         completions.add(new Completion(bsn));
                     }
                 }
@@ -75,12 +75,13 @@ public class BundleSymbolicNameConverter implements
         }
 
         if (obr) {
-            Repository[] repositories = repositoryAdmin.listRepositories();
+            final Repository[] repositories = repositoryAdmin
+                    .listRepositories();
             if (repositories != null) {
-                for (Repository repository : repositories) {
-                    Resource[] resources = repository.getResources();
+                for (final Repository repository : repositories) {
+                    final Resource[] resources = repository.getResources();
                     if (resources != null) {
-                        for (Resource resource : resources) {
+                        for (final Resource resource : resources) {
                             if (resource.getSymbolicName().startsWith(
                                     originalUserInput)) {
                                 completions.add(new Completion(resource

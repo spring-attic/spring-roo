@@ -35,15 +35,29 @@ import org.springframework.roo.support.util.StringUtils;
 @Service
 public class ControllerCommands implements CommandMarker {
 
-    // Constants
     private static Logger LOGGER = HandlerUtils
             .getLogger(ControllerCommands.class);
 
-    // Fields
     @Reference private ControllerOperations controllerOperations;
     @Reference private MetadataService metadataService;
     @Reference private ProjectOperations projectOperations;
     @Reference private TypeLocationService typeLocationService;
+
+    @Deprecated
+    @CliCommand(value = "controller all", help = "Scaffold controllers for all project entities without an existing controller - deprecated, use 'web mvc setup' + 'web mvc all' instead")
+    public void generateAll(
+            @CliOption(key = "package", mandatory = true, optionContext = "update", help = "The package in which new controllers will be placed") final JavaPackage javaPackage) {
+
+        LOGGER.warning("This command has been deprecated and will be disabled soon! Please use 'web mvc setup' followed by 'web mvc all --package ' instead.");
+        controllerOperations.setup();
+        webMvcAll(javaPackage);
+    }
+
+    @Deprecated
+    @CliAvailabilityIndicator({ "controller scaffold", "controller all" })
+    public boolean isNewControllerAvailable() {
+        return controllerOperations.isNewControllerAvailable();
+    }
 
     @CliAvailabilityIndicator({ "web mvc all", "web mvc scaffold" })
     public boolean isScaffoldAvailable() {
@@ -51,9 +65,16 @@ public class ControllerCommands implements CommandMarker {
     }
 
     @Deprecated
-    @CliAvailabilityIndicator({ "controller scaffold", "controller all" })
-    public boolean isNewControllerAvailable() {
-        return controllerOperations.isNewControllerAvailable();
+    @CliCommand(value = "controller scaffold", help = "Create a new scaffold Controller (ie where we maintain CRUD automatically) - deprecated, use 'web mvc scaffold' instead")
+    public void newController(
+            @CliOption(key = { "class", "" }, mandatory = true, help = "The path and name of the controller object to be created") final JavaType controller,
+            @CliOption(key = "entity", mandatory = false, optionContext = JavaTypeConverter.PROJECT, unspecifiedDefaultValue = "*", help = "The name of the entity object which the controller exposes to the web tier") final JavaType entity,
+            @CliOption(key = "path", mandatory = false, help = "The base path under which the controller listens for RESTful requests (defaults to the simple name of the form backing object)") final String path,
+            @CliOption(key = "disallowedOperations", mandatory = false, help = "A comma separated list of operations (only create, update, delete allowed) that should not be generated in the controller") final String disallowedOperations) {
+
+        LOGGER.warning("This command has been deprecated and will be disabled soon! Please use 'web mvc setup' followed by 'web mvc scaffold' instead.");
+        controllerOperations.setup();
+        webMvcScaffold(controller, entity, path, disallowedOperations);
     }
 
     @CliCommand(value = "web mvc all", help = "Scaffold Spring MVC controllers for all project entities without an existing controller")
@@ -76,7 +97,7 @@ public class ControllerCommands implements CommandMarker {
             @CliOption(key = "path", mandatory = false, help = "The base path under which the controller listens for RESTful requests (defaults to the simple name of the form backing object)") String path,
             @CliOption(key = "disallowedOperations", mandatory = false, help = "A comma separated list of operations (only create, update, delete allowed) that should not be generated in the controller") final String disallowedOperations) {
 
-        ClassOrInterfaceTypeDetails cid = typeLocationService
+        final ClassOrInterfaceTypeDetails cid = typeLocationService
                 .getTypeDetails(backingType);
         if (cid == null) {
             LOGGER.warning("The specified entity can not be resolved to a type in your project");
@@ -90,9 +111,9 @@ public class ControllerCommands implements CommandMarker {
             return;
         }
 
-        Set<String> disallowedOperationSet = new HashSet<String>();
+        final Set<String> disallowedOperationSet = new HashSet<String>();
         if (!"".equals(disallowedOperations)) {
-            for (String operation : StringUtils
+            for (final String operation : StringUtils
                     .commaDelimitedListToSet(disallowedOperations)) {
                 if (!("create".equals(operation) || "update".equals(operation) || "delete"
                         .equals(operation))) {
@@ -104,9 +125,9 @@ public class ControllerCommands implements CommandMarker {
         }
 
         if (StringUtils.isBlank(path)) {
-            LogicalPath targetPath = PhysicalTypeIdentifier.getPath(cid
+            final LogicalPath targetPath = PhysicalTypeIdentifier.getPath(cid
                     .getDeclaredByMetadataId());
-            PluralMetadata pluralMetadata = (PluralMetadata) metadataService
+            final PluralMetadata pluralMetadata = (PluralMetadata) metadataService
                     .get(PluralMetadata.createIdentifier(backingType,
                             targetPath));
             Assert.notNull(pluralMetadata, "Could not determine plural for '"
@@ -123,28 +144,5 @@ public class ControllerCommands implements CommandMarker {
 
         controllerOperations.createAutomaticController(controller, backingType,
                 disallowedOperationSet, path);
-    }
-
-    @Deprecated
-    @CliCommand(value = "controller all", help = "Scaffold controllers for all project entities without an existing controller - deprecated, use 'web mvc setup' + 'web mvc all' instead")
-    public void generateAll(
-            @CliOption(key = "package", mandatory = true, optionContext = "update", help = "The package in which new controllers will be placed") final JavaPackage javaPackage) {
-
-        LOGGER.warning("This command has been deprecated and will be disabled soon! Please use 'web mvc setup' followed by 'web mvc all --package ' instead.");
-        controllerOperations.setup();
-        webMvcAll(javaPackage);
-    }
-
-    @Deprecated
-    @CliCommand(value = "controller scaffold", help = "Create a new scaffold Controller (ie where we maintain CRUD automatically) - deprecated, use 'web mvc scaffold' instead")
-    public void newController(
-            @CliOption(key = { "class", "" }, mandatory = true, help = "The path and name of the controller object to be created") final JavaType controller,
-            @CliOption(key = "entity", mandatory = false, optionContext = JavaTypeConverter.PROJECT, unspecifiedDefaultValue = "*", help = "The name of the entity object which the controller exposes to the web tier") final JavaType entity,
-            @CliOption(key = "path", mandatory = false, help = "The base path under which the controller listens for RESTful requests (defaults to the simple name of the form backing object)") final String path,
-            @CliOption(key = "disallowedOperations", mandatory = false, help = "A comma separated list of operations (only create, update, delete allowed) that should not be generated in the controller") final String disallowedOperations) {
-
-        LOGGER.warning("This command has been deprecated and will be disabled soon! Please use 'web mvc setup' followed by 'web mvc scaffold' instead.");
-        controllerOperations.setup();
-        webMvcScaffold(controller, entity, path, disallowedOperations);
     }
 }

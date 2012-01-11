@@ -13,6 +13,22 @@ import java.util.Locale;
 public interface I18n {
 
     /**
+     * The input stream for the flag graphic (must be a png image 16 x 11
+     * pixels, 72 DPI). Preferred flag icon set is the Fam Fam Fam set at
+     * http://www.famfamfam.com/lab/icons/flags/
+     * 
+     * @return the flag image stream
+     */
+    InputStream getFlagGraphic();
+
+    /**
+     * The language label to be presented in the Web UI (ie: "English")
+     * 
+     * @return the language
+     */
+    String getLanguage();
+
+    /**
      * The locale can be initialized statically or by using the constructor if
      * the langauge is not statically supported or if a country specific
      * language translation is provided (ie en_AU): static: Locale.ENGLISH
@@ -24,22 +40,6 @@ public interface I18n {
      * @return the locale
      */
     Locale getLocale();
-
-    /**
-     * The language label to be presented in the Web UI (ie: "English")
-     * 
-     * @return the language
-     */
-    String getLanguage();
-
-    /**
-     * The input stream for the flag graphic (must be a png image 16 x 11
-     * pixels, 72 DPI). Preferred flag icon set is the Fam Fam Fam set at
-     * http://www.famfamfam.com/lab/icons/flags/
-     * 
-     * @return the flag image stream
-     */
-    InputStream getFlagGraphic();
 
     /**
      * The input stream for the translated message bundle. It will be saved in

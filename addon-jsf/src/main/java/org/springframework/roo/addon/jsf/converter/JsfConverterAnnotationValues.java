@@ -15,7 +15,7 @@ import org.springframework.roo.model.JavaType;
  * @since 1.2.0
  */
 public class JsfConverterAnnotationValues extends AbstractAnnotationValues {
-    // From annotation
+
     @AutoPopulate private JavaType entity;
 
     public JsfConverterAnnotationValues(

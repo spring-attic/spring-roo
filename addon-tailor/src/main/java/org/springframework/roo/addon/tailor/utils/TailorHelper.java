@@ -31,25 +31,26 @@ public class TailorHelper {
      * @param text A string with potential occurrences of placeholders
      * @return The new command string
      */
-    public static String replaceVars(CommandTransformation trafo, String text) {
+    public static String replaceVars(final CommandTransformation trafo,
+            String text) {
         /*
          * TODO: This could also be done the other way around: iterate over all
          * arguments of the input command and replace the corresponding ${}
          * occurrences. >> Think about which makes more sense.
          */
-        Map<String, String> inputArguments = trafo.getArguments();
+        final Map<String, String> inputArguments = trafo.getArguments();
 
-        Matcher matcher = varPattern.matcher(text);
+        final Matcher matcher = varPattern.matcher(text);
         while (matcher.find()) {
             // Placeholder name between ${}
-            String placeholder = matcher.group(1);
+            final String placeholder = matcher.group(1);
             String inputValue = null;
             if ("*".equals(placeholder)) {
                 // In this case, take the last fragment of the original command
                 // that is not defined with "--" > assumed this is the first
                 // argument,
                 // which can sometimes be given without a "--" name
-                String[] split = inputArguments.get("").split(" ");
+                final String[] split = inputArguments.get("").split(" ");
                 inputValue = split[split.length - 1];
             }
             else {

@@ -38,17 +38,11 @@ import org.springframework.roo.support.util.IOUtils;
 @Service
 public class PropFileOperationsImpl implements PropFileOperations {
 
-    // Constants
-    private static final boolean SORTED = true;
     private static final boolean CHANGE_EXISTING = true;
+    private static final boolean SORTED = true;
 
-    // Fields
     @Reference private FileManager fileManager;
     @Reference private ProjectOperations projectOperations;
-
-    public boolean isPropertiesCommandAvailable() {
-        return projectOperations.isFocusedProjectAvailable();
-    }
 
     public void addProperties(final LogicalPath propertyFilePath,
             final String propertyFilename,
@@ -71,6 +65,12 @@ public class PropFileOperationsImpl implements PropFileOperations {
                 sorted, !CHANGE_EXISTING);
     }
 
+    private Map<String, String> asMap(final String key, final String value) {
+        final Map<String, String> properties = new HashMap<String, String>();
+        properties.put(key, value);
+        return properties;
+    }
+
     public void changeProperty(final LogicalPath propertyFilePath,
             final String propertyFilename, final String key, final String value) {
         manageProperty(propertyFilePath, propertyFilename, asMap(key, value),
@@ -84,6 +84,121 @@ public class PropFileOperationsImpl implements PropFileOperations {
                 sorted, CHANGE_EXISTING);
     }
 
+    public Map<String, String> getProperties(
+            final LogicalPath propertyFilePath, final String propertyFilename) {
+        Assert.notNull(propertyFilePath, "Property file path required");
+        Assert.hasText(propertyFilename, "Property filename required");
+
+        final String filePath = projectOperations.getPathResolver()
+                .getIdentifier(propertyFilePath, propertyFilename);
+        final Properties props = new Properties();
+
+        try {
+            if (fileManager.exists(filePath)) {
+                loadProperties(props, new BufferedInputStream(
+                        new FileInputStream(filePath)));
+            }
+            else {
+                throw new IllegalStateException("Properties file not found");
+            }
+        }
+        catch (final IOException ioe) {
+            throw new IllegalStateException(ioe);
+        }
+
+        final Map<String, String> result = new HashMap<String, String>();
+        for (final Object key : props.keySet()) {
+            result.put(key.toString(), props.getProperty(key.toString()));
+        }
+        return Collections.unmodifiableMap(result);
+    }
+
+    public String getProperty(final LogicalPath propertyFilePath,
+            final String propertyFilename, final String key) {
+        Assert.notNull(propertyFilePath, "Property file path required");
+        Assert.hasText(propertyFilename, "Property filename required");
+        Assert.hasText(key, "Key required");
+
+        final String filePath = projectOperations.getPathResolver()
+                .getIdentifier(propertyFilePath, propertyFilename);
+        MutableFile mutableFile = null;
+        final Properties props = new Properties();
+
+        if (fileManager.exists(filePath)) {
+            mutableFile = fileManager.updateFile(filePath);
+            loadProperties(props, mutableFile.getInputStream());
+        }
+        else {
+            return null;
+        }
+
+        return props.getProperty(key);
+    }
+
+    public SortedSet<String> getPropertyKeys(
+            final LogicalPath propertyFilePath, final String propertyFilename,
+            final boolean includeValues) {
+        Assert.notNull(propertyFilePath, "Property file path required");
+        Assert.hasText(propertyFilename, "Property filename required");
+
+        final String filePath = projectOperations.getPathResolver()
+                .getIdentifier(propertyFilePath, propertyFilename);
+        final Properties props = new Properties();
+
+        try {
+            if (fileManager.exists(filePath)) {
+                loadProperties(props, new BufferedInputStream(
+                        new FileInputStream(filePath)));
+            }
+            else {
+                throw new IllegalStateException("Properties file not found");
+            }
+        }
+        catch (final IOException ioe) {
+            throw new IllegalStateException(ioe);
+        }
+
+        final SortedSet<String> result = new TreeSet<String>();
+        for (final Object key : props.keySet()) {
+            String info = key.toString();
+            if (includeValues) {
+                info += " = " + props.getProperty(key.toString());
+            }
+            result.add(info);
+        }
+        return result;
+    }
+
+    public boolean isPropertiesCommandAvailable() {
+        return projectOperations.isFocusedProjectAvailable();
+    }
+
+    public Properties loadProperties(final InputStream inputStream) {
+        final Properties properties = new Properties();
+        if (inputStream != null) {
+            loadProperties(properties, inputStream);
+        }
+        return properties;
+    }
+
+    private void loadProperties(final Properties props,
+            final InputStream inputStream) {
+        try {
+            props.load(inputStream);
+        }
+        catch (final IOException e) {
+            throw new IllegalStateException("Could not load properties", e);
+        }
+        finally {
+            IOUtils.closeQuietly(inputStream);
+        }
+    }
+
+    public Properties loadProperties(final String filename,
+            final Class<?> loadingClass) {
+        return loadProperties(FileUtils.getInputStream(loadingClass, filename));
+    }
+
     private void manageProperty(final LogicalPath propertyFilePath,
             final String propertyFilename,
             final Map<String, String> properties, final boolean sorted,
@@ -92,8 +207,8 @@ public class PropFileOperationsImpl implements PropFileOperations {
         Assert.hasText(propertyFilename, "Property filename required");
         Assert.notNull(properties, "Property map required");
 
-        String filePath = projectOperations.getPathResolver().getIdentifier(
-                propertyFilePath, propertyFilename);
+        final String filePath = projectOperations.getPathResolver()
+                .getIdentifier(propertyFilePath, propertyFilename);
         MutableFile mutableFile = null;
 
         Properties props;
@@ -138,7 +253,7 @@ public class PropFileOperationsImpl implements PropFileOperations {
             final String key = entry.getKey();
             final String newValue = entry.getValue();
             final String existingValue = props.getProperty(key);
-            if (existingValue == null
+            if ((existingValue == null)
                     || (!existingValue.equals(newValue) && changeExisting)) {
                 props.setProperty(key, newValue);
                 saveNeeded = true;
@@ -157,10 +272,10 @@ public class PropFileOperationsImpl implements PropFileOperations {
         Assert.hasText(propertyFilename, "Property filename required");
         Assert.hasText(key, "Key required");
 
-        String filePath = projectOperations.getPathResolver().getIdentifier(
-                propertyFilePath, propertyFilename);
+        final String filePath = projectOperations.getPathResolver()
+                .getIdentifier(propertyFilePath, propertyFilename);
         MutableFile mutableFile = null;
-        Properties props = new Properties();
+        final Properties props = new Properties();
 
         if (fileManager.exists(filePath)) {
             mutableFile = fileManager.updateFile(filePath);
@@ -176,134 +291,17 @@ public class PropFileOperationsImpl implements PropFileOperations {
                 + new Date());
     }
 
-    public String getProperty(final LogicalPath propertyFilePath,
-            final String propertyFilename, final String key) {
-        Assert.notNull(propertyFilePath, "Property file path required");
-        Assert.hasText(propertyFilename, "Property filename required");
-        Assert.hasText(key, "Key required");
-
-        String filePath = projectOperations.getPathResolver().getIdentifier(
-                propertyFilePath, propertyFilename);
-        MutableFile mutableFile = null;
-        Properties props = new Properties();
-
-        if (fileManager.exists(filePath)) {
-            mutableFile = fileManager.updateFile(filePath);
-            loadProperties(props, mutableFile.getInputStream());
-        }
-        else {
-            return null;
-        }
-
-        return props.getProperty(key);
-    }
-
-    public SortedSet<String> getPropertyKeys(
-            final LogicalPath propertyFilePath, final String propertyFilename,
-            final boolean includeValues) {
-        Assert.notNull(propertyFilePath, "Property file path required");
-        Assert.hasText(propertyFilename, "Property filename required");
-
-        String filePath = projectOperations.getPathResolver().getIdentifier(
-                propertyFilePath, propertyFilename);
-        Properties props = new Properties();
-
-        try {
-            if (fileManager.exists(filePath)) {
-                loadProperties(props, new BufferedInputStream(
-                        new FileInputStream(filePath)));
-            }
-            else {
-                throw new IllegalStateException("Properties file not found");
-            }
-        }
-        catch (IOException ioe) {
-            throw new IllegalStateException(ioe);
-        }
-
-        SortedSet<String> result = new TreeSet<String>();
-        for (Object key : props.keySet()) {
-            String info = key.toString();
-            if (includeValues) {
-                info += " = " + props.getProperty(key.toString());
-            }
-            result.add(info);
-        }
-        return result;
-    }
-
-    public Map<String, String> getProperties(
-            final LogicalPath propertyFilePath, final String propertyFilename) {
-        Assert.notNull(propertyFilePath, "Property file path required");
-        Assert.hasText(propertyFilename, "Property filename required");
-
-        String filePath = projectOperations.getPathResolver().getIdentifier(
-                propertyFilePath, propertyFilename);
-        Properties props = new Properties();
-
-        try {
-            if (fileManager.exists(filePath)) {
-                loadProperties(props, new BufferedInputStream(
-                        new FileInputStream(filePath)));
-            }
-            else {
-                throw new IllegalStateException("Properties file not found");
-            }
-        }
-        catch (IOException ioe) {
-            throw new IllegalStateException(ioe);
-        }
-
-        Map<String, String> result = new HashMap<String, String>();
-        for (Object key : props.keySet()) {
-            result.put(key.toString(), props.getProperty(key.toString()));
-        }
-        return Collections.unmodifiableMap(result);
-    }
-
-    public Properties loadProperties(final InputStream inputStream) {
-        final Properties properties = new Properties();
-        if (inputStream != null) {
-            loadProperties(properties, inputStream);
-        }
-        return properties;
-    }
-
-    private void loadProperties(final Properties props,
-            final InputStream inputStream) {
-        try {
-            props.load(inputStream);
-        }
-        catch (IOException e) {
-            throw new IllegalStateException("Could not load properties", e);
-        }
-        finally {
-            IOUtils.closeQuietly(inputStream);
-        }
-    }
-
-    private Map<String, String> asMap(final String key, final String value) {
-        Map<String, String> properties = new HashMap<String, String>();
-        properties.put(key, value);
-        return properties;
-    }
-
     private void storeProps(final Properties props,
             final OutputStream outputStream, final String comment) {
         Assert.notNull(outputStream, "OutputStream required");
         try {
             props.store(outputStream, comment);
         }
-        catch (IOException e) {
+        catch (final IOException e) {
             throw new IllegalStateException("Could not store properties", e);
         }
         finally {
             IOUtils.closeQuietly(outputStream);
         }
-    }
-
-    public Properties loadProperties(final String filename,
-            final Class<?> loadingClass) {
-        return loadProperties(FileUtils.getInputStream(loadingClass, filename));
     }
 }

@@ -36,8 +36,6 @@ import org.springframework.roo.support.util.Assert;
  */
 public class AnnotationMetadataBuilder implements Builder<AnnotationMetadata> {
 
-    // Constants for JPA annotations (using literal class names so as not to
-    // make Roo depend on JPA)
     public static final AnnotationMetadata JPA_COLUMN_ANNOTATION = getInstance(COLUMN);
     public static final AnnotationMetadata JPA_EMBEDDED_ANNOTATION = getInstance(EMBEDDED);
     public static final AnnotationMetadata JPA_EMBEDDED_ID_ANNOTATION = getInstance(EMBEDDED_ID);
@@ -55,12 +53,11 @@ public class AnnotationMetadataBuilder implements Builder<AnnotationMetadata> {
      * Returns the metadata for the existing annotation, with no attribute
      * values
      * 
-     * @param annotationType the fully-qualified name of the annotation type
-     *            (required)
+     * @param annotationType the annotation type (required)
      * @return a non-<code>null</code> instance
      * @since 1.2.0
      */
-    public static AnnotationMetadata getInstance(final String annotationType) {
+    public static AnnotationMetadata getInstance(final Class<?> annotationType) {
         return new AnnotationMetadataBuilder(annotationType).build();
     }
 
@@ -78,15 +75,15 @@ public class AnnotationMetadataBuilder implements Builder<AnnotationMetadata> {
      * Returns the metadata for the existing annotation, with no attribute
      * values
      * 
-     * @param annotationType the annotation type (required)
+     * @param annotationType the fully-qualified name of the annotation type
+     *            (required)
      * @return a non-<code>null</code> instance
      * @since 1.2.0
      */
-    public static AnnotationMetadata getInstance(final Class<?> annotationType) {
+    public static AnnotationMetadata getInstance(final String annotationType) {
         return new AnnotationMetadataBuilder(annotationType).build();
     }
 
-    // Fields
     private JavaType annotationType;
     private final Map<String, AnnotationAttributeValue<?>> attributeValues = new LinkedHashMap<String, AnnotationAttributeValue<?>>();
 
@@ -105,8 +102,8 @@ public class AnnotationMetadataBuilder implements Builder<AnnotationMetadata> {
      */
     public AnnotationMetadataBuilder(final AnnotationMetadata existing) {
         Assert.notNull(existing);
-        this.annotationType = existing.getAnnotationType();
-        for (JavaSymbolName attributeName : existing.getAttributeNames()) {
+        annotationType = existing.getAnnotationType();
+        for (final JavaSymbolName attributeName : existing.getAttributeNames()) {
             attributeValues.put(attributeName.getSymbolName(),
                     existing.getAttribute(attributeName));
         }
@@ -119,16 +116,6 @@ public class AnnotationMetadataBuilder implements Builder<AnnotationMetadata> {
      * @since 1.2.0
      */
     public AnnotationMetadataBuilder(final Class<?> annotationType) {
-        this(new JavaType(annotationType));
-    }
-
-    /**
-     * Constructor for no initial attribute values
-     * 
-     * @param annotationType the fully-qualified name of the annotation type
-     *            (required)
-     */
-    public AnnotationMetadataBuilder(final String annotationType) {
         this(new JavaType(annotationType));
     }
 
@@ -153,18 +140,27 @@ public class AnnotationMetadataBuilder implements Builder<AnnotationMetadata> {
         setAttributes(attributeValues);
     }
 
+    /**
+     * Constructor for no initial attribute values
+     * 
+     * @param annotationType the fully-qualified name of the annotation type
+     *            (required)
+     */
+    public AnnotationMetadataBuilder(final String annotationType) {
+        this(new JavaType(annotationType));
+    }
+
+    public void addAttribute(final AnnotationAttributeValue<?> value) {
+        // Locate existing attribute with this key and replace it
+        attributeValues.put(value.getName().getSymbolName(), value);
+    }
+
     public void addBooleanAttribute(final String key, final boolean value) {
         addAttribute(new BooleanAttributeValue(new JavaSymbolName(key), value));
     }
 
     public void addCharAttribute(final String key, final char value) {
         addAttribute(new CharAttributeValue(new JavaSymbolName(key), value));
-    }
-
-    public void addClassAttribute(final String key,
-            final String fullyQualifiedTypeName) {
-        addAttribute(new ClassAttributeValue(new JavaSymbolName(key),
-                new JavaType(fullyQualifiedTypeName)));
     }
 
     /**
@@ -177,33 +173,39 @@ public class AnnotationMetadataBuilder implements Builder<AnnotationMetadata> {
         addAttribute(new ClassAttributeValue(new JavaSymbolName(key), javaType));
     }
 
+    public void addClassAttribute(final String key,
+            final String fullyQualifiedTypeName) {
+        addAttribute(new ClassAttributeValue(new JavaSymbolName(key),
+                new JavaType(fullyQualifiedTypeName)));
+    }
+
     public void addDoubleAttribute(final String key, final double value,
             final boolean floatingPrecisionOnly) {
         addAttribute(new DoubleAttributeValue(new JavaSymbolName(key), value,
                 floatingPrecisionOnly));
     }
 
-    public void addEnumAttribute(final String key,
-            final String fullyQualifiedTypeName, final String enumConstant) {
-        EnumDetails details = new EnumDetails(new JavaType(
-                fullyQualifiedTypeName), new JavaSymbolName(enumConstant));
-        addAttribute(new EnumAttributeValue(new JavaSymbolName(key), details));
-    }
-
-    public void addEnumAttribute(final String key, final JavaType javaType,
-            final String enumConstant) {
-        EnumDetails details = new EnumDetails(javaType, new JavaSymbolName(
-                enumConstant));
+    public void addEnumAttribute(final String key, final EnumDetails details) {
         addAttribute(new EnumAttributeValue(new JavaSymbolName(key), details));
     }
 
     public void addEnumAttribute(final String key, final JavaType javaType,
             final JavaSymbolName enumConstant) {
-        EnumDetails details = new EnumDetails(javaType, enumConstant);
+        final EnumDetails details = new EnumDetails(javaType, enumConstant);
         addAttribute(new EnumAttributeValue(new JavaSymbolName(key), details));
     }
 
-    public void addEnumAttribute(final String key, final EnumDetails details) {
+    public void addEnumAttribute(final String key, final JavaType javaType,
+            final String enumConstant) {
+        final EnumDetails details = new EnumDetails(javaType,
+                new JavaSymbolName(enumConstant));
+        addAttribute(new EnumAttributeValue(new JavaSymbolName(key), details));
+    }
+
+    public void addEnumAttribute(final String key,
+            final String fullyQualifiedTypeName, final String enumConstant) {
+        final EnumDetails details = new EnumDetails(new JavaType(
+                fullyQualifiedTypeName), new JavaSymbolName(enumConstant));
         addAttribute(new EnumAttributeValue(new JavaSymbolName(key), details));
     }
 
@@ -219,9 +221,18 @@ public class AnnotationMetadataBuilder implements Builder<AnnotationMetadata> {
         addAttribute(new StringAttributeValue(new JavaSymbolName(key), value));
     }
 
-    public void addAttribute(final AnnotationAttributeValue<?> value) {
-        // Locate existing attribute with this key and replace it
-        attributeValues.put(value.getName().getSymbolName(), value);
+    public AnnotationMetadata build() {
+        return new DefaultAnnotationMetadata(getAnnotationType(),
+                new ArrayList<AnnotationAttributeValue<?>>(getAttributes()
+                        .values()));
+    }
+
+    public JavaType getAnnotationType() {
+        return annotationType;
+    }
+
+    public Map<String, AnnotationAttributeValue<?>> getAttributes() {
+        return attributeValues;
     }
 
     public void removeAttribute(final String key) {
@@ -229,16 +240,8 @@ public class AnnotationMetadataBuilder implements Builder<AnnotationMetadata> {
         attributeValues.remove(key);
     }
 
-    public JavaType getAnnotationType() {
-        return annotationType;
-    }
-
     public void setAnnotationType(final JavaType annotationType) {
         this.annotationType = annotationType;
-    }
-
-    public Map<String, AnnotationAttributeValue<?>> getAttributes() {
-        return attributeValues;
     }
 
     /**
@@ -251,15 +254,9 @@ public class AnnotationMetadataBuilder implements Builder<AnnotationMetadata> {
             final Collection<AnnotationAttributeValue<?>> attributeValues) {
         this.attributeValues.clear();
         if (attributeValues != null) {
-            for (AnnotationAttributeValue<?> attributeValue : attributeValues) {
+            for (final AnnotationAttributeValue<?> attributeValue : attributeValues) {
                 addAttribute(attributeValue);
             }
         }
-    }
-
-    public AnnotationMetadata build() {
-        return new DefaultAnnotationMetadata(getAnnotationType(),
-                new ArrayList<AnnotationAttributeValue<?>>(getAttributes()
-                        .values()));
     }
 }

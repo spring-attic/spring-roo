@@ -38,17 +38,16 @@ public class AbstractMemberHoldingTypeDetailsBuilderTest {
             super(DECLARED_BY_MID);
         }
 
+        @Override
+        public void addImports(final Collection<ImportMetadata> imports) {
+        }
+
         public ClassOrInterfaceTypeDetails build() {
             // This method can be spied upon, see the StackOverflow link above
             return null;
         }
-
-        @Override
-        public void addImports(Collection<ImportMetadata> imports) {
-        }
     }
 
-    // Constants
     private static final String DECLARED_BY_MID = "MID:foo#bar";
 
     // Fixture
@@ -56,7 +55,7 @@ public class AbstractMemberHoldingTypeDetailsBuilderTest {
 
     @Before
     public void setUp() {
-        this.builder = new TestableBuilder();
+        builder = new TestableBuilder();
     }
 
     @Test
@@ -68,14 +67,13 @@ public class AbstractMemberHoldingTypeDetailsBuilderTest {
                 DECLARED_BY_MID);
 
         // Invoke
-        this.builder.setDeclaredConstructors(Collections
-                .singleton(mockConstructor1));
-        final boolean added = this.builder.addConstructor(mockConstructor2);
+        builder.setDeclaredConstructors(Collections.singleton(mockConstructor1));
+        final boolean added = builder.addConstructor(mockConstructor2);
 
         // Check
         assertTrue(added);
         assertEquals(Arrays.asList(mockConstructor1, mockConstructor2),
-                this.builder.getDeclaredConstructors());
+                builder.getDeclaredConstructors());
     }
 
     @Test
@@ -85,13 +83,13 @@ public class AbstractMemberHoldingTypeDetailsBuilderTest {
         final JavaType mockType2 = mock(JavaType.class);
 
         // Invoke
-        this.builder.setExtendsTypes(Collections.singleton(mockType1));
-        final boolean added = this.builder.addExtendsTypes(mockType2);
+        builder.setExtendsTypes(Collections.singleton(mockType1));
+        final boolean added = builder.addExtendsTypes(mockType2);
 
         // Check
         assertTrue(added);
         assertEquals(Arrays.asList(mockType1, mockType2),
-                this.builder.getExtendsTypes());
+                builder.getExtendsTypes());
     }
 
     @Test
@@ -102,13 +100,13 @@ public class AbstractMemberHoldingTypeDetailsBuilderTest {
         when(mockField2.getDeclaredByMetadataId()).thenReturn(DECLARED_BY_MID);
 
         // Invoke
-        this.builder.setDeclaredFields(Collections.singleton(mockField1));
-        final boolean added = this.builder.addField(mockField2);
+        builder.setDeclaredFields(Collections.singleton(mockField1));
+        final boolean added = builder.addField(mockField2);
 
         // Check
         assertTrue(added);
         assertEquals(Arrays.asList(mockField1, mockField2),
-                this.builder.getDeclaredFields());
+                builder.getDeclaredFields());
     }
 
     @Test
@@ -118,13 +116,13 @@ public class AbstractMemberHoldingTypeDetailsBuilderTest {
         final JavaType mockType2 = mock(JavaType.class);
 
         // Invoke
-        this.builder.setImplementsTypes(Collections.singleton(mockType1));
-        final boolean added = this.builder.addImplementsType(mockType2);
+        builder.setImplementsTypes(Collections.singleton(mockType1));
+        final boolean added = builder.addImplementsType(mockType2);
 
         // Check
         assertTrue(added);
         assertEquals(Arrays.asList(mockType1, mockType2),
-                this.builder.getImplementsTypes());
+                builder.getImplementsTypes());
     }
 
     @Test
@@ -136,14 +134,13 @@ public class AbstractMemberHoldingTypeDetailsBuilderTest {
                 DECLARED_BY_MID);
 
         // Invoke
-        this.builder.setDeclaredInitializers(Collections
-                .singleton(mockInitializer1));
-        final boolean added = this.builder.addInitializer(mockInitializer2);
+        builder.setDeclaredInitializers(Collections.singleton(mockInitializer1));
+        final boolean added = builder.addInitializer(mockInitializer2);
 
         // Check
         assertTrue(added);
         assertEquals(Arrays.asList(mockInitializer1, mockInitializer2),
-                this.builder.getDeclaredInitializers());
+                builder.getDeclaredInitializers());
     }
 
     @Test
@@ -153,13 +150,12 @@ public class AbstractMemberHoldingTypeDetailsBuilderTest {
         final ClassOrInterfaceTypeDetailsBuilder mockInnerType2 = mock(ClassOrInterfaceTypeDetailsBuilder.class);
 
         // Invoke
-        this.builder.setDeclaredInnerTypes(Collections
-                .singleton(mockInnerType1));
-        final boolean added = this.builder.addInnerType(mockInnerType2);
+        builder.setDeclaredInnerTypes(Collections.singleton(mockInnerType1));
+        final boolean added = builder.addInnerType(mockInnerType2);
 
         // Check
         assertTrue(added);
         assertEquals(Arrays.asList(mockInnerType1, mockInnerType2),
-                this.builder.getDeclaredInnerTypes());
+                builder.getDeclaredInnerTypes());
     }
 }

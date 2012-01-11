@@ -19,19 +19,39 @@ import org.springframework.roo.project.maven.Pom;
  */
 public class ProjectMetadataTest {
 
-    // Constants
     private static final String LEVEL_ONE_MODULE = "core";
-    private static final String LEVEL_TWO_MODULE = LEVEL_ONE_MODULE
-            + MODULE_SEPARATOR + "sub";
-    private static final String ROOT_MID = PROJECT_MID_PREFIX;
     private static final String LEVEL_ONE_MID = PROJECT_MID_PREFIX
             + MODULE_SEPARATOR + LEVEL_ONE_MODULE;
+    private static final String LEVEL_TWO_MODULE = LEVEL_ONE_MODULE
+            + MODULE_SEPARATOR + "sub";
     private static final String LEVEL_TWO_MID = PROJECT_MID_PREFIX
             + MODULE_SEPARATOR + LEVEL_TWO_MODULE;
+    private static final String ROOT_MID = PROJECT_MID_PREFIX;
 
     @Test
-    public void testGetProjectIdentifierForRootModule() {
-        assertEquals(ROOT_MID, ProjectMetadata.getProjectIdentifier(""));
+    public void testConstructorForLevelTwoModule() {
+        // Set up
+        final Pom mockPom = mock(Pom.class);
+        when(mockPom.getModuleName()).thenReturn(LEVEL_TWO_MODULE);
+
+        // Invoke
+        final ProjectMetadata projectMetadata = new ProjectMetadata(mockPom);
+
+        // Check
+        assertEquals(mockPom, projectMetadata.getPom());
+        assertEquals(LEVEL_TWO_MODULE, projectMetadata.getModuleName());
+        assertEquals(LEVEL_TWO_MID, projectMetadata.getId());
+    }
+
+    @Test
+    public void testGetModuleNameFromLevelOneModuleMID() {
+        assertEquals(LEVEL_ONE_MODULE,
+                ProjectMetadata.getModuleName(LEVEL_ONE_MID));
+    }
+
+    @Test
+    public void testGetModuleNameFromRootModuleMID() {
+        assertEquals("", ProjectMetadata.getModuleName(ROOT_MID));
     }
 
     @Test
@@ -47,19 +67,13 @@ public class ProjectMetadataTest {
     }
 
     @Test
-    public void testGetModuleNameFromRootModuleMID() {
-        assertEquals("", ProjectMetadata.getModuleName(ROOT_MID));
+    public void testGetProjectIdentifierForRootModule() {
+        assertEquals(ROOT_MID, ProjectMetadata.getProjectIdentifier(""));
     }
 
     @Test
-    public void testGetModuleNameFromLevelOneModuleMID() {
-        assertEquals(LEVEL_ONE_MODULE,
-                ProjectMetadata.getModuleName(LEVEL_ONE_MID));
-    }
-
-    @Test
-    public void testRootMIDIsValid() {
-        assertTrue(ProjectMetadata.isValid(ROOT_MID));
+    public void testInvalidMIDIsNotValid() {
+        assertFalse(ProjectMetadata.isValid("MID:foo#bar?baz"));
     }
 
     @Test
@@ -73,22 +87,7 @@ public class ProjectMetadataTest {
     }
 
     @Test
-    public void testInvalidMIDIsNotValid() {
-        assertFalse(ProjectMetadata.isValid("MID:foo#bar?baz"));
-    }
-
-    @Test
-    public void testConstructorForLevelTwoModule() {
-        // Set up
-        final Pom mockPom = mock(Pom.class);
-        when(mockPom.getModuleName()).thenReturn(LEVEL_TWO_MODULE);
-
-        // Invoke
-        final ProjectMetadata projectMetadata = new ProjectMetadata(mockPom);
-
-        // Check
-        assertEquals(mockPom, projectMetadata.getPom());
-        assertEquals(LEVEL_TWO_MODULE, projectMetadata.getModuleName());
-        assertEquals(LEVEL_TWO_MID, projectMetadata.getId());
+    public void testRootMIDIsValid() {
+        assertTrue(ProjectMetadata.isValid(ROOT_MID));
     }
 }

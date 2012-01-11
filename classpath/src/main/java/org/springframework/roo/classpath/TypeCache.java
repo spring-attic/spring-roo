@@ -8,22 +8,22 @@ import org.springframework.roo.project.maven.Pom;
 
 public interface TypeCache {
 
-    void cacheType(String typeFilePath, ClassOrInterfaceTypeDetails cid);
-
     void cacheFilePathAgainstTypeIdentifier(String typeFilePath,
             String typeIdentifier);
 
+    void cacheType(String typeFilePath, ClassOrInterfaceTypeDetails cid);
+
     void cacheTypeAgainstModule(Pom pom, JavaType javaType);
-
-    ClassOrInterfaceTypeDetails getTypeDetails(String mid);
-
-    String getPhysicalTypeIdentifier(JavaType javaType);
-
-    String getTypeIdFromTypeFilePath(String typeFilePath);
-
-    void removeType(String typeIdentifier);
 
     Set<String> getAllTypeIdentifiers();
 
+    String getPhysicalTypeIdentifier(JavaType javaType);
+
+    ClassOrInterfaceTypeDetails getTypeDetails(String mid);
+
+    String getTypeIdFromTypeFilePath(String typeFilePath);
+
     Set<String> getTypeNamesForModuleFilePath(String moduleFilePath);
+
+    void removeType(String typeIdentifier);
 }

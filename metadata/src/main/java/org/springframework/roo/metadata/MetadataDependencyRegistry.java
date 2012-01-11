@@ -41,44 +41,6 @@ import java.util.Set;
 public interface MetadataDependencyRegistry {
 
     /**
-     * Indicates whether the indicated downstream dependency is legally
-     * permitted to depend on the indicated upstream dependency. Specifically,
-     * the {@link MetadataDependencyRegistry} is required to verify the upstream
-     * dependency (and its dependencies) do not already depend on the downstream
-     * dependency (or any other dependency that itself depends on the downstream
-     * dependency). Good metadata design should prevent metadata from ever
-     * invoking this method and receiving a false response, but we like to be
-     * robust in ensuring the {@link MetadataDependencyRegistry} never can
-     * represent a circular dependency graph.
-     * <p>
-     * Both arguments must return true if presented to
-     * {@link MetadataIdentificationUtils#isValid(String)}.
-     * 
-     * @param upstreamDependency the upstream dependency (required; eg metadata
-     *            representing a disk file)
-     * @param downstreamDependency the downstream dependency (required; eg
-     *            metadata representing a Java type)
-     * @return true if the dependency relationship is legal
-     */
-    boolean isValidDependency(String upstreamDependency,
-            String downstreamDependency);
-
-    /**
-     * Registers a dependency between two items of metadata.
-     * <p>
-     * The two items of metadata will be presented to
-     * {@link #isValidDependency(String, String)}. If this method returns false,
-     * an exception will be generated.
-     * 
-     * @param upstreamDependency the upstream dependency (required; eg metadata
-     *            representing a disk file)
-     * @param downstreamDependency the downstream dependency (required; eg
-     *            metadata representing a Java type)
-     */
-    void registerDependency(String upstreamDependency,
-            String downstreamDependency);
-
-    /**
      * Registers an additional instance to receive
      * {@link MetadataNotificationListener} events. Note that these events are
      * guaranteed to be delivered after the {@link MetadataService} has received
@@ -90,30 +52,6 @@ public interface MetadataDependencyRegistry {
      * @param listener to also receive all notifications (required)
      */
     void addNotificationListener(MetadataNotificationListener listener);
-
-    /**
-     * De-register an additional instance to receive
-     * {@link MetadataNotificationListener} events. If the listener was never
-     * registered in the first place, the method simply returns.
-     * 
-     * @param listener to no longer receive notifications (required)
-     */
-    void removeNotificationListener(MetadataNotificationListener listener);
-
-    /**
-     * Removes a dependency between two items of metadata.
-     * <p>
-     * Both arguments must return true if presented to
-     * {@link MetadataIdentificationUtils#isValid(String)}.
-     * <p>
-     * If the dependency was never registered in the first place, this method
-     * simply returns.
-     * 
-     * @param upstreamDependency the upstream dependency (required)
-     * @param downstreamDependency the downstream dependency (required)
-     */
-    void deregisterDependency(String upstreamDependency,
-            String downstreamDependency);
 
     /**
      * Removes all upstream dependencies that were previously registered for the
@@ -132,23 +70,19 @@ public interface MetadataDependencyRegistry {
     void deregisterDependencies(String downstreamDependency);
 
     /**
-     * Causes the immediate downstream dependencies of the indicated metadata
-     * item to be notified the upstream metadata item is publishing a
-     * notification.
+     * Removes a dependency between two items of metadata.
      * <p>
-     * The upstream dependency must return true if presented to
-     * {@link MetadataIdentificationUtils#isValid(String)}. However, the
-     * upstream dependency need not have been registered with this registry in
-     * advance (in which case the method will not notify any downstream
-     * dependencies, as none are known).
+     * Both arguments must return true if presented to
+     * {@link MetadataIdentificationUtils#isValid(String)}.
      * <p>
-     * Notifications are delivered to the {@link MetadataService} initially,
-     * followed by all {@link MetadataNotificationListener}s registered against
-     * the instance.
+     * If the dependency was never registered in the first place, this method
+     * simply returns.
      * 
-     * @param upstreamDependency that is generating the notification (required).
+     * @param upstreamDependency the upstream dependency (required)
+     * @param downstreamDependency the downstream dependency (required)
      */
-    void notifyDownstream(String upstreamDependency);
+    void deregisterDependency(String upstreamDependency,
+            String downstreamDependency);
 
     /**
      * Obtains the list of the immediate downstream dependencies of the
@@ -180,4 +114,70 @@ public interface MetadataDependencyRegistry {
      *         empty)
      */
     Set<String> getUpstream(String downstreamDependency);
+
+    /**
+     * Indicates whether the indicated downstream dependency is legally
+     * permitted to depend on the indicated upstream dependency. Specifically,
+     * the {@link MetadataDependencyRegistry} is required to verify the upstream
+     * dependency (and its dependencies) do not already depend on the downstream
+     * dependency (or any other dependency that itself depends on the downstream
+     * dependency). Good metadata design should prevent metadata from ever
+     * invoking this method and receiving a false response, but we like to be
+     * robust in ensuring the {@link MetadataDependencyRegistry} never can
+     * represent a circular dependency graph.
+     * <p>
+     * Both arguments must return true if presented to
+     * {@link MetadataIdentificationUtils#isValid(String)}.
+     * 
+     * @param upstreamDependency the upstream dependency (required; eg metadata
+     *            representing a disk file)
+     * @param downstreamDependency the downstream dependency (required; eg
+     *            metadata representing a Java type)
+     * @return true if the dependency relationship is legal
+     */
+    boolean isValidDependency(String upstreamDependency,
+            String downstreamDependency);
+
+    /**
+     * Causes the immediate downstream dependencies of the indicated metadata
+     * item to be notified the upstream metadata item is publishing a
+     * notification.
+     * <p>
+     * The upstream dependency must return true if presented to
+     * {@link MetadataIdentificationUtils#isValid(String)}. However, the
+     * upstream dependency need not have been registered with this registry in
+     * advance (in which case the method will not notify any downstream
+     * dependencies, as none are known).
+     * <p>
+     * Notifications are delivered to the {@link MetadataService} initially,
+     * followed by all {@link MetadataNotificationListener}s registered against
+     * the instance.
+     * 
+     * @param upstreamDependency that is generating the notification (required).
+     */
+    void notifyDownstream(String upstreamDependency);
+
+    /**
+     * Registers a dependency between two items of metadata.
+     * <p>
+     * The two items of metadata will be presented to
+     * {@link #isValidDependency(String, String)}. If this method returns false,
+     * an exception will be generated.
+     * 
+     * @param upstreamDependency the upstream dependency (required; eg metadata
+     *            representing a disk file)
+     * @param downstreamDependency the downstream dependency (required; eg
+     *            metadata representing a Java type)
+     */
+    void registerDependency(String upstreamDependency,
+            String downstreamDependency);
+
+    /**
+     * De-register an additional instance to receive
+     * {@link MetadataNotificationListener} events. If the listener was never
+     * registered in the first place, the method simply returns.
+     * 
+     * @param listener to no longer receive notifications (required)
+     */
+    void removeNotificationListener(MetadataNotificationListener listener);
 }

@@ -16,40 +16,13 @@ import java.lang.annotation.Target;
 public @interface RooSolrSearchable {
 
     /**
-     * Specify name of the "search" method to generate. Use a value of "" to
-     * avoid the generation of a search method.
+     * Specify name of the "deleteIndex" methods to generate. Use a value of ""
+     * to avoid the generation of the deleteIndex method.
      * 
-     * @return the name of the "search" method to generate (defaults to
-     *         "search"; mandatory)
+     * @return the name of the "deleteIndex" method to generate (defaults to
+     *         "deleteIndex"; mandatory)
      */
-    String searchMethod() default "search";
-
-    /**
-     * Specify name of the "postPersistOrUpdate" method to generate. Use a value
-     * of "" to avoid the generation of a postPersistOrUpdate method.
-     * 
-     * @return the name of the "postPersistOrUpdate" method to generate
-     *         (defaults to "postPersistOrUpdate"; mandatory)
-     */
-    String postPersistOrUpdateMethod() default "postPersistOrUpdate";
-
-    /**
-     * Specify name of the "search" method to generate. Use a value of "" to
-     * avoid the generation of a search method.
-     * 
-     * @return the name of the "search" method to generate (defaults to
-     *         "search"; mandatory)
-     */
-    String simpleSearchMethod() default "search";
-
-    /**
-     * Specify name of the "preRemove" method to generate. Use a value of "" to
-     * avoid the generation of a preRemove method.
-     * 
-     * @return the name of the "preRemove" method to generate (defaults to
-     *         "preRemove"; mandatory)
-     */
-    String preRemoveMethod() default "preRemove";
+    String deleteIndexMethod() default "deleteIndex";
 
     /**
      * Specify name of the "index" methods to generate. Use a value of "" to
@@ -62,11 +35,38 @@ public @interface RooSolrSearchable {
     String indexMethod() default "index";
 
     /**
-     * Specify name of the "deleteIndex" methods to generate. Use a value of ""
-     * to avoid the generation of the deleteIndex method.
+     * Specify name of the "postPersistOrUpdate" method to generate. Use a value
+     * of "" to avoid the generation of a postPersistOrUpdate method.
      * 
-     * @return the name of the "deleteIndex" method to generate (defaults to
-     *         "deleteIndex"; mandatory)
+     * @return the name of the "postPersistOrUpdate" method to generate
+     *         (defaults to "postPersistOrUpdate"; mandatory)
      */
-    String deleteIndexMethod() default "deleteIndex";
+    String postPersistOrUpdateMethod() default "postPersistOrUpdate";
+
+    /**
+     * Specify name of the "preRemove" method to generate. Use a value of "" to
+     * avoid the generation of a preRemove method.
+     * 
+     * @return the name of the "preRemove" method to generate (defaults to
+     *         "preRemove"; mandatory)
+     */
+    String preRemoveMethod() default "preRemove";
+
+    /**
+     * Specify name of the "search" method to generate. Use a value of "" to
+     * avoid the generation of a search method.
+     * 
+     * @return the name of the "search" method to generate (defaults to
+     *         "search"; mandatory)
+     */
+    String searchMethod() default "search";
+
+    /**
+     * Specify name of the "search" method to generate. Use a value of "" to
+     * avoid the generation of a search method.
+     * 
+     * @return the name of the "search" method to generate (defaults to
+     *         "search"; mandatory)
+     */
+    String simpleSearchMethod() default "search";
 }

@@ -18,15 +18,32 @@ import org.springframework.roo.support.util.Assert;
  */
 public abstract class AbstractAnnotationValues {
 
+    protected AnnotationMetadata annotationMetadata;
+
     /**
      * Indicates whether the class was able to be parsed at all (ie the metadata
      * was properly formed)
      */
     protected boolean classParsed;
 
-    protected AnnotationMetadata annotationMetadata;
-
     protected ClassOrInterfaceTypeDetails governorTypeDetails;
+
+    protected AbstractAnnotationValues(
+            final MemberHoldingTypeDetails memberHoldingTypeDetails,
+            final JavaType annotationType) {
+        Assert.notNull(annotationType, "Annotation to locate is required");
+
+        if (memberHoldingTypeDetails instanceof ClassOrInterfaceTypeDetails) {
+            classParsed = true;
+
+            // We have reliable physical type details
+            governorTypeDetails = (ClassOrInterfaceTypeDetails) memberHoldingTypeDetails;
+
+            // Process values from the annotation, if present
+            annotationMetadata = governorTypeDetails
+                    .getAnnotation(annotationType);
+        }
+    }
 
     /**
      * Convenience constructor that takes a {@link Class} for the annotation
@@ -68,32 +85,15 @@ public abstract class AbstractAnnotationValues {
                     .getMemberHoldingTypeDetails();
 
             if (governorDetails instanceof ClassOrInterfaceTypeDetails) {
-                this.classParsed = true;
+                classParsed = true;
 
                 // We have reliable physical type details
-                this.governorTypeDetails = (ClassOrInterfaceTypeDetails) governorDetails;
+                governorTypeDetails = (ClassOrInterfaceTypeDetails) governorDetails;
 
                 // Process values from the annotation, if present
-                this.annotationMetadata = governorTypeDetails
+                annotationMetadata = governorTypeDetails
                         .getAnnotation(annotationType);
             }
-        }
-    }
-
-    protected AbstractAnnotationValues(
-            final MemberHoldingTypeDetails memberHoldingTypeDetails,
-            final JavaType annotationType) {
-        Assert.notNull(annotationType, "Annotation to locate is required");
-
-        if (memberHoldingTypeDetails instanceof ClassOrInterfaceTypeDetails) {
-            this.classParsed = true;
-
-            // We have reliable physical type details
-            this.governorTypeDetails = (ClassOrInterfaceTypeDetails) memberHoldingTypeDetails;
-
-            // Process values from the annotation, if present
-            this.annotationMetadata = governorTypeDetails
-                    .getAnnotation(annotationType);
         }
     }
 
@@ -105,11 +105,11 @@ public abstract class AbstractAnnotationValues {
         return governorTypeDetails;
     }
 
-    public boolean isClassParsed() {
-        return classParsed;
-    }
-
     public boolean isAnnotationFound() {
         return annotationMetadata != null;
+    }
+
+    public boolean isClassParsed() {
+        return classParsed;
     }
 }

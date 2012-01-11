@@ -51,90 +51,65 @@ import org.springframework.roo.support.util.Assert;
  */
 public final class JdkJavaType {
 
-    // Constants
-    private static final List<String> javaLangSimpleTypeNames = new ArrayList<String>();
-    private static final List<String> javaLangTypes = new ArrayList<String>();
+    // java.sql
+    public static final JavaType ARRAY = new JavaType(Array.class);
+    // java.util
+    public static final JavaType ARRAY_LIST = new JavaType(ArrayList.class);
 
-    // java.beans
-    public static final JavaType PROPERTY_EDITOR_SUPPORT = new JavaType(
-            PropertyEditorSupport.class);
-
-    // java.io
-    public static final JavaType BYTE_ARRAY_INPUT_STREAM = new JavaType(
-            ByteArrayInputStream.class);
-    public static final JavaType SERIALIZABLE = new JavaType(Serializable.class);
-    public static final JavaType UNSUPPORTED_ENCODING_EXCEPTION = new JavaType(
-            UnsupportedEncodingException.class);
-
-    // java.lang
-    public static final JavaType EXCEPTION = new JavaType(Exception.class);
-    public static final JavaType SUPPRESS_WARNINGS = new JavaType(
-            SuppressWarnings.class);
+    public static final JavaType ARRAYS = new JavaType(Arrays.class);
 
     // java.math
     public static final JavaType BIG_DECIMAL = new JavaType(BigDecimal.class);
     public static final JavaType BIG_INTEGER = new JavaType(BigInteger.class);
-
-    // java.security
-    public static final JavaType SECURE_RANDOM = new JavaType(
-            SecureRandom.class);
-
-    // java.sql
-    public static final JavaType ARRAY = new JavaType(Array.class);
     public static final JavaType BLOB = new JavaType(Blob.class);
+
+    // java.io
+    public static final JavaType BYTE_ARRAY_INPUT_STREAM = new JavaType(
+            ByteArrayInputStream.class);
+    public static final JavaType CALENDAR = new JavaType(Calendar.class);
+
     public static final JavaType CLOB = new JavaType(Clob.class);
-    public static final JavaType REF = new JavaType(Ref.class);
-    public static final JavaType STRUCT = new JavaType(Struct.class);
+    public static final JavaType COLLECTION = new JavaType(Collection.class);
+
+    public static final JavaType DATE = new JavaType(Date.class);
 
     // java.text
     public static final JavaType DATE_FORMAT = new JavaType(DateFormat.class);
-    public static final JavaType SIMPLE_DATE_FORMAT = new JavaType(
-            SimpleDateFormat.class);
-
-    // java.util
-    public static final JavaType ARRAY_LIST = new JavaType(ArrayList.class);
-    public static final JavaType ARRAYS = new JavaType(Arrays.class);
-    public static final JavaType CALENDAR = new JavaType(Calendar.class);
-    public static final JavaType COLLECTION = new JavaType(Collection.class);
-    public static final JavaType DATE = new JavaType(Date.class);
+    // java.lang
+    public static final JavaType EXCEPTION = new JavaType(Exception.class);
     public static final JavaType GREGORIAN_CALENDAR = new JavaType(
             GregorianCalendar.class);
     public static final JavaType HASH_SET = new JavaType(HashSet.class);
     public static final JavaType ITERATOR = new JavaType(Iterator.class);
+
+    private static final List<String> javaLangSimpleTypeNames = new ArrayList<String>();
+    private static final List<String> javaLangTypes = new ArrayList<String>();
+
     public static final JavaType LIST = new JavaType(List.class);
     public static final JavaType MAP = new JavaType(Map.class);
-    public static final JavaType RANDOM = new JavaType(Random.class);
-    public static final JavaType SET = new JavaType(Set.class);
-
     // javax.annotation
     public static final JavaType POST_CONSTRUCT = new JavaType(
             PostConstruct.class);
+    // java.beans
+    public static final JavaType PROPERTY_EDITOR_SUPPORT = new JavaType(
+            PropertyEditorSupport.class);
+    public static final JavaType RANDOM = new JavaType(Random.class);
+    public static final JavaType REF = new JavaType(Ref.class);
+    // java.security
+    public static final JavaType SECURE_RANDOM = new JavaType(
+            SecureRandom.class);
+    public static final JavaType SERIALIZABLE = new JavaType(Serializable.class);
+    public static final JavaType SET = new JavaType(Set.class);
+    public static final JavaType SIMPLE_DATE_FORMAT = new JavaType(
+            SimpleDateFormat.class);
+    public static final JavaType STRUCT = new JavaType(Struct.class);
+    public static final JavaType SUPPRESS_WARNINGS = new JavaType(
+            SuppressWarnings.class);
+
+    public static final JavaType UNSUPPORTED_ENCODING_EXCEPTION = new JavaType(
+            UnsupportedEncodingException.class);
 
     // Static methods
-
-    public static boolean isIntegerType(final JavaType javaType) {
-        return javaType.equals(BIG_INTEGER) || javaType.equals(INT_PRIMITIVE)
-                || javaType.equals(INT_OBJECT)
-                || javaType.equals(LONG_PRIMITIVE)
-                || javaType.equals(LONG_OBJECT)
-                || javaType.equals(SHORT_PRIMITIVE)
-                || javaType.equals(SHORT_OBJECT);
-    }
-
-    public static boolean isDecimalType(final JavaType javaType) {
-        return javaType.equals(BIG_DECIMAL) || isDoubleOrFloat(javaType);
-    }
-
-    public static boolean isDoubleOrFloat(final JavaType javaType) {
-        return javaType.equals(DOUBLE_OBJECT)
-                || javaType.equals(DOUBLE_PRIMITIVE)
-                || javaType.equals(FLOAT_OBJECT)
-                || javaType.equals(FLOAT_PRIMITIVE);
-    }
-
-    public static boolean isDateField(final JavaType javaType) {
-        return javaType.equals(DATE) || javaType.equals(CALENDAR);
-    }
 
     static {
         javaLangSimpleTypeNames.add("Appendable");
@@ -227,16 +202,28 @@ public final class JdkJavaType {
         javaLangSimpleTypeNames.add("VirtualMachineError");
     }
 
-    /**
-     * Determines whether the presented simple type name is part of java.lang or
-     * not.
-     * 
-     * @param simpleTypeName the simple type name (required)
-     * @return whether the type is declared as part of java.lang
-     */
-    public static boolean isPartOfJavaLang(final String simpleTypeName) {
-        Assert.hasText(simpleTypeName, "Simple type name required");
-        return javaLangSimpleTypeNames.contains(simpleTypeName);
+    public static boolean isDateField(final JavaType javaType) {
+        return javaType.equals(DATE) || javaType.equals(CALENDAR);
+    }
+
+    public static boolean isDecimalType(final JavaType javaType) {
+        return javaType.equals(BIG_DECIMAL) || isDoubleOrFloat(javaType);
+    }
+
+    public static boolean isDoubleOrFloat(final JavaType javaType) {
+        return javaType.equals(DOUBLE_OBJECT)
+                || javaType.equals(DOUBLE_PRIMITIVE)
+                || javaType.equals(FLOAT_OBJECT)
+                || javaType.equals(FLOAT_PRIMITIVE);
+    }
+
+    public static boolean isIntegerType(final JavaType javaType) {
+        return javaType.equals(BIG_INTEGER) || javaType.equals(INT_PRIMITIVE)
+                || javaType.equals(INT_OBJECT)
+                || javaType.equals(LONG_PRIMITIVE)
+                || javaType.equals(LONG_OBJECT)
+                || javaType.equals(SHORT_PRIMITIVE)
+                || javaType.equals(SHORT_OBJECT);
     }
 
     /**
@@ -249,11 +236,23 @@ public final class JdkJavaType {
     public static boolean isPartOfJavaLang(final JavaType javaType) {
         Assert.notNull(javaType, "Java type required");
         if (javaLangTypes.isEmpty()) {
-            for (String javaLangSimpleTypeName : javaLangSimpleTypeNames) {
+            for (final String javaLangSimpleTypeName : javaLangSimpleTypeNames) {
                 javaLangTypes.add("java.lang." + javaLangSimpleTypeName);
             }
         }
         return javaLangTypes.contains(javaType.getFullyQualifiedTypeName());
+    }
+
+    /**
+     * Determines whether the presented simple type name is part of java.lang or
+     * not.
+     * 
+     * @param simpleTypeName the simple type name (required)
+     * @return whether the type is declared as part of java.lang
+     */
+    public static boolean isPartOfJavaLang(final String simpleTypeName) {
+        Assert.hasText(simpleTypeName, "Simple type name required");
+        return javaLangSimpleTypeNames.contains(simpleTypeName);
     }
 
     /**

@@ -27,17 +27,15 @@ import org.springframework.roo.support.util.StringUtils;
 public class ProjectPathMonitoringInitializer implements
         MetadataNotificationListener {
 
-    // Constants
     private static final FileOperation[] MONITORED_OPERATIONS = {
             MONITORING_START, MONITORING_FINISH, CREATED, RENAMED, UPDATED,
             DELETED };
 
-    // Fields
-    @Reference private MetadataDependencyRegistry metadataDependencyRegistry;
     @Reference private NotifiableFileMonitorService fileMonitorService;
+    @Reference private MetadataDependencyRegistry metadataDependencyRegistry;
     @Reference private PathResolver pathResolver;
-    @Reference private UndoManager undoManager;
     private boolean pathsRegistered;
+    @Reference private UndoManager undoManager;
 
     protected void activate(final ComponentContext context) {
         metadataDependencyRegistry.addNotificationListener(this);
@@ -45,33 +43,6 @@ public class ProjectPathMonitoringInitializer implements
 
     protected void deactivate(final ComponentContext context) {
         metadataDependencyRegistry.removeNotificationListener(this);
-    }
-
-    public void notify(final String upstreamDependency,
-            final String downstreamDependency) {
-        if (pathsRegistered) {
-            return;
-        }
-        monitorProjectPaths();
-        pathsRegistered = true;
-    }
-
-    private void monitorProjectPaths() {
-        for (final LogicalPath logicalPath : pathResolver.getPaths()) {
-            if (requiresMonitoring(logicalPath)) {
-                monitorPathIfExists(logicalPath);
-            }
-        }
-    }
-
-    private boolean requiresMonitoring(final LogicalPath logicalPath) {
-        if (logicalPath.isProjectRoot()) {
-            return false; // already monitored by ProcessManager
-        }
-        if (StringUtils.isBlank(logicalPath.getModule())) {
-            return true; // non-root path within root module
-        }
-        return logicalPath.isModuleRoot();
     }
 
     private void monitorPathIfExists(final LogicalPath logicalPath) {
@@ -87,5 +58,32 @@ public class ProjectPathMonitoringInitializer implements
                         request, true);
             }
         }
+    }
+
+    private void monitorProjectPaths() {
+        for (final LogicalPath logicalPath : pathResolver.getPaths()) {
+            if (requiresMonitoring(logicalPath)) {
+                monitorPathIfExists(logicalPath);
+            }
+        }
+    }
+
+    public void notify(final String upstreamDependency,
+            final String downstreamDependency) {
+        if (pathsRegistered) {
+            return;
+        }
+        monitorProjectPaths();
+        pathsRegistered = true;
+    }
+
+    private boolean requiresMonitoring(final LogicalPath logicalPath) {
+        if (logicalPath.isProjectRoot()) {
+            return false; // already monitored by ProcessManager
+        }
+        if (StringUtils.isBlank(logicalPath.getModule())) {
+            return true; // non-root path within root module
+        }
+        return logicalPath.isModuleRoot();
     }
 }

@@ -31,12 +31,12 @@ import org.springframework.roo.shell.Shell;
 @Reference(name = "shell", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC, referenceInterface = Shell.class, cardinality = ReferenceCardinality.OPTIONAL_UNARY)
 public abstract class AbstractFlashingObject {
 
+    private final Class<?> mutex = getClass();
     /**
      * Provided as a convenience for subclasses so they have a unique slot name
      * for flash messages.
      */
     protected final String MY_SLOT = getClass().getName();
-    private final Class<?> mutex = getClass();
     private Shell shell;
 
     protected final void bindShell(final Shell shell) {
@@ -45,9 +45,21 @@ public abstract class AbstractFlashingObject {
         }
     }
 
-    protected final void unbindShell(final Shell shell) {
+    /**
+     * Same signature as {@link Shell#flash(Level, String, String)}. If this
+     * method is called and the {@link Shell} is not available, it will simply
+     * discard the flash message.
+     * 
+     * @param level see {@link Shell#flash(Level, String, String)}
+     * @param message see {@link Shell#flash(Level, String, String)}
+     * @param slot see {@link Shell#flash(Level, String, String)}
+     */
+    protected final void flash(final Level level, final String message,
+            final String slot) {
         synchronized (mutex) {
-            this.shell = null;
+            if (shell != null) {
+                shell.flash(level, message, slot);
+            }
         }
     }
 
@@ -67,21 +79,9 @@ public abstract class AbstractFlashingObject {
         }
     }
 
-    /**
-     * Same signature as {@link Shell#flash(Level, String, String)}. If this
-     * method is called and the {@link Shell} is not available, it will simply
-     * discard the flash message.
-     * 
-     * @param level see {@link Shell#flash(Level, String, String)}
-     * @param message see {@link Shell#flash(Level, String, String)}
-     * @param slot see {@link Shell#flash(Level, String, String)}
-     */
-    protected final void flash(final Level level, final String message,
-            final String slot) {
+    protected final void unbindShell(final Shell shell) {
         synchronized (mutex) {
-            if (shell != null) {
-                shell.flash(level, message, slot);
-            }
+            this.shell = null;
         }
     }
 }

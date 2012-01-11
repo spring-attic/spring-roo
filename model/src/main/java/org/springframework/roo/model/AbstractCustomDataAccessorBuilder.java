@@ -12,7 +12,6 @@ import org.springframework.roo.support.util.Assert;
 public abstract class AbstractCustomDataAccessorBuilder<T extends CustomDataAccessor>
         implements Builder<T> {
 
-    // Fields
     private CustomDataBuilder customDataBuilder;
 
     /**
@@ -33,25 +32,6 @@ public abstract class AbstractCustomDataAccessorBuilder<T extends CustomDataAcce
         this.customDataBuilder = new CustomDataBuilder(existing.getCustomData());
     }
 
-    public Object putCustomData(final Object key, final Object value) {
-        return customDataBuilder.put(key, value);
-    }
-
-    public CustomDataBuilder getCustomData() {
-        return this.customDataBuilder;
-    }
-
-    /**
-     * Sets this builder's {@link CustomDataBuilder} to the given one (does not
-     * take a copy)
-     * 
-     * @param customDataBuilder the builder to set (required)
-     */
-    public void setCustomData(final CustomDataBuilder customDataBuilder) {
-        Assert.notNull(customDataBuilder, "Custom data builder required");
-        this.customDataBuilder = customDataBuilder;
-    }
-
     /**
      * Appends the given custom data to this builder
      * 
@@ -67,5 +47,24 @@ public abstract class AbstractCustomDataAccessorBuilder<T extends CustomDataAcce
             customDataBuilder.append(this.customDataBuilder.build());
             this.customDataBuilder = customDataBuilder;
         }
+    }
+
+    public CustomDataBuilder getCustomData() {
+        return this.customDataBuilder;
+    }
+
+    public Object putCustomData(final Object key, final Object value) {
+        return customDataBuilder.put(key, value);
+    }
+
+    /**
+     * Sets this builder's {@link CustomDataBuilder} to the given one (does not
+     * take a copy)
+     * 
+     * @param customDataBuilder the builder to set (required)
+     */
+    public void setCustomData(final CustomDataBuilder customDataBuilder) {
+        Assert.notNull(customDataBuilder, "Custom data builder required");
+        this.customDataBuilder = customDataBuilder;
     }
 }

@@ -28,8 +28,6 @@ import org.springframework.roo.project.ProjectOperations;
 @Service
 public class JarPackaging extends AbstractCorePackagingProvider {
 
-    // Constants
-    public static final String NAME = "jar";
     private static final Dependency JAXB_API = new Dependency("javax.xml.bind",
             "jaxb-api", "2.1");
     private static final Dependency JSR250_API = new Dependency(
@@ -38,6 +36,7 @@ public class JarPackaging extends AbstractCorePackagingProvider {
     // above), and the jaxb-api for Hibernate
     private static final List<Dependency> JAVA_5_DEPENDENCIES = Arrays.asList(
             JSR250_API, JAXB_API);
+    public static final String NAME = "jar";
 
     /**
      * Constructor invoked by the OSGi container
@@ -46,10 +45,17 @@ public class JarPackaging extends AbstractCorePackagingProvider {
         super(NAME, "jar-pom-template.xml");
     }
 
-    public boolean isDefault() {
-        return true;
+    @Override
+    protected void createOtherArtifacts(final JavaPackage topLevelPackage,
+            final String module, final ProjectOperations projectOperations) {
+        super.createOtherArtifacts(topLevelPackage, module, projectOperations);
+        final String fullyQualifiedModuleName = getFullyQualifiedModuleName(
+                module, projectOperations);
+        applicationContextOperations.createMiddleTierApplicationContext(
+                topLevelPackage, fullyQualifiedModuleName);
     }
 
+    @Override
     protected String createPom(final JavaPackage topLevelPackage,
             final String nullableProjectName, final String javaVersion,
             final GAV parentPom, final String moduleName,
@@ -63,18 +69,13 @@ public class JarPackaging extends AbstractCorePackagingProvider {
         return pomPath;
     }
 
-    @Override
-    protected void createOtherArtifacts(final JavaPackage topLevelPackage,
-            final String module, final ProjectOperations projectOperations) {
-        super.createOtherArtifacts(topLevelPackage, module, projectOperations);
-        final String fullyQualifiedModuleName = getFullyQualifiedModuleName(
-                module, projectOperations);
-        applicationContextOperations.createMiddleTierApplicationContext(
-                topLevelPackage, fullyQualifiedModuleName);
-    }
-
     public Collection<Path> getPaths() {
         return Arrays.asList(SRC_MAIN_JAVA, SRC_MAIN_RESOURCES, SRC_TEST_JAVA,
                 SRC_TEST_RESOURCES, SPRING_CONFIG_ROOT);
+    }
+
+    @Override
+    public boolean isDefault() {
+        return true;
     }
 }

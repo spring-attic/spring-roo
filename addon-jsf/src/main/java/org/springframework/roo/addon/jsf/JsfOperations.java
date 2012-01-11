@@ -12,17 +12,17 @@ import org.springframework.roo.project.Feature;
  */
 public interface JsfOperations extends Feature {
 
+    void addMediaSuurce(String url, MediaPlayer mediaPlayer);
+
+    void createManagedBean(JavaType managedBean, JavaType entity,
+            String beanName, boolean includeOnMenu);
+
+    void generateAll(JavaPackage destinationPackage);
+
     boolean isJsfInstallationPossible();
 
     boolean isScaffoldOrMediaAdditionAvailable();
 
     void setup(JsfImplementation jsfImplementation, JsfLibrary jsfLibrary,
             Theme theme);
-
-    void generateAll(JavaPackage destinationPackage);
-
-    void createManagedBean(JavaType managedBean, JavaType entity,
-            String beanName, boolean includeOnMenu);
-
-    void addMediaSuurce(String url, MediaPlayer mediaPlayer);
 }

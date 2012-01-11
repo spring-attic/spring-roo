@@ -15,12 +15,7 @@ import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
  */
 public interface GwtFileManager {
 
-    void write(String destFile, String newContents);
-
     String write(ClassOrInterfaceTypeDetails typeDetails, boolean includeWarning);
-
-    void write(List<ClassOrInterfaceTypeDetails> typeDetails,
-            boolean includeWarning);
 
     /**
      * Writes the given Java type to disk in the user project
@@ -32,4 +27,9 @@ public interface GwtFileManager {
      * @return the contents of the type (minus the warning)
      */
     String write(ClassOrInterfaceTypeDetails typeDetails, String warning);
+
+    void write(List<ClassOrInterfaceTypeDetails> typeDetails,
+            boolean includeWarning);
+
+    void write(String destFile, String newContents);
 }

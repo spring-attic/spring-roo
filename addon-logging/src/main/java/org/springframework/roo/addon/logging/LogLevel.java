@@ -7,11 +7,11 @@ package org.springframework.roo.addon.logging;
  * @since 1.0
  */
 public enum LogLevel {
-    FATAL, ERROR, WARN, INFO, DEBUG, TRACE;
+    DEBUG, ERROR, FATAL, INFO, TRACE, WARN;
 
     @Override
     public String toString() {
-        StringBuilder tsc = new StringBuilder();
+        final StringBuilder tsc = new StringBuilder();
         tsc.append("logLevel " + name());
         return tsc.toString();
     }

@@ -21,11 +21,10 @@ public abstract class AbstractInvocableMemberMetadata extends
         AbstractIdentifiableAnnotatedJavaStructureProvider implements
         InvocableMemberMetadata {
 
-    // Fields
+    private final String body;
     private final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
     private final List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
     private final List<JavaType> throwsTypes = new ArrayList<JavaType>();
-    private final String body;
 
     /**
      * Constructor
@@ -52,6 +51,10 @@ public abstract class AbstractInvocableMemberMetadata extends
         CollectionUtils.populate(this.throwsTypes, throwsTypes);
     }
 
+    public final String getBody() {
+        return body;
+    }
+
     public final List<JavaSymbolName> getParameterNames() {
         return Collections.unmodifiableList(parameterNames);
     }
@@ -62,9 +65,5 @@ public abstract class AbstractInvocableMemberMetadata extends
 
     public final List<JavaType> getThrowsTypes() {
         return Collections.unmodifiableList(throwsTypes);
-    }
-
-    public final String getBody() {
-        return body;
     }
 }

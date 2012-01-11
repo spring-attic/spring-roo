@@ -54,7 +54,7 @@ public abstract class AbstractMemberHoldingTypeDetails extends
     }
 
     public FieldMetadata getDeclaredField(final JavaSymbolName fieldName) {
-        for (FieldMetadata field : getDeclaredFields()) {
+        for (final FieldMetadata field : getDeclaredFields()) {
             if (field.getFieldName().equals(fieldName)) {
                 return field;
             }
@@ -78,7 +78,7 @@ public abstract class AbstractMemberHoldingTypeDetails extends
         Assert.notNull(fieldName, "Field name required");
         MemberHoldingTypeDetails current = this;
         while (current != null) {
-            FieldMetadata result = current.getDeclaredField(fieldName);
+            final FieldMetadata result = current.getDeclaredField(fieldName);
             if (result != null) {
                 return result;
             }
@@ -116,12 +116,21 @@ public abstract class AbstractMemberHoldingTypeDetails extends
         return result;
     }
 
+    @SuppressWarnings("unchecked")
+    public List<JavaType> getLayerEntities() {
+        final Object entities = getCustomData().get(LAYER_TYPE);
+        if (entities == null) {
+            return Collections.emptyList();
+        }
+        return (List<JavaType>) entities;
+    }
+
     public MethodMetadata getMethod(final JavaSymbolName methodName) {
         Assert.notNull(methodName, "Method name required");
 
         MemberHoldingTypeDetails current = this;
         while (current != null) {
-            MethodMetadata result = MemberFindingUtils.getDeclaredMethod(
+            final MethodMetadata result = MemberFindingUtils.getDeclaredMethod(
                     current, methodName);
             if (result != null) {
                 return result;
@@ -146,7 +155,7 @@ public abstract class AbstractMemberHoldingTypeDetails extends
 
         MemberHoldingTypeDetails current = this;
         while (current != null) {
-            MethodMetadata result = MemberFindingUtils.getDeclaredMethod(
+            final MethodMetadata result = MemberFindingUtils.getDeclaredMethod(
                     current, methodName, parameters);
             if (result != null) {
                 return result;
@@ -189,15 +198,6 @@ public abstract class AbstractMemberHoldingTypeDetails extends
         }
         // We've derived a unique name
         return new JavaSymbolName(candidateName);
-    }
-
-    @SuppressWarnings("unchecked")
-    public List<JavaType> getLayerEntities() {
-        final Object entities = getCustomData().get(LAYER_TYPE);
-        if (entities == null) {
-            return Collections.emptyList();
-        }
-        return (List<JavaType>) entities;
     }
 
     public boolean implementsType(final JavaType interfaceType) {

@@ -74,21 +74,16 @@ import org.springframework.roo.support.util.Assert;
 public class WebScaffoldMetadata extends
         AbstractItdTypeDetailsProvidingMetadataItem {
 
-    // Constants
     private static final JavaSymbolName CS_FIELD = new JavaSymbolName(
             "conversionService");
     private static final JavaType HTTP_SERVLET_REQUEST = new JavaType(
             "javax.servlet.http.HttpServletRequest");
+    private static final StringAttributeValue PRODUCES_HTML = new StringAttributeValue(
+            new JavaSymbolName("produces"), "text/html");
     private static final String PROVIDES_TYPE_STRING = WebScaffoldMetadata.class
             .getName();
     private static final String PROVIDES_TYPE = MetadataIdentificationUtils
             .create(PROVIDES_TYPE_STRING);
-    private static final StringAttributeValue PRODUCES_HTML = new StringAttributeValue(
-            new JavaSymbolName("produces"), "text/html");
-
-    public static String getMetadataIdentiferType() {
-        return PROVIDES_TYPE;
-    }
 
     public static String createIdentifier(final JavaType javaType,
             final LogicalPath path) {
@@ -101,6 +96,10 @@ public class WebScaffoldMetadata extends
                 PROVIDES_TYPE_STRING, metadataIdentificationString);
     }
 
+    public static String getMetadataIdentiferType() {
+        return PROVIDES_TYPE;
+    }
+
     public static LogicalPath getPath(final String metadataIdentificationString) {
         return PhysicalTypeIdentifierNamingUtils.getPath(PROVIDES_TYPE_STRING,
                 metadataIdentificationString);
@@ -111,14 +110,13 @@ public class WebScaffoldMetadata extends
                 metadataIdentificationString);
     }
 
-    // Fields
+    private WebScaffoldAnnotationValues annotationValues;
     private boolean compositePk;
+    private String controllerPath;
+    private Map<JavaSymbolName, DateTimeFormatDetails> dateTypes;
+    private String entityName;
     private JavaType formBackingType;
     private JavaTypeMetadataDetails javaTypeMetadataHolder;
-    private Map<JavaSymbolName, DateTimeFormatDetails> dateTypes;
-    private String controllerPath;
-    private String entityName;
-    private WebScaffoldAnnotationValues annotationValues;
 
     /**
      * Constructor
@@ -155,21 +153,21 @@ public class WebScaffoldMetadata extends
         }
 
         this.annotationValues = annotationValues;
-        this.controllerPath = annotationValues.getPath();
+        controllerPath = annotationValues.getPath();
         this.dateTypes = dateTypes;
-        this.formBackingType = annotationValues.getFormBackingObject();
-        this.entityName = JavaSymbolName.getReservedWordSafeName(
-                formBackingType).getSymbolName();
-        this.javaTypeMetadataHolder = specialDomainTypes.get(formBackingType);
+        formBackingType = annotationValues.getFormBackingObject();
+        entityName = JavaSymbolName.getReservedWordSafeName(formBackingType)
+                .getSymbolName();
+        javaTypeMetadataHolder = specialDomainTypes.get(formBackingType);
 
         Assert.notNull(javaTypeMetadataHolder,
                 "Metadata holder required for form backing type: "
                         + formBackingType);
 
-        if (javaTypeMetadataHolder.getPersistenceDetails() != null
+        if ((javaTypeMetadataHolder.getPersistenceDetails() != null)
                 && !javaTypeMetadataHolder.getPersistenceDetails()
                         .getRooIdentifierFields().isEmpty()) {
-            this.compositePk = true;
+            compositePk = true;
             builder.addField(getField(CS_FIELD, CONVERSION_SERVICE));
             builder.addConstructor(getConstructor());
         }
@@ -177,7 +175,7 @@ public class WebScaffoldMetadata extends
         // "create" methods
         final MemberTypeAdditions persistMethod = crudAdditions
                 .get(PERSIST_METHOD);
-        if (annotationValues.isCreate() && persistMethod != null) {
+        if (annotationValues.isCreate() && (persistMethod != null)) {
             builder.addMethod(getCreateMethod(persistMethod));
             builder.addMethod(getCreateFormMethod(dependentTypes));
             persistMethod.copyAdditionsTo(builder, governorTypeDetails);
@@ -198,8 +196,8 @@ public class WebScaffoldMetadata extends
             findMethod.copyAdditionsTo(builder, governorTypeDetails);
         }
 
-        if (countAllMethod != null && findAllMethod != null
-                && findEntriesMethod != null) {
+        if ((countAllMethod != null) && (findAllMethod != null)
+                && (findEntriesMethod != null)) {
             builder.addMethod(getListMethod(findAllMethod, countAllMethod,
                     findEntriesMethod));
             countAllMethod.copyAdditionsTo(builder, governorTypeDetails);
@@ -210,8 +208,8 @@ public class WebScaffoldMetadata extends
         // "update" methods
         final MemberTypeAdditions updateMethod = crudAdditions
                 .get(MERGE_METHOD);
-        if (annotationValues.isUpdate() && updateMethod != null
-                && findMethod != null) {
+        if (annotationValues.isUpdate() && (updateMethod != null)
+                && (findMethod != null)) {
             builder.addMethod(getUpdateMethod(updateMethod));
             builder.addMethod(getUpdateFormMethod(findMethod));
             updateMethod.copyAdditionsTo(builder, governorTypeDetails);
@@ -220,8 +218,8 @@ public class WebScaffoldMetadata extends
         // "delete" method
         final MemberTypeAdditions deleteMethod = crudAdditions
                 .get(REMOVE_METHOD);
-        if (annotationValues.isDelete() && deleteMethod != null
-                && findMethod != null) {
+        if (annotationValues.isDelete() && (deleteMethod != null)
+                && (findMethod != null)) {
             builder.addMethod(getDeleteMethod(deleteMethod, findMethod));
             deleteMethod.copyAdditionsTo(builder, governorTypeDetails);
         }
@@ -236,7 +234,11 @@ public class WebScaffoldMetadata extends
             builder.addMethod(getEncodeUrlPathSegmentMethod());
         }
 
-        this.itdTypeDetails = builder.build();
+        itdTypeDetails = builder.build();
+    }
+
+    public WebScaffoldAnnotationValues getAnnotationValues() {
+        return annotationValues;
     }
 
     private ConstructorMetadataBuilder getConstructor() {
@@ -260,6 +262,202 @@ public class WebScaffoldMetadata extends
         constructorBuilder.setModifier(Modifier.PUBLIC);
         constructorBuilder.setBodyBuilder(bodyBuilder);
         return constructorBuilder;
+    }
+
+    private MethodMetadataBuilder getCreateFormMethod(
+            final List<JavaTypeMetadataDetails> dependentTypes) {
+        final JavaSymbolName methodName = new JavaSymbolName("createForm");
+        if (governorHasMethodWithSameName(methodName)) {
+            return null;
+        }
+
+        final List<JavaType> parameterTypes = Arrays.asList(MODEL);
+        final List<JavaSymbolName> parameterNames = Arrays
+                .asList(new JavaSymbolName("uiModel"));
+
+        final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+
+        final List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
+        requestMappingAttributes.add(new StringAttributeValue(
+                new JavaSymbolName("params"), "form"));
+        requestMappingAttributes.add(PRODUCES_HTML);
+        final AnnotationMetadataBuilder requestMapping = new AnnotationMetadataBuilder(
+                REQUEST_MAPPING, requestMappingAttributes);
+        annotations.add(requestMapping);
+
+        final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+        bodyBuilder.appendFormalLine("populateEditForm(uiModel, new "
+                + formBackingType.getNameIncludingTypeParameters(false,
+                        builder.getImportRegistrationResolver()) + "());");
+        boolean listAdded = false;
+        for (final JavaTypeMetadataDetails dependentType : dependentTypes) {
+            if (dependentType.getPersistenceDetails().getCountMethod() == null) {
+                continue;
+            }
+            if (!listAdded) {
+                final JavaType stringArrayType = new JavaType(
+                        STRING.getFullyQualifiedTypeName(), 1, DataType.TYPE,
+                        null, null);
+
+                final JavaType listType = new JavaType(
+                        LIST.getFullyQualifiedTypeName(), 0, DataType.TYPE,
+                        null, Arrays.asList(stringArrayType));
+                final String listShort = listType
+                        .getNameIncludingTypeParameters(false,
+                                builder.getImportRegistrationResolver());
+
+                final JavaType arrayListType = new JavaType(
+                        ARRAY_LIST.getFullyQualifiedTypeName(), 0,
+                        DataType.TYPE, null, Arrays.asList(stringArrayType));
+                final String arrayListShort = arrayListType
+                        .getNameIncludingTypeParameters(false,
+                                builder.getImportRegistrationResolver());
+
+                bodyBuilder.appendFormalLine(listShort + " dependencies = new "
+                        + arrayListShort + "();");
+                listAdded = true;
+            }
+            bodyBuilder.appendFormalLine("if ("
+                    + dependentType.getPersistenceDetails().getCountMethod()
+                            .getMethodCall() + " == 0) {");
+            bodyBuilder.indent();
+            // Adding string array which has the fieldName at position 0 and the
+            // path at position 1
+            bodyBuilder.appendFormalLine("dependencies.add(new String[] { \""
+                    + dependentType.getJavaType().getSimpleTypeName()
+                            .toLowerCase() + "\", \""
+                    + dependentType.getPlural().toLowerCase() + "\" });");
+            bodyBuilder.indentRemove();
+            bodyBuilder.appendFormalLine("}");
+        }
+        if (listAdded) {
+            bodyBuilder
+                    .appendFormalLine("uiModel.addAttribute(\"dependencies\", dependencies);");
+        }
+        bodyBuilder.appendFormalLine("return \"" + controllerPath
+                + "/create\";");
+
+        final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(
+                getId(), Modifier.PUBLIC, methodName, STRING,
+                AnnotatedJavaType.convertFromJavaTypes(parameterTypes),
+                parameterNames, bodyBuilder);
+        methodBuilder.setAnnotations(annotations);
+        return methodBuilder;
+    }
+
+    private MethodMetadataBuilder getCreateMethod(
+            final MemberTypeAdditions persistMethod) {
+        final JavaTypePersistenceMetadataDetails javaTypePersistenceMetadataHolder = javaTypeMetadataHolder
+                .getPersistenceDetails();
+        if ((javaTypePersistenceMetadataHolder == null)
+                || (javaTypePersistenceMetadataHolder
+                        .getIdentifierAccessorMethod() == null)) {
+            return null;
+        }
+
+        final JavaSymbolName methodName = new JavaSymbolName("create");
+        if (governorHasMethodWithSameName(methodName)) {
+            return null;
+        }
+
+        final AnnotationMetadataBuilder validAnnotation = new AnnotationMetadataBuilder(
+                VALID);
+
+        final List<AnnotatedJavaType> parameterTypes = Arrays
+                .asList(new AnnotatedJavaType(formBackingType, validAnnotation
+                        .build()), new AnnotatedJavaType(BINDING_RESULT),
+                        new AnnotatedJavaType(MODEL), new AnnotatedJavaType(
+                                HTTP_SERVLET_REQUEST));
+        final List<JavaSymbolName> parameterNames = Arrays.asList(
+                new JavaSymbolName(entityName), new JavaSymbolName(
+                        "bindingResult"), new JavaSymbolName("uiModel"),
+                new JavaSymbolName("httpServletRequest"));
+
+        final List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
+        requestMappingAttributes.add(new EnumAttributeValue(new JavaSymbolName(
+                "method"), new EnumDetails(REQUEST_METHOD, new JavaSymbolName(
+                "POST"))));
+        requestMappingAttributes.add(PRODUCES_HTML);
+        final AnnotationMetadataBuilder requestMapping = new AnnotationMetadataBuilder(
+                REQUEST_MAPPING, requestMappingAttributes);
+        final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+        annotations.add(requestMapping);
+
+        final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+        bodyBuilder.appendFormalLine("if (bindingResult.hasErrors()) {");
+        bodyBuilder.indent();
+        bodyBuilder.appendFormalLine("populateEditForm(uiModel, " + entityName
+                + ");");
+        bodyBuilder.appendFormalLine("return \"" + controllerPath
+                + "/create\";");
+        bodyBuilder.indentRemove();
+        bodyBuilder.appendFormalLine("}");
+        bodyBuilder.appendFormalLine("uiModel.asMap().clear();");
+        bodyBuilder.appendFormalLine(persistMethod.getMethodCall() + ";");
+        bodyBuilder.appendFormalLine("return \"redirect:/"
+                + controllerPath
+                + "/\" + encodeUrlPathSegment("
+                + (compositePk ? "conversionService.convert(" : "")
+                + entityName
+                + "."
+                + javaTypePersistenceMetadataHolder
+                        .getIdentifierAccessorMethod().getMethodName() + "()"
+                + (compositePk ? ", String.class)" : ".toString()")
+                + ", httpServletRequest);");
+
+        final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(
+                getId(), Modifier.PUBLIC, methodName, STRING, parameterTypes,
+                parameterNames, bodyBuilder);
+        methodBuilder.setAnnotations(annotations);
+        return methodBuilder;
+    }
+
+    private MethodMetadataBuilder getDateTimeFormatHelperMethod() {
+        final JavaSymbolName methodName = new JavaSymbolName(
+                "addDateTimeFormatPatterns");
+        if (governorHasMethodWithSameName(methodName)) {
+            return null;
+        }
+
+        final List<JavaType> parameterTypes = Arrays.asList(MODEL);
+        final List<JavaSymbolName> parameterNames = Arrays
+                .asList(new JavaSymbolName("uiModel"));
+
+        final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+        for (final Entry<JavaSymbolName, DateTimeFormatDetails> javaSymbolNameDateTimeFormatDetailsEntry : dateTypes
+                .entrySet()) {
+            String pattern;
+            if (javaSymbolNameDateTimeFormatDetailsEntry.getValue().pattern != null) {
+                pattern = "\""
+                        + javaSymbolNameDateTimeFormatDetailsEntry.getValue().pattern
+                        + "\"";
+            }
+            else {
+                final JavaType dateTimeFormat = new JavaType(
+                        "org.joda.time.format.DateTimeFormat");
+                final String dateTimeFormatSimple = dateTimeFormat
+                        .getNameIncludingTypeParameters(false,
+                                builder.getImportRegistrationResolver());
+                final String localeContextHolderSimple = LOCALE_CONTEXT_HOLDER
+                        .getNameIncludingTypeParameters(false,
+                                builder.getImportRegistrationResolver());
+                pattern = dateTimeFormatSimple
+                        + ".patternForStyle(\""
+                        + javaSymbolNameDateTimeFormatDetailsEntry.getValue().style
+                        + "\", " + localeContextHolderSimple + ".getLocale())";
+            }
+            bodyBuilder.appendFormalLine("uiModel.addAttribute(\""
+                    + entityName
+                    + "_"
+                    + javaSymbolNameDateTimeFormatDetailsEntry.getKey()
+                            .getSymbolName().toLowerCase() + "_date_format\", "
+                    + pattern + ");");
+        }
+
+        return new MethodMetadataBuilder(getId(), 0, methodName,
+                VOID_PRIMITIVE,
+                AnnotatedJavaType.convertFromJavaTypes(parameterTypes),
+                parameterNames, bodyBuilder);
     }
 
     private MethodMetadataBuilder getDeleteMethod(
@@ -346,6 +544,52 @@ public class WebScaffoldMetadata extends
         return methodBuilder;
     }
 
+    private MethodMetadataBuilder getEncodeUrlPathSegmentMethod() {
+        final JavaSymbolName methodName = new JavaSymbolName(
+                "encodeUrlPathSegment");
+        if (governorHasMethodWithSameName(methodName)) {
+            return null;
+        }
+
+        final List<JavaType> parameterTypes = Arrays.asList(STRING,
+                HTTP_SERVLET_REQUEST);
+        final List<JavaSymbolName> parameterNames = Arrays.asList(
+                new JavaSymbolName("pathSegment"), new JavaSymbolName(
+                        "httpServletRequest"));
+
+        builder.getImportRegistrationResolver().addImport(
+                UNSUPPORTED_ENCODING_EXCEPTION);
+
+        final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+        bodyBuilder
+                .appendFormalLine("String enc = httpServletRequest.getCharacterEncoding();");
+        bodyBuilder.appendFormalLine("if (enc == null) {");
+        bodyBuilder.indent();
+        bodyBuilder.appendFormalLine("enc = "
+                + WEB_UTILS.getNameIncludingTypeParameters(false,
+                        builder.getImportRegistrationResolver())
+                + ".DEFAULT_CHARACTER_ENCODING;");
+        bodyBuilder.indentRemove();
+        bodyBuilder.appendFormalLine("}");
+        bodyBuilder.appendFormalLine("try {");
+        bodyBuilder.indent();
+        bodyBuilder.appendFormalLine("pathSegment = "
+                + URI_UTILS.getNameIncludingTypeParameters(false,
+                        builder.getImportRegistrationResolver())
+                + ".encodePathSegment(pathSegment, enc);");
+        bodyBuilder.indentRemove();
+        bodyBuilder.appendFormalLine("} catch ("
+                + UNSUPPORTED_ENCODING_EXCEPTION
+                        .getNameIncludingTypeParameters(false,
+                                builder.getImportRegistrationResolver())
+                + " uee) {}");
+        bodyBuilder.appendFormalLine("return pathSegment;");
+
+        return new MethodMetadataBuilder(getId(), 0, methodName, STRING,
+                AnnotatedJavaType.convertFromJavaTypes(parameterTypes),
+                parameterNames, bodyBuilder);
+    }
+
     /**
      * Returns the metadata for the "list" method that this ITD introduces into
      * the controller.
@@ -429,6 +673,61 @@ public class WebScaffoldMetadata extends
         return methodBuilder;
     }
 
+    private MethodMetadata getPopulateEditFormMethod(final JavaType entity,
+            final Collection<JavaTypeMetadataDetails> specialDomainTypes,
+            final Collection<JavaType> editableFieldTypes) {
+        final JavaSymbolName methodName = new JavaSymbolName("populateEditForm");
+        final JavaType[] parameterTypes = { MODEL, entity };
+        final List<JavaSymbolName> parameterNames = Arrays.asList(
+                new JavaSymbolName("uiModel"), new JavaSymbolName(entityName));
+        if (governorHasMethod(methodName, parameterTypes)) {
+            return null;
+        }
+        final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+        bodyBuilder.appendFormalLine("uiModel.addAttribute(\"" + entityName
+                + "\", " + entityName + ");");
+        if (!dateTypes.isEmpty()) {
+            bodyBuilder.appendFormalLine("addDateTimeFormatPatterns(uiModel);");
+        }
+        if (annotationValues.isPopulateMethods()) {
+            for (final JavaTypeMetadataDetails domainType : specialDomainTypes) {
+                if (editableFieldTypes.contains(domainType.getJavaType())) {
+                    final JavaTypePersistenceMetadataDetails persistenceDetails = domainType
+                            .getPersistenceDetails();
+                    final String modelAttribute = domainType.getPlural()
+                            .toLowerCase();
+                    if ((persistenceDetails != null)
+                            && (persistenceDetails.getFindAllMethod() != null)) {
+                        bodyBuilder.appendFormalLine("uiModel.addAttribute(\""
+                                + modelAttribute
+                                + "\", "
+                                + persistenceDetails.getFindAllMethod()
+                                        .getMethodCall() + ");");
+                        persistenceDetails.getFindAllMethod().copyAdditionsTo(
+                                builder, governorTypeDetails);
+                    }
+                    else if (domainType.isEnumType()) {
+                        final String enumTypeName = domainType
+                                .getJavaType()
+                                .getNameIncludingTypeParameters(false,
+                                        builder.getImportRegistrationResolver());
+                        final String arraysTypeName = ARRAYS
+                                .getNameIncludingTypeParameters(false,
+                                        builder.getImportRegistrationResolver());
+                        bodyBuilder.appendFormalLine("uiModel.addAttribute(\""
+                                + modelAttribute + "\", " + arraysTypeName
+                                + ".asList(" + enumTypeName + ".values())"
+                                + ");");
+                    }
+                }
+            }
+        }
+        return new MethodMetadataBuilder(getId(), 0, methodName,
+                VOID_PRIMITIVE,
+                AnnotatedJavaType.convertFromJavaTypes(parameterTypes),
+                parameterNames, bodyBuilder).build();
+    }
+
     private MethodMetadataBuilder getShowMethod(
             final MemberTypeAdditions findMethod) {
         final JavaTypePersistenceMetadataDetails javaTypePersistenceMetadataHolder = javaTypeMetadataHolder
@@ -475,219 +774,6 @@ public class WebScaffoldMetadata extends
                 + (compositePk ? "conversionService.convert(" : "") + "id"
                 + (compositePk ? ", String.class)" : "") + ");");
         bodyBuilder.appendFormalLine("return \"" + controllerPath + "/show\";");
-
-        final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(
-                getId(), Modifier.PUBLIC, methodName, STRING, parameterTypes,
-                parameterNames, bodyBuilder);
-        methodBuilder.setAnnotations(annotations);
-        return methodBuilder;
-    }
-
-    private MethodMetadataBuilder getCreateMethod(
-            final MemberTypeAdditions persistMethod) {
-        final JavaTypePersistenceMetadataDetails javaTypePersistenceMetadataHolder = javaTypeMetadataHolder
-                .getPersistenceDetails();
-        if (javaTypePersistenceMetadataHolder == null
-                || javaTypePersistenceMetadataHolder
-                        .getIdentifierAccessorMethod() == null) {
-            return null;
-        }
-
-        final JavaSymbolName methodName = new JavaSymbolName("create");
-        if (governorHasMethodWithSameName(methodName)) {
-            return null;
-        }
-
-        final AnnotationMetadataBuilder validAnnotation = new AnnotationMetadataBuilder(
-                VALID);
-
-        final List<AnnotatedJavaType> parameterTypes = Arrays
-                .asList(new AnnotatedJavaType(formBackingType, validAnnotation
-                        .build()), new AnnotatedJavaType(BINDING_RESULT),
-                        new AnnotatedJavaType(MODEL), new AnnotatedJavaType(
-                                HTTP_SERVLET_REQUEST));
-        final List<JavaSymbolName> parameterNames = Arrays.asList(
-                new JavaSymbolName(entityName), new JavaSymbolName(
-                        "bindingResult"), new JavaSymbolName("uiModel"),
-                new JavaSymbolName("httpServletRequest"));
-
-        final List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
-        requestMappingAttributes.add(new EnumAttributeValue(new JavaSymbolName(
-                "method"), new EnumDetails(REQUEST_METHOD, new JavaSymbolName(
-                "POST"))));
-        requestMappingAttributes.add(PRODUCES_HTML);
-        final AnnotationMetadataBuilder requestMapping = new AnnotationMetadataBuilder(
-                REQUEST_MAPPING, requestMappingAttributes);
-        final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
-        annotations.add(requestMapping);
-
-        final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-        bodyBuilder.appendFormalLine("if (bindingResult.hasErrors()) {");
-        bodyBuilder.indent();
-        bodyBuilder.appendFormalLine("populateEditForm(uiModel, " + entityName
-                + ");");
-        bodyBuilder.appendFormalLine("return \"" + controllerPath
-                + "/create\";");
-        bodyBuilder.indentRemove();
-        bodyBuilder.appendFormalLine("}");
-        bodyBuilder.appendFormalLine("uiModel.asMap().clear();");
-        bodyBuilder.appendFormalLine(persistMethod.getMethodCall() + ";");
-        bodyBuilder.appendFormalLine("return \"redirect:/"
-                + controllerPath
-                + "/\" + encodeUrlPathSegment("
-                + (compositePk ? "conversionService.convert(" : "")
-                + entityName
-                + "."
-                + javaTypePersistenceMetadataHolder
-                        .getIdentifierAccessorMethod().getMethodName() + "()"
-                + (compositePk ? ", String.class)" : ".toString()")
-                + ", httpServletRequest);");
-
-        final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(
-                getId(), Modifier.PUBLIC, methodName, STRING, parameterTypes,
-                parameterNames, bodyBuilder);
-        methodBuilder.setAnnotations(annotations);
-        return methodBuilder;
-    }
-
-    private MethodMetadataBuilder getCreateFormMethod(
-            final List<JavaTypeMetadataDetails> dependentTypes) {
-        final JavaSymbolName methodName = new JavaSymbolName("createForm");
-        if (governorHasMethodWithSameName(methodName)) {
-            return null;
-        }
-
-        final List<JavaType> parameterTypes = Arrays.asList(MODEL);
-        final List<JavaSymbolName> parameterNames = Arrays
-                .asList(new JavaSymbolName("uiModel"));
-
-        final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
-
-        final List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
-        requestMappingAttributes.add(new StringAttributeValue(
-                new JavaSymbolName("params"), "form"));
-        requestMappingAttributes.add(PRODUCES_HTML);
-        final AnnotationMetadataBuilder requestMapping = new AnnotationMetadataBuilder(
-                REQUEST_MAPPING, requestMappingAttributes);
-        annotations.add(requestMapping);
-
-        final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-        bodyBuilder.appendFormalLine("populateEditForm(uiModel, new "
-                + formBackingType.getNameIncludingTypeParameters(false,
-                        builder.getImportRegistrationResolver()) + "());");
-        boolean listAdded = false;
-        for (final JavaTypeMetadataDetails dependentType : dependentTypes) {
-            if (dependentType.getPersistenceDetails().getCountMethod() == null) {
-                continue;
-            }
-            if (!listAdded) {
-                final JavaType stringArrayType = new JavaType(
-                        STRING.getFullyQualifiedTypeName(), 1, DataType.TYPE,
-                        null, null);
-
-                final JavaType listType = new JavaType(
-                        LIST.getFullyQualifiedTypeName(), 0, DataType.TYPE,
-                        null, Arrays.asList(stringArrayType));
-                final String listShort = listType
-                        .getNameIncludingTypeParameters(false,
-                                builder.getImportRegistrationResolver());
-
-                final JavaType arrayListType = new JavaType(
-                        ARRAY_LIST.getFullyQualifiedTypeName(), 0,
-                        DataType.TYPE, null, Arrays.asList(stringArrayType));
-                final String arrayListShort = arrayListType
-                        .getNameIncludingTypeParameters(false,
-                                builder.getImportRegistrationResolver());
-
-                bodyBuilder.appendFormalLine(listShort + " dependencies = new "
-                        + arrayListShort + "();");
-                listAdded = true;
-            }
-            bodyBuilder.appendFormalLine("if ("
-                    + dependentType.getPersistenceDetails().getCountMethod()
-                            .getMethodCall() + " == 0) {");
-            bodyBuilder.indent();
-            // Adding string array which has the fieldName at position 0 and the
-            // path at position 1
-            bodyBuilder.appendFormalLine("dependencies.add(new String[] { \""
-                    + dependentType.getJavaType().getSimpleTypeName()
-                            .toLowerCase() + "\", \""
-                    + dependentType.getPlural().toLowerCase() + "\" });");
-            bodyBuilder.indentRemove();
-            bodyBuilder.appendFormalLine("}");
-        }
-        if (listAdded) {
-            bodyBuilder
-                    .appendFormalLine("uiModel.addAttribute(\"dependencies\", dependencies);");
-        }
-        bodyBuilder.appendFormalLine("return \"" + controllerPath
-                + "/create\";");
-
-        final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(
-                getId(), Modifier.PUBLIC, methodName, STRING,
-                AnnotatedJavaType.convertFromJavaTypes(parameterTypes),
-                parameterNames, bodyBuilder);
-        methodBuilder.setAnnotations(annotations);
-        return methodBuilder;
-    }
-
-    private MethodMetadataBuilder getUpdateMethod(
-            final MemberTypeAdditions updateMethod) {
-        final JavaTypePersistenceMetadataDetails javaTypePersistenceMetadataHolder = javaTypeMetadataHolder
-                .getPersistenceDetails();
-        if (javaTypePersistenceMetadataHolder == null
-                || javaTypePersistenceMetadataHolder.getMergeMethod() == null) {
-            return null;
-        }
-        final JavaSymbolName methodName = new JavaSymbolName("update");
-        if (governorHasMethodWithSameName(methodName)) {
-            return null;
-        }
-
-        final AnnotationMetadataBuilder validAnnotation = new AnnotationMetadataBuilder(
-                VALID);
-
-        final List<AnnotatedJavaType> parameterTypes = Arrays
-                .asList(new AnnotatedJavaType(formBackingType, validAnnotation
-                        .build()), new AnnotatedJavaType(BINDING_RESULT),
-                        new AnnotatedJavaType(MODEL), new AnnotatedJavaType(
-                                HTTP_SERVLET_REQUEST));
-        final List<JavaSymbolName> parameterNames = Arrays.asList(
-                new JavaSymbolName(entityName), new JavaSymbolName(
-                        "bindingResult"), new JavaSymbolName("uiModel"),
-                new JavaSymbolName("httpServletRequest"));
-
-        final List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
-        requestMappingAttributes.add(new EnumAttributeValue(new JavaSymbolName(
-                "method"), new EnumDetails(REQUEST_METHOD, new JavaSymbolName(
-                "PUT"))));
-        requestMappingAttributes.add(PRODUCES_HTML);
-        final AnnotationMetadataBuilder requestMapping = new AnnotationMetadataBuilder(
-                REQUEST_MAPPING, requestMappingAttributes);
-        final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
-        annotations.add(requestMapping);
-
-        final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-        bodyBuilder.appendFormalLine("if (bindingResult.hasErrors()) {");
-        bodyBuilder.indent();
-        bodyBuilder.appendFormalLine("populateEditForm(uiModel, " + entityName
-                + ");");
-        bodyBuilder.appendFormalLine("return \"" + controllerPath
-                + "/update\";");
-        bodyBuilder.indentRemove();
-        bodyBuilder.appendFormalLine("}");
-        bodyBuilder.appendFormalLine("uiModel.asMap().clear();");
-        bodyBuilder.appendFormalLine(updateMethod.getMethodCall() + ";");
-        bodyBuilder.appendFormalLine("return \"redirect:/"
-                + controllerPath
-                + "/\" + encodeUrlPathSegment("
-                + (compositePk ? "conversionService.convert(" : "")
-                + entityName
-                + "."
-                + javaTypePersistenceMetadataHolder
-                        .getIdentifierAccessorMethod().getMethodName() + "()"
-                + (compositePk ? ", String.class)" : ".toString()")
-                + ", httpServletRequest);");
 
         final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(
                 getId(), Modifier.PUBLIC, methodName, STRING, parameterTypes,
@@ -745,157 +831,69 @@ public class WebScaffoldMetadata extends
         return methodBuilder;
     }
 
-    private MethodMetadataBuilder getEncodeUrlPathSegmentMethod() {
-        final JavaSymbolName methodName = new JavaSymbolName(
-                "encodeUrlPathSegment");
+    private MethodMetadataBuilder getUpdateMethod(
+            final MemberTypeAdditions updateMethod) {
+        final JavaTypePersistenceMetadataDetails javaTypePersistenceMetadataHolder = javaTypeMetadataHolder
+                .getPersistenceDetails();
+        if ((javaTypePersistenceMetadataHolder == null)
+                || (javaTypePersistenceMetadataHolder.getMergeMethod() == null)) {
+            return null;
+        }
+        final JavaSymbolName methodName = new JavaSymbolName("update");
         if (governorHasMethodWithSameName(methodName)) {
             return null;
         }
 
-        final List<JavaType> parameterTypes = Arrays.asList(STRING,
-                HTTP_SERVLET_REQUEST);
-        final List<JavaSymbolName> parameterNames = Arrays.asList(
-                new JavaSymbolName("pathSegment"), new JavaSymbolName(
-                        "httpServletRequest"));
+        final AnnotationMetadataBuilder validAnnotation = new AnnotationMetadataBuilder(
+                VALID);
 
-        builder.getImportRegistrationResolver().addImport(
-                UNSUPPORTED_ENCODING_EXCEPTION);
+        final List<AnnotatedJavaType> parameterTypes = Arrays
+                .asList(new AnnotatedJavaType(formBackingType, validAnnotation
+                        .build()), new AnnotatedJavaType(BINDING_RESULT),
+                        new AnnotatedJavaType(MODEL), new AnnotatedJavaType(
+                                HTTP_SERVLET_REQUEST));
+        final List<JavaSymbolName> parameterNames = Arrays.asList(
+                new JavaSymbolName(entityName), new JavaSymbolName(
+                        "bindingResult"), new JavaSymbolName("uiModel"),
+                new JavaSymbolName("httpServletRequest"));
+
+        final List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
+        requestMappingAttributes.add(new EnumAttributeValue(new JavaSymbolName(
+                "method"), new EnumDetails(REQUEST_METHOD, new JavaSymbolName(
+                "PUT"))));
+        requestMappingAttributes.add(PRODUCES_HTML);
+        final AnnotationMetadataBuilder requestMapping = new AnnotationMetadataBuilder(
+                REQUEST_MAPPING, requestMappingAttributes);
+        final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+        annotations.add(requestMapping);
 
         final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-        bodyBuilder
-                .appendFormalLine("String enc = httpServletRequest.getCharacterEncoding();");
-        bodyBuilder.appendFormalLine("if (enc == null) {");
+        bodyBuilder.appendFormalLine("if (bindingResult.hasErrors()) {");
         bodyBuilder.indent();
-        bodyBuilder.appendFormalLine("enc = "
-                + WEB_UTILS.getNameIncludingTypeParameters(false,
-                        builder.getImportRegistrationResolver())
-                + ".DEFAULT_CHARACTER_ENCODING;");
+        bodyBuilder.appendFormalLine("populateEditForm(uiModel, " + entityName
+                + ");");
+        bodyBuilder.appendFormalLine("return \"" + controllerPath
+                + "/update\";");
         bodyBuilder.indentRemove();
         bodyBuilder.appendFormalLine("}");
-        bodyBuilder.appendFormalLine("try {");
-        bodyBuilder.indent();
-        bodyBuilder.appendFormalLine("pathSegment = "
-                + URI_UTILS.getNameIncludingTypeParameters(false,
-                        builder.getImportRegistrationResolver())
-                + ".encodePathSegment(pathSegment, enc);");
-        bodyBuilder.indentRemove();
-        bodyBuilder.appendFormalLine("} catch ("
-                + UNSUPPORTED_ENCODING_EXCEPTION
-                        .getNameIncludingTypeParameters(false,
-                                builder.getImportRegistrationResolver())
-                + " uee) {}");
-        bodyBuilder.appendFormalLine("return pathSegment;");
+        bodyBuilder.appendFormalLine("uiModel.asMap().clear();");
+        bodyBuilder.appendFormalLine(updateMethod.getMethodCall() + ";");
+        bodyBuilder.appendFormalLine("return \"redirect:/"
+                + controllerPath
+                + "/\" + encodeUrlPathSegment("
+                + (compositePk ? "conversionService.convert(" : "")
+                + entityName
+                + "."
+                + javaTypePersistenceMetadataHolder
+                        .getIdentifierAccessorMethod().getMethodName() + "()"
+                + (compositePk ? ", String.class)" : ".toString()")
+                + ", httpServletRequest);");
 
-        return new MethodMetadataBuilder(getId(), 0, methodName, STRING,
-                AnnotatedJavaType.convertFromJavaTypes(parameterTypes),
+        final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(
+                getId(), Modifier.PUBLIC, methodName, STRING, parameterTypes,
                 parameterNames, bodyBuilder);
-    }
-
-    private MethodMetadataBuilder getDateTimeFormatHelperMethod() {
-        final JavaSymbolName methodName = new JavaSymbolName(
-                "addDateTimeFormatPatterns");
-        if (governorHasMethodWithSameName(methodName)) {
-            return null;
-        }
-
-        final List<JavaType> parameterTypes = Arrays.asList(MODEL);
-        final List<JavaSymbolName> parameterNames = Arrays
-                .asList(new JavaSymbolName("uiModel"));
-
-        final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-        for (final Entry<JavaSymbolName, DateTimeFormatDetails> javaSymbolNameDateTimeFormatDetailsEntry : dateTypes
-                .entrySet()) {
-            String pattern;
-            if (javaSymbolNameDateTimeFormatDetailsEntry.getValue().pattern != null) {
-                pattern = "\""
-                        + javaSymbolNameDateTimeFormatDetailsEntry.getValue().pattern
-                        + "\"";
-            }
-            else {
-                final JavaType dateTimeFormat = new JavaType(
-                        "org.joda.time.format.DateTimeFormat");
-                final String dateTimeFormatSimple = dateTimeFormat
-                        .getNameIncludingTypeParameters(false,
-                                builder.getImportRegistrationResolver());
-                final String localeContextHolderSimple = LOCALE_CONTEXT_HOLDER
-                        .getNameIncludingTypeParameters(false,
-                                builder.getImportRegistrationResolver());
-                pattern = dateTimeFormatSimple
-                        + ".patternForStyle(\""
-                        + javaSymbolNameDateTimeFormatDetailsEntry.getValue().style
-                        + "\", " + localeContextHolderSimple + ".getLocale())";
-            }
-            bodyBuilder.appendFormalLine("uiModel.addAttribute(\""
-                    + entityName
-                    + "_"
-                    + javaSymbolNameDateTimeFormatDetailsEntry.getKey()
-                            .getSymbolName().toLowerCase() + "_date_format\", "
-                    + pattern + ");");
-        }
-
-        return new MethodMetadataBuilder(getId(), 0, methodName,
-                VOID_PRIMITIVE,
-                AnnotatedJavaType.convertFromJavaTypes(parameterTypes),
-                parameterNames, bodyBuilder);
-    }
-
-    private MethodMetadata getPopulateEditFormMethod(final JavaType entity,
-            final Collection<JavaTypeMetadataDetails> specialDomainTypes,
-            final Collection<JavaType> editableFieldTypes) {
-        final JavaSymbolName methodName = new JavaSymbolName("populateEditForm");
-        final JavaType[] parameterTypes = { MODEL, entity };
-        final List<JavaSymbolName> parameterNames = Arrays.asList(
-                new JavaSymbolName("uiModel"), new JavaSymbolName(entityName));
-        if (governorHasMethod(methodName, parameterTypes)) {
-            return null;
-        }
-        final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-        bodyBuilder.appendFormalLine("uiModel.addAttribute(\"" + entityName
-                + "\", " + entityName + ");");
-        if (!dateTypes.isEmpty()) {
-            bodyBuilder.appendFormalLine("addDateTimeFormatPatterns(uiModel);");
-        }
-        if (annotationValues.isPopulateMethods()) {
-            for (final JavaTypeMetadataDetails domainType : specialDomainTypes) {
-                if (editableFieldTypes.contains(domainType.getJavaType())) {
-                    final JavaTypePersistenceMetadataDetails persistenceDetails = domainType
-                            .getPersistenceDetails();
-                    final String modelAttribute = domainType.getPlural()
-                            .toLowerCase();
-                    if (persistenceDetails != null
-                            && persistenceDetails.getFindAllMethod() != null) {
-                        bodyBuilder.appendFormalLine("uiModel.addAttribute(\""
-                                + modelAttribute
-                                + "\", "
-                                + persistenceDetails.getFindAllMethod()
-                                        .getMethodCall() + ");");
-                        persistenceDetails.getFindAllMethod().copyAdditionsTo(
-                                builder, governorTypeDetails);
-                    }
-                    else if (domainType.isEnumType()) {
-                        final String enumTypeName = domainType
-                                .getJavaType()
-                                .getNameIncludingTypeParameters(false,
-                                        builder.getImportRegistrationResolver());
-                        final String arraysTypeName = ARRAYS
-                                .getNameIncludingTypeParameters(false,
-                                        builder.getImportRegistrationResolver());
-                        bodyBuilder.appendFormalLine("uiModel.addAttribute(\""
-                                + modelAttribute + "\", " + arraysTypeName
-                                + ".asList(" + enumTypeName + ".values())"
-                                + ");");
-                    }
-                }
-            }
-        }
-        return new MethodMetadataBuilder(getId(), 0, methodName,
-                VOID_PRIMITIVE,
-                AnnotatedJavaType.convertFromJavaTypes(parameterTypes),
-                parameterNames, bodyBuilder).build();
-    }
-
-    public WebScaffoldAnnotationValues getAnnotationValues() {
-        return annotationValues;
+        methodBuilder.setAnnotations(annotations);
+        return methodBuilder;
     }
 
     @Override

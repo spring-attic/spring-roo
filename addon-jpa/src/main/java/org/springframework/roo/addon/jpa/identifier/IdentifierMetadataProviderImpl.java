@@ -32,7 +32,6 @@ public class IdentifierMetadataProviderImpl extends
         AbstractIdentifierServiceAwareMetadataProvider implements
         IdentifierMetadataProvider {
 
-    // Fields
     @Reference private ConfigurableMetadataProvider configurableMetadataProvider;
     @Reference private ProjectOperations projectOperations;
     @Reference private SerializableMetadataProvider serializableMetadataProvider;
@@ -46,6 +45,12 @@ public class IdentifierMetadataProviderImpl extends
         serializableMetadataProvider.addMetadataTrigger(ROO_IDENTIFIER);
     }
 
+    @Override
+    protected String createLocalIdentifier(final JavaType javaType,
+            final LogicalPath path) {
+        return IdentifierMetadata.createIdentifier(javaType, path);
+    }
+
     protected void deactivate(final ComponentContext context) {
         metadataDependencyRegistry.deregisterDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
@@ -53,6 +58,20 @@ public class IdentifierMetadataProviderImpl extends
         removeMetadataTrigger(ROO_IDENTIFIER);
         configurableMetadataProvider.removeMetadataTrigger(ROO_IDENTIFIER);
         serializableMetadataProvider.removeMetadataTrigger(ROO_IDENTIFIER);
+    }
+
+    @Override
+    protected String getGovernorPhysicalTypeIdentifier(
+            final String metadataIdentificationString) {
+        final JavaType javaType = IdentifierMetadata
+                .getJavaType(metadataIdentificationString);
+        final LogicalPath path = IdentifierMetadata
+                .getPath(metadataIdentificationString);
+        return PhysicalTypeIdentifier.createIdentifier(javaType, path);
+    }
+
+    public String getItdUniquenessFilenameSuffix() {
+        return "Identifier";
     }
 
     @Override
@@ -68,11 +87,11 @@ public class IdentifierMetadataProviderImpl extends
         }
 
         // We know governor type details are non-null and can be safely cast
-        JavaType javaType = IdentifierMetadata
+        final JavaType javaType = IdentifierMetadata
                 .getJavaType(metadataIdentificationString);
-        List<Identifier> identifierServiceResult = getIdentifiersForType(javaType);
+        final List<Identifier> identifierServiceResult = getIdentifiersForType(javaType);
 
-        LogicalPath path = PhysicalTypeIdentifierNamingUtils
+        final LogicalPath path = PhysicalTypeIdentifierNamingUtils
                 .getPath(metadataIdentificationString);
         if (projectOperations.isProjectAvailable(path.getModule())) {
             // If the project itself changes, we want a chance to refresh this
@@ -85,26 +104,6 @@ public class IdentifierMetadataProviderImpl extends
         return new IdentifierMetadata(metadataIdentificationString, aspectName,
                 governorPhysicalTypeMetadata, annotationValues,
                 identifierServiceResult);
-    }
-
-    public String getItdUniquenessFilenameSuffix() {
-        return "Identifier";
-    }
-
-    @Override
-    protected String getGovernorPhysicalTypeIdentifier(
-            final String metadataIdentificationString) {
-        JavaType javaType = IdentifierMetadata
-                .getJavaType(metadataIdentificationString);
-        LogicalPath path = IdentifierMetadata
-                .getPath(metadataIdentificationString);
-        return PhysicalTypeIdentifier.createIdentifier(javaType, path);
-    }
-
-    @Override
-    protected String createLocalIdentifier(final JavaType javaType,
-            final LogicalPath path) {
-        return IdentifierMetadata.createIdentifier(javaType, path);
     }
 
     public String getProvidesType() {

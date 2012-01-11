@@ -20,9 +20,8 @@ import org.springframework.roo.support.util.Assert;
 @Service
 public class DefaultUndoManager implements UndoManager {
 
-    // Fields
-    private final Stack<UndoableOperation> stack = new Stack<UndoableOperation>();
     private final Set<UndoListener> listeners = new HashSet<UndoListener>();
+    private final Stack<UndoableOperation> stack = new Stack<UndoableOperation>();
     private boolean undoEnabled = true;
 
     protected void activate(final ComponentContext context) {
@@ -30,20 +29,34 @@ public class DefaultUndoManager implements UndoManager {
 
     public void add(final UndoableOperation undoableOperation) {
         Assert.notNull(undoableOperation, "Undoable operation required");
-        this.stack.push(undoableOperation);
+        stack.push(undoableOperation);
+    }
+
+    public void addUndoListener(final UndoListener undoListener) {
+        listeners.add(undoListener);
     }
 
     public void flush() {
         notifyListeners(UndoOperation.FLUSH);
     }
 
+    private void notifyListeners(final UndoOperation operation) {
+        for (final UndoListener listener : listeners) {
+            listener.onUndoEvent(new UndoEvent(operation));
+        }
+    }
+
+    public void removeUndoListener(final UndoListener undoListener) {
+        listeners.remove(undoListener);
+    }
+
     public void reset() {
-        while (!this.stack.empty()) {
-            UndoableOperation op = this.stack.pop();
+        while (!stack.empty()) {
+            final UndoableOperation op = stack.pop();
             try {
                 op.reset();
             }
-            catch (Throwable t) {
+            catch (final Throwable t) {
                 throw new IllegalStateException(
                         "UndoableOperation '"
                                 + op
@@ -53,14 +66,18 @@ public class DefaultUndoManager implements UndoManager {
         notifyListeners(UndoOperation.RESET);
     }
 
+    public void setUndoEnabled(final boolean undoEnabled) {
+        this.undoEnabled = undoEnabled;
+    }
+
     public boolean undo() {
         boolean undoMode = true;
         if (!undoEnabled) {
             // Force the undo stack to simply reset (but not perform any undos)
             undoMode = false;
         }
-        while (!this.stack.empty()) {
-            UndoableOperation op = this.stack.pop();
+        while (!stack.empty()) {
+            final UndoableOperation op = stack.pop();
             try {
                 if (undoMode) {
                     if (!op.undo()) {
@@ -73,7 +90,7 @@ public class DefaultUndoManager implements UndoManager {
                     op.reset();
                 }
             }
-            catch (Throwable t) {
+            catch (final Throwable t) {
                 throw new IllegalStateException(
                         "UndoableOperation '"
                                 + op
@@ -82,23 +99,5 @@ public class DefaultUndoManager implements UndoManager {
         }
         notifyListeners(UndoOperation.UNDO);
         return undoMode;
-    }
-
-    public void setUndoEnabled(final boolean undoEnabled) {
-        this.undoEnabled = undoEnabled;
-    }
-
-    private void notifyListeners(final UndoOperation operation) {
-        for (UndoListener listener : listeners) {
-            listener.onUndoEvent(new UndoEvent(operation));
-        }
-    }
-
-    public void addUndoListener(final UndoListener undoListener) {
-        listeners.add(undoListener);
-    }
-
-    public void removeUndoListener(final UndoListener undoListener) {
-        listeners.remove(undoListener);
     }
 }

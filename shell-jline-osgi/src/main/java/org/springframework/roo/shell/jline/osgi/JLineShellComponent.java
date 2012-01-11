@@ -44,16 +44,15 @@ import org.springframework.roo.url.stream.UrlInputStreamService;
 @Service
 public class JLineShellComponent extends JLineShell {
 
-    // Fields
+    private ComponentContext context;
     @Reference private ExecutionStrategy executionStrategy;
     @Reference private Parser parser;
-    @Reference private UrlInputStreamService urlInputStreamService;
     @Reference private Tailor tailor;
-    private ComponentContext context;
+    @Reference private UrlInputStreamService urlInputStreamService;
 
     protected void activate(final ComponentContext context) {
         this.context = context;
-        Thread thread = new Thread(this, "Spring Roo JLine Shell");
+        final Thread thread = new Thread(this, "Spring Roo JLine Shell");
         thread.start();
     }
 
@@ -74,29 +73,9 @@ public class JLineShellComponent extends JLineShell {
         return executionStrategy;
     }
 
-    @Override
-    protected Tailor getTailor() {
-        return tailor;
-    }
-
-    @Override
-    protected Parser getParser() {
-        return parser;
-    }
-
-    @Override
-    public String getStartupNotifications() {
-        try {
-            return getLatestFavouriteTweet();
-        }
-        catch (Exception e) {
-            return null;
-        }
-    }
-
     private String getLatestFavouriteTweet() {
         // Access Twitter's REST API
-        String string = sendGetRequest(
+        final String string = sendGetRequest(
                 "http://api.twitter.com/1/favorites.json",
                 "id=SpringRoo&count=5");
         if (StringUtils.isBlank(string)) {
@@ -104,7 +83,7 @@ public class JLineShellComponent extends JLineShell {
         }
         // Parse the returned JSON. This is a once off operation so we can used
         // JSONValue.parse without penalty
-        JSONArray object = (JSONArray) JSONValue.parse(string);
+        final JSONArray object = (JSONArray) JSONValue.parse(string);
         if (object == null) {
             return null;
         }
@@ -112,17 +91,17 @@ public class JLineShellComponent extends JLineShell {
         if (object.size() > 4) {
             index = new Random().nextInt(5);
         }
-        JSONObject jsonObject = (JSONObject) object.get(index);
+        final JSONObject jsonObject = (JSONObject) object.get(index);
         if (jsonObject == null) {
             return null;
         }
-        String screenName = (String) ((JSONObject) jsonObject.get("user"))
+        final String screenName = (String) ((JSONObject) jsonObject.get("user"))
                 .get("screen_name");
         String tweet = (String) jsonObject.get("text");
         // We only want one line
         tweet = tweet.replace(StringUtils.LINE_SEPARATOR, " ");
-        List<String> words = Arrays.asList(tweet.split(" "));
-        StringBuilder sb = new StringBuilder();
+        final List<String> words = Arrays.asList(tweet.split(" "));
+        final StringBuilder sb = new StringBuilder();
         // Add in Roo's twitter account to give context to the notification
         sb.append(decorate("@" + screenName + ":",
                 (OsUtils.isWindows() ? FG_YELLOW : REVERSE)));
@@ -132,7 +111,7 @@ public class JLineShellComponent extends JLineShell {
         // This is a basic attempt at pattern identification, it should be
         // adequate in most cases although may be incorrect for URLs.
         // For example url.com/ttym: is valid by may mean "url.com/ttym" + ":"
-        for (String word : words) {
+        for (final String word : words) {
             if (word.startsWith("http://") || word.startsWith("https://")) {
                 // It's a URL
                 if (OsUtils.isWindows()) {
@@ -160,6 +139,26 @@ public class JLineShellComponent extends JLineShell {
         return sb.toString();
     }
 
+    @Override
+    protected Parser getParser() {
+        return parser;
+    }
+
+    @Override
+    public String getStartupNotifications() {
+        try {
+            return getLatestFavouriteTweet();
+        }
+        catch (final Exception e) {
+            return null;
+        }
+    }
+
+    @Override
+    protected Tailor getTailor() {
+        return tailor;
+    }
+
     // TODO: This should probably be moved to a HTTP service of some sort - JTT
     // 29/08/11
     private String sendGetRequest(final String endpoint,
@@ -177,18 +176,18 @@ public class JLineShellComponent extends JLineShell {
             if (StringUtils.hasText(requestParameters)) {
                 urlStr += "?" + requestParameters;
             }
-            URL url = new URL(urlStr);
+            final URL url = new URL(urlStr);
             inputStream = urlInputStreamService.openConnection(url);
             // Get the response
             reader = new BufferedReader(new InputStreamReader(inputStream));
-            StringBuilder sb = new StringBuilder();
+            final StringBuilder sb = new StringBuilder();
             String line;
             while ((line = reader.readLine()) != null) {
                 sb.append(line);
             }
             return sb.toString();
         }
-        catch (Exception e) {
+        catch (final Exception e) {
             return null;
         }
         finally {

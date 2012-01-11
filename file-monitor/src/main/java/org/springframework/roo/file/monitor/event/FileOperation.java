@@ -8,11 +8,15 @@ package org.springframework.roo.file.monitor.event;
  */
 public enum FileOperation {
     /**
-     * Represents a file that has been initially detected on the file system and
-     * will be monitored. Guaranteed to be fired before any other
-     * {@link FileOperation} status code.
+     * Represents a file or directory creation event.
      */
-    MONITORING_START,
+    CREATED,
+
+    /**
+     * Represents a file or directory deletion event. Guaranteed to be fired
+     * before any {@link #MONITORING_FINISH}.
+     */
+    DELETED,
 
     /**
      * Represents a file that will no longer be monitored. This usually follows
@@ -23,9 +27,11 @@ public enum FileOperation {
     MONITORING_FINISH,
 
     /**
-     * Represents a file or directory creation event.
+     * Represents a file that has been initially detected on the file system and
+     * will be monitored. Guaranteed to be fired before any other
+     * {@link FileOperation} status code.
      */
-    CREATED,
+    MONITORING_START,
 
     /**
      * Represents a file or directory rename event; note this may not be
@@ -38,10 +44,4 @@ public enum FileOperation {
      * Represents a file or directory modification event.
      */
     UPDATED,
-
-    /**
-     * Represents a file or directory deletion event. Guaranteed to be fired
-     * before any {@link #MONITORING_FINISH}.
-     */
-    DELETED,
 }

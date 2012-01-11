@@ -12,15 +12,6 @@ import org.springframework.roo.project.LogicalPath;
  */
 public interface ClasspathOperations {
 
-    boolean isProjectAvailable();
-
-    /**
-     * Changes the focus to the given type.
-     * 
-     * @param type the type to focus on (required)
-     */
-    void focus(final JavaType type);
-
     /**
      * Creates a new Java class source file in any project path.
      * 
@@ -38,16 +29,6 @@ public interface ClasspathOperations {
             final boolean createAbstract, final boolean permitReservedWords);
 
     /**
-     * Creates a new Java interface source file in any project path.
-     * 
-     * @param name the name of the interface to create
-     * @param path the source directory in which to create the interface
-     * @param permitReservedWords whether reserved words are ignored by Roo
-     */
-    void createInterface(final JavaType name, final LogicalPath path,
-            final boolean permitReservedWords);
-
-    /**
      * Creates a new Java enum source file in any project path.
      * 
      * @param name the name of the enum to create
@@ -55,6 +36,16 @@ public interface ClasspathOperations {
      * @param permitReservedWords whether reserved words are ignored by Roo
      */
     void createEnum(final JavaType name, final LogicalPath path,
+            final boolean permitReservedWords);
+
+    /**
+     * Creates a new Java interface source file in any project path.
+     * 
+     * @param name the name of the interface to create
+     * @param path the source directory in which to create the interface
+     * @param permitReservedWords whether reserved words are ignored by Roo
+     */
+    void createInterface(final JavaType name, final LogicalPath path,
             final boolean permitReservedWords);
 
     /**
@@ -66,4 +57,13 @@ public interface ClasspathOperations {
      */
     void enumConstant(final JavaType name, final JavaSymbolName fieldName,
             final boolean permitReservedWords);
+
+    /**
+     * Changes the focus to the given type.
+     * 
+     * @param type the type to focus on (required)
+     */
+    void focus(final JavaType type);
+
+    boolean isProjectAvailable();
 }

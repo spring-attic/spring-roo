@@ -17,18 +17,13 @@ import org.junit.Test;
 public class NumberUtilsTest {
 
     @Test
+    public void testMaxValues() {
+        assertEquals(BigDecimal.ONE, NumberUtils.max(null, 1, -1, null));
+    }
+
+    @Test
     public void testMinValueOfEmptyArray() {
         assertNull(NumberUtils.min(new Number[0]));
-    }
-
-    @Test
-    public void testNullMinValues() {
-        assertNull(NumberUtils.min(null, null));
-    }
-
-    @Test
-    public void testOneMinValue() {
-        assertEquals(BigDecimal.ONE, NumberUtils.min(1));
     }
 
     @Test
@@ -40,6 +35,13 @@ public class NumberUtilsTest {
     @Test
     public void testMinValues2() {
         assertEquals(new BigDecimal("3"), NumberUtils.min(null, 3, null, 4));
+    }
+
+    @Test
+    public void testMultipleMaxValues() {
+        assertEquals(new BigDecimal(String.valueOf(Double.MAX_VALUE)),
+                NumberUtils.max(0, null, Integer.MIN_VALUE, 10, -10,
+                        Integer.MAX_VALUE, Long.MAX_VALUE, Double.MAX_VALUE));
     }
 
     @Test
@@ -59,19 +61,17 @@ public class NumberUtilsTest {
     }
 
     @Test
+    public void testNullMinValues() {
+        assertNull(NumberUtils.min(null, null));
+    }
+
+    @Test
     public void testOneMaxValue() {
         assertEquals(BigDecimal.ONE, NumberUtils.max(1));
     }
 
     @Test
-    public void testMaxValues() {
-        assertEquals(BigDecimal.ONE, NumberUtils.max(null, 1, -1, null));
-    }
-
-    @Test
-    public void testMultipleMaxValues() {
-        assertEquals(new BigDecimal(String.valueOf(Double.MAX_VALUE)),
-                NumberUtils.max(0, null, Integer.MIN_VALUE, 10, -10,
-                        Integer.MAX_VALUE, Long.MAX_VALUE, Double.MAX_VALUE));
+    public void testOneMinValue() {
+        assertEquals(BigDecimal.ONE, NumberUtils.min(1));
     }
 }

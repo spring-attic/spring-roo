@@ -33,10 +33,13 @@ import org.springframework.roo.support.util.StringUtils;
 @Service
 public class EntityLayerProvider extends CoreLayerProvider {
 
-    // Fields
     @Reference private JpaActiveRecordMetadataProvider jpaActiveRecordMetadataProvider;
     @Reference private MetadataService metadataService;
     @Reference TypeLocationService typeLocationService;
+
+    public int getLayerPosition() {
+        return LayerType.ACTIVE_RECORD.getPosition();
+    }
 
     public MemberTypeAdditions getMemberTypeAdditions(final String callerMID,
             final String methodIdentifier, final JavaType targetEntity,
@@ -109,10 +112,6 @@ public class EntityLayerProvider extends CoreLayerProvider {
             return null;
         }
         return pluralMetadata.getPlural();
-    }
-
-    public int getLayerPosition() {
-        return LayerType.ACTIVE_RECORD.getPosition();
     }
 
     /**

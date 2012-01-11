@@ -14,11 +14,11 @@ public abstract class IdentifiableJavaStructureCustomDataKey<T extends Identifia
         implements CustomDataKey<T> {
     private Integer modifier;
 
-    public IdentifiableJavaStructureCustomDataKey(final Integer modifier) {
-        this.modifier = modifier;
+    protected IdentifiableJavaStructureCustomDataKey() {
     }
 
-    protected IdentifiableJavaStructureCustomDataKey() {
+    public IdentifiableJavaStructureCustomDataKey(final Integer modifier) {
+        this.modifier = modifier;
     }
 
     public Integer getModifier() {

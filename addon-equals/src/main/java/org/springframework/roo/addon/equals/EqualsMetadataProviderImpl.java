@@ -43,12 +43,37 @@ public class EqualsMetadataProviderImpl extends
         addMetadataTrigger(ROO_EQUALS);
     }
 
+    @Override
+    protected String createLocalIdentifier(final JavaType javaType,
+            final LogicalPath path) {
+        return EqualsMetadata.createIdentifier(javaType, path);
+    }
+
     protected void deactivate(final ComponentContext context) {
         metadataDependencyRegistry.removeNotificationListener(this);
         metadataDependencyRegistry.deregisterDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
                 getProvidesType());
         removeMetadataTrigger(ROO_EQUALS);
+    }
+
+    @Override
+    protected String getGovernorPhysicalTypeIdentifier(
+            final String metadataIdentificationString) {
+        final JavaType javaType = EqualsMetadata
+                .getJavaType(metadataIdentificationString);
+        final LogicalPath path = EqualsMetadata
+                .getPath(metadataIdentificationString);
+        return PhysicalTypeIdentifier.createIdentifier(javaType, path);
+    }
+
+    public String getItdUniquenessFilenameSuffix() {
+        return "Equals";
+    }
+
+    @Override
+    protected String getLocalMidToRequest(final ItdTypeDetails itdTypeDetails) {
+        return getLocalMid(itdTypeDetails);
     }
 
     @Override
@@ -78,9 +103,8 @@ public class EqualsMetadataProviderImpl extends
                 governorPhysicalTypeMetadata, annotationValues, equalityFields);
     }
 
-    @Override
-    protected String getLocalMidToRequest(final ItdTypeDetails itdTypeDetails) {
-        return getLocalMid(itdTypeDetails);
+    public String getProvidesType() {
+        return EqualsMetadata.getMetadataIdentiferType();
     }
 
     private List<FieldMetadata> locateFields(final JavaType javaType,
@@ -110,7 +134,7 @@ public class EqualsMetadataProviderImpl extends
                     || field.getFieldType().isArray()) {
                 continue;
             }
-            if (versionField != null
+            if ((versionField != null)
                     && field.getFieldName().equals(versionField.getFieldName())) {
                 continue;
             }
@@ -122,28 +146,5 @@ public class EqualsMetadataProviderImpl extends
         }
 
         return new ArrayList<FieldMetadata>(locatedFields);
-    }
-
-    public String getItdUniquenessFilenameSuffix() {
-        return "Equals";
-    }
-
-    @Override
-    protected String getGovernorPhysicalTypeIdentifier(
-            final String metadataIdentificationString) {
-        JavaType javaType = EqualsMetadata
-                .getJavaType(metadataIdentificationString);
-        LogicalPath path = EqualsMetadata.getPath(metadataIdentificationString);
-        return PhysicalTypeIdentifier.createIdentifier(javaType, path);
-    }
-
-    @Override
-    protected String createLocalIdentifier(final JavaType javaType,
-            final LogicalPath path) {
-        return EqualsMetadata.createIdentifier(javaType, path);
-    }
-
-    public String getProvidesType() {
-        return EqualsMetadata.getMetadataIdentiferType();
     }
 }

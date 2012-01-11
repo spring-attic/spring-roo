@@ -24,17 +24,11 @@ import org.springframework.roo.support.util.Assert;
 @Service
 public class TypeManagementServiceImpl implements TypeManagementService {
 
-    // Fields
     @Reference private FileManager fileManager;
     @Reference private MetadataService metadataService;
     @Reference private ProjectOperations projectOperations;
     @Reference private TypeLocationService typeLocationService;
     @Reference private TypeParsingService typeParsingService;
-
-    @Deprecated
-    public void generateClassFile(final ClassOrInterfaceTypeDetails cid) {
-        createOrUpdateTypeOnDisk(cid);
-    }
 
     public void addEnumConstant(final String physicalTypeIdentifier,
             final JavaSymbolName constantName) {
@@ -42,20 +36,20 @@ public class TypeManagementServiceImpl implements TypeManagementService {
         Assert.notNull(constantName, "Constant name required");
 
         // Obtain the physical type and itd mutable details
-        PhysicalTypeMetadata ptm = (PhysicalTypeMetadata) metadataService
+        final PhysicalTypeMetadata ptm = (PhysicalTypeMetadata) metadataService
                 .get(physicalTypeIdentifier);
         Assert.notNull(
                 ptm,
                 "Java source code unavailable for type "
                         + PhysicalTypeIdentifier
                                 .getFriendlyName(physicalTypeIdentifier));
-        PhysicalTypeDetails ptd = ptm.getMemberHoldingTypeDetails();
+        final PhysicalTypeDetails ptd = ptm.getMemberHoldingTypeDetails();
         Assert.notNull(
                 ptd,
                 "Java source code details unavailable for type "
                         + PhysicalTypeIdentifier
                                 .getFriendlyName(physicalTypeIdentifier));
-        ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(
+        final ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(
                 (ClassOrInterfaceTypeDetails) ptd);
 
         // Ensure it's an enum
@@ -72,26 +66,26 @@ public class TypeManagementServiceImpl implements TypeManagementService {
         Assert.notNull(field, "Field metadata not provided");
 
         // Obtain the physical type and ITD mutable details
-        PhysicalTypeMetadata ptm = (PhysicalTypeMetadata) metadataService
+        final PhysicalTypeMetadata ptm = (PhysicalTypeMetadata) metadataService
                 .get(field.getDeclaredByMetadataId());
         Assert.notNull(
                 ptm,
                 "Java source code unavailable for type "
                         + PhysicalTypeIdentifier.getFriendlyName(field
                                 .getDeclaredByMetadataId()));
-        PhysicalTypeDetails ptd = ptm.getMemberHoldingTypeDetails();
+        final PhysicalTypeDetails ptd = ptm.getMemberHoldingTypeDetails();
         Assert.notNull(
                 ptd,
                 "Java source code details unavailable for type "
                         + PhysicalTypeIdentifier.getFriendlyName(field
                                 .getDeclaredByMetadataId()));
-        ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(
+        final ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(
                 (ClassOrInterfaceTypeDetails) ptd);
 
         // Automatically add JSR 303 (Bean Validation API) support if there is
         // no current JSR 303 support but a JSR 303 annotation is present
         boolean jsr303Required = false;
-        for (AnnotationMetadata annotation : field.getAnnotations()) {
+        for (final AnnotationMetadata annotation : field.getAnnotations()) {
             if (annotation.getAnnotationType().getFullyQualifiedTypeName()
                     .startsWith("javax.validation")) {
                 jsr303Required = true;
@@ -99,7 +93,7 @@ public class TypeManagementServiceImpl implements TypeManagementService {
             }
         }
 
-        LogicalPath path = PhysicalTypeIdentifier.getPath(cidBuilder
+        final LogicalPath path = PhysicalTypeIdentifier.getPath(cidBuilder
                 .getDeclaredByMetadataId());
 
         if (jsr303Required) {
@@ -119,5 +113,10 @@ public class TypeManagementServiceImpl implements TypeManagementService {
                 .getCompilationUnitContents(cid);
         fileManager.createOrUpdateTextFileIfRequired(fileCanonicalPath,
                 newContents, true);
+    }
+
+    @Deprecated
+    public void generateClassFile(final ClassOrInterfaceTypeDetails cid) {
+        createOrUpdateTypeOnDisk(cid);
     }
 }

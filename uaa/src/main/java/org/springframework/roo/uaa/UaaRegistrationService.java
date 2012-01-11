@@ -40,6 +40,15 @@ public interface UaaRegistrationService {
             UaaRegistrationServiceImpl.class, "Spring Roo");
 
     /**
+     * Indicates to attempt to flush the buffered notifications. If the
+     * {@link UaaService} is at a privacy level where it will accept
+     * registrations, the buffered notifications should be sent to the service.
+     * If the privacy level does not support this, the buffer should be
+     * preserved.
+     */
+    void flushIfPossible();
+
+    /**
      * Registers a new "feature use" within UAA. This method requires every
      * feature to be a bundle symbolic name. This method permits (but does not
      * require) the presentation of UTF-8 encoded custom JSON that will be
@@ -71,15 +80,6 @@ public interface UaaRegistrationService {
      * @param projectId the project name to register (required)
      */
     void registerProject(Product product, String projectId);
-
-    /**
-     * Indicates to attempt to flush the buffered notifications. If the
-     * {@link UaaService} is at a privacy level where it will accept
-     * registrations, the buffered notifications should be sent to the service.
-     * If the privacy level does not support this, the buffer should be
-     * preserved.
-     */
-    void flushIfPossible();
 
     /**
      * Attempts to transmit the data immediately to the server. This will only

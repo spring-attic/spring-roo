@@ -60,49 +60,8 @@ public class NaturalOrderComparator<E> implements Comparator<E> {
         }
     }
 
-    int compareRight(final String a, final String b) {
-        int bias = 0;
-        int ia = 0;
-        int ib = 0;
-
-        // The longest run of digits wins. That aside, the greatest
-        // value wins, but we can't know that it will until we've scanned
-        // both numbers to know that they have the same magnitude, so we
-        // remember it in BIAS.
-        for (;; ia++, ib++) {
-            char ca = charAt(a, ia);
-            char cb = charAt(b, ib);
-
-            if (!Character.isDigit(ca) && !Character.isDigit(cb)) {
-                return bias;
-            }
-            else if (!Character.isDigit(ca)) {
-                return -1;
-            }
-            else if (!Character.isDigit(cb)) {
-                return +1;
-            }
-            else if (ca < cb) {
-                if (bias == 0) {
-                    bias = -1;
-                }
-            }
-            else if (ca > cb) {
-                if (bias == 0)
-                    bias = +1;
-            }
-            else if (ca == 0 && cb == 0) {
-                return bias;
-            }
-        }
-    }
-
-    protected String stringify(final E object) {
-        return object.toString();
-    }
-
     public int compare(final E o1, final E o2) {
-        if (o1 == null && o2 == null) {
+        if ((o1 == null) && (o2 == null)) {
             return 1;
         }
 
@@ -114,8 +73,8 @@ public class NaturalOrderComparator<E> implements Comparator<E> {
             return -1;
         }
 
-        String a = stringify(o1);
-        String b = stringify(o2);
+        final String a = stringify(o1);
+        final String b = stringify(o2);
 
         int ia = 0, ib = 0;
         int nza = 0, nzb = 0;
@@ -130,7 +89,7 @@ public class NaturalOrderComparator<E> implements Comparator<E> {
             cb = charAt(b, ib);
 
             // Skip over leading spaces or zeros
-            while (isSpace(ca) || ca == '0') {
+            while (isSpace(ca) || (ca == '0')) {
                 if (ca == '0') {
                     nza++;
                 }
@@ -142,7 +101,7 @@ public class NaturalOrderComparator<E> implements Comparator<E> {
                 ca = charAt(a, ++ia);
             }
 
-            while (isSpace(cb) || cb == '0') {
+            while (isSpace(cb) || (cb == '0')) {
                 if (cb == '0') {
                     nzb++;
                 }
@@ -161,7 +120,7 @@ public class NaturalOrderComparator<E> implements Comparator<E> {
                 }
             }
 
-            if (ca == 0 && cb == 0) {
+            if ((ca == 0) && (cb == 0)) {
                 // The strings compare the same. Perhaps the caller
                 // will want to call strcmp to break the tie.
                 return nza - nzb;
@@ -177,5 +136,47 @@ public class NaturalOrderComparator<E> implements Comparator<E> {
             ++ia;
             ++ib;
         }
+    }
+
+    int compareRight(final String a, final String b) {
+        int bias = 0;
+        int ia = 0;
+        int ib = 0;
+
+        // The longest run of digits wins. That aside, the greatest
+        // value wins, but we can't know that it will until we've scanned
+        // both numbers to know that they have the same magnitude, so we
+        // remember it in BIAS.
+        for (;; ia++, ib++) {
+            final char ca = charAt(a, ia);
+            final char cb = charAt(b, ib);
+
+            if (!Character.isDigit(ca) && !Character.isDigit(cb)) {
+                return bias;
+            }
+            else if (!Character.isDigit(ca)) {
+                return -1;
+            }
+            else if (!Character.isDigit(cb)) {
+                return +1;
+            }
+            else if (ca < cb) {
+                if (bias == 0) {
+                    bias = -1;
+                }
+            }
+            else if (ca > cb) {
+                if (bias == 0) {
+                    bias = +1;
+                }
+            }
+            else if ((ca == 0) && (cb == 0)) {
+                return bias;
+            }
+        }
+    }
+
+    protected String stringify(final E object) {
+        return object.toString();
     }
 }

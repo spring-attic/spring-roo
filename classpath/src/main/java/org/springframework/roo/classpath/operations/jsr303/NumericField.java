@@ -18,11 +18,11 @@ import org.springframework.roo.support.util.Assert;
 
 public class NumericField extends StringOrNumericField {
 
-    /** Whether the JSR 303 @Min annotation will be added */
-    private Long min;
-
-    /** Whether the JSR 303 @Max annotation will be added */
-    private Long max;
+    /**
+     * Whether the JSR 303 @Digits annotation will be added (you must also set
+     * digitsInteger)
+     */
+    private Integer digitsFraction;
 
     /**
      * Whether the JSR 303 @Digits annotation will be added (you must also set
@@ -30,11 +30,11 @@ public class NumericField extends StringOrNumericField {
      */
     private Integer digitsInteger;
 
-    /**
-     * Whether the JSR 303 @Digits annotation will be added (you must also set
-     * digitsInteger)
-     */
-    private Integer digitsFraction;
+    /** Whether the JSR 303 @Max annotation will be added */
+    private Long max;
+
+    /** Whether the JSR 303 @Min annotation will be added */
+    private Long min;
 
     public NumericField(final String physicalTypeIdentifier,
             final JavaType fieldType, final JavaSymbolName fieldName) {
@@ -46,19 +46,19 @@ public class NumericField extends StringOrNumericField {
             final List<AnnotationMetadataBuilder> annotations) {
         super.decorateAnnotationsList(annotations);
         if (min != null) {
-            List<AnnotationAttributeValue<?>> attrs = new ArrayList<AnnotationAttributeValue<?>>();
+            final List<AnnotationAttributeValue<?>> attrs = new ArrayList<AnnotationAttributeValue<?>>();
             attrs.add(new LongAttributeValue(new JavaSymbolName("value"), min));
             annotations.add(new AnnotationMetadataBuilder(MIN, attrs));
         }
         if (max != null) {
-            List<AnnotationAttributeValue<?>> attrs = new ArrayList<AnnotationAttributeValue<?>>();
+            final List<AnnotationAttributeValue<?>> attrs = new ArrayList<AnnotationAttributeValue<?>>();
             attrs.add(new LongAttributeValue(new JavaSymbolName("value"), max));
             annotations.add(new AnnotationMetadataBuilder(MAX, attrs));
         }
         Assert.isTrue(isDigitsSetCorrectly(),
                 "Validation constraints for @Digit are not correctly set");
         if (digitsInteger != null) {
-            List<AnnotationAttributeValue<?>> attrs = new ArrayList<AnnotationAttributeValue<?>>();
+            final List<AnnotationAttributeValue<?>> attrs = new ArrayList<AnnotationAttributeValue<?>>();
             attrs.add(new IntegerAttributeValue(new JavaSymbolName("integer"),
                     digitsInteger));
             attrs.add(new IntegerAttributeValue(new JavaSymbolName("fraction"),
@@ -67,40 +67,33 @@ public class NumericField extends StringOrNumericField {
         }
     }
 
-    public boolean isDigitsSetCorrectly() {
-        return (digitsInteger == null && digitsFraction == null)
-                || (digitsInteger != null && digitsFraction != null);
+    public Integer getDigitsFraction() {
+        return digitsFraction;
     }
 
     public Integer getDigitsInteger() {
         return digitsInteger;
     }
 
-    public void setDigitsInteger(final Integer digitsInteger) {
-        this.digitsInteger = digitsInteger;
-    }
-
-    public Integer getDigitsFraction() {
-        return digitsFraction;
-    }
-
-    public void setDigitsFraction(final Integer digitsFractional) {
-        this.digitsFraction = digitsFractional;
+    public Long getMax() {
+        return max;
     }
 
     public Long getMin() {
         return min;
     }
 
-    public void setMin(final Long min) {
-        if (JdkJavaType.isDoubleOrFloat(getFieldType())) {
-            LOGGER.warning("@Min constraint is not supported for double or float fields");
-        }
-        this.min = min;
+    public boolean isDigitsSetCorrectly() {
+        return ((digitsInteger == null) && (digitsFraction == null))
+                || ((digitsInteger != null) && (digitsFraction != null));
     }
 
-    public Long getMax() {
-        return max;
+    public void setDigitsFraction(final Integer digitsFractional) {
+        digitsFraction = digitsFractional;
+    }
+
+    public void setDigitsInteger(final Integer digitsInteger) {
+        this.digitsInteger = digitsInteger;
     }
 
     public void setMax(final Long max) {
@@ -108,5 +101,12 @@ public class NumericField extends StringOrNumericField {
             LOGGER.warning("@Max constraint is not supported for double or float fields");
         }
         this.max = max;
+    }
+
+    public void setMin(final Long min) {
+        if (JdkJavaType.isDoubleOrFloat(getFieldType())) {
+            LOGGER.warning("@Min constraint is not supported for double or float fields");
+        }
+        this.min = min;
     }
 }

@@ -25,19 +25,76 @@ import org.springframework.roo.support.util.StringUtils;
  */
 public class JLineLogHandler extends Handler {
 
-    // Constants
     private static final boolean BRIGHT_COLORS = Boolean
             .getBoolean("roo.bright");
 
-    // Fields
-    private ConsoleReader reader;
-    private ShellPromptAccessor shellPromptAccessor;
-    private static ThreadLocal<Boolean> redrawProhibit = new ThreadLocal<Boolean>();
-    private static String lastMessage;
     private static boolean includeThreadName = false;
-    private boolean ansiSupported;
-    private String userInterfaceThreadName;
+    private static String lastMessage;
+    private static ThreadLocal<Boolean> redrawProhibit = new ThreadLocal<Boolean>();
     private static boolean suppressDuplicateMessages = true;
+
+    public static void cancelRedrawProhibition() {
+        redrawProhibit.remove();
+    }
+
+    /**
+     * Makes text brighter if requested through system property 'roo.bright' and
+     * works around issue on Windows in using reverse() in combination with the
+     * Jansi lib, which leaves its 'negative' flag set unless reset explicitly.
+     * 
+     * @return new patched ANSIBuffer
+     */
+    static ANSIBuffer getANSIBuffer() {
+        final char esc = (char) 27;
+        return new ANSIBuffer() {
+            @Override
+            public ANSIBuffer attrib(final String str, final int code) {
+                if (BRIGHT_COLORS && (30 <= code) && (code <= 37)) {
+                    // This is a color code: add a 'bright' code
+                    return append(esc + "[" + code + ";1m").append(str).append(
+                            ANSICodes.attrib(0));
+                }
+                return super.attrib(str, code);
+            };
+
+            @Override
+            public ANSIBuffer reverse(final String str) {
+                if (OsUtils.isWindows()) {
+                    return super.reverse(str).append(ANSICodes.attrib(esc));
+                }
+                return super.reverse(str);
+            }
+        };
+    }
+
+    public static boolean isSuppressDuplicateMessages() {
+        return suppressDuplicateMessages;
+    }
+
+    public static void prohibitRedraw() {
+        redrawProhibit.set(true);
+    }
+
+    public static void resetMessageTracking() {
+        lastMessage = null; // see ROO-251
+    }
+
+    public static void setIncludeThreadName(final boolean include) {
+        includeThreadName = include;
+    }
+
+    public static void setSuppressDuplicateMessages(
+            final boolean suppressDuplicateMessages) {
+        JLineLogHandler.suppressDuplicateMessages = suppressDuplicateMessages;
+    }
+
+    private boolean ansiSupported;
+
+    private ConsoleReader reader;
+
+    private ShellPromptAccessor shellPromptAccessor;
+
+    private String userInterfaceThreadName;
 
     public JLineLogHandler(final ConsoleReader reader,
             final ShellPromptAccessor shellPromptAccessor) {
@@ -45,13 +102,13 @@ public class JLineLogHandler extends Handler {
         Assert.notNull(shellPromptAccessor, "Shell prompt accessor required");
         this.reader = reader;
         this.shellPromptAccessor = shellPromptAccessor;
-        this.userInterfaceThreadName = Thread.currentThread().getName();
-        this.ansiSupported = reader.getTerminal().isANSISupported();
+        userInterfaceThreadName = Thread.currentThread().getName();
+        ansiSupported = reader.getTerminal().isANSISupported();
 
         setFormatter(new Formatter() {
             @Override
             public String format(final LogRecord record) {
-                StringBuffer sb = new StringBuffer();
+                final StringBuffer sb = new StringBuffer();
                 if (record.getMessage() != null) {
                     sb.append(record.getMessage()).append(
                             StringUtils.LINE_SEPARATOR);
@@ -59,12 +116,12 @@ public class JLineLogHandler extends Handler {
                 if (record.getThrown() != null) {
                     PrintWriter pw = null;
                     try {
-                        StringWriter sw = new StringWriter();
+                        final StringWriter sw = new StringWriter();
                         pw = new PrintWriter(sw);
                         record.getThrown().printStackTrace(pw);
                         sb.append(sw.toString());
                     }
-                    catch (Exception ex) {
+                    catch (final Exception ex) {
                     }
                     finally {
                         IOUtils.closeQuietly(pw);
@@ -76,36 +133,11 @@ public class JLineLogHandler extends Handler {
     }
 
     @Override
-    public void flush() {
-    }
-
-    @Override
     public void close() throws SecurityException {
     }
 
-    public static void prohibitRedraw() {
-        redrawProhibit.set(true);
-    }
-
-    public static void cancelRedrawProhibition() {
-        redrawProhibit.remove();
-    }
-
-    public static void setIncludeThreadName(final boolean include) {
-        includeThreadName = include;
-    }
-
-    public static void resetMessageTracking() {
-        lastMessage = null; // see ROO-251
-    }
-
-    public static boolean isSuppressDuplicateMessages() {
-        return suppressDuplicateMessages;
-    }
-
-    public static void setSuppressDuplicateMessages(
-            final boolean suppressDuplicateMessages) {
-        JLineLogHandler.suppressDuplicateMessages = suppressDuplicateMessages;
+    @Override
+    public void flush() {
     }
 
     @Override
@@ -113,14 +145,14 @@ public class JLineLogHandler extends Handler {
         try {
             // Avoid repeating the same message that displayed immediately
             // before the current message (ROO-30, ROO-1873)
-            String toDisplay = toDisplay(record);
+            final String toDisplay = toDisplay(record);
             if (toDisplay.equals(lastMessage) && suppressDuplicateMessages) {
                 return;
             }
             lastMessage = toDisplay;
 
-            StringBuffer buffer = reader.getCursorBuffer().getBuffer();
-            int cursor = reader.getCursorBuffer().cursor;
+            final StringBuffer buffer = reader.getCursorBuffer().getBuffer();
+            final int cursor = reader.getCursorBuffer().cursor;
             if (reader.getCursorBuffer().length() > 0) {
                 // The user has semi-typed something, so put a new line in so
                 // the debug message is separated
@@ -144,21 +176,21 @@ public class JLineLogHandler extends Handler {
 
             reader.printString(toDisplay);
 
-            Boolean prohibitingRedraw = redrawProhibit.get();
+            final Boolean prohibitingRedraw = redrawProhibit.get();
             if (prohibitingRedraw == null) {
                 reader.redrawLine();
             }
 
             reader.flushConsole();
         }
-        catch (Exception e) {
+        catch (final Exception e) {
             reportError("Could not publish log message", e,
                     Level.SEVERE.intValue());
         }
     }
 
     private String toDisplay(final LogRecord event) {
-        StringBuilder sb = new StringBuilder();
+        final StringBuilder sb = new StringBuilder();
 
         String threadName;
         String eventString;
@@ -170,7 +202,7 @@ public class JLineLogHandler extends Handler {
 
             // Build an event string that will indent nicely given the left hand
             // side now contains a thread name
-            StringBuilder lineSeparatorAndIndentingString = new StringBuilder();
+            final StringBuilder lineSeparatorAndIndentingString = new StringBuilder();
             for (int i = 0; i <= threadName.length(); i++) {
                 lineSeparatorAndIndentingString.append(" ");
             }
@@ -214,35 +246,5 @@ public class JLineLogHandler extends Handler {
         }
 
         return sb.toString();
-    }
-
-    /**
-     * Makes text brighter if requested through system property 'roo.bright' and
-     * works around issue on Windows in using reverse() in combination with the
-     * Jansi lib, which leaves its 'negative' flag set unless reset explicitly.
-     * 
-     * @return new patched ANSIBuffer
-     */
-    static ANSIBuffer getANSIBuffer() {
-        final char esc = (char) 27;
-        return new ANSIBuffer() {
-            @Override
-            public ANSIBuffer reverse(final String str) {
-                if (OsUtils.isWindows()) {
-                    return super.reverse(str).append(ANSICodes.attrib(esc));
-                }
-                return super.reverse(str);
-            };
-
-            @Override
-            public ANSIBuffer attrib(final String str, final int code) {
-                if (BRIGHT_COLORS && 30 <= code && code <= 37) {
-                    // This is a color code: add a 'bright' code
-                    return append(esc + "[" + code + ";1m").append(str).append(
-                            ANSICodes.attrib(0));
-                }
-                return super.attrib(str, code);
-            }
-        };
     }
 }

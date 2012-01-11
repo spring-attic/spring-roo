@@ -13,21 +13,13 @@ import java.util.Properties;
 public interface ConnectionProvider {
 
     /**
-     * Returns a JDBC {@link Connection} configured with the specified
-     * connection properties.
+     * Closes the given {@link Connection}.
      * <p>
-     * The properties "user" and "password" are required for the driver to make
-     * a connection. If these properties are not supplied, the implementing
-     * method will need to provide them.
+     * An exception will NOT be thrown if the connection cannot be closed.
      * 
-     * @param props the database connection properties (required)
-     * @param displayAddOns displays add-on availability if the JDBC driver
-     *            isn't available (required)
-     * @return a new connection
-     * @throws RuntimeException if there is a problem acquiring a connection
+     * @param connection the connection to close (may be null).
      */
-    Connection getConnection(Properties props, boolean displayAddOns)
-            throws RuntimeException;
+    void closeConnection(Connection connection);
 
     /**
      * Returns a JDBC {@link Connection} configured with the specified
@@ -48,6 +40,23 @@ public interface ConnectionProvider {
             throws RuntimeException;
 
     /**
+     * Returns a JDBC {@link Connection} configured with the specified
+     * connection properties.
+     * <p>
+     * The properties "user" and "password" are required for the driver to make
+     * a connection. If these properties are not supplied, the implementing
+     * method will need to provide them.
+     * 
+     * @param props the database connection properties (required)
+     * @param displayAddOns displays add-on availability if the JDBC driver
+     *            isn't available (required)
+     * @return a new connection
+     * @throws RuntimeException if there is a problem acquiring a connection
+     */
+    Connection getConnection(Properties props, boolean displayAddOns)
+            throws RuntimeException;
+
+    /**
      * Returns a JDBC {@link Connection} configured with the specified JNDI
      * {@link DataSource} name.
      * 
@@ -61,13 +70,4 @@ public interface ConnectionProvider {
     Connection getConnectionViaJndiDataSource(String jndiDataSource,
             Map<String, String> map, boolean displayAddOns)
             throws RuntimeException;
-
-    /**
-     * Closes the given {@link Connection}.
-     * <p>
-     * An exception will NOT be thrown if the connection cannot be closed.
-     * 
-     * @param connection the connection to close (may be null).
-     */
-    void closeConnection(Connection connection);
 }

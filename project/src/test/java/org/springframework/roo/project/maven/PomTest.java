@@ -29,7 +29,6 @@ import org.springframework.roo.support.util.StringUtils;
  */
 public class PomTest {
 
-    // Constants
     private static final String ARTIFACT_ID = "my-app";
     private static final String DEPENDENCY_ARTIFACT_ID = "commons-foo";
     private static final String DEPENDENCY_GROUP_ID = "org.apache";
@@ -43,48 +42,6 @@ public class PomTest {
     private static final String VERSION = "1.0.1.RELEASE";
     private static final String WAR = "war";
 
-    @Test
-    public void testDefaultPackaging() {
-        assertEquals(DEFAULT_PACKAGING, getMinimalPom(DEFAULT_PACKAGING)
-                .getPackaging());
-    }
-
-    @Test
-    public void testGetModulePathsForMinimalJarPom() {
-        // Set up
-        final Pom pom = getMinimalPom(DEFAULT_PACKAGING);
-        final Path[] expectedPaths = { ROOT };
-
-        // Invoke and check
-        assertEquals(expectedPaths.length, pom.getPhysicalPaths().size());
-        for (final Path path : expectedPaths) {
-            final PhysicalPath modulePath = pom.getPhysicalPath(path);
-            assertEquals(new File(PROJECT_ROOT, path.getDefaultLocation()),
-                    modulePath.getLocation());
-            assertEquals(path.isJavaSource(), modulePath.isSource());
-            final LogicalPath moduelPathId = modulePath.getLogicalPath();
-            assertEquals(path, moduelPathId.getPath());
-            assertEquals(ROOT_MODULE, moduelPathId.getModule());
-        }
-    }
-
-    @Test
-    public void testGetAsDependency() {
-        // Set up
-        final Pom pom = getMinimalPom(WAR);
-
-        // Invoke
-        final Dependency dependency = pom.asDependency(COMPILE);
-
-        // Check
-        assertEquals(GROUP_ID, dependency.getGroupId());
-        assertEquals(ARTIFACT_ID, dependency.getArtifactId());
-        assertEquals(VERSION, dependency.getVersion());
-        assertEquals(DependencyType.WAR, dependency.getType());
-        assertEquals(COMPILE, dependency.getScope());
-        assertTrue(StringUtils.isBlank(dependency.getClassifier()));
-    }
-
     private Pom getMinimalPom(final String packaging,
             final Dependency... dependencies) {
         return new Pom(GROUP_ID, ARTIFACT_ID, VERSION, packaging,
@@ -93,35 +50,15 @@ public class PomTest {
                         + File.separator + "pom.xml", ROOT_MODULE, null);
     }
 
-    @Test
-    public void testCannotAddNullDependency() {
-        // Set up
-        final Pom pom = getMinimalPom(POM);
-
-        // Invoke and check
-        assertFalse(pom.canAddDependency(null));
-    }
-
-    @Test
-    public void testCannotAddAlreadyRegisteredDependency() {
-        // Set up
-        final Dependency mockExistingDependency = mock(Dependency.class);
-        when(mockExistingDependency.getType()).thenReturn(DependencyType.JAR);
-        final Pom pom = getMinimalPom(POM, mockExistingDependency);
-
-        // Invoke and check
-        assertFalse(pom.canAddDependency(mockExistingDependency));
-    }
-
-    @Test
-    public void testCannotAddNewDependencyOfHigherType() {
-        // Set up
-        final Dependency mockNewDependency = mock(Dependency.class);
-        when(mockNewDependency.getType()).thenReturn(DependencyType.WAR);
-        final Pom pom = getMinimalPom(JAR);
-
-        // Invoke and check
-        assertFalse(pom.canAddDependency(mockNewDependency));
+    private Dependency getMockDependency(final String groupId,
+            final String artifactId, final String version,
+            final DependencyType type) {
+        final Dependency mockDependency = mock(Dependency.class);
+        when(mockDependency.getGroupId()).thenReturn(groupId);
+        when(mockDependency.getArtifactId()).thenReturn(artifactId);
+        when(mockDependency.getVersion()).thenReturn(version);
+        when(mockDependency.getType()).thenReturn(type);
+        return mockDependency;
     }
 
     @Test
@@ -147,28 +84,76 @@ public class PomTest {
     }
 
     @Test
-    public void testHasDependencyExcludingVersionWhenDependencyIsNull() {
+    public void testCannotAddAlreadyRegisteredDependency() {
         // Set up
-        final Pom pom = getMinimalPom(JAR);
+        final Dependency mockExistingDependency = mock(Dependency.class);
+        when(mockExistingDependency.getType()).thenReturn(DependencyType.JAR);
+        final Pom pom = getMinimalPom(POM, mockExistingDependency);
 
         // Invoke and check
-        assertFalse(pom.hasDependencyExcludingVersion(null));
+        assertFalse(pom.canAddDependency(mockExistingDependency));
     }
 
     @Test
-    public void testHasDependencyExcludingVersionWhenDependencyHasDifferentVersion() {
+    public void testCannotAddNewDependencyOfHigherType() {
         // Set up
-        final String existingVersion = "1.0";
-        final Dependency mockExistingDependency = getMockDependency(
-                DEPENDENCY_GROUP_ID, DEPENDENCY_ARTIFACT_ID, existingVersion,
-                DependencyType.JAR);
-        final Pom pom = getMinimalPom(JAR, mockExistingDependency);
-        final Dependency mockOtherDependency = getMockDependency(
-                DEPENDENCY_GROUP_ID, DEPENDENCY_ARTIFACT_ID, existingVersion
-                        + ".1", DependencyType.JAR);
+        final Dependency mockNewDependency = mock(Dependency.class);
+        when(mockNewDependency.getType()).thenReturn(DependencyType.WAR);
+        final Pom pom = getMinimalPom(JAR);
 
         // Invoke and check
-        assertTrue(pom.hasDependencyExcludingVersion(mockOtherDependency));
+        assertFalse(pom.canAddDependency(mockNewDependency));
+    }
+
+    @Test
+    public void testCannotAddNullDependency() {
+        // Set up
+        final Pom pom = getMinimalPom(POM);
+
+        // Invoke and check
+        assertFalse(pom.canAddDependency(null));
+    }
+
+    @Test
+    public void testDefaultPackaging() {
+        assertEquals(DEFAULT_PACKAGING, getMinimalPom(DEFAULT_PACKAGING)
+                .getPackaging());
+    }
+
+    @Test
+    public void testGetAsDependency() {
+        // Set up
+        final Pom pom = getMinimalPom(WAR);
+
+        // Invoke
+        final Dependency dependency = pom.asDependency(COMPILE);
+
+        // Check
+        assertEquals(GROUP_ID, dependency.getGroupId());
+        assertEquals(ARTIFACT_ID, dependency.getArtifactId());
+        assertEquals(VERSION, dependency.getVersion());
+        assertEquals(DependencyType.WAR, dependency.getType());
+        assertEquals(COMPILE, dependency.getScope());
+        assertTrue(StringUtils.isBlank(dependency.getClassifier()));
+    }
+
+    @Test
+    public void testGetModulePathsForMinimalJarPom() {
+        // Set up
+        final Pom pom = getMinimalPom(DEFAULT_PACKAGING);
+        final Path[] expectedPaths = { ROOT };
+
+        // Invoke and check
+        assertEquals(expectedPaths.length, pom.getPhysicalPaths().size());
+        for (final Path path : expectedPaths) {
+            final PhysicalPath modulePath = pom.getPhysicalPath(path);
+            assertEquals(new File(PROJECT_ROOT, path.getDefaultLocation()),
+                    modulePath.getLocation());
+            assertEquals(path.isJavaSource(), modulePath.isSource());
+            final LogicalPath moduelPathId = modulePath.getLogicalPath();
+            assertEquals(path, moduelPathId.getPath());
+            assertEquals(ROOT_MODULE, moduelPathId.getModule());
+        }
     }
 
     @Test
@@ -201,14 +186,28 @@ public class PomTest {
         assertFalse(pom.hasDependencyExcludingVersion(mockOtherDependency));
     }
 
-    private Dependency getMockDependency(final String groupId,
-            final String artifactId, final String version,
-            final DependencyType type) {
-        final Dependency mockDependency = mock(Dependency.class);
-        when(mockDependency.getGroupId()).thenReturn(groupId);
-        when(mockDependency.getArtifactId()).thenReturn(artifactId);
-        when(mockDependency.getVersion()).thenReturn(version);
-        when(mockDependency.getType()).thenReturn(type);
-        return mockDependency;
+    @Test
+    public void testHasDependencyExcludingVersionWhenDependencyHasDifferentVersion() {
+        // Set up
+        final String existingVersion = "1.0";
+        final Dependency mockExistingDependency = getMockDependency(
+                DEPENDENCY_GROUP_ID, DEPENDENCY_ARTIFACT_ID, existingVersion,
+                DependencyType.JAR);
+        final Pom pom = getMinimalPom(JAR, mockExistingDependency);
+        final Dependency mockOtherDependency = getMockDependency(
+                DEPENDENCY_GROUP_ID, DEPENDENCY_ARTIFACT_ID, existingVersion
+                        + ".1", DependencyType.JAR);
+
+        // Invoke and check
+        assertTrue(pom.hasDependencyExcludingVersion(mockOtherDependency));
+    }
+
+    @Test
+    public void testHasDependencyExcludingVersionWhenDependencyIsNull() {
+        // Set up
+        final Pom pom = getMinimalPom(JAR);
+
+        // Invoke and check
+        assertFalse(pom.hasDependencyExcludingVersion(null));
     }
 }

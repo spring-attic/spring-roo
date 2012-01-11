@@ -51,20 +51,111 @@ public class Dependency implements Comparable<Dependency> {
     public static boolean isHigherLevel(final String type1, final String type2) {
         final int type1Index = TYPE_HIERARCHY.indexOf(type1.toLowerCase());
         final int type2Index = TYPE_HIERARCHY.indexOf(type2.toLowerCase());
-        return type2Index >= 0 && type1Index > type2Index;
+        return (type2Index >= 0) && (type1Index > type2Index);
     }
 
-    // Fields
+    private final String artifactId;
+    private final String classifier;
+    private final List<Dependency> exclusions = new ArrayList<Dependency>();
     // -- Identifying
     private final String groupId;
-    private final String artifactId;
-    private final DependencyType type;
-    private final String classifier;
     // -- Non-identifying
     private final DependencyScope scope;
-    private final List<Dependency> exclusions = new ArrayList<Dependency>();
-    private final String version;
     private final String systemPath;
+    private final DependencyType type;
+    private final String version;
+
+    /**
+     * Constructs a {@link Dependency} from a Maven-style &lt;dependency&gt;
+     * element.
+     * 
+     * @param dependency to parse (required)
+     */
+    public Dependency(final Element dependency) {
+        // Test if it has Maven format
+        if (dependency.hasChildNodes()
+                && (dependency.getElementsByTagName("artifactId").getLength() > 0)) {
+            groupId = dependency.getElementsByTagName("groupId").item(0)
+                    .getTextContent().trim();
+            artifactId = dependency.getElementsByTagName("artifactId").item(0)
+                    .getTextContent().trim();
+
+            final NodeList versionElements = dependency
+                    .getElementsByTagName("version");
+            if (versionElements.getLength() > 0) {
+                version = versionElements.item(0).getTextContent();
+            }
+            else {
+                version = "";
+            }
+
+            // POM attributes supported in Maven 3.1
+            type = DependencyType.getType(dependency);
+
+            // POM attributes supported in Maven 3.1
+            scope = DependencyScope.getScope(dependency);
+            if (scope == DependencyScope.SYSTEM) {
+                if (XmlUtils.findFirstElement("systemPath", dependency) != null) {
+                    systemPath = XmlUtils
+                            .findFirstElement("systemPath", dependency)
+                            .getTextContent().trim();
+                }
+                else {
+                    throw new IllegalArgumentException(
+                            "Missing <systemPath> declaration for system scope");
+                }
+            }
+            else {
+                systemPath = null;
+            }
+
+            classifier = DomUtils.getChildTextContent(dependency, "classifier");
+
+            // Parsing for exclusions
+            final List<Element> exclusionList = XmlUtils.findElements(
+                    "exclusions/exclusion", dependency);
+            if (exclusionList.size() > 0) {
+                for (final Element exclusion : exclusionList) {
+                    final Element exclusionE = XmlUtils.findFirstElement(
+                            "groupId", exclusion);
+                    String exclusionId = "";
+                    if (exclusionE != null) {
+                        exclusionId = exclusionE.getTextContent();
+                    }
+                    final Element exclusionArtifactE = XmlUtils
+                            .findFirstElement("artifactId", exclusion);
+                    String exclusionArtifactId = "";
+                    if (exclusionArtifactE != null) {
+                        exclusionArtifactId = exclusionArtifactE
+                                .getTextContent();
+                    }
+                    if (!(exclusionArtifactId.length() < 1)
+                            && !(exclusionId.length() < 1)) {
+                        exclusions.add(new Dependency(exclusionId,
+                                exclusionArtifactId, "ignored"));
+                    }
+                }
+            }
+        }
+        // Otherwise test for Ivy format
+        else if (dependency.hasAttribute("org")
+                && dependency.hasAttribute("name")
+                && dependency.hasAttribute("rev")) {
+            artifactId = dependency.getAttribute("name");
+            classifier = dependency.getAttribute("classifier");
+            groupId = dependency.getAttribute("org");
+            scope = DependencyScope.COMPILE;
+            systemPath = null;
+            type = DependencyType.JAR;
+            version = dependency.getAttribute("rev");
+            // TODO: Implement exclusions parser for IVY format
+        }
+        else {
+            throw new IllegalStateException(
+                    "Dependency XML format not supported or is missing a mandatory node ('"
+                            + dependency + "')");
+        }
+    }
 
     /**
      * Constructor for a dependency with the given attributes.
@@ -78,48 +169,6 @@ public class Dependency implements Comparable<Dependency> {
             final DependencyScope scope) {
         this(gav.getGroupId(), gav.getArtifactId(), gav.getVersion(), type,
                 scope);
-    }
-
-    /**
-     * Creates an immutable {@link Dependency}.
-     * 
-     * @param groupId the group ID (required)
-     * @param artifactId the artifact ID (required)
-     * @param version the version ID (required)
-     * @param type the dependency type (required)
-     * @param scope the dependency scope (required)
-     * @param classifier the dependency classifier (required)
-     */
-    public Dependency(final String groupId, final String artifactId,
-            final String version, final DependencyType type,
-            final DependencyScope scope, final String classifier) {
-        XmlUtils.assertElementLegal(groupId);
-        XmlUtils.assertElementLegal(artifactId);
-        Assert.hasText(version, "Version required");
-        Assert.notNull(scope, "Dependency scope required");
-        Assert.notNull(type, "Dependency type required");
-        this.artifactId = artifactId;
-        this.classifier = classifier;
-        this.groupId = groupId;
-        this.scope = scope;
-        this.systemPath = null;
-        this.type = type;
-        this.version = version;
-    }
-
-    /**
-     * Constructs a dependency with the given type and scope.
-     * 
-     * @param groupId the group ID (required)
-     * @param artifactId the artifact ID (required)
-     * @param version the version ID (required)
-     * @param type the dependency type (required)
-     * @param scope the dependency scope (required)
-     */
-    public Dependency(final String groupId, final String artifactId,
-            final String version, final DependencyType type,
-            final DependencyScope scope) {
-        this(groupId, artifactId, version, type, scope, "");
     }
 
     /**
@@ -154,163 +203,61 @@ public class Dependency implements Comparable<Dependency> {
     }
 
     /**
-     * Constructs a {@link Dependency} from a Maven-style &lt;dependency&gt;
-     * element.
+     * Constructs a dependency with the given type and scope.
      * 
-     * @param dependency to parse (required)
+     * @param groupId the group ID (required)
+     * @param artifactId the artifact ID (required)
+     * @param version the version ID (required)
+     * @param type the dependency type (required)
+     * @param scope the dependency scope (required)
      */
-    public Dependency(final Element dependency) {
-        // Test if it has Maven format
-        if (dependency.hasChildNodes()
-                && dependency.getElementsByTagName("artifactId").getLength() > 0) {
-            this.groupId = dependency.getElementsByTagName("groupId").item(0)
-                    .getTextContent().trim();
-            this.artifactId = dependency.getElementsByTagName("artifactId")
-                    .item(0).getTextContent().trim();
-
-            final NodeList versionElements = dependency
-                    .getElementsByTagName("version");
-            if (versionElements.getLength() > 0) {
-                version = versionElements.item(0).getTextContent();
-            }
-            else {
-                version = "";
-            }
-
-            // POM attributes supported in Maven 3.1
-            this.type = DependencyType.getType(dependency);
-
-            // POM attributes supported in Maven 3.1
-            this.scope = DependencyScope.getScope(dependency);
-            if (scope == DependencyScope.SYSTEM) {
-                if (XmlUtils.findFirstElement("systemPath", dependency) != null) {
-                    systemPath = XmlUtils
-                            .findFirstElement("systemPath", dependency)
-                            .getTextContent().trim();
-                }
-                else {
-                    throw new IllegalArgumentException(
-                            "Missing <systemPath> declaration for system scope");
-                }
-            }
-            else {
-                this.systemPath = null;
-            }
-
-            this.classifier = DomUtils.getChildTextContent(dependency,
-                    "classifier");
-
-            // Parsing for exclusions
-            final List<Element> exclusionList = XmlUtils.findElements(
-                    "exclusions/exclusion", dependency);
-            if (exclusionList.size() > 0) {
-                for (final Element exclusion : exclusionList) {
-                    final Element exclusionE = XmlUtils.findFirstElement(
-                            "groupId", exclusion);
-                    String exclusionId = "";
-                    if (exclusionE != null) {
-                        exclusionId = exclusionE.getTextContent();
-                    }
-                    final Element exclusionArtifactE = XmlUtils
-                            .findFirstElement("artifactId", exclusion);
-                    String exclusionArtifactId = "";
-                    if (exclusionArtifactE != null) {
-                        exclusionArtifactId = exclusionArtifactE
-                                .getTextContent();
-                    }
-                    if (!(exclusionArtifactId.length() < 1)
-                            && !(exclusionId.length() < 1)) {
-                        this.exclusions.add(new Dependency(exclusionId,
-                                exclusionArtifactId, "ignored"));
-                    }
-                }
-            }
-        }
-        // Otherwise test for Ivy format
-        else if (dependency.hasAttribute("org")
-                && dependency.hasAttribute("name")
-                && dependency.hasAttribute("rev")) {
-            artifactId = dependency.getAttribute("name");
-            classifier = dependency.getAttribute("classifier");
-            groupId = dependency.getAttribute("org");
-            scope = DependencyScope.COMPILE;
-            systemPath = null;
-            type = DependencyType.JAR;
-            version = dependency.getAttribute("rev");
-            // TODO: Implement exclusions parser for IVY format
-        }
-        else {
-            throw new IllegalStateException(
-                    "Dependency XML format not supported or is missing a mandatory node ('"
-                            + dependency + "')");
-        }
-    }
-
-    public String getGroupId() {
-        return groupId;
-    }
-
-    public String getArtifactId() {
-        return artifactId;
-    }
-
-    @Deprecated
-    public String getVersionId() {
-        return version;
-    }
-
-    public String getVersion() {
-        return version;
-    }
-
-    public DependencyType getType() {
-        return type;
-    }
-
-    public DependencyScope getScope() {
-        return scope;
-    }
-
-    public String getClassifier() {
-        return classifier;
-    }
-
-    public String getSystemPath() {
-        return systemPath;
+    public Dependency(final String groupId, final String artifactId,
+            final String version, final DependencyType type,
+            final DependencyScope scope) {
+        this(groupId, artifactId, version, type, scope, "");
     }
 
     /**
-     * @return list of exclusions (never null)
+     * Creates an immutable {@link Dependency}.
+     * 
+     * @param groupId the group ID (required)
+     * @param artifactId the artifact ID (required)
+     * @param version the version ID (required)
+     * @param type the dependency type (required)
+     * @param scope the dependency scope (required)
+     * @param classifier the dependency classifier (required)
      */
-    public List<Dependency> getExclusions() {
-        return exclusions;
+    public Dependency(final String groupId, final String artifactId,
+            final String version, final DependencyType type,
+            final DependencyScope scope, final String classifier) {
+        XmlUtils.assertElementLegal(groupId);
+        XmlUtils.assertElementLegal(artifactId);
+        Assert.hasText(version, "Version required");
+        Assert.notNull(scope, "Dependency scope required");
+        Assert.notNull(type, "Dependency type required");
+        this.artifactId = artifactId;
+        this.classifier = classifier;
+        this.groupId = groupId;
+        this.scope = scope;
+        systemPath = null;
+        this.type = type;
+        this.version = version;
     }
 
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result
-                + ((artifactId == null) ? 0 : artifactId.hashCode());
-        result = prime * result + ((groupId == null) ? 0 : groupId.hashCode());
-        result = prime * result
-                + ((classifier == null) ? 0 : classifier.hashCode());
-        result = prime * result + ((type == null) ? 0 : type.hashCode());
-        return result;
-    }
-
-    @Override
-    public boolean equals(final Object obj) {
-        return obj instanceof Dependency
-                && this.compareTo((Dependency) obj) == 0;
-    }
-
-    public int compareTo(final Dependency o) {
-        int result = compareCoordinates(o);
-        if (result != 0) {
-            return result;
-        }
-        return version.compareTo(o.getVersion());
+    /**
+     * Adds the given exclusion to this dependency
+     * 
+     * @param exclusionGroupId the groupId of the dependency to exclude
+     *            (required)
+     * @param exclusionArtifactId the artifactId of the dependency to exclude
+     *            (required)
+     */
+    public void addExclusion(final String exclusionGroupId,
+            final String exclusionArtifactId) {
+        Assert.hasText(exclusionGroupId, "Excluded groupId required");
+        Assert.hasText(exclusionArtifactId, "Excluded artifactId required");
+        exclusions.add(new Dependency(exclusionGroupId, exclusionArtifactId,
+                "ignored"));
     }
 
     /**
@@ -330,48 +277,32 @@ public class Dependency implements Comparable<Dependency> {
             result = StringUtils.trimToEmpty(classifier).compareTo(
                     StringUtils.trimToEmpty(other.getClassifier()));
         }
-        if (result == 0 && type != null) {
+        if ((result == 0) && (type != null)) {
             result = type.compareTo(other.getType());
         }
         return result;
     }
 
-    /**
-     * @return a simple description, as would be used for console output
-     */
-    public String getSimpleDescription() {
-        return groupId + ":" + artifactId + ":" + version
-                + (StringUtils.hasText(classifier) ? ":" + classifier : "");
+    public int compareTo(final Dependency o) {
+        final int result = compareCoordinates(o);
+        if (result != 0) {
+            return result;
+        }
+        return version.compareTo(o.getVersion());
     }
 
     @Override
-    public String toString() {
-        final ToStringCreator tsc = new ToStringCreator(this);
-        tsc.append("groupId", groupId);
-        tsc.append("artifactId", artifactId);
-        tsc.append("version", version);
-        tsc.append("type", type);
-        tsc.append("scope", scope);
-        if (classifier != null) {
-            tsc.append("classifier", classifier);
-        }
-        return tsc.toString();
+    public boolean equals(final Object obj) {
+        return (obj instanceof Dependency)
+                && (compareTo((Dependency) obj) == 0);
     }
 
-    /**
-     * Adds the given exclusion to this dependency
-     * 
-     * @param exclusionGroupId the groupId of the dependency to exclude
-     *            (required)
-     * @param exclusionArtifactId the artifactId of the dependency to exclude
-     *            (required)
-     */
-    public void addExclusion(final String exclusionGroupId,
-            final String exclusionArtifactId) {
-        Assert.hasText(exclusionGroupId, "Excluded groupId required");
-        Assert.hasText(exclusionArtifactId, "Excluded artifactId required");
-        this.exclusions.add(new Dependency(exclusionGroupId,
-                exclusionArtifactId, "ignored"));
+    public String getArtifactId() {
+        return artifactId;
+    }
+
+    public String getClassifier() {
+        return classifier;
     }
 
     /**
@@ -390,7 +321,7 @@ public class Dependency implements Comparable<Dependency> {
         dependencyElement.appendChild(XmlUtils.createTextElement(document,
                 "version", version));
 
-        if (type != null && type != DependencyType.JAR) {
+        if ((type != null) && (type != DependencyType.JAR)) {
             // Keep the XML short, we don't need "JAR" given it's the default
             final Element typeElement = XmlUtils.createTextElement(document,
                     "type", type.toString().toLowerCase());
@@ -398,10 +329,10 @@ public class Dependency implements Comparable<Dependency> {
         }
 
         // Keep the XML short, we don't need "compile" given it's the default
-        if (scope != null && scope != DependencyScope.COMPILE) {
+        if ((scope != null) && (scope != DependencyScope.COMPILE)) {
             dependencyElement.appendChild(XmlUtils.createTextElement(document,
                     "scope", scope.toString().toLowerCase()));
-            if (scope == DependencyScope.SYSTEM
+            if ((scope == DependencyScope.SYSTEM)
                     && StringUtils.hasText(systemPath)) {
                 dependencyElement.appendChild(XmlUtils.createTextElement(
                         document, "systemPath", systemPath));
@@ -431,6 +362,60 @@ public class Dependency implements Comparable<Dependency> {
     }
 
     /**
+     * @return list of exclusions (never null)
+     */
+    public List<Dependency> getExclusions() {
+        return exclusions;
+    }
+
+    public String getGroupId() {
+        return groupId;
+    }
+
+    public DependencyScope getScope() {
+        return scope;
+    }
+
+    /**
+     * @return a simple description, as would be used for console output
+     */
+    public String getSimpleDescription() {
+        return groupId + ":" + artifactId + ":" + version
+                + (StringUtils.hasText(classifier) ? ":" + classifier : "");
+    }
+
+    public String getSystemPath() {
+        return systemPath;
+    }
+
+    public DependencyType getType() {
+        return type;
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    @Deprecated
+    public String getVersionId() {
+        return version;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = (prime * result)
+                + ((artifactId == null) ? 0 : artifactId.hashCode());
+        result = (prime * result)
+                + ((groupId == null) ? 0 : groupId.hashCode());
+        result = (prime * result)
+                + ((classifier == null) ? 0 : classifier.hashCode());
+        result = (prime * result) + ((type == null) ? 0 : type.hashCode());
+        return result;
+    }
+
+    /**
      * Indicates whether the given {@link Dependency} has the same Maven
      * coordinates as this one; this is not necessarily the same as calling
      * {@link #equals(Object)}, which may compare more fields beyond the basic
@@ -440,6 +425,20 @@ public class Dependency implements Comparable<Dependency> {
      * @return <code>false</code> if any coordinates are different
      */
     public boolean hasSameCoordinates(final Dependency dependency) {
-        return dependency != null && compareCoordinates(dependency) == 0;
+        return (dependency != null) && (compareCoordinates(dependency) == 0);
+    }
+
+    @Override
+    public String toString() {
+        final ToStringCreator tsc = new ToStringCreator(this);
+        tsc.append("groupId", groupId);
+        tsc.append("artifactId", artifactId);
+        tsc.append("version", version);
+        tsc.append("type", type);
+        tsc.append("scope", scope);
+        if (classifier != null) {
+            tsc.append("classifier", classifier);
+        }
+        return tsc.toString();
     }
 }

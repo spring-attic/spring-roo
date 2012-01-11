@@ -23,7 +23,7 @@ public class FileMonitoringRequest extends MonitoringRequest {
 
     @Override
     public String toString() {
-        ToStringCreator tsc = new ToStringCreator(this);
+        final ToStringCreator tsc = new ToStringCreator(this);
         tsc.append("resource", getFile());
         tsc.append("notifyOn", getNotifyOn());
         return tsc.toString();

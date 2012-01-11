@@ -18,7 +18,7 @@ public class DefaultFilenameResolver implements FilenameResolver {
         try {
             return file.getCanonicalPath();
         }
-        catch (IOException ioe) {
+        catch (final IOException ioe) {
             throw new IllegalStateException("Could not resolve filename for '"
                     + file + "'", ioe);
         }

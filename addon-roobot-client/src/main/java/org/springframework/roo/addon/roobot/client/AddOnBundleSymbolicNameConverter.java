@@ -24,7 +24,6 @@ import org.springframework.roo.shell.MethodTarget;
 public class AddOnBundleSymbolicNameConverter implements
         Converter<AddOnBundleSymbolicName> {
 
-    // Fields
     @Reference private AddOnRooBotOperations addonManagerOperations;
 
     public AddOnBundleSymbolicName convertFromText(final String value,

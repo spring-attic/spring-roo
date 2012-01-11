@@ -14,10 +14,9 @@ import org.springframework.roo.support.util.Assert;
  */
 public class MonitoringRequestCommand implements CommandCallback<Boolean> {
 
-    // Fields
+    private final boolean add;
     private final FileMonitorService fileMonitorService;
     private final MonitoringRequest monitoringRequest;
-    private final boolean add;
 
     public MonitoringRequestCommand(
             final FileMonitorService fileMonitorService,
@@ -32,12 +31,12 @@ public class MonitoringRequestCommand implements CommandCallback<Boolean> {
     public Boolean callback() {
         boolean result;
         if (add) {
-            result = this.fileMonitorService.add(monitoringRequest);
+            result = fileMonitorService.add(monitoringRequest);
         }
         else {
-            result = this.fileMonitorService.remove(monitoringRequest);
+            result = fileMonitorService.remove(monitoringRequest);
         }
-        this.fileMonitorService.scanAll();
+        fileMonitorService.scanAll();
         return result;
     }
 }

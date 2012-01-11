@@ -56,9 +56,8 @@ public class LogicalPath {
         return new LogicalPath(module, path);
     }
 
-    // Fields
-    private final Path path;
     private final String module;
+    private final Path path;
 
     /**
      * Constructor
@@ -70,6 +69,28 @@ public class LogicalPath {
         Assert.notNull(path, "Path required");
         this.module = StringUtils.trimToEmpty(module);
         this.path = path;
+    }
+
+    public int compareTo(final LogicalPath o) {
+        if (o == null) {
+            throw new NullPointerException();
+        }
+        return getName().compareTo(o.getName());
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        return (obj instanceof LogicalPath)
+                && (compareTo((LogicalPath) obj) == 0);
+    }
+
+    /**
+     * Returns the name of the module containing this path, if any
+     * 
+     * @return a non-<code>null</code> name (might be empty)
+     */
+    public String getModule() {
+        return module;
     }
 
     /**
@@ -96,35 +117,18 @@ public class LogicalPath {
     }
 
     /**
-     * Returns the name of the module containing this path, if any
+     * Returns the physical path of this logical path relative to the given POM
      * 
-     * @return a non-<code>null</code> name (might be empty)
+     * @param pom can be <code>null</code>
+     * @return a non-<code>null</code> path
      */
-    public String getModule() {
-        return module;
+    public String getPathRelativeToPom(final Pom pom) {
+        return path.getPathRelativeToPom(pom);
     }
 
     @Override
     public int hashCode() {
         return getName().hashCode();
-    }
-
-    @Override
-    public boolean equals(final Object obj) {
-        return obj instanceof LogicalPath
-                && this.compareTo((LogicalPath) obj) == 0;
-    }
-
-    public int compareTo(final LogicalPath o) {
-        if (o == null) {
-            throw new NullPointerException();
-        }
-        return getName().compareTo(o.getName());
-    }
-
-    @Override
-    public final String toString() {
-        return getName();
     }
 
     /**
@@ -145,13 +149,8 @@ public class LogicalPath {
         return isModuleRoot() && StringUtils.isBlank(module);
     }
 
-    /**
-     * Returns the physical path of this logical path relative to the given POM
-     * 
-     * @param pom can be <code>null</code>
-     * @return a non-<code>null</code> path
-     */
-    public String getPathRelativeToPom(final Pom pom) {
-        return path.getPathRelativeToPom(pom);
+    @Override
+    public final String toString() {
+        return getName();
     }
 }

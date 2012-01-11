@@ -20,7 +20,6 @@ import org.springframework.roo.shell.CommandMarker;
 @Service
 public class RepositoryJpaCommands implements CommandMarker {
 
-    // Fields
     @Reference private RepositoryJpaOperations repositoryJpaOperations;
 
     @CliAvailabilityIndicator("repository jpa")

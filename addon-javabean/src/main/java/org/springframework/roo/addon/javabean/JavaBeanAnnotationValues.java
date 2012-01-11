@@ -14,7 +14,6 @@ import org.springframework.roo.model.RooJavaType;
  */
 public class JavaBeanAnnotationValues extends AbstractAnnotationValues {
 
-    // From annotation
     @AutoPopulate private boolean gettersByDefault = true;
     @AutoPopulate private boolean settersByDefault = true;
 

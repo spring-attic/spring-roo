@@ -16,18 +16,6 @@ public class Schema {
                 DbreModelService.NO_SCHEMA_REQUIRED);
     }
 
-    public String getName() {
-        return name;
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + name.hashCode();
-        return result;
-    }
-
     @Override
     public boolean equals(final Object obj) {
         if (this == obj) {
@@ -39,7 +27,7 @@ public class Schema {
         if (!(obj instanceof Schema)) {
             return false;
         }
-        Schema other = (Schema) obj;
+        final Schema other = (Schema) obj;
         if (name == null) {
             if (other.name != null) {
                 return false;
@@ -49,6 +37,18 @@ public class Schema {
             return false;
         }
         return true;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = (prime * result) + name.hashCode();
+        return result;
     }
 
     @Override

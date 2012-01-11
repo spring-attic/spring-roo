@@ -13,7 +13,6 @@ import org.springframework.roo.classpath.details.annotations.populator.AutoPopul
  */
 public class PluralAnnotationValues extends AbstractAnnotationValues {
 
-    // Fields
     @AutoPopulate private String value = "";
 
     /**

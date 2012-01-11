@@ -30,11 +30,31 @@ public class ConfigurableMetadataProviderImpl extends
         addMetadataTrigger(ROO_CONFIGURABLE);
     }
 
+    @Override
+    protected String createLocalIdentifier(final JavaType javaType,
+            final LogicalPath path) {
+        return ConfigurableMetadata.createIdentifier(javaType, path);
+    }
+
     protected void deactivate(final ComponentContext context) {
         metadataDependencyRegistry.deregisterDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
                 getProvidesType());
         removeMetadataTrigger(ROO_CONFIGURABLE);
+    }
+
+    @Override
+    protected String getGovernorPhysicalTypeIdentifier(
+            final String metadataIdentificationString) {
+        final JavaType javaType = ConfigurableMetadata
+                .getJavaType(metadataIdentificationString);
+        final LogicalPath path = ConfigurableMetadata
+                .getPath(metadataIdentificationString);
+        return PhysicalTypeIdentifier.createIdentifier(javaType, path);
+    }
+
+    public String getItdUniquenessFilenameSuffix() {
+        return "Configurable";
     }
 
     @Override
@@ -45,26 +65,6 @@ public class ConfigurableMetadataProviderImpl extends
             final String itdFilename) {
         return new ConfigurableMetadata(metadataIdentificationString,
                 aspectName, governorPhysicalTypeMetadata);
-    }
-
-    public String getItdUniquenessFilenameSuffix() {
-        return "Configurable";
-    }
-
-    @Override
-    protected String getGovernorPhysicalTypeIdentifier(
-            final String metadataIdentificationString) {
-        JavaType javaType = ConfigurableMetadata
-                .getJavaType(metadataIdentificationString);
-        LogicalPath path = ConfigurableMetadata
-                .getPath(metadataIdentificationString);
-        return PhysicalTypeIdentifier.createIdentifier(javaType, path);
-    }
-
-    @Override
-    protected String createLocalIdentifier(final JavaType javaType,
-            final LogicalPath path) {
-        return ConfigurableMetadata.createIdentifier(javaType, path);
     }
 
     public String getProvidesType() {

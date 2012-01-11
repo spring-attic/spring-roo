@@ -84,14 +84,14 @@ public enum RepositoryJpaLayerMethod {
     FIND("find", FIND_METHOD) {
 
         @Override
-        protected List<JavaType> getParameterTypes(final JavaType entityType,
-                final JavaType idType) {
-            return Arrays.asList(idType);
+        public String getCall(final List<MethodParameter> parameters) {
+            return "findOne(" + parameters.get(0).getValue() + ")";
         }
 
         @Override
-        public String getCall(final List<MethodParameter> parameters) {
-            return "findOne(" + parameters.get(0).getValue() + ")";
+        protected List<JavaType> getParameterTypes(final JavaType entityType,
+                final JavaType idType) {
+            return Arrays.asList(idType);
         }
     },
 
@@ -194,7 +194,6 @@ public enum RepositoryJpaLayerMethod {
         return null;
     }
 
-    // Fields
     private final List<String> ids;
     private final String name;
 
@@ -208,9 +207,9 @@ public enum RepositoryJpaLayerMethod {
             final MethodMetadataCustomDataKey... keys) {
         Assert.hasText(name, "Name is required");
         Assert.isTrue(keys.length > 0, "One or more ids are required");
-        this.ids = new ArrayList<String>();
+        ids = new ArrayList<String>();
         for (final MethodMetadataCustomDataKey key : keys) {
-            this.ids.add(key.name());
+            ids.add(key.name());
         }
         this.name = name;
     }
@@ -230,7 +229,7 @@ public enum RepositoryJpaLayerMethod {
      * @return a non-blank name
      */
     public String getName() {
-        return this.name;
+        return name;
     }
 
     /**

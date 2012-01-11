@@ -32,7 +32,7 @@ public class DefaultConstructorMetadata extends AbstractInvocableMemberMetadata
 
     @Override
     public String toString() {
-        ToStringCreator tsc = new ToStringCreator(this);
+        final ToStringCreator tsc = new ToStringCreator(this);
         tsc.append("declaredByMetadataId", getDeclaredByMetadataId());
         tsc.append("modifier", Modifier.toString(getModifier()));
         tsc.append("parameterTypes", getParameterTypes());

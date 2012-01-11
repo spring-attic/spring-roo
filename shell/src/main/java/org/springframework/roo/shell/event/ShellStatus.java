@@ -15,7 +15,6 @@ import org.springframework.roo.shell.ParseResult;
  */
 public class ShellStatus {
 
-    // Fields
     private final Status status;
     private String message = "";
     private ParseResult parseResult;

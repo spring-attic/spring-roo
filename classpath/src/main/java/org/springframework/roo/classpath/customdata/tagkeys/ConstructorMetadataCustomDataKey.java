@@ -18,8 +18,8 @@ public class ConstructorMetadataCustomDataKey extends
     }
 
     @Override
-    public String toString() {
-        return name;
+    public boolean meets(final ConstructorMetadata constructor) {
+        return super.meets(constructor);
     }
 
     public String name() {
@@ -27,7 +27,7 @@ public class ConstructorMetadataCustomDataKey extends
     }
 
     @Override
-    public boolean meets(final ConstructorMetadata constructor) {
-        return super.meets(constructor);
+    public String toString() {
+        return name;
     }
 }

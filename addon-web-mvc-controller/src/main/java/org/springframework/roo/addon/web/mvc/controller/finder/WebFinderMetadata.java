@@ -54,18 +54,45 @@ import org.springframework.roo.support.util.StringUtils;
 public class WebFinderMetadata extends
         AbstractItdTypeDetailsProvidingMetadataItem {
 
-    // Constants
     private static final String PROVIDES_TYPE_STRING = WebFinderMetadata.class
             .getName();
     private static final String PROVIDES_TYPE = MetadataIdentificationUtils
             .create(PROVIDES_TYPE_STRING);
 
-    // Fields
-    private JavaType formBackingType;
-    private JavaTypeMetadataDetails javaTypeMetadataHolder;
-    private Map<JavaType, JavaTypeMetadataDetails> specialDomainTypes;
-    private String controllerPath;
+    public static String createIdentifier(final JavaType javaType,
+            final LogicalPath path) {
+        return PhysicalTypeIdentifierNamingUtils.createIdentifier(
+                PROVIDES_TYPE_STRING, javaType, path);
+    }
+
+    public static JavaType getJavaType(final String metadataIdentificationString) {
+        return PhysicalTypeIdentifierNamingUtils.getJavaType(
+                PROVIDES_TYPE_STRING, metadataIdentificationString);
+    }
+
+    public static String getMetadataIdentiferType() {
+        return PROVIDES_TYPE;
+    }
+
+    public static LogicalPath getPath(final String metadataIdentificationString) {
+        return PhysicalTypeIdentifierNamingUtils.getPath(PROVIDES_TYPE_STRING,
+                metadataIdentificationString);
+    }
+
+    public static boolean isValid(final String metadataIdentificationString) {
+        return PhysicalTypeIdentifierNamingUtils.isValid(PROVIDES_TYPE_STRING,
+                metadataIdentificationString);
+    }
+
     private WebScaffoldAnnotationValues annotationValues;
+
+    private String controllerPath;
+
+    private JavaType formBackingType;
+
+    private JavaTypeMetadataDetails javaTypeMetadataHolder;
+
+    private Map<JavaType, JavaTypeMetadataDetails> specialDomainTypes;
 
     /**
      * Constructor
@@ -96,8 +123,8 @@ public class WebFinderMetadata extends
         }
 
         this.annotationValues = annotationValues;
-        this.controllerPath = annotationValues.getPath();
-        this.formBackingType = annotationValues.getFormBackingObject();
+        controllerPath = annotationValues.getPath();
+        formBackingType = annotationValues.getFormBackingObject();
         this.specialDomainTypes = specialDomainTypes;
 
         if (dynamicFinderMethods.isEmpty()) {
@@ -110,7 +137,7 @@ public class WebFinderMetadata extends
                 "Metadata holder required for form backing type: "
                         + formBackingType);
 
-        for (FinderMetadataDetails finder : dynamicFinderMethods) {
+        for (final FinderMetadataDetails finder : dynamicFinderMethods) {
             builder.addMethod(getFinderFormMethod(finder));
             builder.addMethod(getFinderMethod(finder));
         }
@@ -125,31 +152,32 @@ public class WebFinderMetadata extends
     private MethodMetadataBuilder getFinderFormMethod(
             final FinderMetadataDetails finder) {
         Assert.notNull(finder, "Method metadata required for finder");
-        JavaSymbolName finderFormMethodName = new JavaSymbolName(finder
+        final JavaSymbolName finderFormMethodName = new JavaSymbolName(finder
                 .getFinderMethodMetadata().getMethodName().getSymbolName()
                 + "Form");
 
-        List<JavaType> parameterTypes = new ArrayList<JavaType>();
-        List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
-        List<JavaType> types = AnnotatedJavaType
+        final List<JavaType> parameterTypes = new ArrayList<JavaType>();
+        final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+        final List<JavaType> types = AnnotatedJavaType
                 .convertFromAnnotatedJavaTypes(finder.getFinderMethodMetadata()
                         .getParameterTypes());
 
-        InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+        final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
         boolean needmodel = false;
-        for (JavaType javaType : types) {
-            JavaTypeMetadataDetails typeMd = specialDomainTypes.get(javaType);
+        for (final JavaType javaType : types) {
+            final JavaTypeMetadataDetails typeMd = specialDomainTypes
+                    .get(javaType);
             JavaTypePersistenceMetadataDetails javaTypePersistenceMetadataHolder = null;
             if (javaType.isCommonCollectionType()) {
-                JavaTypeMetadataDetails paramTypeMd = specialDomainTypes
+                final JavaTypeMetadataDetails paramTypeMd = specialDomainTypes
                         .get(javaType.getParameters().get(0));
-                if (paramTypeMd != null && paramTypeMd.isApplicationType()) {
+                if ((paramTypeMd != null) && paramTypeMd.isApplicationType()) {
                     javaTypePersistenceMetadataHolder = paramTypeMd
                             .getPersistenceDetails();
                 }
             }
-            else if (typeMd != null && typeMd.isEnumType()) {
+            else if ((typeMd != null) && typeMd.isEnumType()) {
                 bodyBuilder.appendFormalLine("uiModel.addAttribute(\""
                         + typeMd.getPlural().toLowerCase()
                         + "\", java.util.Arrays.asList("
@@ -157,13 +185,13 @@ public class WebFinderMetadata extends
                                 builder.getImportRegistrationResolver())
                         + ".class.getEnumConstants()));");
             }
-            else if (typeMd != null && typeMd.isApplicationType()) {
+            else if ((typeMd != null) && typeMd.isApplicationType()) {
                 javaTypePersistenceMetadataHolder = typeMd
                         .getPersistenceDetails();
             }
-            if (typeMd != null
-                    && javaTypePersistenceMetadataHolder != null
-                    && javaTypePersistenceMetadataHolder.getFindAllMethod() != null) {
+            if ((typeMd != null)
+                    && (javaTypePersistenceMetadataHolder != null)
+                    && (javaTypePersistenceMetadataHolder.getFindAllMethod() != null)) {
                 bodyBuilder.appendFormalLine("uiModel.addAttribute(\""
                         + typeMd.getPlural().toLowerCase()
                         + "\", "
@@ -190,8 +218,8 @@ public class WebFinderMetadata extends
             return null;
         }
 
-        List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
-        List<StringAttributeValue> arrayValues = new ArrayList<StringAttributeValue>();
+        final List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
+        final List<StringAttributeValue> arrayValues = new ArrayList<StringAttributeValue>();
         arrayValues.add(new StringAttributeValue(new JavaSymbolName("value"),
                 "find="
                         + finder.getFinderMethodMetadata()
@@ -209,12 +237,12 @@ public class WebFinderMetadata extends
         requestMappingAttributes.add(new EnumAttributeValue(new JavaSymbolName(
                 "method"), new EnumDetails(REQUEST_METHOD, new JavaSymbolName(
                 "GET"))));
-        AnnotationMetadataBuilder requestMapping = new AnnotationMetadataBuilder(
+        final AnnotationMetadataBuilder requestMapping = new AnnotationMetadataBuilder(
                 REQUEST_MAPPING, requestMappingAttributes);
-        List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+        final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
         annotations.add(requestMapping);
 
-        MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(
+        final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(
                 getId(), Modifier.PUBLIC, finderFormMethodName,
                 JavaType.STRING,
                 AnnotatedJavaType.convertFromJavaTypes(parameterTypes),
@@ -227,22 +255,22 @@ public class WebFinderMetadata extends
             final FinderMetadataDetails finderMetadataDetails) {
         Assert.notNull(finderMetadataDetails,
                 "Method metadata required for finder");
-        JavaSymbolName finderMethodName = new JavaSymbolName(
+        final JavaSymbolName finderMethodName = new JavaSymbolName(
                 finderMetadataDetails.getFinderMethodMetadata().getMethodName()
                         .getSymbolName());
 
-        List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
-        List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+        final List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+        final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
 
-        InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-        StringBuilder methodParams = new StringBuilder();
+        final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+        final StringBuilder methodParams = new StringBuilder();
 
         boolean dateFieldPresent = false;
-        for (FieldMetadata field : finderMetadataDetails
+        for (final FieldMetadata field : finderMetadataDetails
                 .getFinderMethodParamFields()) {
-            JavaSymbolName fieldName = field.getFieldName();
-            List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
-            List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
+            final JavaSymbolName fieldName = field.getFieldName();
+            final List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
+            final List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
             attributes.add(new StringAttributeValue(
                     new JavaSymbolName("value"), uncapitalize(fieldName
                             .getSymbolName())));
@@ -251,13 +279,13 @@ public class WebFinderMetadata extends
                 attributes.add(new BooleanAttributeValue(new JavaSymbolName(
                         "required"), false));
             }
-            AnnotationMetadataBuilder requestParamAnnotation = new AnnotationMetadataBuilder(
+            final AnnotationMetadataBuilder requestParamAnnotation = new AnnotationMetadataBuilder(
                     REQUEST_PARAM, attributes);
             annotations.add(requestParamAnnotation.build());
             if (field.getFieldType().equals(DATE)
                     || field.getFieldType().equals(CALENDAR)) {
                 dateFieldPresent = true;
-                AnnotationMetadata annotation = MemberFindingUtils
+                final AnnotationMetadata annotation = MemberFindingUtils
                         .getAnnotationOfType(field.getAnnotations(),
                                 DATE_TIME_FORMAT);
                 if (annotation != null) {
@@ -290,11 +318,11 @@ public class WebFinderMetadata extends
             return null;
         }
 
-        List<JavaSymbolName> newParamNames = new ArrayList<JavaSymbolName>();
+        final List<JavaSymbolName> newParamNames = new ArrayList<JavaSymbolName>();
         newParamNames.addAll(parameterNames);
         newParamNames.add(new JavaSymbolName("uiModel"));
 
-        List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
+        final List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
         requestMappingAttributes.add(new StringAttributeValue(
                 new JavaSymbolName("params"), "find="
                         + finderMetadataDetails
@@ -308,9 +336,9 @@ public class WebFinderMetadata extends
         requestMappingAttributes.add(new EnumAttributeValue(new JavaSymbolName(
                 "method"), new EnumDetails(REQUEST_METHOD, new JavaSymbolName(
                 "GET"))));
-        AnnotationMetadataBuilder requestMapping = new AnnotationMetadataBuilder(
+        final AnnotationMetadataBuilder requestMapping = new AnnotationMetadataBuilder(
                 REQUEST_MAPPING, requestMappingAttributes);
-        List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+        final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
         annotations.add(requestMapping);
 
         bodyBuilder.appendFormalLine("uiModel.addAttribute(\""
@@ -327,22 +355,16 @@ public class WebFinderMetadata extends
         }
         bodyBuilder.appendFormalLine("return \"" + controllerPath + "/list\";");
 
-        MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(
+        final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(
                 getId(), Modifier.PUBLIC, finderMethodName, JavaType.STRING,
                 parameterTypes, newParamNames, bodyBuilder);
         methodBuilder.setAnnotations(annotations);
         return methodBuilder;
     }
 
-    private String uncapitalize(final String term) {
-        // [ROO-1790] this is needed to adhere to the JavaBean naming
-        // conventions (see JavaBean spec section 8.8)
-        return Introspector.decapitalize(StringUtils.capitalize(term));
-    }
-
     @Override
     public String toString() {
-        ToStringCreator tsc = new ToStringCreator(this);
+        final ToStringCreator tsc = new ToStringCreator(this);
         tsc.append("identifier", getId());
         tsc.append("valid", valid);
         tsc.append("aspectName", aspectName);
@@ -352,28 +374,9 @@ public class WebFinderMetadata extends
         return tsc.toString();
     }
 
-    public static String getMetadataIdentiferType() {
-        return PROVIDES_TYPE;
-    }
-
-    public static String createIdentifier(final JavaType javaType,
-            final LogicalPath path) {
-        return PhysicalTypeIdentifierNamingUtils.createIdentifier(
-                PROVIDES_TYPE_STRING, javaType, path);
-    }
-
-    public static JavaType getJavaType(final String metadataIdentificationString) {
-        return PhysicalTypeIdentifierNamingUtils.getJavaType(
-                PROVIDES_TYPE_STRING, metadataIdentificationString);
-    }
-
-    public static LogicalPath getPath(final String metadataIdentificationString) {
-        return PhysicalTypeIdentifierNamingUtils.getPath(PROVIDES_TYPE_STRING,
-                metadataIdentificationString);
-    }
-
-    public static boolean isValid(final String metadataIdentificationString) {
-        return PhysicalTypeIdentifierNamingUtils.isValid(PROVIDES_TYPE_STRING,
-                metadataIdentificationString);
+    private String uncapitalize(final String term) {
+        // [ROO-1790] this is needed to adhere to the JavaBean naming
+        // conventions (see JavaBean spec section 8.8)
+        return Introspector.decapitalize(StringUtils.capitalize(term));
     }
 }

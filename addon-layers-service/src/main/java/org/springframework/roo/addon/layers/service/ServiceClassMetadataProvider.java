@@ -38,10 +38,8 @@ import org.springframework.roo.project.LogicalPath;
 public class ServiceClassMetadataProvider extends
         AbstractMemberDiscoveringItdMetadataProvider {
 
-    // Constants
     private static final int LAYER_POSITION = LayerType.SERVICE.getPosition();
 
-    // Fields
     @Reference private LayerService layerService;
     private final Map<JavaType, String> managedEntityTypes = new HashMap<JavaType, String>();
 
@@ -53,11 +51,31 @@ public class ServiceClassMetadataProvider extends
         setIgnoreTriggerAnnotations(true);
     }
 
+    @Override
+    protected String createLocalIdentifier(final JavaType javaType,
+            final LogicalPath path) {
+        return ServiceClassMetadata.createIdentifier(javaType, path);
+    }
+
     protected void deactivate(final ComponentContext context) {
         metadataDependencyRegistry.removeNotificationListener(this);
         metadataDependencyRegistry.deregisterDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
                 getProvidesType());
+    }
+
+    @Override
+    protected String getGovernorPhysicalTypeIdentifier(
+            final String metadataIdentificationString) {
+        final JavaType javaType = ServiceClassMetadata
+                .getJavaType(metadataIdentificationString);
+        final LogicalPath path = ServiceClassMetadata
+                .getPath(metadataIdentificationString);
+        return PhysicalTypeIdentifier.createIdentifier(javaType, path);
+    }
+
+    public String getItdUniquenessFilenameSuffix() {
+        return "Service";
     }
 
     @Override
@@ -97,10 +115,10 @@ public class ServiceClassMetadataProvider extends
         }
         ServiceInterfaceMetadata serviceInterfaceMetadata = null;
         for (final JavaType implementedType : serviceClass.getImplementsTypes()) {
-            ClassOrInterfaceTypeDetails potentialServiceInterfaceTypeDetails = typeLocationService
+            final ClassOrInterfaceTypeDetails potentialServiceInterfaceTypeDetails = typeLocationService
                     .getTypeDetails(implementedType);
             if (potentialServiceInterfaceTypeDetails != null) {
-                LogicalPath path = PhysicalTypeIdentifier
+                final LogicalPath path = PhysicalTypeIdentifier
                         .getPath(potentialServiceInterfaceTypeDetails
                                 .getDeclaredByMetadataId());
                 final String implementedTypeId = ServiceInterfaceMetadata
@@ -112,7 +130,7 @@ public class ServiceClassMetadataProvider extends
                 }
             }
         }
-        if (serviceInterfaceMetadata == null
+        if ((serviceInterfaceMetadata == null)
                 || !serviceInterfaceMetadata.isValid()) {
             return null;
         }
@@ -149,13 +167,13 @@ public class ServiceClassMetadataProvider extends
             domainTypeToIdTypeMap.put(domainType, idType);
             // Collect the plural for this domain type
 
-            ClassOrInterfaceTypeDetails domainTypeDetails = typeLocationService
+            final ClassOrInterfaceTypeDetails domainTypeDetails = typeLocationService
                     .getTypeDetails(domainType);
             if (domainTypeDetails == null) {
                 return null;
             }
-            LogicalPath path = PhysicalTypeIdentifier.getPath(domainTypeDetails
-                    .getDeclaredByMetadataId());
+            final LogicalPath path = PhysicalTypeIdentifier
+                    .getPath(domainTypeDetails.getDeclaredByMetadataId());
             final String pluralId = PluralMetadata.createIdentifier(domainType,
                     path);
             final PluralMetadata pluralMetadata = (PluralMetadata) metadataService
@@ -201,27 +219,7 @@ public class ServiceClassMetadataProvider extends
                 allCrudAdditions, domainTypePlurals);
     }
 
-    public String getItdUniquenessFilenameSuffix() {
-        return "Service";
-    }
-
     public String getProvidesType() {
         return ServiceClassMetadata.getMetadataIdentiferType();
-    }
-
-    @Override
-    protected String createLocalIdentifier(final JavaType javaType,
-            final LogicalPath path) {
-        return ServiceClassMetadata.createIdentifier(javaType, path);
-    }
-
-    @Override
-    protected String getGovernorPhysicalTypeIdentifier(
-            final String metadataIdentificationString) {
-        JavaType javaType = ServiceClassMetadata
-                .getJavaType(metadataIdentificationString);
-        LogicalPath path = ServiceClassMetadata
-                .getPath(metadataIdentificationString);
-        return PhysicalTypeIdentifier.createIdentifier(javaType, path);
     }
 }

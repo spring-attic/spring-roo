@@ -34,7 +34,6 @@ import org.springframework.roo.project.LogicalPath;
 public class WebFinderMetadataProviderImpl extends AbstractItdMetadataProvider
         implements WebFinderMetadataProvider {
 
-    // Fields
     @Reference private WebMetadataService webMetadataService;
 
     protected void activate(final ComponentContext context) {
@@ -44,11 +43,31 @@ public class WebFinderMetadataProviderImpl extends AbstractItdMetadataProvider
         addMetadataTrigger(ROO_WEB_FINDER);
     }
 
+    @Override
+    protected String createLocalIdentifier(final JavaType javaType,
+            final LogicalPath path) {
+        return WebFinderMetadata.createIdentifier(javaType, path);
+    }
+
     protected void deactivate(final ComponentContext context) {
         metadataDependencyRegistry.deregisterDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
                 getProvidesType());
         removeMetadataTrigger(ROO_WEB_FINDER);
+    }
+
+    @Override
+    protected String getGovernorPhysicalTypeIdentifier(
+            final String metadataIdentificationString) {
+        final JavaType javaType = WebFinderMetadata
+                .getJavaType(metadataIdentificationString);
+        final LogicalPath path = WebFinderMetadata
+                .getPath(metadataIdentificationString);
+        return PhysicalTypeIdentifier.createIdentifier(javaType, path);
+    }
+
+    public String getItdUniquenessFilenameSuffix() {
+        return "Controller_Finder";
     }
 
     @Override
@@ -62,8 +81,8 @@ public class WebFinderMetadataProviderImpl extends AbstractItdMetadataProvider
                 governorPhysicalTypeMetadata);
         if (!annotationValues.isAnnotationFound()
                 || !annotationValues.isExposeFinders()
-                || annotationValues.getFormBackingObject() == null
-                || governorPhysicalTypeMetadata.getMemberHoldingTypeDetails() == null) {
+                || (annotationValues.getFormBackingObject() == null)
+                || (governorPhysicalTypeMetadata.getMemberHoldingTypeDetails() == null)) {
             return null;
         }
 
@@ -72,7 +91,7 @@ public class WebFinderMetadataProviderImpl extends AbstractItdMetadataProvider
                 .getFormBackingObject();
         final ClassOrInterfaceTypeDetails formBackingTypeDetails = typeLocationService
                 .getTypeDetails(formBackingType);
-        if (formBackingTypeDetails == null
+        if ((formBackingTypeDetails == null)
                 || !formBackingTypeDetails.getCustomData().keySet()
                         .contains(CustomDataKeys.PERSISTENT_TYPE)) {
             return null;
@@ -96,26 +115,6 @@ public class WebFinderMetadataProviderImpl extends AbstractItdMetadataProvider
         return new WebFinderMetadata(metadataIdentificationString, aspectName,
                 governorPhysicalTypeMetadata, annotationValues,
                 relatedApplicationTypeMetadata, dynamicFinderMethods);
-    }
-
-    public String getItdUniquenessFilenameSuffix() {
-        return "Controller_Finder";
-    }
-
-    @Override
-    protected String getGovernorPhysicalTypeIdentifier(
-            final String metadataIdentificationString) {
-        JavaType javaType = WebFinderMetadata
-                .getJavaType(metadataIdentificationString);
-        LogicalPath path = WebFinderMetadata
-                .getPath(metadataIdentificationString);
-        return PhysicalTypeIdentifier.createIdentifier(javaType, path);
-    }
-
-    @Override
-    protected String createLocalIdentifier(final JavaType javaType,
-            final LogicalPath path) {
-        return WebFinderMetadata.createIdentifier(javaType, path);
     }
 
     public String getProvidesType() {

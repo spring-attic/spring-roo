@@ -16,11 +16,10 @@ import org.springframework.roo.support.util.StringUtils;
  */
 public class MethodTarget {
 
-    // Fields
-    private final Method method;
-    private final Object target;
-    private final String remainingBuffer;
     private final String key;
+    private final Method method;
+    private final String remainingBuffer;
+    private final Object target;
 
     /**
      * Constructor for a <code>null remainingBuffer</code> and <code>key</code>
@@ -61,8 +60,38 @@ public class MethodTarget {
             return false;
         }
         final MethodTarget otherMethodTarget = (MethodTarget) other;
-        return this.method.equals(otherMethodTarget.getMethod())
-                && this.target.equals(otherMethodTarget.getTarget());
+        return method.equals(otherMethodTarget.getMethod())
+                && target.equals(otherMethodTarget.getTarget());
+    }
+
+    /**
+     * @since 1.2.0
+     */
+    public String getKey() {
+        return key;
+    }
+
+    /**
+     * @return a non-<code>null</code> method
+     * @since 1.2.0
+     */
+    public Method getMethod() {
+        return method;
+    }
+
+    /**
+     * @since 1.2.0
+     */
+    public String getRemainingBuffer() {
+        return remainingBuffer;
+    }
+
+    /**
+     * @return a non-<code>null</code> Object
+     * @since 1.2.0
+     */
+    public Object getTarget() {
+        return target;
     }
 
     @Override
@@ -78,35 +107,5 @@ public class MethodTarget {
         tsc.append("remainingBuffer", remainingBuffer);
         tsc.append("key", key);
         return tsc.toString();
-    }
-
-    /**
-     * @since 1.2.0
-     */
-    public String getKey() {
-        return this.key;
-    }
-
-    /**
-     * @return a non-<code>null</code> method
-     * @since 1.2.0
-     */
-    public Method getMethod() {
-        return this.method;
-    }
-
-    /**
-     * @since 1.2.0
-     */
-    public String getRemainingBuffer() {
-        return this.remainingBuffer;
-    }
-
-    /**
-     * @return a non-<code>null</code> Object
-     * @since 1.2.0
-     */
-    public Object getTarget() {
-        return this.target;
     }
 }

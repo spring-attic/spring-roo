@@ -20,7 +20,6 @@ import org.springframework.roo.support.util.Assert;
 public class DefaultMethodMetadata extends AbstractInvocableMemberMetadata
         implements MethodMetadata {
 
-    // Fields
     private final JavaSymbolName methodName;
     private final JavaType returnType;
 
@@ -40,16 +39,6 @@ public class DefaultMethodMetadata extends AbstractInvocableMemberMetadata
         this.returnType = returnType;
     }
 
-    public boolean hasSameName(final MethodMetadata... otherMethods) {
-        for (final MethodMetadata otherMethod : otherMethods) {
-            if (otherMethod != null
-                    && this.methodName.equals(otherMethod.getMethodName())) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     public JavaSymbolName getMethodName() {
         return methodName;
     }
@@ -58,9 +47,23 @@ public class DefaultMethodMetadata extends AbstractInvocableMemberMetadata
         return returnType;
     }
 
+    public boolean hasSameName(final MethodMetadata... otherMethods) {
+        for (final MethodMetadata otherMethod : otherMethods) {
+            if ((otherMethod != null)
+                    && methodName.equals(otherMethod.getMethodName())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean isStatic() {
+        return Modifier.isStatic(getModifier());
+    }
+
     @Override
     public String toString() {
-        ToStringCreator tsc = new ToStringCreator(this);
+        final ToStringCreator tsc = new ToStringCreator(this);
         tsc.append("declaredByMetadataId", getDeclaredByMetadataId());
         tsc.append("modifier", Modifier.toString(getModifier()));
         tsc.append("methodName", methodName);
@@ -72,9 +75,5 @@ public class DefaultMethodMetadata extends AbstractInvocableMemberMetadata
         tsc.append("customData", getCustomData());
         tsc.append("body", getBody());
         return tsc.toString();
-    }
-
-    public boolean isStatic() {
-        return Modifier.isStatic(getModifier());
     }
 }

@@ -18,9 +18,8 @@ import org.springframework.roo.support.util.Assert;
 public class DefaultPhysicalTypeDetails extends
         AbstractCustomDataAccessorProvider implements PhysicalTypeDetails {
 
-    // Fields
-    private final PhysicalTypeCategory physicalTypeCategory;
     private final JavaType javaType;
+    private final PhysicalTypeCategory physicalTypeCategory;
 
     public DefaultPhysicalTypeDetails(
             final PhysicalTypeCategory physicalTypeCategory,
@@ -32,12 +31,12 @@ public class DefaultPhysicalTypeDetails extends
         this.physicalTypeCategory = physicalTypeCategory;
     }
 
-    public PhysicalTypeCategory getPhysicalTypeCategory() {
-        return physicalTypeCategory;
-    }
-
     public JavaType getName() {
         return getType();
+    }
+
+    public PhysicalTypeCategory getPhysicalTypeCategory() {
+        return physicalTypeCategory;
     }
 
     public JavaType getType() {

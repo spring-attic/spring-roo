@@ -29,18 +29,13 @@ import org.springframework.roo.support.util.Assert;
 public class SerializableMetadata extends
         AbstractItdTypeDetailsProvidingMetadataItem {
 
-    // Constants
-    static final JavaSymbolName SERIAL_VERSION_FIELD = new JavaSymbolName(
-            "serialVersionUID");
     private static final String DEFAULT_SERIAL_VERSION = "1L";
     private static final String PROVIDES_TYPE_STRING = SerializableMetadata.class
             .getName();
     private static final String PROVIDES_TYPE = MetadataIdentificationUtils
             .create(PROVIDES_TYPE_STRING);
-
-    public static String getMetadataIdentiferType() {
-        return PROVIDES_TYPE;
-    }
+    static final JavaSymbolName SERIAL_VERSION_FIELD = new JavaSymbolName(
+            "serialVersionUID");
 
     public static String createIdentifier(final JavaType javaType,
             final LogicalPath path) {
@@ -51,6 +46,10 @@ public class SerializableMetadata extends
     public static JavaType getJavaType(final String metadataIdentificationString) {
         return PhysicalTypeIdentifierNamingUtils.getJavaType(
                 PROVIDES_TYPE_STRING, metadataIdentificationString);
+    }
+
+    public static String getMetadataIdentiferType() {
+        return PROVIDES_TYPE;
     }
 
     public static LogicalPath getPath(final String metadataIdentificationString) {
@@ -114,12 +113,12 @@ public class SerializableMetadata extends
      * @return
      */
     ItdTypeDetails getItdTypeDetails() {
-        return this.itdTypeDetails;
+        return itdTypeDetails;
     }
 
     @Override
     public String toString() {
-        ToStringCreator tsc = new ToStringCreator(this);
+        final ToStringCreator tsc = new ToStringCreator(this);
         tsc.append("identifier", getId());
         tsc.append("valid", valid);
         tsc.append("aspectName", aspectName);

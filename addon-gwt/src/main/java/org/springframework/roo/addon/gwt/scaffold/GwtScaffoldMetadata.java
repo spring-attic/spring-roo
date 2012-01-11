@@ -17,19 +17,10 @@ import org.springframework.roo.project.LogicalPath;
  */
 public class GwtScaffoldMetadata extends AbstractMetadataItem {
 
-    // Constants
     private static final String PROVIDES_TYPE_STRING = GwtScaffoldMetadata.class
             .getName();
     private static final String PROVIDES_TYPE = MetadataIdentificationUtils
             .create(PROVIDES_TYPE_STRING);
-
-    public GwtScaffoldMetadata(final String id) {
-        super(id);
-    }
-
-    public static String getMetadataIdentifierType() {
-        return PROVIDES_TYPE;
-    }
 
     public static String createIdentifier(final JavaType javaType,
             final LogicalPath path) {
@@ -42,8 +33,16 @@ public class GwtScaffoldMetadata extends AbstractMetadataItem {
                 PROVIDES_TYPE_STRING, metadataIdentificationString);
     }
 
+    public static String getMetadataIdentifierType() {
+        return PROVIDES_TYPE;
+    }
+
     public static LogicalPath getPath(final String metadataIdentificationString) {
         return PhysicalTypeIdentifierNamingUtils.getPath(PROVIDES_TYPE_STRING,
                 metadataIdentificationString);
+    }
+
+    public GwtScaffoldMetadata(final String id) {
+        super(id);
     }
 }

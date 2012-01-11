@@ -21,9 +21,8 @@ import org.springframework.roo.shell.converters.StaticFieldConverter;
 @Service
 public class AddOnCommands implements CommandMarker {
 
-    // Fields
-    @Reference private AddOnRooBotOperations addOnRooBotOperations;
     @Reference private AddOnFeedbackOperations addOnfeedbackOperations;
+    @Reference private AddOnRooBotOperations addOnRooBotOperations;
     @Reference private StaticFieldConverter staticFieldConverter;
 
     protected void activate(final ComponentContext context) {
@@ -34,11 +33,13 @@ public class AddOnCommands implements CommandMarker {
         staticFieldConverter.remove(Rating.class);
     }
 
-    @CliCommand(value = "addon info id", help = "Provide information about a specific Spring Roo Add-on")
-    public void infoId(
-            @CliOption(key = { "", "searchResultId" }, mandatory = true, help = "The bundle ID as presented via the addon list or addon search command") final String bundleId) {
+    @CliCommand(value = "addon feedback bundle", help = "Provide anonymous ratings and comments on a Spring Roo Add-on (your feedback will be published publicly)")
+    public void feedbackBundle(
+            @CliOption(key = "bundleSymbolicName", mandatory = true, help = "The bundle symbolic name for the add-on of interest") final BundleSymbolicName bsn,
+            @CliOption(key = "rating", mandatory = true, help = "How much did you like this add-on?") final Rating rating,
+            @CliOption(key = "comment", mandatory = false, help = "Your comments on this add-on eg \"this is my comment!\"; limit of 140 characters") final String comment) {
 
-        addOnRooBotOperations.addOnInfo(bundleId);
+        addOnfeedbackOperations.feedbackBundle(bsn, rating, comment);
     }
 
     @CliCommand(value = "addon info bundle", help = "Provide information about a specific Spring Roo Add-on")
@@ -46,6 +47,26 @@ public class AddOnCommands implements CommandMarker {
             @CliOption(key = "bundleSymbolicName", mandatory = true, help = "The bundle symbolic name for the add-on of interest") final AddOnBundleSymbolicName bsn) {
 
         addOnRooBotOperations.addOnInfo(bsn);
+    }
+
+    @CliCommand(value = "addon info id", help = "Provide information about a specific Spring Roo Add-on")
+    public void infoId(
+            @CliOption(key = { "", "searchResultId" }, mandatory = true, help = "The bundle ID as presented via the addon list or addon search command") final String bundleId) {
+
+        addOnRooBotOperations.addOnInfo(bundleId);
+    }
+
+    @CliCommand(value = "addon install bundle", help = "Install Spring Roo Add-on")
+    public void installBsn(
+            @CliOption(key = "bundleSymbolicName", mandatory = true, help = "The bundle symbolic name for the add-on of interest") final AddOnBundleSymbolicName bsn) {
+        addOnRooBotOperations.installAddOn(bsn);
+    }
+
+    @CliCommand(value = "addon install id", help = "Install Spring Roo Add-on")
+    public void installId(
+            @CliOption(key = { "", "searchResultId" }, mandatory = true, help = "The bundle ID as presented via the addon list or addon search command") final String bundleId) {
+
+        addOnRooBotOperations.installAddOn(bundleId);
     }
 
     @CliCommand(value = "addon list", help = "List all known Spring Roo Add-ons (up to the maximum number displayed on a single page)")
@@ -64,6 +85,13 @@ public class AddOnCommands implements CommandMarker {
                 maxResults, trustedOnly, compatibleOnly, communityOnly, null);
     }
 
+    @CliCommand(value = "addon remove", help = "Remove Spring Roo Add-on")
+    public void remove(
+            @CliOption(key = "bundleSymbolicName", mandatory = true, help = "The bundle symbolic name for the add-on of interest") final BundleSymbolicName bsn) {
+
+        addOnRooBotOperations.removeAddOn(bsn);
+    }
+
     @CliCommand(value = "addon search", help = "Search all known Spring Roo Add-ons")
     public void search(
             @CliOption(key = { "", "requiresDescription" }, mandatory = false, specifiedDefaultValue = "*", unspecifiedDefaultValue = "*", help = "A comma separated list of search terms") final String searchTerms,
@@ -80,24 +108,16 @@ public class AddOnCommands implements CommandMarker {
                 communityOnly, requiresCommand);
     }
 
-    @CliCommand(value = "addon install id", help = "Install Spring Roo Add-on")
-    public void installId(
-            @CliOption(key = { "", "searchResultId" }, mandatory = true, help = "The bundle ID as presented via the addon list or addon search command") final String bundleId) {
-
-        addOnRooBotOperations.installAddOn(bundleId);
+    @CliCommand(value = "addon upgrade all", help = "Upgrade all relevant Spring Roo Add-ons / Components for the current stability level")
+    public void ugradeAll() {
+        addOnRooBotOperations.upgradeAddOns();
     }
 
-    @CliCommand(value = "addon install bundle", help = "Install Spring Roo Add-on")
-    public void installBsn(
-            @CliOption(key = "bundleSymbolicName", mandatory = true, help = "The bundle symbolic name for the add-on of interest") final AddOnBundleSymbolicName bsn) {
-        addOnRooBotOperations.installAddOn(bsn);
-    }
+    @CliCommand(value = "addon upgrade available", help = "List available Spring Roo Add-on / Component upgrades")
+    public void ugradeAvailable(
+            @CliOption(key = "addonStabilityLevel", mandatory = false, help = "The stability level of add-ons or components which are presented for upgrading (default: ANY)") final AddOnStabilityLevel level) {
 
-    @CliCommand(value = "addon remove", help = "Remove Spring Roo Add-on")
-    public void remove(
-            @CliOption(key = "bundleSymbolicName", mandatory = true, help = "The bundle symbolic name for the add-on of interest") final BundleSymbolicName bsn) {
-
-        addOnRooBotOperations.removeAddOn(bsn);
+        addOnRooBotOperations.upgradesAvailable(level);
     }
 
     @CliCommand(value = "addon upgrade bundle", help = "Upgrade a specific Spring Roo Add-on / Component")
@@ -114,30 +134,9 @@ public class AddOnCommands implements CommandMarker {
         addOnRooBotOperations.upgradeAddOn(bundleId);
     }
 
-    @CliCommand(value = "addon upgrade all", help = "Upgrade all relevant Spring Roo Add-ons / Components for the current stability level")
-    public void ugradeAll() {
-        addOnRooBotOperations.upgradeAddOns();
-    }
-
-    @CliCommand(value = "addon upgrade available", help = "List available Spring Roo Add-on / Component upgrades")
-    public void ugradeAvailable(
-            @CliOption(key = "addonStabilityLevel", mandatory = false, help = "The stability level of add-ons or components which are presented for upgrading (default: ANY)") final AddOnStabilityLevel level) {
-
-        addOnRooBotOperations.upgradesAvailable(level);
-    }
-
     @CliCommand(value = "addon upgrade settings", help = "Settings for Add-on upgrade operations")
     public void ugradeSettings(
             @CliOption(key = "addonStabilityLevel", mandatory = false, help = "The stability level of add-ons or components which are presented for upgrading") final AddOnStabilityLevel level) {
         addOnRooBotOperations.upgradeSettings(level);
-    }
-
-    @CliCommand(value = "addon feedback bundle", help = "Provide anonymous ratings and comments on a Spring Roo Add-on (your feedback will be published publicly)")
-    public void feedbackBundle(
-            @CliOption(key = "bundleSymbolicName", mandatory = true, help = "The bundle symbolic name for the add-on of interest") final BundleSymbolicName bsn,
-            @CliOption(key = "rating", mandatory = true, help = "How much did you like this add-on?") final Rating rating,
-            @CliOption(key = "comment", mandatory = false, help = "Your comments on this add-on eg \"this is my comment!\"; limit of 140 characters") final String comment) {
-
-        addOnfeedbackOperations.feedbackBundle(bsn, rating, comment);
     }
 }

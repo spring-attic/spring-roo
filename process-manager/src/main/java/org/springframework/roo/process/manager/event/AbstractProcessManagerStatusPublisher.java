@@ -16,9 +16,29 @@ import org.springframework.roo.support.util.Assert;
 public abstract class AbstractProcessManagerStatusPublisher implements
         ProcessManagerStatusProvider {
 
-    protected Set<ProcessManagerStatusListener> processManagerStatusListeners = new CopyOnWriteArraySet<ProcessManagerStatusListener>();
+    /**
+     * Used so a single object instance contains the changing
+     * {@link ProcessManagerStatus} enum. This is needed so there is a single
+     * object instance for synchronization purposes.
+     */
+    private static class StatusHolder {
+
+        private ProcessManagerStatus status;
+
+        /**
+         * Constructor
+         * 
+         * @param initialStatus
+         */
+        private StatusHolder(final ProcessManagerStatus initialStatus) {
+            status = initialStatus;
+        }
+    }
+
     protected StatusHolder processManagerStatus = new StatusHolder(
             ProcessManagerStatus.STARTING);
+
+    protected Set<ProcessManagerStatusListener> processManagerStatusListeners = new CopyOnWriteArraySet<ProcessManagerStatusListener>();
 
     public final void addProcessManagerStatusListener(
             final ProcessManagerStatusListener processManagerStatusListener) {
@@ -26,17 +46,17 @@ public abstract class AbstractProcessManagerStatusPublisher implements
         processManagerStatusListeners.add(processManagerStatusListener);
     }
 
-    public final void removeProcessManagerStatusListener(
-            final ProcessManagerStatusListener processManagerStatusListener) {
-        Assert.notNull(processManagerStatusListener, "Status listener required");
-        processManagerStatusListeners.remove(processManagerStatusListener);
-    }
-
     /**
      * Obtains the process manager status without synchronization.
      */
     public final ProcessManagerStatus getProcessManagerStatus() {
         return processManagerStatus.status;
+    }
+
+    public final void removeProcessManagerStatusListener(
+            final ProcessManagerStatusListener processManagerStatusListener) {
+        Assert.notNull(processManagerStatusListener, "Status listener required");
+        processManagerStatusListeners.remove(processManagerStatusListener);
     }
 
     /**
@@ -53,29 +73,9 @@ public abstract class AbstractProcessManagerStatusPublisher implements
 
         this.processManagerStatus.status = processManagerStatus;
 
-        for (ProcessManagerStatusListener listener : processManagerStatusListeners) {
+        for (final ProcessManagerStatusListener listener : processManagerStatusListeners) {
             listener.onProcessManagerStatusChange(
                     this.processManagerStatus.status, processManagerStatus);
-        }
-    }
-
-    /**
-     * Used so a single object instance contains the changing
-     * {@link ProcessManagerStatus} enum. This is needed so there is a single
-     * object instance for synchronization purposes.
-     */
-    private static class StatusHolder {
-
-        // Fields
-        private ProcessManagerStatus status;
-
-        /**
-         * Constructor
-         * 
-         * @param initialStatus
-         */
-        private StatusHolder(final ProcessManagerStatus initialStatus) {
-            status = initialStatus;
         }
     }
 

@@ -14,11 +14,10 @@ import org.springframework.roo.support.style.ToStringCreator;
 public class DefaultImportMetadata extends
         AbstractIdentifiableJavaStructureProvider implements ImportMetadata {
 
-    // Fields
-    private boolean isStatic = false;
     private final JavaPackage importPackage;
     private final JavaType importType;
     private boolean isAsterisk = false;
+    private boolean isStatic = false;
 
     // Package protected to mandate the use of ImportMetadataBuilder
     DefaultImportMetadata(final CustomData customData,
@@ -40,17 +39,17 @@ public class DefaultImportMetadata extends
         return importType;
     }
 
-    public boolean isStatic() {
-        return isStatic;
-    }
-
     public boolean isAsterisk() {
         return isAsterisk;
     }
 
+    public boolean isStatic() {
+        return isStatic;
+    }
+
     @Override
     public String toString() {
-        ToStringCreator tsc = new ToStringCreator(this);
+        final ToStringCreator tsc = new ToStringCreator(this);
         tsc.append("declaredByMetadataId", getDeclaredByMetadataId());
         tsc.append("typePackage", importPackage);
         tsc.append("type", importType);

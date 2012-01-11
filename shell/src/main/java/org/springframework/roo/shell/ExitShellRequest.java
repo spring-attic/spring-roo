@@ -10,14 +10,12 @@ package org.springframework.roo.shell;
  */
 public class ExitShellRequest {
 
-    // Constants
-    public static final ExitShellRequest NORMAL_EXIT = new ExitShellRequest(0);
     public static final ExitShellRequest FATAL_EXIT = new ExitShellRequest(1);
     public static final ExitShellRequest JVM_TERMINATED_EXIT = new ExitShellRequest(
             99); // Ensure 99 is maintained in o.s.r.bootstrap.Main as it's the
                  // default for a null roo.exit code
+    public static final ExitShellRequest NORMAL_EXIT = new ExitShellRequest(0);
 
-    // Fields
     private final int exitCode;
 
     private ExitShellRequest(final int exitCode) {

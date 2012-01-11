@@ -33,12 +33,37 @@ public class ToStringMetadataProvider extends
         addMetadataTrigger(ROO_TO_STRING);
     }
 
+    @Override
+    protected String createLocalIdentifier(final JavaType javaType,
+            final LogicalPath path) {
+        return ToStringMetadata.createIdentifier(javaType, path);
+    }
+
     protected void deactivate(final ComponentContext context) {
         metadataDependencyRegistry.removeNotificationListener(this);
         metadataDependencyRegistry.deregisterDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
                 getProvidesType());
         removeMetadataTrigger(ROO_TO_STRING);
+    }
+
+    @Override
+    protected String getGovernorPhysicalTypeIdentifier(
+            final String metadataIdentificationString) {
+        final JavaType javaType = ToStringMetadata
+                .getJavaType(metadataIdentificationString);
+        final LogicalPath path = ToStringMetadata
+                .getPath(metadataIdentificationString);
+        return PhysicalTypeIdentifier.createIdentifier(javaType, path);
+    }
+
+    public String getItdUniquenessFilenameSuffix() {
+        return "ToString";
+    }
+
+    @Override
+    protected String getLocalMidToRequest(final ItdTypeDetails itdTypeDetails) {
+        return getLocalMid(itdTypeDetails);
     }
 
     @Override
@@ -54,37 +79,12 @@ public class ToStringMetadataProvider extends
         }
 
         final MemberDetails memberDetails = getMemberDetails(governorPhysicalTypeMetadata);
-        if (memberDetails == null || memberDetails.getFields().isEmpty()) {
+        if ((memberDetails == null) || memberDetails.getFields().isEmpty()) {
             return null;
         }
 
         return new ToStringMetadata(metadataIdentificationString, aspectName,
                 governorPhysicalTypeMetadata, annotationValues);
-    }
-
-    @Override
-    protected String getLocalMidToRequest(final ItdTypeDetails itdTypeDetails) {
-        return getLocalMid(itdTypeDetails);
-    }
-
-    public String getItdUniquenessFilenameSuffix() {
-        return "ToString";
-    }
-
-    @Override
-    protected String getGovernorPhysicalTypeIdentifier(
-            final String metadataIdentificationString) {
-        JavaType javaType = ToStringMetadata
-                .getJavaType(metadataIdentificationString);
-        LogicalPath path = ToStringMetadata
-                .getPath(metadataIdentificationString);
-        return PhysicalTypeIdentifier.createIdentifier(javaType, path);
-    }
-
-    @Override
-    protected String createLocalIdentifier(final JavaType javaType,
-            final LogicalPath path) {
-        return ToStringMetadata.createIdentifier(javaType, path);
     }
 
     public String getProvidesType() {

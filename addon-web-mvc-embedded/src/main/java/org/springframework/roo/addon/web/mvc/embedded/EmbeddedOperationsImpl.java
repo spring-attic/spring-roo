@@ -27,40 +27,27 @@ import org.springframework.roo.support.logging.HandlerUtils;
 @Reference(name = "embeddedProvider", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC, referenceInterface = EmbeddedProvider.class, cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE)
 public class EmbeddedOperationsImpl implements EmbeddedOperations {
 
-    // Constants
     private static final Logger LOGGER = HandlerUtils
             .getLogger(EmbeddedOperationsImpl.class);
 
-    // Fields
-    @Reference private ProjectOperations projectOperations;
-
     private final Object mutex = new Object();
+
+    @Reference private ProjectOperations projectOperations;
     private final Set<EmbeddedProvider> providers = new HashSet<EmbeddedProvider>();
 
-    public boolean isEmbeddedInstallationPossible() {
-        return projectOperations.isFocusedProjectAvailable()
-                && !projectOperations
-                        .isFeatureInstalledInFocusedModule(FeatureNames.JSF);
+    protected void bindEmbeddedProvider(final EmbeddedProvider provider) {
+        synchronized (mutex) {
+            providers.add(provider);
+        }
     }
 
     public boolean embed(final String url, final String viewName) {
-        for (EmbeddedProvider provider : getEmbeddedProviders()) {
+        for (final EmbeddedProvider provider : getEmbeddedProviders()) {
             if (provider.embed(url, viewName)) {
                 return true;
             }
         }
         LOGGER.warning("Could not find a matching provider for this URL");
-        return false;
-    }
-
-    public boolean install(final String viewName,
-            final Map<String, String> options) {
-        for (EmbeddedProvider provider : getEmbeddedProviders()) {
-            if (provider.install(viewName, options)) {
-                return true;
-            }
-        }
-        LOGGER.warning("Could not find a matching implementation for this 'web mvc embed' type");
         return false;
     }
 
@@ -70,10 +57,21 @@ public class EmbeddedOperationsImpl implements EmbeddedOperations {
         }
     }
 
-    protected void bindEmbeddedProvider(final EmbeddedProvider provider) {
-        synchronized (mutex) {
-            providers.add(provider);
+    public boolean install(final String viewName,
+            final Map<String, String> options) {
+        for (final EmbeddedProvider provider : getEmbeddedProviders()) {
+            if (provider.install(viewName, options)) {
+                return true;
+            }
         }
+        LOGGER.warning("Could not find a matching implementation for this 'web mvc embed' type");
+        return false;
+    }
+
+    public boolean isEmbeddedInstallationPossible() {
+        return projectOperations.isFocusedProjectAvailable()
+                && !projectOperations
+                        .isFeatureInstalledInFocusedModule(FeatureNames.JSF);
     }
 
     protected void unbindEmbeddedProvider(final EmbeddedProvider provider) {

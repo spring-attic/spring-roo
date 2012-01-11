@@ -9,10 +9,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.SOURCE)
 public @interface RooGwtRequest {
 
-    /**
-     * @return the fully-qualified type name this key instance was mirrored from
-     */
-    String value();
+    boolean dontIncludeProxyMethods() default true;
 
     /**
      * Entity methods to exclude from the request interface.
@@ -27,5 +24,8 @@ public @interface RooGwtRequest {
 
     boolean ignoreProxyReadOnly() default false;
 
-    boolean dontIncludeProxyMethods() default true;
+    /**
+     * @return the fully-qualified type name this key instance was mirrored from
+     */
+    String value();
 }

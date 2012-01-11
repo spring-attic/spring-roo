@@ -13,14 +13,14 @@ import org.junit.Test;
  */
 public class JdkJavaTypeTest {
 
-    @Test
-    public void testClassNamesAreActualJdkTypes() throws Exception {
-        for (final Field field : JdkJavaType.class.getDeclaredFields()) {
-            if (isPublicConstant(field)
-                    && JavaType.class.equals(field.getType())) {
-                assertValidJdkType((JavaType) field.get(null));
-            }
-        }
+    /**
+     * Asserts that the given {@link JavaType} represents a valid JDK type
+     * 
+     * @param javaType
+     * @throws Exception
+     */
+    private void assertValidJdkType(final JavaType javaType) throws Exception {
+        Class.forName(javaType.getFullyQualifiedTypeName());
     }
 
     /**
@@ -35,13 +35,13 @@ public class JdkJavaTypeTest {
                 && Modifier.isFinal(modifiers);
     }
 
-    /**
-     * Asserts that the given {@link JavaType} represents a valid JDK type
-     * 
-     * @param javaType
-     * @throws Exception
-     */
-    private void assertValidJdkType(final JavaType javaType) throws Exception {
-        Class.forName(javaType.getFullyQualifiedTypeName());
+    @Test
+    public void testClassNamesAreActualJdkTypes() throws Exception {
+        for (final Field field : JdkJavaType.class.getDeclaredFields()) {
+            if (isPublicConstant(field)
+                    && JavaType.class.equals(field.getType())) {
+                assertValidJdkType((JavaType) field.get(null));
+            }
+        }
     }
 }

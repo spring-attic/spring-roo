@@ -11,7 +11,6 @@ import org.springframework.roo.support.util.Assert;
 public abstract class AbstractCustomDataAccessorProvider implements
         CustomDataAccessor {
 
-    // Fields
     private final CustomData customData;
 
     /**

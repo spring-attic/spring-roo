@@ -27,19 +27,6 @@ public interface Shell extends ShellStatusProvider, ShellPromptAccessor {
     String WINDOW_TITLE_SLOT = "WINDOW_TITLE_SLOT";
 
     /**
-     * Presents a console prompt and allows the user to interact with the shell.
-     * The shell should not return to the caller until the user has finished
-     * their session (by way of a "quit" or similar command).
-     */
-    void promptLoop();
-
-    /**
-     * @return null if no exit was requested, otherwise the last exit code
-     *         indicated to the shell to use
-     */
-    ExitShellRequest getExitShellRequest();
-
-    /**
      * Runs the specified command. Control will return to the caller after the
      * command is run.
      * 
@@ -48,15 +35,6 @@ public interface Shell extends ShellStatusProvider, ShellPromptAccessor {
      *         exception
      */
     boolean executeCommand(String line);
-
-    /**
-     * Indicates the shell should switch into a lower-level development mode.
-     * The exact meaning varies by shell implementation.
-     * 
-     * @param developmentMode true if development mode should be enabled, false
-     *            otherwise
-     */
-    void setDevelopmentMode(boolean developmentMode);
 
     /**
      * Displays a progress notification to the user. This notification will
@@ -83,7 +61,36 @@ public interface Shell extends ShellStatusProvider, ShellPromptAccessor {
      */
     void flash(Level level, String message, String slot);
 
+    /**
+     * @return null if no exit was requested, otherwise the last exit code
+     *         indicated to the shell to use
+     */
+    ExitShellRequest getExitShellRequest();
+
+    /**
+     * Returns the home directory of the current running shell instance
+     * 
+     * @return the home directory of the current shell instance
+     */
+    File getHome();
+
     boolean isDevelopmentMode();
+
+    /**
+     * Presents a console prompt and allows the user to interact with the shell.
+     * The shell should not return to the caller until the user has finished
+     * their session (by way of a "quit" or similar command).
+     */
+    void promptLoop();
+
+    /**
+     * Indicates the shell should switch into a lower-level development mode.
+     * The exact meaning varies by shell implementation.
+     * 
+     * @param developmentMode true if development mode should be enabled, false
+     *            otherwise
+     */
+    void setDevelopmentMode(boolean developmentMode);
 
     /**
      * Changes the "path" displayed in the shell prompt. An implementation will
@@ -97,11 +104,4 @@ public interface Shell extends ShellStatusProvider, ShellPromptAccessor {
     void setPromptPath(String path);
 
     void setPromptPath(String path, boolean overrideStyle);
-
-    /**
-     * Returns the home directory of the current running shell instance
-     * 
-     * @return the home directory of the current shell instance
-     */
-    File getHome();
 }

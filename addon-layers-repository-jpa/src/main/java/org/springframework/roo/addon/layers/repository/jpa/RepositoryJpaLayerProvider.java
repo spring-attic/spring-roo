@@ -35,8 +35,11 @@ import org.springframework.uaa.client.util.Assert;
 @Service
 public class RepositoryJpaLayerProvider extends CoreLayerProvider {
 
-    // Fields
     @Reference private RepositoryJpaLocator repositoryLocator;
+
+    public int getLayerPosition() {
+        return LayerType.REPOSITORY.getPosition();
+    }
 
     public MemberTypeAdditions getMemberTypeAdditions(final String callerMID,
             final String methodIdentifier, final JavaType targetEntity,
@@ -104,10 +107,6 @@ public class RepositoryJpaLayerProvider extends CoreLayerProvider {
                 + method.getCall(parameters);
         return new MemberTypeAdditions(cidBuilder, method.getName(),
                 methodCall, false, parameters);
-    }
-
-    public int getLayerPosition() {
-        return LayerType.REPOSITORY.getPosition();
     }
 
     // -------------------- Setters for use by unit tests ----------------------

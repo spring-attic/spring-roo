@@ -21,7 +21,6 @@ public abstract class AbstractIdentifiableAnnotatedJavaStructureProvider extends
         AbstractIdentifiableJavaStructureProvider implements
         IdentifiableAnnotatedJavaStructure {
 
-    // Fields
     private final List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
 
     /**
@@ -39,10 +38,6 @@ public abstract class AbstractIdentifiableAnnotatedJavaStructureProvider extends
         CollectionUtils.populate(this.annotations, annotations);
     }
 
-    public List<AnnotationMetadata> getAnnotations() {
-        return Collections.unmodifiableList(annotations);
-    }
-
     public AnnotationMetadata getAnnotation(final JavaType type) {
         Assert.notNull(type, "Annotation type to locate required");
         for (final AnnotationMetadata md : getAnnotations()) {
@@ -51,6 +46,10 @@ public abstract class AbstractIdentifiableAnnotatedJavaStructureProvider extends
             }
         }
         return null;
+    }
+
+    public List<AnnotationMetadata> getAnnotations() {
+        return Collections.unmodifiableList(annotations);
     }
 
     public AnnotationMetadata getTypeAnnotation(final JavaType annotationType) {

@@ -36,13 +36,36 @@ import org.springframework.uaa.client.util.Assert;
 public class MongoEntityMetadata extends
         AbstractItdTypeDetailsProvidingMetadataItem {
 
-    // Constants
     private static final String PROVIDES_TYPE_STRING = MongoEntityMetadata.class
             .getName();
     private static final String PROVIDES_TYPE = MetadataIdentificationUtils
             .create(PROVIDES_TYPE_STRING);
 
-    // Fields
+    public static String createIdentifier(final JavaType javaType,
+            final LogicalPath path) {
+        return PhysicalTypeIdentifierNamingUtils.createIdentifier(
+                PROVIDES_TYPE_STRING, javaType, path);
+    }
+
+    public static JavaType getJavaType(final String metadataIdentificationString) {
+        return PhysicalTypeIdentifierNamingUtils.getJavaType(
+                PROVIDES_TYPE_STRING, metadataIdentificationString);
+    }
+
+    public static String getMetadataIdentiferType() {
+        return PROVIDES_TYPE;
+    }
+
+    public static LogicalPath getPath(final String metadataIdentificationString) {
+        return PhysicalTypeIdentifierNamingUtils.getPath(PROVIDES_TYPE_STRING,
+                metadataIdentificationString);
+    }
+
+    public static boolean isValid(final String metadataIdentificationString) {
+        return PhysicalTypeIdentifierNamingUtils.isValid(PROVIDES_TYPE_STRING,
+                metadataIdentificationString);
+    }
+
     private final MemberDetails memberDetails;
 
     /**
@@ -67,7 +90,7 @@ public class MongoEntityMetadata extends
 
         builder.addAnnotation(getTypeAnnotation(SpringJavaType.PERSISTENT));
 
-        FieldMetadata idField = getIdentifierField(idType);
+        final FieldMetadata idField = getIdentifierField(idType);
         if (idField != null) {
             builder.addField(idField);
             builder.addMethod(getIdentifierAccessor(idField));
@@ -76,22 +99,6 @@ public class MongoEntityMetadata extends
 
         // Build the ITD
         itdTypeDetails = builder.build();
-    }
-
-    private FieldMetadata getIdentifierField(final JavaType idType) {
-        // Try to locate an existing field with SPRING_DATA_ID
-        final List<FieldMetadata> idFields = governorTypeDetails
-                .getFieldsWithAnnotation(SpringJavaType.DATA_ID);
-        if (!idFields.isEmpty()) {
-            return idFields.get(0);
-        }
-        JavaSymbolName idFieldName = governorTypeDetails
-                .getUniqueFieldName("id");
-        FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(),
-                Modifier.PRIVATE, idFieldName, idType, null);
-        fieldBuilder.addAnnotation(new AnnotationMetadataBuilder(
-                SpringJavaType.DATA_ID));
-        return fieldBuilder.build();
     }
 
     private MethodMetadataBuilder getIdentifierAccessor(
@@ -125,6 +132,22 @@ public class MongoEntityMetadata extends
 
         return new MethodMetadataBuilder(getId(), Modifier.PUBLIC,
                 requiredAccessorName, idField.getFieldType(), bodyBuilder);
+    }
+
+    private FieldMetadata getIdentifierField(final JavaType idType) {
+        // Try to locate an existing field with SPRING_DATA_ID
+        final List<FieldMetadata> idFields = governorTypeDetails
+                .getFieldsWithAnnotation(SpringJavaType.DATA_ID);
+        if (!idFields.isEmpty()) {
+            return idFields.get(0);
+        }
+        final JavaSymbolName idFieldName = governorTypeDetails
+                .getUniqueFieldName("id");
+        final FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(
+                getId(), Modifier.PRIVATE, idFieldName, idType, null);
+        fieldBuilder.addAnnotation(new AnnotationMetadataBuilder(
+                SpringJavaType.DATA_ID));
+        return fieldBuilder.build();
     }
 
     private MethodMetadataBuilder getIdentifierMutator(
@@ -165,34 +188,9 @@ public class MongoEntityMetadata extends
                 parameterNames, bodyBuilder);
     }
 
-    public static String getMetadataIdentiferType() {
-        return PROVIDES_TYPE;
-    }
-
-    public static String createIdentifier(final JavaType javaType,
-            final LogicalPath path) {
-        return PhysicalTypeIdentifierNamingUtils.createIdentifier(
-                PROVIDES_TYPE_STRING, javaType, path);
-    }
-
-    public static JavaType getJavaType(final String metadataIdentificationString) {
-        return PhysicalTypeIdentifierNamingUtils.getJavaType(
-                PROVIDES_TYPE_STRING, metadataIdentificationString);
-    }
-
-    public static LogicalPath getPath(final String metadataIdentificationString) {
-        return PhysicalTypeIdentifierNamingUtils.getPath(PROVIDES_TYPE_STRING,
-                metadataIdentificationString);
-    }
-
-    public static boolean isValid(final String metadataIdentificationString) {
-        return PhysicalTypeIdentifierNamingUtils.isValid(PROVIDES_TYPE_STRING,
-                metadataIdentificationString);
-    }
-
     @Override
     public String toString() {
-        ToStringCreator tsc = new ToStringCreator(this);
+        final ToStringCreator tsc = new ToStringCreator(this);
         tsc.append("identifier", getId());
         tsc.append("valid", valid);
         tsc.append("aspectName", aspectName);

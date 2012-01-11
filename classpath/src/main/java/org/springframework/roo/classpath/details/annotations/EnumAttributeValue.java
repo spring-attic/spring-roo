@@ -28,13 +28,13 @@ public class EnumAttributeValue extends
 
     @SuppressWarnings("all")
     public Enum<?> getAsEnum() throws ClassNotFoundException {
-        Class<?> enumType = getClass().getClassLoader().loadClass(
-                this.value.getType().getFullyQualifiedTypeName());
+        final Class<?> enumType = getClass().getClassLoader().loadClass(
+                value.getType().getFullyQualifiedTypeName());
         Assert.isTrue(
                 enumType.isEnum(),
                 "Should have obtained an Enum but failed for type '"
                         + enumType.getName() + "'");
-        String name = this.value.getField().getSymbolName();
+        final String name = value.getField().getSymbolName();
         return Enum.valueOf((Class<? extends Enum>) enumType, name);
     }
 

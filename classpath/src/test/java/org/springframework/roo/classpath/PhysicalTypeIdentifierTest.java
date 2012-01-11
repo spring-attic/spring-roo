@@ -14,7 +14,6 @@ import org.springframework.roo.project.Path;
  */
 public class PhysicalTypeIdentifierTest {
 
-    // Constants
     private static final String USER_PROJECT_TYPE = "com.foo.Bar";
 
     @Test

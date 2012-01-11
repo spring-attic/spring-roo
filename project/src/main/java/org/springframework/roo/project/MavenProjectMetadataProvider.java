@@ -37,18 +37,16 @@ import org.springframework.uaa.client.protobuf.UaaClient.Product;
 public class MavenProjectMetadataProvider implements MetadataProvider,
         FileEventListener {
 
-    // Constants
     static final String POM_RELATIVE_PATH = "/pom.xml";
 
     private static final String PROVIDES_TYPE = MetadataIdentificationUtils
             .create(MetadataIdentificationUtils
                     .getMetadataClass(ProjectMetadata.getProjectIdentifier("")));
 
-    // Fields (some with default-level access for testability)
     @Reference FileManager fileManager;
     @Reference private PomManagementService pomManagementService;
-    @Reference private UaaRegistrationService uaaRegistrationService;
     @Reference private UaaDetectedProducts uaaDetectedProducts;
+    @Reference private UaaRegistrationService uaaRegistrationService;
 
     public MetadataItem get(final String metadataId) {
         Assert.isTrue(ProjectMetadata.isValid(metadataId),
@@ -57,14 +55,14 @@ public class MavenProjectMetadataProvider implements MetadataProvider,
         // Just rebuild on demand. We always do this as we expect
         // MetadataService to cache on our behalf
 
-        Pom pom = pomManagementService.getPomFromModuleName(ProjectMetadata
-                .getModuleName(metadataId));
+        final Pom pom = pomManagementService
+                .getPomFromModuleName(ProjectMetadata.getModuleName(metadataId));
         // Read the file, if it is available
-        if (pom == null || !fileManager.exists(pom.getPath())) {
+        if ((pom == null) || !fileManager.exists(pom.getPath())) {
             return null;
         }
 
-        JavaPackage topLevelPackage = new JavaPackage(pom.getGroupId());
+        final JavaPackage topLevelPackage = new JavaPackage(pom.getGroupId());
         // Update UAA with the project name
         uaaRegistrationService.registerProject(
                 UaaRegistrationService.SPRING_ROO,
@@ -99,7 +97,8 @@ public class MavenProjectMetadataProvider implements MetadataProvider,
                 // Convert the detected dependency into a Product as best we can
                 String versionSequence = first.getVersion();
                 // Version sequence given; see if it looks like a property
-                if (versionSequence != null && versionSequence.startsWith("${")
+                if ((versionSequence != null)
+                        && versionSequence.startsWith("${")
                         && versionSequence.endsWith("}")) {
                     // Strip the ${ } from the version sequence
                     final String propertyName = versionSequence.replace("${",
@@ -114,7 +113,7 @@ public class MavenProjectMetadataProvider implements MetadataProvider,
                     }
                 }
                 // Handle there being no version sequence
-                if (versionSequence == null || "".equals(versionSequence)) {
+                if ((versionSequence == null) || "".equals(versionSequence)) {
                     versionSequence = "0.0.0.UNKNOWN";
                 }
                 final Product product = VersionHelper.getProduct(
@@ -126,6 +125,10 @@ public class MavenProjectMetadataProvider implements MetadataProvider,
         }
 
         return new ProjectMetadata(pom);
+    }
+
+    public String getProvidesType() {
+        return PROVIDES_TYPE;
     }
 
     public void onFileEvent(final FileEvent fileEvent) {
@@ -144,9 +147,5 @@ public class MavenProjectMetadataProvider implements MetadataProvider,
             pomManagementService.getPomFromPath(fileEvent.getFileDetails()
                     .getCanonicalPath());
         }
-    }
-
-    public String getProvidesType() {
-        return PROVIDES_TYPE;
     }
 }

@@ -17,45 +17,13 @@ import org.springframework.roo.support.util.Assert;
  */
 public abstract class AbstractMetadataCache implements MetadataCache {
 
-    // Constants
     private static final float hashTableLoadFactor = 0.75f;
 
-    // Fields
     private LinkedHashMap<String, MetadataItem> map;
     private int maxCapacity = 100000;
 
     protected AbstractMetadataCache() {
         init();
-    }
-
-    protected int getCacheSize() {
-        return map.size();
-    }
-
-    public void setMaxCapacity(int maxCapacity) {
-        if (maxCapacity < 100) {
-            maxCapacity = 100;
-        }
-        this.maxCapacity = maxCapacity;
-        init();
-    }
-
-    public int getMaxCapacity() {
-        return maxCapacity;
-    }
-
-    public void put(final MetadataItem metadataItem) {
-        Assert.notNull(metadataItem, "A metadata item is required");
-        map.put(metadataItem.getId(), metadataItem);
-    }
-
-    protected MetadataItem getFromCache(
-            final String metadataIdentificationString) {
-        Assert.isTrue(MetadataIdentificationUtils
-                .isIdentifyingInstance(metadataIdentificationString),
-                "Only metadata instances can be cached (not '"
-                        + metadataIdentificationString + "')");
-        return map.get(metadataIdentificationString);
     }
 
     public void evict(final String metadataIdentificationString) {
@@ -70,8 +38,25 @@ public abstract class AbstractMetadataCache implements MetadataCache {
         init();
     }
 
+    protected int getCacheSize() {
+        return map.size();
+    }
+
+    protected MetadataItem getFromCache(
+            final String metadataIdentificationString) {
+        Assert.isTrue(MetadataIdentificationUtils
+                .isIdentifyingInstance(metadataIdentificationString),
+                "Only metadata instances can be cached (not '"
+                        + metadataIdentificationString + "')");
+        return map.get(metadataIdentificationString);
+    }
+
+    public int getMaxCapacity() {
+        return maxCapacity;
+    }
+
     private void init() {
-        int hashTableCapacity = (int) Math.ceil(maxCapacity
+        final int hashTableCapacity = (int) Math.ceil(maxCapacity
                 / hashTableLoadFactor) + 1;
         map = new LinkedHashMap<String, MetadataItem>(hashTableCapacity,
                 hashTableLoadFactor, true) {
@@ -83,5 +68,18 @@ public abstract class AbstractMetadataCache implements MetadataCache {
                 return size() > maxCapacity;
             }
         };
+    }
+
+    public void put(final MetadataItem metadataItem) {
+        Assert.notNull(metadataItem, "A metadata item is required");
+        map.put(metadataItem.getId(), metadataItem);
+    }
+
+    public void setMaxCapacity(int maxCapacity) {
+        if (maxCapacity < 100) {
+            maxCapacity = 100;
+        }
+        this.maxCapacity = maxCapacity;
+        init();
     }
 }

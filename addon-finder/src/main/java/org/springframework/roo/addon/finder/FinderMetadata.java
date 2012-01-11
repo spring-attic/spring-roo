@@ -35,16 +35,41 @@ import org.springframework.roo.support.util.Assert;
  */
 public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
-    // Constants
     private static final String PROVIDES_TYPE_STRING = FinderMetadata.class
             .getName();
     private static final String PROVIDES_TYPE = MetadataIdentificationUtils
             .create(PROVIDES_TYPE_STRING);
 
-    // Fields
-    private MethodMetadata entityManagerMethod;
-    private SortedMap<JavaSymbolName, QueryHolder> queryHolders;
+    public static String createIdentifier(final JavaType javaType,
+            final LogicalPath path) {
+        return PhysicalTypeIdentifierNamingUtils.createIdentifier(
+                PROVIDES_TYPE_STRING, javaType, path);
+    }
+
+    public static JavaType getJavaType(final String metadataIdentificationString) {
+        return PhysicalTypeIdentifierNamingUtils.getJavaType(
+                PROVIDES_TYPE_STRING, metadataIdentificationString);
+    }
+
+    public static String getMetadataIdentiferType() {
+        return PROVIDES_TYPE;
+    }
+
+    public static LogicalPath getPath(final String metadataIdentificationString) {
+        return PhysicalTypeIdentifierNamingUtils.getPath(PROVIDES_TYPE_STRING,
+                metadataIdentificationString);
+    }
+
+    public static boolean isValid(final String metadataIdentificationString) {
+        return PhysicalTypeIdentifierNamingUtils.isValid(PROVIDES_TYPE_STRING,
+                metadataIdentificationString);
+    }
+
     private final List<MethodMetadata> dynamicFinderMethods = new ArrayList<MethodMetadata>();
+
+    private MethodMetadata entityManagerMethod;
+
+    private SortedMap<JavaSymbolName, QueryHolder> queryHolders;
 
     public FinderMetadata(final String identifier, final JavaType aspectName,
             final PhysicalTypeMetadata governorPhysicalTypeMetadata,
@@ -63,8 +88,8 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
         this.entityManagerMethod = entityManagerMethod;
         this.queryHolders = queryHolders;
 
-        for (JavaSymbolName finderName : queryHolders.keySet()) {
-            MethodMetadataBuilder methodBuilder = getDynamicFinderMethod(finderName);
+        for (final JavaSymbolName finderName : queryHolders.keySet()) {
+            final MethodMetadataBuilder methodBuilder = getDynamicFinderMethod(finderName);
             builder.addMethod(methodBuilder);
             dynamicFinderMethods.add(methodBuilder.build());
         }
@@ -111,7 +136,8 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
         // alone and treat any match as authoritative
         // We do not scan the superclass, as the caller is expected to know
         // we'll only scan the current class
-        for (MethodMetadata method : governorTypeDetails.getDeclaredMethods()) {
+        for (final MethodMetadata method : governorTypeDetails
+                .getDeclaredMethods()) {
             if (method.getMethodName().equals(finderName)) {
                 // Found a method of the expected name; we won't check method
                 // parameters though
@@ -120,27 +146,28 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
         }
 
         // To get this far we need to create the method...
-        List<JavaType> parameters = new ArrayList<JavaType>();
+        final List<JavaType> parameters = new ArrayList<JavaType>();
         parameters.add(destination);
-        JavaType typedQueryType = new JavaType(
+        final JavaType typedQueryType = new JavaType(
                 TYPED_QUERY.getFullyQualifiedTypeName(), 0, DataType.TYPE,
                 null, parameters);
 
-        QueryHolder queryHolder = queryHolders.get(finderName);
-        String jpaQuery = queryHolder.getJpaQuery();
-        List<JavaType> parameterTypes = queryHolder.getParameterTypes();
-        List<JavaSymbolName> parameterNames = queryHolder.getParameterNames();
+        final QueryHolder queryHolder = queryHolders.get(finderName);
+        final String jpaQuery = queryHolder.getJpaQuery();
+        final List<JavaType> parameterTypes = queryHolder.getParameterTypes();
+        final List<JavaSymbolName> parameterNames = queryHolder
+                .getParameterNames();
 
         // We declared the field in this ITD, so produce a public accessor for
         // it
-        InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-        String methodName = finderName.getSymbolName();
+        final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+        final String methodName = finderName.getSymbolName();
         boolean containsCollectionType = false;
 
         for (int i = 0; i < parameterTypes.size(); i++) {
-            String name = parameterNames.get(i).getSymbolName();
+            final String name = parameterNames.get(i).getSymbolName();
 
-            StringBuilder length = new StringBuilder();
+            final StringBuilder length = new StringBuilder();
             if (parameterTypes.get(i).equals(STRING)) {
                 length.append(" || ").append(parameterNames.get(i))
                         .append(".length() == 0");
@@ -153,7 +180,7 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
                         + " argument is required\");");
             }
 
-            if (length.length() > 0
+            if ((length.length() > 0)
                     && methodName.substring(
                             methodName.indexOf(parameterNames.get(i)
                                     .getSymbolNameCapitalisedFirstLetter())
@@ -188,7 +215,7 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
                 + "."
                 + entityManagerMethod.getMethodName().getSymbolName() + "();");
 
-        List<JavaSymbolName> collectionTypeNames = new ArrayList<JavaSymbolName>();
+        final List<JavaSymbolName> collectionTypeNames = new ArrayList<JavaSymbolName>();
         if (containsCollectionType) {
             bodyBuilder
                     .appendFormalLine("StringBuilder queryBuilder = new StringBuilder(\""
@@ -215,7 +242,7 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
                 }
             }
             int position = 0;
-            for (JavaSymbolName name : collectionTypeNames) {
+            for (final JavaSymbolName name : collectionTypeNames) {
                 bodyBuilder.appendFormalLine("for (int i = 0; i < " + name
                         + ".size(); i++) {");
                 bodyBuilder.indent();
@@ -281,7 +308,7 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
                     + "\", "
                     + destination.getSimpleTypeName() + ".class);");
 
-            for (JavaSymbolName name : parameterNames) {
+            for (final JavaSymbolName name : parameterNames) {
                 bodyBuilder.appendFormalLine("q.setParameter(\"" + name
                         + "\", " + name + ");");
             }
@@ -297,7 +324,7 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 
     @Override
     public String toString() {
-        ToStringCreator tsc = new ToStringCreator(this);
+        final ToStringCreator tsc = new ToStringCreator(this);
         tsc.append("identifier", getId());
         tsc.append("valid", valid);
         tsc.append("aspectName", aspectName);
@@ -305,30 +332,5 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
         tsc.append("governor", governorPhysicalTypeMetadata.getId());
         tsc.append("itdTypeDetails", itdTypeDetails);
         return tsc.toString();
-    }
-
-    public static String getMetadataIdentiferType() {
-        return PROVIDES_TYPE;
-    }
-
-    public static String createIdentifier(final JavaType javaType,
-            final LogicalPath path) {
-        return PhysicalTypeIdentifierNamingUtils.createIdentifier(
-                PROVIDES_TYPE_STRING, javaType, path);
-    }
-
-    public static JavaType getJavaType(final String metadataIdentificationString) {
-        return PhysicalTypeIdentifierNamingUtils.getJavaType(
-                PROVIDES_TYPE_STRING, metadataIdentificationString);
-    }
-
-    public static LogicalPath getPath(final String metadataIdentificationString) {
-        return PhysicalTypeIdentifierNamingUtils.getPath(PROVIDES_TYPE_STRING,
-                metadataIdentificationString);
-    }
-
-    public static boolean isValid(final String metadataIdentificationString) {
-        return PhysicalTypeIdentifierNamingUtils.isValid(PROVIDES_TYPE_STRING,
-                metadataIdentificationString);
     }
 }

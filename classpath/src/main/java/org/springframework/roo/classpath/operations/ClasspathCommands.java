@@ -22,20 +22,7 @@ import org.springframework.roo.shell.CommandMarker;
 @Service
 public class ClasspathCommands implements CommandMarker {
 
-    // Fields
     @Reference private ClasspathOperations classpathOperations;
-
-    @CliAvailabilityIndicator({ "class", "interface", "enum type",
-            "enum constant" })
-    public boolean isProjectAvailable() {
-        return classpathOperations.isProjectAvailable();
-    }
-
-    @CliCommand(value = "focus", help = "Changes focus to a different type")
-    public void focus(
-            @CliOption(key = "class", mandatory = true, optionContext = "update,project", help = "The type to focus on") final JavaType type) {
-        classpathOperations.focus(type);
-    }
 
     @CliCommand(value = "class", help = "Creates a new Java class source file in any project path")
     public void createClass(
@@ -50,15 +37,6 @@ public class ClasspathCommands implements CommandMarker {
                 createAbstract, permitReservedWords);
     }
 
-    @CliCommand(value = "interface", help = "Creates a new Java interface source file in any project path")
-    public void createInterface(
-            @CliOption(key = "class", optionContext = "update,project", mandatory = true, help = "The name of the interface to create") final JavaType name,
-            @CliOption(key = "path", mandatory = false, unspecifiedDefaultValue = "FOCUSED|SRC_MAIN_JAVA", specifiedDefaultValue = "FOCUSED|SRC_MAIN_JAVA", help = "Source directory to create the interface in") final LogicalPath path,
-            @CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") final boolean permitReservedWords) {
-
-        classpathOperations.createInterface(name, path, permitReservedWords);
-    }
-
     @CliCommand(value = "enum type", help = "Creates a new Java enum source file in any project path")
     public void createEnum(
             @CliOption(key = "class", optionContext = "update,project", mandatory = true, help = "The name of the enum to create") final JavaType name,
@@ -68,6 +46,15 @@ public class ClasspathCommands implements CommandMarker {
         classpathOperations.createEnum(name, path, permitReservedWords);
     }
 
+    @CliCommand(value = "interface", help = "Creates a new Java interface source file in any project path")
+    public void createInterface(
+            @CliOption(key = "class", optionContext = "update,project", mandatory = true, help = "The name of the interface to create") final JavaType name,
+            @CliOption(key = "path", mandatory = false, unspecifiedDefaultValue = "FOCUSED|SRC_MAIN_JAVA", specifiedDefaultValue = "FOCUSED|SRC_MAIN_JAVA", help = "Source directory to create the interface in") final LogicalPath path,
+            @CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") final boolean permitReservedWords) {
+
+        classpathOperations.createInterface(name, path, permitReservedWords);
+    }
+
     @CliCommand(value = "enum constant", help = "Inserts a new enum constant into an enum")
     public void enumConstant(
             @CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*", optionContext = "update,project", help = "The name of the enum class to receive this field") final JavaType name,
@@ -75,5 +62,17 @@ public class ClasspathCommands implements CommandMarker {
             @CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") final boolean permitReservedWords) {
 
         classpathOperations.enumConstant(name, fieldName, permitReservedWords);
+    }
+
+    @CliCommand(value = "focus", help = "Changes focus to a different type")
+    public void focus(
+            @CliOption(key = "class", mandatory = true, optionContext = "update,project", help = "The type to focus on") final JavaType type) {
+        classpathOperations.focus(type);
+    }
+
+    @CliAvailabilityIndicator({ "class", "interface", "enum type",
+            "enum constant" })
+    public boolean isProjectAvailable() {
+        return classpathOperations.isProjectAvailable();
     }
 }

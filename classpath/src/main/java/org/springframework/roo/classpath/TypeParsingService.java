@@ -6,6 +6,21 @@ import org.springframework.roo.model.JavaType;
 public interface TypeParsingService {
 
     /**
+     * Returns the compilation unit contents that represents the passed class or
+     * interface details. This is useful if an add-on requires a compilation
+     * unit representation but doesn't wish to cause that representation to be
+     * emitted to disk via {@link TypeManagementService}. One concrete time this
+     * is useful is when an add-on wishes to emulate an ITD-like model for an
+     * external system that cannot support ITDs and may wish to insert a custom
+     * header etc before writing it to disk.
+     * 
+     * @param cid a parsed representation of a class or interface (required)
+     * @return a valid Java compilation unit for the passed object (never null
+     *         or empty)
+     */
+    String getCompilationUnitContents(ClassOrInterfaceTypeDetails cid);
+
+    /**
      * Builds a {@link ClassOrInterfaceTypeDetails} object that represents the
      * requested {@link org.springframework.roo.model.JavaType} from the type at
      * the passed in type path.
@@ -42,19 +57,4 @@ public interface TypeParsingService {
      */
     ClassOrInterfaceTypeDetails getTypeFromString(String typeContents,
             String declaredByMetadataId, JavaType javaType);
-
-    /**
-     * Returns the compilation unit contents that represents the passed class or
-     * interface details. This is useful if an add-on requires a compilation
-     * unit representation but doesn't wish to cause that representation to be
-     * emitted to disk via {@link TypeManagementService}. One concrete time this
-     * is useful is when an add-on wishes to emulate an ITD-like model for an
-     * external system that cannot support ITDs and may wish to insert a custom
-     * header etc before writing it to disk.
-     * 
-     * @param cid a parsed representation of a class or interface (required)
-     * @return a valid Java compilation unit for the passed object (never null
-     *         or empty)
-     */
-    String getCompilationUnitContents(ClassOrInterfaceTypeDetails cid);
 }

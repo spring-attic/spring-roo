@@ -10,7 +10,7 @@ import org.w3c.dom.Element;
  * @since 1.1
  */
 public enum DependencyScope {
-    COMPILE, PROVIDED, RUNTIME, TEST, SYSTEM, IMPORT;
+    COMPILE, IMPORT, PROVIDED, RUNTIME, SYSTEM, TEST;
 
     /**
      * Parses the scope of the given dependency XML element

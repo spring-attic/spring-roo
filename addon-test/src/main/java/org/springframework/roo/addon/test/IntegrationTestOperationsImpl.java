@@ -49,20 +49,31 @@ import org.springframework.roo.support.util.StringUtils;
 @Service
 public class IntegrationTestOperationsImpl implements IntegrationTestOperations {
 
-    // Constants
     private static final JavaType JUNIT_4 = new JavaType(
             "org.junit.runners.JUnit4");
     private static final JavaType RUN_WITH = new JavaType(
             "org.junit.runner.RunWith");
     private static final JavaType TEST = new JavaType("org.junit.Test");
 
-    // Fields
     @Reference private DataOnDemandOperations dataOnDemandOperations;
     @Reference private MemberDetailsScanner memberDetailsScanner;
     @Reference private MetadataService metadataService;
     @Reference private ProjectOperations projectOperations;
     @Reference private TypeLocationService typeLocationService;
     @Reference private TypeManagementService typeManagementService;
+
+    /**
+     * @param entity the entity to lookup required
+     * @return the type details (never null; throws an exception if it cannot be
+     *         obtained or parsed)
+     */
+    private ClassOrInterfaceTypeDetails getEntity(final JavaType entity) {
+        final ClassOrInterfaceTypeDetails cid = typeLocationService
+                .getTypeDetails(entity);
+        Assert.notNull(cid, "Java source code details unavailable for type "
+                + cid);
+        return cid;
+    }
 
     public boolean isIntegrationTestInstallationPossible() {
         return projectOperations.isFocusedProjectAvailable()
@@ -81,27 +92,28 @@ public class IntegrationTestOperationsImpl implements IntegrationTestOperations 
 
         // Verify the requested entity actually exists as a class and is not
         // abstract
-        ClassOrInterfaceTypeDetails cid = getEntity(entity);
+        final ClassOrInterfaceTypeDetails cid = getEntity(entity);
         Assert.isTrue(!Modifier.isAbstract(cid.getModifier()),
                 "Type " + entity.getFullyQualifiedTypeName() + " is abstract");
 
-        LogicalPath path = PhysicalTypeIdentifier.getPath(cid
+        final LogicalPath path = PhysicalTypeIdentifier.getPath(cid
                 .getDeclaredByMetadataId());
         dataOnDemandOperations.newDod(entity,
                 new JavaType(entity.getFullyQualifiedTypeName()
                         + "DataOnDemand"));
 
-        JavaType name = new JavaType(entity + "IntegrationTest");
-        String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(
-                name, Path.SRC_TEST_JAVA.getModulePathId(path.getModule()));
+        final JavaType name = new JavaType(entity + "IntegrationTest");
+        final String declaredByMetadataId = PhysicalTypeIdentifier
+                .createIdentifier(name,
+                        Path.SRC_TEST_JAVA.getModulePathId(path.getModule()));
 
         if (metadataService.get(declaredByMetadataId) != null) {
             // The file already exists
             return;
         }
 
-        List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
-        List<AnnotationAttributeValue<?>> config = new ArrayList<AnnotationAttributeValue<?>>();
+        final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+        final List<AnnotationAttributeValue<?>> config = new ArrayList<AnnotationAttributeValue<?>>();
         config.add(new ClassAttributeValue(new JavaSymbolName("entity"), entity));
         if (!transactional) {
             config.add(new BooleanAttributeValue(new JavaSymbolName(
@@ -110,17 +122,17 @@ public class IntegrationTestOperationsImpl implements IntegrationTestOperations 
         annotations.add(new AnnotationMetadataBuilder(ROO_INTEGRATION_TEST,
                 config));
 
-        List<MethodMetadataBuilder> methods = new ArrayList<MethodMetadataBuilder>();
-        List<AnnotationMetadataBuilder> methodAnnotations = new ArrayList<AnnotationMetadataBuilder>();
+        final List<MethodMetadataBuilder> methods = new ArrayList<MethodMetadataBuilder>();
+        final List<AnnotationMetadataBuilder> methodAnnotations = new ArrayList<AnnotationMetadataBuilder>();
         methodAnnotations.add(new AnnotationMetadataBuilder(TEST));
-        MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(
+        final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(
                 declaredByMetadataId, Modifier.PUBLIC, new JavaSymbolName(
                         "testMarkerMethod"), JavaType.VOID_PRIMITIVE,
                 new InvocableMemberBodyBuilder());
         methodBuilder.setAnnotations(methodAnnotations);
         methods.add(methodBuilder);
 
-        ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(
+        final ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(
                 declaredByMetadataId, Modifier.PUBLIC, name,
                 PhysicalTypeCategory.CLASS);
         cidBuilder.setAnnotations(annotations);
@@ -138,10 +150,11 @@ public class IntegrationTestOperationsImpl implements IntegrationTestOperations 
     public void newMockTest(final JavaType entity) {
         Assert.notNull(entity, "Entity to produce a mock test for is required");
 
-        JavaType name = new JavaType(entity + "Test");
-        String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(
-                name, Path.SRC_TEST_JAVA.getModulePathId(projectOperations
-                        .getFocusedModuleName()));
+        final JavaType name = new JavaType(entity + "Test");
+        final String declaredByMetadataId = PhysicalTypeIdentifier
+                .createIdentifier(name, Path.SRC_TEST_JAVA
+                        .getModulePathId(projectOperations
+                                .getFocusedModuleName()));
 
         if (metadataService.get(declaredByMetadataId) != null) {
             // The file already exists
@@ -149,31 +162,31 @@ public class IntegrationTestOperationsImpl implements IntegrationTestOperations 
         }
 
         // Determine if the mocking infrastructure needs installing
-        List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
-        List<AnnotationAttributeValue<?>> config = new ArrayList<AnnotationAttributeValue<?>>();
+        final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+        final List<AnnotationAttributeValue<?>> config = new ArrayList<AnnotationAttributeValue<?>>();
         config.add(new ClassAttributeValue(new JavaSymbolName("value"), JUNIT_4));
         annotations.add(new AnnotationMetadataBuilder(RUN_WITH, config));
         annotations.add(new AnnotationMetadataBuilder(
                 MOCK_STATIC_ENTITY_METHODS));
 
-        List<MethodMetadataBuilder> methods = new ArrayList<MethodMetadataBuilder>();
-        List<AnnotationMetadataBuilder> methodAnnotations = new ArrayList<AnnotationMetadataBuilder>();
+        final List<MethodMetadataBuilder> methods = new ArrayList<MethodMetadataBuilder>();
+        final List<AnnotationMetadataBuilder> methodAnnotations = new ArrayList<AnnotationMetadataBuilder>();
         methodAnnotations.add(new AnnotationMetadataBuilder(TEST));
 
         // Get the entity so we can hopefully make a demo method that will be
         // usable
-        InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+        final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
-        ClassOrInterfaceTypeDetails cid = typeLocationService
+        final ClassOrInterfaceTypeDetails cid = typeLocationService
                 .getTypeDetails(entity);
         if (cid != null) {
-            MemberDetails memberDetails = memberDetailsScanner
+            final MemberDetails memberDetails = memberDetailsScanner
                     .getMemberDetails(
                             IntegrationTestOperationsImpl.class.getName(), cid);
-            List<MethodMetadata> countMethods = memberDetails
+            final List<MethodMetadata> countMethods = memberDetails
                     .getMethodsWithTag(CustomDataKeys.COUNT_ALL_METHOD);
             if (countMethods.size() == 1) {
-                String countMethod = entity.getSimpleTypeName() + "."
+                final String countMethod = entity.getSimpleTypeName() + "."
                         + countMethods.get(0).getMethodName().getSymbolName()
                         + "()";
                 bodyBuilder.appendFormalLine("int expectedCount = 13;");
@@ -188,13 +201,13 @@ public class IntegrationTestOperationsImpl implements IntegrationTestOperations 
             }
         }
 
-        MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(
+        final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(
                 declaredByMetadataId, Modifier.PUBLIC, new JavaSymbolName(
                         "testMethod"), JavaType.VOID_PRIMITIVE, bodyBuilder);
         methodBuilder.setAnnotations(methodAnnotations);
         methods.add(methodBuilder);
 
-        ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(
+        final ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(
                 declaredByMetadataId, Modifier.PUBLIC, name,
                 PhysicalTypeCategory.CLASS);
         cidBuilder.setAnnotations(annotations);
@@ -206,10 +219,11 @@ public class IntegrationTestOperationsImpl implements IntegrationTestOperations 
     public void newTestStub(final JavaType javaType) {
         Assert.notNull(javaType, "Class to produce a test stub for is required");
 
-        JavaType name = new JavaType(javaType + "Test");
-        String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(
-                name, Path.SRC_TEST_JAVA.getModulePathId(projectOperations
-                        .getFocusedModuleName()));
+        final JavaType name = new JavaType(javaType + "Test");
+        final String declaredByMetadataId = PhysicalTypeIdentifier
+                .createIdentifier(name, Path.SRC_TEST_JAVA
+                        .getModulePathId(projectOperations
+                                .getFocusedModuleName()));
 
         if (metadataService.get(declaredByMetadataId) != null) {
             // The file already exists
@@ -217,36 +231,39 @@ public class IntegrationTestOperationsImpl implements IntegrationTestOperations 
         }
 
         // Determine if the test infrastructure needs installing
-        List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
-        List<AnnotationAttributeValue<?>> config = new ArrayList<AnnotationAttributeValue<?>>();
+        final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+        final List<AnnotationAttributeValue<?>> config = new ArrayList<AnnotationAttributeValue<?>>();
         config.add(new ClassAttributeValue(new JavaSymbolName("value"), JUNIT_4));
         annotations.add(new AnnotationMetadataBuilder(RUN_WITH, config));
 
-        List<MethodMetadataBuilder> methods = new ArrayList<MethodMetadataBuilder>();
-        List<AnnotationMetadataBuilder> methodAnnotations = new ArrayList<AnnotationMetadataBuilder>();
+        final List<MethodMetadataBuilder> methods = new ArrayList<MethodMetadataBuilder>();
+        final List<AnnotationMetadataBuilder> methodAnnotations = new ArrayList<AnnotationMetadataBuilder>();
         methodAnnotations.add(new AnnotationMetadataBuilder(TEST));
 
         // Get the class so we can hopefully make a demo method that will be
         // usable
-        ClassOrInterfaceTypeDetails governorTypeDetails = typeLocationService
+        final ClassOrInterfaceTypeDetails governorTypeDetails = typeLocationService
                 .getTypeDetails(javaType);
-        MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(
-                this.getClass().getName(), governorTypeDetails);
-        for (MemberHoldingTypeDetails typeDetails : memberDetails.getDetails()) {
+        final MemberDetails memberDetails = memberDetailsScanner
+                .getMemberDetails(this.getClass().getName(),
+                        governorTypeDetails);
+        for (final MemberHoldingTypeDetails typeDetails : memberDetails
+                .getDetails()) {
             if (!(typeDetails.getCustomData().keySet()
                     .contains(CustomDataKeys.PERSISTENT_TYPE) || typeDetails
                     .getDeclaredByMetadataId()
                     .startsWith(
                             "MID:org.springframework.roo.addon.tostring.ToStringMetadata"))) {
-                for (MethodMetadata method : typeDetails.getDeclaredMethods()) {
+                for (final MethodMetadata method : typeDetails
+                        .getDeclaredMethods()) {
                     // Check if public, non-abstract method
                     if (Modifier.isPublic(method.getModifier())
                             && !Modifier.isAbstract(method.getModifier())) {
-                        InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+                        final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
                         bodyBuilder
                                 .appendFormalLine("org.junit.Assert.assertTrue(true);");
 
-                        MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(
+                        final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(
                                 declaredByMetadataId, Modifier.PUBLIC,
                                 method.getMethodName(),
                                 JavaType.VOID_PRIMITIVE, bodyBuilder);
@@ -259,12 +276,12 @@ public class IntegrationTestOperationsImpl implements IntegrationTestOperations 
 
         // Only create test class if there are test methods present
         if (!methods.isEmpty()) {
-            ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(
+            final ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(
                     declaredByMetadataId, Modifier.PUBLIC, name,
                     PhysicalTypeCategory.CLASS);
 
             // Create instance of entity to test
-            FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(
+            final FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(
                     declaredByMetadataId);
             fieldBuilder.setModifier(Modifier.PRIVATE);
             fieldBuilder.setFieldName(new JavaSymbolName(StringUtils
@@ -272,7 +289,7 @@ public class IntegrationTestOperationsImpl implements IntegrationTestOperations 
             fieldBuilder.setFieldType(javaType);
             fieldBuilder.setFieldInitializer("new "
                     + javaType.getFullyQualifiedTypeName() + "()");
-            List<FieldMetadataBuilder> fields = new ArrayList<FieldMetadataBuilder>();
+            final List<FieldMetadataBuilder> fields = new ArrayList<FieldMetadataBuilder>();
             fields.add(fieldBuilder);
             cidBuilder.setDeclaredFields(fields);
 
@@ -280,18 +297,5 @@ public class IntegrationTestOperationsImpl implements IntegrationTestOperations 
 
             typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
         }
-    }
-
-    /**
-     * @param entity the entity to lookup required
-     * @return the type details (never null; throws an exception if it cannot be
-     *         obtained or parsed)
-     */
-    private ClassOrInterfaceTypeDetails getEntity(final JavaType entity) {
-        ClassOrInterfaceTypeDetails cid = typeLocationService
-                .getTypeDetails(entity);
-        Assert.notNull(cid, "Java source code details unavailable for type "
-                + cid);
-        return cid;
     }
 }

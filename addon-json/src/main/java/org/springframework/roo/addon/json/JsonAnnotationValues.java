@@ -14,13 +14,12 @@ import org.springframework.roo.model.RooJavaType;
  */
 public class JsonAnnotationValues extends AbstractAnnotationValues {
 
-    // Fields
-    @AutoPopulate String toJsonMethod = "toJson";
-    @AutoPopulate String fromJsonMethod = "fromJsonTo<TypeName>";
-    @AutoPopulate String fromJsonArrayMethod = "fromJsonArrayTo<TypeNamePlural>";
-    @AutoPopulate String toJsonArrayMethod = "toJsonArray";
-    @AutoPopulate String rootName = "";
     @AutoPopulate boolean deepSerialize;
+    @AutoPopulate String fromJsonArrayMethod = "fromJsonArrayTo<TypeNamePlural>";
+    @AutoPopulate String fromJsonMethod = "fromJsonTo<TypeName>";
+    @AutoPopulate String rootName = "";
+    @AutoPopulate String toJsonArrayMethod = "toJsonArray";
+    @AutoPopulate String toJsonMethod = "toJson";
 
     /**
      * Constructor
@@ -33,24 +32,24 @@ public class JsonAnnotationValues extends AbstractAnnotationValues {
         AutoPopulationUtils.populate(this, annotationMetadata);
     }
 
-    public String getToJsonMethod() {
-        return toJsonMethod;
+    public String getFromJsonArrayMethod() {
+        return fromJsonArrayMethod;
     }
 
     public String getFromJsonMethod() {
         return fromJsonMethod;
     }
 
+    public String getRootName() {
+        return rootName;
+    }
+
     public String getToJsonArrayMethod() {
         return toJsonArrayMethod;
     }
 
-    public String getFromJsonArrayMethod() {
-        return fromJsonArrayMethod;
-    }
-
-    public String getRootName() {
-        return rootName;
+    public String getToJsonMethod() {
+        return toJsonMethod;
     }
 
     public boolean isDeepSerialize() {

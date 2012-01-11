@@ -50,68 +50,80 @@ import org.springframework.roo.support.util.StringUtils;
 public final class JavaParserUtils {
 
     /**
-     * Converts the presented class name into a name expression (either a
-     * {@link NameExpr} or {@link QualifiedNameExpr} depending on whether a
-     * package was presented).
+     * Converts the indicated {@link NameExpr} into a
+     * {@link ClassOrInterfaceType}.
+     * <p>
+     * Note that no effort is made to manage imports etc.
      * 
-     * @param className to convert (required; can be fully qualified or simple
-     *            name only)
-     * @return a compatible expression (never returns null)
+     * @param nameExpr to convert (required)
+     * @return the corresponding {@link ClassOrInterfaceType} (never null)
      */
-    public static NameExpr getNameExpr(final String className) {
-        Assert.hasText(className, "Class name required");
-        if (className.contains(".")) {
-            int offset = className.lastIndexOf(".");
-            String packageName = className.substring(0, offset);
-            String typeName = className.substring(offset + 1);
-            return new QualifiedNameExpr(new NameExpr(packageName), typeName);
+    public static ClassOrInterfaceType getClassOrInterfaceType(
+            final NameExpr nameExpr) {
+        Assert.notNull(nameExpr, "Java type required");
+        if (nameExpr instanceof QualifiedNameExpr) {
+            final QualifiedNameExpr qne = (QualifiedNameExpr) nameExpr;
+            if (StringUtils.hasText(qne.getQualifier().getName())) {
+                return new ClassOrInterfaceType(qne.getQualifier().getName()
+                        + "." + qne.getName());
+            }
+            return new ClassOrInterfaceType(qne.getName());
         }
-        return new NameExpr(className);
+        return new ClassOrInterfaceType(nameExpr.getName());
     }
 
     /**
-     * Converts a Java Parser modifier integer into a JDK {@link Modifier}
-     * integer.
+     * Looks up the import declaration applicable to the presented name
+     * expression.
+     * <p>
+     * If a fully-qualified name is passed to this method, the corresponding
+     * import will be evaluated for a complete match. If a simple name is passed
+     * to this method, the corresponding import will be evaluated if its simple
+     * name matches. This therefore reflects the normal Java semantics for using
+     * simple type names that have been imported.
      * 
-     * @param modifiers the Java Parser int
-     * @return the equivalent JDK int
+     * @param compilationUnitServices the types in the compilation unit
+     *            (required)
+     * @param nameExpr the expression to locate an import for (which would
+     *            generally be a {@link NameExpr} and thus not have a package
+     *            identifier; required)
+     * @return the relevant import, or null if there is no import for the
+     *         expression
      */
-    public static int getJdkModifier(final int modifiers) {
-        int result = 0;
-        if (ModifierSet.isAbstract(modifiers)) {
-            result |= Modifier.ABSTRACT;
+    private static ImportDeclaration getImportDeclarationFor(
+            final CompilationUnitServices compilationUnitServices,
+            final NameExpr nameExpr) {
+        Assert.notNull(compilationUnitServices,
+                "Compilation unit services required");
+        Assert.notNull(nameExpr, "Name expression required");
+
+        final List<ImportDeclaration> imports = compilationUnitServices
+                .getImports();
+
+        for (final ImportDeclaration candidate : imports) {
+            final NameExpr candidateNameExpr = candidate.getName();
+            if (!candidate.toString().contains("*")) {
+                Assert.isInstanceOf(QualifiedNameExpr.class, candidateNameExpr,
+                        "Expected import '" + candidate
+                                + "' to use a fully-qualified type name");
+            }
+            if (nameExpr instanceof QualifiedNameExpr) {
+                // User is asking for a fully-qualified name; let's see if there
+                // is a full match
+                if (isEqual(nameExpr, candidateNameExpr)) {
+                    return candidate;
+                }
+            }
+            else {
+                // User is not asking for a fully-qualified name, so let's do a
+                // simple name comparison that discards the import's
+                // qualified-name package
+                if (candidateNameExpr.getName().equals(nameExpr.getName())) {
+                    return candidate;
+                }
+            }
         }
-        if (ModifierSet.isFinal(modifiers)) {
-            result |= Modifier.FINAL;
-        }
-        if (ModifierSet.isNative(modifiers)) {
-            result |= Modifier.NATIVE;
-        }
-        if (ModifierSet.isPrivate(modifiers)) {
-            result |= Modifier.PRIVATE;
-        }
-        if (ModifierSet.isProtected(modifiers)) {
-            result |= Modifier.PROTECTED;
-        }
-        if (ModifierSet.isPublic(modifiers)) {
-            result |= Modifier.PUBLIC;
-        }
-        if (ModifierSet.isStatic(modifiers)) {
-            result |= Modifier.STATIC;
-        }
-        if (ModifierSet.isStrictfp(modifiers)) {
-            result |= Modifier.STRICT;
-        }
-        if (ModifierSet.isSynchronized(modifiers)) {
-            result |= Modifier.SYNCHRONIZED;
-        }
-        if (ModifierSet.isTransient(modifiers)) {
-            result |= Modifier.TRANSIENT;
-        }
-        if (ModifierSet.isVolatile(modifiers)) {
-            result |= Modifier.VOLATILE;
-        }
-        return result;
+        return null;
     }
 
     /**
@@ -163,67 +175,143 @@ public final class JavaParserUtils {
     }
 
     /**
-     * Obtains the name expression ({@link NameExpr}) for the passed
-     * {@link AnnotationExpr}, which is the annotation's type.
-     * 
-     * @param annotationExpr to retrieve the type name from (required)
-     * @return the name (never null)
-     */
-    public static NameExpr getNameExpr(final AnnotationExpr annotationExpr) {
-        Assert.notNull(annotationExpr, "Annotation expression required");
-        if (annotationExpr instanceof MarkerAnnotationExpr) {
-            MarkerAnnotationExpr a = (MarkerAnnotationExpr) annotationExpr;
-            NameExpr nameToFind = a.getName();
-            Assert.notNull(nameToFind,
-                    "Unable to determine annotation name from '"
-                            + annotationExpr + "'");
-            return nameToFind;
-        }
-        else if (annotationExpr instanceof SingleMemberAnnotationExpr) {
-            SingleMemberAnnotationExpr a = (SingleMemberAnnotationExpr) annotationExpr;
-            NameExpr nameToFind = a.getName();
-            Assert.notNull(nameToFind,
-                    "Unable to determine annotation name from '"
-                            + annotationExpr + "'");
-            return nameToFind;
-        }
-        else if (annotationExpr instanceof NormalAnnotationExpr) {
-            NormalAnnotationExpr a = (NormalAnnotationExpr) annotationExpr;
-            NameExpr nameToFind = a.getName();
-            Assert.notNull(nameToFind,
-                    "Unable to determine annotation name from '"
-                            + annotationExpr + "'");
-            return nameToFind;
-        }
-        throw new UnsupportedOperationException(
-                "Unknown annotation expression type '"
-                        + annotationExpr.getClass().getName() + "'");
-    }
-
-    /**
-     * Indicates whether two {@link NameExpr} expressions are equal.
+     * Resolves the effective {@link JavaType} a {@link NameExpr} represents.
      * <p>
-     * This method is necessary given {@link NameExpr} does not offer an equals
-     * method.
+     * You should use {@link #getJavaType(CompilationUnitServices, Type, Set)}
+     * where possible so that type arguments are preserved (a {@link NameExpr}
+     * does not contain type arguments).
+     * <p>
+     * A name expression can be either qualified or unqualified.
+     * <p>
+     * If a name expression is qualified and the qualification starts with a
+     * lowercase letter, that represents the fully-qualified name. If the
+     * qualification starts with an uppercase letter, the package name is
+     * prepended to the qualifier.
+     * <p>
+     * If a name expression is unqualified, the imports are scanned. If the
+     * unqualified name expression is found in the imports, that import
+     * declaration represents the fully-qualified name. If the unqualified name
+     * expression is not found in the imports, it indicates the name to find is
+     * either in the same package as the qualified name expression, or the type
+     * relates to a member of java.lang. If part of java.lang, the fully
+     * qualified name is treated as part of java.lang. Otherwise the compilation
+     * unit package plus unqualified name expression represents the fully
+     * qualified name expression.
      * 
-     * @param o1 the first entry to compare (null is acceptable)
-     * @param o2 the second entry to compare (null is acceptable)
-     * @return true if and only if both entries are identical
+     * @param compilationUnitServices for package management (required)
+     * @param nameToFind to locate (required)
+     * @param typeParameters names to consider type parameters (can be null if
+     *            there are none)
+     * @return the effective Java type (never null)
      */
-    private static boolean isEqual(final NameExpr o1, final NameExpr o2) {
-        if (o1 == null && o2 == null) {
-            return true;
+    public static JavaType getJavaType(
+            final CompilationUnitServices compilationUnitServices,
+            final NameExpr nameToFind, final Set<JavaSymbolName> typeParameters) {
+        Assert.notNull(compilationUnitServices,
+                "Compilation unit services required");
+        Assert.notNull(nameToFind, "Name to find is required");
+
+        final JavaPackage compilationUnitPackage = compilationUnitServices
+                .getCompilationUnitPackage();
+
+        if (nameToFind instanceof QualifiedNameExpr) {
+            final QualifiedNameExpr qne = (QualifiedNameExpr) nameToFind;
+
+            // Handle qualified name expressions that are related to inner types
+            // (eg Foo.Bar)
+            final NameExpr qneQualifier = qne.getQualifier();
+            final NameExpr enclosedBy = getNameExpr(compilationUnitServices
+                    .getEnclosingTypeName().getSimpleTypeName());
+            if (isEqual(qneQualifier, enclosedBy)) {
+                // This qualified name expression is simply an inner type
+                // reference
+                final String name = compilationUnitServices
+                        .getEnclosingTypeName().getFullyQualifiedTypeName()
+                        + "." + nameToFind.getName();
+                return new JavaType(name,
+                        compilationUnitServices.getEnclosingTypeName());
+            }
+
+            // Refers to a different enclosing type, so calculate the package
+            // name based on convention of an uppercase letter denotes same
+            // package (ROO-1210)
+            if ((qne.toString().length() > 1)
+                    && Character.isUpperCase(qne.toString().charAt(0))) {
+                // First letter is uppercase, so this likely requires prepending
+                // of some package name
+                final ImportDeclaration importDeclaration = getImportDeclarationFor(
+                        compilationUnitServices, qne.getQualifier());
+                if (importDeclaration == null) {
+                    if (!compilationUnitPackage.getFullyQualifiedPackageName()
+                            .equals("")) {
+                        // It was not imported, so let's assume it's in the same
+                        // package
+                        return new JavaType(compilationUnitServices
+                                .getCompilationUnitPackage()
+                                .getFullyQualifiedPackageName()
+                                + "." + qne.toString());
+                    }
+                }
+                else {
+                    return new JavaType(importDeclaration.getName() + "."
+                            + qne.getName());
+                }
+
+                // This name expression (which contains a dot) had its qualifier
+                // imported, so let's use the import
+            }
+            else {
+                // First letter is lowercase, so the reference already includes
+                // a package
+                return new JavaType(qne.toString());
+            }
         }
-        if (o1 == null && o2 != null) {
-            return false;
+
+        if ("?".equals(nameToFind.getName())) {
+            return new JavaType(OBJECT.getFullyQualifiedTypeName(), 0,
+                    DataType.TYPE, JavaType.WILDCARD_NEITHER, null);
         }
-        if (o1 != null && o2 == null) {
-            return false;
+
+        // Unqualified name detected, so check if it's in the type parameter
+        // list
+        if ((typeParameters != null)
+                && typeParameters.contains(new JavaSymbolName(nameToFind
+                        .getName()))) {
+            return new JavaType(nameToFind.getName(), 0, DataType.VARIABLE,
+                    null, null);
         }
-        if (o1 != null && !o1.getName().equals(o2.getName())) {
-            return false;
+
+        // We are searching for a non-qualified name expression (nameToFind), so
+        // check if the compilation unit itself declares that type
+        for (final TypeDeclaration internalType : compilationUnitServices
+                .getInnerTypes()) {
+            final NameExpr nameExpr = getNameExpr(internalType.getName());
+            if (isEqual(nameExpr, nameToFind)) {
+                // Found, so now we need to convert the internalType to a proper
+                // JavaType
+                final String name = compilationUnitServices
+                        .getEnclosingTypeName().getFullyQualifiedTypeName()
+                        + "." + nameToFind.getName();
+                return new JavaType(name);
+            }
         }
-        return o1 != null && o1.toString().equals(o2.toString());
+
+        final ImportDeclaration importDeclaration = getImportDeclarationFor(
+                compilationUnitServices, nameToFind);
+        if (importDeclaration == null) {
+            if (JdkJavaType.isPartOfJavaLang(nameToFind.getName())) {
+                return new JavaType("java.lang." + nameToFind.getName());
+            }
+            final String name = compilationUnitPackage
+                    .getFullyQualifiedPackageName().equals("") ? nameToFind
+                    .getName() : compilationUnitPackage
+                    .getFullyQualifiedPackageName()
+                    + "."
+                    + nameToFind.getName();
+            return new JavaType(name);
+        }
+
+        return new JavaType(importDeclaration.getName().toString());
     }
 
     /**
@@ -260,7 +348,7 @@ public final class JavaParserUtils {
         }
 
         if (internalType instanceof PrimitiveType) {
-            PrimitiveType pt = (PrimitiveType) internalType;
+            final PrimitiveType pt = (PrimitiveType) internalType;
             if (pt.getType().equals(Primitive.Boolean)) {
                 return new JavaType(Boolean.class.getName(), array,
                         DataType.PRIMITIVE, null, null);
@@ -301,20 +389,22 @@ public final class JavaParserUtils {
             // We only provide very primitive support for wildcard types; Roo
             // only needs metadata at the end of the day,
             // not complete binding support from an AST
-            WildcardType wt = (WildcardType) internalType;
+            final WildcardType wt = (WildcardType) internalType;
             if (wt.getSuper() != null) {
-                ReferenceType rt = wt.getSuper();
-                ClassOrInterfaceType cit = (ClassOrInterfaceType) rt.getType();
-                JavaType effectiveType = getJavaTypeNow(
+                final ReferenceType rt = wt.getSuper();
+                final ClassOrInterfaceType cit = (ClassOrInterfaceType) rt
+                        .getType();
+                final JavaType effectiveType = getJavaTypeNow(
                         compilationUnitServices, cit, typeParameters);
                 return new JavaType(effectiveType.getFullyQualifiedTypeName(),
                         rt.getArrayCount(), effectiveType.getDataType(),
                         JavaType.WILDCARD_SUPER, effectiveType.getParameters());
             }
             else if (wt.getExtends() != null) {
-                ReferenceType rt = wt.getExtends();
-                ClassOrInterfaceType cit = (ClassOrInterfaceType) rt.getType();
-                JavaType effectiveType = getJavaTypeNow(
+                final ReferenceType rt = wt.getExtends();
+                final ClassOrInterfaceType cit = (ClassOrInterfaceType) rt
+                        .getType();
+                final JavaType effectiveType = getJavaTypeNow(
                         compilationUnitServices, cit, typeParameters);
                 return new JavaType(effectiveType.getFullyQualifiedTypeName(),
                         rt.getArrayCount(), effectiveType.getDataType(),
@@ -340,8 +430,8 @@ public final class JavaParserUtils {
                     + "' is unsupported by JavaParserUtils");
         }
 
-        JavaType effectiveType = getJavaTypeNow(compilationUnitServices, cit,
-                typeParameters);
+        final JavaType effectiveType = getJavaTypeNow(compilationUnitServices,
+                cit, typeParameters);
         if (array > 0) {
             return new JavaType(effectiveType.getFullyQualifiedTypeName(),
                     array, effectiveType.getDataType(),
@@ -352,144 +442,212 @@ public final class JavaParserUtils {
     }
 
     /**
-     * Resolves the effective {@link JavaType} a {@link NameExpr} represents.
-     * <p>
-     * You should use {@link #getJavaType(CompilationUnitServices, Type, Set)}
-     * where possible so that type arguments are preserved (a {@link NameExpr}
-     * does not contain type arguments).
-     * <p>
-     * A name expression can be either qualified or unqualified.
-     * <p>
-     * If a name expression is qualified and the qualification starts with a
-     * lowercase letter, that represents the fully-qualified name. If the
-     * qualification starts with an uppercase letter, the package name is
-     * prepended to the qualifier.
-     * <p>
-     * If a name expression is unqualified, the imports are scanned. If the
-     * unqualified name expression is found in the imports, that import
-     * declaration represents the fully-qualified name. If the unqualified name
-     * expression is not found in the imports, it indicates the name to find is
-     * either in the same package as the qualified name expression, or the type
-     * relates to a member of java.lang. If part of java.lang, the fully
-     * qualified name is treated as part of java.lang. Otherwise the compilation
-     * unit package plus unqualified name expression represents the fully
-     * qualified name expression.
+     * Resolves the effective {@link JavaType} a
+     * {@link ClassOrInterfaceDeclaration} represents, including any type
+     * parameters.
      * 
      * @param compilationUnitServices for package management (required)
-     * @param nameToFind to locate (required)
-     * @param typeParameters names to consider type parameters (can be null if
-     *            there are none)
+     * @param typeDeclaration the type declaration to resolve (required)
      * @return the effective Java type (never null)
      */
     public static JavaType getJavaType(
             final CompilationUnitServices compilationUnitServices,
-            final NameExpr nameToFind, final Set<JavaSymbolName> typeParameters) {
+            final TypeDeclaration typeDeclaration) {
         Assert.notNull(compilationUnitServices,
                 "Compilation unit services required");
-        Assert.notNull(nameToFind, "Name to find is required");
+        Assert.notNull(typeDeclaration, "Type declaration required");
 
-        JavaPackage compilationUnitPackage = compilationUnitServices
-                .getCompilationUnitPackage();
+        // Convert the ClassOrInterfaceDeclaration name into a JavaType
+        final NameExpr nameExpr = getNameExpr(typeDeclaration.getName());
+        final JavaType effectiveType = getJavaType(compilationUnitServices,
+                nameExpr, null);
 
-        if (nameToFind instanceof QualifiedNameExpr) {
-            QualifiedNameExpr qne = (QualifiedNameExpr) nameToFind;
-
-            // Handle qualified name expressions that are related to inner types
-            // (eg Foo.Bar)
-            NameExpr qneQualifier = qne.getQualifier();
-            NameExpr enclosedBy = getNameExpr(compilationUnitServices
-                    .getEnclosingTypeName().getSimpleTypeName());
-            if (isEqual(qneQualifier, enclosedBy)) {
-                // This qualified name expression is simply an inner type
-                // reference
-                String name = compilationUnitServices.getEnclosingTypeName()
-                        .getFullyQualifiedTypeName()
-                        + "."
-                        + nameToFind.getName();
-                return new JavaType(name,
-                        compilationUnitServices.getEnclosingTypeName());
-            }
-
-            // Refers to a different enclosing type, so calculate the package
-            // name based on convention of an uppercase letter denotes same
-            // package (ROO-1210)
-            if (qne.toString().length() > 1
-                    && Character.isUpperCase(qne.toString().charAt(0))) {
-                // First letter is uppercase, so this likely requires prepending
-                // of some package name
-                ImportDeclaration importDeclaration = getImportDeclarationFor(
-                        compilationUnitServices, qne.getQualifier());
-                if (importDeclaration == null) {
-                    if (!compilationUnitPackage.getFullyQualifiedPackageName()
-                            .equals("")) {
-                        // It was not imported, so let's assume it's in the same
-                        // package
-                        return new JavaType(compilationUnitServices
-                                .getCompilationUnitPackage()
-                                .getFullyQualifiedPackageName()
-                                + "." + qne.toString());
+        final List<JavaType> parameterTypes = new ArrayList<JavaType>();
+        if (typeDeclaration instanceof ClassOrInterfaceDeclaration) {
+            final ClassOrInterfaceDeclaration clazz = (ClassOrInterfaceDeclaration) typeDeclaration;
+            // Populate JavaType with type parameters
+            final List<TypeParameter> typeParameters = clazz
+                    .getTypeParameters();
+            if (typeParameters != null) {
+                final Set<JavaSymbolName> locatedTypeParameters = new HashSet<JavaSymbolName>();
+                for (final TypeParameter candidate : typeParameters) {
+                    final JavaSymbolName currentTypeParam = new JavaSymbolName(
+                            candidate.getName());
+                    locatedTypeParameters.add(currentTypeParam);
+                    JavaType javaType = null;
+                    if (candidate.getTypeBound() == null) {
+                        javaType = new JavaType(
+                                OBJECT.getFullyQualifiedTypeName(), 0,
+                                DataType.TYPE, currentTypeParam, null);
                     }
+                    else {
+                        final ClassOrInterfaceType cit = candidate
+                                .getTypeBound().get(0);
+                        javaType = JavaParserUtils.getJavaTypeNow(
+                                compilationUnitServices, cit,
+                                locatedTypeParameters);
+                        javaType = new JavaType(
+                                javaType.getFullyQualifiedTypeName(),
+                                javaType.getArray(), javaType.getDataType(),
+                                currentTypeParam, javaType.getParameters());
+                    }
+                    parameterTypes.add(javaType);
                 }
-                else {
-                    return new JavaType(importDeclaration.getName() + "."
-                            + qne.getName());
-                }
-
-                // This name expression (which contains a dot) had its qualifier
-                // imported, so let's use the import
-            }
-            else {
-                // First letter is lowercase, so the reference already includes
-                // a package
-                return new JavaType(qne.toString());
             }
         }
 
-        if ("?".equals(nameToFind.getName())) {
-            return new JavaType(OBJECT.getFullyQualifiedTypeName(), 0,
-                    DataType.TYPE, JavaType.WILDCARD_NEITHER, null);
-        }
+        return new JavaType(effectiveType.getFullyQualifiedTypeName(),
+                effectiveType.getArray(), effectiveType.getDataType(), null,
+                parameterTypes);
+    }
 
-        // Unqualified name detected, so check if it's in the type parameter
-        // list
-        if (typeParameters != null
-                && typeParameters.contains(new JavaSymbolName(nameToFind
-                        .getName()))) {
-            return new JavaType(nameToFind.getName(), 0, DataType.VARIABLE,
-                    null, null);
-        }
+    /**
+     * Resolves the effective {@link JavaType} a {@link ClassOrInterfaceType}
+     * represents, including any type arguments.
+     * 
+     * @param compilationUnitServices for package management (required)
+     * @param cit the class or interface type to resolve (required)
+     * @return the effective Java type (never null)
+     */
+    public static JavaType getJavaTypeNow(
+            final CompilationUnitServices compilationUnitServices,
+            final ClassOrInterfaceType cit,
+            final Set<JavaSymbolName> typeParameters) {
+        Assert.notNull(compilationUnitServices,
+                "Compilation unit services required");
+        Assert.notNull(cit, "ClassOrInterfaceType required");
 
-        // We are searching for a non-qualified name expression (nameToFind), so
-        // check if the compilation unit itself declares that type
-        for (TypeDeclaration internalType : compilationUnitServices
-                .getInnerTypes()) {
-            NameExpr nameExpr = getNameExpr(internalType.getName());
-            if (isEqual(nameExpr, nameToFind)) {
-                // Found, so now we need to convert the internalType to a proper
-                // JavaType
-                String name = compilationUnitServices.getEnclosingTypeName()
-                        .getFullyQualifiedTypeName()
-                        + "."
-                        + nameToFind.getName();
-                return new JavaType(name);
+        final JavaPackage compilationUnitPackage = compilationUnitServices
+                .getCompilationUnitPackage();
+        Assert.notNull(compilationUnitPackage,
+                "Compilation unit package required");
+
+        String typeName = cit.getName();
+        ClassOrInterfaceType scope = cit.getScope();
+        while (scope != null) {
+            typeName = scope.getName() + "." + typeName;
+            scope = scope.getScope();
+        }
+        final NameExpr nameExpr = getNameExpr(typeName);
+
+        final JavaType effectiveType = getJavaType(compilationUnitServices,
+                nameExpr, typeParameters);
+
+        // Handle any type arguments
+        final List<JavaType> parameterTypes = new ArrayList<JavaType>();
+        if (cit.getTypeArgs() != null) {
+            for (final Type ta : cit.getTypeArgs()) {
+                parameterTypes.add(getJavaType(compilationUnitServices, ta,
+                        typeParameters));
             }
         }
 
-        ImportDeclaration importDeclaration = getImportDeclarationFor(
-                compilationUnitServices, nameToFind);
-        if (importDeclaration == null) {
-            if (JdkJavaType.isPartOfJavaLang(nameToFind.getName())) {
-                return new JavaType("java.lang." + nameToFind.getName());
-            }
-            String name = compilationUnitPackage.getFullyQualifiedPackageName()
-                    .equals("") ? nameToFind.getName() : compilationUnitPackage
-                    .getFullyQualifiedPackageName()
-                    + "."
-                    + nameToFind.getName();
-            return new JavaType(name);
-        }
+        return new JavaType(effectiveType.getFullyQualifiedTypeName(),
+                effectiveType.getArray(), effectiveType.getDataType(), null,
+                parameterTypes);
+    }
 
-        return new JavaType(importDeclaration.getName().toString());
+    /**
+     * Converts a Java Parser modifier integer into a JDK {@link Modifier}
+     * integer.
+     * 
+     * @param modifiers the Java Parser int
+     * @return the equivalent JDK int
+     */
+    public static int getJdkModifier(final int modifiers) {
+        int result = 0;
+        if (ModifierSet.isAbstract(modifiers)) {
+            result |= Modifier.ABSTRACT;
+        }
+        if (ModifierSet.isFinal(modifiers)) {
+            result |= Modifier.FINAL;
+        }
+        if (ModifierSet.isNative(modifiers)) {
+            result |= Modifier.NATIVE;
+        }
+        if (ModifierSet.isPrivate(modifiers)) {
+            result |= Modifier.PRIVATE;
+        }
+        if (ModifierSet.isProtected(modifiers)) {
+            result |= Modifier.PROTECTED;
+        }
+        if (ModifierSet.isPublic(modifiers)) {
+            result |= Modifier.PUBLIC;
+        }
+        if (ModifierSet.isStatic(modifiers)) {
+            result |= Modifier.STATIC;
+        }
+        if (ModifierSet.isStrictfp(modifiers)) {
+            result |= Modifier.STRICT;
+        }
+        if (ModifierSet.isSynchronized(modifiers)) {
+            result |= Modifier.SYNCHRONIZED;
+        }
+        if (ModifierSet.isTransient(modifiers)) {
+            result |= Modifier.TRANSIENT;
+        }
+        if (ModifierSet.isVolatile(modifiers)) {
+            result |= Modifier.VOLATILE;
+        }
+        return result;
+    }
+
+    /**
+     * Obtains the name expression ({@link NameExpr}) for the passed
+     * {@link AnnotationExpr}, which is the annotation's type.
+     * 
+     * @param annotationExpr to retrieve the type name from (required)
+     * @return the name (never null)
+     */
+    public static NameExpr getNameExpr(final AnnotationExpr annotationExpr) {
+        Assert.notNull(annotationExpr, "Annotation expression required");
+        if (annotationExpr instanceof MarkerAnnotationExpr) {
+            final MarkerAnnotationExpr a = (MarkerAnnotationExpr) annotationExpr;
+            final NameExpr nameToFind = a.getName();
+            Assert.notNull(nameToFind,
+                    "Unable to determine annotation name from '"
+                            + annotationExpr + "'");
+            return nameToFind;
+        }
+        else if (annotationExpr instanceof SingleMemberAnnotationExpr) {
+            final SingleMemberAnnotationExpr a = (SingleMemberAnnotationExpr) annotationExpr;
+            final NameExpr nameToFind = a.getName();
+            Assert.notNull(nameToFind,
+                    "Unable to determine annotation name from '"
+                            + annotationExpr + "'");
+            return nameToFind;
+        }
+        else if (annotationExpr instanceof NormalAnnotationExpr) {
+            final NormalAnnotationExpr a = (NormalAnnotationExpr) annotationExpr;
+            final NameExpr nameToFind = a.getName();
+            Assert.notNull(nameToFind,
+                    "Unable to determine annotation name from '"
+                            + annotationExpr + "'");
+            return nameToFind;
+        }
+        throw new UnsupportedOperationException(
+                "Unknown annotation expression type '"
+                        + annotationExpr.getClass().getName() + "'");
+    }
+
+    /**
+     * Converts the presented class name into a name expression (either a
+     * {@link NameExpr} or {@link QualifiedNameExpr} depending on whether a
+     * package was presented).
+     * 
+     * @param className to convert (required; can be fully qualified or simple
+     *            name only)
+     * @return a compatible expression (never returns null)
+     */
+    public static NameExpr getNameExpr(final String className) {
+        Assert.hasText(className, "Class name required");
+        if (className.contains(".")) {
+            final int offset = className.lastIndexOf(".");
+            final String packageName = className.substring(0, offset);
+            final String typeName = className.substring(offset + 1);
+            return new QualifiedNameExpr(new NameExpr(packageName), typeName);
+        }
+        return new NameExpr(className);
     }
 
     /**
@@ -505,27 +663,41 @@ public final class JavaParserUtils {
         return new ReferenceType(getClassOrInterfaceType(nameExpr));
     }
 
-    /**
-     * Converts the indicated {@link NameExpr} into a
-     * {@link ClassOrInterfaceType}.
-     * <p>
-     * Note that no effort is made to manage imports etc.
-     * 
-     * @param nameExpr to convert (required)
-     * @return the corresponding {@link ClassOrInterfaceType} (never null)
-     */
-    public static ClassOrInterfaceType getClassOrInterfaceType(
-            final NameExpr nameExpr) {
-        Assert.notNull(nameExpr, "Java type required");
-        if (nameExpr instanceof QualifiedNameExpr) {
-            QualifiedNameExpr qne = (QualifiedNameExpr) nameExpr;
-            if (StringUtils.hasText(qne.getQualifier().getName())) {
-                return new ClassOrInterfaceType(qne.getQualifier().getName()
-                        + "." + qne.getName());
+    public static ClassOrInterfaceType getResolvedName(final JavaType target,
+            final JavaType current, final CompilationUnit compilationUnit) {
+        final NameExpr nameExpr = JavaParserUtils.importTypeIfRequired(target,
+                compilationUnit.getImports(), current);
+        final ClassOrInterfaceType resolvedName = JavaParserUtils
+                .getClassOrInterfaceType(nameExpr);
+        if ((current.getParameters() != null)
+                && (current.getParameters().size() > 0)) {
+            resolvedName.setTypeArgs(new ArrayList<Type>());
+            for (final JavaType param : current.getParameters()) {
+                resolvedName.getTypeArgs().add(
+                        getResolvedName(target, param, compilationUnit));
             }
-            return new ClassOrInterfaceType(qne.getName());
         }
-        return new ClassOrInterfaceType(nameExpr.getName());
+
+        return resolvedName;
+    }
+
+    public static ClassOrInterfaceType getResolvedName(final JavaType target,
+            final JavaType current,
+            final CompilationUnitServices compilationUnit) {
+        final NameExpr nameExpr = JavaParserUtils.importTypeIfRequired(target,
+                compilationUnit.getImports(), current);
+        final ClassOrInterfaceType resolvedName = JavaParserUtils
+                .getClassOrInterfaceType(nameExpr);
+        if ((current.getParameters() != null)
+                && (current.getParameters().size() > 0)) {
+            resolvedName.setTypeArgs(new ArrayList<Type>());
+            for (final JavaType param : current.getParameters()) {
+                resolvedName.getTypeArgs().add(
+                        getResolvedName(target, param, compilationUnit));
+            }
+        }
+
+        return resolvedName;
     }
 
     /**
@@ -575,161 +747,76 @@ public final class JavaParserUtils {
     }
 
     /**
-     * Resolves the effective {@link JavaType} a {@link ClassOrInterfaceType}
-     * represents, including any type arguments.
-     * 
-     * @param compilationUnitServices for package management (required)
-     * @param cit the class or interface type to resolve (required)
-     * @return the effective Java type (never null)
-     */
-    public static JavaType getJavaTypeNow(
-            final CompilationUnitServices compilationUnitServices,
-            final ClassOrInterfaceType cit,
-            final Set<JavaSymbolName> typeParameters) {
-        Assert.notNull(compilationUnitServices,
-                "Compilation unit services required");
-        Assert.notNull(cit, "ClassOrInterfaceType required");
-
-        JavaPackage compilationUnitPackage = compilationUnitServices
-                .getCompilationUnitPackage();
-        Assert.notNull(compilationUnitPackage,
-                "Compilation unit package required");
-
-        String typeName = cit.getName();
-        ClassOrInterfaceType scope = cit.getScope();
-        while (scope != null) {
-            typeName = scope.getName() + "." + typeName;
-            scope = scope.getScope();
-        }
-        NameExpr nameExpr = getNameExpr(typeName);
-
-        JavaType effectiveType = getJavaType(compilationUnitServices, nameExpr,
-                typeParameters);
-
-        // Handle any type arguments
-        List<JavaType> parameterTypes = new ArrayList<JavaType>();
-        if (cit.getTypeArgs() != null) {
-            for (Type ta : cit.getTypeArgs()) {
-                parameterTypes.add(getJavaType(compilationUnitServices, ta,
-                        typeParameters));
-            }
-        }
-
-        return new JavaType(effectiveType.getFullyQualifiedTypeName(),
-                effectiveType.getArray(), effectiveType.getDataType(), null,
-                parameterTypes);
-    }
-
-    /**
-     * Resolves the effective {@link JavaType} a
-     * {@link ClassOrInterfaceDeclaration} represents, including any type
-     * parameters.
-     * 
-     * @param compilationUnitServices for package management (required)
-     * @param typeDeclaration the type declaration to resolve (required)
-     * @return the effective Java type (never null)
-     */
-    public static JavaType getJavaType(
-            final CompilationUnitServices compilationUnitServices,
-            final TypeDeclaration typeDeclaration) {
-        Assert.notNull(compilationUnitServices,
-                "Compilation unit services required");
-        Assert.notNull(typeDeclaration, "Type declaration required");
-
-        // Convert the ClassOrInterfaceDeclaration name into a JavaType
-        NameExpr nameExpr = getNameExpr(typeDeclaration.getName());
-        JavaType effectiveType = getJavaType(compilationUnitServices, nameExpr,
-                null);
-
-        List<JavaType> parameterTypes = new ArrayList<JavaType>();
-        if (typeDeclaration instanceof ClassOrInterfaceDeclaration) {
-            ClassOrInterfaceDeclaration clazz = (ClassOrInterfaceDeclaration) typeDeclaration;
-            // Populate JavaType with type parameters
-            List<TypeParameter> typeParameters = clazz.getTypeParameters();
-            if (typeParameters != null) {
-                Set<JavaSymbolName> locatedTypeParameters = new HashSet<JavaSymbolName>();
-                for (TypeParameter candidate : typeParameters) {
-                    JavaSymbolName currentTypeParam = new JavaSymbolName(
-                            candidate.getName());
-                    locatedTypeParameters.add(currentTypeParam);
-                    JavaType javaType = null;
-                    if (candidate.getTypeBound() == null) {
-                        javaType = new JavaType(
-                                OBJECT.getFullyQualifiedTypeName(), 0,
-                                DataType.TYPE, currentTypeParam, null);
-                    }
-                    else {
-                        ClassOrInterfaceType cit = candidate.getTypeBound()
-                                .get(0);
-                        javaType = JavaParserUtils.getJavaTypeNow(
-                                compilationUnitServices, cit,
-                                locatedTypeParameters);
-                        javaType = new JavaType(
-                                javaType.getFullyQualifiedTypeName(),
-                                javaType.getArray(), javaType.getDataType(),
-                                currentTypeParam, javaType.getParameters());
-                    }
-                    parameterTypes.add(javaType);
-                }
-            }
-        }
-
-        return new JavaType(effectiveType.getFullyQualifiedTypeName(),
-                effectiveType.getArray(), effectiveType.getDataType(), null,
-                parameterTypes);
-    }
-
-    /**
-     * Looks up the import declaration applicable to the presented name
-     * expression.
+     * Recognises {@link Expression}s of type {@link FieldAccessExpr} and
+     * {@link ClassExpr} and automatically imports them if required, returning
+     * the correct {@link Expression} that should subsequently be used.
      * <p>
-     * If a fully-qualified name is passed to this method, the corresponding
-     * import will be evaluated for a complete match. If a simple name is passed
-     * to this method, the corresponding import will be evaluated if its simple
-     * name matches. This therefore reflects the normal Java semantics for using
-     * simple type names that have been imported.
+     * Even if an {@link Expression} is not resolved by this method into a type
+     * and/or imported, the method guarantees to always return an
+     * {@link Expression} that the caller can subsequently use in place of the
+     * passed {@link Expression}. In practical terms, the {@link Expression}
+     * passed to this method will be returned unless the type was already
+     * imported, just imported, or represented a java.lang type.
      * 
-     * @param compilationUnitServices the types in the compilation unit
-     *            (required)
-     * @param nameExpr the expression to locate an import for (which would
-     *            generally be a {@link NameExpr} and thus not have a package
-     *            identifier; required)
-     * @return the relevant import, or null if there is no import for the
-     *         expression
+     * @param targetType the compilation unit target type (required)
+     * @param imports the existing imports (required)
+     * @param value that expression, which need not necessarily be resolvable to
+     *            a type (required)
+     * @return the expression to now use, as appropriately resolved (never
+     *         returns null)
      */
-    private static ImportDeclaration getImportDeclarationFor(
-            final CompilationUnitServices compilationUnitServices,
-            final NameExpr nameExpr) {
-        Assert.notNull(compilationUnitServices,
-                "Compilation unit services required");
-        Assert.notNull(nameExpr, "Name expression required");
+    public static Expression importExpressionIfRequired(
+            final JavaType targetType, final List<ImportDeclaration> imports,
+            final Expression value) {
+        Assert.notNull(targetType, "Target type required");
+        Assert.notNull(imports, "Imports required");
+        Assert.notNull(value, "Expression value required");
 
-        List<ImportDeclaration> imports = compilationUnitServices.getImports();
-
-        for (ImportDeclaration candidate : imports) {
-            NameExpr candidateNameExpr = candidate.getName();
-            if (!candidate.toString().contains("*")) {
-                Assert.isInstanceOf(QualifiedNameExpr.class, candidateNameExpr,
-                        "Expected import '" + candidate
-                                + "' to use a fully-qualified type name");
-            }
-            if (nameExpr instanceof QualifiedNameExpr) {
-                // User is asking for a fully-qualified name; let's see if there
-                // is a full match
-                if (isEqual(nameExpr, candidateNameExpr)) {
-                    return candidate;
-                }
-            }
-            else {
-                // User is not asking for a fully-qualified name, so let's do a
-                // simple name comparison that discards the import's
-                // qualified-name package
-                if (candidateNameExpr.getName().equals(nameExpr.getName())) {
-                    return candidate;
+        if (value instanceof FieldAccessExpr) {
+            final Expression scope = ((FieldAccessExpr) value).getScope();
+            final String field = ((FieldAccessExpr) value).getField();
+            if (scope instanceof QualifiedNameExpr) {
+                final String packageName = ((QualifiedNameExpr) scope)
+                        .getQualifier().getName();
+                final String simpleName = ((QualifiedNameExpr) scope).getName();
+                final String fullyQualifiedName = packageName + "."
+                        + simpleName;
+                final JavaType javaType = new JavaType(fullyQualifiedName);
+                final NameExpr nameToUse = importTypeIfRequired(targetType,
+                        imports, javaType);
+                if (!(nameToUse instanceof QualifiedNameExpr)) {
+                    return new FieldAccessExpr(nameToUse, field);
                 }
             }
         }
-        return null;
+        else if (value instanceof ClassExpr) {
+            final Type type = ((ClassExpr) value).getType();
+            if (type instanceof ClassOrInterfaceType) {
+                final JavaType javaType = new JavaType(
+                        ((ClassOrInterfaceType) type).getName());
+                final NameExpr nameToUse = importTypeIfRequired(targetType,
+                        imports, javaType);
+                if (!(nameToUse instanceof QualifiedNameExpr)) {
+                    return new ClassExpr(new ClassOrInterfaceType(
+                            javaType.getSimpleTypeName()));
+                }
+            }
+            else if ((type instanceof ReferenceType)
+                    && (((ReferenceType) type).getType() instanceof ClassOrInterfaceType)) {
+                final ClassOrInterfaceType cit = (ClassOrInterfaceType) ((ReferenceType) type)
+                        .getType();
+                final JavaType javaType = new JavaType(cit.getName());
+                final NameExpr nameToUse = importTypeIfRequired(targetType,
+                        imports, javaType);
+                if (!(nameToUse instanceof QualifiedNameExpr)) {
+                    return new ClassExpr(new ClassOrInterfaceType(
+                            javaType.getSimpleTypeName()));
+                }
+            }
+        }
+
+        // Make no changes
+        return value;
     }
 
     public static ReferenceType importParametersForType(
@@ -769,7 +856,7 @@ public final class JavaParserUtils {
     public static NameExpr importTypeIfRequired(final JavaType targetType,
             final List<ImportDeclaration> imports, final JavaType typeToImport) {
         Assert.notNull(targetType, "Target type is required");
-        JavaPackage compilationUnitPackage = targetType.getPackage();
+        final JavaPackage compilationUnitPackage = targetType.getPackage();
         Assert.notNull(imports, "Compilation unit imports required");
         Assert.notNull(typeToImport, "Java type to import is required");
 
@@ -799,12 +886,12 @@ public final class JavaParserUtils {
                     typeToImport.getSimpleTypeName());
         }
 
-        ImportDeclaration newImport = new ImportDeclaration(typeToImportExpr,
-                false, false);
+        final ImportDeclaration newImport = new ImportDeclaration(
+                typeToImportExpr, false, false);
 
         boolean addImport = true;
         boolean useSimpleTypeName = false;
-        for (ImportDeclaration existingImport : imports) {
+        for (final ImportDeclaration existingImport : imports) {
             if (existingImport.getName().getName()
                     .equals(newImport.getName().getName())) {
                 // Do not import, as there is already an import with the simple
@@ -877,75 +964,29 @@ public final class JavaParserUtils {
     }
 
     /**
-     * Recognises {@link Expression}s of type {@link FieldAccessExpr} and
-     * {@link ClassExpr} and automatically imports them if required, returning
-     * the correct {@link Expression} that should subsequently be used.
+     * Indicates whether two {@link NameExpr} expressions are equal.
      * <p>
-     * Even if an {@link Expression} is not resolved by this method into a type
-     * and/or imported, the method guarantees to always return an
-     * {@link Expression} that the caller can subsequently use in place of the
-     * passed {@link Expression}. In practical terms, the {@link Expression}
-     * passed to this method will be returned unless the type was already
-     * imported, just imported, or represented a java.lang type.
+     * This method is necessary given {@link NameExpr} does not offer an equals
+     * method.
      * 
-     * @param targetType the compilation unit target type (required)
-     * @param imports the existing imports (required)
-     * @param value that expression, which need not necessarily be resolvable to
-     *            a type (required)
-     * @return the expression to now use, as appropriately resolved (never
-     *         returns null)
+     * @param o1 the first entry to compare (null is acceptable)
+     * @param o2 the second entry to compare (null is acceptable)
+     * @return true if and only if both entries are identical
      */
-    public static Expression importExpressionIfRequired(
-            final JavaType targetType, final List<ImportDeclaration> imports,
-            final Expression value) {
-        Assert.notNull(targetType, "Target type required");
-        Assert.notNull(imports, "Imports required");
-        Assert.notNull(value, "Expression value required");
-
-        if (value instanceof FieldAccessExpr) {
-            Expression scope = ((FieldAccessExpr) value).getScope();
-            String field = ((FieldAccessExpr) value).getField();
-            if (scope instanceof QualifiedNameExpr) {
-                String packageName = ((QualifiedNameExpr) scope).getQualifier()
-                        .getName();
-                String simpleName = ((QualifiedNameExpr) scope).getName();
-                String fullyQualifiedName = packageName + "." + simpleName;
-                JavaType javaType = new JavaType(fullyQualifiedName);
-                NameExpr nameToUse = importTypeIfRequired(targetType, imports,
-                        javaType);
-                if (!(nameToUse instanceof QualifiedNameExpr)) {
-                    return new FieldAccessExpr(nameToUse, field);
-                }
-            }
+    private static boolean isEqual(final NameExpr o1, final NameExpr o2) {
+        if ((o1 == null) && (o2 == null)) {
+            return true;
         }
-        else if (value instanceof ClassExpr) {
-            Type type = ((ClassExpr) value).getType();
-            if (type instanceof ClassOrInterfaceType) {
-                JavaType javaType = new JavaType(
-                        ((ClassOrInterfaceType) type).getName());
-                NameExpr nameToUse = importTypeIfRequired(targetType, imports,
-                        javaType);
-                if (!(nameToUse instanceof QualifiedNameExpr)) {
-                    return new ClassExpr(new ClassOrInterfaceType(
-                            javaType.getSimpleTypeName()));
-                }
-            }
-            else if (type instanceof ReferenceType
-                    && ((ReferenceType) type).getType() instanceof ClassOrInterfaceType) {
-                ClassOrInterfaceType cit = (ClassOrInterfaceType) ((ReferenceType) type)
-                        .getType();
-                JavaType javaType = new JavaType(cit.getName());
-                NameExpr nameToUse = importTypeIfRequired(targetType, imports,
-                        javaType);
-                if (!(nameToUse instanceof QualifiedNameExpr)) {
-                    return new ClassExpr(new ClassOrInterfaceType(
-                            javaType.getSimpleTypeName()));
-                }
-            }
+        if ((o1 == null) && (o2 != null)) {
+            return false;
         }
-
-        // Make no changes
-        return value;
+        if ((o1 != null) && (o2 == null)) {
+            return false;
+        }
+        if ((o1 != null) && !o1.getName().equals(o2.getName())) {
+            return false;
+        }
+        return (o1 != null) && o1.toString().equals(o2.toString());
     }
 
     /**
@@ -963,50 +1004,13 @@ public final class JavaParserUtils {
         if (compilationUnit.getTypes() == null) {
             return null;
         }
-        for (TypeDeclaration candidate : compilationUnit.getTypes()) {
+        for (final TypeDeclaration candidate : compilationUnit.getTypes()) {
             if (javaType.getSimpleTypeName().equals(candidate.getName())) {
                 // We have the required type declaration
                 return candidate;
             }
         }
         return null;
-    }
-
-    public static ClassOrInterfaceType getResolvedName(final JavaType target,
-            final JavaType current, final CompilationUnit compilationUnit) {
-        NameExpr nameExpr = JavaParserUtils.importTypeIfRequired(target,
-                compilationUnit.getImports(), current);
-        ClassOrInterfaceType resolvedName = JavaParserUtils
-                .getClassOrInterfaceType(nameExpr);
-        if (current.getParameters() != null
-                && current.getParameters().size() > 0) {
-            resolvedName.setTypeArgs(new ArrayList<Type>());
-            for (JavaType param : current.getParameters()) {
-                resolvedName.getTypeArgs().add(
-                        getResolvedName(target, param, compilationUnit));
-            }
-        }
-
-        return resolvedName;
-    }
-
-    public static ClassOrInterfaceType getResolvedName(final JavaType target,
-            final JavaType current,
-            final CompilationUnitServices compilationUnit) {
-        NameExpr nameExpr = JavaParserUtils.importTypeIfRequired(target,
-                compilationUnit.getImports(), current);
-        ClassOrInterfaceType resolvedName = JavaParserUtils
-                .getClassOrInterfaceType(nameExpr);
-        if (current.getParameters() != null
-                && current.getParameters().size() > 0) {
-            resolvedName.setTypeArgs(new ArrayList<Type>());
-            for (JavaType param : current.getParameters()) {
-                resolvedName.getTypeArgs().add(
-                        getResolvedName(target, param, compilationUnit));
-            }
-        }
-
-        return resolvedName;
     }
 
     /**

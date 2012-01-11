@@ -27,14 +27,23 @@ public class ExecuteSelf extends AbstractAction {
      * {@inheritDoc}
      */
     @Override
-    public void executeImpl(CommandTransformation trafo, ActionConfig config) {
-        String processedCommand = removeArguments(trafo, config);
+    public void executeImpl(final CommandTransformation trafo,
+            final ActionConfig config) {
+        final String processedCommand = removeArguments(trafo, config);
         trafo.addOutputCommand(processedCommand);
     }
 
-    private String removeArguments(CommandTransformation trafo,
-            ActionConfig config) {
-        String removeArgumentsAttribute = config
+    public String getDescription(final ActionConfig config) {
+        return "Executing original command";
+    }
+
+    public boolean isValid(final ActionConfig config) {
+        return config != null;
+    }
+
+    private String removeArguments(final CommandTransformation trafo,
+            final ActionConfig config) {
+        final String removeArgumentsAttribute = config
                 .getAttribute(ACTIONATTR_REMOVEARGS);
         if (!StringUtils.hasText(removeArgumentsAttribute)) {
             return trafo.getInputCommand();
@@ -42,18 +51,20 @@ public class ExecuteSelf extends AbstractAction {
 
         String inputCommandString = trafo.getInputCommand();
 
-        String[] removeArgumentsList = removeArgumentsAttribute.split(",");
-        for (int i = 0; i < removeArgumentsList.length; i++) {
-            String argToRemove = removeArgumentsList[i];
+        final String[] removeArgumentsList = removeArgumentsAttribute
+                .split(",");
+        for (final String element : removeArgumentsList) {
+            String argToRemove = element;
 
             if (argToRemove.startsWith("--")) {
                 argToRemove = argToRemove.substring(2);
             }
 
-            Map<String, String> cmdArguments = trafo.getArguments();
-            Iterator<String> keyIterator = cmdArguments.keySet().iterator();
+            final Map<String, String> cmdArguments = trafo.getArguments();
+            final Iterator<String> keyIterator = cmdArguments.keySet()
+                    .iterator();
             while (keyIterator.hasNext()) {
-                String argName = keyIterator.next();
+                final String argName = keyIterator.next();
                 if (argName.equals(argToRemove)) {
                     inputCommandString = inputCommandString.replace("--"
                             + argName + " " + cmdArguments.get(argName), "");
@@ -62,14 +73,6 @@ public class ExecuteSelf extends AbstractAction {
         }
 
         return inputCommandString;
-    }
-
-    public String getDescription(ActionConfig config) {
-        return "Executing original command";
-    }
-
-    public boolean isValid(ActionConfig config) {
-        return config != null;
     }
 
 }

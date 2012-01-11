@@ -16,6 +16,14 @@ public interface LayerProvider {
     int CORE_LAYER_PRIORITY = 0;
 
     /**
+     * Returns the position of this layer relative to others.
+     * 
+     * @return a large number for higher-level layers, a smaller number for
+     *         lower-level layers
+     */
+    int getLayerPosition();
+
+    /**
      * A layer provider should determine if it can provide
      * {@link MemberTypeAdditions} for a given target entity and construct it
      * accordingly. If it can not provide the requested functionality it should
@@ -32,14 +40,6 @@ public interface LayerProvider {
     MemberTypeAdditions getMemberTypeAdditions(String callerMID,
             String methodIdentifier, JavaType targetEntity, JavaType idType,
             MethodParameter... methodParameters);
-
-    /**
-     * Returns the position of this layer relative to others.
-     * 
-     * @return a large number for higher-level layers, a smaller number for
-     *         lower-level layers
-     */
-    int getLayerPosition();
 
     /**
      * Returns the priority of this layer relative to other implementations with

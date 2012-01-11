@@ -48,360 +48,17 @@ import org.w3c.dom.Element;
  */
 public class SimpleParser implements Parser {
 
-    // Constants
+    private static final Comparator<Object> COMPARATOR = new NaturalOrderComparator<Object>();
     private static final Logger LOGGER = HandlerUtils
             .getLogger(SimpleParser.class);
-    private static final Comparator<Object> COMPARATOR = new NaturalOrderComparator<Object>();
-
-    // Fields
-    private final Object mutex = new Object();
-    private final Set<Converter<?>> converters = new HashSet<Converter<?>>();
-    private final Set<CommandMarker> commands = new HashSet<CommandMarker>();
-    private final Map<String, MethodTarget> availabilityIndicators = new HashMap<String, MethodTarget>();
-
-    private MethodTarget getAvailabilityIndicator(final String command) {
-        return availabilityIndicators.get(command);
-    }
-
-    public ParseResult parse(final String rawInput) {
-        synchronized (mutex) {
-            Assert.notNull(rawInput, "Raw input required");
-            final String input = normalise(rawInput);
-
-            // Locate the applicable targets which match this buffer
-            final Collection<MethodTarget> matchingTargets = locateTargets(
-                    input, true, true);
-            if (matchingTargets.isEmpty()) {
-                // Before we just give up, let's see if we can offer a more
-                // informative message to the user
-                // by seeing the command is simply unavailable at this point in
-                // time
-                CollectionUtils.populate(matchingTargets,
-                        locateTargets(input, true, false));
-                if (matchingTargets.isEmpty()) {
-                    commandNotFound(LOGGER, input);
-                }
-                else {
-                    LOGGER.warning("Command '"
-                            + input
-                            + "' was found but is not currently available (type 'help' then ENTER to learn about this command)");
-                }
-                return null;
-            }
-            if (matchingTargets.size() > 1) {
-                LOGGER.warning("Ambigious command '" + input
-                        + "' (for assistance press "
-                        + AbstractShell.completionKeys
-                        + " or type \"hint\" then hit ENTER)");
-                return null;
-            }
-            MethodTarget methodTarget = matchingTargets.iterator().next();
-
-            // Argument conversion time
-            Annotation[][] parameterAnnotations = methodTarget.getMethod()
-                    .getParameterAnnotations();
-            if (parameterAnnotations.length == 0) {
-                // No args
-                return new ParseResult(methodTarget.getMethod(),
-                        methodTarget.getTarget(), null);
-            }
-
-            // Oh well, we need to convert some arguments
-            final List<Object> arguments = new ArrayList<Object>(methodTarget
-                    .getMethod().getParameterTypes().length);
-
-            // Attempt to parse
-            Map<String, String> options = null;
-            try {
-                options = ParserUtils.tokenize(methodTarget
-                        .getRemainingBuffer());
-            }
-            catch (IllegalArgumentException e) {
-                LOGGER.warning(ExceptionUtils.extractRootCause(e).getMessage());
-                return null;
-            }
-
-            final Set<CliOption> cliOptions = getCliOptions(parameterAnnotations);
-            for (CliOption cliOption : cliOptions) {
-                Class<?> requiredType = methodTarget.getMethod()
-                        .getParameterTypes()[arguments.size()];
-
-                if (cliOption.systemProvided()) {
-                    Object result;
-                    if (SimpleParser.class.isAssignableFrom(requiredType)) {
-                        result = this;
-                    }
-                    else {
-                        LOGGER.warning("Parameter type '" + requiredType
-                                + "' is not system provided");
-                        return null;
-                    }
-                    arguments.add(result);
-                    continue;
-                }
-
-                // Obtain the value the user specified, taking care to ensure
-                // they only specified it via a single alias
-                String value = null;
-                String sourcedFrom = null;
-                for (String possibleKey : cliOption.key()) {
-                    if (options.containsKey(possibleKey)) {
-                        if (sourcedFrom != null) {
-                            LOGGER.warning("You cannot specify option '"
-                                    + possibleKey
-                                    + "' when you have also specified '"
-                                    + sourcedFrom + "' in the same command");
-                            return null;
-                        }
-                        sourcedFrom = possibleKey;
-                        value = options.get(possibleKey);
-                    }
-                }
-
-                // Ensure the user specified a value if the value is mandatory
-                if (StringUtils.isBlank(value) && cliOption.mandatory()) {
-                    if ("".equals(cliOption.key()[0])) {
-                        StringBuilder message = new StringBuilder(
-                                "You must specify a default option ");
-                        if (cliOption.key().length > 1) {
-                            message.append("(otherwise known as option '")
-                                    .append(cliOption.key()[1]).append("') ");
-                        }
-                        message.append("for this command");
-                        LOGGER.warning(message.toString());
-                    }
-                    else {
-                        LOGGER.warning("You must specify option '"
-                                + cliOption.key()[0] + "' for this command");
-                    }
-                    return null;
-                }
-
-                // Accept a default if the user specified the option, but didn't
-                // provide a value
-                if ("".equals(value)) {
-                    value = cliOption.specifiedDefaultValue();
-                }
-
-                // Accept a default if the user didn't specify the option at all
-                if (value == null) {
-                    value = cliOption.unspecifiedDefaultValue();
-                }
-
-                // Special token that denotes a null value is sought (useful for
-                // default values)
-                if ("__NULL__".equals(value)) {
-                    if (requiredType.isPrimitive()) {
-                        LOGGER.warning("Nulls cannot be presented to primitive type "
-                                + requiredType.getSimpleName()
-                                + " for option '"
-                                + StringUtils
-                                        .arrayToCommaDelimitedString(cliOption
-                                                .key()) + "'");
-                        return null;
-                    }
-                    arguments.add(null);
-                    continue;
-                }
-
-                // Now we're ready to perform a conversion
-                try {
-                    CliOptionContext
-                            .setOptionContext(cliOption.optionContext());
-                    CliSimpleParserContext.setSimpleParserContext(this);
-                    Object result;
-                    Converter<?> c = null;
-                    for (Converter<?> candidate : converters) {
-                        if (candidate.supports(requiredType,
-                                cliOption.optionContext())) {
-                            // Found a usable converter
-                            c = candidate;
-                            break;
-                        }
-                    }
-                    if (c == null) {
-                        throw new IllegalStateException(
-                                "TODO: Add basic type conversion");
-                        // TODO Fall back to a normal SimpleTypeConverter and
-                        // attempt conversion
-                        // SimpleTypeConverter simpleTypeConverter = new
-                        // SimpleTypeConverter();
-                        // result =
-                        // simpleTypeConverter.convertIfNecessary(value,
-                        // requiredType, mp);
-                    }
-
-                    // Use the converter
-                    result = c.convertFromText(value, requiredType,
-                            cliOption.optionContext());
-
-                    // If the option has been specified to be mandatory then the
-                    // result should never be null
-                    if (result == null && cliOption.mandatory()) {
-                        throw new IllegalStateException();
-                    }
-                    arguments.add(result);
-                }
-                catch (RuntimeException e) {
-                    LOGGER.warning(e.getClass().getName()
-                            + ": Failed to convert '"
-                            + value
-                            + "' to type "
-                            + requiredType.getSimpleName()
-                            + " for option '"
-                            + StringUtils.arrayToCommaDelimitedString(cliOption
-                                    .key()) + "'");
-                    if (StringUtils.hasText(e.getMessage())) {
-                        LOGGER.warning(e.getMessage());
-                    }
-                    return null;
-                }
-                finally {
-                    CliOptionContext.resetOptionContext();
-                    CliSimpleParserContext.resetSimpleParserContext();
-                }
-            }
-
-            // Check for options specified by the user but are unavailable for
-            // the command
-            Set<String> unavailableOptions = getSpecifiedUnavailableOptions(
-                    cliOptions, options);
-            if (!unavailableOptions.isEmpty()) {
-                StringBuilder message = new StringBuilder();
-                if (unavailableOptions.size() == 1) {
-                    message.append("Option '")
-                            .append(unavailableOptions.iterator().next())
-                            .append("' is not available for this command. ");
-                }
-                else {
-                    message.append("Options ")
-                            .append(StringUtils.collectionToDelimitedString(
-                                    unavailableOptions, ", ", "'", "'"))
-                            .append(" are not available for this command. ");
-                }
-                message.append("Use tab assist or the \"help\" command to see the legal options");
-                LOGGER.warning(message.toString());
-                return null;
-            }
-
-            return new ParseResult(methodTarget.getMethod(),
-                    methodTarget.getTarget(), arguments.toArray());
-        }
-    }
-
-    /**
-     * Normalises the given raw user input string ready for parsing
-     * 
-     * @param rawInput the string to normalise; can't be <code>null</code>
-     * @return a non-<code>null</code> string
-     */
-    String normalise(final String rawInput) {
-        // Replace all multiple spaces with a single space and then trim
-        return rawInput.replaceAll(" +", " ").trim();
-    }
-
-    private Set<String> getSpecifiedUnavailableOptions(
-            final Set<CliOption> cliOptions, final Map<String, String> options) {
-        Set<String> cliOptionKeySet = new LinkedHashSet<String>();
-        for (CliOption cliOption : cliOptions) {
-            for (String key : cliOption.key()) {
-                cliOptionKeySet.add(key.toLowerCase());
-            }
-        }
-        Set<String> unavailableOptions = new LinkedHashSet<String>();
-        for (String suppliedOption : options.keySet()) {
-            if (!cliOptionKeySet.contains(suppliedOption.toLowerCase())) {
-                unavailableOptions.add(suppliedOption);
-            }
-        }
-        return unavailableOptions;
-    }
-
-    private Set<CliOption> getCliOptions(
-            final Annotation[][] parameterAnnotations) {
-        Set<CliOption> cliOptions = new LinkedHashSet<CliOption>();
-        for (Annotation[] annotations : parameterAnnotations) {
-            for (Annotation annotation : annotations) {
-                if (annotation instanceof CliOption) {
-                    CliOption cliOption = (CliOption) annotation;
-                    cliOptions.add(cliOption);
-                }
-            }
-        }
-        return cliOptions;
-    }
-
-    protected void commandNotFound(final Logger logger, final String buffer) {
-        logger.warning("Command '" + buffer
-                + "' not found (for assistance press "
-                + AbstractShell.completionKeys
-                + " or type \"hint\" then hit ENTER)");
-    }
-
-    private Collection<MethodTarget> locateTargets(final String buffer,
-            final boolean strictMatching,
-            final boolean checkAvailabilityIndicators) {
-        Assert.notNull(buffer, "Buffer required");
-        final Collection<MethodTarget> result = new HashSet<MethodTarget>();
-
-        // The reflection could certainly be optimised, but it's good enough for
-        // now (and cached reflection
-        // is unlikely to be noticeable to a human being using the CLI)
-        for (final CommandMarker command : commands) {
-            for (final Method method : command.getClass().getMethods()) {
-                CliCommand cmd = method.getAnnotation(CliCommand.class);
-                if (cmd != null) {
-                    // We have a @CliCommand.
-                    if (checkAvailabilityIndicators) {
-                        // Decide if this @CliCommand is available at this
-                        // moment
-                        Boolean available = null;
-                        for (String value : cmd.value()) {
-                            MethodTarget mt = getAvailabilityIndicator(value);
-                            if (mt != null) {
-                                Assert.isNull(available,
-                                        "More than one availability indicator is defined for '"
-                                                + method.toGenericString()
-                                                + "'");
-                                try {
-                                    available = (Boolean) mt.getMethod()
-                                            .invoke(mt.getTarget());
-                                    // We should "break" here, but we loop over
-                                    // all to ensure no conflicting availability
-                                    // indicators are defined
-                                }
-                                catch (Exception e) {
-                                    available = false;
-                                }
-                            }
-                        }
-                        // Skip this @CliCommand if it's not available
-                        if (available != null && !available) {
-                            continue;
-                        }
-                    }
-
-                    for (String value : cmd.value()) {
-                        String remainingBuffer = isMatch(buffer, value,
-                                strictMatching);
-                        if (remainingBuffer != null) {
-                            result.add(new MethodTarget(method, command,
-                                    remainingBuffer, value));
-                        }
-                    }
-                }
-            }
-        }
-        return result;
-    }
 
     static String isMatch(final String buffer, final String command,
             final boolean strictMatching) {
         if ("".equals(buffer.trim())) {
             return "";
         }
-        String[] commandWords = StringUtils.delimitedListToStringArray(command,
-                " ");
+        final String[] commandWords = StringUtils.delimitedListToStringArray(
+                command, " ");
         int lastCommandWordUsed = 0;
         Assert.notEmpty(commandWords, "Command required");
 
@@ -410,11 +67,11 @@ public class SimpleParser implements Parser {
 
         next_buffer_loop: for (int bufferIndex = 0; bufferIndex < buffer
                 .length(); bufferIndex++) {
-            String bufferSoFarIncludingThis = buffer.substring(0,
+            final String bufferSoFarIncludingThis = buffer.substring(0,
                     bufferIndex + 1);
-            String bufferRemaining = buffer.substring(bufferIndex + 1);
+            final String bufferRemaining = buffer.substring(bufferIndex + 1);
 
-            int bufferLastIndexOfWord = bufferSoFarIncludingThis
+            final int bufferLastIndexOfWord = bufferSoFarIncludingThis
                     .lastIndexOf(" ");
             String wordSoFarIncludingThis = bufferSoFarIncludingThis;
             if (bufferLastIndexOfWord != -1) {
@@ -423,21 +80,21 @@ public class SimpleParser implements Parser {
             }
 
             if (wordSoFarIncludingThis.equals(" ")
-                    || bufferIndex == buffer.length() - 1) {
-                if (bufferIndex == buffer.length() - 1
+                    || (bufferIndex == (buffer.length() - 1))) {
+                if ((bufferIndex == (buffer.length() - 1))
                         && !"".equals(wordSoFarIncludingThis.trim())) {
                     lastWord = wordSoFarIncludingThis.trim();
                 }
 
                 // At end of word or buffer. Let's see if a word matched or not
                 for (int candidate = lastCommandWordUsed; candidate < commandWords.length; candidate++) {
-                    if (lastWord != null && lastWord.length() > 0
+                    if ((lastWord != null) && (lastWord.length() > 0)
                             && commandWords[candidate].startsWith(lastWord)) {
                         if (bufferToReturn == null) {
                             // This is the first match, so ensure the intended
                             // match really represents the start of a command
                             // and not a later word within it
-                            if (lastCommandWordUsed == 0 && candidate > 0) {
+                            if ((lastCommandWordUsed == 0) && (candidate > 0)) {
                                 // This is not a valid match
                                 break next_buffer_loop;
                             }
@@ -446,7 +103,7 @@ public class SimpleParser implements Parser {
                         if (bufferToReturn != null) {
                             // We already matched something earlier, so ensure
                             // we didn't skip any word
-                            if (candidate != lastCommandWordUsed + 1) {
+                            if (candidate != (lastCommandWordUsed + 1)) {
                                 // User has skipped a word
                                 bufferToReturn = null;
                                 break next_buffer_loop;
@@ -455,7 +112,7 @@ public class SimpleParser implements Parser {
 
                         bufferToReturn = bufferRemaining;
                         lastCommandWordUsed = candidate;
-                        if (candidate + 1 == commandWords.length) {
+                        if ((candidate + 1) == commandWords.length) {
                             // This was a match for the final word in the
                             // command, so abort
                             break next_buffer_loop;
@@ -477,7 +134,7 @@ public class SimpleParser implements Parser {
         // We only consider it a match if ALL words were actually used
         if (bufferToReturn != null) {
             if (!strictMatching
-                    || lastCommandWordUsed + 1 == commandWords.length) {
+                    || ((lastCommandWordUsed + 1) == commandWords.length)) {
                 return bufferToReturn;
             }
         }
@@ -485,9 +142,54 @@ public class SimpleParser implements Parser {
         return null; // Not a match
     }
 
-    public int complete(String buffer, int cursor, final List<String> candidates) {
+    private final Map<String, MethodTarget> availabilityIndicators = new HashMap<String, MethodTarget>();
+    private final Set<CommandMarker> commands = new HashSet<CommandMarker>();
+    private final Set<Converter<?>> converters = new HashSet<Converter<?>>();
+
+    private final Object mutex = new Object();
+
+    public final void add(final CommandMarker command) {
+        synchronized (mutex) {
+            commands.add(command);
+            for (final Method method : command.getClass().getMethods()) {
+                final CliAvailabilityIndicator availability = method
+                        .getAnnotation(CliAvailabilityIndicator.class);
+                if (availability != null) {
+                    Assert.isTrue(method.getParameterTypes().length == 0,
+                            "CliAvailabilityIndicator is only legal for 0 parameter methods ("
+                                    + method.toGenericString() + ")");
+                    Assert.isTrue(method.getReturnType().equals(Boolean.TYPE),
+                            "CliAvailabilityIndicator is only legal for primitive boolean return types ("
+                                    + method.toGenericString() + ")");
+                    for (final String cmd : availability.value()) {
+                        Assert.isTrue(!availabilityIndicators.containsKey(cmd),
+                                "Cannot specify an availability indicator for '"
+                                        + cmd + "' more than once");
+                        availabilityIndicators.put(cmd, new MethodTarget(
+                                method, command));
+                    }
+                }
+            }
+        }
+    }
+
+    public final void add(final Converter<?> converter) {
+        synchronized (mutex) {
+            converters.add(converter);
+        }
+    }
+
+    protected void commandNotFound(final Logger logger, final String buffer) {
+        logger.warning("Command '" + buffer
+                + "' not found (for assistance press "
+                + AbstractShell.completionKeys
+                + " or type \"hint\" then hit ENTER)");
+    }
+
+    public int complete(final String buffer, final int cursor,
+            final List<String> candidates) {
         final List<Completion> completions = new ArrayList<Completion>();
-        int result = completeAdvanced(buffer, cursor, completions);
+        final int result = completeAdvanced(buffer, cursor, completions);
         for (final Completion completion : completions) {
             candidates.add(completion.getValue());
         }
@@ -514,12 +216,13 @@ public class SimpleParser implements Parser {
 
             // Begin by only including the portion of the buffer represented to
             // the present cursor position
-            String translated = buffer.substring(0, cursor);
+            final String translated = buffer.substring(0, cursor);
 
             // Start by locating a method that matches
             final Collection<MethodTarget> targets = locateTargets(translated,
                     false, true);
-            SortedSet<Completion> results = new TreeSet<Completion>(COMPARATOR);
+            final SortedSet<Completion> results = new TreeSet<Completion>(
+                    COMPARATOR);
 
             if (targets.isEmpty()) {
                 // Nothing matches the buffer they've presented
@@ -527,9 +230,9 @@ public class SimpleParser implements Parser {
             }
             if (targets.size() > 1) {
                 // Assist them locate a particular target
-                for (MethodTarget target : targets) {
+                for (final MethodTarget target : targets) {
                     // Calculate the correct starting position
-                    int startAt = translated.length();
+                    final int startAt = translated.length();
 
                     // Only add the first word of each target
                     int stopAt = target.getKey().indexOf(" ", startAt);
@@ -547,10 +250,10 @@ public class SimpleParser implements Parser {
 
             // There is a single target of this method, so provide completion
             // services for it
-            MethodTarget methodTarget = targets.iterator().next();
+            final MethodTarget methodTarget = targets.iterator().next();
 
             // Identify the command we're working with
-            CliCommand cmd = methodTarget.getMethod().getAnnotation(
+            final CliCommand cmd = methodTarget.getMethod().getAnnotation(
                     CliCommand.class);
             Assert.notNull(cmd, "CliCommand unavailable for '"
                     + methodTarget.getMethod().toGenericString() + "'");
@@ -561,7 +264,7 @@ public class SimpleParser implements Parser {
                 options = ParserUtils.tokenize(methodTarget
                         .getRemainingBuffer());
             }
-            catch (IllegalArgumentException ex) {
+            catch (final IllegalArgumentException ex) {
                 // Assume any IllegalArgumentException is due to a quotation
                 // mark mismatch
                 candidates.add(new Completion(translated + "\""));
@@ -569,13 +272,13 @@ public class SimpleParser implements Parser {
             }
 
             // Lookup arguments for this target
-            Annotation[][] parameterAnnotations = methodTarget.getMethod()
-                    .getParameterAnnotations();
+            final Annotation[][] parameterAnnotations = methodTarget
+                    .getMethod().getParameterAnnotations();
 
             // If there aren't any parameters for the method, at least ensure
             // they have typed the command properly
             if (parameterAnnotations.length == 0) {
-                for (String value : cmd.value()) {
+                for (final String value : cmd.value()) {
                     if (buffer.startsWith(value) || value.startsWith(buffer)) {
                         results.add(new Completion(value)); // no space at the
                                                             // end, as there's
@@ -591,7 +294,7 @@ public class SimpleParser implements Parser {
             // If they haven't specified any parameters yet, at least verify the
             // command name is fully completed
             if (options.isEmpty()) {
-                for (String value : cmd.value()) {
+                for (final String value : cmd.value()) {
                     if (value.startsWith(buffer)) {
                         // They are potentially trying to type this command
                         // We only need provide completion, though, if they
@@ -615,10 +318,10 @@ public class SimpleParser implements Parser {
             // CliCommand, and they specified a valid command name
 
             // Record all the CliOptions applicable to this command
-            List<CliOption> cliOptions = new ArrayList<CliOption>();
-            for (Annotation[] annotations : parameterAnnotations) {
+            final List<CliOption> cliOptions = new ArrayList<CliOption>();
+            for (final Annotation[] annotations : parameterAnnotations) {
                 CliOption cliOption = null;
-                for (Annotation a : annotations) {
+                for (final Annotation a : annotations) {
                     if (a instanceof CliOption) {
                         cliOption = (CliOption) a;
                     }
@@ -630,9 +333,9 @@ public class SimpleParser implements Parser {
 
             // Make a list of all CliOptions they've already included or are
             // system-provided
-            List<CliOption> alreadySpecified = new ArrayList<CliOption>();
-            for (CliOption option : cliOptions) {
-                for (String value : option.key()) {
+            final List<CliOption> alreadySpecified = new ArrayList<CliOption>();
+            for (final CliOption option : cliOptions) {
+                for (final String value : option.key()) {
                     if (options.containsKey(value)) {
                         alreadySpecified.add(option);
                         break;
@@ -644,7 +347,8 @@ public class SimpleParser implements Parser {
             }
 
             // Make a list of all CliOptions they have not provided
-            List<CliOption> unspecified = new ArrayList<CliOption>(cliOptions);
+            final List<CliOption> unspecified = new ArrayList<CliOption>(
+                    cliOptions);
             unspecified.removeAll(alreadySpecified);
 
             // Determine whether they're presently editing an option key or an
@@ -668,15 +372,15 @@ public class SimpleParser implements Parser {
             // when mandatory options are filled in
             if (methodTarget.getRemainingBuffer().endsWith("--")) {
                 boolean showAllRemaining = true;
-                for (CliOption include : unspecified) {
+                for (final CliOption include : unspecified) {
                     if (include.mandatory()) {
                         showAllRemaining = false;
                         break;
                     }
                 }
 
-                for (CliOption include : unspecified) {
-                    for (String value : include.key()) {
+                for (final CliOption include : unspecified) {
+                    for (final String value : include.key()) {
                         if (!"".equals(value)) {
                             results.add(new Completion(translated + value + " "));
                         }
@@ -691,7 +395,7 @@ public class SimpleParser implements Parser {
 
             // Handle suggesting an option key if they haven't got one presently
             // specified (or they've completed a full option key/value pair)
-            if (lastOptionKey == null
+            if ((lastOptionKey == null)
                     || (!"".equals(lastOptionKey)
                             && !"".equals(lastOptionValue) && translated
                                 .endsWith(" "))) {
@@ -700,8 +404,8 @@ public class SimpleParser implements Parser {
 
                 // Let's list some other options the user might want to try
                 // (naturally skip the "" option, as that's the default)
-                for (CliOption include : unspecified) {
-                    for (String value : include.key()) {
+                for (final CliOption include : unspecified) {
+                    for (final String value : include.key()) {
                         // Manually determine if this non-mandatory but
                         // unspecifiedDefaultValue=* requiring option is able to
                         // be bound
@@ -709,15 +413,15 @@ public class SimpleParser implements Parser {
                                 && "*".equals(include.unspecifiedDefaultValue())
                                 && !"".equals(value)) {
                             try {
-                                for (Converter<?> candidate : converters) {
+                                for (final Converter<?> candidate : converters) {
                                     // Find the target parameter
                                     Class<?> paramType = null;
                                     int index = -1;
-                                    for (Annotation[] a : methodTarget
+                                    for (final Annotation[] a : methodTarget
                                             .getMethod()
                                             .getParameterAnnotations()) {
                                         index++;
-                                        for (Annotation an : a) {
+                                        for (final Annotation an : a) {
                                             if (an instanceof CliOption) {
                                                 if (an.equals(include)) {
                                                     // Found the parameter, so
@@ -730,7 +434,7 @@ public class SimpleParser implements Parser {
                                             }
                                         }
                                     }
-                                    if (paramType != null
+                                    if ((paramType != null)
                                             && candidate.supports(paramType,
                                                     include.optionContext())) {
                                         // Try to invoke this usable converter
@@ -745,7 +449,7 @@ public class SimpleParser implements Parser {
                                     }
                                 }
                             }
-                            catch (RuntimeException notYetReady) {
+                            catch (final RuntimeException notYetReady) {
                                 if (translated.endsWith(" ")) {
                                     results.add(new Completion(translated
                                             + "--" + value + " "));
@@ -781,21 +485,23 @@ public class SimpleParser implements Parser {
             }
 
             // Handle completing the option key they're presently typing
-            if ((lastOptionValue == null || "".equals(lastOptionValue))
+            if (((lastOptionValue == null) || "".equals(lastOptionValue))
                     && !translated.endsWith(" ")) {
                 // Given we haven't got an option value of any form, and there's
                 // no space at the buffer end, we must still be typing an option
                 // key
 
-                for (CliOption option : cliOptions) {
-                    for (String value : option.key()) {
-                        if (value != null
-                                && lastOptionKey != null
+                for (final CliOption option : cliOptions) {
+                    for (final String value : option.key()) {
+                        if ((value != null)
+                                && (lastOptionKey != null)
                                 && value.regionMatches(true, 0, lastOptionKey,
                                         0, lastOptionKey.length())) {
-                            String completionValue = translated.substring(0,
-                                    (translated.length() - lastOptionKey
-                                            .length()))
+                            final String completionValue = translated
+                                    .substring(
+                                            0,
+                                            (translated.length() - lastOptionKey
+                                                    .length()))
                                     + value + " ";
                             results.add(new Completion(completionValue));
                         }
@@ -807,27 +513,27 @@ public class SimpleParser implements Parser {
 
             // To be here, we are NOT typing an option key (or we might be, and
             // there are no further option keys left)
-            if (lastOptionKey != null && !"".equals(lastOptionKey)) {
+            if ((lastOptionKey != null) && !"".equals(lastOptionKey)) {
                 // Lookup the relevant CliOption that applies to this
                 // lastOptionKey
                 // We do this via the parameter type
-                Class<?>[] parameterTypes = methodTarget.getMethod()
+                final Class<?>[] parameterTypes = methodTarget.getMethod()
                         .getParameterTypes();
                 for (int i = 0; i < parameterTypes.length; i++) {
-                    CliOption option = cliOptions.get(i);
-                    Class<?> parameterType = parameterTypes[i];
+                    final CliOption option = cliOptions.get(i);
+                    final Class<?> parameterType = parameterTypes[i];
 
-                    for (String key : option.key()) {
+                    for (final String key : option.key()) {
                         if (key.equals(lastOptionKey)) {
-                            List<Completion> allValues = new ArrayList<Completion>();
+                            final List<Completion> allValues = new ArrayList<Completion>();
                             String suffix = " ";
 
                             // Let's use a Converter if one is available
-                            for (Converter<?> candidate : converters) {
+                            for (final Converter<?> candidate : converters) {
                                 if (candidate.supports(parameterType,
                                         option.optionContext())) {
                                     // Found a usable converter
-                                    boolean addSpace = candidate
+                                    final boolean addSpace = candidate
                                             .getAllPossibleValues(allValues,
                                                     parameterType,
                                                     lastOptionValue,
@@ -876,7 +582,7 @@ public class SimpleParser implements Parser {
 
                             // Only include in the candidates those results
                             // which are compatible with the present buffer
-                            for (Completion currentValue : allValues) {
+                            for (final Completion currentValue : allValues) {
                                 // We only provide a suggestion if the
                                 // lastOptionValue == ""
                                 if (StringUtils.isBlank(lastOptionValue)) {
@@ -901,8 +607,8 @@ public class SimpleParser implements Parser {
                                             && !lastOptionValue
                                                     .equalsIgnoreCase(currentValue
                                                             .getValue())
-                                            && lastOptionValue.length() < currentValue
-                                                    .getValue().length()) {
+                                            && (lastOptionValue.length() < currentValue
+                                                    .getValue().length())) {
                                         results.add(new Completion(prefix
                                                 + currentValue.getValue()
                                                 + suffix, currentValue
@@ -916,7 +622,7 @@ public class SimpleParser implements Parser {
                             // ROO-389: give inline options given there's
                             // multiple choices available and we want to help
                             // the user
-                            StringBuilder help = new StringBuilder();
+                            final StringBuilder help = new StringBuilder();
                             help.append(StringUtils.LINE_SEPARATOR);
                             help.append(option.mandatory() ? "required --"
                                     : "optional --");
@@ -964,8 +670,8 @@ public class SimpleParser implements Parser {
                             LOGGER.info(help.toString());
 
                             if (results.size() == 1) {
-                                String suggestion = results.iterator().next()
-                                        .getValue().trim();
+                                final String suggestion = results.iterator()
+                                        .next().getValue().trim();
                                 if (suggestion.equals(lastOptionValue)) {
                                     // They have pressed TAB in the default
                                     // value, and the default value has already
@@ -992,31 +698,82 @@ public class SimpleParser implements Parser {
         }
     }
 
+    private MethodTarget getAvailabilityIndicator(final String command) {
+        return availabilityIndicators.get(command);
+    }
+
+    private Set<CliOption> getCliOptions(
+            final Annotation[][] parameterAnnotations) {
+        final Set<CliOption> cliOptions = new LinkedHashSet<CliOption>();
+        for (final Annotation[] annotations : parameterAnnotations) {
+            for (final Annotation annotation : annotations) {
+                if (annotation instanceof CliOption) {
+                    final CliOption cliOption = (CliOption) annotation;
+                    cliOptions.add(cliOption);
+                }
+            }
+        }
+        return cliOptions;
+    }
+
+    public Set<String> getEveryCommand() {
+        synchronized (mutex) {
+            final SortedSet<String> result = new TreeSet<String>(COMPARATOR);
+            for (final Object o : commands) {
+                final Method[] methods = o.getClass().getMethods();
+                for (final Method m : methods) {
+                    final CliCommand cmd = m.getAnnotation(CliCommand.class);
+                    if (cmd != null) {
+                        result.addAll(Arrays.asList(cmd.value()));
+                    }
+                }
+            }
+            return result;
+        }
+    }
+
+    private Set<String> getSpecifiedUnavailableOptions(
+            final Set<CliOption> cliOptions, final Map<String, String> options) {
+        final Set<String> cliOptionKeySet = new LinkedHashSet<String>();
+        for (final CliOption cliOption : cliOptions) {
+            for (final String key : cliOption.key()) {
+                cliOptionKeySet.add(key.toLowerCase());
+            }
+        }
+        final Set<String> unavailableOptions = new LinkedHashSet<String>();
+        for (final String suppliedOption : options.keySet()) {
+            if (!cliOptionKeySet.contains(suppliedOption.toLowerCase())) {
+                unavailableOptions.add(suppliedOption);
+            }
+        }
+        return unavailableOptions;
+    }
+
     public void helpReferenceGuide() {
         synchronized (mutex) {
-            File f = new File(".");
-            File[] existing = f.listFiles(new FileFilter() {
+            final File f = new File(".");
+            final File[] existing = f.listFiles(new FileFilter() {
                 public boolean accept(final File pathname) {
                     return pathname.getName().startsWith("appendix_");
                 }
             });
-            for (File e : existing) {
+            for (final File e : existing) {
                 e.delete();
             }
 
             // Compute the sections we'll be outputting, and get them into a
             // nice order
-            SortedMap<String, Object> sections = new TreeMap<String, Object>(
+            final SortedMap<String, Object> sections = new TreeMap<String, Object>(
                     COMPARATOR);
-            next_target: for (Object target : commands) {
-                Method[] methods = target.getClass().getMethods();
-                for (Method m : methods) {
-                    CliCommand cmd = m.getAnnotation(CliCommand.class);
+            next_target: for (final Object target : commands) {
+                final Method[] methods = target.getClass().getMethods();
+                for (final Method m : methods) {
+                    final CliCommand cmd = m.getAnnotation(CliCommand.class);
                     if (cmd != null) {
                         String sectionName = target.getClass().getSimpleName();
-                        Pattern p = Pattern.compile("[A-Z][^A-Z]*");
-                        Matcher matcher = p.matcher(sectionName);
-                        StringBuilder string = new StringBuilder();
+                        final Pattern p = Pattern.compile("[A-Z][^A-Z]*");
+                        final Matcher matcher = p.matcher(sectionName);
+                        final StringBuilder string = new StringBuilder();
                         while (matcher.find()) {
                             string.append(matcher.group()).append(" ");
                         }
@@ -1032,39 +789,41 @@ public class SimpleParser implements Parser {
             }
 
             // Build each section of the appendix
-            DocumentBuilder builder = XmlUtils.getDocumentBuilder();
-            Document document = builder.newDocument();
-            List<Element> builtSections = new ArrayList<Element>();
+            final DocumentBuilder builder = XmlUtils.getDocumentBuilder();
+            final Document document = builder.newDocument();
+            final List<Element> builtSections = new ArrayList<Element>();
 
             for (final Entry<String, Object> entry : sections.entrySet()) {
                 final String section = entry.getKey();
                 final Object target = entry.getValue();
-                SortedMap<String, Element> individualCommands = new TreeMap<String, Element>(
+                final SortedMap<String, Element> individualCommands = new TreeMap<String, Element>(
                         COMPARATOR);
 
-                Method[] methods = target.getClass().getMethods();
-                for (Method m : methods) {
-                    CliCommand cmd = m.getAnnotation(CliCommand.class);
+                final Method[] methods = target.getClass().getMethods();
+                for (final Method m : methods) {
+                    final CliCommand cmd = m.getAnnotation(CliCommand.class);
                     if (cmd != null) {
-                        StringBuilder cmdSyntax = new StringBuilder();
+                        final StringBuilder cmdSyntax = new StringBuilder();
                         cmdSyntax.append(cmd.value()[0]);
 
                         // Build the syntax list
 
                         // Store the order options appear
-                        List<String> optionKeys = new ArrayList<String>();
+                        final List<String> optionKeys = new ArrayList<String>();
                         // key: option key, value: help text
-                        Map<String, String> optionDetails = new HashMap<String, String>();
-                        for (Annotation[] ann : m.getParameterAnnotations()) {
-                            for (Annotation a : ann) {
+                        final Map<String, String> optionDetails = new HashMap<String, String>();
+                        for (final Annotation[] ann : m
+                                .getParameterAnnotations()) {
+                            for (final Annotation a : ann) {
                                 if (a instanceof CliOption) {
-                                    CliOption option = (CliOption) a;
+                                    final CliOption option = (CliOption) a;
                                     // Figure out which key we want to use (use
                                     // first non-empty string, or make it
                                     // "(default)" if needed)
                                     String key = option.key()[0];
                                     if ("".equals(key)) {
-                                        for (String otherKey : option.key()) {
+                                        for (final String otherKey : option
+                                                .key()) {
                                             if (!"".equals(otherKey)) {
                                                 key = otherKey;
                                                 break;
@@ -1075,7 +834,7 @@ public class SimpleParser implements Parser {
                                         }
                                     }
 
-                                    StringBuilder help = new StringBuilder();
+                                    final StringBuilder help = new StringBuilder();
                                     if ("".equals(option.help())) {
                                         help.append("No help available");
                                     }
@@ -1139,9 +898,9 @@ public class SimpleParser implements Parser {
                         Element variableListElement = document
                                 .createElement("variablelist");
                         boolean anyVars = false;
-                        for (String optionKey : optionKeys) {
+                        for (final String optionKey : optionKeys) {
                             anyVars = true;
-                            String help = optionDetails.get(optionKey);
+                            final String help = optionDetails.get(optionKey);
                             variableListElement
                                     .appendChild(new XmlElementBuilder(
                                             "varlistentry", document)
@@ -1174,12 +933,13 @@ public class SimpleParser implements Parser {
 
                         // Now we've figured out the options, store this
                         // individual command
-                        CDATASection progList = document
+                        final CDATASection progList = document
                                 .createCDATASection(cmdSyntax.toString());
-                        String safeName = cmd.value()[0].replace("\\", "BCK")
-                                .replace("/", "FWD").replace("*", "ASX");
-                        Element element = new XmlElementBuilder("section",
-                                document)
+                        final String safeName = cmd.value()[0]
+                                .replace("\\", "BCK").replace("/", "FWD")
+                                .replace("*", "ASX");
+                        final Element element = new XmlElementBuilder(
+                                "section", document)
                                 .addAttribute(
                                         "xml:id",
                                         "command-index-"
@@ -1202,7 +962,7 @@ public class SimpleParser implements Parser {
                     }
                 }
 
-                Element topSection = document.createElement("section");
+                final Element topSection = document.createElement("section");
                 topSection.setAttribute("xml:id", "command-index-"
                         + section.toLowerCase().replace(' ', '-'));
                 topSection.appendChild(new XmlElementBuilder("title", document)
@@ -1220,7 +980,7 @@ public class SimpleParser implements Parser {
                 builtSections.add(topSection);
             }
 
-            Element appendix = document.createElement("appendix");
+            final Element appendix = document.createElement("appendix");
             appendix.setAttribute("xmlns", "http://docbook.org/ns/docbook");
             appendix.setAttribute("version", "5.0");
             appendix.setAttribute("xml:id", "command-index");
@@ -1236,14 +996,15 @@ public class SimpleParser implements Parser {
                             "Commands are listed in alphabetic order, and are shown in monospaced font with any mandatory options you must specify when using the command. Most commands accept a large number of options, and all of the possible options for each command are presented in this appendix.")
                     .build());
 
-            for (Element section : builtSections) {
+            for (final Element section : builtSections) {
                 appendix.appendChild(section);
             }
             document.appendChild(appendix);
 
-            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 
-            Transformer transformer = XmlUtils.createIndentingTransformer();
+            final Transformer transformer = XmlUtils
+                    .createIndentingTransformer();
             // Causes an
             // "Error reported by XML parser: Multiple notations were used which had the name 'linespecific', but which were not determined to be duplicates."
             // when creating the DocBook
@@ -1254,13 +1015,81 @@ public class SimpleParser implements Parser {
 
             XmlUtils.writeXml(transformer, byteArrayOutputStream, document);
             try {
-                File output = new File(f, "appendix-command-index.xml");
+                final File output = new File(f, "appendix-command-index.xml");
                 FileCopyUtils.copy(byteArrayOutputStream.toByteArray(), output);
             }
-            catch (IOException ioe) {
+            catch (final IOException ioe) {
                 throw new IllegalStateException(ioe);
             }
         }
+    }
+
+    private Collection<MethodTarget> locateTargets(final String buffer,
+            final boolean strictMatching,
+            final boolean checkAvailabilityIndicators) {
+        Assert.notNull(buffer, "Buffer required");
+        final Collection<MethodTarget> result = new HashSet<MethodTarget>();
+
+        // The reflection could certainly be optimised, but it's good enough for
+        // now (and cached reflection
+        // is unlikely to be noticeable to a human being using the CLI)
+        for (final CommandMarker command : commands) {
+            for (final Method method : command.getClass().getMethods()) {
+                final CliCommand cmd = method.getAnnotation(CliCommand.class);
+                if (cmd != null) {
+                    // We have a @CliCommand.
+                    if (checkAvailabilityIndicators) {
+                        // Decide if this @CliCommand is available at this
+                        // moment
+                        Boolean available = null;
+                        for (final String value : cmd.value()) {
+                            final MethodTarget mt = getAvailabilityIndicator(value);
+                            if (mt != null) {
+                                Assert.isNull(available,
+                                        "More than one availability indicator is defined for '"
+                                                + method.toGenericString()
+                                                + "'");
+                                try {
+                                    available = (Boolean) mt.getMethod()
+                                            .invoke(mt.getTarget());
+                                    // We should "break" here, but we loop over
+                                    // all to ensure no conflicting availability
+                                    // indicators are defined
+                                }
+                                catch (final Exception e) {
+                                    available = false;
+                                }
+                            }
+                        }
+                        // Skip this @CliCommand if it's not available
+                        if ((available != null) && !available) {
+                            continue;
+                        }
+                    }
+
+                    for (final String value : cmd.value()) {
+                        final String remainingBuffer = isMatch(buffer, value,
+                                strictMatching);
+                        if (remainingBuffer != null) {
+                            result.add(new MethodTarget(method, command,
+                                    remainingBuffer, value));
+                        }
+                    }
+                }
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Normalises the given raw user input string ready for parsing
+     * 
+     * @param rawInput the string to normalise; can't be <code>null</code>
+     * @return a non-<code>null</code> string
+     */
+    String normalise(final String rawInput) {
+        // Replace all multiple spaces with a single space and then trim
+        return rawInput.replaceAll(" +", " ").trim();
     }
 
     public void obtainHelp(
@@ -1270,25 +1099,26 @@ public class SimpleParser implements Parser {
                 buffer = "";
             }
 
-            StringBuilder sb = new StringBuilder();
+            final StringBuilder sb = new StringBuilder();
 
             // Figure out if there's a single command we can offer help for
             final Collection<MethodTarget> matchingTargets = locateTargets(
                     buffer, false, false);
             if (matchingTargets.size() == 1) {
                 // Single command help
-                MethodTarget methodTarget = matchingTargets.iterator().next();
+                final MethodTarget methodTarget = matchingTargets.iterator()
+                        .next();
 
                 // Argument conversion time
-                Annotation[][] parameterAnnotations = methodTarget.getMethod()
-                        .getParameterAnnotations();
+                final Annotation[][] parameterAnnotations = methodTarget
+                        .getMethod().getParameterAnnotations();
                 if (parameterAnnotations.length > 0) {
                     // Offer specified help
-                    CliCommand cmd = methodTarget.getMethod().getAnnotation(
-                            CliCommand.class);
+                    final CliCommand cmd = methodTarget.getMethod()
+                            .getAnnotation(CliCommand.class);
                     Assert.notNull(cmd, "CliCommand not found");
 
-                    for (String value : cmd.value()) {
+                    for (final String value : cmd.value()) {
                         sb.append("Keyword:                   ").append(value)
                                 .append(StringUtils.LINE_SEPARATOR);
                     }
@@ -1296,9 +1126,9 @@ public class SimpleParser implements Parser {
                     sb.append("Description:               ").append(cmd.help())
                             .append(StringUtils.LINE_SEPARATOR);
 
-                    for (Annotation[] annotations : parameterAnnotations) {
+                    for (final Annotation[] annotations : parameterAnnotations) {
                         CliOption cliOption = null;
-                        for (Annotation a : annotations) {
+                        for (final Annotation a : annotations) {
                             if (a instanceof CliOption) {
                                 cliOption = (CliOption) a;
 
@@ -1341,11 +1171,12 @@ public class SimpleParser implements Parser {
                 // operation
             }
 
-            SortedSet<String> result = new TreeSet<String>(COMPARATOR);
-            for (MethodTarget mt : matchingTargets) {
-                CliCommand cmd = mt.getMethod().getAnnotation(CliCommand.class);
+            final SortedSet<String> result = new TreeSet<String>(COMPARATOR);
+            for (final MethodTarget mt : matchingTargets) {
+                final CliCommand cmd = mt.getMethod().getAnnotation(
+                        CliCommand.class);
                 if (cmd != null) {
-                    for (String value : cmd.value()) {
+                    for (final String value : cmd.value()) {
                         if ("".equals(cmd.help())) {
                             result.add("* " + value);
                         }
@@ -1356,7 +1187,7 @@ public class SimpleParser implements Parser {
                 }
             }
 
-            for (String s : result) {
+            for (final String s : result) {
                 sb.append(s).append(StringUtils.LINE_SEPARATOR);
             }
 
@@ -1366,65 +1197,244 @@ public class SimpleParser implements Parser {
         }
     }
 
-    public Set<String> getEveryCommand() {
+    public ParseResult parse(final String rawInput) {
         synchronized (mutex) {
-            SortedSet<String> result = new TreeSet<String>(COMPARATOR);
-            for (Object o : commands) {
-                Method[] methods = o.getClass().getMethods();
-                for (Method m : methods) {
-                    CliCommand cmd = m.getAnnotation(CliCommand.class);
-                    if (cmd != null) {
-                        result.addAll(Arrays.asList(cmd.value()));
-                    }
-                }
-            }
-            return result;
-        }
-    }
+            Assert.notNull(rawInput, "Raw input required");
+            final String input = normalise(rawInput);
 
-    public final void add(final CommandMarker command) {
-        synchronized (mutex) {
-            commands.add(command);
-            for (final Method method : command.getClass().getMethods()) {
-                CliAvailabilityIndicator availability = method
-                        .getAnnotation(CliAvailabilityIndicator.class);
-                if (availability != null) {
-                    Assert.isTrue(method.getParameterTypes().length == 0,
-                            "CliAvailabilityIndicator is only legal for 0 parameter methods ("
-                                    + method.toGenericString() + ")");
-                    Assert.isTrue(method.getReturnType().equals(Boolean.TYPE),
-                            "CliAvailabilityIndicator is only legal for primitive boolean return types ("
-                                    + method.toGenericString() + ")");
-                    for (String cmd : availability.value()) {
-                        Assert.isTrue(!availabilityIndicators.containsKey(cmd),
-                                "Cannot specify an availability indicator for '"
-                                        + cmd + "' more than once");
-                        availabilityIndicators.put(cmd, new MethodTarget(
-                                method, command));
+            // Locate the applicable targets which match this buffer
+            final Collection<MethodTarget> matchingTargets = locateTargets(
+                    input, true, true);
+            if (matchingTargets.isEmpty()) {
+                // Before we just give up, let's see if we can offer a more
+                // informative message to the user
+                // by seeing the command is simply unavailable at this point in
+                // time
+                CollectionUtils.populate(matchingTargets,
+                        locateTargets(input, true, false));
+                if (matchingTargets.isEmpty()) {
+                    commandNotFound(LOGGER, input);
+                }
+                else {
+                    LOGGER.warning("Command '"
+                            + input
+                            + "' was found but is not currently available (type 'help' then ENTER to learn about this command)");
+                }
+                return null;
+            }
+            if (matchingTargets.size() > 1) {
+                LOGGER.warning("Ambigious command '" + input
+                        + "' (for assistance press "
+                        + AbstractShell.completionKeys
+                        + " or type \"hint\" then hit ENTER)");
+                return null;
+            }
+            final MethodTarget methodTarget = matchingTargets.iterator().next();
+
+            // Argument conversion time
+            final Annotation[][] parameterAnnotations = methodTarget
+                    .getMethod().getParameterAnnotations();
+            if (parameterAnnotations.length == 0) {
+                // No args
+                return new ParseResult(methodTarget.getMethod(),
+                        methodTarget.getTarget(), null);
+            }
+
+            // Oh well, we need to convert some arguments
+            final List<Object> arguments = new ArrayList<Object>(methodTarget
+                    .getMethod().getParameterTypes().length);
+
+            // Attempt to parse
+            Map<String, String> options = null;
+            try {
+                options = ParserUtils.tokenize(methodTarget
+                        .getRemainingBuffer());
+            }
+            catch (final IllegalArgumentException e) {
+                LOGGER.warning(ExceptionUtils.extractRootCause(e).getMessage());
+                return null;
+            }
+
+            final Set<CliOption> cliOptions = getCliOptions(parameterAnnotations);
+            for (final CliOption cliOption : cliOptions) {
+                final Class<?> requiredType = methodTarget.getMethod()
+                        .getParameterTypes()[arguments.size()];
+
+                if (cliOption.systemProvided()) {
+                    Object result;
+                    if (SimpleParser.class.isAssignableFrom(requiredType)) {
+                        result = this;
+                    }
+                    else {
+                        LOGGER.warning("Parameter type '" + requiredType
+                                + "' is not system provided");
+                        return null;
+                    }
+                    arguments.add(result);
+                    continue;
+                }
+
+                // Obtain the value the user specified, taking care to ensure
+                // they only specified it via a single alias
+                String value = null;
+                String sourcedFrom = null;
+                for (final String possibleKey : cliOption.key()) {
+                    if (options.containsKey(possibleKey)) {
+                        if (sourcedFrom != null) {
+                            LOGGER.warning("You cannot specify option '"
+                                    + possibleKey
+                                    + "' when you have also specified '"
+                                    + sourcedFrom + "' in the same command");
+                            return null;
+                        }
+                        sourcedFrom = possibleKey;
+                        value = options.get(possibleKey);
                     }
                 }
+
+                // Ensure the user specified a value if the value is mandatory
+                if (StringUtils.isBlank(value) && cliOption.mandatory()) {
+                    if ("".equals(cliOption.key()[0])) {
+                        final StringBuilder message = new StringBuilder(
+                                "You must specify a default option ");
+                        if (cliOption.key().length > 1) {
+                            message.append("(otherwise known as option '")
+                                    .append(cliOption.key()[1]).append("') ");
+                        }
+                        message.append("for this command");
+                        LOGGER.warning(message.toString());
+                    }
+                    else {
+                        LOGGER.warning("You must specify option '"
+                                + cliOption.key()[0] + "' for this command");
+                    }
+                    return null;
+                }
+
+                // Accept a default if the user specified the option, but didn't
+                // provide a value
+                if ("".equals(value)) {
+                    value = cliOption.specifiedDefaultValue();
+                }
+
+                // Accept a default if the user didn't specify the option at all
+                if (value == null) {
+                    value = cliOption.unspecifiedDefaultValue();
+                }
+
+                // Special token that denotes a null value is sought (useful for
+                // default values)
+                if ("__NULL__".equals(value)) {
+                    if (requiredType.isPrimitive()) {
+                        LOGGER.warning("Nulls cannot be presented to primitive type "
+                                + requiredType.getSimpleName()
+                                + " for option '"
+                                + StringUtils
+                                        .arrayToCommaDelimitedString(cliOption
+                                                .key()) + "'");
+                        return null;
+                    }
+                    arguments.add(null);
+                    continue;
+                }
+
+                // Now we're ready to perform a conversion
+                try {
+                    CliOptionContext
+                            .setOptionContext(cliOption.optionContext());
+                    CliSimpleParserContext.setSimpleParserContext(this);
+                    Object result;
+                    Converter<?> c = null;
+                    for (final Converter<?> candidate : converters) {
+                        if (candidate.supports(requiredType,
+                                cliOption.optionContext())) {
+                            // Found a usable converter
+                            c = candidate;
+                            break;
+                        }
+                    }
+                    if (c == null) {
+                        throw new IllegalStateException(
+                                "TODO: Add basic type conversion");
+                        // TODO Fall back to a normal SimpleTypeConverter and
+                        // attempt conversion
+                        // SimpleTypeConverter simpleTypeConverter = new
+                        // SimpleTypeConverter();
+                        // result =
+                        // simpleTypeConverter.convertIfNecessary(value,
+                        // requiredType, mp);
+                    }
+
+                    // Use the converter
+                    result = c.convertFromText(value, requiredType,
+                            cliOption.optionContext());
+
+                    // If the option has been specified to be mandatory then the
+                    // result should never be null
+                    if ((result == null) && cliOption.mandatory()) {
+                        throw new IllegalStateException();
+                    }
+                    arguments.add(result);
+                }
+                catch (final RuntimeException e) {
+                    LOGGER.warning(e.getClass().getName()
+                            + ": Failed to convert '"
+                            + value
+                            + "' to type "
+                            + requiredType.getSimpleName()
+                            + " for option '"
+                            + StringUtils.arrayToCommaDelimitedString(cliOption
+                                    .key()) + "'");
+                    if (StringUtils.hasText(e.getMessage())) {
+                        LOGGER.warning(e.getMessage());
+                    }
+                    return null;
+                }
+                finally {
+                    CliOptionContext.resetOptionContext();
+                    CliSimpleParserContext.resetSimpleParserContext();
+                }
             }
+
+            // Check for options specified by the user but are unavailable for
+            // the command
+            final Set<String> unavailableOptions = getSpecifiedUnavailableOptions(
+                    cliOptions, options);
+            if (!unavailableOptions.isEmpty()) {
+                final StringBuilder message = new StringBuilder();
+                if (unavailableOptions.size() == 1) {
+                    message.append("Option '")
+                            .append(unavailableOptions.iterator().next())
+                            .append("' is not available for this command. ");
+                }
+                else {
+                    message.append("Options ")
+                            .append(StringUtils.collectionToDelimitedString(
+                                    unavailableOptions, ", ", "'", "'"))
+                            .append(" are not available for this command. ");
+                }
+                message.append("Use tab assist or the \"help\" command to see the legal options");
+                LOGGER.warning(message.toString());
+                return null;
+            }
+
+            return new ParseResult(methodTarget.getMethod(),
+                    methodTarget.getTarget(), arguments.toArray());
         }
     }
 
     public final void remove(final CommandMarker command) {
         synchronized (mutex) {
             commands.remove(command);
-            for (Method m : command.getClass().getMethods()) {
-                CliAvailabilityIndicator availability = m
+            for (final Method m : command.getClass().getMethods()) {
+                final CliAvailabilityIndicator availability = m
                         .getAnnotation(CliAvailabilityIndicator.class);
                 if (availability != null) {
-                    for (String cmd : availability.value()) {
+                    for (final String cmd : availability.value()) {
                         availabilityIndicators.remove(cmd);
                     }
                 }
             }
-        }
-    }
-
-    public final void add(final Converter<?> converter) {
-        synchronized (mutex) {
-            converters.add(converter);
         }
     }
 

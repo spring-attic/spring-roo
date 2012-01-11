@@ -16,14 +16,14 @@ public abstract class IdentifiableAnnotatedJavaStructureCustomDataKey<T extends 
         extends IdentifiableJavaStructureCustomDataKey<T> {
     private List<AnnotationMetadata> annotations;
 
+    protected IdentifiableAnnotatedJavaStructureCustomDataKey() {
+        super();
+    }
+
     protected IdentifiableAnnotatedJavaStructureCustomDataKey(
             final Integer modifier, final List<AnnotationMetadata> annotations) {
         super(modifier);
         this.annotations = annotations;
-    }
-
-    protected IdentifiableAnnotatedJavaStructureCustomDataKey() {
-        super();
     }
 
     public List<AnnotationMetadata> getAnnotations() {

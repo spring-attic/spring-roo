@@ -26,7 +26,7 @@ public final class IOUtils {
                 try {
                     closeable.close();
                 }
-                catch (IOException e) {
+                catch (final IOException e) {
                     // Ignore
                 }
             }
@@ -46,7 +46,7 @@ public final class IOUtils {
                 try {
                     zipFile.close();
                 }
-                catch (IOException e) {
+                catch (final IOException e) {
                     // Ignore
                 }
             }

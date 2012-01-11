@@ -74,12 +74,20 @@ public interface ProcessManager extends ProcessManagerStatusProvider {
      */
     <T> T execute(CommandCallback<T> callback);
 
+    long getLastPollDuration();
+
+    long getMinimumDelayBetweenPoll();
+
     /**
      * @return true if the system is in development mode, which generally means
      *         more detailed diagnostics are requested from add-ons (defaults to
      *         false)
      */
     boolean isDevelopmentMode();
+
+    void setDevelopmentMode(boolean developmentMode);
+
+    void setMinimumDelayBetweenPoll(long minimumDelayBetweenPoll);
 
     /**
      * Allows the process manager to terminate gracefully. In particular this
@@ -90,12 +98,4 @@ public interface ProcessManager extends ProcessManagerStatusProvider {
     void terminate();
 
     void timerBasedPoll();
-
-    void setDevelopmentMode(boolean developmentMode);
-
-    void setMinimumDelayBetweenPoll(long minimumDelayBetweenPoll);
-
-    long getMinimumDelayBetweenPoll();
-
-    long getLastPollDuration();
 }

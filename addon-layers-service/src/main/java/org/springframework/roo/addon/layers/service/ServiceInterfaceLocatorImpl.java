@@ -27,23 +27,22 @@ import org.springframework.roo.model.RooJavaType;
 @Service
 public class ServiceInterfaceLocatorImpl implements ServiceInterfaceLocator {
 
-    // Fields
     @Reference private TypeLocationService typeLocationService;
 
     public Collection<ClassOrInterfaceTypeDetails> getServiceInterfaces(
             final JavaType domainType) {
-        Set<ClassOrInterfaceTypeDetails> located = typeLocationService
+        final Set<ClassOrInterfaceTypeDetails> located = typeLocationService
                 .findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_SERVICE);
-        Map<String, ClassOrInterfaceTypeDetails> toReturn = new HashMap<String, ClassOrInterfaceTypeDetails>();
-        for (ClassOrInterfaceTypeDetails cid : located) {
-            ServiceAnnotationValues annotationValues = new ServiceAnnotationValues(
+        final Map<String, ClassOrInterfaceTypeDetails> toReturn = new HashMap<String, ClassOrInterfaceTypeDetails>();
+        for (final ClassOrInterfaceTypeDetails cid : located) {
+            final ServiceAnnotationValues annotationValues = new ServiceAnnotationValues(
                     new DefaultPhysicalTypeMetadata(
                             cid.getDeclaredByMetadataId(),
                             typeLocationService
                                     .getPhysicalTypeCanonicalPath(cid
                                             .getDeclaredByMetadataId()), cid));
-            for (JavaType javaType : annotationValues.getDomainTypes()) {
-                if (javaType != null && javaType.equals(domainType)) {
+            for (final JavaType javaType : annotationValues.getDomainTypes()) {
+                if ((javaType != null) && javaType.equals(domainType)) {
                     toReturn.put(cid.getDeclaredByMetadataId(), cid);
                 }
             }

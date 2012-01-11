@@ -52,16 +52,14 @@ public class HttpPgpUrlStreamHandlerServiceImpl extends
         AbstractURLStreamHandlerService implements
         HttpPgpUrlStreamHandlerService {
 
-    // Constants
     private static final Logger LOGGER = HandlerUtils
             .getLogger(HttpPgpUrlStreamHandlerServiceImpl.class);
 
-    // Fields
-    @Reference private UrlInputStreamService urlInputStreamService;
     @Reference private PgpService pgpService;
+    @Reference private UrlInputStreamService urlInputStreamService;
 
     protected void activate(final ComponentContext context) {
-        Hashtable<String, String> dict = new Hashtable<String, String>();
+        final Hashtable<String, String> dict = new Hashtable<String, String>();
         dict.put(URLConstants.URL_HANDLER_PROTOCOL, "httppgp");
         context.getBundleContext().registerService(
                 URLStreamHandlerService.class.getName(), this, dict);
@@ -70,20 +68,21 @@ public class HttpPgpUrlStreamHandlerServiceImpl extends
     @Override
     public URLConnection openConnection(final URL u) throws IOException {
         // Convert httppgp:// URL into a standard http:// URL
-        URL resourceUrl = new URL(u.toExternalForm().replace("httppgp", "http"));
+        final URL resourceUrl = new URL(u.toExternalForm().replace("httppgp",
+                "http"));
         // Add .asc to the end of the standard resource URL
-        URL ascUrl = new URL(resourceUrl.toExternalForm() + ".asc");
+        final URL ascUrl = new URL(resourceUrl.toExternalForm() + ".asc");
 
         // Start with the ASC file, as if this is for an untrusted key, there's
         // no point download the larger resource
-        File ascUrlFile = File.createTempFile("roo_asc", null);
+        final File ascUrlFile = File.createTempFile("roo_asc", null);
         ascUrlFile.deleteOnExit();
 
         try {
             FileCopyUtils.copy(urlInputStreamService.openConnection(ascUrl),
                     new FileOutputStream(ascUrlFile));
         }
-        catch (IOException ioe) {
+        catch (final IOException ioe) {
             // This is not considered fatal; it is likely the ASC isn't
             // available, so we will continue
             ascUrlFile.delete();
@@ -102,7 +101,7 @@ public class HttpPgpUrlStreamHandlerServiceImpl extends
         InputStream signature = null;
         try {
             signature = new FileInputStream(ascUrlFile);
-            SignatureDecision decision = pgpService
+            final SignatureDecision decision = pgpService
                     .isSignatureAcceptable(signature);
             if (!decision.isSignatureAcceptable()) {
                 LOGGER.log(Level.SEVERE,
@@ -124,7 +123,7 @@ public class HttpPgpUrlStreamHandlerServiceImpl extends
 
             // So far so good. Next we need the actual resource to ensure the
             // ASC file really did sign it
-            File resourceFile = File.createTempFile("roo_resource", null);
+            final File resourceFile = File.createTempFile("roo_resource", null);
             resourceFile.deleteOnExit();
             FileCopyUtils.copy(
                     urlInputStreamService.openConnection(resourceUrl),

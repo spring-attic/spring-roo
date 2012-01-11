@@ -18,12 +18,13 @@ import org.springframework.roo.model.JavaSymbolName;
 public interface ClassOrInterfaceTypeDetails extends MemberHoldingTypeDetails {
 
     /**
-     * Obtains the superclass if this is a class and it is available.
+     * Indicates whether this class or interface declares a field with the given
+     * name
      * 
-     * @return the superclass, if available (null will be returned for
-     *         interfaces, or if the class isn't available)
+     * @param fieldName the field name to check for (can be <code>null</code>)
+     * @return <code>false</code> if a <code>null</code> field name is given
      */
-    ClassOrInterfaceTypeDetails getSuperclass();
+    boolean declaresField(JavaSymbolName fieldName);
 
     /**
      * Lists the enum constants this type provides. Always empty except if an
@@ -40,13 +41,12 @@ public interface ClassOrInterfaceTypeDetails extends MemberHoldingTypeDetails {
     Set<ImportMetadata> getRegisteredImports();
 
     /**
-     * Indicates whether this class or interface declares a field with the given
-     * name
+     * Obtains the superclass if this is a class and it is available.
      * 
-     * @param fieldName the field name to check for (can be <code>null</code>)
-     * @return <code>false</code> if a <code>null</code> field name is given
+     * @return the superclass, if available (null will be returned for
+     *         interfaces, or if the class isn't available)
      */
-    boolean declaresField(JavaSymbolName fieldName);
+    ClassOrInterfaceTypeDetails getSuperclass();
 
     /**
      * Indicates whether this class, interface, or enum is abstract

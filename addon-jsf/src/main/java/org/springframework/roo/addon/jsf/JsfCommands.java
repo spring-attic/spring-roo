@@ -21,13 +21,7 @@ import org.springframework.roo.shell.CommandMarker;
 @Service
 public class JsfCommands implements CommandMarker {
 
-    // Fields
     @Reference private JsfOperations jsfOperations;
-
-    @CliAvailabilityIndicator({ "web jsf setup" })
-    public boolean isJsfSetupAvailable() {
-        return jsfOperations.isJsfInstallationPossible();
-    }
 
     @CliAvailabilityIndicator({ "web jsf all", "web jsf scaffold",
             "web jsf media" })
@@ -35,13 +29,9 @@ public class JsfCommands implements CommandMarker {
         return jsfOperations.isScaffoldOrMediaAdditionAvailable();
     }
 
-    @CliCommand(value = "web jsf setup", help = "Set up JSF environment")
-    public void webJsfSetup(
-            @CliOption(key = "implementation", mandatory = false, help = "The JSF implementation to use") final JsfImplementation jsfImplementation,
-            @CliOption(key = "library", mandatory = false, help = "The JSF component library to use") final JsfLibrary jsfLibrary,
-            @CliOption(key = "theme", mandatory = false, help = "The name of the theme") final Theme theme) {
-
-        jsfOperations.setup(jsfImplementation, jsfLibrary, theme);
+    @CliAvailabilityIndicator({ "web jsf setup" })
+    public boolean isJsfSetupAvailable() {
+        return jsfOperations.isJsfInstallationPossible();
     }
 
     @CliCommand(value = "web jsf all", help = "Create JSF managed beans for all entities")
@@ -49,6 +39,14 @@ public class JsfCommands implements CommandMarker {
             @CliOption(key = "package", mandatory = true, optionContext = "update", help = "The package in which new JSF managed beans will be placed") final JavaPackage destinationPackage) {
 
         jsfOperations.generateAll(destinationPackage);
+    }
+
+    @CliCommand(value = "web jsf media", help = "Add a cross-browser generic player to embed multimedia content")
+    public void webJsfMedia(
+            @CliOption(key = "url", mandatory = true, help = "The url of the media source") final String url,
+            @CliOption(key = "player", mandatory = false, help = "The name of the media player") final MediaPlayer mediaPlayer) {
+
+        jsfOperations.addMediaSuurce(url, mediaPlayer);
     }
 
     @CliCommand(value = "web jsf scaffold", help = "Create JSF managed bean for an entity")
@@ -62,11 +60,12 @@ public class JsfCommands implements CommandMarker {
                 includeOnMenu);
     }
 
-    @CliCommand(value = "web jsf media", help = "Add a cross-browser generic player to embed multimedia content")
-    public void webJsfMedia(
-            @CliOption(key = "url", mandatory = true, help = "The url of the media source") final String url,
-            @CliOption(key = "player", mandatory = false, help = "The name of the media player") final MediaPlayer mediaPlayer) {
+    @CliCommand(value = "web jsf setup", help = "Set up JSF environment")
+    public void webJsfSetup(
+            @CliOption(key = "implementation", mandatory = false, help = "The JSF implementation to use") final JsfImplementation jsfImplementation,
+            @CliOption(key = "library", mandatory = false, help = "The JSF component library to use") final JsfLibrary jsfLibrary,
+            @CliOption(key = "theme", mandatory = false, help = "The name of the theme") final Theme theme) {
 
-        jsfOperations.addMediaSuurce(url, mediaPlayer);
+        jsfOperations.setup(jsfImplementation, jsfLibrary, theme);
     }
 }

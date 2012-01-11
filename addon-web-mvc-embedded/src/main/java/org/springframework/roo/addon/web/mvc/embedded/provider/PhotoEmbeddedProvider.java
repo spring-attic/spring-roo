@@ -23,12 +23,23 @@ import org.w3c.dom.Element;
 @Service
 public class PhotoEmbeddedProvider extends AbstractEmbeddedProvider {
 
+    public enum PhotoProvider implements EmbeddedCompletor {
+        FLIKR, PICASA;
+
+        @Override
+        public String toString() {
+            final ToStringCreator tsc = new ToStringCreator(this);
+            tsc.append("provider", name());
+            return tsc.toString();
+        }
+    }
+
     public boolean embed(final String url, final String viewName) {
         // Expected http://picasaweb.google.com.au/stsmedia/SydneyByNight
         if (url.contains("picasaweb.google.")) {
-            String[] split = url.split("/");
+            final String[] split = url.split("/");
             if (split.length > 4) {
-                Map<String, String> options = new HashMap<String, String>();
+                final Map<String, String> options = new HashMap<String, String>();
                 options.put("provider", PhotoProvider.PICASA.name());
                 options.put("userId", split[3]);
                 options.put("albumId", getPicasaId(url));
@@ -37,9 +48,9 @@ public class PhotoEmbeddedProvider extends AbstractEmbeddedProvider {
             return false;
         }
         else if (url.contains("flickr.")) {
-            String[] split = url.split("/");
+            final String[] split = url.split("/");
             if (split.length > 4) {
-                Map<String, String> options = new HashMap<String, String>();
+                final Map<String, String> options = new HashMap<String, String>();
                 options.put("provider", PhotoProvider.FLIKR.name());
                 options.put("userId", split[4]);
                 options.put("albumId", split.length > 5 ? split[5] : split[4]);
@@ -50,22 +61,36 @@ public class PhotoEmbeddedProvider extends AbstractEmbeddedProvider {
         return false;
     }
 
+    private String getPicasaId(final String url) {
+        final String json = sendHttpGetRequest("http://api.embed.ly/v1/api/oembed?url="
+                + url);
+        if (json != null) {
+            final String subDoc = json
+                    .substring(json.indexOf("albumid%2F") + 10);
+            return subDoc.substring(
+                    0,
+                    subDoc.indexOf("%") == 1 ? subDoc.length() : subDoc
+                            .indexOf("%"));
+        }
+        return null;
+    }
+
     public boolean install(final String viewName,
             final Map<String, String> options) {
-        if (options == null || options.size() != 3
+        if ((options == null) || (options.size() != 3)
                 || !options.containsKey("provider")
                 || !options.containsKey("userId")
                 || !options.containsKey("albumId")) {
             return false;
         }
-        String provider = options.get("provider");
+        final String provider = options.get("provider");
         if (!isProviderSupported(provider, PhotoProvider.values())) {
             return false;
         }
-        String userId = options.get("userId");
-        String albumId = options.get("albumId");
+        final String userId = options.get("userId");
+        final String albumId = options.get("albumId");
         installTagx("photos");
-        Element photos = new XmlElementBuilder("embed:photos", XmlUtils
+        final Element photos = new XmlElementBuilder("embed:photos", XmlUtils
                 .getDocumentBuilder().newDocument())
                 .addAttribute("id", "photos_" + userId + "_" + albumId)
                 .addAttribute("albumId", albumId)
@@ -75,29 +100,5 @@ public class PhotoEmbeddedProvider extends AbstractEmbeddedProvider {
                 XmlRoundTripUtils.calculateUniqueKeyFor(photos));
         installJspx(getViewName(viewName, provider.toLowerCase()), null, photos);
         return true;
-    }
-
-    private String getPicasaId(final String url) {
-        String json = sendHttpGetRequest("http://api.embed.ly/v1/api/oembed?url="
-                + url);
-        if (json != null) {
-            String subDoc = json.substring(json.indexOf("albumid%2F") + 10);
-            return subDoc.substring(
-                    0,
-                    subDoc.indexOf("%") == 1 ? subDoc.length() : subDoc
-                            .indexOf("%"));
-        }
-        return null;
-    }
-
-    public enum PhotoProvider implements EmbeddedCompletor {
-        PICASA, FLIKR;
-
-        @Override
-        public String toString() {
-            ToStringCreator tsc = new ToStringCreator(this);
-            tsc.append("provider", name());
-            return tsc.toString();
-        }
     }
 }

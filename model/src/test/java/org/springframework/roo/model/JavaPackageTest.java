@@ -17,9 +17,13 @@ import org.junit.Test;
  */
 public class JavaPackageTest {
 
-    // Constants
     private static final JavaPackage CHILD = new JavaPackage("com.foo.bar");
     private static final JavaPackage PARENT = new JavaPackage("com.foo");
+
+    @Test
+    public void testChildPackageIsWithinParent() {
+        assertTrue(CHILD.isWithin(PARENT));
+    }
 
     @Test
     public void testGetElementsOfMultiLevelPackage() {
@@ -55,11 +59,6 @@ public class JavaPackageTest {
     @Test
     public void testPackageIsWithinSelf() {
         assertTrue(PARENT.isWithin(PARENT));
-    }
-
-    @Test
-    public void testChildPackageIsWithinParent() {
-        assertTrue(CHILD.isWithin(PARENT));
     }
 
     @Test

@@ -18,7 +18,6 @@ import org.springframework.roo.support.util.Assert;
  */
 public class JLineCompletorAdapter implements Completor {
 
-    // Fields
     private final Parser parser;
 
     public JLineCompletorAdapter(final Parser parser) {
@@ -32,9 +31,9 @@ public class JLineCompletorAdapter implements Completor {
         int result;
         try {
             JLineLogHandler.cancelRedrawProhibition();
-            List<Completion> completions = new ArrayList<Completion>();
+            final List<Completion> completions = new ArrayList<Completion>();
             result = parser.completeAdvanced(buffer, cursor, completions);
-            for (Completion completion : completions) {
+            for (final Completion completion : completions) {
                 candidates
                         .add(new jline.Completion(completion.getValue(),
                                 completion.getFormattedValue(), completion

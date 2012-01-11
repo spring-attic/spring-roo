@@ -20,7 +20,6 @@ import org.springframework.roo.shell.MethodTarget;
 @Component
 public class HintConverter implements Converter<String> {
 
-    // Fields
     @Reference private HintOperations hintOperations;
 
     public String convertFromText(final String value,
@@ -31,7 +30,7 @@ public class HintConverter implements Converter<String> {
     public boolean getAllPossibleValues(final List<Completion> completions,
             final Class<?> requiredType, final String existingData,
             final String optionContext, final MethodTarget target) {
-        for (String currentTopic : hintOperations.getCurrentTopics()) {
+        for (final String currentTopic : hintOperations.getCurrentTopics()) {
             completions.add(new Completion(currentTopic));
         }
         return false;

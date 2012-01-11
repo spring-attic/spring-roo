@@ -26,20 +26,6 @@ import org.springframework.roo.file.monitor.event.FileEventListener;
 public interface NotifiableFileMonitorService extends FileMonitorService {
 
     /**
-     * Similar to {@link #scanAll()} except will only notify those files
-     * explicitly advised via notification methods on
-     * {@link NotifiableFileMonitorService}. This is designed to allow faster
-     * operation where a full disk scan (as would be provided by
-     * {@link #scanAll()} is unnecessary.
-     * <p>
-     * Note that executing this method will result in change notifications
-     * 
-     * @return the number of changes detected during this invocation (can be 0
-     *         or above)
-     */
-    int scanNotified();
-
-    /**
      * Indicates the canonical path specified should be treated as if it had
      * changed. The last update time will become equal to actual disk timestamp.
      * <p>
@@ -56,6 +42,8 @@ public interface NotifiableFileMonitorService extends FileMonitorService {
      */
     void notifyChanged(String fileCanonicalPath);
 
+    void notifyCreated(String fileCanonicalPath);
+
     /**
      * Notifies this service that the given file system resource is about to be
      * deleted
@@ -64,5 +52,17 @@ public interface NotifiableFileMonitorService extends FileMonitorService {
      */
     void notifyDeleted(String fileCanonicalPath);
 
-    void notifyCreated(String fileCanonicalPath);
+    /**
+     * Similar to {@link #scanAll()} except will only notify those files
+     * explicitly advised via notification methods on
+     * {@link NotifiableFileMonitorService}. This is designed to allow faster
+     * operation where a full disk scan (as would be provided by
+     * {@link #scanAll()} is unnecessary.
+     * <p>
+     * Note that executing this method will result in change notifications
+     * 
+     * @return the number of changes detected during this invocation (can be 0
+     *         or above)
+     */
+    int scanNotified();
 }

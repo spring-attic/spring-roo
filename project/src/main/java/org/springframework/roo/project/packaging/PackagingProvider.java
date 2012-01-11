@@ -16,22 +16,6 @@ import org.springframework.roo.project.ProjectOperations;
 public interface PackagingProvider {
 
     /**
-     * Returns the unique identifier of this {@link PackagingProvider}, for use
-     * in the Roo user interface.
-     * <p>
-     * The intent of this method is to allow third-party addons to provide
-     * alternative behaviour for a given Maven packaging type. For example, the
-     * core Roo WAR packaging type will have an ID of "war". If the user wants
-     * to customise how WAR modules are generated, they can implement their own
-     * {@link PackagingProvider} with an ID of (say) "custom-war". Then when the
-     * user adds a new module to their project, the shell will offer them the
-     * choice of "WAR" and "CUSTOM-WAR" for the packaging type.
-     * 
-     * @return a non-blank ID, unique when case is ignored
-     */
-    String getId();
-
-    /**
      * Creates the initial set of artifacts (files and directories) for a module
      * with this type of packaging; this includes setting the POM's
      * <code>/project/packaging</code> element to the desired value.
@@ -53,6 +37,30 @@ public interface PackagingProvider {
             ProjectOperations projectOperations);
 
     /**
+     * Returns the unique identifier of this {@link PackagingProvider}, for use
+     * in the Roo user interface.
+     * <p>
+     * The intent of this method is to allow third-party addons to provide
+     * alternative behaviour for a given Maven packaging type. For example, the
+     * core Roo WAR packaging type will have an ID of "war". If the user wants
+     * to customise how WAR modules are generated, they can implement their own
+     * {@link PackagingProvider} with an ID of (say) "custom-war". Then when the
+     * user adds a new module to their project, the shell will offer them the
+     * choice of "WAR" and "CUSTOM-WAR" for the packaging type.
+     * 
+     * @return a non-blank ID, unique when case is ignored
+     */
+    String getId();
+
+    /**
+     * Returns the {@link Path}s to be created for this module, in addition to
+     * {@link Path#ROOT}.
+     * 
+     * @return
+     */
+    Collection<Path> getPaths();
+
+    /**
      * Indicates whether this type of packaging should be used for new projects
      * and modules by default, i.e. when the user doesn't specify the packaging.
      * <p>
@@ -63,12 +71,4 @@ public interface PackagingProvider {
      * @return see above
      */
     boolean isDefault();
-
-    /**
-     * Returns the {@link Path}s to be created for this module, in addition to
-     * {@link Path#ROOT}.
-     * 
-     * @return
-     */
-    Collection<Path> getPaths();
 }

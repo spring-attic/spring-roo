@@ -15,6 +15,9 @@ import org.springframework.roo.model.JavaSymbolName;
  */
 public interface GwtTemplateService {
 
+    String buildUiXml(String templateContents, String destFile,
+            List<MethodMetadata> proxyMethods);
+
     GwtTemplateDataHolder getMirrorTemplateTypeDetails(
             ClassOrInterfaceTypeDetails governorTypeDetails,
             Map<JavaSymbolName, GwtProxyProperty> clientSideTypeMap,
@@ -22,7 +25,4 @@ public interface GwtTemplateService {
 
     List<ClassOrInterfaceTypeDetails> getStaticTemplateTypeDetails(
             GwtType type, String moduleName);
-
-    String buildUiXml(String templateContents, String destFile,
-            List<MethodMetadata> proxyMethods);
 }

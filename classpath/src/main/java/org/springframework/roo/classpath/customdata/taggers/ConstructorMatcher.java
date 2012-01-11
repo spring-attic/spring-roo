@@ -22,23 +22,8 @@ import org.springframework.roo.support.util.Assert;
  */
 public class ConstructorMatcher implements Matcher<ConstructorMetadata> {
 
-    // Fields
     private final CustomDataKey<ConstructorMetadata> customDataKey;
     private final List<JavaType> parameterTypes;
-
-    /**
-     * Constructor
-     * 
-     * @param <T> {@link JavaType} or any subclass
-     * @param customDataKey (required)
-     * @param parameterTypes
-     * @since 1.2.0
-     */
-    public <T extends JavaType> ConstructorMatcher(
-            final CustomDataKey<ConstructorMetadata> customDataKey,
-            final T... parameterTypes) {
-        this(customDataKey, Arrays.asList(parameterTypes));
-    }
 
     /**
      * Constructor
@@ -58,11 +43,33 @@ public class ConstructorMatcher implements Matcher<ConstructorMetadata> {
         }
     }
 
+    /**
+     * Constructor
+     * 
+     * @param <T> {@link JavaType} or any subclass
+     * @param customDataKey (required)
+     * @param parameterTypes
+     * @since 1.2.0
+     */
+    public <T extends JavaType> ConstructorMatcher(
+            final CustomDataKey<ConstructorMetadata> customDataKey,
+            final T... parameterTypes) {
+        this(customDataKey, Arrays.asList(parameterTypes));
+    }
+
+    public CustomDataKey<ConstructorMetadata> getCustomDataKey() {
+        return customDataKey;
+    }
+
+    public Object getTagValue(final ConstructorMetadata key) {
+        return null;
+    }
+
     public List<ConstructorMetadata> matches(
             final List<MemberHoldingTypeDetails> memberHoldingTypeDetailsList) {
-        List<ConstructorMetadata> constructors = new ArrayList<ConstructorMetadata>();
-        for (MemberHoldingTypeDetails memberHoldingTypeDetails : memberHoldingTypeDetailsList) {
-            for (ConstructorMetadata constructor : memberHoldingTypeDetails
+        final List<ConstructorMetadata> constructors = new ArrayList<ConstructorMetadata>();
+        for (final MemberHoldingTypeDetails memberHoldingTypeDetails : memberHoldingTypeDetailsList) {
+            for (final ConstructorMetadata constructor : memberHoldingTypeDetails
                     .getDeclaredConstructors()) {
                 if (parameterTypes.equals(AnnotatedJavaType
                         .convertFromAnnotatedJavaTypes(constructor
@@ -72,13 +79,5 @@ public class ConstructorMatcher implements Matcher<ConstructorMetadata> {
             }
         }
         return constructors;
-    }
-
-    public CustomDataKey<ConstructorMetadata> getCustomDataKey() {
-        return customDataKey;
-    }
-
-    public Object getTagValue(final ConstructorMetadata key) {
-        return null;
     }
 }

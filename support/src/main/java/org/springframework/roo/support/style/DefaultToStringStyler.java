@@ -33,7 +33,6 @@ import org.springframework.roo.support.util.ObjectUtils;
  */
 public class DefaultToStringStyler implements ToStringStyler {
 
-    // Fields
     private final ValueStyler valueStyler;
 
     /**
@@ -50,7 +49,37 @@ public class DefaultToStringStyler implements ToStringStyler {
      * Return the ValueStyler used by this ToStringStyler.
      */
     protected final ValueStyler getValueStyler() {
-        return this.valueStyler;
+        return valueStyler;
+    }
+
+    public void styleEnd(final StringBuilder buffer, final Object o) {
+        buffer.append(']');
+    }
+
+    public void styleField(final StringBuilder buffer, final String fieldName,
+            final Object value) {
+        styleFieldStart(buffer, fieldName);
+        styleValue(buffer, value);
+        styleFieldEnd(buffer, fieldName);
+    }
+
+    protected void styleFieldEnd(final StringBuilder buffer,
+            final String fieldName) {
+    }
+
+    public void styleFieldSeparator(final StringBuilder buffer) {
+        buffer.append(',');
+    }
+
+    protected void styleFieldStart(final StringBuilder buffer,
+            final String fieldName) {
+        buffer.append(' ').append(fieldName).append(" = ");
+    }
+
+    private void styleIdentityHashCode(final StringBuilder buffer,
+            final Object obj) {
+        buffer.append('@');
+        buffer.append(ObjectUtils.getIdentityHexString(obj));
     }
 
     public void styleStart(final StringBuilder buffer, final Object obj) {
@@ -66,37 +95,7 @@ public class DefaultToStringStyler implements ToStringStyler {
         }
     }
 
-    private void styleIdentityHashCode(final StringBuilder buffer,
-            final Object obj) {
-        buffer.append('@');
-        buffer.append(ObjectUtils.getIdentityHexString(obj));
-    }
-
-    public void styleEnd(final StringBuilder buffer, final Object o) {
-        buffer.append(']');
-    }
-
-    public void styleField(final StringBuilder buffer, final String fieldName,
-            final Object value) {
-        styleFieldStart(buffer, fieldName);
-        styleValue(buffer, value);
-        styleFieldEnd(buffer, fieldName);
-    }
-
-    protected void styleFieldStart(final StringBuilder buffer,
-            final String fieldName) {
-        buffer.append(' ').append(fieldName).append(" = ");
-    }
-
-    protected void styleFieldEnd(final StringBuilder buffer,
-            final String fieldName) {
-    }
-
     public void styleValue(final StringBuilder buffer, final Object value) {
-        buffer.append(this.valueStyler.style(value));
-    }
-
-    public void styleFieldSeparator(final StringBuilder buffer) {
-        buffer.append(',');
+        buffer.append(valueStyler.style(value));
     }
 }

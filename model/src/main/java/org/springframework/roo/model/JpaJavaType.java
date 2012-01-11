@@ -28,10 +28,10 @@ public final class JpaJavaType {
             "javax.persistence.Entity");
     public static final JavaType ENTITY_MANAGER = new JavaType(
             "javax.persistence.EntityManager");
-    public static final JavaType ENUMERATED = new JavaType(
-            "javax.persistence.Enumerated");
     public static final JavaType ENUM_TYPE = new JavaType(
             "javax.persistence.EnumType");
+    public static final JavaType ENUMERATED = new JavaType(
+            "javax.persistence.Enumerated");
     public static final JavaType FETCH_TYPE = new JavaType(
             "javax.persistence.FetchType");
     public static final JavaType GENERATED_VALUE = new JavaType(

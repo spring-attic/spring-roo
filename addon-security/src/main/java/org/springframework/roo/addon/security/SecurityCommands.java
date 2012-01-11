@@ -17,16 +17,15 @@ import org.springframework.roo.shell.CommandMarker;
 @Service
 public class SecurityCommands implements CommandMarker {
 
-    // Fields
     @Reference private SecurityOperations securityOperations;
-
-    @CliAvailabilityIndicator("security setup")
-    public boolean isInstallSecurityAvailable() {
-        return securityOperations.isSecurityInstallationPossible();
-    }
 
     @CliCommand(value = "security setup", help = "Install Spring Security into your project")
     public void installSecurity() {
         securityOperations.installSecurity();
+    }
+
+    @CliAvailabilityIndicator("security setup")
+    public boolean isInstallSecurityAvailable() {
+        return securityOperations.isSecurityInstallationPossible();
     }
 }

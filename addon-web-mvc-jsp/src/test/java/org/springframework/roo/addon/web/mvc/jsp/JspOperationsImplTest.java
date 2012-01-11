@@ -45,13 +45,13 @@ public class JspOperationsImplTest {
     }
 
     @Test
-    public void testGetFolderAndMappingForUnadornedPreferredMapping() {
-        assertFolderAndMapping("foo", "foo", "/foo/**");
+    public void testGetFolderAndMappingForPreferredMappingWithLeadingSlash() {
+        assertFolderAndMapping("/foo", "foo", "/foo/**");
     }
 
     @Test
-    public void testGetFolderAndMappingForPreferredMappingWithLeadingSlash() {
-        assertFolderAndMapping("/foo", "foo", "/foo/**");
+    public void testGetFolderAndMappingForPreferredMappingWithMixedCase() {
+        assertFolderAndMapping("fooBar", "fooBar", "/fooBar/**");
     }
 
     @Test
@@ -65,7 +65,7 @@ public class JspOperationsImplTest {
     }
 
     @Test
-    public void testGetFolderAndMappingForPreferredMappingWithMixedCase() {
-        assertFolderAndMapping("fooBar", "fooBar", "/fooBar/**");
+    public void testGetFolderAndMappingForUnadornedPreferredMapping() {
+        assertFolderAndMapping("foo", "foo", "/foo/**");
     }
 }

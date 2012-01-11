@@ -28,20 +28,42 @@ import org.springframework.roo.model.JavaType;
  */
 public class RepositoryMongoLayerProviderTest {
 
-    // Constants
     private static final String CALLER_MID = "MID:anything#com.example.PetService";
 
     // Fixture
     private RepositoryMongoLayerProvider layerProvider;
-    @Mock private JavaType mockTargetEntity;
     @Mock private JavaType mockIdType;
     @Mock private RepositoryMongoLocator mockRepositoryLocator;
+    @Mock private JavaType mockTargetEntity;
+
+    /**
+     * Asserts that the {@link RepositoryMongoLayerProvider} generates the
+     * expected call for the given method with the given parameters
+     * 
+     * @param expectedMethodCall
+     * @param methodKey
+     * @param callerParameters
+     */
+    private void assertMethodCall(final String expectedMethodCall,
+            final MethodMetadataCustomDataKey methodKey,
+            final MethodParameter... callerParameters) {
+        // Set up
+        setUpMockRepository();
+
+        // Invoke
+        final MemberTypeAdditions additions = layerProvider
+                .getMemberTypeAdditions(CALLER_MID, methodKey.name(),
+                        mockTargetEntity, mockIdType, callerParameters);
+
+        // Check
+        assertEquals(expectedMethodCall, additions.getMethodCall());
+    }
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        this.layerProvider = new RepositoryMongoLayerProvider();
-        this.layerProvider.setRepositoryLocator(mockRepositoryLocator);
+        layerProvider = new RepositoryMongoLayerProvider();
+        layerProvider.setRepositoryLocator(mockRepositoryLocator);
     }
 
     /**
@@ -65,7 +87,7 @@ public class RepositoryMongoLayerProviderTest {
     @Test
     public void testGetAdditionsForNonRepositoryLayerMethod() {
         // Invoke
-        final MemberTypeAdditions additions = this.layerProvider
+        final MemberTypeAdditions additions = layerProvider
                 .getMemberTypeAdditions(CALLER_MID, "bogus", mockTargetEntity,
                         mockIdType);
 
@@ -76,35 +98,12 @@ public class RepositoryMongoLayerProviderTest {
     @Test
     public void testGetAdditionsWhenNoRepositoriesExist() {
         // Invoke
-        final MemberTypeAdditions additions = this.layerProvider
+        final MemberTypeAdditions additions = layerProvider
                 .getMemberTypeAdditions(CALLER_MID, FIND_ALL_METHOD.name(),
                         mockTargetEntity, mockIdType);
 
         // Check
         assertNull(additions);
-    }
-
-    /**
-     * Asserts that the {@link RepositoryMongoLayerProvider} generates the
-     * expected call for the given method with the given parameters
-     * 
-     * @param expectedMethodCall
-     * @param methodKey
-     * @param callerParameters
-     */
-    private void assertMethodCall(final String expectedMethodCall,
-            final MethodMetadataCustomDataKey methodKey,
-            final MethodParameter... callerParameters) {
-        // Set up
-        setUpMockRepository();
-
-        // Invoke
-        final MemberTypeAdditions additions = this.layerProvider
-                .getMemberTypeAdditions(CALLER_MID, methodKey.name(),
-                        mockTargetEntity, mockIdType, callerParameters);
-
-        // Check
-        assertEquals(expectedMethodCall, additions.getMethodCall());
     }
 
     @Test

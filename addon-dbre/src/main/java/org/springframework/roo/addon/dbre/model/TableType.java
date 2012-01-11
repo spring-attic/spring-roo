@@ -7,13 +7,13 @@ package org.springframework.roo.addon.dbre.model;
  * @since 1.1
  */
 public enum TableType {
-    TABLE, VIEW, ALIAS, SYNONYM, UNKNOWN;
+    ALIAS, SYNONYM, TABLE, UNKNOWN, VIEW;
 
     public static TableType getTableType(final String typeName) {
         try {
             return TableType.valueOf(typeName);
         }
-        catch (IllegalArgumentException e) {
+        catch (final IllegalArgumentException e) {
             return UNKNOWN;
         }
     }

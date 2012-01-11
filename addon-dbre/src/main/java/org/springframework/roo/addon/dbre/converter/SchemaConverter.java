@@ -24,20 +24,13 @@ import org.springframework.roo.support.util.StringUtils;
 @Service
 public class SchemaConverter implements Converter<Set<Schema>> {
 
-    // Fields
     @Reference private DbreModelService dbreModelService;
-
-    public boolean supports(final Class<?> requiredType,
-            final String optionContext) {
-        return Set.class.isAssignableFrom(requiredType)
-                && optionContext.contains("schema");
-    }
 
     public Set<Schema> convertFromText(final String value,
             final Class<?> requiredType, final String optionContext) {
-        Set<Schema> schemas = new HashSet<Schema>();
-        for (String schemaName : StringUtils.delimitedListToStringArray(value,
-                " ")) {
+        final Set<Schema> schemas = new HashSet<Schema>();
+        for (final String schemaName : StringUtils.delimitedListToStringArray(
+                value, " ")) {
             schemas.add(new Schema(schemaName));
         }
         return schemas;
@@ -48,8 +41,8 @@ public class SchemaConverter implements Converter<Set<Schema>> {
             final String optionContext, final MethodTarget target) {
         try {
             if (dbreModelService.supportsSchema(false)) {
-                Set<Schema> schemas = dbreModelService.getSchemas(false);
-                for (Schema schema : schemas) {
+                final Set<Schema> schemas = dbreModelService.getSchemas(false);
+                for (final Schema schema : schemas) {
                     completions.add(new Completion(schema.getName()));
                 }
             }
@@ -58,10 +51,16 @@ public class SchemaConverter implements Converter<Set<Schema>> {
                         DbreModelService.NO_SCHEMA_REQUIRED));
             }
         }
-        catch (Exception e) {
+        catch (final Exception e) {
             completions.add(new Completion("unable-to-obtain-connection"));
         }
 
         return true;
+    }
+
+    public boolean supports(final Class<?> requiredType,
+            final String optionContext) {
+        return Set.class.isAssignableFrom(requiredType)
+                && optionContext.contains("schema");
     }
 }

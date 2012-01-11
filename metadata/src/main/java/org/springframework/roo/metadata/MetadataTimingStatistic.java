@@ -10,12 +10,6 @@ public interface MetadataTimingStatistic extends
         Comparable<MetadataTimingStatistic> {
 
     /**
-     * @return the number of nanoseconds associated with this {@link #getName()}
-     *         .
-     */
-    long getTime();
-
-    /**
      * @return the number of invocations associated with this {@link #getName()}
      *         .
      */
@@ -26,4 +20,10 @@ public interface MetadataTimingStatistic extends
      *         (never null or empty)
      */
     String getName();
+
+    /**
+     * @return the number of nanoseconds associated with this {@link #getName()}
+     *         .
+     */
+    long getTime();
 }

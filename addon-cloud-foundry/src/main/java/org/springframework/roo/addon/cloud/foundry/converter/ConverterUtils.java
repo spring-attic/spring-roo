@@ -9,13 +9,6 @@ package org.springframework.roo.addon.cloud.foundry.converter;
 public final class ConverterUtils {
 
     /**
-     * Constructor is private to prevent instantiation
-     */
-    private ConverterUtils() {
-        // Empty
-    }
-
-    /**
      * Returns the value of the given option from the given command line
      * 
      * @param option the option whose value to retrieve
@@ -26,10 +19,17 @@ public final class ConverterUtils {
     public static String getOptionValue(final String option, final String buffer) {
         final String[] words = buffer.split(" ");
         for (int i = 0; i < words.length; i++) {
-            if (words[i].equals("--" + option) && i + 1 < words.length) {
+            if (words[i].equals("--" + option) && ((i + 1) < words.length)) {
                 return words[i + 1];
             }
         }
         return null;
+    }
+
+    /**
+     * Constructor is private to prevent instantiation
+     */
+    private ConverterUtils() {
+        // Empty
     }
 }

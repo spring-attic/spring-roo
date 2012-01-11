@@ -40,14 +40,11 @@ public class JsfConverterMetadataProviderImpl extends
         AbstractMemberDiscoveringItdMetadataProvider implements
         JsfConverterMetadataProvider {
 
-    // Constants
     private static final int LAYER_POSITION = LayerType.HIGHEST.getPosition();
-
-    // Fields
     @Reference private ConfigurableMetadataProvider configurableMetadataProvider;
-    @Reference private LayerService layerService;
-    private final Map<JavaType, String> entityToConverterMidMap = new LinkedHashMap<JavaType, String>();
     private final Map<String, JavaType> converterMidToEntityMap = new LinkedHashMap<String, JavaType>();
+    private final Map<JavaType, String> entityToConverterMidMap = new LinkedHashMap<JavaType, String>();
+    @Reference private LayerService layerService;
 
     protected void activate(final ComponentContext context) {
         metadataDependencyRegistry.addNotificationListener(this);
@@ -58,6 +55,12 @@ public class JsfConverterMetadataProviderImpl extends
         configurableMetadataProvider.addMetadataTrigger(ROO_JSF_CONVERTER);
     }
 
+    @Override
+    protected String createLocalIdentifier(final JavaType javaType,
+            final LogicalPath path) {
+        return JsfConverterMetadata.createIdentifier(javaType, path);
+    }
+
     protected void deactivate(final ComponentContext context) {
         metadataDependencyRegistry.removeNotificationListener(this);
         metadataDependencyRegistry.deregisterDependency(
@@ -65,65 +68,6 @@ public class JsfConverterMetadataProviderImpl extends
                 getProvidesType());
         removeMetadataTrigger(ROO_JSF_CONVERTER);
         configurableMetadataProvider.removeMetadataTrigger(ROO_JSF_CONVERTER);
-    }
-
-    @Override
-    protected String getLocalMidToRequest(final ItdTypeDetails itdTypeDetails) {
-        // Determine the governor for this ITD, and whether any metadata is even
-        // hoping to hear about changes to that JavaType and its ITDs
-        JavaType governor = itdTypeDetails.getName();
-        String localMid = entityToConverterMidMap.get(governor);
-        if (localMid != null) {
-            return localMid;
-        }
-
-        final MemberHoldingTypeDetails memberHoldingTypeDetails = typeLocationService
-                .getTypeDetails(itdTypeDetails.getGovernor().getName());
-        if (memberHoldingTypeDetails != null) {
-            for (final JavaType type : memberHoldingTypeDetails
-                    .getLayerEntities()) {
-                String localMidType = entityToConverterMidMap.get(type);
-                if (localMidType != null) {
-                    return localMidType;
-                }
-            }
-        }
-        return null;
-    }
-
-    @Override
-    protected ItdTypeDetailsProvidingMetadataItem getMetadata(
-            final String metadataIdentificationString,
-            final JavaType aspectName,
-            final PhysicalTypeMetadata governorPhysicalTypeMetadata,
-            final String itdFilename) {
-        // We need to parse the annotation, which we expect to be present
-        final JsfConverterAnnotationValues annotationValues = new JsfConverterAnnotationValues(
-                governorPhysicalTypeMetadata);
-        final JavaType entity = annotationValues.getEntity();
-        if (!annotationValues.isAnnotationFound() || entity == null) {
-            return null;
-        }
-
-        // Remember that this entity JavaType matches up with this metadata
-        // identification string
-        // Start by clearing any previous association
-        final JavaType oldEntity = converterMidToEntityMap
-                .get(metadataIdentificationString);
-        if (oldEntity != null) {
-            entityToConverterMidMap.remove(oldEntity);
-        }
-        entityToConverterMidMap.put(entity, metadataIdentificationString);
-        converterMidToEntityMap.put(metadataIdentificationString, entity);
-
-        final MemberTypeAdditions findMethod = getFindMethod(entity,
-                metadataIdentificationString);
-        final MethodMetadata identifierAccessor = persistenceMemberLocator
-                .getIdentifierAccessor(entity);
-
-        return new JsfConverterMetadata(metadataIdentificationString,
-                aspectName, governorPhysicalTypeMetadata, annotationValues,
-                findMethod, identifierAccessor);
     }
 
     private MemberTypeAdditions getFindMethod(final JavaType entity,
@@ -146,14 +90,11 @@ public class JsfConverterMetadataProviderImpl extends
                 .registerDependency(idField.getDeclaredByMetadataId(),
                         metadataIdentificationString);
 
-        MethodParameter idParameter = new MethodParameter(idType, ID_FIELD_NAME);
+        final MethodParameter idParameter = new MethodParameter(idType,
+                ID_FIELD_NAME);
         return layerService.getMemberTypeAdditions(
                 metadataIdentificationString, FIND_METHOD.name(), entity,
                 idType, LAYER_POSITION, idParameter);
-    }
-
-    public String getItdUniquenessFilenameSuffix() {
-        return "Converter";
     }
 
     @Override
@@ -166,10 +107,67 @@ public class JsfConverterMetadataProviderImpl extends
         return PhysicalTypeIdentifier.createIdentifier(javaType, path);
     }
 
+    public String getItdUniquenessFilenameSuffix() {
+        return "Converter";
+    }
+
     @Override
-    protected String createLocalIdentifier(final JavaType javaType,
-            final LogicalPath path) {
-        return JsfConverterMetadata.createIdentifier(javaType, path);
+    protected String getLocalMidToRequest(final ItdTypeDetails itdTypeDetails) {
+        // Determine the governor for this ITD, and whether any metadata is even
+        // hoping to hear about changes to that JavaType and its ITDs
+        final JavaType governor = itdTypeDetails.getName();
+        final String localMid = entityToConverterMidMap.get(governor);
+        if (localMid != null) {
+            return localMid;
+        }
+
+        final MemberHoldingTypeDetails memberHoldingTypeDetails = typeLocationService
+                .getTypeDetails(itdTypeDetails.getGovernor().getName());
+        if (memberHoldingTypeDetails != null) {
+            for (final JavaType type : memberHoldingTypeDetails
+                    .getLayerEntities()) {
+                final String localMidType = entityToConverterMidMap.get(type);
+                if (localMidType != null) {
+                    return localMidType;
+                }
+            }
+        }
+        return null;
+    }
+
+    @Override
+    protected ItdTypeDetailsProvidingMetadataItem getMetadata(
+            final String metadataIdentificationString,
+            final JavaType aspectName,
+            final PhysicalTypeMetadata governorPhysicalTypeMetadata,
+            final String itdFilename) {
+        // We need to parse the annotation, which we expect to be present
+        final JsfConverterAnnotationValues annotationValues = new JsfConverterAnnotationValues(
+                governorPhysicalTypeMetadata);
+        final JavaType entity = annotationValues.getEntity();
+        if (!annotationValues.isAnnotationFound() || (entity == null)) {
+            return null;
+        }
+
+        // Remember that this entity JavaType matches up with this metadata
+        // identification string
+        // Start by clearing any previous association
+        final JavaType oldEntity = converterMidToEntityMap
+                .get(metadataIdentificationString);
+        if (oldEntity != null) {
+            entityToConverterMidMap.remove(oldEntity);
+        }
+        entityToConverterMidMap.put(entity, metadataIdentificationString);
+        converterMidToEntityMap.put(metadataIdentificationString, entity);
+
+        final MemberTypeAdditions findMethod = getFindMethod(entity,
+                metadataIdentificationString);
+        final MethodMetadata identifierAccessor = persistenceMemberLocator
+                .getIdentifierAccessor(entity);
+
+        return new JsfConverterMetadata(metadataIdentificationString,
+                aspectName, governorPhysicalTypeMetadata, annotationValues,
+                findMethod, identifierAccessor);
     }
 
     public String getProvidesType() {

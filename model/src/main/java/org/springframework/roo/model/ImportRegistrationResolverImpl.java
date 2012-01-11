@@ -18,7 +18,6 @@ import org.springframework.roo.support.util.Assert;
 public class ImportRegistrationResolverImpl implements
         ImportRegistrationResolver {
 
-    // Fields
     private final JavaPackage compilationUnitPackage;
     private final SortedSet<JavaType> registeredImports = new TreeSet<JavaType>(
             new Comparator<JavaType>() {
@@ -35,10 +34,6 @@ public class ImportRegistrationResolverImpl implements
         this.compilationUnitPackage = compilationUnitPackage;
     }
 
-    public JavaPackage getCompilationUnitPackage() {
-        return compilationUnitPackage;
-    }
-
     public void addImport(final JavaType javaType) {
         if (javaType != null) {
             if (!JdkJavaType.isPartOfJavaLang(javaType)) {
@@ -53,12 +48,20 @@ public class ImportRegistrationResolverImpl implements
         }
     }
 
-    public void addImports(List<JavaType> typesToImport) {
+    public void addImports(final List<JavaType> typesToImport) {
         if (typesToImport != null) {
             for (final JavaType typeToImport : typesToImport) {
                 addImport(typeToImport);
             }
         }
+    }
+
+    public JavaPackage getCompilationUnitPackage() {
+        return compilationUnitPackage;
+    }
+
+    public Set<JavaType> getRegisteredImports() {
+        return Collections.unmodifiableSet(registeredImports);
     }
 
     public boolean isAdditionLegal(final JavaType javaType) {
@@ -76,7 +79,7 @@ public class ImportRegistrationResolverImpl implements
 
         // Must be a class, so it's legal if there isn't an existing
         // registration that conflicts
-        for (JavaType candidate : registeredImports) {
+        for (final JavaType candidate : registeredImports) {
             if (candidate.getSimpleTypeName().equals(
                     javaType.getSimpleTypeName())) {
                 // Conflict detected
@@ -90,8 +93,8 @@ public class ImportRegistrationResolverImpl implements
     public boolean isFullyQualifiedFormRequired(final JavaType javaType) {
         Assert.notNull(javaType, "Java type required");
 
-        if (javaType.getDataType() == DataType.PRIMITIVE
-                || javaType.getDataType() == DataType.VARIABLE) {
+        if ((javaType.getDataType() == DataType.PRIMITIVE)
+                || (javaType.getDataType() == DataType.VARIABLE)) {
             // Primitives and type variables do not need to be used in
             // fully-qualified form
             return false;
@@ -128,9 +131,5 @@ public class ImportRegistrationResolverImpl implements
         // Indicate whether we can use in a simple or need a fully-qualified
         // form
         return isFullyQualifiedFormRequired(javaType);
-    }
-
-    public Set<JavaType> getRegisteredImports() {
-        return Collections.unmodifiableSet(registeredImports);
     }
 }

@@ -47,9 +47,8 @@ public class FileDetails implements Comparable<FileDetails> {
         return FileUtils.matchesAntPath(antPattern, canonicalPath);
     }
 
-    // Fields
-    private final Long lastModified;
     private final File file;
+    private final Long lastModified;
 
     /**
      * Constructor
@@ -64,29 +63,23 @@ public class FileDetails implements Comparable<FileDetails> {
         this.lastModified = lastModified;
     }
 
-    @Override
-    public int hashCode() {
-        return 7 * this.file.hashCode()
-                * ObjectUtils.nullSafeHashCode(lastModified);
-    }
-
-    @Override
-    public boolean equals(final Object obj) {
-        return obj instanceof FileDetails
-                && this.compareTo((FileDetails) obj) == 0;
-    }
-
     public int compareTo(final FileDetails o) {
         if (o == null) {
             throw new NullPointerException();
         }
         // N.B. this is in reverse order to how we'd normally compare
-        int result = o.getFile().compareTo(this.file);
+        int result = o.getFile().compareTo(file);
         if (result == 0) {
             result = ObjectUtils.nullSafeComparison(o.getLastModified(),
-                    this.lastModified);
+                    lastModified);
         }
         return result;
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        return (obj instanceof FileDetails)
+                && (compareTo((FileDetails) obj) == 0);
     }
 
     /**
@@ -99,6 +92,53 @@ public class FileDetails implements Comparable<FileDetails> {
      */
     public String getCanonicalPath() {
         return FileUtils.getCanonicalPath(file);
+    }
+
+    /**
+     * @return the file that is subject of this status object (indicates the new
+     *         name in the case of a {@link FileOperation#RENAMED}).
+     */
+    public File getFile() {
+        return file;
+    }
+
+    /**
+     * The {@link FileMonitorService} is required to advise of last modification
+     * times. This method provides access to the modification time according to
+     * {@link FileMonitorService}, which may be out of date due to the polling
+     * mechanisms often used by implementations. Instead you should generally
+     * use {@link #getFile()#lastModified} for the most accurate disk-derived
+     * representation of the last modification time.
+     * 
+     * @return the time the file was last modified, or in the case of a delete,
+     *         it is implementation-specific (may return null)
+     */
+    public Long getLastModified() {
+        return lastModified;
+    }
+
+    /**
+     * Returns the portion of the child identifier that is relative to the
+     * parent {@link FileDetails} instance. Note that this instance must be the
+     * parent.
+     * <p>
+     * If an empty string is returned from this method, it denotes the child was
+     * actually the same identifier as the parent.
+     * 
+     * @param childCanonicalPath the confirmed child of this instance (required;
+     *            use canonical path)
+     * @return the relative path within the parent instance (never null)
+     */
+    public String getRelativeSegment(final String childCanonicalPath) {
+        Assert.notNull(childCanonicalPath, "Child identifier is required");
+        Assert.isTrue(isParentOf(childCanonicalPath), "Identifier '"
+                + childCanonicalPath + "' is not a child of '" + this + "'");
+        return childCanonicalPath.substring(getCanonicalPath().length());
+    }
+
+    @Override
+    public int hashCode() {
+        return 7 * file.hashCode() * ObjectUtils.nullSafeHashCode(lastModified);
     }
 
     /**
@@ -138,51 +178,9 @@ public class FileDetails implements Comparable<FileDetails> {
         return FileUtils.matchesAntPath(antPattern, getCanonicalPath());
     }
 
-    /**
-     * Returns the portion of the child identifier that is relative to the
-     * parent {@link FileDetails} instance. Note that this instance must be the
-     * parent.
-     * <p>
-     * If an empty string is returned from this method, it denotes the child was
-     * actually the same identifier as the parent.
-     * 
-     * @param childCanonicalPath the confirmed child of this instance (required;
-     *            use canonical path)
-     * @return the relative path within the parent instance (never null)
-     */
-    public String getRelativeSegment(final String childCanonicalPath) {
-        Assert.notNull(childCanonicalPath, "Child identifier is required");
-        Assert.isTrue(isParentOf(childCanonicalPath), "Identifier '"
-                + childCanonicalPath + "' is not a child of '" + this + "'");
-        return childCanonicalPath.substring(getCanonicalPath().length());
-    }
-
-    /**
-     * The {@link FileMonitorService} is required to advise of last modification
-     * times. This method provides access to the modification time according to
-     * {@link FileMonitorService}, which may be out of date due to the polling
-     * mechanisms often used by implementations. Instead you should generally
-     * use {@link #getFile()#lastModified} for the most accurate disk-derived
-     * representation of the last modification time.
-     * 
-     * @return the time the file was last modified, or in the case of a delete,
-     *         it is implementation-specific (may return null)
-     */
-    public Long getLastModified() {
-        return lastModified;
-    }
-
-    /**
-     * @return the file that is subject of this status object (indicates the new
-     *         name in the case of a {@link FileOperation#RENAMED}).
-     */
-    public File getFile() {
-        return file;
-    }
-
     @Override
     public String toString() {
-        ToStringCreator tsc = new ToStringCreator(this);
+        final ToStringCreator tsc = new ToStringCreator(this);
         tsc.append("file", file);
         tsc.append("exists", file.exists());
         tsc.append("lastModified", lastModified == null ? "Unavailable"

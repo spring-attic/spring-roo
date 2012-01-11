@@ -27,79 +27,6 @@ import org.springframework.roo.support.util.Assert;
  */
 public abstract class AnnotationMetadataUtils {
 
-    /**
-     * Converts the annotation into a string-based form.
-     * 
-     * @param annotation to covert (required)
-     * @return a string-based representation (never null)
-     */
-    public static String toSourceForm(final AnnotationMetadata annotation) {
-        return toSourceForm(annotation, null);
-    }
-
-    /**
-     * Converts the annotation into a string-based form.
-     * 
-     * @param annotation to covert (required)
-     * @param resolver to use for automatic addition of used types (may be null)
-     * @return a string-based representation (never null)
-     */
-    public static String toSourceForm(final AnnotationMetadata annotation,
-            final ImportRegistrationResolver resolver) {
-        Assert.notNull(annotation, "Annotation required");
-
-        StringBuilder sb = new StringBuilder();
-        sb.append("@");
-
-        if (resolver != null) {
-            if (resolver.isFullyQualifiedFormRequiredAfterAutoImport(annotation
-                    .getAnnotationType())) {
-                sb.append(annotation.getAnnotationType()
-                        .getFullyQualifiedTypeName());
-            }
-            else {
-                sb.append(annotation.getAnnotationType().getSimpleTypeName());
-            }
-        }
-        else {
-            sb.append(annotation.getAnnotationType()
-                    .getFullyQualifiedTypeName());
-        }
-
-        if (annotation.getAttributeNames().isEmpty()) {
-            return sb.toString();
-        }
-
-        sb.append("(");
-        boolean requireComma = false;
-        for (JavaSymbolName attributeName : annotation.getAttributeNames()) {
-            // Add a comma, to separate the last annotation attribute
-            if (requireComma) {
-                sb.append(", ");
-                requireComma = false;
-            }
-
-            // Compute the value
-            AnnotationAttributeValue<?> value = annotation
-                    .getAttribute(attributeName);
-
-            String attributeValue = computeAttributeValue(value, resolver);
-
-            if (attributeValue != null) {
-                // We have a supported attribute
-                if (!"value".equals(attributeName.getSymbolName())
-                        || annotation.getAttributeNames().size() > 1) {
-                    sb.append(attributeName.getSymbolName());
-                    sb.append(" = ");
-                }
-                sb.append(attributeValue);
-                requireComma = true;
-            }
-        }
-        sb.append(")");
-        return sb.toString();
-    }
-
     private static String computeAttributeValue(
             final AnnotationAttributeValue<?> value,
             final ImportRegistrationResolver resolver) {
@@ -113,8 +40,8 @@ public abstract class AnnotationMetadataUtils {
                     + ((CharAttributeValue) value).getValue().toString() + "'";
         }
         else if (value instanceof ClassAttributeValue) {
-            JavaType clazz = ((ClassAttributeValue) value).getValue();
-            if (resolver == null
+            final JavaType clazz = ((ClassAttributeValue) value).getValue();
+            if ((resolver == null)
                     || resolver
                             .isFullyQualifiedFormRequiredAfterAutoImport(clazz)) {
                 attributeValue = clazz.getFullyQualifiedTypeName() + ".class";
@@ -124,7 +51,7 @@ public abstract class AnnotationMetadataUtils {
             }
         }
         else if (value instanceof DoubleAttributeValue) {
-            DoubleAttributeValue dbl = (DoubleAttributeValue) value;
+            final DoubleAttributeValue dbl = (DoubleAttributeValue) value;
             if (dbl.isFloatingPrecisionOnly()) {
                 attributeValue = dbl.getValue().toString() + "F";
             }
@@ -133,9 +60,10 @@ public abstract class AnnotationMetadataUtils {
             }
         }
         else if (value instanceof EnumAttributeValue) {
-            EnumDetails enumDetails = ((EnumAttributeValue) value).getValue();
-            JavaType clazz = enumDetails.getType();
-            if (resolver == null
+            final EnumDetails enumDetails = ((EnumAttributeValue) value)
+                    .getValue();
+            final JavaType clazz = enumDetails.getType();
+            if ((resolver == null)
                     || resolver
                             .isFullyQualifiedFormRequiredAfterAutoImport(clazz)) {
                 attributeValue = clazz.getFullyQualifiedTypeName() + "."
@@ -159,11 +87,12 @@ public abstract class AnnotationMetadataUtils {
                     + "\"";
         }
         else if (value instanceof NestedAnnotationAttributeValue) {
-            AnnotationMetadata annotationMetadata = ((NestedAnnotationAttributeValue) value)
+            final AnnotationMetadata annotationMetadata = ((NestedAnnotationAttributeValue) value)
                     .getValue();
-            StringBuilder data = new StringBuilder("@");
-            JavaType annotationType = annotationMetadata.getAnnotationType();
-            if (resolver == null
+            final StringBuilder data = new StringBuilder("@");
+            final JavaType annotationType = annotationMetadata
+                    .getAnnotationType();
+            if ((resolver == null)
                     || resolver
                             .isFullyQualifiedFormRequiredAfterAutoImport(annotationType)) {
                 data.append(annotationType.getFullyQualifiedTypeName());
@@ -174,7 +103,7 @@ public abstract class AnnotationMetadataUtils {
             if (!annotationMetadata.getAttributeNames().isEmpty()) {
                 data.append("(");
                 int i = 0;
-                for (JavaSymbolName attributeName : annotationMetadata
+                for (final JavaSymbolName attributeName : annotationMetadata
                         .getAttributeNames()) {
                     i++;
                     if (i > 1) {
@@ -190,10 +119,10 @@ public abstract class AnnotationMetadataUtils {
             attributeValue = data.toString();
         }
         else if (value instanceof ArrayAttributeValue<?>) {
-            ArrayAttributeValue<?> array = (ArrayAttributeValue<?>) value;
-            StringBuilder data = new StringBuilder("{ ");
+            final ArrayAttributeValue<?> array = (ArrayAttributeValue<?>) value;
+            final StringBuilder data = new StringBuilder("{ ");
             int i = 0;
-            for (AnnotationAttributeValue<?> val : array.getValue()) {
+            for (final AnnotationAttributeValue<?> val : array.getValue()) {
                 i++;
                 if (i > 1) {
                     data.append(", ");
@@ -204,5 +133,79 @@ public abstract class AnnotationMetadataUtils {
             attributeValue = data.toString();
         }
         return attributeValue;
+    }
+
+    /**
+     * Converts the annotation into a string-based form.
+     * 
+     * @param annotation to covert (required)
+     * @return a string-based representation (never null)
+     */
+    public static String toSourceForm(final AnnotationMetadata annotation) {
+        return toSourceForm(annotation, null);
+    }
+
+    /**
+     * Converts the annotation into a string-based form.
+     * 
+     * @param annotation to covert (required)
+     * @param resolver to use for automatic addition of used types (may be null)
+     * @return a string-based representation (never null)
+     */
+    public static String toSourceForm(final AnnotationMetadata annotation,
+            final ImportRegistrationResolver resolver) {
+        Assert.notNull(annotation, "Annotation required");
+
+        final StringBuilder sb = new StringBuilder();
+        sb.append("@");
+
+        if (resolver != null) {
+            if (resolver.isFullyQualifiedFormRequiredAfterAutoImport(annotation
+                    .getAnnotationType())) {
+                sb.append(annotation.getAnnotationType()
+                        .getFullyQualifiedTypeName());
+            }
+            else {
+                sb.append(annotation.getAnnotationType().getSimpleTypeName());
+            }
+        }
+        else {
+            sb.append(annotation.getAnnotationType()
+                    .getFullyQualifiedTypeName());
+        }
+
+        if (annotation.getAttributeNames().isEmpty()) {
+            return sb.toString();
+        }
+
+        sb.append("(");
+        boolean requireComma = false;
+        for (final JavaSymbolName attributeName : annotation
+                .getAttributeNames()) {
+            // Add a comma, to separate the last annotation attribute
+            if (requireComma) {
+                sb.append(", ");
+                requireComma = false;
+            }
+
+            // Compute the value
+            final AnnotationAttributeValue<?> value = annotation
+                    .getAttribute(attributeName);
+
+            final String attributeValue = computeAttributeValue(value, resolver);
+
+            if (attributeValue != null) {
+                // We have a supported attribute
+                if (!"value".equals(attributeName.getSymbolName())
+                        || (annotation.getAttributeNames().size() > 1)) {
+                    sb.append(attributeName.getSymbolName());
+                    sb.append(" = ");
+                }
+                sb.append(attributeValue);
+                requireComma = true;
+            }
+        }
+        sb.append(")");
+        return sb.toString();
     }
 }

@@ -168,11 +168,10 @@ public class Plugin implements Comparable<Plugin> {
         return "";
     }
 
-    // Fields
-    private final GAV gav;
     private final Configuration configuration;
     private final List<Dependency> dependencies = new ArrayList<Dependency>();
     private final List<Execution> executions = new ArrayList<Execution>();
+    private final GAV gav;
 
     /**
      * Constructor from a POM-style XML element that defines a Maven <plugin>.
@@ -216,28 +215,32 @@ public class Plugin implements Comparable<Plugin> {
         Assert.notNull(groupId, "Group ID required");
         Assert.notNull(artifactId, "Artifact ID required");
         Assert.notNull(version, "Version required");
-        this.gav = new GAV(groupId, artifactId, version);
+        gav = new GAV(groupId, artifactId, version);
         this.configuration = configuration;
         // Defensively copy the given nullable collections
         CollectionUtils.populate(this.dependencies, dependencies);
         CollectionUtils.populate(this.executions, executions);
     }
 
-    /**
-     * Returns this plugin's groupId.
-     * 
-     * @return
-     */
-    public String getGroupId() {
-        return gav.getGroupId();
+    public int compareTo(final Plugin o) {
+        if (o == null) {
+            throw new NullPointerException();
+        }
+        int result = gav.compareTo(o.getGAV());
+        if ((result == 0) && (configuration != null)
+                && (o.configuration != null)) {
+            result = configuration.compareTo(o.configuration);
+        }
+        return result;
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        return (obj instanceof Plugin) && (compareTo((Plugin) obj) == 0);
     }
 
     public String getArtifactId() {
         return gav.getArtifactId();
-    }
-
-    public String getVersion() {
-        return gav.getVersion();
     }
 
     /**
@@ -253,51 +256,6 @@ public class Plugin implements Comparable<Plugin> {
 
     public List<Dependency> getDependencies() {
         return dependencies;
-    }
-
-    public List<Execution> getExecutions() {
-        return executions;
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = prime * 1 + gav.hashCode();
-        return prime * result
-                + ((configuration == null) ? 0 : configuration.hashCode());
-    }
-
-    @Override
-    public boolean equals(final Object obj) {
-        return obj instanceof Plugin && this.compareTo((Plugin) obj) == 0;
-    }
-
-    public int compareTo(final Plugin o) {
-        if (o == null) {
-            throw new NullPointerException();
-        }
-        int result = gav.compareTo(o.getGAV());
-        if (result == 0 && configuration != null && o.configuration != null) {
-            result = configuration.compareTo(o.configuration);
-        }
-        return result;
-    }
-
-    /**
-     * @return a simple description, as would be used for console output
-     */
-    public String getSimpleDescription() {
-        return gav.toString();
-    }
-
-    @Override
-    public String toString() {
-        ToStringCreator tsc = new ToStringCreator(this);
-        tsc.append("gav", gav);
-        if (configuration != null) {
-            tsc.append("configuration", configuration);
-        }
-        return tsc.toString();
     }
 
     /**
@@ -321,32 +279,36 @@ public class Plugin implements Comparable<Plugin> {
                 "version", getVersion()));
 
         // Configuration
-        if (this.configuration != null) {
+        if (configuration != null) {
             final Node configuration = document.importNode(
                     this.configuration.getConfiguration(), true);
             pluginElement.appendChild(configuration);
         }
 
         // Executions
-        if (!this.executions.isEmpty()) {
+        if (!executions.isEmpty()) {
             final Element executionsElement = DomUtils.createChildElement(
                     "executions", pluginElement, document);
-            for (final Execution execution : this.executions) {
+            for (final Execution execution : executions) {
                 executionsElement.appendChild(execution.getElement(document));
             }
         }
 
         // Dependencies
-        if (!this.dependencies.isEmpty()) {
+        if (!dependencies.isEmpty()) {
             final Element dependenciesElement = DomUtils.createChildElement(
                     "dependencies", pluginElement, document);
-            for (final Dependency dependency : this.dependencies) {
+            for (final Dependency dependency : dependencies) {
                 dependenciesElement
                         .appendChild(dependency.getElement(document));
             }
         }
 
         return pluginElement;
+    }
+
+    public List<Execution> getExecutions() {
+        return executions;
     }
 
     /**
@@ -356,5 +318,43 @@ public class Plugin implements Comparable<Plugin> {
      */
     public GAV getGAV() {
         return gav;
+    }
+
+    /**
+     * Returns this plugin's groupId.
+     * 
+     * @return
+     */
+    public String getGroupId() {
+        return gav.getGroupId();
+    }
+
+    /**
+     * @return a simple description, as would be used for console output
+     */
+    public String getSimpleDescription() {
+        return gav.toString();
+    }
+
+    public String getVersion() {
+        return gav.getVersion();
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        final int result = (prime * 1) + gav.hashCode();
+        return (prime * result)
+                + ((configuration == null) ? 0 : configuration.hashCode());
+    }
+
+    @Override
+    public String toString() {
+        final ToStringCreator tsc = new ToStringCreator(this);
+        tsc.append("gav", gav);
+        if (configuration != null) {
+            tsc.append("configuration", configuration);
+        }
+        return tsc.toString();
     }
 }

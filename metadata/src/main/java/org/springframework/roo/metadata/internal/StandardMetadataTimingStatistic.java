@@ -10,21 +10,19 @@ import org.springframework.roo.support.util.Assert;
  */
 public class StandardMetadataTimingStatistic implements MetadataTimingStatistic {
 
-    // Constants
-    static final long NANOSECONDS_IN_MILLISECOND = 1000000L;
-
     // Chosen to match the maximum
     private static final int MAXIMUM_EXPECTED_INVOCATIONS = 5;
 
     private static final String INVOCATION_COUNT_FORMAT = "%"
             + MAXIMUM_EXPECTED_INVOCATIONS + "d";
+
+    static final long NANOSECONDS_IN_MILLISECOND = 1000000L;
     private static final String TIME_FORMAT = "%"
             + (String.valueOf(NANOSECONDS_IN_MILLISECOND).length() - 1) + "d";
 
-    // Fields
+    private final long invocations;
     private final String name;
     private final long nanoseconds;
-    private final long invocations;
 
     /**
      * Constructor
@@ -43,18 +41,6 @@ public class StandardMetadataTimingStatistic implements MetadataTimingStatistic 
         this.nanoseconds = nanoseconds;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public long getTime() {
-        return nanoseconds;
-    }
-
-    public long getInvocations() {
-        return invocations;
-    }
-
     public int compareTo(final MetadataTimingStatistic o) {
         int result = Long.valueOf(nanoseconds).compareTo(o.getTime());
         if (result == 0) {
@@ -68,8 +54,20 @@ public class StandardMetadataTimingStatistic implements MetadataTimingStatistic 
 
     @Override
     public boolean equals(final Object obj) {
-        return obj instanceof MetadataTimingStatistic
-                && this.compareTo((MetadataTimingStatistic) obj) == 0;
+        return (obj instanceof MetadataTimingStatistic)
+                && (compareTo((MetadataTimingStatistic) obj) == 0);
+    }
+
+    public long getInvocations() {
+        return invocations;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public long getTime() {
+        return nanoseconds;
     }
 
     @Override
@@ -80,7 +78,7 @@ public class StandardMetadataTimingStatistic implements MetadataTimingStatistic 
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
+        final StringBuilder sb = new StringBuilder();
         if (nanoseconds < NANOSECONDS_IN_MILLISECOND) {
             // Display as nanoseconds
             sb.append(String.format(TIME_FORMAT, nanoseconds)).append(" ns; ");

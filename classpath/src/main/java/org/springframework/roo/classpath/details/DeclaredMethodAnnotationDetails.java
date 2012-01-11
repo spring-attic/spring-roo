@@ -12,9 +12,8 @@ import org.springframework.roo.support.util.Assert;
  */
 public class DeclaredMethodAnnotationDetails {
 
-    // Fields
-    private final MethodMetadata methodMetadata;
     private final AnnotationMetadata methodAnnotation;
+    private final MethodMetadata methodMetadata;
 
     /**
      * Contructor must contain {@link MethodMetadata} of existing method (may
@@ -34,11 +33,11 @@ public class DeclaredMethodAnnotationDetails {
         this.methodAnnotation = methodAnnotation;
     }
 
-    public MethodMetadata getMethodMetadata() {
-        return methodMetadata;
-    }
-
     public AnnotationMetadata getMethodAnnotation() {
         return methodAnnotation;
+    }
+
+    public MethodMetadata getMethodMetadata() {
+        return methodMetadata;
     }
 }

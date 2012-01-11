@@ -35,12 +35,11 @@ public class ToStringCreator {
     private static final ToStringStyler DEFAULT_TO_STRING_STYLER = new DefaultToStringStyler(
             StylerUtils.DEFAULT_VALUE_STYLER);
 
-    // Fields
     private final StringBuilder buffer = new StringBuilder(512);
-    private final ToStringStyler styler;
     private final Object object;
-
     private boolean styledFirstField;
+
+    private final ToStringStyler styler;
 
     /**
      * Create a ToStringCreator for the given object.
@@ -55,6 +54,19 @@ public class ToStringCreator {
      * Create a ToStringCreator for the given object, using the provided style.
      * 
      * @param obj the object to be stringified
+     * @param styler the ToStringStyler encapsulating pretty-print instructions
+     */
+    public ToStringCreator(final Object obj, final ToStringStyler styler) {
+        Assert.notNull(obj, "The object to be styled must not be null");
+        object = obj;
+        this.styler = (styler != null ? styler : DEFAULT_TO_STRING_STYLER);
+        this.styler.styleStart(buffer, object);
+    }
+
+    /**
+     * Create a ToStringCreator for the given object, using the provided style.
+     * 
+     * @param obj the object to be stringified
      * @param styler the ValueStyler encapsulating pretty-print instructions
      */
     public ToStringCreator(final Object obj, final ValueStyler styler) {
@@ -63,16 +75,25 @@ public class ToStringCreator {
     }
 
     /**
-     * Create a ToStringCreator for the given object, using the provided style.
+     * Append the provided value.
      * 
-     * @param obj the object to be stringified
-     * @param styler the ToStringStyler encapsulating pretty-print instructions
+     * @param value The value to append
+     * @return this, to support call-chaining.
      */
-    public ToStringCreator(final Object obj, final ToStringStyler styler) {
-        Assert.notNull(obj, "The object to be styled must not be null");
-        this.object = obj;
-        this.styler = (styler != null ? styler : DEFAULT_TO_STRING_STYLER);
-        this.styler.styleStart(this.buffer, this.object);
+    public ToStringCreator append(final Object value) {
+        styler.styleValue(buffer, value);
+        return this;
+    }
+
+    /**
+     * Append a boolean field value.
+     * 
+     * @param fieldName the name of the field, usually the member variable name
+     * @param value the field value
+     * @return this, to support call-chaining
+     */
+    public ToStringCreator append(final String fieldName, final boolean value) {
+        return append(fieldName, Boolean.valueOf(value));
     }
 
     /**
@@ -87,14 +108,25 @@ public class ToStringCreator {
     }
 
     /**
-     * Append a short field value.
+     * Append a double field value.
      * 
      * @param fieldName the name of the field, usually the member variable name
      * @param value the field value
      * @return this, to support call-chaining
      */
-    public ToStringCreator append(final String fieldName, final short value) {
-        return append(fieldName, Short.valueOf(value));
+    public ToStringCreator append(final String fieldName, final double value) {
+        return append(fieldName, new Double(value));
+    }
+
+    /**
+     * Append a float field value.
+     * 
+     * @param fieldName the name of the field, usually the member variable name
+     * @param value the field value
+     * @return this, to support call-chaining
+     */
+    public ToStringCreator append(final String fieldName, final float value) {
+        return append(fieldName, new Float(value));
     }
 
     /**
@@ -120,39 +152,6 @@ public class ToStringCreator {
     }
 
     /**
-     * Append a float field value.
-     * 
-     * @param fieldName the name of the field, usually the member variable name
-     * @param value the field value
-     * @return this, to support call-chaining
-     */
-    public ToStringCreator append(final String fieldName, final float value) {
-        return append(fieldName, new Float(value));
-    }
-
-    /**
-     * Append a double field value.
-     * 
-     * @param fieldName the name of the field, usually the member variable name
-     * @param value the field value
-     * @return this, to support call-chaining
-     */
-    public ToStringCreator append(final String fieldName, final double value) {
-        return append(fieldName, new Double(value));
-    }
-
-    /**
-     * Append a boolean field value.
-     * 
-     * @param fieldName the name of the field, usually the member variable name
-     * @param value the field value
-     * @return this, to support call-chaining
-     */
-    public ToStringCreator append(final String fieldName, final boolean value) {
-        return append(fieldName, Boolean.valueOf(value));
-    }
-
-    /**
      * Append a field value.
      * 
      * @param fieldName the name of the field, usually the member variable name
@@ -161,28 +160,28 @@ public class ToStringCreator {
      */
     public ToStringCreator append(final String fieldName, final Object value) {
         printFieldSeparatorIfNecessary();
-        this.styler.styleField(this.buffer, fieldName, value);
+        styler.styleField(buffer, fieldName, value);
         return this;
-    }
-
-    private void printFieldSeparatorIfNecessary() {
-        if (this.styledFirstField) {
-            this.styler.styleFieldSeparator(this.buffer);
-        }
-        else {
-            this.styledFirstField = true;
-        }
     }
 
     /**
-     * Append the provided value.
+     * Append a short field value.
      * 
-     * @param value The value to append
-     * @return this, to support call-chaining.
+     * @param fieldName the name of the field, usually the member variable name
+     * @param value the field value
+     * @return this, to support call-chaining
      */
-    public ToStringCreator append(final Object value) {
-        this.styler.styleValue(this.buffer, value);
-        return this;
+    public ToStringCreator append(final String fieldName, final short value) {
+        return append(fieldName, Short.valueOf(value));
+    }
+
+    private void printFieldSeparatorIfNecessary() {
+        if (styledFirstField) {
+            styler.styleFieldSeparator(buffer);
+        }
+        else {
+            styledFirstField = true;
+        }
     }
 
     /**
@@ -190,7 +189,7 @@ public class ToStringCreator {
      */
     @Override
     public String toString() {
-        this.styler.styleEnd(this.buffer, this.object);
-        return this.buffer.toString();
+        styler.styleEnd(buffer, object);
+        return buffer.toString();
     }
 }

@@ -11,7 +11,7 @@ import java.util.Set;
  */
 public interface I18nSupport {
 
-    Set<I18n> getSupportedLanguages();
-
     I18n getLanguage(Locale locale);
+
+    Set<I18n> getSupportedLanguages();
 }

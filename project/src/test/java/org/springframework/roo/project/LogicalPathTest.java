@@ -15,32 +15,24 @@ import org.junit.Test;
  */
 public class LogicalPathTest {
 
-    // Constants
     private static final Path PATH = Path.SRC_TEST_JAVA; // arbitrary; can't be
-                                                         // mocked
     private static final String MODULE_NAME = "web";
     private static final String MODULE_PLUS_PATH = MODULE_NAME
             + MODULE_PATH_SEPARATOR + PATH.name();
 
-    @Test
-    public void testGetInstanceWithNullModuleName() {
-        assertGetInstance(null, "", PATH.toString());
-    }
-
-    @Test
-    public void testGetInstanceWithEmptyModuleName() {
-        assertGetInstance("", "", PATH.toString());
-    }
-
-    @Test
-    public void testGetInstanceWithBlankModuleName() {
-        assertGetInstance(" ", "", PATH.toString());
-    }
-
-    @Test
-    public void testGetInstanceWithNonBlankModuleName() {
-        assertGetInstance(MODULE_NAME, MODULE_NAME, MODULE_NAME
-                + MODULE_PATH_SEPARATOR + PATH.toString());
+    /**
+     * Asserts that the given instance has the expected values
+     * 
+     * @param instance the instance to check (required)
+     * @param expectedInstanceName
+     * @param expectedModuleName
+     */
+    private void assertContextualPath(final LogicalPath instance,
+            final String expectedInstanceName, final String expectedModuleName) {
+        assertEquals(expectedInstanceName, instance.getName());
+        assertEquals(expectedModuleName, instance.getModule());
+        assertEquals(PATH, instance.getPath());
+        assertEquals(instance.getName(), instance.toString());
     }
 
     /**
@@ -63,35 +55,95 @@ public class LogicalPathTest {
         assertContextualPath(instance, expectedInstanceName, expectedModuleName);
     }
 
-    /**
-     * Asserts that the given instance has the expected values
-     * 
-     * @param instance the instance to check (required)
-     * @param expectedInstanceName
-     * @param expectedModuleName
-     */
-    private void assertContextualPath(final LogicalPath instance,
-            final String expectedInstanceName, final String expectedModuleName) {
-        assertEquals(expectedInstanceName, instance.getName());
-        assertEquals(expectedModuleName, instance.getModule());
-        assertEquals(PATH, instance.getPath());
-        assertEquals(instance.getName(), instance.toString());
+    @Test(expected = NullPointerException.class)
+    public void testCompareToNull() {
+        LogicalPath.getInstance(PATH, MODULE_NAME).compareTo(null);
     }
 
     @Test
-    public void testSamePathsInSameModuleAreEqual() {
-        // Set up
-        final LogicalPath instance1 = LogicalPath
-                .getInstance(PATH, MODULE_NAME);
-        final LogicalPath instance2 = LogicalPath
-                .getInstance(PATH, MODULE_NAME);
+    public void testDoesNotEqualOtherType() {
+        assertFalse(LogicalPath.getInstance(PATH, MODULE_NAME).equals(PATH));
+    }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void testGetInstanceFromBlankString() {
+        LogicalPath.getInstance(" ");
+    }
+
+    @Test
+    public void testGetInstanceFromCombinedPathAndModuleName() {
         // Invoke
-        final boolean equal = instance1.equals(instance2)
-                && instance2.equals(instance1);
+        final LogicalPath instance = LogicalPath.getInstance(MODULE_PLUS_PATH);
 
         // Check
-        assertTrue(equal);
+        assertContextualPath(instance, MODULE_PLUS_PATH, MODULE_NAME);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testGetInstanceFromEmptyString() {
+        LogicalPath.getInstance("");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testGetInstanceFromNullString() {
+        LogicalPath.getInstance((String) null);
+    }
+
+    @Test
+    public void testGetInstanceFromPathNameOnly() {
+        // Invoke
+        final LogicalPath instance = LogicalPath.getInstance(PATH.name());
+
+        // Check
+        assertContextualPath(instance, PATH.name(), "");
+    }
+
+    @Test
+    public void testGetInstanceWithBlankModuleName() {
+        assertGetInstance(" ", "", PATH.toString());
+    }
+
+    @Test
+    public void testGetInstanceWithEmptyModuleName() {
+        assertGetInstance("", "", PATH.toString());
+    }
+
+    @Test
+    public void testGetInstanceWithNonBlankModuleName() {
+        assertGetInstance(MODULE_NAME, MODULE_NAME, MODULE_NAME
+                + MODULE_PATH_SEPARATOR + PATH.toString());
+    }
+
+    @Test
+    public void testGetInstanceWithNullModuleName() {
+        assertGetInstance(null, "", PATH.toString());
+    }
+
+    @Test
+    public void testModuleRootIsNotProjectRoot() {
+        assertFalse(LogicalPath.getInstance(Path.ROOT, "web").isProjectRoot());
+    }
+
+    @Test
+    public void testNonRootPathIsNotModuleRoot() {
+        assertFalse(LogicalPath.getInstance(Path.SRC_MAIN_JAVA, "")
+                .isModuleRoot());
+    }
+
+    @Test
+    public void testNonRootPathIsNotProjectRoot() {
+        assertFalse(LogicalPath.getInstance(Path.SRC_MAIN_RESOURCES, null)
+                .isProjectRoot());
+    }
+
+    @Test
+    public void testProjectRootIsModuleRoot() {
+        assertTrue(LogicalPath.getInstance(Path.ROOT, "").isModuleRoot());
+    }
+
+    @Test
+    public void testProjectRootIsProjectRoot() {
+        assertTrue(LogicalPath.getInstance(Path.ROOT, null).isProjectRoot());
     }
 
     @Test
@@ -109,73 +161,19 @@ public class LogicalPathTest {
     }
 
     @Test
-    public void testDoesNotEqualOtherType() {
-        assertFalse(LogicalPath.getInstance(PATH, MODULE_NAME).equals(PATH));
-    }
+    public void testSamePathsInSameModuleAreEqual() {
+        // Set up
+        final LogicalPath instance1 = LogicalPath
+                .getInstance(PATH, MODULE_NAME);
+        final LogicalPath instance2 = LogicalPath
+                .getInstance(PATH, MODULE_NAME);
 
-    @Test
-    public void testGetInstanceFromPathNameOnly() {
         // Invoke
-        final LogicalPath instance = LogicalPath.getInstance(PATH.name());
+        final boolean equal = instance1.equals(instance2)
+                && instance2.equals(instance1);
 
         // Check
-        assertContextualPath(instance, PATH.name(), "");
-    }
-
-    @Test
-    public void testGetInstanceFromCombinedPathAndModuleName() {
-        // Invoke
-        final LogicalPath instance = LogicalPath.getInstance(MODULE_PLUS_PATH);
-
-        // Check
-        assertContextualPath(instance, MODULE_PLUS_PATH, MODULE_NAME);
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void testCompareToNull() {
-        LogicalPath.getInstance(PATH, MODULE_NAME).compareTo(null);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testGetInstanceFromNullString() {
-        LogicalPath.getInstance((String) null);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testGetInstanceFromEmptyString() {
-        LogicalPath.getInstance("");
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testGetInstanceFromBlankString() {
-        LogicalPath.getInstance(" ");
-    }
-
-    @Test
-    public void testModuleRootIsNotProjectRoot() {
-        assertFalse(LogicalPath.getInstance(Path.ROOT, "web").isProjectRoot());
-    }
-
-    @Test
-    public void testNonRootPathIsNotProjectRoot() {
-        assertFalse(LogicalPath.getInstance(Path.SRC_MAIN_RESOURCES, null)
-                .isProjectRoot());
-    }
-
-    @Test
-    public void testProjectRootIsProjectRoot() {
-        assertTrue(LogicalPath.getInstance(Path.ROOT, null).isProjectRoot());
-    }
-
-    @Test
-    public void testNonRootPathIsNotModuleRoot() {
-        assertFalse(LogicalPath.getInstance(Path.SRC_MAIN_JAVA, "")
-                .isModuleRoot());
-    }
-
-    @Test
-    public void testProjectRootIsModuleRoot() {
-        assertTrue(LogicalPath.getInstance(Path.ROOT, "").isModuleRoot());
+        assertTrue(equal);
     }
 
     @Test

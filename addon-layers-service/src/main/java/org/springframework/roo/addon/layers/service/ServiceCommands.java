@@ -20,7 +20,6 @@ import org.springframework.roo.shell.CommandMarker;
 @Service
 public class ServiceCommands implements CommandMarker {
 
-    // Fields
     @Reference private ServiceOperations serviceOperations;
 
     @CliAvailabilityIndicator("service")

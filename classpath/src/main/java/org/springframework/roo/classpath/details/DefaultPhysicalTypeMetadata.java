@@ -13,7 +13,6 @@ import org.springframework.roo.support.util.Assert;
 public class DefaultPhysicalTypeMetadata extends AbstractMetadataItem implements
         PhysicalTypeMetadata {
 
-    // Fields
     private final ClassOrInterfaceTypeDetails cid;
     private final String physicalLocationCanonicalPath;
 
@@ -43,17 +42,18 @@ public class DefaultPhysicalTypeMetadata extends AbstractMetadataItem implements
         this.physicalLocationCanonicalPath = physicalLocationCanonicalPath;
     }
 
-    public ClassOrInterfaceTypeDetails getMemberHoldingTypeDetails() {
-        return cid;
-    }
-
-    public String getPhysicalLocationCanonicalPath() {
-        return physicalLocationCanonicalPath;
-    }
-
     public String getItdCanoncialPath(final ItdMetadataProvider metadataProvider) {
         // Delegate to the correctly spelled method
         return getItdCanonicalPath(metadataProvider);
+    }
+
+    public String getItdCanonicalPath(final ItdMetadataProvider metadataProvider) {
+        Assert.notNull(metadataProvider, "Metadata provider required");
+        final int dropFrom = physicalLocationCanonicalPath.lastIndexOf(".java");
+        Assert.isTrue(dropFrom > -1, "Unexpected governor filename format '"
+                + physicalLocationCanonicalPath + "'");
+        return physicalLocationCanonicalPath.substring(0, dropFrom) + "_Roo_"
+                + metadataProvider.getItdUniquenessFilenameSuffix() + ".aj";
     }
 
     public JavaType getItdJavaType(final ItdMetadataProvider metadataProvider) {
@@ -64,6 +64,14 @@ public class DefaultPhysicalTypeMetadata extends AbstractMetadataItem implements
                 + metadataProvider.getItdUniquenessFilenameSuffix());
     }
 
+    public ClassOrInterfaceTypeDetails getMemberHoldingTypeDetails() {
+        return cid;
+    }
+
+    public String getPhysicalLocationCanonicalPath() {
+        return physicalLocationCanonicalPath;
+    }
+
     public JavaType getType() {
         return cid.getName();
     }
@@ -72,16 +80,5 @@ public class DefaultPhysicalTypeMetadata extends AbstractMetadataItem implements
     public String toString() {
         // Used for example by the "metadata for id" command
         return getClass().getSimpleName() + " for " + cid.getName();
-    }
-
-    public String getItdCanonicalPath(final ItdMetadataProvider metadataProvider) {
-        Assert.notNull(metadataProvider, "Metadata provider required");
-        final int dropFrom = this.physicalLocationCanonicalPath
-                .lastIndexOf(".java");
-        Assert.isTrue(dropFrom > -1, "Unexpected governor filename format '"
-                + this.physicalLocationCanonicalPath + "'");
-        return this.physicalLocationCanonicalPath.substring(0, dropFrom)
-                + "_Roo_" + metadataProvider.getItdUniquenessFilenameSuffix()
-                + ".aj";
     }
 }

@@ -38,11 +38,35 @@ import org.springframework.roo.support.util.Assert;
 public class SolrWebSearchMetadata extends
         AbstractItdTypeDetailsProvidingMetadataItem {
 
-    // Constants
     private static final String PROVIDES_TYPE_STRING = SolrWebSearchMetadata.class
             .getName();
     private static final String PROVIDES_TYPE = MetadataIdentificationUtils
             .create(PROVIDES_TYPE_STRING);
+
+    public static String createIdentifier(final JavaType javaType,
+            final LogicalPath path) {
+        return PhysicalTypeIdentifierNamingUtils.createIdentifier(
+                PROVIDES_TYPE_STRING, javaType, path);
+    }
+
+    public static JavaType getJavaType(final String metadataIdentificationString) {
+        return PhysicalTypeIdentifierNamingUtils.getJavaType(
+                PROVIDES_TYPE_STRING, metadataIdentificationString);
+    }
+
+    public static String getMetadataIdentiferType() {
+        return PROVIDES_TYPE;
+    }
+
+    public static LogicalPath getPath(final String metadataIdentificationString) {
+        return PhysicalTypeIdentifierNamingUtils.getPath(PROVIDES_TYPE_STRING,
+                metadataIdentificationString);
+    }
+
+    public static boolean isValid(final String metadataIdentificationString) {
+        return PhysicalTypeIdentifierNamingUtils.isValid(PROVIDES_TYPE_STRING,
+                metadataIdentificationString);
+    }
 
     public SolrWebSearchMetadata(final String identifier,
             final JavaType aspectName,
@@ -64,13 +88,13 @@ public class SolrWebSearchMetadata extends
             return;
         }
 
-        if (annotationValues.getSearchMethod() != null
-                && annotationValues.getSearchMethod().length() > 0) {
+        if ((annotationValues.getSearchMethod() != null)
+                && (annotationValues.getSearchMethod().length() > 0)) {
             builder.addMethod(getSearchMethod(annotationValues,
                     solrSearchAnnotationValues, webScaffoldAnnotationValues));
         }
-        if (annotationValues.getAutoCompleteMethod() != null
-                && annotationValues.getAutoCompleteMethod().length() > 0) {
+        if ((annotationValues.getAutoCompleteMethod() != null)
+                && (annotationValues.getAutoCompleteMethod().length() > 0)) {
             builder.addMethod(getAutocompleteMethod(annotationValues,
                     solrSearchAnnotationValues, webScaffoldAnnotationValues));
         }
@@ -79,112 +103,27 @@ public class SolrWebSearchMetadata extends
         itdTypeDetails = builder.build();
     }
 
-    private MethodMetadataBuilder getSearchMethod(
-            final SolrWebSearchAnnotationValues solrWebSearchAnnotationValues,
-            final SolrSearchAnnotationValues searchAnnotationValues,
-            final WebScaffoldAnnotationValues webScaffoldAnnotationValues) {
-        JavaType targetObject = webScaffoldAnnotationValues
-                .getFormBackingObject();
-        Assert.notNull(targetObject,
-                "Could not aquire form backing object for the '"
-                        + webScaffoldAnnotationValues.getGovernorTypeDetails()
-                                .getName().getFullyQualifiedTypeName()
-                        + "' controller");
-
-        JavaSymbolName methodName = new JavaSymbolName(
-                solrWebSearchAnnotationValues.getSearchMethod());
-        if (governorHasMethodWithSameName(methodName)) {
-            return null;
-        }
-
-        List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
-        List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
-
-        parameterTypes.add(new AnnotatedJavaType(new JavaType("String"),
-                getRequestParamAnnotation("q", false)));
-        parameterNames.add(new JavaSymbolName("q"));
-
-        parameterTypes.add(new AnnotatedJavaType(new JavaType("String"),
-                getRequestParamAnnotation("fq", false)));
-        parameterNames.add(new JavaSymbolName("facetQuery"));
-
-        parameterTypes.add(new AnnotatedJavaType(new JavaType("Integer"),
-                getRequestParamAnnotation("page", false)));
-        parameterNames.add(new JavaSymbolName("page"));
-
-        parameterTypes.add(new AnnotatedJavaType(new JavaType("Integer"),
-                getRequestParamAnnotation("size", false)));
-        parameterNames.add(new JavaSymbolName("size"));
-
-        parameterTypes.add(new AnnotatedJavaType(MODEL_MAP));
-        parameterNames.add(new JavaSymbolName("modelMap"));
-
-        List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
-        requestMappingAttributes.add(new StringAttributeValue(
-                new JavaSymbolName("params"), "search"));
-        AnnotationMetadataBuilder requestMapping = new AnnotationMetadataBuilder(
-                REQUEST_MAPPING, requestMappingAttributes);
-
-        List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
-        annotations.add(requestMapping);
-
-        String solrQuerySimpleName = new JavaType(
-                "org.apache.solr.client.solrj.SolrQuery")
-                .getNameIncludingTypeParameters(false,
-                        builder.getImportRegistrationResolver());
-        InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-        bodyBuilder.appendFormalLine("if (q != null && q.length() != 0) {");
-        bodyBuilder.indent();
-        bodyBuilder.appendFormalLine(solrQuerySimpleName
-                + " solrQuery = new "
-                + solrQuerySimpleName
-                + "(\""
-                + webScaffoldAnnotationValues.getFormBackingObject()
-                        .getSimpleTypeName().toLowerCase()
-                + "_solrsummary_t:\" + q.toLowerCase());");
-
-        bodyBuilder
-                .appendFormalLine("if (page != null) solrQuery.setStart(page);");
-        bodyBuilder
-                .appendFormalLine("if (size != null) solrQuery.setRows(size);");
-        bodyBuilder
-                .appendFormalLine("modelMap.addAttribute(\"searchResults\", "
-                        + targetObject.getFullyQualifiedTypeName() + "."
-                        + searchAnnotationValues.getSearchMethod()
-                        + "(solrQuery).getResults());");
-        bodyBuilder.indentRemove();
-        bodyBuilder.appendFormalLine("}");
-        bodyBuilder.appendFormalLine("return \""
-                + webScaffoldAnnotationValues.getPath() + "/search\";");
-
-        final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(
-                getId(), Modifier.PUBLIC, methodName, JavaType.STRING,
-                parameterTypes, parameterNames, bodyBuilder);
-        methodBuilder.setAnnotations(annotations);
-        return methodBuilder;
-    }
-
     private MethodMetadataBuilder getAutocompleteMethod(
             final SolrWebSearchAnnotationValues solrWebSearchAnnotationValues,
             final SolrSearchAnnotationValues searchAnnotationValues,
             final WebScaffoldAnnotationValues webScaffoldAnnotationValues) {
-        JavaSymbolName methodName = new JavaSymbolName(
+        final JavaSymbolName methodName = new JavaSymbolName(
                 solrWebSearchAnnotationValues.getAutoCompleteMethod());
         if (governorHasMethodWithSameName(methodName)) {
             return null;
         }
 
-        List<AnnotationAttributeValue<?>> reqMapAttributes = new ArrayList<AnnotationAttributeValue<?>>();
+        final List<AnnotationAttributeValue<?>> reqMapAttributes = new ArrayList<AnnotationAttributeValue<?>>();
         reqMapAttributes.add(new StringAttributeValue(new JavaSymbolName(
                 "params"), "autocomplete"));
 
-        List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+        final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
         annotations.add(new AnnotationMetadataBuilder(REQUEST_MAPPING,
                 reqMapAttributes));
         annotations.add(new AnnotationMetadataBuilder(RESPONSE_BODY));
 
-        List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
-        List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+        final List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+        final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
 
         parameterTypes.add(new AnnotatedJavaType(JavaType.STRING,
                 getRequestParamAnnotation("q", true)));
@@ -198,21 +137,21 @@ public class SolrWebSearchMetadata extends
                 getRequestParamAnnotation("rows", false)));
         parameterNames.add(new JavaSymbolName("rows"));
 
-        String solrQuerySimpleName = new JavaType(
+        final String solrQuerySimpleName = new JavaType(
                 "org.apache.solr.client.solrj.SolrQuery")
                 .getNameIncludingTypeParameters(false,
                         builder.getImportRegistrationResolver());
-        String facetFieldSimpleName = new JavaType(
+        final String facetFieldSimpleName = new JavaType(
                 "org.apache.solr.client.solrj.response.FacetField")
                 .getNameIncludingTypeParameters(false,
                         builder.getImportRegistrationResolver());
 
-        String queryResponseSimpleName = new JavaType(
+        final String queryResponseSimpleName = new JavaType(
                 "org.apache.solr.client.solrj.response.QueryResponse")
                 .getNameIncludingTypeParameters(false,
                         builder.getImportRegistrationResolver());
 
-        InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+        final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
         bodyBuilder
                 .appendFormalLine("StringBuilder dojo = new StringBuilder(\"{identifier:'id',label:'label',items:[\");");
         bodyBuilder.appendFormalLine(solrQuerySimpleName
@@ -258,7 +197,7 @@ public class SolrWebSearchMetadata extends
 
     private AnnotationMetadata getRequestParamAnnotation(
             final String paramName, final boolean required) {
-        List<AnnotationAttributeValue<?>> attributeValue = new ArrayList<AnnotationAttributeValue<?>>();
+        final List<AnnotationAttributeValue<?>> attributeValue = new ArrayList<AnnotationAttributeValue<?>>();
         if (!required) {
             attributeValue.add(new BooleanAttributeValue(new JavaSymbolName(
                     "required"), false));
@@ -269,9 +208,94 @@ public class SolrWebSearchMetadata extends
                 .build();
     }
 
+    private MethodMetadataBuilder getSearchMethod(
+            final SolrWebSearchAnnotationValues solrWebSearchAnnotationValues,
+            final SolrSearchAnnotationValues searchAnnotationValues,
+            final WebScaffoldAnnotationValues webScaffoldAnnotationValues) {
+        final JavaType targetObject = webScaffoldAnnotationValues
+                .getFormBackingObject();
+        Assert.notNull(targetObject,
+                "Could not aquire form backing object for the '"
+                        + webScaffoldAnnotationValues.getGovernorTypeDetails()
+                                .getName().getFullyQualifiedTypeName()
+                        + "' controller");
+
+        final JavaSymbolName methodName = new JavaSymbolName(
+                solrWebSearchAnnotationValues.getSearchMethod());
+        if (governorHasMethodWithSameName(methodName)) {
+            return null;
+        }
+
+        final List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+        final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+
+        parameterTypes.add(new AnnotatedJavaType(new JavaType("String"),
+                getRequestParamAnnotation("q", false)));
+        parameterNames.add(new JavaSymbolName("q"));
+
+        parameterTypes.add(new AnnotatedJavaType(new JavaType("String"),
+                getRequestParamAnnotation("fq", false)));
+        parameterNames.add(new JavaSymbolName("facetQuery"));
+
+        parameterTypes.add(new AnnotatedJavaType(new JavaType("Integer"),
+                getRequestParamAnnotation("page", false)));
+        parameterNames.add(new JavaSymbolName("page"));
+
+        parameterTypes.add(new AnnotatedJavaType(new JavaType("Integer"),
+                getRequestParamAnnotation("size", false)));
+        parameterNames.add(new JavaSymbolName("size"));
+
+        parameterTypes.add(new AnnotatedJavaType(MODEL_MAP));
+        parameterNames.add(new JavaSymbolName("modelMap"));
+
+        final List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
+        requestMappingAttributes.add(new StringAttributeValue(
+                new JavaSymbolName("params"), "search"));
+        final AnnotationMetadataBuilder requestMapping = new AnnotationMetadataBuilder(
+                REQUEST_MAPPING, requestMappingAttributes);
+
+        final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+        annotations.add(requestMapping);
+
+        final String solrQuerySimpleName = new JavaType(
+                "org.apache.solr.client.solrj.SolrQuery")
+                .getNameIncludingTypeParameters(false,
+                        builder.getImportRegistrationResolver());
+        final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+        bodyBuilder.appendFormalLine("if (q != null && q.length() != 0) {");
+        bodyBuilder.indent();
+        bodyBuilder.appendFormalLine(solrQuerySimpleName
+                + " solrQuery = new "
+                + solrQuerySimpleName
+                + "(\""
+                + webScaffoldAnnotationValues.getFormBackingObject()
+                        .getSimpleTypeName().toLowerCase()
+                + "_solrsummary_t:\" + q.toLowerCase());");
+
+        bodyBuilder
+                .appendFormalLine("if (page != null) solrQuery.setStart(page);");
+        bodyBuilder
+                .appendFormalLine("if (size != null) solrQuery.setRows(size);");
+        bodyBuilder
+                .appendFormalLine("modelMap.addAttribute(\"searchResults\", "
+                        + targetObject.getFullyQualifiedTypeName() + "."
+                        + searchAnnotationValues.getSearchMethod()
+                        + "(solrQuery).getResults());");
+        bodyBuilder.indentRemove();
+        bodyBuilder.appendFormalLine("}");
+        bodyBuilder.appendFormalLine("return \""
+                + webScaffoldAnnotationValues.getPath() + "/search\";");
+
+        final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(
+                getId(), Modifier.PUBLIC, methodName, JavaType.STRING,
+                parameterTypes, parameterNames, bodyBuilder);
+        methodBuilder.setAnnotations(annotations);
+        return methodBuilder;
+    }
+
     @Override
     public String toString() {
-        ToStringCreator tsc = new ToStringCreator(this);
+        final ToStringCreator tsc = new ToStringCreator(this);
         tsc.append("identifier", getId());
         tsc.append("valid", valid);
         tsc.append("aspectName", aspectName);
@@ -279,30 +303,5 @@ public class SolrWebSearchMetadata extends
         tsc.append("governor", governorPhysicalTypeMetadata.getId());
         tsc.append("itdTypeDetails", itdTypeDetails);
         return tsc.toString();
-    }
-
-    public static String getMetadataIdentiferType() {
-        return PROVIDES_TYPE;
-    }
-
-    public static String createIdentifier(final JavaType javaType,
-            final LogicalPath path) {
-        return PhysicalTypeIdentifierNamingUtils.createIdentifier(
-                PROVIDES_TYPE_STRING, javaType, path);
-    }
-
-    public static JavaType getJavaType(final String metadataIdentificationString) {
-        return PhysicalTypeIdentifierNamingUtils.getJavaType(
-                PROVIDES_TYPE_STRING, metadataIdentificationString);
-    }
-
-    public static LogicalPath getPath(final String metadataIdentificationString) {
-        return PhysicalTypeIdentifierNamingUtils.getPath(PROVIDES_TYPE_STRING,
-                metadataIdentificationString);
-    }
-
-    public static boolean isValid(final String metadataIdentificationString) {
-        return PhysicalTypeIdentifierNamingUtils.isValid(PROVIDES_TYPE_STRING,
-                metadataIdentificationString);
     }
 }

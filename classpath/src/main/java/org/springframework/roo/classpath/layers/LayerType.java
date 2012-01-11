@@ -12,21 +12,9 @@ package org.springframework.roo.classpath.layers;
 public enum LayerType {
 
     /**
-     * The ultimate consumer of persistence-related operations, for example the
-     * application's web or integration test layer.
+     * The pattern by which entities provide their own persistence methods.
      */
-    HIGHEST(100),
-
-    /**
-     * Domain type that implements an application's use-cases.
-     */
-    SERVICE(80),
-
-    /**
-     * Domain type that provides collection-like access to instances of
-     * aggregate roots; implementations are usually persistence agnostic.
-     */
-    REPOSITORY(60),
+    ACTIVE_RECORD(20),
 
     /**
      * Infrastructure component that provides low-level persistence operations,
@@ -36,11 +24,22 @@ public enum LayerType {
     DAO(40),
 
     /**
-     * The pattern by which entities provide their own persistence methods.
+     * The ultimate consumer of persistence-related operations, for example the
+     * application's web or integration test layer.
      */
-    ACTIVE_RECORD(20);
+    HIGHEST(100),
 
-    // Fields
+    /**
+     * Domain type that provides collection-like access to instances of
+     * aggregate roots; implementations are usually persistence agnostic.
+     */
+    REPOSITORY(60),
+
+    /**
+     * Domain type that implements an application's use-cases.
+     */
+    SERVICE(80);
+
     private final int position;
 
     /**

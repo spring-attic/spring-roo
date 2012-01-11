@@ -42,10 +42,23 @@ import java.util.SortedSet;
 public interface MetadataLogger {
 
     /**
+     * @return a snapshot of timing statistics that have been collated so far
+     *         (never null, but may be empty)
+     */
+    SortedSet<MetadataTimingStatistic> getTimings();
+
+    /**
      * @return the currently active trace level (0 = none, 1 = major events, 2 =
      *         all events)
      */
     int getTraceLevel();
+
+    /**
+     * Logs a message against the given event identifier.
+     * 
+     * @param message to log (required)
+     */
+    void log(String message);
 
     /**
      * Enable low-level tracing of event delivery information. Defaults to level
@@ -56,29 +69,11 @@ public interface MetadataLogger {
     void setTraceLevel(int trace);
 
     /**
-     * @return a snapshot of timing statistics that have been collated so far
-     *         (never null, but may be empty)
-     */
-    SortedSet<MetadataTimingStatistic> getTimings();
-
-    /**
      * Increments the current stack level. The current stack level determines
      * the indentation of logged messages. It is required that for every
      * increment, a corresponding {@link #decrementLevel()} is invoked.
      */
     void startEvent();
-
-    /**
-     * Decrements the current stack level.
-     */
-    void stopEvent();
-
-    /**
-     * Logs a message against the given event identifier.
-     * 
-     * @param message to log (required)
-     */
-    void log(String message);
 
     /**
      * Starts the timer counting against the responsible class. The timer must
@@ -89,6 +84,11 @@ public interface MetadataLogger {
      * @param responsibleClass the class responsible for this timing (required)
      */
     void startTimer(String responsibleClass);
+
+    /**
+     * Decrements the current stack level.
+     */
+    void stopEvent();
 
     /**
      * Stops the most recently started timer. This is mandatory and must be in

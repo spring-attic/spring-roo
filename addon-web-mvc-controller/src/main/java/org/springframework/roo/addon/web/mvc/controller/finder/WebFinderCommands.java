@@ -19,18 +19,7 @@ import org.springframework.roo.shell.CommandMarker;
 @Service
 public class WebFinderCommands implements CommandMarker {
 
-    // Fields
     @Reference private WebFinderOperations webFinderOperations;
-
-    @CliAvailabilityIndicator({ "web mvc finder add", "web mvc finder all" })
-    public boolean isCommandAvailable() {
-        return webFinderOperations.isWebFinderInstallationPossible();
-    }
-
-    @CliCommand(value = "web mvc finder all", help = "Adds  @RooWebFinder annotation to existing MVC controllers")
-    public void all() {
-        webFinderOperations.annotateAll();
-    }
 
     @CliCommand(value = "web mvc finder add", help = "Adds @RooWebFinder annotation to MVC controller type")
     public void add(
@@ -38,5 +27,15 @@ public class WebFinderCommands implements CommandMarker {
             @CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*", optionContext = "update,project", help = "The controller java type to apply this annotation to") final JavaType controllerType) {
 
         webFinderOperations.annotateType(controllerType, finderType);
+    }
+
+    @CliCommand(value = "web mvc finder all", help = "Adds  @RooWebFinder annotation to existing MVC controllers")
+    public void all() {
+        webFinderOperations.annotateAll();
+    }
+
+    @CliAvailabilityIndicator({ "web mvc finder add", "web mvc finder all" })
+    public boolean isCommandAvailable() {
+        return webFinderOperations.isWebFinderInstallationPossible();
     }
 }

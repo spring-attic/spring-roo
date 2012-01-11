@@ -13,20 +13,6 @@ import org.springframework.roo.model.JavaType;
  */
 public interface ControllerOperations {
 
-    boolean isControllerInstallationPossible();
-
-    /**
-     * Creates Spring MVC controllers for all JPA entities in the project.
-     * 
-     * @param javaPackage The package where the new controllers are scaffolded.
-     */
-    void generateAll(JavaPackage javaPackage);
-
-    void setup();
-
-    @Deprecated
-    boolean isNewControllerAvailable();
-
     /**
      * Creates a new Spring MVC controller which will be automatically
      * scaffolded.
@@ -44,4 +30,18 @@ public interface ControllerOperations {
      */
     void createAutomaticController(JavaType controller, JavaType entity,
             Set<String> disallowedOperations, String path);
+
+    /**
+     * Creates Spring MVC controllers for all JPA entities in the project.
+     * 
+     * @param javaPackage The package where the new controllers are scaffolded.
+     */
+    void generateAll(JavaPackage javaPackage);
+
+    boolean isControllerInstallationPossible();
+
+    @Deprecated
+    boolean isNewControllerAvailable();
+
+    void setup();
 }

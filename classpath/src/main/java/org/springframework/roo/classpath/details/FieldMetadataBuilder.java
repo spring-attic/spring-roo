@@ -15,19 +15,18 @@ import org.springframework.roo.model.JavaType;
 public class FieldMetadataBuilder extends
         AbstractIdentifiableAnnotatedJavaStructureBuilder<FieldMetadata> {
 
-    // Fields
+    private String fieldInitializer;
     private JavaSymbolName fieldName;
     private JavaType fieldType;
-    private String fieldInitializer;
-
-    public FieldMetadataBuilder(final String declaredbyMetadataId) {
-        super(declaredbyMetadataId);
-    }
 
     public FieldMetadataBuilder(final FieldMetadata existing) {
         super(existing);
         init(existing.getFieldName(), existing.getFieldType(),
                 existing.getFieldInitializer());
+    }
+
+    public FieldMetadataBuilder(final String declaredbyMetadataId) {
+        super(declaredbyMetadataId);
     }
 
     public FieldMetadataBuilder(final String declaredbyMetadataId,
@@ -81,6 +80,18 @@ public class FieldMetadataBuilder extends
                 getFieldName(), getFieldType(), getFieldInitializer());
     }
 
+    public String getFieldInitializer() {
+        return fieldInitializer;
+    }
+
+    public JavaSymbolName getFieldName() {
+        return fieldName;
+    }
+
+    public JavaType getFieldType() {
+        return fieldType;
+    }
+
     private void init(final JavaSymbolName fieldName, final JavaType fieldType,
             final String fieldInitializer) {
         this.fieldName = fieldName;
@@ -88,24 +99,12 @@ public class FieldMetadataBuilder extends
         this.fieldInitializer = fieldInitializer;
     }
 
-    public String getFieldInitializer() {
-        return fieldInitializer;
-    }
-
     public void setFieldInitializer(final String fieldInitializer) {
         this.fieldInitializer = fieldInitializer;
     }
 
-    public JavaSymbolName getFieldName() {
-        return fieldName;
-    }
-
     public void setFieldName(final JavaSymbolName fieldName) {
         this.fieldName = fieldName;
-    }
-
-    public JavaType getFieldType() {
-        return fieldType;
     }
 
     public void setFieldType(final JavaType fieldType) {

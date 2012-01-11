@@ -13,7 +13,7 @@ public enum EnumType {
 
     @Override
     public String toString() {
-        ToStringCreator tsc = new ToStringCreator(this);
+        final ToStringCreator tsc = new ToStringCreator(this);
         tsc.append("name", name());
         return tsc.toString();
     }

@@ -31,7 +31,6 @@ import org.springframework.roo.shell.Completion;
  */
 public class JavaPackageConverterTest {
 
-    // Constants
     private static final String TOP_LEVEL_PACKAGE = "com.example";
 
     // Fixture
@@ -39,36 +38,6 @@ public class JavaPackageConverterTest {
     private @Mock LastUsed mockLastUsed;
     private @Mock ProjectOperations mockProjectOperations;
     private @Mock TypeLocationService mockTypeLocationService;
-
-    @Before
-    public void setUp() {
-        MockitoAnnotations.initMocks(this);
-        this.converter = new JavaPackageConverter();
-        this.converter.lastUsed = mockLastUsed;
-        this.converter.projectOperations = mockProjectOperations;
-        this.converter.typeLocationService = mockTypeLocationService;
-    }
-
-    @Test
-    public void testSupportsJavaPackage() {
-        assertTrue(converter.supports(JavaPackage.class, null));
-    }
-
-    @Test
-    public void testConvertFromNullText() {
-        assertNull(converter.convertFromText(null, JavaPackage.class, null));
-    }
-
-    @Test
-    public void testConvertFromEmptyText() {
-        assertNull(converter.convertFromText("", JavaPackage.class, null));
-    }
-
-    @Test
-    public void testConvertFromBlankText() {
-        assertNull(converter
-                .convertFromText(" \n\r\t", JavaPackage.class, null));
-    }
 
     /**
      * Asserts that converting the given text in the given option context
@@ -91,54 +60,6 @@ public class JavaPackageConverterTest {
                 expectedPackage,
                 converter.convertFromText(text, JavaPackage.class,
                         optionContext).getFullyQualifiedPackageName());
-    }
-
-    @Test
-    public void testConvertFromSimplePackageNameInNoContext() {
-        assertEquals("foo",
-                converter.convertFromText("FOO", JavaPackage.class, null)
-                        .getFullyQualifiedPackageName());
-        verifyNoMoreInteractions(mockLastUsed);
-    }
-
-    @Test
-    public void testConvertFromSimplePackageNameWithTrailingDotInNonUpdateContext() {
-        assertConvertFromValidText("FOO.", "create", "foo");
-        verifyNoMoreInteractions(mockLastUsed);
-    }
-
-    @Test
-    public void testConvertFromCompoundPackageNameInUpdateContext() {
-        assertConvertFromValidText("COM.example", "update", TOP_LEVEL_PACKAGE);
-        verify(mockLastUsed).setPackage(new JavaPackage(TOP_LEVEL_PACKAGE));
-    }
-
-    @Test
-    public void testConvertFromTextThatStartsWithTopLevelPackageSymbolPlusDot() {
-        assertConvertFromValidText("~.Domain", null, TOP_LEVEL_PACKAGE
-                + ".domain");
-        verifyNoMoreInteractions(mockLastUsed);
-    }
-
-    @Test
-    public void testConvertFromTextWithTrailingDot() {
-        assertConvertFromValidText("~.Domain.", null, TOP_LEVEL_PACKAGE
-                + ".domain");
-        verifyNoMoreInteractions(mockLastUsed);
-    }
-
-    @Test
-    public void testConvertFromTextThatStartsWithTopLevelPackageSymbolPlusNoDot() {
-        assertConvertFromValidText(TOP_LEVEL_PACKAGE_SYMBOL + "Domain", null,
-                TOP_LEVEL_PACKAGE + ".domain");
-        verifyNoMoreInteractions(mockLastUsed);
-    }
-
-    @Test
-    public void testConvertFromTextThatIsTopLevelPackageSymbol() {
-        assertConvertFromValidText(TOP_LEVEL_PACKAGE_SYMBOL, null,
-                TOP_LEVEL_PACKAGE);
-        verifyNoMoreInteractions(mockLastUsed);
     }
 
     /**
@@ -165,9 +86,85 @@ public class JavaPackageConverterTest {
         assertEquals(Arrays.asList(expectedCompletions), completions);
     }
 
+    @Before
+    public void setUp() {
+        MockitoAnnotations.initMocks(this);
+        converter = new JavaPackageConverter();
+        converter.lastUsed = mockLastUsed;
+        converter.projectOperations = mockProjectOperations;
+        converter.typeLocationService = mockTypeLocationService;
+    }
+
+    private Pom setUpMockPom(final String path, final String... types) {
+        final Pom mockPom = mock(Pom.class);
+        when(mockPom.getPath()).thenReturn(path);
+        when(mockTypeLocationService.getTypesForModule(path)).thenReturn(
+                Arrays.asList(types));
+        return mockPom;
+    }
+
     @Test
-    public void testGetAllPossibleValuesWhenProjectNotAvailable() {
-        assertGetAllPossibleValues(false);
+    public void testConvertFromBlankText() {
+        assertNull(converter
+                .convertFromText(" \n\r\t", JavaPackage.class, null));
+    }
+
+    @Test
+    public void testConvertFromCompoundPackageNameInUpdateContext() {
+        assertConvertFromValidText("COM.example", "update", TOP_LEVEL_PACKAGE);
+        verify(mockLastUsed).setPackage(new JavaPackage(TOP_LEVEL_PACKAGE));
+    }
+
+    @Test
+    public void testConvertFromEmptyText() {
+        assertNull(converter.convertFromText("", JavaPackage.class, null));
+    }
+
+    @Test
+    public void testConvertFromNullText() {
+        assertNull(converter.convertFromText(null, JavaPackage.class, null));
+    }
+
+    @Test
+    public void testConvertFromSimplePackageNameInNoContext() {
+        assertEquals("foo",
+                converter.convertFromText("FOO", JavaPackage.class, null)
+                        .getFullyQualifiedPackageName());
+        verifyNoMoreInteractions(mockLastUsed);
+    }
+
+    @Test
+    public void testConvertFromSimplePackageNameWithTrailingDotInNonUpdateContext() {
+        assertConvertFromValidText("FOO.", "create", "foo");
+        verifyNoMoreInteractions(mockLastUsed);
+    }
+
+    @Test
+    public void testConvertFromTextThatIsTopLevelPackageSymbol() {
+        assertConvertFromValidText(TOP_LEVEL_PACKAGE_SYMBOL, null,
+                TOP_LEVEL_PACKAGE);
+        verifyNoMoreInteractions(mockLastUsed);
+    }
+
+    @Test
+    public void testConvertFromTextThatStartsWithTopLevelPackageSymbolPlusDot() {
+        assertConvertFromValidText("~.Domain", null, TOP_LEVEL_PACKAGE
+                + ".domain");
+        verifyNoMoreInteractions(mockLastUsed);
+    }
+
+    @Test
+    public void testConvertFromTextThatStartsWithTopLevelPackageSymbolPlusNoDot() {
+        assertConvertFromValidText(TOP_LEVEL_PACKAGE_SYMBOL + "Domain", null,
+                TOP_LEVEL_PACKAGE + ".domain");
+        verifyNoMoreInteractions(mockLastUsed);
+    }
+
+    @Test
+    public void testConvertFromTextWithTrailingDot() {
+        assertConvertFromValidText("~.Domain.", null, TOP_LEVEL_PACKAGE
+                + ".domain");
+        verifyNoMoreInteractions(mockLastUsed);
     }
 
     @Test
@@ -186,11 +183,13 @@ public class JavaPackageConverterTest {
                 new Completion("com.example.web"));
     }
 
-    private Pom setUpMockPom(final String path, final String... types) {
-        final Pom mockPom = mock(Pom.class);
-        when(mockPom.getPath()).thenReturn(path);
-        when(mockTypeLocationService.getTypesForModule(path)).thenReturn(
-                Arrays.asList(types));
-        return mockPom;
+    @Test
+    public void testGetAllPossibleValuesWhenProjectNotAvailable() {
+        assertGetAllPossibleValues(false);
+    }
+
+    @Test
+    public void testSupportsJavaPackage() {
+        assertTrue(converter.supports(JavaPackage.class, null));
     }
 }

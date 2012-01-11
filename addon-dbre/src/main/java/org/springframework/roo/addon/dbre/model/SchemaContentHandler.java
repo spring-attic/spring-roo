@@ -15,7 +15,6 @@ import org.xml.sax.helpers.DefaultHandler;
  */
 public class SchemaContentHandler extends DefaultHandler {
 
-    // Fields
     private Schema schema;
 
     /**

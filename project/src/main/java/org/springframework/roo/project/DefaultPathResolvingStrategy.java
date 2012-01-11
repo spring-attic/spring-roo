@@ -24,67 +24,22 @@ import org.springframework.roo.support.util.FileUtils;
 @Reference(name = "pathResolvingStrategy", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC, referenceInterface = PathResolvingStrategy.class, cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE)
 public class DefaultPathResolvingStrategy extends AbstractPathResolvingStrategy {
 
-    // Fields
     private final Collection<PathResolvingStrategy> otherPathResolvingStrategies = new ArrayList<PathResolvingStrategy>();
     private final Map<Path, PhysicalPath> rootModulePaths = new LinkedHashMap<Path, PhysicalPath>();
 
     // ------------ OSGi component methods ----------------
+
+    @Override
+    protected void activate(final ComponentContext context) {
+        super.activate(context);
+        populatePaths(getRoot());
+    }
 
     protected void bindPathResolvingStrategy(
             final PathResolvingStrategy pathResolvingStrategy) {
         if (pathResolvingStrategy != this) {
             otherPathResolvingStrategies.add(pathResolvingStrategy);
         }
-    }
-
-    protected void unbindPathResolvingStrategy(
-            final PathResolvingStrategy pathResolvingStrategy) {
-        otherPathResolvingStrategies.remove(pathResolvingStrategy);
-    }
-
-    protected void activate(final ComponentContext context) {
-        super.activate(context);
-        populatePaths(getRoot());
-    }
-
-    private void populatePaths(final String projectDirectory) {
-        for (final Path subPath : Path.values()) {
-            rootModulePaths.put(subPath,
-                    subPath.getRootModulePath(projectDirectory));
-        }
-    }
-
-    List<PhysicalPath> getPhysicalPaths() {
-        return new ArrayList<PhysicalPath>(rootModulePaths.values());
-    }
-
-    // ------------ PathResolvingStrategy methods ----------------
-
-    public String getIdentifier(final LogicalPath path,
-            final String relativePath) {
-        return FileUtils.ensureTrailingSeparator(rootModulePaths.get(
-                path.getPath()).getLocationPath())
-                + relativePath;
-    }
-
-    public String getRoot(final LogicalPath logicalPath) {
-        Assert.notNull(logicalPath, "Path required");
-        final PhysicalPath pathInfo = rootModulePaths
-                .get(logicalPath.getPath());
-        Assert.notNull(pathInfo, "Unable to determine information for path '"
-                + logicalPath + "'");
-        final File root = pathInfo.getLocation();
-        return FileUtils.getCanonicalPath(root);
-    }
-
-    protected Collection<LogicalPath> getPaths(final boolean sourceOnly) {
-        final List<LogicalPath> result = new ArrayList<LogicalPath>();
-        for (final PhysicalPath modulePath : rootModulePaths.values()) {
-            if (!sourceOnly || modulePath.isSource()) {
-                result.add(modulePath.getLogicalPath());
-            }
-        }
-        return result;
     }
 
     /**
@@ -94,6 +49,7 @@ public class DefaultPathResolvingStrategy extends AbstractPathResolvingStrategy 
      * @param identifier to locate the parent of (required)
      * @return the first matching parent, or null if not found
      */
+    @Override
     protected PhysicalPath getApplicablePhysicalPath(final String identifier) {
         Assert.notNull(identifier, "Identifier required");
         for (final PhysicalPath pi : rootModulePaths.values()) {
@@ -111,12 +67,15 @@ public class DefaultPathResolvingStrategy extends AbstractPathResolvingStrategy 
         return null;
     }
 
-    public String getFocusedIdentifier(final Path path,
-            final String relativePath) {
+    public String getFocusedCanonicalPath(final Path path,
+            final JavaType javaType) {
         return null;
     }
 
-    public String getFocusedRoot(final Path path) {
+    // ------------ PathResolvingStrategy methods ----------------
+
+    public String getFocusedIdentifier(final Path path,
+            final String relativePath) {
         return null;
     }
 
@@ -124,9 +83,40 @@ public class DefaultPathResolvingStrategy extends AbstractPathResolvingStrategy 
         return null;
     }
 
-    public String getFocusedCanonicalPath(final Path path,
-            final JavaType javaType) {
+    public String getFocusedRoot(final Path path) {
         return null;
+    }
+
+    public String getIdentifier(final LogicalPath path,
+            final String relativePath) {
+        return FileUtils.ensureTrailingSeparator(rootModulePaths.get(
+                path.getPath()).getLocationPath())
+                + relativePath;
+    }
+
+    @Override
+    protected Collection<LogicalPath> getPaths(final boolean sourceOnly) {
+        final List<LogicalPath> result = new ArrayList<LogicalPath>();
+        for (final PhysicalPath modulePath : rootModulePaths.values()) {
+            if (!sourceOnly || modulePath.isSource()) {
+                result.add(modulePath.getLogicalPath());
+            }
+        }
+        return result;
+    }
+
+    List<PhysicalPath> getPhysicalPaths() {
+        return new ArrayList<PhysicalPath>(rootModulePaths.values());
+    }
+
+    public String getRoot(final LogicalPath logicalPath) {
+        Assert.notNull(logicalPath, "Path required");
+        final PhysicalPath pathInfo = rootModulePaths
+                .get(logicalPath.getPath());
+        Assert.notNull(pathInfo, "Unable to determine information for path '"
+                + logicalPath + "'");
+        final File root = pathInfo.getLocation();
+        return FileUtils.getCanonicalPath(root);
     }
 
     public boolean isActive() {
@@ -136,5 +126,17 @@ public class DefaultPathResolvingStrategy extends AbstractPathResolvingStrategy 
             }
         }
         return true;
+    }
+
+    private void populatePaths(final String projectDirectory) {
+        for (final Path subPath : Path.values()) {
+            rootModulePaths.put(subPath,
+                    subPath.getRootModulePath(projectDirectory));
+        }
+    }
+
+    protected void unbindPathResolvingStrategy(
+            final PathResolvingStrategy pathResolvingStrategy) {
+        otherPathResolvingStrategies.remove(pathResolvingStrategy);
     }
 }

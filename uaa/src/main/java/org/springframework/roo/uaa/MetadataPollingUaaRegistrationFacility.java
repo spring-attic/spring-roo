@@ -25,26 +25,6 @@ import org.springframework.roo.support.osgi.BundleFindingUtils;
 @Component(enabled = true)
 public class MetadataPollingUaaRegistrationFacility {
 
-    // Constants
-    private static final String NOT_FOUND = "___NOT_FOUND___";
-
-    // Fields
-    @Reference private MetadataLogger metadataLogger;
-    @Reference private UaaRegistrationService uaaRegistrationService;
-    private BundleContext bundleContext;
-    private final Timer timer = new Timer();
-    private final Set<String> previouslyNotifiedBsns = new HashSet<String>();
-    private final Map<String, String> typeToBsnMap = new HashMap<String, String>();
-
-    protected void activate(final ComponentContext context) {
-        this.bundleContext = context.getBundleContext();
-        timer.scheduleAtFixedRate(new MetadataTimerTask(), 0, 5 * 1000);
-    }
-
-    protected void deactivate(final ComponentContext context) {
-        timer.cancel();
-    }
-
     private class MetadataTimerTask extends TimerTask {
         @Override
         public void run() {
@@ -52,8 +32,9 @@ public class MetadataPollingUaaRegistrationFacility {
             // timer thread
             try {
                 // Deal with modules being used via the add-on infrastructure
-                for (MetadataTimingStatistic stat : metadataLogger.getTimings()) {
-                    String typeName = stat.getName();
+                for (final MetadataTimingStatistic stat : metadataLogger
+                        .getTimings()) {
+                    final String typeName = stat.getName();
                     String bundleSymbolicName = typeToBsnMap.get(typeName);
                     if (bundleSymbolicName == null) {
                         // Try to look it up and cache the outcome
@@ -84,8 +65,26 @@ public class MetadataPollingUaaRegistrationFacility {
 
                 }
             }
-            catch (RuntimeException ignored) {
+            catch (final RuntimeException ignored) {
             }
         }
+    }
+
+    private static final String NOT_FOUND = "___NOT_FOUND___";
+    private BundleContext bundleContext;
+    @Reference private MetadataLogger metadataLogger;
+    private final Set<String> previouslyNotifiedBsns = new HashSet<String>();
+    private final Timer timer = new Timer();
+    private final Map<String, String> typeToBsnMap = new HashMap<String, String>();
+
+    @Reference private UaaRegistrationService uaaRegistrationService;
+
+    protected void activate(final ComponentContext context) {
+        bundleContext = context.getBundleContext();
+        timer.scheduleAtFixedRate(new MetadataTimerTask(), 0, 5 * 1000);
+    }
+
+    protected void deactivate(final ComponentContext context) {
+        timer.cancel();
     }
 }

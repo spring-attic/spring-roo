@@ -32,7 +32,7 @@ public final class MavenUtils {
      * @return see above
      */
     public static boolean isValidMavenId(final String id) {
-        return id != null && MAVEN_ID_REGEX.matcher(id).matches();
+        return (id != null) && MAVEN_ID_REGEX.matcher(id).matches();
     }
 
     /**

@@ -14,6 +14,46 @@ import org.springframework.roo.model.JavaType;
 public interface PathResolvingStrategy {
 
     /**
+     * @param path the focus path
+     * @param javaType the type t
+     * @return
+     */
+    String getCanonicalPath(LogicalPath path, JavaType javaType);
+
+    /**
+     * @param path
+     * @param javaType
+     * @return
+     */
+    String getFocusedCanonicalPath(Path path, JavaType javaType);
+
+    /**
+     * @param path
+     * @param relativePath
+     * @return
+     */
+    String getFocusedIdentifier(Path path, String relativePath);
+
+    /**
+     * @see PathResolver#getFocusedPath(Path)
+     */
+    LogicalPath getFocusedPath(Path path);
+
+    /**
+     * @param path
+     * @return
+     */
+    String getFocusedRoot(Path path);
+
+    /**
+     * Converts the presented canonical path into a human-friendly name.
+     * 
+     * @param identifier to resolve (required)
+     * @return a human-friendly name for the identifier (required)
+     */
+    String getFriendlyName(String identifier);
+
+    /**
      * Produces a canonical path for the presented {@link LogicalPath} and
      * relative path.
      * 
@@ -35,9 +75,9 @@ public interface PathResolvingStrategy {
     LogicalPath getPath(String identifier);
 
     /**
-     * @see PathResolver#getRoot(LogicalPath)
+     * @see PathResolver#getPaths()
      */
-    String getRoot(LogicalPath path);
+    Collection<LogicalPath> getPaths();
 
     /**
      * Attempts to determine which {@link Path} the specified canonical path
@@ -55,17 +95,14 @@ public interface PathResolvingStrategy {
     String getRelativeSegment(String identifier);
 
     /**
-     * Converts the presented canonical path into a human-friendly name.
-     * 
-     * @param identifier to resolve (required)
-     * @return a human-friendly name for the identifier (required)
+     * @return the directory where Roo was launched
      */
-    String getFriendlyName(String identifier);
+    String getRoot();
 
     /**
-     * @see PathResolver#getPaths()
+     * @see PathResolver#getRoot(LogicalPath)
      */
-    Collection<LogicalPath> getPaths();
+    String getRoot(LogicalPath path);
 
     /**
      * @see PathResolver#getSourcePaths()
@@ -79,41 +116,4 @@ public interface PathResolvingStrategy {
      * @return see above
      */
     boolean isActive();
-
-    /**
-     * @return the directory where Roo was launched
-     */
-    String getRoot();
-
-    /**
-     * @param path the focus path
-     * @param javaType the type t
-     * @return
-     */
-    String getCanonicalPath(LogicalPath path, JavaType javaType);
-
-    /**
-     * @param path
-     * @param relativePath
-     * @return
-     */
-    String getFocusedIdentifier(Path path, String relativePath);
-
-    /**
-     * @param path
-     * @return
-     */
-    String getFocusedRoot(Path path);
-
-    /**
-     * @see PathResolver#getFocusedPath(Path)
-     */
-    LogicalPath getFocusedPath(Path path);
-
-    /**
-     * @param path
-     * @param javaType
-     * @return
-     */
-    String getFocusedCanonicalPath(Path path, JavaType javaType);
 }

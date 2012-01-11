@@ -10,11 +10,11 @@ import org.springframework.roo.support.style.ToStringCreator;
  * @since 1.0
  */
 public enum Cardinality {
-    ONE_TO_MANY, MANY_TO_MANY, MANY_TO_ONE, ONE_TO_ONE;
+    MANY_TO_MANY, MANY_TO_ONE, ONE_TO_MANY, ONE_TO_ONE;
 
     @Override
     public String toString() {
-        ToStringCreator tsc = new ToStringCreator(this);
+        final ToStringCreator tsc = new ToStringCreator(this);
         tsc.append("name", name());
         return tsc.toString();
     }

@@ -13,16 +13,6 @@ import org.springframework.roo.model.JavaSymbolName;
 public interface TypeManagementService {
 
     /**
-     * Creates a new class, with the location name name provided in the details.
-     * <p>
-     * An exception is thrown if the class already exists.
-     * 
-     * @param cid the {@link ClassOrInterfaceTypeDetails} to create (required)
-     */
-    @Deprecated
-    void generateClassFile(ClassOrInterfaceTypeDetails cid);
-
-    /**
      * Adds a new enum constant to an existing class.
      * 
      * @param physicalTypeIdentifier to add (required)
@@ -51,4 +41,14 @@ public interface TypeManagementService {
      *            on (required)
      */
     void createOrUpdateTypeOnDisk(ClassOrInterfaceTypeDetails cid);
+
+    /**
+     * Creates a new class, with the location name name provided in the details.
+     * <p>
+     * An exception is thrown if the class already exists.
+     * 
+     * @param cid the {@link ClassOrInterfaceTypeDetails} to create (required)
+     */
+    @Deprecated
+    void generateClassFile(ClassOrInterfaceTypeDetails cid);
 }

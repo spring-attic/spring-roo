@@ -23,14 +23,7 @@ import org.springframework.roo.shell.CommandMarker;
 @Service
 public class DbreCommands implements CommandMarker {
 
-    // Fields
     @Reference private DbreOperations dbreOperations;
-
-    @CliAvailabilityIndicator({ "database introspect",
-            "database reverse engineer" })
-    public boolean isDbreAvailable() {
-        return dbreOperations.isDbreInstallationPossible();
-    }
 
     @CliCommand(value = "database introspect", help = "Displays database metadata")
     public void displayDatabaseMetadata(
@@ -39,6 +32,12 @@ public class DbreCommands implements CommandMarker {
             @CliOption(key = "enableViews", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Display database views") final boolean view) {
 
         dbreOperations.displayDatabaseMetadata(schemas, file, view);
+    }
+
+    @CliAvailabilityIndicator({ "database introspect",
+            "database reverse engineer" })
+    public boolean isDbreAvailable() {
+        return dbreOperations.isDbreInstallationPossible();
     }
 
     @CliCommand(value = "database reverse engineer", help = "Create and update entities based on database metadata")

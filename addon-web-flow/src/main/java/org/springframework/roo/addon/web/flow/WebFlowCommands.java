@@ -18,18 +18,17 @@ import org.springframework.roo.shell.CommandMarker;
 @Service
 public class WebFlowCommands implements CommandMarker {
 
-    // Fields
     @Reference private WebFlowOperations webFlowOperations;
-
-    @CliAvailabilityIndicator("web flow")
-    public boolean isInstallWebFlowAvailable() {
-        return webFlowOperations.isWebFlowInstallationPossible();
-    }
 
     @CliCommand(value = "web flow", help = "Install Spring Web Flow configuration artifacts into your project")
     public void installWebFlow(
             @CliOption(key = { "flowName" }, mandatory = false, help = "The name for your web flow") final String flowName) {
 
         webFlowOperations.installWebFlow(flowName);
+    }
+
+    @CliAvailabilityIndicator("web flow")
+    public boolean isInstallWebFlowAvailable() {
+        return webFlowOperations.isWebFlowInstallationPossible();
     }
 }

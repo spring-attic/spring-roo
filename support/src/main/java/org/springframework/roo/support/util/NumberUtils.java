@@ -12,14 +12,19 @@ import java.math.BigInteger;
 public final class NumberUtils {
 
     /**
-     * Returns the minimum value in the array.
+     * Converts the given number to a {@link BigDecimal}
      * 
-     * @param array an array of Numbers (can be <code>null</code>)
-     * @return the minimum value in the array, or null if all the elements are
-     *         null
+     * @param number the number to convert (can be <code>null</code>)
+     * @return <code>null</code> if the given number was <code>null</code>
      */
-    public static BigDecimal min(final Number... array) {
-        return minOrMax(true, array);
+    private static BigDecimal getBigDecimal(final Number number) {
+        if ((number == null) || (number instanceof BigDecimal)) {
+            return (BigDecimal) number;
+        }
+        if (number instanceof BigInteger) {
+            return new BigDecimal((BigInteger) number);
+        }
+        return new BigDecimal(number.toString());
     }
 
     /**
@@ -34,6 +39,17 @@ public final class NumberUtils {
     }
 
     /**
+     * Returns the minimum value in the array.
+     * 
+     * @param array an array of Numbers (can be <code>null</code>)
+     * @return the minimum value in the array, or null if all the elements are
+     *         null
+     */
+    public static BigDecimal min(final Number... array) {
+        return minOrMax(true, array);
+    }
+
+    /**
      * Finds the minimum or maxiumum value contained in the given array,
      * ignoring any <code>null</code> elements
      * 
@@ -45,14 +61,14 @@ public final class NumberUtils {
      */
     private static BigDecimal minOrMax(final boolean findMinimum,
             final Number... numbers) {
-        if (numbers == null || numbers.length == 0) {
+        if ((numbers == null) || (numbers.length == 0)) {
             return null;
         }
         BigDecimal extreme = null;
         for (final Number number : numbers) {
             if (number != null) {
                 final BigDecimal candidate = getBigDecimal(number);
-                if (extreme == null
+                if ((extreme == null)
                         || (findMinimum ? candidate.compareTo(extreme) < 0
                                 : candidate.compareTo(extreme) > 0)) {
                     // The non-null candidate is the new extreme
@@ -61,22 +77,6 @@ public final class NumberUtils {
             }
         }
         return extreme;
-    }
-
-    /**
-     * Converts the given number to a {@link BigDecimal}
-     * 
-     * @param number the number to convert (can be <code>null</code>)
-     * @return <code>null</code> if the given number was <code>null</code>
-     */
-    private static BigDecimal getBigDecimal(final Number number) {
-        if (number == null || number instanceof BigDecimal) {
-            return (BigDecimal) number;
-        }
-        if (number instanceof BigInteger) {
-            return new BigDecimal((BigInteger) number);
-        }
-        return new BigDecimal(number.toString());
     }
 
     /**

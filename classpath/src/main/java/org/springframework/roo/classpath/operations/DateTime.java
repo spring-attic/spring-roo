@@ -13,19 +13,9 @@ import org.springframework.roo.support.style.ToStringCreator;
  * @since 1.0
  */
 public enum DateTime {
-    SHORT('S'), MEDIUM('M'), NONE('-');
+    MEDIUM('M'), NONE('-'), SHORT('S');
     // Disabled due to incompatibility between Dojo and JDK dateformat handling
     // LONG('L'), FULL('F');
-
-    private char shortKey;
-
-    private DateTime(final char shortKey) {
-        this.shortKey = shortKey;
-    }
-
-    public char getShortKey() {
-        return shortKey;
-    }
 
     /**
      * This method will return the DateTime style for the character of the style
@@ -68,9 +58,19 @@ public enum DateTime {
         return DateTime.NONE;
     }
 
+    private char shortKey;
+
+    private DateTime(final char shortKey) {
+        this.shortKey = shortKey;
+    }
+
+    public char getShortKey() {
+        return shortKey;
+    }
+
     @Override
     public String toString() {
-        ToStringCreator tsc = new ToStringCreator(this);
+        final ToStringCreator tsc = new ToStringCreator(this);
         tsc.append("name", name());
         tsc.append("shortKey", shortKey);
         return tsc.toString();

@@ -26,18 +26,17 @@ import org.springframework.roo.support.util.Assert;
  */
 public class FieldDetails {
 
-    // Fields
     /** The JPA @Column value */
     private String column;
 
-    /** The type that will receive the field */
-    private final String physicalTypeIdentifier;
-
-    /** The type of field to be added */
-    private final JavaType fieldType;
+    /** Any JavaDoc comments (reserved for future expansion) */
+    protected String comment = "";
 
     /** The name of the field to be added */
     private final JavaSymbolName fieldName;
+
+    /** The type of field to be added */
+    private final JavaType fieldType;
 
     /** Whether the JSR 303 @NotNull annotation will be added */
     private boolean notNull;
@@ -45,8 +44,8 @@ public class FieldDetails {
     /** Whether the JSR 303 @Null annotation will be added */
     private boolean nullRequired;
 
-    /** Any JavaDoc comments (reserved for future expansion) */
-    protected String comment = "";
+    /** The type that will receive the field */
+    private final String physicalTypeIdentifier;
 
     /** Whether unique = true is added to the @Column annotation */
     private boolean unique;
@@ -86,7 +85,7 @@ public class FieldDetails {
 
         AnnotationMetadataBuilder columnBuilder = null;
         if (column != null) {
-            List<AnnotationAttributeValue<?>> attrs = new ArrayList<AnnotationAttributeValue<?>>();
+            final List<AnnotationAttributeValue<?>> attrs = new ArrayList<AnnotationAttributeValue<?>>();
             attrs.add(new StringAttributeValue(new JavaSymbolName("name"),
                     column));
             columnBuilder = new AnnotationMetadataBuilder(COLUMN, attrs);
@@ -96,7 +95,7 @@ public class FieldDetails {
                 columnBuilder.addBooleanAttribute("unique", true);
             }
             else {
-                List<AnnotationAttributeValue<?>> attrs = new ArrayList<AnnotationAttributeValue<?>>();
+                final List<AnnotationAttributeValue<?>> attrs = new ArrayList<AnnotationAttributeValue<?>>();
                 attrs.add(new BooleanAttributeValue(
                         new JavaSymbolName("unique"), true));
                 columnBuilder = new AnnotationMetadataBuilder(COLUMN, attrs);
@@ -107,23 +106,51 @@ public class FieldDetails {
         }
 
         if (value != null) {
-            List<AnnotationAttributeValue<?>> attrs = new ArrayList<AnnotationAttributeValue<?>>();
+            final List<AnnotationAttributeValue<?>> attrs = new ArrayList<AnnotationAttributeValue<?>>();
             attrs.add(new StringAttributeValue(new JavaSymbolName("value"),
                     value));
             annotations.add(new AnnotationMetadataBuilder(VALUE, attrs));
         }
     }
 
-    public boolean isNotNull() {
-        return notNull;
-    }
-
-    public void setNotNull(final boolean notNull) {
-        this.notNull = notNull;
+    public String getColumn() {
+        return column;
     }
 
     public String getComment() {
         return comment;
+    }
+
+    public JavaSymbolName getFieldName() {
+        return fieldName;
+    }
+
+    public JavaType getFieldType() {
+        return fieldType;
+    }
+
+    public String getPhysicalTypeIdentifier() {
+        return physicalTypeIdentifier;
+    }
+
+    public String getValue() {
+        return value;
+    }
+
+    public boolean isNotNull() {
+        return notNull;
+    }
+
+    public boolean isNullRequired() {
+        return nullRequired;
+    }
+
+    public boolean isUnique() {
+        return unique;
+    }
+
+    public void setColumn(final String column) {
+        this.column = column;
     }
 
     public void setComment(final String comment) {
@@ -132,36 +159,12 @@ public class FieldDetails {
         }
     }
 
-    public String getColumn() {
-        return column;
-    }
-
-    public void setColumn(final String column) {
-        this.column = column;
-    }
-
-    public boolean isNullRequired() {
-        return nullRequired;
+    public void setNotNull(final boolean notNull) {
+        this.notNull = notNull;
     }
 
     public void setNullRequired(final boolean nullRequired) {
         this.nullRequired = nullRequired;
-    }
-
-    public String getPhysicalTypeIdentifier() {
-        return physicalTypeIdentifier;
-    }
-
-    public JavaType getFieldType() {
-        return fieldType;
-    }
-
-    public JavaSymbolName getFieldName() {
-        return fieldName;
-    }
-
-    public boolean isUnique() {
-        return unique;
     }
 
     public void setUnique(final boolean unique) {
@@ -170,9 +173,5 @@ public class FieldDetails {
 
     public void setValue(final String value) {
         this.value = value;
-    }
-
-    public String getValue() {
-        return value;
     }
 }

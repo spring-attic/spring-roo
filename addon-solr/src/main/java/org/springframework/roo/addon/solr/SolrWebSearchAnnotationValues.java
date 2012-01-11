@@ -14,7 +14,6 @@ import org.springframework.roo.model.RooJavaType;
  */
 public class SolrWebSearchAnnotationValues extends AbstractAnnotationValues {
 
-    // Fields
     @AutoPopulate private String autoCompleteMethod = "autoComplete";
     @AutoPopulate private String searchMethod = "search";
 

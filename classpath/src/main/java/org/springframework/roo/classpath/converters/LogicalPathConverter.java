@@ -17,13 +17,7 @@ import org.springframework.roo.shell.MethodTarget;
 @Service
 public class LogicalPathConverter implements Converter<LogicalPath> {
 
-    // Fields
     @Reference ProjectOperations projectOperations;
-
-    public boolean supports(final Class<?> requiredType,
-            final String optionContext) {
-        return LogicalPath.class.isAssignableFrom(requiredType);
-    }
 
     public LogicalPath convertFromText(final String value,
             final Class<?> targetType, final String optionContext) {
@@ -45,5 +39,10 @@ public class LogicalPathConverter implements Converter<LogicalPath> {
             }
         }
         return false;
+    }
+
+    public boolean supports(final Class<?> requiredType,
+            final String optionContext) {
+        return LogicalPath.class.isAssignableFrom(requiredType);
     }
 }

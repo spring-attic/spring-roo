@@ -69,15 +69,13 @@ public class DbreDatabaseListenerImpl extends
         AbstractHashCodeTrackingMetadataNotifier implements IdentifierService,
         FileEventListener {
 
-    // Constants
     private static final JavaSymbolName DB_MANAGED = new JavaSymbolName(
             "dbManaged");
     private static final String IDENTIFIER_TYPE = "identifierType";
-    private static final String VERSION_FIELD = "versionField";
-    private static final String VERSION = "version";
     private static final String PRIMARY_KEY_SUFFIX = "PK";
+    private static final String VERSION = "version";
+    private static final String VERSION_FIELD = "versionField";
 
-    // Fields
     @Reference private DbreModelService dbreModelService;
     @Reference private FileManager fileManager;
     @Reference private IntegrationTestOperations integrationTestOperations;
@@ -88,14 +86,162 @@ public class DbreDatabaseListenerImpl extends
 
     private Map<JavaType, List<Identifier>> identifierResults;
 
-    public void onFileEvent(final FileEvent fileEvent) {
-        if (fileEvent.getFileDetails().getCanonicalPath().endsWith(DBRE_XML)) {
-            final FileOperation operation = fileEvent.getOperation();
-            if (operation == FileOperation.UPDATED
-                    || operation == FileOperation.CREATED) {
-                deserializeDatabase();
+    private void createIdentifierClass(final JavaType identifierType) {
+        final List<AnnotationMetadataBuilder> identifierAnnotations = new ArrayList<AnnotationMetadataBuilder>();
+
+        final AnnotationMetadataBuilder identifierBuilder = new AnnotationMetadataBuilder(
+                ROO_IDENTIFIER);
+        identifierBuilder.addBooleanAttribute(DB_MANAGED.getSymbolName(), true);
+        identifierAnnotations.add(identifierBuilder);
+
+        // Produce identifier itself
+        final String declaredByMetadataId = PhysicalTypeIdentifier
+                .createIdentifier(identifierType, projectOperations
+                        .getPathResolver().getFocusedPath(Path.SRC_MAIN_JAVA));
+        final ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(
+                declaredByMetadataId, Modifier.PUBLIC | Modifier.FINAL,
+                identifierType, PhysicalTypeCategory.CLASS);
+        cidBuilder.setAnnotations(identifierAnnotations);
+        typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
+
+        shell.flash(Level.FINE,
+                "Created " + identifierType.getFullyQualifiedTypeName(),
+                DbreDatabaseListenerImpl.class.getName());
+        shell.flash(Level.FINE, "", DbreDatabaseListenerImpl.class.getName());
+    }
+
+    /**
+     * Creates a new DBRE-managed entity from the given table
+     * 
+     * @param javaType the name of the entity to be created (required)
+     * @param table the table from which to create the entity (required)
+     * @param activeRecord whether to create "active record" CRUD methods in the
+     *            new entity
+     * @return the newly created entity
+     */
+    private ClassOrInterfaceTypeDetails createNewManagedEntityFromTable(
+            final JavaType javaType, final Table table,
+            final boolean activeRecord) {
+        // Create type annotations for new entity
+        final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+        annotations.add(new AnnotationMetadataBuilder(ROO_JAVA_BEAN));
+        annotations.add(new AnnotationMetadataBuilder(ROO_TO_STRING));
+
+        // Find primary key from db metadata and add identifier attributes to
+        // @RooJpaEntity
+        final AnnotationMetadataBuilder jpaAnnotationBuilder = new AnnotationMetadataBuilder(
+                activeRecord ? ROO_JPA_ACTIVE_RECORD : ROO_JPA_ENTITY);
+        manageIdentifier(javaType, jpaAnnotationBuilder,
+                new HashSet<JavaSymbolName>(), table);
+
+        if (!hasVersionField(table)) {
+            jpaAnnotationBuilder.addStringAttribute(VERSION_FIELD, "");
+        }
+
+        jpaAnnotationBuilder.addStringAttribute("table", table.getName());
+        if (!DbreModelService.NO_SCHEMA_REQUIRED.equals(table.getSchema()
+                .getName())) {
+            jpaAnnotationBuilder.addStringAttribute("schema", table.getSchema()
+                    .getName());
+        }
+
+        annotations.add(jpaAnnotationBuilder);
+
+        // Add @RooDbManaged
+        annotations.add(getRooDbManagedAnnotation());
+
+        final JavaType superclass = OBJECT;
+        final List<JavaType> extendsTypes = new ArrayList<JavaType>();
+        extendsTypes.add(superclass);
+
+        // Create entity class
+        final String declaredByMetadataId = PhysicalTypeIdentifier
+                .createIdentifier(javaType, projectOperations.getPathResolver()
+                        .getFocusedPath(Path.SRC_MAIN_JAVA));
+        final ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(
+                declaredByMetadataId, Modifier.PUBLIC, javaType,
+                PhysicalTypeCategory.CLASS);
+        cidBuilder.setExtendsTypes(extendsTypes);
+        cidBuilder.setAnnotations(annotations);
+
+        final ClassOrInterfaceTypeDetails entity = cidBuilder.build();
+        typeManagementService.createOrUpdateTypeOnDisk(entity);
+
+        shell.flash(Level.FINE,
+                "Created " + javaType.getFullyQualifiedTypeName(),
+                DbreDatabaseListenerImpl.class.getName());
+        shell.flash(Level.FINE, "", DbreDatabaseListenerImpl.class.getName());
+
+        return entity;
+    }
+
+    /**
+     * Deletes the given {@link JavaType} for the given reason
+     * 
+     * @param javaType the type to be deleted (required)
+     * @param reason the reason for deletion (can be blank)
+     */
+    private void deleteJavaType(final JavaType javaType, final String reason) {
+        final PhysicalTypeMetadata governorPhysicalTypeMetadata = getPhysicalTypeMetadata(javaType);
+        if (governorPhysicalTypeMetadata != null) {
+            final String filePath = governorPhysicalTypeMetadata
+                    .getPhysicalLocationCanonicalPath();
+            if (fileManager.exists(filePath)) {
+                fileManager.delete(filePath, reason);
+                shell.flash(Level.FINE,
+                        "Deleted " + javaType.getFullyQualifiedTypeName(),
+                        DbreDatabaseListenerImpl.class.getName());
+            }
+
+            shell.flash(Level.FINE, "",
+                    DbreDatabaseListenerImpl.class.getName());
+        }
+    }
+
+    private void deleteManagedType(
+            final ClassOrInterfaceTypeDetails managedEntity, final String reason) {
+        if (!isEntityDeletable(managedEntity)) {
+            return;
+        }
+        deleteJavaType(managedEntity.getName(), reason);
+
+        final JavaType identifierType = getIdentifierType(managedEntity
+                .getName());
+        for (final ClassOrInterfaceTypeDetails managedIdentifier : getManagedIdentifiers()) {
+            if (managedIdentifier.getName().equals(identifierType)) {
+                deleteJavaType(
+                        identifierType,
+                        "managed identifier of deleted type "
+                                + managedEntity.getName());
+                break;
             }
         }
+    }
+
+    private void deserializeDatabase() {
+        final Database database = dbreModelService.getDatabase(true);
+        if (database != null) {
+            identifierResults = new LinkedHashMap<JavaType, List<Identifier>>();
+            reverseEngineer(database);
+        }
+    }
+
+    private JavaPackage getDestinationPackage(final Database database,
+            final Set<ClassOrInterfaceTypeDetails> managedEntities) {
+        JavaPackage destinationPackage = database.getDestinationPackage();
+        if (destinationPackage == null) {
+            if (!managedEntities.isEmpty() && !database.hasMultipleSchemas()) {
+                // Take the package of the first one
+                destinationPackage = managedEntities.iterator().next()
+                        .getName().getPackage();
+            }
+        }
+
+        // Fall back to project's top level package
+        if (destinationPackage == null) {
+            destinationPackage = projectOperations.getFocusedTopLevelPackage();
+        }
+        return destinationPackage;
     }
 
     public List<Identifier> getIdentifiers(final JavaType pkType) {
@@ -112,11 +258,307 @@ public class DbreDatabaseListenerImpl extends
         return identifierResults.get(pkType);
     }
 
-    private void deserializeDatabase() {
-        final Database database = dbreModelService.getDatabase(true);
-        if (database != null) {
-            identifierResults = new LinkedHashMap<JavaType, List<Identifier>>();
-            reverseEngineer(database);
+    private List<Identifier> getIdentifiers(final Table table,
+            final boolean usePrimaryKeys) {
+        final List<Identifier> result = new ArrayList<Identifier>();
+
+        // Add fields to the identifier class
+        final Set<Column> columns = usePrimaryKeys ? table.getPrimaryKeys()
+                : table.getColumns();
+        for (final Column column : columns) {
+            final String columnName = column.getName();
+            JavaSymbolName fieldName;
+            try {
+                fieldName = new JavaSymbolName(
+                        DbreTypeUtils.suggestFieldName(columnName));
+            }
+            catch (final RuntimeException e) {
+                throw new IllegalArgumentException(
+                        "Failed to create field name for column '" + columnName
+                                + "' in table '" + table.getName() + "': "
+                                + e.getMessage());
+            }
+            final JavaType fieldType = column.getJavaType();
+            final String columnDefinition = table
+                    .isIncludeNonPortableAttributes() ? column.getTypeName()
+                    : "";
+            result.add(new Identifier(fieldName, fieldType, columnName, column
+                    .getColumnSize(), column.getScale(), columnDefinition));
+        }
+        return result;
+    }
+
+    private List<Identifier> getIdentifiersFromColumns(final Table table) {
+        return getIdentifiers(table, false);
+    }
+
+    private List<Identifier> getIdentifiersFromPrimaryKeys(final Table table) {
+        return getIdentifiers(table, true);
+    }
+
+    /**
+     * Returns the type of ID that DBRE should use for the given entity
+     * 
+     * @param entity the entity for which to get the ID type (required)
+     * @return a non-<code>null</code> ID type
+     */
+    private JavaType getIdentifierType(final JavaType entity) {
+        final PhysicalTypeMetadata governorPhysicalTypeMetadata = getPhysicalTypeMetadata(entity);
+        if (governorPhysicalTypeMetadata != null) {
+            final ClassOrInterfaceTypeDetails governorTypeDetails = governorPhysicalTypeMetadata
+                    .getMemberHoldingTypeDetails();
+            final AnnotationMetadata jpaAnnotation = getJpaAnnotation(governorTypeDetails);
+            if (jpaAnnotation != null) {
+                final AnnotationAttributeValue<?> identifierTypeAttribute = jpaAnnotation
+                        .getAttribute(new JavaSymbolName(IDENTIFIER_TYPE));
+                if (identifierTypeAttribute != null) {
+                    // The identifierType attribute exists, so get its value
+                    final JavaType identifierType = (JavaType) identifierTypeAttribute
+                            .getValue();
+                    if ((identifierType != null)
+                            && !JdkJavaType.isPartOfJavaLang(identifierType)) {
+                        return identifierType;
+                    }
+                }
+            }
+        }
+
+        // The JPA annotation's "identifierType" attribute does not exist or is
+        // not a simple type, so return a default
+        return new JavaType(entity.getFullyQualifiedTypeName()
+                + PRIMARY_KEY_SUFFIX);
+    }
+
+    /**
+     * Returns the JPA-related annotation on the given managed entity
+     * 
+     * @param managedEntity an existing DBRE-managed entity (required)
+     * @return <code>null</code> if there isn't one
+     */
+    private AnnotationMetadata getJpaAnnotation(
+            final ClassOrInterfaceTypeDetails managedEntity) {
+        // The @RooJpaEntity annotation takes precedence if present
+        final AnnotationMetadata rooJpaEntity = managedEntity
+                .getAnnotation(ROO_JPA_ENTITY);
+        if (rooJpaEntity != null) {
+            return rooJpaEntity;
+        }
+        return managedEntity.getAnnotation(ROO_JPA_ACTIVE_RECORD);
+    }
+
+    private Set<ClassOrInterfaceTypeDetails> getManagedIdentifiers() {
+        final Set<ClassOrInterfaceTypeDetails> managedIdentifierTypes = new LinkedHashSet<ClassOrInterfaceTypeDetails>();
+
+        final Set<ClassOrInterfaceTypeDetails> identifierTypes = typeLocationService
+                .findClassesOrInterfaceDetailsWithAnnotation(ROO_IDENTIFIER);
+        for (final ClassOrInterfaceTypeDetails managedIdentifierType : identifierTypes) {
+            final AnnotationMetadata identifierAnnotation = managedIdentifierType
+                    .getTypeAnnotation(ROO_IDENTIFIER);
+            final AnnotationAttributeValue<?> attrValue = identifierAnnotation
+                    .getAttribute(DB_MANAGED);
+            if ((attrValue != null) && (Boolean) attrValue.getValue()) {
+                managedIdentifierTypes.add(managedIdentifierType);
+            }
+        }
+        return managedIdentifierTypes;
+    }
+
+    private PhysicalTypeMetadata getPhysicalTypeMetadata(final JavaType javaType) {
+        final String declaredByMetadataId = typeLocationService
+                .getPhysicalTypeIdentifier(javaType);
+        if (StringUtils.isBlank(declaredByMetadataId)) {
+            return null;
+        }
+        return (PhysicalTypeMetadata) metadataService.get(declaredByMetadataId);
+    }
+
+    private AnnotationMetadataBuilder getRooDbManagedAnnotation() {
+        final AnnotationMetadataBuilder rooDbManagedBuilder = new AnnotationMetadataBuilder(
+                ROO_DB_MANAGED);
+        rooDbManagedBuilder.addBooleanAttribute("automaticallyDelete", true);
+        return rooDbManagedBuilder;
+    }
+
+    /**
+     * Indicates whether the given entity has the standard annotations applied
+     * by Roo, and no others.
+     * 
+     * @param entity the entity to check (required)
+     * @return <code>false</code> if any of the standard ones are missing or any
+     *         extra ones have been added
+     */
+    private boolean hasStandardEntityAnnotations(
+            final ClassOrInterfaceTypeDetails entity) {
+        final List<? extends AnnotationMetadata> typeAnnotations = entity
+                .getAnnotations();
+        // We expect four: RooDbManaged, RooJavaBean, RooToString, and either
+        // RooEntity or RooJpaEntity
+        if (typeAnnotations.size() != 4) {
+            return false;
+        }
+        // There are exactly four - check for any non-standard ones
+        for (final AnnotationMetadata annotation : typeAnnotations) {
+            final JavaType annotationType = annotation.getAnnotationType();
+            final boolean entityAnnotation = ROO_JPA_ACTIVE_RECORD
+                    .equals(annotationType)
+                    || ROO_JPA_ENTITY.equals(annotationType);
+            if (!entityAnnotation && !ROO_DB_MANAGED.equals(annotationType)
+                    && !ROO_JAVA_BEAN.equals(annotationType)
+                    && !ROO_TO_STRING.equals(annotationType)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean hasVersionField(final Table table) {
+        for (final Column column : table.getColumns()) {
+            if (VERSION.equalsIgnoreCase(column.getName())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Indicates whether active record CRUD methods should be generated for the
+     * given entities (this being an all or nothing decision)
+     * 
+     * @param database the database being reverse-engineered (required)
+     * @param managedEntities any existing DB-managed entities in the user
+     *            project (can be <code>null</code> or empty)
+     * @return see above
+     */
+    private boolean isActiveRecord(final Database database,
+            final Collection<ClassOrInterfaceTypeDetails> managedEntities) {
+        if (CollectionUtils.isEmpty(managedEntities)) {
+            // There are no existing entities; use the given setting
+            return database.isActiveRecord();
+        }
+        /*
+         * There are one or more existing entities; preserve the existing
+         * decision, based on the first such entity. This saves the user from
+         * having to enter the same value for the "activeRecord" option each
+         * time they run the database reverse engineer command.
+         */
+        return managedEntities.iterator().next()
+                .getAnnotation(ROO_JPA_ACTIVE_RECORD) != null;
+    }
+
+    private boolean isEntityDeletable(
+            final ClassOrInterfaceTypeDetails managedEntity) {
+        final String declaredByMetadataId = DbreMetadata.createIdentifier(
+                managedEntity.getName(), PhysicalTypeIdentifier
+                        .getPath(managedEntity.getDeclaredByMetadataId()));
+        final DbreMetadata dbreMetadata = (DbreMetadata) metadataService
+                .get(declaredByMetadataId);
+        if ((dbreMetadata == null) || !dbreMetadata.isAutomaticallyDelete()) {
+            return false;
+        }
+
+        // Check whether the type's annotations have been customised
+        if (!hasStandardEntityAnnotations(managedEntity)) {
+            return false;
+        }
+
+        // Finally, check for added constructors, fields and methods
+        return managedEntity.getDeclaredConstructors().isEmpty()
+                && managedEntity.getDeclaredFields().isEmpty()
+                && managedEntity.getDeclaredMethods().isEmpty();
+    }
+
+    private boolean isIdentifierDeletable(final JavaType identifierType) {
+        final PhysicalTypeMetadata governorPhysicalTypeMetadata = getPhysicalTypeMetadata(identifierType);
+        if (governorPhysicalTypeMetadata == null) {
+            return false;
+        }
+
+        // Check for added constructors, fields and methods
+        final ClassOrInterfaceTypeDetails managedIdentifier = governorPhysicalTypeMetadata
+                .getMemberHoldingTypeDetails();
+        return managedIdentifier.getDeclaredConstructors().isEmpty()
+                && managedIdentifier.getDeclaredFields().isEmpty()
+                && managedIdentifier.getDeclaredMethods().isEmpty();
+    }
+
+    private void manageIdentifier(final JavaType javaType,
+            final AnnotationMetadataBuilder jpaAnnotationBuilder,
+            final Set<JavaSymbolName> attributesToDeleteIfPresent,
+            final Table table) {
+        final JavaType identifierType = getIdentifierType(javaType);
+        final PhysicalTypeMetadata identifierPhysicalTypeMetadata = getPhysicalTypeMetadata(identifierType);
+
+        // Process primary keys and add 'identifierType' attribute
+        final int pkCount = table.getPrimaryKeyCount();
+        if (pkCount == 1) {
+            // Table has one primary key
+            // Check for redundant, managed identifier class and delete if found
+            if (isIdentifierDeletable(identifierType)) {
+                deleteJavaType(identifierType, "the " + table.getName()
+                        + " table has only one primary key");
+            }
+
+            attributesToDeleteIfPresent
+                    .add(new JavaSymbolName(IDENTIFIER_TYPE));
+
+            // We don't need a PK class, so we just tell the
+            // JpaActiveRecordProvider via IdentifierService the column name,
+            // field type and field name to use
+            final List<Identifier> identifiers = getIdentifiersFromPrimaryKeys(table);
+            identifierResults.put(javaType, identifiers);
+        }
+        else if ((pkCount == 0) || (pkCount > 1)) {
+            // Table has either no primary keys or more than one primary key so
+            // create a composite key
+
+            // Check if identifier class already exists and if not, create it
+            if ((identifierPhysicalTypeMetadata == null)
+                    || !identifierPhysicalTypeMetadata.isValid()
+                    || (identifierPhysicalTypeMetadata
+                            .getMemberHoldingTypeDetails() == null)) {
+                createIdentifierClass(identifierType);
+            }
+
+            jpaAnnotationBuilder.addClassAttribute(IDENTIFIER_TYPE,
+                    identifierType);
+
+            // We need a PK class, so we tell the IdentifierMetadataProvider via
+            // IdentifierService the various column names, field types and field
+            // names to use
+            // For tables with no primary keys, create a composite key using all
+            // the table's columns
+            final List<Identifier> identifiers = pkCount == 0 ? getIdentifiersFromColumns(table)
+                    : getIdentifiersFromPrimaryKeys(table);
+            identifierResults.put(identifierType, identifiers);
+        }
+    }
+
+    private void notify(final List<ClassOrInterfaceTypeDetails> entities) {
+        for (final ClassOrInterfaceTypeDetails managedIdentifierType : getManagedIdentifiers()) {
+            final MetadataItem metadataItem = metadataService
+                    .evictAndGet(managedIdentifierType
+                            .getDeclaredByMetadataId());
+            if (metadataItem != null) {
+                notifyIfRequired(metadataItem);
+            }
+        }
+
+        for (final ClassOrInterfaceTypeDetails entity : entities) {
+            final MetadataItem metadataItem = metadataService
+                    .evictAndGet(entity.getDeclaredByMetadataId());
+            if (metadataItem != null) {
+                notifyIfRequired(metadataItem);
+            }
+        }
+    }
+
+    public void onFileEvent(final FileEvent fileEvent) {
+        if (fileEvent.getFileDetails().getCanonicalPath().endsWith(DBRE_XML)) {
+            final FileOperation operation = fileEvent.getOperation();
+            if ((operation == FileOperation.UPDATED)
+                    || (operation == FileOperation.CREATED)) {
+                deserializeDatabase();
+            }
         }
     }
 
@@ -185,85 +627,6 @@ public class DbreDatabaseListenerImpl extends
         allEntities.addAll(newEntities);
         allEntities.addAll(managedEntities);
         notify(allEntities);
-    }
-
-    /**
-     * Indicates whether active record CRUD methods should be generated for the
-     * given entities (this being an all or nothing decision)
-     * 
-     * @param database the database being reverse-engineered (required)
-     * @param managedEntities any existing DB-managed entities in the user
-     *            project (can be <code>null</code> or empty)
-     * @return see above
-     */
-    private boolean isActiveRecord(final Database database,
-            final Collection<ClassOrInterfaceTypeDetails> managedEntities) {
-        if (CollectionUtils.isEmpty(managedEntities)) {
-            // There are no existing entities; use the given setting
-            return database.isActiveRecord();
-        }
-        /*
-         * There are one or more existing entities; preserve the existing
-         * decision, based on the first such entity. This saves the user from
-         * having to enter the same value for the "activeRecord" option each
-         * time they run the database reverse engineer command.
-         */
-        return managedEntities.iterator().next()
-                .getAnnotation(ROO_JPA_ACTIVE_RECORD) != null;
-    }
-
-    private JavaPackage getDestinationPackage(final Database database,
-            final Set<ClassOrInterfaceTypeDetails> managedEntities) {
-        JavaPackage destinationPackage = database.getDestinationPackage();
-        if (destinationPackage == null) {
-            if (!managedEntities.isEmpty() && !database.hasMultipleSchemas()) {
-                // Take the package of the first one
-                destinationPackage = managedEntities.iterator().next()
-                        .getName().getPackage();
-            }
-        }
-
-        // Fall back to project's top level package
-        if (destinationPackage == null) {
-            destinationPackage = projectOperations.getFocusedTopLevelPackage();
-        }
-        return destinationPackage;
-    }
-
-    private void notify(final List<ClassOrInterfaceTypeDetails> entities) {
-        for (final ClassOrInterfaceTypeDetails managedIdentifierType : getManagedIdentifiers()) {
-            final MetadataItem metadataItem = metadataService
-                    .evictAndGet(managedIdentifierType
-                            .getDeclaredByMetadataId());
-            if (metadataItem != null) {
-                notifyIfRequired(metadataItem);
-            }
-        }
-
-        for (final ClassOrInterfaceTypeDetails entity : entities) {
-            final MetadataItem metadataItem = metadataService
-                    .evictAndGet(entity.getDeclaredByMetadataId());
-            if (metadataItem != null) {
-                notifyIfRequired(metadataItem);
-            }
-        }
-    }
-
-    private Set<ClassOrInterfaceTypeDetails> getManagedIdentifiers() {
-        final Set<ClassOrInterfaceTypeDetails> managedIdentifierTypes = new LinkedHashSet<ClassOrInterfaceTypeDetails>();
-
-        final Set<ClassOrInterfaceTypeDetails> identifierTypes = typeLocationService
-                .findClassesOrInterfaceDetailsWithAnnotation(ROO_IDENTIFIER);
-        for (final ClassOrInterfaceTypeDetails managedIdentifierType : identifierTypes) {
-            final AnnotationMetadata identifierAnnotation = managedIdentifierType
-                    .getTypeAnnotation(ROO_IDENTIFIER);
-            final AnnotationAttributeValue<?> attrValue = identifierAnnotation
-                    .getAttribute(DB_MANAGED);
-            if (attrValue != null && (Boolean) attrValue.getValue()) {
-                managedIdentifierTypes.add(managedIdentifierType);
-            }
-        }
-        return managedIdentifierTypes;
     }
 
     private Table updateOrDeleteManagedEntity(
@@ -342,370 +705,5 @@ public class DbreDatabaseListenerImpl extends
                 attributesToDeleteIfPresent);
         typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
         return table;
-    }
-
-    /**
-     * Returns the JPA-related annotation on the given managed entity
-     * 
-     * @param managedEntity an existing DBRE-managed entity (required)
-     * @return <code>null</code> if there isn't one
-     */
-    private AnnotationMetadata getJpaAnnotation(
-            final ClassOrInterfaceTypeDetails managedEntity) {
-        // The @RooJpaEntity annotation takes precedence if present
-        final AnnotationMetadata rooJpaEntity = managedEntity
-                .getAnnotation(ROO_JPA_ENTITY);
-        if (rooJpaEntity != null) {
-            return rooJpaEntity;
-        }
-        return managedEntity.getAnnotation(ROO_JPA_ACTIVE_RECORD);
-    }
-
-    /**
-     * Creates a new DBRE-managed entity from the given table
-     * 
-     * @param javaType the name of the entity to be created (required)
-     * @param table the table from which to create the entity (required)
-     * @param activeRecord whether to create "active record" CRUD methods in the
-     *            new entity
-     * @return the newly created entity
-     */
-    private ClassOrInterfaceTypeDetails createNewManagedEntityFromTable(
-            final JavaType javaType, final Table table,
-            final boolean activeRecord) {
-        // Create type annotations for new entity
-        final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
-        annotations.add(new AnnotationMetadataBuilder(ROO_JAVA_BEAN));
-        annotations.add(new AnnotationMetadataBuilder(ROO_TO_STRING));
-
-        // Find primary key from db metadata and add identifier attributes to
-        // @RooJpaEntity
-        final AnnotationMetadataBuilder jpaAnnotationBuilder = new AnnotationMetadataBuilder(
-                activeRecord ? ROO_JPA_ACTIVE_RECORD : ROO_JPA_ENTITY);
-        manageIdentifier(javaType, jpaAnnotationBuilder,
-                new HashSet<JavaSymbolName>(), table);
-
-        if (!hasVersionField(table)) {
-            jpaAnnotationBuilder.addStringAttribute(VERSION_FIELD, "");
-        }
-
-        jpaAnnotationBuilder.addStringAttribute("table", table.getName());
-        if (!DbreModelService.NO_SCHEMA_REQUIRED.equals(table.getSchema()
-                .getName())) {
-            jpaAnnotationBuilder.addStringAttribute("schema", table.getSchema()
-                    .getName());
-        }
-
-        annotations.add(jpaAnnotationBuilder);
-
-        // Add @RooDbManaged
-        annotations.add(getRooDbManagedAnnotation());
-
-        final JavaType superclass = OBJECT;
-        final List<JavaType> extendsTypes = new ArrayList<JavaType>();
-        extendsTypes.add(superclass);
-
-        // Create entity class
-        final String declaredByMetadataId = PhysicalTypeIdentifier
-                .createIdentifier(javaType, projectOperations.getPathResolver()
-                        .getFocusedPath(Path.SRC_MAIN_JAVA));
-        final ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(
-                declaredByMetadataId, Modifier.PUBLIC, javaType,
-                PhysicalTypeCategory.CLASS);
-        cidBuilder.setExtendsTypes(extendsTypes);
-        cidBuilder.setAnnotations(annotations);
-
-        final ClassOrInterfaceTypeDetails entity = cidBuilder.build();
-        typeManagementService.createOrUpdateTypeOnDisk(entity);
-
-        shell.flash(Level.FINE,
-                "Created " + javaType.getFullyQualifiedTypeName(),
-                DbreDatabaseListenerImpl.class.getName());
-        shell.flash(Level.FINE, "", DbreDatabaseListenerImpl.class.getName());
-
-        return entity;
-    }
-
-    private AnnotationMetadataBuilder getRooDbManagedAnnotation() {
-        final AnnotationMetadataBuilder rooDbManagedBuilder = new AnnotationMetadataBuilder(
-                ROO_DB_MANAGED);
-        rooDbManagedBuilder.addBooleanAttribute("automaticallyDelete", true);
-        return rooDbManagedBuilder;
-    }
-
-    private boolean hasVersionField(final Table table) {
-        for (final Column column : table.getColumns()) {
-            if (VERSION.equalsIgnoreCase(column.getName())) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private void manageIdentifier(final JavaType javaType,
-            final AnnotationMetadataBuilder jpaAnnotationBuilder,
-            final Set<JavaSymbolName> attributesToDeleteIfPresent,
-            final Table table) {
-        final JavaType identifierType = getIdentifierType(javaType);
-        final PhysicalTypeMetadata identifierPhysicalTypeMetadata = getPhysicalTypeMetadata(identifierType);
-
-        // Process primary keys and add 'identifierType' attribute
-        final int pkCount = table.getPrimaryKeyCount();
-        if (pkCount == 1) {
-            // Table has one primary key
-            // Check for redundant, managed identifier class and delete if found
-            if (isIdentifierDeletable(identifierType)) {
-                deleteJavaType(identifierType, "the " + table.getName()
-                        + " table has only one primary key");
-            }
-
-            attributesToDeleteIfPresent
-                    .add(new JavaSymbolName(IDENTIFIER_TYPE));
-
-            // We don't need a PK class, so we just tell the
-            // JpaActiveRecordProvider via IdentifierService the column name,
-            // field type and field name to use
-            final List<Identifier> identifiers = getIdentifiersFromPrimaryKeys(table);
-            identifierResults.put(javaType, identifiers);
-        }
-        else if (pkCount == 0 || pkCount > 1) {
-            // Table has either no primary keys or more than one primary key so
-            // create a composite key
-
-            // Check if identifier class already exists and if not, create it
-            if (identifierPhysicalTypeMetadata == null
-                    || !identifierPhysicalTypeMetadata.isValid()
-                    || identifierPhysicalTypeMetadata
-                            .getMemberHoldingTypeDetails() == null) {
-                createIdentifierClass(identifierType);
-            }
-
-            jpaAnnotationBuilder.addClassAttribute(IDENTIFIER_TYPE,
-                    identifierType);
-
-            // We need a PK class, so we tell the IdentifierMetadataProvider via
-            // IdentifierService the various column names, field types and field
-            // names to use
-            // For tables with no primary keys, create a composite key using all
-            // the table's columns
-            final List<Identifier> identifiers = pkCount == 0 ? getIdentifiersFromColumns(table)
-                    : getIdentifiersFromPrimaryKeys(table);
-            identifierResults.put(identifierType, identifiers);
-        }
-    }
-
-    private void createIdentifierClass(final JavaType identifierType) {
-        final List<AnnotationMetadataBuilder> identifierAnnotations = new ArrayList<AnnotationMetadataBuilder>();
-
-        final AnnotationMetadataBuilder identifierBuilder = new AnnotationMetadataBuilder(
-                ROO_IDENTIFIER);
-        identifierBuilder.addBooleanAttribute(DB_MANAGED.getSymbolName(), true);
-        identifierAnnotations.add(identifierBuilder);
-
-        // Produce identifier itself
-        final String declaredByMetadataId = PhysicalTypeIdentifier
-                .createIdentifier(identifierType, projectOperations
-                        .getPathResolver().getFocusedPath(Path.SRC_MAIN_JAVA));
-        final ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(
-                declaredByMetadataId, Modifier.PUBLIC | Modifier.FINAL,
-                identifierType, PhysicalTypeCategory.CLASS);
-        cidBuilder.setAnnotations(identifierAnnotations);
-        typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
-
-        shell.flash(Level.FINE,
-                "Created " + identifierType.getFullyQualifiedTypeName(),
-                DbreDatabaseListenerImpl.class.getName());
-        shell.flash(Level.FINE, "", DbreDatabaseListenerImpl.class.getName());
-    }
-
-    private List<Identifier> getIdentifiersFromPrimaryKeys(final Table table) {
-        return getIdentifiers(table, true);
-    }
-
-    private List<Identifier> getIdentifiersFromColumns(final Table table) {
-        return getIdentifiers(table, false);
-    }
-
-    private List<Identifier> getIdentifiers(final Table table,
-            final boolean usePrimaryKeys) {
-        final List<Identifier> result = new ArrayList<Identifier>();
-
-        // Add fields to the identifier class
-        final Set<Column> columns = usePrimaryKeys ? table.getPrimaryKeys()
-                : table.getColumns();
-        for (final Column column : columns) {
-            final String columnName = column.getName();
-            JavaSymbolName fieldName;
-            try {
-                fieldName = new JavaSymbolName(
-                        DbreTypeUtils.suggestFieldName(columnName));
-            }
-            catch (final RuntimeException e) {
-                throw new IllegalArgumentException(
-                        "Failed to create field name for column '" + columnName
-                                + "' in table '" + table.getName() + "': "
-                                + e.getMessage());
-            }
-            final JavaType fieldType = column.getJavaType();
-            final String columnDefinition = table
-                    .isIncludeNonPortableAttributes() ? column.getTypeName()
-                    : "";
-            result.add(new Identifier(fieldName, fieldType, columnName, column
-                    .getColumnSize(), column.getScale(), columnDefinition));
-        }
-        return result;
-    }
-
-    private void deleteManagedType(
-            final ClassOrInterfaceTypeDetails managedEntity, final String reason) {
-        if (!isEntityDeletable(managedEntity)) {
-            return;
-        }
-        deleteJavaType(managedEntity.getName(), reason);
-
-        final JavaType identifierType = getIdentifierType(managedEntity
-                .getName());
-        for (final ClassOrInterfaceTypeDetails managedIdentifier : getManagedIdentifiers()) {
-            if (managedIdentifier.getName().equals(identifierType)) {
-                deleteJavaType(
-                        identifierType,
-                        "managed identifier of deleted type "
-                                + managedEntity.getName());
-                break;
-            }
-        }
-    }
-
-    private boolean isEntityDeletable(
-            final ClassOrInterfaceTypeDetails managedEntity) {
-        final String declaredByMetadataId = DbreMetadata.createIdentifier(
-                managedEntity.getName(), PhysicalTypeIdentifier
-                        .getPath(managedEntity.getDeclaredByMetadataId()));
-        final DbreMetadata dbreMetadata = (DbreMetadata) metadataService
-                .get(declaredByMetadataId);
-        if (dbreMetadata == null || !dbreMetadata.isAutomaticallyDelete()) {
-            return false;
-        }
-
-        // Check whether the type's annotations have been customised
-        if (!hasStandardEntityAnnotations(managedEntity)) {
-            return false;
-        }
-
-        // Finally, check for added constructors, fields and methods
-        return managedEntity.getDeclaredConstructors().isEmpty()
-                && managedEntity.getDeclaredFields().isEmpty()
-                && managedEntity.getDeclaredMethods().isEmpty();
-    }
-
-    /**
-     * Indicates whether the given entity has the standard annotations applied
-     * by Roo, and no others.
-     * 
-     * @param entity the entity to check (required)
-     * @return <code>false</code> if any of the standard ones are missing or any
-     *         extra ones have been added
-     */
-    private boolean hasStandardEntityAnnotations(
-            final ClassOrInterfaceTypeDetails entity) {
-        final List<? extends AnnotationMetadata> typeAnnotations = entity
-                .getAnnotations();
-        // We expect four: RooDbManaged, RooJavaBean, RooToString, and either
-        // RooEntity or RooJpaEntity
-        if (typeAnnotations.size() != 4) {
-            return false;
-        }
-        // There are exactly four - check for any non-standard ones
-        for (final AnnotationMetadata annotation : typeAnnotations) {
-            final JavaType annotationType = annotation.getAnnotationType();
-            final boolean entityAnnotation = ROO_JPA_ACTIVE_RECORD
-                    .equals(annotationType)
-                    || ROO_JPA_ENTITY.equals(annotationType);
-            if (!entityAnnotation && !ROO_DB_MANAGED.equals(annotationType)
-                    && !ROO_JAVA_BEAN.equals(annotationType)
-                    && !ROO_TO_STRING.equals(annotationType)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private boolean isIdentifierDeletable(final JavaType identifierType) {
-        final PhysicalTypeMetadata governorPhysicalTypeMetadata = getPhysicalTypeMetadata(identifierType);
-        if (governorPhysicalTypeMetadata == null) {
-            return false;
-        }
-
-        // Check for added constructors, fields and methods
-        final ClassOrInterfaceTypeDetails managedIdentifier = governorPhysicalTypeMetadata
-                .getMemberHoldingTypeDetails();
-        return managedIdentifier.getDeclaredConstructors().isEmpty()
-                && managedIdentifier.getDeclaredFields().isEmpty()
-                && managedIdentifier.getDeclaredMethods().isEmpty();
-    }
-
-    /**
-     * Deletes the given {@link JavaType} for the given reason
-     * 
-     * @param javaType the type to be deleted (required)
-     * @param reason the reason for deletion (can be blank)
-     */
-    private void deleteJavaType(final JavaType javaType, final String reason) {
-        final PhysicalTypeMetadata governorPhysicalTypeMetadata = getPhysicalTypeMetadata(javaType);
-        if (governorPhysicalTypeMetadata != null) {
-            final String filePath = governorPhysicalTypeMetadata
-                    .getPhysicalLocationCanonicalPath();
-            if (fileManager.exists(filePath)) {
-                fileManager.delete(filePath, reason);
-                shell.flash(Level.FINE,
-                        "Deleted " + javaType.getFullyQualifiedTypeName(),
-                        DbreDatabaseListenerImpl.class.getName());
-            }
-
-            shell.flash(Level.FINE, "",
-                    DbreDatabaseListenerImpl.class.getName());
-        }
-    }
-
-    /**
-     * Returns the type of ID that DBRE should use for the given entity
-     * 
-     * @param entity the entity for which to get the ID type (required)
-     * @return a non-<code>null</code> ID type
-     */
-    private JavaType getIdentifierType(final JavaType entity) {
-        final PhysicalTypeMetadata governorPhysicalTypeMetadata = getPhysicalTypeMetadata(entity);
-        if (governorPhysicalTypeMetadata != null) {
-            final ClassOrInterfaceTypeDetails governorTypeDetails = governorPhysicalTypeMetadata
-                    .getMemberHoldingTypeDetails();
-            final AnnotationMetadata jpaAnnotation = getJpaAnnotation(governorTypeDetails);
-            if (jpaAnnotation != null) {
-                final AnnotationAttributeValue<?> identifierTypeAttribute = jpaAnnotation
-                        .getAttribute(new JavaSymbolName(IDENTIFIER_TYPE));
-                if (identifierTypeAttribute != null) {
-                    // The identifierType attribute exists, so get its value
-                    final JavaType identifierType = (JavaType) identifierTypeAttribute
-                            .getValue();
-                    if (identifierType != null
-                            && !JdkJavaType.isPartOfJavaLang(identifierType)) {
-                        return identifierType;
-                    }
-                }
-            }
-        }
-
-        // The JPA annotation's "identifierType" attribute does not exist or is
-        // not a simple type, so return a default
-        return new JavaType(entity.getFullyQualifiedTypeName()
-                + PRIMARY_KEY_SUFFIX);
-    }
-
-    private PhysicalTypeMetadata getPhysicalTypeMetadata(final JavaType javaType) {
-        final String declaredByMetadataId = typeLocationService
-                .getPhysicalTypeIdentifier(javaType);
-        if (StringUtils.isBlank(declaredByMetadataId)) {
-            return null;
-        }
-        return (PhysicalTypeMetadata) metadataService.get(declaredByMetadataId);
     }
 }

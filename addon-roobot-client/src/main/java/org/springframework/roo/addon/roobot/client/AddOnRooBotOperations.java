@@ -17,7 +17,7 @@ import org.springframework.roo.support.api.AddOnSearch;
 public interface AddOnRooBotOperations extends AddOnSearch {
 
     enum InstallOrUpgradeStatus {
-        SUCCESS, FAILED, INVALID_OBR_URL, PGP_VERIFICATION_NEEDED, SHELL_RESTART_NEEDED;
+        FAILED, INVALID_OBR_URL, PGP_VERIFICATION_NEEDED, SHELL_RESTART_NEEDED, SUCCESS;
     }
 
     /**
@@ -67,6 +67,14 @@ public interface AddOnRooBotOperations extends AddOnSearch {
             String requiresCommand);
 
     /**
+     * Get a list of all cached addon bundles.
+     * 
+     * @param refresh refresh attempt a fresh download of roobot.xml (optional)
+     * @return a set of addon bundles
+     */
+    Map<String, Bundle> getAddOnCache(boolean refresh);
+
+    /**
      * Install addon with given {@link AddOnBundleSymbolicName}.
      * 
      * @param bsn the bundle symbolic name (required)
@@ -88,19 +96,6 @@ public interface AddOnRooBotOperations extends AddOnSearch {
     InstallOrUpgradeStatus removeAddOn(BundleSymbolicName bsn);
 
     /**
-     * Display information about the available upgrades
-     * 
-     * @param addonStabilityLevel the add-on stability level taken into account
-     *            for the upgrade
-     */
-    void upgradesAvailable(AddOnStabilityLevel addonStabilityLevel);
-
-    /**
-     * Upgrade all add-ons according to the user defined add-on stability level.
-     */
-    void upgradeAddOns();
-
-    /**
      * Upgrade specific add-on only.
      * 
      * @param bsn the bundle symbolic name (required)
@@ -115,18 +110,23 @@ public interface AddOnRooBotOperations extends AddOnSearch {
     InstallOrUpgradeStatus upgradeAddOn(String bundleId);
 
     /**
+     * Upgrade all add-ons according to the user defined add-on stability level.
+     */
+    void upgradeAddOns();
+
+    /**
+     * Display information about the available upgrades
+     * 
+     * @param addonStabilityLevel the add-on stability level taken into account
+     *            for the upgrade
+     */
+    void upgradesAvailable(AddOnStabilityLevel addonStabilityLevel);
+
+    /**
      * Define the stability level for add-on upgrades
      * 
      * @param addOnStabilityLevel the stability level for add-on upgrades
      *            (required)
      */
     void upgradeSettings(AddOnStabilityLevel addOnStabilityLevel);
-
-    /**
-     * Get a list of all cached addon bundles.
-     * 
-     * @param refresh refresh attempt a fresh download of roobot.xml (optional)
-     * @return a set of addon bundles
-     */
-    Map<String, Bundle> getAddOnCache(boolean refresh);
 }

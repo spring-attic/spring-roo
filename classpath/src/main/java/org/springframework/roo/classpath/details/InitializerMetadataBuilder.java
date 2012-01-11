@@ -13,19 +13,18 @@ import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 public class InitializerMetadataBuilder extends
         AbstractIdentifiableJavaStructureBuilder<InitializerMetadata> {
 
-    // Fields
-    private boolean isStatic;
     private InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-
-    public InitializerMetadataBuilder(final String declaredbyMetadataId) {
-        super(declaredbyMetadataId);
-    }
+    private boolean isStatic;
 
     public InitializerMetadataBuilder(final InitializerMetadata existing) {
         super(existing);
-        this.isStatic = existing.getModifier() == Modifier.STATIC
+        isStatic = (existing.getModifier() == Modifier.STATIC)
                 || existing.isStatic();
-        this.bodyBuilder.append(existing.getBody());
+        bodyBuilder.append(existing.getBody());
+    }
+
+    public InitializerMetadataBuilder(final String declaredbyMetadataId) {
+        super(declaredbyMetadataId);
     }
 
     public InitializerMetadataBuilder(final String declaredbyMetadataId,
@@ -46,14 +45,6 @@ public class InitializerMetadataBuilder extends
                 getBodyBuilder().getOutput());
     }
 
-    public boolean isStatic() {
-        return isStatic;
-    }
-
-    public void setStatic(final boolean isStatic) {
-        this.isStatic = isStatic;
-    }
-
     public String getBody() {
         if (bodyBuilder != null) {
             return bodyBuilder.getOutput();
@@ -65,7 +56,15 @@ public class InitializerMetadataBuilder extends
         return bodyBuilder;
     }
 
+    public boolean isStatic() {
+        return isStatic;
+    }
+
     public void setBodyBuilder(final InvocableMemberBodyBuilder bodyBuilder) {
         this.bodyBuilder = bodyBuilder;
+    }
+
+    public void setStatic(final boolean isStatic) {
+        this.isStatic = isStatic;
     }
 }

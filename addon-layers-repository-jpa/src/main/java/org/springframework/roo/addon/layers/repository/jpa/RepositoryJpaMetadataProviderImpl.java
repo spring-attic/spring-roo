@@ -34,7 +34,6 @@ public class RepositoryJpaMetadataProviderImpl extends
         AbstractMemberDiscoveringItdMetadataProvider implements
         RepositoryJpaMetadataProvider {
 
-    // Fields
     @Reference private CustomDataKeyDecorator customDataKeyDecorator;
     private final Map<JavaType, String> domainTypeToRepositoryMidMap = new LinkedHashMap<JavaType, String>();
     private final Map<String, JavaType> repositoryMidToDomainTypeMap = new LinkedHashMap<String, JavaType>();
@@ -49,6 +48,12 @@ public class RepositoryJpaMetadataProviderImpl extends
         registerMatchers();
     }
 
+    @Override
+    protected String createLocalIdentifier(final JavaType javaType,
+            final LogicalPath path) {
+        return RepositoryJpaMetadata.createIdentifier(javaType, path);
+    }
+
     protected void deactivate(final ComponentContext context) {
         metadataDependencyRegistry.removeNotificationListener(this);
         metadataDependencyRegistry.deregisterDependency(
@@ -58,19 +63,26 @@ public class RepositoryJpaMetadataProviderImpl extends
         customDataKeyDecorator.unregisterMatchers(getClass());
     }
 
-    @SuppressWarnings("unchecked")
-    private void registerMatchers() {
-        customDataKeyDecorator.registerMatchers(getClass(),
-                new LayerTypeMatcher(ROO_REPOSITORY_JPA, new JavaSymbolName(
-                        RooJpaRepository.DOMAIN_TYPE_ATTRIBUTE)));
+    @Override
+    protected String getGovernorPhysicalTypeIdentifier(
+            final String metadataIdentificationString) {
+        final JavaType javaType = RepositoryJpaMetadata
+                .getJavaType(metadataIdentificationString);
+        final LogicalPath path = RepositoryJpaMetadata
+                .getPath(metadataIdentificationString);
+        return PhysicalTypeIdentifier.createIdentifier(javaType, path);
+    }
+
+    public String getItdUniquenessFilenameSuffix() {
+        return "Jpa_Repository";
     }
 
     @Override
-    protected String getLocalMidToRequest(ItdTypeDetails itdTypeDetails) {
+    protected String getLocalMidToRequest(final ItdTypeDetails itdTypeDetails) {
         // Determine the governor for this ITD, and whether any metadata is even
         // hoping to hear about changes to that JavaType and its ITDs
-        JavaType governor = itdTypeDetails.getName();
-        String localMid = domainTypeToRepositoryMidMap.get(governor);
+        final JavaType governor = itdTypeDetails.getName();
+        final String localMid = domainTypeToRepositoryMidMap.get(governor);
         if (localMid != null) {
             return localMid;
         }
@@ -123,27 +135,14 @@ public class RepositoryJpaMetadataProviderImpl extends
                 identifierType);
     }
 
-    public String getItdUniquenessFilenameSuffix() {
-        return "Jpa_Repository";
-    }
-
     public String getProvidesType() {
         return RepositoryJpaMetadata.getMetadataIdentiferType();
     }
 
-    @Override
-    protected String createLocalIdentifier(final JavaType javaType,
-            final LogicalPath path) {
-        return RepositoryJpaMetadata.createIdentifier(javaType, path);
-    }
-
-    @Override
-    protected String getGovernorPhysicalTypeIdentifier(
-            final String metadataIdentificationString) {
-        final JavaType javaType = RepositoryJpaMetadata
-                .getJavaType(metadataIdentificationString);
-        final LogicalPath path = RepositoryJpaMetadata
-                .getPath(metadataIdentificationString);
-        return PhysicalTypeIdentifier.createIdentifier(javaType, path);
+    @SuppressWarnings("unchecked")
+    private void registerMatchers() {
+        customDataKeyDecorator.registerMatchers(getClass(),
+                new LayerTypeMatcher(ROO_REPOSITORY_JPA, new JavaSymbolName(
+                        RooJpaRepository.DOMAIN_TYPE_ATTRIBUTE)));
     }
 }

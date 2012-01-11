@@ -17,11 +17,6 @@ import java.lang.annotation.Target;
 public @interface RooService {
 
     /**
-     * The name of this annotation's "domain types" attribute
-     */
-    String DOMAIN_TYPES_ATTRIBUTE = "domainTypes";
-
-    /**
      * The default prefix of the "count all" method
      */
     String COUNT_ALL_METHOD = "countAll";
@@ -32,9 +27,9 @@ public @interface RooService {
     String DELETE_METHOD = "delete";
 
     /**
-     * The default prefix of the "find" method
+     * The name of this annotation's "domain types" attribute
      */
-    String FIND_METHOD = "find";
+    String DOMAIN_TYPES_ATTRIBUTE = "domainTypes";
 
     /**
      * The default prefix of the "find all" method
@@ -47,6 +42,11 @@ public @interface RooService {
     String FIND_ENTRIES_METHOD = "find";
 
     /**
+     * The default prefix of the "find" method
+     */
+    String FIND_METHOD = "find";
+
+    /**
      * The default name of the "save" method
      */
     String SAVE_METHOD = "save";
@@ -55,13 +55,6 @@ public @interface RooService {
      * The default name of the "update" method
      */
     String UPDATE_METHOD = "update";
-
-    /**
-     * Returns the domain type(s) managed by this service
-     * 
-     * @return a non-<code>null</code> array
-     */
-    Class<?>[] domainTypes();
 
     /**
      * Returns the prefix of the "count all" method
@@ -78,11 +71,11 @@ public @interface RooService {
     String deleteMethod() default DELETE_METHOD;
 
     /**
-     * Returns the name of the "find" method
+     * Returns the domain type(s) managed by this service
      * 
-     * @return a blank string if the annotated type doesn't support this method
+     * @return a non-<code>null</code> array
      */
-    String findMethod() default FIND_METHOD;
+    Class<?>[] domainTypes();
 
     /**
      * Returns the name of the "find all" method
@@ -99,6 +92,13 @@ public @interface RooService {
     String findEntriesMethod() default FIND_ENTRIES_METHOD;
 
     /**
+     * Returns the name of the "find" method
+     * 
+     * @return a blank string if the annotated type doesn't support this method
+     */
+    String findMethod() default FIND_METHOD;
+
+    /**
      * Returns the name of the "save" method
      * 
      * @return a blank string if the annotated type doesn't support this method
@@ -106,16 +106,16 @@ public @interface RooService {
     String saveMethod() default SAVE_METHOD;
 
     /**
-     * Returns the name of the "update" method
-     * 
-     * @return a blank string if the annotated type doesn't support this method
-     */
-    String updateMethod() default UPDATE_METHOD;
-
-    /**
      * Indicates whether the annotated service should be transactional
      * 
      * @return see above
      */
     boolean transactional() default true;
+
+    /**
+     * Returns the name of the "update" method
+     * 
+     * @return a blank string if the annotated type doesn't support this method
+     */
+    String updateMethod() default UPDATE_METHOD;
 }

@@ -12,10 +12,22 @@ import org.springframework.roo.support.util.Assert;
  */
 public class DeclaredFieldAnnotationDetails {
 
-    // Fields
     private final FieldMetadata field;
     private final AnnotationMetadata fieldAnnotation;
     private final boolean removeAnnotation;
+
+    /**
+     * Overloaded constructor which is used in the most typical case of ADDING
+     * an annotation to a field, not removing one.
+     * 
+     * @param field FieldMetadata of existing field (may not be null)
+     * @param fieldAnnotation Annotation to be added to field via an ITD (may
+     *            not be null)
+     */
+    public DeclaredFieldAnnotationDetails(final FieldMetadata field,
+            final AnnotationMetadata fieldAnnotation) {
+        this(field, fieldAnnotation, false);
+    }
 
     /**
      * Constructor must contain {@link FieldMetadata} of existing field (may
@@ -49,19 +61,6 @@ public class DeclaredFieldAnnotationDetails {
         this.field = field;
         this.fieldAnnotation = fieldAnnotation;
         this.removeAnnotation = removeAnnotation;
-    }
-
-    /**
-     * Overloaded constructor which is used in the most typical case of ADDING
-     * an annotation to a field, not removing one.
-     * 
-     * @param field FieldMetadata of existing field (may not be null)
-     * @param fieldAnnotation Annotation to be added to field via an ITD (may
-     *            not be null)
-     */
-    public DeclaredFieldAnnotationDetails(final FieldMetadata field,
-            final AnnotationMetadata fieldAnnotation) {
-        this(field, fieldAnnotation, false);
     }
 
     public FieldMetadata getField() {

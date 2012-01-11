@@ -13,7 +13,6 @@ import org.springframework.roo.support.util.Assert;
 public abstract class AbstractIdentifiableJavaStructureProvider extends
         AbstractCustomDataAccessorProvider implements IdentifiableJavaStructure {
 
-    // Fields
     private final String declaredByMetadataId;
     private final int modifier;
 

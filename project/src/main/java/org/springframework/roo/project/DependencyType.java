@@ -13,7 +13,7 @@ import org.w3c.dom.Element;
  */
 public enum DependencyType {
 
-    JAR, WAR, ZIP, OTHER;
+    JAR, OTHER, WAR, ZIP;
 
     /**
      * Returns the type of the dependency represented by the given XML element
@@ -29,6 +29,16 @@ public enum DependencyType {
 
         // Resolve this to a DependencyType
         return valueOfTypeCode(type);
+    }
+
+    private static String getTypeCode(final Element dependencyElement) {
+        if (dependencyElement.hasAttribute("type")) {
+            return dependencyElement.getAttribute("type");
+        }
+        // Read it from the "type" child element, if any
+        return DomUtils.getTextContent(
+                XmlUtils.findFirstElement("type", dependencyElement), "")
+                .trim();
     }
 
     /**
@@ -49,15 +59,5 @@ public enum DependencyType {
         catch (final IllegalArgumentException invalidCode) {
             return OTHER;
         }
-    }
-
-    private static String getTypeCode(final Element dependencyElement) {
-        if (dependencyElement.hasAttribute("type")) {
-            return dependencyElement.getAttribute("type");
-        }
-        // Read it from the "type" child element, if any
-        return DomUtils.getTextContent(
-                XmlUtils.findFirstElement("type", dependencyElement), "")
-                .trim();
     }
 }

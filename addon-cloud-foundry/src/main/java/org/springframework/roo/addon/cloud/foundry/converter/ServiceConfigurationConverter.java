@@ -34,17 +34,17 @@ public class ServiceConfigurationConverter implements
         return session.getService(value);
     }
 
-    public boolean supports(final Class<?> requiredType,
-            final String optionContext) {
-        return ServiceConfiguration.class.isAssignableFrom(requiredType);
-    }
-
     public boolean getAllPossibleValues(final List<Completion> completions,
             final Class<?> requiredType, final String existingData,
             final String optionContext, final MethodTarget target) {
-        for (String serviceType : session.getServiceTypes()) {
+        for (final String serviceType : session.getServiceTypes()) {
             completions.add(new Completion(serviceType));
         }
         return false;
+    }
+
+    public boolean supports(final Class<?> requiredType,
+            final String optionContext) {
+        return ServiceConfiguration.class.isAssignableFrom(requiredType);
     }
 }

@@ -4,7 +4,7 @@ import java.util.SortedSet;
 
 public interface HintOperations {
 
-    String hint(String topic);
-
     SortedSet<String> getCurrentTopics();
+
+    String hint(String topic);
 }

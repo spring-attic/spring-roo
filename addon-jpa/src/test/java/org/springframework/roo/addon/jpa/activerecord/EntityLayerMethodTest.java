@@ -27,28 +27,16 @@ import org.springframework.roo.model.JavaType;
  */
 public class EntityLayerMethodTest {
 
-    // Constants
-    private static final String PLURAL = "People";
-
     private static final List<JavaType> NO_TYPES = Collections
             .<JavaType> emptyList();
 
-    // Fixture
-    @Mock private JavaType mockTargetEntity;
+    private static final String PLURAL = "People";
+
+    @Mock private JpaCrudAnnotationValues mockAnnotationValues;
     @Mock private JavaType mockIdType;
     @Mock private JavaSymbolName mockParameterName;
-    @Mock private JpaCrudAnnotationValues mockAnnotationValues;
-
-    @Before
-    public void setUp() {
-        MockitoAnnotations.initMocks(this);
-        when(mockParameterName.getSymbolName()).thenReturn("person");
-        when(mockTargetEntity.getFullyQualifiedTypeName()).thenReturn(
-                "com.example.Person");
-        when(mockTargetEntity.getSimpleTypeName()).thenReturn("Person");
-        when(mockIdType.getFullyQualifiedTypeName()).thenReturn(
-                Long.class.getName());
-    }
+    // Fixture
+    @Mock private JavaType mockTargetEntity;
 
     private void assertMethodCall(final String expectedMethodCall,
             final EntityLayerMethod method, final String... parameterNames) {
@@ -65,13 +53,15 @@ public class EntityLayerMethodTest {
                 mockTargetEntity, PLURAL, parameters));
     }
 
-    @Test
-    public void testCallCountAllMethod() {
-        // Set up
-        when(mockAnnotationValues.getCountMethod()).thenReturn("total");
-
-        // Invoke and check
-        assertMethodCall("Person.totalPeople()", EntityLayerMethod.COUNT_ALL);
+    @Before
+    public void setUp() {
+        MockitoAnnotations.initMocks(this);
+        when(mockParameterName.getSymbolName()).thenReturn("person");
+        when(mockTargetEntity.getFullyQualifiedTypeName()).thenReturn(
+                "com.example.Person");
+        when(mockTargetEntity.getSimpleTypeName()).thenReturn("Person");
+        when(mockIdType.getFullyQualifiedTypeName()).thenReturn(
+                Long.class.getName());
     }
 
     @Test
@@ -81,6 +71,15 @@ public class EntityLayerMethodTest {
 
         // Invoke and check
         assertMethodCall("Person.erase()", EntityLayerMethod.CLEAR);
+    }
+
+    @Test
+    public void testCallCountAllMethod() {
+        // Set up
+        when(mockAnnotationValues.getCountMethod()).thenReturn("total");
+
+        // Invoke and check
+        assertMethodCall("Person.totalPeople()", EntityLayerMethod.COUNT_ALL);
     }
 
     @Test
@@ -139,12 +138,6 @@ public class EntityLayerMethodTest {
     }
 
     @Test
-    public void testValueOfBogusMethodId() {
-        assertNull(EntityLayerMethod.valueOf("foo", NO_TYPES, mockTargetEntity,
-                mockIdType));
-    }
-
-    @Test
     public void testParameterTypes() {
         for (final EntityLayerMethod method : EntityLayerMethod.values()) {
             final List<JavaType> parameterTypes = method.getParameterTypes(
@@ -158,5 +151,11 @@ public class EntityLayerMethodTest {
                 assertEquals(Arrays.asList(mockTargetEntity), parameterTypes);
             }
         }
+    }
+
+    @Test
+    public void testValueOfBogusMethodId() {
+        assertNull(EntityLayerMethod.valueOf("foo", NO_TYPES, mockTargetEntity,
+                mockIdType));
     }
 }

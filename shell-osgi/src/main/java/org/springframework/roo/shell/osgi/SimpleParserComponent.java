@@ -37,6 +37,22 @@ public class SimpleParserComponent extends SimpleParser implements
         CommandMarker {
     private AddOnSearch addOnSearch;
 
+    protected void activate(final ComponentContext context) {
+        bindCommand(this);
+    }
+
+    protected void bindAddOnSearch(final AddOnSearch s) {
+        addOnSearch = s;
+    }
+
+    protected void bindCommand(final CommandMarker c) {
+        add(c);
+    }
+
+    protected void bindConverter(final Converter<?> c) {
+        add(c);
+    }
+
     @Override
     protected void commandNotFound(final Logger logger, final String buffer) {
         logger.warning("Command '" + buffer
@@ -52,7 +68,7 @@ public class SimpleParserComponent extends SimpleParser implements
         String command = buffer.trim();
 
         // Truncate from the first option, if any was given
-        int firstDash = buffer.indexOf("--");
+        final int firstDash = buffer.indexOf("--");
         if (firstDash > 1) {
             command = buffer.substring(0, firstDash - 1).trim();
         }
@@ -78,34 +94,6 @@ public class SimpleParserComponent extends SimpleParser implements
         }
     }
 
-    protected void bindAddOnSearch(final AddOnSearch s) {
-        this.addOnSearch = s;
-    }
-
-    protected void unbindAddOnSearch(final AddOnSearch s) {
-        this.addOnSearch = null;
-    }
-
-    protected void bindConverter(final Converter<?> c) {
-        add(c);
-    }
-
-    protected void unbindConverter(final Converter<?> c) {
-        remove(c);
-    }
-
-    protected void bindCommand(final CommandMarker c) {
-        add(c);
-    }
-
-    protected void unbindCommand(final CommandMarker c) {
-        remove(c);
-    }
-
-    protected void activate(final ComponentContext context) {
-        bindCommand(this);
-    }
-
     protected void deactivate(final ComponentContext context) {
         unbindCommand(this);
     }
@@ -122,5 +110,17 @@ public class SimpleParserComponent extends SimpleParser implements
             @CliOption(key = { "", "command" }, optionContext = "availableCommands", help = "Command name to provide help for") final String buffer) {
 
         super.obtainHelp(buffer);
+    }
+
+    protected void unbindAddOnSearch(final AddOnSearch s) {
+        addOnSearch = null;
+    }
+
+    protected void unbindCommand(final CommandMarker c) {
+        remove(c);
+    }
+
+    protected void unbindConverter(final Converter<?> c) {
+        remove(c);
     }
 }

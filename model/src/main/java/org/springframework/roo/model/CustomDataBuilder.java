@@ -16,7 +16,6 @@ import java.util.Set;
  */
 public class CustomDataBuilder implements Builder<CustomData> {
 
-    // Fields
     private final Map<Object, Object> customData = new LinkedHashMap<Object, Object>();
 
     /**
@@ -34,14 +33,6 @@ public class CustomDataBuilder implements Builder<CustomData> {
         append(existing);
     }
 
-    public CustomData build() {
-        return new CustomDataImpl(customData);
-    }
-
-    public void clear() {
-        customData.clear();
-    }
-
     /**
      * Appends the given custom data to this builder
      * 
@@ -54,6 +45,14 @@ public class CustomDataBuilder implements Builder<CustomData> {
                 this.customData.put(key, customData.get(key));
             }
         }
+    }
+
+    public CustomData build() {
+        return new CustomDataImpl(customData);
+    }
+
+    public void clear() {
+        customData.clear();
     }
 
     public Object get(final Object key) {

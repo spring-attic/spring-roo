@@ -17,9 +17,13 @@ import org.springframework.roo.model.JavaType;
  */
 public abstract class InvocableMemberMetadataCustomDataKey<T extends InvocableMemberMetadata>
         extends IdentifiableAnnotatedJavaStructureCustomDataKey<T> {
-    private List<AnnotatedJavaType> parameterTypes;
     private List<JavaSymbolName> parameterNames;
+    private List<AnnotatedJavaType> parameterTypes;
     private List<JavaType> throwsTypes;
+
+    protected InvocableMemberMetadataCustomDataKey() {
+        super();
+    }
 
     protected InvocableMemberMetadataCustomDataKey(final Integer modifier,
             final List<AnnotationMetadata> annotations,
@@ -32,8 +36,16 @@ public abstract class InvocableMemberMetadataCustomDataKey<T extends InvocableMe
         this.throwsTypes = throwsTypes;
     }
 
-    protected InvocableMemberMetadataCustomDataKey() {
-        super();
+    public List<JavaSymbolName> getParameterNames() {
+        return parameterNames;
+    }
+
+    public List<AnnotatedJavaType> getParameterTypes() {
+        return parameterTypes;
+    }
+
+    public List<JavaType> getThrowsTypes() {
+        return throwsTypes;
     }
 
     @Override
@@ -42,17 +54,5 @@ public abstract class InvocableMemberMetadataCustomDataKey<T extends InvocableMe
         // TODO: Add in validation logic for parameterTypes, parameterNames,
         // throwsTypes
         return super.meets(invocableMemberMetadata);
-    }
-
-    public List<AnnotatedJavaType> getParameterTypes() {
-        return parameterTypes;
-    }
-
-    public List<JavaSymbolName> getParameterNames() {
-        return parameterNames;
-    }
-
-    public List<JavaType> getThrowsTypes() {
-        return throwsTypes;
     }
 }

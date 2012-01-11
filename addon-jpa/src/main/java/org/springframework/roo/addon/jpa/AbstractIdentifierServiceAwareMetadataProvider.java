@@ -28,20 +28,12 @@ import org.springframework.roo.model.JavaType;
 public abstract class AbstractIdentifierServiceAwareMetadataProvider extends
         AbstractItdMetadataProvider {
 
-    // Fields
     private final Set<IdentifierService> identifierServices = new HashSet<IdentifierService>();
 
     protected void bindIdentifierService(
             final IdentifierService identifierService) {
         synchronized (identifierServices) {
             identifierServices.add(identifierService);
-        }
-    }
-
-    protected void unbindIdentifierService(
-            final IdentifierService identifierService) {
-        synchronized (identifierServices) {
-            identifierServices.remove(identifierService);
         }
     }
 
@@ -64,7 +56,7 @@ public abstract class AbstractIdentifierServiceAwareMetadataProvider extends
     protected List<Identifier> getIdentifiersForType(final JavaType javaType) {
         List<Identifier> identifierServiceResult = null;
         synchronized (identifierServices) {
-            for (IdentifierService service : identifierServices) {
+            for (final IdentifierService service : identifierServices) {
                 identifierServiceResult = service.getIdentifiers(javaType);
                 if (identifierServiceResult != null) {
                     // Someone has authoritatively indicated the fields for this
@@ -74,5 +66,12 @@ public abstract class AbstractIdentifierServiceAwareMetadataProvider extends
             }
         }
         return identifierServiceResult;
+    }
+
+    protected void unbindIdentifierService(
+            final IdentifierService identifierService) {
+        synchronized (identifierServices) {
+            identifierServices.remove(identifierService);
+        }
     }
 }

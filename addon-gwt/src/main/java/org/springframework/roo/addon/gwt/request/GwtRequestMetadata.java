@@ -10,15 +10,10 @@ import org.springframework.roo.support.util.StringUtils;
 
 public class GwtRequestMetadata extends AbstractMetadataItem {
 
-    // Constants
     private static final String PROVIDES_TYPE_STRING = GwtRequestMetadata.class
             .getName();
     private static final String PROVIDES_TYPE = MetadataIdentificationUtils
             .create(PROVIDES_TYPE_STRING);
-
-    public static String getMetadataIdentifierType() {
-        return PROVIDES_TYPE;
-    }
 
     public static String createIdentifier(final JavaType javaType,
             final LogicalPath path) {
@@ -31,12 +26,15 @@ public class GwtRequestMetadata extends AbstractMetadataItem {
                 PROVIDES_TYPE_STRING, metadataIdentificationString);
     }
 
+    public static String getMetadataIdentifierType() {
+        return PROVIDES_TYPE;
+    }
+
     public static LogicalPath getPath(final String metadataIdentificationString) {
         return PhysicalTypeIdentifierNamingUtils.getPath(PROVIDES_TYPE_STRING,
                 metadataIdentificationString);
     }
 
-    // Fields
     private final String requestTypeContents;
 
     /**
@@ -56,10 +54,12 @@ public class GwtRequestMetadata extends AbstractMetadataItem {
 
     @Override
     public boolean equals(final Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (!(obj instanceof GwtRequestMetadata))
+        }
+        if (!(obj instanceof GwtRequestMetadata)) {
             return false;
+        }
         final GwtRequestMetadata other = (GwtRequestMetadata) obj;
         return StringUtils.equals(requestTypeContents,
                 other.requestTypeContents);

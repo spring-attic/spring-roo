@@ -63,7 +63,7 @@ public class FileEvent {
 
     @Override
     public String toString() {
-        ToStringCreator tsc = new ToStringCreator(this);
+        final ToStringCreator tsc = new ToStringCreator(this);
         tsc.append("fileDetails", fileDetails);
         tsc.append("operation", operation);
         tsc.append("previousName", previousName);

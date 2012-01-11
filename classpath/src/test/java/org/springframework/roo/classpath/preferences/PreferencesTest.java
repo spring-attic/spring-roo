@@ -17,7 +17,6 @@ import org.mockito.MockitoAnnotations;
  */
 public class PreferencesTest {
 
-    // Constants
     private static final String INVALID_KEY = "this-key-does-not-exist";
 
     // Fixture

@@ -55,9 +55,312 @@ import org.springframework.roo.support.util.Assert;
 public class JavaParserAnnotationMetadataBuilder implements
         Builder<AnnotationMetadata> {
 
-    // Fields
-    private final JavaType annotationType;
-    private final List<AnnotationAttributeValue<?>> attributeValues;
+    /**
+     * Facilitates the addition of the annotation to the presented type.
+     * 
+     * @param compilationUnitServices to use (required)
+     * @param annotations to add to the end of (required)
+     * @param annotation to add (required)
+     */
+    public static void addAnnotationToList(
+            final CompilationUnitServices compilationUnitServices,
+            final List<AnnotationExpr> annotations,
+            final AnnotationMetadata annotation) {
+        Assert.notNull(compilationUnitServices,
+                "Compilation unit services required");
+        Assert.notNull(annotations, "Annotations required");
+        Assert.notNull(annotation, "Annotation metadata required");
+
+        // Create a holder for the annotation we're going to create
+        boolean foundExisting = false;
+
+        // Search for an existing annotation of this type
+        for (final AnnotationExpr candidate : annotations) {
+            NameExpr existingName = null;
+            if (candidate instanceof NormalAnnotationExpr) {
+                existingName = ((NormalAnnotationExpr) candidate).getName();
+            }
+            else if (candidate instanceof MarkerAnnotationExpr) {
+                existingName = ((MarkerAnnotationExpr) candidate).getName();
+            }
+            else if (candidate instanceof SingleMemberAnnotationExpr) {
+                existingName = ((SingleMemberAnnotationExpr) candidate)
+                        .getName();
+            }
+
+            // Convert the candidate annotation type's into a JavaType
+            final JavaType javaType = JavaParserUtils.getJavaType(
+                    compilationUnitServices, existingName, null);
+            if (annotation.getAnnotationType().equals(javaType)) {
+                foundExisting = true;
+                break;
+            }
+        }
+        Assert.isTrue(!foundExisting, "Found an existing annotation for type '"
+                + annotation.getAnnotationType() + "'");
+
+        // Import the annotation type, if needed
+        final NameExpr nameToUse = JavaParserUtils.importTypeIfRequired(
+                compilationUnitServices.getEnclosingTypeName(),
+                compilationUnitServices.getImports(),
+                annotation.getAnnotationType());
+
+        // Create member-value pairs in accordance with Java Parser requirements
+        final List<MemberValuePair> memberValuePairs = new ArrayList<MemberValuePair>();
+        for (final JavaSymbolName attributeName : annotation
+                .getAttributeNames()) {
+            final AnnotationAttributeValue<?> value = annotation
+                    .getAttribute(attributeName);
+            Assert.notNull(value, "Unable to acquire value '" + attributeName
+                    + "' from annotation");
+            final MemberValuePair memberValuePair = convert(value);
+            Assert.notNull(memberValuePair,
+                    "Member value pair should have been set");
+            memberValuePairs.add(memberValuePair);
+        }
+
+        // Create the AnnotationExpr; it varies depending on how many
+        // member-value pairs we need to present
+        AnnotationExpr annotationExpression = null;
+        if (memberValuePairs.isEmpty()) {
+            annotationExpression = new MarkerAnnotationExpr(nameToUse);
+        }
+        else if ((memberValuePairs.size() == 1)
+                && ((memberValuePairs.get(0).getName() == null) || "value"
+                        .equals(memberValuePairs.get(0).getName()))) {
+            final Expression toUse = JavaParserUtils
+                    .importExpressionIfRequired(
+                            compilationUnitServices.getEnclosingTypeName(),
+                            compilationUnitServices.getImports(),
+                            memberValuePairs.get(0).getValue());
+            annotationExpression = new SingleMemberAnnotationExpr(nameToUse,
+                    toUse);
+        }
+        else {
+            // We have a number of pairs being presented
+            annotationExpression = new NormalAnnotationExpr(nameToUse,
+                    new ArrayList<MemberValuePair>());
+        }
+
+        // Add our AnnotationExpr to the actual annotations that will eventually
+        // be flushed through to the compilation unit
+        annotations.add(annotationExpression);
+
+        // Add member-value pairs to our AnnotationExpr
+        if (!memberValuePairs.isEmpty()) {
+            // Have to check here for cases where we need to change an existing
+            // MarkerAnnotationExpr to a NormalAnnotationExpr or
+            // SingleMemberAnnotationExpr
+            if (annotationExpression instanceof MarkerAnnotationExpr) {
+                final MarkerAnnotationExpr mae = (MarkerAnnotationExpr) annotationExpression;
+
+                annotations.remove(mae);
+
+                if ((memberValuePairs.size() == 1)
+                        && ((memberValuePairs.get(0).getName() == null) || "value"
+                                .equals(memberValuePairs.get(0).getName()))) {
+                    final Expression toUse = JavaParserUtils
+                            .importExpressionIfRequired(compilationUnitServices
+                                    .getEnclosingTypeName(),
+                                    compilationUnitServices.getImports(),
+                                    memberValuePairs.get(0).getValue());
+                    annotationExpression = new SingleMemberAnnotationExpr(
+                            nameToUse, toUse);
+                    annotations.add(annotationExpression);
+                }
+                else {
+                    // We have a number of pairs being presented
+                    annotationExpression = new NormalAnnotationExpr(nameToUse,
+                            new ArrayList<MemberValuePair>());
+                    annotations.add(annotationExpression);
+                }
+            }
+            if (annotationExpression instanceof SingleMemberAnnotationExpr) {
+                // Potentially upgrade this expression to a NormalAnnotationExpr
+                final SingleMemberAnnotationExpr smae = (SingleMemberAnnotationExpr) annotationExpression;
+                if (((memberValuePairs.size() == 1) && (memberValuePairs.get(0)
+                        .getName() == null))
+                        || memberValuePairs.get(0).getName().equals("value")
+                        || memberValuePairs.get(0).getName().equals("")) {
+                    // They specified only a single member-value pair, and it is
+                    // the default anyway, so we need not do anything except
+                    // update the value
+                    final Expression toUse = JavaParserUtils
+                            .importExpressionIfRequired(compilationUnitServices
+                                    .getEnclosingTypeName(),
+                                    compilationUnitServices.getImports(),
+                                    memberValuePairs.get(0).getValue());
+                    smae.setMemberValue(toUse);
+                    return;
+                }
+
+                // There is > 1 expression, or they have provided some sort of
+                // non-default value, so it's time to upgrade the expression
+                // (whilst retaining any potentially existing expression values)
+                final Expression existingValue = smae.getMemberValue();
+                annotationExpression = new NormalAnnotationExpr(smae.getName(),
+                        new ArrayList<MemberValuePair>());
+                ((NormalAnnotationExpr) annotationExpression).getPairs().add(
+                        new MemberValuePair("value", existingValue));
+            }
+            Assert.isInstanceOf(
+                    NormalAnnotationExpr.class,
+                    annotationExpression,
+                    "Attempting to add >1 annotation member-value pair requires an existing normal annotation expression");
+            final List<MemberValuePair> annotationPairs = ((NormalAnnotationExpr) annotationExpression)
+                    .getPairs();
+            annotationPairs.clear();
+            for (final MemberValuePair pair : memberValuePairs) {
+                final Expression toUse = JavaParserUtils
+                        .importExpressionIfRequired(
+                                compilationUnitServices.getEnclosingTypeName(),
+                                compilationUnitServices.getImports(),
+                                pair.getValue());
+                pair.setValue(toUse);
+                annotationPairs.add(pair);
+            }
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private static MemberValuePair convert(
+            final AnnotationAttributeValue<?> value) {
+        if (value instanceof NestedAnnotationAttributeValue) {
+            final NestedAnnotationAttributeValue castValue = (NestedAnnotationAttributeValue) value;
+            Assert.isInstanceOf(JavaParserAnnotationMetadataBuilder.class,
+                    castValue.getValue(),
+                    "Cannot present nested annotations unless created by this class");
+            AnnotationExpr annotationExpr;
+            final AnnotationMetadata nestedAnnotation = castValue.getValue();
+            if (castValue.getValue().getAttributeNames().size() == 0) {
+                annotationExpr = new MarkerAnnotationExpr(
+                        JavaParserUtils.getNameExpr(nestedAnnotation
+                                .getAnnotationType()
+                                .getFullyQualifiedTypeName()));
+            }
+            else if (castValue.getValue().getAttributeNames().size() == 1) {
+                annotationExpr = new SingleMemberAnnotationExpr(
+                        JavaParserUtils.getNameExpr(nestedAnnotation
+                                .getAnnotationType()
+                                .getFullyQualifiedTypeName()), convert(
+                                nestedAnnotation.getAttribute(nestedAnnotation
+                                        .getAttributeNames().get(0)))
+                                .getValue());
+            }
+            else {
+                final List<MemberValuePair> memberValuePairs = new ArrayList<MemberValuePair>();
+                for (final JavaSymbolName attributeName : nestedAnnotation
+                        .getAttributeNames()) {
+                    memberValuePairs.add(convert(nestedAnnotation
+                            .getAttribute(attributeName)));
+                }
+                annotationExpr = new NormalAnnotationExpr(
+                        JavaParserUtils.getNameExpr(nestedAnnotation
+                                .getAnnotationType()
+                                .getFullyQualifiedTypeName()), memberValuePairs);
+            }
+            // Rely on the nested instance to know its member value pairs
+            return new MemberValuePair(value.getName().getSymbolName(),
+                    annotationExpr);
+        }
+
+        if (value instanceof BooleanAttributeValue) {
+            final boolean castValue = ((BooleanAttributeValue) value)
+                    .getValue();
+            final BooleanLiteralExpr convertedValue = new BooleanLiteralExpr(
+                    castValue);
+            return new MemberValuePair(value.getName().getSymbolName(),
+                    convertedValue);
+        }
+
+        if (value instanceof CharAttributeValue) {
+            final char castValue = ((CharAttributeValue) value).getValue();
+            final CharLiteralExpr convertedValue = new CharLiteralExpr(
+                    new String(new char[] { castValue }));
+            return new MemberValuePair(value.getName().getSymbolName(),
+                    convertedValue);
+        }
+
+        if (value instanceof LongAttributeValue) {
+            final Long castValue = ((LongAttributeValue) value).getValue();
+            final LongLiteralExpr convertedValue = new LongLiteralExpr(
+                    castValue.toString() + "L");
+            return new MemberValuePair(value.getName().getSymbolName(),
+                    convertedValue);
+        }
+
+        if (value instanceof IntegerAttributeValue) {
+            final Integer castValue = ((IntegerAttributeValue) value)
+                    .getValue();
+            final IntegerLiteralExpr convertedValue = new IntegerLiteralExpr(
+                    castValue.toString());
+            return new MemberValuePair(value.getName().getSymbolName(),
+                    convertedValue);
+        }
+
+        if (value instanceof DoubleAttributeValue) {
+            final DoubleAttributeValue doubleAttributeValue = (DoubleAttributeValue) value;
+            final Double castValue = doubleAttributeValue.getValue();
+            DoubleLiteralExpr convertedValue;
+            if (doubleAttributeValue.isFloatingPrecisionOnly()) {
+                convertedValue = new DoubleLiteralExpr(castValue.toString()
+                        + "F");
+            }
+            else {
+                convertedValue = new DoubleLiteralExpr(castValue.toString()
+                        + "D");
+            }
+            return new MemberValuePair(value.getName().getSymbolName(),
+                    convertedValue);
+        }
+
+        if (value instanceof StringAttributeValue) {
+            final String castValue = ((StringAttributeValue) value).getValue();
+            final StringLiteralExpr convertedValue = new StringLiteralExpr(
+                    castValue.toString());
+            return new MemberValuePair(value.getName().getSymbolName(),
+                    convertedValue);
+        }
+
+        if (value instanceof EnumAttributeValue) {
+            final EnumDetails castValue = ((EnumAttributeValue) value)
+                    .getValue();
+            // This isn't as elegant as it could be (ie loss of type
+            // parameters), but it will do for now
+            final FieldAccessExpr convertedValue = new FieldAccessExpr(
+                    JavaParserUtils.getNameExpr(castValue.getType()
+                            .getFullyQualifiedTypeName()), castValue.getField()
+                            .getSymbolName());
+            return new MemberValuePair(value.getName().getSymbolName(),
+                    convertedValue);
+        }
+
+        if (value instanceof ClassAttributeValue) {
+            final JavaType castValue = ((ClassAttributeValue) value).getValue();
+            // This doesn't preserve type parameters
+            final NameExpr nameExpr = JavaParserUtils.getNameExpr(castValue
+                    .getFullyQualifiedTypeName());
+            final ClassExpr convertedValue = new ClassExpr(
+                    JavaParserUtils.getReferenceType(nameExpr));
+            return new MemberValuePair(value.getName().getSymbolName(),
+                    convertedValue);
+        }
+
+        if (value instanceof ArrayAttributeValue) {
+            final ArrayAttributeValue<AnnotationAttributeValue<?>> castValue = (ArrayAttributeValue<AnnotationAttributeValue<?>>) value;
+
+            final List<Expression> arrayElements = new ArrayList<Expression>();
+            for (final AnnotationAttributeValue<?> v : castValue.getValue()) {
+                arrayElements.add(convert(v).getValue());
+            }
+            return new MemberValuePair(value.getName().getSymbolName(),
+                    new ArrayInitializerExpr(arrayElements));
+        }
+
+        throw new UnsupportedOperationException("Unsupported attribute value '"
+                + value.getName() + "' of type '" + value.getClass().getName()
+                + "'");
+    }
 
     public static JavaParserAnnotationMetadataBuilder getInstance(
             final AnnotationExpr annotationExpr,
@@ -65,6 +368,10 @@ public class JavaParserAnnotationMetadataBuilder implements
         return new JavaParserAnnotationMetadataBuilder(annotationExpr,
                 compilationUnitServices);
     }
+
+    private final JavaType annotationType;
+
+    private final List<AnnotationAttributeValue<?>> attributeValues;
 
     /**
      * Factory method
@@ -88,8 +395,8 @@ public class JavaParserAnnotationMetadataBuilder implements
 
         // Compute the actual annotation type, having regard to the compilation
         // unit package and imports
-        this.annotationType = JavaParserUtils.getJavaType(
-                compilationUnitServices, nameToFind, null);
+        annotationType = JavaParserUtils.getJavaType(compilationUnitServices,
+                nameToFind, null);
 
         // Generate some member-value pairs for subsequent parsing
         List<MemberValuePair> annotationPairs = new ArrayList<MemberValuePair>();
@@ -97,7 +404,7 @@ public class JavaParserAnnotationMetadataBuilder implements
             // A marker annotation has no values, so we can have no pairs to add
         }
         else if (annotationExpr instanceof SingleMemberAnnotationExpr) {
-            SingleMemberAnnotationExpr a = (SingleMemberAnnotationExpr) annotationExpr;
+            final SingleMemberAnnotationExpr a = (SingleMemberAnnotationExpr) annotationExpr;
             // Add the "value=" member-value pair.
             if (a.getMemberValue() != null) {
                 annotationPairs.add(new MemberValuePair("value", a
@@ -105,7 +412,7 @@ public class JavaParserAnnotationMetadataBuilder implements
             }
         }
         else if (annotationExpr instanceof NormalAnnotationExpr) {
-            NormalAnnotationExpr a = (NormalAnnotationExpr) annotationExpr;
+            final NormalAnnotationExpr a = (NormalAnnotationExpr) annotationExpr;
             // Must iterate over the expressions
             if (a.getPairs() != null) {
                 annotationPairs = a.getPairs();
@@ -115,9 +422,10 @@ public class JavaParserAnnotationMetadataBuilder implements
         // Iterate over the annotation attributes, creating our parsed
         // attributes map
         final List<AnnotationAttributeValue<?>> attributeValues = new ArrayList<AnnotationAttributeValue<?>>();
-        for (MemberValuePair p : annotationPairs) {
-            JavaSymbolName annotationName = new JavaSymbolName(p.getName());
-            AnnotationAttributeValue<?> value = convert(annotationName,
+        for (final MemberValuePair p : annotationPairs) {
+            final JavaSymbolName annotationName = new JavaSymbolName(
+                    p.getName());
+            final AnnotationAttributeValue<?> value = convert(annotationName,
                     p.getValue(), compilationUnitServices);
             attributeValues.add(value);
         }
@@ -125,7 +433,7 @@ public class JavaParserAnnotationMetadataBuilder implements
     }
 
     public AnnotationMetadata build() {
-        AnnotationMetadataBuilder annotationMetadataBuilder = new AnnotationMetadataBuilder(
+        final AnnotationMetadataBuilder annotationMetadataBuilder = new AnnotationMetadataBuilder(
                 annotationType, attributeValues);
         return annotationMetadataBuilder.build();
     }
@@ -138,24 +446,24 @@ public class JavaParserAnnotationMetadataBuilder implements
         }
 
         if (expression instanceof AnnotationExpr) {
-            AnnotationExpr annotationExpr = (AnnotationExpr) expression;
-            AnnotationMetadata value = getInstance(annotationExpr,
+            final AnnotationExpr annotationExpr = (AnnotationExpr) expression;
+            final AnnotationMetadata value = getInstance(annotationExpr,
                     compilationUnitServices).build();
             return new NestedAnnotationAttributeValue(annotationName, value);
         }
 
         if (expression instanceof BooleanLiteralExpr) {
-            boolean value = ((BooleanLiteralExpr) expression).getValue();
+            final boolean value = ((BooleanLiteralExpr) expression).getValue();
             return new BooleanAttributeValue(annotationName, value);
         }
 
         if (expression instanceof CharLiteralExpr) {
-            String value = ((CharLiteralExpr) expression).getValue();
+            final String value = ((CharLiteralExpr) expression).getValue();
             Assert.isTrue(value.length() == 1,
                     "Expected a char expression, but instead received '"
                             + value + "' for attribute '" + annotationName
                             + "'");
-            char c = value.charAt(0);
+            final char c = value.charAt(0);
             return new CharAttributeValue(annotationName, c);
         }
 
@@ -165,13 +473,13 @@ public class JavaParserAnnotationMetadataBuilder implements
                     "Expected long literal expression '" + value
                             + "' to end in 'l' or 'L'");
             value = value.substring(0, value.length() - 1);
-            long l = new Long(value);
+            final long l = new Long(value);
             return new LongAttributeValue(annotationName, l);
         }
 
         if (expression instanceof IntegerLiteralExpr) {
-            String value = ((IntegerLiteralExpr) expression).getValue();
-            int i = new Integer(value);
+            final String value = ((IntegerLiteralExpr) expression).getValue();
+            final int i = new Integer(value);
             return new IntegerAttributeValue(annotationName, i);
         }
 
@@ -185,7 +493,7 @@ public class JavaParserAnnotationMetadataBuilder implements
             if (value.toUpperCase().endsWith("D")) {
                 value = value.substring(0, value.length() - 1);
             }
-            double d = new Double(value);
+            final double d = new Double(value);
             return new DoubleAttributeValue(annotationName, d,
                     floatingPrecisionOnly);
         }
@@ -204,7 +512,7 @@ public class JavaParserAnnotationMetadataBuilder implements
 
                 result = right + result;
                 if (current.getLeft() instanceof StringLiteralExpr) {
-                    String left = ((StringLiteralExpr) current.getLeft())
+                    final String left = ((StringLiteralExpr) current.getLeft())
                             .getValue();
                     result = left + result;
                 }
@@ -219,19 +527,19 @@ public class JavaParserAnnotationMetadataBuilder implements
         }
 
         if (expression instanceof StringLiteralExpr) {
-            String value = ((StringLiteralExpr) expression).getValue();
+            final String value = ((StringLiteralExpr) expression).getValue();
             return new StringAttributeValue(annotationName, value);
         }
 
         if (expression instanceof FieldAccessExpr) {
-            FieldAccessExpr field = (FieldAccessExpr) expression;
-            String fieldName = field.getField();
+            final FieldAccessExpr field = (FieldAccessExpr) expression;
+            final String fieldName = field.getField();
 
             // Determine the type
-            Expression scope = field.getScope();
+            final Expression scope = field.getScope();
             NameExpr nameToFind = null;
             if (scope instanceof FieldAccessExpr) {
-                FieldAccessExpr fScope = (FieldAccessExpr) scope;
+                final FieldAccessExpr fScope = (FieldAccessExpr) scope;
                 nameToFind = JavaParserUtils.getNameExpr(fScope.toString());
             }
             else if (scope instanceof NameExpr) {
@@ -244,39 +552,40 @@ public class JavaParserAnnotationMetadataBuilder implements
                                 + "' should return a NameExpr or FieldAccessExpr (was "
                                 + field.getScope().getClass().getName() + ")");
             }
-            JavaType fieldType = JavaParserUtils.getJavaType(
+            final JavaType fieldType = JavaParserUtils.getJavaType(
                     compilationUnitServices, nameToFind, null);
 
-            EnumDetails enumDetails = new EnumDetails(fieldType,
+            final EnumDetails enumDetails = new EnumDetails(fieldType,
                     new JavaSymbolName(fieldName));
             return new EnumAttributeValue(annotationName, enumDetails);
         }
 
         if (expression instanceof NameExpr) {
-            NameExpr field = (NameExpr) expression;
-            String name = field.getName();
-            JavaType fieldType = new JavaType("unknown.Object"); // As we have
-                                                                 // no way of
-                                                                 // finding out
-                                                                 // the real
-                                                                 // type
-            EnumDetails enumDetails = new EnumDetails(fieldType,
+            final NameExpr field = (NameExpr) expression;
+            final String name = field.getName();
+            final JavaType fieldType = new JavaType("unknown.Object"); // As we
+                                                                       // have
+            // no way of
+            // finding out
+            // the real
+            // type
+            final EnumDetails enumDetails = new EnumDetails(fieldType,
                     new JavaSymbolName(name));
             return new EnumAttributeValue(annotationName, enumDetails);
         }
 
         if (expression instanceof ClassExpr) {
-            ClassExpr clazz = (ClassExpr) expression;
-            Type nameToFind = clazz.getType();
-            JavaType javaType = JavaParserUtils.getJavaType(
+            final ClassExpr clazz = (ClassExpr) expression;
+            final Type nameToFind = clazz.getType();
+            final JavaType javaType = JavaParserUtils.getJavaType(
                     compilationUnitServices, nameToFind, null);
             return new ClassAttributeValue(annotationName, javaType);
         }
 
         if (expression instanceof ArrayInitializerExpr) {
-            ArrayInitializerExpr castExp = (ArrayInitializerExpr) expression;
-            List<AnnotationAttributeValue<?>> arrayElements = new ArrayList<AnnotationAttributeValue<?>>();
-            for (Expression e : castExp.getValues()) {
+            final ArrayInitializerExpr castExp = (ArrayInitializerExpr) expression;
+            final List<AnnotationAttributeValue<?>> arrayElements = new ArrayList<AnnotationAttributeValue<?>>();
+            for (final Expression e : castExp.getValues()) {
                 arrayElements.add(convert(null, e, compilationUnitServices));
             }
             return new ArrayAttributeValue<AnnotationAttributeValue<?>>(
@@ -284,12 +593,12 @@ public class JavaParserAnnotationMetadataBuilder implements
         }
 
         if (expression instanceof UnaryExpr) {
-            UnaryExpr castExp = (UnaryExpr) expression;
+            final UnaryExpr castExp = (UnaryExpr) expression;
             if (castExp.getOperator() == Operator.negative) {
                 String value = castExp.toString();
                 value = value.toUpperCase().endsWith("L") ? value.substring(0,
                         value.length() - 1) : value;
-                long l = new Long(value);
+                final long l = new Long(value);
                 return new LongAttributeValue(annotationName, l);
             }
             else {
@@ -302,305 +611,5 @@ public class JavaParserAnnotationMetadataBuilder implements
                 "Unable to parse annotation attribute '" + annotationName
                         + "' due to unsupported annotation expression '"
                         + expression.getClass().getName() + "'");
-    }
-
-    /**
-     * Facilitates the addition of the annotation to the presented type.
-     * 
-     * @param compilationUnitServices to use (required)
-     * @param annotations to add to the end of (required)
-     * @param annotation to add (required)
-     */
-    public static void addAnnotationToList(
-            final CompilationUnitServices compilationUnitServices,
-            final List<AnnotationExpr> annotations,
-            final AnnotationMetadata annotation) {
-        Assert.notNull(compilationUnitServices,
-                "Compilation unit services required");
-        Assert.notNull(annotations, "Annotations required");
-        Assert.notNull(annotation, "Annotation metadata required");
-
-        // Create a holder for the annotation we're going to create
-        boolean foundExisting = false;
-
-        // Search for an existing annotation of this type
-        for (AnnotationExpr candidate : annotations) {
-            NameExpr existingName = null;
-            if (candidate instanceof NormalAnnotationExpr) {
-                existingName = ((NormalAnnotationExpr) candidate).getName();
-            }
-            else if (candidate instanceof MarkerAnnotationExpr) {
-                existingName = ((MarkerAnnotationExpr) candidate).getName();
-            }
-            else if (candidate instanceof SingleMemberAnnotationExpr) {
-                existingName = ((SingleMemberAnnotationExpr) candidate)
-                        .getName();
-            }
-
-            // Convert the candidate annotation type's into a JavaType
-            JavaType javaType = JavaParserUtils.getJavaType(
-                    compilationUnitServices, existingName, null);
-            if (annotation.getAnnotationType().equals(javaType)) {
-                foundExisting = true;
-                break;
-            }
-        }
-        Assert.isTrue(!foundExisting, "Found an existing annotation for type '"
-                + annotation.getAnnotationType() + "'");
-
-        // Import the annotation type, if needed
-        NameExpr nameToUse = JavaParserUtils.importTypeIfRequired(
-                compilationUnitServices.getEnclosingTypeName(),
-                compilationUnitServices.getImports(),
-                annotation.getAnnotationType());
-
-        // Create member-value pairs in accordance with Java Parser requirements
-        List<MemberValuePair> memberValuePairs = new ArrayList<MemberValuePair>();
-        for (JavaSymbolName attributeName : annotation.getAttributeNames()) {
-            AnnotationAttributeValue<?> value = annotation
-                    .getAttribute(attributeName);
-            Assert.notNull(value, "Unable to acquire value '" + attributeName
-                    + "' from annotation");
-            MemberValuePair memberValuePair = convert(value);
-            Assert.notNull(memberValuePair,
-                    "Member value pair should have been set");
-            memberValuePairs.add(memberValuePair);
-        }
-
-        // Create the AnnotationExpr; it varies depending on how many
-        // member-value pairs we need to present
-        AnnotationExpr annotationExpression = null;
-        if (memberValuePairs.isEmpty()) {
-            annotationExpression = new MarkerAnnotationExpr(nameToUse);
-        }
-        else if (memberValuePairs.size() == 1
-                && (memberValuePairs.get(0).getName() == null || "value"
-                        .equals(memberValuePairs.get(0).getName()))) {
-            Expression toUse = JavaParserUtils.importExpressionIfRequired(
-                    compilationUnitServices.getEnclosingTypeName(),
-                    compilationUnitServices.getImports(),
-                    memberValuePairs.get(0).getValue());
-            annotationExpression = new SingleMemberAnnotationExpr(nameToUse,
-                    toUse);
-        }
-        else {
-            // We have a number of pairs being presented
-            annotationExpression = new NormalAnnotationExpr(nameToUse,
-                    new ArrayList<MemberValuePair>());
-        }
-
-        // Add our AnnotationExpr to the actual annotations that will eventually
-        // be flushed through to the compilation unit
-        annotations.add(annotationExpression);
-
-        // Add member-value pairs to our AnnotationExpr
-        if (!memberValuePairs.isEmpty()) {
-            // Have to check here for cases where we need to change an existing
-            // MarkerAnnotationExpr to a NormalAnnotationExpr or
-            // SingleMemberAnnotationExpr
-            if (annotationExpression instanceof MarkerAnnotationExpr) {
-                MarkerAnnotationExpr mae = (MarkerAnnotationExpr) annotationExpression;
-
-                annotations.remove(mae);
-
-                if (memberValuePairs.size() == 1
-                        && (memberValuePairs.get(0).getName() == null || "value"
-                                .equals(memberValuePairs.get(0).getName()))) {
-                    Expression toUse = JavaParserUtils
-                            .importExpressionIfRequired(compilationUnitServices
-                                    .getEnclosingTypeName(),
-                                    compilationUnitServices.getImports(),
-                                    memberValuePairs.get(0).getValue());
-                    annotationExpression = new SingleMemberAnnotationExpr(
-                            nameToUse, toUse);
-                    annotations.add(annotationExpression);
-                }
-                else {
-                    // We have a number of pairs being presented
-                    annotationExpression = new NormalAnnotationExpr(nameToUse,
-                            new ArrayList<MemberValuePair>());
-                    annotations.add(annotationExpression);
-                }
-            }
-            if (annotationExpression instanceof SingleMemberAnnotationExpr) {
-                // Potentially upgrade this expression to a NormalAnnotationExpr
-                SingleMemberAnnotationExpr smae = (SingleMemberAnnotationExpr) annotationExpression;
-                if (memberValuePairs.size() == 1
-                        && memberValuePairs.get(0).getName() == null
-                        || memberValuePairs.get(0).getName().equals("value")
-                        || memberValuePairs.get(0).getName().equals("")) {
-                    // They specified only a single member-value pair, and it is
-                    // the default anyway, so we need not do anything except
-                    // update the value
-                    Expression toUse = JavaParserUtils
-                            .importExpressionIfRequired(compilationUnitServices
-                                    .getEnclosingTypeName(),
-                                    compilationUnitServices.getImports(),
-                                    memberValuePairs.get(0).getValue());
-                    smae.setMemberValue(toUse);
-                    return;
-                }
-
-                // There is > 1 expression, or they have provided some sort of
-                // non-default value, so it's time to upgrade the expression
-                // (whilst retaining any potentially existing expression values)
-                Expression existingValue = smae.getMemberValue();
-                annotationExpression = new NormalAnnotationExpr(smae.getName(),
-                        new ArrayList<MemberValuePair>());
-                ((NormalAnnotationExpr) annotationExpression).getPairs().add(
-                        new MemberValuePair("value", existingValue));
-            }
-            Assert.isInstanceOf(
-                    NormalAnnotationExpr.class,
-                    annotationExpression,
-                    "Attempting to add >1 annotation member-value pair requires an existing normal annotation expression");
-            List<MemberValuePair> annotationPairs = ((NormalAnnotationExpr) annotationExpression)
-                    .getPairs();
-            annotationPairs.clear();
-            for (MemberValuePair pair : memberValuePairs) {
-                Expression toUse = JavaParserUtils.importExpressionIfRequired(
-                        compilationUnitServices.getEnclosingTypeName(),
-                        compilationUnitServices.getImports(), pair.getValue());
-                pair.setValue(toUse);
-                annotationPairs.add(pair);
-            }
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    private static MemberValuePair convert(
-            final AnnotationAttributeValue<?> value) {
-        if (value instanceof NestedAnnotationAttributeValue) {
-            NestedAnnotationAttributeValue castValue = (NestedAnnotationAttributeValue) value;
-            Assert.isInstanceOf(JavaParserAnnotationMetadataBuilder.class,
-                    castValue.getValue(),
-                    "Cannot present nested annotations unless created by this class");
-            AnnotationExpr annotationExpr;
-            AnnotationMetadata nestedAnnotation = castValue.getValue();
-            if (castValue.getValue().getAttributeNames().size() == 0) {
-                annotationExpr = new MarkerAnnotationExpr(
-                        JavaParserUtils.getNameExpr(nestedAnnotation
-                                .getAnnotationType()
-                                .getFullyQualifiedTypeName()));
-            }
-            else if (castValue.getValue().getAttributeNames().size() == 1) {
-                annotationExpr = new SingleMemberAnnotationExpr(
-                        JavaParserUtils.getNameExpr(nestedAnnotation
-                                .getAnnotationType()
-                                .getFullyQualifiedTypeName()), convert(
-                                nestedAnnotation.getAttribute(nestedAnnotation
-                                        .getAttributeNames().get(0)))
-                                .getValue());
-            }
-            else {
-                List<MemberValuePair> memberValuePairs = new ArrayList<MemberValuePair>();
-                for (JavaSymbolName attributeName : nestedAnnotation
-                        .getAttributeNames()) {
-                    memberValuePairs.add(convert(nestedAnnotation
-                            .getAttribute(attributeName)));
-                }
-                annotationExpr = new NormalAnnotationExpr(
-                        JavaParserUtils.getNameExpr(nestedAnnotation
-                                .getAnnotationType()
-                                .getFullyQualifiedTypeName()), memberValuePairs);
-            }
-            // Rely on the nested instance to know its member value pairs
-            return new MemberValuePair(value.getName().getSymbolName(),
-                    annotationExpr);
-        }
-
-        if (value instanceof BooleanAttributeValue) {
-            boolean castValue = ((BooleanAttributeValue) value).getValue();
-            BooleanLiteralExpr convertedValue = new BooleanLiteralExpr(
-                    castValue);
-            return new MemberValuePair(value.getName().getSymbolName(),
-                    convertedValue);
-        }
-
-        if (value instanceof CharAttributeValue) {
-            char castValue = ((CharAttributeValue) value).getValue();
-            CharLiteralExpr convertedValue = new CharLiteralExpr(new String(
-                    new char[] { castValue }));
-            return new MemberValuePair(value.getName().getSymbolName(),
-                    convertedValue);
-        }
-
-        if (value instanceof LongAttributeValue) {
-            Long castValue = ((LongAttributeValue) value).getValue();
-            LongLiteralExpr convertedValue = new LongLiteralExpr(
-                    castValue.toString() + "L");
-            return new MemberValuePair(value.getName().getSymbolName(),
-                    convertedValue);
-        }
-
-        if (value instanceof IntegerAttributeValue) {
-            Integer castValue = ((IntegerAttributeValue) value).getValue();
-            IntegerLiteralExpr convertedValue = new IntegerLiteralExpr(
-                    castValue.toString());
-            return new MemberValuePair(value.getName().getSymbolName(),
-                    convertedValue);
-        }
-
-        if (value instanceof DoubleAttributeValue) {
-            DoubleAttributeValue doubleAttributeValue = (DoubleAttributeValue) value;
-            Double castValue = doubleAttributeValue.getValue();
-            DoubleLiteralExpr convertedValue;
-            if (doubleAttributeValue.isFloatingPrecisionOnly()) {
-                convertedValue = new DoubleLiteralExpr(castValue.toString()
-                        + "F");
-            }
-            else {
-                convertedValue = new DoubleLiteralExpr(castValue.toString()
-                        + "D");
-            }
-            return new MemberValuePair(value.getName().getSymbolName(),
-                    convertedValue);
-        }
-
-        if (value instanceof StringAttributeValue) {
-            String castValue = ((StringAttributeValue) value).getValue();
-            StringLiteralExpr convertedValue = new StringLiteralExpr(
-                    castValue.toString());
-            return new MemberValuePair(value.getName().getSymbolName(),
-                    convertedValue);
-        }
-
-        if (value instanceof EnumAttributeValue) {
-            EnumDetails castValue = ((EnumAttributeValue) value).getValue();
-            // This isn't as elegant as it could be (ie loss of type
-            // parameters), but it will do for now
-            FieldAccessExpr convertedValue = new FieldAccessExpr(
-                    JavaParserUtils.getNameExpr(castValue.getType()
-                            .getFullyQualifiedTypeName()), castValue.getField()
-                            .getSymbolName());
-            return new MemberValuePair(value.getName().getSymbolName(),
-                    convertedValue);
-        }
-
-        if (value instanceof ClassAttributeValue) {
-            JavaType castValue = ((ClassAttributeValue) value).getValue();
-            // This doesn't preserve type parameters
-            NameExpr nameExpr = JavaParserUtils.getNameExpr(castValue
-                    .getFullyQualifiedTypeName());
-            ClassExpr convertedValue = new ClassExpr(
-                    JavaParserUtils.getReferenceType(nameExpr));
-            return new MemberValuePair(value.getName().getSymbolName(),
-                    convertedValue);
-        }
-
-        if (value instanceof ArrayAttributeValue) {
-            ArrayAttributeValue<AnnotationAttributeValue<?>> castValue = (ArrayAttributeValue<AnnotationAttributeValue<?>>) value;
-
-            List<Expression> arrayElements = new ArrayList<Expression>();
-            for (AnnotationAttributeValue<?> v : castValue.getValue()) {
-                arrayElements.add(convert(v).getValue());
-            }
-            return new MemberValuePair(value.getName().getSymbolName(),
-                    new ArrayInitializerExpr(arrayElements));
-        }
-
-        throw new UnsupportedOperationException("Unsupported attribute value '"
-                + value.getName() + "' of type '" + value.getClass().getName()
-                + "'");
     }
 }

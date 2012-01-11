@@ -12,12 +12,11 @@ import org.springframework.roo.support.util.Assert;
  */
 public enum OrmProvider {
 
-    HIBERNATE("org.hibernate.ejb.HibernatePersistence"), OPENJPA(
-            "org.apache.openjpa.persistence.PersistenceProviderImpl"), ECLIPSELINK(
-            "org.eclipse.persistence.jpa.PersistenceProvider"), DATANUCLEUS(
-            "org.datanucleus.api.jpa.PersistenceProviderImpl");
+    DATANUCLEUS("org.datanucleus.api.jpa.PersistenceProviderImpl"), ECLIPSELINK(
+            "org.eclipse.persistence.jpa.PersistenceProvider"), HIBERNATE(
+            "org.hibernate.ejb.HibernatePersistence"), OPENJPA(
+            "org.apache.openjpa.persistence.PersistenceProviderImpl");
 
-    // Fields
     private final String adapter;
 
     /**

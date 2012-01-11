@@ -26,7 +26,6 @@ import org.springframework.roo.support.util.Assert;
 @Service
 public class SolrWebSearchMetadataProvider extends AbstractItdMetadataProvider {
 
-    // Fields
     @Reference private WebScaffoldMetadataProvider webScaffoldMetadataProvider;
 
     protected void activate(final ComponentContext context) {
@@ -35,6 +34,12 @@ public class SolrWebSearchMetadataProvider extends AbstractItdMetadataProvider {
                 getProvidesType());
         webScaffoldMetadataProvider.addMetadataTrigger(ROO_SOLR_WEB_SEARCHABLE);
         addMetadataTrigger(ROO_SOLR_WEB_SEARCHABLE);
+    }
+
+    @Override
+    protected String createLocalIdentifier(final JavaType javaType,
+            final LogicalPath path) {
+        return SolrWebSearchMetadata.createIdentifier(javaType, path);
     }
 
     /**
@@ -53,39 +58,53 @@ public class SolrWebSearchMetadataProvider extends AbstractItdMetadataProvider {
     }
 
     @Override
+    protected String getGovernorPhysicalTypeIdentifier(
+            final String metadataIdentificationString) {
+        final JavaType javaType = SolrWebSearchMetadata
+                .getJavaType(metadataIdentificationString);
+        final LogicalPath path = SolrWebSearchMetadata
+                .getPath(metadataIdentificationString);
+        return PhysicalTypeIdentifier.createIdentifier(javaType, path);
+    }
+
+    public String getItdUniquenessFilenameSuffix() {
+        return "SolrWebSearch";
+    }
+
+    @Override
     protected ItdTypeDetailsProvidingMetadataItem getMetadata(
             final String metadataIdentificationString,
             final JavaType aspectName,
             final PhysicalTypeMetadata governorPhysicalTypeMetadata,
             final String itdFilename) {
         // We need to parse the annotation, which we expect to be present
-        SolrWebSearchAnnotationValues annotationValues = new SolrWebSearchAnnotationValues(
+        final SolrWebSearchAnnotationValues annotationValues = new SolrWebSearchAnnotationValues(
                 governorPhysicalTypeMetadata);
         if (!annotationValues.isAnnotationFound()
-                || annotationValues.getSearchMethod() == null) {
+                || (annotationValues.getSearchMethod() == null)) {
             return null;
         }
 
         // Acquire bean info (we need getters details, specifically)
-        JavaType javaType = SolrWebSearchMetadata
+        final JavaType javaType = SolrWebSearchMetadata
                 .getJavaType(metadataIdentificationString);
-        LogicalPath path = SolrWebSearchMetadata
+        final LogicalPath path = SolrWebSearchMetadata
                 .getPath(metadataIdentificationString);
-        String webScaffoldMetadataKey = WebScaffoldMetadata.createIdentifier(
-                javaType, path);
+        final String webScaffoldMetadataKey = WebScaffoldMetadata
+                .createIdentifier(javaType, path);
 
         // We want to be notified if the getter info changes in any way
         metadataDependencyRegistry.registerDependency(webScaffoldMetadataKey,
                 metadataIdentificationString);
-        WebScaffoldMetadata webScaffoldMetadata = (WebScaffoldMetadata) metadataService
+        final WebScaffoldMetadata webScaffoldMetadata = (WebScaffoldMetadata) metadataService
                 .get(webScaffoldMetadataKey);
 
         // Abort if we don't have getter information available
-        if (webScaffoldMetadata == null || !webScaffoldMetadata.isValid()) {
+        if ((webScaffoldMetadata == null) || !webScaffoldMetadata.isValid()) {
             return null;
         }
 
-        JavaType targetObject = webScaffoldMetadata.getAnnotationValues()
+        final JavaType targetObject = webScaffoldMetadata.getAnnotationValues()
                 .getFormBackingObject();
         Assert.notNull(
                 targetObject,
@@ -94,12 +113,12 @@ public class SolrWebSearchMetadataProvider extends AbstractItdMetadataProvider {
                                 webScaffoldMetadata.getId())
                                 .getFullyQualifiedTypeName() + "' controller");
 
-        String targetObjectMid = typeLocationService
+        final String targetObjectMid = typeLocationService
                 .getPhysicalTypeIdentifier(targetObject);
-        LogicalPath targetObjectPath = PhysicalTypeIdentifier
+        final LogicalPath targetObjectPath = PhysicalTypeIdentifier
                 .getPath(targetObjectMid);
 
-        SolrMetadata solrMetadata = (SolrMetadata) metadataService
+        final SolrMetadata solrMetadata = (SolrMetadata) metadataService
                 .get(SolrMetadata.createIdentifier(targetObject,
                         targetObjectPath));
         Assert.notNull(
@@ -112,26 +131,6 @@ public class SolrWebSearchMetadataProvider extends AbstractItdMetadataProvider {
                 aspectName, governorPhysicalTypeMetadata, annotationValues,
                 webScaffoldMetadata.getAnnotationValues(),
                 solrMetadata.getAnnotationValues());
-    }
-
-    public String getItdUniquenessFilenameSuffix() {
-        return "SolrWebSearch";
-    }
-
-    @Override
-    protected String getGovernorPhysicalTypeIdentifier(
-            final String metadataIdentificationString) {
-        JavaType javaType = SolrWebSearchMetadata
-                .getJavaType(metadataIdentificationString);
-        LogicalPath path = SolrWebSearchMetadata
-                .getPath(metadataIdentificationString);
-        return PhysicalTypeIdentifier.createIdentifier(javaType, path);
-    }
-
-    @Override
-    protected String createLocalIdentifier(final JavaType javaType,
-            final LogicalPath path) {
-        return SolrWebSearchMetadata.createIdentifier(javaType, path);
     }
 
     public String getProvidesType() {

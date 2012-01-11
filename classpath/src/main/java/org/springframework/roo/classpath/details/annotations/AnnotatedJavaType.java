@@ -18,6 +18,54 @@ import org.springframework.roo.support.util.Assert;
 public class AnnotatedJavaType {
 
     /**
+     * Converts a non-null {@link AnnotatedJavaType} into an equivalent
+     * {@link JavaType}. Note the annotation metadata will be discarded, as it
+     * cannot be stored inside a {@link JavaType}.
+     * 
+     * @param annotatedJavaType to convert (required)
+     * @return the equivalent {@link AnnotatedJavaType}, but without any actual
+     *         annotations (never returns null)
+     */
+    public static JavaType convertFromAnnotatedJavaType(
+            final AnnotatedJavaType annotatedJavaType) {
+        Assert.notNull(annotatedJavaType, "Annotated Java types required");
+        return annotatedJavaType.getJavaType();
+    }
+
+    /**
+     * Converts a non-null {@link List} of {@link AnnotatedJavaType}s into a
+     * {@link List} of equivalent {@link JavaType}s. Note the annotation
+     * metadata will be discarded, as it cannot be stored inside a
+     * {@link JavaType}.
+     * 
+     * @param annotatedJavaTypes to convert (required)
+     * @return the equivalent {@link AnnotatedJavaType}s, but without any actual
+     *         annotations (never returns null)
+     */
+    public static List<JavaType> convertFromAnnotatedJavaTypes(
+            final List<AnnotatedJavaType> annotatedJavaTypes) {
+        Assert.notNull(annotatedJavaTypes, "Annotated Java types required");
+        final List<JavaType> result = new ArrayList<JavaType>();
+        for (final AnnotatedJavaType annotatedJavaType : annotatedJavaTypes) {
+            result.add(convertFromAnnotatedJavaType(annotatedJavaType));
+        }
+        return result;
+    }
+
+    /**
+     * Converts a {@link JavaType} into an equivalent {@link AnnotatedJavaType}.
+     * Note that each returned {@link AnnotatedJavaType}will have no annotation
+     * metadata, as the input {@link JavaType} cannot store any such metadata.
+     * 
+     * @param javaType to convert (required)
+     * @return the equivalent {@link AnnotatedJavaType} (never returns null)
+     */
+    public static AnnotatedJavaType convertFromJavaType(final JavaType javaType) {
+        Assert.notNull(javaType, "Java type required");
+        return new AnnotatedJavaType(javaType);
+    }
+
+    /**
      * Converts a non-null bag of {@link JavaType}s into a {@link List} of
      * equivalent {@link AnnotatedJavaType}s. Note that each returned
      * {@link AnnotatedJavaType} will have no annotation metadata, as the input
@@ -52,58 +100,9 @@ public class AnnotatedJavaType {
         return convertFromJavaTypes(Arrays.asList(javaTypes));
     }
 
-    /**
-     * Converts a {@link JavaType} into an equivalent {@link AnnotatedJavaType}.
-     * Note that each returned {@link AnnotatedJavaType}will have no annotation
-     * metadata, as the input {@link JavaType} cannot store any such metadata.
-     * 
-     * @param javaType to convert (required)
-     * @return the equivalent {@link AnnotatedJavaType} (never returns null)
-     */
-    public static AnnotatedJavaType convertFromJavaType(final JavaType javaType) {
-        Assert.notNull(javaType, "Java type required");
-        return new AnnotatedJavaType(javaType);
-    }
-
-    /**
-     * Converts a non-null {@link List} of {@link AnnotatedJavaType}s into a
-     * {@link List} of equivalent {@link JavaType}s. Note the annotation
-     * metadata will be discarded, as it cannot be stored inside a
-     * {@link JavaType}.
-     * 
-     * @param annotatedJavaTypes to convert (required)
-     * @return the equivalent {@link AnnotatedJavaType}s, but without any actual
-     *         annotations (never returns null)
-     */
-    public static List<JavaType> convertFromAnnotatedJavaTypes(
-            final List<AnnotatedJavaType> annotatedJavaTypes) {
-        Assert.notNull(annotatedJavaTypes, "Annotated Java types required");
-        final List<JavaType> result = new ArrayList<JavaType>();
-        for (final AnnotatedJavaType annotatedJavaType : annotatedJavaTypes) {
-            result.add(convertFromAnnotatedJavaType(annotatedJavaType));
-        }
-        return result;
-    }
-
-    /**
-     * Converts a non-null {@link AnnotatedJavaType} into an equivalent
-     * {@link JavaType}. Note the annotation metadata will be discarded, as it
-     * cannot be stored inside a {@link JavaType}.
-     * 
-     * @param annotatedJavaType to convert (required)
-     * @return the equivalent {@link AnnotatedJavaType}, but without any actual
-     *         annotations (never returns null)
-     */
-    public static JavaType convertFromAnnotatedJavaType(
-            final AnnotatedJavaType annotatedJavaType) {
-        Assert.notNull(annotatedJavaType, "Annotated Java types required");
-        return annotatedJavaType.getJavaType();
-    }
-
-    // Fields
-    private final JavaType javaType;
     private final List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
     private boolean isVarArgs;
+    private final JavaType javaType;
 
     /**
      * Constructor that accepts a vararg array of annotations
@@ -134,19 +133,27 @@ public class AnnotatedJavaType {
     }
 
     /**
+     * Returns the annotations on this type
+     * 
+     * @return a copy of this list (never <code>null</code>, but may be empty)
+     */
+    public List<AnnotationMetadata> getAnnotations() {
+        return new ArrayList<AnnotationMetadata>(annotations);
+    }
+
+    /**
      * @return the type (never returns null)
      */
     public JavaType getJavaType() {
         return javaType;
     }
 
-    /**
-     * Returns the annotations on this type
-     * 
-     * @return a copy of this list (never <code>null</code>, but may be empty)
-     */
-    public List<AnnotationMetadata> getAnnotations() {
-        return new ArrayList<AnnotationMetadata>(this.annotations);
+    public boolean isVarArgs() {
+        return isVarArgs;
+    }
+
+    public void setVarArgs(final boolean varArgs) {
+        isVarArgs = varArgs;
     }
 
     @Override
@@ -158,13 +165,5 @@ public class AnnotatedJavaType {
         }
         sb.append(javaType.getNameIncludingTypeParameters());
         return sb.toString();
-    }
-
-    public boolean isVarArgs() {
-        return isVarArgs;
-    }
-
-    public void setVarArgs(final boolean varArgs) {
-        isVarArgs = varArgs;
     }
 }

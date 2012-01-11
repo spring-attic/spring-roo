@@ -17,7 +17,6 @@ import org.springframework.roo.support.util.StringUtils;
 public class ArrayAttributeValue<Y extends AnnotationAttributeValue<?>> extends
         AbstractAnnotationAttributeValue<List<Y>> {
 
-    // Fields
     private final List<Y> value;
 
     /**

@@ -53,13 +53,11 @@ import org.springframework.roo.support.util.StringUtils;
 @Service
 public class ControllerOperationsImpl implements ControllerOperations {
 
-    // Constants
-    private static final JavaSymbolName PATH = new JavaSymbolName("path");
-    private static final JavaSymbolName VALUE = new JavaSymbolName("value");
     private static final Logger LOG = HandlerUtils
             .getLogger(ControllerOperationsImpl.class);
+    private static final JavaSymbolName PATH = new JavaSymbolName("path");
+    private static final JavaSymbolName VALUE = new JavaSymbolName("value");
 
-    // Fields
     @Reference private MetadataDependencyRegistry dependencyRegistry;
     @Reference private MetadataService metadataService;
     @Reference private PathResolver pathResolver;
@@ -67,59 +65,6 @@ public class ControllerOperationsImpl implements ControllerOperations {
     @Reference private TypeLocationService typeLocationService;
     @Reference private TypeManagementService typeManagementService;
     @Reference private WebMvcOperations webMvcOperations;
-
-    public boolean isControllerInstallationPossible() {
-        return projectOperations.isFocusedProjectAvailable()
-                && projectOperations
-                        .isFeatureInstalledInFocusedModule(FeatureNames.MVC)
-                && !projectOperations
-                        .isFeatureInstalledInFocusedModule(FeatureNames.JSF);
-    }
-
-    public boolean isNewControllerAvailable() {
-        return projectOperations.isFocusedProjectAvailable();
-    }
-
-    public void setup() {
-        webMvcOperations.installAllWebMvcArtifacts();
-    }
-
-    public void generateAll(final JavaPackage javaPackage) {
-        for (ClassOrInterfaceTypeDetails entityDetails : typeLocationService
-                .findClassesOrInterfaceDetailsWithTag(PERSISTENT_TYPE)) {
-            if (Modifier.isAbstract(entityDetails.getModifier())) {
-                continue;
-            }
-
-            final JavaType entityType = entityDetails.getType();
-            final LogicalPath entityPath = PhysicalTypeIdentifier
-                    .getPath(entityDetails.getDeclaredByMetadataId());
-
-            // Check to see if this persistent type has a web scaffold metadata
-            // listening to it
-            String downstreamWebScaffoldMetadataId = WebScaffoldMetadata
-                    .createIdentifier(entityType, entityPath);
-            if (dependencyRegistry.getDownstream(
-                    entityDetails.getDeclaredByMetadataId()).contains(
-                    downstreamWebScaffoldMetadataId)) {
-                // There is already a controller for this entity
-                continue;
-            }
-
-            // To get here, there is no listening controller, so add one
-            final PluralMetadata pluralMetadata = (PluralMetadata) metadataService
-                    .get(PluralMetadata
-                            .createIdentifier(entityType, entityPath));
-            if (pluralMetadata != null) {
-                final JavaType controller = new JavaType(
-                        javaPackage.getFullyQualifiedPackageName() + "."
-                                + entityType.getSimpleTypeName() + "Controller");
-                createAutomaticController(controller, entityType,
-                        new HashSet<String>(), pluralMetadata.getPlural()
-                                .toLowerCase());
-            }
-        }
-    }
 
     public void createAutomaticController(final JavaType controller,
             final JavaType entity, final Set<String> disallowedOperations,
@@ -139,16 +84,16 @@ public class ControllerOperationsImpl implements ControllerOperations {
 
         ClassOrInterfaceTypeDetailsBuilder cidBuilder = null;
         if (existingController == null) {
-            LogicalPath controllerPath = pathResolver
+            final LogicalPath controllerPath = pathResolver
                     .getFocusedPath(Path.SRC_MAIN_JAVA);
-            String resourceIdentifier = typeLocationService
+            final String resourceIdentifier = typeLocationService
                     .getPhysicalTypeCanonicalPath(controller, controllerPath);
-            String declaredByMetadataId = PhysicalTypeIdentifier
+            final String declaredByMetadataId = PhysicalTypeIdentifier
                     .createIdentifier(controller,
                             pathResolver.getPath(resourceIdentifier));
 
             // Create annotation @RequestMapping("/myobject/**")
-            List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
+            final List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
             requestMappingAttributes.add(new StringAttributeValue(VALUE, "/"
                     + path));
             annotations = new ArrayList<AnnotationMetadataBuilder>();
@@ -156,7 +101,7 @@ public class ControllerOperationsImpl implements ControllerOperations {
                     requestMappingAttributes));
 
             // Create annotation @Controller
-            List<AnnotationAttributeValue<?>> controllerAttributes = new ArrayList<AnnotationAttributeValue<?>>();
+            final List<AnnotationAttributeValue<?>> controllerAttributes = new ArrayList<AnnotationAttributeValue<?>>();
             annotations.add(new AnnotationMetadataBuilder(CONTROLLER,
                     controllerAttributes));
 
@@ -180,6 +125,43 @@ public class ControllerOperationsImpl implements ControllerOperations {
         }
         cidBuilder.setAnnotations(annotations);
         typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
+    }
+
+    public void generateAll(final JavaPackage javaPackage) {
+        for (final ClassOrInterfaceTypeDetails entityDetails : typeLocationService
+                .findClassesOrInterfaceDetailsWithTag(PERSISTENT_TYPE)) {
+            if (Modifier.isAbstract(entityDetails.getModifier())) {
+                continue;
+            }
+
+            final JavaType entityType = entityDetails.getType();
+            final LogicalPath entityPath = PhysicalTypeIdentifier
+                    .getPath(entityDetails.getDeclaredByMetadataId());
+
+            // Check to see if this persistent type has a web scaffold metadata
+            // listening to it
+            final String downstreamWebScaffoldMetadataId = WebScaffoldMetadata
+                    .createIdentifier(entityType, entityPath);
+            if (dependencyRegistry.getDownstream(
+                    entityDetails.getDeclaredByMetadataId()).contains(
+                    downstreamWebScaffoldMetadataId)) {
+                // There is already a controller for this entity
+                continue;
+            }
+
+            // To get here, there is no listening controller, so add one
+            final PluralMetadata pluralMetadata = (PluralMetadata) metadataService
+                    .get(PluralMetadata
+                            .createIdentifier(entityType, entityPath));
+            if (pluralMetadata != null) {
+                final JavaType controller = new JavaType(
+                        javaPackage.getFullyQualifiedPackageName() + "."
+                                + entityType.getSimpleTypeName() + "Controller");
+                createAutomaticController(controller, entityType,
+                        new HashSet<String>(), pluralMetadata.getPlural()
+                                .toLowerCase());
+            }
+        }
     }
 
     /**
@@ -211,15 +193,31 @@ public class ControllerOperationsImpl implements ControllerOperations {
     private AnnotationMetadataBuilder getRooWebScaffoldAnnotation(
             final JavaType entity, final Set<String> disallowedOperations,
             final String path, final JavaSymbolName pathName) {
-        List<AnnotationAttributeValue<?>> rooWebScaffoldAttributes = new ArrayList<AnnotationAttributeValue<?>>();
+        final List<AnnotationAttributeValue<?>> rooWebScaffoldAttributes = new ArrayList<AnnotationAttributeValue<?>>();
         rooWebScaffoldAttributes.add(new StringAttributeValue(pathName, path));
         rooWebScaffoldAttributes.add(new ClassAttributeValue(
                 new JavaSymbolName("formBackingObject"), entity));
-        for (String operation : disallowedOperations) {
+        for (final String operation : disallowedOperations) {
             rooWebScaffoldAttributes.add(new BooleanAttributeValue(
                     new JavaSymbolName(operation), false));
         }
         return new AnnotationMetadataBuilder(ROO_WEB_SCAFFOLD,
                 rooWebScaffoldAttributes);
+    }
+
+    public boolean isControllerInstallationPossible() {
+        return projectOperations.isFocusedProjectAvailable()
+                && projectOperations
+                        .isFeatureInstalledInFocusedModule(FeatureNames.MVC)
+                && !projectOperations
+                        .isFeatureInstalledInFocusedModule(FeatureNames.JSF);
+    }
+
+    public boolean isNewControllerAvailable() {
+        return projectOperations.isFocusedProjectAvailable();
+    }
+
+    public void setup() {
+        webMvcOperations.installAllWebMvcArtifacts();
     }
 }

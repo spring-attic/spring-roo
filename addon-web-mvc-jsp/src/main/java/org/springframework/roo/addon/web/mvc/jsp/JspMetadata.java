@@ -24,43 +24,10 @@ import org.springframework.roo.support.util.Assert;
  */
 public class JspMetadata extends AbstractMetadataItem {
 
-    // Constants
     private static final String PROVIDES_TYPE_STRING = JspMetadata.class
             .getName();
     private static final String PROVIDES_TYPE = MetadataIdentificationUtils
             .create(PROVIDES_TYPE_STRING);
-
-    // Fields
-    private final WebScaffoldMetadata webScaffoldMetadata;
-    private final WebScaffoldAnnotationValues annotationValues;
-
-    public JspMetadata(final String identifier,
-            final WebScaffoldMetadata webScaffoldMetadata) {
-        super(identifier);
-        Assert.isTrue(isValid(identifier), "Metadata identification string '"
-                + identifier + "' does not appear to be a valid");
-        Assert.notNull(webScaffoldMetadata, "Web scaffold metadata required");
-
-        this.webScaffoldMetadata = webScaffoldMetadata;
-        this.annotationValues = webScaffoldMetadata.getAnnotationValues();
-    }
-
-    public WebScaffoldAnnotationValues getAnnotationValues() {
-        return annotationValues;
-    }
-
-    @Override
-    public String toString() {
-        ToStringCreator tsc = new ToStringCreator(this);
-        tsc.append("identifier", getId());
-        tsc.append("valid", valid);
-        tsc.append("web scaffold metadata id", webScaffoldMetadata.getId());
-        return tsc.toString();
-    }
-
-    public static String getMetadataIdentiferType() {
-        return PROVIDES_TYPE;
-    }
 
     public static String createIdentifier(final JavaType javaType,
             final LogicalPath path) {
@@ -73,6 +40,10 @@ public class JspMetadata extends AbstractMetadataItem {
                 PROVIDES_TYPE_STRING, metadataIdentificationString);
     }
 
+    public static String getMetadataIdentiferType() {
+        return PROVIDES_TYPE;
+    }
+
     public static LogicalPath getPath(final String metadataIdentificationString) {
         return PhysicalTypeIdentifierNamingUtils.getPath(PROVIDES_TYPE_STRING,
                 metadataIdentificationString);
@@ -81,5 +52,33 @@ public class JspMetadata extends AbstractMetadataItem {
     public static boolean isValid(final String metadataIdentificationString) {
         return PhysicalTypeIdentifierNamingUtils.isValid(PROVIDES_TYPE_STRING,
                 metadataIdentificationString);
+    }
+
+    private final WebScaffoldAnnotationValues annotationValues;
+
+    private final WebScaffoldMetadata webScaffoldMetadata;
+
+    public JspMetadata(final String identifier,
+            final WebScaffoldMetadata webScaffoldMetadata) {
+        super(identifier);
+        Assert.isTrue(isValid(identifier), "Metadata identification string '"
+                + identifier + "' does not appear to be a valid");
+        Assert.notNull(webScaffoldMetadata, "Web scaffold metadata required");
+
+        this.webScaffoldMetadata = webScaffoldMetadata;
+        annotationValues = webScaffoldMetadata.getAnnotationValues();
+    }
+
+    public WebScaffoldAnnotationValues getAnnotationValues() {
+        return annotationValues;
+    }
+
+    @Override
+    public String toString() {
+        final ToStringCreator tsc = new ToStringCreator(this);
+        tsc.append("identifier", getId());
+        tsc.append("valid", valid);
+        tsc.append("web scaffold metadata id", webScaffoldMetadata.getId());
+        return tsc.toString();
     }
 }

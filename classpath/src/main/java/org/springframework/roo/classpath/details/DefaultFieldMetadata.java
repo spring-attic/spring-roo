@@ -20,7 +20,6 @@ public class DefaultFieldMetadata extends
         AbstractIdentifiableAnnotatedJavaStructureProvider implements
         FieldMetadata {
 
-    // Fields
     private final String fieldInitializer;
     private final JavaSymbolName fieldName;
     private final JavaType fieldType;
@@ -54,7 +53,7 @@ public class DefaultFieldMetadata extends
 
     @Override
     public String toString() {
-        ToStringCreator tsc = new ToStringCreator(this);
+        final ToStringCreator tsc = new ToStringCreator(this);
         tsc.append("declaredByMetadataId", getDeclaredByMetadataId());
         tsc.append("modifier", Modifier.toString(getModifier()));
         tsc.append("fieldType", fieldType);

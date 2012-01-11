@@ -35,42 +35,6 @@ public interface FileMonitorService {
     boolean add(MonitoringRequest request);
 
     /**
-     * @param request a monitoring request
-     * @return true if this set contained the specified element
-     */
-    boolean remove(MonitoringRequest request);
-
-    /**
-     * Execute a scan of all monitored locations.
-     * 
-     * @return the number of changes detected during this invocation (can be 0
-     *         or above)
-     */
-    int scanAll();
-
-    /**
-     * Indicates on a best-efforts basis whether there are known changes to the
-     * disk which would be reported should {@link #scanAll()} be invoked. This
-     * method is not required to return a guaranteed outcome of what will happen
-     * should {@link #scanAll()} be invoked, but callers may rely on this method
-     * to assist with optimisations where applicable.
-     * 
-     * @return true if there are known changes to be notified during the next
-     *         {@link #scanAll}
-     */
-    boolean isDirty();
-
-    /**
-     * Indicates the files currently being monitored, which is potentially
-     * useful for newly-registered {@link FileEventListener} instances that may
-     * have missed previous events.
-     * 
-     * @return every file currently being monitored (never null, but may be
-     *         empty if there are no files being monitored)
-     */
-    List<FileDetails> getMonitored();
-
-    /**
      * Locates all {@link FileDetails} which match the presented Ant path.
      * 
      * @param antPath the Ant path to evaluate, as per the canonical file path
@@ -95,4 +59,40 @@ public interface FileMonitorService {
      *         the requesting class (may be empty, but never null)
      */
     Collection<String> getDirtyFiles(String requestingClass);
+
+    /**
+     * Indicates the files currently being monitored, which is potentially
+     * useful for newly-registered {@link FileEventListener} instances that may
+     * have missed previous events.
+     * 
+     * @return every file currently being monitored (never null, but may be
+     *         empty if there are no files being monitored)
+     */
+    List<FileDetails> getMonitored();
+
+    /**
+     * Indicates on a best-efforts basis whether there are known changes to the
+     * disk which would be reported should {@link #scanAll()} be invoked. This
+     * method is not required to return a guaranteed outcome of what will happen
+     * should {@link #scanAll()} be invoked, but callers may rely on this method
+     * to assist with optimisations where applicable.
+     * 
+     * @return true if there are known changes to be notified during the next
+     *         {@link #scanAll}
+     */
+    boolean isDirty();
+
+    /**
+     * @param request a monitoring request
+     * @return true if this set contained the specified element
+     */
+    boolean remove(MonitoringRequest request);
+
+    /**
+     * Execute a scan of all monitored locations.
+     * 
+     * @return the number of changes detected during this invocation (can be 0
+     *         or above)
+     */
+    int scanAll();
 }

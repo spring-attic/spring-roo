@@ -24,7 +24,6 @@ import org.springframework.roo.support.osgi.BundleFindingUtils;
 @Service
 public class CommonJdbcDriverProvider implements JdbcDriverProvider {
 
-    // Fields
     private BundleContext bundleContext;
 
     protected void activate(final ComponentContext context) {
@@ -38,7 +37,7 @@ public class CommonJdbcDriverProvider implements JdbcDriverProvider {
     public Driver loadDriver(final String driverClassName)
             throws RuntimeException {
         // Try a search
-        Class<?> clazz = BundleFindingUtils.findFirstBundleWithType(
+        final Class<?> clazz = BundleFindingUtils.findFirstBundleWithType(
                 bundleContext, driverClassName);
 
         if (clazz == null) {
@@ -53,11 +52,11 @@ public class CommonJdbcDriverProvider implements JdbcDriverProvider {
 
         // Time to create it and register etc
         try {
-            Driver result = (Driver) clazz.newInstance();
+            final Driver result = (Driver) clazz.newInstance();
             DriverManager.registerDriver(result);
             return result;
         }
-        catch (Exception e) {
+        catch (final Exception e) {
             throw new IllegalStateException("Unable to load JDBC driver '"
                     + driverClassName + "'", e);
         }

@@ -11,13 +11,13 @@ import org.springframework.roo.model.JavaType;
  */
 public interface WebJsonOperations {
 
-    boolean isWebJsonInstallationPossible();
-
-    boolean isWebJsonCommandAvailable();
-
-    void setup();
+    void annotateAll(JavaPackage javaPackage);
 
     void annotateType(JavaType type, JavaType jsonType);
 
-    void annotateAll(JavaPackage javaPackage);
+    boolean isWebJsonCommandAvailable();
+
+    boolean isWebJsonInstallationPossible();
+
+    void setup();
 }

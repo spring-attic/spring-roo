@@ -10,7 +10,10 @@ import org.springframework.roo.support.util.Assert;
  */
 public class UndoEvent {
 
-    // Fields
+    public enum UndoOperation {
+        FLUSH, RESET, UNDO
+    }
+
     private final UndoOperation operation;
 
     public UndoEvent(final UndoOperation operation) {
@@ -18,26 +21,22 @@ public class UndoEvent {
         this.operation = operation;
     }
 
-    /**
-     * @return true if undoing, false if committing
-     */
-    public boolean isUndoing() {
-        return operation == UndoOperation.UNDO;
-    }
-
-    public boolean isResetting() {
-        return operation == UndoOperation.RESET;
+    public UndoOperation getOperation() {
+        return operation;
     }
 
     public boolean isFlushing() {
         return operation == UndoOperation.FLUSH;
     }
 
-    public UndoOperation getOperation() {
-        return operation;
+    public boolean isResetting() {
+        return operation == UndoOperation.RESET;
     }
 
-    public enum UndoOperation {
-        UNDO, RESET, FLUSH
+    /**
+     * @return true if undoing, false if committing
+     */
+    public boolean isUndoing() {
+        return operation == UndoOperation.UNDO;
     }
 }

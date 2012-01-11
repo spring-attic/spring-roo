@@ -25,13 +25,13 @@ public class PomPackaging extends AbstractCorePackagingProvider {
         super("pom", "parent-pom-template.xml");
     }
 
-    public Collection<Path> getPaths() {
-        return null;
-    }
-
     @Override
     protected void createOtherArtifacts(final JavaPackage topLevelPackage,
             final String module, final ProjectOperations projectOperations) {
         // No artifacts are applicable for POM modules
+    }
+
+    public Collection<Path> getPaths() {
+        return null;
     }
 }

@@ -16,20 +16,21 @@ import org.springframework.roo.support.util.StringUtils;
 @Service
 public class PomConverter implements Converter<Pom> {
 
-    // Constants
-    static final String ROOT_MODULE_SYMBOL = "~";
-
     /**
      * An option context value indicating that the currently focused module
      * should be included when this {@link Converter} generates completions.
      */
     public static final String INCLUDE_CURRENT_MODULE = "includeCurrent";
 
-    // Fields
+    static final String ROOT_MODULE_SYMBOL = "~";
+
     @Reference ProjectOperations projectOperations;
 
-    public boolean supports(final Class<?> type, final String optionContext) {
-        return Pom.class.isAssignableFrom(type);
+    private void addCompletion(final String moduleName,
+            final List<Completion> completions) {
+        final String nonEmptyModuleName = StringUtils.defaultIfEmpty(
+                moduleName, ROOT_MODULE_SYMBOL);
+        completions.add(new Completion(nonEmptyModuleName));
     }
 
     public Pom convertFromText(final String value, final Class<?> targetType,
@@ -63,10 +64,7 @@ public class PomConverter implements Converter<Pom> {
                 || !moduleName.equals(focusedModuleName);
     }
 
-    private void addCompletion(final String moduleName,
-            final List<Completion> completions) {
-        final String nonEmptyModuleName = StringUtils.defaultIfEmpty(
-                moduleName, ROOT_MODULE_SYMBOL);
-        completions.add(new Completion(nonEmptyModuleName));
+    public boolean supports(final Class<?> type, final String optionContext) {
+        return Pom.class.isAssignableFrom(type);
     }
 }

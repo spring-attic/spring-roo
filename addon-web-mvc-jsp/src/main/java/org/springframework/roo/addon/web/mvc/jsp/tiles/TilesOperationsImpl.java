@@ -37,8 +37,21 @@ import org.xml.sax.SAXException;
 @Service
 public class TilesOperationsImpl implements TilesOperations {
 
-    // Fields
+    private static class TilesDtdResolver implements EntityResolver {
+        public InputSource resolveEntity(final String publicId,
+                final String systemId) {
+            if (systemId
+                    .equals("http://tiles.apache.org/dtds/tiles-config_2_1.dtd")) {
+                return new InputSource(FileUtils.getInputStream(
+                        TilesOperationsImpl.class, "tiles-config_2_1.dtd"));
+            }
+            // Use the default behaviour
+            return null;
+        }
+    }
+
     @Reference private FileManager fileManager;
+
     @Reference private PathResolver pathResolver;
 
     public void addViewDefinition(final String folderName,
@@ -75,6 +88,60 @@ public class TilesOperationsImpl implements TilesOperations {
         root.appendChild(newDefinition);
 
         writeToDiskIfNecessary(viewsDefinitionFile, root);
+    }
+
+    /**
+     * Returns the canonical path of the "views.xml" Tiles configuration file in
+     * the given folder.
+     * 
+     * @param folderName can be blank for the main views file; if not, any
+     *            leading slash is ignored
+     * @param path
+     * @return a non-<code>null</code> path
+     */
+    private String getTilesConfigFile(final String folderName,
+            final LogicalPath path) {
+        final String subPath;
+        if (StringUtils.hasText(folderName) && !"/".equals(folderName)) {
+            subPath = StringUtils.prefix(folderName, "/");
+        }
+        else {
+            subPath = "";
+        }
+        return pathResolver.getIdentifier(path, "WEB-INF/views" + subPath
+                + "/views.xml");
+    }
+
+    /**
+     * Returns the root element of the given Tiles configuration file
+     * 
+     * @param viewsDefinitionFile the canonical path of the file to load
+     * @return the root of a new XML document if that file does not exist
+     */
+    private Element getViewsElement(final String viewsDefinitionFile) {
+        final Document tilesView;
+        if (fileManager.exists(viewsDefinitionFile)) {
+            final DocumentBuilder builder = XmlUtils.getDocumentBuilder();
+            builder.setEntityResolver(new TilesDtdResolver());
+            try {
+                tilesView = builder.parse(fileManager
+                        .getInputStream(viewsDefinitionFile));
+            }
+            catch (final SAXException se) {
+                throw new IllegalStateException("Unable to parse the tiles "
+                        + viewsDefinitionFile + " file", se);
+            }
+            catch (final IOException ioe) {
+                throw new IllegalStateException("Unable to read the tiles "
+                        + viewsDefinitionFile + " file (reason: "
+                        + ioe.getMessage() + ")", ioe);
+            }
+        }
+        else {
+            tilesView = XmlUtils.getDocumentBuilder().newDocument();
+            tilesView.appendChild(tilesView.createElement("tiles-definitions"));
+        }
+        return tilesView.getDocumentElement();
     }
 
     public void removeViewDefinition(final String name,
@@ -155,72 +222,5 @@ public class TilesOperationsImpl implements TilesOperations {
 
         // A file existed, but it contained the same content, so we return false
         return false;
-    }
-
-    /**
-     * Returns the root element of the given Tiles configuration file
-     * 
-     * @param viewsDefinitionFile the canonical path of the file to load
-     * @return the root of a new XML document if that file does not exist
-     */
-    private Element getViewsElement(final String viewsDefinitionFile) {
-        final Document tilesView;
-        if (fileManager.exists(viewsDefinitionFile)) {
-            final DocumentBuilder builder = XmlUtils.getDocumentBuilder();
-            builder.setEntityResolver(new TilesDtdResolver());
-            try {
-                tilesView = builder.parse(fileManager
-                        .getInputStream(viewsDefinitionFile));
-            }
-            catch (final SAXException se) {
-                throw new IllegalStateException("Unable to parse the tiles "
-                        + viewsDefinitionFile + " file", se);
-            }
-            catch (final IOException ioe) {
-                throw new IllegalStateException("Unable to read the tiles "
-                        + viewsDefinitionFile + " file (reason: "
-                        + ioe.getMessage() + ")", ioe);
-            }
-        }
-        else {
-            tilesView = XmlUtils.getDocumentBuilder().newDocument();
-            tilesView.appendChild(tilesView.createElement("tiles-definitions"));
-        }
-        return tilesView.getDocumentElement();
-    }
-
-    /**
-     * Returns the canonical path of the "views.xml" Tiles configuration file in
-     * the given folder.
-     * 
-     * @param folderName can be blank for the main views file; if not, any
-     *            leading slash is ignored
-     * @param path
-     * @return a non-<code>null</code> path
-     */
-    private String getTilesConfigFile(final String folderName,
-            final LogicalPath path) {
-        final String subPath;
-        if (StringUtils.hasText(folderName) && !"/".equals(folderName)) {
-            subPath = StringUtils.prefix(folderName, "/");
-        }
-        else {
-            subPath = "";
-        }
-        return pathResolver.getIdentifier(path, "WEB-INF/views" + subPath
-                + "/views.xml");
-    }
-
-    private static class TilesDtdResolver implements EntityResolver {
-        public InputSource resolveEntity(final String publicId,
-                final String systemId) {
-            if (systemId
-                    .equals("http://tiles.apache.org/dtds/tiles-config_2_1.dtd")) {
-                return new InputSource(FileUtils.getInputStream(
-                        TilesOperationsImpl.class, "tiles-config_2_1.dtd"));
-            }
-            // Use the default behaviour
-            return null;
-        }
     }
 }

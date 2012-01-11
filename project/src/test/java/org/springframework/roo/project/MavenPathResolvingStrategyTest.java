@@ -22,7 +22,6 @@ import org.springframework.roo.support.util.FileUtils;
  */
 public class MavenPathResolvingStrategyTest {
 
-    // Constants
     private static final String NEW_MODULE = "new";
     private static final String PATH_RELATIVE_TO_POM = FileUtils
             .getSystemDependentPath("src", "main", "java");
@@ -30,32 +29,11 @@ public class MavenPathResolvingStrategyTest {
             + FileUtils.getSystemDependentPath("path", "to", "the", "pom");
     private static final String ROOT_MODULE = "";
 
-    // Fixture
-    private MavenPathResolvingStrategy strategy;
+    @Mock private LogicalPath mockNonSourcePath;
     @Mock private PomManagementService mockPomManagementService;
     @Mock private LogicalPath mockSourcePath;
-    @Mock private LogicalPath mockNonSourcePath;
-
-    @Before
-    public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
-        strategy = new MavenPathResolvingStrategy();
-        strategy.pomManagementService = mockPomManagementService;
-    }
-
-    private LogicalPath getMockContextualPath(final String module, final Pom pom) {
-        final LogicalPath mockContextualPath = mock(LogicalPath.class);
-        when(mockContextualPath.getModule()).thenReturn(module);
-        when(mockContextualPath.getPathRelativeToPom(pom)).thenReturn(
-                PATH_RELATIVE_TO_POM);
-        return mockContextualPath;
-    }
-
-    private Pom getMockPom(final String rootPath) {
-        final Pom mockPom = mock(Pom.class);
-        when(mockPom.getRoot()).thenReturn(rootPath);
-        return mockPom;
-    }
+    // Fixture
+    private MavenPathResolvingStrategy strategy;
 
     /**
      * Asserts that calling
@@ -84,32 +62,12 @@ public class MavenPathResolvingStrategyTest {
         assertEquals(expectedIdentifier, identifier.replaceFirst("[A-Z]:", ""));
     }
 
-    @Test
-    public void testGetIdentifierForRootModuleWithEmptyRelativePath() {
-        final String expectedIdentifier = FileUtils.getSystemDependentPath(
-                POM_PATH, PATH_RELATIVE_TO_POM) + File.separator;
-        assertIdentifier(getMockPom(POM_PATH), ROOT_MODULE, "",
-                expectedIdentifier);
-    }
-
-    @Test
-    public void testGetIdentifierForRootModuleWithNonEmptyRelativePath() {
-        final String relativePath = FileUtils.getSystemDependentPath("com",
-                "example", "domain", "PersonTest.java");
-        final String expectedIdentifier = FileUtils.getSystemDependentPath(
-                POM_PATH, PATH_RELATIVE_TO_POM, relativePath);
-        assertIdentifier(getMockPom(POM_PATH), ROOT_MODULE, relativePath,
-                expectedIdentifier);
-    }
-
-    @Test
-    public void testGetIdentifierForNewModuleWithEmptyRelativePath() {
-        final Pom mockParentPom = getMockPom(POM_PATH);
-        when(mockPomManagementService.getFocusedModule()).thenReturn(
-                mockParentPom);
-        final String expectedIdentifier = FileUtils.getSystemDependentPath(
-                POM_PATH, NEW_MODULE, PATH_RELATIVE_TO_POM) + File.separator;
-        assertIdentifier(null, NEW_MODULE, "", expectedIdentifier);
+    private LogicalPath getMockContextualPath(final String module, final Pom pom) {
+        final LogicalPath mockContextualPath = mock(LogicalPath.class);
+        when(mockContextualPath.getModule()).thenReturn(module);
+        when(mockContextualPath.getPathRelativeToPom(pom)).thenReturn(
+                PATH_RELATIVE_TO_POM);
+        return mockContextualPath;
     }
 
     private PhysicalPath getMockModulePath(final boolean isSource,
@@ -118,6 +76,19 @@ public class MavenPathResolvingStrategyTest {
         when(mockModulePath.isSource()).thenReturn(isSource);
         when(mockModulePath.getLogicalPath()).thenReturn(logicalPath);
         return mockModulePath;
+    }
+
+    private Pom getMockPom(final String rootPath) {
+        final Pom mockPom = mock(Pom.class);
+        when(mockPom.getRoot()).thenReturn(rootPath);
+        return mockPom;
+    }
+
+    @Before
+    public void setUp() throws Exception {
+        MockitoAnnotations.initMocks(this);
+        strategy = new MavenPathResolvingStrategy();
+        strategy.pomManagementService = mockPomManagementService;
     }
 
     private void setUpModulePaths() {
@@ -143,6 +114,34 @@ public class MavenPathResolvingStrategyTest {
         // Check
         assertEquals(Arrays.asList(mockSourcePath, mockNonSourcePath),
                 modulePathIds);
+    }
+
+    @Test
+    public void testGetIdentifierForNewModuleWithEmptyRelativePath() {
+        final Pom mockParentPom = getMockPom(POM_PATH);
+        when(mockPomManagementService.getFocusedModule()).thenReturn(
+                mockParentPom);
+        final String expectedIdentifier = FileUtils.getSystemDependentPath(
+                POM_PATH, NEW_MODULE, PATH_RELATIVE_TO_POM) + File.separator;
+        assertIdentifier(null, NEW_MODULE, "", expectedIdentifier);
+    }
+
+    @Test
+    public void testGetIdentifierForRootModuleWithEmptyRelativePath() {
+        final String expectedIdentifier = FileUtils.getSystemDependentPath(
+                POM_PATH, PATH_RELATIVE_TO_POM) + File.separator;
+        assertIdentifier(getMockPom(POM_PATH), ROOT_MODULE, "",
+                expectedIdentifier);
+    }
+
+    @Test
+    public void testGetIdentifierForRootModuleWithNonEmptyRelativePath() {
+        final String relativePath = FileUtils.getSystemDependentPath("com",
+                "example", "domain", "PersonTest.java");
+        final String expectedIdentifier = FileUtils.getSystemDependentPath(
+                POM_PATH, PATH_RELATIVE_TO_POM, relativePath);
+        assertIdentifier(getMockPom(POM_PATH), ROOT_MODULE, relativePath,
+                expectedIdentifier);
     }
 
     @Test

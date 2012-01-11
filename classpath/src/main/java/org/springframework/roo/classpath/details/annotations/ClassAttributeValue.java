@@ -17,7 +17,6 @@ import org.springframework.roo.support.util.Assert;
 public class ClassAttributeValue extends
         AbstractAnnotationAttributeValue<JavaType> {
 
-    // Fields
     private final JavaType value;
 
     /**

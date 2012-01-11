@@ -14,7 +14,6 @@ import org.junit.Test;
  */
 public class CloudCredentialsTest {
 
-    // Constants
     private static final String EMAIL = "bob@example.com";
     private static final String PASSWORD = "hello";
     private static final String URL = "http://api.example.com";
@@ -32,11 +31,6 @@ public class CloudCredentialsTest {
     }
 
     @Test
-    public void testSameDetailsIsSameAccount() {
-        assertTrue(CREDENTIALS.isSameAccount(URL, EMAIL));
-    }
-
-    @Test
     public void testEncodeAndDecodeRoundTrip() {
         // Set up
         final String encoded = CREDENTIALS.encode();
@@ -48,5 +42,10 @@ public class CloudCredentialsTest {
         assertEquals(URL, decoded.getUrl());
         assertEquals(EMAIL, decoded.getEmail());
         assertEquals(PASSWORD, decoded.getPassword());
+    }
+
+    @Test
+    public void testSameDetailsIsSameAccount() {
+        assertTrue(CREDENTIALS.isSameAccount(URL, EMAIL));
     }
 }

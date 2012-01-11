@@ -54,117 +54,38 @@ import java.util.Map;
 public abstract class Assert {
 
     /**
-     * Assert a boolean expression, throwing
-     * <code>IllegalArgumentException</code> if the test result is
-     * <code>false</code>.
+     * Assert that the given text does not contain the given substring.
      * 
      * <pre class="code">
-     * Assert.isTrue(i &gt; 0, &quot;The value must be greater than zero&quot;);
+     * Assert.doesNotContain(name, &quot;rod&quot;);
      * </pre>
      * 
-     * @param expression a boolean expression
+     * @param textToSearch the text to search
+     * @param substring the substring to find within the text
+     */
+    public static void doesNotContain(final String textToSearch,
+            final String substring) {
+        doesNotContain(textToSearch, substring,
+                "[Assertion failed] - this String argument must not contain the substring ["
+                        + substring + "]");
+    }
+
+    /**
+     * Assert that the given text does not contain the given substring.
+     * 
+     * <pre class="code">
+     * Assert.doesNotContain(name, &quot;rod&quot;, &quot;Name must not contain 'rod'&quot;);
+     * </pre>
+     * 
+     * @param textToSearch the text to search
+     * @param substring the substring to find within the text
      * @param message the exception message to use if the assertion fails
-     * @throws IllegalArgumentException if expression is <code>false</code>
      */
-    public static void isTrue(final boolean expression, final String message) {
-        if (!expression) {
-            throw new IllegalArgumentException(message);
-        }
-    }
-
-    /**
-     * Assert a boolean expression, throwing
-     * <code>IllegalArgumentException</code> if the test result is
-     * <code>false</code>.
-     * 
-     * <pre class="code">
-     * Assert.isTrue(i &gt; 0);
-     * </pre>
-     * 
-     * @param expression a boolean expression
-     * @throws IllegalArgumentException if expression is <code>false</code>
-     */
-    public static void isTrue(final boolean expression) {
-        isTrue(expression, "[Assertion failed] - this expression must be true");
-    }
-
-    /**
-     * Assert that an object is <code>null</code> .
-     * 
-     * <pre class="code">
-     * Assert.isNull(value, &quot;The value must be null&quot;);
-     * </pre>
-     * 
-     * @param object the object to check
-     * @param message the exception message to use if the assertion fails
-     * @throws IllegalArgumentException if the object is not <code>null</code>
-     */
-    public static void isNull(final Object object, final String message) {
-        if (object != null) {
-            throw new IllegalArgumentException(message);
-        }
-    }
-
-    /**
-     * Assert that an object is <code>null</code> .
-     * 
-     * <pre class="code">
-     * Assert.isNull(value);
-     * </pre>
-     * 
-     * @param object the object to check
-     * @throws IllegalArgumentException if the object is not <code>null</code>
-     */
-    public static void isNull(final Object object) {
-        isNull(object, "[Assertion failed] - the object argument must be null");
-    }
-
-    /**
-     * Assert that an object is not <code>null</code> .
-     * 
-     * <pre class="code">
-     * Assert.notNull(clazz, &quot;The class must not be null&quot;);
-     * </pre>
-     * 
-     * @param object the object to check
-     * @param message the exception message to use if the assertion fails
-     * @throws IllegalArgumentException if the object is <code>null</code>
-     */
-    public static void notNull(final Object object, final String message) {
-        if (object == null) {
-            throw new IllegalArgumentException(message);
-        }
-    }
-
-    /**
-     * Assert that an object is not <code>null</code> .
-     * 
-     * <pre class="code">
-     * Assert.notNull(clazz);
-     * </pre>
-     * 
-     * @param object the object to check
-     * @throws IllegalArgumentException if the object is <code>null</code>
-     */
-    public static void notNull(final Object object) {
-        notNull(object,
-                "[Assertion failed] - this argument is required; it must not be null");
-    }
-
-    /**
-     * Assert that the given String is not empty; that is, it must not be
-     * <code>null</code> and not the empty String.
-     * 
-     * <pre class="code">
-     * Assert.hasLength(name, &quot;Name must not be empty&quot;);
-     * </pre>
-     * 
-     * @param text the String to check
-     * @param message the exception message to use if the assertion fails
-     * @see StringUtils#hasLength
-     */
-    public static void hasLength(final String text, final String message) {
-        if (!StringUtils.hasLength(text)) {
+    public static void doesNotContain(final String textToSearch,
+            final String substring, final String message) {
+        if (StringUtils.hasLength(textToSearch)
+                && StringUtils.hasLength(substring)
+                && (textToSearch.indexOf(substring) != -1)) {
             throw new IllegalArgumentException(message);
         }
     }
@@ -187,20 +108,19 @@ public abstract class Assert {
     }
 
     /**
-     * Assert that the given String has valid text content; that is, it must not
-     * be <code>null</code> and must contain at least one non-whitespace
-     * character.
+     * Assert that the given String is not empty; that is, it must not be
+     * <code>null</code> and not the empty String.
      * 
      * <pre class="code">
-     * Assert.hasText(name, &quot;'name' must not be empty&quot;);
+     * Assert.hasLength(name, &quot;Name must not be empty&quot;);
      * </pre>
      * 
      * @param text the String to check
      * @param message the exception message to use if the assertion fails
-     * @see StringUtils#hasText
+     * @see StringUtils#hasLength
      */
-    public static void hasText(final String text, final String message) {
-        if (StringUtils.isBlank(text)) {
+    public static void hasLength(final String text, final String message) {
+        if (!StringUtils.hasLength(text)) {
             throw new IllegalArgumentException(message);
         }
     }
@@ -223,192 +143,64 @@ public abstract class Assert {
     }
 
     /**
-     * Assert that the given text does not contain the given substring.
+     * Assert that the given String has valid text content; that is, it must not
+     * be <code>null</code> and must contain at least one non-whitespace
+     * character.
      * 
      * <pre class="code">
-     * Assert.doesNotContain(name, &quot;rod&quot;, &quot;Name must not contain 'rod'&quot;);
+     * Assert.hasText(name, &quot;'name' must not be empty&quot;);
      * </pre>
      * 
-     * @param textToSearch the text to search
-     * @param substring the substring to find within the text
+     * @param text the String to check
      * @param message the exception message to use if the assertion fails
+     * @see StringUtils#hasText
      */
-    public static void doesNotContain(final String textToSearch,
-            final String substring, final String message) {
-        if (StringUtils.hasLength(textToSearch)
-                && StringUtils.hasLength(substring)
-                && textToSearch.indexOf(substring) != -1) {
+    public static void hasText(final String text, final String message) {
+        if (StringUtils.isBlank(text)) {
             throw new IllegalArgumentException(message);
         }
     }
 
     /**
-     * Assert that the given text does not contain the given substring.
+     * Assert that <code>superType.isAssignableFrom(subType)</code> is
+     * <code>true</code>.
      * 
      * <pre class="code">
-     * Assert.doesNotContain(name, &quot;rod&quot;);
+     * Assert.isAssignable(Number.class, myClass);
      * </pre>
      * 
-     * @param textToSearch the text to search
-     * @param substring the substring to find within the text
+     * @param superType the super type to check
+     * @param subType the sub type to check
+     * @throws IllegalArgumentException if the classes are not assignable
      */
-    public static void doesNotContain(final String textToSearch,
-            final String substring) {
-        doesNotContain(textToSearch, substring,
-                "[Assertion failed] - this String argument must not contain the substring ["
-                        + substring + "]");
+    public static void isAssignable(final Class<?> superType,
+            final Class<?> subType) {
+        isAssignable(superType, subType, "");
     }
 
     /**
-     * Assert that an array has elements; that is, it must not be
-     * <code>null</code> and must have at least one element.
+     * Assert that <code>superType.isAssignableFrom(subType)</code> is
+     * <code>true</code>.
      * 
      * <pre class="code">
-     * Assert.notEmpty(array, &quot;The array must have elements&quot;);
+     * Assert.isAssignable(Number.class, myClass);
      * </pre>
      * 
-     * @param array the array to check
-     * @param message the exception message to use if the assertion fails
-     * @throws IllegalArgumentException if the object array is <code>null</code>
-     *             or has no elements
+     * @param superType the super type to check against
+     * @param subType the sub type to check
+     * @param message a message which will be prepended to the message produced
+     *            by the function itself, and which may be used to provide
+     *            context. It should normally end in a ": " or ". " so that the
+     *            function generate message looks ok when prepended to it.
+     * @throws IllegalArgumentException if the classes are not assignable
      */
-    public static void notEmpty(final Object[] array, final String message) {
-        if (ObjectUtils.isEmpty(array)) {
-            throw new IllegalArgumentException(message);
+    public static void isAssignable(final Class<?> superType,
+            final Class<?> subType, final String message) {
+        notNull(superType, "Type to check against must not be null");
+        if ((subType == null) || !superType.isAssignableFrom(subType)) {
+            throw new IllegalArgumentException(message + subType
+                    + " is not assignable to " + superType);
         }
-    }
-
-    /**
-     * Assert that an array has elements; that is, it must not be
-     * <code>null</code> and must have at least one element.
-     * 
-     * <pre class="code">
-     * Assert.notEmpty(array);
-     * </pre>
-     * 
-     * @param array the array to check
-     * @throws IllegalArgumentException if the object array is <code>null</code>
-     *             or has no elements
-     */
-    public static void notEmpty(final Object[] array) {
-        notEmpty(
-                array,
-                "[Assertion failed] - this array must not be empty: it must contain at least 1 element");
-    }
-
-    /**
-     * Assert that an array has no null elements. Note: Does not complain if the
-     * array is empty!
-     * 
-     * <pre class="code">
-     * Assert.noNullElements(array, &quot;The array must have non-null elements&quot;);
-     * </pre>
-     * 
-     * @param array the array to check
-     * @param message the exception message to use if the assertion fails
-     * @throws IllegalArgumentException if the object array contains a
-     *             <code>null</code> element
-     */
-    public static void noNullElements(final Object[] array, final String message) {
-        if (array != null) {
-            for (int i = 0; i < array.length; i++) {
-                if (array[i] == null) {
-                    throw new IllegalArgumentException(message);
-                }
-            }
-        }
-    }
-
-    /**
-     * Assert that an array has no null elements. Note: Does not complain if the
-     * array is empty!
-     * 
-     * <pre class="code">
-     * Assert.noNullElements(array);
-     * </pre>
-     * 
-     * @param array the array to check
-     * @throws IllegalArgumentException if the object array contains a
-     *             <code>null</code> element
-     */
-    public static void noNullElements(final Object[] array) {
-        noNullElements(array,
-                "[Assertion failed] - this array must not contain any null elements");
-    }
-
-    /**
-     * Assert that a collection has elements; that is, it must not be
-     * <code>null</code> and must have at least one element.
-     * 
-     * <pre class="code">
-     * Assert.notEmpty(collection, &quot;Collection must have elements&quot;);
-     * </pre>
-     * 
-     * @param collection the collection to check
-     * @param message the exception message to use if the assertion fails
-     * @throws IllegalArgumentException if the collection is <code>null</code>
-     *             or has no elements
-     */
-    public static void notEmpty(final Collection<?> collection,
-            final String message) {
-        if (CollectionUtils.isEmpty(collection)) {
-            throw new IllegalArgumentException(message);
-        }
-    }
-
-    /**
-     * Assert that a collection has elements; that is, it must not be
-     * <code>null</code> and must have at least one element.
-     * 
-     * <pre class="code">
-     * Assert.notEmpty(collection, &quot;Collection must have elements&quot;);
-     * </pre>
-     * 
-     * @param collection the collection to check
-     * @throws IllegalArgumentException if the collection is <code>null</code>
-     *             or has no elements
-     */
-    public static void notEmpty(final Collection<?> collection) {
-        notEmpty(
-                collection,
-                "[Assertion failed] - this collection must not be empty: it must contain at least 1 element");
-    }
-
-    /**
-     * Assert that a Map has entries; that is, it must not be <code>null</code>
-     * and must have at least one entry.
-     * 
-     * <pre class="code">
-     * Assert.notEmpty(map, &quot;Map must have entries&quot;);
-     * </pre>
-     * 
-     * @param map the map to check
-     * @param message the exception message to use if the assertion fails
-     * @throws IllegalArgumentException if the map is <code>null</code> or has
-     *             no entries
-     */
-    public static void notEmpty(final Map<?, ?> map, final String message) {
-        if (CollectionUtils.isEmpty(map)) {
-            throw new IllegalArgumentException(message);
-        }
-    }
-
-    /**
-     * Assert that a Map has entries; that is, it must not be <code>null</code>
-     * and must have at least one entry.
-     * 
-     * <pre class="code">
-     * Assert.notEmpty(map);
-     * </pre>
-     * 
-     * @param map the map to check
-     * @throws IllegalArgumentException if the map is <code>null</code> or has
-     *             no entries
-     */
-    public static void notEmpty(final Map<?, ?> map) {
-        notEmpty(
-                map,
-                "[Assertion failed] - this map must not be empty; it must contain at least one entry");
     }
 
     /**
@@ -456,63 +248,252 @@ public abstract class Assert {
     }
 
     /**
-     * Assert that <code>superType.isAssignableFrom(subType)</code> is
-     * <code>true</code>.
+     * Assert that an object is <code>null</code> .
      * 
      * <pre class="code">
-     * Assert.isAssignable(Number.class, myClass);
+     * Assert.isNull(value);
      * </pre>
      * 
-     * @param superType the super type to check
-     * @param subType the sub type to check
-     * @throws IllegalArgumentException if the classes are not assignable
+     * @param object the object to check
+     * @throws IllegalArgumentException if the object is not <code>null</code>
      */
-    public static void isAssignable(final Class<?> superType,
-            final Class<?> subType) {
-        isAssignable(superType, subType, "");
+    public static void isNull(final Object object) {
+        isNull(object, "[Assertion failed] - the object argument must be null");
     }
 
     /**
-     * Assert that <code>superType.isAssignableFrom(subType)</code> is
-     * <code>true</code>.
+     * Assert that an object is <code>null</code> .
      * 
      * <pre class="code">
-     * Assert.isAssignable(Number.class, myClass);
+     * Assert.isNull(value, &quot;The value must be null&quot;);
      * </pre>
      * 
-     * @param superType the super type to check against
-     * @param subType the sub type to check
-     * @param message a message which will be prepended to the message produced
-     *            by the function itself, and which may be used to provide
-     *            context. It should normally end in a ": " or ". " so that the
-     *            function generate message looks ok when prepended to it.
-     * @throws IllegalArgumentException if the classes are not assignable
+     * @param object the object to check
+     * @param message the exception message to use if the assertion fails
+     * @throws IllegalArgumentException if the object is not <code>null</code>
      */
-    public static void isAssignable(final Class<?> superType,
-            final Class<?> subType, final String message) {
-        notNull(superType, "Type to check against must not be null");
-        if (subType == null || !superType.isAssignableFrom(subType)) {
-            throw new IllegalArgumentException(message + subType
-                    + " is not assignable to " + superType);
+    public static void isNull(final Object object, final String message) {
+        if (object != null) {
+            throw new IllegalArgumentException(message);
         }
     }
 
     /**
-     * Assert a boolean expression, throwing <code>IllegalStateException</code>
-     * if the test result is <code>false</code>. Call isTrue if you wish to
-     * throw IllegalArgumentException on an assertion failure.
+     * Assert a boolean expression, throwing
+     * <code>IllegalArgumentException</code> if the test result is
+     * <code>false</code>.
      * 
      * <pre class="code">
-     * Assert.state(id == null, &quot;The id property must not already be initialized&quot;);
+     * Assert.isTrue(i &gt; 0);
+     * </pre>
+     * 
+     * @param expression a boolean expression
+     * @throws IllegalArgumentException if expression is <code>false</code>
+     */
+    public static void isTrue(final boolean expression) {
+        isTrue(expression, "[Assertion failed] - this expression must be true");
+    }
+
+    /**
+     * Assert a boolean expression, throwing
+     * <code>IllegalArgumentException</code> if the test result is
+     * <code>false</code>.
+     * 
+     * <pre class="code">
+     * Assert.isTrue(i &gt; 0, &quot;The value must be greater than zero&quot;);
      * </pre>
      * 
      * @param expression a boolean expression
      * @param message the exception message to use if the assertion fails
-     * @throws IllegalStateException if expression is <code>false</code>
+     * @throws IllegalArgumentException if expression is <code>false</code>
      */
-    public static void state(final boolean expression, final String message) {
+    public static void isTrue(final boolean expression, final String message) {
         if (!expression) {
-            throw new IllegalStateException(message);
+            throw new IllegalArgumentException(message);
+        }
+    }
+
+    /**
+     * Assert that an array has no null elements. Note: Does not complain if the
+     * array is empty!
+     * 
+     * <pre class="code">
+     * Assert.noNullElements(array);
+     * </pre>
+     * 
+     * @param array the array to check
+     * @throws IllegalArgumentException if the object array contains a
+     *             <code>null</code> element
+     */
+    public static void noNullElements(final Object[] array) {
+        noNullElements(array,
+                "[Assertion failed] - this array must not contain any null elements");
+    }
+
+    /**
+     * Assert that an array has no null elements. Note: Does not complain if the
+     * array is empty!
+     * 
+     * <pre class="code">
+     * Assert.noNullElements(array, &quot;The array must have non-null elements&quot;);
+     * </pre>
+     * 
+     * @param array the array to check
+     * @param message the exception message to use if the assertion fails
+     * @throws IllegalArgumentException if the object array contains a
+     *             <code>null</code> element
+     */
+    public static void noNullElements(final Object[] array, final String message) {
+        if (array != null) {
+            for (final Object element : array) {
+                if (element == null) {
+                    throw new IllegalArgumentException(message);
+                }
+            }
+        }
+    }
+
+    /**
+     * Assert that a collection has elements; that is, it must not be
+     * <code>null</code> and must have at least one element.
+     * 
+     * <pre class="code">
+     * Assert.notEmpty(collection, &quot;Collection must have elements&quot;);
+     * </pre>
+     * 
+     * @param collection the collection to check
+     * @throws IllegalArgumentException if the collection is <code>null</code>
+     *             or has no elements
+     */
+    public static void notEmpty(final Collection<?> collection) {
+        notEmpty(
+                collection,
+                "[Assertion failed] - this collection must not be empty: it must contain at least 1 element");
+    }
+
+    /**
+     * Assert that a collection has elements; that is, it must not be
+     * <code>null</code> and must have at least one element.
+     * 
+     * <pre class="code">
+     * Assert.notEmpty(collection, &quot;Collection must have elements&quot;);
+     * </pre>
+     * 
+     * @param collection the collection to check
+     * @param message the exception message to use if the assertion fails
+     * @throws IllegalArgumentException if the collection is <code>null</code>
+     *             or has no elements
+     */
+    public static void notEmpty(final Collection<?> collection,
+            final String message) {
+        if (CollectionUtils.isEmpty(collection)) {
+            throw new IllegalArgumentException(message);
+        }
+    }
+
+    /**
+     * Assert that a Map has entries; that is, it must not be <code>null</code>
+     * and must have at least one entry.
+     * 
+     * <pre class="code">
+     * Assert.notEmpty(map);
+     * </pre>
+     * 
+     * @param map the map to check
+     * @throws IllegalArgumentException if the map is <code>null</code> or has
+     *             no entries
+     */
+    public static void notEmpty(final Map<?, ?> map) {
+        notEmpty(
+                map,
+                "[Assertion failed] - this map must not be empty; it must contain at least one entry");
+    }
+
+    /**
+     * Assert that a Map has entries; that is, it must not be <code>null</code>
+     * and must have at least one entry.
+     * 
+     * <pre class="code">
+     * Assert.notEmpty(map, &quot;Map must have entries&quot;);
+     * </pre>
+     * 
+     * @param map the map to check
+     * @param message the exception message to use if the assertion fails
+     * @throws IllegalArgumentException if the map is <code>null</code> or has
+     *             no entries
+     */
+    public static void notEmpty(final Map<?, ?> map, final String message) {
+        if (CollectionUtils.isEmpty(map)) {
+            throw new IllegalArgumentException(message);
+        }
+    }
+
+    /**
+     * Assert that an array has elements; that is, it must not be
+     * <code>null</code> and must have at least one element.
+     * 
+     * <pre class="code">
+     * Assert.notEmpty(array);
+     * </pre>
+     * 
+     * @param array the array to check
+     * @throws IllegalArgumentException if the object array is <code>null</code>
+     *             or has no elements
+     */
+    public static void notEmpty(final Object[] array) {
+        notEmpty(
+                array,
+                "[Assertion failed] - this array must not be empty: it must contain at least 1 element");
+    }
+
+    /**
+     * Assert that an array has elements; that is, it must not be
+     * <code>null</code> and must have at least one element.
+     * 
+     * <pre class="code">
+     * Assert.notEmpty(array, &quot;The array must have elements&quot;);
+     * </pre>
+     * 
+     * @param array the array to check
+     * @param message the exception message to use if the assertion fails
+     * @throws IllegalArgumentException if the object array is <code>null</code>
+     *             or has no elements
+     */
+    public static void notEmpty(final Object[] array, final String message) {
+        if (ObjectUtils.isEmpty(array)) {
+            throw new IllegalArgumentException(message);
+        }
+    }
+
+    /**
+     * Assert that an object is not <code>null</code> .
+     * 
+     * <pre class="code">
+     * Assert.notNull(clazz);
+     * </pre>
+     * 
+     * @param object the object to check
+     * @throws IllegalArgumentException if the object is <code>null</code>
+     */
+    public static void notNull(final Object object) {
+        notNull(object,
+                "[Assertion failed] - this argument is required; it must not be null");
+    }
+
+    /**
+     * Assert that an object is not <code>null</code> .
+     * 
+     * <pre class="code">
+     * Assert.notNull(clazz, &quot;The class must not be null&quot;);
+     * </pre>
+     * 
+     * @param object the object to check
+     * @param message the exception message to use if the assertion fails
+     * @throws IllegalArgumentException if the object is <code>null</code>
+     */
+    public static void notNull(final Object object, final String message) {
+        if (object == null) {
+            throw new IllegalArgumentException(message);
         }
     }
 
@@ -534,5 +515,24 @@ public abstract class Assert {
     public static void state(final boolean expression) {
         state(expression,
                 "[Assertion failed] - this state invariant must be true");
+    }
+
+    /**
+     * Assert a boolean expression, throwing <code>IllegalStateException</code>
+     * if the test result is <code>false</code>. Call isTrue if you wish to
+     * throw IllegalArgumentException on an assertion failure.
+     * 
+     * <pre class="code">
+     * Assert.state(id == null, &quot;The id property must not already be initialized&quot;);
+     * </pre>
+     * 
+     * @param expression a boolean expression
+     * @param message the exception message to use if the assertion fails
+     * @throws IllegalStateException if expression is <code>false</code>
+     */
+    public static void state(final boolean expression, final String message) {
+        if (!expression) {
+            throw new IllegalStateException(message);
+        }
     }
 }

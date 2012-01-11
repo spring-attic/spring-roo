@@ -34,11 +34,6 @@ public class CloudFileConverter implements Converter<CloudFile> {
         return new CloudFile(value);
     }
 
-    public boolean supports(final Class<?> requiredType,
-            final String optionContext) {
-        return CloudFile.class.isAssignableFrom(requiredType);
-    }
-
     public boolean getAllPossibleValues(final List<Completion> completions,
             final Class<?> requiredType, final String existingData,
             final String optionContext, final MethodTarget target) {
@@ -47,7 +42,7 @@ public class CloudFileConverter implements Converter<CloudFile> {
         String path = ConverterUtils.getOptionValue("path",
                 target.getRemainingBuffer());
         if (path != null) {
-            int index = path.lastIndexOf(/* "/" */File.separator);
+            final int index = path.lastIndexOf(/* "/" */File.separator);
             if (index > 0) {
                 path = path.substring(0, index + 1);
             }
@@ -56,30 +51,35 @@ public class CloudFileConverter implements Converter<CloudFile> {
             }
         }
         try {
-            String file = session.getClient().getFile(appName, 1, path);
-            List<String> options = getFileOptions(file);
-            for (String option : options) {
+            final String file = session.getClient().getFile(appName, 1, path);
+            final List<String> options = getFileOptions(file);
+            for (final String option : options) {
                 if (path == null) {
                     path = "";
                 }
                 completions.add(new Completion(path + option));
             }
         }
-        catch (Exception ignored) {
+        catch (final Exception ignored) {
         }
 
         return false;
     }
 
     private List<String> getFileOptions(final String files) {
-        String[] lines = files.split("\n");
-        List<String> options = new ArrayList<String>();
-        for (String line : lines) {
-            int index = line.indexOf(" ");
+        final String[] lines = files.split("\n");
+        final List<String> options = new ArrayList<String>();
+        for (final String line : lines) {
+            final int index = line.indexOf(" ");
             if (index > 0) {
                 options.add(line.substring(0, index));
             }
         }
         return options;
+    }
+
+    public boolean supports(final Class<?> requiredType,
+            final String optionContext) {
+        return CloudFile.class.isAssignableFrom(requiredType);
     }
 }

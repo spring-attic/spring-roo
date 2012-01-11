@@ -19,9 +19,19 @@ import org.springframework.roo.support.logging.HandlerUtils;
  */
 public abstract class MessageDisplayUtils {
 
-    // Constants
     private static Logger LOGGER = HandlerUtils
             .getLogger(MessageDisplayUtils.class);
+
+    /**
+     * Same as {@link #displayFile(String, Class, boolean)} except it passes
+     * false as the final argument.
+     * 
+     * @param fileName the simple filename (required)
+     * @param owner the class which owns the file (required)
+     */
+    public static void displayFile(final String fileName, final Class<?> owner) {
+        displayFile(fileName, owner, false);
+    }
 
     /**
      * Displays the requested file via the LOGGER API.
@@ -39,36 +49,27 @@ public abstract class MessageDisplayUtils {
      */
     public static void displayFile(final String fileName, final Class<?> owner,
             final boolean important) {
-        Level level = important ? Level.SEVERE : Level.FINE;
-        String owningPackage = owner.getPackage().getName().replace('.', '/');
-        String fullResourceName = "/" + owningPackage + "/" + fileName;
-        InputStream inputStream = owner.getClassLoader().getResourceAsStream(
-                fullResourceName);
+        final Level level = important ? Level.SEVERE : Level.FINE;
+        final String owningPackage = owner.getPackage().getName()
+                .replace('.', '/');
+        final String fullResourceName = "/" + owningPackage + "/" + fileName;
+        final InputStream inputStream = owner.getClassLoader()
+                .getResourceAsStream(fullResourceName);
         if (inputStream == null) {
             throw new IllegalStateException("Could not locate '" + fileName
                     + "'");
         }
         try {
-            String message = FileCopyUtils.copyToString(new InputStreamReader(
-                    new BufferedInputStream(inputStream)));
+            final String message = FileCopyUtils
+                    .copyToString(new InputStreamReader(
+                            new BufferedInputStream(inputStream)));
             LOGGER.log(level, message);
         }
-        catch (Exception e) {
+        catch (final Exception e) {
             throw new IllegalStateException(e);
         }
         finally {
             IOUtils.closeQuietly(inputStream);
         }
-    }
-
-    /**
-     * Same as {@link #displayFile(String, Class, boolean)} except it passes
-     * false as the final argument.
-     * 
-     * @param fileName the simple filename (required)
-     * @param owner the class which owns the file (required)
-     */
-    public static void displayFile(final String fileName, final Class<?> owner) {
-        displayFile(fileName, owner, false);
     }
 }

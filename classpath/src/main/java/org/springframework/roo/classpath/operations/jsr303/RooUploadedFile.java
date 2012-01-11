@@ -15,7 +15,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.SOURCE)
 public @interface RooUploadedFile {
 
-    String contentType();
-
     boolean autoUpload() default false;
+
+    String contentType();
 }

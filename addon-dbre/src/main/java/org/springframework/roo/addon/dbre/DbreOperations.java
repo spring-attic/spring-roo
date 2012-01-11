@@ -15,13 +15,6 @@ import org.springframework.roo.model.JavaPackage;
 public interface DbreOperations {
 
     /**
-     * Returns whether or not the DBRE commands can be executed.
-     * 
-     * @return true if the DBRE commands are available to use, otherwise false
-     */
-    boolean isDbreInstallationPossible();
-
-    /**
      * Displays the metadata for the indicated schema on the screen, or writes
      * it to the given file if a filename is specified.
      * 
@@ -31,6 +24,13 @@ public interface DbreOperations {
      * @param view true if database views are displayed, otherwise false
      */
     void displayDatabaseMetadata(Set<Schema> schemas, File file, boolean view);
+
+    /**
+     * Returns whether or not the DBRE commands can be executed.
+     * 
+     * @return true if the DBRE commands are available to use, otherwise false
+     */
+    boolean isDbreInstallationPossible();
 
     /**
      * Introspects the database schema and causes the related entities on disk

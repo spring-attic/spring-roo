@@ -63,7 +63,6 @@ public abstract class MonitoringRequest {
         return mre.getValue();
     }
 
-    // Fields
     private final Collection<FileOperation> notifyOn;
     private final File resource;
 

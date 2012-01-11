@@ -17,7 +17,6 @@ import org.springframework.roo.support.util.FileUtils;
 @Service
 public class MavenPathResolvingStrategy extends AbstractPathResolvingStrategy {
 
-    // Fields
     @Reference protected PomManagementService pomManagementService;
 
     // ------------ OSGi component methods ----------------
@@ -31,6 +30,7 @@ public class MavenPathResolvingStrategy extends AbstractPathResolvingStrategy {
      * @param identifier to locate the parent of (required)
      * @return the first matching parent, or null if not found
      */
+    @Override
     protected PhysicalPath getApplicablePhysicalPath(final String identifier) {
         Assert.notNull(identifier, "Identifier required");
         PhysicalPath physicalPath = null;
@@ -38,7 +38,7 @@ public class MavenPathResolvingStrategy extends AbstractPathResolvingStrategy {
         for (final Pom pom : pomManagementService.getPoms()) {
             if (removeTrailingSeparator(identifier).startsWith(
                     removeTrailingSeparator(pom.getRoot()))
-                    && removeTrailingSeparator(pom.getRoot()).length() > longest) {
+                    && (removeTrailingSeparator(pom.getRoot()).length() > longest)) {
                 longest = removeTrailingSeparator(pom.getRoot()).length();
                 int nextLongest = 0;
                 for (final PhysicalPath thisPhysicalPath : pom
@@ -48,7 +48,7 @@ public class MavenPathResolvingStrategy extends AbstractPathResolvingStrategy {
                             .getCanonicalPath();
                     if (removeTrailingSeparator(identifier).startsWith(
                             possibleParent)
-                            && possibleParent.length() > nextLongest) {
+                            && (possibleParent.length() > nextLongest)) {
                         nextLongest = possibleParent.length();
                         physicalPath = thisPhysicalPath;
                     }
@@ -119,6 +119,7 @@ public class MavenPathResolvingStrategy extends AbstractPathResolvingStrategy {
         return new File(moduleRoot, pathRelativeToPom);
     }
 
+    @Override
     protected Collection<LogicalPath> getPaths(final boolean sourceOnly) {
         final Collection<LogicalPath> pathIds = new ArrayList<LogicalPath>();
         for (final Pom pom : pomManagementService.getPoms()) {

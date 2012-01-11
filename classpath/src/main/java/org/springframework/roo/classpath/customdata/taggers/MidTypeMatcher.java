@@ -16,7 +16,6 @@ import org.springframework.roo.support.util.Assert;
  */
 public class MidTypeMatcher extends TypeMatcher {
 
-    // Fields
     private final CustomDataKey<MemberHoldingTypeDetails> customDataKey;
     private final String declaredBy;
 
@@ -47,6 +46,14 @@ public class MidTypeMatcher extends TypeMatcher {
         this.declaredBy = declaredBy;
     }
 
+    public CustomDataKey<MemberHoldingTypeDetails> getCustomDataKey() {
+        return customDataKey;
+    }
+
+    public Object getTagValue(final MemberHoldingTypeDetails key) {
+        return null;
+    }
+
     public List<MemberHoldingTypeDetails> matches(
             final List<MemberHoldingTypeDetails> memberHoldingTypeDetailsList) {
         final List<MemberHoldingTypeDetails> types = new ArrayList<MemberHoldingTypeDetails>();
@@ -57,13 +64,5 @@ public class MidTypeMatcher extends TypeMatcher {
             }
         }
         return types;
-    }
-
-    public CustomDataKey<MemberHoldingTypeDetails> getCustomDataKey() {
-        return customDataKey;
-    }
-
-    public Object getTagValue(final MemberHoldingTypeDetails key) {
-        return null;
     }
 }

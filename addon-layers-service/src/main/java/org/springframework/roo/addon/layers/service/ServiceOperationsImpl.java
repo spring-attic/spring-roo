@@ -34,21 +34,26 @@ import org.springframework.uaa.client.util.Assert;
 @Service
 public class ServiceOperationsImpl implements ServiceOperations {
 
-    // Fields
     @Reference private FileManager fileManager;
     @Reference private PathResolver pathResolver;
     @Reference private ProjectOperations projectOperations;
     @Reference private TypeManagementService typeManagementService;
 
-    public boolean isServiceInstallationPossible() {
-        return projectOperations.isFocusedProjectAvailable();
-    }
-
-    public void setupService(final JavaType interfaceType,
-            final JavaType classType, final JavaType domainType) {
-        Assert.notNull(interfaceType, "Interface type required");
-        createServiceInterface(interfaceType, domainType);
-        createServiceClass(interfaceType, classType);
+    private void createServiceClass(final JavaType interfaceType,
+            final JavaType classType) {
+        Assert.notNull(classType, "Class type required");
+        final String classIdentifier = pathResolver.getFocusedCanonicalPath(
+                Path.SRC_MAIN_JAVA, classType);
+        if (fileManager.exists(classIdentifier)) {
+            return; // Type already exists - nothing to do
+        }
+        final String classMid = PhysicalTypeIdentifier.createIdentifier(
+                classType, pathResolver.getPath(classIdentifier));
+        final ClassOrInterfaceTypeDetailsBuilder classTypeBuilder = new ClassOrInterfaceTypeDetailsBuilder(
+                classMid, PUBLIC, classType, CLASS);
+        classTypeBuilder.addImplementsType(interfaceType);
+        typeManagementService
+                .createOrUpdateTypeOnDisk(classTypeBuilder.build());
     }
 
     private void createServiceInterface(final JavaType interfaceType,
@@ -75,20 +80,14 @@ public class ServiceOperationsImpl implements ServiceOperations {
                 .build());
     }
 
-    private void createServiceClass(final JavaType interfaceType,
-            final JavaType classType) {
-        Assert.notNull(classType, "Class type required");
-        final String classIdentifier = pathResolver.getFocusedCanonicalPath(
-                Path.SRC_MAIN_JAVA, classType);
-        if (fileManager.exists(classIdentifier)) {
-            return; // Type already exists - nothing to do
-        }
-        final String classMid = PhysicalTypeIdentifier.createIdentifier(
-                classType, pathResolver.getPath(classIdentifier));
-        final ClassOrInterfaceTypeDetailsBuilder classTypeBuilder = new ClassOrInterfaceTypeDetailsBuilder(
-                classMid, PUBLIC, classType, CLASS);
-        classTypeBuilder.addImplementsType(interfaceType);
-        typeManagementService
-                .createOrUpdateTypeOnDisk(classTypeBuilder.build());
+    public boolean isServiceInstallationPossible() {
+        return projectOperations.isFocusedProjectAvailable();
+    }
+
+    public void setupService(final JavaType interfaceType,
+            final JavaType classType, final JavaType domainType) {
+        Assert.notNull(interfaceType, "Interface type required");
+        createServiceInterface(interfaceType, domainType);
+        createServiceClass(interfaceType, classType);
     }
 }

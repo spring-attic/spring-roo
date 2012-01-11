@@ -28,14 +28,15 @@ public class JavaParserTypeResolutionService implements TypeResolutionService {
         Assert.isTrue(new File(fileIdentifier).isFile(),
                 "The identifier doesn't represent a file");
         try {
-            File file = new File(fileIdentifier);
-            String typeContents = FileUtils.read(file);
-            CompilationUnit compilationUnit = JavaParser
+            final File file = new File(fileIdentifier);
+            final String typeContents = FileUtils.read(file);
+            final CompilationUnit compilationUnit = JavaParser
                     .parse(new ByteArrayInputStream(typeContents.getBytes()));
-            String typeName = fileIdentifier.substring(
+            final String typeName = fileIdentifier.substring(
                     fileIdentifier.lastIndexOf(File.separator) + 1,
                     fileIdentifier.lastIndexOf("."));
-            for (TypeDeclaration typeDeclaration : compilationUnit.getTypes()) {
+            for (final TypeDeclaration typeDeclaration : compilationUnit
+                    .getTypes()) {
                 if (typeName.equals(typeDeclaration.getName())) {
                     return new JavaType(compilationUnit.getPackage().getName()
                             .getName()
@@ -44,7 +45,7 @@ public class JavaParserTypeResolutionService implements TypeResolutionService {
             }
             return null;
         }
-        catch (ParseException e) {
+        catch (final ParseException e) {
             throw new IllegalStateException(e);
         }
     }
@@ -56,20 +57,21 @@ public class JavaParserTypeResolutionService implements TypeResolutionService {
         Assert.isTrue(new File(fileIdentifier).isFile(),
                 "The identifier doesn't represent a file");
         try {
-            File file = new File(fileIdentifier);
-            String typeContents = FileUtils.read(file);
+            final File file = new File(fileIdentifier);
+            final String typeContents = FileUtils.read(file);
             if (StringUtils.isBlank(typeContents)) {
                 return null;
             }
-            CompilationUnit compilationUnit = JavaParser
+            final CompilationUnit compilationUnit = JavaParser
                     .parse(new ByteArrayInputStream(typeContents.getBytes()));
-            if (compilationUnit == null || compilationUnit.getPackage() == null) {
+            if ((compilationUnit == null)
+                    || (compilationUnit.getPackage() == null)) {
                 return null;
             }
             return new JavaPackage(compilationUnit.getPackage().getName()
                     .toString());
         }
-        catch (ParseException e) {
+        catch (final ParseException e) {
             throw new IllegalStateException(e);
         }
     }

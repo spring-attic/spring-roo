@@ -15,7 +15,6 @@ import org.springframework.roo.model.RooJavaType;
  */
 public class EditorAnnotationValues extends AbstractAnnotationValues {
 
-    // From annotation
     @AutoPopulate private JavaType providePropertyEditorFor;
 
     /**
@@ -35,6 +34,6 @@ public class EditorAnnotationValues extends AbstractAnnotationValues {
      * @return <code>null</code> if not set
      */
     public JavaType getEditedType() {
-        return this.providePropertyEditorFor;
+        return providePropertyEditorFor;
     }
 }

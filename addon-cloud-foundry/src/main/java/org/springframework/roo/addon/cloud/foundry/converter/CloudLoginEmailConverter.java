@@ -32,17 +32,17 @@ public class CloudLoginEmailConverter implements Converter<Object> {
         return new CloudLoginEmail(value);
     }
 
-    public boolean supports(final Class<?> requiredType,
-            final String optionContext) {
-        return CloudLoginEmail.class.isAssignableFrom(requiredType);
-    }
-
     public boolean getAllPossibleValues(final List<Completion> completions,
             final Class<?> requiredType, final String existingData,
             final String optionContext, final MethodTarget target) {
-        for (String storedEmail : session.getStoredEmails()) {
+        for (final String storedEmail : session.getStoredEmails()) {
             completions.add(new Completion(storedEmail));
         }
         return false;
+    }
+
+    public boolean supports(final Class<?> requiredType,
+            final String optionContext) {
+        return CloudLoginEmail.class.isAssignableFrom(requiredType);
     }
 }

@@ -205,19 +205,9 @@ enum EntityLayerMethod {
         return null;
     }
 
-    /**
-     * Returns the type of parameters taken by this method
-     * 
-     * @param targetEntity the type of entity being managed
-     * @param idType specifies the ID type used by the target entity (required)
-     * @return a non-<code>null</code> list
-     */
-    protected abstract List<JavaType> getParameterTypes(JavaType targetEntity,
-            JavaType idType);
-
-    // Fields
-    private final boolean isStatic;
     private final String id;
+
+    private final boolean isStatic;
 
     /**
      * Constructor
@@ -228,22 +218,9 @@ enum EntityLayerMethod {
     private EntityLayerMethod(final MethodMetadataCustomDataKey key,
             final boolean isStatic) {
         Assert.notNull(key, "Key is required");
-        this.id = key.name();
+        id = key.name();
         this.isStatic = isStatic;
     }
-
-    /**
-     * Returns the desired name of this method based on the given annotation
-     * values
-     * 
-     * @param annotationValues the values of the {@link RooJpaActiveRecord}
-     *            annotation on the entity type
-     * @param targetEntity the entity type (required)
-     * @param plural the plural form of the entity (required)
-     * @return <code>null</code> if the method isn't desired for that entity
-     */
-    public abstract String getName(JpaCrudAnnotationValues annotationValues,
-            JavaType targetEntity, String plural);
 
     /**
      * Returns the Java snippet that invokes this method, including the target
@@ -260,7 +237,7 @@ enum EntityLayerMethod {
             final JavaType targetEntity, final String plural,
             final List<MethodParameter> callerParameters) {
         final String target;
-        if (this.isStatic) {
+        if (isStatic) {
             target = targetEntity.getSimpleTypeName();
         }
         else {
@@ -298,6 +275,19 @@ enum EntityLayerMethod {
     }
 
     /**
+     * Returns the desired name of this method based on the given annotation
+     * values
+     * 
+     * @param annotationValues the values of the {@link RooJpaActiveRecord}
+     *            annotation on the entity type
+     * @param targetEntity the entity type (required)
+     * @param plural the plural form of the entity (required)
+     * @return <code>null</code> if the method isn't desired for that entity
+     */
+    public abstract String getName(JpaCrudAnnotationValues annotationValues,
+            JavaType targetEntity, String plural);
+
+    /**
      * Returns the parameters to be passed when this method is invoked
      * 
      * @param callerParameters the parameters provided by the caller (required)
@@ -307,12 +297,22 @@ enum EntityLayerMethod {
             final Collection<MethodParameter> callerParameters) {
         final List<MethodParameter> parameters = new ArrayList<MethodParameter>(
                 callerParameters);
-        if (!this.isStatic) {
+        if (!isStatic) {
             parameters.remove(0); // the instance doesn't need itself as a
                                   // parameter
         }
         return parameters;
     }
+
+    /**
+     * Returns the type of parameters taken by this method
+     * 
+     * @param targetEntity the type of entity being managed
+     * @param idType specifies the ID type used by the target entity (required)
+     * @return a non-<code>null</code> list
+     */
+    protected abstract List<JavaType> getParameterTypes(JavaType targetEntity,
+            JavaType idType);
 
     /**
      * Indicates whether this method is static

@@ -26,12 +26,25 @@ import org.springframework.roo.support.util.CollectionUtils;
 @Service
 public class ConnectionProviderImpl implements ConnectionProvider {
 
-    // Constants
-    private static final String USER = "user";
     private static final String PASSWORD = "password";
+    private static final String USER = "user";
 
-    // Fields
     @Reference private JdbcDriverManager jdbcDriverManager;
+
+    public void closeConnection(final Connection connection) {
+        if (connection != null) {
+            try {
+                connection.close();
+            }
+            catch (final SQLException ignored) {
+            }
+        }
+    }
+
+    public Connection getConnection(final Map<String, String> map,
+            final boolean displayAddOns) throws RuntimeException {
+        return getConnection(getProps(map), displayAddOns);
+    }
 
     public Connection getConnection(final Properties props,
             final boolean displayAddOns) throws RuntimeException {
@@ -47,55 +60,42 @@ public class ConnectionProviderImpl implements ConnectionProvider {
             props.put(PASSWORD, props.getProperty("database.password"));
         }
 
-        String driverClassName = props.getProperty("database.driverClassName");
-        Driver driver = jdbcDriverManager.loadDriver(driverClassName,
+        final String driverClassName = props
+                .getProperty("database.driverClassName");
+        final Driver driver = jdbcDriverManager.loadDriver(driverClassName,
                 displayAddOns);
         Assert.notNull(driver, "JDBC driver not available for '"
                 + driverClassName + "'");
         try {
             return driver.connect(props.getProperty("database.url"), props);
         }
-        catch (SQLException e) {
+        catch (final SQLException e) {
             throw new IllegalStateException(
                     "Unable to get connection from driver: " + e.getMessage(),
                     e);
         }
-    }
-
-    public Connection getConnection(final Map<String, String> map,
-            final boolean displayAddOns) throws RuntimeException {
-        return getConnection(getProps(map), displayAddOns);
     }
 
     public Connection getConnectionViaJndiDataSource(
             final String jndiDataSource, final Map<String, String> map,
             final boolean displayAddOns) throws RuntimeException {
         try {
-            InitialContext context = new InitialContext(getProps(map));
-            DataSource dataSource = (DataSource) context.lookup(jndiDataSource);
+            final InitialContext context = new InitialContext(getProps(map));
+            final DataSource dataSource = (DataSource) context
+                    .lookup(jndiDataSource);
             return dataSource.getConnection();
         }
-        catch (Exception e) {
+        catch (final Exception e) {
             throw new IllegalStateException(
                     "Unable to get connection from driver: " + e.getMessage(),
                     e);
         }
     }
 
-    public void closeConnection(final Connection connection) {
-        if (connection != null) {
-            try {
-                connection.close();
-            }
-            catch (SQLException ignored) {
-            }
-        }
-    }
-
     private Properties getProps(final Map<String, String> map) {
         Assert.isTrue(!CollectionUtils.isEmpty(map),
                 "Connection properties map must not be null or empty");
-        Properties props = new Properties();
+        final Properties props = new Properties();
         props.putAll(map);
         return props;
     }

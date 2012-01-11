@@ -15,10 +15,9 @@ import org.springframework.roo.support.util.Assert;
  */
 public class UndoableMonitoringRequest implements UndoableOperation {
 
-    // Fields
+    private final boolean add;
     private final FileMonitorService fileMonitorService;
     private final MonitoringRequest monitoringRequest;
-    private final boolean add;
     private boolean resetRequired;
 
     public UndoableMonitoringRequest(final UndoManager undoManager,
@@ -57,7 +56,7 @@ public class UndoableMonitoringRequest implements UndoableOperation {
             }
             return true;
         }
-        catch (RuntimeException e) {
+        catch (final RuntimeException e) {
             return false;
         }
     }

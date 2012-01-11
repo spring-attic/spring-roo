@@ -15,7 +15,19 @@ import org.w3c.dom.Element;
  */
 public class XmlTemplate {
 
-    // Fields
+    public interface DomElementCallback {
+
+        /**
+         * Use this method to provide logic for updating a {@link Document}.
+         * 
+         * @param document the document
+         * @param rootElement the root element of the document.
+         * @return true if any changes were made that require saving, false
+         *         otherwise
+         */
+        boolean doWithElement(Document document, Element rootElement);
+    }
+
     private final FileManager fileManager;
 
     public XmlTemplate(final FileManager fileManager) {
@@ -33,26 +45,13 @@ public class XmlTemplate {
      */
     public void update(final String resolvedPathIdentifier,
             final DomElementCallback rootElementCallback) {
-        Document document = XmlUtils.readXml(fileManager
+        final Document document = XmlUtils.readXml(fileManager
                 .getInputStream(resolvedPathIdentifier));
-        Element root = document.getDocumentElement();
+        final Element root = document.getDocumentElement();
         if (rootElementCallback.doWithElement(document, root)) {
             fileManager.createOrUpdateTextFileIfRequired(
                     resolvedPathIdentifier, XmlUtils.nodeToString(document),
                     false);
         }
-    }
-
-    public interface DomElementCallback {
-
-        /**
-         * Use this method to provide logic for updating a {@link Document}.
-         * 
-         * @param document the document
-         * @param rootElement the root element of the document.
-         * @return true if any changes were made that require saving, false
-         *         otherwise
-         */
-        boolean doWithElement(Document document, Element rootElement);
     }
 }

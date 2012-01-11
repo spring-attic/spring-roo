@@ -35,39 +35,25 @@ import org.springframework.roo.model.JavaType;
         JavaParser.class, JavaParserUtils.class })
 public class JavaParserTypeParsingServiceTest {
 
-    // Constants
     private static final String DECLARED_BY_MID = "MID:foo#bar";
     private static final String EMPTY_FILE = "package com.example;";
-
-    // Fixture
-    private JavaParserTypeParsingService typeParsingService;
-    @Mock private MetadataService mockMetadataService;
-    @Mock private TypeLocationService mockTypeLocationService;
-
-    @Before
-    public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
-        this.typeParsingService = new JavaParserTypeParsingService();
-        this.typeParsingService.metadataService = mockMetadataService;
-        this.typeParsingService.typeLocationService = mockTypeLocationService;
-    }
-
-    @Test
-    public void testGetTypeFromStringWhenFileContainsNoTypes() {
-        // Set up
-        final JavaType mockTargetType = mock(JavaType.class);
-
-        // Invoke
-        final ClassOrInterfaceTypeDetails locatedType = typeParsingService
-                .getTypeFromString(EMPTY_FILE, DECLARED_BY_MID, mockTargetType);
-
-        // Check
-        assertNull(locatedType);
-    }
 
     private static final String SOURCE_FILE = "package com.example;" + ""
             + "public class MyClass {}" + "" + "class TargetClass {}" + ""
             + "class OtherClass {}";
+    @Mock private MetadataService mockMetadataService;
+    @Mock private TypeLocationService mockTypeLocationService;
+
+    // Fixture
+    private JavaParserTypeParsingService typeParsingService;
+
+    @Before
+    public void setUp() throws Exception {
+        MockitoAnnotations.initMocks(this);
+        typeParsingService = new JavaParserTypeParsingService();
+        typeParsingService.metadataService = mockMetadataService;
+        typeParsingService.typeLocationService = mockTypeLocationService;
+    }
 
     @Test
     public void testGetTypeFromStringWhenFileContainsNoSuchType() {
@@ -78,6 +64,19 @@ public class JavaParserTypeParsingServiceTest {
         // Invoke
         final ClassOrInterfaceTypeDetails locatedType = typeParsingService
                 .getTypeFromString(SOURCE_FILE, DECLARED_BY_MID, mockTargetType);
+
+        // Check
+        assertNull(locatedType);
+    }
+
+    @Test
+    public void testGetTypeFromStringWhenFileContainsNoTypes() {
+        // Set up
+        final JavaType mockTargetType = mock(JavaType.class);
+
+        // Invoke
+        final ClassOrInterfaceTypeDetails locatedType = typeParsingService
+                .getTypeFromString(EMPTY_FILE, DECLARED_BY_MID, mockTargetType);
 
         // Check
         assertNull(locatedType);

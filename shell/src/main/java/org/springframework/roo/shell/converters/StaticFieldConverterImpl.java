@@ -22,7 +22,6 @@ import org.springframework.roo.support.util.StringUtils;
  */
 public class StaticFieldConverterImpl implements StaticFieldConverter {
 
-    // Fields
     private final Map<Class<?>, Map<String, Field>> fields = new HashMap<Class<?>, Map<String, Field>>();
 
     public void add(final Class<?> clazz) {

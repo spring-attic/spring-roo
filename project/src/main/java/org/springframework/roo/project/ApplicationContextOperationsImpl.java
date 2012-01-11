@@ -25,14 +25,13 @@ import org.w3c.dom.Element;
 public class ApplicationContextOperationsImpl implements
         ApplicationContextOperations {
 
-    // Fields
     @Reference private FileManager fileManager;
     @Reference private MetadataService metadataService;
     @Reference private PathResolver pathResolver;
 
     public void createMiddleTierApplicationContext(
             final JavaPackage topLevelPackage, final String moduleName) {
-        ProjectMetadata projectMetadata = (ProjectMetadata) metadataService
+        final ProjectMetadata projectMetadata = (ProjectMetadata) metadataService
                 .get(ProjectMetadata.getProjectIdentifier(moduleName));
         Assert.notNull(projectMetadata,
                 "Project metadata required for module '" + moduleName + "'");

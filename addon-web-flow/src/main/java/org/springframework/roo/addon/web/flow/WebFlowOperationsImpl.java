@@ -39,7 +39,6 @@ import org.w3c.dom.Element;
 @Service
 public class WebFlowOperationsImpl implements WebFlowOperations {
 
-    // Fields
     @Reference private FileManager fileManager;
     @Reference private JspOperations jspOperations;
     @Reference private MenuOperations menuOperations;
@@ -48,11 +47,28 @@ public class WebFlowOperationsImpl implements WebFlowOperations {
     @Reference private TilesOperations tilesOperations;
     @Reference private WebMvcOperations webMvcOperations;
 
-    public boolean isWebFlowInstallationPossible() {
-        return projectOperations
-                .isFeatureInstalledInFocusedModule(FeatureNames.MVC)
-                && !projectOperations
-                        .isFeatureInstalledInFocusedModule(FeatureNames.JSF);
+    private void copyTemplate(final String templateFileName,
+            final String resolvedTargetDirectoryPath) {
+        try {
+            FileCopyUtils.copy(
+                    FileUtils.getInputStream(getClass(), templateFileName),
+                    fileManager.createFile(
+                            resolvedTargetDirectoryPath + "/"
+                                    + templateFileName).getOutputStream());
+        }
+        catch (final IOException e) {
+            throw new IllegalStateException(
+                    "Encountered an error during copying of resources for Web Flow addon.",
+                    e);
+        }
+    }
+
+    private String getFlowId(String flowName) {
+        flowName = StringUtils.defaultIfEmpty(flowName, "sample-flow");
+        if (flowName.startsWith("/")) {
+            flowName = flowName.substring(1);
+        }
+        return flowName.replaceAll("[^a-zA-Z/_]", "");
     }
 
     /**
@@ -62,10 +78,11 @@ public class WebFlowOperationsImpl implements WebFlowOperations {
         installWebFlowConfiguration();
 
         final String flowId = getFlowId(flowName);
-        String webRelativeFlowPath = "/WEB-INF/views/" + flowId;
-        String resolvedFlowPath = pathResolver.getFocusedIdentifier(
+        final String webRelativeFlowPath = "/WEB-INF/views/" + flowId;
+        final String resolvedFlowPath = pathResolver.getFocusedIdentifier(
                 Path.SRC_MAIN_WEBAPP, webRelativeFlowPath);
-        String resolvedFlowDefinitionPath = resolvedFlowPath + "/flow.xml";
+        final String resolvedFlowDefinitionPath = resolvedFlowPath
+                + "/flow.xml";
 
         if (fileManager.exists(resolvedFlowPath)) {
             throw new IllegalStateException("Flow directory already exists: "
@@ -82,9 +99,9 @@ public class WebFlowOperationsImpl implements WebFlowOperations {
                 new DomElementCallback() {
                     public boolean doWithElement(final Document document,
                             final Element root) {
-                        List<Element> states = XmlUtils.findElements(
+                        final List<Element> states = XmlUtils.findElements(
                                 "/flow/view-state|end-state", root);
-                        for (Element state : states) {
+                        for (final Element state : states) {
                             state.setAttribute("view",
                                     flowId + "/" + state.getAttribute("id"));
                         }
@@ -92,9 +109,9 @@ public class WebFlowOperationsImpl implements WebFlowOperations {
                     }
                 });
 
-        JavaSymbolName flowMenuCategory = new JavaSymbolName("Flows");
-        JavaSymbolName flowMenuName = new JavaSymbolName(flowId.replace("/",
-                "_"));
+        final JavaSymbolName flowMenuCategory = new JavaSymbolName("Flows");
+        final JavaSymbolName flowMenuName = new JavaSymbolName(flowId.replace(
+                "/", "_"));
         menuOperations.addMenuItem(flowMenuCategory, flowMenuName,
                 flowMenuName.getReadableSymbolName(), "webflow_menu_enter", "/"
                         + flowId, null,
@@ -110,8 +127,8 @@ public class WebFlowOperationsImpl implements WebFlowOperations {
     }
 
     private void installWebFlowConfiguration() {
-        String resolvedSpringConfigPath = pathResolver.getFocusedIdentifier(
-                Path.SRC_MAIN_WEBAPP, "WEB-INF/spring");
+        final String resolvedSpringConfigPath = pathResolver
+                .getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/spring");
         if (fileManager
                 .exists(resolvedSpringConfigPath + "/webflow-config.xml")) {
             return;
@@ -119,7 +136,7 @@ public class WebFlowOperationsImpl implements WebFlowOperations {
 
         copyTemplate("webflow-config.xml", resolvedSpringConfigPath);
 
-        String webMvcConfigPath = resolvedSpringConfigPath
+        final String webMvcConfigPath = resolvedSpringConfigPath
                 + "/webmvc-config.xml";
         if (!fileManager.exists(webMvcConfigPath)) {
             webMvcOperations.installAllWebMvcArtifacts();
@@ -135,7 +152,7 @@ public class WebFlowOperationsImpl implements WebFlowOperations {
                                 .findFirstElement(
                                         "/beans/import[@resource='webflow-config.xml']",
                                         root)) {
-                            Element importSWF = document
+                            final Element importSWF = document
                                     .createElement("import");
                             importSWF.setAttribute("resource",
                                     "webflow-config.xml");
@@ -147,8 +164,15 @@ public class WebFlowOperationsImpl implements WebFlowOperations {
                 });
     }
 
+    public boolean isWebFlowInstallationPossible() {
+        return projectOperations
+                .isFeatureInstalledInFocusedModule(FeatureNames.MVC)
+                && !projectOperations
+                        .isFeatureInstalledInFocusedModule(FeatureNames.JSF);
+    }
+
     private void updateConfiguration() {
-        Element configuration = XmlUtils.getConfiguration(getClass());
+        final Element configuration = XmlUtils.getConfiguration(getClass());
         final String focusedModuleName = projectOperations
                 .getFocusedModuleName();
 
@@ -171,29 +195,5 @@ public class WebFlowOperationsImpl implements WebFlowOperations {
                 .addRepositories(focusedModuleName, repositoryElements);
 
         projectOperations.updateProjectType(focusedModuleName, ProjectType.WAR);
-    }
-
-    private String getFlowId(String flowName) {
-        flowName = StringUtils.defaultIfEmpty(flowName, "sample-flow");
-        if (flowName.startsWith("/")) {
-            flowName = flowName.substring(1);
-        }
-        return flowName.replaceAll("[^a-zA-Z/_]", "");
-    }
-
-    private void copyTemplate(final String templateFileName,
-            final String resolvedTargetDirectoryPath) {
-        try {
-            FileCopyUtils.copy(
-                    FileUtils.getInputStream(getClass(), templateFileName),
-                    fileManager.createFile(
-                            resolvedTargetDirectoryPath + "/"
-                                    + templateFileName).getOutputStream());
-        }
-        catch (IOException e) {
-            throw new IllegalStateException(
-                    "Encountered an error during copying of resources for Web Flow addon.",
-                    e);
-        }
     }
 }

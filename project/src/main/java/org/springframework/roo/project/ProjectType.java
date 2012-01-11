@@ -16,7 +16,6 @@ public class ProjectType {
     public static final ProjectType JAR = new ProjectType("jar");
     public static final ProjectType WAR = new ProjectType("war");
 
-    // Fields
     private final String name;
 
     /**
@@ -33,20 +32,20 @@ public class ProjectType {
      * Returns the name of this type of project
      * 
      * @return a non-blank name
-     * @deprecated use {@link #getName()} instead
+     * @since 1.2.0
      */
-    @Deprecated
-    public String getType() {
-        return getName();
+    public String getName() {
+        return name;
     }
 
     /**
      * Returns the name of this type of project
      * 
      * @return a non-blank name
-     * @since 1.2.0
+     * @deprecated use {@link #getName()} instead
      */
-    public String getName() {
-        return name;
+    @Deprecated
+    public String getType() {
+        return getName();
     }
 }

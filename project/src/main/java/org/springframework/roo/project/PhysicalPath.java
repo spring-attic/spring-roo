@@ -17,10 +17,9 @@ import org.springframework.roo.support.util.FileUtils;
  */
 public class PhysicalPath {
 
-    // Fields
-    private final LogicalPath logicalPath;
-    private final File location;
     private final String canonicalPath;
+    private final File location;
+    private final LogicalPath logicalPath;
 
     /**
      * Constructor
@@ -31,22 +30,9 @@ public class PhysicalPath {
     public PhysicalPath(final LogicalPath logicalPath, final File location) {
         Assert.notNull(logicalPath, "Module path required");
         Assert.notNull(location, "Location required");
-        this.canonicalPath = FileUtils.getCanonicalPath(location);
+        canonicalPath = FileUtils.getCanonicalPath(location);
         this.logicalPath = logicalPath;
         this.location = location;
-    }
-
-    public LogicalPath getLogicalPath() {
-        return logicalPath;
-    }
-
-    /**
-     * Indicates whether this path contains Java source code
-     * 
-     * @return see above
-     */
-    public boolean isSource() {
-        return logicalPath.getPath().isJavaSource();
     }
 
     /**
@@ -67,13 +53,26 @@ public class PhysicalPath {
         return canonicalPath;
     }
 
+    public LogicalPath getLogicalPath() {
+        return logicalPath;
+    }
+
     public Path getPath() {
         return logicalPath.getPath();
     }
 
+    /**
+     * Indicates whether this path contains Java source code
+     * 
+     * @return see above
+     */
+    public boolean isSource() {
+        return logicalPath.getPath().isJavaSource();
+    }
+
     @Override
     public final String toString() {
-        ToStringCreator tsc = new ToStringCreator(this);
+        final ToStringCreator tsc = new ToStringCreator(this);
         tsc.append("logicalPath", logicalPath);
         tsc.append("location", location);
         return tsc.toString();

@@ -31,20 +31,20 @@ public class PathConverter implements Converter<Path> {
         return Path.valueOf(value);
     }
 
-    public boolean supports(final Class<?> requiredType,
-            final String optionContext) {
-        return Path.class.isAssignableFrom(requiredType);
-    }
-
     public boolean getAllPossibleValues(final List<Completion> completions,
             final Class<?> requiredType, final String existingData,
             final String optionContext, final MethodTarget target) {
-        for (Path candidate : Path.values()) {
+        for (final Path candidate : Path.values()) {
             if ("".equals(existingData)
                     || candidate.name().startsWith(existingData)) {
                 completions.add(new Completion(candidate.name()));
             }
         }
         return true;
+    }
+
+    public boolean supports(final Class<?> requiredType,
+            final String optionContext) {
+        return Path.class.isAssignableFrom(requiredType);
     }
 }

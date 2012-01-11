@@ -37,14 +37,14 @@ public class AnsiEscapeCodeTest {
     }
 
     @Test
-    public void testDecorateNullText() {
-        assertNull(AnsiEscapeCode.decorate(null, AnsiEscapeCode.values()[0]));
-    }
-
-    @Test
     public void testDecorateEmptyText() {
         assertEquals("",
                 AnsiEscapeCode.decorate("", AnsiEscapeCode.values()[0]));
+    }
+
+    @Test
+    public void testDecorateNullText() {
+        assertNull(AnsiEscapeCode.decorate(null, AnsiEscapeCode.values()[0]));
     }
 
     @Test

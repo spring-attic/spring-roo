@@ -7,7 +7,7 @@ package org.springframework.roo.url.stream;
  * @author Ben Alex
  * @since 1.1.1
  */
-public abstract class UrlInputStreamUtils {
+public final class UrlInputStreamUtils {
 
     private static final String LINE_SEPARATOR = System
             .getProperty("line.separator");
@@ -20,4 +20,6 @@ public abstract class UrlInputStreamUtils {
             + "type 'download status' and press ENTER for further information."
             + LINE_SEPARATOR;
 
+    private UrlInputStreamUtils() {
+    }
 }

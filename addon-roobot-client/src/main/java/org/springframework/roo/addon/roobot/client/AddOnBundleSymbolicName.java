@@ -23,30 +23,31 @@ public class AddOnBundleSymbolicName implements
         this.key = key;
     }
 
-    @Override
-    public final int hashCode() {
-        return this.key.hashCode();
+    public final int compareTo(final AddOnBundleSymbolicName o) {
+        if (o == null) {
+            return -1;
+        }
+        return key.compareTo(o.key);
     }
 
     @Override
     public final boolean equals(final Object obj) {
-        return obj instanceof AddOnBundleSymbolicName
-                && this.compareTo((AddOnBundleSymbolicName) obj) == 0;
-    }
-
-    public final int compareTo(final AddOnBundleSymbolicName o) {
-        if (o == null)
-            return -1;
-        return this.key.compareTo(o.key);
+        return (obj instanceof AddOnBundleSymbolicName)
+                && (compareTo((AddOnBundleSymbolicName) obj) == 0);
     }
 
     public String getKey() {
-        return this.key;
+        return key;
+    }
+
+    @Override
+    public final int hashCode() {
+        return key.hashCode();
     }
 
     @Override
     public String toString() {
-        ToStringCreator tsc = new ToStringCreator(this);
+        final ToStringCreator tsc = new ToStringCreator(this);
         tsc.append("key", key);
         return tsc.toString();
     }

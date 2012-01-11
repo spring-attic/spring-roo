@@ -20,22 +20,14 @@ import org.springframework.roo.shell.CommandMarker;
 @Service
 public class WebJsonCommands implements CommandMarker {
 
-    // Fields
     @Reference private WebJsonOperations webJsonOperations;
 
-    @CliAvailabilityIndicator({ "web mvc json setup" })
-    public boolean isSetupAvailable() {
-        return webJsonOperations.isWebJsonInstallationPossible();
-    }
+    @CliCommand(value = "web mvc json add", help = "Adds @RooJson annotation to target type")
+    public void add(
+            @CliOption(key = "jsonObject", mandatory = true, help = "The JSON-enabled object which backs this Spring MVC controller.") final JavaType jsonObject,
+            @CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*", optionContext = "update,project", help = "The java type to apply this annotation to") final JavaType target) {
 
-    @CliAvailabilityIndicator({ "web mvc json add", "web mvc json all" })
-    public boolean isCommandAvailable() {
-        return webJsonOperations.isWebJsonCommandAvailable();
-    }
-
-    @CliCommand(value = "web mvc json setup", help = "Set up Spring MVC to support JSON")
-    public void setup() {
-        webJsonOperations.setup();
+        webJsonOperations.annotateType(target, jsonObject);
     }
 
     @CliCommand(value = "web mvc json all", help = "Adds or creates MVC controllers annotated with @RooWebJson annotation")
@@ -45,11 +37,18 @@ public class WebJsonCommands implements CommandMarker {
         webJsonOperations.annotateAll(javaPackage);
     }
 
-    @CliCommand(value = "web mvc json add", help = "Adds @RooJson annotation to target type")
-    public void add(
-            @CliOption(key = "jsonObject", mandatory = true, help = "The JSON-enabled object which backs this Spring MVC controller.") final JavaType jsonObject,
-            @CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*", optionContext = "update,project", help = "The java type to apply this annotation to") final JavaType target) {
+    @CliAvailabilityIndicator({ "web mvc json add", "web mvc json all" })
+    public boolean isCommandAvailable() {
+        return webJsonOperations.isWebJsonCommandAvailable();
+    }
 
-        webJsonOperations.annotateType(target, jsonObject);
+    @CliAvailabilityIndicator({ "web mvc json setup" })
+    public boolean isSetupAvailable() {
+        return webJsonOperations.isWebJsonInstallationPossible();
+    }
+
+    @CliCommand(value = "web mvc json setup", help = "Set up Spring MVC to support JSON")
+    public void setup() {
+        webJsonOperations.setup();
     }
 }

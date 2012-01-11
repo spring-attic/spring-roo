@@ -27,14 +27,14 @@ public abstract class AbstractIdentifiableAnnotatedJavaStructureBuilder<T extend
     private List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 
     protected AbstractIdentifiableAnnotatedJavaStructureBuilder(
-            final String declaredbyMetadataId) {
-        super(declaredbyMetadataId);
-    }
-
-    protected AbstractIdentifiableAnnotatedJavaStructureBuilder(
             final IdentifiableAnnotatedJavaStructure existing) {
         super(existing);
         init(existing);
+    }
+
+    protected AbstractIdentifiableAnnotatedJavaStructureBuilder(
+            final String declaredbyMetadataId) {
+        super(declaredbyMetadataId);
     }
 
     protected AbstractIdentifiableAnnotatedJavaStructureBuilder(
@@ -44,60 +44,64 @@ public abstract class AbstractIdentifiableAnnotatedJavaStructureBuilder<T extend
         init(existing);
     }
 
-    private void init(final IdentifiableAnnotatedJavaStructure existing) {
-        for (AnnotationMetadata element : existing.getAnnotations()) {
-            this.annotations.add(new AnnotationMetadataBuilder(element));
-        }
-    }
-
     public final boolean addAnnotation(
             final AnnotationMetadata annotationMetadata) {
-        if (annotationMetadata == null)
+        if (annotationMetadata == null) {
             return false;
+        }
         return addAnnotation(new AnnotationMetadataBuilder(annotationMetadata));
     }
 
     public final boolean addAnnotation(
             final AnnotationMetadataBuilder annotationBuilder) {
-        if (annotationBuilder == null)
+        if (annotationBuilder == null) {
             return false;
+        }
         onAddAnnotation(annotationBuilder);
         return annotations.add(annotationBuilder);
     }
 
-    protected void onAddAnnotation(
-            final AnnotationMetadataBuilder annotationMetadata) {
+    public final List<AnnotationMetadata> buildAnnotations() {
+        final List<AnnotationMetadata> result = new ArrayList<AnnotationMetadata>();
+        for (final AnnotationMetadataBuilder annotationBuilder : annotations) {
+            result.add(annotationBuilder.build());
+        }
+        return result;
     }
 
     public final List<AnnotationMetadataBuilder> getAnnotations() {
         return annotations;
     }
 
-    public final List<AnnotationMetadata> buildAnnotations() {
-        List<AnnotationMetadata> result = new ArrayList<AnnotationMetadata>();
-        for (AnnotationMetadataBuilder annotationBuilder : annotations) {
-            result.add(annotationBuilder.build());
+    /**
+     * Locates the specified type-level annotation.
+     * 
+     * @param type to locate (can be <code>null</code>)
+     * @return the annotation, or null if not found
+     * @since 1.2.0
+     */
+    public AnnotationMetadataBuilder getDeclaredTypeAnnotation(
+            final JavaType type) {
+        for (final AnnotationMetadataBuilder annotationBuilder : getAnnotations()) {
+            if (annotationBuilder.getAnnotationType().equals(type)) {
+                return annotationBuilder;
+            }
         }
-        return result;
+        return null;
     }
 
-    public final void setAnnotations(
-            final List<AnnotationMetadataBuilder> annotations) {
-        this.annotations = annotations;
+    private void init(final IdentifiableAnnotatedJavaStructure existing) {
+        for (final AnnotationMetadata element : existing.getAnnotations()) {
+            this.annotations.add(new AnnotationMetadataBuilder(element));
+        }
     }
 
-    public final void setAnnotations(
-            final Collection<AnnotationMetadata> annotations) {
-        List<AnnotationMetadataBuilder> annotationBuilders = new ArrayList<AnnotationMetadataBuilder>();
-        for (AnnotationMetadata annotationMetadata : annotations) {
-            annotationBuilders.add(new AnnotationMetadataBuilder(
-                    annotationMetadata));
-        }
-        setAnnotations(annotationBuilders);
+    protected void onAddAnnotation(
+            final AnnotationMetadataBuilder annotationMetadata) {
     }
 
     public void removeAnnotation(final JavaType annotationType) {
-        for (AnnotationMetadataBuilder annotationMetadataBuilder : annotations) {
+        for (final AnnotationMetadataBuilder annotationMetadataBuilder : annotations) {
             if (annotationMetadataBuilder.getAnnotationType().equals(
                     annotationType)) {
                 annotations.remove(annotationMetadataBuilder);
@@ -106,9 +110,19 @@ public abstract class AbstractIdentifiableAnnotatedJavaStructureBuilder<T extend
         }
     }
 
-    public boolean updateTypeAnnotation(
-            final AnnotationMetadataBuilder annotationBuilder) {
-        return updateTypeAnnotation(annotationBuilder.build());
+    public final void setAnnotations(
+            final Collection<AnnotationMetadata> annotations) {
+        final List<AnnotationMetadataBuilder> annotationBuilders = new ArrayList<AnnotationMetadataBuilder>();
+        for (final AnnotationMetadata annotationMetadata : annotations) {
+            annotationBuilders.add(new AnnotationMetadataBuilder(
+                    annotationMetadata));
+        }
+        setAnnotations(annotationBuilders);
+    }
+
+    public final void setAnnotations(
+            final List<AnnotationMetadataBuilder> annotations) {
+        this.annotations = annotations;
     }
 
     public boolean updateTypeAnnotation(final AnnotationMetadata annotation) {
@@ -122,28 +136,28 @@ public abstract class AbstractIdentifiableAnnotatedJavaStructureBuilder<T extend
         // We are going to build a replacement AnnotationMetadata.
         // This variable tracks the new attribute values the replacement will
         // hold.
-        Map<JavaSymbolName, AnnotationAttributeValue<?>> replacementAttributeValues = new LinkedHashMap<JavaSymbolName, AnnotationAttributeValue<?>>();
+        final Map<JavaSymbolName, AnnotationAttributeValue<?>> replacementAttributeValues = new LinkedHashMap<JavaSymbolName, AnnotationAttributeValue<?>>();
 
-        AnnotationMetadataBuilder existingBuilder = getDeclaredTypeAnnotation(annotation
+        final AnnotationMetadataBuilder existingBuilder = getDeclaredTypeAnnotation(annotation
                 .getAnnotationType());
 
         if (existingBuilder == null) {
             // Not already present, so just go and add it
-            for (JavaSymbolName incomingAttributeName : annotation
+            for (final JavaSymbolName incomingAttributeName : annotation
                     .getAttributeNames()) {
                 // Do not copy incoming attributes which exist in the
                 // attributesToDeleteIfPresent Set
-                if (attributesToDeleteIfPresent == null
+                if ((attributesToDeleteIfPresent == null)
                         || !attributesToDeleteIfPresent
                                 .contains(incomingAttributeName)) {
-                    AnnotationAttributeValue<?> incomingValue = annotation
+                    final AnnotationAttributeValue<?> incomingValue = annotation
                             .getAttribute(incomingAttributeName);
                     replacementAttributeValues.put(incomingAttributeName,
                             incomingValue);
                 }
             }
 
-            AnnotationMetadataBuilder replacement = new AnnotationMetadataBuilder(
+            final AnnotationMetadataBuilder replacement = new AnnotationMetadataBuilder(
                     annotation.getAnnotationType(),
                     new ArrayList<AnnotationAttributeValue<?>>(
                             replacementAttributeValues.values()));
@@ -151,18 +165,18 @@ public abstract class AbstractIdentifiableAnnotatedJavaStructureBuilder<T extend
             return true;
         }
 
-        AnnotationMetadata existing = existingBuilder.build();
+        final AnnotationMetadata existing = existingBuilder.build();
 
         // Copy the existing attributes into the new attributes
-        for (JavaSymbolName existingAttributeName : existing
+        for (final JavaSymbolName existingAttributeName : existing
                 .getAttributeNames()) {
-            if (attributesToDeleteIfPresent != null
+            if ((attributesToDeleteIfPresent != null)
                     && attributesToDeleteIfPresent
                             .contains(existingAttributeName)) {
                 hasChanged = true;
             }
             else {
-                AnnotationAttributeValue<?> existingValue = existing
+                final AnnotationAttributeValue<?> existingValue = existing
                         .getAttribute(existingAttributeName);
                 replacementAttributeValues.put(existingAttributeName,
                         existingValue);
@@ -170,9 +184,9 @@ public abstract class AbstractIdentifiableAnnotatedJavaStructureBuilder<T extend
         }
 
         // Now we ensure every incoming attribute replaces the existing
-        for (JavaSymbolName incomingAttributeName : annotation
+        for (final JavaSymbolName incomingAttributeName : annotation
                 .getAttributeNames()) {
-            AnnotationAttributeValue<?> incomingValue = annotation
+            final AnnotationAttributeValue<?> incomingValue = annotation
                     .getAttribute(incomingAttributeName);
 
             // Add this attribute to the end of the list if the attribute is not
@@ -181,7 +195,7 @@ public abstract class AbstractIdentifiableAnnotatedJavaStructureBuilder<T extend
                     incomingAttributeName)) {
                 // There was already an attribute. Need to determine if this new
                 // attribute value is materially different
-                AnnotationAttributeValue<?> existingValue = replacementAttributeValues
+                final AnnotationAttributeValue<?> existingValue = replacementAttributeValues
                         .get(incomingAttributeName);
                 Assert.notNull(existingValue,
                         "Existing value should have been provided by earlier loop");
@@ -191,7 +205,7 @@ public abstract class AbstractIdentifiableAnnotatedJavaStructureBuilder<T extend
                     hasChanged = true;
                 }
             }
-            else if (attributesToDeleteIfPresent == null
+            else if ((attributesToDeleteIfPresent == null)
                     || !attributesToDeleteIfPresent
                             .contains(incomingAttributeName)) {
                 // This is a new attribute that does not already exist, so add
@@ -207,7 +221,7 @@ public abstract class AbstractIdentifiableAnnotatedJavaStructureBuilder<T extend
         }
 
         // Make a new AnnotationMetadata representing the replacement
-        AnnotationMetadataBuilder replacement = new AnnotationMetadataBuilder(
+        final AnnotationMetadataBuilder replacement = new AnnotationMetadataBuilder(
                 annotation.getAnnotationType(),
                 new ArrayList<AnnotationAttributeValue<?>>(
                         replacementAttributeValues.values()));
@@ -217,20 +231,8 @@ public abstract class AbstractIdentifiableAnnotatedJavaStructureBuilder<T extend
         return true;
     }
 
-    /**
-     * Locates the specified type-level annotation.
-     * 
-     * @param type to locate (can be <code>null</code>)
-     * @return the annotation, or null if not found
-     * @since 1.2.0
-     */
-    public AnnotationMetadataBuilder getDeclaredTypeAnnotation(
-            final JavaType type) {
-        for (AnnotationMetadataBuilder annotationBuilder : getAnnotations()) {
-            if (annotationBuilder.getAnnotationType().equals(type)) {
-                return annotationBuilder;
-            }
-        }
-        return null;
+    public boolean updateTypeAnnotation(
+            final AnnotationMetadataBuilder annotationBuilder) {
+        return updateTypeAnnotation(annotationBuilder.build());
     }
 }

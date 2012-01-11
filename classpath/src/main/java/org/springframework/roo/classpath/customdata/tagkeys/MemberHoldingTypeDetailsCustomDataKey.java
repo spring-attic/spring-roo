@@ -18,17 +18,17 @@ public class MemberHoldingTypeDetailsCustomDataKey implements
         this.name = name;
     }
 
-    @Override
-    public String toString() {
-        return name;
-    }
-
     public boolean meets(final MemberHoldingTypeDetails memberHoldingTypeDetails)
             throws IllegalStateException {
         return true;
     }
 
     public String name() {
+        return name;
+    }
+
+    @Override
+    public String toString() {
         return name;
     }
 }

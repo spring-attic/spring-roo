@@ -22,24 +22,14 @@ import org.springframework.roo.model.JdkJavaType;
  */
 public class SerializableMetadataTest {
 
-    // Constants
     private static final String METADATA_ID = "MID:org.springframework.roo.addon.serializable.SerializableMetadata#SRC_MAIN_JAVA?com.example.Person";
 
+    @Mock private JavaType mockAspectName;
     // Fixture
     @Mock private ClassOrInterfaceTypeDetails mockClassDetails;
-    @Mock private JavaPackage mockPackage;
-    @Mock private JavaType mockAspectName;
-    @Mock private JavaType mockTargetType;
     @Mock private PhysicalTypeMetadata mockGovernor;
-
-    @Before
-    public void setUp() {
-        MockitoAnnotations.initMocks(this);
-        when(mockAspectName.getPackage()).thenReturn(mockPackage);
-        when(mockClassDetails.getName()).thenReturn(mockTargetType);
-        when(mockGovernor.getMemberHoldingTypeDetails()).thenReturn(
-                mockClassDetails);
-    }
+    @Mock private JavaPackage mockPackage;
+    @Mock private JavaType mockTargetType;
 
     /**
      * Asserts that the ITD has the expected contents when the governor does or
@@ -70,9 +60,13 @@ public class SerializableMetadataTest {
                 .size());
     }
 
-    @Test
-    public void testWhenGovernorIsAlreadyFullySerializable() {
-        assertItdContents(true, true);
+    @Before
+    public void setUp() {
+        MockitoAnnotations.initMocks(this);
+        when(mockAspectName.getPackage()).thenReturn(mockPackage);
+        when(mockClassDetails.getName()).thenReturn(mockTargetType);
+        when(mockGovernor.getMemberHoldingTypeDetails()).thenReturn(
+                mockClassDetails);
     }
 
     @Test
@@ -83,6 +77,11 @@ public class SerializableMetadataTest {
     @Test
     public void testWhenGovernorAlreadyImplementsSerializable() {
         assertItdContents(true, false);
+    }
+
+    @Test
+    public void testWhenGovernorIsAlreadyFullySerializable() {
+        assertItdContents(true, true);
     }
 
     @Test

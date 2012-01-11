@@ -34,12 +34,11 @@ import org.springframework.roo.support.util.Assert;
  */
 public class DeferredLogHandler extends Handler {
 
-    // Fields
+    private final Handler fallbackHandler;
+    private boolean fallbackMode = false;
+    private final Level fallbackPushLevel;
     private final List<LogRecord> logRecords = Collections
             .synchronizedList(new ArrayList<LogRecord>());
-    private final Handler fallbackHandler;
-    private final Level fallbackPushLevel;
-    private boolean fallbackMode = false;
     private Handler targetHandler;
 
     /**
@@ -86,6 +85,14 @@ public class DeferredLogHandler extends Handler {
     }
 
     /**
+     * @return the target {@link Handler}, or null if there is no target
+     *         {@link Handler} defined so far
+     */
+    public Handler getTargetHandler() {
+        return targetHandler;
+    }
+
+    /**
      * Stores the log record internally.
      */
     @Override
@@ -105,18 +112,20 @@ public class DeferredLogHandler extends Handler {
             logRecords.add(record);
         }
         if (!fallbackMode
-                && record.getLevel().intValue() >= fallbackPushLevel.intValue()) {
+                && (record.getLevel().intValue() >= fallbackPushLevel
+                        .intValue())) {
             fallbackMode = true;
             publishLogRecordsTo(fallbackHandler);
         }
     }
 
-    /**
-     * @return the target {@link Handler}, or null if there is no target
-     *         {@link Handler} defined so far
-     */
-    public Handler getTargetHandler() {
-        return targetHandler;
+    private void publishLogRecordsTo(final Handler destination) {
+        synchronized (logRecords) {
+            for (final LogRecord record : logRecords) {
+                destination.publish(record);
+            }
+            logRecords.clear();
+        }
     }
 
     public void setTargetHandler(final Handler targetHandler) {
@@ -124,15 +133,6 @@ public class DeferredLogHandler extends Handler {
         this.targetHandler = targetHandler;
         if (!fallbackMode) {
             publishLogRecordsTo(this.targetHandler);
-        }
-    }
-
-    private void publishLogRecordsTo(final Handler destination) {
-        synchronized (logRecords) {
-            for (LogRecord record : logRecords) {
-                destination.publish(record);
-            }
-            logRecords.clear();
         }
     }
 }

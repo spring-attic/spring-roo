@@ -30,14 +30,10 @@ import org.springframework.roo.support.util.Assert;
 @Service
 public class ItdFileDeletionService implements FileEventListener {
 
-    // Constants
     private static String ANT_PATH_ALL_ITD_SOURCE = "**" + File.separator
             + "*_Roo_*.aj";
     private static String ANT_PATH_ALL_JAVA_SOURCE = "**" + File.separator
             + "*.java";
-
-    // Fields
-    @Reference private FileManager fileManager;
 
     static {
         if ("/".equals(File.separator)) {
@@ -49,6 +45,8 @@ public class ItdFileDeletionService implements FileEventListener {
         }
     }
 
+    @Reference private FileManager fileManager;
+
     public void onFileEvent(final FileEvent fileEvent) {
         Assert.notNull(fileEvent, "File event required");
         if (fileEvent.getFileDetails().matchesAntPath(ANT_PATH_ALL_ITD_SOURCE)) {
@@ -57,9 +55,9 @@ public class ItdFileDeletionService implements FileEventListener {
                 return;
             }
             // It exists, so compute the governor filename
-            String path = fileEvent.getFileDetails().getCanonicalPath();
-            int lastIndex = path.lastIndexOf("_Roo_");
-            String governorName = path.substring(0, lastIndex) + ".java";
+            final String path = fileEvent.getFileDetails().getCanonicalPath();
+            final int lastIndex = path.lastIndexOf("_Roo_");
+            final String governorName = path.substring(0, lastIndex) + ".java";
             if (!fileManager.exists(governorName)) {
                 // We just checked the disk, and the governor does not exist, so
                 // blow away the ITD
@@ -75,14 +73,14 @@ public class ItdFileDeletionService implements FileEventListener {
             if (!fileEvent.getFileDetails().getFile().exists()) {
                 // Java file was deleted, so let's get rid of any ITDs that are
                 // laying around
-                String governorName = fileEvent.getFileDetails()
+                final String governorName = fileEvent.getFileDetails()
                         .getCanonicalPath();
-                int lastIndex = governorName.lastIndexOf(".java");
-                String itdAntPath = governorName.substring(0, lastIndex)
+                final int lastIndex = governorName.lastIndexOf(".java");
+                final String itdAntPath = governorName.substring(0, lastIndex)
                         + "_Roo_*.aj";
-                for (FileDetails itd : fileManager
+                for (final FileDetails itd : fileManager
                         .findMatchingAntPath(itdAntPath)) {
-                    String itdCanonicalPath = itd.getCanonicalPath();
+                    final String itdCanonicalPath = itd.getCanonicalPath();
                     if (fileManager.exists(itdCanonicalPath)) {
                         fileManager.delete(itdCanonicalPath, fileEvent
                                 .getFileDetails().getFile().getName()

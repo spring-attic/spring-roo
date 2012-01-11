@@ -13,19 +13,8 @@ import org.junit.Test;
 public class DependencyTypeTest {
 
     @Test
-    public void testValueOfNullCode() {
-        assertEquals(DependencyType.JAR, DependencyType.valueOfTypeCode(null));
-    }
-
-    @Test
     public void testValueOfEmptyCode() {
         assertEquals(DependencyType.JAR, DependencyType.valueOfTypeCode(""));
-    }
-
-    @Test
-    public void testValueOfUnknownCode() {
-        assertEquals(DependencyType.OTHER,
-                DependencyType.valueOfTypeCode("guff"));
     }
 
     @Test
@@ -35,5 +24,16 @@ public class DependencyTypeTest {
                     DependencyType.valueOfTypeCode(dependencyType.name()
                             .toLowerCase()));
         }
+    }
+
+    @Test
+    public void testValueOfNullCode() {
+        assertEquals(DependencyType.JAR, DependencyType.valueOfTypeCode(null));
+    }
+
+    @Test
+    public void testValueOfUnknownCode() {
+        assertEquals(DependencyType.OTHER,
+                DependencyType.valueOfTypeCode("guff"));
     }
 }

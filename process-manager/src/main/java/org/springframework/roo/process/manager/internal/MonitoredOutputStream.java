@@ -25,19 +25,18 @@ import org.springframework.roo.support.util.HexUtils;
  */
 public class MonitoredOutputStream extends ByteArrayOutputStream {
 
-    // Fields
-    private final File file;
-    private final NotifiableFileMonitorService fileMonitorService;
-    private final ManagedMessageRenderer managedMessageRenderer;
     private static MessageDigest sha;
-
     static {
         try {
             sha = MessageDigest.getInstance("SHA1");
         }
-        catch (NoSuchAlgorithmException ignored) {
+        catch (final NoSuchAlgorithmException ignored) {
         }
     }
+    private final File file;
+    private final NotifiableFileMonitorService fileMonitorService;
+
+    private final ManagedMessageRenderer managedMessageRenderer;
 
     /**
      * Constructs a {@link MonitoredOutputStream}.
@@ -63,16 +62,16 @@ public class MonitoredOutputStream extends ByteArrayOutputStream {
     @Override
     public void close() throws IOException {
         // Obtain the bytes the user is writing out
-        byte[] bytes = toByteArray();
+        final byte[] bytes = toByteArray();
 
         // Try to calculate the SHA hash code
         if (sha != null) {
-            byte[] digest = sha.digest(bytes);
-            this.managedMessageRenderer.setHashCode(HexUtils.toHex(digest));
+            final byte[] digest = sha.digest(bytes);
+            managedMessageRenderer.setHashCode(HexUtils.toHex(digest));
         }
 
         // Log that we're writing the file
-        this.managedMessageRenderer.logManagedMessage();
+        managedMessageRenderer.logManagedMessage();
 
         // Write the actual file out to disk
         FileCopyUtils.copy(bytes, file);
@@ -82,7 +81,7 @@ public class MonitoredOutputStream extends ByteArrayOutputStream {
         try {
             fileCanonicalPath = file.getCanonicalPath();
         }
-        catch (IOException ioe) {
+        catch (final IOException ioe) {
             throw new IllegalStateException(ioe);
         }
         if (fileMonitorService != null) {

@@ -52,11 +52,9 @@ import org.springframework.roo.support.util.StringUtils;
 @Service
 public class TypeLocationServiceImpl implements TypeLocationService {
 
-    // Constants
     private static final String JAVA_FILES_ANT_PATH = "**" + File.separatorChar
             + "*.java";
 
-    // Fields
     @Reference private FileManager fileManager;
     @Reference private FileMonitorService fileMonitorService;
     @Reference private MetadataService metadataService;
@@ -65,12 +63,56 @@ public class TypeLocationServiceImpl implements TypeLocationService {
     @Reference private TypeResolutionService typeResolutionService;
 
     private final Map<JavaType, Set<String>> annotationToMidMap = new HashMap<JavaType, Set<String>>();
-    private final Map<Object, Set<String>> tagToMidMap = new HashMap<Object, Set<String>>();
-    private final Map<String, Set<JavaType>> typeAnnotationMap = new HashMap<String, Set<JavaType>>();
-    private final Map<String, Set<Object>> typeCustomDataMap = new HashMap<String, Set<Object>>();
     private final Map<String, Set<String>> changeMap = new HashMap<String, Set<String>>();
     private final Set<String> dirtyFiles = new HashSet<String>();
     private final Set<String> discoveredTypes = new HashSet<String>();
+    private final Map<String, Set<Object>> typeCustomDataMap = new HashMap<String, Set<Object>>();
+    private final Map<Object, Set<String>> tagToMidMap = new HashMap<Object, Set<String>>();
+    private final Map<String, Set<JavaType>> typeAnnotationMap = new HashMap<String, Set<JavaType>>();
+
+    private void cacheType(final String fileCanonicalPath) {
+        Assert.hasText(fileCanonicalPath, "File canonical path required");
+        if (doesPathIndicateJavaType(fileCanonicalPath)) {
+            final String id = getPhysicalTypeIdentifier(fileCanonicalPath);
+            if ((id != null) && PhysicalTypeIdentifier.isValid(id)) {
+                // Change to Java, so drop the cache
+                final ClassOrInterfaceTypeDetails cid = lookupClassOrInterfaceTypeDetails(id);
+                if (cid == null) {
+                    if (!fileManager.exists(fileCanonicalPath)) {
+                        typeCache.removeType(id);
+                        final JavaType type = typeCache.getTypeDetails(id)
+                                .getName();
+                        updateChanges(type.getFullyQualifiedTypeName(), true);
+                    }
+                    return;
+                }
+                typeCache.cacheType(fileCanonicalPath, cid);
+                updateAttributeCache(cid);
+                updateChanges(cid.getName().getFullyQualifiedTypeName(), false);
+            }
+        }
+    }
+
+    private Set<String> discoverTypes() {
+        // Retrieve a list of paths that have been discovered or modified since
+        // the last invocation by this class
+        for (final String change : fileMonitorService
+                .getDirtyFiles(TypeLocationServiceImpl.class.getName())) {
+            if (doesPathIndicateJavaType(change)) {
+                discoveredTypes.add(change);
+                dirtyFiles.add(change);
+            }
+        }
+        return discoveredTypes;
+    }
+
+    private boolean doesPathIndicateJavaType(final String fileCanonicalPath) {
+        Assert.hasText(fileCanonicalPath, "File canonical path required");
+        return fileCanonicalPath.endsWith(".java")
+                && !fileCanonicalPath.endsWith("package-info.java")
+                && JavaSymbolName
+                        .isLegalJavaName(getProposedJavaType(fileCanonicalPath));
+    }
 
     public Set<ClassOrInterfaceTypeDetails> findClassesOrInterfaceDetailsWithAnnotation(
             final JavaType... annotationsToDetect) {
@@ -131,6 +173,38 @@ public class TypeLocationServiceImpl implements TypeLocationService {
                     }
                 });
         return Collections.unmodifiableSet(types);
+    }
+
+    private String getParentPath(final JavaType javaType) {
+        final String relativePath = javaType.getRelativeFileName();
+        for (final String typePath : discoverTypes()) {
+            if (typePath.endsWith(relativePath)) {
+                return StringUtils.removeSuffix(typePath, relativePath);
+            }
+        }
+        return null;
+    }
+
+    private PhysicalPath getPhysicalPath(final JavaType javaType) {
+        Assert.notNull(javaType, "Java type required");
+        final String parentPath = getParentPath(javaType);
+        if (parentPath == null) {
+            return null;
+        }
+        for (final Pom pom : projectOperations.getPoms()) {
+            for (final PhysicalPath physicalPath : pom.getPhysicalPaths()) {
+                if (physicalPath.isSource()) {
+                    final String pathLocation = FileUtils
+                            .ensureTrailingSeparator(physicalPath
+                                    .getLocationPath());
+                    if (pathLocation.startsWith(parentPath)) {
+                        typeCache.cacheTypeAgainstModule(pom, javaType);
+                        return physicalPath;
+                    }
+                }
+            }
+        }
+        return null;
     }
 
     public String getPhysicalTypeCanonicalPath(final JavaType javaType,
@@ -261,6 +335,44 @@ public class TypeLocationServiceImpl implements TypeLocationService {
         return topLevelPackages;
     }
 
+    private String getProposedJavaType(final String fileCanonicalPath) {
+        Assert.hasText(fileCanonicalPath, "File canonical path required");
+        // Determine the JavaType for this file
+        String relativePath = "";
+        final Pom moduleForFileIdentifier = projectOperations
+                .getModuleForFileIdentifier(fileCanonicalPath);
+        if (moduleForFileIdentifier == null) {
+            return relativePath;
+        }
+
+        for (final PhysicalPath physicalPath : moduleForFileIdentifier
+                .getPhysicalPaths()) {
+            final String moduleCanonicalPath = FileUtils
+                    .ensureTrailingSeparator(FileUtils
+                            .getCanonicalPath(physicalPath.getLocation()));
+            if (fileCanonicalPath.startsWith(moduleCanonicalPath)) {
+                relativePath = File.separator
+                        + StringUtils.replaceFirst(fileCanonicalPath,
+                                moduleCanonicalPath, "");
+                break;
+            }
+        }
+        Assert.hasText(relativePath,
+                "Could not determine compilation unit name for file '"
+                        + fileCanonicalPath + "'");
+        Assert.isTrue(relativePath.startsWith(File.separator),
+                "Relative path unexpectedly dropped the '" + File.separator
+                        + "' prefix (received '" + relativePath + "' from '"
+                        + fileCanonicalPath + "'");
+        relativePath = relativePath.substring(1);
+        Assert.isTrue(relativePath.endsWith(".java"),
+                "The relative path unexpectedly dropped the .java extension for file '"
+                        + fileCanonicalPath + "'");
+        relativePath = relativePath.substring(0,
+                relativePath.lastIndexOf(".java"));
+        return relativePath.replace(File.separatorChar, '.');
+    }
+
     public String getTopLevelPackageForModule(final Pom module) {
         Assert.notNull(module, "Module required");
 
@@ -329,6 +441,8 @@ public class TypeLocationServiceImpl implements TypeLocationService {
         return getTypeDetails(getPhysicalTypeIdentifier(type));
     }
 
+    // -------------------------- Private methods ------------------------------
+
     public ClassOrInterfaceTypeDetails getTypeDetails(
             final String physicalTypeId) {
         if (StringUtils.isBlank(physicalTypeId)) {
@@ -390,9 +504,42 @@ public class TypeLocationServiceImpl implements TypeLocationService {
         return false;
     }
 
+    private void initTypeMap() {
+        for (final Pom pom : projectOperations.getPoms()) {
+            for (final PhysicalPath path : pom.getPhysicalPaths()) {
+                if (path.isSource()) {
+                    final String allJavaFiles = FileUtils
+                            .ensureTrailingSeparator(path.getLocationPath())
+                            + JAVA_FILES_ANT_PATH;
+                    for (final FileDetails file : fileManager
+                            .findMatchingAntPath(allJavaFiles)) {
+                        cacheType(file.getCanonicalPath());
+                    }
+                }
+            }
+        }
+    }
+
     public boolean isInProject(final JavaType javaType) {
-        return javaType != null && !javaType.isCoreType()
-                && getPhysicalPath(javaType) != null;
+        return (javaType != null) && !javaType.isCoreType()
+                && (getPhysicalPath(javaType) != null);
+    }
+
+    /**
+     * Obtains the a fresh copy of the {@link ClassOrInterfaceTypeDetails} for
+     * the given physical type.
+     * 
+     * @param physicalTypeIdentifier to lookup (required)
+     * @return the requested details (or <code>null</code> if unavailable)
+     */
+    private ClassOrInterfaceTypeDetails lookupClassOrInterfaceTypeDetails(
+            final String physicalTypeIdentifier) {
+        final PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService
+                .evictAndGet(physicalTypeIdentifier);
+        if (physicalTypeMetadata == null) {
+            return null;
+        }
+        return physicalTypeMetadata.getMemberHoldingTypeDetails();
     }
 
     public void processTypesWithAnnotation(
@@ -420,155 +567,6 @@ public class TypeLocationServiceImpl implements TypeLocationService {
                 callback.process(located);
             }
         }
-    }
-
-    // -------------------------- Private methods ------------------------------
-
-    private void cacheType(final String fileCanonicalPath) {
-        Assert.hasText(fileCanonicalPath, "File canonical path required");
-        if (doesPathIndicateJavaType(fileCanonicalPath)) {
-            final String id = getPhysicalTypeIdentifier(fileCanonicalPath);
-            if (id != null && PhysicalTypeIdentifier.isValid(id)) {
-                // Change to Java, so drop the cache
-                final ClassOrInterfaceTypeDetails cid = lookupClassOrInterfaceTypeDetails(id);
-                if (cid == null) {
-                    if (!fileManager.exists(fileCanonicalPath)) {
-                        typeCache.removeType(id);
-                        final JavaType type = typeCache.getTypeDetails(id)
-                                .getName();
-                        updateChanges(type.getFullyQualifiedTypeName(), true);
-                    }
-                    return;
-                }
-                typeCache.cacheType(fileCanonicalPath, cid);
-                updateAttributeCache(cid);
-                updateChanges(cid.getName().getFullyQualifiedTypeName(), false);
-            }
-        }
-    }
-
-    private Set<String> discoverTypes() {
-        // Retrieve a list of paths that have been discovered or modified since
-        // the last invocation by this class
-        for (final String change : fileMonitorService
-                .getDirtyFiles(TypeLocationServiceImpl.class.getName())) {
-            if (doesPathIndicateJavaType(change)) {
-                discoveredTypes.add(change);
-                dirtyFiles.add(change);
-            }
-        }
-        return discoveredTypes;
-    }
-
-    private boolean doesPathIndicateJavaType(final String fileCanonicalPath) {
-        Assert.hasText(fileCanonicalPath, "File canonical path required");
-        return fileCanonicalPath.endsWith(".java")
-                && !fileCanonicalPath.endsWith("package-info.java")
-                && JavaSymbolName
-                        .isLegalJavaName(getProposedJavaType(fileCanonicalPath));
-    }
-
-    private String getParentPath(final JavaType javaType) {
-        final String relativePath = javaType.getRelativeFileName();
-        for (final String typePath : discoverTypes()) {
-            if (typePath.endsWith(relativePath)) {
-                return StringUtils.removeSuffix(typePath, relativePath);
-            }
-        }
-        return null;
-    }
-
-    private PhysicalPath getPhysicalPath(final JavaType javaType) {
-        Assert.notNull(javaType, "Java type required");
-        final String parentPath = getParentPath(javaType);
-        if (parentPath == null) {
-            return null;
-        }
-        for (final Pom pom : projectOperations.getPoms()) {
-            for (final PhysicalPath physicalPath : pom.getPhysicalPaths()) {
-                if (physicalPath.isSource()) {
-                    final String pathLocation = FileUtils
-                            .ensureTrailingSeparator(physicalPath
-                                    .getLocationPath());
-                    if (pathLocation.startsWith(parentPath)) {
-                        typeCache.cacheTypeAgainstModule(pom, javaType);
-                        return physicalPath;
-                    }
-                }
-            }
-        }
-        return null;
-    }
-
-    private String getProposedJavaType(final String fileCanonicalPath) {
-        Assert.hasText(fileCanonicalPath, "File canonical path required");
-        // Determine the JavaType for this file
-        String relativePath = "";
-        final Pom moduleForFileIdentifier = projectOperations
-                .getModuleForFileIdentifier(fileCanonicalPath);
-        if (moduleForFileIdentifier == null) {
-            return relativePath;
-        }
-
-        for (final PhysicalPath physicalPath : moduleForFileIdentifier
-                .getPhysicalPaths()) {
-            final String moduleCanonicalPath = FileUtils
-                    .ensureTrailingSeparator(FileUtils
-                            .getCanonicalPath(physicalPath.getLocation()));
-            if (fileCanonicalPath.startsWith(moduleCanonicalPath)) {
-                relativePath = File.separator
-                        + StringUtils.replaceFirst(fileCanonicalPath,
-                                moduleCanonicalPath, "");
-                break;
-            }
-        }
-        Assert.hasText(relativePath,
-                "Could not determine compilation unit name for file '"
-                        + fileCanonicalPath + "'");
-        Assert.isTrue(relativePath.startsWith(File.separator),
-                "Relative path unexpectedly dropped the '" + File.separator
-                        + "' prefix (received '" + relativePath + "' from '"
-                        + fileCanonicalPath + "'");
-        relativePath = relativePath.substring(1);
-        Assert.isTrue(relativePath.endsWith(".java"),
-                "The relative path unexpectedly dropped the .java extension for file '"
-                        + fileCanonicalPath + "'");
-        relativePath = relativePath.substring(0,
-                relativePath.lastIndexOf(".java"));
-        return relativePath.replace(File.separatorChar, '.');
-    }
-
-    private void initTypeMap() {
-        for (final Pom pom : projectOperations.getPoms()) {
-            for (final PhysicalPath path : pom.getPhysicalPaths()) {
-                if (path.isSource()) {
-                    final String allJavaFiles = FileUtils
-                            .ensureTrailingSeparator(path.getLocationPath())
-                            + JAVA_FILES_ANT_PATH;
-                    for (final FileDetails file : fileManager
-                            .findMatchingAntPath(allJavaFiles)) {
-                        cacheType(file.getCanonicalPath());
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * Obtains the a fresh copy of the {@link ClassOrInterfaceTypeDetails} for
-     * the given physical type.
-     * 
-     * @param physicalTypeIdentifier to lookup (required)
-     * @return the requested details (or <code>null</code> if unavailable)
-     */
-    private ClassOrInterfaceTypeDetails lookupClassOrInterfaceTypeDetails(
-            final String physicalTypeIdentifier) {
-        final PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService
-                .evictAndGet(physicalTypeIdentifier);
-        if (physicalTypeMetadata == null) {
-            return null;
-        }
-        return physicalTypeMetadata.getMemberHoldingTypeDetails();
     }
 
     private void processTypesWithTag(final Object tag,

@@ -1,5 +1,7 @@
 package org.springframework.roo.process.manager.event;
 
+import org.springframework.roo.process.manager.ProcessManager;
+
 /**
  * Implemented by classes that wish to be notified of {@link ProcessManager}
  * status changes.

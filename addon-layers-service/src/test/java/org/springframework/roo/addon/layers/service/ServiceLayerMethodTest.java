@@ -31,32 +31,15 @@ import org.springframework.roo.support.util.PairList;
  */
 public class ServiceLayerMethodTest {
 
-    // Constants
-    private static final JavaType TARGET_ENTITY = new JavaType(
-            "com.example.Person");
     private static final JavaType ID_TYPE = LONG_OBJECT;
     private static final String PLURAL = "People";
+    private static final JavaType TARGET_ENTITY = new JavaType(
+            "com.example.Person");
 
     @Test
-    public void testValueOfMethodUsingWrongName() {
-        assertNull(valueOf("x", Arrays.<JavaType> asList(), TARGET_ENTITY,
-                ID_TYPE));
-    }
-
-    @Test
-    public void testValueOfMethodUsingWrongParameterTypes() {
-        assertNull(valueOf(FIND_ALL.getKey(),
-                Arrays.asList(JavaType.BYTE_OBJECT), TARGET_ENTITY, ID_TYPE));
-    }
-
-    @Test
-    public void testValueOfMethodUsingCorrectDetails() {
+    public void testEachMethodHasNonNullReturnType() {
         for (final ServiceLayerMethod method : ServiceLayerMethod.values()) {
-            assertEquals(
-                    method,
-                    valueOf(method.getKey(),
-                            method.getParameterTypes(TARGET_ENTITY, ID_TYPE),
-                            TARGET_ENTITY, ID_TYPE));
+            assertNotNull(method.getReturnType(TARGET_ENTITY));
         }
     }
 
@@ -87,9 +70,11 @@ public class ServiceLayerMethodTest {
     }
 
     @Test
-    public void testEachMethodHasNonNullReturnType() {
+    public void testGetBodyWhenLowerLayerDoesNotImplementMethod() {
         for (final ServiceLayerMethod method : ServiceLayerMethod.values()) {
-            assertNotNull(method.getReturnType(TARGET_ENTITY));
+            assertEquals(
+                    "throw new UnsupportedOperationException(\"Implement me!\");",
+                    method.getBody(null));
         }
     }
 
@@ -105,25 +90,6 @@ public class ServiceLayerMethodTest {
                 assertEquals("return foo();",
                         method.getBody(mockLowerLayerAdditions));
             }
-        }
-    }
-
-    @Test
-    public void testGetBodyWhenLowerLayerDoesNotImplementMethod() {
-        for (final ServiceLayerMethod method : ServiceLayerMethod.values()) {
-            assertEquals(
-                    "throw new UnsupportedOperationException(\"Implement me!\");",
-                    method.getBody(null));
-        }
-    }
-
-    @Test
-    public void testGetNameWhenAnnotationHasBlankName() {
-        final ServiceAnnotationValues mockAnnotationValues = mock(ServiceAnnotationValues.class);
-        for (final ServiceLayerMethod method : ServiceLayerMethod.values()) {
-            assertNull(method.getName(mockAnnotationValues, TARGET_ENTITY, "x"));
-            assertNull(method.getSymbolName(mockAnnotationValues,
-                    TARGET_ENTITY, "x"));
         }
     }
 
@@ -161,5 +127,38 @@ public class ServiceLayerMethodTest {
         when(mockAnnotationValues.getUpdateMethod()).thenReturn("change");
         assertEquals("changePerson",
                 UPDATE.getName(mockAnnotationValues, TARGET_ENTITY, PLURAL));
+    }
+
+    @Test
+    public void testGetNameWhenAnnotationHasBlankName() {
+        final ServiceAnnotationValues mockAnnotationValues = mock(ServiceAnnotationValues.class);
+        for (final ServiceLayerMethod method : ServiceLayerMethod.values()) {
+            assertNull(method.getName(mockAnnotationValues, TARGET_ENTITY, "x"));
+            assertNull(method.getSymbolName(mockAnnotationValues,
+                    TARGET_ENTITY, "x"));
+        }
+    }
+
+    @Test
+    public void testValueOfMethodUsingCorrectDetails() {
+        for (final ServiceLayerMethod method : ServiceLayerMethod.values()) {
+            assertEquals(
+                    method,
+                    valueOf(method.getKey(),
+                            method.getParameterTypes(TARGET_ENTITY, ID_TYPE),
+                            TARGET_ENTITY, ID_TYPE));
+        }
+    }
+
+    @Test
+    public void testValueOfMethodUsingWrongName() {
+        assertNull(valueOf("x", Arrays.<JavaType> asList(), TARGET_ENTITY,
+                ID_TYPE));
+    }
+
+    @Test
+    public void testValueOfMethodUsingWrongParameterTypes() {
+        assertNull(valueOf(FIND_ALL.getKey(),
+                Arrays.asList(JavaType.BYTE_OBJECT), TARGET_ENTITY, ID_TYPE));
     }
 }

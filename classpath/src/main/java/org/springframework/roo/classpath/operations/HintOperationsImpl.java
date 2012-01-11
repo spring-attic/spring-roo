@@ -35,47 +35,14 @@ import org.springframework.roo.support.util.StringUtils;
 @Component
 public class HintOperationsImpl implements HintOperations {
 
-    // Constants
     private static final String ANT_MATCH_DIRECTORY_PATTERN = File.separator
             + "**" + File.separator;
     private static ResourceBundle bundle = ResourceBundle
             .getBundle(HintCommands.class.getName());
 
-    // Fields
     @Reference private FileManager fileManager;
     @Reference private PathResolver pathResolver;
     @Reference private ProjectOperations projectOperations;
-
-    public String hint(String topic) {
-        if (StringUtils.isBlank(topic)) {
-            topic = determineTopic();
-        }
-        try {
-            String message = bundle.getString(topic);
-            return message.replace("\r", StringUtils.LINE_SEPARATOR).replace(
-                    "${completion_key}", AbstractShell.completionKeys);
-        }
-        catch (MissingResourceException exception) {
-            return "Cannot find topic '" + topic + "'";
-        }
-    }
-
-    public SortedSet<String> getCurrentTopics() {
-        SortedSet<String> result = new TreeSet<String>();
-        String topic = determineTopic();
-        if ("general".equals(topic)) {
-            for (Enumeration<String> keys = bundle.getKeys(); keys
-                    .hasMoreElements();) {
-                result.add(keys.nextElement());
-            }
-            // result.addAll(bundle.keySet()); ResourceBundle.keySet() method in
-            // JDK 6+
-        }
-        else {
-            result.add(topic);
-        }
-        return result;
-    }
 
     private String determineTopic() {
         if (!projectOperations.isFocusedProjectAvailable()) {
@@ -96,7 +63,7 @@ public class HintOperationsImpl implements HintOperations {
             return "entities";
         }
 
-        int javaBeanCount = getItdCount("JavaBean");
+        final int javaBeanCount = getItdCount("JavaBean");
         if (javaBeanCount == 0) {
             return "fields";
         }
@@ -104,10 +71,41 @@ public class HintOperationsImpl implements HintOperations {
         return "general";
     }
 
+    public SortedSet<String> getCurrentTopics() {
+        final SortedSet<String> result = new TreeSet<String>();
+        final String topic = determineTopic();
+        if ("general".equals(topic)) {
+            for (final Enumeration<String> keys = bundle.getKeys(); keys
+                    .hasMoreElements();) {
+                result.add(keys.nextElement());
+            }
+            // result.addAll(bundle.keySet()); ResourceBundle.keySet() method in
+            // JDK 6+
+        }
+        else {
+            result.add(topic);
+        }
+        return result;
+    }
+
     private int getItdCount(final String itdUniquenessFilenameSuffix) {
         return fileManager.findMatchingAntPath(
                 pathResolver.getFocusedRoot(Path.SRC_MAIN_JAVA)
                         + ANT_MATCH_DIRECTORY_PATTERN + "*_Roo_"
                         + itdUniquenessFilenameSuffix + ".aj").size();
+    }
+
+    public String hint(String topic) {
+        if (StringUtils.isBlank(topic)) {
+            topic = determineTopic();
+        }
+        try {
+            final String message = bundle.getString(topic);
+            return message.replace("\r", StringUtils.LINE_SEPARATOR).replace(
+                    "${completion_key}", AbstractShell.completionKeys);
+        }
+        catch (final MissingResourceException exception) {
+            return "Cannot find topic '" + topic + "'";
+        }
     }
 }

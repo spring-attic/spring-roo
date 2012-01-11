@@ -31,29 +31,19 @@ import org.springframework.roo.support.util.CollectionUtils;
  */
 public class EqualsMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
-    // Constants
-    private static final JavaSymbolName EQUALS_METHOD_NAME = new JavaSymbolName(
-            "equals");
-    private static final JavaSymbolName HASH_CODE_METHOD_NAME = new JavaSymbolName(
-            "hashCode");
     private static final JavaType EQUALS_BUILDER = new JavaType(
             "org.apache.commons.lang3.builder.EqualsBuilder");
+    private static final JavaSymbolName EQUALS_METHOD_NAME = new JavaSymbolName(
+            "equals");
     private static final JavaType HASH_CODE_BUILDER = new JavaType(
             "org.apache.commons.lang3.builder.HashCodeBuilder");
+    private static final JavaSymbolName HASH_CODE_METHOD_NAME = new JavaSymbolName(
+            "hashCode");
     private static final String OBJECT_NAME = "obj";
     private static final String PROVIDES_TYPE_STRING = EqualsMetadata.class
             .getName();
     private static final String PROVIDES_TYPE = MetadataIdentificationUtils
             .create(PROVIDES_TYPE_STRING);
-
-    /**
-     * Returns the class-level ID of this type of metadata
-     * 
-     * @return a valid class-level MID
-     */
-    public static String getMetadataIdentiferType() {
-        return PROVIDES_TYPE;
-    }
 
     public static String createIdentifier(final JavaType javaType,
             final LogicalPath path) {
@@ -66,6 +56,15 @@ public class EqualsMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
                 PROVIDES_TYPE_STRING, metadataIdentificationString);
     }
 
+    /**
+     * Returns the class-level ID of this type of metadata
+     * 
+     * @return a valid class-level MID
+     */
+    public static String getMetadataIdentiferType() {
+        return PROVIDES_TYPE;
+    }
+
     public static LogicalPath getPath(final String metadataIdentificationString) {
         return PhysicalTypeIdentifierNamingUtils.getPath(PROVIDES_TYPE_STRING,
                 metadataIdentificationString);
@@ -76,7 +75,6 @@ public class EqualsMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
                 metadataIdentificationString);
     }
 
-    // Fields
     private final EqualsAnnotationValues annotationValues;
     private final List<FieldMetadata> locatedFields;
 
@@ -102,7 +100,7 @@ public class EqualsMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
         Assert.notNull(annotationValues, "Annotation values required");
 
         this.annotationValues = annotationValues;
-        this.locatedFields = equalityFields;
+        locatedFields = equalityFields;
 
         if (!CollectionUtils.isEmpty(equalityFields)) {
             builder.addMethod(getEqualsMethod());

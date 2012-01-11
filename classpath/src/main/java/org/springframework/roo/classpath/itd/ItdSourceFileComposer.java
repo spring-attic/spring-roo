@@ -32,14 +32,13 @@ import org.springframework.roo.support.util.Assert;
  */
 public class ItdSourceFileComposer {
 
-    // Fields
+    private final JavaType aspect;
+    private boolean content;
     private int indentLevel = 0;
     private final JavaType introductionTo;
-    private StringBuilder pw = new StringBuilder();
-    private boolean content;
     private final ItdTypeDetails itdTypeDetails;
+    private StringBuilder pw = new StringBuilder();
     private final ImportRegistrationResolver resolver;
-    private final JavaType aspect;
 
     /**
      * Constructs an {@link ItdSourceFileComposer} containing the members that
@@ -88,6 +87,499 @@ public class ItdSourceFileComposer {
         prependCompilationUnitDetails();
     }
 
+    /**
+     * Prints the message, WITHOUT ANY INDENTATION.
+     */
+    private ItdSourceFileComposer append(final String message) {
+        if ((message != null) && !"".equals(message)) {
+            pw.append(message);
+            content = true;
+        }
+        return this;
+    }
+
+    private void appendConstructors() {
+        final List<? extends ConstructorMetadata> constructors = itdTypeDetails
+                .getDeclaredConstructors();
+        if ((constructors == null) || constructors.isEmpty()) {
+            return;
+        }
+
+        content = true;
+
+        for (final ConstructorMetadata constructor : constructors) {
+            Assert.isTrue(constructor.getParameterTypes().size() == constructor
+                    .getParameterNames().size(),
+                    "Mismatched parameter names against parameter types");
+
+            // Append annotations
+            for (final AnnotationMetadata annotation : constructor
+                    .getAnnotations()) {
+                appendIndent();
+                outputAnnotation(annotation);
+                this.newLine(false);
+            }
+
+            // Append "<modifier> <TargetOfIntroduction>.new" portion
+            appendIndent();
+            if (constructor.getModifier() != 0) {
+                append(Modifier.toString(constructor.getModifier()));
+                append(" ");
+            }
+            append(introductionTo.getSimpleTypeName());
+            append(".");
+            append("new");
+
+            // Append parameter types and names
+            append("(");
+            final List<AnnotatedJavaType> parameterTypes = constructor
+                    .getParameterTypes();
+            final List<JavaSymbolName> parameterNames = constructor
+                    .getParameterNames();
+            for (int i = 0; i < parameterTypes.size(); i++) {
+                final AnnotatedJavaType paramType = parameterTypes.get(i);
+                final JavaSymbolName paramName = parameterNames.get(i);
+                for (final AnnotationMetadata methodParameterAnnotation : paramType
+                        .getAnnotations()) {
+                    append(AnnotationMetadataUtils
+                            .toSourceForm(methodParameterAnnotation));
+                    append(" ");
+                }
+                append(paramType.getJavaType().getNameIncludingTypeParameters(
+                        false, resolver));
+                append(" ");
+                append(paramName.getSymbolName());
+                if (i < (parameterTypes.size() - 1)) {
+                    append(", ");
+                }
+            }
+            append(") {");
+            this.newLine(false);
+            indent();
+
+            // Add body
+            append(constructor.getBody());
+            indentRemove();
+            appendFormalLine("}");
+            this.newLine(false);
+        }
+    }
+
+    private void appendExtendsTypes() {
+        final List<JavaType> extendsTypes = itdTypeDetails.getExtendsTypes();
+        if ((extendsTypes == null) || extendsTypes.isEmpty()) {
+            return;
+        }
+
+        content = true;
+
+        for (final JavaType extendsType : extendsTypes) {
+            appendIndent();
+            append("declare parents: ");
+            append(introductionTo.getSimpleTypeName());
+            append(" extends ");
+            if (resolver
+                    .isFullyQualifiedFormRequiredAfterAutoImport(extendsType)) {
+                append(extendsType.getNameIncludingTypeParameters());
+            }
+            else {
+                append(extendsType.getNameIncludingTypeParameters(false,
+                        resolver));
+            }
+            append(";");
+            this.newLine(false);
+            this.newLine();
+        }
+    }
+
+    private void appendFieldAnnotations() {
+        final List<DeclaredFieldAnnotationDetails> fieldAnnotations = itdTypeDetails
+                .getFieldAnnotations();
+        if ((fieldAnnotations == null) || fieldAnnotations.isEmpty()) {
+            return;
+        }
+
+        content = true;
+
+        for (final DeclaredFieldAnnotationDetails fieldDetails : fieldAnnotations) {
+            appendIndent();
+            append("declare @field: * ");
+            append(introductionTo.getSimpleTypeName());
+            append(".");
+            append(fieldDetails.getField().getFieldName().getSymbolName());
+            append(": ");
+            if (fieldDetails.isRemoveAnnotation()) {
+                append("-");
+            }
+            outputAnnotation(fieldDetails.getFieldAnnotation());
+            append(";");
+            this.newLine(false);
+            this.newLine();
+        }
+    }
+
+    private void appendFields() {
+        final List<? extends FieldMetadata> fields = itdTypeDetails
+                .getDeclaredFields();
+        if ((fields == null) || fields.isEmpty()) {
+            return;
+        }
+
+        content = true;
+        for (final FieldMetadata field : fields) {
+            // Append annotations
+            for (final AnnotationMetadata annotation : field.getAnnotations()) {
+                appendIndent();
+                outputAnnotation(annotation);
+                this.newLine(false);
+            }
+
+            // Append "<modifier> <fieldType> <fieldName>" portion
+            appendIndent();
+            if (field.getModifier() != 0) {
+                append(Modifier.toString(field.getModifier()));
+                append(" ");
+            }
+            append(field.getFieldType().getNameIncludingTypeParameters(false,
+                    resolver));
+            append(" ");
+            append(introductionTo.getSimpleTypeName());
+            append(".");
+            append(field.getFieldName().getSymbolName());
+
+            // Append initializer, if present
+            if (field.getFieldInitializer() != null) {
+                append(" = ");
+                append(field.getFieldInitializer());
+            }
+
+            // Complete the field declaration
+            append(";");
+            this.newLine(false);
+            this.newLine();
+        }
+    }
+
+    /**
+     * Prints the message, after adding indents and returns to a new line. This
+     * is the most commonly used method.
+     */
+    private ItdSourceFileComposer appendFormalLine(final String message) {
+        appendIndent();
+        if ((message != null) && !"".equals(message)) {
+            pw.append(message);
+            content = true;
+        }
+        return newLine(false);
+    }
+
+    private void appendImplementsTypes() {
+        final List<JavaType> implementsTypes = itdTypeDetails
+                .getImplementsTypes();
+        if ((implementsTypes == null) || implementsTypes.isEmpty()) {
+            return;
+        }
+
+        content = true;
+
+        for (final JavaType extendsType : implementsTypes) {
+            appendIndent();
+            append("declare parents: ");
+            append(introductionTo.getSimpleTypeName());
+            append(" implements ");
+            if (resolver
+                    .isFullyQualifiedFormRequiredAfterAutoImport(extendsType)) {
+                append(extendsType.getNameIncludingTypeParameters());
+            }
+            else {
+                append(extendsType.getNameIncludingTypeParameters(false,
+                        resolver));
+            }
+            append(";");
+            this.newLine(false);
+            this.newLine();
+        }
+    }
+
+    /**
+     * Prints the relevant number of indents.
+     */
+    private ItdSourceFileComposer appendIndent() {
+        for (int i = 0; i < indentLevel; i++) {
+            pw.append("    ");
+        }
+        return this;
+    }
+
+    /**
+     * supports static inner types with static field definitions only at this
+     * point
+     */
+    private void appendInnerTypes() {
+        final List<ClassOrInterfaceTypeDetails> innerTypes = itdTypeDetails
+                .getInnerTypes();
+
+        for (final ClassOrInterfaceTypeDetails innerType : innerTypes) {
+            content = true;
+            appendIndent();
+            if (innerType.getModifier() != 0) {
+                append(Modifier.toString(innerType.getModifier()));
+                append(" ");
+            }
+            append("class ");
+            append(introductionTo.getNameIncludingTypeParameters());
+            append(".");
+            append(innerType.getName().getSimpleTypeName());
+            if (innerType.getExtendsTypes().size() > 0) {
+                append(" extends ");
+                // There should only be one extends type for inner classes
+                final JavaType extendsType = innerType.getExtendsTypes().get(0);
+                if (resolver
+                        .isFullyQualifiedFormRequiredAfterAutoImport(extendsType)) {
+                    append(extendsType.getNameIncludingTypeParameters());
+                }
+                else {
+                    append(extendsType.getNameIncludingTypeParameters(false,
+                            resolver));
+                }
+                append(" ");
+            }
+            final List<JavaType> implementsTypes = innerType
+                    .getImplementsTypes();
+            if (implementsTypes.size() > 0) {
+                append(" implements ");
+                for (int i = 0; i < implementsTypes.size(); i++) {
+                    final JavaType implementsType = implementsTypes.get(i);
+                    if (resolver
+                            .isFullyQualifiedFormRequiredAfterAutoImport(implementsType)) {
+                        append(implementsType.getNameIncludingTypeParameters());
+                    }
+                    else {
+                        append(implementsType.getNameIncludingTypeParameters(
+                                false, resolver));
+                    }
+                    if (i != (implementsTypes.size() - 1)) {
+                        append(", ");
+                    }
+                    else {
+                        append(" ");
+                    }
+                }
+            }
+            append("{");
+            this.newLine(false);
+
+            // Write out fields
+            for (final FieldMetadata field : innerType.getDeclaredFields()) {
+                indent();
+                this.newLine(false);
+
+                // Append annotations
+                for (final AnnotationMetadata annotation : field
+                        .getAnnotations()) {
+                    appendIndent();
+                    outputAnnotation(annotation);
+                    this.newLine(false);
+                }
+                appendIndent();
+                if (field.getModifier() != 0) {
+                    append(Modifier.toString(field.getModifier()));
+                    append(" ");
+                }
+                append(field.getFieldType().getNameIncludingTypeParameters(
+                        false, resolver));
+                append(" ");
+                append(field.getFieldName().getSymbolName());
+
+                // Append initializer, if present
+                if (field.getFieldInitializer() != null) {
+                    append(" = ");
+                    append(field.getFieldInitializer());
+                }
+
+                // Complete the field declaration
+                append(";");
+                this.newLine(false);
+                indentRemove();
+            }
+            this.newLine(false);
+
+            // Write out methods
+            indent();
+            writeMethods(innerType.getDeclaredMethods(), false, false);
+            indentRemove();
+
+            appendIndent();
+            append("}");
+            this.newLine(false);
+            this.newLine();
+        }
+    }
+
+    private void appendMethodAnnotations() {
+        final List<DeclaredMethodAnnotationDetails> methodAnnotations = itdTypeDetails
+                .getMethodAnnotations();
+        if ((methodAnnotations == null) || methodAnnotations.isEmpty()) {
+            return;
+        }
+
+        content = true;
+
+        for (final DeclaredMethodAnnotationDetails methodDetails : methodAnnotations) {
+            appendIndent();
+            append("declare @method: ");
+            append(Modifier.toString(methodDetails.getMethodMetadata()
+                    .getModifier()));
+            append(" ");
+            append(methodDetails.getMethodMetadata().getReturnType()
+                    .getNameIncludingTypeParameters());
+            append(" ");
+            append(introductionTo.getSimpleTypeName());
+            append(".");
+            append(methodDetails.getMethodMetadata().getMethodName()
+                    .getSymbolName());
+            append("(");
+            for (int i = 0; i < methodDetails.getMethodMetadata()
+                    .getParameterTypes().size(); i++) {
+                append(methodDetails.getMethodMetadata().getParameterTypes()
+                        .get(i).getJavaType()
+                        .getNameIncludingTypeParameters(false, resolver));
+                if (i != (methodDetails.getMethodMetadata().getParameterTypes()
+                        .size() - 1)) {
+                    append(",");
+                }
+            }
+            append("): ");
+            outputAnnotation(methodDetails.getMethodAnnotation());
+            append(";");
+            this.newLine(false);
+            this.newLine();
+        }
+    }
+
+    private void appendMethods(final boolean interfaceMethod) {
+        final List<? extends MethodMetadata> methods = itdTypeDetails
+                .getDeclaredMethods();
+        if ((methods == null) || methods.isEmpty()) {
+            return;
+        }
+
+        content = true;
+        writeMethods(methods, true, interfaceMethod);
+    }
+
+    private void appendTerminator() {
+        Assert.isTrue(indentLevel == 1, "Indent level must be 1 (not "
+                + indentLevel + ") to conclude!");
+        indentRemove();
+
+        // Ensure we present the content flag, as it will be set true during the
+        // formal line append
+        final boolean contentBefore = content;
+        appendFormalLine("}");
+        content = contentBefore;
+
+    }
+
+    private void appendTypeAnnotations() {
+        final List<? extends AnnotationMetadata> typeAnnotations = itdTypeDetails
+                .getAnnotations();
+        if ((typeAnnotations == null) || typeAnnotations.isEmpty()) {
+            return;
+        }
+
+        content = true;
+
+        for (final AnnotationMetadata typeAnnotation : typeAnnotations) {
+            appendIndent();
+            append("declare @type: ");
+            append(introductionTo.getSimpleTypeName());
+            append(": ");
+            outputAnnotation(typeAnnotation);
+            append(";");
+            this.newLine(false);
+            this.newLine();
+        }
+    }
+
+    private void appendTypeDeclaration() {
+        Assert.isTrue(introductionTo.getPackage().equals(aspect.getPackage()),
+                "Aspect and introduction must be in identical packages");
+
+        appendIndent();
+        if (itdTypeDetails.isPrivilegedAspect()) {
+            append("privileged ");
+        }
+        append("aspect " + aspect.getSimpleTypeName() + " {");
+        this.newLine(false);
+        indent();
+        this.newLine();
+
+        // Set to false, as it was set true during the above operations
+        content = false;
+    }
+
+    private String getNewLine() {
+        // We use \n for consistency with JavaParser's DumpVisitor, which always
+        // uses \n
+        return ("\n");
+    }
+
+    public String getOutput() {
+        return pw.toString();
+    }
+
+    /**
+     * Increases the indent by one level.
+     */
+    private ItdSourceFileComposer indent() {
+        indentLevel++;
+        return this;
+    }
+
+    /**
+     * Decreases the indent by one level.
+     */
+    private ItdSourceFileComposer indentRemove() {
+        indentLevel--;
+        return this;
+    }
+
+    /**
+     * Indicates whether any content was added to the ITD, aside from the formal
+     * ITD declaration.
+     * 
+     * @return true if there is actual content in the ITD, false otherwise
+     */
+    public boolean isContent() {
+        return content;
+    }
+
+    /**
+     * Prints a blank line, ensuring any indent is included before doing so.
+     */
+    private ItdSourceFileComposer newLine() {
+        return newLine(true);
+    }
+
+    /**
+     * Prints a blank line, ensuring any indent is included before doing so.
+     */
+    private ItdSourceFileComposer newLine(final boolean indent) {
+        if (indent) {
+            appendIndent();
+        }
+        // We use \n for consistency with JavaParser's DumpVisitor, which always
+        // uses \n
+        pw.append(getNewLine());
+        // pw.append(StringUtils.LINE_SEPARATOR);
+        return this;
+    }
+
+    private void outputAnnotation(final AnnotationMetadata annotation) {
+        append(AnnotationMetadataUtils.toSourceForm(annotation, resolver));
+    }
+
     private void prependCompilationUnitDetails() {
         final StringBuilder topOfFile = new StringBuilder();
 
@@ -129,397 +621,7 @@ public class ItdSourceFileComposer {
         topOfFile.append(pw.toString());
 
         // Replace the old writer with out new writer
-        this.pw = topOfFile;
-    }
-
-    private void appendTypeDeclaration() {
-        Assert.isTrue(introductionTo.getPackage().equals(aspect.getPackage()),
-                "Aspect and introduction must be in identical packages");
-
-        this.appendIndent();
-        if (itdTypeDetails.isPrivilegedAspect()) {
-            this.append("privileged ");
-        }
-        this.append("aspect " + aspect.getSimpleTypeName() + " {");
-        this.newLine(false);
-        this.indent();
-        this.newLine();
-
-        // Set to false, as it was set true during the above operations
-        content = false;
-    }
-
-    private void outputAnnotation(final AnnotationMetadata annotation) {
-        this.append(AnnotationMetadataUtils.toSourceForm(annotation, resolver));
-    }
-
-    private void appendTypeAnnotations() {
-        final List<? extends AnnotationMetadata> typeAnnotations = itdTypeDetails
-                .getAnnotations();
-        if (typeAnnotations == null || typeAnnotations.isEmpty()) {
-            return;
-        }
-
-        content = true;
-
-        for (final AnnotationMetadata typeAnnotation : typeAnnotations) {
-            this.appendIndent();
-            this.append("declare @type: ");
-            this.append(introductionTo.getSimpleTypeName());
-            this.append(": ");
-            outputAnnotation(typeAnnotation);
-            this.append(";");
-            this.newLine(false);
-            this.newLine();
-        }
-    }
-
-    private void appendFieldAnnotations() {
-        final List<DeclaredFieldAnnotationDetails> fieldAnnotations = itdTypeDetails
-                .getFieldAnnotations();
-        if (fieldAnnotations == null || fieldAnnotations.isEmpty()) {
-            return;
-        }
-
-        content = true;
-
-        for (final DeclaredFieldAnnotationDetails fieldDetails : fieldAnnotations) {
-            this.appendIndent();
-            this.append("declare @field: * ");
-            this.append(introductionTo.getSimpleTypeName());
-            this.append(".");
-            this.append(fieldDetails.getField().getFieldName().getSymbolName());
-            this.append(": ");
-            if (fieldDetails.isRemoveAnnotation()) {
-                this.append("-");
-            }
-            outputAnnotation(fieldDetails.getFieldAnnotation());
-            this.append(";");
-            this.newLine(false);
-            this.newLine();
-        }
-    }
-
-    private void appendMethodAnnotations() {
-        final List<DeclaredMethodAnnotationDetails> methodAnnotations = itdTypeDetails
-                .getMethodAnnotations();
-        if (methodAnnotations == null || methodAnnotations.isEmpty()) {
-            return;
-        }
-
-        content = true;
-
-        for (final DeclaredMethodAnnotationDetails methodDetails : methodAnnotations) {
-            this.appendIndent();
-            this.append("declare @method: ");
-            this.append(Modifier.toString(methodDetails.getMethodMetadata()
-                    .getModifier()));
-            this.append(" ");
-            this.append(methodDetails.getMethodMetadata().getReturnType()
-                    .getNameIncludingTypeParameters());
-            this.append(" ");
-            this.append(introductionTo.getSimpleTypeName());
-            this.append(".");
-            this.append(methodDetails.getMethodMetadata().getMethodName()
-                    .getSymbolName());
-            this.append("(");
-            for (int i = 0; i < methodDetails.getMethodMetadata()
-                    .getParameterTypes().size(); i++) {
-                this.append(methodDetails.getMethodMetadata()
-                        .getParameterTypes().get(i).getJavaType()
-                        .getNameIncludingTypeParameters(false, resolver));
-                if (i != methodDetails.getMethodMetadata().getParameterTypes()
-                        .size() - 1) {
-                    this.append(",");
-                }
-            }
-            this.append("): ");
-            outputAnnotation(methodDetails.getMethodAnnotation());
-            this.append(";");
-            this.newLine(false);
-            this.newLine();
-        }
-    }
-
-    private void appendExtendsTypes() {
-        final List<JavaType> extendsTypes = itdTypeDetails.getExtendsTypes();
-        if (extendsTypes == null || extendsTypes.isEmpty()) {
-            return;
-        }
-
-        content = true;
-
-        for (final JavaType extendsType : extendsTypes) {
-            this.appendIndent();
-            this.append("declare parents: ");
-            this.append(introductionTo.getSimpleTypeName());
-            this.append(" extends ");
-            if (resolver
-                    .isFullyQualifiedFormRequiredAfterAutoImport(extendsType)) {
-                this.append(extendsType.getNameIncludingTypeParameters());
-            }
-            else {
-                this.append(extendsType.getNameIncludingTypeParameters(false,
-                        resolver));
-            }
-            this.append(";");
-            this.newLine(false);
-            this.newLine();
-        }
-    }
-
-    private void appendImplementsTypes() {
-        final List<JavaType> implementsTypes = itdTypeDetails
-                .getImplementsTypes();
-        if (implementsTypes == null || implementsTypes.isEmpty()) {
-            return;
-        }
-
-        content = true;
-
-        for (final JavaType extendsType : implementsTypes) {
-            this.appendIndent();
-            this.append("declare parents: ");
-            this.append(introductionTo.getSimpleTypeName());
-            this.append(" implements ");
-            if (resolver
-                    .isFullyQualifiedFormRequiredAfterAutoImport(extendsType)) {
-                this.append(extendsType.getNameIncludingTypeParameters());
-            }
-            else {
-                this.append(extendsType.getNameIncludingTypeParameters(false,
-                        resolver));
-            }
-            this.append(";");
-            this.newLine(false);
-            this.newLine();
-        }
-    }
-
-    private void appendConstructors() {
-        final List<? extends ConstructorMetadata> constructors = itdTypeDetails
-                .getDeclaredConstructors();
-        if (constructors == null || constructors.isEmpty()) {
-            return;
-        }
-
-        content = true;
-
-        for (final ConstructorMetadata constructor : constructors) {
-            Assert.isTrue(constructor.getParameterTypes().size() == constructor
-                    .getParameterNames().size(),
-                    "Mismatched parameter names against parameter types");
-
-            // Append annotations
-            for (final AnnotationMetadata annotation : constructor
-                    .getAnnotations()) {
-                this.appendIndent();
-                outputAnnotation(annotation);
-                this.newLine(false);
-            }
-
-            // Append "<modifier> <TargetOfIntroduction>.new" portion
-            this.appendIndent();
-            if (constructor.getModifier() != 0) {
-                this.append(Modifier.toString(constructor.getModifier()));
-                this.append(" ");
-            }
-            this.append(introductionTo.getSimpleTypeName());
-            this.append(".");
-            this.append("new");
-
-            // Append parameter types and names
-            this.append("(");
-            final List<AnnotatedJavaType> parameterTypes = constructor
-                    .getParameterTypes();
-            final List<JavaSymbolName> parameterNames = constructor
-                    .getParameterNames();
-            for (int i = 0; i < parameterTypes.size(); i++) {
-                final AnnotatedJavaType paramType = parameterTypes.get(i);
-                final JavaSymbolName paramName = parameterNames.get(i);
-                for (final AnnotationMetadata methodParameterAnnotation : paramType
-                        .getAnnotations()) {
-                    this.append(AnnotationMetadataUtils
-                            .toSourceForm(methodParameterAnnotation));
-                    this.append(" ");
-                }
-                this.append(paramType.getJavaType()
-                        .getNameIncludingTypeParameters(false, resolver));
-                this.append(" ");
-                this.append(paramName.getSymbolName());
-                if (i < parameterTypes.size() - 1) {
-                    this.append(", ");
-                }
-            }
-            this.append(") {");
-            this.newLine(false);
-            this.indent();
-
-            // Add body
-            this.append(constructor.getBody());
-            this.indentRemove();
-            this.appendFormalLine("}");
-            this.newLine(false);
-        }
-    }
-
-    private void appendMethods(final boolean interfaceMethod) {
-        final List<? extends MethodMetadata> methods = itdTypeDetails
-                .getDeclaredMethods();
-        if (methods == null || methods.isEmpty()) {
-            return;
-        }
-
-        content = true;
-        writeMethods(methods, true, interfaceMethod);
-    }
-
-    private void appendFields() {
-        final List<? extends FieldMetadata> fields = itdTypeDetails
-                .getDeclaredFields();
-        if (fields == null || fields.isEmpty()) {
-            return;
-        }
-
-        content = true;
-        for (final FieldMetadata field : fields) {
-            // Append annotations
-            for (final AnnotationMetadata annotation : field.getAnnotations()) {
-                this.appendIndent();
-                outputAnnotation(annotation);
-                this.newLine(false);
-            }
-
-            // Append "<modifier> <fieldType> <fieldName>" portion
-            this.appendIndent();
-            if (field.getModifier() != 0) {
-                this.append(Modifier.toString(field.getModifier()));
-                this.append(" ");
-            }
-            this.append(field.getFieldType().getNameIncludingTypeParameters(
-                    false, resolver));
-            this.append(" ");
-            this.append(introductionTo.getSimpleTypeName());
-            this.append(".");
-            this.append(field.getFieldName().getSymbolName());
-
-            // Append initializer, if present
-            if (field.getFieldInitializer() != null) {
-                this.append(" = ");
-                this.append(field.getFieldInitializer());
-            }
-
-            // Complete the field declaration
-            this.append(";");
-            this.newLine(false);
-            this.newLine();
-        }
-    }
-
-    /**
-     * supports static inner types with static field definitions only at this
-     * point
-     */
-    private void appendInnerTypes() {
-        final List<ClassOrInterfaceTypeDetails> innerTypes = itdTypeDetails
-                .getInnerTypes();
-
-        for (final ClassOrInterfaceTypeDetails innerType : innerTypes) {
-            content = true;
-            this.appendIndent();
-            if (innerType.getModifier() != 0) {
-                this.append(Modifier.toString(innerType.getModifier()));
-                this.append(" ");
-            }
-            this.append("class ");
-            this.append(introductionTo.getNameIncludingTypeParameters());
-            this.append(".");
-            this.append(innerType.getName().getSimpleTypeName());
-            if (innerType.getExtendsTypes().size() > 0) {
-                this.append(" extends ");
-                // There should only be one extends type for inner classes
-                final JavaType extendsType = innerType.getExtendsTypes().get(0);
-                if (resolver
-                        .isFullyQualifiedFormRequiredAfterAutoImport(extendsType)) {
-                    this.append(extendsType.getNameIncludingTypeParameters());
-                }
-                else {
-                    this.append(extendsType.getNameIncludingTypeParameters(
-                            false, resolver));
-                }
-                this.append(" ");
-            }
-            final List<JavaType> implementsTypes = innerType
-                    .getImplementsTypes();
-            if (implementsTypes.size() > 0) {
-                this.append(" implements ");
-                for (int i = 0; i < implementsTypes.size(); i++) {
-                    final JavaType implementsType = implementsTypes.get(i);
-                    if (resolver
-                            .isFullyQualifiedFormRequiredAfterAutoImport(implementsType)) {
-                        this.append(implementsType
-                                .getNameIncludingTypeParameters());
-                    }
-                    else {
-                        this.append(implementsType
-                                .getNameIncludingTypeParameters(false, resolver));
-                    }
-                    if (i != (implementsTypes.size() - 1)) {
-                        this.append(", ");
-                    }
-                    else {
-                        this.append(" ");
-                    }
-                }
-            }
-            this.append("{");
-            this.newLine(false);
-
-            // Write out fields
-            for (final FieldMetadata field : innerType.getDeclaredFields()) {
-                this.indent();
-                this.newLine(false);
-
-                // Append annotations
-                for (final AnnotationMetadata annotation : field
-                        .getAnnotations()) {
-                    this.appendIndent();
-                    outputAnnotation(annotation);
-                    this.newLine(false);
-                }
-                this.appendIndent();
-                if (field.getModifier() != 0) {
-                    this.append(Modifier.toString(field.getModifier()));
-                    this.append(" ");
-                }
-                this.append(field.getFieldType()
-                        .getNameIncludingTypeParameters(false, resolver));
-                this.append(" ");
-                this.append(field.getFieldName().getSymbolName());
-
-                // Append initializer, if present
-                if (field.getFieldInitializer() != null) {
-                    this.append(" = ");
-                    this.append(field.getFieldInitializer());
-                }
-
-                // Complete the field declaration
-                this.append(";");
-                this.newLine(false);
-                this.indentRemove();
-            }
-            this.newLine(false);
-
-            // Write out methods
-            this.indent();
-            writeMethods(innerType.getDeclaredMethods(), false, false);
-            this.indentRemove();
-
-            this.appendIndent();
-            this.append("}");
-            this.newLine(false);
-            this.newLine();
-        }
+        pw = topOfFile;
     }
 
     private void writeMethods(final List<? extends MethodMetadata> methods,
@@ -532,32 +634,32 @@ public class ItdSourceFileComposer {
 
             // Append annotations
             for (final AnnotationMetadata annotation : method.getAnnotations()) {
-                this.appendIndent();
+                appendIndent();
                 outputAnnotation(annotation);
                 this.newLine(false);
             }
 
             // Append "<modifier> <returnType> <methodName>" portion
-            this.appendIndent();
+            appendIndent();
             if (method.getModifier() != 0) {
-                this.append(Modifier.toString(method.getModifier()));
-                this.append(" ");
+                append(Modifier.toString(method.getModifier()));
+                append(" ");
             }
 
             // return type
             final boolean staticMethod = Modifier
                     .isStatic(method.getModifier());
-            this.append(method.getReturnType().getNameIncludingTypeParameters(
+            append(method.getReturnType().getNameIncludingTypeParameters(
                     staticMethod, resolver));
-            this.append(" ");
+            append(" ");
             if (defineTarget) {
-                this.append(introductionTo.getSimpleTypeName());
-                this.append(".");
+                append(introductionTo.getSimpleTypeName());
+                append(".");
             }
-            this.append(method.getMethodName().getSymbolName());
+            append(method.getMethodName().getSymbolName());
 
             // Append parameter types and names
-            this.append("(");
+            append("(");
             final List<AnnotatedJavaType> parameterTypes = method
                     .getParameterTypes();
             final List<JavaSymbolName> parameterNames = method
@@ -568,26 +670,26 @@ public class ItdSourceFileComposer {
                 for (final AnnotationMetadata methodParameterAnnotation : paramType
                         .getAnnotations()) {
                     outputAnnotation(methodParameterAnnotation);
-                    this.append(" ");
+                    append(" ");
                 }
-                this.append(paramType.getJavaType()
-                        .getNameIncludingTypeParameters(false, resolver));
-                this.append(" ");
-                this.append(paramName.getSymbolName());
-                if (i < parameterTypes.size() - 1) {
-                    this.append(", ");
+                append(paramType.getJavaType().getNameIncludingTypeParameters(
+                        false, resolver));
+                append(" ");
+                append(paramName.getSymbolName());
+                if (i < (parameterTypes.size() - 1)) {
+                    append(", ");
                 }
             }
 
             // Add exceptions to be thrown
             final List<JavaType> throwsTypes = method.getThrowsTypes();
             if (throwsTypes.size() > 0) {
-                this.append(") throws ");
+                append(") throws ");
                 for (int i = 0; i < throwsTypes.size(); i++) {
-                    this.append(throwsTypes.get(i)
-                            .getNameIncludingTypeParameters(false, resolver));
+                    append(throwsTypes.get(i).getNameIncludingTypeParameters(
+                            false, resolver));
                     if (throwsTypes.size() > (i + 1)) {
-                        this.append(", ");
+                        append(", ");
                     }
                 }
             }
@@ -603,116 +705,13 @@ public class ItdSourceFileComposer {
                 this.newLine(false);
 
                 // Add body
-                this.indent();
-                this.append(method.getBody());
-                this.indentRemove();
+                indent();
+                append(method.getBody());
+                indentRemove();
 
-                this.appendFormalLine("}");
+                appendFormalLine("}");
             }
             this.newLine();
         }
-    }
-
-    /**
-     * Increases the indent by one level.
-     */
-    private ItdSourceFileComposer indent() {
-        indentLevel++;
-        return this;
-    }
-
-    /**
-     * Decreases the indent by one level.
-     */
-    private ItdSourceFileComposer indentRemove() {
-        indentLevel--;
-        return this;
-    }
-
-    /**
-     * Prints a blank line, ensuring any indent is included before doing so.
-     */
-    private ItdSourceFileComposer newLine() {
-        return newLine(true);
-    }
-
-    /**
-     * Prints a blank line, ensuring any indent is included before doing so.
-     */
-    private ItdSourceFileComposer newLine(final boolean indent) {
-        if (indent)
-            appendIndent();
-        // We use \n for consistency with JavaParser's DumpVisitor, which always
-        // uses \n
-        pw.append(getNewLine());
-        // pw.append(StringUtils.LINE_SEPARATOR);
-        return this;
-    }
-
-    private String getNewLine() {
-        // We use \n for consistency with JavaParser's DumpVisitor, which always
-        // uses \n
-        return ("\n");
-    }
-
-    /**
-     * Prints the message, WITHOUT ANY INDENTATION.
-     */
-    private ItdSourceFileComposer append(final String message) {
-        if (message != null && !"".equals(message)) {
-            pw.append(message);
-            content = true;
-        }
-        return this;
-    }
-
-    /**
-     * Prints the message, after adding indents and returns to a new line. This
-     * is the most commonly used method.
-     */
-    private ItdSourceFileComposer appendFormalLine(final String message) {
-        appendIndent();
-        if (message != null && !"".equals(message)) {
-            pw.append(message);
-            content = true;
-        }
-        return newLine(false);
-    }
-
-    /**
-     * Prints the relevant number of indents.
-     */
-    private ItdSourceFileComposer appendIndent() {
-        for (int i = 0; i < indentLevel; i++) {
-            pw.append("    ");
-        }
-        return this;
-    }
-
-    private void appendTerminator() {
-        Assert.isTrue(this.indentLevel == 1, "Indent level must be 1 (not "
-                + indentLevel + ") to conclude!");
-        this.indentRemove();
-
-        // Ensure we present the content flag, as it will be set true during the
-        // formal line append
-        final boolean contentBefore = content;
-        this.appendFormalLine("}");
-        content = contentBefore;
-
-    }
-
-    public String getOutput() {
-        return pw.toString();
-    }
-
-    /**
-     * Indicates whether any content was added to the ITD, aside from the formal
-     * ITD declaration.
-     * 
-     * @return true if there is actual content in the ITD, false otherwise
-     */
-    public boolean isContent() {
-        return content;
     }
 }

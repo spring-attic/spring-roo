@@ -41,7 +41,6 @@ import org.springframework.roo.support.util.StringUtils;
 public abstract class AbstractShell extends AbstractShellStatusPublisher
         implements Shell {
 
-    // Constants
     private static final String MY_SLOT = AbstractShell.class.getName();
     protected static final String ROO_PROMPT = "roo> ";
 
@@ -50,7 +49,6 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher
     public static String completionKeys = "TAB";
     public static String shellPrompt = ROO_PROMPT;
 
-    // Instance fields
     protected final Logger logger = HandlerUtils.getLogger(getClass());
     protected boolean inBlockComment;
     protected ExitShellRequest exitShellRequest;
@@ -363,7 +361,7 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher
 
     @CliCommand(value = { "system properties" }, help = "Shows the shell's properties")
     public String props() {
-        final Set<String> data = new TreeSet<String>(); // For repeatability
+        final Set<String> data = new TreeSet<String>();
         for (final Entry<Object, Object> entry : System.getProperties()
                 .entrySet()) {
             data.add(entry.getKey() + " = " + entry.getValue());
@@ -499,7 +497,7 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher
 
         if (gitCommitHash != null && gitCommitHash.length() > 7) {
             if (sb.length() > 0) {
-                sb.append(" "); // to separate from version
+                sb.append(" ");
             }
             sb.append("[rev ");
             sb.append(gitCommitHash.substring(0, 7));

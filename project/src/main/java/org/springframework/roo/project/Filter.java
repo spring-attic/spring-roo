@@ -12,8 +12,17 @@ import org.w3c.dom.Element;
  */
 public class Filter implements Comparable<Filter> {
 
-    // Fields
     private final String value;
+
+    /**
+     * Convenience constructor for creating a filter instance from a XML Element
+     * 
+     * @param element containing the property definition (required)
+     */
+    public Filter(final Element element) {
+        Assert.notNull(element, "Element required");
+        value = element.getTextContent();
+    }
 
     /**
      * Convenience constructor creating a filter instance
@@ -25,14 +34,16 @@ public class Filter implements Comparable<Filter> {
         this.value = value;
     }
 
-    /**
-     * Convenience constructor for creating a filter instance from a XML Element
-     * 
-     * @param element containing the property definition (required)
-     */
-    public Filter(final Element element) {
-        Assert.notNull(element, "Element required");
-        this.value = element.getTextContent();
+    public int compareTo(final Filter o) {
+        if (o == null) {
+            throw new NullPointerException();
+        }
+        return value.compareTo(o.value);
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        return (obj instanceof Filter) && (compareTo((Filter) obj) == 0);
     }
 
     /**
@@ -48,25 +59,13 @@ public class Filter implements Comparable<Filter> {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((value == null) ? 0 : value.hashCode());
+        result = (prime * result) + ((value == null) ? 0 : value.hashCode());
         return result;
     }
 
     @Override
-    public boolean equals(final Object obj) {
-        return obj instanceof Filter && this.compareTo((Filter) obj) == 0;
-    }
-
-    public int compareTo(final Filter o) {
-        if (o == null) {
-            throw new NullPointerException();
-        }
-        return value.compareTo(o.value);
-    }
-
-    @Override
     public String toString() {
-        ToStringCreator tsc = new ToStringCreator(this);
+        final ToStringCreator tsc = new ToStringCreator(this);
         tsc.append("value", value);
         return tsc.toString();
     }

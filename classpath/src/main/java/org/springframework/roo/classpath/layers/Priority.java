@@ -7,7 +7,7 @@ package org.springframework.roo.classpath.layers;
  * @since 1.2.0
  */
 public enum Priority {
-    LOW(0), MEDIUM(50), HIGH(100);
+    HIGH(100), LOW(0), MEDIUM(50);
 
     private int priority;
 

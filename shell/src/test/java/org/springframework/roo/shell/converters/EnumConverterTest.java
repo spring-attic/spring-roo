@@ -18,17 +18,22 @@ import org.springframework.roo.shell.Completion;
  */
 public class EnumConverterTest {
 
+    /**
+     * A simple test enum (enums can't be mocked).
+     * 
+     * @author Andrew Swan
+     * @since 1.2.0
+     */
+    private enum Flavour {
+        BANANA, CHERRY, RASPBERRY;
+    }
+
     // Fixture
     private EnumConverter enumConverter;
 
     @Before
     public void setUp() {
-        this.enumConverter = new EnumConverter();
-    }
-
-    @Test
-    public void testSupports() {
-        assertTrue(enumConverter.supports(Flavour.class, "anything"));
+        enumConverter = new EnumConverter();
     }
 
     @Test
@@ -56,13 +61,8 @@ public class EnumConverterTest {
         assertEquals(Flavour.BANANA.name(), completions.get(0).getValue());
     }
 
-    /**
-     * A simple test enum (enums can't be mocked).
-     * 
-     * @author Andrew Swan
-     * @since 1.2.0
-     */
-    private enum Flavour {
-        BANANA, CHERRY, RASPBERRY;
+    @Test
+    public void testSupports() {
+        assertTrue(enumConverter.supports(Flavour.class, "anything"));
     }
 }

@@ -24,17 +24,10 @@ import org.springframework.roo.support.util.StringUtils;
 @Service
 public class OsCommands implements CommandMarker {
 
-    // Constants
     private static final Logger LOGGER = HandlerUtils
             .getLogger(OsCommands.class);
 
-    // Fields
     @Reference private OsOperations osOperations;
-
-    @CliAvailabilityIndicator("!")
-    public boolean isCommandAvailable() {
-        return true; // This command is always available!
-    }
 
     @CliCommand(value = "!", help = "Allows execution of operating system (OS) commands.")
     public void command(
@@ -44,10 +37,15 @@ public class OsCommands implements CommandMarker {
             try {
                 osOperations.executeCommand(command);
             }
-            catch (IOException e) {
+            catch (final IOException e) {
                 LOGGER.severe("Unable to execute command " + command + " ["
                         + e.getMessage() + "]");
             }
         }
+    }
+
+    @CliAvailabilityIndicator("!")
+    public boolean isCommandAvailable() {
+        return true; // This command is always available!
     }
 }

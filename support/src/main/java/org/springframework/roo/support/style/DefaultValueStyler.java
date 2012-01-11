@@ -38,13 +38,62 @@ import org.springframework.roo.support.util.ObjectUtils;
  * @since 1.2.2
  */
 public class DefaultValueStyler implements ValueStyler {
-    private static final String EMPTY = "[empty]";
-    private static final String NULL = "[null]";
+    private static final String ARRAY = "array";
     private static final String COLLECTION = "collection";
-    private static final String SET = "set";
+    private static final String EMPTY = "[empty]";
     private static final String LIST = "list";
     private static final String MAP = "map";
-    private static final String ARRAY = "array";
+    private static final String NULL = "[null]";
+    private static final String SET = "set";
+
+    private String getCollectionTypeString(final Collection<?> value) {
+        if (value instanceof List<?>) {
+            return LIST;
+        }
+        else if (value instanceof Set<?>) {
+            return SET;
+        }
+        else {
+            return COLLECTION;
+        }
+    }
+
+    private String style(final Collection<?> value) {
+        final StringBuilder result = new StringBuilder((value.size() * 8) + 16);
+        result.append(getCollectionTypeString(value)).append('[');
+        for (final Iterator<?> i = value.iterator(); i.hasNext();) {
+            result.append(style(i.next()));
+            if (i.hasNext()) {
+                result.append(',').append(' ');
+            }
+        }
+        if (value.isEmpty()) {
+            result.append(EMPTY);
+        }
+        result.append("]");
+        return result.toString();
+    }
+
+    private String style(final Map.Entry<?, ?> value) {
+        return style(value.getKey()) + " -> " + style(value.getValue());
+    }
+
+    private String style(final Map<?, ?> value) {
+        final StringBuilder result = new StringBuilder((value.size() * 8) + 16);
+        result.append(MAP + "[");
+        for (final Iterator<?> it = value.entrySet().iterator(); it.hasNext();) {
+            final Map.Entry<?, ?> entry = (Map.Entry<?, ?>) it.next();
+            result.append(style(entry));
+            if (it.hasNext()) {
+                result.append(',').append(' ');
+            }
+        }
+        if (value.isEmpty()) {
+            result.append(EMPTY);
+        }
+        result.append("]");
+        return result.toString();
+    }
 
     public String style(final Object value) {
         if (value == null) {
@@ -57,7 +106,7 @@ public class DefaultValueStyler implements ValueStyler {
             return ClassUtils.getShortName((Class<?>) value);
         }
         else if (value instanceof Method) {
-            Method method = (Method) value;
+            final Method method = (Method) value;
             return method.getName() + "@"
                     + ClassUtils.getShortName(method.getDeclaringClass());
         }
@@ -78,61 +127,12 @@ public class DefaultValueStyler implements ValueStyler {
         }
     }
 
-    private String style(final Map<?, ?> value) {
-        StringBuilder result = new StringBuilder(value.size() * 8 + 16);
-        result.append(MAP + "[");
-        for (Iterator<?> it = value.entrySet().iterator(); it.hasNext();) {
-            Map.Entry<?, ?> entry = (Map.Entry<?, ?>) it.next();
-            result.append(style(entry));
-            if (it.hasNext()) {
-                result.append(',').append(' ');
-            }
-        }
-        if (value.isEmpty()) {
-            result.append(EMPTY);
-        }
-        result.append("]");
-        return result.toString();
-    }
-
-    private String style(final Map.Entry<?, ?> value) {
-        return style(value.getKey()) + " -> " + style(value.getValue());
-    }
-
-    private String style(final Collection<?> value) {
-        StringBuilder result = new StringBuilder(value.size() * 8 + 16);
-        result.append(getCollectionTypeString(value)).append('[');
-        for (Iterator<?> i = value.iterator(); i.hasNext();) {
-            result.append(style(i.next()));
-            if (i.hasNext()) {
-                result.append(',').append(' ');
-            }
-        }
-        if (value.isEmpty()) {
-            result.append(EMPTY);
-        }
-        result.append("]");
-        return result.toString();
-    }
-
-    private String getCollectionTypeString(final Collection<?> value) {
-        if (value instanceof List<?>) {
-            return LIST;
-        }
-        else if (value instanceof Set<?>) {
-            return SET;
-        }
-        else {
-            return COLLECTION;
-        }
-    }
-
     private String styleArray(final Object[] array) {
-        StringBuilder result = new StringBuilder(array.length * 8 + 16);
+        final StringBuilder result = new StringBuilder((array.length * 8) + 16);
         result.append(ARRAY + "<")
                 .append(ClassUtils.getShortName(array.getClass()
                         .getComponentType())).append(">[");
-        for (int i = 0; i < array.length - 1; i++) {
+        for (int i = 0; i < (array.length - 1); i++) {
             result.append(style(array[i]));
             result.append(',').append(' ');
         }

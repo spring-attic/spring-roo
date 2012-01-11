@@ -44,18 +44,58 @@ import org.w3c.dom.Element;
 @Service
 public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
 
-    // Fields
     @Reference private FileManager fileManager;
     @Reference private PathResolver pathResolver;
     @Reference private ProjectOperations projectOperations;
     @Reference private TypeManagementService typeManagementService;
 
+    private void configureProject() {
+        final Element configuration = XmlUtils.getConfiguration(getClass());
+
+        final List<Dependency> dependencies = new ArrayList<Dependency>();
+        final List<Element> springDependencies = XmlUtils.findElements(
+                "/configuration/spring-data-jpa/dependencies/dependency",
+                configuration);
+        for (final Element dependencyElement : springDependencies) {
+            dependencies.add(new Dependency(dependencyElement));
+        }
+
+        projectOperations.addDependencies(
+                projectOperations.getFocusedModuleName(), dependencies);
+
+        final String appCtxId = pathResolver.getFocusedIdentifier(
+                Path.SPRING_CONFIG_ROOT, "applicationContext-jpa.xml");
+        if (fileManager.exists(appCtxId)) {
+            return;
+        }
+        else {
+            try {
+                final InputStream templateInputStream = FileUtils
+                        .getInputStream(getClass(),
+                                "applicationContext-jpa.xml");
+                String input = FileCopyUtils
+                        .copyToString(new InputStreamReader(templateInputStream));
+                input = input.replace("TO_BE_CHANGED_BY_ADDON",
+                        projectOperations.getFocusedTopLevelPackage()
+                                .getFullyQualifiedPackageName());
+                final MutableFile mutableFile = fileManager
+                        .createFile(appCtxId);
+                FileCopyUtils.copy(input.getBytes(),
+                        mutableFile.getOutputStream());
+            }
+            catch (final IOException e) {
+                throw new IllegalStateException("Unable to create '" + appCtxId
+                        + "'", e);
+            }
+        }
+    }
+
     public String getName() {
         return FeatureNames.JPA;
     }
 
-    public boolean isInstalledInModule(String moduleName) {
-        LogicalPath resourcesPath = LogicalPath.getInstance(
+    public boolean isInstalledInModule(final String moduleName) {
+        final LogicalPath resourcesPath = LogicalPath.getInstance(
                 Path.SRC_MAIN_RESOURCES, moduleName);
         return projectOperations.isFocusedProjectAvailable()
                 && fileManager.exists(projectOperations.getPathResolver()
@@ -74,21 +114,21 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
         Assert.notNull(interfaceType, "Interface type required");
         Assert.notNull(domainType, "Domain type required");
 
-        String interfaceIdentifier = pathResolver.getFocusedCanonicalPath(
-                Path.SRC_MAIN_JAVA, interfaceType);
+        final String interfaceIdentifier = pathResolver
+                .getFocusedCanonicalPath(Path.SRC_MAIN_JAVA, interfaceType);
 
         if (fileManager.exists(interfaceIdentifier)) {
             return; // Type exists already - nothing to do
         }
 
         // Build interface type
-        AnnotationMetadataBuilder interfaceAnnotationMetadata = new AnnotationMetadataBuilder(
+        final AnnotationMetadataBuilder interfaceAnnotationMetadata = new AnnotationMetadataBuilder(
                 ROO_REPOSITORY_JPA);
         interfaceAnnotationMetadata.addAttribute(new ClassAttributeValue(
                 new JavaSymbolName("domainType"), domainType));
-        String interfaceMdId = PhysicalTypeIdentifier.createIdentifier(
+        final String interfaceMdId = PhysicalTypeIdentifier.createIdentifier(
                 interfaceType, pathResolver.getPath(interfaceIdentifier));
-        ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(
+        final ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(
                 interfaceMdId, Modifier.PUBLIC, interfaceType,
                 PhysicalTypeCategory.INTERFACE);
         cidBuilder.addAnnotation(interfaceAnnotationMetadata.build());
@@ -96,44 +136,5 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
 
         // Take care of project configuration
         configureProject();
-    }
-
-    private void configureProject() {
-        Element configuration = XmlUtils.getConfiguration(getClass());
-
-        List<Dependency> dependencies = new ArrayList<Dependency>();
-        List<Element> springDependencies = XmlUtils.findElements(
-                "/configuration/spring-data-jpa/dependencies/dependency",
-                configuration);
-        for (Element dependencyElement : springDependencies) {
-            dependencies.add(new Dependency(dependencyElement));
-        }
-
-        projectOperations.addDependencies(
-                projectOperations.getFocusedModuleName(), dependencies);
-
-        String appCtxId = pathResolver.getFocusedIdentifier(
-                Path.SPRING_CONFIG_ROOT, "applicationContext-jpa.xml");
-        if (fileManager.exists(appCtxId)) {
-            return;
-        }
-        else {
-            try {
-                InputStream templateInputStream = FileUtils.getInputStream(
-                        getClass(), "applicationContext-jpa.xml");
-                String input = FileCopyUtils
-                        .copyToString(new InputStreamReader(templateInputStream));
-                input = input.replace("TO_BE_CHANGED_BY_ADDON",
-                        projectOperations.getFocusedTopLevelPackage()
-                                .getFullyQualifiedPackageName());
-                MutableFile mutableFile = fileManager.createFile(appCtxId);
-                FileCopyUtils.copy(input.getBytes(),
-                        mutableFile.getOutputStream());
-            }
-            catch (IOException e) {
-                throw new IllegalStateException("Unable to create '" + appCtxId
-                        + "'", e);
-            }
-        }
     }
 }

@@ -62,18 +62,16 @@ import org.springframework.roo.support.util.Assert;
 public class IntegrationTestMetadataProviderImpl extends
         AbstractItdMetadataProvider implements IntegrationTestMetadataProvider {
 
-    // Constants
     private static final int LAYER_POSITION = LayerType.HIGHEST.getPosition();
     private static final JavaSymbolName TRANSACTION_MANAGER_ATTRIBUTE = new JavaSymbolName(
             "transactionManager");
 
-    // Fields
     @Reference private ConfigurableMetadataProvider configurableMetadataProvider;
     @Reference private LayerService layerService;
-    @Reference private ProjectOperations projectOperations;
-
     private final Map<JavaType, String> managedEntityTypes = new HashMap<JavaType, String>();
+
     private final Set<String> producedMids = new LinkedHashSet<String>();
+    @Reference private ProjectOperations projectOperations;
     private Boolean wasGaeEnabled;
 
     protected void activate(final ComponentContext context) {
@@ -87,6 +85,12 @@ public class IntegrationTestMetadataProviderImpl extends
         addMetadataTrigger(ROO_INTEGRATION_TEST);
     }
 
+    @Override
+    protected String createLocalIdentifier(final JavaType javaType,
+            final LogicalPath path) {
+        return IntegrationTestMetadata.createIdentifier(javaType, path);
+    }
+
     protected void deactivate(final ComponentContext context) {
         metadataDependencyRegistry.removeNotificationListener(this);
         metadataDependencyRegistry.deregisterDependency(
@@ -97,71 +101,80 @@ public class IntegrationTestMetadataProviderImpl extends
         removeMetadataTrigger(ROO_INTEGRATION_TEST);
     }
 
-    @Override
-    protected void notifyForGenericListener(final String upstreamDependency) {
-        if (PhysicalTypeIdentifier.isValid(upstreamDependency)) {
-            handleGenericChangeToPhysicalType(PhysicalTypeIdentifier
-                    .getJavaType(upstreamDependency));
-        }
-        if (ProjectMetadata.isValid(upstreamDependency)) {
-            handleGenericChangeToProject(ProjectMetadata
-                    .getModuleName(upstreamDependency));
-        }
-    }
-
     /**
-     * Handles a generic change (i.e. with no explicit downstream dependency) to
-     * the given physical type
+     * Returns the {@link JavaType} for the given entity's "data on demand"
+     * class.
      * 
-     * @param physicalType the type that changed (required)
+     * @param entity the entity for which to get the DoD type
+     * @return a non-<code>null</code> type (which may or may not exist yet)
      */
-    private void handleGenericChangeToPhysicalType(final JavaType physicalType) {
-        handleChangesToTestedEntities(physicalType);
-        handleChangesToLayeringForTestedEntities(physicalType);
-    }
-
-    private void handleChangesToTestedEntities(final JavaType physicalType) {
-        final String localMid = managedEntityTypes.get(physicalType);
-        if (localMid != null) {
-            // One of the entities for which we produce metadata has changed;
-            // refresh that metadata
-            metadataService.get(localMid);
+    private JavaType getDataOnDemandType(final JavaType entity) {
+        // First check for an existing type with the standard DoD naming
+        // convention
+        final JavaType defaultDodType = new JavaType(
+                entity.getFullyQualifiedTypeName() + "DataOnDemand");
+        if (typeLocationService.getTypeDetails(defaultDodType) != null) {
+            return defaultDodType;
         }
-    }
 
-    private void handleChangesToLayeringForTestedEntities(
-            final JavaType physicalType) {
-        final MemberHoldingTypeDetails memberHoldingTypeDetails = typeLocationService
-                .getTypeDetails(physicalType);
-        if (memberHoldingTypeDetails != null) {
-            for (final JavaType type : memberHoldingTypeDetails
-                    .getLayerEntities()) {
-                handleChangesToTestedEntities(type);
+        // Otherwise we look through all DoD-annotated classes for this entity's
+        // one
+        for (final ClassOrInterfaceTypeDetails dodType : typeLocationService
+                .findClassesOrInterfaceDetailsWithAnnotation(ROO_DATA_ON_DEMAND)) {
+            final AnnotationMetadata dodAnnotation = MemberFindingUtils
+                    .getFirstAnnotation(dodType, ROO_DATA_ON_DEMAND);
+            if ((dodAnnotation != null)
+                    && dodAnnotation.getAttribute("entity").getValue()
+                            .equals(entity)) {
+                return dodType.getName();
             }
         }
+
+        // No existing DoD class was found for this entity, so use the default
+        // name
+        return defaultDodType;
     }
 
-    /**
-     * Handles a generic change (i.e. with no explicit downstream dependency) to
-     * the project metadata
-     */
-    private void handleGenericChangeToProject(final String moduleName) {
-        final ProjectMetadata projectMetadata = projectOperations
-                .getProjectMetadata(moduleName);
-        if (projectMetadata != null && projectMetadata.isValid()) {
-            final boolean isGaeEnabled = projectOperations
-                    .isFeatureInstalledInFocusedModule(FeatureNames.GAE);
-            // We need to determine if the persistence state has changed, we do
-            // this by comparing the last known state to the current state
-            final boolean hasGaeStateChanged = wasGaeEnabled == null
-                    || isGaeEnabled != wasGaeEnabled;
-            if (hasGaeStateChanged) {
-                wasGaeEnabled = isGaeEnabled;
-                for (final String producedMid : producedMids) {
-                    metadataService.evictAndGet(producedMid);
-                }
-            }
-        }
+    private ClassOrInterfaceTypeDetails getEntitySuperclass(
+            final JavaType entity) {
+        final String physicalTypeIdentifier = PhysicalTypeIdentifier
+                .createIdentifier(entity,
+                        typeLocationService.getTypePath(entity));
+        final PhysicalTypeMetadata ptm = (PhysicalTypeMetadata) metadataService
+                .get(physicalTypeIdentifier);
+        Assert.notNull(
+                ptm,
+                "Java source code unavailable for type "
+                        + PhysicalTypeIdentifier
+                                .getFriendlyName(physicalTypeIdentifier));
+        final PhysicalTypeDetails ptd = ptm.getMemberHoldingTypeDetails();
+        Assert.notNull(
+                ptd,
+                "Java source code details unavailable for type "
+                        + PhysicalTypeIdentifier
+                                .getFriendlyName(physicalTypeIdentifier));
+        Assert.isInstanceOf(
+                ClassOrInterfaceTypeDetails.class,
+                ptd,
+                "Java source code is immutable for type "
+                        + PhysicalTypeIdentifier
+                                .getFriendlyName(physicalTypeIdentifier));
+        final ClassOrInterfaceTypeDetails cid = (ClassOrInterfaceTypeDetails) ptd;
+        return cid.getSuperclass();
+    }
+
+    @Override
+    protected String getGovernorPhysicalTypeIdentifier(
+            final String metadataIdentificationString) {
+        final JavaType javaType = IntegrationTestMetadata
+                .getJavaType(metadataIdentificationString);
+        final LogicalPath path = IntegrationTestMetadata
+                .getPath(metadataIdentificationString);
+        return PhysicalTypeIdentifier.createIdentifier(javaType, path);
+    }
+
+    public String getItdUniquenessFilenameSuffix() {
+        return "IntegrationTest";
     }
 
     @Override
@@ -174,7 +187,7 @@ public class IntegrationTestMetadataProviderImpl extends
         final IntegrationTestAnnotationValues annotationValues = new IntegrationTestAnnotationValues(
                 governorPhysicalTypeMetadata);
         final JavaType entity = annotationValues.getEntity();
-        if (!annotationValues.isAnnotationFound() || entity == null) {
+        if (!annotationValues.isAnnotationFound() || (entity == null)) {
             return null;
         }
 
@@ -189,7 +202,7 @@ public class IntegrationTestMetadataProviderImpl extends
         metadataDependencyRegistry.registerDependency(dataOnDemandMetadataKey,
                 metadataIdentificationString);
 
-        if (dataOnDemandMetadata == null || !dataOnDemandMetadata.isValid()) {
+        if ((dataOnDemandMetadata == null) || !dataOnDemandMetadata.isValid()) {
             return null;
         }
 
@@ -204,7 +217,7 @@ public class IntegrationTestMetadataProviderImpl extends
             return null;
         }
 
-        MemberHoldingTypeDetails persistenceMemberHoldingTypeDetails = MemberFindingUtils
+        final MemberHoldingTypeDetails persistenceMemberHoldingTypeDetails = MemberFindingUtils
                 .getMostConcreteMemberHoldingTypeDetailsWithTag(memberDetails,
                         PERSISTENT_TYPE);
         if (persistenceMemberHoldingTypeDetails == null) {
@@ -261,8 +274,8 @@ public class IntegrationTestMetadataProviderImpl extends
                 .getMemberTypeAdditions(metadataIdentificationString,
                         REMOVE_METHOD.name(), entity, identifierType,
                         LAYER_POSITION, entityParameter);
-        if (persistMethodAdditions == null || findMethodAdditions == null
-                || identifierAccessorMethod == null) {
+        if ((persistMethodAdditions == null) || (findMethodAdditions == null)
+                || (identifierAccessorMethod == null)) {
             return null;
         }
 
@@ -288,9 +301,10 @@ public class IntegrationTestMetadataProviderImpl extends
         // Maintain a list of entities that are being tested
         managedEntityTypes.put(entity, metadataIdentificationString);
 
-        String moduleName = PhysicalTypeIdentifierNamingUtils.getPath(
+        final String moduleName = PhysicalTypeIdentifierNamingUtils.getPath(
                 metadataIdentificationString).getModule();
-        boolean isGaeEnabled = projectOperations.isProjectAvailable(moduleName)
+        final boolean isGaeEnabled = projectOperations
+                .isProjectAvailable(moduleName)
                 && projectOperations
                         .isFeatureInstalledInFocusedModule(FeatureNames.GAE);
 
@@ -305,89 +319,74 @@ public class IntegrationTestMetadataProviderImpl extends
                 isGaeEnabled);
     }
 
-    /**
-     * Returns the {@link JavaType} for the given entity's "data on demand"
-     * class.
-     * 
-     * @param entity the entity for which to get the DoD type
-     * @return a non-<code>null</code> type (which may or may not exist yet)
-     */
-    private JavaType getDataOnDemandType(final JavaType entity) {
-        // First check for an existing type with the standard DoD naming
-        // convention
-        final JavaType defaultDodType = new JavaType(
-                entity.getFullyQualifiedTypeName() + "DataOnDemand");
-        if (typeLocationService.getTypeDetails(defaultDodType) != null) {
-            return defaultDodType;
-        }
-
-        // Otherwise we look through all DoD-annotated classes for this entity's
-        // one
-        for (final ClassOrInterfaceTypeDetails dodType : typeLocationService
-                .findClassesOrInterfaceDetailsWithAnnotation(ROO_DATA_ON_DEMAND)) {
-            final AnnotationMetadata dodAnnotation = MemberFindingUtils
-                    .getFirstAnnotation(dodType, ROO_DATA_ON_DEMAND);
-            if (dodAnnotation != null
-                    && dodAnnotation.getAttribute("entity").getValue()
-                            .equals(entity)) {
-                return dodType.getName();
-            }
-        }
-
-        // No existing DoD class was found for this entity, so use the default
-        // name
-        return defaultDodType;
-    }
-
-    private ClassOrInterfaceTypeDetails getEntitySuperclass(
-            final JavaType entity) {
-        final String physicalTypeIdentifier = PhysicalTypeIdentifier
-                .createIdentifier(entity,
-                        typeLocationService.getTypePath(entity));
-        final PhysicalTypeMetadata ptm = (PhysicalTypeMetadata) metadataService
-                .get(physicalTypeIdentifier);
-        Assert.notNull(
-                ptm,
-                "Java source code unavailable for type "
-                        + PhysicalTypeIdentifier
-                                .getFriendlyName(physicalTypeIdentifier));
-        final PhysicalTypeDetails ptd = ptm.getMemberHoldingTypeDetails();
-        Assert.notNull(
-                ptd,
-                "Java source code details unavailable for type "
-                        + PhysicalTypeIdentifier
-                                .getFriendlyName(physicalTypeIdentifier));
-        Assert.isInstanceOf(
-                ClassOrInterfaceTypeDetails.class,
-                ptd,
-                "Java source code is immutable for type "
-                        + PhysicalTypeIdentifier
-                                .getFriendlyName(physicalTypeIdentifier));
-        final ClassOrInterfaceTypeDetails cid = (ClassOrInterfaceTypeDetails) ptd;
-        return cid.getSuperclass();
-    }
-
-    public String getItdUniquenessFilenameSuffix() {
-        return "IntegrationTest";
-    }
-
-    @Override
-    protected String getGovernorPhysicalTypeIdentifier(
-            final String metadataIdentificationString) {
-        final JavaType javaType = IntegrationTestMetadata
-                .getJavaType(metadataIdentificationString);
-        final LogicalPath path = IntegrationTestMetadata
-                .getPath(metadataIdentificationString);
-        return PhysicalTypeIdentifier.createIdentifier(javaType, path);
-    }
-
-    @Override
-    protected String createLocalIdentifier(final JavaType javaType,
-            final LogicalPath path) {
-        return IntegrationTestMetadata.createIdentifier(javaType, path);
-    }
-
     public String getProvidesType() {
         return IntegrationTestMetadata.getMetadataIdentiferType();
+    }
+
+    private void handleChangesToLayeringForTestedEntities(
+            final JavaType physicalType) {
+        final MemberHoldingTypeDetails memberHoldingTypeDetails = typeLocationService
+                .getTypeDetails(physicalType);
+        if (memberHoldingTypeDetails != null) {
+            for (final JavaType type : memberHoldingTypeDetails
+                    .getLayerEntities()) {
+                handleChangesToTestedEntities(type);
+            }
+        }
+    }
+
+    private void handleChangesToTestedEntities(final JavaType physicalType) {
+        final String localMid = managedEntityTypes.get(physicalType);
+        if (localMid != null) {
+            // One of the entities for which we produce metadata has changed;
+            // refresh that metadata
+            metadataService.get(localMid);
+        }
+    }
+
+    /**
+     * Handles a generic change (i.e. with no explicit downstream dependency) to
+     * the given physical type
+     * 
+     * @param physicalType the type that changed (required)
+     */
+    private void handleGenericChangeToPhysicalType(final JavaType physicalType) {
+        handleChangesToTestedEntities(physicalType);
+        handleChangesToLayeringForTestedEntities(physicalType);
+    }
+
+    /**
+     * Handles a generic change (i.e. with no explicit downstream dependency) to
+     * the project metadata
+     */
+    private void handleGenericChangeToProject(final String moduleName) {
+        final ProjectMetadata projectMetadata = projectOperations
+                .getProjectMetadata(moduleName);
+        if ((projectMetadata != null) && projectMetadata.isValid()) {
+            final boolean isGaeEnabled = projectOperations
+                    .isFeatureInstalledInFocusedModule(FeatureNames.GAE);
+            // We need to determine if the persistence state has changed, we do
+            // this by comparing the last known state to the current state
+            final boolean hasGaeStateChanged = (wasGaeEnabled == null)
+                    || (isGaeEnabled != wasGaeEnabled);
+            if (hasGaeStateChanged) {
+                wasGaeEnabled = isGaeEnabled;
+                for (final String producedMid : producedMids) {
+                    metadataService.evictAndGet(producedMid);
+                }
+            }
+        }
+    }
+
+    @Override
+    protected void notifyForGenericListener(final String upstreamDependency) {
+        if (PhysicalTypeIdentifier.isValid(upstreamDependency)) {
+            handleGenericChangeToPhysicalType(PhysicalTypeIdentifier
+                    .getJavaType(upstreamDependency));
+        }
+        if (ProjectMetadata.isValid(upstreamDependency)) {
+            handleGenericChangeToProject(ProjectMetadata
+                    .getModuleName(upstreamDependency));
+        }
     }
 }

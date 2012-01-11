@@ -23,20 +23,26 @@ import org.springframework.roo.support.util.Assert;
 @Component
 public class DefaultMetadataLogger implements MetadataLogger {
 
-    // Fields
-    private int traceLevel = 0;
+    private static class TimerEntry {
+        long clockStartedOrResumed; // nanos
+        long duration; // nanos
+        String responsibleClass;
+    }
+
     private long eventNumber = 0;
-    private FileWriter fileLog;
     private final Stack<Long> eventStack = new Stack<Long>();
-    private final Stack<TimerEntry> timerStack = new Stack<TimerEntry>();
-    /** key: responsible class, value: nanos occupied */
-    private final Map<String, Long> timings = new HashMap<String, Long>();
+    private FileWriter fileLog;
     /**
      * key: responsible class, value: number of times a timing record was
      * created for the responsible class
      */
     private final Map<String, Long> invocations = new HashMap<String, Long>();
     private final Class<DefaultMetadataLogger> mutex = DefaultMetadataLogger.class;
+    private final Stack<TimerEntry> timerStack = new Stack<TimerEntry>();
+    /** key: responsible class, value: nanos occupied */
+    private final Map<String, Long> timings = new HashMap<String, Long>();
+
+    private int traceLevel = 0;
 
     public DefaultMetadataLogger() {
         if (System.getProperty("roo.metadata.trace") != null) {
@@ -44,18 +50,10 @@ public class DefaultMetadataLogger implements MetadataLogger {
         }
     }
 
-    public int getTraceLevel() {
-        return traceLevel;
-    }
-
-    public void setTraceLevel(final int trace) {
-        this.traceLevel = trace;
-    }
-
     public SortedSet<MetadataTimingStatistic> getTimings() {
-        SortedSet<MetadataTimingStatistic> result = new TreeSet<MetadataTimingStatistic>();
+        final SortedSet<MetadataTimingStatistic> result = new TreeSet<MetadataTimingStatistic>();
         synchronized (mutex) {
-            for (String key : timings.keySet()) {
+            for (final String key : timings.keySet()) {
                 result.add(new StandardMetadataTimingStatistic(key, timings
                         .get(key), invocations.get(key)));
             }
@@ -63,9 +61,75 @@ public class DefaultMetadataLogger implements MetadataLogger {
         return result;
     }
 
+    public int getTraceLevel() {
+        return traceLevel;
+    }
+
+    public void log(final String message) {
+        Assert.hasText(message, "Message to log required");
+        Assert.isTrue(eventStack.size() > 0,
+                "Event stack is empty, so no logging should have been requested at this time");
+        final StringBuilder sb = new StringBuilder("00000000");
+        // Get the current event ID off the stack
+        final Long eventIdentifier = eventStack.get(eventStack.size() - 1);
+        // Figure out the indentation level
+        final int indentationLevel = eventStack.size();
+        final String hex = Long.toHexString(eventIdentifier);
+        sb.replace(8 - hex.length(), 8, hex);
+        for (int i = 0; i < indentationLevel; i++) {
+            sb.append(" ");
+        }
+        sb.append(message);
+        logToFile(sb.toString());
+    }
+
+    private void logToFile(final String line) {
+        if (fileLog == null) {
+            try {
+                // Overwrite existing (don't append)
+                fileLog = new FileWriter("metadata.log", false);
+            }
+            catch (final IOException ignore) {
+            }
+            if (fileLog == null) {
+                // Still failing, so give up
+                return;
+            }
+        }
+        try {
+            fileLog.write(line + "\n"); // Unix line endings only from Roo
+            fileLog.flush(); // So tail -f will show it's working
+        }
+        catch (final IOException ignoreIt) {
+        }
+    }
+
+    public void setTraceLevel(final int trace) {
+        traceLevel = trace;
+    }
+
     public void startEvent() {
         eventNumber++;
         eventStack.push(eventNumber);
+    }
+
+    public void startTimer(final String responsibleClass) {
+        Assert.hasText(responsibleClass, "Responsible class required");
+        final long now = System.nanoTime();
+        if (timerStack.size() > 0) {
+            // There is an existing timer on the stack, so we need to stop the
+            // clock for it
+            final TimerEntry timerEntry = timerStack.get(timerStack.size() - 1);
+            // Add the duration it ran to any existing duration
+            timerEntry.duration = timerEntry.duration
+                    + (now - timerEntry.clockStartedOrResumed);
+            timerEntry.clockStartedOrResumed = now;
+        }
+        // Start a new timer
+        final TimerEntry timerEntry = new TimerEntry();
+        timerEntry.responsibleClass = responsibleClass;
+        timerEntry.clockStartedOrResumed = now;
+        timerStack.push(timerEntry);
     }
 
     public void stopEvent() {
@@ -75,52 +139,15 @@ public class DefaultMetadataLogger implements MetadataLogger {
         eventStack.pop();
     }
 
-    public void log(final String message) {
-        Assert.hasText(message, "Message to log required");
-        Assert.isTrue(eventStack.size() > 0,
-                "Event stack is empty, so no logging should have been requested at this time");
-        StringBuilder sb = new StringBuilder("00000000");
-        // Get the current event ID off the stack
-        Long eventIdentifier = eventStack.get(eventStack.size() - 1);
-        // Figure out the indentation level
-        int indentationLevel = eventStack.size();
-        String hex = Long.toHexString(eventIdentifier);
-        sb.replace(8 - hex.length(), 8, hex);
-        for (int i = 0; i < indentationLevel; i++) {
-            sb.append(" ");
-        }
-        sb.append(message);
-        logToFile(sb.toString());
-    }
-
-    public void startTimer(final String responsibleClass) {
-        Assert.hasText(responsibleClass, "Responsible class required");
-        long now = System.nanoTime();
-        if (timerStack.size() > 0) {
-            // There is an existing timer on the stack, so we need to stop the
-            // clock for it
-            TimerEntry timerEntry = timerStack.get(timerStack.size() - 1);
-            // Add the duration it ran to any existing duration
-            timerEntry.duration = timerEntry.duration
-                    + (now - timerEntry.clockStartedOrResumed);
-            timerEntry.clockStartedOrResumed = now;
-        }
-        // Start a new timer
-        TimerEntry timerEntry = new TimerEntry();
-        timerEntry.responsibleClass = responsibleClass;
-        timerEntry.clockStartedOrResumed = now;
-        timerStack.push(timerEntry);
-    }
-
     public void stopTimer() {
         Assert.isTrue(
                 timerStack.size() > 0,
                 "Timer stack is empty, indicating a mismatched number of timer start/stop calls");
-        long now = System.nanoTime();
-        TimerEntry timerEntry = timerStack.pop();
+        final long now = System.nanoTime();
+        final TimerEntry timerEntry = timerStack.pop();
         timerEntry.duration = timerEntry.duration
                 + (now - timerEntry.clockStartedOrResumed);
-        String responsibleClass = timerEntry.responsibleClass;
+        final String responsibleClass = timerEntry.responsibleClass;
 
         // Update the timings summary
         synchronized (mutex) {
@@ -141,32 +168,5 @@ public class DefaultMetadataLogger implements MetadataLogger {
             existingInvocations++;
             invocations.put(responsibleClass, existingInvocations);
         }
-    }
-
-    private void logToFile(final String line) {
-        if (fileLog == null) {
-            try {
-                // Overwrite existing (don't append)
-                fileLog = new FileWriter("metadata.log", false);
-            }
-            catch (IOException ignore) {
-            }
-            if (fileLog == null) {
-                // Still failing, so give up
-                return;
-            }
-        }
-        try {
-            fileLog.write(line + "\n"); // Unix line endings only from Roo
-            fileLog.flush(); // So tail -f will show it's working
-        }
-        catch (IOException ignoreIt) {
-        }
-    }
-
-    private static class TimerEntry {
-        String responsibleClass;
-        long clockStartedOrResumed; // nanos
-        long duration; // nanos
     }
 }

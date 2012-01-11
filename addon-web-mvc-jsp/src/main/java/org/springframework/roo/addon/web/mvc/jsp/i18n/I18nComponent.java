@@ -24,9 +24,8 @@ import org.apache.felix.scr.annotations.Service;
 @Reference(name = "language", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC, referenceInterface = I18n.class, cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE)
 public class I18nComponent implements I18nSupport {
 
-    // Fields
-    private final Object mutex = new Object();
     private final Set<I18n> i18nSet = new HashSet<I18n>();
+    private final Object mutex = new Object();
 
     protected void bindLanguage(final I18n i18n) {
         synchronized (mutex) {
@@ -34,10 +33,16 @@ public class I18nComponent implements I18nSupport {
         }
     }
 
-    protected void unbindLanguage(final I18n i18n) {
+    public I18n getLanguage(final Locale locale) {
         synchronized (mutex) {
-            i18nSet.remove(i18n);
+            for (final I18n lang : Collections.unmodifiableSet(i18nSet)) {
+                if (lang.getLocale().toString()
+                        .equalsIgnoreCase(locale.toString())) {
+                    return lang;
+                }
+            }
         }
+        return null;
     }
 
     public Set<I18n> getSupportedLanguages() {
@@ -48,15 +53,9 @@ public class I18nComponent implements I18nSupport {
         return set;
     }
 
-    public I18n getLanguage(final Locale locale) {
+    protected void unbindLanguage(final I18n i18n) {
         synchronized (mutex) {
-            for (I18n lang : Collections.unmodifiableSet(i18nSet)) {
-                if (lang.getLocale().toString()
-                        .equalsIgnoreCase(locale.toString())) {
-                    return lang;
-                }
-            }
+            i18nSet.remove(i18n);
         }
-        return null;
     }
 }

@@ -22,16 +22,10 @@ import org.springframework.roo.shell.MethodTarget;
 @Service
 public class ExcludeFieldsConverter implements Converter<Set<String>> {
 
-    public boolean supports(final Class<?> requiredType,
-            final String optionContext) {
-        return Set.class.isAssignableFrom(requiredType)
-                && optionContext.contains("exclude-fields");
-    }
-
     public Set<String> convertFromText(final String value,
             final Class<?> requiredType, final String optionContext) {
-        Set<String> fields = new LinkedHashSet<String>();
-        StringTokenizer st = new StringTokenizer(value, " ");
+        final Set<String> fields = new LinkedHashSet<String>();
+        final StringTokenizer st = new StringTokenizer(value, " ");
         while (st.hasMoreTokens()) {
             fields.add(st.nextToken());
         }
@@ -42,5 +36,11 @@ public class ExcludeFieldsConverter implements Converter<Set<String>> {
             final Class<?> requiredType, final String existingData,
             final String optionContext, final MethodTarget target) {
         return false;
+    }
+
+    public boolean supports(final Class<?> requiredType,
+            final String optionContext) {
+        return Set.class.isAssignableFrom(requiredType)
+                && optionContext.contains("exclude-fields");
     }
 }

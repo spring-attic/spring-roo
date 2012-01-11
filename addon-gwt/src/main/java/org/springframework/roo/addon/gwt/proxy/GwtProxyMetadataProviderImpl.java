@@ -48,7 +48,6 @@ public class GwtProxyMetadataProviderImpl extends
         AbstractHashCodeTrackingMetadataNotifier implements
         GwtProxyMetadataProvider {
 
-    // Fields
     @Reference protected GwtFileManager gwtFileManager;
     @Reference protected GwtTypeService gwtTypeService;
     @Reference protected ProjectOperations projectOperations;
@@ -67,87 +66,87 @@ public class GwtProxyMetadataProviderImpl extends
     }
 
     public MetadataItem get(final String metadataIdentificationString) {
-        ClassOrInterfaceTypeDetails proxy = getGovernor(metadataIdentificationString);
+        final ClassOrInterfaceTypeDetails proxy = getGovernor(metadataIdentificationString);
         if (proxy == null) {
             return null;
         }
 
-        AnnotationMetadata mirrorAnnotation = MemberFindingUtils
+        final AnnotationMetadata mirrorAnnotation = MemberFindingUtils
                 .getAnnotationOfType(proxy.getAnnotations(),
                         RooJavaType.ROO_GWT_PROXY);
         if (mirrorAnnotation == null) {
             return null;
         }
 
-        JavaType mirroredType = GwtUtils.lookupProxyTargetType(proxy);
+        final JavaType mirroredType = GwtUtils.lookupProxyTargetType(proxy);
         if (mirroredType == null) {
             return null;
         }
 
-        List<String> exclusionList = new ArrayList<String>();
-        AnnotationAttributeValue<?> excludeAttribute = mirrorAnnotation
+        final List<String> exclusionList = new ArrayList<String>();
+        final AnnotationAttributeValue<?> excludeAttribute = mirrorAnnotation
                 .getAttribute("exclude");
-        if (excludeAttribute != null
-                && excludeAttribute instanceof ArrayAttributeValue) {
+        if ((excludeAttribute != null)
+                && (excludeAttribute instanceof ArrayAttributeValue)) {
             @SuppressWarnings("unchecked")
-            ArrayAttributeValue<StringAttributeValue> excludeArrayAttribute = (ArrayAttributeValue<StringAttributeValue>) excludeAttribute;
-            for (StringAttributeValue attributeValue : excludeArrayAttribute
+            final ArrayAttributeValue<StringAttributeValue> excludeArrayAttribute = (ArrayAttributeValue<StringAttributeValue>) excludeAttribute;
+            for (final StringAttributeValue attributeValue : excludeArrayAttribute
                     .getValue()) {
                 exclusionList.add(attributeValue.getValue());
             }
         }
-        else if (excludeAttribute != null
-                && excludeAttribute instanceof StringAttributeValue) {
-            StringAttributeValue excludeStringAttribute = (StringAttributeValue) excludeAttribute;
+        else if ((excludeAttribute != null)
+                && (excludeAttribute instanceof StringAttributeValue)) {
+            final StringAttributeValue excludeStringAttribute = (StringAttributeValue) excludeAttribute;
             exclusionList.add(excludeStringAttribute.getValue());
         }
 
-        List<String> readOnlyList = new ArrayList<String>();
-        AnnotationAttributeValue<?> readOnlyAttribute = mirrorAnnotation
+        final List<String> readOnlyList = new ArrayList<String>();
+        final AnnotationAttributeValue<?> readOnlyAttribute = mirrorAnnotation
                 .getAttribute("readOnly");
-        if (readOnlyAttribute != null
-                && readOnlyAttribute instanceof ArrayAttributeValue) {
+        if ((readOnlyAttribute != null)
+                && (readOnlyAttribute instanceof ArrayAttributeValue)) {
             @SuppressWarnings("unchecked")
-            ArrayAttributeValue<StringAttributeValue> readOnlyArrayAttribute = (ArrayAttributeValue<StringAttributeValue>) readOnlyAttribute;
-            for (StringAttributeValue attributeValue : readOnlyArrayAttribute
+            final ArrayAttributeValue<StringAttributeValue> readOnlyArrayAttribute = (ArrayAttributeValue<StringAttributeValue>) readOnlyAttribute;
+            for (final StringAttributeValue attributeValue : readOnlyArrayAttribute
                     .getValue()) {
                 readOnlyList.add(attributeValue.getValue());
             }
         }
-        else if (readOnlyAttribute != null
-                && readOnlyAttribute instanceof StringAttributeValue) {
-            StringAttributeValue readOnlyStringAttribute = (StringAttributeValue) readOnlyAttribute;
+        else if ((readOnlyAttribute != null)
+                && (readOnlyAttribute instanceof StringAttributeValue)) {
+            final StringAttributeValue readOnlyStringAttribute = (StringAttributeValue) readOnlyAttribute;
             readOnlyList.add(readOnlyStringAttribute.getValue());
         }
 
-        ClassOrInterfaceTypeDetails mirroredDetails = typeLocationService
+        final ClassOrInterfaceTypeDetails mirroredDetails = typeLocationService
                 .getTypeDetails(mirroredType);
-        if (mirroredDetails == null
+        if ((mirroredDetails == null)
                 || Modifier.isAbstract(mirroredDetails.getModifier())) {
             return null;
         }
 
         final String moduleName = PhysicalTypeIdentifier.getPath(
                 proxy.getDeclaredByMetadataId()).getModule();
-        List<MethodMetadata> proxyMethods = gwtTypeService
+        final List<MethodMetadata> proxyMethods = gwtTypeService
                 .getProxyMethods(mirroredDetails);
-        List<MethodMetadata> convertedProxyMethods = new ArrayList<MethodMetadata>();
+        final List<MethodMetadata> convertedProxyMethods = new ArrayList<MethodMetadata>();
         final Collection<JavaPackage> sourcePackages = gwtTypeService
                 .getSourcePackages(moduleName);
-        for (MethodMetadata method : proxyMethods) {
-            JavaType gwtType = gwtTypeService.getGwtSideLeafType(
+        for (final MethodMetadata method : proxyMethods) {
+            final JavaType gwtType = gwtTypeService.getGwtSideLeafType(
                     method.getReturnType(), mirroredDetails.getName(), false,
                     true);
-            MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(
+            final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(
                     method);
             methodBuilder.setReturnType(gwtType);
-            MethodMetadata convertedMethod = methodBuilder.build();
+            final MethodMetadata convertedMethod = methodBuilder.build();
             if (gwtTypeService.isMethodReturnTypeInSourcePath(convertedMethod,
                     mirroredDetails, sourcePackages)) {
                 convertedProxyMethods.add(methodBuilder.build());
             }
         }
-        GwtProxyMetadata metadata = new GwtProxyMetadata(
+        final GwtProxyMetadata metadata = new GwtProxyMetadata(
                 metadataIdentificationString, updateProxy(proxy,
                         convertedProxyMethods, exclusionList, readOnlyList));
         notifyIfRequired(metadata);
@@ -156,78 +155,18 @@ public class GwtProxyMetadataProviderImpl extends
 
     private ClassOrInterfaceTypeDetails getGovernor(
             final String metadataIdentificationString) {
-        JavaType governorTypeName = GwtProxyMetadata
+        final JavaType governorTypeName = GwtProxyMetadata
                 .getJavaType(metadataIdentificationString);
-        LogicalPath governorTypePath = GwtProxyMetadata
+        final LogicalPath governorTypePath = GwtProxyMetadata
                 .getPath(metadataIdentificationString);
 
-        String physicalTypeId = PhysicalTypeIdentifier.createIdentifier(
+        final String physicalTypeId = PhysicalTypeIdentifier.createIdentifier(
                 governorTypeName, governorTypePath);
         return typeLocationService.getTypeDetails(physicalTypeId);
     }
 
-    private String updateProxy(final ClassOrInterfaceTypeDetails proxy,
-            final List<MethodMetadata> proxyMethods,
-            final List<String> exclusionList, final List<String> readOnlyList) {
-        // Create a new ClassOrInterfaceTypeDetailsBuilder for the Proxy, will
-        // be overridden if the Proxy has already been created
-        ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(
-                proxy);
-
-        // Only inherit from EntityProxy if extension is not already defined
-        if (!cidBuilder.getExtendsTypes().contains(OLD_ENTITY_PROXY)
-                && !cidBuilder.getExtendsTypes().contains(ENTITY_PROXY)) {
-            cidBuilder.addExtendsTypes(ENTITY_PROXY);
-        }
-
-        if (!cidBuilder.getExtendsTypes().contains(ENTITY_PROXY)) {
-            cidBuilder.addExtendsTypes(ENTITY_PROXY);
-        }
-
-        String destinationMetadataId = proxy.getDeclaredByMetadataId();
-        List<MethodMetadataBuilder> methods = new ArrayList<MethodMetadataBuilder>();
-        for (MethodMetadata method : proxyMethods) {
-            if (exclusionList.contains(method.getMethodName().getSymbolName())) {
-                continue;
-            }
-            String propertyName = StringUtils.uncapitalize(BeanInfoUtils
-                    .getPropertyNameForJavaBeanMethod(method).getSymbolName());
-            if (exclusionList.contains(propertyName)) {
-                continue;
-            }
-
-            MethodMetadataBuilder abstractAccessorMethodBuilder = new MethodMetadataBuilder(
-                    destinationMetadataId, method);
-            abstractAccessorMethodBuilder
-                    .setBodyBuilder(new InvocableMemberBodyBuilder());
-            abstractAccessorMethodBuilder.setModifier(Modifier.ABSTRACT);
-            methods.add(abstractAccessorMethodBuilder);
-
-            if (readOnlyList.contains(propertyName)) {
-                continue;
-            }
-            MethodMetadataBuilder abstractMutatorMethodBuilder = new MethodMetadataBuilder(
-                    destinationMetadataId, method);
-            abstractMutatorMethodBuilder
-                    .setBodyBuilder(new InvocableMemberBodyBuilder());
-            abstractMutatorMethodBuilder.setModifier(Modifier.ABSTRACT);
-            abstractMutatorMethodBuilder.setReturnType(JavaType.VOID_PRIMITIVE);
-            abstractMutatorMethodBuilder
-                    .setParameterTypes(AnnotatedJavaType
-                            .convertFromJavaTypes(Arrays.asList(method
-                                    .getReturnType())));
-            abstractMutatorMethodBuilder.setParameterNames(Arrays
-                    .asList(new JavaSymbolName(StringUtils
-                            .uncapitalize(propertyName))));
-            abstractMutatorMethodBuilder.setMethodName(new JavaSymbolName(
-                    method.getMethodName().getSymbolName()
-                            .replaceFirst("get", "set")));
-            methods.add(abstractMutatorMethodBuilder);
-        }
-
-        cidBuilder.setDeclaredMethods(methods);
-        return gwtFileManager.write(cidBuilder.build(),
-                GwtUtils.PROXY_REQUEST_WARNING);
+    public String getProvidesType() {
+        return GwtProxyMetadata.getMetadataIdentifierType();
     }
 
     public void notify(final String upstreamDependency,
@@ -243,7 +182,7 @@ public class GwtProxyMetadataProviderImpl extends
                     "Expected class-level notifications only for PhysicalTypeIdentifier (not '"
                             + upstreamDependency + "')");
 
-            ClassOrInterfaceTypeDetails cid = typeLocationService
+            final ClassOrInterfaceTypeDetails cid = typeLocationService
                     .getTypeDetails(upstreamDependency);
             if (cid == null) {
                 return;
@@ -251,26 +190,26 @@ public class GwtProxyMetadataProviderImpl extends
             if (MemberFindingUtils.getAnnotationOfType(cid.getAnnotations(),
                     RooJavaType.ROO_GWT_PROXY) == null) {
                 boolean found = false;
-                for (ClassOrInterfaceTypeDetails proxyCid : typeLocationService
+                for (final ClassOrInterfaceTypeDetails proxyCid : typeLocationService
                         .findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_GWT_PROXY)) {
-                    AnnotationMetadata annotationMetadata = GwtUtils
+                    final AnnotationMetadata annotationMetadata = GwtUtils
                             .getFirstAnnotation(proxyCid,
                                     GwtUtils.ROO_PROXY_REQUEST_ANNOTATIONS);
                     if (annotationMetadata != null) {
-                        AnnotationAttributeValue<?> attributeValue = annotationMetadata
+                        final AnnotationAttributeValue<?> attributeValue = annotationMetadata
                                 .getAttribute("value");
                         if (attributeValue != null) {
-                            String mirrorName = GwtUtils
+                            final String mirrorName = GwtUtils
                                     .getStringValue(attributeValue);
-                            if (mirrorName != null
+                            if ((mirrorName != null)
                                     && cid.getName()
                                             .getFullyQualifiedTypeName()
                                             .equals(attributeValue.getValue())) {
                                 found = true;
-                                JavaType typeName = PhysicalTypeIdentifier
+                                final JavaType typeName = PhysicalTypeIdentifier
                                         .getJavaType(proxyCid
                                                 .getDeclaredByMetadataId());
-                                LogicalPath typePath = PhysicalTypeIdentifier
+                                final LogicalPath typePath = PhysicalTypeIdentifier
                                         .getPath(proxyCid
                                                 .getDeclaredByMetadataId());
                                 downstreamDependency = GwtProxyMetadata
@@ -288,9 +227,9 @@ public class GwtProxyMetadataProviderImpl extends
                 // A physical Java type has changed, and determine what the
                 // corresponding local metadata identification string would have
                 // been
-                JavaType typeName = PhysicalTypeIdentifier
+                final JavaType typeName = PhysicalTypeIdentifier
                         .getJavaType(upstreamDependency);
-                LogicalPath typePath = PhysicalTypeIdentifier
+                final LogicalPath typePath = PhysicalTypeIdentifier
                         .getPath(upstreamDependency);
                 downstreamDependency = GwtProxyMetadata.createIdentifier(
                         typeName, typePath);
@@ -321,7 +260,67 @@ public class GwtProxyMetadataProviderImpl extends
         metadataService.evictAndGet(downstreamDependency);
     }
 
-    public String getProvidesType() {
-        return GwtProxyMetadata.getMetadataIdentifierType();
+    private String updateProxy(final ClassOrInterfaceTypeDetails proxy,
+            final List<MethodMetadata> proxyMethods,
+            final List<String> exclusionList, final List<String> readOnlyList) {
+        // Create a new ClassOrInterfaceTypeDetailsBuilder for the Proxy, will
+        // be overridden if the Proxy has already been created
+        final ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(
+                proxy);
+
+        // Only inherit from EntityProxy if extension is not already defined
+        if (!cidBuilder.getExtendsTypes().contains(OLD_ENTITY_PROXY)
+                && !cidBuilder.getExtendsTypes().contains(ENTITY_PROXY)) {
+            cidBuilder.addExtendsTypes(ENTITY_PROXY);
+        }
+
+        if (!cidBuilder.getExtendsTypes().contains(ENTITY_PROXY)) {
+            cidBuilder.addExtendsTypes(ENTITY_PROXY);
+        }
+
+        final String destinationMetadataId = proxy.getDeclaredByMetadataId();
+        final List<MethodMetadataBuilder> methods = new ArrayList<MethodMetadataBuilder>();
+        for (final MethodMetadata method : proxyMethods) {
+            if (exclusionList.contains(method.getMethodName().getSymbolName())) {
+                continue;
+            }
+            final String propertyName = StringUtils.uncapitalize(BeanInfoUtils
+                    .getPropertyNameForJavaBeanMethod(method).getSymbolName());
+            if (exclusionList.contains(propertyName)) {
+                continue;
+            }
+
+            final MethodMetadataBuilder abstractAccessorMethodBuilder = new MethodMetadataBuilder(
+                    destinationMetadataId, method);
+            abstractAccessorMethodBuilder
+                    .setBodyBuilder(new InvocableMemberBodyBuilder());
+            abstractAccessorMethodBuilder.setModifier(Modifier.ABSTRACT);
+            methods.add(abstractAccessorMethodBuilder);
+
+            if (readOnlyList.contains(propertyName)) {
+                continue;
+            }
+            final MethodMetadataBuilder abstractMutatorMethodBuilder = new MethodMetadataBuilder(
+                    destinationMetadataId, method);
+            abstractMutatorMethodBuilder
+                    .setBodyBuilder(new InvocableMemberBodyBuilder());
+            abstractMutatorMethodBuilder.setModifier(Modifier.ABSTRACT);
+            abstractMutatorMethodBuilder.setReturnType(JavaType.VOID_PRIMITIVE);
+            abstractMutatorMethodBuilder
+                    .setParameterTypes(AnnotatedJavaType
+                            .convertFromJavaTypes(Arrays.asList(method
+                                    .getReturnType())));
+            abstractMutatorMethodBuilder.setParameterNames(Arrays
+                    .asList(new JavaSymbolName(StringUtils
+                            .uncapitalize(propertyName))));
+            abstractMutatorMethodBuilder.setMethodName(new JavaSymbolName(
+                    method.getMethodName().getSymbolName()
+                            .replaceFirst("get", "set")));
+            methods.add(abstractMutatorMethodBuilder);
+        }
+
+        cidBuilder.setDeclaredMethods(methods);
+        return gwtFileManager.write(cidBuilder.build(),
+                GwtUtils.PROXY_REQUEST_WARNING);
     }
 }

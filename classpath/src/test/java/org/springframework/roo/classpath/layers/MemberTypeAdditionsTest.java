@@ -16,27 +16,6 @@ import org.springframework.roo.model.JavaType;
  */
 public class MemberTypeAdditionsTest {
 
-    @Test
-    public void testGetMethodCallWithBlankTargetAndNoParameters() {
-        assertMethodCall("foo()", null, "foo");
-    }
-
-    @Test
-    public void testGetMethodCallWithTargetAndNoParameters() {
-        assertMethodCall("Foo.bar()", "Foo", "bar");
-    }
-
-    @Test
-    public void testGetMethodCallWithBlankTargetAndTwoParameters() {
-        final MethodParameter firstNameParameter = new MethodParameter(
-                JavaType.STRING, "firstName");
-        final MethodParameter lastNameParameter = new MethodParameter(
-                JavaType.STRING, "lastName");
-        assertMethodCall("matchmakingService.marry(firstName, lastName)",
-                "matchmakingService", "marry", firstNameParameter,
-                lastNameParameter);
-    }
-
     /**
      * Asserts that
      * {@link MemberTypeAdditions#buildMethodCall(String, String, java.util.Iterator)}
@@ -64,5 +43,26 @@ public class MemberTypeAdditionsTest {
 
         // Invoke and check
         assertNull(memberTypeAdditions.getInvokedField());
+    }
+
+    @Test
+    public void testGetMethodCallWithBlankTargetAndNoParameters() {
+        assertMethodCall("foo()", null, "foo");
+    }
+
+    @Test
+    public void testGetMethodCallWithBlankTargetAndTwoParameters() {
+        final MethodParameter firstNameParameter = new MethodParameter(
+                JavaType.STRING, "firstName");
+        final MethodParameter lastNameParameter = new MethodParameter(
+                JavaType.STRING, "lastName");
+        assertMethodCall("matchmakingService.marry(firstName, lastName)",
+                "matchmakingService", "marry", firstNameParameter,
+                lastNameParameter);
+    }
+
+    @Test
+    public void testGetMethodCallWithTargetAndNoParameters() {
+        assertMethodCall("Foo.bar()", "Foo", "bar");
     }
 }

@@ -34,11 +34,9 @@ import org.springframework.roo.support.util.Assert;
 @Reference(name = "jdbcDriverProvider", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC, referenceInterface = JdbcDriverProvider.class, cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE)
 public class PollingJdbcDriverManager implements JdbcDriverManager {
 
-    // Constants
     private static final Logger LOGGER = HandlerUtils
             .getLogger(PollingJdbcDriverManager.class);
 
-    // Fields
     @Reference private AddOnSearch addOnSearch;
     private final Set<JdbcDriverProvider> providers = new HashSet<JdbcDriverProvider>();
 
@@ -48,18 +46,12 @@ public class PollingJdbcDriverManager implements JdbcDriverManager {
         }
     }
 
-    protected void unbindJdbcDriverProvider(final JdbcDriverProvider listener) {
-        synchronized (providers) {
-            providers.remove(listener);
-        }
-    }
-
     public Driver loadDriver(final String driverClassName,
             final boolean displayAddOns) throws RuntimeException {
         Assert.hasText(driverClassName, "Driver class name required");
         synchronized (providers) {
-            for (JdbcDriverProvider provider : providers) {
-                Driver driver = provider.loadDriver(driverClassName);
+            for (final JdbcDriverProvider provider : providers) {
+                final Driver driver = provider.loadDriver(driverClassName);
                 if (driver != null) {
                     return driver;
                 }
@@ -74,11 +66,12 @@ public class PollingJdbcDriverManager implements JdbcDriverManager {
             // No implementation could provide it
 
             // Compute a suitable search term for a JDBC driver
-            String searchTerms = "#jdbcdriver,driverclass:" + driverClassName;
+            final String searchTerms = "#jdbcdriver,driverclass:"
+                    + driverClassName;
 
             // Do a silent (console message free) lookup of matches
-            Integer matches = addOnSearch.searchAddOns(false, searchTerms,
-                    false, 1, 99, false, false, false, null);
+            final Integer matches = addOnSearch.searchAddOns(false,
+                    searchTerms, false, 1, 99, false, false, false, null);
 
             // Render to screen if required
             if (matches == null) {
@@ -96,6 +89,12 @@ public class PollingJdbcDriverManager implements JdbcDriverManager {
             }
 
             return null;
+        }
+    }
+
+    protected void unbindJdbcDriverProvider(final JdbcDriverProvider listener) {
+        synchronized (providers) {
+            providers.remove(listener);
         }
     }
 }

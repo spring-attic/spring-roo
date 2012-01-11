@@ -36,13 +36,112 @@ import org.springframework.roo.model.RooJavaType;
  */
 public final class GwtUtils {
 
-    public static final String PROXY_REQUEST_WARNING = "// WARNING: THIS FILE IS MANAGED BY SPRING ROO.\n\n";
     public static final JavaType[] PROXY_ANNOTATIONS = { PROXY_FOR,
             PROXY_FOR_NAME };
+    public static final String PROXY_REQUEST_WARNING = "// WARNING: THIS FILE IS MANAGED BY SPRING ROO.\n\n";
     public static final JavaType[] REQUEST_ANNOTATIONS = { SERVICE,
             SERVICE_NAME };
     public static final JavaType[] ROO_PROXY_REQUEST_ANNOTATIONS = {
             ROO_GWT_PROXY, ROO_GWT_REQUEST, ROO_GWT_MIRRORED_FROM };
+
+    public static JavaType convertGovernorTypeNameIntoKeyTypeName(
+            final JavaType governorType, final GwtType type,
+            final JavaPackage topLevelPackage) {
+        final String destinationPackage = type.getPath().packageName(
+                topLevelPackage);
+        String typeName;
+        if (type.isMirrorType()) {
+            final String simple = governorType.getSimpleTypeName();
+            typeName = destinationPackage + "." + simple + type.getSuffix();
+        }
+        else {
+            typeName = destinationPackage + "." + type.getTemplate();
+        }
+        return new JavaType(typeName);
+    }
+
+    public static JavaType convertPrimitiveType(final JavaType type,
+            final boolean convertVoid) {
+        if (!convertVoid && JavaType.VOID_PRIMITIVE.equals(type)) {
+            return type;
+        }
+        if ((type != null) && type.isPrimitive()) {
+            return new JavaType(type.getFullyQualifiedTypeName());
+        }
+        return type;
+    }
+
+    public static List<String> getAnnotationValues(
+            final ClassOrInterfaceTypeDetails target,
+            final JavaType annotationType, final String attributeName) {
+        final List<String> values = new ArrayList<String>();
+        final AnnotationMetadata annotation = MemberFindingUtils
+                .getAnnotationOfType(target.getAnnotations(), annotationType);
+        if (annotation == null) {
+            return values;
+        }
+        final AnnotationAttributeValue<?> attributeValue = annotation
+                .getAttribute(attributeName);
+        if ((attributeValue != null)
+                && (attributeValue instanceof ArrayAttributeValue)) {
+            @SuppressWarnings("unchecked")
+            final ArrayAttributeValue<StringAttributeValue> arrayAttributeValue = (ArrayAttributeValue<StringAttributeValue>) attributeValue;
+            for (final StringAttributeValue value : arrayAttributeValue
+                    .getValue()) {
+                values.add(value.getValue());
+            }
+        }
+        else if ((attributeValue != null)
+                && (attributeValue instanceof StringAttributeValue)) {
+            final StringAttributeValue stringAttributeVale = (StringAttributeValue) attributeValue;
+            values.add(stringAttributeVale.getValue());
+        }
+        return values;
+    }
+
+    public static boolean getBooleanAnnotationValue(
+            final ClassOrInterfaceTypeDetails target,
+            final JavaType annotationType, final String attributeName,
+            final boolean valueIfNull) {
+        final AnnotationMetadata annotation = MemberFindingUtils
+                .getAnnotationOfType(target.getAnnotations(), annotationType);
+        if (annotation == null) {
+            return valueIfNull;
+        }
+        final AnnotationAttributeValue<?> attributeValue = annotation
+                .getAttribute(attributeName);
+        if ((attributeValue != null)
+                && (attributeValue instanceof BooleanAttributeValue)) {
+            final BooleanAttributeValue booleanAttributeValue = (BooleanAttributeValue) attributeValue;
+            return booleanAttributeValue.getValue();
+        }
+        return valueIfNull;
+    }
+
+    public static AnnotationMetadata getFirstAnnotation(
+            final ClassOrInterfaceTypeDetails cid,
+            final JavaType... annotationTypes) {
+        for (final JavaType annotationType : annotationTypes) {
+            final AnnotationMetadata annotationMetadata = MemberFindingUtils
+                    .getAnnotationOfType(cid.getAnnotations(), annotationType);
+            if (annotationMetadata != null) {
+                return annotationMetadata;
+            }
+        }
+        return null;
+    }
+
+    public static Map<GwtType, JavaType> getMirrorTypeMap(
+            final JavaType governorType, final JavaPackage topLevelPackage) {
+        final Map<GwtType, JavaType> mirrorTypeMap = new HashMap<GwtType, JavaType>();
+        for (final GwtType mirrorType : GwtType.values()) {
+            mirrorTypeMap.put(
+                    mirrorType,
+                    convertGovernorTypeNameIntoKeyTypeName(governorType,
+                            mirrorType, topLevelPackage));
+        }
+        return mirrorTypeMap;
+    }
 
     /**
      * Returns the {@link #RECEIVER} Java type, generically typed to the given
@@ -56,31 +155,16 @@ public final class GwtUtils {
                 DataType.TYPE, null, Collections.singletonList(genericType));
     }
 
-    public static Map<GwtType, JavaType> getMirrorTypeMap(
-            final JavaType governorType, final JavaPackage topLevelPackage) {
-        Map<GwtType, JavaType> mirrorTypeMap = new HashMap<GwtType, JavaType>();
-        for (GwtType mirrorType : GwtType.values()) {
-            mirrorTypeMap.put(
-                    mirrorType,
-                    convertGovernorTypeNameIntoKeyTypeName(governorType,
-                            mirrorType, topLevelPackage));
+    public static String getStringValue(
+            final AnnotationAttributeValue<?> attributeValue) {
+        if (attributeValue instanceof StringAttributeValue) {
+            return ((StringAttributeValue) attributeValue).getValue();
         }
-        return mirrorTypeMap;
-    }
-
-    public static JavaType convertGovernorTypeNameIntoKeyTypeName(
-            final JavaType governorType, final GwtType type,
-            final JavaPackage topLevelPackage) {
-        String destinationPackage = type.getPath().packageName(topLevelPackage);
-        String typeName;
-        if (type.isMirrorType()) {
-            String simple = governorType.getSimpleTypeName();
-            typeName = destinationPackage + "." + simple + type.getSuffix();
+        else if (attributeValue instanceof ClassAttributeValue) {
+            return ((ClassAttributeValue) attributeValue).getValue()
+                    .getFullyQualifiedTypeName();
         }
-        else {
-            typeName = destinationPackage + "." + type.getTemplate();
-        }
-        return new JavaType(typeName);
+        return null;
     }
 
     public static JavaType lookupProxyTargetType(
@@ -120,91 +204,9 @@ public final class GwtUtils {
         return null;
     }
 
-    public static List<String> getAnnotationValues(
-            final ClassOrInterfaceTypeDetails target,
-            final JavaType annotationType, final String attributeName) {
-        List<String> values = new ArrayList<String>();
-        AnnotationMetadata annotation = MemberFindingUtils.getAnnotationOfType(
-                target.getAnnotations(), annotationType);
-        if (annotation == null) {
-            return values;
-        }
-        AnnotationAttributeValue<?> attributeValue = annotation
-                .getAttribute(attributeName);
-        if (attributeValue != null
-                && attributeValue instanceof ArrayAttributeValue) {
-            @SuppressWarnings("unchecked")
-            ArrayAttributeValue<StringAttributeValue> arrayAttributeValue = (ArrayAttributeValue<StringAttributeValue>) attributeValue;
-            for (StringAttributeValue value : arrayAttributeValue.getValue()) {
-                values.add(value.getValue());
-            }
-        }
-        else if (attributeValue != null
-                && attributeValue instanceof StringAttributeValue) {
-            StringAttributeValue stringAttributeVale = (StringAttributeValue) attributeValue;
-            values.add(stringAttributeVale.getValue());
-        }
-        return values;
-    }
-
-    public static boolean getBooleanAnnotationValue(
-            final ClassOrInterfaceTypeDetails target,
-            final JavaType annotationType, final String attributeName,
-            final boolean valueIfNull) {
-        AnnotationMetadata annotation = MemberFindingUtils.getAnnotationOfType(
-                target.getAnnotations(), annotationType);
-        if (annotation == null) {
-            return valueIfNull;
-        }
-        AnnotationAttributeValue<?> attributeValue = annotation
-                .getAttribute(attributeName);
-        if (attributeValue != null
-                && attributeValue instanceof BooleanAttributeValue) {
-            BooleanAttributeValue booleanAttributeValue = (BooleanAttributeValue) attributeValue;
-            return booleanAttributeValue.getValue();
-        }
-        return valueIfNull;
-    }
-
     public static boolean scaffoldProxy(final ClassOrInterfaceTypeDetails proxy) {
         return GwtUtils.getBooleanAnnotationValue(proxy,
                 RooJavaType.ROO_GWT_PROXY, "scaffold", false);
-    }
-
-    public static AnnotationMetadata getFirstAnnotation(
-            final ClassOrInterfaceTypeDetails cid,
-            final JavaType... annotationTypes) {
-        for (JavaType annotationType : annotationTypes) {
-            AnnotationMetadata annotationMetadata = MemberFindingUtils
-                    .getAnnotationOfType(cid.getAnnotations(), annotationType);
-            if (annotationMetadata != null) {
-                return annotationMetadata;
-            }
-        }
-        return null;
-    }
-
-    public static String getStringValue(
-            final AnnotationAttributeValue<?> attributeValue) {
-        if (attributeValue instanceof StringAttributeValue) {
-            return ((StringAttributeValue) attributeValue).getValue();
-        }
-        else if (attributeValue instanceof ClassAttributeValue) {
-            return ((ClassAttributeValue) attributeValue).getValue()
-                    .getFullyQualifiedTypeName();
-        }
-        return null;
-    }
-
-    public static JavaType convertPrimitiveType(final JavaType type,
-            final boolean convertVoid) {
-        if (!convertVoid && JavaType.VOID_PRIMITIVE.equals(type)) {
-            return type;
-        }
-        if (type != null && type.isPrimitive()) {
-            return new JavaType(type.getFullyQualifiedTypeName());
-        }
-        return type;
     }
 
     /**

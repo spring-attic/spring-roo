@@ -12,13 +12,13 @@ public final class CliSimpleParserContext {
         return simpleParserContextHolder.get();
     }
 
+    public static void resetSimpleParserContext() {
+        simpleParserContextHolder.remove();
+    }
+
     public static void setSimpleParserContext(
             final SimpleParser simpleParserContext) {
         simpleParserContextHolder.set(simpleParserContext);
-    }
-
-    public static void resetSimpleParserContext() {
-        simpleParserContextHolder.remove();
     }
 
     /**

@@ -14,27 +14,6 @@ import org.w3c.dom.Document;
  */
 public interface JspOperations extends Feature {
 
-    boolean isMvcInstallationPossible();
-
-    boolean isControllerAvailable();
-
-    boolean isInstallLanguageCommandAvailable();
-
-    /**
-     * Installs the common view artifacts needed for MVC scaffolding into the
-     * currently focused module.
-     */
-    void installCommonViewArtefacts();
-
-    /**
-     * Installs all common view artifacts needed for MVC scaffolding into the
-     * given module.
-     * 
-     * @param moduleName the name of the module into which to install the
-     *            artifacts; can be empty for the root or only module
-     */
-    void installCommonViewArtefacts(String moduleName);
-
     /**
      * Creates a new Spring MVC controller.
      * <p>
@@ -52,24 +31,27 @@ public interface JspOperations extends Feature {
             LogicalPath webappPath);
 
     /**
+     * Installs the common view artifacts needed for MVC scaffolding into the
+     * currently focused module.
+     */
+    void installCommonViewArtefacts();
+
+    /**
+     * Installs all common view artifacts needed for MVC scaffolding into the
+     * given module.
+     * 
+     * @param moduleName the name of the module into which to install the
+     *            artifacts; can be empty for the root or only module
+     */
+    void installCommonViewArtefacts(String moduleName);
+
+    /**
      * Installs additional languages into Web MVC app.
      * 
      * @param language the language
      * @param webappPath
      */
     void installI18n(I18n language, LogicalPath webappPath);
-
-    /**
-     * Creates a new Spring MVC static view.
-     * 
-     * @param path the static view to create in (required, ie '/foo')
-     * @param title the title of the view (required)
-     * @param category the menu category name (required)
-     * @param viewName the mapping this view should adopt (required, ie 'index')
-     * @param webappPath
-     */
-    void installView(String path, String viewName, String title,
-            String category, LogicalPath webappPath);
 
     /**
      * Installs a new Spring MVC static view.
@@ -83,6 +65,24 @@ public interface JspOperations extends Feature {
      */
     void installView(String path, String viewName, String title,
             String category, Document document, LogicalPath webappPath);
+
+    /**
+     * Creates a new Spring MVC static view.
+     * 
+     * @param path the static view to create in (required, ie '/foo')
+     * @param title the title of the view (required)
+     * @param category the menu category name (required)
+     * @param viewName the mapping this view should adopt (required, ie 'index')
+     * @param webappPath
+     */
+    void installView(String path, String viewName, String title,
+            String category, LogicalPath webappPath);
+
+    boolean isControllerAvailable();
+
+    boolean isInstallLanguageCommandAvailable();
+
+    boolean isMvcInstallationPossible();
 
     /**
      * Replaces an existing tag library with the latest version (set backup flag

@@ -32,21 +32,19 @@ import org.springframework.roo.support.util.CollectionUtils;
 public class DefaultItdTypeDetails extends AbstractMemberHoldingTypeDetails
         implements ItdTypeDetails {
 
-    // Constants
     static final PhysicalTypeCategory PHYSICAL_TYPE_CATEGORY = PhysicalTypeCategory.ITD;
 
-    // Fields
-    private final boolean privilegedAspect;
-    private final ClassOrInterfaceTypeDetails governor;
     private final JavaType aspect;
-    private final List<ClassOrInterfaceTypeDetails> innerTypes = new ArrayList<ClassOrInterfaceTypeDetails>();
     private final List<ConstructorMetadata> declaredConstructors = new ArrayList<ConstructorMetadata>();
-    private final List<DeclaredFieldAnnotationDetails> fieldAnnotations = new ArrayList<DeclaredFieldAnnotationDetails>();
-    private final List<DeclaredMethodAnnotationDetails> methodAnnotations = new ArrayList<DeclaredMethodAnnotationDetails>();
     private final List<FieldMetadata> declaredFields = new ArrayList<FieldMetadata>();
-    private final List<JavaType> extendsTypes = new ArrayList<JavaType>();
-    private final List<JavaType> implementsTypes = new ArrayList<JavaType>();
     private final List<MethodMetadata> declaredMethods = new ArrayList<MethodMetadata>();
+    private final List<JavaType> extendsTypes = new ArrayList<JavaType>();
+    private final List<DeclaredFieldAnnotationDetails> fieldAnnotations = new ArrayList<DeclaredFieldAnnotationDetails>();
+    private final ClassOrInterfaceTypeDetails governor;
+    private final List<JavaType> implementsTypes = new ArrayList<JavaType>();
+    private final List<ClassOrInterfaceTypeDetails> innerTypes = new ArrayList<ClassOrInterfaceTypeDetails>();
+    private final List<DeclaredMethodAnnotationDetails> methodAnnotations = new ArrayList<DeclaredMethodAnnotationDetails>();
+    private final boolean privilegedAspect;
     private final Set<JavaType> registeredImports = new HashSet<JavaType>();
 
     /**
@@ -109,32 +107,12 @@ public class DefaultItdTypeDetails extends AbstractMemberHoldingTypeDetails
         CollectionUtils.populate(this.registeredImports, registeredImports);
     }
 
-    public Set<JavaType> getRegisteredImports() {
-        return Collections.unmodifiableSet(registeredImports);
-    }
-
-    public PhysicalTypeCategory getPhysicalTypeCategory() {
-        return PHYSICAL_TYPE_CATEGORY;
-    }
-
-    public JavaType getName() {
-        return getType();
-    }
-
-    public JavaType getType() {
-        return governor.getType();
-    }
-
-    public ClassOrInterfaceTypeDetails getGovernor() {
-        return governor;
+    public boolean extendsType(final JavaType type) {
+        return extendsTypes.contains(type);
     }
 
     public JavaType getAspect() {
         return aspect;
-    }
-
-    public boolean isPrivilegedAspect() {
-        return privilegedAspect;
     }
 
     public List<? extends ConstructorMetadata> getDeclaredConstructors() {
@@ -145,15 +123,19 @@ public class DefaultItdTypeDetails extends AbstractMemberHoldingTypeDetails
         return Collections.unmodifiableList(declaredFields);
     }
 
-    public List<MethodMetadata> getDeclaredMethods() {
-        return Collections.unmodifiableList(declaredMethods);
+    public List<InitializerMetadata> getDeclaredInitializers() {
+        return Collections.emptyList();
     }
 
     public List<ClassOrInterfaceTypeDetails> getDeclaredInnerTypes() {
         return Collections.emptyList();
     }
 
-    public List<InitializerMetadata> getDeclaredInitializers() {
+    public List<MethodMetadata> getDeclaredMethods() {
+        return Collections.unmodifiableList(declaredMethods);
+    }
+
+    public List<String> getDynamicFinderNames() {
         return Collections.emptyList();
     }
 
@@ -161,33 +143,40 @@ public class DefaultItdTypeDetails extends AbstractMemberHoldingTypeDetails
         return Collections.unmodifiableList(extendsTypes);
     }
 
-    public List<JavaType> getImplementsTypes() {
-        return Collections.unmodifiableList(implementsTypes);
-    }
-
     public List<DeclaredFieldAnnotationDetails> getFieldAnnotations() {
         return Collections.unmodifiableList(fieldAnnotations);
     }
 
-    public List<DeclaredMethodAnnotationDetails> getMethodAnnotations() {
-        return Collections.unmodifiableList(methodAnnotations);
+    public ClassOrInterfaceTypeDetails getGovernor() {
+        return governor;
+    }
+
+    public List<JavaType> getImplementsTypes() {
+        return Collections.unmodifiableList(implementsTypes);
     }
 
     public List<ClassOrInterfaceTypeDetails> getInnerTypes() {
         return Collections.unmodifiableList(innerTypes);
     }
 
-    public boolean extendsType(final JavaType type) {
-        return this.extendsTypes.contains(type);
+    public List<DeclaredMethodAnnotationDetails> getMethodAnnotations() {
+        return Collections.unmodifiableList(methodAnnotations);
     }
 
-    public boolean implementsAny(final JavaType... types) {
-        for (final JavaType type : types) {
-            if (this.implementsTypes.contains(type)) {
-                return true;
-            }
-        }
-        return false;
+    public JavaType getName() {
+        return getType();
+    }
+
+    public PhysicalTypeCategory getPhysicalTypeCategory() {
+        return PHYSICAL_TYPE_CATEGORY;
+    }
+
+    public Set<JavaType> getRegisteredImports() {
+        return Collections.unmodifiableSet(registeredImports);
+    }
+
+    public JavaType getType() {
+        return governor.getType();
     }
 
     @Override
@@ -203,6 +192,15 @@ public class DefaultItdTypeDetails extends AbstractMemberHoldingTypeDetails
         return hash;
     }
 
+    public boolean implementsAny(final JavaType... types) {
+        for (final JavaType type : types) {
+            if (implementsTypes.contains(type)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private int includeCustomDataHash(
             final Collection<? extends CustomDataAccessor> coll) {
         int result = 1;
@@ -210,6 +208,10 @@ public class DefaultItdTypeDetails extends AbstractMemberHoldingTypeDetails
             result *= accessor.getCustomData().hashCode();
         }
         return result;
+    }
+
+    public boolean isPrivilegedAspect() {
+        return privilegedAspect;
     }
 
     @Override
@@ -232,9 +234,5 @@ public class DefaultItdTypeDetails extends AbstractMemberHoldingTypeDetails
         tsc.append("innerTypes", innerTypes);
         tsc.append("customData", getCustomData());
         return tsc.toString();
-    }
-
-    public List<String> getDynamicFinderNames() {
-        return Collections.emptyList();
     }
 }

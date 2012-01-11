@@ -19,13 +19,7 @@ import org.springframework.roo.shell.CommandMarker;
 @Service
 public class SeleniumCommands implements CommandMarker {
 
-    // Fields
     @Reference private SeleniumOperations seleniumOperations;
-
-    @CliAvailabilityIndicator({ "selenium test" })
-    public boolean isJdkFieldManagementAvailable() {
-        return seleniumOperations.isSeleniumInstallationPossible();
-    }
 
     @CliCommand(value = "selenium test", help = "Creates a new Selenium test for a particular controller")
     public void generateTest(
@@ -34,5 +28,10 @@ public class SeleniumCommands implements CommandMarker {
             @CliOption(key = "serverUrl", mandatory = false, unspecifiedDefaultValue = "http://localhost:8080/", specifiedDefaultValue = "http://localhost:8080/", help = "URL of the server where the web application is available, including protocol, port and hostname") final String url) {
 
         seleniumOperations.generateTest(controller, name, url);
+    }
+
+    @CliAvailabilityIndicator({ "selenium test" })
+    public boolean isJdkFieldManagementAvailable() {
+        return seleniumOperations.isSeleniumInstallationPossible();
     }
 }

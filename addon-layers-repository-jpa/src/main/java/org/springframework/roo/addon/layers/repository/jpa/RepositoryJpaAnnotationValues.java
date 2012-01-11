@@ -16,7 +16,6 @@ import org.springframework.roo.model.RooJavaType;
  */
 public class RepositoryJpaAnnotationValues extends AbstractAnnotationValues {
 
-    // Fields
     @AutoPopulate private JavaType domainType;
 
     /**

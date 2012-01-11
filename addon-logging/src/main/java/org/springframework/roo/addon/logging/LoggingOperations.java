@@ -8,7 +8,7 @@ package org.springframework.roo.addon.logging;
  */
 public interface LoggingOperations {
 
-    boolean isLoggingInstallationPossible();
-
     void configureLogging(LogLevel logLevel, LoggerPackage loggerPackage);
+
+    boolean isLoggingInstallationPossible();
 }

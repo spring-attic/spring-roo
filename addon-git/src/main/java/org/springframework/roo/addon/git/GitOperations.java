@@ -9,11 +9,19 @@ package org.springframework.roo.addon.git;
 public interface GitOperations {
 
     /**
-     * Check if Git setup command is available in Shell.
+     * Triggers commit for all changes in the Git tree. (works like 'git commmit
+     * -a -m {message}')
      * 
-     * @return availability
+     * @param message Commit message
      */
-    boolean isGitInstallationPossible();
+    void commitAllChanges(String message);
+
+    /**
+     * Check if automatic commit is enabled for successful Roo commands.
+     * 
+     * @return automaticCommit
+     */
+    boolean isAutomaticCommit();
 
     /**
      * Check if Git commands are available in Shell. Depends on presence of .git
@@ -24,17 +32,23 @@ public interface GitOperations {
     boolean isGitCommandAvailable();
 
     /**
-     * Initial setup of git repository in target project.
+     * Check if Git setup command is available in Shell.
+     * 
+     * @return availability
      */
-    void setup();
+    boolean isGitInstallationPossible();
 
     /**
-     * Triggers commit for all changes in the Git tree. (works like 'git commmit
-     * -a -m {message}')
+     * Present git log.
      * 
-     * @param message Commit message
+     * @param maxHistory
      */
-    void commitAllChanges(String message);
+    void log(int maxHistory);
+
+    /**
+     * Trigger git push.
+     */
+    void push();
 
     /**
      * Triggers Git reset (hard).
@@ -45,20 +59,6 @@ public interface GitOperations {
     void reset(int noOfCommitsToReset, String message);
 
     /**
-     * Triggers revert of last commit.
-     * 
-     * @param message Commit message
-     */
-    void revertLastCommit(String message);
-
-    /**
-     * Present git log.
-     * 
-     * @param maxHistory
-     */
-    void log(int maxHistory);
-
-    /**
      * Trigger revert of commit with given rev string.
      * 
      * @param revstr
@@ -67,9 +67,11 @@ public interface GitOperations {
     void revertCommit(String revstr, String message);
 
     /**
-     * Trigger git push.
+     * Triggers revert of last commit.
+     * 
+     * @param message Commit message
      */
-    void push();
+    void revertLastCommit(String message);
 
     /**
      * Convenience access to the Git config (allows setting config options)
@@ -81,9 +83,7 @@ public interface GitOperations {
     void setConfig(String category, String key, String value);
 
     /**
-     * Check if automatic commit is enabled for successful Roo commands.
-     * 
-     * @return automaticCommit
+     * Initial setup of git repository in target project.
      */
-    boolean isAutomaticCommit();
+    void setup();
 }

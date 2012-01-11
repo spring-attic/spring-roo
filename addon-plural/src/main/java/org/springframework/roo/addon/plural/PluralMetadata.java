@@ -34,7 +34,6 @@ import org.springframework.roo.support.util.StringUtils;
  */
 public class PluralMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
-    // Constants
     private static final String PROVIDES_TYPE_STRING = PluralMetadata.class
             .getName();
     private static final String PROVIDES_TYPE = MetadataIdentificationUtils
@@ -72,7 +71,6 @@ public class PluralMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
                 metadataIdentificationString);
     }
 
-    // Fields
     private Map<String, String> cache;
     private String plural;
 
@@ -87,15 +85,23 @@ public class PluralMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
             return;
         }
 
-        this.plural = getPlural(pluralAnnotation);
+        plural = getPlural(pluralAnnotation);
     }
 
-    private String getPlural(final PluralAnnotationValues pluralAnnotation) {
-        if (StringUtils.hasText(pluralAnnotation.getValue())) {
-            return pluralAnnotation.getValue();
+    @Override
+    public boolean equals(final Object obj) {
+        // We override equals because we overrode hashCode, see that method
+        if (this == obj) {
+            return true;
         }
-        return getInflectorPlural(destination.getSimpleTypeName(),
-                Locale.ENGLISH);
+        if (obj == null) {
+            return false;
+        }
+        if (!(obj instanceof PluralMetadata)) {
+            return false;
+        }
+        final PluralMetadata other = (PluralMetadata) obj;
+        return StringUtils.equals(plural, other.getPlural());
     }
 
     /**
@@ -110,7 +116,7 @@ public class PluralMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
         try {
             return Noun.pluralOf(term, locale);
         }
-        catch (RuntimeException re) {
+        catch (final RuntimeException re) {
             // Inflector failed (see for example ROO-305), so don't pluralize it
             return term;
         }
@@ -131,18 +137,18 @@ public class PluralMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
     public String getPlural(final FieldMetadata field) {
         Assert.notNull(field, "Field required");
         // Obtain the plural from the cache, if available
-        String symbolName = field.getFieldName().getSymbolName();
-        if (cache != null && cache.containsKey(symbolName)) {
+        final String symbolName = field.getFieldName().getSymbolName();
+        if ((cache != null) && cache.containsKey(symbolName)) {
             return cache.get(symbolName);
         }
 
         // We need to build the plural
         String thePlural = "";
-        AnnotationMetadata annotation = MemberFindingUtils.getAnnotationOfType(
-                field.getAnnotations(), ROO_PLURAL);
+        final AnnotationMetadata annotation = MemberFindingUtils
+                .getAnnotationOfType(field.getAnnotations(), ROO_PLURAL);
         if (annotation != null) {
             // Use the plural the user defined via the annotation
-            AnnotationAttributeValue<?> attribute = annotation
+            final AnnotationAttributeValue<?> attribute = annotation
                     .getAttribute(new JavaSymbolName("value"));
             if (attribute != null) {
                 thePlural = attribute.getValue().toString();
@@ -164,34 +170,12 @@ public class PluralMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
         return thePlural;
     }
 
-    @Override
-    public String toString() {
-        ToStringCreator tsc = new ToStringCreator(this);
-        tsc.append("identifier", getId());
-        tsc.append("valid", valid);
-        tsc.append("aspectName", aspectName);
-        tsc.append("destinationType", destination);
-        tsc.append("governor", governorPhysicalTypeMetadata.getId());
-        tsc.append("plural", getPlural());
-        tsc.append("cachedLookups", cache == null ? "[None]" : cache.keySet()
-                .toString());
-        return tsc.toString();
-    }
-
-    @Override
-    public boolean equals(final Object obj) {
-        // We override equals because we overrode hashCode, see that method
-        if (this == obj) {
-            return true;
+    private String getPlural(final PluralAnnotationValues pluralAnnotation) {
+        if (StringUtils.hasText(pluralAnnotation.getValue())) {
+            return pluralAnnotation.getValue();
         }
-        if (obj == null) {
-            return false;
-        }
-        if (!(obj instanceof PluralMetadata)) {
-            return false;
-        }
-        final PluralMetadata other = (PluralMetadata) obj;
-        return StringUtils.equals(this.plural, other.getPlural());
+        return getInflectorPlural(destination.getSimpleTypeName(),
+                Locale.ENGLISH);
     }
 
     @Override
@@ -205,5 +189,19 @@ public class PluralMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
          * changes.
          */
         return plural == null ? 0 : plural.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        final ToStringCreator tsc = new ToStringCreator(this);
+        tsc.append("identifier", getId());
+        tsc.append("valid", valid);
+        tsc.append("aspectName", aspectName);
+        tsc.append("destinationType", destination);
+        tsc.append("governor", governorPhysicalTypeMetadata.getId());
+        tsc.append("plural", getPlural());
+        tsc.append("cachedLookups", cache == null ? "[None]" : cache.keySet()
+                .toString());
+        return tsc.toString();
     }
 }

@@ -12,7 +12,6 @@ import org.springframework.roo.support.util.Assert;
 public abstract class AbstractAnnotationAttributeValue<T extends Object>
         implements AnnotationAttributeValue<T> {
 
-    // Fields
     private final JavaSymbolName name;
 
     /**
@@ -23,20 +22,6 @@ public abstract class AbstractAnnotationAttributeValue<T extends Object>
     protected AbstractAnnotationAttributeValue(final JavaSymbolName name) {
         Assert.notNull(name, "Annotation attribute name required");
         this.name = name;
-    }
-
-    public JavaSymbolName getName() {
-        return name;
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result
-                + ((getValue() == null) ? 0 : getValue().hashCode());
-        result = prime * result + ((name == null) ? 0 : name.hashCode());
-        return result;
     }
 
     @Override
@@ -50,7 +35,7 @@ public abstract class AbstractAnnotationAttributeValue<T extends Object>
         if (!(obj instanceof AbstractAnnotationAttributeValue<?>)) {
             return false;
         }
-        AbstractAnnotationAttributeValue<?> other = (AbstractAnnotationAttributeValue<?>) obj;
+        final AbstractAnnotationAttributeValue<?> other = (AbstractAnnotationAttributeValue<?>) obj;
         if (getValue() == null) {
             if (other.getValue() != null) {
                 return false;
@@ -68,5 +53,19 @@ public abstract class AbstractAnnotationAttributeValue<T extends Object>
             return false;
         }
         return true;
+    }
+
+    public JavaSymbolName getName() {
+        return name;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = (prime * result)
+                + ((getValue() == null) ? 0 : getValue().hashCode());
+        result = (prime * result) + ((name == null) ? 0 : name.hashCode());
+        return result;
     }
 }

@@ -18,28 +18,25 @@ import org.junit.Test;
  */
 public class MetadataIdentificationUtilsTest {
 
-    // Constants
-    private static final String METADATA_CLASS = MetadataItem.class.getName(); // normally
-                                                                               // this
-                                                                               // would
-                                                                               // be
-                                                                               // a
-                                                                               // concrete
-                                                                               // class
     private static final String INSTANCE_CLASS = Integer.class.getName(); // normally
-                                                                          // this
-                                                                          // would
-                                                                          // be
-                                                                          // a
-                                                                          // project
-                                                                          // type
+    private static final String METADATA_CLASS = MetadataItem.class.getName();
     private static final String CLASS_MID = MID_PREFIX + METADATA_CLASS;
     private static final String INSTANCE_MID = MID_PREFIX + METADATA_CLASS
             + INSTANCE_DELIMITER + INSTANCE_CLASS;
 
     @Test
-    public void testClassIdFromNullMetadataClass() {
-        assertNull(MetadataIdentificationUtils.create((Class<?>) null));
+    public void testBlankMidIsNotValid() {
+        assertFalse(MetadataIdentificationUtils.isValid("\t\n\r"));
+    }
+
+    @Test
+    public void testClassIdFromBadlyFormedMetadataClassName() {
+        assertNull(MetadataIdentificationUtils.create("foo#bar"));
+    }
+
+    @Test
+    public void testClassIdFromEmptyMetadataClassName() {
+        assertNull(MetadataIdentificationUtils.create(""));
     }
 
     @Test
@@ -49,18 +46,13 @@ public class MetadataIdentificationUtilsTest {
     }
 
     @Test
+    public void testClassIdFromNullMetadataClass() {
+        assertNull(MetadataIdentificationUtils.create((Class<?>) null));
+    }
+
+    @Test
     public void testClassIdFromNullMetadataClassName() {
         assertNull(MetadataIdentificationUtils.create((String) null));
-    }
-
-    @Test
-    public void testClassIdFromEmptyMetadataClassName() {
-        assertNull(MetadataIdentificationUtils.create(""));
-    }
-
-    @Test
-    public void testClassIdFromBadlyFormedMetadataClassName() {
-        assertNull(MetadataIdentificationUtils.create("foo#bar"));
     }
 
     @Test
@@ -71,25 +63,47 @@ public class MetadataIdentificationUtilsTest {
     }
 
     @Test
-    public void testInstanceIdFromValidInputs() {
-        assertEquals(MID_PREFIX + METADATA_CLASS + INSTANCE_DELIMITER
-                + INSTANCE_CLASS, MetadataIdentificationUtils.create(
-                METADATA_CLASS, INSTANCE_CLASS));
+    public void testClassMidIsClassMid() {
+        assertTrue(MetadataIdentificationUtils.isIdentifyingClass(CLASS_MID));
     }
 
     @Test
-    public void testInstanceIdFromNullInstanceKey() {
-        assertNull(MetadataIdentificationUtils.create(METADATA_CLASS, null));
+    public void testClassMidIsNotInstanceMid() {
+        assertFalse(MetadataIdentificationUtils
+                .isIdentifyingInstance(CLASS_MID));
     }
 
     @Test
-    public void testGetMetadataClassFromNullMid() {
-        assertNull(MetadataIdentificationUtils.getMetadataClass(null));
+    public void testClassMidIsValid() {
+        assertTrue(MetadataIdentificationUtils.isValid(CLASS_MID));
+    }
+
+    @Test
+    public void testEmptyMidIsNotValid() {
+        assertFalse(MetadataIdentificationUtils.isValid(""));
+    }
+
+    @Test
+    public void testGetInstanceKey() {
+        assertEquals(INSTANCE_CLASS,
+                MetadataIdentificationUtils.getMetadataInstance(INSTANCE_MID));
+    }
+
+    @Test
+    public void testGetMetadataClassFromClassMid() {
+        assertEquals(METADATA_CLASS,
+                MetadataIdentificationUtils.getMetadataClass(CLASS_MID));
     }
 
     @Test
     public void testGetMetadataClassFromEmptyMid() {
         assertNull(MetadataIdentificationUtils.getMetadataClass(""));
+    }
+
+    @Test
+    public void testGetMetadataClassFromInstanceMid() {
+        assertEquals(METADATA_CLASS,
+                MetadataIdentificationUtils.getMetadataClass(INSTANCE_MID));
     }
 
     @Test
@@ -104,32 +118,85 @@ public class MetadataIdentificationUtilsTest {
     }
 
     @Test
-    public void testGetMetadataClassFromClassMid() {
-        assertEquals(METADATA_CLASS,
-                MetadataIdentificationUtils.getMetadataClass(CLASS_MID));
+    public void testGetMetadataClassFromNullMid() {
+        assertNull(MetadataIdentificationUtils.getMetadataClass(null));
     }
 
     @Test
-    public void testGetMetadataClassFromInstanceMid() {
-        assertEquals(METADATA_CLASS,
-                MetadataIdentificationUtils.getMetadataClass(INSTANCE_MID));
+    public void testGetMetadataClassIdFromClassMid() {
+        assertEquals(MID_PREFIX + METADATA_CLASS,
+                MetadataIdentificationUtils.getMetadataClassId(CLASS_MID));
     }
 
     @Test
-    public void testGetInstanceKey() {
+    public void testGetMetadataClassIdFromEmptyMid() {
+        assertNull(MetadataIdentificationUtils.getMetadataClassId(""));
+    }
+
+    @Test
+    public void testGetMetadataClassIdFromInstanceMid() {
+        assertEquals(MID_PREFIX + METADATA_CLASS,
+                MetadataIdentificationUtils.getMetadataClassId(INSTANCE_MID));
+    }
+
+    @Test
+    public void testGetMetadataClassIdFromMidPrefix() {
+        assertNull(MetadataIdentificationUtils.getMetadataClassId(MID_PREFIX));
+    }
+
+    @Test
+    public void testGetMetadataClassIdFromMidPrefixPlusDelimiter() {
+        assertNull(MetadataIdentificationUtils.getMetadataClassId(MID_PREFIX
+                + INSTANCE_DELIMITER));
+    }
+
+    @Test
+    public void testGetMetadataClassIdFromNullMid() {
+        assertNull(MetadataIdentificationUtils.getMetadataClassId(null));
+    }
+
+    @Test
+    public void testGetMetadataInstanceFromClassMid() {
+        assertNull(MetadataIdentificationUtils.getMetadataInstance(CLASS_MID));
+    }
+
+    @Test
+    public void testGetMetadataInstanceFromEmptyMid() {
+        assertNull(MetadataIdentificationUtils.getMetadataInstance(""));
+    }
+
+    @Test
+    public void testGetMetadataInstanceFromInstanceMid() {
         assertEquals(INSTANCE_CLASS,
                 MetadataIdentificationUtils.getMetadataInstance(INSTANCE_MID));
     }
 
     @Test
-    public void testClassMidIsClassMid() {
-        assertTrue(MetadataIdentificationUtils.isIdentifyingClass(CLASS_MID));
+    public void testGetMetadataInstanceFromMidPrefix() {
+        assertNull(MetadataIdentificationUtils.getMetadataInstance(MID_PREFIX));
     }
 
     @Test
-    public void testClassMidIsNotInstanceMid() {
-        assertFalse(MetadataIdentificationUtils
-                .isIdentifyingInstance(CLASS_MID));
+    public void testGetMetadataInstanceFromMidPrefixPlusDelimiter() {
+        assertNull(MetadataIdentificationUtils.getMetadataInstance(MID_PREFIX
+                + INSTANCE_DELIMITER));
+    }
+
+    @Test
+    public void testGetMetadataInstanceFromNullMid() {
+        assertNull(MetadataIdentificationUtils.getMetadataInstance(null));
+    }
+
+    @Test
+    public void testInstanceIdFromNullInstanceKey() {
+        assertNull(MetadataIdentificationUtils.create(METADATA_CLASS, null));
+    }
+
+    @Test
+    public void testInstanceIdFromValidInputs() {
+        assertEquals(MID_PREFIX + METADATA_CLASS + INSTANCE_DELIMITER
+                + INSTANCE_CLASS, MetadataIdentificationUtils.create(
+                METADATA_CLASS, INSTANCE_CLASS));
     }
 
     @Test
@@ -145,103 +212,36 @@ public class MetadataIdentificationUtilsTest {
     }
 
     @Test
-    public void testNullMidIsNotValid() {
-        assertFalse(MetadataIdentificationUtils.isValid(null));
-    }
-
-    @Test
-    public void testEmptyMidIsNotValid() {
-        assertFalse(MetadataIdentificationUtils.isValid(""));
-    }
-
-    @Test
-    public void testBlankMidIsNotValid() {
-        assertFalse(MetadataIdentificationUtils.isValid("\t\n\r"));
-    }
-
-    @Test
-    public void testMidPrefixIsNotValid() {
-        assertFalse(MetadataIdentificationUtils.isValid(MID_PREFIX));
-    }
-
-    @Test
-    public void testUnprefixedMidIsNotValid() {
-        assertFalse(MetadataIdentificationUtils.isValid(METADATA_CLASS));
-    }
-
-    @Test
-    public void testClassMidIsValid() {
-        assertTrue(MetadataIdentificationUtils.isValid(CLASS_MID));
-    }
-
-    @Test
     public void testInstanceMidIsValid() {
         assertTrue(MetadataIdentificationUtils.isValid(CLASS_MID));
     }
 
     @Test
-    public void testGetMetadataInstanceFromNullMid() {
-        assertNull(MetadataIdentificationUtils.getMetadataInstance(null));
-    }
-
-    @Test
-    public void testGetMetadataInstanceFromEmptyMid() {
-        assertNull(MetadataIdentificationUtils.getMetadataInstance(""));
-    }
-
-    @Test
-    public void testGetMetadataInstanceFromMidPrefix() {
-        assertNull(MetadataIdentificationUtils.getMetadataInstance(MID_PREFIX));
-    }
-
-    @Test
-    public void testGetMetadataInstanceFromMidPrefixPlusDelimiter() {
-        assertNull(MetadataIdentificationUtils.getMetadataInstance(MID_PREFIX
-                + INSTANCE_DELIMITER));
-    }
-
-    @Test
-    public void testGetMetadataInstanceFromClassMid() {
-        assertNull(MetadataIdentificationUtils.getMetadataInstance(CLASS_MID));
-    }
-
-    @Test
-    public void testGetMetadataInstanceFromInstanceMid() {
-        assertEquals(INSTANCE_CLASS,
-                MetadataIdentificationUtils.getMetadataInstance(INSTANCE_MID));
-    }
-
-    @Test
-    public void testGetMetadataClassIdFromNullMid() {
-        assertNull(MetadataIdentificationUtils.getMetadataClassId(null));
-    }
-
-    @Test
-    public void testGetMetadataClassIdFromEmptyMid() {
-        assertNull(MetadataIdentificationUtils.getMetadataClassId(""));
-    }
-
-    @Test
-    public void testGetMetadataClassIdFromMidPrefix() {
-        assertNull(MetadataIdentificationUtils.getMetadataClassId(MID_PREFIX));
-    }
-
-    @Test
-    public void testGetMetadataClassIdFromMidPrefixPlusDelimiter() {
-        assertNull(MetadataIdentificationUtils.getMetadataClassId(MID_PREFIX
-                + INSTANCE_DELIMITER));
-    }
-
-    @Test
-    public void testGetMetadataClassIdFromClassMid() {
-        assertEquals(MID_PREFIX + METADATA_CLASS,
-                MetadataIdentificationUtils.getMetadataClassId(CLASS_MID));
-    }
-
-    @Test
-    public void testGetMetadataClassIdFromInstanceMid() {
-        assertEquals(MID_PREFIX + METADATA_CLASS,
-                MetadataIdentificationUtils.getMetadataClassId(INSTANCE_MID));
+    public void testMetadataIdentifierCreation() {
+        Assert.assertEquals("MID:com.foo.Bar",
+                MetadataIdentificationUtils.create("com.foo.Bar"));
+        Assert.assertNull(MetadataIdentificationUtils.create((String) null));
+        Assert.assertNull(MetadataIdentificationUtils.create("com.foo.Bar#"));
+        Assert.assertNull(MetadataIdentificationUtils.create("com.foo.Bar#foo"));
+        Assert.assertNull(MetadataIdentificationUtils.create("com.foo.Bar # "));
+        Assert.assertNull(MetadataIdentificationUtils.create(""));
+        Assert.assertNull(MetadataIdentificationUtils.create("#"));
+        Assert.assertEquals("MID:com.foo.Bar#239",
+                MetadataIdentificationUtils.create("com.foo.Bar", "239"));
+        Assert.assertEquals("MID:com.foo.Bar#239 #40",
+                MetadataIdentificationUtils.create("com.foo.Bar", "239 #40"));
+        Assert.assertNull(MetadataIdentificationUtils.create(null, "239"));
+        Assert.assertNull(MetadataIdentificationUtils.create("com.foo.Bar#",
+                "239"));
+        Assert.assertNull(MetadataIdentificationUtils.create("com.foo.Bar#foo",
+                "239"));
+        Assert.assertNull(MetadataIdentificationUtils.create("com.foo.Bar # ",
+                "239"));
+        Assert.assertNull(MetadataIdentificationUtils.create("", "239"));
+        Assert.assertNull(MetadataIdentificationUtils.create("#", "239"));
+        Assert.assertNull(MetadataIdentificationUtils.create("com.foo.Bar",
+                null));
+        Assert.assertNull(MetadataIdentificationUtils.create("com.foo.Bar", ""));
     }
 
     @Test
@@ -279,30 +279,17 @@ public class MetadataIdentificationUtilsTest {
     }
 
     @Test
-    public void testMetadataIdentifierCreation() {
-        Assert.assertEquals("MID:com.foo.Bar",
-                MetadataIdentificationUtils.create("com.foo.Bar"));
-        Assert.assertNull(MetadataIdentificationUtils.create((String) null));
-        Assert.assertNull(MetadataIdentificationUtils.create("com.foo.Bar#"));
-        Assert.assertNull(MetadataIdentificationUtils.create("com.foo.Bar#foo"));
-        Assert.assertNull(MetadataIdentificationUtils.create("com.foo.Bar # "));
-        Assert.assertNull(MetadataIdentificationUtils.create(""));
-        Assert.assertNull(MetadataIdentificationUtils.create("#"));
-        Assert.assertEquals("MID:com.foo.Bar#239",
-                MetadataIdentificationUtils.create("com.foo.Bar", "239"));
-        Assert.assertEquals("MID:com.foo.Bar#239 #40",
-                MetadataIdentificationUtils.create("com.foo.Bar", "239 #40"));
-        Assert.assertNull(MetadataIdentificationUtils.create(null, "239"));
-        Assert.assertNull(MetadataIdentificationUtils.create("com.foo.Bar#",
-                "239"));
-        Assert.assertNull(MetadataIdentificationUtils.create("com.foo.Bar#foo",
-                "239"));
-        Assert.assertNull(MetadataIdentificationUtils.create("com.foo.Bar # ",
-                "239"));
-        Assert.assertNull(MetadataIdentificationUtils.create("", "239"));
-        Assert.assertNull(MetadataIdentificationUtils.create("#", "239"));
-        Assert.assertNull(MetadataIdentificationUtils.create("com.foo.Bar",
-                null));
-        Assert.assertNull(MetadataIdentificationUtils.create("com.foo.Bar", ""));
+    public void testMidPrefixIsNotValid() {
+        assertFalse(MetadataIdentificationUtils.isValid(MID_PREFIX));
+    }
+
+    @Test
+    public void testNullMidIsNotValid() {
+        assertFalse(MetadataIdentificationUtils.isValid(null));
+    }
+
+    @Test
+    public void testUnprefixedMidIsNotValid() {
+        assertFalse(MetadataIdentificationUtils.isValid(METADATA_CLASS));
     }
 }

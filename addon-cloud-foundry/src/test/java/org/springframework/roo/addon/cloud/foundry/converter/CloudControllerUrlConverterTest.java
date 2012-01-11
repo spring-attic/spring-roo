@@ -24,16 +24,6 @@ public class CloudControllerUrlConverterTest {
     }
 
     @Test
-    public void testConvertNullUrl() {
-        // Invoke
-        final CloudControllerUrl url = converter.convertFromText(null, null,
-                null);
-
-        // Check
-        assertNull(url);
-    }
-
-    @Test
     public void testConvertEmptyUrl() {
         // Invoke
         final CloudControllerUrl url = converter
@@ -54,5 +44,15 @@ public class CloudControllerUrlConverterTest {
 
         // Check
         assertEquals(value, url.getUrl());
+    }
+
+    @Test
+    public void testConvertNullUrl() {
+        // Invoke
+        final CloudControllerUrl url = converter.convertFromText(null, null,
+                null);
+
+        // Check
+        assertNull(url);
     }
 }

@@ -30,58 +30,29 @@ import org.springframework.roo.support.util.StringUtils;
  */
 public abstract class DbreTypeUtils {
 
-    // Constants
     private static final JavaSymbolName NAME_ATTRIBUTE = new JavaSymbolName(
             "name");
     private static final JavaSymbolName SCHEMA_ATTRIBUTE = new JavaSymbolName(
             "schema");
+    // The annotation attributes from which to read the db schema name
+    // Linked to preserve the iteration order below
+    private static final Map<JavaType, JavaSymbolName> SCHEMA_ATTRIBUTES = new LinkedHashMap<JavaType, JavaSymbolName>();
+
     private static final JavaSymbolName TABLE_ATTRIBUTE = new JavaSymbolName(
             "table");
-
     // The annotation attributes from which to read the db table name
     // Linked to preserve the iteration order below
     private static final Map<JavaType, JavaSymbolName> TABLE_ATTRIBUTES = new LinkedHashMap<JavaType, JavaSymbolName>();
+
     static {
         TABLE_ATTRIBUTES.put(TABLE, NAME_ATTRIBUTE);
         TABLE_ATTRIBUTES.put(ROO_JPA_ENTITY, TABLE_ATTRIBUTE);
         TABLE_ATTRIBUTES.put(ROO_JPA_ACTIVE_RECORD, TABLE_ATTRIBUTE);
     }
-
-    // The annotation attributes from which to read the db schema name
-    // Linked to preserve the iteration order below
-    private static final Map<JavaType, JavaSymbolName> SCHEMA_ATTRIBUTES = new LinkedHashMap<JavaType, JavaSymbolName>();
     static {
         SCHEMA_ATTRIBUTES.put(TABLE, SCHEMA_ATTRIBUTE);
         SCHEMA_ATTRIBUTES.put(ROO_JPA_ENTITY, SCHEMA_ATTRIBUTE);
         SCHEMA_ATTRIBUTES.put(ROO_JPA_ACTIVE_RECORD, SCHEMA_ATTRIBUTE);
-    }
-
-    /**
-     * Locates the type associated with the presented table name.
-     * 
-     * @param managedEntities a set of database-managed entities to search
-     *            (required)
-     * @param tableName the table to locate (required)
-     * @param schemaName the table's schema name
-     * @return the type (if known) or null (if not found)
-     */
-    public static JavaType findTypeForTableName(
-            final Iterable<ClassOrInterfaceTypeDetails> managedEntities,
-            final String tableName, final String schemaName) {
-        Assert.notNull(managedEntities, "Set of managed entities required");
-        Assert.hasText(tableName, "Table name required");
-
-        for (ClassOrInterfaceTypeDetails managedEntity : managedEntities) {
-            String managedSchemaName = getSchemaName(managedEntity);
-            if (tableName.equals(getTableName(managedEntity))
-                    && (!DbreModelService.NO_SCHEMA_REQUIRED
-                            .equals(managedSchemaName) || schemaName
-                            .equals(managedSchemaName))) {
-                return managedEntity.getName();
-            }
-        }
-
-        return null;
     }
 
     /**
@@ -102,51 +73,30 @@ public abstract class DbreTypeUtils {
     }
 
     /**
-     * Returns the database schema for the given entity.
+     * Locates the type associated with the presented table name.
      * 
-     * @param entityDetails the type to search (required)
-     * @return the schema name (if known) or null (if not found)
-     */
-    public static String getSchemaName(
-            final MemberHoldingTypeDetails entityDetails) {
-        Assert.notNull(entityDetails, "MemberHoldingTypeDetails type required");
-        return getFirstNonBlankAttributeValue(entityDetails, SCHEMA_ATTRIBUTES);
-    }
-
-    /**
-     * Returns the database table for the given entity.
-     * 
-     * @param entityDetails the type to search (required)
-     * @return the table (if known) or null (if not found)
-     */
-    public static String getTableName(
-            final MemberHoldingTypeDetails entityDetails) {
-        Assert.notNull(entityDetails, "MemberHoldingTypeDetails type required");
-        return getFirstNonBlankAttributeValue(entityDetails, TABLE_ATTRIBUTES);
-    }
-
-    /**
-     * Reads the given attributes of the given annotations on the given type,
-     * returning the first non-blank one found.
-     * 
-     * @param annotatedType the type for which to read the annotations
+     * @param managedEntities a set of database-managed entities to search
      *            (required)
-     * @param annotationAttributes the annotation/attribute pairs to read for
-     *            that type
-     * @return <code>null</code> if none of those annotations provide a
-     *         non-blank schema name
+     * @param tableName the table to locate (required)
+     * @param schemaName the table's schema name
+     * @return the type (if known) or null (if not found)
      */
-    private static String getFirstNonBlankAttributeValue(
-            final MemberHoldingTypeDetails annotatedType,
-            final Map<JavaType, JavaSymbolName> annotationAttributes) {
-        for (final Entry<JavaType, JavaSymbolName> entry : annotationAttributes
-                .entrySet()) {
-            final String attributeValue = getAnnotationAttribute(annotatedType,
-                    entry.getKey(), entry.getValue());
-            if (StringUtils.hasText(attributeValue)) {
-                return attributeValue;
+    public static JavaType findTypeForTableName(
+            final Iterable<ClassOrInterfaceTypeDetails> managedEntities,
+            final String tableName, final String schemaName) {
+        Assert.notNull(managedEntities, "Set of managed entities required");
+        Assert.hasText(tableName, "Table name required");
+
+        for (final ClassOrInterfaceTypeDetails managedEntity : managedEntities) {
+            final String managedSchemaName = getSchemaName(managedEntity);
+            if (tableName.equals(getTableName(managedEntity))
+                    && (!DbreModelService.NO_SCHEMA_REQUIRED
+                            .equals(managedSchemaName) || schemaName
+                            .equals(managedSchemaName))) {
+                return managedEntity.getName();
             }
         }
+
         return null;
     }
 
@@ -178,25 +128,96 @@ public abstract class DbreTypeUtils {
     }
 
     /**
-     * Returns a JavaType given a table identity.
+     * Reads the given attributes of the given annotations on the given type,
+     * returning the first non-blank one found.
      * 
-     * @param tableName the table name to convert (required)
-     * @param javaPackage the Java package to use for the type
-     * @return a new JavaType
+     * @param annotatedType the type for which to read the annotations
+     *            (required)
+     * @param annotationAttributes the annotation/attribute pairs to read for
+     *            that type
+     * @return <code>null</code> if none of those annotations provide a
+     *         non-blank schema name
      */
-    public static JavaType suggestTypeNameForNewTable(final String tableName,
-            final JavaPackage javaPackage) {
-        Assert.hasText(tableName, "Table name required");
-
-        StringBuilder result = new StringBuilder();
-        if (javaPackage != null
-                && StringUtils.hasText(javaPackage
-                        .getFullyQualifiedPackageName())) {
-            result.append(javaPackage.getFullyQualifiedPackageName());
-            result.append(".");
+    private static String getFirstNonBlankAttributeValue(
+            final MemberHoldingTypeDetails annotatedType,
+            final Map<JavaType, JavaSymbolName> annotationAttributes) {
+        for (final Entry<JavaType, JavaSymbolName> entry : annotationAttributes
+                .entrySet()) {
+            final String attributeValue = getAnnotationAttribute(annotatedType,
+                    entry.getKey(), entry.getValue());
+            if (StringUtils.hasText(attributeValue)) {
+                return attributeValue;
+            }
         }
-        result.append(getName(tableName, false));
-        return new JavaType(result.toString());
+        return null;
+    }
+
+    private static String getName(final String str, final boolean isField) {
+        final StringBuilder result = new StringBuilder();
+        boolean isDelimChar = false;
+        for (int i = 0; i < str.length(); i++) {
+            final char c = str.charAt(i);
+            if (i == 0) {
+                if ((c == '0') || (c == '1') || (c == '2') || (c == '3')
+                        || (c == '4') || (c == '5') || (c == '6') || (c == '7')
+                        || (c == '8') || (c == '9')) {
+                    result.append(isField ? "f" : "T");
+                    result.append(c);
+                }
+                else {
+                    result.append(isField ? Character.toLowerCase(c)
+                            : Character.toUpperCase(c));
+                }
+                continue;
+            }
+            else if (((i > 0) && ((c == '_') || (c == '-') || (c == '\\') || (c == '/')))
+                    || (c == '.') || (c == ' ')) {
+                isDelimChar = true;
+                continue;
+            }
+
+            if (isDelimChar) {
+                result.append(Character.toUpperCase(c));
+                isDelimChar = false;
+            }
+            else {
+                if ((i > 1) && Character.isLowerCase(str.charAt(i - 1))
+                        && Character.isUpperCase(c)) {
+                    result.append(c);
+                }
+                else {
+                    result.append(Character.toLowerCase(c));
+                }
+            }
+        }
+        if (ReservedWords.RESERVED_JAVA_KEYWORDS.contains(result.toString())) {
+            result.append("1");
+        }
+        return result.toString();
+    }
+
+    /**
+     * Returns the database schema for the given entity.
+     * 
+     * @param entityDetails the type to search (required)
+     * @return the schema name (if known) or null (if not found)
+     */
+    public static String getSchemaName(
+            final MemberHoldingTypeDetails entityDetails) {
+        Assert.notNull(entityDetails, "MemberHoldingTypeDetails type required");
+        return getFirstNonBlankAttributeValue(entityDetails, SCHEMA_ATTRIBUTES);
+    }
+
+    /**
+     * Returns the database table for the given entity.
+     * 
+     * @param entityDetails the type to search (required)
+     * @return the table (if known) or null (if not found)
+     */
+    public static String getTableName(
+            final MemberHoldingTypeDetails entityDetails) {
+        Assert.notNull(entityDetails, "MemberHoldingTypeDetails type required");
+        return getFirstNonBlankAttributeValue(entityDetails, TABLE_ATTRIBUTES);
     }
 
     /**
@@ -222,22 +243,23 @@ public abstract class DbreTypeUtils {
     }
 
     public static String suggestPackageName(final String str) {
-        StringBuilder result = new StringBuilder();
-        char[] value = str.toCharArray();
+        final StringBuilder result = new StringBuilder();
+        final char[] value = str.toCharArray();
         for (int i = 0; i < value.length; i++) {
-            char c = value[i];
-            if (i == 0
-                    && ('1' == c || '2' == c || '3' == c || '4' == c
-                            || '5' == c || '6' == c || '7' == c || '8' == c
-                            || '9' == c || '0' == c)) {
+            final char c = value[i];
+            if ((i == 0)
+                    && (('1' == c) || ('2' == c) || ('3' == c) || ('4' == c)
+                            || ('5' == c) || ('6' == c) || ('7' == c)
+                            || ('8' == c) || ('9' == c) || ('0' == c))) {
                 result.append("p");
                 result.append(c);
             }
-            else if ('.' == c || '/' == c || ' ' == c || '*' == c || '>' == c
-                    || '<' == c || '!' == c || '@' == c || '%' == c || '^' == c
-                    || '?' == c || '(' == c || ')' == c || '~' == c || '`' == c
-                    || '{' == c || '}' == c || '[' == c || ']' == c || '|' == c
-                    || '\\' == c || '\'' == c || '+' == c || '-' == c) {
+            else if (('.' == c) || ('/' == c) || (' ' == c) || ('*' == c)
+                    || ('>' == c) || ('<' == c) || ('!' == c) || ('@' == c)
+                    || ('%' == c) || ('^' == c) || ('?' == c) || ('(' == c)
+                    || (')' == c) || ('~' == c) || ('`' == c) || ('{' == c)
+                    || ('}' == c) || ('[' == c) || (']' == c) || ('|' == c)
+                    || ('\\' == c) || ('\'' == c) || ('+' == c) || ('-' == c)) {
                 result.append("");
             }
             else {
@@ -247,47 +269,25 @@ public abstract class DbreTypeUtils {
         return result.toString();
     }
 
-    private static String getName(final String str, final boolean isField) {
-        StringBuilder result = new StringBuilder();
-        boolean isDelimChar = false;
-        for (int i = 0; i < str.length(); i++) {
-            char c = str.charAt(i);
-            if (i == 0) {
-                if (c == '0' || c == '1' || c == '2' || c == '3' || c == '4'
-                        || c == '5' || c == '6' || c == '7' || c == '8'
-                        || c == '9') {
-                    result.append(isField ? "f" : "T");
-                    result.append(c);
-                }
-                else {
-                    result.append(isField ? Character.toLowerCase(c)
-                            : Character.toUpperCase(c));
-                }
-                continue;
-            }
-            else if (i > 0 && (c == '_' || c == '-' || c == '\\' || c == '/')
-                    || c == '.' || c == ' ') {
-                isDelimChar = true;
-                continue;
-            }
+    /**
+     * Returns a JavaType given a table identity.
+     * 
+     * @param tableName the table name to convert (required)
+     * @param javaPackage the Java package to use for the type
+     * @return a new JavaType
+     */
+    public static JavaType suggestTypeNameForNewTable(final String tableName,
+            final JavaPackage javaPackage) {
+        Assert.hasText(tableName, "Table name required");
 
-            if (isDelimChar) {
-                result.append(Character.toUpperCase(c));
-                isDelimChar = false;
-            }
-            else {
-                if (i > 1 && Character.isLowerCase(str.charAt(i - 1))
-                        && Character.isUpperCase(c)) {
-                    result.append(c);
-                }
-                else {
-                    result.append(Character.toLowerCase(c));
-                }
-            }
+        final StringBuilder result = new StringBuilder();
+        if ((javaPackage != null)
+                && StringUtils.hasText(javaPackage
+                        .getFullyQualifiedPackageName())) {
+            result.append(javaPackage.getFullyQualifiedPackageName());
+            result.append(".");
         }
-        if (ReservedWords.RESERVED_JAVA_KEYWORDS.contains(result.toString())) {
-            result.append("1");
-        }
-        return result.toString();
+        result.append(getName(tableName, false));
+        return new JavaType(result.toString());
     }
 }

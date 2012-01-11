@@ -13,7 +13,6 @@ import org.springframework.roo.support.util.Assert;
  */
 public final class PhysicalTypeIdentifier {
 
-    // Constants
     private static final String PHYSICAL_METADATA_TYPE = PhysicalTypeIdentifier.class
             .getName();
 
@@ -24,16 +23,6 @@ public final class PhysicalTypeIdentifier {
      */
     public static final String PHYSICAL_METADATA_TYPE_ID = MetadataIdentificationUtils
             .create(PHYSICAL_METADATA_TYPE);
-
-    /**
-     * Returns the class-level ID for physical type metadata. Equivalent to
-     * accessing {@link #PHYSICAL_METADATA_TYPE_ID} directly.
-     * 
-     * @return {@value #PHYSICAL_METADATA_TYPE_ID}
-     */
-    public static String getMetadataIdentiferType() {
-        return PHYSICAL_METADATA_TYPE_ID;
-    }
 
     /**
      * Creates a physical type metadata ID for the given user project type,
@@ -51,6 +40,12 @@ public final class PhysicalTypeIdentifier {
                 PHYSICAL_METADATA_TYPE, javaType, path);
     }
 
+    public static String getFriendlyName(final String metadataId) {
+        Assert.isTrue(isValid(metadataId), "Invalid metadata id '" + metadataId
+                + "'");
+        return getPath(metadataId) + "/" + getJavaType(metadataId);
+    }
+
     /**
      * Parses the given metadata ID for the user project type to which it
      * relates.
@@ -64,6 +59,16 @@ public final class PhysicalTypeIdentifier {
                 "Physical type identifier is invalid");
         return PhysicalTypeIdentifierNamingUtils.getJavaType(
                 PHYSICAL_METADATA_TYPE, physicalTypeId);
+    }
+
+    /**
+     * Returns the class-level ID for physical type metadata. Equivalent to
+     * accessing {@link #PHYSICAL_METADATA_TYPE_ID} directly.
+     * 
+     * @return {@value #PHYSICAL_METADATA_TYPE_ID}
+     */
+    public static String getMetadataIdentiferType() {
+        return PHYSICAL_METADATA_TYPE_ID;
     }
 
     /**
@@ -89,12 +94,6 @@ public final class PhysicalTypeIdentifier {
     public static boolean isValid(final String metadataIdentificationString) {
         return PhysicalTypeIdentifierNamingUtils.isValid(
                 PHYSICAL_METADATA_TYPE, metadataIdentificationString);
-    }
-
-    public static String getFriendlyName(final String metadataId) {
-        Assert.isTrue(isValid(metadataId), "Invalid metadata id '" + metadataId
-                + "'");
-        return getPath(metadataId) + "/" + getJavaType(metadataId);
     }
 
     /**

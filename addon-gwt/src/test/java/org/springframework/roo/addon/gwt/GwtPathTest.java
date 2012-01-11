@@ -18,6 +18,11 @@ import org.junit.Test;
 public class GwtPathTest {
 
     @Test
+    public void testPackageNameForWebPath() {
+        assertEquals("", GwtPath.WEB.packageName(null));
+    }
+
+    @Test
     public void testSegmentNamesAreNonNull() {
         for (final GwtPath gwtPath : GwtPath.values()) {
             assertNotNull("Null segment name for " + gwtPath,
@@ -33,11 +38,6 @@ public class GwtPathTest {
             assertTrue("Duplicate segment name '" + segmentName + "'",
                     segmentNames.add(segmentName));
         }
-    }
-
-    @Test
-    public void testPackageNameForWebPath() {
-        assertEquals("", GwtPath.WEB.packageName(null));
     }
 
     @Test

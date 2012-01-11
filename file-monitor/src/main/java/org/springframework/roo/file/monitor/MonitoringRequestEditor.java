@@ -40,7 +40,6 @@ import org.springframework.roo.support.util.StringUtils;
  */
 public class MonitoringRequestEditor extends PropertyEditorSupport {
 
-    // Constants
     private static final FileOperation[] MONITORED_OPERATIONS = { CREATED,
             RENAMED, UPDATED, DELETED };
     private static final String SUBTREE_WILDCARD = "**";
@@ -51,7 +50,7 @@ public class MonitoringRequestEditor extends PropertyEditorSupport {
      */
     @Override
     public String getAsText() {
-        MonitoringRequest req = getValue();
+        final MonitoringRequest req = getValue();
         if (req == null) {
             return null;
         }
@@ -59,7 +58,7 @@ public class MonitoringRequestEditor extends PropertyEditorSupport {
         try {
             text.append(req.getFile().getCanonicalPath());
         }
-        catch (IOException ioe) {
+        catch (final IOException ioe) {
             throw new IllegalStateException(
                     "Failure retrieving path for request '" + req + "'", ioe);
         }
@@ -70,7 +69,7 @@ public class MonitoringRequestEditor extends PropertyEditorSupport {
             }
         }
         if (req instanceof DirectoryMonitoringRequest) {
-            DirectoryMonitoringRequest dmr = (DirectoryMonitoringRequest) req;
+            final DirectoryMonitoringRequest dmr = (DirectoryMonitoringRequest) req;
             if (dmr.isWatchSubtree()) {
                 text.append(",").append(SUBTREE_WILDCARD);
             }
@@ -83,6 +82,18 @@ public class MonitoringRequestEditor extends PropertyEditorSupport {
         return (MonitoringRequest) super.getValue();
     }
 
+    private Collection<FileOperation> parseFileOperations(
+            final String fileOperationCodes) {
+        final Set<FileOperation> fileOperations = new HashSet<FileOperation>();
+        for (final FileOperation fileOperation : MONITORED_OPERATIONS) {
+            if (fileOperationCodes.contains(fileOperation.name()
+                    .substring(0, 1))) {
+                fileOperations.add(fileOperation);
+            }
+        }
+        return fileOperations;
+    }
+
     @Override
     public void setAsText(final String text) throws IllegalArgumentException {
         if (StringUtils.isBlank(text)) {
@@ -92,8 +103,8 @@ public class MonitoringRequestEditor extends PropertyEditorSupport {
 
         final String[] segments = StringUtils
                 .commaDelimitedListToStringArray(text);
-        Assert.isTrue(segments.length == 2 || segments.length == 3, "Text '"
-                + text + "' is invalid for a MonitoringRequest");
+        Assert.isTrue((segments.length == 2) || (segments.length == 3),
+                "Text '" + text + "' is invalid for a MonitoringRequest");
         final File file = new File(segments[0]);
         Assert.isTrue(file.exists(), "File '" + file + "' does not exist");
 
@@ -110,18 +121,6 @@ public class MonitoringRequestEditor extends PropertyEditorSupport {
         else {
             setValueToDirectoryMonitoringRequest(segments, file, fileOperations);
         }
-    }
-
-    private Collection<FileOperation> parseFileOperations(
-            final String fileOperationCodes) {
-        final Set<FileOperation> fileOperations = new HashSet<FileOperation>();
-        for (final FileOperation fileOperation : MONITORED_OPERATIONS) {
-            if (fileOperationCodes.contains(fileOperation.name()
-                    .substring(0, 1))) {
-                fileOperations.add(fileOperation);
-            }
-        }
-        return fileOperations;
     }
 
     private void setValueToDirectoryMonitoringRequest(final String[] segments,

@@ -51,12 +51,23 @@ public class PgpKeyId implements Comparable<PgpKeyId> {
         }
     }
 
+    public int compareTo(final PgpKeyId o) {
+        if (o == null) {
+            return -1;
+        }
+        return id.compareTo(o.id);
+    }
+
     @Override
     public boolean equals(final Object obj) {
         if (obj instanceof PgpKeyId) {
             return id.equals(((PgpKeyId) obj).id);
         }
         return false;
+    }
+
+    public String getId() {
+        return id;
     }
 
     @Override
@@ -67,15 +78,5 @@ public class PgpKeyId implements Comparable<PgpKeyId> {
     @Override
     public String toString() {
         return id.toString();
-    }
-
-    public int compareTo(final PgpKeyId o) {
-        if (o == null)
-            return -1;
-        return id.compareTo(o.id);
-    }
-
-    public String getId() {
-        return id;
     }
 }

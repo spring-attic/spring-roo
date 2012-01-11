@@ -34,8 +34,11 @@ import org.springframework.uaa.client.util.Assert;
 @Service
 public class RepositoryMongoLayerProvider extends CoreLayerProvider {
 
-    // Fields
     @Reference private RepositoryMongoLocator repositoryLocator;
+
+    public int getLayerPosition() {
+        return LayerType.REPOSITORY.getPosition() - 1;
+    }
 
     public MemberTypeAdditions getMemberTypeAdditions(final String callerMID,
             final String methodIdentifier, final JavaType targetEntity,
@@ -103,10 +106,6 @@ public class RepositoryMongoLayerProvider extends CoreLayerProvider {
                 + method.getCall(parameters);
         return new MemberTypeAdditions(cidBuilder, method.getName(),
                 methodCall, false, parameters);
-    }
-
-    public int getLayerPosition() {
-        return LayerType.REPOSITORY.getPosition() - 1;
     }
 
     // -------------------- Setters for use by unit tests ----------------------

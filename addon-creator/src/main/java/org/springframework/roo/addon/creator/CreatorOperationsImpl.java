@@ -73,11 +73,9 @@ public class CreatorOperationsImpl implements CreatorOperations {
         WRAPPER
     };
 
-    // Constants
     private static final String ICON_SET_URL = "http://www.famfamfam.com/lab/icons/flags/famfamfam_flag_icons.zip";
     private static final String POM_XML = "pom.xml";
 
-    // Fields
     @Reference private FileManager fileManager;
     @Reference private PathResolver pathResolver;
     @Reference private ProjectOperations projectOperations;

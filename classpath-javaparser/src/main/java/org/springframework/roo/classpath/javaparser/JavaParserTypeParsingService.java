@@ -55,9 +55,22 @@ import org.springframework.roo.support.util.StringUtils;
 @Service
 public class JavaParserTypeParsingService implements TypeParsingService {
 
-    // Fields
     @Reference MetadataService metadataService;
     @Reference TypeLocationService typeLocationService;
+
+    private void addEnumConstant(final List<EnumConstantDeclaration> constants,
+            final JavaSymbolName name) {
+        // Determine location to insert
+        for (final EnumConstantDeclaration constant : constants) {
+            if (constant.getName().equals(name.getSymbolName())) {
+                throw new IllegalArgumentException("Enum constant '"
+                        + name.getSymbolName() + "' already exists");
+            }
+        }
+        final EnumConstantDeclaration newEntry = new EnumConstantDeclaration(
+                name.getSymbolName());
+        constants.add(constants.size(), newEntry);
+    }
 
     public final String getCompilationUnitContents(
             final ClassOrInterfaceTypeDetails cid) {
@@ -108,9 +121,9 @@ public class JavaParserTypeParsingService implements TypeParsingService {
         Assert.hasText(declaredByMetadataId, "Declaring metadata ID required");
         Assert.notNull(typeName, "Java type to locate required");
         try {
-            CompilationUnit compilationUnit = JavaParser
+            final CompilationUnit compilationUnit = JavaParser
                     .parse(new ByteArrayInputStream(fileContents.getBytes()));
-            TypeDeclaration typeDeclaration = JavaParserUtils
+            final TypeDeclaration typeDeclaration = JavaParserUtils
                     .locateTypeDeclaration(compilationUnit, typeName);
             if (typeDeclaration == null) {
                 return null;
@@ -120,7 +133,7 @@ public class JavaParserTypeParsingService implements TypeParsingService {
                     declaredByMetadataId, typeName, metadataService,
                     typeLocationService).build();
         }
-        catch (ParseException e) {
+        catch (final ParseException e) {
             throw new IllegalStateException(e);
         }
     }
@@ -145,7 +158,7 @@ public class JavaParserTypeParsingService implements TypeParsingService {
         Assert.notNull(compilationUnit.getImports(),
                 "Compilation unit imports should be non-null when producing type '"
                         + cid.getName() + "'");
-        for (ImportMetadata importType : cid.getRegisteredImports()) {
+        for (final ImportMetadata importType : cid.getRegisteredImports()) {
             if (!importType.isAsterisk()) {
                 NameExpr typeToImportExpr;
                 if (importType.getImportType().getEnclosingType() == null) {
@@ -173,21 +186,21 @@ public class JavaParserTypeParsingService implements TypeParsingService {
         }
 
         // Create a class or interface declaration to represent this actual type
-        int javaParserModifier = JavaParserUtils.getJavaParserModifier(cid
-                .getModifier());
+        final int javaParserModifier = JavaParserUtils
+                .getJavaParserModifier(cid.getModifier());
         TypeDeclaration typeDeclaration;
         ClassOrInterfaceDeclaration classOrInterfaceDeclaration;
 
         // Implements handling
-        List<ClassOrInterfaceType> implementsList = new ArrayList<ClassOrInterfaceType>();
-        for (JavaType current : cid.getImplementsTypes()) {
+        final List<ClassOrInterfaceType> implementsList = new ArrayList<ClassOrInterfaceType>();
+        for (final JavaType current : cid.getImplementsTypes()) {
             implementsList.add(JavaParserUtils.getResolvedName(cid.getName(),
                     current, compilationUnit));
         }
 
-        if (cid.getPhysicalTypeCategory() == PhysicalTypeCategory.INTERFACE
-                || cid.getPhysicalTypeCategory() == PhysicalTypeCategory.CLASS) {
-            boolean isInterface = cid.getPhysicalTypeCategory() == PhysicalTypeCategory.INTERFACE;
+        if ((cid.getPhysicalTypeCategory() == PhysicalTypeCategory.INTERFACE)
+                || (cid.getPhysicalTypeCategory() == PhysicalTypeCategory.CLASS)) {
+            final boolean isInterface = cid.getPhysicalTypeCategory() == PhysicalTypeCategory.INTERFACE;
 
             if (parent == null) {
                 // Top level type
@@ -212,15 +225,15 @@ public class JavaParserTypeParsingService implements TypeParsingService {
                     classOrInterfaceDeclaration
                             .setTypeParameters(new ArrayList<TypeParameter>());
 
-                    for (JavaType param : cid.getName().getParameters()) {
+                    for (final JavaType param : cid.getName().getParameters()) {
                         NameExpr pNameExpr = JavaParserUtils
                                 .importTypeIfRequired(cid.getName(),
                                         compilationUnit.getImports(), param);
-                        String tempName = StringUtils.replaceFirst(
+                        final String tempName = StringUtils.replaceFirst(
                                 pNameExpr.toString(), param.getArgName()
                                         + " extends ", "");
                         pNameExpr = new NameExpr(tempName);
-                        ClassOrInterfaceType pResolvedName = JavaParserUtils
+                        final ClassOrInterfaceType pResolvedName = JavaParserUtils
                                 .getClassOrInterfaceType(pNameExpr);
                         classOrInterfaceDeclaration.getTypeParameters().add(
                                 new TypeParameter(param.getArgName()
@@ -231,8 +244,8 @@ public class JavaParserTypeParsingService implements TypeParsingService {
             }
 
             // Superclass handling
-            List<ClassOrInterfaceType> extendsList = new ArrayList<ClassOrInterfaceType>();
-            for (JavaType current : cid.getExtendsTypes()) {
+            final List<ClassOrInterfaceType> extendsList = new ArrayList<ClassOrInterfaceType>();
+            for (final JavaType current : cid.getExtendsTypes()) {
                 if (!OBJECT.equals(current)) {
                     extendsList.add(JavaParserUtils.getResolvedName(
                             cid.getName(), current, compilationUnit));
@@ -277,20 +290,20 @@ public class JavaParserTypeParsingService implements TypeParsingService {
             // Create a compilation unit so that we can use JavaType*Metadata
             // static methods directly
             enclosingCompilationUnitServices = new CompilationUnitServices() {
-                public List<ImportDeclaration> getImports() {
-                    return compilationUnit.getImports();
-                }
-
                 public JavaPackage getCompilationUnitPackage() {
                     return cid.getName().getPackage();
                 }
 
-                public List<TypeDeclaration> getInnerTypes() {
-                    return compilationUnit.getTypes();
-                }
-
                 public JavaType getEnclosingTypeName() {
                     return cid.getName();
+                }
+
+                public List<ImportDeclaration> getImports() {
+                    return compilationUnit.getImports();
+                }
+
+                public List<TypeDeclaration> getInnerTypes() {
+                    return compilationUnit.getTypes();
                 }
 
                 public PhysicalTypeCategory getPhysicalTypeCategory() {
@@ -302,21 +315,21 @@ public class JavaParserTypeParsingService implements TypeParsingService {
         final CompilationUnitServices finalCompilationUnitServices = enclosingCompilationUnitServices;
         // A hybrid CompilationUnitServices must be provided that references the
         // enclosing types imports and package
-        CompilationUnitServices compilationUnitServices = new CompilationUnitServices() {
-            public List<ImportDeclaration> getImports() {
-                return finalCompilationUnitServices.getImports();
-            }
-
+        final CompilationUnitServices compilationUnitServices = new CompilationUnitServices() {
             public JavaPackage getCompilationUnitPackage() {
                 return finalCompilationUnitServices.getCompilationUnitPackage();
             }
 
-            public List<TypeDeclaration> getInnerTypes() {
-                return compilationUnit.getTypes();
-            }
-
             public JavaType getEnclosingTypeName() {
                 return cid.getName();
+            }
+
+            public List<ImportDeclaration> getImports() {
+                return finalCompilationUnitServices.getImports();
+            }
+
+            public List<TypeDeclaration> getInnerTypes() {
+                return compilationUnit.getTypes();
             }
 
             public PhysicalTypeCategory getPhysicalTypeCategory() {
@@ -325,22 +338,22 @@ public class JavaParserTypeParsingService implements TypeParsingService {
         };
 
         // Add type annotations
-        List<AnnotationExpr> annotations = new ArrayList<AnnotationExpr>();
+        final List<AnnotationExpr> annotations = new ArrayList<AnnotationExpr>();
         typeDeclaration.setAnnotations(annotations);
-        for (AnnotationMetadata candidate : cid.getAnnotations()) {
+        for (final AnnotationMetadata candidate : cid.getAnnotations()) {
             JavaParserAnnotationMetadataBuilder.addAnnotationToList(
                     compilationUnitServices, annotations, candidate);
         }
 
         // Add enum constants and interfaces
-        if (typeDeclaration instanceof EnumDeclaration
-                && cid.getEnumConstants().size() > 0) {
-            EnumDeclaration enumDeclaration = (EnumDeclaration) typeDeclaration;
+        if ((typeDeclaration instanceof EnumDeclaration)
+                && (cid.getEnumConstants().size() > 0)) {
+            final EnumDeclaration enumDeclaration = (EnumDeclaration) typeDeclaration;
 
-            List<EnumConstantDeclaration> constants = new ArrayList<EnumConstantDeclaration>();
+            final List<EnumConstantDeclaration> constants = new ArrayList<EnumConstantDeclaration>();
             enumDeclaration.setEntries(constants);
 
-            for (JavaSymbolName constant : cid.getEnumConstants()) {
+            for (final JavaSymbolName constant : cid.getEnumConstants()) {
                 addEnumConstant(constants, constant);
             }
 
@@ -351,34 +364,36 @@ public class JavaParserTypeParsingService implements TypeParsingService {
         }
 
         // Add fields
-        for (FieldMetadata candidate : cid.getDeclaredFields()) {
+        for (final FieldMetadata candidate : cid.getDeclaredFields()) {
             JavaParserFieldMetadataBuilder.addField(compilationUnitServices,
                     typeDeclaration.getMembers(), candidate);
         }
 
         // Add constructors
-        for (ConstructorMetadata candidate : cid.getDeclaredConstructors()) {
+        for (final ConstructorMetadata candidate : cid
+                .getDeclaredConstructors()) {
             JavaParserConstructorMetadataBuilder.addConstructor(
                     compilationUnitServices, typeDeclaration.getMembers(),
                     candidate, null);
         }
 
         // Add methods
-        for (MethodMetadata candidate : cid.getDeclaredMethods()) {
+        for (final MethodMetadata candidate : cid.getDeclaredMethods()) {
             JavaParserMethodMetadataBuilder.addMethod(compilationUnitServices,
                     typeDeclaration.getMembers(), candidate, null);
         }
 
         // Add inner types
-        for (ClassOrInterfaceTypeDetails candidate : cid
+        for (final ClassOrInterfaceTypeDetails candidate : cid
                 .getDeclaredInnerTypes()) {
             updateOutput(compilationUnit, compilationUnitServices, candidate,
                     typeDeclaration.getMembers());
         }
 
-        HashSet<String> imported = new HashSet<String>();
-        ArrayList<ImportDeclaration> imports = new ArrayList<ImportDeclaration>();
-        for (ImportDeclaration importDeclaration : compilationUnit.getImports()) {
+        final HashSet<String> imported = new HashSet<String>();
+        final ArrayList<ImportDeclaration> imports = new ArrayList<ImportDeclaration>();
+        for (final ImportDeclaration importDeclaration : compilationUnit
+                .getImports()) {
             JavaPackage importPackage = null;
             JavaType importType = null;
             if (importDeclaration.isAsterisk()) {
@@ -397,12 +412,12 @@ public class JavaParserTypeParsingService implements TypeParsingService {
             }
 
             if (importPackage.equals(cid.getName().getPackage())
-                    && importType != null
-                    && importType.getEnclosingType() == null) {
+                    && (importType != null)
+                    && (importType.getEnclosingType() == null)) {
                 continue;
             }
 
-            if (importType != null && importType.equals(cid.getName())) {
+            if ((importType != null) && importType.equals(cid.getName())) {
                 continue;
             }
 
@@ -421,19 +436,5 @@ public class JavaParserTypeParsingService implements TypeParsingService {
         });
 
         compilationUnit.setImports(imports);
-    }
-
-    private void addEnumConstant(final List<EnumConstantDeclaration> constants,
-            final JavaSymbolName name) {
-        // Determine location to insert
-        for (EnumConstantDeclaration constant : constants) {
-            if (constant.getName().equals(name.getSymbolName())) {
-                throw new IllegalArgumentException("Enum constant '"
-                        + name.getSymbolName() + "' already exists");
-            }
-        }
-        EnumConstantDeclaration newEntry = new EnumConstantDeclaration(
-                name.getSymbolName());
-        constants.add(constants.size(), newEntry);
     }
 }

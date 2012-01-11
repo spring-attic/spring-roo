@@ -12,13 +12,12 @@ import org.springframework.roo.support.util.Assert;
  */
 public class Identifier {
 
-    // Fields
-    private final int columnSize;
-    private final int scale;
-    private final JavaSymbolName fieldName;
-    private final JavaType fieldType;
     private final String columnDefinition;
     private final String columnName;
+    private final int columnSize;
+    private final JavaSymbolName fieldName;
+    private final JavaType fieldType;
+    private final int scale;
 
     /**
      * Constructor
@@ -44,48 +43,6 @@ public class Identifier {
         this.scale = scale;
     }
 
-    public JavaSymbolName getFieldName() {
-        return fieldName;
-    }
-
-    public JavaType getFieldType() {
-        return fieldType;
-    }
-
-    public String getColumnName() {
-        return columnName;
-    }
-
-    public int getColumnSize() {
-        return columnSize;
-    }
-
-    public int getScale() {
-        return scale;
-    }
-
-    public String getColumnDefinition() {
-        return columnDefinition;
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime
-                * result
-                + ((columnDefinition == null) ? 0 : columnDefinition.hashCode());
-        result = prime * result
-                + ((columnName == null) ? 0 : columnName.hashCode());
-        result = prime * result + columnSize;
-        result = prime * result
-                + ((fieldName == null) ? 0 : fieldName.hashCode());
-        result = prime * result
-                + ((fieldType == null) ? 0 : fieldType.hashCode());
-        result = prime * result + scale;
-        return result;
-    }
-
     @Override
     public boolean equals(final Object obj) {
         if (this == obj) {
@@ -97,7 +54,7 @@ public class Identifier {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        Identifier other = (Identifier) obj;
+        final Identifier other = (Identifier) obj;
         if (columnDefinition == null) {
             if (other.columnDefinition != null) {
                 return false;
@@ -137,6 +94,47 @@ public class Identifier {
             return false;
         }
         return true;
+    }
+
+    public String getColumnDefinition() {
+        return columnDefinition;
+    }
+
+    public String getColumnName() {
+        return columnName;
+    }
+
+    public int getColumnSize() {
+        return columnSize;
+    }
+
+    public JavaSymbolName getFieldName() {
+        return fieldName;
+    }
+
+    public JavaType getFieldType() {
+        return fieldType;
+    }
+
+    public int getScale() {
+        return scale;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = (prime * result)
+                + ((columnDefinition == null) ? 0 : columnDefinition.hashCode());
+        result = (prime * result)
+                + ((columnName == null) ? 0 : columnName.hashCode());
+        result = (prime * result) + columnSize;
+        result = (prime * result)
+                + ((fieldName == null) ? 0 : fieldName.hashCode());
+        result = (prime * result)
+                + ((fieldType == null) ? 0 : fieldType.hashCode());
+        result = (prime * result) + scale;
+        return result;
     }
 
     @Override

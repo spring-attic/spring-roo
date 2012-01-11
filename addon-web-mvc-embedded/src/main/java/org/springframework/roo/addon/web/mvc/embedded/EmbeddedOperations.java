@@ -10,9 +10,9 @@ import java.util.Map;
  */
 public interface EmbeddedOperations {
 
-    boolean isEmbeddedInstallationPossible();
-
     boolean embed(String url, String viewName);
 
     boolean install(String viewName, Map<String, String> options);
+
+    boolean isEmbeddedInstallationPossible();
 }

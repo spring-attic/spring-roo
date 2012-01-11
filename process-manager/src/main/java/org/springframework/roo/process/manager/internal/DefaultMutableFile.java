@@ -21,14 +21,9 @@ import org.springframework.roo.support.util.FileUtils;
  */
 public class DefaultMutableFile implements MutableFile {
 
-    // Fields
     private final File file;
     private final NotifiableFileMonitorService fileMonitorService;
     private final ManagedMessageRenderer managedMessageRenderer;
-
-    public void setDescriptionOfChange(final String message) {
-        this.managedMessageRenderer.setDescriptionOfChange(message);
-    }
 
     public DefaultMutableFile(final File file,
             final NotifiableFileMonitorService fileMonitorService,
@@ -57,7 +52,7 @@ public class DefaultMutableFile implements MutableFile {
         try {
             return new BufferedInputStream(new FileInputStream(file));
         }
-        catch (IOException ioe) {
+        catch (final IOException ioe) {
             throw new IllegalStateException(
                     "Unable to acquire input stream for file '"
                             + getCanonicalPath() + "'", ioe);
@@ -75,16 +70,20 @@ public class DefaultMutableFile implements MutableFile {
             return new MonitoredOutputStream(file, managedMessageRenderer,
                     fileMonitorService);
         }
-        catch (IOException ioe) {
+        catch (final IOException ioe) {
             throw new IllegalStateException(
                     "Unable to acquire output stream for file '"
                             + getCanonicalPath() + "'", ioe);
         }
     }
 
+    public void setDescriptionOfChange(final String message) {
+        managedMessageRenderer.setDescriptionOfChange(message);
+    }
+
     @Override
     public String toString() {
-        ToStringCreator tsc = new ToStringCreator(this);
+        final ToStringCreator tsc = new ToStringCreator(this);
         tsc.append("file", getCanonicalPath());
         return tsc.toString();
     }

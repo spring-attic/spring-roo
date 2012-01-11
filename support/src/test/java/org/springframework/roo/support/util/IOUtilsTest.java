@@ -18,11 +18,6 @@ import org.junit.Test;
 public class IOUtilsTest {
 
     @Test
-    public void testCloseNullCloseable() {
-        IOUtils.closeQuietly((Closeable) null); // Shouldn't throw an exception
-    }
-
-    @Test
     public void testCloseNonNullCloseableWithoutError() throws Exception {
         // Set up
         final Closeable mockCloseable = mock(Closeable.class);
@@ -32,6 +27,11 @@ public class IOUtilsTest {
 
         // Check
         verify(mockCloseable).close();
+    }
+
+    @Test
+    public void testCloseNullCloseable() {
+        IOUtils.closeQuietly((Closeable) null); // Shouldn't throw an exception
     }
 
     @Test

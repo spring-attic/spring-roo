@@ -33,7 +33,8 @@ import org.springframework.roo.support.util.StringUtils;
  */
 public class JpaOperationsImplTest {
 
-    // Constants
+    private static final String APP_CONTEXT = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+            + "<beans>" + "</beans>";
     private static final String APPLICATION_CONTEXT_PATH = "/path/to/the/app/context";
     private static final String DB_DIALECT = "dbDialect";
     private static final String DB_HOST_NAME = "myDbHost";
@@ -41,84 +42,6 @@ public class JpaOperationsImplTest {
     private static final String DB_NAME = "myDbName";
     private static final String DB_PASSWORD = "myDbPassword";
     private static final String DB_USER_NAME = "myDbUserName";
-    private static final String PERSISTENCE_PATH = "/path/to/persistence";
-    private static final String PERSISTENCE_UNIT = "myPersistenceUnit";
-    private static final String POM_PATH = "/path/to/the/pom";
-    private static final String TRANSACTION_MANAGER = "myTransactionManager";
-
-    // Fixture
-    private JpaOperationsImpl jpaOperations;
-    private Properties dialects;
-    @Mock private FileManager mockFileManager;
-    @Mock private PathResolver mockPathResolver;
-    @Mock private ProjectOperations mockProjectOperations;
-    @Mock private PropFileOperations mockPropFileOperations;
-
-    @Before
-    public void setUp() {
-        MockitoAnnotations.initMocks(this);
-
-        // Mocks
-        when(mockProjectOperations.getPathResolver()).thenReturn(
-                mockPathResolver);
-        when(
-                mockPathResolver.getFocusedIdentifier(Path.ROOT,
-                        JpaOperationsImpl.POM_XML)).thenReturn(POM_PATH);
-        when(
-                mockPathResolver.getFocusedIdentifier(Path.SPRING_CONFIG_ROOT,
-                        JpaOperationsImpl.APPLICATION_CONTEXT_XML)).thenReturn(
-                APPLICATION_CONTEXT_PATH);
-
-        // Object under test
-        this.jpaOperations = new JpaOperationsImpl();
-        this.jpaOperations.pathResolver = mockPathResolver;
-        this.jpaOperations.fileManager = mockFileManager;
-        this.jpaOperations.projectOperations = mockProjectOperations;
-        this.jpaOperations.propFileOperations = mockPropFileOperations;
-
-        // Things that are too hard or ugly to mock
-        this.dialects = new Properties();
-    }
-
-    private static final String POM = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-            + "<project>"
-            + "    <build>"
-            + "        <plugins>"
-            + "            <plugin>"
-            + "                <groupId>org.apache.maven.plugins</groupId>"
-            + "                <artifactId>maven-eclipse-plugin</artifactId>"
-            + "                <version>2.7</version>"
-            + "                <configuration>"
-            + "                    <additionalBuildcommands></additionalBuildcommands>"
-            + "                    <additionalProjectnatures></additionalProjectnatures>"
-            + "                </configuration>"
-            + "            </plugin>"
-            + "        </plugins>" + "    </build>" + "</project>";
-
-    private static final String APP_CONTEXT = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-            + "<beans>" + "</beans>";
-
-    /**
-     * Creates a new {@link InputStream} each time we need to read from the
-     * Spring application context
-     * 
-     * @param pom the application context XML as a String (required)
-     * @return a fresh stream
-     */
-    private InputStream getAppContextInputStream(final String appContext) {
-        return new ByteArrayInputStream(appContext.getBytes());
-    }
-
-    /**
-     * Creates a new {@link InputStream} each time we need to read from the POM
-     * 
-     * @param pom the POM XML as a String (required)
-     * @return a fresh stream
-     */
-    private ByteArrayInputStream getPomInputStream(final String pom) {
-        return new ByteArrayInputStream(pom.getBytes());
-    }
-
     private static final String EXPECTED_APPLICATION_CONTEXT = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n"
             + "<beans>\n"
             + "    <bean class=\"org.apache.commons.dbcp.BasicDataSource\" destroy-method=\"close\" id=\"dataSource\">\n"
@@ -141,7 +64,6 @@ public class JpaOperationsImplTest {
             + "        <property name=\"persistenceUnitName\" value=\"myPersistenceUnit\"/>\n"
             + "        <property name=\"dataSource\" ref=\"dataSource\"/>\n"
             + "    </bean>\n" + "</beans>\n";
-
     private static final String EXPECTED_JNDI_APPLICATION_CONTEXT = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n"
             + "<beans>\n"
             + "    <jee:jndi-lookup id=\"dataSource\" jndi-name=\"myDataSource\"/>\n"
@@ -153,7 +75,6 @@ public class JpaOperationsImplTest {
             + "        <property name=\"persistenceUnitName\" value=\"myPersistenceUnit\"/>\n"
             + "        <property name=\"dataSource\" ref=\"dataSource\"/>\n"
             + "    </bean>\n" + "</beans>\n";
-
     private static final String EXPECTED_PERSISTENCE_XML_FOR_H2_IN_MEMORY_AND_HIBERNATE = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n"
             + "<persistence xmlns=\"http://java.sun.com/xml/ns/persistence\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" version=\"2.0\" xsi:schemaLocation=\"http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd\">\n"
             + "<persistence-unit name=\"myPersistenceUnit\" transaction-type=\"RESOURCE_LOCAL\">\n"
@@ -171,38 +92,82 @@ public class JpaOperationsImplTest {
             + "    </persistence-unit>\n"
             + "</persistence>\n";
 
-    @Test
-    public void testConfigureJpaForH2InMemoryAndHibernateForNewProject() {
-        // Set up
-        when(mockFileManager.getInputStream(POM_PATH)).thenReturn(
-                getPomInputStream(POM), getPomInputStream(POM));
-        when(mockFileManager.getInputStream(APPLICATION_CONTEXT_PATH))
-                .thenReturn(getAppContextInputStream(APP_CONTEXT));
+    private static final String PERSISTENCE_PATH = "/path/to/persistence";
+    private static final String PERSISTENCE_UNIT = "myPersistenceUnit";
+    private static final String POM = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+            + "<project>"
+            + "    <build>"
+            + "        <plugins>"
+            + "            <plugin>"
+            + "                <groupId>org.apache.maven.plugins</groupId>"
+            + "                <artifactId>maven-eclipse-plugin</artifactId>"
+            + "                <version>2.7</version>"
+            + "                <configuration>"
+            + "                    <additionalBuildcommands></additionalBuildcommands>"
+            + "                    <additionalProjectnatures></additionalProjectnatures>"
+            + "                </configuration>"
+            + "            </plugin>"
+            + "        </plugins>" + "    </build>" + "</project>";
+    private static final String POM_PATH = "/path/to/the/pom";
+    private static final String TRANSACTION_MANAGER = "myTransactionManager";
+    private Properties dialects;
+
+    // Fixture
+    private JpaOperationsImpl jpaOperations;
+
+    @Mock private FileManager mockFileManager;
+
+    @Mock private PathResolver mockPathResolver;
+
+    @Mock private ProjectOperations mockProjectOperations;
+
+    @Mock private PropFileOperations mockPropFileOperations;
+
+    /**
+     * Creates a new {@link InputStream} each time we need to read from the
+     * Spring application context
+     * 
+     * @param pom the application context XML as a String (required)
+     * @return a fresh stream
+     */
+    private InputStream getAppContextInputStream(final String appContext) {
+        return new ByteArrayInputStream(appContext.getBytes());
+    }
+
+    /**
+     * Creates a new {@link InputStream} each time we need to read from the POM
+     * 
+     * @param pom the POM XML as a String (required)
+     * @return a fresh stream
+     */
+    private ByteArrayInputStream getPomInputStream(final String pom) {
+        return new ByteArrayInputStream(pom.getBytes());
+    }
+
+    @Before
+    public void setUp() {
+        MockitoAnnotations.initMocks(this);
+
+        // Mocks
+        when(mockProjectOperations.getPathResolver()).thenReturn(
+                mockPathResolver);
         when(
-                mockPathResolver.getFocusedIdentifier(Path.SRC_MAIN_RESOURCES,
-                        PERSISTENCE_XML)).thenReturn(PERSISTENCE_PATH);
-        when(mockFileManager.exists(PERSISTENCE_PATH)).thenReturn(false); // i.e.
-                                                                          // no
-                                                                          // existing
-                                                                          // persistence.xml
+                mockPathResolver.getFocusedIdentifier(Path.ROOT,
+                        JpaOperationsImpl.POM_XML)).thenReturn(POM_PATH);
         when(
-                mockPropFileOperations.loadProperties(JPA_DIALECTS_FILE,
-                        JpaOperationsImpl.class)).thenReturn(dialects);
+                mockPathResolver.getFocusedIdentifier(Path.SPRING_CONFIG_ROOT,
+                        JpaOperationsImpl.APPLICATION_CONTEXT_XML)).thenReturn(
+                APPLICATION_CONTEXT_PATH);
 
-        final OrmProvider ormProvider = HIBERNATE;
-        final JdbcDatabase jdbcDatabase = H2_IN_MEMORY;
-        dialects.put(ormProvider.name() + "." + jdbcDatabase.name(), DB_DIALECT);
+        // Object under test
+        jpaOperations = new JpaOperationsImpl();
+        jpaOperations.pathResolver = mockPathResolver;
+        jpaOperations.fileManager = mockFileManager;
+        jpaOperations.projectOperations = mockProjectOperations;
+        jpaOperations.propFileOperations = mockPropFileOperations;
 
-        // Invoke
-        this.jpaOperations.configureJpa(ormProvider, jdbcDatabase, null, null,
-                DB_HOST_NAME, DB_NAME, DB_USER_NAME, DB_PASSWORD,
-                TRANSACTION_MANAGER, PERSISTENCE_UNIT, "");
-
-        // Check
-        verifyFileUpdate(EXPECTED_APPLICATION_CONTEXT, APPLICATION_CONTEXT_PATH);
-        verifyFileUpdate(
-                EXPECTED_PERSISTENCE_XML_FOR_H2_IN_MEMORY_AND_HIBERNATE,
-                PERSISTENCE_PATH);
+        // Things that are too hard or ugly to mock
+        dialects = new Properties();
     }
 
     @Test
@@ -228,13 +193,47 @@ public class JpaOperationsImplTest {
         dialects.put(ormProvider.name() + "." + jdbcDatabase.name(), DB_DIALECT);
 
         // Invoke
-        this.jpaOperations.configureJpa(ormProvider, jdbcDatabase,
-                DB_JNDI_NAME, null, DB_HOST_NAME, DB_NAME, DB_USER_NAME,
-                DB_PASSWORD, TRANSACTION_MANAGER, PERSISTENCE_UNIT, "");
+        jpaOperations.configureJpa(ormProvider, jdbcDatabase, DB_JNDI_NAME,
+                null, DB_HOST_NAME, DB_NAME, DB_USER_NAME, DB_PASSWORD,
+                TRANSACTION_MANAGER, PERSISTENCE_UNIT, "");
 
         // Check
         verifyFileUpdate(EXPECTED_JNDI_APPLICATION_CONTEXT,
                 APPLICATION_CONTEXT_PATH);
+        verifyFileUpdate(
+                EXPECTED_PERSISTENCE_XML_FOR_H2_IN_MEMORY_AND_HIBERNATE,
+                PERSISTENCE_PATH);
+    }
+
+    @Test
+    public void testConfigureJpaForH2InMemoryAndHibernateForNewProject() {
+        // Set up
+        when(mockFileManager.getInputStream(POM_PATH)).thenReturn(
+                getPomInputStream(POM), getPomInputStream(POM));
+        when(mockFileManager.getInputStream(APPLICATION_CONTEXT_PATH))
+                .thenReturn(getAppContextInputStream(APP_CONTEXT));
+        when(
+                mockPathResolver.getFocusedIdentifier(Path.SRC_MAIN_RESOURCES,
+                        PERSISTENCE_XML)).thenReturn(PERSISTENCE_PATH);
+        when(mockFileManager.exists(PERSISTENCE_PATH)).thenReturn(false); // i.e.
+                                                                          // no
+                                                                          // existing
+                                                                          // persistence.xml
+        when(
+                mockPropFileOperations.loadProperties(JPA_DIALECTS_FILE,
+                        JpaOperationsImpl.class)).thenReturn(dialects);
+
+        final OrmProvider ormProvider = HIBERNATE;
+        final JdbcDatabase jdbcDatabase = H2_IN_MEMORY;
+        dialects.put(ormProvider.name() + "." + jdbcDatabase.name(), DB_DIALECT);
+
+        // Invoke
+        jpaOperations.configureJpa(ormProvider, jdbcDatabase, null, null,
+                DB_HOST_NAME, DB_NAME, DB_USER_NAME, DB_PASSWORD,
+                TRANSACTION_MANAGER, PERSISTENCE_UNIT, "");
+
+        // Check
+        verifyFileUpdate(EXPECTED_APPLICATION_CONTEXT, APPLICATION_CONTEXT_PATH);
         verifyFileUpdate(
                 EXPECTED_PERSISTENCE_XML_FOR_H2_IN_MEMORY_AND_HIBERNATE,
                 PERSISTENCE_PATH);

@@ -12,20 +12,6 @@ import java.io.InputStream;
 public final class TemplateUtils {
 
     /**
-     * Determines the path to the requested template.
-     * 
-     * @param clazz which owns the template (required)
-     * @param templateFilename the filename of the template (required)
-     * @return the full classloader-specific path to the template (never null)
-     * @deprecated use {@link FileUtils#getPath(Class, String)} instead
-     */
-    @Deprecated
-    public static String getTemplatePath(final Class<?> loadingClass,
-            final String relativeFilename) {
-        return FileUtils.getPath(loadingClass, relativeFilename);
-    }
-
-    /**
      * Acquires an {@link InputStream} to the requested classloader-derived
      * template.
      * 
@@ -39,6 +25,20 @@ public final class TemplateUtils {
     public static InputStream getTemplate(final Class<?> clazz,
             final String templateFilename) {
         return clazz.getResourceAsStream(templateFilename);
+    }
+
+    /**
+     * Determines the path to the requested template.
+     * 
+     * @param clazz which owns the template (required)
+     * @param templateFilename the filename of the template (required)
+     * @return the full classloader-specific path to the template (never null)
+     * @deprecated use {@link FileUtils#getPath(Class, String)} instead
+     */
+    @Deprecated
+    public static String getTemplatePath(final Class<?> loadingClass,
+            final String relativeFilename) {
+        return FileUtils.getPath(loadingClass, relativeFilename);
     }
 
     /**

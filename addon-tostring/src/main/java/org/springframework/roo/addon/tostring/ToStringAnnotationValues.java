@@ -14,9 +14,8 @@ import org.springframework.roo.model.RooJavaType;
  */
 public class ToStringAnnotationValues extends AbstractAnnotationValues {
 
-    // From annotation
-    @AutoPopulate private String toStringMethod = "toString";
     @AutoPopulate private String[] excludeFields;
+    @AutoPopulate private String toStringMethod = "toString";
 
     /**
      * Constructor
@@ -29,11 +28,11 @@ public class ToStringAnnotationValues extends AbstractAnnotationValues {
         AutoPopulationUtils.populate(this, annotationMetadata);
     }
 
-    public String getToStringMethod() {
-        return toStringMethod;
-    }
-
     public String[] getExcludeFields() {
         return excludeFields;
+    }
+
+    public String getToStringMethod() {
+        return toStringMethod;
     }
 }

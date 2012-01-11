@@ -23,10 +23,6 @@ import org.springframework.roo.support.util.StringUtils;
 @Service
 public class MongoIdTypeConverter implements Converter<MongoIdType> {
 
-    public boolean supports(final Class<?> type, final String optionContext) {
-        return MongoIdType.class.isAssignableFrom(type);
-    }
-
     public MongoIdType convertFromText(final String value,
             final Class<?> targetType, final String optionContext) {
         if (StringUtils.isBlank(value)) {
@@ -38,15 +34,19 @@ public class MongoIdTypeConverter implements Converter<MongoIdType> {
     public boolean getAllPossibleValues(final List<Completion> completions,
             final Class<?> targetType, final String existingData,
             final String optionContext, final MethodTarget target) {
-        SortedSet<String> types = new TreeSet<String>();
+        final SortedSet<String> types = new TreeSet<String>();
         types.add(BigInteger.class.getName());
         types.add("org.bson.types.ObjectId");
 
-        for (String type : types) {
+        for (final String type : types) {
             if (type.startsWith(existingData) || existingData.startsWith(type)) {
                 completions.add(new Completion(type));
             }
         }
         return false;
+    }
+
+    public boolean supports(final Class<?> type, final String optionContext) {
+        return MongoIdType.class.isAssignableFrom(type);
     }
 }

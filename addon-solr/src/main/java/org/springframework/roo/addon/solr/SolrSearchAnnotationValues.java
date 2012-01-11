@@ -14,7 +14,6 @@ import org.springframework.roo.model.RooJavaType;
  */
 public class SolrSearchAnnotationValues extends AbstractAnnotationValues {
 
-    // Fields
     @AutoPopulate String deleteIndexMethod = "deleteIndex";
     @AutoPopulate String indexMethod = "index";
     @AutoPopulate String postPersistOrUpdateMethod = "postPersistOrUpdate";
@@ -33,12 +32,12 @@ public class SolrSearchAnnotationValues extends AbstractAnnotationValues {
         AutoPopulationUtils.populate(this, annotationMetadata);
     }
 
-    public String getSearchMethod() {
-        return searchMethod;
+    public String getDeleteIndexMethod() {
+        return deleteIndexMethod;
     }
 
-    public String getSimpleSearchMethod() {
-        return simpleSearchMethod;
+    public String getIndexMethod() {
+        return indexMethod;
     }
 
     public String getPostPersistOrUpdateMethod() {
@@ -49,11 +48,11 @@ public class SolrSearchAnnotationValues extends AbstractAnnotationValues {
         return preRemoveMethod;
     }
 
-    public String getIndexMethod() {
-        return indexMethod;
+    public String getSearchMethod() {
+        return searchMethod;
     }
 
-    public String getDeleteIndexMethod() {
-        return deleteIndexMethod;
+    public String getSimpleSearchMethod() {
+        return simpleSearchMethod;
     }
 }

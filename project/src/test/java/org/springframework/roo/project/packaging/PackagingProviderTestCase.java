@@ -21,17 +21,17 @@ public abstract class PackagingProviderTestCase<T extends AbstractPackagingProvi
     // Fixture
     private T provider;
 
-    @Before
-    public void setUp() throws Exception {
-        this.provider = getProvider();
-    }
-
     /**
      * Subclasses must return an instance of the provider being tested
      * 
      * @return a non-<code>null</code> instance
      */
     protected abstract T getProvider();
+
+    @Before
+    public void setUp() throws Exception {
+        this.provider = getProvider();
+    }
 
     @Test
     public void testIdIsNotBlank() {

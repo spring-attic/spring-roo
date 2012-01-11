@@ -19,16 +19,6 @@ import java.lang.annotation.Target;
 public @interface RooWebJson {
 
     /**
-     * The default prefix of the "show" method
-     */
-    String SHOW_JSON = "showJson";
-
-    /**
-     * The default prefix of the "find all" method
-     */
-    String LIST_JSON = "listJson";
-
-    /**
      * The default prefix of the "create" method
      */
     String CREATE_FROM_JSON = "createFromJson";
@@ -37,16 +27,6 @@ public @interface RooWebJson {
      * The default prefix of the "create from array" method
      */
     String CREATE_FROM_JSON_ARRAY = "createFromJsonArray";
-
-    /**
-     * The default prefix of the "update" method
-     */
-    String UPDATE_FROM_JSON = "updateFromJson";
-
-    /**
-     * The default prefix of the "update from array" method
-     */
-    String UPDATE_FROM_JSON_ARRAY = "updateFromJsonArray";
 
     /**
      * The default prefix of the "delete" method
@@ -59,35 +39,24 @@ public @interface RooWebJson {
     boolean EXPOSE_FINDERS = true;
 
     /**
-     * Every controller is responsible for a single JSON-enabled object. The
-     * backing object defined here class will be exposed in a RESTful way.
+     * The default prefix of the "find all" method
      */
-    Class<?> jsonObject();
+    String LIST_JSON = "listJson";
 
     /**
-     * Creates a showJson() method which finds an object for a given id. Set
-     * methodName to "" to prevent its generation.
-     * 
-     * @return indicates the method name for the showJson() method (optional)
+     * The default prefix of the "show" method
      */
-    String showJsonMethod() default SHOW_JSON;
+    String SHOW_JSON = "showJson";
 
     /**
-     * Creates a listJson() method which finds all objects. Set methodName to ""
-     * to prevent its generation.
-     * 
-     * @return indicates the method name for the listJson() method (optional)
+     * The default prefix of the "update" method
      */
-    String listJsonMethod() default LIST_JSON;
+    String UPDATE_FROM_JSON = "updateFromJson";
 
     /**
-     * Creates a createFromJson() method which finds all objects. Set methodName
-     * to "" to prevent its generation.
-     * 
-     * @return indicates the method name for the createFromJson() method
-     *         (optional)
+     * The default prefix of the "update from array" method
      */
-    String createFromJsonMethod() default CREATE_FROM_JSON;
+    String UPDATE_FROM_JSON_ARRAY = "updateFromJsonArray";
 
     /**
      * Creates a createFromJsonArray() method which finds all objects. Set
@@ -99,22 +68,13 @@ public @interface RooWebJson {
     String createFromJsonArrayMethod() default CREATE_FROM_JSON_ARRAY;
 
     /**
-     * Creates a updateFromJson() method which finds all objects. Set methodName
+     * Creates a createFromJson() method which finds all objects. Set methodName
      * to "" to prevent its generation.
      * 
-     * @return indicates the method name for the updateFromJson() method
+     * @return indicates the method name for the createFromJson() method
      *         (optional)
      */
-    String updateFromJsonMethod() default UPDATE_FROM_JSON;
-
-    /**
-     * Creates a updateFromJsonArray() method which finds all objects. Set
-     * methodName to "" to prevent its generation.
-     * 
-     * @return indicates the method name for the updateFromJsonArray() method
-     *         (optional)
-     */
-    String updateFromJsonArrayMethod() default UPDATE_FROM_JSON_ARRAY;
+    String createFromJsonMethod() default CREATE_FROM_JSON;
 
     /**
      * Creates a deleteFromJson() method which finds all objects. Set methodName
@@ -133,4 +93,44 @@ public @interface RooWebJson {
      *         "true"; optional)
      */
     boolean exposeFinders() default EXPOSE_FINDERS;
+
+    /**
+     * Every controller is responsible for a single JSON-enabled object. The
+     * backing object defined here class will be exposed in a RESTful way.
+     */
+    Class<?> jsonObject();
+
+    /**
+     * Creates a listJson() method which finds all objects. Set methodName to ""
+     * to prevent its generation.
+     * 
+     * @return indicates the method name for the listJson() method (optional)
+     */
+    String listJsonMethod() default LIST_JSON;
+
+    /**
+     * Creates a showJson() method which finds an object for a given id. Set
+     * methodName to "" to prevent its generation.
+     * 
+     * @return indicates the method name for the showJson() method (optional)
+     */
+    String showJsonMethod() default SHOW_JSON;
+
+    /**
+     * Creates a updateFromJsonArray() method which finds all objects. Set
+     * methodName to "" to prevent its generation.
+     * 
+     * @return indicates the method name for the updateFromJsonArray() method
+     *         (optional)
+     */
+    String updateFromJsonArrayMethod() default UPDATE_FROM_JSON_ARRAY;
+
+    /**
+     * Creates a updateFromJson() method which finds all objects. Set methodName
+     * to "" to prevent its generation.
+     * 
+     * @return indicates the method name for the updateFromJson() method
+     *         (optional)
+     */
+    String updateFromJsonMethod() default UPDATE_FROM_JSON;
 }

@@ -34,16 +34,6 @@ public class CloudFoundryCommandsTest {
     }
 
     @Test
-    public void testLoginWithDefaultParameters() {
-        // Invoke
-        commands.login(null, null, null);
-
-        // Check
-        verify(mockCloudFoundryOperations).login(null, null, null);
-        verifyNoMoreInteractions(mockCloudFoundryOperations);
-    }
-
-    @Test
     public void testLoginWithCustomUrl() {
         // Set up
         final CloudControllerUrl mockUrl = mock(CloudControllerUrl.class);
@@ -55,6 +45,16 @@ public class CloudFoundryCommandsTest {
 
         // Check
         verify(mockCloudFoundryOperations).login(null, null, customUrl);
+        verifyNoMoreInteractions(mockCloudFoundryOperations);
+    }
+
+    @Test
+    public void testLoginWithDefaultParameters() {
+        // Invoke
+        commands.login(null, null, null);
+
+        // Check
+        verify(mockCloudFoundryOperations).login(null, null, null);
         verifyNoMoreInteractions(mockCloudFoundryOperations);
     }
 }

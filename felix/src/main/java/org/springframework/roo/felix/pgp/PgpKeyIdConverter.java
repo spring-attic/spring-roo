@@ -29,8 +29,8 @@ public class PgpKeyIdConverter implements Converter<PgpKeyId> {
     public boolean getAllPossibleValues(final List<Completion> completions,
             final Class<?> requiredType, final String originalUserInput,
             final String optionContext, final MethodTarget target) {
-        for (PgpKeyId candidate : pgpService.getDiscoveredKeyIds()) {
-            String id = candidate.getId();
+        for (final PgpKeyId candidate : pgpService.getDiscoveredKeyIds()) {
+            final String id = candidate.getId();
             if (id.toUpperCase().startsWith(originalUserInput.toUpperCase())) {
                 completions.add(new Completion(id));
             }

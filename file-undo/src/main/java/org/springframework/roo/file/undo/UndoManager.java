@@ -24,6 +24,39 @@ public interface UndoManager {
     void add(UndoableOperation undoableOperation);
 
     /**
+     * @param undoListener registers a new undo listener (required)
+     */
+    void addUndoListener(UndoListener undoListener);
+
+    /**
+     * Indicates a caller wishes the {@link UndoManager} or "flush" its
+     * contents. The exact meaning of a flush is implementation dependent. It is
+     * guaranteed to not change the undo stack, but simply notify
+     * {@link UndoListener}s.
+     */
+    void flush();
+
+    /**
+     * @param undoListener removes a previously-registered undo listener
+     *            (required)
+     */
+    void removeUndoListener(UndoListener undoListener);
+
+    /**
+     * Resets the undo {@link Stack}, and guarantees to clear the {@link Stack}.
+     * <p>
+     * Executing this command guarantees the {@link Stack} will be empty upon
+     * return, with every element reset.
+     */
+    void reset();
+
+    /**
+     * @param undoEnabled enables or disables the undo feature, which is useful
+     *            for debugging (defaults to true)
+     */
+    void setUndoEnabled(boolean undoEnabled);
+
+    /**
      * Replays the undo {@link Stack}, and guarantees to clear the {@link Stack}
      * .
      * <p>
@@ -38,37 +71,4 @@ public interface UndoManager {
      *         successfully undone
      */
     boolean undo();
-
-    /**
-     * Resets the undo {@link Stack}, and guarantees to clear the {@link Stack}.
-     * <p>
-     * Executing this command guarantees the {@link Stack} will be empty upon
-     * return, with every element reset.
-     */
-    void reset();
-
-    /**
-     * Indicates a caller wishes the {@link UndoManager} or "flush" its
-     * contents. The exact meaning of a flush is implementation dependent. It is
-     * guaranteed to not change the undo stack, but simply notify
-     * {@link UndoListener}s.
-     */
-    void flush();
-
-    /**
-     * @param undoListener registers a new undo listener (required)
-     */
-    void addUndoListener(UndoListener undoListener);
-
-    /**
-     * @param undoListener removes a previously-registered undo listener
-     *            (required)
-     */
-    void removeUndoListener(UndoListener undoListener);
-
-    /**
-     * @param undoEnabled enables or disables the undo feature, which is useful
-     *            for debugging (defaults to true)
-     */
-    void setUndoEnabled(boolean undoEnabled);
 }

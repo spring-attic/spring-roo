@@ -17,16 +17,15 @@ import org.springframework.roo.shell.CommandMarker;
 @Service
 public class BackupCommands implements CommandMarker {
 
-    // Fields
     @Reference private BackupOperations backupOperations;
-
-    @CliAvailabilityIndicator("backup")
-    public boolean isBackupCommandAvailable() {
-        return backupOperations.isBackupPossible();
-    }
 
     @CliCommand(value = "backup", help = "Backup your project to a zip file")
     public String backup() {
         return backupOperations.backup();
+    }
+
+    @CliAvailabilityIndicator("backup")
+    public boolean isBackupCommandAvailable() {
+        return backupOperations.isBackupPossible();
     }
 }

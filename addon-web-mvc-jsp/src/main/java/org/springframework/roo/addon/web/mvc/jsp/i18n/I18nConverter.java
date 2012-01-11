@@ -20,7 +20,6 @@ import org.springframework.roo.shell.MethodTarget;
 @Service
 public class I18nConverter implements Converter<I18n> {
 
-    // Fields
     @Reference private I18nSupport i18nSupport;
 
     public I18n convertFromText(final String value,
@@ -39,10 +38,12 @@ public class I18nConverter implements Converter<I18n> {
     public boolean getAllPossibleValues(final List<Completion> completions,
             final Class<?> requiredType, final String existingData,
             final String optionContext, final MethodTarget target) {
-        for (I18n i18n : i18nSupport.getSupportedLanguages()) {
-            Locale locale = i18n.getLocale();
-            StringBuilder localeString = new StringBuilder(locale.getLanguage());
-            if (locale.getCountry() == null || locale.getCountry().length() > 0) {
+        for (final I18n i18n : i18nSupport.getSupportedLanguages()) {
+            final Locale locale = i18n.getLocale();
+            final StringBuilder localeString = new StringBuilder(
+                    locale.getLanguage());
+            if ((locale.getCountry() == null)
+                    || (locale.getCountry().length() > 0)) {
                 localeString.append("_").append(
                         locale.getCountry().toUpperCase());
             }

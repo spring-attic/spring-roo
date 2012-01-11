@@ -22,16 +22,15 @@ import org.mockito.MockitoAnnotations;
  */
 public class PackagingProviderRegistryTest {
 
-    // Constants
     private static final String CORE_JAR_ID = "jar";
-    private static final String CUSTOM_JAR_ID = "jar_custom";
     private static final String CORE_WAR_ID = "war";
+    private static final String CUSTOM_JAR_ID = "jar_custom";
 
+    @Mock private CorePackagingProvider mockCoreJarPackaging;
+    @Mock private PackagingProvider mockCustomJarPackaging;
+    @Mock private CorePackagingProvider mockWarPackaging;
     // Fixture
     private PackagingProviderRegistryImpl registry;
-    @Mock private CorePackagingProvider mockCoreJarPackaging;
-    @Mock private CorePackagingProvider mockWarPackaging;
-    @Mock private PackagingProvider mockCustomJarPackaging;
 
     @Before
     public void setUp() {
@@ -42,10 +41,10 @@ public class PackagingProviderRegistryTest {
         setUpMockPackagingProvider(mockWarPackaging, CORE_WAR_ID, false);
 
         // Object under test
-        this.registry = new PackagingProviderRegistryImpl();
-        this.registry.bindPackagingProvider(mockCoreJarPackaging);
-        this.registry.bindPackagingProvider(mockCustomJarPackaging);
-        this.registry.bindPackagingProvider(mockWarPackaging);
+        registry = new PackagingProviderRegistryImpl();
+        registry.bindPackagingProvider(mockCoreJarPackaging);
+        registry.bindPackagingProvider(mockCustomJarPackaging);
+        registry.bindPackagingProvider(mockWarPackaging);
     }
 
     private void setUpMockPackagingProvider(

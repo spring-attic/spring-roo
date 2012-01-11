@@ -33,10 +33,30 @@ public class PluralMetadataProviderImpl extends AbstractItdMetadataProvider
         setDependsOnGovernorBeingAClass(false);
     }
 
+    @Override
+    protected String createLocalIdentifier(final JavaType javaType,
+            final LogicalPath path) {
+        return PluralMetadata.createIdentifier(javaType, path);
+    }
+
     protected void deactivate(final ComponentContext context) {
         metadataDependencyRegistry.deregisterDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
                 getProvidesType());
+    }
+
+    @Override
+    protected String getGovernorPhysicalTypeIdentifier(
+            final String metadataIdentificationString) {
+        final JavaType javaType = PluralMetadata
+                .getJavaType(metadataIdentificationString);
+        final LogicalPath path = PluralMetadata
+                .getPath(metadataIdentificationString);
+        return PhysicalTypeIdentifier.createIdentifier(javaType, path);
+    }
+
+    public String getItdUniquenessFilenameSuffix() {
+        return "Plural";
     }
 
     @Override
@@ -49,25 +69,6 @@ public class PluralMetadataProviderImpl extends AbstractItdMetadataProvider
                 governorPhysicalTypeMetadata);
         return new PluralMetadata(metadataIdentificationString, aspectName,
                 governorPhysicalTypeMetadata, pluralAnnotationValues);
-    }
-
-    public String getItdUniquenessFilenameSuffix() {
-        return "Plural";
-    }
-
-    @Override
-    protected String getGovernorPhysicalTypeIdentifier(
-            final String metadataIdentificationString) {
-        JavaType javaType = PluralMetadata
-                .getJavaType(metadataIdentificationString);
-        LogicalPath path = PluralMetadata.getPath(metadataIdentificationString);
-        return PhysicalTypeIdentifier.createIdentifier(javaType, path);
-    }
-
-    @Override
-    protected String createLocalIdentifier(final JavaType javaType,
-            final LogicalPath path) {
-        return PluralMetadata.createIdentifier(javaType, path);
     }
 
     public String getProvidesType() {

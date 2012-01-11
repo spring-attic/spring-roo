@@ -25,30 +25,30 @@ import org.springframework.roo.model.RooJavaType;
 @Service
 public class RepositoryMongoLocatorImpl implements RepositoryMongoLocator {
 
-    // Fields
-    @Reference private TypeLocationService typeLocationService;
     private final Map<JavaType, Set<ClassOrInterfaceTypeDetails>> cacheMap = new HashMap<JavaType, Set<ClassOrInterfaceTypeDetails>>();
+    @Reference private TypeLocationService typeLocationService;
 
     public Collection<ClassOrInterfaceTypeDetails> getRepositories(
             final JavaType domainType) {
         if (!cacheMap.containsKey(domainType)) {
             cacheMap.put(domainType, new HashSet<ClassOrInterfaceTypeDetails>());
         }
-        Set<ClassOrInterfaceTypeDetails> existing = cacheMap.get(domainType);
-        Set<ClassOrInterfaceTypeDetails> located = typeLocationService
+        final Set<ClassOrInterfaceTypeDetails> existing = cacheMap
+                .get(domainType);
+        final Set<ClassOrInterfaceTypeDetails> located = typeLocationService
                 .findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_REPOSITORY_MONGO);
         if (existing.containsAll(located)) {
             return existing;
         }
-        Map<String, ClassOrInterfaceTypeDetails> toReturn = new HashMap<String, ClassOrInterfaceTypeDetails>();
-        for (ClassOrInterfaceTypeDetails cid : located) {
-            RepositoryMongoAnnotationValues annotationValues = new RepositoryMongoAnnotationValues(
+        final Map<String, ClassOrInterfaceTypeDetails> toReturn = new HashMap<String, ClassOrInterfaceTypeDetails>();
+        for (final ClassOrInterfaceTypeDetails cid : located) {
+            final RepositoryMongoAnnotationValues annotationValues = new RepositoryMongoAnnotationValues(
                     new DefaultPhysicalTypeMetadata(
                             cid.getDeclaredByMetadataId(),
                             typeLocationService
                                     .getPhysicalTypeCanonicalPath(cid
                                             .getDeclaredByMetadataId()), cid));
-            if (annotationValues.getDomainType() != null
+            if ((annotationValues.getDomainType() != null)
                     && annotationValues.getDomainType().equals(domainType)) {
                 toReturn.put(cid.getDeclaredByMetadataId(), cid);
             }

@@ -22,7 +22,6 @@ import org.springframework.roo.shell.CommandMarker;
 @Service
 public class MongoCommands implements CommandMarker {
 
-    // Fields
     @Reference private MongoOperations mongoOperations;
 
     @CliAvailabilityIndicator("mongo setup")
@@ -33,6 +32,14 @@ public class MongoCommands implements CommandMarker {
     @CliAvailabilityIndicator({ "repository mongo", "entity mongo" })
     public boolean isRepositoryCommandAvailable() {
         return mongoOperations.isRepositoryInstallationPossible();
+    }
+
+    @CliCommand(value = "repository mongo", help = "Adds @RooMongoRepository annotation to target type")
+    public void repository(
+            @CliOption(key = "interface", mandatory = true, help = "The java interface to apply this annotation to") final JavaType interfaceType,
+            @CliOption(key = "entity", unspecifiedDefaultValue = "*", optionContext = JavaTypeConverter.PROJECT, mandatory = false, help = "The domain entity this repository should expose") final JavaType domainType) {
+
+        mongoOperations.setupRepository(interfaceType, domainType);
     }
 
     @CliCommand(value = "mongo setup", help = "Configures the project for MongoDB peristence.")
@@ -46,14 +53,6 @@ public class MongoCommands implements CommandMarker {
 
         mongoOperations.setup(username, password, name, port, host,
                 cloudFoundry);
-    }
-
-    @CliCommand(value = "repository mongo", help = "Adds @RooMongoRepository annotation to target type")
-    public void repository(
-            @CliOption(key = "interface", mandatory = true, help = "The java interface to apply this annotation to") final JavaType interfaceType,
-            @CliOption(key = "entity", unspecifiedDefaultValue = "*", optionContext = JavaTypeConverter.PROJECT, mandatory = false, help = "The domain entity this repository should expose") final JavaType domainType) {
-
-        mongoOperations.setupRepository(interfaceType, domainType);
     }
 
     @CliCommand(value = "entity mongo", help = "Creates a domain entity which can be backed by a MongoDB repository")

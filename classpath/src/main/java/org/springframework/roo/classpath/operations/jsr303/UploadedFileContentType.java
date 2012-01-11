@@ -9,12 +9,24 @@ package org.springframework.roo.classpath.operations.jsr303;
  * @since 1.2.0
  */
 public enum UploadedFileContentType {
-    ZIP("application/zip"), PDF("application/pdf"), JSON("application/json"), DOC(
-            "application/msword"), XLS("application/vnd.ms-excel"), JPG(
-            "image/jpeg"), GIF("image/gif"), PNG("image/png"), MP3("audio/mpeg"), MP4(
-            "audio/mp4"), CSV("text/csv"), CSS("text/css"), HTML("text/html"), JAVASCRIPT(
-            "text/javascript"), TXT("text/plain"), XML("text/xml"), MPEG(
-            "video/mpeg");
+    CSS("text/css"), CSV("text/csv"), DOC("application/msword"), GIF(
+            "image/gif"), HTML("text/html"), JAVASCRIPT("text/javascript"), JPG(
+            "image/jpeg"), JSON("application/json"), MP3("audio/mpeg"), MP4(
+            "audio/mp4"), MPEG("video/mpeg"), PDF("application/pdf"), PNG(
+            "image/png"), TXT("text/plain"), XLS("application/vnd.ms-excel"), XML(
+            "text/xml"), ZIP("application/zip");
+
+    public static UploadedFileContentType getFileExtension(
+            final String contentType) {
+        for (final UploadedFileContentType uploadedFileContentType : UploadedFileContentType
+                .values()) {
+            if (uploadedFileContentType.getContentType().equals(contentType)) {
+                return uploadedFileContentType;
+            }
+        }
+        throw new IllegalStateException("Unknown content type '" + contentType
+                + "'");
+    }
 
     private String contentType;
 
@@ -24,17 +36,5 @@ public enum UploadedFileContentType {
 
     public String getContentType() {
         return contentType;
-    }
-
-    public static UploadedFileContentType getFileExtension(
-            final String contentType) {
-        for (UploadedFileContentType uploadedFileContentType : UploadedFileContentType
-                .values()) {
-            if (uploadedFileContentType.getContentType().equals(contentType)) {
-                return uploadedFileContentType;
-            }
-        }
-        throw new IllegalStateException("Unknown content type '" + contentType
-                + "'");
     }
 }

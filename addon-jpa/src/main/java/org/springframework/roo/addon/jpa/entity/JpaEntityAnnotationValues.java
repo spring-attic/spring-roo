@@ -18,21 +18,18 @@ import org.springframework.roo.model.JavaType;
  */
 public class JpaEntityAnnotationValues extends AbstractAnnotationValues {
 
-    // Fields (one for each attribute of the RooJpaEntity annotation)
-    @AutoPopulate private boolean mappedSuperclass;
-
-    @AutoPopulate private JavaType identifierType;
-    @AutoPopulate private JavaType versionType = JavaType.INT_OBJECT;
-
     @AutoPopulate private String catalog = "";
     @AutoPopulate private String entityName = "";
     @AutoPopulate private String identifierColumn = "";
     @AutoPopulate private String identifierField = "";
+    @AutoPopulate private JavaType identifierType;
     @AutoPopulate private String inheritanceType = "";
+    @AutoPopulate private boolean mappedSuperclass;
     @AutoPopulate private String schema = "";
     @AutoPopulate private String table = "";
     @AutoPopulate private String versionColumn = "";
     @AutoPopulate private String versionField = VERSION_FIELD_DEFAULT;
+    @AutoPopulate private JavaType versionType = JavaType.INT_OBJECT;
 
     /**
      * Constructor for reading the values of the given annotation

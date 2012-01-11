@@ -18,16 +18,16 @@ import org.springframework.roo.support.util.FileUtils;
 @Service
 public class SpanishLanguage extends AbstractLanguage {
 
-    public Locale getLocale() {
-        return new Locale("es");
+    public InputStream getFlagGraphic() {
+        return FileUtils.getInputStream(getClass(), "es.png");
     }
 
     public String getLanguage() {
         return "Espanol";
     }
 
-    public InputStream getFlagGraphic() {
-        return FileUtils.getInputStream(getClass(), "es.png");
+    public Locale getLocale() {
+        return new Locale("es");
     }
 
     public InputStream getMessageBundle() {

@@ -21,8 +21,26 @@ import org.springframework.roo.shell.CommandMarker;
 @Service
 public class PropFileCommands implements CommandMarker {
 
-    // Fields
     @Reference private PropFileOperations propFileOperations;
+
+    @CliCommand(value = "properties remove", help = "Removes a particular properties file property")
+    public void databaseRemove(
+            @CliOption(key = "name", mandatory = true, help = "Property file name (including .properties suffix)") final String name,
+            @CliOption(key = "path", mandatory = true, help = "Source path to property file") final LogicalPath path,
+            @CliOption(key = { "", "key" }, mandatory = true, help = "The property key that should be removed") final String key) {
+
+        propFileOperations.removeProperty(path, name, key);
+    }
+
+    @CliCommand(value = "properties set", help = "Changes a particular properties file property")
+    public void databaseSet(
+            @CliOption(key = "name", mandatory = true, help = "Property file name (including .properties suffix)") final String name,
+            @CliOption(key = "path", mandatory = true, help = "Source path to property file") final LogicalPath path,
+            @CliOption(key = "key", mandatory = true, help = "The property key that should be changed") final String key,
+            @CliOption(key = "value", mandatory = true, help = "The new vale for this property key") final String value) {
+
+        propFileOperations.changeProperty(path, name, key, value);
+    }
 
     @CliAvailabilityIndicator({ "properties list", "properties set",
             "properties remove" })
@@ -36,24 +54,5 @@ public class PropFileCommands implements CommandMarker {
             @CliOption(key = "path", mandatory = true, help = "Source path to property file") final LogicalPath path) {
 
         return propFileOperations.getPropertyKeys(path, name, true);
-    }
-
-    @CliCommand(value = "properties set", help = "Changes a particular properties file property")
-    public void databaseSet(
-            @CliOption(key = "name", mandatory = true, help = "Property file name (including .properties suffix)") final String name,
-            @CliOption(key = "path", mandatory = true, help = "Source path to property file") final LogicalPath path,
-            @CliOption(key = "key", mandatory = true, help = "The property key that should be changed") final String key,
-            @CliOption(key = "value", mandatory = true, help = "The new vale for this property key") final String value) {
-
-        propFileOperations.changeProperty(path, name, key, value);
-    }
-
-    @CliCommand(value = "properties remove", help = "Removes a particular properties file property")
-    public void databaseRemove(
-            @CliOption(key = "name", mandatory = true, help = "Property file name (including .properties suffix)") final String name,
-            @CliOption(key = "path", mandatory = true, help = "Source path to property file") final LogicalPath path,
-            @CliOption(key = { "", "key" }, mandatory = true, help = "The property key that should be removed") final String key) {
-
-        propFileOperations.removeProperty(path, name, key);
     }
 }

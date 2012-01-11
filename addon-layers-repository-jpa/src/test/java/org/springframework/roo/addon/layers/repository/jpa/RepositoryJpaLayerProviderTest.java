@@ -30,20 +30,42 @@ import org.springframework.roo.model.JavaType;
  */
 public class RepositoryJpaLayerProviderTest {
 
-    // Constants
     private static final String CALLER_MID = "MID:anything#com.example.PetService";
 
     // Fixture
     private RepositoryJpaLayerProvider layerProvider;
-    @Mock private JavaType mockTargetEntity;
     @Mock private JavaType mockIdType;
     @Mock private RepositoryJpaLocator mockRepositoryLocator;
+    @Mock private JavaType mockTargetEntity;
+
+    /**
+     * Asserts that the {@link RepositoryJpaLayerProvider} generates the
+     * expected call for the given method with the given parameters
+     * 
+     * @param expectedMethodCall
+     * @param methodKey
+     * @param callerParameters
+     */
+    private void assertMethodCall(final String expectedMethodCall,
+            final MethodMetadataCustomDataKey methodKey,
+            final MethodParameter... callerParameters) {
+        // Set up
+        setUpMockRepository();
+
+        // Invoke
+        final MemberTypeAdditions additions = layerProvider
+                .getMemberTypeAdditions(CALLER_MID, methodKey.name(),
+                        mockTargetEntity, mockIdType, callerParameters);
+
+        // Check
+        assertEquals(expectedMethodCall, additions.getMethodCall());
+    }
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        this.layerProvider = new RepositoryJpaLayerProvider();
-        this.layerProvider.setRepositoryLocator(mockRepositoryLocator);
+        layerProvider = new RepositoryJpaLayerProvider();
+        layerProvider.setRepositoryLocator(mockRepositoryLocator);
     }
 
     /**
@@ -67,7 +89,7 @@ public class RepositoryJpaLayerProviderTest {
     @Test
     public void testGetAdditionsForNonRepositoryLayerMethod() {
         // Invoke
-        final MemberTypeAdditions additions = this.layerProvider
+        final MemberTypeAdditions additions = layerProvider
                 .getMemberTypeAdditions(CALLER_MID, "bogus", mockTargetEntity,
                         mockIdType);
 
@@ -78,35 +100,12 @@ public class RepositoryJpaLayerProviderTest {
     @Test
     public void testGetAdditionsWhenNoRepositoriesExist() {
         // Invoke
-        final MemberTypeAdditions additions = this.layerProvider
+        final MemberTypeAdditions additions = layerProvider
                 .getMemberTypeAdditions(CALLER_MID, FIND_ALL_METHOD.name(),
                         mockTargetEntity, mockIdType);
 
         // Check
         assertNull(additions);
-    }
-
-    /**
-     * Asserts that the {@link RepositoryJpaLayerProvider} generates the
-     * expected call for the given method with the given parameters
-     * 
-     * @param expectedMethodCall
-     * @param methodKey
-     * @param callerParameters
-     */
-    private void assertMethodCall(final String expectedMethodCall,
-            final MethodMetadataCustomDataKey methodKey,
-            final MethodParameter... callerParameters) {
-        // Set up
-        setUpMockRepository();
-
-        // Invoke
-        final MemberTypeAdditions additions = this.layerProvider
-                .getMemberTypeAdditions(CALLER_MID, methodKey.name(),
-                        mockTargetEntity, mockIdType, callerParameters);
-
-        // Check
-        assertEquals(expectedMethodCall, additions.getMethodCall());
     }
 
     @Test

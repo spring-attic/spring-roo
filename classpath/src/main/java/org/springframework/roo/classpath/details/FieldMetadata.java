@@ -12,9 +12,10 @@ import org.springframework.roo.model.JavaType;
 public interface FieldMetadata extends IdentifiableAnnotatedJavaStructure {
 
     /**
-     * @return the type of field (never null)
+     * @return the field initializer, if known (may be null if there is no
+     *         initializer)
      */
-    JavaType getFieldType();
+    String getFieldInitializer();
 
     /**
      * @return the name of the field (never null)
@@ -22,8 +23,7 @@ public interface FieldMetadata extends IdentifiableAnnotatedJavaStructure {
     JavaSymbolName getFieldName();
 
     /**
-     * @return the field initializer, if known (may be null if there is no
-     *         initializer)
+     * @return the type of field (never null)
      */
-    String getFieldInitializer();
+    JavaType getFieldType();
 }

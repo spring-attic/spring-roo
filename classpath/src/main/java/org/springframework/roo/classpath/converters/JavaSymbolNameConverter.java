@@ -29,14 +29,14 @@ public class JavaSymbolNameConverter implements Converter<JavaSymbolName> {
         return new JavaSymbolName(value);
     }
 
-    public boolean supports(final Class<?> requiredType,
-            final String optionContext) {
-        return JavaSymbolName.class.isAssignableFrom(requiredType);
-    }
-
     public boolean getAllPossibleValues(final List<Completion> completions,
             final Class<?> requiredType, final String existingData,
             final String optionContext, final MethodTarget target) {
         return false;
+    }
+
+    public boolean supports(final Class<?> requiredType,
+            final String optionContext) {
+        return JavaSymbolName.class.isAssignableFrom(requiredType);
     }
 }

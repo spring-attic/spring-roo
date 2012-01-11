@@ -17,13 +17,11 @@ import org.springframework.roo.support.util.StringUtils;
  */
 public class DeleteDirectory implements UndoableOperation {
 
-    // Constants
-    private static final File TEMP_DIRECTORY = new File(
-            System.getProperty("java.io.tmpdir"));
     private static final Logger LOGGER = HandlerUtils
             .getLogger(DeleteDirectory.class);
+    private static final File TEMP_DIRECTORY = new File(
+            System.getProperty("java.io.tmpdir"));
 
-    // Fields
     private final File actual;
     private final File backup;
     private final FilenameResolver filenameResolver;
@@ -64,8 +62,8 @@ public class DeleteDirectory implements UndoableOperation {
                 + "' must be a directory (not a file)");
         Assert.isTrue(TEMP_DIRECTORY.isDirectory(), "Temporary directory '"
                 + TEMP_DIRECTORY + "' is not a directory");
-        this.actual = directory;
-        this.backup = new File(TEMP_DIRECTORY, "tmp_" + new Date().getTime()
+        actual = directory;
+        backup = new File(TEMP_DIRECTORY, "tmp_" + new Date().getTime()
                 + "_dir");
         this.filenameResolver = filenameResolver;
         if (!FileUtils.copyRecursively(directory, backup, true)) {

@@ -20,13 +20,6 @@ public interface ItdDiscoveryService {
     void addItdTypeDetails(ItdTypeDetails itdTypeDetails);
 
     /**
-     * Removes the {@link ItdTypeDetails} associated with the presented String.
-     * 
-     * @param mid the ID of the {@link ItdTypeDetails} be removed (required)
-     */
-    void removeItdTypeDetails(String mid);
-
-    /**
      * Indicates whether ITDs associate with the passed in type has changed
      * since last invocation by the requesting class.
      * 
@@ -35,4 +28,11 @@ public interface ItdDiscoveryService {
      * @return a collection of MIDs which represent changed types
      */
     boolean haveItdsChanged(String requestingClass, JavaType javaType);
+
+    /**
+     * Removes the {@link ItdTypeDetails} associated with the presented String.
+     * 
+     * @param mid the ID of the {@link ItdTypeDetails} be removed (required)
+     */
+    void removeItdTypeDetails(String mid);
 }

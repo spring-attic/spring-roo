@@ -22,7 +22,6 @@ import org.springframework.roo.model.JavaType;
  */
 public class GwtProxyPropertyTest {
 
-    // Constants
     private static final String GETTER = "getBar";
     private static final String NAME = "foo";
 

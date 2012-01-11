@@ -74,18 +74,18 @@ public class XMLTailorConfigurationFactory implements
         // TODO: This factory could also look for this file in the user.dir:
         // So that wherever the user starts the shell, he would always have his
         // central "tailors" available
-        String configFileIdentifier = shellRootPath + "/tailor.xml";
+        final String configFileIdentifier = shellRootPath + "/tailor.xml";
         if (!fileManager.exists(configFileIdentifier)) {
             return null;
         }
 
         try {
-            Document readXml = XmlUtils.readXml(fileManager
+            final Document readXml = XmlUtils.readXml(fileManager
                     .getInputStream(configFileIdentifier));
-            Element root = readXml.getDocumentElement();
+            final Element root = readXml.getDocumentElement();
             return mapXmlToTailorConfiguration(root);
         }
-        catch (Exception e) {
+        catch (final Exception e) {
             // Make sure that an invalid tailor.xml file does not crash the
             // whole shell
             // TODO: Log exception only in development mode
@@ -97,7 +97,7 @@ public class XMLTailorConfigurationFactory implements
 
     }
 
-    private void logTailorXMLInvalid(String msg) {
+    private void logTailorXMLInvalid(final String msg) {
         LOGGER.warning("Invalid tailor.xml - please correct and restart the shell to use this configuration ("
                 + msg + ")");
     }
@@ -108,9 +108,8 @@ public class XMLTailorConfigurationFactory implements
      * @param root
      * @return
      */
-    private TailorConfiguration mapXmlToTailorConfiguration(Element root) {
-
-        List<Element> elTailors = XmlUtils.findElements(
+    private TailorConfiguration mapXmlToTailorConfiguration(final Element root) {
+        final List<Element> elTailors = XmlUtils.findElements(
                 "/tailorconfiguration/tailor", root);
         // TODO: Currently only one tailor supported in the configuration file
         // > Should be extended to support multiple tailors, the XML already
@@ -120,45 +119,46 @@ public class XMLTailorConfigurationFactory implements
             return null;
         }
 
-        Element elTailor = elTailors.get(0);
+        final Element elTailor = elTailors.get(0);
         if (!StringUtils.hasLength(elTailor.getAttribute("name"))) {
             logTailorXMLInvalid("<tailor> must have a name attribute");
             return null;
         }
 
-        TailorConfiguration result = new TailorConfiguration(
+        final TailorConfiguration result = new TailorConfiguration(
                 elTailor.getAttribute("name"),
                 elTailor.getAttribute("description"));
 
-        List<Element> elConfigs = XmlUtils.findElements(
+        final List<Element> elConfigs = XmlUtils.findElements(
                 "/tailorconfiguration/tailor/config", root);
         if (elConfigs.isEmpty()) {
             logTailorXMLInvalid("<tailor> must have <config> child elements");
             return null;
         }
 
-        for (Element elConfig : elConfigs) {
-            String command = elConfig.getAttribute("command");
+        for (final Element elConfig : elConfigs) {
+            final String command = elConfig.getAttribute("command");
             if (!StringUtils.hasText(command)) {
                 logTailorXMLInvalid("found <config> without command attribute");
                 return null;
             }
 
-            CommandConfiguration newCmdConfig = new CommandConfiguration();
+            final CommandConfiguration newCmdConfig = new CommandConfiguration();
             newCmdConfig.setCommandName(command);
-            List<Element> elActions = XmlUtils.findElements("action", elConfig);
-            for (Element elAction : elActions) {
+            final List<Element> elActions = XmlUtils.findElements("action",
+                    elConfig);
+            for (final Element elAction : elActions) {
                 // Determine the action type
                 if (!StringUtils.hasText(elAction.getAttribute("type"))) {
                     logTailorXMLInvalid("found <action> without type attribute");
                     return null;
                 }
-                ActionConfig newAction = new ActionConfig(
+                final ActionConfig newAction = new ActionConfig(
                         elAction.getAttribute("type"));
-                NamedNodeMap attributes = elAction.getAttributes();
+                final NamedNodeMap attributes = elAction.getAttributes();
                 for (int i = 0; i < attributes.getLength(); i++) {
-                    Node item = attributes.item(i);
-                    String attributeKey = item.getNodeName();
+                    final Node item = attributes.item(i);
+                    final String attributeKey = item.getNodeName();
                     if (!"type".equals(attributeKey)) {
                         newAction.setAttribute(attributeKey,
                                 item.getNodeValue());
@@ -170,7 +170,5 @@ public class XMLTailorConfigurationFactory implements
 
         }
         return result;
-
     }
-
 }

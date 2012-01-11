@@ -29,14 +29,9 @@ import org.springframework.roo.support.util.IOUtils;
 @Service
 public class LoggingOperationsImpl implements LoggingOperations {
 
-    // Fields
     @Reference private FileManager fileManager;
     @Reference private PathResolver pathResolver;
     @Reference private ProjectOperations projectOperations;
-
-    public boolean isLoggingInstallationPossible() {
-        return projectOperations.isFocusedProjectAvailable();
-    }
 
     public void configureLogging(final LogLevel logLevel,
             final LoggerPackage loggerPackage) {
@@ -46,12 +41,16 @@ public class LoggingOperationsImpl implements LoggingOperations {
         setupProperties(logLevel, loggerPackage);
     }
 
+    public boolean isLoggingInstallationPossible() {
+        return projectOperations.isFocusedProjectAvailable();
+    }
+
     private void setupProperties(final LogLevel logLevel,
             final LoggerPackage loggerPackage) {
-        String filePath = pathResolver.getFocusedIdentifier(
+        final String filePath = pathResolver.getFocusedIdentifier(
                 Path.SRC_MAIN_RESOURCES, "log4j.properties");
         MutableFile log4jMutableFile = null;
-        Properties props = new Properties();
+        final Properties props = new Properties();
 
         InputStream inputStream = null;
         try {
@@ -69,14 +68,14 @@ public class LoggingOperationsImpl implements LoggingOperations {
                 props.load(inputStream);
             }
         }
-        catch (IOException ioe) {
+        catch (final IOException ioe) {
             throw new IllegalStateException(ioe);
         }
         finally {
             IOUtils.closeQuietly(inputStream);
         }
 
-        JavaPackage topLevelPackage = projectOperations
+        final JavaPackage topLevelPackage = projectOperations
                 .getTopLevelPackage(projectOperations.getFocusedModuleName());
         final String logStr = "log4j.logger.";
 
@@ -93,7 +92,7 @@ public class LoggingOperationsImpl implements LoggingOperations {
                     logLevel.name());
             break;
         default:
-            for (String packageName : loggerPackage.getPackageNames()) {
+            for (final String packageName : loggerPackage.getPackageNames()) {
                 props.remove(logStr + packageName);
                 props.setProperty(logStr + packageName, logLevel.name());
             }
@@ -105,7 +104,7 @@ public class LoggingOperationsImpl implements LoggingOperations {
             outputStream = log4jMutableFile.getOutputStream();
             props.store(outputStream, "Updated at " + new Date());
         }
-        catch (IOException ioe) {
+        catch (final IOException ioe) {
             throw new IllegalStateException(ioe);
         }
         finally {

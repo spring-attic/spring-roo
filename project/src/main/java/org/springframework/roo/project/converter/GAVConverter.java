@@ -19,10 +19,6 @@ import org.springframework.roo.shell.MethodTarget;
 @Service
 public class GAVConverter implements Converter<GAV> {
 
-    public boolean supports(final Class<?> type, final String optionContext) {
-        return GAV.class.isAssignableFrom(type);
-    }
-
     public GAV convertFromText(final String value, final Class<?> targetType,
             final String optionContext) {
         return GAV.getInstance(value);
@@ -38,5 +34,9 @@ public class GAVConverter implements Converter<GAV> {
         // TODO offer the GAVs of the project, its modules, and any parent POMs
         // of either
         return true;
+    }
+
+    public boolean supports(final Class<?> type, final String optionContext) {
+        return GAV.class.isAssignableFrom(type);
     }
 }

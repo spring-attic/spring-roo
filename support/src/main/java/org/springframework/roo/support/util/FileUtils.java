@@ -20,15 +20,16 @@ import org.springframework.roo.support.ant.PathMatcher;
  */
 public final class FileUtils {
 
-    // Constants
     private static final String BACKSLASH = "\\";
-    private static final String ESCAPED_BACKSLASH = "\\\\";
-
     /**
      * The relative file path to the current directory. Should be valid on all
      * platforms that Roo supports.
      */
     public static final String CURRENT_DIRECTORY = ".";
+
+    private static final String ESCAPED_BACKSLASH = "\\\\";
+
+    private static final PathMatcher PATH_MATCHER;
 
     private static final String WINDOWS_DRIVE_PREFIX = "^[A-Za-z]:";
 
@@ -37,40 +38,23 @@ public final class FileUtils {
     private static final Pattern WINDOWS_DRIVE_PATH = Pattern
             .compile(WINDOWS_DRIVE_PREFIX + ".*");
 
-    private static final PathMatcher PATH_MATCHER;
-
     static {
         PATH_MATCHER = new AntPathMatcher();
         ((AntPathMatcher) PATH_MATCHER).setPathSeparator(File.separator);
     }
 
     /**
-     * Deletes the specified {@link File}.
-     * <p>
-     * If the {@link File} refers to a directory, any contents of that directory
-     * (including other directories) are also deleted.
-     * <p>
-     * If the {@link File} does not already exist, this method immediately
-     * returns true.
+     * Returns the given file system path minus its last element
      * 
-     * @param file to delete (required; the file may or may not exist)
-     * @return true if the file is fully deleted, or false if there was a
-     *         failure when deleting
+     * @param fileIdentifier
+     * @return
+     * @since 1.2.0
      */
-    public static boolean deleteRecursively(final File file) {
-        Assert.notNull(file, "File to delete required");
-        if (!file.exists()) {
-            return true;
-        }
-        if (file.isDirectory()) {
-            for (File f : file.listFiles()) {
-                if (!deleteRecursively(f)) {
-                    return false;
-                }
-            }
-        }
-        file.delete();
-        return true;
+    public static String backOneDirectory(String fileIdentifier) {
+        fileIdentifier = removeTrailingSeparator(fileIdentifier);
+        fileIdentifier = fileIdentifier.substring(0,
+                fileIdentifier.lastIndexOf(File.separator));
+        return removeTrailingSeparator(fileIdentifier);
     }
 
     /**
@@ -104,8 +88,8 @@ public final class FileUtils {
                 destination.deleteOnExit();
             }
         }
-        for (File s : source.listFiles()) {
-            File d = new File(destination, s.getName());
+        for (final File s : source.listFiles()) {
+            final File d = new File(destination, s.getName());
             if (deleteDestinationOnExit) {
                 d.deleteOnExit();
             }
@@ -113,7 +97,7 @@ public final class FileUtils {
                 try {
                     FileCopyUtils.copy(s, d);
                 }
-                catch (IOException ioe) {
+                catch (final IOException ioe) {
                     return false;
                 }
             }
@@ -125,6 +109,35 @@ public final class FileUtils {
                 }
             }
         }
+        return true;
+    }
+
+    /**
+     * Deletes the specified {@link File}.
+     * <p>
+     * If the {@link File} refers to a directory, any contents of that directory
+     * (including other directories) are also deleted.
+     * <p>
+     * If the {@link File} does not already exist, this method immediately
+     * returns true.
+     * 
+     * @param file to delete (required; the file may or may not exist)
+     * @return true if the file is fully deleted, or false if there was a
+     *         failure when deleting
+     */
+    public static boolean deleteRecursively(final File file) {
+        Assert.notNull(file, "File to delete required");
+        if (!file.exists()) {
+            return true;
+        }
+        if (file.isDirectory()) {
+            for (final File f : file.listFiles()) {
+                if (!deleteRecursively(f)) {
+                    return false;
+                }
+            }
+        }
+        file.delete();
         return true;
     }
 
@@ -149,89 +162,6 @@ public final class FileUtils {
     }
 
     /**
-     * Returns the part of the given path that represents a directory, in other
-     * words the given path if it's already a directory, or the parent directory
-     * if it's a file.
-     * 
-     * @param fileIdentifier the path to parse (required)
-     * @return see above
-     * @since 1.2.0
-     */
-    public static String getFirstDirectory(String fileIdentifier) {
-        fileIdentifier = removeTrailingSeparator(fileIdentifier);
-        if (new File(fileIdentifier).isDirectory()) {
-            return fileIdentifier;
-        }
-        return backOneDirectory(fileIdentifier);
-    }
-
-    /**
-     * Returns the given file system path minus its last element
-     * 
-     * @param fileIdentifier
-     * @return
-     * @since 1.2.0
-     */
-    public static String backOneDirectory(String fileIdentifier) {
-        fileIdentifier = removeTrailingSeparator(fileIdentifier);
-        fileIdentifier = fileIdentifier.substring(0,
-                fileIdentifier.lastIndexOf(File.separator));
-        return removeTrailingSeparator(fileIdentifier);
-    }
-
-    /**
-     * Removes any trailing {@link File#separator}s from the given path
-     * 
-     * @param path the path to modify (can be <code>null</code>)
-     * @return the modified path
-     * @since 1.2.0
-     */
-    public static String removeTrailingSeparator(String path) {
-        while (path != null && path.endsWith(File.separator)) {
-            path = StringUtils.removeSuffix(path, File.separator);
-        }
-        return path;
-    }
-
-    /**
-     * Indicates whether the given canonical path matches the given Ant-style
-     * pattern
-     * 
-     * @param antPattern the pattern to check against (can't be blank)
-     * @param canonicalPath the path to check (can't be blank)
-     * @return see above
-     * @since 1.2.0
-     */
-    public static boolean matchesAntPath(final String antPattern,
-            final String canonicalPath) {
-        Assert.hasText(antPattern, "Ant pattern required");
-        Assert.hasText(canonicalPath, "Canonical path required");
-        return PATH_MATCHER.match(antPattern, canonicalPath);
-    }
-
-    /**
-     * Removes any leading or trailing {@link File#separator}s from the given
-     * path.
-     * 
-     * @param path the path to modify (can be <code>null</code>)
-     * @return the path, modified as above, or <code>null</code> if
-     *         <code>null</code> was given
-     * @since 1.2.0
-     */
-    public static String removeLeadingAndTrailingSeparators(String path) {
-        if (StringUtils.isBlank(path)) {
-            return path;
-        }
-        while (path.endsWith(File.separator)) {
-            path = StringUtils.removeSuffix(path, File.separator);
-        }
-        while (path.startsWith(File.separator)) {
-            path = StringUtils.removePrefix(path, File.separator);
-        }
-        return path;
-    }
-
-    /**
      * Ensures that the given path has exactly one trailing
      * {@link File#separator}
      * 
@@ -242,35 +172,6 @@ public final class FileUtils {
     public static String ensureTrailingSeparator(final String path) {
         Assert.notNull(path);
         return removeTrailingSeparator(path) + File.separatorChar;
-    }
-
-    /**
-     * Returns an operating-system-dependent path consisting of the given
-     * elements, separated by {@link File#separator}.
-     * 
-     * @param pathElements the path elements from uppermost downwards (can't be
-     *            empty)
-     * @return a non-blank string
-     * @since 1.2.0
-     */
-    public static String getSystemDependentPath(final String... pathElements) {
-        return getSystemDependentPath(Arrays.asList(pathElements));
-    }
-
-    /**
-     * Returns an operating-system-dependent path consisting of the given
-     * elements, separated by {@link File#separator}.
-     * 
-     * @param pathElements the path elements from uppermost downwards (can't be
-     *            empty)
-     * @return a non-blank string
-     * @since 1.2.0
-     */
-    public static String getSystemDependentPath(
-            final Collection<String> pathElements) {
-        Assert.notEmpty(pathElements);
-        return StringUtils.collectionToDelimitedString(pathElements,
-                File.separator);
     }
 
     /**
@@ -296,6 +197,29 @@ public final class FileUtils {
     }
 
     /**
+     * Loads the given file from the classpath.
+     * 
+     * @param loadingClass the class from whose package to load the file
+     *            (required)
+     * @param filename the name of the file to load, relative to that package
+     *            (required)
+     * @return the file's input stream (never <code>null</code>)
+     * @throws IllegalArgumentException if the given file cannot be found
+     */
+    public static File getFile(final Class<?> loadingClass,
+            final String filename) {
+        final URL url = loadingClass.getResource(filename);
+        Assert.notNull(url, "Could not locate '" + filename
+                + "' in classpath of " + loadingClass.getName());
+        try {
+            return new File(url.toURI());
+        }
+        catch (final URISyntaxException e) {
+            throw new IllegalArgumentException(e);
+        }
+    }
+
+    /**
      * Returns the platform-specific file separator as a regular expression.
      * 
      * @return a non-blank regex
@@ -308,6 +232,42 @@ public final class FileUtils {
             return fileSeparator.replace(BACKSLASH, ESCAPED_BACKSLASH);
         }
         return fileSeparator;
+    }
+
+    /**
+     * Returns the part of the given path that represents a directory, in other
+     * words the given path if it's already a directory, or the parent directory
+     * if it's a file.
+     * 
+     * @param fileIdentifier the path to parse (required)
+     * @return see above
+     * @since 1.2.0
+     */
+    public static String getFirstDirectory(String fileIdentifier) {
+        fileIdentifier = removeTrailingSeparator(fileIdentifier);
+        if (new File(fileIdentifier).isDirectory()) {
+            return fileIdentifier;
+        }
+        return backOneDirectory(fileIdentifier);
+    }
+
+    /**
+     * Loads the given file from the classpath.
+     * 
+     * @param loadingClass the class from whose package to load the file
+     *            (required)
+     * @param filename the name of the file to load, relative to that package
+     *            (required)
+     * @return the file's input stream (never <code>null</code>)
+     * @throws IllegalArgumentException if the given file cannot be found
+     */
+    public static InputStream getInputStream(final Class<?> loadingClass,
+            final String filename) {
+        final InputStream inputStream = loadingClass
+                .getResourceAsStream(filename);
+        Assert.notNull(inputStream, "Could not locate '" + filename
+                + "' in classpath of " + loadingClass.getName());
+        return inputStream;
     }
 
     /**
@@ -334,45 +294,48 @@ public final class FileUtils {
     }
 
     /**
-     * Loads the given file from the classpath.
+     * Returns an operating-system-dependent path consisting of the given
+     * elements, separated by {@link File#separator}.
      * 
-     * @param loadingClass the class from whose package to load the file
-     *            (required)
-     * @param filename the name of the file to load, relative to that package
-     *            (required)
-     * @return the file's input stream (never <code>null</code>)
-     * @throws IllegalArgumentException if the given file cannot be found
+     * @param pathElements the path elements from uppermost downwards (can't be
+     *            empty)
+     * @return a non-blank string
+     * @since 1.2.0
      */
-    public static File getFile(final Class<?> loadingClass,
-            final String filename) {
-        final URL url = loadingClass.getResource(filename);
-        Assert.notNull(url, "Could not locate '" + filename
-                + "' in classpath of " + loadingClass.getName());
-        try {
-            return new File(url.toURI());
-        }
-        catch (URISyntaxException e) {
-            throw new IllegalArgumentException(e);
-        }
+    public static String getSystemDependentPath(
+            final Collection<String> pathElements) {
+        Assert.notEmpty(pathElements);
+        return StringUtils.collectionToDelimitedString(pathElements,
+                File.separator);
     }
 
     /**
-     * Loads the given file from the classpath.
+     * Returns an operating-system-dependent path consisting of the given
+     * elements, separated by {@link File#separator}.
      * 
-     * @param loadingClass the class from whose package to load the file
-     *            (required)
-     * @param filename the name of the file to load, relative to that package
-     *            (required)
-     * @return the file's input stream (never <code>null</code>)
-     * @throws IllegalArgumentException if the given file cannot be found
+     * @param pathElements the path elements from uppermost downwards (can't be
+     *            empty)
+     * @return a non-blank string
+     * @since 1.2.0
      */
-    public static InputStream getInputStream(final Class<?> loadingClass,
-            final String filename) {
-        final InputStream inputStream = loadingClass
-                .getResourceAsStream(filename);
-        Assert.notNull(inputStream, "Could not locate '" + filename
-                + "' in classpath of " + loadingClass.getName());
-        return inputStream;
+    public static String getSystemDependentPath(final String... pathElements) {
+        return getSystemDependentPath(Arrays.asList(pathElements));
+    }
+
+    /**
+     * Indicates whether the given canonical path matches the given Ant-style
+     * pattern
+     * 
+     * @param antPattern the pattern to check against (can't be blank)
+     * @param canonicalPath the path to check (can't be blank)
+     * @return see above
+     * @since 1.2.0
+     */
+    public static boolean matchesAntPath(final String antPattern,
+            final String canonicalPath) {
+        Assert.hasText(antPattern, "Ant pattern required");
+        Assert.hasText(canonicalPath, "Canonical path required");
+        return PATH_MATCHER.match(antPattern, canonicalPath);
     }
 
     /**
@@ -390,6 +353,42 @@ public final class FileUtils {
         catch (final IOException e) {
             throw new IllegalStateException(e);
         }
+    }
+
+    /**
+     * Removes any leading or trailing {@link File#separator}s from the given
+     * path.
+     * 
+     * @param path the path to modify (can be <code>null</code>)
+     * @return the path, modified as above, or <code>null</code> if
+     *         <code>null</code> was given
+     * @since 1.2.0
+     */
+    public static String removeLeadingAndTrailingSeparators(String path) {
+        if (StringUtils.isBlank(path)) {
+            return path;
+        }
+        while (path.endsWith(File.separator)) {
+            path = StringUtils.removeSuffix(path, File.separator);
+        }
+        while (path.startsWith(File.separator)) {
+            path = StringUtils.removePrefix(path, File.separator);
+        }
+        return path;
+    }
+
+    /**
+     * Removes any trailing {@link File#separator}s from the given path
+     * 
+     * @param path the path to modify (can be <code>null</code>)
+     * @return the modified path
+     * @since 1.2.0
+     */
+    public static String removeTrailingSeparator(String path) {
+        while ((path != null) && path.endsWith(File.separator)) {
+            path = StringUtils.removeSuffix(path, File.separator);
+        }
+        return path;
     }
 
     /**

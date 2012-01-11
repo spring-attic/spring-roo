@@ -31,16 +31,15 @@ import org.springframework.roo.support.util.Assert;
 @Service
 public class CustomDataKeyDecoratorImpl implements CustomDataKeyDecorator {
 
-    // Fields
-    private final Map<String, Matcher<? extends CustomDataAccessor>> taggerMap = new HashMap<String, Matcher<? extends CustomDataAccessor>>();
     private final Map<String, String> pluralMap = new HashMap<String, String>();
+    private final Map<String, Matcher<? extends CustomDataAccessor>> taggerMap = new HashMap<String, Matcher<? extends CustomDataAccessor>>();
 
     public MemberDetails decorate(final String requestingClass,
             final MemberDetails memberDetails) {
-        MemberDetailsBuilder memberDetailsBuilder = new MemberDetailsBuilder(
+        final MemberDetailsBuilder memberDetailsBuilder = new MemberDetailsBuilder(
                 memberDetails);
 
-        for (MemberHoldingTypeDetails memberHoldingTypeDetails : memberDetails
+        for (final MemberHoldingTypeDetails memberHoldingTypeDetails : memberDetails
                 .getDetails()) {
             if (memberHoldingTypeDetails instanceof ClassOrInterfaceTypeDetails) {
                 if (!pluralMap.containsKey(memberHoldingTypeDetails
@@ -56,16 +55,16 @@ public class CustomDataKeyDecoratorImpl implements CustomDataKeyDecorator {
 
         // Locate any requests that we add custom data to identifiable java
         // structures
-        for (FieldMatcher fieldTagger : getFieldTaggers()) {
-            for (FieldMetadata field : fieldTagger.matches(memberDetails
+        for (final FieldMatcher fieldTagger : getFieldTaggers()) {
+            for (final FieldMetadata field : fieldTagger.matches(memberDetails
                     .getDetails())) {
                 memberDetailsBuilder.tag(field, fieldTagger.getCustomDataKey(),
                         fieldTagger.getTagValue(field));
             }
         }
 
-        for (MethodMatcher methodTagger : getMethodTaggers()) {
-            for (MethodMetadata method : methodTagger.matches(
+        for (final MethodMatcher methodTagger : getMethodTaggers()) {
+            for (final MethodMetadata method : methodTagger.matches(
                     memberDetails.getDetails(), pluralMap)) {
                 memberDetailsBuilder.tag(method,
                         methodTagger.getCustomDataKey(),
@@ -73,8 +72,8 @@ public class CustomDataKeyDecoratorImpl implements CustomDataKeyDecorator {
             }
         }
 
-        for (ConstructorMatcher constructorTagger : getConstructorTaggers()) {
-            for (ConstructorMetadata constructor : constructorTagger
+        for (final ConstructorMatcher constructorTagger : getConstructorTaggers()) {
+            for (final ConstructorMetadata constructor : constructorTagger
                     .matches(memberDetails.getDetails())) {
                 memberDetailsBuilder.tag(constructor,
                         constructorTagger.getCustomDataKey(),
@@ -82,8 +81,8 @@ public class CustomDataKeyDecoratorImpl implements CustomDataKeyDecorator {
             }
         }
 
-        for (TypeMatcher typeTagger : getTypeTaggers()) {
-            for (MemberHoldingTypeDetails typeDetails : typeTagger
+        for (final TypeMatcher typeTagger : getTypeTaggers()) {
+            for (final MemberHoldingTypeDetails typeDetails : typeTagger
                     .matches(memberDetails.getDetails())) {
                 memberDetailsBuilder.tag(typeDetails,
                         typeTagger.getCustomDataKey(),
@@ -96,10 +95,10 @@ public class CustomDataKeyDecoratorImpl implements CustomDataKeyDecorator {
 
     public MemberDetails decorateTypes(final String requestingClass,
             final MemberDetails memberDetails) {
-        MemberDetailsBuilder memberDetailsBuilder = new MemberDetailsBuilder(
+        final MemberDetailsBuilder memberDetailsBuilder = new MemberDetailsBuilder(
                 memberDetails);
-        for (TypeMatcher typeTagger : getTypeTaggers()) {
-            for (MemberHoldingTypeDetails typeDetails : typeTagger
+        for (final TypeMatcher typeTagger : getTypeTaggers()) {
+            for (final MemberHoldingTypeDetails typeDetails : typeTagger
                     .matches(memberDetails.getDetails())) {
                 memberDetailsBuilder.tag(typeDetails,
                         typeTagger.getCustomDataKey(),
@@ -107,6 +106,28 @@ public class CustomDataKeyDecoratorImpl implements CustomDataKeyDecorator {
             }
         }
         return memberDetailsBuilder.build();
+    }
+
+    public List<ConstructorMatcher> getConstructorTaggers() {
+        final List<ConstructorMatcher> constructorTaggers = new ArrayList<ConstructorMatcher>();
+        for (final Matcher<? extends CustomDataAccessor> matcher : taggerMap
+                .values()) {
+            if (matcher instanceof ConstructorMatcher) {
+                constructorTaggers.add((ConstructorMatcher) matcher);
+            }
+        }
+        return constructorTaggers;
+    }
+
+    public List<FieldMatcher> getFieldTaggers() {
+        final List<FieldMatcher> fieldTaggers = new ArrayList<FieldMatcher>();
+        for (final Matcher<? extends CustomDataAccessor> matcher : taggerMap
+                .values()) {
+            if (matcher instanceof FieldMatcher) {
+                fieldTaggers.add((FieldMatcher) matcher);
+            }
+        }
+        return fieldTaggers;
     }
 
     /**
@@ -121,10 +142,32 @@ public class CustomDataKeyDecoratorImpl implements CustomDataKeyDecorator {
         try {
             return Noun.pluralOf(term, locale);
         }
-        catch (RuntimeException re) {
+        catch (final RuntimeException re) {
             // Inflector failed (see for example ROO-305), so don't pluralize it
             return term;
         }
+    }
+
+    public List<MethodMatcher> getMethodTaggers() {
+        final List<MethodMatcher> methodTaggers = new ArrayList<MethodMatcher>();
+        for (final Matcher<? extends CustomDataAccessor> matcher : taggerMap
+                .values()) {
+            if (matcher instanceof MethodMatcher) {
+                methodTaggers.add((MethodMatcher) matcher);
+            }
+        }
+        return methodTaggers;
+    }
+
+    public List<TypeMatcher> getTypeTaggers() {
+        final List<TypeMatcher> typeTaggers = new ArrayList<TypeMatcher>();
+        for (final Matcher<? extends CustomDataAccessor> matcher : taggerMap
+                .values()) {
+            if (matcher instanceof TypeMatcher) {
+                typeTaggers.add((TypeMatcher) matcher);
+            }
+        }
+        return typeTaggers;
     }
 
     public void registerMatcher(final String addingClass,
@@ -145,59 +188,19 @@ public class CustomDataKeyDecoratorImpl implements CustomDataKeyDecorator {
         }
     }
 
-    public void unregisterMatchers(final String addingClass) {
-        Set<String> toRemove = new HashSet<String>();
-        for (String taggerKey : taggerMap.keySet()) {
-            if (taggerKey.startsWith(addingClass)) {
-                toRemove.add(taggerKey);
-            }
-        }
-        for (String taggerKey : toRemove) {
-            taggerMap.remove(taggerKey);
-        }
-    }
-
     public void unregisterMatchers(final Class<?> addingClass) {
         unregisterMatchers(addingClass.getName());
     }
 
-    public List<MethodMatcher> getMethodTaggers() {
-        List<MethodMatcher> methodTaggers = new ArrayList<MethodMatcher>();
-        for (Matcher<? extends CustomDataAccessor> matcher : taggerMap.values()) {
-            if (matcher instanceof MethodMatcher) {
-                methodTaggers.add((MethodMatcher) matcher);
+    public void unregisterMatchers(final String addingClass) {
+        final Set<String> toRemove = new HashSet<String>();
+        for (final String taggerKey : taggerMap.keySet()) {
+            if (taggerKey.startsWith(addingClass)) {
+                toRemove.add(taggerKey);
             }
         }
-        return methodTaggers;
-    }
-
-    public List<FieldMatcher> getFieldTaggers() {
-        List<FieldMatcher> fieldTaggers = new ArrayList<FieldMatcher>();
-        for (Matcher<? extends CustomDataAccessor> matcher : taggerMap.values()) {
-            if (matcher instanceof FieldMatcher) {
-                fieldTaggers.add((FieldMatcher) matcher);
-            }
+        for (final String taggerKey : toRemove) {
+            taggerMap.remove(taggerKey);
         }
-        return fieldTaggers;
-    }
-
-    public List<ConstructorMatcher> getConstructorTaggers() {
-        List<ConstructorMatcher> constructorTaggers = new ArrayList<ConstructorMatcher>();
-        for (Matcher<? extends CustomDataAccessor> matcher : taggerMap.values()) {
-            if (matcher instanceof ConstructorMatcher) {
-                constructorTaggers.add((ConstructorMatcher) matcher);
-            }
-        }
-        return constructorTaggers;
-    }
-
-    public List<TypeMatcher> getTypeTaggers() {
-        List<TypeMatcher> typeTaggers = new ArrayList<TypeMatcher>();
-        for (Matcher<? extends CustomDataAccessor> matcher : taggerMap.values()) {
-            if (matcher instanceof TypeMatcher) {
-                typeTaggers.add((TypeMatcher) matcher);
-            }
-        }
-        return typeTaggers;
     }
 }

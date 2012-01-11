@@ -36,25 +36,23 @@ import org.springframework.roo.support.util.StringUtils;
  */
 public class Pom {
 
-    // Constants
     static final String DEFAULT_PACKAGING = "jar"; // Maven behaviour
 
-    // Fields
-    private final GAV gav;
-    private final Map<Path, PhysicalPath> pathLocations = new LinkedHashMap<Path, PhysicalPath>();
-    private final Parent parent;
+    private final Set<Plugin> buildPlugins = new LinkedHashSet<Plugin>();
     private final Set<Dependency> dependencies = new LinkedHashSet<Dependency>();
     private final Set<Filter> filters = new LinkedHashSet<Filter>();
-    private final Set<Module> modules = new LinkedHashSet<Module>();
-    private final Set<Plugin> buildPlugins = new LinkedHashSet<Plugin>();
-    private final Set<Property> pomProperties = new LinkedHashSet<Property>();
-    private final Set<Repository> pluginRepositories = new LinkedHashSet<Repository>();
-    private final Set<Repository> repositories = new LinkedHashSet<Repository>();
-    private final Set<Resource> resources = new LinkedHashSet<Resource>();
+    private final GAV gav;
     private final String moduleName;
+    private final Set<Module> modules = new LinkedHashSet<Module>();
     private final String name;
     private final String packaging;
+    private final Parent parent;
     private final String path;
+    private final Map<Path, PhysicalPath> pathLocations = new LinkedHashMap<Path, PhysicalPath>();
+    private final Set<Repository> pluginRepositories = new LinkedHashSet<Repository>();
+    private final Set<Property> pomProperties = new LinkedHashSet<Property>();
+    private final Set<Repository> repositories = new LinkedHashSet<Repository>();
+    private final Set<Resource> resources = new LinkedHashSet<Resource>();
     private final String sourceDirectory; // TODO use pathCache instead
     private final String testSourceDirectory; // TODO use pathCache instead
 
@@ -109,7 +107,7 @@ public class Pom {
         Assert.hasText(packaging, "Invalid packaging '" + packaging + "'");
         Assert.hasText(path, "Invalid path '" + path + "'");
 
-        this.gav = new GAV(groupId, artifactId, version);
+        gav = new GAV(groupId, artifactId, version);
         this.moduleName = StringUtils.trimToEmpty(moduleName);
         this.name = StringUtils.trimToEmpty(name);
         this.packaging = packaging;
@@ -132,6 +130,16 @@ public class Pom {
         cachePhysicalPaths(paths);
     }
 
+    /**
+     * Returns this module as a Dependency with the given scope
+     * 
+     * @return a non-<code>null</code> instance
+     */
+    public Dependency asDependency(final DependencyScope scope) {
+        return new Dependency(gav, DependencyType.valueOfTypeCode(packaging),
+                scope);
+    }
+
     private void cachePhysicalPaths(final Collection<Path> paths) {
         final Collection<Path> pathsToCache = CollectionUtils.populate(
                 new HashSet<Path>(), paths);
@@ -144,13 +152,19 @@ public class Pom {
     }
 
     /**
-     * Returns this module as a Dependency with the given scope
+     * Indicates whether it's valid to add the given {@link Dependency} to this
+     * POM.
      * 
-     * @return a non-<code>null</code> instance
+     * @param newDependency the {@link Dependency} to check (can be
+     *            <code>null</code>)
+     * @return see above
+     * @since 1.2.1
      */
-    public Dependency asDependency(final DependencyScope scope) {
-        return new Dependency(gav, DependencyType.valueOfTypeCode(packaging),
-                scope);
+    public boolean canAddDependency(final Dependency newDependency) {
+        return (newDependency != null)
+                && !isDependencyRegistered(newDependency)
+                && !Dependency.isHigherLevel(
+                        newDependency.getType().toString(), packaging);
     }
 
     /**
@@ -210,7 +224,7 @@ public class Pom {
             final Dependency dependency) {
         final Set<Dependency> result = new HashSet<Dependency>();
         for (final Dependency d : dependencies) {
-            if (dependency != null
+            if ((dependency != null)
                     && dependency.getArtifactId().equals(d.getArtifactId())
                     && dependency.getGroupId().equals(d.getGroupId())
                     && dependency.getType().equals(d.getType())) {
@@ -218,19 +232,6 @@ public class Pom {
             }
         }
         return result;
-    }
-
-    /**
-     * Indicates whether this {@link Pom} has the given {@link Dependency},
-     * ignoring the version number.
-     * 
-     * @param dependency the {@link Dependency} to check for (can be
-     *            <code>null</code>)
-     * @return <code>false</code> if a <code>null</code> dependency is given
-     * @since 1.2.1
-     */
-    public boolean hasDependencyExcludingVersion(final Dependency dependency) {
-        return !getDependenciesExcludingVersion(dependency).isEmpty();
     }
 
     /**
@@ -297,21 +298,6 @@ public class Pom {
         return path;
     }
 
-    public List<PhysicalPath> getPhysicalPaths() {
-        return new ArrayList<PhysicalPath>(pathLocations.values());
-    }
-
-    /**
-     * Returns the {@link PhysicalPath} for the given {@link Path} of this
-     * module
-     * 
-     * @param path the sub-path for which to return the {@link PhysicalPath}
-     * @return <code>null</code> if this module has no such sub-path
-     */
-    public PhysicalPath getPhysicalPath(final Path path) {
-        return pathLocations.get(path);
-    }
-
     /**
      * Returns the canonical path of the given {@link Path} within this module,
      * plus a trailing separator if found
@@ -325,6 +311,21 @@ public class Pom {
             return null;
         }
         return FileUtils.ensureTrailingSeparator(modulePath.getLocationPath());
+    }
+
+    /**
+     * Returns the {@link PhysicalPath} for the given {@link Path} of this
+     * module
+     * 
+     * @param path the sub-path for which to return the {@link PhysicalPath}
+     * @return <code>null</code> if this module has no such sub-path
+     */
+    public PhysicalPath getPhysicalPath(final Path path) {
+        return pathLocations.get(path);
+    }
+
+    public List<PhysicalPath> getPhysicalPaths() {
+        return new ArrayList<PhysicalPath>(pathLocations.values());
     }
 
     public Set<Repository> getPluginRepositories() {
@@ -409,6 +410,19 @@ public class Pom {
     }
 
     /**
+     * Indicates whether this {@link Pom} has the given {@link Dependency},
+     * ignoring the version number.
+     * 
+     * @param dependency the {@link Dependency} to check for (can be
+     *            <code>null</code>)
+     * @return <code>false</code> if a <code>null</code> dependency is given
+     * @since 1.2.1
+     */
+    public boolean hasDependencyExcludingVersion(final Dependency dependency) {
+        return !getDependenciesExcludingVersion(dependency).isEmpty();
+    }
+
+    /**
      * Indicates whether all of the given dependencies are registered, by
      * calling {@link #isDependencyRegistered(Dependency)} for each one,
      * ignoring any <code>null</code> elements.
@@ -421,7 +435,7 @@ public class Pom {
             final Collection<? extends Dependency> dependencies) {
         if (dependencies != null) {
             for (final Dependency dependency : dependencies) {
-                if (dependency != null && !isDependencyRegistered(dependency)) {
+                if ((dependency != null) && !isDependencyRegistered(dependency)) {
                     return false;
                 }
             }
@@ -442,7 +456,7 @@ public class Pom {
             final Collection<? extends Repository> repositories) {
         if (repositories != null) {
             for (final Repository repository : repositories) {
-                if (repository != null
+                if ((repository != null)
                         && !isPluginRepositoryRegistered(repository)) {
                     return false;
                 }
@@ -462,7 +476,7 @@ public class Pom {
             final Collection<? extends Plugin> plugins) {
         Assert.notNull(plugins, "Plugins to check is required");
         for (final Plugin plugin : plugins) {
-            if (plugin != null && !isBuildPluginRegistered(plugin)) {
+            if ((plugin != null) && !isBuildPluginRegistered(plugin)) {
                 return false;
             }
         }
@@ -481,7 +495,7 @@ public class Pom {
             final Collection<? extends Repository> repositories) {
         if (repositories != null) {
             for (final Repository repository : repositories) {
-                if (repository != null && !isRepositoryRegistered(repository)) {
+                if ((repository != null) && !isRepositoryRegistered(repository)) {
                     return false;
                 }
             }
@@ -536,7 +550,7 @@ public class Pom {
      */
     @Deprecated
     public boolean isBuildPluginRegistered(final Plugin plugin) {
-        return plugin != null && isPluginRegistered(plugin.getGAV());
+        return (plugin != null) && isPluginRegistered(plugin.getGAV());
     }
 
     /**
@@ -547,7 +561,7 @@ public class Pom {
      * @return <code>false</code> if a <code>null</code> dependency is given
      */
     public boolean isDependencyRegistered(final Dependency dependency) {
-        return dependency != null && dependencies.contains(dependency);
+        return (dependency != null) && dependencies.contains(dependency);
     }
 
     /**
@@ -623,21 +637,5 @@ public class Pom {
     public String toString() {
         // For debugging
         return gav + " at " + path;
-    }
-
-    /**
-     * Indicates whether it's valid to add the given {@link Dependency} to this
-     * POM.
-     * 
-     * @param newDependency the {@link Dependency} to check (can be
-     *            <code>null</code>)
-     * @return see above
-     * @since 1.2.1
-     */
-    public boolean canAddDependency(final Dependency newDependency) {
-        return newDependency != null
-                && !isDependencyRegistered(newDependency)
-                && !Dependency.isHigherLevel(
-                        newDependency.getType().toString(), this.packaging);
     }
 }

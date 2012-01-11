@@ -1,7 +1,5 @@
 package org.springframework.roo.addon.layers.repository.mongo;
 
-import org.springframework.roo.addon.layers.repository.mongo.RepositoryMongoAnnotationValues;
-import org.springframework.roo.addon.layers.repository.mongo.RooMongoRepository;
 import org.springframework.roo.classpath.details.annotations.populator.AnnotationValuesTestCase;
 
 /**

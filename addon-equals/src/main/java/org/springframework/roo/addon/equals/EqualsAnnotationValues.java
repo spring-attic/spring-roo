@@ -15,7 +15,6 @@ import org.springframework.roo.classpath.details.annotations.populator.AutoPopul
  */
 public class EqualsAnnotationValues extends AbstractAnnotationValues {
 
-    // From annotation
     @AutoPopulate private boolean appendSuper;
     @AutoPopulate private String[] excludeFields;
 
@@ -30,11 +29,11 @@ public class EqualsAnnotationValues extends AbstractAnnotationValues {
         AutoPopulationUtils.populate(this, annotationMetadata);
     }
 
-    public boolean isAppendSuper() {
-        return appendSuper;
-    }
-
     public String[] getExcludeFields() {
         return excludeFields;
+    }
+
+    public boolean isAppendSuper() {
+        return appendSuper;
     }
 }

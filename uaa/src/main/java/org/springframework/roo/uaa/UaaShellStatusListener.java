@@ -27,14 +27,13 @@ import org.springframework.uaa.client.protobuf.UaaClient.Privacy.PrivacyLevel;
 @Component(immediate = true)
 public class UaaShellStatusListener implements ShellStatusListener {
 
-    // Fields
-    @Reference UaaService uaaService;
     @Reference Shell shell;
     private boolean startupMessageConsidered = false;
+    @Reference UaaService uaaService;
 
     protected void activate(final ComponentContext componentContext) {
         shell.addShellStatusListener(this);
-        String originalThreadName = Thread.currentThread().getName();
+        final String originalThreadName = Thread.currentThread().getName();
         try {
             // Preventing thread name appearing on JLine console
             Thread.currentThread().setName("");
@@ -52,7 +51,7 @@ public class UaaShellStatusListener implements ShellStatusListener {
     public void onShellStatusChange(final ShellStatus oldStatus,
             final ShellStatus newStatus) {
         if (!startupMessageConsidered
-                && newStatus.getStatus() == Status.USER_INPUT) {
+                && (newStatus.getStatus() == Status.USER_INPUT)) {
             startupMessageConsidered = true;
             if (uaaService.getPrivacyLevel() == PrivacyLevel.UNDECIDED_TOU) {
                 // NB: The first line of the text file must contain spaces to

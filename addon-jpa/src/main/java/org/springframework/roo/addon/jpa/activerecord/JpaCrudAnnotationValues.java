@@ -26,11 +26,11 @@ import org.springframework.roo.support.util.StringUtils;
  */
 public class JpaCrudAnnotationValues extends AbstractAnnotationValues {
 
-    // Fields (for each @RooJpaActiveRecord attribute)
     @AutoPopulate private String clearMethod = CLEAR_METHOD_DEFAULT;
     @AutoPopulate private String countMethod = COUNT_METHOD_DEFAULT;
     @AutoPopulate private String findAllMethod = FIND_ALL_METHOD_DEFAULT;
     @AutoPopulate private String findEntriesMethod = FIND_ENTRIES_METHOD_DEFAULT;
+    @AutoPopulate private String[] finders;
     @AutoPopulate private String findMethod = FIND_METHOD_DEFAULT;
     @AutoPopulate private String flushMethod = FLUSH_METHOD_DEFAULT;
     @AutoPopulate private String mergeMethod = MERGE_METHOD_DEFAULT;
@@ -38,7 +38,6 @@ public class JpaCrudAnnotationValues extends AbstractAnnotationValues {
     @AutoPopulate private String persistMethod = PERSIST_METHOD_DEFAULT;
     @AutoPopulate private String removeMethod = REMOVE_METHOD_DEFAULT;
     @AutoPopulate private String transactionManager = "";
-    @AutoPopulate private String[] finders;
 
     /**
      * Constructor

@@ -17,11 +17,9 @@ import org.springframework.roo.support.util.StringUtils;
  */
 public class DeleteFile implements UndoableOperation {
 
-    // Constants
     private static final Logger LOGGER = HandlerUtils
             .getLogger(DeleteFile.class);
 
-    // Fields
     private final File actual;
     private final File backup;
     private final FilenameResolver filenameResolver;
@@ -62,7 +60,7 @@ public class DeleteFile implements UndoableOperation {
                 + "' must be a file (not a directory)");
 
         try {
-            this.backup = File.createTempFile("DeleteFile", "tmp");
+            backup = File.createTempFile("DeleteFile", "tmp");
             FileCopyUtils.copy(actual, backup);
         }
         catch (final IOException ioe) {

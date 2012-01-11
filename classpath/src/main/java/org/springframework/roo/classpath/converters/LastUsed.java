@@ -13,31 +13,31 @@ import org.springframework.roo.project.maven.Pom;
 public interface LastUsed {
 
     /**
-     * Sets the package, and clears the type field. Ignores attempts to set to
-     * java.*.
+     * @return the package, either explicitly set or via a type set (may also be
+     *         null if never set)
      */
-    void setPackage(JavaPackage javaPackage);
-
-    /**
-     * Sets the type, and also sets the package field. Ignores attempts to set
-     * to java.*.
-     */
-    void setType(JavaType javaType);
-
-    JavaPackage getTopLevelPackage();
-
-    void setTopLevelPackage(JavaPackage topLevelPackage);
+    JavaPackage getJavaPackage();
 
     /**
      * @return the type or null
      */
     JavaType getJavaType();
 
+    JavaPackage getTopLevelPackage();
+
     /**
-     * @return the package, either explicitly set or via a type set (may also be
-     *         null if never set)
+     * Sets the package, and clears the type field. Ignores attempts to set to
+     * java.*.
      */
-    JavaPackage getJavaPackage();
+    void setPackage(JavaPackage javaPackage);
+
+    void setTopLevelPackage(JavaPackage topLevelPackage);
+
+    /**
+     * Sets the type, and also sets the package field. Ignores attempts to set
+     * to java.*.
+     */
+    void setType(JavaType javaType);
 
     /**
      * Sets the last used type and the module to which it belongs

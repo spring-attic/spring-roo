@@ -27,28 +27,6 @@ public interface MemberHoldingTypeDetails extends PhysicalTypeDetails,
     boolean extendsType(JavaType type);
 
     /**
-     * Indicates whether this type implements the given interface. Equivalent to
-     * calling {@link #getImplementsTypes()} and checking whether the given type
-     * is in the returned list.
-     * 
-     * @param type the interface being checked for (required)
-     * @return see above
-     */
-    boolean implementsType(JavaType interfaceType);
-
-    /**
-     * Indicates whether this type implements the given types. Equivalent to
-     * calling {@link #getImplementsTypes()} and checking whether the given
-     * types are in the returned list.
-     * 
-     * @param type the interfaces being checked for (required)
-     * @return see above
-     */
-    boolean implementsAny(JavaType... type);
-
-    List<? extends MethodMetadata> getDeclaredMethods();
-
-    /**
      * Locates the constructor with the specified parameter types.
      * 
      * @param parameters to locate (can be null if there are no parameters)
@@ -81,6 +59,16 @@ public interface MemberHoldingTypeDetails extends PhysicalTypeDetails,
     ClassOrInterfaceTypeDetails getDeclaredInnerType(JavaType typeName);
 
     List<ClassOrInterfaceTypeDetails> getDeclaredInnerTypes();
+
+    List<? extends MethodMetadata> getDeclaredMethods();
+
+    /**
+     * Returns the names of any dynamic finders
+     * 
+     * @return a non-<code>null</code> list
+     * @since 1.2.0
+     */
+    List<String> getDynamicFinderNames();
 
     /**
      * Lists the classes this type extends. This may be empty. Always empty in
@@ -182,10 +170,22 @@ public interface MemberHoldingTypeDetails extends PhysicalTypeDetails,
     JavaSymbolName getUniqueFieldName(final String proposedName);
 
     /**
-     * Returns the names of any dynamic finders
+     * Indicates whether this type implements the given types. Equivalent to
+     * calling {@link #getImplementsTypes()} and checking whether the given
+     * types are in the returned list.
      * 
-     * @return a non-<code>null</code> list
-     * @since 1.2.0
+     * @param type the interfaces being checked for (required)
+     * @return see above
      */
-    List<String> getDynamicFinderNames();
+    boolean implementsAny(JavaType... type);
+
+    /**
+     * Indicates whether this type implements the given interface. Equivalent to
+     * calling {@link #getImplementsTypes()} and checking whether the given type
+     * is in the returned list.
+     * 
+     * @param type the interface being checked for (required)
+     * @return see above
+     */
+    boolean implementsType(JavaType interfaceType);
 }

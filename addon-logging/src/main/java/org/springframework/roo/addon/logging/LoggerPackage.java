@@ -11,11 +11,11 @@ import org.springframework.roo.support.style.ToStringCreator;
  * @since 1.0
  */
 public enum LoggerPackage {
-    ROOT, PROJECT, TRANSACTIONS("org.springframework.transactions"), SECURITY(
-            "org.springframework.security"), AOP("org.springframework.aop",
+    ALL_SPRING("org.springframework"), AOP("org.springframework.aop",
             "org.springframework.aspects"), PERSISTENCE(
-            "org.springframework.orm"), ALL_SPRING("org.springframework"), WEB(
-            "org.springframework.web");
+            "org.springframework.orm"), PROJECT, ROOT, SECURITY(
+            "org.springframework.security"), TRANSACTIONS(
+            "org.springframework.transactions"), WEB("org.springframework.web");
 
     private String[] packageNames;
 
@@ -29,7 +29,7 @@ public enum LoggerPackage {
 
     @Override
     public String toString() {
-        ToStringCreator tsc = new ToStringCreator(this);
+        final ToStringCreator tsc = new ToStringCreator(this);
         tsc.append("layer", name());
         tsc.append("package names", Arrays.asList(packageNames));
         return tsc.toString();

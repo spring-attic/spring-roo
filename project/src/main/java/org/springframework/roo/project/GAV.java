@@ -38,9 +38,8 @@ public class GAV implements Comparable<GAV> {
                 coordinateArray[2]);
     }
 
-    // Fields
-    private final String groupId;
     private final String artifactId;
+    private final String groupId;
     private final String version;
 
     /**
@@ -65,25 +64,6 @@ public class GAV implements Comparable<GAV> {
         this.version = version;
     }
 
-    public String getArtifactId() {
-        return artifactId;
-    }
-
-    public String getGroupId() {
-        return groupId;
-    }
-
-    public String getVersion() {
-        return version;
-    }
-
-    @Override
-    public String toString() {
-        // For debugging
-        return StringUtils.arrayToDelimitedString(":", groupId, artifactId,
-                version);
-    }
-
     public int compareTo(final GAV other) {
         Assert.notNull(other, "Cannot compare " + this + " to null");
         int result = groupId.compareTo(other.getGroupId());
@@ -98,12 +78,31 @@ public class GAV implements Comparable<GAV> {
 
     @Override
     public boolean equals(final Object other) {
-        return other == this
-                || (other instanceof GAV && compareTo((GAV) other) == 0);
+        return (other == this)
+                || ((other instanceof GAV) && (compareTo((GAV) other) == 0));
+    }
+
+    public String getArtifactId() {
+        return artifactId;
+    }
+
+    public String getGroupId() {
+        return groupId;
+    }
+
+    public String getVersion() {
+        return version;
     }
 
     @Override
     public int hashCode() {
         return artifactId.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        // For debugging
+        return StringUtils.arrayToDelimitedString(":", groupId, artifactId,
+                version);
     }
 }

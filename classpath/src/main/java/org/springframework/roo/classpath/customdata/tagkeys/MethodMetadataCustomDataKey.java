@@ -13,7 +13,6 @@ import org.springframework.roo.support.util.Assert;
 public class MethodMetadataCustomDataKey extends
         InvocableMemberMetadataCustomDataKey<MethodMetadata> {
 
-    // Fields
     private final String tag;
 
     /**
@@ -26,12 +25,12 @@ public class MethodMetadataCustomDataKey extends
         this.tag = tag;
     }
 
-    @Override
-    public String toString() {
+    public String name() {
         return tag;
     }
 
-    public String name() {
+    @Override
+    public String toString() {
         return tag;
     }
 }

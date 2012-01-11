@@ -12,19 +12,19 @@ public class ConstructorMetadataBuilder extends
     /**
      * Constructor
      * 
-     * @param declaredbyMetadataId
+     * @param existing
      */
-    public ConstructorMetadataBuilder(final String declaredbyMetadataId) {
-        super(declaredbyMetadataId);
+    public ConstructorMetadataBuilder(final ConstructorMetadata existing) {
+        super(existing);
     }
 
     /**
      * Constructor
      * 
-     * @param existing
+     * @param declaredbyMetadataId
      */
-    public ConstructorMetadataBuilder(final ConstructorMetadata existing) {
-        super(existing);
+    public ConstructorMetadataBuilder(final String declaredbyMetadataId) {
+        super(declaredbyMetadataId);
     }
 
     /**

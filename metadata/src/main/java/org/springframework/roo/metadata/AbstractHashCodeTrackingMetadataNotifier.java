@@ -23,11 +23,10 @@ import org.apache.felix.scr.annotations.Reference;
 @Component(componentAbstract = true)
 public abstract class AbstractHashCodeTrackingMetadataNotifier {
 
-    // Fields
-    @Reference protected MetadataDependencyRegistry metadataDependencyRegistry;
-    @Reference protected MetadataService metadataService;
-
     private final Map<String, Integer> hashes = new HashMap<String, Integer>();
+    @Reference protected MetadataDependencyRegistry metadataDependencyRegistry;
+
+    @Reference protected MetadataService metadataService;
 
     /**
      * Notifies downstream dependencies of a change if and only if the passed
@@ -40,11 +39,11 @@ public abstract class AbstractHashCodeTrackingMetadataNotifier {
      *            presented to this class)
      */
     protected void notifyIfRequired(final MetadataItem metadataItem) {
-        String instanceId = MetadataIdentificationUtils
+        final String instanceId = MetadataIdentificationUtils
                 .getMetadataInstance(metadataItem.getId());
-        Integer existing = hashes.get(instanceId);
-        int newHash = metadataItem.hashCode();
-        if (existing != null && newHash == existing) {
+        final Integer existing = hashes.get(instanceId);
+        final int newHash = metadataItem.hashCode();
+        if ((existing != null) && (newHash == existing)) {
             // No need to notify
             return;
         }

@@ -27,108 +27,33 @@ public final class XmlRoundTripUtils {
         try {
             digest = MessageDigest.getInstance("sha-1");
         }
-        catch (NoSuchAlgorithmException e) {
+        catch (final NoSuchAlgorithmException e) {
             throw new IllegalStateException(
                     "Could not create hash key for identifier");
         }
     }
 
-    /**
-     * Create a base 64 encoded SHA1 hash key for a given XML element. The key
-     * is based on the element name, the attribute names and their values. Child
-     * elements are ignored. Attributes named 'z' are not concluded since they
-     * contain the hash key itself.
-     * 
-     * @param element The element to create the base 64 encoded hash key for
-     * @return the unique key
-     */
-    public static String calculateUniqueKeyFor(final Element element) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(element.getTagName());
-        NamedNodeMap attributes = element.getAttributes();
-        SortedMap<String, String> attrKVStore = Collections
-                .synchronizedSortedMap(new TreeMap<String, String>());
-        for (int i = 0, n = attributes.getLength(); i < n; i++) {
-            Node attr = attributes.item(i);
-            if (!"z".equals(attr.getNodeName())
-                    && !attr.getNodeName().startsWith("_")) {
-                attrKVStore.put(attr.getNodeName(), attr.getNodeValue());
-            }
-        }
-        for (Entry<String, String> entry : attrKVStore.entrySet()) {
-            sb.append(entry.getKey()).append(entry.getValue());
-        }
-        return base64(sha1(sb.toString().getBytes()));
-    }
-
-    /**
-     * This method will compare the original document with the proposed document
-     * and return true if adjustments to the original document were necessary.
-     * Adjustments are only made if new elements or attributes are proposed.
-     * Changes to the order of attributes or elements in the original document
-     * will not result in an adjustment.
-     * 
-     * @param original document as read from the file system
-     * @param proposed document as determined by the JspViewManager
-     * @return true if the document was adjusted, otherwise false
-     */
-    public static boolean compareDocuments(final Document original,
-            final Document proposed) {
-        boolean originalDocumentAdjusted = checkNamespaces(original, proposed);
-        originalDocumentAdjusted |= addOrUpdateElements(
-                original.getDocumentElement(), proposed.getDocumentElement(),
-                originalDocumentAdjusted);
-        originalDocumentAdjusted |= removeElements(
-                original.getDocumentElement(), proposed.getDocumentElement(),
-                originalDocumentAdjusted);
-        return originalDocumentAdjusted;
-    }
-
-    /**
-     * Compare necessary namespace declarations between original and proposed
-     * document, if namespaces in the original are missing compared to the
-     * proposed, we add them to the original.
-     * 
-     * @param original document as read from the file system
-     * @param proposed document as determined by the JspViewManager
-     * @return true if the document was adjusted, otherwise false
-     */
-    private static boolean checkNamespaces(final Document original,
-            final Document proposed) {
-        boolean originalDocumentChanged = false;
-        NamedNodeMap nsNodes = proposed.getDocumentElement().getAttributes();
-        for (int i = 0; i < nsNodes.getLength(); i++) {
-            if (0 == original.getDocumentElement()
-                    .getAttribute(nsNodes.item(i).getNodeName()).length()) {
-                original.getDocumentElement().setAttribute(
-                        nsNodes.item(i).getNodeName(),
-                        nsNodes.item(i).getNodeValue());
-                originalDocumentChanged = true;
-            }
-        }
-        return originalDocumentChanged;
-    }
-
     private static boolean addOrUpdateElements(final Element original,
             final Element proposed, boolean originalDocumentChanged) {
-        NodeList proposedChildren = proposed.getChildNodes();
+        final NodeList proposedChildren = proposed.getChildNodes();
         // Check proposed elements and compare to originals to find out if we
         // need to add or replace elements
         for (int i = 0, n = proposedChildren.getLength(); i < n; i++) {
-            Node node = proposedChildren.item(i);
-            if (node != null && node.getNodeType() == Node.ELEMENT_NODE) {
-                Element proposedElement = (Element) node;
-                String proposedId = proposedElement.getAttribute("id");
+            final Node node = proposedChildren.item(i);
+            if ((node != null) && (node.getNodeType() == Node.ELEMENT_NODE)) {
+                final Element proposedElement = (Element) node;
+                final String proposedId = proposedElement.getAttribute("id");
                 // Only proposed elements with
                 // an id will be considered
                 if (proposedId.length() != 0) {
-                    Element originalElement = XmlUtils.findFirstElement(
+                    final Element originalElement = XmlUtils.findFirstElement(
                             "//*[@id='" + proposedId + "']", original);
                     // Insert proposed element given the original document has
                     // no element with a matching id
                     if (null == originalElement) {
-                        Element placeHolder = DomUtils.findFirstElementByName(
-                                "util:placeholder", original);
+                        final Element placeHolder = DomUtils
+                                .findFirstElementByName("util:placeholder",
+                                        original);
                         if (placeHolder != null) { // Insert right before place
                                                    // holder if we can find it
                             placeHolder.getParentNode().insertBefore(
@@ -141,7 +66,7 @@ public final class XmlRoundTripUtils {
                             // Try to find the id of the proposed element's
                             // parent id in the original document
                             if (proposed.getAttribute("id").length() != 0) {
-                                Element originalParent = XmlUtils
+                                final Element originalParent = XmlUtils
                                         .findFirstElement("//*[@id='"
                                                 + proposed.getAttribute("id")
                                                 + "']", original);
@@ -174,7 +99,7 @@ public final class XmlRoundTripUtils {
                     // We found an element in the original document with
                     // a matching id
                     else {
-                        String originalElementHashCode = originalElement
+                        final String originalElementHashCode = originalElement
                                 .getAttribute("z");
                         // Only actif a hash code exists
                         if (originalElementHashCode.length() > 0) {
@@ -233,22 +158,130 @@ public final class XmlRoundTripUtils {
         return originalDocumentChanged;
     }
 
+    private static String base64(final byte[] data) {
+        return Base64.encodeBytes(data);
+    }
+
+    /**
+     * Create a base 64 encoded SHA1 hash key for a given XML element. The key
+     * is based on the element name, the attribute names and their values. Child
+     * elements are ignored. Attributes named 'z' are not concluded since they
+     * contain the hash key itself.
+     * 
+     * @param element The element to create the base 64 encoded hash key for
+     * @return the unique key
+     */
+    public static String calculateUniqueKeyFor(final Element element) {
+        final StringBuilder sb = new StringBuilder();
+        sb.append(element.getTagName());
+        final NamedNodeMap attributes = element.getAttributes();
+        final SortedMap<String, String> attrKVStore = Collections
+                .synchronizedSortedMap(new TreeMap<String, String>());
+        for (int i = 0, n = attributes.getLength(); i < n; i++) {
+            final Node attr = attributes.item(i);
+            if (!"z".equals(attr.getNodeName())
+                    && !attr.getNodeName().startsWith("_")) {
+                attrKVStore.put(attr.getNodeName(), attr.getNodeValue());
+            }
+        }
+        for (final Entry<String, String> entry : attrKVStore.entrySet()) {
+            sb.append(entry.getKey()).append(entry.getValue());
+        }
+        return base64(sha1(sb.toString().getBytes()));
+    }
+
+    /**
+     * Compare necessary namespace declarations between original and proposed
+     * document, if namespaces in the original are missing compared to the
+     * proposed, we add them to the original.
+     * 
+     * @param original document as read from the file system
+     * @param proposed document as determined by the JspViewManager
+     * @return true if the document was adjusted, otherwise false
+     */
+    private static boolean checkNamespaces(final Document original,
+            final Document proposed) {
+        boolean originalDocumentChanged = false;
+        final NamedNodeMap nsNodes = proposed.getDocumentElement()
+                .getAttributes();
+        for (int i = 0; i < nsNodes.getLength(); i++) {
+            if (0 == original.getDocumentElement()
+                    .getAttribute(nsNodes.item(i).getNodeName()).length()) {
+                original.getDocumentElement().setAttribute(
+                        nsNodes.item(i).getNodeName(),
+                        nsNodes.item(i).getNodeValue());
+                originalDocumentChanged = true;
+            }
+        }
+        return originalDocumentChanged;
+    }
+
+    /**
+     * This method will compare the original document with the proposed document
+     * and return true if adjustments to the original document were necessary.
+     * Adjustments are only made if new elements or attributes are proposed.
+     * Changes to the order of attributes or elements in the original document
+     * will not result in an adjustment.
+     * 
+     * @param original document as read from the file system
+     * @param proposed document as determined by the JspViewManager
+     * @return true if the document was adjusted, otherwise false
+     */
+    public static boolean compareDocuments(final Document original,
+            final Document proposed) {
+        boolean originalDocumentAdjusted = checkNamespaces(original, proposed);
+        originalDocumentAdjusted |= addOrUpdateElements(
+                original.getDocumentElement(), proposed.getDocumentElement(),
+                originalDocumentAdjusted);
+        originalDocumentAdjusted |= removeElements(
+                original.getDocumentElement(), proposed.getDocumentElement(),
+                originalDocumentAdjusted);
+        return originalDocumentAdjusted;
+    }
+
+    private static boolean equalElements(final Element a, final Element b) {
+        if (!a.getTagName().equals(b.getTagName())) {
+            return false;
+        }
+        final NamedNodeMap attributes = a.getAttributes();
+        int customAttributeCounter = 0;
+        for (int i = 0, n = attributes.getLength(); i < n; i++) {
+            final Node node = attributes.item(i);
+            if ((node != null) && !node.getNodeName().startsWith("_")) {
+                if (!node.getNodeName().equals("z")
+                        && ((b.getAttribute(node.getNodeName()).length() == 0) || !b
+                                .getAttribute(node.getNodeName()).equals(
+                                        node.getNodeValue()))) {
+                    return false;
+                }
+            }
+            else {
+                customAttributeCounter++;
+            }
+        }
+        if ((a.getAttributes().getLength() - customAttributeCounter) != b
+                .getAttributes().getLength()) {
+            return false;
+        }
+        return true;
+    }
+
     private static boolean removeElements(final Element original,
             final Element proposed, boolean originalDocumentChanged) {
-        NodeList originalChildren = original.getChildNodes();
+        final NodeList originalChildren = original.getChildNodes();
         // Check original elements and compare to proposed to find out if we
         // need to remove elements
         for (int i = 0, n = originalChildren.getLength(); i < n; i++) {
-            Node node = originalChildren.item(i);
-            if (node != null && node.getNodeType() == Node.ELEMENT_NODE) {
-                Element originalElement = (Element) node;
-                String originalId = originalElement.getAttribute("id");
+            final Node node = originalChildren.item(i);
+            if ((node != null) && (node.getNodeType() == Node.ELEMENT_NODE)) {
+                final Element originalElement = (Element) node;
+                final String originalId = originalElement.getAttribute("id");
                 if (originalId.length() != 0) {
                     // Only proposed elements with
                     // an id will be considered
-                    Element proposedElement = XmlUtils.findFirstElement(
+                    final Element proposedElement = XmlUtils.findFirstElement(
                             "//*[@id='" + originalId + "']", proposed);
-                    if (null == proposedElement
+                    if ((null == proposedElement)
                             && (originalElement.getAttribute("z").equals(
                                     calculateUniqueKeyFor(originalElement)) || originalElement
                                     .getAttribute("z").equals("?"))) {
@@ -267,33 +300,6 @@ public final class XmlRoundTripUtils {
         return originalDocumentChanged;
     }
 
-    private static boolean equalElements(final Element a, final Element b) {
-        if (!a.getTagName().equals(b.getTagName())) {
-            return false;
-        }
-        NamedNodeMap attributes = a.getAttributes();
-        int customAttributeCounter = 0;
-        for (int i = 0, n = attributes.getLength(); i < n; i++) {
-            Node node = attributes.item(i);
-            if (node != null && !node.getNodeName().startsWith("_")) {
-                if (!node.getNodeName().equals("z")
-                        && (b.getAttribute(node.getNodeName()).length() == 0 || !b
-                                .getAttribute(node.getNodeName()).equals(
-                                        node.getNodeValue()))) {
-                    return false;
-                }
-            }
-            else {
-                customAttributeCounter++;
-            }
-        }
-        if (a.getAttributes().getLength() - customAttributeCounter != b
-                .getAttributes().getLength()) {
-            return false;
-        }
-        return true;
-    }
-
     /**
      * Creates a sha-1 hash value for the given data byte array.
      * 
@@ -303,10 +309,6 @@ public final class XmlRoundTripUtils {
     private static byte[] sha1(final byte[] data) {
         Assert.notNull(digest, "Could not create hash key for identifier");
         return digest.digest(data);
-    }
-
-    private static String base64(final byte[] data) {
-        return Base64.encodeBytes(data);
     }
 
     /**

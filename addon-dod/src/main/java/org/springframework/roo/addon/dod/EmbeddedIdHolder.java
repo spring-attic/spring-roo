@@ -16,7 +16,6 @@ import org.springframework.roo.support.util.StringUtils;
  */
 public class EmbeddedIdHolder {
 
-    // Fields
     private final FieldMetadata embeddedIdField;
     private final List<FieldMetadata> idFields;
 

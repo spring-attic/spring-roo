@@ -27,57 +27,6 @@ public class GAVConverterTest {
     // Fixture
     private GAVConverter converter;
 
-    @Before
-    public void setUp() {
-        this.converter = new GAVConverter();
-    }
-
-    @Test
-    public void testSupportsGAVs() {
-        assertTrue(converter.supports(GAV.class, null));
-    }
-
-    @Test
-    public void testSupportsSubclassOfGAV() {
-        // Set up
-        final Class<? extends GAV> subclass = new GAV("a", "b", "c") {
-        }.getClass();
-
-        // Invoke and check
-        assertTrue(converter.supports(subclass, null));
-    }
-
-    @Test
-    public void testDoesNotSupportObjects() {
-        assertFalse(converter.supports(Object.class, null));
-    }
-
-    @Test
-    public void testConvertFromNull() {
-        assertInvalidString(null,
-                "Expected three coordinates, but found 0: []; did you use the ':' separator?");
-    }
-
-    @Test
-    public void testConvertFromEmptyString() {
-        assertInvalidString("",
-                "Expected three coordinates, but found 0: []; did you use the ':' separator?");
-    }
-
-    @Test
-    public void testConvertFromOneTooFewCoordinates() {
-        assertInvalidString(
-                "foo:bar",
-                "Expected three coordinates, but found 2: [foo, bar]; did you use the ':' separator?");
-    }
-
-    @Test
-    public void testConvertFromOneTooManyCoordinates() {
-        assertInvalidString(
-                "foo:bar:baz:bop",
-                "Expected three coordinates, but found 4: [foo, bar, baz, bop]; did you use the ':' separator?");
-    }
-
     private void assertInvalidString(final String string,
             final String expectedMessage) {
         try {
@@ -87,30 +36,6 @@ public class GAVConverterTest {
         catch (final Exception e) {
             assertEquals(expectedMessage, e.getMessage());
         }
-    }
-
-    @Test
-    public void testConvertFromValidCoordinates() {
-        // Set up
-        final String groupId = "org.springframework.roo";
-        final String artifactId = "addon-gradle";
-        final String version = "-0.1";
-        final String coordinates = StringUtils.collectionToDelimitedString(
-                Arrays.asList(groupId, artifactId, version),
-                MavenUtils.COORDINATE_SEPARATOR);
-
-        // Invoke
-        final GAV gav = converter.convertFromText(coordinates, GAV.class, null);
-
-        // Check
-        assertEquals(groupId, gav.getGroupId());
-        assertEquals(artifactId, gav.getArtifactId());
-        assertEquals(version, gav.getVersion());
-    }
-
-    @Test
-    public void testGetAllPossibleValuesForNullInput() {
-        assertPossibleValues(null, true);
     }
 
     /**
@@ -134,5 +59,80 @@ public class GAVConverterTest {
         // Check
         assertEquals(expectedComplete, complete);
         assertEquals(Arrays.asList(expectedCompletions), completions);
+    }
+
+    @Before
+    public void setUp() {
+        converter = new GAVConverter();
+    }
+
+    @Test
+    public void testConvertFromEmptyString() {
+        assertInvalidString("",
+                "Expected three coordinates, but found 0: []; did you use the ':' separator?");
+    }
+
+    @Test
+    public void testConvertFromNull() {
+        assertInvalidString(null,
+                "Expected three coordinates, but found 0: []; did you use the ':' separator?");
+    }
+
+    @Test
+    public void testConvertFromOneTooFewCoordinates() {
+        assertInvalidString(
+                "foo:bar",
+                "Expected three coordinates, but found 2: [foo, bar]; did you use the ':' separator?");
+    }
+
+    @Test
+    public void testConvertFromOneTooManyCoordinates() {
+        assertInvalidString(
+                "foo:bar:baz:bop",
+                "Expected three coordinates, but found 4: [foo, bar, baz, bop]; did you use the ':' separator?");
+    }
+
+    @Test
+    public void testConvertFromValidCoordinates() {
+        // Set up
+        final String groupId = "org.springframework.roo";
+        final String artifactId = "addon-gradle";
+        final String version = "-0.1";
+        final String coordinates = StringUtils.collectionToDelimitedString(
+                Arrays.asList(groupId, artifactId, version),
+                MavenUtils.COORDINATE_SEPARATOR);
+
+        // Invoke
+        final GAV gav = converter.convertFromText(coordinates, GAV.class, null);
+
+        // Check
+        assertEquals(groupId, gav.getGroupId());
+        assertEquals(artifactId, gav.getArtifactId());
+        assertEquals(version, gav.getVersion());
+    }
+
+    @Test
+    public void testDoesNotSupportObjects() {
+        assertFalse(converter.supports(Object.class, null));
+    }
+
+    @Test
+    public void testGetAllPossibleValuesForNullInput() {
+        assertPossibleValues(null, true);
+    }
+
+    @Test
+    public void testSupportsGAVs() {
+        assertTrue(converter.supports(GAV.class, null));
+    }
+
+    @Test
+    public void testSupportsSubclassOfGAV() {
+        // Set up
+        final Class<? extends GAV> subclass = new GAV("a", "b", "c") {
+        }.getClass();
+
+        // Invoke and check
+        assertTrue(converter.supports(subclass, null));
     }
 }

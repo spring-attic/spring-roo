@@ -27,8 +27,8 @@ public class ClasspathOperationsImplTest {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        this.classpathOperations = new ClasspathOperationsImpl();
-        this.classpathOperations.typeLocationService = mockTypeLocationService;
+        classpathOperations = new ClasspathOperationsImpl();
+        classpathOperations.typeLocationService = mockTypeLocationService;
     }
 
     @Test

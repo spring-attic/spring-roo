@@ -31,19 +31,14 @@ import org.w3c.dom.Element;
 @Service
 public class Op4jOperationsImpl implements Op4jOperations {
 
-    // Fields
     @Reference private ProjectOperations projectOperations;
     @Reference private TypeLocationService typeLocationService;
     @Reference private TypeManagementService typeManagementService;
 
-    public boolean isOp4jInstallationPossible() {
-        return projectOperations.isFocusedProjectAvailable();
-    }
-
     public void annotateType(final JavaType javaType) {
         Assert.notNull(javaType, "Java type required");
 
-        ClassOrInterfaceTypeDetails cid = typeLocationService
+        final ClassOrInterfaceTypeDetails cid = typeLocationService
                 .getTypeDetails(javaType);
         if (cid == null) {
             throw new IllegalArgumentException("Cannot locate source for '"
@@ -52,22 +47,26 @@ public class Op4jOperationsImpl implements Op4jOperations {
 
         if (MemberFindingUtils.getAnnotationOfType(cid.getAnnotations(),
                 ROO_OP4J) == null) {
-            AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(
+            final AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(
                     ROO_OP4J);
-            ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(
+            final ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(
                     cid);
             cidBuilder.addAnnotation(annotationBuilder);
             typeManagementService.createOrUpdateTypeOnDisk(cid);
         }
     }
 
-    public void setup() {
-        Element configuration = XmlUtils.getConfiguration(getClass());
+    public boolean isOp4jInstallationPossible() {
+        return projectOperations.isFocusedProjectAvailable();
+    }
 
-        List<Dependency> dependencies = new ArrayList<Dependency>();
-        List<Element> op4jDependencies = XmlUtils.findElements(
+    public void setup() {
+        final Element configuration = XmlUtils.getConfiguration(getClass());
+
+        final List<Dependency> dependencies = new ArrayList<Dependency>();
+        final List<Element> op4jDependencies = XmlUtils.findElements(
                 "/configuration/op4j/dependencies/dependency", configuration);
-        for (Element dependencyElement : op4jDependencies) {
+        for (final Element dependencyElement : op4jDependencies) {
             dependencies.add(new Dependency(dependencyElement));
         }
         projectOperations.addDependencies(

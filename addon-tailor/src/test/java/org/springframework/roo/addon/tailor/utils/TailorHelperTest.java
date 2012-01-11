@@ -4,14 +4,13 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 import org.springframework.roo.addon.tailor.CommandTransformation;
-import org.springframework.roo.addon.tailor.utils.TailorHelper;
 
 /**
  * Tests for {@link TailorHelper#replaceVars(CommandTransformation, String)}
  * 
  * @author Birgitta Boeckeler
  */
-public class TestTailorHelper {
+public class TailorHelperTest {
 
     /**
      * Tests a standard case: 2 arguments in the trigger command, both of them
@@ -19,12 +18,12 @@ public class TestTailorHelper {
      */
     @Test
     public void testReplaceVars() {
-        CommandTransformation rooCommand = new CommandTransformation(
+        final CommandTransformation rooCommand = new CommandTransformation(
                 "project --topLevelPackage com.foo.sample --projectName test --domain otherdomainname");
-        String result = TailorHelper
+        final String result = TailorHelper
                 .replaceVars(rooCommand,
                         "module create --moduleName ${domain} --topLevelPackage ${topLevelPackage}");
-        String expectedResult = "module create --moduleName otherdomainname --topLevelPackage com.foo.sample";
+        final String expectedResult = "module create --moduleName otherdomainname --topLevelPackage com.foo.sample";
         Assert.assertEquals("Unexpected result: " + result, expectedResult,
                 result);
     }
@@ -35,29 +34,13 @@ public class TestTailorHelper {
      */
     @Test
     public void testReplaceVarsDuplicatePlaceholders() {
-        CommandTransformation rooCommand = new CommandTransformation(
+        final CommandTransformation rooCommand = new CommandTransformation(
                 "project --topLevelPackage com.foo.sample --projectName test --domain otherdomainname");
-        String result = TailorHelper
+        final String result = TailorHelper
                 .replaceVars(
                         rooCommand,
                         "module create --moduleName ${domain} --topLevelPackage ${topLevelPackage}.${domain}");
-        String expectedResult = "module create --moduleName otherdomainname --topLevelPackage com.foo.sample.otherdomainname";
-        Assert.assertEquals("Unexpected result: " + result, expectedResult,
-                result);
-    }
-
-    /**
-     * Test makes sure that the regex used by TailorHelper does not match
-     * placeholders that are similar, but different. (Prefix and suffix)
-     */
-    @Test
-    public void testReplaceVarsSimilarPlaceholders() {
-        CommandTransformation rooCommand = new CommandTransformation(
-                "project --topLevelPackage com.foo.sample --projectName test --domain otherdomainname");
-        String result = TailorHelper
-                .replaceVars(rooCommand,
-                        "module create --moduleName ${xdomain} --topLevelPackage ${topLevelPackagex}");
-        String expectedResult = "module create --moduleName ${xdomain} --topLevelPackage ${topLevelPackagex}";
+        final String expectedResult = "module create --moduleName otherdomainname --topLevelPackage com.foo.sample.otherdomainname";
         Assert.assertEquals("Unexpected result: " + result, expectedResult,
                 result);
     }
@@ -70,12 +53,28 @@ public class TestTailorHelper {
     @Test
     public void testReplaceVarsForUnnamedArgument() {
 
-        CommandTransformation rooCommand = new CommandTransformation(
+        final CommandTransformation rooCommand = new CommandTransformation(
                 "cd test-data");
-        String result = TailorHelper.replaceVars(rooCommand,
+        final String result = TailorHelper.replaceVars(rooCommand,
                 "module focus --moduleName ${*}");
         Assert.assertTrue("* was not replaced: " + result,
                 result.endsWith("test-data"));
+    }
+
+    /**
+     * Test makes sure that the regex used by TailorHelper does not match
+     * placeholders that are similar, but different. (Prefix and suffix)
+     */
+    @Test
+    public void testReplaceVarsSimilarPlaceholders() {
+        final CommandTransformation rooCommand = new CommandTransformation(
+                "project --topLevelPackage com.foo.sample --projectName test --domain otherdomainname");
+        final String result = TailorHelper
+                .replaceVars(rooCommand,
+                        "module create --moduleName ${xdomain} --topLevelPackage ${topLevelPackagex}");
+        final String expectedResult = "module create --moduleName ${xdomain} --topLevelPackage ${topLevelPackagex}";
+        Assert.assertEquals("Unexpected result: " + result, expectedResult,
+                result);
     }
 
 }

@@ -11,13 +11,7 @@ import org.w3c.dom.Element;
  */
 public class RepositoryTest extends XmlTestCase {
 
-    // Constants
     private static final boolean ENABLE_SNAPSHOTS = true;
-    private static final String ID = "the-id";
-    private static final String NAME = "the_name";
-    private static final String URL = "the-url";
-    private static final String PATH = "pluginRepo";
-
     private static final String EXPECTED_XML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
             + "<pluginRepo>\n"
             + "    <id>the-id</id>\n"
@@ -26,6 +20,11 @@ public class RepositoryTest extends XmlTestCase {
             + "    <snapshots>\n"
             + "        <enabled>true</enabled>\n"
             + "    </snapshots>\n" + "</pluginRepo>";
+    private static final String ID = "the-id";
+    private static final String NAME = "the_name";
+    private static final String PATH = "pluginRepo";
+
+    private static final String URL = "the-url";
 
     @Test
     public void testGetElement() {

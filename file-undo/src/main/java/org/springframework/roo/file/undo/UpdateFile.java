@@ -16,14 +16,12 @@ import org.springframework.roo.support.util.FileCopyUtils;
  */
 public class UpdateFile implements UndoableOperation {
 
-    // Constants
     private static final Logger LOGGER = HandlerUtils
             .getLogger(UpdateFile.class);
 
-    // Fields
-    private final FilenameResolver filenameResolver;
     private final File actual;
     private final File backup;
+    private final FilenameResolver filenameResolver;
 
     /**
      * Constructor
@@ -46,7 +44,7 @@ public class UpdateFile implements UndoableOperation {
             backup = File.createTempFile("UpdateFile", "tmp");
             FileCopyUtils.copy(actual, backup);
         }
-        catch (IOException ioe) {
+        catch (final IOException ioe) {
             throw new IllegalStateException("Unable to make a backup of file '"
                     + actual + "'", ioe);
         }
@@ -67,7 +65,7 @@ public class UpdateFile implements UndoableOperation {
                         + filenameResolver.getMeaningfulName(backup));
             }
         }
-        catch (Throwable e) {
+        catch (final Throwable e) {
             backup.deleteOnExit();
             LOGGER.fine("Reset failed "
                     + filenameResolver.getMeaningfulName(backup));
@@ -81,7 +79,7 @@ public class UpdateFile implements UndoableOperation {
                     + filenameResolver.getMeaningfulName(actual));
             return true;
         }
-        catch (IOException ioe) {
+        catch (final IOException ioe) {
             LOGGER.fine("Undo failed "
                     + filenameResolver.getMeaningfulName(actual));
             return false;

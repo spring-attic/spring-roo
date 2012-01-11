@@ -18,58 +18,103 @@ import org.w3c.dom.NodeList;
  */
 public final class WebXmlUtils {
 
-    // Constants
-    private static final String WEB_APP_XPATH = "/web-app/";
-    private static final String WHITESPACE = "[ \t\r\n]";
-
     /**
-     * Set the display-name element in the web.xml document.
+     * Enum to define dispatcher
      * 
-     * @param displayName (required)
-     * @param document the web.xml document (required)
-     * @param comment (optional)
+     * @author Stefan Schmidt
+     * @since 1.1.1
      */
-    public static void setDisplayName(final String displayName,
-            final Document document, final String comment) {
-        Assert.hasText(displayName, "display name required");
-        Assert.notNull(document, "Web XML document required");
-
-        Element displayNameElement = XmlUtils.findFirstElement(WEB_APP_XPATH
-                + "display-name", document.getDocumentElement());
-        if (displayNameElement == null) {
-            displayNameElement = document.createElement("display-name");
-            insertBetween(displayNameElement, "the-start", "description",
-                    document);
-            if (StringUtils.hasText(comment)) {
-                addCommentBefore(displayNameElement, comment, document);
-            }
-        }
-        displayNameElement.setTextContent(displayName);
+    public static enum Dispatcher {
+        ERROR, FORWARD, INCLUDE, REQUEST;
     }
 
     /**
-     * Set the description element in the web.xml document.
+     * Enum to define filter position
      * 
-     * @param description (required)
-     * @param document the web.xml document (required)
-     * @param comment (optional)
+     * @author Stefan Schmidt
+     * @since 1.1
      */
-    public static void setDescription(final String description,
-            final Document document, final String comment) {
-        Assert.notNull(document, "Web XML document required");
-        Assert.hasText(description, "Description required");
+    public static enum FilterPosition {
+        AFTER, BEFORE, BETWEEN, FIRST, LAST;
+    }
 
-        Element descriptionElement = XmlUtils.findFirstElement(WEB_APP_XPATH
-                + "description", document.getDocumentElement());
-        if (descriptionElement == null) {
-            descriptionElement = document.createElement("description");
-            insertBetween(descriptionElement, "display-name[last()]",
-                    "context-param", document);
-            if (StringUtils.hasText(comment)) {
-                addCommentBefore(descriptionElement, comment, document);
-            }
+    /**
+     * Convenience class for passing a web-resource-collection element's details
+     * 
+     * @since 1.1.1
+     */
+    public static class WebResourceCollection {
+        private final String description;
+        private final List<String> httpMethods;
+        private final List<String> urlPatterns;
+        private final String webResourceName;
+
+        public WebResourceCollection(final String webResourceName,
+                final String description, final List<String> urlPatterns,
+                final List<String> httpMethods) {
+            this.webResourceName = webResourceName;
+            this.description = description;
+            this.urlPatterns = urlPatterns;
+            this.httpMethods = httpMethods;
         }
-        descriptionElement.setTextContent(description);
+
+        public String getDescription() {
+            return description;
+        }
+
+        public List<String> getHttpMethods() {
+            return httpMethods;
+        }
+
+        public List<String> getUrlPatterns() {
+            return urlPatterns;
+        }
+
+        public String getWebResourceName() {
+            return webResourceName;
+        }
+    }
+
+    /**
+     * Value object that holds init-param style information
+     * 
+     * @author Stefan Schmidt
+     * @since 1.1
+     */
+    public static class WebXmlParam extends Pair<String, String> {
+
+        /**
+         * Constructor
+         * 
+         * @param name
+         * @param value
+         */
+        public WebXmlParam(final String name, final String value) {
+            super(name, value);
+        }
+
+        /**
+         * Returns the name of this parameter
+         * 
+         * @return
+         */
+        public String getName() {
+            return getKey();
+        }
+    }
+
+    private static final String WEB_APP_XPATH = "/web-app/";
+
+    private static final String WHITESPACE = "[ \t\r\n]";
+
+    private static void addCommentBefore(final Element element,
+            final String comment, final Document document) {
+        if (null == XmlUtils.findNode("//comment()[.=' " + comment + " ']",
+                document.getDocumentElement())) {
+            document.getDocumentElement().insertBefore(
+                    document.createComment(" " + comment + " "), element);
+            addLineBreakBefore(element, document);
+        }
     }
 
     /**
@@ -104,6 +149,72 @@ public final class WebXmlUtils {
     }
 
     /**
+     * Add error code to web.xml document
+     * 
+     * @param errorCode (required)
+     * @param location (required)
+     * @param document (required)
+     * @param comment (optional)
+     */
+    public static void addErrorCode(final Integer errorCode,
+            final String location, final Document document, final String comment) {
+        Assert.notNull(document, "Web XML document required");
+        Assert.notNull(errorCode, "Error code required");
+        Assert.hasText(location, "Location required");
+
+        Element errorPageElement = XmlUtils.findFirstElement(WEB_APP_XPATH
+                + "error-page[error-code = '" + errorCode.toString() + "']",
+                document.getDocumentElement());
+        if (errorPageElement == null) {
+            errorPageElement = new XmlElementBuilder("error-page", document)
+                    .addChild(
+                            new XmlElementBuilder("error-code", document)
+                                    .setText(errorCode.toString()).build())
+                    .build();
+            insertBetween(errorPageElement, "welcome-file-list[last()]",
+                    "the-end", document);
+            if (StringUtils.hasText(comment)) {
+                addCommentBefore(errorPageElement, comment, document);
+            }
+        }
+        appendChildIfNotPresent(errorPageElement, new XmlElementBuilder(
+                "location", document).setText(location).build());
+    }
+
+    /**
+     * Add exception type to web.xml document
+     * 
+     * @param exceptionType fully qualified exception type name (required)
+     * @param location (required)
+     * @param document (required)
+     * @param comment (optional)
+     */
+    public static void addExceptionType(final String exceptionType,
+            final String location, final Document document, final String comment) {
+        Assert.notNull(document, "Web XML document required");
+        Assert.hasText(exceptionType,
+                "Fully qualified exception type name required");
+        Assert.hasText(location, "location required");
+
+        Element errorPageElement = XmlUtils.findFirstElement(WEB_APP_XPATH
+                + "error-page[exception-type = '" + exceptionType + "']",
+                document.getDocumentElement());
+        if (errorPageElement == null) {
+            errorPageElement = new XmlElementBuilder("error-page", document)
+                    .addChild(
+                            new XmlElementBuilder("exception-type", document)
+                                    .setText(exceptionType).build()).build();
+            insertBetween(errorPageElement, "welcome-file-list[last()]",
+                    "the-end", document);
+            if (StringUtils.hasText(comment)) {
+                addCommentBefore(errorPageElement, comment, document);
+            }
+        }
+        appendChildIfNotPresent(errorPageElement, new XmlElementBuilder(
+                "location", document).setText(location).build());
+    }
+
+    /**
      * Add a new filter definition to web.xml document. The filter will be added
      * AFTER (FilterPosition.LAST) all existing filters.
      * 
@@ -120,38 +231,6 @@ public final class WebXmlUtils {
             final WebXmlParam... initParams) {
         addFilterAtPosition(FilterPosition.LAST, null, null, filterName,
                 filterClass, urlPattern, document, comment, initParams);
-    }
-
-    /**
-     * Add a new filter definition to web.xml document. The filter will be added
-     * at the FilterPosition specified.
-     * 
-     * @param filterPosition Filter position (required)
-     * @param beforeFilterName (optional for filter position FIRST and LAST,
-     *            required for BEFORE and AFTER)
-     * @param filterName (required)
-     * @param filterClass the fully qualified name of the filter type (required)
-     * @param urlPattern (required)
-     * @param document the web.xml document (required)
-     * @param comment (optional)
-     * @param initParams (optional)
-     */
-    public static void addFilterAtPosition(final FilterPosition filterPosition,
-            final String afterFilterName, final String beforeFilterName,
-            final String filterName, final String filterClass,
-            final String urlPattern, final Document document,
-            final String comment, final WebXmlParam... initParams) {
-        addFilterAtPosition(
-                filterPosition,
-                afterFilterName,
-                beforeFilterName,
-                filterName,
-                filterClass,
-                urlPattern,
-                document,
-                comment,
-                initParams == null ? new ArrayList<WebXmlParam>() : Arrays
-                        .asList(initParams), new ArrayList<Dispatcher>());
     }
 
     /**
@@ -287,6 +366,44 @@ public final class WebXmlUtils {
     }
 
     /**
+     * Add a new filter definition to web.xml document. The filter will be added
+     * at the FilterPosition specified.
+     * 
+     * @param filterPosition Filter position (required)
+     * @param beforeFilterName (optional for filter position FIRST and LAST,
+     *            required for BEFORE and AFTER)
+     * @param filterName (required)
+     * @param filterClass the fully qualified name of the filter type (required)
+     * @param urlPattern (required)
+     * @param document the web.xml document (required)
+     * @param comment (optional)
+     * @param initParams (optional)
+     */
+    public static void addFilterAtPosition(final FilterPosition filterPosition,
+            final String afterFilterName, final String beforeFilterName,
+            final String filterName, final String filterClass,
+            final String urlPattern, final Document document,
+            final String comment, final WebXmlParam... initParams) {
+        addFilterAtPosition(
+                filterPosition,
+                afterFilterName,
+                beforeFilterName,
+                filterName,
+                filterClass,
+                urlPattern,
+                document,
+                comment,
+                initParams == null ? new ArrayList<WebXmlParam>() : Arrays
+                        .asList(initParams), new ArrayList<Dispatcher>());
+    }
+
+    private static void addLineBreakBefore(final Element element,
+            final Document document) {
+        document.getDocumentElement().insertBefore(
+                document.createTextNode("\n    "), element);
+    }
+
+    /**
      * Add listener element to web.xml document
      * 
      * @param className the fully qualified name of the listener type (required)
@@ -312,209 +429,6 @@ public final class WebXmlUtils {
                 addCommentBefore(listenerElement, comment, document);
             }
         }
-    }
-
-    /**
-     * Add servlet element to the web.xml document
-     * 
-     * @param servletName (required)
-     * @param className the fully qualified name of the servlet type (required)
-     * @param urlPattern this can be set to null in which case the servletName
-     *            will be used for mapping (optional)
-     * @param loadOnStartup (optional)
-     * @param document (required)
-     * @param comment (optional)
-     * @param initParams (optional)
-     */
-    public static void addServlet(final String servletName,
-            final String className, final String urlPattern,
-            final Integer loadOnStartup, final Document document,
-            final String comment, final WebXmlParam... initParams) {
-        Assert.notNull(document, "Web XML document required");
-        Assert.hasText(servletName, "Servlet name required");
-        Assert.hasText(className, "Fully qualified class name required");
-
-        // Create servlet
-        Element servletElement = XmlUtils.findFirstElement(WEB_APP_XPATH
-                + "servlet[servlet-name = '" + servletName + "']",
-                document.getDocumentElement());
-        if (servletElement == null) {
-            servletElement = new XmlElementBuilder("servlet", document)
-                    .addChild(
-                            new XmlElementBuilder("servlet-name", document)
-                                    .setText(servletName).build()).build();
-            insertBetween(servletElement, "listener[last()]",
-                    "servlet-mapping", document);
-            if (comment != null && comment.length() > 0) {
-                addCommentBefore(servletElement, comment, document);
-            }
-        }
-        appendChildIfNotPresent(servletElement, new XmlElementBuilder(
-                "servlet-class", document).setText(className).build());
-        for (final WebXmlParam initParam : initParams) {
-            appendChildIfNotPresent(
-                    servletElement,
-                    new XmlElementBuilder("init-param", document)
-                            .addChild(
-                                    new XmlElementBuilder("param-name",
-                                            document).setText(
-                                            initParam.getName()).build())
-                            .addChild(
-                                    new XmlElementBuilder("param-value",
-                                            document).setText(
-                                            initParam.getValue()).build())
-                            .build());
-        }
-        if (loadOnStartup != null) {
-            appendChildIfNotPresent(
-                    servletElement,
-                    new XmlElementBuilder("load-on-startup", document).setText(
-                            loadOnStartup.toString()).build());
-        }
-
-        // Create servlet mapping
-        Element servletMappingElement = XmlUtils.findFirstElement(WEB_APP_XPATH
-                + "servlet-mapping[servlet-name = '" + servletName + "']",
-                document.getDocumentElement());
-        if (servletMappingElement == null) {
-            servletMappingElement = new XmlElementBuilder("servlet-mapping",
-                    document).addChild(
-                    new XmlElementBuilder("servlet-name", document).setText(
-                            servletName).build()).build();
-            insertBetween(servletMappingElement, "servlet[last()]",
-                    "session-config", document);
-        }
-        if (StringUtils.hasText(urlPattern)) {
-            appendChildIfNotPresent(
-                    servletMappingElement,
-                    new XmlElementBuilder("url-pattern", document).setText(
-                            urlPattern).build());
-        }
-        else {
-            appendChildIfNotPresent(
-                    servletMappingElement,
-                    new XmlElementBuilder("servlet-name", document).setText(
-                            servletName).build());
-        }
-    }
-
-    /**
-     * Set session timeout in web.xml document
-     * 
-     * @param timeout
-     * @param document (required)
-     * @param comment (optional)
-     */
-    public static void setSessionTimeout(final int timeout,
-            final Document document, final String comment) {
-        Assert.notNull(document, "Web XML document required");
-        Assert.notNull(timeout, "Timeout required");
-
-        Element sessionConfigElement = XmlUtils.findFirstElement(WEB_APP_XPATH
-                + "session-config", document.getDocumentElement());
-        if (sessionConfigElement == null) {
-            sessionConfigElement = document.createElement("session-config");
-            insertBetween(sessionConfigElement, "servlet-mapping[last()]",
-                    "welcome-file-list", document);
-            if (StringUtils.hasText(comment)) {
-                addCommentBefore(sessionConfigElement, comment, document);
-            }
-        }
-        appendChildIfNotPresent(sessionConfigElement, new XmlElementBuilder(
-                "session-timeout", document).setText(String.valueOf(timeout))
-                .build());
-    }
-
-    /**
-     * Add a welcome file definition to web.xml document
-     * 
-     * @param path (required)
-     * @param document (required)
-     * @param comment (optional)
-     */
-    public static void addWelcomeFile(final String path,
-            final Document document, final String comment) {
-        Assert.notNull(document, "Web XML document required");
-        Assert.hasText("Path required");
-
-        Element welcomeFileElement = XmlUtils.findFirstElement(WEB_APP_XPATH
-                + "welcome-file-list", document.getDocumentElement());
-        if (welcomeFileElement == null) {
-            welcomeFileElement = document.createElement("welcome-file-list");
-            insertBetween(welcomeFileElement, "session-config[last()]",
-                    "error-page", document);
-            if (StringUtils.hasText(comment)) {
-                addCommentBefore(welcomeFileElement, comment, document);
-            }
-        }
-        appendChildIfNotPresent(welcomeFileElement, new XmlElementBuilder(
-                "welcome-file", document).setText(path).build());
-    }
-
-    /**
-     * Add exception type to web.xml document
-     * 
-     * @param exceptionType fully qualified exception type name (required)
-     * @param location (required)
-     * @param document (required)
-     * @param comment (optional)
-     */
-    public static void addExceptionType(final String exceptionType,
-            final String location, final Document document, final String comment) {
-        Assert.notNull(document, "Web XML document required");
-        Assert.hasText(exceptionType,
-                "Fully qualified exception type name required");
-        Assert.hasText(location, "location required");
-
-        Element errorPageElement = XmlUtils.findFirstElement(WEB_APP_XPATH
-                + "error-page[exception-type = '" + exceptionType + "']",
-                document.getDocumentElement());
-        if (errorPageElement == null) {
-            errorPageElement = new XmlElementBuilder("error-page", document)
-                    .addChild(
-                            new XmlElementBuilder("exception-type", document)
-                                    .setText(exceptionType).build()).build();
-            insertBetween(errorPageElement, "welcome-file-list[last()]",
-                    "the-end", document);
-            if (StringUtils.hasText(comment)) {
-                addCommentBefore(errorPageElement, comment, document);
-            }
-        }
-        appendChildIfNotPresent(errorPageElement, new XmlElementBuilder(
-                "location", document).setText(location).build());
-    }
-
-    /**
-     * Add error code to web.xml document
-     * 
-     * @param errorCode (required)
-     * @param location (required)
-     * @param document (required)
-     * @param comment (optional)
-     */
-    public static void addErrorCode(final Integer errorCode,
-            final String location, final Document document, final String comment) {
-        Assert.notNull(document, "Web XML document required");
-        Assert.notNull(errorCode, "Error code required");
-        Assert.hasText(location, "Location required");
-
-        Element errorPageElement = XmlUtils.findFirstElement(WEB_APP_XPATH
-                + "error-page[error-code = '" + errorCode.toString() + "']",
-                document.getDocumentElement());
-        if (errorPageElement == null) {
-            errorPageElement = new XmlElementBuilder("error-page", document)
-                    .addChild(
-                            new XmlElementBuilder("error-code", document)
-                                    .setText(errorCode.toString()).build())
-                    .build();
-            insertBetween(errorPageElement, "welcome-file-list[last()]",
-                    "the-end", document);
-            if (StringUtils.hasText(comment)) {
-                addCommentBefore(errorPageElement, comment, document);
-            }
-        }
-        appendChildIfNotPresent(errorPageElement, new XmlElementBuilder(
-                "location", document).setText(location).build());
     }
 
     /**
@@ -588,7 +502,7 @@ public final class WebXmlUtils {
                     webResourceCollectionBuilder.build());
         }
 
-        if (roleNames != null && roleNames.size() > 0) {
+        if ((roleNames != null) && (roleNames.size() > 0)) {
             final XmlElementBuilder authConstraintBuilder = new XmlElementBuilder(
                     "auth-constraint", document);
             for (final String roleName : roleNames) {
@@ -612,64 +526,114 @@ public final class WebXmlUtils {
         }
     }
 
-    private static void insertBetween(final Element element,
-            final String afterElementName, final String beforeElementName,
-            final Document document) {
-        final Element beforeElement = XmlUtils.findFirstElement(WEB_APP_XPATH
-                + beforeElementName, document.getDocumentElement());
-        if (beforeElement != null) {
-            document.getDocumentElement().insertBefore(element, beforeElement);
-            addLineBreakBefore(element, document);
-            addLineBreakBefore(element, document);
-            return;
+    /**
+     * Add servlet element to the web.xml document
+     * 
+     * @param servletName (required)
+     * @param className the fully qualified name of the servlet type (required)
+     * @param urlPattern this can be set to null in which case the servletName
+     *            will be used for mapping (optional)
+     * @param loadOnStartup (optional)
+     * @param document (required)
+     * @param comment (optional)
+     * @param initParams (optional)
+     */
+    public static void addServlet(final String servletName,
+            final String className, final String urlPattern,
+            final Integer loadOnStartup, final Document document,
+            final String comment, final WebXmlParam... initParams) {
+        Assert.notNull(document, "Web XML document required");
+        Assert.hasText(servletName, "Servlet name required");
+        Assert.hasText(className, "Fully qualified class name required");
+
+        // Create servlet
+        Element servletElement = XmlUtils.findFirstElement(WEB_APP_XPATH
+                + "servlet[servlet-name = '" + servletName + "']",
+                document.getDocumentElement());
+        if (servletElement == null) {
+            servletElement = new XmlElementBuilder("servlet", document)
+                    .addChild(
+                            new XmlElementBuilder("servlet-name", document)
+                                    .setText(servletName).build()).build();
+            insertBetween(servletElement, "listener[last()]",
+                    "servlet-mapping", document);
+            if ((comment != null) && (comment.length() > 0)) {
+                addCommentBefore(servletElement, comment, document);
+            }
+        }
+        appendChildIfNotPresent(servletElement, new XmlElementBuilder(
+                "servlet-class", document).setText(className).build());
+        for (final WebXmlParam initParam : initParams) {
+            appendChildIfNotPresent(
+                    servletElement,
+                    new XmlElementBuilder("init-param", document)
+                            .addChild(
+                                    new XmlElementBuilder("param-name",
+                                            document).setText(
+                                            initParam.getName()).build())
+                            .addChild(
+                                    new XmlElementBuilder("param-value",
+                                            document).setText(
+                                            initParam.getValue()).build())
+                            .build());
+        }
+        if (loadOnStartup != null) {
+            appendChildIfNotPresent(
+                    servletElement,
+                    new XmlElementBuilder("load-on-startup", document).setText(
+                            loadOnStartup.toString()).build());
         }
 
-        final Element afterElement = XmlUtils.findFirstElement(WEB_APP_XPATH
-                + afterElementName, document.getDocumentElement());
-        if (afterElement != null && afterElement.getNextSibling() != null
-                && afterElement.getNextSibling() instanceof Element) {
-            document.getDocumentElement().insertBefore(element,
-                    afterElement.getNextSibling());
-            addLineBreakBefore(element, document);
-            addLineBreakBefore(element, document);
-            return;
+        // Create servlet mapping
+        Element servletMappingElement = XmlUtils.findFirstElement(WEB_APP_XPATH
+                + "servlet-mapping[servlet-name = '" + servletName + "']",
+                document.getDocumentElement());
+        if (servletMappingElement == null) {
+            servletMappingElement = new XmlElementBuilder("servlet-mapping",
+                    document).addChild(
+                    new XmlElementBuilder("servlet-name", document).setText(
+                            servletName).build()).build();
+            insertBetween(servletMappingElement, "servlet[last()]",
+                    "session-config", document);
         }
-
-        document.getDocumentElement().appendChild(element);
-        addLineBreakBefore(element, document);
-        addLineBreakBefore(element, document);
+        if (StringUtils.hasText(urlPattern)) {
+            appendChildIfNotPresent(
+                    servletMappingElement,
+                    new XmlElementBuilder("url-pattern", document).setText(
+                            urlPattern).build());
+        }
+        else {
+            appendChildIfNotPresent(
+                    servletMappingElement,
+                    new XmlElementBuilder("servlet-name", document).setText(
+                            servletName).build());
+        }
     }
 
-    private static void insertBefore(final Element element,
-            final String beforeElementName, final Document document) {
-        final Element beforeElement = XmlUtils.findFirstElement(WEB_APP_XPATH
-                + beforeElementName, document.getDocumentElement());
-        if (beforeElement != null) {
-            document.getDocumentElement().insertBefore(element, beforeElement);
-            addLineBreakBefore(element, document);
-            addLineBreakBefore(element, document);
-            return;
-        }
-        document.getDocumentElement().appendChild(element);
-        addLineBreakBefore(element, document);
-        addLineBreakBefore(element, document);
-    }
+    /**
+     * Add a welcome file definition to web.xml document
+     * 
+     * @param path (required)
+     * @param document (required)
+     * @param comment (optional)
+     */
+    public static void addWelcomeFile(final String path,
+            final Document document, final String comment) {
+        Assert.notNull(document, "Web XML document required");
+        Assert.hasText("Path required");
 
-    private static void insertAfter(final Element element,
-            final String afterElementName, final Document document) {
-        final Element afterElement = XmlUtils.findFirstElement(WEB_APP_XPATH
-                + afterElementName, document.getDocumentElement());
-        if (afterElement != null && afterElement.getNextSibling() != null
-                && afterElement.getNextSibling() instanceof Element) {
-            document.getDocumentElement().insertBefore(element,
-                    afterElement.getNextSibling());
-            addLineBreakBefore(element, document);
-            addLineBreakBefore(element, document);
-            return;
+        Element welcomeFileElement = XmlUtils.findFirstElement(WEB_APP_XPATH
+                + "welcome-file-list", document.getDocumentElement());
+        if (welcomeFileElement == null) {
+            welcomeFileElement = document.createElement("welcome-file-list");
+            insertBetween(welcomeFileElement, "session-config[last()]",
+                    "error-page", document);
+            if (StringUtils.hasText(comment)) {
+                addCommentBefore(welcomeFileElement, comment, document);
+            }
         }
-        document.getDocumentElement().appendChild(element);
-        addLineBreakBefore(element, document);
-        addLineBreakBefore(element, document);
+        appendChildIfNotPresent(welcomeFileElement, new XmlElementBuilder(
+                "welcome-file", document).setText(path).build());
     }
 
     /**
@@ -705,105 +669,141 @@ public final class WebXmlUtils {
         parent.appendChild(child);
     }
 
-    private static void addLineBreakBefore(final Element element,
-            final Document document) {
-        document.getDocumentElement().insertBefore(
-                document.createTextNode("\n    "), element);
-    }
-
-    private static void addCommentBefore(final Element element,
-            final String comment, final Document document) {
-        if (null == XmlUtils.findNode("//comment()[.=' " + comment + " ']",
-                document.getDocumentElement())) {
-            document.getDocumentElement().insertBefore(
-                    document.createComment(" " + comment + " "), element);
+    private static void insertAfter(final Element element,
+            final String afterElementName, final Document document) {
+        final Element afterElement = XmlUtils.findFirstElement(WEB_APP_XPATH
+                + afterElementName, document.getDocumentElement());
+        if ((afterElement != null) && (afterElement.getNextSibling() != null)
+                && (afterElement.getNextSibling() instanceof Element)) {
+            document.getDocumentElement().insertBefore(element,
+                    afterElement.getNextSibling());
             addLineBreakBefore(element, document);
+            addLineBreakBefore(element, document);
+            return;
         }
+        document.getDocumentElement().appendChild(element);
+        addLineBreakBefore(element, document);
+        addLineBreakBefore(element, document);
+    }
+
+    private static void insertBefore(final Element element,
+            final String beforeElementName, final Document document) {
+        final Element beforeElement = XmlUtils.findFirstElement(WEB_APP_XPATH
+                + beforeElementName, document.getDocumentElement());
+        if (beforeElement != null) {
+            document.getDocumentElement().insertBefore(element, beforeElement);
+            addLineBreakBefore(element, document);
+            addLineBreakBefore(element, document);
+            return;
+        }
+        document.getDocumentElement().appendChild(element);
+        addLineBreakBefore(element, document);
+        addLineBreakBefore(element, document);
+    }
+
+    private static void insertBetween(final Element element,
+            final String afterElementName, final String beforeElementName,
+            final Document document) {
+        final Element beforeElement = XmlUtils.findFirstElement(WEB_APP_XPATH
+                + beforeElementName, document.getDocumentElement());
+        if (beforeElement != null) {
+            document.getDocumentElement().insertBefore(element, beforeElement);
+            addLineBreakBefore(element, document);
+            addLineBreakBefore(element, document);
+            return;
+        }
+
+        final Element afterElement = XmlUtils.findFirstElement(WEB_APP_XPATH
+                + afterElementName, document.getDocumentElement());
+        if ((afterElement != null) && (afterElement.getNextSibling() != null)
+                && (afterElement.getNextSibling() instanceof Element)) {
+            document.getDocumentElement().insertBefore(element,
+                    afterElement.getNextSibling());
+            addLineBreakBefore(element, document);
+            addLineBreakBefore(element, document);
+            return;
+        }
+
+        document.getDocumentElement().appendChild(element);
+        addLineBreakBefore(element, document);
+        addLineBreakBefore(element, document);
     }
 
     /**
-     * Value object that holds init-param style information
+     * Set the description element in the web.xml document.
      * 
-     * @author Stefan Schmidt
-     * @since 1.1
+     * @param description (required)
+     * @param document the web.xml document (required)
+     * @param comment (optional)
      */
-    public static class WebXmlParam extends Pair<String, String> {
+    public static void setDescription(final String description,
+            final Document document, final String comment) {
+        Assert.notNull(document, "Web XML document required");
+        Assert.hasText(description, "Description required");
 
-        /**
-         * Constructor
-         * 
-         * @param name
-         * @param value
-         */
-        public WebXmlParam(final String name, final String value) {
-            super(name, value);
+        Element descriptionElement = XmlUtils.findFirstElement(WEB_APP_XPATH
+                + "description", document.getDocumentElement());
+        if (descriptionElement == null) {
+            descriptionElement = document.createElement("description");
+            insertBetween(descriptionElement, "display-name[last()]",
+                    "context-param", document);
+            if (StringUtils.hasText(comment)) {
+                addCommentBefore(descriptionElement, comment, document);
+            }
         }
-
-        /**
-         * Returns the name of this parameter
-         * 
-         * @return
-         */
-        public String getName() {
-            return getKey();
-        }
+        descriptionElement.setTextContent(description);
     }
 
     /**
-     * Enum to define filter position
+     * Set the display-name element in the web.xml document.
      * 
-     * @author Stefan Schmidt
-     * @since 1.1
+     * @param displayName (required)
+     * @param document the web.xml document (required)
+     * @param comment (optional)
      */
-    public static enum FilterPosition {
-        FIRST, LAST, BEFORE, AFTER, BETWEEN;
+    public static void setDisplayName(final String displayName,
+            final Document document, final String comment) {
+        Assert.hasText(displayName, "display name required");
+        Assert.notNull(document, "Web XML document required");
+
+        Element displayNameElement = XmlUtils.findFirstElement(WEB_APP_XPATH
+                + "display-name", document.getDocumentElement());
+        if (displayNameElement == null) {
+            displayNameElement = document.createElement("display-name");
+            insertBetween(displayNameElement, "the-start", "description",
+                    document);
+            if (StringUtils.hasText(comment)) {
+                addCommentBefore(displayNameElement, comment, document);
+            }
+        }
+        displayNameElement.setTextContent(displayName);
     }
 
     /**
-     * Enum to define dispatcher
+     * Set session timeout in web.xml document
      * 
-     * @author Stefan Schmidt
-     * @since 1.1.1
+     * @param timeout
+     * @param document (required)
+     * @param comment (optional)
      */
-    public static enum Dispatcher {
-        FORWARD, REQUEST, INCLUDE, ERROR;
-    }
+    public static void setSessionTimeout(final int timeout,
+            final Document document, final String comment) {
+        Assert.notNull(document, "Web XML document required");
+        Assert.notNull(timeout, "Timeout required");
 
-    /**
-     * Convenience class for passing a web-resource-collection element's details
-     * 
-     * @since 1.1.1
-     */
-    public static class WebResourceCollection {
-        private final String webResourceName;
-        private final String description;
-        private final List<String> urlPatterns;
-        private final List<String> httpMethods;
-
-        public WebResourceCollection(final String webResourceName,
-                final String description, final List<String> urlPatterns,
-                final List<String> httpMethods) {
-            this.webResourceName = webResourceName;
-            this.description = description;
-            this.urlPatterns = urlPatterns;
-            this.httpMethods = httpMethods;
+        Element sessionConfigElement = XmlUtils.findFirstElement(WEB_APP_XPATH
+                + "session-config", document.getDocumentElement());
+        if (sessionConfigElement == null) {
+            sessionConfigElement = document.createElement("session-config");
+            insertBetween(sessionConfigElement, "servlet-mapping[last()]",
+                    "welcome-file-list", document);
+            if (StringUtils.hasText(comment)) {
+                addCommentBefore(sessionConfigElement, comment, document);
+            }
         }
-
-        public String getWebResourceName() {
-            return webResourceName;
-        }
-
-        public List<String> getUrlPatterns() {
-            return urlPatterns;
-        }
-
-        public List<String> getHttpMethods() {
-            return httpMethods;
-        }
-
-        public String getDescription() {
-            return description;
-        }
+        appendChildIfNotPresent(sessionConfigElement, new XmlElementBuilder(
+                "session-timeout", document).setText(String.valueOf(timeout))
+                .build());
     }
 
     /**

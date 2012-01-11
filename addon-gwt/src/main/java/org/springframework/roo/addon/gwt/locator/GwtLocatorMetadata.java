@@ -9,15 +9,10 @@ import org.springframework.roo.support.util.StringUtils;
 
 public class GwtLocatorMetadata extends AbstractMetadataItem {
 
-    // Constants
     private static final String PROVIDES_TYPE_STRING = GwtLocatorMetadata.class
             .getName();
     private static final String PROVIDES_TYPE = MetadataIdentificationUtils
             .create(PROVIDES_TYPE_STRING);
-
-    public static String getMetadataIdentifierType() {
-        return PROVIDES_TYPE;
-    }
 
     public static String createIdentifier(final JavaType javaType,
             final LogicalPath path) {
@@ -30,12 +25,15 @@ public class GwtLocatorMetadata extends AbstractMetadataItem {
                 PROVIDES_TYPE_STRING, metadataIdentificationString);
     }
 
+    public static String getMetadataIdentifierType() {
+        return PROVIDES_TYPE;
+    }
+
     public static LogicalPath getPath(final String metadataIdentificationString) {
         return PhysicalTypeIdentifierNamingUtils.getPath(PROVIDES_TYPE_STRING,
                 metadataIdentificationString);
     }
 
-    // Fields
     private final String proxyTypeContents;
 
     public GwtLocatorMetadata(final String id, final String proxyTypeContents) {
@@ -45,13 +43,14 @@ public class GwtLocatorMetadata extends AbstractMetadataItem {
 
     @Override
     public boolean equals(final Object o) {
-        if (this == o)
+        if (this == o) {
             return true;
-        if (o == null || getClass() != o.getClass())
+        }
+        if ((o == null) || (getClass() != o.getClass())) {
             return false;
-        GwtLocatorMetadata that = (GwtLocatorMetadata) o;
-        return StringUtils.equals(this.proxyTypeContents,
-                that.proxyTypeContents);
+        }
+        final GwtLocatorMetadata that = (GwtLocatorMetadata) o;
+        return StringUtils.equals(proxyTypeContents, that.proxyTypeContents);
     }
 
     @Override

@@ -39,30 +39,6 @@ import java.lang.annotation.Target;
 public @interface RooWebScaffold {
 
     /**
-     * All view-related artifacts for a specific controller are stored in a
-     * sub-directory under WEB-INF/views/<em>path</em>. The path parameter
-     * defines the name of this sub-directory or path. This path is also used to
-     * define the restful resource in the URL to which the controller is mapped.
-     * 
-     * @return The view path.
-     */
-    String path();
-
-    /**
-     * Every controller is responsible for a single form backing object. The
-     * form backing object defined here class will be exposed in a RESTful way.
-     */
-    Class<?> formBackingObject();
-
-    /**
-     * Creates a delete() method which deletes an entity for a given id.
-     * 
-     * @return indicates if the delete() method should be provided (defaults to
-     *         "true"; optional)
-     */
-    boolean delete() default true;
-
-    /**
      * Creates a create() method which allows the creation of a new entity.
      * 
      * @return indicates if the create() method should be provided (defaults to
@@ -71,12 +47,12 @@ public @interface RooWebScaffold {
     boolean create() default true;
 
     /**
-     * Creates an update() method which allows alteration of an existing entity.
+     * Creates a delete() method which deletes an entity for a given id.
      * 
-     * @return indicates if the update() method should be provided (defaults to
+     * @return indicates if the delete() method should be provided (defaults to
      *         "true"; optional)
      */
-    boolean update() default true;
+    boolean delete() default true;
 
     /**
      * This flag is not used any more as of Roo 1.2.0. Please annotate
@@ -106,6 +82,22 @@ public @interface RooWebScaffold {
     boolean exposeJson() default true;
 
     /**
+     * Every controller is responsible for a single form backing object. The
+     * form backing object defined here class will be exposed in a RESTful way.
+     */
+    Class<?> formBackingObject();
+
+    /**
+     * All view-related artifacts for a specific controller are stored in a
+     * sub-directory under WEB-INF/views/<em>path</em>. The path parameter
+     * defines the name of this sub-directory or path. This path is also used to
+     * define the restful resource in the URL to which the controller is mapped.
+     * 
+     * @return The view path.
+     */
+    String path();
+
+    /**
      * Indicate if Roo should create data population methods used for model
      * attributes required for the Spring MVC forms. If this flag is set to
      * false the developer is expected to manage the population of the model
@@ -115,4 +107,12 @@ public @interface RooWebScaffold {
      *         (defaults to "true"; optional)
      */
     boolean populateMethods() default true;
+
+    /**
+     * Creates an update() method which allows alteration of an existing entity.
+     * 
+     * @return indicates if the update() method should be provided (defaults to
+     *         "true"; optional)
+     */
+    boolean update() default true;
 }

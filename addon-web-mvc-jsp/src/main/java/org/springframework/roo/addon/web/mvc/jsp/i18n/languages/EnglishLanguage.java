@@ -18,16 +18,16 @@ import org.springframework.roo.support.util.FileUtils;
 @Service
 public class EnglishLanguage extends AbstractLanguage {
 
-    public Locale getLocale() {
-        return Locale.ENGLISH;
+    public InputStream getFlagGraphic() {
+        return FileUtils.getInputStream(getClass(), "gb.png");
     }
 
     public String getLanguage() {
         return "English";
     }
 
-    public InputStream getFlagGraphic() {
-        return FileUtils.getInputStream(getClass(), "gb.png");
+    public Locale getLocale() {
+        return Locale.ENGLISH;
     }
 
     public InputStream getMessageBundle() {

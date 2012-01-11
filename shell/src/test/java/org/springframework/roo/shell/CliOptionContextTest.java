@@ -13,21 +13,11 @@ import org.junit.Test;
  */
 public class CliOptionContextTest {
 
-    // Constants
     private static final String OPTION_CONTEXT = "anything";
 
     @Test
     public void testGetOptionContextWhenNoneSet() {
         assertNull(CliOptionContext.getOptionContext());
-    }
-
-    @Test
-    public void testSetAndGetOptionContext() {
-        // Set up
-        CliOptionContext.setOptionContext(OPTION_CONTEXT);
-
-        // Invoke and check
-        assertEquals(OPTION_CONTEXT, CliOptionContext.getOptionContext());
     }
 
     @Test
@@ -40,5 +30,14 @@ public class CliOptionContextTest {
 
         // Check
         assertNull(CliOptionContext.getOptionContext());
+    }
+
+    @Test
+    public void testSetAndGetOptionContext() {
+        // Set up
+        CliOptionContext.setOptionContext(OPTION_CONTEXT);
+
+        // Invoke and check
+        assertEquals(OPTION_CONTEXT, CliOptionContext.getOptionContext());
     }
 }

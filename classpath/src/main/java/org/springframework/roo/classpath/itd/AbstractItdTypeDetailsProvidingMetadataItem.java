@@ -39,13 +39,12 @@ import org.springframework.roo.support.util.Assert;
 public abstract class AbstractItdTypeDetailsProvidingMetadataItem extends
         AbstractMetadataItem implements ItdTypeDetailsProvidingMetadataItem {
 
-    // Fields
-    protected ClassOrInterfaceTypeDetails governorTypeDetails;
-    protected ItdTypeDetails itdTypeDetails;
+    protected JavaType aspectName;
     protected ItdTypeDetailsBuilder builder;
     protected JavaType destination;
-    protected JavaType aspectName;
     protected PhysicalTypeMetadata governorPhysicalTypeMetadata;
+    protected ClassOrInterfaceTypeDetails governorTypeDetails;
+    protected ItdTypeDetails itdTypeDetails;
 
     /**
      * Validates input and constructs a superclass that implements
@@ -79,56 +78,123 @@ public abstract class AbstractItdTypeDetailsProvidingMetadataItem extends
                 .getMemberHoldingTypeDetails();
         if (physicalTypeDetails instanceof ClassOrInterfaceTypeDetails) {
             // We have reliable physical type details
-            this.governorTypeDetails = (ClassOrInterfaceTypeDetails) physicalTypeDetails;
+            governorTypeDetails = (ClassOrInterfaceTypeDetails) physicalTypeDetails;
         }
         else {
             // There is a problem
-            this.valid = false;
+            valid = false;
         }
 
-        this.destination = governorTypeDetails.getName();
+        destination = governorTypeDetails.getName();
 
         // Provide the subclass a builder, to make preparing an ITD even easier
-        this.builder = new ItdTypeDetailsBuilder(getId(), governorTypeDetails,
+        builder = new ItdTypeDetailsBuilder(getId(), governorTypeDetails,
                 aspectName, true);
     }
 
-    public final ItdTypeDetails getMemberHoldingTypeDetails() {
-        return itdTypeDetails;
+    private void addToImports(final List<JavaType> parameterTypes) {
+        if (parameterTypes != null) {
+            final List<JavaType> typesToImport = new ArrayList<JavaType>();
+            for (final JavaType parameterType : parameterTypes) {
+                if (!JdkJavaType.isPartOfJavaLang(parameterType)) {
+                    typesToImport.add(parameterType);
+                }
+            }
+            builder.getImportRegistrationResolver().addImports(typesToImport);
+        }
     }
 
     /**
-     * Returns the metadata for an annotation of the given type if the governor
-     * does not already have one.
+     * Generates the {@link ItdTypeDetails} from the current contents of this
+     * instance's {@link ItdTypeDetailsBuilder}.
      * 
-     * @param annotationType the type of annotation to generate (required)
-     * @return <code>null</code> if the governor already has that annotation
+     * @since 1.2.0
      */
-    protected AnnotationMetadata getTypeAnnotation(final JavaType annotationType) {
-        if (governorTypeDetails.getAnnotation(annotationType) != null) {
+    protected void buildItd() {
+        itdTypeDetails = builder.build();
+    }
+
+    /**
+     * Ensures that the governor extends the given type, i.e. introduces that
+     * type as a supertype iff it's not already one
+     * 
+     * @param javaType the type to extend (required)
+     * @since 1.2.0
+     */
+    protected final void ensureGovernorExtends(final JavaType javaType) {
+        if (!governorTypeDetails.extendsType(javaType)) {
+            builder.addExtendsTypes(javaType);
+        }
+    }
+
+    /**
+     * Ensures that the governor implements the given type.
+     * 
+     * @param javaType the type to implement (required)
+     * @since 1.2.0
+     */
+    protected final void ensureGovernorImplements(final JavaType javaType) {
+        if (!governorTypeDetails.implementsType(javaType)) {
+            builder.addImplementsType(javaType);
+        }
+    }
+
+    protected MethodMetadataBuilder getAccessorMethod(final FieldMetadata field) {
+        return getAccessorMethod(
+                field,
+                InvocableMemberBodyBuilder.getInstance().appendFormalLine(
+                        "return " + field.getFieldName().getSymbolName() + ";"));
+    }
+
+    protected MethodMetadataBuilder getAccessorMethod(
+            final FieldMetadata field,
+            final InvocableMemberBodyBuilder bodyBuilder) {
+        return getMethod(PUBLIC, BeanInfoUtils.getAccessorMethodName(field),
+                field.getFieldType(), null, null, bodyBuilder);
+    }
+
+    protected MethodMetadataBuilder getAccessorMethod(
+            final JavaSymbolName fieldName, final JavaType fieldType) {
+        return getAccessorMethod(
+                fieldName,
+                fieldType,
+                InvocableMemberBodyBuilder.getInstance().appendFormalLine(
+                        "return " + fieldName + ";"));
+    }
+
+    protected MethodMetadataBuilder getAccessorMethod(
+            final JavaSymbolName fieldName, final JavaType fieldType,
+            final InvocableMemberBodyBuilder bodyBuilder) {
+        return getMethod(PUBLIC,
+                BeanInfoUtils.getAccessorMethodName(fieldName, fieldType),
+                fieldType, null, null, bodyBuilder);
+    }
+
+    /**
+     * Convenience method for returning a simple private field based on the
+     * field name, type, and initializer.
+     * 
+     * @param fieldName the field name
+     * @param fieldType the field type
+     * @param fieldInitializer the string to initialize the field with
+     * @return null if the field exists on the governor, otherwise a new field
+     *         with the given field name and type
+     */
+    protected FieldMetadataBuilder getField(final int modifier,
+            final JavaSymbolName fieldName, final JavaType fieldType,
+            final String fieldInitializer) {
+        if (governorTypeDetails.getField(fieldName) != null) {
             return null;
         }
-        return new AnnotationMetadataBuilder(annotationType).build();
+
+        addToImports(Arrays.asList(fieldType));
+        return new FieldMetadataBuilder(getId(), modifier, fieldName,
+                fieldType, fieldInitializer);
     }
 
-    /**
-     * Determines if the presented class (or any of its superclasses) implements
-     * the target interface.
-     * 
-     * @param clazz the cid to search
-     * @param interfaceTarget the interface to locate
-     * @return true if the class or any of its superclasses contains the
-     *         specified interface
-     */
-    protected boolean isImplementing(final ClassOrInterfaceTypeDetails clazz,
-            final JavaType interfaceTarget) {
-        if (clazz.getImplementsTypes().contains(interfaceTarget)) {
-            return true;
-        }
-        if (clazz.getSuperclass() != null) {
-            return isImplementing(clazz.getSuperclass(), interfaceTarget);
-        }
-        return false;
+    protected FieldMetadataBuilder getField(final JavaSymbolName fieldName,
+            final JavaType fieldType) {
+        return getField(PRIVATE, fieldName, fieldType, null);
     }
 
     /**
@@ -144,6 +210,88 @@ public abstract class AbstractItdTypeDetailsProvidingMetadataItem extends
     protected MethodMetadata getGovernorMethod(final JavaSymbolName methodName,
             final JavaType... parameterTypes) {
         return getGovernorMethod(methodName, Arrays.asList(parameterTypes));
+    }
+
+    /**
+     * Returns the given method of the governor.
+     * 
+     * @param methodName the name of the method for which to search
+     * @param parameterTypes the method's parameter types
+     * @return null if there was no such method
+     * @see MemberFindingUtils#getDeclaredMethod(org.springframework.roo.classpath.details.MemberHoldingTypeDetails,
+     *      JavaSymbolName, List)
+     * @since 1.2.0 (previously called methodExists)
+     */
+    protected MethodMetadata getGovernorMethod(final JavaSymbolName methodName,
+            final List<JavaType> parameterTypes) {
+        return MemberFindingUtils.getDeclaredMethod(governorTypeDetails,
+                methodName, parameterTypes);
+    }
+
+    public final ItdTypeDetails getMemberHoldingTypeDetails() {
+        return itdTypeDetails;
+    }
+
+    /**
+     * Returns a public method given the method name, return type, parameter
+     * types, parameter names, and method body.
+     * 
+     * @param methodName the method name
+     * @param returnType the return type
+     * @param parameterTypes a list of parameter types
+     * @param parameterNames a list of parameter names
+     * @param bodyBuilder the method body
+     * @return null if the method exists on the governor, otherwise a new method
+     *         is returned
+     */
+    protected MethodMetadataBuilder getMethod(final int modifier,
+            final JavaSymbolName methodName, final JavaType returnType,
+            final List<JavaType> parameterTypes,
+            final List<JavaSymbolName> parameterNames,
+            final InvocableMemberBodyBuilder bodyBuilder) {
+        final MethodMetadata method = getGovernorMethod(methodName,
+                parameterTypes);
+        if (method != null) {
+            return null;
+        }
+
+        addToImports(parameterTypes);
+        return new MethodMetadataBuilder(getId(), modifier, methodName,
+                returnType,
+                AnnotatedJavaType.convertFromJavaTypes(parameterTypes),
+                parameterNames, bodyBuilder);
+    }
+
+    protected MethodMetadataBuilder getMutatorMethod(
+            final JavaSymbolName fieldName, final JavaType parameterType) {
+        return getMutatorMethod(
+                fieldName,
+                parameterType,
+                InvocableMemberBodyBuilder.getInstance().appendFormalLine(
+                        "this." + fieldName.getSymbolName() + " = "
+                                + fieldName.getSymbolName() + ";"));
+    }
+
+    protected MethodMetadataBuilder getMutatorMethod(
+            final JavaSymbolName fieldName, final JavaType parameterType,
+            final InvocableMemberBodyBuilder bodyBuilder) {
+        return getMethod(PUBLIC, BeanInfoUtils.getMutatorMethodName(fieldName),
+                JavaType.VOID_PRIMITIVE, Arrays.asList(parameterType),
+                Arrays.asList(fieldName), bodyBuilder);
+    }
+
+    /**
+     * Returns the metadata for an annotation of the given type if the governor
+     * does not already have one.
+     * 
+     * @param annotationType the type of annotation to generate (required)
+     * @return <code>null</code> if the governor already has that annotation
+     */
+    protected AnnotationMetadata getTypeAnnotation(final JavaType annotationType) {
+        if (governorTypeDetails.getAnnotation(annotationType) != null) {
+            return null;
+        }
+        return new AnnotationMetadataBuilder(annotationType).build();
     }
 
     /**
@@ -173,180 +321,34 @@ public abstract class AbstractItdTypeDetailsProvidingMetadataItem extends
                 methodName) != null;
     }
 
-    /**
-     * Returns the given method of the governor.
-     * 
-     * @param methodName the name of the method for which to search
-     * @param parameterTypes the method's parameter types
-     * @return null if there was no such method
-     * @see MemberFindingUtils#getDeclaredMethod(org.springframework.roo.classpath.details.MemberHoldingTypeDetails,
-     *      JavaSymbolName, List)
-     * @since 1.2.0 (previously called methodExists)
-     */
-    protected MethodMetadata getGovernorMethod(final JavaSymbolName methodName,
-            final List<JavaType> parameterTypes) {
-        return MemberFindingUtils.getDeclaredMethod(governorTypeDetails,
-                methodName, parameterTypes);
-    }
-
-    protected FieldMetadataBuilder getField(final JavaSymbolName fieldName,
-            final JavaType fieldType) {
-        return getField(PRIVATE, fieldName, fieldType, null);
-    }
-
-    /**
-     * Convenience method for returning a simple private field based on the
-     * field name, type, and initializer.
-     * 
-     * @param fieldName the field name
-     * @param fieldType the field type
-     * @param fieldInitializer the string to initialize the field with
-     * @return null if the field exists on the governor, otherwise a new field
-     *         with the given field name and type
-     */
-    protected FieldMetadataBuilder getField(final int modifier,
-            final JavaSymbolName fieldName, final JavaType fieldType,
-            final String fieldInitializer) {
-        if (governorTypeDetails.getField(fieldName) != null)
-            return null;
-
-        addToImports(Arrays.asList(fieldType));
-        return new FieldMetadataBuilder(getId(), modifier, fieldName,
-                fieldType, fieldInitializer);
-    }
-
-    protected MethodMetadataBuilder getAccessorMethod(final FieldMetadata field) {
-        return getAccessorMethod(
-                field,
-                InvocableMemberBodyBuilder.getInstance().appendFormalLine(
-                        "return " + field.getFieldName().getSymbolName() + ";"));
-    }
-
-    protected MethodMetadataBuilder getAccessorMethod(
-            final JavaSymbolName fieldName, final JavaType fieldType) {
-        return getAccessorMethod(
-                fieldName,
-                fieldType,
-                InvocableMemberBodyBuilder.getInstance().appendFormalLine(
-                        "return " + fieldName + ";"));
-    }
-
-    protected MethodMetadataBuilder getAccessorMethod(
-            final FieldMetadata field,
-            final InvocableMemberBodyBuilder bodyBuilder) {
-        return getMethod(PUBLIC, BeanInfoUtils.getAccessorMethodName(field),
-                field.getFieldType(), null, null, bodyBuilder);
-    }
-
-    protected MethodMetadataBuilder getAccessorMethod(JavaSymbolName fieldName,
-            JavaType fieldType, final InvocableMemberBodyBuilder bodyBuilder) {
-        return getMethod(PUBLIC,
-                BeanInfoUtils.getAccessorMethodName(fieldName, fieldType),
-                fieldType, null, null, bodyBuilder);
-    }
-
-    protected MethodMetadataBuilder getMutatorMethod(
-            final JavaSymbolName fieldName, final JavaType parameterType) {
-        return getMutatorMethod(
-                fieldName,
-                parameterType,
-                InvocableMemberBodyBuilder.getInstance().appendFormalLine(
-                        "this." + fieldName.getSymbolName() + " = "
-                                + fieldName.getSymbolName() + ";"));
-    }
-
-    protected MethodMetadataBuilder getMutatorMethod(
-            final JavaSymbolName fieldName, final JavaType parameterType,
-            final InvocableMemberBodyBuilder bodyBuilder) {
-        return getMethod(PUBLIC, BeanInfoUtils.getMutatorMethodName(fieldName),
-                JavaType.VOID_PRIMITIVE, Arrays.asList(parameterType),
-                Arrays.asList(fieldName), bodyBuilder);
-    }
-
-    /**
-     * Returns a public method given the method name, return type, parameter
-     * types, parameter names, and method body.
-     * 
-     * @param methodName the method name
-     * @param returnType the return type
-     * @param parameterTypes a list of parameter types
-     * @param parameterNames a list of parameter names
-     * @param bodyBuilder the method body
-     * @return null if the method exists on the governor, otherwise a new method
-     *         is returned
-     */
-    protected MethodMetadataBuilder getMethod(final int modifier,
-            final JavaSymbolName methodName, final JavaType returnType,
-            final List<JavaType> parameterTypes,
-            final List<JavaSymbolName> parameterNames,
-            final InvocableMemberBodyBuilder bodyBuilder) {
-        final MethodMetadata method = getGovernorMethod(methodName,
-                parameterTypes);
-        if (method != null)
-            return null;
-
-        addToImports(parameterTypes);
-        return new MethodMetadataBuilder(getId(), modifier, methodName,
-                returnType,
-                AnnotatedJavaType.convertFromJavaTypes(parameterTypes),
-                parameterNames, bodyBuilder);
-    }
-
-    private void addToImports(final List<JavaType> parameterTypes) {
-        if (parameterTypes != null) {
-            final List<JavaType> typesToImport = new ArrayList<JavaType>();
-            for (JavaType parameterType : parameterTypes) {
-                if (!JdkJavaType.isPartOfJavaLang(parameterType)) {
-                    typesToImport.add(parameterType);
-                }
-            }
-            builder.getImportRegistrationResolver().addImports(typesToImport);
-        }
-    }
-
-    /**
-     * Ensures that the governor extends the given type, i.e. introduces that
-     * type as a supertype iff it's not already one
-     * 
-     * @param javaType the type to extend (required)
-     * @since 1.2.0
-     */
-    protected final void ensureGovernorExtends(final JavaType javaType) {
-        if (!governorTypeDetails.extendsType(javaType)) {
-            builder.addExtendsTypes(javaType);
-        }
-    }
-
-    /**
-     * Ensures that the governor implements the given type.
-     * 
-     * @param javaType the type to implement (required)
-     * @since 1.2.0
-     */
-    protected final void ensureGovernorImplements(final JavaType javaType) {
-        if (!governorTypeDetails.implementsType(javaType)) {
-            builder.addImplementsType(javaType);
-        }
-    }
-
-    /**
-     * Generates the {@link ItdTypeDetails} from the current contents of this
-     * instance's {@link ItdTypeDetailsBuilder}.
-     * 
-     * @since 1.2.0
-     */
-    protected void buildItd() {
-        this.itdTypeDetails = this.builder.build();
-    }
-
     @Override
     public int hashCode() {
         return builder.build().hashCode();
     }
 
+    /**
+     * Determines if the presented class (or any of its superclasses) implements
+     * the target interface.
+     * 
+     * @param clazz the cid to search
+     * @param interfaceTarget the interface to locate
+     * @return true if the class or any of its superclasses contains the
+     *         specified interface
+     */
+    protected boolean isImplementing(final ClassOrInterfaceTypeDetails clazz,
+            final JavaType interfaceTarget) {
+        if (clazz.getImplementsTypes().contains(interfaceTarget)) {
+            return true;
+        }
+        if (clazz.getSuperclass() != null) {
+            return isImplementing(clazz.getSuperclass(), interfaceTarget);
+        }
+        return false;
+    }
+
     @Override
     public String toString() {
-        ToStringCreator tsc = new ToStringCreator(this);
+        final ToStringCreator tsc = new ToStringCreator(this);
         tsc.append("identifier", getId());
         tsc.append("valid", valid);
         tsc.append("aspectName", aspectName);

@@ -29,7 +29,6 @@ import org.w3c.dom.Element;
 @Service
 public class PomFactoryImpl implements PomFactory {
 
-    // Constants
     private static final String ARTIFACT_ID_XPATH = "/project/artifactId";
     private static final String DEFAULT_RELATIVE_PATH = "../pom.xml";
     private static final String DEPENDENCY_XPATH = "/project/dependencies/dependency";
@@ -50,8 +49,24 @@ public class PomFactoryImpl implements PomFactory {
     private static final String TEST_SOURCE_DIRECTORY_XPATH = "/project/build/testSourceDirectory";
     private static final String VERSION_XPATH = "/project/version";
 
-    // Fields
     @Reference PackagingProviderRegistry packagingProviderRegistry;
+
+    /**
+     * Returns the groupId defined in the given POM
+     * 
+     * @param root the POM's root element (required)
+     * @return a non-blank groupId
+     */
+    private String getGroupId(final Element root) {
+        final String projectGroupId = XmlUtils.getTextContent(GROUP_ID_XPATH,
+                root);
+        if (StringUtils.hasText(projectGroupId)) {
+            return projectGroupId;
+        }
+        // Fall back to a group ID assumed to be the same as any possible
+        // <parent> (ROO-1193)
+        return XmlUtils.getTextContent(PARENT_GROUP_ID_XPATH, root);
+    }
 
     public Pom getInstance(final Element root, final String pomPath,
             final String moduleName) {
@@ -88,6 +103,35 @@ public class PomFactoryImpl implements PomFactory {
                 parent, modules, pomProperties, name, repositories,
                 pluginRepositories, sourceDirectory, testSourceDirectory,
                 filters, plugins, resources, pomPath, moduleName, paths);
+    }
+
+    private List<Module> getModules(final Element root, final String pomPath,
+            final String packaging) {
+        if (!"pom".equalsIgnoreCase(packaging)) {
+            return null;
+        }
+        final List<Module> modules = new ArrayList<Module>();
+        for (final Element module : XmlUtils.findElements(MODULE_XPATH, root)) {
+            final String moduleName = module.getTextContent();
+            if (StringUtils.hasText(moduleName)) {
+                final String modulePath = resolveRelativePath(pomPath,
+                        moduleName);
+                modules.add(new Module(moduleName, modulePath));
+            }
+        }
+        return modules;
+    }
+
+    private Parent getParent(final String pomPath, final Element root) {
+        final Element parentElement = XmlUtils.findFirstElement(PARENT_XPATH,
+                root);
+        if (parentElement == null) {
+            return null;
+        }
+        final String relativePath = XmlUtils.getTextContent("/relativePath",
+                parentElement, DEFAULT_RELATIVE_PATH);
+        final String parentPomPath = resolveRelativePath(pomPath, relativePath);
+        return new ParentBuilder(parentElement, parentPomPath).build();
     }
 
     private Collection<Path> getPaths(final Element root, final String packaging) {
@@ -128,52 +172,6 @@ public class PomFactoryImpl implements PomFactory {
             }
         }
         return results;
-    }
-
-    /**
-     * Returns the groupId defined in the given POM
-     * 
-     * @param root the POM's root element (required)
-     * @return a non-blank groupId
-     */
-    private String getGroupId(final Element root) {
-        final String projectGroupId = XmlUtils.getTextContent(GROUP_ID_XPATH,
-                root);
-        if (StringUtils.hasText(projectGroupId)) {
-            return projectGroupId;
-        }
-        // Fall back to a group ID assumed to be the same as any possible
-        // <parent> (ROO-1193)
-        return XmlUtils.getTextContent(PARENT_GROUP_ID_XPATH, root);
-    }
-
-    private List<Module> getModules(final Element root, final String pomPath,
-            final String packaging) {
-        if (!"pom".equalsIgnoreCase(packaging)) {
-            return null;
-        }
-        final List<Module> modules = new ArrayList<Module>();
-        for (final Element module : XmlUtils.findElements(MODULE_XPATH, root)) {
-            final String moduleName = module.getTextContent();
-            if (StringUtils.hasText(moduleName)) {
-                final String modulePath = resolveRelativePath(pomPath,
-                        moduleName);
-                modules.add(new Module(moduleName, modulePath));
-            }
-        }
-        return modules;
-    }
-
-    private Parent getParent(final String pomPath, final Element root) {
-        final Element parentElement = XmlUtils.findFirstElement(PARENT_XPATH,
-                root);
-        if (parentElement == null) {
-            return null;
-        }
-        final String relativePath = XmlUtils.getTextContent("/relativePath",
-                parentElement, DEFAULT_RELATIVE_PATH);
-        final String parentPomPath = resolveRelativePath(pomPath, relativePath);
-        return new ParentBuilder(parentElement, parentPomPath).build();
     }
 
     private String resolveRelativePath(String relativeTo,

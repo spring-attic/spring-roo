@@ -42,12 +42,24 @@ import org.springframework.roo.support.util.Assert;
 @Service
 public class DataOnDemandOperationsImpl implements DataOnDemandOperations {
 
-    // Fields
-    @Reference private MetadataService metadataService;
     @Reference private MemberDetailsScanner memberDetailsScanner;
+    @Reference private MetadataService metadataService;
     @Reference private ProjectOperations projectOperations;
     @Reference private TypeLocationService typeLocationService;
     @Reference private TypeManagementService typeManagementService;
+
+    /**
+     * @param entity the entity to lookup required
+     * @return the type details (never null; throws an exception if it cannot be
+     *         obtained or parsed)
+     */
+    private ClassOrInterfaceTypeDetails getEntity(final JavaType entity) {
+        final ClassOrInterfaceTypeDetails cid = typeLocationService
+                .getTypeDetails(entity);
+        Assert.notNull(cid, "Java source code details unavailable for type '"
+                + entity + "'");
+        return cid;
+    }
 
     public boolean isDataOnDemandInstallationPossible() {
         return projectOperations.isFocusedProjectAvailable()
@@ -68,7 +80,7 @@ public class DataOnDemandOperationsImpl implements DataOnDemandOperations {
 
         // Verify the requested entity actually exists as a class and is not
         // abstract
-        ClassOrInterfaceTypeDetails cid = getEntity(entity);
+        final ClassOrInterfaceTypeDetails cid = getEntity(entity);
         Assert.isTrue(
                 cid.getPhysicalTypeCategory() == PhysicalTypeCategory.CLASS,
                 "Type " + entity.getFullyQualifiedTypeName()
@@ -77,50 +89,39 @@ public class DataOnDemandOperationsImpl implements DataOnDemandOperations {
                 "Type " + entity.getFullyQualifiedTypeName() + " is abstract");
 
         // Check if the requested entity is a JPA @Entity
-        MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(
-                DataOnDemandOperationsImpl.class.getName(), cid);
-        AnnotationMetadata entityAnnotation = memberDetails
+        final MemberDetails memberDetails = memberDetailsScanner
+                .getMemberDetails(DataOnDemandOperationsImpl.class.getName(),
+                        cid);
+        final AnnotationMetadata entityAnnotation = memberDetails
                 .getAnnotation(ENTITY);
-        AnnotationMetadata persistentAnnotation = memberDetails
+        final AnnotationMetadata persistentAnnotation = memberDetails
                 .getAnnotation(PERSISTENT);
-        Assert.isTrue(entityAnnotation != null || persistentAnnotation != null,
+        Assert.isTrue((entityAnnotation != null)
+                || (persistentAnnotation != null),
                 "Type " + entity.getFullyQualifiedTypeName()
                         + " must be a persistent type");
 
         // Everything is OK to proceed
-        String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(
-                name, path);
+        final String declaredByMetadataId = PhysicalTypeIdentifier
+                .createIdentifier(name, path);
 
         if (metadataService.get(declaredByMetadataId) != null) {
             // The file already exists
             return;
         }
 
-        List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
-        List<AnnotationAttributeValue<?>> dodConfig = new ArrayList<AnnotationAttributeValue<?>>();
+        final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+        final List<AnnotationAttributeValue<?>> dodConfig = new ArrayList<AnnotationAttributeValue<?>>();
         dodConfig.add(new ClassAttributeValue(new JavaSymbolName("entity"),
                 entity));
         annotations.add(new AnnotationMetadataBuilder(
                 RooJavaType.ROO_DATA_ON_DEMAND, dodConfig));
 
-        ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(
+        final ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(
                 declaredByMetadataId, Modifier.PUBLIC, name,
                 PhysicalTypeCategory.CLASS);
         cidBuilder.setAnnotations(annotations);
 
         typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
-    }
-
-    /**
-     * @param entity the entity to lookup required
-     * @return the type details (never null; throws an exception if it cannot be
-     *         obtained or parsed)
-     */
-    private ClassOrInterfaceTypeDetails getEntity(final JavaType entity) {
-        ClassOrInterfaceTypeDetails cid = typeLocationService
-                .getTypeDetails(entity);
-        Assert.notNull(cid, "Java source code details unavailable for type '"
-                + entity + "'");
-        return cid;
     }
 }

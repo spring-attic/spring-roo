@@ -18,15 +18,6 @@ import java.net.URL;
 public interface UrlInputStreamService {
 
     /**
-     * Opens an input stream to the specified connection. The input stream
-     * represents the resource (no headers).
-     * 
-     * @param httpUrl to open (HTTP only, never HTTPS or another protocol)
-     * @return the input stream (implementation may not return null)
-     */
-    InputStream openConnection(URL httpUrl) throws IOException;
-
-    /**
      * Returns a reason a URL cannot be opened, or null if there is no known
      * reason why the URL wouldn't be able to be opened if
      * {@link #openConnection(URL)} was invoked. The returned reasons should be
@@ -43,4 +34,13 @@ public interface UrlInputStreamService {
      *         unavailable
      */
     String getUrlCannotBeOpenedMessage(URL httpUrl);
+
+    /**
+     * Opens an input stream to the specified connection. The input stream
+     * represents the resource (no headers).
+     * 
+     * @param httpUrl to open (HTTP only, never HTTPS or another protocol)
+     * @return the input stream (implementation may not return null)
+     */
+    InputStream openConnection(URL httpUrl) throws IOException;
 }

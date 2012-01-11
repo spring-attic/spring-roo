@@ -26,24 +26,61 @@ import org.springframework.roo.support.util.StringUtils;
 @Service
 public class LastUsedImpl implements LastUsed {
 
-    // Fields
-    @Reference private Shell shell;
-    @Reference private TypeLocationService typeLocationService;
-    @Reference private ProjectOperations projectOperations;
-
     private JavaPackage javaPackage;
-    private JavaPackage topLevelPackage;
     private JavaType javaType;
     private Pom module;
+
+    @Reference private ProjectOperations projectOperations;
+    @Reference private Shell shell;
+    private JavaPackage topLevelPackage;
+    @Reference private TypeLocationService typeLocationService;
+
+    public JavaPackage getJavaPackage() {
+        return javaPackage;
+    }
+
+    public JavaType getJavaType() {
+        return javaType;
+    }
+
+    public JavaPackage getTopLevelPackage() {
+        return topLevelPackage;
+    }
 
     public void setPackage(final JavaPackage javaPackage) {
         Assert.notNull(javaPackage, "JavaPackage required");
         if (javaPackage.getFullyQualifiedPackageName().startsWith("java.")) {
             return;
         }
-        this.javaType = null;
+        javaType = null;
         this.javaPackage = javaPackage;
         setPromptPath(javaPackage.getFullyQualifiedPackageName());
+    }
+
+    private void setPromptPath(final String fullyQualifiedName) {
+        if (topLevelPackage == null) {
+            return;
+        }
+
+        String moduleName = "";
+        if ((module != null) && StringUtils.hasText(module.getModuleName())) {
+            moduleName = AnsiEscapeCode.decorate(module.getModuleName()
+                    + MODULE_PATH_SEPARATOR, AnsiEscapeCode.FG_CYAN);
+        }
+
+        topLevelPackage = new JavaPackage(
+                typeLocationService
+                        .getTopLevelPackageForModule(projectOperations
+                                .getFocusedModule()));
+        final String path = moduleName
+                + fullyQualifiedName.replace(
+                        topLevelPackage.getFullyQualifiedPackageName(),
+                        TOP_LEVEL_PACKAGE_SYMBOL);
+        shell.setPromptPath(path, StringUtils.hasText(moduleName));
+    }
+
+    public void setTopLevelPackage(final JavaPackage topLevelPackage) {
+        this.topLevelPackage = topLevelPackage;
     }
 
     public void setType(final JavaType javaType) {
@@ -53,7 +90,7 @@ public class LastUsedImpl implements LastUsed {
             return;
         }
         this.javaType = javaType;
-        this.javaPackage = javaType.getPackage();
+        javaPackage = javaType.getPackage();
         setPromptPath(javaType.getFullyQualifiedTypeName());
     }
 
@@ -65,45 +102,7 @@ public class LastUsedImpl implements LastUsed {
         }
         this.module = module;
         this.javaType = javaType;
-        this.javaPackage = javaType.getPackage();
+        javaPackage = javaType.getPackage();
         setPromptPath(javaType.getFullyQualifiedTypeName());
-    }
-
-    private void setPromptPath(final String fullyQualifiedName) {
-        if (topLevelPackage == null) {
-            return;
-        }
-
-        String moduleName = "";
-        if (module != null && StringUtils.hasText(module.getModuleName())) {
-            moduleName = AnsiEscapeCode.decorate(module.getModuleName()
-                    + MODULE_PATH_SEPARATOR, AnsiEscapeCode.FG_CYAN);
-        }
-
-        topLevelPackage = new JavaPackage(
-                typeLocationService
-                        .getTopLevelPackageForModule(projectOperations
-                                .getFocusedModule()));
-        String path = moduleName
-                + fullyQualifiedName.replace(
-                        topLevelPackage.getFullyQualifiedPackageName(),
-                        TOP_LEVEL_PACKAGE_SYMBOL);
-        shell.setPromptPath(path, StringUtils.hasText(moduleName));
-    }
-
-    public JavaPackage getTopLevelPackage() {
-        return topLevelPackage;
-    }
-
-    public void setTopLevelPackage(final JavaPackage topLevelPackage) {
-        this.topLevelPackage = topLevelPackage;
-    }
-
-    public JavaType getJavaType() {
-        return javaType;
-    }
-
-    public JavaPackage getJavaPackage() {
-        return javaPackage;
     }
 }

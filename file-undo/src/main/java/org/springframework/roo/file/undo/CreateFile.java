@@ -15,13 +15,11 @@ import org.springframework.roo.support.util.Assert;
  */
 public class CreateFile implements UndoableOperation {
 
-    // Constants
     private static final Logger LOGGER = HandlerUtils
             .getLogger(CreateFile.class);
 
-    // Fields
-    private final FilenameResolver filenameResolver;
     private final File actual;
+    private final FilenameResolver filenameResolver;
 
     public CreateFile(final UndoManager undoManager,
             final FilenameResolver filenameResolver, final File actual) {
@@ -35,7 +33,7 @@ public class CreateFile implements UndoableOperation {
         try {
             this.actual.createNewFile();
         }
-        catch (IOException ioe) {
+        catch (final IOException ioe) {
             throw new IllegalStateException("Unable to create file '"
                     + this.actual + "'", ioe);
         }
@@ -46,7 +44,7 @@ public class CreateFile implements UndoableOperation {
     }
 
     public boolean undo() {
-        boolean success = this.actual.delete();
+        final boolean success = actual.delete();
         if (success) {
             LOGGER.fine("Undo create "
                     + filenameResolver.getMeaningfulName(actual));

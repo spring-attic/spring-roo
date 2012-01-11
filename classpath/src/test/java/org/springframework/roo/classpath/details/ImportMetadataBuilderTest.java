@@ -15,7 +15,6 @@ import org.springframework.roo.model.JavaType;
  */
 public class ImportMetadataBuilderTest {
 
-    // Constants
     private static final String CALLER_MID = "MID:foo#bar";
 
     @Test

@@ -30,19 +30,18 @@ import org.springframework.roo.support.util.Assert;
 public class DefaultClassOrInterfaceTypeDetails extends
         AbstractMemberHoldingTypeDetails implements ClassOrInterfaceTypeDetails {
 
-    // Fields
-    private final ClassOrInterfaceTypeDetails superclass;
-    private final JavaType name;
-    private List<ClassOrInterfaceTypeDetails> declaredInnerTypes = new ArrayList<ClassOrInterfaceTypeDetails>();
     private List<ConstructorMetadata> declaredConstructors = new ArrayList<ConstructorMetadata>();
     private List<FieldMetadata> declaredFields = new ArrayList<FieldMetadata>();
     private List<InitializerMetadata> declaredInitializers = new ArrayList<InitializerMetadata>();
+    private List<ClassOrInterfaceTypeDetails> declaredInnerTypes = new ArrayList<ClassOrInterfaceTypeDetails>();
+    private List<MethodMetadata> declaredMethods = new ArrayList<MethodMetadata>();
     private List<JavaSymbolName> enumConstants = new ArrayList<JavaSymbolName>();
     private List<JavaType> extendsTypes = new ArrayList<JavaType>();
     private List<JavaType> implementsTypes = new ArrayList<JavaType>();
-    private List<MethodMetadata> declaredMethods = new ArrayList<MethodMetadata>();
+    private final JavaType name;
     private final PhysicalTypeCategory physicalTypeCategory;
     private Set<ImportMetadata> registeredImports = new HashSet<ImportMetadata>();
+    private final ClassOrInterfaceTypeDetails superclass;
 
     /**
      * Constructor is package protected to mandate the use of
@@ -116,7 +115,7 @@ public class DefaultClassOrInterfaceTypeDetails extends
             this.implementsTypes = implementsTypes;
         }
 
-        if (enumConstants != null && physicalTypeCategory == ENUMERATION) {
+        if ((enumConstants != null) && (physicalTypeCategory == ENUMERATION)) {
             this.enumConstants = enumConstants;
         }
 
@@ -126,69 +125,32 @@ public class DefaultClassOrInterfaceTypeDetails extends
         }
     }
 
-    public PhysicalTypeCategory getPhysicalTypeCategory() {
-        return physicalTypeCategory;
+    public boolean declaresField(final JavaSymbolName fieldName) {
+        return getDeclaredField(fieldName) != null;
     }
 
-    public JavaType getName() {
-        return getType();
-    }
-
-    public JavaType getType() {
-        return name;
+    public boolean extendsType(final JavaType type) {
+        return extendsTypes.contains(type);
     }
 
     public List<? extends ConstructorMetadata> getDeclaredConstructors() {
         return Collections.unmodifiableList(declaredConstructors);
     }
 
-    public List<JavaSymbolName> getEnumConstants() {
-        return Collections.unmodifiableList(enumConstants);
-    }
-
     public List<? extends FieldMetadata> getDeclaredFields() {
         return Collections.unmodifiableList(declaredFields);
-    }
-
-    public List<? extends MethodMetadata> getDeclaredMethods() {
-        return Collections.unmodifiableList(declaredMethods);
-    }
-
-    public List<ClassOrInterfaceTypeDetails> getDeclaredInnerTypes() {
-        return Collections.unmodifiableList(declaredInnerTypes);
     }
 
     public List<InitializerMetadata> getDeclaredInitializers() {
         return Collections.unmodifiableList(declaredInitializers);
     }
 
-    public List<JavaType> getExtendsTypes() {
-        return Collections.unmodifiableList(extendsTypes);
+    public List<ClassOrInterfaceTypeDetails> getDeclaredInnerTypes() {
+        return Collections.unmodifiableList(declaredInnerTypes);
     }
 
-    public List<JavaType> getImplementsTypes() {
-        return Collections.unmodifiableList(implementsTypes);
-    }
-
-    public ClassOrInterfaceTypeDetails getSuperclass() {
-        return superclass;
-    }
-
-    public Set<ImportMetadata> getRegisteredImports() {
-        return Collections.unmodifiableSet(registeredImports);
-    }
-
-    public boolean extendsType(final JavaType type) {
-        return this.extendsTypes.contains(type);
-    }
-
-    public boolean implementsAny(final JavaType... types) {
-        for (final JavaType type : types) {
-            if (this.implementsTypes.contains(type)) {
-                return true;
-            }
-        }
-        return false;
+    public List<? extends MethodMetadata> getDeclaredMethods() {
+        return Collections.unmodifiableList(declaredMethods);
     }
 
     @SuppressWarnings("unchecked")
@@ -202,13 +164,56 @@ public class DefaultClassOrInterfaceTypeDetails extends
         return dynamicFinders;
     }
 
-    public boolean declaresField(final JavaSymbolName fieldName) {
-        return getDeclaredField(fieldName) != null;
+    public List<JavaSymbolName> getEnumConstants() {
+        return Collections.unmodifiableList(enumConstants);
+    }
+
+    public List<JavaType> getExtendsTypes() {
+        return Collections.unmodifiableList(extendsTypes);
+    }
+
+    public List<JavaType> getImplementsTypes() {
+        return Collections.unmodifiableList(implementsTypes);
+    }
+
+    public JavaType getName() {
+        return getType();
+    }
+
+    public PhysicalTypeCategory getPhysicalTypeCategory() {
+        return physicalTypeCategory;
+    }
+
+    public Set<ImportMetadata> getRegisteredImports() {
+        return Collections.unmodifiableSet(registeredImports);
+    }
+
+    public ClassOrInterfaceTypeDetails getSuperclass() {
+        return superclass;
+    }
+
+    public JavaType getType() {
+        return name;
+    }
+
+    public boolean implementsAny(final JavaType... types) {
+        for (final JavaType type : types) {
+            if (implementsTypes.contains(type)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean isAbstract() {
+        return (physicalTypeCategory == INTERFACE)
+                || ((physicalTypeCategory == CLASS) && Modifier
+                        .isAbstract(getModifier()));
     }
 
     @Override
     public String toString() {
-        ToStringCreator tsc = new ToStringCreator(this);
+        final ToStringCreator tsc = new ToStringCreator(this);
         tsc.append("name", name);
         tsc.append("modifier", Modifier.toString(getModifier()));
         tsc.append("physicalTypeCategory", physicalTypeCategory);
@@ -223,11 +228,5 @@ public class DefaultClassOrInterfaceTypeDetails extends
         tsc.append("annotations", getAnnotations());
         tsc.append("customData", getCustomData());
         return tsc.toString();
-    }
-
-    public boolean isAbstract() {
-        return physicalTypeCategory == INTERFACE
-                || (physicalTypeCategory == CLASS && Modifier
-                        .isAbstract(getModifier()));
     }
 }

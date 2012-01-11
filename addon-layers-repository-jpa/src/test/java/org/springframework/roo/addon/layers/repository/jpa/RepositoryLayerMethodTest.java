@@ -24,13 +24,23 @@ import org.springframework.roo.support.util.StringUtils;
  */
 public class RepositoryLayerMethodTest {
 
+    @Mock private JavaType mockIdType;
     // Fixture
     @Mock private JavaType mockTargetEntity;
-    @Mock private JavaType mockIdType;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+    }
+
+    @Test
+    public void testCallFlushMethod() {
+        // Invoke
+        final String methodCall = RepositoryJpaLayerMethod.FLUSH
+                .getCall(Collections.<MethodParameter> emptyList());
+
+        // Check
+        assertEquals("flush()", methodCall);
     }
 
     @Test
@@ -52,15 +62,5 @@ public class RepositoryLayerMethodTest {
             assertNotNull(method
                     .getParameterTypes(mockTargetEntity, mockIdType));
         }
-    }
-
-    @Test
-    public void testCallFlushMethod() {
-        // Invoke
-        final String methodCall = RepositoryJpaLayerMethod.FLUSH
-                .getCall(Collections.<MethodParameter> emptyList());
-
-        // Check
-        assertEquals("flush()", methodCall);
     }
 }

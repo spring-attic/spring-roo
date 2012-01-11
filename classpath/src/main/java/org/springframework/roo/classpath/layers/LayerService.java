@@ -34,7 +34,7 @@ public interface LayerService {
     MemberTypeAdditions getMemberTypeAdditions(
             String metadataIdentificationString, String methodIdentifier,
             JavaType targetEntity, JavaType idType, int layerPosition,
-            MethodParameter... methodParameters);
+            Collection<? extends MethodParameter> methodParameters);
 
     /**
      * Returns source code modifications for a requested operation offered by a
@@ -55,5 +55,5 @@ public interface LayerService {
     MemberTypeAdditions getMemberTypeAdditions(
             String metadataIdentificationString, String methodIdentifier,
             JavaType targetEntity, JavaType idType, int layerPosition,
-            Collection<? extends MethodParameter> methodParameters);
+            MethodParameter... methodParameters);
 }

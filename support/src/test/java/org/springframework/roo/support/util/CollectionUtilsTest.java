@@ -21,12 +21,8 @@ import org.junit.Test;
  */
 public class CollectionUtilsTest {
 
-    // A simple filter for testing the filtering methods
-    private static final Filter<String> NON_BLANK_FILTER = new Filter<String>() {
-        public boolean include(final String instance) {
-            return StringUtils.hasText(instance);
-        }
-    };
+    private static class Child extends Parent {
+    }
 
     private static class Parent {
         @Override
@@ -35,57 +31,12 @@ public class CollectionUtilsTest {
         }
     }
 
-    private static class Child extends Parent {
-    }
-
-    @Test
-    public void testFilterNullCollection() {
-        assertEquals(0, CollectionUtils.filter(null, NON_BLANK_FILTER).size());
-    }
-
-    @Test
-    public void testFilterNonNullIterableWithNullFilter() {
-        // Set up
-        final Iterable<String> inputs = Arrays.asList("a", "");
-
-        // Invoke
-        final List<? extends String> results = CollectionUtils.filter(inputs,
-                null);
-
-        // Check
-        assertEquals(inputs, results);
-    }
-
-    @Test
-    public void testFilterNonNullIterableWithNonNullFilter() {
-        // Set up
-        final Iterable<String> inputs = Arrays.asList("a", "", null, "b");
-
-        // Invoke
-        final List<? extends String> results = CollectionUtils.filter(inputs,
-                NON_BLANK_FILTER);
-
-        // Check
-        assertEquals(Arrays.asList("a", "b"), results);
-    }
-
-    @Test
-    public void testAddNullCollectionToNullCollection() {
-        assertFalse(CollectionUtils.addAll(null, null));
-    }
-
-    @Test
-    public void testAddNullCollectionToNonNullCollection() {
-        // Set up
-        final Parent parent = new Parent();
-        final Collection<Parent> parents = Arrays.asList(parent);
-
-        // Invoke
-        final boolean added = CollectionUtils.addAll(null, parents);
-
-        // Check
-        assertFalse(added);
-    }
+    // A simple filter for testing the filtering methods
+    private static final Filter<String> NON_BLANK_FILTER = new Filter<String>() {
+        public boolean include(final String instance) {
+            return StringUtils.hasText(instance);
+        }
+    };
 
     @Test
     public void testAddNonNullCollectionToNonNullCollection() {
@@ -105,22 +56,76 @@ public class CollectionUtilsTest {
     }
 
     @Test
-    public void testPopulateNullCollectionWithNullCollection() {
-        assertNull(CollectionUtils.populate(null, null));
+    public void testAddNullCollectionToNonNullCollection() {
+        // Set up
+        final Parent parent = new Parent();
+        final Collection<Parent> parents = Arrays.asList(parent);
+
+        // Invoke
+        final boolean added = CollectionUtils.addAll(null, parents);
+
+        // Check
+        assertFalse(added);
     }
 
     @Test
-    public void testPopulateNonNullCollectionWithNullCollection() {
+    public void testAddNullCollectionToNullCollection() {
+        assertFalse(CollectionUtils.addAll(null, null));
+    }
+
+    @Test
+    public void testFilterNonNullIterableWithNonNullFilter() {
         // Set up
-        final Collection<Parent> collection = new ArrayList<Parent>();
-        collection.add(new Parent());
+        final Iterable<String> inputs = Arrays.asList("a", "", null, "b");
 
         // Invoke
-        final Collection<Parent> result = CollectionUtils.populate(collection,
+        final List<? extends String> results = CollectionUtils.filter(inputs,
+                NON_BLANK_FILTER);
+
+        // Check
+        assertEquals(Arrays.asList("a", "b"), results);
+    }
+
+    @Test
+    public void testFilterNonNullIterableWithNullFilter() {
+        // Set up
+        final Iterable<String> inputs = Arrays.asList("a", "");
+
+        // Invoke
+        final List<? extends String> results = CollectionUtils.filter(inputs,
                 null);
 
         // Check
-        assertEquals(0, result.size());
+        assertEquals(inputs, results);
+    }
+
+    @Test
+    public void testFilterNullCollection() {
+        assertEquals(0, CollectionUtils.filter(null, NON_BLANK_FILTER).size());
+    }
+
+    @Test
+    public void testFirstElementOfEmptyCollection() {
+        assertNull(CollectionUtils.firstElementOf(Collections.emptySet()));
+    }
+
+    @Test
+    public void testFirstElementOfMultiElementCollection() {
+        final String[] members = { "x", "y", "z" };
+        assertEquals(members[0],
+                CollectionUtils.firstElementOf(Arrays.asList(members)));
+    }
+
+    @Test
+    public void testFirstElementOfNullCollection() {
+        assertNull(CollectionUtils.firstElementOf(null));
+    }
+
+    @Test
+    public void testFirstElementOfSingleElementCollection() {
+        final String member = "x";
+        assertEquals(member,
+                CollectionUtils.firstElementOf(Collections.singleton(member)));
     }
 
     @Test
@@ -139,26 +144,21 @@ public class CollectionUtilsTest {
     }
 
     @Test
-    public void testFirstElementOfNullCollection() {
-        assertNull(CollectionUtils.firstElementOf(null));
+    public void testPopulateNonNullCollectionWithNullCollection() {
+        // Set up
+        final Collection<Parent> collection = new ArrayList<Parent>();
+        collection.add(new Parent());
+
+        // Invoke
+        final Collection<Parent> result = CollectionUtils.populate(collection,
+                null);
+
+        // Check
+        assertEquals(0, result.size());
     }
 
     @Test
-    public void testFirstElementOfEmptyCollection() {
-        assertNull(CollectionUtils.firstElementOf(Collections.emptySet()));
-    }
-
-    @Test
-    public void testFirstElementOfSingleElementCollection() {
-        final String member = "x";
-        assertEquals(member,
-                CollectionUtils.firstElementOf(Collections.singleton(member)));
-    }
-
-    @Test
-    public void testFirstElementOfMultiElementCollection() {
-        final String[] members = { "x", "y", "z" };
-        assertEquals(members[0],
-                CollectionUtils.firstElementOf(Arrays.asList(members)));
+    public void testPopulateNullCollectionWithNullCollection() {
+        assertNull(CollectionUtils.populate(null, null));
     }
 }

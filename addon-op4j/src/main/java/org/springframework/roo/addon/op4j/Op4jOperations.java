@@ -10,9 +10,9 @@ import org.springframework.roo.model.JavaType;
  */
 public interface Op4jOperations {
 
-    boolean isOp4jInstallationPossible();
-
     void annotateType(JavaType type);
+
+    boolean isOp4jInstallationPossible();
 
     void setup();
 }

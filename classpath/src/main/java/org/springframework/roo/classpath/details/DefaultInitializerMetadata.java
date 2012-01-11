@@ -15,7 +15,6 @@ public class DefaultInitializerMetadata extends
         AbstractIdentifiableJavaStructureProvider implements
         InitializerMetadata {
 
-    // Fields
     private final String body;
     private final boolean isStatic;
 
@@ -28,17 +27,17 @@ public class DefaultInitializerMetadata extends
         this.body = body;
     }
 
-    public boolean isStatic() {
-        return isStatic;
-    }
-
     public final String getBody() {
         return body;
     }
 
+    public boolean isStatic() {
+        return isStatic;
+    }
+
     @Override
     public String toString() {
-        ToStringCreator tsc = new ToStringCreator(this);
+        final ToStringCreator tsc = new ToStringCreator(this);
         tsc.append("declaredByMetadataId", getDeclaredByMetadataId());
         tsc.append("modifier", Modifier.toString(getModifier()));
         tsc.append("customData", getCustomData());

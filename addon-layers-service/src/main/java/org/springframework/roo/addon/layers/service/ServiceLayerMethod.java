@@ -255,7 +255,6 @@ enum ServiceLayerMethod {
         return null;
     }
 
-    // Fields
     private final MethodMetadataCustomDataKey key;
 
     /**
@@ -294,7 +293,7 @@ enum ServiceLayerMethod {
      * @return a non-blank string that's unique within this enum
      */
     public String getKey() {
-        return this.key.name();
+        return key.name();
     }
 
     /**

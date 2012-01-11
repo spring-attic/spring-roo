@@ -29,55 +29,56 @@ import org.w3c.dom.Document;
 @Service
 public class DefaultXmlRoundTripFileManager implements XmlRoundTripFileManager {
 
-    // Fields
-    @Reference private FileManager fileManager;
-    private final Map<String, String> fileContentsMap = new HashMap<String, String>();
-
     private static MessageDigest sha = null;
     static {
         try {
             sha = MessageDigest.getInstance("SHA1");
         }
-        catch (NoSuchAlgorithmException ignored) {
+        catch (final NoSuchAlgorithmException ignored) {
         }
     }
+
+    private final Map<String, String> fileContentsMap = new HashMap<String, String>();
+    @Reference private FileManager fileManager;
 
     public void writeToDiskIfNecessary(final String filename,
             final Document proposed) {
         Assert.notNull(filename, "The file name is required");
         Assert.notNull(proposed, "The proposed document is required");
         if (fileManager.exists(filename)) {
-            String proposedContents = XmlUtils.nodeToString(proposed);
+            final String proposedContents = XmlUtils.nodeToString(proposed);
             try {
                 if (sha != null) {
-                    String contents = FileCopyUtils.copyToString(new File(
-                            filename)) + proposedContents;
-                    byte[] digest = sha.digest(contents.getBytes());
-                    String contentsSha = HexUtils.toHex(digest);
-                    String lastContents = fileContentsMap.get(filename);
-                    if (lastContents != null
+                    final String contents = FileCopyUtils
+                            .copyToString(new File(filename))
+                            + proposedContents;
+                    final byte[] digest = sha.digest(contents.getBytes());
+                    final String contentsSha = HexUtils.toHex(digest);
+                    final String lastContents = fileContentsMap.get(filename);
+                    if ((lastContents != null)
                             && contentsSha.equals(lastContents)) {
                         return;
                     }
                     fileContentsMap.put(filename, contentsSha);
                 }
             }
-            catch (IOException ignored) {
+            catch (final IOException ignored) {
             }
             final Document original = XmlUtils.readXml(fileManager
                     .getInputStream(filename));
             if (XmlRoundTripUtils.compareDocuments(original, proposed)) {
                 DomUtils.removeTextNodes(original);
-                String updateContents = XmlUtils.nodeToString(original);
+                final String updateContents = XmlUtils.nodeToString(original);
                 fileManager.createOrUpdateTextFileIfRequired(filename,
                         updateContents, false);
             }
         }
         else {
-            String contents = XmlUtils.nodeToString(proposed);
+            final String contents = XmlUtils.nodeToString(proposed);
             if (sha != null) {
-                byte[] digest = sha.digest((contents + contents).getBytes());
-                String contentsSha = HexUtils.toHex(digest);
+                final byte[] digest = sha.digest((contents + contents)
+                        .getBytes());
+                final String contentsSha = HexUtils.toHex(digest);
                 fileContentsMap.put(filename, contentsSha);
             }
             fileManager.createOrUpdateTextFileIfRequired(filename, contents,

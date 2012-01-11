@@ -14,14 +14,14 @@ import org.springframework.roo.support.util.Assert;
  */
 public class InvocableMemberBodyBuilder {
 
-    // Fields
-    private boolean reset;
-    private int indentLevel;
-    private final StringBuilder stringBuilder = new StringBuilder();
-
     public static InvocableMemberBodyBuilder getInstance() {
         return new InvocableMemberBodyBuilder();
     }
+
+    private int indentLevel;
+    private boolean reset;
+
+    private final StringBuilder stringBuilder = new StringBuilder();
 
     /**
      * Constructor for an empty body
@@ -32,54 +32,10 @@ public class InvocableMemberBodyBuilder {
     }
 
     /**
-     * Increases the indent by one level.
-     */
-    public InvocableMemberBodyBuilder indent() {
-        indentLevel++;
-        return this;
-    }
-
-    /**
-     * Resets the indent to zero.
-     */
-    public InvocableMemberBodyBuilder reset() {
-        indentLevel = 0;
-        reset = true;
-        return this;
-    }
-
-    /**
-     * Decreases the indent by one level.
-     */
-    public InvocableMemberBodyBuilder indentRemove() {
-        indentLevel--;
-        return this;
-    }
-
-    /**
-     * Prints a blank line, ensuring any indent is included before doing so.
-     */
-    public InvocableMemberBodyBuilder newLine(final boolean indentBefore) {
-        if (indentBefore) {
-            appendIndent();
-        }
-        // We use \n for consistency with JavaParser's DumpVisitor, which always
-        // uses \n
-        stringBuilder.append("\n");
-        // stringBuilder.append(StringUtils.LINE_SEPARATOR);
-        return this;
-    }
-
-    public InvocableMemberBodyBuilder newLine() {
-        newLine(true);
-        return this;
-    }
-
-    /**
      * Prints the message, WITHOUT ANY INDENTATION.
      */
     public InvocableMemberBodyBuilder append(final String message) {
-        if (message != null && !"".equals(message)) {
+        if ((message != null) && !"".equals(message)) {
             stringBuilder.append(message);
         }
         return this;
@@ -91,7 +47,7 @@ public class InvocableMemberBodyBuilder {
      */
     public InvocableMemberBodyBuilder appendFormalLine(final String message) {
         appendIndent();
-        if (message != null && !"".equals(message)) {
+        if ((message != null) && !"".equals(message)) {
             stringBuilder.append(message);
         }
         return newLine(false);
@@ -109,14 +65,58 @@ public class InvocableMemberBodyBuilder {
 
     public String getOutput() {
         if (reset) {
-            Assert.isTrue(this.indentLevel == 0, "Indent level must be 0 (not "
+            Assert.isTrue(indentLevel == 0, "Indent level must be 0 (not "
                     + indentLevel + ") to terminate following a reset!");
         }
         else {
-            Assert.isTrue(this.indentLevel == 2, "Indent level must be 2 (not "
+            Assert.isTrue(indentLevel == 2, "Indent level must be 2 (not "
                     + indentLevel
                     + ") to terminate (use reset to indent to level 0)!");
         }
         return stringBuilder.toString();
+    }
+
+    /**
+     * Increases the indent by one level.
+     */
+    public InvocableMemberBodyBuilder indent() {
+        indentLevel++;
+        return this;
+    }
+
+    /**
+     * Decreases the indent by one level.
+     */
+    public InvocableMemberBodyBuilder indentRemove() {
+        indentLevel--;
+        return this;
+    }
+
+    public InvocableMemberBodyBuilder newLine() {
+        newLine(true);
+        return this;
+    }
+
+    /**
+     * Prints a blank line, ensuring any indent is included before doing so.
+     */
+    public InvocableMemberBodyBuilder newLine(final boolean indentBefore) {
+        if (indentBefore) {
+            appendIndent();
+        }
+        // We use \n for consistency with JavaParser's DumpVisitor, which always
+        // uses \n
+        stringBuilder.append("\n");
+        // stringBuilder.append(StringUtils.LINE_SEPARATOR);
+        return this;
+    }
+
+    /**
+     * Resets the indent to zero.
+     */
+    public InvocableMemberBodyBuilder reset() {
+        indentLevel = 0;
+        reset = true;
+        return this;
     }
 }

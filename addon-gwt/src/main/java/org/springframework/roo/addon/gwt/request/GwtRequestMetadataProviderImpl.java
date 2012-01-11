@@ -71,10 +71,8 @@ public class GwtRequestMetadataProviderImpl extends
         AbstractHashCodeTrackingMetadataNotifier implements
         GwtRequestMetadataProvider {
 
-    // Constants
     private static final int LAYER_POSITION = LayerType.HIGHEST.getPosition();
 
-    // Fields
     @Reference GwtFileManager gwtFileManager;
     @Reference GwtTypeService gwtTypeService;
     @Reference LayerService layerService;
@@ -93,10 +91,6 @@ public class GwtRequestMetadataProviderImpl extends
         metadataDependencyRegistry.deregisterDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
                 getProvidesType());
-    }
-
-    public String getProvidesType() {
-        return GwtRequestMetadata.getMetadataIdentifierType();
     }
 
     public MetadataItem get(final String requestMetadataId) {
@@ -139,30 +133,77 @@ public class GwtRequestMetadataProviderImpl extends
         return gwtRequestMetadata;
     }
 
-    private Map<MethodMetadata, FieldMetadata> getRequestMethodsAndInvokedTypes(
-            final JavaType entity, final String requestMetadataId) {
-        final JavaType idType = persistenceMemberLocator
-                .getIdentifierType(entity);
-        if (idType == null) {
+    private ClassOrInterfaceTypeDetails getGovernor(
+            final String metadataIdentificationString) {
+        final JavaType governorTypeName = GwtRequestMetadata
+                .getJavaType(metadataIdentificationString);
+        final LogicalPath governorTypePath = GwtRequestMetadata
+                .getPath(metadataIdentificationString);
+        final String physicalTypeId = PhysicalTypeIdentifier.createIdentifier(
+                governorTypeName, governorTypePath);
+        return typeLocationService.getTypeDetails(physicalTypeId);
+    }
+
+    /**
+     * Returns the type on which the given request methods will be invoked
+     * 
+     * @param invokedFields the autowired fields invoked by layer method calls
+     *            (can include <code>null</code> elements for 'active record'
+     *            calls)
+     * @return <code>null</code> if active record is being used, otherwise a
+     *         layer component type
+     */
+    private JavaType getInvokedType(
+            final Collection<FieldMetadata> invokedFields) {
+        final Collection<JavaType> distinctInvokedTypes = new HashSet<JavaType>();
+        for (final FieldMetadata invokedField : invokedFields) {
+            if (invokedField == null) {
+                distinctInvokedTypes.add(null);
+            }
+            else {
+                distinctInvokedTypes.add(invokedField.getFieldType());
+            }
+        }
+        Assert.isTrue(distinctInvokedTypes.size() == 1,
+                "Expected one invoked type but found: " + distinctInvokedTypes);
+        return distinctInvokedTypes.iterator().next();
+    }
+
+    public String getProvidesType() {
+        return GwtRequestMetadata.getMetadataIdentifierType();
+    }
+
+    private MethodMetadataBuilder getRequestMethod(
+            final ClassOrInterfaceTypeDetails request,
+            final MethodMetadata method, final JavaType returnType) {
+        final ClassOrInterfaceTypeDetails entity = gwtTypeService
+                .lookupEntityFromRequest(request);
+        if (entity == null) {
             return null;
         }
-        final Map<MethodMetadata, FieldMetadata> requestMethods = new LinkedHashMap<MethodMetadata, FieldMetadata>();
-        for (final Entry<MethodMetadataCustomDataKey, Collection<MethodParameter>> methodSignature : getRequestMethodSignatures(
-                entity, idType).entrySet()) {
-            final String methodId = methodSignature.getKey().name();
-            final MemberTypeAdditions memberTypeAdditions = layerService
-                    .getMemberTypeAdditions(requestMetadataId, methodId,
-                            entity, idType, LAYER_POSITION,
-                            methodSignature.getValue());
-            Assert.notNull(memberTypeAdditions, "No support for " + methodId
-                    + " method for domain type " + entity);
-            final MethodMetadata requestMethod = getRequestMethod(entity,
-                    methodSignature.getKey(), memberTypeAdditions,
-                    requestMetadataId);
-            requestMethods.put(requestMethod,
-                    memberTypeAdditions.getInvokedField());
+        final List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+        for (final AnnotatedJavaType parameterType : method.getParameterTypes()) {
+            parameterTypes.add(new AnnotatedJavaType(gwtTypeService
+                    .getGwtSideLeafType(parameterType.getJavaType(),
+                            entity.getType(), true, false)));
         }
-        return requestMethods;
+        return new MethodMetadataBuilder(request.getDeclaredByMetadataId(),
+                ABSTRACT, method.getMethodName(), returnType, parameterTypes,
+                method.getParameterNames(), null);
+    }
+
+    private MethodMetadataBuilder getRequestMethod(
+            final ClassOrInterfaceTypeDetails request,
+            final MethodMetadata method, final JavaType entityType,
+            final JavaType invokedType) {
+        final ClassOrInterfaceTypeDetails proxy = gwtTypeService
+                .lookupProxyFromRequest(request);
+        if (proxy == null) {
+            return null;
+        }
+        final JavaType methodReturnType = getRequestMethodReturnType(
+                invokedType, method, proxy.getType());
+        return getRequestMethod(request, method, methodReturnType);
     }
 
     private MethodMetadata getRequestMethod(final JavaType entity,
@@ -198,22 +239,46 @@ public class GwtRequestMetadataProviderImpl extends
         return methodBuilder.build();
     }
 
-    private JavaType getReturnType(final MethodMetadataCustomDataKey methodKey,
-            final JavaType entity) {
-        if (COUNT_ALL_METHOD.equals(methodKey)) {
-            return LONG_PRIMITIVE;
+    private JavaType getRequestMethodReturnType(final JavaType invokedType,
+            final MethodMetadata method, final JavaType proxyType) {
+        if ((invokedType == null) && !method.isStatic()) {
+            // Calling an active record method that's non-static (i.e. target is
+            // an entity instance)
+            final List<JavaType> methodReturnTypeArgs = Arrays.asList(
+                    proxyType, method.getReturnType());
+            return new JavaType(INSTANCE_REQUEST.getFullyQualifiedTypeName(),
+                    0, DataType.TYPE, null, methodReturnTypeArgs);
         }
-        if (FIND_ALL_METHOD.equals(methodKey)
-                || FIND_ENTRIES_METHOD.equals(methodKey)) {
-            return JavaType.listOf(entity);
+        final List<JavaType> methodReturnTypeArgs = Collections
+                .singletonList(method.getReturnType());
+        return new JavaType(REQUEST.getFullyQualifiedTypeName(), 0,
+                DataType.TYPE, null, methodReturnTypeArgs);
+    }
+
+    private Map<MethodMetadata, FieldMetadata> getRequestMethodsAndInvokedTypes(
+            final JavaType entity, final String requestMetadataId) {
+        final JavaType idType = persistenceMemberLocator
+                .getIdentifierType(entity);
+        if (idType == null) {
+            return null;
         }
-        if (FIND_METHOD.equals(methodKey)) {
-            return entity;
+        final Map<MethodMetadata, FieldMetadata> requestMethods = new LinkedHashMap<MethodMetadata, FieldMetadata>();
+        for (final Entry<MethodMetadataCustomDataKey, Collection<MethodParameter>> methodSignature : getRequestMethodSignatures(
+                entity, idType).entrySet()) {
+            final String methodId = methodSignature.getKey().name();
+            final MemberTypeAdditions memberTypeAdditions = layerService
+                    .getMemberTypeAdditions(requestMetadataId, methodId,
+                            entity, idType, LAYER_POSITION,
+                            methodSignature.getValue());
+            Assert.notNull(memberTypeAdditions, "No support for " + methodId
+                    + " method for domain type " + entity);
+            final MethodMetadata requestMethod = getRequestMethod(entity,
+                    methodSignature.getKey(), memberTypeAdditions,
+                    requestMetadataId);
+            requestMethods.put(requestMethod,
+                    memberTypeAdditions.getInvokedField());
         }
-        if (PERSIST_METHOD.equals(methodKey) || REMOVE_METHOD.equals(methodKey)) {
-            return VOID_PRIMITIVE;
-        }
-        throw new IllegalStateException("Unexpected method key " + methodKey);
+        return requestMethods;
     }
 
     private Map<MethodMetadataCustomDataKey, Collection<MethodParameter>> getRequestMethodSignatures(
@@ -234,15 +299,56 @@ public class GwtRequestMetadataProviderImpl extends
         return signatures;
     }
 
-    private ClassOrInterfaceTypeDetails getGovernor(
-            final String metadataIdentificationString) {
-        final JavaType governorTypeName = GwtRequestMetadata
-                .getJavaType(metadataIdentificationString);
-        final LogicalPath governorTypePath = GwtRequestMetadata
-                .getPath(metadataIdentificationString);
-        final String physicalTypeId = PhysicalTypeIdentifier.createIdentifier(
-                governorTypeName, governorTypePath);
-        return typeLocationService.getTypeDetails(physicalTypeId);
+    private JavaType getReturnType(final MethodMetadataCustomDataKey methodKey,
+            final JavaType entity) {
+        if (COUNT_ALL_METHOD.equals(methodKey)) {
+            return LONG_PRIMITIVE;
+        }
+        if (FIND_ALL_METHOD.equals(methodKey)
+                || FIND_ENTRIES_METHOD.equals(methodKey)) {
+            return JavaType.listOf(entity);
+        }
+        if (FIND_METHOD.equals(methodKey)) {
+            return entity;
+        }
+        if (PERSIST_METHOD.equals(methodKey) || REMOVE_METHOD.equals(methodKey)) {
+            return VOID_PRIMITIVE;
+        }
+        throw new IllegalStateException("Unexpected method key " + methodKey);
+    }
+
+    private AnnotationMetadata getServiceNameAnnotation(
+            final ClassOrInterfaceTypeDetails request,
+            final JavaType invokedType, final JavaType entityType,
+            final String requestMetadataId) {
+        final List<AnnotationAttributeValue<?>> serviceAttributeValues = new ArrayList<AnnotationAttributeValue<?>>();
+        if (invokedType == null) {
+            // Active record; specify the entity type as the invoked "service"
+            final StringAttributeValue stringAttributeValue = new StringAttributeValue(
+                    new JavaSymbolName("value"),
+                    entityType.getFullyQualifiedTypeName());
+            serviceAttributeValues.add(stringAttributeValue);
+        }
+        else {
+            // Layer component, e.g. repository or service; specify its type as
+            // the invoked "service"
+            final StringAttributeValue stringAttributeValue = new StringAttributeValue(
+                    new JavaSymbolName("value"),
+                    invokedType.getFullyQualifiedTypeName());
+            serviceAttributeValues.add(stringAttributeValue);
+
+            // Specify the locator that GWT will use to find it
+            final LogicalPath requestLogicalPath = PhysicalTypeIdentifier
+                    .getPath(request.getDeclaredByMetadataId());
+            final JavaType serviceLocator = gwtTypeService
+                    .getServiceLocator(requestLogicalPath.getModule());
+            final StringAttributeValue locatorAttributeValue = new StringAttributeValue(
+                    new JavaSymbolName("locator"),
+                    serviceLocator.getFullyQualifiedTypeName());
+            serviceAttributeValues.add(locatorAttributeValue);
+        }
+        return new AnnotationMetadataBuilder(SERVICE_NAME,
+                serviceAttributeValues).build();
     }
 
     /**
@@ -284,113 +390,5 @@ public class GwtRequestMetadataProviderImpl extends
 
         return gwtFileManager.write(typeDetailsBuilder.build(),
                 GwtUtils.PROXY_REQUEST_WARNING);
-    }
-
-    private AnnotationMetadata getServiceNameAnnotation(
-            final ClassOrInterfaceTypeDetails request,
-            final JavaType invokedType, final JavaType entityType,
-            final String requestMetadataId) {
-        final List<AnnotationAttributeValue<?>> serviceAttributeValues = new ArrayList<AnnotationAttributeValue<?>>();
-        if (invokedType == null) {
-            // Active record; specify the entity type as the invoked "service"
-            final StringAttributeValue stringAttributeValue = new StringAttributeValue(
-                    new JavaSymbolName("value"),
-                    entityType.getFullyQualifiedTypeName());
-            serviceAttributeValues.add(stringAttributeValue);
-        }
-        else {
-            // Layer component, e.g. repository or service; specify its type as
-            // the invoked "service"
-            final StringAttributeValue stringAttributeValue = new StringAttributeValue(
-                    new JavaSymbolName("value"),
-                    invokedType.getFullyQualifiedTypeName());
-            serviceAttributeValues.add(stringAttributeValue);
-
-            // Specify the locator that GWT will use to find it
-            final LogicalPath requestLogicalPath = PhysicalTypeIdentifier
-                    .getPath(request.getDeclaredByMetadataId());
-            final JavaType serviceLocator = gwtTypeService
-                    .getServiceLocator(requestLogicalPath.getModule());
-            final StringAttributeValue locatorAttributeValue = new StringAttributeValue(
-                    new JavaSymbolName("locator"),
-                    serviceLocator.getFullyQualifiedTypeName());
-            serviceAttributeValues.add(locatorAttributeValue);
-        }
-        return new AnnotationMetadataBuilder(SERVICE_NAME,
-                serviceAttributeValues).build();
-    }
-
-    /**
-     * Returns the type on which the given request methods will be invoked
-     * 
-     * @param invokedFields the autowired fields invoked by layer method calls
-     *            (can include <code>null</code> elements for 'active record'
-     *            calls)
-     * @return <code>null</code> if active record is being used, otherwise a
-     *         layer component type
-     */
-    private JavaType getInvokedType(
-            final Collection<FieldMetadata> invokedFields) {
-        final Collection<JavaType> distinctInvokedTypes = new HashSet<JavaType>();
-        for (final FieldMetadata invokedField : invokedFields) {
-            if (invokedField == null) {
-                distinctInvokedTypes.add(null);
-            }
-            else {
-                distinctInvokedTypes.add(invokedField.getFieldType());
-            }
-        }
-        Assert.isTrue(distinctInvokedTypes.size() == 1,
-                "Expected one invoked type but found: " + distinctInvokedTypes);
-        return distinctInvokedTypes.iterator().next();
-    }
-
-    private MethodMetadataBuilder getRequestMethod(
-            final ClassOrInterfaceTypeDetails request,
-            final MethodMetadata method, final JavaType entityType,
-            final JavaType invokedType) {
-        final ClassOrInterfaceTypeDetails proxy = gwtTypeService
-                .lookupProxyFromRequest(request);
-        if (proxy == null) {
-            return null;
-        }
-        final JavaType methodReturnType = getRequestMethodReturnType(
-                invokedType, method, proxy.getType());
-        return getRequestMethod(request, method, methodReturnType);
-    }
-
-    private JavaType getRequestMethodReturnType(final JavaType invokedType,
-            final MethodMetadata method, final JavaType proxyType) {
-        if (invokedType == null && !method.isStatic()) {
-            // Calling an active record method that's non-static (i.e. target is
-            // an entity instance)
-            final List<JavaType> methodReturnTypeArgs = Arrays.asList(
-                    proxyType, method.getReturnType());
-            return new JavaType(INSTANCE_REQUEST.getFullyQualifiedTypeName(),
-                    0, DataType.TYPE, null, methodReturnTypeArgs);
-        }
-        final List<JavaType> methodReturnTypeArgs = Collections
-                .singletonList(method.getReturnType());
-        return new JavaType(REQUEST.getFullyQualifiedTypeName(), 0,
-                DataType.TYPE, null, methodReturnTypeArgs);
-    }
-
-    private MethodMetadataBuilder getRequestMethod(
-            final ClassOrInterfaceTypeDetails request,
-            final MethodMetadata method, final JavaType returnType) {
-        final ClassOrInterfaceTypeDetails entity = gwtTypeService
-                .lookupEntityFromRequest(request);
-        if (entity == null) {
-            return null;
-        }
-        final List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
-        for (final AnnotatedJavaType parameterType : method.getParameterTypes()) {
-            parameterTypes.add(new AnnotatedJavaType(gwtTypeService
-                    .getGwtSideLeafType(parameterType.getJavaType(),
-                            entity.getType(), true, false)));
-        }
-        return new MethodMetadataBuilder(request.getDeclaredByMetadataId(),
-                ABSTRACT, method.getMethodName(), returnType, parameterTypes,
-                method.getParameterNames(), null);
     }
 }

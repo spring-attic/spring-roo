@@ -14,18 +14,12 @@ import org.springframework.roo.project.Path;
  */
 public class PhysicalTypeIdentifierNamingUtilsTest {
 
-    // Constants
-    private static final Path PATH = Path.SRC_MAIN_JAVA; // Same as in the below
-                                                         // instance ID
+    // instance ID
     private static final String METADATA_CLASS_ID = "MID:org.springframework.roo.addon.plural.PluralMetadata";
     private static final String METADATA_INSTANCE_ID = "MID:org.springframework.roo.addon.plural.PluralMetadata#core|SRC_MAIN_JAVA?com.example.domain.Thing";
     private static final String MODULE = "core"; // Same as in the above
                                                  // instance ID
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testGetPathFromMetadataClassId() {
-        PhysicalTypeIdentifierNamingUtils.getPath(METADATA_CLASS_ID);
-    }
+    private static final Path PATH = Path.SRC_MAIN_JAVA; // Same as in the below
 
     @Test
     public void testGetLogicalPathFromMetadataInstanceId() {
@@ -45,5 +39,10 @@ public class PhysicalTypeIdentifierNamingUtilsTest {
 
         // Check
         assertEquals(MODULE, module);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testGetPathFromMetadataClassId() {
+        PhysicalTypeIdentifierNamingUtils.getPath(METADATA_CLASS_ID);
     }
 }

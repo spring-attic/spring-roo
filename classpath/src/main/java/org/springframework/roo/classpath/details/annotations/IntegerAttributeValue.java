@@ -11,7 +11,6 @@ import org.springframework.roo.model.JavaSymbolName;
 public class IntegerAttributeValue extends
         AbstractAnnotationAttributeValue<Integer> {
 
-    // Fields
     private final int value;
 
     /**

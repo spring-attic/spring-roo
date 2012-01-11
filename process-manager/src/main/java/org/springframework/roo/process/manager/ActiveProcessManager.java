@@ -10,15 +10,15 @@ package org.springframework.roo.process.manager;
 public class ActiveProcessManager {
     private static ThreadLocal<ProcessManager> processManager = new ThreadLocal<ProcessManager>();
 
+    public static void clearActiveProcessManager() {
+        processManager.remove();
+    }
+
     public static ProcessManager getActiveProcessManager() {
         return processManager.get();
     }
 
     public static void setActiveProcessManager(final ProcessManager pm) {
         processManager.set(pm);
-    }
-
-    public static void clearActiveProcessManager() {
-        processManager.remove();
     }
 }

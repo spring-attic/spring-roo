@@ -16,11 +16,9 @@ import org.springframework.roo.support.util.Assert;
  */
 public class CustomDataImpl implements CustomData {
 
-    // Constants
     public static final CustomData NONE = new CustomDataImpl(
             new LinkedHashMap<Object, Object>());
 
-    // Fields
     private final Map<Object, Object> customData;
 
     public CustomDataImpl(final Map<Object, Object> customData) {
@@ -28,42 +26,47 @@ public class CustomDataImpl implements CustomData {
         this.customData = Collections.unmodifiableMap(customData);
     }
 
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final CustomDataImpl other = (CustomDataImpl) obj;
+        if (customData == null) {
+            if (other.customData != null) {
+                return false;
+            }
+        }
+        else if (!customData.equals(other.customData)) {
+            return false;
+        }
+        return true;
+    }
+
     public Object get(final Object key) {
         return customData.get(key);
     }
 
-    public Set<Object> keySet() {
-        return customData.keySet();
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        final int result = 1;
+        return (prime * result)
+                + ((customData == null) ? 0 : customData.hashCode());
     }
 
     public Iterator<Object> iterator() {
         return customData.keySet().iterator();
     }
 
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        return prime * result
-                + ((customData == null) ? 0 : customData.hashCode());
-    }
-
-    @Override
-    public boolean equals(final Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        CustomDataImpl other = (CustomDataImpl) obj;
-        if (customData == null) {
-            if (other.customData != null)
-                return false;
-        }
-        else if (!customData.equals(other.customData))
-            return false;
-        return true;
+    public Set<Object> keySet() {
+        return customData.keySet();
     }
 
     @Override

@@ -21,19 +21,19 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.1
  */
 public class Column {
-    private final String name;
-    private final int dataType;
-    private final String typeName;
+    private boolean autoIncrement;
     private final int columnSize;
-    private int scale = 0;
+    private final int dataType;
+    private String defaultValue;
     private String description;
+    private JavaType javaType;
+    private String jdbcType;
+    private final String name;
     private boolean primaryKey;
     private boolean required;
+    private int scale = 0;
+    private final String typeName;
     private boolean unique;
-    private boolean autoIncrement;
-    private String jdbcType;
-    private JavaType javaType;
-    private String defaultValue;
 
     Column(final String name, final int dataType, final String typeName,
             final int columnSize, final int scale) {
@@ -44,6 +44,77 @@ public class Column {
         this.columnSize = columnSize;
         this.scale = scale;
         init();
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final Column other = (Column) obj;
+        if (name == null) {
+            if (other.name != null) {
+                return false;
+            }
+        }
+        else if (!name.equals(other.name)) {
+            return false;
+        }
+        return true;
+    }
+
+    public int getColumnSize() {
+        return columnSize;
+    }
+
+    public int getDataType() {
+        return dataType;
+    }
+
+    public String getDefaultValue() {
+        return defaultValue;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public String getEscapedName() {
+        return name.replaceAll("\\\\", "\\\\\\\\");
+    }
+
+    public JavaType getJavaType() {
+        return javaType;
+    }
+
+    public String getJdbcType() {
+        return jdbcType;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public int getScale() {
+        return scale;
+    }
+
+    public String getTypeName() {
+        return typeName;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = (prime * result) + ((name == null) ? 0 : name.hashCode());
+        return result;
     }
 
     private void init() {
@@ -177,110 +248,44 @@ public class Column {
         }
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public String getEscapedName() {
-        return name.replaceAll("\\\\", "\\\\\\\\");
-    }
-
-    public int getDataType() {
-        return dataType;
-    }
-
-    public String getTypeName() {
-        return typeName;
-    }
-
-    public int getColumnSize() {
-        return columnSize;
-    }
-
-    public int getScale() {
-        return scale;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(final String description) {
-        this.description = description;
+    public boolean isAutoIncrement() {
+        return autoIncrement;
     }
 
     public boolean isPrimaryKey() {
         return primaryKey;
     }
 
-    public void setPrimaryKey(final boolean primaryKey) {
-        this.primaryKey = primaryKey;
-    }
-
     public boolean isRequired() {
         return required;
-    }
-
-    public void setRequired(final boolean required) {
-        this.required = required;
     }
 
     public boolean isUnique() {
         return unique;
     }
 
-    public void setUnique(final boolean unique) {
-        this.unique = unique;
-    }
-
-    public boolean isAutoIncrement() {
-        return autoIncrement;
-    }
-
     public void setAutoIncrement(final boolean autoIncrement) {
         this.autoIncrement = autoIncrement;
-    }
-
-    public String getJdbcType() {
-        return jdbcType;
-    }
-
-    public JavaType getJavaType() {
-        return javaType;
-    }
-
-    public String getDefaultValue() {
-        return defaultValue;
     }
 
     public void setDefaultValue(final String defaultValue) {
         this.defaultValue = defaultValue;
     }
 
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((name == null) ? 0 : name.hashCode());
-        return result;
+    public void setDescription(final String description) {
+        this.description = description;
     }
 
-    @Override
-    public boolean equals(final Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        Column other = (Column) obj;
-        if (name == null) {
-            if (other.name != null)
-                return false;
-        }
-        else if (!name.equals(other.name))
-            return false;
-        return true;
+    public void setPrimaryKey(final boolean primaryKey) {
+        this.primaryKey = primaryKey;
+    }
+
+    public void setRequired(final boolean required) {
+        this.required = required;
+    }
+
+    public void setUnique(final boolean unique) {
+        this.unique = unique;
     }
 
     @Override

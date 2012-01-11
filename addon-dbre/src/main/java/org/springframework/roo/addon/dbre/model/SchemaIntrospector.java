@@ -19,9 +19,9 @@ public class SchemaIntrospector extends AbstractIntrospector {
     }
 
     public Set<Schema> getSchemas() throws SQLException {
-        Set<Schema> schemas = new LinkedHashSet<Schema>();
+        final Set<Schema> schemas = new LinkedHashSet<Schema>();
 
-        ResultSet rs = databaseMetaData.getSchemas();
+        final ResultSet rs = databaseMetaData.getSchemas();
         try {
             while (rs.next()) {
                 schemas.add(new Schema(rs.getString("TABLE_SCHEM")));

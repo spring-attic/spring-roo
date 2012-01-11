@@ -26,18 +26,41 @@ import org.springframework.roo.support.util.StringUtils;
 public class ToStringMetadata extends
         AbstractItdTypeDetailsProvidingMetadataItem {
 
-    // Constants
     private static final String PROVIDES_TYPE_STRING = ToStringMetadata.class
             .getName();
     private static final String PROVIDES_TYPE = MetadataIdentificationUtils
             .create(PROVIDES_TYPE_STRING);
+    private static final String STYLE = "SHORT_PREFIX_STYLE";
     private static final JavaType TO_STRING_BUILDER = new JavaType(
             "org.apache.commons.lang3.builder.ReflectionToStringBuilder");
     private static final JavaType TO_STRING_STYLE = new JavaType(
             "org.apache.commons.lang3.builder.ToStringStyle");
-    private static final String STYLE = "SHORT_PREFIX_STYLE";
 
-    // Fields
+    public static String createIdentifier(final JavaType javaType,
+            final LogicalPath path) {
+        return PhysicalTypeIdentifierNamingUtils.createIdentifier(
+                PROVIDES_TYPE_STRING, javaType, path);
+    }
+
+    public static JavaType getJavaType(final String metadataIdentificationString) {
+        return PhysicalTypeIdentifierNamingUtils.getJavaType(
+                PROVIDES_TYPE_STRING, metadataIdentificationString);
+    }
+
+    public static String getMetadataIdentiferType() {
+        return PROVIDES_TYPE;
+    }
+
+    public static LogicalPath getPath(final String metadataIdentificationString) {
+        return PhysicalTypeIdentifierNamingUtils.getPath(PROVIDES_TYPE_STRING,
+                metadataIdentificationString);
+    }
+
+    public static boolean isValid(final String metadataIdentificationString) {
+        return PhysicalTypeIdentifierNamingUtils.isValid(PROVIDES_TYPE_STRING,
+                metadataIdentificationString);
+    }
+
     private final ToStringAnnotationValues annotationValues;
 
     /**
@@ -75,13 +98,13 @@ public class ToStringMetadata extends
      *         introduced (or null if undeclared and not introduced)
      */
     private MethodMetadataBuilder getToStringMethod() {
-        String toStringMethod = annotationValues.getToStringMethod();
+        final String toStringMethod = annotationValues.getToStringMethod();
         if (StringUtils.isBlank(toStringMethod)) {
             return null;
         }
 
         // Compute the relevant toString method name
-        JavaSymbolName methodName = new JavaSymbolName(toStringMethod);
+        final JavaSymbolName methodName = new JavaSymbolName(toStringMethod);
 
         // See if the type itself declared the method
         if (governorHasMethod(methodName)) {
@@ -92,10 +115,10 @@ public class ToStringMetadata extends
                 TO_STRING_STYLE);
 
         final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-        String[] excludeFields = annotationValues.getExcludeFields();
+        final String[] excludeFields = annotationValues.getExcludeFields();
         String str;
-        if (excludeFields != null && excludeFields.length > 0) {
-            StringBuilder builder = new StringBuilder();
+        if ((excludeFields != null) && (excludeFields.length > 0)) {
+            final StringBuilder builder = new StringBuilder();
             for (int i = 0; i < excludeFields.length; i++) {
                 if (i > 0) {
                     builder.append(", ");
@@ -118,7 +141,7 @@ public class ToStringMetadata extends
 
     @Override
     public String toString() {
-        ToStringCreator tsc = new ToStringCreator(this);
+        final ToStringCreator tsc = new ToStringCreator(this);
         tsc.append("identifier", getId());
         tsc.append("valid", valid);
         tsc.append("aspectName", aspectName);
@@ -126,30 +149,5 @@ public class ToStringMetadata extends
         tsc.append("governor", governorPhysicalTypeMetadata.getId());
         tsc.append("itdTypeDetails", itdTypeDetails);
         return tsc.toString();
-    }
-
-    public static String getMetadataIdentiferType() {
-        return PROVIDES_TYPE;
-    }
-
-    public static String createIdentifier(final JavaType javaType,
-            final LogicalPath path) {
-        return PhysicalTypeIdentifierNamingUtils.createIdentifier(
-                PROVIDES_TYPE_STRING, javaType, path);
-    }
-
-    public static JavaType getJavaType(final String metadataIdentificationString) {
-        return PhysicalTypeIdentifierNamingUtils.getJavaType(
-                PROVIDES_TYPE_STRING, metadataIdentificationString);
-    }
-
-    public static LogicalPath getPath(final String metadataIdentificationString) {
-        return PhysicalTypeIdentifierNamingUtils.getPath(PROVIDES_TYPE_STRING,
-                metadataIdentificationString);
-    }
-
-    public static boolean isValid(final String metadataIdentificationString) {
-        return PhysicalTypeIdentifierNamingUtils.isValid(PROVIDES_TYPE_STRING,
-                metadataIdentificationString);
     }
 }

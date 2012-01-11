@@ -33,17 +33,17 @@ public class CloudServiceConverter implements Converter<CloudService> {
         return session.getProvisionedService(value);
     }
 
-    public boolean supports(final Class<?> requiredType,
-            final String optionContext) {
-        return CloudService.class.isAssignableFrom(requiredType);
-    }
-
     public boolean getAllPossibleValues(final List<Completion> completions,
             final Class<?> requiredType, final String existingData,
             final String optionContext, final MethodTarget target) {
-        for (String provisionedService : session.getProvisionedServices()) {
+        for (final String provisionedService : session.getProvisionedServices()) {
             completions.add(new Completion(provisionedService));
         }
         return false;
+    }
+
+    public boolean supports(final Class<?> requiredType,
+            final String optionContext) {
+        return CloudService.class.isAssignableFrom(requiredType);
     }
 }

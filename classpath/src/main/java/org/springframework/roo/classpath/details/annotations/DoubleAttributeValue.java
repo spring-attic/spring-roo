@@ -11,9 +11,8 @@ import org.springframework.roo.model.JavaSymbolName;
 public class DoubleAttributeValue extends
         AbstractAnnotationAttributeValue<Double> {
 
-    // Fields
-    private final double value;
     private boolean floatingPrecisionOnly = false;
+    private final double value;
 
     public DoubleAttributeValue(final JavaSymbolName name, final double value,
             final boolean floatingPrecisionOnly) {
@@ -22,12 +21,12 @@ public class DoubleAttributeValue extends
         this.floatingPrecisionOnly = floatingPrecisionOnly;
     }
 
-    public boolean isFloatingPrecisionOnly() {
-        return floatingPrecisionOnly;
-    }
-
     public Double getValue() {
         return value;
+    }
+
+    public boolean isFloatingPrecisionOnly() {
+        return floatingPrecisionOnly;
     }
 
     @Override

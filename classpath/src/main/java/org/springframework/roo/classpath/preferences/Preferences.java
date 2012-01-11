@@ -13,7 +13,6 @@ import org.springframework.roo.support.util.Assert;
  */
 public class Preferences {
 
-    // Fields
     private final java.util.prefs.Preferences preferences; // "Delegate" pattern
 
     /**
@@ -70,9 +69,9 @@ public class Preferences {
         try {
             final byte[] defaultBytes = defaultValue == null ? new byte[0]
                     : defaultValue.getBytes(characterSetName);
-            return this.preferences.getByteArray(key, defaultBytes);
+            return preferences.getByteArray(key, defaultBytes);
         }
-        catch (UnsupportedEncodingException e) {
+        catch (final UnsupportedEncodingException e) {
             throw new UnsupportedOperationException(e);
         }
     }
@@ -84,7 +83,7 @@ public class Preferences {
      * @param defaultValue see above
      */
     public int getInt(final String key, final int defaultValue) {
-        return this.preferences.getInt(key, defaultValue);
+        return preferences.getInt(key, defaultValue);
     }
 
     /**
@@ -94,7 +93,7 @@ public class Preferences {
      * @param value
      */
     public void putByteArray(final String key, final byte[] value) {
-        this.preferences.putByteArray(key, value);
+        preferences.putByteArray(key, value);
     }
 
     /**
@@ -104,6 +103,6 @@ public class Preferences {
      * @param value
      */
     public void putInt(final String key, final int value) {
-        this.preferences.putInt(key, value);
+        preferences.putInt(key, value);
     }
 }

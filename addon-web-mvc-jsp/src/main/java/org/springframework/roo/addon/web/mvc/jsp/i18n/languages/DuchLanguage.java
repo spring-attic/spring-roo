@@ -18,16 +18,16 @@ import org.springframework.roo.support.util.FileUtils;
 @Service
 public class DuchLanguage extends AbstractLanguage {
 
-    public Locale getLocale() {
-        return new Locale("nl");
+    public InputStream getFlagGraphic() {
+        return FileUtils.getInputStream(getClass(), "nl.png");
     }
 
     public String getLanguage() {
         return "Dutch";
     }
 
-    public InputStream getFlagGraphic() {
-        return FileUtils.getInputStream(getClass(), "nl.png");
+    public Locale getLocale() {
+        return new Locale("nl");
     }
 
     public InputStream getMessageBundle() {

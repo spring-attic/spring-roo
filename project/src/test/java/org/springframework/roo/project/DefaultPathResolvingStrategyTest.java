@@ -25,7 +25,6 @@ import org.springframework.roo.support.util.FileUtils;
  */
 public class DefaultPathResolvingStrategyTest {
 
-    // Constants
     private static final String WORKING_DIRECTORY;
 
     static {
@@ -39,12 +38,6 @@ public class DefaultPathResolvingStrategyTest {
 
     // Fixture
     private DefaultPathResolvingStrategy pathResolvingStrategy;
-
-    @Before
-    public void setUp() {
-        // Object under test
-        this.pathResolvingStrategy = new DefaultPathResolvingStrategy();
-    }
 
     /**
      * Creates a mock {@link ComponentContext} in which the
@@ -66,31 +59,19 @@ public class DefaultPathResolvingStrategyTest {
         return mockComponentContext;
     }
 
-    @Test
-    public void testGetRootOfPath() {
-        // Set up
-        this.pathResolvingStrategy.activate(getMockComponentContext(null));
-        final LogicalPath mockContextualPath = mock(LogicalPath.class);
-        when(mockContextualPath.getPath()).thenReturn(Path.SRC_MAIN_JAVA);
-
-        // Invoke
-        final String root = this.pathResolvingStrategy
-                .getRoot(mockContextualPath);
-
-        // Check
-        final String srcMainJava = FileUtils.getSystemDependentPath("src",
-                "main", "java");
-        assertTrue("Expected the root to end with '" + srcMainJava
-                + "', but was '" + root + "'", root.endsWith(srcMainJava));
+    @Before
+    public void setUp() {
+        // Object under test
+        pathResolvingStrategy = new DefaultPathResolvingStrategy();
     }
 
     @Test
     public void testGetModulePaths() {
         // Set up
-        this.pathResolvingStrategy.activate(getMockComponentContext(null));
+        pathResolvingStrategy.activate(getMockComponentContext(null));
 
         // Invoke
-        final List<PhysicalPath> modulePaths = this.pathResolvingStrategy
+        final List<PhysicalPath> modulePaths = pathResolvingStrategy
                 .getPhysicalPaths();
 
         // Check
@@ -105,5 +86,22 @@ public class DefaultPathResolvingStrategyTest {
                     new File(WORKING_DIRECTORY, subPath.getDefaultLocation()),
                     modulePath.getLocation());
         }
+    }
+
+    @Test
+    public void testGetRootOfPath() {
+        // Set up
+        pathResolvingStrategy.activate(getMockComponentContext(null));
+        final LogicalPath mockContextualPath = mock(LogicalPath.class);
+        when(mockContextualPath.getPath()).thenReturn(Path.SRC_MAIN_JAVA);
+
+        // Invoke
+        final String root = pathResolvingStrategy.getRoot(mockContextualPath);
+
+        // Check
+        final String srcMainJava = FileUtils.getSystemDependentPath("src",
+                "main", "java");
+        assertTrue("Expected the root to end with '" + srcMainJava
+                + "', but was '" + root + "'", root.endsWith(srcMainJava));
     }
 }

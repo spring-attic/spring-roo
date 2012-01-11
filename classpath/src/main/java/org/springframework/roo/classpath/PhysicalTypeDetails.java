@@ -17,15 +17,15 @@ import org.springframework.roo.model.JavaType;
 public interface PhysicalTypeDetails extends CustomDataAccessor {
 
     /**
+     * @see #getType(), which returns the same thing but is better named
+     */
+    JavaType getName();
+
+    /**
      * @return the category of Java type being provided by this
      *         {@link PhysicalTypeDetails} instance (never null)
      */
     PhysicalTypeCategory getPhysicalTypeCategory();
-
-    /**
-     * @see #getType(), which returns the same thing but is better named
-     */
-    JavaType getName();
 
     /**
      * Returns the {@link JavaType} provided by this physical type. If possible,

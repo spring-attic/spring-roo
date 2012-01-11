@@ -18,15 +18,14 @@ import org.springframework.roo.project.maven.Pom;
 @Service
 public class DatabaseDotComOperationsImpl implements DatabaseDotComOperations {
 
-    // Fields
     @Reference private ProjectOperations projectOperations;
 
     public String getName() {
         return FeatureNames.DATABASE_DOT_COM;
     }
 
-    public boolean isInstalledInModule(String moduleName) {
-        Pom pom = projectOperations.getPomFromModuleName(moduleName);
+    public boolean isInstalledInModule(final String moduleName) {
+        final Pom pom = projectOperations.getPomFromModuleName(moduleName);
         if (pom == null) {
             return false;
         }

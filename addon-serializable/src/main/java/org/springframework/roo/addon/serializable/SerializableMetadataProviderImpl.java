@@ -30,11 +30,31 @@ public class SerializableMetadataProviderImpl extends
         addMetadataTrigger(ROO_SERIALIZABLE);
     }
 
+    @Override
+    protected String createLocalIdentifier(final JavaType javaType,
+            final LogicalPath path) {
+        return SerializableMetadata.createIdentifier(javaType, path);
+    }
+
     protected void deactivate(final ComponentContext context) {
         metadataDependencyRegistry.deregisterDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
                 getProvidesType());
         removeMetadataTrigger(ROO_SERIALIZABLE);
+    }
+
+    @Override
+    protected String getGovernorPhysicalTypeIdentifier(
+            final String metadataIdentificationString) {
+        final JavaType javaType = SerializableMetadata
+                .getJavaType(metadataIdentificationString);
+        final LogicalPath path = SerializableMetadata
+                .getPath(metadataIdentificationString);
+        return PhysicalTypeIdentifier.createIdentifier(javaType, path);
+    }
+
+    public String getItdUniquenessFilenameSuffix() {
+        return "Serializable";
     }
 
     @Override
@@ -45,26 +65,6 @@ public class SerializableMetadataProviderImpl extends
             final String itdFilename) {
         return new SerializableMetadata(metadataIdentificationString,
                 aspectName, governorPhysicalTypeMetadata);
-    }
-
-    public String getItdUniquenessFilenameSuffix() {
-        return "Serializable";
-    }
-
-    @Override
-    protected String getGovernorPhysicalTypeIdentifier(
-            final String metadataIdentificationString) {
-        JavaType javaType = SerializableMetadata
-                .getJavaType(metadataIdentificationString);
-        LogicalPath path = SerializableMetadata
-                .getPath(metadataIdentificationString);
-        return PhysicalTypeIdentifier.createIdentifier(javaType, path);
-    }
-
-    @Override
-    protected String createLocalIdentifier(final JavaType javaType,
-            final LogicalPath path) {
-        return SerializableMetadata.createIdentifier(javaType, path);
     }
 
     public String getProvidesType() {

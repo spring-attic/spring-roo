@@ -35,6 +35,43 @@ public final class FileCopyUtils {
     // ---------------------------------------------------------------------
 
     /**
+     * Copy the contents of the given byte array to the given output File.
+     * 
+     * @param bytes the byte array to copy from
+     * @param file the file to copy to
+     * @throws IOException in case of I/O errors
+     */
+    public static void copy(final byte[] bytes, final File file)
+            throws IOException {
+        Assert.notNull(bytes, "No input byte array specified");
+        Assert.notNull(file, "No output File specified");
+        final ByteArrayInputStream in = new ByteArrayInputStream(bytes);
+        final OutputStream out = new BufferedOutputStream(new FileOutputStream(
+                file));
+        copy(in, out);
+    }
+
+    /**
+     * Copy the contents of the given byte array to the given OutputStream.
+     * Closes the stream when done.
+     * 
+     * @param bytes the byte array to copy from
+     * @param out the OutputStream to copy to
+     * @throws IOException in case of I/O errors
+     */
+    public static void copy(final byte[] bytes, final OutputStream out)
+            throws IOException {
+        Assert.notNull(bytes, "No input byte array specified");
+        Assert.notNull(out, "No OutputStream specified");
+        try {
+            out.write(bytes);
+        }
+        finally {
+            IOUtils.closeQuietly(out);
+        }
+    }
+
+    /**
      * Copy the contents of the given input File to the given output File.
      * 
      * @param in the file to copy from
@@ -47,34 +84,6 @@ public final class FileCopyUtils {
         Assert.notNull(out, "No output File specified");
         return copy(new BufferedInputStream(new FileInputStream(in)),
                 new BufferedOutputStream(new FileOutputStream(out)));
-    }
-
-    /**
-     * Copy the contents of the given byte array to the given output File.
-     * 
-     * @param bytes the byte array to copy from
-     * @param file the file to copy to
-     * @throws IOException in case of I/O errors
-     */
-    public static void copy(final byte[] bytes, final File file)
-            throws IOException {
-        Assert.notNull(bytes, "No input byte array specified");
-        Assert.notNull(file, "No output File specified");
-        ByteArrayInputStream in = new ByteArrayInputStream(bytes);
-        OutputStream out = new BufferedOutputStream(new FileOutputStream(file));
-        copy(in, out);
-    }
-
-    /**
-     * Copy the contents of the given input File into a new byte array.
-     * 
-     * @param in the file to copy from
-     * @return the new byte array that has been copied to
-     * @throws IOException in case of I/O errors
-     */
-    public static byte[] copyToByteArray(final File in) throws IOException {
-        Assert.notNull(in, "No input File specified");
-        return copyToByteArray(new BufferedInputStream(new FileInputStream(in)));
     }
 
     // ---------------------------------------------------------------------
@@ -101,7 +110,7 @@ public final class FileCopyUtils {
         }
         try {
             int byteCount = 0;
-            byte[] buffer = new byte[BUFFER_SIZE];
+            final byte[] buffer = new byte[BUFFER_SIZE];
             int bytesRead = -1;
             while ((bytesRead = in.read(buffer)) != -1) {
                 out.write(buffer, 0, bytesRead);
@@ -114,45 +123,6 @@ public final class FileCopyUtils {
             IOUtils.closeQuietly(in, out);
         }
     }
-
-    /**
-     * Copy the contents of the given byte array to the given OutputStream.
-     * Closes the stream when done.
-     * 
-     * @param bytes the byte array to copy from
-     * @param out the OutputStream to copy to
-     * @throws IOException in case of I/O errors
-     */
-    public static void copy(final byte[] bytes, final OutputStream out)
-            throws IOException {
-        Assert.notNull(bytes, "No input byte array specified");
-        Assert.notNull(out, "No OutputStream specified");
-        try {
-            out.write(bytes);
-        }
-        finally {
-            IOUtils.closeQuietly(out);
-        }
-    }
-
-    /**
-     * Copy the contents of the given InputStream into a new byte array. Closes
-     * the stream when done.
-     * 
-     * @param in the stream to copy from
-     * @return the new byte array that has been copied to
-     * @throws IOException in case of I/O errors
-     */
-    public static byte[] copyToByteArray(final InputStream in)
-            throws IOException {
-        ByteArrayOutputStream out = new ByteArrayOutputStream(BUFFER_SIZE);
-        copy(in, out);
-        return out.toByteArray();
-    }
-
-    // ---------------------------------------------------------------------
-    // Copy methods for java.io.Reader / java.io.Writer
-    // ---------------------------------------------------------------------
 
     /**
      * Copy the contents of the given Reader to the given Writer. Closes both
@@ -174,7 +144,7 @@ public final class FileCopyUtils {
         }
         try {
             int byteCount = 0;
-            char[] buffer = new char[BUFFER_SIZE];
+            final char[] buffer = new char[BUFFER_SIZE];
             int bytesRead = -1;
             while ((bytesRead = in.read(buffer)) != -1) {
                 out.write(buffer, 0, bytesRead);
@@ -210,18 +180,35 @@ public final class FileCopyUtils {
         }
     }
 
+    // ---------------------------------------------------------------------
+    // Copy methods for java.io.Reader / java.io.Writer
+    // ---------------------------------------------------------------------
+
     /**
-     * Copy the contents of the given Reader into a String. Closes the reader
-     * when done.
+     * Copy the contents of the given input File into a new byte array.
      * 
-     * @param in the reader to copy from
-     * @return the String that has been copied to
+     * @param in the file to copy from
+     * @return the new byte array that has been copied to
      * @throws IOException in case of I/O errors
      */
-    public static String copyToString(final Reader in) throws IOException {
-        StringWriter out = new StringWriter();
+    public static byte[] copyToByteArray(final File in) throws IOException {
+        Assert.notNull(in, "No input File specified");
+        return copyToByteArray(new BufferedInputStream(new FileInputStream(in)));
+    }
+
+    /**
+     * Copy the contents of the given InputStream into a new byte array. Closes
+     * the stream when done.
+     * 
+     * @param in the stream to copy from
+     * @return the new byte array that has been copied to
+     * @throws IOException in case of I/O errors
+     */
+    public static byte[] copyToByteArray(final InputStream in)
+            throws IOException {
+        final ByteArrayOutputStream out = new ByteArrayOutputStream(BUFFER_SIZE);
         copy(in, out);
-        return out.toString();
+        return out.toByteArray();
     }
 
     /**
@@ -236,6 +223,20 @@ public final class FileCopyUtils {
      */
     public static String copyToString(final File file) throws IOException {
         return copyToString(new BufferedReader(new FileReader(file)));
+    }
+
+    /**
+     * Copy the contents of the given Reader into a String. Closes the reader
+     * when done.
+     * 
+     * @param in the reader to copy from
+     * @return the String that has been copied to
+     * @throws IOException in case of I/O errors
+     */
+    public static String copyToString(final Reader in) throws IOException {
+        final StringWriter out = new StringWriter();
+        copy(in, out);
+        return out.toString();
     }
 
     /**

@@ -58,13 +58,12 @@ import org.springframework.roo.support.util.StringUtils;
 public class JpaEntityMetadata extends
         AbstractItdTypeDetailsProvidingMetadataItem {
 
-    // Fields
-    private final Identifier identifier;
     private final JpaEntityAnnotationValues annotationValues;
-    private final JpaEntityMetadata parentEntity;
     private final MemberDetails entityMemberDetails;
-    private final boolean isGaeEnabled;
+    private final Identifier identifier;
     private final boolean isDatabaseDotComEnabled;
+    private final boolean isGaeEnabled;
+    private final JpaEntityMetadata parentEntity;
 
     /**
      * Constructor
@@ -134,7 +133,7 @@ public class JpaEntityMetadata extends
         builder.addMethod(getVersionMutator());
 
         // Build the ITD based on what we added to the builder above
-        this.itdTypeDetails = this.builder.build();
+        itdTypeDetails = builder.build();
     }
 
     private AnnotationMetadata getDiscriminatorColumnAnnotation() {
@@ -221,7 +220,7 @@ public class JpaEntityMetadata extends
         if (StringUtils.hasText(annotationValues.getIdentifierColumn())) {
             return annotationValues.getIdentifierColumn();
         }
-        else if (identifier != null
+        else if ((identifier != null)
                 && StringUtils.hasText(identifier.getColumnName())) {
             return identifier.getColumnName();
         }
@@ -312,7 +311,7 @@ public class JpaEntityMetadata extends
                         final EnumAttributeValue enumAttributeValue = (EnumAttributeValue) value;
                         final EnumDetails details = enumAttributeValue
                                 .getValue();
-                        if (details != null
+                        if ((details != null)
                                 && details.getType().equals(INHERITANCE_TYPE)) {
                             if ("TABLE_PER_CLASS".equals(details.getField()
                                     .getSymbolName())) {
@@ -340,23 +339,23 @@ public class JpaEntityMetadata extends
             final AnnotationMetadataBuilder columnBuilder = new AnnotationMetadataBuilder(
                     COLUMN);
             columnBuilder.addStringAttribute("name", columnName);
-            if (identifier != null
+            if ((identifier != null)
                     && StringUtils.hasText(identifier.getColumnDefinition())) {
                 columnBuilder.addStringAttribute("columnDefinition",
                         identifier.getColumnDefinition());
             }
 
             // Add length attribute for String field
-            if (identifier != null && identifier.getColumnSize() > 0
-                    && identifier.getColumnSize() < 4000
+            if ((identifier != null) && (identifier.getColumnSize() > 0)
+                    && (identifier.getColumnSize() < 4000)
                     && identifierType.equals(JavaType.STRING)) {
                 columnBuilder.addIntegerAttribute("length",
                         identifier.getColumnSize());
             }
 
             // Add precision and scale attributes for numeric field
-            if (identifier != null
-                    && identifier.getScale() > 0
+            if ((identifier != null)
+                    && (identifier.getScale() > 0)
                     && (identifierType.equals(JavaType.DOUBLE_OBJECT)
                             || identifierType.equals(JavaType.DOUBLE_PRIMITIVE) || identifierType
                                 .equals(BIG_DECIMAL))) {
@@ -388,7 +387,7 @@ public class JpaEntityMetadata extends
         if (StringUtils.hasText(annotationValues.getIdentifierField())) {
             return annotationValues.getIdentifierField();
         }
-        else if (identifier != null && identifier.getFieldName() != null) {
+        else if ((identifier != null) && (identifier.getFieldName() != null)) {
             return identifier.getFieldName().getSymbolName();
         }
         // Use the default
@@ -464,7 +463,7 @@ public class JpaEntityMetadata extends
         if (annotationValues.getIdentifierType() != null) {
             return annotationValues.getIdentifierType();
         }
-        else if (identifier != null && identifier.getFieldType() != null) {
+        else if ((identifier != null) && (identifier.getFieldType() != null)) {
             return identifier.getFieldType();
         }
         // Use the default

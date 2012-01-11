@@ -85,14 +85,13 @@ import org.w3c.dom.Element;
 @Service
 public class GwtOperationsImpl implements GwtOperations {
 
-    // Constants
-    private static final JavaSymbolName VALUE = new JavaSymbolName("value");
     private static final String GWT_BUILD_COMMAND = "com.google.gwt.eclipse.core.gwtProjectValidator";
     private static final String GWT_PROJECT_NATURE = "com.google.gwt.eclipse.core.gwtNature";
     private static final String MAVEN_ECLIPSE_PLUGIN = "/project/build/plugins/plugin[artifactId = 'maven-eclipse-plugin']";
     private static final String OUTPUT_DIRECTORY = "${project.build.directory}/${project.build.finalName}/WEB-INF/classes";
+    private static final JavaSymbolName VALUE = new JavaSymbolName("value");
 
-    // Fields
+    private ComponentContext context;
     @Reference protected FileManager fileManager;
     @Reference protected GwtTemplateService gwtTemplateService;
     @Reference protected GwtTypeService gwtTypeService;
@@ -101,17 +100,260 @@ public class GwtOperationsImpl implements GwtOperations {
     @Reference protected ProjectOperations projectOperations;
     @Reference protected TypeLocationService typeLocationService;
     @Reference protected TypeManagementService typeManagementService;
-    @Reference protected WebMvcOperations webMvcOperations;
 
-    private ComponentContext context;
     private Boolean wasGaeEnabled;
+    @Reference protected WebMvcOperations webMvcOperations;
 
     protected void activate(final ComponentContext context) {
         this.context = context;
     }
 
+    private void addPackageToGwtXml(final JavaPackage sourcePackage) {
+        String gwtConfig = gwtTypeService.getGwtModuleXml(projectOperations
+                .getFocusedModuleName());
+        gwtConfig = FileUtils.removeTrailingSeparator(gwtConfig).substring(0,
+                gwtConfig.lastIndexOf(File.separator));
+        final String moduleRoot = projectOperations.getPathResolver()
+                .getFocusedRoot(SRC_MAIN_JAVA);
+        final String topLevelPackage = gwtConfig.replace(
+                FileUtils.ensureTrailingSeparator(moduleRoot), "").replace(
+                File.separator, ".");
+        final String relativePackage = StringUtils.removePrefix(
+                sourcePackage.getFullyQualifiedPackageName(), topLevelPackage
+                        + ".");
+        gwtTypeService.addSourcePath(
+                relativePackage.replace(".", PATH_DELIMITER),
+                projectOperations.getFocusedModuleName());
+    }
+
+    private void copyDirectoryContents() {
+        for (final GwtPath path : GwtPath.values()) {
+            copyDirectoryContents(path);
+        }
+    }
+
+    private void copyDirectoryContents(final GwtPath gwtPath) {
+        final String sourceAntPath = gwtPath.getSourceAntPath();
+        if (sourceAntPath.contains("gae")
+                && !projectOperations
+                        .isFeatureInstalledInFocusedModule(FeatureNames.GAE)) {
+            return;
+        }
+        final String targetDirectory = gwtPath == GwtPath.WEB ? projectOperations
+                .getPathResolver().getFocusedRoot(SRC_MAIN_WEBAPP)
+                : projectOperations.getPathResolver().getFocusedIdentifier(
+                        SRC_MAIN_JAVA,
+                        gwtPath.getPackagePath(projectOperations
+                                .getFocusedTopLevelPackage()));
+        updateFile(sourceAntPath, targetDirectory, gwtPath.segmentPackage(),
+                false);
+    }
+
+    private void createProxy(final ClassOrInterfaceTypeDetails entity,
+            final JavaPackage destinationPackage) {
+        final ClassOrInterfaceTypeDetails existingProxy = gwtTypeService
+                .lookupProxyFromEntity(entity);
+        if ((existingProxy != null) || entity.isAbstract()) {
+            return;
+        }
+
+        final JavaType proxyType = new JavaType(
+                destinationPackage.getFullyQualifiedPackageName() + "."
+                        + entity.getName().getSimpleTypeName() + "Proxy");
+        final String focusedModule = projectOperations.getFocusedModuleName();
+        final LogicalPath proxyLogicalPath = LogicalPath.getInstance(
+                SRC_MAIN_JAVA, focusedModule);
+        final ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(
+                PhysicalTypeIdentifier.createIdentifier(proxyType,
+                        proxyLogicalPath));
+        cidBuilder.setName(proxyType);
+        cidBuilder.setExtendsTypes(Collections.singletonList(ENTITY_PROXY));
+        cidBuilder.setPhysicalTypeCategory(INTERFACE);
+        cidBuilder.setModifier(PUBLIC);
+        final List<AnnotationAttributeValue<?>> attributeValues = new ArrayList<AnnotationAttributeValue<?>>();
+        final StringAttributeValue stringAttributeValue = new StringAttributeValue(
+                VALUE, entity.getName().getFullyQualifiedTypeName());
+        attributeValues.add(stringAttributeValue);
+        final String locator = projectOperations
+                .getTopLevelPackage(focusedModule)
+                + ".server.locator."
+                + entity.getName().getSimpleTypeName() + "Locator";
+        final StringAttributeValue locatorAttributeValue = new StringAttributeValue(
+                new JavaSymbolName("locator"), locator);
+        attributeValues.add(locatorAttributeValue);
+        cidBuilder.updateTypeAnnotation(new AnnotationMetadataBuilder(
+                PROXY_FOR_NAME, attributeValues));
+        attributeValues.remove(locatorAttributeValue);
+        final List<StringAttributeValue> readOnlyValues = new ArrayList<StringAttributeValue>();
+        final FieldMetadata versionField = persistenceMemberLocator
+                .getVersionField(entity.getName());
+        if (versionField != null) {
+            readOnlyValues.add(new StringAttributeValue(VALUE, versionField
+                    .getFieldName().getSymbolName()));
+        }
+        final List<FieldMetadata> idFields = persistenceMemberLocator
+                .getIdentifierFields(entity.getName());
+        if (!CollectionUtils.isEmpty(idFields)) {
+            readOnlyValues.add(new StringAttributeValue(VALUE, idFields.get(0)
+                    .getFieldName().getSymbolName()));
+        }
+        final ArrayAttributeValue<StringAttributeValue> readOnlyAttribute = new ArrayAttributeValue<StringAttributeValue>(
+                new JavaSymbolName("readOnly"), readOnlyValues);
+        attributeValues.add(readOnlyAttribute);
+        cidBuilder.updateTypeAnnotation(new AnnotationMetadataBuilder(
+                ROO_GWT_PROXY, attributeValues));
+        typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
+        addPackageToGwtXml(destinationPackage);
+    }
+
+    /**
+     * Builds the given entity's RequestContext interface. Note that we don't
+     * generate the entire interface here, only the @RooGwtRequest annotation;
+     * we then invoke the metadata provider, which takes over and generates the
+     * remaining code, namely the method declarations and the @ServiceName
+     * annotation. This is analogous to how ITD-based addons work, e.g. adding a
+     * trigger annotation and letting the metadata provider do the rest. This
+     * allows for the metadata provider to correctly respond to project changes.
+     * 
+     * @param entity the entity for which to create the GWT request interface
+     *            (required)
+     * @param destinationPackage the package in which to create the request
+     *            interface (required)
+     */
+    private void createRequestInterface(
+            final ClassOrInterfaceTypeDetails entity,
+            final JavaPackage destinationPackage) {
+        final JavaType requestType = new JavaType(
+                destinationPackage.getFullyQualifiedPackageName() + "."
+                        + entity.getType().getSimpleTypeName() + "Request");
+        final LogicalPath focusedSrcMainJava = LogicalPath.getInstance(
+                SRC_MAIN_JAVA, projectOperations.getFocusedModuleName());
+        final ClassOrInterfaceTypeDetailsBuilder requestBuilder = new ClassOrInterfaceTypeDetailsBuilder(
+                PhysicalTypeIdentifier.createIdentifier(requestType,
+                        focusedSrcMainJava));
+        requestBuilder.setName(requestType);
+        requestBuilder.addExtendsTypes(REQUEST_CONTEXT);
+        requestBuilder.setPhysicalTypeCategory(INTERFACE);
+        requestBuilder.setModifier(PUBLIC);
+        requestBuilder.addAnnotation(getRooGwtRequestAnnotation(entity));
+        typeManagementService.createOrUpdateTypeOnDisk(requestBuilder.build());
+        addPackageToGwtXml(destinationPackage);
+        // Trigger the GwtRequestMetadataProvider to finish generating the code
+        metadataService.get(GwtRequestMetadata.createIdentifier(requestType,
+                focusedSrcMainJava));
+    }
+
+    private void createRequestInterfaceIfNecessary(
+            final ClassOrInterfaceTypeDetails entity,
+            final JavaPackage destinationPackage) {
+        if ((entity != null) && !entity.isAbstract()
+                && (gwtTypeService.lookupRequestFromEntity(entity) == null)) {
+            createRequestInterface(entity, destinationPackage);
+        }
+    }
+
+    private void createScaffold(final ClassOrInterfaceTypeDetails proxy) {
+        final AnnotationMetadata annotationMetadata = GwtUtils
+                .getFirstAnnotation(proxy, ROO_GWT_PROXY);
+        if (annotationMetadata != null) {
+            final AnnotationAttributeValue<Boolean> booleanAttributeValue = annotationMetadata
+                    .getAttribute("scaffold");
+            if ((booleanAttributeValue == null)
+                    || !booleanAttributeValue.getValue()) {
+                final ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(
+                        proxy);
+                final AnnotationMetadataBuilder annotationMetadataBuilder = new AnnotationMetadataBuilder(
+                        annotationMetadata);
+                annotationMetadataBuilder.addBooleanAttribute("scaffold", true);
+                for (final AnnotationMetadataBuilder existingAnnotation : cidBuilder
+                        .getAnnotations()) {
+                    if (existingAnnotation.getAnnotationType().equals(
+                            annotationMetadata.getAnnotationType())) {
+                        cidBuilder.getAnnotations().remove(existingAnnotation);
+                        cidBuilder.getAnnotations().add(
+                                annotationMetadataBuilder);
+                        break;
+                    }
+                }
+                typeManagementService.createOrUpdateTypeOnDisk(cidBuilder
+                        .build());
+            }
+        }
+    }
+
+    private void deleteUntouchedSetupFiles(final String sourceAntPath,
+            String targetDirectory) {
+        if (!targetDirectory.endsWith(File.separator)) {
+            targetDirectory += File.separator;
+        }
+        if (!fileManager.exists(targetDirectory)) {
+            fileManager.createDirectory(targetDirectory);
+        }
+
+        final String path = FileUtils.getPath(getClass(), sourceAntPath);
+        final Iterable<URL> uris = OSGiUtils.findEntriesByPattern(
+                context.getBundleContext(), path);
+        Assert.notNull(uris,
+                "Could not search bundles for resources for Ant Path '" + path
+                        + "'");
+
+        for (final URL url : uris) {
+            String fileName = url.getPath().substring(
+                    url.getPath().lastIndexOf('/') + 1);
+            fileName = fileName.replace("-template", "");
+            final String targetFilename = targetDirectory + fileName;
+            if (!fileManager.exists(targetFilename)) {
+                continue;
+            }
+            try {
+                String input = FileCopyUtils
+                        .copyToString(new InputStreamReader(url.openStream()));
+                input = processTemplate(input, null);
+                final String existing = FileCopyUtils.copyToString(new File(
+                        targetFilename));
+                if (existing.equals(input)) {
+                    // new File(targetFilename).delete();
+                    fileManager.delete(targetFilename);
+                }
+            }
+            catch (final IOException ignored) {
+            }
+        }
+    }
+
+    private CharSequence getGaeHookup() {
+        final StringBuilder builder = new StringBuilder(
+                "// AppEngine user authentication\n\n");
+        builder.append("new GaeLoginWidgetDriver(requestFactory).setWidget(shell.getLoginWidget());\n\n");
+        builder.append("new ReloadOnAuthenticationFailure().register(eventBus);\n\n");
+        return builder.toString();
+    }
+
     public String getName() {
         return FeatureNames.GWT;
+    }
+
+    private String getPomPath() {
+        return projectOperations.getPathResolver().getFocusedIdentifier(ROOT,
+                "pom.xml");
+    }
+
+    private AnnotationMetadata getRooGwtRequestAnnotation(
+            final ClassOrInterfaceTypeDetails entity) {
+        // The GwtRequestMetadataProvider doesn't need to know excluded methods
+        // any more because it actively adds the required CRUD methods itself.
+        final StringAttributeValue entityAttributeValue = new StringAttributeValue(
+                VALUE, entity.getType().getFullyQualifiedTypeName());
+        final List<AnnotationAttributeValue<?>> gwtRequestAttributeValues = new ArrayList<AnnotationAttributeValue<?>>();
+        gwtRequestAttributeValues.add(entityAttributeValue);
+        return new AnnotationMetadataBuilder(ROO_GWT_REQUEST,
+                gwtRequestAttributeValues).build();
+    }
+
+    public boolean isGwtInstallationPossible() {
+        return projectOperations.isFocusedProjectAvailable()
+                && !projectOperations
+                        .isFeatureInstalledInFocusedModule(FeatureNames.JSF);
     }
 
     public boolean isInstalledInModule(final String moduleName) {
@@ -127,15 +369,126 @@ public class GwtOperationsImpl implements GwtOperations {
         return false;
     }
 
-    public boolean isGwtInstallationPossible() {
-        return projectOperations.isFocusedProjectAvailable()
-                && !projectOperations
-                        .isFeatureInstalledInFocusedModule(FeatureNames.JSF);
-    }
-
     public boolean isScaffoldAvailable() {
         return isGwtInstallationPossible()
                 && isInstalledInModule(projectOperations.getFocusedModuleName());
+    }
+
+    private String processTemplate(String input, String segmentPackage) {
+        if (segmentPackage == null) {
+            segmentPackage = "";
+        }
+        final String topLevelPackage = projectOperations.getTopLevelPackage(
+                projectOperations.getFocusedModuleName())
+                .getFullyQualifiedPackageName();
+        input = input.replace("__TOP_LEVEL_PACKAGE__", topLevelPackage);
+        input = input.replace("__SEGMENT_PACKAGE__", segmentPackage);
+        input = input.replace("__PROJECT_NAME__", projectOperations
+                .getProjectName(projectOperations.getFocusedModuleName()));
+
+        if (projectOperations
+                .isFeatureInstalledInFocusedModule(FeatureNames.GAE)) {
+            input = input.replace("__GAE_IMPORT__", "import " + topLevelPackage
+                    + ".client.scaffold.gae.*;\n");
+            input = input.replace("__GAE_HOOKUP__", getGaeHookup());
+            input = input.replace("__GAE_REQUEST_TRANSPORT__",
+                    ", new GaeAuthRequestTransport(eventBus)");
+        }
+        else {
+            input = input.replace("__GAE_IMPORT__", "");
+            input = input.replace("__GAE_HOOKUP__", "");
+            input = input.replace("__GAE_REQUEST_TRANSPORT__", "");
+        }
+        return input;
+    }
+
+    public void proxyAll(final JavaPackage proxyPackage) {
+        for (final ClassOrInterfaceTypeDetails entity : typeLocationService
+                .findClassesOrInterfaceDetailsWithAnnotation(ROO_JPA_ENTITY,
+                        ROO_JPA_ACTIVE_RECORD)) {
+            createProxy(entity, proxyPackage);
+        }
+        copyDirectoryContents(GwtPath.LOCATOR);
+    }
+
+    public void proxyAndRequestAll(final JavaPackage proxyAndRequestPackage) {
+        proxyAll(proxyAndRequestPackage);
+        requestAll(proxyAndRequestPackage);
+    }
+
+    public void proxyAndRequestType(final JavaPackage proxyAndRequestPackage,
+            final JavaType type) {
+        proxyType(proxyAndRequestPackage, type);
+        requestType(proxyAndRequestPackage, type);
+    }
+
+    public void proxyType(final JavaPackage proxyPackage, final JavaType type) {
+        final ClassOrInterfaceTypeDetails entity = typeLocationService
+                .getTypeDetails(type);
+        if (entity != null) {
+            createProxy(entity, proxyPackage);
+        }
+        copyDirectoryContents(GwtPath.LOCATOR);
+    }
+
+    private void removeIfFound(final String xpath, final Element webXmlRoot) {
+        for (Element toRemove : XmlUtils.findElements(xpath, webXmlRoot)) {
+            if (toRemove != null) {
+                toRemove.getParentNode().removeChild(toRemove);
+                toRemove = null;
+            }
+        }
+    }
+
+    public void requestAll(final JavaPackage proxyPackage) {
+        for (final ClassOrInterfaceTypeDetails entity : typeLocationService
+                .findClassesOrInterfaceDetailsWithAnnotation(ROO_JPA_ENTITY,
+                        ROO_JPA_ACTIVE_RECORD)) {
+            createRequestInterfaceIfNecessary(entity, proxyPackage);
+        }
+    }
+
+    public void requestType(final JavaPackage requestPackage,
+            final JavaType type) {
+        createRequestInterfaceIfNecessary(
+                typeLocationService.getTypeDetails(type), requestPackage);
+    }
+
+    public void scaffoldAll(final JavaPackage proxyPackage,
+            final JavaPackage requestPackage) {
+        updateScaffoldBoilerPlate();
+        proxyAll(proxyPackage);
+        requestAll(requestPackage);
+        for (final ClassOrInterfaceTypeDetails proxy : typeLocationService
+                .findClassesOrInterfaceDetailsWithAnnotation(ROO_GWT_PROXY)) {
+            final ClassOrInterfaceTypeDetails request = gwtTypeService
+                    .lookupRequestFromProxy(proxy);
+            if (request == null) {
+                throw new IllegalStateException(
+                        "In order to scaffold, an entity must have a request");
+            }
+            createScaffold(proxy);
+        }
+    }
+
+    public void scaffoldType(final JavaPackage proxyPackage,
+            final JavaPackage requestPackage, final JavaType type) {
+        proxyType(proxyPackage, type);
+        requestType(requestPackage, type);
+        final ClassOrInterfaceTypeDetails entity = typeLocationService
+                .getTypeDetails(type);
+        if ((entity != null) && !entity.isAbstract()) {
+            final ClassOrInterfaceTypeDetails proxy = gwtTypeService
+                    .lookupProxyFromEntity(entity);
+            final ClassOrInterfaceTypeDetails request = gwtTypeService
+                    .lookupRequestFromEntity(entity);
+            if ((proxy == null) || (request == null)) {
+                throw new IllegalStateException(
+                        "In order to scaffold, an entity must have an associated proxy and request");
+            }
+            updateScaffoldBoilerPlate();
+            createScaffold(proxy);
+        }
     }
 
     public void setup() {
@@ -226,312 +579,68 @@ public class GwtOperationsImpl implements GwtOperations {
                 .isFeatureInstalledInFocusedModule(FeatureNames.GAE));
     }
 
-    public void proxyAll(final JavaPackage proxyPackage) {
-        for (final ClassOrInterfaceTypeDetails entity : typeLocationService
-                .findClassesOrInterfaceDetailsWithAnnotation(ROO_JPA_ENTITY,
-                        ROO_JPA_ACTIVE_RECORD)) {
-            createProxy(entity, proxyPackage);
-        }
-        copyDirectoryContents(GwtPath.LOCATOR);
-    }
-
-    public void proxyType(final JavaPackage proxyPackage, final JavaType type) {
-        final ClassOrInterfaceTypeDetails entity = typeLocationService
-                .getTypeDetails(type);
-        if (entity != null) {
-            createProxy(entity, proxyPackage);
-        }
-        copyDirectoryContents(GwtPath.LOCATOR);
-    }
-
-    public void requestAll(final JavaPackage proxyPackage) {
-        for (final ClassOrInterfaceTypeDetails entity : typeLocationService
-                .findClassesOrInterfaceDetailsWithAnnotation(ROO_JPA_ENTITY,
-                        ROO_JPA_ACTIVE_RECORD)) {
-            createRequestInterfaceIfNecessary(entity, proxyPackage);
-        }
-    }
-
-    public void requestType(final JavaPackage requestPackage,
-            final JavaType type) {
-        createRequestInterfaceIfNecessary(
-                typeLocationService.getTypeDetails(type), requestPackage);
-    }
-
-    public void proxyAndRequestAll(final JavaPackage proxyAndRequestPackage) {
-        proxyAll(proxyAndRequestPackage);
-        requestAll(proxyAndRequestPackage);
-    }
-
-    public void proxyAndRequestType(final JavaPackage proxyAndRequestPackage,
-            final JavaType type) {
-        proxyType(proxyAndRequestPackage, type);
-        requestType(proxyAndRequestPackage, type);
-    }
-
-    public void scaffoldAll(final JavaPackage proxyPackage,
-            final JavaPackage requestPackage) {
-        updateScaffoldBoilerPlate();
-        proxyAll(proxyPackage);
-        requestAll(requestPackage);
-        for (final ClassOrInterfaceTypeDetails proxy : typeLocationService
-                .findClassesOrInterfaceDetailsWithAnnotation(ROO_GWT_PROXY)) {
-            final ClassOrInterfaceTypeDetails request = gwtTypeService
-                    .lookupRequestFromProxy(proxy);
-            if (request == null) {
-                throw new IllegalStateException(
-                        "In order to scaffold, an entity must have a request");
-            }
-            createScaffold(proxy);
-        }
-    }
-
-    public void scaffoldType(final JavaPackage proxyPackage,
-            final JavaPackage requestPackage, final JavaType type) {
-        proxyType(proxyPackage, type);
-        requestType(requestPackage, type);
-        final ClassOrInterfaceTypeDetails entity = typeLocationService
-                .getTypeDetails(type);
-        if (entity != null && !entity.isAbstract()) {
-            final ClassOrInterfaceTypeDetails proxy = gwtTypeService
-                    .lookupProxyFromEntity(entity);
-            final ClassOrInterfaceTypeDetails request = gwtTypeService
-                    .lookupRequestFromEntity(entity);
-            if (proxy == null || request == null) {
-                throw new IllegalStateException(
-                        "In order to scaffold, an entity must have an associated proxy and request");
-            }
-            updateScaffoldBoilerPlate();
-            createScaffold(proxy);
-        }
-    }
-
-    public void updateGaeConfiguration() {
-        final boolean isGaeEnabled = projectOperations
-                .isFeatureInstalledInFocusedModule(FeatureNames.GAE);
-        final boolean hasGaeStateChanged = wasGaeEnabled == null
-                || isGaeEnabled != wasGaeEnabled;
-        if (!isInstalledInModule(projectOperations.getFocusedModuleName())
-                || !hasGaeStateChanged) {
-            return;
-        }
-
-        wasGaeEnabled = isGaeEnabled;
-
-        // Update the GaeHelper type
-        updateGaeHelper();
-
-        gwtTypeService.buildType(GwtType.APP_REQUEST_FACTORY,
-                gwtTemplateService.getStaticTemplateTypeDetails(
-                        GwtType.APP_REQUEST_FACTORY, projectOperations
-                                .getFocusedProjectMetadata().getModuleName()),
-                projectOperations.getFocusedModuleName());
-
-        // Ensure the gwt-maven-plugin appropriate to a GAE enabled or disabled
-        // environment is updated
-        updateBuildPlugins(isGaeEnabled);
-
-        // If there is a class that could possibly import from the appengine
-        // sdk, denoted here as having Gae in the type name,
-        // then we need to add the appengine-api-1.0-sdk dependency to the
-        // pom.xml file
-        final String rootPath = projectOperations.getPathResolver()
-                .getFocusedRoot(ROOT);
-        final Set<FileDetails> files = fileManager.findMatchingAntPath(rootPath
-                + "/**/*Gae*.java");
-        if (!files.isEmpty()) {
-            final Element configuration = XmlUtils.getConfiguration(getClass());
-            final Element gaeDependency = XmlUtils
-                    .findFirstElement(
-                            "/configuration/gae/dependencies/dependency",
-                            configuration);
-            projectOperations.addDependency(projectOperations
-                    .getFocusedModuleName(), new Dependency(gaeDependency));
-        }
-
-        // Copy across any missing files, only if GAE state has changed and is
-        // now enabled
-        if (isGaeEnabled) {
-            copyDirectoryContents();
-        }
-    }
-
-    private void addPackageToGwtXml(final JavaPackage sourcePackage) {
-        String gwtConfig = gwtTypeService.getGwtModuleXml(projectOperations
-                .getFocusedModuleName());
-        gwtConfig = FileUtils.removeTrailingSeparator(gwtConfig).substring(0,
-                gwtConfig.lastIndexOf(File.separator));
-        final String moduleRoot = projectOperations.getPathResolver()
-                .getFocusedRoot(SRC_MAIN_JAVA);
-        final String topLevelPackage = gwtConfig.replace(
-                FileUtils.ensureTrailingSeparator(moduleRoot), "").replace(
-                File.separator, ".");
-        final String relativePackage = StringUtils.removePrefix(
-                sourcePackage.getFullyQualifiedPackageName(), topLevelPackage
-                        + ".");
-        gwtTypeService.addSourcePath(
-                relativePackage.replace(".", PATH_DELIMITER),
-                projectOperations.getFocusedModuleName());
-    }
-
-    private void createProxy(final ClassOrInterfaceTypeDetails entity,
-            final JavaPackage destinationPackage) {
-        final ClassOrInterfaceTypeDetails existingProxy = gwtTypeService
-                .lookupProxyFromEntity(entity);
-        if (existingProxy != null || entity.isAbstract()) {
-            return;
-        }
-
-        final JavaType proxyType = new JavaType(
-                destinationPackage.getFullyQualifiedPackageName() + "."
-                        + entity.getName().getSimpleTypeName() + "Proxy");
-        final String focusedModule = projectOperations.getFocusedModuleName();
-        final LogicalPath proxyLogicalPath = LogicalPath.getInstance(
-                SRC_MAIN_JAVA, focusedModule);
-        final ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(
-                PhysicalTypeIdentifier.createIdentifier(proxyType,
-                        proxyLogicalPath));
-        cidBuilder.setName(proxyType);
-        cidBuilder.setExtendsTypes(Collections.singletonList(ENTITY_PROXY));
-        cidBuilder.setPhysicalTypeCategory(INTERFACE);
-        cidBuilder.setModifier(PUBLIC);
-        final List<AnnotationAttributeValue<?>> attributeValues = new ArrayList<AnnotationAttributeValue<?>>();
-        final StringAttributeValue stringAttributeValue = new StringAttributeValue(
-                VALUE, entity.getName().getFullyQualifiedTypeName());
-        attributeValues.add(stringAttributeValue);
-        final String locator = projectOperations
-                .getTopLevelPackage(focusedModule)
-                + ".server.locator."
-                + entity.getName().getSimpleTypeName() + "Locator";
-        final StringAttributeValue locatorAttributeValue = new StringAttributeValue(
-                new JavaSymbolName("locator"), locator);
-        attributeValues.add(locatorAttributeValue);
-        cidBuilder.updateTypeAnnotation(new AnnotationMetadataBuilder(
-                PROXY_FOR_NAME, attributeValues));
-        attributeValues.remove(locatorAttributeValue);
-        final List<StringAttributeValue> readOnlyValues = new ArrayList<StringAttributeValue>();
-        final FieldMetadata versionField = persistenceMemberLocator
-                .getVersionField(entity.getName());
-        if (versionField != null) {
-            readOnlyValues.add(new StringAttributeValue(VALUE, versionField
-                    .getFieldName().getSymbolName()));
-        }
-        final List<FieldMetadata> idFields = persistenceMemberLocator
-                .getIdentifierFields(entity.getName());
-        if (!CollectionUtils.isEmpty(idFields)) {
-            readOnlyValues.add(new StringAttributeValue(VALUE, idFields.get(0)
-                    .getFieldName().getSymbolName()));
-        }
-        final ArrayAttributeValue<StringAttributeValue> readOnlyAttribute = new ArrayAttributeValue<StringAttributeValue>(
-                new JavaSymbolName("readOnly"), readOnlyValues);
-        attributeValues.add(readOnlyAttribute);
-        cidBuilder.updateTypeAnnotation(new AnnotationMetadataBuilder(
-                ROO_GWT_PROXY, attributeValues));
-        typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
-        addPackageToGwtXml(destinationPackage);
-    }
-
-    private void createRequestInterfaceIfNecessary(
-            final ClassOrInterfaceTypeDetails entity,
-            final JavaPackage destinationPackage) {
-        if (entity != null && !entity.isAbstract()
-                && gwtTypeService.lookupRequestFromEntity(entity) == null) {
-            createRequestInterface(entity, destinationPackage);
-        }
-    }
-
     /**
-     * Builds the given entity's RequestContext interface. Note that we don't
-     * generate the entire interface here, only the @RooGwtRequest annotation;
-     * we then invoke the metadata provider, which takes over and generates the
-     * remaining code, namely the method declarations and the @ServiceName
-     * annotation. This is analogous to how ITD-based addons work, e.g. adding a
-     * trigger annotation and letting the metadata provider do the rest. This
-     * allows for the metadata provider to correctly respond to project changes.
-     * 
-     * @param entity the entity for which to create the GWT request interface
-     *            (required)
-     * @param destinationPackage the package in which to create the request
-     *            interface (required)
+     * Sets the POM's output directory to {@value #OUTPUT_DIRECTORY}, if it's
+     * not already set to something else.
      */
-    private void createRequestInterface(
-            final ClassOrInterfaceTypeDetails entity,
-            final JavaPackage destinationPackage) {
-        final JavaType requestType = new JavaType(
-                destinationPackage.getFullyQualifiedPackageName() + "."
-                        + entity.getType().getSimpleTypeName() + "Request");
-        final LogicalPath focusedSrcMainJava = LogicalPath.getInstance(
-                SRC_MAIN_JAVA, projectOperations.getFocusedModuleName());
-        final ClassOrInterfaceTypeDetailsBuilder requestBuilder = new ClassOrInterfaceTypeDetailsBuilder(
-                PhysicalTypeIdentifier.createIdentifier(requestType,
-                        focusedSrcMainJava));
-        requestBuilder.setName(requestType);
-        requestBuilder.addExtendsTypes(REQUEST_CONTEXT);
-        requestBuilder.setPhysicalTypeCategory(INTERFACE);
-        requestBuilder.setModifier(PUBLIC);
-        requestBuilder.addAnnotation(getRooGwtRequestAnnotation(entity));
-        typeManagementService.createOrUpdateTypeOnDisk(requestBuilder.build());
-        addPackageToGwtXml(destinationPackage);
-        // Trigger the GwtRequestMetadataProvider to finish generating the code
-        metadataService.get(GwtRequestMetadata.createIdentifier(requestType,
-                focusedSrcMainJava));
+    private void updateBuildOutputDirectory() {
+        // Read the POM
+        final String pom = getPomPath();
+        final Document document = XmlUtils.readXml(fileManager
+                .getInputStream(pom));
+        final Element root = document.getDocumentElement();
+
+        Element outputDirectoryElement = XmlUtils.findFirstElement(
+                "/project/build/outputDirectory", root);
+        if (outputDirectoryElement == null) {
+            // Create it
+            final Element buildElement = XmlUtils.findRequiredElement(
+                    "/project/build", root);
+            outputDirectoryElement = DomUtils.createChildElement(
+                    "outputDirectory", buildElement, document);
+        }
+        outputDirectoryElement.setTextContent(OUTPUT_DIRECTORY);
+
+        fileManager.createOrUpdateTextFileIfRequired(pom,
+                XmlUtils.nodeToString(document), false);
     }
 
-    private AnnotationMetadata getRooGwtRequestAnnotation(
-            final ClassOrInterfaceTypeDetails entity) {
-        // The GwtRequestMetadataProvider doesn't need to know excluded methods
-        // any more because it actively adds the required CRUD methods itself.
-        final StringAttributeValue entityAttributeValue = new StringAttributeValue(
-                VALUE, entity.getType().getFullyQualifiedTypeName());
-        final List<AnnotationAttributeValue<?>> gwtRequestAttributeValues = new ArrayList<AnnotationAttributeValue<?>>();
-        gwtRequestAttributeValues.add(entityAttributeValue);
-        return new AnnotationMetadataBuilder(ROO_GWT_REQUEST,
-                gwtRequestAttributeValues).build();
-    }
-
-    private void createScaffold(final ClassOrInterfaceTypeDetails proxy) {
-        final AnnotationMetadata annotationMetadata = GwtUtils
-                .getFirstAnnotation(proxy, ROO_GWT_PROXY);
-        if (annotationMetadata != null) {
-            final AnnotationAttributeValue<Boolean> booleanAttributeValue = annotationMetadata
-                    .getAttribute("scaffold");
-            if (booleanAttributeValue == null
-                    || !booleanAttributeValue.getValue()) {
-                final ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(
-                        proxy);
-                final AnnotationMetadataBuilder annotationMetadataBuilder = new AnnotationMetadataBuilder(
-                        annotationMetadata);
-                annotationMetadataBuilder.addBooleanAttribute("scaffold", true);
-                for (final AnnotationMetadataBuilder existingAnnotation : cidBuilder
-                        .getAnnotations()) {
-                    if (existingAnnotation.getAnnotationType().equals(
-                            annotationMetadata.getAnnotationType())) {
-                        cidBuilder.getAnnotations().remove(existingAnnotation);
-                        cidBuilder.getAnnotations().add(
-                                annotationMetadataBuilder);
-                        break;
-                    }
+    private void updateBuildPlugins(final boolean isGaeEnabled) {
+        // Update the POM
+        final String xPathExpression = "/configuration/"
+                + (isGaeEnabled ? "gae" : "gwt") + "/plugins/plugin";
+        final List<Element> pluginElements = XmlUtils.findElements(
+                xPathExpression, XmlUtils.getConfiguration(getClass()));
+        for (final Element pluginElement : pluginElements) {
+            final Plugin defaultPlugin = new Plugin(pluginElement);
+            for (final Plugin plugin : projectOperations.getFocusedModule()
+                    .getBuildPlugins()) {
+                if ("gwt-maven-plugin".equals(plugin.getArtifactId())) {
+                    projectOperations.removeBuildPluginImmediately(
+                            projectOperations.getFocusedModuleName(),
+                            defaultPlugin);
+                    break;
                 }
-                typeManagementService.createOrUpdateTypeOnDisk(cidBuilder
-                        .build());
             }
+            projectOperations.addBuildPlugin(
+                    projectOperations.getFocusedModuleName(), defaultPlugin);
         }
     }
 
-    private void updateScaffoldBoilerPlate() {
-        final String targetDirectory = projectOperations.getPathResolver()
-                .getFocusedIdentifier(
-                        SRC_MAIN_JAVA,
-                        projectOperations
-                                .getTopLevelPackage(
-                                        projectOperations
-                                                .getFocusedModuleName())
-                                .getFullyQualifiedPackageName()
-                                .replace('.', File.separatorChar));
-        deleteUntouchedSetupFiles("setup/*", targetDirectory);
-        deleteUntouchedSetupFiles("setup/client/*", targetDirectory + "/client");
-        copyDirectoryContents();
-        updateGaeHelper();
+    private void updateDependencies(final Element configuration) {
+        final List<Dependency> dependencies = new ArrayList<Dependency>();
+        final List<Element> gwtDependencies = XmlUtils.findElements(
+                "/configuration/gwt/dependencies/dependency", configuration);
+        for (final Element dependencyElement : gwtDependencies) {
+            dependencies.add(new Dependency(dependencyElement));
+        }
+        projectOperations.removeDependencies(
+                projectOperations.getFocusedModuleName(), dependencies);
+        metadataService
+                .evict(ProjectMetadata.getProjectIdentifier(projectOperations
+                        .getFocusedModuleName()));
+        projectOperations.addDependencies(
+                projectOperations.getFocusedModuleName(), dependencies);
     }
 
     /**
@@ -581,35 +690,121 @@ public class GwtOperationsImpl implements GwtOperations {
                 XmlUtils.nodeToString(document), false);
     }
 
-    /**
-     * Sets the POM's output directory to {@value #OUTPUT_DIRECTORY}, if it's
-     * not already set to something else.
-     */
-    private void updateBuildOutputDirectory() {
-        // Read the POM
-        final String pom = getPomPath();
-        final Document document = XmlUtils.readXml(fileManager
-                .getInputStream(pom));
-        final Element root = document.getDocumentElement();
-
-        Element outputDirectoryElement = XmlUtils.findFirstElement(
-                "/project/build/outputDirectory", root);
-        if (outputDirectoryElement == null) {
-            // Create it
-            final Element buildElement = XmlUtils.findRequiredElement(
-                    "/project/build", root);
-            outputDirectoryElement = DomUtils.createChildElement(
-                    "outputDirectory", buildElement, document);
+    private void updateFile(final String sourceAntPath, String targetDirectory,
+            final String segmentPackage, final boolean overwrite) {
+        if (!targetDirectory.endsWith(File.separator)) {
+            targetDirectory += File.separator;
         }
-        outputDirectoryElement.setTextContent(OUTPUT_DIRECTORY);
+        if (!fileManager.exists(targetDirectory)) {
+            fileManager.createDirectory(targetDirectory);
+        }
 
-        fileManager.createOrUpdateTextFileIfRequired(pom,
-                XmlUtils.nodeToString(document), false);
+        final String path = FileUtils.getPath(getClass(), sourceAntPath);
+        final Iterable<URL> urls = OSGiUtils.findEntriesByPattern(
+                context.getBundleContext(), path);
+        Assert.notNull(urls,
+                "Could not search bundles for resources for Ant Path '" + path
+                        + "'");
+
+        for (final URL url : urls) {
+            String fileName = url.getPath().substring(
+                    url.getPath().lastIndexOf('/') + 1);
+            fileName = fileName.replace("-template", "");
+            final String targetFilename = targetDirectory + fileName;
+            try {
+                if (fileManager.exists(targetFilename) && !overwrite) {
+                    continue;
+                }
+                if (targetFilename.endsWith("png")) {
+                    FileCopyUtils.copy(url.openStream(), fileManager
+                            .createFile(targetFilename).getOutputStream());
+                }
+                else {
+                    // Read template and insert the user's package
+                    String input = FileCopyUtils
+                            .copyToString(new InputStreamReader(url
+                                    .openStream()));
+                    input = processTemplate(input, segmentPackage);
+
+                    // Output the file for the user
+                    fileManager.createOrUpdateTextFileIfRequired(
+                            targetFilename, input, true);
+                }
+            }
+            catch (final IOException e) {
+                throw new IllegalStateException("Unable to create '"
+                        + targetFilename + "'", e);
+            }
+        }
     }
 
-    private String getPomPath() {
-        return projectOperations.getPathResolver().getFocusedIdentifier(ROOT,
-                "pom.xml");
+    public void updateGaeConfiguration() {
+        final boolean isGaeEnabled = projectOperations
+                .isFeatureInstalledInFocusedModule(FeatureNames.GAE);
+        final boolean hasGaeStateChanged = (wasGaeEnabled == null)
+                || (isGaeEnabled != wasGaeEnabled);
+        if (!isInstalledInModule(projectOperations.getFocusedModuleName())
+                || !hasGaeStateChanged) {
+            return;
+        }
+
+        wasGaeEnabled = isGaeEnabled;
+
+        // Update the GaeHelper type
+        updateGaeHelper();
+
+        gwtTypeService.buildType(GwtType.APP_REQUEST_FACTORY,
+                gwtTemplateService.getStaticTemplateTypeDetails(
+                        GwtType.APP_REQUEST_FACTORY, projectOperations
+                                .getFocusedProjectMetadata().getModuleName()),
+                projectOperations.getFocusedModuleName());
+
+        // Ensure the gwt-maven-plugin appropriate to a GAE enabled or disabled
+        // environment is updated
+        updateBuildPlugins(isGaeEnabled);
+
+        // If there is a class that could possibly import from the appengine
+        // sdk, denoted here as having Gae in the type name,
+        // then we need to add the appengine-api-1.0-sdk dependency to the
+        // pom.xml file
+        final String rootPath = projectOperations.getPathResolver()
+                .getFocusedRoot(ROOT);
+        final Set<FileDetails> files = fileManager.findMatchingAntPath(rootPath
+                + "/**/*Gae*.java");
+        if (!files.isEmpty()) {
+            final Element configuration = XmlUtils.getConfiguration(getClass());
+            final Element gaeDependency = XmlUtils
+                    .findFirstElement(
+                            "/configuration/gae/dependencies/dependency",
+                            configuration);
+            projectOperations.addDependency(projectOperations
+                    .getFocusedModuleName(), new Dependency(gaeDependency));
+        }
+
+        // Copy across any missing files, only if GAE state has changed and is
+        // now enabled
+        if (isGaeEnabled) {
+            copyDirectoryContents();
+        }
+    }
+
+    private void updateGaeHelper() {
+        final String sourceAntPath = "module/client/scaffold/gae/GaeHelper-template.java";
+        final String segmentPackage = "client.scaffold.gae";
+        final String targetDirectory = projectOperations.getPathResolver()
+                .getFocusedIdentifier(
+                        SRC_MAIN_JAVA,
+                        projectOperations
+                                .getTopLevelPackage(
+                                        projectOperations
+                                                .getFocusedModuleName())
+                                .getFullyQualifiedPackageName()
+                                .replace('.', File.separatorChar)
+                                + File.separator
+                                + "client"
+                                + File.separator
+                                + "scaffold" + File.separator + "gae");
+        updateFile(sourceAntPath, targetDirectory, segmentPackage, true);
     }
 
     private void updateRepositories(final Element configuration) {
@@ -634,20 +829,20 @@ public class GwtOperationsImpl implements GwtOperations {
                 projectOperations.getFocusedModuleName(), repositories);
     }
 
-    private void updateDependencies(final Element configuration) {
-        final List<Dependency> dependencies = new ArrayList<Dependency>();
-        final List<Element> gwtDependencies = XmlUtils.findElements(
-                "/configuration/gwt/dependencies/dependency", configuration);
-        for (final Element dependencyElement : gwtDependencies) {
-            dependencies.add(new Dependency(dependencyElement));
-        }
-        projectOperations.removeDependencies(
-                projectOperations.getFocusedModuleName(), dependencies);
-        metadataService
-                .evict(ProjectMetadata.getProjectIdentifier(projectOperations
-                        .getFocusedModuleName()));
-        projectOperations.addDependencies(
-                projectOperations.getFocusedModuleName(), dependencies);
+    private void updateScaffoldBoilerPlate() {
+        final String targetDirectory = projectOperations.getPathResolver()
+                .getFocusedIdentifier(
+                        SRC_MAIN_JAVA,
+                        projectOperations
+                                .getTopLevelPackage(
+                                        projectOperations
+                                                .getFocusedModuleName())
+                                .getFullyQualifiedPackageName()
+                                .replace('.', File.separatorChar));
+        deleteUntouchedSetupFiles("setup/*", targetDirectory);
+        deleteUntouchedSetupFiles("setup/client/*", targetDirectory + "/client");
+        copyDirectoryContents();
+        updateGaeHelper();
     }
 
     private void updateWebXml() {
@@ -711,202 +906,5 @@ public class GwtOperationsImpl implements GwtOperations {
 
         fileManager.createOrUpdateTextFileIfRequired(webXmlpath,
                 XmlUtils.nodeToString(webXml), false);
-    }
-
-    private void updateGaeHelper() {
-        final String sourceAntPath = "module/client/scaffold/gae/GaeHelper-template.java";
-        final String segmentPackage = "client.scaffold.gae";
-        final String targetDirectory = projectOperations.getPathResolver()
-                .getFocusedIdentifier(
-                        SRC_MAIN_JAVA,
-                        projectOperations
-                                .getTopLevelPackage(
-                                        projectOperations
-                                                .getFocusedModuleName())
-                                .getFullyQualifiedPackageName()
-                                .replace('.', File.separatorChar)
-                                + File.separator
-                                + "client"
-                                + File.separator
-                                + "scaffold" + File.separator + "gae");
-        updateFile(sourceAntPath, targetDirectory, segmentPackage, true);
-    }
-
-    private void copyDirectoryContents() {
-        for (final GwtPath path : GwtPath.values()) {
-            copyDirectoryContents(path);
-        }
-    }
-
-    private void copyDirectoryContents(final GwtPath gwtPath) {
-        final String sourceAntPath = gwtPath.getSourceAntPath();
-        if (sourceAntPath.contains("gae")
-                && !projectOperations
-                        .isFeatureInstalledInFocusedModule(FeatureNames.GAE)) {
-            return;
-        }
-        final String targetDirectory = gwtPath == GwtPath.WEB ? projectOperations
-                .getPathResolver().getFocusedRoot(SRC_MAIN_WEBAPP)
-                : projectOperations.getPathResolver().getFocusedIdentifier(
-                        SRC_MAIN_JAVA,
-                        gwtPath.getPackagePath(projectOperations
-                                .getFocusedTopLevelPackage()));
-        updateFile(sourceAntPath, targetDirectory, gwtPath.segmentPackage(),
-                false);
-    }
-
-    private void deleteUntouchedSetupFiles(final String sourceAntPath,
-            String targetDirectory) {
-        if (!targetDirectory.endsWith(File.separator)) {
-            targetDirectory += File.separator;
-        }
-        if (!fileManager.exists(targetDirectory)) {
-            fileManager.createDirectory(targetDirectory);
-        }
-
-        final String path = FileUtils.getPath(getClass(), sourceAntPath);
-        final Iterable<URL> uris = OSGiUtils.findEntriesByPattern(
-                context.getBundleContext(), path);
-        Assert.notNull(uris,
-                "Could not search bundles for resources for Ant Path '" + path
-                        + "'");
-
-        for (final URL url : uris) {
-            String fileName = url.getPath().substring(
-                    url.getPath().lastIndexOf('/') + 1);
-            fileName = fileName.replace("-template", "");
-            final String targetFilename = targetDirectory + fileName;
-            if (!fileManager.exists(targetFilename)) {
-                continue;
-            }
-            try {
-                String input = FileCopyUtils
-                        .copyToString(new InputStreamReader(url.openStream()));
-                input = processTemplate(input, null);
-                final String existing = FileCopyUtils.copyToString(new File(
-                        targetFilename));
-                if (existing.equals(input)) {
-                    // new File(targetFilename).delete();
-                    fileManager.delete(targetFilename);
-                }
-            }
-            catch (final IOException ignored) {
-            }
-        }
-    }
-
-    private void updateFile(final String sourceAntPath, String targetDirectory,
-            final String segmentPackage, final boolean overwrite) {
-        if (!targetDirectory.endsWith(File.separator)) {
-            targetDirectory += File.separator;
-        }
-        if (!fileManager.exists(targetDirectory)) {
-            fileManager.createDirectory(targetDirectory);
-        }
-
-        final String path = FileUtils.getPath(getClass(), sourceAntPath);
-        final Iterable<URL> urls = OSGiUtils.findEntriesByPattern(
-                context.getBundleContext(), path);
-        Assert.notNull(urls,
-                "Could not search bundles for resources for Ant Path '" + path
-                        + "'");
-
-        for (final URL url : urls) {
-            String fileName = url.getPath().substring(
-                    url.getPath().lastIndexOf('/') + 1);
-            fileName = fileName.replace("-template", "");
-            final String targetFilename = targetDirectory + fileName;
-            try {
-                if (fileManager.exists(targetFilename) && !overwrite) {
-                    continue;
-                }
-                if (targetFilename.endsWith("png")) {
-                    FileCopyUtils.copy(url.openStream(), fileManager
-                            .createFile(targetFilename).getOutputStream());
-                }
-                else {
-                    // Read template and insert the user's package
-                    String input = FileCopyUtils
-                            .copyToString(new InputStreamReader(url
-                                    .openStream()));
-                    input = processTemplate(input, segmentPackage);
-
-                    // Output the file for the user
-                    fileManager.createOrUpdateTextFileIfRequired(
-                            targetFilename, input, true);
-                }
-            }
-            catch (final IOException e) {
-                throw new IllegalStateException("Unable to create '"
-                        + targetFilename + "'", e);
-            }
-        }
-    }
-
-    private String processTemplate(String input, String segmentPackage) {
-        if (segmentPackage == null) {
-            segmentPackage = "";
-        }
-        final String topLevelPackage = projectOperations.getTopLevelPackage(
-                projectOperations.getFocusedModuleName())
-                .getFullyQualifiedPackageName();
-        input = input.replace("__TOP_LEVEL_PACKAGE__", topLevelPackage);
-        input = input.replace("__SEGMENT_PACKAGE__", segmentPackage);
-        input = input.replace("__PROJECT_NAME__", projectOperations
-                .getProjectName(projectOperations.getFocusedModuleName()));
-
-        if (projectOperations
-                .isFeatureInstalledInFocusedModule(FeatureNames.GAE)) {
-            input = input.replace("__GAE_IMPORT__", "import " + topLevelPackage
-                    + ".client.scaffold.gae.*;\n");
-            input = input.replace("__GAE_HOOKUP__", getGaeHookup());
-            input = input.replace("__GAE_REQUEST_TRANSPORT__",
-                    ", new GaeAuthRequestTransport(eventBus)");
-        }
-        else {
-            input = input.replace("__GAE_IMPORT__", "");
-            input = input.replace("__GAE_HOOKUP__", "");
-            input = input.replace("__GAE_REQUEST_TRANSPORT__", "");
-        }
-        return input;
-    }
-
-    private void updateBuildPlugins(final boolean isGaeEnabled) {
-        // Update the POM
-        final String xPathExpression = "/configuration/"
-                + (isGaeEnabled ? "gae" : "gwt") + "/plugins/plugin";
-        final List<Element> pluginElements = XmlUtils.findElements(
-                xPathExpression, XmlUtils.getConfiguration(getClass()));
-        for (final Element pluginElement : pluginElements) {
-            final Plugin defaultPlugin = new Plugin(pluginElement);
-            for (final Plugin plugin : projectOperations.getFocusedModule()
-                    .getBuildPlugins()) {
-                if ("gwt-maven-plugin".equals(plugin.getArtifactId())) {
-                    projectOperations.removeBuildPluginImmediately(
-                            projectOperations.getFocusedModuleName(),
-                            defaultPlugin);
-                    break;
-                }
-            }
-            projectOperations.addBuildPlugin(
-                    projectOperations.getFocusedModuleName(), defaultPlugin);
-        }
-    }
-
-    private void removeIfFound(final String xpath, final Element webXmlRoot) {
-        for (Element toRemove : XmlUtils.findElements(xpath, webXmlRoot)) {
-            if (toRemove != null) {
-                toRemove.getParentNode().removeChild(toRemove);
-                toRemove = null;
-            }
-        }
-    }
-
-    private CharSequence getGaeHookup() {
-        final StringBuilder builder = new StringBuilder(
-                "// AppEngine user authentication\n\n");
-        builder.append("new GaeLoginWidgetDriver(requestFactory).setWidget(shell.getLoginWidget());\n\n");
-        builder.append("new ReloadOnAuthenticationFailure().register(eventBus);\n\n");
-        return builder.toString();
     }
 }

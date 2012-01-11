@@ -39,15 +39,25 @@ import org.w3c.dom.Element;
 @Service
 public class DbreOperationsImpl implements DbreOperations {
 
-    // Constants
     private static final Logger LOGGER = HandlerUtils
             .getLogger(DbreOperationsImpl.class);
 
-    // Fields
     @Reference private DbreModelService dbreModelService;
     @Reference private FileManager fileManager;
     @Reference private PathResolver pathResolver;
     @Reference private ProjectOperations projectOperations;
+
+    public void displayDatabaseMetadata(final Set<Schema> schemas,
+            final File file, final boolean view) {
+        Assert.notNull(schemas, "Schemas required");
+
+        // Force it to refresh the database from the actual JDBC connection
+        final Database database = dbreModelService.refreshDatabase(schemas,
+                view, Collections.<String> emptySet(),
+                Collections.<String> emptySet());
+        database.setIncludeNonPortableAttributes(true);
+        outputSchemaXml(database, schemas, file, true);
+    }
 
     public boolean isDbreInstallationPossible() {
         return projectOperations.isFocusedProjectAvailable()
@@ -55,16 +65,39 @@ public class DbreOperationsImpl implements DbreOperations {
                         .isFeatureInstalledInFocusedModule(FeatureNames.JPA);
     }
 
-    public void displayDatabaseMetadata(final Set<Schema> schemas,
-            final File file, final boolean view) {
-        Assert.notNull(schemas, "Schemas required");
-
-        // Force it to refresh the database from the actual JDBC connection
-        Database database = dbreModelService.refreshDatabase(schemas, view,
-                Collections.<String> emptySet(),
-                Collections.<String> emptySet());
-        database.setIncludeNonPortableAttributes(true);
-        outputSchemaXml(database, schemas, file, true);
+    private void outputSchemaXml(final Database database,
+            final Set<Schema> schemas, final File file,
+            final boolean displayOnly) {
+        if (database == null) {
+            LOGGER.warning("Cannot obtain database information for schema(s) '"
+                    + StringUtils.collectionToCommaDelimitedString(schemas)
+                    + "'");
+        }
+        else if (!database.hasTables()) {
+            LOGGER.warning("Schema(s) '"
+                    + StringUtils.collectionToCommaDelimitedString(schemas)
+                    + "' do not exist or does not have any tables. Note that the schema names of some databases are case-sensitive");
+        }
+        else {
+            try {
+                if (displayOnly) {
+                    final Document document = DatabaseXmlUtils
+                            .getDatabaseDocument(database);
+                    final OutputStream outputStream = file != null ? new FileOutputStream(
+                            file) : new ByteArrayOutputStream();
+                    XmlUtils.writeXml(outputStream, document);
+                    LOGGER.info(file != null ? "Database metadata written to file "
+                            + file.getAbsolutePath()
+                            : outputStream.toString());
+                }
+                else {
+                    dbreModelService.writeDatabase(database);
+                }
+            }
+            catch (final Exception e) {
+                throw new IllegalStateException(e);
+            }
+        }
     }
 
     public void reverseEngineerDatabase(final Set<Schema> schemas,
@@ -92,104 +125,35 @@ public class DbreOperationsImpl implements DbreOperations {
         updatePersistenceXml();
     }
 
-    private void outputSchemaXml(final Database database,
-            final Set<Schema> schemas, final File file,
-            final boolean displayOnly) {
-        if (database == null) {
-            LOGGER.warning("Cannot obtain database information for schema(s) '"
-                    + StringUtils.collectionToCommaDelimitedString(schemas)
-                    + "'");
+    private boolean setPropertyValue(final Element root,
+            Element propertyElement, final String name, final String value) {
+        boolean changed = false;
+        propertyElement = XmlUtils.findFirstElement(
+                "/persistence/persistence-unit/properties/property[@name = '"
+                        + name + "']", root);
+        if ((propertyElement != null)
+                && !propertyElement.getAttribute("value").equals(value)) {
+            propertyElement.setAttribute("value", value);
+            changed = true;
         }
-        else if (!database.hasTables()) {
-            LOGGER.warning("Schema(s) '"
-                    + StringUtils.collectionToCommaDelimitedString(schemas)
-                    + "' do not exist or does not have any tables. Note that the schema names of some databases are case-sensitive");
-        }
-        else {
-            try {
-                if (displayOnly) {
-                    Document document = DatabaseXmlUtils
-                            .getDatabaseDocument(database);
-                    OutputStream outputStream = file != null ? new FileOutputStream(
-                            file) : new ByteArrayOutputStream();
-                    XmlUtils.writeXml(outputStream, document);
-                    LOGGER.info(file != null ? "Database metadata written to file "
-                            + file.getAbsolutePath()
-                            : outputStream.toString());
-                }
-                else {
-                    dbreModelService.writeDatabase(database);
-                }
-            }
-            catch (Exception e) {
-                throw new IllegalStateException(e);
-            }
-        }
-    }
-
-    private void updatePom() {
-        String pom = pathResolver.getFocusedIdentifier(Path.ROOT, "pom.xml");
-        Document document = XmlUtils.readXml(fileManager.getInputStream(pom));
-        Element root = document.getDocumentElement();
-
-        String warPluginXPath = "/project/build/plugins/plugin[artifactId = 'maven-war-plugin']";
-        Element warPluginElement = XmlUtils.findFirstElement(warPluginXPath,
-                root);
-        if (warPluginElement == null) {
-            // Project may not be a web project, so just exit
-            return;
-        }
-        Element excludeElement = XmlUtils
-                .findFirstElement(
-                        warPluginXPath
-                                + "/configuration/webResources/resource/excludes/exclude[text() = '"
-                                + DbreModelService.DBRE_XML + "']", root);
-        if (excludeElement != null) {
-            // <exclude> element is already there, so just exit
-            return;
-        }
-
-        // Create the required elements
-        final Element configurationElement = DomUtils.createChildIfNotExists(
-                "configuration", warPluginElement, document);
-        final Element webResourcesElement = DomUtils.createChildIfNotExists(
-                "webResources", configurationElement, document);
-        final Element resourceElement = DomUtils.createChildIfNotExists(
-                "resource", webResourcesElement, document);
-        final Element excludesElement = DomUtils.createChildIfNotExists(
-                "excludes", resourceElement, document);
-        excludeElement = DomUtils.createChildIfNotExists("exclude",
-                excludesElement, document);
-        final Element directoryElement = DomUtils.createChildIfNotExists(
-                "directory", resourceElement, document);
-
-        // Populate them with the required text
-        excludeElement.setTextContent(DbreModelService.DBRE_XML);
-        directoryElement.setTextContent("src/main/resources");
-
-        // Clean up the XML
-        DomUtils.removeTextNodes(warPluginElement);
-
-        // Write out the updated POM
-        fileManager.createOrUpdateTextFileIfRequired(pom,
-                XmlUtils.nodeToString(document), false);
+        return changed;
     }
 
     private void updatePersistenceXml() {
-        String persistencePath = pathResolver.getFocusedIdentifier(
+        final String persistencePath = pathResolver.getFocusedIdentifier(
                 Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml");
-        Document document = XmlUtils.readXml(fileManager
+        final Document document = XmlUtils.readXml(fileManager
                 .getInputStream(persistencePath));
-        Element root = document.getDocumentElement();
+        final Element root = document.getDocumentElement();
 
-        Element providerElement = XmlUtils
+        final Element providerElement = XmlUtils
                 .findFirstElement(
                         "/persistence/persistence-unit[@transaction-type = 'RESOURCE_LOCAL']/provider",
                         root);
         Assert.notNull(providerElement,
                 "/persistence/persistence-unit/provider is null");
-        String provider = providerElement.getTextContent();
-        Element propertyElement = null;
+        final String provider = providerElement.getTextContent();
+        final Element propertyElement = null;
         boolean changed = false;
         if (provider.contains("hibernate")) {
             changed = setPropertyValue(root, propertyElement,
@@ -231,17 +195,53 @@ public class DbreOperationsImpl implements DbreOperations {
         }
     }
 
-    private boolean setPropertyValue(final Element root,
-            Element propertyElement, final String name, final String value) {
-        boolean changed = false;
-        propertyElement = XmlUtils.findFirstElement(
-                "/persistence/persistence-unit/properties/property[@name = '"
-                        + name + "']", root);
-        if (propertyElement != null
-                && !propertyElement.getAttribute("value").equals(value)) {
-            propertyElement.setAttribute("value", value);
-            changed = true;
+    private void updatePom() {
+        final String pom = pathResolver.getFocusedIdentifier(Path.ROOT,
+                "pom.xml");
+        final Document document = XmlUtils.readXml(fileManager
+                .getInputStream(pom));
+        final Element root = document.getDocumentElement();
+
+        final String warPluginXPath = "/project/build/plugins/plugin[artifactId = 'maven-war-plugin']";
+        final Element warPluginElement = XmlUtils.findFirstElement(
+                warPluginXPath, root);
+        if (warPluginElement == null) {
+            // Project may not be a web project, so just exit
+            return;
         }
-        return changed;
+        Element excludeElement = XmlUtils
+                .findFirstElement(
+                        warPluginXPath
+                                + "/configuration/webResources/resource/excludes/exclude[text() = '"
+                                + DbreModelService.DBRE_XML + "']", root);
+        if (excludeElement != null) {
+            // <exclude> element is already there, so just exit
+            return;
+        }
+
+        // Create the required elements
+        final Element configurationElement = DomUtils.createChildIfNotExists(
+                "configuration", warPluginElement, document);
+        final Element webResourcesElement = DomUtils.createChildIfNotExists(
+                "webResources", configurationElement, document);
+        final Element resourceElement = DomUtils.createChildIfNotExists(
+                "resource", webResourcesElement, document);
+        final Element excludesElement = DomUtils.createChildIfNotExists(
+                "excludes", resourceElement, document);
+        excludeElement = DomUtils.createChildIfNotExists("exclude",
+                excludesElement, document);
+        final Element directoryElement = DomUtils.createChildIfNotExists(
+                "directory", resourceElement, document);
+
+        // Populate them with the required text
+        excludeElement.setTextContent(DbreModelService.DBRE_XML);
+        directoryElement.setTextContent("src/main/resources");
+
+        // Clean up the XML
+        DomUtils.removeTextNodes(warPluginElement);
+
+        // Write out the updated POM
+        fileManager.createOrUpdateTextFileIfRequired(pom,
+                XmlUtils.nodeToString(document), false);
     }
 }

@@ -19,7 +19,6 @@ import org.springframework.roo.support.util.FileUtils;
 @Service
 public class PathResolvingAwareFilenameResolver implements FilenameResolver {
 
-    // Fields
     @Reference private PathResolver pathResolver;
 
     public String getMeaningfulName(final File file) {

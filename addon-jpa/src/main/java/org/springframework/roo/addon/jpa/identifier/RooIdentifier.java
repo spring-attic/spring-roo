@@ -34,12 +34,6 @@ public @interface RooIdentifier {
     boolean gettersByDefault() default true;
 
     /**
-     * @return whether to generate setters for each non-transient field declared
-     *         in this class (defaults to false)
-     */
-    boolean settersByDefault() default false;
-
-    /**
      * Allows disabling the automated creation of a no-arg constructor. This
      * might be appropriate, for example, if another add-on is providing more
      * sophisticated constructor creation facilities.
@@ -48,4 +42,10 @@ public @interface RooIdentifier {
      *         (defaults to true)
      */
     boolean noArgConstructor() default true;
+
+    /**
+     * @return whether to generate setters for each non-transient field declared
+     *         in this class (defaults to false)
+     */
+    boolean settersByDefault() default false;
 }

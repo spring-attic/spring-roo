@@ -44,30 +44,60 @@ import org.w3c.dom.Element;
 @Service
 public class SolrOperationsImpl implements SolrOperations {
 
-    // Constants
     private static final Dependency SOLRJ = new Dependency("org.apache.solr",
             "solr-solrj", "1.4.1");
 
-    // Fields
     @Reference private FileManager fileManager;
     @Reference private ProjectOperations projectOperations;
     @Reference private TypeLocationService typeLocationService;
     @Reference private TypeManagementService typeManagementService;
 
-    public boolean isSolrInstallationPossible() {
-        return projectOperations.isFocusedProjectAvailable()
-                && !solrPropsInstalled()
-                && projectOperations.isFeatureInstalled(FeatureNames.JPA);
+    public void addAll() {
+        final Set<ClassOrInterfaceTypeDetails> cids = typeLocationService
+                .findClassesOrInterfaceDetailsWithTag(CustomDataKeys.PERSISTENT_TYPE);
+        for (final ClassOrInterfaceTypeDetails cid : cids) {
+            if (!Modifier.isAbstract(cid.getModifier())) {
+                addSolrSearchableAnnotation(cid);
+            }
+        }
+    }
+
+    public void addSearch(final JavaType javaType) {
+        Assert.notNull(javaType, "Java type required");
+
+        final ClassOrInterfaceTypeDetails cid = typeLocationService
+                .getTypeDetails(javaType);
+        if (cid == null) {
+            throw new IllegalArgumentException("Cannot locate source for '"
+                    + javaType.getFullyQualifiedTypeName() + "'");
+        }
+
+        if (Modifier.isAbstract(cid.getModifier())) {
+            throw new IllegalStateException(
+                    "The class specified is an abstract type. Can only add solr search for concrete types.");
+        }
+        addSolrSearchableAnnotation(cid);
+    }
+
+    private void addSolrSearchableAnnotation(
+            final ClassOrInterfaceTypeDetails cid) {
+        if (cid.getTypeAnnotation(ROO_SOLR_SEARCHABLE) == null) {
+            final ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(
+                    cid);
+            cidBuilder.addAnnotation(new AnnotationMetadataBuilder(
+                    ROO_SOLR_SEARCHABLE));
+            typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
+        }
     }
 
     public boolean isSearchAvailable() {
         return solrPropsInstalled();
     }
 
-    private boolean solrPropsInstalled() {
-        return fileManager.exists(projectOperations.getPathResolver()
-                .getFocusedIdentifier(Path.SPRING_CONFIG_ROOT,
-                        "solr.properties"));
+    public boolean isSolrInstallationPossible() {
+        return projectOperations.isFocusedProjectAvailable()
+                && !solrPropsInstalled()
+                && projectOperations.isFeatureInstalled(FeatureNames.JPA);
     }
 
     public void setupConfig(final String solrServerUrl) {
@@ -76,12 +106,12 @@ public class SolrOperationsImpl implements SolrOperations {
 
         updateSolrProperties(solrServerUrl);
 
-        String contextPath = projectOperations.getPathResolver()
+        final String contextPath = projectOperations.getPathResolver()
                 .getFocusedIdentifier(Path.SPRING_CONFIG_ROOT,
                         "applicationContext.xml");
-        Document appCtx = XmlUtils.readXml(fileManager
+        final Document appCtx = XmlUtils.readXml(fileManager
                 .getInputStream(contextPath));
-        Element root = appCtx.getDocumentElement();
+        final Element root = appCtx.getDocumentElement();
 
         if (DomUtils.findFirstElementByName("task:annotation-driven", root) == null) {
             if (root.getAttribute("xmlns:task").length() == 0) {
@@ -100,7 +130,7 @@ public class SolrOperationsImpl implements SolrOperations {
                     .addAttribute("pool-size", "${executor.poolSize}").build());
         }
 
-        Element solrServer = XmlUtils.findFirstElement(
+        final Element solrServer = XmlUtils.findFirstElement(
                 "/beans/bean[@id='solrServer']", root);
         if (solrServer != null) {
             return;
@@ -120,13 +150,19 @@ public class SolrOperationsImpl implements SolrOperations {
                 XmlUtils.nodeToString(appCtx), false);
     }
 
+    private boolean solrPropsInstalled() {
+        return fileManager.exists(projectOperations.getPathResolver()
+                .getFocusedIdentifier(Path.SPRING_CONFIG_ROOT,
+                        "solr.properties"));
+    }
+
     private void updateSolrProperties(final String solrServerUrl) {
-        String solrPath = projectOperations.getPathResolver()
+        final String solrPath = projectOperations.getPathResolver()
                 .getFocusedIdentifier(Path.SPRING_CONFIG_ROOT,
                         "solr.properties");
-        boolean solrExists = fileManager.exists(solrPath);
+        final boolean solrExists = fileManager.exists(solrPath);
 
-        Properties props = new Properties();
+        final Properties props = new Properties();
         InputStream inputStream = null;
         try {
             if (fileManager.exists(solrPath)) {
@@ -134,7 +170,7 @@ public class SolrOperationsImpl implements SolrOperations {
                 props.load(inputStream);
             }
         }
-        catch (IOException ioe) {
+        catch (final IOException ioe) {
             throw new IllegalStateException(ioe);
         }
         finally {
@@ -146,54 +182,16 @@ public class SolrOperationsImpl implements SolrOperations {
 
         OutputStream outputStream = null;
         try {
-            MutableFile mutableFile = solrExists ? fileManager
+            final MutableFile mutableFile = solrExists ? fileManager
                     .updateFile(solrPath) : fileManager.createFile(solrPath);
             outputStream = mutableFile.getOutputStream();
             props.store(outputStream, "Updated at " + new Date());
         }
-        catch (IOException e) {
+        catch (final IOException e) {
             throw new IllegalStateException(e);
         }
         finally {
             IOUtils.closeQuietly(outputStream);
-        }
-    }
-
-    public void addAll() {
-        Set<ClassOrInterfaceTypeDetails> cids = typeLocationService
-                .findClassesOrInterfaceDetailsWithTag(CustomDataKeys.PERSISTENT_TYPE);
-        for (ClassOrInterfaceTypeDetails cid : cids) {
-            if (!Modifier.isAbstract(cid.getModifier())) {
-                addSolrSearchableAnnotation(cid);
-            }
-        }
-    }
-
-    public void addSearch(final JavaType javaType) {
-        Assert.notNull(javaType, "Java type required");
-
-        ClassOrInterfaceTypeDetails cid = typeLocationService
-                .getTypeDetails(javaType);
-        if (cid == null) {
-            throw new IllegalArgumentException("Cannot locate source for '"
-                    + javaType.getFullyQualifiedTypeName() + "'");
-        }
-
-        if (Modifier.isAbstract(cid.getModifier())) {
-            throw new IllegalStateException(
-                    "The class specified is an abstract type. Can only add solr search for concrete types.");
-        }
-        addSolrSearchableAnnotation(cid);
-    }
-
-    private void addSolrSearchableAnnotation(
-            final ClassOrInterfaceTypeDetails cid) {
-        if (cid.getTypeAnnotation(ROO_SOLR_SEARCHABLE) == null) {
-            ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(
-                    cid);
-            cidBuilder.addAnnotation(new AnnotationMetadataBuilder(
-                    ROO_SOLR_SEARCHABLE));
-            typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
         }
     }
 }

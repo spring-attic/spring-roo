@@ -35,14 +35,12 @@ import org.springframework.util.Assert;
  */
 public class CloudPreferences {
 
-    // Constants
     private static final String CHARSET_NAME = "UTF-8";
     private static final String CLOUD_FOUNDRY_KEY = "Cloud Foundry Prefs";
     private static final String DELIMITER = "|";
     private static final String DELIMITER_REGEX = "\\|"; // i.e. a pipe
     private static final String ROO_KEY = "Roo == Java + Productivity";
 
-    // Fields
     private final Preferences preferences;
 
     /**
@@ -52,77 +50,8 @@ public class CloudPreferences {
      *            (required)
      */
     public CloudPreferences(final PreferencesService preferencesService) {
-        this.preferences = preferencesService
+        preferences = preferencesService
                 .getPreferencesFor(CloudFoundrySessionImpl.class);
-    }
-
-    /**
-     * Stores the given credentials along with any previously stored ones
-     * 
-     * @param newCredentials the credentials to store (required, must be valid)
-     */
-    public void storeCredentials(final CloudCredentials newCredentials) {
-        Assert.isTrue(newCredentials.isValid(),
-                "Cannot store invalid credentials");
-        // The credentials to write are the existing valid ones...
-        final Collection<String> entries = new LinkedHashSet<String>();
-        for (final CloudCredentials storedCredentials : getStoredCredentials()) {
-            if (storedCredentials.isValid()) {
-                entries.add(storedCredentials.encode());
-            }
-        }
-        // ...plus the given ones
-        entries.add(newCredentials.encode());
-
-        // Write them
-        try {
-            final byte[] encodedEntries = StringUtils
-                    .collectionToDelimitedString(entries, DELIMITER).getBytes(
-                            CHARSET_NAME);
-            final byte[] encryptedEntries = crypt(encodedEntries, ENCRYPT_MODE);
-            preferences.putByteArray(CLOUD_FOUNDRY_KEY, encryptedEntries);
-        }
-        catch (final UnsupportedEncodingException e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
-    /**
-     * Returns any stored {@link CloudCredentials}
-     * 
-     * @return a non-<code>null</code> set
-     */
-    private Set<CloudCredentials> getStoredCredentials() {
-        final byte[] encodedPrefs = preferences.getByteArray(CLOUD_FOUNDRY_KEY);
-        if (encodedPrefs.length == 0) {
-            return Collections.emptySet();
-        }
-        final byte[] decryptedPrefs = crypt(encodedPrefs, DECRYPT_MODE);
-
-        try {
-            return decodeLoginPrefEntries(new String(decryptedPrefs,
-                    CHARSET_NAME));
-        }
-        catch (final UnsupportedEncodingException e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
-    /**
-     * Returns the stored password for the given URL and email address
-     * 
-     * @param cloudControllerUrl
-     * @param email
-     * @return <code>null</code> if there isn't one
-     */
-    public String getStoredPassword(final String cloudControllerUrl,
-            final String email) {
-        for (final CloudCredentials storedCredential : getStoredCredentials()) {
-            if (storedCredential.isSameAccount(cloudControllerUrl, email)) {
-                return storedCredential.getPassword();
-            }
-        }
-        return null;
     }
 
     /**
@@ -131,6 +60,25 @@ public class CloudPreferences {
     public void clearStoredLoginDetails() {
         preferences.putByteArray(CLOUD_FOUNDRY_KEY, new byte[0]);
         preferences.flush();
+    }
+
+    /**
+     * Encrypts or decrypts the given input, according to the given
+     * <code>opmode</code>
+     * 
+     * @param input the bytes to operate upon (required)
+     * @param opmode the operation to perform, see the {@link Cipher} class for
+     *            suitable constants
+     * @return a non-<code>null</code> array
+     */
+    private byte[] crypt(final byte[] input, final int opmode) {
+        final Cipher cipher = getCipher(opmode);
+        try {
+            return cipher.doFinal(input);
+        }
+        catch (final GeneralSecurityException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     /**
@@ -153,22 +101,12 @@ public class CloudPreferences {
     }
 
     /**
-     * Encrypts or decrypts the given input, according to the given
-     * <code>opmode</code>
+     * Flushes these preferences to the persistent store
      * 
-     * @param input the bytes to operate upon (required)
-     * @param opmode the operation to perform, see the {@link Cipher} class for
-     *            suitable constants
-     * @return a non-<code>null</code> array
+     * @see Preferences#flush()
      */
-    private byte[] crypt(final byte[] input, final int opmode) {
-        final Cipher cipher = getCipher(opmode);
-        try {
-            return cipher.doFinal(input);
-        }
-        catch (final GeneralSecurityException e) {
-            throw new IllegalStateException(e);
-        }
+    public void flush() {
+        preferences.flush();
     }
 
     private Cipher getCipher(final int opmode) {
@@ -197,6 +135,46 @@ public class CloudPreferences {
         catch (final UnsupportedEncodingException e) {
             throw new IllegalStateException(e);
         }
+    }
+
+    /**
+     * Returns any stored {@link CloudCredentials}
+     * 
+     * @return a non-<code>null</code> set
+     */
+    private Set<CloudCredentials> getStoredCredentials() {
+        final byte[] encodedPrefs = preferences.getByteArray(CLOUD_FOUNDRY_KEY);
+        if (encodedPrefs.length == 0) {
+            return Collections.emptySet();
+        }
+        final byte[] decryptedPrefs = crypt(encodedPrefs, DECRYPT_MODE);
+
+        try {
+            return decodeLoginPrefEntries(new String(decryptedPrefs,
+                    CHARSET_NAME));
+        }
+        catch (final UnsupportedEncodingException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    /**
+     * Returns any stored credentials having the given URL.
+     * 
+     * @param url the URL to match upon (can be <code>null</code>)
+     * @return a non-<code>null</code> list, empty if the given URL is
+     *         <code>null</code>
+     */
+    public List<CloudCredentials> getStoredCredentialsForUrl(final String url) {
+        final List<CloudCredentials> matches = new ArrayList<CloudCredentials>();
+        if (url != null) {
+            for (final CloudCredentials cloudCredentials : getStoredCredentials()) {
+                if (url.equals(cloudCredentials.getUrl())) {
+                    matches.add(cloudCredentials);
+                }
+            }
+        }
+        return matches;
     }
 
     /**
@@ -232,22 +210,20 @@ public class CloudPreferences {
     }
 
     /**
-     * Returns any stored credentials having the given URL.
+     * Returns the stored password for the given URL and email address
      * 
-     * @param url the URL to match upon (can be <code>null</code>)
-     * @return a non-<code>null</code> list, empty if the given URL is
-     *         <code>null</code>
+     * @param cloudControllerUrl
+     * @param email
+     * @return <code>null</code> if there isn't one
      */
-    public List<CloudCredentials> getStoredCredentialsForUrl(final String url) {
-        final List<CloudCredentials> matches = new ArrayList<CloudCredentials>();
-        if (url != null) {
-            for (final CloudCredentials cloudCredentials : getStoredCredentials()) {
-                if (url.equals(cloudCredentials.getUrl())) {
-                    matches.add(cloudCredentials);
-                }
+    public String getStoredPassword(final String cloudControllerUrl,
+            final String email) {
+        for (final CloudCredentials storedCredential : getStoredCredentials()) {
+            if (storedCredential.isSameAccount(cloudControllerUrl, email)) {
+                return storedCredential.getPassword();
             }
         }
-        return matches;
+        return null;
     }
 
     /**
@@ -264,11 +240,33 @@ public class CloudPreferences {
     }
 
     /**
-     * Flushes these preferences to the persistent store
+     * Stores the given credentials along with any previously stored ones
      * 
-     * @see Preferences#flush()
+     * @param newCredentials the credentials to store (required, must be valid)
      */
-    public void flush() {
-        this.preferences.flush();
+    public void storeCredentials(final CloudCredentials newCredentials) {
+        Assert.isTrue(newCredentials.isValid(),
+                "Cannot store invalid credentials");
+        // The credentials to write are the existing valid ones...
+        final Collection<String> entries = new LinkedHashSet<String>();
+        for (final CloudCredentials storedCredentials : getStoredCredentials()) {
+            if (storedCredentials.isValid()) {
+                entries.add(storedCredentials.encode());
+            }
+        }
+        // ...plus the given ones
+        entries.add(newCredentials.encode());
+
+        // Write them
+        try {
+            final byte[] encodedEntries = StringUtils
+                    .collectionToDelimitedString(entries, DELIMITER).getBytes(
+                            CHARSET_NAME);
+            final byte[] encryptedEntries = crypt(encodedEntries, ENCRYPT_MODE);
+            preferences.putByteArray(CLOUD_FOUNDRY_KEY, encryptedEntries);
+        }
+        catch (final UnsupportedEncodingException e) {
+            throw new IllegalStateException(e);
+        }
     }
 }

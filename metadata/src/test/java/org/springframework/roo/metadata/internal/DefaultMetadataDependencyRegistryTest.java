@@ -4,7 +4,6 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
-import org.springframework.roo.metadata.internal.DefaultMetadataDependencyRegistry;
 
 public class DefaultMetadataDependencyRegistryTest {
 
@@ -14,16 +13,16 @@ public class DefaultMetadataDependencyRegistryTest {
             .create("com.Test", "object");
     private static final String JAVA_TYPE_PERSON = MetadataIdentificationUtils
             .create("com.Test", "person");
-    private static final String MVC_CONTROLLER = MetadataIdentificationUtils
-            .create("com.Test", "mvc ctrl");
     private static final String JSP_PAGE_1 = MetadataIdentificationUtils
             .create("com.Test", "jsp 1");
     private static final String JSP_PAGE_2 = MetadataIdentificationUtils
             .create("com.Test", "jsp 2");
+    private static final String MVC_CONTROLLER = MetadataIdentificationUtils
+            .create("com.Test", "mvc ctrl");
 
     @Test
     public void testRegistration() {
-        DefaultMetadataDependencyRegistry reg = new DefaultMetadataDependencyRegistry();
+        final DefaultMetadataDependencyRegistry reg = new DefaultMetadataDependencyRegistry();
 
         // Verify simple registration
         reg.registerDependency(DISK_FILE, JAVA_TYPE_OBJECT);

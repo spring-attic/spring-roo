@@ -11,13 +11,11 @@ import org.springframework.roo.model.JavaPackage;
  */
 public interface WebMvcOperations {
 
-    String OPEN_ENTITYMANAGER_IN_VIEW_FILTER_NAME = "Spring OpenEntityManagerInViewFilter";
-
     String CHARACTER_ENCODING_FILTER_NAME = "CharacterEncodingFilter";
 
     String HTTP_METHOD_FILTER_NAME = "HttpMethodFilter";
 
-    void installMinimalWebArtifacts();
+    String OPEN_ENTITYMANAGER_IN_VIEW_FILTER_NAME = "Spring OpenEntityManagerInViewFilter";
 
     void installAllWebMvcArtifacts();
 
@@ -30,6 +28,8 @@ public interface WebMvcOperations {
      *            class
      */
     void installConversionService(JavaPackage destinationPackage);
+
+    void installMinimalWebArtifacts();
 
     void registerWebFlowConversionServiceExposingInterceptor();
 }

@@ -63,18 +63,6 @@ import org.springframework.roo.project.Path;
 public interface ItdMetadataProvider extends MetadataProvider {
 
     /**
-     * Returns the suffix that makes filenames unique for this implementation.
-     * This suffix is appended to the end of the
-     * {@link PhysicalTypeIdentifierNamingUtils} filename + "_Roo_" portion.
-     * This suffix should not contain any periods and as such does not represent
-     * the filename's extension.
-     * 
-     * @return the filename suffix that makes ITDs produced by this
-     *         implementation unique (cannot be null or an empty string)
-     */
-    String getItdUniquenessFilenameSuffix();
-
-    /**
      * Obtains an identifier that would be validly recognized by this
      * {@link ItdMetadataProvider} instance. The identifier must represent the
      * presented physical Java type identifier.
@@ -92,4 +80,16 @@ public interface ItdMetadataProvider extends MetadataProvider {
      *         or an empty string)
      */
     String getIdForPhysicalJavaType(String physicalJavaTypeIdentifier);
+
+    /**
+     * Returns the suffix that makes filenames unique for this implementation.
+     * This suffix is appended to the end of the
+     * {@link PhysicalTypeIdentifierNamingUtils} filename + "_Roo_" portion.
+     * This suffix should not contain any periods and as such does not represent
+     * the filename's extension.
+     * 
+     * @return the filename suffix that makes ITDs produced by this
+     *         implementation unique (cannot be null or an empty string)
+     */
+    String getItdUniquenessFilenameSuffix();
 }

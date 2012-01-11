@@ -11,7 +11,6 @@ package org.springframework.roo.support.util;
  */
 public class Pair<K, V> {
 
-    // Fields
     private final K key;
     private final V value;
 
@@ -24,6 +23,19 @@ public class Pair<K, V> {
     public Pair(final K key, final V value) {
         this.key = key;
         this.value = value;
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (!(obj instanceof Pair)) {
+            return false;
+        }
+        final Pair<?, ?> otherPair = (Pair<?, ?>) obj;
+        return ObjectUtils.nullSafeEquals(key, otherPair.getKey())
+                && ObjectUtils.nullSafeEquals(value, otherPair.getValue());
     }
 
     /**
@@ -45,19 +57,6 @@ public class Pair<K, V> {
     }
 
     @Override
-    public boolean equals(final Object obj) {
-        if (obj == this) {
-            return true;
-        }
-        if (!(obj instanceof Pair)) {
-            return false;
-        }
-        final Pair<?, ?> otherPair = (Pair<?, ?>) obj;
-        return ObjectUtils.nullSafeEquals(key, otherPair.getKey())
-                && ObjectUtils.nullSafeEquals(value, otherPair.getValue());
-    }
-
-    @Override
     public int hashCode() {
         return ObjectUtils
                 .nullSafeHashCode(new Object[] { getKey(), getValue() });
@@ -65,7 +64,7 @@ public class Pair<K, V> {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
+        final StringBuilder sb = new StringBuilder();
         sb.append("key: ").append(key);
         sb.append(", value: ").append(value);
         return sb.toString();

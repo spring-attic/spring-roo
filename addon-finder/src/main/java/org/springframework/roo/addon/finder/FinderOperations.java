@@ -13,9 +13,9 @@ import org.springframework.roo.model.JavaType;
  */
 public interface FinderOperations {
 
+    void installFinder(JavaType typeName, JavaSymbolName finderName);
+
     boolean isFinderInstallationPossible();
 
     SortedSet<String> listFindersFor(JavaType typeName, Integer depth);
-
-    void installFinder(JavaType typeName, JavaSymbolName finderName);
 }

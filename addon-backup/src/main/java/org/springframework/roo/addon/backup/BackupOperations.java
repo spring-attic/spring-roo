@@ -8,7 +8,7 @@ package org.springframework.roo.addon.backup;
  */
 public interface BackupOperations {
 
-    boolean isBackupPossible();
-
     String backup();
+
+    boolean isBackupPossible();
 }

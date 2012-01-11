@@ -22,7 +22,6 @@ import org.springframework.uaa.client.UaaServiceFactory;
 @Component
 public class UaaRelatedComponentRegistrationHelper {
 
-    // Fields
     private final Set<ServiceRegistration> registrations = new HashSet<ServiceRegistration>();
 
     protected void activate(final ComponentContext context) {
@@ -40,7 +39,7 @@ public class UaaRelatedComponentRegistrationHelper {
     }
 
     protected void deactivate(final ComponentContext context) {
-        for (ServiceRegistration registration : registrations) {
+        for (final ServiceRegistration registration : registrations) {
             registration.unregister();
         }
     }

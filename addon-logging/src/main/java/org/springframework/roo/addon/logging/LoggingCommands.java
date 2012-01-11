@@ -20,13 +20,21 @@ import org.springframework.roo.shell.converters.StaticFieldConverter;
 @Service
 public class LoggingCommands implements CommandMarker {
 
-    // Fields
     @Reference private LoggingOperations loggingOperations;
     @Reference private StaticFieldConverter staticFieldConverter;
 
     protected void activate(final ComponentContext context) {
         staticFieldConverter.add(LoggerPackage.class);
         staticFieldConverter.add(LogLevel.class);
+    }
+
+    @CliCommand(value = "logging setup", help = "Configure logging in your project")
+    public void configureLogging(
+            @CliOption(key = { "", "level" }, mandatory = true, help = "The log level to configure") final LogLevel logLevel,
+            @CliOption(key = "package", mandatory = false, help = "The package to append the logging level to (all by default)") final LoggerPackage loggerPackage) {
+
+        loggingOperations.configureLogging(logLevel,
+                loggerPackage == null ? LoggerPackage.ROOT : loggerPackage);
     }
 
     protected void deactivate(final ComponentContext context) {
@@ -37,14 +45,5 @@ public class LoggingCommands implements CommandMarker {
     @CliAvailabilityIndicator("logging setup")
     public boolean isConfigureLoggingAvailable() {
         return loggingOperations.isLoggingInstallationPossible();
-    }
-
-    @CliCommand(value = "logging setup", help = "Configure logging in your project")
-    public void configureLogging(
-            @CliOption(key = { "", "level" }, mandatory = true, help = "The log level to configure") final LogLevel logLevel,
-            @CliOption(key = "package", mandatory = false, help = "The package to append the logging level to (all by default)") final LoggerPackage loggerPackage) {
-
-        loggingOperations.configureLogging(logLevel,
-                loggerPackage == null ? LoggerPackage.ROOT : loggerPackage);
     }
 }

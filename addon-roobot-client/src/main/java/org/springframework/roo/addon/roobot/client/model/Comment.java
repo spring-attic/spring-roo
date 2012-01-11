@@ -3,9 +3,9 @@ package org.springframework.roo.addon.roobot.client.model;
 import java.util.Date;
 
 public class Comment {
-    private final Rating rating;
     private final String comment;
     private final Date date;
+    private final Rating rating;
 
     public Comment(final Rating rating, final String comment, final Date date) {
         super();
@@ -14,15 +14,15 @@ public class Comment {
         this.date = date;
     }
 
-    public Rating getRating() {
-        return rating;
-    }
-
     public String getComment() {
         return comment;
     }
 
     public Date getDate() {
         return date;
+    }
+
+    public Rating getRating() {
+        return rating;
     }
 }

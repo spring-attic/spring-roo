@@ -28,46 +28,38 @@ import org.springframework.roo.file.monitor.event.FileOperation;
  */
 public class MonitoringRequestEditorTest {
 
-    // Constants
     private static final File TEMP_DIR = new File(
             System.getProperty("java.io.tmpdir"));
 
+    private MonitoringRequestEditor editor;
     // Fixture
     private File testDirectory;
     private File testFile;
-    private MonitoringRequestEditor editor;
 
-    @Before
-    public void setUp() throws Exception {
-        this.editor = new MonitoringRequestEditor();
-        this.testDirectory = new File(TEMP_DIR, getClass().getSimpleName());
-        this.testDirectory.mkdir();
-        this.testFile = File.createTempFile(getClass().getSimpleName(), null);
-    }
+    /**
+     * Asserts that the editor converts the given {@link MonitoringRequest} to
+     * the given text
+     * 
+     * @param mockMonitoringRequest
+     * @param expectedText
+     * @throws Exception
+     */
+    private void assertAsText(final MonitoringRequest mockMonitoringRequest,
+            final String expectedText) throws Exception {
+        // Set up
+        final File mockFile = mock(File.class);
+        when(mockMonitoringRequest.getFile()).thenReturn(mockFile);
+        when(mockFile.getCanonicalPath()).thenReturn("/path/to/file");
+        final FileOperation[] operations = { CREATED, DELETED };
+        when(mockMonitoringRequest.getNotifyOn()).thenReturn(
+                Arrays.asList(operations));
+        editor.setValue(mockMonitoringRequest);
 
-    @Test(expected = IllegalArgumentException.class)
-    public void testSettingTextWithNoCommaIsInvalid() {
-        this.editor.setAsText("foo");
-    }
+        // Invoke
+        final String text = editor.getAsText();
 
-    @Test(expected = IllegalArgumentException.class)
-    public void testSettingTextWithNoOperationCodesIsInvalid() {
-        this.editor.setAsText("foo,");
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testMonitoringSubTreeOfFileIsInvalid() {
-        this.editor.setAsText(this.testFile.getAbsolutePath() + ",C,**");
-    }
-
-    @Test
-    public void testSettingNullAsTextCreatesNullValue() {
-        assertCreatesNullMonitoringRequest(null);
-    }
-
-    @Test
-    public void testSettingEmptyAsTextCreatesNullValue() {
-        assertCreatesNullMonitoringRequest("");
+        // Check
+        assertEquals(expectedText, text);
     }
 
     /**
@@ -79,10 +71,10 @@ public class MonitoringRequestEditorTest {
      */
     private void assertCreatesNullMonitoringRequest(final String text) {
         // Set up
-        this.editor.setAsText(text);
+        editor.setAsText(text);
 
         // Invoke
-        final MonitoringRequest monitoringRequest = this.editor.getValue();
+        final MonitoringRequest monitoringRequest = editor.getValue();
 
         // Check
         assertNull(monitoringRequest);
@@ -104,10 +96,10 @@ public class MonitoringRequestEditorTest {
             final File expectedFile,
             final FileOperation... expectedFileOperations) {
         // Set up
-        this.editor.setAsText(text);
+        editor.setAsText(text);
 
         // Invoke
-        final MonitoringRequest monitoringRequest = this.editor.getValue();
+        final MonitoringRequest monitoringRequest = editor.getValue();
 
         // Check
         assertEquals(expectedFile, monitoringRequest.getFile());
@@ -120,41 +112,18 @@ public class MonitoringRequestEditorTest {
         return monitoringRequest;
     }
 
-    @Test
-    public void testMonitorFileForRenameUpdateOrDelete() {
-        assertMonitoringRequest(this.testFile.getAbsolutePath() + ",RUD",
-                this.testFile, RENAMED, UPDATED, DELETED);
+    @Before
+    public void setUp() throws Exception {
+        editor = new MonitoringRequestEditor();
+        testDirectory = new File(TEMP_DIR, getClass().getSimpleName());
+        testDirectory.mkdir();
+        testFile = File.createTempFile(getClass().getSimpleName(), null);
     }
 
-    @Test
-    public void testMonitorDirectoryButNotSubtreeForRename() {
-        final MonitoringRequest monitoringRequest = assertMonitoringRequest(
-                this.testDirectory.getAbsolutePath() + ",R",
-                this.testDirectory, RENAMED);
-        final DirectoryMonitoringRequest directoryMonitoringRequest = (DirectoryMonitoringRequest) monitoringRequest;
-        assertFalse(directoryMonitoringRequest.isWatchSubtree());
-    }
-
-    @Test
-    public void testMonitorDirectoryAndSubtreeForDelete() {
-        final MonitoringRequest monitoringRequest = assertMonitoringRequest(
-                this.testDirectory.getAbsolutePath() + ",D,**",
-                this.testDirectory, DELETED);
-        final DirectoryMonitoringRequest directoryMonitoringRequest = (DirectoryMonitoringRequest) monitoringRequest;
-        assertTrue(directoryMonitoringRequest.isWatchSubtree());
-    }
-
-    @Test
-    public void testGetAsTextWhenNoValueSet() {
-        assertNull(editor.getAsText());
-    }
-
-    @Test
-    public void testGetAsTextWhenMonitoringDirectoryOnly() throws Exception {
-        // Set up
-        final DirectoryMonitoringRequest mockMonitoringRequest = mock(DirectoryMonitoringRequest.class);
-        when(mockMonitoringRequest.isWatchSubtree()).thenReturn(false);
-        assertAsText(mockMonitoringRequest, "/path/to/file,CD");
+    @After
+    public void tearDown() {
+        testDirectory.delete();
+        testFile.delete();
     }
 
     @Test
@@ -167,39 +136,68 @@ public class MonitoringRequestEditorTest {
     }
 
     @Test
+    public void testGetAsTextWhenMonitoringDirectoryOnly() throws Exception {
+        // Set up
+        final DirectoryMonitoringRequest mockMonitoringRequest = mock(DirectoryMonitoringRequest.class);
+        when(mockMonitoringRequest.isWatchSubtree()).thenReturn(false);
+        assertAsText(mockMonitoringRequest, "/path/to/file,CD");
+    }
+
+    @Test
     public void testGetAsTextWhenMonitoringFile() throws Exception {
         assertAsText(mock(MonitoringRequest.class), "/path/to/file,CD");
     }
 
-    /**
-     * Asserts that the editor converts the given {@link MonitoringRequest} to
-     * the given text
-     * 
-     * @param mockMonitoringRequest
-     * @param expectedText
-     * @throws Exception
-     */
-    private void assertAsText(final MonitoringRequest mockMonitoringRequest,
-            final String expectedText) throws Exception {
-        // Set up
-        final File mockFile = mock(File.class);
-        when(mockMonitoringRequest.getFile()).thenReturn(mockFile);
-        when(mockFile.getCanonicalPath()).thenReturn("/path/to/file");
-        final FileOperation[] operations = { CREATED, DELETED };
-        when(mockMonitoringRequest.getNotifyOn()).thenReturn(
-                Arrays.asList(operations));
-        this.editor.setValue(mockMonitoringRequest);
-
-        // Invoke
-        final String text = this.editor.getAsText();
-
-        // Check
-        assertEquals(expectedText, text);
+    @Test
+    public void testGetAsTextWhenNoValueSet() {
+        assertNull(editor.getAsText());
     }
 
-    @After
-    public void tearDown() {
-        this.testDirectory.delete();
-        this.testFile.delete();
+    @Test
+    public void testMonitorDirectoryAndSubtreeForDelete() {
+        final MonitoringRequest monitoringRequest = assertMonitoringRequest(
+                testDirectory.getAbsolutePath() + ",D,**", testDirectory,
+                DELETED);
+        final DirectoryMonitoringRequest directoryMonitoringRequest = (DirectoryMonitoringRequest) monitoringRequest;
+        assertTrue(directoryMonitoringRequest.isWatchSubtree());
+    }
+
+    @Test
+    public void testMonitorDirectoryButNotSubtreeForRename() {
+        final MonitoringRequest monitoringRequest = assertMonitoringRequest(
+                testDirectory.getAbsolutePath() + ",R", testDirectory, RENAMED);
+        final DirectoryMonitoringRequest directoryMonitoringRequest = (DirectoryMonitoringRequest) monitoringRequest;
+        assertFalse(directoryMonitoringRequest.isWatchSubtree());
+    }
+
+    @Test
+    public void testMonitorFileForRenameUpdateOrDelete() {
+        assertMonitoringRequest(testFile.getAbsolutePath() + ",RUD", testFile,
+                RENAMED, UPDATED, DELETED);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testMonitoringSubTreeOfFileIsInvalid() {
+        editor.setAsText(testFile.getAbsolutePath() + ",C,**");
+    }
+
+    @Test
+    public void testSettingEmptyAsTextCreatesNullValue() {
+        assertCreatesNullMonitoringRequest("");
+    }
+
+    @Test
+    public void testSettingNullAsTextCreatesNullValue() {
+        assertCreatesNullMonitoringRequest(null);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testSettingTextWithNoCommaIsInvalid() {
+        editor.setAsText("foo");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testSettingTextWithNoOperationCodesIsInvalid() {
+        editor.setAsText("foo,");
     }
 }

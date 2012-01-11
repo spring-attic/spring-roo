@@ -44,10 +44,9 @@ public class WebScaffoldMetadataProviderImpl extends
         AbstractMemberDiscoveringItdMetadataProvider implements
         WebScaffoldMetadataProvider {
 
-    // Fields
-    @Reference private WebMetadataService webMetadataService;
-
     private final Map<JavaType, String> entityToWebScaffoldMidMap = new LinkedHashMap<JavaType, String>();
+
+    @Reference private WebMetadataService webMetadataService;
     private final Map<String, JavaType> webScaffoldMidToEntityMap = new LinkedHashMap<String, JavaType>();
 
     protected void activate(final ComponentContext context) {
@@ -58,12 +57,32 @@ public class WebScaffoldMetadataProviderImpl extends
         addMetadataTrigger(ROO_WEB_SCAFFOLD);
     }
 
+    @Override
+    protected String createLocalIdentifier(final JavaType javaType,
+            final LogicalPath path) {
+        return WebScaffoldMetadata.createIdentifier(javaType, path);
+    }
+
     protected void deactivate(final ComponentContext context) {
         metadataDependencyRegistry.removeNotificationListener(this);
         metadataDependencyRegistry.deregisterDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
                 getProvidesType());
         removeMetadataTrigger(ROO_WEB_SCAFFOLD);
+    }
+
+    @Override
+    protected String getGovernorPhysicalTypeIdentifier(
+            final String metadataIdentificationString) {
+        final JavaType javaType = WebScaffoldMetadata
+                .getJavaType(metadataIdentificationString);
+        final LogicalPath path = WebScaffoldMetadata
+                .getPath(metadataIdentificationString);
+        return PhysicalTypeIdentifier.createIdentifier(javaType, path);
+    }
+
+    public String getItdUniquenessFilenameSuffix() {
+        return "Controller";
     }
 
     @Override
@@ -81,40 +100,6 @@ public class WebScaffoldMetadataProviderImpl extends
         return getWebScaffoldMidIfLayerComponent(governor);
     }
 
-    /**
-     * If the given governor is a layer component (service, repository, etc.)
-     * that manages an entity for which we maintain web scaffold metadata,
-     * returns the ID of that metadata, otherwise returns <code>null</code>.
-     * TODO doesn't handle the case where the governor is a component that
-     * manages multiple entities, as it always returns the MID for the first
-     * entity found (in annotation order) for which we provide web metadata. We
-     * would need to enhance
-     * {@link AbstractMemberDiscoveringItdMetadataProvider#getLocalMidToRequest}
-     * to return a list of MIDs, rather than only one.
-     * 
-     * @param governor the governor to check (required)
-     * @return see above
-     */
-    private String getWebScaffoldMidIfLayerComponent(final JavaType governor) {
-        final ClassOrInterfaceTypeDetails governorTypeDetails = typeLocationService
-                .getTypeDetails(governor);
-        if (governorTypeDetails != null) {
-            for (final JavaType type : governorTypeDetails.getLayerEntities()) {
-                final String localMid = entityToWebScaffoldMidMap.get(type);
-                if (localMid != null) {
-                    /*
-                     * The ITD's governor is a layer component that manages an
-                     * entity for which we maintain web scaffold metadata =>
-                     * refresh that MD in case a layer has appeared or gone
-                     * away.
-                     */
-                    return localMid;
-                }
-            }
-        }
-        return null;
-    }
-
     @Override
     protected ItdTypeDetailsProvidingMetadataItem getMetadata(
             final String metadataIdentificationString,
@@ -126,7 +111,7 @@ public class WebScaffoldMetadataProviderImpl extends
                 governorPhysicalType);
         final JavaType formBackingType = annotationValues
                 .getFormBackingObject();
-        if (!annotationValues.isAnnotationFound() || formBackingType == null) {
+        if (!annotationValues.isAnnotationFound() || (formBackingType == null)) {
             return null;
         }
 
@@ -189,27 +174,41 @@ public class WebScaffoldMetadataProviderImpl extends
                 editableFieldTypes);
     }
 
-    public String getItdUniquenessFilenameSuffix() {
-        return "Controller";
-    }
-
-    @Override
-    protected String getGovernorPhysicalTypeIdentifier(
-            final String metadataIdentificationString) {
-        JavaType javaType = WebScaffoldMetadata
-                .getJavaType(metadataIdentificationString);
-        LogicalPath path = WebScaffoldMetadata
-                .getPath(metadataIdentificationString);
-        return PhysicalTypeIdentifier.createIdentifier(javaType, path);
-    }
-
-    @Override
-    protected String createLocalIdentifier(final JavaType javaType,
-            final LogicalPath path) {
-        return WebScaffoldMetadata.createIdentifier(javaType, path);
-    }
-
     public String getProvidesType() {
         return WebScaffoldMetadata.getMetadataIdentiferType();
+    }
+
+    /**
+     * If the given governor is a layer component (service, repository, etc.)
+     * that manages an entity for which we maintain web scaffold metadata,
+     * returns the ID of that metadata, otherwise returns <code>null</code>.
+     * TODO doesn't handle the case where the governor is a component that
+     * manages multiple entities, as it always returns the MID for the first
+     * entity found (in annotation order) for which we provide web metadata. We
+     * would need to enhance
+     * {@link AbstractMemberDiscoveringItdMetadataProvider#getLocalMidToRequest}
+     * to return a list of MIDs, rather than only one.
+     * 
+     * @param governor the governor to check (required)
+     * @return see above
+     */
+    private String getWebScaffoldMidIfLayerComponent(final JavaType governor) {
+        final ClassOrInterfaceTypeDetails governorTypeDetails = typeLocationService
+                .getTypeDetails(governor);
+        if (governorTypeDetails != null) {
+            for (final JavaType type : governorTypeDetails.getLayerEntities()) {
+                final String localMid = entityToWebScaffoldMidMap.get(type);
+                if (localMid != null) {
+                    /*
+                     * The ITD's governor is a layer component that manages an
+                     * entity for which we maintain web scaffold metadata =>
+                     * refresh that MD in case a layer has appeared or gone
+                     * away.
+                     */
+                    return localMid;
+                }
+            }
+        }
+        return null;
     }
 }

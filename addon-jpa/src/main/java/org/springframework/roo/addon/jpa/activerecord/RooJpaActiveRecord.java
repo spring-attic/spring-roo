@@ -23,7 +23,6 @@ import org.springframework.roo.addon.jpa.entity.RooJpaEntity;
 @Retention(RetentionPolicy.SOURCE)
 public @interface RooJpaActiveRecord {
 
-    // Constants for the non-blank default attribute values
     String CLEAR_METHOD_DEFAULT = "clear";
     String COUNT_METHOD_DEFAULT = "count";
     String FIND_ALL_METHOD_DEFAULT = "findAll";

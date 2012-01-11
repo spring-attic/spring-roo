@@ -41,25 +41,23 @@ import com.vmware.appcloud.client.UploadStatusCallback;
 public class UaaAwareAppCloudClient extends AppCloudClient implements
         TransmissionEventListener {
 
-    // Constants
     public static final String CLOUD_FOUNDRY_URL = "http://api.cloudfoundry.com";
 
-    private static final Product DEFAULT_PRODUCT = VersionHelper.getProduct(
-            "Cloud Foundry Java API", "0.0.0.RELEASE");
-
     private static final int CLOUD_MAJOR_VERSION = 0;
+
     private static final int CLOUD_MINOR_VERSION = 0;
     private static final int CLOUD_PATCH_VERSION = 0;
+    private static final Product DEFAULT_PRODUCT = VersionHelper.getProduct(
+            "Cloud Foundry Java API", "0.0.0.RELEASE");
     private static final int HTTP_SUCCESS_CODE = 200;
 
-    // Fields
-    private final Product product;
     private final Set<String> discoveredAppNames;
-    private final UaaService uaaService;
-
     // key = method name; value = sorted map of HTTP response code keys to count
     // of that response code
     private final Map<String, SortedMap<Integer, Integer>> methodToResponses = new HashMap<String, SortedMap<Integer, Integer>>();
+    private final Product product;
+
+    private final UaaService uaaService;
 
     /**
      * Constructor; consider using
@@ -78,18 +76,14 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements
         super(credentials.getEmail(), credentials.getPassword(), null,
                 credentials.getUrlObject(), requestFactory);
         Assert.notNull(uaaService, "UAA Service required");
-        this.discoveredAppNames = new HashSet<String>();
+        discoveredAppNames = new HashSet<String>();
         this.product = ObjectUtils.defaultIfNull(product, DEFAULT_PRODUCT);
         this.uaaService = uaaService;
     }
 
-    public void deactivate() {
-        flushToUaa();
-    }
-
     public void afterTransmission(final TransmissionType type,
             final boolean successful) {
-        if (type == TransmissionType.UPLOAD && successful) {
+        if ((type == TransmissionType.UPLOAD) && successful) {
             discoveredAppNames.clear();
             methodToResponses.clear();
         }
@@ -101,9 +95,168 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements
         }
     }
 
+    @Override
+    public void bindService(final String appName, final String serviceName) {
+        int resultCode = HTTP_SUCCESS_CODE;
+        try {
+            super.bindService(appName, serviceName);
+        }
+        catch (final AppCloudException he) {
+            resultCode = he.getStatusCode().value();
+            throw new IllegalStateException(
+                    "Operation could not be completed: " + he.toString(), he);
+        }
+        finally {
+            recordHttpResult("bindService", resultCode, appName);
+        }
+    }
+
+    @Override
+    public void createAndUploadAndStartApplication(final String appName,
+            final String framework, final int memory, final File warFile,
+            final List<String> uris, final List<String> serviceNames)
+            throws IOException {
+        int resultCode = HTTP_SUCCESS_CODE;
+        try {
+            super.createAndUploadAndStartApplication(appName, framework,
+                    memory, warFile, uris, serviceNames);
+        }
+        catch (final AppCloudException he) {
+            resultCode = he.getStatusCode().value();
+            throw new IllegalStateException(
+                    "Operation could not be completed: " + he.toString(), he);
+        }
+        finally {
+            recordHttpResult("createAndUploadAndStartApplication", resultCode,
+                    appName);
+        }
+    }
+
+    @Override
+    public void createApplication(final String appName, final String framework,
+            final int memory, final List<String> uris,
+            final List<String> serviceNames) {
+        int resultCode = HTTP_SUCCESS_CODE;
+        try {
+            super.createApplication(appName, framework, memory, uris,
+                    serviceNames);
+        }
+        catch (final AppCloudException he) {
+            resultCode = he.getStatusCode().value();
+            throw new IllegalStateException(
+                    "Operation could not be completed: " + he.toString(), he);
+        }
+        finally {
+            recordHttpResult("createApplication", resultCode, appName);
+        }
+    }
+
+    @Override
+    public void createApplication(final String appName, final String framework,
+            final int memory, final List<String> uris,
+            final List<String> serviceNames, final boolean checkExists) {
+        int resultCode = HTTP_SUCCESS_CODE;
+        try {
+            super.createApplication(appName, framework, memory, uris,
+                    serviceNames, checkExists);
+        }
+        catch (final AppCloudException he) {
+            resultCode = he.getStatusCode().value();
+            throw new IllegalStateException(
+                    "Operation could not be completed: " + he.getMessage(), he);
+        }
+        finally {
+            recordHttpResult("createApplication", resultCode, appName);
+        }
+    }
+
+    @Override
+    public void createService(final CloudService service) {
+        int resultCode = HTTP_SUCCESS_CODE;
+        try {
+            super.createService(service);
+        }
+        catch (final AppCloudException he) {
+            resultCode = he.getStatusCode().value();
+            throw new IllegalStateException(
+                    "Operation could not be completed: " + he.toString(), he);
+        }
+        finally {
+            recordHttpResult("createService", resultCode);
+        }
+    }
+
+    public void deactivate() {
+        flushToUaa();
+    }
+
+    @Override
+    public void deleteAllApplications() {
+        int resultCode = HTTP_SUCCESS_CODE;
+        try {
+            super.deleteAllApplications();
+        }
+        catch (final AppCloudException he) {
+            resultCode = he.getStatusCode().value();
+            throw new IllegalStateException(
+                    "Operation could not be completed: " + he.toString(), he);
+        }
+        finally {
+            recordHttpResult("deleteAllApplications", resultCode);
+        }
+    }
+
+    @Override
+    public void deleteAllServices() {
+        int resultCode = HTTP_SUCCESS_CODE;
+        try {
+            super.deleteAllServices();
+        }
+        catch (final AppCloudException he) {
+            resultCode = he.getStatusCode().value();
+            throw new IllegalStateException(
+                    "Operation could not be completed: " + he.toString(), he);
+        }
+        finally {
+            recordHttpResult("deleteAllServices", resultCode);
+        }
+    }
+
+    @Override
+    public void deleteApplication(final String appName) {
+        int resultCode = HTTP_SUCCESS_CODE;
+        try {
+            super.deleteApplication(appName);
+        }
+        catch (final AppCloudException he) {
+            resultCode = he.getStatusCode().value();
+            throw new IllegalStateException(
+                    "Operation could not be completed: " + he.toString(), he);
+        }
+        finally {
+            recordHttpResult("deleteApplication", resultCode, appName);
+        }
+    }
+
+    @Override
+    public void deleteService(final String service) {
+        int resultCode = HTTP_SUCCESS_CODE;
+        try {
+            super.deleteService(service);
+        }
+        catch (final AppCloudException he) {
+            resultCode = he.getStatusCode().value();
+            throw new IllegalStateException(
+                    "Operation could not be completed: " + he.toString(), he);
+        }
+        finally {
+            recordHttpResult("deleteService", resultCode);
+        }
+    }
+
     private void flushToUaa() {
         // Store the app names being used
-        for (String appName : discoveredAppNames) {
+        for (final String appName : discoveredAppNames) {
             uaaService.registerProductUsage(product, appName);
         }
 
@@ -120,19 +273,19 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements
             ccType = "Cloud Controller: Localhost";
         }
         // Store the cloud controller hostname SHA 256
-        String ccUrlHashed = sha256(cloudHost);
+        final String ccUrlHashed = sha256(cloudHost);
 
         // Create a feature use record for the cloud controller
-        Map<String, Object> ccJson = new HashMap<String, Object>();
+        final Map<String, Object> ccJson = new HashMap<String, Object>();
         ccJson.put("type", "cc_info");
         ccJson.put("cc_hostname_sha256", JSONObject.escape(ccUrlHashed));
         registerFeatureUse(ccType, ccJson);
 
         // Crate feature uses for each method name
-        for (String methodName : methodToResponses.keySet()) {
-            SortedMap<Integer, Integer> resultCounts = methodToResponses
+        for (final String methodName : methodToResponses.keySet()) {
+            final SortedMap<Integer, Integer> resultCounts = methodToResponses
                     .get(methodName);
-            Map<String, Object> methodCallInfo = new HashMap<String, Object>();
+            final Map<String, Object> methodCallInfo = new HashMap<String, Object>();
             methodCallInfo.put("type", "method_call_info");
             methodCallInfo.put("cc_hostname_sha256",
                     JSONObject.escape(ccUrlHashed));
@@ -141,39 +294,264 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements
         }
     }
 
-    private void registerFeatureUse(final String featureName,
-            final Map<String, Object> jsonPayload) {
-        jsonPayload.put("version",
-                product.getMajorVersion() + "." + product.getMinorVersion()
-                        + "." + product.getPatchVersion());
-        String jsonAsString = JSONObject.toJSONString(jsonPayload);
-        FeatureUse featureToRegister = FeatureUse.newBuilder()
-                .setName(featureName)
-                .setDateLastUsed(System.currentTimeMillis())
-                .setMajorVersion(CLOUD_MAJOR_VERSION)
-                .setMinorVersion(CLOUD_MINOR_VERSION)
-                .setPatchVersion(CLOUD_PATCH_VERSION).build();
+    @Override
+    public CloudApplication getApplication(final String appName) {
+        int resultCode = HTTP_SUCCESS_CODE;
         try {
-            uaaService.registerFeatureUsage(product, featureToRegister,
-                    jsonAsString.getBytes("UTF-8"));
+            return super.getApplication(appName);
         }
-        catch (UnsupportedEncodingException ignore) {
+        catch (final AppCloudException he) {
+            resultCode = he.getStatusCode().value();
+            throw new IllegalStateException(
+                    "Operation could not be completed: " + he.toString(), he);
+        }
+        finally {
+            recordHttpResult("getApplication", resultCode, appName);
         }
     }
 
-    private String sha256(final String input) {
+    @Override
+    public InstancesInfo getApplicationInstances(final String appName) {
+        int resultCode = HTTP_SUCCESS_CODE;
         try {
-            MessageDigest sha1 = MessageDigest.getInstance("SHA-256");
-            byte[] digest = sha1.digest(input.getBytes("UTF-8"));
-            return HexUtils.toHex(digest);
+            return super.getApplicationInstances(appName);
         }
-        catch (NoSuchAlgorithmException e) {
-            // This can't happen as we know that there is an SHA-256 algorithm
+        catch (final AppCloudException he) {
+            resultCode = he.getStatusCode().value();
+            throw new IllegalStateException(
+                    "Operation could not be completed: " + he.toString(), he);
         }
-        catch (UnsupportedEncodingException e) {
-            // This can't happen as we know that there is an UTF-8 encoding
+        finally {
+            recordHttpResult("getApplicationInstances", resultCode, appName);
         }
-        return null;
+    }
+
+    @Override
+    public int[] getApplicationMemoryChoices() {
+        int resultCode = HTTP_SUCCESS_CODE;
+        try {
+            return super.getApplicationMemoryChoices();
+        }
+        catch (final AppCloudException he) {
+            resultCode = he.getStatusCode().value();
+            throw new IllegalStateException(
+                    "Operation could not be completed: " + he.toString(), he);
+        }
+        finally {
+            recordHttpResult("getApplicationMemoryChoices", resultCode);
+        }
+    }
+
+    @Override
+    public List<CloudApplication> getApplications() {
+        int resultCode = HTTP_SUCCESS_CODE;
+        try {
+            return super.getApplications();
+        }
+        catch (final AppCloudException he) {
+            resultCode = he.getStatusCode().value();
+            throw new IllegalStateException(
+                    "Operation could not be completed: " + he.toString(), he);
+        }
+        finally {
+            recordHttpResult("getApplications", resultCode);
+        }
+    }
+
+    @Override
+    public ApplicationStats getApplicationStats(final String appName) {
+        int resultCode = HTTP_SUCCESS_CODE;
+        try {
+            return super.getApplicationStats(appName);
+        }
+        catch (final AppCloudException he) {
+            resultCode = he.getStatusCode().value();
+            throw new IllegalStateException(
+                    "Operation could not be completed: " + he.toString(), he);
+        }
+        finally {
+            recordHttpResult("getApplicationStats", resultCode, appName);
+        }
+    }
+
+    @Override
+    public URL getCloudControllerUrl() {
+        int resultCode = HTTP_SUCCESS_CODE;
+        try {
+            return super.getCloudControllerUrl();
+        }
+        catch (final AppCloudException he) {
+            resultCode = he.getStatusCode().value();
+            throw new IllegalStateException(
+                    "Operation could not be completed: " + he.toString(), he);
+        }
+        finally {
+            recordHttpResult("getCloudControllerUrl", resultCode);
+        }
+    }
+
+    @Override
+    public CloudInfo getCloudInfo() {
+        int resultCode = HTTP_SUCCESS_CODE;
+        try {
+            return super.getCloudInfo();
+        }
+        catch (final AppCloudException he) {
+            resultCode = he.getStatusCode().value();
+            throw new IllegalStateException(
+                    "Operation could not be completed: " + he.toString(), he);
+        }
+        finally {
+            recordHttpResult("getCloudInfo", resultCode);
+        }
+    }
+
+    @Override
+    public CrashesInfo getCrashes(final String appName) {
+        int resultCode = HTTP_SUCCESS_CODE;
+        try {
+            return super.getCrashes(appName);
+        }
+        catch (final AppCloudException he) {
+            resultCode = he.getStatusCode().value();
+            throw new IllegalStateException(
+                    "Operation could not be completed: " + he.toString(), he);
+        }
+        finally {
+            recordHttpResult("getCrashes", resultCode, appName);
+        }
+    }
+
+    @Override
+    public int getDefaultApplicationMemory(final String framework) {
+        int resultCode = HTTP_SUCCESS_CODE;
+        try {
+            return super.getDefaultApplicationMemory(framework);
+        }
+        catch (final AppCloudException he) {
+            resultCode = he.getStatusCode().value();
+            throw new IllegalStateException(
+                    "Operation could not be completed: " + he.toString(), he);
+        }
+        finally {
+            recordHttpResult("getDefaultApplicationMemory", resultCode);
+        }
+    }
+
+    @Override
+    public String getFile(final String appName, final int instanceIndex,
+            final String filePath) {
+        int resultCode = HTTP_SUCCESS_CODE;
+        try {
+            return super.getFile(appName, instanceIndex, filePath);
+        }
+        catch (final AppCloudException he) {
+            resultCode = he.getStatusCode().value();
+            throw new IllegalStateException(
+                    "Operation could not be completed: " + he.toString(), he);
+        }
+        finally {
+            recordHttpResult("getFile", resultCode, appName);
+        }
+    }
+
+    @Override
+    public <T> T getFile(final String appName, final int instanceIndex,
+            final String filePath, final RequestCallback requestCallback,
+            final ResponseExtractor<T> responseHandler) {
+        int resultCode = HTTP_SUCCESS_CODE;
+        try {
+            return super.getFile(appName, instanceIndex, filePath,
+                    requestCallback, responseHandler);
+        }
+        catch (final AppCloudException he) {
+            resultCode = he.getStatusCode().value();
+            throw new IllegalStateException(
+                    "Operation could not be completed: " + he.toString(), he);
+        }
+        finally {
+            recordHttpResult("getFile", resultCode, appName);
+        }
+    }
+
+    @Override
+    public CloudService getService(final String service) {
+        int resultCode = HTTP_SUCCESS_CODE;
+        try {
+            return super.getService(service);
+        }
+        catch (final AppCloudException he) {
+            resultCode = he.getStatusCode().value();
+            throw new IllegalStateException(
+                    "Operation could not be completed: " + he.toString(), he);
+        }
+        finally {
+            recordHttpResult("getService", resultCode);
+        }
+    }
+
+    @Override
+    public List<ServiceConfiguration> getServiceConfigurations() {
+        int resultCode = HTTP_SUCCESS_CODE;
+        try {
+            return super.getServiceConfigurations();
+        }
+        catch (final AppCloudException he) {
+            resultCode = he.getStatusCode().value();
+            throw new IllegalStateException(
+                    "Operation could not be completed: " + he.toString(), he);
+        }
+        finally {
+            recordHttpResult("getServiceConfigurations", resultCode);
+        }
+    }
+
+    @Override
+    public List<CloudService> getServices() {
+        int resultCode = HTTP_SUCCESS_CODE;
+        try {
+            return super.getServices();
+        }
+        catch (final AppCloudException he) {
+            resultCode = he.getStatusCode().value();
+            throw new IllegalStateException(
+                    "Operation could not be completed: " + he.toString(), he);
+        }
+        finally {
+            recordHttpResult("getServices", resultCode);
+        }
+    }
+
+    @Override
+    public String login() {
+        int resultCode = HTTP_SUCCESS_CODE;
+        try {
+            return super.login();
+        }
+        catch (final AppCloudException he) {
+            resultCode = he.getStatusCode().value();
+            throw new IllegalStateException(
+                    "Operation could not be completed: " + he.toString(), he);
+        }
+        finally {
+            recordHttpResult("login", resultCode);
+        }
+    }
+
+    @Override
+    public String loginIfNeeded() {
+        int resultCode = 200;
+        try {
+            return super.loginIfNeeded();
+        }
+        catch (final AppCloudException he) {
+            resultCode = he.getStatusCode().value();
+            throw new IllegalStateException(
+                    "Operation could not be completed: " + he.toString(), he);
+        }
+        finally {
+            recordHttpResult("loginIfNeeded", resultCode);
+        }
     }
 
     private void recordHttpResult(final String methodName, final int resultCode) {
@@ -198,427 +576,12 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements
     }
 
     @Override
-    public void bindService(final String appName, final String serviceName) {
-        int resultCode = HTTP_SUCCESS_CODE;
-        try {
-            super.bindService(appName, serviceName);
-        }
-        catch (AppCloudException he) {
-            resultCode = he.getStatusCode().value();
-            throw new IllegalStateException(
-                    "Operation could not be completed: " + he.toString(), he);
-        }
-        finally {
-            recordHttpResult("bindService", resultCode, appName);
-        }
-    }
-
-    @Override
-    public void createAndUploadAndStartApplication(final String appName,
-            final String framework, final int memory, final File warFile,
-            final List<String> uris, final List<String> serviceNames)
-            throws IOException {
-        int resultCode = HTTP_SUCCESS_CODE;
-        try {
-            super.createAndUploadAndStartApplication(appName, framework,
-                    memory, warFile, uris, serviceNames);
-        }
-        catch (AppCloudException he) {
-            resultCode = he.getStatusCode().value();
-            throw new IllegalStateException(
-                    "Operation could not be completed: " + he.toString(), he);
-        }
-        finally {
-            recordHttpResult("createAndUploadAndStartApplication", resultCode,
-                    appName);
-        }
-    }
-
-    @Override
-    public void createApplication(final String appName, final String framework,
-            final int memory, final List<String> uris,
-            final List<String> serviceNames, final boolean checkExists) {
-        int resultCode = HTTP_SUCCESS_CODE;
-        try {
-            super.createApplication(appName, framework, memory, uris,
-                    serviceNames, checkExists);
-        }
-        catch (AppCloudException he) {
-            resultCode = he.getStatusCode().value();
-            throw new IllegalStateException(
-                    "Operation could not be completed: " + he.getMessage(), he);
-        }
-        finally {
-            recordHttpResult("createApplication", resultCode, appName);
-        }
-    }
-
-    @Override
-    public void createApplication(final String appName, final String framework,
-            final int memory, final List<String> uris,
-            final List<String> serviceNames) {
-        int resultCode = HTTP_SUCCESS_CODE;
-        try {
-            super.createApplication(appName, framework, memory, uris,
-                    serviceNames);
-        }
-        catch (AppCloudException he) {
-            resultCode = he.getStatusCode().value();
-            throw new IllegalStateException(
-                    "Operation could not be completed: " + he.toString(), he);
-        }
-        finally {
-            recordHttpResult("createApplication", resultCode, appName);
-        }
-    }
-
-    @Override
-    public void createService(final CloudService service) {
-        int resultCode = HTTP_SUCCESS_CODE;
-        try {
-            super.createService(service);
-        }
-        catch (AppCloudException he) {
-            resultCode = he.getStatusCode().value();
-            throw new IllegalStateException(
-                    "Operation could not be completed: " + he.toString(), he);
-        }
-        finally {
-            recordHttpResult("createService", resultCode);
-        }
-    }
-
-    @Override
-    public void deleteAllApplications() {
-        int resultCode = HTTP_SUCCESS_CODE;
-        try {
-            super.deleteAllApplications();
-        }
-        catch (AppCloudException he) {
-            resultCode = he.getStatusCode().value();
-            throw new IllegalStateException(
-                    "Operation could not be completed: " + he.toString(), he);
-        }
-        finally {
-            recordHttpResult("deleteAllApplications", resultCode);
-        }
-    }
-
-    @Override
-    public void deleteAllServices() {
-        int resultCode = HTTP_SUCCESS_CODE;
-        try {
-            super.deleteAllServices();
-        }
-        catch (AppCloudException he) {
-            resultCode = he.getStatusCode().value();
-            throw new IllegalStateException(
-                    "Operation could not be completed: " + he.toString(), he);
-        }
-        finally {
-            recordHttpResult("deleteAllServices", resultCode);
-        }
-    }
-
-    @Override
-    public void deleteApplication(final String appName) {
-        int resultCode = HTTP_SUCCESS_CODE;
-        try {
-            super.deleteApplication(appName);
-        }
-        catch (AppCloudException he) {
-            resultCode = he.getStatusCode().value();
-            throw new IllegalStateException(
-                    "Operation could not be completed: " + he.toString(), he);
-        }
-        finally {
-            recordHttpResult("deleteApplication", resultCode, appName);
-        }
-    }
-
-    @Override
-    public void deleteService(final String service) {
-        int resultCode = HTTP_SUCCESS_CODE;
-        try {
-            super.deleteService(service);
-        }
-        catch (AppCloudException he) {
-            resultCode = he.getStatusCode().value();
-            throw new IllegalStateException(
-                    "Operation could not be completed: " + he.toString(), he);
-        }
-        finally {
-            recordHttpResult("deleteService", resultCode);
-        }
-    }
-
-    @Override
-    public CloudApplication getApplication(final String appName) {
-        int resultCode = HTTP_SUCCESS_CODE;
-        try {
-            return super.getApplication(appName);
-        }
-        catch (AppCloudException he) {
-            resultCode = he.getStatusCode().value();
-            throw new IllegalStateException(
-                    "Operation could not be completed: " + he.toString(), he);
-        }
-        finally {
-            recordHttpResult("getApplication", resultCode, appName);
-        }
-    }
-
-    @Override
-    public InstancesInfo getApplicationInstances(final String appName) {
-        int resultCode = HTTP_SUCCESS_CODE;
-        try {
-            return super.getApplicationInstances(appName);
-        }
-        catch (AppCloudException he) {
-            resultCode = he.getStatusCode().value();
-            throw new IllegalStateException(
-                    "Operation could not be completed: " + he.toString(), he);
-        }
-        finally {
-            recordHttpResult("getApplicationInstances", resultCode, appName);
-        }
-    }
-
-    @Override
-    public int[] getApplicationMemoryChoices() {
-        int resultCode = HTTP_SUCCESS_CODE;
-        try {
-            return super.getApplicationMemoryChoices();
-        }
-        catch (AppCloudException he) {
-            resultCode = he.getStatusCode().value();
-            throw new IllegalStateException(
-                    "Operation could not be completed: " + he.toString(), he);
-        }
-        finally {
-            recordHttpResult("getApplicationMemoryChoices", resultCode);
-        }
-    }
-
-    @Override
-    public List<CloudApplication> getApplications() {
-        int resultCode = HTTP_SUCCESS_CODE;
-        try {
-            return super.getApplications();
-        }
-        catch (AppCloudException he) {
-            resultCode = he.getStatusCode().value();
-            throw new IllegalStateException(
-                    "Operation could not be completed: " + he.toString(), he);
-        }
-        finally {
-            recordHttpResult("getApplications", resultCode);
-        }
-    }
-
-    @Override
-    public ApplicationStats getApplicationStats(final String appName) {
-        int resultCode = HTTP_SUCCESS_CODE;
-        try {
-            return super.getApplicationStats(appName);
-        }
-        catch (AppCloudException he) {
-            resultCode = he.getStatusCode().value();
-            throw new IllegalStateException(
-                    "Operation could not be completed: " + he.toString(), he);
-        }
-        finally {
-            recordHttpResult("getApplicationStats", resultCode, appName);
-        }
-    }
-
-    @Override
-    public URL getCloudControllerUrl() {
-        int resultCode = HTTP_SUCCESS_CODE;
-        try {
-            return super.getCloudControllerUrl();
-        }
-        catch (AppCloudException he) {
-            resultCode = he.getStatusCode().value();
-            throw new IllegalStateException(
-                    "Operation could not be completed: " + he.toString(), he);
-        }
-        finally {
-            recordHttpResult("getCloudControllerUrl", resultCode);
-        }
-    }
-
-    @Override
-    public CloudInfo getCloudInfo() {
-        int resultCode = HTTP_SUCCESS_CODE;
-        try {
-            return super.getCloudInfo();
-        }
-        catch (AppCloudException he) {
-            resultCode = he.getStatusCode().value();
-            throw new IllegalStateException(
-                    "Operation could not be completed: " + he.toString(), he);
-        }
-        finally {
-            recordHttpResult("getCloudInfo", resultCode);
-        }
-    }
-
-    @Override
-    public CrashesInfo getCrashes(final String appName) {
-        int resultCode = HTTP_SUCCESS_CODE;
-        try {
-            return super.getCrashes(appName);
-        }
-        catch (AppCloudException he) {
-            resultCode = he.getStatusCode().value();
-            throw new IllegalStateException(
-                    "Operation could not be completed: " + he.toString(), he);
-        }
-        finally {
-            recordHttpResult("getCrashes", resultCode, appName);
-        }
-    }
-
-    @Override
-    public int getDefaultApplicationMemory(final String framework) {
-        int resultCode = HTTP_SUCCESS_CODE;
-        try {
-            return super.getDefaultApplicationMemory(framework);
-        }
-        catch (AppCloudException he) {
-            resultCode = he.getStatusCode().value();
-            throw new IllegalStateException(
-                    "Operation could not be completed: " + he.toString(), he);
-        }
-        finally {
-            recordHttpResult("getDefaultApplicationMemory", resultCode);
-        }
-    }
-
-    @Override
-    public <T> T getFile(final String appName, final int instanceIndex,
-            final String filePath, final RequestCallback requestCallback,
-            final ResponseExtractor<T> responseHandler) {
-        int resultCode = HTTP_SUCCESS_CODE;
-        try {
-            return super.getFile(appName, instanceIndex, filePath,
-                    requestCallback, responseHandler);
-        }
-        catch (AppCloudException he) {
-            resultCode = he.getStatusCode().value();
-            throw new IllegalStateException(
-                    "Operation could not be completed: " + he.toString(), he);
-        }
-        finally {
-            recordHttpResult("getFile", resultCode, appName);
-        }
-    }
-
-    @Override
-    public String getFile(final String appName, final int instanceIndex,
-            final String filePath) {
-        int resultCode = HTTP_SUCCESS_CODE;
-        try {
-            return super.getFile(appName, instanceIndex, filePath);
-        }
-        catch (AppCloudException he) {
-            resultCode = he.getStatusCode().value();
-            throw new IllegalStateException(
-                    "Operation could not be completed: " + he.toString(), he);
-        }
-        finally {
-            recordHttpResult("getFile", resultCode, appName);
-        }
-    }
-
-    @Override
-    public CloudService getService(final String service) {
-        int resultCode = HTTP_SUCCESS_CODE;
-        try {
-            return super.getService(service);
-        }
-        catch (AppCloudException he) {
-            resultCode = he.getStatusCode().value();
-            throw new IllegalStateException(
-                    "Operation could not be completed: " + he.toString(), he);
-        }
-        finally {
-            recordHttpResult("getService", resultCode);
-        }
-    }
-
-    @Override
-    public List<ServiceConfiguration> getServiceConfigurations() {
-        int resultCode = HTTP_SUCCESS_CODE;
-        try {
-            return super.getServiceConfigurations();
-        }
-        catch (AppCloudException he) {
-            resultCode = he.getStatusCode().value();
-            throw new IllegalStateException(
-                    "Operation could not be completed: " + he.toString(), he);
-        }
-        finally {
-            recordHttpResult("getServiceConfigurations", resultCode);
-        }
-    }
-
-    @Override
-    public List<CloudService> getServices() {
-        int resultCode = HTTP_SUCCESS_CODE;
-        try {
-            return super.getServices();
-        }
-        catch (AppCloudException he) {
-            resultCode = he.getStatusCode().value();
-            throw new IllegalStateException(
-                    "Operation could not be completed: " + he.toString(), he);
-        }
-        finally {
-            recordHttpResult("getServices", resultCode);
-        }
-    }
-
-    @Override
-    public String login() {
-        int resultCode = HTTP_SUCCESS_CODE;
-        try {
-            return super.login();
-        }
-        catch (AppCloudException he) {
-            resultCode = he.getStatusCode().value();
-            throw new IllegalStateException(
-                    "Operation could not be completed: " + he.toString(), he);
-        }
-        finally {
-            recordHttpResult("login", resultCode);
-        }
-    }
-
-    @Override
-    public String loginIfNeeded() {
-        int resultCode = 200;
-        try {
-            return super.loginIfNeeded();
-        }
-        catch (AppCloudException he) {
-            resultCode = he.getStatusCode().value();
-            throw new IllegalStateException(
-                    "Operation could not be completed: " + he.toString(), he);
-        }
-        finally {
-            recordHttpResult("loginIfNeeded", resultCode);
-        }
-    }
-
-    @Override
     public void register(final String email, final String password) {
         int resultCode = HTTP_SUCCESS_CODE;
         try {
             super.register(email, password);
         }
-        catch (AppCloudException he) {
+        catch (final AppCloudException he) {
             resultCode = he.getStatusCode().value();
             throw new IllegalStateException(
                     "Operation could not be completed: " + he.toString(), he);
@@ -628,13 +591,33 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements
         }
     }
 
+    private void registerFeatureUse(final String featureName,
+            final Map<String, Object> jsonPayload) {
+        jsonPayload.put("version",
+                product.getMajorVersion() + "." + product.getMinorVersion()
+                        + "." + product.getPatchVersion());
+        final String jsonAsString = JSONObject.toJSONString(jsonPayload);
+        final FeatureUse featureToRegister = FeatureUse.newBuilder()
+                .setName(featureName)
+                .setDateLastUsed(System.currentTimeMillis())
+                .setMajorVersion(CLOUD_MAJOR_VERSION)
+                .setMinorVersion(CLOUD_MINOR_VERSION)
+                .setPatchVersion(CLOUD_PATCH_VERSION).build();
+        try {
+            uaaService.registerFeatureUsage(product, featureToRegister,
+                    jsonAsString.getBytes("UTF-8"));
+        }
+        catch (final UnsupportedEncodingException ignore) {
+        }
+    }
+
     @Override
     public void rename(final String appName, final String newName) {
         int resultCode = HTTP_SUCCESS_CODE;
         try {
             super.rename(appName, newName);
         }
-        catch (AppCloudException he) {
+        catch (final AppCloudException he) {
             resultCode = he.getStatusCode().value();
             throw new IllegalStateException(
                     "Operation could not be completed: " + he.toString(), he);
@@ -650,7 +633,7 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements
         try {
             super.restartApplication(appName);
         }
-        catch (AppCloudException he) {
+        catch (final AppCloudException he) {
             resultCode = he.getStatusCode().value();
             throw new IllegalStateException(
                     "Operation could not be completed: " + he.toString(), he);
@@ -660,13 +643,28 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements
         }
     }
 
+    private String sha256(final String input) {
+        try {
+            final MessageDigest sha1 = MessageDigest.getInstance("SHA-256");
+            final byte[] digest = sha1.digest(input.getBytes("UTF-8"));
+            return HexUtils.toHex(digest);
+        }
+        catch (final NoSuchAlgorithmException e) {
+            // This can't happen as we know that there is an SHA-256 algorithm
+        }
+        catch (final UnsupportedEncodingException e) {
+            // This can't happen as we know that there is an UTF-8 encoding
+        }
+        return null;
+    }
+
     @Override
     public void startApplication(final String appName) {
         int resultCode = HTTP_SUCCESS_CODE;
         try {
             super.startApplication(appName);
         }
-        catch (AppCloudException he) {
+        catch (final AppCloudException he) {
             resultCode = he.getStatusCode().value();
             throw new IllegalStateException(
                     "Operation could not be completed: " + he.toString(), he);
@@ -682,7 +680,7 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements
         try {
             super.stopApplication(appName);
         }
-        catch (AppCloudException he) {
+        catch (final AppCloudException he) {
             resultCode = he.getStatusCode().value();
             throw new IllegalStateException(
                     "Operation could not be completed: " + he.toString(), he);
@@ -698,7 +696,7 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements
         try {
             super.unbindService(appName, serviceName);
         }
-        catch (AppCloudException he) {
+        catch (final AppCloudException he) {
             resultCode = he.getStatusCode().value();
             throw new IllegalStateException(
                     "Operation could not be completed: " + he.toString(), he);
@@ -714,7 +712,7 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements
         try {
             super.unregister();
         }
-        catch (AppCloudException he) {
+        catch (final AppCloudException he) {
             resultCode = he.getStatusCode().value();
             throw new IllegalStateException(
                     "Operation could not be completed: " + he.toString(), he);
@@ -731,7 +729,7 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements
         try {
             super.updateApplicationInstances(appName, instances);
         }
-        catch (AppCloudException he) {
+        catch (final AppCloudException he) {
             resultCode = he.getStatusCode().value();
             throw new IllegalStateException(
                     "Operation could not be completed: " + he.toString(), he);
@@ -747,7 +745,7 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements
         try {
             super.updateApplicationMemory(appName, memory);
         }
-        catch (AppCloudException he) {
+        catch (final AppCloudException he) {
             resultCode = he.getStatusCode().value();
             throw new IllegalStateException(
                     "Operation could not be completed: " + he.toString(), he);
@@ -764,7 +762,7 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements
         try {
             super.updateApplicationServices(appName, services);
         }
-        catch (AppCloudException he) {
+        catch (final AppCloudException he) {
             resultCode = he.getStatusCode().value();
             throw new IllegalStateException(
                     "Operation could not be completed: " + he.toString(), he);
@@ -781,7 +779,7 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements
         try {
             super.updateApplicationUris(appName, uris);
         }
-        catch (AppCloudException he) {
+        catch (final AppCloudException he) {
             resultCode = he.getStatusCode().value();
             throw new IllegalStateException(
                     "Operation could not be completed: " + he.toString(), he);
@@ -792,13 +790,13 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements
     }
 
     @Override
-    public void uploadApplication(final String appName, final File warFile,
-            final UploadStatusCallback callback) throws IOException {
+    public void uploadApplication(final String appName, final File warFile)
+            throws IOException {
         int resultCode = HTTP_SUCCESS_CODE;
         try {
-            super.uploadApplication(appName, warFile, callback);
+            super.uploadApplication(appName, warFile);
         }
-        catch (AppCloudException he) {
+        catch (final AppCloudException he) {
             resultCode = he.getStatusCode().value();
             throw new IllegalStateException(
                     "Operation could not be completed: " + he.toString(), he);
@@ -809,13 +807,13 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements
     }
 
     @Override
-    public void uploadApplication(final String appName, final File warFile)
-            throws IOException {
+    public void uploadApplication(final String appName, final File warFile,
+            final UploadStatusCallback callback) throws IOException {
         int resultCode = HTTP_SUCCESS_CODE;
         try {
-            super.uploadApplication(appName, warFile);
+            super.uploadApplication(appName, warFile, callback);
         }
-        catch (AppCloudException he) {
+        catch (final AppCloudException he) {
             resultCode = he.getStatusCode().value();
             throw new IllegalStateException(
                     "Operation could not be completed: " + he.toString(), he);
@@ -832,7 +830,7 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements
         try {
             super.uploadApplication(appName, warFilePath);
         }
-        catch (AppCloudException he) {
+        catch (final AppCloudException he) {
             resultCode = he.getStatusCode().value();
             throw new IllegalStateException(
                     "Operation could not be completed: " + he.toString(), he);

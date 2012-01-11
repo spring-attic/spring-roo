@@ -34,101 +34,9 @@ import org.springframework.roo.support.util.StringUtils;
 public class CloudDeployableFileConverter implements
         Converter<CloudDeployableFile> {
 
-    // Constants
+    private static final String CREATE_OPTION = "CREATE";
     private static final Logger LOGGER = HandlerUtils
             .getLogger(CloudDeployableFileConverter.class);
-    private static final String CREATE_OPTION = "CREATE";
-
-    // Fields
-    @Reference private FileManager fileManager;
-    @Reference private ProjectOperations projectOperations;
-
-    public CloudDeployableFile convertFromText(String value,
-            final Class<?> requiredType, final String optionContext) {
-        if (StringUtils.isBlank(value)) {
-            return null;
-        }
-        if (CREATE_OPTION.equals(value)) {
-            if (projectOperations instanceof MavenOperationsImpl) {
-                try {
-                    if (projectOperations.getPathResolver() == null) {
-                        return null;
-                    }
-                    ((MavenOperationsImpl) projectOperations)
-                            .executeMvnCommand("clean package");
-                    String rootPath = projectOperations.getFocusedModule()
-                            .getRoot();
-                    Set<FileDetails> fileDetails = fileManager
-                            .findMatchingAntPath(rootPath + File.separator
-                                    + "**" + File.separator + "*.war");
-                    if (fileDetails.size() > 0) {
-                        FileDetails fileToDeploy = fileDetails.iterator()
-                                .next();
-                        return new CloudDeployableFile(fileToDeploy);
-                    }
-                }
-                catch (IOException e) {
-                    throw new IllegalStateException(e);
-                }
-            }
-            return null;
-        }
-        String oppositeFileSeparator = getOppositeFileSeparator();
-        if (value.contains(oppositeFileSeparator)) {
-            value = value.replaceAll(escapeString(oppositeFileSeparator),
-                    escapeString(File.separator));
-        }
-        String path = projectOperations.getFocusedModule().getRoot() + value;
-        if (!new File(path).exists()) {
-            LOGGER.severe("The file at path '" + path
-                    + "' doesn't exist; cannot continue");
-            return null;
-        }
-        FileDetails fileToDeploy = fileManager.readFile(projectOperations
-                .getFocusedModule().getRoot() + value);
-        return new CloudDeployableFile(fileToDeploy);
-    }
-
-    public boolean supports(final Class<?> requiredType,
-            final String optionContext) {
-        return CloudDeployableFile.class.isAssignableFrom(requiredType);
-    }
-
-    public boolean getAllPossibleValues(final List<Completion> completions,
-            final Class<?> requiredType, final String existingData,
-            final String optionContext, final MethodTarget target) {
-        if (projectOperations.getPathResolver() == null) {
-            LOGGER.warning("A project has not been created please specify the full path of the file you wish to deploy");
-            return false;
-        }
-        String rootPath = projectOperations.getFocusedModule().getRoot();
-        Set<FileDetails> fileDetails = fileManager.findMatchingAntPath(rootPath
-                + File.separator + "**" + File.separator + "*.war");
-
-        if (fileDetails.isEmpty()) {
-            LOGGER.warning("No deployable files found in the project directory. Please use the '"
-                    + CREATE_OPTION + "' option to build the war.");
-            completions.add(new Completion(CREATE_OPTION));
-        }
-        for (FileDetails fileDetail : fileDetails) {
-            completions.add(new Completion(fileDetail.getCanonicalPath()
-                    .replaceAll(escapeString(rootPath), "")));
-        }
-
-        return false;
-    }
-
-    private String getOppositeFileSeparator() {
-        Character fileSeparator = File.separatorChar;
-        if (fileSeparator.equals('/')) {
-            return "\\";
-        }
-        else if (fileSeparator.equals('\\')) {
-            return "/";
-        }
-        throw new IllegalStateException(
-                "Unexpected file separator character encountered; cannot continue");
-    }
 
     public static String escapeString(final String toEscape) {
         final StringBuilder result = new StringBuilder();
@@ -204,5 +112,98 @@ public class CloudDeployableFileConverter implements
             character = iterator.next();
         }
         return result.toString();
+    }
+
+    @Reference private FileManager fileManager;
+
+    @Reference private ProjectOperations projectOperations;
+
+    public CloudDeployableFile convertFromText(String value,
+            final Class<?> requiredType, final String optionContext) {
+        if (StringUtils.isBlank(value)) {
+            return null;
+        }
+        if (CREATE_OPTION.equals(value)) {
+            if (projectOperations instanceof MavenOperationsImpl) {
+                try {
+                    if (projectOperations.getPathResolver() == null) {
+                        return null;
+                    }
+                    ((MavenOperationsImpl) projectOperations)
+                            .executeMvnCommand("clean package");
+                    final String rootPath = projectOperations
+                            .getFocusedModule().getRoot();
+                    final Set<FileDetails> fileDetails = fileManager
+                            .findMatchingAntPath(rootPath + File.separator
+                                    + "**" + File.separator + "*.war");
+                    if (fileDetails.size() > 0) {
+                        final FileDetails fileToDeploy = fileDetails.iterator()
+                                .next();
+                        return new CloudDeployableFile(fileToDeploy);
+                    }
+                }
+                catch (final IOException e) {
+                    throw new IllegalStateException(e);
+                }
+            }
+            return null;
+        }
+        final String oppositeFileSeparator = getOppositeFileSeparator();
+        if (value.contains(oppositeFileSeparator)) {
+            value = value.replaceAll(escapeString(oppositeFileSeparator),
+                    escapeString(File.separator));
+        }
+        final String path = projectOperations.getFocusedModule().getRoot()
+                + value;
+        if (!new File(path).exists()) {
+            LOGGER.severe("The file at path '" + path
+                    + "' doesn't exist; cannot continue");
+            return null;
+        }
+        final FileDetails fileToDeploy = fileManager.readFile(projectOperations
+                .getFocusedModule().getRoot() + value);
+        return new CloudDeployableFile(fileToDeploy);
+    }
+
+    public boolean getAllPossibleValues(final List<Completion> completions,
+            final Class<?> requiredType, final String existingData,
+            final String optionContext, final MethodTarget target) {
+        if (projectOperations.getPathResolver() == null) {
+            LOGGER.warning("A project has not been created please specify the full path of the file you wish to deploy");
+            return false;
+        }
+        final String rootPath = projectOperations.getFocusedModule().getRoot();
+        final Set<FileDetails> fileDetails = fileManager
+                .findMatchingAntPath(rootPath + File.separator + "**"
+                        + File.separator + "*.war");
+
+        if (fileDetails.isEmpty()) {
+            LOGGER.warning("No deployable files found in the project directory. Please use the '"
+                    + CREATE_OPTION + "' option to build the war.");
+            completions.add(new Completion(CREATE_OPTION));
+        }
+        for (final FileDetails fileDetail : fileDetails) {
+            completions.add(new Completion(fileDetail.getCanonicalPath()
+                    .replaceAll(escapeString(rootPath), "")));
+        }
+
+        return false;
+    }
+
+    private String getOppositeFileSeparator() {
+        final Character fileSeparator = File.separatorChar;
+        if (fileSeparator.equals('/')) {
+            return "\\";
+        }
+        else if (fileSeparator.equals('\\')) {
+            return "/";
+        }
+        throw new IllegalStateException(
+                "Unexpected file separator character encountered; cannot continue");
+    }
+
+    public boolean supports(final Class<?> requiredType,
+            final String optionContext) {
+        return CloudDeployableFile.class.isAssignableFrom(requiredType);
     }
 }

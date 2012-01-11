@@ -31,11 +31,35 @@ import org.springframework.roo.support.util.Assert;
  */
 public class EditorMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
-    // Constants
     private static final String PROVIDES_TYPE_STRING = EditorMetadata.class
             .getName();
     private static final String PROVIDES_TYPE = MetadataIdentificationUtils
             .create(PROVIDES_TYPE_STRING);
+
+    public static String createIdentifier(final JavaType javaType,
+            final LogicalPath path) {
+        return PhysicalTypeIdentifierNamingUtils.createIdentifier(
+                PROVIDES_TYPE_STRING, javaType, path);
+    }
+
+    public static JavaType getJavaType(final String metadataIdentificationString) {
+        return PhysicalTypeIdentifierNamingUtils.getJavaType(
+                PROVIDES_TYPE_STRING, metadataIdentificationString);
+    }
+
+    public static String getMetadataIdentiferType() {
+        return PROVIDES_TYPE;
+    }
+
+    public static LogicalPath getPath(final String metadataIdentificationString) {
+        return PhysicalTypeIdentifierNamingUtils.getPath(PROVIDES_TYPE_STRING,
+                metadataIdentificationString);
+    }
+
+    public static boolean isValid(final String metadataIdentificationString) {
+        return PhysicalTypeIdentifierNamingUtils.isValid(PROVIDES_TYPE_STRING,
+                metadataIdentificationString);
+    }
 
     public EditorMetadata(final String identifier, final JavaType aspectName,
             final PhysicalTypeMetadata governorPhysicalTypeMetadata,
@@ -50,14 +74,14 @@ public class EditorMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
         Assert.notNull(identifierAccessorMethod,
                 "Identifier accessor metadata required");
 
-        if (!isValid() || findMethod == null) {
+        if (!isValid() || (findMethod == null)) {
             valid = false;
             return;
         }
 
         // Only make the ITD cause PropertyEditorSupport to be subclasses if the
         // governor doesn't already subclass it
-        JavaType requiredSuperclass = JdkJavaType.PROPERTY_EDITOR_SUPPORT;
+        final JavaType requiredSuperclass = JdkJavaType.PROPERTY_EDITOR_SUPPORT;
         if (!governorTypeDetails.extendsType(requiredSuperclass)) {
             builder.addImplementsType(requiredSuperclass);
         }
@@ -71,10 +95,10 @@ public class EditorMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
     }
 
     private FieldMetadataBuilder getField() {
-        JavaSymbolName fieldName = new JavaSymbolName("typeConverter");
+        final JavaSymbolName fieldName = new JavaSymbolName("typeConverter");
 
         // Locate user-defined field
-        FieldMetadata userField = governorTypeDetails.getField(fieldName);
+        final FieldMetadata userField = governorTypeDetails.getField(fieldName);
         final JavaType fieldType = SpringJavaType.SIMPLE_TYPE_CONVERTER;
         if (userField != null) {
             Assert.isTrue(
@@ -91,12 +115,12 @@ public class EditorMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 
     private MethodMetadataBuilder getGetAsTextMethod(final JavaType javaType,
             final MethodMetadata identifierAccessorMethod) {
-        JavaType returnType = JavaType.STRING;
-        JavaSymbolName methodName = new JavaSymbolName("getAsText");
+        final JavaType returnType = JavaType.STRING;
+        final JavaSymbolName methodName = new JavaSymbolName("getAsText");
         final JavaType[] parameterTypes = {};
 
         // Locate user-defined method
-        MethodMetadata userMethod = getGovernorMethod(methodName,
+        final MethodMetadata userMethod = getGovernorMethod(methodName,
                 parameterTypes);
         if (userMethod != null) {
             Assert.isTrue(
@@ -107,9 +131,9 @@ public class EditorMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
             return new MethodMetadataBuilder(userMethod);
         }
 
-        List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+        final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
 
-        InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+        final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
         bodyBuilder.appendFormalLine("Object obj = getValue();");
         bodyBuilder.appendFormalLine("if (obj == null) {");
         bodyBuilder.indent();
@@ -133,14 +157,15 @@ public class EditorMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
     private MethodMetadataBuilder getSetAsTextMethod(final JavaType javaType,
             final JavaType idType, final MethodMetadata findMethod) {
         final JavaType parameterType = JavaType.STRING;
-        List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName(
-                "text"));
+        final List<JavaSymbolName> parameterNames = Arrays
+                .asList(new JavaSymbolName("text"));
 
-        JavaSymbolName methodName = new JavaSymbolName("setAsText");
-        JavaType returnType = JavaType.VOID_PRIMITIVE;
+        final JavaSymbolName methodName = new JavaSymbolName("setAsText");
+        final JavaType returnType = JavaType.VOID_PRIMITIVE;
 
         // Locate user-defined method
-        MethodMetadata userMethod = getGovernorMethod(methodName, parameterType);
+        final MethodMetadata userMethod = getGovernorMethod(methodName,
+                parameterType);
         if (userMethod != null) {
             Assert.isTrue(
                     userMethod.getReturnType().equals(returnType),
@@ -150,10 +175,11 @@ public class EditorMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
             return new MethodMetadataBuilder(userMethod);
         }
 
-        String identifierTypeName = idType.getNameIncludingTypeParameters(
-                false, builder.getImportRegistrationResolver());
+        final String identifierTypeName = idType
+                .getNameIncludingTypeParameters(false,
+                        builder.getImportRegistrationResolver());
 
-        InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+        final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
         bodyBuilder
                 .appendFormalLine("if (text == null || 0 == text.length()) {");
         bodyBuilder.indent();
@@ -186,7 +212,7 @@ public class EditorMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 
     @Override
     public String toString() {
-        ToStringCreator tsc = new ToStringCreator(this);
+        final ToStringCreator tsc = new ToStringCreator(this);
         tsc.append("identifier", getId());
         tsc.append("valid", valid);
         tsc.append("aspectName", aspectName);
@@ -194,30 +220,5 @@ public class EditorMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
         tsc.append("governor", governorPhysicalTypeMetadata.getId());
         tsc.append("itdTypeDetails", itdTypeDetails);
         return tsc.toString();
-    }
-
-    public static String getMetadataIdentiferType() {
-        return PROVIDES_TYPE;
-    }
-
-    public static String createIdentifier(final JavaType javaType,
-            final LogicalPath path) {
-        return PhysicalTypeIdentifierNamingUtils.createIdentifier(
-                PROVIDES_TYPE_STRING, javaType, path);
-    }
-
-    public static JavaType getJavaType(final String metadataIdentificationString) {
-        return PhysicalTypeIdentifierNamingUtils.getJavaType(
-                PROVIDES_TYPE_STRING, metadataIdentificationString);
-    }
-
-    public static LogicalPath getPath(final String metadataIdentificationString) {
-        return PhysicalTypeIdentifierNamingUtils.getPath(PROVIDES_TYPE_STRING,
-                metadataIdentificationString);
-    }
-
-    public static boolean isValid(final String metadataIdentificationString) {
-        return PhysicalTypeIdentifierNamingUtils.isValid(PROVIDES_TYPE_STRING,
-                metadataIdentificationString);
     }
 }

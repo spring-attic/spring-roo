@@ -16,15 +16,6 @@ import java.lang.annotation.Target;
 public @interface RooSolrWebSearchable {
 
     /**
-     * Specify name of the "search" method to generate. Use a value of "" to
-     * avoid the generation of a search method.
-     * 
-     * @return the name of the "search" method to generate (defaults to
-     *         "search"; mandatory)
-     */
-    String searchMethod() default "search";
-
-    /**
      * Specify name of the "autoComplete" method to generate. Use a value of ""
      * to avoid the generation of a autoComplete method.
      * 
@@ -32,4 +23,13 @@ public @interface RooSolrWebSearchable {
      *         "search"; mandatory)
      */
     String autoCompleteMethod() default "autoComplete";
+
+    /**
+     * Specify name of the "search" method to generate. Use a value of "" to
+     * avoid the generation of a search method.
+     * 
+     * @return the name of the "search" method to generate (defaults to
+     *         "search"; mandatory)
+     */
+    String searchMethod() default "search";
 }

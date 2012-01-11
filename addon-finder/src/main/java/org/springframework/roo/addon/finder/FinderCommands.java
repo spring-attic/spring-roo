@@ -27,8 +27,15 @@ import org.springframework.roo.support.util.StringUtils;
 @Service
 public class FinderCommands implements CommandMarker {
 
-    // Fields
     @Reference private FinderOperations finderOperations;
+
+    @CliCommand(value = "finder add", help = "Install finders in the given target (must be an entity)")
+    public void installFinders(
+            @CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*", optionContext = "update,project", help = "The controller or entity for which the finders are generated") final JavaType typeName,
+            @CliOption(key = { "finderName", "" }, mandatory = true, help = "The finder string as generated with the 'finder list' command") final JavaSymbolName finderName) {
+
+        finderOperations.installFinder(typeName, finderName);
+    }
 
     @CliAvailabilityIndicator({ "finder list", "finder add" })
     public boolean isFinderCommandAvailable() {
@@ -44,14 +51,14 @@ public class FinderCommands implements CommandMarker {
         Assert.isTrue(depth >= 1, "Depth must be at least 1");
         Assert.isTrue(depth <= 3, "Depth must not be greater than 3");
 
-        SortedSet<String> finders = finderOperations.listFindersFor(typeName,
-                depth);
+        final SortedSet<String> finders = finderOperations.listFindersFor(
+                typeName, depth);
         if (StringUtils.isBlank(filter)) {
             return finders;
         }
 
-        Set<String> requiredEntries = new HashSet<String>();
-        for (String requiredString : StringUtils
+        final Set<String> requiredEntries = new HashSet<String>();
+        for (final String requiredString : StringUtils
                 .commaDelimitedListToSet(filter)) {
             requiredEntries.add(requiredString.toLowerCase());
         }
@@ -59,9 +66,9 @@ public class FinderCommands implements CommandMarker {
             return finders;
         }
 
-        SortedSet<String> result = new TreeSet<String>();
-        for (String finder : finders) {
-            required: for (String requiredEntry : requiredEntries) {
+        final SortedSet<String> result = new TreeSet<String>();
+        for (final String finder : finders) {
+            required: for (final String requiredEntry : requiredEntries) {
                 if (finder.toLowerCase().contains(requiredEntry)) {
                     result.add(finder);
                     break required;
@@ -69,13 +76,5 @@ public class FinderCommands implements CommandMarker {
             }
         }
         return result;
-    }
-
-    @CliCommand(value = "finder add", help = "Install finders in the given target (must be an entity)")
-    public void installFinders(
-            @CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*", optionContext = "update,project", help = "The controller or entity for which the finders are generated") final JavaType typeName,
-            @CliOption(key = { "finderName", "" }, mandatory = true, help = "The finder string as generated with the 'finder list' command") final JavaSymbolName finderName) {
-
-        finderOperations.installFinder(typeName, finderName);
     }
 }

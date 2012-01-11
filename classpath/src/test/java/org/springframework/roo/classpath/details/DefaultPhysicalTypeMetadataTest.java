@@ -22,7 +22,6 @@ import org.springframework.roo.project.Path;
  */
 public class DefaultPhysicalTypeMetadataTest {
 
-    // Constants
     private static final String CANONICAL_PATH = "/usr/bob/projects/foo/Foo.java";
     private static final String METADATA_ID = PhysicalTypeIdentifier
             .createIdentifier(new JavaType("com.example.Bar"),
@@ -35,8 +34,8 @@ public class DefaultPhysicalTypeMetadataTest {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        this.metadata = new DefaultPhysicalTypeMetadata(METADATA_ID,
-                CANONICAL_PATH, mockClassOrInterfaceTypeDetails);
+        metadata = new DefaultPhysicalTypeMetadata(METADATA_ID, CANONICAL_PATH,
+                mockClassOrInterfaceTypeDetails);
     }
 
     @Test

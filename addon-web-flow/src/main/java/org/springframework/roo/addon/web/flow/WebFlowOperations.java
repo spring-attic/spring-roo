@@ -8,8 +8,6 @@ package org.springframework.roo.addon.web.flow;
  */
 public interface WebFlowOperations {
 
-    boolean isWebFlowInstallationPossible();
-
     /**
      * Installs a new flow in its own directory under /WEB-INF/views. For
      * example if the flow name is "main" then all flow artifacts will be in
@@ -23,4 +21,6 @@ public interface WebFlowOperations {
      *             exists.
      */
     void installWebFlow(String flowName);
+
+    boolean isWebFlowInstallationPossible();
 }

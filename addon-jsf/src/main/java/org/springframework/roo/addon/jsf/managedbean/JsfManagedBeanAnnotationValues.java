@@ -17,16 +17,10 @@ import org.springframework.roo.model.RooJavaType;
  * @since 1.2.0
  */
 public class JsfManagedBeanAnnotationValues extends AbstractAnnotationValues {
-    // From annotation
-    @AutoPopulate private JavaType entity;
-    @AutoPopulate private String beanName;
-    @AutoPopulate private boolean includeOnMenu = true;
 
-    public JsfManagedBeanAnnotationValues(
-            final PhysicalTypeMetadata governorPhysicalTypeMetadata) {
-        super(governorPhysicalTypeMetadata, ROO_JSF_MANAGED_BEAN);
-        AutoPopulationUtils.populate(this, annotationMetadata);
-    }
+    @AutoPopulate private String beanName;
+    @AutoPopulate private JavaType entity;
+    @AutoPopulate private boolean includeOnMenu = true;
 
     public JsfManagedBeanAnnotationValues(
             final ClassOrInterfaceTypeDetails governorPhysicalTypeDetails) {
@@ -34,12 +28,18 @@ public class JsfManagedBeanAnnotationValues extends AbstractAnnotationValues {
         AutoPopulationUtils.populate(this, annotationMetadata);
     }
 
-    public JavaType getEntity() {
-        return entity;
+    public JsfManagedBeanAnnotationValues(
+            final PhysicalTypeMetadata governorPhysicalTypeMetadata) {
+        super(governorPhysicalTypeMetadata, ROO_JSF_MANAGED_BEAN);
+        AutoPopulationUtils.populate(this, annotationMetadata);
     }
 
     public String getBeanName() {
         return beanName;
+    }
+
+    public JavaType getEntity() {
+        return entity;
     }
 
     public boolean isIncludeOnMenu() {

@@ -45,6 +45,14 @@ import org.springframework.roo.support.util.StringUtils;
 public class JavaTypeConverter implements Converter<JavaType> {
 
     /**
+     * The value that converts to the most recently used {@link JavaType}.
+     */
+    static final String LAST_USED_INDICATOR = "*";
+
+    private static final List<String> NUMBER_PRIMITIVES = Arrays.asList("byte",
+            "short", "int", "long", "float", "double");
+
+    /**
      * If this String appears in an option context, this converter will return
      * {@link JavaType}s appearing in any module of the user's project.
      */
@@ -56,184 +64,10 @@ public class JavaTypeConverter implements Converter<JavaType> {
      */
     public static final String UPDATE = "update";
 
-    private static final List<String> NUMBER_PRIMITIVES = Arrays.asList("byte",
-            "short", "int", "long", "float", "double");
-
-    /**
-     * The value that converts to the most recently used {@link JavaType}.
-     */
-    static final String LAST_USED_INDICATOR = "*";
-
-    // Fields
-    @Reference LastUsed lastUsed;
     @Reference FileManager fileManager;
+    @Reference LastUsed lastUsed;
     @Reference ProjectOperations projectOperations;
     @Reference TypeLocationService typeLocationService;
-
-    public JavaType convertFromText(String value, final Class<?> requiredType,
-            final String optionContext) {
-        if (StringUtils.isBlank(value)) {
-            return null;
-        }
-
-        // Check for number primitives
-        if (NUMBER_PRIMITIVES.contains(value)) {
-            return getNumberPrimitiveType(value);
-        }
-
-        if (LAST_USED_INDICATOR.equals(value)) {
-            JavaType result = lastUsed.getJavaType();
-            if (result == null) {
-                throw new IllegalStateException(
-                        "Unknown type; please indicate the type as a command option (ie --xxxx)");
-            }
-            return result;
-        }
-
-        String topLevelPath;
-
-        Pom module = projectOperations.getFocusedModule();
-
-        if (value.contains(MODULE_PATH_SEPARATOR)) {
-            String moduleName = value.substring(0,
-                    value.indexOf(MODULE_PATH_SEPARATOR));
-            module = projectOperations.getPomFromModuleName(moduleName);
-            topLevelPath = typeLocationService
-                    .getTopLevelPackageForModule(module);
-            value = value.substring(value.indexOf(MODULE_PATH_SEPARATOR) + 1,
-                    value.length()).trim();
-            if (StringUtils.contains(optionContext, UPDATE)) {
-                projectOperations.setModule(module);
-            }
-        }
-        else {
-            topLevelPath = typeLocationService
-                    .getTopLevelPackageForModule(projectOperations
-                            .getFocusedModule());
-        }
-
-        if (value.equals(topLevelPath)) {
-            return null;
-        }
-
-        String newValue = locateExisting(value, topLevelPath);
-        if (newValue == null) {
-            newValue = locateNew(value, topLevelPath);
-        }
-
-        if (StringUtils.hasText(newValue)) {
-            String physicalTypeIdentifier = typeLocationService
-                    .getPhysicalTypeIdentifier(new JavaType(newValue));
-            if (StringUtils.hasText(physicalTypeIdentifier)) {
-                module = projectOperations
-                        .getPomFromModuleName(PhysicalTypeIdentifier.getPath(
-                                physicalTypeIdentifier).getModule());
-            }
-        }
-
-        // If the user did not provide a java type name containing a dot, it's
-        // taken as relative to the current package directory
-        if (!newValue.contains(".")) {
-            newValue = (lastUsed.getJavaPackage() == null ? lastUsed
-                    .getTopLevelPackage().getFullyQualifiedPackageName()
-                    : lastUsed.getJavaPackage().getFullyQualifiedPackageName())
-                    + "." + newValue;
-        }
-
-        // Automatically capitalise the first letter of the last name segment
-        // (i.e. capitalise the type name, but not the package)
-        int index = newValue.lastIndexOf(".");
-        if (index > -1 && !newValue.endsWith(".")) {
-            String typeName = newValue.substring(index + 1);
-            typeName = StringUtils.capitalize(typeName);
-            newValue = newValue.substring(0, index).toLowerCase() + "."
-                    + typeName;
-        }
-        JavaType result = new JavaType(newValue);
-        if (StringUtils.contains(optionContext, UPDATE)) {
-            lastUsed.setType(result, module);
-        }
-        return result;
-    }
-
-    private String locateNew(final String value, final String topLevelPath) {
-        String newValue = value;
-        if (value.startsWith(TOP_LEVEL_PACKAGE_SYMBOL)) {
-            if (value.length() > 1) {
-                newValue = (value.charAt(1) == '.' ? topLevelPath
-                        : topLevelPath + ".") + value.substring(1);
-            }
-            else {
-                newValue = topLevelPath + ".";
-            }
-        }
-
-        lastUsed.setTopLevelPackage(new JavaPackage(topLevelPath));
-
-        return newValue;
-    }
-
-    private String locateExisting(final String value, String topLevelPath) {
-        String newValue = value;
-        if (value.startsWith(TOP_LEVEL_PACKAGE_SYMBOL)) {
-            boolean found = false;
-            while (!found) {
-                if (value.length() > 1) {
-                    newValue = (value.charAt(1) == '.' ? topLevelPath
-                            : topLevelPath + ".") + value.substring(1);
-                }
-                else {
-                    newValue = topLevelPath + ".";
-                }
-                String physicalTypeIdentifier = typeLocationService
-                        .getPhysicalTypeIdentifier(new JavaType(newValue));
-                if (physicalTypeIdentifier != null) {
-                    topLevelPath = typeLocationService
-                            .getTopLevelPackageForModule(projectOperations
-                                    .getPomFromModuleName(PhysicalTypeIdentifier
-                                            .getPath(physicalTypeIdentifier)
-                                            .getModule()));
-                    found = true;
-                }
-                else {
-                    int index = topLevelPath.lastIndexOf('.');
-                    if (index == -1) {
-                        break;
-                    }
-                    topLevelPath = topLevelPath.substring(0,
-                            topLevelPath.lastIndexOf('.'));
-                }
-            }
-            if (!found) {
-                return null;
-            }
-        }
-
-        lastUsed.setTopLevelPackage(new JavaPackage(topLevelPath));
-        return newValue;
-    }
-
-    public boolean supports(final Class<?> requiredType,
-            final String optionContext) {
-        return JavaType.class.isAssignableFrom(requiredType);
-    }
-
-    public boolean getAllPossibleValues(final List<Completion> completions,
-            final Class<?> requiredType, String existingData,
-            final String optionContext, final MethodTarget target) {
-        existingData = StringUtils.trimToEmpty(existingData);
-
-        if (StringUtils.isBlank(optionContext)
-                || optionContext.contains(PROJECT)) {
-            completeProjectSpecificPaths(completions, existingData);
-        }
-
-        if (StringUtils.contains(optionContext, "java")) {
-            completeJavaSpecificPaths(completions, existingData, optionContext);
-        }
-
-        return false;
-    }
 
     /**
      * Adds common "java." types to the completions. For now we just provide
@@ -241,7 +75,7 @@ public class JavaTypeConverter implements Converter<JavaType> {
      */
     private void completeJavaSpecificPaths(final List<Completion> completions,
             final String existingData, String optionContext) {
-        SortedSet<String> types = new TreeSet<String>();
+        final SortedSet<String> types = new TreeSet<String>();
 
         if (StringUtils.isBlank(optionContext)) {
             optionContext = "java-all";
@@ -300,7 +134,7 @@ public class JavaTypeConverter implements Converter<JavaType> {
             types.add(Calendar.class.getName());
         }
 
-        for (String type : types) {
+        for (final String type : types) {
             if (type.startsWith(existingData) || existingData.startsWith(type)) {
                 completions.add(new Completion(type));
             }
@@ -359,7 +193,7 @@ public class JavaTypeConverter implements Converter<JavaType> {
                     + MODULE_PATH_SEPARATOR, AnsiEscapeCode.FG_CYAN);
         }
 
-        for (String moduleName : projectOperations.getModuleNames()) {
+        for (final String moduleName : projectOperations.getModuleNames()) {
             if (!moduleName.equals(focusedModuleName)) {
                 completions.add(new Completion(moduleName
                         + MODULE_PATH_SEPARATOR, AnsiEscapeCode.decorate(
@@ -393,6 +227,109 @@ public class JavaTypeConverter implements Converter<JavaType> {
         }
     }
 
+    public JavaType convertFromText(String value, final Class<?> requiredType,
+            final String optionContext) {
+        if (StringUtils.isBlank(value)) {
+            return null;
+        }
+
+        // Check for number primitives
+        if (NUMBER_PRIMITIVES.contains(value)) {
+            return getNumberPrimitiveType(value);
+        }
+
+        if (LAST_USED_INDICATOR.equals(value)) {
+            final JavaType result = lastUsed.getJavaType();
+            if (result == null) {
+                throw new IllegalStateException(
+                        "Unknown type; please indicate the type as a command option (ie --xxxx)");
+            }
+            return result;
+        }
+
+        String topLevelPath;
+
+        Pom module = projectOperations.getFocusedModule();
+
+        if (value.contains(MODULE_PATH_SEPARATOR)) {
+            final String moduleName = value.substring(0,
+                    value.indexOf(MODULE_PATH_SEPARATOR));
+            module = projectOperations.getPomFromModuleName(moduleName);
+            topLevelPath = typeLocationService
+                    .getTopLevelPackageForModule(module);
+            value = value.substring(value.indexOf(MODULE_PATH_SEPARATOR) + 1,
+                    value.length()).trim();
+            if (StringUtils.contains(optionContext, UPDATE)) {
+                projectOperations.setModule(module);
+            }
+        }
+        else {
+            topLevelPath = typeLocationService
+                    .getTopLevelPackageForModule(projectOperations
+                            .getFocusedModule());
+        }
+
+        if (value.equals(topLevelPath)) {
+            return null;
+        }
+
+        String newValue = locateExisting(value, topLevelPath);
+        if (newValue == null) {
+            newValue = locateNew(value, topLevelPath);
+        }
+
+        if (StringUtils.hasText(newValue)) {
+            final String physicalTypeIdentifier = typeLocationService
+                    .getPhysicalTypeIdentifier(new JavaType(newValue));
+            if (StringUtils.hasText(physicalTypeIdentifier)) {
+                module = projectOperations
+                        .getPomFromModuleName(PhysicalTypeIdentifier.getPath(
+                                physicalTypeIdentifier).getModule());
+            }
+        }
+
+        // If the user did not provide a java type name containing a dot, it's
+        // taken as relative to the current package directory
+        if (!newValue.contains(".")) {
+            newValue = (lastUsed.getJavaPackage() == null ? lastUsed
+                    .getTopLevelPackage().getFullyQualifiedPackageName()
+                    : lastUsed.getJavaPackage().getFullyQualifiedPackageName())
+                    + "." + newValue;
+        }
+
+        // Automatically capitalise the first letter of the last name segment
+        // (i.e. capitalise the type name, but not the package)
+        final int index = newValue.lastIndexOf(".");
+        if ((index > -1) && !newValue.endsWith(".")) {
+            String typeName = newValue.substring(index + 1);
+            typeName = StringUtils.capitalize(typeName);
+            newValue = newValue.substring(0, index).toLowerCase() + "."
+                    + typeName;
+        }
+        final JavaType result = new JavaType(newValue);
+        if (StringUtils.contains(optionContext, UPDATE)) {
+            lastUsed.setType(result, module);
+        }
+        return result;
+    }
+
+    public boolean getAllPossibleValues(final List<Completion> completions,
+            final Class<?> requiredType, String existingData,
+            final String optionContext, final MethodTarget target) {
+        existingData = StringUtils.trimToEmpty(existingData);
+
+        if (StringUtils.isBlank(optionContext)
+                || optionContext.contains(PROJECT)) {
+            completeProjectSpecificPaths(completions, existingData);
+        }
+
+        if (StringUtils.contains(optionContext, "java")) {
+            completeJavaSpecificPaths(completions, existingData, optionContext);
+        }
+
+        return false;
+    }
+
     private JavaType getNumberPrimitiveType(final String value) {
         if ("byte".equals(value)) {
             return JavaType.BYTE_PRIMITIVE;
@@ -415,5 +352,67 @@ public class JavaTypeConverter implements Converter<JavaType> {
         else {
             return null;
         }
+    }
+
+    private String locateExisting(final String value, String topLevelPath) {
+        String newValue = value;
+        if (value.startsWith(TOP_LEVEL_PACKAGE_SYMBOL)) {
+            boolean found = false;
+            while (!found) {
+                if (value.length() > 1) {
+                    newValue = (value.charAt(1) == '.' ? topLevelPath
+                            : topLevelPath + ".") + value.substring(1);
+                }
+                else {
+                    newValue = topLevelPath + ".";
+                }
+                final String physicalTypeIdentifier = typeLocationService
+                        .getPhysicalTypeIdentifier(new JavaType(newValue));
+                if (physicalTypeIdentifier != null) {
+                    topLevelPath = typeLocationService
+                            .getTopLevelPackageForModule(projectOperations
+                                    .getPomFromModuleName(PhysicalTypeIdentifier
+                                            .getPath(physicalTypeIdentifier)
+                                            .getModule()));
+                    found = true;
+                }
+                else {
+                    final int index = topLevelPath.lastIndexOf('.');
+                    if (index == -1) {
+                        break;
+                    }
+                    topLevelPath = topLevelPath.substring(0,
+                            topLevelPath.lastIndexOf('.'));
+                }
+            }
+            if (!found) {
+                return null;
+            }
+        }
+
+        lastUsed.setTopLevelPackage(new JavaPackage(topLevelPath));
+        return newValue;
+    }
+
+    private String locateNew(final String value, final String topLevelPath) {
+        String newValue = value;
+        if (value.startsWith(TOP_LEVEL_PACKAGE_SYMBOL)) {
+            if (value.length() > 1) {
+                newValue = (value.charAt(1) == '.' ? topLevelPath
+                        : topLevelPath + ".") + value.substring(1);
+            }
+            else {
+                newValue = topLevelPath + ".";
+            }
+        }
+
+        lastUsed.setTopLevelPackage(new JavaPackage(topLevelPath));
+
+        return newValue;
+    }
+
+    public boolean supports(final Class<?> requiredType,
+            final String optionContext) {
+        return JavaType.class.isAssignableFrom(requiredType);
     }
 }

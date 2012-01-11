@@ -34,48 +34,62 @@ import org.springframework.roo.project.Path;
  */
 public class ServiceLayerProviderTest {
 
-    // Constants
+    private static final String BOGUS_METHOD = "bogus";
+    private static final String CALLER_MID = "MID:anything#com.example.web.PersonController";
+    private static final String SERVICE_MID = "MID:anything#com.example.serv.PersonService";
     private static final MethodParameter SIZE_PARAMETER = new MethodParameter(
             JavaType.INT_PRIMITIVE, "count");
     private static final MethodParameter START_PARAMETER = new MethodParameter(
             JavaType.INT_PRIMITIVE, "start");
-    private static final String BOGUS_METHOD = "bogus";
-    private static final String CALLER_MID = "MID:anything#com.example.web.PersonController";
-    private static final String SERVICE_MID = "MID:anything#com.example.serv.PersonService";
 
     // Fixture
 
-    // -- Mocks
-    @Mock private JavaType mockTargetType;
     @Mock private JavaType mockIdType;
     @Mock private MetadataService mockMetadataService;
     @Mock private ServiceAnnotationValuesFactory mockServiceAnnotationValuesFactory;
     @Mock private ServiceInterfaceLocator mockServiceInterfaceLocator;
+    // -- Mocks
+    @Mock private JavaType mockTargetType;
     @Mock private TypeLocationService mockTypeLocationService;
 
+    private String pluralId;
     // -- Others
     private ServiceLayerProvider provider;
-    private String pluralId;
 
-    @Before
-    public void setUp() {
-        MockitoAnnotations.initMocks(this);
-        this.provider = new ServiceLayerProvider();
-        this.provider.setMetadataService(mockMetadataService);
-        this.provider
-                .setServiceAnnotationValuesFactory(mockServiceAnnotationValuesFactory);
-        this.provider.setServiceInterfaceLocator(mockServiceInterfaceLocator);
-        this.provider.typeLocationService = mockTypeLocationService;
+    /**
+     * Asserts that asking the {@link ServiceLayerProvider} for a method with
+     * the given name and parameters results in the given method signature
+     * 
+     * @param plural
+     * @param mockServiceInterfaces can be empty
+     * @param methodId
+     * @param expectedMethodSignature <code>null</code> means no additions are
+     *            expected
+     * @param methodParameters
+     */
+    private void assertAdditions(final String plural,
+            final List<ClassOrInterfaceTypeDetails> mockServiceInterfaces,
+            final String methodId, final String expectedMethodSignature,
+            final MethodParameter... methodParameters) {
+        // Set up
+        setUpPluralMetadata(plural);
+        when(mockServiceInterfaceLocator.getServiceInterfaces(mockTargetType))
+                .thenReturn(mockServiceInterfaces);
 
-        when(mockTargetType.getFullyQualifiedTypeName()).thenReturn(
-                "com.example.domain.Person");
-        when(mockIdType.getFullyQualifiedTypeName()).thenReturn(
-                Long.class.getName());
-        when(mockTargetType.getSimpleTypeName()).thenReturn("Person");
-        when(mockTypeLocationService.getTypePath(mockTargetType)).thenReturn(
-                Path.SRC_MAIN_JAVA.getModulePathId(""));
-        this.pluralId = PluralMetadata.createIdentifier(mockTargetType,
-                Path.SRC_MAIN_JAVA.getModulePathId(""));
+        // Invoke
+        final MemberTypeAdditions additions = provider.getMemberTypeAdditions(
+                CALLER_MID, methodId, mockTargetType, mockIdType,
+                methodParameters);
+
+        // Check
+        if (expectedMethodSignature == null) {
+            assertNull("Expected no additions but found: " + additions,
+                    additions);
+        }
+        else {
+            assertNotNull("Expected some additions but was null", additions);
+            assertEquals(expectedMethodSignature, additions.getMethodCall());
+        }
     }
 
     /**
@@ -116,6 +130,26 @@ public class ServiceLayerProviderTest {
         return mockServiceInterface;
     }
 
+    @Before
+    public void setUp() {
+        MockitoAnnotations.initMocks(this);
+        provider = new ServiceLayerProvider();
+        provider.setMetadataService(mockMetadataService);
+        provider.setServiceAnnotationValuesFactory(mockServiceAnnotationValuesFactory);
+        provider.setServiceInterfaceLocator(mockServiceInterfaceLocator);
+        provider.typeLocationService = mockTypeLocationService;
+
+        when(mockTargetType.getFullyQualifiedTypeName()).thenReturn(
+                "com.example.domain.Person");
+        when(mockIdType.getFullyQualifiedTypeName()).thenReturn(
+                Long.class.getName());
+        when(mockTargetType.getSimpleTypeName()).thenReturn("Person");
+        when(mockTypeLocationService.getTypePath(mockTargetType)).thenReturn(
+                Path.SRC_MAIN_JAVA.getModulePathId(""));
+        pluralId = PluralMetadata.createIdentifier(mockTargetType,
+                Path.SRC_MAIN_JAVA.getModulePathId(""));
+    }
+
     /**
      * Sets up the mock {@link MetadataService} to return the given plural text
      * for our test entity type.
@@ -128,40 +162,17 @@ public class ServiceLayerProviderTest {
         when(mockMetadataService.get(pluralId)).thenReturn(mockPluralMetadata);
     }
 
-    /**
-     * Asserts that asking the {@link ServiceLayerProvider} for a method with
-     * the given name and parameters results in the given method signature
-     * 
-     * @param plural
-     * @param mockServiceInterfaces can be empty
-     * @param methodId
-     * @param expectedMethodSignature <code>null</code> means no additions are
-     *            expected
-     * @param methodParameters
-     */
-    private void assertAdditions(final String plural,
-            final List<ClassOrInterfaceTypeDetails> mockServiceInterfaces,
-            final String methodId, final String expectedMethodSignature,
-            final MethodParameter... methodParameters) {
-        // Set up
-        setUpPluralMetadata(plural);
-        when(mockServiceInterfaceLocator.getServiceInterfaces(mockTargetType))
-                .thenReturn(mockServiceInterfaces);
+    @Test
+    public void testGetAdditionsForBogusMethod() {
+        final ClassOrInterfaceTypeDetails mockServiceInterface = mock(ClassOrInterfaceTypeDetails.class);
+        assertAdditions("x", Arrays.asList(mockServiceInterface), BOGUS_METHOD,
+                null);
+    }
 
-        // Invoke
-        final MemberTypeAdditions additions = this.provider
-                .getMemberTypeAdditions(CALLER_MID, methodId, mockTargetType,
-                        mockIdType, methodParameters);
-
-        // Check
-        if (expectedMethodSignature == null) {
-            assertNull("Expected no additions but found: " + additions,
-                    additions);
-        }
-        else {
-            assertNotNull("Expected some additions but was null", additions);
-            assertEquals(expectedMethodSignature, additions.getMethodCall());
-        }
+    @Test
+    public void testGetAdditionsForEntityWithNoServices() {
+        assertAdditions("x", Arrays.<ClassOrInterfaceTypeDetails> asList(),
+                BOGUS_METHOD, null);
     }
 
     @Test
@@ -170,9 +181,8 @@ public class ServiceLayerProviderTest {
         when(mockMetadataService.get(pluralId)).thenReturn(null);
 
         // Invoke
-        final MemberTypeAdditions additions = this.provider
-                .getMemberTypeAdditions(CALLER_MID, BOGUS_METHOD,
-                        mockTargetType, mockIdType);
+        final MemberTypeAdditions additions = provider.getMemberTypeAdditions(
+                CALLER_MID, BOGUS_METHOD, mockTargetType, mockIdType);
 
         // Check
         assertNull(additions);
@@ -185,23 +195,11 @@ public class ServiceLayerProviderTest {
     }
 
     @Test
-    public void testGetAdditionsForEntityWithNoServices() {
-        assertAdditions("x", Arrays.<ClassOrInterfaceTypeDetails> asList(),
-                BOGUS_METHOD, null);
-    }
-
-    @Test
-    public void testGetAdditionsWhenServiceAnnotationValuesUnavailable() {
-        final ClassOrInterfaceTypeDetails mockServiceInterface = mock(ClassOrInterfaceTypeDetails.class);
-        assertAdditions("anything", Arrays.asList(mockServiceInterface),
-                BOGUS_METHOD, null);
-    }
-
-    @Test
-    public void testGetAdditionsForBogusMethod() {
-        final ClassOrInterfaceTypeDetails mockServiceInterface = mock(ClassOrInterfaceTypeDetails.class);
-        assertAdditions("x", Arrays.asList(mockServiceInterface), BOGUS_METHOD,
-                null);
+    public void testGetAdditionsForFindAllMethodWhenServiceDoesNotProvideIt() {
+        final ClassOrInterfaceTypeDetails mockServiceInterface = getMockService(
+                "", "x", "x", "x");
+        assertAdditions("x", Arrays.asList(mockServiceInterface),
+                FIND_ALL.getKey(), null);
     }
 
     @Test
@@ -213,11 +211,31 @@ public class ServiceLayerProviderTest {
     }
 
     @Test
-    public void testGetAdditionsForFindAllMethodWhenServiceDoesNotProvideIt() {
+    public void testGetAdditionsForFindEntriesMethodWhenServiceDoesNotProvideIt() {
         final ClassOrInterfaceTypeDetails mockServiceInterface = getMockService(
-                "", "x", "x", "x");
+                "x", "x", "x", "");
         assertAdditions("x", Arrays.asList(mockServiceInterface),
-                FIND_ALL.getKey(), null);
+                FIND_ENTRIES.getKey(), null, START_PARAMETER, SIZE_PARAMETER);
+    }
+
+    @Test
+    public void testGetAdditionsForFindEntriesMethodWhenServiceProvidesIt() {
+        final ClassOrInterfaceTypeDetails mockServiceInterface = getMockService(
+                "x", "x", "x", "locate");
+        assertAdditions("z", Arrays.asList(mockServiceInterface),
+                FIND_ENTRIES.getKey(),
+                "personService.locatePersonEntries(start, count)",
+                START_PARAMETER, SIZE_PARAMETER);
+    }
+
+    @Test
+    public void testGetAdditionsForSaveMethodWhenServiceDoesNotProvideIt() {
+        final ClassOrInterfaceTypeDetails mockServiceInterface = getMockService(
+                "x", null, "x", "x");
+        final MethodParameter methodParameter = new MethodParameter(
+                mockTargetType, "anything");
+        assertAdditions("x", Arrays.asList(mockServiceInterface),
+                SAVE.getKey(), null, methodParameter);
     }
 
     @Test
@@ -232,13 +250,13 @@ public class ServiceLayerProviderTest {
     }
 
     @Test
-    public void testGetAdditionsForSaveMethodWhenServiceDoesNotProvideIt() {
+    public void testGetAdditionsForUpdateMethodWhenServiceDoesNotProvideIt() {
         final ClassOrInterfaceTypeDetails mockServiceInterface = getMockService(
-                "x", null, "x", "x");
+                "x", "x", "", "x");
         final MethodParameter methodParameter = new MethodParameter(
-                mockTargetType, "anything");
+                mockTargetType, "employee");
         assertAdditions("x", Arrays.asList(mockServiceInterface),
-                SAVE.getKey(), null, methodParameter);
+                UPDATE.getKey(), null, methodParameter);
     }
 
     @Test
@@ -253,30 +271,9 @@ public class ServiceLayerProviderTest {
     }
 
     @Test
-    public void testGetAdditionsForUpdateMethodWhenServiceDoesNotProvideIt() {
-        final ClassOrInterfaceTypeDetails mockServiceInterface = getMockService(
-                "x", "x", "", "x");
-        final MethodParameter methodParameter = new MethodParameter(
-                mockTargetType, "employee");
-        assertAdditions("x", Arrays.asList(mockServiceInterface),
-                UPDATE.getKey(), null, methodParameter);
-    }
-
-    @Test
-    public void testGetAdditionsForFindEntriesMethodWhenServiceProvidesIt() {
-        final ClassOrInterfaceTypeDetails mockServiceInterface = getMockService(
-                "x", "x", "x", "locate");
-        assertAdditions("z", Arrays.asList(mockServiceInterface),
-                FIND_ENTRIES.getKey(),
-                "personService.locatePersonEntries(start, count)",
-                START_PARAMETER, SIZE_PARAMETER);
-    }
-
-    @Test
-    public void testGetAdditionsForFindEntriesMethodWhenServiceDoesNotProvideIt() {
-        final ClassOrInterfaceTypeDetails mockServiceInterface = getMockService(
-                "x", "x", "x", "");
-        assertAdditions("x", Arrays.asList(mockServiceInterface),
-                FIND_ENTRIES.getKey(), null, START_PARAMETER, SIZE_PARAMETER);
+    public void testGetAdditionsWhenServiceAnnotationValuesUnavailable() {
+        final ClassOrInterfaceTypeDetails mockServiceInterface = mock(ClassOrInterfaceTypeDetails.class);
+        assertAdditions("anything", Arrays.asList(mockServiceInterface),
+                BOGUS_METHOD, null);
     }
 }

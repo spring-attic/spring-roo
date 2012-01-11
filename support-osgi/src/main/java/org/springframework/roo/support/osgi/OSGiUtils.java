@@ -22,17 +22,37 @@ import org.springframework.roo.support.util.Assert;
  */
 public final class OSGiUtils {
 
-    /**
-     * The root path within an OSGi bundle
-     */
-    public static final String ROOT_PATH = "/";
+    private static final PathMatcher PATH_MATCHER = new AntPathMatcher();
 
     /**
      * The name of the property that stores the Roo working directory.
      */
     public static final String ROO_WORKING_DIRECTORY_PROPERTY = "roo.working.directory";
 
-    private static final PathMatcher PATH_MATCHER = new AntPathMatcher();
+    /**
+     * The root path within an OSGi bundle
+     */
+    public static final String ROOT_PATH = "/";
+
+    /**
+     * Executes the given callback on any bundles in the given context
+     * 
+     * @param callback can be <code>null</code> to do nothing
+     * @param context can be <code>null</code> to do nothing
+     */
+    public static void execute(final BundleCallback callback,
+            final BundleContext context) {
+        if ((callback == null) || (context == null)) {
+            return;
+        }
+        final Bundle[] bundles = context.getBundles();
+        if (bundles == null) {
+            return;
+        }
+        for (final Bundle bundle : bundles) {
+            callback.execute(bundle);
+        }
+    }
 
     /**
      * Searches the bundles in the given context for entries with the given
@@ -116,7 +136,7 @@ public final class OSGiUtils {
                                         uris.add(uri);
                                     }
                                 }
-                                catch (URISyntaxException e) {
+                                catch (final URISyntaxException e) {
                                     // This URL can't be converted to a URI -
                                     // ignore it
                                 }
@@ -130,26 +150,6 @@ public final class OSGiUtils {
             }
         }, context);
         return urls;
-    }
-
-    /**
-     * Executes the given callback on any bundles in the given context
-     * 
-     * @param callback can be <code>null</code> to do nothing
-     * @param context can be <code>null</code> to do nothing
-     */
-    public static void execute(final BundleCallback callback,
-            final BundleContext context) {
-        if (callback == null || context == null) {
-            return;
-        }
-        final Bundle[] bundles = context.getBundles();
-        if (bundles == null) {
-            return;
-        }
-        for (final Bundle bundle : bundles) {
-            callback.execute(bundle);
-        }
     }
 
     /**

@@ -30,23 +30,21 @@ import com.vmware.appcloud.client.ServiceConfiguration;
 public class CloudFoundrySessionImpl implements CloudFoundrySession,
         TransmissionEventListener {
 
-    // Constants
     private static final Logger LOGGER = HandlerUtils
             .getLogger(CloudFoundryOperationsImpl.class);
 
-    // Fields
     @Reference AppCloudClientFactory appCloudClientFactory;
-    @Reference private PreferencesService preferencesService;
-    @Reference private UaaService uaaService;
-
-    private final List<Integer> memoryOptions = new ArrayList<Integer>();
     private final List<String> appNames = new ArrayList<String>();
-    private final List<String> provisionedServices = new ArrayList<String>();
-    private final List<String> serviceTypes = new ArrayList<String>();
     private final Map<String, List<String>> boundUrlMap = new HashMap<String, List<String>>();
 
-    CloudPreferences preferences;
     private UaaAwareAppCloudClient client;
+    private final List<Integer> memoryOptions = new ArrayList<Integer>();
+    CloudPreferences preferences;
+    @Reference private PreferencesService preferencesService;
+    private final List<String> provisionedServices = new ArrayList<String>();
+
+    private final List<String> serviceTypes = new ArrayList<String>();
+    @Reference private UaaService uaaService;
 
     protected void activate(final ComponentContext context) {
         preferences = new CloudPreferences(preferencesService);
@@ -54,6 +52,23 @@ public class CloudFoundrySessionImpl implements CloudFoundrySession,
             ((TransmissionAwareUaaService) uaaService)
                     .addTransmissionEventListener(this);
         }
+    }
+
+    public void afterTransmission(final TransmissionType type,
+            final boolean successful) {
+        if (client != null) {
+            client.afterTransmission(type, successful);
+        }
+    }
+
+    public void beforeTransmission(final TransmissionType type) {
+        if (client != null) {
+            client.beforeTransmission(type);
+        }
+    }
+
+    public void clearStoredLoginDetails() {
+        preferences.clearStoredLoginDetails();
     }
 
     protected void deactivate(final ComponentContext cc) {
@@ -67,38 +82,23 @@ public class CloudFoundrySessionImpl implements CloudFoundrySession,
         preferences.flush();
     }
 
-    public void beforeTransmission(final TransmissionType type) {
-        if (client != null) {
-            client.beforeTransmission(type);
-        }
+    public List<Integer> getApplicationMemoryOptions() {
+        updateMemoryOptions();
+        return memoryOptions;
     }
 
-    public void afterTransmission(final TransmissionType type,
-            final boolean successful) {
-        if (client != null) {
-            client.afterTransmission(type, successful);
-        }
+    public List<String> getApplicationNames() {
+        updateApplicationNames();
+        return appNames;
     }
 
-    public void login(final String email, final String password,
-            final String cloudControllerUrl) {
-        final CloudCredentials credentials = getLoginCredentials(
-                cloudControllerUrl, email, password);
-        if (credentials == null) {
-            LOGGER.info("Login failed");
-            return;
-        }
+    public Map<String, List<String>> getBoundUrlMap() {
+        updateUrlMap();
+        return boundUrlMap;
+    }
 
-        login(credentials);
-
-        if (StringUtils.hasText(email) && StringUtils.hasText(password)) {
-            // The user provided fresh credentials
-            preferences.storeCredentials(credentials);
-            LOGGER.info("Credentials saved.");
-        }
-
-        LOGGER.info("Logged in successfully with email address '"
-                + credentials.getEmail() + "'");
+    public AppCloudClient getClient() {
+        return client;
     }
 
     /**
@@ -134,6 +134,31 @@ public class CloudFoundrySessionImpl implements CloudFoundrySession,
         return null;
     }
 
+    public CloudService getProvisionedService(
+            final String provisionedServiceName) {
+        return client.getService(provisionedServiceName);
+    }
+
+    public List<String> getProvisionedServices() {
+        updateProvisionedServices();
+        return provisionedServices;
+    }
+
+    public ServiceConfiguration getService(final String serviceVendor) {
+        for (final ServiceConfiguration serviceConfiguration : client
+                .getServiceConfigurations()) {
+            if (serviceConfiguration.getVendor().equals(serviceVendor)) {
+                return serviceConfiguration;
+            }
+        }
+        return null;
+    }
+
+    public List<String> getServiceTypes() {
+        updateServiceTypes();
+        return serviceTypes;
+    }
+
     /**
      * Returns the email address for the stored credentials with the given URL
      * 
@@ -158,6 +183,14 @@ public class CloudFoundrySessionImpl implements CloudFoundrySession,
         }
     }
 
+    public List<String> getStoredEmails() {
+        return preferences.getStoredEmails();
+    }
+
+    public List<String> getStoredUrls() {
+        return preferences.getStoredUrls();
+    }
+
     /**
      * Logs the user in with the given credentials
      * 
@@ -173,60 +206,25 @@ public class CloudFoundrySessionImpl implements CloudFoundrySession,
         client.loginIfNeeded();
     }
 
-    public AppCloudClient getClient() {
-        return client;
-    }
-
-    public List<String> getApplicationNames() {
-        updateApplicationNames();
-        return appNames;
-    }
-
-    public List<String> getProvisionedServices() {
-        updateProvisionedServices();
-        return provisionedServices;
-    }
-
-    public Map<String, List<String>> getBoundUrlMap() {
-        updateUrlMap();
-        return boundUrlMap;
-    }
-
-    public List<Integer> getApplicationMemoryOptions() {
-        updateMemoryOptions();
-        return memoryOptions;
-    }
-
-    public CloudService getProvisionedService(
-            final String provisionedServiceName) {
-        return client.getService(provisionedServiceName);
-    }
-
-    public ServiceConfiguration getService(final String serviceVendor) {
-        for (final ServiceConfiguration serviceConfiguration : client
-                .getServiceConfigurations()) {
-            if (serviceConfiguration.getVendor().equals(serviceVendor)) {
-                return serviceConfiguration;
-            }
+    public void login(final String email, final String password,
+            final String cloudControllerUrl) {
+        final CloudCredentials credentials = getLoginCredentials(
+                cloudControllerUrl, email, password);
+        if (credentials == null) {
+            LOGGER.info("Login failed");
+            return;
         }
-        return null;
-    }
 
-    public List<String> getServiceTypes() {
-        updateServiceTypes();
-        return serviceTypes;
-    }
+        login(credentials);
 
-    public List<String> getStoredEmails() {
-        return preferences.getStoredEmails();
-    }
+        if (StringUtils.hasText(email) && StringUtils.hasText(password)) {
+            // The user provided fresh credentials
+            preferences.storeCredentials(credentials);
+            LOGGER.info("Credentials saved.");
+        }
 
-    public List<String> getStoredUrls() {
-        return preferences.getStoredUrls();
-    }
-
-    public void clearStoredLoginDetails() {
-        preferences.clearStoredLoginDetails();
+        LOGGER.info("Logged in successfully with email address '"
+                + credentials.getEmail() + "'");
     }
 
     private void updateApplicationNames() {
@@ -234,6 +232,14 @@ public class CloudFoundrySessionImpl implements CloudFoundrySession,
         for (final CloudApplication app : client.getApplications()) {
             appNames.add(app.getName());
         }
+    }
+
+    private void updateMemoryOptions() {
+        memoryOptions.clear();
+        for (final int memoryOption : client.getApplicationMemoryChoices()) {
+            memoryOptions.add(memoryOption);
+        }
+        Collections.sort(memoryOptions);
     }
 
     private void updateProvisionedServices() {
@@ -252,17 +258,9 @@ public class CloudFoundrySessionImpl implements CloudFoundrySession,
     }
 
     private void updateUrlMap() {
-        this.boundUrlMap.clear();
+        boundUrlMap.clear();
         for (final CloudApplication app : client.getApplications()) {
-            this.boundUrlMap.put(app.getName(), app.getUris());
+            boundUrlMap.put(app.getName(), app.getUris());
         }
-    }
-
-    private void updateMemoryOptions() {
-        memoryOptions.clear();
-        for (final int memoryOption : client.getApplicationMemoryChoices()) {
-            memoryOptions.add(memoryOption);
-        }
-        Collections.sort(memoryOptions);
     }
 }

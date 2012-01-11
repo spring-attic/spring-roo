@@ -21,6 +21,28 @@ import org.springframework.roo.support.util.StringUtils;
 public abstract class HandlerUtils {
 
     /**
+     * Forces all {@link Handler} instances registered in the presented
+     * {@link Logger} to be flushed.
+     * 
+     * @param logger to flush (required)
+     * @return the number of {@link Handler}s flushed (may be 0 or above)
+     */
+    public static int flushAllHandlers(final Logger logger) {
+        Assert.notNull(logger, "Logger is required");
+
+        int flushed = 0;
+        final Handler[] handlers = logger.getHandlers();
+        if ((handlers != null) && (handlers.length > 0)) {
+            for (final Handler h : handlers) {
+                flushed++;
+                h.flush();
+            }
+        }
+
+        return flushed;
+    }
+
+    /**
      * Obtains a {@link Logger} that guarantees to set the {@link Level} to
      * {@link Level#FINE} if it is part of org.springframework.roo.
      * Unfortunately this is needed due to a regression in JDK 1.6.0_18 as per
@@ -32,68 +54,12 @@ public abstract class HandlerUtils {
      */
     public static Logger getLogger(final Class<?> clazz) {
         Assert.notNull(clazz, "Class required");
-        Logger logger = Logger.getLogger(clazz.getName());
-        if (logger.getLevel() == null
+        final Logger logger = Logger.getLogger(clazz.getName());
+        if ((logger.getLevel() == null)
                 && clazz.getName().startsWith("org.springframework.roo")) {
             logger.setLevel(Level.FINE);
         }
         return logger;
-    }
-
-    /**
-     * Replaces each {@link Handler} defined against the presented
-     * {@link Logger} with {@link DeferredLogHandler}.
-     * <p>
-     * This is useful for ensuring any {@link Handler} defaults defined by the
-     * user are preserved and treated as the {@link DeferredLogHandler}
-     * "fallback" {@link Handler} if the indicated severity {@link Level} is
-     * encountered.
-     * <p>
-     * This method will create a {@link ConsoleHandler} if the presented
-     * {@link Logger} has no current {@link Handler}.
-     * 
-     * @param logger to introspect and replace the {@link Handler}s for
-     *            (required)
-     * @param fallbackSeverity to trigger fallback mode (required)
-     * @return the number of {@link DeferredLogHandler}s now registered against
-     *         the {@link Logger} (guaranteed to be 1 or above)
-     */
-    public static int wrapWithDeferredLogHandler(final Logger logger,
-            final Level fallbackSeverity) {
-        Assert.notNull(logger, "Logger is required");
-        Assert.notNull(fallbackSeverity, "Fallback severity is required");
-
-        List<DeferredLogHandler> newHandlers = new ArrayList<DeferredLogHandler>();
-
-        // Create DeferredLogHandlers for each Handler in presented Logger
-        Handler[] handlers = logger.getHandlers();
-        if (handlers != null && handlers.length > 0) {
-            for (Handler h : handlers) {
-                logger.removeHandler(h);
-                newHandlers.add(new DeferredLogHandler(h, fallbackSeverity));
-            }
-        }
-
-        // Create a default DeferredLogHandler if no Handler was defined in the
-        // presented Logger
-        if (newHandlers.isEmpty()) {
-            ConsoleHandler consoleHandler = new ConsoleHandler();
-            consoleHandler.setFormatter(new Formatter() {
-                @Override
-                public String format(final LogRecord record) {
-                    return record.getMessage() + StringUtils.LINE_SEPARATOR;
-                }
-            });
-            newHandlers.add(new DeferredLogHandler(consoleHandler,
-                    fallbackSeverity));
-        }
-
-        // Add the new DeferredLogHandlers to the presented Logger
-        for (DeferredLogHandler h : newHandlers) {
-            logger.addHandler(h);
-        }
-
-        return newHandlers.size();
     }
 
     /**
@@ -123,12 +89,12 @@ public abstract class HandlerUtils {
         Assert.notNull(target, "Target handler is required");
 
         int replaced = 0;
-        Handler[] handlers = logger.getHandlers();
-        if (handlers != null && handlers.length > 0) {
-            for (Handler h : handlers) {
+        final Handler[] handlers = logger.getHandlers();
+        if ((handlers != null) && (handlers.length > 0)) {
+            for (final Handler h : handlers) {
                 if (h instanceof DeferredLogHandler) {
                     replaced++;
-                    DeferredLogHandler defLogger = (DeferredLogHandler) h;
+                    final DeferredLogHandler defLogger = (DeferredLogHandler) h;
                     defLogger.setTargetHandler(target);
                 }
             }
@@ -138,24 +104,58 @@ public abstract class HandlerUtils {
     }
 
     /**
-     * Forces all {@link Handler} instances registered in the presented
-     * {@link Logger} to be flushed.
+     * Replaces each {@link Handler} defined against the presented
+     * {@link Logger} with {@link DeferredLogHandler}.
+     * <p>
+     * This is useful for ensuring any {@link Handler} defaults defined by the
+     * user are preserved and treated as the {@link DeferredLogHandler}
+     * "fallback" {@link Handler} if the indicated severity {@link Level} is
+     * encountered.
+     * <p>
+     * This method will create a {@link ConsoleHandler} if the presented
+     * {@link Logger} has no current {@link Handler}.
      * 
-     * @param logger to flush (required)
-     * @return the number of {@link Handler}s flushed (may be 0 or above)
+     * @param logger to introspect and replace the {@link Handler}s for
+     *            (required)
+     * @param fallbackSeverity to trigger fallback mode (required)
+     * @return the number of {@link DeferredLogHandler}s now registered against
+     *         the {@link Logger} (guaranteed to be 1 or above)
      */
-    public static int flushAllHandlers(final Logger logger) {
+    public static int wrapWithDeferredLogHandler(final Logger logger,
+            final Level fallbackSeverity) {
         Assert.notNull(logger, "Logger is required");
+        Assert.notNull(fallbackSeverity, "Fallback severity is required");
 
-        int flushed = 0;
-        Handler[] handlers = logger.getHandlers();
-        if (handlers != null && handlers.length > 0) {
-            for (Handler h : handlers) {
-                flushed++;
-                h.flush();
+        final List<DeferredLogHandler> newHandlers = new ArrayList<DeferredLogHandler>();
+
+        // Create DeferredLogHandlers for each Handler in presented Logger
+        final Handler[] handlers = logger.getHandlers();
+        if ((handlers != null) && (handlers.length > 0)) {
+            for (final Handler h : handlers) {
+                logger.removeHandler(h);
+                newHandlers.add(new DeferredLogHandler(h, fallbackSeverity));
             }
         }
 
-        return flushed;
+        // Create a default DeferredLogHandler if no Handler was defined in the
+        // presented Logger
+        if (newHandlers.isEmpty()) {
+            final ConsoleHandler consoleHandler = new ConsoleHandler();
+            consoleHandler.setFormatter(new Formatter() {
+                @Override
+                public String format(final LogRecord record) {
+                    return record.getMessage() + StringUtils.LINE_SEPARATOR;
+                }
+            });
+            newHandlers.add(new DeferredLogHandler(consoleHandler,
+                    fallbackSeverity));
+        }
+
+        // Add the new DeferredLogHandlers to the presented Logger
+        for (final DeferredLogHandler h : newHandlers) {
+            logger.addHandler(h);
+        }
+
+        return newHandlers.size();
     }
 }

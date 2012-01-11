@@ -33,32 +33,26 @@ import org.w3c.dom.Element;
  */
 public class PomFactoryImplTest {
 
-    // Constants
     private static final String MODULE_NAME = "my-module";
 
     // Fixture
     private PomFactoryImpl factory;
     @Mock private PackagingProviderRegistry mockPackagingProviderRegistry;
 
-    @Before
-    public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
-        this.factory = new PomFactoryImpl();
-        this.factory.packagingProviderRegistry = mockPackagingProviderRegistry;
+    private void assertGav(final Pom pom, final String expectedGroupId,
+            final String expectedArtifactId, final String expectedVersion) {
+        assertEquals(expectedGroupId, pom.getGroupId());
+        assertEquals(expectedArtifactId, pom.getArtifactId());
+        assertEquals(expectedVersion, pom.getVersion());
     }
 
-    /**
-     * Returns the URL of the given POM file
-     * 
-     * @param pomFileName the name of a POM in this test's package
-     * @return a non-<code>null</code> URL
-     * @throws Exception
-     */
-    private URL getPomUrl(final String pomFileName) throws Exception {
-        final URL pomUrl = getClass().getResource(pomFileName);
-        assertNotNull("Can't find test POM '" + pomFileName
-                + "' on classpath of " + getClass().getName(), pomUrl);
-        return pomUrl;
+    private void assertModule(final Module module, final String expectedName,
+            final String pomFileName) throws Exception {
+        assertEquals(expectedName, module.getName());
+        final File parentPomDirectory = getPomFile(pomFileName).getParentFile();
+        final File moduleDirectory = new File(parentPomDirectory, expectedName);
+        final File modulePom = new File(moduleDirectory, "pom.xml");
+        assertEquals(modulePom.getCanonicalPath(), module.getPomPath());
     }
 
     /**
@@ -82,33 +76,31 @@ public class PomFactoryImplTest {
         return new File(pomUrl.toURI());
     }
 
+    /**
+     * Returns the URL of the given POM file
+     * 
+     * @param pomFileName the name of a POM in this test's package
+     * @return a non-<code>null</code> URL
+     * @throws Exception
+     */
+    private URL getPomUrl(final String pomFileName) throws Exception {
+        final URL pomUrl = getClass().getResource(pomFileName);
+        assertNotNull("Can't find test POM '" + pomFileName
+                + "' on classpath of " + getClass().getName(), pomUrl);
+        return pomUrl;
+    }
+
     private Pom invokeFactory(final String pomFile) throws Exception {
         final Pair<Element, String> pomDetails = getPom(pomFile);
         return factory.getInstance(pomDetails.getKey(), pomDetails.getValue(),
                 MODULE_NAME);
     }
 
-    private void assertGav(final Pom pom, final String expectedGroupId,
-            final String expectedArtifactId, final String expectedVersion) {
-        assertEquals(expectedGroupId, pom.getGroupId());
-        assertEquals(expectedArtifactId, pom.getArtifactId());
-        assertEquals(expectedVersion, pom.getVersion());
-    }
-
-    @Test
-    public void testGetMinimalInstance() throws Exception {
-        // Set up
-        setUpMockPackagingProvider(DEFAULT_PACKAGING);
-
-        // Invoke
-        final Pom pom = invokeFactory("minimal-pom.xml");
-
-        // Check
-        assertGav(pom, "com.example", "minimal-app", "2.0");
-        assertEquals(SRC_MAIN_JAVA.getDefaultLocation(),
-                pom.getSourceDirectory());
-        assertEquals(SRC_TEST_JAVA.getDefaultLocation(),
-                pom.getTestSourceDirectory());
+    @Before
+    public void setUp() throws Exception {
+        MockitoAnnotations.initMocks(this);
+        factory = new PomFactoryImpl();
+        factory.packagingProviderRegistry = mockPackagingProviderRegistry;
     }
 
     private void setUpMockPackagingProvider(final String providerId) {
@@ -172,12 +164,19 @@ public class PomFactoryImplTest {
         assertModule(moduleIterator.next(), "module-two", pomFileName);
     }
 
-    private void assertModule(final Module module, final String expectedName,
-            final String pomFileName) throws Exception {
-        assertEquals(expectedName, module.getName());
-        final File parentPomDirectory = getPomFile(pomFileName).getParentFile();
-        final File moduleDirectory = new File(parentPomDirectory, expectedName);
-        final File modulePom = new File(moduleDirectory, "pom.xml");
-        assertEquals(modulePom.getCanonicalPath(), module.getPomPath());
+    @Test
+    public void testGetMinimalInstance() throws Exception {
+        // Set up
+        setUpMockPackagingProvider(DEFAULT_PACKAGING);
+
+        // Invoke
+        final Pom pom = invokeFactory("minimal-pom.xml");
+
+        // Check
+        assertGav(pom, "com.example", "minimal-app", "2.0");
+        assertEquals(SRC_MAIN_JAVA.getDefaultLocation(),
+                pom.getSourceDirectory());
+        assertEquals(SRC_TEST_JAVA.getDefaultLocation(),
+                pom.getTestSourceDirectory());
     }
 }

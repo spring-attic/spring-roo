@@ -72,7 +72,6 @@ import org.springframework.roo.support.util.StringUtils;
 public class GwtScaffoldMetadataProviderImpl implements
         GwtScaffoldMetadataProvider {
 
-    // Fields
     @Reference protected GwtFileManager gwtFileManager;
     @Reference protected GwtTemplateService gwtTemplateService;
     @Reference protected GwtTypeService gwtTypeService;
@@ -87,6 +86,16 @@ public class GwtScaffoldMetadataProviderImpl implements
                 getProvidesType());
     }
 
+    private void buildType(final GwtType type, final String moduleName) {
+        gwtTypeService.buildType(type, gwtTemplateService
+                .getStaticTemplateTypeDetails(type, moduleName), moduleName);
+    }
+
+    private String createLocalIdentifier(final JavaType javaType,
+            final LogicalPath path) {
+        return GwtScaffoldMetadata.createIdentifier(javaType, path);
+    }
+
     protected void deactivate(final ComponentContext context) {
         metadataDependencyRegistry.deregisterDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
@@ -95,19 +104,19 @@ public class GwtScaffoldMetadataProviderImpl implements
 
     public MetadataItem get(final String metadataIdentificationString) {
         // Obtain the governor's information
-        ClassOrInterfaceTypeDetails mirroredType = getGovernor(metadataIdentificationString);
-        if (mirroredType == null
+        final ClassOrInterfaceTypeDetails mirroredType = getGovernor(metadataIdentificationString);
+        if ((mirroredType == null)
                 || Modifier.isAbstract(mirroredType.getModifier())) {
             return null;
         }
 
-        ClassOrInterfaceTypeDetails proxy = gwtTypeService
+        final ClassOrInterfaceTypeDetails proxy = gwtTypeService
                 .lookupProxyFromEntity(mirroredType);
-        if (proxy == null || proxy.getDeclaredMethods().isEmpty()) {
+        if ((proxy == null) || proxy.getDeclaredMethods().isEmpty()) {
             return null;
         }
 
-        ClassOrInterfaceTypeDetails request = gwtTypeService
+        final ClassOrInterfaceTypeDetails request = gwtTypeService
                 .lookupRequestFromEntity(mirroredType);
         if (request == null) {
             return null;
@@ -118,7 +127,7 @@ public class GwtScaffoldMetadataProviderImpl implements
             return null;
         }
 
-        String moduleName = PhysicalTypeIdentifier.getPath(
+        final String moduleName = PhysicalTypeIdentifier.getPath(
                 proxy.getDeclaredByMetadataId()).getModule();
         buildType(GwtType.APP_ENTITY_TYPES_PROCESSOR, moduleName);
         buildType(GwtType.APP_REQUEST_FACTORY, moduleName);
@@ -128,21 +137,21 @@ public class GwtScaffoldMetadataProviderImpl implements
         buildType(GwtType.DETAILS_ACTIVITIES, moduleName);
         buildType(GwtType.MOBILE_ACTIVITIES, moduleName);
 
-        GwtScaffoldMetadata gwtScaffoldMetadata = new GwtScaffoldMetadata(
+        final GwtScaffoldMetadata gwtScaffoldMetadata = new GwtScaffoldMetadata(
                 metadataIdentificationString);
 
         final JavaPackage topLevelPackage = projectOperations
                 .getTopLevelPackage(moduleName);
-        Map<JavaSymbolName, GwtProxyProperty> clientSideTypeMap = new LinkedHashMap<JavaSymbolName, GwtProxyProperty>();
-        for (MethodMetadata proxyMethod : proxy.getDeclaredMethods()) {
+        final Map<JavaSymbolName, GwtProxyProperty> clientSideTypeMap = new LinkedHashMap<JavaSymbolName, GwtProxyProperty>();
+        for (final MethodMetadata proxyMethod : proxy.getDeclaredMethods()) {
             if (!proxyMethod.getMethodName().getSymbolName().startsWith("get")) {
                 continue;
             }
-            JavaSymbolName propertyName = new JavaSymbolName(
+            final JavaSymbolName propertyName = new JavaSymbolName(
                     StringUtils.uncapitalize(BeanInfoUtils
                             .getPropertyNameForJavaBeanMethod(proxyMethod)
                             .getSymbolName()));
-            JavaType propertyType = proxyMethod.getReturnType();
+            final JavaType propertyType = proxyMethod.getReturnType();
             ClassOrInterfaceTypeDetails ptmd = typeLocationService
                     .getTypeDetails(propertyType);
             if (propertyType.isCommonCollectionType()
@@ -151,32 +160,33 @@ public class GwtScaffoldMetadataProviderImpl implements
                         .getParameters().get(0));
             }
 
-            FieldMetadata field = proxy.getDeclaredField(propertyName);
-            List<AnnotationMetadata> annotations = field != null ? field
+            final FieldMetadata field = proxy.getDeclaredField(propertyName);
+            final List<AnnotationMetadata> annotations = field != null ? field
                     .getAnnotations() : Collections
                     .<AnnotationMetadata> emptyList();
 
-            GwtProxyProperty gwtProxyProperty = new GwtProxyProperty(
+            final GwtProxyProperty gwtProxyProperty = new GwtProxyProperty(
                     topLevelPackage, ptmd, propertyType,
                     propertyName.getSymbolName(), annotations, proxyMethod
                             .getMethodName().getSymbolName());
             clientSideTypeMap.put(propertyName, gwtProxyProperty);
         }
 
-        GwtTemplateDataHolder templateDataHolder = gwtTemplateService
+        final GwtTemplateDataHolder templateDataHolder = gwtTemplateService
                 .getMirrorTemplateTypeDetails(mirroredType, clientSideTypeMap,
                         moduleName);
-        Map<GwtType, List<ClassOrInterfaceTypeDetails>> typesToBeWritten = new LinkedHashMap<GwtType, List<ClassOrInterfaceTypeDetails>>();
-        Map<String, String> xmlToBeWritten = new LinkedHashMap<String, String>();
+        final Map<GwtType, List<ClassOrInterfaceTypeDetails>> typesToBeWritten = new LinkedHashMap<GwtType, List<ClassOrInterfaceTypeDetails>>();
+        final Map<String, String> xmlToBeWritten = new LinkedHashMap<String, String>();
 
-        Map<GwtType, JavaType> mirrorTypeMap = GwtUtils.getMirrorTypeMap(
+        final Map<GwtType, JavaType> mirrorTypeMap = GwtUtils.getMirrorTypeMap(
                 mirroredType.getName(), topLevelPackage);
         mirrorTypeMap.put(GwtType.PROXY, proxy.getName());
         mirrorTypeMap.put(GwtType.REQUEST, request.getName());
 
-        for (Map.Entry<GwtType, JavaType> entry : mirrorTypeMap.entrySet()) {
-            GwtType gwtType = entry.getKey();
-            JavaType javaType = entry.getValue();
+        for (final Map.Entry<GwtType, JavaType> entry : mirrorTypeMap
+                .entrySet()) {
+            final GwtType gwtType = entry.getKey();
+            final JavaType javaType = entry.getValue();
             if (!gwtType.isMirrorType() || gwtType.equals(GwtType.PROXY)
                     || gwtType.equals(GwtType.REQUEST)) {
                 continue;
@@ -185,7 +195,7 @@ public class GwtScaffoldMetadataProviderImpl implements
             gwtType.dynamicallyResolveMethodsToWatch(proxy.getName(),
                     clientSideTypeMap, topLevelPackage);
 
-            List<MemberHoldingTypeDetails> extendsTypes = gwtTypeService
+            final List<MemberHoldingTypeDetails> extendsTypes = gwtTypeService
                     .getExtendsTypes(templateDataHolder
                             .getTemplateTypeDetailsMap().get(gwtType));
             typesToBeWritten.put(gwtType, gwtTypeService
@@ -207,9 +217,9 @@ public class GwtScaffoldMetadataProviderImpl implements
 
                 final String targetDirectory = gwtPath == GwtPath.WEB ? webappPath
                         : packagePath;
-                String destFile = targetDirectory + File.separatorChar
+                final String destFile = targetDirectory + File.separatorChar
                         + javaType.getSimpleTypeName() + ".ui.xml";
-                String contents = gwtTemplateService.buildUiXml(
+                final String contents = gwtTemplateService.buildUiXml(
                         templateDataHolder.getXmlTemplates().get(gwtType),
                         destFile,
                         new ArrayList<MethodMetadata>(proxy
@@ -222,20 +232,20 @@ public class GwtScaffoldMetadataProviderImpl implements
         // offers a conceptual representation of what should go into the 4
         // key-specific types; after that we do comparisons and write to disk if
         // needed
-        for (Map.Entry<GwtType, List<ClassOrInterfaceTypeDetails>> entry : typesToBeWritten
+        for (final Map.Entry<GwtType, List<ClassOrInterfaceTypeDetails>> entry : typesToBeWritten
                 .entrySet()) {
             gwtFileManager.write(typesToBeWritten.get(entry.getKey()), entry
                     .getKey().isOverwriteConcrete());
         }
-        for (ClassOrInterfaceTypeDetails type : templateDataHolder
+        for (final ClassOrInterfaceTypeDetails type : templateDataHolder
                 .getTypeList()) {
             gwtFileManager.write(type, false);
         }
-        for (Map.Entry<String, String> entry : xmlToBeWritten.entrySet()) {
+        for (final Map.Entry<String, String> entry : xmlToBeWritten.entrySet()) {
             gwtFileManager.write(entry.getKey(), entry.getValue());
         }
-        for (Map.Entry<String, String> entry : templateDataHolder.getXmlMap()
-                .entrySet()) {
+        for (final Map.Entry<String, String> entry : templateDataHolder
+                .getXmlMap().entrySet()) {
             gwtFileManager.write(entry.getKey(), entry.getValue());
         }
 
@@ -244,19 +254,18 @@ public class GwtScaffoldMetadataProviderImpl implements
 
     private ClassOrInterfaceTypeDetails getGovernor(
             final String metadataIdentificationString) {
-        JavaType governorTypeName = GwtScaffoldMetadata
+        final JavaType governorTypeName = GwtScaffoldMetadata
                 .getJavaType(metadataIdentificationString);
-        LogicalPath governorTypePath = GwtScaffoldMetadata
+        final LogicalPath governorTypePath = GwtScaffoldMetadata
                 .getPath(metadataIdentificationString);
 
-        String physicalTypeId = PhysicalTypeIdentifier.createIdentifier(
+        final String physicalTypeId = PhysicalTypeIdentifier.createIdentifier(
                 governorTypeName, governorTypePath);
         return typeLocationService.getTypeDetails(physicalTypeId);
     }
 
-    private void buildType(final GwtType type, final String moduleName) {
-        gwtTypeService.buildType(type, gwtTemplateService
-                .getStaticTemplateTypeDetails(type, moduleName), moduleName);
+    public String getProvidesType() {
+        return GwtScaffoldMetadata.getMetadataIdentifierType();
     }
 
     public void notify(String upstreamDependency, String downstreamDependency) {
@@ -270,28 +279,28 @@ public class GwtScaffoldMetadataProviderImpl implements
                                             .getMetadataIdentiferType())),
                     "Expected class-level notifications only for PhysicalTypeIdentifier (not '"
                             + upstreamDependency + "')");
-            ClassOrInterfaceTypeDetails cid = typeLocationService
+            final ClassOrInterfaceTypeDetails cid = typeLocationService
                     .getTypeDetails(upstreamDependency);
             if (cid == null) {
                 return;
             }
 
             if (cid.getAnnotation(RooJavaType.ROO_GWT_PROXY) != null) {
-                ClassOrInterfaceTypeDetails entityType = gwtTypeService
+                final ClassOrInterfaceTypeDetails entityType = gwtTypeService
                         .lookupEntityFromProxy(cid);
                 if (entityType != null) {
                     upstreamDependency = entityType.getDeclaredByMetadataId();
                 }
             }
             else if (cid.getAnnotation(RooJavaType.ROO_GWT_REQUEST) != null) {
-                ClassOrInterfaceTypeDetails entityType = gwtTypeService
+                final ClassOrInterfaceTypeDetails entityType = gwtTypeService
                         .lookupEntityFromRequest(cid);
                 if (entityType != null) {
                     upstreamDependency = entityType.getDeclaredByMetadataId();
                 }
             }
             else if (cid.getAnnotation(RooJavaType.ROO_GWT_LOCATOR) != null) {
-                ClassOrInterfaceTypeDetails entityType = gwtTypeService
+                final ClassOrInterfaceTypeDetails entityType = gwtTypeService
                         .lookupEntityFromLocator(cid);
                 if (entityType != null) {
                     upstreamDependency = entityType.getDeclaredByMetadataId();
@@ -301,9 +310,9 @@ public class GwtScaffoldMetadataProviderImpl implements
             // A physical Java type has changed, and determine what the
             // corresponding local metadata identification string would have
             // been
-            JavaType typeName = PhysicalTypeIdentifier
+            final JavaType typeName = PhysicalTypeIdentifier
                     .getJavaType(upstreamDependency);
-            LogicalPath typePath = PhysicalTypeIdentifier
+            final LogicalPath typePath = PhysicalTypeIdentifier
                     .getPath(upstreamDependency);
             downstreamDependency = createLocalIdentifier(typeName, typePath);
         }
@@ -330,14 +339,5 @@ public class GwtScaffoldMetadataProviderImpl implements
                         + getProvidesType() + "'");
 
         metadataService.evictAndGet(downstreamDependency);
-    }
-
-    private String createLocalIdentifier(final JavaType javaType,
-            final LogicalPath path) {
-        return GwtScaffoldMetadata.createIdentifier(javaType, path);
-    }
-
-    public String getProvidesType() {
-        return GwtScaffoldMetadata.getMetadataIdentifierType();
     }
 }

@@ -38,16 +38,94 @@ import org.w3c.dom.Element;
 @Service
 public class SecurityOperationsImpl implements SecurityOperations {
 
-    // Constants
     private static final Dependency SPRING_SECURITY = new Dependency(
             "org.springframework.security", "spring-security-core",
             "3.1.0.RELEASE");
 
-    // Fields
     @Reference private FileManager fileManager;
     @Reference private PathResolver pathResolver;
     @Reference private ProjectOperations projectOperations;
     @Reference private TilesOperations tilesOperations;
+
+    public void installSecurity() {
+        // Parse the configuration.xml file
+        final Element configuration = XmlUtils.getConfiguration(getClass());
+
+        // Add POM properties
+        updatePomProperties(configuration,
+                projectOperations.getFocusedModuleName());
+
+        // Add dependencies to POM
+        updateDependencies(configuration,
+                projectOperations.getFocusedModuleName());
+
+        // Copy the template across
+        final String destination = pathResolver.getFocusedIdentifier(
+                Path.SPRING_CONFIG_ROOT, "applicationContext-security.xml");
+        if (!fileManager.exists(destination)) {
+            try {
+                FileCopyUtils.copy(FileUtils.getInputStream(getClass(),
+                        "applicationContext-security-template.xml"),
+                        fileManager.createFile(destination).getOutputStream());
+            }
+            catch (final IOException ioe) {
+                throw new IllegalStateException(ioe);
+            }
+        }
+
+        // Copy the template across
+        final String loginPage = pathResolver.getFocusedIdentifier(
+                Path.SRC_MAIN_WEBAPP, "WEB-INF/views/login.jspx");
+        if (!fileManager.exists(loginPage)) {
+            try {
+                FileCopyUtils.copy(
+                        FileUtils.getInputStream(getClass(), "login.jspx"),
+                        fileManager.createFile(loginPage).getOutputStream());
+            }
+            catch (final IOException ioe) {
+                throw new IllegalStateException(ioe);
+            }
+        }
+
+        if (fileManager.exists(pathResolver.getFocusedIdentifier(
+                Path.SRC_MAIN_WEBAPP, "WEB-INF/views/views.xml"))) {
+            tilesOperations.addViewDefinition("",
+                    pathResolver.getFocusedPath(Path.SRC_MAIN_WEBAPP), "login",
+                    TilesOperations.PUBLIC_TEMPLATE,
+                    "/WEB-INF/views/login.jspx");
+        }
+
+        final String webXmlPath = pathResolver.getFocusedIdentifier(
+                Path.SRC_MAIN_WEBAPP, "WEB-INF/web.xml");
+        final Document webXmlDocument = XmlUtils.readXml(fileManager
+                .getInputStream(webXmlPath));
+        WebXmlUtils.addFilterAtPosition(WebXmlUtils.FilterPosition.BETWEEN,
+                WebMvcOperations.HTTP_METHOD_FILTER_NAME,
+                WebMvcOperations.OPEN_ENTITYMANAGER_IN_VIEW_FILTER_NAME,
+                SecurityOperations.SECURITY_FILTER_NAME,
+                "org.springframework.web.filter.DelegatingFilterProxy", "/*",
+                webXmlDocument, null);
+        fileManager.createOrUpdateTextFileIfRequired(webXmlPath,
+                XmlUtils.nodeToString(webXmlDocument), false);
+
+        // Include static view controller handler to webmvc-config.xml
+        final String webConfigPath = pathResolver.getFocusedIdentifier(
+                Path.SRC_MAIN_WEBAPP, "WEB-INF/spring/webmvc-config.xml");
+        final Document webConfigDocument = XmlUtils.readXml(fileManager
+                .getInputStream(webConfigPath));
+        final Element webConfig = webConfigDocument.getDocumentElement();
+        final Element viewController = DomUtils.findFirstElementByName(
+                "mvc:view-controller", webConfig);
+        Assert.notNull(viewController, "Could not find mvc:view-controller in "
+                + webConfig);
+        viewController.getParentNode()
+                .insertBefore(
+                        new XmlElementBuilder("mvc:view-controller",
+                                webConfigDocument).addAttribute("path",
+                                "/login").build(), viewController);
+        fileManager.createOrUpdateTextFileIfRequired(webConfigPath,
+                XmlUtils.nodeToString(webConfigDocument), false);
+    }
 
     public boolean isSecurityInstallationPossible() {
         // Permit installation if they have a web project (as per ROO-342) and
@@ -61,104 +139,24 @@ public class SecurityOperationsImpl implements SecurityOperations {
                         FeatureNames.JSF, FeatureNames.GWT);
     }
 
-    public void installSecurity() {
-        // Parse the configuration.xml file
-        Element configuration = XmlUtils.getConfiguration(getClass());
-
-        // Add POM properties
-        updatePomProperties(configuration,
-                projectOperations.getFocusedModuleName());
-
-        // Add dependencies to POM
-        updateDependencies(configuration,
-                projectOperations.getFocusedModuleName());
-
-        // Copy the template across
-        String destination = pathResolver.getFocusedIdentifier(
-                Path.SPRING_CONFIG_ROOT, "applicationContext-security.xml");
-        if (!fileManager.exists(destination)) {
-            try {
-                FileCopyUtils.copy(FileUtils.getInputStream(getClass(),
-                        "applicationContext-security-template.xml"),
-                        fileManager.createFile(destination).getOutputStream());
-            }
-            catch (IOException ioe) {
-                throw new IllegalStateException(ioe);
-            }
+    private void updateDependencies(final Element configuration,
+            final String moduleName) {
+        final List<Dependency> dependencies = new ArrayList<Dependency>();
+        final List<Element> securityDependencies = XmlUtils.findElements(
+                "/configuration/spring-security/dependencies/dependency",
+                configuration);
+        for (final Element dependencyElement : securityDependencies) {
+            dependencies.add(new Dependency(dependencyElement));
         }
-
-        // Copy the template across
-        String loginPage = pathResolver.getFocusedIdentifier(
-                Path.SRC_MAIN_WEBAPP, "WEB-INF/views/login.jspx");
-        if (!fileManager.exists(loginPage)) {
-            try {
-                FileCopyUtils.copy(
-                        FileUtils.getInputStream(getClass(), "login.jspx"),
-                        fileManager.createFile(loginPage).getOutputStream());
-            }
-            catch (IOException ioe) {
-                throw new IllegalStateException(ioe);
-            }
-        }
-
-        if (fileManager.exists(pathResolver.getFocusedIdentifier(
-                Path.SRC_MAIN_WEBAPP, "WEB-INF/views/views.xml"))) {
-            tilesOperations.addViewDefinition("",
-                    pathResolver.getFocusedPath(Path.SRC_MAIN_WEBAPP), "login",
-                    TilesOperations.PUBLIC_TEMPLATE,
-                    "/WEB-INF/views/login.jspx");
-        }
-
-        String webXmlPath = pathResolver.getFocusedIdentifier(
-                Path.SRC_MAIN_WEBAPP, "WEB-INF/web.xml");
-        Document webXmlDocument = XmlUtils.readXml(fileManager
-                .getInputStream(webXmlPath));
-        WebXmlUtils.addFilterAtPosition(WebXmlUtils.FilterPosition.BETWEEN,
-                WebMvcOperations.HTTP_METHOD_FILTER_NAME,
-                WebMvcOperations.OPEN_ENTITYMANAGER_IN_VIEW_FILTER_NAME,
-                SecurityOperations.SECURITY_FILTER_NAME,
-                "org.springframework.web.filter.DelegatingFilterProxy", "/*",
-                webXmlDocument, null);
-        fileManager.createOrUpdateTextFileIfRequired(webXmlPath,
-                XmlUtils.nodeToString(webXmlDocument), false);
-
-        // Include static view controller handler to webmvc-config.xml
-        String webConfigPath = pathResolver.getFocusedIdentifier(
-                Path.SRC_MAIN_WEBAPP, "WEB-INF/spring/webmvc-config.xml");
-        Document webConfigDocument = XmlUtils.readXml(fileManager
-                .getInputStream(webConfigPath));
-        Element webConfig = webConfigDocument.getDocumentElement();
-        Element viewController = DomUtils.findFirstElementByName(
-                "mvc:view-controller", webConfig);
-        Assert.notNull(viewController, "Could not find mvc:view-controller in "
-                + webConfig);
-        viewController.getParentNode()
-                .insertBefore(
-                        new XmlElementBuilder("mvc:view-controller",
-                                webConfigDocument).addAttribute("path",
-                                "/login").build(), viewController);
-        fileManager.createOrUpdateTextFileIfRequired(webConfigPath,
-                XmlUtils.nodeToString(webConfigDocument), false);
+        projectOperations.addDependencies(moduleName, dependencies);
     }
 
     private void updatePomProperties(final Element configuration,
             final String moduleName) {
-        List<Element> databaseProperties = XmlUtils.findElements(
+        final List<Element> databaseProperties = XmlUtils.findElements(
                 "/configuration/spring-security/properties/*", configuration);
-        for (Element property : databaseProperties) {
+        for (final Element property : databaseProperties) {
             projectOperations.addProperty(moduleName, new Property(property));
         }
-    }
-
-    private void updateDependencies(final Element configuration,
-            final String moduleName) {
-        List<Dependency> dependencies = new ArrayList<Dependency>();
-        List<Element> securityDependencies = XmlUtils.findElements(
-                "/configuration/spring-security/dependencies/dependency",
-                configuration);
-        for (Element dependencyElement : securityDependencies) {
-            dependencies.add(new Dependency(dependencyElement));
-        }
-        projectOperations.addDependencies(moduleName, dependencies);
     }
 }

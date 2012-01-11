@@ -52,13 +52,12 @@ public class ConversionServiceMetadataProviderImpl extends
         AbstractItdMetadataProvider implements
         ConversionServiceMetadataProvider {
 
-    // Fields
-    @Reference private LayerService layerService;
-
     // Stores the MID (as accepted by this
     // ConversionServiceMetadataProviderImpl) for the one (and only one)
     // application-wide conversion service
     private String applicationConversionServiceFactoryBeanMid;
+
+    @Reference private LayerService layerService;
 
     protected void activate(final ComponentContext context) {
         metadataDependencyRegistry.registerDependency(
@@ -68,6 +67,13 @@ public class ConversionServiceMetadataProviderImpl extends
                 WebScaffoldMetadata.getMetadataIdentiferType(),
                 getProvidesType());
         addMetadataTrigger(ROO_CONVERSION_SERVICE);
+    }
+
+    @Override
+    protected String createLocalIdentifier(final JavaType javaType,
+            final LogicalPath path) {
+        return PhysicalTypeIdentifierNamingUtils.createIdentifier(
+                ConversionServiceMetadata.class.getName(), javaType, path);
     }
 
     protected void deactivate(final ComponentContext context) {
@@ -81,24 +87,17 @@ public class ConversionServiceMetadataProviderImpl extends
     }
 
     @Override
-    protected String resolveDownstreamDependencyIdentifier(
-            final String upstreamDependency) {
-        if (MetadataIdentificationUtils.getMetadataClass(upstreamDependency)
-                .equals(MetadataIdentificationUtils
-                        .getMetadataClass(WebScaffoldMetadata
-                                .getMetadataIdentiferType()))) {
-            // A WebScaffoldMetadata upstream MID has changed or become
-            // available for the first time
-            // It's OK to return null if we don't yet know the MID because its
-            // JavaType has never been found
-            return applicationConversionServiceFactoryBeanMid;
-        }
+    protected String getGovernorPhysicalTypeIdentifier(final String metadataId) {
+        final JavaType javaType = PhysicalTypeIdentifierNamingUtils
+                .getJavaType(ConversionServiceMetadata.class.getName(),
+                        metadataId);
+        final LogicalPath path = PhysicalTypeIdentifierNamingUtils.getPath(
+                ConversionServiceMetadata.class.getName(), metadataId);
+        return PhysicalTypeIdentifier.createIdentifier(javaType, path);
+    }
 
-        // It wasn't a WebScaffoldMetadata, so we can let the superclass handle
-        // it
-        // (it's expected it would be a PhysicalTypeIdentifier notification, as
-        // that's the only other thing we registered to receive)
-        return super.resolveDownstreamDependencyIdentifier(upstreamDependency);
+    public String getItdUniquenessFilenameSuffix() {
+        return "ConversionService";
     }
 
     @Override
@@ -118,13 +117,13 @@ public class ConversionServiceMetadataProviderImpl extends
         final Map<JavaType, JavaType> idTypes = new HashMap<JavaType, JavaType>();
         final Map<JavaType, List<MethodMetadata>> toStringMethods = new HashMap<JavaType, List<MethodMetadata>>();
 
-        for (ClassOrInterfaceTypeDetails controllerTypeDetails : typeLocationService
+        for (final ClassOrInterfaceTypeDetails controllerTypeDetails : typeLocationService
                 .findClassesOrInterfaceDetailsWithAnnotation(ROO_WEB_SCAFFOLD)) {
             metadataDependencyRegistry.registerDependency(
                     controllerTypeDetails.getDeclaredByMetadataId(),
                     metadataIdentificationString);
 
-            WebScaffoldAnnotationValues webScaffoldAnnotationValues = new WebScaffoldAnnotationValues(
+            final WebScaffoldAnnotationValues webScaffoldAnnotationValues = new WebScaffoldAnnotationValues(
                     controllerTypeDetails);
             final JavaType formBackingObject = webScaffoldAnnotationValues
                     .getFormBackingObject();
@@ -153,7 +152,7 @@ public class ConversionServiceMetadataProviderImpl extends
                 if (fromJsonMethod != null) {
                     jsonMethodNames.put(CustomDataJsonTags.FROM_JSON_METHOD,
                             fromJsonMethod.getMethodName());
-                    MethodMetadata toJsonMethod = MemberFindingUtils
+                    final MethodMetadata toJsonMethod = MemberFindingUtils
                             .getMostConcreteMethodWithTag(fieldMemberDetails,
                                     CustomDataJsonTags.TO_JSON_METHOD);
                     if (toJsonMethod != null) {
@@ -195,19 +194,24 @@ public class ConversionServiceMetadataProviderImpl extends
                 relevantDomainTypes, compositePrimaryKeyTypes, toStringMethods);
     }
 
+    public String getProvidesType() {
+        return MetadataIdentificationUtils
+                .create(ConversionServiceMetadata.class.getName());
+    }
+
     private List<MethodMetadata> getToStringMethods(
             final MemberDetails memberDetails,
             final String metadataIdentificationString) {
-        List<MethodMetadata> toStringMethods = new ArrayList<MethodMetadata>();
+        final List<MethodMetadata> toStringMethods = new ArrayList<MethodMetadata>();
 
         int counter = 0;
-        for (MethodMetadata method : memberDetails.getMethods()) {
+        for (final MethodMetadata method : memberDetails.getMethods()) {
             // Track any changes to that method (eg it goes away)
             metadataDependencyRegistry.registerDependency(
                     method.getDeclaredByMetadataId(),
                     metadataIdentificationString);
 
-            if (counter < 4 && isMethodOfInterest(method, memberDetails)) {
+            if ((counter < 4) && isMethodOfInterest(method, memberDetails)) {
                 counter++;
                 toStringMethods.add(method);
             }
@@ -216,8 +220,8 @@ public class ConversionServiceMetadataProviderImpl extends
         return toStringMethods;
     }
 
-    private boolean isMethodOfInterest(MethodMetadata method,
-            MemberDetails memberDetails) {
+    private boolean isMethodOfInterest(final MethodMetadata method,
+            final MemberDetails memberDetails) {
         if (!BeanInfoUtils.isAccessorMethod(method)) {
             return false; // Only interested in accessors
         }
@@ -229,12 +233,12 @@ public class ConversionServiceMetadataProviderImpl extends
                           // for persistence id or version fields
         }
 
-        FieldMetadata field = BeanInfoUtils.getFieldForJavaBeanMethod(
+        final FieldMetadata field = BeanInfoUtils.getFieldForJavaBeanMethod(
                 memberDetails, method);
         if (field == null) {
             return false;
         }
-        JavaType fieldType = field.getFieldType();
+        final JavaType fieldType = field.getFieldType();
         if (fieldType.isCommonCollectionType()
                 || fieldType.isArray() // Exclude collections and arrays
                 || typeLocationService.isInProject(fieldType) // Exclude
@@ -261,28 +265,24 @@ public class ConversionServiceMetadataProviderImpl extends
         return true;
     }
 
-    public String getItdUniquenessFilenameSuffix() {
-        return "ConversionService";
-    }
-
-    public String getProvidesType() {
-        return MetadataIdentificationUtils
-                .create(ConversionServiceMetadata.class.getName());
-    }
-
     @Override
-    protected String createLocalIdentifier(final JavaType javaType,
-            final LogicalPath path) {
-        return PhysicalTypeIdentifierNamingUtils.createIdentifier(
-                ConversionServiceMetadata.class.getName(), javaType, path);
-    }
+    protected String resolveDownstreamDependencyIdentifier(
+            final String upstreamDependency) {
+        if (MetadataIdentificationUtils.getMetadataClass(upstreamDependency)
+                .equals(MetadataIdentificationUtils
+                        .getMetadataClass(WebScaffoldMetadata
+                                .getMetadataIdentiferType()))) {
+            // A WebScaffoldMetadata upstream MID has changed or become
+            // available for the first time
+            // It's OK to return null if we don't yet know the MID because its
+            // JavaType has never been found
+            return applicationConversionServiceFactoryBeanMid;
+        }
 
-    @Override
-    protected String getGovernorPhysicalTypeIdentifier(final String metadataId) {
-        JavaType javaType = PhysicalTypeIdentifierNamingUtils.getJavaType(
-                ConversionServiceMetadata.class.getName(), metadataId);
-        LogicalPath path = PhysicalTypeIdentifierNamingUtils.getPath(
-                ConversionServiceMetadata.class.getName(), metadataId);
-        return PhysicalTypeIdentifier.createIdentifier(javaType, path);
+        // It wasn't a WebScaffoldMetadata, so we can let the superclass handle
+        // it
+        // (it's expected it would be a PhysicalTypeIdentifier notification, as
+        // that's the only other thing we registered to receive)
+        return super.resolveDownstreamDependencyIdentifier(upstreamDependency);
     }
 }

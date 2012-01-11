@@ -30,8 +30,8 @@ public class AppCloudClientFactoryImplTest {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        this.factory = new AppCloudClientFactoryImpl();
-        this.factory.uaaService = mockUaaService;
+        factory = new AppCloudClientFactoryImpl();
+        factory.uaaService = mockUaaService;
     }
 
     @Test
@@ -43,7 +43,7 @@ public class AppCloudClientFactoryImplTest {
         when(mockCredentials.getUrlObject()).thenReturn(url);
 
         // Invoke
-        final UaaAwareAppCloudClient instance = this.factory
+        final UaaAwareAppCloudClient instance = factory
                 .getUaaAwareInstance(mockCredentials);
 
         // Check

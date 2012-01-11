@@ -24,7 +24,6 @@ import org.springframework.roo.support.util.Assert;
 @Reference(name = "packagingProvider", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC, referenceInterface = PackagingProvider.class, cardinality = ReferenceCardinality.MANDATORY_MULTIPLE)
 public class PackagingProviderRegistryImpl implements PackagingProviderRegistry {
 
-    // Fields
     private final Object mutex = new Object();
     // Using a map avoids each PackagingProvider having to implement equals()
     // properly (when removing)
@@ -43,18 +42,11 @@ public class PackagingProviderRegistryImpl implements PackagingProviderRegistry 
         }
     }
 
-    protected void unbindPackagingProvider(
-            final PackagingProvider packagingProvider) {
-        synchronized (mutex) {
-            packagingProviders.remove(packagingProvider.getId());
-        }
-    }
-
-    // ------------------ PackagingProviderRegistry methods --------------------
-
     public Collection<PackagingProvider> getAllPackagingProviders() {
         return new ArrayList<PackagingProvider>(packagingProviders.values());
     }
+
+    // ------------------ PackagingProviderRegistry methods --------------------
 
     public PackagingProvider getDefaultPackagingProvider() {
         PackagingProvider defaultCoreProvider = null;
@@ -74,7 +66,7 @@ public class PackagingProviderRegistryImpl implements PackagingProviderRegistry 
         return defaultCoreProvider;
     }
 
-    public PackagingProvider getPackagingProvider(String id) {
+    public PackagingProvider getPackagingProvider(final String id) {
         for (final PackagingProvider packagingProvider : packagingProviders
                 .values()) {
             if (packagingProvider.getId().equalsIgnoreCase(id)) {
@@ -82,5 +74,12 @@ public class PackagingProviderRegistryImpl implements PackagingProviderRegistry 
             }
         }
         return null;
+    }
+
+    protected void unbindPackagingProvider(
+            final PackagingProvider packagingProvider) {
+        synchronized (mutex) {
+            packagingProviders.remove(packagingProvider.getId());
+        }
     }
 }

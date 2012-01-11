@@ -28,7 +28,6 @@ import org.springframework.roo.support.util.Assert;
  */
 public class LayerTypeMatcher extends AnnotatedTypeMatcher {
 
-    // Fields
     private final JavaSymbolName domainTypesAttribute;
     private final JavaType layerAnnotationType;
 
@@ -47,15 +46,15 @@ public class LayerTypeMatcher extends AnnotatedTypeMatcher {
         Assert.notNull(domainTypesAttribute,
                 "Domain types attribute is required");
         this.domainTypesAttribute = domainTypesAttribute;
-        this.layerAnnotationType = layerAnnotation;
+        layerAnnotationType = layerAnnotation;
     }
 
     @Override
     public Object getTagValue(final MemberHoldingTypeDetails type) {
         final AnnotationMetadata layerAnnotation = MemberFindingUtils
                 .getAnnotationOfType(type.getAnnotations(), layerAnnotationType);
-        if (layerAnnotation == null
-                || layerAnnotation.getAttribute(domainTypesAttribute) == null) {
+        if ((layerAnnotation == null)
+                || (layerAnnotation.getAttribute(domainTypesAttribute) == null)) {
             return null;
         }
         final AnnotationAttributeValue<?> value = layerAnnotation

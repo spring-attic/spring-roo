@@ -18,15 +18,6 @@ import org.springframework.roo.model.CustomDataKey;
 public interface Matcher<T extends CustomDataAccessor> {
 
     /**
-     * Returns the {@link CustomDataAccessor}s for any elements of the given
-     * list that meet this matcher's inclusion criteria.
-     * 
-     * @param memberHoldingTypeDetailsList the list to check for matches
-     * @return a non-<code>null</code> list
-     */
-    List<T> matches(List<MemberHoldingTypeDetails> memberHoldingTypeDetailsList);
-
-    /**
      * Returns a key indicating the type of custom data returned by
      * {@link #matches(List)}
      * 
@@ -42,4 +33,13 @@ public interface Matcher<T extends CustomDataAccessor> {
      * @return a value (can be null)
      */
     Object getTagValue(T key);
+
+    /**
+     * Returns the {@link CustomDataAccessor}s for any elements of the given
+     * list that meet this matcher's inclusion criteria.
+     * 
+     * @param memberHoldingTypeDetailsList the list to check for matches
+     * @return a non-<code>null</code> list
+     */
+    List<T> matches(List<MemberHoldingTypeDetails> memberHoldingTypeDetailsList);
 }

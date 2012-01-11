@@ -30,8 +30,98 @@ import com.vmware.appcloud.client.ServiceConfiguration;
 @Service
 public class CloudFoundryCommands implements CommandMarker {
 
-    // Fields
     @Reference CloudFoundryOperations cloudFoundryOperations;
+
+    @CliCommand(value = "cloud foundry list apps", help = "List deployed applications")
+    public void apps() {
+        cloudFoundryOperations.apps();
+    }
+
+    @CliCommand(value = "cloud foundry bind service", help = "Bind a service to a deployed application")
+    public void bindService(
+            @CliOption(key = "serviceName", mandatory = true, help = "The name of the service instance you want to bind") final CloudService service,
+            @CliOption(key = "appName", mandatory = true, help = "The name of the application you want to bind the service to") final CloudApp appName) {
+
+        cloudFoundryOperations
+                .bindService(service.getName(), appName.getName());
+    }
+
+    @CliCommand(value = "cloud foundry clear login details", help = "Clears all stored login information")
+    public void clearStoredLoginDetails() {
+        cloudFoundryOperations.clearStoredLoginDetails();
+    }
+
+    // TODO: Add setup command once cloud namespace is more understood
+    // @CliCommand(value = "cloud foundry setup", help = "Setup Cloud Foundry")
+    public void config() {
+        cloudFoundryOperations.setup();
+    }
+
+    @CliCommand(value = "cloud foundry view crashes", help = "View recent application crashes")
+    public void crashes(
+            @CliOption(key = "appName", mandatory = true, help = "The name of the application to view recent crashes for") final CloudApp appName) {
+
+        cloudFoundryOperations.crashes(appName.getName());
+    }
+
+    @CliCommand(value = "cloud foundry view crash logs", help = "Display all the logs for crashed instance")
+    public void crashLogs(
+            @CliOption(key = "appName", mandatory = true, help = "The name of the application to view the crash logs for") final CloudApp appName,
+            @CliOption(key = "instance", mandatory = false, help = "The name specific instance of the application of interest") final String instance) {
+
+        cloudFoundryOperations.crashLogs(appName.getName(), instance);
+    }
+
+    @CliCommand(value = "cloud foundry create service", help = "Create a service instance")
+    public void createService(
+            @CliOption(key = "serviceType", mandatory = true, help = "The service type") final ServiceConfiguration service,
+            @CliOption(key = "serviceName", mandatory = true, help = "The name of your service instance") final String name,
+            @CliOption(key = "appName", mandatory = false, help = "The name of the app to bind the service to") final CloudApp bind) {
+
+        String appName = null;
+        if (bind != null) {
+            appName = bind.getName();
+        }
+        cloudFoundryOperations
+                .createService(service.getVendor(), name, appName);
+    }
+
+    @CliCommand(value = "cloud foundry delete app", help = "Delete an application")
+    public void delete(
+            @CliOption(key = "appName", mandatory = true, help = "The name of the application to delete") final CloudApp appName) {
+
+        cloudFoundryOperations.delete(appName.getName());
+    }
+
+    @CliCommand(value = "cloud foundry delete service", help = "Delete a service")
+    public void deleteService(
+            @CliOption(key = "serviceName", mandatory = false, help = "The name of the service instance to delete") final CloudService service) {
+
+        cloudFoundryOperations.deleteService(service.getName());
+    }
+
+    @CliCommand(value = "cloud foundry files", help = "Directory listings or file download")
+    public void files(
+            @CliOption(key = "appName", mandatory = true, help = "The name of the application to target") final CloudApp appName,
+            @CliOption(key = "path", mandatory = true, help = "The path of the file or folder to navigate to or view") final CloudFile path,
+            @CliOption(key = "instance", mandatory = false, help = "The specific instance of the application to be targeted") final String instance) {
+
+        cloudFoundryOperations.files(appName.getName(), path.getFileName(),
+                instance);
+    }
+
+    @CliCommand(value = "cloud foundry info", help = "Information")
+    public void info() {
+        cloudFoundryOperations.info();
+    }
+
+    @CliCommand(value = "cloud foundry list instances", help = "List and/or change the number of application instances")
+    public void instances(
+            @CliOption(key = "appName", mandatory = true, help = "The name of the application to list and/or change the number instances for") final CloudApp appName,
+            @CliOption(key = "num", mandatory = false, help = "The number of instances to scale the application to") final String number) {
+
+        cloudFoundryOperations.instances(appName.getName(), number);
+    }
 
     @CliAvailabilityIndicator({ "cloud foundry list apps",
             "cloud foundry bind service", "cloud foundry view crash logs",
@@ -48,11 +138,6 @@ public class CloudFoundryCommands implements CommandMarker {
             "cloud foundry update app memory" })
     public boolean isCommandAvailable() {
         return cloudFoundryOperations.isCloudFoundryCommandAvailable();
-    }
-
-    @CliCommand(value = "cloud foundry info", help = "Information")
-    public void info() {
-        cloudFoundryOperations.info();
     }
 
     @CliCommand(value = "cloud foundry login", help = "Login")
@@ -73,53 +158,20 @@ public class CloudFoundryCommands implements CommandMarker {
         cloudFoundryOperations.login(email, password, url);
     }
 
-    @CliCommand(value = "cloud foundry list services", help = "List of services available")
-    public void services() {
-        cloudFoundryOperations.services();
+    @CliCommand(value = "cloud foundry view logs", help = "Display all the logs for a specific application")
+    public void logs(
+            @CliOption(key = "appName", mandatory = true, help = "The name of the application to view the logs for") final CloudApp appName,
+            @CliOption(key = "instance", mandatory = false, help = "The name specific instance of the application of interest") final String instance) {
+
+        cloudFoundryOperations.logs(appName.getName(), instance);
     }
 
-    @CliCommand(value = "cloud foundry create service", help = "Create a service instance")
-    public void createService(
-            @CliOption(key = "serviceType", mandatory = true, help = "The service type") final ServiceConfiguration service,
-            @CliOption(key = "serviceName", mandatory = true, help = "The name of your service instance") final String name,
-            @CliOption(key = "appName", mandatory = false, help = "The name of the app to bind the service to") final CloudApp bind) {
+    @CliCommand(value = "cloud foundry map url", help = "Register an application with a URL")
+    public void mapUrl(
+            @CliOption(key = "appName", mandatory = true, help = "The name of the application to bind the URL to") final CloudApp appName,
+            @CliOption(key = "url", mandatory = true, help = "The URL to bind the application to") final String url) {
 
-        String appName = null;
-        if (bind != null) {
-            appName = bind.getName();
-        }
-        cloudFoundryOperations
-                .createService(service.getVendor(), name, appName);
-    }
-
-    @CliCommand(value = "cloud foundry delete service", help = "Delete a service")
-    public void deleteService(
-            @CliOption(key = "serviceName", mandatory = false, help = "The name of the service instance to delete") final CloudService service) {
-
-        cloudFoundryOperations.deleteService(service.getName());
-    }
-
-    @CliCommand(value = "cloud foundry bind service", help = "Bind a service to a deployed application")
-    public void bindService(
-            @CliOption(key = "serviceName", mandatory = true, help = "The name of the service instance you want to bind") final CloudService service,
-            @CliOption(key = "appName", mandatory = true, help = "The name of the application you want to bind the service to") final CloudApp appName) {
-
-        cloudFoundryOperations
-                .bindService(service.getName(), appName.getName());
-    }
-
-    @CliCommand(value = "cloud foundry unbind service", help = "Unbind a service from a deployed application")
-    public void unbindService(
-            @CliOption(key = "serviceName", mandatory = true, help = "The name of the service instance you want to bind") final CloudService service,
-            @CliOption(key = "appName", mandatory = true, help = "The name of the application you want to bind the service to") final CloudApp appName) {
-
-        cloudFoundryOperations.unbindService(service.getName(),
-                appName.getName());
-    }
-
-    @CliCommand(value = "cloud foundry list apps", help = "List deployed applications")
-    public void apps() {
-        cloudFoundryOperations.apps();
+        cloudFoundryOperations.map(appName.getName(), url);
     }
 
     @CliCommand(value = "cloud foundry deploy", help = "Deploy an application")
@@ -138,6 +190,28 @@ public class CloudFoundryCommands implements CommandMarker {
                 path.getPath(), urls);
     }
 
+    // TODO: This feature was not working in the initial release JT
+    // @CliCommand(value = "cloud foundry rename app", help =
+    // "Delete an application")
+    public void renameApp(
+            @CliOption(key = "appName", mandatory = true, help = "The name of the application to rename") final CloudApp appName,
+            @CliOption(key = "newAppName", mandatory = true, help = "The new name of the application") final String newAppName) {
+
+        cloudFoundryOperations.renameApp(appName.getName(), newAppName);
+    }
+
+    @CliCommand(value = "cloud foundry restart app", help = "Restart an application")
+    public void restart(
+            @CliOption(key = "appName", mandatory = true, help = "The name of the application to restart") final CloudApp appName) {
+
+        cloudFoundryOperations.restart(appName.getName());
+    }
+
+    @CliCommand(value = "cloud foundry list services", help = "List of services available")
+    public void services() {
+        cloudFoundryOperations.services();
+    }
+
     @CliCommand(value = "cloud foundry start app", help = "Start an application")
     public void start(
             @CliOption(key = "appName", mandatory = true, help = "The name of the application to start") final CloudApp appName) {
@@ -152,43 +226,21 @@ public class CloudFoundryCommands implements CommandMarker {
         cloudFoundryOperations.stop(appName.getName());
     }
 
-    @CliCommand(value = "cloud foundry restart app", help = "Restart an application")
-    public void restart(
-            @CliOption(key = "appName", mandatory = true, help = "The name of the application to restart") final CloudApp appName) {
+    @CliCommand(value = "cloud foundry unbind service", help = "Unbind a service from a deployed application")
+    public void unbindService(
+            @CliOption(key = "serviceName", mandatory = true, help = "The name of the service instance you want to bind") final CloudService service,
+            @CliOption(key = "appName", mandatory = true, help = "The name of the application you want to bind the service to") final CloudApp appName) {
 
-        cloudFoundryOperations.restart(appName.getName());
+        cloudFoundryOperations.unbindService(service.getName(),
+                appName.getName());
     }
 
-    @CliCommand(value = "cloud foundry delete app", help = "Delete an application")
-    public void delete(
-            @CliOption(key = "appName", mandatory = true, help = "The name of the application to delete") final CloudApp appName) {
+    @CliCommand(value = "cloud foundry unmap url", help = "Register an application with a URL")
+    public void unMapUrl(
+            @CliOption(key = "appName", mandatory = true, help = "The name of the application to unbind the URL from") final CloudApp appName,
+            @CliOption(key = "url", mandatory = true, help = "The URL to unbind the application from") final CloudUri url) {
 
-        cloudFoundryOperations.delete(appName.getName());
-    }
-
-    // TODO: This feature was not working in the initial release JT
-    // @CliCommand(value = "cloud foundry rename app", help =
-    // "Delete an application")
-    public void renameApp(
-            @CliOption(key = "appName", mandatory = true, help = "The name of the application to rename") final CloudApp appName,
-            @CliOption(key = "newAppName", mandatory = true, help = "The new name of the application") final String newAppName) {
-
-        cloudFoundryOperations.renameApp(appName.getName(), newAppName);
-    }
-
-    @CliCommand(value = "cloud foundry list instances", help = "List and/or change the number of application instances")
-    public void instances(
-            @CliOption(key = "appName", mandatory = true, help = "The name of the application to list and/or change the number instances for") final CloudApp appName,
-            @CliOption(key = "num", mandatory = false, help = "The number of instances to scale the application to") final String number) {
-
-        cloudFoundryOperations.instances(appName.getName(), number);
-    }
-
-    @CliCommand(value = "cloud foundry view app memory", help = "View or update the memory reservation for an application")
-    public void viewMemory(
-            @CliOption(key = "appName", mandatory = true, help = "The name of the application to view or update the reservation for") final CloudApp appName) {
-
-        cloudFoundryOperations.mem(appName.getName(), null);
+        cloudFoundryOperations.unMap(appName.getName(), url.getUri());
     }
 
     @CliCommand(value = "cloud foundry update app memory", help = "View or update the memory reservation for an application")
@@ -203,39 +255,6 @@ public class CloudFoundryCommands implements CommandMarker {
         cloudFoundryOperations.mem(appName.getName(), memory);
     }
 
-    @CliCommand(value = "cloud foundry view crashes", help = "View recent application crashes")
-    public void crashes(
-            @CliOption(key = "appName", mandatory = true, help = "The name of the application to view recent crashes for") final CloudApp appName) {
-
-        cloudFoundryOperations.crashes(appName.getName());
-    }
-
-    @CliCommand(value = "cloud foundry view crash logs", help = "Display all the logs for crashed instance")
-    public void crashLogs(
-            @CliOption(key = "appName", mandatory = true, help = "The name of the application to view the crash logs for") final CloudApp appName,
-            @CliOption(key = "instance", mandatory = false, help = "The name specific instance of the application of interest") final String instance) {
-
-        cloudFoundryOperations.crashLogs(appName.getName(), instance);
-    }
-
-    @CliCommand(value = "cloud foundry view logs", help = "Display all the logs for a specific application")
-    public void logs(
-            @CliOption(key = "appName", mandatory = true, help = "The name of the application to view the logs for") final CloudApp appName,
-            @CliOption(key = "instance", mandatory = false, help = "The name specific instance of the application of interest") final String instance) {
-
-        cloudFoundryOperations.logs(appName.getName(), instance);
-    }
-
-    @CliCommand(value = "cloud foundry files", help = "Directory listings or file download")
-    public void files(
-            @CliOption(key = "appName", mandatory = true, help = "The name of the application to target") final CloudApp appName,
-            @CliOption(key = "path", mandatory = true, help = "The path of the file or folder to navigate to or view") final CloudFile path,
-            @CliOption(key = "instance", mandatory = false, help = "The specific instance of the application to be targeted") final String instance) {
-
-        cloudFoundryOperations.files(appName.getName(), path.getFileName(),
-                instance);
-    }
-
     @CliCommand(value = "cloud foundry view app stats", help = "Report resource usage for the application")
     public void viewApptats(
             @CliOption(key = "appName", mandatory = true, help = "The name of the application to target") final CloudApp appName) {
@@ -243,30 +262,10 @@ public class CloudFoundryCommands implements CommandMarker {
         cloudFoundryOperations.stats(appName.getName());
     }
 
-    @CliCommand(value = "cloud foundry map url", help = "Register an application with a URL")
-    public void mapUrl(
-            @CliOption(key = "appName", mandatory = true, help = "The name of the application to bind the URL to") final CloudApp appName,
-            @CliOption(key = "url", mandatory = true, help = "The URL to bind the application to") final String url) {
+    @CliCommand(value = "cloud foundry view app memory", help = "View or update the memory reservation for an application")
+    public void viewMemory(
+            @CliOption(key = "appName", mandatory = true, help = "The name of the application to view or update the reservation for") final CloudApp appName) {
 
-        cloudFoundryOperations.map(appName.getName(), url);
-    }
-
-    @CliCommand(value = "cloud foundry unmap url", help = "Register an application with a URL")
-    public void unMapUrl(
-            @CliOption(key = "appName", mandatory = true, help = "The name of the application to unbind the URL from") final CloudApp appName,
-            @CliOption(key = "url", mandatory = true, help = "The URL to unbind the application from") final CloudUri url) {
-
-        cloudFoundryOperations.unMap(appName.getName(), url.getUri());
-    }
-
-    @CliCommand(value = "cloud foundry clear login details", help = "Clears all stored login information")
-    public void clearStoredLoginDetails() {
-        cloudFoundryOperations.clearStoredLoginDetails();
-    }
-
-    // TODO: Add setup command once cloud namespace is more understood
-    // @CliCommand(value = "cloud foundry setup", help = "Setup Cloud Foundry")
-    public void config() {
-        cloudFoundryOperations.setup();
+        cloudFoundryOperations.mem(appName.getName(), null);
     }
 }

@@ -20,40 +20,21 @@ import org.mockito.MockitoAnnotations;
  */
 public class CloudFoundrySessionImplTest {
 
-    // Constants
     private static final String CUSTOM_CLOUD_URL = "http://cloud.example.com";
     private static final String EMAIL = "bob@example.com";
     private static final String PASSWORD = "letmein";
 
-    // Fixture
-    private CloudFoundrySessionImpl session;
     @Mock private AppCloudClientFactory mockAppCloudClientFactory;
     @Mock private CloudPreferences mockPreferences;
+    // Fixture
+    private CloudFoundrySessionImpl session;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        this.session = new CloudFoundrySessionImpl();
-        this.session.appCloudClientFactory = mockAppCloudClientFactory;
-        this.session.preferences = mockPreferences;
-    }
-
-    @Test
-    public void testLoginWithNonBlankEmailNonBlankPasswordAndCustomUrl() {
-        // Set up
-        final CloudCredentials credentials = new CloudCredentials(EMAIL,
-                PASSWORD, CUSTOM_CLOUD_URL);
-        final UaaAwareAppCloudClient mockClient = mock(UaaAwareAppCloudClient.class);
-        when(mockAppCloudClientFactory.getUaaAwareInstance(credentials))
-                .thenReturn(mockClient);
-
-        // Invoke
-        session.login(EMAIL, PASSWORD, CUSTOM_CLOUD_URL);
-
-        // Check
-        verify(mockClient).loginIfNeeded();
-        verify(mockPreferences).storeCredentials(credentials);
-        verifyNoMoreInteractions(mockClient, mockPreferences);
+        session = new CloudFoundrySessionImpl();
+        session.appCloudClientFactory = mockAppCloudClientFactory;
+        session.preferences = mockPreferences;
     }
 
     @Test
@@ -121,5 +102,23 @@ public class CloudFoundrySessionImplTest {
         // Check
         verify(mockClient).loginIfNeeded();
         verifyNoMoreInteractions(mockClient);
+    }
+
+    @Test
+    public void testLoginWithNonBlankEmailNonBlankPasswordAndCustomUrl() {
+        // Set up
+        final CloudCredentials credentials = new CloudCredentials(EMAIL,
+                PASSWORD, CUSTOM_CLOUD_URL);
+        final UaaAwareAppCloudClient mockClient = mock(UaaAwareAppCloudClient.class);
+        when(mockAppCloudClientFactory.getUaaAwareInstance(credentials))
+                .thenReturn(mockClient);
+
+        // Invoke
+        session.login(EMAIL, PASSWORD, CUSTOM_CLOUD_URL);
+
+        // Check
+        verify(mockClient).loginIfNeeded();
+        verify(mockPreferences).storeCredentials(credentials);
+        verifyNoMoreInteractions(mockClient, mockPreferences);
     }
 }

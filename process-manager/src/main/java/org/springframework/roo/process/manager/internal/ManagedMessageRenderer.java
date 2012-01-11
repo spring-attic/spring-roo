@@ -9,33 +9,15 @@ import org.springframework.roo.support.util.Assert;
 
 public class ManagedMessageRenderer {
 
-    // Constants
     private static final Logger LOGGER = HandlerUtils
             .getLogger(ManagedMessageRenderer.class);
 
-    // Fields
-    private final FilenameResolver filenameResolver;
-    private final File file;
-    private String descriptionOfChange;
     private final boolean createOperation;
+    private String descriptionOfChange;
+    private final File file;
+    private final FilenameResolver filenameResolver;
     private String hashCode;
     private boolean includeHashCode;
-
-    public void setDescriptionOfChange(final String message) {
-        this.descriptionOfChange = message;
-    }
-
-    void setHashCode(final String hashCode) {
-        this.hashCode = hashCode;
-    }
-
-    boolean isIncludeHashCode() {
-        return includeHashCode;
-    }
-
-    void setIncludeHashCode(final boolean includeHashCode) {
-        this.includeHashCode = includeHashCode;
-    }
 
     public ManagedMessageRenderer(final FilenameResolver filenameResolver,
             final File file, final boolean createOperation) {
@@ -46,9 +28,13 @@ public class ManagedMessageRenderer {
         this.createOperation = createOperation;
     }
 
+    boolean isIncludeHashCode() {
+        return includeHashCode;
+    }
+
     void logManagedMessage() {
-        StringBuilder message = new StringBuilder();
-        if (hashCode != null && includeHashCode && hashCode.length() >= 7) {
+        final StringBuilder message = new StringBuilder();
+        if ((hashCode != null) && includeHashCode && (hashCode.length() >= 7)) {
             // Display only the first 6 characters, being consistent with Git
             // hash code display conventions
             message.append(hashCode.subSequence(0, 7)).append(" ");
@@ -60,11 +46,23 @@ public class ManagedMessageRenderer {
             message.append("Updated ");
         }
         message.append(filenameResolver.getMeaningfulName(file));
-        if (descriptionOfChange != null && descriptionOfChange.length() > 0) {
+        if ((descriptionOfChange != null) && (descriptionOfChange.length() > 0)) {
             message.append(" [");
             message.append(descriptionOfChange);
             message.append("]");
         }
         LOGGER.fine(message.toString());
+    }
+
+    public void setDescriptionOfChange(final String message) {
+        descriptionOfChange = message;
+    }
+
+    void setHashCode(final String hashCode) {
+        this.hashCode = hashCode;
+    }
+
+    void setIncludeHashCode(final boolean includeHashCode) {
+        this.includeHashCode = includeHashCode;
     }
 }

@@ -22,7 +22,6 @@ import org.springframework.roo.shell.converters.StaticFieldConverter;
 @Service
 public class JmsCommands implements CommandMarker {
 
-    // Fields
     @Reference private JmsOperations jmsOperations;
     @Reference private StaticFieldConverter staticFieldConverter;
 
@@ -31,14 +30,27 @@ public class JmsCommands implements CommandMarker {
         staticFieldConverter.add(JmsDestinationType.class);
     }
 
+    @CliCommand(value = "jms listener class", help = "Create an asynchronous JMS consumer")
+    public void addJmsListener(
+            @CliOption(key = "class", mandatory = true, help = "The name of the class to create") final JavaType typeName,
+            @CliOption(key = { "destinationName" }, mandatory = false, unspecifiedDefaultValue = "myDestination", specifiedDefaultValue = "myDestination", help = "The name of the destination") final String name,
+            @CliOption(key = { "destinationType" }, mandatory = false, unspecifiedDefaultValue = "QUEUE", specifiedDefaultValue = "QUEUE", help = "The type of the destination") final JmsDestinationType type) {
+
+        jmsOperations.addJmsListener(typeName, name, type);
+    }
+
     protected void deactivate(final ComponentContext context) {
         staticFieldConverter.remove(JmsProvider.class);
         staticFieldConverter.remove(JmsDestinationType.class);
     }
 
-    @CliAvailabilityIndicator("jms setup")
-    public boolean isInstallJmsAvailable() {
-        return jmsOperations.isJmsInstallationPossible();
+    @CliCommand(value = "field jms template", help = "Insert a JmsOperations field into an existing type")
+    public void injectJmsProducer(
+            @CliOption(key = { "", "fieldName" }, mandatory = false, specifiedDefaultValue = "jmsOperations", unspecifiedDefaultValue = "jmsOperations", help = "The name of the field to add") final JavaSymbolName fieldName,
+            @CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*", optionContext = "update,project", help = "The name of the class to receive this field") final JavaType typeName,
+            @CliOption(key = "async", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates if the injected method should be executed asynchronously") final boolean async) {
+
+        jmsOperations.injectJmsTemplate(typeName, fieldName, async);
     }
 
     @CliCommand(value = "jms setup", help = "Install a JMS provider into your project")
@@ -55,21 +67,8 @@ public class JmsCommands implements CommandMarker {
         return jmsOperations.isManageJmsAvailable();
     }
 
-    @CliCommand(value = "field jms template", help = "Insert a JmsOperations field into an existing type")
-    public void injectJmsProducer(
-            @CliOption(key = { "", "fieldName" }, mandatory = false, specifiedDefaultValue = "jmsOperations", unspecifiedDefaultValue = "jmsOperations", help = "The name of the field to add") final JavaSymbolName fieldName,
-            @CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*", optionContext = "update,project", help = "The name of the class to receive this field") final JavaType typeName,
-            @CliOption(key = "async", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates if the injected method should be executed asynchronously") final boolean async) {
-
-        jmsOperations.injectJmsTemplate(typeName, fieldName, async);
-    }
-
-    @CliCommand(value = "jms listener class", help = "Create an asynchronous JMS consumer")
-    public void addJmsListener(
-            @CliOption(key = "class", mandatory = true, help = "The name of the class to create") final JavaType typeName,
-            @CliOption(key = { "destinationName" }, mandatory = false, unspecifiedDefaultValue = "myDestination", specifiedDefaultValue = "myDestination", help = "The name of the destination") final String name,
-            @CliOption(key = { "destinationType" }, mandatory = false, unspecifiedDefaultValue = "QUEUE", specifiedDefaultValue = "QUEUE", help = "The type of the destination") final JmsDestinationType type) {
-
-        jmsOperations.addJmsListener(typeName, name, type);
+    @CliAvailabilityIndicator("jms setup")
+    public boolean isInstallJmsAvailable() {
+        return jmsOperations.isJmsInstallationPossible();
     }
 }

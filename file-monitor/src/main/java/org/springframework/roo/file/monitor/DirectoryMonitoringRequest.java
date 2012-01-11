@@ -16,21 +16,7 @@ import org.springframework.roo.support.util.Assert;
  */
 public class DirectoryMonitoringRequest extends MonitoringRequest {
 
-    // Fields
     private final boolean watchSubtree;
-
-    /**
-     * Constructor that accepts an array of operations
-     * 
-     * @param directory the directory to monitor; must be an existing directory
-     * @param watchSubtree whether to also monitor the sub-directories of the
-     *            given directory
-     * @param notifyOn the operations to notify upon (can't be empty)
-     */
-    public DirectoryMonitoringRequest(final File file,
-            final boolean watchSubtree, final FileOperation... notifyOn) {
-        this(file, watchSubtree, Arrays.asList(notifyOn));
-    }
 
     /**
      * Constructor that accepts a Collection of operations
@@ -49,6 +35,19 @@ public class DirectoryMonitoringRequest extends MonitoringRequest {
     }
 
     /**
+     * Constructor that accepts an array of operations
+     * 
+     * @param directory the directory to monitor; must be an existing directory
+     * @param watchSubtree whether to also monitor the sub-directories of the
+     *            given directory
+     * @param notifyOn the operations to notify upon (can't be empty)
+     */
+    public DirectoryMonitoringRequest(final File file,
+            final boolean watchSubtree, final FileOperation... notifyOn) {
+        this(file, watchSubtree, Arrays.asList(notifyOn));
+    }
+
+    /**
      * @return whether all files and folders under this directory should also be
      *         monitored (to an unlimited depth).
      */
@@ -58,7 +57,7 @@ public class DirectoryMonitoringRequest extends MonitoringRequest {
 
     @Override
     public String toString() {
-        ToStringCreator tsc = new ToStringCreator(this);
+        final ToStringCreator tsc = new ToStringCreator(this);
         tsc.append("directory", getFile());
         tsc.append("watchSubtree", watchSubtree);
         tsc.append("notifyOn", getNotifyOn());

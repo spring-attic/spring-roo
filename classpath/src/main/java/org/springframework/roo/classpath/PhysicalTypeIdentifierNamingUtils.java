@@ -22,7 +22,6 @@ import org.springframework.roo.support.util.Assert;
  */
 public final class PhysicalTypeIdentifierNamingUtils {
 
-    // Constants
     private static final String PATH_SUFFIX = "?";
 
     /**
@@ -44,6 +43,35 @@ public final class PhysicalTypeIdentifierNamingUtils {
     }
 
     /**
+     * Parses the instance key from the given metadata ID.
+     * 
+     * @param metadataClass the fully-qualified name of the metadata type
+     *            (required)
+     * @param metadataId the ID of the metadata instance (must identify an
+     *            instance of the given metadata class)
+     * @return a non-blank key, as per
+     *         {@link MetadataIdentificationUtils#getMetadataInstance(String)}
+     */
+    private static String getInstanceKey(final String metadataClass,
+            final String metadataId) {
+        Assert.isTrue(isValid(metadataClass, metadataId), "Metadata id '"
+                + metadataId + "' is not a valid " + metadataClass
+                + " identifier");
+        return MetadataIdentificationUtils.getMetadataInstance(metadataId);
+    }
+
+    public static JavaType getJavaType(final String metadataIdentificationString) {
+        Assert.isTrue(metadataIdentificationString.contains("#"),
+                "Metadata identification string '"
+                        + metadataIdentificationString
+                        + "' does not appear to be a valid identifier");
+        final String instance = MetadataIdentificationUtils
+                .getMetadataInstance(metadataIdentificationString);
+        final int index = instance.indexOf("?");
+        return new JavaType(instance.substring(index + 1));
+    }
+
+    /**
      * Returns the user project type with which the given metadata ID is
      * associated.
      * 
@@ -58,28 +86,6 @@ public final class PhysicalTypeIdentifierNamingUtils {
         final String instanceKey = getInstanceKey(metadataClass, metadataId);
         return new JavaType(instanceKey.substring(instanceKey
                 .indexOf(PATH_SUFFIX) + 1));
-    }
-
-    /**
-     * Parses the user project path from the given metadata ID.
-     * 
-     * @param metadataClass the fully-qualified name of the metadata type
-     *            (required)
-     * @param metadataId the ID of the metadata instance (must identify an
-     *            instance of the given metadata class)
-     * @return a non-<code>null</code> path
-     */
-    public static LogicalPath getPath(final String providesType,
-            final String metadataIdentificationString) {
-        Assert.isTrue(
-                isValid(providesType, metadataIdentificationString),
-                "Metadata identification string '"
-                        + metadataIdentificationString
-                        + "' does not appear to be a valid physical type identifier");
-        String instance = MetadataIdentificationUtils
-                .getMetadataInstance(metadataIdentificationString);
-        int index = instance.indexOf("?");
-        return LogicalPath.getInstance(instance.substring(0, index));
     }
 
     /**
@@ -108,37 +114,30 @@ public final class PhysicalTypeIdentifierNamingUtils {
                         + "' does not appear to be a valid identifier");
         final String instanceKey = MetadataIdentificationUtils
                 .getMetadataInstance(metadataId);
-        int index = instanceKey.indexOf("?");
+        final int index = instanceKey.indexOf("?");
         return LogicalPath.getInstance(instanceKey.substring(0, index));
     }
 
-    public static JavaType getJavaType(final String metadataIdentificationString) {
-        Assert.isTrue(metadataIdentificationString.contains("#"),
-                "Metadata identification string '"
-                        + metadataIdentificationString
-                        + "' does not appear to be a valid identifier");
-        String instance = MetadataIdentificationUtils
-                .getMetadataInstance(metadataIdentificationString);
-        int index = instance.indexOf("?");
-        return new JavaType(instance.substring(index + 1));
-    }
-
     /**
-     * Parses the instance key from the given metadata ID.
+     * Parses the user project path from the given metadata ID.
      * 
      * @param metadataClass the fully-qualified name of the metadata type
      *            (required)
      * @param metadataId the ID of the metadata instance (must identify an
      *            instance of the given metadata class)
-     * @return a non-blank key, as per
-     *         {@link MetadataIdentificationUtils#getMetadataInstance(String)}
+     * @return a non-<code>null</code> path
      */
-    private static String getInstanceKey(final String metadataClass,
-            final String metadataId) {
-        Assert.isTrue(isValid(metadataClass, metadataId), "Metadata id '"
-                + metadataId + "' is not a valid " + metadataClass
-                + " identifier");
-        return MetadataIdentificationUtils.getMetadataInstance(metadataId);
+    public static LogicalPath getPath(final String providesType,
+            final String metadataIdentificationString) {
+        Assert.isTrue(
+                isValid(providesType, metadataIdentificationString),
+                "Metadata identification string '"
+                        + metadataIdentificationString
+                        + "' does not appear to be a valid physical type identifier");
+        final String instance = MetadataIdentificationUtils
+                .getMetadataInstance(metadataIdentificationString);
+        final int index = instance.indexOf("?");
+        return LogicalPath.getInstance(instance.substring(0, index));
     }
 
     /**

@@ -10,16 +10,16 @@ import org.springframework.roo.model.JavaType;
  */
 public interface JmsOperations {
 
-    boolean isJmsInstallationPossible();
-
-    boolean isManageJmsAvailable();
-
-    void installJms(JmsProvider jmsProvider, String name,
+    void addJmsListener(JavaType targetType, String name,
             JmsDestinationType destinationType);
 
     void injectJmsTemplate(JavaType targetType, JavaSymbolName fieldName,
             boolean async);
 
-    void addJmsListener(JavaType targetType, String name,
+    void installJms(JmsProvider jmsProvider, String name,
             JmsDestinationType destinationType);
+
+    boolean isJmsInstallationPossible();
+
+    boolean isManageJmsAvailable();
 }

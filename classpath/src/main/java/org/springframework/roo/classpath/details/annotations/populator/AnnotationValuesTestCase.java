@@ -22,6 +22,21 @@ import org.springframework.roo.support.util.ReflectionUtils;
  */
 public abstract class AnnotationValuesTestCase<A, V extends AbstractAnnotationValues> {
 
+    /**
+     * Subclasses must return the class of annotation whose value class is being
+     * tested
+     * 
+     * @return a non-<code>null</code> annotation type
+     */
+    protected abstract Class<A> getAnnotationClass();
+
+    /**
+     * Subclasses must return the values class being tested
+     * 
+     * @return a non-<code>null</code> class
+     */
+    protected abstract Class<V> getValuesClass();
+
     @Test
     public void testAllAnnotationAttributesHaveAValueField() {
         final Class<A> annotationClass = getAnnotationClass();
@@ -42,19 +57,4 @@ public abstract class AnnotationValuesTestCase<A, V extends AbstractAnnotationVa
                     valueField.getAnnotation(AutoPopulate.class));
         }
     }
-
-    /**
-     * Subclasses must return the class of annotation whose value class is being
-     * tested
-     * 
-     * @return a non-<code>null</code> annotation type
-     */
-    protected abstract Class<A> getAnnotationClass();
-
-    /**
-     * Subclasses must return the values class being tested
-     * 
-     * @return a non-<code>null</code> class
-     */
-    protected abstract Class<V> getValuesClass();
 }

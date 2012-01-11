@@ -15,46 +15,6 @@ import java.util.Map;
 public interface PathMatcher {
 
     /**
-     * Does the given <code>path</code> represent a pattern that can be matched
-     * by an implementation of this interface?
-     * <p>
-     * If the return value is <code>false</code>, then the {@link #match} method
-     * does not have to be used because direct equality comparisons on the
-     * static path Strings will lead to the same result.
-     * 
-     * @param path the path String to check
-     * @return <code>true</code> if the given <code>path</code> represents a
-     *         pattern
-     */
-    boolean isPattern(String path);
-
-    /**
-     * Match the given <code>path</code> against the given <code>pattern</code>,
-     * according to this PathMatcher's matching strategy.
-     * 
-     * @param pattern the pattern to match against
-     * @param path the path String to test
-     * @return <code>true</code> if the supplied <code>path</code> matched,
-     *         <code>false</code> if it didn't
-     */
-    boolean match(String pattern, String path);
-
-    /**
-     * Match the given <code>path</code> against the corresponding part of the
-     * given <code>pattern</code>, according to this PathMatcher's matching
-     * strategy.
-     * <p>
-     * Determines whether the pattern at least matches as far as the given base
-     * path goes, assuming that a full path may then match as well.
-     * 
-     * @param pattern the pattern to match against
-     * @param path the path String to test
-     * @return <code>true</code> if the supplied <code>path</code> matched,
-     *         <code>false</code> if it didn't
-     */
-    boolean matchStart(String pattern, String path);
-
-    /**
      * Given a pattern and a full path, determine the pattern-mapped part.
      * <p>
      * This method is supposed to find out which part of the path is matched
@@ -94,4 +54,44 @@ public interface PathMatcher {
      *         values
      */
     Map<String, String> extractUriTemplateVariables(String pattern, String path);
+
+    /**
+     * Does the given <code>path</code> represent a pattern that can be matched
+     * by an implementation of this interface?
+     * <p>
+     * If the return value is <code>false</code>, then the {@link #match} method
+     * does not have to be used because direct equality comparisons on the
+     * static path Strings will lead to the same result.
+     * 
+     * @param path the path String to check
+     * @return <code>true</code> if the given <code>path</code> represents a
+     *         pattern
+     */
+    boolean isPattern(String path);
+
+    /**
+     * Match the given <code>path</code> against the given <code>pattern</code>,
+     * according to this PathMatcher's matching strategy.
+     * 
+     * @param pattern the pattern to match against
+     * @param path the path String to test
+     * @return <code>true</code> if the supplied <code>path</code> matched,
+     *         <code>false</code> if it didn't
+     */
+    boolean match(String pattern, String path);
+
+    /**
+     * Match the given <code>path</code> against the corresponding part of the
+     * given <code>pattern</code>, according to this PathMatcher's matching
+     * strategy.
+     * <p>
+     * Determines whether the pattern at least matches as far as the given base
+     * path goes, assuming that a full path may then match as well.
+     * 
+     * @param pattern the pattern to match against
+     * @param path the path String to test
+     * @return <code>true</code> if the supplied <code>path</code> matched,
+     *         <code>false</code> if it didn't
+     */
+    boolean matchStart(String pattern, String path);
 }

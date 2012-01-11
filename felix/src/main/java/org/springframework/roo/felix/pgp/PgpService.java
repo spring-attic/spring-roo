@@ -19,33 +19,14 @@ import org.bouncycastle.openpgp.PGPPublicKeyRing;
 public interface PgpService {
 
     /**
-     * @return the canonical file path to the key store (never null, although
-     *         the file may not exist)
-     */
-    String getKeyStorePhysicalLocation();
-
-    /**
-     * Indicates if the service automatically trusts new keys.
+     * Provides a way of discovered all Key IDs that have been encountered by
+     * the service since it started. This is mostly useful for the user
+     * interface building tab completion commands etc.
      * 
-     * @return true if auto-trust is active
+     * @return an unmodifiable list of the Key IDs (never null, but may be
+     *         empty)
      */
-    boolean isAutomaticTrust();
-
-    /**
-     * Directs the service to automatically trust new keys it encounters.
-     * 
-     * @param automaticTrust the new value
-     */
-    void setAutomaticTrust(boolean automaticTrust);
-
-    /**
-     * Obtains all of the keys presently trusted by the user.
-     * <p>
-     * Does not require internet access.
-     * 
-     * @return the list of keys (may have zero elements, but will never be null)
-     */
-    List<PGPPublicKeyRing> getTrustedKeys();
+    SortedSet<PgpKeyId> getDiscoveredKeyIds();
 
     /**
      * Obtains a URL that should allow a human-friendly display of key
@@ -60,41 +41,10 @@ public interface PgpService {
     URL getKeyServerUrlToRetrieveKeyInformation(PgpKeyId keyId);
 
     /**
-     * Trusts a new key ID (refreshing the existing key ID if it is already
-     * trusted).
-     * <p>
-     * This method requires internet access to complete.
-     * 
-     * @param keyId hex-encoded key ID to trust (required)
-     * @return the key information now trusted (as refreshed from the server)
+     * @return the canonical file path to the key store (never null, although
+     *         the file may not exist)
      */
-    PGPPublicKeyRing trust(PgpKeyId keyId);
-
-    /**
-     * Untrusts an existing key ID (method will throw an exception if the key
-     * isn't currently trusted).
-     * <p>
-     * This method does not require internet access.
-     * 
-     * @param keyId hex-encoded key ID to untrust (required)
-     * @return the key information that is no longer trusted (as last cached;
-     *         never returns null)
-     */
-    PGPPublicKeyRing untrust(PgpKeyId keyId);
-
-    /**
-     * Instructs the implementation to refresh all keys it current trusts. This
-     * is to identify keys that may have been revoked, which will automatically
-     * be untrusted.
-     * <p>
-     * This method requires internet access to complete. If a download fails,
-     * the key trust will be retained (but of course not refreshed). The outcome
-     * of each refresh request is included in the returned object.
-     * 
-     * @return a map where the keys are the hexadecimal key IDs and the values
-     *         are the status of the update (never returns null)
-     */
-    SortedMap<PgpKeyId, String> refresh();
+    String getKeyStorePhysicalLocation();
 
     /**
      * Attempts to download the specified key ID.
@@ -106,6 +56,38 @@ public interface PgpService {
      *         unavailable)
      */
     PGPPublicKeyRing getPublicKey(PgpKeyId keyId);
+
+    /**
+     * Obtains all of the keys presently trusted by the user.
+     * <p>
+     * Does not require internet access.
+     * 
+     * @return the list of keys (may have zero elements, but will never be null)
+     */
+    List<PGPPublicKeyRing> getTrustedKeys();
+
+    /**
+     * Indicates if the service automatically trusts new keys.
+     * 
+     * @return true if auto-trust is active
+     */
+    boolean isAutomaticTrust();
+
+    /**
+     * Indicates if this resource has been signed by the presented ASC file.
+     * This does not make any decision whether the key used in the ASC is valid
+     * or not (use {@link #isSignatureAcceptable(InputStream)} for this
+     * instead).
+     * <p>
+     * This method does not require internet access.
+     * 
+     * @param resource the resource that was presented (required)
+     * @param signature the ASC signature that was presented (required)
+     * @return true if this signature file verified this resource, false
+     *         otherwise
+     */
+    boolean isResourceSignedBySignature(InputStream resource,
+            InputStream signature) throws IOException;
 
     /**
      * Indicates if the signature is acceptable or not based on the presentation
@@ -129,29 +111,47 @@ public interface PgpService {
             throws IOException;
 
     /**
-     * Indicates if this resource has been signed by the presented ASC file.
-     * This does not make any decision whether the key used in the ASC is valid
-     * or not (use {@link #isSignatureAcceptable(InputStream)} for this
-     * instead).
+     * Instructs the implementation to refresh all keys it current trusts. This
+     * is to identify keys that may have been revoked, which will automatically
+     * be untrusted.
+     * <p>
+     * This method requires internet access to complete. If a download fails,
+     * the key trust will be retained (but of course not refreshed). The outcome
+     * of each refresh request is included in the returned object.
+     * 
+     * @return a map where the keys are the hexadecimal key IDs and the values
+     *         are the status of the update (never returns null)
+     */
+    SortedMap<PgpKeyId, String> refresh();
+
+    /**
+     * Directs the service to automatically trust new keys it encounters.
+     * 
+     * @param automaticTrust the new value
+     */
+    void setAutomaticTrust(boolean automaticTrust);
+
+    /**
+     * Trusts a new key ID (refreshing the existing key ID if it is already
+     * trusted).
+     * <p>
+     * This method requires internet access to complete.
+     * 
+     * @param keyId hex-encoded key ID to trust (required)
+     * @return the key information now trusted (as refreshed from the server)
+     */
+    PGPPublicKeyRing trust(PgpKeyId keyId);
+
+    /**
+     * Untrusts an existing key ID (method will throw an exception if the key
+     * isn't currently trusted).
      * <p>
      * This method does not require internet access.
      * 
-     * @param resource the resource that was presented (required)
-     * @param signature the ASC signature that was presented (required)
-     * @return true if this signature file verified this resource, false
-     *         otherwise
+     * @param keyId hex-encoded key ID to untrust (required)
+     * @return the key information that is no longer trusted (as last cached;
+     *         never returns null)
      */
-    boolean isResourceSignedBySignature(InputStream resource,
-            InputStream signature) throws IOException;
-
-    /**
-     * Provides a way of discovered all Key IDs that have been encountered by
-     * the service since it started. This is mostly useful for the user
-     * interface building tab completion commands etc.
-     * 
-     * @return an unmodifiable list of the Key IDs (never null, but may be
-     *         empty)
-     */
-    SortedSet<PgpKeyId> getDiscoveredKeyIds();
+    PGPPublicKeyRing untrust(PgpKeyId keyId);
 
 }

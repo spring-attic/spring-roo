@@ -21,10 +21,11 @@ public abstract class AbstractAction implements Action {
     /**
      * {@inheritDoc}
      */
-    public void execute(CommandTransformation command, ActionConfig config) {
+    public void execute(final CommandTransformation command,
+            final ActionConfig config) {
         if (isValid(config)) {
-            ActionConfig processedConfig = processConfigAttributes(command,
-                    config);
+            final ActionConfig processedConfig = processConfigAttributes(
+                    command, config);
             executeImpl(command, processedConfig);
         }
         else {
@@ -32,26 +33,27 @@ public abstract class AbstractAction implements Action {
         }
     }
 
-    private ActionConfig processConfigAttributes(CommandTransformation command,
-            ActionConfig config) {
-        // Process variables in config
-        ActionConfig processedConfig = new ActionConfig(
-                config.getActionTypeId());
-        Map<String, String> attributes = config.getAttributes();
-        Iterator<String> keyIterator = attributes.keySet().iterator();
-        while (keyIterator.hasNext()) {
-            String key = keyIterator.next();
-            String value = attributes.get(key);
-            String processedValue = TailorHelper.replaceVars(command, value);
-            processedConfig.setAttribute(key, processedValue);
-        }
-        return processedConfig;
-    }
-
     /*
      * @see #execute(RooCommand, ActionConfig)
      */
     protected abstract void executeImpl(CommandTransformation command,
             ActionConfig config);
+
+    private ActionConfig processConfigAttributes(
+            final CommandTransformation command, final ActionConfig config) {
+        // Process variables in config
+        final ActionConfig processedConfig = new ActionConfig(
+                config.getActionTypeId());
+        final Map<String, String> attributes = config.getAttributes();
+        final Iterator<String> keyIterator = attributes.keySet().iterator();
+        while (keyIterator.hasNext()) {
+            final String key = keyIterator.next();
+            final String value = attributes.get(key);
+            final String processedValue = TailorHelper.replaceVars(command,
+                    value);
+            processedConfig.setAttribute(key, processedValue);
+        }
+        return processedConfig;
+    }
 
 }

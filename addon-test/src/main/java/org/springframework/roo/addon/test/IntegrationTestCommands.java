@@ -22,7 +22,6 @@ import org.springframework.roo.support.util.Assert;
 @Service
 public class IntegrationTestCommands implements CommandMarker {
 
-    // Fields
     @Reference private IntegrationTestOperations integrationTestOperations;
 
     @CliAvailabilityIndicator({ "test integration", "test mock", "test stub" })

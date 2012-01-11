@@ -36,7 +36,6 @@ import org.springframework.roo.project.LogicalPath;
 public class ServiceInterfaceMetadataProvider extends
         AbstractMemberDiscoveringItdMetadataProvider {
 
-    // Fields
     @Reference private CustomDataKeyDecorator customDataKeyDecorator;
 
     private final Map<JavaType, String> managedEntityTypes = new HashMap<JavaType, String>();
@@ -54,12 +53,32 @@ public class ServiceInterfaceMetadataProvider extends
                         RooService.DOMAIN_TYPES_ATTRIBUTE)));
     }
 
+    @Override
+    protected String createLocalIdentifier(final JavaType javaType,
+            final LogicalPath path) {
+        return ServiceInterfaceMetadata.createIdentifier(javaType, path);
+    }
+
     protected void deactivate(final ComponentContext context) {
         metadataDependencyRegistry.removeNotificationListener(this);
         metadataDependencyRegistry.deregisterDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
                 getProvidesType());
         removeMetadataTrigger(ROO_SERVICE);
+    }
+
+    @Override
+    protected String getGovernorPhysicalTypeIdentifier(
+            final String metadataIdentificationString) {
+        final JavaType javaType = ServiceInterfaceMetadata
+                .getJavaType(metadataIdentificationString);
+        final LogicalPath path = ServiceInterfaceMetadata
+                .getPath(metadataIdentificationString);
+        return PhysicalTypeIdentifier.createIdentifier(javaType, path);
+    }
+
+    public String getItdUniquenessFilenameSuffix() {
+        return "Service";
     }
 
     @Override
@@ -92,22 +111,22 @@ public class ServiceInterfaceMetadataProvider extends
             final JavaType aspectName,
             final PhysicalTypeMetadata governorPhysicalTypeMetadata,
             final String itdFilename) {
-        ServiceAnnotationValues annotationValues = new ServiceAnnotationValues(
+        final ServiceAnnotationValues annotationValues = new ServiceAnnotationValues(
                 governorPhysicalTypeMetadata);
-        ClassOrInterfaceTypeDetails cid = governorPhysicalTypeMetadata
+        final ClassOrInterfaceTypeDetails cid = governorPhysicalTypeMetadata
                 .getMemberHoldingTypeDetails();
         if (cid == null) {
             return null;
         }
-        MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(
-                getClass().getName(), cid);
-        JavaType[] domainTypes = annotationValues.getDomainTypes();
-        if (domainTypes == null || domainTypes.length == 0) {
+        final MemberDetails memberDetails = memberDetailsScanner
+                .getMemberDetails(getClass().getName(), cid);
+        final JavaType[] domainTypes = annotationValues.getDomainTypes();
+        if ((domainTypes == null) || (domainTypes.length == 0)) {
             return null;
         }
-        Map<JavaType, String> domainTypePlurals = new HashMap<JavaType, String>();
-        Map<JavaType, JavaType> domainTypeToIdTypeMap = new HashMap<JavaType, JavaType>();
-        for (JavaType type : domainTypes) {
+        final Map<JavaType, String> domainTypePlurals = new HashMap<JavaType, String>();
+        final Map<JavaType, JavaType> domainTypeToIdTypeMap = new HashMap<JavaType, JavaType>();
+        for (final JavaType type : domainTypes) {
             final JavaType idType = persistenceMemberLocator
                     .getIdentifierType(type);
             if (idType == null) {
@@ -116,14 +135,15 @@ public class ServiceInterfaceMetadataProvider extends
             // We simply take the first disregarding any further fields which
             // may be identifiers
             domainTypeToIdTypeMap.put(type, idType);
-            String domainTypeId = typeLocationService
+            final String domainTypeId = typeLocationService
                     .getPhysicalTypeIdentifier(type);
             if (domainTypeId == null) {
                 return null;
             }
-            LogicalPath path = PhysicalTypeIdentifier.getPath(domainTypeId);
-            String pluralId = PluralMetadata.createIdentifier(type, path);
-            PluralMetadata pluralMetadata = (PluralMetadata) metadataService
+            final LogicalPath path = PhysicalTypeIdentifier
+                    .getPath(domainTypeId);
+            final String pluralId = PluralMetadata.createIdentifier(type, path);
+            final PluralMetadata pluralMetadata = (PluralMetadata) metadataService
                     .get(pluralId);
             if (pluralMetadata == null) {
                 return null;
@@ -140,27 +160,7 @@ public class ServiceInterfaceMetadataProvider extends
                 domainTypeToIdTypeMap, annotationValues, domainTypePlurals);
     }
 
-    public String getItdUniquenessFilenameSuffix() {
-        return "Service";
-    }
-
     public String getProvidesType() {
         return ServiceInterfaceMetadata.getMetadataIdentiferType();
-    }
-
-    @Override
-    protected String createLocalIdentifier(final JavaType javaType,
-            final LogicalPath path) {
-        return ServiceInterfaceMetadata.createIdentifier(javaType, path);
-    }
-
-    @Override
-    protected String getGovernorPhysicalTypeIdentifier(
-            final String metadataIdentificationString) {
-        JavaType javaType = ServiceInterfaceMetadata
-                .getJavaType(metadataIdentificationString);
-        LogicalPath path = ServiceInterfaceMetadata
-                .getPath(metadataIdentificationString);
-        return PhysicalTypeIdentifier.createIdentifier(javaType, path);
     }
 }

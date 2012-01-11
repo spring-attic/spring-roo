@@ -18,10 +18,9 @@ import org.springframework.roo.support.util.Assert;
  */
 public class QueryHolder {
 
-    // Fields
     private final String jpaQuery;
-    private final List<JavaType> parameterTypes;
     private final List<JavaSymbolName> parameterNames;
+    private final List<JavaType> parameterTypes;
     private final List<Token> tokens;
 
     public QueryHolder(final String jpaQuery,
@@ -41,12 +40,12 @@ public class QueryHolder {
         return jpaQuery;
     }
 
-    public List<JavaType> getParameterTypes() {
-        return parameterTypes;
-    }
-
     public List<JavaSymbolName> getParameterNames() {
         return parameterNames;
+    }
+
+    public List<JavaType> getParameterTypes() {
+        return parameterTypes;
     }
 
     /**

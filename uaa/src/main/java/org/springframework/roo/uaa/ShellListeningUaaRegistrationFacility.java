@@ -23,14 +23,13 @@ import org.springframework.uaa.client.UaaService;
 public class ShellListeningUaaRegistrationFacility implements
         ShellStatusListener {
 
-    // Fields
+    private BundleContext bundleContext;
     @Reference private Shell shell;
     @Reference private UaaRegistrationService uaaRegistrationService;
     @Reference UaaService uaaService;
-    private BundleContext bundleContext;
 
     protected void activate(final ComponentContext context) {
-        this.bundleContext = context.getBundleContext();
+        bundleContext = context.getBundleContext();
         shell.addShellStatusListener(this);
     }
 
@@ -41,7 +40,7 @@ public class ShellListeningUaaRegistrationFacility implements
     public void onShellStatusChange(final ShellStatus oldStatus,
             final ShellStatus newStatus) {
         // Handle registering use of a BSN
-        ParseResult parseResult = newStatus.getParseResult();
+        final ParseResult parseResult = newStatus.getParseResult();
         if (parseResult == null) {
             return;
         }
@@ -50,8 +49,8 @@ public class ShellListeningUaaRegistrationFacility implements
         // the fact an add-on type inherited from another type to prevent using
         // of that add-on
         // from being detected
-        String typeName = parseResult.getInstance().getClass().getName();
-        String bundleSymbolicName = BundleFindingUtils
+        final String typeName = parseResult.getInstance().getClass().getName();
+        final String bundleSymbolicName = BundleFindingUtils
                 .findFirstBundleForTypeName(bundleContext, typeName);
         if (bundleSymbolicName == null) {
             return;

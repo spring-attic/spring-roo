@@ -23,10 +23,8 @@ import org.springframework.roo.support.util.StringUtils;
 public abstract class AbstractPathResolvingStrategy implements
         PathResolvingStrategy {
 
-    // Constants
     protected static final String ROOT_MODULE = "";
 
-    // Fields
     private String rootPath;
 
     // ------------ OSGi component methods ----------------
@@ -38,6 +36,8 @@ public abstract class AbstractPathResolvingStrategy implements
     }
 
     // ------------ PathResolvingStrategy methods ----------------
+
+    protected abstract PhysicalPath getApplicablePhysicalPath(String identifier);
 
     public String getFriendlyName(final String identifier) {
         Assert.notNull(identifier, "Identifier required");
@@ -60,10 +60,6 @@ public abstract class AbstractPathResolvingStrategy implements
         return getPaths(false);
     }
 
-    public Collection<LogicalPath> getSourcePaths() {
-        return getPaths(true);
-    }
-
     /**
      * Obtains the {@link Path}s.
      * 
@@ -83,9 +79,11 @@ public abstract class AbstractPathResolvingStrategy implements
         return parentFile.getRelativeSegment(identifier);
     }
 
-    protected abstract PhysicalPath getApplicablePhysicalPath(String identifier);
-
     public String getRoot() {
         return rootPath;
+    }
+
+    public Collection<LogicalPath> getSourcePaths() {
+        return getPaths(true);
     }
 }

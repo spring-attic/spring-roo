@@ -14,10 +14,9 @@ import org.springframework.roo.support.util.Assert;
  */
 public class Index {
 
-    // Fields
+    private final Set<IndexColumn> columns = new LinkedHashSet<IndexColumn>();
     private String name;
     private boolean unique;
-    private final Set<IndexColumn> columns = new LinkedHashSet<IndexColumn>();
 
     /**
      * Constructor
@@ -28,37 +27,9 @@ public class Index {
         this.name = name;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(final String name) {
-        this.name = name;
-    }
-
-    public boolean isUnique() {
-        return unique;
-    }
-
-    public void setUnique(final boolean unique) {
-        this.unique = unique;
-    }
-
-    public Set<IndexColumn> getColumns() {
-        return columns;
-    }
-
     public boolean addColumn(final IndexColumn indexColumn) {
         Assert.notNull(indexColumn, "Column required");
         return columns.add(indexColumn);
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((name == null) ? 0 : name.hashCode());
-        return result;
     }
 
     @Override
@@ -72,7 +43,7 @@ public class Index {
         if (!(obj instanceof Index)) {
             return false;
         }
-        Index other = (Index) obj;
+        final Index other = (Index) obj;
         if (name == null) {
             if (other.name != null) {
                 return false;
@@ -82,6 +53,34 @@ public class Index {
             return false;
         }
         return true;
+    }
+
+    public Set<IndexColumn> getColumns() {
+        return columns;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = (prime * result) + ((name == null) ? 0 : name.hashCode());
+        return result;
+    }
+
+    public boolean isUnique() {
+        return unique;
+    }
+
+    public void setName(final String name) {
+        this.name = name;
+    }
+
+    public void setUnique(final boolean unique) {
+        this.unique = unique;
     }
 
     @Override

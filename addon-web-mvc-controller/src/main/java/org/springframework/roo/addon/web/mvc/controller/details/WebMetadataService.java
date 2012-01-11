@@ -22,6 +22,30 @@ import org.springframework.roo.model.JavaType;
  */
 public interface WebMetadataService {
 
+    Map<MethodMetadataCustomDataKey, MemberTypeAdditions> getCrudAdditions(
+            JavaType domainType, String metadataIdentificationString);
+
+    Map<JavaSymbolName, DateTimeFormatDetails> getDatePatterns(
+            JavaType javaType, MemberDetails memberDetails,
+            String metadataIdentificationString);
+
+    List<JavaTypeMetadataDetails> getDependentApplicationTypeMetadata(
+            JavaType javaType, MemberDetails memberDetails,
+            String metadataIdentificationString);
+
+    Set<FinderMetadataDetails> getDynamicFinderMethodsAndFields(
+            JavaType javaType, MemberDetails memberDetails,
+            String metadataIdentificationString);
+
+    JavaTypeMetadataDetails getJavaTypeMetadataDetails(JavaType javaType,
+            MemberDetails memberDetails, String metadataIdentificationString);
+
+    JavaTypePersistenceMetadataDetails getJavaTypePersistenceMetadataDetails(
+            JavaType javaType, MemberDetails memberDetails,
+            String metadataIdentificationString);
+
+    MemberDetails getMemberDetails(JavaType javaType);
+
     /**
      * Returns details of the Java types that are related to the given type
      * 
@@ -36,37 +60,14 @@ public interface WebMetadataService {
     SortedMap<JavaType, JavaTypeMetadataDetails> getRelatedApplicationTypeMetadata(
             JavaType baseType, MemberDetails baseTypeDetails, String metadataId);
 
-    List<JavaTypeMetadataDetails> getDependentApplicationTypeMetadata(
-            JavaType javaType, MemberDetails memberDetails,
-            String metadataIdentificationString);
-
     List<FieldMetadata> getScaffoldEligibleFieldMetadata(JavaType javaType,
             MemberDetails memberDetails, String metadataIdentificationString);
-
-    JavaTypePersistenceMetadataDetails getJavaTypePersistenceMetadataDetails(
-            JavaType javaType, MemberDetails memberDetails,
-            String metadataIdentificationString);
-
-    boolean isRooIdentifier(JavaType javaType, MemberDetails memberDetails);
 
     /**
      * @deprecated use {@link TypeLocationService#isInProject(JavaType)} instead
      */
+    @Deprecated
     boolean isApplicationType(JavaType javaType);
 
-    Map<JavaSymbolName, DateTimeFormatDetails> getDatePatterns(
-            JavaType javaType, MemberDetails memberDetails,
-            String metadataIdentificationString);
-
-    Set<FinderMetadataDetails> getDynamicFinderMethodsAndFields(
-            JavaType javaType, MemberDetails memberDetails,
-            String metadataIdentificationString);
-
-    JavaTypeMetadataDetails getJavaTypeMetadataDetails(JavaType javaType,
-            MemberDetails memberDetails, String metadataIdentificationString);
-
-    MemberDetails getMemberDetails(JavaType javaType);
-
-    Map<MethodMetadataCustomDataKey, MemberTypeAdditions> getCrudAdditions(
-            JavaType domainType, String metadataIdentificationString);
+    boolean isRooIdentifier(JavaType javaType, MemberDetails memberDetails);
 }

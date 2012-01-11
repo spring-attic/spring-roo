@@ -17,22 +17,6 @@ import org.springframework.roo.project.Feature;
 public interface JpaOperations extends Feature {
 
     /**
-     * Indicates whether JPA can be installed in the currently focused module.
-     * 
-     * @return <code>false</code> if no module has the focus
-     */
-    boolean isJpaInstallationPossible();
-
-    boolean hasDatabaseProperties();
-
-    /**
-     * Checks for the existence the META-INF/persistence.xml
-     * 
-     * @return true if the META-INF/persistence.xml exists, otherwise false
-     */
-    boolean isPersistentClassAvailable();
-
-    /**
      * This method is responsible for managing all JPA related artifacts
      * (META-INF/persistence.xml, applicationContext.xml, database.properties
      * and the project pom.xml)
@@ -60,6 +44,31 @@ public interface JpaOperations extends Feature {
 
     SortedSet<String> getDatabaseProperties();
 
+    boolean hasDatabaseProperties();
+
+    /**
+     * Indicates whether JPA can be installed in the currently focused module.
+     * 
+     * @return <code>false</code> if no module has the focus
+     */
+    boolean isJpaInstallationPossible();
+
+    /**
+     * Checks for the existence the META-INF/persistence.xml
+     * 
+     * @return true if the META-INF/persistence.xml exists, otherwise false
+     */
+    boolean isPersistentClassAvailable();
+
+    /**
+     * Creates a new JPA embeddable class.
+     * 
+     * @param name the name of the embeddable class (required)
+     * @param serializable whether the class implements
+     *            {@link java.io.Serializable}
+     */
+    void newEmbeddableClass(JavaType name, boolean serializable);
+
     /**
      * Creates a new entity.
      * 
@@ -71,15 +80,6 @@ public interface JpaOperations extends Feature {
      */
     void newEntity(JavaType name, boolean createAbstract, JavaType superclass,
             List<AnnotationMetadataBuilder> annotations);
-
-    /**
-     * Creates a new JPA embeddable class.
-     * 
-     * @param name the name of the embeddable class (required)
-     * @param serializable whether the class implements
-     *            {@link java.io.Serializable}
-     */
-    void newEmbeddableClass(JavaType name, boolean serializable);
 
     /**
      * Creates a new JPA identifier class.
