@@ -25,8 +25,8 @@ import org.springframework.roo.model.RooJavaType;
 @Service
 public class RepositoryMongoLocatorImpl implements RepositoryMongoLocator {
 
-    private final Map<JavaType, Set<ClassOrInterfaceTypeDetails>> cacheMap = new HashMap<JavaType, Set<ClassOrInterfaceTypeDetails>>();
     @Reference private TypeLocationService typeLocationService;
+    private final Map<JavaType, Set<ClassOrInterfaceTypeDetails>> cacheMap = new HashMap<JavaType, Set<ClassOrInterfaceTypeDetails>>();
 
     public Collection<ClassOrInterfaceTypeDetails> getRepositories(
             final JavaType domainType) {

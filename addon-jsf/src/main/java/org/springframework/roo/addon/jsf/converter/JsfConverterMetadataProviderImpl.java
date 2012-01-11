@@ -42,9 +42,9 @@ public class JsfConverterMetadataProviderImpl extends
 
     private static final int LAYER_POSITION = LayerType.HIGHEST.getPosition();
     @Reference private ConfigurableMetadataProvider configurableMetadataProvider;
+    @Reference private LayerService layerService;
     private final Map<String, JavaType> converterMidToEntityMap = new LinkedHashMap<String, JavaType>();
     private final Map<JavaType, String> entityToConverterMidMap = new LinkedHashMap<JavaType, String>();
-    @Reference private LayerService layerService;
 
     protected void activate(final ComponentContext context) {
         metadataDependencyRegistry.addNotificationListener(this);

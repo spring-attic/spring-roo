@@ -90,10 +90,10 @@ public class WebMetadataServiceImpl implements WebMetadataService {
     @Reference private MemberDetailsScanner memberDetailsScanner;
     @Reference private MetadataDependencyRegistry metadataDependencyRegistry;
     @Reference private MetadataService metadataService;
-    private final HashMap<String, String> pathMap = new HashMap<String, String>();
     @Reference private PersistenceMemberLocator persistenceMemberLocator;
-
     @Reference private TypeLocationService typeLocationService;
+
+    private final HashMap<String, String> pathMap = new HashMap<String, String>();
 
     private String getControllerPathForType(final JavaType type,
             final String metadataIdentificationString) {

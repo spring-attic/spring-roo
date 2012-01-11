@@ -90,20 +90,21 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
             "org.springframework.roo.support.osgi",
             "org.springframework.roo.uaa");
 
+    @Reference private PgpService pgpService;
+    @Reference private PreferencesService preferencesService;
+    @Reference private Shell shell;
+    @Reference private UrlInputStreamService urlInputStreamService;
+
     private Map<String, Bundle> bundleCache;
     private ComponentContext context;
     private final DateFormat dateFormat = new SimpleDateFormat(
             "yyyy-MM-dd hh:mm:ss");
     private final Object mutex = new Object();
-    @Reference private PgpService pgpService;
-    @Reference private PreferencesService preferencesService;
     private Preferences prefs;
     private volatile Thread rooBotEagerDownload;
     private boolean rooBotIndexDownload = true;
     private String rooBotXmlUrl = "http://spring-roo-repository.springsource.org/roobot/roobot.xml.zip";
     private Map<String, Bundle> searchResultCache;
-    @Reference private Shell shell;
-    @Reference private UrlInputStreamService urlInputStreamService;
 
     protected void activate(final ComponentContext context) {
         this.context = context;

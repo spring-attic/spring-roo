@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 public class BundleVersion {
+
     /**
      * Returns a {@link List} of {@link BundleVersion} objects in ascending
      * version order, i.e. the object with the smallest version is in position 0
@@ -37,7 +38,6 @@ public class BundleVersion {
     private final String rooVersion;
     private final Long size;
     private final String uri;
-
     private final String version;
 
     public BundleVersion(final String uri, final String obrUrl,

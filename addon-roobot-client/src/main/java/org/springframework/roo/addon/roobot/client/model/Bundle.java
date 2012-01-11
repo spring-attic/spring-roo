@@ -8,6 +8,7 @@ import java.util.List;
 import org.springframework.roo.support.util.Assert;
 
 public class Bundle {
+
     public static List<Bundle> orderByRanking(final List<Bundle> bundles) {
         Collections.sort(bundles, new Comparator<Bundle>() {
             public int compare(final Bundle o1, final Bundle o2) {

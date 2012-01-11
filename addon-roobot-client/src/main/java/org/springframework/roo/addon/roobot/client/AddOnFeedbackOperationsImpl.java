@@ -32,9 +32,10 @@ public class AddOnFeedbackOperationsImpl implements AddOnFeedbackOperations {
     private static final Logger LOGGER = HandlerUtils
             .getLogger(AddOnFeedbackOperationsImpl.class);
 
-    private BundleContext bundleContext;
     @Reference private UaaRegistrationService registrationService;
     @Reference private UrlInputStreamService urlInputStreamService;
+
+    private BundleContext bundleContext;
 
     protected void activate(final ComponentContext context) {
         bundleContext = context.getBundleContext();

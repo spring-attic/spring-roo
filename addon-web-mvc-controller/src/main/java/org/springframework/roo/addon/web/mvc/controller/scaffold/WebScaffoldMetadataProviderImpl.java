@@ -44,9 +44,9 @@ public class WebScaffoldMetadataProviderImpl extends
         AbstractMemberDiscoveringItdMetadataProvider implements
         WebScaffoldMetadataProvider {
 
-    private final Map<JavaType, String> entityToWebScaffoldMidMap = new LinkedHashMap<JavaType, String>();
-
     @Reference private WebMetadataService webMetadataService;
+
+    private final Map<JavaType, String> entityToWebScaffoldMidMap = new LinkedHashMap<JavaType, String>();
     private final Map<String, JavaType> webScaffoldMidToEntityMap = new LinkedHashMap<String, JavaType>();
 
     protected void activate(final ComponentContext context) {

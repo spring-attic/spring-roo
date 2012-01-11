@@ -726,6 +726,5 @@ public class CloudFoundryOperationsImpl extends AbstractFlashingObject
     }
 
     public void update(final String appName) {
-
     }
 }

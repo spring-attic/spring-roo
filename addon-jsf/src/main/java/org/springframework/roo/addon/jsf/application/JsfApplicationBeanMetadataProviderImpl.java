@@ -35,12 +35,12 @@ public class JsfApplicationBeanMetadataProviderImpl extends
         AbstractItdMetadataProvider implements
         JsfApplicationBeanMetadataProvider {
 
+    @Reference private ConfigurableMetadataProvider configurableMetadataProvider;
+    @Reference private ProjectOperations projectOperations;
+
     // Stores the MID (as accepted by this JsfApplicationBeanMetadataProvider)
     // for the one (and only one) application-wide menu bean
     private String applicationBeanMid;
-    @Reference private ConfigurableMetadataProvider configurableMetadataProvider;
-
-    @Reference private ProjectOperations projectOperations;
 
     protected void activate(final ComponentContext context) {
         metadataDependencyRegistry.registerDependency(

@@ -46,10 +46,10 @@ public class WebJsonMetadataProviderImpl extends
         AbstractMemberDiscoveringItdMetadataProvider implements
         WebJsonMetadataProvider {
 
+    @Reference private WebMetadataService webMetadataService;
+
     // Maps entities to the IDs of their WebJsonMetadata
     private final Map<JavaType, String> managedEntityTypes = new HashMap<JavaType, String>();
-
-    @Reference private WebMetadataService webMetadataService;
 
     protected void activate(final ComponentContext context) {
         metadataDependencyRegistry.addNotificationListener(this);

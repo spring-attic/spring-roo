@@ -83,8 +83,8 @@ public class JsfManagedBeanMetadataProviderImpl extends
     private static final int MAX_LIST_VIEW_FIELDS = 5;
 
     @Reference private ConfigurableMetadataProvider configurableMetadataProvider;
-    private final Map<JavaType, String> entityToManagedBeanMidMap = new LinkedHashMap<JavaType, String>();
     @Reference private LayerService layerService;
+    private final Map<JavaType, String> entityToManagedBeanMidMap = new LinkedHashMap<JavaType, String>();
     private final Map<String, JavaType> managedBeanMidToEntityMap = new LinkedHashMap<String, JavaType>();
 
     protected void activate(final ComponentContext context) {

@@ -68,10 +68,10 @@ public class IntegrationTestMetadataProviderImpl extends
 
     @Reference private ConfigurableMetadataProvider configurableMetadataProvider;
     @Reference private LayerService layerService;
-    private final Map<JavaType, String> managedEntityTypes = new HashMap<JavaType, String>();
-
-    private final Set<String> producedMids = new LinkedHashSet<String>();
     @Reference private ProjectOperations projectOperations;
+
+    private final Map<JavaType, String> managedEntityTypes = new HashMap<JavaType, String>();
+    private final Set<String> producedMids = new LinkedHashSet<String>();
     private Boolean wasGaeEnabled;
 
     protected void activate(final ComponentContext context) {
