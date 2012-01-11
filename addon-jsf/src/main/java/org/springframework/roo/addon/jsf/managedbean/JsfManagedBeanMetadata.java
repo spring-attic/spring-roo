@@ -389,8 +389,6 @@ public class JsfManagedBeanMetadata extends
         }
     }
 
-    // Methods
-
     private String getAddChildToComponent(final String componentId,
             final String childComponentId) {
         return componentId + ".getChildren().add(" + childComponentId + ");";

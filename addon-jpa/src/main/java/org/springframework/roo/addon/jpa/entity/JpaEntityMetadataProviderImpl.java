@@ -126,8 +126,6 @@ public class JpaEntityMetadataProviderImpl extends
     @Reference private CustomDataKeyDecorator customDataKeyDecorator;
     @Reference private ProjectOperations projectOperations;
 
-    // ------------- Mandatory AbstractItdMetadataProvider methods -------------
-
     protected void activate(final ComponentContext context) {
         metadataDependencyRegistry.registerDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
@@ -185,8 +183,6 @@ public class JpaEntityMetadataProviderImpl extends
                         + "' (should only be one identifier field given this is an entity, not an Identifier class)");
         return identifiers.iterator().next();
     }
-
-    // ------------- Optional AbstractItdMetadataProvider methods --------------
 
     public String getItdUniquenessFilenameSuffix() {
         return "Jpa_Entity";

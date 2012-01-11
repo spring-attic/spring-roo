@@ -215,8 +215,8 @@ public class GwtRequestMetadataProviderImpl extends
         methodBuilder.setMethodName(new JavaSymbolName(memberTypeAdditions
                 .getMethodName()));
         if (memberTypeAdditions.isStatic()) {
-            methodBuilder.setModifier(STATIC); // OK to overwrite any other
-                                               // modifiers
+            // OK to overwrite any other modifiers
+            methodBuilder.setModifier(STATIC);
         }
         /*
          * TODO make sure the active record instance methods have the correct
@@ -381,7 +381,6 @@ public class GwtRequestMetadataProviderImpl extends
             typeDetailsBuilder.addExtendsTypes(REQUEST_CONTEXT);
         }
 
-        // Methods
         typeDetailsBuilder.clearDeclaredMethods();
         for (final MethodMetadata method : requestMethods) {
             typeDetailsBuilder.addMethod(getRequestMethod(request, method,
