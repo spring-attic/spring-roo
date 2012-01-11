@@ -71,7 +71,6 @@ public class JspMetadataListener implements MetadataProvider,
     private static final String WEB_INF_VIEWS = "/WEB-INF/views/";
 
     @Reference private FileManager fileManager;
-    private final Map<JavaType, String> formBackingObjectTypesToLocalMids = new HashMap<JavaType, String>();
     @Reference private JspOperations jspOperations;
     @Reference private MenuOperations menuOperations;
     @Reference private MetadataDependencyRegistry metadataDependencyRegistry;
@@ -81,8 +80,9 @@ public class JspMetadataListener implements MetadataProvider,
     @Reference private TilesOperations tilesOperations;
     @Reference private TypeLocationService typeLocationService;
     @Reference private WebMetadataService webMetadataService;
-
     @Reference private XmlRoundTripFileManager xmlRoundTripFileManager;
+
+    private final Map<JavaType, String> formBackingObjectTypesToLocalMids = new HashMap<JavaType, String>();
 
     protected void activate(final ComponentContext context) {
         metadataDependencyRegistry.registerDependency(

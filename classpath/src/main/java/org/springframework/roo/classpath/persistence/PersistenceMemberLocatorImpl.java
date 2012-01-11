@@ -31,16 +31,16 @@ import org.springframework.roo.model.JavaType;
 @Service
 public class PersistenceMemberLocatorImpl implements PersistenceMemberLocator {
 
-    private final Map<JavaType, List<FieldMetadata>> domainTypeEmbeddedIdFieldsCache = new HashMap<JavaType, List<FieldMetadata>>();
-    private final Map<JavaType, MethodMetadata> domainTypeIdAccessorCache = new HashMap<JavaType, MethodMetadata>();
-    private final Map<JavaType, JavaType> domainTypeIdCache = new HashMap<JavaType, JavaType>();
-
-    private final Map<JavaType, List<FieldMetadata>> domainTypeIdFieldsCache = new HashMap<JavaType, List<FieldMetadata>>();
-    private final Map<JavaType, MethodMetadata> domainTypeVersionAccessorCache = new HashMap<JavaType, MethodMetadata>();
-    private final Map<JavaType, FieldMetadata> domainTypeVersionFieldCache = new HashMap<JavaType, FieldMetadata>();
     @Reference private ItdDiscoveryService itdDiscoveryService;
     @Reference private MemberDetailsScanner memberDetailsScanner;
     @Reference private TypeLocationService typeLocationService;
+
+    private final Map<JavaType, List<FieldMetadata>> domainTypeEmbeddedIdFieldsCache = new HashMap<JavaType, List<FieldMetadata>>();
+    private final Map<JavaType, MethodMetadata> domainTypeIdAccessorCache = new HashMap<JavaType, MethodMetadata>();
+    private final Map<JavaType, JavaType> domainTypeIdCache = new HashMap<JavaType, JavaType>();
+    private final Map<JavaType, List<FieldMetadata>> domainTypeIdFieldsCache = new HashMap<JavaType, List<FieldMetadata>>();
+    private final Map<JavaType, MethodMetadata> domainTypeVersionAccessorCache = new HashMap<JavaType, MethodMetadata>();
+    private final Map<JavaType, FieldMetadata> domainTypeVersionFieldCache = new HashMap<JavaType, FieldMetadata>();
 
     public List<FieldMetadata> getEmbeddedIdentifierFields(
             final JavaType domainType) {

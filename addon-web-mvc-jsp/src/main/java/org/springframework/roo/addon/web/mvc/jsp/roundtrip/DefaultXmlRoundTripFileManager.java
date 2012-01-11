@@ -38,8 +38,8 @@ public class DefaultXmlRoundTripFileManager implements XmlRoundTripFileManager {
         }
     }
 
-    private final Map<String, String> fileContentsMap = new HashMap<String, String>();
     @Reference private FileManager fileManager;
+    private final Map<String, String> fileContentsMap = new HashMap<String, String>();
 
     public void writeToDiskIfNecessary(final String filename,
             final Document proposed) {

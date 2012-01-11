@@ -51,7 +51,6 @@ public class TilesOperationsImpl implements TilesOperations {
     }
 
     @Reference private FileManager fileManager;
-
     @Reference private PathResolver pathResolver;
 
     public void addViewDefinition(final String folderName,

@@ -20,7 +20,6 @@ public class InvocableMemberBodyBuilder {
 
     private int indentLevel;
     private boolean reset;
-
     private final StringBuilder stringBuilder = new StringBuilder();
 
     /**
