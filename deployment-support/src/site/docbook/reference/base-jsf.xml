@@ -197,7 +197,10 @@
     <title>The bikeshop example</title>
 
     <para>The Roo distribution contains a script called bikeshop.roo that
-    demonstrates the JSF add-on capability.</para>
+    demonstrates the JSF add-on capability. Please note that the --equals
+    attribute should be specified as true on the entity jpa command for all
+    entities intended to be scaffolded with JSF. Alternatively, add the
+    @RooEquals annotation to existing entities. </para>
 
     <para>In the Roo shell, type:</para>
 
