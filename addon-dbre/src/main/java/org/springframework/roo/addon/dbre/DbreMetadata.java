@@ -86,6 +86,7 @@ import org.springframework.roo.support.util.Assert;
  */
 public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
+    private static final String CREATED = "created";
     private static final String MAPPED_BY = "mappedBy";
     private static final String NAME = "name";
     private static final String PROVIDES_TYPE_STRING = DbreMetadata.class
@@ -231,11 +232,12 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
                     + "' for many-to-many relationship could not be found. Note that table names are case sensitive in some databases such as MySQL.";
             final Iterator<ForeignKey> iter = joinTable.getImportedKeys()
                     .iterator();
-            final ForeignKey foreignKey1 = iter.next(); // First foreign key in
-                                                        // set
-            final ForeignKey foreignKey2 = iter.next(); // Second and last
-                                                        // foreign key
-            // in set
+
+            // First foreign key in set
+            final ForeignKey foreignKey1 = iter.next();
+
+            // Second and last foreign key in set
+            final ForeignKey foreignKey2 = iter.next();
 
             final Table owningSideTable = foreignKey1.getForeignTable();
             Assert.notNull(owningSideTable, "Owning-side " + errMsg);
@@ -557,6 +559,10 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
             final FieldMetadataBuilder fieldBuilder = getField(fieldName,
                     column, table.getName(),
                     table.isIncludeNonPortableAttributes());
+            if (fieldBuilder.getFieldType().equals(DATE)
+                    && fieldName.getSymbolName().equals(CREATED)) {
+                fieldBuilder.setFieldInitializer("new Date()");
+            }
             uniqueFields.put(fieldName, fieldBuilder);
         }
 
@@ -705,6 +711,10 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
             final AnnotationMetadataBuilder dateTimeFormatBuilder = new AnnotationMetadataBuilder(
                     DATE_TIME_FORMAT);
             dateTimeFormatBuilder.addStringAttribute("style", "M-");
+
+            if (fieldName.getSymbolName().equals(CREATED)) {
+                columnBuilder.addBooleanAttribute("updatable", false);
+            }
             annotations.add(dateTimeFormatBuilder);
         }
 
@@ -713,8 +723,12 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
             annotations.add(new AnnotationMetadataBuilder(LOB));
         }
 
-        return new FieldMetadataBuilder(getId(), Modifier.PRIVATE, annotations,
-                fieldName, fieldType);
+        final FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(
+                getId(), Modifier.PRIVATE, annotations, fieldName, fieldType);
+        if (fieldName.getSymbolName().equals(CREATED)) {
+            fieldBuilder.setFieldInitializer("new java.util.Date()");
+        }
+        return fieldBuilder;
     }
 
     private String getInflectorPlural(final String term) {

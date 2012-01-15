@@ -101,15 +101,21 @@ public class FieldDetails {
                 columnBuilder = new AnnotationMetadataBuilder(COLUMN, attrs);
             }
         }
-        if (columnBuilder != null) {
-            annotations.add(columnBuilder);
-        }
-
         if (value != null) {
             final List<AnnotationAttributeValue<?>> attrs = new ArrayList<AnnotationAttributeValue<?>>();
             attrs.add(new StringAttributeValue(new JavaSymbolName("value"),
                     value));
             annotations.add(new AnnotationMetadataBuilder(VALUE, attrs));
+        }
+        if (fieldName.getSymbolName().equals("created")) {
+            if (columnBuilder == null) {
+                columnBuilder = new AnnotationMetadataBuilder(COLUMN);
+            }
+            columnBuilder.addBooleanAttribute("updatable", false);
+        }
+
+        if (columnBuilder != null) {
+            annotations.add(columnBuilder);
         }
     }
 

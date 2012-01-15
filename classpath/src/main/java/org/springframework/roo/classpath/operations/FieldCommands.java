@@ -603,6 +603,11 @@ public class FieldCommands implements CommandMarker {
             final CollectionField collectionField = (CollectionField) fieldDetails;
             initializer = "new " + collectionField.getInitializer() + "()";
         }
+        else if (fieldDetails instanceof DateField
+                && fieldDetails.getFieldName().getSymbolName()
+                        .equals("created")) {
+            initializer = "new Date()";
+        }
         int modifier = Modifier.PRIVATE;
         if (transientModifier) {
             modifier += Modifier.TRANSIENT;

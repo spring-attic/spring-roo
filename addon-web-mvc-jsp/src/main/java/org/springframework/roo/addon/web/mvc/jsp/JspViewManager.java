@@ -60,7 +60,9 @@ import org.w3c.dom.Element;
  */
 public class JspViewManager {
 
-    private static final JavaSymbolName VALUE = new JavaSymbolName("value");
+ 
+    private static final String CREATED = "created";
+   private static final JavaSymbolName VALUE = new JavaSymbolName("value");
 
     private final String controllerPath;
     private final String entityName;
@@ -319,7 +321,7 @@ public class JspViewManager {
                 final JavaType referenceType = getJavaTypeForField(field);
                 final JavaTypeMetadataDetails referenceTypeMetadata = relatedDomainTypes
                         .get(referenceType);
-                if ((referenceType != null/** fix for ROO-1888 --> **/
+                if ((referenceType != null /** Fix for ROO-1888 --> **/
                 ) && (referenceTypeMetadata != null)
                         && referenceTypeMetadata.isApplicationType()
                         && (typePersistenceMetadataHolder != null)) {
@@ -347,6 +349,9 @@ public class JspViewManager {
                 }
             }
             else if (fieldType.equals(DATE) || fieldType.equals(CALENDAR)) {
+                if (fieldName.equals(CREATED)) {
+                    continue;
+                }
                 // Only include the date picker for styles supported by Dojo
                 // (SMALL & MEDIUM)
                 fieldElement = new XmlElementBuilder("field:datetime", document)
@@ -863,6 +868,9 @@ public class JspViewManager {
                             "${" + entityName.toLowerCase() + "}")
                     .addAttribute("field", fieldName).build();
             if (field.getFieldType().equals(DATE)) {
+                if (fieldName.equals(CREATED)) {
+                    continue;
+                }
                 fieldDisplay.setAttribute("date", "true");
                 fieldDisplay.setAttribute("dateTimePattern", "${" + entityName
                         + "_" + fieldName.toLowerCase() + "_date_format}");
