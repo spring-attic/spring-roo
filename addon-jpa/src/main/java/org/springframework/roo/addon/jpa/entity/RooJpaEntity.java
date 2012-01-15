@@ -91,6 +91,14 @@ public @interface RooJpaEntity {
     String schema() default "";
 
     /**
+     * Specifies the name of the sequence to use for incrementing
+     * sequence-driven primary keys.
+     * 
+     * @return the name of the sequence (defaults to "")
+     */
+    String sequenceName() default "";
+
+    /**
      * Specifies the table name that should be used for the entity.
      * 
      * @return the name of the table to use (defaults to "")

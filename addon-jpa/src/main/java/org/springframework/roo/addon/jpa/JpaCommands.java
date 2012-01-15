@@ -129,6 +129,7 @@ public class JpaCommands implements CommandMarker {
      * @param persistenceUnit
      * @param transactionManager
      * @param entityName
+     * @param sequenceName
      * @param activeRecord whether to generate active record CRUD methods for
      *            the entity
      * @return a non-<code>null</code> builder
@@ -141,7 +142,7 @@ public class JpaCommands implements CommandMarker {
             final InheritanceType inheritanceType,
             final boolean mappedSuperclass, final String persistenceUnit,
             final String transactionManager, final String entityName,
-            final boolean activeRecord) {
+            final String sequenceName, final boolean activeRecord) {
         final AnnotationMetadataBuilder entityAnnotationBuilder = new AnnotationMetadataBuilder(
                 getEntityAnnotationType(activeRecord));
 
@@ -152,6 +153,10 @@ public class JpaCommands implements CommandMarker {
         if (entityName != null) {
             entityAnnotationBuilder
                     .addStringAttribute("entityName", entityName);
+        }
+        if (sequenceName != null) {
+            entityAnnotationBuilder.addStringAttribute("sequenceName",
+                    sequenceName);
         }
         if (identifierColumn != null) {
             entityAnnotationBuilder.addStringAttribute("identifierColumn",
@@ -322,6 +327,7 @@ public class JpaCommands implements CommandMarker {
             @CliOption(key = "transactionManager", mandatory = false, help = "The transaction manager name") final String transactionManager,
             @CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") final boolean permitReservedWords,
             @CliOption(key = "entityName", mandatory = false, help = "The name used to refer to the entity in queries") final String entityName,
+            @CliOption(key = "sequenceName", mandatory = false, help = "The name of the sequence for incrementing sequence-driven primary keys") final String sequenceName,
             @CliOption(key = "activeRecord", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "true", help = "Generate CRUD active record methods for this entity") final boolean activeRecord) {
         Assert.isTrue(!identifierType.isPrimitive(),
                 "Identifier type cannot be a primitive");
@@ -358,7 +364,7 @@ public class JpaCommands implements CommandMarker {
                 catalog, identifierField, identifierColumn, identifierType,
                 versionField, versionColumn, versionType, inheritanceType,
                 mappedSuperclass, persistenceUnit, transactionManager,
-                entityName, activeRecord));
+                entityName, sequenceName, activeRecord));
         if (equals) {
             annotationBuilder.add(ROO_EQUALS_BUILDER);
         }

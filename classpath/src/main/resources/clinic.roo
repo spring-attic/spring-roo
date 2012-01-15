@@ -12,8 +12,8 @@ enum constant --name Cardiology
 enum constant --name Dentistry
 enum constant --name Nutrition
 
-entity jpa --class ~.domain.Pet
-entity jpa --class ~.domain.Visit
+entity jpa --class ~.domain.Pet --sequenceName PET_SEQ
+entity jpa --class ~.domain.Visit --sequenceName VISIT_SEQ
 entity jpa --class ~.domain.AbstractPerson --abstract
 entity jpa --class ~.domain.Vet --extends ~.domain.AbstractPerson
 entity jpa --class ~.domain.Owner --extends ~.domain.AbstractPerson

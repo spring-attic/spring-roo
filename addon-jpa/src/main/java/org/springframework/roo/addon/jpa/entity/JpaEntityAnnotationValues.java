@@ -26,6 +26,7 @@ public class JpaEntityAnnotationValues extends AbstractAnnotationValues {
     @AutoPopulate private String inheritanceType = "";
     @AutoPopulate private boolean mappedSuperclass;
     @AutoPopulate private String schema = "";
+    @AutoPopulate private String sequenceName = "";
     @AutoPopulate private String table = "";
     @AutoPopulate private String versionColumn = "";
     @AutoPopulate private String versionField = VERSION_FIELD_DEFAULT;
@@ -43,11 +44,8 @@ public class JpaEntityAnnotationValues extends AbstractAnnotationValues {
             final MemberHoldingTypeDetailsMetadataItem<?> annotatedType,
             final JavaType annotationType) {
         super(annotatedType, annotationType);
-        AutoPopulationUtils.populate(this, annotationMetadata); // TODO move to
-                                                                // superclass
-                                                                // for this and
-                                                                // all sibling
-                                                                // classes?
+        // TODO move to superclass for this and all sibling classes?
+        AutoPopulationUtils.populate(this, annotationMetadata);
     }
 
     public String getCatalog() {
@@ -76,6 +74,10 @@ public class JpaEntityAnnotationValues extends AbstractAnnotationValues {
 
     public String getSchema() {
         return schema;
+    }
+
+    public String getSequenceName() {
+        return sequenceName;
     }
 
     public String getTable() {

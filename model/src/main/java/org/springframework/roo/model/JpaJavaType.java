@@ -69,6 +69,8 @@ public final class JpaJavaType {
     public static final JavaType PRE_REMOVE = new JavaType(
             "javax.persistence.PreRemove");
     public static final JavaType QUERY = new JavaType("javax.persistence.Query");
+    public static final JavaType SEQUENCE_GENERATOR = new JavaType(
+            "javax.persistence.SequenceGenerator");
     public static final JavaType TABLE = new JavaType("javax.persistence.Table");
     public static final JavaType TEMPORAL = new JavaType(
             "javax.persistence.Temporal");

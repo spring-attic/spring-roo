@@ -14,6 +14,7 @@ import static org.springframework.roo.model.JpaJavaType.ID;
 import static org.springframework.roo.model.JpaJavaType.INHERITANCE;
 import static org.springframework.roo.model.JpaJavaType.INHERITANCE_TYPE;
 import static org.springframework.roo.model.JpaJavaType.MAPPED_SUPERCLASS;
+import static org.springframework.roo.model.JpaJavaType.SEQUENCE_GENERATOR;
 import static org.springframework.roo.model.JpaJavaType.TABLE;
 import static org.springframework.roo.model.JpaJavaType.VERSION;
 
@@ -326,6 +327,21 @@ public class JpaEntityMetadata extends
                     GENERATED_VALUE);
             generatedValueBuilder.addEnumAttribute("strategy", new EnumDetails(
                     GENERATION_TYPE, new JavaSymbolName(generationType)));
+
+            if (StringUtils.hasText(annotationValues.getSequenceName())
+                    && !(isGaeEnabled || isDatabaseDotComEnabled)) {
+                final String sequenceKey = StringUtils.toLowerCase(destination
+                        .getSimpleTypeName()) + "_seq";
+                generatedValueBuilder.addStringAttribute("generator",
+                        sequenceKey);
+                final AnnotationMetadataBuilder sequenceGeneratorBuilder = new AnnotationMetadataBuilder(
+                        SEQUENCE_GENERATOR);
+                sequenceGeneratorBuilder
+                        .addStringAttribute("name", sequenceKey);
+                sequenceGeneratorBuilder.addStringAttribute("sequenceName",
+                        annotationValues.getSequenceName());
+                annotations.add(sequenceGeneratorBuilder);
+            }
             annotations.add(generatedValueBuilder);
 
             final String identifierColumn = StringUtils
