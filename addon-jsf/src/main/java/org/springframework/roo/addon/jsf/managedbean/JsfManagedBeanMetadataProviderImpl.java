@@ -20,6 +20,7 @@ import static org.springframework.roo.model.JavaType.BOOLEAN_OBJECT;
 import static org.springframework.roo.model.JavaType.BOOLEAN_PRIMITIVE;
 import static org.springframework.roo.model.JavaType.BYTE_ARRAY_PRIMITIVE;
 import static org.springframework.roo.model.JavaType.INT_PRIMITIVE;
+import static org.springframework.roo.model.JdkJavaType.DATE;
 import static org.springframework.roo.model.RooJavaType.ROO_JSF_MANAGED_BEAN;
 
 import java.util.ArrayList;
@@ -343,6 +344,11 @@ public class JsfManagedBeanMetadataProviderImpl extends
             final CustomDataBuilder customDataBuilder = new CustomDataBuilder(
                     field.getCustomData());
             final JavaType fieldType = field.getFieldType();
+            if (fieldType.equals(DATE)
+                    && field.getFieldName().getSymbolName().equals("created")) {
+                continue;
+            }
+
             final ClassOrInterfaceTypeDetails fieldTypeCid = typeLocationService
                     .getTypeDetails(fieldType);
 
