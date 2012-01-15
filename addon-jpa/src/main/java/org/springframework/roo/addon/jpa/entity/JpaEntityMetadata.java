@@ -330,8 +330,8 @@ public class JpaEntityMetadata extends
 
             if (StringUtils.hasText(annotationValues.getSequenceName())
                     && !(isGaeEnabled || isDatabaseDotComEnabled)) {
-                final String sequenceKey = StringUtils.toLowerCase(destination
-                        .getSimpleTypeName()) + "_seq";
+                final String sequenceKey = StringUtils.uncapitalize(destination
+                        .getSimpleTypeName()) + "Gen";
                 generatedValueBuilder.addStringAttribute("generator",
                         sequenceKey);
                 final AnnotationMetadataBuilder sequenceGeneratorBuilder = new AnnotationMetadataBuilder(
