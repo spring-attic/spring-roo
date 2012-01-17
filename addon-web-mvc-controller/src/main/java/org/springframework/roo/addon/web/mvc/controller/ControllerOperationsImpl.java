@@ -53,7 +53,7 @@ import org.springframework.roo.support.util.StringUtils;
 @Service
 public class ControllerOperationsImpl implements ControllerOperations {
 
-    private static final Logger LOG = HandlerUtils
+    private static final Logger LOGGER = HandlerUtils
             .getLogger(ControllerOperationsImpl.class);
     private static final JavaSymbolName PATH = new JavaSymbolName("path");
     private static final JavaSymbolName VALUE = new JavaSymbolName("value");
@@ -180,7 +180,7 @@ public class ControllerOperationsImpl implements ControllerOperations {
                 final String mapping = mappingAttribute.getValue();
                 if (StringUtils.hasText(mapping)
                         && mapping.equalsIgnoreCase("/" + path)) {
-                    LOG.info("Introducing into existing controller '"
+                    LOGGER.info("Introducing into existing controller '"
                             + cid.getName().getFullyQualifiedTypeName()
                             + "' mapped to '/" + path);
                     return cid;

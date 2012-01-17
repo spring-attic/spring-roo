@@ -99,8 +99,8 @@ public class JavaSymbolName implements Comparable<JavaSymbolName> {
         String str = Introspector.decapitalize(StringUtils
                 .capitalize(simpleTypeName));
         while (ReservedWords.RESERVED_JAVA_KEYWORDS.contains(str)) {
-            str += "_"; // Prefixing can create names that don't work in the
-                        // Derby DB
+            // Prefixing can create names that don't work in the Derby DB
+            str += "_";
         }
         if (str.equals(simpleTypeName)) { // ROO-2929
             str += "_";

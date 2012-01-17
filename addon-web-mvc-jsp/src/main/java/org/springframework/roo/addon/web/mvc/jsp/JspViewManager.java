@@ -60,9 +60,8 @@ import org.w3c.dom.Element;
  */
 public class JspViewManager {
 
- 
     private static final String CREATED = "created";
-   private static final JavaSymbolName VALUE = new JavaSymbolName("value");
+    private static final JavaSymbolName VALUE = new JavaSymbolName("value");
 
     private final String controllerPath;
     private final String entityName;

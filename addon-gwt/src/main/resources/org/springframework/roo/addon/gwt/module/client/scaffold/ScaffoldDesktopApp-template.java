@@ -28,7 +28,7 @@ __GAE_IMPORT__
  * Application for browsing entities.
  */
 public class ScaffoldDesktopApp extends ScaffoldApp {
-	private static final Logger log = Logger.getLogger(Scaffold.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(Scaffold.class.getName());
 	private final ScaffoldDesktopShell shell;
 	private final ApplicationRequestFactory requestFactory;
 	private final EventBus eventBus;
@@ -64,7 +64,7 @@ public class ScaffoldDesktopApp extends ScaffoldApp {
 		GWT.setUncaughtExceptionHandler(new GWT.UncaughtExceptionHandler() {
 			public void onUncaughtException(Throwable e) {
 				Window.alert("Error: " + e.getMessage());
-				log.log(Level.SEVERE, e.getMessage(), e);
+				LOGGER.log(Level.SEVERE, e.getMessage(), e);
 			}
 		});
 
