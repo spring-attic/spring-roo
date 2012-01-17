@@ -2,6 +2,7 @@ package org.springframework.roo.addon.jsf;
 
 import static org.springframework.roo.model.RooJavaType.ROO_JSF_CONVERTER;
 import static org.springframework.roo.model.RooJavaType.ROO_JSF_MANAGED_BEAN;
+import static org.springframework.roo.model.RooJavaType.ROO_SERIALIZABLE;
 
 import java.io.File;
 import java.io.IOException;
@@ -300,10 +301,14 @@ public class JsfOperationsImpl extends AbstractOperations implements
         final String declaredByMetadataId = PhysicalTypeIdentifier
                 .createIdentifier(managedBean,
                         pathResolver.getPath(resourceIdentifier));
+
         final ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(
                 declaredByMetadataId, Modifier.PUBLIC, managedBean,
                 PhysicalTypeCategory.CLASS);
+        cidBuilder
+                .addAnnotation(new AnnotationMetadataBuilder(ROO_SERIALIZABLE));
         cidBuilder.addAnnotation(annotationBuilder);
+
         typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
 
         shell.flash(Level.FINE,
