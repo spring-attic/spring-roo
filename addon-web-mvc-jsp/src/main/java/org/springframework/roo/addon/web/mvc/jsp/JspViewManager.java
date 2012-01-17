@@ -62,7 +62,6 @@ public class JspViewManager {
 
     private static final String CREATED = "created";
     private static final JavaSymbolName VALUE = new JavaSymbolName("value");
-
     private final String controllerPath;
     private final String entityName;
     private final List<FieldMetadata> fields;
