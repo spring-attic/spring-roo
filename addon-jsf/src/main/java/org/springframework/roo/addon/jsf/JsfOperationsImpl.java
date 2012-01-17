@@ -191,8 +191,9 @@ public class JsfOperationsImpl extends AbstractOperations implements
                 .getFocusedIdentifier(
                         Path.SRC_MAIN_WEBAPP,
                         "pages/"
-                                + StringUtils.uncapitalize(entity
-                                        .getSimpleTypeName()) + ".xhtml");
+                                + JavaSymbolName
+                                        .getReservedWordSafeName(entity)
+                                + ".xhtml");
         try {
             final InputStream inputStream = FileUtils.getInputStream(
                     getClass(), "pages/content-template.xhtml");
