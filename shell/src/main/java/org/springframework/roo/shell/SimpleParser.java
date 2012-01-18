@@ -280,11 +280,9 @@ public class SimpleParser implements Parser {
             if (parameterAnnotations.length == 0) {
                 for (final String value : cmd.value()) {
                     if (buffer.startsWith(value) || value.startsWith(buffer)) {
-                        results.add(new Completion(value)); // no space at the
-                                                            // end, as there's
-                                                            // no need to
-                                                            // continue the
-                                                            // command further
+                        // No space at the end, as there's no need to continue
+                        // the command further
+                        results.add(new Completion(value));
                     }
                 }
                 candidates.addAll(results);

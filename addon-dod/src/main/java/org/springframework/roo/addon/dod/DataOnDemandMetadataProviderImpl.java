@@ -71,11 +71,10 @@ public class DataOnDemandMetadataProviderImpl extends
             .name();
 
     @Reference private ConfigurableMetadataProvider configurableMetadataProvider;
-    private final Map<String, JavaType> dodMidToEntityMap = new LinkedHashMap<String, JavaType>();
-
-    private final Map<JavaType, String> entityToDodMidMap = new LinkedHashMap<JavaType, String>();
     @Reference private LayerService layerService;
-
+    private final Map<String, JavaType> dodMidToEntityMap = new LinkedHashMap<String, JavaType>();
+    private final Map<JavaType, String> entityToDodMidMap = new LinkedHashMap<JavaType, String>();
+ 
     protected void activate(final ComponentContext context) {
         metadataDependencyRegistry.addNotificationListener(this);
         metadataDependencyRegistry.registerDependency(
@@ -397,8 +396,7 @@ public class DataOnDemandMetadataProviderImpl extends
 
     /**
      * Returns the data-on-demand metadata for the entity that's the target of
-     * the given reference field. Registers a metadata dependency on that entity
-     * type if appropriate.
+     * the given reference field. 
      * 
      * @param metadataIdentificationString
      * @param field
@@ -412,12 +410,12 @@ public class DataOnDemandMetadataProviderImpl extends
             final Set<ClassOrInterfaceTypeDetails> dataOnDemandTypes) {
         // Check field type to ensure it is a persistent type and is not
         // abstract
-        final JavaType fieldType = field.getFieldType();
-        if (!field.getCustomData().keySet().contains(MANY_TO_ONE_FIELD)
-                && !field.getCustomData().keySet().contains(ONE_TO_ONE_FIELD)) {
+        if (!(field.getCustomData().keySet().contains(MANY_TO_ONE_FIELD) || field
+                .getCustomData().keySet().contains(ONE_TO_ONE_FIELD))) {
             return null;
         }
 
+        final JavaType fieldType = field.getFieldType();
         String otherProvider = null;
         for (final ClassOrInterfaceTypeDetails cid : dataOnDemandTypes) {
             final AnnotationMetadata annotationMetadata = MemberFindingUtils
@@ -439,6 +437,7 @@ public class DataOnDemandMetadataProviderImpl extends
             // No other provider or ignore self-references
             return null;
         }
+
         metadataDependencyRegistry.registerDependency(otherProvider,
                 metadataIdentificationString);
 

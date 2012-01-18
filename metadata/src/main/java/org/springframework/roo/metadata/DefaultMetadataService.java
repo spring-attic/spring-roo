@@ -34,11 +34,13 @@ import org.springframework.roo.support.util.Assert;
 public class DefaultMetadataService extends AbstractMetadataCache implements
         MetadataService {
 
+    @Reference private MetadataDependencyRegistry metadataDependencyRegistry;
+    @Reference private MetadataLogger metadataLogger;
+
     // Request control
     // List to assist output "stacks"which show the order of requests
     private final List<String> activeRequests = new ArrayList<String>();
     private int cacheEvictions = 0;
-
     private int cacheHits = 0;
     private int cacheMisses = 0;
     private int cachePuts = 0;
@@ -47,14 +49,9 @@ public class DefaultMetadataService extends AbstractMetadataCache implements
     private final List<String> keysToRetry = new ArrayList<String>();
     // Mutex
     private final Object lock = new Object();
-    @Reference private MetadataDependencyRegistry metadataDependencyRegistry;
-    @Reference private MetadataLogger metadataLogger;
     private final Map<String, MetadataProvider> providerMap = new HashMap<String, MetadataProvider>();
-
     private final Set<MetadataProvider> providers = new HashSet<MetadataProvider>();
-
     private int recursiveGets = 0;
-
     private int validGets = 0;
 
     protected void activate(final ComponentContext context) {
