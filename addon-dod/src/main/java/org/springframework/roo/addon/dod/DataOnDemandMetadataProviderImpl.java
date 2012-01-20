@@ -74,7 +74,7 @@ public class DataOnDemandMetadataProviderImpl extends
     @Reference private LayerService layerService;
     private final Map<String, JavaType> dodMidToEntityMap = new LinkedHashMap<String, JavaType>();
     private final Map<JavaType, String> entityToDodMidMap = new LinkedHashMap<JavaType, String>();
- 
+
     protected void activate(final ComponentContext context) {
         metadataDependencyRegistry.addNotificationListener(this);
         metadataDependencyRegistry.registerDependency(
@@ -217,10 +217,9 @@ public class DataOnDemandMetadataProviderImpl extends
     }
 
     private Map<FieldMetadata, DataOnDemandMetadata> getLocatedFields(
-            final MemberDetails memberDetails,
-            final String metadataIdentificationString) {
+            final MemberDetails memberDetails, final String dodMetadataId) {
         final Map<FieldMetadata, DataOnDemandMetadata> locatedFields = new LinkedHashMap<FieldMetadata, DataOnDemandMetadata>();
-        final Set<ClassOrInterfaceTypeDetails> dataOnDemandTypes = typeLocationService
+        final Iterable<ClassOrInterfaceTypeDetails> dataOnDemandTypes = typeLocationService
                 .findClassesOrInterfaceDetailsWithAnnotation(ROO_DATA_ON_DEMAND);
 
         final List<MethodMetadata> mutatorMethods = memberDetails.getMethods();
@@ -247,8 +246,7 @@ public class DataOnDemandMetadataProviderImpl extends
 
             // Track any changes to the mutator method (eg it goes away)
             metadataDependencyRegistry.registerDependency(
-                    method.getDeclaredByMetadataId(),
-                    metadataIdentificationString);
+                    method.getDeclaredByMetadataId(), dodMetadataId);
 
             final Set<Object> fieldCustomDataKeys = field.getCustomData()
                     .keySet();
@@ -278,7 +276,7 @@ public class DataOnDemandMetadataProviderImpl extends
 
             // Look up collaborating metadata
             final DataOnDemandMetadata collaboratingMetadata = locateCollaboratingMetadata(
-                    metadataIdentificationString, field, dataOnDemandTypes);
+                    dodMetadataId, field, dataOnDemandTypes);
             locatedFields.put(field, collaboratingMetadata);
         }
 
@@ -287,8 +285,7 @@ public class DataOnDemandMetadataProviderImpl extends
 
     @Override
     protected ItdTypeDetailsProvidingMetadataItem getMetadata(
-            final String metadataIdentificationString,
-            final JavaType aspectName,
+            final String dodMetadataId, final JavaType aspectName,
             final PhysicalTypeMetadata governorPhysicalTypeMetadata,
             final String itdFilename) {
         // We need to parse the annotation, which we expect to be present
@@ -302,15 +299,12 @@ public class DataOnDemandMetadataProviderImpl extends
         // Remember that this entity JavaType matches up with this DOD's
         // metadata identification string
         // Start by clearing the previous association
-        final JavaType oldEntity = dodMidToEntityMap
-                .get(metadataIdentificationString);
+        final JavaType oldEntity = dodMidToEntityMap.get(dodMetadataId);
         if (oldEntity != null) {
             entityToDodMidMap.remove(oldEntity);
         }
-        entityToDodMidMap.put(annotationValues.getEntity(),
-                metadataIdentificationString);
-        dodMidToEntityMap.put(metadataIdentificationString,
-                annotationValues.getEntity());
+        entityToDodMidMap.put(annotationValues.getEntity(), dodMetadataId);
+        dodMidToEntityMap.put(dodMetadataId, annotationValues.getEntity());
 
         final JavaType identifierType = persistenceMemberLocator
                 .getIdentifierType(entity);
@@ -333,7 +327,7 @@ public class DataOnDemandMetadataProviderImpl extends
         // We need to be informed if our dependent metadata changes
         metadataDependencyRegistry.registerDependency(
                 persistenceMemberHoldingTypeDetails.getDeclaredByMetadataId(),
-                metadataIdentificationString);
+                dodMetadataId);
 
         // Get the additions to make for each required method
         final MethodParameter fromParameter = new MethodParameter(
@@ -341,27 +335,27 @@ public class DataOnDemandMetadataProviderImpl extends
         final MethodParameter toParameter = new MethodParameter(
                 JavaType.INT_PRIMITIVE, "to");
         final MemberTypeAdditions findEntriesMethod = layerService
-                .getMemberTypeAdditions(metadataIdentificationString,
+                .getMemberTypeAdditions(dodMetadataId,
                         FIND_ENTRIES_METHOD.name(), entity, identifierType,
                         LayerType.HIGHEST.getPosition(), fromParameter,
                         toParameter);
         final MemberTypeAdditions findMethodAdditions = layerService
-                .getMemberTypeAdditions(metadataIdentificationString,
-                        FIND_METHOD.name(), entity, identifierType,
+                .getMemberTypeAdditions(dodMetadataId, FIND_METHOD.name(),
+                        entity, identifierType,
                         LayerType.HIGHEST.getPosition(), new MethodParameter(
                                 identifierType, "id"));
         final MethodParameter entityParameter = new MethodParameter(entity,
                 "obj");
         final MemberTypeAdditions flushMethod = layerService
-                .getMemberTypeAdditions(metadataIdentificationString,
-                        FLUSH_METHOD, entity, identifierType,
-                        LayerType.HIGHEST.getPosition(), entityParameter);
+                .getMemberTypeAdditions(dodMetadataId, FLUSH_METHOD, entity,
+                        identifierType, LayerType.HIGHEST.getPosition(),
+                        entityParameter);
         final MethodMetadata identifierAccessor = memberDetails
                 .getMostConcreteMethodWithTag(IDENTIFIER_ACCESSOR_METHOD);
         final MemberTypeAdditions persistMethodAdditions = layerService
-                .getMemberTypeAdditions(metadataIdentificationString,
-                        PERSIST_METHOD, entity, identifierType,
-                        LayerType.HIGHEST.getPosition(), entityParameter);
+                .getMemberTypeAdditions(dodMetadataId, PERSIST_METHOD, entity,
+                        identifierType, LayerType.HIGHEST.getPosition(),
+                        entityParameter);
 
         if ((findEntriesMethod == null) || (findMethodAdditions == null)
                 || (identifierAccessor == null)
@@ -371,20 +365,20 @@ public class DataOnDemandMetadataProviderImpl extends
 
         // Identify all the fields we care about on the entity
         final Map<FieldMetadata, DataOnDemandMetadata> locatedFields = getLocatedFields(
-                memberDetails, metadataIdentificationString);
+                memberDetails, dodMetadataId);
 
         // Get the embedded identifier metadata holder - may be null if no
         // embedded identifier exists
         final EmbeddedIdHolder embeddedIdHolder = getEmbeddedIdHolder(
-                memberDetails, metadataIdentificationString);
+                memberDetails, dodMetadataId);
 
         // Get the list of embedded metadata holders - may be an empty list if
         // no embedded identifier exists
         final List<EmbeddedHolder> embeddedHolders = getEmbeddedHolders(
-                memberDetails, metadataIdentificationString);
+                memberDetails, dodMetadataId);
 
-        return new DataOnDemandMetadata(metadataIdentificationString,
-                aspectName, governorPhysicalTypeMetadata, annotationValues,
+        return new DataOnDemandMetadata(dodMetadataId, aspectName,
+                governorPhysicalTypeMetadata, annotationValues,
                 identifierAccessor, findMethodAdditions, findEntriesMethod,
                 persistMethodAdditions, flushMethod, locatedFields,
                 identifierType, embeddedIdHolder, embeddedHolders);
@@ -395,52 +389,62 @@ public class DataOnDemandMetadataProviderImpl extends
     }
 
     /**
-     * Returns the data-on-demand metadata for the entity that's the target of
-     * the given reference field. 
+     * Returns the {@link DataOnDemandMetadata} for the entity that's the target
+     * of the given reference field.
      * 
-     * @param metadataIdentificationString
+     * @param dodMetadataId
      * @param field
      * @param dataOnDemandTypes
      * @return <code>null</code> if it's not an n:1 or 1:1 field, or the DoD
      *         metadata is simply not available
      */
     private DataOnDemandMetadata locateCollaboratingMetadata(
-            final String metadataIdentificationString,
-            final FieldMetadata field,
-            final Set<ClassOrInterfaceTypeDetails> dataOnDemandTypes) {
-        // Check field type to ensure it is a persistent type and is not
-        // abstract
+            final String dodMetadataId, final FieldMetadata field,
+            final Iterable<ClassOrInterfaceTypeDetails> dataOnDemandTypes) {
         if (!(field.getCustomData().keySet().contains(MANY_TO_ONE_FIELD) || field
                 .getCustomData().keySet().contains(ONE_TO_ONE_FIELD))) {
             return null;
         }
 
-        final JavaType fieldType = field.getFieldType();
-        String otherProvider = null;
-        for (final ClassOrInterfaceTypeDetails cid : dataOnDemandTypes) {
-            final AnnotationMetadata annotationMetadata = MemberFindingUtils
-                    .getAnnotationOfType(cid.getAnnotations(),
-                            ROO_DATA_ON_DEMAND);
-            final AnnotationAttributeValue<JavaType> annotationAttributeValue = annotationMetadata
-                    .getAttribute("entity");
-            if ((annotationAttributeValue != null)
-                    && annotationAttributeValue.getValue().equals(fieldType)) {
-                otherProvider = DataOnDemandMetadata.createIdentifier(cid
-                        .getName(), PhysicalTypeIdentifier.getPath(cid
-                        .getDeclaredByMetadataId()));
-                break;
-            }
-        }
+        final String otherDodMetadataId = getDataOnDemandMetadataId(
+                field.getFieldType(), dataOnDemandTypes);
 
-        if ((otherProvider == null)
-                || otherProvider.equals(metadataIdentificationString)) {
-            // No other provider or ignore self-references
+        if (otherDodMetadataId == null
+                || otherDodMetadataId.equals(dodMetadataId)) {
+            // No DoD for this field's type, or it's a self-reference
             return null;
         }
 
-        metadataDependencyRegistry.registerDependency(otherProvider,
-                metadataIdentificationString);
+        // Make this DoD depend on the related entity (not its Dod, otherwise
+        // we get a circular MD dependency)
+        registerDependencyUponType(dodMetadataId, field.getFieldType());
 
-        return (DataOnDemandMetadata) metadataService.get(otherProvider);
+        return (DataOnDemandMetadata) metadataService.get(otherDodMetadataId);
+    }
+
+    private void registerDependencyUponType(final String dodMetadataId,
+            final JavaType type) {
+        final String fieldPhysicalTypeId = typeLocationService
+                .getPhysicalTypeIdentifier(type);
+        metadataDependencyRegistry.registerDependency(fieldPhysicalTypeId,
+                dodMetadataId);
+    }
+
+    private String getDataOnDemandMetadataId(final JavaType javaType,
+            final Iterable<ClassOrInterfaceTypeDetails> dataOnDemandTypes) {
+        for (final ClassOrInterfaceTypeDetails cid : dataOnDemandTypes) {
+            final AnnotationMetadata dodAnnotation = cid
+                    .getAnnotation(ROO_DATA_ON_DEMAND);
+            final AnnotationAttributeValue<JavaType> entityAttribute = dodAnnotation
+                    .getAttribute("entity");
+            if (entityAttribute != null
+                    && entityAttribute.getValue().equals(javaType)) {
+                // Found the DoD type for the given field's type
+                return DataOnDemandMetadata.createIdentifier(cid.getName(),
+                        PhysicalTypeIdentifier.getPath(cid
+                                .getDeclaredByMetadataId()));
+            }
+        }
+        return null;
     }
 }
