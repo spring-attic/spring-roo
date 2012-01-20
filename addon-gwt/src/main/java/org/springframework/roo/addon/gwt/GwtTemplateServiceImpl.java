@@ -769,17 +769,22 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
     }
 
     private JavaType getCollectionImplementation(final JavaType javaType) {
-        if (javaType.equals(SET)) {
+        if (isSameBaseType(javaType, SET)) {
             return new JavaType(HASH_SET.getFullyQualifiedTypeName(),
                     javaType.getArray(), javaType.getDataType(),
                     javaType.getArgName(), javaType.getParameters());
         }
-        if (javaType.equals(LIST)) {
+        if (isSameBaseType(javaType, LIST)) {
             return new JavaType(ARRAY_LIST.getFullyQualifiedTypeName(),
                     javaType.getArray(), javaType.getDataType(),
                     javaType.getArgName(), javaType.getParameters());
         }
         return javaType;
+    }
+
+    private boolean isSameBaseType(final JavaType type1, final JavaType type2) {
+        return type1.getFullyQualifiedTypeName().equals(
+                type2.getFullyQualifiedTypeName());
     }
 
     private JavaType getDestinationJavaType(final GwtType destType,
@@ -944,7 +949,7 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
             final TemplateLoader templateLoader = TemplateResourceLoader
                     .create();
             final Template template = templateLoader.getTemplate(templateFile);
-            Assert.notNull(template, "Tenmplate required for '" + templateFile
+            Assert.notNull(template, "Template required for '" + templateFile
                     + "'");
             final String templateContents = template
                     .renderToString(dataDictionary);
