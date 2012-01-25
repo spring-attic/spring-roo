@@ -214,7 +214,7 @@ public class JmsOperationsImpl implements JmsOperations {
             }
             root.appendChild(new XmlElementBuilder("task:annotation-driven",
                     appContext).addAttribute("executor", "asyncExecutor")
-                    .addAttribute("mode", "aspectj").build());
+                    .build());
             root.appendChild(new XmlElementBuilder("task:executor", appContext)
                     .addAttribute("id", "asyncExecutor")
                     .addAttribute("pool-size", "${executor.poolSize}").build());

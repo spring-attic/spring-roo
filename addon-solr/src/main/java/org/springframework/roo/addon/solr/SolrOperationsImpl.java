@@ -123,8 +123,7 @@ public class SolrOperationsImpl implements SolrOperations {
                                 + "  http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-3.1.xsd");
             }
             root.appendChild(new XmlElementBuilder("task:annotation-driven",
-                    appCtx).addAttribute("executor", "asyncExecutor")
-                    .addAttribute("mode", "aspectj").build());
+                    appCtx).addAttribute("executor", "asyncExecutor").build());
             root.appendChild(new XmlElementBuilder("task:executor", appCtx)
                     .addAttribute("id", "asyncExecutor")
                     .addAttribute("pool-size", "${executor.poolSize}").build());

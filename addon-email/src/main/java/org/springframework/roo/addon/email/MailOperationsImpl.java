@@ -235,9 +235,8 @@ public class MailOperationsImpl implements MailOperations {
                                     + SPRING_TASK_NS + " " + SPRING_TASK_XSD);
                 }
                 root.appendChild(new XmlElementBuilder(
-                        "task:annotation-driven", document)
-                        .addAttribute("executor", "asyncExecutor")
-                        .addAttribute("mode", "aspectj").build());
+                        "task:annotation-driven", document).addAttribute(
+                        "executor", "asyncExecutor").build());
                 root.appendChild(new XmlElementBuilder("task:executor",
                         document).addAttribute("id", "asyncExecutor")
                         .addAttribute("pool-size", "${executor.poolSize}")
