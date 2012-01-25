@@ -156,51 +156,52 @@ public class WebFinderMetadata extends
                 .getFinderMethodMetadata().getMethodName().getSymbolName()
                 + "Form");
 
-        final List<JavaType> parameterTypes = new ArrayList<JavaType>();
-        final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
-        final List<JavaType> types = AnnotatedJavaType
+        final List<JavaType> methodParameterTypes = new ArrayList<JavaType>();
+        final List<JavaSymbolName> methodParameterNames = new ArrayList<JavaSymbolName>();
+        final List<JavaType> finderParameterTypes = AnnotatedJavaType
                 .convertFromAnnotatedJavaTypes(finder.getFinderMethodMetadata()
                         .getParameterTypes());
 
         final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
-        boolean needmodel = false;
-        for (final JavaType javaType : types) {
-            final JavaTypeMetadataDetails typeMd = specialDomainTypes
-                    .get(javaType);
+        boolean needModel = false;
+        for (final JavaType finderParameterType : finderParameterTypes) {
+            JavaTypeMetadataDetails typeMd = specialDomainTypes
+                    .get(finderParameterType);
             JavaTypePersistenceMetadataDetails javaTypePersistenceMetadataHolder = null;
-            if (javaType.isCommonCollectionType()) {
-                final JavaTypeMetadataDetails paramTypeMd = specialDomainTypes
-                        .get(javaType.getParameters().get(0));
-                if ((paramTypeMd != null) && paramTypeMd.isApplicationType()) {
-                    javaTypePersistenceMetadataHolder = paramTypeMd
+            if (finderParameterType.isCommonCollectionType()) {
+                typeMd = specialDomainTypes.get(finderParameterType
+                        .getParameters().get(0));
+                if (typeMd != null && typeMd.isApplicationType()) {
+                    javaTypePersistenceMetadataHolder = typeMd
                             .getPersistenceDetails();
                 }
             }
-            else if ((typeMd != null) && typeMd.isEnumType()) {
+            else if (typeMd != null && typeMd.isEnumType()) {
                 bodyBuilder.appendFormalLine("uiModel.addAttribute(\""
                         + typeMd.getPlural().toLowerCase()
                         + "\", java.util.Arrays.asList("
-                        + javaType.getNameIncludingTypeParameters(false,
-                                builder.getImportRegistrationResolver())
+                        + finderParameterType.getNameIncludingTypeParameters(
+                                false, builder.getImportRegistrationResolver())
                         + ".class.getEnumConstants()));");
             }
-            else if ((typeMd != null) && typeMd.isApplicationType()) {
+            else if (typeMd != null && typeMd.isApplicationType()) {
                 javaTypePersistenceMetadataHolder = typeMd
                         .getPersistenceDetails();
             }
-            if ((typeMd != null)
-                    && (javaTypePersistenceMetadataHolder != null)
-                    && (javaTypePersistenceMetadataHolder.getFindAllMethod() != null)) {
+            if (typeMd != null
+                    && javaTypePersistenceMetadataHolder != null
+                    && javaTypePersistenceMetadataHolder.getFindAllMethod() != null) {
                 bodyBuilder.appendFormalLine("uiModel.addAttribute(\""
                         + typeMd.getPlural().toLowerCase()
                         + "\", "
                         + javaTypePersistenceMetadataHolder.getFindAllMethod()
                                 .getMethodCall() + ");");
             }
-            needmodel = true;
+            needModel = true;
         }
-        if (types.contains(DATE) || types.contains(CALENDAR)) {
+        if (finderParameterTypes.contains(DATE)
+                || finderParameterTypes.contains(CALENDAR)) {
             bodyBuilder.appendFormalLine("addDateTimeFormatPatterns(uiModel);");
         }
         bodyBuilder.appendFormalLine("return \""
@@ -209,12 +210,12 @@ public class WebFinderMetadata extends
                 + finder.getFinderMethodMetadata().getMethodName()
                         .getSymbolName() + "\";");
 
-        if (needmodel) {
-            parameterTypes.add(MODEL);
-            parameterNames.add(new JavaSymbolName("uiModel"));
+        if (needModel) {
+            methodParameterTypes.add(MODEL);
+            methodParameterNames.add(new JavaSymbolName("uiModel"));
         }
 
-        if (getGovernorMethod(finderFormMethodName, parameterTypes) != null) {
+        if (governorHasMethod(finderFormMethodName, methodParameterTypes)) {
             return null;
         }
 
@@ -245,8 +246,8 @@ public class WebFinderMetadata extends
         final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(
                 getId(), Modifier.PUBLIC, finderFormMethodName,
                 JavaType.STRING,
-                AnnotatedJavaType.convertFromJavaTypes(parameterTypes),
-                parameterNames, bodyBuilder);
+                AnnotatedJavaType.convertFromJavaTypes(methodParameterTypes),
+                methodParameterNames, bodyBuilder);
         methodBuilder.setAnnotations(annotations);
         return methodBuilder;
     }
