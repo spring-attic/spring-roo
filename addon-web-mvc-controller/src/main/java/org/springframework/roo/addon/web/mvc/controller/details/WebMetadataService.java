@@ -33,9 +33,19 @@ public interface WebMetadataService {
             JavaType javaType, MemberDetails memberDetails,
             String metadataIdentificationString);
 
+    /**
+     * Returns details of the dynamic finders for the given form backing type
+     * 
+     * @param formBackingType
+     * @param formBackingTypeDetails
+     * @param consumingMetadataId the ID of the
+     *            {@link org.springframework.roo.metadata.MetadataItem} that's
+     *            using these details
+     * @return <code>null</code> if this information is not currently available
+     */
     Set<FinderMetadataDetails> getDynamicFinderMethodsAndFields(
-            JavaType javaType, MemberDetails memberDetails,
-            String metadataIdentificationString);
+            JavaType formBackingType, MemberDetails formBackingTypeDetails,
+            String consumingMetadataId);
 
     JavaTypeMetadataDetails getJavaTypeMetadataDetails(JavaType javaType,
             MemberDetails memberDetails, String metadataIdentificationString);

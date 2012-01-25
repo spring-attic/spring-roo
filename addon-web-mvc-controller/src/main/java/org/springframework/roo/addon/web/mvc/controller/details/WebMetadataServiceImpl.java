@@ -291,59 +291,61 @@ public class WebMetadataServiceImpl implements WebMetadataService {
     }
 
     public Set<FinderMetadataDetails> getDynamicFinderMethodsAndFields(
-            final JavaType javaType, final MemberDetails memberDetails,
+            final JavaType formBackingType,
+            final MemberDetails formBackingTypeDetails,
             final String metadataIdentificationString) {
-        Assert.notNull(javaType, "Java type required");
-        Assert.notNull(memberDetails, "Member details required");
+        Assert.notNull(formBackingType, "Java type required");
+        Assert.notNull(formBackingTypeDetails, "Member details required");
 
-        final SortedSet<FinderMetadataDetails> finderMetadataDetails = new TreeSet<FinderMetadataDetails>();
         final ClassOrInterfaceTypeDetails javaTypeDetails = typeLocationService
-                .getTypeDetails(javaType);
-        Assert.notNull(javaType,
+                .getTypeDetails(formBackingType);
+        Assert.notNull(formBackingType,
                 "Class or interface type details isn't available for type '"
-                        + javaType + "'");
+                        + formBackingType + "'");
         final LogicalPath logicalPath = PhysicalTypeIdentifier
                 .getPath(javaTypeDetails.getDeclaredByMetadataId());
         final String finderMetadataKey = FinderMetadata.createIdentifier(
-                javaType, logicalPath);
+                formBackingType, logicalPath);
         registerDependency(finderMetadataKey, metadataIdentificationString);
         final FinderMetadata finderMetadata = (FinderMetadata) metadataService
                 .get(finderMetadataKey);
-        if (finderMetadata != null) {
-            for (final MethodMetadata method : finderMetadata
-                    .getAllDynamicFinders()) {
-                final List<JavaSymbolName> parameterNames = method
-                        .getParameterNames();
-                final List<JavaType> parameterTypes = AnnotatedJavaType
-                        .convertFromAnnotatedJavaTypes(method
-                                .getParameterTypes());
-                final List<FieldMetadata> fields = new ArrayList<FieldMetadata>();
-                for (int i = 0; i < parameterTypes.size(); i++) {
-                    JavaSymbolName fieldName = null;
-                    if (parameterNames.get(i).getSymbolName().startsWith("max")
-                            || parameterNames.get(i).getSymbolName()
-                                    .startsWith("min")) {
-                        fieldName = new JavaSymbolName(
-                                Introspector.decapitalize(StringUtils
-                                        .capitalize(parameterNames.get(i)
-                                                .getSymbolName().substring(3))));
-                    }
-                    else {
-                        fieldName = parameterNames.get(i);
-                    }
-                    final FieldMetadata field = BeanInfoUtils
-                            .getFieldForPropertyName(memberDetails, fieldName);
-                    if (field != null) {
-                        final FieldMetadataBuilder fieldMd = new FieldMetadataBuilder(
-                                field);
-                        fieldMd.setFieldName(parameterNames.get(i));
-                        fields.add(fieldMd.build());
-                    }
+        if (finderMetadata == null) {
+            return null;
+        }
+        final SortedSet<FinderMetadataDetails> finderMetadataDetails = new TreeSet<FinderMetadataDetails>();
+        for (final MethodMetadata method : finderMetadata
+                .getAllDynamicFinders()) {
+            final List<JavaSymbolName> parameterNames = method
+                    .getParameterNames();
+            final List<JavaType> parameterTypes = AnnotatedJavaType
+                    .convertFromAnnotatedJavaTypes(method.getParameterTypes());
+            final List<FieldMetadata> fields = new ArrayList<FieldMetadata>();
+            for (int i = 0; i < parameterTypes.size(); i++) {
+                JavaSymbolName fieldName = null;
+                if (parameterNames.get(i).getSymbolName().startsWith("max")
+                        || parameterNames.get(i).getSymbolName()
+                                .startsWith("min")) {
+                    fieldName = new JavaSymbolName(
+                            Introspector.decapitalize(StringUtils
+                                    .capitalize(parameterNames.get(i)
+                                            .getSymbolName().substring(3))));
                 }
-                final FinderMetadataDetails details = new FinderMetadataDetails(
-                        method.getMethodName().getSymbolName(), method, fields);
-                finderMetadataDetails.add(details);
+                else {
+                    fieldName = parameterNames.get(i);
+                }
+                final FieldMetadata field = BeanInfoUtils
+                        .getFieldForPropertyName(formBackingTypeDetails,
+                                fieldName);
+                if (field != null) {
+                    final FieldMetadataBuilder fieldMd = new FieldMetadataBuilder(
+                            field);
+                    fieldMd.setFieldName(parameterNames.get(i));
+                    fields.add(fieldMd.build());
+                }
             }
+            final FinderMetadataDetails details = new FinderMetadataDetails(
+                    method.getMethodName().getSymbolName(), method, fields);
+            finderMetadataDetails.add(details);
         }
         return Collections.unmodifiableSortedSet(finderMetadataDetails);
     }

@@ -106,15 +106,14 @@ public class JspMetadataListener implements MetadataProvider,
         metadataDependencyRegistry.removeNotificationListener(this);
     }
 
-    public MetadataItem get(final String metadataIdentificationString) {
+    public MetadataItem get(final String jspMetadataId) {
         // Work out the MIDs of the other metadata we depend on
         // NB: The JavaType and Path are to the corresponding web scaffold
         // controller class
 
         final String webScaffoldMetadataKey = WebScaffoldMetadata
-                .createIdentifier(
-                        JspMetadata.getJavaType(metadataIdentificationString),
-                        JspMetadata.getPath(metadataIdentificationString));
+                .createIdentifier(JspMetadata.getJavaType(jspMetadataId),
+                        JspMetadata.getPath(jspMetadataId));
         final WebScaffoldMetadata webScaffoldMetadata = (WebScaffoldMetadata) metadataService
                 .get(webScaffoldMetadataKey);
         if ((webScaffoldMetadata == null) || !webScaffoldMetadata.isValid()) {
@@ -129,18 +128,17 @@ public class JspMetadataListener implements MetadataProvider,
                 .getMemberDetails(formBackingType);
         final JavaTypeMetadataDetails formBackingTypeMetadataDetails = webMetadataService
                 .getJavaTypeMetadataDetails(formBackingType, memberDetails,
-                        metadataIdentificationString);
+                        jspMetadataId);
         Assert.notNull(
                 formBackingTypeMetadataDetails,
                 "Unable to obtain metadata for type "
                         + formBackingType.getFullyQualifiedTypeName());
 
-        formBackingObjectTypesToLocalMids.put(formBackingType,
-                metadataIdentificationString);
+        formBackingObjectTypesToLocalMids.put(formBackingType, jspMetadataId);
 
         final SortedMap<JavaType, JavaTypeMetadataDetails> relatedTypeMd = webMetadataService
                 .getRelatedApplicationTypeMetadata(formBackingType,
-                        memberDetails, metadataIdentificationString);
+                        memberDetails, jspMetadataId);
         final JavaTypeMetadataDetails formbackingTypeMetadata = relatedTypeMd
                 .get(formBackingType);
         Assert.notNull(formbackingTypeMetadata,
@@ -158,8 +156,7 @@ public class JspMetadataListener implements MetadataProvider,
                 .createIdentifier(formBackingType, formBackingTypePath),
                 JspMetadata.createIdentifier(formBackingType,
                         formBackingTypePath));
-        final LogicalPath path = JspMetadata
-                .getPath(metadataIdentificationString);
+        final LogicalPath path = JspMetadata.getPath(jspMetadataId);
 
         // Install web artifacts only if Spring MVC config is missing
         // TODO: Remove this call when 'controller' commands are gone
@@ -182,7 +179,7 @@ public class JspMetadataListener implements MetadataProvider,
 
         final List<FieldMetadata> eligibleFields = webMetadataService
                 .getScaffoldEligibleFieldMetadata(formBackingType,
-                        memberDetails, metadataIdentificationString);
+                        memberDetails, jspMetadataId);
         if (eligibleFields.isEmpty()
                 && formBackingTypePersistenceMetadata.getRooIdentifierFields()
                         .isEmpty()) {
@@ -332,7 +329,7 @@ public class JspMetadataListener implements MetadataProvider,
                         .getJavaTypePersistenceMetadataDetails(method
                                 .getReturnType(), webMetadataService
                                 .getMemberDetails(method.getReturnType()),
-                                metadataIdentificationString);
+                                jspMetadataId);
                 if (typePersistenceMetadataDetails != null) {
                     for (final FieldMetadata f : typePersistenceMetadataDetails
                             .getRooIdentifierFields()) {
@@ -388,76 +385,79 @@ public class JspMetadataListener implements MetadataProvider,
                     webappPath);
         }
 
+        final String controllerPhysicalTypeId = PhysicalTypeIdentifier
+                .createIdentifier(JspMetadata.getJavaType(jspMetadataId),
+                        JspMetadata.getPath(jspMetadataId));
+        final PhysicalTypeMetadata controllerPhysicalTypeMd = (PhysicalTypeMetadata) metadataService
+                .get(controllerPhysicalTypeId);
+        if (controllerPhysicalTypeMd == null) {
+            return null;
+        }
+        final MemberHoldingTypeDetails mhtd = controllerPhysicalTypeMd
+                .getMemberHoldingTypeDetails();
+        if (mhtd == null) {
+            return null;
+        }
         final List<String> allowedMenuItems = new ArrayList<String>();
-        final PhysicalTypeMetadata ptm = (PhysicalTypeMetadata) metadataService
-                .get(PhysicalTypeIdentifier.createIdentifier(
-                        JspMetadata.getJavaType(metadataIdentificationString),
-                        JspMetadata.getPath(metadataIdentificationString)));
-        if (ptm != null) {
-            final MemberHoldingTypeDetails mhtd = ptm
-                    .getMemberHoldingTypeDetails();
-            if ((mhtd != null)
-                    && (MemberFindingUtils.getAnnotationOfType(
-                            mhtd.getAnnotations(), RooJavaType.ROO_WEB_FINDER) != null)) {
-                final Set<FinderMetadataDetails> finderMethodsDetails = webMetadataService
-                        .getDynamicFinderMethodsAndFields(formBackingType,
-                                memberDetails, metadataIdentificationString);
-                for (final FinderMetadataDetails finderDetails : finderMethodsDetails) {
-                    final String finderName = finderDetails
-                            .getFinderMethodMetadata().getMethodName()
-                            .getSymbolName();
-                    final String listPath = destinationDirectory + "/"
-                            + finderName + ".jspx";
-                    // Finders only get scaffolded if the finder name is not too
-                    // long (see ROO-1027)
-                    if (listPath.length() > 244) {
-                        continue;
-                    }
-                    xmlRoundTripFileManager.writeToDiskIfNecessary(listPath,
-                            viewManager.getFinderDocument(finderDetails));
-                    final JavaSymbolName finderLabel = new JavaSymbolName(
-                            finderName.replace("find" + plural + "By", ""));
-                    // Add 'Find by' menu item
-
-                    menuOperations.addMenuItem(categoryName, finderLabel,
-                            "global_menu_find", "/" + controllerPath + "?find="
-                                    + finderName.replace("find" + plural, "")
-                                    + "&form",
-                            MenuOperations.FINDER_MENU_ITEM_PREFIX, webappPath);
-                    properties.put("menu_item_"
-                            + categoryName.getSymbolName().toLowerCase() + "_"
-                            + finderLabel.getSymbolName().toLowerCase()
-                            + "_label", finderLabel.getReadableSymbolName());
-                    allowedMenuItems.add(MenuOperations.FINDER_MENU_ITEM_PREFIX
-                            + categoryName.getSymbolName().toLowerCase() + "_"
-                            + finderLabel.getSymbolName().toLowerCase());
-                    for (final JavaSymbolName paramName : finderDetails
-                            .getFinderMethodMetadata().getParameterNames()) {
-                        properties.put(
-                                XmlUtils.convertId(resourceId
-                                        + "."
-                                        + paramName.getSymbolName()
-                                                .toLowerCase()),
-                                paramName.getReadableSymbolName());
-                    }
-                    tilesOperations.addViewDefinition(controllerPath,
-                            webappPath, controllerPath + "/" + finderName,
-                            TilesOperations.DEFAULT_TEMPLATE, WEB_INF_VIEWS
-                                    + controllerPath + "/" + finderName
-                                    + ".jspx");
+        if (MemberFindingUtils.getAnnotationOfType(mhtd.getAnnotations(),
+                RooJavaType.ROO_WEB_FINDER) != null) {
+            // This controller is annotated with @RooWebFinder
+            final Set<FinderMetadataDetails> finderMethodsDetails = webMetadataService
+                    .getDynamicFinderMethodsAndFields(formBackingType,
+                            memberDetails, jspMetadataId);
+            if (finderMethodsDetails == null) {
+                return null;
+            }
+            for (final FinderMetadataDetails finderDetails : finderMethodsDetails) {
+                final String finderName = finderDetails
+                        .getFinderMethodMetadata().getMethodName()
+                        .getSymbolName();
+                final String listPath = destinationDirectory + "/" + finderName
+                        + ".jspx";
+                // Finders only get scaffolded if the finder name is not too
+                // long (see ROO-1027)
+                if (listPath.length() > 244) {
+                    continue;
                 }
+                xmlRoundTripFileManager.writeToDiskIfNecessary(listPath,
+                        viewManager.getFinderDocument(finderDetails));
+                final JavaSymbolName finderLabel = new JavaSymbolName(
+                        finderName.replace("find" + plural + "By", ""));
+                // Add 'Find by' menu item
+
+                menuOperations.addMenuItem(categoryName, finderLabel,
+                        "global_menu_find", "/" + controllerPath + "?find="
+                                + finderName.replace("find" + plural, "")
+                                + "&form",
+                        MenuOperations.FINDER_MENU_ITEM_PREFIX, webappPath);
+                properties.put("menu_item_"
+                        + categoryName.getSymbolName().toLowerCase() + "_"
+                        + finderLabel.getSymbolName().toLowerCase() + "_label",
+                        finderLabel.getReadableSymbolName());
+                allowedMenuItems.add(MenuOperations.FINDER_MENU_ITEM_PREFIX
+                        + categoryName.getSymbolName().toLowerCase() + "_"
+                        + finderLabel.getSymbolName().toLowerCase());
+                for (final JavaSymbolName paramName : finderDetails
+                        .getFinderMethodMetadata().getParameterNames()) {
+                    properties.put(
+                            XmlUtils.convertId(resourceId + "."
+                                    + paramName.getSymbolName().toLowerCase()),
+                            paramName.getReadableSymbolName());
+                }
+                tilesOperations.addViewDefinition(controllerPath, webappPath,
+                        controllerPath + "/" + finderName,
+                        TilesOperations.DEFAULT_TEMPLATE, WEB_INF_VIEWS
+                                + controllerPath + "/" + finderName + ".jspx");
             }
         }
+
+        menuOperations.cleanUpFinderMenuItems(categoryName, allowedMenuItems,
+                webappPath);
 
         propFileOperations.addProperties(webappPath,
                 "WEB-INF/i18n/application.properties", properties, true, false);
 
-        // Clean up links to finders which are removed by now
-        menuOperations.cleanUpFinderMenuItems(categoryName, allowedMenuItems,
-                webappPath);
-
-        return new JspMetadata(metadataIdentificationString,
-                webScaffoldMetadata);
+        return new JspMetadata(jspMetadataId, webScaffoldMetadata);
     }
 
     public String getProvidesType() {

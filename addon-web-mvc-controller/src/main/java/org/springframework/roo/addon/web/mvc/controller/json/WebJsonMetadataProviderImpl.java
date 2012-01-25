@@ -161,6 +161,9 @@ public class WebJsonMetadataProviderImpl extends
                 .getDynamicFinderMethodsAndFields(jsonObject,
                         formBackingObjectMemberDetails,
                         metadataIdentificationString);
+        if (finderDetails == null) {
+            return null;
+        }
         final Map<MethodMetadataCustomDataKey, MemberTypeAdditions> persistenceAdditions = webMetadataService
                 .getCrudAdditions(jsonObject, metadataIdentificationString);
         final JavaTypePersistenceMetadataDetails javaTypePersistenceMetadataDetails = webMetadataService

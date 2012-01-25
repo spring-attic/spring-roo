@@ -157,14 +157,18 @@ public class MenuOperationsImpl implements MenuOperations {
         }
         for (final Element element : elements) {
             if (!allowedFinderMenuIds.contains(element.getAttribute("id"))
-                    && ("?".equals(element.getAttribute("z")) || XmlRoundTripUtils
-                            .calculateUniqueKeyFor(element).equals(
-                                    element.getAttribute("z")))) {
+                    && isNotUserManaged(element)) {
                 element.getParentNode().removeChild(element);
             }
         }
         xmlRoundTripFileManager.writeToDiskIfNecessary(
                 getMenuFileName(logicalPath), document);
+    }
+
+    private boolean isNotUserManaged(final Element element) {
+        return "?".equals(element.getAttribute("z"))
+                || XmlRoundTripUtils.calculateUniqueKeyFor(element).equals(
+                        element.getAttribute("z"));
     }
 
     /**
@@ -197,9 +201,7 @@ public class MenuOperationsImpl implements MenuOperations {
         if (element == null) {
             return;
         }
-        if ("?".equals(element.getAttribute("z"))
-                || XmlRoundTripUtils.calculateUniqueKeyFor(element).equals(
-                        element.getAttribute("z"))) {
+        if (isNotUserManaged(element)) {
             element.getParentNode().removeChild(element);
         }
 

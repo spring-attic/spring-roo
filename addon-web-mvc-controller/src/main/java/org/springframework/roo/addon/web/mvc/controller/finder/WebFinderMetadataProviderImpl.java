@@ -107,6 +107,9 @@ public class WebFinderMetadataProviderImpl extends AbstractItdMetadataProvider
                 .getDynamicFinderMethodsAndFields(formBackingType,
                         formBackingObjectMemberDetails,
                         metadataIdentificationString);
+        if (dynamicFinderMethods == null) {
+            return null;
+        }
         final SortedMap<JavaType, JavaTypeMetadataDetails> relatedApplicationTypeMetadata = webMetadataService
                 .getRelatedApplicationTypeMetadata(formBackingType,
                         formBackingObjectMemberDetails,
