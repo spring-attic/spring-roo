@@ -13,7 +13,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Handler;
@@ -35,7 +34,6 @@ import org.springframework.roo.shell.event.ShellStatus.Status;
 import org.springframework.roo.shell.event.ShellStatusListener;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.ClassUtils;
-import org.springframework.roo.support.util.CollectionUtils;
 import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.IOUtils;
 import org.springframework.roo.support.util.OsUtils;
@@ -159,8 +157,8 @@ public abstract class JLineShell extends AbstractShell implements
         }
         else {
             buff.append(ANSICodes.gotoxy(row, mostFurtherLeftColNumber));
-            buff.append(ANSICodes.clreol()); // Clear what was present on the
-                                             // line
+            // Clear what was present on the line
+            buff.append(ANSICodes.clreol());
         }
 
         if (("".equals(message))) {
@@ -208,23 +206,23 @@ public abstract class JLineShell extends AbstractShell implements
      * 
      * @param line - command line
      */
-    @Override
-    public boolean executeCommand(final String line) {
-        List<String> commands = null;
-        if (getTailor() != null) {
-            commands = getTailor().sew(line);
-        }
-        if (CollectionUtils.isEmpty(commands)) {
-            return super.executeCommand(line);
-        }
-        for (final String command : commands) {
-            logger.info("Tailored: " + command);
-            if (!super.executeCommand(command)) {
-                return false;
-            }
-        }
-        return true;
-    }
+    // @Override
+    // public boolean executeCommand(final String line) {
+    // List<String> commands = null;
+    // if (getTailor() != null) {
+    // commands = getTailor().sew(line);
+    // }
+    // if (CollectionUtils.isEmpty(commands)) {
+    // return super.executeCommand(line);
+    // }
+    // for (final String command : commands) {
+    // logger.info("Tailored: " + command);
+    // if (!super.executeCommand(command)) {
+    // return false;
+    // }
+    // }
+    // return true;
+    // }
 
     @Override
     public void flash(final Level level, final String message, final String slot) {

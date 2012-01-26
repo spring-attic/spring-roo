@@ -154,10 +154,10 @@ public class JLineShellComponent extends JLineShell {
         }
     }
 
-    @Override
-    protected Tailor getTailor() {
-        return tailor;
-    }
+    // @Override
+    // protected Tailor getTailor() {
+    // return tailor;
+    // }
 
     // TODO: This should probably be moved to a HTTP service of some sort - JTT
     // 29/08/11
