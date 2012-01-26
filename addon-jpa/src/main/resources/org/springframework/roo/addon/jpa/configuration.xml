@@ -198,12 +198,12 @@
                 <dependency>
                     <groupId>org.hibernate</groupId>
                     <artifactId>hibernate-core</artifactId>
-                    <version>3.6.8.Final</version>
+                    <version>3.6.9.Final</version>
                 </dependency>
                 <dependency>
                     <groupId>org.hibernate</groupId>
                     <artifactId>hibernate-entitymanager</artifactId>
-                    <version>3.6.8.Final</version>
+                    <version>3.6.9.Final</version>
                     <exclusions>
                         <exclusion>
                             <groupId>cglib</groupId>
@@ -221,6 +221,11 @@
                     <version>1.0.1.Final</version>
                 </dependency>
             </dependencies>
+            <dependency>
+                <groupId>commons-collections</groupId>
+                <artifactId>commons-collections</artifactId>
+                <version>3.2.1</version>
+            </dependency>
         </provider>
         <provider id="OPENJPA">
             <dependencies>
@@ -323,17 +328,17 @@
                 <dependency>
                     <groupId>org.datanucleus</groupId>
                     <artifactId>datanucleus-core</artifactId>
-                    <version>3.0.4</version>
+                    <version>3.0.5</version>
                 </dependency>
                 <dependency>
                     <groupId>org.datanucleus</groupId>
                     <artifactId>datanucleus-api-jpa</artifactId>
-                    <version>3.0.4</version>
+                    <version>3.0.5</version>
                 </dependency>
                 <dependency>
                     <groupId>org.datanucleus</groupId>
                     <artifactId>datanucleus-rdbms</artifactId>
-                    <version>3.0.4</version>
+                    <version>3.0.5</version>
                 </dependency>
             </dependencies>
             <plugins>
