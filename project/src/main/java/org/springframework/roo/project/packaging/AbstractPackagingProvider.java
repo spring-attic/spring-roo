@@ -49,10 +49,9 @@ public abstract class AbstractPackagingProvider implements PackagingProvider {
 
     @Reference protected ApplicationContextOperations applicationContextOperations;
     @Reference protected FileManager fileManager;
-    private final String id;
-
-    private final String name;
     @Reference protected PathResolver pathResolver;
+    private final String id;
+    private final String name;
     private final String pomTemplate;
 
     /**
@@ -85,8 +84,9 @@ public abstract class AbstractPackagingProvider implements PackagingProvider {
             final ProjectOperations projectOperations) {
         final String pomPath = createPom(topLevelPackage, nullableProjectName,
                 javaVersion, parentPom, module, projectOperations);
-        fileManager.scan(); // TODO not sure why or if this is necessary; find
-                            // out and document/remove it
+        // TODO not sure why or if this is necessary; find out and
+        // document/remove it
+        fileManager.scan();
         createOtherArtifacts(topLevelPackage, module, projectOperations);
         return pomPath;
     }

@@ -72,10 +72,9 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements
                 }
             }
             catch (final IOException e) {
-                if (e.getMessage().contains("No such file or directory") || // For
-                                                                            // *nix/Mac
-                        e.getMessage().contains("CreateProcess error=2")) { // For
-                                                                            // Windows
+                // 1st condition for *nix/Mac, 2nd condition for Windows
+                if (e.getMessage().contains("No such file or directory")
+                        || e.getMessage().contains("CreateProcess error=2")) {
                     LOGGER.severe("Could not locate Maven executable; please ensure mvn command is in your path");
                 }
             }
@@ -88,8 +87,8 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements
 
     private static final Logger LOGGER = HandlerUtils
             .getLogger(MavenOperationsImpl.class);
-    @Reference private PackagingProviderRegistry packagingProviderRegistry;
 
+    @Reference private PackagingProviderRegistry packagingProviderRegistry;
     @Reference private ProcessManager processManager;
 
     private void addModuleDeclaration(final String moduleName,
@@ -156,9 +155,9 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements
         final LoggingInputStream errors = new LoggingInputStream(
                 p.getErrorStream(), processManager);
 
-        p.getOutputStream().close(); // Close OutputStream to avoid blocking by
-                                     // Maven commands that expect input, as per
-                                     // ROO-2034
+        // Close OutputStream to avoid blocking by Maven commands that expect
+        // input, as per ROO-2034
+        IOUtils.closeQuietly(p.getOutputStream());
         input.start();
         errors.start();
 
