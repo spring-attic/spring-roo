@@ -228,7 +228,7 @@ public class JsfManagedBeanMetadataProviderImpl extends
         final JsfManagedBeanAnnotationValues annotationValues = new JsfManagedBeanAnnotationValues(
                 governorPhysicalTypeMetadata);
         final JavaType entity = annotationValues.getEntity();
-        if (!annotationValues.isAnnotationFound() || (entity == null)) {
+        if (!annotationValues.isAnnotationFound() || entity == null) {
             return null;
         }
 
@@ -279,8 +279,8 @@ public class JsfManagedBeanMetadataProviderImpl extends
     }
 
     private boolean isEnum(final ClassOrInterfaceTypeDetails cid) {
-        return (cid != null)
-                && (cid.getPhysicalTypeCategory() == PhysicalTypeCategory.ENUMERATION);
+        return cid != null
+                && cid.getPhysicalTypeCategory() == PhysicalTypeCategory.ENUMERATION;
     }
 
     private boolean isFieldOfInterest(final FieldMetadata field) {
@@ -288,15 +288,11 @@ public class JsfManagedBeanMetadataProviderImpl extends
         return !fieldType.isCommonCollectionType()
                 && !fieldType.isArray() // Exclude collections and arrays
                 && !fieldType.equals(BOOLEAN_PRIMITIVE)
-                && !fieldType.equals(BOOLEAN_OBJECT) // Boolean values would not
-                                                     // be meaningful in this
-                                                     // presentation
+                // Boolean values would not be meaningful in this presentation
+                && !fieldType.equals(BOOLEAN_OBJECT)
                 && !fieldType.equals(BYTE_ARRAY_PRIMITIVE)
-                && !field.getCustomData().keySet().contains(EMBEDDED_FIELD); // Not
-                                                                             // interested
-                                                                             // in
-                                                                             // embedded
-                                                                             // types
+                // Not interested in embedded types
+                && !field.getCustomData().keySet().contains(EMBEDDED_FIELD);
     }
 
     /**
@@ -353,8 +349,8 @@ public class JsfManagedBeanMetadataProviderImpl extends
                     .getTypeDetails(fieldType);
 
             // Check field is to be displayed in the entity's list view
-            if ((listViewFields < MAX_LIST_VIEW_FIELDS)
-                    && isFieldOfInterest(field) && (fieldTypeCid == null)) {
+            if (listViewFields < MAX_LIST_VIEW_FIELDS
+                    && isFieldOfInterest(field) && fieldTypeCid == null) {
                 listViewFields++;
                 customDataBuilder.put(LIST_VIEW_FIELD_KEY, field);
             }
@@ -398,9 +394,8 @@ public class JsfManagedBeanMetadataProviderImpl extends
                                             PARAMETER_TYPE_PLURAL_KEY,
                                             pluralMetadata.getPlural());
                                 }
-                                break parameterTypeLoop; // Only support one
-                                                         // generic type
-                                                         // parameter
+                             // Only support one generic type parameter
+                                break parameterTypeLoop; 
                             }
                             // Parameter type is not an entity - test for an
                             // enum
@@ -412,7 +407,7 @@ public class JsfManagedBeanMetadataProviderImpl extends
                     }
                 }
                 else {
-                    if ((fieldTypeCid != null)
+                    if (fieldTypeCid != null
                             && !customDataBuilder.keySet().contains(
                                     CustomDataKeys.EMBEDDED_FIELD)) {
                         customDataBuilder.put(APPLICATION_TYPE_KEY, null);
@@ -442,7 +437,7 @@ public class JsfManagedBeanMetadataProviderImpl extends
                             if (applicationTypeField == null) {
                                 continue;
                             }
-                            if ((dropDownFields < MAX_DROP_DOWN_FIELDS)
+                            if (dropDownFields < MAX_DROP_DOWN_FIELDS
                                     && isFieldOfInterest(applicationTypeField)
                                     && !typeLocationService
                                             .isInProject(applicationTypeField
