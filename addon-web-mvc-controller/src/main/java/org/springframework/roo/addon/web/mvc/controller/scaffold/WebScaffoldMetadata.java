@@ -252,6 +252,7 @@ public class WebScaffoldMetadata extends
         }
 
         final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+        bodyBuilder.appendFormalLine("super();");
         bodyBuilder.appendFormalLine("this." + CS_FIELD + " = " + CS_FIELD
                 + ";");
 
