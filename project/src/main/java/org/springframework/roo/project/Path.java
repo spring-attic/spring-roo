@@ -33,7 +33,6 @@ public enum Path {
      * The module sub-path containing production Java source code.
      */
     SRC_MAIN_JAVA(true, "src/main/java") {
-
         @Override
         public String getPathRelativeToPom(final Pom pom) {
             if ((pom != null) && StringUtils.hasText(pom.getSourceDirectory())) {
@@ -57,7 +56,6 @@ public enum Path {
      * The module sub-path containing test Java source code.
      */
     SRC_TEST_JAVA(true, "src/test/java") {
-
         @Override
         public String getPathRelativeToPom(final Pom pom) {
             if ((pom != null)

@@ -19,6 +19,7 @@ import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.shell.Completion;
 import org.springframework.roo.shell.Converter;
 import org.springframework.roo.shell.MethodTarget;
+import org.springframework.roo.support.util.Assert;
 
 /**
  * A {@link Converter} for {@link JavaPackage}s, with support for using
@@ -47,6 +48,10 @@ public class JavaPackageConverter implements Converter<JavaPackage> {
         if (isBlank(value)) {
             return null;
         }
+        Assert.isTrue(
+                !(value.contains("target") || value.contains("bin") || value
+                        .contains("maven")),
+                "Package name cannot contain the words 'target', 'bin', or 'maven'");
         final JavaPackage result = new JavaPackage(
                 convertToFullyQualifiedPackageName(value));
         if ((optionContext != null) && optionContext.contains("update")) {
@@ -90,8 +95,8 @@ public class JavaPackageConverter implements Converter<JavaPackage> {
                     .getTopLevelPackageForModule(projectOperations
                             .getFocusedModule());
         }
-        return ""; // Shouldn't happen if there's a project, i.e. most of the
-                   // time
+        // Shouldn't happen if there's a project, i.e. most of the time
+        return "";
     }
 
     /**

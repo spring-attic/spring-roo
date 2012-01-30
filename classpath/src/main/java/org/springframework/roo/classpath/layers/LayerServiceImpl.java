@@ -37,7 +37,7 @@ public class LayerServiceImpl implements LayerService {
     static class DescendingLayerComparator implements
             Comparator<LayerProvider>, Serializable {
 
-        private static final long serialVersionUID = 1L;
+        private static final long serialVersionUID = 2840103254559366403L;
 
         public int compare(final LayerProvider provider1,
                 final LayerProvider provider2) {
