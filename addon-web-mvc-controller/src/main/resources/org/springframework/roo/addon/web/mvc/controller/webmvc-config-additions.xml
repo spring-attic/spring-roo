@@ -22,7 +22,7 @@
     The messages*.properties files translate Roo generated messages which are part of the admin interface, the 
     application.properties resource bundle localizes all application specific messages such as entity names and menu items. -->
     <bean class="org.springframework.context.support.ReloadableResourceBundleMessageSource" id="messageSource" 
-        p:basenames="WEB-INF/i18n/messages,WEB-INF/i18n/application" p:fallbackToSystemLocale="false" p:defaultEncoding="UTF-8" />
+        p:basenames="WEB-INF/i18n/messages,WEB-INF/i18n/application" p:fallbackToSystemLocale="false" />
 
     <!-- Store preferred language configuration in a cookie -->
     <bean class="org.springframework.web.servlet.i18n.CookieLocaleResolver" id="localeResolver" p:cookieName="locale" />
