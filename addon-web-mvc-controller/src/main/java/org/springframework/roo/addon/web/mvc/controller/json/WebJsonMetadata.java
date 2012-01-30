@@ -98,13 +98,9 @@ public class WebJsonMetadata extends
     }
 
     private WebJsonAnnotationValues annotationValues;
-
     private String entityName;
-
     private boolean introduceLayerComponents;
-
     private JavaType jsonEnabledType;
-
     private JsonMetadata jsonMetadata;
 
     /**
@@ -615,13 +611,14 @@ public class WebJsonMetadata extends
         annotations.add(new AnnotationMetadataBuilder(RESPONSE_BODY));
 
         final String beanShortName = getShortName(jsonEnabledType);
+        final String httpHeadersShortName = getShortName(HTTP_HEADERS);
+        final String responseEntityShortName = getShortName(RESPONSE_ENTITY);
+        final String httpStatusShortName = getShortName(HTTP_STATUS);
+
         final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
         bodyBuilder.appendFormalLine(beanShortName + " "
                 + beanShortName.toLowerCase() + " = "
                 + findMethod.getMethodCall() + ";");
-        final String httpHeadersShortName = getShortName(HTTP_HEADERS);
-        final String responseEntityShortName = getShortName(RESPONSE_ENTITY);
-        final String httpStatusShortName = getShortName(HTTP_STATUS);
         bodyBuilder.appendFormalLine(httpHeadersShortName + " headers = new "
                 + httpHeadersShortName + "();");
         bodyBuilder.appendFormalLine("headers.add(\"Content-Type\", \""

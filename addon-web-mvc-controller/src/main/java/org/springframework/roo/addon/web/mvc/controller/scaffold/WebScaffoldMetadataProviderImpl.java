@@ -20,6 +20,7 @@ import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.customdata.tagkeys.MethodMetadataCustomDataKey;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
+import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
@@ -151,6 +152,8 @@ public class WebScaffoldMetadataProviderImpl extends
         webScaffoldMidToEntityMap.put(metadataIdentificationString,
                 formBackingType);
 
+        final FieldMetadata idField = webMetadataService
+                .getIdentifierField(formBackingType);
         final SortedMap<JavaType, JavaTypeMetadataDetails> relatedApplicationTypeMetadata = webMetadataService
                 .getRelatedApplicationTypeMetadata(formBackingType,
                         formBackingObjectMemberDetails,
@@ -168,7 +171,7 @@ public class WebScaffoldMetadataProviderImpl extends
                         persistenceMemberLocator);
 
         return new WebScaffoldMetadata(metadataIdentificationString,
-                aspectName, governorPhysicalType, annotationValues,
+                aspectName, governorPhysicalType, annotationValues, idField,
                 relatedApplicationTypeMetadata,
                 dependentApplicationTypeMetadata, datePatterns, crudAdditions,
                 editableFieldTypes);

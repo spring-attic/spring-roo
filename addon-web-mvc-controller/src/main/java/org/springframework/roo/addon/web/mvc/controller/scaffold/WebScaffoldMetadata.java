@@ -44,6 +44,7 @@ import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.customdata.tagkeys.MethodMetadataCustomDataKey;
 import org.springframework.roo.classpath.details.ConstructorMetadata;
 import org.springframework.roo.classpath.details.ConstructorMetadataBuilder;
+import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
@@ -125,6 +126,7 @@ public class WebScaffoldMetadata extends
      * @param aspectName
      * @param governorPhysicalType
      * @param annotationValues
+     * @param idField
      * @param specialDomainTypes
      * @param dependentTypes
      * @param dateTypes
@@ -136,6 +138,7 @@ public class WebScaffoldMetadata extends
             final JavaType aspectName,
             final PhysicalTypeMetadata governorPhysicalType,
             final WebScaffoldAnnotationValues annotationValues,
+            final FieldMetadata idField,
             final SortedMap<JavaType, JavaTypeMetadataDetails> specialDomainTypes,
             final List<JavaTypeMetadataDetails> dependentTypes,
             final Map<JavaSymbolName, DateTimeFormatDetails> dateTypes,
@@ -192,7 +195,7 @@ public class WebScaffoldMetadata extends
 
         // "show" method
         if (findMethod != null) {
-            builder.addMethod(getShowMethod(findMethod));
+            builder.addMethod(getShowMethod(idField, findMethod));
             findMethod.copyAdditionsTo(builder, governorTypeDetails);
         }
 
@@ -211,7 +214,7 @@ public class WebScaffoldMetadata extends
         if (annotationValues.isUpdate() && (updateMethod != null)
                 && (findMethod != null)) {
             builder.addMethod(getUpdateMethod(updateMethod));
-            builder.addMethod(getUpdateFormMethod(findMethod));
+            builder.addMethod(getUpdateFormMethod(idField, findMethod));
             updateMethod.copyAdditionsTo(builder, governorTypeDetails);
         }
 
@@ -220,7 +223,7 @@ public class WebScaffoldMetadata extends
                 .get(REMOVE_METHOD);
         if (annotationValues.isDelete() && (deleteMethod != null)
                 && (findMethod != null)) {
-            builder.addMethod(getDeleteMethod(deleteMethod, findMethod));
+            builder.addMethod(getDeleteMethod(idField, deleteMethod, findMethod));
             deleteMethod.copyAdditionsTo(builder, governorTypeDetails);
         }
 
@@ -460,7 +463,7 @@ public class WebScaffoldMetadata extends
                 parameterNames, bodyBuilder);
     }
 
-    private MethodMetadataBuilder getDeleteMethod(
+    private MethodMetadataBuilder getDeleteMethod(final FieldMetadata idField,
             final MemberTypeAdditions deleteMethodAdditions,
             final MemberTypeAdditions findMethod) {
         final JavaTypePersistenceMetadataDetails javaTypePersistenceMetadataHolder = javaTypeMetadataHolder
@@ -473,9 +476,10 @@ public class WebScaffoldMetadata extends
             return null;
         }
 
+        final String idFieldName = idField.getFieldName().getSymbolName();
         final List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
         attributes.add(new StringAttributeValue(new JavaSymbolName("value"),
-                "id"));
+                idFieldName));
         final AnnotationMetadataBuilder pathVariableAnnotation = new AnnotationMetadataBuilder(
                 PATH_VARIABLE, attributes);
 
@@ -504,12 +508,12 @@ public class WebScaffoldMetadata extends
                         maxResultAnnotation.build()), new AnnotatedJavaType(
                         MODEL));
         final List<JavaSymbolName> parameterNames = Arrays.asList(
-                new JavaSymbolName("id"), new JavaSymbolName("page"),
+                new JavaSymbolName(idFieldName), new JavaSymbolName("page"),
                 new JavaSymbolName("size"), new JavaSymbolName("uiModel"));
 
         final List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
         requestMappingAttributes.add(new StringAttributeValue(
-                new JavaSymbolName("value"), "/{id}"));
+                new JavaSymbolName("value"), "/{" + idFieldName + "}"));
         requestMappingAttributes.add(new EnumAttributeValue(new JavaSymbolName(
                 "method"), new EnumDetails(REQUEST_METHOD, new JavaSymbolName(
                 "DELETE"))));
@@ -728,7 +732,7 @@ public class WebScaffoldMetadata extends
                 parameterNames, bodyBuilder).build();
     }
 
-    private MethodMetadataBuilder getShowMethod(
+    private MethodMetadataBuilder getShowMethod(final FieldMetadata idField,
             final MemberTypeAdditions findMethod) {
         final JavaTypePersistenceMetadataDetails javaTypePersistenceMetadataHolder = javaTypeMetadataHolder
                 .getPersistenceDetails();
@@ -742,8 +746,9 @@ public class WebScaffoldMetadata extends
         }
 
         final List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
+        final String idFieldName = idField.getFieldName().getSymbolName();
         attributes.add(new StringAttributeValue(new JavaSymbolName("value"),
-                "id"));
+                idFieldName));
         final AnnotationMetadataBuilder pathVariableAnnotation = new AnnotationMetadataBuilder(
                 PATH_VARIABLE, attributes);
 
@@ -752,11 +757,11 @@ public class WebScaffoldMetadata extends
                         .getIdentifierType(), pathVariableAnnotation.build()),
                 new AnnotatedJavaType(MODEL));
         final List<JavaSymbolName> parameterNames = Arrays.asList(
-                new JavaSymbolName("id"), new JavaSymbolName("uiModel"));
+                new JavaSymbolName(idFieldName), new JavaSymbolName("uiModel"));
 
         final List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
         requestMappingAttributes.add(new StringAttributeValue(
-                new JavaSymbolName("value"), "/{id}"));
+                new JavaSymbolName("value"), "/{" + idFieldName + "}"));
         requestMappingAttributes.add(PRODUCES_HTML);
         final AnnotationMetadataBuilder requestMapping = new AnnotationMetadataBuilder(
                 REQUEST_MAPPING, requestMappingAttributes);
@@ -771,8 +776,8 @@ public class WebScaffoldMetadata extends
                 + entityName.toLowerCase() + "\", "
                 + findMethod.getMethodCall() + ");");
         bodyBuilder.appendFormalLine("uiModel.addAttribute(\"itemId\", "
-                + (compositePk ? "conversionService.convert(" : "") + "id"
-                + (compositePk ? ", String.class)" : "") + ");");
+                + (compositePk ? "conversionService.convert(" : "")
+                + idFieldName + (compositePk ? ", String.class)" : "") + ");");
         bodyBuilder.appendFormalLine("return \"" + controllerPath + "/show\";");
 
         final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(
@@ -783,7 +788,7 @@ public class WebScaffoldMetadata extends
     }
 
     private MethodMetadataBuilder getUpdateFormMethod(
-            final MemberTypeAdditions findMethod) {
+            final FieldMetadata idField, final MemberTypeAdditions findMethod) {
         final JavaTypePersistenceMetadataDetails javaTypePersistenceMetadataHolder = javaTypeMetadataHolder
                 .getPersistenceDetails();
         if (javaTypePersistenceMetadataHolder == null) {
@@ -794,9 +799,10 @@ public class WebScaffoldMetadata extends
             return null;
         }
 
+        final String idFieldName = idField.getFieldName().getSymbolName();
         final List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
         attributes.add(new StringAttributeValue(new JavaSymbolName("value"),
-                "id"));
+                idFieldName));
         final AnnotationMetadataBuilder pathVariableAnnotation = new AnnotationMetadataBuilder(
                 PATH_VARIABLE, attributes);
 
@@ -805,11 +811,11 @@ public class WebScaffoldMetadata extends
                         .getIdentifierType(), pathVariableAnnotation.build()),
                 new AnnotatedJavaType(MODEL));
         final List<JavaSymbolName> parameterNames = Arrays.asList(
-                new JavaSymbolName("id"), new JavaSymbolName("uiModel"));
+                new JavaSymbolName(idFieldName), new JavaSymbolName("uiModel"));
 
         final List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
         requestMappingAttributes.add(new StringAttributeValue(
-                new JavaSymbolName("value"), "/{id}"));
+                new JavaSymbolName("value"), "/{" + idFieldName + "}"));
         requestMappingAttributes.add(new StringAttributeValue(
                 new JavaSymbolName("params"), "form"));
         requestMappingAttributes.add(PRODUCES_HTML);

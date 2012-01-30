@@ -183,6 +183,8 @@ public class JpaActiveRecordMetadataProviderImpl extends
             // The ID field metadata is either unavailable or not stable yet
             return null;
         }
+        final FieldMetadata idField = idFields.get(0);
+
         final String entityName = StringUtils.defaultIfEmpty(
                 jpaEntityAnnotationValues.getEntityName(),
                 entity.getSimpleTypeName());
@@ -199,10 +201,10 @@ public class JpaActiveRecordMetadataProviderImpl extends
             isGaeEnabled = projectOperations
                     .isFeatureInstalledInFocusedModule(FeatureNames.GAE);
         }
+
         return new JpaActiveRecordMetadata(metadataIdentificationString,
                 aspectName, governorPhysicalType, parent, crudAnnotationValues,
-                pluralMetadata.getPlural(), idFields.get(0), entityName,
-                isGaeEnabled);
+                pluralMetadata.getPlural(), idField, entityName, isGaeEnabled);
     }
 
     public String getProvidesType() {

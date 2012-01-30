@@ -93,7 +93,7 @@ public class WebMetadataServiceImpl implements WebMetadataService {
     @Reference private PersistenceMemberLocator persistenceMemberLocator;
     @Reference private TypeLocationService typeLocationService;
 
-    private final HashMap<String, String> pathMap = new HashMap<String, String>();
+    private final Map<String, String> pathMap = new HashMap<String, String>();
 
     private String getControllerPathForType(final JavaType type,
             final String metadataIdentificationString) {
@@ -402,7 +402,8 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 
         final MethodParameter entityParameter = new MethodParameter(javaType,
                 JavaSymbolName.getReservedWordSafeName(javaType));
-        final MethodParameter idParameter = new MethodParameter(idType, "id");
+        final MethodParameter idParameter = new MethodParameter(idType, idField
+                .getFieldName().getSymbolName());
         final MethodMetadata versionAccessor = memberDetails
                 .getMostConcreteMethodWithTag(VERSION_ACCESSOR_METHOD);
         final MemberTypeAdditions persistMethod = layerService
@@ -549,6 +550,11 @@ public class WebMetadataServiceImpl implements WebMetadataService {
         }
         return Collections.unmodifiableList(new ArrayList<FieldMetadata>(fields
                 .values()));
+    }
+
+    public FieldMetadata getIdentifierField(final JavaType javaType) {
+        return CollectionUtils.firstElementOf(persistenceMemberLocator
+                .getIdentifierFields(javaType));
     }
 
     public boolean isApplicationType(final JavaType javaType) {

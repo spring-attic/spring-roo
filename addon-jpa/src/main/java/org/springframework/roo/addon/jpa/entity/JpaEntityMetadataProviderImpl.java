@@ -173,7 +173,7 @@ public class JpaEntityMetadataProviderImpl extends
         }
         // We have potential identifier information from an IdentifierService.
         // We only use this identifier information if the user did NOT provide
-        // ANY identifier-related attributes on @RooJpaActiveRecord....
+        // ANY identifier-related attributes on @RooJpaEntity....
         Assert.isTrue(
                 identifiers.size() == 1,
                 "Identifier service indicates "

@@ -73,6 +73,8 @@ public interface WebMetadataService {
     List<FieldMetadata> getScaffoldEligibleFieldMetadata(JavaType javaType,
             MemberDetails memberDetails, String metadataIdentificationString);
 
+    FieldMetadata getIdentifierField(JavaType javaType);
+
     /**
      * @deprecated use {@link TypeLocationService#isInProject(JavaType)} instead
      */
