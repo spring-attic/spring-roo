@@ -409,7 +409,7 @@ public class JsfOperationsImpl extends AbstractOperations implements
             final Element jsfDependencyElement = XmlUtils.findFirstElement(
                     JSF_IMPLEMENTATION_XPATH + "[@id = '" + value.name() + "']"
                             + DEPENDENCY_XPATH, configuration);
-            if ((jsfDependencyElement != null)
+            if (jsfDependencyElement != null
                     && pom.isDependencyRegistered(new Dependency(
                             jsfDependencyElement))) {
                 existingJsfImplementation = value;
@@ -429,7 +429,7 @@ public class JsfOperationsImpl extends AbstractOperations implements
             final Element jsfDependencyElement = XmlUtils.findFirstElement(
                     JSF_LIBRARY_XPATH + "[@id = '" + value.name() + "']"
                             + DEPENDENCY_XPATH, configuration);
-            if ((jsfDependencyElement != null)
+            if (jsfDependencyElement != null
                     && pom.isDependencyRegistered(new Dependency(
                             jsfDependencyElement))) {
                 existingJsfImplementation = value;

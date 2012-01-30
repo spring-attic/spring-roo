@@ -175,7 +175,7 @@ public class JsfApplicationBeanMetadata extends
 
             final AnnotationAttributeValue<?> includeOnMenuAttributeValue = annotation
                     .getAttribute(new JavaSymbolName("includeOnMenu"));
-            if ((includeOnMenuAttributeValue != null)
+            if (includeOnMenuAttributeValue != null
                     && !((Boolean) includeOnMenuAttributeValue.getValue())
                             .booleanValue()) {
                 continue;
@@ -260,10 +260,10 @@ public class JsfApplicationBeanMetadata extends
     }
 
     private boolean hasScopeAnnotation() {
-        return ((governorTypeDetails.getAnnotation(SESSION_SCOPED) != null)
-                || (governorTypeDetails.getAnnotation(VIEW_SCOPED) != null)
-                || (governorTypeDetails.getAnnotation(REQUEST_SCOPED) != null) || (governorTypeDetails
-                    .getAnnotation(APPLICATION_SCOPED) != null));
+        return governorTypeDetails.getAnnotation(SESSION_SCOPED) != null
+                || governorTypeDetails.getAnnotation(VIEW_SCOPED) != null
+                || governorTypeDetails.getAnnotation(REQUEST_SCOPED) != null || governorTypeDetails
+                    .getAnnotation(APPLICATION_SCOPED) != null;
     }
 
     @Override

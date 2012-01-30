@@ -84,7 +84,7 @@ public class JsfConverterMetadata extends
             return;
         }
 
-        if ((findMethod == null) || (identifierAccessor == null)) {
+        if (findMethod == null || identifierAccessor == null) {
             valid = false;
             return;
         }

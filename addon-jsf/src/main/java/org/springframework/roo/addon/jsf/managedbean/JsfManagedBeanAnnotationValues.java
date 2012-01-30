@@ -20,7 +20,7 @@ public class JsfManagedBeanAnnotationValues extends AbstractAnnotationValues {
 
     @AutoPopulate private String beanName;
     @AutoPopulate private JavaType entity;
-    @AutoPopulate private boolean includeOnMenu = true;
+    @AutoPopulate private final boolean includeOnMenu = true;
 
     public JsfManagedBeanAnnotationValues(
             final ClassOrInterfaceTypeDetails governorPhysicalTypeDetails) {

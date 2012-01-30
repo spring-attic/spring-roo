@@ -212,9 +212,9 @@ public class JsfManagedBeanMetadata extends
                 .get(PERSIST_METHOD);
         final MemberTypeAdditions removeMethod = crudAdditions
                 .get(REMOVE_METHOD);
-        if ((identifierAccessor == null) || (findAllMethod == null)
-                || (mergeMethod == null) || (persistMethod == null)
-                || (removeMethod == null) || (entity == null)) {
+        if (identifierAccessor == null || findAllMethod == null
+                || mergeMethod == null || persistMethod == null
+                || removeMethod == null || entity == null) {
             valid = false;
             return;
         }
@@ -545,7 +545,7 @@ public class JsfManagedBeanMetadata extends
         @SuppressWarnings("unchecked")
         final Map<String, Object> values = (Map<String, Object>) field
                 .getCustomData().get(CustomDataKeys.COLUMN_FIELD);
-        if ((values != null) && values.containsKey("length")) {
+        if (values != null && values.containsKey("length")) {
             return (Integer) values.get("length");
         }
         return null;
@@ -814,8 +814,8 @@ public class JsfManagedBeanMetadata extends
             final JavaType annotationType) {
         final AnnotationMetadata annotation = MemberFindingUtils
                 .getAnnotationOfType(field.getAnnotations(), annotationType);
-        if ((annotation != null)
-                && (annotation.getAttribute(new JavaSymbolName("value")) != null)) {
+        if (annotation != null
+                && annotation.getAttribute(new JavaSymbolName("value")) != null) {
             return new BigDecimal(String.valueOf(annotation.getAttribute(
                     new JavaSymbolName("value")).getValue()));
         }
@@ -1031,12 +1031,12 @@ public class JsfManagedBeanMetadata extends
             final Integer sizeMinValue = getSizeMinOrMax(field, "min");
             final BigDecimal sizeMaxValue = NumberUtils.min(
                     getSizeMinOrMax(field, "max"), getColumnLength(field));
-            final boolean required = (action != Action.VIEW)
-                    && (!isNullable(field) || (minValue != null)
-                            || (maxValue != null) || (sizeMinValue != null) || (sizeMaxValue != null));
-            final boolean isTextarea = ((sizeMinValue != null) && (sizeMinValue
-                    .intValue() > 30))
-                    || ((sizeMaxValue != null) && (sizeMaxValue.intValue() > 30))
+            final boolean required = action != Action.VIEW
+                    && (!isNullable(field) || minValue != null
+                            || maxValue != null || sizeMinValue != null || sizeMaxValue != null);
+            final boolean isTextarea = sizeMinValue != null && sizeMinValue
+                    .intValue() > 30
+                    || sizeMaxValue != null && sizeMaxValue.intValue() > 30
                     || customData.keySet().contains(CustomDataKeys.LOB_FIELD);
 
             // Field label
@@ -1150,7 +1150,7 @@ public class JsfManagedBeanMetadata extends
 
                     final AnnotationAttributeValue<?> autoUploadAttr = annotation
                             .getAttribute("autoUpload");
-                    if ((autoUploadAttr != null)
+                    if (autoUploadAttr != null
                             && (Boolean) autoUploadAttr.getValue()) {
                         bodyBuilder.appendFormalLine(fieldValueId
                                 + ".setAuto(true);");
@@ -1271,7 +1271,7 @@ public class JsfManagedBeanMetadata extends
                     bodyBuilder.appendFormalLine(getSetValueExpression(
                             fieldValueId, fieldName, simpleTypeName));
                     bodyBuilder.appendFormalLine(requiredStr);
-                    if ((minValue != null) || (maxValue != null)) {
+                    if (minValue != null || maxValue != null) {
                         if (minValue != null) {
                             bodyBuilder.appendFormalLine(fieldValueId
                                     + ".setMin(" + minValue.doubleValue()
@@ -1307,7 +1307,7 @@ public class JsfManagedBeanMetadata extends
                     bodyBuilder.appendFormalLine(getSetValueExpression(
                             fieldValueId, fieldName, simpleTypeName));
                     bodyBuilder.appendFormalLine(requiredStr);
-                    if ((minValue != null) || (maxValue != null)) {
+                    if (minValue != null || maxValue != null) {
                         bodyBuilder.append(getDoubleRangeValdatorString(
                                 fieldValueId, minValue, maxValue));
                     }
@@ -1346,7 +1346,7 @@ public class JsfManagedBeanMetadata extends
                     }
                 }
                 else {
-                    if ((sizeMinValue != null) || (sizeMaxValue != null)) {
+                    if (sizeMinValue != null || sizeMaxValue != null) {
                         bodyBuilder.append(getLengthValdatorString(
                                 fieldValueId, sizeMinValue, sizeMaxValue));
                         bodyBuilder.appendFormalLine(requiredStr);
@@ -1369,9 +1369,9 @@ public class JsfManagedBeanMetadata extends
 
                 if (StringUtils.hasText(parameterTypeManagedBeanName)) {
                     if (customData.keySet().contains(ONE_TO_MANY_FIELD)
-                            || (customData.keySet()
+                            || customData.keySet()
                                     .contains(MANY_TO_MANY_FIELD) && isInverseSideOfRelationship(
-                                    field, ONE_TO_MANY, MANY_TO_MANY))) {
+                                    field, ONE_TO_MANY, MANY_TO_MANY)) {
                         bodyBuilder.appendFormalLine(htmlOutputTextStr);
                         bodyBuilder.appendFormalLine(componentIdStr);
                         bodyBuilder
@@ -1714,8 +1714,8 @@ public class JsfManagedBeanMetadata extends
             final String attrName) {
         final AnnotationMetadata annotation = MemberFindingUtils
                 .getAnnotationOfType(field.getAnnotations(), SIZE);
-        if ((annotation != null)
-                && (annotation.getAttribute(new JavaSymbolName(attrName)) != null)) {
+        if (annotation != null
+                && annotation.getAttribute(new JavaSymbolName(attrName)) != null) {
             return (Integer) annotation.getAttribute(
                     new JavaSymbolName(attrName)).getValue();
         }
@@ -1723,10 +1723,10 @@ public class JsfManagedBeanMetadata extends
     }
 
     private boolean hasScopeAnnotation() {
-        return ((governorTypeDetails.getAnnotation(SESSION_SCOPED) != null)
-                || (governorTypeDetails.getAnnotation(VIEW_SCOPED) != null)
-                || (governorTypeDetails.getAnnotation(REQUEST_SCOPED) != null) || (governorTypeDetails
-                    .getAnnotation(APPLICATION_SCOPED) != null));
+        return governorTypeDetails.getAnnotation(SESSION_SCOPED) != null
+                || governorTypeDetails.getAnnotation(VIEW_SCOPED) != null
+                || governorTypeDetails.getAnnotation(REQUEST_SCOPED) != null || governorTypeDetails
+                    .getAnnotation(APPLICATION_SCOPED) != null;
     }
 
     private boolean isInverseSideOfRelationship(final FieldMetadata field,
@@ -1734,8 +1734,8 @@ public class JsfManagedBeanMetadata extends
         for (final JavaType annotationType : annotationTypes) {
             final AnnotationMetadata annotation = MemberFindingUtils
                     .getAnnotationOfType(field.getAnnotations(), annotationType);
-            if ((annotation != null)
-                    && (annotation.getAttribute(new JavaSymbolName("mappedBy")) != null)) {
+            if (annotation != null
+                    && annotation.getAttribute(new JavaSymbolName("mappedBy")) != null) {
                 return true;
             }
         }

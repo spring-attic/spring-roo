@@ -145,7 +145,7 @@ public class JsfConverterMetadataProviderImpl extends
         final JsfConverterAnnotationValues annotationValues = new JsfConverterAnnotationValues(
                 governorPhysicalTypeMetadata);
         final JavaType entity = annotationValues.getEntity();
-        if (!annotationValues.isAnnotationFound() || (entity == null)) {
+        if (!annotationValues.isAnnotationFound() || entity == null) {
             return null;
         }
 
