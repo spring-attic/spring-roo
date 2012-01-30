@@ -51,13 +51,6 @@ import org.springframework.roo.support.util.FileUtils;
  */
 public class PollingFileMonitorService implements NotifiableFileMonitorService {
 
-    private static final String[] EXCLUDE_PATHS = {
-            File.separator + "target",
-            File.separator + "bin",
-            File.separator + "src" + File.separator + "main" + File.separator
-                    + "webapp" + File.separator + "META-INF" + File.separator
-                    + "maven" };
-
     private final Set<String> allFiles = new HashSet<String>();
     private final Map<String, Set<String>> changeMap = new HashMap<String, Set<String>>();
     private final Set<FileEventListener> fileEventListeners = new HashSet<FileEventListener>();
@@ -149,6 +142,7 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
         if (!currentFile.exists()
                 || ((currentFile.getName().length() > 1) && currentFile
                         .getName().startsWith("."))
+                || currentFile.getName().equals("log.roo")
                 || (currentFile.isDirectory() && isExcludedDirectory(currentFile
                         .getPath()))) {
             return;
@@ -176,12 +170,11 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
     }
 
     private boolean isExcludedDirectory(final String path) {
-        for (String excludedPath : EXCLUDE_PATHS) {
-            if (path.contains(excludedPath)) {
-                return true;
-            }
-        }
-        return false;
+        final boolean hasSrc = path.contains(File.separator + "src");
+        return (!hasSrc
+                && (path.contains(File.separator + "target") || path
+                        .contains(File.separator + "bin")) || (hasSrc && path
+                .contains(File.separator + "maven")));
     }
 
     public SortedSet<FileDetails> findMatchingAntPath(final String antPath) {
