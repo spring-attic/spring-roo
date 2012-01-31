@@ -11,7 +11,10 @@ import java.util.Collection;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
+import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.project.Path;
+import org.springframework.roo.project.ProjectOperations;
+import org.springframework.roo.support.util.StringUtils;
 
 /**
  * The core {@link PackagingProvider} for web modules.
@@ -30,5 +33,18 @@ public class WarPackaging extends AbstractCorePackagingProvider {
     public Collection<Path> getPaths() {
         return Arrays.asList(SRC_MAIN_JAVA, SRC_TEST_JAVA, SRC_TEST_RESOURCES,
                 SPRING_CONFIG_ROOT, SRC_MAIN_WEBAPP);
+    }
+
+    @Override
+    protected void createOtherArtifacts(final JavaPackage topLevelPackage,
+            final String module, final ProjectOperations projectOperations) {
+        super.createOtherArtifacts(topLevelPackage, module, projectOperations);
+        if (StringUtils.isBlank(module)) {
+            // This is a single-module web project
+            final String fullyQualifiedModuleName = getFullyQualifiedModuleName(
+                    module, projectOperations);
+            applicationContextOperations.createMiddleTierApplicationContext(
+                    topLevelPackage, fullyQualifiedModuleName);
+        }
     }
 }
