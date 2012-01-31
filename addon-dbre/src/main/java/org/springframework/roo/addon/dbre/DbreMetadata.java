@@ -373,8 +373,8 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
             }
 
             final Short keySequence = exportedKey.getKeySequence();
-            final String fieldSuffix = keySequence != null
-                    && keySequence > 0 ? String.valueOf(keySequence) : "";
+            final String fieldSuffix = keySequence != null && keySequence > 0 ? String
+                    .valueOf(keySequence) : "";
             JavaSymbolName fieldName = new JavaSymbolName(
                     getInflectorPlural(DbreTypeUtils
                             .suggestFieldName(foreignTableName)) + fieldSuffix);
@@ -421,8 +421,8 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
             final String foreignSchemaName = importedKeyForeignTable
                     .getSchema().getName();
             final Short keySequence = foreignKey.getKeySequence();
-            final String fieldSuffix = keySequence != null
-                    && keySequence > 0 ? String.valueOf(keySequence) : "";
+            final String fieldSuffix = keySequence != null && keySequence > 0 ? String
+                    .valueOf(keySequence) : "";
             final JavaSymbolName fieldName = new JavaSymbolName(
                     DbreTypeUtils.suggestFieldName(foreignTableName)
                             + fieldSuffix);
@@ -492,8 +492,8 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
                 continue;
             }
             final Short keySequence = exportedKey.getKeySequence();
-            final String fieldSuffix = keySequence != null
-                    && keySequence > 0 ? String.valueOf(keySequence) : "";
+            final String fieldSuffix = keySequence != null && keySequence > 0 ? String
+                    .valueOf(keySequence) : "";
             JavaSymbolName fieldName = new JavaSymbolName(
                     DbreTypeUtils.suggestFieldName(foreignTableName)
                             + fieldSuffix);
@@ -676,8 +676,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
         }
 
         // Add length attribute for Strings
-        if (column.getColumnSize() < 4000
-                && fieldType.equals(JavaType.STRING)) {
+        if (column.getColumnSize() < 4000 && fieldType.equals(JavaType.STRING)) {
             columnBuilder.addIntegerAttribute("length", column.getColumnSize());
         }
 

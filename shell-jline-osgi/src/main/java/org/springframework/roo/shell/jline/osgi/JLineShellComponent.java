@@ -46,7 +46,7 @@ public class JLineShellComponent extends JLineShell {
     private ComponentContext context;
     @Reference private ExecutionStrategy executionStrategy;
     @Reference private Parser parser;
-    //  @Reference private Tailor tailor;
+    // @Reference private Tailor tailor;
     @Reference private UrlInputStreamService urlInputStreamService;
 
     protected void activate(final ComponentContext context) {
