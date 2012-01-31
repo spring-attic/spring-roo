@@ -178,10 +178,13 @@ public class JavaTypeConverter implements Converter<JavaType> {
         final String basePackage = resolveTopLevelPackageSymbol(typeName,
                 topLevelPackage);
 
-        addCompletionsForOtherModules(completions, targetModule);
+        addCompletionsForOtherModuleNames(completions, targetModule);
 
-        addCompletionsForTargetModule(completions, targetModule, heading,
-                prefix, formattedPrefix, topLevelPackage, basePackage);
+        if (!"pom".equals(targetModule.getPackaging())) {
+            addCompletionsForTypesInTargetModule(completions, targetModule,
+                    heading, prefix, formattedPrefix, topLevelPackage,
+                    basePackage);
+        }
     }
 
     private String resolveTopLevelPackageSymbol(final String existingData,
@@ -198,10 +201,11 @@ public class JavaTypeConverter implements Converter<JavaType> {
         return existingData;
     }
 
-    private void addCompletionsForOtherModules(
+    private void addCompletionsForOtherModuleNames(
             final List<Completion> completions, final Pom targetModule) {
         for (final String moduleName : projectOperations.getModuleNames()) {
-            if (!moduleName.equals(targetModule.getModuleName())) {
+            if (StringUtils.hasText(moduleName)
+                    && !moduleName.equals(targetModule.getModuleName())) {
                 completions.add(new Completion(moduleName
                         + MODULE_PATH_SEPARATOR, decorate(moduleName
                         + MODULE_PATH_SEPARATOR, FG_CYAN), "Modules", 0));
@@ -209,21 +213,22 @@ public class JavaTypeConverter implements Converter<JavaType> {
         }
     }
 
-    private void addCompletionsForTargetModule(
+    private void addCompletionsForTypesInTargetModule(
             final List<Completion> completions, final Pom targetModule,
             final String heading, final String prefix,
             final String formattedPrefix, final String topLevelPackage,
             final String basePackage) {
-        final Collection<String> typesForModule = typeLocationService
-                .getTypesForModule(targetModule.getPath());
-        if (typesForModule.isEmpty()) {
+        final Collection<JavaType> typesInModule = typeLocationService
+                .getTypesForModule(targetModule);
+        if (typesInModule.isEmpty()) {
             completions.add(new Completion(prefix + targetModule.getGroupId(),
                     formattedPrefix + targetModule.getGroupId(), heading, 1));
         }
         else {
             completions.add(new Completion(prefix + topLevelPackage,
                     formattedPrefix + topLevelPackage, heading, 1));
-            for (String type : typesForModule) {
+            for (JavaType javaType : typesInModule) {
+                String type = javaType.getFullyQualifiedTypeName();
                 if (type.startsWith(basePackage)) {
                     type = StringUtils.replaceFirst(type, topLevelPackage,
                             TOP_LEVEL_PACKAGE_SYMBOL);

@@ -19,6 +19,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.model.JavaPackage;
+import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.shell.Completion;
@@ -95,10 +96,10 @@ public class JavaPackageConverterTest {
         converter.typeLocationService = mockTypeLocationService;
     }
 
-    private Pom setUpMockPom(final String path, final String... types) {
+    private Pom setUpMockPom(final String path, final JavaType... types) {
         final Pom mockPom = mock(Pom.class);
         when(mockPom.getPath()).thenReturn(path);
-        when(mockTypeLocationService.getTypesForModule(path)).thenReturn(
+        when(mockTypeLocationService.getTypesForModule(mockPom)).thenReturn(
                 Arrays.asList(types));
         return mockPom;
     }
@@ -170,11 +171,12 @@ public class JavaPackageConverterTest {
     @Test
     public void testGetAllPossibleValuesWhenProjectIsAvailable() {
         // Set up
-        final Pom mockPom1 = setUpMockPom("/path/to/pom/1",
-                "com.example.domain.Choice", "com.example.domain.Vote");
-        final Pom mockPom2 = setUpMockPom("/path/to/pom/2",
-                "com.example.web.ChoiceController",
-                "com.example.web.VoteController");
+        final Pom mockPom1 = setUpMockPom("/path/to/pom/1", new JavaType(
+                "com.example.domain.Choice"), new JavaType(
+                "com.example.domain.Vote"));
+        final Pom mockPom2 = setUpMockPom("/path/to/pom/2", new JavaType(
+                "com.example.web.ChoiceController"), new JavaType(
+                "com.example.web.VoteController"));
         when(mockProjectOperations.getPoms()).thenReturn(
                 Arrays.asList(mockPom1, mockPom2));
 

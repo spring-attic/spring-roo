@@ -200,10 +200,10 @@ public class JavaTypeConverterTest {
         final String otherModuleName = "core";
         when(mockProjectOperations.getModuleNames()).thenReturn(
                 Arrays.asList(focusedModuleName, otherModuleName));
-        String type1 = "com.example.Foo";
-        String type2 = "com.example.sub.Bar";
-        when(mockTypeLocationService.getTypesForModule(modulePath)).thenReturn(
-                Arrays.asList(type1, type2));
+        JavaType type1 = new JavaType("com.example.Foo");
+        JavaType type2 = new JavaType("com.example.sub.Bar");
+        when(mockTypeLocationService.getTypesForModule(mockFocusedModule))
+                .thenReturn(Arrays.asList(type1, type2));
 
         // Invoke
         converter.getAllPossibleValues(mockCompletions, JavaType.class, "",
@@ -248,10 +248,10 @@ public class JavaTypeConverterTest {
                 Arrays.asList(focusedModuleName, otherModuleName));
         final String modulePath = "/path/to/it";
         when(mockOtherModule.getPath()).thenReturn(modulePath);
-        String type1 = "com.example.web.ShouldBeFound";
-        String type2 = "com.example.foo.ShouldNotBeFound";
-        when(mockTypeLocationService.getTypesForModule(modulePath)).thenReturn(
-                Arrays.asList(type1, type2));
+        JavaType type1 = new JavaType("com.example.web.ShouldBeFound");
+        JavaType type2 = new JavaType("com.example.foo.ShouldNotBeFound");
+        when(mockTypeLocationService.getTypesForModule(mockOtherModule))
+                .thenReturn(Arrays.asList(type1, type2));
 
         // Invoke
         converter.getAllPossibleValues(mockCompletions, JavaType.class,

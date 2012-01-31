@@ -3,6 +3,7 @@ package org.springframework.roo.classpath;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -659,5 +660,17 @@ public class TypeLocationServiceImpl implements TypeLocationService {
             cacheType(change);
         }
         dirtyFiles.clear();
+    }
+
+    public Collection<JavaType> getTypesForModule(final Pom module) {
+        if ("pom".equals(module.getPackaging())) {
+            return Collections.emptySet();
+        }
+        final Set<String> typeNames = getTypesForModule(module.getPath());
+        final Collection<JavaType> javaTypes = new ArrayList<JavaType>();
+        for (final String typeName : typeNames) {
+            javaTypes.add(new JavaType(typeName));
+        }
+        return javaTypes;
     }
 }
