@@ -152,8 +152,10 @@ public interface TypeLocationService {
     LogicalPath getTypePath(JavaType javaType);
 
     /**
+     * Returns the Java types that belong to the given module.
+     *
      * @param modulePath
-     * @return
+     * @return a non-<code>null</code> collection of fully-qualified type names
      */
     Collection<String> getTypesForModule(String modulePath);
 
