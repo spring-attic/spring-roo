@@ -2,6 +2,8 @@ package org.springframework.roo.classpath.converters;
 
 import static org.springframework.roo.classpath.converters.JavaPackageConverter.TOP_LEVEL_PACKAGE_SYMBOL;
 import static org.springframework.roo.project.LogicalPath.MODULE_PATH_SEPARATOR;
+import static org.springframework.roo.support.util.AnsiEscapeCode.FG_CYAN;
+import static org.springframework.roo.support.util.AnsiEscapeCode.decorate;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -29,7 +31,6 @@ import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.shell.Completion;
 import org.springframework.roo.shell.Converter;
 import org.springframework.roo.shell.MethodTarget;
-import org.springframework.roo.support.util.AnsiEscapeCode;
 import org.springframework.roo.support.util.StringUtils;
 
 /**
@@ -142,87 +143,93 @@ public class JavaTypeConverter implements Converter<JavaType> {
     }
 
     private void completeProjectSpecificPaths(
-            final List<Completion> completions, String existingData) {
-        String topLevelPath = "";
-
+            final List<Completion> completions, final String existingData) {
         if (!projectOperations.isFocusedProjectAvailable()) {
             return;
         }
-
-        topLevelPath = typeLocationService
-                .getTopLevelPackageForModule(projectOperations
-                        .getFocusedModule());
-
-        Pom focusedModule = projectOperations.getFocusedModule();
-        String focusedModulePath = projectOperations.getFocusedModule()
-                .getPath();
-        String focusedModuleName = focusedModule.getModuleName();
-        boolean intraModule = false;
+        final Pom targetModule;
+        final String heading;
+        final String prefix;
+        final String formattedPrefix;
+        final String typeName;
         if (existingData.contains(MODULE_PATH_SEPARATOR)) {
-            focusedModuleName = existingData.substring(0,
+            // Looking for a type in another module
+            String targetModuleName = existingData.substring(0,
                     existingData.indexOf(MODULE_PATH_SEPARATOR));
-            focusedModule = projectOperations
-                    .getPomFromModuleName(focusedModuleName);
-            focusedModulePath = focusedModule.getPath();
-            existingData = existingData.substring(
-                    existingData.indexOf(MODULE_PATH_SEPARATOR) + 1,
-                    existingData.length());
-            topLevelPath = typeLocationService
-                    .getTopLevelPackageForModule(focusedModule);
-            intraModule = true;
-        }
-
-        String newValue = existingData;
-        if (existingData.startsWith(TOP_LEVEL_PACKAGE_SYMBOL)) {
-            if (existingData.length() > 1) {
-                newValue = (existingData.charAt(1) == '.' ? topLevelPath
-                        : topLevelPath + ".") + existingData.substring(1);
-            }
-            else {
-                newValue = topLevelPath + ".";
-            }
-        }
-
-        String prefix = "";
-        String formattedPrefix = "";
-
-        if (!focusedModulePath.equals(projectOperations.getFocusedModule()
-                .getPath())) {
-            prefix = focusedModuleName + MODULE_PATH_SEPARATOR;
-            formattedPrefix = AnsiEscapeCode.decorate(focusedModuleName
-                    + MODULE_PATH_SEPARATOR, AnsiEscapeCode.FG_CYAN);
-        }
-
-        for (final String moduleName : projectOperations.getModuleNames()) {
-            if (!moduleName.equals(focusedModuleName)) {
-                completions.add(new Completion(moduleName
-                        + MODULE_PATH_SEPARATOR, AnsiEscapeCode.decorate(
-                        moduleName + MODULE_PATH_SEPARATOR,
-                        AnsiEscapeCode.FG_CYAN), "Modules", 0));
-            }
-        }
-
-        String heading = "";
-        if (!intraModule) {
-            heading = focusedModuleName;
-        }
-        if (typeLocationService.getTypesForModule(focusedModulePath).isEmpty()) {
-            completions.add(new Completion(prefix + focusedModule.getGroupId(),
-                    formattedPrefix + focusedModule.getGroupId(), heading, 1));
-            return;
+            targetModule = projectOperations
+                    .getPomFromModuleName(targetModuleName);
+            heading = "";
+            prefix = targetModuleName + MODULE_PATH_SEPARATOR;
+            formattedPrefix = decorate(
+                    targetModuleName + MODULE_PATH_SEPARATOR, FG_CYAN);
+            typeName = StringUtils.substringAfterLast(existingData,
+                    MODULE_PATH_SEPARATOR);
         }
         else {
-            completions.add(new Completion(prefix + topLevelPath,
-                    formattedPrefix + topLevelPath, heading, 1));
+            // Looking for a type in the currently focused module
+            targetModule = projectOperations.getFocusedModule();
+            heading = targetModule.getModuleName();
+            prefix = "";
+            formattedPrefix = "";
+            typeName = existingData;
         }
+        final String topLevelPackage = typeLocationService
+                .getTopLevelPackageForModule(targetModule);
+        final String basePackage = resolveTopLevelPackageSymbol(typeName,
+                topLevelPackage);
 
-        for (String type : typeLocationService
-                .getTypesForModule(focusedModulePath)) {
-            if (type.startsWith(newValue)) {
-                type = StringUtils.replaceFirst(type, topLevelPath,
-                        TOP_LEVEL_PACKAGE_SYMBOL);
-                completions.add(new Completion(prefix + type, formattedPrefix
-                        + type, heading, 1));
+        addCompletionsForOtherModules(completions, targetModule);
+
+        addCompletionsForTargetModule(completions, targetModule, heading,
+                prefix, formattedPrefix, topLevelPackage, basePackage);
+    }
+
+    private String resolveTopLevelPackageSymbol(final String existingData,
+            final String topLevelPackage) {
+        if (TOP_LEVEL_PACKAGE_SYMBOL.equals(existingData)) {
+            // existing data = "~" => "com.foo."
+            return topLevelPackage + ".";
+        }
+        if (existingData.startsWith(TOP_LEVEL_PACKAGE_SYMBOL)) {
+            // e.g. turn "~.blah" or "~blah" into "com.foo.blah"
+            return topLevelPackage + (existingData.charAt(1) == '.' ? "" : ".")
+                    + existingData.substring(1);
+        }
+        return existingData;
+    }
+
+    private void addCompletionsForOtherModules(
+            final List<Completion> completions, final Pom targetModule) {
+        for (final String moduleName : projectOperations.getModuleNames()) {
+            if (!moduleName.equals(targetModule.getModuleName())) {
+                completions.add(new Completion(moduleName
+                        + MODULE_PATH_SEPARATOR, decorate(moduleName
+                        + MODULE_PATH_SEPARATOR, FG_CYAN), "Modules", 0));
+            }
+        }
+    }
+
+    private void addCompletionsForTargetModule(
+            final List<Completion> completions, final Pom targetModule,
+            final String heading, final String prefix,
+            final String formattedPrefix, final String topLevelPackage,
+            final String basePackage) {
+        final Collection<String> typesForModule = typeLocationService
+                .getTypesForModule(targetModule.getPath());
+        if (typesForModule.isEmpty()) {
+            completions.add(new Completion(prefix + targetModule.getGroupId(),
+                    formattedPrefix + targetModule.getGroupId(), heading, 1));
+        }
+        else {
+            completions.add(new Completion(prefix + topLevelPackage,
+                    formattedPrefix + topLevelPackage, heading, 1));
+            for (String type : typesForModule) {
+                if (type.startsWith(basePackage)) {
+                    type = StringUtils.replaceFirst(type, topLevelPackage,
+                            TOP_LEVEL_PACKAGE_SYMBOL);
+                    completions.add(new Completion(prefix + type,
+                            formattedPrefix + type, heading, 1));
+                }
             }
         }
     }

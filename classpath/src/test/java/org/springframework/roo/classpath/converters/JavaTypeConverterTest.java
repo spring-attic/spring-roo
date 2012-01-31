@@ -4,8 +4,15 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.roo.project.LogicalPath.MODULE_PATH_SEPARATOR;
+import static org.springframework.roo.support.util.AnsiEscapeCode.FG_CYAN;
+import static org.springframework.roo.support.util.AnsiEscapeCode.decorate;
+
+import java.util.Arrays;
+import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -16,6 +23,8 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.maven.Pom;
+import org.springframework.roo.shell.Completion;
+import org.springframework.roo.support.util.AnsiEscapeCode;
 
 /**
  * Unit test of {@link JavaTypeConverter}
@@ -153,5 +162,119 @@ public class JavaTypeConverterTest {
     @Test
     public void testSupportsJavaType() {
         assertTrue(converter.supports(JavaType.class, null));
+    }
+
+    @Test
+    public void testGetAllPossibleValuesInProjectWhenNoModuleHasFocus() {
+        // Set up
+        @SuppressWarnings("unchecked")
+        final List<Completion> mockCompletions = mock(List.class);
+
+        // Invoke
+        converter.getAllPossibleValues(mockCompletions, JavaType.class, "",
+                JavaTypeConverter.PROJECT, null);
+
+        // Check
+        verifyNoMoreInteractions(mockCompletions);
+    }
+
+    @Test
+    public void testGetAllPossibleValuesInProjectWhenNoModulePrefixIsUsed() {
+        // Set up
+        @SuppressWarnings("unchecked")
+        final List<Completion> mockCompletions = mock(List.class);
+        when(mockProjectOperations.isFocusedProjectAvailable())
+                .thenReturn(true);
+        final Pom mockFocusedModule = mock(Pom.class);
+        when(mockProjectOperations.getFocusedModule()).thenReturn(
+                mockFocusedModule);
+        final String topLevelPackage = "com.example";
+        when(
+                mockTypeLocationService
+                        .getTopLevelPackageForModule(mockFocusedModule))
+                .thenReturn(topLevelPackage);
+        String focusedModuleName = "web";
+        when(mockFocusedModule.getModuleName()).thenReturn(focusedModuleName);
+        final String modulePath = "/path/to/it";
+        when(mockFocusedModule.getPath()).thenReturn(modulePath);
+        final String otherModuleName = "core";
+        when(mockProjectOperations.getModuleNames()).thenReturn(
+                Arrays.asList(focusedModuleName, otherModuleName));
+        String type1 = "com.example.Foo";
+        String type2 = "com.example.sub.Bar";
+        when(mockTypeLocationService.getTypesForModule(modulePath)).thenReturn(
+                Arrays.asList(type1, type2));
+
+        // Invoke
+        converter.getAllPossibleValues(mockCompletions, JavaType.class, "",
+                JavaTypeConverter.PROJECT, null);
+
+        // Check
+        verify(mockCompletions).add(
+                new Completion(otherModuleName + MODULE_PATH_SEPARATOR,
+                        AnsiEscapeCode
+                                .decorate(otherModuleName
+                                        + MODULE_PATH_SEPARATOR,
+                                        AnsiEscapeCode.FG_CYAN), "Modules", 0));
+        verify(mockCompletions).add(
+                new Completion(topLevelPackage, topLevelPackage,
+                        focusedModuleName, 1));
+        verify(mockCompletions).add(
+                new Completion("~.Foo", "~.Foo", focusedModuleName, 1));
+        verify(mockCompletions).add(
+                new Completion("~.sub.Bar", "~.sub.Bar", focusedModuleName, 1));
+        verifyNoMoreInteractions(mockCompletions);
+    }
+
+    @Test
+    public void testGetAllPossibleValuesInProjectWhenModulePrefixIsUsed() {
+        // Set up
+        @SuppressWarnings("unchecked")
+        final List<Completion> mockCompletions = mock(List.class);
+        when(mockProjectOperations.isFocusedProjectAvailable())
+                .thenReturn(true);
+        final String otherModuleName = "core";
+        final Pom mockOtherModule = mock(Pom.class);
+        when(mockOtherModule.getModuleName()).thenReturn(otherModuleName);
+        when(mockProjectOperations.getPomFromModuleName(otherModuleName))
+                .thenReturn(mockOtherModule);
+        final String topLevelPackage = "com.example";
+        when(
+                mockTypeLocationService
+                        .getTopLevelPackageForModule(mockOtherModule))
+                .thenReturn(topLevelPackage);
+        String focusedModuleName = "web";
+        when(mockProjectOperations.getModuleNames()).thenReturn(
+                Arrays.asList(focusedModuleName, otherModuleName));
+        final String modulePath = "/path/to/it";
+        when(mockOtherModule.getPath()).thenReturn(modulePath);
+        String type1 = "com.example.web.ShouldBeFound";
+        String type2 = "com.example.foo.ShouldNotBeFound";
+        when(mockTypeLocationService.getTypesForModule(modulePath)).thenReturn(
+                Arrays.asList(type1, type2));
+
+        // Invoke
+        converter.getAllPossibleValues(mockCompletions, JavaType.class,
+                otherModuleName + MODULE_PATH_SEPARATOR + "~.web",
+                JavaTypeConverter.PROJECT, null);
+
+        // Check
+        verify(mockCompletions).add(
+                new Completion(focusedModuleName + MODULE_PATH_SEPARATOR,
+                        AnsiEscapeCode
+                                .decorate(focusedModuleName
+                                        + MODULE_PATH_SEPARATOR,
+                                        AnsiEscapeCode.FG_CYAN), "Modules", 0));
+        // prefix + topLevelPackage, formattedPrefix + topLevelPackage, heading
+        final String formattedPrefix = decorate(otherModuleName
+                + MODULE_PATH_SEPARATOR, FG_CYAN);
+        final String prefix = otherModuleName + MODULE_PATH_SEPARATOR;
+        verify(mockCompletions).add(
+                new Completion(prefix + topLevelPackage, formattedPrefix
+                        + topLevelPackage, "", 1));
+        verify(mockCompletions).add(
+                new Completion(prefix + "~.web.ShouldBeFound", formattedPrefix
+                        + "~.web.ShouldBeFound", "", 1));
+        verifyNoMoreInteractions(mockCompletions);
     }
 }
