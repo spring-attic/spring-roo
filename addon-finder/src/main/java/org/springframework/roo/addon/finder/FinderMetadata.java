@@ -8,7 +8,7 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.SortedMap;
+import java.util.Map;
 
 import org.springframework.roo.addon.jpa.activerecord.RooJpaActiveRecord;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
@@ -67,29 +67,28 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 
     private final List<MethodMetadata> dynamicFinderMethods = new ArrayList<MethodMetadata>();
 
-    private MethodMetadata entityManagerMethod;
-
-    private SortedMap<JavaSymbolName, QueryHolder> queryHolders;
+    private Map<JavaSymbolName, QueryHolder> queryHolders;
 
     public FinderMetadata(final String identifier, final JavaType aspectName,
             final PhysicalTypeMetadata governorPhysicalTypeMetadata,
             final MethodMetadata entityManagerMethod,
-            final SortedMap<JavaSymbolName, QueryHolder> queryHolders) {
+            final Map<JavaSymbolName, QueryHolder> queryHolders) {
         super(identifier, aspectName, governorPhysicalTypeMetadata);
         Assert.isTrue(isValid(identifier), "Metadata identification string '"
                 + identifier + "' does not appear to be a valid");
-        Assert.notNull(entityManagerMethod, "EntityManager method required");
+        Assert.isTrue(entityManagerMethod != null || queryHolders.isEmpty(),
+                "EntityManager method required if any query holders are provided");
         Assert.notNull(queryHolders, "Query holders required");
 
         if (!isValid()) {
             return;
         }
 
-        this.entityManagerMethod = entityManagerMethod;
         this.queryHolders = queryHolders;
 
         for (final JavaSymbolName finderName : queryHolders.keySet()) {
-            final MethodMetadataBuilder methodBuilder = getDynamicFinderMethod(finderName);
+            final MethodMetadataBuilder methodBuilder = getDynamicFinderMethod(
+                    finderName, entityManagerMethod);
             builder.addMethod(methodBuilder);
             dynamicFinderMethods.add(methodBuilder.build());
         }
@@ -123,11 +122,12 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
      * is thrown.
      * 
      * @param finderName the dynamic finder method name
+     * @param entityManagerMethod required
      * @return the user-defined method, or an ITD-generated method (never
      *         returns null)
      */
     private MethodMetadataBuilder getDynamicFinderMethod(
-            final JavaSymbolName finderName) {
+            final JavaSymbolName finderName, MethodMetadata entityManagerMethod) {
         Assert.notNull(finderName, "Dynamic finder method name is required");
         Assert.isTrue(queryHolders.containsKey(finderName),
                 "Undefined method name '" + finderName.getSymbolName() + "'");
