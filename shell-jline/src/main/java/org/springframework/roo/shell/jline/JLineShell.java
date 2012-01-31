@@ -386,9 +386,10 @@ public abstract class JLineShell extends AbstractShell implements
             }
         }
         try {
-            fileLog.write(processedLine + "\n"); // Unix line endings only from
-                                                 // Roo
-            fileLog.flush(); // So tail -f will show it's working
+            // Unix line endings only from Roo
+            fileLog.write(processedLine + "\n");
+            // So tail -f will show it's working
+            fileLog.flush();
             if (getExitShellRequest() != null) {
                 // Shutting down, so close our file (we can always reopen it
                 // later if needed)
@@ -553,16 +554,8 @@ public abstract class JLineShell extends AbstractShell implements
 
     public void setDevelopmentMode(final boolean developmentMode) {
         JLineLogHandler.setIncludeThreadName(developmentMode);
-        JLineLogHandler.setSuppressDuplicateMessages(!developmentMode); // We
-                                                                        // want
-                                                                        // to
-                                                                        // see
-                                                                        // duplicate
-                                                                        // messages
-                                                                        // during
-                                                                        // development
-                                                                        // time
-                                                                        // (ROO-1873)
+        // We want to see duplicate messages during development time (ROO-1873)
+        JLineLogHandler.setSuppressDuplicateMessages(!developmentMode);
         this.developmentMode = developmentMode;
     }
 

@@ -394,8 +394,8 @@ public class JsfManagedBeanMetadataProviderImpl extends
                                             PARAMETER_TYPE_PLURAL_KEY,
                                             pluralMetadata.getPlural());
                                 }
-                             // Only support one generic type parameter
-                                break parameterTypeLoop; 
+                                // Only support one generic type parameter
+                                break parameterTypeLoop;
                             }
                             // Parameter type is not an entity - test for an
                             // enum

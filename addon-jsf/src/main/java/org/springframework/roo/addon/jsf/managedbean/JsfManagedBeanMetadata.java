@@ -1034,9 +1034,9 @@ public class JsfManagedBeanMetadata extends
             final boolean required = action != Action.VIEW
                     && (!isNullable(field) || minValue != null
                             || maxValue != null || sizeMinValue != null || sizeMaxValue != null);
-            final boolean isTextarea = sizeMinValue != null && sizeMinValue
-                    .intValue() > 30
-                    || sizeMaxValue != null && sizeMaxValue.intValue() > 30
+            final boolean isTextarea = sizeMinValue != null
+                    && sizeMinValue.intValue() > 30 || sizeMaxValue != null
+                    && sizeMaxValue.intValue() > 30
                     || customData.keySet().contains(CustomDataKeys.LOB_FIELD);
 
             // Field label
@@ -1369,9 +1369,9 @@ public class JsfManagedBeanMetadata extends
 
                 if (StringUtils.hasText(parameterTypeManagedBeanName)) {
                     if (customData.keySet().contains(ONE_TO_MANY_FIELD)
-                            || customData.keySet()
-                                    .contains(MANY_TO_MANY_FIELD) && isInverseSideOfRelationship(
-                                    field, ONE_TO_MANY, MANY_TO_MANY)) {
+                            || customData.keySet().contains(MANY_TO_MANY_FIELD)
+                            && isInverseSideOfRelationship(field, ONE_TO_MANY,
+                                    MANY_TO_MANY)) {
                         bodyBuilder.appendFormalLine(htmlOutputTextStr);
                         bodyBuilder.appendFormalLine(componentIdStr);
                         bodyBuilder
@@ -1725,8 +1725,8 @@ public class JsfManagedBeanMetadata extends
     private boolean hasScopeAnnotation() {
         return governorTypeDetails.getAnnotation(SESSION_SCOPED) != null
                 || governorTypeDetails.getAnnotation(VIEW_SCOPED) != null
-                || governorTypeDetails.getAnnotation(REQUEST_SCOPED) != null || governorTypeDetails
-                    .getAnnotation(APPLICATION_SCOPED) != null;
+                || governorTypeDetails.getAnnotation(REQUEST_SCOPED) != null
+                || governorTypeDetails.getAnnotation(APPLICATION_SCOPED) != null;
     }
 
     private boolean isInverseSideOfRelationship(final FieldMetadata field,

@@ -26,7 +26,6 @@ import org.json.simple.JSONValue;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.shell.ExecutionStrategy;
 import org.springframework.roo.shell.Parser;
-import org.springframework.roo.shell.Tailor;
 import org.springframework.roo.shell.jline.JLineShell;
 import org.springframework.roo.support.osgi.OSGiUtils;
 import org.springframework.roo.support.util.IOUtils;
@@ -47,7 +46,7 @@ public class JLineShellComponent extends JLineShell {
     private ComponentContext context;
     @Reference private ExecutionStrategy executionStrategy;
     @Reference private Parser parser;
-    @Reference private Tailor tailor;
+    //  @Reference private Tailor tailor;
     @Reference private UrlInputStreamService urlInputStreamService;
 
     protected void activate(final ComponentContext context) {

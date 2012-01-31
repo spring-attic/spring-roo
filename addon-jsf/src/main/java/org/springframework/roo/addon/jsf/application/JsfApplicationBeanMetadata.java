@@ -262,8 +262,8 @@ public class JsfApplicationBeanMetadata extends
     private boolean hasScopeAnnotation() {
         return governorTypeDetails.getAnnotation(SESSION_SCOPED) != null
                 || governorTypeDetails.getAnnotation(VIEW_SCOPED) != null
-                || governorTypeDetails.getAnnotation(REQUEST_SCOPED) != null || governorTypeDetails
-                    .getAnnotation(APPLICATION_SCOPED) != null;
+                || governorTypeDetails.getAnnotation(REQUEST_SCOPED) != null
+                || governorTypeDetails.getAnnotation(APPLICATION_SCOPED) != null;
     }
 
     @Override
