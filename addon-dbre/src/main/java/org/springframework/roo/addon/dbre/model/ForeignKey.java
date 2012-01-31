@@ -140,13 +140,13 @@ public class ForeignKey {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = (prime * result) + (exported ? 1231 : 1237);
-        result = (prime * result)
-                + ((foreignSchemaName == null) ? 0 : foreignSchemaName
+        result = prime * result + (exported ? 1231 : 1237);
+        result = prime * result
+                + (foreignSchemaName == null ? 0 : foreignSchemaName
                         .hashCode());
-        result = (prime * result)
-                + ((foreignTableName == null) ? 0 : foreignTableName.hashCode());
-        result = (prime * result) + ((name == null) ? 0 : name.hashCode());
+        result = prime * result
+                + (foreignTableName == null ? 0 : foreignTableName.hashCode());
+        result = prime * result + (name == null ? 0 : name.hashCode());
         return result;
     }
 

@@ -158,9 +158,9 @@ public abstract class DbreTypeUtils {
         for (int i = 0; i < str.length(); i++) {
             final char c = str.charAt(i);
             if (i == 0) {
-                if ((c == '0') || (c == '1') || (c == '2') || (c == '3')
-                        || (c == '4') || (c == '5') || (c == '6') || (c == '7')
-                        || (c == '8') || (c == '9')) {
+                if (c == '0' || c == '1' || c == '2' || c == '3'
+                        || c == '4' || c == '5' || c == '6' || c == '7'
+                        || c == '8' || c == '9') {
                     result.append(isField ? "f" : "T");
                     result.append(c);
                 }
@@ -170,8 +170,8 @@ public abstract class DbreTypeUtils {
                 }
                 continue;
             }
-            else if (((i > 0) && ((c == '_') || (c == '-') || (c == '\\') || (c == '/')))
-                    || (c == '.') || (c == ' ')) {
+            else if (i > 0 && (c == '_' || c == '-' || c == '\\' || c == '/')
+                    || c == '.' || c == ' ') {
                 isDelimChar = true;
                 continue;
             }
@@ -181,7 +181,7 @@ public abstract class DbreTypeUtils {
                 isDelimChar = false;
             }
             else {
-                if ((i > 1) && Character.isLowerCase(str.charAt(i - 1))
+                if (i > 1 && Character.isLowerCase(str.charAt(i - 1))
                         && Character.isUpperCase(c)) {
                     result.append(c);
                 }
@@ -247,19 +247,19 @@ public abstract class DbreTypeUtils {
         final char[] value = str.toCharArray();
         for (int i = 0; i < value.length; i++) {
             final char c = value[i];
-            if ((i == 0)
-                    && (('1' == c) || ('2' == c) || ('3' == c) || ('4' == c)
-                            || ('5' == c) || ('6' == c) || ('7' == c)
-                            || ('8' == c) || ('9' == c) || ('0' == c))) {
+            if (i == 0
+                    && ('1' == c || '2' == c || '3' == c || '4' == c
+                            || '5' == c || '6' == c || '7' == c
+                            || '8' == c || '9' == c || '0' == c)) {
                 result.append("p");
                 result.append(c);
             }
-            else if (('.' == c) || ('/' == c) || (' ' == c) || ('*' == c)
-                    || ('>' == c) || ('<' == c) || ('!' == c) || ('@' == c)
-                    || ('%' == c) || ('^' == c) || ('?' == c) || ('(' == c)
-                    || (')' == c) || ('~' == c) || ('`' == c) || ('{' == c)
-                    || ('}' == c) || ('[' == c) || (']' == c) || ('|' == c)
-                    || ('\\' == c) || ('\'' == c) || ('+' == c) || ('-' == c)) {
+            else if ('.' == c || '/' == c || ' ' == c || '*' == c
+                    || '>' == c || '<' == c || '!' == c || '@' == c
+                    || '%' == c || '^' == c || '?' == c || '(' == c
+                    || ')' == c || '~' == c || '`' == c || '{' == c
+                    || '}' == c || '[' == c || ']' == c || '|' == c
+                    || '\\' == c || '\'' == c || '+' == c || '-' == c) {
                 result.append("");
             }
             else {
@@ -281,7 +281,7 @@ public abstract class DbreTypeUtils {
         Assert.hasText(tableName, "Table name required");
 
         final StringBuilder result = new StringBuilder();
-        if ((javaPackage != null)
+        if (javaPackage != null
                 && StringUtils.hasText(javaPackage
                         .getFullyQualifiedPackageName())) {
             result.append(javaPackage.getFullyQualifiedPackageName());

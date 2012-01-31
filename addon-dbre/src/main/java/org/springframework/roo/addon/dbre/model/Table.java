@@ -138,7 +138,7 @@ public class Table {
 
     public String getFullyQualifiedTableName() {
         return DbreModelService.NO_SCHEMA_REQUIRED.equals(schema.getName()) ? name
-                : (schema.getName() + "." + name);
+                : schema.getName() + "." + name;
     }
 
     public ForeignKey getImportedKey(final String name) {
@@ -202,8 +202,8 @@ public class Table {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = (prime * result) + name.hashCode();
-        result = (prime * result) + schema.hashCode();
+        result = prime * result + name.hashCode();
+        result = prime * result + schema.hashCode();
         return result;
     }
 

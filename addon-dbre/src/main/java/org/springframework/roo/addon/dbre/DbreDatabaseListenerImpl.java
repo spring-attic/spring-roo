@@ -315,7 +315,7 @@ public class DbreDatabaseListenerImpl extends
                     // The identifierType attribute exists, so get its value
                     final JavaType identifierType = (JavaType) identifierTypeAttribute
                             .getValue();
-                    if ((identifierType != null)
+                    if (identifierType != null
                             && !JdkJavaType.isPartOfJavaLang(identifierType)) {
                         return identifierType;
                     }
@@ -356,7 +356,7 @@ public class DbreDatabaseListenerImpl extends
                     .getTypeAnnotation(ROO_IDENTIFIER);
             final AnnotationAttributeValue<?> attrValue = identifierAnnotation
                     .getAttribute(DB_MANAGED);
-            if ((attrValue != null) && (Boolean) attrValue.getValue()) {
+            if (attrValue != null && (Boolean) attrValue.getValue()) {
                 managedIdentifierTypes.add(managedIdentifierType);
             }
         }
@@ -452,7 +452,7 @@ public class DbreDatabaseListenerImpl extends
                         .getPath(managedEntity.getDeclaredByMetadataId()));
         final DbreMetadata dbreMetadata = (DbreMetadata) metadataService
                 .get(declaredByMetadataId);
-        if ((dbreMetadata == null) || !dbreMetadata.isAutomaticallyDelete()) {
+        if (dbreMetadata == null || !dbreMetadata.isAutomaticallyDelete()) {
             return false;
         }
 
@@ -507,15 +507,15 @@ public class DbreDatabaseListenerImpl extends
             final List<Identifier> identifiers = getIdentifiersFromPrimaryKeys(table);
             identifierResults.put(javaType, identifiers);
         }
-        else if ((pkCount == 0) || (pkCount > 1)) {
+        else if (pkCount == 0 || pkCount > 1) {
             // Table has either no primary keys or more than one primary key so
             // create a composite key
 
             // Check if identifier class already exists and if not, create it
-            if ((identifierPhysicalTypeMetadata == null)
+            if (identifierPhysicalTypeMetadata == null
                     || !identifierPhysicalTypeMetadata.isValid()
-                    || (identifierPhysicalTypeMetadata
-                            .getMemberHoldingTypeDetails() == null)) {
+                    || identifierPhysicalTypeMetadata
+                            .getMemberHoldingTypeDetails() == null) {
                 createIdentifierClass(identifierType);
             }
 
@@ -555,8 +555,8 @@ public class DbreDatabaseListenerImpl extends
     public void onFileEvent(final FileEvent fileEvent) {
         if (fileEvent.getFileDetails().getCanonicalPath().endsWith(DBRE_XML)) {
             final FileOperation operation = fileEvent.getOperation();
-            if ((operation == FileOperation.UPDATED)
-                    || (operation == FileOperation.CREATED)) {
+            if (operation == FileOperation.UPDATED
+                    || operation == FileOperation.CREATED) {
                 deserializeDatabase();
             }
         }

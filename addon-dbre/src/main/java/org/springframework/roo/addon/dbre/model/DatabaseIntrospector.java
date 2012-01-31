@@ -137,14 +137,14 @@ public class DatabaseIntrospector extends AbstractIntrospector {
     }
 
     private boolean hasExcludedTable(final String tableName) {
-        if ((excludeTables == null) || excludeTables.isEmpty()) {
+        if (excludeTables == null || excludeTables.isEmpty()) {
             return false;
         }
         return hasTable(excludeTables, tableName);
     }
 
     private boolean hasIncludedTable(final String tableName) {
-        if ((includeTables == null) || includeTables.isEmpty()) {
+        if (includeTables == null || includeTables.isEmpty()) {
             return true;
         }
         return hasTable(includeTables, tableName);

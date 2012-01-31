@@ -100,11 +100,11 @@ public class Reference {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = (prime * result)
-                + ((foreignColumnName == null) ? 0 : foreignColumnName
+        result = prime * result
+                + (foreignColumnName == null ? 0 : foreignColumnName
                         .hashCode());
-        result = (prime * result)
-                + ((localColumnName == null) ? 0 : localColumnName.hashCode());
+        result = prime * result
+                + (localColumnName == null ? 0 : localColumnName.hashCode());
         return result;
     }
 

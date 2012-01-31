@@ -188,13 +188,13 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
             final CascadeAction onUpdate, final CascadeAction onDelete) {
         final String attributeName = "cascade";
         boolean hasCascadeType = true;
-        if ((onUpdate == CascadeAction.CASCADE)
-                && (onDelete == CascadeAction.CASCADE)) {
+        if (onUpdate == CascadeAction.CASCADE
+                && onDelete == CascadeAction.CASCADE) {
             annotationBuilder.addEnumAttribute(attributeName, CASCADE_TYPE,
                     "ALL");
         }
-        else if ((onUpdate == CascadeAction.CASCADE)
-                && (onDelete != CascadeAction.CASCADE)) {
+        else if (onUpdate == CascadeAction.CASCADE
+                && onDelete != CascadeAction.CASCADE) {
             final List<EnumAttributeValue> arrayValues = new ArrayList<EnumAttributeValue>();
             arrayValues.add(new EnumAttributeValue(new JavaSymbolName(
                     attributeName), new EnumDetails(CASCADE_TYPE,
@@ -206,8 +206,8 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
                     .addAttribute(new ArrayAttributeValue<EnumAttributeValue>(
                             new JavaSymbolName(attributeName), arrayValues));
         }
-        else if ((onUpdate != CascadeAction.CASCADE)
-                && (onDelete == CascadeAction.CASCADE)) {
+        else if (onUpdate != CascadeAction.CASCADE
+                && onDelete == CascadeAction.CASCADE) {
             annotationBuilder.addEnumAttribute(attributeName,
                     CASCADE_TYPE.getSimpleTypeName(), "REMOVE");
         }
@@ -288,7 +288,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
         for (final ForeignKey foreignKey : table.getImportedKeys()) {
             final Table foreignTable = foreignKey.getForeignTable();
-            if ((foreignTable == null) || isOneToOne(table, foreignKey)) {
+            if (foreignTable == null || isOneToOne(table, foreignKey)) {
                 continue;
             }
 
@@ -305,8 +305,8 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
             }
             else {
                 final Short keySequence = foreignKey.getKeySequence();
-                final String fieldSuffix = (keySequence != null)
-                        && (keySequence > 0) ? String.valueOf(keySequence) : "";
+                final String fieldSuffix = keySequence != null
+                        && keySequence > 0 ? String.valueOf(keySequence) : "";
                 fieldName = new JavaSymbolName(
                         DbreTypeUtils.suggestFieldName(foreignTableName)
                                 + fieldSuffix);
@@ -373,8 +373,8 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
             }
 
             final Short keySequence = exportedKey.getKeySequence();
-            final String fieldSuffix = (keySequence != null)
-                    && (keySequence > 0) ? String.valueOf(keySequence) : "";
+            final String fieldSuffix = keySequence != null
+                    && keySequence > 0 ? String.valueOf(keySequence) : "";
             JavaSymbolName fieldName = new JavaSymbolName(
                     getInflectorPlural(DbreTypeUtils
                             .suggestFieldName(foreignTableName)) + fieldSuffix);
@@ -421,8 +421,8 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
             final String foreignSchemaName = importedKeyForeignTable
                     .getSchema().getName();
             final Short keySequence = foreignKey.getKeySequence();
-            final String fieldSuffix = (keySequence != null)
-                    && (keySequence > 0) ? String.valueOf(keySequence) : "";
+            final String fieldSuffix = keySequence != null
+                    && keySequence > 0 ? String.valueOf(keySequence) : "";
             final JavaSymbolName fieldName = new JavaSymbolName(
                     DbreTypeUtils.suggestFieldName(foreignTableName)
                             + fieldSuffix);
@@ -492,8 +492,8 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
                 continue;
             }
             final Short keySequence = exportedKey.getKeySequence();
-            final String fieldSuffix = (keySequence != null)
-                    && (keySequence > 0) ? String.valueOf(keySequence) : "";
+            final String fieldSuffix = keySequence != null
+                    && keySequence > 0 ? String.valueOf(keySequence) : "";
             JavaSymbolName fieldName = new JavaSymbolName(
                     DbreTypeUtils.suggestFieldName(foreignTableName)
                             + fieldSuffix);
@@ -572,7 +572,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
     }
 
     private void addToBuilder(final FieldMetadataBuilder fieldBuilder) {
-        if ((fieldBuilder == null)
+        if (fieldBuilder == null
                 || hasField(fieldBuilder.getFieldName(),
                         fieldBuilder.buildAnnotations())) {
             return;
@@ -676,13 +676,13 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
         }
 
         // Add length attribute for Strings
-        if ((column.getColumnSize() < 4000)
+        if (column.getColumnSize() < 4000
                 && fieldType.equals(JavaType.STRING)) {
             columnBuilder.addIntegerAttribute("length", column.getColumnSize());
         }
 
         // Add precision and scale attributes for numeric fields
-        if ((column.getScale() > 0) && JdkJavaType.isDecimalType(fieldType)) {
+        if (column.getScale() > 0 && JdkJavaType.isDecimalType(fieldType)) {
             columnBuilder.addIntegerAttribute("precision",
                     column.getColumnSize());
             columnBuilder.addIntegerAttribute("scale", column.getScale());
@@ -875,7 +875,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
         final Set<Reference> firstKeyReferences = iter.next().getReferences();
         for (final Reference reference : firstKeyReferences) {
             final AnnotationMetadataBuilder joinColumnBuilder = getJoinColumnAnnotation(
-                    reference, (firstKeyReferences.size() > 1));
+                    reference, firstKeyReferences.size() > 1);
             joinColumnArrayValues.add(new NestedAnnotationAttributeValue(
                     new JavaSymbolName(VALUE), joinColumnBuilder.build()));
         }
@@ -890,7 +890,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
         final Set<Reference> lastKeyReferences = iter.next().getReferences();
         for (final Reference reference : lastKeyReferences) {
             final AnnotationMetadataBuilder joinColumnBuilder = getJoinColumnAnnotation(
-                    reference, (lastKeyReferences.size() > 1));
+                    reference, lastKeyReferences.size() > 1);
             inverseJoinColumnArrayValues
                     .add(new NestedAnnotationAttributeValue(new JavaSymbolName(
                             VALUE), joinColumnBuilder.build()));
@@ -1019,7 +1019,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
                     for (final AnnotationMetadata annotationMetadata : annotations) {
                         final AnnotationAttributeValue<?> columnName = annotationMetadata
                                 .getAttribute(new JavaSymbolName(NAME));
-                        if ((columnName != null) && columnName.equals(name)) {
+                        if (columnName != null && columnName.equals(name)) {
                             return true;
                         }
                     }
@@ -1116,7 +1116,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
     }
 
     private boolean isVersionField(final JavaSymbolName fieldName) {
-        return (versionField != null)
+        return versionField != null
                 && versionField.getFieldName().equals(fieldName);
     }
 }

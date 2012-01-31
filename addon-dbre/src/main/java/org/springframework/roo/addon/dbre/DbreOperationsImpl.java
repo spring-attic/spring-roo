@@ -131,7 +131,7 @@ public class DbreOperationsImpl implements DbreOperations {
         propertyElement = XmlUtils.findFirstElement(
                 "/persistence/persistence-unit/properties/property[@name = '"
                         + name + "']", root);
-        if ((propertyElement != null)
+        if (propertyElement != null
                 && !propertyElement.getAttribute("value").equals(value)) {
             propertyElement.setAttribute("value", value);
             changed = true;

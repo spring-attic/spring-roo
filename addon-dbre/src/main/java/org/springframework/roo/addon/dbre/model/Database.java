@@ -108,7 +108,7 @@ public class Database {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = (prime * result) + ((tables == null) ? 0 : tables.hashCode());
+        result = prime * result + (tables == null ? 0 : tables.hashCode());
         return result;
     }
 
@@ -171,8 +171,8 @@ public class Database {
                         reference.setLocalColumn(localColumn);
                     }
                 }
-                if ((reference.getForeignColumn() == null)
-                        && (exportedKey.getForeignTable() != null)) {
+                if (reference.getForeignColumn() == null
+                        && exportedKey.getForeignTable() != null) {
                     final Column foreignColumn = exportedKey.getForeignTable()
                             .findColumn(reference.getForeignColumnName());
                     if (foreignColumn != null) {
@@ -226,8 +226,8 @@ public class Database {
                         repeatedColumns.put(localColumn, fkSet);
                     }
                 }
-                if ((reference.getForeignColumn() == null)
-                        && (foreignKey.getForeignTable() != null)) {
+                if (reference.getForeignColumn() == null
+                        && foreignKey.getForeignTable() != null) {
                     final Column foreignColumn = foreignKey.getForeignTable()
                             .findColumn(reference.getForeignColumnName());
                     if (foreignColumn != null) {
@@ -242,7 +242,7 @@ public class Database {
                 .entrySet()) {
             final Set<ForeignKey> foreignKeys = entrySet.getValue();
             for (final ForeignKey foreignKey : foreignKeys) {
-                if ((foreignKeys.size() > 1)
+                if (foreignKeys.size() > 1
                         || foreignKey.getForeignTableName().equals(
                                 table.getName())) {
                     for (final Reference reference : foreignKey.getReferences()) {
@@ -257,7 +257,7 @@ public class Database {
         for (final Index index : table.getIndices()) {
             for (final IndexColumn indexColumn : index.getColumns()) {
                 final Column column = table.findColumn(indexColumn.getName());
-                if ((column != null) && index.isUnique()) {
+                if (column != null && index.isUnique()) {
                     column.setUnique(true);
                 }
             }
@@ -272,10 +272,10 @@ public class Database {
      * other entity tables and have no other columns.
      */
     private void initializeJoinTable(final Table table) {
-        boolean equals = (table.getColumnCount() == 2)
-                && (table.getPrimaryKeyCount() == 2)
-                && (table.getImportedKeyCount() == 2)
-                && (table.getPrimaryKeyCount() == table.getImportedKeyCount());
+        boolean equals = table.getColumnCount() == 2
+                && table.getPrimaryKeyCount() == 2
+                && table.getImportedKeyCount() == 2
+                && table.getPrimaryKeyCount() == table.getImportedKeyCount();
         final Iterator<Column> iter = table.getColumns().iterator();
         while (equals && iter.hasNext()) {
             final Column column = iter.next();
