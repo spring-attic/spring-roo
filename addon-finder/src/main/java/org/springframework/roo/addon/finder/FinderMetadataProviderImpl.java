@@ -1,7 +1,5 @@
 package org.springframework.roo.addon.finder;
 
-import static org.springframework.roo.model.RooJavaType.ROO_JPA_ACTIVE_RECORD;
-
 import java.util.Collections;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -43,7 +41,9 @@ public class FinderMetadataProviderImpl extends
         metadataDependencyRegistry.registerDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
                 getProvidesType());
-        addMetadataTrigger(ROO_JPA_ACTIVE_RECORD);
+        // Ignoring trigger annotations means that other MD providers that want
+        // to discover whether a type has finders can do so.
+        setIgnoreTriggerAnnotations(true);
     }
 
     @Override
@@ -57,7 +57,6 @@ public class FinderMetadataProviderImpl extends
         metadataDependencyRegistry.deregisterDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
                 getProvidesType());
-        removeMetadataTrigger(ROO_JPA_ACTIVE_RECORD);
     }
 
     @Override
@@ -100,7 +99,9 @@ public class FinderMetadataProviderImpl extends
                 .get(jpaActiveRecordMetadataKey);
         if ((jpaActiveRecordMetadata == null)
                 || !jpaActiveRecordMetadata.isValid()) {
-            return null;
+            return new FinderMetadata(metadataIdentificationString, aspectName,
+                    governorPhysicalTypeMetadata, null,
+                    Collections.<JavaSymbolName, QueryHolder> emptyMap());
         }
         final MethodMetadata entityManagerMethod = jpaActiveRecordMetadata
                 .getEntityManagerMethod();
