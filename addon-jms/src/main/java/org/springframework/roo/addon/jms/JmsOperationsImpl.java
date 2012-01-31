@@ -130,7 +130,7 @@ public class JmsOperationsImpl implements JmsOperations {
 
         Element listenerContainer = DomUtils.findFirstElementByName(
                 "jms:listener-container", root);
-        if ((listenerContainer != null)
+        if (listenerContainer != null
                 && destinationType.name().equalsIgnoreCase(
                         listenerContainer.getAttribute("destination-type"))) {
             listenerContainer = document

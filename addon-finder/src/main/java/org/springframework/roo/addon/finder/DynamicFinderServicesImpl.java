@@ -109,7 +109,7 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
             final SortedSet<JavaSymbolName> tempFinders = new TreeSet<JavaSymbolName>();
             for (final FieldMetadata field : fields) {
                 // Ignoring java.util.Map field types (see ROO-194)
-                if ((field == null) || field.getFieldType().equals(MAP)) {
+                if (field == null || field.getFieldType().equals(MAP)) {
                     continue;
                 }
                 if (exclusions.contains(field.getFieldName())) {
@@ -280,7 +280,7 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
             }
         }
         if (isNewField) {
-            if ((lastFieldToken != null)
+            if (lastFieldToken != null
                     && !lastFieldToken.getField().getFieldType()
                             .isCommonCollectionType()) {
                 builder.append("o.").append(
@@ -290,7 +290,7 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
             isFieldApplied = false;
         }
         if (!isFieldApplied) {
-            if ((lastFieldToken != null)
+            if (lastFieldToken != null
                     && !lastFieldToken.getField().getFieldType()
                             .isCommonCollectionType()) {
                 builder.append(" = :").append(
@@ -319,8 +319,8 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
         for (int i = 0; i < tokens.size(); i++) {
             final Token token = tokens.get(i);
             if (token instanceof FieldToken) {
-                final String fieldName = (((FieldToken) token).getField()
-                        .getFieldName().getSymbolName());
+                final String fieldName = ((FieldToken) token).getField()
+                        .getFieldName().getSymbolName();
                 parameterNames.add(new JavaSymbolName(fieldName));
             }
             else {
@@ -419,7 +419,7 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
 
     private boolean isMethodOfInterest(final MethodMetadata method) {
         return method.getMethodName().getSymbolName().startsWith("set")
-                && (method.getModifier() == Modifier.PUBLIC);
+                && method.getModifier() == Modifier.PUBLIC;
     }
 
     private boolean isNumberOrDate(final JavaType fieldType) {
@@ -509,8 +509,8 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
             final Token token = getFirstToken(fieldTokens, finder,
                     finderName.getSymbolName(), simpleTypeName);
             if (token != null) {
-                if ((token instanceof FieldToken)
-                        || (token instanceof ReservedToken)) {
+                if (token instanceof FieldToken
+                        || token instanceof ReservedToken) {
                     tokens.add(token);
                 }
                 finder = finder.substring(token.getValue().length());

@@ -114,7 +114,7 @@ public class SolrMetadataProvider extends
         final SolrSearchAnnotationValues annotationValues = new SolrSearchAnnotationValues(
                 governorPhysicalTypeMetadata);
         if (!annotationValues.isAnnotationFound()
-                || (annotationValues.searchMethod == null)) {
+                || annotationValues.searchMethod == null) {
             return null;
         }
 
@@ -133,7 +133,7 @@ public class SolrMetadataProvider extends
                 .get(jpaActiveRecordMetadataKey);
 
         // Abort if we don't have getter information available
-        if ((jpaActiveRecordMetadata == null)
+        if (jpaActiveRecordMetadata == null
                 || !jpaActiveRecordMetadata.isValid()) {
             return null;
         }
@@ -142,7 +142,7 @@ public class SolrMetadataProvider extends
         String beanPlural = javaType.getSimpleTypeName() + "s";
         final PluralMetadata pluralMetadata = (PluralMetadata) metadataService
                 .get(PluralMetadata.createIdentifier(javaType, path));
-        if ((pluralMetadata != null) && pluralMetadata.isValid()) {
+        if (pluralMetadata != null && pluralMetadata.isValid()) {
             beanPlural = pluralMetadata.getPlural();
         }
 

@@ -205,7 +205,7 @@ public class MemberDetailsBuilder {
                     .getDeclaredConstructor(AnnotatedJavaType
                             .convertFromAnnotatedJavaTypes(constructor
                                     .getParameterTypes()));
-            if ((matchedConstructor != null)
+            if (matchedConstructor != null
                     && !matchedConstructor.getCustomData().keySet()
                             .containsAll(customData.keySet())) {
                 final TypeDetailsBuilder typeDetailsBuilder = getTypeDetailsBuilder(memberHoldingTypeDetails);
@@ -223,7 +223,7 @@ public class MemberDetailsBuilder {
         if (memberHoldingTypeDetails != null) {
             final FieldMetadata matchedField = memberHoldingTypeDetails
                     .getField(field.getFieldName());
-            if ((matchedField != null)
+            if (matchedField != null
                     && !matchedField.getCustomData().keySet()
                             .containsAll(customData.keySet())) {
                 final TypeDetailsBuilder typeDetailsBuilder = getTypeDetailsBuilder(memberHoldingTypeDetails);
@@ -257,7 +257,7 @@ public class MemberDetailsBuilder {
                     .getMethod(method.getMethodName(), AnnotatedJavaType
                             .convertFromAnnotatedJavaTypes(method
                                     .getParameterTypes()));
-            if ((matchedMethod != null)
+            if (matchedMethod != null
                     && !matchedMethod.getCustomData().keySet()
                             .containsAll(customData.keySet())) {
                 final TypeDetailsBuilder typeDetailsBuilder = getTypeDetailsBuilder(memberHoldingTypeDetails);

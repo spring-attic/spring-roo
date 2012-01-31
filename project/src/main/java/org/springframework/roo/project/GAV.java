@@ -78,8 +78,8 @@ public class GAV implements Comparable<GAV> {
 
     @Override
     public boolean equals(final Object other) {
-        return (other == this)
-                || ((other instanceof GAV) && (compareTo((GAV) other) == 0));
+        return other == this || other instanceof GAV
+                && compareTo((GAV) other) == 0;
     }
 
     public String getArtifactId() {

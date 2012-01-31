@@ -28,17 +28,17 @@ public abstract class AbstractShellStatusPublisher implements
         }
     }
 
+    public final ShellStatus getShellStatus() {
+        synchronized (shellStatus) {
+            return shellStatus;
+        }
+    }
+
     public final void removeShellStatusListener(
             final ShellStatusListener shellStatusListener) {
         Assert.notNull(shellStatusListener, "Status listener required");
         synchronized (shellStatus) {
             shellStatusListeners.remove(shellStatusListener);
-        }
-    }
-
-    public final ShellStatus getShellStatus() {
-        synchronized (shellStatus) {
-            return shellStatus;
         }
     }
 
@@ -63,7 +63,7 @@ public abstract class AbstractShellStatusPublisher implements
                 return;
             }
 
-            for (ShellStatusListener listener : shellStatusListeners) {
+            for (final ShellStatusListener listener : shellStatusListeners) {
                 listener.onShellStatusChange(this.shellStatus, st);
             }
             this.shellStatus = st;

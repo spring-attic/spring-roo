@@ -102,12 +102,12 @@ public class JavaParserFieldMetadataBuilder implements Builder<FieldMetadata> {
                         "Illegal state: JavaParser did not parse correctly", pe);
             }
             final List<TypeDeclaration> types = ci.getTypes();
-            if ((types == null) || (types.size() != 1)) {
+            if (types == null || types.size() != 1) {
                 throw new IllegalArgumentException("Field member invalid");
             }
             final TypeDeclaration td = types.get(0);
             final List<BodyDeclaration> bodyDeclarations = td.getMembers();
-            if ((bodyDeclarations == null) || (bodyDeclarations.size() != 1)) {
+            if (bodyDeclarations == null || bodyDeclarations.size() != 1) {
                 throw new IllegalStateException(
                         "Illegal state: JavaParser did not return body declarations correctly");
             }
@@ -117,7 +117,7 @@ public class JavaParserFieldMetadataBuilder implements Builder<FieldMetadata> {
                         "Illegal state: JavaParser did not return a field declaration correctly");
             }
             final FieldDeclaration fd = (FieldDeclaration) bd;
-            if ((fd.getVariables() == null) || (fd.getVariables().size() != 1)) {
+            if (fd.getVariables() == null || fd.getVariables().size() != 1) {
                 throw new IllegalStateException(
                         "Illegal state: JavaParser did not return a field declaration correctly");
             }

@@ -139,12 +139,11 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
         Assert.notNull(map, "Map required");
         Assert.notNull(currentFile, "Current file is required");
 
-        if (!currentFile.exists()
-                || ((currentFile.getName().length() > 1) && currentFile
-                        .getName().startsWith("."))
+        if (!currentFile.exists() || currentFile.getName().length() > 1
+                && currentFile.getName().startsWith(".")
                 || currentFile.getName().equals("log.roo")
-                || (currentFile.isDirectory() && isExcludedDirectory(currentFile
-                        .getPath()))) {
+                || currentFile.isDirectory()
+                && isExcludedDirectory(currentFile.getPath())) {
             return;
         }
 
@@ -167,14 +166,6 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
                 }
             }
         }
-    }
-
-    private boolean isExcludedDirectory(final String path) {
-        final boolean hasSrc = path.contains(File.separator + "src");
-        return (!hasSrc
-                && (path.contains(File.separator + "target") || path
-                        .contains(File.separator + "bin")) || (hasSrc && path
-                .contains(File.separator + "maven")));
     }
 
     public SortedSet<FileDetails> findMatchingAntPath(final String antPath) {
@@ -323,6 +314,14 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
             return !notifyChanged.isEmpty() || !notifyCreated.isEmpty()
                     || !notifyDeleted.isEmpty();
         }
+    }
+
+    private boolean isExcludedDirectory(final String path) {
+        final boolean hasSrc = path.contains(File.separator + "src");
+        return !hasSrc
+                && (path.contains(File.separator + "target") || path
+                        .contains(File.separator + "bin")) || hasSrc
+                && path.contains(File.separator + "maven");
     }
 
     /**
@@ -475,7 +474,7 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
         Assert.notNull(result, "Result required");
 
         final File[] listFiles = currentDirectory.listFiles();
-        if ((listFiles == null) || (listFiles.length == 0)) {
+        if (listFiles == null || listFiles.length == 0) {
             return;
         }
         for (final File f : listFiles) {

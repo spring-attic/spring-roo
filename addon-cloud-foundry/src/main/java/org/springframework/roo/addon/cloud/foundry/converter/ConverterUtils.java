@@ -19,7 +19,7 @@ public final class ConverterUtils {
     public static String getOptionValue(final String option, final String buffer) {
         final String[] words = buffer.split(" ");
         for (int i = 0; i < words.length; i++) {
-            if (words[i].equals("--" + option) && ((i + 1) < words.length)) {
+            if (words[i].equals("--" + option) && i + 1 < words.length) {
                 return words[i + 1];
             }
         }

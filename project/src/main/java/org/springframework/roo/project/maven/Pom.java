@@ -161,7 +161,7 @@ public class Pom {
      * @since 1.2.1
      */
     public boolean canAddDependency(final Dependency newDependency) {
-        return (newDependency != null)
+        return newDependency != null
                 && !isDependencyRegistered(newDependency)
                 && !Dependency.isHigherLevel(
                         newDependency.getType().toString(), packaging);
@@ -224,7 +224,7 @@ public class Pom {
             final Dependency dependency) {
         final Set<Dependency> result = new HashSet<Dependency>();
         for (final Dependency d : dependencies) {
-            if ((dependency != null)
+            if (dependency != null
                     && dependency.getArtifactId().equals(d.getArtifactId())
                     && dependency.getGroupId().equals(d.getGroupId())
                     && dependency.getType().equals(d.getType())) {
@@ -435,7 +435,7 @@ public class Pom {
             final Collection<? extends Dependency> dependencies) {
         if (dependencies != null) {
             for (final Dependency dependency : dependencies) {
-                if ((dependency != null) && !isDependencyRegistered(dependency)) {
+                if (dependency != null && !isDependencyRegistered(dependency)) {
                     return false;
                 }
             }
@@ -456,7 +456,7 @@ public class Pom {
             final Collection<? extends Repository> repositories) {
         if (repositories != null) {
             for (final Repository repository : repositories) {
-                if ((repository != null)
+                if (repository != null
                         && !isPluginRepositoryRegistered(repository)) {
                     return false;
                 }
@@ -476,7 +476,7 @@ public class Pom {
             final Collection<? extends Plugin> plugins) {
         Assert.notNull(plugins, "Plugins to check is required");
         for (final Plugin plugin : plugins) {
-            if ((plugin != null) && !isBuildPluginRegistered(plugin)) {
+            if (plugin != null && !isBuildPluginRegistered(plugin)) {
                 return false;
             }
         }
@@ -495,7 +495,7 @@ public class Pom {
             final Collection<? extends Repository> repositories) {
         if (repositories != null) {
             for (final Repository repository : repositories) {
-                if ((repository != null) && !isRepositoryRegistered(repository)) {
+                if (repository != null && !isRepositoryRegistered(repository)) {
                     return false;
                 }
             }
@@ -550,7 +550,7 @@ public class Pom {
      */
     @Deprecated
     public boolean isBuildPluginRegistered(final Plugin plugin) {
-        return (plugin != null) && isPluginRegistered(plugin.getGAV());
+        return plugin != null && isPluginRegistered(plugin.getGAV());
     }
 
     /**
@@ -561,7 +561,7 @@ public class Pom {
      * @return <code>false</code> if a <code>null</code> dependency is given
      */
     public boolean isDependencyRegistered(final Dependency dependency) {
-        return (dependency != null) && dependencies.contains(dependency);
+        return dependency != null && dependencies.contains(dependency);
     }
 
     /**

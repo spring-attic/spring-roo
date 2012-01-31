@@ -38,7 +38,7 @@ public class EqualsOperationsImpl implements EqualsOperations {
         // Add @RooEquals annotation to class if not yet present
         final ClassOrInterfaceTypeDetails cid = typeLocationService
                 .getTypeDetails(javaType);
-        if ((cid == null) || (cid.getTypeAnnotation(ROO_EQUALS) != null)) {
+        if (cid == null || cid.getTypeAnnotation(ROO_EQUALS) != null) {
             return;
         }
 

@@ -561,7 +561,7 @@ public abstract class ClassUtils {
             final Class<?>[] ifcs = clazz.getInterfaces();
             for (int i = 0; i < ifcs.length; i++) {
                 result.append(ifcs[i].getName());
-                if (i < (ifcs.length - 1)) {
+                if (i < ifcs.length - 1) {
                     result.append(',');
                 }
             }
@@ -655,13 +655,13 @@ public abstract class ClassUtils {
     public static Method getMostSpecificMethod(final Method method,
             final Class<?> targetClass) {
         Method specificMethod = null;
-        if ((method != null) && isOverridable(method, targetClass)
-                && (targetClass != null)
+        if (method != null && isOverridable(method, targetClass)
+                && targetClass != null
                 && !targetClass.equals(method.getDeclaringClass())) {
             specificMethod = ReflectionUtils.findMethod(targetClass,
                     method.getName(), method.getParameterTypes());
         }
-        return (specificMethod != null ? specificMethod : method);
+        return specificMethod != null ? specificMethod : method;
     }
 
     /**
@@ -676,7 +676,7 @@ public abstract class ClassUtils {
         Assert.notNull(clazz, "Class must not be null");
         final String className = clazz.getName();
         final int lastDotIndex = className.lastIndexOf(PACKAGE_SEPARATOR);
-        return (lastDotIndex != -1 ? className.substring(0, lastDotIndex) : "");
+        return lastDotIndex != -1 ? className.substring(0, lastDotIndex) : "";
     }
 
     /**
@@ -765,8 +765,8 @@ public abstract class ClassUtils {
     public static String getShortNameAsProperty(final Class<?> clazz) {
         String shortName = ClassUtils.getShortName(clazz);
         final int dotIndex = shortName.lastIndexOf('.');
-        shortName = (dotIndex != -1 ? shortName.substring(dotIndex + 1)
-                : shortName);
+        shortName = dotIndex != -1 ? shortName.substring(dotIndex + 1)
+                : shortName;
         return Introspector.decapitalize(shortName);
     }
 
@@ -803,9 +803,9 @@ public abstract class ClassUtils {
      * @return the user-defined class
      */
     public static Class<?> getUserClass(final Class<?> clazz) {
-        if ((clazz != null) && clazz.getName().contains(CGLIB_CLASS_SEPARATOR)) {
+        if (clazz != null && clazz.getName().contains(CGLIB_CLASS_SEPARATOR)) {
             final Class<?> superClass = clazz.getSuperclass();
-            if ((superClass != null) && !Object.class.equals(superClass)) {
+            if (superClass != null && !Object.class.equals(superClass)) {
                 return superClass;
             }
         }
@@ -850,8 +850,9 @@ public abstract class ClassUtils {
                 return true;
             }
         }
-        return ((clazz.getSuperclass() != null) && hasAtLeastOneMethodWithName(
-                clazz.getSuperclass(), methodName));
+        return clazz.getSuperclass() != null
+                && hasAtLeastOneMethodWithName(clazz.getSuperclass(),
+                        methodName);
     }
 
     /**
@@ -867,7 +868,7 @@ public abstract class ClassUtils {
      */
     public static boolean hasConstructor(final Class<?> clazz,
             final Class<?>... parameterTypes) {
-        return (getConstructorIfAvailable(clazz, parameterTypes) != null);
+        return getConstructorIfAvailable(clazz, parameterTypes) != null;
     }
 
     /**
@@ -883,7 +884,7 @@ public abstract class ClassUtils {
      */
     public static boolean hasMethod(final Class<?> clazz,
             final String methodName, final Class<?>... parameterTypes) {
-        return (getMethodIfAvailable(clazz, methodName, parameterTypes) != null);
+        return getMethodIfAvailable(clazz, methodName, parameterTypes) != null;
     }
 
     /**
@@ -900,8 +901,8 @@ public abstract class ClassUtils {
             final Class<?> rhsType) {
         Assert.notNull(lhsType, "Left-hand side type must not be null");
         Assert.notNull(rhsType, "Right-hand side type must not be null");
-        return (lhsType.isAssignableFrom(rhsType) || lhsType
-                .equals(primitiveWrapperTypeMap.get(rhsType)));
+        return lhsType.isAssignableFrom(rhsType)
+                || lhsType.equals(primitiveWrapperTypeMap.get(rhsType));
     }
 
     /**
@@ -916,8 +917,8 @@ public abstract class ClassUtils {
     public static boolean isAssignableValue(final Class<?> type,
             final Object value) {
         Assert.notNull(type, "Type must not be null");
-        return (value != null ? isAssignable(type, value.getClass()) : !type
-                .isPrimitive());
+        return value != null ? isAssignable(type, value.getClass()) : !type
+                .isPrimitive();
     }
 
     /**
@@ -1013,7 +1014,7 @@ public abstract class ClassUtils {
      */
     public static boolean isPrimitiveArray(final Class<?> clazz) {
         Assert.notNull(clazz, "Class must not be null");
-        return (clazz.isArray() && clazz.getComponentType().isPrimitive());
+        return clazz.isArray() && clazz.getComponentType().isPrimitive();
     }
 
     /**
@@ -1026,7 +1027,7 @@ public abstract class ClassUtils {
      */
     public static boolean isPrimitiveOrWrapper(final Class<?> clazz) {
         Assert.notNull(clazz, "Class must not be null");
-        return (clazz.isPrimitive() || isPrimitiveWrapper(clazz));
+        return clazz.isPrimitive() || isPrimitiveWrapper(clazz);
     }
 
     /**
@@ -1050,7 +1051,7 @@ public abstract class ClassUtils {
      */
     public static boolean isPrimitiveWrapperArray(final Class<?> clazz) {
         Assert.notNull(clazz, "Class must not be null");
-        return (clazz.isArray() && isPrimitiveWrapper(clazz.getComponentType()));
+        return clazz.isArray() && isPrimitiveWrapper(clazz.getComponentType());
     }
 
     /**
@@ -1068,7 +1069,7 @@ public abstract class ClassUtils {
         }
         try {
             final Class<?> actualClass = classLoader.loadClass(clazz.getName());
-            return (clazz == actualClass);
+            return clazz == actualClass;
             // Else: different interface class found...
         }
         catch (final ClassNotFoundException ex) {
@@ -1085,9 +1086,11 @@ public abstract class ClassUtils {
      */
     public static boolean matchesTypeName(final Class<?> clazz,
             final String typeName) {
-        return ((typeName != null) && (typeName.equals(clazz.getName())
-                || typeName.equals(clazz.getSimpleName()) || (clazz.isArray() && typeName
-                .equals(getQualifiedNameForArray(clazz)))));
+        return typeName != null
+                && (typeName.equals(clazz.getName())
+                        || typeName.equals(clazz.getSimpleName()) || clazz
+                        .isArray()
+                        && typeName.equals(getQualifiedNameForArray(clazz)));
     }
 
     /**
@@ -1105,7 +1108,7 @@ public abstract class ClassUtils {
         final Thread currentThread = Thread.currentThread();
         final ClassLoader threadContextClassLoader = currentThread
                 .getContextClassLoader();
-        if ((classLoaderToUse != null)
+        if (classLoaderToUse != null
                 && !classLoaderToUse.equals(threadContextClassLoader)) {
             currentThread.setContextClassLoader(classLoaderToUse);
             return threadContextClassLoader;
@@ -1171,7 +1174,7 @@ public abstract class ClassUtils {
         Class<?> result = null;
         // Most class names will be quite long, considering that they
         // SHOULD sit in a package, so a length check is worthwhile.
-        if ((name != null) && (name.length() <= 8)) {
+        if (name != null && name.length() <= 8) {
             // Could be a primitive - likely.
             result = primitiveTypeNameMap.get(name);
         }
@@ -1188,7 +1191,7 @@ public abstract class ClassUtils {
      */
     public static Class<?> resolvePrimitiveIfNecessary(final Class<?> clazz) {
         Assert.notNull(clazz, "Class must not be null");
-        return (clazz.isPrimitive() && (clazz != void.class) ? primitiveTypeToWrapperMap
-                .get(clazz) : clazz);
+        return clazz.isPrimitive() && clazz != void.class ? primitiveTypeToWrapperMap
+                .get(clazz) : clazz;
     }
 }

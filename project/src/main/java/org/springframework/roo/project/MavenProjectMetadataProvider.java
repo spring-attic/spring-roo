@@ -58,7 +58,7 @@ public class MavenProjectMetadataProvider implements MetadataProvider,
         final Pom pom = pomManagementService
                 .getPomFromModuleName(ProjectMetadata.getModuleName(metadataId));
         // Read the file, if it is available
-        if ((pom == null) || !fileManager.exists(pom.getPath())) {
+        if (pom == null || !fileManager.exists(pom.getPath())) {
             return null;
         }
 
@@ -97,8 +97,7 @@ public class MavenProjectMetadataProvider implements MetadataProvider,
                 // Convert the detected dependency into a Product as best we can
                 String versionSequence = first.getVersion();
                 // Version sequence given; see if it looks like a property
-                if ((versionSequence != null)
-                        && versionSequence.startsWith("${")
+                if (versionSequence != null && versionSequence.startsWith("${")
                         && versionSequence.endsWith("}")) {
                     // Strip the ${ } from the version sequence
                     final String propertyName = versionSequence.replace("${",
@@ -113,7 +112,7 @@ public class MavenProjectMetadataProvider implements MetadataProvider,
                     }
                 }
                 // Handle there being no version sequence
-                if ((versionSequence == null) || "".equals(versionSequence)) {
+                if (versionSequence == null || "".equals(versionSequence)) {
                     versionSequence = "0.0.0.UNKNOWN";
                 }
                 final Product product = VersionHelper.getProduct(

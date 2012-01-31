@@ -111,7 +111,7 @@ public class PomManagementServiceImpl implements PomManagementService {
 
     public Pom getFocusedModule() {
         updatePomCache();
-        if ((focusedModulePath == null) && (getRootPom() != null)) {
+        if (focusedModulePath == null && getRootPom() != null) {
             focusedModulePath = getRootPom().getPath();
         }
         return getPomFromPath(focusedModulePath);

@@ -43,7 +43,7 @@ public class FinderMetadataDetails implements Comparable<FinderMetadataDetails> 
     public final boolean equals(final Object obj) {
         // NB: Not using the normal convention of delegating to compareTo (for
         // efficiency reasons)
-        return (obj instanceof FinderMetadataDetails)
+        return obj instanceof FinderMetadataDetails
                 && finderName.equals(((FinderMetadataDetails) obj).finderName);
     }
 
@@ -63,8 +63,8 @@ public class FinderMetadataDetails implements Comparable<FinderMetadataDetails> 
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = (prime * result)
-                + ((finderName == null) ? 0 : finderName.hashCode());
+        result = prime * result
+                + (finderName == null ? 0 : finderName.hashCode());
         return result;
     }
 }

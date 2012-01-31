@@ -85,7 +85,7 @@ public abstract class Assert {
             final String substring, final String message) {
         if (StringUtils.hasLength(textToSearch)
                 && StringUtils.hasLength(substring)
-                && (textToSearch.indexOf(substring) != -1)) {
+                && textToSearch.indexOf(substring) != -1) {
             throw new IllegalArgumentException(message);
         }
     }
@@ -197,7 +197,7 @@ public abstract class Assert {
     public static void isAssignable(final Class<?> superType,
             final Class<?> subType, final String message) {
         notNull(superType, "Type to check against must not be null");
-        if ((subType == null) || !superType.isAssignableFrom(subType)) {
+        if (subType == null || !superType.isAssignableFrom(subType)) {
             throw new IllegalArgumentException(message + subType
                     + " is not assignable to " + superType);
         }

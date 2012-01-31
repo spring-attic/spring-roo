@@ -43,7 +43,7 @@ public class Filter implements Comparable<Filter> {
 
     @Override
     public boolean equals(final Object obj) {
-        return (obj instanceof Filter) && (compareTo((Filter) obj) == 0);
+        return obj instanceof Filter && compareTo((Filter) obj) == 0;
     }
 
     /**
@@ -59,7 +59,7 @@ public class Filter implements Comparable<Filter> {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = (prime * result) + ((value == null) ? 0 : value.hashCode());
+        result = prime * result + (value == null ? 0 : value.hashCode());
         return result;
     }
 

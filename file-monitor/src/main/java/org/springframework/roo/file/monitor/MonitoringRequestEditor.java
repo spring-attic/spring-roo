@@ -103,8 +103,8 @@ public class MonitoringRequestEditor extends PropertyEditorSupport {
 
         final String[] segments = StringUtils
                 .commaDelimitedListToStringArray(text);
-        Assert.isTrue((segments.length == 2) || (segments.length == 3),
-                "Text '" + text + "' is invalid for a MonitoringRequest");
+        Assert.isTrue(segments.length == 2 || segments.length == 3, "Text '"
+                + text + "' is invalid for a MonitoringRequest");
         final File file = new File(segments[0]);
         Assert.isTrue(file.exists(), "File '" + file + "' does not exist");
 

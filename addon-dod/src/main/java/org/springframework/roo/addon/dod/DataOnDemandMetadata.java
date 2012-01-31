@@ -177,9 +177,9 @@ public class DataOnDemandMetadata extends
             return;
         }
 
-        if ((findEntriesMethodAdditions == null)
-                || (persistMethodAdditions == null)
-                || (findMethodAdditions == null)) {
+        if (findEntriesMethodAdditions == null
+                || persistMethodAdditions == null
+                || findMethodAdditions == null) {
             valid = false;
             return;
         }
@@ -330,7 +330,7 @@ public class DataOnDemandMetadata extends
 
     private String getColumnPrecisionAndScaleBody(final FieldMetadata field,
             final Map<String, Object> values, final String suffix) {
-        if ((values == null) || !values.containsKey("precision")) {
+        if (values == null || !values.containsKey("precision")) {
             return InvocableMemberBodyBuilder.getInstance().getOutput();
         }
 
@@ -341,7 +341,7 @@ public class DataOnDemandMetadata extends
         Integer scale = (Integer) values.get("scale");
         scale = scale == null ? 0 : scale;
         final BigDecimal maxValue = new BigDecimal(StringUtils.padRight("9",
-                (precision - scale), '9')
+                precision - scale, '9')
                 + "."
                 + StringUtils.padRight("9", scale, '9'));
 
@@ -447,7 +447,7 @@ public class DataOnDemandMetadata extends
 
         final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
-        if ((decimalMinAnnotation != null) && (decimalMaxAnnotation == null)) {
+        if (decimalMinAnnotation != null && decimalMaxAnnotation == null) {
             final String minValue = (String) decimalMinAnnotation.getAttribute(
                     VALUE).getValue();
 
@@ -471,8 +471,7 @@ public class DataOnDemandMetadata extends
             bodyBuilder.indentRemove();
             bodyBuilder.appendFormalLine("}");
         }
-        else if ((decimalMinAnnotation == null)
-                && (decimalMaxAnnotation != null)) {
+        else if (decimalMinAnnotation == null && decimalMaxAnnotation != null) {
             final String maxValue = (String) decimalMaxAnnotation.getAttribute(
                     VALUE).getValue();
 
@@ -496,8 +495,7 @@ public class DataOnDemandMetadata extends
             bodyBuilder.indentRemove();
             bodyBuilder.appendFormalLine("}");
         }
-        else if ((decimalMinAnnotation != null)
-                && (decimalMaxAnnotation != null)) {
+        else if (decimalMinAnnotation != null && decimalMaxAnnotation != null) {
             final String minValue = (String) decimalMinAnnotation.getAttribute(
                     VALUE).getValue();
             final String maxValue = (String) decimalMaxAnnotation.getAttribute(
@@ -751,7 +749,7 @@ public class DataOnDemandMetadata extends
             }
         }
         else if (fieldType.equals(STRING)) {
-            if ((fieldInitializer != null) && fieldInitializer.contains("\"")) {
+            if (fieldInitializer != null && fieldInitializer.contains("\"")) {
                 final int offset = fieldInitializer.indexOf("\"");
                 initializer = fieldInitializer.substring(offset + 1,
                         fieldInitializer.lastIndexOf("\""));
@@ -760,8 +758,8 @@ public class DataOnDemandMetadata extends
                 initializer = fieldName;
             }
 
-            if ((MemberFindingUtils.getAnnotationOfType(field.getAnnotations(),
-                    VALIDATOR_CONSTRAINTS_EMAIL) != null)
+            if (MemberFindingUtils.getAnnotationOfType(field.getAnnotations(),
+                    VALIDATOR_CONSTRAINTS_EMAIL) != null
                     || fieldName.toLowerCase().contains("email")) {
                 initializer = "\"foo\" + " + INDEX_VAR + " + \"@bar.com\"";
             }
@@ -787,7 +785,7 @@ public class DataOnDemandMetadata extends
                                 "@Size attribute 'max' must be greater than 'min' for field '"
                                         + fieldName + "' in "
                                         + entity.getFullyQualifiedTypeName());
-                        if ((initializer.length() + 2) < minLength) {
+                        if (initializer.length() + 2 < minLength) {
                             initializer = String
                                     .format("%1$-" + (minLength - 2) + "s",
                                             initializer).replace(' ', 'x');
@@ -820,7 +818,7 @@ public class DataOnDemandMetadata extends
                             + INDEX_VAR;
                     break;
                 default:
-                    if ((initializer.length() + 2) > maxLength) {
+                    if (initializer.length() + 2 > maxLength) {
                         initializer = "\""
                                 + initializer.substring(0, maxLength - 2)
                                 + "_\" + " + INDEX_VAR;
@@ -973,8 +971,8 @@ public class DataOnDemandMetadata extends
             initializer = fieldType.getSimpleTypeName()
                     + ".class.getEnumConstants()[0]";
         }
-        else if ((collaboratingMetadata != null)
-                && (collaboratingMetadata.getEntityType() != null)) {
+        else if (collaboratingMetadata != null
+                && collaboratingMetadata.getEntityType() != null) {
             requiredDataOnDemandCollaborators.add(fieldType);
 
             final String collaboratingFieldName = getCollaboratingFieldName(
@@ -1067,15 +1065,15 @@ public class DataOnDemandMetadata extends
             @SuppressWarnings("unchecked")
             final Map<String, Object> values = (Map<String, Object>) field
                     .getCustomData().get(CustomDataKeys.COLUMN_FIELD);
-            if (!isUnique && (values != null) && values.containsKey("unique")) {
+            if (!isUnique && values != null && values.containsKey("unique")) {
                 isUnique = (Boolean) values.get("unique");
             }
 
             // Check for @Size or @Column with length attribute
             final AnnotationMetadata sizeAnnotation = MemberFindingUtils
                     .getAnnotationOfType(field.getAnnotations(), SIZE);
-            if ((sizeAnnotation != null)
-                    && (sizeAnnotation.getAttribute(MAX_SYMBOL) != null)) {
+            if (sizeAnnotation != null
+                    && sizeAnnotation.getAttribute(MAX_SYMBOL) != null) {
                 final Integer maxValue = (Integer) sizeAnnotation.getAttribute(
                         MAX_SYMBOL).getValue();
                 bodyBuilder.appendFormalLine("if (" + fieldName
@@ -1093,7 +1091,7 @@ public class DataOnDemandMetadata extends
                 bodyBuilder.indentRemove();
                 bodyBuilder.appendFormalLine("}");
             }
-            else if ((sizeAnnotation == null) && (values != null)) {
+            else if (sizeAnnotation == null && values != null) {
                 if (values.containsKey("length")) {
                     final Integer lengthValue = (Integer) values.get("length");
                     bodyBuilder.appendFormalLine("if (" + fieldName
@@ -1127,8 +1125,8 @@ public class DataOnDemandMetadata extends
                 bodyBuilder.append(getDigitsBody(field, digitsAnnotation,
                         suffix));
             }
-            else if ((decimalMinAnnotation != null)
-                    || (decimalMaxAnnotation != null)) {
+            else if (decimalMinAnnotation != null
+                    || decimalMaxAnnotation != null) {
                 bodyBuilder.append(getDecimalMinAndDecimalMaxBody(field,
                         decimalMinAnnotation, decimalMaxAnnotation, suffix));
             }
@@ -1271,7 +1269,7 @@ public class DataOnDemandMetadata extends
                 .getAnnotationOfType(field.getAnnotations(), MIN);
         final AnnotationMetadata maxAnnotation = MemberFindingUtils
                 .getAnnotationOfType(field.getAnnotations(), MAX);
-        if ((minAnnotation != null) && (maxAnnotation == null)) {
+        if (minAnnotation != null && maxAnnotation == null) {
             final Number minValue = (Number) minAnnotation.getAttribute(VALUE)
                     .getValue();
 
@@ -1295,7 +1293,7 @@ public class DataOnDemandMetadata extends
             bodyBuilder.indentRemove();
             bodyBuilder.appendFormalLine("}");
         }
-        else if ((minAnnotation == null) && (maxAnnotation != null)) {
+        else if (minAnnotation == null && maxAnnotation != null) {
             final Number maxValue = (Number) maxAnnotation.getAttribute(VALUE)
                     .getValue();
 
@@ -1319,7 +1317,7 @@ public class DataOnDemandMetadata extends
             bodyBuilder.indentRemove();
             bodyBuilder.appendFormalLine("}");
         }
-        else if ((minAnnotation != null) && (maxAnnotation != null)) {
+        else if (minAnnotation != null && maxAnnotation != null) {
             final Number minValue = (Number) minAnnotation.getAttribute(VALUE)
                     .getValue();
             final Number maxValue = (Number) maxAnnotation.getAttribute(VALUE)

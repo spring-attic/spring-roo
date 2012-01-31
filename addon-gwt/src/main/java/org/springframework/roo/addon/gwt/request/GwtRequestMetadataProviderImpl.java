@@ -241,7 +241,7 @@ public class GwtRequestMetadataProviderImpl extends
 
     private JavaType getRequestMethodReturnType(final JavaType invokedType,
             final MethodMetadata method, final JavaType proxyType) {
-        if ((invokedType == null) && !method.isStatic()) {
+        if (invokedType == null && !method.isStatic()) {
             // Calling an active record method that's non-static (i.e. target is
             // an entity instance)
             final List<JavaType> methodReturnTypeArgs = Arrays.asList(

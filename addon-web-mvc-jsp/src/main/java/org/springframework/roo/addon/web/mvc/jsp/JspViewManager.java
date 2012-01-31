@@ -142,8 +142,8 @@ public class JspViewManager {
                     "field_invalid_number");
         }
         if ("field:input".equals(fieldElement.getTagName())
-                && (null != (annotationMetadata = MemberFindingUtils
-                        .getAnnotationOfType(field.getAnnotations(), MIN)))) {
+                && null != (annotationMetadata = MemberFindingUtils
+                        .getAnnotationOfType(field.getAnnotations(), MIN))) {
             final AnnotationAttributeValue<?> min = annotationMetadata
                     .getAttribute(VALUE);
             if (min != null) {
@@ -152,8 +152,8 @@ public class JspViewManager {
             }
         }
         if ("field:input".equals(fieldElement.getTagName())
-                && (null != (annotationMetadata = MemberFindingUtils
-                        .getAnnotationOfType(field.getAnnotations(), MAX)))
+                && null != (annotationMetadata = MemberFindingUtils
+                        .getAnnotationOfType(field.getAnnotations(), MAX))
                 && !"field:textarea".equals(fieldElement.getTagName())) {
             final AnnotationAttributeValue<?> maxA = annotationMetadata
                     .getAttribute(VALUE);
@@ -162,9 +162,9 @@ public class JspViewManager {
             }
         }
         if ("field:input".equals(fieldElement.getTagName())
-                && (null != (annotationMetadata = MemberFindingUtils
+                && null != (annotationMetadata = MemberFindingUtils
                         .getAnnotationOfType(field.getAnnotations(),
-                                DECIMAL_MIN)))
+                                DECIMAL_MIN))
                 && !"field:textarea".equals(fieldElement.getTagName())) {
             final AnnotationAttributeValue<?> decimalMin = annotationMetadata
                     .getAttribute(VALUE);
@@ -175,9 +175,9 @@ public class JspViewManager {
             }
         }
         if ("field:input".equals(fieldElement.getTagName())
-                && (null != (annotationMetadata = MemberFindingUtils
+                && null != (annotationMetadata = MemberFindingUtils
                         .getAnnotationOfType(field.getAnnotations(),
-                                DECIMAL_MAX)))) {
+                                DECIMAL_MAX))) {
             final AnnotationAttributeValue<?> decimalMax = annotationMetadata
                     .getAttribute(VALUE);
             if (decimalMax != null) {
@@ -195,8 +195,8 @@ public class JspViewManager {
             }
         }
         if ("field:input".equals(fieldElement.getTagName())
-                && (null != (annotationMetadata = MemberFindingUtils
-                        .getAnnotationOfType(field.getAnnotations(), SIZE)))) {
+                && null != (annotationMetadata = MemberFindingUtils
+                        .getAnnotationOfType(field.getAnnotations(), SIZE))) {
             final AnnotationAttributeValue<?> max = annotationMetadata
                     .getAttribute(new JavaSymbolName("max"));
             if (max != null) {
@@ -226,7 +226,7 @@ public class JspViewManager {
             final Map<String, Object> values = (Map<String, Object>) field
                     .getCustomData().get(CustomDataKeys.COLUMN_FIELD);
             if (values.keySet().contains("nullable")
-                    && (((Boolean) values.get("nullable")) == false)) {
+                    && (Boolean) values.get("nullable") == false) {
                 fieldElement.setAttribute("required", "true");
             }
         }
@@ -274,7 +274,7 @@ public class JspViewManager {
                 fieldElement = document.createElement("field:checkbox");
                 // Handle enum fields
             }
-            else if ((typeMetadataHolder != null)
+            else if (typeMetadataHolder != null
                     && typeMetadataHolder.isEnumType()) {
                 fieldElement = new XmlElementBuilder("field:select", document)
                         .addAttribute(
@@ -319,10 +319,9 @@ public class JspViewManager {
                 final JavaType referenceType = getJavaTypeForField(field);
                 final JavaTypeMetadataDetails referenceTypeMetadata = relatedDomainTypes
                         .get(referenceType);
-                if ((referenceType != null /** Fix for ROO-1888 --> **/
-                ) && (referenceTypeMetadata != null)
+                if (referenceType != null && referenceTypeMetadata != null
                         && referenceTypeMetadata.isApplicationType()
-                        && (typePersistenceMetadataHolder != null)) {
+                        && typePersistenceMetadataHolder != null) {
                     fieldElement = new XmlElementBuilder("field:select",
                             document)
                             .addAttribute(
@@ -378,7 +377,7 @@ public class JspViewManager {
                         .getAttribute(new JavaSymbolName("max"));
                 if (max != null) {
                     final int maxValue = (Integer) max.getValue();
-                    if ((fieldElement == null) && (maxValue > 30)) {
+                    if (fieldElement == null && maxValue > 30) {
                         fieldElement = new XmlElementBuilder("field:textarea",
                                 document).build();
                     }
@@ -591,7 +590,7 @@ public class JspViewManager {
                     }
                 }
             }
-            else if ((typeMetadataHolder != null)
+            else if (typeMetadataHolder != null
                     && typeMetadataHolder.isEnumType()
                     && field.getCustomData().keySet()
                             .contains(CustomDataKeys.ENUMERATED_FIELD)) {
@@ -609,7 +608,7 @@ public class JspViewManager {
                     || type.equals(BOOLEAN_PRIMITIVE)) {
                 fieldElement = document.createElement("field:checkbox");
             }
-            else if ((typeMetadataHolder != null)
+            else if (typeMetadataHolder != null
                     && typeMetadataHolder.isApplicationType()) {
                 final JavaTypePersistenceMetadataDetails typePersistenceMetadataHolder = typeMetadataHolder
                         .getPersistenceDetails();
@@ -765,8 +764,8 @@ public class JspViewManager {
                             + "_date_format}");
                 }
                 else if (field.getFieldType().isCommonCollectionType()
-                        && (field.getCustomData().get(
-                                CustomDataKeys.ONE_TO_MANY_FIELD) != null)) {
+                        && field.getCustomData().get(
+                                CustomDataKeys.ONE_TO_MANY_FIELD) != null) {
                     continue;
                 }
                 columnElement.setAttribute("z",
@@ -879,8 +878,8 @@ public class JspViewManager {
                         + "_" + fieldName.toLowerCase() + "_date_format}");
             }
             else if (field.getFieldType().isCommonCollectionType()
-                    && (field.getCustomData().get(
-                            CustomDataKeys.ONE_TO_MANY_FIELD) != null)) {
+                    && field.getCustomData().get(
+                            CustomDataKeys.ONE_TO_MANY_FIELD) != null) {
                 continue;
             }
             fieldDisplay.setAttribute("z",

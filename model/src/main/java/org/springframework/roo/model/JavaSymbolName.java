@@ -46,24 +46,23 @@ public class JavaSymbolName implements Comparable<JavaSymbolName> {
         final char[] value = name.toCharArray();
         for (int i = 0; i < value.length; i++) {
             final char c = value[i];
-            if (('/' == c) || (' ' == c) || ('*' == c) || ('>' == c)
-                    || ('<' == c) || ('!' == c) || ('@' == c) || ('%' == c)
-                    || ('^' == c) || ('?' == c) || ('(' == c) || (')' == c)
-                    || ('~' == c) || ('`' == c) || ('{' == c) || ('}' == c)
-                    || ('[' == c) || (']' == c) || ('|' == c) || ('\\' == c)
-                    || ('\'' == c) || ('+' == c) || ('-' == c)) {
+            if ('/' == c || ' ' == c || '*' == c || '>' == c || '<' == c
+                    || '!' == c || '@' == c || '%' == c || '^' == c || '?' == c
+                    || '(' == c || ')' == c || '~' == c || '`' == c || '{' == c
+                    || '}' == c || '[' == c || ']' == c || '|' == c
+                    || '\\' == c || '\'' == c || '+' == c || '-' == c) {
                 throw new IllegalArgumentException("Illegal name '" + name
                         + "' (illegal character)");
             }
             if (i == 0) {
-                if (('1' == c) || ('2' == c) || ('3' == c) || ('4' == c)
-                        || ('5' == c) || ('6' == c) || ('7' == c) || ('8' == c)
-                        || ('9' == c) || ('0' == c)) {
+                if ('1' == c || '2' == c || '3' == c || '4' == c || '5' == c
+                        || '6' == c || '7' == c || '8' == c || '9' == c
+                        || '0' == c) {
                     throw new IllegalArgumentException("Illegal name '" + name
                             + "' (cannot start with a number)");
                 }
             }
-            if (((i + 1) == value.length) || (i == 0)) {
+            if (i + 1 == value.length || i == 0) {
                 if ('.' == c) {
                     throw new IllegalArgumentException("Illegal name '" + name
                             + "' (cannot start or end with a period)");
@@ -164,7 +163,7 @@ public class JavaSymbolName implements Comparable<JavaSymbolName> {
     public boolean equals(final Object obj) {
         // NB: Not using the normal convention of delegating to compareTo (for
         // efficiency reasons)
-        return (obj instanceof JavaSymbolName)
+        return obj instanceof JavaSymbolName
                 && symbolName.equals(((JavaSymbolName) obj).symbolName);
     }
 

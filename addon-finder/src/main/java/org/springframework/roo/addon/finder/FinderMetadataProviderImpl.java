@@ -97,7 +97,7 @@ public class FinderMetadataProviderImpl extends
         // We need to lookup the metadata we depend on
         final JpaActiveRecordMetadata jpaActiveRecordMetadata = (JpaActiveRecordMetadata) metadataService
                 .get(jpaActiveRecordMetadataKey);
-        if ((jpaActiveRecordMetadata == null)
+        if (jpaActiveRecordMetadata == null
                 || !jpaActiveRecordMetadata.isValid()) {
             return new FinderMetadata(metadataIdentificationString, aspectName,
                     governorPhysicalTypeMetadata, null,

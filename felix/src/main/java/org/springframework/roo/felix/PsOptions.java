@@ -42,7 +42,7 @@ public class PsOptions implements Comparable<PsOptions> {
 
     @Override
     public final boolean equals(final Object obj) {
-        return (obj instanceof PsOptions) && (compareTo((PsOptions) obj) == 0);
+        return obj instanceof PsOptions && compareTo((PsOptions) obj) == 0;
     }
 
     public String getFelixCode() {

@@ -198,7 +198,7 @@ public class WebMetadataServiceImpl implements WebMetadataService {
             }
             final FieldMetadata field = BeanInfoUtils
                     .getFieldForJavaBeanMethod(memberDetails, method);
-            if ((field == null)
+            if (field == null
                     || !BeanInfoUtils.hasAccessorAndMutator(field,
                             memberDetails)) {
                 continue;
@@ -273,9 +273,9 @@ public class WebMetadataServiceImpl implements WebMetadataService {
                     && isApplicationType(type)) {
                 final FieldMetadata field = BeanInfoUtils
                         .getFieldForJavaBeanMethod(memberDetails, method);
-                if ((field != null)
-                        && (MemberFindingUtils.getAnnotationOfType(
-                                field.getAnnotations(), NOT_NULL) != null)) {
+                if (field != null
+                        && MemberFindingUtils.getAnnotationOfType(
+                                field.getAnnotations(), NOT_NULL) != null) {
                     final MemberDetails typeMemberDetails = getMemberDetails(type);
                     if (getJavaTypePersistenceMetadataDetails(type,
                             typeMemberDetails, metadataIdentificationString) != null) {
@@ -348,6 +348,11 @@ public class WebMetadataServiceImpl implements WebMetadataService {
             finderMetadataDetails.add(details);
         }
         return Collections.unmodifiableSortedSet(finderMetadataDetails);
+    }
+
+    public FieldMetadata getIdentifierField(final JavaType javaType) {
+        return CollectionUtils.firstElementOf(persistenceMemberLocator
+                .getIdentifierFields(javaType));
     }
 
     public JavaTypeMetadataDetails getJavaTypeMetadataDetails(
@@ -536,7 +541,7 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 
             final FieldMetadata field = BeanInfoUtils
                     .getFieldForJavaBeanMethod(memberDetails, method);
-            if ((field == null)
+            if (field == null
                     || !BeanInfoUtils.hasAccessorAndMutator(field,
                             memberDetails)) {
                 continue;
@@ -550,11 +555,6 @@ public class WebMetadataServiceImpl implements WebMetadataService {
         }
         return Collections.unmodifiableList(new ArrayList<FieldMetadata>(fields
                 .values()));
-    }
-
-    public FieldMetadata getIdentifierField(final JavaType javaType) {
-        return CollectionUtils.firstElementOf(persistenceMemberLocator
-                .getIdentifierFields(javaType));
     }
 
     public boolean isApplicationType(final JavaType javaType) {
@@ -585,7 +585,7 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 
     private void registerDependency(final String upstreamDependency,
             final String downStreamDependency) {
-        if ((metadataDependencyRegistry != null)
+        if (metadataDependencyRegistry != null
                 && StringUtils.hasText(upstreamDependency)
                 && StringUtils.hasText(downStreamDependency)
                 && !upstreamDependency.equals(downStreamDependency)

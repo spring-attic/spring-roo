@@ -70,6 +70,44 @@ public class JavaTypeConverter implements Converter<JavaType> {
     @Reference ProjectOperations projectOperations;
     @Reference TypeLocationService typeLocationService;
 
+    private void addCompletionsForOtherModuleNames(
+            final List<Completion> completions, final Pom targetModule) {
+        for (final String moduleName : projectOperations.getModuleNames()) {
+            if (StringUtils.hasText(moduleName)
+                    && !moduleName.equals(targetModule.getModuleName())) {
+                completions.add(new Completion(moduleName
+                        + MODULE_PATH_SEPARATOR, decorate(moduleName
+                        + MODULE_PATH_SEPARATOR, FG_CYAN), "Modules", 0));
+            }
+        }
+    }
+
+    private void addCompletionsForTypesInTargetModule(
+            final List<Completion> completions, final Pom targetModule,
+            final String heading, final String prefix,
+            final String formattedPrefix, final String topLevelPackage,
+            final String basePackage) {
+        final Collection<JavaType> typesInModule = typeLocationService
+                .getTypesForModule(targetModule);
+        if (typesInModule.isEmpty()) {
+            completions.add(new Completion(prefix + targetModule.getGroupId(),
+                    formattedPrefix + targetModule.getGroupId(), heading, 1));
+        }
+        else {
+            completions.add(new Completion(prefix + topLevelPackage,
+                    formattedPrefix + topLevelPackage, heading, 1));
+            for (final JavaType javaType : typesInModule) {
+                String type = javaType.getFullyQualifiedTypeName();
+                if (type.startsWith(basePackage)) {
+                    type = StringUtils.replaceFirst(type, topLevelPackage,
+                            TOP_LEVEL_PACKAGE_SYMBOL);
+                    completions.add(new Completion(prefix + type,
+                            formattedPrefix + type, heading, 1));
+                }
+            }
+        }
+    }
+
     /**
      * Adds common "java." types to the completions. For now we just provide
      * them statically.
@@ -154,7 +192,7 @@ public class JavaTypeConverter implements Converter<JavaType> {
         final String typeName;
         if (existingData.contains(MODULE_PATH_SEPARATOR)) {
             // Looking for a type in another module
-            String targetModuleName = existingData.substring(0,
+            final String targetModuleName = existingData.substring(0,
                     existingData.indexOf(MODULE_PATH_SEPARATOR));
             targetModule = projectOperations
                     .getPomFromModuleName(targetModuleName);
@@ -184,58 +222,6 @@ public class JavaTypeConverter implements Converter<JavaType> {
             addCompletionsForTypesInTargetModule(completions, targetModule,
                     heading, prefix, formattedPrefix, topLevelPackage,
                     basePackage);
-        }
-    }
-
-    private String resolveTopLevelPackageSymbol(final String existingData,
-            final String topLevelPackage) {
-        if (TOP_LEVEL_PACKAGE_SYMBOL.equals(existingData)) {
-            // existing data = "~" => "com.foo."
-            return topLevelPackage + ".";
-        }
-        if (existingData.startsWith(TOP_LEVEL_PACKAGE_SYMBOL)) {
-            // e.g. turn "~.blah" or "~blah" into "com.foo.blah"
-            return topLevelPackage + (existingData.charAt(1) == '.' ? "" : ".")
-                    + existingData.substring(1);
-        }
-        return existingData;
-    }
-
-    private void addCompletionsForOtherModuleNames(
-            final List<Completion> completions, final Pom targetModule) {
-        for (final String moduleName : projectOperations.getModuleNames()) {
-            if (StringUtils.hasText(moduleName)
-                    && !moduleName.equals(targetModule.getModuleName())) {
-                completions.add(new Completion(moduleName
-                        + MODULE_PATH_SEPARATOR, decorate(moduleName
-                        + MODULE_PATH_SEPARATOR, FG_CYAN), "Modules", 0));
-            }
-        }
-    }
-
-    private void addCompletionsForTypesInTargetModule(
-            final List<Completion> completions, final Pom targetModule,
-            final String heading, final String prefix,
-            final String formattedPrefix, final String topLevelPackage,
-            final String basePackage) {
-        final Collection<JavaType> typesInModule = typeLocationService
-                .getTypesForModule(targetModule);
-        if (typesInModule.isEmpty()) {
-            completions.add(new Completion(prefix + targetModule.getGroupId(),
-                    formattedPrefix + targetModule.getGroupId(), heading, 1));
-        }
-        else {
-            completions.add(new Completion(prefix + topLevelPackage,
-                    formattedPrefix + topLevelPackage, heading, 1));
-            for (JavaType javaType : typesInModule) {
-                String type = javaType.getFullyQualifiedTypeName();
-                if (type.startsWith(basePackage)) {
-                    type = StringUtils.replaceFirst(type, topLevelPackage,
-                            TOP_LEVEL_PACKAGE_SYMBOL);
-                    completions.add(new Completion(prefix + type,
-                            formattedPrefix + type, heading, 1));
-                }
-            }
         }
     }
 
@@ -312,7 +298,7 @@ public class JavaTypeConverter implements Converter<JavaType> {
         // Automatically capitalise the first letter of the last name segment
         // (i.e. capitalise the type name, but not the package)
         final int index = newValue.lastIndexOf(".");
-        if ((index > -1) && !newValue.endsWith(".")) {
+        if (index > -1 && !newValue.endsWith(".")) {
             String typeName = newValue.substring(index + 1);
             typeName = StringUtils.capitalize(typeName);
             newValue = newValue.substring(0, index).toLowerCase() + "."
@@ -421,6 +407,20 @@ public class JavaTypeConverter implements Converter<JavaType> {
         lastUsed.setTopLevelPackage(new JavaPackage(topLevelPath));
 
         return newValue;
+    }
+
+    private String resolveTopLevelPackageSymbol(final String existingData,
+            final String topLevelPackage) {
+        if (TOP_LEVEL_PACKAGE_SYMBOL.equals(existingData)) {
+            // existing data = "~" => "com.foo."
+            return topLevelPackage + ".";
+        }
+        if (existingData.startsWith(TOP_LEVEL_PACKAGE_SYMBOL)) {
+            // e.g. turn "~.blah" or "~blah" into "com.foo.blah"
+            return topLevelPackage + (existingData.charAt(1) == '.' ? "" : ".")
+                    + existingData.substring(1);
+        }
+        return existingData;
     }
 
     public boolean supports(final Class<?> requiredType,

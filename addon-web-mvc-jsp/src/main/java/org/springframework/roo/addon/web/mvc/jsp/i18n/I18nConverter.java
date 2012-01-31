@@ -42,8 +42,7 @@ public class I18nConverter implements Converter<I18n> {
             final Locale locale = i18n.getLocale();
             final StringBuilder localeString = new StringBuilder(
                     locale.getLanguage());
-            if ((locale.getCountry() == null)
-                    || (locale.getCountry().length() > 0)) {
+            if (locale.getCountry() == null || locale.getCountry().length() > 0) {
                 localeString.append("_").append(
                         locale.getCountry().toUpperCase());
             }

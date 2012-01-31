@@ -127,7 +127,8 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
      *         returns null)
      */
     private MethodMetadataBuilder getDynamicFinderMethod(
-            final JavaSymbolName finderName, MethodMetadata entityManagerMethod) {
+            final JavaSymbolName finderName,
+            final MethodMetadata entityManagerMethod) {
         Assert.notNull(finderName, "Dynamic finder method name is required");
         Assert.isTrue(queryHolders.containsKey(finderName),
                 "Undefined method name '" + finderName.getSymbolName() + "'");
@@ -180,7 +181,7 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
                         + " argument is required\");");
             }
 
-            if ((length.length() > 0)
+            if (length.length() > 0
                     && methodName.substring(
                             methodName.indexOf(parameterNames.get(i)
                                     .getSymbolNameCapitalisedFirstLetter())

@@ -63,7 +63,7 @@ public class LastUsedImpl implements LastUsed {
         }
 
         String moduleName = "";
-        if ((module != null) && StringUtils.hasText(module.getModuleName())) {
+        if (module != null && StringUtils.hasText(module.getModuleName())) {
             moduleName = AnsiEscapeCode.decorate(module.getModuleName()
                     + MODULE_PATH_SEPARATOR, AnsiEscapeCode.FG_CYAN);
         }

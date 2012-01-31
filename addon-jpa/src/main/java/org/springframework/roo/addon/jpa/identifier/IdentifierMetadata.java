@@ -182,14 +182,14 @@ public class IdentifierMetadata extends
         columnBuilder.addBooleanAttribute("nullable", false);
 
         // Add length attribute for Strings
-        if ((identifier.getColumnSize() < 4000)
+        if (identifier.getColumnSize() < 4000
                 && identifier.getFieldType().equals(JavaType.STRING)) {
             columnBuilder.addIntegerAttribute("length",
                     identifier.getColumnSize());
         }
 
         // Add precision and scale attributes for numeric fields
-        if ((identifier.getScale() > 0)
+        if (identifier.getScale() > 0
                 && (identifier.getFieldType().equals(JavaType.DOUBLE_OBJECT)
                         || identifier.getFieldType().equals(
                                 JavaType.DOUBLE_PRIMITIVE) || identifier

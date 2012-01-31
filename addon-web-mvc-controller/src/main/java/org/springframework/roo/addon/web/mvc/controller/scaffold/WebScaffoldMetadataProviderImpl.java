@@ -112,7 +112,7 @@ public class WebScaffoldMetadataProviderImpl extends
                 governorPhysicalType);
         final JavaType formBackingType = annotationValues
                 .getFormBackingObject();
-        if (!annotationValues.isAnnotationFound() || (formBackingType == null)) {
+        if (!annotationValues.isAnnotationFound() || formBackingType == null) {
             return null;
         }
 

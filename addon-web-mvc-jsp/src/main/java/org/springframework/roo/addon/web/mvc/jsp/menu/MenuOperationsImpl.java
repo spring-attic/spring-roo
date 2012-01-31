@@ -165,12 +165,6 @@ public class MenuOperationsImpl implements MenuOperations {
                 getMenuFileName(logicalPath), document);
     }
 
-    private boolean isNotUserManaged(final Element element) {
-        return "?".equals(element.getAttribute("z"))
-                || XmlRoundTripUtils.calculateUniqueKeyFor(element).equals(
-                        element.getAttribute("z"));
-    }
-
     /**
      * Attempts to locate a menu item and remove it.
      * 
@@ -291,5 +285,11 @@ public class MenuOperationsImpl implements MenuOperations {
     private String getMenuFileName(final LogicalPath logicalPath) {
         return projectOperations.getPathResolver().getIdentifier(logicalPath,
                 "WEB-INF/views/menu.jspx");
+    }
+
+    private boolean isNotUserManaged(final Element element) {
+        return "?".equals(element.getAttribute("z"))
+                || XmlRoundTripUtils.calculateUniqueKeyFor(element).equals(
+                        element.getAttribute("z"));
     }
 }

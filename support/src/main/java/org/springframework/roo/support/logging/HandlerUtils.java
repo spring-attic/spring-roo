@@ -32,7 +32,7 @@ public abstract class HandlerUtils {
 
         int flushed = 0;
         final Handler[] handlers = logger.getHandlers();
-        if ((handlers != null) && (handlers.length > 0)) {
+        if (handlers != null && handlers.length > 0) {
             for (final Handler h : handlers) {
                 flushed++;
                 h.flush();
@@ -55,7 +55,7 @@ public abstract class HandlerUtils {
     public static Logger getLogger(final Class<?> clazz) {
         Assert.notNull(clazz, "Class required");
         final Logger logger = Logger.getLogger(clazz.getName());
-        if ((logger.getLevel() == null)
+        if (logger.getLevel() == null
                 && clazz.getName().startsWith("org.springframework.roo")) {
             logger.setLevel(Level.FINE);
         }
@@ -90,7 +90,7 @@ public abstract class HandlerUtils {
 
         int replaced = 0;
         final Handler[] handlers = logger.getHandlers();
-        if ((handlers != null) && (handlers.length > 0)) {
+        if (handlers != null && handlers.length > 0) {
             for (final Handler h : handlers) {
                 if (h instanceof DeferredLogHandler) {
                     replaced++;
@@ -130,7 +130,7 @@ public abstract class HandlerUtils {
 
         // Create DeferredLogHandlers for each Handler in presented Logger
         final Handler[] handlers = logger.getHandlers();
-        if ((handlers != null) && (handlers.length > 0)) {
+        if (handlers != null && handlers.length > 0) {
             for (final Handler h : handlers) {
                 logger.removeHandler(h);
                 newHandlers.add(new DeferredLogHandler(h, fallbackSeverity));

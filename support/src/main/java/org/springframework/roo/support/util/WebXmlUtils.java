@@ -502,7 +502,7 @@ public final class WebXmlUtils {
                     webResourceCollectionBuilder.build());
         }
 
-        if ((roleNames != null) && (roleNames.size() > 0)) {
+        if (roleNames != null && roleNames.size() > 0) {
             final XmlElementBuilder authConstraintBuilder = new XmlElementBuilder(
                     "auth-constraint", document);
             for (final String roleName : roleNames) {
@@ -557,7 +557,7 @@ public final class WebXmlUtils {
                                     .setText(servletName).build()).build();
             insertBetween(servletElement, "listener[last()]",
                     "servlet-mapping", document);
-            if ((comment != null) && (comment.length() > 0)) {
+            if (comment != null && comment.length() > 0) {
                 addCommentBefore(servletElement, comment, document);
             }
         }
@@ -673,8 +673,8 @@ public final class WebXmlUtils {
             final String afterElementName, final Document document) {
         final Element afterElement = XmlUtils.findFirstElement(WEB_APP_XPATH
                 + afterElementName, document.getDocumentElement());
-        if ((afterElement != null) && (afterElement.getNextSibling() != null)
-                && (afterElement.getNextSibling() instanceof Element)) {
+        if (afterElement != null && afterElement.getNextSibling() != null
+                && afterElement.getNextSibling() instanceof Element) {
             document.getDocumentElement().insertBefore(element,
                     afterElement.getNextSibling());
             addLineBreakBefore(element, document);
@@ -715,8 +715,8 @@ public final class WebXmlUtils {
 
         final Element afterElement = XmlUtils.findFirstElement(WEB_APP_XPATH
                 + afterElementName, document.getDocumentElement());
-        if ((afterElement != null) && (afterElement.getNextSibling() != null)
-                && (afterElement.getNextSibling() instanceof Element)) {
+        if (afterElement != null && afterElement.getNextSibling() != null
+                && afterElement.getNextSibling() instanceof Element) {
             document.getDocumentElement().insertBefore(element,
                     afterElement.getNextSibling());
             addLineBreakBefore(element, document);

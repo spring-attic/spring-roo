@@ -80,8 +80,7 @@ public class LogicalPath {
 
     @Override
     public boolean equals(final Object obj) {
-        return (obj instanceof LogicalPath)
-                && (compareTo((LogicalPath) obj) == 0);
+        return obj instanceof LogicalPath && compareTo((LogicalPath) obj) == 0;
     }
 
     /**

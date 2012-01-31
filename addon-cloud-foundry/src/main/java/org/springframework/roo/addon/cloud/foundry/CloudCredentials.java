@@ -101,7 +101,7 @@ public class CloudCredentials {
         if (this == o) {
             return true;
         }
-        if ((o == null) || (getClass() != o.getClass())) {
+        if (o == null || getClass() != o.getClass()) {
             return false;
         }
 
@@ -151,7 +151,7 @@ public class CloudCredentials {
     @Override
     public int hashCode() {
         int result = email != null ? email.hashCode() : 0;
-        result = (31 * result) + (url != null ? url.hashCode() : 0);
+        result = 31 * result + (url != null ? url.hashCode() : 0);
         return result;
     }
 

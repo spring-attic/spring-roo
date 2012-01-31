@@ -184,7 +184,7 @@ public abstract class AbstractItdMetadataProvider extends
         // Obtain the physical type
         final PhysicalTypeMetadata governorPhysicalTypeMetadata = (PhysicalTypeMetadata) metadataService
                 .get(governorPhysicalTypeIdentifier);
-        if ((governorPhysicalTypeMetadata == null)
+        if (governorPhysicalTypeMetadata == null
                 || !governorPhysicalTypeMetadata.isValid()) {
             // We can't get even basic information about the physical type, so
             // abort (the ITD will be deleted by ItdFileDeletionService)
@@ -216,15 +216,14 @@ public abstract class AbstractItdMetadataProvider extends
 
         // Cancel production if the governor type details are required, but
         // aren't available
-        if (dependsOnGovernorTypeDetailAvailability && (cid == null)) {
+        if (dependsOnGovernorTypeDetailAvailability && cid == null) {
             produceMetadata = false;
         }
 
         // Cancel production if the governor is not a class, and the subclass
         // only wants to know about classes
-        if ((cid != null)
-                && dependsOnGovernorBeingAClass
-                && (cid.getPhysicalTypeCategory() != PhysicalTypeCategory.CLASS)) {
+        if (cid != null && dependsOnGovernorBeingAClass
+                && cid.getPhysicalTypeCategory() != PhysicalTypeCategory.CLASS) {
             produceMetadata = false;
         }
 
@@ -257,7 +256,7 @@ public abstract class AbstractItdMetadataProvider extends
             // convention by AbstractItdMetadataProvider subclasses (BPA 10 Dec
             // 2010)
 
-            if ((metadata == null) || !metadata.isValid()) {
+            if (metadata == null || !metadata.isValid()) {
                 // The metadata couldn't be created properly
                 deleteItd(metadataIdentificationString, itdFilename, "", false);
                 return null;
@@ -414,7 +413,7 @@ public abstract class AbstractItdMetadataProvider extends
     protected MemberDetails getMemberDetails(
             final PhysicalTypeMetadata physicalTypeMetadata) {
         // We need to abort if we couldn't find dependent metadata
-        if ((physicalTypeMetadata == null) || !physicalTypeMetadata.isValid()) {
+        if (physicalTypeMetadata == null || !physicalTypeMetadata.isValid()) {
             return null;
         }
 
@@ -467,7 +466,7 @@ public abstract class AbstractItdMetadataProvider extends
             final ClassOrInterfaceTypeDetails child) {
         T parentMetadata = null;
         ClassOrInterfaceTypeDetails superCid = child.getSuperclass();
-        while ((parentMetadata == null) && (superCid != null)) {
+        while (parentMetadata == null && superCid != null) {
             final String superCidPhysicalTypeIdentifier = superCid
                     .getDeclaredByMetadataId();
             final LogicalPath path = PhysicalTypeIdentifier

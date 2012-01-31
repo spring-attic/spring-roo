@@ -91,7 +91,7 @@ public class ItdSourceFileComposer {
      * Prints the message, WITHOUT ANY INDENTATION.
      */
     private ItdSourceFileComposer append(final String message) {
-        if ((message != null) && !"".equals(message)) {
+        if (message != null && !"".equals(message)) {
             pw.append(message);
             content = true;
         }
@@ -101,7 +101,7 @@ public class ItdSourceFileComposer {
     private void appendConstructors() {
         final List<? extends ConstructorMetadata> constructors = itdTypeDetails
                 .getDeclaredConstructors();
-        if ((constructors == null) || constructors.isEmpty()) {
+        if (constructors == null || constructors.isEmpty()) {
             return;
         }
 
@@ -149,7 +149,7 @@ public class ItdSourceFileComposer {
                         false, resolver));
                 append(" ");
                 append(paramName.getSymbolName());
-                if (i < (parameterTypes.size() - 1)) {
+                if (i < parameterTypes.size() - 1) {
                     append(", ");
                 }
             }
@@ -167,7 +167,7 @@ public class ItdSourceFileComposer {
 
     private void appendExtendsTypes() {
         final List<JavaType> extendsTypes = itdTypeDetails.getExtendsTypes();
-        if ((extendsTypes == null) || extendsTypes.isEmpty()) {
+        if (extendsTypes == null || extendsTypes.isEmpty()) {
             return;
         }
 
@@ -195,7 +195,7 @@ public class ItdSourceFileComposer {
     private void appendFieldAnnotations() {
         final List<DeclaredFieldAnnotationDetails> fieldAnnotations = itdTypeDetails
                 .getFieldAnnotations();
-        if ((fieldAnnotations == null) || fieldAnnotations.isEmpty()) {
+        if (fieldAnnotations == null || fieldAnnotations.isEmpty()) {
             return;
         }
 
@@ -221,7 +221,7 @@ public class ItdSourceFileComposer {
     private void appendFields() {
         final List<? extends FieldMetadata> fields = itdTypeDetails
                 .getDeclaredFields();
-        if ((fields == null) || fields.isEmpty()) {
+        if (fields == null || fields.isEmpty()) {
             return;
         }
 
@@ -266,7 +266,7 @@ public class ItdSourceFileComposer {
      */
     private ItdSourceFileComposer appendFormalLine(final String message) {
         appendIndent();
-        if ((message != null) && !"".equals(message)) {
+        if (message != null && !"".equals(message)) {
             pw.append(message);
             content = true;
         }
@@ -276,7 +276,7 @@ public class ItdSourceFileComposer {
     private void appendImplementsTypes() {
         final List<JavaType> implementsTypes = itdTypeDetails
                 .getImplementsTypes();
-        if ((implementsTypes == null) || implementsTypes.isEmpty()) {
+        if (implementsTypes == null || implementsTypes.isEmpty()) {
             return;
         }
 
@@ -358,7 +358,7 @@ public class ItdSourceFileComposer {
                         append(implementsType.getNameIncludingTypeParameters(
                                 false, resolver));
                     }
-                    if (i != (implementsTypes.size() - 1)) {
+                    if (i != implementsTypes.size() - 1) {
                         append(", ");
                     }
                     else {
@@ -419,7 +419,7 @@ public class ItdSourceFileComposer {
     private void appendMethodAnnotations() {
         final List<DeclaredMethodAnnotationDetails> methodAnnotations = itdTypeDetails
                 .getMethodAnnotations();
-        if ((methodAnnotations == null) || methodAnnotations.isEmpty()) {
+        if (methodAnnotations == null || methodAnnotations.isEmpty()) {
             return;
         }
 
@@ -444,8 +444,8 @@ public class ItdSourceFileComposer {
                 append(methodDetails.getMethodMetadata().getParameterTypes()
                         .get(i).getJavaType()
                         .getNameIncludingTypeParameters(false, resolver));
-                if (i != (methodDetails.getMethodMetadata().getParameterTypes()
-                        .size() - 1)) {
+                if (i != methodDetails.getMethodMetadata().getParameterTypes()
+                        .size() - 1) {
                     append(",");
                 }
             }
@@ -460,7 +460,7 @@ public class ItdSourceFileComposer {
     private void appendMethods(final boolean interfaceMethod) {
         final List<? extends MethodMetadata> methods = itdTypeDetails
                 .getDeclaredMethods();
-        if ((methods == null) || methods.isEmpty()) {
+        if (methods == null || methods.isEmpty()) {
             return;
         }
 
@@ -484,7 +484,7 @@ public class ItdSourceFileComposer {
     private void appendTypeAnnotations() {
         final List<? extends AnnotationMetadata> typeAnnotations = itdTypeDetails
                 .getAnnotations();
-        if ((typeAnnotations == null) || typeAnnotations.isEmpty()) {
+        if (typeAnnotations == null || typeAnnotations.isEmpty()) {
             return;
         }
 
@@ -522,7 +522,7 @@ public class ItdSourceFileComposer {
     private String getNewLine() {
         // We use \n for consistency with JavaParser's DumpVisitor, which always
         // uses \n
-        return ("\n");
+        return "\n";
     }
 
     public String getOutput() {
@@ -627,10 +627,10 @@ public class ItdSourceFileComposer {
     private void writeMethods(final List<? extends MethodMetadata> methods,
             final boolean defineTarget, final boolean isInterfaceMethod) {
         for (final MethodMetadata method : methods) {
-            Assert.isTrue(
-                    method.getParameterTypes().size() == method
-                            .getParameterNames().size(),
-                    ("Method " + method.getMethodName().getSymbolName() + " has mismatched parameter names against parameter types"));
+            Assert.isTrue(method.getParameterTypes().size() == method
+                    .getParameterNames().size(), "Method "
+                    + method.getMethodName().getSymbolName()
+                    + " has mismatched parameter names against parameter types");
 
             // Append annotations
             for (final AnnotationMetadata annotation : method.getAnnotations()) {
@@ -676,7 +676,7 @@ public class ItdSourceFileComposer {
                         false, resolver));
                 append(" ");
                 append(paramName.getSymbolName());
-                if (i < (parameterTypes.size() - 1)) {
+                if (i < parameterTypes.size() - 1) {
                     append(", ");
                 }
             }
@@ -688,7 +688,7 @@ public class ItdSourceFileComposer {
                 for (int i = 0; i < throwsTypes.size(); i++) {
                     append(throwsTypes.get(i).getNameIncludingTypeParameters(
                             false, resolver));
-                    if (throwsTypes.size() > (i + 1)) {
+                    if (throwsTypes.size() > i + 1) {
                         append(", ");
                     }
                 }

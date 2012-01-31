@@ -216,10 +216,9 @@ public class JsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
         final String serializer = JSON_SERIALIZER
                 .getNameIncludingTypeParameters(false,
                         builder.getImportRegistrationResolver());
-        final String root = (annotationValues.getRootName() != null)
-                && (annotationValues.getRootName().length() > 0) ? ".rootName(\""
-                + annotationValues.getRootName() + "\")"
-                : "";
+        final String root = annotationValues.getRootName() != null
+                && annotationValues.getRootName().length() > 0 ? ".rootName(\""
+                + annotationValues.getRootName() + "\")" : "";
         bodyBuilder
                 .appendFormalLine("return new "
                         + serializer
@@ -262,10 +261,9 @@ public class JsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
         final String serializer = JSON_SERIALIZER
                 .getNameIncludingTypeParameters(false,
                         builder.getImportRegistrationResolver());
-        final String root = (annotationValues.getRootName() != null)
-                && (annotationValues.getRootName().length() > 0) ? ".rootName(\""
-                + annotationValues.getRootName() + "\")"
-                : "";
+        final String root = annotationValues.getRootName() != null
+                && annotationValues.getRootName().length() > 0 ? ".rootName(\""
+                + annotationValues.getRootName() + "\")" : "";
         bodyBuilder.appendFormalLine("return new "
                 + serializer
                 + "()"

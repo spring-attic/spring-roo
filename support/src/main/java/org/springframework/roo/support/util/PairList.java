@@ -33,7 +33,7 @@ public class PairList<K, V> extends ArrayList<Pair<K, V>> {
      *            must be non-null and of the same size as the keys)
      */
     public PairList(final List<? extends K> keys, final List<? extends V> values) {
-        Assert.isTrue(!((keys == null) ^ (values == null)),
+        Assert.isTrue(!(keys == null ^ values == null),
                 "Parameter types and names must either both be null or both be not null");
         if (keys == null) {
             Assert.isTrue(values == null,

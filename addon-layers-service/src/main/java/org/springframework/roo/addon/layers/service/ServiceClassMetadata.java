@@ -102,7 +102,7 @@ public class ServiceClassMetadata extends
                 final JavaSymbolName methodName = method.getSymbolName(
                         annotationValues, domainType,
                         domainTypePlurals.get(domainType));
-                if ((methodName != null)
+                if (methodName != null
                         && !governorDetails.isMethodDeclaredByAnother(
                                 methodName,
                                 method.getParameterTypes(domainType, idType),

@@ -117,7 +117,7 @@ public class AutomaticProjectUpgradeService implements
 
     public void notify(final String upstreamDependency,
             final String downstreamDependency) {
-        if ((bundleVersionInfo != null)
+        if (bundleVersionInfo != null
                 && ProjectMetadata.isValid(upstreamDependency)) {
             final String moduleName = ProjectMetadata
                     .getModuleName(upstreamDependency);

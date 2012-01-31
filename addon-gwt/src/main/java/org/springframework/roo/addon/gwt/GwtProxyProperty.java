@@ -134,7 +134,7 @@ public class GwtProxyProperty {
 
     private String getDateTimeFormat() {
         String format = "DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_SHORT)";
-        if ((annotations == null) || annotations.isEmpty()) {
+        if (annotations == null || annotations.isEmpty()) {
             return format;
         }
 
@@ -216,7 +216,7 @@ public class GwtProxyProperty {
                 || type.equals(JavaType.DOUBLE_OBJECT)
                 || type.equals(BIG_INTEGER) || type.equals(BIG_DECIMAL)) {
             String formatter = "String.valueOf";
-            if ((annotations == null) || annotations.isEmpty()) {
+            if (annotations == null || annotations.isEmpty()) {
                 return formatter;
             }
 
@@ -341,7 +341,7 @@ public class GwtProxyProperty {
     }
 
     public boolean isCollectionOfProxy() {
-        return (type.getParameters().size() != 0)
+        return type.getParameters().size() != 0
                 && isCollection()
                 && new GwtProxyProperty(topLevelPackage, ptmd, type
                         .getParameters().get(0)).isProxy();
@@ -365,8 +365,8 @@ public class GwtProxyProperty {
     }
 
     boolean isEnum() {
-        return (ptmd != null)
-                && (ptmd.getPhysicalTypeCategory() == PhysicalTypeCategory.ENUMERATION);
+        return ptmd != null
+                && ptmd.getPhysicalTypeCategory() == PhysicalTypeCategory.ENUMERATION;
     }
 
     public boolean isPrimitive() {
@@ -381,7 +381,7 @@ public class GwtProxyProperty {
     }
 
     public boolean isProxy() {
-        return (ptmd != null) && !isDate() && !isString() && !isPrimitive()
+        return ptmd != null && !isDate() && !isString() && !isPrimitive()
                 && !isEnum() && !isCollection() && !isEmbeddable()
                 && !type.equals(OBJECT);
     }

@@ -123,7 +123,7 @@ public class ServiceInterfaceMetadata extends
             final String plural) {
         final JavaSymbolName methodName = method.getSymbolName(
                 annotationValues, domainType, plural);
-        if ((methodName != null)
+        if (methodName != null
                 && governorDetails.isMethodDeclaredByAnother(methodName,
                         method.getParameterTypes(domainType, idType), getId())) {
             // We don't want this method, or the governor already declares it

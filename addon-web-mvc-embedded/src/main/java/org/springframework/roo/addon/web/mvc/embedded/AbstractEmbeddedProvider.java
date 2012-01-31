@@ -65,7 +65,7 @@ public abstract class AbstractEmbeddedProvider implements EmbeddedProvider {
      * @return the cleaned name
      */
     public String getViewName(String viewName, final String defaultName) {
-        if ((viewName == null) || (viewName.length() == 0)) {
+        if (viewName == null || viewName.length() == 0) {
             viewName = defaultName;
         }
         if (viewName.endsWith(".jspx")) {

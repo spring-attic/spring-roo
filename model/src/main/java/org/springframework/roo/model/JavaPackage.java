@@ -47,8 +47,7 @@ public class JavaPackage implements Comparable<JavaPackage> {
 
     @Override
     public boolean equals(final Object obj) {
-        return (obj instanceof JavaPackage)
-                && (compareTo((JavaPackage) obj) == 0);
+        return obj instanceof JavaPackage && compareTo((JavaPackage) obj) == 0;
     }
 
     /**
@@ -99,7 +98,7 @@ public class JavaPackage implements Comparable<JavaPackage> {
      * @return <code>false</code> if a <code>null</code> package is given
      */
     public boolean isWithin(final JavaPackage otherPackage) {
-        return (otherPackage != null)
+        return otherPackage != null
                 && fullyQualifiedPackageName.startsWith(otherPackage
                         .getFullyQualifiedPackageName());
     }

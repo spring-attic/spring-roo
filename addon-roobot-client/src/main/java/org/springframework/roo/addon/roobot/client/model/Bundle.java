@@ -155,8 +155,8 @@ public class Bundle {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = (prime * result)
-                + ((symbolicName == null) ? 0 : symbolicName.hashCode());
+        result = prime * result
+                + (symbolicName == null ? 0 : symbolicName.hashCode());
         return result;
     }
 

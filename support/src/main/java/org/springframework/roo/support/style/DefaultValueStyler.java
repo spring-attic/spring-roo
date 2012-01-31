@@ -59,7 +59,7 @@ public class DefaultValueStyler implements ValueStyler {
     }
 
     private String style(final Collection<?> value) {
-        final StringBuilder result = new StringBuilder((value.size() * 8) + 16);
+        final StringBuilder result = new StringBuilder(value.size() * 8 + 16);
         result.append(getCollectionTypeString(value)).append('[');
         for (final Iterator<?> i = value.iterator(); i.hasNext();) {
             result.append(style(i.next()));
@@ -79,7 +79,7 @@ public class DefaultValueStyler implements ValueStyler {
     }
 
     private String style(final Map<?, ?> value) {
-        final StringBuilder result = new StringBuilder((value.size() * 8) + 16);
+        final StringBuilder result = new StringBuilder(value.size() * 8 + 16);
         result.append(MAP + "[");
         for (final Iterator<?> it = value.entrySet().iterator(); it.hasNext();) {
             final Map.Entry<?, ?> entry = (Map.Entry<?, ?>) it.next();
@@ -128,11 +128,11 @@ public class DefaultValueStyler implements ValueStyler {
     }
 
     private String styleArray(final Object[] array) {
-        final StringBuilder result = new StringBuilder((array.length * 8) + 16);
+        final StringBuilder result = new StringBuilder(array.length * 8 + 16);
         result.append(ARRAY + "<")
                 .append(ClassUtils.getShortName(array.getClass()
                         .getComponentType())).append(">[");
-        for (int i = 0; i < (array.length - 1); i++) {
+        for (int i = 0; i < array.length - 1; i++) {
             result.append(style(array[i]));
             result.append(',').append(' ');
         }

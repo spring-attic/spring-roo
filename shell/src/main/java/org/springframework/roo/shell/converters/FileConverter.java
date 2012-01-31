@@ -22,73 +22,6 @@ public abstract class FileConverter implements Converter<File> {
     private static final String HOME_DIRECTORY_SYMBOL = "~";
     private static final String home = System.getProperty("user.home");
 
-    /**
-     * @return the "current working directory" this {@link FileConverter} should
-     *         use if the user fails to provide an explicit directory in their
-     *         input (required)
-     */
-    protected abstract File getWorkingDirectory();
-
-    public File convertFromText(final String value,
-            final Class<?> requiredType, final String optionContext) {
-        return new File(convertUserInputIntoAFullyQualifiedPath(value));
-    }
-
-    public boolean getAllPossibleValues(final List<Completion> completions,
-            final Class<?> requiredType, final String originalUserInput,
-            final String optionContext, final MethodTarget target) {
-        String adjustedUserInput = convertUserInputIntoAFullyQualifiedPath(originalUserInput);
-
-        String directoryData = adjustedUserInput.substring(0,
-                adjustedUserInput.lastIndexOf(File.separator) + 1);
-        adjustedUserInput = adjustedUserInput.substring(adjustedUserInput
-                .lastIndexOf(File.separator) + 1);
-
-        populate(completions, adjustedUserInput, originalUserInput,
-                directoryData);
-
-        return false;
-    }
-
-    protected void populate(final List<Completion> completions,
-            final String adjustedUserInput, final String originalUserInput,
-            final String directoryData) {
-        File directory = new File(directoryData);
-
-        if (!directory.isDirectory()) {
-            return;
-        }
-
-        for (File file : directory.listFiles()) {
-            if (adjustedUserInput == null
-                    || adjustedUserInput.length() == 0
-                    || file.getName().toLowerCase()
-                            .startsWith(adjustedUserInput.toLowerCase())) {
-
-                String completion = "";
-                if (directoryData.length() > 0)
-                    completion += directoryData;
-                completion += file.getName();
-
-                completion = convertCompletionBackIntoUserInputStyle(
-                        originalUserInput, completion);
-
-                if (file.isDirectory()) {
-                    completions
-                            .add(new Completion(completion + File.separator));
-                }
-                else {
-                    completions.add(new Completion(completion));
-                }
-            }
-        }
-    }
-
-    public boolean supports(final Class<?> requiredType,
-            final String optionContext) {
-        return File.class.isAssignableFrom(requiredType);
-    }
-
     private String convertCompletionBackIntoUserInputStyle(
             final String originalUserInput, final String completion) {
         if (FileUtils.denotesAbsolutePath(originalUserInput)) {
@@ -106,6 +39,11 @@ public abstract class FileConverter implements Converter<File> {
         // The path was working directory specific, so strip the working
         // directory given the user never typed it
         return completion.substring(getWorkingDirectoryAsString().length());
+    }
+
+    public File convertFromText(final String value,
+            final Class<?> requiredType, final String optionContext) {
+        return new File(convertUserInputIntoAFullyQualifiedPath(value));
     }
 
     /**
@@ -137,16 +75,79 @@ public abstract class FileConverter implements Converter<File> {
         }
         // The path is working directory specific, so prepend the working
         // directory
-        String fullPath = getWorkingDirectoryAsString() + userInput;
+        final String fullPath = getWorkingDirectoryAsString() + userInput;
         return fullPath;
     }
+
+    public boolean getAllPossibleValues(final List<Completion> completions,
+            final Class<?> requiredType, final String originalUserInput,
+            final String optionContext, final MethodTarget target) {
+        String adjustedUserInput = convertUserInputIntoAFullyQualifiedPath(originalUserInput);
+
+        final String directoryData = adjustedUserInput.substring(0,
+                adjustedUserInput.lastIndexOf(File.separator) + 1);
+        adjustedUserInput = adjustedUserInput.substring(adjustedUserInput
+                .lastIndexOf(File.separator) + 1);
+
+        populate(completions, adjustedUserInput, originalUserInput,
+                directoryData);
+
+        return false;
+    }
+
+    /**
+     * @return the "current working directory" this {@link FileConverter} should
+     *         use if the user fails to provide an explicit directory in their
+     *         input (required)
+     */
+    protected abstract File getWorkingDirectory();
 
     private String getWorkingDirectoryAsString() {
         try {
             return getWorkingDirectory().getCanonicalPath() + File.separator;
         }
-        catch (Exception e) {
+        catch (final Exception e) {
             throw new IllegalStateException(e);
         }
+    }
+
+    protected void populate(final List<Completion> completions,
+            final String adjustedUserInput, final String originalUserInput,
+            final String directoryData) {
+        final File directory = new File(directoryData);
+
+        if (!directory.isDirectory()) {
+            return;
+        }
+
+        for (final File file : directory.listFiles()) {
+            if (adjustedUserInput == null
+                    || adjustedUserInput.length() == 0
+                    || file.getName().toLowerCase()
+                            .startsWith(adjustedUserInput.toLowerCase())) {
+
+                String completion = "";
+                if (directoryData.length() > 0) {
+                    completion += directoryData;
+                }
+                completion += file.getName();
+
+                completion = convertCompletionBackIntoUserInputStyle(
+                        originalUserInput, completion);
+
+                if (file.isDirectory()) {
+                    completions
+                            .add(new Completion(completion + File.separator));
+                }
+                else {
+                    completions.add(new Completion(completion));
+                }
+            }
+        }
+    }
+
+    public boolean supports(final Class<?> requiredType,
+            final String optionContext) {
+        return File.class.isAssignableFrom(requiredType);
     }
 }

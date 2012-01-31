@@ -78,12 +78,11 @@ public final class XmlUtils {
         // profiling than this approach
         final char[] value = element.toCharArray();
         for (final char c : value) {
-            if ((' ' == c) || ('*' == c) || ('>' == c) || ('<' == c)
-                    || ('!' == c) || ('@' == c) || ('%' == c) || ('^' == c)
-                    || ('?' == c) || ('(' == c) || (')' == c) || ('~' == c)
-                    || ('`' == c) || ('{' == c) || ('}' == c) || ('[' == c)
-                    || (']' == c) || ('|' == c) || ('\\' == c) || ('\'' == c)
-                    || ('+' == c)) {
+            if (' ' == c || '*' == c || '>' == c || '<' == c || '!' == c
+                    || '@' == c || '%' == c || '^' == c || '?' == c || '(' == c
+                    || ')' == c || '~' == c || '`' == c || '{' == c || '}' == c
+                    || '[' == c || ']' == c || '|' == c || '\\' == c
+                    || '\'' == c || '+' == c) {
                 throw new IllegalArgumentException("Illegal name '" + element
                         + "' (illegal character)");
             }
@@ -107,7 +106,7 @@ public final class XmlUtils {
         node2 = node2.cloneNode(true);
         // The documents need to be normalized before comparison takes place to
         // remove any formatting that interfere with comparison
-        if ((node1 instanceof Document) && (node2 instanceof Document)) {
+        if (node1 instanceof Document && node2 instanceof Document) {
             ((Document) node1).normalizeDocument();
             ((Document) node2).normalizeDocument();
         }
@@ -182,9 +181,9 @@ public final class XmlUtils {
                 @Override
                 public void write(final char[] cbuf, final int off,
                         final int len) throws IOException {
-                    for (int i = off; i < (off + len); i++) {
-                        if ((cbuf[i] != '\r')
-                                || ((i < (cbuf.length - 1)) && (cbuf[i + 1] != '\n'))) {
+                    for (int i = off; i < off + len; i++) {
+                        if (cbuf[i] != '\r' || i < cbuf.length - 1
+                                && cbuf[i + 1] != '\n') {
                             super.write(cbuf[i]);
                         }
                     }

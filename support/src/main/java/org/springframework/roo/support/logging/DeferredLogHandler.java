@@ -112,8 +112,7 @@ public class DeferredLogHandler extends Handler {
             logRecords.add(record);
         }
         if (!fallbackMode
-                && (record.getLevel().intValue() >= fallbackPushLevel
-                        .intValue())) {
+                && record.getLevel().intValue() >= fallbackPushLevel.intValue()) {
             fallbackMode = true;
             publishLogRecordsTo(fallbackHandler);
         }

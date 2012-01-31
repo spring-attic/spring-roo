@@ -231,7 +231,7 @@ public class SolrMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
         for (final Entry<MethodMetadata, FieldMetadata> entry : accessorDetails
                 .entrySet()) {
             final FieldMetadata field = entry.getValue();
-            if ((versionField != null)
+            if (versionField != null
                     && field.getFieldName().equals(versionField.getFieldName())) {
                 continue;
             }

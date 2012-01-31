@@ -51,7 +51,7 @@ public class Dependency implements Comparable<Dependency> {
     public static boolean isHigherLevel(final String type1, final String type2) {
         final int type1Index = TYPE_HIERARCHY.indexOf(type1.toLowerCase());
         final int type2Index = TYPE_HIERARCHY.indexOf(type2.toLowerCase());
-        return (type2Index >= 0) && (type1Index > type2Index);
+        return type2Index >= 0 && type1Index > type2Index;
     }
 
     private final String artifactId;
@@ -74,7 +74,7 @@ public class Dependency implements Comparable<Dependency> {
     public Dependency(final Element dependency) {
         // Test if it has Maven format
         if (dependency.hasChildNodes()
-                && (dependency.getElementsByTagName("artifactId").getLength() > 0)) {
+                && dependency.getElementsByTagName("artifactId").getLength() > 0) {
             groupId = dependency.getElementsByTagName("groupId").item(0)
                     .getTextContent().trim();
             artifactId = dependency.getElementsByTagName("artifactId").item(0)
@@ -277,7 +277,7 @@ public class Dependency implements Comparable<Dependency> {
             result = StringUtils.trimToEmpty(classifier).compareTo(
                     StringUtils.trimToEmpty(other.getClassifier()));
         }
-        if ((result == 0) && (type != null)) {
+        if (result == 0 && type != null) {
             result = type.compareTo(other.getType());
         }
         return result;
@@ -293,8 +293,7 @@ public class Dependency implements Comparable<Dependency> {
 
     @Override
     public boolean equals(final Object obj) {
-        return (obj instanceof Dependency)
-                && (compareTo((Dependency) obj) == 0);
+        return obj instanceof Dependency && compareTo((Dependency) obj) == 0;
     }
 
     public String getArtifactId() {
@@ -321,7 +320,7 @@ public class Dependency implements Comparable<Dependency> {
         dependencyElement.appendChild(XmlUtils.createTextElement(document,
                 "version", version));
 
-        if ((type != null) && (type != DependencyType.JAR)) {
+        if (type != null && type != DependencyType.JAR) {
             // Keep the XML short, we don't need "JAR" given it's the default
             final Element typeElement = XmlUtils.createTextElement(document,
                     "type", type.toString().toLowerCase());
@@ -329,10 +328,10 @@ public class Dependency implements Comparable<Dependency> {
         }
 
         // Keep the XML short, we don't need "compile" given it's the default
-        if ((scope != null) && (scope != DependencyScope.COMPILE)) {
+        if (scope != null && scope != DependencyScope.COMPILE) {
             dependencyElement.appendChild(XmlUtils.createTextElement(document,
                     "scope", scope.toString().toLowerCase()));
-            if ((scope == DependencyScope.SYSTEM)
+            if (scope == DependencyScope.SYSTEM
                     && StringUtils.hasText(systemPath)) {
                 dependencyElement.appendChild(XmlUtils.createTextElement(
                         document, "systemPath", systemPath));
@@ -405,13 +404,12 @@ public class Dependency implements Comparable<Dependency> {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = (prime * result)
-                + ((artifactId == null) ? 0 : artifactId.hashCode());
-        result = (prime * result)
-                + ((groupId == null) ? 0 : groupId.hashCode());
-        result = (prime * result)
-                + ((classifier == null) ? 0 : classifier.hashCode());
-        result = (prime * result) + ((type == null) ? 0 : type.hashCode());
+        result = prime * result
+                + (artifactId == null ? 0 : artifactId.hashCode());
+        result = prime * result + (groupId == null ? 0 : groupId.hashCode());
+        result = prime * result
+                + (classifier == null ? 0 : classifier.hashCode());
+        result = prime * result + (type == null ? 0 : type.hashCode());
         return result;
     }
 
@@ -425,7 +423,7 @@ public class Dependency implements Comparable<Dependency> {
      * @return <code>false</code> if any coordinates are different
      */
     public boolean hasSameCoordinates(final Dependency dependency) {
-        return (dependency != null) && (compareCoordinates(dependency) == 0);
+        return dependency != null && compareCoordinates(dependency) == 0;
     }
 
     @Override

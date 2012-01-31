@@ -79,7 +79,7 @@ public class ToStringMetadataProvider extends
         }
 
         final MemberDetails memberDetails = getMemberDetails(governorPhysicalTypeMetadata);
-        if ((memberDetails == null) || memberDetails.getFields().isEmpty()) {
+        if (memberDetails == null || memberDetails.getFields().isEmpty()) {
             return null;
         }
 

@@ -36,8 +36,8 @@ public class MailProtocol implements Comparable<MailProtocol> {
 
     @Override
     public final boolean equals(final Object obj) {
-        return (obj instanceof MailProtocol)
-                && (compareTo((MailProtocol) obj) == 0);
+        return obj instanceof MailProtocol
+                && compareTo((MailProtocol) obj) == 0;
     }
 
     public String getKey() {
@@ -52,8 +52,8 @@ public class MailProtocol implements Comparable<MailProtocol> {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = (prime * result)
-                + ((protocolLabel == null) ? 0 : protocolLabel.hashCode());
+        result = prime * result
+                + (protocolLabel == null ? 0 : protocolLabel.hashCode());
         return result;
     }
 

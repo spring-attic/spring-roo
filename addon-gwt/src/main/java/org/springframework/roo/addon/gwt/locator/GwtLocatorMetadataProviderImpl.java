@@ -92,8 +92,7 @@ public class GwtLocatorMetadataProviderImpl implements
 
         final ClassOrInterfaceTypeDetails entityType = gwtTypeService
                 .lookupEntityFromProxy(proxy);
-        if ((entityType == null)
-                || Modifier.isAbstract(entityType.getModifier())) {
+        if (entityType == null || Modifier.isAbstract(entityType.getModifier())) {
             return null;
         }
 
@@ -102,7 +101,7 @@ public class GwtLocatorMetadataProviderImpl implements
                 .getIdentifierAccessor(entity);
         final MethodMetadata versionAccessor = persistenceMemberLocator
                 .getVersionAccessor(entity);
-        if ((identifierAccessor == null) || (versionAccessor == null)) {
+        if (identifierAccessor == null || versionAccessor == null) {
             return null;
         }
 
@@ -311,7 +310,7 @@ public class GwtLocatorMetadataProviderImpl implements
                 }
             }
             if (!processed
-                    && (cid.getAnnotation(RooJavaType.ROO_GWT_PROXY) == null)) {
+                    && cid.getAnnotation(RooJavaType.ROO_GWT_PROXY) == null) {
                 boolean found = false;
                 for (final ClassOrInterfaceTypeDetails proxyCid : typeLocationService
                         .findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_GWT_PROXY)) {
@@ -324,7 +323,7 @@ public class GwtLocatorMetadataProviderImpl implements
                         if (attributeValue != null) {
                             final String mirrorName = GwtUtils
                                     .getStringValue(attributeValue);
-                            if ((mirrorName != null)
+                            if (mirrorName != null
                                     && cid.getName()
                                             .getFullyQualifiedTypeName()
                                             .equals(attributeValue.getValue())) {

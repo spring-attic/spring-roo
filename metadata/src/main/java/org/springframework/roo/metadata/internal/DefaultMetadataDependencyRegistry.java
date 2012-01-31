@@ -153,7 +153,7 @@ public class DefaultMetadataDependencyRegistry implements
         // The simplest possible outcome is the relationship already exists, so
         // quickly return in that case
         Set<String> downstream = upstreamKeyed.get(upstreamDependency);
-        if ((downstream != null) && downstream.contains(downstreamDependency)) {
+        if (downstream != null && downstream.contains(downstreamDependency)) {
             return true;
         }
         // Don't need the variable anymore, as we don't care about the other
@@ -295,7 +295,7 @@ public class DefaultMetadataDependencyRegistry implements
             final MetadataNotificationListener listener) {
         Assert.notNull(listener, "Metadata notification listener required");
 
-        if ((listener instanceof MetadataService)
+        if (listener instanceof MetadataService
                 && listener.equals(metadataService)) {
             metadataService = null;
             return;

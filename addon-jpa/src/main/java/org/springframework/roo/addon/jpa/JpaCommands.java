@@ -184,12 +184,12 @@ public class JpaCommands implements CommandMarker {
         if (table != null) {
             entityAnnotationBuilder.addStringAttribute("table", table);
         }
-        if ((versionColumn != null)
+        if (versionColumn != null
                 && !RooJpaEntity.VERSION_COLUMN_DEFAULT.equals(versionColumn)) {
             entityAnnotationBuilder.addStringAttribute("versionColumn",
                     versionColumn);
         }
-        if ((versionField != null)
+        if (versionField != null
                 && !RooJpaEntity.VERSION_FIELD_DEFAULT.equals(versionField)) {
             entityAnnotationBuilder.addStringAttribute("versionField",
                     versionField);
@@ -245,21 +245,21 @@ public class JpaCommands implements CommandMarker {
             @CliOption(key = "transactionManager", mandatory = false, help = "The transaction manager name") final String transactionManager,
             @CliOption(key = "persistenceUnit", mandatory = false, help = "The persistence unit name to be used in the persistence.xml file") final String persistenceUnit) {
 
-        if ((jdbcDatabase == JdbcDatabase.GOOGLE_APP_ENGINE)
-                && (ormProvider != OrmProvider.DATANUCLEUS)) {
+        if (jdbcDatabase == JdbcDatabase.GOOGLE_APP_ENGINE
+                && ormProvider != OrmProvider.DATANUCLEUS) {
             LOGGER.warning("Provider must be " + OrmProvider.DATANUCLEUS.name()
                     + " for the Google App Engine");
             return;
         }
 
-        if ((jdbcDatabase == JdbcDatabase.DATABASE_DOT_COM)
-                && (ormProvider != OrmProvider.DATANUCLEUS)) {
+        if (jdbcDatabase == JdbcDatabase.DATABASE_DOT_COM
+                && ormProvider != OrmProvider.DATANUCLEUS) {
             LOGGER.warning("Provider must be " + OrmProvider.DATANUCLEUS.name()
                     + " for Database.com");
             return;
         }
 
-        if ((jdbcDatabase == JdbcDatabase.FIREBIRD) && !isJdk6OrHigher()) {
+        if (jdbcDatabase == JdbcDatabase.FIREBIRD && !isJdk6OrHigher()) {
             LOGGER.warning("JDK must be 1.6 or higher to use Firebird");
             return;
         }
@@ -291,7 +291,7 @@ public class JpaCommands implements CommandMarker {
 
     private boolean isJdk6OrHigher() {
         final String ver = System.getProperty("java.version");
-        return (ver.indexOf("1.6.") > -1) || (ver.indexOf("1.7.") > -1);
+        return ver.indexOf("1.6.") > -1 || ver.indexOf("1.7.") > -1;
     }
 
     @CliAvailabilityIndicator({ "jpa setup", "persistence setup" })

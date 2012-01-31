@@ -70,7 +70,7 @@ public class EditorMetadataProvider extends AbstractItdMetadataProvider {
         final EditorAnnotationValues annotationValues = new EditorAnnotationValues(
                 governorPhysicalTypeMetadata);
         if (!annotationValues.isAnnotationFound()
-                || (annotationValues.getEditedType() == null)) {
+                || annotationValues.getEditedType() == null) {
             return null;
         }
 
@@ -88,7 +88,7 @@ public class EditorMetadataProvider extends AbstractItdMetadataProvider {
         // We need to lookup the metadata we depend on
         final JpaActiveRecordMetadata jpaActiveRecordMetadata = (JpaActiveRecordMetadata) metadataService
                 .get(jpaActiveRecordMetadataKey);
-        if ((jpaActiveRecordMetadata == null)
+        if (jpaActiveRecordMetadata == null
                 || !jpaActiveRecordMetadata.isValid()) {
             return null;
         }

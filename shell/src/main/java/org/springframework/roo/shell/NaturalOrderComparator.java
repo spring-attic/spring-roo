@@ -61,7 +61,7 @@ public class NaturalOrderComparator<E> implements Comparator<E> {
     }
 
     public int compare(final E o1, final E o2) {
-        if ((o1 == null) && (o2 == null)) {
+        if (o1 == null && o2 == null) {
             return 1;
         }
 
@@ -89,7 +89,7 @@ public class NaturalOrderComparator<E> implements Comparator<E> {
             cb = charAt(b, ib);
 
             // Skip over leading spaces or zeros
-            while (isSpace(ca) || (ca == '0')) {
+            while (isSpace(ca) || ca == '0') {
                 if (ca == '0') {
                     nza++;
                 }
@@ -101,7 +101,7 @@ public class NaturalOrderComparator<E> implements Comparator<E> {
                 ca = charAt(a, ++ia);
             }
 
-            while (isSpace(cb) || (cb == '0')) {
+            while (isSpace(cb) || cb == '0') {
                 if (cb == '0') {
                     nzb++;
                 }
@@ -120,7 +120,7 @@ public class NaturalOrderComparator<E> implements Comparator<E> {
                 }
             }
 
-            if ((ca == 0) && (cb == 0)) {
+            if (ca == 0 && cb == 0) {
                 // The strings compare the same. Perhaps the caller
                 // will want to call strcmp to break the tie.
                 return nza - nzb;
@@ -170,7 +170,7 @@ public class NaturalOrderComparator<E> implements Comparator<E> {
                     bias = +1;
                 }
             }
-            else if ((ca == 0) && (cb == 0)) {
+            else if (ca == 0 && cb == 0) {
                 return bias;
             }
         }

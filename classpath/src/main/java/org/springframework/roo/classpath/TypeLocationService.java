@@ -154,6 +154,15 @@ public interface TypeLocationService {
     /**
      * Returns the Java types that belong to the given module.
      * 
+     * @param module
+     * @return a non-<code>null</code> collection
+     * @since 1.2.1
+     */
+    Collection<JavaType> getTypesForModule(Pom module);
+
+    /**
+     * Returns the Java types that belong to the given module.
+     * 
      * @param modulePath
      * @return a non-<code>null</code> collection of fully-qualified type names
      * @deprecated use {@link #getTypesForModule(Pom)} instead; more strongly
@@ -162,15 +171,6 @@ public interface TypeLocationService {
      */
     @Deprecated
     Collection<String> getTypesForModule(String modulePath);
-
-    /**
-     * Returns the Java types that belong to the given module.
-     * 
-     * @param module
-     * @return a non-<code>null</code> collection
-     * @since 1.2.1
-     */
-    Collection<JavaType> getTypesForModule(Pom module);
 
     /**
      * Indicates whether the passed in type has changed since last invocation by

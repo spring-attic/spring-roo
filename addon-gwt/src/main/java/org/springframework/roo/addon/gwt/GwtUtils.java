@@ -65,7 +65,7 @@ public final class GwtUtils {
         if (!convertVoid && JavaType.VOID_PRIMITIVE.equals(type)) {
             return type;
         }
-        if ((type != null) && type.isPrimitive()) {
+        if (type != null && type.isPrimitive()) {
             return new JavaType(type.getFullyQualifiedTypeName());
         }
         return type;
@@ -82,8 +82,8 @@ public final class GwtUtils {
         }
         final AnnotationAttributeValue<?> attributeValue = annotation
                 .getAttribute(attributeName);
-        if ((attributeValue != null)
-                && (attributeValue instanceof ArrayAttributeValue)) {
+        if (attributeValue != null
+                && attributeValue instanceof ArrayAttributeValue) {
             @SuppressWarnings("unchecked")
             final ArrayAttributeValue<StringAttributeValue> arrayAttributeValue = (ArrayAttributeValue<StringAttributeValue>) attributeValue;
             for (final StringAttributeValue value : arrayAttributeValue
@@ -91,8 +91,8 @@ public final class GwtUtils {
                 values.add(value.getValue());
             }
         }
-        else if ((attributeValue != null)
-                && (attributeValue instanceof StringAttributeValue)) {
+        else if (attributeValue != null
+                && attributeValue instanceof StringAttributeValue) {
             final StringAttributeValue stringAttributeVale = (StringAttributeValue) attributeValue;
             values.add(stringAttributeVale.getValue());
         }
@@ -110,8 +110,8 @@ public final class GwtUtils {
         }
         final AnnotationAttributeValue<?> attributeValue = annotation
                 .getAttribute(attributeName);
-        if ((attributeValue != null)
-                && (attributeValue instanceof BooleanAttributeValue)) {
+        if (attributeValue != null
+                && attributeValue instanceof BooleanAttributeValue) {
             final BooleanAttributeValue booleanAttributeValue = (BooleanAttributeValue) attributeValue;
             return booleanAttributeValue.getValue();
         }

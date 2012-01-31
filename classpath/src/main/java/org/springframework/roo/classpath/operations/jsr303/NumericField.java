@@ -84,8 +84,8 @@ public class NumericField extends StringOrNumericField {
     }
 
     public boolean isDigitsSetCorrectly() {
-        return ((digitsInteger == null) && (digitsFraction == null))
-                || ((digitsInteger != null) && (digitsFraction != null));
+        return digitsInteger == null && digitsFraction == null
+                || digitsInteger != null && digitsFraction != null;
     }
 
     public void setDigitsFraction(final Integer digitsFractional) {

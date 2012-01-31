@@ -42,7 +42,7 @@ public abstract class CollectionField extends FieldDetails {
     public void decorateAnnotationsList(
             final List<AnnotationMetadataBuilder> annotations) {
         super.decorateAnnotationsList(annotations);
-        if ((sizeMin != null) || (sizeMax != null)) {
+        if (sizeMin != null || sizeMax != null) {
             final List<AnnotationAttributeValue<?>> attrs = new ArrayList<AnnotationAttributeValue<?>>();
             if (sizeMin != null) {
                 attrs.add(new IntegerAttributeValue(new JavaSymbolName("min"),

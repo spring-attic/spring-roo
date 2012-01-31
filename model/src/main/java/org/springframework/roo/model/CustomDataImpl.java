@@ -57,8 +57,8 @@ public class CustomDataImpl implements CustomData {
     public int hashCode() {
         final int prime = 31;
         final int result = 1;
-        return (prime * result)
-                + ((customData == null) ? 0 : customData.hashCode());
+        return prime * result
+                + (customData == null ? 0 : customData.hashCode());
     }
 
     public Iterator<Object> iterator() {

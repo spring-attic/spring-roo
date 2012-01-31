@@ -24,7 +24,7 @@ public class LocaleConverter implements Converter<Locale> {
             return new Locale(value, value.toUpperCase());
         }
         else if (value.length() == 5) {
-            String[] split = value.split("_");
+            final String[] split = value.split("_");
             return new Locale(split[0], split[1]);
         }
         else {

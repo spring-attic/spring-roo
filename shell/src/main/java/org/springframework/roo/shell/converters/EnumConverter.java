@@ -18,16 +18,16 @@ public class EnumConverter implements Converter<Enum> {
 
     public Enum convertFromText(final String value,
             final Class<?> requiredType, final String optionContext) {
-        Class<Enum> enumClass = (Class<Enum>) requiredType;
+        final Class<Enum> enumClass = (Class<Enum>) requiredType;
         return Enum.valueOf(enumClass, value);
     }
 
     public boolean getAllPossibleValues(final List<Completion> completions,
             final Class<?> requiredType, final String existingData,
             final String optionContext, final MethodTarget target) {
-        Class<Enum> enumClass = (Class<Enum>) requiredType;
-        for (Enum enumValue : enumClass.getEnumConstants()) {
-            String candidate = enumValue.name();
+        final Class<Enum> enumClass = (Class<Enum>) requiredType;
+        for (final Enum enumValue : enumClass.getEnumConstants()) {
+            final String candidate = enumValue.name();
             if ("".equals(existingData)
                     || candidate.startsWith(existingData)
                     || existingData.startsWith(candidate)

@@ -35,7 +35,7 @@ public enum Path {
     SRC_MAIN_JAVA(true, "src/main/java") {
         @Override
         public String getPathRelativeToPom(final Pom pom) {
-            if ((pom != null) && StringUtils.hasText(pom.getSourceDirectory())) {
+            if (pom != null && StringUtils.hasText(pom.getSourceDirectory())) {
                 return pom.getSourceDirectory();
             }
             return getDefaultLocation();
@@ -58,7 +58,7 @@ public enum Path {
     SRC_TEST_JAVA(true, "src/test/java") {
         @Override
         public String getPathRelativeToPom(final Pom pom) {
-            if ((pom != null)
+            if (pom != null
                     && StringUtils.hasText(pom.getTestSourceDirectory())) {
                 return pom.getTestSourceDirectory();
             }

@@ -40,7 +40,7 @@ public class LogLevel implements Comparable<LogLevel> {
 
     @Override
     public final boolean equals(final Object obj) {
-        return (obj instanceof LogLevel) && (compareTo((LogLevel) obj) == 0);
+        return obj instanceof LogLevel && compareTo((LogLevel) obj) == 0;
     }
 
     public String getFelixCode() {

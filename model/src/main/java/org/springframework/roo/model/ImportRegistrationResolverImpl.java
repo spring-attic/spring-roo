@@ -93,8 +93,8 @@ public class ImportRegistrationResolverImpl implements
     public boolean isFullyQualifiedFormRequired(final JavaType javaType) {
         Assert.notNull(javaType, "Java type required");
 
-        if ((javaType.getDataType() == DataType.PRIMITIVE)
-                || (javaType.getDataType() == DataType.VARIABLE)) {
+        if (javaType.getDataType() == DataType.PRIMITIVE
+                || javaType.getDataType() == DataType.VARIABLE) {
             // Primitives and type variables do not need to be used in
             // fully-qualified form
             return false;

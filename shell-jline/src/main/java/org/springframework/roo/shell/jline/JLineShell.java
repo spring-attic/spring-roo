@@ -161,7 +161,7 @@ public abstract class JLineShell extends AbstractShell implements
             buff.append(ANSICodes.clreol());
         }
 
-        if (("".equals(message))) {
+        if ("".equals(message)) {
             // They want the line blank; we've already achieved this if needed
             // via the erasing above
             // Just need to record we no longer care about this line the next
@@ -173,7 +173,7 @@ public abstract class JLineShell extends AbstractShell implements
                 return; // ROO-1599
             }
             // They want some message displayed
-            int startFrom = (reader.getTermwidth() - message.length()) + 1;
+            int startFrom = reader.getTermwidth() - message.length() + 1;
             if (startFrom < 1) {
                 startFrom = 1;
             }
@@ -231,7 +231,7 @@ public abstract class JLineShell extends AbstractShell implements
         Assert.hasText(slot, "Slot name must be specified for a flash message");
 
         if (Shell.WINDOW_TITLE_SLOT.equals(slot)) {
-            if ((reader != null) && reader.getTerminal().isANSISupported()) {
+            if (reader != null && reader.getTerminal().isANSISupported()) {
                 // We can probably update the window title, as requested
                 if (StringUtils.isBlank(message)) {
                     System.out.println("No text");
@@ -250,7 +250,7 @@ public abstract class JLineShell extends AbstractShell implements
 
             return;
         }
-        if (((reader != null) && !reader.getTerminal().isANSISupported())) {
+        if (reader != null && !reader.getTerminal().isANSISupported()) {
             super.flash(level, message, slot);
             return;
         }
@@ -421,8 +421,8 @@ public abstract class JLineShell extends AbstractShell implements
         String line;
 
         try {
-            while ((exitShellRequest == null)
-                    && ((line = reader.readLine()) != null)) {
+            while (exitShellRequest == null
+                    && (line = reader.readLine()) != null) {
                 JLineLogHandler.resetMessageTracking();
                 setShellStatus(Status.USER_INPUT);
 
@@ -442,7 +442,7 @@ public abstract class JLineShell extends AbstractShell implements
 
     private void removeHandlers(final Logger l) {
         final Handler[] handlers = l.getHandlers();
-        if ((handlers != null) && (handlers.length > 0)) {
+        if (handlers != null && handlers.length > 0) {
             for (final Handler h : handlers) {
                 l.removeHandler(h);
             }
@@ -534,7 +534,7 @@ public abstract class JLineShell extends AbstractShell implements
 
         // Handle any "execute-then-quit" operation
         final String rooArgs = System.getProperty("roo.args");
-        if ((rooArgs != null) && !"".equals(rooArgs)) {
+        if (rooArgs != null && !"".equals(rooArgs)) {
             setShellStatus(Status.USER_INPUT);
             final boolean success = executeCommand(rooArgs);
             if (exitShellRequest == null) {
@@ -568,7 +568,7 @@ public abstract class JLineShell extends AbstractShell implements
     public void setPromptPath(final String path, final boolean overrideStyle) {
         if (reader.getTerminal().isANSISupported()) {
             final ANSIBuffer ansi = JLineLogHandler.getANSIBuffer();
-            if ((path == null) || "".equals(path)) {
+            if (path == null || "".equals(path)) {
                 shellPrompt = ansi.yellow(ROO_PROMPT).toString();
             }
             else {

@@ -30,11 +30,6 @@ public class WarPackaging extends AbstractCorePackagingProvider {
         super("war", "war-pom-template.xml");
     }
 
-    public Collection<Path> getPaths() {
-        return Arrays.asList(SRC_MAIN_JAVA, SRC_TEST_JAVA, SRC_TEST_RESOURCES,
-                SPRING_CONFIG_ROOT, SRC_MAIN_WEBAPP);
-    }
-
     @Override
     protected void createOtherArtifacts(final JavaPackage topLevelPackage,
             final String module, final ProjectOperations projectOperations) {
@@ -46,5 +41,10 @@ public class WarPackaging extends AbstractCorePackagingProvider {
             applicationContextOperations.createMiddleTierApplicationContext(
                     topLevelPackage, fullyQualifiedModuleName);
         }
+    }
+
+    public Collection<Path> getPaths() {
+        return Arrays.asList(SRC_MAIN_JAVA, SRC_TEST_JAVA, SRC_TEST_RESOURCES,
+                SPRING_CONFIG_ROOT, SRC_MAIN_WEBAPP);
     }
 }

@@ -46,7 +46,7 @@ public class GwtLocatorMetadata extends AbstractMetadataItem {
         if (this == o) {
             return true;
         }
-        if ((o == null) || (getClass() != o.getClass())) {
+        if (o == null || getClass() != o.getClass()) {
             return false;
         }
         final GwtLocatorMetadata that = (GwtLocatorMetadata) o;

@@ -42,7 +42,7 @@ public class ServiceInterfaceLocatorImpl implements ServiceInterfaceLocator {
                                     .getPhysicalTypeCanonicalPath(cid
                                             .getDeclaredByMetadataId()), cid));
             for (final JavaType javaType : annotationValues.getDomainTypes()) {
-                if ((javaType != null) && javaType.equals(domainType)) {
+                if (javaType != null && javaType.equals(domainType)) {
                     toReturn.put(cid.getDeclaredByMetadataId(), cid);
                 }
             }

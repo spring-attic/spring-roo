@@ -198,8 +198,8 @@ public class JavaParserTypeParsingService implements TypeParsingService {
                     current, compilationUnit));
         }
 
-        if ((cid.getPhysicalTypeCategory() == PhysicalTypeCategory.INTERFACE)
-                || (cid.getPhysicalTypeCategory() == PhysicalTypeCategory.CLASS)) {
+        if (cid.getPhysicalTypeCategory() == PhysicalTypeCategory.INTERFACE
+                || cid.getPhysicalTypeCategory() == PhysicalTypeCategory.CLASS) {
             final boolean isInterface = cid.getPhysicalTypeCategory() == PhysicalTypeCategory.INTERFACE;
 
             if (parent == null) {
@@ -346,8 +346,8 @@ public class JavaParserTypeParsingService implements TypeParsingService {
         }
 
         // Add enum constants and interfaces
-        if ((typeDeclaration instanceof EnumDeclaration)
-                && (cid.getEnumConstants().size() > 0)) {
+        if (typeDeclaration instanceof EnumDeclaration
+                && cid.getEnumConstants().size() > 0) {
             final EnumDeclaration enumDeclaration = (EnumDeclaration) typeDeclaration;
 
             final List<EnumConstantDeclaration> constants = new ArrayList<EnumConstantDeclaration>();
@@ -412,12 +412,12 @@ public class JavaParserTypeParsingService implements TypeParsingService {
             }
 
             if (importPackage.equals(cid.getName().getPackage())
-                    && (importType != null)
-                    && (importType.getEnclosingType() == null)) {
+                    && importType != null
+                    && importType.getEnclosingType() == null) {
                 continue;
             }
 
-            if ((importType != null) && importType.equals(cid.getName())) {
+            if (importType != null && importType.equals(cid.getName())) {
                 continue;
             }
 

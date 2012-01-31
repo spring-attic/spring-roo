@@ -101,9 +101,9 @@ public class DefaultPhysicalTypeMetadataProvider implements
                 metadataIdentificationString, canonicalPath, typeDetails);
         final ClassOrInterfaceTypeDetails details = result
                 .getMemberHoldingTypeDetails();
-        if ((details != null)
-                && (details.getPhysicalTypeCategory() == PhysicalTypeCategory.CLASS)
-                && (details.getExtendsTypes().size() == 1)) {
+        if (details != null
+                && details.getPhysicalTypeCategory() == PhysicalTypeCategory.CLASS
+                && details.getExtendsTypes().size() == 1) {
             // This is a class, and it extends another class
             if (details.getSuperclass() != null) {
                 // We have a dependency on the superclass, and there is metadata
@@ -170,7 +170,7 @@ public class DefaultPhysicalTypeMetadataProvider implements
 
         // Check to see if file is of interest
         if (fileIdentifier.endsWith(".java")
-                && (fileEvent.getOperation() != FileOperation.MONITORING_FINISH)
+                && fileEvent.getOperation() != FileOperation.MONITORING_FINISH
                 && !fileIdentifier.endsWith("package-info.java")) {
             // Figure out the PhysicalTypeIdentifier
             final String id = typeLocationService

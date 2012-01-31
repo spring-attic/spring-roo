@@ -104,7 +104,7 @@ public class VideoEmbeddedProvider extends AbstractEmbeddedProvider {
 
     public boolean install(final String viewName,
             final Map<String, String> options) {
-        if ((options == null) || (options.size() != 2)
+        if (options == null || options.size() != 2
                 || !options.containsKey("provider")
                 || !options.containsKey("id")) {
             return false;

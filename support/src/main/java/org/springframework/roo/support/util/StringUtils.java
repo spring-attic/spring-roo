@@ -283,7 +283,7 @@ public final class StringUtils {
         final Iterator<?> it = coll.iterator();
         while (it.hasNext()) {
             sb.append(prefix).append(it.next()).append(suffix);
-            if (it.hasNext() && (delim != null)) {
+            if (it.hasNext() && delim != null) {
                 sb.append(delim);
             }
         }
@@ -360,7 +360,7 @@ public final class StringUtils {
      * @since 1.2.0
      */
     public static boolean contains(final String str, final String substr) {
-        if ((str == null) || (substr == null)) {
+        if (str == null || substr == null) {
             return false;
         }
         return str.contains(substr);
@@ -547,7 +547,7 @@ public final class StringUtils {
                 result.add(deleteAny(str.substring(pos, delPos), charsToDelete));
                 pos = delPos + delimiter.length();
             }
-            if ((str.length() > 0) && (pos <= str.length())) {
+            if (str.length() > 0 && pos <= str.length()) {
                 // Add rest of String, but not in case of empty input.
                 result.add(deleteAny(str.substring(pos), charsToDelete));
             }
@@ -565,7 +565,7 @@ public final class StringUtils {
      */
     public static boolean endsWithIgnoreCase(final String str,
             final String suffix) {
-        if ((str == null) || (suffix == null)) {
+        if (str == null || suffix == null) {
             return false;
         }
         if (str.endsWith(suffix)) {
@@ -609,8 +609,7 @@ public final class StringUtils {
             return null;
         }
         final int separatorIndex = path.lastIndexOf(FOLDER_SEPARATOR);
-        return (separatorIndex != -1 ? path.substring(separatorIndex + 1)
-                : path);
+        return separatorIndex != -1 ? path.substring(separatorIndex + 1) : path;
     }
 
     /**
@@ -625,7 +624,7 @@ public final class StringUtils {
             return null;
         }
         final int sepIndex = path.lastIndexOf(EXTENSION_SEPARATOR);
-        return (sepIndex != -1 ? path.substring(sepIndex + 1) : null);
+        return sepIndex != -1 ? path.substring(sepIndex + 1) : null;
     }
 
     /**
@@ -646,7 +645,7 @@ public final class StringUtils {
      * @see #hasText(String)
      */
     public static boolean hasLength(final CharSequence str) {
-        return ((str != null) && (str.length() > 0));
+        return str != null && str.length() > 0;
     }
 
     /**
@@ -824,8 +823,8 @@ public final class StringUtils {
     public static Locale parseLocaleString(final String localeString) {
         final String[] parts = tokenizeToStringArray(localeString, "_ ", false,
                 false);
-        final String language = (parts.length > 0 ? parts[0] : "");
-        final String country = (parts.length > 1 ? parts[1] : "");
+        final String language = parts.length > 0 ? parts[0] : "";
+        final String country = parts.length > 1 ? parts[1] : "";
         String variant = "";
         if (parts.length >= 2) {
             // There is definitely a variant, and it is everything after the
@@ -841,8 +840,8 @@ public final class StringUtils {
                 variant = trimLeadingCharacter(variant, '_');
             }
         }
-        return (language.length() > 0 ? new Locale(language, country, variant)
-                : null);
+        return language.length() > 0 ? new Locale(language, country, variant)
+                : null;
     }
 
     /**
@@ -866,7 +865,7 @@ public final class StringUtils {
      * @since 1.2.0
      */
     public static String prefix(final String str, final String prefix) {
-        if ((str == null) || (prefix == null) || str.startsWith(prefix)) {
+        if (str == null || prefix == null || str.startsWith(prefix)) {
             return str;
         }
         return prefix + str;
@@ -880,7 +879,7 @@ public final class StringUtils {
      *         <code>null<code> if the input was <code>null</code>
      */
     public static String quote(final String str) {
-        return (str != null ? "'" + str + "'" : null);
+        return str != null ? "'" + str + "'" : null;
     }
 
     /**
@@ -892,7 +891,7 @@ public final class StringUtils {
      *         if not a String
      */
     public static Object quoteIfString(final Object obj) {
-        return (obj instanceof String ? quote((String) obj) : obj);
+        return obj instanceof String ? quote((String) obj) : obj;
     }
 
     /**
@@ -999,7 +998,7 @@ public final class StringUtils {
     public static String replaceFirst(final String original,
             final String toReplace, final String replacement) {
         if (!hasLength(original) || !hasLength(toReplace)
-                || (replacement == null) || !original.contains(toReplace)) {
+                || replacement == null || !original.contains(toReplace)) {
             return original;
         }
         final int startOfOld = original.indexOf(toReplace);
@@ -1118,7 +1117,7 @@ public final class StringUtils {
      */
     public static boolean startsWithIgnoreCase(final String str,
             final String prefix) {
-        if ((str == null) || (prefix == null)) {
+        if (str == null || prefix == null) {
             return false;
         }
         if (str.startsWith(prefix)) {
@@ -1145,7 +1144,7 @@ public final class StringUtils {
             return null;
         }
         final int sepIndex = path.lastIndexOf(EXTENSION_SEPARATOR);
-        return (sepIndex != -1 ? path.substring(0, sepIndex) : path);
+        return sepIndex != -1 ? path.substring(0, sepIndex) : path;
     }
 
     /**
@@ -1204,7 +1203,7 @@ public final class StringUtils {
             final int index, final CharSequence substring) {
         for (int j = 0, n = substring.length(); j < n; j++) {
             final int i = index + j;
-            if ((i >= str.length()) || (str.charAt(i) != substring.charAt(j))) {
+            if (i >= str.length() || str.charAt(i) != substring.charAt(j)) {
                 return false;
             }
         }
@@ -1220,7 +1219,7 @@ public final class StringUtils {
      * @since 1.2.0
      */
     public static String suffix(final String str, final String suffix) {
-        if ((str == null) || (suffix == null) || str.endsWith(suffix)) {
+        if (str == null || suffix == null || str.endsWith(suffix)) {
             return str;
         }
         return str + suffix;
@@ -1284,7 +1283,7 @@ public final class StringUtils {
             if (trimTokens) {
                 token = token.trim();
             }
-            if (!ignoreEmptyTokens || (token.length() > 0)) {
+            if (!ignoreEmptyTokens || token.length() > 0) {
                 tokens.add(token);
             }
         }
@@ -1394,7 +1393,7 @@ public final class StringUtils {
         final String[] result = new String[arr.length];
         for (int i = 0, n = arr.length; i < n; i++) {
             final String element = arr[i];
-            result[i] = (element != null ? element.trim() : null);
+            result[i] = element != null ? element.trim() : null;
         }
         return result;
     }
@@ -1413,7 +1412,7 @@ public final class StringUtils {
             return str;
         }
         final StringBuilder sb = new StringBuilder(str);
-        while ((sb.length() > 0) && (sb.charAt(0) == leadingCharacter)) {
+        while (sb.length() > 0 && sb.charAt(0) == leadingCharacter) {
             sb.deleteCharAt(0);
         }
         return sb.toString();
@@ -1431,7 +1430,7 @@ public final class StringUtils {
             return str;
         }
         final StringBuilder sb = new StringBuilder(str);
-        while ((sb.length() > 0) && Character.isWhitespace(sb.charAt(0))) {
+        while (sb.length() > 0 && Character.isWhitespace(sb.charAt(0))) {
             sb.deleteCharAt(0);
         }
         return sb.toString();
@@ -1499,8 +1498,8 @@ public final class StringUtils {
             return str;
         }
         final StringBuilder sb = new StringBuilder(str);
-        while ((sb.length() > 0)
-                && (sb.charAt(sb.length() - 1) == trailingCharacter)) {
+        while (sb.length() > 0
+                && sb.charAt(sb.length() - 1) == trailingCharacter) {
             sb.deleteCharAt(sb.length() - 1);
         }
         return sb.toString();
@@ -1518,7 +1517,7 @@ public final class StringUtils {
             return str;
         }
         final StringBuilder sb = new StringBuilder(str);
-        while ((sb.length() > 0)
+        while (sb.length() > 0
                 && Character.isWhitespace(sb.charAt(sb.length() - 1))) {
             sb.deleteCharAt(sb.length() - 1);
         }
@@ -1537,10 +1536,10 @@ public final class StringUtils {
             return str;
         }
         final StringBuilder sb = new StringBuilder(str);
-        while ((sb.length() > 0) && Character.isWhitespace(sb.charAt(0))) {
+        while (sb.length() > 0 && Character.isWhitespace(sb.charAt(0))) {
             sb.deleteCharAt(0);
         }
-        while ((sb.length() > 0)
+        while (sb.length() > 0
                 && Character.isWhitespace(sb.charAt(sb.length() - 1))) {
             sb.deleteCharAt(sb.length() - 1);
         }

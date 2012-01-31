@@ -107,8 +107,7 @@ public class GwtRequestMetadataNotificationListener implements
                     .findClassesOrInterfaceDetailsWithAnnotation(ROO_GWT_REQUEST)) {
                 final ClassOrInterfaceTypeDetails entity = gwtTypeService
                         .lookupEntityFromRequest(request);
-                if ((entity != null)
-                        && layerEntities.contains(entity.getType())) {
+                if (entity != null && layerEntities.contains(entity.getType())) {
                     // This layer component has an associated GWT request; make
                     // that request the downstream
                     return getLocalMid(request.getDeclaredByMetadataId());

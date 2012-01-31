@@ -44,7 +44,7 @@ public class DefaultValue extends AbstractAction {
     }
 
     public boolean isValid(final ActionConfig config) {
-        return (config != null) && StringUtils.hasText(config.getArgument())
+        return config != null && StringUtils.hasText(config.getArgument())
                 && StringUtils.hasText(config.getDefaultValue());
     }
 }

@@ -150,7 +150,7 @@ public class UaaRegistrationServiceImpl implements UaaRegistrationService,
         featureUseBuilder.setMinorVersion(version.getMinor());
         featureUseBuilder.setPatchVersion(version.getMicro());
         featureUseBuilder.setReleaseQualifier(version.getQualifier());
-        if ((commitHash != null) && (commitHash.length() > 0)) {
+        if (commitHash != null && commitHash.length() > 0) {
             featureUseBuilder.setSourceControlIdentifier(commitHash);
         }
     }
@@ -242,12 +242,12 @@ public class UaaRegistrationServiceImpl implements UaaRegistrationService,
             boolean add = true;
             for (final Product existing : value) {
                 if (existing.getName().equals(product.getName())
-                        && (existing.getMajorVersion() == product
-                                .getMajorVersion())
-                        && (existing.getMinorVersion() == product
-                                .getMinorVersion())
-                        && (existing.getPatchVersion() == product
-                                .getPatchVersion())
+                        && existing.getMajorVersion() == product
+                                .getMajorVersion()
+                        && existing.getMinorVersion() == product
+                                .getMinorVersion()
+                        && existing.getPatchVersion() == product
+                                .getPatchVersion()
                         && existing.getReleaseQualifier().equals(
                                 product.getReleaseQualifier())
                         && existing.getSourceControlIdentifier().equals(

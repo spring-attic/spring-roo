@@ -124,16 +124,16 @@ public class Identifier {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = (prime * result)
-                + ((columnDefinition == null) ? 0 : columnDefinition.hashCode());
-        result = (prime * result)
-                + ((columnName == null) ? 0 : columnName.hashCode());
-        result = (prime * result) + columnSize;
-        result = (prime * result)
-                + ((fieldName == null) ? 0 : fieldName.hashCode());
-        result = (prime * result)
-                + ((fieldType == null) ? 0 : fieldType.hashCode());
-        result = (prime * result) + scale;
+        result = prime * result
+                + (columnDefinition == null ? 0 : columnDefinition.hashCode());
+        result = prime * result
+                + (columnName == null ? 0 : columnName.hashCode());
+        result = prime * result + columnSize;
+        result = prime * result
+                + (fieldName == null ? 0 : fieldName.hashCode());
+        result = prime * result
+                + (fieldType == null ? 0 : fieldType.hashCode());
+        result = prime * result + scale;
         return result;
     }
 

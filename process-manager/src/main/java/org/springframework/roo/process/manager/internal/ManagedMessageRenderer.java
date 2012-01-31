@@ -34,7 +34,7 @@ public class ManagedMessageRenderer {
 
     void logManagedMessage() {
         final StringBuilder message = new StringBuilder();
-        if ((hashCode != null) && includeHashCode && (hashCode.length() >= 7)) {
+        if (hashCode != null && includeHashCode && hashCode.length() >= 7) {
             // Display only the first 6 characters, being consistent with Git
             // hash code display conventions
             message.append(hashCode.subSequence(0, 7)).append(" ");
@@ -46,7 +46,7 @@ public class ManagedMessageRenderer {
             message.append("Updated ");
         }
         message.append(filenameResolver.getMeaningfulName(file));
-        if ((descriptionOfChange != null) && (descriptionOfChange.length() > 0)) {
+        if (descriptionOfChange != null && descriptionOfChange.length() > 0) {
             message.append(" [");
             message.append(descriptionOfChange);
             message.append("]");

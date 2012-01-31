@@ -217,7 +217,7 @@ public class DefaultMetadataService extends AbstractMetadataCache implements
 
                 // If the item isn't available, evict it from the cache (unless
                 // we did so at the start of the method already)
-                if ((result == null) && !evictCache) {
+                if (result == null && !evictCache) {
                     if (metadataLogger.getTraceLevel() > 0) {
                         metadataLogger.log("Evicting unavailable item "
                                 + metadataIdentificationString);
@@ -259,8 +259,8 @@ public class DefaultMetadataService extends AbstractMetadataCache implements
                         final List<String> thisRetry = new ArrayList<String>();
                         thisRetry.addAll(keysToRetry);
                         keysToRetry.clear();
-                        if ((metadataLogger.getTraceLevel() > 0)
-                                && (thisRetry.size() > 0)) {
+                        if (metadataLogger.getTraceLevel() > 0
+                                && thisRetry.size() > 0) {
                             metadataLogger.log(thisRetry.size()
                                     + " keys to retry: " + thisRetry);
                         }
@@ -276,8 +276,8 @@ public class DefaultMetadataService extends AbstractMetadataCache implements
                             }
                             getInternal(retryMid, false, false);
                         }
-                        if ((metadataLogger.getTraceLevel() > 0)
-                                && (thisRetry.size() > 0)) {
+                        if (metadataLogger.getTraceLevel() > 0
+                                && thisRetry.size() > 0) {
                             metadataLogger.log("Retry group completed "
                                     + metadataIdentificationString);
                         }

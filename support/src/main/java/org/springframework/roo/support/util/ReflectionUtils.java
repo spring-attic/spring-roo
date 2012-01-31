@@ -159,7 +159,7 @@ public abstract class ReflectionUtils {
             final Field[] fields = targetClass.getDeclaredFields();
             for (final Field field : fields) {
                 // Skip static and final fields.
-                if ((ff != null) && !ff.matches(field)) {
+                if (ff != null && !ff.matches(field)) {
                     continue;
                 }
                 try {
@@ -172,7 +172,7 @@ public abstract class ReflectionUtils {
                 }
             }
             targetClass = targetClass.getSuperclass();
-        } while ((targetClass != null) && (targetClass != Object.class));
+        } while (targetClass != null && targetClass != Object.class);
     }
 
     /**
@@ -209,7 +209,7 @@ public abstract class ReflectionUtils {
         do {
             final Method[] methods = targetClass.getDeclaredMethods();
             for (final Method method : methods) {
-                if ((mf != null) && !mf.matches(method)) {
+                if (mf != null && !mf.matches(method)) {
                     continue;
                 }
                 try {
@@ -253,14 +253,14 @@ public abstract class ReflectionUtils {
     public static Field findField(final Class<?> clazz, final String name,
             final Class<?> type) {
         Assert.notNull(clazz, "Class must not be null");
-        Assert.isTrue((name != null) || (type != null),
+        Assert.isTrue(name != null || type != null,
                 "Either name or type of the field must be specified");
         Class<?> searchType = clazz;
-        while (!Object.class.equals(searchType) && (searchType != null)) {
+        while (!Object.class.equals(searchType) && searchType != null) {
             final Field[] fields = searchType.getDeclaredFields();
             for (final Field field : fields) {
-                if (((name == null) || name.equals(field.getName()))
-                        && ((type == null) || type.equals(field.getType()))) {
+                if ((name == null || name.equals(field.getName()))
+                        && (type == null || type.equals(field.getType()))) {
                     return field;
                 }
             }
@@ -302,12 +302,12 @@ public abstract class ReflectionUtils {
         Assert.notNull(clazz, "Class must not be null");
         Assert.notNull(name, "Method name must not be null");
         Class<?> searchType = clazz;
-        while (!Object.class.equals(searchType) && (searchType != null)) {
-            final Method[] methods = (searchType.isInterface() ? searchType
-                    .getMethods() : searchType.getDeclaredMethods());
+        while (!Object.class.equals(searchType) && searchType != null) {
+            final Method[] methods = searchType.isInterface() ? searchType
+                    .getMethods() : searchType.getDeclaredMethods();
             for (final Method method : methods) {
                 if (name.equals(method.getName())
-                        && ((parameterTypes == null) || Arrays.equals(
+                        && (parameterTypes == null || Arrays.equals(
                                 parameterTypes, method.getParameterTypes()))) {
                     return method;
                 }
@@ -498,11 +498,11 @@ public abstract class ReflectionUtils {
      * @see java.lang.Object#equals
      */
     public static boolean isEqualsMethod(final Method method) {
-        if ((method == null) || !method.getName().equals("equals")) {
+        if (method == null || !method.getName().equals("equals")) {
             return false;
         }
         final Class<?>[] parameterTypes = method.getParameterTypes();
-        return ((parameterTypes.length == 1) && (parameterTypes[0] == Object.class));
+        return parameterTypes.length == 1 && parameterTypes[0] == Object.class;
     }
 
     /**
@@ -511,8 +511,8 @@ public abstract class ReflectionUtils {
      * @see java.lang.Object#hashCode
      */
     public static boolean isHashCodeMethod(final Method method) {
-        return ((method != null) && method.getName().equals("hashCode") && (method
-                .getParameterTypes().length == 0));
+        return method != null && method.getName().equals("hashCode")
+                && method.getParameterTypes().length == 0;
     }
 
     /**
@@ -522,8 +522,8 @@ public abstract class ReflectionUtils {
      */
     public static boolean isPublicStaticFinal(final Field field) {
         final int modifiers = field.getModifiers();
-        return (Modifier.isPublic(modifiers) && Modifier.isStatic(modifiers) && Modifier
-                .isFinal(modifiers));
+        return Modifier.isPublic(modifiers) && Modifier.isStatic(modifiers)
+                && Modifier.isFinal(modifiers);
     }
 
     /**
@@ -532,8 +532,8 @@ public abstract class ReflectionUtils {
      * @see java.lang.Object#toString()
      */
     public static boolean isToStringMethod(final Method method) {
-        return ((method != null) && method.getName().equals("toString") && (method
-                .getParameterTypes().length == 0));
+        return method != null && method.getName().equals("toString")
+                && method.getParameterTypes().length == 0;
     }
 
     /**

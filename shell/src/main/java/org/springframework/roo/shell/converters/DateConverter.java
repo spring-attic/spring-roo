@@ -21,7 +21,7 @@ public class DateConverter implements Converter<Date> {
     private final DateFormat dateFormat;
 
     public DateConverter() {
-        this.dateFormat = DateFormat.getDateInstance(DateFormat.DEFAULT,
+        dateFormat = DateFormat.getDateInstance(DateFormat.DEFAULT,
                 Locale.getDefault());
     }
 
@@ -34,7 +34,7 @@ public class DateConverter implements Converter<Date> {
         try {
             return dateFormat.parse(value);
         }
-        catch (ParseException e) {
+        catch (final ParseException e) {
             throw new IllegalArgumentException("Could not parse date: "
                     + e.getMessage());
         }

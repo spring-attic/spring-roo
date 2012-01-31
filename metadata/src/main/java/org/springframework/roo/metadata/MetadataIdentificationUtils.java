@@ -195,8 +195,8 @@ public final class MetadataIdentificationUtils {
          * optimisation over simply checking for null and calling
          * String#startsWith().
          */
-        if ((metadataIdentificationString == null)
-                || (metadataIdentificationString.length() <= MID_PREFIX_LENGTH)) {
+        if (metadataIdentificationString == null
+                || metadataIdentificationString.length() <= MID_PREFIX_LENGTH) {
             return false;
         }
         for (int i = 0; i < MID_PREFIX_LENGTH; i++) {

@@ -378,7 +378,7 @@ public class GwtTypeServiceImpl implements GwtTypeService {
                 for (final JavaSymbolName paramName : abstractConstructor
                         .getParameterNames()) {
                     bodyBuilder.append(" ").append(paramName.getSymbolName());
-                    if (abstractConstructor.getParameterTypes().size() > (i + 1)) {
+                    if (abstractConstructor.getParameterTypes().size() > i + 1) {
                         bodyBuilder.append(", ");
                     }
                     i++;
@@ -414,8 +414,8 @@ public class GwtTypeServiceImpl implements GwtTypeService {
             for (final JavaType javaType : childType.getExtendsTypes()) {
                 final String superTypeId = typeLocationService
                         .getPhysicalTypeIdentifier(javaType);
-                if ((superTypeId == null)
-                        || (metadataService.get(superTypeId) == null)) {
+                if (superTypeId == null
+                        || metadataService.get(superTypeId) == null) {
                     continue;
                 }
                 final MemberHoldingTypeDetails superType = ((PhysicalTypeMetadata) metadataService
@@ -482,7 +482,7 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 
         if (isCollectionType(returnType)) {
             final List<JavaType> args = returnType.getParameters();
-            if ((args != null) && (args.size() == 1)) {
+            if (args != null && args.size() == 1) {
                 final JavaType elementType = args.get(0);
                 final JavaType convertedJavaType = getGwtSideLeafType(
                         elementType, governorType, requestType,
@@ -612,10 +612,9 @@ public class GwtTypeServiceImpl implements GwtTypeService {
     }
 
     private boolean isCommonType(final JavaType type) {
-        return isTypeCommon(type)
-                || (isCollectionType(type)
-                        && (type.getParameters().size() == 1) && isAllowableReturnType(type
-                        .getParameters().get(0)));
+        return isTypeCommon(type) || isCollectionType(type)
+                && type.getParameters().size() == 1
+                && isAllowableReturnType(type.getParameters().get(0));
     }
 
     public boolean isDomainObject(final JavaType type) {
@@ -627,7 +626,7 @@ public class GwtTypeServiceImpl implements GwtTypeService {
     private boolean isDomainObject(final JavaType returnType,
             final ClassOrInterfaceTypeDetails ptmd) {
         return !isEnum(ptmd) && isEntity(returnType)
-                && !(isRequestFactoryCompatible(returnType))
+                && !isRequestFactoryCompatible(returnType)
                 && !isEmbeddable(ptmd);
     }
 
@@ -645,8 +644,8 @@ public class GwtTypeServiceImpl implements GwtTypeService {
     }
 
     private boolean isEnum(final ClassOrInterfaceTypeDetails ptmd) {
-        return (ptmd != null)
-                && (ptmd.getPhysicalTypeCategory() == PhysicalTypeCategory.ENUMERATION);
+        return ptmd != null
+                && ptmd.getPhysicalTypeCategory() == PhysicalTypeCategory.ENUMERATION;
     }
 
     private boolean isEnum(final JavaType type) {
@@ -676,17 +675,16 @@ public class GwtTypeServiceImpl implements GwtTypeService {
     }
 
     private boolean isPrimitive(final JavaType type) {
-        return type.isPrimitive()
-                || (isCollectionType(type)
-                        && (type.getParameters().size() == 1) && isPrimitive(type
-                        .getParameters().get(0)));
+        return type.isPrimitive() || isCollectionType(type)
+                && type.getParameters().size() == 1
+                && isPrimitive(type.getParameters().get(0));
     }
 
     private boolean isPublicAccessor(final MethodMetadata method) {
         return Modifier.isPublic(method.getModifier())
                 && !method.getReturnType().equals(JavaType.VOID_PRIMITIVE)
                 && method.getParameterTypes().isEmpty()
-                && (method.getMethodName().getSymbolName().startsWith("get"));
+                && method.getMethodName().getSymbolName().startsWith("get");
     }
 
     private boolean isRequestFactoryCompatible(final JavaType type) {
@@ -705,9 +703,9 @@ public class GwtTypeServiceImpl implements GwtTypeService {
                 || JavaType.STRING.equals(type)
                 || DATE.equals(type)
                 || BIG_DECIMAL.equals(type)
-                || (type.isPrimitive() && !JavaType.VOID_PRIMITIVE
-                        .getFullyQualifiedTypeName().equals(
-                                type.getFullyQualifiedTypeName()));
+                || type.isPrimitive()
+                && !JavaType.VOID_PRIMITIVE.getFullyQualifiedTypeName().equals(
+                        type.getFullyQualifiedTypeName());
     }
 
     private boolean isTypeInAnySourcePackage(final JavaType type,
@@ -717,7 +715,7 @@ public class GwtTypeServiceImpl implements GwtTypeService {
                 return true; // It's a project type
             }
             if (isCollectionType(type)
-                    && (type.getParameters().size() == 1)
+                    && type.getParameters().size() == 1
                     && type.getParameters().get(0).getPackage()
                             .isWithin(sourcePackage)) {
                 return true; // It's a collection of a project type

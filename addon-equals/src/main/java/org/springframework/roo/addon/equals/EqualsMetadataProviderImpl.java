@@ -134,7 +134,7 @@ public class EqualsMetadataProviderImpl extends
                     || field.getFieldType().isArray()) {
                 continue;
             }
-            if ((versionField != null)
+            if (versionField != null
                     && field.getFieldName().equals(versionField.getFieldName())) {
                 continue;
             }

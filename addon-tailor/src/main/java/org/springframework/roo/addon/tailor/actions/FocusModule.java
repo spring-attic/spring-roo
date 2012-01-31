@@ -42,7 +42,7 @@ public class FocusModule extends AbstractAction {
     }
 
     public boolean isValid(final ActionConfig config) {
-        return (config != null) && StringUtils.hasText(config.getModule());
+        return config != null && StringUtils.hasText(config.getModule());
     }
 
 }

@@ -42,7 +42,7 @@ public final class OSGiUtils {
      */
     public static void execute(final BundleCallback callback,
             final BundleContext context) {
-        if ((callback == null) || (context == null)) {
+        if (callback == null || context == null) {
             return;
         }
         final Bundle[] bundles = context.getBundles();

@@ -38,7 +38,7 @@ public class MavenPathResolvingStrategy extends AbstractPathResolvingStrategy {
         for (final Pom pom : pomManagementService.getPoms()) {
             if (removeTrailingSeparator(identifier).startsWith(
                     removeTrailingSeparator(pom.getRoot()))
-                    && (removeTrailingSeparator(pom.getRoot()).length() > longest)) {
+                    && removeTrailingSeparator(pom.getRoot()).length() > longest) {
                 longest = removeTrailingSeparator(pom.getRoot()).length();
                 int nextLongest = 0;
                 for (final PhysicalPath thisPhysicalPath : pom
@@ -48,7 +48,7 @@ public class MavenPathResolvingStrategy extends AbstractPathResolvingStrategy {
                             .getCanonicalPath();
                     if (removeTrailingSeparator(identifier).startsWith(
                             possibleParent)
-                            && (possibleParent.length() > nextLongest)) {
+                            && possibleParent.length() > nextLongest) {
                         nextLongest = possibleParent.length();
                         physicalPath = thisPhysicalPath;
                     }

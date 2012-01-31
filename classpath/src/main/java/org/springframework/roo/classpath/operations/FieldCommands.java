@@ -226,8 +226,8 @@ public class FieldCommands implements CommandMarker {
         final MemberDetails memberDetails = memberDetailsScanner
                 .getMemberDetails(this.getClass().getName(), targetTypeCid);
         Assert.isTrue(
-                (memberDetails.getAnnotation(ENTITY) != null)
-                        || (memberDetails.getAnnotation(PERSISTENT) != null),
+                memberDetails.getAnnotation(ENTITY) != null
+                        || memberDetails.getAnnotation(PERSISTENT) != null,
                 "The field embedded command is only applicable to JPA @Entity or Spring Data @Persistent target types.");
 
         final EmbeddedField fieldDetails = new EmbeddedField(
@@ -377,11 +377,11 @@ public class FieldCommands implements CommandMarker {
         final AnnotationMetadata persistentAnnotation = memberDetails
                 .getAnnotation(PERSISTENT);
         Assert.isTrue(
-                (entityAnnotation != null) || (persistentAnnotation != null),
+                entityAnnotation != null || persistentAnnotation != null,
                 "The field reference command is only applicable to JPA @Entity or Spring Data @Persistent target types.");
 
-        Assert.isTrue((cardinality == Cardinality.MANY_TO_ONE)
-                || (cardinality == Cardinality.ONE_TO_ONE),
+        Assert.isTrue(cardinality == Cardinality.MANY_TO_ONE
+                || cardinality == Cardinality.ONE_TO_ONE,
                 "Cardinality must be MANY_TO_ONE or ONE_TO_ONE for the field reference command");
 
         final ClassOrInterfaceTypeDetails javaTypeDetails = typeLocationService
@@ -444,8 +444,8 @@ public class FieldCommands implements CommandMarker {
                 .getAnnotation(PERSISTENT);
 
         if (entityAnnotation != null) {
-            Assert.isTrue((cardinality == Cardinality.ONE_TO_MANY)
-                    || (cardinality == Cardinality.MANY_TO_MANY),
+            Assert.isTrue(cardinality == Cardinality.ONE_TO_MANY
+                    || cardinality == Cardinality.MANY_TO_MANY,
                     "Cardinality must be ONE_TO_MANY or MANY_TO_MANY for the field set command");
         }
         else if (cid.getPhysicalTypeCategory() == PhysicalTypeCategory.ENUMERATION) {

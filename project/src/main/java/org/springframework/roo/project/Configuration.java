@@ -51,8 +51,8 @@ public class Configuration implements Comparable<Configuration> {
 
     @Override
     public boolean equals(final Object obj) {
-        return (obj instanceof Configuration)
-                && (compareTo((Configuration) obj) == 0);
+        return obj instanceof Configuration
+                && compareTo((Configuration) obj) == 0;
     }
 
     /**
@@ -68,8 +68,8 @@ public class Configuration implements Comparable<Configuration> {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = (prime * result)
-                + ((configuration == null) ? 0 : configuration.hashCode());
+        result = prime * result
+                + (configuration == null ? 0 : configuration.hashCode());
         return result;
     }
 }

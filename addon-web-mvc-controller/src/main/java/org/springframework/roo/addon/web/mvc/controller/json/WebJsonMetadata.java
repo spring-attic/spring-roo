@@ -184,7 +184,7 @@ public class WebJsonMetadata extends
             final MemberTypeAdditions persistMethod) {
         if (StringUtils
                 .isBlank(annotationValues.getCreateFromJsonArrayMethod())
-                || (persistMethod == null)) {
+                || persistMethod == null) {
             return null;
         }
         final JavaSymbolName methodName = new JavaSymbolName(
@@ -254,8 +254,8 @@ public class WebJsonMetadata extends
 
     private MethodMetadataBuilder getFinderJsonMethod(
             final FinderMetadataDetails finderDetails, final String plural) {
-        if ((finderDetails == null)
-                || (jsonMetadata.getToJsonArrayMethodName() == null)) {
+        if (finderDetails == null
+                || jsonMetadata.getToJsonArrayMethodName() == null) {
             return null;
         }
         final JavaSymbolName finderMethodName = new JavaSymbolName("json"
@@ -367,7 +367,7 @@ public class WebJsonMetadata extends
     private MethodMetadataBuilder getJsonCreateMethod(
             final MemberTypeAdditions persistMethod) {
         if (StringUtils.isBlank(annotationValues.getCreateFromJsonMethod())
-                || (persistMethod == null)) {
+                || persistMethod == null) {
             return null;
         }
         final JavaSymbolName methodName = new JavaSymbolName(
@@ -434,8 +434,8 @@ public class WebJsonMetadata extends
             final FieldMetadata identifierField,
             final MemberTypeAdditions findMethod) {
         if (StringUtils.isBlank(annotationValues.getDeleteFromJsonMethod())
-                || (removeMethod == null) || (identifierField == null)
-                || (findMethod == null)) {
+                || removeMethod == null || identifierField == null
+                || findMethod == null) {
             return null;
         }
         final JavaSymbolName methodName = new JavaSymbolName(
@@ -513,7 +513,7 @@ public class WebJsonMetadata extends
     private MethodMetadataBuilder getJsonListMethod(
             final MemberTypeAdditions findAllMethod) {
         if (StringUtils.isBlank(annotationValues.getListJsonMethod())
-                || (findAllMethod == null)) {
+                || findAllMethod == null) {
             return null;
         }
         final JavaSymbolName methodName = new JavaSymbolName(
@@ -572,7 +572,7 @@ public class WebJsonMetadata extends
             final FieldMetadata identifierField,
             final MemberTypeAdditions findMethod) {
         if (StringUtils.isBlank(annotationValues.getShowJsonMethod())
-                || (identifierField == null) || (findMethod == null)) {
+                || identifierField == null || findMethod == null) {
             return null;
         }
         final JavaSymbolName methodName = new JavaSymbolName(
@@ -649,7 +649,7 @@ public class WebJsonMetadata extends
     private MethodMetadataBuilder getJsonUpdateMethod(
             final MemberTypeAdditions mergeMethod) {
         if (StringUtils.isBlank(annotationValues.getUpdateFromJsonMethod())
-                || (mergeMethod == null)) {
+                || mergeMethod == null) {
             return null;
         }
         final JavaSymbolName methodName = new JavaSymbolName(
@@ -731,7 +731,7 @@ public class WebJsonMetadata extends
             final MemberTypeAdditions mergeMethod) {
         if (StringUtils
                 .isBlank(annotationValues.getUpdateFromJsonArrayMethod())
-                || (mergeMethod == null)) {
+                || mergeMethod == null) {
             return null;
         }
         final JavaSymbolName methodName = new JavaSymbolName(

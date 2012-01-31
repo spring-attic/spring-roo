@@ -43,7 +43,7 @@ public abstract class AbstractHashCodeTrackingMetadataNotifier {
                 .getMetadataInstance(metadataItem.getId());
         final Integer existing = hashes.get(instanceId);
         final int newHash = metadataItem.hashCode();
-        if ((existing != null) && (newHash == existing)) {
+        if (existing != null && newHash == existing) {
             // No need to notify
             return;
         }

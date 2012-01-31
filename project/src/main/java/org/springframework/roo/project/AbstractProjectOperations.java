@@ -122,7 +122,7 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 
         final List<String> newPlugins = new ArrayList<String>();
         for (final Plugin plugin : plugins) {
-            if ((plugin != null) && !pom.isPluginRegistered(plugin.getGAV())) {
+            if (plugin != null && !pom.isPluginRegistered(plugin.getGAV())) {
                 pluginsElement.appendChild(plugin.getElement(document));
                 newPlugins.add(plugin.getSimpleDescription());
             }
@@ -254,7 +254,7 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
         final Pom pom = getPomFromModuleName(moduleName);
         Assert.notNull(pom,
                 "The pom is not available, so filter addition cannot be performed");
-        if ((filter == null) || pom.isFilterRegistered(filter)) {
+        if (filter == null || pom.isFilterRegistered(filter)) {
             return;
         }
 
@@ -583,7 +583,7 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
             final String... featureNames) {
         for (final String featureName : featureNames) {
             final Feature feature = features.get(featureName);
-            if ((feature != null)
+            if (feature != null
                     && feature.isInstalledInModule(getFocusedModuleName())) {
                 return true;
             }
@@ -816,7 +816,7 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
         final Pom pom = getPomFromModuleName(moduleName);
         Assert.notNull(pom,
                 "The pom is not available, so filter removal cannot be performed");
-        if ((filter == null) || !pom.isFilterRegistered(filter)) {
+        if (filter == null || !pom.isFilterRegistered(filter)) {
             return;
         }
 

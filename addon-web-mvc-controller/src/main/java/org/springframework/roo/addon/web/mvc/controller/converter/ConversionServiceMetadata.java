@@ -91,9 +91,8 @@ public class ConversionServiceMetadata extends
                         + " ID types, but was " + idTypes.size());
         Assert.notNull(toStringMethods, "ToString methods required");
 
-        if (!isValid()
-                || (relevantDomainTypes.isEmpty() && compositePrimaryKeyTypes
-                        .isEmpty())) {
+        if (!isValid() || relevantDomainTypes.isEmpty()
+                && compositePrimaryKeyTypes.isEmpty()) {
             valid = false;
             return;
         }

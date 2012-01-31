@@ -71,9 +71,9 @@ public class JdkUrlInputStreamService extends AbstractFlashingObject implements
             readSoFar++;
             if (totalSize > 0) {
                 // Total size is known
-                final int percentageDownloaded = Math
-                        .round((readSoFar / totalSize) * 100);
-                if (System.currentTimeMillis() > (lastNotified + 1000)) {
+                final int percentageDownloaded = Math.round(readSoFar
+                        / totalSize * 100);
+                if (System.currentTimeMillis() > lastNotified + 1000) {
                     if (lastPercentageIndicated != percentageDownloaded) {
                         flash(Level.FINE, "Downloaded " + percentageDownloaded
                                 + "% of " + text, MY_SLOT);
@@ -84,9 +84,9 @@ public class JdkUrlInputStreamService extends AbstractFlashingObject implements
             }
             else {
                 // Total size is not known, rely on time-based updates instead
-                if (System.currentTimeMillis() > (lastNotified + 1000)) {
+                if (System.currentTimeMillis() > lastNotified + 1000) {
                     flash(Level.FINE,
-                            "Downloaded " + Math.round((readSoFar / 1024))
+                            "Downloaded " + Math.round(readSoFar / 1024)
                                     + " kB of " + text, MY_SLOT);
                     lastNotified = System.currentTimeMillis();
                 }
@@ -99,7 +99,7 @@ public class JdkUrlInputStreamService extends AbstractFlashingObject implements
                 }
                 else {
                     flash(Level.FINE,
-                            "Downloaded " + Math.round((readSoFar / 1024))
+                            "Downloaded " + Math.round(readSoFar / 1024)
                                     + " kB of " + text, MY_SLOT);
                 }
                 flash(Level.FINE, "", MY_SLOT);

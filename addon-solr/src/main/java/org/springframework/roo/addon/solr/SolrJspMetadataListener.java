@@ -104,7 +104,7 @@ public class SolrJspMetadataListener implements MetadataProvider,
                 .createIdentifier(javaType, path);
         final SolrWebSearchMetadata webSearchMetadata = (SolrWebSearchMetadata) metadataService
                 .get(solrWebSearchMetadataKeyString);
-        if ((webSearchMetadata == null) || !webSearchMetadata.isValid()) {
+        if (webSearchMetadata == null || !webSearchMetadata.isValid()) {
             return null;
         }
 

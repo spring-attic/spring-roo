@@ -100,7 +100,7 @@ public class MongoEntityMetadataProviderImpl extends
         final MongoEntityAnnotationValues annotationValues = new MongoEntityAnnotationValues(
                 governorPhysicalTypeMetadata);
         final JavaType identifierType = annotationValues.getIdentifierType();
-        if (!annotationValues.isAnnotationFound() || (identifierType == null)) {
+        if (!annotationValues.isAnnotationFound() || identifierType == null) {
             return null;
         }
 

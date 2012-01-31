@@ -49,116 +49,84 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher
     public static String completionKeys = "TAB";
     public static String shellPrompt = ROO_PROMPT;
 
-    protected final Logger logger = HandlerUtils.getLogger(getClass());
-    protected boolean inBlockComment;
-    protected ExitShellRequest exitShellRequest;
-
-    /**
-     * Returns any classpath resources with the given path
-     * 
-     * @param path the path for which to search (never null)
-     * @return <code>null</code> if the search can't be performed
-     * @since 1.2.0
-     */
-    protected abstract Collection<URL> findResources(String path);
-
-    protected abstract String getHomeAsString();
-
-    protected abstract ExecutionStrategy getExecutionStrategy();
-
-    protected abstract Parser getParser();
-
-    // protected abstract Tailor getTailor();
-
-    @CliCommand(value = { "script" }, help = "Parses the specified resource file and executes its commands")
-    public void script(
-            @CliOption(key = { "", "file" }, help = "The file to locate and execute", mandatory = true) final File script,
-            @CliOption(key = "lineNumbers", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Display line numbers when executing the script") final boolean lineNumbers) {
-
-        Assert.notNull(script, "Script file to parse is required");
-        double startedNanoseconds = System.nanoTime();
-        final InputStream inputStream = openScript(script);
-
-        BufferedReader in = null;
+    public static String versionInfo() {
+        // Try to determine the bundle version
+        String bundleVersion = null;
+        String gitCommitHash = null;
+        JarFile jarFile = null;
         try {
-            in = new BufferedReader(new InputStreamReader(inputStream));
-            String line;
-            int i = 0;
-            while ((line = in.readLine()) != null) {
-                i++;
-                if (lineNumbers) {
-                    logger.fine("Line " + i + ": " + line);
-                }
-                else {
-                    logger.fine(line);
-                }
-                if (!"".equals(line.trim())) {
-                    boolean success = executeScriptLine(line);
-                    if (success
-                            && ((line.trim().startsWith("q") || line.trim()
-                                    .startsWith("ex")))) {
-                        break;
-                    }
-                    else if (!success) {
-                        // Abort script processing, given something went wrong
-                        throw new IllegalStateException(
-                                "Script execution aborted");
-                    }
-                }
+            final URL classContainer = AbstractShell.class
+                    .getProtectionDomain().getCodeSource().getLocation();
+            if (classContainer.toString().endsWith(".jar")) {
+                // Attempt to obtain the "Bundle-Version" version from the
+                // manifest
+                jarFile = new JarFile(new File(classContainer.toURI()), false);
+                final ZipEntry manifestEntry = jarFile
+                        .getEntry("META-INF/MANIFEST.MF");
+                final Manifest manifest = new Manifest(
+                        jarFile.getInputStream(manifestEntry));
+                bundleVersion = manifest.getMainAttributes().getValue(
+                        "Bundle-Version");
+                gitCommitHash = manifest.getMainAttributes().getValue(
+                        "Git-Commit-Hash");
             }
         }
-        catch (IOException e) {
-            throw new IllegalStateException(e);
+        catch (final IOException ignoreAndMoveOn) {
+        }
+        catch (final URISyntaxException ignoreAndMoveOn) {
         }
         finally {
-            IOUtils.closeQuietly(inputStream, in);
-            double executionDurationInSeconds = (System.nanoTime() - startedNanoseconds) / 1000000000D;
-            logger.fine("Script required "
-                    + MathUtils.round(executionDurationInSeconds, 3)
-                    + " seconds to execute");
+            IOUtils.closeQuietly(jarFile);
         }
-    }
 
-    /**
-     * Opens the given script for reading
-     * 
-     * @param script the script to read (required)
-     * @return a non-<code>null</code> input stream
-     */
-    private InputStream openScript(final File script) {
-        try {
-            return new BufferedInputStream(new FileInputStream(script));
+        final StringBuilder sb = new StringBuilder();
+
+        if (bundleVersion != null) {
+            sb.append(bundleVersion);
         }
-        catch (final FileNotFoundException fnfe) {
-            // Try to find the script via the classloader
-            final Collection<URL> urls = findResources(script.getName());
 
-            // Handle search failure
-            Assert.notNull(urls,
-                    "Unexpected error looking for '" + script.getName() + "'");
-
-            // Handle the search being OK but the file simply not being present
-            Assert.notEmpty(urls, "Script '" + script
-                    + "' not found on disk or in classpath");
-            Assert.isTrue(urls.size() == 1, "More than one '" + script
-                    + "' was found in the classpath; unable to continue");
-            try {
-                return urls.iterator().next().openStream();
+        if (gitCommitHash != null && gitCommitHash.length() > 7) {
+            if (sb.length() > 0) {
+                sb.append(" ");
             }
-            catch (IOException e) {
-                throw new IllegalStateException(e);
-            }
+            sb.append("[rev ");
+            sb.append(gitCommitHash.substring(0, 7));
+            sb.append("]");
         }
+
+        if (sb.length() == 0) {
+            sb.append("UNKNOWN VERSION");
+        }
+
+        return sb.toString();
     }
 
-    /**
-     * Execute the single line from a script.
-     * <p>
-     * This method can be overridden by sub-classes to pre-process script lines.
-     */
-    protected boolean executeScriptLine(final String line) {
-        return executeCommand(line);
+    protected final Logger logger = HandlerUtils.getLogger(getClass());
+    protected boolean inBlockComment;
+
+    protected ExitShellRequest exitShellRequest;
+
+    @CliCommand(value = { "/*" }, help = "Start of block comment")
+    public void blockCommentBegin() {
+        Assert.isTrue(!inBlockComment,
+                "Cannot open a new block comment when one already active");
+        inBlockComment = true;
     }
+
+    @CliCommand(value = { "*/" }, help = "End of block comment")
+    public void blockCommentFinish() {
+        Assert.isTrue(inBlockComment,
+                "Cannot close a block comment when it has not been opened");
+        inBlockComment = false;
+    }
+
+    @CliCommand(value = { "date" }, help = "Displays the local date and time")
+    public String date() {
+        return DateFormat.getDateTimeInstance(DateFormat.FULL, DateFormat.FULL)
+                .format(new Date());
+    }
+
+    // protected abstract Tailor getTailor();
 
     public boolean executeCommand(String line) {
         // Another command was attempted
@@ -172,7 +140,7 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher
             try {
                 Thread.sleep(500);
             }
-            catch (InterruptedException ignore) {
+            catch (final InterruptedException ignore) {
             }
             if (!flashedMessage) {
                 flash(Level.INFO, "Please wait - still loading", MY_SLOT);
@@ -188,7 +156,7 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher
             // We support simple block comments; ie a single pair per line
             if (!inBlockComment && line.contains("/*") && line.contains("*/")) {
                 blockCommentBegin();
-                String lhs = line.substring(0, line.lastIndexOf("/*"));
+                final String lhs = line.substring(0, line.lastIndexOf("/*"));
                 if (line.contains("*/")) {
                     line = lhs + line.substring(line.lastIndexOf("*/") + 2);
                     blockCommentFinish();
@@ -225,7 +193,7 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher
             }
 
             setShellStatus(Status.EXECUTING);
-            Object result = executionStrategy.execute(parseResult);
+            final Object result = executionStrategy.execute(parseResult);
             setShellStatus(Status.EXECUTION_RESULT_PROCESSING);
             if (result != null) {
                 if (result instanceof ExitShellRequest) {
@@ -236,7 +204,7 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher
                     executionStrategy.terminate();
                 }
                 else if (result instanceof Iterable<?>) {
-                    for (Object o : (Iterable<?>) result) {
+                    for (final Object o : (Iterable<?>) result) {
                         logger.info(o.toString());
                     }
                 }
@@ -249,19 +217,132 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher
             setShellStatus(Status.EXECUTION_SUCCESS, line, parseResult);
             return true;
         }
-        catch (RuntimeException e) {
+        catch (final RuntimeException e) {
             setShellStatus(Status.EXECUTION_FAILED, line, parseResult);
             // We rely on execution strategy to log it
             try {
                 logCommandIfRequired(line, false);
             }
-            catch (Exception ignored) {
+            catch (final Exception ignored) {
             }
             return false;
         }
         finally {
             setShellStatus(Status.USER_INPUT);
         }
+    }
+
+    /**
+     * Execute the single line from a script.
+     * <p>
+     * This method can be overridden by sub-classes to pre-process script lines.
+     */
+    protected boolean executeScriptLine(final String line) {
+        return executeCommand(line);
+    }
+
+    /**
+     * Returns any classpath resources with the given path
+     * 
+     * @param path the path for which to search (never null)
+     * @return <code>null</code> if the search can't be performed
+     * @since 1.2.0
+     */
+    protected abstract Collection<URL> findResources(String path);
+
+    /**
+     * Simple implementation of {@link #flash(Level, String, String)} that
+     * simply displays the message via the logger. It is strongly recommended
+     * shell implementations override this method with a more effective
+     * approach.
+     */
+    public void flash(final Level level, final String message, final String slot) {
+        Assert.notNull(level, "Level is required for a flash message");
+        Assert.notNull(message, "Message is required for a flash message");
+        Assert.hasText(slot, "Slot name must be specified for a flash message");
+        if (!"".equals(message)) {
+            logger.log(level, message);
+        }
+    }
+
+    @CliCommand(value = { "flash test" }, help = "Tests message flashing")
+    public void flashCustom() throws Exception {
+        flash(Level.FINE, "Hello world", "a");
+        Thread.sleep(150);
+        flash(Level.FINE, "Short world", "a");
+        Thread.sleep(150);
+        flash(Level.FINE, "Small", "a");
+        Thread.sleep(150);
+        flash(Level.FINE, "Downloading xyz", "b");
+        Thread.sleep(150);
+        flash(Level.FINE, "", "a");
+        Thread.sleep(150);
+        flash(Level.FINE, "Downloaded xyz", "b");
+        Thread.sleep(150);
+        flash(Level.FINE, "System online", "c");
+        Thread.sleep(150);
+        flash(Level.FINE, "System ready", "c");
+        Thread.sleep(150);
+        flash(Level.FINE, "System farewell", "c");
+        Thread.sleep(150);
+        flash(Level.FINE, "", "c");
+        Thread.sleep(150);
+        flash(Level.FINE, "", "b");
+    }
+
+    protected abstract ExecutionStrategy getExecutionStrategy();
+
+    public ExitShellRequest getExitShellRequest() {
+        return exitShellRequest;
+    }
+
+    /**
+     * Obtains the home directory for the current shell instance.
+     * <p>
+     * Note: calls the {@link #getHomeAsString()} method to allow subclasses to
+     * provide the home directory location as string using different
+     * environment-specific strategies.
+     * <p>
+     * If the path indicated by {@link #getHomeAsString()} exists and refers to
+     * a directory, that directory is returned.
+     * <p>
+     * If the path indicated by {@link #getHomeAsString()} exists and refers to
+     * a file, an exception is thrown.
+     * <p>
+     * If the path indicated by {@link #getHomeAsString()} does not exist, it
+     * will be created as a directory. If this fails, an exception will be
+     * thrown.
+     * 
+     * @return the home directory for the current shell instance (which is
+     *         guaranteed to exist and be a directory)
+     */
+    public File getHome() {
+        final String rooHome = getHomeAsString();
+        final File f = new File(rooHome);
+        Assert.isTrue(!f.exists() || f.exists() && f.isDirectory(), "Path '"
+                + f.getAbsolutePath()
+                + "' must be a directory, or it must not exist");
+        if (!f.exists()) {
+            f.mkdirs();
+        }
+        Assert.isTrue(
+                f.exists() && f.isDirectory(),
+                "Path '"
+                        + f.getAbsolutePath()
+                        + "' is not a directory; please specify roo.home system property correctly");
+        return f;
+    }
+
+    protected abstract String getHomeAsString();
+
+    protected abstract Parser getParser();
+
+    public String getShellPrompt() {
+        return shellPrompt;
+    }
+
+    @CliCommand(value = { "//", ";" }, help = "Inline comment markers (start of line only)")
+    public void inlineComment() {
     }
 
     /**
@@ -309,6 +390,99 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher
     }
 
     /**
+     * Opens the given script for reading
+     * 
+     * @param script the script to read (required)
+     * @return a non-<code>null</code> input stream
+     */
+    private InputStream openScript(final File script) {
+        try {
+            return new BufferedInputStream(new FileInputStream(script));
+        }
+        catch (final FileNotFoundException fnfe) {
+            // Try to find the script via the classloader
+            final Collection<URL> urls = findResources(script.getName());
+
+            // Handle search failure
+            Assert.notNull(urls,
+                    "Unexpected error looking for '" + script.getName() + "'");
+
+            // Handle the search being OK but the file simply not being present
+            Assert.notEmpty(urls, "Script '" + script
+                    + "' not found on disk or in classpath");
+            Assert.isTrue(urls.size() == 1, "More than one '" + script
+                    + "' was found in the classpath; unable to continue");
+            try {
+                return urls.iterator().next().openStream();
+            }
+            catch (final IOException e) {
+                throw new IllegalStateException(e);
+            }
+        }
+    }
+
+    @CliCommand(value = { "system properties" }, help = "Shows the shell's properties")
+    public String props() {
+        final Set<String> data = new TreeSet<String>();
+        for (final Entry<Object, Object> entry : System.getProperties()
+                .entrySet()) {
+            data.add(entry.getKey() + " = " + entry.getValue());
+        }
+
+        return StringUtils.collectionToDelimitedString(data, LINE_SEPARATOR)
+                + LINE_SEPARATOR;
+    }
+
+    @CliCommand(value = { "script" }, help = "Parses the specified resource file and executes its commands")
+    public void script(
+            @CliOption(key = { "", "file" }, help = "The file to locate and execute", mandatory = true) final File script,
+            @CliOption(key = "lineNumbers", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Display line numbers when executing the script") final boolean lineNumbers) {
+
+        Assert.notNull(script, "Script file to parse is required");
+        final double startedNanoseconds = System.nanoTime();
+        final InputStream inputStream = openScript(script);
+
+        BufferedReader in = null;
+        try {
+            in = new BufferedReader(new InputStreamReader(inputStream));
+            String line;
+            int i = 0;
+            while ((line = in.readLine()) != null) {
+                i++;
+                if (lineNumbers) {
+                    logger.fine("Line " + i + ": " + line);
+                }
+                else {
+                    logger.fine(line);
+                }
+                if (!"".equals(line.trim())) {
+                    final boolean success = executeScriptLine(line);
+                    if (success
+                            && (line.trim().startsWith("q") || line.trim()
+                                    .startsWith("ex"))) {
+                        break;
+                    }
+                    else if (!success) {
+                        // Abort script processing, given something went wrong
+                        throw new IllegalStateException(
+                                "Script execution aborted");
+                    }
+                }
+            }
+        }
+        catch (final IOException e) {
+            throw new IllegalStateException(e);
+        }
+        finally {
+            IOUtils.closeQuietly(inputStream, in);
+            final double executionDurationInSeconds = (System.nanoTime() - startedNanoseconds) / 1000000000D;
+            logger.fine("Script required "
+                    + MathUtils.round(executionDurationInSeconds, 3)
+                    + " seconds to execute");
+        }
+    }
+
+    /**
      * Base implementation of the {@link Shell#setPromptPath(String)} method,
      * designed for simple shell implementations. Advanced implementations (eg
      * those that support ANSI codes etc) will likely want to override this
@@ -333,79 +507,14 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher
      * @param path to set (can be null or empty)
      * @param overrideStyle
      */
-    public void setPromptPath(String path, boolean overrideStyle) {
+    public void setPromptPath(final String path, final boolean overrideStyle) {
         setPromptPath(path);
-    }
-
-    public ExitShellRequest getExitShellRequest() {
-        return exitShellRequest;
-    }
-
-    @CliCommand(value = { "//", ";" }, help = "Inline comment markers (start of line only)")
-    public void inlineComment() {
-    }
-
-    @CliCommand(value = { "/*" }, help = "Start of block comment")
-    public void blockCommentBegin() {
-        Assert.isTrue(!inBlockComment,
-                "Cannot open a new block comment when one already active");
-        inBlockComment = true;
-    }
-
-    @CliCommand(value = { "*/" }, help = "End of block comment")
-    public void blockCommentFinish() {
-        Assert.isTrue(inBlockComment,
-                "Cannot close a block comment when it has not been opened");
-        inBlockComment = false;
-    }
-
-    @CliCommand(value = { "system properties" }, help = "Shows the shell's properties")
-    public String props() {
-        final Set<String> data = new TreeSet<String>();
-        for (final Entry<Object, Object> entry : System.getProperties()
-                .entrySet()) {
-            data.add(entry.getKey() + " = " + entry.getValue());
-        }
-
-        return StringUtils.collectionToDelimitedString(data, LINE_SEPARATOR)
-                + LINE_SEPARATOR;
-    }
-
-    @CliCommand(value = { "date" }, help = "Displays the local date and time")
-    public String date() {
-        return DateFormat.getDateTimeInstance(DateFormat.FULL, DateFormat.FULL)
-                .format(new Date());
-    }
-
-    @CliCommand(value = { "flash test" }, help = "Tests message flashing")
-    public void flashCustom() throws Exception {
-        flash(Level.FINE, "Hello world", "a");
-        Thread.sleep(150);
-        flash(Level.FINE, "Short world", "a");
-        Thread.sleep(150);
-        flash(Level.FINE, "Small", "a");
-        Thread.sleep(150);
-        flash(Level.FINE, "Downloading xyz", "b");
-        Thread.sleep(150);
-        flash(Level.FINE, "", "a");
-        Thread.sleep(150);
-        flash(Level.FINE, "Downloaded xyz", "b");
-        Thread.sleep(150);
-        flash(Level.FINE, "System online", "c");
-        Thread.sleep(150);
-        flash(Level.FINE, "System ready", "c");
-        Thread.sleep(150);
-        flash(Level.FINE, "System farewell", "c");
-        Thread.sleep(150);
-        flash(Level.FINE, "", "c");
-        Thread.sleep(150);
-        flash(Level.FINE, "", "b");
     }
 
     @CliCommand(value = { "version" }, help = "Displays shell version")
     public String version(
             @CliOption(key = "", help = "Special version flags") final String extra) {
-        StringBuilder sb = new StringBuilder();
+        final StringBuilder sb = new StringBuilder();
 
         if ("jaime".equals(extra)) {
             sb.append("               /\\ /l").append(LINE_SEPARATOR);
@@ -457,113 +566,5 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher
         sb.append(LINE_SEPARATOR);
 
         return sb.toString();
-    }
-
-    public static String versionInfo() {
-        // Try to determine the bundle version
-        String bundleVersion = null;
-        String gitCommitHash = null;
-        JarFile jarFile = null;
-        try {
-            URL classContainer = AbstractShell.class.getProtectionDomain()
-                    .getCodeSource().getLocation();
-            if (classContainer.toString().endsWith(".jar")) {
-                // Attempt to obtain the "Bundle-Version" version from the
-                // manifest
-                jarFile = new JarFile(new File(classContainer.toURI()), false);
-                ZipEntry manifestEntry = jarFile
-                        .getEntry("META-INF/MANIFEST.MF");
-                Manifest manifest = new Manifest(
-                        jarFile.getInputStream(manifestEntry));
-                bundleVersion = manifest.getMainAttributes().getValue(
-                        "Bundle-Version");
-                gitCommitHash = manifest.getMainAttributes().getValue(
-                        "Git-Commit-Hash");
-            }
-        }
-        catch (IOException ignoreAndMoveOn) {
-        }
-        catch (URISyntaxException ignoreAndMoveOn) {
-        }
-        finally {
-            IOUtils.closeQuietly(jarFile);
-        }
-
-        StringBuilder sb = new StringBuilder();
-
-        if (bundleVersion != null) {
-            sb.append(bundleVersion);
-        }
-
-        if (gitCommitHash != null && gitCommitHash.length() > 7) {
-            if (sb.length() > 0) {
-                sb.append(" ");
-            }
-            sb.append("[rev ");
-            sb.append(gitCommitHash.substring(0, 7));
-            sb.append("]");
-        }
-
-        if (sb.length() == 0) {
-            sb.append("UNKNOWN VERSION");
-        }
-
-        return sb.toString();
-    }
-
-    public String getShellPrompt() {
-        return shellPrompt;
-    }
-
-    /**
-     * Obtains the home directory for the current shell instance.
-     * <p>
-     * Note: calls the {@link #getHomeAsString()} method to allow subclasses to
-     * provide the home directory location as string using different
-     * environment-specific strategies.
-     * <p>
-     * If the path indicated by {@link #getHomeAsString()} exists and refers to
-     * a directory, that directory is returned.
-     * <p>
-     * If the path indicated by {@link #getHomeAsString()} exists and refers to
-     * a file, an exception is thrown.
-     * <p>
-     * If the path indicated by {@link #getHomeAsString()} does not exist, it
-     * will be created as a directory. If this fails, an exception will be
-     * thrown.
-     * 
-     * @return the home directory for the current shell instance (which is
-     *         guaranteed to exist and be a directory)
-     */
-    public File getHome() {
-        String rooHome = getHomeAsString();
-        File f = new File(rooHome);
-        Assert.isTrue(!f.exists() || (f.exists() && f.isDirectory()), "Path '"
-                + f.getAbsolutePath()
-                + "' must be a directory, or it must not exist");
-        if (!f.exists()) {
-            f.mkdirs();
-        }
-        Assert.isTrue(
-                f.exists() && f.isDirectory(),
-                "Path '"
-                        + f.getAbsolutePath()
-                        + "' is not a directory; please specify roo.home system property correctly");
-        return f;
-    }
-
-    /**
-     * Simple implementation of {@link #flash(Level, String, String)} that
-     * simply displays the message via the logger. It is strongly recommended
-     * shell implementations override this method with a more effective
-     * approach.
-     */
-    public void flash(final Level level, final String message, final String slot) {
-        Assert.notNull(level, "Level is required for a flash message");
-        Assert.notNull(message, "Message is required for a flash message");
-        Assert.hasText(slot, "Slot name must be specified for a flash message");
-        if (!("".equals(message))) {
-            logger.log(level, message);
-        }
     }
 }

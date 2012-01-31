@@ -27,7 +27,7 @@ public abstract class HexUtils {
             result[j++] = HEX[(0xF0 & bytes[i]) >>> 4];
 
             // Bottom 4
-            result[j++] = HEX[(0x0F & bytes[i])];
+            result[j++] = HEX[0x0F & bytes[i]];
         }
 
         return result;

@@ -41,7 +41,7 @@ public abstract class AnnotationMetadataUtils {
         }
         else if (value instanceof ClassAttributeValue) {
             final JavaType clazz = ((ClassAttributeValue) value).getValue();
-            if ((resolver == null)
+            if (resolver == null
                     || resolver
                             .isFullyQualifiedFormRequiredAfterAutoImport(clazz)) {
                 attributeValue = clazz.getFullyQualifiedTypeName() + ".class";
@@ -63,7 +63,7 @@ public abstract class AnnotationMetadataUtils {
             final EnumDetails enumDetails = ((EnumAttributeValue) value)
                     .getValue();
             final JavaType clazz = enumDetails.getType();
-            if ((resolver == null)
+            if (resolver == null
                     || resolver
                             .isFullyQualifiedFormRequiredAfterAutoImport(clazz)) {
                 attributeValue = clazz.getFullyQualifiedTypeName() + "."
@@ -92,7 +92,7 @@ public abstract class AnnotationMetadataUtils {
             final StringBuilder data = new StringBuilder("@");
             final JavaType annotationType = annotationMetadata
                     .getAnnotationType();
-            if ((resolver == null)
+            if (resolver == null
                     || resolver
                             .isFullyQualifiedFormRequiredAfterAutoImport(annotationType)) {
                 data.append(annotationType.getFullyQualifiedTypeName());
@@ -197,7 +197,7 @@ public abstract class AnnotationMetadataUtils {
             if (attributeValue != null) {
                 // We have a supported attribute
                 if (!"value".equals(attributeName.getSymbolName())
-                        || (annotation.getAttributeNames().size() > 1)) {
+                        || annotation.getAttributeNames().size() > 1) {
                     sb.append(attributeName.getSymbolName());
                     sb.append(" = ");
                 }

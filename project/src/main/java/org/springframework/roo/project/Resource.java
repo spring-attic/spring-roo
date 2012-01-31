@@ -40,8 +40,8 @@ public class Resource implements Comparable<Resource> {
 
         final Element filteringElement = XmlUtils.findFirstElement("filtering",
                 resource);
-        filtering = (filteringElement == null ? null : Boolean
-                .valueOf(filteringElement.getTextContent()));
+        filtering = filteringElement == null ? null : Boolean
+                .valueOf(filteringElement.getTextContent());
 
         // Parsing for includes
         for (final Element include : XmlUtils.findElements("includes/include",

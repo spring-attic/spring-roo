@@ -250,13 +250,13 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
         final Document document = XmlUtils.readXml(templateInputStream);
 
         final Element root = (Element) document.getLastChild();
-        if ((root == null) || !"html".equals(root.getNodeName())) {
+        if (root == null || !"html".equals(root.getNodeName())) {
             throw new IllegalArgumentException(
                     "Could not parse selenium test case template file!");
         }
 
-        name = (name != null ? name : "Selenium test for "
-                + controller.getSimpleTypeName());
+        name = name != null ? name : "Selenium test for "
+                + controller.getSimpleTypeName();
         XmlUtils.findRequiredElement("/html/head/title", root).setTextContent(
                 name);
 

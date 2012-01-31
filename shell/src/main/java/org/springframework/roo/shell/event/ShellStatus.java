@@ -15,13 +15,14 @@ import org.springframework.roo.shell.ParseResult;
  */
 public class ShellStatus {
 
-    private final Status status;
-    private String message = "";
-    private ParseResult parseResult;
-
     public enum Status {
         STARTING, STARTED, USER_INPUT, PARSING, EXECUTING, EXECUTION_RESULT_PROCESSING, EXECUTION_SUCCESS, EXECUTION_FAILED, SHUTTING_DOWN
     }
+
+    private final Status status;
+    private String message = "";
+
+    private ParseResult parseResult;
 
     ShellStatus(final Status status) {
         this.status = status;
@@ -30,60 +31,69 @@ public class ShellStatus {
     ShellStatus(final Status status, final String msg,
             final ParseResult parseResult) {
         this.status = status;
-        this.message = msg;
+        message = msg;
         this.parseResult = parseResult;
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final ShellStatus other = (ShellStatus) obj;
+        if (message == null) {
+            if (other.message != null) {
+                return false;
+            }
+        }
+        else if (!message.equals(other.message)) {
+            return false;
+        }
+        if (parseResult == null) {
+            if (other.parseResult != null) {
+                return false;
+            }
+        }
+        else if (!parseResult.equals(other.parseResult)) {
+            return false;
+        }
+        if (status == null) {
+            if (other.status != null) {
+                return false;
+            }
+        }
+        else if (!status.equals(other.status)) {
+            return false;
+        }
+        return true;
     }
 
     public String getMessage() {
         return message;
     }
 
-    public Status getStatus() {
-        return status;
-    }
-
     public final ParseResult getParseResult() {
         return parseResult;
+    }
+
+    public Status getStatus() {
+        return status;
     }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((message == null) ? 0 : message.hashCode());
+        result = prime * result + (message == null ? 0 : message.hashCode());
         result = prime * result
-                + ((parseResult == null) ? 0 : parseResult.hashCode());
-        result = prime * result + ((status == null) ? 0 : status.hashCode());
+                + (parseResult == null ? 0 : parseResult.hashCode());
+        result = prime * result + (status == null ? 0 : status.hashCode());
         return result;
-    }
-
-    @Override
-    public boolean equals(final Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        ShellStatus other = (ShellStatus) obj;
-        if (message == null) {
-            if (other.message != null)
-                return false;
-        }
-        else if (!message.equals(other.message))
-            return false;
-        if (parseResult == null) {
-            if (other.parseResult != null)
-                return false;
-        }
-        else if (!parseResult.equals(other.parseResult))
-            return false;
-        if (status == null) {
-            if (other.status != null)
-                return false;
-        }
-        else if (!status.equals(other.status))
-            return false;
-        return true;
     }
 }

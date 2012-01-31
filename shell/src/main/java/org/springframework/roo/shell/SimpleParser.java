@@ -80,21 +80,21 @@ public class SimpleParser implements Parser {
             }
 
             if (wordSoFarIncludingThis.equals(" ")
-                    || (bufferIndex == (buffer.length() - 1))) {
-                if ((bufferIndex == (buffer.length() - 1))
+                    || bufferIndex == buffer.length() - 1) {
+                if (bufferIndex == buffer.length() - 1
                         && !"".equals(wordSoFarIncludingThis.trim())) {
                     lastWord = wordSoFarIncludingThis.trim();
                 }
 
                 // At end of word or buffer. Let's see if a word matched or not
                 for (int candidate = lastCommandWordUsed; candidate < commandWords.length; candidate++) {
-                    if ((lastWord != null) && (lastWord.length() > 0)
+                    if (lastWord != null && lastWord.length() > 0
                             && commandWords[candidate].startsWith(lastWord)) {
                         if (bufferToReturn == null) {
                             // This is the first match, so ensure the intended
                             // match really represents the start of a command
                             // and not a later word within it
-                            if ((lastCommandWordUsed == 0) && (candidate > 0)) {
+                            if (lastCommandWordUsed == 0 && candidate > 0) {
                                 // This is not a valid match
                                 break next_buffer_loop;
                             }
@@ -103,7 +103,7 @@ public class SimpleParser implements Parser {
                         if (bufferToReturn != null) {
                             // We already matched something earlier, so ensure
                             // we didn't skip any word
-                            if (candidate != (lastCommandWordUsed + 1)) {
+                            if (candidate != lastCommandWordUsed + 1) {
                                 // User has skipped a word
                                 bufferToReturn = null;
                                 break next_buffer_loop;
@@ -112,7 +112,7 @@ public class SimpleParser implements Parser {
 
                         bufferToReturn = bufferRemaining;
                         lastCommandWordUsed = candidate;
-                        if ((candidate + 1) == commandWords.length) {
+                        if (candidate + 1 == commandWords.length) {
                             // This was a match for the final word in the
                             // command, so abort
                             break next_buffer_loop;
@@ -134,7 +134,7 @@ public class SimpleParser implements Parser {
         // We only consider it a match if ALL words were actually used
         if (bufferToReturn != null) {
             if (!strictMatching
-                    || ((lastCommandWordUsed + 1) == commandWords.length)) {
+                    || lastCommandWordUsed + 1 == commandWords.length) {
                 return bufferToReturn;
             }
         }
@@ -393,10 +393,8 @@ public class SimpleParser implements Parser {
 
             // Handle suggesting an option key if they haven't got one presently
             // specified (or they've completed a full option key/value pair)
-            if ((lastOptionKey == null)
-                    || (!"".equals(lastOptionKey)
-                            && !"".equals(lastOptionValue) && translated
-                                .endsWith(" "))) {
+            if (lastOptionKey == null || !"".equals(lastOptionKey)
+                    && !"".equals(lastOptionValue) && translated.endsWith(" ")) {
                 // We have either NEVER specified an option key/value pair
                 // OR we have specified a full option key/value pair
 
@@ -432,7 +430,7 @@ public class SimpleParser implements Parser {
                                             }
                                         }
                                     }
-                                    if ((paramType != null)
+                                    if (paramType != null
                                             && candidate.supports(paramType,
                                                     include.optionContext())) {
                                         // Try to invoke this usable converter
@@ -483,7 +481,7 @@ public class SimpleParser implements Parser {
             }
 
             // Handle completing the option key they're presently typing
-            if (((lastOptionValue == null) || "".equals(lastOptionValue))
+            if ((lastOptionValue == null || "".equals(lastOptionValue))
                     && !translated.endsWith(" ")) {
                 // Given we haven't got an option value of any form, and there's
                 // no space at the buffer end, we must still be typing an option
@@ -491,15 +489,13 @@ public class SimpleParser implements Parser {
 
                 for (final CliOption option : cliOptions) {
                     for (final String value : option.key()) {
-                        if ((value != null)
-                                && (lastOptionKey != null)
+                        if (value != null
+                                && lastOptionKey != null
                                 && value.regionMatches(true, 0, lastOptionKey,
                                         0, lastOptionKey.length())) {
                             final String completionValue = translated
-                                    .substring(
-                                            0,
-                                            (translated.length() - lastOptionKey
-                                                    .length()))
+                                    .substring(0, translated.length()
+                                            - lastOptionKey.length())
                                     + value + " ";
                             results.add(new Completion(completionValue));
                         }
@@ -511,7 +507,7 @@ public class SimpleParser implements Parser {
 
             // To be here, we are NOT typing an option key (or we might be, and
             // there are no further option keys left)
-            if ((lastOptionKey != null) && !"".equals(lastOptionKey)) {
+            if (lastOptionKey != null && !"".equals(lastOptionKey)) {
                 // Lookup the relevant CliOption that applies to this
                 // lastOptionKey
                 // We do this via the parameter type
@@ -605,8 +601,8 @@ public class SimpleParser implements Parser {
                                             && !lastOptionValue
                                                     .equalsIgnoreCase(currentValue
                                                             .getValue())
-                                            && (lastOptionValue.length() < currentValue
-                                                    .getValue().length())) {
+                                            && lastOptionValue.length() < currentValue
+                                                    .getValue().length()) {
                                         results.add(new Completion(prefix
                                                 + currentValue.getValue()
                                                 + suffix, currentValue
@@ -1060,7 +1056,7 @@ public class SimpleParser implements Parser {
                             }
                         }
                         // Skip this @CliCommand if it's not available
-                        if ((available != null) && !available) {
+                        if (available != null && !available) {
                             continue;
                         }
                     }
@@ -1369,7 +1365,7 @@ public class SimpleParser implements Parser {
 
                     // If the option has been specified to be mandatory then the
                     // result should never be null
-                    if ((result == null) && cliOption.mandatory()) {
+                    if (result == null && cliOption.mandatory()) {
                         throw new IllegalStateException();
                     }
                     arguments.add(result);

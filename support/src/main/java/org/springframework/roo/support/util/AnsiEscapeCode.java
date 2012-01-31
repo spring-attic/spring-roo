@@ -28,7 +28,7 @@ public enum AnsiEscapeCode {
      */
     public static String decorate(final String text,
             final AnsiEscapeCode... codes) {
-        if ((text == null) || "".equals(text)) {
+        if (text == null || "".equals(text)) {
             return text;
         }
 
@@ -39,7 +39,7 @@ public enum AnsiEscapeCode {
             }
         }
         sb.append(text);
-        if ((codes != null) && (codes.length > 0) && ANSI_SUPPORTED) {
+        if (codes != null && codes.length > 0 && ANSI_SUPPORTED) {
             sb.append(OFF.code);
         }
         return sb.toString();

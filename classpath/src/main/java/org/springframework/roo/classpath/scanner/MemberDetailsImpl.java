@@ -113,7 +113,7 @@ public class MemberDetailsImpl implements MemberDetails {
         for (final MemberHoldingTypeDetails memberHoldingTypeDetails : details) {
             final MethodMetadata method = MemberFindingUtils.getDeclaredMethod(
                     memberHoldingTypeDetails, methodName, parameters);
-            if ((method != null)
+            if (method != null
                     && !method.getDeclaredByMetadataId().equals(excludingMid)) {
                 return method;
             }
@@ -164,7 +164,7 @@ public class MemberDetailsImpl implements MemberDetails {
             // immutable fields
             final FieldMetadata field = BeanInfoUtils
                     .getFieldForJavaBeanMethod(this, method);
-            if ((field == null)
+            if (field == null
                     || field.getCustomData().keySet()
                             .contains(CustomDataKeys.TRANSIENT_FIELD)
                     || !BeanInfoUtils.hasAccessorAndMutator(field, this)) {
@@ -189,7 +189,7 @@ public class MemberDetailsImpl implements MemberDetails {
             final List<JavaType> parameterTypes,
             final String declaredByMetadataId) {
         final MethodMetadata method = getMethod(methodName, parameterTypes);
-        return (method != null)
+        return method != null
                 && !method.getDeclaredByMetadataId().equals(
                         declaredByMetadataId);
     }

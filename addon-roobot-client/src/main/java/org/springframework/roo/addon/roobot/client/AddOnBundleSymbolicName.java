@@ -32,8 +32,8 @@ public class AddOnBundleSymbolicName implements
 
     @Override
     public final boolean equals(final Object obj) {
-        return (obj instanceof AddOnBundleSymbolicName)
-                && (compareTo((AddOnBundleSymbolicName) obj) == 0);
+        return obj instanceof AddOnBundleSymbolicName
+                && compareTo((AddOnBundleSymbolicName) obj) == 0;
     }
 
     public String getKey() {

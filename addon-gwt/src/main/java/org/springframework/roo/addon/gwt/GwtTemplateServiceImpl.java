@@ -198,7 +198,7 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
                         .getSimpleTypeName();
                 final ClassOrInterfaceTypeDetails entity = gwtTypeService
                         .lookupEntityFromProxy(proxy);
-                if ((entity != null)
+                if (entity != null
                         && !Modifier.isAbstract(entity.getModifier())) {
                     final String entitySimpleName = entity.getName()
                             .getSimpleTypeName();
@@ -224,7 +224,7 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
                 }
                 final ClassOrInterfaceTypeDetails entity = gwtTypeService
                         .lookupEntityFromProxy(proxy);
-                if ((entity != null)
+                if (entity != null
                         && !Modifier.isAbstract(entity.getModifier())) {
                     final String entitySimpleName = entity.getName()
                             .getSimpleTypeName();
@@ -445,7 +445,7 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
             }
 
             // Determine if this is the first date property.
-            if ((dateProperty == null) && gwtProxyProperty.isDate()) {
+            if (dateProperty == null && gwtProxyProperty.isDate()) {
                 dateProperty = gwtProxyProperty;
             }
 
@@ -744,7 +744,7 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
                         }
                     }
                     for (final Element el : sortedElements) {
-                        if ((el.getParentNode() != null)
+                        if (el.getParentNode() != null
                                 && el.getParentNode().equals(
                                         existingHoldingElement)) {
                             existingHoldingElement.removeChild(el);
@@ -780,11 +780,6 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
                     javaType.getArgName(), javaType.getParameters());
         }
         return javaType;
-    }
-
-    private boolean isSameBaseType(final JavaType type1, final JavaType type2) {
-        return type1.getFullyQualifiedTypeName().equals(
-                type2.getFullyQualifiedTypeName());
     }
 
     private JavaType getDestinationJavaType(final GwtType destType,
@@ -975,6 +970,11 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
         }
 
         return readOnly.contains(name);
+    }
+
+    private boolean isSameBaseType(final JavaType type1, final JavaType type2) {
+        return type1.getFullyQualifiedTypeName().equals(
+                type2.getFullyQualifiedTypeName());
     }
 
     private void maybeAddImport(final TemplateDataDictionary dataDictionary,

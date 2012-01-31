@@ -49,7 +49,7 @@ public class JLineLogHandler extends Handler {
         return new ANSIBuffer() {
             @Override
             public ANSIBuffer attrib(final String str, final int code) {
-                if (BRIGHT_COLORS && (30 <= code) && (code <= 37)) {
+                if (BRIGHT_COLORS && 30 <= code && code <= 37) {
                     // This is a color code: add a 'bright' code
                     return append(esc + "[" + code + ";1m").append(str).append(
                             ANSICodes.attrib(0));

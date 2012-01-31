@@ -117,8 +117,8 @@ public class WebJsonMetadataProviderImpl extends
         final WebJsonAnnotationValues annotationValues = new WebJsonAnnotationValues(
                 governorPhysicalTypeMetadata);
         if (!annotationValues.isAnnotationFound()
-                || (annotationValues.getJsonObject() == null)
-                || (governorPhysicalTypeMetadata.getMemberHoldingTypeDetails() == null)) {
+                || annotationValues.getJsonObject() == null
+                || governorPhysicalTypeMetadata.getMemberHoldingTypeDetails() == null) {
             return null;
         }
 
@@ -174,8 +174,8 @@ public class WebJsonMetadataProviderImpl extends
                 .get(PluralMetadata.createIdentifier(jsonObject,
                         typeLocationService.getTypePath(jsonObject)));
         if (persistenceAdditions.isEmpty()
-                || (javaTypePersistenceMetadataDetails == null)
-                || (pluralMetadata == null)) {
+                || javaTypePersistenceMetadataDetails == null
+                || pluralMetadata == null) {
             return null;
         }
 

@@ -40,13 +40,13 @@ public class GitCommands implements CommandMarker {
             @CliOption(key = { "colorCoding" }, mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Enable color coding of commands in OS shell") final boolean color,
             @CliOption(key = { "automaticCommit" }, mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "true", help = "Enable automatic commit after successful execution of Roo shell command") final Boolean automaticCommit) {
 
-        if ((userName != null) && (userName.length() > 0)) {
+        if (userName != null && userName.length() > 0) {
             gitOperations.setConfig("user", "name", userName);
         }
-        if ((email != null) && (email.length() > 0)) {
+        if (email != null && email.length() > 0) {
             gitOperations.setConfig("user", "email", email);
         }
-        if ((repoUrl != null) && (repoUrl.length() > 0)) {
+        if (repoUrl != null && repoUrl.length() > 0) {
             gitOperations.setConfig("remote \"origin\"", "url", repoUrl);
         }
         if (color) {

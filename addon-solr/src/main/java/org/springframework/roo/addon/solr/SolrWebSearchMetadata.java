@@ -88,13 +88,13 @@ public class SolrWebSearchMetadata extends
             return;
         }
 
-        if ((annotationValues.getSearchMethod() != null)
-                && (annotationValues.getSearchMethod().length() > 0)) {
+        if (annotationValues.getSearchMethod() != null
+                && annotationValues.getSearchMethod().length() > 0) {
             builder.addMethod(getSearchMethod(annotationValues,
                     solrSearchAnnotationValues, webScaffoldAnnotationValues));
         }
-        if ((annotationValues.getAutoCompleteMethod() != null)
-                && (annotationValues.getAutoCompleteMethod().length() > 0)) {
+        if (annotationValues.getAutoCompleteMethod() != null
+                && annotationValues.getAutoCompleteMethod().length() > 0) {
             builder.addMethod(getAutocompleteMethod(annotationValues,
                     solrSearchAnnotationValues, webScaffoldAnnotationValues));
         }

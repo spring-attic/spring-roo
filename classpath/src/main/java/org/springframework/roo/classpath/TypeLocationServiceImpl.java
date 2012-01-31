@@ -75,7 +75,7 @@ public class TypeLocationServiceImpl implements TypeLocationService {
         Assert.hasText(fileCanonicalPath, "File canonical path required");
         if (doesPathIndicateJavaType(fileCanonicalPath)) {
             final String id = getPhysicalTypeIdentifier(fileCanonicalPath);
-            if ((id != null) && PhysicalTypeIdentifier.isValid(id)) {
+            if (id != null && PhysicalTypeIdentifier.isValid(id)) {
                 // Change to Java, so drop the cache
                 final ClassOrInterfaceTypeDetails cid = lookupClassOrInterfaceTypeDetails(id);
                 if (cid == null) {
@@ -474,6 +474,18 @@ public class TypeLocationServiceImpl implements TypeLocationService {
         return PhysicalTypeIdentifier.getPath(physicalTypeId);
     }
 
+    public Collection<JavaType> getTypesForModule(final Pom module) {
+        if ("pom".equals(module.getPackaging())) {
+            return Collections.emptySet();
+        }
+        final Set<String> typeNames = getTypesForModule(module.getPath());
+        final Collection<JavaType> javaTypes = new ArrayList<JavaType>();
+        for (final String typeName : typeNames) {
+            javaTypes.add(new JavaType(typeName));
+        }
+        return javaTypes;
+    }
+
     public Set<String> getTypesForModule(final String modulePath) {
         Assert.notNull(modulePath, "Module path required");
         return typeCache.getTypeNamesForModuleFilePath(modulePath);
@@ -522,8 +534,8 @@ public class TypeLocationServiceImpl implements TypeLocationService {
     }
 
     public boolean isInProject(final JavaType javaType) {
-        return (javaType != null) && !javaType.isCoreType()
-                && (getPhysicalPath(javaType) != null);
+        return javaType != null && !javaType.isCoreType()
+                && getPhysicalPath(javaType) != null;
     }
 
     /**
@@ -660,17 +672,5 @@ public class TypeLocationServiceImpl implements TypeLocationService {
             cacheType(change);
         }
         dirtyFiles.clear();
-    }
-
-    public Collection<JavaType> getTypesForModule(final Pom module) {
-        if ("pom".equals(module.getPackaging())) {
-            return Collections.emptySet();
-        }
-        final Set<String> typeNames = getTypesForModule(module.getPath());
-        final Collection<JavaType> javaTypes = new ArrayList<JavaType>();
-        for (final String typeName : typeNames) {
-            javaTypes.add(new JavaType(typeName));
-        }
-        return javaTypes;
     }
 }

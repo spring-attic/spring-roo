@@ -47,7 +47,7 @@ public abstract class AbstractLanguage implements I18n {
         final Locale locale = getLocale();
         final int prime = 31;
         int result = 1;
-        result = (prime * result) + ((locale == null) ? 0 : locale.hashCode());
+        result = prime * result + (locale == null ? 0 : locale.hashCode());
         return result;
     }
 

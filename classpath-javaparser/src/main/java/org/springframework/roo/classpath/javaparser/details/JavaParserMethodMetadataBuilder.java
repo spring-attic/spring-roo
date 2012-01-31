@@ -227,12 +227,12 @@ public class JavaParserMethodMetadataBuilder implements Builder<MethodMetadata> 
                         "Illegal state: JavaParser did not parse correctly", pe);
             }
             final List<TypeDeclaration> types = ci.getTypes();
-            if ((types == null) || (types.size() != 1)) {
+            if (types == null || types.size() != 1) {
                 throw new IllegalArgumentException("Method body invalid");
             }
             final TypeDeclaration td = types.get(0);
             final List<BodyDeclaration> bodyDeclarations = td.getMembers();
-            if ((bodyDeclarations == null) || (bodyDeclarations.size() != 1)) {
+            if (bodyDeclarations == null || bodyDeclarations.size() != 1) {
                 throw new IllegalStateException(
                         "Illegal state: JavaParser did not return body declarations correctly");
             }
@@ -252,17 +252,17 @@ public class JavaParserMethodMetadataBuilder implements Builder<MethodMetadata> 
                 // Next method should appear after this current method
                 final MethodDeclaration md = (MethodDeclaration) bd;
                 if (md.getName().equals(d.getName())) {
-                    if (((md.getParameters() == null) || md.getParameters()
+                    if ((md.getParameters() == null || md.getParameters()
                             .isEmpty())
-                            && ((d.getParameters() == null) || d
-                                    .getParameters().isEmpty())) {
+                            && (d.getParameters() == null || d.getParameters()
+                                    .isEmpty())) {
                         throw new IllegalStateException("Method '"
                                 + method.getMethodName().getSymbolName()
                                 + "' already exists");
                     }
-                    else if ((md.getParameters() != null)
-                            && (md.getParameters().size() == d.getParameters()
-                                    .size())) {
+                    else if (md.getParameters() != null
+                            && md.getParameters().size() == d.getParameters()
+                                    .size()) {
                         // Possible match, we need to consider parameter types
                         // as well now
                         final MethodMetadata methodMetadata = JavaParserMethodMetadataBuilder

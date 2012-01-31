@@ -278,8 +278,8 @@ public class IntegrationTestMetadata extends
         // Add an @Transactional, if the user did not define it on the governor
         // directly
         if (annotationValues.isTransactional()
-                && (MemberFindingUtils.getAnnotationOfType(
-                        governorTypeDetails.getAnnotations(), TRANSACTIONAL) == null)) {
+                && MemberFindingUtils.getAnnotationOfType(
+                        governorTypeDetails.getAnnotations(), TRANSACTIONAL) == null) {
             final AnnotationMetadataBuilder transactionalBuilder = new AnnotationMetadataBuilder(
                     TRANSACTIONAL);
             if (StringUtils.hasText(transactionManager)
@@ -327,7 +327,7 @@ public class IntegrationTestMetadata extends
      */
     private MethodMetadataBuilder getCountMethodTest(
             final MemberTypeAdditions countMethod) {
-        if (!annotationValues.isCount() || (countMethod == null)) {
+        if (!annotationValues.isCount() || countMethod == null) {
             // User does not want this method
             return null;
         }
@@ -376,8 +376,8 @@ public class IntegrationTestMetadata extends
     private MethodMetadataBuilder getFindAllMethodTest(
             final MemberTypeAdditions findAllMethod,
             final MemberTypeAdditions countMethod) {
-        if (!annotationValues.isFindAll() || (findAllMethod == null)
-                || (countMethod == null)) {
+        if (!annotationValues.isFindAll() || findAllMethod == null
+                || countMethod == null) {
             // User does not want this method, or core dependencies are missing
             return null;
         }
@@ -439,8 +439,8 @@ public class IntegrationTestMetadata extends
     private MethodMetadataBuilder getFindEntriesMethodTest(
             final MemberTypeAdditions countMethod,
             final MemberTypeAdditions findEntriesMethod) {
-        if (!annotationValues.isFindEntries() || (countMethod == null)
-                || (findEntriesMethod == null)) {
+        if (!annotationValues.isFindEntries() || countMethod == null
+                || findEntriesMethod == null) {
             // User does not want this method, or core dependencies are missing
             return null;
         }
@@ -500,8 +500,8 @@ public class IntegrationTestMetadata extends
     private MethodMetadataBuilder getFindMethodTest(
             final MemberTypeAdditions findMethod,
             final MethodMetadata identifierAccessorMethod) {
-        if (!annotationValues.isFind() || (findMethod == null)
-                || (identifierAccessorMethod == null)) {
+        if (!annotationValues.isFind() || findMethod == null
+                || identifierAccessorMethod == null) {
             // User does not want this method
             return null;
         }
@@ -569,9 +569,9 @@ public class IntegrationTestMetadata extends
             final MethodMetadata identifierAccessorMethod,
             final MemberTypeAdditions flushMethod,
             final MemberTypeAdditions findMethod) {
-        if (!annotationValues.isFlush() || (versionAccessorMethod == null)
-                || (identifierAccessorMethod == null) || (flushMethod == null)
-                || (findMethod == null)) {
+        if (!annotationValues.isFlush() || versionAccessorMethod == null
+                || identifierAccessorMethod == null || flushMethod == null
+                || findMethod == null) {
             // User does not want this method, or core dependencies are missing
             return null;
         }
@@ -665,9 +665,9 @@ public class IntegrationTestMetadata extends
             final MemberTypeAdditions flushMethod,
             final MethodMetadata versionAccessorMethod,
             final MethodMetadata identifierAccessorMethod) {
-        if (!annotationValues.isMerge() || (mergeMethod == null)
-                || (versionAccessorMethod == null) || (findMethod == null)
-                || (identifierAccessorMethod == null)) {
+        if (!annotationValues.isMerge() || mergeMethod == null
+                || versionAccessorMethod == null || findMethod == null
+                || identifierAccessorMethod == null) {
             // User does not want this method, or core dependencies are missing
             return null;
         }
@@ -771,8 +771,8 @@ public class IntegrationTestMetadata extends
             final MemberTypeAdditions persistMethod,
             final MemberTypeAdditions flushMethod,
             final MethodMetadata identifierAccessorMethod) {
-        if (!annotationValues.isPersist() || (persistMethod == null)
-                || (identifierAccessorMethod == null)) {
+        if (!annotationValues.isPersist() || persistMethod == null
+                || identifierAccessorMethod == null) {
             // User does not want this method
             return null;
         }
@@ -844,8 +844,8 @@ public class IntegrationTestMetadata extends
             final MemberTypeAdditions findMethod,
             final MemberTypeAdditions flushMethod,
             final MethodMetadata identifierAccessorMethod) {
-        if (!annotationValues.isRemove() || (removeMethod == null)
-                || (findMethod == null) || (identifierAccessorMethod == null)) {
+        if (!annotationValues.isRemove() || removeMethod == null
+                || findMethod == null || identifierAccessorMethod == null) {
             // User does not want this method or one of its core dependencies
             return null;
         }

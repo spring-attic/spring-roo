@@ -121,7 +121,7 @@ public class ServiceInterfaceMetadataProvider extends
         final MemberDetails memberDetails = memberDetailsScanner
                 .getMemberDetails(getClass().getName(), cid);
         final JavaType[] domainTypes = annotationValues.getDomainTypes();
-        if ((domainTypes == null) || (domainTypes.length == 0)) {
+        if (domainTypes == null || domainTypes.length == 0) {
             return null;
         }
         final Map<JavaType, String> domainTypePlurals = new HashMap<JavaType, String>();

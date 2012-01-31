@@ -34,11 +34,11 @@ public class Repository implements Comparable<Repository> {
         final Element name = XmlUtils.findFirstElement("name", element);
         final Element snapshotsElement = XmlUtils.findFirstElement("snapshots",
                 element);
-        enableSnapshots = (snapshotsElement == null ? false : Boolean
+        enableSnapshots = snapshotsElement == null ? false : Boolean
                 .valueOf(XmlUtils.findRequiredElement("enabled",
-                        snapshotsElement).getTextContent()));
+                        snapshotsElement).getTextContent());
         id = XmlUtils.findRequiredElement("id", element).getTextContent();
-        this.name = (name == null ? null : name.getTextContent());
+        this.name = name == null ? null : name.getTextContent();
         url = XmlUtils.findRequiredElement("url", element).getTextContent();
     }
 
@@ -84,8 +84,7 @@ public class Repository implements Comparable<Repository> {
 
     @Override
     public boolean equals(final Object obj) {
-        return (obj instanceof Repository)
-                && (compareTo((Repository) obj) == 0);
+        return obj instanceof Repository && compareTo((Repository) obj) == 0;
     }
 
     /**

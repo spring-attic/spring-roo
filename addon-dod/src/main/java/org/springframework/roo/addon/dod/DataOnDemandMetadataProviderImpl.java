@@ -101,6 +101,24 @@ public class DataOnDemandMetadataProviderImpl extends
         removeMetadataTrigger(ROO_DATA_ON_DEMAND);
     }
 
+    private String getDataOnDemandMetadataId(final JavaType javaType,
+            final Iterable<ClassOrInterfaceTypeDetails> dataOnDemandTypes) {
+        for (final ClassOrInterfaceTypeDetails cid : dataOnDemandTypes) {
+            final AnnotationMetadata dodAnnotation = cid
+                    .getAnnotation(ROO_DATA_ON_DEMAND);
+            final AnnotationAttributeValue<JavaType> entityAttribute = dodAnnotation
+                    .getAttribute("entity");
+            if (entityAttribute != null
+                    && entityAttribute.getValue().equals(javaType)) {
+                // Found the DoD type for the given field's type
+                return DataOnDemandMetadata.createIdentifier(cid.getName(),
+                        PhysicalTypeIdentifier.getPath(cid
+                                .getDeclaredByMetadataId()));
+            }
+        }
+        return null;
+    }
+
     private List<EmbeddedHolder> getEmbeddedHolders(
             final MemberDetails memberDetails,
             final String metadataIdentificationString) {
@@ -292,7 +310,7 @@ public class DataOnDemandMetadataProviderImpl extends
         final DataOnDemandAnnotationValues annotationValues = new DataOnDemandAnnotationValues(
                 governorPhysicalTypeMetadata);
         final JavaType entity = annotationValues.getEntity();
-        if (!annotationValues.isAnnotationFound() || (entity == null)) {
+        if (!annotationValues.isAnnotationFound() || entity == null) {
             return null;
         }
 
@@ -357,9 +375,8 @@ public class DataOnDemandMetadataProviderImpl extends
                         identifierType, LayerType.HIGHEST.getPosition(),
                         entityParameter);
 
-        if ((findEntriesMethod == null) || (findMethodAdditions == null)
-                || (identifierAccessor == null)
-                || (persistMethodAdditions == null)) {
+        if (findEntriesMethod == null || findMethodAdditions == null
+                || identifierAccessor == null || persistMethodAdditions == null) {
             return null;
         }
 
@@ -428,23 +445,5 @@ public class DataOnDemandMetadataProviderImpl extends
                 .getPhysicalTypeIdentifier(type);
         metadataDependencyRegistry.registerDependency(fieldPhysicalTypeId,
                 dodMetadataId);
-    }
-
-    private String getDataOnDemandMetadataId(final JavaType javaType,
-            final Iterable<ClassOrInterfaceTypeDetails> dataOnDemandTypes) {
-        for (final ClassOrInterfaceTypeDetails cid : dataOnDemandTypes) {
-            final AnnotationMetadata dodAnnotation = cid
-                    .getAnnotation(ROO_DATA_ON_DEMAND);
-            final AnnotationAttributeValue<JavaType> entityAttribute = dodAnnotation
-                    .getAttribute("entity");
-            if (entityAttribute != null
-                    && entityAttribute.getValue().equals(javaType)) {
-                // Found the DoD type for the given field's type
-                return DataOnDemandMetadata.createIdentifier(cid.getName(),
-                        PhysicalTypeIdentifier.getPath(cid
-                                .getDeclaredByMetadataId()));
-            }
-        }
-        return null;
     }
 }

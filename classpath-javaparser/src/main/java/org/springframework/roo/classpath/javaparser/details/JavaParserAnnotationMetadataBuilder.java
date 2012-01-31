@@ -125,8 +125,8 @@ public class JavaParserAnnotationMetadataBuilder implements
         if (memberValuePairs.isEmpty()) {
             annotationExpression = new MarkerAnnotationExpr(nameToUse);
         }
-        else if ((memberValuePairs.size() == 1)
-                && ((memberValuePairs.get(0).getName() == null) || "value"
+        else if (memberValuePairs.size() == 1
+                && (memberValuePairs.get(0).getName() == null || "value"
                         .equals(memberValuePairs.get(0).getName()))) {
             final Expression toUse = JavaParserUtils
                     .importExpressionIfRequired(
@@ -156,8 +156,8 @@ public class JavaParserAnnotationMetadataBuilder implements
 
                 annotations.remove(mae);
 
-                if ((memberValuePairs.size() == 1)
-                        && ((memberValuePairs.get(0).getName() == null) || "value"
+                if (memberValuePairs.size() == 1
+                        && (memberValuePairs.get(0).getName() == null || "value"
                                 .equals(memberValuePairs.get(0).getName()))) {
                     final Expression toUse = JavaParserUtils
                             .importExpressionIfRequired(compilationUnitServices
@@ -178,8 +178,8 @@ public class JavaParserAnnotationMetadataBuilder implements
             if (annotationExpression instanceof SingleMemberAnnotationExpr) {
                 // Potentially upgrade this expression to a NormalAnnotationExpr
                 final SingleMemberAnnotationExpr smae = (SingleMemberAnnotationExpr) annotationExpression;
-                if (((memberValuePairs.size() == 1) && (memberValuePairs.get(0)
-                        .getName() == null))
+                if (memberValuePairs.size() == 1
+                        && memberValuePairs.get(0).getName() == null
                         || memberValuePairs.get(0).getName().equals("value")
                         || memberValuePairs.get(0).getName().equals("")) {
                     // They specified only a single member-value pair, and it is

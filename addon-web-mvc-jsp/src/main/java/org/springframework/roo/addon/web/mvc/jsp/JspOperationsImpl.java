@@ -612,10 +612,10 @@ public class JspOperationsImpl extends AbstractOperations implements
                 .getInputStream(mvcConfig));
         final Element beans = mvcConfigDocument.getDocumentElement();
 
-        if ((XmlUtils.findFirstElement(
-                "/beans/bean[@id = 'tilesViewResolver']", beans) != null)
-                || (XmlUtils.findFirstElement(
-                        "/beans/bean[@id = 'tilesConfigurer']", beans) != null)) {
+        if (XmlUtils.findFirstElement("/beans/bean[@id = 'tilesViewResolver']",
+                beans) != null
+                || XmlUtils.findFirstElement(
+                        "/beans/bean[@id = 'tilesConfigurer']", beans) != null) {
             return; // Tiles is already configured, nothing to do
         }
 

@@ -471,7 +471,7 @@ public class PgpServiceImpl implements PgpService {
             while (it.hasNext()) {
                 final PGPPublicKey pgpKey = it.next();
                 final PgpKeyId candidateKeyId = new PgpKeyId(pgpKey);
-                if ((removed == null) && candidateKeyId.equals(keyId)) {
+                if (removed == null && candidateKeyId.equals(keyId)) {
                     stillTrust = false;
                     removed = candidate;
                     break;

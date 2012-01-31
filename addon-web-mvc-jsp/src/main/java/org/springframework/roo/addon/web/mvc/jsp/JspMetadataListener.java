@@ -116,7 +116,7 @@ public class JspMetadataListener implements MetadataProvider,
                         JspMetadata.getPath(jspMetadataId));
         final WebScaffoldMetadata webScaffoldMetadata = (WebScaffoldMetadata) metadataService
                 .get(webScaffoldMetadataKey);
-        if ((webScaffoldMetadata == null) || !webScaffoldMetadata.isValid()) {
+        if (webScaffoldMetadata == null || !webScaffoldMetadata.isValid()) {
             // Can't get the corresponding scaffold, so we certainly don't need
             // to manage any JSPs at this time
             return null;
@@ -350,12 +350,12 @@ public class JspMetadataListener implements MetadataProvider,
             else if (!method.getMethodName().equals(
                     javaTypePersistenceMetadataDetails
                             .getIdentifierAccessorMethod().getMethodName())
-                    || ((javaTypePersistenceMetadataDetails
-                            .getVersionAccessorMethod() != null) && !method
-                            .getMethodName().equals(
-                                    javaTypePersistenceMetadataDetails
-                                            .getVersionAccessorMethod()
-                                            .getMethodName()))) {
+                    || javaTypePersistenceMetadataDetails
+                            .getVersionAccessorMethod() != null
+                    && !method
+                            .getMethodName()
+                            .equals(javaTypePersistenceMetadataDetails
+                                    .getVersionAccessorMethod().getMethodName())) {
                 final String sb = fieldName.getReadableSymbolName();
                 properties.put(fieldResourceId, StringUtils.hasText(sb) ? sb
                         : fieldName.getSymbolName());
@@ -529,7 +529,7 @@ public class JspMetadataListener implements MetadataProvider,
             // We don't have to worry about physical type metadata, as we
             // monitor the relevant .java once the DOD governor is first
             // detected
-            if ((metadataItem == null)
+            if (metadataItem == null
                     || !metadataItem.isValid()
                     || !(metadataItem instanceof ItdTypeDetailsProvidingMetadataItem)) {
                 // There's something wrong with it or it's not for an ITD, so

@@ -253,8 +253,8 @@ public class PropFileOperationsImpl implements PropFileOperations {
             final String key = entry.getKey();
             final String newValue = entry.getValue();
             final String existingValue = props.getProperty(key);
-            if ((existingValue == null)
-                    || (!existingValue.equals(newValue) && changeExisting)) {
+            if (existingValue == null || !existingValue.equals(newValue)
+                    && changeExisting) {
                 props.setProperty(key, newValue);
                 saveNeeded = true;
             }

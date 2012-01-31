@@ -200,9 +200,9 @@ public class JpaOperationsImpl implements JpaOperations {
         String connectionString = jdbcDatabase.getConnectionString();
         if (connectionString.contains("TO_BE_CHANGED_BY_ADDON")) {
             connectionString = connectionString.replace(
-                    "TO_BE_CHANGED_BY_ADDON", (StringUtils
-                            .hasText(databaseName) ? databaseName
-                            : projectOperations.getProjectName(moduleName)));
+                    "TO_BE_CHANGED_BY_ADDON",
+                    StringUtils.hasText(databaseName) ? databaseName
+                            : projectOperations.getProjectName(moduleName));
         }
         else {
             if (StringUtils.hasText(databaseName)) {
@@ -436,7 +436,7 @@ public class JpaOperationsImpl implements JpaOperations {
         Element gaeBuildCommandElement = XmlUtils.findFirstElement(
                 "buildCommand[name = '" + gaeBuildCommandName + "']",
                 additionalBuildcommandsElement);
-        if (addGaeSettingsToPlugin && (gaeBuildCommandElement == null)) {
+        if (addGaeSettingsToPlugin && gaeBuildCommandElement == null) {
             final Element nameElement = document.createElement("name");
             nameElement.setTextContent(gaeBuildCommandName);
             gaeBuildCommandElement = document.createElement("buildCommand");
@@ -444,7 +444,7 @@ public class JpaOperationsImpl implements JpaOperations {
             additionalBuildcommandsElement.appendChild(gaeBuildCommandElement);
             changes.add("added GAE buildCommand to maven-eclipse-plugin");
         }
-        else if (!addGaeSettingsToPlugin && (gaeBuildCommandElement != null)) {
+        else if (!addGaeSettingsToPlugin && gaeBuildCommandElement != null) {
             additionalBuildcommandsElement.removeChild(gaeBuildCommandElement);
             changes.add("removed GAE buildCommand from maven-eclipse-plugin");
         }
@@ -463,14 +463,14 @@ public class JpaOperationsImpl implements JpaOperations {
         Element gaeProjectnatureElement = XmlUtils.findFirstElement(
                 "projectnature[text() = '" + gaeProjectnatureName + "']",
                 additionalProjectnaturesElement);
-        if (addGaeSettingsToPlugin && (gaeProjectnatureElement == null)) {
+        if (addGaeSettingsToPlugin && gaeProjectnatureElement == null) {
             gaeProjectnatureElement = new XmlElementBuilder("projectnature",
                     document).setText(gaeProjectnatureName).build();
             additionalProjectnaturesElement
                     .appendChild(gaeProjectnatureElement);
             changes.add("added GAE projectnature to maven-eclipse-plugin");
         }
-        else if (!addGaeSettingsToPlugin && (gaeProjectnatureElement != null)) {
+        else if (!addGaeSettingsToPlugin && gaeProjectnatureElement != null) {
             additionalProjectnaturesElement
                     .removeChild(gaeProjectnatureElement);
             changes.add("removed GAE projectnature from maven-eclipse-plugin");
@@ -665,7 +665,7 @@ public class JpaOperationsImpl implements JpaOperations {
                 root.removeChild(dataSourceJndi);
             }
         }
-        else if (StringUtils.isBlank(jndi) && (dataSource == null)) {
+        else if (StringUtils.isBlank(jndi) && dataSource == null) {
             dataSource = appCtx.createElement("bean");
             dataSource.setAttribute("class",
                     "org.apache.commons.dbcp.BasicDataSource");
@@ -908,8 +908,8 @@ public class JpaOperationsImpl implements JpaOperations {
         final String connectionString = getConnectionString(jdbcDatabase,
                 hostName, databaseName, moduleName);
         if (jdbcDatabase.getKey().equals("HYPERSONIC")
-                || (jdbcDatabase == JdbcDatabase.H2_IN_MEMORY)
-                || (jdbcDatabase == JdbcDatabase.SYBASE)) {
+                || jdbcDatabase == JdbcDatabase.H2_IN_MEMORY
+                || jdbcDatabase == JdbcDatabase.SYBASE) {
             userName = StringUtils.defaultIfEmpty(userName, "sa");
         }
 
@@ -918,13 +918,13 @@ public class JpaOperationsImpl implements JpaOperations {
         final String uname = props.getProperty(DATABASE_USERNAME);
         final String pwd = props.getProperty(DATABASE_PASSWORD);
 
-        boolean hasChanged = ((driver == null) || !driver.equals(jdbcDatabase
-                .getDriverClassName()));
-        hasChanged |= ((url == null) || !url.equals(connectionString));
-        hasChanged |= ((uname == null) || !uname.equals(StringUtils
-                .trimToEmpty(userName)));
-        hasChanged |= ((pwd == null) || !pwd.equals(StringUtils
-                .trimToEmpty(password)));
+        boolean hasChanged = driver == null
+                || !driver.equals(jdbcDatabase.getDriverClassName());
+        hasChanged |= url == null || !url.equals(connectionString);
+        hasChanged |= uname == null
+                || !uname.equals(StringUtils.trimToEmpty(userName));
+        hasChanged |= pwd == null
+                || !pwd.equals(StringUtils.trimToEmpty(password));
         if (!hasChanged) {
             // No changes from existing database configuration so exit now
             return;
@@ -977,7 +977,7 @@ public class JpaOperationsImpl implements JpaOperations {
         String descriptionOfChange = "";
         Element mappingExcludesElement = XmlUtils.findFirstElement(
                 "mappingExcludes", configurationElement);
-        if (addToPlugin && (mappingExcludesElement == null)) {
+        if (addToPlugin && mappingExcludesElement == null) {
             mappingExcludesElement = new XmlElementBuilder("mappingExcludes",
                     document)
                     .setText(
@@ -986,7 +986,7 @@ public class JpaOperationsImpl implements JpaOperations {
             configurationElement.appendChild(mappingExcludesElement);
             descriptionOfChange = "added GAEAuthFilter mappingExcludes to maven-datanuclueus-plugin";
         }
-        else if (!addToPlugin && (mappingExcludesElement != null)) {
+        else if (!addToPlugin && mappingExcludesElement != null) {
             configurationElement.removeChild(mappingExcludesElement);
             descriptionOfChange = "removed GAEAuthFilter mappingExcludes from maven-datanuclueus-plugin";
         }
@@ -1136,13 +1136,13 @@ public class JpaOperationsImpl implements JpaOperations {
         try {
             props.load(log4jMutableFile.getInputStream());
             final String dnKey = "log4j.category.DataNucleus";
-            if ((ormProvider == OrmProvider.DATANUCLEUS)
+            if (ormProvider == OrmProvider.DATANUCLEUS
                     && !props.containsKey(dnKey)) {
                 outputStream = log4jMutableFile.getOutputStream();
                 props.put(dnKey, "WARN");
                 props.store(outputStream, "Updated at " + new Date());
             }
-            else if ((ormProvider != OrmProvider.DATANUCLEUS)
+            else if (ormProvider != OrmProvider.DATANUCLEUS
                     && props.containsKey(dnKey)) {
                 outputStream = log4jMutableFile.getOutputStream();
                 props.remove(dnKey);
@@ -1212,23 +1212,21 @@ public class JpaOperationsImpl implements JpaOperations {
         final Element provider = persistence.createElement("provider");
         switch (jdbcDatabase) {
         case GOOGLE_APP_ENGINE:
-            persistenceUnitElement.setAttribute("name",
-                    (StringUtils.defaultIfEmpty(persistenceUnit,
-                            GAE_PERSISTENCE_UNIT_NAME)));
+            persistenceUnitElement
+                    .setAttribute("name", StringUtils.defaultIfEmpty(
+                            persistenceUnit, GAE_PERSISTENCE_UNIT_NAME));
             persistenceUnitElement.removeAttribute("transaction-type");
             provider.setTextContent(ormProvider.getAdapter());
             break;
         case DATABASE_DOT_COM:
-            persistenceUnitElement
-                    .setAttribute("name", (StringUtils.defaultIfEmpty(
-                            persistenceUnit, DEFAULT_PERSISTENCE_UNIT)));
+            persistenceUnitElement.setAttribute("name", StringUtils
+                    .defaultIfEmpty(persistenceUnit, DEFAULT_PERSISTENCE_UNIT));
             persistenceUnitElement.removeAttribute("transaction-type");
             provider.setTextContent("com.force.sdk.jpa.PersistenceProviderImpl");
             break;
         default:
-            persistenceUnitElement
-                    .setAttribute("name", (StringUtils.defaultIfEmpty(
-                            persistenceUnit, DEFAULT_PERSISTENCE_UNIT)));
+            persistenceUnitElement.setAttribute("name", StringUtils
+                    .defaultIfEmpty(persistenceUnit, DEFAULT_PERSISTENCE_UNIT));
             persistenceUnitElement.setAttribute("transaction-type",
                     "RESOURCE_LOCAL");
             provider.setTextContent(ormProvider.getAdapter());
@@ -1243,7 +1241,7 @@ public class JpaOperationsImpl implements JpaOperations {
         final boolean isDbreProject = fileManager.exists(pathResolver
                 .getFocusedIdentifier(Path.SRC_MAIN_RESOURCES, "dbre.xml"));
         final boolean isDbreProjectOrDB2400 = isDbreProject
-                || (jdbcDatabase == JdbcDatabase.DB2_400);
+                || jdbcDatabase == JdbcDatabase.DB2_400;
 
         switch (ormProvider) {
         case HIBERNATE:
@@ -1254,10 +1252,11 @@ public class JpaOperationsImpl implements JpaOperations {
             properties
                     .appendChild(persistence
                             .createComment(" value=\"create\" to build a new database on each run; value=\"update\" to modify an existing database; value=\"create-drop\" means the same as \"create\" but also drops tables when Hibernate closes; value=\"validate\" makes no changes to the database ")); // ROO-627
-            properties.appendChild(createPropertyElement(
-                    "hibernate.hbm2ddl.auto",
-                    (isDbreProjectOrDB2400 ? "validate" : "create"),
-                    persistence));
+            properties
+                    .appendChild(createPropertyElement(
+                            "hibernate.hbm2ddl.auto",
+                            isDbreProjectOrDB2400 ? "validate" : "create",
+                            persistence));
             properties.appendChild(createPropertyElement(
                     "hibernate.ejb.naming_strategy",
                     "org.hibernate.cfg.ImprovedNamingStrategy", persistence));
@@ -1283,7 +1282,7 @@ public class JpaOperationsImpl implements JpaOperations {
                             .createComment(" value=\"buildSchema\" to runtime forward map the DDL SQL; value=\"validate\" makes no changes to the database ")); // ROO-627
             properties.appendChild(createPropertyElement(
                     "openjpa.jdbc.SynchronizeMappings",
-                    (isDbreProjectOrDB2400 ? "validate" : "buildSchema"),
+                    isDbreProjectOrDB2400 ? "validate" : "buildSchema",
                     persistence));
             properties.appendChild(createPropertyElement(
                     "openjpa.RuntimeUnenhancedClasses", "supported",
@@ -1297,11 +1296,10 @@ public class JpaOperationsImpl implements JpaOperations {
             properties
                     .appendChild(persistence
                             .createComment(" value=\"drop-and-create-tables\" to build a new database on each run; value=\"create-tables\" creates new tables if needed; value=\"none\" makes no changes to the database ")); // ROO-627
-            properties
-                    .appendChild(createPropertyElement(
-                            "eclipselink.ddl-generation",
-                            (isDbreProjectOrDB2400 ? "none"
-                                    : "drop-and-create-tables"), persistence));
+            properties.appendChild(createPropertyElement(
+                    "eclipselink.ddl-generation",
+                    isDbreProjectOrDB2400 ? "none" : "drop-and-create-tables",
+                    persistence));
             properties.appendChild(createPropertyElement(
                     "eclipselink.ddl-generation.output-mode", "database",
                     persistence));
@@ -1346,8 +1344,8 @@ public class JpaOperationsImpl implements JpaOperations {
                         "TO_BE_CHANGED_BY_ADDON",
                         projectOperations.getProjectName(moduleName));
                 if (jdbcDatabase.getKey().equals("HYPERSONIC")
-                        || (jdbcDatabase == JdbcDatabase.H2_IN_MEMORY)
-                        || (jdbcDatabase == JdbcDatabase.SYBASE)) {
+                        || jdbcDatabase == JdbcDatabase.H2_IN_MEMORY
+                        || jdbcDatabase == JdbcDatabase.SYBASE) {
                     userName = StringUtils.defaultIfEmpty(userName, "sa");
                 }
                 properties.appendChild(createPropertyElement(
@@ -1392,8 +1390,8 @@ public class JpaOperationsImpl implements JpaOperations {
         fileManager.createOrUpdateTextFileIfRequired(persistencePath,
                 XmlUtils.nodeToString(persistence), false);
 
-        if ((jdbcDatabase != JdbcDatabase.GOOGLE_APP_ENGINE)
-                && (ormProvider == OrmProvider.DATANUCLEUS)) {
+        if (jdbcDatabase != JdbcDatabase.GOOGLE_APP_ENGINE
+                && ormProvider == OrmProvider.DATANUCLEUS) {
             LOGGER.warning("Please update your database details in src/main/resources/META-INF/persistence.xml.");
         }
     }

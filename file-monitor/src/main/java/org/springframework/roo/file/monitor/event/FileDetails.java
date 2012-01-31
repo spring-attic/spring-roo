@@ -78,8 +78,7 @@ public class FileDetails implements Comparable<FileDetails> {
 
     @Override
     public boolean equals(final Object obj) {
-        return (obj instanceof FileDetails)
-                && (compareTo((FileDetails) obj) == 0);
+        return obj instanceof FileDetails && compareTo((FileDetails) obj) == 0;
     }
 
     /**

@@ -50,7 +50,7 @@ public class JavaPackageConverter implements Converter<JavaPackage> {
         }
         final JavaPackage result = new JavaPackage(
                 convertToFullyQualifiedPackageName(value));
-        if ((optionContext != null) && optionContext.contains("update")) {
+        if (optionContext != null && optionContext.contains("update")) {
             lastUsed.setPackage(result);
         }
         return result;
@@ -78,7 +78,7 @@ public class JavaPackageConverter implements Converter<JavaPackage> {
         for (final Pom pom : projectOperations.getPoms()) {
             for (final JavaType javaType : typeLocationService
                     .getTypesForModule(pom)) {
-                String type = javaType.getFullyQualifiedTypeName();
+                final String type = javaType.getFullyQualifiedTypeName();
                 completions.add(new Completion(type.substring(0,
                         type.lastIndexOf('.'))));
             }

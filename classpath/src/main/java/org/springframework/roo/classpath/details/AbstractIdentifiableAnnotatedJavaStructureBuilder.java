@@ -147,7 +147,7 @@ public abstract class AbstractIdentifiableAnnotatedJavaStructureBuilder<T extend
                     .getAttributeNames()) {
                 // Do not copy incoming attributes which exist in the
                 // attributesToDeleteIfPresent Set
-                if ((attributesToDeleteIfPresent == null)
+                if (attributesToDeleteIfPresent == null
                         || !attributesToDeleteIfPresent
                                 .contains(incomingAttributeName)) {
                     final AnnotationAttributeValue<?> incomingValue = annotation
@@ -170,7 +170,7 @@ public abstract class AbstractIdentifiableAnnotatedJavaStructureBuilder<T extend
         // Copy the existing attributes into the new attributes
         for (final JavaSymbolName existingAttributeName : existing
                 .getAttributeNames()) {
-            if ((attributesToDeleteIfPresent != null)
+            if (attributesToDeleteIfPresent != null
                     && attributesToDeleteIfPresent
                             .contains(existingAttributeName)) {
                 hasChanged = true;
@@ -205,7 +205,7 @@ public abstract class AbstractIdentifiableAnnotatedJavaStructureBuilder<T extend
                     hasChanged = true;
                 }
             }
-            else if ((attributesToDeleteIfPresent == null)
+            else if (attributesToDeleteIfPresent == null
                     || !attributesToDeleteIfPresent
                             .contains(incomingAttributeName)) {
                 // This is a new attribute that does not already exist, so add

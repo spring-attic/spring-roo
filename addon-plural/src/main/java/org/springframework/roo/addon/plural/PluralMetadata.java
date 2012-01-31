@@ -138,7 +138,7 @@ public class PluralMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
         Assert.notNull(field, "Field required");
         // Obtain the plural from the cache, if available
         final String symbolName = field.getFieldName().getSymbolName();
-        if ((cache != null) && cache.containsKey(symbolName)) {
+        if (cache != null && cache.containsKey(symbolName)) {
             return cache.get(symbolName);
         }
 

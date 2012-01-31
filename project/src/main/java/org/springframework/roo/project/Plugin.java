@@ -227,8 +227,7 @@ public class Plugin implements Comparable<Plugin> {
             throw new NullPointerException();
         }
         int result = gav.compareTo(o.getGAV());
-        if ((result == 0) && (configuration != null)
-                && (o.configuration != null)) {
+        if (result == 0 && configuration != null && o.configuration != null) {
             result = configuration.compareTo(o.configuration);
         }
         return result;
@@ -236,7 +235,7 @@ public class Plugin implements Comparable<Plugin> {
 
     @Override
     public boolean equals(final Object obj) {
-        return (obj instanceof Plugin) && (compareTo((Plugin) obj) == 0);
+        return obj instanceof Plugin && compareTo((Plugin) obj) == 0;
     }
 
     public String getArtifactId() {
@@ -343,9 +342,9 @@ public class Plugin implements Comparable<Plugin> {
     @Override
     public int hashCode() {
         final int prime = 31;
-        final int result = (prime * 1) + gav.hashCode();
-        return (prime * result)
-                + ((configuration == null) ? 0 : configuration.hashCode());
+        final int result = prime * 1 + gav.hashCode();
+        return prime * result
+                + (configuration == null ? 0 : configuration.hashCode());
     }
 
     @Override

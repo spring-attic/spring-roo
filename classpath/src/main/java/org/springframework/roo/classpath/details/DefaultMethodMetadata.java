@@ -49,7 +49,7 @@ public class DefaultMethodMetadata extends AbstractInvocableMemberMetadata
 
     public boolean hasSameName(final MethodMetadata... otherMethods) {
         for (final MethodMetadata otherMethod : otherMethods) {
-            if ((otherMethod != null)
+            if (otherMethod != null
                     && methodName.equals(otherMethod.getMethodName())) {
                 return true;
             }

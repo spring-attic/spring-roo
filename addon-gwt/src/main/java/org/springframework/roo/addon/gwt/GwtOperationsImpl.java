@@ -153,7 +153,7 @@ public class GwtOperationsImpl implements GwtOperations {
             final JavaPackage destinationPackage) {
         final ClassOrInterfaceTypeDetails existingProxy = gwtTypeService
                 .lookupProxyFromEntity(entity);
-        if ((existingProxy != null) || entity.isAbstract()) {
+        if (existingProxy != null || entity.isAbstract()) {
             return;
         }
 
@@ -246,8 +246,8 @@ public class GwtOperationsImpl implements GwtOperations {
     private void createRequestInterfaceIfNecessary(
             final ClassOrInterfaceTypeDetails entity,
             final JavaPackage destinationPackage) {
-        if ((entity != null) && !entity.isAbstract()
-                && (gwtTypeService.lookupRequestFromEntity(entity) == null)) {
+        if (entity != null && !entity.isAbstract()
+                && gwtTypeService.lookupRequestFromEntity(entity) == null) {
             createRequestInterface(entity, destinationPackage);
         }
     }
@@ -258,7 +258,7 @@ public class GwtOperationsImpl implements GwtOperations {
         if (annotationMetadata != null) {
             final AnnotationAttributeValue<Boolean> booleanAttributeValue = annotationMetadata
                     .getAttribute("scaffold");
-            if ((booleanAttributeValue == null)
+            if (booleanAttributeValue == null
                     || !booleanAttributeValue.getValue()) {
                 final ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(
                         proxy);
@@ -477,12 +477,12 @@ public class GwtOperationsImpl implements GwtOperations {
         requestType(requestPackage, type);
         final ClassOrInterfaceTypeDetails entity = typeLocationService
                 .getTypeDetails(type);
-        if ((entity != null) && !entity.isAbstract()) {
+        if (entity != null && !entity.isAbstract()) {
             final ClassOrInterfaceTypeDetails proxy = gwtTypeService
                     .lookupProxyFromEntity(entity);
             final ClassOrInterfaceTypeDetails request = gwtTypeService
                     .lookupRequestFromEntity(entity);
-            if ((proxy == null) || (request == null)) {
+            if (proxy == null || request == null) {
                 throw new IllegalStateException(
                         "In order to scaffold, an entity must have an associated proxy and request");
             }
@@ -741,8 +741,8 @@ public class GwtOperationsImpl implements GwtOperations {
     public void updateGaeConfiguration() {
         final boolean isGaeEnabled = projectOperations
                 .isFeatureInstalledInFocusedModule(FeatureNames.GAE);
-        final boolean hasGaeStateChanged = (wasGaeEnabled == null)
-                || (isGaeEnabled != wasGaeEnabled);
+        final boolean hasGaeStateChanged = wasGaeEnabled == null
+                || isGaeEnabled != wasGaeEnabled;
         if (!isInstalledInModule(projectOperations.getFocusedModuleName())
                 || !hasGaeStateChanged) {
             return;

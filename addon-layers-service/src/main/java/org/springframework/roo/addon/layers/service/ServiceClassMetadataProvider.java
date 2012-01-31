@@ -130,7 +130,7 @@ public class ServiceClassMetadataProvider extends
                 }
             }
         }
-        if ((serviceInterfaceMetadata == null)
+        if (serviceInterfaceMetadata == null
                 || !serviceInterfaceMetadata.isValid()) {
             return null;
         }

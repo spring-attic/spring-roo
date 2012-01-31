@@ -83,7 +83,7 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements
 
     public void afterTransmission(final TransmissionType type,
             final boolean successful) {
-        if ((type == TransmissionType.UPLOAD) && successful) {
+        if (type == TransmissionType.UPLOAD && successful) {
             discoveredAppNames.clear();
             methodToResponses.clear();
         }

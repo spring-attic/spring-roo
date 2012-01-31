@@ -60,8 +60,7 @@ public final class MemberFindingUtils {
     public static AnnotationMetadata getAnnotationOfType(
             final MemberHoldingTypeDetailsMetadataItem<?> metadata,
             final JavaType annotationType) {
-        if ((metadata == null)
-                || (metadata.getMemberHoldingTypeDetails() == null)) {
+        if (metadata == null || metadata.getMemberHoldingTypeDetails() == null) {
             return null;
         }
         return getAnnotationOfType(metadata.getMemberHoldingTypeDetails()
@@ -329,7 +328,7 @@ public final class MemberFindingUtils {
     public static AnnotationMetadata getFirstAnnotation(
             final ClassOrInterfaceTypeDetails cid,
             final JavaType... annotationTypes) {
-        if ((cid != null) && (annotationTypes != null)) {
+        if (cid != null && annotationTypes != null) {
             for (final JavaType annotationType : annotationTypes) {
                 final AnnotationMetadata annotation = MemberFindingUtils
                         .getAnnotationOfType(cid.getAnnotations(),

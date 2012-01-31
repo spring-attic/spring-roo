@@ -215,7 +215,7 @@ public class PersistenceMemberLocatorImpl implements PersistenceMemberLocator {
 
         final ClassOrInterfaceTypeDetails domainTypeDetails = typeLocationService
                 .getTypeDetails(domainType);
-        if ((domainTypeDetails == null)
+        if (domainTypeDetails == null
                 || !domainTypeDetails.getCustomData().keySet()
                         .contains(CustomDataKeys.PERSISTENT_TYPE)) {
             return;

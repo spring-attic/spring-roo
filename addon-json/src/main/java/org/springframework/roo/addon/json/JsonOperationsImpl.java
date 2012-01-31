@@ -60,7 +60,7 @@ public class JsonOperationsImpl implements JsonOperations {
                 RooJavaType.ROO_JSON) == null) {
             final AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(
                     RooJavaType.ROO_JSON);
-            if ((rootName != null) && (rootName.length() > 0)) {
+            if (rootName != null && rootName.length() > 0) {
                 annotationBuilder.addStringAttribute("rootName", rootName);
             }
             if (deepSerialize) {

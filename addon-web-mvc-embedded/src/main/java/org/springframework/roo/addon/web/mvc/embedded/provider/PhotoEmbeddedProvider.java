@@ -77,7 +77,7 @@ public class PhotoEmbeddedProvider extends AbstractEmbeddedProvider {
 
     public boolean install(final String viewName,
             final Map<String, String> options) {
-        if ((options == null) || (options.size() != 3)
+        if (options == null || options.size() != 3
                 || !options.containsKey("provider")
                 || !options.containsKey("userId")
                 || !options.containsKey("albumId")) {

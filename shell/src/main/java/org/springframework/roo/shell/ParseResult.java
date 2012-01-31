@@ -87,10 +87,9 @@ public class ParseResult {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = (prime * result) + Arrays.hashCode(arguments);
-        result = (prime * result)
-                + ((instance == null) ? 0 : instance.hashCode());
-        result = (prime * result) + ((method == null) ? 0 : method.hashCode());
+        result = prime * result + Arrays.hashCode(arguments);
+        result = prime * result + (instance == null ? 0 : instance.hashCode());
+        result = prime * result + (method == null ? 0 : method.hashCode());
         return result;
     }
 

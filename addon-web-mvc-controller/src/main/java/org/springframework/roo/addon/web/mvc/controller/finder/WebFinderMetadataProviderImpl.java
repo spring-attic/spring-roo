@@ -81,8 +81,8 @@ public class WebFinderMetadataProviderImpl extends AbstractItdMetadataProvider
                 governorPhysicalTypeMetadata);
         if (!annotationValues.isAnnotationFound()
                 || !annotationValues.isExposeFinders()
-                || (annotationValues.getFormBackingObject() == null)
-                || (governorPhysicalTypeMetadata.getMemberHoldingTypeDetails() == null)) {
+                || annotationValues.getFormBackingObject() == null
+                || governorPhysicalTypeMetadata.getMemberHoldingTypeDetails() == null) {
             return null;
         }
 
@@ -91,7 +91,7 @@ public class WebFinderMetadataProviderImpl extends AbstractItdMetadataProvider
                 .getFormBackingObject();
         final ClassOrInterfaceTypeDetails formBackingTypeDetails = typeLocationService
                 .getTypeDetails(formBackingType);
-        if ((formBackingTypeDetails == null)
+        if (formBackingTypeDetails == null
                 || !formBackingTypeDetails.getCustomData().keySet()
                         .contains(CustomDataKeys.PERSISTENT_TYPE)) {
             return null;

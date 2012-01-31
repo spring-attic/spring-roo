@@ -119,7 +119,7 @@ public class Activator implements BundleActivator {
         final Element rootElement = (Element) document.getFirstChild();
         final NodeList components = rootElement
                 .getElementsByTagName("scr:component");
-        if ((components == null) || (components.getLength() == 0)) {
+        if (components == null || components.getLength() == 0) {
             return;
         }
 
@@ -144,7 +144,7 @@ public class Activator implements BundleActivator {
             String componentName = null;
             final NodeList implementation = component
                     .getElementsByTagName("implementation");
-            if ((implementation != null) && (implementation.getLength() == 1)) {
+            if (implementation != null && implementation.getLength() == 1) {
                 final Element impl = (Element) implementation.item(0);
                 if (impl.hasAttribute("class")) {
                     componentName = impl.getAttribute("class");
@@ -154,10 +154,10 @@ public class Activator implements BundleActivator {
             // Get its first implementing service
             String serviceInterface = null;
             final NodeList service = component.getElementsByTagName("service");
-            if ((service != null) && (service.getLength() == 1)) {
+            if (service != null && service.getLength() == 1) {
                 final Element s = (Element) service.item(0);
                 final NodeList provide = s.getElementsByTagName("provide");
-                if ((provide != null) && (provide.getLength() > 0)) {
+                if (provide != null && provide.getLength() > 0) {
                     final Element firstProvide = (Element) provide.item(0);
                     if (firstProvide.hasAttribute("interface")) {
                         serviceInterface = firstProvide
@@ -166,7 +166,7 @@ public class Activator implements BundleActivator {
                 }
             }
 
-            if ((componentName != null) && (serviceInterface != null)) {
+            if (componentName != null && serviceInterface != null) {
                 requiredImplementations.put(componentName, serviceInterface);
             }
         }

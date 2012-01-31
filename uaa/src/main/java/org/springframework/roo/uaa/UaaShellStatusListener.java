@@ -51,7 +51,7 @@ public class UaaShellStatusListener implements ShellStatusListener {
     public void onShellStatusChange(final ShellStatus oldStatus,
             final ShellStatus newStatus) {
         if (!startupMessageConsidered
-                && (newStatus.getStatus() == Status.USER_INPUT)) {
+                && newStatus.getStatus() == Status.USER_INPUT) {
             startupMessageConsidered = true;
             if (uaaService.getPrivacyLevel() == PrivacyLevel.UNDECIDED_TOU) {
                 // NB: The first line of the text file must contain spaces to

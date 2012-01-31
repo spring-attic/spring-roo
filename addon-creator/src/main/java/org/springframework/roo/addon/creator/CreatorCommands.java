@@ -24,10 +24,13 @@ public class CreatorCommands implements CommandMarker {
 
     @Reference private CreatorOperations creatorOperations;
 
-    @CliAvailabilityIndicator({ "addon create i18n", "addon create simple",
-            "addon create advanced" })
-    public boolean isCreateAddonAvailable() {
-        return creatorOperations.isAddonCreatePossible();
+    @CliCommand(value = "addon create advanced", help = "Create a new advanced add-on for Spring Roo (commands + operations + metadata + trigger annotation + dependencies)")
+    public void advanced(
+            @CliOption(key = "topLevelPackage", mandatory = true, optionContext = "update", help = "The top level package of the new addon") final JavaPackage tlp,
+            @CliOption(key = "description", mandatory = false, help = "Description of your addon (surround text with double quotes)") final String description,
+            @CliOption(key = "projectName", mandatory = false, help = "Provide a custom project name (if not provided the top level package name will be used instead)") final String projectName) {
+
+        creatorOperations.createAdvancedAddon(tlp, description, projectName);
     }
 
     @CliCommand(value = "addon create i18n", help = "Create a new Internationalization add-on for Spring Roo")
@@ -48,6 +51,12 @@ public class CreatorCommands implements CommandMarker {
                 flagGraphic, description, projectName);
     }
 
+    @CliAvailabilityIndicator({ "addon create i18n", "addon create simple",
+            "addon create advanced" })
+    public boolean isCreateAddonAvailable() {
+        return creatorOperations.isAddonCreatePossible();
+    }
+
     @CliCommand(value = "addon create simple", help = "Create a new simple add-on for Spring Roo (commands + operations)")
     public void simple(
             @CliOption(key = "topLevelPackage", mandatory = true, optionContext = "update", help = "The top level package of the new addon") final JavaPackage tlp,
@@ -55,15 +64,6 @@ public class CreatorCommands implements CommandMarker {
             @CliOption(key = "projectName", mandatory = false, help = "Provide a custom project name (if not provided the top level package name will be used instead)") final String projectName) {
 
         creatorOperations.createSimpleAddon(tlp, description, projectName);
-    }
-
-    @CliCommand(value = "addon create advanced", help = "Create a new advanced add-on for Spring Roo (commands + operations + metadata + trigger annotation + dependencies)")
-    public void advanced(
-            @CliOption(key = "topLevelPackage", mandatory = true, optionContext = "update", help = "The top level package of the new addon") final JavaPackage tlp,
-            @CliOption(key = "description", mandatory = false, help = "Description of your addon (surround text with double quotes)") final String description,
-            @CliOption(key = "projectName", mandatory = false, help = "Provide a custom project name (if not provided the top level package name will be used instead)") final String projectName) {
-
-        creatorOperations.createAdvancedAddon(tlp, description, projectName);
     }
 
     @CliCommand(value = "addon create wrapper", help = "Create a new add-on for Spring Roo which wraps a maven artifact to create a OSGi compliant bundle")

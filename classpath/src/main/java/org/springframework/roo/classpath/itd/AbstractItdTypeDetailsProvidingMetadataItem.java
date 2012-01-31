@@ -300,10 +300,10 @@ public abstract class AbstractItdTypeDetailsProvidingMetadataItem extends
      * @param methodName the name of the method for which to search
      * @param parameterTypes the method's parameter types
      * @return see above
-     * @since 1.2.1
+     * @since 1.2.0
      */
     protected boolean governorHasMethod(final JavaSymbolName methodName,
-            final List<JavaType> parameterTypes) {
+            final JavaType... parameterTypes) {
         return getGovernorMethod(methodName, parameterTypes) != null;
     }
 
@@ -313,10 +313,10 @@ public abstract class AbstractItdTypeDetailsProvidingMetadataItem extends
      * @param methodName the name of the method for which to search
      * @param parameterTypes the method's parameter types
      * @return see above
-     * @since 1.2.0
+     * @since 1.2.1
      */
     protected boolean governorHasMethod(final JavaSymbolName methodName,
-            final JavaType... parameterTypes) {
+            final List<JavaType> parameterTypes) {
         return getGovernorMethod(methodName, parameterTypes) != null;
     }
 

@@ -32,8 +32,7 @@ public class ProcessManagerDiagnosticsListener extends AbstractFlashingObject
 
     protected void activate(final ComponentContext context) {
         processManagerStatusProvider.addProcessManagerStatusListener(this);
-        isDebug = (System.getProperty("roo-args") != null)
-                && isDevelopmentMode();
+        isDebug = System.getProperty("roo-args") != null && isDevelopmentMode();
     }
 
     protected void deactivate(final ComponentContext context) {

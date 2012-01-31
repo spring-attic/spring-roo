@@ -62,8 +62,9 @@ public class TailorCommands implements CommandMarker {
         final Iterator<String> iterator = configs.keySet().iterator();
         while (iterator.hasNext()) {
             final String configName = iterator.next();
-            final String isActive = ((activeConfig != null) && configName
-                    .equals(activeConfig.getName())) ? " [ ACTIVE ] " : "";
+            final String isActive = activeConfig != null
+                    && configName.equals(activeConfig.getName()) ? " [ ACTIVE ] "
+                    : "";
             LOGGER.info("\to " + configName + isActive + " - "
                     + configs.get(configName).getDescription());
         }

@@ -115,7 +115,7 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
         final BundleContext bundleContext = context.getBundleContext();
         if (bundleContext != null) {
             final String roobot = bundleContext.getProperty("roobot.url");
-            if ((roobot != null) && (roobot.length() > 0)) {
+            if (roobot != null && roobot.length() > 0) {
                 rooBotXmlUrl = roobot;
             }
             rooBotIndexDownload = Boolean.valueOf(bundleContext
@@ -180,7 +180,7 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
         logInfo("Description", bundleVersion.getDescription());
         int cc = 0;
         for (final Comment comment : bundle.getComments()) {
-            logInfo("Comment " + (++cc),
+            logInfo("Comment " + ++cc,
                     "Rating ["
                             + comment.getRating().name()
                             + "], grade ["
@@ -228,7 +228,7 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
     }
 
     protected void deactivate(final ComponentContext context) {
-        if ((rooBotEagerDownload != null) && rooBotEagerDownload.isAlive()) {
+        if (rooBotEagerDownload != null && rooBotEagerDownload.isAlive()) {
             rooBotEagerDownload = null;
         }
     }
@@ -262,7 +262,7 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
             if (isBundleInstalled(bundle)) {
                 continue bundle_loop;
             }
-            if ((requiresCommand != null) && (requiresCommand.length() > 0)) {
+            if (requiresCommand != null && requiresCommand.length() > 0) {
                 boolean matchingCommand = false;
                 for (final String cmd : latest.getCommands().keySet()) {
                     if (cmd.startsWith(requiresCommand)
@@ -303,7 +303,7 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
             }
             if (bundleCache.size() != 0) {
                 boolean onlyRelevantBundles = false;
-                if ((searchTerms != null) && !"".equals(searchTerms)) {
+                if (searchTerms != null && !"".equals(searchTerms)) {
                     onlyRelevantBundles = true;
                     final String[] terms = searchTerms.split(",");
                     for (final Bundle bundle : bundleCache.values()) {
@@ -374,10 +374,10 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
             }
             final String exisingBundleVersion = ebv.toString().trim();
             if (isCompatible(b.getLatestVersion().getRooVersion())
-                    && (rooBotBundleVersion
-                            .compareToIgnoreCase(exisingBundleVersion) > 0)
-                    && (asl.getLevel() > AddOnStabilityLevel
-                            .getAddOnStabilityLevel(exisingBundleVersion))) {
+                    && rooBotBundleVersion
+                            .compareToIgnoreCase(exisingBundleVersion) > 0
+                    && asl.getLevel() > AddOnStabilityLevel
+                            .getAddOnStabilityLevel(exisingBundleVersion)) {
 
                 bundles.put(b.getSymbolicName() + ";" + exisingBundleVersion, b);
             }
@@ -475,7 +475,7 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
         success &= !(requiresWrappedCoreDependency && !shell
                 .executeCommand("osgi obr url remove --url http://spring-roo-repository.springsource.org/repository.xml"));
 
-        if (install && (count == countBundles())) {
+        if (install && count == countBundles()) {
             return InstallOrUpgradeStatus.PGP_VERIFICATION_NEEDED; // Most
                                                                    // likely PgP
                                                                    // verification
@@ -555,7 +555,7 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
     private void logInfo(final String label, String content) {
         final StringBuilder sb = new StringBuilder();
         sb.append(label);
-        for (int i = 0; i < (13 - label.length()); i++) {
+        for (int i = 0; i < 13 - label.length(); i++) {
             sb.append(".");
         }
         sb.append(": ");
@@ -580,8 +580,8 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
             }
             else {
                 while (split.size() > 0) {
-                    while (!(split.isEmpty())
-                            && ((split.get(0).length() + sb.length()) < 79)) {
+                    while (!split.isEmpty()
+                            && split.get(0).length() + sb.length() < 79) {
                         sb.append(split.get(0)).append(" ");
                         split.remove(0);
                     }
@@ -671,12 +671,12 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
                             comments);
                     for (final Element versionElement : XmlUtils.findElements(
                             "versions/version", bundleElement)) {
-                        if ((bsn != null) && (bsn.length() > 0)
-                                && (versionElement != null)) {
+                        if (bsn != null && bsn.length() > 0
+                                && versionElement != null) {
                             String signedBy = "";
                             final String pgpKey = versionElement
                                     .getAttribute("pgp-key-id");
-                            if ((pgpKey != null) && (pgpKey.length() > 0)) {
+                            if (pgpKey != null && pgpKey.length() > 0) {
                                 final Element pgpSigned = XmlUtils
                                         .findFirstElement(
                                                 "/roobot/pgp-keys/pgp-key[@id='"
@@ -705,14 +705,14 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
                                             .getAttribute("minor"));
                             final String versionMicro = versionElement
                                     .getAttribute("micro");
-                            if ((versionMicro != null)
-                                    && (versionMicro.length() > 0)) {
+                            if (versionMicro != null
+                                    && versionMicro.length() > 0) {
                                 versionBuilder.append(".").append(versionMicro);
                             }
                             final String versionQualifier = versionElement
                                     .getAttribute("qualifier");
-                            if ((versionQualifier != null)
-                                    && (versionQualifier.length() > 0)) {
+                            if (versionQualifier != null
+                                    && versionQualifier.length() > 0) {
                                 versionBuilder.append(".").append(
                                         versionQualifier);
                             }
@@ -720,7 +720,7 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
                             String rooVersion = versionElement
                                     .getAttribute("roo-version");
                             if (rooVersion.equals("*")
-                                    || (rooVersion.length() == 0)) {
+                                    || rooVersion.length() == 0) {
                                 rooVersion = getVersionForCompatibility();
                             }
                             else {
@@ -820,16 +820,16 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
             final List<String> split = new ArrayList<String>(
                     Arrays.asList(latest.getDescription().split("\\s")));
             int lpr = linesPerResult;
-            while ((split.size() > 0) && (--lpr >= 0)) {
-                while (!(split.isEmpty())
-                        && ((split.get(0).length() + sb.length()) < (lpr == 0 ? 77
-                                : 80))) {
+            while (split.size() > 0 && --lpr >= 0) {
+                while (!split.isEmpty()
+                        && split.get(0).length() + sb.length() < (lpr == 0 ? 77
+                                : 80)) {
                     sb.append(split.get(0)).append(" ");
                     split.remove(0);
                 }
                 String line = sb.toString().substring(0,
                         sb.toString().length() - 1);
-                if ((lpr == 0) && (split.size() > 0)) {
+                if (lpr == 0 && split.size() > 0) {
                     line += "...";
                 }
                 LOGGER.info(line);
@@ -860,7 +860,7 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
                     .executeCommand("osgi uninstall --bundleSymbolicName "
                             + bsn.getKey());
             InstallOrUpgradeStatus status;
-            if ((count == countBundles()) || !success) {
+            if (count == countBundles() || !success) {
                 LOGGER.warning("Unable to remove add-on: " + bsn.getKey());
                 status = InstallOrUpgradeStatus.FAILED;
             }
@@ -880,7 +880,7 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
         final List<Bundle> result = findAddons(showFeedback, searchTerms,
                 refresh, linesPerResult, maxResults, trustedOnly,
                 compatibleOnly, communityOnly, requiresCommand);
-        return (result != null) ? result.size() : null;
+        return result != null ? result.size() : null;
     }
 
     public InstallOrUpgradeStatus upgradeAddOn(final AddOnBundleSymbolicName bsn) {

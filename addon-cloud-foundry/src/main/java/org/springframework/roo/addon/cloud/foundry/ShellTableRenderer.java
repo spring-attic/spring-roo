@@ -77,7 +77,7 @@ public class ShellTableRenderer {
                 final int columnWidth = getColumnWidth(j);
                 final String text = columnMap.get(j).get(i);
                 entry.append(text);
-                if (j < (columnMap.size() - 1)) {
+                if (j < columnMap.size() - 1) {
                     entry.append(getPadding(columnWidth - text.length()));
                 }
             }
@@ -93,13 +93,13 @@ public class ShellTableRenderer {
         }
         final StringBuilder titleBuilder = new StringBuilder();
         titleBuilder.append("\n");
-        if (longestRow > (title.length() + 2)) {
+        if (longestRow > title.length() + 2) {
             final int titleLengthPlusPadding = title.length() + 2;
             final String padding = " ";
             final String emphasis = getRepeatingChars('=',
                     (longestRow - titleLengthPlusPadding) / 2);
             String extra = "";
-            if ((titleLengthPlusPadding % 2) != 0) {
+            if (titleLengthPlusPadding % 2 != 0) {
                 extra = "=";
             }
             titleBuilder.append(emphasis).append(padding).append(title)

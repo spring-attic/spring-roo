@@ -110,8 +110,8 @@ public class JavaParserClassOrInterfaceTypeDetailsBuilder implements
 
         // Assign
         this.compilationUnit = compilationUnit;
-        compilationUnitServices = (enclosingCompilationUnitServices == null ? getDefaultCompilationUnitServices()
-                : enclosingCompilationUnitServices);
+        compilationUnitServices = enclosingCompilationUnitServices == null ? getDefaultCompilationUnitServices()
+                : enclosingCompilationUnitServices;
         this.declaredByMetadataId = declaredByMetadataId;
         this.metadataService = metadataService;
         name = typeName;
@@ -205,7 +205,7 @@ public class JavaParserClassOrInterfaceTypeDetailsBuilder implements
         for (final JavaType param : name.getParameters()) {
             final JavaSymbolName arg = param.getArgName();
             // Fortunately type names can only appear at the top-level
-            if ((arg != null) && !JavaType.WILDCARD_NEITHER.equals(arg)
+            if (arg != null && !JavaType.WILDCARD_NEITHER.equals(arg)
                     && !JavaType.WILDCARD_EXTENDS.equals(arg)
                     && !JavaType.WILDCARD_SUPER.equals(arg)) {
                 typeParameterNames.add(arg);
@@ -229,8 +229,8 @@ public class JavaParserClassOrInterfaceTypeDetailsBuilder implements
 
             final List<JavaType> extendsTypes = cidBuilder.getExtendsTypes();
             // Obtain the superclass, if this is a class and one is available
-            if ((physicalTypeCategory == PhysicalTypeCategory.CLASS)
-                    && (extendsTypes.size() == 1)) {
+            if (physicalTypeCategory == PhysicalTypeCategory.CLASS
+                    && extendsTypes.size() == 1) {
                 final JavaType superclass = extendsTypes.get(0);
                 final String superclassId = typeLocationService
                         .getPhysicalTypeIdentifier(superclass);
@@ -239,8 +239,8 @@ public class JavaParserClassOrInterfaceTypeDetailsBuilder implements
                     superPtm = (PhysicalTypeMetadata) metadataService
                             .get(superclassId);
                 }
-                if ((superPtm != null)
-                        && (superPtm.getMemberHoldingTypeDetails() != null)) {
+                if (superPtm != null
+                        && superPtm.getMemberHoldingTypeDetails() != null) {
                     cidBuilder.setSuperclass(superPtm
                             .getMemberHoldingTypeDetails());
                 }

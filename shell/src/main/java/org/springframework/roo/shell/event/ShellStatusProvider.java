@@ -28,6 +28,13 @@ public interface ShellStatusProvider {
     void addShellStatusListener(ShellStatusListener shellStatusListener);
 
     /**
+     * Returns the current shell status.
+     * 
+     * @return the current status (never null)
+     */
+    ShellStatus getShellStatus();
+
+    /**
      * Removes an existing status listener.
      * <p>
      * If the presented status listener is not found, the method returns without
@@ -36,11 +43,4 @@ public interface ShellStatusProvider {
      * @param shellStatusListener to remove (cannot be null)
      */
     void removeShellStatusListener(ShellStatusListener shellStatusListener);
-
-    /**
-     * Returns the current shell status.
-     * 
-     * @return the current status (never null)
-     */
-    ShellStatus getShellStatus();
 }

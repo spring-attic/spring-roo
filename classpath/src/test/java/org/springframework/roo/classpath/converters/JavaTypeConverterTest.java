@@ -160,8 +160,55 @@ public class JavaTypeConverterTest {
     }
 
     @Test
-    public void testSupportsJavaType() {
-        assertTrue(converter.supports(JavaType.class, null));
+    public void testGetAllPossibleValuesInProjectWhenModulePrefixIsUsed() {
+        // Set up
+        @SuppressWarnings("unchecked")
+        final List<Completion> mockCompletions = mock(List.class);
+        when(mockProjectOperations.isFocusedProjectAvailable())
+                .thenReturn(true);
+        final String otherModuleName = "core";
+        final Pom mockOtherModule = mock(Pom.class);
+        when(mockOtherModule.getModuleName()).thenReturn(otherModuleName);
+        when(mockProjectOperations.getPomFromModuleName(otherModuleName))
+                .thenReturn(mockOtherModule);
+        final String topLevelPackage = "com.example";
+        when(
+                mockTypeLocationService
+                        .getTopLevelPackageForModule(mockOtherModule))
+                .thenReturn(topLevelPackage);
+        final String focusedModuleName = "web";
+        when(mockProjectOperations.getModuleNames()).thenReturn(
+                Arrays.asList(focusedModuleName, otherModuleName));
+        final String modulePath = "/path/to/it";
+        when(mockOtherModule.getPath()).thenReturn(modulePath);
+        final JavaType type1 = new JavaType("com.example.web.ShouldBeFound");
+        final JavaType type2 = new JavaType("com.example.foo.ShouldNotBeFound");
+        when(mockTypeLocationService.getTypesForModule(mockOtherModule))
+                .thenReturn(Arrays.asList(type1, type2));
+
+        // Invoke
+        converter.getAllPossibleValues(mockCompletions, JavaType.class,
+                otherModuleName + MODULE_PATH_SEPARATOR + "~.web",
+                JavaTypeConverter.PROJECT, null);
+
+        // Check
+        verify(mockCompletions).add(
+                new Completion(focusedModuleName + MODULE_PATH_SEPARATOR,
+                        AnsiEscapeCode
+                                .decorate(focusedModuleName
+                                        + MODULE_PATH_SEPARATOR,
+                                        AnsiEscapeCode.FG_CYAN), "Modules", 0));
+        // prefix + topLevelPackage, formattedPrefix + topLevelPackage, heading
+        final String formattedPrefix = decorate(otherModuleName
+                + MODULE_PATH_SEPARATOR, FG_CYAN);
+        final String prefix = otherModuleName + MODULE_PATH_SEPARATOR;
+        verify(mockCompletions).add(
+                new Completion(prefix + topLevelPackage, formattedPrefix
+                        + topLevelPackage, "", 1));
+        verify(mockCompletions).add(
+                new Completion(prefix + "~.web.ShouldBeFound", formattedPrefix
+                        + "~.web.ShouldBeFound", "", 1));
+        verifyNoMoreInteractions(mockCompletions);
     }
 
     @Test
@@ -193,15 +240,15 @@ public class JavaTypeConverterTest {
                 mockTypeLocationService
                         .getTopLevelPackageForModule(mockFocusedModule))
                 .thenReturn(topLevelPackage);
-        String focusedModuleName = "web";
+        final String focusedModuleName = "web";
         when(mockFocusedModule.getModuleName()).thenReturn(focusedModuleName);
         final String modulePath = "/path/to/it";
         when(mockFocusedModule.getPath()).thenReturn(modulePath);
         final String otherModuleName = "core";
         when(mockProjectOperations.getModuleNames()).thenReturn(
                 Arrays.asList(focusedModuleName, otherModuleName));
-        JavaType type1 = new JavaType("com.example.Foo");
-        JavaType type2 = new JavaType("com.example.sub.Bar");
+        final JavaType type1 = new JavaType("com.example.Foo");
+        final JavaType type2 = new JavaType("com.example.sub.Bar");
         when(mockTypeLocationService.getTypesForModule(mockFocusedModule))
                 .thenReturn(Arrays.asList(type1, type2));
 
@@ -227,54 +274,7 @@ public class JavaTypeConverterTest {
     }
 
     @Test
-    public void testGetAllPossibleValuesInProjectWhenModulePrefixIsUsed() {
-        // Set up
-        @SuppressWarnings("unchecked")
-        final List<Completion> mockCompletions = mock(List.class);
-        when(mockProjectOperations.isFocusedProjectAvailable())
-                .thenReturn(true);
-        final String otherModuleName = "core";
-        final Pom mockOtherModule = mock(Pom.class);
-        when(mockOtherModule.getModuleName()).thenReturn(otherModuleName);
-        when(mockProjectOperations.getPomFromModuleName(otherModuleName))
-                .thenReturn(mockOtherModule);
-        final String topLevelPackage = "com.example";
-        when(
-                mockTypeLocationService
-                        .getTopLevelPackageForModule(mockOtherModule))
-                .thenReturn(topLevelPackage);
-        String focusedModuleName = "web";
-        when(mockProjectOperations.getModuleNames()).thenReturn(
-                Arrays.asList(focusedModuleName, otherModuleName));
-        final String modulePath = "/path/to/it";
-        when(mockOtherModule.getPath()).thenReturn(modulePath);
-        JavaType type1 = new JavaType("com.example.web.ShouldBeFound");
-        JavaType type2 = new JavaType("com.example.foo.ShouldNotBeFound");
-        when(mockTypeLocationService.getTypesForModule(mockOtherModule))
-                .thenReturn(Arrays.asList(type1, type2));
-
-        // Invoke
-        converter.getAllPossibleValues(mockCompletions, JavaType.class,
-                otherModuleName + MODULE_PATH_SEPARATOR + "~.web",
-                JavaTypeConverter.PROJECT, null);
-
-        // Check
-        verify(mockCompletions).add(
-                new Completion(focusedModuleName + MODULE_PATH_SEPARATOR,
-                        AnsiEscapeCode
-                                .decorate(focusedModuleName
-                                        + MODULE_PATH_SEPARATOR,
-                                        AnsiEscapeCode.FG_CYAN), "Modules", 0));
-        // prefix + topLevelPackage, formattedPrefix + topLevelPackage, heading
-        final String formattedPrefix = decorate(otherModuleName
-                + MODULE_PATH_SEPARATOR, FG_CYAN);
-        final String prefix = otherModuleName + MODULE_PATH_SEPARATOR;
-        verify(mockCompletions).add(
-                new Completion(prefix + topLevelPackage, formattedPrefix
-                        + topLevelPackage, "", 1));
-        verify(mockCompletions).add(
-                new Completion(prefix + "~.web.ShouldBeFound", formattedPrefix
-                        + "~.web.ShouldBeFound", "", 1));
-        verifyNoMoreInteractions(mockCompletions);
+    public void testSupportsJavaType() {
+        assertTrue(converter.supports(JavaType.class, null));
     }
 }

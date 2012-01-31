@@ -385,7 +385,7 @@ public final class FileUtils {
      * @since 1.2.0
      */
     public static String removeTrailingSeparator(String path) {
-        while ((path != null) && path.endsWith(File.separator)) {
+        while (path != null && path.endsWith(File.separator)) {
             path = StringUtils.removeSuffix(path, File.separator);
         }
         return path;

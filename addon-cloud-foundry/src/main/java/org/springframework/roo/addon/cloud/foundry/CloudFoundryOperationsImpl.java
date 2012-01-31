@@ -105,7 +105,7 @@ public class CloudFoundryOperationsImpl extends AbstractFlashingObject
                     final StringBuilder uris = new StringBuilder();
                     for (int i = 0; i < application.getUris().size(); i++) {
                         uris.append(application.getUris().get(i));
-                        if (i < (application.getUris().size() - 1)) {
+                        if (i < application.getUris().size() - 1) {
                             uris.append(", ");
                         }
                     }
@@ -235,7 +235,7 @@ public class CloudFoundryOperationsImpl extends AbstractFlashingObject
                 public void run() {
                     flash(Level.FINE, command.getGerund() + " "
                             + statusIndicators[statusCount[0]], MY_SLOT);
-                    if (statusCount[0] < (statusIndicators.length - 1)) {
+                    if (statusCount[0] < statusIndicators.length - 1) {
                         statusCount[0] = statusCount[0] + 1;
                     }
                     else {
@@ -286,15 +286,15 @@ public class CloudFoundryOperationsImpl extends AbstractFlashingObject
         sb.append(days).append("d:");
         if (days > 1) {
             double remainder = seconds % secondsInDay;
-            final long hours = (long) ((remainder) / (secondsInHour));
+            final long hours = (long) (remainder / secondsInHour);
             sb.append(hours).append("h:");
 
-            remainder = remainder % (secondsInHour);
-            final long minutes = (long) (remainder / (60));
+            remainder = remainder % secondsInHour;
+            final long minutes = (long) (remainder / 60);
             sb.append(minutes).append("m:");
 
-            remainder = remainder % (60);
-            final long secs = (long) (remainder);
+            remainder = remainder % 60;
+            final long secs = (long) remainder;
             sb.append(secs).append("s");
         }
         return sb.toString();
@@ -327,8 +327,8 @@ public class CloudFoundryOperationsImpl extends AbstractFlashingObject
             @Override
             public void execute() throws Exception {
                 final CloudInfo cloudInfo = client.getCloudInfo();
-                if ((cloudInfo == null) || (cloudInfo.getUsage() == null)
-                        || (cloudInfo.getLimits() == null)) {
+                if (cloudInfo == null || cloudInfo.getUsage() == null
+                        || cloudInfo.getLimits() == null) {
                     LOGGER.warning("Information could not be retrieved");
                     return;
                 }
@@ -652,13 +652,14 @@ public class CloudFoundryOperationsImpl extends AbstractFlashingObject
                         memory = roundTwoDecimals(instanceStats.getUsage()
                                 .getMem() / 1024)
                                 + "M ("
-                                + (instanceStats.getMemQuota() / (1024 * 1024))
+                                + instanceStats.getMemQuota()
+                                / (1024 * 1024)
                                 + "M)";
                         disk = roundTwoDecimals(instanceStats.getUsage()
                                 .getDisk() / (1024 * 1024))
                                 + "M ("
-                                + (instanceStats.getDiskQuota() / (1024 * 1024))
-                                + "M)";
+                                + instanceStats.getDiskQuota()
+                                / (1024 * 1024) + "M)";
                     }
                     Double uptime = instanceStats.getUptime();
                     if (uptime == null) {

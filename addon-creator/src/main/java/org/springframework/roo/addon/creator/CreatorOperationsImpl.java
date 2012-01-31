@@ -91,10 +91,6 @@ public class CreatorOperationsImpl implements CreatorOperations {
         }
     }
 
-    public boolean isAddonCreatePossible() {
-        return !projectOperations.isFocusedProjectAvailable();
-    }
-
     public void createAdvancedAddon(final JavaPackage topLevelPackage,
             final String description, final String projectName) {
         Assert.notNull(topLevelPackage, "Top-level package required");
@@ -119,96 +115,6 @@ public class CreatorOperationsImpl implements CreatorOperations {
                 Type.ADVANCED, projectName);
     }
 
-    public void createSimpleAddon(final JavaPackage topLevelPackage,
-            final String description, final String projectName) {
-        Assert.notNull(topLevelPackage, "Top Level Package required");
-
-        createProject(topLevelPackage, Type.SIMPLE, description, projectName);
-
-        install("Commands.java", topLevelPackage, Path.SRC_MAIN_JAVA,
-                Type.SIMPLE, projectName);
-        install("Operations.java", topLevelPackage, Path.SRC_MAIN_JAVA,
-                Type.SIMPLE, projectName);
-        install("OperationsImpl.java", topLevelPackage, Path.SRC_MAIN_JAVA,
-                Type.SIMPLE, projectName);
-        install("PropertyName.java", topLevelPackage, Path.SRC_MAIN_JAVA,
-                Type.SIMPLE, projectName);
-        install("assembly.xml", topLevelPackage, Path.ROOT, Type.SIMPLE,
-                projectName);
-        install("info.tagx", topLevelPackage, Path.SRC_MAIN_RESOURCES,
-                Type.SIMPLE, projectName);
-        install("show.tagx", topLevelPackage, Path.SRC_MAIN_RESOURCES,
-                Type.SIMPLE, projectName);
-    }
-
-    public void createWrapperAddon(final JavaPackage topLevelPackage,
-            final String groupId, final String artifactId,
-            final String version, final String vendorName,
-            final String lincenseUrl, final String docUrl,
-            final String osgiImports, final String description,
-            String projectName) {
-        Assert.notNull(topLevelPackage, "Top Level Package required");
-        if (StringUtils.isBlank(projectName)) {
-            projectName = topLevelPackage.getFullyQualifiedPackageName()
-                    .replace(".", "-");
-        }
-        final String wrapperGroupId = topLevelPackage
-                .getFullyQualifiedPackageName();
-        Document pom = XmlUtils.readXml(FileUtils.getInputStream(getClass(),
-                "wrapper/roo-addon-wrapper-template.xml"));
-        Element root = pom.getDocumentElement();
-
-        XmlUtils.findRequiredElement("/project/name", root).setTextContent(
-                projectName);
-        XmlUtils.findRequiredElement("/project/groupId", root).setTextContent(
-                wrapperGroupId);
-        XmlUtils.findRequiredElement("/project/artifactId", root)
-                .setTextContent(wrapperGroupId + "." + artifactId);
-        XmlUtils.findRequiredElement("/project/version", root).setTextContent(
-                version + ".0001");
-        XmlUtils.findRequiredElement(
-                "/project/dependencies/dependency/groupId", root)
-                .setTextContent(groupId);
-        XmlUtils.findRequiredElement(
-                "/project/dependencies/dependency/artifactId", root)
-                .setTextContent(artifactId);
-        XmlUtils.findRequiredElement(
-                "/project/dependencies/dependency/version", root)
-                .setTextContent(version);
-        XmlUtils.findRequiredElement("/project/properties/pkgArtifactId", root)
-                .setTextContent(artifactId);
-        XmlUtils.findRequiredElement("/project/properties/pkgVersion", root)
-                .setTextContent(version);
-        XmlUtils.findRequiredElement("/project/properties/pkgVendor", root)
-                .setTextContent(vendorName);
-        XmlUtils.findRequiredElement("/project/properties/pkgLicense", root)
-                .setTextContent(lincenseUrl);
-        XmlUtils.findRequiredElement("/project/properties/repo.folder", root)
-                .setTextContent(
-                        topLevelPackage.getFullyQualifiedPackageName().replace(
-                                ".", "/"));
-        if (docUrl != null && docUrl.length() > 0) {
-            XmlUtils.findRequiredElement("/project/properties/pkgDocUrl", root)
-                    .setTextContent(docUrl);
-        }
-        if (osgiImports != null && osgiImports.length() > 0) {
-            Element config = XmlUtils
-                    .findRequiredElement(
-                            "/project/build/plugins/plugin[artifactId = 'maven-bundle-plugin']/configuration/instructions",
-                            root);
-            config.appendChild(new XmlElementBuilder("Import-Package", pom)
-                    .setText(osgiImports).build());
-        }
-        if (description != null && description.length() > 0) {
-            Element descriptionE = XmlUtils.findRequiredElement(
-                    "/project/description", root);
-            descriptionE.setTextContent(description + " "
-                    + descriptionE.getTextContent());
-        }
-
-        writePomFile(pom);
-    }
-
     public void createI18nAddon(final JavaPackage topLevelPackage,
             String language, final Locale locale, final File messageBundle,
             final File flagGraphic, String description, final String projectName) {
@@ -218,22 +124,22 @@ public class CreatorOperationsImpl implements CreatorOperations {
 
         if (StringUtils.isBlank(language)) {
             language = "";
-            InputStreamReader is = new InputStreamReader(
+            final InputStreamReader is = new InputStreamReader(
                     FileUtils.getInputStream(getClass(), Type.I18N.name()
                             .toLowerCase() + "/iso3166.txt"));
-            BufferedReader br = new BufferedReader(is);
+            final BufferedReader br = new BufferedReader(is);
             String line;
             try {
                 while ((line = br.readLine()) != null) {
-                    String[] split = line.split(";");
+                    final String[] split = line.split(";");
                     if (split[1].startsWith(locale.getCountry().toUpperCase())) {
                         if (split[0].contains(",")) {
                             split[0] = split[0].substring(0,
                                     split[0].indexOf(",") - 1);
                         }
-                        String[] langWords = split[0].split("\\s");
-                        StringBuffer b = new StringBuffer();
-                        for (String word : langWords) {
+                        final String[] langWords = split[0].split("\\s");
+                        final StringBuffer b = new StringBuffer();
+                        for (final String word : langWords) {
                             b.append(StringUtils.capitalize(word.toLowerCase()))
                                     .append(" ");
                         }
@@ -241,7 +147,7 @@ public class CreatorOperationsImpl implements CreatorOperations {
                     }
                 }
             }
-            catch (IOException e) {
+            catch (final IOException e) {
                 throw new IllegalStateException(
                         "Could not parse ISO 3166 language list, please use --language option in command");
             }
@@ -250,14 +156,14 @@ public class CreatorOperationsImpl implements CreatorOperations {
             }
         }
 
-        String[] langWords = language.split("\\s");
-        StringBuffer b = new StringBuffer();
-        for (String word : langWords) {
+        final String[] langWords = language.split("\\s");
+        final StringBuffer b = new StringBuffer();
+        for (final String word : langWords) {
             b.append(StringUtils.capitalize(word.toLowerCase()));
         }
-        String languageName = b.toString();
-        String packagePath = topLevelPackage.getFullyQualifiedPackageName()
-                .replace('.', separatorChar);
+        final String languageName = b.toString();
+        final String packagePath = topLevelPackage
+                .getFullyQualifiedPackageName().replace('.', separatorChar);
 
         if (StringUtils.isBlank(description)) {
             description = languageName
@@ -297,17 +203,17 @@ public class CreatorOperationsImpl implements CreatorOperations {
                 installFlagGraphic(locale, packagePath);
             }
         }
-        catch (IOException e) {
+        catch (final IOException e) {
             throw new IllegalStateException(
                     "Could not copy addon resources into project", e);
         }
 
-        String destinationFile = pathResolver.getFocusedIdentifier(
+        final String destinationFile = pathResolver.getFocusedIdentifier(
                 Path.SRC_MAIN_JAVA, packagePath + separatorChar + languageName
                         + "Language.java");
 
         if (!fileManager.exists(destinationFile)) {
-            InputStream templateInputStream = FileUtils.getInputStream(
+            final InputStream templateInputStream = FileUtils.getInputStream(
                     getClass(), Type.I18N.name().toLowerCase()
                             + "/Language.java-template");
             try {
@@ -332,12 +238,12 @@ public class CreatorOperationsImpl implements CreatorOperations {
                         messageBundle.getName());
 
                 // Output the file for the user
-                MutableFile mutableFile = fileManager
+                final MutableFile mutableFile = fileManager
                         .createFile(destinationFile);
                 FileCopyUtils.copy(input.getBytes(),
                         mutableFile.getOutputStream());
             }
-            catch (IOException ioe) {
+            catch (final IOException ioe) {
                 throw new IllegalStateException("Unable to create '"
                         + languageName + "Language.java'", ioe);
             }
@@ -399,16 +305,99 @@ public class CreatorOperationsImpl implements CreatorOperations {
         fileManager.scan();
     }
 
-    /**
-     * Writes the given Maven POM to disk
-     * 
-     * @param pom the POM to write (required)
-     */
-    private void writePomFile(final Document pom) {
-        final LogicalPath rootPath = LogicalPath.getInstance(Path.ROOT, "");
-        final MutableFile pomFile = fileManager.createFile(pathResolver
-                .getIdentifier(rootPath, POM_XML));
-        XmlUtils.writeXml(pomFile.getOutputStream(), pom);
+    public void createSimpleAddon(final JavaPackage topLevelPackage,
+            final String description, final String projectName) {
+        Assert.notNull(topLevelPackage, "Top Level Package required");
+
+        createProject(topLevelPackage, Type.SIMPLE, description, projectName);
+
+        install("Commands.java", topLevelPackage, Path.SRC_MAIN_JAVA,
+                Type.SIMPLE, projectName);
+        install("Operations.java", topLevelPackage, Path.SRC_MAIN_JAVA,
+                Type.SIMPLE, projectName);
+        install("OperationsImpl.java", topLevelPackage, Path.SRC_MAIN_JAVA,
+                Type.SIMPLE, projectName);
+        install("PropertyName.java", topLevelPackage, Path.SRC_MAIN_JAVA,
+                Type.SIMPLE, projectName);
+        install("assembly.xml", topLevelPackage, Path.ROOT, Type.SIMPLE,
+                projectName);
+        install("info.tagx", topLevelPackage, Path.SRC_MAIN_RESOURCES,
+                Type.SIMPLE, projectName);
+        install("show.tagx", topLevelPackage, Path.SRC_MAIN_RESOURCES,
+                Type.SIMPLE, projectName);
+    }
+
+    public void createWrapperAddon(final JavaPackage topLevelPackage,
+            final String groupId, final String artifactId,
+            final String version, final String vendorName,
+            final String lincenseUrl, final String docUrl,
+            final String osgiImports, final String description,
+            String projectName) {
+        Assert.notNull(topLevelPackage, "Top Level Package required");
+        if (StringUtils.isBlank(projectName)) {
+            projectName = topLevelPackage.getFullyQualifiedPackageName()
+                    .replace(".", "-");
+        }
+        final String wrapperGroupId = topLevelPackage
+                .getFullyQualifiedPackageName();
+        final Document pom = XmlUtils.readXml(FileUtils.getInputStream(
+                getClass(), "wrapper/roo-addon-wrapper-template.xml"));
+        final Element root = pom.getDocumentElement();
+
+        XmlUtils.findRequiredElement("/project/name", root).setTextContent(
+                projectName);
+        XmlUtils.findRequiredElement("/project/groupId", root).setTextContent(
+                wrapperGroupId);
+        XmlUtils.findRequiredElement("/project/artifactId", root)
+                .setTextContent(wrapperGroupId + "." + artifactId);
+        XmlUtils.findRequiredElement("/project/version", root).setTextContent(
+                version + ".0001");
+        XmlUtils.findRequiredElement(
+                "/project/dependencies/dependency/groupId", root)
+                .setTextContent(groupId);
+        XmlUtils.findRequiredElement(
+                "/project/dependencies/dependency/artifactId", root)
+                .setTextContent(artifactId);
+        XmlUtils.findRequiredElement(
+                "/project/dependencies/dependency/version", root)
+                .setTextContent(version);
+        XmlUtils.findRequiredElement("/project/properties/pkgArtifactId", root)
+                .setTextContent(artifactId);
+        XmlUtils.findRequiredElement("/project/properties/pkgVersion", root)
+                .setTextContent(version);
+        XmlUtils.findRequiredElement("/project/properties/pkgVendor", root)
+                .setTextContent(vendorName);
+        XmlUtils.findRequiredElement("/project/properties/pkgLicense", root)
+                .setTextContent(lincenseUrl);
+        XmlUtils.findRequiredElement("/project/properties/repo.folder", root)
+                .setTextContent(
+                        topLevelPackage.getFullyQualifiedPackageName().replace(
+                                ".", "/"));
+        if (docUrl != null && docUrl.length() > 0) {
+            XmlUtils.findRequiredElement("/project/properties/pkgDocUrl", root)
+                    .setTextContent(docUrl);
+        }
+        if (osgiImports != null && osgiImports.length() > 0) {
+            final Element config = XmlUtils
+                    .findRequiredElement(
+                            "/project/build/plugins/plugin[artifactId = 'maven-bundle-plugin']/configuration/instructions",
+                            root);
+            config.appendChild(new XmlElementBuilder("Import-Package", pom)
+                    .setText(osgiImports).build());
+        }
+        if (description != null && description.length() > 0) {
+            final Element descriptionE = XmlUtils.findRequiredElement(
+                    "/project/description", root);
+            descriptionE.setTextContent(description + " "
+                    + descriptionE.getTextContent());
+        }
+
+        writePomFile(pom);
+    }
+
+    private String getErrorMsg(final String localeStr) {
+        return "Could not acquire flag icon for locale " + localeStr
+                + " please use --flagGraphic to specify the flag manually";
     }
 
     private void install(final String targetFilename,
@@ -418,9 +407,10 @@ public class CreatorOperationsImpl implements CreatorOperations {
             projectName = topLevelPackage.getFullyQualifiedPackageName()
                     .replace(".", "-");
         }
-        String topLevelPackageName = topLevelPackage
+        final String topLevelPackageName = topLevelPackage
                 .getFullyQualifiedPackageName();
-        String packagePath = topLevelPackageName.replace('.', separatorChar);
+        final String packagePath = topLevelPackageName.replace('.',
+                separatorChar);
         String destinationFile = "";
 
         if (targetFilename.endsWith(".java")) {
@@ -458,7 +448,7 @@ public class CreatorOperationsImpl implements CreatorOperations {
         }
 
         if (!fileManager.exists(destinationFile)) {
-            InputStream templateInputStream = FileUtils.getInputStream(
+            final InputStream templateInputStream = FileUtils.getInputStream(
                     getClass(), type.name().toLowerCase() + "/"
                             + targetFilename + "-template");
             try {
@@ -481,39 +471,22 @@ public class CreatorOperationsImpl implements CreatorOperations {
                         projectName.toLowerCase());
 
                 // Output the file for the user
-                MutableFile mutableFile = fileManager
+                final MutableFile mutableFile = fileManager
                         .createFile(destinationFile);
                 FileCopyUtils.copy(input.getBytes(),
                         mutableFile.getOutputStream());
             }
-            catch (IOException ioe) {
+            catch (final IOException ioe) {
                 throw new IllegalStateException("Unable to create '"
                         + targetFilename + "'", ioe);
             }
         }
     }
 
-    private void writeTextFile(final String fullPathFromRoot,
-            final String message) {
-        Assert.hasText(fullPathFromRoot, "Text file name to write is required");
-        Assert.hasText(message, "Message required");
-        String path = pathResolver.getFocusedIdentifier(Path.ROOT,
-                fullPathFromRoot);
-        MutableFile mutableFile = fileManager.exists(path) ? fileManager
-                .updateFile(path) : fileManager.createFile(path);
-        byte[] input = message.getBytes();
-        try {
-            FileCopyUtils.copy(input, mutableFile.getOutputStream());
-        }
-        catch (IOException ioe) {
-            throw new IllegalStateException(ioe);
-        }
-    }
-
     private void installFlagGraphic(final Locale locale,
             final String packagePath) {
         boolean success = false;
-        String countryCode = locale.getCountry().toLowerCase();
+        final String countryCode = locale.getCountry().toLowerCase();
 
         // Retrieve the icon file:
         BufferedInputStream bis = null;
@@ -523,14 +496,15 @@ public class CreatorOperationsImpl implements CreatorOperations {
                     iconSetUrl)));
             zis = new ZipInputStream(bis);
             ZipEntry entry;
-            String expectedEntryName = "png/" + countryCode + ".png";
+            final String expectedEntryName = "png/" + countryCode + ".png";
             while ((entry = zis.getNextEntry()) != null) {
                 if (entry.getName().equals(expectedEntryName)) {
                     int size;
-                    byte[] buffer = new byte[2048];
-                    MutableFile target = fileManager.createFile(pathResolver
-                            .getFocusedIdentifier(Path.SRC_MAIN_RESOURCES,
-                                    packagePath + "/" + countryCode + ".png"));
+                    final byte[] buffer = new byte[2048];
+                    final MutableFile target = fileManager
+                            .createFile(pathResolver.getFocusedIdentifier(
+                                    Path.SRC_MAIN_RESOURCES, packagePath + "/"
+                                            + countryCode + ".png"));
                     BufferedOutputStream bos = null;
                     try {
                         bos = new BufferedOutputStream(
@@ -546,7 +520,7 @@ public class CreatorOperationsImpl implements CreatorOperations {
                 }
             }
         }
-        catch (IOException e) {
+        catch (final IOException e) {
             throw new IllegalStateException(getErrorMsg(locale.getCountry()), e);
         }
         finally {
@@ -558,8 +532,36 @@ public class CreatorOperationsImpl implements CreatorOperations {
         }
     }
 
-    private String getErrorMsg(final String localeStr) {
-        return "Could not acquire flag icon for locale " + localeStr
-                + " please use --flagGraphic to specify the flag manually";
+    public boolean isAddonCreatePossible() {
+        return !projectOperations.isFocusedProjectAvailable();
+    }
+
+    /**
+     * Writes the given Maven POM to disk
+     * 
+     * @param pom the POM to write (required)
+     */
+    private void writePomFile(final Document pom) {
+        final LogicalPath rootPath = LogicalPath.getInstance(Path.ROOT, "");
+        final MutableFile pomFile = fileManager.createFile(pathResolver
+                .getIdentifier(rootPath, POM_XML));
+        XmlUtils.writeXml(pomFile.getOutputStream(), pom);
+    }
+
+    private void writeTextFile(final String fullPathFromRoot,
+            final String message) {
+        Assert.hasText(fullPathFromRoot, "Text file name to write is required");
+        Assert.hasText(message, "Message required");
+        final String path = pathResolver.getFocusedIdentifier(Path.ROOT,
+                fullPathFromRoot);
+        final MutableFile mutableFile = fileManager.exists(path) ? fileManager
+                .updateFile(path) : fileManager.createFile(path);
+        final byte[] input = message.getBytes();
+        try {
+            FileCopyUtils.copy(input, mutableFile.getOutputStream());
+        }
+        catch (final IOException ioe) {
+            throw new IllegalStateException(ioe);
+        }
     }
 }

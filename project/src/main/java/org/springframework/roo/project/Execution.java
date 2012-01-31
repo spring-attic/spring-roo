@@ -90,7 +90,7 @@ public class Execution implements Comparable<Execution> {
 
     @Override
     public boolean equals(final Object obj) {
-        return (obj instanceof Execution) && (compareTo((Execution) obj) == 0);
+        return obj instanceof Execution && compareTo((Execution) obj) == 0;
     }
 
     /**
@@ -174,10 +174,10 @@ public class Execution implements Comparable<Execution> {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = (prime * result) + ObjectUtils.nullSafeHashCode(goals);
-        result = (prime * result) + ObjectUtils.nullSafeHashCode(id);
-        result = (prime * result) + ObjectUtils.nullSafeHashCode(phase);
-        result = (prime * result) + ObjectUtils.nullSafeHashCode(configuration);
+        result = prime * result + ObjectUtils.nullSafeHashCode(goals);
+        result = prime * result + ObjectUtils.nullSafeHashCode(id);
+        result = prime * result + ObjectUtils.nullSafeHashCode(phase);
+        result = prime * result + ObjectUtils.nullSafeHashCode(configuration);
         return result;
     }
 

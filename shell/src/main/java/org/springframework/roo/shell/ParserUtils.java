@@ -66,7 +66,7 @@ public class ParserUtils {
                 count++;
             }
         }
-        Assert.isTrue((count % 2) == 0,
+        Assert.isTrue(count % 2 == 0,
                 "Cannot have an unbalanced number of quotation marks");
 
         if ("".equals(remainingBuffer.trim())) {
@@ -79,7 +79,7 @@ public class ParserUtils {
             final String currentToken = split[i];
 
             if (currentToken.startsWith("\"") && currentToken.endsWith("\"")
-                    && (currentToken.length() > 1)) {
+                    && currentToken.length() > 1) {
                 final String tokenLessDelimiters = currentToken.substring(1,
                         currentToken.length() - 1);
                 currentValue.append(tokenLessDelimiters);
@@ -134,7 +134,7 @@ public class ParserUtils {
 
                 // Store this token if it's the last one, or the next token
                 // starts with a "-"
-                if ((i + 1) == split.length) {
+                if (i + 1 == split.length) {
                     // We're at the end of the tokens, so store this one and
                     // stop processing
                     store(result, currentOption, currentValue);
@@ -165,7 +165,7 @@ public class ParserUtils {
 
                 // Store this token if it's the last one, or the next token
                 // starts with a "-"
-                if ((i + 1) == split.length) {
+                if (i + 1 == split.length) {
                     // We're at the end of the tokens, so store this one and
                     // stop processing
                     store(result, currentOption, currentValue);

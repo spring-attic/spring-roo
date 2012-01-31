@@ -50,7 +50,7 @@ public class AddOnFeedbackOperationsImpl implements AddOnFeedbackOperations {
             final Rating rating, String comment) {
         Assert.notNull(bsn, "Bundle symbolic name required");
         Assert.notNull(rating, "Rating required");
-        Assert.isTrue((comment == null) || (comment.length() <= 140),
+        Assert.isTrue(comment == null || comment.length() <= 140,
                 "Comment must be under 140 characters");
         if ("".equals(comment)) {
             comment = null;

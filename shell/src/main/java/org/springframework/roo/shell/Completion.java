@@ -44,7 +44,7 @@ public class Completion {
         if (this == o) {
             return true;
         }
-        if ((o == null) || (getClass() != o.getClass())) {
+        if (o == null || getClass() != o.getClass()) {
             return false;
         }
 
@@ -82,9 +82,9 @@ public class Completion {
     @Override
     public int hashCode() {
         int result = value != null ? value.hashCode() : 0;
-        result = (31 * result)
+        result = 31 * result
                 + (formattedValue != null ? formattedValue.hashCode() : 0);
-        result = (31 * result) + (heading != null ? heading.hashCode() : 0);
+        result = 31 * result + (heading != null ? heading.hashCode() : 0);
         return result;
     }
 

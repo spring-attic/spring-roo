@@ -54,8 +54,8 @@ public class StandardMetadataTimingStatistic implements MetadataTimingStatistic 
 
     @Override
     public boolean equals(final Object obj) {
-        return (obj instanceof MetadataTimingStatistic)
-                && (compareTo((MetadataTimingStatistic) obj) == 0);
+        return obj instanceof MetadataTimingStatistic
+                && compareTo((MetadataTimingStatistic) obj) == 0;
     }
 
     public long getInvocations() {

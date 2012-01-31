@@ -150,9 +150,9 @@ public class JpaActiveRecordMetadataProviderImpl extends
 
         // If the parent is null, but the type has a super class it is likely
         // that the we don't have information to proceed
-        if ((parent == null)
-                && ((governorPhysicalType.getMemberHoldingTypeDetails())
-                        .getSuperclass() != null)) {
+        if (parent == null
+                && governorPhysicalType.getMemberHoldingTypeDetails()
+                        .getSuperclass() != null) {
             // If the superclass is annotated with the Entity trigger annotation
             // then we can be pretty sure that we don't have enough information
             // to proceed

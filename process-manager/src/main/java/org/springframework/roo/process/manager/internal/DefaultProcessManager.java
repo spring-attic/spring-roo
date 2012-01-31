@@ -217,8 +217,8 @@ public class DefaultProcessManager extends
             // For us to acquire this lock means no other thread has hold of
             // process manager status
             Assert.isTrue(
-                    (getProcessManagerStatus() == ProcessManagerStatus.AVAILABLE)
-                            || (getProcessManagerStatus() == ProcessManagerStatus.BUSY_EXECUTING),
+                    getProcessManagerStatus() == ProcessManagerStatus.AVAILABLE
+                            || getProcessManagerStatus() == ProcessManagerStatus.BUSY_EXECUTING,
                     "Unable to execute as another thread has set status to "
                             + getProcessManagerStatus());
             setProcessManagerStatus(ProcessManagerStatus.BUSY_EXECUTING);
@@ -262,9 +262,9 @@ public class DefaultProcessManager extends
         }
         else {
             String message = root.getMessage();
-            if ((message == null) || "".equals(message)) {
+            if (message == null || "".equals(message)) {
                 final StackTraceElement[] trace = root.getStackTrace();
-                if ((trace != null) && (trace.length > 0)) {
+                if (trace != null && trace.length > 0) {
                     message = root.getClass().getSimpleName() + " at "
                             + trace[0].toString();
                 }
@@ -328,7 +328,7 @@ public class DefaultProcessManager extends
                 }
             }
             final long started = System.currentTimeMillis();
-            if (started < (lastPollTime + effectiveMinimumDelayBetweenPoll)) {
+            if (started < lastPollTime + effectiveMinimumDelayBetweenPoll) {
                 // Too soon to re-poll
                 return;
             }

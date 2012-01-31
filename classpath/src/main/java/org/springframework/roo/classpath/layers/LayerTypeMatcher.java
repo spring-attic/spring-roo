@@ -53,8 +53,8 @@ public class LayerTypeMatcher extends AnnotatedTypeMatcher {
     public Object getTagValue(final MemberHoldingTypeDetails type) {
         final AnnotationMetadata layerAnnotation = MemberFindingUtils
                 .getAnnotationOfType(type.getAnnotations(), layerAnnotationType);
-        if ((layerAnnotation == null)
-                || (layerAnnotation.getAttribute(domainTypesAttribute) == null)) {
+        if (layerAnnotation == null
+                || layerAnnotation.getAttribute(domainTypesAttribute) == null) {
             return null;
         }
         final AnnotationAttributeValue<?> value = layerAnnotation

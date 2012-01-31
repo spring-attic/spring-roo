@@ -235,7 +235,7 @@ public final class JavaParserUtils {
             // Refers to a different enclosing type, so calculate the package
             // name based on convention of an uppercase letter denotes same
             // package (ROO-1210)
-            if ((qne.toString().length() > 1)
+            if (qne.toString().length() > 1
                     && Character.isUpperCase(qne.toString().charAt(0))) {
                 // First letter is uppercase, so this likely requires prepending
                 // of some package name
@@ -274,7 +274,7 @@ public final class JavaParserUtils {
 
         // Unqualified name detected, so check if it's in the type parameter
         // list
-        if ((typeParameters != null)
+        if (typeParameters != null
                 && typeParameters.contains(new JavaSymbolName(nameToFind
                         .getName()))) {
             return new JavaType(nameToFind.getName(), 0, DataType.VARIABLE,
@@ -669,8 +669,8 @@ public final class JavaParserUtils {
                 compilationUnit.getImports(), current);
         final ClassOrInterfaceType resolvedName = JavaParserUtils
                 .getClassOrInterfaceType(nameExpr);
-        if ((current.getParameters() != null)
-                && (current.getParameters().size() > 0)) {
+        if (current.getParameters() != null
+                && current.getParameters().size() > 0) {
             resolvedName.setTypeArgs(new ArrayList<Type>());
             for (final JavaType param : current.getParameters()) {
                 resolvedName.getTypeArgs().add(
@@ -688,8 +688,8 @@ public final class JavaParserUtils {
                 compilationUnit.getImports(), current);
         final ClassOrInterfaceType resolvedName = JavaParserUtils
                 .getClassOrInterfaceType(nameExpr);
-        if ((current.getParameters() != null)
-                && (current.getParameters().size() > 0)) {
+        if (current.getParameters() != null
+                && current.getParameters().size() > 0) {
             resolvedName.setTypeArgs(new ArrayList<Type>());
             for (final JavaType param : current.getParameters()) {
                 resolvedName.getTypeArgs().add(
@@ -801,8 +801,8 @@ public final class JavaParserUtils {
                             javaType.getSimpleTypeName()));
                 }
             }
-            else if ((type instanceof ReferenceType)
-                    && (((ReferenceType) type).getType() instanceof ClassOrInterfaceType)) {
+            else if (type instanceof ReferenceType
+                    && ((ReferenceType) type).getType() instanceof ClassOrInterfaceType) {
                 final ClassOrInterfaceType cit = (ClassOrInterfaceType) ((ReferenceType) type)
                         .getType();
                 final JavaType javaType = new JavaType(cit.getName());
@@ -974,19 +974,19 @@ public final class JavaParserUtils {
      * @return true if and only if both entries are identical
      */
     private static boolean isEqual(final NameExpr o1, final NameExpr o2) {
-        if ((o1 == null) && (o2 == null)) {
+        if (o1 == null && o2 == null) {
             return true;
         }
-        if ((o1 == null) && (o2 != null)) {
+        if (o1 == null && o2 != null) {
             return false;
         }
-        if ((o1 != null) && (o2 == null)) {
+        if (o1 != null && o2 == null) {
             return false;
         }
-        if ((o1 != null) && !o1.getName().equals(o2.getName())) {
+        if (o1 != null && !o1.getName().equals(o2.getName())) {
             return false;
         }
-        return (o1 != null) && o1.toString().equals(o2.toString());
+        return o1 != null && o1.toString().equals(o2.toString());
     }
 
     /**

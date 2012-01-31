@@ -55,7 +55,7 @@ public class DefaultXmlRoundTripFileManager implements XmlRoundTripFileManager {
                     final byte[] digest = sha.digest(contents.getBytes());
                     final String contentsSha = HexUtils.toHex(digest);
                     final String lastContents = fileContentsMap.get(filename);
-                    if ((lastContents != null)
+                    if (lastContents != null
                             && contentsSha.equals(lastContents)) {
                         return;
                     }

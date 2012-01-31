@@ -105,14 +105,14 @@ public class GwtScaffoldMetadataProviderImpl implements
     public MetadataItem get(final String metadataIdentificationString) {
         // Obtain the governor's information
         final ClassOrInterfaceTypeDetails mirroredType = getGovernor(metadataIdentificationString);
-        if ((mirroredType == null)
+        if (mirroredType == null
                 || Modifier.isAbstract(mirroredType.getModifier())) {
             return null;
         }
 
         final ClassOrInterfaceTypeDetails proxy = gwtTypeService
                 .lookupProxyFromEntity(mirroredType);
-        if ((proxy == null) || proxy.getDeclaredMethods().isEmpty()) {
+        if (proxy == null || proxy.getDeclaredMethods().isEmpty()) {
             return null;
         }
 

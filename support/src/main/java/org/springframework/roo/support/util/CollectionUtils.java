@@ -49,7 +49,7 @@ public final class CollectionUtils {
      */
     public static <T> boolean addAll(final Collection<? extends T> newItems,
             final Collection<T> existingItems) {
-        if ((existingItems != null) && (newItems != null)) {
+        if (existingItems != null && newItems != null) {
             return existingItems.addAll(newItems);
         }
         return false;
@@ -166,7 +166,7 @@ public final class CollectionUtils {
         final List<T> filtered = new ArrayList<T>();
         if (unfiltered != null) {
             for (final T element : unfiltered) {
-                if ((filter == null) || filter.include(element)) {
+                if (filter == null || filter.include(element)) {
                     filtered.add(element);
                 }
             }
@@ -238,7 +238,7 @@ public final class CollectionUtils {
         }
         T value = null;
         for (final Object element : collection) {
-            if ((type == null) || type.isInstance(element)) {
+            if (type == null || type.isInstance(element)) {
                 if (value != null) {
                     // More than one value found... no clear single value.
                     return null;
@@ -299,7 +299,7 @@ public final class CollectionUtils {
      * @return whether the given Collection is empty
      */
     public static boolean isEmpty(final Collection<?> collection) {
-        return ((collection == null) || collection.isEmpty());
+        return collection == null || collection.isEmpty();
     }
 
     /**
@@ -310,7 +310,7 @@ public final class CollectionUtils {
      * @return whether the given Map is empty
      */
     public static boolean isEmpty(final Map<?, ?> map) {
-        return ((map == null) || map.isEmpty());
+        return map == null || map.isEmpty();
     }
 
     /**

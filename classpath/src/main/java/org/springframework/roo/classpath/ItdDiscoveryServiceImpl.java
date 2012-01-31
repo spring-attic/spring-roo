@@ -27,7 +27,7 @@ public class ItdDiscoveryServiceImpl implements ItdDiscoveryService {
     private final Map<String, Map<String, MemberHoldingTypeDetails>> typeMap = new HashMap<String, Map<String, MemberHoldingTypeDetails>>();
 
     public void addItdTypeDetails(final ItdTypeDetails itdTypeDetails) {
-        if ((itdTypeDetails == null) || (itdTypeDetails.getGovernor() == null)) {
+        if (itdTypeDetails == null || itdTypeDetails.getGovernor() == null) {
             return;
         }
         if (typeMap.get(itdTypeDetails.getGovernor().getName()

@@ -96,8 +96,7 @@ public class DataOnDemandOperationsImpl implements DataOnDemandOperations {
                 .getAnnotation(ENTITY);
         final AnnotationMetadata persistentAnnotation = memberDetails
                 .getAnnotation(PERSISTENT);
-        Assert.isTrue((entityAnnotation != null)
-                || (persistentAnnotation != null),
+        Assert.isTrue(entityAnnotation != null || persistentAnnotation != null,
                 "Type " + entity.getFullyQualifiedTypeName()
                         + " must be a persistent type");
 

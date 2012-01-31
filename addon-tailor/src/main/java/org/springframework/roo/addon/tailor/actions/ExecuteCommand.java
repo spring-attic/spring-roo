@@ -27,7 +27,7 @@ public class ExecuteCommand extends AbstractAction {
     }
 
     public boolean isValid(final ActionConfig config) {
-        return (config != null) && StringUtils.hasText(config.getCommand());
+        return config != null && StringUtils.hasText(config.getCommand());
     }
 
 }

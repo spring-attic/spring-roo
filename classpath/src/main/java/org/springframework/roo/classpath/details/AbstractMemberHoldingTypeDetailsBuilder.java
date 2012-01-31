@@ -71,7 +71,7 @@ public abstract class AbstractMemberHoldingTypeDetailsBuilder<T extends MemberHo
 
     public final boolean addConstructor(
             final ConstructorMetadataBuilder constructorBuilder) {
-        if ((constructorBuilder == null)
+        if (constructorBuilder == null
                 || !getDeclaredByMetadataId().equals(
                         constructorBuilder.getDeclaredByMetadataId())) {
             return false;
@@ -96,7 +96,7 @@ public abstract class AbstractMemberHoldingTypeDetailsBuilder<T extends MemberHo
     }
 
     public final boolean addField(final FieldMetadataBuilder fieldBuilder) {
-        if ((fieldBuilder == null)
+        if (fieldBuilder == null
                 || !getDeclaredByMetadataId().equals(
                         fieldBuilder.getDeclaredByMetadataId())) {
             return false;
@@ -123,7 +123,7 @@ public abstract class AbstractMemberHoldingTypeDetailsBuilder<T extends MemberHo
 
     public final boolean addInitializer(
             final InitializerMetadataBuilder initializer) {
-        if ((initializer == null)
+        if (initializer == null
                 || !getDeclaredByMetadataId().equals(
                         initializer.getDeclaredByMetadataId())) {
             return false;
@@ -179,7 +179,7 @@ public abstract class AbstractMemberHoldingTypeDetailsBuilder<T extends MemberHo
      * @return true if the state of this builder changed
      */
     public final boolean addMethod(final MethodMetadataBuilder methodBuilder) {
-        if ((methodBuilder == null)
+        if (methodBuilder == null
                 || !getDeclaredByMetadataId().equals(
                         methodBuilder.getDeclaredByMetadataId())) {
             return false;

@@ -50,10 +50,9 @@ public class GitOperationsImpl implements GitOperations {
             final Git git = new Git(repository);
             git.add().addFilepattern(".").call();
             final Status status = git.status().call();
-            if ((status.getChanged().size() > 0)
-                    || (status.getAdded().size() > 0)
-                    || (status.getModified().size() > 0)
-                    || (status.getRemoved().size() > 0)) {
+            if (status.getChanged().size() > 0 || status.getAdded().size() > 0
+                    || status.getModified().size() > 0
+                    || status.getRemoved().size() > 0) {
                 final RevCommit rev = git.commit().setAll(true)
                         .setCommitter(person).setAuthor(person)
                         .setMessage(message).call();

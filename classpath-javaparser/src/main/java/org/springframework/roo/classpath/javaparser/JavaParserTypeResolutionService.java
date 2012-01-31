@@ -64,8 +64,7 @@ public class JavaParserTypeResolutionService implements TypeResolutionService {
             }
             final CompilationUnit compilationUnit = JavaParser
                     .parse(new ByteArrayInputStream(typeContents.getBytes()));
-            if ((compilationUnit == null)
-                    || (compilationUnit.getPackage() == null)) {
+            if (compilationUnit == null || compilationUnit.getPackage() == null) {
                 return null;
             }
             return new JavaPackage(compilationUnit.getPackage().getName()

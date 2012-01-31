@@ -115,7 +115,7 @@ public class DefaultClassOrInterfaceTypeDetails extends
             this.implementsTypes = implementsTypes;
         }
 
-        if ((enumConstants != null) && (physicalTypeCategory == ENUMERATION)) {
+        if (enumConstants != null && physicalTypeCategory == ENUMERATION) {
             this.enumConstants = enumConstants;
         }
 
@@ -206,9 +206,9 @@ public class DefaultClassOrInterfaceTypeDetails extends
     }
 
     public boolean isAbstract() {
-        return (physicalTypeCategory == INTERFACE)
-                || ((physicalTypeCategory == CLASS) && Modifier
-                        .isAbstract(getModifier()));
+        return physicalTypeCategory == INTERFACE
+                || physicalTypeCategory == CLASS
+                && Modifier.isAbstract(getModifier());
     }
 
     @Override

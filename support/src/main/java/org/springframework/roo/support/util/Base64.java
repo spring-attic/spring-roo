@@ -271,7 +271,7 @@ public class Base64 {
                         // Read four "meaningful" bytes:
                         int b = 0;
                         do { b = in.read(); }
-                        while((b >= 0) && (decodabet[b & 0x7f] <= WHITE_SPACE_ENC));
+                        while(b >= 0 && decodabet[b & 0x7f] <= WHITE_SPACE_ENC);
 
                         if (b < 0) {
                             break; // Reads a -1 if end of stream
@@ -302,7 +302,7 @@ public class Base64 {
                     return -1;
                 }   // end if: got data
 
-                if (encode && breakLines && (lineLength >= MAX_LINE_LENGTH)) {
+                if (encode && breakLines && lineLength >= MAX_LINE_LENGTH) {
                     lineLength = 0;
                     return '\n';
                 }   // end if
@@ -532,7 +532,7 @@ public class Base64 {
                     out.write(encode3to4(b4, buffer, bufferLength, options));
 
                     lineLength += 4;
-                    if (breakLines && (lineLength >= MAX_LINE_LENGTH)) {
+                    if (breakLines && lineLength >= MAX_LINE_LENGTH) {
                         out.write(NEW_LINE);
                         lineLength = 0;
                     }   // end if: end of line
@@ -836,7 +836,7 @@ public class Base64 {
         if (source == null) {
             throw new NullPointerException("Cannot decode null source array.");
         }
-        if ((off < 0) || ((off + len) > source.length)) {
+        if (off < 0 || off + len > source.length) {
             throw new IllegalArgumentException(String.format("Source array with length %d cannot have offset of %d and process %d bytes.", source.length, off, len));
         }
 
@@ -849,7 +849,7 @@ public class Base64 {
 
         final byte[] DECODABET = getDecodabet(options);
 
-        final int    len34   = (len * 3) / 4;       // Estimate on array size
+        final int    len34   = len * 3 / 4;       // Estimate on array size
         final byte[] outBuff = new byte[len34]; // Upper limit on size of output
         int    outBuffPosn = 0;             // Keep track of where we're writing
 
@@ -858,7 +858,7 @@ public class Base64 {
         int    i         = 0;               // Source array counter
         byte   sbiDecode = 0;               // Special value from DECODABET
 
-        for (i = off; i < (off+len); i++) {  // Loop through source
+        for (i = off; i < off+len; i++) {  // Loop through source
 
             sbiDecode = DECODABET[source[i]&0xFF];
 
@@ -935,9 +935,9 @@ public class Base64 {
         // Check to see if it's gzip-compressed
         // GZIP Magic Two-Byte Number: 0x8b1f (35615)
         final boolean dontGunzip = (options & DONT_GUNZIP) != 0;
-        if ((bytes != null) && (bytes.length >= 4) && (!dontGunzip)) {
+        if (bytes != null && bytes.length >= 4 && !dontGunzip) {
 
-            final int head = (bytes[0] & 0xff) | ((bytes[1] << 8) & 0xff00);
+            final int head = bytes[0] & 0xff | bytes[1] << 8 & 0xff00;
             if (GZIPInputStream.GZIP_MAGIC == head)  {
                 ByteArrayInputStream  bais = null;
                 GZIPInputStream gzis = null;
@@ -1004,11 +1004,11 @@ public class Base64 {
         if (destination == null) {
             throw new NullPointerException("Destination array was null.");
         }
-        if ((srcOffset < 0) || ((srcOffset + 3) >= source.length)) {
+        if (srcOffset < 0 || srcOffset + 3 >= source.length) {
             throw new IllegalArgumentException(String.format(
             "Source array with length %d cannot have offset of %d and still process four bytes.", source.length, srcOffset));
         }
-        if ((destOffset < 0) || ((destOffset +2) >= destination.length)) {
+        if (destOffset < 0 || destOffset +2 >= destination.length) {
             throw new IllegalArgumentException(String.format(
             "Destination array with length %d cannot have offset of %d and still store three bytes.", destination.length, destOffset));
         }
@@ -1020,8 +1020,8 @@ public class Base64 {
             // Two ways to do the same thing. Don't know which way I like best.
           //int outBuff =   ((DECODABET[source[srcOffset   ]] << 24) >>>  6)
           //              | ((DECODABET[source[srcOffset + 1]] << 24) >>> 12);
-            final int outBuff =   ((DECODABET[source[srcOffset   ]] & 0xFF) << 18)
-                          | ((DECODABET[source[srcOffset + 1]] & 0xFF) << 12);
+            final int outBuff =   (DECODABET[source[srcOffset   ]] & 0xFF) << 18
+                          | (DECODABET[source[srcOffset + 1]] & 0xFF) << 12;
 
             destination[destOffset] = (byte)(outBuff >>> 16);
             return 1;
@@ -1033,9 +1033,9 @@ public class Base64 {
           //int outBuff =   ((DECODABET[source[srcOffset    ]] << 24) >>>  6)
           //              | ((DECODABET[source[srcOffset + 1]] << 24) >>> 12)
           //              | ((DECODABET[source[srcOffset + 2]] << 24) >>> 18);
-            final int outBuff =   ((DECODABET[source[srcOffset    ]] & 0xFF) << 18)
-                          | ((DECODABET[source[srcOffset + 1]] & 0xFF) << 12)
-                          | ((DECODABET[source[srcOffset + 2]] & 0xFF) <<  6);
+            final int outBuff =   (DECODABET[source[srcOffset    ]] & 0xFF) << 18
+                          | (DECODABET[source[srcOffset + 1]] & 0xFF) << 12
+                          | (DECODABET[source[srcOffset + 2]] & 0xFF) <<  6;
 
             destination[destOffset    ] = (byte)(outBuff >>> 16);
             destination[destOffset + 1] = (byte)(outBuff >>>  8);
@@ -1049,15 +1049,15 @@ public class Base64 {
           //              | ((DECODABET[source[srcOffset + 1]] << 24) >>> 12)
           //              | ((DECODABET[source[srcOffset + 2]] << 24) >>> 18)
           //              | ((DECODABET[source[srcOffset + 3]] << 24) >>> 24);
-            final int outBuff =   ((DECODABET[source[srcOffset    ]] & 0xFF) << 18)
-                          | ((DECODABET[source[srcOffset + 1]] & 0xFF) << 12)
-                          | ((DECODABET[source[srcOffset + 2]] & 0xFF) <<  6)
-                          | ((DECODABET[source[srcOffset + 3]] & 0xFF)    );
+            final int outBuff =   (DECODABET[source[srcOffset    ]] & 0xFF) << 18
+                          | (DECODABET[source[srcOffset + 1]] & 0xFF) << 12
+                          | (DECODABET[source[srcOffset + 2]] & 0xFF) <<  6
+                          | DECODABET[source[srcOffset + 3]] & 0xFF;
 
 
             destination[destOffset    ] = (byte)(outBuff >> 16);
             destination[destOffset + 1] = (byte)(outBuff >>  8);
-            destination[destOffset + 2] = (byte)(outBuff     );
+            destination[destOffset + 2] = (byte)outBuff;
 
             return 3;
         }
@@ -1355,28 +1355,28 @@ public class Base64 {
         // significant bytes passed in the array.
         // We have to shift left 24 in order to flush out the 1's that appear
         // when Java treats a value as negative that is cast from a byte to an int.
-        final int inBuff =   (numSigBytes > 0 ? ((source[srcOffset    ] << 24) >>>  8) : 0)
-                     | (numSigBytes > 1 ? ((source[srcOffset + 1] << 24) >>> 16) : 0)
-                     | (numSigBytes > 2 ? ((source[srcOffset + 2] << 24) >>> 24) : 0);
+        final int inBuff =   (numSigBytes > 0 ? source[srcOffset    ] << 24 >>>  8 : 0)
+                     | (numSigBytes > 1 ? source[srcOffset + 1] << 24 >>> 16 : 0)
+                     | (numSigBytes > 2 ? source[srcOffset + 2] << 24 >>> 24 : 0);
 
         switch(numSigBytes) {
             case 3:
-                destination[destOffset    ] = ALPHABET[(inBuff >>> 18)       ];
-                destination[destOffset + 1] = ALPHABET[(inBuff >>> 12) & 0x3f];
-                destination[destOffset + 2] = ALPHABET[(inBuff >>>  6) & 0x3f];
-                destination[destOffset + 3] = ALPHABET[(inBuff      ) & 0x3f];
+                destination[destOffset    ] = ALPHABET[inBuff >>> 18       ];
+                destination[destOffset + 1] = ALPHABET[inBuff >>> 12 & 0x3f];
+                destination[destOffset + 2] = ALPHABET[inBuff >>>  6 & 0x3f];
+                destination[destOffset + 3] = ALPHABET[inBuff & 0x3f];
                 return destination;
 
             case 2:
-                destination[destOffset    ] = ALPHABET[(inBuff >>> 18)       ];
-                destination[destOffset + 1] = ALPHABET[(inBuff >>> 12) & 0x3f];
-                destination[destOffset + 2] = ALPHABET[(inBuff >>>  6) & 0x3f];
+                destination[destOffset    ] = ALPHABET[inBuff >>> 18       ];
+                destination[destOffset + 1] = ALPHABET[inBuff >>> 12 & 0x3f];
+                destination[destOffset + 2] = ALPHABET[inBuff >>>  6 & 0x3f];
                 destination[destOffset + 3] = EQUALS_SIGN;
                 return destination;
 
             case 1:
-                destination[destOffset    ] = ALPHABET[(inBuff >>> 18)       ];
-                destination[destOffset + 1] = ALPHABET[(inBuff >>> 12) & 0x3f];
+                destination[destOffset    ] = ALPHABET[inBuff >>> 18       ];
+                destination[destOffset + 1] = ALPHABET[inBuff >>> 12 & 0x3f];
                 destination[destOffset + 2] = EQUALS_SIGN;
                 destination[destOffset + 3] = EQUALS_SIGN;
                 return destination;
@@ -1565,7 +1565,7 @@ public class Base64 {
             throw new IllegalArgumentException("Cannot have length offset: " + len);
         }
 
-        if ((off + len) > source.length ) {
+        if (off + len > source.length ) {
             throw new IllegalArgumentException(String.format("Cannot have offset of %d and length of %d with array of length %d", off,len,source.length));
         }
 
@@ -1600,7 +1600,7 @@ public class Base64 {
             // Try to determine more precisely how big the array needs to be.
             // If we get it right, we don't have to do an array copy, and
             // we save a bunch of memory.
-            int encLen = ((len / 3) * 4) + ((len % 3) > 0 ? 4 : 0); // Bytes needed for actual encoding
+            int encLen = len / 3 * 4 + (len % 3 > 0 ? 4 : 0); // Bytes needed for actual encoding
             if (breakLines) {
                 encLen += encLen / MAX_LINE_LENGTH; // Plus extra newline characters
             }
@@ -1614,7 +1614,7 @@ public class Base64 {
                 encode3to4(source, d+off, 3, outBuff, e, options);
 
                 lineLength += 4;
-                if (breakLines && (lineLength >= MAX_LINE_LENGTH))
+                if (breakLines && lineLength >= MAX_LINE_LENGTH)
                 {
                     outBuff[e+4] = NEW_LINE;
                     e++;
@@ -1628,7 +1628,7 @@ public class Base64 {
             }   // end if: some padding needed
 
             // Only resize array if we didn't guess it right.
-            if (e <= (outBuff.length - 1)) {
+            if (e <= outBuff.length - 1) {
                 // If breaking lines and the last byte falls right at
                 // the line length (76 bytes per line), there will be
                 // one extra byte, and the array will need to be resized.
@@ -1688,7 +1688,7 @@ public class Base64 {
         try {
             // Set up some useful variables
             final File file = new File(filename);
-            final byte[] buffer = new byte[Math.max((int)((file.length() * 1.4)+1),40)]; // Need max() for math on small files (v2.2.1); Need +1 for a few corner cases (v2.3.5)
+            final byte[] buffer = new byte[Math.max((int)(file.length() * 1.4+1),40)]; // Need max() for math on small files (v2.2.1); Need +1 for a few corner cases (v2.3.5)
             int length   = 0;
             int numBytes = 0;
 

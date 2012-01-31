@@ -161,10 +161,10 @@ public final class BeanInfoUtils {
         Assert.notNull(field, "Field required");
         Assert.notNull(memberDetails, "Member details required");
 
-        if ((memberDetails.getMethod(getAccessorMethodName(field),
-                new ArrayList<JavaType>()) != null)
-                && (memberDetails.getMethod(getMutatorMethodName(field),
-                        Arrays.asList(field.getFieldType())) != null)) {
+        if (memberDetails.getMethod(getAccessorMethodName(field),
+                new ArrayList<JavaType>()) != null
+                && memberDetails.getMethod(getMutatorMethodName(field),
+                        Arrays.asList(field.getFieldType())) != null) {
             return true;
         }
 
@@ -209,7 +209,7 @@ public final class BeanInfoUtils {
     public static boolean isMutatorMethod(final MethodMetadata method) {
         Assert.notNull(method, "Method is required");
         return method.getMethodName().getSymbolName().startsWith("set")
-                && (method.getParameterTypes().size() == 1)
+                && method.getParameterTypes().size() == 1
                 && Modifier.isPublic(method.getModifier());
     }
 

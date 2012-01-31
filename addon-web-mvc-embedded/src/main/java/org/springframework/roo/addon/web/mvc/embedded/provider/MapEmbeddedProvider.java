@@ -43,7 +43,7 @@ public class MapEmbeddedProvider extends AbstractEmbeddedProvider {
 
     public boolean install(final String viewName,
             final Map<String, String> options) {
-        if ((options == null) || (options.size() != 2)
+        if (options == null || options.size() != 2
                 || !options.containsKey("provider")
                 || !options.get("provider").equalsIgnoreCase("GOOGLE_MAPS")
                 || !options.containsKey("location")) {

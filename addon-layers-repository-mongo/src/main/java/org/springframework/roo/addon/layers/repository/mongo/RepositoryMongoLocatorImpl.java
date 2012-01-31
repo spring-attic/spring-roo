@@ -48,7 +48,7 @@ public class RepositoryMongoLocatorImpl implements RepositoryMongoLocator {
                             typeLocationService
                                     .getPhysicalTypeCanonicalPath(cid
                                             .getDeclaredByMetadataId()), cid));
-            if ((annotationValues.getDomainType() != null)
+            if (annotationValues.getDomainType() != null
                     && annotationValues.getDomainType().equals(domainType)) {
                 toReturn.put(cid.getDeclaredByMetadataId(), cid);
             }

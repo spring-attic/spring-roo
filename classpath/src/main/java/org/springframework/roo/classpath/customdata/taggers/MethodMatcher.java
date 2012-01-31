@@ -186,8 +186,7 @@ public class MethodMatcher implements Matcher<MethodMetadata> {
     private JavaSymbolName getUserDefinedMethod(
             final List<MemberHoldingTypeDetails> memberHoldingTypeDetailsList,
             final Map<String, String> pluralMap) {
-        if ((catalystAnnotationType == null)
-                || (userDefinedNameAttribute == null)) {
+        if (catalystAnnotationType == null || userDefinedNameAttribute == null) {
             return null;
         }
         final String suffix = suffixPlural || suffixSingular ? getSuffix(
@@ -199,7 +198,7 @@ public class MethodMatcher implements Matcher<MethodMetadata> {
                     .equals(catalystAnnotationType.getFullyQualifiedTypeName())) {
                 final AnnotationAttributeValue<?> annotationAttributeValue = annotationMetadata
                         .getAttribute(userDefinedNameAttribute);
-                if ((annotationAttributeValue != null)
+                if (annotationAttributeValue != null
                         && StringUtils.hasText(annotationAttributeValue
                                 .getValue().toString())) {
                     return new JavaSymbolName(annotationAttributeValue

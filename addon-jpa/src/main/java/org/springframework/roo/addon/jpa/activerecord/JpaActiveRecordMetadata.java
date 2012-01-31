@@ -382,7 +382,7 @@ public class JpaActiveRecordMetadata extends
 
                 if (!Modifier.isPublic(candidate.getModifier())
                         && !Modifier.isProtected(candidate.getModifier())
-                        && (Modifier.TRANSIENT != candidate.getModifier())) {
+                        && Modifier.TRANSIENT != candidate.getModifier()) {
                     // Candidate is not public and not protected and not simply
                     // a transient field (in which case subclasses
                     // will see the inherited field), so any subsequent

@@ -167,7 +167,7 @@ public class WebScaffoldMetadata extends
                 "Metadata holder required for form backing type: "
                         + formBackingType);
 
-        if ((javaTypeMetadataHolder.getPersistenceDetails() != null)
+        if (javaTypeMetadataHolder.getPersistenceDetails() != null
                 && !javaTypeMetadataHolder.getPersistenceDetails()
                         .getRooIdentifierFields().isEmpty()) {
             compositePk = true;
@@ -178,7 +178,7 @@ public class WebScaffoldMetadata extends
         // "create" methods
         final MemberTypeAdditions persistMethod = crudAdditions
                 .get(PERSIST_METHOD);
-        if (annotationValues.isCreate() && (persistMethod != null)) {
+        if (annotationValues.isCreate() && persistMethod != null) {
             builder.addMethod(getCreateMethod(persistMethod));
             builder.addMethod(getCreateFormMethod(dependentTypes));
             persistMethod.copyAdditionsTo(builder, governorTypeDetails);
@@ -199,8 +199,8 @@ public class WebScaffoldMetadata extends
             findMethod.copyAdditionsTo(builder, governorTypeDetails);
         }
 
-        if ((countAllMethod != null) && (findAllMethod != null)
-                && (findEntriesMethod != null)) {
+        if (countAllMethod != null && findAllMethod != null
+                && findEntriesMethod != null) {
             builder.addMethod(getListMethod(findAllMethod, countAllMethod,
                     findEntriesMethod));
             countAllMethod.copyAdditionsTo(builder, governorTypeDetails);
@@ -211,8 +211,8 @@ public class WebScaffoldMetadata extends
         // "update" methods
         final MemberTypeAdditions updateMethod = crudAdditions
                 .get(MERGE_METHOD);
-        if (annotationValues.isUpdate() && (updateMethod != null)
-                && (findMethod != null)) {
+        if (annotationValues.isUpdate() && updateMethod != null
+                && findMethod != null) {
             builder.addMethod(getUpdateMethod(updateMethod));
             builder.addMethod(getUpdateFormMethod(idField, findMethod));
             updateMethod.copyAdditionsTo(builder, governorTypeDetails);
@@ -221,8 +221,8 @@ public class WebScaffoldMetadata extends
         // "delete" method
         final MemberTypeAdditions deleteMethod = crudAdditions
                 .get(REMOVE_METHOD);
-        if (annotationValues.isDelete() && (deleteMethod != null)
-                && (findMethod != null)) {
+        if (annotationValues.isDelete() && deleteMethod != null
+                && findMethod != null) {
             builder.addMethod(getDeleteMethod(idField, deleteMethod, findMethod));
             deleteMethod.copyAdditionsTo(builder, governorTypeDetails);
         }
@@ -353,9 +353,9 @@ public class WebScaffoldMetadata extends
             final MemberTypeAdditions persistMethod) {
         final JavaTypePersistenceMetadataDetails javaTypePersistenceMetadataHolder = javaTypeMetadataHolder
                 .getPersistenceDetails();
-        if ((javaTypePersistenceMetadataHolder == null)
-                || (javaTypePersistenceMetadataHolder
-                        .getIdentifierAccessorMethod() == null)) {
+        if (javaTypePersistenceMetadataHolder == null
+                || javaTypePersistenceMetadataHolder
+                        .getIdentifierAccessorMethod() == null) {
             return null;
         }
 
@@ -701,8 +701,8 @@ public class WebScaffoldMetadata extends
                             .getPersistenceDetails();
                     final String modelAttribute = domainType.getPlural()
                             .toLowerCase();
-                    if ((persistenceDetails != null)
-                            && (persistenceDetails.getFindAllMethod() != null)) {
+                    if (persistenceDetails != null
+                            && persistenceDetails.getFindAllMethod() != null) {
                         bodyBuilder.appendFormalLine("uiModel.addAttribute(\""
                                 + modelAttribute
                                 + "\", "
@@ -842,8 +842,8 @@ public class WebScaffoldMetadata extends
             final MemberTypeAdditions updateMethod) {
         final JavaTypePersistenceMetadataDetails javaTypePersistenceMetadataHolder = javaTypeMetadataHolder
                 .getPersistenceDetails();
-        if ((javaTypePersistenceMetadataHolder == null)
-                || (javaTypePersistenceMetadataHolder.getMergeMethod() == null)) {
+        if (javaTypePersistenceMetadataHolder == null
+                || javaTypePersistenceMetadataHolder.getMergeMethod() == null) {
             return null;
         }
         final JavaSymbolName methodName = new JavaSymbolName("update");

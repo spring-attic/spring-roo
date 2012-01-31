@@ -142,7 +142,7 @@ public class MemberDetailsScannerImpl implements MemberDetailsScanner {
                     // Get the metadata and ensure we have ITD type details
                     // available
                     final MetadataItem metadataItem = metadataService.get(key);
-                    if ((metadataItem == null) || !metadataItem.isValid()) {
+                    if (metadataItem == null || !metadataItem.isValid()) {
                         continue;
                     }
                     Assert.isInstanceOf(
@@ -177,7 +177,7 @@ public class MemberDetailsScannerImpl implements MemberDetailsScanner {
                     Assert.isTrue(newResult != null, "Decorator '"
                             + decorator.getClass().getName()
                             + "' returned an illegal result");
-                    if ((newResult != null) && !newResult.equals(result)) {
+                    if (newResult != null && !newResult.equals(result)) {
                         additionalLoopRequired = true;
                     }
                     result = newResult;

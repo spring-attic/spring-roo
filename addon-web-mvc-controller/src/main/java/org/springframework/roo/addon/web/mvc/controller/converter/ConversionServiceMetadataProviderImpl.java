@@ -211,7 +211,7 @@ public class ConversionServiceMetadataProviderImpl extends
                     method.getDeclaredByMetadataId(),
                     metadataIdentificationString);
 
-            if ((counter < 4) && isMethodOfInterest(method, memberDetails)) {
+            if (counter < 4 && isMethodOfInterest(method, memberDetails)) {
                 counter++;
                 toStringMethods.add(method);
             }

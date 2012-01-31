@@ -137,8 +137,8 @@ public class JavaParserConstructorMetadataBuilder implements
         }
 
         // Set the body
-        if ((constructor.getBody() == null)
-                || (constructor.getBody().length() == 0)) {
+        if (constructor.getBody() == null
+                || constructor.getBody().length() == 0) {
             d.setBlock(new BlockStmt());
         }
         else {

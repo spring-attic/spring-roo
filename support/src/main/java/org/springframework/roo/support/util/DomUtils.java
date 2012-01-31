@@ -97,7 +97,7 @@ public final class DomUtils {
         final NodeList nl = element.getChildNodes();
         for (int i = 0; i < nl.getLength(); i++) {
             final Node node = nl.item(i);
-            if ((node instanceof Element)
+            if (node instanceof Element
                     && nodeNameMatch(node, childElementName)) {
                 return (Element) node;
             }
@@ -144,7 +144,7 @@ public final class DomUtils {
         final List<Element> childEles = new ArrayList<Element>();
         for (int i = 0; i < nl.getLength(); i++) {
             final Node node = nl.item(i);
-            if ((node instanceof Element)
+            if (node instanceof Element
                     && nodeNameMatch(node, childEleNameList)) {
                 childEles.add((Element) node);
             }
@@ -164,7 +164,7 @@ public final class DomUtils {
             final String childElementName) {
         final Element child = getChildElementByTagName(element,
                 childElementName);
-        return (child != null ? getTextValue(child) : null);
+        return child != null ? getTextValue(child) : null;
     }
 
     /**
@@ -218,8 +218,8 @@ public final class DomUtils {
         final NodeList nl = valueElement.getChildNodes();
         for (int i = 0; i < nl.getLength(); i++) {
             final Node item = nl.item(i);
-            if (((item instanceof CharacterData) && !(item instanceof Comment))
-                    || (item instanceof EntityReference)) {
+            if (item instanceof CharacterData && !(item instanceof Comment)
+                    || item instanceof EntityReference) {
                 sb.append(item.getNodeValue());
             }
         }
@@ -252,8 +252,8 @@ public final class DomUtils {
      */
     private static boolean nodeNameMatch(final Node node,
             final Collection<?> desiredNames) {
-        return (desiredNames.contains(node.getNodeName()) || desiredNames
-                .contains(node.getLocalName()));
+        return desiredNames.contains(node.getNodeName())
+                || desiredNames.contains(node.getLocalName());
     }
 
     /**
@@ -266,8 +266,8 @@ public final class DomUtils {
      */
     private static boolean nodeNameMatch(final Node node,
             final String desiredName) {
-        return (desiredName.equals(node.getNodeName()) || desiredName
-                .equals(node.getLocalName()));
+        return desiredName.equals(node.getNodeName())
+                || desiredName.equals(node.getLocalName());
     }
 
     /**

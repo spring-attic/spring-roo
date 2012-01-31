@@ -34,7 +34,7 @@ public class InvocableMemberBodyBuilder {
      * Prints the message, WITHOUT ANY INDENTATION.
      */
     public InvocableMemberBodyBuilder append(final String message) {
-        if ((message != null) && !"".equals(message)) {
+        if (message != null && !"".equals(message)) {
             stringBuilder.append(message);
         }
         return this;
@@ -46,7 +46,7 @@ public class InvocableMemberBodyBuilder {
      */
     public InvocableMemberBodyBuilder appendFormalLine(final String message) {
         appendIndent();
-        if ((message != null) && !"".equals(message)) {
+        if (message != null && !"".equals(message)) {
             stringBuilder.append(message);
         }
         return newLine(false);

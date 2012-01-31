@@ -117,7 +117,7 @@ public class ToStringMetadata extends
         final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
         final String[] excludeFields = annotationValues.getExcludeFields();
         String str;
-        if ((excludeFields != null) && (excludeFields.length > 0)) {
+        if (excludeFields != null && excludeFields.length > 0) {
             final StringBuilder builder = new StringBuilder();
             for (int i = 0; i < excludeFields.length; i++) {
                 if (i > 0) {

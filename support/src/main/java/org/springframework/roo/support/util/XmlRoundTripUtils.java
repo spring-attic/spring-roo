@@ -40,7 +40,7 @@ public final class XmlRoundTripUtils {
         // need to add or replace elements
         for (int i = 0, n = proposedChildren.getLength(); i < n; i++) {
             final Node node = proposedChildren.item(i);
-            if ((node != null) && (node.getNodeType() == Node.ELEMENT_NODE)) {
+            if (node != null && node.getNodeType() == Node.ELEMENT_NODE) {
                 final Element proposedElement = (Element) node;
                 final String proposedId = proposedElement.getAttribute("id");
                 // Only proposed elements with
@@ -247,9 +247,9 @@ public final class XmlRoundTripUtils {
         int customAttributeCounter = 0;
         for (int i = 0, n = attributes.getLength(); i < n; i++) {
             final Node node = attributes.item(i);
-            if ((node != null) && !node.getNodeName().startsWith("_")) {
+            if (node != null && !node.getNodeName().startsWith("_")) {
                 if (!node.getNodeName().equals("z")
-                        && ((b.getAttribute(node.getNodeName()).length() == 0) || !b
+                        && (b.getAttribute(node.getNodeName()).length() == 0 || !b
                                 .getAttribute(node.getNodeName()).equals(
                                         node.getNodeValue()))) {
                     return false;
@@ -259,7 +259,7 @@ public final class XmlRoundTripUtils {
                 customAttributeCounter++;
             }
         }
-        if ((a.getAttributes().getLength() - customAttributeCounter) != b
+        if (a.getAttributes().getLength() - customAttributeCounter != b
                 .getAttributes().getLength()) {
             return false;
         }
@@ -273,7 +273,7 @@ public final class XmlRoundTripUtils {
         // need to remove elements
         for (int i = 0, n = originalChildren.getLength(); i < n; i++) {
             final Node node = originalChildren.item(i);
-            if ((node != null) && (node.getNodeType() == Node.ELEMENT_NODE)) {
+            if (node != null && node.getNodeType() == Node.ELEMENT_NODE) {
                 final Element originalElement = (Element) node;
                 final String originalId = originalElement.getAttribute("id");
                 if (originalId.length() != 0) {
@@ -281,7 +281,7 @@ public final class XmlRoundTripUtils {
                     // an id will be considered
                     final Element proposedElement = XmlUtils.findFirstElement(
                             "//*[@id='" + originalId + "']", proposed);
-                    if ((null == proposedElement)
+                    if (null == proposedElement
                             && (originalElement.getAttribute("z").equals(
                                     calculateUniqueKeyFor(originalElement)) || originalElement
                                     .getAttribute("z").equals("?"))) {

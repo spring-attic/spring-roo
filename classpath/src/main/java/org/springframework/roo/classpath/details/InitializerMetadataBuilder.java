@@ -18,7 +18,7 @@ public class InitializerMetadataBuilder extends
 
     public InitializerMetadataBuilder(final InitializerMetadata existing) {
         super(existing);
-        isStatic = (existing.getModifier() == Modifier.STATIC)
+        isStatic = existing.getModifier() == Modifier.STATIC
                 || existing.isStatic();
         bodyBuilder.append(existing.getBody());
     }

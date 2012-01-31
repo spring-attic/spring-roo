@@ -103,7 +103,7 @@ public class JLineShellComponent extends JLineShell {
         final StringBuilder sb = new StringBuilder();
         // Add in Roo's twitter account to give context to the notification
         sb.append(decorate("@" + screenName + ":",
-                (OsUtils.isWindows() ? FG_YELLOW : REVERSE)));
+                OsUtils.isWindows() ? FG_YELLOW : REVERSE));
         sb.append(" ");
         // We want to colourise certain words. The codes used here should be
         // moved to a ShellUtils and include a few helper methods

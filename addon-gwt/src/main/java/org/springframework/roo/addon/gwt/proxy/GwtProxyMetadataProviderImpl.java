@@ -86,8 +86,8 @@ public class GwtProxyMetadataProviderImpl extends
         final List<String> exclusionList = new ArrayList<String>();
         final AnnotationAttributeValue<?> excludeAttribute = mirrorAnnotation
                 .getAttribute("exclude");
-        if ((excludeAttribute != null)
-                && (excludeAttribute instanceof ArrayAttributeValue)) {
+        if (excludeAttribute != null
+                && excludeAttribute instanceof ArrayAttributeValue) {
             @SuppressWarnings("unchecked")
             final ArrayAttributeValue<StringAttributeValue> excludeArrayAttribute = (ArrayAttributeValue<StringAttributeValue>) excludeAttribute;
             for (final StringAttributeValue attributeValue : excludeArrayAttribute
@@ -95,8 +95,8 @@ public class GwtProxyMetadataProviderImpl extends
                 exclusionList.add(attributeValue.getValue());
             }
         }
-        else if ((excludeAttribute != null)
-                && (excludeAttribute instanceof StringAttributeValue)) {
+        else if (excludeAttribute != null
+                && excludeAttribute instanceof StringAttributeValue) {
             final StringAttributeValue excludeStringAttribute = (StringAttributeValue) excludeAttribute;
             exclusionList.add(excludeStringAttribute.getValue());
         }
@@ -104,8 +104,8 @@ public class GwtProxyMetadataProviderImpl extends
         final List<String> readOnlyList = new ArrayList<String>();
         final AnnotationAttributeValue<?> readOnlyAttribute = mirrorAnnotation
                 .getAttribute("readOnly");
-        if ((readOnlyAttribute != null)
-                && (readOnlyAttribute instanceof ArrayAttributeValue)) {
+        if (readOnlyAttribute != null
+                && readOnlyAttribute instanceof ArrayAttributeValue) {
             @SuppressWarnings("unchecked")
             final ArrayAttributeValue<StringAttributeValue> readOnlyArrayAttribute = (ArrayAttributeValue<StringAttributeValue>) readOnlyAttribute;
             for (final StringAttributeValue attributeValue : readOnlyArrayAttribute
@@ -113,15 +113,15 @@ public class GwtProxyMetadataProviderImpl extends
                 readOnlyList.add(attributeValue.getValue());
             }
         }
-        else if ((readOnlyAttribute != null)
-                && (readOnlyAttribute instanceof StringAttributeValue)) {
+        else if (readOnlyAttribute != null
+                && readOnlyAttribute instanceof StringAttributeValue) {
             final StringAttributeValue readOnlyStringAttribute = (StringAttributeValue) readOnlyAttribute;
             readOnlyList.add(readOnlyStringAttribute.getValue());
         }
 
         final ClassOrInterfaceTypeDetails mirroredDetails = typeLocationService
                 .getTypeDetails(mirroredType);
-        if ((mirroredDetails == null)
+        if (mirroredDetails == null
                 || Modifier.isAbstract(mirroredDetails.getModifier())) {
             return null;
         }
@@ -201,7 +201,7 @@ public class GwtProxyMetadataProviderImpl extends
                         if (attributeValue != null) {
                             final String mirrorName = GwtUtils
                                     .getStringValue(attributeValue);
-                            if ((mirrorName != null)
+                            if (mirrorName != null
                                     && cid.getName()
                                             .getFullyQualifiedTypeName()
                                             .equals(attributeValue.getValue())) {

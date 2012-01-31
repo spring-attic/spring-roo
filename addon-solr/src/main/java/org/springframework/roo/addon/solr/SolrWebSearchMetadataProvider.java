@@ -81,7 +81,7 @@ public class SolrWebSearchMetadataProvider extends AbstractItdMetadataProvider {
         final SolrWebSearchAnnotationValues annotationValues = new SolrWebSearchAnnotationValues(
                 governorPhysicalTypeMetadata);
         if (!annotationValues.isAnnotationFound()
-                || (annotationValues.getSearchMethod() == null)) {
+                || annotationValues.getSearchMethod() == null) {
             return null;
         }
 
@@ -100,7 +100,7 @@ public class SolrWebSearchMetadataProvider extends AbstractItdMetadataProvider {
                 .get(webScaffoldMetadataKey);
 
         // Abort if we don't have getter information available
-        if ((webScaffoldMetadata == null) || !webScaffoldMetadata.isValid()) {
+        if (webScaffoldMetadata == null || !webScaffoldMetadata.isValid()) {
             return null;
         }
 

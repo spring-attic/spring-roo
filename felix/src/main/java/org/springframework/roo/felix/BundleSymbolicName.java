@@ -29,8 +29,8 @@ public class BundleSymbolicName implements Comparable<BundleSymbolicName> {
 
     @Override
     public final boolean equals(final Object obj) {
-        return (obj instanceof BundleSymbolicName)
-                && (compareTo((BundleSymbolicName) obj) == 0);
+        return obj instanceof BundleSymbolicName
+                && compareTo((BundleSymbolicName) obj) == 0;
     }
 
     /**

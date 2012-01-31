@@ -108,46 +108,46 @@ public abstract class AutoPopulationUtils {
                 // Assign the value to the target object
                 try {
                     final Class<?> fieldType = field.getType();
-                    if ((value instanceof BooleanAttributeValue)
+                    if (value instanceof BooleanAttributeValue
                             && (fieldType.equals(Boolean.class) || fieldType
                                     .equals(Boolean.TYPE))) {
                         field.set(target, value.getValue());
                     }
-                    else if ((value instanceof CharAttributeValue)
+                    else if (value instanceof CharAttributeValue
                             && (fieldType.equals(Character.class) || fieldType
                                     .equals(Character.TYPE))) {
                         field.set(target, value.getValue());
                     }
-                    else if ((value instanceof ClassAttributeValue)
+                    else if (value instanceof ClassAttributeValue
                             && fieldType.equals(JavaType.class)) {
                         field.set(target, value.getValue());
                     }
-                    else if ((value instanceof DoubleAttributeValue)
+                    else if (value instanceof DoubleAttributeValue
                             && (fieldType.equals(Double.class) || fieldType
                                     .equals(Double.TYPE))) {
                         field.set(target, value.getValue());
                     }
-                    else if ((value instanceof EnumAttributeValue)
+                    else if (value instanceof EnumAttributeValue
                             && Enum.class.isAssignableFrom(fieldType)) {
                         field.set(target,
                                 ((EnumAttributeValue) value).getAsEnum());
                     }
-                    else if ((value instanceof IntegerAttributeValue)
+                    else if (value instanceof IntegerAttributeValue
                             && (fieldType.equals(Integer.class) || fieldType
                                     .equals(Integer.TYPE))) {
                         field.set(target, value.getValue());
                     }
-                    else if ((value instanceof LongAttributeValue)
+                    else if (value instanceof LongAttributeValue
                             && (fieldType.equals(Long.class) || fieldType
                                     .equals(Long.TYPE))) {
                         field.set(target, value.getValue());
                     }
-                    else if ((value instanceof StringAttributeValue)
+                    else if (value instanceof StringAttributeValue
                             && fieldType.equals(String.class)) {
                         field.set(target, value.getValue());
                     }
-                    else if ((value instanceof StringAttributeValue)
-                            && (fieldType.getComponentType() != null)
+                    else if (value instanceof StringAttributeValue
+                            && fieldType.getComponentType() != null
                             && fieldType.getComponentType()
                                     .equals(String.class)) {
                         // ROO-618
@@ -156,7 +156,7 @@ public abstract class AutoPopulationUtils {
                         Array.set(newValue, 0, value.getValue());
                         field.set(target, newValue);
                     }
-                    else if ((value instanceof ArrayAttributeValue<?>)
+                    else if (value instanceof ArrayAttributeValue<?>
                             && fieldType.isArray()) {
                         // The field is a string array, the attribute is an
                         // array, so let's hope it's a string array
@@ -168,13 +168,13 @@ public abstract class AutoPopulationUtils {
                             // For now we'll only support arrays of strings
                             if (fieldType.getComponentType().equals(
                                     String.class)
-                                    && (val instanceof StringAttributeValue)) {
+                                    && val instanceof StringAttributeValue) {
                                 final StringAttributeValue stringValue = (StringAttributeValue) val;
                                 result.add(stringValue.getValue());
                             }
                             else if (fieldType.getComponentType().equals(
                                     JavaType.class)
-                                    && (val instanceof ClassAttributeValue)) {
+                                    && val instanceof ClassAttributeValue) {
                                 final ClassAttributeValue classValue = (ClassAttributeValue) val;
                                 result1.add(classValue.getValue());
                             }

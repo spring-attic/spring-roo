@@ -171,8 +171,8 @@ public class JavaBeanMetadataProvider extends AbstractItdMetadataProvider {
                     .isFeatureInstalled(FeatureNames.GAE);
             // We need to determine if the persistence state has changed, we do
             // this by comparing the last known state to the current state
-            final boolean hasGaeStateChanged = (wasGaeEnabled == null)
-                    || (isGaeEnabled != wasGaeEnabled);
+            final boolean hasGaeStateChanged = wasGaeEnabled == null
+                    || isGaeEnabled != wasGaeEnabled;
             if (hasGaeStateChanged) {
                 wasGaeEnabled = isGaeEnabled;
                 for (final String producedMid : producedMids) {

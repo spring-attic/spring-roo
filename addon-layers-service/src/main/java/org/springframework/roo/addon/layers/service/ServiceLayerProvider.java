@@ -70,7 +70,7 @@ public class ServiceLayerProvider extends CoreLayerProvider {
                 typeLocationService.getTypePath(targetEntity));
         final PluralMetadata pluralMetadata = (PluralMetadata) metadataService
                 .get(pluralId);
-        if ((pluralMetadata == null) || (pluralMetadata.getPlural() == null)) {
+        if (pluralMetadata == null || pluralMetadata.getPlural() == null) {
             return null;
         }
 

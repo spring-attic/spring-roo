@@ -123,7 +123,7 @@ public class IntegrationTestMetadataProviderImpl extends
                 .findClassesOrInterfaceDetailsWithAnnotation(ROO_DATA_ON_DEMAND)) {
             final AnnotationMetadata dodAnnotation = MemberFindingUtils
                     .getFirstAnnotation(dodType, ROO_DATA_ON_DEMAND);
-            if ((dodAnnotation != null)
+            if (dodAnnotation != null
                     && dodAnnotation.getAttribute("entity").getValue()
                             .equals(entity)) {
                 return dodType.getName();
@@ -187,7 +187,7 @@ public class IntegrationTestMetadataProviderImpl extends
         final IntegrationTestAnnotationValues annotationValues = new IntegrationTestAnnotationValues(
                 governorPhysicalTypeMetadata);
         final JavaType entity = annotationValues.getEntity();
-        if (!annotationValues.isAnnotationFound() || (entity == null)) {
+        if (!annotationValues.isAnnotationFound() || entity == null) {
             return null;
         }
 
@@ -202,7 +202,7 @@ public class IntegrationTestMetadataProviderImpl extends
         metadataDependencyRegistry.registerDependency(dataOnDemandMetadataKey,
                 metadataIdentificationString);
 
-        if ((dataOnDemandMetadata == null) || !dataOnDemandMetadata.isValid()) {
+        if (dataOnDemandMetadata == null || !dataOnDemandMetadata.isValid()) {
             return null;
         }
 
@@ -274,8 +274,8 @@ public class IntegrationTestMetadataProviderImpl extends
                 .getMemberTypeAdditions(metadataIdentificationString,
                         REMOVE_METHOD.name(), entity, identifierType,
                         LAYER_POSITION, entityParameter);
-        if ((persistMethodAdditions == null) || (findMethodAdditions == null)
-                || (identifierAccessorMethod == null)) {
+        if (persistMethodAdditions == null || findMethodAdditions == null
+                || identifierAccessorMethod == null) {
             return null;
         }
 
@@ -362,13 +362,13 @@ public class IntegrationTestMetadataProviderImpl extends
     private void handleGenericChangeToProject(final String moduleName) {
         final ProjectMetadata projectMetadata = projectOperations
                 .getProjectMetadata(moduleName);
-        if ((projectMetadata != null) && projectMetadata.isValid()) {
+        if (projectMetadata != null && projectMetadata.isValid()) {
             final boolean isGaeEnabled = projectOperations
                     .isFeatureInstalledInFocusedModule(FeatureNames.GAE);
             // We need to determine if the persistence state has changed, we do
             // this by comparing the last known state to the current state
-            final boolean hasGaeStateChanged = (wasGaeEnabled == null)
-                    || (isGaeEnabled != wasGaeEnabled);
+            final boolean hasGaeStateChanged = wasGaeEnabled == null
+                    || isGaeEnabled != wasGaeEnabled;
             if (hasGaeStateChanged) {
                 wasGaeEnabled = isGaeEnabled;
                 for (final String producedMid : producedMids) {

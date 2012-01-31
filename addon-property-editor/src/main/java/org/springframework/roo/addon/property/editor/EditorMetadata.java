@@ -74,7 +74,7 @@ public class EditorMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
         Assert.notNull(identifierAccessorMethod,
                 "Identifier accessor metadata required");
 
-        if (!isValid() || (findMethod == null)) {
+        if (!isValid() || findMethod == null) {
             valid = false;
             return;
         }

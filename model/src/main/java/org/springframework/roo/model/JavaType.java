@@ -330,7 +330,7 @@ public class JavaType implements Comparable<JavaType> {
         if (Character.isUpperCase(enclosedWithinTypeName.charAt(0))) {
             // First letter is upper-case, so treat it as a type name for now
             final String preTypeNamePortion = enclosedWithinPackage == null ? ""
-                    : (enclosedWithinPackage + ".");
+                    : enclosedWithinPackage + ".";
             return new JavaType(preTypeNamePortion + enclosedWithinTypeName);
         }
 
@@ -341,12 +341,12 @@ public class JavaType implements Comparable<JavaType> {
     public boolean equals(final Object obj) {
         // NB: Not using the normal convention of delegating to compareTo (for
         // efficiency reasons)
-        return (obj != null)
-                && (obj instanceof JavaType)
+        return obj != null
+                && obj instanceof JavaType
                 && fullyQualifiedTypeName.equals(((JavaType) obj)
                         .getFullyQualifiedTypeName())
-                && (dataType == ((JavaType) obj).getDataType())
-                && (arrayDimensions == ((JavaType) obj).getArray())
+                && dataType == ((JavaType) obj).getDataType()
+                && arrayDimensions == ((JavaType) obj).getArray()
                 && ((JavaType) obj).getParameters().containsAll(parameters);
     }
 
@@ -461,7 +461,7 @@ public class JavaType implements Comparable<JavaType> {
 
         if (WILDCARD_EXTENDS.equals(argName)) {
             sb.append("?");
-            if ((dataType == DataType.TYPE) || !staticForm) {
+            if (dataType == DataType.TYPE || !staticForm) {
                 sb.append(" extends ");
             }
             else if (types.containsKey(fullyQualifiedTypeName)) {
@@ -471,7 +471,7 @@ public class JavaType implements Comparable<JavaType> {
         }
         else if (WILDCARD_SUPER.equals(argName)) {
             sb.append("?");
-            if ((dataType == DataType.TYPE) || !staticForm) {
+            if (dataType == DataType.TYPE || !staticForm) {
                 sb.append(" super ");
             }
             else if (types.containsKey(fullyQualifiedTypeName)) {
@@ -482,7 +482,7 @@ public class JavaType implements Comparable<JavaType> {
         else if (WILDCARD_NEITHER.equals(argName)) {
             sb.append("?");
         }
-        else if ((argName != null) && !staticForm) {
+        else if (argName != null && !staticForm) {
             sb.append(argName);
             if (dataType == DataType.TYPE) {
                 if (!fullyQualifiedTypeName.equals(OBJECT
@@ -495,7 +495,7 @@ public class JavaType implements Comparable<JavaType> {
         if (!WILDCARD_NEITHER.equals(argName)) {
             // It wasn't a WILDCARD_NEITHER, so we might need to continue with
             // more details
-            if ((dataType == DataType.TYPE) || !staticForm) {
+            if (dataType == DataType.TYPE || !staticForm) {
                 if (resolver != null) {
                     if (resolver
                             .isFullyQualifiedFormRequiredAfterAutoImport(this)) {
@@ -521,8 +521,8 @@ public class JavaType implements Comparable<JavaType> {
                 }
             }
 
-            if ((parameters.size() > 0)
-                    && ((dataType == DataType.TYPE) || !staticForm)) {
+            if (parameters.size() > 0
+                    && (dataType == DataType.TYPE || !staticForm)) {
                 sb.append("<");
                 int counter = 0;
                 for (final JavaType param : parameters) {
@@ -540,7 +540,7 @@ public class JavaType implements Comparable<JavaType> {
             sb.append(getArraySuffix());
         }
 
-        if ((argName != null) && !argName.equals(WILDCARD_EXTENDS)
+        if (argName != null && !argName.equals(WILDCARD_EXTENDS)
                 && !argName.equals(WILDCARD_SUPER)
                 && !argName.equals(WILDCARD_NEITHER)) {
             types.put(argName.getSymbolName(), sb.toString());
@@ -565,7 +565,7 @@ public class JavaType implements Comparable<JavaType> {
                     .lastIndexOf(".");
             // Handle case where the package name after the last period starts
             // with a capital letter.
-            if ((offset > -1)
+            if (offset > -1
                     && Character
                             .isUpperCase(enclosingTypeFullyQualifiedTypeName
                                     .charAt(offset + 1))) {
@@ -607,12 +607,12 @@ public class JavaType implements Comparable<JavaType> {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = (prime * result)
-                + ((fullyQualifiedTypeName == null) ? 0
-                        : fullyQualifiedTypeName.hashCode());
-        result = (prime * result)
-                + ((dataType == null) ? 0 : dataType.hashCode());
-        result = (prime * result) + arrayDimensions;
+        result = prime
+                * result
+                + (fullyQualifiedTypeName == null ? 0 : fullyQualifiedTypeName
+                        .hashCode());
+        result = prime * result + (dataType == null ? 0 : dataType.hashCode());
+        result = prime * result + arrayDimensions;
         return result;
     }
 

@@ -24,7 +24,7 @@ public class JavaSymbolNameEditor extends PropertyEditorSupport {
 
     @Override
     public void setAsText(String text) throws IllegalArgumentException {
-        if ((text == null) || "".equals(text)) {
+        if (text == null || "".equals(text)) {
             setValue(null);
         }
         // Symbol names never start with a capital

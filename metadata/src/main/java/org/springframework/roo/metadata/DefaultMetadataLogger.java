@@ -121,8 +121,8 @@ public class DefaultMetadataLogger implements MetadataLogger {
             // clock for it
             final TimerEntry timerEntry = timerStack.get(timerStack.size() - 1);
             // Add the duration it ran to any existing duration
-            timerEntry.duration = timerEntry.duration
-                    + (now - timerEntry.clockStartedOrResumed);
+            timerEntry.duration = timerEntry.duration + now
+                    - timerEntry.clockStartedOrResumed;
             timerEntry.clockStartedOrResumed = now;
         }
         // Start a new timer
@@ -145,8 +145,8 @@ public class DefaultMetadataLogger implements MetadataLogger {
                 "Timer stack is empty, indicating a mismatched number of timer start/stop calls");
         final long now = System.nanoTime();
         final TimerEntry timerEntry = timerStack.pop();
-        timerEntry.duration = timerEntry.duration
-                + (now - timerEntry.clockStartedOrResumed);
+        timerEntry.duration = timerEntry.duration + now
+                - timerEntry.clockStartedOrResumed;
         final String responsibleClass = timerEntry.responsibleClass;
 
         // Update the timings summary

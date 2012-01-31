@@ -77,8 +77,7 @@ public class JavaTypeMetadataDetails {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = (prime * result)
-                + ((javaType == null) ? 0 : javaType.hashCode());
+        result = prime * result + (javaType == null ? 0 : javaType.hashCode());
         return result;
     }
 
@@ -97,7 +96,7 @@ public class JavaTypeMetadataDetails {
      * @since 1.2.1
      */
     public boolean isPersistent() {
-        return isApplicationType && (persistenceDetails != null);
+        return isApplicationType && persistenceDetails != null;
     }
 
     @Override

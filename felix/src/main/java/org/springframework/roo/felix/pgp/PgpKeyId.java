@@ -16,17 +16,17 @@ public class PgpKeyId implements Comparable<PgpKeyId> {
     private String id;
 
     public PgpKeyId(final long keyId) {
-        id = "0x" + String.format("%08X", (MASK & keyId));
+        id = "0x" + String.format("%08X", MASK & keyId);
     }
 
     public PgpKeyId(final PGPPublicKey keyId) {
         Assert.notNull(keyId, "Key ID required");
-        id = "0x" + String.format("%08X", (MASK & keyId.getKeyID()));
+        id = "0x" + String.format("%08X", MASK & keyId.getKeyID());
     }
 
     public PgpKeyId(final PGPSignature signature) {
         Assert.notNull(signature, "Signautre required");
-        id = "0x" + String.format("%08X", (MASK & signature.getKeyID()));
+        id = "0x" + String.format("%08X", MASK & signature.getKeyID());
     }
 
     public PgpKeyId(String keyId) {
