@@ -8,7 +8,7 @@
 <setting id="cleanup.add_missing_deprecated_annotations" value="true"/>
 <setting id="cleanup.convert_to_enhanced_for_loop" value="true"/>
 <setting id="cleanup.remove_unnecessary_nls_tags" value="true"/>
-<setting id="cleanup.sort_members" value="false"/>
+<setting id="cleanup.sort_members" value="true"/>
 <setting id="cleanup.remove_unused_local_variables" value="true"/>
 <setting id="cleanup.never_use_parentheses_in_expressions" value="true"/>
 <setting id="cleanup.remove_unused_private_members" value="true"/>
@@ -40,7 +40,7 @@
 <setting id="cleanup.add_generated_serial_version_id" value="false"/>
 <setting id="cleanup.organize_imports" value="true"/>
 <setting id="cleanup.remove_trailing_whitespaces" value="false"/>
-<setting id="cleanup.sort_members_all" value="true"/>
+<setting id="cleanup.sort_members_all" value="false"/>
 <setting id="cleanup.use_blocks_only_for_return_and_throw" value="false"/>
 <setting id="cleanup.add_missing_annotations" value="true"/>
 <setting id="cleanup.use_parentheses_in_expressions" value="true"/>
