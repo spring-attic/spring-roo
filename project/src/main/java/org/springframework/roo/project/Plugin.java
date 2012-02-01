@@ -4,11 +4,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.support.style.ToStringCreator;
-import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.CollectionUtils;
 import org.springframework.roo.support.util.DomUtils;
-import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -98,8 +98,8 @@ public class Plugin implements Comparable<Plugin> {
                 final String exclusionArtifactId = DomUtils.getTextContent(
                         exclusionArtifactIdElement, "");
 
-                if (StringUtils.hasText(exclusionGroupId)
-                        && StringUtils.hasText(exclusionArtifactId)) {
+                if (StringUtils.isNotBlank(exclusionGroupId)
+                        && StringUtils.isNotBlank(exclusionArtifactId)) {
                     dependency.addExclusion(exclusionGroupId,
                             exclusionArtifactId);
                 }
@@ -212,9 +212,9 @@ public class Plugin implements Comparable<Plugin> {
             final String version, final Configuration configuration,
             final Collection<? extends Dependency> dependencies,
             final Collection<? extends Execution> executions) {
-        Assert.notNull(groupId, "Group ID required");
-        Assert.notNull(artifactId, "Artifact ID required");
-        Assert.notNull(version, "Version required");
+        Validate.notNull(groupId, "Group ID required");
+        Validate.notNull(artifactId, "Artifact ID required");
+        Validate.notNull(version, "Version required");
         gav = new GAV(groupId, artifactId, version);
         this.configuration = configuration;
         // Defensively copy the given nullable collections

@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.logging.Logger;
 
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -46,7 +47,6 @@ import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.Plugin;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.logging.HandlerUtils;
-import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
@@ -205,11 +205,11 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
      */
     public void generateTest(final JavaType controller, String name,
             String serverURL) {
-        Assert.notNull(controller, "Controller type required");
+        Validate.notNull(controller, "Controller type required");
 
         final ClassOrInterfaceTypeDetails controllerTypeDetails = typeLocationService
                 .getTypeDetails(controller);
-        Assert.notNull(controllerTypeDetails,
+        Validate.notNull(controllerTypeDetails,
                 "Class or interface type details for type '" + controller
                         + "' could not be resolved");
 
@@ -219,7 +219,7 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
                 .createIdentifier(controller, path);
         final WebScaffoldMetadata webScaffoldMetadata = (WebScaffoldMetadata) metadataService
                 .get(webScaffoldMetadataIdentifier);
-        Assert.notNull(
+        Validate.notNull(
                 webScaffoldMetadata,
                 "Web controller '"
                         + controller.getFullyQualifiedTypeName()
@@ -245,7 +245,7 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 
         final InputStream templateInputStream = FileUtils.getInputStream(
                 getClass(), "selenium-template.xhtml");
-        Assert.notNull(templateInputStream,
+        Validate.notNull(templateInputStream,
                 "Could not acquire selenium.xhtml template");
         final Document document = XmlUtils.readXml(templateInputStream);
 
@@ -275,7 +275,7 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 
         final ClassOrInterfaceTypeDetails formBackingTypeDetails = typeLocationService
                 .getTypeDetails(formBackingType);
-        Assert.notNull(formBackingType,
+        Validate.notNull(formBackingType,
                 "Class or interface type details for type '" + formBackingType
                         + "' could not be resolved");
         final MemberDetails memberDetails = memberDetailsScanner
@@ -373,7 +373,7 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
         else {
             inputStream = FileUtils.getInputStream(getClass(),
                     "selenium-test-suite-template.xhtml");
-            Assert.notNull(inputStream,
+            Validate.notNull(inputStream,
                     "Could not acquire selenium test suite template");
         }
 

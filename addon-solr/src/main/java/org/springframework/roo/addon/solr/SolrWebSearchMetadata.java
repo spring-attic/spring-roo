@@ -10,6 +10,7 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.addon.web.mvc.controller.scaffold.WebScaffoldAnnotationValues;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
@@ -27,7 +28,6 @@ import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.support.style.ToStringCreator;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Metadata for {@link RooSolrWebSearchable}.
@@ -75,13 +75,13 @@ public class SolrWebSearchMetadata extends
             final WebScaffoldAnnotationValues webScaffoldAnnotationValues,
             final SolrSearchAnnotationValues solrSearchAnnotationValues) {
         super(identifier, aspectName, governorPhysicalTypeMetadata);
-        Assert.notNull(webScaffoldAnnotationValues,
+        Validate.notNull(webScaffoldAnnotationValues,
                 "Web scaffold annotation values required");
-        Assert.notNull(annotationValues,
+        Validate.notNull(annotationValues,
                 "Solr web searchable annotation values required");
-        Assert.notNull(solrSearchAnnotationValues,
+        Validate.notNull(solrSearchAnnotationValues,
                 "Solr search annotation values required");
-        Assert.isTrue(isValid(identifier), "Metadata identification string '"
+        Validate.isTrue(isValid(identifier), "Metadata identification string '"
                 + identifier + "' does not appear to be a valid");
 
         if (!isValid()) {
@@ -214,7 +214,7 @@ public class SolrWebSearchMetadata extends
             final WebScaffoldAnnotationValues webScaffoldAnnotationValues) {
         final JavaType targetObject = webScaffoldAnnotationValues
                 .getFormBackingObject();
-        Assert.notNull(targetObject,
+        Validate.notNull(targetObject,
                 "Could not aquire form backing object for the '"
                         + webScaffoldAnnotationValues.getGovernorTypeDetails()
                                 .getName().getFullyQualifiedTypeName()

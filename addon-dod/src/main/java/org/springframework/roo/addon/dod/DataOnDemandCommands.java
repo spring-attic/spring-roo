@@ -1,5 +1,6 @@
 package org.springframework.roo.addon.dod;
 
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -10,7 +11,6 @@ import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
 import org.springframework.roo.shell.CommandMarker;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Shell commands for creating data-on-demand (DoD) classes.
@@ -39,7 +39,7 @@ public class DataOnDemandCommands implements CommandMarker {
             ReservedWords.verifyReservedWordsNotPresent(entity);
         }
 
-        Assert.isTrue(
+        Validate.isTrue(
                 BeanInfoUtils.isEntityReasonablyNamed(entity),
                 "Cannot create data on demand for an entity named 'Test' or 'TestCase' under any circumstances");
 

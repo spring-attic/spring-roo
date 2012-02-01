@@ -6,11 +6,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.shell.Completion;
 import org.springframework.roo.shell.Converter;
 import org.springframework.roo.shell.MethodTarget;
-import org.springframework.roo.support.util.Assert;
-import org.springframework.roo.support.util.StringUtils;
 
 /**
  * A simple {@link Converter} for those classes which provide public static
@@ -25,9 +25,9 @@ public class StaticFieldConverterImpl implements StaticFieldConverter {
     private final Map<Class<?>, Map<String, Field>> fields = new HashMap<Class<?>, Map<String, Field>>();
 
     public void add(final Class<?> clazz) {
-        Assert.notNull(clazz,
+        Validate.notNull(clazz,
                 "A class to provide conversion services is required");
-        Assert.isNull(fields.get(clazz), "Class '" + clazz
+        Validate.isTrue(fields.get(clazz) == null, "Class '" + clazz
                 + "' is already registered for completion services");
         final Map<String, Field> ffields = new HashMap<String, Field>();
         for (final Field field : clazz.getFields()) {
@@ -36,7 +36,7 @@ public class StaticFieldConverterImpl implements StaticFieldConverter {
                 ffields.put(field.getName(), field);
             }
         }
-        Assert.notEmpty(ffields, "Zero public static fields accessible in '"
+        Validate.notEmpty(ffields, "Zero public static fields accessible in '"
                 + clazz + "'");
         fields.put(clazz, ffields);
     }
@@ -87,7 +87,7 @@ public class StaticFieldConverterImpl implements StaticFieldConverter {
     }
 
     public void remove(final Class<?> clazz) {
-        Assert.notNull(clazz,
+        Validate.notNull(clazz,
                 "A class that was providing conversion services is required");
         fields.remove(clazz);
     }

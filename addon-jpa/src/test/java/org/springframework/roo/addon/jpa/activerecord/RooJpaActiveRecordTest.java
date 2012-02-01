@@ -6,9 +6,9 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.lang3.ObjectUtils;
 import org.junit.Test;
 import org.springframework.roo.addon.jpa.entity.RooJpaEntity;
-import org.springframework.roo.support.util.ObjectUtils;
 
 /**
  * Unit test of the {@link RooJpaActiveRecord} annotation.
@@ -32,8 +32,7 @@ public class RooJpaActiveRecordTest {
             if (candidateMethod.getReturnType().equals(
                     targetMethod.getReturnType())
                     && candidateMethod.getName().equals(targetMethod.getName())
-                    && ObjectUtils.nullSafeEquals(
-                            candidateMethod.getDefaultValue(),
+                    && ObjectUtils.equals(candidateMethod.getDefaultValue(),
                             targetMethod.getDefaultValue())) {
                 return; // Found a match
             }

@@ -7,7 +7,7 @@ import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 
-import org.springframework.roo.support.util.Assert;
+import org.apache.commons.lang3.Validate;
 
 /**
  * Defers the publication of JDK {@link LogRecord} instances until a target
@@ -52,8 +52,8 @@ public class DeferredLogHandler extends Handler {
      */
     public DeferredLogHandler(final Handler fallbackHandler,
             final Level fallbackPushLevel) {
-        Assert.notNull(fallbackHandler, "Fallback handler required");
-        Assert.notNull(fallbackPushLevel, "Fallback push level required");
+        Validate.notNull(fallbackHandler, "Fallback handler required");
+        Validate.notNull(fallbackPushLevel, "Fallback push level required");
         this.fallbackHandler = fallbackHandler;
         this.fallbackPushLevel = fallbackPushLevel;
     }
@@ -128,7 +128,7 @@ public class DeferredLogHandler extends Handler {
     }
 
     public void setTargetHandler(final Handler targetHandler) {
-        Assert.notNull(targetHandler, "Must specify a target handler");
+        Validate.notNull(targetHandler, "Must specify a target handler");
         this.targetHandler = targetHandler;
         if (!fallbackMode) {
             publishLogRecordsTo(this.targetHandler);

@@ -1,11 +1,11 @@
 package org.springframework.roo.addon.tailor.actions;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.addon.tailor.CommandTransformation;
 import org.springframework.roo.project.ProjectOperations;
-import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Focuses on a module with a given name. This action does not check for the
@@ -42,7 +42,7 @@ public class FocusModule extends AbstractAction {
     }
 
     public boolean isValid(final ActionConfig config) {
-        return config != null && StringUtils.hasText(config.getModule());
+        return config != null && StringUtils.isNotBlank(config.getModule());
     }
 
 }

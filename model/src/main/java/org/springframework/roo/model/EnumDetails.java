@@ -1,6 +1,6 @@
 package org.springframework.roo.model;
 
-import org.springframework.roo.support.util.Assert;
+import org.apache.commons.lang3.Validate;
 
 /**
  * Immutable representation of an enumeration.
@@ -13,8 +13,8 @@ public class EnumDetails {
     private final JavaType type;
 
     public EnumDetails(final JavaType type, final JavaSymbolName field) {
-        Assert.notNull(type, "Type required");
-        Assert.notNull(field, "Field required");
+        Validate.notNull(type, "Type required");
+        Validate.notNull(field, "Field required");
         this.type = type;
         this.field = field;
     }

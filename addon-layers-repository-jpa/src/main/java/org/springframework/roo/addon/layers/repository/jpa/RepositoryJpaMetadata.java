@@ -2,6 +2,7 @@ package org.springframework.roo.addon.layers.repository.jpa;
 
 import java.util.Arrays;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
@@ -13,7 +14,6 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.SpringJavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.support.style.ToStringCreator;
-import org.springframework.uaa.client.util.Assert;
 
 /**
  * Metadata for {@link RooJpaRepository}.
@@ -74,8 +74,8 @@ public class RepositoryJpaMetadata extends
             final RepositoryJpaAnnotationValues annotationValues,
             final JavaType identifierType) {
         super(identifier, aspectName, governorPhysicalTypeMetadata);
-        Assert.notNull(annotationValues, "Annotation values required");
-        Assert.notNull(identifierType, "Id type required");
+        Validate.notNull(annotationValues, "Annotation values required");
+        Validate.notNull(identifierType, "Id type required");
 
         // Make the user's Repository interface extend Spring Data's
         // JpaRepository interface if it doesn't already

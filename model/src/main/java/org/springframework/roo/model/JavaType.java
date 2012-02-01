@@ -13,8 +13,8 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.Vector;
 
-import org.springframework.roo.support.util.Assert;
-import org.springframework.roo.support.util.StringUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 
 /**
  * The declaration of a Java type (i.e. contains no details of its members).
@@ -264,9 +264,9 @@ public class JavaType implements Comparable<JavaType> {
             final JavaType enclosingType, final int arrayDimensions,
             final DataType dataType, final JavaSymbolName argName,
             final List<JavaType> parameters) {
-        Assert.hasText(fullyQualifiedTypeName,
+        Validate.notBlank(fullyQualifiedTypeName,
                 "Fully qualified type name required");
-        Assert.notNull(dataType, "Data type required");
+        Validate.notNull(dataType, "Data type required");
         JavaSymbolName.assertJavaNameLegal(fullyQualifiedTypeName);
         this.argName = argName;
         this.arrayDimensions = arrayDimensions;
@@ -442,7 +442,7 @@ public class JavaType implements Comparable<JavaType> {
             final ImportRegistrationResolver resolver,
             final Map<String, String> types) {
         if (DataType.PRIMITIVE == dataType) {
-            Assert.isTrue(parameters.isEmpty(),
+            Validate.isTrue(parameters.isEmpty(),
                     "A primitive cannot have parameters");
             if (fullyQualifiedTypeName.equals(Integer.class.getName())) {
                 return "int" + getArraySuffix();

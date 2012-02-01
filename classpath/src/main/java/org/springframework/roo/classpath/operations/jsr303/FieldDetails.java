@@ -8,6 +8,7 @@ import static org.springframework.roo.model.SpringJavaType.VALUE;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
@@ -15,7 +16,6 @@ import org.springframework.roo.classpath.details.annotations.BooleanAttributeVal
 import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Base class containing common JSR 303 and JSR 220 properties that can be
@@ -62,10 +62,10 @@ public class FieldDetails {
      */
     public FieldDetails(final String physicalTypeIdentifier,
             final JavaType fieldType, final JavaSymbolName fieldName) {
-        Assert.isTrue(PhysicalTypeIdentifier.isValid(physicalTypeIdentifier),
+        Validate.isTrue(PhysicalTypeIdentifier.isValid(physicalTypeIdentifier),
                 "Destination physical type identifier is invalid");
-        Assert.notNull(fieldType, "Field type required");
-        Assert.notNull(fieldName, "Field name required");
+        Validate.notNull(fieldType, "Field type required");
+        Validate.notNull(fieldName, "Field name required");
         this.physicalTypeIdentifier = physicalTypeIdentifier;
         this.fieldType = fieldType;
         this.fieldName = fieldName;
@@ -73,7 +73,7 @@ public class FieldDetails {
 
     public void decorateAnnotationsList(
             final List<AnnotationMetadataBuilder> annotations) {
-        Assert.notNull(annotations);
+        Validate.notNull(annotations);
 
         if (notNull) {
             annotations.add(new AnnotationMetadataBuilder(NOT_NULL));

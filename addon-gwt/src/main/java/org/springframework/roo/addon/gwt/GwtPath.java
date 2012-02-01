@@ -2,8 +2,8 @@ package org.springframework.roo.addon.gwt;
 
 import java.io.File;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.model.JavaPackage;
-import org.springframework.roo.support.util.Assert;
 
 public enum GwtPath {
 
@@ -58,7 +58,7 @@ public enum GwtPath {
      *            located (required)
      */
     GwtPath(final String segmentName, final String sourceAntPath) {
-        Assert.hasText(sourceAntPath, "Source Ant path is required");
+        Validate.notBlank(sourceAntPath, "Source Ant path is required");
         this.segmentName = segmentName;
         this.sourceAntPath = sourceAntPath;
     }

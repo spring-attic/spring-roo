@@ -20,6 +20,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
@@ -38,7 +39,6 @@ import org.springframework.roo.model.Builder;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.support.util.Assert;
 
 public class JavaParserClassOrInterfaceTypeDetailsBuilder implements
         Builder<ClassOrInterfaceTypeDetails> {
@@ -102,11 +102,12 @@ public class JavaParserClassOrInterfaceTypeDetailsBuilder implements
             final MetadataService metadataService,
             final TypeLocationService typeLocationService) {
         // Check
-        Assert.notNull(compilationUnit, "Compilation unit required");
-        Assert.hasText(declaredByMetadataId, "Declared by metadata ID required");
-        Assert.notNull(typeDeclaration,
+        Validate.notNull(compilationUnit, "Compilation unit required");
+        Validate.notBlank(declaredByMetadataId,
+                "Declared by metadata ID required");
+        Validate.notNull(typeDeclaration,
                 "Unable to locate the class or interface declaration");
-        Assert.notNull(typeName, "Name required");
+        Validate.notNull(typeName, "Name required");
 
         // Assign
         this.compilationUnit = compilationUnit;
@@ -120,7 +121,7 @@ public class JavaParserClassOrInterfaceTypeDetailsBuilder implements
     }
 
     public ClassOrInterfaceTypeDetails build() {
-        Assert.notEmpty(compilationUnit.getTypes(),
+        Validate.notEmpty(compilationUnit.getTypes(),
                 "No types in compilation unit, so unable to continue parsing");
 
         ClassOrInterfaceDeclaration clazz = null;
@@ -160,9 +161,9 @@ public class JavaParserClassOrInterfaceTypeDetailsBuilder implements
             physicalTypeCategory = PhysicalTypeCategory.ENUMERATION;
         }
 
-        Assert.notNull(physicalTypeCategory, UNSUPPORTED_MESSAGE_PREFIX + " ("
-                + typeDeclaration.getClass().getSimpleName() + " for " + name
-                + ")");
+        Validate.notNull(physicalTypeCategory, UNSUPPORTED_MESSAGE_PREFIX
+                + " (" + typeDeclaration.getClass().getSimpleName() + " for "
+                + name + ")");
 
         cidBuilder.setName(name);
         cidBuilder.setPhysicalTypeCategory(physicalTypeCategory);
@@ -174,7 +175,7 @@ public class JavaParserClassOrInterfaceTypeDetailsBuilder implements
         }
 
         // Verify the package declaration appears to be correct
-        Assert.isTrue(compilationUnitPackage.equals(name.getPackage()),
+        Validate.isTrue(compilationUnitPackage.equals(name.getPackage()),
                 "Compilation unit package '" + compilationUnitPackage
                         + "' unexpected for type '" + name.getPackage() + "'");
 

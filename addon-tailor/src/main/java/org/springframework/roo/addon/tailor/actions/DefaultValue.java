@@ -1,9 +1,9 @@
 package org.springframework.roo.addon.tailor.actions;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.addon.tailor.CommandTransformation;
-import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Adds default argument to the command If default argument is mandatory it will
@@ -44,7 +44,7 @@ public class DefaultValue extends AbstractAction {
     }
 
     public boolean isValid(final ActionConfig config) {
-        return config != null && StringUtils.hasText(config.getArgument())
-                && StringUtils.hasText(config.getDefaultValue());
+        return config != null && StringUtils.isNotBlank(config.getArgument())
+                && StringUtils.isNotBlank(config.getDefaultValue());
     }
 }

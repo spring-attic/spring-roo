@@ -1,12 +1,12 @@
 package org.springframework.roo.addon.gwt.request;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.metadata.AbstractMetadataItem;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.LogicalPath;
-import org.springframework.roo.support.util.Assert;
-import org.springframework.roo.support.util.StringUtils;
 
 public class GwtRequestMetadata extends AbstractMetadataItem {
 
@@ -47,7 +47,7 @@ public class GwtRequestMetadata extends AbstractMetadataItem {
      */
     public GwtRequestMetadata(final String id, final String requestTypeContents) {
         super(id);
-        Assert.hasText(requestTypeContents, "Invalid contents '"
+        Validate.notBlank(requestTypeContents, "Invalid contents '"
                 + requestTypeContents + "'");
         this.requestTypeContents = requestTypeContents;
     }

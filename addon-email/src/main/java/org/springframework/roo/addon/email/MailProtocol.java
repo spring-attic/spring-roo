@@ -1,7 +1,7 @@
 package org.springframework.roo.addon.email;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.support.style.ToStringCreator;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Protocols known to the email add-on.
@@ -19,8 +19,8 @@ public class MailProtocol implements Comparable<MailProtocol> {
     private final String protocolLabel;
 
     public MailProtocol(final String protocolLabel, final String protocol) {
-        Assert.notNull(protocolLabel, "Protocol label required");
-        Assert.notNull(protocol, "protocol required");
+        Validate.notNull(protocolLabel, "Protocol label required");
+        Validate.notNull(protocol, "protocol required");
         this.protocolLabel = protocolLabel;
         this.protocol = protocol;
     }

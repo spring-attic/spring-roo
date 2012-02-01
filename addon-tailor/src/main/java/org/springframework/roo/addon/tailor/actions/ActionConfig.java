@@ -4,9 +4,9 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.roo.addon.tailor.config.CommandConfiguration;
 import org.springframework.roo.addon.tailor.service.ActionLocator;
-import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Configuration object for an action that can be executed by the a
@@ -114,7 +114,7 @@ public class ActionConfig {
         // Don't allow overriding of arguments!
         // The ActionConfig will be reused for all action executions,
         // so it should stay the same after instantiation.
-        if (StringUtils.hasText(attributes.get(argument))) {
+        if (StringUtils.isNotBlank(attributes.get(argument))) {
             throw new IllegalStateException(
                     "ActionConfig.setArgument: ActionConfig attributes are immutable once instantiated!");
         }

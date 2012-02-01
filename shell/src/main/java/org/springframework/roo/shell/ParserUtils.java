@@ -3,7 +3,7 @@ package org.springframework.roo.shell;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.springframework.roo.support.util.Assert;
+import org.apache.commons.lang3.Validate;
 
 /**
  * Utilities for parsing.
@@ -18,14 +18,14 @@ public class ParserUtils {
         if (currentOption.length() > 0) {
             // There is an option marker
             final String option = currentOption.toString();
-            Assert.isTrue(!results.containsKey(option),
+            Validate.isTrue(!results.containsKey(option),
                     "You cannot specify option '" + option
                             + "' more than once in a single command");
             results.put(option, currentValue.toString());
         }
         else {
             // There was no option marker, so verify this isn't the first
-            Assert.isTrue(!results.containsKey(""),
+            Validate.isTrue(!results.containsKey(""),
                     "You cannot add more than one default option ('"
                             + currentValue.toString()
                             + "') in a single command");
@@ -52,7 +52,7 @@ public class ParserUtils {
      *         values are the option values (any double-quotes are removed)
      */
     public static Map<String, String> tokenize(final String remainingBuffer) {
-        Assert.notNull(remainingBuffer,
+        Validate.notNull(remainingBuffer,
                 "Remaining buffer cannot be null, although it can be empty");
         final Map<String, String> result = new LinkedHashMap<String, String>();
         StringBuilder currentOption = new StringBuilder();
@@ -66,7 +66,7 @@ public class ParserUtils {
                 count++;
             }
         }
-        Assert.isTrue(count % 2 == 0,
+        Validate.isTrue(count % 2 == 0,
                 "Cannot have an unbalanced number of quotation marks");
 
         if ("".equals(remainingBuffer.trim())) {

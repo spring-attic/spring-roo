@@ -13,6 +13,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -35,10 +37,8 @@ import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectOperations;
-import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.DomUtils;
 import org.springframework.roo.support.util.FileUtils;
-import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
@@ -84,7 +84,7 @@ public class JmsOperationsImpl implements JmsOperations {
 
     public void addJmsListener(final JavaType targetType, final String name,
             final JmsDestinationType destinationType) {
-        Assert.notNull(targetType, "Java type required");
+        Validate.notNull(targetType, "Java type required");
 
         final String declaredByMetadataId = PhysicalTypeIdentifier
                 .createIdentifier(targetType, projectOperations
@@ -113,7 +113,7 @@ public class JmsOperationsImpl implements JmsOperations {
         final String physicalLocationCanonicalPath = getPhysicalLocationCanonicalPath(declaredByMetadataId);
 
         // Check the file doesn't already exist
-        Assert.isTrue(
+        Validate.isTrue(
                 !fileManager.exists(physicalLocationCanonicalPath),
                 projectOperations.getPathResolver().getFriendlyName(
                         physicalLocationCanonicalPath)
@@ -230,7 +230,7 @@ public class JmsOperationsImpl implements JmsOperations {
 
     private String getPhysicalLocationCanonicalPath(
             final String physicalTypeIdentifier) {
-        Assert.isTrue(PhysicalTypeIdentifier.isValid(physicalTypeIdentifier),
+        Validate.isTrue(PhysicalTypeIdentifier.isValid(physicalTypeIdentifier),
                 "Physical type identifier is invalid");
         final JavaType javaType = PhysicalTypeIdentifier
                 .getJavaType(physicalTypeIdentifier);
@@ -248,12 +248,12 @@ public class JmsOperationsImpl implements JmsOperations {
 
     public void injectJmsTemplate(final JavaType targetType,
             final JavaSymbolName fieldName, final boolean asynchronous) {
-        Assert.notNull(targetType, "Java type required");
-        Assert.notNull(fieldName, "Field name required");
+        Validate.notNull(targetType, "Java type required");
+        Validate.notNull(fieldName, "Field name required");
 
         final ClassOrInterfaceTypeDetails targetTypeDetails = typeLocationService
                 .getTypeDetails(targetType);
-        Assert.isTrue(targetTypeDetails != null, "Cannot locate source for '"
+        Validate.isTrue(targetTypeDetails != null, "Cannot locate source for '"
                 + targetType.getFullyQualifiedTypeName() + "'");
 
         final String declaredByMetadataId = targetTypeDetails
@@ -280,8 +280,8 @@ public class JmsOperationsImpl implements JmsOperations {
 
     public void installJms(final JmsProvider jmsProvider, final String name,
             final JmsDestinationType destinationType) {
-        Assert.isTrue(isJmsInstallationPossible(), "Project not available");
-        Assert.notNull(jmsProvider, "JMS provider required");
+        Validate.isTrue(isJmsInstallationPossible(), "Project not available");
+        Validate.notNull(jmsProvider, "JMS provider required");
 
         final String jmsContextPath = projectOperations.getPathResolver()
                 .getFocusedIdentifier(Path.SPRING_CONFIG_ROOT,
@@ -294,14 +294,14 @@ public class JmsOperationsImpl implements JmsOperations {
         else {
             in = FileUtils.getInputStream(getClass(),
                     "applicationContext-jms-template.xml");
-            Assert.notNull(in,
+            Validate.notNull(in,
                     "Could not acquire applicationContext-jms.xml template");
         }
         final Document document = XmlUtils.readXml(in);
 
         final Element root = document.getDocumentElement();
 
-        if (StringUtils.hasText(name)) {
+        if (StringUtils.isNotBlank(name)) {
             final Element destination = document.createElement("amq:"
                     + destinationType.name().toLowerCase());
             destination.setAttribute("physicalName", name);

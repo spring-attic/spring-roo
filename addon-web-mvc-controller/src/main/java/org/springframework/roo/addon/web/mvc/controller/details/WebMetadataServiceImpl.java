@@ -28,6 +28,8 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.logging.Logger;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -63,9 +65,7 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.JdkJavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.support.logging.HandlerUtils;
-import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.CollectionUtils;
-import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Implementation of {@link WebMetadataService} to retrieve various metadata
@@ -174,8 +174,8 @@ public class WebMetadataServiceImpl implements WebMetadataService {
     public Map<JavaSymbolName, DateTimeFormatDetails> getDatePatterns(
             final JavaType javaType, final MemberDetails memberDetails,
             final String metadataIdentificationString) {
-        Assert.notNull(javaType, "Java type required");
-        Assert.notNull(memberDetails, "Member details required");
+        Validate.notNull(javaType, "Java type required");
+        Validate.notNull(memberDetails, "Member details required");
 
         final MethodMetadata identifierAccessor = persistenceMemberLocator
                 .getIdentifierAccessor(javaType);
@@ -263,8 +263,8 @@ public class WebMetadataServiceImpl implements WebMetadataService {
     public List<JavaTypeMetadataDetails> getDependentApplicationTypeMetadata(
             final JavaType javaType, final MemberDetails memberDetails,
             final String metadataIdentificationString) {
-        Assert.notNull(javaType, "Java type required");
-        Assert.notNull(memberDetails, "Member details required");
+        Validate.notNull(javaType, "Java type required");
+        Validate.notNull(memberDetails, "Member details required");
 
         final List<JavaTypeMetadataDetails> dependentTypes = new ArrayList<JavaTypeMetadataDetails>();
         for (final MethodMetadata method : memberDetails.getMethods()) {
@@ -294,12 +294,12 @@ public class WebMetadataServiceImpl implements WebMetadataService {
             final JavaType formBackingType,
             final MemberDetails formBackingTypeDetails,
             final String metadataIdentificationString) {
-        Assert.notNull(formBackingType, "Java type required");
-        Assert.notNull(formBackingTypeDetails, "Member details required");
+        Validate.notNull(formBackingType, "Java type required");
+        Validate.notNull(formBackingTypeDetails, "Member details required");
 
         final ClassOrInterfaceTypeDetails javaTypeDetails = typeLocationService
                 .getTypeDetails(formBackingType);
-        Assert.notNull(formBackingType,
+        Validate.notNull(formBackingType,
                 "Class or interface type details isn't available for type '"
                         + formBackingType + "'");
         final LogicalPath logicalPath = PhysicalTypeIdentifier
@@ -358,7 +358,7 @@ public class WebMetadataServiceImpl implements WebMetadataService {
     public JavaTypeMetadataDetails getJavaTypeMetadataDetails(
             final JavaType javaType, final MemberDetails memberDetails,
             final String metadataIdentificationString) {
-        Assert.notNull(javaType, "Java type required");
+        Validate.notNull(javaType, "Java type required");
         registerDependency(
                 memberDetails.getDetails()
                         .get(memberDetails.getDetails().size() - 1)
@@ -377,9 +377,9 @@ public class WebMetadataServiceImpl implements WebMetadataService {
     public JavaTypePersistenceMetadataDetails getJavaTypePersistenceMetadataDetails(
             final JavaType javaType, final MemberDetails memberDetails,
             final String metadataIdentificationString) {
-        Assert.notNull(javaType, "Java type required");
-        Assert.notNull(memberDetails, "Member details required");
-        Assert.hasText(metadataIdentificationString, "Metadata id required");
+        Validate.notNull(javaType, "Java type required");
+        Validate.notNull(memberDetails, "Member details required");
+        Validate.notBlank(metadataIdentificationString, "Metadata id required");
 
         final MethodMetadata idAccessor = memberDetails
                 .getMostConcreteMethodWithTag(IDENTIFIER_ACCESSOR_METHOD);
@@ -454,20 +454,22 @@ public class WebMetadataServiceImpl implements WebMetadataService {
     public MemberDetails getMemberDetails(final JavaType javaType) {
         final ClassOrInterfaceTypeDetails cid = typeLocationService
                 .getTypeDetails(javaType);
-        Assert.notNull(cid, "Unable to obtain physical type metadata for type "
-                + javaType.getFullyQualifiedTypeName());
+        Validate.notNull(
+                cid,
+                "Unable to obtain physical type metadata for type "
+                        + javaType.getFullyQualifiedTypeName());
         return memberDetailsScanner.getMemberDetails(
                 WebMetadataServiceImpl.class.getName(), cid);
     }
 
     private String getPlural(final JavaType javaType,
             final String metadataIdentificationString) {
-        Assert.notNull(javaType, "Java type required");
-        Assert.notNull(metadataService, "Metadata service required");
+        Validate.notNull(javaType, "Java type required");
+        Validate.notNull(metadataService, "Metadata service required");
 
         final ClassOrInterfaceTypeDetails javaTypeDetails = typeLocationService
                 .getTypeDetails(javaType);
-        Assert.notNull(javaType,
+        Validate.notNull(javaType,
                 "Class or interface type details isn't available for type '"
                         + javaType + "'");
         final LogicalPath logicalPath = PhysicalTypeIdentifier
@@ -493,9 +495,9 @@ public class WebMetadataServiceImpl implements WebMetadataService {
     public SortedMap<JavaType, JavaTypeMetadataDetails> getRelatedApplicationTypeMetadata(
             final JavaType baseType, final MemberDetails baseTypeDetails,
             final String metadataIdentificationString) {
-        Assert.notNull(baseType, "Java type required");
-        Assert.notNull(baseTypeDetails, "Member details required");
-        Assert.isTrue(isApplicationType(baseType), "The type " + baseType
+        Validate.notNull(baseType, "Java type required");
+        Validate.notNull(baseTypeDetails, "Member details required");
+        Validate.isTrue(isApplicationType(baseType), "The type " + baseType
                 + " does not belong to this application");
 
         final SortedMap<JavaType, JavaTypeMetadataDetails> specialTypes = new TreeMap<JavaType, JavaTypeMetadataDetails>();
@@ -521,8 +523,8 @@ public class WebMetadataServiceImpl implements WebMetadataService {
     public List<FieldMetadata> getScaffoldEligibleFieldMetadata(
             final JavaType javaType, final MemberDetails memberDetails,
             final String metadataIdentificationString) {
-        Assert.notNull(javaType, "Java type required");
-        Assert.notNull(memberDetails, "Member details required");
+        Validate.notNull(javaType, "Java type required");
+        Validate.notNull(memberDetails, "Member details required");
 
         final MethodMetadata identifierAccessor = persistenceMemberLocator
                 .getIdentifierAccessor(javaType);
@@ -562,8 +564,8 @@ public class WebMetadataServiceImpl implements WebMetadataService {
     }
 
     private boolean isEnumType(final JavaType javaType) {
-        Assert.notNull(javaType, "Java type required");
-        Assert.notNull(metadataService, "Metadata service required");
+        Validate.notNull(javaType, "Java type required");
+        Validate.notNull(metadataService, "Metadata service required");
         final ClassOrInterfaceTypeDetails javaTypeDetails = typeLocationService
                 .getTypeDetails(javaType);
         if (javaTypeDetails != null) {
@@ -577,8 +579,8 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 
     public boolean isRooIdentifier(final JavaType javaType,
             final MemberDetails memberDetails) {
-        Assert.notNull(javaType, "Java type required");
-        Assert.notNull(memberDetails, "Member details required");
+        Validate.notNull(javaType, "Java type required");
+        Validate.notNull(memberDetails, "Member details required");
         return MemberFindingUtils.getMemberHoldingTypeDetailsWithTag(
                 memberDetails, IDENTIFIER_TYPE).size() > 0;
     }
@@ -586,8 +588,8 @@ public class WebMetadataServiceImpl implements WebMetadataService {
     private void registerDependency(final String upstreamDependency,
             final String downStreamDependency) {
         if (metadataDependencyRegistry != null
-                && StringUtils.hasText(upstreamDependency)
-                && StringUtils.hasText(downStreamDependency)
+                && StringUtils.isNotBlank(upstreamDependency)
+                && StringUtils.isNotBlank(downStreamDependency)
                 && !upstreamDependency.equals(downStreamDependency)
                 && !MetadataIdentificationUtils.getMetadataClass(
                         downStreamDependency).equals(

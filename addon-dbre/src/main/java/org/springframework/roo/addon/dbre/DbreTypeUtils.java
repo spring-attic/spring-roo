@@ -8,6 +8,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.addon.dbre.model.DbreModelService;
 import org.springframework.roo.addon.dbre.model.Table;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
@@ -18,8 +20,6 @@ import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.ReservedWords;
-import org.springframework.roo.support.util.Assert;
-import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Provides methods to find types based on table names and to suggest type and
@@ -66,8 +66,8 @@ public abstract class DbreTypeUtils {
     public static JavaType findTypeForTable(
             final Iterable<ClassOrInterfaceTypeDetails> managedEntities,
             final Table table) {
-        Assert.notNull(managedEntities, "Set of managed entities required");
-        Assert.notNull(table, "Table required");
+        Validate.notNull(managedEntities, "Set of managed entities required");
+        Validate.notNull(table, "Table required");
         return findTypeForTableName(managedEntities, table.getName(), table
                 .getSchema().getName());
     }
@@ -84,8 +84,8 @@ public abstract class DbreTypeUtils {
     public static JavaType findTypeForTableName(
             final Iterable<ClassOrInterfaceTypeDetails> managedEntities,
             final String tableName, final String schemaName) {
-        Assert.notNull(managedEntities, "Set of managed entities required");
-        Assert.hasText(tableName, "Table name required");
+        Validate.notNull(managedEntities, "Set of managed entities required");
+        Validate.notBlank(tableName, "Table name required");
 
         for (final ClassOrInterfaceTypeDetails managedEntity : managedEntities) {
             final String managedSchemaName = getSchemaName(managedEntity);
@@ -145,7 +145,7 @@ public abstract class DbreTypeUtils {
                 .entrySet()) {
             final String attributeValue = getAnnotationAttribute(annotatedType,
                     entry.getKey(), entry.getValue());
-            if (StringUtils.hasText(attributeValue)) {
+            if (StringUtils.isNotBlank(attributeValue)) {
                 return attributeValue;
             }
         }
@@ -204,7 +204,8 @@ public abstract class DbreTypeUtils {
      */
     public static String getSchemaName(
             final MemberHoldingTypeDetails entityDetails) {
-        Assert.notNull(entityDetails, "MemberHoldingTypeDetails type required");
+        Validate.notNull(entityDetails,
+                "MemberHoldingTypeDetails type required");
         return getFirstNonBlankAttributeValue(entityDetails, SCHEMA_ATTRIBUTES);
     }
 
@@ -216,7 +217,8 @@ public abstract class DbreTypeUtils {
      */
     public static String getTableName(
             final MemberHoldingTypeDetails entityDetails) {
-        Assert.notNull(entityDetails, "MemberHoldingTypeDetails type required");
+        Validate.notNull(entityDetails,
+                "MemberHoldingTypeDetails type required");
         return getFirstNonBlankAttributeValue(entityDetails, TABLE_ATTRIBUTES);
     }
 
@@ -227,7 +229,7 @@ public abstract class DbreTypeUtils {
      * @return a String representing the table or column
      */
     public static String suggestFieldName(final String name) {
-        Assert.hasText(name, "Table or column name required");
+        Validate.notBlank(name, "Table or column name required");
         return getName(name, true);
     }
 
@@ -238,7 +240,7 @@ public abstract class DbreTypeUtils {
      * @return a String representing the table or column.
      */
     public static String suggestFieldName(final Table table) {
-        Assert.notNull(table, "Table required");
+        Validate.notNull(table, "Table required");
         return getName(table.getName(), true);
     }
 
@@ -277,11 +279,11 @@ public abstract class DbreTypeUtils {
      */
     public static JavaType suggestTypeNameForNewTable(final String tableName,
             final JavaPackage javaPackage) {
-        Assert.hasText(tableName, "Table name required");
+        Validate.notBlank(tableName, "Table name required");
 
         final StringBuilder result = new StringBuilder();
         if (javaPackage != null
-                && StringUtils.hasText(javaPackage
+                && StringUtils.isNotBlank(javaPackage
                         .getFullyQualifiedPackageName())) {
             result.append(javaPackage.getFullyQualifiedPackageName());
             result.append(".");

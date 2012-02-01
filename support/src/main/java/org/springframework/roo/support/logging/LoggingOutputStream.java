@@ -7,7 +7,7 @@ import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
-import org.springframework.roo.support.util.Assert;
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.support.util.IOUtils;
 
 /**
@@ -34,7 +34,7 @@ public class LoggingOutputStream extends OutputStream {
      * @param level the level at which to log (required)
      */
     public LoggingOutputStream(final Level level) {
-        Assert.notNull(level, "A logging level is required");
+        Validate.notNull(level, "A logging level is required");
         this.level = level;
     }
 

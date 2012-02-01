@@ -5,6 +5,8 @@ import java.util.Comparator;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
@@ -27,8 +29,6 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.ProjectOperations;
-import org.springframework.roo.support.util.Assert;
-import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Monitors for *.java files and produces a {@link PhysicalTypeMetadata} for
@@ -73,7 +73,7 @@ public class DefaultPhysicalTypeMetadataProvider implements
     }
 
     public MetadataItem get(final String metadataIdentificationString) {
-        Assert.isTrue(
+        Validate.isTrue(
                 PhysicalTypeIdentifier.isValid(metadataIdentificationString),
                 "Metadata id '" + metadataIdentificationString
                         + "' is not valid for this metadata provider");
@@ -145,7 +145,7 @@ public class DefaultPhysicalTypeMetadataProvider implements
                 final MemberDetails newResult = decorator.decorateTypes(
                         DefaultPhysicalTypeMetadataProvider.class.getName(),
                         memberDetails);
-                Assert.isTrue(newResult != null, "Decorator '"
+                Validate.isTrue(newResult != null, "Decorator '"
                         + decorator.getClass().getName()
                         + "' returned an illegal result");
                 if (!newResult.equals(memberDetails)) {

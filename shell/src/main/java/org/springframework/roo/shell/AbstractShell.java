@@ -1,7 +1,5 @@
 package org.springframework.roo.shell;
 
-import static org.springframework.roo.support.util.StringUtils.LINE_SEPARATOR;
-
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
@@ -24,14 +22,13 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.shell.event.AbstractShellStatusPublisher;
 import org.springframework.roo.shell.event.ShellStatus;
 import org.springframework.roo.shell.event.ShellStatus.Status;
 import org.springframework.roo.support.logging.HandlerUtils;
-import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.IOUtils;
-import org.springframework.roo.support.util.MathUtils;
-import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Provides a base {@link Shell} implementation.
@@ -41,6 +38,8 @@ import org.springframework.roo.support.util.StringUtils;
 public abstract class AbstractShell extends AbstractShellStatusPublisher
         implements Shell {
 
+    private static final String LINE_SEPARATOR = System
+            .getProperty("line.separator");
     private static final String MY_SLOT = AbstractShell.class.getName();
     protected static final String ROO_PROMPT = "roo> ";
 
@@ -108,14 +107,14 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher
 
     @CliCommand(value = { "/*" }, help = "Start of block comment")
     public void blockCommentBegin() {
-        Assert.isTrue(!inBlockComment,
+        Validate.isTrue(!inBlockComment,
                 "Cannot open a new block comment when one already active");
         inBlockComment = true;
     }
 
     @CliCommand(value = { "*/" }, help = "End of block comment")
     public void blockCommentFinish() {
-        Assert.isTrue(inBlockComment,
+        Validate.isTrue(inBlockComment,
                 "Cannot close a block comment when it has not been opened");
         inBlockComment = false;
     }
@@ -257,9 +256,10 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher
      * approach.
      */
     public void flash(final Level level, final String message, final String slot) {
-        Assert.notNull(level, "Level is required for a flash message");
-        Assert.notNull(message, "Message is required for a flash message");
-        Assert.hasText(slot, "Slot name must be specified for a flash message");
+        Validate.notNull(level, "Level is required for a flash message");
+        Validate.notNull(message, "Message is required for a flash message");
+        Validate.notBlank(slot,
+                "Slot name must be specified for a flash message");
         if (!"".equals(message)) {
             logger.log(level, message);
         }
@@ -319,13 +319,13 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher
     public File getHome() {
         final String rooHome = getHomeAsString();
         final File f = new File(rooHome);
-        Assert.isTrue(!f.exists() || f.exists() && f.isDirectory(), "Path '"
+        Validate.isTrue(!f.exists() || f.exists() && f.isDirectory(), "Path '"
                 + f.getAbsolutePath()
                 + "' must be a directory, or it must not exist");
         if (!f.exists()) {
             f.mkdirs();
         }
-        Assert.isTrue(
+        Validate.isTrue(
                 f.exists() && f.isDirectory(),
                 "Path '"
                         + f.getAbsolutePath()
@@ -404,13 +404,13 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher
             final Collection<URL> urls = findResources(script.getName());
 
             // Handle search failure
-            Assert.notNull(urls,
+            Validate.notNull(urls,
                     "Unexpected error looking for '" + script.getName() + "'");
 
             // Handle the search being OK but the file simply not being present
-            Assert.notEmpty(urls, "Script '" + script
+            Validate.notEmpty(urls, "Script '" + script
                     + "' not found on disk or in classpath");
-            Assert.isTrue(urls.size() == 1, "More than one '" + script
+            Validate.isTrue(urls.size() == 1, "More than one '" + script
                     + "' was found in the classpath; unable to continue");
             try {
                 return urls.iterator().next().openStream();
@@ -429,8 +429,14 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher
             data.add(entry.getKey() + " = " + entry.getValue());
         }
 
-        return StringUtils.collectionToDelimitedString(data, LINE_SEPARATOR)
-                + LINE_SEPARATOR;
+        return StringUtils.join(data, LINE_SEPARATOR) + LINE_SEPARATOR;
+    }
+
+    private double round(final double valueToRound,
+            final int numberOfDecimalPlaces) {
+        final double multiplicationFactor = Math.pow(10, numberOfDecimalPlaces);
+        final double interestedInZeroDPs = valueToRound * multiplicationFactor;
+        return Math.round(interestedInZeroDPs) / multiplicationFactor;
     }
 
     @CliCommand(value = { "script" }, help = "Parses the specified resource file and executes its commands")
@@ -438,7 +444,7 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher
             @CliOption(key = { "", "file" }, help = "The file to locate and execute", mandatory = true) final File script,
             @CliOption(key = "lineNumbers", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Display line numbers when executing the script") final boolean lineNumbers) {
 
-        Assert.notNull(script, "Script file to parse is required");
+        Validate.notNull(script, "Script file to parse is required");
         final double startedNanoseconds = System.nanoTime();
         final InputStream inputStream = openScript(script);
 
@@ -477,7 +483,7 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher
             IOUtils.closeQuietly(inputStream, in);
             final double executionDurationInSeconds = (System.nanoTime() - startedNanoseconds) / 1000000000D;
             logger.fine("Script required "
-                    + MathUtils.round(executionDurationInSeconds, 3)
+                    + round(executionDurationInSeconds, 3)
                     + " seconds to execute");
         }
     }

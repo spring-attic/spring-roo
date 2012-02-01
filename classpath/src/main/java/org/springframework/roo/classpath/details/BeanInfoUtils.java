@@ -4,11 +4,11 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.support.util.Assert;
-import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Provides utility methods for querying JavaBeans.
@@ -25,7 +25,7 @@ public final class BeanInfoUtils {
      * @return the accessor method name
      */
     public static JavaSymbolName getAccessorMethodName(final FieldMetadata field) {
-        Assert.notNull(field, "Field required");
+        Validate.notNull(field, "Field required");
         return getAccessorMethodName(field.getFieldName(), field.getFieldType());
     }
 
@@ -38,8 +38,8 @@ public final class BeanInfoUtils {
      */
     public static JavaSymbolName getAccessorMethodName(
             final JavaSymbolName fieldName, final JavaType fieldType) {
-        Assert.notNull(fieldName, "Field name required");
-        Assert.notNull(fieldType, "Field type required");
+        Validate.notNull(fieldName, "Field name required");
+        Validate.notNull(fieldType, "Field type required");
         final String capitalizedFieldName = StringUtils.capitalize(fieldName
                 .getSymbolName());
         return fieldType.equals(JavaType.BOOLEAN_PRIMITIVE) ? new JavaSymbolName(
@@ -60,8 +60,8 @@ public final class BeanInfoUtils {
      */
     public static FieldMetadata getFieldForJavaBeanMethod(
             final MemberDetails memberDetails, final MethodMetadata method) {
-        Assert.notNull(memberDetails, "Member details required");
-        Assert.notNull(method, "Method is required");
+        Validate.notNull(memberDetails, "Member details required");
+        Validate.notNull(method, "Method is required");
         final JavaSymbolName propertyName = getPropertyNameForJavaBeanMethod(method);
         return getFieldForPropertyName(memberDetails, propertyName);
     }
@@ -79,8 +79,8 @@ public final class BeanInfoUtils {
      */
     public static FieldMetadata getFieldForPropertyName(
             final MemberDetails memberDetails, final JavaSymbolName propertyName) {
-        Assert.notNull(memberDetails, "Member details required");
-        Assert.notNull(propertyName, "Property name required");
+        Validate.notNull(memberDetails, "Member details required");
+        Validate.notNull(propertyName, "Property name required");
         for (final MemberHoldingTypeDetails holder : memberDetails.getDetails()) {
             FieldMetadata result = holder.getDeclaredField(propertyName);
             if (result != null) {
@@ -105,7 +105,7 @@ public final class BeanInfoUtils {
      * @return the mutator method name
      */
     public static JavaSymbolName getMutatorMethodName(final FieldMetadata field) {
-        Assert.notNull(field, "Field metadata required");
+        Validate.notNull(field, "Field metadata required");
         return getMutatorMethodName(field.getFieldName());
     }
 
@@ -117,7 +117,7 @@ public final class BeanInfoUtils {
      */
     public static JavaSymbolName getMutatorMethodName(
             final JavaSymbolName fieldName) {
-        Assert.notNull(fieldName, "Field name required");
+        Validate.notNull(fieldName, "Field name required");
         return new JavaSymbolName("set"
                 + StringUtils.capitalize(fieldName.getSymbolName()));
     }
@@ -134,7 +134,7 @@ public final class BeanInfoUtils {
      */
     public static JavaSymbolName getPropertyNameForJavaBeanMethod(
             final MethodMetadata method) {
-        Assert.notNull(method, "Method is required");
+        Validate.notNull(method, "Method is required");
         final String name = method.getMethodName().getSymbolName();
         if (name.startsWith("set") || name.startsWith("get")) {
             return new JavaSymbolName(name.substring(3));
@@ -158,8 +158,8 @@ public final class BeanInfoUtils {
      */
     public static boolean hasAccessorAndMutator(final FieldMetadata field,
             final MemberDetails memberDetails) {
-        Assert.notNull(field, "Field required");
-        Assert.notNull(memberDetails, "Member details required");
+        Validate.notNull(field, "Field required");
+        Validate.notNull(memberDetails, "Member details required");
 
         if (memberDetails.getMethod(getAccessorMethodName(field),
                 new ArrayList<JavaType>()) != null
@@ -179,7 +179,7 @@ public final class BeanInfoUtils {
      * @return true if the presented method is an accessor, otherwise false
      */
     public static boolean isAccessorMethod(final MethodMetadata method) {
-        Assert.notNull(method, "Method is required");
+        Validate.notNull(method, "Method is required");
         return (method.getMethodName().getSymbolName().startsWith("get") || method
                 .getMethodName().getSymbolName().startsWith("is"))
                 && method.getParameterTypes().isEmpty()
@@ -193,7 +193,7 @@ public final class BeanInfoUtils {
      * @return true if the entity is likely not a test class, otherwise false
      */
     public static boolean isEntityReasonablyNamed(final JavaType entity) {
-        Assert.notNull(entity, "Entity required");
+        Validate.notNull(entity, "Entity required");
         return !entity.getSimpleTypeName().startsWith("Test")
                 && !entity.getSimpleTypeName().endsWith("TestCase")
                 && !entity.getSimpleTypeName().endsWith("Test");
@@ -207,7 +207,7 @@ public final class BeanInfoUtils {
      * @return true if the presented method is a mutator, otherwise false
      */
     public static boolean isMutatorMethod(final MethodMetadata method) {
-        Assert.notNull(method, "Method is required");
+        Validate.notNull(method, "Method is required");
         return method.getMethodName().getSymbolName().startsWith("set")
                 && method.getParameterTypes().size() == 1
                 && Modifier.isPublic(method.getModifier());

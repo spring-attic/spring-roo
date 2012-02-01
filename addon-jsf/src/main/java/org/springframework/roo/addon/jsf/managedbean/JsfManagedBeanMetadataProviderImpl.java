@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -62,7 +63,6 @@ import org.springframework.roo.model.CustomDataBuilder;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.LogicalPath;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Implementation of {@link JsfManagedBeanMetadataProvider}.
@@ -262,7 +262,7 @@ public class JsfManagedBeanMetadataProviderImpl extends
                 .getPath(physicalTypeIdentifier);
         final PluralMetadata pluralMetadata = (PluralMetadata) metadataService
                 .get(PluralMetadata.createIdentifier(entity, path));
-        Assert.notNull(pluralMetadata, "Could not determine plural for '"
+        Validate.notNull(pluralMetadata, "Could not determine plural for '"
                 + entity.getSimpleTypeName() + "'");
         final String plural = pluralMetadata.getPlural();
 

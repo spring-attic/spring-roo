@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.BeanInfoUtils;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
@@ -25,7 +26,6 @@ import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.JdkJavaType;
 import org.springframework.roo.support.style.ToStringCreator;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Abstract implementation of {@link ItdTypeDetailsProvidingMetadataItem}, which
@@ -67,8 +67,8 @@ public abstract class AbstractItdTypeDetailsProvidingMetadataItem extends
             final String identifier, final JavaType aspectName,
             final PhysicalTypeMetadata governorPhysicalTypeMetadata) {
         super(identifier);
-        Assert.notNull(aspectName, "Aspect name required");
-        Assert.notNull(governorPhysicalTypeMetadata,
+        Validate.notNull(aspectName, "Aspect name required");
+        Validate.notNull(governorPhysicalTypeMetadata,
                 "Governor physical type metadata required");
 
         this.aspectName = aspectName;

@@ -1,11 +1,11 @@
 package org.springframework.roo.classpath.details;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.itd.ItdMetadataProvider;
 import org.springframework.roo.metadata.AbstractMetadataItem;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * The default {@link PhysicalTypeMetadata} implementation.
@@ -31,13 +31,13 @@ public class DefaultPhysicalTypeMetadata extends AbstractMetadataItem implements
             final String physicalLocationCanonicalPath,
             final ClassOrInterfaceTypeDetails cid) {
         super(metadataIdentificationString);
-        Assert.isTrue(
+        Validate.isTrue(
                 PhysicalTypeIdentifier.isValid(metadataIdentificationString),
                 "Metadata id '" + metadataIdentificationString
                         + "' is not a valid physical type identifier");
-        Assert.hasText(physicalLocationCanonicalPath,
+        Validate.notBlank(physicalLocationCanonicalPath,
                 "Physical location canonical path required");
-        Assert.notNull(cid, "Class or interface type details required");
+        Validate.notNull(cid, "Class or interface type details required");
         this.cid = cid;
         this.physicalLocationCanonicalPath = physicalLocationCanonicalPath;
     }
@@ -48,16 +48,16 @@ public class DefaultPhysicalTypeMetadata extends AbstractMetadataItem implements
     }
 
     public String getItdCanonicalPath(final ItdMetadataProvider metadataProvider) {
-        Assert.notNull(metadataProvider, "Metadata provider required");
+        Validate.notNull(metadataProvider, "Metadata provider required");
         final int dropFrom = physicalLocationCanonicalPath.lastIndexOf(".java");
-        Assert.isTrue(dropFrom > -1, "Unexpected governor filename format '"
+        Validate.isTrue(dropFrom > -1, "Unexpected governor filename format '"
                 + physicalLocationCanonicalPath + "'");
         return physicalLocationCanonicalPath.substring(0, dropFrom) + "_Roo_"
                 + metadataProvider.getItdUniquenessFilenameSuffix() + ".aj";
     }
 
     public JavaType getItdJavaType(final ItdMetadataProvider metadataProvider) {
-        Assert.notNull(metadataProvider, "Metadata provider required");
+        Validate.notNull(metadataProvider, "Metadata provider required");
         return new JavaType(PhysicalTypeIdentifier.getJavaType(getId())
                 .getFullyQualifiedTypeName()
                 + "_Roo_"

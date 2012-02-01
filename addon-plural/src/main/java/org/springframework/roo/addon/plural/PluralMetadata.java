@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.jvnet.inflector.Noun;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
@@ -19,8 +21,6 @@ import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.support.style.ToStringCreator;
-import org.springframework.roo.support.util.Assert;
-import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Metadata for {@link RooPlural}.
@@ -78,7 +78,7 @@ public class PluralMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
             final PhysicalTypeMetadata governorPhysicalTypeMetadata,
             final PluralAnnotationValues pluralAnnotation) {
         super(identifier, aspectName, governorPhysicalTypeMetadata);
-        Assert.isTrue(isValid(identifier), "Metadata id '" + identifier
+        Validate.isTrue(isValid(identifier), "Metadata id '" + identifier
                 + "' is invalid");
 
         if (!isValid()) {
@@ -135,7 +135,7 @@ public class PluralMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
      *         (never returns null or an empty string)
      */
     public String getPlural(final FieldMetadata field) {
-        Assert.notNull(field, "Field required");
+        Validate.notNull(field, "Field required");
         // Obtain the plural from the cache, if available
         final String symbolName = field.getFieldName().getSymbolName();
         if (cache != null && cache.containsKey(symbolName)) {
@@ -171,7 +171,7 @@ public class PluralMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
     }
 
     private String getPlural(final PluralAnnotationValues pluralAnnotation) {
-        if (StringUtils.hasText(pluralAnnotation.getValue())) {
+        if (StringUtils.isNotBlank(pluralAnnotation.getValue())) {
             return pluralAnnotation.getValue();
         }
         return getInflectorPlural(destination.getSimpleTypeName(),

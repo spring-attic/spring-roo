@@ -1,6 +1,6 @@
 package org.springframework.roo.metadata;
 
-import org.springframework.roo.support.util.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * Utility methods relating to metadata identification strings.

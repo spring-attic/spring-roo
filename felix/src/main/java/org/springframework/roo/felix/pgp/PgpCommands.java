@@ -17,7 +17,6 @@ import org.bouncycastle.util.encoders.Hex;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
 import org.springframework.roo.shell.CommandMarker;
-import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Enables a user to manage the Roo PGP keystore.
@@ -28,6 +27,9 @@ import org.springframework.roo.support.util.StringUtils;
 @Service
 @Component
 public class PgpCommands implements CommandMarker {
+
+    private static final String LINE_SEPARATOR = System
+            .getProperty("line.separator");
 
     private static String getAlgorithm(final int algId) {
         switch (algId) {
@@ -56,7 +58,7 @@ public class PgpCommands implements CommandMarker {
     @Reference PgpService pgpService;
 
     private void appendLine(final StringBuilder sb, final String line) {
-        sb.append(line).append(StringUtils.LINE_SEPARATOR);
+        sb.append(line).append(LINE_SEPARATOR);
     }
 
     @CliCommand(value = "pgp automatic trust", help = "Indicates to automatically trust all keys encountered until the command is invoked again")

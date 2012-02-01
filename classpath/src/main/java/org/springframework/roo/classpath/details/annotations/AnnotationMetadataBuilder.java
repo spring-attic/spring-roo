@@ -18,11 +18,11 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.model.Builder;
 import org.springframework.roo.model.EnumDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Builder for {@link AnnotationMetadata}.
@@ -101,7 +101,7 @@ public class AnnotationMetadataBuilder implements Builder<AnnotationMetadata> {
      * @param existing required
      */
     public AnnotationMetadataBuilder(final AnnotationMetadata existing) {
-        Assert.notNull(existing);
+        Validate.notNull(existing);
         annotationType = existing.getAnnotationType();
         for (final JavaSymbolName attributeName : existing.getAttributeNames()) {
             attributeValues.put(attributeName.getSymbolName(),

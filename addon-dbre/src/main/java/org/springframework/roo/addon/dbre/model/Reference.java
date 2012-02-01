@@ -1,7 +1,7 @@
 package org.springframework.roo.addon.dbre.model;
 
-import org.springframework.roo.support.util.Assert;
-import org.springframework.roo.support.util.StringUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 
 /**
  * Represents a reference between a column in the local table and a column in
@@ -41,9 +41,9 @@ public class Reference {
      * Creates a new reference between the two given columns.
      */
     Reference(final String localColumnName, final String foreignColumnName) {
-        Assert.isTrue(StringUtils.hasText(localColumnName),
+        Validate.isTrue(StringUtils.isNotBlank(localColumnName),
                 "Foreign key reference local column name required");
-        Assert.isTrue(StringUtils.hasText(foreignColumnName),
+        Validate.isTrue(StringUtils.isNotBlank(foreignColumnName),
                 "Foreign key reference foreign column name required");
         this.localColumnName = localColumnName;
         this.foreignColumnName = foreignColumnName;

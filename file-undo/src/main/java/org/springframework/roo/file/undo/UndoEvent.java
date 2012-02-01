@@ -1,6 +1,6 @@
 package org.springframework.roo.file.undo;
 
-import org.springframework.roo.support.util.Assert;
+import org.apache.commons.lang3.Validate;
 
 /**
  * An event delivered to an {@link UndoListener}.
@@ -17,7 +17,7 @@ public class UndoEvent {
     private final UndoOperation operation;
 
     public UndoEvent(final UndoOperation operation) {
-        Assert.notNull(operation, "Operation required");
+        Validate.notNull(operation, "Operation required");
         this.operation = operation;
     }
 

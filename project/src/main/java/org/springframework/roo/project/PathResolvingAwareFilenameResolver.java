@@ -2,11 +2,11 @@ package org.springframework.roo.project;
 
 import java.io.File;
 
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.file.undo.FilenameResolver;
-import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileUtils;
 
 /**
@@ -22,7 +22,7 @@ public class PathResolvingAwareFilenameResolver implements FilenameResolver {
     @Reference private PathResolver pathResolver;
 
     public String getMeaningfulName(final File file) {
-        Assert.notNull(file, "File required");
+        Validate.notNull(file, "File required");
         return pathResolver.getFriendlyName(FileUtils.getCanonicalPath(file));
     }
 }

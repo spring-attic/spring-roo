@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
@@ -22,7 +23,6 @@ import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.metadata.MetadataItem;
 import org.springframework.roo.metadata.MetadataProvider;
 import org.springframework.roo.metadata.MetadataService;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Default implementation of {@link MemberDetailsScanner}.
@@ -80,9 +80,10 @@ public class MemberDetailsScannerImpl implements MemberDetailsScanner {
 
     protected void bindMetadataProvider(final MetadataProvider mp) {
         synchronized (lock) {
-            Assert.notNull(mp, "Metadata provider required");
+            Validate.notNull(mp, "Metadata provider required");
             final String mid = mp.getProvidesType();
-            Assert.isTrue(MetadataIdentificationUtils.isIdentifyingClass(mid),
+            Validate.isTrue(
+                    MetadataIdentificationUtils.isIdentifyingClass(mid),
                     "Metadata provider '" + mp
                             + "' violated interface contract by returning '"
                             + mid + "'");
@@ -133,7 +134,7 @@ public class MemberDetailsScannerImpl implements MemberDetailsScanner {
                     final String key = ((ItdMetadataProvider) mp)
                             .getIdForPhysicalJavaType(currentClass
                                     .getDeclaredByMetadataId());
-                    Assert.isTrue(MetadataIdentificationUtils
+                    Validate.isTrue(MetadataIdentificationUtils
                             .isIdentifyingInstance(key),
                             "ITD metadata provider '" + mp
                                     + "' returned an illegal key ('" + key
@@ -145,7 +146,7 @@ public class MemberDetailsScannerImpl implements MemberDetailsScanner {
                     if (metadataItem == null || !metadataItem.isValid()) {
                         continue;
                     }
-                    Assert.isInstanceOf(
+                    Validate.isInstanceOf(
                             ItdTypeDetailsProvidingMetadataItem.class,
                             metadataItem,
                             "ITD metadata provider '"
@@ -174,7 +175,7 @@ public class MemberDetailsScannerImpl implements MemberDetailsScanner {
                 for (final MemberDetailsDecorator decorator : decorators) {
                     final MemberDetails newResult = decorator.decorate(
                             requestingClass, result);
-                    Assert.isTrue(newResult != null, "Decorator '"
+                    Validate.isTrue(newResult != null, "Decorator '"
                             + decorator.getClass().getName()
                             + "' returned an illegal result");
                     if (newResult != null && !newResult.equals(result)) {
@@ -197,7 +198,7 @@ public class MemberDetailsScannerImpl implements MemberDetailsScanner {
 
     protected void unbindMetadataProvider(final MetadataProvider mp) {
         synchronized (lock) {
-            Assert.notNull(mp, "Metadata provider required");
+            Validate.notNull(mp, "Metadata provider required");
             providers.remove(mp);
         }
     }

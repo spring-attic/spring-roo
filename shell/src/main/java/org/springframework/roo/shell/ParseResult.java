@@ -3,9 +3,9 @@ package org.springframework.roo.shell;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.support.style.ToStringCreator;
-import org.springframework.roo.support.util.Assert;
-import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Immutable representation of the outcome of parsing a given shell line.
@@ -26,12 +26,12 @@ public class ParseResult {
 
     public ParseResult(final Method method, final Object instance,
             final Object[] arguments) {
-        Assert.notNull(method, "Method required");
-        Assert.notNull(instance, "Instance required");
+        Validate.notNull(method, "Method required");
+        Validate.notNull(instance, "Instance required");
         final int length = arguments == null ? 0 : arguments.length;
-        Assert.isTrue(method.getParameterTypes().length == length, "Required "
-                + method.getParameterTypes().length
-                + " arguments, but received " + length);
+        Validate.isTrue(method.getParameterTypes().length == length,
+                "Required " + method.getParameterTypes().length
+                        + " arguments, but received " + length);
         this.method = method;
         this.instance = instance;
         this.arguments = arguments;
@@ -98,8 +98,7 @@ public class ParseResult {
         final ToStringCreator tsc = new ToStringCreator(this);
         tsc.append("method", method);
         tsc.append("instance", instance);
-        tsc.append("arguments",
-                StringUtils.arrayToCommaDelimitedString(arguments));
+        tsc.append("arguments", StringUtils.join(arguments, ","));
         return tsc.toString();
     }
 }

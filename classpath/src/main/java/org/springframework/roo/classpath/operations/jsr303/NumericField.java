@@ -7,6 +7,7 @@ import static org.springframework.roo.model.Jsr303JavaType.MIN;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.IntegerAttributeValue;
@@ -14,7 +15,6 @@ import org.springframework.roo.classpath.details.annotations.LongAttributeValue;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.JdkJavaType;
-import org.springframework.roo.support.util.Assert;
 
 public class NumericField extends StringOrNumericField {
 
@@ -55,7 +55,7 @@ public class NumericField extends StringOrNumericField {
             attrs.add(new LongAttributeValue(new JavaSymbolName("value"), max));
             annotations.add(new AnnotationMetadataBuilder(MAX, attrs));
         }
-        Assert.isTrue(isDigitsSetCorrectly(),
+        Validate.isTrue(isDigitsSetCorrectly(),
                 "Validation constraints for @Digit are not correctly set");
         if (digitsInteger != null) {
             final List<AnnotationAttributeValue<?>> attrs = new ArrayList<AnnotationAttributeValue<?>>();

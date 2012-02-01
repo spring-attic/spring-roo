@@ -10,6 +10,7 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -31,7 +32,6 @@ import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.shell.converters.StaticFieldConverter;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * OSGi implementation of {@link ClasspathOperations}.
@@ -144,14 +144,14 @@ public class ClasspathOperationsImpl implements ClasspathOperations {
     }
 
     public void focus(final JavaType type) {
-        Assert.notNull(type, "Specify the type to focus on");
+        Validate.notNull(type, "Specify the type to focus on");
         final String physicalTypeIdentifier = typeLocationService
                 .getPhysicalTypeIdentifier(type);
-        Assert.notNull(physicalTypeIdentifier,
-                "Cannot locate the type " + type.getFullyQualifiedTypeName());
+        Validate.notNull(physicalTypeIdentifier, "Cannot locate the type "
+                + type.getFullyQualifiedTypeName());
         final PhysicalTypeMetadata ptm = (PhysicalTypeMetadata) metadataService
                 .get(physicalTypeIdentifier);
-        Assert.notNull(
+        Validate.notNull(
                 ptm,
                 "Class "
                         + PhysicalTypeIdentifier

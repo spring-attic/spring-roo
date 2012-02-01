@@ -1,10 +1,10 @@
 package org.springframework.roo.project;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.file.monitor.FileMonitorService;
 import org.springframework.roo.file.monitor.MonitoringRequest;
 import org.springframework.roo.file.undo.UndoManager;
 import org.springframework.roo.file.undo.UndoableOperation;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Allows {@link org.springframework.roo.file.monitor.MonitoringRequest}s to be
@@ -23,9 +23,9 @@ public class UndoableMonitoringRequest implements UndoableOperation {
     public UndoableMonitoringRequest(final UndoManager undoManager,
             final FileMonitorService fileMonitorService,
             final MonitoringRequest monitoringRequest, final boolean add) {
-        Assert.notNull(undoManager, "Undo manager required");
-        Assert.notNull(fileMonitorService, "File monitor service required");
-        Assert.notNull(monitoringRequest, "Request required");
+        Validate.notNull(undoManager, "Undo manager required");
+        Validate.notNull(fileMonitorService, "File monitor service required");
+        Validate.notNull(monitoringRequest, "Request required");
         this.fileMonitorService = fileMonitorService;
         this.monitoringRequest = monitoringRequest;
         this.add = add;

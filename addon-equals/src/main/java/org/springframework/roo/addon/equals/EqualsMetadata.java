@@ -8,6 +8,7 @@ import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.FieldMetadata;
@@ -20,7 +21,6 @@ import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.support.style.ToStringCreator;
-import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.CollectionUtils;
 
 /**
@@ -95,9 +95,9 @@ public class EqualsMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
             final EqualsAnnotationValues annotationValues,
             final List<FieldMetadata> equalityFields) {
         super(identifier, aspectName, governorPhysicalTypeMetadata);
-        Assert.isTrue(isValid(identifier), "Metadata id '" + identifier
+        Validate.isTrue(isValid(identifier), "Metadata id '" + identifier
                 + "' is invalid");
-        Assert.notNull(annotationValues, "Annotation values required");
+        Validate.notNull(annotationValues, "Annotation values required");
 
         this.annotationValues = annotationValues;
         locatedFields = equalityFields;

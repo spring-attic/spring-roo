@@ -79,6 +79,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.customdata.CustomDataKeys;
@@ -105,9 +108,6 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.JdkJavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.support.style.ToStringCreator;
-import org.springframework.roo.support.util.Assert;
-import org.springframework.roo.support.util.NumberUtils;
-import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Metadata for {@link RooJsfManagedBean}.
@@ -169,17 +169,11 @@ public class JsfManagedBeanMetadata extends
     }
 
     private String beanName;
-
     private final List<FieldMetadataBuilder> builderFields = new ArrayList<FieldMetadataBuilder>();;
-
     private final List<MethodMetadataBuilder> builderMethods = new ArrayList<MethodMetadataBuilder>();
-
     private JavaType entity;
-
     private JavaSymbolName entityName;
-
     private Set<FieldMetadata> locatedFields;
-
     private String plural;
 
     public JsfManagedBeanMetadata(
@@ -192,12 +186,12 @@ public class JsfManagedBeanMetadata extends
             final Set<FieldMetadata> locatedFields,
             final MethodMetadata identifierAccessor) {
         super(identifier, aspectName, governorPhysicalTypeMetadata);
-        Assert.isTrue(isValid(identifier), "Metadata identification string '"
+        Validate.isTrue(isValid(identifier), "Metadata identification string '"
                 + identifier + "' is invalid");
-        Assert.notNull(annotationValues, "Annotation values required");
-        Assert.isTrue(StringUtils.hasText(plural), "Plural required");
-        Assert.notNull(crudAdditions, "Crud additions map required");
-        Assert.notNull(locatedFields, "Located fields required");
+        Validate.notNull(annotationValues, "Annotation values required");
+        Validate.isTrue(StringUtils.isNotBlank(plural), "Plural required");
+        Validate.notNull(crudAdditions, "Crud additions map required");
+        Validate.notNull(locatedFields, "Located fields required");
 
         if (!isValid()) {
             return;
@@ -359,7 +353,7 @@ public class JsfManagedBeanMetadata extends
                 final String contentType = (String) annotation.getAttribute(
                         "contentType").getValue();
                 final String fileExtension = StringUtils
-                        .toLowerCase(UploadedFileContentType.getFileExtension(
+                        .lowerCase(UploadedFileContentType.getFileExtension(
                                 contentType).name());
 
                 final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
@@ -810,7 +804,7 @@ public class JsfManagedBeanMetadata extends
         return annotationBuilder.build();
     }
 
-    private BigDecimal getMinOrMax(final FieldMetadata field,
+    private BigDecimal getMinOrMaxValue(final FieldMetadata field,
             final JavaType annotationType) {
         final AnnotationMetadata annotation = MemberFindingUtils
                 .getAnnotationOfType(field.getAnnotations(), annotationType);
@@ -862,7 +856,7 @@ public class JsfManagedBeanMetadata extends
     }
 
     private MethodMetadataBuilder getPanelGridAccessorMethod(final Action action) {
-        final String fieldName = StringUtils.toLowerCase(action.name())
+        final String fieldName = StringUtils.lowerCase(action.name())
                 + "PanelGrid";
         final JavaSymbolName methodName = BeanInfoUtils.getAccessorMethodName(
                 new JavaSymbolName(fieldName), HTML_PANEL_GRID);
@@ -898,13 +892,13 @@ public class JsfManagedBeanMetadata extends
 
     private FieldMetadataBuilder getPanelGridField(final Action panelType) {
         return getField(
-                new JavaSymbolName(StringUtils.toLowerCase(panelType.name())
+                new JavaSymbolName(StringUtils.lowerCase(panelType.name())
                         + "PanelGrid"), HTML_PANEL_GRID);
     }
 
     private MethodMetadataBuilder getPanelGridMutatorMethod(final Action action) {
         return getMutatorMethod(
-                new JavaSymbolName(StringUtils.toLowerCase(action.name())
+                new JavaSymbolName(StringUtils.lowerCase(action.name())
                         + "PanelGrid"), HTML_PANEL_GRID);
     }
 
@@ -1024,13 +1018,15 @@ public class JsfManagedBeanMetadata extends
             final String fieldName = field.getFieldName().getSymbolName();
             final String fieldLabelId = fieldName + suffix1;
 
-            final BigDecimal minValue = NumberUtils.max(
-                    getMinOrMax(field, MIN), getMinOrMax(field, DECIMAL_MIN));
-            final BigDecimal maxValue = NumberUtils.min(
-                    getMinOrMax(field, MAX), getMinOrMax(field, DECIMAL_MAX));
+            final BigDecimal minValue = ObjectUtils.max(
+                    getMinOrMaxValue(field, MIN),
+                    getMinOrMaxValue(field, DECIMAL_MIN));
+            final BigDecimal maxValue = ObjectUtils.min(
+                    getMinOrMaxValue(field, MAX),
+                    getMinOrMaxValue(field, DECIMAL_MAX));
             final Integer sizeMinValue = getSizeMinOrMax(field, "min");
-            final BigDecimal sizeMaxValue = NumberUtils.min(
-                    getSizeMinOrMax(field, "max"), getColumnLength(field));
+            final BigDecimal sizeMaxValue = new BigDecimal(ObjectUtils.min(
+                    getSizeMinOrMax(field, "max"), getColumnLength(field)));
             final boolean required = action != Action.VIEW
                     && (!isNullable(field) || minValue != null
                             || maxValue != null || sizeMinValue != null || sizeMaxValue != null);
@@ -1367,7 +1363,7 @@ public class JsfManagedBeanMetadata extends
                 final String parameterTypePlural = (String) customData
                         .get(PARAMETER_TYPE_PLURAL_KEY);
 
-                if (StringUtils.hasText(parameterTypeManagedBeanName)) {
+                if (StringUtils.isNotBlank(parameterTypeManagedBeanName)) {
                     if (customData.keySet().contains(ONE_TO_MANY_FIELD)
                             || customData.keySet().contains(MANY_TO_MANY_FIELD)
                             && isInverseSideOfRelationship(field, ONE_TO_MANY,

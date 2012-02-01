@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.support.style.ToStringCreator;
-import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.DomUtils;
-import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -35,7 +35,7 @@ public class Resource implements Comparable<Resource> {
     public Resource(final Element resource) {
         final Element directoryElement = XmlUtils.findFirstElement("directory",
                 resource);
-        Assert.notNull(directoryElement, "directory element required");
+        Validate.notNull(directoryElement, "directory element required");
         directory = directoryElement.getTextContent();
 
         final Element filteringElement = XmlUtils.findFirstElement("filtering",
@@ -69,7 +69,7 @@ public class Resource implements Comparable<Resource> {
      */
     public Resource(final String directory, final Boolean filtering,
             final Collection<String> includes) {
-        Assert.notNull(directory, "Directory required");
+        Validate.notNull(directory, "Directory required");
         this.directory = directory;
         this.filtering = filtering;
         if (includes != null) {
@@ -147,7 +147,7 @@ public class Resource implements Comparable<Resource> {
         }
         if (!includes.isEmpty()) {
             builder.append(", includes ").append(
-                    StringUtils.collectionToCommaDelimitedString(includes));
+                    StringUtils.join(includes, ","));
         }
         return builder.toString();
     }

@@ -13,6 +13,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -45,10 +47,8 @@ import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.osgi.BundleFindingUtils;
-import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.Pair;
-import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlUtils;
 import org.springframework.roo.uaa.UaaRegistrationService;
@@ -82,20 +82,21 @@ public class JspOperationsImpl extends AbstractOperations implements
      */
     static Pair<String, String> getFolderAndMapping(
             final String preferredMapping, final JavaType controller) {
-        if (StringUtils.hasText(preferredMapping)) {
-            String folderName = StringUtils.removePrefix(preferredMapping, "/");
-            folderName = StringUtils.removeSuffix(folderName, "**");
-            folderName = StringUtils.removeSuffix(folderName, "/");
+        if (StringUtils.isNotBlank(preferredMapping)) {
+            String folderName = StringUtils.removeStart(preferredMapping, "/");
+            folderName = StringUtils.removeEnd(folderName, "**");
+            folderName = StringUtils.removeEnd(folderName, "/");
 
-            String mapping = StringUtils.prefix(preferredMapping, "/");
-            mapping = StringUtils.removeSuffix(mapping, "/");
-            mapping = StringUtils.suffix(mapping, "/**");
+            String mapping = (preferredMapping.startsWith("/") ? "" : "/")
+                    + preferredMapping;
+            mapping = StringUtils.removeEnd(mapping, "/");
+            mapping = mapping + (mapping.endsWith("/**") ? "" : "/**");
 
             return new Pair<String, String>(folderName, mapping);
         }
 
         // Use sensible defaults
-        final String typeNameLower = StringUtils.removeSuffix(
+        final String typeNameLower = StringUtils.removeEnd(
                 controller.getSimpleTypeName(), "Controller").toLowerCase();
         return new Pair<String, String>(typeNameLower, "/" + typeNameLower
                 + "/**");
@@ -116,7 +117,7 @@ public class JspOperationsImpl extends AbstractOperations implements
         if ("/".equals(path)) {
             return "";
         }
-        path = StringUtils.prefix(path, "/");
+        path = "/" + path;
         if (path.contains(".")) {
             path = path.substring(0, path.indexOf(".") - 1);
         }
@@ -147,7 +148,7 @@ public class JspOperationsImpl extends AbstractOperations implements
      */
     public void createManualController(final JavaType controller,
             final String preferredMapping, final LogicalPath webappPath) {
-        Assert.notNull(controller, "Controller Java Type required");
+        Validate.notNull(controller, "Controller Java Type required");
 
         // Create annotation @RequestMapping("/myobject/**")
         final Pair<String, String> folderAndMapping = getFolderAndMapping(
@@ -258,7 +259,7 @@ public class JspOperationsImpl extends AbstractOperations implements
     }
 
     public void installCommonViewArtefacts(final String moduleName) {
-        Assert.isTrue(isProjectAvailable(), "Project metadata required");
+        Validate.isTrue(isProjectAvailable(), "Project metadata required");
         final LogicalPath webappPath = Path.SRC_MAIN_WEBAPP
                 .getModulePathId(moduleName);
         if (!isControllerAvailable()) {
@@ -341,7 +342,7 @@ public class JspOperationsImpl extends AbstractOperations implements
     }
 
     public void installI18n(final I18n i18n, final LogicalPath webappPath) {
-        Assert.notNull(i18n, "Language choice required");
+        Validate.notNull(i18n, "Language choice required");
 
         if (i18n.getLocale() == null) {
             LOGGER.warning("could not parse language choice");
@@ -474,9 +475,9 @@ public class JspOperationsImpl extends AbstractOperations implements
     private void installView(final String path, final String viewName,
             final String title, final String category, Document document,
             final boolean registerStaticController, final LogicalPath webappPath) {
-        Assert.hasText(path, "Path required");
-        Assert.hasText(viewName, "View name required");
-        Assert.hasText(title, "Title required");
+        Validate.notBlank(path, "Path required");
+        Validate.notBlank(viewName, "View name required");
+        Validate.notBlank(title, "Title required");
 
         final String cleanedPath = cleanPath(path);
         final String cleanedViewName = cleanViewName(viewName);
@@ -566,7 +567,7 @@ public class JspOperationsImpl extends AbstractOperations implements
         if (fileManager.exists(mvcConfig)) {
             final Document document = XmlUtils.readXml(fileManager
                     .getInputStream(mvcConfig));
-            final String prefixedUrl = StringUtils.prefix(relativeUrl, "/");
+            final String prefixedUrl = "/" + relativeUrl;
             if (XmlUtils.findFirstElement("/beans/view-controller[@path='"
                     + prefixedUrl + "']", document.getDocumentElement()) == null) {
                 final Element sibling = XmlUtils

@@ -1,7 +1,7 @@
 package org.springframework.roo.felix;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.support.style.ToStringCreator;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Provides display formats for the Felix "ps" command.
@@ -23,8 +23,8 @@ public class PsOptions implements Comparable<PsOptions> {
     private final String key;
 
     public PsOptions(final String key, final String felixCode) {
-        Assert.hasText(key, "Key required");
-        Assert.notNull(felixCode, "Felix code required");
+        Validate.notBlank(key, "Key required");
+        Validate.notNull(felixCode, "Felix code required");
         this.key = key;
         this.felixCode = felixCode;
     }

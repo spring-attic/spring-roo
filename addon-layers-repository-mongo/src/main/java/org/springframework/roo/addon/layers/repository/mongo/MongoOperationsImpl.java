@@ -12,6 +12,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -43,9 +45,7 @@ import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.Repository;
 import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.FileUtils;
-import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.XmlUtils;
-import org.springframework.uaa.client.util.Assert;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -72,8 +72,8 @@ public class MongoOperationsImpl implements MongoOperations {
 
     public void createType(final JavaType classType, final JavaType idType,
             final boolean testAutomatically) {
-        Assert.notNull(classType, "Class type required");
-        Assert.notNull(idType, "Identifier type required");
+        Validate.notNull(classType, "Class type required");
+        Validate.notNull(idType, "Identifier type required");
 
         final String classIdentifier = typeLocationService
                 .getPhysicalTypeCanonicalPath(classType,
@@ -171,13 +171,13 @@ public class MongoOperationsImpl implements MongoOperations {
                 mongoSetup = document.createElement("mongo:db-factory");
                 root.appendChild(mongoSetup);
             }
-            if (StringUtils.hasText(name)) {
+            if (StringUtils.isNotBlank(name)) {
                 mongoSetup.setAttribute("dbname", "${mongo.database}");
             }
-            if (StringUtils.hasText(username)) {
+            if (StringUtils.isNotBlank(username)) {
                 mongoSetup.setAttribute("username", "${mongo.username}");
             }
-            if (StringUtils.hasText(password)) {
+            if (StringUtils.isNotBlank(password)) {
                 mongoSetup.setAttribute("password", "${mongo.password}");
             }
             mongoSetup.setAttribute("host", "${mongo.host}");
@@ -237,8 +237,8 @@ public class MongoOperationsImpl implements MongoOperations {
 
     public void setupRepository(final JavaType interfaceType,
             final JavaType domainType) {
-        Assert.notNull(interfaceType, "Interface type required");
-        Assert.notNull(domainType, "Domain type required");
+        Validate.notNull(interfaceType, "Interface type required");
+        Validate.notNull(domainType, "Domain type required");
 
         final String interfaceIdentifier = pathResolver
                 .getFocusedCanonicalPath(Path.SRC_MAIN_JAVA, interfaceType);

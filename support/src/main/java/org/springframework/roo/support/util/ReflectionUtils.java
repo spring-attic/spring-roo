@@ -26,6 +26,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.lang3.Validate;
+
 /**
  * Simple utility class for working with the reflection API and handling
  * reflection exceptions.
@@ -119,7 +121,7 @@ public abstract class ReflectionUtils {
      */
     public static boolean declaresException(final Method method,
             final Class<?> exceptionType) {
-        Assert.notNull(method, "Method must not be null");
+        Validate.notNull(method, "Method must not be null");
         final Class<?>[] declaredExceptions = method.getExceptionTypes();
         for (final Class<?> declaredException : declaredExceptions) {
             if (declaredException.isAssignableFrom(exceptionType)) {
@@ -252,8 +254,8 @@ public abstract class ReflectionUtils {
      */
     public static Field findField(final Class<?> clazz, final String name,
             final Class<?> type) {
-        Assert.notNull(clazz, "Class must not be null");
-        Assert.isTrue(name != null || type != null,
+        Validate.notNull(clazz, "Class must not be null");
+        Validate.isTrue(name != null || type != null,
                 "Either name or type of the field must be specified");
         Class<?> searchType = clazz;
         while (!Object.class.equals(searchType) && searchType != null) {
@@ -299,8 +301,8 @@ public abstract class ReflectionUtils {
      */
     public static Method findMethod(final Class<?> clazz, final String name,
             final Class<?>[] parameterTypes) {
-        Assert.notNull(clazz, "Class must not be null");
-        Assert.notNull(name, "Method name must not be null");
+        Validate.notNull(clazz, "Class must not be null");
+        Validate.notNull(name, "Method name must not be null");
         Class<?> searchType = clazz;
         while (!Object.class.equals(searchType) && searchType != null) {
             final Method[] methods = searchType.isInterface() ? searchType

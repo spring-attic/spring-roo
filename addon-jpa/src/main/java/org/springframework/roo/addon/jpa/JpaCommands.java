@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.SortedSet;
 import java.util.logging.Logger;
 
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -34,7 +35,6 @@ import org.springframework.roo.shell.CliOption;
 import org.springframework.roo.shell.CommandMarker;
 import org.springframework.roo.shell.converters.StaticFieldConverter;
 import org.springframework.roo.support.logging.HandlerUtils;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Commands for the JPA add-on to be used by the ROO shell.
@@ -329,7 +329,7 @@ public class JpaCommands implements CommandMarker {
             @CliOption(key = "entityName", mandatory = false, help = "The name used to refer to the entity in queries") final String entityName,
             @CliOption(key = "sequenceName", mandatory = false, help = "The name of the sequence for incrementing sequence-driven primary keys") final String sequenceName,
             @CliOption(key = "activeRecord", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "true", help = "Generate CRUD active record methods for this entity") final boolean activeRecord) {
-        Assert.isTrue(!identifierType.isPrimitive(),
+        Validate.isTrue(!identifierType.isPrimitive(),
                 "Identifier type cannot be a primitive");
 
         if (!permitReservedWords) {

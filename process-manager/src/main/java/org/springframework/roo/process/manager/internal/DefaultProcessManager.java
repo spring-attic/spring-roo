@@ -3,6 +3,8 @@ package org.springframework.roo.process.manager.internal;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -21,8 +23,6 @@ import org.springframework.roo.process.manager.event.AbstractProcessManagerStatu
 import org.springframework.roo.process.manager.event.ProcessManagerStatus;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.osgi.OSGiUtils;
-import org.springframework.roo.support.util.Assert;
-import org.springframework.roo.support.util.ExceptionUtils;
 
 /**
  * Default implementation of {@link ProcessManager} interface.
@@ -212,11 +212,11 @@ public class DefaultProcessManager extends
     }
 
     public <T> T execute(final CommandCallback<T> callback) {
-        Assert.notNull(callback, "Callback required");
+        Validate.notNull(callback, "Callback required");
         synchronized (processManagerStatus) {
             // For us to acquire this lock means no other thread has hold of
             // process manager status
-            Assert.isTrue(
+            Validate.isTrue(
                     getProcessManagerStatus() == ProcessManagerStatus.AVAILABLE
                             || getProcessManagerStatus() == ProcessManagerStatus.BUSY_EXECUTING,
                     "Unable to execute as another thread has set status to "
@@ -256,7 +256,7 @@ public class DefaultProcessManager extends
     }
 
     private void logException(final Throwable t) {
-        final Throwable root = ExceptionUtils.extractRootCause(t);
+        final Throwable root = ExceptionUtils.getRootCause(t);
         if (developmentMode) {
             LOGGER.log(Level.FINE, root.getMessage(), root);
         }

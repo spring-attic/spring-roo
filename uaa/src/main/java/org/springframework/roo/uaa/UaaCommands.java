@@ -14,7 +14,6 @@ import org.springframework.roo.shell.CommandMarker;
 import org.springframework.roo.shell.converters.StaticFieldConverter;
 import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.MessageDisplayUtils;
-import org.springframework.roo.support.util.StringUtils;
 import org.springframework.uaa.client.UaaService;
 import org.springframework.uaa.client.protobuf.UaaClient.Privacy.PrivacyLevel;
 
@@ -28,6 +27,9 @@ import org.springframework.uaa.client.protobuf.UaaClient.Privacy.PrivacyLevel;
 @Service
 @Component
 public class UaaCommands implements CommandMarker {
+
+    private static final String LINE_SEPARATOR = System
+            .getProperty("line.separator");
 
     @Reference private StaticFieldConverter staticFieldConverter;
     @Reference private UaaRegistrationService uaaRegistrationService;
@@ -89,12 +91,10 @@ public class UaaCommands implements CommandMarker {
         sb.append("Output for privacy level ")
                 .append(uaaService.getPrivacyLevel()).append(" (last changed ")
                 .append(uaaService.getPrivacyLevelLastChanged()).append(")")
-                .append(StringUtils.LINE_SEPARATOR)
-                .append(StringUtils.LINE_SEPARATOR);
+                .append(LINE_SEPARATOR).append(LINE_SEPARATOR);
 
         sb.append(readablePayload);
-        sb.append(StringUtils.LINE_SEPARATOR)
-                .append(StringUtils.LINE_SEPARATOR);
+        sb.append(LINE_SEPARATOR).append(LINE_SEPARATOR);
 
         if (file != null) {
             try {

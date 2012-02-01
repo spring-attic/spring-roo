@@ -6,7 +6,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.springframework.roo.support.util.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Node;
 
@@ -17,6 +17,9 @@ import org.w3c.dom.Node;
  * @since 1.2.0
  */
 public abstract class XmlTestCase {
+
+    private static final String LINE_SEPARATOR = System
+            .getProperty("line.separator");
 
     /**
      * A builder for XML DOM documents.
@@ -45,12 +48,11 @@ public abstract class XmlTestCase {
             final Node actualNode) {
         // Replace the dummy line terminator with the platform-specific one that
         // will be applied by XmlUtils.nodeToString.
-        final String normalisedXml = expectedXml.replace("\n",
-                StringUtils.LINE_SEPARATOR);
+        final String normalisedXml = expectedXml.replace("\n", LINE_SEPARATOR);
         // Trim trailing whitespace as XmlUtils.nodeToString appends an extra
         // newline.
-        final String actualXml = StringUtils.trimTrailingWhitespace(XmlUtils
-                .nodeToString(actualNode));
+        final String actualXml = StringUtils.stripEnd(
+                XmlUtils.nodeToString(actualNode), null);
         assertEquals(normalisedXml, actualXml);
     }
 }

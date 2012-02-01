@@ -7,10 +7,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.file.monitor.NotifiableFileMonitorService;
 import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.support.style.ToStringCreator;
-import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileUtils;
 
 /**
@@ -28,11 +28,11 @@ public class DefaultMutableFile implements MutableFile {
     public DefaultMutableFile(final File file,
             final NotifiableFileMonitorService fileMonitorService,
             final ManagedMessageRenderer managedMessageRenderer) {
-        Assert.notNull(file, "File required");
-        Assert.notNull(managedMessageRenderer, "Message renderer required");
-        Assert.isTrue(file.isFile(),
+        Validate.notNull(file, "File required");
+        Validate.notNull(managedMessageRenderer, "Message renderer required");
+        Validate.isTrue(file.isFile(),
                 "A mutable file must actually be a file (not a directory)");
-        Assert.isTrue(file.exists(), "A mutable file must actually exist");
+        Validate.isTrue(file.exists(), "A mutable file must actually exist");
         this.file = file;
         this.managedMessageRenderer = managedMessageRenderer;
         // null is permitted
@@ -46,9 +46,9 @@ public class DefaultMutableFile implements MutableFile {
     public InputStream getInputStream() {
         // Do more checks, in case the file has changed since this instance was
         // constructed
-        Assert.isTrue(file.isFile(),
+        Validate.isTrue(file.isFile(),
                 "A mutable file must actually be a file (not a directory)");
-        Assert.isTrue(file.exists(), "A mutable file must actually exist");
+        Validate.isTrue(file.exists(), "A mutable file must actually exist");
         try {
             return new BufferedInputStream(new FileInputStream(file));
         }
@@ -62,9 +62,9 @@ public class DefaultMutableFile implements MutableFile {
     public OutputStream getOutputStream() {
         // Do more checks, in case the file has changed since this instance was
         // constructed
-        Assert.isTrue(file.isFile(),
+        Validate.isTrue(file.isFile(),
                 "A mutable file must actually be a file (not a directory)");
-        Assert.isTrue(file.exists(), "A mutable file must actually exist");
+        Validate.isTrue(file.exists(), "A mutable file must actually exist");
 
         try {
             return new MonitoredOutputStream(file, managedMessageRenderer,

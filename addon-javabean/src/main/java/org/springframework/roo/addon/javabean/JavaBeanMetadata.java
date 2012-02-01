@@ -20,6 +20,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.BeanInfoUtils;
@@ -38,8 +40,6 @@ import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.support.style.ToStringCreator;
-import org.springframework.roo.support.util.Assert;
-import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Metadata for {@link RooJavaBean}.
@@ -101,10 +101,10 @@ public class JavaBeanMetadata extends
             final JavaBeanAnnotationValues annotationValues,
             final Map<FieldMetadata, JavaSymbolName> declaredFields) {
         super(identifier, aspectName, governorPhysicalTypeMetadata);
-        Assert.isTrue(isValid(identifier), "Metadata identification string '"
+        Validate.isTrue(isValid(identifier), "Metadata identification string '"
                 + identifier + "' does not appear to be a valid");
-        Assert.notNull(annotationValues, "Annotation values required");
-        Assert.notNull(declaredFields, "Declared fields required");
+        Validate.notNull(annotationValues, "Annotation values required");
+        Validate.notNull(declaredFields, "Declared fields required");
 
         if (!isValid()) {
             return;
@@ -168,7 +168,7 @@ public class JavaBeanMetadata extends
      * @return the method corresponding to an accessor, or null if not found
      */
     private MethodMetadataBuilder getDeclaredGetter(final FieldMetadata field) {
-        Assert.notNull(field, "Field required");
+        Validate.notNull(field, "Field required");
 
         // Compute the mutator method name
         final JavaSymbolName methodName = BeanInfoUtils
@@ -206,7 +206,7 @@ public class JavaBeanMetadata extends
      * @return the method corresponding to a mutator, or null if not found
      */
     private MethodMetadataBuilder getDeclaredSetter(final FieldMetadata field) {
-        Assert.notNull(field, "Field required");
+        Validate.notNull(field, "Field required");
 
         // Compute the mutator method name
         final JavaSymbolName methodName = BeanInfoUtils

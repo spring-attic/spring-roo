@@ -23,6 +23,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
@@ -34,8 +36,6 @@ import org.springframework.roo.classpath.javaparser.JavaParserUtils;
 import org.springframework.roo.model.Builder;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.support.util.Assert;
-import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Java Parser implementation of {@link MethodMetadata}.
@@ -49,10 +49,10 @@ public class JavaParserMethodMetadataBuilder implements Builder<MethodMetadata> 
             final CompilationUnitServices compilationUnitServices,
             final List<BodyDeclaration> members, final MethodMetadata method,
             Set<JavaSymbolName> typeParameters) {
-        Assert.notNull(compilationUnitServices,
+        Validate.notNull(compilationUnitServices,
                 "Flushable compilation unit services required");
-        Assert.notNull(members, "Members required");
-        Assert.notNull(method, "Method required");
+        Validate.notNull(members, "Members required");
+        Validate.notNull(method, "Method required");
 
         if (typeParameters == null) {
             typeParameters = new HashSet<JavaSymbolName>();
@@ -323,9 +323,10 @@ public class JavaParserMethodMetadataBuilder implements Builder<MethodMetadata> 
             final MethodDeclaration methodDeclaration,
             final CompilationUnitServices compilationUnitServices,
             final Set<JavaSymbolName> typeParameters) {
-        Assert.hasText(declaredByMetadataId, "Declared by metadata ID required");
-        Assert.notNull(methodDeclaration, "Method declaration is mandatory");
-        Assert.notNull(compilationUnitServices,
+        Validate.notBlank(declaredByMetadataId,
+                "Declared by metadata ID required");
+        Validate.notNull(methodDeclaration, "Method declaration is mandatory");
+        Validate.notNull(compilationUnitServices,
                 "Compilation unit services are required");
 
         this.declaredByMetadataId = declaredByMetadataId;
@@ -360,7 +361,7 @@ public class JavaParserMethodMetadataBuilder implements Builder<MethodMetadata> 
         body = methodDeclaration.getBody() == null ? null : methodDeclaration
                 .getBody().toString();
         if (body != null) {
-            body = StringUtils.replaceFirst(body, "{", "");
+            body = StringUtils.replace(body, "{", "", 1);
             body = body.substring(0, body.lastIndexOf("}"));
         }
 

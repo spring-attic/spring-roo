@@ -1,10 +1,10 @@
 package org.springframework.roo.classpath;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Path;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Produces metadata identification strings that represent a {@link JavaType}
@@ -36,8 +36,8 @@ public final class PhysicalTypeIdentifierNamingUtils {
      */
     public static String createIdentifier(final String metadataClass,
             final JavaType projectType, final LogicalPath path) {
-        Assert.notNull(projectType, "Java type required");
-        Assert.notNull(path, "Path required");
+        Validate.notNull(projectType, "Java type required");
+        Validate.notNull(path, "Path required");
         return MetadataIdentificationUtils.create(metadataClass, path.getName()
                 + PATH_SUFFIX + projectType.getFullyQualifiedTypeName());
     }
@@ -54,14 +54,14 @@ public final class PhysicalTypeIdentifierNamingUtils {
      */
     private static String getInstanceKey(final String metadataClass,
             final String metadataId) {
-        Assert.isTrue(isValid(metadataClass, metadataId), "Metadata id '"
+        Validate.isTrue(isValid(metadataClass, metadataId), "Metadata id '"
                 + metadataId + "' is not a valid " + metadataClass
                 + " identifier");
         return MetadataIdentificationUtils.getMetadataInstance(metadataId);
     }
 
     public static JavaType getJavaType(final String metadataIdentificationString) {
-        Assert.isTrue(metadataIdentificationString.contains("#"),
+        Validate.isTrue(metadataIdentificationString.contains("#"),
                 "Metadata identification string '"
                         + metadataIdentificationString
                         + "' does not appear to be a valid identifier");
@@ -108,7 +108,7 @@ public final class PhysicalTypeIdentifierNamingUtils {
      * @return a non-<code>null</code> path
      */
     public static LogicalPath getPath(final String metadataId) {
-        Assert.isTrue(
+        Validate.isTrue(
                 MetadataIdentificationUtils.isIdentifyingInstance(metadataId),
                 "Metadata id '" + metadataId
                         + "' does not appear to be a valid identifier");
@@ -129,7 +129,7 @@ public final class PhysicalTypeIdentifierNamingUtils {
      */
     public static LogicalPath getPath(final String providesType,
             final String metadataIdentificationString) {
-        Assert.isTrue(
+        Validate.isTrue(
                 isValid(providesType, metadataIdentificationString),
                 "Metadata identification string '"
                         + metadataIdentificationString

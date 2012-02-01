@@ -7,6 +7,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
@@ -16,7 +17,6 @@ import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.file.monitor.event.FileDetails;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileUtils;
 
 @Component(immediate = true)
@@ -51,7 +51,7 @@ public class DefaultPathResolvingStrategy extends AbstractPathResolvingStrategy 
      */
     @Override
     protected PhysicalPath getApplicablePhysicalPath(final String identifier) {
-        Assert.notNull(identifier, "Identifier required");
+        Validate.notNull(identifier, "Identifier required");
         for (final PhysicalPath pi : rootModulePaths.values()) {
             final FileDetails possibleParent = new FileDetails(
                     pi.getLocation(), null);
@@ -110,10 +110,10 @@ public class DefaultPathResolvingStrategy extends AbstractPathResolvingStrategy 
     }
 
     public String getRoot(final LogicalPath logicalPath) {
-        Assert.notNull(logicalPath, "Path required");
+        Validate.notNull(logicalPath, "Path required");
         final PhysicalPath pathInfo = rootModulePaths
                 .get(logicalPath.getPath());
-        Assert.notNull(pathInfo, "Unable to determine information for path '"
+        Validate.notNull(pathInfo, "Unable to determine information for path '"
                 + logicalPath + "'");
         final File root = pathInfo.getLocation();
         return FileUtils.getCanonicalPath(root);

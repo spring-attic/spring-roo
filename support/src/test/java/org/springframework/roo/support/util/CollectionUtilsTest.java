@@ -11,6 +11,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 
 /**
@@ -34,7 +35,7 @@ public class CollectionUtilsTest {
     // A simple filter for testing the filtering methods
     private static final Filter<String> NON_BLANK_FILTER = new Filter<String>() {
         public boolean include(final String instance) {
-            return StringUtils.hasText(instance);
+            return StringUtils.isNotBlank(instance);
         }
     };
 

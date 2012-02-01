@@ -6,6 +6,8 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.logging.Logger;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.springframework.roo.model.JavaPackage;
@@ -16,11 +18,9 @@ import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.logging.HandlerUtils;
-import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.DomUtils;
 import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.FileUtils;
-import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -70,9 +70,9 @@ public abstract class AbstractPackagingProvider implements PackagingProvider {
      */
     protected AbstractPackagingProvider(final String id, final String name,
             final String pomTemplate) {
-        Assert.hasText(id, "ID is required");
-        Assert.hasText(name, "Name is required");
-        Assert.hasText(pomTemplate, "POM template path is required");
+        Validate.notBlank(id, "ID is required");
+        Validate.notBlank(name, "Name is required");
+        Validate.notBlank(pomTemplate, "POM template path is required");
         this.id = id;
         this.name = name;
         this.pomTemplate = pomTemplate;
@@ -144,8 +144,8 @@ public abstract class AbstractPackagingProvider implements PackagingProvider {
             final String projectName, final String javaVersion,
             final GAV parentPom, final String module,
             final ProjectOperations projectOperations) {
-        Assert.hasText(javaVersion, "Java version required");
-        Assert.notNull(topLevelPackage, "Top level package required");
+        Validate.notBlank(javaVersion, "Java version required");
+        Validate.notNull(topLevelPackage, "Top level package required");
 
         // Read the POM template from the classpath
         final Document pom = XmlUtils.readXml(FileUtils.getInputStream(
@@ -155,7 +155,7 @@ public abstract class AbstractPackagingProvider implements PackagingProvider {
         // name
         final String mavenName = getProjectName(projectName, module,
                 topLevelPackage);
-        if (StringUtils.hasText(mavenName)) {
+        if (StringUtils.isNotBlank(mavenName)) {
             // If the user wants this element in the traditional place, ensure
             // the template already contains it
             DomUtils.createChildIfNotExists("name", root, pom).setTextContent(
@@ -171,7 +171,7 @@ public abstract class AbstractPackagingProvider implements PackagingProvider {
         // artifactId
         final String artifactId = getArtifactId(projectName, module,
                 topLevelPackage);
-        Assert.hasText(artifactId, "Maven artifactIds cannot be blank");
+        Validate.notBlank(artifactId, "Maven artifactIds cannot be blank");
         DomUtils.createChildIfNotExists("artifactId", root, pom)
                 .setTextContent(artifactId.trim());
 
@@ -286,7 +286,9 @@ public abstract class AbstractPackagingProvider implements PackagingProvider {
      */
     protected String getProjectName(final String nullableProjectName,
             final String module, final JavaPackage topLevelPackage) {
-        return StringUtils.defaultIfEmpty(nullableProjectName, module,
+        String packageName = StringUtils.defaultIfEmpty(nullableProjectName,
+                module);
+        return StringUtils.defaultIfEmpty(packageName,
                 topLevelPackage.getLastElement());
     }
 

@@ -1,7 +1,7 @@
 package org.springframework.roo.project;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.roo.support.util.DomUtils;
-import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Element;
 

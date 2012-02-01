@@ -2,10 +2,10 @@ package org.springframework.roo.shell;
 
 import java.lang.reflect.Method;
 
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.support.style.ToStringCreator;
-import org.springframework.roo.support.util.Assert;
-import org.springframework.roo.support.util.ObjectUtils;
-import org.springframework.roo.support.util.StringUtils;
 
 /**
  * A method that can be executed via a shell command.
@@ -43,8 +43,8 @@ public class MethodTarget {
      */
     public MethodTarget(final Method method, final Object target,
             final String remainingBuffer, final String key) {
-        Assert.notNull(method, "Method is required");
-        Assert.notNull(target, "Target is required");
+        Validate.notNull(method, "Method is required");
+        Validate.notNull(target, "Target is required");
         this.key = StringUtils.trimToEmpty(key);
         this.method = method;
         this.remainingBuffer = StringUtils.trimToEmpty(remainingBuffer);
@@ -96,7 +96,7 @@ public class MethodTarget {
 
     @Override
     public int hashCode() {
-        return ObjectUtils.nullSafeHashCode(method, target);
+        return ObjectUtils.hashCodeMulti(method, target);
     }
 
     @Override

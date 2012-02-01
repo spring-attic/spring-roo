@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.BeanInfoUtils;
@@ -24,7 +25,6 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.SpringJavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.support.style.ToStringCreator;
-import org.springframework.uaa.client.util.Assert;
 
 /**
  * Creates metadata for domain entity ITDs (annotated with
@@ -83,8 +83,8 @@ public class MongoEntityMetadata extends
             final PhysicalTypeMetadata governorPhysicalTypeMetadata,
             final JavaType idType, final MemberDetails memberDetails) {
         super(identifier, aspectName, governorPhysicalTypeMetadata);
-        Assert.notNull(idType, "Id type required");
-        Assert.notNull(memberDetails, "Entity MemberDetails required");
+        Validate.notNull(idType, "Id type required");
+        Validate.notNull(memberDetails, "Entity MemberDetails required");
 
         this.memberDetails = memberDetails;
 

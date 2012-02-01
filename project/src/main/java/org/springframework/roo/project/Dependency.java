@@ -5,10 +5,10 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.support.style.ToStringCreator;
-import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.DomUtils;
-import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -232,9 +232,9 @@ public class Dependency implements Comparable<Dependency> {
             final DependencyScope scope, final String classifier) {
         XmlUtils.assertElementLegal(groupId);
         XmlUtils.assertElementLegal(artifactId);
-        Assert.hasText(version, "Version required");
-        Assert.notNull(scope, "Dependency scope required");
-        Assert.notNull(type, "Dependency type required");
+        Validate.notBlank(version, "Version required");
+        Validate.notNull(scope, "Dependency scope required");
+        Validate.notNull(type, "Dependency type required");
         this.artifactId = artifactId;
         this.classifier = classifier;
         this.groupId = groupId;
@@ -254,8 +254,8 @@ public class Dependency implements Comparable<Dependency> {
      */
     public void addExclusion(final String exclusionGroupId,
             final String exclusionArtifactId) {
-        Assert.hasText(exclusionGroupId, "Excluded groupId required");
-        Assert.hasText(exclusionArtifactId, "Excluded artifactId required");
+        Validate.notBlank(exclusionGroupId, "Excluded groupId required");
+        Validate.notBlank(exclusionArtifactId, "Excluded artifactId required");
         exclusions.add(new Dependency(exclusionGroupId, exclusionArtifactId,
                 "ignored"));
     }
@@ -268,7 +268,7 @@ public class Dependency implements Comparable<Dependency> {
      * @return see {@link Comparable#compareTo(Object)}
      */
     private int compareCoordinates(final Dependency other) {
-        Assert.notNull(other, "Dependency being compared to cannot be null");
+        Validate.notNull(other, "Dependency being compared to cannot be null");
         int result = groupId.compareTo(other.getGroupId());
         if (result == 0) {
             result = artifactId.compareTo(other.getArtifactId());
@@ -332,13 +332,13 @@ public class Dependency implements Comparable<Dependency> {
             dependencyElement.appendChild(XmlUtils.createTextElement(document,
                     "scope", scope.toString().toLowerCase()));
             if (scope == DependencyScope.SYSTEM
-                    && StringUtils.hasText(systemPath)) {
+                    && StringUtils.isNotBlank(systemPath)) {
                 dependencyElement.appendChild(XmlUtils.createTextElement(
                         document, "systemPath", systemPath));
             }
         }
 
-        if (StringUtils.hasText(classifier)) {
+        if (StringUtils.isNotBlank(classifier)) {
             dependencyElement.appendChild(XmlUtils.createTextElement(document,
                     "classifier", classifier));
         }
@@ -380,7 +380,7 @@ public class Dependency implements Comparable<Dependency> {
      */
     public String getSimpleDescription() {
         return groupId + ":" + artifactId + ":" + version
-                + (StringUtils.hasText(classifier) ? ":" + classifier : "");
+                + (StringUtils.isNotBlank(classifier) ? ":" + classifier : "");
     }
 
     public String getSystemPath() {

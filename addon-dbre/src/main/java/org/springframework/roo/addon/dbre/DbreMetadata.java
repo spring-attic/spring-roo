@@ -29,6 +29,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.Validate;
 import org.jvnet.inflector.Noun;
 import org.springframework.roo.addon.dbre.model.CascadeAction;
 import org.springframework.roo.addon.dbre.model.Column;
@@ -57,7 +58,6 @@ import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.JdkJavaType;
 import org.springframework.roo.project.LogicalPath;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Metadata for {@link RooDbManaged}.
@@ -140,12 +140,12 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
             final Iterable<ClassOrInterfaceTypeDetails> managedEntities,
             final Database database) {
         super(identifier, aspectName, governorPhysicalTypeMetadata);
-        Assert.isTrue(isValid(identifier), "Metadata identification string '"
+        Validate.isTrue(isValid(identifier), "Metadata identification string '"
                 + identifier + "' does not appear to be a valid");
-        Assert.notNull(annotationValues, "Annotation values required");
-        Assert.notNull(identifierHolder, "Identifier holder required");
-        Assert.notNull(managedEntities, "Managed entities required");
-        Assert.notNull(database, "Database required");
+        Validate.notNull(annotationValues, "Annotation values required");
+        Validate.notNull(identifierHolder, "Identifier holder required");
+        Validate.notNull(managedEntities, "Managed entities required");
+        Validate.notNull(database, "Database required");
 
         this.annotationValues = annotationValues;
         this.identifierHolder = identifierHolder;
@@ -240,10 +240,10 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
             final ForeignKey foreignKey2 = iter.next();
 
             final Table owningSideTable = foreignKey1.getForeignTable();
-            Assert.notNull(owningSideTable, "Owning-side " + errMsg);
+            Validate.notNull(owningSideTable, "Owning-side " + errMsg);
 
             final Table inverseSideTable = foreignKey2.getForeignTable();
-            Assert.notNull(inverseSideTable, "Inverse-side " + errMsg);
+            Validate.notNull(inverseSideTable, "Inverse-side " + errMsg);
 
             final Integer tableCount = owningSideTables
                     .containsKey(owningSideTable) ? owningSideTables
@@ -313,7 +313,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
             }
             final JavaType fieldType = DbreTypeUtils.findTypeForTableName(
                     managedEntities, foreignTableName, foreignSchemaName);
-            Assert.notNull(
+            Validate.notNull(
                     fieldType,
                     "Attempted to create many-to-one field '"
                             + fieldName
@@ -339,14 +339,14 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
     }
 
     private void addOneToManyFields(final Table table) {
-        Assert.notNull(table, "Table required");
+        Validate.notNull(table, "Table required");
         if (table.isJoinTable()) {
             return;
         }
 
         for (final ForeignKey exportedKey : table.getExportedKeys()) {
             final Table exportedKeyForeignTable = exportedKey.getForeignTable();
-            Assert.notNull(
+            Validate.notNull(
                     exportedKeyForeignTable,
                     "Foreign key table for foreign key '"
                             + exportedKey.getName()
@@ -362,7 +362,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
                     .getSchema().getName();
             final Table foreignTable = database.getTable(foreignTableName,
                     foreignSchemaName);
-            Assert.notNull(foreignTable, "Related table '"
+            Validate.notNull(foreignTable, "Related table '"
                     + exportedKeyForeignTable.getFullyQualifiedTableName()
                     + "' could not be found but was referenced by table '"
                     + table.getFullyQualifiedTableName() + "'");
@@ -428,7 +428,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
                             + fieldSuffix);
             final JavaType fieldType = DbreTypeUtils.findTypeForTableName(
                     managedEntities, foreignTableName, foreignSchemaName);
-            Assert.notNull(
+            Validate.notNull(
                     fieldType,
                     "Attempted to create one-to-one field '"
                             + fieldName
@@ -464,7 +464,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
         for (final ForeignKey exportedKey : table.getExportedKeys()) {
             final Table exportedKeyForeignTable = exportedKey.getForeignTable();
-            Assert.notNull(
+            Validate.notNull(
                     exportedKeyForeignTable,
                     "Foreign key table for foreign key '"
                             + exportedKey.getName()
@@ -480,7 +480,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
                     .getSchema().getName();
             final Table foreignTable = database.getTable(foreignTableName,
                     foreignSchemaName);
-            Assert.notNull(
+            Validate.notNull(
                     foreignTable,
                     "Related table '"
                             + exportedKeyForeignTable
@@ -500,7 +500,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
             final JavaType fieldType = DbreTypeUtils.findTypeForTableName(
                     managedEntities, foreignTableName, foreignSchemaName);
-            Assert.notNull(
+            Validate.notNull(
                     fieldType,
                     "Attempted to create one-to-one mapped-by field '"
                             + fieldName
@@ -609,10 +609,10 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
         // Ensure we have an array of strings
         final String errMsg = "@RooToString attribute 'excludeFields' must be an array of strings";
-        Assert.isInstanceOf(ArrayAttributeValue.class, value, errMsg);
+        Validate.isInstanceOf(ArrayAttributeValue.class, value, errMsg);
         final ArrayAttributeValue<?> arrayVal = (ArrayAttributeValue<?>) value;
         for (final Object obj : arrayVal.getValue()) {
-            Assert.isInstanceOf(StringAttributeValue.class, obj, errMsg);
+            Validate.isInstanceOf(StringAttributeValue.class, obj, errMsg);
             final StringAttributeValue sv = (StringAttributeValue) obj;
             if (sv.getValue().equals(fieldName)) {
                 alreadyAdded = true;
@@ -654,8 +654,9 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
             final Column column, final String tableName,
             final boolean includeNonPortable) {
         JavaType fieldType = column.getJavaType();
-        Assert.notNull(fieldType, "Field type for column '" + column.getName()
-                + "' in table '" + tableName + "' is null");
+        Validate.notNull(fieldType,
+                "Field type for column '" + column.getName() + "' in table '"
+                        + tableName + "' is null");
 
         // Check if field is a Boolean object and is required, then change to
         // boolean primitive
@@ -749,7 +750,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
             final Reference reference, final boolean referencedColumn,
             final JavaType fieldType) {
         final Column localColumn = reference.getLocalColumn();
-        Assert.notNull(localColumn, "Foreign-key reference local column '"
+        Validate.notNull(localColumn, "Foreign-key reference local column '"
                 + reference.getLocalColumnName() + "' must not be null");
         final AnnotationMetadataBuilder joinColumnBuilder = new AnnotationMetadataBuilder(
                 JOIN_COLUMN);
@@ -758,7 +759,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
         if (referencedColumn) {
             final Column foreignColumn = reference.getForeignColumn();
-            Assert.notNull(
+            Validate.notNull(
                     foreignColumn,
                     "Foreign-key reference foreign column '"
                             + reference.getForeignColumnName()
@@ -804,7 +805,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
             final CascadeAction onDelete) {
         final JavaType element = DbreTypeUtils.findTypeForTable(
                 managedEntities, owningSideTable);
-        Assert.notNull(
+        Validate.notNull(
                 element,
                 "Attempted to create many-to-many inverse-side field '"
                         + fieldName
@@ -837,7 +838,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
             final CascadeAction onDelete) {
         final JavaType element = DbreTypeUtils.findTypeForTable(
                 managedEntities, inverseSideTable);
-        Assert.notNull(
+        Validate.notNull(
                 element,
                 "Attempted to create many-to-many owning-side field '"
                         + fieldName
@@ -914,7 +915,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
             final CascadeAction onUpdate, final CascadeAction onDelete) {
         final JavaType element = DbreTypeUtils.findTypeForTableName(
                 managedEntities, foreignTableName, foreignSchemaName);
-        Assert.notNull(element,
+        Validate.notNull(element,
                 "Attempted to create one-to-many mapped-by field '"
                         + fieldName
                         + "' in '"
@@ -1100,9 +1101,9 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
     }
 
     private boolean isOneToOne(final Table table, final ForeignKey foreignKey) {
-        Assert.notNull(table,
+        Validate.notNull(table,
                 "Table must not be null in determining a one-to-one relationship");
-        Assert.notNull(foreignKey,
+        Validate.notNull(foreignKey,
                 "Foreign key must not be null in determining a one-to-one relationship");
         boolean equals = table.getPrimaryKeyCount() == foreignKey
                 .getReferenceCount();

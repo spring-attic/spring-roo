@@ -7,7 +7,7 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import org.springframework.roo.support.util.Assert;
+import org.apache.commons.lang3.Validate;
 
 /**
  * Implementation of {@link ImportRegistrationResolver}.
@@ -29,7 +29,7 @@ public class ImportRegistrationResolverImpl implements
 
     public ImportRegistrationResolverImpl(
             final JavaPackage compilationUnitPackage) {
-        Assert.notNull(compilationUnitPackage,
+        Validate.notNull(compilationUnitPackage,
                 "Compilation unit package required");
         this.compilationUnitPackage = compilationUnitPackage;
     }
@@ -65,7 +65,7 @@ public class ImportRegistrationResolverImpl implements
     }
 
     public boolean isAdditionLegal(final JavaType javaType) {
-        Assert.notNull(javaType, "Java type required");
+        Validate.notNull(javaType, "Java type required");
 
         if (javaType.getDataType() != DataType.TYPE) {
             // It's a type variable or primitive
@@ -91,7 +91,7 @@ public class ImportRegistrationResolverImpl implements
     }
 
     public boolean isFullyQualifiedFormRequired(final JavaType javaType) {
-        Assert.notNull(javaType, "Java type required");
+        Validate.notNull(javaType, "Java type required");
 
         if (javaType.getDataType() == DataType.PRIMITIVE
                 || javaType.getDataType() == DataType.VARIABLE) {
@@ -121,7 +121,7 @@ public class ImportRegistrationResolverImpl implements
 
     public boolean isFullyQualifiedFormRequiredAfterAutoImport(
             final JavaType javaType) {
-        Assert.notNull(javaType, "Java type required");
+        Validate.notNull(javaType, "Java type required");
 
         // Try to add import if possible
         if (isAdditionLegal(javaType)) {

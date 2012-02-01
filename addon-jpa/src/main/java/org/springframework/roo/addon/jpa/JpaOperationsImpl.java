@@ -31,6 +31,8 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.logging.Logger;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -58,12 +60,10 @@ import org.springframework.roo.project.Property;
 import org.springframework.roo.project.Repository;
 import org.springframework.roo.project.Resource;
 import org.springframework.roo.support.logging.HandlerUtils;
-import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.DomUtils;
 import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.FileUtils;
 import org.springframework.roo.support.util.IOUtils;
-import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
@@ -128,8 +128,8 @@ public class JpaOperationsImpl implements JpaOperations {
             final String databaseName, final String userName,
             final String password, final String transactionManager,
             final String persistenceUnit, final String moduleName) {
-        Assert.notNull(ormProvider, "ORM provider required");
-        Assert.notNull(jdbcDatabase, "JDBC database required");
+        Validate.notNull(ormProvider, "ORM provider required");
+        Validate.notNull(jdbcDatabase, "JDBC database required");
 
         // Parse the configuration.xml file
         final Element configuration = XmlUtils.getConfiguration(getClass());
@@ -200,12 +200,12 @@ public class JpaOperationsImpl implements JpaOperations {
         String connectionString = jdbcDatabase.getConnectionString();
         if (connectionString.contains("TO_BE_CHANGED_BY_ADDON")) {
             connectionString = connectionString.replace(
-                    "TO_BE_CHANGED_BY_ADDON",
-                    StringUtils.hasText(databaseName) ? databaseName
+                    "TO_BE_CHANGED_BY_ADDON", StringUtils
+                            .isNotBlank(databaseName) ? databaseName
                             : projectOperations.getProjectName(moduleName));
         }
         else {
-            if (StringUtils.hasText(databaseName)) {
+            if (StringUtils.isNotBlank(databaseName)) {
                 // Oracle uses a different connection URL - see ROO-1203
                 final String dbDelimiter = jdbcDatabase == JdbcDatabase.ORACLE ? ":"
                         : "/";
@@ -315,7 +315,7 @@ public class JpaOperationsImpl implements JpaOperations {
 
         final List<Element> propertyElements = XmlUtils.findElements(
                 "/persistence/persistence-unit/properties/property", root);
-        Assert.notEmpty(propertyElements,
+        Validate.notEmpty(propertyElements,
                 "Failed to find property elements in " + persistenceXmlPath);
         final SortedSet<String> properties = new TreeSet<String>();
 
@@ -430,7 +430,7 @@ public class JpaOperationsImpl implements JpaOperations {
                 .findFirstElement(
                         "/project/build/plugins/plugin[artifactId = 'maven-eclipse-plugin']/configuration/additionalBuildcommands",
                         root);
-        Assert.notNull(additionalBuildcommandsElement,
+        Validate.notNull(additionalBuildcommandsElement,
                 "additionalBuildCommands element of the maven-eclipse-plugin required");
         final String gaeBuildCommandName = "com.google.appengine.eclipse.core.enhancerbuilder";
         Element gaeBuildCommandElement = XmlUtils.findFirstElement(
@@ -457,7 +457,7 @@ public class JpaOperationsImpl implements JpaOperations {
                 .findFirstElement(
                         "/project/build/plugins/plugin[artifactId = 'maven-eclipse-plugin']/configuration/additionalProjectnatures",
                         root);
-        Assert.notNull(additionalProjectnaturesElement,
+        Validate.notNull(additionalProjectnaturesElement,
                 "additionalProjectnatures element of the maven-eclipse-plugin required");
         final String gaeProjectnatureName = "com.google.appengine.eclipse.core.gaeNature";
         Element gaeProjectnatureElement = XmlUtils.findFirstElement(
@@ -508,7 +508,7 @@ public class JpaOperationsImpl implements JpaOperations {
         else {
             in = FileUtils.getInputStream(getClass(),
                     "appengine-web-template.xml");
-            Assert.notNull(in, "Could not acquire appengine-web.xml template");
+            Validate.notNull(in, "Could not acquire appengine-web.xml template");
         }
         final Document appengine = XmlUtils.readXml(in);
 
@@ -540,7 +540,7 @@ public class JpaOperationsImpl implements JpaOperations {
 
     public void newEmbeddableClass(final JavaType name,
             final boolean serializable) {
-        Assert.notNull(name, "Embeddable name required");
+        Validate.notNull(name, "Embeddable name required");
 
         final String declaredByMetadataId = PhysicalTypeIdentifier
                 .createIdentifier(name,
@@ -567,7 +567,7 @@ public class JpaOperationsImpl implements JpaOperations {
     public void newEntity(final JavaType name, final boolean createAbstract,
             final JavaType superclass,
             final List<AnnotationMetadataBuilder> annotations) {
-        Assert.notNull(name, "Entity name required");
+        Validate.notNull(name, "Entity name required");
 
         int modifier = Modifier.PUBLIC;
         if (createAbstract) {
@@ -599,7 +599,7 @@ public class JpaOperationsImpl implements JpaOperations {
 
     public void newIdentifier(final JavaType identifierType,
             final String identifierField, final String identifierColumn) {
-        Assert.notNull(identifierType, "Identifier type required");
+        Validate.notNull(identifierType, "Identifier type required");
 
         final String declaredByMetadataId = PhysicalTypeIdentifier
                 .createIdentifier(identifierType,
@@ -627,7 +627,7 @@ public class JpaOperationsImpl implements JpaOperations {
             else {
                 inputStream = FileUtils.getInputStream(getClass(),
                         templateFilename);
-                Assert.notNull(inputStream, "Could not acquire "
+                Validate.notNull(inputStream, "Could not acquire "
                         + templateFilename);
             }
             props.load(inputStream);
@@ -696,7 +696,7 @@ public class JpaOperationsImpl implements JpaOperations {
                 dataSourceJndi.getParentNode().removeChild(dataSourceJndi);
             }
         }
-        else if (StringUtils.hasText(jndi)) {
+        else if (StringUtils.isNotBlank(jndi)) {
             if (dataSourceJndi == null) {
                 dataSourceJndi = appCtx.createElement("jee:jndi-lookup");
                 dataSourceJndi.setAttribute("id", "dataSource");
@@ -726,7 +726,7 @@ public class JpaOperationsImpl implements JpaOperations {
                 validationQuery = "SELECT 1";
                 break;
             }
-            if (StringUtils.hasText(validationQuery)) {
+            if (StringUtils.isNotBlank(validationQuery)) {
                 dataSource.appendChild(createPropertyElement("validationQuery",
                         validationQuery, appCtx));
             }
@@ -1065,8 +1065,7 @@ public class JpaOperationsImpl implements JpaOperations {
         manageGaeProjectNature(addGaeSettingsToPlugin, document, changes);
 
         if (!changes.isEmpty()) {
-            final String changesMessage = StringUtils
-                    .collectionToDelimitedString(changes, "; ");
+            final String changesMessage = StringUtils.join(changes, "; ");
             fileManager.createOrUpdateTextFileIfRequired(pom,
                     XmlUtils.nodeToString(document), changesMessage, false);
         }
@@ -1171,17 +1170,17 @@ public class JpaOperationsImpl implements JpaOperations {
             // Use the addon's template file
             inputStream = FileUtils.getInputStream(getClass(),
                     "persistence-template.xml");
-            Assert.notNull(inputStream,
+            Validate.notNull(inputStream,
                     "Could not acquire persistence.xml template");
         }
         final Document persistence = XmlUtils.readXml(inputStream);
         final Element root = persistence.getDocumentElement();
         final Element persistenceElement = XmlUtils.findFirstElement(
                 "/persistence", root);
-        Assert.notNull(persistenceElement, "No persistence element found");
+        Validate.notNull(persistenceElement, "No persistence element found");
 
         Element persistenceUnitElement;
-        if (StringUtils.hasText(persistenceUnit)) {
+        if (StringUtils.isNotBlank(persistenceUnit)) {
             persistenceUnitElement = XmlUtils
                     .findFirstElement(PERSISTENCE_UNIT + "[@name = '"
                             + persistenceUnit + "']", persistenceElement);

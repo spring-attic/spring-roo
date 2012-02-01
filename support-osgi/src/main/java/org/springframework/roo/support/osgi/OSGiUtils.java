@@ -7,12 +7,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Enumeration;
 
+import org.apache.commons.lang3.Validate;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.support.ant.AntPathMatcher;
 import org.springframework.roo.support.ant.PathMatcher;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Utility methods relating to OSGi
@@ -69,7 +69,7 @@ public final class OSGiUtils {
      */
     public static Collection<URL> findEntriesByPath(
             final BundleContext context, final String path) {
-        Assert.hasText(path, "Path to locate is required");
+        Validate.notBlank(path, "Path to locate is required");
         final Collection<URL> urls = new ArrayList<URL>();
         // We use a collection of URIs to avoid duplication in the collection of
         // URLs; we can't simply use a Set of URLs because URL#equals is broken.
@@ -113,7 +113,7 @@ public final class OSGiUtils {
     @SuppressWarnings("unchecked")
     public static Collection<URL> findEntriesByPattern(
             final BundleContext context, final String antPathExpression) {
-        Assert.hasText(antPathExpression,
+        Validate.notBlank(antPathExpression,
                 "Ant path expression to match is required");
         final Collection<URL> urls = new ArrayList<URL>();
         // We use a collection of URIs to avoid duplication in the collection of

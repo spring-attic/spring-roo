@@ -21,6 +21,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.details.ConstructorMetadata;
 import org.springframework.roo.classpath.details.ConstructorMetadataBuilder;
@@ -32,8 +34,6 @@ import org.springframework.roo.classpath.javaparser.JavaParserUtils;
 import org.springframework.roo.model.Builder;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.support.util.Assert;
-import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Java Parser implementation of {@link ConstructorMetadata}.
@@ -51,10 +51,10 @@ public class JavaParserConstructorMetadataBuilder implements
             final List<BodyDeclaration> members,
             final ConstructorMetadata constructor,
             final Set<JavaSymbolName> typeParameters) {
-        Assert.notNull(compilationUnitServices,
+        Validate.notNull(compilationUnitServices,
                 "Compilation unit services required");
-        Assert.notNull(members, "Members required");
-        Assert.notNull(constructor, "Method required");
+        Validate.notNull(members, "Members required");
+        Validate.notNull(constructor, "Method required");
 
         // Start with the basic constructor
         final ConstructorDeclaration d = new ConstructorDeclaration();
@@ -242,10 +242,11 @@ public class JavaParserConstructorMetadataBuilder implements
             final ConstructorDeclaration constructorDeclaration,
             final CompilationUnitServices compilationUnitServices,
             Set<JavaSymbolName> typeParameterNames) {
-        Assert.hasText(declaredByMetadataId, "Declared by metadata ID required");
-        Assert.notNull(constructorDeclaration,
+        Validate.notBlank(declaredByMetadataId,
+                "Declared by metadata ID required");
+        Validate.notNull(constructorDeclaration,
                 "Constructor declaration is mandatory");
-        Assert.notNull(compilationUnitServices,
+        Validate.notNull(compilationUnitServices,
                 "Compilation unit services are required");
 
         // Convert Java Parser modifier into JDK modifier
@@ -274,7 +275,7 @@ public class JavaParserConstructorMetadataBuilder implements
 
         // Get the body
         body = constructorDeclaration.getBlock().toString();
-        body = StringUtils.replaceFirst(body, "{", "");
+        body = StringUtils.replace(body, "{", "", 1);
         body = body.substring(0, body.lastIndexOf("}"));
 
         // Lookup the parameters and their names

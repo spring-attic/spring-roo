@@ -1,5 +1,6 @@
 package org.springframework.roo.classpath.details;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.ArrayAttributeValue;
@@ -16,7 +17,6 @@ import org.springframework.roo.model.EnumDetails;
 import org.springframework.roo.model.ImportRegistrationResolver;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Utilities to use with {@link AnnotationMetadata}.
@@ -154,7 +154,7 @@ public abstract class AnnotationMetadataUtils {
      */
     public static String toSourceForm(final AnnotationMetadata annotation,
             final ImportRegistrationResolver resolver) {
-        Assert.notNull(annotation, "Annotation required");
+        Validate.notNull(annotation, "Annotation required");
 
         final StringBuilder sb = new StringBuilder();
         sb.append("@");

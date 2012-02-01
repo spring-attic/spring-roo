@@ -7,6 +7,7 @@ import java.util.Map.Entry;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+import org.apache.commons.lang3.Validate;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
@@ -307,7 +308,7 @@ public final class XmlRoundTripUtils {
      * @return byte[] hash of the input data
      */
     private static byte[] sha1(final byte[] data) {
-        Assert.notNull(digest, "Could not create hash key for identifier");
+        Validate.notNull(digest, "Could not create hash key for identifier");
         return digest.digest(data);
     }
 

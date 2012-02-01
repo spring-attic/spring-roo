@@ -6,7 +6,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.springframework.roo.support.util.Assert;
+import org.apache.commons.lang3.Validate;
 
 /**
  * Default implementation of {@link CustomData}.
@@ -22,7 +22,7 @@ public class CustomDataImpl implements CustomData {
     private final Map<Object, Object> customData;
 
     public CustomDataImpl(final Map<Object, Object> customData) {
-        Assert.notNull(customData, "Custom data required");
+        Validate.notNull(customData, "Custom data required");
         this.customData = Collections.unmodifiableMap(customData);
     }
 

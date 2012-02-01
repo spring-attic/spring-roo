@@ -7,6 +7,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -31,8 +33,6 @@ import org.springframework.roo.classpath.layers.MemberTypeAdditions;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.LogicalPath;
-import org.springframework.roo.support.util.Assert;
-import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Implementation of {@link WebJsonMetadataProvider}.
@@ -98,7 +98,7 @@ public class WebJsonMetadataProviderImpl extends
         // Check whether a relevant layer component has appeared, changed, or
         // disappeared
         final String localMidForLayerManagedEntity = getWebJsonMidIfLayerComponent(governorTypeDetails);
-        if (StringUtils.hasText(localMidForLayerManagedEntity)) {
+        if (StringUtils.isNotBlank(localMidForLayerManagedEntity)) {
             return localMidForLayerManagedEntity;
         }
 
@@ -140,7 +140,7 @@ public class WebJsonMetadataProviderImpl extends
         final PhysicalTypeMetadata backingObjectPhysicalTypeMetadata = (PhysicalTypeMetadata) metadataService
                 .get(PhysicalTypeIdentifier.createIdentifier(jsonObject,
                         typeLocationService.getTypePath(jsonObject)));
-        Assert.notNull(backingObjectPhysicalTypeMetadata,
+        Validate.notNull(backingObjectPhysicalTypeMetadata,
                 "Unable to obtain physical type metadata for type "
                         + jsonObject.getFullyQualifiedTypeName());
         final MemberDetails formBackingObjectMemberDetails = getMemberDetails(backingObjectPhysicalTypeMetadata);

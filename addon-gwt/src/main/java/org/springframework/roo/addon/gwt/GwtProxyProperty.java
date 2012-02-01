@@ -11,6 +11,8 @@ import static org.springframework.roo.model.SpringJavaType.NUMBER_FORMAT;
 
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
@@ -19,8 +21,6 @@ import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.support.util.Assert;
-import org.springframework.roo.support.util.StringUtils;
 
 public class GwtProxyProperty {
 
@@ -40,7 +40,7 @@ public class GwtProxyProperty {
 
     public GwtProxyProperty(final JavaPackage topLevelPackage,
             final ClassOrInterfaceTypeDetails ptmd, final JavaType type) {
-        Assert.notNull(type, "Type required");
+        Validate.notNull(type, "Type required");
         this.topLevelPackage = topLevelPackage;
         this.ptmd = ptmd;
         this.type = type;
@@ -148,7 +148,7 @@ public class GwtProxyProperty {
                 style = (String) attr.getValue();
             }
         }
-        if (StringUtils.hasText(style)) {
+        if (StringUtils.isNotBlank(style)) {
             if (style.equals("S")) {
                 format = "DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_TIME_SHORT)";
             }

@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.details.AnnotationMetadataUtils;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
@@ -20,7 +21,6 @@ import org.springframework.roo.model.ImportRegistrationResolver;
 import org.springframework.roo.model.ImportRegistrationResolverImpl;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * A simple way of producing an inter-type declaration source file.
@@ -47,8 +47,9 @@ public class ItdSourceFileComposer {
      * @param itdTypeDetails to construct (required)
      */
     public ItdSourceFileComposer(final ItdTypeDetails itdTypeDetails) {
-        Assert.notNull(itdTypeDetails, "ITD type details required");
-        Assert.notNull(itdTypeDetails.getName(), "Introduction to is required");
+        Validate.notNull(itdTypeDetails, "ITD type details required");
+        Validate.notNull(itdTypeDetails.getName(),
+                "Introduction to is required");
 
         this.itdTypeDetails = itdTypeDetails;
         introductionTo = itdTypeDetails.getName();
@@ -108,8 +109,9 @@ public class ItdSourceFileComposer {
         content = true;
 
         for (final ConstructorMetadata constructor : constructors) {
-            Assert.isTrue(constructor.getParameterTypes().size() == constructor
-                    .getParameterNames().size(),
+            Validate.isTrue(
+                    constructor.getParameterTypes().size() == constructor
+                            .getParameterNames().size(),
                     "Mismatched parameter names against parameter types");
 
             // Append annotations
@@ -469,7 +471,7 @@ public class ItdSourceFileComposer {
     }
 
     private void appendTerminator() {
-        Assert.isTrue(indentLevel == 1, "Indent level must be 1 (not "
+        Validate.isTrue(indentLevel == 1, "Indent level must be 1 (not "
                 + indentLevel + ") to conclude!");
         indentRemove();
 
@@ -503,7 +505,8 @@ public class ItdSourceFileComposer {
     }
 
     private void appendTypeDeclaration() {
-        Assert.isTrue(introductionTo.getPackage().equals(aspect.getPackage()),
+        Validate.isTrue(
+                introductionTo.getPackage().equals(aspect.getPackage()),
                 "Aspect and introduction must be in identical packages");
 
         appendIndent();
@@ -627,7 +630,7 @@ public class ItdSourceFileComposer {
     private void writeMethods(final List<? extends MethodMetadata> methods,
             final boolean defineTarget, final boolean isInterfaceMethod) {
         for (final MethodMetadata method : methods) {
-            Assert.isTrue(method.getParameterTypes().size() == method
+            Validate.isTrue(method.getParameterTypes().size() == method
                     .getParameterNames().size(), "Method "
                     + method.getMethodName().getSymbolName()
                     + " has mismatched parameter names against parameter types");

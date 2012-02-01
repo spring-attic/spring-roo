@@ -3,7 +3,7 @@ package org.springframework.roo.classpath.preferences;
 import java.io.UnsupportedEncodingException;
 import java.util.prefs.BackingStoreException;
 
-import org.springframework.roo.support.util.Assert;
+import org.apache.commons.lang3.Validate;
 
 /**
  * A node in the user's tree of preferences.
@@ -21,7 +21,7 @@ public class Preferences {
      * @param preferences the preferences to read and write (required)
      */
     public Preferences(final java.util.prefs.Preferences preferences) {
-        Assert.notNull(preferences, "Delegate preferences are required");
+        Validate.notNull(preferences, "Delegate preferences are required");
         this.preferences = preferences;
     }
 

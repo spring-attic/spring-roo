@@ -7,6 +7,7 @@ import java.util.Comparator;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
@@ -14,7 +15,6 @@ import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.ReferenceStrategy;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * The {@link LayerService} implementation.
@@ -46,8 +46,10 @@ public class LayerServiceImpl implements LayerService {
             }
             final int difference = provider2.getLayerPosition()
                     - provider1.getLayerPosition();
-            Assert.state(difference != 0, provider1.getClass().getSimpleName()
-                    + " and " + provider2.getClass().getSimpleName()
+            Validate.validState(difference != 0, provider1.getClass()
+                    .getSimpleName()
+                    + " and "
+                    + provider2.getClass().getSimpleName()
                     + " both have position " + provider1.getLayerPosition());
             return difference;
         }
@@ -82,10 +84,10 @@ public class LayerServiceImpl implements LayerService {
             final String methodIdentifier, final JavaType targetEntity,
             final JavaType idType, final int layerPosition,
             final MethodParameter... methodParameters) {
-        Assert.hasText(metadataIdentificationString,
+        Validate.notBlank(metadataIdentificationString,
                 "metadataIdentificationString is required");
-        Assert.hasText(methodIdentifier, "methodIdentifier is required");
-        Assert.notNull(targetEntity, "targetEntity is required");
+        Validate.notBlank(methodIdentifier, "methodIdentifier is required");
+        Validate.notNull(targetEntity, "targetEntity is required");
         for (final LayerProvider provider : new ArrayList<LayerProvider>(
                 providers)) {
             if (provider.getLayerPosition() >= layerPosition) {

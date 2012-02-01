@@ -14,15 +14,15 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.Validate;
 import org.json.simple.JSONObject;
 import org.springframework.http.client.ClientHttpRequestFactory;
-import org.springframework.roo.support.util.ObjectUtils;
 import org.springframework.uaa.client.TransmissionEventListener;
 import org.springframework.uaa.client.UaaService;
 import org.springframework.uaa.client.VersionHelper;
 import org.springframework.uaa.client.protobuf.UaaClient.FeatureUse;
 import org.springframework.uaa.client.protobuf.UaaClient.Product;
-import org.springframework.uaa.client.util.Assert;
 import org.springframework.uaa.client.util.HexUtils;
 import org.springframework.web.client.RequestCallback;
 import org.springframework.web.client.ResponseExtractor;
@@ -75,7 +75,7 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements
             final ClientHttpRequestFactory requestFactory) {
         super(credentials.getEmail(), credentials.getPassword(), null,
                 credentials.getUrlObject(), requestFactory);
-        Assert.notNull(uaaService, "UAA Service required");
+        Validate.notNull(uaaService, "UAA Service required");
         discoveredAppNames = new HashSet<String>();
         this.product = ObjectUtils.defaultIfNull(product, DEFAULT_PRODUCT);
         this.uaaService = uaaService;

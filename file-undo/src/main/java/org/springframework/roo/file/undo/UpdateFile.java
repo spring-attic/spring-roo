@@ -4,8 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.logging.Logger;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.support.logging.HandlerUtils;
-import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
 
 /**
@@ -33,12 +33,12 @@ public class UpdateFile implements UndoableOperation {
      */
     public UpdateFile(final UndoManager undoManager,
             final FilenameResolver filenameResolver, final File actual) {
-        Assert.notNull(undoManager, "Undo manager required");
-        Assert.notNull(actual, "File required");
-        Assert.isTrue(actual.exists(), "File '" + actual + "' must exist");
-        Assert.isTrue(actual.isFile(), "Path '" + actual
+        Validate.notNull(undoManager, "Undo manager required");
+        Validate.notNull(actual, "File required");
+        Validate.isTrue(actual.exists(), "File '" + actual + "' must exist");
+        Validate.isTrue(actual.isFile(), "Path '" + actual
                 + "' must be a file (not a directory)");
-        Assert.notNull(filenameResolver, "Filename resolver required");
+        Validate.notNull(filenameResolver, "Filename resolver required");
         this.filenameResolver = filenameResolver;
         try {
             backup = File.createTempFile("UpdateFile", "tmp");

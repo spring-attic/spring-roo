@@ -4,11 +4,11 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.Stack;
 
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.file.undo.UndoEvent.UndoOperation;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Default implementation of the {@link UndoManager} interface.
@@ -28,7 +28,7 @@ public class DefaultUndoManager implements UndoManager {
     }
 
     public void add(final UndoableOperation undoableOperation) {
-        Assert.notNull(undoableOperation, "Undoable operation required");
+        Validate.notNull(undoableOperation, "Undoable operation required");
         stack.push(undoableOperation);
     }
 

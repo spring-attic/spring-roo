@@ -5,9 +5,9 @@ import static org.junit.Assert.assertTrue;
 
 import java.net.URL;
 
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Convenient superclass for writing tests of concrete {@link PackagingProvider}
@@ -35,7 +35,7 @@ public abstract class PackagingProviderTestCase<T extends AbstractPackagingProvi
 
     @Test
     public void testIdIsNotBlank() {
-        assertTrue(StringUtils.hasText(provider.getId()));
+        assertTrue(StringUtils.isNotBlank(provider.getId()));
     }
 
     @Test

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
@@ -12,7 +13,6 @@ import org.springframework.roo.classpath.details.annotations.AnnotationMetadataB
 import org.springframework.roo.model.ImportRegistrationResolver;
 import org.springframework.roo.model.ImportRegistrationResolverImpl;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Assists in the building of an {@link ItdTypeDetails} instance.
@@ -68,8 +68,9 @@ public class ItdTypeDetailsBuilder extends
             final ClassOrInterfaceTypeDetails governor, final JavaType aspect,
             final boolean privilegedAspect) {
         super(declaredByMetadataId);
-        Assert.notNull(governor, "Name (to receive the introductions) required");
-        Assert.notNull(aspect, "Aspect required");
+        Validate.notNull(governor,
+                "Name (to receive the introductions) required");
+        Validate.notNull(aspect, "Aspect required");
         this.aspect = aspect;
         this.governor = governor;
         importRegistrationResolver = new ImportRegistrationResolverImpl(
@@ -90,7 +91,7 @@ public class ItdTypeDetailsBuilder extends
                 declaredFieldAnnotationDetails.getFieldAnnotation()
                         .getAnnotationType()) != null;
         if (!declaredFieldAnnotationDetails.isRemoveAnnotation()) {
-            Assert.isTrue(
+            Validate.isTrue(
                     !hasAnnotation,
                     "Field annotation '@"
                             + declaredFieldAnnotationDetails
@@ -105,7 +106,7 @@ public class ItdTypeDetailsBuilder extends
                             + aspect.getFullyQualifiedTypeName() + "')");
         }
         else {
-            Assert.isTrue(
+            Validate.isTrue(
                     hasAnnotation,
                     "Field annotation '@"
                             + declaredFieldAnnotationDetails
@@ -143,7 +144,7 @@ public class ItdTypeDetailsBuilder extends
                 declaredMethodAnnotationDetails.getMethodMetadata()
                         .getAnnotations(), declaredMethodAnnotationDetails
                         .getMethodAnnotation().getAnnotationType()) != null;
-        Assert.isTrue(
+        Validate.isTrue(
                 !hasAnnotation,
                 "Method annotation '@"
                         + declaredMethodAnnotationDetails.getMethodAnnotation()
@@ -180,15 +181,15 @@ public class ItdTypeDetailsBuilder extends
 
     @Override
     protected void onAddAnnotation(final AnnotationMetadataBuilder md) {
-        Assert.isNull(
-                governor.getAnnotation(md.getAnnotationType()),
+        Validate.isTrue(
+                governor.getAnnotation(md.getAnnotationType()) == null,
                 "Type annotation '" + md.getAnnotationType()
                         + "' already defined in target type '"
                         + governor.getName().getFullyQualifiedTypeName()
                         + "' (ITD target '"
                         + aspect.getFullyQualifiedTypeName() + "')");
-        Assert.isNull(
-                build().getAnnotation(md.getAnnotationType()),
+        Validate.isTrue(
+                build().getAnnotation(md.getAnnotationType()) == null,
                 "Type annotation '" + md.getAnnotationType()
                         + "' already defined in ITD (ITD target '"
                         + aspect.getFullyQualifiedTypeName() + "'");
@@ -196,22 +197,22 @@ public class ItdTypeDetailsBuilder extends
 
     @Override
     protected void onAddConstructor(final ConstructorMetadataBuilder md) {
-        Assert.isNull(
+        Validate.isTrue(
                 governor.getDeclaredConstructor(AnnotatedJavaType
-                        .convertFromAnnotatedJavaTypes(md.getParameterTypes())),
+                        .convertFromAnnotatedJavaTypes(md.getParameterTypes())) == null,
                 "Constructor with " + md.getParameterTypes().size()
                         + " parameters already defined in target type '"
                         + governor.getName().getFullyQualifiedTypeName()
                         + "' (ITD target '"
                         + aspect.getFullyQualifiedTypeName() + "')");
-        Assert.isNull(
+        Validate.isTrue(
                 build().getDeclaredConstructor(
                         AnnotatedJavaType.convertFromAnnotatedJavaTypes(md
-                                .getParameterTypes())), "Constructor with "
-                        + md.getParameterTypes().size()
+                                .getParameterTypes())) == null,
+                "Constructor with " + md.getParameterTypes().size()
                         + " parameters already defined in ITD (ITD target '"
                         + aspect.getFullyQualifiedTypeName() + "'");
-        Assert.hasText(
+        Validate.notBlank(
                 md.getBody(),
                 "Constructor '"
                         + md
@@ -220,12 +221,12 @@ public class ItdTypeDetailsBuilder extends
 
     @Override
     protected void onAddExtendsTypes(final JavaType type) {
-        Assert.isTrue(!governor.getExtendsTypes().contains(type), "Type '"
+        Validate.isTrue(!governor.getExtendsTypes().contains(type), "Type '"
                 + type
                 + "' already declared in extends types list in target type '"
                 + governor.getName().getFullyQualifiedTypeName()
                 + "' (ITD target '" + aspect.getFullyQualifiedTypeName() + "')");
-        Assert.isTrue(
+        Validate.isTrue(
                 !getExtendsTypes().contains(type),
                 "Type '"
                         + type
@@ -235,18 +236,23 @@ public class ItdTypeDetailsBuilder extends
 
     @Override
     protected void onAddField(final FieldMetadataBuilder md) {
-        Assert.isNull(governor.getDeclaredField(md.getFieldName()), "Field '"
-                + md.getFieldName() + "' already defined in target type '"
-                + governor.getName().getFullyQualifiedTypeName()
-                + "' (ITD target '" + aspect.getFullyQualifiedTypeName() + "')");
-        Assert.isNull(build().getDeclaredField(md.getFieldName()), "Field '"
-                + md.getFieldName() + "' already defined in ITD (ITD target '"
-                + aspect.getFullyQualifiedTypeName() + ")'");
+        Validate.isTrue(
+                governor.getDeclaredField(md.getFieldName()) == null,
+                "Field '" + md.getFieldName()
+                        + "' already defined in target type '"
+                        + governor.getName().getFullyQualifiedTypeName()
+                        + "' (ITD target '"
+                        + aspect.getFullyQualifiedTypeName() + "')");
+        Validate.isTrue(
+                build().getDeclaredField(md.getFieldName()) == null,
+                "Field '" + md.getFieldName()
+                        + "' already defined in ITD (ITD target '"
+                        + aspect.getFullyQualifiedTypeName() + ")'");
     }
 
     @Override
     protected void onAddImplementType(final JavaType type) {
-        Assert.isTrue(
+        Validate.isTrue(
                 !governor.getImplementsTypes().contains(type),
                 "Type '"
                         + type
@@ -254,7 +260,7 @@ public class ItdTypeDetailsBuilder extends
                         + governor.getName().getFullyQualifiedTypeName()
                         + "' (ITD target '"
                         + aspect.getFullyQualifiedTypeName() + "')");
-        Assert.isTrue(
+        Validate.isTrue(
                 !getImplementsTypes().contains(type),
                 "Type '"
                         + type
@@ -267,30 +273,30 @@ public class ItdTypeDetailsBuilder extends
         if (cid == null) {
             return;
         }
-        Assert.isTrue(Modifier.isStatic(cid.getModifier()),
+        Validate.isTrue(Modifier.isStatic(cid.getModifier()),
                 "Currently only static inner types are supported by AspectJ");
     }
 
     @Override
     protected void onAddMethod(final MethodMetadataBuilder md) {
-        Assert.isNull(
+        Validate.isTrue(
                 MemberFindingUtils.getDeclaredMethod(governor, md
                         .getMethodName(), AnnotatedJavaType
-                        .convertFromAnnotatedJavaTypes(md.getParameterTypes())),
+                        .convertFromAnnotatedJavaTypes(md.getParameterTypes())) == null,
                 "Method '" + md.getMethodName()
                         + "' already defined in target type '"
                         + governor.getName().getFullyQualifiedTypeName()
                         + "' (ITD target '"
                         + aspect.getFullyQualifiedTypeName() + "')");
-        Assert.isNull(
+        Validate.isTrue(
                 MemberFindingUtils.getDeclaredMethod(build(), md
                         .getMethodName(), AnnotatedJavaType
-                        .convertFromAnnotatedJavaTypes(md.getParameterTypes())),
+                        .convertFromAnnotatedJavaTypes(md.getParameterTypes())) == null,
                 "Method '" + md.getMethodName()
                         + "' already defined in ITD (ITD target '"
                         + aspect.getFullyQualifiedTypeName() + "'");
         if (!Modifier.isAbstract(md.getModifier())) {
-            Assert.hasText(
+            Validate.notBlank(
                     md.getBody(),
                     "Method '"
                             + md

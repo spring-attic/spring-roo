@@ -12,6 +12,7 @@ import static org.springframework.roo.project.maven.Pom.DEFAULT_PACKAGING;
 import java.io.File;
 import java.util.Arrays;
 
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.DependencyType;
@@ -19,7 +20,6 @@ import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PhysicalPath;
 import org.springframework.roo.support.util.FileUtils;
-import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Unit test of the {@link Pom} class

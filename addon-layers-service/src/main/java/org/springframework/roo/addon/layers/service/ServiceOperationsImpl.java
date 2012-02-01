@@ -7,6 +7,7 @@ import static org.springframework.roo.model.RooJavaType.ROO_SERVICE;
 
 import java.util.Arrays;
 
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -22,7 +23,6 @@ import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
-import org.springframework.uaa.client.util.Assert;
 
 /**
  * The {@link ServiceOperations} implementation.
@@ -41,7 +41,7 @@ public class ServiceOperationsImpl implements ServiceOperations {
 
     private void createServiceClass(final JavaType interfaceType,
             final JavaType classType) {
-        Assert.notNull(classType, "Class type required");
+        Validate.notNull(classType, "Class type required");
         final String classIdentifier = pathResolver.getFocusedCanonicalPath(
                 Path.SRC_MAIN_JAVA, classType);
         if (fileManager.exists(classIdentifier)) {
@@ -63,7 +63,7 @@ public class ServiceOperationsImpl implements ServiceOperations {
         if (fileManager.exists(interfaceIdentifier)) {
             return; // Type already exists - nothing to do
         }
-        Assert.notNull(domainType, "Domain type required");
+        Validate.notNull(domainType, "Domain type required");
         final AnnotationMetadataBuilder interfaceAnnotationMetadata = new AnnotationMetadataBuilder(
                 ROO_SERVICE);
         interfaceAnnotationMetadata
@@ -86,7 +86,7 @@ public class ServiceOperationsImpl implements ServiceOperations {
 
     public void setupService(final JavaType interfaceType,
             final JavaType classType, final JavaType domainType) {
-        Assert.notNull(interfaceType, "Interface type required");
+        Validate.notNull(interfaceType, "Interface type required");
         createServiceInterface(interfaceType, domainType);
         createServiceClass(interfaceType, classType);
     }

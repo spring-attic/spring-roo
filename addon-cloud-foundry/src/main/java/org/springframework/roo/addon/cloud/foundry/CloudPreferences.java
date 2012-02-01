@@ -22,10 +22,10 @@ import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.DESKeySpec;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.classpath.preferences.Preferences;
 import org.springframework.roo.classpath.preferences.PreferencesService;
-import org.springframework.roo.support.util.StringUtils;
-import org.springframework.util.Assert;
 
 /**
  * The user's cloud-related preferences.
@@ -199,7 +199,7 @@ public class CloudPreferences {
      */
     public List<String> getStoredEmails(final String cloudControllerUrl) {
         final Set<String> storedEmails = new LinkedHashSet<String>();
-        if (StringUtils.hasText(cloudControllerUrl)) {
+        if (StringUtils.isNotBlank(cloudControllerUrl)) {
             for (final CloudCredentials storedCredentials : getStoredCredentials()) {
                 if (cloudControllerUrl.equals(storedCredentials.getUrl())) {
                     storedEmails.add(storedCredentials.getEmail());
@@ -245,7 +245,7 @@ public class CloudPreferences {
      * @param newCredentials the credentials to store (required, must be valid)
      */
     public void storeCredentials(final CloudCredentials newCredentials) {
-        Assert.isTrue(newCredentials.isValid(),
+        Validate.isTrue(newCredentials.isValid(),
                 "Cannot store invalid credentials");
         // The credentials to write are the existing valid ones...
         final Collection<String> entries = new LinkedHashSet<String>();
@@ -259,9 +259,8 @@ public class CloudPreferences {
 
         // Write them
         try {
-            final byte[] encodedEntries = StringUtils
-                    .collectionToDelimitedString(entries, DELIMITER).getBytes(
-                            CHARSET_NAME);
+            final byte[] encodedEntries = StringUtils.join(entries, DELIMITER)
+                    .getBytes(CHARSET_NAME);
             final byte[] encryptedEntries = crypt(encodedEntries, ENCRYPT_MODE);
             preferences.putByteArray(CLOUD_FOUNDRY_KEY, encryptedEntries);
         }

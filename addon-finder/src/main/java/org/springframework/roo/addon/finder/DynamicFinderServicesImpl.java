@@ -14,6 +14,8 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.classpath.customdata.CustomDataKeys;
@@ -24,8 +26,6 @@ import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.support.util.Assert;
-import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Default implementation of {@link DynamicFinderServices}.
@@ -81,7 +81,7 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
      * @return the first non-abstract JavaType, or null if not found
      */
     private JavaType getConcreteJavaType(final MemberDetails memberDetails) {
-        Assert.notNull(memberDetails, "Member details required");
+        Validate.notNull(memberDetails, "Member details required");
         JavaType javaType = null;
         for (final MemberHoldingTypeDetails memberHoldingTypeDetails : memberDetails
                 .getDetails()) {
@@ -96,11 +96,11 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
     public List<JavaSymbolName> getFinders(final MemberDetails memberDetails,
             final String plural, final int depth,
             final Set<JavaSymbolName> exclusions) {
-        Assert.notNull(memberDetails, "Member details required");
-        Assert.hasText(plural, "Plural required");
-        Assert.notNull(depth,
+        Validate.notNull(memberDetails, "Member details required");
+        Validate.notBlank(plural, "Plural required");
+        Validate.notNull(depth,
                 "The depth of combinations used for finder signatures combinations required");
-        Assert.notNull(exclusions, "Exclusions required");
+        Validate.notNull(exclusions, "Exclusions required");
 
         final SortedSet<JavaSymbolName> finders = new TreeSet<JavaSymbolName>();
 
@@ -391,9 +391,9 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
     public QueryHolder getQueryHolder(final MemberDetails memberDetails,
             final JavaSymbolName finderName, final String plural,
             final String entityName) {
-        Assert.notNull(memberDetails, "Member details required");
-        Assert.notNull(finderName, "Finder name required");
-        Assert.hasText(plural, "Plural required");
+        Validate.notNull(memberDetails, "Member details required");
+        Validate.notNull(finderName, "Finder name required");
+        Validate.notBlank(plural, "Plural required");
 
         List<Token> tokens;
         try {

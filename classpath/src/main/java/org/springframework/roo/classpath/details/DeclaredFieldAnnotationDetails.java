@@ -1,7 +1,7 @@
 package org.springframework.roo.classpath.details;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Convenience class to hold annotation details which should be introduced to a
@@ -44,10 +44,10 @@ public class DeclaredFieldAnnotationDetails {
     public DeclaredFieldAnnotationDetails(final FieldMetadata field,
             final AnnotationMetadata fieldAnnotation,
             final boolean removeAnnotation) {
-        Assert.notNull(field, "Field metadata required");
-        Assert.notNull(fieldAnnotation, "Field annotation required");
+        Validate.notNull(field, "Field metadata required");
+        Validate.notNull(fieldAnnotation, "Field annotation required");
         if (removeAnnotation) {
-            Assert.isTrue(
+            Validate.isTrue(
                     fieldAnnotation.getAttributeNames().isEmpty(),
                     "Field annotation '@"
                             + fieldAnnotation.getAnnotationType()

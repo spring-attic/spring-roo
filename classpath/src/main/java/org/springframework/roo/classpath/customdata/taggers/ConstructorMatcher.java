@@ -5,12 +5,12 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.classpath.details.ConstructorMetadata;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.model.CustomDataKey;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * {@link ConstructorMetadata}-specific implementation of {@link Matcher}.
@@ -34,7 +34,7 @@ public class ConstructorMatcher implements Matcher<ConstructorMetadata> {
     public ConstructorMatcher(
             final CustomDataKey<ConstructorMetadata> customDataKey,
             final Collection<? extends JavaType> parameterTypes) {
-        Assert.notNull(customDataKey,
+        Validate.notNull(customDataKey,
                 "Custom data key is required, e.g. a ConstructorMetadataCustomDataKey");
         this.customDataKey = customDataKey;
         this.parameterTypes = new ArrayList<JavaType>();

@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
@@ -15,7 +16,6 @@ import org.springframework.roo.addon.jdbc.JdbcDriverManager;
 import org.springframework.roo.addon.jdbc.polling.JdbcDriverProvider;
 import org.springframework.roo.support.api.AddOnSearch;
 import org.springframework.roo.support.logging.HandlerUtils;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Polls all OSGi-located {@link JdbcDriverProvider} instances and returns the
@@ -48,7 +48,7 @@ public class PollingJdbcDriverManager implements JdbcDriverManager {
 
     public Driver loadDriver(final String driverClassName,
             final boolean displayAddOns) throws RuntimeException {
-        Assert.hasText(driverClassName, "Driver class name required");
+        Validate.notBlank(driverClassName, "Driver class name required");
         synchronized (providers) {
             for (final JdbcDriverProvider provider : providers) {
                 final Driver driver = provider.loadDriver(driverClassName);

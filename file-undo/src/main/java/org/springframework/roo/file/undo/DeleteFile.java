@@ -4,10 +4,10 @@ import java.io.File;
 import java.io.IOException;
 import java.util.logging.Logger;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.support.logging.HandlerUtils;
-import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
-import org.springframework.roo.support.util.StringUtils;
 
 /**
  * {@link UndoableOperation} to delete a file.
@@ -52,11 +52,11 @@ public class DeleteFile implements UndoableOperation {
     public DeleteFile(final UndoManager undoManager,
             final FilenameResolver filenameResolver, final File actual,
             final String reason) {
-        Assert.notNull(undoManager, "Undo manager required");
-        Assert.notNull(actual, "File required");
-        Assert.notNull(filenameResolver, "Filename resolver required");
-        Assert.isTrue(actual.exists(), "File '" + actual + "' must exist");
-        Assert.isTrue(actual.isFile(), "Path '" + actual
+        Validate.notNull(undoManager, "Undo manager required");
+        Validate.notNull(actual, "File required");
+        Validate.notNull(filenameResolver, "Filename resolver required");
+        Validate.isTrue(actual.exists(), "File '" + actual + "' must exist");
+        Validate.isTrue(actual.isFile(), "Path '" + actual
                 + "' must be a file (not a directory)");
 
         try {
@@ -73,7 +73,7 @@ public class DeleteFile implements UndoableOperation {
         undoManager.add(this);
         String deletionMessage = "Deleted "
                 + filenameResolver.getMeaningfulName(actual);
-        if (StringUtils.hasText(reason)) {
+        if (StringUtils.isNotBlank(reason)) {
             deletionMessage += " - " + reason.trim();
         }
         LOGGER.fine(deletionMessage);

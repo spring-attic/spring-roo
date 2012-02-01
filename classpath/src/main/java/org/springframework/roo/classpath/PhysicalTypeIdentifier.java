@@ -1,9 +1,9 @@
 package org.springframework.roo.classpath;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.LogicalPath;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Provides string manipulation functions for {@link PhysicalTypeMetadata} IDs.
@@ -41,8 +41,8 @@ public final class PhysicalTypeIdentifier {
     }
 
     public static String getFriendlyName(final String metadataId) {
-        Assert.isTrue(isValid(metadataId), "Invalid metadata id '" + metadataId
-                + "'");
+        Validate.isTrue(isValid(metadataId), "Invalid metadata id '"
+                + metadataId + "'");
         return getPath(metadataId) + "/" + getJavaType(metadataId);
     }
 
@@ -55,7 +55,7 @@ public final class PhysicalTypeIdentifier {
      * @return a non-<code>null</code> type
      */
     public static JavaType getJavaType(final String physicalTypeId) {
-        Assert.isTrue(PhysicalTypeIdentifier.isValid(physicalTypeId),
+        Validate.isTrue(PhysicalTypeIdentifier.isValid(physicalTypeId),
                 "Physical type identifier is invalid");
         return PhysicalTypeIdentifierNamingUtils.getJavaType(
                 PHYSICAL_METADATA_TYPE, physicalTypeId);

@@ -1,6 +1,6 @@
 package org.springframework.roo.model;
 
-import org.springframework.roo.support.util.Assert;
+import org.apache.commons.lang3.Validate;
 
 /**
  * Convenience superclass for {@link CustomDataAccessor} implementations.
@@ -19,7 +19,7 @@ public abstract class AbstractCustomDataAccessorProvider implements
      * @param customData
      */
     protected AbstractCustomDataAccessorProvider(final CustomData customData) {
-        Assert.notNull(customData, "Custom data required");
+        Validate.notNull(customData, "Custom data required");
         this.customData = customData;
     }
 

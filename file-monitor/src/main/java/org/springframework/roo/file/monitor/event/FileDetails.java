@@ -3,11 +3,11 @@ package org.springframework.roo.file.monitor.event;
 import java.io.File;
 import java.util.Date;
 
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.file.monitor.FileMonitorService;
 import org.springframework.roo.support.style.ToStringCreator;
-import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileUtils;
-import org.springframework.roo.support.util.ObjectUtils;
 
 /**
  * The details of a file that once existed on the disk.
@@ -58,7 +58,7 @@ public class FileDetails implements Comparable<FileDetails> {
      *            last modified (can be <code>null</code>)
      */
     public FileDetails(final File file, final Long lastModified) {
-        Assert.notNull(file, "File required");
+        Validate.notNull(file, "File required");
         this.file = file;
         this.lastModified = lastModified;
     }
@@ -70,8 +70,7 @@ public class FileDetails implements Comparable<FileDetails> {
         // N.B. this is in reverse order to how we'd normally compare
         int result = o.getFile().compareTo(file);
         if (result == 0) {
-            result = ObjectUtils.nullSafeComparison(o.getLastModified(),
-                    lastModified);
+            result = ObjectUtils.compare(o.getLastModified(), lastModified);
         }
         return result;
     }
@@ -129,15 +128,15 @@ public class FileDetails implements Comparable<FileDetails> {
      * @return the relative path within the parent instance (never null)
      */
     public String getRelativeSegment(final String childCanonicalPath) {
-        Assert.notNull(childCanonicalPath, "Child identifier is required");
-        Assert.isTrue(isParentOf(childCanonicalPath), "Identifier '"
+        Validate.notNull(childCanonicalPath, "Child identifier is required");
+        Validate.isTrue(isParentOf(childCanonicalPath), "Identifier '"
                 + childCanonicalPath + "' is not a child of '" + this + "'");
         return childCanonicalPath.substring(getCanonicalPath().length());
     }
 
     @Override
     public int hashCode() {
-        return 7 * file.hashCode() * ObjectUtils.nullSafeHashCode(lastModified);
+        return 7 * file.hashCode() * ObjectUtils.hashCode(lastModified);
     }
 
     /**
@@ -155,7 +154,7 @@ public class FileDetails implements Comparable<FileDetails> {
      *         current instance
      */
     public boolean isParentOf(final String possibleChildCanonicalPath) {
-        Assert.hasText(possibleChildCanonicalPath,
+        Validate.notBlank(possibleChildCanonicalPath,
                 "Possible child to evaluate is required");
         return FileUtils.ensureTrailingSeparator(possibleChildCanonicalPath)
                 .startsWith(

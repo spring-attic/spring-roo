@@ -3,7 +3,7 @@ package org.springframework.roo.model;
 import java.beans.PropertyEditor;
 import java.beans.PropertyEditorSupport;
 
-import org.springframework.roo.support.util.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * {@link PropertyEditor} for {@link JavaSymbolName}.

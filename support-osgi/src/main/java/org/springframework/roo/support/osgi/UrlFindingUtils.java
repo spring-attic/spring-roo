@@ -5,11 +5,11 @@ import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.apache.commons.lang3.Validate;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.springframework.roo.support.ant.AntPathMatcher;
 import org.springframework.roo.support.ant.PathMatcher;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Utility methods for locating resources within OSGi bundles.
@@ -37,7 +37,7 @@ public final class UrlFindingUtils {
     @SuppressWarnings("unchecked")
     public static Set<URL> findMatchingClasspathResources(
             final BundleContext context, final String antPathExpression) {
-        Assert.hasText(antPathExpression,
+        Validate.notBlank(antPathExpression,
                 "Ant path expression to match is required");
         final Set<URL> results = new HashSet<URL>();
         OSGiUtils.execute(new BundleCallback() {
@@ -81,7 +81,7 @@ public final class UrlFindingUtils {
     @Deprecated
     public static Set<URL> findUrls(final BundleContext context,
             final String resourceName) {
-        Assert.hasText(resourceName, "Resource name to locate is required");
+        Validate.notBlank(resourceName, "Resource name to locate is required");
         final Set<URL> results = new HashSet<URL>();
         OSGiUtils.execute(new BundleCallback() {
             public void execute(final Bundle bundle) {

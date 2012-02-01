@@ -40,7 +40,7 @@ import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
-import org.springframework.roo.support.util.Assert;
+import org.apache.commons.lang3.Validate;
 
 /**
  * Constants for JDK {@link JavaType}s. Use them in preference to creating new
@@ -234,7 +234,7 @@ public final class JdkJavaType {
      * @return whether the type is declared as part of java.lang
      */
     public static boolean isPartOfJavaLang(final JavaType javaType) {
-        Assert.notNull(javaType, "Java type required");
+        Validate.notNull(javaType, "Java type required");
         if (javaLangTypes.isEmpty()) {
             for (final String javaLangSimpleTypeName : javaLangSimpleTypeNames) {
                 javaLangTypes.add("java.lang." + javaLangSimpleTypeName);
@@ -251,7 +251,7 @@ public final class JdkJavaType {
      * @return whether the type is declared as part of java.lang
      */
     public static boolean isPartOfJavaLang(final String simpleTypeName) {
-        Assert.hasText(simpleTypeName, "Simple type name required");
+        Validate.notBlank(simpleTypeName, "Simple type name required");
         return javaLangSimpleTypeNames.contains(simpleTypeName);
     }
 

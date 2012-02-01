@@ -2,8 +2,8 @@ package org.springframework.roo.addon.dbre;
 
 import java.util.List;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.classpath.details.FieldMetadata;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Holder for identifier and embedded identifier fields
@@ -20,8 +20,8 @@ public class IdentifierHolder {
     public IdentifierHolder(final FieldMetadata identifierField,
             final boolean embeddedIdField,
             final List<FieldMetadata> embeddedIdentifierFields) {
-        Assert.notNull(identifierField, "Identifier field required");
-        Assert.notNull(embeddedIdentifierFields, "Fields for "
+        Validate.notNull(identifierField, "Identifier field required");
+        Validate.notNull(embeddedIdentifierFields, "Fields for "
                 + identifierField.getFieldType().getFullyQualifiedTypeName()
                 + " required");
         this.identifierField = identifierField;

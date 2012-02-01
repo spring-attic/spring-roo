@@ -3,9 +3,9 @@ package org.springframework.roo.file.monitor;
 import java.io.File;
 import java.util.Collection;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.file.monitor.event.FileOperation;
 import org.springframework.roo.support.style.ToStringCreator;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * A request to monitor a particular file.
@@ -18,7 +18,7 @@ public class FileMonitoringRequest extends MonitoringRequest {
     public FileMonitoringRequest(final File file,
             final Collection<FileOperation> notifyOn) {
         super(file, notifyOn);
-        Assert.isTrue(file.isFile(), "File '" + file + "' must be a file");
+        Validate.isTrue(file.isFile(), "File '" + file + "' must be a file");
     }
 
     @Override

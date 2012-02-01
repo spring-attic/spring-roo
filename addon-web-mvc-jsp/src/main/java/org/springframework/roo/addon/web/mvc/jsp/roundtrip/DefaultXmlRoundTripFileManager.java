@@ -7,11 +7,11 @@ import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.process.manager.FileManager;
-import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.DomUtils;
 import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.HexUtils;
@@ -43,8 +43,8 @@ public class DefaultXmlRoundTripFileManager implements XmlRoundTripFileManager {
 
     public void writeToDiskIfNecessary(final String filename,
             final Document proposed) {
-        Assert.notNull(filename, "The file name is required");
-        Assert.notNull(proposed, "The proposed document is required");
+        Validate.notNull(filename, "The file name is required");
+        Validate.notNull(proposed, "The proposed document is required");
         if (fileManager.exists(filename)) {
             final String proposedContents = XmlUtils.nodeToString(proposed);
             try {

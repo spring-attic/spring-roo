@@ -10,12 +10,12 @@ import java.util.TimerTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.shell.osgi.AbstractFlashingObject;
 import org.springframework.roo.support.logging.HandlerUtils;
-import org.springframework.roo.support.util.StringUtils;
 
 import com.vmware.appcloud.client.AppCloudClient;
 import com.vmware.appcloud.client.ApplicationStats;
@@ -245,7 +245,7 @@ public class CloudFoundryOperationsImpl extends AbstractFlashingObject
             };
             timer.scheduleAtFixedRate(timerTask, 0, 100);
             command.execute();
-            if (StringUtils.hasText(command.getSuccessMessage())
+            if (StringUtils.isNotBlank(command.getSuccessMessage())
                     && command.isDisplaySuccessMessage()) {
                 LOGGER.info(command.getSuccessMessage());
             }

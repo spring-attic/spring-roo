@@ -7,13 +7,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.model.Builder;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Assists in the creation of a {@link Builder} for types that eventually
@@ -197,7 +197,7 @@ public abstract class AbstractIdentifiableAnnotatedJavaStructureBuilder<T extend
                 // attribute value is materially different
                 final AnnotationAttributeValue<?> existingValue = replacementAttributeValues
                         .get(incomingAttributeName);
-                Assert.notNull(existingValue,
+                Validate.notNull(existingValue,
                         "Existing value should have been provided by earlier loop");
                 if (!existingValue.equals(incomingValue)) {
                     replacementAttributeValues.put(incomingAttributeName,

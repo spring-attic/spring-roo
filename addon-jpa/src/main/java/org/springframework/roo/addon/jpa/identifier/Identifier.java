@@ -1,8 +1,8 @@
 package org.springframework.roo.addon.jpa.identifier;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Represents an entity identifier. Instances are immutable.
@@ -32,9 +32,9 @@ public class Identifier {
     public Identifier(final JavaSymbolName fieldName, final JavaType fieldType,
             final String columnName, final int columnSize, final int scale,
             final String columnDefinition) {
-        Assert.notNull(fieldName, "Field name required");
-        Assert.notNull(fieldType, "Field type required");
-        Assert.hasText(columnName, "Column name required");
+        Validate.notNull(fieldName, "Field name required");
+        Validate.notNull(fieldType, "Field type required");
+        Validate.notBlank(columnName, "Column name required");
         this.columnDefinition = columnDefinition;
         this.columnName = columnName;
         this.columnSize = columnSize;

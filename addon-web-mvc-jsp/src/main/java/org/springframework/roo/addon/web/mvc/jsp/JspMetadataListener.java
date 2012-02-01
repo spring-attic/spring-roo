@@ -9,6 +9,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -49,10 +51,8 @@ import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
-import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.FileUtils;
-import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.XmlUtils;
 
 /**
@@ -129,7 +129,7 @@ public class JspMetadataListener implements MetadataProvider,
         final JavaTypeMetadataDetails formBackingTypeMetadataDetails = webMetadataService
                 .getJavaTypeMetadataDetails(formBackingType, memberDetails,
                         jspMetadataId);
-        Assert.notNull(
+        Validate.notNull(
                 formBackingTypeMetadataDetails,
                 "Unable to obtain metadata for type "
                         + formBackingType.getFullyQualifiedTypeName());
@@ -141,7 +141,7 @@ public class JspMetadataListener implements MetadataProvider,
                         memberDetails, jspMetadataId);
         final JavaTypeMetadataDetails formbackingTypeMetadata = relatedTypeMd
                 .get(formBackingType);
-        Assert.notNull(formbackingTypeMetadata,
+        Validate.notNull(formbackingTypeMetadata,
                 "Form backing type metadata required");
         final JavaTypePersistenceMetadataDetails formBackingTypePersistenceMetadata = formbackingTypeMetadata
                 .getPersistenceDetails();
@@ -202,7 +202,7 @@ public class JspMetadataListener implements MetadataProvider,
         }
         else {
             final File file = new File(destinationDirectory);
-            Assert.isTrue(file.isDirectory(), destinationDirectory
+            Validate.isTrue(file.isDirectory(), destinationDirectory
                     + " is a file, when a directory was expected");
         }
 
@@ -287,7 +287,7 @@ public class JspMetadataListener implements MetadataProvider,
 
         final JavaTypePersistenceMetadataDetails javaTypePersistenceMetadataDetails = formBackingTypeMetadataDetails
                 .getPersistenceDetails();
-        Assert.notNull(javaTypePersistenceMetadataDetails,
+        Validate.notNull(javaTypePersistenceMetadataDetails,
                 "Unable to determine persistence metadata for type "
                         + formBackingType.getFullyQualifiedTypeName());
 
@@ -335,15 +335,17 @@ public class JspMetadataListener implements MetadataProvider,
                             .getRooIdentifierFields()) {
                         final String sb = f.getFieldName()
                                 .getReadableSymbolName();
-                        properties.put(XmlUtils.convertId(resourceId
-                                + "."
-                                + javaTypePersistenceMetadataDetails
-                                        .getIdentifierField().getFieldName()
-                                        .getSymbolName()
-                                + "."
-                                + f.getFieldName().getSymbolName()
-                                        .toLowerCase()), StringUtils
-                                .hasText(sb) ? sb : fieldName.getSymbolName());
+                        properties.put(
+                                XmlUtils.convertId(resourceId
+                                        + "."
+                                        + javaTypePersistenceMetadataDetails
+                                                .getIdentifierField()
+                                                .getFieldName().getSymbolName()
+                                        + "."
+                                        + f.getFieldName().getSymbolName()
+                                                .toLowerCase()),
+                                StringUtils.isNotBlank(sb) ? sb : fieldName
+                                        .getSymbolName());
                     }
                 }
             }
@@ -357,7 +359,7 @@ public class JspMetadataListener implements MetadataProvider,
                             .equals(javaTypePersistenceMetadataDetails
                                     .getVersionAccessorMethod().getMethodName())) {
                 final String sb = fieldName.getReadableSymbolName();
-                properties.put(fieldResourceId, StringUtils.hasText(sb) ? sb
+                properties.put(fieldResourceId, StringUtils.isNotBlank(sb) ? sb
                         : fieldName.getSymbolName());
             }
         }

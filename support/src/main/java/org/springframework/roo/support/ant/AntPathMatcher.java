@@ -3,8 +3,8 @@ package org.springframework.roo.support.ant;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.springframework.roo.support.util.Assert;
-import org.springframework.roo.support.util.StringUtils;
+import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.text.StrTokenizer;
 
 /**
  * PathMatcher implementation for Ant-style path patterns. Examples are provided
@@ -40,19 +40,19 @@ public class AntPathMatcher implements PathMatcher {
             return false;
         }
 
-        final String[] pattDirs = StringUtils.tokenizeToStringArray(pattern,
-                pathSeparator);
-        final String[] pathDirs = StringUtils.tokenizeToStringArray(path,
-                pathSeparator);
+        final String[] patternDirs = new StrTokenizer(pattern, pathSeparator)
+                .setIgnoreEmptyTokens(true).getTokenArray();
+        final String[] pathDirs = new StrTokenizer(path, pathSeparator)
+                .setIgnoreEmptyTokens(true).getTokenArray();
 
         int pattIdxStart = 0;
-        int pattIdxEnd = pattDirs.length - 1;
+        int pattIdxEnd = patternDirs.length - 1;
         int pathIdxStart = 0;
         int pathIdxEnd = pathDirs.length - 1;
 
         // Match all elements up to the first **
         while (pattIdxStart <= pattIdxEnd && pathIdxStart <= pathIdxEnd) {
-            final String patDir = pattDirs[pattIdxStart];
+            final String patDir = patternDirs[pattIdxStart];
             if ("**".equals(patDir)) {
                 break;
             }
@@ -75,12 +75,12 @@ public class AntPathMatcher implements PathMatcher {
                 return true;
             }
             if (pattIdxStart == pattIdxEnd
-                    && pattDirs[pattIdxStart].equals("*")
+                    && patternDirs[pattIdxStart].equals("*")
                     && path.endsWith(pathSeparator)) {
                 return true;
             }
             for (int i = pattIdxStart; i <= pattIdxEnd; i++) {
-                if (!pattDirs[i].equals("**")) {
+                if (!patternDirs[i].equals("**")) {
                     return false;
                 }
             }
@@ -90,14 +90,14 @@ public class AntPathMatcher implements PathMatcher {
             // String not exhausted, but pattern is. Failure.
             return false;
         }
-        else if (!fullMatch && "**".equals(pattDirs[pattIdxStart])) {
+        else if (!fullMatch && "**".equals(patternDirs[pattIdxStart])) {
             // Path start definitely matches due to "**" part in pattern.
             return true;
         }
 
         // Up to last '**'
         while (pattIdxStart <= pattIdxEnd && pathIdxStart <= pathIdxEnd) {
-            final String patDir = pattDirs[pattIdxEnd];
+            final String patDir = patternDirs[pattIdxEnd];
             if (patDir.equals("**")) {
                 break;
             }
@@ -111,7 +111,7 @@ public class AntPathMatcher implements PathMatcher {
         if (pathIdxStart > pathIdxEnd) {
             // String is exhausted
             for (int i = pattIdxStart; i <= pattIdxEnd; i++) {
-                if (!pattDirs[i].equals("**")) {
+                if (!patternDirs[i].equals("**")) {
                     return false;
                 }
             }
@@ -121,7 +121,7 @@ public class AntPathMatcher implements PathMatcher {
         while (pattIdxStart != pattIdxEnd && pathIdxStart <= pathIdxEnd) {
             int patIdxTmp = -1;
             for (int i = pattIdxStart + 1; i <= pattIdxEnd; i++) {
-                if (pattDirs[i].equals("**")) {
+                if (patternDirs[i].equals("**")) {
                     patIdxTmp = i;
                     break;
                 }
@@ -139,7 +139,7 @@ public class AntPathMatcher implements PathMatcher {
 
             strLoop: for (int i = 0; i <= strLength - patLength; i++) {
                 for (int j = 0; j < patLength; j++) {
-                    final String subPat = pattDirs[pattIdxStart + j + 1];
+                    final String subPat = patternDirs[pattIdxStart + j + 1];
                     final String subStr = pathDirs[pathIdxStart + i + j];
                     if (!matchStrings(subPat, subStr, uriTemplateVariables)) {
                         continue strLoop;
@@ -158,7 +158,7 @@ public class AntPathMatcher implements PathMatcher {
         }
 
         for (int i = pattIdxStart; i <= pattIdxEnd; i++) {
-            if (!pattDirs[i].equals("**")) {
+            if (!patternDirs[i].equals("**")) {
                 return false;
             }
         }
@@ -195,10 +195,10 @@ public class AntPathMatcher implements PathMatcher {
      */
     public String extractPathWithinPattern(final String pattern,
             final String path) {
-        final String[] patternParts = StringUtils.tokenizeToStringArray(
-                pattern, pathSeparator);
-        final String[] pathParts = StringUtils.tokenizeToStringArray(path,
-                pathSeparator);
+        final String[] patternParts = new StrTokenizer(pattern, pathSeparator)
+                .setIgnoreEmptyTokens(true).getTokenArray();
+        final String[] pathParts = new StrTokenizer(path, pathSeparator)
+                .setIgnoreEmptyTokens(true).getTokenArray();
 
         final StringBuilder builder = new StringBuilder();
 
@@ -231,7 +231,7 @@ public class AntPathMatcher implements PathMatcher {
             final String pattern, final String path) {
         final Map<String, String> variables = new LinkedHashMap<String, String>();
         final boolean result = doMatch(pattern, path, true, variables);
-        Assert.state(result, "Pattern \"" + pattern
+        Validate.validState(result, "Pattern \"" + pattern
                 + "\" is not a match for \"" + path + "\"");
         return variables;
     }

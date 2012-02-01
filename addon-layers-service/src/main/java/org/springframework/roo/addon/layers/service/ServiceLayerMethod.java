@@ -4,14 +4,14 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.classpath.customdata.CustomDataKeys;
 import org.springframework.roo.classpath.customdata.tagkeys.MethodMetadataCustomDataKey;
 import org.springframework.roo.classpath.layers.MemberTypeAdditions;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.PairList;
-import org.springframework.roo.support.util.StringUtils;
 
 /**
  * A method provided by a user project's service layer
@@ -29,7 +29,7 @@ enum ServiceLayerMethod {
         @Override
         public String getName(final ServiceAnnotationValues annotationValues,
                 final JavaType entityType, final String plural) {
-            if (StringUtils.hasText(annotationValues.getCountAllMethod())) {
+            if (StringUtils.isNotBlank(annotationValues.getCountAllMethod())) {
                 return annotationValues.getCountAllMethod() + plural;
             }
             return null;
@@ -57,7 +57,7 @@ enum ServiceLayerMethod {
         @Override
         public String getName(final ServiceAnnotationValues annotationValues,
                 final JavaType entityType, final String plural) {
-            if (StringUtils.hasText(annotationValues.getDeleteMethod())) {
+            if (StringUtils.isNotBlank(annotationValues.getDeleteMethod())) {
                 return annotationValues.getDeleteMethod()
                         + entityType.getSimpleTypeName();
             }
@@ -87,7 +87,7 @@ enum ServiceLayerMethod {
         @Override
         public String getName(final ServiceAnnotationValues annotationValues,
                 final JavaType entityType, final String plural) {
-            if (StringUtils.hasText(annotationValues.getFindMethod())) {
+            if (StringUtils.isNotBlank(annotationValues.getFindMethod())) {
                 return annotationValues.getFindMethod()
                         + entityType.getSimpleTypeName();
             }
@@ -116,7 +116,7 @@ enum ServiceLayerMethod {
         @Override
         public String getName(final ServiceAnnotationValues annotationValues,
                 final JavaType entityType, final String plural) {
-            if (StringUtils.hasText(annotationValues.getFindAllMethod())) {
+            if (StringUtils.isNotBlank(annotationValues.getFindAllMethod())) {
                 return annotationValues.getFindAllMethod() + plural;
             }
             return null;
@@ -144,7 +144,7 @@ enum ServiceLayerMethod {
         @Override
         public String getName(final ServiceAnnotationValues annotationValues,
                 final JavaType entityType, final String plural) {
-            if (StringUtils.hasText(annotationValues.getFindEntriesMethod())) {
+            if (StringUtils.isNotBlank(annotationValues.getFindEntriesMethod())) {
                 return annotationValues.getFindEntriesMethod()
                         + entityType.getSimpleTypeName() + "Entries";
             }
@@ -175,7 +175,7 @@ enum ServiceLayerMethod {
         @Override
         public String getName(final ServiceAnnotationValues annotationValues,
                 final JavaType entityType, final String plural) {
-            if (StringUtils.hasText(annotationValues.getSaveMethod())) {
+            if (StringUtils.isNotBlank(annotationValues.getSaveMethod())) {
                 return annotationValues.getSaveMethod()
                         + entityType.getSimpleTypeName();
             }
@@ -205,7 +205,7 @@ enum ServiceLayerMethod {
         @Override
         public String getName(final ServiceAnnotationValues annotationValues,
                 final JavaType entityType, final String plural) {
-            if (StringUtils.hasText(annotationValues.getUpdateMethod())) {
+            if (StringUtils.isNotBlank(annotationValues.getUpdateMethod())) {
                 return annotationValues.getUpdateMethod()
                         + entityType.getSimpleTypeName();
             }
@@ -263,7 +263,7 @@ enum ServiceLayerMethod {
      * @param key the internal key for this method (required)
      */
     private ServiceLayerMethod(final MethodMetadataCustomDataKey key) {
-        Assert.notNull(key, "Method key is required");
+        Validate.notNull(key, "Method key is required");
         this.key = key;
     }
 
@@ -365,7 +365,7 @@ enum ServiceLayerMethod {
             final ServiceAnnotationValues annotationValues,
             final JavaType entityType, final String plural) {
         final String methodName = getName(annotationValues, entityType, plural);
-        if (StringUtils.hasText(methodName)) {
+        if (StringUtils.isNotBlank(methodName)) {
             return new JavaSymbolName(methodName);
         }
         return null;

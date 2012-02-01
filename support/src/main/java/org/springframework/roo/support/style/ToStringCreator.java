@@ -16,7 +16,7 @@
 
 package org.springframework.roo.support.style;
 
-import org.springframework.roo.support.util.Assert;
+import org.apache.commons.lang3.Validate;
 
 /**
  * Utility class that builds pretty-printing <code>toString()</code> methods
@@ -57,7 +57,7 @@ public class ToStringCreator {
      * @param styler the ToStringStyler encapsulating pretty-print instructions
      */
     public ToStringCreator(final Object obj, final ToStringStyler styler) {
-        Assert.notNull(obj, "The object to be styled must not be null");
+        Validate.notNull(obj, "The object to be styled must not be null");
         object = obj;
         this.styler = styler != null ? styler : DEFAULT_TO_STRING_STYLER;
         this.styler.styleStart(buffer, object);

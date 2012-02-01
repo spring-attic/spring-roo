@@ -20,6 +20,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
@@ -28,8 +30,6 @@ import org.springframework.roo.classpath.javaparser.JavaParserUtils;
 import org.springframework.roo.model.Builder;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.support.util.Assert;
-import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Java Parser implementation of {@link FieldMetadata}.
@@ -42,10 +42,10 @@ public class JavaParserFieldMetadataBuilder implements Builder<FieldMetadata> {
     public static void addField(
             final CompilationUnitServices compilationUnitServices,
             final List<BodyDeclaration> members, final FieldMetadata field) {
-        Assert.notNull(compilationUnitServices,
+        Validate.notNull(compilationUnitServices,
                 "Flushable compilation unit services required");
-        Assert.notNull(members, "Members required");
-        Assert.notNull(field, "Field required");
+        Validate.notNull(members, "Members required");
+        Validate.notNull(field, "Field required");
 
         JavaParserUtils.importTypeIfRequired(
                 compilationUnitServices.getEnclosingTypeName(),
@@ -74,13 +74,13 @@ public class JavaParserFieldMetadataBuilder implements Builder<FieldMetadata> {
         }
 
         final List<VariableDeclarator> vars = newField.getVariables();
-        Assert.notEmpty(vars,
+        Validate.notEmpty(vars,
                 "Expected ASTHelper to have provided a single VariableDeclarator");
-        Assert.isTrue(vars.size() == 1,
+        Validate.isTrue(vars.size() == 1,
                 "Expected ASTHelper to have provided a single VariableDeclarator");
         final VariableDeclarator vd = vars.iterator().next();
 
-        if (StringUtils.hasText(field.getFieldInitializer())) {
+        if (StringUtils.isNotBlank(field.getFieldInitializer())) {
             // There is an initializer.
             // We need to make a fake field that we can have JavaParser parse.
             // Easiest way to do that is to build a simple source class
@@ -175,12 +175,10 @@ public class JavaParserFieldMetadataBuilder implements Builder<FieldMetadata> {
                 nextFieldIndex = i + 1;
                 final FieldDeclaration bdf = (FieldDeclaration) bd;
                 for (final VariableDeclarator v : bdf.getVariables()) {
-                    Assert.isTrue(
-                            !field.getFieldName().getSymbolName()
-                                    .equals(v.getId().getName()),
-                            "A field with name '"
-                                    + field.getFieldName().getSymbolName()
-                                    + "' already exists");
+                    Validate.isTrue(!field.getFieldName().getSymbolName()
+                            .equals(v.getId().getName()), "A field with name '"
+                            + field.getFieldName().getSymbolName()
+                            + "' already exists");
                 }
             }
         }
@@ -202,10 +200,10 @@ public class JavaParserFieldMetadataBuilder implements Builder<FieldMetadata> {
     public static void removeField(
             final CompilationUnitServices compilationUnitServices,
             final List<BodyDeclaration> members, final JavaSymbolName fieldName) {
-        Assert.notNull(compilationUnitServices,
+        Validate.notNull(compilationUnitServices,
                 "Flushable compilation unit services required");
-        Assert.notNull(members, "Members required");
-        Assert.notNull(fieldName, "Field name to remove is required");
+        Validate.notNull(members, "Members required");
+        Validate.notNull(fieldName, "Field name to remove is required");
 
         // Locate the field
         int i = -1;
@@ -224,7 +222,7 @@ public class JavaParserFieldMetadataBuilder implements Builder<FieldMetadata> {
             }
         }
 
-        Assert.isTrue(toDelete > -1, "Could not locate field '" + fieldName
+        Validate.isTrue(toDelete > -1, "Could not locate field '" + fieldName
                 + "' to delete");
 
         // Do removal outside iteration of body declaration members, to avoid
@@ -247,12 +245,13 @@ public class JavaParserFieldMetadataBuilder implements Builder<FieldMetadata> {
             final VariableDeclarator var,
             final CompilationUnitServices compilationUnitServices,
             final Set<JavaSymbolName> typeParameters) {
-        Assert.notNull(declaredByMetadataId, "Declared by metadata ID required");
-        Assert.notNull(fieldDeclaration, "Field declaration is mandatory");
-        Assert.notNull(var, "Variable declarator required");
-        Assert.isTrue(fieldDeclaration.getVariables().contains(var),
+        Validate.notNull(declaredByMetadataId,
+                "Declared by metadata ID required");
+        Validate.notNull(fieldDeclaration, "Field declaration is mandatory");
+        Validate.notNull(var, "Variable declarator required");
+        Validate.isTrue(fieldDeclaration.getVariables().contains(var),
                 "Cannot request a variable not already in the field declaration");
-        Assert.notNull(compilationUnitServices,
+        Validate.notNull(compilationUnitServices,
                 "Compilation unit services are required");
 
         // Convert Java Parser modifier into JDK modifier

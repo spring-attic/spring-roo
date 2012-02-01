@@ -7,6 +7,7 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -30,7 +31,6 @@ import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectOperations;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Implementation of {@link DataOnDemandOperations}.
@@ -56,7 +56,7 @@ public class DataOnDemandOperationsImpl implements DataOnDemandOperations {
     private ClassOrInterfaceTypeDetails getEntity(final JavaType entity) {
         final ClassOrInterfaceTypeDetails cid = typeLocationService
                 .getTypeDetails(entity);
-        Assert.notNull(cid, "Java source code details unavailable for type '"
+        Validate.notNull(cid, "Java source code details unavailable for type '"
                 + entity + "'");
         return cid;
     }
@@ -68,25 +68,25 @@ public class DataOnDemandOperationsImpl implements DataOnDemandOperations {
     }
 
     public void newDod(final JavaType entity, final JavaType name) {
-        Assert.notNull(entity,
+        Validate.notNull(entity,
                 "Entity to produce a data on demand provider for is required");
-        Assert.notNull(name,
+        Validate.notNull(name,
                 "Name of the new data on demand provider is required");
 
         final LogicalPath path = LogicalPath.getInstance(Path.SRC_TEST_JAVA,
                 projectOperations.getFocusedModuleName());
-        Assert.notNull(path,
+        Validate.notNull(path,
                 "Location of the new data on demand provider is required");
 
         // Verify the requested entity actually exists as a class and is not
         // abstract
         final ClassOrInterfaceTypeDetails cid = getEntity(entity);
-        Assert.isTrue(
+        Validate.isTrue(
                 cid.getPhysicalTypeCategory() == PhysicalTypeCategory.CLASS,
                 "Type " + entity.getFullyQualifiedTypeName()
                         + " is not a class");
-        Assert.isTrue(!Modifier.isAbstract(cid.getModifier()),
-                "Type " + entity.getFullyQualifiedTypeName() + " is abstract");
+        Validate.isTrue(!Modifier.isAbstract(cid.getModifier()), "Type "
+                + entity.getFullyQualifiedTypeName() + " is abstract");
 
         // Check if the requested entity is a JPA @Entity
         final MemberDetails memberDetails = memberDetailsScanner
@@ -96,7 +96,8 @@ public class DataOnDemandOperationsImpl implements DataOnDemandOperations {
                 .getAnnotation(ENTITY);
         final AnnotationMetadata persistentAnnotation = memberDetails
                 .getAnnotation(PERSISTENT);
-        Assert.isTrue(entityAnnotation != null || persistentAnnotation != null,
+        Validate.isTrue(entityAnnotation != null
+                || persistentAnnotation != null,
                 "Type " + entity.getFullyQualifiedTypeName()
                         + " must be a persistent type");
 

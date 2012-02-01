@@ -4,6 +4,7 @@ import static org.springframework.roo.model.RooJavaType.ROO_GWT_REQUEST;
 
 import java.util.List;
 
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -24,7 +25,6 @@ import org.springframework.roo.metadata.MetadataNotificationListener;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.LogicalPath;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Triggers the generation of {@link GwtRequestMetadata} upon being notified of
@@ -82,7 +82,7 @@ public class GwtRequestMetadataNotificationListener implements
             if (gwtRequestAnnotation != null) {
                 final AnnotationAttributeValue<?> attributeValue = gwtRequestAnnotation
                         .getAttribute("value");
-                Assert.state(attributeValue != null,
+                Validate.validState(attributeValue != null,
                         "The x annotation should have a '" + "value"
                                 + "' attribute");
                 final String entityClass = GwtUtils
@@ -143,7 +143,7 @@ public class GwtRequestMetadataNotificationListener implements
 
         // We should now have an instance-specific "downstream dependency" that
         // can be processed by this class
-        Assert.isTrue(PhysicalTypeIdentifierNamingUtils.isValid(
+        Validate.isTrue(PhysicalTypeIdentifierNamingUtils.isValid(
                 GwtRequestMetadata.class.getName(), downstreamInstanceId));
         metadataService.evictAndGet(downstreamInstanceId);
     }

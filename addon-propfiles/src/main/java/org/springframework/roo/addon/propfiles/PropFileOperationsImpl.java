@@ -16,6 +16,7 @@ import java.util.Properties;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -23,7 +24,6 @@ import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.ProjectOperations;
-import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileUtils;
 import org.springframework.roo.support.util.IOUtils;
 
@@ -86,8 +86,8 @@ public class PropFileOperationsImpl implements PropFileOperations {
 
     public Map<String, String> getProperties(
             final LogicalPath propertyFilePath, final String propertyFilename) {
-        Assert.notNull(propertyFilePath, "Property file path required");
-        Assert.hasText(propertyFilename, "Property filename required");
+        Validate.notNull(propertyFilePath, "Property file path required");
+        Validate.notBlank(propertyFilename, "Property filename required");
 
         final String filePath = projectOperations.getPathResolver()
                 .getIdentifier(propertyFilePath, propertyFilename);
@@ -115,9 +115,9 @@ public class PropFileOperationsImpl implements PropFileOperations {
 
     public String getProperty(final LogicalPath propertyFilePath,
             final String propertyFilename, final String key) {
-        Assert.notNull(propertyFilePath, "Property file path required");
-        Assert.hasText(propertyFilename, "Property filename required");
-        Assert.hasText(key, "Key required");
+        Validate.notNull(propertyFilePath, "Property file path required");
+        Validate.notBlank(propertyFilename, "Property filename required");
+        Validate.notBlank(key, "Key required");
 
         final String filePath = projectOperations.getPathResolver()
                 .getIdentifier(propertyFilePath, propertyFilename);
@@ -138,8 +138,8 @@ public class PropFileOperationsImpl implements PropFileOperations {
     public SortedSet<String> getPropertyKeys(
             final LogicalPath propertyFilePath, final String propertyFilename,
             final boolean includeValues) {
-        Assert.notNull(propertyFilePath, "Property file path required");
-        Assert.hasText(propertyFilename, "Property filename required");
+        Validate.notNull(propertyFilePath, "Property file path required");
+        Validate.notBlank(propertyFilename, "Property filename required");
 
         final String filePath = projectOperations.getPathResolver()
                 .getIdentifier(propertyFilePath, propertyFilename);
@@ -203,9 +203,9 @@ public class PropFileOperationsImpl implements PropFileOperations {
             final String propertyFilename,
             final Map<String, String> properties, final boolean sorted,
             final boolean changeExisting) {
-        Assert.notNull(propertyFilePath, "Property file path required");
-        Assert.hasText(propertyFilename, "Property filename required");
-        Assert.notNull(properties, "Property map required");
+        Validate.notNull(propertyFilePath, "Property file path required");
+        Validate.notBlank(propertyFilename, "Property filename required");
+        Validate.notNull(properties, "Property map required");
 
         final String filePath = projectOperations.getPathResolver()
                 .getIdentifier(propertyFilePath, propertyFilename);
@@ -268,9 +268,9 @@ public class PropFileOperationsImpl implements PropFileOperations {
 
     public void removeProperty(final LogicalPath propertyFilePath,
             final String propertyFilename, final String key) {
-        Assert.notNull(propertyFilePath, "Property file path required");
-        Assert.hasText(propertyFilename, "Property filename required");
-        Assert.hasText(key, "Key required");
+        Validate.notNull(propertyFilePath, "Property file path required");
+        Validate.notBlank(propertyFilename, "Property filename required");
+        Validate.notBlank(key, "Key required");
 
         final String filePath = projectOperations.getPathResolver()
                 .getIdentifier(propertyFilePath, propertyFilename);
@@ -293,7 +293,7 @@ public class PropFileOperationsImpl implements PropFileOperations {
 
     private void storeProps(final Properties props,
             final OutputStream outputStream, final String comment) {
-        Assert.notNull(outputStream, "OutputStream required");
+        Validate.notNull(outputStream, "OutputStream required");
         try {
             props.store(outputStream, comment);
         }

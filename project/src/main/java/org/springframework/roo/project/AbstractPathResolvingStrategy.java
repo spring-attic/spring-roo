@@ -5,13 +5,13 @@ import static org.springframework.roo.support.util.FileUtils.CURRENT_DIRECTORY;
 import java.io.File;
 import java.util.Collection;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.file.monitor.event.FileDetails;
 import org.springframework.roo.support.osgi.OSGiUtils;
-import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileUtils;
-import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Convenient superclass for {@link PathResolvingStrategy} implementations.
@@ -40,7 +40,7 @@ public abstract class AbstractPathResolvingStrategy implements
     protected abstract PhysicalPath getApplicablePhysicalPath(String identifier);
 
     public String getFriendlyName(final String identifier) {
-        Assert.notNull(identifier, "Identifier required");
+        Validate.notNull(identifier, "Identifier required");
         final LogicalPath p = getPath(identifier);
         if (p == null) {
             return identifier;

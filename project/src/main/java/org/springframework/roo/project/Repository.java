@@ -1,8 +1,8 @@
 package org.springframework.roo.project;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.support.style.ToStringCreator;
-import org.springframework.roo.support.util.Assert;
-import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
@@ -30,7 +30,7 @@ public class Repository implements Comparable<Repository> {
      * @param element containing the repository definition (required)
      */
     public Repository(final Element element) {
-        Assert.notNull(element, "Element required");
+        Validate.notNull(element, "Element required");
         final Element name = XmlUtils.findFirstElement("name", element);
         final Element snapshotsElement = XmlUtils.findFirstElement("snapshots",
                 element);
@@ -63,8 +63,8 @@ public class Repository implements Comparable<Repository> {
      */
     public Repository(final String id, final String name, final String url,
             final boolean enableSnapshots) {
-        Assert.hasText(id, "ID required");
-        Assert.hasText(url, "URL required");
+        Validate.notBlank(id, "ID required");
+        Validate.notBlank(url, "URL required");
         this.enableSnapshots = enableSnapshots;
         this.id = id;
         this.name = StringUtils.trimToNull(name);

@@ -23,7 +23,6 @@ import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
-import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Unit test of {@link JpaOperationsImpl}
@@ -92,6 +91,8 @@ public class JpaOperationsImplTest {
             + "    </persistence-unit>\n"
             + "</persistence>\n";
 
+    private static final String LINE_SEPARATOR = System
+            .getProperty("line.separator");
     private static final String PERSISTENCE_PATH = "/path/to/persistence";
     private static final String PERSISTENCE_UNIT = "myPersistenceUnit";
     private static final String POM = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
@@ -180,10 +181,8 @@ public class JpaOperationsImplTest {
         when(
                 mockPathResolver.getFocusedIdentifier(Path.SRC_MAIN_RESOURCES,
                         PERSISTENCE_XML)).thenReturn(PERSISTENCE_PATH);
-        when(mockFileManager.exists(PERSISTENCE_PATH)).thenReturn(false); // i.e.
-                                                                          // no
-                                                                          // existing
-                                                                          // persistence.xml
+        // i.e. no existing persistence.xml
+        when(mockFileManager.exists(PERSISTENCE_PATH)).thenReturn(false);
         when(
                 mockPropFileOperations.loadProperties(JPA_DIALECTS_FILE,
                         JpaOperationsImpl.class)).thenReturn(dialects);
@@ -255,7 +254,7 @@ public class JpaOperationsImplTest {
         // Replace the dummy line terminator with the platform-specific one that
         // will be applied by XmlUtils.nodeToString.
         final String normalisedContents = expectedContents.replace("\n",
-                StringUtils.LINE_SEPARATOR);
+                LINE_SEPARATOR);
         assertEquals(normalisedContents, textCaptor.getValue());
     }
 }

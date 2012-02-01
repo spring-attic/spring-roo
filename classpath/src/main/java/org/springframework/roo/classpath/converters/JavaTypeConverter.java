@@ -18,6 +18,7 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -31,7 +32,6 @@ import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.shell.Completion;
 import org.springframework.roo.shell.Converter;
 import org.springframework.roo.shell.MethodTarget;
-import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Provides conversion to and from {@link JavaType}, with full support for using
@@ -73,7 +73,7 @@ public class JavaTypeConverter implements Converter<JavaType> {
     private void addCompletionsForOtherModuleNames(
             final List<Completion> completions, final Pom targetModule) {
         for (final String moduleName : projectOperations.getModuleNames()) {
-            if (StringUtils.hasText(moduleName)
+            if (StringUtils.isNotBlank(moduleName)
                     && !moduleName.equals(targetModule.getModuleName())) {
                 completions.add(new Completion(moduleName
                         + MODULE_PATH_SEPARATOR, decorate(moduleName
@@ -99,8 +99,8 @@ public class JavaTypeConverter implements Converter<JavaType> {
             for (final JavaType javaType : typesInModule) {
                 String type = javaType.getFullyQualifiedTypeName();
                 if (type.startsWith(basePackage)) {
-                    type = StringUtils.replaceFirst(type, topLevelPackage,
-                            TOP_LEVEL_PACKAGE_SYMBOL);
+                    type = StringUtils.replace(type, topLevelPackage,
+                            TOP_LEVEL_PACKAGE_SYMBOL, 1);
                     completions.add(new Completion(prefix + type,
                             formattedPrefix + type, heading, 1));
                 }
@@ -276,10 +276,10 @@ public class JavaTypeConverter implements Converter<JavaType> {
             newValue = locateNew(value, topLevelPath);
         }
 
-        if (StringUtils.hasText(newValue)) {
+        if (StringUtils.isNotBlank(newValue)) {
             final String physicalTypeIdentifier = typeLocationService
                     .getPhysicalTypeIdentifier(new JavaType(newValue));
-            if (StringUtils.hasText(physicalTypeIdentifier)) {
+            if (StringUtils.isNotBlank(physicalTypeIdentifier)) {
                 module = projectOperations
                         .getPomFromModuleName(PhysicalTypeIdentifier.getPath(
                                 physicalTypeIdentifier).getModule());

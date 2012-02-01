@@ -24,7 +24,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.springframework.roo.support.util.ClassUtils;
-import org.springframework.roo.support.util.ObjectUtils;
+import org.springframework.roo.support.util.RooObjectUtils;
 
 /**
  * Converts objects to String form, generally for debugging purposes, using
@@ -120,7 +120,7 @@ public class DefaultValueStyler implements ValueStyler {
             return style((Collection<?>) value);
         }
         else if (value.getClass().isArray()) {
-            return styleArray(ObjectUtils.toObjectArray(value));
+            return styleArray(RooObjectUtils.toObjectArray(value));
         }
         else {
             return String.valueOf(value);

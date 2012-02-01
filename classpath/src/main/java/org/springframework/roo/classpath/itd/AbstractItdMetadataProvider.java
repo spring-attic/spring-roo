@@ -3,6 +3,7 @@ package org.springframework.roo.classpath.itd;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.springframework.roo.classpath.ItdDiscoveryService;
@@ -28,7 +29,6 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Path;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Provides common functionality used by ITD-based generators.
@@ -102,7 +102,7 @@ public abstract class AbstractItdMetadataProvider extends
      *            metadata creation (required)
      */
     public void addMetadataTrigger(final JavaType javaType) {
-        Assert.notNull(javaType,
+        Validate.notNull(javaType,
                 "Java type required for metadata trigger registration");
         metadataTriggers.add(javaType);
     }
@@ -163,7 +163,7 @@ public abstract class AbstractItdMetadataProvider extends
     }
 
     public final MetadataItem get(final String metadataIdentificationString) {
-        Assert.isTrue(
+        Validate.isTrue(
                 MetadataIdentificationUtils.getMetadataClass(
                         metadataIdentificationString).equals(
                         MetadataIdentificationUtils
@@ -326,7 +326,7 @@ public abstract class AbstractItdMetadataProvider extends
 
     public final String getIdForPhysicalJavaType(
             final String physicalJavaTypeIdentifier) {
-        Assert.isTrue(
+        Validate.isTrue(
                 MetadataIdentificationUtils.getMetadataClass(
                         physicalJavaTypeIdentifier).equals(
                         MetadataIdentificationUtils
@@ -533,7 +533,7 @@ public abstract class AbstractItdMetadataProvider extends
                 return;
             }
 
-            Assert.isTrue(MetadataIdentificationUtils
+            Validate.isTrue(MetadataIdentificationUtils
                     .isIdentifyingInstance(downstreamDependency),
                     "An instance-specific downstream MID was required by '"
                             + getClass().getName() + "' (not '"
@@ -552,7 +552,7 @@ public abstract class AbstractItdMetadataProvider extends
 
         // We should now have an instance-specific "downstream dependency" that
         // can be processed by this class
-        Assert.isTrue(
+        Validate.isTrue(
                 MetadataIdentificationUtils.getMetadataClass(
                         downstreamDependency).equals(
                         MetadataIdentificationUtils
@@ -595,7 +595,7 @@ public abstract class AbstractItdMetadataProvider extends
      * @param javaType to remove (required)
      */
     public void removeMetadataTrigger(final JavaType javaType) {
-        Assert.notNull(javaType,
+        Validate.notNull(javaType,
                 "Java type required for metadata trigger deregistration");
         metadataTriggers.remove(javaType);
     }
@@ -645,7 +645,7 @@ public abstract class AbstractItdMetadataProvider extends
         // convert this to a downstream MID.
         // In any other case the downstream metadata should have registered an
         // instance-specific downstream dependency on a given upstream.
-        Assert.isTrue(isNotificationForJavaType(upstreamDependency),
+        Validate.isTrue(isNotificationForJavaType(upstreamDependency),
                 "Expected class-level notifications only for physical Java types (not '"
                         + upstreamDependency + "') for metadata provider "
                         + getClass().getName());

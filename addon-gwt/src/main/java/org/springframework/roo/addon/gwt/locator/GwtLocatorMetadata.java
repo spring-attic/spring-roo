@@ -1,11 +1,11 @@
 package org.springframework.roo.addon.gwt.locator;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.metadata.AbstractMetadataItem;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.LogicalPath;
-import org.springframework.roo.support.util.StringUtils;
 
 public class GwtLocatorMetadata extends AbstractMetadataItem {
 

@@ -1,9 +1,9 @@
 package org.springframework.roo.felix;
 
+import org.apache.commons.lang3.Validate;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.springframework.roo.support.style.ToStringCreator;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Represents a Bundle Symbolic Name.
@@ -16,7 +16,7 @@ public class BundleSymbolicName implements Comparable<BundleSymbolicName> {
     private final String key;
 
     public BundleSymbolicName(final String key) {
-        Assert.hasText(key, "Key required");
+        Validate.notBlank(key, "Key required");
         this.key = key;
     }
 
@@ -40,7 +40,7 @@ public class BundleSymbolicName implements Comparable<BundleSymbolicName> {
      * @return the ID (or null if cannot be found)
      */
     public Long findBundleIdWithoutFail(final BundleContext context) {
-        Assert.notNull(context, "Bundle context is unavailable");
+        Validate.notNull(context, "Bundle context is unavailable");
         final Bundle[] bundles = context.getBundles();
         if (bundles == null) {
             throw new IllegalStateException(

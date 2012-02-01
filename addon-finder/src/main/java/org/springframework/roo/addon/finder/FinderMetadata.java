@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.addon.jpa.activerecord.RooJpaActiveRecord;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
@@ -24,7 +25,6 @@ import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.support.style.ToStringCreator;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Metadata for {@link RooJpaActiveRecord#finders()}.
@@ -74,11 +74,11 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
             final MethodMetadata entityManagerMethod,
             final Map<JavaSymbolName, QueryHolder> queryHolders) {
         super(identifier, aspectName, governorPhysicalTypeMetadata);
-        Assert.isTrue(isValid(identifier), "Metadata identification string '"
+        Validate.isTrue(isValid(identifier), "Metadata identification string '"
                 + identifier + "' does not appear to be a valid");
-        Assert.isTrue(entityManagerMethod != null || queryHolders.isEmpty(),
+        Validate.isTrue(entityManagerMethod != null || queryHolders.isEmpty(),
                 "EntityManager method required if any query holders are provided");
-        Assert.notNull(queryHolders, "Query holders required");
+        Validate.notNull(queryHolders, "Query holders required");
 
         if (!isValid()) {
             return;
@@ -129,8 +129,8 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
     private MethodMetadataBuilder getDynamicFinderMethod(
             final JavaSymbolName finderName,
             final MethodMetadata entityManagerMethod) {
-        Assert.notNull(finderName, "Dynamic finder method name is required");
-        Assert.isTrue(queryHolders.containsKey(finderName),
+        Validate.notNull(finderName, "Dynamic finder method name is required");
+        Validate.isTrue(queryHolders.containsKey(finderName),
                 "Undefined method name '" + finderName.getSymbolName() + "'");
 
         // We have no access to method parameter information, so we scan by name

@@ -12,6 +12,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.customdata.CustomDataKeys;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
@@ -19,7 +20,6 @@ import org.springframework.roo.model.CustomData;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.support.style.ToStringCreator;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Default representation of a {@link ClassOrInterfaceTypeDetails}.
@@ -80,8 +80,9 @@ public class DefaultClassOrInterfaceTypeDetails extends
             final Collection<ImportMetadata> registeredImports) {
 
         super(customData, declaredByMetadataId, modifier, annotations);
-        Assert.notNull(name, "Name required");
-        Assert.notNull(physicalTypeCategory, "Physical type category required");
+        Validate.notNull(name, "Name required");
+        Validate.notNull(physicalTypeCategory,
+                "Physical type category required");
 
         this.name = name;
         this.physicalTypeCategory = physicalTypeCategory;

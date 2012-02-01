@@ -3,6 +3,8 @@ package org.springframework.roo.classpath.converters;
 import static org.springframework.roo.classpath.converters.JavaPackageConverter.TOP_LEVEL_PACKAGE_SYMBOL;
 import static org.springframework.roo.project.LogicalPath.MODULE_PATH_SEPARATOR;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -13,8 +15,6 @@ import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.shell.Shell;
 import org.springframework.roo.support.util.AnsiEscapeCode;
-import org.springframework.roo.support.util.Assert;
-import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Records the last Java package and type used.
@@ -48,7 +48,7 @@ public class LastUsedImpl implements LastUsed {
     }
 
     public void setPackage(final JavaPackage javaPackage) {
-        Assert.notNull(javaPackage, "JavaPackage required");
+        Validate.notNull(javaPackage, "JavaPackage required");
         if (javaPackage.getFullyQualifiedPackageName().startsWith("java.")) {
             return;
         }
@@ -63,7 +63,7 @@ public class LastUsedImpl implements LastUsed {
         }
 
         String moduleName = "";
-        if (module != null && StringUtils.hasText(module.getModuleName())) {
+        if (module != null && StringUtils.isNotBlank(module.getModuleName())) {
             moduleName = AnsiEscapeCode.decorate(module.getModuleName()
                     + MODULE_PATH_SEPARATOR, AnsiEscapeCode.FG_CYAN);
         }
@@ -76,7 +76,7 @@ public class LastUsedImpl implements LastUsed {
                 + fullyQualifiedName.replace(
                         topLevelPackage.getFullyQualifiedPackageName(),
                         TOP_LEVEL_PACKAGE_SYMBOL);
-        shell.setPromptPath(path, StringUtils.hasText(moduleName));
+        shell.setPromptPath(path, StringUtils.isNotBlank(moduleName));
     }
 
     public void setTopLevelPackage(final JavaPackage topLevelPackage) {
@@ -84,7 +84,7 @@ public class LastUsedImpl implements LastUsed {
     }
 
     public void setType(final JavaType javaType) {
-        Assert.notNull(javaType, "JavaType required");
+        Validate.notNull(javaType, "JavaType required");
         if (javaType.getPackage().getFullyQualifiedPackageName()
                 .startsWith("java.")) {
             return;
@@ -95,7 +95,7 @@ public class LastUsedImpl implements LastUsed {
     }
 
     public void setType(final JavaType javaType, final Pom module) {
-        Assert.notNull(javaType, "JavaType required");
+        Validate.notNull(javaType, "JavaType required");
         if (javaType.getPackage().getFullyQualifiedPackageName()
                 .startsWith("java.")) {
             return;

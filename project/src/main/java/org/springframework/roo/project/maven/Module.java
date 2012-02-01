@@ -1,6 +1,6 @@
 package org.springframework.roo.project.maven;
 
-import org.springframework.roo.support.util.Assert;
+import org.apache.commons.lang3.Validate;
 
 /**
  * A module of a Maven multi-module project.
@@ -21,8 +21,8 @@ public class Module {
      *            blank)
      */
     public Module(final String name, final String pomPath) {
-        Assert.hasText(name, "Invalid module name '" + name + "'");
-        Assert.hasText(pomPath, "Invalid path '" + pomPath + "'");
+        Validate.notBlank(name, "Invalid module name '" + name + "'");
+        Validate.notBlank(pomPath, "Invalid path '" + pomPath + "'");
         this.name = name;
         this.pomPath = pomPath;
     }

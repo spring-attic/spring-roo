@@ -8,6 +8,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -40,8 +42,6 @@ import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
-import org.springframework.roo.support.util.Assert;
-import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Monitors Java types and if necessary creates/updates/deletes the GWT files
@@ -271,7 +271,7 @@ public class GwtScaffoldMetadataProviderImpl implements
     public void notify(String upstreamDependency, String downstreamDependency) {
         if (MetadataIdentificationUtils
                 .isIdentifyingClass(downstreamDependency)) {
-            Assert.isTrue(
+            Validate.isTrue(
                     MetadataIdentificationUtils.getMetadataClass(
                             upstreamDependency).equals(
                             MetadataIdentificationUtils
@@ -328,7 +328,7 @@ public class GwtScaffoldMetadataProviderImpl implements
 
         // We should now have an instance-specific "downstream dependency" that
         // can be processed by this class
-        Assert.isTrue(
+        Validate.isTrue(
                 MetadataIdentificationUtils.getMetadataClass(
                         downstreamDependency).equals(
                         MetadataIdentificationUtils

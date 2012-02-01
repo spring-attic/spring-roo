@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -16,7 +17,6 @@ import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.Property;
-import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.DomUtils;
 import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.FileUtils;
@@ -116,8 +116,8 @@ public class SecurityOperationsImpl implements SecurityOperations {
         final Element webConfig = webConfigDocument.getDocumentElement();
         final Element viewController = DomUtils.findFirstElementByName(
                 "mvc:view-controller", webConfig);
-        Assert.notNull(viewController, "Could not find mvc:view-controller in "
-                + webConfig);
+        Validate.notNull(viewController,
+                "Could not find mvc:view-controller in " + webConfig);
         viewController.getParentNode()
                 .insertBefore(
                         new XmlElementBuilder("mvc:view-controller",

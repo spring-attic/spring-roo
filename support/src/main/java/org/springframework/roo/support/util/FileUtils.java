@@ -9,6 +9,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.support.ant.AntPathMatcher;
 import org.springframework.roo.support.ant.PathMatcher;
 
@@ -72,15 +74,16 @@ public final class FileUtils {
      */
     public static boolean copyRecursively(final File source,
             final File destination, final boolean deleteDestinationOnExit) {
-        Assert.notNull(source, "Source directory required");
-        Assert.notNull(destination, "Destination directory required");
-        Assert.isTrue(source.exists(), "Source directory '" + source
+        Validate.notNull(source, "Source directory required");
+        Validate.notNull(destination, "Destination directory required");
+        Validate.isTrue(source.exists(), "Source directory '" + source
                 + "' must exist");
-        Assert.isTrue(source.isDirectory(), "Source directory '" + source
+        Validate.isTrue(source.isDirectory(), "Source directory '" + source
                 + "' must be a directory");
         if (destination.exists()) {
-            Assert.isTrue(destination.isDirectory(), "Destination directory '"
-                    + destination + "' must be a directory");
+            Validate.isTrue(destination.isDirectory(),
+                    "Destination directory '" + destination
+                            + "' must be a directory");
         }
         else {
             destination.mkdirs();
@@ -126,7 +129,7 @@ public final class FileUtils {
      *         failure when deleting
      */
     public static boolean deleteRecursively(final File file) {
-        Assert.notNull(file, "File to delete required");
+        Validate.notNull(file, "File to delete required");
         if (!file.exists()) {
             return true;
         }
@@ -170,7 +173,7 @@ public final class FileUtils {
      * @since 1.2.0
      */
     public static String ensureTrailingSeparator(final String path) {
-        Assert.notNull(path);
+        Validate.notNull(path);
         return removeTrailingSeparator(path) + File.separatorChar;
     }
 
@@ -209,7 +212,7 @@ public final class FileUtils {
     public static File getFile(final Class<?> loadingClass,
             final String filename) {
         final URL url = loadingClass.getResource(filename);
-        Assert.notNull(url, "Could not locate '" + filename
+        Validate.notNull(url, "Could not locate '" + filename
                 + "' in classpath of " + loadingClass.getName());
         try {
             return new File(url.toURI());
@@ -259,13 +262,13 @@ public final class FileUtils {
      * @param filename the name of the file to load, relative to that package
      *            (required)
      * @return the file's input stream (never <code>null</code>)
-     * @throws IllegalArgumentException if the given file cannot be found
+     * @throws NullPointerException if the given file cannot be found
      */
     public static InputStream getInputStream(final Class<?> loadingClass,
             final String filename) {
         final InputStream inputStream = loadingClass
                 .getResourceAsStream(filename);
-        Assert.notNull(inputStream, "Could not locate '" + filename
+        Validate.notNull(inputStream, "Could not locate '" + filename
                 + "' in classpath of " + loadingClass.getName());
         return inputStream;
     }
@@ -283,9 +286,9 @@ public final class FileUtils {
      */
     public static String getPath(final Class<?> loadingClass,
             final String relativeFilename) {
-        Assert.notNull(loadingClass, "Loading class required");
-        Assert.hasText(relativeFilename, "Filename required");
-        Assert.isTrue(!relativeFilename.startsWith("/"),
+        Validate.notNull(loadingClass, "Loading class required");
+        Validate.notBlank(relativeFilename, "Filename required");
+        Validate.isTrue(!relativeFilename.startsWith("/"),
                 "Filename shouldn't start with a slash");
         // Slashes instead of File.separatorChar is correct here, as these are
         // classloader paths (not file system paths)
@@ -304,9 +307,8 @@ public final class FileUtils {
      */
     public static String getSystemDependentPath(
             final Collection<String> pathElements) {
-        Assert.notEmpty(pathElements);
-        return StringUtils.collectionToDelimitedString(pathElements,
-                File.separator);
+        Validate.notEmpty(pathElements);
+        return StringUtils.join(pathElements, File.separator);
     }
 
     /**
@@ -319,6 +321,7 @@ public final class FileUtils {
      * @since 1.2.0
      */
     public static String getSystemDependentPath(final String... pathElements) {
+        Validate.notEmpty(pathElements);
         return getSystemDependentPath(Arrays.asList(pathElements));
     }
 
@@ -333,8 +336,8 @@ public final class FileUtils {
      */
     public static boolean matchesAntPath(final String antPattern,
             final String canonicalPath) {
-        Assert.hasText(antPattern, "Ant pattern required");
-        Assert.hasText(canonicalPath, "Canonical path required");
+        Validate.notBlank(antPattern, "Ant pattern required");
+        Validate.notBlank(canonicalPath, "Canonical path required");
         return PATH_MATCHER.match(antPattern, canonicalPath);
     }
 
@@ -369,10 +372,10 @@ public final class FileUtils {
             return path;
         }
         while (path.endsWith(File.separator)) {
-            path = StringUtils.removeSuffix(path, File.separator);
+            path = StringUtils.removeEnd(path, File.separator);
         }
         while (path.startsWith(File.separator)) {
-            path = StringUtils.removePrefix(path, File.separator);
+            path = StringUtils.removeStart(path, File.separator);
         }
         return path;
     }
@@ -386,7 +389,7 @@ public final class FileUtils {
      */
     public static String removeTrailingSeparator(String path) {
         while (path != null && path.endsWith(File.separator)) {
-            path = StringUtils.removeSuffix(path, File.separator);
+            path = StringUtils.removeEnd(path, File.separator);
         }
         return path;
     }

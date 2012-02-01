@@ -5,12 +5,12 @@ import static org.springframework.roo.model.Jsr303JavaType.SIZE;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.IntegerAttributeValue;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.support.util.Assert;
 
 public abstract class CollectionField extends FieldDetails {
 
@@ -33,7 +33,7 @@ public abstract class CollectionField extends FieldDetails {
             final JavaType fieldType, final JavaSymbolName fieldName,
             final JavaType genericParameterTypeName) {
         super(physicalTypeIdentifier, fieldType, fieldName);
-        Assert.notNull(genericParameterTypeName,
+        Validate.notNull(genericParameterTypeName,
                 "Generic parameter type name is required");
         this.genericParameterTypeName = genericParameterTypeName;
     }

@@ -13,9 +13,9 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.file.monitor.event.FileOperation;
-import org.springframework.roo.support.util.Assert;
-import org.springframework.roo.support.util.StringUtils;
 
 /**
  * A {@link PropertyEditor} for {@link MonitoringRequest}s.
@@ -101,20 +101,19 @@ public class MonitoringRequestEditor extends PropertyEditorSupport {
             return;
         }
 
-        final String[] segments = StringUtils
-                .commaDelimitedListToStringArray(text);
-        Assert.isTrue(segments.length == 2 || segments.length == 3, "Text '"
+        final String[] segments = StringUtils.split(text, ",");
+        Validate.isTrue(segments.length == 2 || segments.length == 3, "Text '"
                 + text + "' is invalid for a MonitoringRequest");
         final File file = new File(segments[0]);
-        Assert.isTrue(file.exists(), "File '" + file + "' does not exist");
+        Validate.isTrue(file.exists(), "File '" + file + "' does not exist");
 
         final Collection<FileOperation> fileOperations = parseFileOperations(segments[1]);
-        Assert.notEmpty(fileOperations,
+        Validate.notEmpty(fileOperations,
                 "One or more valid operation codes ('CRUD') required for file '"
                         + file + "'");
 
         if (file.isFile()) {
-            Assert.isTrue(segments.length == 2,
+            Validate.isTrue(segments.length == 2,
                     "Can only have two values for file '" + file + "'");
             setValue(new FileMonitoringRequest(file, fileOperations));
         }
@@ -126,7 +125,7 @@ public class MonitoringRequestEditor extends PropertyEditorSupport {
     private void setValueToDirectoryMonitoringRequest(final String[] segments,
             final File file, final Collection<FileOperation> fileOperations) {
         if (segments.length == 3) {
-            Assert.isTrue(
+            Validate.isTrue(
                     SUBTREE_WILDCARD.equals(segments[2]),
                     "The third value for directory '"
                             + file

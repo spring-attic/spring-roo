@@ -3,8 +3,8 @@ package org.springframework.roo.process.manager.event;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.process.manager.ProcessManager;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Provides a convenience superclass for those {@link ProcessManager}s wishing
@@ -42,7 +42,8 @@ public abstract class AbstractProcessManagerStatusPublisher implements
 
     public final void addProcessManagerStatusListener(
             final ProcessManagerStatusListener processManagerStatusListener) {
-        Assert.notNull(processManagerStatusListener, "Status listener required");
+        Validate.notNull(processManagerStatusListener,
+                "Status listener required");
         processManagerStatusListeners.add(processManagerStatusListener);
     }
 
@@ -55,7 +56,8 @@ public abstract class AbstractProcessManagerStatusPublisher implements
 
     public final void removeProcessManagerStatusListener(
             final ProcessManagerStatusListener processManagerStatusListener) {
-        Assert.notNull(processManagerStatusListener, "Status listener required");
+        Validate.notNull(processManagerStatusListener,
+                "Status listener required");
         processManagerStatusListeners.remove(processManagerStatusListener);
     }
 
@@ -64,7 +66,8 @@ public abstract class AbstractProcessManagerStatusPublisher implements
      */
     protected void setProcessManagerStatus(
             final ProcessManagerStatus processManagerStatus) {
-        Assert.notNull(processManagerStatus, "Process manager status required");
+        Validate.notNull(processManagerStatus,
+                "Process manager status required");
 
         if (this.processManagerStatus.status == processManagerStatus) {
             // No need to make a change

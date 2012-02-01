@@ -9,6 +9,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -39,8 +41,6 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.ProjectOperations;
-import org.springframework.roo.support.util.Assert;
-import org.springframework.roo.support.util.StringUtils;
 
 @Component(immediate = true)
 @Service
@@ -173,7 +173,7 @@ public class GwtProxyMetadataProviderImpl extends
             String downstreamDependency) {
         if (MetadataIdentificationUtils
                 .isIdentifyingClass(downstreamDependency)) {
-            Assert.isTrue(
+            Validate.isTrue(
                     MetadataIdentificationUtils.getMetadataClass(
                             upstreamDependency).equals(
                             MetadataIdentificationUtils
@@ -247,7 +247,7 @@ public class GwtProxyMetadataProviderImpl extends
 
         // We should now have an instance-specific "downstream dependency" that
         // can be processed by this class
-        Assert.isTrue(
+        Validate.isTrue(
                 MetadataIdentificationUtils.getMetadataClass(
                         downstreamDependency).equals(
                         MetadataIdentificationUtils

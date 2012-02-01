@@ -3,9 +3,9 @@ package org.springframework.roo.classpath.customdata.taggers;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.model.CustomDataKey;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * {@link MemberHoldingTypeDetails}-specific implementation of {@link Matcher}.
@@ -41,7 +41,7 @@ public class MidTypeMatcher extends TypeMatcher {
     public MidTypeMatcher(
             final CustomDataKey<MemberHoldingTypeDetails> customDataKey,
             final String declaredBy) {
-        Assert.hasText(declaredBy, "declaredBy is required");
+        Validate.notBlank(declaredBy, "declaredBy is required");
         this.customDataKey = customDataKey;
         this.declaredBy = declaredBy;
     }

@@ -1,6 +1,6 @@
 package org.springframework.roo.metadata;
 
-import org.springframework.roo.support.util.Assert;
+import org.apache.commons.lang3.Validate;
 
 /**
  * Abstract implementation of {@link MetadataItem}.
@@ -31,7 +31,7 @@ public abstract class AbstractMetadataItem implements MetadataItem {
      *            )
      */
     protected AbstractMetadataItem(final String id) {
-        Assert.isTrue(MetadataIdentificationUtils.isIdentifyingInstance(id),
+        Validate.isTrue(MetadataIdentificationUtils.isIdentifyingInstance(id),
                 "Metadata identification string '" + id
                         + "' does not identify a metadata instance");
         this.id = id;

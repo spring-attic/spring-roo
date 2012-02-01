@@ -4,8 +4,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
-import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Unit test of {@link GAV}
@@ -39,9 +39,8 @@ public class GAVTest {
     @Test
     public void testGetInstance() {
         // Set up
-        final String coordinates = StringUtils.arrayToDelimitedString(
-                new String[] { GROUP_ID, ARTIFACT_ID, VERSION },
-                MavenUtils.COORDINATE_SEPARATOR);
+        final String coordinates = StringUtils.join(new String[] { GROUP_ID,
+                ARTIFACT_ID, VERSION }, MavenUtils.COORDINATE_SEPARATOR);
 
         // Invoke
         final GAV gav = GAV.getInstance(coordinates);

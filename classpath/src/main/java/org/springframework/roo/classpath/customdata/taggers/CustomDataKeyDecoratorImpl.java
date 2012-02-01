@@ -8,6 +8,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.jvnet.inflector.Noun;
@@ -19,7 +20,6 @@ import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.classpath.scanner.MemberDetailsBuilder;
 import org.springframework.roo.model.CustomDataAccessor;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * An implementation of {@link CustomDataKeyDecorator}.
@@ -172,8 +172,8 @@ public class CustomDataKeyDecoratorImpl implements CustomDataKeyDecorator {
 
     public void registerMatcher(final String addingClass,
             final Matcher<? extends CustomDataAccessor> matcher) {
-        Assert.notNull(addingClass, "The calling class must be specified");
-        Assert.notNull(matcher, "The matcher must be specified");
+        Validate.notNull(addingClass, "The calling class must be specified");
+        Validate.notNull(matcher, "The matcher must be specified");
         taggerMap.put(addingClass + matcher.getCustomDataKey(), matcher);
     }
 

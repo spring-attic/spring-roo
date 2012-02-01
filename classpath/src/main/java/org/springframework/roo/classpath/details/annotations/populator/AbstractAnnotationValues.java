@@ -1,12 +1,12 @@
 package org.springframework.roo.classpath.details.annotations.populator;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.itd.MemberHoldingTypeDetailsMetadataItem;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Abstract class that provides a convenience parser and holder for annotation
@@ -31,7 +31,7 @@ public abstract class AbstractAnnotationValues {
     protected AbstractAnnotationValues(
             final MemberHoldingTypeDetails memberHoldingTypeDetails,
             final JavaType annotationType) {
-        Assert.notNull(annotationType, "Annotation to locate is required");
+        Validate.notNull(annotationType, "Annotation to locate is required");
 
         if (memberHoldingTypeDetails instanceof ClassOrInterfaceTypeDetails) {
             classParsed = true;
@@ -78,7 +78,7 @@ public abstract class AbstractAnnotationValues {
     protected AbstractAnnotationValues(
             final MemberHoldingTypeDetailsMetadataItem<?> governorMetadata,
             final JavaType annotationType) {
-        Assert.notNull(annotationType, "Annotation to locate is required");
+        Validate.notNull(annotationType, "Annotation to locate is required");
 
         if (governorMetadata != null) {
             final Object governorDetails = governorMetadata

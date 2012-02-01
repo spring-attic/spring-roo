@@ -12,6 +12,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -53,7 +54,6 @@ import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
 import org.springframework.roo.shell.CommandMarker;
 import org.springframework.roo.shell.converters.StaticFieldConverter;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Additional shell commands for the purpose of creating fields.
@@ -66,14 +66,14 @@ import org.springframework.roo.support.util.Assert;
 @Service
 public class FieldCommands implements CommandMarker {
 
-    private final Set<String> legalNumericPrimitives = new HashSet<String>();
     @Reference private MemberDetailsScanner memberDetailsScanner;
     @Reference private MetadataService metadataService;
     @Reference private ProjectOperations projectOperations;
     @Reference private StaticFieldConverter staticFieldConverter;
     @Reference private TypeLocationService typeLocationService;
-
     @Reference private TypeManagementService typeManagementService;
+
+    private final Set<String> legalNumericPrimitives = new HashSet<String>();
 
     protected void activate(final ComponentContext context) {
         legalNumericPrimitives.add(Short.class.getName());
@@ -105,7 +105,7 @@ public class FieldCommands implements CommandMarker {
 
         final ClassOrInterfaceTypeDetails javaTypeDetails = typeLocationService
                 .getTypeDetails(typeName);
-        Assert.notNull(javaTypeDetails, "The type specified, '" + typeName
+        Validate.notNull(javaTypeDetails, "The type specified, '" + typeName
                 + "'doesn't exist");
 
         final String physicalTypeIdentifier = javaTypeDetails
@@ -151,7 +151,7 @@ public class FieldCommands implements CommandMarker {
 
         final ClassOrInterfaceTypeDetails javaTypeDetails = typeLocationService
                 .getTypeDetails(typeName);
-        Assert.notNull(javaTypeDetails, "The type specified, '" + typeName
+        Validate.notNull(javaTypeDetails, "The type specified, '" + typeName
                 + "'doesn't exist");
 
         final String physicalTypeIdentifier = javaTypeDetails
@@ -199,33 +199,33 @@ public class FieldCommands implements CommandMarker {
         // Check if the field type is a JPA @Embeddable class
         final ClassOrInterfaceTypeDetails cid = typeLocationService
                 .getTypeDetails(fieldType);
-        Assert.notNull(
+        Validate.notNull(
                 cid,
                 "The specified target '--type' does not exist or can not be found. Please create this type first.");
-        Assert.notNull(cid.getAnnotation(EMBEDDABLE),
+        Validate.notNull(cid.getAnnotation(EMBEDDABLE),
                 "The field embedded command is only applicable to JPA @Embeddable field types.");
 
         // Check if the requested entity is a JPA @Entity
         final ClassOrInterfaceTypeDetails javaTypeDetails = typeLocationService
                 .getTypeDetails(typeName);
-        Assert.notNull(javaTypeDetails, "The type specified, '" + typeName
+        Validate.notNull(javaTypeDetails, "The type specified, '" + typeName
                 + "'doesn't exist");
 
         final String physicalTypeIdentifier = javaTypeDetails
                 .getDeclaredByMetadataId();
         final PhysicalTypeMetadata targetTypeMetadata = (PhysicalTypeMetadata) metadataService
                 .get(physicalTypeIdentifier);
-        Assert.notNull(
+        Validate.notNull(
                 targetTypeMetadata,
                 "The specified target '--class' does not exist or can not be found. Please create this type first.");
         final PhysicalTypeDetails targetPtd = targetTypeMetadata
                 .getMemberHoldingTypeDetails();
-        Assert.isInstanceOf(MemberHoldingTypeDetails.class, targetPtd);
+        Validate.isInstanceOf(MemberHoldingTypeDetails.class, targetPtd);
 
         final ClassOrInterfaceTypeDetails targetTypeCid = (ClassOrInterfaceTypeDetails) targetPtd;
         final MemberDetails memberDetails = memberDetailsScanner
                 .getMemberDetails(this.getClass().getName(), targetTypeCid);
-        Assert.isTrue(
+        Validate.isTrue(
                 memberDetails.getAnnotation(ENTITY) != null
                         || memberDetails.getAnnotation(PERSISTENT) != null,
                 "The field embedded command is only applicable to JPA @Entity or Spring Data @Persistent target types.");
@@ -251,7 +251,7 @@ public class FieldCommands implements CommandMarker {
 
         final ClassOrInterfaceTypeDetails cid = typeLocationService
                 .getTypeDetails(typeName);
-        Assert.notNull(cid, "The type specified, '" + typeName
+        Validate.notNull(cid, "The type specified, '" + typeName
                 + "'doesn't exist");
 
         final String physicalTypeIdentifier = cid.getDeclaredByMetadataId();
@@ -295,7 +295,7 @@ public class FieldCommands implements CommandMarker {
 
         final ClassOrInterfaceTypeDetails javaTypeDetails = typeLocationService
                 .getTypeDetails(typeName);
-        Assert.notNull(javaTypeDetails, "The type specified, '" + typeName
+        Validate.notNull(javaTypeDetails, "The type specified, '" + typeName
                 + "'doesn't exist");
 
         final String physicalTypeIdentifier = javaTypeDetails
@@ -341,7 +341,7 @@ public class FieldCommands implements CommandMarker {
             fieldDetails.setValue(value);
         }
 
-        Assert.isTrue(
+        Validate.isTrue(
                 fieldDetails.isDigitsSetCorrectly(),
                 "Must specify both --digitsInteger and --digitsFractional for @Digits to be added");
 
@@ -365,7 +365,7 @@ public class FieldCommands implements CommandMarker {
 
         final ClassOrInterfaceTypeDetails cid = typeLocationService
                 .getTypeDetails(fieldType);
-        Assert.notNull(
+        Validate.notNull(
                 cid,
                 "The specified target '--type' does not exist or can not be found. Please create this type first.");
 
@@ -376,17 +376,17 @@ public class FieldCommands implements CommandMarker {
                 .getAnnotation(ENTITY);
         final AnnotationMetadata persistentAnnotation = memberDetails
                 .getAnnotation(PERSISTENT);
-        Assert.isTrue(
+        Validate.isTrue(
                 entityAnnotation != null || persistentAnnotation != null,
                 "The field reference command is only applicable to JPA @Entity or Spring Data @Persistent target types.");
 
-        Assert.isTrue(cardinality == Cardinality.MANY_TO_ONE
+        Validate.isTrue(cardinality == Cardinality.MANY_TO_ONE
                 || cardinality == Cardinality.ONE_TO_ONE,
                 "Cardinality must be MANY_TO_ONE or ONE_TO_ONE for the field reference command");
 
         final ClassOrInterfaceTypeDetails javaTypeDetails = typeLocationService
                 .getTypeDetails(typeName);
-        Assert.notNull(javaTypeDetails, "The type specified, '" + typeName
+        Validate.notNull(javaTypeDetails, "The type specified, '" + typeName
                 + "'doesn't exist");
 
         final String physicalTypeIdentifier = javaTypeDetails
@@ -399,7 +399,7 @@ public class FieldCommands implements CommandMarker {
             fieldDetails.setJoinColumnName(joinColumnName);
         }
         if (referencedColumnName != null) {
-            Assert.notNull(joinColumnName,
+            Validate.notNull(joinColumnName,
                     "@JoinColumn name is required if specifying a referencedColumnName");
             fieldDetails.setReferencedColumnName(referencedColumnName);
         }
@@ -431,7 +431,7 @@ public class FieldCommands implements CommandMarker {
 
         final ClassOrInterfaceTypeDetails cid = typeLocationService
                 .getTypeDetails(fieldType);
-        Assert.notNull(
+        Validate.notNull(
                 cid,
                 "The specified target '--type' does not exist or can not be found. Please create this type first.");
 
@@ -444,7 +444,7 @@ public class FieldCommands implements CommandMarker {
                 .getAnnotation(PERSISTENT);
 
         if (entityAnnotation != null) {
-            Assert.isTrue(cardinality == Cardinality.ONE_TO_MANY
+            Validate.isTrue(cardinality == Cardinality.ONE_TO_MANY
                     || cardinality == Cardinality.MANY_TO_MANY,
                     "Cardinality must be ONE_TO_MANY or MANY_TO_MANY for the field set command");
         }
@@ -461,7 +461,7 @@ public class FieldCommands implements CommandMarker {
 
         final ClassOrInterfaceTypeDetails javaTypeDetails = typeLocationService
                 .getTypeDetails(typeName);
-        Assert.notNull(javaTypeDetails, "The type specified, '" + typeName
+        Validate.notNull(javaTypeDetails, "The type specified, '" + typeName
                 + "'doesn't exist");
 
         final String physicalTypeIdentifier = javaTypeDetails
@@ -511,7 +511,7 @@ public class FieldCommands implements CommandMarker {
 
         final ClassOrInterfaceTypeDetails javaTypeDetails = typeLocationService
                 .getTypeDetails(typeName);
-        Assert.notNull(javaTypeDetails, "The type specified, '" + typeName
+        Validate.notNull(javaTypeDetails, "The type specified, '" + typeName
                 + "'doesn't exist");
 
         final String physicalTypeIdentifier = javaTypeDetails
@@ -563,7 +563,7 @@ public class FieldCommands implements CommandMarker {
 
         final ClassOrInterfaceTypeDetails cid = typeLocationService
                 .getTypeDetails(typeName);
-        Assert.notNull(cid, "The type specified, '" + typeName
+        Validate.notNull(cid, "The type specified, '" + typeName
                 + "'doesn't exist");
 
         final String physicalTypeIdentifier = cid.getDeclaredByMetadataId();
@@ -636,7 +636,7 @@ public class FieldCommands implements CommandMarker {
 
         final ClassOrInterfaceTypeDetails javaTypeDetails = typeLocationService
                 .getTypeDetails(typeName);
-        Assert.notNull(javaTypeDetails, "The type specified, '" + typeName
+        Validate.notNull(javaTypeDetails, "The type specified, '" + typeName
                 + "'doesn't exist");
 
         final String physicalTypeIdentifier = javaTypeDetails

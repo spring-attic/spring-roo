@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.lang3.Validate;
+
 /**
  * A {@link List} of {@link Pair}s. Unlike a {@link java.util.Map}, it can have
  * duplicate and/or <code>null</code> keys.
@@ -33,16 +35,16 @@ public class PairList<K, V> extends ArrayList<Pair<K, V>> {
      *            must be non-null and of the same size as the keys)
      */
     public PairList(final List<? extends K> keys, final List<? extends V> values) {
-        Assert.isTrue(!(keys == null ^ values == null),
+        Validate.isTrue(!(keys == null ^ values == null),
                 "Parameter types and names must either both be null or both be not null");
         if (keys == null) {
-            Assert.isTrue(values == null,
+            Validate.isTrue(values == null,
                     "Parameter names must be null if types are null");
         }
         else {
-            Assert.isTrue(values != null,
+            Validate.isTrue(values != null,
                     "Parameter names are required if types are provided");
-            Assert.isTrue(
+            Validate.isTrue(
                     keys.size() == values.size(),
                     "Expected " + keys.size() + " values but found "
                             + values.size());

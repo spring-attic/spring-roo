@@ -4,8 +4,8 @@ import java.beans.Introspector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.springframework.roo.support.util.Assert;
-import org.springframework.roo.support.util.StringUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 
 /**
  * Immutable representation of a Java field name, method name, or other common
@@ -39,7 +39,7 @@ public class JavaSymbolName implements Comparable<JavaSymbolName> {
      * @param name the name to evaluate (required)
      */
     public static void assertJavaNameLegal(final String name) {
-        Assert.notNull(name, "Name required");
+        Validate.notNull(name, "Name required");
 
         // Note regular expression for legal characters found to be x5 slower in
         // profiling than this approach
@@ -145,7 +145,7 @@ public class JavaSymbolName implements Comparable<JavaSymbolName> {
      * @param symbolName the name (mandatory)
      */
     public JavaSymbolName(final String symbolName) {
-        Assert.hasText(symbolName, "Fully qualified type name required");
+        Validate.notBlank(symbolName, "Fully qualified type name required");
         assertJavaNameLegal(symbolName);
         this.symbolName = symbolName;
     }

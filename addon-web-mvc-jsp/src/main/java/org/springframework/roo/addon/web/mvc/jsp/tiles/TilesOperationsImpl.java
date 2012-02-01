@@ -9,6 +9,8 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -16,10 +18,8 @@ import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.PathResolver;
-import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.FileUtils;
-import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -56,13 +56,13 @@ public class TilesOperationsImpl implements TilesOperations {
     public void addViewDefinition(final String folderName,
             final LogicalPath path, final String tilesViewName,
             final String tilesTemplateName, final String viewLocation) {
-        Assert.hasText(tilesViewName, "View name required");
-        Assert.hasText(tilesTemplateName, "Template name required");
-        Assert.hasText(viewLocation, "View location required");
+        Validate.notBlank(tilesViewName, "View name required");
+        Validate.notBlank(tilesTemplateName, "Template name required");
+        Validate.notBlank(viewLocation, "View location required");
 
         final String viewsDefinitionFile = getTilesConfigFile(folderName, path);
 
-        final String unprefixedViewName = StringUtils.removePrefix(
+        final String unprefixedViewName = StringUtils.removeStart(
                 tilesViewName, "/");
         final Element root = getViewsElement(viewsDefinitionFile);
         final Element existingDefinition = XmlUtils.findFirstElement(
@@ -101,8 +101,8 @@ public class TilesOperationsImpl implements TilesOperations {
     private String getTilesConfigFile(final String folderName,
             final LogicalPath path) {
         final String subPath;
-        if (StringUtils.hasText(folderName) && !"/".equals(folderName)) {
-            subPath = StringUtils.prefix(folderName, "/");
+        if (StringUtils.isNotBlank(folderName) && !"/".equals(folderName)) {
+            subPath = "/" + folderName;
         }
         else {
             subPath = "";
@@ -145,7 +145,7 @@ public class TilesOperationsImpl implements TilesOperations {
 
     public void removeViewDefinition(final String name,
             final String folderName, final LogicalPath path) {
-        Assert.hasText(name, "View name required");
+        Validate.notBlank(name, "View name required");
 
         final String viewsDefinitionFile = getTilesConfigFile(folderName, path);
 
@@ -198,7 +198,7 @@ public class TilesOperationsImpl implements TilesOperations {
         }
         else {
             mutableFile = fileManager.createFile(tilesDefinitionFile);
-            Assert.notNull(mutableFile,
+            Validate.notNull(mutableFile,
                     "Could not create tiles view definition '"
                             + tilesDefinitionFile + "'");
         }

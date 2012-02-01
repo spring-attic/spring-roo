@@ -13,6 +13,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.addon.json.CustomDataJsonTags;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.MethodMetadata;
@@ -24,8 +26,6 @@ import org.springframework.roo.classpath.layers.MemberTypeAdditions;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.SpringJavaType;
-import org.springframework.roo.support.util.Assert;
-import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Represents metadata for the application-wide conversion service. Generates
@@ -81,15 +81,15 @@ public class ConversionServiceMetadata extends
             final Map<JavaType, Map<Object, JavaSymbolName>> compositePrimaryKeyTypes,
             final Map<JavaType, List<MethodMetadata>> toStringMethods) {
         super(identifier, aspectName, governorPhysicalTypeMetadata);
-        Assert.notNull(findMethods, "Find methods required");
-        Assert.notNull(compositePrimaryKeyTypes, "List of PK types required");
-        Assert.notNull(idTypes, "List of ID types required");
-        Assert.notNull(relevantDomainTypes,
+        Validate.notNull(findMethods, "Find methods required");
+        Validate.notNull(compositePrimaryKeyTypes, "List of PK types required");
+        Validate.notNull(idTypes, "List of ID types required");
+        Validate.notNull(relevantDomainTypes,
                 "List of relevant domain types required");
-        Assert.isTrue(relevantDomainTypes.size() == idTypes.size(),
+        Validate.isTrue(relevantDomainTypes.size() == idTypes.size(),
                 "Expected " + relevantDomainTypes.size()
                         + " ID types, but was " + idTypes.size());
-        Assert.notNull(toStringMethods, "ToString methods required");
+        Validate.notNull(toStringMethods, "ToString methods required");
 
         if (!isValid() || relevantDomainTypes.isEmpty()
                 && compositePrimaryKeyTypes.isEmpty()) {

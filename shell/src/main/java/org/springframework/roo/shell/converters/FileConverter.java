@@ -3,10 +3,10 @@ package org.springframework.roo.shell.converters;
 import java.io.File;
 import java.util.List;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.shell.Completion;
 import org.springframework.roo.shell.Converter;
 import org.springframework.roo.shell.MethodTarget;
-import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileUtils;
 
 /**
@@ -32,7 +32,7 @@ public abstract class FileConverter implements Converter<File> {
         if (originalUserInput.startsWith(HOME_DIRECTORY_SYMBOL)) {
             // Input originally started with this symbol, so replace the user's
             // home directory with it again
-            Assert.notNull(home,
+            Validate.notNull(home,
                     "Home directory could not be determined from system properties");
             return HOME_DIRECTORY_SYMBOL + completion.substring(home.length());
         }
@@ -67,7 +67,7 @@ public abstract class FileConverter implements Converter<File> {
         }
         if (userInput.startsWith(HOME_DIRECTORY_SYMBOL)) {
             // Replace this symbol with the user's actual home directory
-            Assert.notNull(home,
+            Validate.notNull(home,
                     "Home directory could not be determined from system properties");
             if (userInput.length() > 1) {
                 return home + userInput.substring(1);

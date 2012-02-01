@@ -6,11 +6,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.uaa.client.util.Assert;
 
 /**
  * Builder for {@link ClassOrInterfaceTypeDetails}.
@@ -139,8 +139,8 @@ public class ClassOrInterfaceTypeDetailsBuilder extends
     public void copyTo(
             final AbstractMemberHoldingTypeDetailsBuilder<?> targetBuilder,
             final ClassOrInterfaceTypeDetails governorDetails) {
-        Assert.notNull(targetBuilder, "Target builder required");
-        Assert.notNull(governorDetails,
+        Validate.notNull(targetBuilder, "Target builder required");
+        Validate.notNull(governorDetails,
                 "Governor member holding types required");
         // Copy fields
         fieldAdditions: for (final FieldMetadataBuilder field : getDeclaredFields()) {

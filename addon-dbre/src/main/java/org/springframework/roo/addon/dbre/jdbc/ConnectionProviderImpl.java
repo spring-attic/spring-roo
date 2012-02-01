@@ -9,11 +9,11 @@ import java.util.Properties;
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
 
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.addon.jdbc.JdbcDriverManager;
-import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.CollectionUtils;
 
 /**
@@ -48,7 +48,7 @@ public class ConnectionProviderImpl implements ConnectionProvider {
 
     public Connection getConnection(final Properties props,
             final boolean displayAddOns) throws RuntimeException {
-        Assert.notEmpty(props,
+        Validate.notEmpty(props,
                 "Connection properties must not be null or empty");
 
         // The properties "user" and "password" are required to make a
@@ -64,7 +64,7 @@ public class ConnectionProviderImpl implements ConnectionProvider {
                 .getProperty("database.driverClassName");
         final Driver driver = jdbcDriverManager.loadDriver(driverClassName,
                 displayAddOns);
-        Assert.notNull(driver, "JDBC driver not available for '"
+        Validate.notNull(driver, "JDBC driver not available for '"
                 + driverClassName + "'");
         try {
             return driver.connect(props.getProperty("database.url"), props);
@@ -93,7 +93,7 @@ public class ConnectionProviderImpl implements ConnectionProvider {
     }
 
     private Properties getProps(final Map<String, String> map) {
-        Assert.isTrue(!CollectionUtils.isEmpty(map),
+        Validate.isTrue(!CollectionUtils.isEmpty(map),
                 "Connection properties map must not be null or empty");
         final Properties props = new Properties();
         props.putAll(map);

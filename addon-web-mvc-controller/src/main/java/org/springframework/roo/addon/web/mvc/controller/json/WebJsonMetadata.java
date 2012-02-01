@@ -25,6 +25,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.addon.json.JsonMetadata;
 import org.springframework.roo.addon.web.mvc.controller.details.FinderMetadataDetails;
 import org.springframework.roo.addon.web.mvc.controller.scaffold.RooWebScaffold;
@@ -51,8 +53,6 @@ import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.support.style.ToStringCreator;
-import org.springframework.roo.support.util.Assert;
-import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Metadata for Json functionality provided through {@link RooWebScaffold}.
@@ -129,13 +129,13 @@ public class WebJsonMetadata extends
             final JsonMetadata jsonMetadata,
             final boolean introduceLayerComponents) {
         super(identifier, aspectName, governorPhysicalTypeMetadata);
-        Assert.isTrue(isValid(identifier), "Metadata identification string '"
+        Validate.isTrue(isValid(identifier), "Metadata identification string '"
                 + identifier + "' is invalid");
-        Assert.notNull(annotationValues, "Annotation values required");
-        Assert.notNull(persistenceAdditions, "Persistence additions required");
-        Assert.notNull(finderDetails,
+        Validate.notNull(annotationValues, "Annotation values required");
+        Validate.notNull(persistenceAdditions, "Persistence additions required");
+        Validate.notNull(finderDetails,
                 "Set of dynamic finder methods cannot be null");
-        Assert.notNull(jsonMetadata, "Json metadata required");
+        Validate.notNull(jsonMetadata, "Json metadata required");
 
         if (!isValid()) {
             return;

@@ -2,6 +2,7 @@ package org.springframework.roo.classpath.itd;
 
 import java.io.File;
 
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -10,7 +11,6 @@ import org.springframework.roo.file.monitor.event.FileDetails;
 import org.springframework.roo.file.monitor.event.FileEvent;
 import org.springframework.roo.file.monitor.event.FileEventListener;
 import org.springframework.roo.process.manager.FileManager;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Automatically deletes any ITD that should not exist due to the non-existence
@@ -48,7 +48,7 @@ public class ItdFileDeletionService implements FileEventListener {
     @Reference private FileManager fileManager;
 
     public void onFileEvent(final FileEvent fileEvent) {
-        Assert.notNull(fileEvent, "File event required");
+        Validate.notNull(fileEvent, "File event required");
         if (fileEvent.getFileDetails().matchesAntPath(ANT_PATH_ALL_ITD_SOURCE)) {
             // It's a ROO ITD, but check it really exists
             if (!fileEvent.getFileDetails().getFile().exists()) {

@@ -2,10 +2,10 @@ package org.springframework.roo.project;
 
 import java.io.File;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.project.maven.Pom;
-import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileUtils;
-import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Common file paths used in Maven projects.
@@ -35,7 +35,7 @@ public enum Path {
     SRC_MAIN_JAVA(true, "src/main/java") {
         @Override
         public String getPathRelativeToPom(final Pom pom) {
-            if (pom != null && StringUtils.hasText(pom.getSourceDirectory())) {
+            if (pom != null && StringUtils.isNotBlank(pom.getSourceDirectory())) {
                 return pom.getSourceDirectory();
             }
             return getDefaultLocation();
@@ -59,7 +59,7 @@ public enum Path {
         @Override
         public String getPathRelativeToPom(final Pom pom) {
             if (pom != null
-                    && StringUtils.hasText(pom.getTestSourceDirectory())) {
+                    && StringUtils.isNotBlank(pom.getTestSourceDirectory())) {
                 return pom.getTestSourceDirectory();
             }
             return getDefaultLocation();
@@ -83,7 +83,7 @@ public enum Path {
      *            <code>null</code>)
      */
     private Path(final boolean javaSource, final String defaultLocation) {
-        Assert.notNull(defaultLocation, "Default location is required");
+        Validate.notNull(defaultLocation, "Default location is required");
         this.defaultLocation = defaultLocation;
         this.javaSource = javaSource;
     }

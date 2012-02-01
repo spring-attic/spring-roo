@@ -1,7 +1,7 @@
 package org.springframework.roo.addon.web.mvc.controller.details;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Aggregates metadata for a given {@link JavaType} which is needed by Web
@@ -35,9 +35,9 @@ public class JavaTypeMetadataDetails {
             final boolean isApplicationType,
             final JavaTypePersistenceMetadataDetails persistenceDetails,
             final String controllerPath) {
-        Assert.notNull(javaType, "Java type required");
-        Assert.hasText(plural, "Plural required");
-        Assert.hasText(controllerPath, "Controller path required");
+        Validate.notNull(javaType, "Java type required");
+        Validate.notBlank(plural, "Plural required");
+        Validate.notBlank(controllerPath, "Controller path required");
         this.javaType = javaType;
         this.plural = plural;
         this.isEnumType = isEnumType;

@@ -5,6 +5,7 @@ import static org.springframework.roo.model.RooJavaType.ROO_JSF_MANAGED_BEAN;
 
 import java.util.Set;
 
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -21,7 +22,6 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Implementation of {@link JsfApplicationBeanMetadataProvider}.
@@ -106,7 +106,7 @@ public class JsfApplicationBeanMetadataProviderImpl extends
 
         final ProjectMetadata projectMetadata = projectOperations
                 .getFocusedProjectMetadata();
-        Assert.notNull(projectMetadata, "Project metadata required");
+        Validate.notNull(projectMetadata, "Project metadata required");
 
         return new JsfApplicationBeanMetadata(metadataIdentificationString,
                 aspectName, governorPhysicalTypeMetadata, managedBeans,

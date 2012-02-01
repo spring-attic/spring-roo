@@ -1,7 +1,7 @@
 package org.springframework.roo.classpath.details.annotations;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.model.JavaSymbolName;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Represents a {@link String} annotation attribute value.
@@ -18,7 +18,7 @@ public class StringAttributeValue extends
 
     public StringAttributeValue(final JavaSymbolName name, final String value) {
         super(name);
-        Assert.notNull(value, "Value required");
+        Validate.notNull(value, "Value required");
         this.value = value;
     }
 

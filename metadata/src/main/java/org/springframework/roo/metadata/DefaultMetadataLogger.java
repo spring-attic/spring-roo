@@ -8,10 +8,10 @@ import java.util.SortedSet;
 import java.util.Stack;
 import java.util.TreeSet;
 
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.metadata.internal.StandardMetadataTimingStatistic;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Default implementation of {@link MetadataLogger}.
@@ -66,8 +66,8 @@ public class DefaultMetadataLogger implements MetadataLogger {
     }
 
     public void log(final String message) {
-        Assert.hasText(message, "Message to log required");
-        Assert.isTrue(eventStack.size() > 0,
+        Validate.notBlank(message, "Message to log required");
+        Validate.isTrue(eventStack.size() > 0,
                 "Event stack is empty, so no logging should have been requested at this time");
         final StringBuilder sb = new StringBuilder("00000000");
         // Get the current event ID off the stack
@@ -114,7 +114,7 @@ public class DefaultMetadataLogger implements MetadataLogger {
     }
 
     public void startTimer(final String responsibleClass) {
-        Assert.hasText(responsibleClass, "Responsible class required");
+        Validate.notBlank(responsibleClass, "Responsible class required");
         final long now = System.nanoTime();
         if (timerStack.size() > 0) {
             // There is an existing timer on the stack, so we need to stop the
@@ -133,14 +133,14 @@ public class DefaultMetadataLogger implements MetadataLogger {
     }
 
     public void stopEvent() {
-        Assert.isTrue(
+        Validate.isTrue(
                 eventStack.size() > 0,
                 "Event stack is empty, indicating a mismatched number of timer start/stop calls");
         eventStack.pop();
     }
 
     public void stopTimer() {
-        Assert.isTrue(
+        Validate.isTrue(
                 timerStack.size() > 0,
                 "Timer stack is empty, indicating a mismatched number of timer start/stop calls");
         final long now = System.nanoTime();

@@ -23,6 +23,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.addon.jpa.activerecord.RooJpaActiveRecord;
 import org.springframework.roo.addon.jpa.identifier.Identifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
@@ -47,8 +49,6 @@ import org.springframework.roo.metadata.MetadataItem;
 import org.springframework.roo.model.EnumDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.support.util.Assert;
-import org.springframework.roo.support.util.StringUtils;
 
 /**
  * The metadata for a JPA entity's *_Roo_Jpa_Entity.aj ITD.
@@ -92,8 +92,9 @@ public class JpaEntityMetadata extends
             final JpaEntityAnnotationValues annotationValues,
             final boolean isGaeEnabled, final boolean isDatabaseDotComEnabled) {
         super(metadataIdentificationString, itdName, entityPhysicalType);
-        Assert.notNull(annotationValues, "Annotation values are required");
-        Assert.notNull(entityMemberDetails, "Entity MemberDetails are required");
+        Validate.notNull(annotationValues, "Annotation values are required");
+        Validate.notNull(entityMemberDetails,
+                "Entity MemberDetails are required");
 
         /*
          * Ideally we'd pass these parameters to the methods below rather than
@@ -138,7 +139,7 @@ public class JpaEntityMetadata extends
     }
 
     private AnnotationMetadata getDiscriminatorColumnAnnotation() {
-        if (StringUtils.hasText(annotationValues.getInheritanceType())
+        if (StringUtils.isNotBlank(annotationValues.getInheritanceType())
                 && InheritanceType.SINGLE_TABLE.name().equals(
                         annotationValues.getInheritanceType())) {
             // Theoretically not required based on @DiscriminatorColumn
@@ -159,7 +160,7 @@ public class JpaEntityMetadata extends
             return null;
         }
 
-        if (StringUtils.hasText(annotationValues.getEntityName())) {
+        if (StringUtils.isNotBlank(annotationValues.getEntityName())) {
             final AnnotationMetadataBuilder entityBuilder = new AnnotationMetadataBuilder(
                     entityAnnotation);
             entityBuilder.addStringAttribute("name",
@@ -219,11 +220,11 @@ public class JpaEntityMetadata extends
     }
 
     private String getIdentifierColumn() {
-        if (StringUtils.hasText(annotationValues.getIdentifierColumn())) {
+        if (StringUtils.isNotBlank(annotationValues.getIdentifierColumn())) {
             return annotationValues.getIdentifierColumn();
         }
         else if (identifier != null
-                && StringUtils.hasText(identifier.getColumnName())) {
+                && StringUtils.isNotBlank(identifier.getColumnName())) {
             return identifier.getColumnName();
         }
         return "";
@@ -329,7 +330,7 @@ public class JpaEntityMetadata extends
             generatedValueBuilder.addEnumAttribute("strategy", new EnumDetails(
                     GENERATION_TYPE, new JavaSymbolName(generationType)));
 
-            if (StringUtils.hasText(annotationValues.getSequenceName())
+            if (StringUtils.isNotBlank(annotationValues.getSequenceName())
                     && !(isGaeEnabled || isDatabaseDotComEnabled)) {
                 final String sequenceKey = StringUtils.uncapitalize(destination
                         .getSimpleTypeName()) + "Gen";
@@ -348,7 +349,7 @@ public class JpaEntityMetadata extends
             final String identifierColumn = StringUtils
                     .trimToEmpty(getIdentifierColumn());
             String columnName = idField.getSymbolName();
-            if (StringUtils.hasText(identifierColumn)) {
+            if (StringUtils.isNotBlank(identifierColumn)) {
                 // User has specified an alternate column name
                 columnName = identifierColumn;
             }
@@ -357,7 +358,7 @@ public class JpaEntityMetadata extends
                     COLUMN);
             columnBuilder.addStringAttribute("name", columnName);
             if (identifier != null
-                    && StringUtils.hasText(identifier.getColumnDefinition())) {
+                    && StringUtils.isNotBlank(identifier.getColumnDefinition())) {
                 columnBuilder.addStringAttribute("columnDefinition",
                         identifier.getColumnDefinition());
             }
@@ -392,7 +393,7 @@ public class JpaEntityMetadata extends
     private FieldMetadata getIdentifierField(
             final List<FieldMetadata> identifierFields,
             final JavaType identifierType) {
-        Assert.isTrue(
+        Validate.isTrue(
                 identifierFields.size() == 1,
                 "More than one field was annotated with @"
                         + identifierType.getSimpleTypeName() + " in '"
@@ -401,7 +402,7 @@ public class JpaEntityMetadata extends
     }
 
     private String getIdentifierFieldName() {
-        if (StringUtils.hasText(annotationValues.getIdentifierField())) {
+        if (StringUtils.isNotBlank(annotationValues.getIdentifierField())) {
             return annotationValues.getIdentifierField();
         }
         else if (identifier != null && identifier.getFieldName() != null) {
@@ -499,7 +500,7 @@ public class JpaEntityMetadata extends
         if (governorTypeDetails.getAnnotation(INHERITANCE) != null) {
             return null;
         }
-        if (StringUtils.hasText(annotationValues.getInheritanceType())) {
+        if (StringUtils.isNotBlank(annotationValues.getInheritanceType())) {
             final AnnotationMetadataBuilder inheritanceBuilder = new AnnotationMetadataBuilder(
                     INHERITANCE);
             inheritanceBuilder.addEnumAttribute("strategy",
@@ -561,17 +562,17 @@ public class JpaEntityMetadata extends
         final String catalog = annotationValues.getCatalog();
         final String schema = annotationValues.getSchema();
         final String table = annotationValues.getTable();
-        if (StringUtils.hasText(table) || StringUtils.hasText(schema)
-                || StringUtils.hasText(catalog)) {
+        if (StringUtils.isNotBlank(table) || StringUtils.isNotBlank(schema)
+                || StringUtils.isNotBlank(catalog)) {
             final AnnotationMetadataBuilder tableBuilder = new AnnotationMetadataBuilder(
                     tableAnnotation);
-            if (StringUtils.hasText(catalog)) {
+            if (StringUtils.isNotBlank(catalog)) {
                 tableBuilder.addStringAttribute("catalog", catalog);
             }
-            if (StringUtils.hasText(schema)) {
+            if (StringUtils.isNotBlank(schema)) {
                 tableBuilder.addStringAttribute("schema", schema);
             }
-            if (StringUtils.hasText(table)) {
+            if (StringUtils.isNotBlank(table)) {
                 tableBuilder.addStringAttribute("name", table);
             }
             return tableBuilder.build();
@@ -665,7 +666,7 @@ public class JpaEntityMetadata extends
         final List<FieldMetadata> versionFields = governorTypeDetails
                 .getFieldsWithAnnotation(VERSION);
         if (!versionFields.isEmpty()) {
-            Assert.isTrue(versionFields.size() == 1,
+            Validate.isTrue(versionFields.size() == 1,
                     "More than 1 field was annotated with @Version in '"
                             + destination.getFullyQualifiedTypeName() + "'");
             return versionFields.get(0);

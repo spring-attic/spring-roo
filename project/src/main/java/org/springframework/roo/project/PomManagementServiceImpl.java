@@ -15,6 +15,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -27,9 +29,7 @@ import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.project.maven.PomFactory;
 import org.springframework.roo.shell.Shell;
 import org.springframework.roo.support.osgi.OSGiUtils;
-import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileUtils;
-import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -147,7 +147,7 @@ public class PomManagementServiceImpl implements PomManagementService {
                 .ensureTrailingSeparator(projectRootDirectory);
         final String normalisedPomDirectory = FileUtils
                 .ensureTrailingSeparator(pomDirectory);
-        final String moduleName = StringUtils.removePrefix(
+        final String moduleName = StringUtils.removeStart(
                 normalisedPomDirectory, normalisedRootPath);
         return FileUtils.removeTrailingSeparator(moduleName);
     }
@@ -194,7 +194,7 @@ public class PomManagementServiceImpl implements PomManagementService {
             if (new File(pathToChangedPom).exists()) {
                 final String pomContents = FileUtils.read(new File(
                         pathToChangedPom));
-                if (StringUtils.hasText(pomContents)) {
+                if (StringUtils.isNotBlank(pomContents)) {
                     final Element rootElement = XmlUtils
                             .stringToElement(pomContents);
                     resolvePoms(rootElement, pathToChangedPom, pomModuleMap);
@@ -202,7 +202,7 @@ public class PomManagementServiceImpl implements PomManagementService {
                             .getFirstDirectory(pathToChangedPom));
                     final Pom pom = pomFactory.getInstance(rootElement,
                             pathToChangedPom, moduleName);
-                    Assert.notNull(pom, "POM is null for module = '"
+                    Validate.notNull(pom, "POM is null for module = '"
                             + moduleName + "' and path = '" + pathToChangedPom
                             + "'");
                     pomMap.put(pathToChangedPom, pom);
@@ -219,7 +219,7 @@ public class PomManagementServiceImpl implements PomManagementService {
         for (final Element module : XmlUtils.findElements(
                 "/project/modules/module", pomRoot)) {
             final String moduleName = module.getTextContent();
-            if (StringUtils.hasText(moduleName)) {
+            if (StringUtils.isNotBlank(moduleName)) {
                 final String modulePath = resolveRelativePath(pomPath,
                         moduleName);
                 final boolean alreadyDiscovered = pomSet
@@ -308,7 +308,7 @@ public class PomManagementServiceImpl implements PomManagementService {
     }
 
     public void setFocusedModule(final Pom focusedModule) {
-        Assert.notNull(focusedModule, "Module required");
+        Validate.notNull(focusedModule, "Module required");
         if (focusedModule.getPath().equals(focusedModulePath)) {
             return;
         }

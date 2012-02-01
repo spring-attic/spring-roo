@@ -4,9 +4,9 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.Collection;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.file.monitor.event.FileOperation;
 import org.springframework.roo.support.style.ToStringCreator;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * A request to monitor a particular directory.
@@ -29,7 +29,7 @@ public class DirectoryMonitoringRequest extends MonitoringRequest {
     public DirectoryMonitoringRequest(final File directory,
             final boolean watchSubtree, final Collection<FileOperation> notifyOn) {
         super(directory, notifyOn);
-        Assert.isTrue(directory.isDirectory(), "File '" + directory
+        Validate.isTrue(directory.isDirectory(), "File '" + directory
                 + "' must be a directory");
         this.watchSubtree = watchSubtree;
     }

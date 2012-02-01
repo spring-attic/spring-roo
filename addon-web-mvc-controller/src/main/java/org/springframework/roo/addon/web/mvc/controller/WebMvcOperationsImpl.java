@@ -15,6 +15,8 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -30,12 +32,10 @@ import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.ProjectType;
-import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.DomUtils;
 import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.FileUtils;
 import org.springframework.roo.support.util.IOUtils;
-import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.WebXmlUtils;
 import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlUtils;
@@ -65,12 +65,12 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
     @Reference private ProjectOperations projectOperations;
 
     private void copyWebXml() {
-        Assert.isTrue(projectOperations.isFocusedProjectAvailable(),
+        Validate.isTrue(projectOperations.isFocusedProjectAvailable(),
                 "Project metadata required");
 
         // Verify the servlet application context already exists
         final String servletCtxFilename = WEBMVC_CONFIG_XML;
-        Assert.isTrue(fileManager.exists(pathResolver.getFocusedIdentifier(
+        Validate.isTrue(fileManager.exists(pathResolver.getFocusedIdentifier(
                 Path.SRC_MAIN_WEBAPP, servletCtxFilename)), "'"
                 + servletCtxFilename + "' does not exist");
 
@@ -83,7 +83,7 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
 
         final InputStream templateInputStream = FileUtils.getInputStream(
                 getClass(), "web-template.xml");
-        Assert.notNull(templateInputStream,
+        Validate.notNull(templateInputStream,
                 "Could not acquire web.xml template");
         final Document document = XmlUtils.readXml(templateInputStream);
 
@@ -98,7 +98,7 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
     }
 
     private void createWebApplicationContext() {
-        Assert.isTrue(projectOperations.isFocusedProjectAvailable(),
+        Validate.isTrue(projectOperations.isFocusedProjectAvailable(),
                 "Project metadata required");
         final String webConfigFile = pathResolver.getFocusedIdentifier(
                 Path.SRC_MAIN_WEBAPP, WEBMVC_CONFIG_XML);
@@ -117,7 +117,7 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
     public void installConversionService(final JavaPackage destinationPackage) {
         final String webMvcConfigPath = pathResolver.getFocusedIdentifier(
                 Path.SRC_MAIN_WEBAPP, WEBMVC_CONFIG_XML);
-        Assert.isTrue(fileManager.exists(webMvcConfigPath), "'"
+        Validate.isTrue(fileManager.exists(webMvcConfigPath), "'"
                 + webMvcConfigPath + "' does not exist");
 
         final Document document = XmlUtils.readXml(fileManager
@@ -186,7 +186,7 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
     private boolean isConversionServiceConfigured() {
         final String webMvcConfigPath = pathResolver.getFocusedIdentifier(
                 Path.SRC_MAIN_WEBAPP, WEBMVC_CONFIG_XML);
-        Assert.isTrue(fileManager.exists(webMvcConfigPath), webMvcConfigPath
+        Validate.isTrue(fileManager.exists(webMvcConfigPath), webMvcConfigPath
                 + " doesn't exist");
 
         final MutableFile mutableFile = fileManager
@@ -215,19 +215,20 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
                 "Found custom ConversionService installed in webmvc-config.xml. ");
         sb.append("Remove the conversion-service attribute, let Spring ROO 1.1.1 (or higher), install the new application-wide ");
         sb.append("ApplicationConversionServiceFactoryBean and then use that to register your custom converters and formatters.");
-        Assert.isTrue(classAttribute.endsWith(CONVERSION_SERVICE_SIMPLE_TYPE),
+        Validate.isTrue(
+                classAttribute.endsWith(CONVERSION_SERVICE_SIMPLE_TYPE),
                 sb.toString());
         return true;
     }
 
     private void manageWebXml() {
-        Assert.isTrue(projectOperations.isFocusedProjectAvailable(),
+        Validate.isTrue(projectOperations.isFocusedProjectAvailable(),
                 "Project metadata required");
 
         // Verify that the web.xml already exists
         final String webXmlPath = pathResolver.getFocusedIdentifier(
                 Path.SRC_MAIN_WEBAPP, WEB_XML);
-        Assert.isTrue(fileManager.exists(webXmlPath), "'" + webXmlPath
+        Validate.isTrue(fileManager.exists(webXmlPath), "'" + webXmlPath
                 + "' does not exist");
 
         final Document document = XmlUtils.readXml(fileManager
@@ -281,7 +282,7 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
         else {
             inputStream = FileUtils.getInputStream(getClass(),
                     "webmvc-config.xml");
-            Assert.notNull(inputStream, "Could not acquire web.xml template");
+            Validate.notNull(inputStream, "Could not acquire web.xml template");
         }
         return XmlUtils.readXml(inputStream);
     }
@@ -363,12 +364,12 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
         // Update webmvc-config.xml if needed.
         final String webConfigFile = pathResolver.getFocusedIdentifier(
                 Path.SRC_MAIN_WEBAPP, WEBMVC_CONFIG_XML);
-        Assert.isTrue(fileManager.exists(webConfigFile),
+        Validate.isTrue(fileManager.exists(webConfigFile),
                 "Aborting: Unable to find " + webConfigFile);
         InputStream webMvcConfigInputStream = null;
         try {
             webMvcConfigInputStream = fileManager.getInputStream(webConfigFile);
-            Assert.notNull(webMvcConfigInputStream,
+            Validate.notNull(webMvcConfigInputStream,
                     "Aborting: Unable to acquire webmvc-config.xml file");
             final Document webMvcConfig = XmlUtils
                     .readXml(webMvcConfigInputStream);
@@ -377,7 +378,7 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
                 final InputStream templateInputStream = FileUtils
                         .getInputStream(getClass(),
                                 "webmvc-config-additions.xml");
-                Assert.notNull(templateInputStream,
+                Validate.notNull(templateInputStream,
                         "Could not acquire webmvc-config-additions.xml template");
                 final Document webMvcConfigAdditions = XmlUtils
                         .readXml(templateInputStream);

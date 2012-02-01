@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
@@ -16,7 +17,6 @@ import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.metadata.internal.AbstractMetadataCache;
 import org.springframework.roo.support.style.ToStringCreator;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Default implementation of {@link MetadataService}.
@@ -60,15 +60,17 @@ public class DefaultMetadataService extends AbstractMetadataCache implements
 
     protected void bindMetadataProvider(final MetadataProvider mp) {
         synchronized (lock) {
-            Assert.notNull(mp, "Metadata provider required");
+            Validate.notNull(mp, "Metadata provider required");
             final String mid = mp.getProvidesType();
-            Assert.isTrue(MetadataIdentificationUtils.isIdentifyingClass(mid),
+            Validate.isTrue(
+                    MetadataIdentificationUtils.isIdentifyingClass(mid),
                     "Metadata provider '" + mp
                             + "' violated interface contract by returning '"
                             + mid + "'");
-            Assert.isTrue(!providerMap.containsKey(mid), "Metadata provider '"
-                    + providerMap.get(mid)
-                    + "' already is providing metadata for '" + mid + "'");
+            Validate.isTrue(!providerMap.containsKey(mid),
+                    "Metadata provider '" + providerMap.get(mid)
+                            + "' already is providing metadata for '" + mid
+                            + "'");
             providers.add(mp);
             providerMap.put(mid, mp);
         }
@@ -130,7 +132,7 @@ public class DefaultMetadataService extends AbstractMetadataCache implements
 
     private MetadataItem getInternal(final String metadataIdentificationString,
             final boolean evictCache, final boolean cacheRetrievalAllowed) {
-        Assert.isTrue(MetadataIdentificationUtils
+        Validate.isTrue(MetadataIdentificationUtils
                 .isIdentifyingInstance(metadataIdentificationString),
                 "Metadata identification string '"
                         + metadataIdentificationString
@@ -191,7 +193,7 @@ public class DefaultMetadataService extends AbstractMetadataCache implements
                 final String mdClassId = MetadataIdentificationUtils
                         .getMetadataClassId(metadataIdentificationString);
                 final MetadataProvider p = providerMap.get(mdClassId);
-                Assert.notNull(
+                Validate.notNull(
                         p,
                         "No metadata provider is currently registered to provide metadata for identifier '"
                                 + metadataIdentificationString
@@ -292,10 +294,11 @@ public class DefaultMetadataService extends AbstractMetadataCache implements
 
     public void notify(final String upstreamDependency,
             final String downstreamDependency) {
-        Assert.isTrue(MetadataIdentificationUtils.isValid(upstreamDependency),
+        Validate.isTrue(
+                MetadataIdentificationUtils.isValid(upstreamDependency),
                 "Upstream dependency is an invalid metadata identification string ('"
                         + upstreamDependency + "')");
-        Assert.isTrue(
+        Validate.isTrue(
                 MetadataIdentificationUtils.isValid(downstreamDependency),
                 "Downstream dependency is an invalid metadata identification string ('"
                         + downstreamDependency + "')");

@@ -6,11 +6,11 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.logging.Level;
 
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.shell.osgi.AbstractFlashingObject;
-import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.url.stream.UrlInputStreamService;
 import org.springframework.roo.url.stream.UrlInputStreamUtils;
 import org.springframework.uaa.client.ProxyService;
@@ -43,7 +43,7 @@ public class JdkUrlInputStreamService extends AbstractFlashingObject implements
          */
         public ProgressIndicatingInputStream(final HttpURLConnection connection)
                 throws IOException {
-            Assert.notNull(connection, "URL Connection required");
+            Validate.notNull(connection, "URL Connection required");
             totalSize = connection.getContentLength();
             delegate = connection.getInputStream();
             text = connection.getURL().getPath();
@@ -123,12 +123,12 @@ public class JdkUrlInputStreamService extends AbstractFlashingObject implements
     }
 
     public InputStream openConnection(final URL httpUrl) throws IOException {
-        Assert.notNull(httpUrl, "HTTP URL is required");
-        Assert.isTrue(httpUrl.getProtocol().equals("http"),
+        Validate.notNull(httpUrl, "HTTP URL is required");
+        Validate.isTrue(httpUrl.getProtocol().equals("http"),
                 "Only HTTP is supported (not " + httpUrl + ")");
 
         // Fail if we're banned from accessing this domain
-        Assert.isNull(getUrlCannotBeOpenedMessage(httpUrl),
+        Validate.isTrue(getUrlCannotBeOpenedMessage(httpUrl) == null,
                 UrlInputStreamUtils.SETUP_UAA_REQUIRED);
         final HttpURLConnection connection = proxyService
                 .prepareHttpUrlConnection(httpUrl);

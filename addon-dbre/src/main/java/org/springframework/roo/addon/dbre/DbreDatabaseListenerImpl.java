@@ -20,6 +20,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -53,9 +55,7 @@ import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.shell.Shell;
-import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.CollectionUtils;
-import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Implementation of {@link DbreDatabaseListener}.
@@ -634,11 +634,11 @@ public class DbreDatabaseListenerImpl extends
             final Database database) {
         // Update the attributes of the existing JPA-related annotation
         final AnnotationMetadata jpaAnnotation = getJpaAnnotation(managedEntity);
-        Assert.state(jpaAnnotation != null,
-                "Neither @" + ROO_JPA_ACTIVE_RECORD.getSimpleTypeName()
-                        + " nor @" + ROO_JPA_ENTITY.getSimpleTypeName()
-                        + " found on existing DBRE-managed entity "
-                        + managedEntity.getName().getFullyQualifiedTypeName());
+        Validate.validState(jpaAnnotation != null, "Neither @"
+                + ROO_JPA_ACTIVE_RECORD.getSimpleTypeName() + " nor @"
+                + ROO_JPA_ENTITY.getSimpleTypeName()
+                + " found on existing DBRE-managed entity "
+                + managedEntity.getName().getFullyQualifiedTypeName());
 
         // Find table in database using 'table' and 'schema' attributes from the
         // JPA annotation
@@ -647,9 +647,9 @@ public class DbreDatabaseListenerImpl extends
         final String errMsg = "Unable to maintain database-managed entity "
                 + managedEntity.getName().getFullyQualifiedTypeName()
                 + " because its associated table could not be found";
-        Assert.notNull(tableAttribute, errMsg);
+        Validate.notNull(tableAttribute, errMsg);
         final String tableName = (String) tableAttribute.getValue();
-        Assert.hasText(tableName, errMsg);
+        Validate.notBlank(tableName, errMsg);
 
         final AnnotationAttributeValue<?> schemaAttribute = jpaAnnotation
                 .getAttribute(new JavaSymbolName("schema"));

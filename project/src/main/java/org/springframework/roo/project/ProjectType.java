@@ -1,7 +1,7 @@
 package org.springframework.roo.project;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.project.packaging.PackagingProvider;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Provides available project types for the project. Currently only war and jar
@@ -24,7 +24,7 @@ public class ProjectType {
      * @param name the name of this type of project (required)
      */
     public ProjectType(final String name) {
-        Assert.hasText(name, "Name required");
+        Validate.notBlank(name, "Name required");
         this.name = name;
     }
 

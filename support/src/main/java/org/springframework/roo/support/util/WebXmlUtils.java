@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -126,8 +128,8 @@ public final class WebXmlUtils {
      */
     public static void addContextParam(final WebXmlParam contextParam,
             final Document document, final String comment) {
-        Assert.notNull(document, "Web XML document required");
-        Assert.notNull(contextParam, "Context param required");
+        Validate.notNull(document, "Web XML document required");
+        Validate.notNull(contextParam, "Context param required");
 
         Element contextParamElement = XmlUtils.findFirstElement(WEB_APP_XPATH
                 + "context-param[param-name = '" + contextParam.getName()
@@ -139,7 +141,7 @@ public final class WebXmlUtils {
                             contextParam.getName()).build()).build();
             insertBetween(contextParamElement, "description[last()]", "filter",
                     document);
-            if (StringUtils.hasText(comment)) {
+            if (StringUtils.isNotBlank(comment)) {
                 addCommentBefore(contextParamElement, comment, document);
             }
         }
@@ -158,9 +160,9 @@ public final class WebXmlUtils {
      */
     public static void addErrorCode(final Integer errorCode,
             final String location, final Document document, final String comment) {
-        Assert.notNull(document, "Web XML document required");
-        Assert.notNull(errorCode, "Error code required");
-        Assert.hasText(location, "Location required");
+        Validate.notNull(document, "Web XML document required");
+        Validate.notNull(errorCode, "Error code required");
+        Validate.notBlank(location, "Location required");
 
         Element errorPageElement = XmlUtils.findFirstElement(WEB_APP_XPATH
                 + "error-page[error-code = '" + errorCode.toString() + "']",
@@ -173,7 +175,7 @@ public final class WebXmlUtils {
                     .build();
             insertBetween(errorPageElement, "welcome-file-list[last()]",
                     "the-end", document);
-            if (StringUtils.hasText(comment)) {
+            if (StringUtils.isNotBlank(comment)) {
                 addCommentBefore(errorPageElement, comment, document);
             }
         }
@@ -191,10 +193,10 @@ public final class WebXmlUtils {
      */
     public static void addExceptionType(final String exceptionType,
             final String location, final Document document, final String comment) {
-        Assert.notNull(document, "Web XML document required");
-        Assert.hasText(exceptionType,
+        Validate.notNull(document, "Web XML document required");
+        Validate.notBlank(exceptionType,
                 "Fully qualified exception type name required");
-        Assert.hasText(location, "location required");
+        Validate.notBlank(location, "location required");
 
         Element errorPageElement = XmlUtils.findFirstElement(WEB_APP_XPATH
                 + "error-page[exception-type = '" + exceptionType + "']",
@@ -206,7 +208,7 @@ public final class WebXmlUtils {
                                     .setText(exceptionType).build()).build();
             insertBetween(errorPageElement, "welcome-file-list[last()]",
                     "the-end", document);
-            if (StringUtils.hasText(comment)) {
+            if (StringUtils.isNotBlank(comment)) {
                 addCommentBefore(errorPageElement, comment, document);
             }
         }
@@ -254,10 +256,10 @@ public final class WebXmlUtils {
             final String urlPattern, final Document document,
             final String comment, List<WebXmlParam> initParams,
             final List<Dispatcher> dispatchers) {
-        Assert.notNull(document, "Web XML document required");
-        Assert.hasText(filterName, "Filter name required");
-        Assert.hasText(filterClass, "Filter class required");
-        Assert.notNull(urlPattern, "Filter URL mapping pattern required");
+        Validate.notNull(document, "Web XML document required");
+        Validate.notBlank(filterName, "Filter name required");
+        Validate.notBlank(filterClass, "Filter class required");
+        Validate.notNull(urlPattern, "Filter URL mapping pattern required");
 
         if (initParams == null) {
             initParams = new ArrayList<WebXmlUtils.WebXmlParam>();
@@ -276,21 +278,21 @@ public final class WebXmlUtils {
                         document);
             }
             else if (filterPosition.equals(FilterPosition.BEFORE)) {
-                Assert.hasText(beforeFilterName,
+                Validate.notBlank(beforeFilterName,
                         "The filter position filter name is required when using FilterPosition.BEFORE");
                 insertBefore(filterElement, "filter[filter-name = '"
                         + beforeFilterName + "']", document);
             }
             else if (filterPosition.equals(FilterPosition.AFTER)) {
-                Assert.hasText(afterFilterName,
+                Validate.notBlank(afterFilterName,
                         "The filter position filter name is required when using FilterPosition.AFTER");
                 insertAfter(filterElement, "filter[filter-name = '"
                         + afterFilterName + "']", document);
             }
             else if (filterPosition.equals(FilterPosition.BETWEEN)) {
-                Assert.hasText(beforeFilterName,
+                Validate.notBlank(beforeFilterName,
                         "The 'before' filter name is required when using FilterPosition.BETWEEN");
-                Assert.hasText(afterFilterName,
+                Validate.notBlank(afterFilterName,
                         "The 'after' filter name is required when using FilterPosition.BETWEEN");
                 insertBetween(filterElement, "filter[filter-name = '"
                         + afterFilterName + "']", "filter[filter-name = '"
@@ -300,7 +302,7 @@ public final class WebXmlUtils {
                 insertBetween(filterElement, "context-param[last()]",
                         "filter-mapping", document);
             }
-            if (StringUtils.hasText(comment)) {
+            if (StringUtils.isNotBlank(comment)) {
                 addCommentBefore(filterElement, comment, document);
             }
         }
@@ -412,8 +414,8 @@ public final class WebXmlUtils {
      */
     public static void addListener(final String className,
             final Document document, final String comment) {
-        Assert.notNull(document, "Web XML document required");
-        Assert.hasText(className, "Class name required");
+        Validate.notNull(document, "Web XML document required");
+        Validate.notBlank(className, "Class name required");
 
         Element listenerElement = XmlUtils.findFirstElement(WEB_APP_XPATH
                 + "listener[listener-class = '" + className + "']",
@@ -425,7 +427,7 @@ public final class WebXmlUtils {
                                     .setText(className).build()).build();
             insertBetween(listenerElement, "filter-mapping[last()]", "servlet",
                     document);
-            if (StringUtils.hasText(comment)) {
+            if (StringUtils.isNotBlank(comment)) {
                 addCommentBefore(listenerElement, comment, document);
             }
         }
@@ -445,8 +447,8 @@ public final class WebXmlUtils {
             final List<WebResourceCollection> webResourceCollections,
             final List<String> roleNames, final String transportGuarantee,
             final Document document, final String comment) {
-        Assert.notNull(document, "Web XML document required");
-        Assert.isTrue(
+        Validate.notNull(document, "Web XML document required");
+        Validate.isTrue(
                 !CollectionUtils.isEmpty(webResourceCollections),
                 "A security-constraint element must contain at least one web-resource-collection");
 
@@ -457,12 +459,12 @@ public final class WebXmlUtils {
                     .createElement("security-constraint");
             insertAfter(securityConstraintElement, "session-config[last()]",
                     document);
-            if (StringUtils.hasText(comment)) {
+            if (StringUtils.isNotBlank(comment)) {
                 addCommentBefore(securityConstraintElement, comment, document);
             }
         }
 
-        if (StringUtils.hasText(displayName)) {
+        if (StringUtils.isNotBlank(displayName)) {
             appendChildIfNotPresent(
                     securityConstraintElement,
                     new XmlElementBuilder("display-name", document).setText(
@@ -472,19 +474,19 @@ public final class WebXmlUtils {
         for (final WebResourceCollection webResourceCollection : webResourceCollections) {
             final XmlElementBuilder webResourceCollectionBuilder = new XmlElementBuilder(
                     "web-resource-collection", document);
-            Assert.hasText(webResourceCollection.getWebResourceName(),
+            Validate.notBlank(webResourceCollection.getWebResourceName(),
                     "web-resource-name is required");
             webResourceCollectionBuilder.addChild(new XmlElementBuilder(
                     "web-resource-name", document).setText(
                     webResourceCollection.getWebResourceName()).build());
-            if (StringUtils.hasText(webResourceCollection.getDescription())) {
+            if (StringUtils.isNotBlank(webResourceCollection.getDescription())) {
                 webResourceCollectionBuilder.addChild(new XmlElementBuilder(
                         "description", document).setText(
                         webResourceCollection.getWebResourceName()).build());
             }
             for (final String urlPattern : webResourceCollection
                     .getUrlPatterns()) {
-                if (StringUtils.hasText(urlPattern)) {
+                if (StringUtils.isNotBlank(urlPattern)) {
                     webResourceCollectionBuilder
                             .addChild(new XmlElementBuilder("url-pattern",
                                     document).setText(urlPattern).build());
@@ -492,7 +494,7 @@ public final class WebXmlUtils {
             }
             for (final String httpMethod : webResourceCollection
                     .getHttpMethods()) {
-                if (StringUtils.hasText(httpMethod)) {
+                if (StringUtils.isNotBlank(httpMethod)) {
                     webResourceCollectionBuilder
                             .addChild(new XmlElementBuilder("http-method",
                                     document).setText(httpMethod).build());
@@ -506,7 +508,7 @@ public final class WebXmlUtils {
             final XmlElementBuilder authConstraintBuilder = new XmlElementBuilder(
                     "auth-constraint", document);
             for (final String roleName : roleNames) {
-                if (StringUtils.hasText(roleName)) {
+                if (StringUtils.isNotBlank(roleName)) {
                     authConstraintBuilder.addChild(new XmlElementBuilder(
                             "role-name", document).setText(roleName).build());
                 }
@@ -515,7 +517,7 @@ public final class WebXmlUtils {
                     authConstraintBuilder.build());
         }
 
-        if (StringUtils.hasText(transportGuarantee)) {
+        if (StringUtils.isNotBlank(transportGuarantee)) {
             final XmlElementBuilder userDataConstraintBuilder = new XmlElementBuilder(
                     "user-data-constraint", document);
             userDataConstraintBuilder.addChild(new XmlElementBuilder(
@@ -542,9 +544,9 @@ public final class WebXmlUtils {
             final String className, final String urlPattern,
             final Integer loadOnStartup, final Document document,
             final String comment, final WebXmlParam... initParams) {
-        Assert.notNull(document, "Web XML document required");
-        Assert.hasText(servletName, "Servlet name required");
-        Assert.hasText(className, "Fully qualified class name required");
+        Validate.notNull(document, "Web XML document required");
+        Validate.notBlank(servletName, "Servlet name required");
+        Validate.notBlank(className, "Fully qualified class name required");
 
         // Create servlet
         Element servletElement = XmlUtils.findFirstElement(WEB_APP_XPATH
@@ -596,7 +598,7 @@ public final class WebXmlUtils {
             insertBetween(servletMappingElement, "servlet[last()]",
                     "session-config", document);
         }
-        if (StringUtils.hasText(urlPattern)) {
+        if (StringUtils.isNotBlank(urlPattern)) {
             appendChildIfNotPresent(
                     servletMappingElement,
                     new XmlElementBuilder("url-pattern", document).setText(
@@ -619,8 +621,8 @@ public final class WebXmlUtils {
      */
     public static void addWelcomeFile(final String path,
             final Document document, final String comment) {
-        Assert.notNull(document, "Web XML document required");
-        Assert.hasText("Path required");
+        Validate.notNull(document, "Web XML document required");
+        Validate.notBlank("Path required");
 
         Element welcomeFileElement = XmlUtils.findFirstElement(WEB_APP_XPATH
                 + "welcome-file-list", document.getDocumentElement());
@@ -628,7 +630,7 @@ public final class WebXmlUtils {
             welcomeFileElement = document.createElement("welcome-file-list");
             insertBetween(welcomeFileElement, "session-config[last()]",
                     "error-page", document);
-            if (StringUtils.hasText(comment)) {
+            if (StringUtils.isNotBlank(comment)) {
                 addCommentBefore(welcomeFileElement, comment, document);
             }
         }
@@ -738,8 +740,8 @@ public final class WebXmlUtils {
      */
     public static void setDescription(final String description,
             final Document document, final String comment) {
-        Assert.notNull(document, "Web XML document required");
-        Assert.hasText(description, "Description required");
+        Validate.notNull(document, "Web XML document required");
+        Validate.notBlank(description, "Description required");
 
         Element descriptionElement = XmlUtils.findFirstElement(WEB_APP_XPATH
                 + "description", document.getDocumentElement());
@@ -747,7 +749,7 @@ public final class WebXmlUtils {
             descriptionElement = document.createElement("description");
             insertBetween(descriptionElement, "display-name[last()]",
                     "context-param", document);
-            if (StringUtils.hasText(comment)) {
+            if (StringUtils.isNotBlank(comment)) {
                 addCommentBefore(descriptionElement, comment, document);
             }
         }
@@ -763,8 +765,8 @@ public final class WebXmlUtils {
      */
     public static void setDisplayName(final String displayName,
             final Document document, final String comment) {
-        Assert.hasText(displayName, "display name required");
-        Assert.notNull(document, "Web XML document required");
+        Validate.notBlank(displayName, "display name required");
+        Validate.notNull(document, "Web XML document required");
 
         Element displayNameElement = XmlUtils.findFirstElement(WEB_APP_XPATH
                 + "display-name", document.getDocumentElement());
@@ -772,7 +774,7 @@ public final class WebXmlUtils {
             displayNameElement = document.createElement("display-name");
             insertBetween(displayNameElement, "the-start", "description",
                     document);
-            if (StringUtils.hasText(comment)) {
+            if (StringUtils.isNotBlank(comment)) {
                 addCommentBefore(displayNameElement, comment, document);
             }
         }
@@ -788,8 +790,8 @@ public final class WebXmlUtils {
      */
     public static void setSessionTimeout(final int timeout,
             final Document document, final String comment) {
-        Assert.notNull(document, "Web XML document required");
-        Assert.notNull(timeout, "Timeout required");
+        Validate.notNull(document, "Web XML document required");
+        Validate.notNull(timeout, "Timeout required");
 
         Element sessionConfigElement = XmlUtils.findFirstElement(WEB_APP_XPATH
                 + "session-config", document.getDocumentElement());
@@ -797,7 +799,7 @@ public final class WebXmlUtils {
             sessionConfigElement = document.createElement("session-config");
             insertBetween(sessionConfigElement, "servlet-mapping[last()]",
                     "welcome-file-list", document);
-            if (StringUtils.hasText(comment)) {
+            if (StringUtils.isNotBlank(comment)) {
                 addCommentBefore(sessionConfigElement, comment, document);
             }
         }

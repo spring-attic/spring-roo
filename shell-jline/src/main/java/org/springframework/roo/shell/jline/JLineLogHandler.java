@@ -10,11 +10,10 @@ import java.util.logging.LogRecord;
 import jline.ANSIBuffer;
 import jline.ConsoleReader;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.shell.ShellPromptAccessor;
-import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.IOUtils;
 import org.springframework.roo.support.util.OsUtils;
-import org.springframework.roo.support.util.StringUtils;
 
 /**
  * JDK logging {@link Handler} that emits log messages to a JLine
@@ -27,7 +26,8 @@ public class JLineLogHandler extends Handler {
 
     private static final boolean BRIGHT_COLORS = Boolean
             .getBoolean("roo.bright");
-
+    private static final String LINE_SEPARATOR = System
+            .getProperty("line.separator");
     private static boolean includeThreadName = false;
     private static String lastMessage;
     private static ThreadLocal<Boolean> redrawProhibit = new ThreadLocal<Boolean>();
@@ -98,8 +98,8 @@ public class JLineLogHandler extends Handler {
 
     public JLineLogHandler(final ConsoleReader reader,
             final ShellPromptAccessor shellPromptAccessor) {
-        Assert.notNull(reader, "Console reader required");
-        Assert.notNull(shellPromptAccessor, "Shell prompt accessor required");
+        Validate.notNull(reader, "Console reader required");
+        Validate.notNull(shellPromptAccessor, "Shell prompt accessor required");
         this.reader = reader;
         this.shellPromptAccessor = shellPromptAccessor;
         userInterfaceThreadName = Thread.currentThread().getName();
@@ -110,8 +110,7 @@ public class JLineLogHandler extends Handler {
             public String format(final LogRecord record) {
                 final StringBuffer sb = new StringBuffer();
                 if (record.getMessage() != null) {
-                    sb.append(record.getMessage()).append(
-                            StringUtils.LINE_SEPARATOR);
+                    sb.append(record.getMessage()).append(LINE_SEPARATOR);
                 }
                 if (record.getThrown() != null) {
                     PrintWriter pw = null;
@@ -209,8 +208,8 @@ public class JLineLogHandler extends Handler {
 
             eventString = " "
                     + getFormatter().format(event).replace(
-                            StringUtils.LINE_SEPARATOR,
-                            StringUtils.LINE_SEPARATOR
+                            LINE_SEPARATOR,
+                            LINE_SEPARATOR
                                     + lineSeparatorAndIndentingString
                                             .toString());
             if (eventString

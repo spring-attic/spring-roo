@@ -30,6 +30,8 @@ import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.w3c.dom.DOMConfiguration;
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
@@ -54,12 +56,14 @@ import org.xml.sax.SAXException;
  */
 public final class XmlUtils {
 
-    private static final Map<String, XPathExpression> compiledExpressionCache = new HashMap<String, XPathExpression>();
-    private static final DocumentBuilderFactory factory = DocumentBuilderFactory
+    private static final Map<String, XPathExpression> COMPILED_EXPRESSION_CACHE = new HashMap<String, XPathExpression>();
+    private static final DocumentBuilderFactory FACTORY = DocumentBuilderFactory
             .newInstance();
-    private static final TransformerFactory transformerFactory = TransformerFactory
+    private static final String LINE_SEPARATOR = System
+            .getProperty("line.separator");
+    private static final TransformerFactory TRANSFORMER_FACTORY = TransformerFactory
             .newInstance();
-    private static final XPath xpath = XPathFactory.newInstance().newXPath();
+    private static final XPath XPATH = XPathFactory.newInstance().newXPath();
 
     /**
      * Checks the presented element for illegal characters that could cause
@@ -99,8 +103,8 @@ public final class XmlUtils {
      *         representation of node2, otherwise false
      */
     public static boolean compareNodes(Node node1, Node node2) {
-        Assert.notNull(node1, "First node required");
-        Assert.notNull(node2, "Second node required");
+        Validate.notNull(node1, "First node required");
+        Validate.notNull(node2, "Second node required");
         // The documents need to be cloned as normalization has side-effects
         node1 = node1.cloneNode(true);
         node2 = node2.cloneNode(true);
@@ -134,8 +138,8 @@ public final class XmlUtils {
     public static Transformer createIndentingTransformer() {
         Transformer transformer;
         try {
-            transformerFactory.setAttribute("indent-number", 4);
-            transformer = transformerFactory.newTransformer();
+            TRANSFORMER_FACTORY.setAttribute("indent-number", 4);
+            transformer = TRANSFORMER_FACTORY.newTransformer();
         }
         catch (final Exception e) {
             throw new IllegalStateException(e);
@@ -176,7 +180,7 @@ public final class XmlUtils {
             final OutputStream outputStream)
             throws UnsupportedEncodingException {
         final Writer writer;
-        if (StringUtils.LINE_SEPARATOR.equals("\r\n")) {
+        if (LINE_SEPARATOR.equals("\r\n")) {
             writer = new OutputStreamWriter(outputStream, "ISO-8859-1") {
                 @Override
                 public void write(final char[] cbuf, final int off,
@@ -237,10 +241,11 @@ public final class XmlUtils {
         NodeList nodes = null;
 
         try {
-            XPathExpression expr = compiledExpressionCache.get(xPathExpression);
+            XPathExpression expr = COMPILED_EXPRESSION_CACHE
+                    .get(xPathExpression);
             if (expr == null) {
-                expr = xpath.compile(xPathExpression);
-                compiledExpressionCache.put(xPathExpression, expr);
+                expr = XPATH.compile(xPathExpression);
+                COMPILED_EXPRESSION_CACHE.put(xPathExpression, expr);
             }
             nodes = (NodeList) expr.evaluate(root, XPathConstants.NODESET);
         }
@@ -267,10 +272,11 @@ public final class XmlUtils {
             final Element element) {
         Node attr = null;
         try {
-            XPathExpression expr = compiledExpressionCache.get(xPathExpression);
+            XPathExpression expr = COMPILED_EXPRESSION_CACHE
+                    .get(xPathExpression);
             if (expr == null) {
-                expr = xpath.compile(xPathExpression);
-                compiledExpressionCache.put(xPathExpression, expr);
+                expr = XPATH.compile(xPathExpression);
+                COMPILED_EXPRESSION_CACHE.put(xPathExpression, expr);
             }
             attr = (Node) expr.evaluate(element, XPathConstants.NODE);
         }
@@ -329,14 +335,15 @@ public final class XmlUtils {
      * @return the Node if discovered (null if not found)
      */
     public static Node findNode(final String xPathExpression, final Node root) {
-        Assert.hasText(xPathExpression, "XPath expression required");
-        Assert.notNull(root, "Root element required");
+        Validate.notBlank(xPathExpression, "XPath expression required");
+        Validate.notNull(root, "Root element required");
         Node node = null;
         try {
-            XPathExpression expr = compiledExpressionCache.get(xPathExpression);
+            XPathExpression expr = COMPILED_EXPRESSION_CACHE
+                    .get(xPathExpression);
             if (expr == null) {
-                expr = xpath.compile(xPathExpression);
-                compiledExpressionCache.put(xPathExpression, expr);
+                expr = XPATH.compile(xPathExpression);
+                COMPILED_EXPRESSION_CACHE.put(xPathExpression, expr);
             }
             node = (Node) expr.evaluate(root, XPathConstants.NODE);
         }
@@ -363,10 +370,10 @@ public final class XmlUtils {
      */
     public static Element findRequiredElement(final String xPathExpression,
             final Element root) {
-        Assert.hasText(xPathExpression, "XPath expression required");
-        Assert.notNull(root, "Root element required");
+        Validate.notBlank(xPathExpression, "XPath expression required");
+        Validate.notNull(root, "Root element required");
         final Element element = findFirstElement(xPathExpression, root);
-        Assert.notNull(element, "Unable to obtain required element '"
+        Validate.notNull(element, "Unable to obtain required element '"
                 + xPathExpression + "' from element '" + root + "'");
         return element;
     }
@@ -387,7 +394,7 @@ public final class XmlUtils {
     public static DocumentBuilder getDocumentBuilder() {
         // factory.setNamespaceAware(true);
         try {
-            return factory.newDocumentBuilder();
+            return FACTORY.newDocumentBuilder();
         }
         catch (final ParserConfigurationException e) {
             throw new IllegalStateException(e);
@@ -407,7 +414,7 @@ public final class XmlUtils {
             final String xmlFilePath) {
         final InputStream inputStream = FileUtils.getInputStream(clazz,
                 xmlFilePath);
-        Assert.notNull(inputStream, "Could not open the file '" + xmlFilePath
+        Validate.notNull(inputStream, "Could not open the file '" + xmlFilePath
                 + "'");
         return readXml(inputStream).getDocumentElement();
     }
@@ -454,7 +461,7 @@ public final class XmlUtils {
      * @throws IllegalStateException if the stream could not be read
      */
     public static Document readXml(InputStream inputStream) {
-        Assert.notNull(inputStream, "InputStream required");
+        Validate.notNull(inputStream, "InputStream required");
         try {
             if (!(inputStream instanceof BufferedInputStream)) {
                 inputStream = new BufferedInputStream(inputStream);
@@ -493,7 +500,7 @@ public final class XmlUtils {
             return null;
         }
         try {
-            return factory.newDocumentBuilder()
+            return FACTORY.newDocumentBuilder()
                     .parse(new ByteArrayInputStream(xml.getBytes()))
                     .getDocumentElement();
         }
@@ -619,9 +626,9 @@ public final class XmlUtils {
      */
     public static void writeXml(final Transformer transformer,
             OutputStream outputStream, final Document document) {
-        Assert.notNull(transformer, "Transformer required");
-        Assert.notNull(outputStream, "OutputStream required");
-        Assert.notNull(document, "Document required");
+        Validate.notNull(transformer, "Transformer required");
+        Validate.notNull(outputStream, "OutputStream required");
+        Validate.notNull(document, "Document required");
 
         transformer.setOutputProperty(OutputKeys.METHOD, "xml");
         try {

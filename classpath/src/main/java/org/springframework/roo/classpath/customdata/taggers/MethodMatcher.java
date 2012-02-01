@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
@@ -18,8 +20,6 @@ import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.model.CustomDataKey;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.support.util.Assert;
-import org.springframework.roo.support.util.StringUtils;
 
 /**
  * {@link MethodMetadata} specific implementation of {@link Matcher}. Matches
@@ -145,7 +145,7 @@ public class MethodMatcher implements Matcher<MethodMetadata> {
                 cid = (ClassOrInterfaceTypeDetails) memberHoldingTypeDetails;
             }
         }
-        Assert.notNull(cid, "No concrete type found; cannot continue");
+        Validate.notNull(cid, "No concrete type found; cannot continue");
         return cid;
     }
 
@@ -173,7 +173,7 @@ public class MethodMatcher implements Matcher<MethodMetadata> {
                 break;
             }
         }
-        if (StringUtils.hasText(plural)) {
+        if (StringUtils.isNotBlank(plural)) {
             plural = StringUtils.capitalize(plural);
         }
         return plural;
@@ -199,7 +199,7 @@ public class MethodMatcher implements Matcher<MethodMetadata> {
                 final AnnotationAttributeValue<?> annotationAttributeValue = annotationMetadata
                         .getAttribute(userDefinedNameAttribute);
                 if (annotationAttributeValue != null
-                        && StringUtils.hasText(annotationAttributeValue
+                        && StringUtils.isNotBlank(annotationAttributeValue
                                 .getValue().toString())) {
                     return new JavaSymbolName(annotationAttributeValue
                             .getValue().toString() + suffix);

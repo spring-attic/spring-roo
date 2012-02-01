@@ -4,10 +4,10 @@ import java.io.File;
 import java.util.Date;
 import java.util.logging.Logger;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.support.logging.HandlerUtils;
-import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileUtils;
-import org.springframework.roo.support.util.StringUtils;
 
 /**
  * {@link UndoableOperation} to delete a directory.
@@ -54,13 +54,14 @@ public class DeleteDirectory implements UndoableOperation {
     public DeleteDirectory(final UndoManager undoManager,
             final FilenameResolver filenameResolver, final File directory,
             final String reason) {
-        Assert.notNull(undoManager, "Undo manager required");
-        Assert.notNull(directory, "Actual file required");
-        Assert.notNull(filenameResolver, "Filename resolver required");
-        Assert.isTrue(directory.exists(), "File '" + directory + "' must exist");
-        Assert.isTrue(directory.isDirectory(), "Path '" + directory
+        Validate.notNull(undoManager, "Undo manager required");
+        Validate.notNull(directory, "Actual file required");
+        Validate.notNull(filenameResolver, "Filename resolver required");
+        Validate.isTrue(directory.exists(), "File '" + directory
+                + "' must exist");
+        Validate.isTrue(directory.isDirectory(), "Path '" + directory
                 + "' must be a directory (not a file)");
-        Assert.isTrue(TEMP_DIRECTORY.isDirectory(), "Temporary directory '"
+        Validate.isTrue(TEMP_DIRECTORY.isDirectory(), "Temporary directory '"
                 + TEMP_DIRECTORY + "' is not a directory");
         actual = directory;
         backup = new File(TEMP_DIRECTORY, "tmp_" + new Date().getTime()
@@ -78,7 +79,7 @@ public class DeleteDirectory implements UndoableOperation {
         undoManager.add(this);
         String deletionMessage = "Deleted "
                 + filenameResolver.getMeaningfulName(directory);
-        if (StringUtils.hasText(reason)) {
+        if (StringUtils.isNotBlank(reason)) {
             deletionMessage += " - " + reason.trim();
         }
         LOGGER.fine(deletionMessage);

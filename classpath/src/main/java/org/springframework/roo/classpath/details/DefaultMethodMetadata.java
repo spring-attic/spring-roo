@@ -3,13 +3,13 @@ package org.springframework.roo.classpath.details;
 import java.lang.reflect.Modifier;
 import java.util.List;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.model.CustomData;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.support.style.ToStringCreator;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Default implementation of {@link MethodMetadata}.
@@ -33,8 +33,8 @@ public class DefaultMethodMetadata extends AbstractInvocableMemberMetadata
             final List<JavaType> throwsTypes, final String body) {
         super(customData, declaredByMetadataId, modifier, annotations,
                 parameterTypes, parameterNames, throwsTypes, body);
-        Assert.notNull(methodName, "Method name required");
-        Assert.notNull(returnType, "Return type required");
+        Validate.notNull(methodName, "Method name required");
+        Validate.notNull(returnType, "Return type required");
         this.methodName = methodName;
         this.returnType = returnType;
     }

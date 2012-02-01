@@ -5,10 +5,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.model.CustomData;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.CollectionUtils;
 
 /**
@@ -39,7 +39,7 @@ public abstract class AbstractIdentifiableAnnotatedJavaStructureProvider extends
     }
 
     public AnnotationMetadata getAnnotation(final JavaType type) {
-        Assert.notNull(type, "Annotation type to locate required");
+        Validate.notNull(type, "Annotation type to locate required");
         for (final AnnotationMetadata md : getAnnotations()) {
             if (md.getAnnotationType().equals(type)) {
                 return md;
@@ -53,7 +53,7 @@ public abstract class AbstractIdentifiableAnnotatedJavaStructureProvider extends
     }
 
     public AnnotationMetadata getTypeAnnotation(final JavaType annotationType) {
-        Assert.notNull(annotationType, "Annotation type required");
+        Validate.notNull(annotationType, "Annotation type required");
         IdentifiableAnnotatedJavaStructure current = this;
         while (current != null) {
             final AnnotationMetadata result = current

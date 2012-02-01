@@ -9,8 +9,8 @@ import java.util.Set;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.roo.model.JavaPackage;
-import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Comment;
 import org.w3c.dom.Document;
@@ -147,14 +147,14 @@ public abstract class DatabaseXmlUtils {
             if (!DbreModelService.NO_SCHEMA_REQUIRED.equals(schemaName)) {
                 tableElement.setAttribute("alias", schemaName);
             }
-            if (StringUtils.hasText(table.getDescription())) {
+            if (StringUtils.isNotBlank(table.getDescription())) {
                 tableElement.setAttribute(DESCRIPTION, table.getDescription());
             }
 
             for (final Column column : table.getColumns()) {
                 final Element columnElement = document.createElement("column");
                 columnElement.setAttribute(NAME, column.getName());
-                if (StringUtils.hasText(column.getDescription())) {
+                if (StringUtils.isNotBlank(column.getDescription())) {
                     columnElement.setAttribute(DESCRIPTION,
                             column.getDescription());
                 }
@@ -243,7 +243,7 @@ public abstract class DatabaseXmlUtils {
                     databaseElement.getAttribute(NAME));
             final Table table = new Table(tableElement.getAttribute(NAME),
                     new Schema(schemaName));
-            if (StringUtils.hasText(tableElement.getAttribute(DESCRIPTION))) {
+            if (StringUtils.isNotBlank(tableElement.getAttribute(DESCRIPTION))) {
                 table.setDescription(tableElement.getAttribute(DESCRIPTION));
             }
 
@@ -318,7 +318,7 @@ public abstract class DatabaseXmlUtils {
         }
 
         JavaPackage destinationPackage = null;
-        if (StringUtils.hasText(databaseElement.getAttribute("package"))) {
+        if (StringUtils.isNotBlank(databaseElement.getAttribute("package"))) {
             destinationPackage = new JavaPackage(
                     databaseElement.getAttribute("package"));
         }

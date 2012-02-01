@@ -2,8 +2,8 @@ package org.springframework.roo.felix.pgp;
 
 import java.io.InputStream;
 
+import org.apache.commons.lang3.Validate;
 import org.bouncycastle.openpgp.PGPSignature;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Represents the result of a signature verification via
@@ -19,8 +19,8 @@ public class SignatureDecision {
 
     public SignatureDecision(final PGPSignature pgpSignature,
             final PgpKeyId signatureAsHex, final boolean signatureAcceptable) {
-        Assert.notNull(pgpSignature, "PGP Signature required");
-        Assert.notNull(signatureAsHex, "PGP Key ID required");
+        Validate.notNull(pgpSignature, "PGP Signature required");
+        Validate.notNull(signatureAsHex, "PGP Key ID required");
         this.pgpSignature = pgpSignature;
         this.signatureAsHex = signatureAsHex;
         this.signatureAcceptable = signatureAcceptable;

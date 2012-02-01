@@ -1,6 +1,6 @@
 package org.springframework.roo.addon.finder;
 
-import org.springframework.roo.support.util.Assert;
+import org.apache.commons.lang3.Validate;
 
 /**
  * A reserved token is a reserved word which is used as part of a JPA compliant
@@ -20,7 +20,7 @@ public class ReservedToken implements Token, Comparable<ReservedToken> {
      * @param token the String token.
      */
     public ReservedToken(final String token) {
-        Assert.hasText(token, "Reserved token required");
+        Validate.notBlank(token, "Reserved token required");
         value = token;
     }
 

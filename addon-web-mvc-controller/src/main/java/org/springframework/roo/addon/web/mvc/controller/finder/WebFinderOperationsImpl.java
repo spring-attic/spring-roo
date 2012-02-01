@@ -3,6 +3,7 @@ package org.springframework.roo.addon.web.mvc.controller.finder;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -20,7 +21,6 @@ import org.springframework.roo.classpath.details.annotations.AnnotationMetadataB
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
-import org.springframework.uaa.client.util.Assert;
 
 /**
  * Implementation of {@link WebFinderOperations}
@@ -54,7 +54,7 @@ public class WebFinderOperationsImpl implements WebFinderOperations {
             final PhysicalTypeMetadata ptm = (PhysicalTypeMetadata) metadataService
                     .get(typeLocationService.getPhysicalTypeIdentifier(cod
                             .getName()));
-            Assert.notNull(ptm, "Java source code unavailable for type "
+            Validate.notNull(ptm, "Java source code unavailable for type "
                     + cod.getName().getFullyQualifiedTypeName());
             final WebScaffoldAnnotationValues webScaffoldAnnotationValues = new WebScaffoldAnnotationValues(
                     ptm);
@@ -70,8 +70,8 @@ public class WebFinderOperationsImpl implements WebFinderOperations {
 
     public void annotateType(final JavaType controllerType,
             final JavaType entityType) {
-        Assert.notNull(controllerType, "Controller type required");
-        Assert.notNull(entityType, "Entity type required");
+        Validate.notNull(controllerType, "Controller type required");
+        Validate.notNull(entityType, "Entity type required");
 
         final String id = typeLocationService
                 .getPhysicalTypeIdentifier(controllerType);
@@ -83,7 +83,7 @@ public class WebFinderOperationsImpl implements WebFinderOperations {
         // Obtain the physical type and itd mutable details
         final PhysicalTypeMetadata ptm = (PhysicalTypeMetadata) metadataService
                 .get(id);
-        Assert.notNull(ptm, "Java source code unavailable for type "
+        Validate.notNull(ptm, "Java source code unavailable for type "
                 + PhysicalTypeIdentifier.getFriendlyName(id));
         final WebScaffoldAnnotationValues webScaffoldAnnotationValues = new WebScaffoldAnnotationValues(
                 ptm);
@@ -97,7 +97,7 @@ public class WebFinderOperationsImpl implements WebFinderOperations {
         }
 
         final PhysicalTypeDetails ptd = ptm.getMemberHoldingTypeDetails();
-        Assert.notNull(ptd, "Java source code details unavailable for type "
+        Validate.notNull(ptd, "Java source code details unavailable for type "
                 + PhysicalTypeIdentifier.getFriendlyName(id));
         final ClassOrInterfaceTypeDetails cid = (ClassOrInterfaceTypeDetails) ptd;
         if (null == MemberFindingUtils.getAnnotationOfType(

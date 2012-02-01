@@ -4,13 +4,13 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.file.monitor.event.FileDetails;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.maven.Pom;
-import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileUtils;
 
 @Component(immediate = true)
@@ -32,7 +32,7 @@ public class MavenPathResolvingStrategy extends AbstractPathResolvingStrategy {
      */
     @Override
     protected PhysicalPath getApplicablePhysicalPath(final String identifier) {
-        Assert.notNull(identifier, "Identifier required");
+        Validate.notNull(identifier, "Identifier required");
         PhysicalPath physicalPath = null;
         int longest = 0;
         for (final Pom pom : pomManagementService.getPoms()) {
@@ -80,7 +80,7 @@ public class MavenPathResolvingStrategy extends AbstractPathResolvingStrategy {
     public LogicalPath getFocusedPath(final Path path) {
         final PhysicalPath physicalPath = pomManagementService
                 .getFocusedModule().getPhysicalPath(path);
-        Assert.notNull(physicalPath, "Physical path for '" + path.name()
+        Validate.notNull(physicalPath, "Physical path for '" + path.name()
                 + "' not found");
         return physicalPath.getLogicalPath();
     }
@@ -91,8 +91,8 @@ public class MavenPathResolvingStrategy extends AbstractPathResolvingStrategy {
 
     public String getIdentifier(final LogicalPath logicalPath,
             final String relativePath) {
-        Assert.notNull(logicalPath, "Path required");
-        Assert.notNull(relativePath,
+        Validate.notNull(logicalPath, "Path required");
+        Validate.notNull(relativePath,
                 "Relative path cannot be null, although it can be empty");
 
         String initialPath = FileUtils.getCanonicalPath(getPath(logicalPath));

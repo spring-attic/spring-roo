@@ -1,6 +1,6 @@
 package org.springframework.roo.model;
 
-import org.springframework.roo.support.util.Assert;
+import org.apache.commons.lang3.Validate;
 
 /**
  * Assists in the creation of a {@link Builder} for types that eventually
@@ -28,7 +28,7 @@ public abstract class AbstractCustomDataAccessorBuilder<T extends CustomDataAcce
      */
     protected AbstractCustomDataAccessorBuilder(
             final CustomDataAccessor existing) {
-        Assert.notNull(existing, "Custom data accessor required");
+        Validate.notNull(existing, "Custom data accessor required");
         this.customDataBuilder = new CustomDataBuilder(existing.getCustomData());
     }
 
@@ -64,7 +64,7 @@ public abstract class AbstractCustomDataAccessorBuilder<T extends CustomDataAcce
      * @param customDataBuilder the builder to set (required)
      */
     public void setCustomData(final CustomDataBuilder customDataBuilder) {
-        Assert.notNull(customDataBuilder, "Custom data builder required");
+        Validate.notNull(customDataBuilder, "Custom data builder required");
         this.customDataBuilder = customDataBuilder;
     }
 }

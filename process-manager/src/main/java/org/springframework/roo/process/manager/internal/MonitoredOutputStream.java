@@ -7,8 +7,8 @@ import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.file.monitor.NotifiableFileMonitorService;
-import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.HexUtils;
 
@@ -52,8 +52,8 @@ public class MonitoredOutputStream extends ByteArrayOutputStream {
             final ManagedMessageRenderer managedMessageRenderer,
             final NotifiableFileMonitorService fileMonitorService)
             throws FileNotFoundException {
-        Assert.notNull(file, "File required");
-        Assert.notNull(managedMessageRenderer, "Message renderer required");
+        Validate.notNull(file, "File required");
+        Validate.notNull(managedMessageRenderer, "Message renderer required");
         this.file = file;
         this.fileMonitorService = fileMonitorService;
         this.managedMessageRenderer = managedMessageRenderer;

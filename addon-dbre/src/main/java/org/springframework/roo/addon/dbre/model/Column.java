@@ -11,8 +11,8 @@ import static org.springframework.roo.model.JdkJavaType.STRUCT;
 
 import java.sql.Types;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Represents a column in the database model.
@@ -37,7 +37,7 @@ public class Column {
 
     Column(final String name, final int dataType, final String typeName,
             final int columnSize, final int scale) {
-        Assert.hasText(name, "Column name required");
+        Validate.notBlank(name, "Column name required");
         this.name = name;
         this.dataType = dataType;
         this.typeName = typeName;

@@ -6,6 +6,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -17,10 +19,8 @@ import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
-import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.FileUtils;
-import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlRoundTripUtils;
 import org.springframework.roo.support.util.XmlUtils;
@@ -54,9 +54,9 @@ public class MenuOperationsImpl implements MenuOperations {
             final JavaSymbolName menuItemId, final String menuItemLabel,
             final String globalMessageCode, final String link, String idPrefix,
             final boolean writeProps, final LogicalPath logicalPath) {
-        Assert.notNull(menuCategoryName, "Menu category name required");
-        Assert.notNull(menuItemId, "Menu item name required");
-        Assert.hasText(link, "Link required");
+        Validate.notNull(menuCategoryName, "Menu category name required");
+        Validate.notNull(menuItemId, "Menu item name required");
+        Validate.notBlank(link, "Link required");
 
         final Map<String, String> properties = new LinkedHashMap<String, String>();
 
@@ -138,8 +138,8 @@ public class MenuOperationsImpl implements MenuOperations {
     public void cleanUpFinderMenuItems(final JavaSymbolName menuCategoryName,
             final List<String> allowedFinderMenuIds,
             final LogicalPath logicalPath) {
-        Assert.notNull(menuCategoryName, "Menu category identifier required");
-        Assert.notNull(allowedFinderMenuIds,
+        Validate.notNull(menuCategoryName, "Menu category identifier required");
+        Validate.notNull(allowedFinderMenuIds,
                 "List of allowed menu items required");
 
         final Document document = getMenuDocument(logicalPath);
@@ -176,8 +176,8 @@ public class MenuOperationsImpl implements MenuOperations {
     public void cleanUpMenuItem(final JavaSymbolName menuCategoryName,
             final JavaSymbolName menuItemName, String idPrefix,
             final LogicalPath logicalPath) {
-        Assert.notNull(menuCategoryName, "Menu category identifier required");
-        Assert.notNull(menuItemName, "Menu item id required");
+        Validate.notNull(menuCategoryName, "Menu category identifier required");
+        Validate.notNull(menuItemName, "Menu item id required");
 
         if (StringUtils.isBlank(idPrefix)) {
             idPrefix = DEFAULT_MENU_ITEM_PREFIX;

@@ -3,8 +3,8 @@ package org.springframework.roo.addon.dbre.model;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import org.springframework.roo.support.util.Assert;
-import org.springframework.roo.support.util.StringUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 
 /**
  * Represents a table in the database model.
@@ -25,29 +25,29 @@ public class Table {
     private final Schema schema;
 
     Table(final String name, final Schema schema) {
-        Assert.isTrue(StringUtils.hasText(name), "Table name required");
-        Assert.notNull(schema, "Table schema required");
+        Validate.isTrue(StringUtils.isNotBlank(name), "Table name required");
+        Validate.notNull(schema, "Table schema required");
         this.name = name;
         this.schema = schema;
     }
 
     public boolean addColumn(final Column column) {
-        Assert.notNull(column, "Column required");
+        Validate.notNull(column, "Column required");
         return columns.add(column);
     }
 
     public boolean addExportedKey(final ForeignKey exportedKey) {
-        Assert.notNull(exportedKey, "Exported key required");
+        Validate.notNull(exportedKey, "Exported key required");
         return exportedKeys.add(exportedKey);
     }
 
     public boolean addImportedKey(final ForeignKey foreignKey) {
-        Assert.notNull(foreignKey, "Foreign key required");
+        Validate.notNull(foreignKey, "Foreign key required");
         return importedKeys.add(foreignKey);
     }
 
     public boolean addIndex(final Index index) {
-        Assert.notNull(index, "Index required");
+        Validate.notNull(index, "Index required");
         return indices.add(index);
     }
 
@@ -143,7 +143,7 @@ public class Table {
 
     public ForeignKey getImportedKey(final String name) {
         for (final ForeignKey foreignKey : importedKeys) {
-            Assert.isTrue(StringUtils.hasText(foreignKey.getName()),
+            Validate.isTrue(StringUtils.isNotBlank(foreignKey.getName()),
                     "Foreign key name required");
             if (foreignKey.getName().equalsIgnoreCase(name)) {
                 return foreignKey;

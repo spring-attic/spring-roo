@@ -1,7 +1,7 @@
 package org.springframework.roo.shell;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.roo.support.util.AnsiEscapeCode;
-import org.springframework.roo.support.util.StringUtils;
 
 public class Completion {
 
@@ -32,7 +32,7 @@ public class Completion {
         this.formattedValue = formattedValue;
         this.order = order;
         this.value = value;
-        if (StringUtils.hasText(heading)) {
+        if (StringUtils.isNotBlank(heading)) {
             heading = AnsiEscapeCode.decorate(heading,
                     AnsiEscapeCode.UNDERSCORE, AnsiEscapeCode.FG_GREEN);
         }

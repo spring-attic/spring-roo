@@ -4,12 +4,12 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.support.style.DefaultValueStyler;
 import org.springframework.roo.support.style.ToStringCreator;
-import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.DomUtils;
-import org.springframework.roo.support.util.ObjectUtils;
-import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -44,9 +44,9 @@ public class Execution implements Comparable<Execution> {
      */
     public Execution(final String id, final String phase,
             final Configuration configuration, final String... goals) {
-        Assert.notNull(id, "execution id must be specified");
-        Assert.notNull(phase, "execution phase must be specified");
-        Assert.notEmpty(goals, "at least one goal must be specified");
+        Validate.notNull(id, "execution id must be specified");
+        Validate.notNull(phase, "execution phase must be specified");
+        Validate.notEmpty(goals, "at least one goal must be specified");
         this.configuration = configuration;
         this.goals = Collections.unmodifiableList(Arrays.asList(goals));
         this.id = id.trim();
@@ -82,8 +82,7 @@ public class Execution implements Comparable<Execution> {
                     Arrays.toString(oGoals));
         }
         if (result == 0) {
-            result = ObjectUtils.nullSafeComparison(configuration,
-                    other.configuration);
+            result = ObjectUtils.compare(configuration, other.configuration);
         }
         return result;
     }
@@ -114,13 +113,13 @@ public class Execution implements Comparable<Execution> {
         final Element executionElement = document.createElement("execution");
 
         // ID
-        if (StringUtils.hasText(id)) {
+        if (StringUtils.isNotBlank(id)) {
             executionElement.appendChild(XmlUtils.createTextElement(document,
                     "id", id));
         }
 
         // Phase
-        if (StringUtils.hasText(phase)) {
+        if (StringUtils.isNotBlank(phase)) {
             executionElement.appendChild(XmlUtils.createTextElement(document,
                     "phase", phase));
         }
@@ -174,10 +173,10 @@ public class Execution implements Comparable<Execution> {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ObjectUtils.nullSafeHashCode(goals);
-        result = prime * result + ObjectUtils.nullSafeHashCode(id);
-        result = prime * result + ObjectUtils.nullSafeHashCode(phase);
-        result = prime * result + ObjectUtils.nullSafeHashCode(configuration);
+        result = prime * result + ObjectUtils.hashCode(goals);
+        result = prime * result + ObjectUtils.hashCode(id);
+        result = prime * result + ObjectUtils.hashCode(phase);
+        result = prime * result + ObjectUtils.hashCode(configuration);
         return result;
     }
 

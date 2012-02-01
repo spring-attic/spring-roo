@@ -1,5 +1,7 @@
 package org.springframework.roo.support.util;
 
+import org.apache.commons.lang3.ObjectUtils;
+
 /**
  * A pair with a key of type "K" and a value of type "V". Instances are
  * immutable.
@@ -34,8 +36,8 @@ public class Pair<K, V> {
             return false;
         }
         final Pair<?, ?> otherPair = (Pair<?, ?>) obj;
-        return ObjectUtils.nullSafeEquals(key, otherPair.getKey())
-                && ObjectUtils.nullSafeEquals(value, otherPair.getValue());
+        return ObjectUtils.equals(key, otherPair.getKey())
+                && ObjectUtils.equals(value, otherPair.getValue());
     }
 
     /**
@@ -58,8 +60,7 @@ public class Pair<K, V> {
 
     @Override
     public int hashCode() {
-        return ObjectUtils
-                .nullSafeHashCode(new Object[] { getKey(), getValue() });
+        return ObjectUtils.hashCodeMulti(getKey(), getValue());
     }
 
     @Override

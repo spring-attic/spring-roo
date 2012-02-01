@@ -1,7 +1,7 @@
 package org.springframework.roo.addon.roobot.client;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.support.style.ToStringCreator;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Display Addon symbolic name for command completion.
@@ -19,7 +19,7 @@ public class AddOnBundleSymbolicName implements
     private final String key;
 
     public AddOnBundleSymbolicName(final String key) {
-        Assert.hasText(key, "bundle symbolic name required");
+        Validate.notBlank(key, "bundle symbolic name required");
         this.key = key;
     }
 

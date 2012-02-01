@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -17,7 +18,6 @@ import org.springframework.roo.addon.tailor.service.ConfigurationLocator;
 import org.springframework.roo.shell.AbstractShell;
 import org.springframework.roo.shell.Tailor;
 import org.springframework.roo.support.logging.HandlerUtils;
-import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Executed by {@link AbstractShell} Triggers action execution
@@ -72,7 +72,7 @@ public class DefaultTailorImpl implements Tailor {
      * @Inheritdoc
      */
     public List<String> sew(final String command) {
-        if (StringUtils.hasText(command)) {
+        if (StringUtils.isNotBlank(command)) {
             final CommandTransformation commandTrafo = new CommandTransformation(
                     command);
             try {

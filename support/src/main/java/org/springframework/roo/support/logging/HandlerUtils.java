@@ -9,8 +9,7 @@ import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
-import org.springframework.roo.support.util.Assert;
-import org.springframework.roo.support.util.StringUtils;
+import org.apache.commons.lang3.Validate;
 
 /**
  * Utility methods for dealing with {@link Handler} objects.
@@ -18,7 +17,10 @@ import org.springframework.roo.support.util.StringUtils;
  * @author Ben Alex
  * @since 1.0
  */
-public abstract class HandlerUtils {
+public final class HandlerUtils {
+
+    private static final String LINE_SEPARATOR = System
+            .getProperty("line.separator");
 
     /**
      * Forces all {@link Handler} instances registered in the presented
@@ -28,7 +30,7 @@ public abstract class HandlerUtils {
      * @return the number of {@link Handler}s flushed (may be 0 or above)
      */
     public static int flushAllHandlers(final Logger logger) {
-        Assert.notNull(logger, "Logger is required");
+        Validate.notNull(logger, "Logger is required");
 
         int flushed = 0;
         final Handler[] handlers = logger.getHandlers();
@@ -53,7 +55,7 @@ public abstract class HandlerUtils {
      *         was specified
      */
     public static Logger getLogger(final Class<?> clazz) {
-        Assert.notNull(clazz, "Class required");
+        Validate.notNull(clazz, "Class required");
         final Logger logger = Logger.getLogger(clazz.getName());
         if (logger.getLevel() == null
                 && clazz.getName().startsWith("org.springframework.roo")) {
@@ -85,8 +87,8 @@ public abstract class HandlerUtils {
      */
     public static int registerTargetHandler(final Logger logger,
             final Handler target) {
-        Assert.notNull(logger, "Logger is required");
-        Assert.notNull(target, "Target handler is required");
+        Validate.notNull(logger, "Logger is required");
+        Validate.notNull(target, "Target handler is required");
 
         int replaced = 0;
         final Handler[] handlers = logger.getHandlers();
@@ -123,8 +125,8 @@ public abstract class HandlerUtils {
      */
     public static int wrapWithDeferredLogHandler(final Logger logger,
             final Level fallbackSeverity) {
-        Assert.notNull(logger, "Logger is required");
-        Assert.notNull(fallbackSeverity, "Fallback severity is required");
+        Validate.notNull(logger, "Logger is required");
+        Validate.notNull(fallbackSeverity, "Fallback severity is required");
 
         final List<DeferredLogHandler> newHandlers = new ArrayList<DeferredLogHandler>();
 
@@ -144,7 +146,7 @@ public abstract class HandlerUtils {
             consoleHandler.setFormatter(new Formatter() {
                 @Override
                 public String format(final LogRecord record) {
-                    return record.getMessage() + StringUtils.LINE_SEPARATOR;
+                    return record.getMessage() + LINE_SEPARATOR;
                 }
             });
             newHandlers.add(new DeferredLogHandler(consoleHandler,
@@ -157,5 +159,13 @@ public abstract class HandlerUtils {
         }
 
         return newHandlers.size();
+    }
+
+    /**
+     * Constructor is private to prevent instantiation
+     * 
+     * @since 1.2.0
+     */
+    private HandlerUtils() {
     }
 }

@@ -4,6 +4,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.logging.Logger;
 
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -14,7 +15,6 @@ import org.springframework.roo.addon.roobot.client.model.Rating;
 import org.springframework.roo.felix.BundleSymbolicName;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.osgi.BundleFindingUtils;
-import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.uaa.UaaRegistrationService;
 import org.springframework.roo.url.stream.UrlInputStreamService;
 
@@ -48,9 +48,9 @@ public class AddOnFeedbackOperationsImpl implements AddOnFeedbackOperations {
     @SuppressWarnings("unchecked")
     public void feedbackBundle(final BundleSymbolicName bsn,
             final Rating rating, String comment) {
-        Assert.notNull(bsn, "Bundle symbolic name required");
-        Assert.notNull(rating, "Rating required");
-        Assert.isTrue(comment == null || comment.length() <= 140,
+        Validate.notNull(bsn, "Bundle symbolic name required");
+        Validate.notNull(rating, "Rating required");
+        Validate.isTrue(comment == null || comment.length() <= 140,
                 "Comment must be under 140 characters");
         if ("".equals(comment)) {
             comment = null;

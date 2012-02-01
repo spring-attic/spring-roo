@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import org.springframework.roo.support.util.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * Creates a {@link Database database} model from a live database using JDBC.
@@ -55,10 +55,10 @@ public class DatabaseIntrospector extends AbstractIntrospector {
 
     private String getArtifact(final String artifactName) throws SQLException {
         if (databaseMetaData.storesLowerCaseIdentifiers()) {
-            return StringUtils.toLowerCase(artifactName);
+            return StringUtils.lowerCase(artifactName);
         }
         else if (databaseMetaData.storesUpperCaseIdentifiers()) {
-            return StringUtils.toUpperCase(artifactName);
+            return StringUtils.upperCase(artifactName);
         }
         else {
             return artifactName;

@@ -3,12 +3,12 @@ package org.springframework.roo.addon.cloud.foundry;
 import java.net.URL;
 import java.util.Dictionary;
 
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
-import org.springframework.roo.support.util.ObjectUtils;
 import org.springframework.uaa.client.UaaService;
 import org.springframework.uaa.client.VersionHelper;
 import org.springframework.uaa.client.internal.BasicProxyService;

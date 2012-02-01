@@ -45,9 +45,9 @@ public class PackagingProviderConverterTest {
     private void assertInvalidString(final String string) {
         try {
             converter.convertFromText(string, PackagingProvider.class, null);
-            fail("Expected a " + IllegalArgumentException.class);
+            fail("Expected a " + NullPointerException.class);
         }
-        catch (final IllegalArgumentException expected) {
+        catch (final NullPointerException expected) {
             assertEquals("Unsupported packaging id '" + string + "'",
                     expected.getMessage());
         }

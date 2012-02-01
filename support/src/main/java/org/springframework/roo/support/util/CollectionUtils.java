@@ -63,10 +63,10 @@ public final class CollectionUtils {
      * 
      * @param source the (potentially primitive) array
      * @return the converted List result
-     * @see ObjectUtils#toObjectArray(Object)
+     * @see RooObjectUtils#toObjectArray(Object)
      */
     public static List<?> arrayToList(final Object source) {
-        return Arrays.asList(ObjectUtils.toObjectArray(source));
+        return Arrays.asList(RooObjectUtils.toObjectArray(source));
     }
 
     /**
@@ -81,7 +81,7 @@ public final class CollectionUtils {
         if (enumeration != null) {
             while (enumeration.hasMoreElements()) {
                 final Object candidate = enumeration.nextElement();
-                if (ObjectUtils.nullSafeEquals(candidate, element)) {
+                if (RooObjectUtils.nullSafeEquals(candidate, element)) {
                     return true;
                 }
             }
@@ -101,7 +101,7 @@ public final class CollectionUtils {
         if (iterator != null) {
             while (iterator.hasNext()) {
                 final Object candidate = iterator.next();
-                if (ObjectUtils.nullSafeEquals(candidate, element)) {
+                if (RooObjectUtils.nullSafeEquals(candidate, element)) {
                     return true;
                 }
             }
@@ -210,7 +210,7 @@ public final class CollectionUtils {
      */
     public static Object findValueOfType(final Collection<?> collection,
             final Class<?>... types) {
-        if (isEmpty(collection) || ObjectUtils.isEmpty(types)) {
+        if (isEmpty(collection) || RooObjectUtils.isEmpty(types)) {
             return null;
         }
         for (final Class<?> type : types) {
@@ -324,7 +324,7 @@ public final class CollectionUtils {
         if (collection == null) {
             throw new IllegalArgumentException("Collection must not be null");
         }
-        final Object[] arr = ObjectUtils.toObjectArray(array);
+        final Object[] arr = RooObjectUtils.toObjectArray(array);
         for (final Object elem : arr) {
             collection.add(elem);
         }

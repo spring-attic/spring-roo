@@ -6,6 +6,7 @@ import java.io.OutputStream;
 import java.util.Date;
 import java.util.Properties;
 
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -15,7 +16,6 @@ import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
-import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileUtils;
 import org.springframework.roo.support.util.IOUtils;
 
@@ -35,8 +35,8 @@ public class LoggingOperationsImpl implements LoggingOperations {
 
     public void configureLogging(final LogLevel logLevel,
             final LoggerPackage loggerPackage) {
-        Assert.notNull(logLevel, "LogLevel required");
-        Assert.notNull(loggerPackage, "LoggerPackage required");
+        Validate.notNull(logLevel, "LogLevel required");
+        Validate.notNull(loggerPackage, "LoggerPackage required");
 
         setupProperties(logLevel, loggerPackage);
     }
@@ -63,7 +63,7 @@ public class LoggingOperationsImpl implements LoggingOperations {
                 log4jMutableFile = fileManager.createFile(filePath);
                 inputStream = FileUtils.getInputStream(getClass(),
                         "log4j-template.properties");
-                Assert.notNull(inputStream,
+                Validate.notNull(inputStream,
                         "Could not acquire log4j configuration template");
                 props.load(inputStream);
             }

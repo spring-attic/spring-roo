@@ -3,10 +3,10 @@ package org.springframework.roo.addon.tailor.actions;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.addon.tailor.CommandTransformation;
-import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Schedules the original input command for execution. The purpose of this
@@ -45,7 +45,7 @@ public class ExecuteSelf extends AbstractAction {
             final ActionConfig config) {
         final String removeArgumentsAttribute = config
                 .getAttribute(ACTIONATTR_REMOVEARGS);
-        if (!StringUtils.hasText(removeArgumentsAttribute)) {
+        if (!StringUtils.isNotBlank(removeArgumentsAttribute)) {
             return trafo.getInputCommand();
         }
 

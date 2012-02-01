@@ -1,8 +1,8 @@
 package org.springframework.roo.classpath.details;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.model.AbstractCustomDataAccessorProvider;
 import org.springframework.roo.model.CustomData;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Abstract class for {@link IdentifiableJavaStructure} subclasses.
@@ -27,7 +27,8 @@ public abstract class AbstractIdentifiableJavaStructureProvider extends
             final CustomData customData, final String declaredByMetadataId,
             final int modifier) {
         super(customData);
-        Assert.hasText(declaredByMetadataId, "Declared by metadata ID required");
+        Validate.notBlank(declaredByMetadataId,
+                "Declared by metadata ID required");
         this.declaredByMetadataId = declaredByMetadataId;
         this.modifier = modifier;
     }

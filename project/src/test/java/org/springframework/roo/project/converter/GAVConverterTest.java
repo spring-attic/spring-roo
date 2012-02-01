@@ -9,12 +9,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.roo.project.GAV;
 import org.springframework.roo.project.MavenUtils;
 import org.springframework.roo.shell.Completion;
-import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Unit test of {@link GAVConverter}
@@ -98,7 +98,7 @@ public class GAVConverterTest {
         final String groupId = "org.springframework.roo";
         final String artifactId = "addon-gradle";
         final String version = "-0.1";
-        final String coordinates = StringUtils.collectionToDelimitedString(
+        final String coordinates = StringUtils.join(
                 Arrays.asList(groupId, artifactId, version),
                 MavenUtils.COORDINATE_SEPARATOR);
 

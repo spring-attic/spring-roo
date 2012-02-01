@@ -3,6 +3,7 @@ package org.springframework.roo.addon.oscommands;
 import java.io.IOException;
 import java.util.logging.Logger;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -11,7 +12,6 @@ import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
 import org.springframework.roo.shell.CommandMarker;
 import org.springframework.roo.support.logging.HandlerUtils;
-import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Command type to allow execution of native OS commands from the Spring Roo
@@ -33,7 +33,7 @@ public class OsCommands implements CommandMarker {
     public void command(
             @CliOption(key = { "", "command" }, mandatory = false, specifiedDefaultValue = "", unspecifiedDefaultValue = "", help = "The command to execute") final String command) {
 
-        if (StringUtils.hasText(command)) {
+        if (StringUtils.isNotBlank(command)) {
             try {
                 osOperations.executeCommand(command);
             }

@@ -1,7 +1,7 @@
 package org.springframework.roo.classpath.itd;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.classpath.details.InvocableMemberMetadata;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * A simple way of producing method bodies for
@@ -64,11 +64,11 @@ public class InvocableMemberBodyBuilder {
 
     public String getOutput() {
         if (reset) {
-            Assert.isTrue(indentLevel == 0, "Indent level must be 0 (not "
+            Validate.isTrue(indentLevel == 0, "Indent level must be 0 (not "
                     + indentLevel + ") to terminate following a reset!");
         }
         else {
-            Assert.isTrue(indentLevel == 2, "Indent level must be 2 (not "
+            Validate.isTrue(indentLevel == 2, "Indent level must be 2 (not "
                     + indentLevel
                     + ") to terminate (use reset to indent to level 0)!");
         }

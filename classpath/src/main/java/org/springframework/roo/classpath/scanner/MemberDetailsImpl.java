@@ -9,6 +9,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.classpath.customdata.CustomDataKeys;
 import org.springframework.roo.classpath.details.BeanInfoUtils;
 import org.springframework.roo.classpath.details.ConstructorMetadata;
@@ -20,7 +21,6 @@ import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.persistence.PersistenceMemberLocator;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.CollectionUtils;
 
 /**
@@ -41,12 +41,12 @@ public class MemberDetailsImpl implements MemberDetails {
      */
     MemberDetailsImpl(
             final Collection<? extends MemberHoldingTypeDetails> details) {
-        Assert.notEmpty(details, "Member holding details required");
+        Validate.notEmpty(details, "Member holding details required");
         CollectionUtils.populate(this.details, details);
     }
 
     public AnnotationMetadata getAnnotation(final JavaType type) {
-        Assert.notNull(type, "Annotation type to locate required");
+        Validate.notNull(type, "Annotation type to locate required");
         for (final MemberHoldingTypeDetails memberHoldingTypeDetails : details) {
             final AnnotationMetadata md = memberHoldingTypeDetails
                     .getAnnotation(type);
@@ -130,7 +130,7 @@ public class MemberDetailsImpl implements MemberDetails {
     }
 
     public List<MethodMetadata> getMethodsWithTag(final Object tagKey) {
-        Assert.notNull(tagKey, "Custom data key required");
+        Validate.notNull(tagKey, "Custom data key required");
         final List<MethodMetadata> result = new ArrayList<MethodMetadata>();
         for (final MethodMetadata method : getMethods()) {
             if (method.getCustomData().keySet().contains(tagKey)) {

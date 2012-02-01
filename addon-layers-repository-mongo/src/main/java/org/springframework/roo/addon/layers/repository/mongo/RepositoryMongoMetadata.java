@@ -2,6 +2,7 @@ package org.springframework.roo.addon.layers.repository.mongo;
 
 import java.util.Arrays;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
@@ -12,7 +13,6 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.SpringJavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.support.style.ToStringCreator;
-import org.springframework.uaa.client.util.Assert;
 
 /**
  * Creates metadata for repository ITDs (annotated with
@@ -72,8 +72,8 @@ public class RepositoryMongoMetadata extends
             final RepositoryMongoAnnotationValues annotationValues,
             final JavaType identifierType) {
         super(identifier, aspectName, governorPhysicalTypeMetadata);
-        Assert.notNull(annotationValues, "Annotation values required");
-        Assert.notNull(identifierType, "Identifier type required");
+        Validate.notNull(annotationValues, "Annotation values required");
+        Validate.notNull(identifierType, "Identifier type required");
 
         // Make the user's Repository interface extend Spring Data's Repository
         // interface if it doesn't already

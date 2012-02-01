@@ -5,9 +5,9 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.classpath.details.AnnotationMetadataUtils;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Represents a {@link JavaType} with zero or more annotations.
@@ -28,7 +28,7 @@ public class AnnotatedJavaType {
      */
     public static JavaType convertFromAnnotatedJavaType(
             final AnnotatedJavaType annotatedJavaType) {
-        Assert.notNull(annotatedJavaType, "Annotated Java types required");
+        Validate.notNull(annotatedJavaType, "Annotated Java types required");
         return annotatedJavaType.getJavaType();
     }
 
@@ -44,7 +44,7 @@ public class AnnotatedJavaType {
      */
     public static List<JavaType> convertFromAnnotatedJavaTypes(
             final List<AnnotatedJavaType> annotatedJavaTypes) {
-        Assert.notNull(annotatedJavaTypes, "Annotated Java types required");
+        Validate.notNull(annotatedJavaTypes, "Annotated Java types required");
         final List<JavaType> result = new ArrayList<JavaType>();
         for (final AnnotatedJavaType annotatedJavaType : annotatedJavaTypes) {
             result.add(convertFromAnnotatedJavaType(annotatedJavaType));
@@ -61,7 +61,7 @@ public class AnnotatedJavaType {
      * @return the equivalent {@link AnnotatedJavaType} (never returns null)
      */
     public static AnnotatedJavaType convertFromJavaType(final JavaType javaType) {
-        Assert.notNull(javaType, "Java type required");
+        Validate.notNull(javaType, "Java type required");
         return new AnnotatedJavaType(javaType);
     }
 
@@ -125,7 +125,7 @@ public class AnnotatedJavaType {
      */
     public AnnotatedJavaType(final JavaType javaType,
             final Collection<AnnotationMetadata> annotations) {
-        Assert.notNull(javaType, "Java type required");
+        Validate.notNull(javaType, "Java type required");
         this.javaType = javaType;
         if (annotations != null) {
             this.annotations.addAll(annotations);

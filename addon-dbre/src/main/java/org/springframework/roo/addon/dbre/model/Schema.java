@@ -1,6 +1,6 @@
 package org.springframework.roo.addon.dbre.model;
 
-import org.springframework.roo.support.util.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * Represents a schema in the database model.

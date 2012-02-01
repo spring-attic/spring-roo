@@ -36,6 +36,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.SortedMap;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.addon.web.mvc.controller.details.DateTimeFormatDetails;
 import org.springframework.roo.addon.web.mvc.controller.details.JavaTypeMetadataDetails;
 import org.springframework.roo.addon.web.mvc.controller.details.JavaTypePersistenceMetadataDetails;
@@ -63,7 +64,6 @@ import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.support.style.ToStringCreator;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Metadata for {@link RooWebScaffold}.
@@ -145,11 +145,12 @@ public class WebScaffoldMetadata extends
             final Map<MethodMetadataCustomDataKey, MemberTypeAdditions> crudAdditions,
             final Collection<JavaType> editableFieldTypes) {
         super(identifier, aspectName, governorPhysicalType);
-        Assert.isTrue(isValid(identifier), "Metadata identification string '"
+        Validate.isTrue(isValid(identifier), "Metadata identification string '"
                 + identifier + "' is invalid");
-        Assert.notNull(annotationValues, "Annotation values required");
-        Assert.notNull(specialDomainTypes, "Special domain types map required");
-        Assert.notNull(dependentTypes, "Dependent types list required");
+        Validate.notNull(annotationValues, "Annotation values required");
+        Validate.notNull(specialDomainTypes,
+                "Special domain types map required");
+        Validate.notNull(dependentTypes, "Dependent types list required");
 
         if (!isValid()) {
             return;
@@ -163,7 +164,7 @@ public class WebScaffoldMetadata extends
                 .getSymbolName();
         javaTypeMetadataHolder = specialDomainTypes.get(formBackingType);
 
-        Assert.notNull(javaTypeMetadataHolder,
+        Validate.notNull(javaTypeMetadataHolder,
                 "Metadata holder required for form backing type: "
                         + formBackingType);
 

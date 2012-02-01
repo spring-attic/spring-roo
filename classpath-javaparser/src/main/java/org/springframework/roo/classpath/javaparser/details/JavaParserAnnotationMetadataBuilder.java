@@ -24,6 +24,7 @@ import japa.parser.ast.type.Type;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
@@ -43,7 +44,6 @@ import org.springframework.roo.model.Builder;
 import org.springframework.roo.model.EnumDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Java Parser implementation of {@link AnnotationMetadata}.
@@ -66,10 +66,10 @@ public class JavaParserAnnotationMetadataBuilder implements
             final CompilationUnitServices compilationUnitServices,
             final List<AnnotationExpr> annotations,
             final AnnotationMetadata annotation) {
-        Assert.notNull(compilationUnitServices,
+        Validate.notNull(compilationUnitServices,
                 "Compilation unit services required");
-        Assert.notNull(annotations, "Annotations required");
-        Assert.notNull(annotation, "Annotation metadata required");
+        Validate.notNull(annotations, "Annotations required");
+        Validate.notNull(annotation, "Annotation metadata required");
 
         // Create a holder for the annotation we're going to create
         boolean foundExisting = false;
@@ -96,8 +96,10 @@ public class JavaParserAnnotationMetadataBuilder implements
                 break;
             }
         }
-        Assert.isTrue(!foundExisting, "Found an existing annotation for type '"
-                + annotation.getAnnotationType() + "'");
+        Validate.isTrue(
+                !foundExisting,
+                "Found an existing annotation for type '"
+                        + annotation.getAnnotationType() + "'");
 
         // Import the annotation type, if needed
         final NameExpr nameToUse = JavaParserUtils.importTypeIfRequired(
@@ -111,10 +113,10 @@ public class JavaParserAnnotationMetadataBuilder implements
                 .getAttributeNames()) {
             final AnnotationAttributeValue<?> value = annotation
                     .getAttribute(attributeName);
-            Assert.notNull(value, "Unable to acquire value '" + attributeName
+            Validate.notNull(value, "Unable to acquire value '" + attributeName
                     + "' from annotation");
             final MemberValuePair memberValuePair = convert(value);
-            Assert.notNull(memberValuePair,
+            Validate.notNull(memberValuePair,
                     "Member value pair should have been set");
             memberValuePairs.add(memberValuePair);
         }
@@ -203,7 +205,7 @@ public class JavaParserAnnotationMetadataBuilder implements
                 ((NormalAnnotationExpr) annotationExpression).getPairs().add(
                         new MemberValuePair("value", existingValue));
             }
-            Assert.isInstanceOf(
+            Validate.isInstanceOf(
                     NormalAnnotationExpr.class,
                     annotationExpression,
                     "Attempting to add >1 annotation member-value pair requires an existing normal annotation expression");
@@ -227,7 +229,7 @@ public class JavaParserAnnotationMetadataBuilder implements
             final AnnotationAttributeValue<?> value) {
         if (value instanceof NestedAnnotationAttributeValue) {
             final NestedAnnotationAttributeValue castValue = (NestedAnnotationAttributeValue) value;
-            Assert.isInstanceOf(JavaParserAnnotationMetadataBuilder.class,
+            Validate.isInstanceOf(JavaParserAnnotationMetadataBuilder.class,
                     castValue.getValue(),
                     "Cannot present nested annotations unless created by this class");
             AnnotationExpr annotationExpr;
@@ -384,8 +386,8 @@ public class JavaParserAnnotationMetadataBuilder implements
     private JavaParserAnnotationMetadataBuilder(
             final AnnotationExpr annotationExpr,
             final CompilationUnitServices compilationUnitServices) {
-        Assert.notNull(annotationExpr, "Annotation expression required");
-        Assert.notNull(compilationUnitServices,
+        Validate.notNull(annotationExpr, "Annotation expression required");
+        Validate.notNull(compilationUnitServices,
                 "Compilation unit services required");
 
         // Obtain the annotation type name from the assorted types of
@@ -459,7 +461,7 @@ public class JavaParserAnnotationMetadataBuilder implements
 
         if (expression instanceof CharLiteralExpr) {
             final String value = ((CharLiteralExpr) expression).getValue();
-            Assert.isTrue(value.length() == 1,
+            Validate.isTrue(value.length() == 1,
                     "Expected a char expression, but instead received '"
                             + value + "' for attribute '" + annotationName
                             + "'");
@@ -469,7 +471,7 @@ public class JavaParserAnnotationMetadataBuilder implements
 
         if (expression instanceof LongLiteralExpr) {
             String value = ((LongLiteralExpr) expression).getValue();
-            Assert.isTrue(value.toUpperCase().endsWith("L"),
+            Validate.isTrue(value.toUpperCase().endsWith("L"),
                     "Expected long literal expression '" + value
                             + "' to end in 'l' or 'L'");
             value = value.substring(0, value.length() - 1);

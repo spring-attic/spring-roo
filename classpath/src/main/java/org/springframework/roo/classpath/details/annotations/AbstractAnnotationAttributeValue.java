@@ -1,7 +1,7 @@
 package org.springframework.roo.classpath.details.annotations;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.model.JavaSymbolName;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Abstract base class for annotation attribute values.
@@ -20,7 +20,7 @@ public abstract class AbstractAnnotationAttributeValue<T extends Object>
      * @param name the attribute name (required)
      */
     protected AbstractAnnotationAttributeValue(final JavaSymbolName name) {
-        Assert.notNull(name, "Annotation attribute name required");
+        Validate.notNull(name, "Annotation attribute name required");
         this.name = name;
     }
 

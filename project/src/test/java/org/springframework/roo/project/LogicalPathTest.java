@@ -84,7 +84,7 @@ public class LogicalPathTest {
         LogicalPath.getInstance("");
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = NullPointerException.class)
     public void testGetInstanceFromNullString() {
         LogicalPath.getInstance((String) null);
     }

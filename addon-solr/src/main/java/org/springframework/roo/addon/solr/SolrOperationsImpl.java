@@ -10,6 +10,7 @@ import java.util.Date;
 import java.util.Properties;
 import java.util.Set;
 
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -26,7 +27,6 @@ import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectOperations;
-import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.DomUtils;
 import org.springframework.roo.support.util.IOUtils;
 import org.springframework.roo.support.util.XmlElementBuilder;
@@ -63,7 +63,7 @@ public class SolrOperationsImpl implements SolrOperations {
     }
 
     public void addSearch(final JavaType javaType) {
-        Assert.notNull(javaType, "Java type required");
+        Validate.notNull(javaType, "Java type required");
 
         final ClassOrInterfaceTypeDetails cid = typeLocationService
                 .getTypeDetails(javaType);

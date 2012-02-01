@@ -1,8 +1,8 @@
 package org.springframework.roo.addon.finder;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.model.JavaSymbolName;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Token which represents a field in an JPA Entity
@@ -22,7 +22,7 @@ public class FieldToken implements Token, Comparable<FieldToken> {
      * @param field
      */
     public FieldToken(final FieldMetadata field) {
-        Assert.notNull(field, "FieldMetadata required");
+        Validate.notNull(field, "FieldMetadata required");
         this.field = field;
         fieldName = field.getFieldName();
     }

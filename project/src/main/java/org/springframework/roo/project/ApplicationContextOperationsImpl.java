@@ -1,12 +1,12 @@
 package org.springframework.roo.project;
 
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.process.manager.FileManager;
-import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.DomUtils;
 import org.springframework.roo.support.util.FileUtils;
 import org.springframework.roo.support.util.XmlUtils;
@@ -33,7 +33,7 @@ public class ApplicationContextOperationsImpl implements
             final JavaPackage topLevelPackage, final String moduleName) {
         final ProjectMetadata projectMetadata = (ProjectMetadata) metadataService
                 .get(ProjectMetadata.getProjectIdentifier(moduleName));
-        Assert.notNull(projectMetadata,
+        Validate.notNull(projectMetadata,
                 "Project metadata required for module '" + moduleName + "'");
         final Document document = XmlUtils.readXml(FileUtils.getInputStream(
                 getClass(), "applicationContext-template.xml"));

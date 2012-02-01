@@ -8,17 +8,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.classpath.preferences.PreferencesService;
 import org.springframework.roo.support.logging.HandlerUtils;
-import org.springframework.roo.support.util.StringUtils;
 import org.springframework.uaa.client.TransmissionAwareUaaService;
 import org.springframework.uaa.client.TransmissionEventListener;
 import org.springframework.uaa.client.UaaService;
-import org.springframework.util.Assert;
 
 import com.vmware.appcloud.client.AppCloudClient;
 import com.vmware.appcloud.client.CloudApplication;
@@ -197,7 +197,7 @@ public class CloudFoundrySessionImpl implements CloudFoundrySession,
      * @param credentials the credentials to use (must be valid)
      */
     private void login(final CloudCredentials credentials) {
-        Assert.isTrue(credentials.isValid(), "Invalid credentials "
+        Validate.isTrue(credentials.isValid(), "Invalid credentials "
                 + credentials);
         if (client != null) {
             client.deactivate();
@@ -217,7 +217,7 @@ public class CloudFoundrySessionImpl implements CloudFoundrySession,
 
         login(credentials);
 
-        if (StringUtils.hasText(email) && StringUtils.hasText(password)) {
+        if (StringUtils.isNotBlank(email) && StringUtils.isNotBlank(password)) {
             // The user provided fresh credentials
             preferences.storeCredentials(credentials);
             LOGGER.info("Credentials saved.");

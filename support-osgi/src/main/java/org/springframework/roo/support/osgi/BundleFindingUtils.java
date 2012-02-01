@@ -2,9 +2,9 @@ package org.springframework.roo.support.osgi;
 
 import java.net.URL;
 
+import org.apache.commons.lang3.Validate;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Helper to locate bundle symbolic names used by Spring Roo.
@@ -24,8 +24,9 @@ public abstract class BundleFindingUtils {
      */
     public static String findFirstBundleForTypeName(
             final BundleContext context, final String typeNameInExternalForm) {
-        Assert.notNull(context, "Bundle context required to perform the search");
-        Assert.hasText(typeNameInExternalForm,
+        Validate.notNull(context,
+                "Bundle context required to perform the search");
+        Validate.notBlank(typeNameInExternalForm,
                 "Resource name to locate is required");
         final String resourceName = "/"
                 + typeNameInExternalForm.replace('.', '/') + ".class";
@@ -60,8 +61,9 @@ public abstract class BundleFindingUtils {
      */
     public static Class<?> findFirstBundleWithType(final BundleContext context,
             final String typeNameInExternalForm) {
-        Assert.notNull(context, "Bundle context required to perform the search");
-        Assert.hasText(typeNameInExternalForm,
+        Validate.notNull(context,
+                "Bundle context required to perform the search");
+        Validate.notBlank(typeNameInExternalForm,
                 "Resource name to locate is required");
         final String resourceName = "/"
                 + typeNameInExternalForm.replace('.', '/') + ".class";

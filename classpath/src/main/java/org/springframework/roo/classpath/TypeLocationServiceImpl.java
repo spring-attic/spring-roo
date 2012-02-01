@@ -14,6 +14,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -33,9 +35,7 @@ import org.springframework.roo.project.PhysicalPath;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.shell.NaturalOrderComparator;
-import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileUtils;
-import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Implementation of {@link TypeLocationService}.
@@ -72,7 +72,7 @@ public class TypeLocationServiceImpl implements TypeLocationService {
     private final Map<String, Set<JavaType>> typeAnnotationMap = new HashMap<String, Set<JavaType>>();
 
     private void cacheType(final String fileCanonicalPath) {
-        Assert.hasText(fileCanonicalPath, "File canonical path required");
+        Validate.notBlank(fileCanonicalPath, "File canonical path required");
         if (doesPathIndicateJavaType(fileCanonicalPath)) {
             final String id = getPhysicalTypeIdentifier(fileCanonicalPath);
             if (id != null && PhysicalTypeIdentifier.isValid(id)) {
@@ -108,7 +108,7 @@ public class TypeLocationServiceImpl implements TypeLocationService {
     }
 
     private boolean doesPathIndicateJavaType(final String fileCanonicalPath) {
-        Assert.hasText(fileCanonicalPath, "File canonical path required");
+        Validate.notBlank(fileCanonicalPath, "File canonical path required");
         return fileCanonicalPath.endsWith(".java")
                 && !fileCanonicalPath.endsWith("package-info.java")
                 && JavaSymbolName
@@ -143,7 +143,7 @@ public class TypeLocationServiceImpl implements TypeLocationService {
 
     public Set<ClassOrInterfaceTypeDetails> findClassesOrInterfaceDetailsWithTag(
             final Object tag) {
-        Assert.notNull(tag, "Tag required");
+        Validate.notNull(tag, "Tag required");
         final Set<ClassOrInterfaceTypeDetails> types = new LinkedHashSet<ClassOrInterfaceTypeDetails>();
         processTypesWithTag(tag, new LocatedTypeCallback() {
             public void process(final ClassOrInterfaceTypeDetails located) {
@@ -162,7 +162,7 @@ public class TypeLocationServiceImpl implements TypeLocationService {
 
     public Set<JavaType> findTypesWithAnnotation(
             final List<JavaType> annotationsToDetect) {
-        Assert.notNull(annotationsToDetect, "Annotations to detect required");
+        Validate.notNull(annotationsToDetect, "Annotations to detect required");
         final Set<JavaType> types = new LinkedHashSet<JavaType>();
         processTypesWithAnnotation(annotationsToDetect,
                 new LocatedTypeCallback() {
@@ -180,14 +180,14 @@ public class TypeLocationServiceImpl implements TypeLocationService {
         final String relativePath = javaType.getRelativeFileName();
         for (final String typePath : discoverTypes()) {
             if (typePath.endsWith(relativePath)) {
-                return StringUtils.removeSuffix(typePath, relativePath);
+                return StringUtils.removeEnd(typePath, relativePath);
             }
         }
         return null;
     }
 
     private PhysicalPath getPhysicalPath(final JavaType javaType) {
-        Assert.notNull(javaType, "Java type required");
+        Validate.notNull(javaType, "Java type required");
         final String parentPath = getParentPath(javaType);
         if (parentPath == null) {
             return null;
@@ -244,7 +244,7 @@ public class TypeLocationServiceImpl implements TypeLocationService {
     }
 
     public String getPhysicalTypeIdentifier(final String fileCanonicalPath) {
-        Assert.hasText(fileCanonicalPath, "File canonical path required");
+        Validate.notBlank(fileCanonicalPath, "File canonical path required");
         if (!doesPathIndicateJavaType(fileCanonicalPath)) {
             return null;
         }
@@ -255,9 +255,8 @@ public class TypeLocationServiceImpl implements TypeLocationService {
         }
         final String typeDirectory = FileUtils
                 .getFirstDirectory(fileCanonicalPath);
-        final String simpleTypeName = StringUtils.replaceFirst(
-                fileCanonicalPath, typeDirectory + File.separator, "").replace(
-                ".java", "");
+        final String simpleTypeName = StringUtils.replace(fileCanonicalPath,
+                typeDirectory + File.separator, "", 1).replace(".java", "");
         final JavaPackage javaPackage = typeResolutionService
                 .getPackage(fileCanonicalPath);
         if (javaPackage == null) {
@@ -268,8 +267,8 @@ public class TypeLocationServiceImpl implements TypeLocationService {
                         + simpleTypeName);
         final Pom module = projectOperations
                 .getModuleForFileIdentifier(fileCanonicalPath);
-        Assert.notNull(module, "The module for the file '" + fileCanonicalPath
-                + "' could not be located");
+        Validate.notNull(module, "The module for the file '"
+                + fileCanonicalPath + "' could not be located");
         typeCache.cacheTypeAgainstModule(module, javaType);
 
         String reducedPath = fileCanonicalPath.replace(
@@ -292,7 +291,7 @@ public class TypeLocationServiceImpl implements TypeLocationService {
     }
 
     public List<String> getPotentialTopLevelPackagesForModule(final Pom module) {
-        Assert.notNull(module, "Module required");
+        Validate.notNull(module, "Module required");
 
         final Map<String, Set<String>> packageMap = new HashMap<String, Set<String>>();
         final Set<String> moduleTypes = getTypesForModule(module.getPath());
@@ -337,7 +336,7 @@ public class TypeLocationServiceImpl implements TypeLocationService {
     }
 
     private String getProposedJavaType(final String fileCanonicalPath) {
-        Assert.hasText(fileCanonicalPath, "File canonical path required");
+        Validate.notBlank(fileCanonicalPath, "File canonical path required");
         // Determine the JavaType for this file
         String relativePath = "";
         final Pom moduleForFileIdentifier = projectOperations
@@ -353,20 +352,20 @@ public class TypeLocationServiceImpl implements TypeLocationService {
                             .getCanonicalPath(physicalPath.getLocation()));
             if (fileCanonicalPath.startsWith(moduleCanonicalPath)) {
                 relativePath = File.separator
-                        + StringUtils.replaceFirst(fileCanonicalPath,
-                                moduleCanonicalPath, "");
+                        + StringUtils.replace(fileCanonicalPath,
+                                moduleCanonicalPath, "", 1);
                 break;
             }
         }
-        Assert.hasText(relativePath,
+        Validate.notBlank(relativePath,
                 "Could not determine compilation unit name for file '"
                         + fileCanonicalPath + "'");
-        Assert.isTrue(relativePath.startsWith(File.separator),
+        Validate.isTrue(relativePath.startsWith(File.separator),
                 "Relative path unexpectedly dropped the '" + File.separator
                         + "' prefix (received '" + relativePath + "' from '"
                         + fileCanonicalPath + "'");
         relativePath = relativePath.substring(1);
-        Assert.isTrue(relativePath.endsWith(".java"),
+        Validate.isTrue(relativePath.endsWith(".java"),
                 "The relative path unexpectedly dropped the .java extension for file '"
                         + fileCanonicalPath + "'");
         relativePath = relativePath.substring(0,
@@ -375,7 +374,7 @@ public class TypeLocationServiceImpl implements TypeLocationService {
     }
 
     public String getTopLevelPackageForModule(final Pom module) {
-        Assert.notNull(module, "Module required");
+        Validate.notNull(module, "Module required");
 
         final Map<String, Set<String>> packageMap = new HashMap<String, Set<String>>();
         final Set<String> moduleTypes = getTypesForModule(module.getPath());
@@ -449,7 +448,7 @@ public class TypeLocationServiceImpl implements TypeLocationService {
         if (StringUtils.isBlank(physicalTypeId)) {
             return null;
         }
-        Assert.isTrue(PhysicalTypeIdentifier.isValid(physicalTypeId),
+        Validate.isTrue(PhysicalTypeIdentifier.isValid(physicalTypeId),
                 "Metadata id '" + physicalTypeId
                         + "' is not a valid physical type id");
         updateTypeCache();
@@ -487,14 +486,14 @@ public class TypeLocationServiceImpl implements TypeLocationService {
     }
 
     public Set<String> getTypesForModule(final String modulePath) {
-        Assert.notNull(modulePath, "Module path required");
+        Validate.notNull(modulePath, "Module path required");
         return typeCache.getTypeNamesForModuleFilePath(modulePath);
     }
 
     public boolean hasTypeChanged(final String requestingClass,
             final JavaType javaType) {
-        Assert.notNull(requestingClass, "Requesting class required");
-        Assert.notNull(javaType, "Java type required");
+        Validate.notNull(requestingClass, "Requesting class required");
+        Validate.notNull(javaType, "Java type required");
 
         updateTypeCache();
         Set<String> changesSinceLastRequest = changeMap.get(requestingClass);
@@ -558,8 +557,8 @@ public class TypeLocationServiceImpl implements TypeLocationService {
     public void processTypesWithAnnotation(
             final List<JavaType> annotationsToDetect,
             final LocatedTypeCallback callback) {
-        Assert.notNull(annotationsToDetect, "Annotations to detect required");
-        Assert.notNull(callback, "Callback required");
+        Validate.notNull(annotationsToDetect, "Annotations to detect required");
+        Validate.notNull(callback, "Callback required");
         // If the cache doesn't yet contain the annotation to be found it should
         // be added
         for (final JavaType annotationType : annotationsToDetect) {
@@ -584,8 +583,8 @@ public class TypeLocationServiceImpl implements TypeLocationService {
 
     private void processTypesWithTag(final Object tag,
             final LocatedTypeCallback callback) {
-        Assert.notNull(tag, "Tag required");
-        Assert.notNull(callback, "Callback required");
+        Validate.notNull(tag, "Tag required");
+        Validate.notNull(callback, "Callback required");
         // If the cache doesn't yet contain the tag it should be added
         if (!tagToMidMap.containsKey(tag)) {
             tagToMidMap.put(tag, new HashSet<String>());
@@ -603,7 +602,7 @@ public class TypeLocationServiceImpl implements TypeLocationService {
     }
 
     private void updateAttributeCache(final MemberHoldingTypeDetails cid) {
-        Assert.notNull(cid, "Member holding type details required");
+        Validate.notNull(cid, "Member holding type details required");
         if (!typeAnnotationMap.containsKey(cid.getDeclaredByMetadataId())) {
             typeAnnotationMap.put(cid.getDeclaredByMetadataId(),
                     new HashSet<JavaType>());
@@ -651,7 +650,7 @@ public class TypeLocationServiceImpl implements TypeLocationService {
     }
 
     private void updateChanges(final String typeName, final boolean remove) {
-        Assert.notNull(typeName, "Type name required");
+        Validate.notNull(typeName, "Type name required");
         for (final String requestingClass : changeMap.keySet()) {
             if (remove) {
                 changeMap.get(requestingClass).remove(typeName);

@@ -8,9 +8,9 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.model.JavaPackage;
-import org.springframework.roo.support.util.Assert;
-import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Represents the database model, ie. the tables in the database.
@@ -50,7 +50,7 @@ public class Database {
      * @param tables (required)
      */
     Database(final Set<Table> tables) {
-        Assert.notNull(tables, "Tables required");
+        Validate.notNull(tables, "Tables required");
         this.tables = tables;
         init();
     }

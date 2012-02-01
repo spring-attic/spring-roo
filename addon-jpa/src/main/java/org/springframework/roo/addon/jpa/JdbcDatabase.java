@@ -1,7 +1,7 @@
 package org.springframework.roo.addon.jpa;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.support.style.ToStringCreator;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Provides information related to JDBC database configuration.
@@ -52,8 +52,8 @@ public enum JdbcDatabase {
      */
     private JdbcDatabase(final String key, final String driverClassName,
             final String connectionString) {
-        Assert.hasText(connectionString, "Connection string is required");
-        Assert.hasText(key, "Key is required");
+        Validate.notBlank(connectionString, "Connection string is required");
+        Validate.notBlank(key, "Key is required");
         this.connectionString = connectionString;
         this.driverClassName = driverClassName;
         this.key = key;

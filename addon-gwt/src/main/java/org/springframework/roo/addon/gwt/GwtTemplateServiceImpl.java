@@ -30,6 +30,8 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -57,10 +59,8 @@ import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectOperations;
-import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileUtils;
 import org.springframework.roo.support.util.IOUtils;
-import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -338,8 +338,9 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
                 .getDeclaredByMetadataId();
         final JavaType idType = persistenceMemberLocator
                 .getIdentifierType(entity);
-        Assert.notNull(idType, "Identifier type is not available for entity '"
-                + entityName + "'");
+        Validate.notNull(idType,
+                "Identifier type is not available for entity '" + entityName
+                        + "'");
 
         final MethodParameter entityParameter = new MethodParameter(entity,
                 "proxy");
@@ -350,7 +351,7 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
                 .getMemberTypeAdditions(metadataIdentificationString,
                         CustomDataKeys.PERSIST_METHOD.name(), entity, idType,
                         LAYER_POSITION, entityParameter);
-        Assert.notNull(persistMethodAdditions,
+        Validate.notNull(persistMethodAdditions,
                 "Persist method is not available for entity '" + entityName
                         + "'");
         final String persistMethodSignature = getRequestMethodCall(request,
@@ -362,7 +363,7 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
                 .getMemberTypeAdditions(metadataIdentificationString,
                         CustomDataKeys.REMOVE_METHOD.name(), entity, idType,
                         LAYER_POSITION, entityParameter);
-        Assert.notNull(removeMethodAdditions,
+        Validate.notNull(removeMethodAdditions,
                 "Remove method is not available for entity '" + entityName
                         + "'");
         final String removeMethodSignature = getRequestMethodCall(request,
@@ -374,7 +375,7 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
                 .getMemberTypeAdditions(metadataIdentificationString,
                         CustomDataKeys.COUNT_ALL_METHOD.name(), entity, idType,
                         LAYER_POSITION);
-        Assert.notNull(countMethodAdditions,
+        Validate.notNull(countMethodAdditions,
                 "Count method is not available for entity '" + entityName + "'");
         dataDictionary.setVariable("countEntitiesMethod",
                 countMethodAdditions.getMethodName());
@@ -944,7 +945,7 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
             final TemplateLoader templateLoader = TemplateResourceLoader
                     .create();
             final Template template = templateLoader.getTemplate(templateFile);
-            Assert.notNull(template, "Template required for '" + templateFile
+            Validate.notNull(template, "Template required for '" + templateFile
                     + "'");
             final String templateContents = template
                     .renderToString(dataDictionary);

@@ -14,6 +14,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -43,12 +45,10 @@ import org.springframework.roo.project.ProjectType;
 import org.springframework.roo.project.Repository;
 import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.shell.Shell;
-import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.DomUtils;
 import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.FileUtils;
 import org.springframework.roo.support.util.IOUtils;
-import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.WebXmlUtils;
 import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlUtils;
@@ -82,7 +82,8 @@ public class JsfOperationsImpl extends AbstractOperations implements
     @Reference private TypeManagementService typeManagementService;
 
     public void addMediaSuurce(final String url, MediaPlayer mediaPlayer) {
-        Assert.isTrue(StringUtils.hasText(url), "Media source url required");
+        Validate.isTrue(StringUtils.isNotBlank(url),
+                "Media source url required");
 
         final String mainPage = projectOperations.getPathResolver()
                 .getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, "pages/main.xhtml");
@@ -98,7 +99,7 @@ public class JsfOperationsImpl extends AbstractOperations implements
         if (mediaPlayer == null) {
             mp: for (final MediaPlayer mp : MediaPlayer.values()) {
                 for (final String mediaType : mp.getMediaTypes()) {
-                    if (StringUtils.toLowerCase(url).contains(mediaType)) {
+                    if (StringUtils.lowerCase(url).contains(mediaType)) {
                         mediaPlayer = mp;
                         break mp;
                     }
@@ -121,8 +122,7 @@ public class JsfOperationsImpl extends AbstractOperations implements
             mediaElement = new XmlElementBuilder("p:media", document)
                     .addAttribute("value", url)
                     .addAttribute("player",
-                            StringUtils.toLowerCase(mediaPlayer.name()))
-                    .build();
+                            StringUtils.lowerCase(mediaPlayer.name())).build();
         }
         paraElement.appendChild(mediaElement);
         element.appendChild(paraElement);
@@ -133,8 +133,8 @@ public class JsfOperationsImpl extends AbstractOperations implements
 
     private void addOrRemoveMyFacesListener(
             final JsfImplementation jsfImplementation, final Document document) {
-        Assert.notNull(jsfImplementation, "JSF implementation required");
-        Assert.notNull(document, "web.xml document required");
+        Validate.notNull(jsfImplementation, "JSF implementation required");
+        Validate.notNull(document, "web.xml document required");
 
         final Element root = document.getDocumentElement();
         final Element webAppElement = XmlUtils.findFirstElement("/web-app",
@@ -160,11 +160,11 @@ public class JsfOperationsImpl extends AbstractOperations implements
 
     private void changePrimeFacesTheme(final Theme theme,
             final Document document) {
-        Assert.notNull(theme, "Theme required");
-        Assert.notNull(document, "web.xml document required");
+        Validate.notNull(theme, "Theme required");
+        Validate.notNull(document, "web.xml document required");
 
         // Add theme to the pom if not already there
-        final String themeName = StringUtils.toLowerCase(theme.name().replace(
+        final String themeName = StringUtils.lowerCase(theme.name().replace(
                 "_", "-"));
         projectOperations.addDependency(
                 projectOperations.getFocusedModuleName(),
@@ -177,11 +177,11 @@ public class JsfOperationsImpl extends AbstractOperations implements
                 .findFirstElement(
                         "/web-app/context-param[param-name = 'primefaces.THEME']",
                         root);
-        Assert.notNull(contextParamElement,
+        Validate.notNull(contextParamElement,
                 "The web.xml primefaces.THEME context param element required");
         final Element paramValueElement = XmlUtils.findFirstElement(
                 "param-value", contextParamElement);
-        Assert.notNull(paramValueElement,
+        Validate.notNull(paramValueElement,
                 "primefaces.THEME param-value element required");
         paramValueElement.setTextContent(themeName);
     }
@@ -268,14 +268,14 @@ public class JsfOperationsImpl extends AbstractOperations implements
 
         final ClassOrInterfaceTypeDetails entityTypeDetails = typeLocationService
                 .getTypeDetails(entity);
-        Assert.notNull(entityTypeDetails, "The type '" + entity
+        Validate.notNull(entityTypeDetails, "The type '" + entity
                 + "' could not be resolved");
 
         final PluralMetadata pluralMetadata = (PluralMetadata) metadataService
                 .get(PluralMetadata.createIdentifier(entity,
                         PhysicalTypeIdentifier.getPath(entityTypeDetails
                                 .getDeclaredByMetadataId())));
-        Assert.notNull(pluralMetadata, "The plural for type '" + entity
+        Validate.notNull(pluralMetadata, "The plural for type '" + entity
                 + "' could not be resolved");
 
         // Create type annotation for new managed bean
@@ -352,7 +352,7 @@ public class JsfOperationsImpl extends AbstractOperations implements
     }
 
     public void generateAll(final JavaPackage destinationPackage) {
-        Assert.notNull(destinationPackage, "Destination package required");
+        Validate.notNull(destinationPackage, "Destination package required");
 
         // Create JSF managed bean for each entity
         generateManagedBeans(destinationPackage);
@@ -545,7 +545,7 @@ public class JsfOperationsImpl extends AbstractOperations implements
     }
 
     private void installFacesConfig(final JavaPackage destinationPackage) {
-        Assert.isTrue(projectOperations.isFocusedProjectAvailable(),
+        Validate.isTrue(projectOperations.isFocusedProjectAvailable(),
                 "Project metadata required");
         if (hasFacesConfig()) {
             return;

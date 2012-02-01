@@ -4,6 +4,8 @@ import static org.springframework.roo.model.JavaType.STRING;
 
 import java.lang.reflect.Modifier;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
@@ -14,8 +16,6 @@ import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.support.style.ToStringCreator;
-import org.springframework.roo.support.util.Assert;
-import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Metadata for {@link RooToString}.
@@ -75,9 +75,9 @@ public class ToStringMetadata extends
             final PhysicalTypeMetadata governorPhysicalTypeMetadata,
             final ToStringAnnotationValues annotationValues) {
         super(identifier, aspectName, governorPhysicalTypeMetadata);
-        Assert.isTrue(isValid(identifier), "Metadata identification string '"
+        Validate.isTrue(isValid(identifier), "Metadata identification string '"
                 + identifier + "' does not appear to be a valid");
-        Assert.notNull(annotationValues, "Annotation values required");
+        Validate.notNull(annotationValues, "Annotation values required");
 
         this.annotationValues = annotationValues;
 

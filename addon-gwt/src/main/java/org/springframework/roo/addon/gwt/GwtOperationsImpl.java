@@ -25,6 +25,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -59,12 +61,10 @@ import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.Repository;
 import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.support.osgi.OSGiUtils;
-import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.CollectionUtils;
 import org.springframework.roo.support.util.DomUtils;
 import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.FileUtils;
-import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.WebXmlUtils;
 import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlUtils;
@@ -118,7 +118,7 @@ public class GwtOperationsImpl implements GwtOperations {
         final String topLevelPackage = gwtConfig.replace(
                 FileUtils.ensureTrailingSeparator(moduleRoot), "").replace(
                 File.separator, ".");
-        final String relativePackage = StringUtils.removePrefix(
+        final String relativePackage = StringUtils.removeStart(
                 sourcePackage.getFullyQualifiedPackageName(), topLevelPackage
                         + ".");
         gwtTypeService.addSourcePath(
@@ -293,7 +293,7 @@ public class GwtOperationsImpl implements GwtOperations {
         final String path = FileUtils.getPath(getClass(), sourceAntPath);
         final Iterable<URL> uris = OSGiUtils.findEntriesByPattern(
                 context.getBundleContext(), path);
-        Assert.notNull(uris,
+        Validate.notNull(uris,
                 "Could not search bundles for resources for Ant Path '" + path
                         + "'");
 
@@ -657,7 +657,7 @@ public class GwtOperationsImpl implements GwtOperations {
         final Element additionalBuildCommandsElement = XmlUtils
                 .findFirstElement(MAVEN_ECLIPSE_PLUGIN
                         + "/configuration/additionalBuildcommands", root);
-        Assert.notNull(additionalBuildCommandsElement,
+        Validate.notNull(additionalBuildCommandsElement,
                 "additionalBuildcommands element of the maven-eclipse-plugin required");
         Element gwtBuildCommandElement = XmlUtils.findFirstElement(
                 "buildCommand[name = '" + GWT_BUILD_COMMAND + "']",
@@ -674,7 +674,7 @@ public class GwtOperationsImpl implements GwtOperations {
         final Element additionalProjectNaturesElement = XmlUtils
                 .findFirstElement(MAVEN_ECLIPSE_PLUGIN
                         + "/configuration/additionalProjectnatures", root);
-        Assert.notNull(additionalProjectNaturesElement,
+        Validate.notNull(additionalProjectNaturesElement,
                 "additionalProjectnatures element of the maven-eclipse-plugin required");
         Element gwtProjectNatureElement = XmlUtils.findFirstElement(
                 "projectnature[name = '" + GWT_PROJECT_NATURE + "']",
@@ -702,7 +702,7 @@ public class GwtOperationsImpl implements GwtOperations {
         final String path = FileUtils.getPath(getClass(), sourceAntPath);
         final Iterable<URL> urls = OSGiUtils.findEntriesByPattern(
                 context.getBundleContext(), path);
-        Assert.notNull(urls,
+        Validate.notNull(urls,
                 "Could not search bundles for resources for Ant Path '" + path
                         + "'");
 

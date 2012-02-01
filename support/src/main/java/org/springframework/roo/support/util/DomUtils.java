@@ -5,6 +5,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.w3c.dom.CharacterData;
 import org.w3c.dom.Comment;
 import org.w3c.dom.Document;
@@ -77,8 +79,8 @@ public final class DomUtils {
      */
     public static Element findFirstElementByName(final String name,
             final Element root) {
-        Assert.hasText(name, "Element name required");
-        Assert.notNull(root, "Root element required");
+        Validate.notBlank(name, "Element name required");
+        Validate.notNull(root, "Root element required");
         return (Element) root.getElementsByTagName(name).item(0);
     }
 
@@ -92,8 +94,8 @@ public final class DomUtils {
      */
     public static Element getChildElementByTagName(final Element element,
             final String childElementName) {
-        Assert.notNull(element, "Element must not be null");
-        Assert.notNull(childElementName, "Element name must not be null");
+        Validate.notNull(element, "Element must not be null");
+        Validate.notNull(childElementName, "Element name must not be null");
         final NodeList nl = element.getChildNodes();
         for (int i = 0; i < nl.getLength(); i++) {
             final Node node = nl.item(i);
@@ -136,8 +138,8 @@ public final class DomUtils {
      */
     public static List<Element> getChildElementsByTagName(
             final Element element, final String[] childElementNames) {
-        Assert.notNull(element, "Element must not be null");
-        Assert.notNull(childElementNames,
+        Validate.notNull(element, "Element must not be null");
+        Validate.notNull(childElementNames,
                 "Element names collection must not be null");
         final List<String> childEleNameList = Arrays.asList(childElementNames);
         final NodeList nl = element.getChildNodes();
@@ -213,7 +215,7 @@ public final class DomUtils {
      * @see Comment
      */
     public static String getTextValue(final Element valueElement) {
-        Assert.notNull(valueElement, "Element must not be null");
+        Validate.notNull(valueElement, "Element must not be null");
         final StringBuilder sb = new StringBuilder();
         final NodeList nl = valueElement.getChildNodes();
         for (int i = 0; i < nl.getLength(); i++) {
@@ -237,8 +239,8 @@ public final class DomUtils {
      */
     public static boolean nodeNameEquals(final Node node,
             final String desiredName) {
-        Assert.notNull(node, "Node must not be null");
-        Assert.notNull(desiredName, "Desired name must not be null");
+        Validate.notNull(node, "Node must not be null");
+        Validate.notNull(desiredName, "Desired name must not be null");
         return nodeNameMatch(node, desiredName);
     }
 

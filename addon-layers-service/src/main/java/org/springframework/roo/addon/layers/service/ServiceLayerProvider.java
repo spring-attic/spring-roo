@@ -5,6 +5,8 @@ import static org.springframework.roo.model.SpringJavaType.AUTOWIRED;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -22,8 +24,6 @@ import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.support.util.PairList;
-import org.springframework.roo.support.util.StringUtils;
-import org.springframework.uaa.client.util.Assert;
 
 /**
  * The {@link org.springframework.roo.classpath.layers.LayerProvider} that
@@ -49,11 +49,11 @@ public class ServiceLayerProvider extends CoreLayerProvider {
     public MemberTypeAdditions getMemberTypeAdditions(final String callerMID,
             final String methodIdentifier, final JavaType targetEntity,
             final JavaType idType, final MethodParameter... methodParameters) {
-        Assert.isTrue(StringUtils.hasText(callerMID),
+        Validate.isTrue(StringUtils.isNotBlank(callerMID),
                 "Caller's metadata identifier required");
-        Assert.notNull(methodIdentifier, "Method identifier required");
-        Assert.notNull(targetEntity, "Target entity type required");
-        Assert.notNull(methodParameters,
+        Validate.notNull(methodIdentifier, "Method identifier required");
+        Validate.notNull(targetEntity, "Target entity type required");
+        Validate.notNull(methodParameters,
                 "Method param names and types required (may be empty)");
 
         // Check whether this is even a known service layer method
@@ -86,7 +86,7 @@ public class ServiceLayerProvider extends CoreLayerProvider {
                 // Check whether this method is implemented by the given service
                 final String methodName = method.getName(annotationValues,
                         targetEntity, pluralMetadata.getPlural());
-                if (StringUtils.hasText(methodName)) {
+                if (StringUtils.isNotBlank(methodName)) {
                     // The service implements the method; get the additions to
                     // be made by the caller
                     final MemberTypeAdditions methodAdditions = getMethodAdditions(

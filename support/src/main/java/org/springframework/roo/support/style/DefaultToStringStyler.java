@@ -16,9 +16,9 @@
 
 package org.springframework.roo.support.style;
 
-import org.springframework.roo.support.util.Assert;
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.support.util.ClassUtils;
-import org.springframework.roo.support.util.ObjectUtils;
+import org.springframework.roo.support.util.RooObjectUtils;
 
 /**
  * Spring's default <code>toString()</code> styler.
@@ -41,7 +41,7 @@ public class DefaultToStringStyler implements ToStringStyler {
      * @param valueStyler the ValueStyler to use
      */
     public DefaultToStringStyler(final ValueStyler valueStyler) {
-        Assert.notNull(valueStyler, "ValueStyler must not be null");
+        Validate.notNull(valueStyler, "ValueStyler must not be null");
         this.valueStyler = valueStyler;
     }
 
@@ -79,7 +79,7 @@ public class DefaultToStringStyler implements ToStringStyler {
     private void styleIdentityHashCode(final StringBuilder buffer,
             final Object obj) {
         buffer.append('@');
-        buffer.append(ObjectUtils.getIdentityHexString(obj));
+        buffer.append(RooObjectUtils.getIdentityHexString(obj));
     }
 
     public void styleStart(final StringBuilder buffer, final Object obj) {

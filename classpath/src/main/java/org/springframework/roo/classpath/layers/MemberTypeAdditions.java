@@ -6,6 +6,8 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.classpath.details.AbstractMemberHoldingTypeDetailsBuilder;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
@@ -13,9 +15,7 @@ import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.support.style.ToStringCreator;
-import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.CollectionUtils;
-import org.springframework.roo.support.util.StringUtils;
 
 /**
  * The required additions to a given type in order to invoke a given application
@@ -42,7 +42,7 @@ public class MemberTypeAdditions {
             final Collection<MethodParameter> parameters) {
         JavaSymbolName.assertJavaNameLegal(methodName);
         final StringBuilder methodCall = new StringBuilder();
-        if (StringUtils.hasText(targetName)) {
+        if (StringUtils.isNotBlank(targetName)) {
             JavaSymbolName.assertJavaNameLegal(targetName);
             methodCall.append(targetName);
             methodCall.append(".");
@@ -135,8 +135,9 @@ public class MemberTypeAdditions {
             final ClassOrInterfaceTypeDetailsBuilder builder,
             final String methodName, final String methodCall,
             final boolean isStatic, final List<MethodParameter> methodParameters) {
-        Assert.hasText(methodName, "Invalid method name '" + methodName + "'");
-        Assert.hasText(methodCall, "Invalid method signature '" + methodCall
+        Validate.notBlank(methodName, "Invalid method name '" + methodName
+                + "'");
+        Validate.notBlank(methodCall, "Invalid method signature '" + methodCall
                 + "'");
         classOrInterfaceDetailsBuilder = builder;
         this.methodCall = methodCall;

@@ -6,6 +6,8 @@ import static org.springframework.roo.model.JavaType.CLASS;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -41,8 +43,6 @@ import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.model.SpringJavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.ProjectOperations;
-import org.springframework.roo.support.util.Assert;
-import org.springframework.roo.support.util.StringUtils;
 
 @Component(immediate = true)
 @Service
@@ -134,7 +134,7 @@ public class GwtLocatorMetadataProviderImpl implements
                         CustomDataKeys.FIND_METHOD.name(), entity,
                         identifierType, LAYER_POSITION, new MethodParameter(
                                 identifierType, "id"));
-        Assert.notNull(
+        Validate.notNull(
                 findMethodAdditions,
                 "Find method not available for entity '"
                         + entity.getFullyQualifiedTypeName() + "'");
@@ -281,7 +281,7 @@ public class GwtLocatorMetadataProviderImpl implements
             String downstreamDependency) {
         if (MetadataIdentificationUtils
                 .isIdentifyingClass(downstreamDependency)) {
-            Assert.isTrue(
+            Validate.isTrue(
                     MetadataIdentificationUtils.getMetadataClass(
                             upstreamDependency).equals(
                             MetadataIdentificationUtils
@@ -369,7 +369,7 @@ public class GwtLocatorMetadataProviderImpl implements
 
         // We should now have an instance-specific "downstream dependency" that
         // can be processed by this class
-        Assert.isTrue(
+        Validate.isTrue(
                 MetadataIdentificationUtils.getMetadataClass(
                         downstreamDependency).equals(
                         MetadataIdentificationUtils

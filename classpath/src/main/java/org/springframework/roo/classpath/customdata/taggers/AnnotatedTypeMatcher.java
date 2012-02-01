@@ -6,11 +6,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.model.CustomDataKey;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * A {@link TypeMatcher} that looks for any of a given set of annotations.
@@ -31,7 +31,7 @@ public class AnnotatedTypeMatcher extends TypeMatcher {
     public AnnotatedTypeMatcher(
             final CustomDataKey<MemberHoldingTypeDetails> customDataKey,
             final JavaType... annotationTypesToMatchOn) {
-        Assert.notNull(customDataKey, "Custom data key required");
+        Validate.notNull(customDataKey, "Custom data key required");
         this.annotationTypesToMatchOn = Arrays.asList(annotationTypesToMatchOn);
         this.customDataKey = customDataKey;
     }

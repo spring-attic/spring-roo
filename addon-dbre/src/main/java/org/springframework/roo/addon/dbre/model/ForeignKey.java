@@ -3,7 +3,7 @@ package org.springframework.roo.addon.dbre.model;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import org.springframework.roo.support.util.Assert;
+import org.apache.commons.lang3.Validate;
 
 /**
  * Represents a database foreign key.
@@ -54,7 +54,7 @@ public class ForeignKey {
     }
 
     public void addReference(final Reference reference) {
-        Assert.notNull(reference, "Reference required");
+        Validate.notNull(reference, "Reference required");
         references.add(reference);
     }
 

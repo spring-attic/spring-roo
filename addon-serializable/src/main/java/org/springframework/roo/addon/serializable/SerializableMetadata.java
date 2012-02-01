@@ -6,6 +6,7 @@ import static java.lang.reflect.Modifier.STATIC;
 import static org.springframework.roo.model.JavaType.LONG_PRIMITIVE;
 import static org.springframework.roo.model.JdkJavaType.SERIALIZABLE;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.customdata.CustomDataKeys;
@@ -18,7 +19,6 @@ import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.support.style.ToStringCreator;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Metadata for {@link RooSerializable}.
@@ -73,7 +73,7 @@ public class SerializableMetadata extends
             final JavaType aspectName,
             final PhysicalTypeMetadata governorPhysicalTypeMetadata) {
         super(identifier, aspectName, governorPhysicalTypeMetadata);
-        Assert.isTrue(isValid(identifier), "Metadata id '" + identifier
+        Validate.isTrue(isValid(identifier), "Metadata id '" + identifier
                 + "' is invalid");
 
         if (isValid()) {

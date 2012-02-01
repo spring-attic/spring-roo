@@ -1,9 +1,9 @@
 package org.springframework.roo.classpath.details;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.AbstractCustomDataAccessorBuilder;
 import org.springframework.roo.model.Builder;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Assists in the creation of a {@link Builder} for types that eventually
@@ -37,7 +37,7 @@ public abstract class AbstractIdentifiableJavaStructureBuilder<T extends Identif
      */
     protected AbstractIdentifiableJavaStructureBuilder(
             final String declaredByMetadataId) {
-        Assert.isTrue(MetadataIdentificationUtils
+        Validate.isTrue(MetadataIdentificationUtils
                 .isIdentifyingInstance(declaredByMetadataId),
                 "Declared by metadata ID must identify a specific instance (not '"
                         + declaredByMetadataId + "')");

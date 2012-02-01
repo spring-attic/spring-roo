@@ -2,8 +2,8 @@ package org.springframework.roo.file.monitor.event;
 
 import java.io.File;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.support.style.ToStringCreator;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Represents a file notification message.
@@ -28,8 +28,8 @@ public class FileEvent {
 
     public FileEvent(final FileDetails fileDetails,
             final FileOperation operation, final File previousName) {
-        Assert.notNull(fileDetails, "File details required");
-        Assert.notNull(operation, "File operation required");
+        Validate.notNull(fileDetails, "File details required");
+        Validate.notNull(operation, "File operation required");
         this.fileDetails = fileDetails;
         this.operation = operation;
         this.previousName = previousName;

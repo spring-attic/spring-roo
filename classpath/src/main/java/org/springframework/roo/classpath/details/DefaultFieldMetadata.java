@@ -3,12 +3,12 @@ package org.springframework.roo.classpath.details;
 import java.lang.reflect.Modifier;
 import java.util.List;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.model.CustomData;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.support.style.ToStringCreator;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Default implementation of {@link FieldMetadata}.
@@ -31,9 +31,10 @@ public class DefaultFieldMetadata extends
             final JavaSymbolName fieldName, final JavaType fieldType,
             final String fieldInitializer) {
         super(customData, declaredByMetadataId, modifier, annotations);
-        Assert.hasText(declaredByMetadataId, "Declared by metadata ID required");
-        Assert.notNull(fieldName, "Field name required");
-        Assert.notNull(fieldType, "Field type required");
+        Validate.notBlank(declaredByMetadataId,
+                "Declared by metadata ID required");
+        Validate.notNull(fieldName, "Field name required");
+        Validate.notNull(fieldType, "Field type required");
         this.fieldName = fieldName;
         this.fieldType = fieldType;
         this.fieldInitializer = fieldInitializer;

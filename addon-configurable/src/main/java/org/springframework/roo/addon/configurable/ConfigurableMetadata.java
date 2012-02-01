@@ -2,6 +2,7 @@ package org.springframework.roo.addon.configurable;
 
 import static org.springframework.roo.model.SpringJavaType.CONFIGURABLE;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
@@ -10,7 +11,6 @@ import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.support.style.ToStringCreator;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Metadata for {@link RooConfigurable}.
@@ -55,7 +55,7 @@ public class ConfigurableMetadata extends
             final JavaType aspectName,
             final PhysicalTypeMetadata governorPhysicalTypeMetadata) {
         super(identifier, aspectName, governorPhysicalTypeMetadata);
-        Assert.isTrue(isValid(identifier), "Metadata identification string '"
+        Validate.isTrue(isValid(identifier), "Metadata identification string '"
                 + identifier + "' does not appear to be a valid");
 
         if (!isValid()) {

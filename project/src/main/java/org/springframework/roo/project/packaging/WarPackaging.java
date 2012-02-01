@@ -9,12 +9,12 @@ import static org.springframework.roo.project.Path.SRC_TEST_RESOURCES;
 import java.util.Arrays;
 import java.util.Collection;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectOperations;
-import org.springframework.roo.support.util.StringUtils;
 
 /**
  * The core {@link PackagingProvider} for web modules.

@@ -6,13 +6,13 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.logging.Logger;
 
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.osgi.OSGiUtils;
-import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.FileUtils;
 import org.springframework.roo.support.util.IOUtils;
@@ -47,8 +47,8 @@ public abstract class AbstractOperations {
      */
     public void copyDirectoryContents(final String sourceAntPath,
             String targetDirectory, final boolean replace) {
-        Assert.hasText(sourceAntPath, "Source path required");
-        Assert.hasText(targetDirectory, "Target directory required");
+        Validate.notBlank(sourceAntPath, "Source path required");
+        Validate.notBlank(targetDirectory, "Target directory required");
 
         if (!targetDirectory.endsWith("/")) {
             targetDirectory += "/";
@@ -61,7 +61,7 @@ public abstract class AbstractOperations {
         final String path = FileUtils.getPath(getClass(), sourceAntPath);
         final Iterable<URL> urls = OSGiUtils.findEntriesByPattern(
                 context.getBundleContext(), path);
-        Assert.notNull(urls,
+        Validate.notNull(urls,
                 "Could not search bundles for resources for Ant Path '" + path
                         + "'");
         for (final URL url : urls) {

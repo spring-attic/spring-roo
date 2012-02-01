@@ -2,9 +2,9 @@ package org.springframework.roo.addon.web.mvc.controller.details;
 
 import java.util.List;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.MethodMetadata;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Aggregates metadata for a given Roo finder which is scaffolded by Web
@@ -22,8 +22,9 @@ public class FinderMetadataDetails implements Comparable<FinderMetadataDetails> 
     public FinderMetadataDetails(final String finderName,
             final MethodMetadata finderMethodMetadata,
             final List<FieldMetadata> finderMethodParamFields) {
-        Assert.hasText(finderName, "Finder name required");
-        Assert.notNull(finderMethodMetadata, "Finder method metadata required");
+        Validate.notBlank(finderName, "Finder name required");
+        Validate.notNull(finderMethodMetadata,
+                "Finder method metadata required");
         this.finderName = finderName;
         this.finderMethodMetadata = finderMethodMetadata;
         this.finderMethodParamFields = finderMethodParamFields;

@@ -17,6 +17,8 @@ import java.io.Reader;
 import java.io.StringWriter;
 import java.io.Writer;
 
+import org.apache.commons.lang3.Validate;
+
 /**
  * Simple utility methods for file and stream copying. All copy methods use a
  * block size of 4096 bytes, and close all affected streams when done.
@@ -43,8 +45,8 @@ public final class FileCopyUtils {
      */
     public static void copy(final byte[] bytes, final File file)
             throws IOException {
-        Assert.notNull(bytes, "No input byte array specified");
-        Assert.notNull(file, "No output File specified");
+        Validate.notNull(bytes, "No input byte array specified");
+        Validate.notNull(file, "No output File specified");
         final ByteArrayInputStream in = new ByteArrayInputStream(bytes);
         final OutputStream out = new BufferedOutputStream(new FileOutputStream(
                 file));
@@ -61,8 +63,8 @@ public final class FileCopyUtils {
      */
     public static void copy(final byte[] bytes, final OutputStream out)
             throws IOException {
-        Assert.notNull(bytes, "No input byte array specified");
-        Assert.notNull(out, "No OutputStream specified");
+        Validate.notNull(bytes, "No input byte array specified");
+        Validate.notNull(out, "No OutputStream specified");
         try {
             out.write(bytes);
         }
@@ -80,8 +82,8 @@ public final class FileCopyUtils {
      * @throws IOException in case of I/O errors
      */
     public static int copy(final File in, final File out) throws IOException {
-        Assert.notNull(in, "No input File specified");
-        Assert.notNull(out, "No output File specified");
+        Validate.notNull(in, "No input File specified");
+        Validate.notNull(out, "No output File specified");
         return copy(new BufferedInputStream(new FileInputStream(in)),
                 new BufferedOutputStream(new FileOutputStream(out)));
     }
@@ -100,8 +102,8 @@ public final class FileCopyUtils {
      * @throws IOException in case of I/O errors
      */
     public static int copy(InputStream in, OutputStream out) throws IOException {
-        Assert.notNull(in, "No InputStream specified");
-        Assert.notNull(out, "No OutputStream specified");
+        Validate.notNull(in, "No InputStream specified");
+        Validate.notNull(out, "No OutputStream specified");
         if (!(in instanceof BufferedInputStream)) {
             in = new BufferedInputStream(in);
         }
@@ -134,8 +136,8 @@ public final class FileCopyUtils {
      * @throws IOException in case of I/O errors
      */
     public static int copy(Reader in, Writer out) throws IOException {
-        Assert.notNull(in, "No Reader specified");
-        Assert.notNull(out, "No Writer specified");
+        Validate.notNull(in, "No Reader specified");
+        Validate.notNull(out, "No Writer specified");
         if (!(in instanceof BufferedReader)) {
             in = new BufferedReader(in);
         }
@@ -167,8 +169,8 @@ public final class FileCopyUtils {
      * @throws IOException in case of I/O errors
      */
     public static void copy(final String in, Writer out) throws IOException {
-        Assert.notNull(in, "No input String specified");
-        Assert.notNull(out, "No Writer specified");
+        Validate.notNull(in, "No input String specified");
+        Validate.notNull(out, "No Writer specified");
         if (!(out instanceof BufferedWriter)) {
             out = new BufferedWriter(out);
         }
@@ -192,7 +194,7 @@ public final class FileCopyUtils {
      * @throws IOException in case of I/O errors
      */
     public static byte[] copyToByteArray(final File in) throws IOException {
-        Assert.notNull(in, "No input File specified");
+        Validate.notNull(in, "No input File specified");
         return copyToByteArray(new BufferedInputStream(new FileInputStream(in)));
     }
 

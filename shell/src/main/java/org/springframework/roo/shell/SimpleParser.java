@@ -12,6 +12,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -28,12 +29,12 @@ import java.util.regex.Pattern;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.transform.Transformer;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.roo.support.logging.HandlerUtils;
-import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.CollectionUtils;
-import org.springframework.roo.support.util.ExceptionUtils;
 import org.springframework.roo.support.util.FileCopyUtils;
-import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.CDATASection;
@@ -49,6 +50,8 @@ import org.w3c.dom.Element;
 public class SimpleParser implements Parser {
 
     private static final Comparator<Object> COMPARATOR = new NaturalOrderComparator<Object>();
+    private static final String LINE_SEPARATOR = System
+            .getProperty("line.separator");
     private static final Logger LOGGER = HandlerUtils
             .getLogger(SimpleParser.class);
 
@@ -57,10 +60,9 @@ public class SimpleParser implements Parser {
         if ("".equals(buffer.trim())) {
             return "";
         }
-        final String[] commandWords = StringUtils.delimitedListToStringArray(
-                command, " ");
+        final String[] commandWords = StringUtils.split(command, " ");
         int lastCommandWordUsed = 0;
-        Assert.notEmpty(commandWords, "Command required");
+        Validate.notEmpty(commandWords, "Command required");
 
         String bufferToReturn = null;
         String lastWord = null;
@@ -155,14 +157,16 @@ public class SimpleParser implements Parser {
                 final CliAvailabilityIndicator availability = method
                         .getAnnotation(CliAvailabilityIndicator.class);
                 if (availability != null) {
-                    Assert.isTrue(method.getParameterTypes().length == 0,
+                    Validate.isTrue(method.getParameterTypes().length == 0,
                             "CliAvailabilityIndicator is only legal for 0 parameter methods ("
                                     + method.toGenericString() + ")");
-                    Assert.isTrue(method.getReturnType().equals(Boolean.TYPE),
+                    Validate.isTrue(
+                            method.getReturnType().equals(Boolean.TYPE),
                             "CliAvailabilityIndicator is only legal for primitive boolean return types ("
                                     + method.toGenericString() + ")");
                     for (final String cmd : availability.value()) {
-                        Assert.isTrue(!availabilityIndicators.containsKey(cmd),
+                        Validate.isTrue(
+                                !availabilityIndicators.containsKey(cmd),
                                 "Cannot specify an availability indicator for '"
                                         + cmd + "' more than once");
                         availabilityIndicators.put(cmd, new MethodTarget(
@@ -199,8 +203,8 @@ public class SimpleParser implements Parser {
     public int completeAdvanced(String buffer, int cursor,
             final List<Completion> candidates) {
         synchronized (mutex) {
-            Assert.notNull(buffer, "Buffer required");
-            Assert.notNull(candidates, "Candidates list required");
+            Validate.notNull(buffer, "Buffer required");
+            Validate.notNull(candidates, "Candidates list required");
 
             // Remove all spaces from beginning of command
             while (buffer.startsWith(" ")) {
@@ -210,7 +214,7 @@ public class SimpleParser implements Parser {
 
             // Replace all multiple spaces with a single space
             while (buffer.contains("  ")) {
-                buffer = StringUtils.replaceFirst(buffer, "  ", " ");
+                buffer = StringUtils.replace(buffer, "  ", " ", 1);
                 cursor--;
             }
 
@@ -255,7 +259,7 @@ public class SimpleParser implements Parser {
             // Identify the command we're working with
             final CliCommand cmd = methodTarget.getMethod().getAnnotation(
                     CliCommand.class);
-            Assert.notNull(cmd, "CliCommand unavailable for '"
+            Validate.notNull(cmd, "CliCommand unavailable for '"
                     + methodTarget.getMethod().toGenericString() + "'");
 
             // Make a reasonable attempt at parsing the remainingBuffer
@@ -324,8 +328,10 @@ public class SimpleParser implements Parser {
                         cliOption = (CliOption) a;
                     }
                 }
-                Assert.notNull(cliOption, "CliOption not found for parameter '"
-                        + Arrays.toString(annotations) + "'");
+                Validate.notNull(
+                        cliOption,
+                        "CliOption not found for parameter '"
+                                + Arrays.toString(annotations) + "'");
                 cliOptions.add(cliOption);
             }
 
@@ -617,7 +623,7 @@ public class SimpleParser implements Parser {
                             // multiple choices available and we want to help
                             // the user
                             final StringBuilder help = new StringBuilder();
-                            help.append(StringUtils.LINE_SEPARATOR);
+                            help.append(LINE_SEPARATOR);
                             help.append(option.mandatory() ? "required --"
                                     : "optional --");
                             if ("".equals(option.help())) {
@@ -1021,7 +1027,7 @@ public class SimpleParser implements Parser {
     private Collection<MethodTarget> locateTargets(final String buffer,
             final boolean strictMatching,
             final boolean checkAvailabilityIndicators) {
-        Assert.notNull(buffer, "Buffer required");
+        Validate.notNull(buffer, "Buffer required");
         final Collection<MethodTarget> result = new HashSet<MethodTarget>();
 
         // The reflection could certainly be optimised, but it's good enough for
@@ -1039,7 +1045,7 @@ public class SimpleParser implements Parser {
                         for (final String value : cmd.value()) {
                             final MethodTarget mt = getAvailabilityIndicator(value);
                             if (mt != null) {
-                                Assert.isNull(available,
+                                Validate.isTrue(available == null,
                                         "More than one availability indicator is defined for '"
                                                 + method.toGenericString()
                                                 + "'");
@@ -1110,15 +1116,15 @@ public class SimpleParser implements Parser {
                     // Offer specified help
                     final CliCommand cmd = methodTarget.getMethod()
                             .getAnnotation(CliCommand.class);
-                    Assert.notNull(cmd, "CliCommand not found");
+                    Validate.notNull(cmd, "CliCommand not found");
 
                     for (final String value : cmd.value()) {
                         sb.append("Keyword:                   ").append(value)
-                                .append(StringUtils.LINE_SEPARATOR);
+                                .append(LINE_SEPARATOR);
                     }
 
                     sb.append("Description:               ").append(cmd.help())
-                            .append(StringUtils.LINE_SEPARATOR);
+                            .append(LINE_SEPARATOR);
 
                     for (final Annotation[] annotations : parameterAnnotations) {
                         CliOption cliOption = null;
@@ -1131,31 +1137,28 @@ public class SimpleParser implements Parser {
                                         key = "** default **";
                                     }
                                     sb.append(" Keyword:                  ")
-                                            .append(key)
-                                            .append(StringUtils.LINE_SEPARATOR);
+                                            .append(key).append(LINE_SEPARATOR);
                                 }
 
                                 sb.append("   Help:                   ")
                                         .append(cliOption.help())
-                                        .append(StringUtils.LINE_SEPARATOR);
+                                        .append(LINE_SEPARATOR);
                                 sb.append("   Mandatory:              ")
                                         .append(cliOption.mandatory())
-                                        .append(StringUtils.LINE_SEPARATOR);
+                                        .append(LINE_SEPARATOR);
                                 sb.append("   Default if specified:   '")
                                         .append(cliOption
                                                 .specifiedDefaultValue())
-                                        .append("'")
-                                        .append(StringUtils.LINE_SEPARATOR);
+                                        .append("'").append(LINE_SEPARATOR);
                                 sb.append("   Default if unspecified: '")
                                         .append(cliOption
                                                 .unspecifiedDefaultValue())
-                                        .append("'")
-                                        .append(StringUtils.LINE_SEPARATOR);
-                                sb.append(StringUtils.LINE_SEPARATOR);
+                                        .append("'").append(LINE_SEPARATOR);
+                                sb.append(LINE_SEPARATOR);
                             }
 
                         }
-                        Assert.notNull(
+                        Validate.notNull(
                                 cliOption,
                                 "CliOption not found for parameter '"
                                         + Arrays.toString(annotations) + "'");
@@ -1182,18 +1185,18 @@ public class SimpleParser implements Parser {
             }
 
             for (final String s : result) {
-                sb.append(s).append(StringUtils.LINE_SEPARATOR);
+                sb.append(s).append(LINE_SEPARATOR);
             }
 
             LOGGER.info(sb.toString());
             LOGGER.warning("** Type 'hint' (without the quotes) and hit ENTER for step-by-step guidance **"
-                    + StringUtils.LINE_SEPARATOR);
+                    + LINE_SEPARATOR);
         }
     }
 
     public ParseResult parse(final String rawInput) {
         synchronized (mutex) {
-            Assert.notNull(rawInput, "Raw input required");
+            Validate.notNull(rawInput, "Raw input required");
             final String input = normalise(rawInput);
 
             // Locate the applicable targets which match this buffer
@@ -1245,7 +1248,7 @@ public class SimpleParser implements Parser {
                         .getRemainingBuffer());
             }
             catch (final IllegalArgumentException e) {
-                LOGGER.warning(ExceptionUtils.extractRootCause(e).getMessage());
+                LOGGER.warning(ExceptionUtils.getRootCauseMessage(e));
                 return null;
             }
 
@@ -1323,9 +1326,7 @@ public class SimpleParser implements Parser {
                         LOGGER.warning("Nulls cannot be presented to primitive type "
                                 + requiredType.getSimpleName()
                                 + " for option '"
-                                + StringUtils
-                                        .arrayToCommaDelimitedString(cliOption
-                                                .key()) + "'");
+                                + StringUtils.join(cliOption.key(), ",") + "'");
                         return null;
                     }
                     arguments.add(null);
@@ -1372,14 +1373,10 @@ public class SimpleParser implements Parser {
                 }
                 catch (final RuntimeException e) {
                     LOGGER.warning(e.getClass().getName()
-                            + ": Failed to convert '"
-                            + value
-                            + "' to type "
-                            + requiredType.getSimpleName()
-                            + " for option '"
-                            + StringUtils.arrayToCommaDelimitedString(cliOption
-                                    .key()) + "'");
-                    if (StringUtils.hasText(e.getMessage())) {
+                            + ": Failed to convert '" + value + "' to type "
+                            + requiredType.getSimpleName() + " for option '"
+                            + StringUtils.join(cliOption.key(), ",") + "'");
+                    if (StringUtils.isNotBlank(e.getMessage())) {
                         LOGGER.warning(e.getMessage());
                     }
                     return null;
@@ -1403,7 +1400,7 @@ public class SimpleParser implements Parser {
                 }
                 else {
                     message.append("Options ")
-                            .append(StringUtils.collectionToDelimitedString(
+                            .append(collectionToDelimitedString(
                                     unavailableOptions, ", ", "'", "'"))
                             .append(" are not available for this command. ");
                 }
@@ -1415,6 +1412,22 @@ public class SimpleParser implements Parser {
             return new ParseResult(methodTarget.getMethod(),
                     methodTarget.getTarget(), arguments.toArray());
         }
+    }
+
+    private String collectionToDelimitedString(final Collection<?> coll,
+            final String delim, final String prefix, final String suffix) {
+        if (CollectionUtils.isEmpty(coll)) {
+            return "";
+        }
+        final StringBuilder sb = new StringBuilder();
+        final Iterator<?> it = coll.iterator();
+        while (it.hasNext()) {
+            sb.append(prefix).append(it.next()).append(suffix);
+            if (it.hasNext() && delim != null) {
+                sb.append(delim);
+            }
+        }
+        return sb.toString();
     }
 
     public final void remove(final CommandMarker command) {

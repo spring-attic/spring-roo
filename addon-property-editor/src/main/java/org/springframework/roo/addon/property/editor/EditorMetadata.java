@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.FieldMetadata;
@@ -21,7 +22,6 @@ import org.springframework.roo.model.JdkJavaType;
 import org.springframework.roo.model.SpringJavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.support.style.ToStringCreator;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Metadata for {@link RooEditor}.
@@ -67,11 +67,11 @@ public class EditorMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
             final MethodMetadata identifierAccessorMethod,
             final MethodMetadata findMethod) {
         super(identifier, aspectName, governorPhysicalTypeMetadata);
-        Assert.isTrue(isValid(identifier), "Metadata identification string '"
+        Validate.isTrue(isValid(identifier), "Metadata identification string '"
                 + identifier + "' does not appear to be a valid");
-        Assert.notNull(javaType, "Java type required");
-        Assert.notNull(idType, "Identifier field metadata required");
-        Assert.notNull(identifierAccessorMethod,
+        Validate.notNull(javaType, "Java type required");
+        Validate.notNull(idType, "Identifier field metadata required");
+        Validate.notNull(identifierAccessorMethod,
                 "Identifier accessor metadata required");
 
         if (!isValid() || findMethod == null) {
@@ -101,7 +101,7 @@ public class EditorMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
         final FieldMetadata userField = governorTypeDetails.getField(fieldName);
         final JavaType fieldType = SpringJavaType.SIMPLE_TYPE_CONVERTER;
         if (userField != null) {
-            Assert.isTrue(
+            Validate.isTrue(
                     userField.getFieldType().equals(fieldType),
                     "Field '" + fieldName + "' on '" + destination
                             + "' must be of type '"
@@ -123,7 +123,7 @@ public class EditorMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
         final MethodMetadata userMethod = getGovernorMethod(methodName,
                 parameterTypes);
         if (userMethod != null) {
-            Assert.isTrue(
+            Validate.isTrue(
                     userMethod.getReturnType().equals(returnType),
                     "Method '" + methodName + "' on '" + destination
                             + "' must return '"
@@ -167,7 +167,7 @@ public class EditorMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
         final MethodMetadata userMethod = getGovernorMethod(methodName,
                 parameterType);
         if (userMethod != null) {
-            Assert.isTrue(
+            Validate.isTrue(
                     userMethod.getReturnType().equals(returnType),
                     "Method '" + methodName + "' on '" + destination
                             + "' must return '"

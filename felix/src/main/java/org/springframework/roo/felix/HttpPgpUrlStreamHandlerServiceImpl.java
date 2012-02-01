@@ -11,6 +11,7 @@ import java.util.Hashtable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -21,7 +22,6 @@ import org.osgi.service.url.URLStreamHandlerService;
 import org.springframework.roo.felix.pgp.PgpService;
 import org.springframework.roo.felix.pgp.SignatureDecision;
 import org.springframework.roo.support.logging.HandlerUtils;
-import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.IOUtils;
 import org.springframework.roo.url.stream.UrlInputStreamService;
@@ -90,7 +90,7 @@ public class HttpPgpUrlStreamHandlerServiceImpl extends
 
         // Abort if a signature wasn't downloaded (this is a httppgp:// URL
         // after all, so it should be available)
-        Assert.isTrue(
+        Validate.isTrue(
                 ascUrlFile.exists(),
                 "Signature verification file is not available at '"
                         + ascUrl.toExternalForm() + "'; continuing");
@@ -131,7 +131,7 @@ public class HttpPgpUrlStreamHandlerServiceImpl extends
 
             resource = new FileInputStream(resourceFile);
             signature = new FileInputStream(ascUrlFile);
-            Assert.isTrue(
+            Validate.isTrue(
                     pgpService.isResourceSignedBySignature(resource, signature),
                     "PGP signature illegal for URL '"
                             + resourceUrl.toExternalForm() + "'");

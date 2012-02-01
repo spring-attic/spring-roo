@@ -8,24 +8,24 @@ import japa.parser.ast.body.TypeDeclaration;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.classpath.TypeResolutionService;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileUtils;
-import org.springframework.roo.support.util.StringUtils;
 
 @Component(immediate = true)
 @Service
 public class JavaParserTypeResolutionService implements TypeResolutionService {
 
     public final JavaType getJavaType(final String fileIdentifier) {
-        Assert.hasText(fileIdentifier, "Compilation unit path required");
-        Assert.isTrue(new File(fileIdentifier).exists(),
+        Validate.notBlank(fileIdentifier, "Compilation unit path required");
+        Validate.isTrue(new File(fileIdentifier).exists(),
                 "The file doesn't exist");
-        Assert.isTrue(new File(fileIdentifier).isFile(),
+        Validate.isTrue(new File(fileIdentifier).isFile(),
                 "The identifier doesn't represent a file");
         try {
             final File file = new File(fileIdentifier);
@@ -51,10 +51,10 @@ public class JavaParserTypeResolutionService implements TypeResolutionService {
     }
 
     public final JavaPackage getPackage(final String fileIdentifier) {
-        Assert.hasText(fileIdentifier, "Compilation unit path required");
-        Assert.isTrue(new File(fileIdentifier).exists(),
+        Validate.notBlank(fileIdentifier, "Compilation unit path required");
+        Validate.isTrue(new File(fileIdentifier).exists(),
                 "The file doesn't exist");
-        Assert.isTrue(new File(fileIdentifier).isFile(),
+        Validate.isTrue(new File(fileIdentifier).isFile(),
                 "The identifier doesn't represent a file");
         try {
             final File file = new File(fileIdentifier);

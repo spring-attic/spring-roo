@@ -28,6 +28,8 @@ import java.util.logging.Logger;
 
 import javax.xml.parsers.DocumentBuilder;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -67,10 +69,8 @@ import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.logging.HandlerUtils;
-import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileUtils;
 import org.springframework.roo.support.util.IOUtils;
-import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -105,7 +105,7 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 
     public void addSourcePath(final String sourcePath, final String moduleName) {
         final String gwtXmlPath = getGwtModuleXml(moduleName);
-        Assert.hasText(gwtXmlPath, "gwt.xml could not be found for module '"
+        Validate.notBlank(gwtXmlPath, "gwt.xml could not be found for module '"
                 + moduleName + "'");
         final Document gwtXmlDoc = getGwtXmlDocument(gwtXmlPath);
         final Element gwtXmlRoot = gwtXmlDoc.getDocumentElement();
@@ -764,19 +764,19 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 
     public ClassOrInterfaceTypeDetails lookupEntityFromLocator(
             final ClassOrInterfaceTypeDetails locator) {
-        Assert.notNull(locator, "Locator is required");
+        Validate.notNull(locator, "Locator is required");
         return lookupTargetFromX(locator, RooJavaType.ROO_GWT_LOCATOR);
     }
 
     public ClassOrInterfaceTypeDetails lookupEntityFromProxy(
             final ClassOrInterfaceTypeDetails proxy) {
-        Assert.notNull(proxy, "Proxy is required");
+        Validate.notNull(proxy, "Proxy is required");
         return lookupTargetFromX(proxy, RooJavaType.ROO_GWT_PROXY);
     }
 
     public ClassOrInterfaceTypeDetails lookupEntityFromRequest(
             final ClassOrInterfaceTypeDetails request) {
-        Assert.notNull(request, "Request is required");
+        Validate.notNull(request, "Request is required");
         return lookupTargetFromX(request, RooJavaType.ROO_GWT_REQUEST);
     }
 
@@ -789,7 +789,7 @@ public class GwtTypeServiceImpl implements GwtTypeService {
             final ClassOrInterfaceTypeDetails request) {
         final AnnotationMetadata annotation = GwtUtils.getFirstAnnotation(
                 request, RooJavaType.ROO_GWT_REQUEST);
-        Assert.notNull(annotation, "Request '" + request.getName()
+        Validate.notNull(annotation, "Request '" + request.getName()
                 + "' isn't annotated with '" + RooJavaType.ROO_GWT_REQUEST
                 + "'");
         final AnnotationAttributeValue<?> attributeValue = annotation
@@ -809,7 +809,7 @@ public class GwtTypeServiceImpl implements GwtTypeService {
             final ClassOrInterfaceTypeDetails proxy) {
         final AnnotationMetadata annotation = GwtUtils.getFirstAnnotation(
                 proxy, RooJavaType.ROO_GWT_PROXY);
-        Assert.notNull(annotation, "Proxy '" + proxy.getName()
+        Validate.notNull(annotation, "Proxy '" + proxy.getName()
                 + "' isn't annotated with '" + RooJavaType.ROO_GWT_PROXY + "'");
         final AnnotationAttributeValue<?> attributeValue = annotation
                 .getAttribute("value");
@@ -824,13 +824,10 @@ public class GwtTypeServiceImpl implements GwtTypeService {
             final JavaType... annotations) {
         final AnnotationMetadata annotation = GwtUtils.getFirstAnnotation(
                 annotatedType, annotations);
-        Assert.notNull(
-                annotation,
-                "Type '"
-                        + annotatedType.getName()
-                        + "' isn't annotated with '"
-                        + StringUtils.collectionToCommaDelimitedString(Arrays
-                                .asList(annotations)) + "'");
+        Validate.notNull(annotation,
+                "Type '" + annotatedType.getName() + "' isn't annotated with '"
+                        + StringUtils.join(Arrays.asList(annotations), ",")
+                        + "'");
         final AnnotationAttributeValue<?> attributeValue = annotation
                 .getAttribute("value");
         final JavaType targetType = new JavaType(
@@ -840,14 +837,14 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 
     public ClassOrInterfaceTypeDetails lookupTargetServiceFromRequest(
             final ClassOrInterfaceTypeDetails request) {
-        Assert.notNull(request, "Request is required");
+        Validate.notNull(request, "Request is required");
         return lookupTargetFromX(request, GwtUtils.REQUEST_ANNOTATIONS);
     }
 
     public ClassOrInterfaceTypeDetails lookupXFromEntity(
             final ClassOrInterfaceTypeDetails entity,
             final JavaType... annotations) {
-        Assert.notNull(entity, "Entity not found");
+        Validate.notNull(entity, "Entity not found");
         for (final ClassOrInterfaceTypeDetails cid : typeLocationService
                 .findClassesOrInterfaceDetailsWithAnnotation(annotations)) {
             final AnnotationMetadata annotationMetadata = GwtUtils
@@ -869,7 +866,7 @@ public class GwtTypeServiceImpl implements GwtTypeService {
         final Map<JavaSymbolName, JavaType> typeMap = new LinkedHashMap<JavaSymbolName, JavaType>();
         final boolean typeCountMatch = generic.getParameters().size() == typed
                 .getParameters().size();
-        Assert.isTrue(typeCountMatch, "Type count must match.");
+        Validate.isTrue(typeCountMatch, "Type count must match.");
 
         int i = 0;
         for (final JavaType genericParamType : generic.getParameters()) {

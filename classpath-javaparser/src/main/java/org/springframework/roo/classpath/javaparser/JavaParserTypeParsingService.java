@@ -26,6 +26,8 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -47,9 +49,7 @@ import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileUtils;
-import org.springframework.roo.support.util.StringUtils;
 
 @Component(immediate = true)
 @Service
@@ -74,7 +74,7 @@ public class JavaParserTypeParsingService implements TypeParsingService {
 
     public final String getCompilationUnitContents(
             final ClassOrInterfaceTypeDetails cid) {
-        Assert.notNull(cid, "Class or interface type details are required");
+        Validate.notNull(cid, "Class or interface type details are required");
         // Create a compilation unit to store the type to be created
         final CompilationUnit compilationUnit = new CompilationUnit();
 
@@ -100,9 +100,10 @@ public class JavaParserTypeParsingService implements TypeParsingService {
     public ClassOrInterfaceTypeDetails getTypeAtLocation(
             final String fileIdentifier, final String declaredByMetadataId,
             final JavaType typeName) {
-        Assert.hasText(fileIdentifier, "Compilation unit path required");
-        Assert.hasText(declaredByMetadataId, "Declaring metadata ID required");
-        Assert.notNull(typeName, "Java type to locate required");
+        Validate.notBlank(fileIdentifier, "Compilation unit path required");
+        Validate.notBlank(declaredByMetadataId,
+                "Declaring metadata ID required");
+        Validate.notNull(typeName, "Java type to locate required");
         final File file = new File(fileIdentifier);
         final String typeContents = FileUtils.read(file);
         if (StringUtils.isBlank(typeContents)) {
@@ -118,8 +119,9 @@ public class JavaParserTypeParsingService implements TypeParsingService {
             return null;
         }
 
-        Assert.hasText(declaredByMetadataId, "Declaring metadata ID required");
-        Assert.notNull(typeName, "Java type to locate required");
+        Validate.notBlank(declaredByMetadataId,
+                "Declaring metadata ID required");
+        Validate.notNull(typeName, "Java type to locate required");
         try {
             final CompilationUnit compilationUnit = JavaParser
                     .parse(new ByteArrayInputStream(fileContents.getBytes()));
@@ -155,7 +157,7 @@ public class JavaParserTypeParsingService implements TypeParsingService {
             final ClassOrInterfaceTypeDetails cid,
             final List<BodyDeclaration> parent) {
         // Append the new imports this class declares
-        Assert.notNull(compilationUnit.getImports(),
+        Validate.notNull(compilationUnit.getImports(),
                 "Compilation unit imports should be non-null when producing type '"
                         + cid.getName() + "'");
         for (final ImportMetadata importType : cid.getRegisteredImports()) {
@@ -229,9 +231,9 @@ public class JavaParserTypeParsingService implements TypeParsingService {
                         NameExpr pNameExpr = JavaParserUtils
                                 .importTypeIfRequired(cid.getName(),
                                         compilationUnit.getImports(), param);
-                        final String tempName = StringUtils.replaceFirst(
+                        final String tempName = StringUtils.replace(
                                 pNameExpr.toString(), param.getArgName()
-                                        + " extends ", "");
+                                        + " extends ", "", 1);
                         pNameExpr = new NameExpr(tempName);
                         final ClassOrInterfaceType pResolvedName = JavaParserUtils
                                 .getClassOrInterfaceType(pNameExpr);
@@ -266,12 +268,12 @@ public class JavaParserTypeParsingService implements TypeParsingService {
         }
         typeDeclaration.setMembers(new ArrayList<BodyDeclaration>());
 
-        Assert.notNull(typeDeclaration.getName(),
+        Validate.notNull(typeDeclaration.getName(),
                 "Missing type declaration name for '" + cid.getName() + "'");
 
         // If adding a new top-level type, must add it to the compilation unit
         // types
-        Assert.notNull(compilationUnit.getTypes(),
+        Validate.notNull(compilationUnit.getTypes(),
                 "Compilation unit types must not be null when attempting to add '"
                         + cid.getName() + "'");
 

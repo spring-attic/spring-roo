@@ -19,6 +19,8 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -35,9 +37,7 @@ import org.bouncycastle.openpgp.PGPUtil;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.support.osgi.OSGiUtils;
-import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.IOUtils;
-import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.url.stream.UrlInputStreamService;
 
 /**
@@ -83,7 +83,7 @@ public class PgpServiceImpl implements PgpService {
         this.context = context.getBundleContext();
         final String keyserver = context.getBundleContext().getProperty(
                 "pgp.keyserver.url");
-        if (StringUtils.hasText(keyserver)) {
+        if (StringUtils.isNotBlank(keyserver)) {
             defaultKeyServerUrl = keyserver;
         }
         trustDefaultKeysIfRequired();
@@ -114,7 +114,7 @@ public class PgpServiceImpl implements PgpService {
     }
 
     public URL getKeyServerUrlToRetrieveKeyInformation(final PgpKeyId keyId) {
-        Assert.notNull(keyId, "Key ID required");
+        Validate.notNull(keyId, "Key ID required");
         final URL keyUrl = getKeyServerUrlToRetrieveKeyId(keyId);
         try {
             final URL keyIndexUrl = new URL(keyUrl.getProtocol() + "://"
@@ -157,7 +157,7 @@ public class PgpServiceImpl implements PgpService {
     }
 
     public PGPPublicKeyRing getPublicKey(final PgpKeyId keyId) {
-        Assert.notNull(keyId, "Key ID required");
+        Validate.notNull(keyId, "Key ID required");
         InputStream in = null;
         try {
             final URL lookup = getKeyServerUrlToRetrieveKeyId(keyId);
@@ -220,7 +220,7 @@ public class PgpServiceImpl implements PgpService {
             rememberKey(keyRing);
             publicKey = keyRing.getPublicKey();
 
-            Assert.notNull(publicKey,
+            Validate.notNull(publicKey,
                     "Could not obtain public key for signer key ID '"
                             + pgpSignature + "'");
 
@@ -245,11 +245,11 @@ public class PgpServiceImpl implements PgpService {
 
     public SignatureDecision isSignatureAcceptable(final InputStream signature)
             throws IOException {
-        Assert.notNull(signature, "Signature input stream required");
+        Validate.notNull(signature, "Signature input stream required");
         PGPObjectFactory factory = new PGPObjectFactory(
                 PGPUtil.getDecoderStream(signature));
         final Object obj = factory.nextObject();
-        Assert.notNull(obj, "Unable to retrieve signature from stream");
+        Validate.notNull(obj, "Unable to retrieve signature from stream");
 
         PGPSignatureList p3;
         if (obj instanceof PGPCompressedData) {
@@ -267,7 +267,8 @@ public class PgpServiceImpl implements PgpService {
         }
 
         final PGPSignature pgpSignature = p3.get(0);
-        Assert.notNull(pgpSignature, "Unable to retrieve signature from stream");
+        Validate.notNull(pgpSignature,
+                "Unable to retrieve signature from stream");
 
         final PgpKeyId keyIdInHex = new PgpKeyId(pgpSignature);
 
@@ -387,7 +388,7 @@ public class PgpServiceImpl implements PgpService {
     }
 
     public PGPPublicKeyRing trust(final PgpKeyId keyId) {
-        Assert.notNull(keyId, "Key ID required");
+        Validate.notNull(keyId, "Key ID required");
         final PGPPublicKeyRing keyRing = getPublicKey(keyId);
         return trust(keyRing);
     }
@@ -399,9 +400,9 @@ public class PgpServiceImpl implements PgpService {
         final List<PGPPublicKeyRing> trusted = getTrustedKeys();
 
         // Do not store if the first key is revoked
-        Assert.state(!keyRing.getPublicKey().isRevoked(), "The public key ID '"
-                + new PgpKeyId(keyRing.getPublicKey())
-                + "' has been revoked and cannot be trusted");
+        Validate.validState(!keyRing.getPublicKey().isRevoked(),
+                "The public key ID '" + new PgpKeyId(keyRing.getPublicKey())
+                        + "' has been revoked and cannot be trusted");
 
         // trust it and write back to disk
         trusted.add(keyRing);
@@ -454,7 +455,7 @@ public class PgpServiceImpl implements PgpService {
 
     @SuppressWarnings("unchecked")
     public PGPPublicKeyRing untrust(final PgpKeyId keyId) {
-        Assert.notNull(keyId, "Key ID required");
+        Validate.notNull(keyId, "Key ID required");
         // Get the keys we currently trust
         final List<PGPPublicKeyRing> trusted = getTrustedKeys();
 
@@ -482,7 +483,7 @@ public class PgpServiceImpl implements PgpService {
             }
         }
 
-        Assert.notNull(removed, "The public key ID '" + keyId
+        Validate.notNull(removed, "The public key ID '" + keyId
                 + "' is not currently trusted");
 
         // Write back to disk

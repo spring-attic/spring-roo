@@ -7,6 +7,8 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -36,8 +38,6 @@ import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectOperations;
-import org.springframework.roo.support.util.Assert;
-import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Provides convenience methods that can be used to create mock tests.
@@ -70,7 +70,7 @@ public class IntegrationTestOperationsImpl implements IntegrationTestOperations 
     private ClassOrInterfaceTypeDetails getEntity(final JavaType entity) {
         final ClassOrInterfaceTypeDetails cid = typeLocationService
                 .getTypeDetails(entity);
-        Assert.notNull(cid, "Java source code details unavailable for type "
+        Validate.notNull(cid, "Java source code details unavailable for type "
                 + cid);
         return cid;
     }
@@ -87,14 +87,14 @@ public class IntegrationTestOperationsImpl implements IntegrationTestOperations 
 
     public void newIntegrationTest(final JavaType entity,
             final boolean transactional) {
-        Assert.notNull(entity,
+        Validate.notNull(entity,
                 "Entity to produce an integration test for is required");
 
         // Verify the requested entity actually exists as a class and is not
         // abstract
         final ClassOrInterfaceTypeDetails cid = getEntity(entity);
-        Assert.isTrue(!Modifier.isAbstract(cid.getModifier()),
-                "Type " + entity.getFullyQualifiedTypeName() + " is abstract");
+        Validate.isTrue(!Modifier.isAbstract(cid.getModifier()), "Type "
+                + entity.getFullyQualifiedTypeName() + " is abstract");
 
         final LogicalPath path = PhysicalTypeIdentifier.getPath(cid
                 .getDeclaredByMetadataId());
@@ -148,7 +148,8 @@ public class IntegrationTestOperationsImpl implements IntegrationTestOperations 
      * @param entity to produce a mock test for (required)
      */
     public void newMockTest(final JavaType entity) {
-        Assert.notNull(entity, "Entity to produce a mock test for is required");
+        Validate.notNull(entity,
+                "Entity to produce a mock test for is required");
 
         final JavaType name = new JavaType(entity + "Test");
         final String declaredByMetadataId = PhysicalTypeIdentifier
@@ -217,7 +218,8 @@ public class IntegrationTestOperationsImpl implements IntegrationTestOperations 
     }
 
     public void newTestStub(final JavaType javaType) {
-        Assert.notNull(javaType, "Class to produce a test stub for is required");
+        Validate.notNull(javaType,
+                "Class to produce a test stub for is required");
 
         final JavaType name = new JavaType(javaType + "Test");
         final String declaredByMetadataId = PhysicalTypeIdentifier

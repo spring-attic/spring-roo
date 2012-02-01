@@ -11,6 +11,7 @@ import static org.springframework.roo.model.JavaType.STRING;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.MethodMetadata;
@@ -27,7 +28,6 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.JdkJavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.support.style.ToStringCreator;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Metadata for {@link RooJsfConverter}.
@@ -76,9 +76,9 @@ public class JsfConverterMetadata extends
             final MemberTypeAdditions findMethod,
             final MethodMetadata identifierAccessor) {
         super(identifier, aspectName, governorPhysicalTypeMetadata);
-        Assert.isTrue(isValid(identifier), "Metadata identification string '"
+        Validate.isTrue(isValid(identifier), "Metadata identification string '"
                 + identifier + "' is invalid");
-        Assert.notNull(annotationValues, "Annotation values required");
+        Validate.notNull(annotationValues, "Annotation values required");
 
         if (!isValid()) {
             return;

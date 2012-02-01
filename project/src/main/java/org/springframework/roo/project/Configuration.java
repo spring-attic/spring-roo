@@ -1,6 +1,6 @@
 package org.springframework.roo.project;
 
-import org.springframework.roo.support.util.Assert;
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Element;
 
@@ -38,7 +38,7 @@ public class Configuration implements Comparable<Configuration> {
      *            (required)
      */
     public Configuration(final Element configuration) {
-        Assert.notNull(configuration, "configuration must be specified");
+        Validate.notNull(configuration, "configuration must be specified");
         this.configuration = configuration;
     }
 

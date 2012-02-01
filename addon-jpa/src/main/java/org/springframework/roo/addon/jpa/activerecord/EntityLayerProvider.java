@@ -3,6 +3,8 @@ package org.springframework.roo.addon.jpa.activerecord;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -17,9 +19,7 @@ import org.springframework.roo.classpath.layers.MethodParameter;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.PairList;
-import org.springframework.roo.support.util.StringUtils;
 
 /**
  * The {@link org.springframework.roo.classpath.layers.LayerProvider} for the
@@ -44,10 +44,10 @@ public class EntityLayerProvider extends CoreLayerProvider {
     public MemberTypeAdditions getMemberTypeAdditions(final String callerMID,
             final String methodIdentifier, final JavaType targetEntity,
             final JavaType idType, final MethodParameter... callerParameters) {
-        Assert.isTrue(StringUtils.hasText(callerMID),
+        Validate.isTrue(StringUtils.isNotBlank(callerMID),
                 "Metadata identifier required");
-        Assert.hasText(methodIdentifier, "Method identifier required");
-        Assert.notNull(targetEntity, "Target enitity type required");
+        Validate.notBlank(methodIdentifier, "Method identifier required");
+        Validate.notNull(targetEntity, "Target enitity type required");
 
         // Get the CRUD-related values of this entity's @RooJpaActiveRecord
         // annotation

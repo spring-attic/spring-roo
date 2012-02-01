@@ -7,6 +7,7 @@ import java.lang.reflect.Modifier;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
@@ -23,7 +24,6 @@ import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.support.style.ToStringCreator;
-import org.springframework.uaa.client.util.Assert;
 
 /**
  * @author Stefan Schmidt
@@ -87,10 +87,10 @@ public class ServiceClassMetadata extends
             final Map<JavaType, Map<ServiceLayerMethod, MemberTypeAdditions>> allCrudAdditions,
             final Map<JavaType, String> domainTypePlurals) {
         super(identifier, aspectName, governorPhysicalTypeMetadata);
-        Assert.notNull(allCrudAdditions, "CRUD additions required");
-        Assert.notNull(annotationValues, "Annotation values required");
-        Assert.notNull(governorDetails, "Governor details required");
-        Assert.notNull(domainTypePlurals, "Domain type plurals required");
+        Validate.notNull(allCrudAdditions, "CRUD additions required");
+        Validate.notNull(annotationValues, "Annotation values required");
+        Validate.notNull(governorDetails, "Governor details required");
+        Validate.notNull(domainTypePlurals, "Domain type plurals required");
 
         for (final Entry<JavaType, JavaType> entry : domainTypeToIdTypeMap
                 .entrySet()) {

@@ -2,12 +2,12 @@ package org.springframework.roo.project;
 
 import java.io.File;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.metadata.AbstractMetadataItem;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.support.style.ToStringCreator;
-import org.springframework.roo.support.util.Assert;
-import org.springframework.roo.support.util.StringUtils;
 
 /**
  * The metadata for a module within the user's project. A simple project will
@@ -41,7 +41,7 @@ public class ProjectMetadata extends AbstractMetadataItem {
      */
     public static String getProjectIdentifier(final String moduleName) {
         final StringBuilder sb = new StringBuilder(PROJECT_MID_PREFIX);
-        if (StringUtils.hasText(moduleName)) {
+        if (StringUtils.isNotBlank(moduleName)) {
             sb.append(MODULE_SEPARATOR).append(
                     moduleName.replace("/", File.separator));
         }
@@ -61,7 +61,7 @@ public class ProjectMetadata extends AbstractMetadataItem {
      */
     public ProjectMetadata(final Pom pom) {
         super(getProjectIdentifier(pom.getModuleName()));
-        Assert.notNull(pom, "POM is required");
+        Validate.notNull(pom, "POM is required");
         this.pom = pom;
     }
 

@@ -1,7 +1,7 @@
 package org.springframework.roo.classpath;
 
-import static org.springframework.roo.support.util.StringUtils.LINE_SEPARATOR;
-
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -22,13 +22,13 @@ import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
 import org.springframework.roo.shell.CommandMarker;
-import org.springframework.roo.support.util.Assert;
-import org.springframework.roo.support.util.ObjectUtils;
 
 @Component
 @Service
 public class MetadataCommands implements CommandMarker {
 
+    private static final String LINE_SEPARATOR = System
+            .getProperty("line.separator");
     private static final String METADATA_FOR_MODULE_COMMAND = "metadata for module";
 
     @Reference private MemberDetailsScanner memberDetailsScanner;
@@ -46,7 +46,7 @@ public class MetadataCommands implements CommandMarker {
     @CliCommand(value = "metadata cache", help = "Shows detailed metadata for the indicated type")
     public String metadataCacheMaximum(
             @CliOption(key = { "maximumCapacity" }, mandatory = true, help = "The maximum number of metadata items to cache") final int maxCapacity) {
-        Assert.isTrue(maxCapacity >= 100,
+        Validate.isTrue(maxCapacity >= 100,
                 "Maximum capacity must be 100 or greater");
         metadataService.setMaxCapacity(maxCapacity);
         // Show them that the change has taken place

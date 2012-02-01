@@ -6,6 +6,7 @@ import java.io.File;
 import java.util.List;
 import java.util.logging.Logger;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -18,7 +19,6 @@ import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.osgi.OSGiUtils;
 import org.springframework.roo.support.util.FileUtils;
-import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -120,7 +120,7 @@ public class XMLTailorConfigurationFactory implements
         }
 
         final Element elTailor = elTailors.get(0);
-        if (!StringUtils.hasLength(elTailor.getAttribute("name"))) {
+        if (StringUtils.isEmpty(elTailor.getAttribute("name"))) {
             logTailorXMLInvalid("<tailor> must have a name attribute");
             return null;
         }
@@ -138,7 +138,7 @@ public class XMLTailorConfigurationFactory implements
 
         for (final Element elConfig : elConfigs) {
             final String command = elConfig.getAttribute("command");
-            if (!StringUtils.hasText(command)) {
+            if (!StringUtils.isNotBlank(command)) {
                 logTailorXMLInvalid("found <config> without command attribute");
                 return null;
             }
@@ -149,7 +149,7 @@ public class XMLTailorConfigurationFactory implements
                     elConfig);
             for (final Element elAction : elActions) {
                 // Determine the action type
-                if (!StringUtils.hasText(elAction.getAttribute("type"))) {
+                if (!StringUtils.isNotBlank(elAction.getAttribute("type"))) {
                     logTailorXMLInvalid("found <action> without type attribute");
                     return null;
                 }

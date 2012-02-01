@@ -11,6 +11,8 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.addon.dod.DataOnDemandMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
@@ -31,8 +33,6 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.JdkJavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.support.style.ToStringCreator;
-import org.springframework.roo.support.util.Assert;
-import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Metadata for {@link RooIntegrationTest}.
@@ -115,10 +115,11 @@ public class IntegrationTestMetadata extends
             final boolean hasEmbeddedIdentifier,
             final boolean entityHasSuperclass, final boolean isGaeEnabled) {
         super(identifier, aspectName, governorPhysicalTypeMetadata);
-        Assert.isTrue(isValid(identifier), "Metadata identification string '"
+        Validate.isTrue(isValid(identifier), "Metadata identification string '"
                 + identifier + "' does not appear to be a valid");
-        Assert.notNull(annotationValues, "Annotation values required");
-        Assert.notNull(dataOnDemandMetadata, "Data on demand metadata required");
+        Validate.notNull(annotationValues, "Annotation values required");
+        Validate.notNull(dataOnDemandMetadata,
+                "Data on demand metadata required");
 
         if (!isValid()) {
             return;
@@ -167,7 +168,7 @@ public class IntegrationTestMetadata extends
         final FieldMetadata helperField = governorTypeDetails
                 .getField(new JavaSymbolName("helper"));
         if (helperField != null) {
-            Assert.isTrue(
+            Validate.isTrue(
                     helperField.getFieldType().getFullyQualifiedTypeName()
                             .equals(helperType.getFullyQualifiedTypeName()),
                     "Field 'helper' on '"
@@ -190,7 +191,7 @@ public class IntegrationTestMetadata extends
         final MethodMetadata setUpMethod = getGovernorMethod(setUpMethodName,
                 SETUP_PARAMETERS);
         if (setUpMethod != null) {
-            Assert.notNull(
+            Validate.notNull(
                     MemberFindingUtils.getAnnotationOfType(
                             setUpMethod.getAnnotations(), BEFORE_CLASS),
                     "Method 'setUp' on '"
@@ -219,7 +220,7 @@ public class IntegrationTestMetadata extends
         final MethodMetadata tearDownMethod = getGovernorMethod(
                 tearDownMethodName, TEARDOWN_PARAMETERS);
         if (tearDownMethod != null) {
-            Assert.notNull(
+            Validate.notNull(
                     MemberFindingUtils.getAnnotationOfType(
                             tearDownMethod.getAnnotations(), AFTER_CLASS),
                     "Method 'tearDown' on '"
@@ -282,7 +283,7 @@ public class IntegrationTestMetadata extends
                         governorTypeDetails.getAnnotations(), TRANSACTIONAL) == null) {
             final AnnotationMetadataBuilder transactionalBuilder = new AnnotationMetadataBuilder(
                     TRANSACTIONAL);
-            if (StringUtils.hasText(transactionManager)
+            if (StringUtils.isNotBlank(transactionManager)
                     && !"transactionManager".equals(transactionManager)) {
                 transactionalBuilder.addStringAttribute("value",
                         transactionManager);
@@ -295,13 +296,13 @@ public class IntegrationTestMetadata extends
         final FieldMetadata field = governorTypeDetails
                 .getField(new JavaSymbolName("dod"));
         if (field != null) {
-            Assert.isTrue(
+            Validate.isTrue(
                     field.getFieldType().equals(dodGovernor),
                     "Field 'dod' on '"
                             + destination.getFullyQualifiedTypeName()
                             + "' must be of type '"
                             + dodGovernor.getFullyQualifiedTypeName() + "'");
-            Assert.notNull(
+            Validate.notNull(
                     MemberFindingUtils.getAnnotationOfType(
                             field.getAnnotations(), AUTOWIRED),
                     "Field 'dod' on '"
@@ -865,7 +866,7 @@ public class IntegrationTestMetadata extends
         if (isGaeSupported) {
             final AnnotationMetadataBuilder transactionalBuilder = new AnnotationMetadataBuilder(
                     TRANSACTIONAL);
-            if (StringUtils.hasText(transactionManager)
+            if (StringUtils.isNotBlank(transactionManager)
                     && !"transactionManager".equals(transactionManager)) {
                 transactionalBuilder.addStringAttribute("value",
                         transactionManager);

@@ -1,7 +1,7 @@
 package org.springframework.roo.project;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.support.style.ToStringCreator;
-import org.springframework.roo.support.util.Assert;
 import org.w3c.dom.Element;
 
 /**
@@ -20,7 +20,7 @@ public class Filter implements Comparable<Filter> {
      * @param element containing the property definition (required)
      */
     public Filter(final Element element) {
-        Assert.notNull(element, "Element required");
+        Validate.notNull(element, "Element required");
         value = element.getTextContent();
     }
 
@@ -30,7 +30,7 @@ public class Filter implements Comparable<Filter> {
      * @param value the property value (required)
      */
     public Filter(final String value) {
-        Assert.hasText(value, "Value required");
+        Validate.notBlank(value, "Value required");
         this.value = value;
     }
 

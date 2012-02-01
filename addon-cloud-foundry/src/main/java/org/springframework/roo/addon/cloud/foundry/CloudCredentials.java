@@ -6,8 +6,8 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.roo.support.util.Base64;
-import org.springframework.roo.support.util.StringUtils;
 
 /**
  * The credentials for logging into a cloud.
@@ -137,7 +137,7 @@ public class CloudCredentials {
      * @return <code>null</code> if none is set
      */
     public URL getUrlObject() {
-        if (StringUtils.hasText(url)) {
+        if (StringUtils.isNotBlank(url)) {
             try {
                 return new URL(url);
             }
@@ -174,7 +174,8 @@ public class CloudCredentials {
      * @return see above
      */
     public boolean isValid() {
-        return StringUtils.hasText(email) && StringUtils.hasText(password)
-                && StringUtils.hasText(url);
+        return StringUtils.isNotBlank(email)
+                && StringUtils.isNotBlank(password)
+                && StringUtils.isNotBlank(url);
     }
 }

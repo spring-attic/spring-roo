@@ -1,7 +1,7 @@
 package org.springframework.roo.classpath.details;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Convenience class to hold annotation details which should be introduced to a
@@ -27,8 +27,8 @@ public class DeclaredMethodAnnotationDetails {
      */
     public DeclaredMethodAnnotationDetails(final MethodMetadata methodMetadata,
             final AnnotationMetadata methodAnnotation) {
-        Assert.notNull(methodMetadata, "Method metadata required");
-        Assert.notNull(methodAnnotation, "Method annotation required");
+        Validate.notNull(methodMetadata, "Method metadata required");
+        Validate.notNull(methodAnnotation, "Method annotation required");
         this.methodMetadata = methodMetadata;
         this.methodAnnotation = methodAnnotation;
     }

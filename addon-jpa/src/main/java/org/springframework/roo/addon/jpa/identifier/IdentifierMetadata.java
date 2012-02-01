@@ -16,6 +16,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.BeanInfoUtils;
@@ -35,8 +37,6 @@ import org.springframework.roo.model.EnumDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.LogicalPath;
-import org.springframework.roo.support.util.Assert;
-import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Metadata for {@link RooIdentifier}.
@@ -89,9 +89,9 @@ public class IdentifierMetadata extends
             final IdentifierAnnotationValues annotationValues,
             final List<Identifier> identifierServiceResult) {
         super(identifier, aspectName, governorPhysicalTypeMetadata);
-        Assert.isTrue(isValid(identifier), "Metadata identification string '"
+        Validate.isTrue(isValid(identifier), "Metadata identification string '"
                 + identifier + "' does not appear to be a valid");
-        Assert.notNull(annotationValues, "Annotation values required");
+        Validate.notNull(annotationValues, "Annotation values required");
 
         if (!isValid()) {
             return;
@@ -158,7 +158,7 @@ public class IdentifierMetadata extends
                         field.getFieldType()));
             }
             else {
-                Assert.isTrue(
+                Validate.isTrue(
                         Modifier.isPublic(accessor.getModifier()),
                         "User provided field but failed to provide a public '"
                                 + requiredAccessorName.getSymbolName()
@@ -175,7 +175,7 @@ public class IdentifierMetadata extends
         final AnnotationMetadataBuilder columnBuilder = new AnnotationMetadataBuilder(
                 COLUMN);
         columnBuilder.addStringAttribute("name", identifier.getColumnName());
-        if (StringUtils.hasText(identifier.getColumnDefinition())) {
+        if (StringUtils.isNotBlank(identifier.getColumnDefinition())) {
             columnBuilder.addStringAttribute("columnDefinition",
                     identifier.getColumnDefinition());
         }
@@ -315,7 +315,7 @@ public class IdentifierMetadata extends
                         field.getFieldType()));
             }
             else {
-                Assert.isTrue(
+                Validate.isTrue(
                         Modifier.isPublic(mutator.getModifier()),
                         "User provided field but failed to provide a public '"
                                 + requiredMutatorName + "("
@@ -427,7 +427,7 @@ public class IdentifierMetadata extends
             final List<AnnotationMetadataBuilder> annotations) {
         // Add JSR 220 @Temporal annotation to date fields
         String temporalType = StringUtils.defaultIfEmpty(
-                StringUtils.toUpperCase(columnDefinition), "DATE");
+                StringUtils.upperCase(columnDefinition), "DATE");
         if ("DATETIME".equals(temporalType)) {
             temporalType = "TIMESTAMP"; // ROO-2606
         }

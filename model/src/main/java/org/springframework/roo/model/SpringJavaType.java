@@ -2,7 +2,7 @@ package org.springframework.roo.model;
 
 import java.util.Arrays;
 
-import org.springframework.roo.support.util.Assert;
+import org.apache.commons.lang3.Validate;
 
 /**
  * Constants for Spring-specific {@link JavaType}s. Use them in preference to
@@ -124,8 +124,8 @@ public final class SpringJavaType {
      */
     public static JavaType getConverterType(final JavaType fromType,
             final JavaType toType) {
-        Assert.notNull(fromType, "'From' type is required");
-        Assert.notNull(toType, "'To' type is required");
+        Validate.notNull(fromType, "'From' type is required");
+        Validate.notNull(toType, "'To' type is required");
         return new JavaType(
                 "org.springframework.core.convert.converter.Converter", 0,
                 DataType.TYPE, null, Arrays.asList(fromType, toType));

@@ -5,6 +5,9 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.text.StrTokenizer;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -14,8 +17,6 @@ import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
 import org.springframework.roo.shell.CommandMarker;
-import org.springframework.roo.support.util.Assert;
-import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Commands for the 'finder' add-on to be used by the ROO shell.
@@ -48,8 +49,8 @@ public class FinderCommands implements CommandMarker {
             @CliOption(key = { "", "depth" }, mandatory = false, unspecifiedDefaultValue = "1", specifiedDefaultValue = "1", help = "The depth of attribute combinations to be generated for the finders") final Integer depth,
             @CliOption(key = "filter", mandatory = false, help = "A comma separated list of strings that must be present in a filter to be included") final String filter) {
 
-        Assert.isTrue(depth >= 1, "Depth must be at least 1");
-        Assert.isTrue(depth <= 3, "Depth must not be greater than 3");
+        Validate.isTrue(depth >= 1, "Depth must be at least 1");
+        Validate.isTrue(depth <= 3, "Depth must not be greater than 3");
 
         final SortedSet<String> finders = finderOperations.listFindersFor(
                 typeName, depth);
@@ -58,8 +59,9 @@ public class FinderCommands implements CommandMarker {
         }
 
         final Set<String> requiredEntries = new HashSet<String>();
-        for (final String requiredString : StringUtils
-                .commaDelimitedListToSet(filter)) {
+        final String[] filterTokens = new StrTokenizer(filter, ",")
+                .getTokenArray();
+        for (final String requiredString : filterTokens) {
             requiredEntries.add(requiredString.toLowerCase());
         }
         if (requiredEntries.isEmpty()) {

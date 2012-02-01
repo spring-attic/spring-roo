@@ -2,10 +2,10 @@ package org.springframework.roo.addon.dod;
 
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.model.JavaSymbolName;
-import org.springframework.roo.support.util.Assert;
-import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Holder for embedded id attributes
@@ -21,8 +21,8 @@ public class EmbeddedIdHolder {
 
     public EmbeddedIdHolder(final FieldMetadata embeddedIdField,
             final List<FieldMetadata> idFields) {
-        Assert.notNull(embeddedIdField, "Identifier type required");
-        Assert.notNull(idFields, "Fields for "
+        Validate.notNull(embeddedIdField, "Identifier type required");
+        Validate.notNull(idFields, "Fields for "
                 + embeddedIdField.getFieldType().getFullyQualifiedTypeName()
                 + " required");
         this.embeddedIdField = embeddedIdField;

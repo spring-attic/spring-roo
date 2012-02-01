@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.DependencyScope;
 import org.springframework.roo.project.DependencyType;
@@ -22,10 +24,8 @@ import org.springframework.roo.project.Plugin;
 import org.springframework.roo.project.Property;
 import org.springframework.roo.project.Repository;
 import org.springframework.roo.project.Resource;
-import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.CollectionUtils;
 import org.springframework.roo.support.util.FileUtils;
-import org.springframework.roo.support.util.StringUtils;
 
 /**
  * A Maven project object model (POM).
@@ -104,8 +104,8 @@ public class Pom {
             final Collection<? extends Plugin> buildPlugins,
             final Collection<? extends Resource> resources, final String path,
             final String moduleName, final Collection<Path> paths) {
-        Assert.hasText(packaging, "Invalid packaging '" + packaging + "'");
-        Assert.hasText(path, "Invalid path '" + path + "'");
+        Validate.notBlank(packaging, "Invalid packaging '" + packaging + "'");
+        Validate.notBlank(path, "Invalid path '" + path + "'");
 
         gav = new GAV(groupId, artifactId, version);
         this.moduleName = StringUtils.trimToEmpty(moduleName);
@@ -195,7 +195,7 @@ public class Pom {
      *         {@link Set})
      */
     public Set<Plugin> getBuildPluginsExcludingVersion(final Plugin plugin) {
-        Assert.notNull(plugin, "Plugin to locate is required");
+        Validate.notNull(plugin, "Plugin to locate is required");
         final Set<Plugin> result = new HashSet<Plugin>();
         for (final Plugin p : buildPlugins) {
             if (plugin.getArtifactId().equals(p.getArtifactId())
@@ -347,7 +347,7 @@ public class Pom {
      *         empty {@link Set})
      */
     public Set<Property> getPropertiesExcludingValue(final Property property) {
-        Assert.notNull(property, "Property to locate is required");
+        Validate.notNull(property, "Property to locate is required");
         final Set<Property> result = new HashSet<Property>();
         for (final Property p : pomProperties) {
             if (property.getName().equals(p.getName())) {
@@ -365,7 +365,7 @@ public class Pom {
      * @return the property if found otherwise null
      */
     public Property getProperty(final String name) {
-        Assert.hasText(name, "Property name to locate is required");
+        Validate.notBlank(name, "Property name to locate is required");
         for (final Property p : pomProperties) {
             if (name.equals(p.getName())) {
                 return p;
@@ -474,7 +474,7 @@ public class Pom {
      */
     public boolean isAllPluginsRegistered(
             final Collection<? extends Plugin> plugins) {
-        Assert.notNull(plugins, "Plugins to check is required");
+        Validate.notNull(plugins, "Plugins to check is required");
         for (final Plugin plugin : plugins) {
             if (plugin != null && !isBuildPluginRegistered(plugin)) {
                 return false;
@@ -531,7 +531,7 @@ public class Pom {
      */
     public boolean isAnyPluginsRegistered(
             final Collection<? extends Plugin> plugins) {
-        Assert.notNull(plugins, "Plugins to check is required");
+        Validate.notNull(plugins, "Plugins to check is required");
         for (final Plugin plugin : plugins) {
             if (isBuildPluginRegistered(plugin)) {
                 return true;
@@ -571,7 +571,7 @@ public class Pom {
      * @return whether the filter is currently registered or not
      */
     public boolean isFilterRegistered(final Filter filter) {
-        Assert.notNull(filter, "Filter to check is required");
+        Validate.notNull(filter, "Filter to check is required");
         return filters.contains(filter);
     }
 
@@ -608,7 +608,7 @@ public class Pom {
      * @return whether the property is currently registered or not
      */
     public boolean isPropertyRegistered(final Property property) {
-        Assert.notNull(property, "Property to check is required");
+        Validate.notNull(property, "Property to check is required");
         return pomProperties.contains(property);
     }
 
@@ -629,7 +629,7 @@ public class Pom {
      * @return whether the resource is currently registered or not
      */
     public boolean isResourceRegistered(final Resource resource) {
-        Assert.notNull(resource, "Resource to check is required");
+        Validate.notNull(resource, "Resource to check is required");
         return resources.contains(resource);
     }
 

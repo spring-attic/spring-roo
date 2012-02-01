@@ -1,11 +1,11 @@
 package org.springframework.roo.classpath.itd;
 
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.metadata.MetadataItem;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Simplifies the development of {@link ItdMetadataProvider}s that wish to
@@ -102,12 +102,12 @@ public abstract class AbstractMemberDiscoveringItdMetadataProvider extends
         // response
         final String localMid = getLocalMidToRequest(itdTypeDetails);
         if (localMid != null) {
-            Assert.isTrue(
+            Validate.isTrue(
                     MetadataIdentificationUtils.isIdentifyingInstance(localMid),
                     "Metadata identification string '"
                             + localMid
                             + "' should identify a specific instance to request");
-            Assert.isTrue(
+            Validate.isTrue(
                     MetadataIdentificationUtils.getMetadataClass(localMid)
                             .equals(MetadataIdentificationUtils
                                     .getMetadataClass(getProvidesType())),

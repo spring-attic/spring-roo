@@ -3,7 +3,7 @@ package org.springframework.roo.addon.dbre.model;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import org.springframework.roo.support.util.Assert;
+import org.apache.commons.lang3.Validate;
 
 /**
  * Represents an index definition for a table which may be either unique or
@@ -28,7 +28,7 @@ public class Index {
     }
 
     public boolean addColumn(final IndexColumn indexColumn) {
-        Assert.notNull(indexColumn, "Column required");
+        Validate.notNull(indexColumn, "Column required");
         return columns.add(indexColumn);
     }
 

@@ -1,7 +1,7 @@
 package org.springframework.roo.metadata.internal;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.metadata.MetadataTimingStatistic;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Standard implementation of {@link MetadataTimingStatistic}.
@@ -33,9 +33,9 @@ public class StandardMetadataTimingStatistic implements MetadataTimingStatistic 
      */
     public StandardMetadataTimingStatistic(final String name,
             final long nanoseconds, final long invocations) {
-        Assert.hasText(name, "Name required");
-        Assert.isTrue(invocations >= 0, "Invocations must be zero or more");
-        Assert.isTrue(nanoseconds >= 0, "Nanoseconds must be zero or more");
+        Validate.notBlank(name, "Name required");
+        Validate.isTrue(invocations >= 0, "Invocations must be zero or more");
+        Validate.isTrue(nanoseconds >= 0, "Nanoseconds must be zero or more");
         this.invocations = invocations;
         this.name = name;
         this.nanoseconds = nanoseconds;

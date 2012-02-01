@@ -1,8 +1,8 @@
 package org.springframework.roo.classpath.details.annotations;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.model.EnumDetails;
 import org.springframework.roo.model.JavaSymbolName;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Represents an enumeration annotation attribute value.
@@ -22,7 +22,7 @@ public class EnumAttributeValue extends
 
     public EnumAttributeValue(final JavaSymbolName name, final EnumDetails value) {
         super(name);
-        Assert.notNull(value, "Value required");
+        Validate.notNull(value, "Value required");
         this.value = value;
     }
 
@@ -30,7 +30,7 @@ public class EnumAttributeValue extends
     public Enum<?> getAsEnum() throws ClassNotFoundException {
         final Class<?> enumType = getClass().getClassLoader().loadClass(
                 value.getType().getFullyQualifiedTypeName());
-        Assert.isTrue(
+        Validate.isTrue(
                 enumType.isEnum(),
                 "Should have obtained an Enum but failed for type '"
                         + enumType.getName() + "'");

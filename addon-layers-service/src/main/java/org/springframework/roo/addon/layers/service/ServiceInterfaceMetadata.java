@@ -4,6 +4,7 @@ import java.lang.reflect.Modifier;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
@@ -16,7 +17,6 @@ import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.support.style.ToStringCreator;
-import org.springframework.uaa.client.util.Assert;
 
 /**
  * The metadata about a service interface within a user project
@@ -84,11 +84,12 @@ public class ServiceInterfaceMetadata extends
             final ServiceAnnotationValues annotationValues,
             final Map<JavaType, String> domainTypePlurals) {
         super(identifier, aspectName, governorPhysicalTypeMetadata);
-        Assert.notNull(annotationValues, "Annotation values required");
-        Assert.notNull(governorDetails, "Governor member details required");
-        Assert.notNull(domainTypeToIdTypeMap,
+        Validate.notNull(annotationValues, "Annotation values required");
+        Validate.notNull(governorDetails, "Governor member details required");
+        Validate.notNull(domainTypeToIdTypeMap,
                 "Domain type to ID type map required required");
-        Assert.notNull(domainTypePlurals, "Domain type plural values required");
+        Validate.notNull(domainTypePlurals,
+                "Domain type plural values required");
 
         this.annotationValues = annotationValues;
         this.governorDetails = governorDetails;

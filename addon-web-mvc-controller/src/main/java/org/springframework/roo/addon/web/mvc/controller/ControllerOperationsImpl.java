@@ -12,6 +12,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -40,8 +42,6 @@ import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.logging.HandlerUtils;
-import org.springframework.roo.support.util.Assert;
-import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Implementation of {@link ControllerOperations}.
@@ -69,11 +69,11 @@ public class ControllerOperationsImpl implements ControllerOperations {
     public void createAutomaticController(final JavaType controller,
             final JavaType entity, final Set<String> disallowedOperations,
             final String path) {
-        Assert.notNull(controller, "Controller Java Type required");
-        Assert.notNull(entity, "Entity Java Type required");
-        Assert.notNull(disallowedOperations,
+        Validate.notNull(controller, "Controller Java Type required");
+        Validate.notNull(entity, "Entity Java Type required");
+        Validate.notNull(disallowedOperations,
                 "Set of disallowed operations required");
-        Assert.hasText(path, "Controller base path required");
+        Validate.notBlank(path, "Controller base path required");
 
         // Look for an existing controller mapped to this path
         final ClassOrInterfaceTypeDetails existingController = getExistingController(path);
@@ -178,7 +178,7 @@ public class ControllerOperationsImpl implements ControllerOperations {
                     .getAttribute(VALUE);
             if (mappingAttribute != null) {
                 final String mapping = mappingAttribute.getValue();
-                if (StringUtils.hasText(mapping)
+                if (StringUtils.isNotBlank(mapping)
                         && mapping.equalsIgnoreCase("/" + path)) {
                     LOGGER.info("Introducing into existing controller '"
                             + cid.getName().getFullyQualifiedTypeName()

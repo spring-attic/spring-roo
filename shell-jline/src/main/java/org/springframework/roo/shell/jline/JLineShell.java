@@ -24,6 +24,8 @@ import jline.ANSIBuffer.ANSICodes;
 import jline.ConsoleReader;
 import jline.WindowsTerminal;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.shell.AbstractShell;
 import org.springframework.roo.shell.CommandMarker;
 import org.springframework.roo.shell.ExitShellRequest;
@@ -32,12 +34,10 @@ import org.springframework.roo.shell.Tailor;
 import org.springframework.roo.shell.event.ShellStatus;
 import org.springframework.roo.shell.event.ShellStatus.Status;
 import org.springframework.roo.shell.event.ShellStatusListener;
-import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.ClassUtils;
 import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.IOUtils;
 import org.springframework.roo.support.util.OsUtils;
-import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Uses the feature-rich <a
@@ -72,6 +72,9 @@ public abstract class JLineShell extends AbstractShell implements
 
     private static final boolean JANSI_AVAILABLE = ClassUtils.isPresent(
             ANSI_CONSOLE_CLASSNAME, JLineShell.class.getClassLoader());
+    private static final String LINE_SEPARATOR = System
+            .getProperty("line.separator");
+
     private boolean developmentMode = false;
     private final DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     private FileWriter fileLog;
@@ -226,9 +229,10 @@ public abstract class JLineShell extends AbstractShell implements
 
     @Override
     public void flash(final Level level, final String message, final String slot) {
-        Assert.notNull(level, "Level is required for a flash message");
-        Assert.notNull(message, "Message is required for a flash message");
-        Assert.hasText(slot, "Slot name must be specified for a flash message");
+        Validate.notNull(level, "Level is required for a flash message");
+        Validate.notNull(message, "Message is required for a flash message");
+        Validate.notBlank(slot,
+                "Slot name must be specified for a flash message");
 
         if (Shell.WINDOW_TITLE_SLOT.equals(slot)) {
             if (reader != null && reader.getTerminal().isANSISupported()) {
@@ -493,8 +497,7 @@ public abstract class JLineShell extends AbstractShell implements
         try {
             final String logFileContents = FileCopyUtils.copyToString(new File(
                     "log.roo"));
-            final String[] logEntries = logFileContents
-                    .split(StringUtils.LINE_SEPARATOR);
+            final String[] logEntries = logFileContents.split(LINE_SEPARATOR);
             // LIFO
             for (final String logEntry : logEntries) {
                 if (!logEntry.startsWith("//")) {
@@ -516,7 +519,7 @@ public abstract class JLineShell extends AbstractShell implements
                 + completionKeys + " or type \"hint\" then hit ENTER.");
 
         final String startupNotifications = getStartupNotifications();
-        if (StringUtils.hasText(startupNotifications)) {
+        if (StringUtils.isNotBlank(startupNotifications)) {
             logger.info(startupNotifications);
         }
 

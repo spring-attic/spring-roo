@@ -1,7 +1,7 @@
 package org.springframework.roo.felix;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.support.style.ToStringCreator;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Provides levels for the Felix "log" command.
@@ -21,8 +21,8 @@ public class LogLevel implements Comparable<LogLevel> {
     private final String key;
 
     public LogLevel(final String key, final String felixCode) {
-        Assert.hasText(key, "Key required");
-        Assert.hasText(felixCode, "Felix code required");
+        Validate.notBlank(key, "Key required");
+        Validate.notBlank(felixCode, "Felix code required");
         this.key = key;
         this.felixCode = felixCode;
     }

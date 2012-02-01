@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -63,7 +64,6 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
-import org.springframework.roo.support.util.Assert;
 
 @Component(immediate = true)
 @Service
@@ -164,7 +164,7 @@ public class GwtRequestMetadataProviderImpl extends
                 distinctInvokedTypes.add(invokedField.getFieldType());
             }
         }
-        Assert.isTrue(distinctInvokedTypes.size() == 1,
+        Validate.isTrue(distinctInvokedTypes.size() == 1,
                 "Expected one invoked type but found: " + distinctInvokedTypes);
         return distinctInvokedTypes.iterator().next();
     }
@@ -270,7 +270,7 @@ public class GwtRequestMetadataProviderImpl extends
                     .getMemberTypeAdditions(requestMetadataId, methodId,
                             entity, idType, LAYER_POSITION,
                             methodSignature.getValue());
-            Assert.notNull(memberTypeAdditions, "No support for " + methodId
+            Validate.notNull(memberTypeAdditions, "No support for " + methodId
                     + " method for domain type " + entity);
             final MethodMetadata requestMethod = getRequestMethod(entity,
                     methodSignature.getKey(), memberTypeAdditions,

@@ -5,10 +5,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.support.style.ToStringCreator;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Default implementation of {@link AnnotationMetadata}.
@@ -32,7 +32,7 @@ public class DefaultAnnotationMetadata implements AnnotationMetadata {
      */
     DefaultAnnotationMetadata(final JavaType annotationType,
             final List<AnnotationAttributeValue<?>> attributeValues) {
-        Assert.notNull(annotationType, "Annotation type required");
+        Validate.notNull(annotationType, "Annotation type required");
         this.annotationType = annotationType;
         attributes = new ArrayList<AnnotationAttributeValue<?>>();
         attributeMap = new HashMap<JavaSymbolName, AnnotationAttributeValue<?>>();
@@ -50,7 +50,7 @@ public class DefaultAnnotationMetadata implements AnnotationMetadata {
 
     public AnnotationAttributeValue<?> getAttribute(
             final JavaSymbolName attributeName) {
-        Assert.notNull(attributeName, "Attribute name required");
+        Validate.notNull(attributeName, "Attribute name required");
         return attributeMap.get(attributeName);
     }
 

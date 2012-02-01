@@ -15,6 +15,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.FieldMetadata;
@@ -33,8 +35,6 @@ import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.support.style.ToStringCreator;
-import org.springframework.roo.support.util.Assert;
-import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Metadata for {@link RooSolrSearchable}.
@@ -97,14 +97,14 @@ public class SolrMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
             final Map<MethodMetadata, FieldMetadata> accessorDetails,
             final String javaTypePlural) {
         super(identifier, aspectName, governorPhysicalTypeMetadata);
-        Assert.notNull(annotationValues,
+        Validate.notNull(annotationValues,
                 "Solr search annotation values required");
-        Assert.isTrue(isValid(identifier), "Metadata identification string '"
+        Validate.isTrue(isValid(identifier), "Metadata identification string '"
                 + identifier + "' is invalid");
-        Assert.notNull(identifierAccessor,
+        Validate.notNull(identifierAccessor,
                 "Persistence identifier method required");
-        Assert.notNull(accessorDetails, "Public accessors requred");
-        Assert.hasText(javaTypePlural,
+        Validate.notNull(accessorDetails, "Public accessors requred");
+        Validate.notBlank(javaTypePlural,
                 "Plural representation of java type required");
 
         if (!isValid()) {
@@ -122,25 +122,25 @@ public class SolrMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
         }
 
         builder.addField(getSolrServerField());
-        if (StringUtils.hasText(annotationValues.getSimpleSearchMethod())) {
+        if (StringUtils.isNotBlank(annotationValues.getSimpleSearchMethod())) {
             builder.addMethod(getSimpleSearchMethod());
         }
-        if (StringUtils.hasText(annotationValues.getSearchMethod())) {
+        if (StringUtils.isNotBlank(annotationValues.getSearchMethod())) {
             builder.addMethod(getSearchMethod());
         }
-        if (StringUtils.hasText(annotationValues.getIndexMethod())) {
+        if (StringUtils.isNotBlank(annotationValues.getIndexMethod())) {
             builder.addMethod(getIndexEntityMethod());
             builder.addMethod(getIndexEntitiesMethod(accessorDetails,
                     identifierAccessor, versionField));
         }
-        if (StringUtils.hasText(annotationValues.getDeleteIndexMethod())) {
+        if (StringUtils.isNotBlank(annotationValues.getDeleteIndexMethod())) {
             builder.addMethod(getDeleteIndexMethod(identifierAccessor));
         }
-        if (StringUtils
-                .hasText(annotationValues.getPostPersistOrUpdateMethod())) {
+        if (StringUtils.isNotBlank(annotationValues
+                .getPostPersistOrUpdateMethod())) {
             builder.addMethod(getPostPersistOrUpdateMethod());
         }
-        if (StringUtils.hasText(annotationValues.getPreRemoveMethod())) {
+        if (StringUtils.isNotBlank(annotationValues.getPreRemoveMethod())) {
             builder.addMethod(getPreRemoveMethod());
         }
 

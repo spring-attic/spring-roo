@@ -30,6 +30,8 @@ import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.addon.web.mvc.controller.details.FinderMetadataDetails;
 import org.springframework.roo.addon.web.mvc.controller.details.JavaTypeMetadataDetails;
 import org.springframework.roo.addon.web.mvc.controller.details.JavaTypePersistenceMetadataDetails;
@@ -43,9 +45,7 @@ import org.springframework.roo.classpath.details.annotations.AnnotationAttribute
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.DomUtils;
-import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlRoundTripUtils;
 import org.springframework.roo.support.util.XmlUtils;
@@ -81,24 +81,24 @@ public class JspViewManager {
     public JspViewManager(final List<FieldMetadata> fields,
             final WebScaffoldAnnotationValues webScaffoldAnnotationValues,
             final Map<JavaType, JavaTypeMetadataDetails> relatedDomainTypes) {
-        Assert.notNull(fields, "List of fields required");
-        Assert.notNull(webScaffoldAnnotationValues,
+        Validate.notNull(fields, "List of fields required");
+        Validate.notNull(webScaffoldAnnotationValues,
                 "Web scaffold annotation values required");
-        Assert.notNull(relatedDomainTypes, "Related domain types required");
+        Validate.notNull(relatedDomainTypes, "Related domain types required");
         this.fields = Collections.unmodifiableList(fields);
         this.webScaffoldAnnotationValues = webScaffoldAnnotationValues;
         formBackingType = webScaffoldAnnotationValues.getFormBackingObject();
         this.relatedDomainTypes = relatedDomainTypes;
         entityName = uncapitalize(formBackingType.getSimpleTypeName());
         formBackingTypeMetadata = relatedDomainTypes.get(formBackingType);
-        Assert.notNull(formBackingTypeMetadata,
+        Validate.notNull(formBackingTypeMetadata,
                 "Form backing type metadata required");
         formBackingTypePersistenceMetadata = formBackingTypeMetadata
                 .getPersistenceDetails();
-        Assert.notNull(formBackingTypePersistenceMetadata,
+        Validate.notNull(formBackingTypePersistenceMetadata,
                 "Persistence metadata required for form backing type");
 
-        Assert.notNull(webScaffoldAnnotationValues.getPath(),
+        Validate.notNull(webScaffoldAnnotationValues.getPath(),
                 "Path is not specified in the @RooWebScaffold annotation for '"
                         + webScaffoldAnnotationValues.getGovernorTypeDetails()
                                 .getName() + "'");
@@ -550,7 +550,7 @@ public class JspViewManager {
             if (type.equals(new JavaType(Map.class.getName()))) {
                 continue;
             }
-            Assert.notNull(paramName, "Could not find field '" + paramName
+            Validate.notNull(paramName, "Could not find field '" + paramName
                     + "' in '" + type.getFullyQualifiedTypeName() + "'");
             Element fieldElement = null;
 
@@ -796,7 +796,7 @@ public class JspViewManager {
     private String getPathForType(final JavaType type) {
         final JavaTypeMetadataDetails javaTypeMetadataHolder = relatedDomainTypes
                 .get(type);
-        Assert.notNull(
+        Validate.notNull(
                 javaTypeMetadataHolder,
                 "Unable to obtain metadata for type "
                         + type.getFullyQualifiedTypeName());

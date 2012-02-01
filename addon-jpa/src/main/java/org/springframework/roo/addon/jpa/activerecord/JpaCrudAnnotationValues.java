@@ -11,11 +11,11 @@ import static org.springframework.roo.addon.jpa.activerecord.RooJpaActiveRecord.
 import static org.springframework.roo.addon.jpa.activerecord.RooJpaActiveRecord.REMOVE_METHOD_DEFAULT;
 import static org.springframework.roo.model.RooJavaType.ROO_JPA_ACTIVE_RECORD;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.roo.classpath.details.annotations.populator.AbstractAnnotationValues;
 import org.springframework.roo.classpath.details.annotations.populator.AutoPopulate;
 import org.springframework.roo.classpath.details.annotations.populator.AutoPopulationUtils;
 import org.springframework.roo.classpath.itd.MemberHoldingTypeDetailsMetadataItem;
-import org.springframework.roo.support.util.StringUtils;
 
 /**
  * The purely CRUD-related values of a parsed {@link RooJpaActiveRecord}

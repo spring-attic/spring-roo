@@ -10,6 +10,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.logging.Logger;
 
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -37,7 +38,6 @@ import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.logging.HandlerUtils;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Implementation of {@link FinderOperations}.
@@ -67,8 +67,8 @@ public class FinderOperationsImpl implements FinderOperations {
 
     public void installFinder(final JavaType typeName,
             final JavaSymbolName finderName) {
-        Assert.notNull(typeName, "Java type required");
-        Assert.notNull(finderName, "Finer name required");
+        Validate.notNull(typeName, "Java type required");
+        Validate.notNull(finderName, "Finer name required");
 
         final String id = typeLocationService
                 .getPhysicalTypeIdentifier(typeName);
@@ -180,7 +180,7 @@ public class FinderOperationsImpl implements FinderOperations {
 
     public SortedSet<String> listFindersFor(final JavaType typeName,
             final Integer depth) {
-        Assert.notNull(typeName, "Java type required");
+        Validate.notNull(typeName, "Java type required");
 
         final String id = typeLocationService
                 .getPhysicalTypeIdentifier(typeName);

@@ -6,17 +6,17 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.logging.Logger;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.springframework.roo.addon.web.mvc.jsp.JspOperations;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
-import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.FileUtils;
 import org.springframework.roo.support.util.IOUtils;
-import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.url.stream.UrlInputStreamService;
 import org.w3c.dom.Document;
@@ -84,8 +84,8 @@ public abstract class AbstractEmbeddedProvider implements EmbeddedProvider {
      */
     public void installJspx(String viewName, String title,
             final Element contentElement) {
-        Assert.hasText(viewName, "View name required");
-        Assert.notNull(contentElement, "Content element required");
+        Validate.notBlank(viewName, "View name required");
+        Validate.notNull(contentElement, "Content element required");
         if (StringUtils.isBlank(title)) {
             title = getTitle(viewName);
         }
@@ -132,7 +132,7 @@ public abstract class AbstractEmbeddedProvider implements EmbeddedProvider {
      * @param tagName
      */
     public void installTagx(String tagName) {
-        Assert.hasText(tagName, "Tag name required");
+        Validate.notBlank(tagName, "Tag name required");
 
         if (!tagName.endsWith(".tagx")) {
             tagName = tagName.concat(".tagx");
@@ -178,7 +178,7 @@ public abstract class AbstractEmbeddedProvider implements EmbeddedProvider {
      * @return the result of the GET request.
      */
     public String sendHttpGetRequest(final String urlStr) {
-        Assert.hasText(urlStr, "URL required");
+        Validate.notBlank(urlStr, "URL required");
 
         String result = null;
         if (urlStr.startsWith("http://")) {

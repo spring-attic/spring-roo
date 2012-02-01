@@ -2,8 +2,9 @@ package org.springframework.roo.project;
 
 import java.util.Arrays;
 
-import org.springframework.roo.support.util.Assert;
-import org.springframework.roo.support.util.StringUtils;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 
 /**
  * The combination of Maven-style groupId, artifactId, and version
@@ -24,10 +25,9 @@ public class GAV implements Comparable<GAV> {
      *             invalid.
      */
     public static GAV getInstance(final String coordinates) {
-        final String[] coordinateArray = StringUtils
-                .delimitedListToStringArray(coordinates,
-                        MavenUtils.COORDINATE_SEPARATOR);
-        Assert.isTrue(
+        final String[] coordinateArray = ArrayUtils.nullToEmpty(StringUtils
+                .split(coordinates, MavenUtils.COORDINATE_SEPARATOR));
+        Validate.isTrue(
                 coordinateArray.length == 3,
                 "Expected three coordinates, but found "
                         + coordinateArray.length + ": "
@@ -52,11 +52,11 @@ public class GAV implements Comparable<GAV> {
     public GAV(final String groupId, final String artifactId,
             final String version) {
         // Check
-        Assert.isTrue(MavenUtils.isValidMavenId(groupId), "Invalid groupId '"
+        Validate.isTrue(MavenUtils.isValidMavenId(groupId), "Invalid groupId '"
                 + groupId + "'");
-        Assert.isTrue(MavenUtils.isValidMavenId(artifactId),
+        Validate.isTrue(MavenUtils.isValidMavenId(artifactId),
                 "Invalid artifactId '" + artifactId + "'");
-        Assert.hasText(version, "Version is required");
+        Validate.notBlank(version, "Version is required");
 
         // Assign
         this.groupId = groupId;
@@ -65,7 +65,7 @@ public class GAV implements Comparable<GAV> {
     }
 
     public int compareTo(final GAV other) {
-        Assert.notNull(other, "Cannot compare " + this + " to null");
+        Validate.notNull(other, "Cannot compare " + this + " to null");
         int result = groupId.compareTo(other.getGroupId());
         if (result == 0) {
             result = artifactId.compareTo(other.getArtifactId());
@@ -102,7 +102,7 @@ public class GAV implements Comparable<GAV> {
     @Override
     public String toString() {
         // For debugging
-        return StringUtils.arrayToDelimitedString(":", groupId, artifactId,
-                version);
+        return StringUtils.join(
+                ArrayUtils.toArray(groupId, artifactId, version), ":");
     }
 }

@@ -8,6 +8,8 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -22,9 +24,7 @@ import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.logging.HandlerUtils;
-import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.DomUtils;
-import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -49,7 +49,7 @@ public class DbreOperationsImpl implements DbreOperations {
 
     public void displayDatabaseMetadata(final Set<Schema> schemas,
             final File file, final boolean view) {
-        Assert.notNull(schemas, "Schemas required");
+        Validate.notNull(schemas, "Schemas required");
 
         // Force it to refresh the database from the actual JDBC connection
         final Database database = dbreModelService.refreshDatabase(schemas,
@@ -70,12 +70,11 @@ public class DbreOperationsImpl implements DbreOperations {
             final boolean displayOnly) {
         if (database == null) {
             LOGGER.warning("Cannot obtain database information for schema(s) '"
-                    + StringUtils.collectionToCommaDelimitedString(schemas)
-                    + "'");
+                    + StringUtils.join(schemas, ",") + "'");
         }
         else if (!database.hasTables()) {
             LOGGER.warning("Schema(s) '"
-                    + StringUtils.collectionToCommaDelimitedString(schemas)
+                    + StringUtils.join(schemas, ",")
                     + "' do not exist or does not have any tables. Note that the schema names of some databases are case-sensitive");
         }
         else {
@@ -150,7 +149,7 @@ public class DbreOperationsImpl implements DbreOperations {
                 .findFirstElement(
                         "/persistence/persistence-unit[@transaction-type = 'RESOURCE_LOCAL']/provider",
                         root);
-        Assert.notNull(providerElement,
+        Validate.notNull(providerElement,
                 "/persistence/persistence-unit/provider is null");
         final String provider = providerElement.getTextContent();
         final Element propertyElement = null;

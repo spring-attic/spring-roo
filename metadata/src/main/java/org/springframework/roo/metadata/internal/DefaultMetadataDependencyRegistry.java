@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -15,7 +16,6 @@ import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.metadata.MetadataLogger;
 import org.springframework.roo.metadata.MetadataNotificationListener;
 import org.springframework.roo.metadata.MetadataService;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Default implementation of {@link MetadataDependencyRegistry}.
@@ -41,10 +41,10 @@ public class DefaultMetadataDependencyRegistry implements
 
     public void addNotificationListener(
             final MetadataNotificationListener listener) {
-        Assert.notNull(listener, "Metadata notification listener required");
+        Validate.notNull(listener, "Metadata notification listener required");
 
         if (listener instanceof MetadataService) {
-            Assert.isTrue(metadataService == null,
+            Validate.isTrue(metadataService == null,
                     "Cannot register more than one MetadataListener");
             metadataService = (MetadataService) listener;
             return;
@@ -67,7 +67,7 @@ public class DefaultMetadataDependencyRegistry implements
     }
 
     public void deregisterDependencies(final String downstreamDependency) {
-        Assert.isTrue(
+        Validate.isTrue(
                 MetadataIdentificationUtils.isValid(downstreamDependency),
                 "Downstream dependency is an invalid metadata identification string ('"
                         + downstreamDependency + "')");
@@ -88,10 +88,11 @@ public class DefaultMetadataDependencyRegistry implements
 
     public void deregisterDependency(final String upstreamDependency,
             final String downstreamDependency) {
-        Assert.isTrue(MetadataIdentificationUtils.isValid(upstreamDependency),
+        Validate.isTrue(
+                MetadataIdentificationUtils.isValid(upstreamDependency),
                 "Upstream dependency is an invalid metadata identification string ('"
                         + upstreamDependency + "')");
-        Assert.isTrue(
+        Validate.isTrue(
                 MetadataIdentificationUtils.isValid(downstreamDependency),
                 "Downstream dependency is an invalid metadata identification string ('"
                         + downstreamDependency + "')");
@@ -110,7 +111,8 @@ public class DefaultMetadataDependencyRegistry implements
     }
 
     public Set<String> getDownstream(final String upstreamDependency) {
-        Assert.isTrue(MetadataIdentificationUtils.isValid(upstreamDependency),
+        Validate.isTrue(
+                MetadataIdentificationUtils.isValid(upstreamDependency),
                 "Upstream dependency is an invalid metadata identification string ('"
                         + upstreamDependency + "')");
 
@@ -124,7 +126,7 @@ public class DefaultMetadataDependencyRegistry implements
     }
 
     public Set<String> getUpstream(final String downstreamDependency) {
-        Assert.isTrue(
+        Validate.isTrue(
                 MetadataIdentificationUtils.isValid(downstreamDependency),
                 "Downstream dependency is an invalid metadata identification string ('"
                         + downstreamDependency + "')");
@@ -139,14 +141,15 @@ public class DefaultMetadataDependencyRegistry implements
 
     public boolean isValidDependency(final String upstreamDependency,
             final String downstreamDependency) {
-        Assert.isTrue(MetadataIdentificationUtils.isValid(upstreamDependency),
+        Validate.isTrue(
+                MetadataIdentificationUtils.isValid(upstreamDependency),
                 "Upstream dependency is an invalid metadata identification string ('"
                         + upstreamDependency + "')");
-        Assert.isTrue(
+        Validate.isTrue(
                 MetadataIdentificationUtils.isValid(downstreamDependency),
                 "Downstream dependency is an invalid metadata identification string ('"
                         + downstreamDependency + "')");
-        Assert.isTrue(!upstreamDependency.equals(downstreamDependency),
+        Validate.isTrue(!upstreamDependency.equals(downstreamDependency),
                 "Upstream dependency cannot be the same as the downstream dependency ('"
                         + upstreamDependency + "')");
 
@@ -269,7 +272,7 @@ public class DefaultMetadataDependencyRegistry implements
 
     public void registerDependency(final String upstreamDependency,
             final String downstreamDependency) {
-        Assert.isTrue(
+        Validate.isTrue(
                 isValidDependency(upstreamDependency, downstreamDependency),
                 "Invalid dependency between upstream '" + upstreamDependency
                         + "' and downstream '" + downstreamDependency + "'");
@@ -293,7 +296,7 @@ public class DefaultMetadataDependencyRegistry implements
 
     public void removeNotificationListener(
             final MetadataNotificationListener listener) {
-        Assert.notNull(listener, "Metadata notification listener required");
+        Validate.notNull(listener, "Metadata notification listener required");
 
         if (listener instanceof MetadataService
                 && listener.equals(metadataService)) {

@@ -12,7 +12,7 @@ import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.springframework.roo.support.util.Assert;
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.support.util.FileCopyUtils;
 
 /**
@@ -80,7 +80,7 @@ public class TemplateResourceLoader implements TemplateLoader {
 
         final InputStream is = getClass().getClassLoader().getResourceAsStream(
                 templatePath);
-        Assert.notNull(is, "template path required");
+        Validate.notNull(is, "template path required");
         String contents;
         try {
             contents = FileCopyUtils.copyToString(new InputStreamReader(

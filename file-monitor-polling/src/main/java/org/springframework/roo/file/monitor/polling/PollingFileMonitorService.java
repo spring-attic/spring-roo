@@ -16,6 +16,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.WeakHashMap;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.file.monitor.DirectoryMonitoringRequest;
 import org.springframework.roo.file.monitor.FileMonitorService;
 import org.springframework.roo.file.monitor.MonitoringRequest;
@@ -24,7 +25,6 @@ import org.springframework.roo.file.monitor.event.FileDetails;
 import org.springframework.roo.file.monitor.event.FileEvent;
 import org.springframework.roo.file.monitor.event.FileEventListener;
 import org.springframework.roo.file.monitor.event.FileOperation;
-import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileUtils;
 
 /**
@@ -69,7 +69,7 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 
     public boolean add(final MonitoringRequest request) {
         synchronized (lock) {
-            Assert.notNull(request, "MonitoringRequest required");
+            Validate.notNull(request, "MonitoringRequest required");
 
             // Ensure existing monitoring requests don't overlap with this new
             // request;
@@ -136,8 +136,8 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
      */
     private void computeEntries(final Map<File, Long> map,
             final File currentFile, final boolean includeSubtree) {
-        Assert.notNull(map, "Map required");
-        Assert.notNull(currentFile, "Current file is required");
+        Validate.notNull(map, "Map required");
+        Validate.notNull(currentFile, "Current file is required");
 
         if (!currentFile.exists() || currentFile.getName().length() > 1
                 && currentFile.getName().startsWith(".")
@@ -169,18 +169,18 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
     }
 
     public SortedSet<FileDetails> findMatchingAntPath(final String antPath) {
-        Assert.hasText(antPath, "Ant path required");
+        Validate.notBlank(antPath, "Ant path required");
         final SortedSet<FileDetails> result = new TreeSet<FileDetails>();
         // Now we need to compute the starting directory by reference to the
         // first * in the Ant Path
         int index = antPath.indexOf("*");
         // Conditionals are based on an index of 0 (not -1) to ensure the
         // detected character is not the only character in the string
-        Assert.isTrue(index > 0, "'" + antPath
+        Validate.isTrue(index > 0, "'" + antPath
                 + "' is not an Ant Path as it fails to include an * character");
         String newPath = antPath.substring(0, index);
         index = newPath.lastIndexOf(File.separatorChar);
-        Assert.isTrue(index > 0, "'" + antPath + "' fails to include any '"
+        Validate.isTrue(index > 0, "'" + antPath + "' fails to include any '"
                 + File.separatorChar + "' directory separator");
         newPath = newPath.substring(0, index);
         final File somePath = new File(newPath);
@@ -189,7 +189,7 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
             // no way we'll find anything via a search
             return result;
         }
-        Assert.isTrue(somePath.isDirectory(), "Ant path '" + antPath
+        Validate.isTrue(somePath.isDirectory(), "Ant path '" + antPath
                 + "' appears under file system path '" + somePath
                 + "' but this is not a directory that can be searched");
         recursiveAntMatch(antPath, somePath, result);
@@ -465,13 +465,13 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
      */
     private void recursiveAntMatch(final String antPath,
             final File currentDirectory, final SortedSet<FileDetails> result) {
-        Assert.notNull(currentDirectory, "Current directory required");
-        Assert.isTrue(
+        Validate.notNull(currentDirectory, "Current directory required");
+        Validate.isTrue(
                 currentDirectory.exists() && currentDirectory.isDirectory(),
                 "Path '" + currentDirectory
                         + "' does not exist or is not a directory");
-        Assert.hasText(antPath, "Ant path required");
-        Assert.notNull(result, "Result required");
+        Validate.notBlank(antPath, "Ant path required");
+        Validate.notNull(result, "Result required");
 
         final File[] listFiles = currentDirectory.listFiles();
         if (listFiles == null || listFiles.length == 0) {
@@ -500,7 +500,7 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 
     public boolean remove(final MonitoringRequest request) {
         synchronized (lock) {
-            Assert.notNull(request, "MonitoringRequest required");
+            Validate.notNull(request, "MonitoringRequest required");
 
             // Advise of the cessation to monitoring
             if (priorExecution.containsKey(request)) {

@@ -2,6 +2,7 @@ package org.springframework.roo.addon.json;
 
 import static org.springframework.roo.model.RooJavaType.ROO_JAVA_BEAN;
 
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -14,7 +15,6 @@ import org.springframework.roo.classpath.details.annotations.AnnotationMetadataB
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.ProjectOperations;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Implementation of addon-json operations interface.
@@ -47,7 +47,7 @@ public class JsonOperationsImpl implements JsonOperations {
 
     public void annotateType(final JavaType javaType, final String rootName,
             final boolean deepSerialize) {
-        Assert.notNull(javaType, "Java type required");
+        Validate.notNull(javaType, "Java type required");
 
         final ClassOrInterfaceTypeDetails cid = typeLocationService
                 .getTypeDetails(javaType);

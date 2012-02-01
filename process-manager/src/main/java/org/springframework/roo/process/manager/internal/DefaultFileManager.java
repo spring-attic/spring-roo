@@ -11,6 +11,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.SortedSet;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -29,10 +31,8 @@ import org.springframework.roo.file.undo.UpdateFile;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.process.manager.ProcessManager;
-import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.FileUtils;
-import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Default implementation of {@link FileManager}.
@@ -70,7 +70,7 @@ public class DefaultFileManager implements FileManager, UndoListener {
             for (final Entry<String, String> entry : toRemove.entrySet()) {
                 final String fileIdentifier = entry.getKey();
                 final String newContents = entry.getValue();
-                if (StringUtils.hasText(newContents)) {
+                if (StringUtils.isNotBlank(newContents)) {
                     createOrUpdateTextFileIfRequired(fileIdentifier,
                             newContents,
                             StringUtils
@@ -91,9 +91,9 @@ public class DefaultFileManager implements FileManager, UndoListener {
     }
 
     public FileDetails createDirectory(final String fileIdentifier) {
-        Assert.notNull(fileIdentifier, "File identifier required");
+        Validate.notNull(fileIdentifier, "File identifier required");
         final File actual = new File(fileIdentifier);
-        Assert.isTrue(!actual.exists(), "File '" + fileIdentifier
+        Validate.isTrue(!actual.exists(), "File '" + fileIdentifier
                 + "' already exists");
         try {
             fileMonitorService.notifyCreated(actual.getCanonicalPath());
@@ -105,9 +105,9 @@ public class DefaultFileManager implements FileManager, UndoListener {
     }
 
     public MutableFile createFile(final String fileIdentifier) {
-        Assert.notNull(fileIdentifier, "File identifier required");
+        Validate.notNull(fileIdentifier, "File identifier required");
         final File actual = new File(fileIdentifier);
-        Assert.isTrue(!actual.exists(), "File '" + fileIdentifier
+        Validate.isTrue(!actual.exists(), "File '" + fileIdentifier
                 + "' already exists");
         try {
             fileMonitorService.notifyCreated(actual.getCanonicalPath());
@@ -150,13 +150,13 @@ public class DefaultFileManager implements FileManager, UndoListener {
         }
         else {
             mutableFile = createFile(fileIdentifier);
-            Assert.notNull(mutableFile, "Could not create file '"
+            Validate.notNull(mutableFile, "Could not create file '"
                     + fileIdentifier + "'");
         }
 
         if (mutableFile != null) {
             try {
-                if (StringUtils.hasText(descriptionOfChange)) {
+                if (StringUtils.isNotBlank(descriptionOfChange)) {
                     mutableFile.setDescriptionOfChange(descriptionOfChange);
                 }
                 FileCopyUtils.copy(newContents.getBytes(),
@@ -181,7 +181,7 @@ public class DefaultFileManager implements FileManager, UndoListener {
 
             String deferredDescriptionOfChange = StringUtils.defaultIfEmpty(
                     deferredDescriptionOfChanges.get(fileIdentifier), "");
-            if (StringUtils.hasText(deferredDescriptionOfChange)
+            if (StringUtils.isNotBlank(deferredDescriptionOfChange)
                     && !deferredDescriptionOfChange.trim().endsWith(";")) {
                 deferredDescriptionOfChange += "; ";
             }
@@ -207,7 +207,7 @@ public class DefaultFileManager implements FileManager, UndoListener {
         }
 
         final File actual = new File(fileIdentifier);
-        Assert.isTrue(actual.exists(), "File '" + fileIdentifier
+        Validate.isTrue(actual.exists(), "File '" + fileIdentifier
                 + "' does not exist");
         try {
             fileMonitorService.notifyDeleted(actual.getCanonicalPath());
@@ -225,7 +225,7 @@ public class DefaultFileManager implements FileManager, UndoListener {
     }
 
     public boolean exists(final String fileIdentifier) {
-        Assert.hasText(fileIdentifier, "File identifier required");
+        Validate.notBlank(fileIdentifier, "File identifier required");
         return new File(fileIdentifier).exists();
     }
 
@@ -240,9 +240,9 @@ public class DefaultFileManager implements FileManager, UndoListener {
         }
 
         final File file = new File(fileIdentifier);
-        Assert.isTrue(file.exists(), "File '" + fileIdentifier
+        Validate.isTrue(file.exists(), "File '" + fileIdentifier
                 + "' does not exist");
-        Assert.isTrue(file.isFile(), "Path '" + fileIdentifier
+        Validate.isTrue(file.isFile(), "Path '" + fileIdentifier
                 + "' is not a file");
         try {
             return new BufferedInputStream(new FileInputStream(new File(
@@ -266,7 +266,7 @@ public class DefaultFileManager implements FileManager, UndoListener {
     }
 
     public FileDetails readFile(final String fileIdentifier) {
-        Assert.notNull(fileIdentifier, "File identifier required");
+        Validate.notNull(fileIdentifier, "File identifier required");
         final File f = new File(fileIdentifier);
         if (!f.exists()) {
             return null;
@@ -279,9 +279,9 @@ public class DefaultFileManager implements FileManager, UndoListener {
     }
 
     public MutableFile updateFile(final String fileIdentifier) {
-        Assert.notNull(fileIdentifier, "File identifier required");
+        Validate.notNull(fileIdentifier, "File identifier required");
         final File actual = new File(fileIdentifier);
-        Assert.isTrue(actual.exists(), "File '" + fileIdentifier
+        Validate.isTrue(actual.exists(), "File '" + fileIdentifier
                 + "' does not exist");
         new UpdateFile(undoManager, filenameResolver, actual);
         final ManagedMessageRenderer renderer = new ManagedMessageRenderer(

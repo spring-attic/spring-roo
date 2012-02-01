@@ -36,6 +36,7 @@ import static org.springframework.roo.model.RooJavaType.ROO_JPA_ENTITY;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -61,7 +62,6 @@ import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
-import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.CollectionUtils;
 
 /**
@@ -174,7 +174,7 @@ public class JpaEntityMetadataProviderImpl extends
         // We have potential identifier information from an IdentifierService.
         // We only use this identifier information if the user did NOT provide
         // ANY identifier-related attributes on @RooJpaEntity....
-        Assert.isTrue(
+        Validate.isTrue(
                 identifiers.size() == 1,
                 "Identifier service indicates "
                         + identifiers.size()

@@ -5,6 +5,7 @@ import static org.springframework.roo.model.RooJavaType.ROO_OP4J;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -17,7 +18,6 @@ import org.springframework.roo.classpath.details.annotations.AnnotationMetadataB
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.ProjectOperations;
-import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Element;
 
@@ -36,7 +36,7 @@ public class Op4jOperationsImpl implements Op4jOperations {
     @Reference private TypeManagementService typeManagementService;
 
     public void annotateType(final JavaType javaType) {
-        Assert.notNull(javaType, "Java type required");
+        Validate.notNull(javaType, "Java type required");
 
         final ClassOrInterfaceTypeDetails cid = typeLocationService
                 .getTypeDetails(javaType);

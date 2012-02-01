@@ -22,6 +22,8 @@ import static org.springframework.roo.model.RooJavaType.ROO_JPA_ENTITY;
 
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -45,8 +47,6 @@ import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
-import org.springframework.roo.support.util.Assert;
-import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Implementation of {@link JpaActiveRecordMetadataProvider}.
@@ -92,7 +92,7 @@ public class JpaActiveRecordMetadataProviderImpl extends
     }
 
     public JpaCrudAnnotationValues getAnnotationValues(final JavaType javaType) {
-        Assert.notNull(javaType, "JavaType required");
+        Validate.notNull(javaType, "JavaType required");
         final String physicalTypeId = typeLocationService
                 .getPhysicalTypeIdentifier(javaType);
         if (StringUtils.isBlank(physicalTypeId)) {
@@ -138,7 +138,7 @@ public class JpaActiveRecordMetadataProviderImpl extends
         if (!jpaEntityAnnotationValues.isAnnotationFound()) {
             jpaEntityAnnotationValues = new JpaEntityAnnotationValues(
                     governorPhysicalType, ROO_JPA_ACTIVE_RECORD);
-            Assert.state(jpaEntityAnnotationValues.isAnnotationFound(),
+            Validate.validState(jpaEntityAnnotationValues.isAnnotationFound(),
                     "No @RooJpaEntity or @RooJpaActiveRecord on "
                             + metadataIdentificationString);
         }

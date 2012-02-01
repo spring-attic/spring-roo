@@ -14,6 +14,8 @@ import java.util.Set;
 
 import javax.xml.parsers.DocumentBuilder;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -24,9 +26,7 @@ import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectOperations;
-import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.IOUtils;
-import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -59,7 +59,7 @@ public class DbreModelServiceImpl implements DbreModelService {
     private Connection getConnection(final boolean displayAddOns) {
         final String dbProps = "database.properties";
         final String jndiDataSource = getJndiDataSourceName();
-        if (StringUtils.hasText(jndiDataSource)) {
+        if (StringUtils.isNotBlank(jndiDataSource)) {
             final Map<String, String> props = propFileOperations.getProperties(
                     Path.SPRING_CONFIG_ROOT.getModulePathId(projectOperations
                             .getFocusedModuleName()), "jndi.properties");
@@ -105,7 +105,7 @@ public class DbreModelServiceImpl implements DbreModelService {
         final List<Element> propertyElements = XmlUtils.findElements(
                 "/persistence/persistence-unit/properties/property",
                 document.getDocumentElement());
-        Assert.notEmpty(propertyElements,
+        Validate.notEmpty(propertyElements,
                 "Failed to find property elements in " + persistenceXmlPath);
         final Properties properties = new Properties();
 
@@ -214,7 +214,7 @@ public class DbreModelServiceImpl implements DbreModelService {
     public Database refreshDatabase(final Set<Schema> schemas,
             final boolean view, final Set<String> includeTables,
             final Set<String> excludeTables) {
-        Assert.notNull(schemas, "Schemas required");
+        Validate.notNull(schemas, "Schemas required");
 
         Connection connection = null;
         try {
@@ -240,7 +240,7 @@ public class DbreModelServiceImpl implements DbreModelService {
             connection = getConnection(displayAddOns);
             final DatabaseMetaData databaseMetaData = connection.getMetaData();
             final String schemaTerm = databaseMetaData.getSchemaTerm();
-            return StringUtils.hasText(schemaTerm)
+            return StringUtils.isNotBlank(schemaTerm)
                     && schemaTerm.equalsIgnoreCase("schema");
         }
         catch (final Exception e) {

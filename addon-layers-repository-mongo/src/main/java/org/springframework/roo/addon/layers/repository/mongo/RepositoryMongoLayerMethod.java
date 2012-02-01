@@ -13,12 +13,12 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.classpath.customdata.tagkeys.MethodMetadataCustomDataKey;
 import org.springframework.roo.classpath.layers.LayerType;
 import org.springframework.roo.classpath.layers.MethodParameter;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * A method provided by the {@link LayerType#REPOSITORY} layer.
@@ -236,8 +236,8 @@ public enum RepositoryMongoLayerMethod {
      */
     private RepositoryMongoLayerMethod(final String name,
             final MethodMetadataCustomDataKey... keys) {
-        Assert.hasText(name, "Name is required");
-        Assert.isTrue(keys.length > 0, "One or more ids are required");
+        Validate.notBlank(name, "Name is required");
+        Validate.isTrue(keys.length > 0, "One or more ids are required");
         ids = new ArrayList<String>();
         for (final MethodMetadataCustomDataKey key : keys) {
             ids.add(key.name());

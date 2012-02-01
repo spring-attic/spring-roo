@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -13,7 +14,6 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.Version;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.support.osgi.BundleFindingUtils;
-import org.springframework.roo.support.util.Assert;
 import org.springframework.uaa.client.TransmissionAwareUaaService;
 import org.springframework.uaa.client.TransmissionEventListener;
 import org.springframework.uaa.client.UaaService;
@@ -162,7 +162,7 @@ public class UaaRegistrationServiceImpl implements UaaRegistrationService,
 
     private void registerBundleSymbolicNameUse(final String bundleSymbolicName,
             String customJson, final boolean flushWhenDone) {
-        Assert.hasText(bundleSymbolicName, "Bundle symbolic name required");
+        Validate.notBlank(bundleSymbolicName, "Bundle symbolic name required");
 
         // Ensure it's a public feature (we do not want to log or buffer private
         // features)
@@ -226,8 +226,8 @@ public class UaaRegistrationServiceImpl implements UaaRegistrationService,
 
     private void registerProject(final Product product, final String projectId,
             final boolean flushWhenDone) {
-        Assert.notNull(product, "Product required");
-        Assert.hasText(projectId, "Project ID required");
+        Validate.notNull(product, "Product required");
+        Validate.notBlank(projectId, "Project ID required");
 
         // If we cannot persist it at present, buffer it for potential
         // persistence later on

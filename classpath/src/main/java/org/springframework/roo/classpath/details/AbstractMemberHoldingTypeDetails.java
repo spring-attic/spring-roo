@@ -7,12 +7,12 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.model.CustomData;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.CollectionUtils;
 
 /**
@@ -64,7 +64,7 @@ public abstract class AbstractMemberHoldingTypeDetails extends
 
     public ClassOrInterfaceTypeDetails getDeclaredInnerType(
             final JavaType typeName) {
-        Assert.notNull(typeName, "Name of inner type required");
+        Validate.notNull(typeName, "Name of inner type required");
         for (final ClassOrInterfaceTypeDetails cid : getDeclaredInnerTypes()) {
             if (cid.getName().getSimpleTypeName()
                     .equals(typeName.getSimpleTypeName())) {
@@ -75,7 +75,7 @@ public abstract class AbstractMemberHoldingTypeDetails extends
     }
 
     public FieldMetadata getField(final JavaSymbolName fieldName) {
-        Assert.notNull(fieldName, "Field name required");
+        Validate.notNull(fieldName, "Field name required");
         MemberHoldingTypeDetails current = this;
         while (current != null) {
             final FieldMetadata result = current.getDeclaredField(fieldName);
@@ -94,7 +94,7 @@ public abstract class AbstractMemberHoldingTypeDetails extends
     }
 
     public List<FieldMetadata> getFieldsWithAnnotation(final JavaType annotation) {
-        Assert.notNull(annotation, "Annotation required");
+        Validate.notNull(annotation, "Annotation required");
         final List<FieldMetadata> result = new ArrayList<FieldMetadata>();
         MemberHoldingTypeDetails current = this;
         while (current != null) {
@@ -126,7 +126,7 @@ public abstract class AbstractMemberHoldingTypeDetails extends
     }
 
     public MethodMetadata getMethod(final JavaSymbolName methodName) {
-        Assert.notNull(methodName, "Method name required");
+        Validate.notNull(methodName, "Method name required");
 
         MemberHoldingTypeDetails current = this;
         while (current != null) {
@@ -148,7 +148,7 @@ public abstract class AbstractMemberHoldingTypeDetails extends
 
     public MethodMetadata getMethod(final JavaSymbolName methodName,
             List<JavaType> parameters) {
-        Assert.notNull(methodName, "Method name required");
+        Validate.notNull(methodName, "Method name required");
         if (parameters == null) {
             parameters = new ArrayList<JavaType>();
         }
@@ -190,7 +190,7 @@ public abstract class AbstractMemberHoldingTypeDetails extends
     }
 
     public JavaSymbolName getUniqueFieldName(final String proposedName) {
-        Assert.hasText(proposedName, "Proposed field name is required");
+        Validate.notBlank(proposedName, "Proposed field name is required");
         String candidateName = proposedName;
         while (getField(new JavaSymbolName(candidateName)) != null) {
             // The proposed field name is taken; differentiate it

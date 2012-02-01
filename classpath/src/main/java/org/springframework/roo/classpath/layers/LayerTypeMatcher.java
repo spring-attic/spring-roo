@@ -3,6 +3,7 @@ package org.springframework.roo.classpath.layers;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.classpath.customdata.CustomDataKeys;
 import org.springframework.roo.classpath.customdata.taggers.AnnotatedTypeMatcher;
 import org.springframework.roo.classpath.customdata.taggers.Matcher;
@@ -14,7 +15,6 @@ import org.springframework.roo.classpath.details.annotations.ArrayAttributeValue
 import org.springframework.roo.classpath.details.annotations.ClassAttributeValue;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * A {@link Matcher} used for layering support; identifies layer components
@@ -42,8 +42,8 @@ public class LayerTypeMatcher extends AnnotatedTypeMatcher {
     public LayerTypeMatcher(final JavaType layerAnnotation,
             final JavaSymbolName domainTypesAttribute) {
         super(CustomDataKeys.LAYER_TYPE, layerAnnotation);
-        Assert.notNull(layerAnnotation, "Layer annotation is required");
-        Assert.notNull(domainTypesAttribute,
+        Validate.notNull(layerAnnotation, "Layer annotation is required");
+        Validate.notNull(domainTypesAttribute,
                 "Domain types attribute is required");
         this.domainTypesAttribute = domainTypesAttribute;
         layerAnnotationType = layerAnnotation;

@@ -6,6 +6,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -21,8 +23,6 @@ import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.support.util.CollectionUtils;
 import org.springframework.roo.support.util.PairList;
-import org.springframework.roo.support.util.StringUtils;
-import org.springframework.uaa.client.util.Assert;
 
 /**
  * A provider of the {@link LayerType#REPOSITORY} layer.
@@ -43,12 +43,12 @@ public class RepositoryMongoLayerProvider extends CoreLayerProvider {
     public MemberTypeAdditions getMemberTypeAdditions(final String callerMID,
             final String methodIdentifier, final JavaType targetEntity,
             final JavaType idType, final MethodParameter... callerParameters) {
-        Assert.isTrue(StringUtils.hasText(callerMID),
+        Validate.isTrue(StringUtils.isNotBlank(callerMID),
                 "Caller's metadata ID required");
-        Assert.isTrue(StringUtils.hasText(methodIdentifier),
+        Validate.isTrue(StringUtils.isNotBlank(methodIdentifier),
                 "Method identifier required");
-        Assert.notNull(targetEntity, "Target enitity type required");
-        Assert.notNull(idType, "Enitity Id type required");
+        Validate.notNull(targetEntity, "Target enitity type required");
+        Validate.notNull(idType, "Enitity Id type required");
 
         // Look for a repository layer method with this ID and parameter types
         final List<JavaType> parameterTypes = new PairList<JavaType, JavaSymbolName>(

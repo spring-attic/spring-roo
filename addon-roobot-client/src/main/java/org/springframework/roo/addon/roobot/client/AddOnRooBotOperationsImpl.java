@@ -21,6 +21,8 @@ import java.util.zip.ZipInputStream;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -39,9 +41,7 @@ import org.springframework.roo.felix.pgp.PgpKeyId;
 import org.springframework.roo.felix.pgp.PgpService;
 import org.springframework.roo.shell.Shell;
 import org.springframework.roo.support.logging.HandlerUtils;
-import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.IOUtils;
-import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.springframework.roo.uaa.UaaRegistrationService;
 import org.springframework.roo.url.stream.UrlInputStreamService;
@@ -134,7 +134,7 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
     }
 
     public void addOnInfo(final AddOnBundleSymbolicName bsn) {
-        Assert.notNull(bsn, "A valid add-on bundle symbolic name is required");
+        Validate.notNull(bsn, "A valid add-on bundle symbolic name is required");
         synchronized (mutex) {
             String bsnString = bsn.getKey();
             if (bsnString.contains(";")) {
@@ -191,7 +191,7 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
     }
 
     public void addOnInfo(final String bundleKey) {
-        Assert.hasText(bundleKey, "A valid bundle ID is required");
+        Validate.notBlank(bundleKey, "A valid bundle ID is required");
         synchronized (mutex) {
             Bundle bundle = null;
             if (searchResultCache != null) {
@@ -419,7 +419,7 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 
     public InstallOrUpgradeStatus installAddOn(final AddOnBundleSymbolicName bsn) {
         synchronized (mutex) {
-            Assert.notNull(bsn,
+            Validate.notNull(bsn,
                     "A valid add-on bundle symbolic name is required");
             String bsnString = bsn.getKey();
             if (bsnString.contains(";")) {
@@ -438,7 +438,7 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 
     public InstallOrUpgradeStatus installAddOn(final String bundleKey) {
         synchronized (mutex) {
-            Assert.hasText(bundleKey, "A valid bundle ID is required");
+            Validate.notBlank(bundleKey, "A valid bundle ID is required");
             Bundle bundle = null;
             if (searchResultCache != null) {
                 bundle = searchResultCache.get(String.format("%02d",
@@ -498,7 +498,7 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
                 .getBundles()) {
             final String bsn = (String) bundle.getHeaders().get(
                     "Bundle-SymbolicName");
-            if (StringUtils.hasText(bsn)
+            if (StringUtils.isNotBlank(bsn)
                     && bsn.equals(search.getSymbolicName())) {
                 return true;
             }
@@ -853,7 +853,7 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 
     public InstallOrUpgradeStatus removeAddOn(final BundleSymbolicName bsn) {
         synchronized (mutex) {
-            Assert.notNull(bsn, "Bundle symbolic name required");
+            Validate.notNull(bsn, "Bundle symbolic name required");
             boolean success = false;
             final int count = countBundles();
             success = shell
@@ -885,7 +885,7 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 
     public InstallOrUpgradeStatus upgradeAddOn(final AddOnBundleSymbolicName bsn) {
         synchronized (mutex) {
-            Assert.notNull(bsn,
+            Validate.notNull(bsn,
                     "A valid add-on bundle symbolic name is required");
             String bsnString = bsn.getKey();
             if (bsnString.contains(";")) {
@@ -917,7 +917,7 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 
     public InstallOrUpgradeStatus upgradeAddOn(final String bundleId) {
         synchronized (mutex) {
-            Assert.hasText(bundleId, "A valid bundle ID is required");
+            Validate.notBlank(bundleId, "A valid bundle ID is required");
             Bundle bundle = null;
             if (searchResultCache != null) {
                 bundle = searchResultCache.get(String.format("%02d",
@@ -1066,7 +1066,7 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
             else {
                 doc = db.parse(obrUrl.openStream());
             }
-            Assert.notNull(doc,
+            Validate.notNull(doc,
                     "RooBot was unable to parse the repository document of this add-on");
             for (final Element resource : XmlUtils.findElements("resource",
                     doc.getDocumentElement())) {

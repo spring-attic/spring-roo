@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -19,9 +21,7 @@ import org.springframework.roo.project.Repository;
 import org.springframework.roo.project.Resource;
 import org.springframework.roo.project.packaging.PackagingProvider;
 import org.springframework.roo.project.packaging.PackagingProviderRegistry;
-import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileUtils;
-import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Element;
 
@@ -60,7 +60,7 @@ public class PomFactoryImpl implements PomFactory {
     private String getGroupId(final Element root) {
         final String projectGroupId = XmlUtils.getTextContent(GROUP_ID_XPATH,
                 root);
-        if (StringUtils.hasText(projectGroupId)) {
+        if (StringUtils.isNotBlank(projectGroupId)) {
             return projectGroupId;
         }
         // Fall back to a group ID assumed to be the same as any possible
@@ -70,7 +70,7 @@ public class PomFactoryImpl implements PomFactory {
 
     public Pom getInstance(final Element root, final String pomPath,
             final String moduleName) {
-        Assert.hasText(pomPath, "POM's canonical path is required");
+        Validate.notBlank(pomPath, "POM's canonical path is required");
         final String artifactId = XmlUtils.getTextContent(ARTIFACT_ID_XPATH,
                 root);
         final String groupId = getGroupId(root);
@@ -113,7 +113,7 @@ public class PomFactoryImpl implements PomFactory {
         final List<Module> modules = new ArrayList<Module>();
         for (final Element module : XmlUtils.findElements(MODULE_XPATH, root)) {
             final String moduleName = module.getTextContent();
-            if (StringUtils.hasText(moduleName)) {
+            if (StringUtils.isNotBlank(moduleName)) {
                 final String modulePath = resolveRelativePath(pomPath,
                         moduleName);
                 modules.add(new Module(moduleName, modulePath));
@@ -139,7 +139,7 @@ public class PomFactoryImpl implements PomFactory {
                 PACKAGING_PROVIDER_PROPERTY_XPATH, root, packaging);
         final PackagingProvider packagingProvider = packagingProviderRegistry
                 .getPackagingProvider(packagingProviderId);
-        Assert.notNull(packagingProvider,
+        Validate.notNull(packagingProvider,
                 "No PackagingProvider found with the ID '"
                         + packagingProviderId + "'");
         return packagingProvider.getPaths();
@@ -176,7 +176,7 @@ public class PomFactoryImpl implements PomFactory {
 
     private String resolveRelativePath(String relativeTo,
             final String relativePath) {
-        relativeTo = StringUtils.removeSuffix(relativeTo, File.separator);
+        relativeTo = StringUtils.removeEnd(relativeTo, File.separator);
         while (new File(relativeTo).isFile()) {
             relativeTo = relativeTo.substring(0,
                     relativeTo.lastIndexOf(File.separator));

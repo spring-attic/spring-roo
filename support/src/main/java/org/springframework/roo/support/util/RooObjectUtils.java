@@ -13,9 +13,9 @@ import java.util.Arrays;
  * @author Rod Johnson
  * @author Rob Harrop
  * @author Alex Ruiz
- * @see org.apache.commons.lang.ObjectUtils
+ * @see org.apache.commons.RooObjectUtils.ObjectUtils
  */
-public final class ObjectUtils {
+public final class RooObjectUtils {
 
     private static final String ARRAY_ELEMENT_SEPARATOR = ", ";
     private static final String ARRAY_END = "}";
@@ -954,6 +954,6 @@ public final class ObjectUtils {
     /**
      * Constructor is private to prevent instantiation
      */
-    private ObjectUtils() {
+    private RooObjectUtils() {
     }
 }

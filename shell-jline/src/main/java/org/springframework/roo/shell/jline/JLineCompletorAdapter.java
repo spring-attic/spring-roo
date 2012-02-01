@@ -5,9 +5,9 @@ import java.util.List;
 
 import jline.Completor;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.shell.Completion;
 import org.springframework.roo.shell.Parser;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * An implementation of JLine's {@link Completor} interface that delegates to a
@@ -21,7 +21,7 @@ public class JLineCompletorAdapter implements Completor {
     private final Parser parser;
 
     public JLineCompletorAdapter(final Parser parser) {
-        Assert.notNull(parser, "Parser required");
+        Validate.notNull(parser, "Parser required");
         this.parser = parser;
     }
 

@@ -1,9 +1,9 @@
 package org.springframework.roo.process.manager.internal;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.file.monitor.FileMonitorService;
 import org.springframework.roo.file.monitor.MonitoringRequest;
 import org.springframework.roo.process.manager.CommandCallback;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Represents a {@link CommandCallback} to start or stop monitoring a particular
@@ -21,8 +21,8 @@ public class MonitoringRequestCommand implements CommandCallback<Boolean> {
     public MonitoringRequestCommand(
             final FileMonitorService fileMonitorService,
             final MonitoringRequest monitoringRequest, final boolean add) {
-        Assert.notNull(fileMonitorService, "File monitor service required");
-        Assert.notNull(monitoringRequest, "Request required");
+        Validate.notNull(fileMonitorService, "File monitor service required");
+        Validate.notNull(monitoringRequest, "Request required");
         this.fileMonitorService = fileMonitorService;
         this.monitoringRequest = monitoringRequest;
         this.add = add;

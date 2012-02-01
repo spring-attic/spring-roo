@@ -2,6 +2,7 @@ package org.springframework.roo.addon.solr;
 
 import static org.springframework.roo.model.RooJavaType.ROO_SOLR_WEB_SEARCHABLE;
 
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -14,7 +15,6 @@ import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.LogicalPath;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Provides {@link SolrWebSearchMetadata}.
@@ -106,7 +106,7 @@ public class SolrWebSearchMetadataProvider extends AbstractItdMetadataProvider {
 
         final JavaType targetObject = webScaffoldMetadata.getAnnotationValues()
                 .getFormBackingObject();
-        Assert.notNull(
+        Validate.notNull(
                 targetObject,
                 "Could not acquire form backing object for the '"
                         + WebScaffoldMetadata.getJavaType(
@@ -121,7 +121,7 @@ public class SolrWebSearchMetadataProvider extends AbstractItdMetadataProvider {
         final SolrMetadata solrMetadata = (SolrMetadata) metadataService
                 .get(SolrMetadata.createIdentifier(targetObject,
                         targetObjectPath));
-        Assert.notNull(
+        Validate.notNull(
                 solrMetadata,
                 "Could not determine SolrMetadata for type '"
                         + targetObject.getFullyQualifiedTypeName() + "'");

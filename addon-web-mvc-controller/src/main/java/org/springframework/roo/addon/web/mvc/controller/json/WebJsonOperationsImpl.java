@@ -9,6 +9,7 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -40,7 +41,6 @@ import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.ProjectType;
-import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.WebXmlUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
@@ -105,8 +105,8 @@ public class WebJsonOperationsImpl implements WebJsonOperations {
     }
 
     public void annotateType(final JavaType type, final JavaType jsonEntity) {
-        Assert.notNull(type, "Target type required");
-        Assert.notNull(jsonEntity, "Json entity required");
+        Validate.notNull(type, "Target type required");
+        Validate.notNull(jsonEntity, "Json entity required");
         final String id = typeLocationService.getPhysicalTypeIdentifier(type);
         if (id == null) {
             createNewType(type, jsonEntity);
@@ -191,7 +191,7 @@ public class WebJsonOperationsImpl implements WebJsonOperations {
         // Verify that the web.xml already exists
         final String webXmlPath = pathResolver.getFocusedIdentifier(
                 Path.SRC_MAIN_WEBAPP, "WEB-INF/web.xml");
-        Assert.isTrue(fileManager.exists(webXmlPath), "'" + webXmlPath
+        Validate.isTrue(fileManager.exists(webXmlPath), "'" + webXmlPath
                 + "' does not exist");
 
         final Document document = XmlUtils.readXml(fileManager

@@ -4,6 +4,9 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.text.StrTokenizer;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -22,8 +25,6 @@ import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
 import org.springframework.roo.shell.CommandMarker;
 import org.springframework.roo.support.logging.HandlerUtils;
-import org.springframework.roo.support.util.Assert;
-import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Commands for the 'mvc controller' add-on to be used by the ROO shell.
@@ -113,8 +114,9 @@ public class ControllerCommands implements CommandMarker {
 
         final Set<String> disallowedOperationSet = new HashSet<String>();
         if (!"".equals(disallowedOperations)) {
-            for (final String operation : StringUtils
-                    .commaDelimitedListToSet(disallowedOperations)) {
+            final String[] disallowedOperationsTokens = new StrTokenizer(
+                    disallowedOperations, ",").getTokenArray();
+            for (final String operation : disallowedOperationsTokens) {
                 if (!("create".equals(operation) || "update".equals(operation) || "delete"
                         .equals(operation))) {
                     LOGGER.warning("-disallowedOperations options can only contain 'create', 'update', 'delete': -disallowedOperations update,delete");
@@ -130,7 +132,7 @@ public class ControllerCommands implements CommandMarker {
             final PluralMetadata pluralMetadata = (PluralMetadata) metadataService
                     .get(PluralMetadata.createIdentifier(backingType,
                             targetPath));
-            Assert.notNull(pluralMetadata, "Could not determine plural for '"
+            Validate.notNull(pluralMetadata, "Could not determine plural for '"
                     + backingType.getSimpleTypeName() + "'");
             path = pluralMetadata.getPlural().toLowerCase();
         }

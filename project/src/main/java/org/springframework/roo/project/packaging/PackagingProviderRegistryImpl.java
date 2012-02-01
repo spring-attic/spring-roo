@@ -5,13 +5,13 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.ReferenceStrategy;
 import org.apache.felix.scr.annotations.Service;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * The {@link PackagingProviderRegistry} implementation.
@@ -29,14 +29,12 @@ public class PackagingProviderRegistryImpl implements PackagingProviderRegistry 
     // properly (when removing)
     private final Map<String, PackagingProvider> packagingProviders = new HashMap<String, PackagingProvider>();
 
-    // ------------------------- OSGi callback methods -------------------------
-
     protected void bindPackagingProvider(
             final PackagingProvider packagingProvider) {
         synchronized (mutex) {
             final PackagingProvider previousPackagingProvider = packagingProviders
                     .put(packagingProvider.getId(), packagingProvider);
-            Assert.isNull(previousPackagingProvider,
+            Validate.isTrue(previousPackagingProvider == null,
                     "More than one PackagingProvider with ID = '"
                             + packagingProvider.getId() + "'");
         }
@@ -45,8 +43,6 @@ public class PackagingProviderRegistryImpl implements PackagingProviderRegistry 
     public Collection<PackagingProvider> getAllPackagingProviders() {
         return new ArrayList<PackagingProvider>(packagingProviders.values());
     }
-
-    // ------------------ PackagingProviderRegistry methods --------------------
 
     public PackagingProvider getDefaultPackagingProvider() {
         PackagingProvider defaultCoreProvider = null;
@@ -61,7 +57,7 @@ public class PackagingProviderRegistryImpl implements PackagingProviderRegistry 
                 }
             }
         }
-        Assert.state(defaultCoreProvider != null,
+        Validate.validState(defaultCoreProvider != null,
                 "Should have found a default core PackagingProvider");
         return defaultCoreProvider;
     }

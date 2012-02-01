@@ -14,6 +14,7 @@ import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -22,7 +23,6 @@ import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.logging.HandlerUtils;
-import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileUtils;
 import org.springframework.roo.support.util.IOUtils;
 
@@ -45,7 +45,7 @@ public class BackupOperationsImpl implements BackupOperations {
     @Reference private ProjectOperations projectOperations;
 
     public String backup() {
-        Assert.isTrue(isBackupPossible(), "Project metadata unavailable");
+        Validate.isTrue(isBackupPossible(), "Project metadata unavailable");
 
         // For Windows, make a date format that can legally form part of a
         // filename (ROO-277)

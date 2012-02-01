@@ -2,6 +2,7 @@ package org.springframework.roo.project;
 
 import java.util.Set;
 
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -14,7 +15,6 @@ import org.springframework.roo.metadata.MetadataProvider;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.maven.Pom;
-import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.uaa.UaaRegistrationService;
 import org.springframework.uaa.client.UaaDetectedProducts;
 import org.springframework.uaa.client.UaaDetectedProducts.ProductInfo;
@@ -49,7 +49,7 @@ public class MavenProjectMetadataProvider implements MetadataProvider,
     @Reference private UaaRegistrationService uaaRegistrationService;
 
     public MetadataItem get(final String metadataId) {
-        Assert.isTrue(ProjectMetadata.isValid(metadataId),
+        Validate.isTrue(ProjectMetadata.isValid(metadataId),
                 "Unexpected metadata request '" + metadataId
                         + "' for this provider");
         // Just rebuild on demand. We always do this as we expect
@@ -131,7 +131,7 @@ public class MavenProjectMetadataProvider implements MetadataProvider,
     }
 
     public void onFileEvent(final FileEvent fileEvent) {
-        Assert.notNull(fileEvent, "File event required");
+        Validate.notNull(fileEvent, "File event required");
 
         if (fileEvent.getFileDetails().getCanonicalPath()
                 .endsWith(POM_RELATIVE_PATH)) {

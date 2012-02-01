@@ -2,11 +2,11 @@ package org.springframework.roo.addon.web.mvc.controller.details;
 
 import java.util.List;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.layers.MemberTypeAdditions;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Aggregates persistence metadata for a given {@link JavaType} which is needed
@@ -68,12 +68,12 @@ public class JavaTypePersistenceMetadataDetails {
             final MemberTypeAdditions findEntriesMethod,
             final List<String> finderNames, final boolean isRooIdentifier,
             final List<FieldMetadata> rooIdentifierFields) {
-        Assert.notNull(identifierType, "Indentifier type required");
-        Assert.notNull(identifierField, "Indentifier field required");
-        Assert.notNull(identifierAccessorMethod,
+        Validate.notNull(identifierType, "Indentifier type required");
+        Validate.notNull(identifierField, "Indentifier field required");
+        Validate.notNull(identifierAccessorMethod,
                 "Indentifier accessor method required");
-        Assert.notNull(finderNames, "List of finder Names required");
-        Assert.notNull(rooIdentifierFields,
+        Validate.notNull(finderNames, "List of finder Names required");
+        Validate.notNull(rooIdentifierFields,
                 "List of fields for Roo identifier required (may be empty)");
 
         this.identifierType = identifierType;

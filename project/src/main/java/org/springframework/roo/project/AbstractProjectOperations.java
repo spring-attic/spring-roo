@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
@@ -23,10 +25,8 @@ import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.shell.Shell;
-import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.CollectionUtils;
 import org.springframework.roo.support.util.DomUtils;
-import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
@@ -70,7 +70,7 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
             return "";
         }
         return highlight(action + " " + (items.size() == 1 ? singular : plural))
-                + " " + StringUtils.collectionToDelimitedString(items, ", ");
+                + " " + StringUtils.join(items, ", ");
     }
 
     /**
@@ -93,22 +93,22 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
     @Reference protected Shell shell;
 
     public void addBuildPlugin(final String moduleName, final Plugin plugin) {
-        Assert.isTrue(isProjectAvailable(moduleName),
+        Validate.isTrue(isProjectAvailable(moduleName),
                 "Plugin modification prohibited at this time");
-        Assert.notNull(plugin, "Plugin required");
+        Validate.notNull(plugin, "Plugin required");
         addBuildPlugins(moduleName, Collections.singletonList(plugin));
     }
 
     public void addBuildPlugins(final String moduleName,
             final Collection<? extends Plugin> plugins) {
-        Assert.isTrue(isProjectAvailable(moduleName),
+        Validate.isTrue(isProjectAvailable(moduleName),
                 "Plugin modification prohibited at this time");
-        Assert.notNull(plugins, "Plugins required");
+        Validate.notNull(plugins, "Plugins required");
         if (CollectionUtils.isEmpty(plugins)) {
             return;
         }
         final Pom pom = getPomFromModuleName(moduleName);
-        Assert.notNull(pom,
+        Validate.notNull(pom,
                 "The pom is not available, so plugin addition cannot be performed");
         if (pom.isAllPluginsRegistered(plugins)) {
             return;
@@ -139,11 +139,11 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 
     public void addDependencies(final String moduleName,
             final Collection<? extends Dependency> newDependencies) {
-        Assert.isTrue(isProjectAvailable(moduleName),
+        Validate.isTrue(isProjectAvailable(moduleName),
                 "Dependency modification prohibited; no such module '"
                         + moduleName + "'");
         final Pom pom = getPomFromModuleName(moduleName);
-        Assert.notNull(pom,
+        Validate.notNull(pom,
                 "The pom is not available, so dependencies cannot be added");
         if (pom.isAllDependenciesRegistered(newDependencies)) {
             return;
@@ -214,9 +214,9 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 
     public void addDependency(final String moduleName,
             final Dependency dependency) {
-        Assert.isTrue(isProjectAvailable(moduleName),
+        Validate.isTrue(isProjectAvailable(moduleName),
                 "Dependency modification prohibited at this time");
-        Assert.notNull(dependency, "Dependency required");
+        Validate.notNull(dependency, "Dependency required");
         addDependencies(moduleName, Collections.singletonList(dependency));
     }
 
@@ -234,11 +234,11 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
     public final void addDependency(final String moduleName,
             final String groupId, final String artifactId,
             final String version, DependencyScope scope, final String classifier) {
-        Assert.isTrue(isProjectAvailable(moduleName),
+        Validate.isTrue(isProjectAvailable(moduleName),
                 "Dependency modification prohibited at this time");
-        Assert.notNull(groupId, "Group ID required");
-        Assert.notNull(artifactId, "Artifact ID required");
-        Assert.hasText(version, "Version required");
+        Validate.notNull(groupId, "Group ID required");
+        Validate.notNull(artifactId, "Artifact ID required");
+        Validate.notBlank(version, "Version required");
         if (scope == null) {
             scope = COMPILE;
         }
@@ -248,11 +248,11 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
     }
 
     public void addFilter(final String moduleName, final Filter filter) {
-        Assert.isTrue(isProjectAvailable(moduleName),
+        Validate.isTrue(isProjectAvailable(moduleName),
                 "Filter modification prohibited at this time");
-        Assert.notNull(filter, "Filter required");
+        Validate.notNull(filter, "Filter required");
         final Pom pom = getPomFromModuleName(moduleName);
-        Assert.notNull(pom,
+        Validate.notNull(pom,
                 "The pom is not available, so filter addition cannot be performed");
         if (filter == null || pom.isFilterRegistered(filter)) {
             return;
@@ -290,7 +290,7 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
             return; // No need to ever add a dependency upon the root POM
         }
         final Pom focusedModule = getFocusedModule();
-        if (StringUtils.hasText(focusedModule.getModuleName())
+        if (StringUtils.isNotBlank(focusedModule.getModuleName())
                 && !moduleToDependUpon.equals(focusedModule.getModuleName())) {
             final ProjectMetadata dependencyProject = getProjectMetadata(moduleToDependUpon);
             if (dependencyProject != null) {
@@ -310,28 +310,28 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 
     public void addPluginRepositories(final String moduleName,
             final Collection<? extends Repository> repositories) {
-        Assert.isTrue(isProjectAvailable(moduleName),
+        Validate.isTrue(isProjectAvailable(moduleName),
                 "Plugin repository modification prohibited at this time");
-        Assert.notNull(repositories, "Plugin repositories required");
+        Validate.notNull(repositories, "Plugin repositories required");
         addRepositories(moduleName, repositories, "pluginRepositories",
                 "pluginRepository");
     }
 
     public void addPluginRepository(final String moduleName,
             final Repository repository) {
-        Assert.isTrue(isProjectAvailable(moduleName),
+        Validate.isTrue(isProjectAvailable(moduleName),
                 "Plugin repository modification prohibited at this time");
-        Assert.notNull(repository, "Repository required");
+        Validate.notNull(repository, "Repository required");
         addRepository(moduleName, repository, "pluginRepositories",
                 "pluginRepository");
     }
 
     public void addProperty(final String moduleName, final Property property) {
-        Assert.isTrue(isProjectAvailable(moduleName),
+        Validate.isTrue(isProjectAvailable(moduleName),
                 "Property modification prohibited at this time");
-        Assert.notNull(property, "Property to add required");
+        Validate.notNull(property, "Property to add required");
         final Pom pom = getPomFromModuleName(moduleName);
-        Assert.notNull(pom,
+        Validate.notNull(pom,
                 "The pom is not available, so property addition cannot be performed");
         if (pom.isPropertyRegistered(property)) {
             return;
@@ -371,15 +371,15 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
     private void addRepositories(final String moduleName,
             final Collection<? extends Repository> repositories,
             final String containingPath, final String path) {
-        Assert.isTrue(isProjectAvailable(moduleName),
+        Validate.isTrue(isProjectAvailable(moduleName),
                 "Repository modification prohibited at this time");
-        Assert.notNull(repositories, "Repositories required");
+        Validate.notNull(repositories, "Repositories required");
 
         if (CollectionUtils.isEmpty(repositories)) {
             return;
         }
         final Pom pom = getPomFromModuleName(moduleName);
-        Assert.notNull(pom,
+        Validate.notNull(pom,
                 "The pom is not available, so repository addition cannot be performed");
         if ("pluginRepository".equals(path)) {
             if (pom.isAllPluginRepositoriesRegistered(repositories)) {
@@ -428,19 +428,19 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
     private void addRepository(final String moduleName,
             final Repository repository, final String containingPath,
             final String path) {
-        Assert.isTrue(isProjectAvailable(moduleName),
+        Validate.isTrue(isProjectAvailable(moduleName),
                 "Repository modification prohibited at this time");
-        Assert.notNull(repository, "Repository required");
+        Validate.notNull(repository, "Repository required");
         addRepositories(moduleName, Collections.singletonList(repository),
                 containingPath, path);
     }
 
     public void addResource(final String moduleName, final Resource resource) {
-        Assert.isTrue(isProjectAvailable(moduleName),
+        Validate.isTrue(isProjectAvailable(moduleName),
                 "Resource modification prohibited at this time");
-        Assert.notNull(resource, "Resource to add required");
+        Validate.notNull(resource, "Resource to add required");
         final Pom pom = getPomFromModuleName(moduleName);
-        Assert.notNull(pom,
+        Validate.notNull(pom,
                 "The pom is not available, so resource addition cannot be performed");
         if (pom.isResourceRegistered(resource)) {
             return;
@@ -543,7 +543,7 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
                 iter.remove();
             }
         }
-        return StringUtils.collectionToDelimitedString(changes, ";");
+        return StringUtils.join(changes, ";");
     }
 
     public final ProjectMetadata getProjectMetadata(final String moduleName) {
@@ -553,7 +553,7 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 
     public String getProjectName(final String moduleName) {
         final Pom pom = getPomFromModuleName(moduleName);
-        Assert.notNull(pom, "A pom with module name '" + moduleName
+        Validate.notNull(pom, "A pom with module name '" + moduleName
                 + "' could not be found");
         return pom.getDisplayName();
     }
@@ -608,17 +608,17 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
     }
 
     public void removeBuildPlugin(final String moduleName, final Plugin plugin) {
-        Assert.isTrue(isProjectAvailable(moduleName),
+        Validate.isTrue(isProjectAvailable(moduleName),
                 "Plugin modification prohibited at this time");
-        Assert.notNull(plugin, "Plugin required");
+        Validate.notNull(plugin, "Plugin required");
         removeBuildPlugins(moduleName, Collections.singletonList(plugin));
     }
 
     public void removeBuildPluginImmediately(final String moduleName,
             final Plugin plugin) {
-        Assert.isTrue(isProjectAvailable(moduleName),
+        Validate.isTrue(isProjectAvailable(moduleName),
                 "Plugin modification prohibited at this time");
-        Assert.notNull(plugin, "Plugin required");
+        Validate.notNull(plugin, "Plugin required");
         removeBuildPlugins(moduleName, Collections.singletonList(plugin), true);
     }
 
@@ -630,14 +630,14 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
     private void removeBuildPlugins(final String moduleName,
             final Collection<? extends Plugin> plugins,
             final boolean writeImmediately) {
-        Assert.isTrue(isProjectAvailable(moduleName),
+        Validate.isTrue(isProjectAvailable(moduleName),
                 "Plugin modification prohibited at this time");
-        Assert.notNull(plugins, "Plugins required");
+        Validate.notNull(plugins, "Plugins required");
         if (CollectionUtils.isEmpty(plugins)) {
             return;
         }
         final Pom pom = getPomFromModuleName(moduleName);
-        Assert.notNull(pom,
+        Validate.notNull(pom,
                 "The pom is not available, so plugin removal cannot be performed");
         if (!pom.isAnyPluginsRegistered(plugins)) {
             return;
@@ -684,14 +684,14 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 
     public void removeDependencies(final String moduleName,
             final Collection<? extends Dependency> dependenciesToRemove) {
-        Assert.isTrue(isProjectAvailable(moduleName),
+        Validate.isTrue(isProjectAvailable(moduleName),
                 "Dependency modification prohibited at this time");
-        Assert.notNull(dependenciesToRemove, "Dependencies required");
+        Validate.notNull(dependenciesToRemove, "Dependencies required");
         if (CollectionUtils.isEmpty(dependenciesToRemove)) {
             return;
         }
         final Pom pom = getPomFromModuleName(moduleName);
-        Assert.notNull(pom,
+        Validate.notNull(pom,
                 "The pom is not available, so dependency removal cannot be performed");
         if (!pom.isAnyDependenciesRegistered(dependenciesToRemove)) {
             return;
@@ -758,11 +758,11 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
     private void removeDependency(final String moduleName,
             final Dependency dependency, final String containingPath,
             final String path) {
-        Assert.isTrue(isProjectAvailable(moduleName),
+        Validate.isTrue(isProjectAvailable(moduleName),
                 "Dependency modification prohibited at this time");
-        Assert.notNull(dependency, "Dependency to remove required");
+        Validate.notNull(dependency, "Dependency to remove required");
         final Pom pom = getPomFromModuleName(moduleName);
-        Assert.notNull(pom,
+        Validate.notNull(pom,
                 "The pom is not available, so dependency removal cannot be performed");
         if (!pom.isDependencyRegistered(dependency)) {
             return;
@@ -799,22 +799,22 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
     public final void removeDependency(final String moduleName,
             final String groupId, final String artifactId,
             final String version, final String classifier) {
-        Assert.isTrue(isProjectAvailable(moduleName),
+        Validate.isTrue(isProjectAvailable(moduleName),
                 "Dependency modification prohibited at this time");
-        Assert.notNull(groupId, "Group ID required");
-        Assert.notNull(artifactId, "Artifact ID required");
-        Assert.hasText(version, "Version required");
+        Validate.notNull(groupId, "Group ID required");
+        Validate.notNull(artifactId, "Artifact ID required");
+        Validate.notBlank(version, "Version required");
         final Dependency dependency = new Dependency(groupId, artifactId,
                 version, DependencyType.JAR, COMPILE, classifier);
         removeDependency(moduleName, dependency);
     }
 
     public void removeFilter(final String moduleName, final Filter filter) {
-        Assert.isTrue(isProjectAvailable(moduleName),
+        Validate.isTrue(isProjectAvailable(moduleName),
                 "Filter modification prohibited at this time");
-        Assert.notNull(filter, "Filter required");
+        Validate.notNull(filter, "Filter required");
         final Pom pom = getPomFromModuleName(moduleName);
-        Assert.notNull(pom,
+        Validate.notNull(pom,
                 "The pom is not available, so filter removal cannot be performed");
         if (filter == null || !pom.isFilterRegistered(filter)) {
             return;
@@ -856,19 +856,19 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 
     public void removePluginRepository(final String moduleName,
             final Repository repository) {
-        Assert.isTrue(isProjectAvailable(moduleName),
+        Validate.isTrue(isProjectAvailable(moduleName),
                 "Plugin repository modification prohibited at this time");
-        Assert.notNull(repository, "Repository required");
+        Validate.notNull(repository, "Repository required");
         removeRepository(moduleName, repository,
                 "/project/pluginRepositories/pluginRepository");
     }
 
     public void removeProperty(final String moduleName, final Property property) {
-        Assert.isTrue(isProjectAvailable(moduleName),
+        Validate.isTrue(isProjectAvailable(moduleName),
                 "Property modification prohibited at this time");
-        Assert.notNull(property, "Property to remove required");
+        Validate.notNull(property, "Property to remove required");
         final Pom pom = getPomFromModuleName(moduleName);
-        Assert.notNull(pom,
+        Validate.notNull(pom,
                 "The pom is not available, so property removal cannot be performed");
         if (!pom.isPropertyRegistered(property)) {
             return;
@@ -905,11 +905,11 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 
     private void removeRepository(final String moduleName,
             final Repository repository, final String path) {
-        Assert.isTrue(isProjectAvailable(moduleName),
+        Validate.isTrue(isProjectAvailable(moduleName),
                 "Repository modification prohibited at this time");
-        Assert.notNull(repository, "Repository required");
+        Validate.notNull(repository, "Repository required");
         final Pom pom = getPomFromModuleName(moduleName);
-        Assert.notNull(pom,
+        Validate.notNull(pom,
                 "The pom is not available, so repository removal cannot be performed");
         if ("pluginRepository".equals(path)) {
             if (!pom.isPluginRepositoryRegistered(repository)) {
@@ -942,11 +942,11 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
     }
 
     public void removeResource(final String moduleName, final Resource resource) {
-        Assert.isTrue(isProjectAvailable(moduleName),
+        Validate.isTrue(isProjectAvailable(moduleName),
                 "Resource modification prohibited at this time");
-        Assert.notNull(resource, "Resource required");
+        Validate.notNull(resource, "Resource required");
         final Pom pom = getPomFromModuleName(moduleName);
-        Assert.notNull(pom,
+        Validate.notNull(pom,
                 "The pom is not available, so resource removal cannot be performed");
         if (!pom.isResourceRegistered(resource)) {
             return;
@@ -1002,9 +1002,9 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 
     public void updateBuildPlugin(final String moduleName, final Plugin plugin) {
         final Pom pom = getPomFromModuleName(moduleName);
-        Assert.notNull(pom,
+        Validate.notNull(pom,
                 "The pom is not available, so plugins cannot be modified at this time");
-        Assert.notNull(plugin, "Plugin required");
+        Validate.notNull(plugin, "Plugin required");
         for (final Plugin existingPlugin : pom.getBuildPlugins()) {
             if (existingPlugin.equals(plugin)) {
                 // Already exists, so just quit
@@ -1021,11 +1021,11 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 
     public void updateDependencyScope(final String moduleName,
             final Dependency dependency, final DependencyScope dependencyScope) {
-        Assert.isTrue(isProjectAvailable(moduleName),
+        Validate.isTrue(isProjectAvailable(moduleName),
                 "Dependency modification prohibited at this time");
-        Assert.notNull(dependency, "Dependency to update required");
+        Validate.notNull(dependency, "Dependency to update required");
         final Pom pom = getPomFromModuleName(moduleName);
-        Assert.notNull(pom,
+        Validate.notNull(pom,
                 "The pom is not available, so updating a dependency cannot be performed");
         if (!pom.isDependencyRegistered(dependency)) {
             return;
@@ -1085,9 +1085,9 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 
     public void updateProjectType(final String moduleName,
             final ProjectType projectType) {
-        Assert.notNull(projectType, "Project type required");
+        Validate.notNull(projectType, "Project type required");
         final Pom pom = getPomFromModuleName(moduleName);
-        Assert.notNull(pom,
+        Validate.notNull(pom,
                 "The pom is not available, so the project type cannot be changed");
 
         final Document document = XmlUtils.readXml(fileManager

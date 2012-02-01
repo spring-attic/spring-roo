@@ -1,13 +1,10 @@
 package org.springframework.roo.classpath.converters;
 
-import static org.springframework.roo.support.util.StringUtils.isBlank;
-import static org.springframework.roo.support.util.StringUtils.removePrefix;
-import static org.springframework.roo.support.util.StringUtils.removeSuffix;
-
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -45,7 +42,7 @@ public class JavaPackageConverter implements Converter<JavaPackage> {
 
     public JavaPackage convertFromText(final String value,
             final Class<?> requiredType, final String optionContext) {
-        if (isBlank(value)) {
+        if (StringUtils.isBlank(value)) {
             return null;
         }
         final JavaPackage result = new JavaPackage(
@@ -57,7 +54,8 @@ public class JavaPackageConverter implements Converter<JavaPackage> {
     }
 
     private String convertToFullyQualifiedPackageName(final String text) {
-        final String normalisedText = removeSuffix(text, ".").toLowerCase();
+        final String normalisedText = StringUtils.removeEnd(text, ".")
+                .toLowerCase();
         if (normalisedText.startsWith(TOP_LEVEL_PACKAGE_SYMBOL)) {
             return replaceTopLevelPackageSymbol(normalisedText);
         }
@@ -108,9 +106,10 @@ public class JavaPackageConverter implements Converter<JavaPackage> {
         if (TOP_LEVEL_PACKAGE_SYMBOL.equals(text)) {
             return topLevelPackage;
         }
-        final String textWithoutSymbol = removePrefix(text,
+        final String textWithoutSymbol = StringUtils.removeStart(text,
                 TOP_LEVEL_PACKAGE_SYMBOL);
-        return topLevelPackage + "." + removePrefix(textWithoutSymbol, ".");
+        return topLevelPackage + "."
+                + StringUtils.removeStart(textWithoutSymbol, ".");
     }
 
     public boolean supports(final Class<?> requiredType,

@@ -1,5 +1,6 @@
 package org.springframework.roo.classpath;
 
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -12,7 +13,6 @@ import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.ProjectOperations;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Implementation of {@link TypeManagementService}.
@@ -32,19 +32,20 @@ public class TypeManagementServiceImpl implements TypeManagementService {
 
     public void addEnumConstant(final String physicalTypeIdentifier,
             final JavaSymbolName constantName) {
-        Assert.hasText(physicalTypeIdentifier, "Type identifier not provided");
-        Assert.notNull(constantName, "Constant name required");
+        Validate.notBlank(physicalTypeIdentifier,
+                "Type identifier not provided");
+        Validate.notNull(constantName, "Constant name required");
 
         // Obtain the physical type and itd mutable details
         final PhysicalTypeMetadata ptm = (PhysicalTypeMetadata) metadataService
                 .get(physicalTypeIdentifier);
-        Assert.notNull(
+        Validate.notNull(
                 ptm,
                 "Java source code unavailable for type "
                         + PhysicalTypeIdentifier
                                 .getFriendlyName(physicalTypeIdentifier));
         final PhysicalTypeDetails ptd = ptm.getMemberHoldingTypeDetails();
-        Assert.notNull(
+        Validate.notNull(
                 ptd,
                 "Java source code details unavailable for type "
                         + PhysicalTypeIdentifier
@@ -53,7 +54,7 @@ public class TypeManagementServiceImpl implements TypeManagementService {
                 (ClassOrInterfaceTypeDetails) ptd);
 
         // Ensure it's an enum
-        Assert.isTrue(
+        Validate.isTrue(
                 cidBuilder.getPhysicalTypeCategory() == PhysicalTypeCategory.ENUMERATION,
                 PhysicalTypeIdentifier.getFriendlyName(physicalTypeIdentifier)
                         + " is not an enum");
@@ -63,18 +64,18 @@ public class TypeManagementServiceImpl implements TypeManagementService {
     }
 
     public void addField(final FieldMetadata field) {
-        Assert.notNull(field, "Field metadata not provided");
+        Validate.notNull(field, "Field metadata not provided");
 
         // Obtain the physical type and ITD mutable details
         final PhysicalTypeMetadata ptm = (PhysicalTypeMetadata) metadataService
                 .get(field.getDeclaredByMetadataId());
-        Assert.notNull(
+        Validate.notNull(
                 ptm,
                 "Java source code unavailable for type "
                         + PhysicalTypeIdentifier.getFriendlyName(field
                                 .getDeclaredByMetadataId()));
         final PhysicalTypeDetails ptd = ptm.getMemberHoldingTypeDetails();
-        Assert.notNull(
+        Validate.notNull(
                 ptd,
                 "Java source code details unavailable for type "
                         + PhysicalTypeIdentifier.getFriendlyName(field

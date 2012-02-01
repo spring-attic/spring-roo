@@ -5,8 +5,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.file.monitor.event.FileOperation;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Represents a request to monitor a particular file system location.
@@ -74,8 +74,8 @@ public abstract class MonitoringRequest {
      */
     protected MonitoringRequest(final File resource,
             final Collection<FileOperation> notifyOn) {
-        Assert.notNull(resource, "Resource to monitor is required");
-        Assert.notEmpty(notifyOn,
+        Validate.notNull(resource, "Resource to monitor is required");
+        Validate.notEmpty(notifyOn,
                 "At least one FileOperation to monitor must be specified");
         this.notifyOn = new HashSet<FileOperation>(notifyOn);
         this.resource = resource;

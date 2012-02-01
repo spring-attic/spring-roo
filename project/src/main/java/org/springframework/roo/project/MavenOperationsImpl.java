@@ -8,6 +8,8 @@ import java.io.InputStreamReader;
 import java.util.Collections;
 import java.util.logging.Logger;
 
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -17,10 +19,8 @@ import org.springframework.roo.process.manager.ProcessManager;
 import org.springframework.roo.project.packaging.PackagingProvider;
 import org.springframework.roo.project.packaging.PackagingProviderRegistry;
 import org.springframework.roo.support.logging.HandlerUtils;
-import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.DomUtils;
 import org.springframework.roo.support.util.IOUtils;
-import org.springframework.roo.support.util.ObjectUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -105,7 +105,7 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements
             final GAV parentPom, final String moduleName,
             final PackagingProvider selectedPackagingProvider,
             final Integer majorJavaVersion) {
-        Assert.isTrue(isCreateModuleAvailable(),
+        Validate.isTrue(isCreateModuleAvailable(),
                 "Cannot create modules at this time");
         final PackagingProvider packagingProvider = getPackagingProvider(selectedPackagingProvider);
         final String pathToNewPom = packagingProvider.createArtifacts(
@@ -132,7 +132,7 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements
             final String projectName, final Integer majorJavaVersion,
             final GAV parentPom,
             final PackagingProvider selectedPackagingProvider) {
-        Assert.isTrue(isCreateProjectAvailable(),
+        Validate.isTrue(isCreateProjectAvailable(),
                 "Project creation is unavailable at this time");
         final PackagingProvider packagingProvider = getPackagingProvider(selectedPackagingProvider);
         packagingProvider.createArtifacts(topLevelPackage, projectName,
@@ -141,7 +141,7 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements
 
     public void executeMvnCommand(final String extra) throws IOException {
         final File root = new File(getProjectRoot());
-        Assert.isTrue(root.isDirectory() && root.exists(),
+        Validate.isTrue(root.isDirectory() && root.exists(),
                 "Project root does not currently exist as a directory ('"
                         + root.getCanonicalPath() + "')");
 

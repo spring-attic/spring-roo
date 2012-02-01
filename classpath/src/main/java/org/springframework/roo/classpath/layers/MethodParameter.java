@@ -3,9 +3,9 @@ package org.springframework.roo.classpath.layers;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.Pair;
 
 /**
@@ -42,8 +42,8 @@ public class MethodParameter extends Pair<JavaType, JavaSymbolName> {
      */
     public MethodParameter(final JavaType type, final JavaSymbolName name) {
         super(type, name);
-        Assert.notNull(type, "Parameter type is required");
-        Assert.notNull(name, "Parameter name is required");
+        Validate.notNull(type, "Parameter type is required");
+        Validate.notNull(name, "Parameter name is required");
     }
 
     /**

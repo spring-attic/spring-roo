@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
@@ -15,7 +16,6 @@ import org.springframework.roo.model.CustomData;
 import org.springframework.roo.model.CustomDataAccessor;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.support.style.ToStringCreator;
-import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.CollectionUtils;
 
 /**
@@ -87,8 +87,8 @@ public class DefaultItdTypeDetails extends AbstractMemberHoldingTypeDetails
             final Collection<ClassOrInterfaceTypeDetails> innerTypes) {
 
         super(customData, declaredByMetadataId, modifier, typeAnnotations);
-        Assert.notNull(aspect, "Aspect required");
-        Assert.notNull(governor,
+        Validate.notNull(aspect, "Aspect required");
+        Validate.notNull(governor,
                 "Governor (to receive the introductions) required");
 
         this.aspect = aspect;

@@ -2,8 +2,8 @@ package org.springframework.roo.project;
 
 import java.io.File;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.support.style.ToStringCreator;
-import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileUtils;
 
 /**
@@ -28,8 +28,8 @@ public class PhysicalPath {
      * @param location the physical location of this path (required)
      */
     public PhysicalPath(final LogicalPath logicalPath, final File location) {
-        Assert.notNull(logicalPath, "Module path required");
-        Assert.notNull(location, "Location required");
+        Validate.notNull(logicalPath, "Module path required");
+        Validate.notNull(location, "Location required");
         canonicalPath = FileUtils.getCanonicalPath(location);
         this.logicalPath = logicalPath;
         this.location = location;

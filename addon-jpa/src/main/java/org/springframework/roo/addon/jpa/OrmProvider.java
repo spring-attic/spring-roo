@@ -1,7 +1,7 @@
 package org.springframework.roo.addon.jpa;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.support.style.ToStringCreator;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * ORM providers known to the JPA add-on.
@@ -25,7 +25,7 @@ public enum OrmProvider {
      * @param adapter (required)
      */
     private OrmProvider(final String adapter) {
-        Assert.hasText(adapter, "Adapter is required");
+        Validate.notBlank(adapter, "Adapter is required");
         this.adapter = adapter;
     }
 

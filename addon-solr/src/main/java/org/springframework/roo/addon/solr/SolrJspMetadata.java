@@ -1,5 +1,6 @@
 package org.springframework.roo.addon.solr;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.metadata.AbstractMetadataItem;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
@@ -7,7 +8,6 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.support.style.ToStringCreator;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Metadata built from {@link SolrWebSearchMetadata}. A single
@@ -57,9 +57,9 @@ public class SolrJspMetadata extends AbstractMetadataItem {
     public SolrJspMetadata(final String identifier,
             final SolrWebSearchMetadata solrWebSearchMetadata) {
         super(identifier);
-        Assert.isTrue(isValid(identifier), "Metadata identification string '"
+        Validate.isTrue(isValid(identifier), "Metadata identification string '"
                 + identifier + "' does not appear to be a valid");
-        Assert.notNull(solrWebSearchMetadata,
+        Validate.notNull(solrWebSearchMetadata,
                 "Solr web search metadata required");
         this.solrWebSearchMetadata = solrWebSearchMetadata;
     }

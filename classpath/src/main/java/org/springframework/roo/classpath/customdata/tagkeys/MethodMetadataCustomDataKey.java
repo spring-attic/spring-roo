@@ -1,7 +1,7 @@
 package org.springframework.roo.classpath.customdata.tagkeys;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.classpath.details.MethodMetadata;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * {@link MethodMetadata}-specific implementation of
@@ -21,7 +21,7 @@ public class MethodMetadataCustomDataKey extends
      * @param tag
      */
     public MethodMetadataCustomDataKey(final String tag) {
-        Assert.hasText(tag, "Invalid tag '" + tag + "'");
+        Validate.notBlank(tag, "Invalid tag '" + tag + "'");
         this.tag = tag;
     }
 

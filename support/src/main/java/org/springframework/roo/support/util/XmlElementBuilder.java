@@ -1,5 +1,6 @@
 package org.springframework.roo.support.util;
 
+import org.apache.commons.lang3.Validate;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -21,8 +22,8 @@ public class XmlElementBuilder {
      * @param document The parent document (required)
      */
     public XmlElementBuilder(final String name, final Document document) {
-        Assert.hasText(name, "Element name required");
-        Assert.notNull(document, "Owner document required");
+        Validate.notBlank(name, "Element name required");
+        Validate.notNull(document, "Owner document required");
         element = document.createElement(name);
     }
 
@@ -34,8 +35,8 @@ public class XmlElementBuilder {
      * @return the current XmlElementBuilder
      */
     public XmlElementBuilder addAttribute(final String qName, final String value) {
-        Assert.hasText(qName, "Attribute qName required");
-        Assert.notNull(value, "Attribute value required");
+        Validate.notBlank(qName, "Attribute qName required");
+        Validate.notNull(value, "Attribute value required");
         element.setAttribute(qName, value);
         return this;
     }
@@ -47,7 +48,7 @@ public class XmlElementBuilder {
      * @return The builder for the current element
      */
     public XmlElementBuilder addChild(final Node node) {
-        Assert.notNull(node, "Node required");
+        Validate.notNull(node, "Node required");
         element.appendChild(node);
         return this;
     }
@@ -69,7 +70,7 @@ public class XmlElementBuilder {
      * @return The builder for the current element
      */
     public XmlElementBuilder setText(final String text) {
-        Assert.hasText(text, "Text content required");
+        Validate.notBlank(text, "Text content required");
         element.setTextContent(text);
         return this;
     }

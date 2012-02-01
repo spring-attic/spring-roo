@@ -15,6 +15,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -36,10 +38,8 @@ import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.logging.HandlerUtils;
-import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.DomUtils;
 import org.springframework.roo.support.util.PairList;
-import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
@@ -81,7 +81,7 @@ public class MailOperationsImpl implements MailOperations {
 
         final Map<String, String> props = new HashMap<String, String>();
 
-        if (StringUtils.hasText(from) || StringUtils.hasText(subject)) {
+        if (StringUtils.isNotBlank(from) || StringUtils.isNotBlank(subject)) {
             Element smmBean = getSimpleMailMessageBean(root);
             if (smmBean == null) {
                 smmBean = document.createElement("bean");
@@ -90,7 +90,7 @@ public class MailOperationsImpl implements MailOperations {
                 smmBean.setAttribute("id", "templateMessage");
             }
 
-            if (StringUtils.hasText(from)) {
+            if (StringUtils.isNotBlank(from)) {
                 Element smmProperty = XmlUtils.findFirstElement(
                         "//property[@name='from']", smmBean);
                 if (smmProperty != null) {
@@ -103,7 +103,7 @@ public class MailOperationsImpl implements MailOperations {
                 props.put("email.from", from);
             }
 
-            if (StringUtils.hasText(subject)) {
+            if (StringUtils.isNotBlank(subject)) {
                 Element smmProperty = XmlUtils.findFirstElement(
                         "//property[@name='subject']", smmBean);
                 if (smmProperty != null) {
@@ -268,8 +268,8 @@ public class MailOperationsImpl implements MailOperations {
 
     public void injectEmailTemplate(final JavaType targetType,
             final JavaSymbolName fieldName, final boolean async) {
-        Assert.notNull(targetType, "Java type required");
-        Assert.notNull(fieldName, "Field name required");
+        Validate.notNull(targetType, "Java type required");
+        Validate.notNull(fieldName, "Field name required");
 
         final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
         annotations.add(new AnnotationMetadataBuilder(AUTOWIRED));
@@ -302,7 +302,7 @@ public class MailOperationsImpl implements MailOperations {
     public void installEmail(final String hostServer,
             final MailProtocol protocol, final String port,
             final String encoding, final String username, final String password) {
-        Assert.hasText(hostServer, "Host server name required");
+        Validate.notBlank(hostServer, "Host server name required");
 
         final String contextPath = getApplicationContextPath();
         final Document document = XmlUtils.readXml(fileManager
@@ -340,7 +340,7 @@ public class MailOperationsImpl implements MailOperations {
             props.put("email.protocol", protocol.getProtocol());
         }
 
-        if (StringUtils.hasText(port)) {
+        if (StringUtils.isNotBlank(port)) {
             final Element pElement = document.createElement("property");
             pElement.setAttribute("name", "port");
             pElement.setAttribute("value", "${email.port}");
@@ -348,7 +348,7 @@ public class MailOperationsImpl implements MailOperations {
             props.put("email.port", port);
         }
 
-        if (StringUtils.hasText(encoding)) {
+        if (StringUtils.isNotBlank(encoding)) {
             final Element pElement = document.createElement("property");
             pElement.setAttribute("name", "defaultEncoding");
             pElement.setAttribute("value", "${email.encoding}");
@@ -356,7 +356,7 @@ public class MailOperationsImpl implements MailOperations {
             props.put("email.encoding", encoding);
         }
 
-        if (StringUtils.hasText(username)) {
+        if (StringUtils.isNotBlank(username)) {
             final Element pElement = document.createElement("property");
             pElement.setAttribute("name", "username");
             pElement.setAttribute("value", "${email.username}");
@@ -364,7 +364,7 @@ public class MailOperationsImpl implements MailOperations {
             props.put("email.username", username);
         }
 
-        if (StringUtils.hasText(password)) {
+        if (StringUtils.isNotBlank(password)) {
             final Element pElement = document.createElement("property");
             pElement.setAttribute("name", "password");
             pElement.setAttribute("value", "${email.password}");

@@ -20,6 +20,7 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -49,7 +50,6 @@ import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Implementation of {@link IntegrationTestMetadataProvider}.
@@ -142,18 +142,18 @@ public class IntegrationTestMetadataProviderImpl extends
                         typeLocationService.getTypePath(entity));
         final PhysicalTypeMetadata ptm = (PhysicalTypeMetadata) metadataService
                 .get(physicalTypeIdentifier);
-        Assert.notNull(
+        Validate.notNull(
                 ptm,
                 "Java source code unavailable for type "
                         + PhysicalTypeIdentifier
                                 .getFriendlyName(physicalTypeIdentifier));
         final PhysicalTypeDetails ptd = ptm.getMemberHoldingTypeDetails();
-        Assert.notNull(
+        Validate.notNull(
                 ptd,
                 "Java source code details unavailable for type "
                         + PhysicalTypeIdentifier
                                 .getFriendlyName(physicalTypeIdentifier));
-        Assert.isInstanceOf(
+        Validate.isInstanceOf(
                 ClassOrInterfaceTypeDetails.class,
                 ptd,
                 "Java source code is immutable for type "

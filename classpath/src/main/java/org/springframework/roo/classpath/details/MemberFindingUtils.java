@@ -3,6 +3,7 @@ package org.springframework.roo.classpath.details;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
@@ -11,7 +12,6 @@ import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.CustomData;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Utility methods for finding members in {@link MemberHoldingTypeDetails}
@@ -299,7 +299,7 @@ public final class MemberFindingUtils {
      */
     public static List<FieldMetadata> getFieldsWithTag(
             final MemberDetails memberDetails, final Object tagKey) {
-        Assert.notNull(tagKey, "Custom data key required");
+        Validate.notNull(tagKey, "Custom data key required");
         final List<FieldMetadata> fields = new ArrayList<FieldMetadata>();
         if (memberDetails != null) {
             for (final MemberHoldingTypeDetails memberHoldingTypeDetails : memberDetails
@@ -353,7 +353,7 @@ public final class MemberFindingUtils {
      */
     public static List<MemberHoldingTypeDetails> getMemberHoldingTypeDetailsWithTag(
             final MemberDetails memberDetails, final Object tagKey) {
-        Assert.notNull(tagKey, "Custom data tag required");
+        Validate.notNull(tagKey, "Custom data tag required");
         final List<MemberHoldingTypeDetails> result = new ArrayList<MemberHoldingTypeDetails>();
         if (memberDetails != null) {
             for (final MemberHoldingTypeDetails memberHoldingTypeDetails : memberDetails
@@ -438,7 +438,7 @@ public final class MemberFindingUtils {
      */
     public static MethodMetadata getMethod(final MemberDetails memberDetails,
             final String methodName) {
-        Assert.notNull(methodName, "Method name required");
+        Validate.notNull(methodName, "Method name required");
         return memberDetails.getMethod(new JavaSymbolName(methodName));
     }
 
@@ -548,7 +548,7 @@ public final class MemberFindingUtils {
      */
     public static MemberHoldingTypeDetails getMostConcreteMemberHoldingTypeDetailsWithTag(
             final MemberDetails memberDetails, final Object tag) {
-        Assert.notNull(tag, "Custom data tag required");
+        Validate.notNull(tag, "Custom data tag required");
         final List<MemberHoldingTypeDetails> memberHoldingTypeDetailsList = getMemberHoldingTypeDetailsWithTag(
                 memberDetails, tag);
         if (memberHoldingTypeDetailsList.isEmpty()) {

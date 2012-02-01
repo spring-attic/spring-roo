@@ -17,6 +17,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -30,7 +31,6 @@ import org.springframework.roo.shell.jline.JLineShell;
 import org.springframework.roo.support.osgi.OSGiUtils;
 import org.springframework.roo.support.util.IOUtils;
 import org.springframework.roo.support.util.OsUtils;
-import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.url.stream.UrlInputStreamService;
 
 /**
@@ -43,11 +43,14 @@ import org.springframework.roo.url.stream.UrlInputStreamService;
 @Service
 public class JLineShellComponent extends JLineShell {
 
-    private ComponentContext context;
+    private static final String LINE_SEPARATOR = System
+            .getProperty("line.separator");
     @Reference private ExecutionStrategy executionStrategy;
     @Reference private Parser parser;
     // @Reference private Tailor tailor;
     @Reference private UrlInputStreamService urlInputStreamService;
+
+    private ComponentContext context;
 
     protected void activate(final ComponentContext context) {
         this.context = context;
@@ -98,7 +101,7 @@ public class JLineShellComponent extends JLineShell {
                 .get("screen_name");
         String tweet = (String) jsonObject.get("text");
         // We only want one line
-        tweet = tweet.replace(StringUtils.LINE_SEPARATOR, " ");
+        tweet = tweet.replace(LINE_SEPARATOR, " ");
         final List<String> words = Arrays.asList(tweet.split(" "));
         final StringBuilder sb = new StringBuilder();
         // Add in Roo's twitter account to give context to the notification
@@ -172,7 +175,7 @@ public class JLineShellComponent extends JLineShell {
         try {
             // Send data
             String urlStr = endpoint;
-            if (StringUtils.hasText(requestParameters)) {
+            if (StringUtils.isNotBlank(requestParameters)) {
                 urlStr += "?" + requestParameters;
             }
             final URL url = new URL(urlStr);

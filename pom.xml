@@ -36,7 +36,7 @@
         <module>classpath</module>
         <module>classpath-javaparser</module>
         <module>addon-tostring</module>
-		<module>addon-equals</module>
+        <module>addon-equals</module>
         <module>addon-javabean</module>
         <module>addon-plural</module>
         <module>addon-propfiles</module>
@@ -70,9 +70,9 @@
         <module>addon-cloud-foundry</module>
         <module>addon-layers-service</module>
         <module>addon-layers-repository-jpa</module>
-		<module>addon-layers-repository-mongo</module>
-		<module>addon-oscommands</module>
-		<module>addon-tailor</module>		
+        <module>addon-layers-repository-mongo</module>
+        <module>addon-oscommands</module>
+        <module>addon-tailor</module>
         <module>annotations</module>
     </modules>
     <organization>
@@ -106,7 +106,7 @@
             <url>http://spring-roo-repository.springsource.org/snapshot</url>
             <snapshots>
                 <updatePolicy>never</updatePolicy>
-				<enabled>true</enabled>
+                <enabled>true</enabled>
             </snapshots>
         </repository>
     </repositories>
@@ -160,6 +160,10 @@
             <groupId>org.powermock</groupId>
             <artifactId>powermock-api-mockito</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+        </dependency>
     </dependencies>
     <dependencyManagement>
         <dependencies>
@@ -187,13 +191,13 @@
                 <artifactId>powermock-module-junit4</artifactId>
                 <version>${powermock.version}</version>
                 <scope>test</scope>
-           </dependency>
-           <dependency>
+            </dependency>
+            <dependency>
                 <groupId>org.powermock</groupId>
                 <artifactId>powermock-api-mockito</artifactId>
                 <version>${powermock.version}</version>
                 <scope>test</scope>
-           </dependency>
+            </dependency>
             <!-- OSGi APIs -->
             <dependency>
                 <groupId>org.osgi</groupId>
@@ -339,6 +343,11 @@
                 <groupId>org.slf4j</groupId>
                 <artifactId>jcl-over-slf4j</artifactId>
                 <version>1.6.4</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-lang3</artifactId>
+                <version>3.1</version>
             </dependency>
             <dependency>
                 <groupId>org.mortbay.jetty</groupId>
@@ -627,12 +636,12 @@
                 <artifactId>org.springframework.roo.addon.tostring</artifactId>
                 <version>${project.version}</version>
             </dependency>
-             <dependency>
+            <dependency>
                 <groupId>org.springframework.roo</groupId>
                 <artifactId>org.springframework.roo.addon.equals</artifactId>
                 <version>${project.version}</version>
             </dependency>
-           <dependency>
+            <dependency>
                 <groupId>org.springframework.roo</groupId>
                 <artifactId>org.springframework.roo.addon.web.flow</artifactId>
                 <version>${project.version}</version>
@@ -657,10 +666,10 @@
                 <artifactId>org.springframework.roo.addon.web.mvc.selenium</artifactId>
                 <version>${project.version}</version>
             </dependency>
-            <dependency> 
-                <groupId>org.springframework.roo</groupId> 
-                <artifactId>org.springframework.roo.addon.jsf</artifactId> 
-                <version>${project.version}</version> 
+            <dependency>
+                <groupId>org.springframework.roo</groupId>
+                <artifactId>org.springframework.roo.addon.jsf</artifactId>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework.roo</groupId>

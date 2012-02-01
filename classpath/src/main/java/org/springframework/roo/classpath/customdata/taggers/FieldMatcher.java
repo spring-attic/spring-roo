@@ -32,12 +32,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.model.CustomDataKey;
 import org.springframework.roo.model.JavaSymbolName;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * A {@link Matcher} for {@link FieldMetadata}-that matches on the presence of
@@ -99,7 +99,7 @@ public class FieldMatcher implements Matcher<FieldMetadata> {
      */
     public FieldMatcher(final CustomDataKey<FieldMetadata> customDataKey,
             final Collection<AnnotationMetadata> annotations) {
-        Assert.notNull(customDataKey, "Custom data key is required");
+        Validate.notNull(customDataKey, "Custom data key is required");
         this.annotations = new ArrayList<AnnotationMetadata>();
         this.customDataKey = customDataKey;
         if (annotations != null) {

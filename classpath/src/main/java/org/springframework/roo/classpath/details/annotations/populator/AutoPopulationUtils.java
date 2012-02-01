@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.ArrayAttributeValue;
@@ -20,7 +21,6 @@ import org.springframework.roo.classpath.details.annotations.LongAttributeValue;
 import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Automatically populates the {@link AutoPopulate} annotated fields on a given
@@ -48,7 +48,7 @@ public abstract class AutoPopulationUtils {
      */
     public static void populate(final Object target,
             final AnnotationMetadata annotation) {
-        Assert.notNull(target, "Target required");
+        Validate.notNull(target, "Target required");
 
         if (annotation == null) {
             return;

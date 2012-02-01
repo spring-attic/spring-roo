@@ -1,7 +1,7 @@
 package org.springframework.roo.project;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.support.style.ToStringCreator;
-import org.springframework.roo.support.util.Assert;
 import org.w3c.dom.Element;
 
 /**
@@ -22,7 +22,7 @@ public class Property implements Comparable<Property> {
      * @param element containing the property definition (required)
      */
     public Property(final Element element) {
-        Assert.notNull(element, "Element required");
+        Validate.notNull(element, "Element required");
         name = element.getNodeName();
         value = element.getTextContent();
     }
@@ -44,8 +44,8 @@ public class Property implements Comparable<Property> {
      * @param value the property value (required)
      */
     public Property(final String name, final String value) {
-        Assert.hasText(name, "Name required");
-        Assert.notNull(value, "Value required");
+        Validate.notBlank(name, "Name required");
+        Validate.notNull(value, "Value required");
         this.name = name;
         this.value = value;
     }

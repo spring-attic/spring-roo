@@ -4,11 +4,11 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.Stack;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.addon.dbre.model.DatabaseXmlUtils.IndexType;
 import org.springframework.roo.model.JavaPackage;
-import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.Pair;
-import org.springframework.roo.support.util.StringUtils;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
@@ -125,7 +125,7 @@ public class DatabaseContentHandler extends DefaultHandler {
     private Column getColumn(final Attributes attributes) {
         final String type = attributes.getValue("type");
         final String[] dataTypeAndName = StringUtils.split(type, ",");
-        Assert.notNull(
+        Validate.notNull(
                 dataTypeAndName,
                 "The 'type' attribute of the column element must contain a comma separated value pair, eg, type=\"12,varchar\"."
                         + getErrorMessage());
@@ -144,7 +144,7 @@ public class DatabaseContentHandler extends DefaultHandler {
             columnSize = Integer.parseInt(size);
         }
 
-        if (StringUtils.hasText(attributes.getValue("scale"))) {
+        if (StringUtils.isNotBlank(attributes.getValue("scale"))) {
             scale = Integer.parseInt(attributes.getValue("scale"));
         }
 
@@ -199,7 +199,7 @@ public class DatabaseContentHandler extends DefaultHandler {
         final Table table = new Table(
                 attributes.getValue(DatabaseXmlUtils.NAME), new Schema(
                         attributes.getValue("alias")));
-        if (StringUtils.hasText(attributes
+        if (StringUtils.isNotBlank(attributes
                 .getValue(DatabaseXmlUtils.DESCRIPTION))) {
             table.setDescription(DatabaseXmlUtils.DESCRIPTION);
         }
@@ -212,7 +212,7 @@ public class DatabaseContentHandler extends DefaultHandler {
             throws SAXException {
         if (qName.equals("database")) {
             stack.push(new Object());
-            if (StringUtils.hasText(attributes.getValue("package"))) {
+            if (StringUtils.isNotBlank(attributes.getValue("package"))) {
                 destinationPackage = new JavaPackage(
                         attributes.getValue("package"));
             }

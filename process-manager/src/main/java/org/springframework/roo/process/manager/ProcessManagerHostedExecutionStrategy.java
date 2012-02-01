@@ -1,5 +1,6 @@
 package org.springframework.roo.process.manager;
 
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
@@ -9,7 +10,6 @@ import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.process.manager.event.ProcessManagerStatus;
 import org.springframework.roo.shell.ExecutionStrategy;
 import org.springframework.roo.shell.ParseResult;
-import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.ReflectionUtils;
 
 /**
@@ -36,9 +36,9 @@ public class ProcessManagerHostedExecutionStrategy implements ExecutionStrategy 
 
     public Object execute(final ParseResult parseResult)
             throws RuntimeException {
-        Assert.notNull(parseResult, "Parse result required");
+        Validate.notNull(parseResult, "Parse result required");
         synchronized (mutex) {
-            Assert.isTrue(isReadyForCommands(),
+            Validate.isTrue(isReadyForCommands(),
                     "ProcessManagerHostedExecutionStrategy not yet ready for commands");
             return processManager.execute(new CommandCallback<Object>() {
                 public Object callback() {

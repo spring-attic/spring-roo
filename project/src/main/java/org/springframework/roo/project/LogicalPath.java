@@ -1,8 +1,8 @@
 package org.springframework.roo.project;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.project.maven.Pom;
-import org.springframework.roo.support.util.Assert;
-import org.springframework.roo.support.util.StringUtils;
 
 /**
  * A given {@link Path} within the context of a specific project module.
@@ -44,7 +44,7 @@ public class LogicalPath {
      *            <code>[<i>module_name</i>{@value #MODULE_PATH_SEPARATOR}]<i>path</i></code>
      */
     public static LogicalPath getInstance(final String modulePlusPath) {
-        Assert.hasText(modulePlusPath, "Module path required");
+        Validate.notBlank(modulePlusPath, "Module path required");
         final int separatorIndex = modulePlusPath
                 .indexOf(MODULE_PATH_SEPARATOR);
         if (separatorIndex == -1) {
@@ -66,7 +66,7 @@ public class LogicalPath {
      * @param path the path within the module, if any (required)
      */
     private LogicalPath(final String module, final Path path) {
-        Assert.notNull(path, "Path required");
+        Validate.notNull(path, "Path required");
         this.module = StringUtils.trimToEmpty(module);
         this.path = path;
     }
@@ -99,7 +99,7 @@ public class LogicalPath {
      */
     public String getName() {
         final StringBuilder name = new StringBuilder();
-        if (StringUtils.hasText(module)) {
+        if (StringUtils.isNotBlank(module)) {
             name.append(module).append(MODULE_PATH_SEPARATOR);
         }
         name.append(path);

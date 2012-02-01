@@ -9,6 +9,7 @@ import static org.springframework.roo.file.monitor.event.FileOperation.UPDATED;
 
 import java.io.File;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -20,7 +21,6 @@ import org.springframework.roo.file.monitor.event.FileOperation;
 import org.springframework.roo.file.undo.UndoManager;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.MetadataNotificationListener;
-import org.springframework.roo.support.util.StringUtils;
 
 @Component(immediate = true)
 @Service
@@ -49,7 +49,7 @@ public class ProjectPathMonitoringInitializer implements
         final String canonicalPath = pathResolver.getRoot(logicalPath);
         // The path can be blank if a sub-folder contains a POM that doesn't
         // belong to a module
-        if (StringUtils.hasText(canonicalPath)) {
+        if (StringUtils.isNotBlank(canonicalPath)) {
             final File directory = new File(canonicalPath);
             if (directory.isDirectory()) {
                 final MonitoringRequest request = new DirectoryMonitoringRequest(

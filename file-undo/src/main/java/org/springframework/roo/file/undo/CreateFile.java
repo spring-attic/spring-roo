@@ -4,8 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.logging.Logger;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.support.logging.HandlerUtils;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * {@link UndoableOperation} to create a file.
@@ -23,10 +23,10 @@ public class CreateFile implements UndoableOperation {
 
     public CreateFile(final UndoManager undoManager,
             final FilenameResolver filenameResolver, final File actual) {
-        Assert.notNull(undoManager, "Undo manager required");
-        Assert.notNull(actual, "Actual file required");
-        Assert.notNull(filenameResolver, "Filename resolver required");
-        Assert.isTrue(!actual.exists(), "Actual file '" + actual
+        Validate.notNull(undoManager, "Undo manager required");
+        Validate.notNull(actual, "Actual file required");
+        Validate.notNull(filenameResolver, "Filename resolver required");
+        Validate.isTrue(!actual.exists(), "Actual file '" + actual
                 + "' cannot exist");
         this.filenameResolver = filenameResolver;
         this.actual = actual;

@@ -16,6 +16,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.addon.web.mvc.controller.details.FinderMetadataDetails;
 import org.springframework.roo.addon.web.mvc.controller.details.JavaTypeMetadataDetails;
 import org.springframework.roo.addon.web.mvc.controller.details.JavaTypePersistenceMetadataDetails;
@@ -42,8 +44,6 @@ import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.support.style.ToStringCreator;
-import org.springframework.roo.support.util.Assert;
-import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Metadata for finder functionality provided via {@link RooWebScaffold}.
@@ -112,11 +112,12 @@ public class WebFinderMetadata extends
             final SortedMap<JavaType, JavaTypeMetadataDetails> specialDomainTypes,
             final Set<FinderMetadataDetails> dynamicFinderMethods) {
         super(identifier, aspectName, governorPhysicalTypeMetadata);
-        Assert.isTrue(isValid(identifier), "Metadata identification string '"
+        Validate.isTrue(isValid(identifier), "Metadata identification string '"
                 + identifier + "' does not appear to be a valid");
-        Assert.notNull(annotationValues, "Annotation values required");
-        Assert.notNull(specialDomainTypes, "Special domain type map required");
-        Assert.notNull(dynamicFinderMethods, "Dynamoic finder methods required");
+        Validate.notNull(annotationValues, "Annotation values required");
+        Validate.notNull(specialDomainTypes, "Special domain type map required");
+        Validate.notNull(dynamicFinderMethods,
+                "Dynamoic finder methods required");
 
         if (!isValid()) {
             return;
@@ -133,7 +134,7 @@ public class WebFinderMetadata extends
         }
 
         javaTypeMetadataHolder = specialDomainTypes.get(formBackingType);
-        Assert.notNull(javaTypeMetadataHolder,
+        Validate.notNull(javaTypeMetadataHolder,
                 "Metadata holder required for form backing type: "
                         + formBackingType);
 
@@ -151,7 +152,7 @@ public class WebFinderMetadata extends
 
     private MethodMetadataBuilder getFinderFormMethod(
             final FinderMetadataDetails finder) {
-        Assert.notNull(finder, "Method metadata required for finder");
+        Validate.notNull(finder, "Method metadata required for finder");
         final JavaSymbolName finderFormMethodName = new JavaSymbolName(finder
                 .getFinderMethodMetadata().getMethodName().getSymbolName()
                 + "Form");
@@ -254,7 +255,7 @@ public class WebFinderMetadata extends
 
     private MethodMetadataBuilder getFinderMethod(
             final FinderMetadataDetails finderMetadataDetails) {
-        Assert.notNull(finderMetadataDetails,
+        Validate.notNull(finderMetadataDetails,
                 "Method metadata required for finder");
         final JavaSymbolName finderMethodName = new JavaSymbolName(
                 finderMetadataDetails.getFinderMethodMetadata().getMethodName()

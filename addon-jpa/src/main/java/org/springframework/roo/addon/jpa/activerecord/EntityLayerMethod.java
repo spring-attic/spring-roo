@@ -7,12 +7,12 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.classpath.customdata.CustomDataKeys;
 import org.springframework.roo.classpath.customdata.tagkeys.MethodMetadataCustomDataKey;
 import org.springframework.roo.classpath.layers.MethodParameter;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.support.util.Assert;
-import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Methods implemented by a user project entity.
@@ -29,7 +29,7 @@ enum EntityLayerMethod {
         @Override
         public String getName(final JpaCrudAnnotationValues annotationValues,
                 final JavaType targetEntity, final String plural) {
-            if (StringUtils.hasText(annotationValues.getClearMethod())) {
+            if (StringUtils.isNotBlank(annotationValues.getClearMethod())) {
                 return annotationValues.getClearMethod();
             }
             return null;
@@ -46,7 +46,7 @@ enum EntityLayerMethod {
         @Override
         public String getName(final JpaCrudAnnotationValues annotationValues,
                 final JavaType targetEntity, final String plural) {
-            if (StringUtils.hasText(annotationValues.getCountMethod())) {
+            if (StringUtils.isNotBlank(annotationValues.getCountMethod())) {
                 return annotationValues.getCountMethod() + plural;
             }
             return null;
@@ -63,7 +63,7 @@ enum EntityLayerMethod {
         @Override
         public String getName(final JpaCrudAnnotationValues annotationValues,
                 final JavaType targetEntity, final String plural) {
-            if (StringUtils.hasText(annotationValues.getFindMethod())) {
+            if (StringUtils.isNotBlank(annotationValues.getFindMethod())) {
                 return annotationValues.getFindMethod()
                         + targetEntity.getSimpleTypeName();
             }
@@ -81,7 +81,7 @@ enum EntityLayerMethod {
         @Override
         public String getName(final JpaCrudAnnotationValues annotationValues,
                 final JavaType targetEntity, final String plural) {
-            if (StringUtils.hasText(annotationValues.getFindAllMethod())) {
+            if (StringUtils.isNotBlank(annotationValues.getFindAllMethod())) {
                 return annotationValues.getFindAllMethod() + plural;
             }
             return null;
@@ -98,7 +98,7 @@ enum EntityLayerMethod {
         @Override
         public String getName(final JpaCrudAnnotationValues annotationValues,
                 final JavaType targetEntity, final String plural) {
-            if (StringUtils.hasText(annotationValues.getFindEntriesMethod())) {
+            if (StringUtils.isNotBlank(annotationValues.getFindEntriesMethod())) {
                 return annotationValues.getFindEntriesMethod()
                         + targetEntity.getSimpleTypeName() + "Entries";
             }
@@ -117,7 +117,7 @@ enum EntityLayerMethod {
         @Override
         public String getName(final JpaCrudAnnotationValues annotationValues,
                 final JavaType targetEntity, final String plural) {
-            if (StringUtils.hasText(annotationValues.getFlushMethod())) {
+            if (StringUtils.isNotBlank(annotationValues.getFlushMethod())) {
                 return annotationValues.getFlushMethod();
             }
             return null;
@@ -134,7 +134,7 @@ enum EntityLayerMethod {
         @Override
         public String getName(final JpaCrudAnnotationValues annotationValues,
                 final JavaType targetEntity, final String plural) {
-            if (StringUtils.hasText(annotationValues.getMergeMethod())) {
+            if (StringUtils.isNotBlank(annotationValues.getMergeMethod())) {
                 return annotationValues.getMergeMethod();
             }
             return null;
@@ -151,7 +151,7 @@ enum EntityLayerMethod {
         @Override
         public String getName(final JpaCrudAnnotationValues annotationValues,
                 final JavaType targetEntity, final String plural) {
-            if (StringUtils.hasText(annotationValues.getPersistMethod())) {
+            if (StringUtils.isNotBlank(annotationValues.getPersistMethod())) {
                 return annotationValues.getPersistMethod();
             }
             return null;
@@ -168,7 +168,7 @@ enum EntityLayerMethod {
         @Override
         public String getName(final JpaCrudAnnotationValues annotationValues,
                 final JavaType targetEntity, final String plural) {
-            if (StringUtils.hasText(annotationValues.getRemoveMethod())) {
+            if (StringUtils.isNotBlank(annotationValues.getRemoveMethod())) {
                 return annotationValues.getRemoveMethod();
             }
             return null;
@@ -217,7 +217,7 @@ enum EntityLayerMethod {
      */
     private EntityLayerMethod(final MethodMetadataCustomDataKey key,
             final boolean isStatic) {
-        Assert.notNull(key, "Key is required");
+        Validate.notNull(key, "Key is required");
         id = key.name();
         this.isStatic = isStatic;
     }

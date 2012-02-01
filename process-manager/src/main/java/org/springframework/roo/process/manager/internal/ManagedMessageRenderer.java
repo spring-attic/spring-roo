@@ -3,9 +3,9 @@ package org.springframework.roo.process.manager.internal;
 import java.io.File;
 import java.util.logging.Logger;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.file.undo.FilenameResolver;
 import org.springframework.roo.support.logging.HandlerUtils;
-import org.springframework.roo.support.util.Assert;
 
 public class ManagedMessageRenderer {
 
@@ -21,8 +21,8 @@ public class ManagedMessageRenderer {
 
     public ManagedMessageRenderer(final FilenameResolver filenameResolver,
             final File file, final boolean createOperation) {
-        Assert.notNull(filenameResolver, "Filename resolver required");
-        Assert.notNull(file, "File to manage required");
+        Validate.notNull(filenameResolver, "Filename resolver required");
+        Validate.notNull(file, "File to manage required");
         this.filenameResolver = filenameResolver;
         this.file = file;
         this.createOperation = createOperation;

@@ -3,10 +3,10 @@ package org.springframework.roo.metadata.internal;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.metadata.MetadataCache;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.metadata.MetadataItem;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Basic {@link MetadataCache} that stores elements on a least recently used
@@ -27,7 +27,7 @@ public abstract class AbstractMetadataCache implements MetadataCache {
     }
 
     public void evict(final String metadataIdentificationString) {
-        Assert.isTrue(MetadataIdentificationUtils
+        Validate.isTrue(MetadataIdentificationUtils
                 .isIdentifyingInstance(metadataIdentificationString),
                 "Only metadata instances can be cached (not '"
                         + metadataIdentificationString + "')");
@@ -44,7 +44,7 @@ public abstract class AbstractMetadataCache implements MetadataCache {
 
     protected MetadataItem getFromCache(
             final String metadataIdentificationString) {
-        Assert.isTrue(MetadataIdentificationUtils
+        Validate.isTrue(MetadataIdentificationUtils
                 .isIdentifyingInstance(metadataIdentificationString),
                 "Only metadata instances can be cached (not '"
                         + metadataIdentificationString + "')");
@@ -71,7 +71,7 @@ public abstract class AbstractMetadataCache implements MetadataCache {
     }
 
     public void put(final MetadataItem metadataItem) {
-        Assert.notNull(metadataItem, "A metadata item is required");
+        Validate.notNull(metadataItem, "A metadata item is required");
         map.put(metadataItem.getId(), metadataItem);
     }
 

@@ -3,9 +3,9 @@ package org.springframework.roo.classpath.details.annotations;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.model.JavaSymbolName;
-import org.springframework.roo.support.util.Assert;
-import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Represents an array of annotation attribute values.
@@ -27,7 +27,7 @@ public class ArrayAttributeValue<Y extends AnnotationAttributeValue<?>> extends
      */
     public ArrayAttributeValue(final JavaSymbolName name, final List<Y> value) {
         super(name);
-        Assert.notNull(value, "Value required");
+        Validate.notNull(value, "Value required");
         this.value = value;
     }
 
@@ -40,7 +40,6 @@ public class ArrayAttributeValue<Y extends AnnotationAttributeValue<?>> extends
 
     @Override
     public String toString() {
-        return getName() + " -> {"
-                + StringUtils.collectionToCommaDelimitedString(value) + "}";
+        return getName() + " -> {" + StringUtils.join(value, ",") + "}";
     }
 }

@@ -8,13 +8,13 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.roo.classpath.layers.MethodParameter;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Unit test of the {@link RepositoryLayerMethod} enum.
@@ -50,7 +50,7 @@ public class RepositoryLayerMethodTest {
                 .values()) {
             final String name = method.getName();
             names.add(name);
-            assertTrue(StringUtils.hasText(name));
+            assertTrue(StringUtils.isNotBlank(name));
         }
         assertEquals(RepositoryJpaLayerMethod.values().length, names.size());
     }

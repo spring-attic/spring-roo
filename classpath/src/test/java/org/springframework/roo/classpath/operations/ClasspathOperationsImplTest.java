@@ -43,9 +43,9 @@ public class ClasspathOperationsImplTest {
         // Invoke and check
         try {
             classpathOperations.focus(mockType);
-            fail("Expected a " + IllegalArgumentException.class);
+            fail("Expected a " + NullPointerException.class);
         }
-        catch (final IllegalArgumentException expected) {
+        catch (final NullPointerException expected) {
             assertEquals("Cannot locate the type " + typeName,
                     expected.getMessage());
         }

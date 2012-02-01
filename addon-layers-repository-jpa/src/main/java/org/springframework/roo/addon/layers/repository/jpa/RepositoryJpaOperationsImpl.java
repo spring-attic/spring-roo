@@ -9,6 +9,7 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -31,7 +32,6 @@ import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.FileUtils;
 import org.springframework.roo.support.util.XmlUtils;
-import org.springframework.uaa.client.util.Assert;
 import org.w3c.dom.Element;
 
 /**
@@ -111,8 +111,8 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
 
     public void setupRepository(final JavaType interfaceType,
             final JavaType domainType) {
-        Assert.notNull(interfaceType, "Interface type required");
-        Assert.notNull(domainType, "Domain type required");
+        Validate.notNull(interfaceType, "Interface type required");
+        Validate.notNull(domainType, "Domain type required");
 
         final String interfaceIdentifier = pathResolver
                 .getFocusedCanonicalPath(Path.SRC_MAIN_JAVA, interfaceType);

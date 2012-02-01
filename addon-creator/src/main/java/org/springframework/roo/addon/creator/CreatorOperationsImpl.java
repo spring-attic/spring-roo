@@ -15,6 +15,8 @@ import java.util.Locale;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -26,11 +28,9 @@ import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
-import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.FileUtils;
 import org.springframework.roo.support.util.IOUtils;
-import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlUtils;
 import org.springframework.roo.url.stream.UrlInputStreamService;
@@ -93,7 +93,7 @@ public class CreatorOperationsImpl implements CreatorOperations {
 
     public void createAdvancedAddon(final JavaPackage topLevelPackage,
             final String description, final String projectName) {
-        Assert.notNull(topLevelPackage, "Top-level package required");
+        Validate.notNull(topLevelPackage, "Top-level package required");
 
         createProject(topLevelPackage, Type.ADVANCED, description, projectName);
 
@@ -118,9 +118,9 @@ public class CreatorOperationsImpl implements CreatorOperations {
     public void createI18nAddon(final JavaPackage topLevelPackage,
             String language, final Locale locale, final File messageBundle,
             final File flagGraphic, String description, final String projectName) {
-        Assert.notNull(topLevelPackage, "Top Level Package required");
-        Assert.notNull(locale, "Locale required");
-        Assert.notNull(messageBundle, "Message Bundle required");
+        Validate.notNull(topLevelPackage, "Top Level Package required");
+        Validate.notNull(locale, "Locale required");
+        Validate.notNull(messageBundle, "Message Bundle required");
 
         if (StringUtils.isBlank(language)) {
             language = "";
@@ -289,7 +289,7 @@ public class CreatorOperationsImpl implements CreatorOperations {
                 .setTextContent(
                         topLevelPackage.getFullyQualifiedPackageName().replace(
                                 ".", "/"));
-        if (StringUtils.hasText(description)) {
+        if (StringUtils.isNotBlank(description)) {
             XmlUtils.findRequiredElement("/project/description", root)
                     .setTextContent(description);
         }
@@ -307,7 +307,7 @@ public class CreatorOperationsImpl implements CreatorOperations {
 
     public void createSimpleAddon(final JavaPackage topLevelPackage,
             final String description, final String projectName) {
-        Assert.notNull(topLevelPackage, "Top Level Package required");
+        Validate.notNull(topLevelPackage, "Top Level Package required");
 
         createProject(topLevelPackage, Type.SIMPLE, description, projectName);
 
@@ -333,7 +333,7 @@ public class CreatorOperationsImpl implements CreatorOperations {
             final String lincenseUrl, final String docUrl,
             final String osgiImports, final String description,
             String projectName) {
-        Assert.notNull(topLevelPackage, "Top Level Package required");
+        Validate.notNull(topLevelPackage, "Top Level Package required");
         if (StringUtils.isBlank(projectName)) {
             projectName = topLevelPackage.getFullyQualifiedPackageName()
                     .replace(".", "-");
@@ -550,8 +550,9 @@ public class CreatorOperationsImpl implements CreatorOperations {
 
     private void writeTextFile(final String fullPathFromRoot,
             final String message) {
-        Assert.hasText(fullPathFromRoot, "Text file name to write is required");
-        Assert.hasText(message, "Message required");
+        Validate.notBlank(fullPathFromRoot,
+                "Text file name to write is required");
+        Validate.notBlank(message, "Message required");
         final String path = pathResolver.getFocusedIdentifier(Path.ROOT,
                 fullPathFromRoot);
         final MutableFile mutableFile = fileManager.exists(path) ? fileManager

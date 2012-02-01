@@ -3,9 +3,9 @@ package org.springframework.roo.shell.event;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.shell.ParseResult;
 import org.springframework.roo.shell.event.ShellStatus.Status;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Provides a convenience superclass for those shells wishing to publish status
@@ -22,7 +22,7 @@ public abstract class AbstractShellStatusPublisher implements
 
     public final void addShellStatusListener(
             final ShellStatusListener shellStatusListener) {
-        Assert.notNull(shellStatusListener, "Status listener required");
+        Validate.notNull(shellStatusListener, "Status listener required");
         synchronized (shellStatus) {
             shellStatusListeners.add(shellStatusListener);
         }
@@ -36,7 +36,7 @@ public abstract class AbstractShellStatusPublisher implements
 
     public final void removeShellStatusListener(
             final ShellStatusListener shellStatusListener) {
-        Assert.notNull(shellStatusListener, "Status listener required");
+        Validate.notNull(shellStatusListener, "Status listener required");
         synchronized (shellStatus) {
             shellStatusListeners.remove(shellStatusListener);
         }
@@ -48,7 +48,7 @@ public abstract class AbstractShellStatusPublisher implements
 
     protected void setShellStatus(final Status shellStatus, final String msg,
             final ParseResult parseResult) {
-        Assert.notNull(shellStatus, "Shell status required");
+        Validate.notNull(shellStatus, "Shell status required");
 
         synchronized (this.shellStatus) {
             ShellStatus st;

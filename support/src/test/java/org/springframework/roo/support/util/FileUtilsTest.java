@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 import org.springframework.roo.support.util.loader.Loader;
 
@@ -48,7 +49,7 @@ public class FileUtilsTest {
         assertEquals(File.separator, FileUtils.ensureTrailingSeparator(""));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = NullPointerException.class)
     public void testEnsureTrailingSeparatorForNullPath() {
         FileUtils.ensureTrailingSeparator(null);
     }
@@ -152,7 +153,7 @@ public class FileUtilsTest {
         assertEquals("This file is required for FileUtilsTest.", contents);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = NullPointerException.class)
     public void testGetInputStreamOfInvalidFile() throws Exception {
         FileUtils.getInputStream(Loader.class, MISSING_FILE);
     }

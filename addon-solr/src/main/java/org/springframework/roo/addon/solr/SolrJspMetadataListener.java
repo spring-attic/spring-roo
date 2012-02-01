@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
 
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -34,7 +35,6 @@ import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
-import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.FileUtils;
 import org.springframework.roo.support.util.XmlElementBuilder;
@@ -110,14 +110,14 @@ public class SolrJspMetadataListener implements MetadataProvider,
 
         webScaffoldMetadata = (WebScaffoldMetadata) metadataService
                 .get(WebScaffoldMetadata.createIdentifier(javaType, path));
-        Assert.notNull(webScaffoldMetadata, "Web scaffold metadata required");
+        Validate.notNull(webScaffoldMetadata, "Web scaffold metadata required");
 
         formbackingObject = webScaffoldMetadata.getAnnotationValues()
                 .getFormBackingObject();
         jpaActiveRecordMetadata = (JpaActiveRecordMetadata) metadataService
                 .get(JpaActiveRecordMetadata.createIdentifier(
                         formbackingObject, path));
-        Assert.notNull(
+        Validate.notNull(
                 jpaActiveRecordMetadata,
                 "Could not determine entity metadata for type: "
                         + javaType.getFullyQualifiedTypeName());
@@ -135,7 +135,7 @@ public class SolrJspMetadataListener implements MetadataProvider,
     private Document getSearchDocument(
             final WebScaffoldMetadata webScaffoldMetadata) {
         // Next install search.jspx
-        Assert.notNull(webScaffoldMetadata, "Web scaffold metadata required");
+        Validate.notNull(webScaffoldMetadata, "Web scaffold metadata required");
 
         final DocumentBuilder builder = XmlUtils.getDocumentBuilder();
         final Document document = builder.newDocument();
@@ -201,7 +201,7 @@ public class SolrJspMetadataListener implements MetadataProvider,
 
         final ClassOrInterfaceTypeDetails formbackingClassOrInterfaceDetails = typeLocationService
                 .getTypeDetails(formbackingObject);
-        Assert.notNull(formbackingClassOrInterfaceDetails,
+        Validate.notNull(formbackingClassOrInterfaceDetails,
                 "Unable to obtain physical type metadata for type "
                         + formbackingObject.getFullyQualifiedTypeName());
         final MemberDetails memberDetails = memberDetailsScanner
@@ -337,7 +337,7 @@ public class SolrJspMetadataListener implements MetadataProvider,
             String downstreamDependency) {
         if (MetadataIdentificationUtils
                 .isIdentifyingClass(downstreamDependency)) {
-            Assert.isTrue(
+            Validate.isTrue(
                     MetadataIdentificationUtils.getMetadataClass(
                             upstreamDependency).equals(
                             MetadataIdentificationUtils
@@ -368,7 +368,7 @@ public class SolrJspMetadataListener implements MetadataProvider,
 
         // We should now have an instance-specific "downstream dependency" that
         // can be processed by this class
-        Assert.isTrue(
+        Validate.isTrue(
                 MetadataIdentificationUtils.getMetadataClass(
                         downstreamDependency).equals(
                         MetadataIdentificationUtils

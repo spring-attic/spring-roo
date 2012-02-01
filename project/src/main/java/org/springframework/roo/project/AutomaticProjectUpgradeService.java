@@ -2,6 +2,7 @@ package org.springframework.roo.project;
 
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.osgi.framework.Bundle;
@@ -9,7 +10,6 @@ import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.MetadataNotificationListener;
 import org.springframework.roo.project.maven.Pom;
-import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Automatically upgrades a Spring Roo annotation JAR to the current version of

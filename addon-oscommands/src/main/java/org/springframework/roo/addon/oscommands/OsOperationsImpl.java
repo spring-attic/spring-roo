@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.logging.Logger;
 
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -14,7 +15,6 @@ import org.springframework.roo.process.manager.ActiveProcessManager;
 import org.springframework.roo.process.manager.ProcessManager;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.support.logging.HandlerUtils;
-import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.IOUtils;
 
 /**
@@ -79,7 +79,7 @@ public class OsOperationsImpl implements OsOperations {
 
     public void executeCommand(final String command) throws IOException {
         final File root = new File(getProjectRoot());
-        Assert.isTrue(root.isDirectory() && root.exists(),
+        Validate.isTrue(root.isDirectory() && root.exists(),
                 "Project root does not currently exist as a directory ('"
                         + root.getCanonicalPath() + "')");
 

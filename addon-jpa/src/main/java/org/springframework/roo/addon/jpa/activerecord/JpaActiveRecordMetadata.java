@@ -13,6 +13,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.customdata.CustomDataKeys;
@@ -32,8 +34,6 @@ import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.support.style.ToStringCreator;
-import org.springframework.roo.support.util.Assert;
-import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Metadata for a type annotated with {@link RooJpaActiveRecord}.
@@ -111,17 +111,17 @@ public class JpaActiveRecordMetadata extends
             final String entityName, final boolean isGaeEnabled) {
         super(metadataIdentificationString, aspectName,
                 governorPhysicalTypeMetadata);
-        Assert.isTrue(isValid(metadataIdentificationString),
+        Validate.isTrue(isValid(metadataIdentificationString),
                 "Metadata identification string '"
                         + metadataIdentificationString
                         + "' does not appear to be a valid");
-        Assert.notNull(crudAnnotationValues,
+        Validate.notNull(crudAnnotationValues,
                 "CRUD-related annotation values required");
-        Assert.notNull(identifierField, "Identifier required for '"
+        Validate.notNull(identifierField, "Identifier required for '"
                 + metadataIdentificationString + "'");
-        Assert.hasText(entityName, "Entity name required for '"
+        Validate.notBlank(entityName, "Entity name required for '"
                 + metadataIdentificationString + "'");
-        Assert.hasText(plural, "Plural required for '"
+        Validate.notBlank(plural, "Plural required for '"
                 + metadataIdentificationString + "'");
 
         if (!isValid()) {
@@ -170,7 +170,8 @@ public class JpaActiveRecordMetadata extends
             final boolean isPersistMethod) {
         final AnnotationMetadataBuilder transactionalBuilder = new AnnotationMetadataBuilder(
                 TRANSACTIONAL);
-        if (StringUtils.hasText(crudAnnotationValues.getTransactionManager())) {
+        if (StringUtils
+                .isNotBlank(crudAnnotationValues.getTransactionManager())) {
             transactionalBuilder.addStringAttribute("value",
                     crudAnnotationValues.getTransactionManager());
         }
@@ -218,15 +219,10 @@ public class JpaActiveRecordMetadata extends
         final MethodMetadata userMethod = getGovernorMethod(methodName,
                 parameterTypes);
         if (userMethod != null) {
-            Assert.isTrue(
-                    userMethod.getReturnType().equals(COUNT_RETURN_TYPE),
-                    "Method '"
-                            + methodName
-                            + "' on '"
-                            + destination
-                            + "' must return '"
-                            + COUNT_RETURN_TYPE
-                                    .getNameIncludingTypeParameters() + "'");
+            Validate.isTrue(userMethod.getReturnType()
+                    .equals(COUNT_RETURN_TYPE), "Method '" + methodName
+                    + "' on '" + destination + "' must return '"
+                    + COUNT_RETURN_TYPE.getNameIncludingTypeParameters() + "'");
             return userMethod;
         }
 
@@ -269,7 +265,7 @@ public class JpaActiveRecordMetadata extends
 
         // Address non-injected entity manager field
         final MethodMetadata entityManagerMethod = getEntityManagerMethod();
-        Assert.notNull(entityManagerMethod,
+        Validate.notNull(entityManagerMethod,
                 "Entity manager method should not have returned null");
 
         // Use the getEntityManager() method to acquire an entity manager (the
@@ -410,7 +406,8 @@ public class JpaActiveRecordMetadata extends
             final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
             final AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(
                     PERSISTENCE_CONTEXT);
-            if (StringUtils.hasText(crudAnnotationValues.getPersistenceUnit())) {
+            if (StringUtils.isNotBlank(crudAnnotationValues
+                    .getPersistenceUnit())) {
                 annotationBuilder.addStringAttribute("unitName",
                         crudAnnotationValues.getPersistenceUnit());
             }
@@ -460,7 +457,7 @@ public class JpaActiveRecordMetadata extends
         final MethodMetadata userMethod = getGovernorMethod(methodName,
                 parameterTypes);
         if (userMethod != null) {
-            Assert.isTrue(
+            Validate.isTrue(
                     userMethod.getReturnType().equals(returnType),
                     "Method '" + methodName + "' on '" + destination
                             + "' must return '"
@@ -512,7 +509,7 @@ public class JpaActiveRecordMetadata extends
         final MethodMetadata userMethod = getGovernorMethod(methodName,
                 parameterTypes);
         if (userMethod != null) {
-            Assert.isTrue(
+            Validate.isTrue(
                     userMethod.getReturnType().equals(returnType),
                     "Method '" + methodName + "' on '" + destination
                             + "' must return '"
@@ -642,7 +639,7 @@ public class JpaActiveRecordMetadata extends
         final MethodMetadata userMethod = getGovernorMethod(methodName,
                 parameterTypes);
         if (userMethod != null) {
-            Assert.isTrue(
+            Validate.isTrue(
                     userMethod.getReturnType().equals(returnType),
                     "Method '" + methodName + "' on '" + destination
                             + "' must return '"
@@ -747,7 +744,7 @@ public class JpaActiveRecordMetadata extends
         final MethodMetadata userMethod = getGovernorMethod(methodName,
                 parameterType);
         if (userMethod != null) {
-            Assert.isTrue(
+            Validate.isTrue(
                     userMethod.getReturnType().equals(returnType),
                     "Method '" + methodName + "' on '" + returnType
                             + "' must return '"

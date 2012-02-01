@@ -3,8 +3,8 @@ package org.springframework.roo.model;
 import java.util.Arrays;
 import java.util.List;
 
-import org.springframework.roo.support.util.Assert;
-import org.springframework.roo.support.util.StringUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 
 /**
  * Immutable representation of a Java package.
@@ -31,7 +31,7 @@ public class JavaPackage implements Comparable<JavaPackage> {
      *            mandatory)
      */
     public JavaPackage(final String fullyQualifiedPackageName) {
-        Assert.notNull(fullyQualifiedPackageName,
+        Validate.notNull(fullyQualifiedPackageName,
                 "Fully qualified package name required");
         JavaSymbolName.assertJavaNameLegal(fullyQualifiedPackageName);
         this.fullyQualifiedPackageName = fullyQualifiedPackageName;
@@ -56,8 +56,7 @@ public class JavaPackage implements Comparable<JavaPackage> {
      * @return a non-empty list
      */
     public List<String> getElements() {
-        return Arrays.asList(StringUtils.delimitedListToStringArray(
-                fullyQualifiedPackageName, "."));
+        return Arrays.asList(StringUtils.split(fullyQualifiedPackageName, "."));
     }
 
     /**
