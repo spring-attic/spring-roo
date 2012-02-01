@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.BeanInfoUtils;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
@@ -25,7 +26,6 @@ import org.springframework.roo.metadata.AbstractMetadataItem;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.JdkJavaType;
-import org.springframework.roo.support.style.ToStringCreator;
 
 /**
  * Abstract implementation of {@link ItdTypeDetailsProvidingMetadataItem}, which
@@ -361,12 +361,12 @@ public abstract class AbstractItdTypeDetailsProvidingMetadataItem extends
 
     @Override
     public String toString() {
-        final ToStringCreator tsc = new ToStringCreator(this);
-        tsc.append("identifier", getId());
-        tsc.append("valid", valid);
-        tsc.append("aspectName", aspectName);
-        tsc.append("governor", governorPhysicalTypeMetadata.getId());
-        tsc.append("itdTypeDetails", itdTypeDetails);
-        return tsc.toString();
+        final ToStringBuilder builder = new ToStringBuilder(this);
+        builder.append("identifier", getId());
+        builder.append("valid", valid);
+        builder.append("aspectName", aspectName);
+        builder.append("governor", governorPhysicalTypeMetadata.getId());
+        builder.append("itdTypeDetails", itdTypeDetails);
+        return builder.toString();
     }
 }

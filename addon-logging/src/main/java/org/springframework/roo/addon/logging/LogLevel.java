@@ -11,8 +11,8 @@ public enum LogLevel {
 
     @Override
     public String toString() {
-        final StringBuilder tsc = new StringBuilder();
-        tsc.append("logLevel " + name());
-        return tsc.toString();
+        final StringBuilder builder = new StringBuilder();
+        builder.append("logLevel " + name());
+        return builder.toString();
     }
 }

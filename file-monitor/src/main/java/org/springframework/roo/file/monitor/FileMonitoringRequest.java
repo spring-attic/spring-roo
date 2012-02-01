@@ -4,8 +4,8 @@ import java.io.File;
 import java.util.Collection;
 
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.springframework.roo.file.monitor.event.FileOperation;
-import org.springframework.roo.support.style.ToStringCreator;
 
 /**
  * A request to monitor a particular file.
@@ -23,9 +23,9 @@ public class FileMonitoringRequest extends MonitoringRequest {
 
     @Override
     public String toString() {
-        final ToStringCreator tsc = new ToStringCreator(this);
-        tsc.append("resource", getFile());
-        tsc.append("notifyOn", getNotifyOn());
-        return tsc.toString();
+        final ToStringBuilder builder = new ToStringBuilder(this);
+        builder.append("resource", getFile());
+        builder.append("notifyOn", getNotifyOn());
+        return builder.toString();
     }
 }

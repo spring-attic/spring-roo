@@ -8,9 +8,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.springframework.roo.file.monitor.NotifiableFileMonitorService;
 import org.springframework.roo.process.manager.MutableFile;
-import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.FileUtils;
 
 /**
@@ -83,8 +83,8 @@ public class DefaultMutableFile implements MutableFile {
 
     @Override
     public String toString() {
-        final ToStringCreator tsc = new ToStringCreator(this);
-        tsc.append("file", getCanonicalPath());
-        return tsc.toString();
+        final ToStringBuilder builder = new ToStringBuilder(this);
+        builder.append("file", getCanonicalPath());
+        return builder.toString();
     }
 }

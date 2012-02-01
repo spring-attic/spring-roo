@@ -23,7 +23,7 @@ public class GermanLanguage extends AbstractLanguage {
     }
 
     public String getLanguage() {
-        return "Deutsch";
+        return "Deubuilderh";
     }
 
     public Locale getLocale() {

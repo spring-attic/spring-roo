@@ -5,8 +5,8 @@ import java.util.Date;
 
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.springframework.roo.file.monitor.FileMonitorService;
-import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.FileUtils;
 
 /**
@@ -178,11 +178,11 @@ public class FileDetails implements Comparable<FileDetails> {
 
     @Override
     public String toString() {
-        final ToStringCreator tsc = new ToStringCreator(this);
-        tsc.append("file", file);
-        tsc.append("exists", file.exists());
-        tsc.append("lastModified", lastModified == null ? "Unavailable"
+        final ToStringBuilder builder = new ToStringBuilder(this);
+        builder.append("file", file);
+        builder.append("exists", file.exists());
+        builder.append("lastModified", lastModified == null ? "Unavailable"
                 : new Date(lastModified).toString());
-        return tsc.toString();
+        return builder.toString();
     }
 }

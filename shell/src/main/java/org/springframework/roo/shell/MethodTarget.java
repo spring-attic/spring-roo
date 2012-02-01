@@ -5,7 +5,7 @@ import java.lang.reflect.Method;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
-import org.springframework.roo.support.style.ToStringCreator;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 /**
  * A method that can be executed via a shell command.
@@ -101,11 +101,11 @@ public class MethodTarget {
 
     @Override
     public final String toString() {
-        final ToStringCreator tsc = new ToStringCreator(this);
-        tsc.append("target", target);
-        tsc.append("method", method);
-        tsc.append("remainingBuffer", remainingBuffer);
-        tsc.append("key", key);
-        return tsc.toString();
+        final ToStringBuilder builder = new ToStringBuilder(this);
+        builder.append("target", target);
+        builder.append("method", method);
+        builder.append("remainingBuffer", remainingBuffer);
+        builder.append("key", key);
+        return builder.toString();
     }
 }

@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
@@ -16,7 +17,6 @@ import org.apache.felix.scr.annotations.ReferenceStrategy;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.metadata.internal.AbstractMetadataCache;
-import org.springframework.roo.support.style.ToStringCreator;
 
 /**
  * Default implementation of {@link MetadataService}.
@@ -348,16 +348,16 @@ public class DefaultMetadataService extends AbstractMetadataCache implements
 
     @Override
     public final String toString() {
-        final ToStringCreator tsc = new ToStringCreator(this);
-        tsc.append("validGets", validGets);
-        tsc.append("recursiveGets", recursiveGets);
-        tsc.append("cachePuts", cachePuts);
-        tsc.append("cacheHits", cacheHits);
-        tsc.append("cacheMisses", cacheMisses);
-        tsc.append("cacheEvictions", cacheEvictions);
-        tsc.append("cacheCurrentSize", getCacheSize());
-        tsc.append("cacheMaximumSize", getMaxCapacity());
-        return tsc.toString().replaceFirst("@[0-9a-f]+", ":");
+        final ToStringBuilder builder = new ToStringBuilder(this);
+        builder.append("validGets", validGets);
+        builder.append("recursiveGets", recursiveGets);
+        builder.append("cachePuts", cachePuts);
+        builder.append("cacheHits", cacheHits);
+        builder.append("cacheMisses", cacheMisses);
+        builder.append("cacheEvictions", cacheEvictions);
+        builder.append("cacheCurrentSize", getCacheSize());
+        builder.append("cacheMaximumSize", getMaxCapacity());
+        return builder.toString().replaceFirst("@[0-9a-f]+", ":");
     }
 
     protected void unbindMetadataProvider(final MetadataProvider mp) {

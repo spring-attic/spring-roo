@@ -3,7 +3,7 @@ package org.springframework.roo.file.monitor.event;
 import java.io.File;
 
 import org.apache.commons.lang3.Validate;
-import org.springframework.roo.support.style.ToStringCreator;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 /**
  * Represents a file notification message.
@@ -63,11 +63,11 @@ public class FileEvent {
 
     @Override
     public String toString() {
-        final ToStringCreator tsc = new ToStringCreator(this);
-        tsc.append("fileDetails", fileDetails);
-        tsc.append("operation", operation);
-        tsc.append("previousName", previousName);
-        return tsc.toString();
+        final ToStringBuilder builder = new ToStringBuilder(this);
+        builder.append("fileDetails", fileDetails);
+        builder.append("operation", operation);
+        builder.append("previousName", previousName);
+        return builder.toString();
     }
 
 }

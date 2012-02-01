@@ -4,11 +4,11 @@ import java.lang.reflect.Modifier;
 import java.util.List;
 
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.model.CustomData;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.support.style.ToStringCreator;
 
 /**
  * Default implementation of {@link FieldMetadata}.
@@ -54,14 +54,14 @@ public class DefaultFieldMetadata extends
 
     @Override
     public String toString() {
-        final ToStringCreator tsc = new ToStringCreator(this);
-        tsc.append("declaredByMetadataId", getDeclaredByMetadataId());
-        tsc.append("modifier", Modifier.toString(getModifier()));
-        tsc.append("fieldType", fieldType);
-        tsc.append("fieldName", fieldName);
-        tsc.append("fieldInitializer", fieldInitializer);
-        tsc.append("annotations", getAnnotations());
-        tsc.append("customData", getCustomData());
-        return tsc.toString();
+        final ToStringBuilder builder = new ToStringBuilder(this);
+        builder.append("declaredByMetadataId", getDeclaredByMetadataId());
+        builder.append("modifier", Modifier.toString(getModifier()));
+        builder.append("fieldType", fieldType);
+        builder.append("fieldName", fieldName);
+        builder.append("fieldInitializer", fieldInitializer);
+        builder.append("annotations", getAnnotations());
+        builder.append("customData", getCustomData());
+        return builder.toString();
     }
 }

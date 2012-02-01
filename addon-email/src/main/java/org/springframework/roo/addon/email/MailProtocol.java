@@ -1,7 +1,7 @@
 package org.springframework.roo.addon.email;
 
 import org.apache.commons.lang3.Validate;
-import org.springframework.roo.support.style.ToStringCreator;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 /**
  * Protocols known to the email add-on.
@@ -59,8 +59,8 @@ public class MailProtocol implements Comparable<MailProtocol> {
 
     @Override
     public String toString() {
-        final ToStringCreator tsc = new ToStringCreator(this);
-        tsc.append("provider", protocolLabel);
-        return tsc.toString();
+        final ToStringBuilder builder = new ToStringBuilder(this);
+        builder.append("provider", protocolLabel);
+        return builder.toString();
     }
 }

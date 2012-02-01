@@ -3,12 +3,12 @@ package org.springframework.roo.classpath.details;
 import java.lang.reflect.Modifier;
 import java.util.List;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.model.CustomData;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.support.style.ToStringCreator;
 
 /**
  * Default implementation of {@link ConstructorMetadata}.
@@ -32,14 +32,14 @@ public class DefaultConstructorMetadata extends AbstractInvocableMemberMetadata
 
     @Override
     public String toString() {
-        final ToStringCreator tsc = new ToStringCreator(this);
-        tsc.append("declaredByMetadataId", getDeclaredByMetadataId());
-        tsc.append("modifier", Modifier.toString(getModifier()));
-        tsc.append("parameterTypes", getParameterTypes());
-        tsc.append("parameterNames", getParameterNames());
-        tsc.append("annotations", getAnnotations());
-        tsc.append("customData", getCustomData());
-        tsc.append("body", getBody());
-        return tsc.toString();
+        final ToStringBuilder builder = new ToStringBuilder(this);
+        builder.append("declaredByMetadataId", getDeclaredByMetadataId());
+        builder.append("modifier", Modifier.toString(getModifier()));
+        builder.append("parameterTypes", getParameterTypes());
+        builder.append("parameterNames", getParameterNames());
+        builder.append("annotations", getAnnotations());
+        builder.append("customData", getCustomData());
+        builder.append("body", getBody());
+        return builder.toString();
     }
 }

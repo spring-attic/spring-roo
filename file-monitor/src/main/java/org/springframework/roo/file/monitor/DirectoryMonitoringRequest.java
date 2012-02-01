@@ -5,8 +5,8 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.springframework.roo.file.monitor.event.FileOperation;
-import org.springframework.roo.support.style.ToStringCreator;
 
 /**
  * A request to monitor a particular directory.
@@ -57,10 +57,10 @@ public class DirectoryMonitoringRequest extends MonitoringRequest {
 
     @Override
     public String toString() {
-        final ToStringCreator tsc = new ToStringCreator(this);
-        tsc.append("directory", getFile());
-        tsc.append("watchSubtree", watchSubtree);
-        tsc.append("notifyOn", getNotifyOn());
-        return tsc.toString();
+        final ToStringBuilder builder = new ToStringBuilder(this);
+        builder.append("directory", getFile());
+        builder.append("watchSubtree", watchSubtree);
+        builder.append("notifyOn", getNotifyOn());
+        return builder.toString();
     }
 }

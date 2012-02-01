@@ -2,7 +2,7 @@ package org.springframework.roo.project;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
-import org.springframework.roo.support.style.ToStringCreator;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
@@ -160,10 +160,10 @@ public class Repository implements Comparable<Repository> {
 
     @Override
     public String toString() {
-        final ToStringCreator tsc = new ToStringCreator(this);
-        tsc.append("id", id);
-        tsc.append("name", name);
-        tsc.append("url", url);
-        return tsc.toString();
+        final ToStringBuilder builder = new ToStringBuilder(this);
+        builder.append("id", id);
+        builder.append("name", name);
+        builder.append("url", url);
+        return builder.toString();
     }
 }

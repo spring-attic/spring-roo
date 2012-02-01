@@ -7,8 +7,7 @@ import java.util.List;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
-import org.springframework.roo.support.style.DefaultValueStyler;
-import org.springframework.roo.support.style.ToStringCreator;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.springframework.roo.support.util.DomUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
@@ -182,12 +181,11 @@ public class Execution implements Comparable<Execution> {
 
     @Override
     public String toString() {
-        final ToStringCreator toStringCreator = new ToStringCreator(this,
-                new DefaultValueStyler());
-        toStringCreator.append("id", id);
-        toStringCreator.append("phase", phase);
-        toStringCreator.append("goals", goals);
-        toStringCreator.append("configuration", configuration);
-        return toStringCreator.toString();
+        final ToStringBuilder tsb = new ToStringBuilder(this);
+        tsb.append("id", id);
+        tsb.append("phase", phase);
+        tsb.append("goals", goals);
+        tsb.append("configuration", configuration);
+        return tsb.toString();
     }
 }

@@ -6,9 +6,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.support.style.ToStringCreator;
 
 /**
  * Default implementation of {@link AnnotationMetadata}.
@@ -69,9 +69,9 @@ public class DefaultAnnotationMetadata implements AnnotationMetadata {
 
     @Override
     public String toString() {
-        final ToStringCreator tsc = new ToStringCreator(this);
-        tsc.append("annotationType", annotationType);
-        tsc.append("attributes", attributes);
-        return tsc.toString();
+        final ToStringBuilder builder = new ToStringBuilder(this);
+        builder.append("annotationType", annotationType);
+        builder.append("attributes", attributes);
+        return builder.toString();
     }
 }

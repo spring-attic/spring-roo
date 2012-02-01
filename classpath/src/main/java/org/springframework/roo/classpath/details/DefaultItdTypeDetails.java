@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
@@ -15,7 +16,6 @@ import org.springframework.roo.classpath.itd.ItdSourceFileComposer;
 import org.springframework.roo.model.CustomData;
 import org.springframework.roo.model.CustomDataAccessor;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.CollectionUtils;
 
 /**
@@ -216,23 +216,23 @@ public class DefaultItdTypeDetails extends AbstractMemberHoldingTypeDetails
 
     @Override
     public String toString() {
-        final ToStringCreator tsc = new ToStringCreator(this);
-        tsc.append("declaredByMetadataId", getDeclaredByMetadataId());
-        tsc.append("modifier", getModifier());
-        tsc.append("name", governor);
-        tsc.append("aspect", aspect);
-        tsc.append("physicalTypeCategory", PHYSICAL_TYPE_CATEGORY);
-        tsc.append("privilegedAspect", privilegedAspect);
-        tsc.append("registeredImports", registeredImports);
-        tsc.append("declaredConstructors", declaredConstructors);
-        tsc.append("declaredFields", declaredFields);
-        tsc.append("declaredMethods", declaredMethods);
-        tsc.append("extendsTypes", extendsTypes);
-        tsc.append("fieldAnnotations", fieldAnnotations);
-        tsc.append("methodAnnotations", methodAnnotations);
-        tsc.append("typeAnnotations", getAnnotations());
-        tsc.append("innerTypes", innerTypes);
-        tsc.append("customData", getCustomData());
-        return tsc.toString();
+        final ToStringBuilder builder = new ToStringBuilder(this);
+        builder.append("declaredByMetadataId", getDeclaredByMetadataId());
+        builder.append("modifier", getModifier());
+        builder.append("name", governor);
+        builder.append("aspect", aspect);
+        builder.append("physicalTypeCategory", PHYSICAL_TYPE_CATEGORY);
+        builder.append("privilegedAspect", privilegedAspect);
+        builder.append("registeredImports", registeredImports);
+        builder.append("declaredConstructors", declaredConstructors);
+        builder.append("declaredFields", declaredFields);
+        builder.append("declaredMethods", declaredMethods);
+        builder.append("extendsTypes", extendsTypes);
+        builder.append("fieldAnnotations", fieldAnnotations);
+        builder.append("methodAnnotations", methodAnnotations);
+        builder.append("typeAnnotations", getAnnotations());
+        builder.append("innerTypes", innerTypes);
+        builder.append("customData", getCustomData());
+        return builder.toString();
     }
 }

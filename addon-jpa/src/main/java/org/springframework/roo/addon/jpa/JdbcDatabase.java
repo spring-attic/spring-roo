@@ -1,7 +1,7 @@
 package org.springframework.roo.addon.jpa;
 
 import org.apache.commons.lang3.Validate;
-import org.springframework.roo.support.style.ToStringCreator;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 /**
  * Provides information related to JDBC database configuration.
@@ -77,11 +77,11 @@ public enum JdbcDatabase {
 
     @Override
     public String toString() {
-        final ToStringCreator tsc = new ToStringCreator(this);
-        tsc.append("name", name());
-        tsc.append("key", key);
-        tsc.append("driver class name", driverClassName);
-        tsc.append("connection string", connectionString);
-        return tsc.toString();
+        final ToStringBuilder builder = new ToStringBuilder(this);
+        builder.append("name", name());
+        builder.append("key", key);
+        builder.append("driver class name", driverClassName);
+        builder.append("connection string", connectionString);
+        return builder.toString();
     }
 }

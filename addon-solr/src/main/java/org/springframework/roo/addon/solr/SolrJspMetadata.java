@@ -1,13 +1,13 @@
 package org.springframework.roo.addon.solr;
 
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.metadata.AbstractMetadataItem;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Path;
-import org.springframework.roo.support.style.ToStringCreator;
 
 /**
  * Metadata built from {@link SolrWebSearchMetadata}. A single
@@ -66,11 +66,11 @@ public class SolrJspMetadata extends AbstractMetadataItem {
 
     @Override
     public String toString() {
-        final ToStringCreator tsc = new ToStringCreator(this);
-        tsc.append("identifier", getId());
-        tsc.append("valid", valid);
-        tsc.append("solr jsp scaffold metadata id",
+        final ToStringBuilder builder = new ToStringBuilder(this);
+        builder.append("identifier", getId());
+        builder.append("valid", valid);
+        builder.append("solr jsp scaffold metadata id",
                 solrWebSearchMetadata.getId());
-        return tsc.toString();
+        return builder.toString();
     }
 }

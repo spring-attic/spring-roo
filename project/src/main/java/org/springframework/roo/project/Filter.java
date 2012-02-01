@@ -1,7 +1,7 @@
 package org.springframework.roo.project;
 
 import org.apache.commons.lang3.Validate;
-import org.springframework.roo.support.style.ToStringCreator;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.w3c.dom.Element;
 
 /**
@@ -65,8 +65,8 @@ public class Filter implements Comparable<Filter> {
 
     @Override
     public String toString() {
-        final ToStringCreator tsc = new ToStringCreator(this);
-        tsc.append("value", value);
-        return tsc.toString();
+        final ToStringBuilder builder = new ToStringBuilder(this);
+        builder.append("value", value);
+        return builder.toString();
     }
 }

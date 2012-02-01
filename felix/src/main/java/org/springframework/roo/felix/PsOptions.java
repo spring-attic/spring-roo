@@ -1,7 +1,7 @@
 package org.springframework.roo.felix;
 
 import org.apache.commons.lang3.Validate;
-import org.springframework.roo.support.style.ToStringCreator;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 /**
  * Provides display formats for the Felix "ps" command.
@@ -60,9 +60,9 @@ public class PsOptions implements Comparable<PsOptions> {
 
     @Override
     public String toString() {
-        final ToStringCreator tsc = new ToStringCreator(this);
-        tsc.append("key", key);
-        tsc.append("felixCode", felixCode);
-        return tsc.toString();
+        final ToStringBuilder builder = new ToStringBuilder(this);
+        builder.append("key", key);
+        builder.append("felixCode", felixCode);
+        return builder.toString();
     }
 }

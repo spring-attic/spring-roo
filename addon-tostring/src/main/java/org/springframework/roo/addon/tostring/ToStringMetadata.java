@@ -6,6 +6,7 @@ import java.lang.reflect.Modifier;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
@@ -15,7 +16,6 @@ import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.LogicalPath;
-import org.springframework.roo.support.style.ToStringCreator;
 
 /**
  * Metadata for {@link RooToString}.
@@ -141,13 +141,13 @@ public class ToStringMetadata extends
 
     @Override
     public String toString() {
-        final ToStringCreator tsc = new ToStringCreator(this);
-        tsc.append("identifier", getId());
-        tsc.append("valid", valid);
-        tsc.append("aspectName", aspectName);
-        tsc.append("destinationType", destination);
-        tsc.append("governor", governorPhysicalTypeMetadata.getId());
-        tsc.append("itdTypeDetails", itdTypeDetails);
-        return tsc.toString();
+        final ToStringBuilder builder = new ToStringBuilder(this);
+        builder.append("identifier", getId());
+        builder.append("valid", valid);
+        builder.append("aspectName", aspectName);
+        builder.append("destinationType", destination);
+        builder.append("governor", governorPhysicalTypeMetadata.getId());
+        builder.append("itdTypeDetails", itdTypeDetails);
+        return builder.toString();
     }
 }

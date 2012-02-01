@@ -1,6 +1,7 @@
 package org.springframework.roo.addon.web.mvc.jsp;
 
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.springframework.roo.addon.web.mvc.controller.scaffold.WebScaffoldAnnotationValues;
 import org.springframework.roo.addon.web.mvc.controller.scaffold.WebScaffoldMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
@@ -9,7 +10,6 @@ import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Path;
-import org.springframework.roo.support.style.ToStringCreator;
 
 /**
  * Metadata built from {@link WebScaffoldMetadata}. A single {@link JspMetadata}
@@ -75,10 +75,10 @@ public class JspMetadata extends AbstractMetadataItem {
 
     @Override
     public String toString() {
-        final ToStringCreator tsc = new ToStringCreator(this);
-        tsc.append("identifier", getId());
-        tsc.append("valid", valid);
-        tsc.append("web scaffold metadata id", webScaffoldMetadata.getId());
-        return tsc.toString();
+        final ToStringBuilder builder = new ToStringBuilder(this);
+        builder.append("identifier", getId());
+        builder.append("valid", valid);
+        builder.append("web scaffold metadata id", webScaffoldMetadata.getId());
+        return builder.toString();
     }
 }

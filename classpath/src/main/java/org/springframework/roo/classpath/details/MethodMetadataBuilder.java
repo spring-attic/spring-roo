@@ -3,11 +3,11 @@ package org.springframework.roo.classpath.details;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.support.style.ToStringCreator;
 
 /**
  * Builder for {@link MethodMetadata}.
@@ -110,7 +110,7 @@ public final class MethodMetadataBuilder extends
 
     @Override
     public String toString() {
-        return new ToStringCreator(this)
+        return new ToStringBuilder(this)
                 // Append the parts of the method that make up the Java
                 // signature
                 .append("methodName", methodName)

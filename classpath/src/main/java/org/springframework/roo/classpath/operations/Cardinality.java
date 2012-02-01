@@ -1,6 +1,6 @@
 package org.springframework.roo.classpath.operations;
 
-import org.springframework.roo.support.style.ToStringCreator;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 /**
  * Provides cardinality options for "set" relationships.
@@ -14,8 +14,8 @@ public enum Cardinality {
 
     @Override
     public String toString() {
-        final ToStringCreator tsc = new ToStringCreator(this);
-        tsc.append("name", name());
-        return tsc.toString();
+        final ToStringBuilder builder = new ToStringBuilder(this);
+        builder.append("name", name());
+        return builder.toString();
     }
 }

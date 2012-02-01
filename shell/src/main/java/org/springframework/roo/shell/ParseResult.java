@@ -5,7 +5,7 @@ import java.util.Arrays;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
-import org.springframework.roo.support.style.ToStringCreator;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 /**
  * Immutable representation of the outcome of parsing a given shell line.
@@ -95,10 +95,10 @@ public class ParseResult {
 
     @Override
     public String toString() {
-        final ToStringCreator tsc = new ToStringCreator(this);
-        tsc.append("method", method);
-        tsc.append("instance", instance);
-        tsc.append("arguments", StringUtils.join(arguments, ","));
-        return tsc.toString();
+        final ToStringBuilder builder = new ToStringBuilder(this);
+        builder.append("method", method);
+        builder.append("instance", instance);
+        builder.append("arguments", StringUtils.join(arguments, ","));
+        return builder.toString();
     }
 }

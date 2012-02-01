@@ -4,10 +4,10 @@ import java.io.File;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.springframework.roo.metadata.AbstractMetadataItem;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.project.maven.Pom;
-import org.springframework.roo.support.style.ToStringCreator;
 
 /**
  * The metadata for a module within the user's project. A simple project will
@@ -75,10 +75,10 @@ public class ProjectMetadata extends AbstractMetadataItem {
 
     @Override
     public final String toString() {
-        final ToStringCreator tsc = new ToStringCreator(this);
-        tsc.append("identifier", getId());
-        tsc.append("valid", isValid());
-        tsc.append("pom", pom);
-        return tsc.toString();
+        final ToStringBuilder builder = new ToStringBuilder(this);
+        builder.append("identifier", getId());
+        builder.append("valid", isValid());
+        builder.append("pom", pom);
+        return builder.toString();
     }
 }

@@ -4,7 +4,7 @@ import java.text.DateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
-import org.springframework.roo.support.style.ToStringCreator;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 /**
  * Provides date format options for {@link Date} and {@link Calendar} types.
@@ -70,9 +70,9 @@ public enum DateTime {
 
     @Override
     public String toString() {
-        final ToStringCreator tsc = new ToStringCreator(this);
-        tsc.append("name", name());
-        tsc.append("shortKey", shortKey);
-        return tsc.toString();
+        final ToStringBuilder builder = new ToStringBuilder(this);
+        builder.append("name", name());
+        builder.append("shortKey", shortKey);
+        return builder.toString();
     }
 }

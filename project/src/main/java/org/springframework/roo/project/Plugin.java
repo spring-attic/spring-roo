@@ -6,7 +6,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
-import org.springframework.roo.support.style.ToStringCreator;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.springframework.roo.support.util.CollectionUtils;
 import org.springframework.roo.support.util.DomUtils;
 import org.springframework.roo.support.util.XmlUtils;
@@ -349,11 +349,11 @@ public class Plugin implements Comparable<Plugin> {
 
     @Override
     public String toString() {
-        final ToStringCreator tsc = new ToStringCreator(this);
-        tsc.append("gav", gav);
+        final ToStringBuilder builder = new ToStringBuilder(this);
+        builder.append("gav", gav);
         if (configuration != null) {
-            tsc.append("configuration", configuration);
+            builder.append("configuration", configuration);
         }
-        return tsc.toString();
+        return builder.toString();
     }
 }

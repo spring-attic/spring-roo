@@ -1,6 +1,6 @@
 package org.springframework.roo.addon.roobot.client.model;
 
-import org.springframework.roo.support.style.ToStringCreator;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 /**
  * Star ratings for the "addon feedback bundle" command.
@@ -41,9 +41,9 @@ public enum Rating {
 
     @Override
     public String toString() {
-        final ToStringCreator tsc = new ToStringCreator(this);
-        tsc.append("name", name());
-        tsc.append("key", key);
-        return tsc.toString();
+        final ToStringBuilder builder = new ToStringBuilder(this);
+        builder.append("name", name());
+        builder.append("key", key);
+        return builder.toString();
     }
 }

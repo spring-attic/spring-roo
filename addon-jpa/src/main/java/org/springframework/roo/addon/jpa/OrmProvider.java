@@ -1,7 +1,7 @@
 package org.springframework.roo.addon.jpa;
 
 import org.apache.commons.lang3.Validate;
-import org.springframework.roo.support.style.ToStringCreator;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 /**
  * ORM providers known to the JPA add-on.
@@ -39,9 +39,9 @@ public enum OrmProvider {
 
     @Override
     public String toString() {
-        final ToStringCreator tsc = new ToStringCreator(this);
-        tsc.append("provider", name());
-        tsc.append("adapter", adapter);
-        return tsc.toString();
+        final ToStringBuilder builder = new ToStringBuilder(this);
+        builder.append("provider", name());
+        builder.append("adapter", adapter);
+        return builder.toString();
     }
 }

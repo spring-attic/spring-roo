@@ -13,13 +13,13 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.customdata.CustomDataKeys;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.model.CustomData;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.support.style.ToStringCreator;
 
 /**
  * Default representation of a {@link ClassOrInterfaceTypeDetails}.
@@ -214,20 +214,20 @@ public class DefaultClassOrInterfaceTypeDetails extends
 
     @Override
     public String toString() {
-        final ToStringCreator tsc = new ToStringCreator(this);
-        tsc.append("name", name);
-        tsc.append("modifier", Modifier.toString(getModifier()));
-        tsc.append("physicalTypeCategory", physicalTypeCategory);
-        tsc.append("declaredByMetadataId", getDeclaredByMetadataId());
-        tsc.append("declaredConstructors", declaredConstructors);
-        tsc.append("declaredFields", declaredFields);
-        tsc.append("declaredMethods", declaredMethods);
-        tsc.append("enumConstants", enumConstants);
-        tsc.append("superclass", superclass);
-        tsc.append("extendsTypes", extendsTypes);
-        tsc.append("implementsTypes", implementsTypes);
-        tsc.append("annotations", getAnnotations());
-        tsc.append("customData", getCustomData());
-        return tsc.toString();
+        final ToStringBuilder builder = new ToStringBuilder(this);
+        builder.append("name", name);
+        builder.append("modifier", Modifier.toString(getModifier()));
+        builder.append("physicalTypeCategory", physicalTypeCategory);
+        builder.append("declaredByMetadataId", getDeclaredByMetadataId());
+        builder.append("declaredConstructors", declaredConstructors);
+        builder.append("declaredFields", declaredFields);
+        builder.append("declaredMethods", declaredMethods);
+        builder.append("enumConstants", enumConstants);
+        builder.append("superclass", superclass);
+        builder.append("extendsTypes", extendsTypes);
+        builder.append("implementsTypes", implementsTypes);
+        builder.append("annotations", getAnnotations());
+        builder.append("customData", getCustomData());
+        return builder.toString();
     }
 }

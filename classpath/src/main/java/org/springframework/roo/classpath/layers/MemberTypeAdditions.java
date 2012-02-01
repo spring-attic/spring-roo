@@ -8,13 +8,13 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.springframework.roo.classpath.details.AbstractMemberHoldingTypeDetailsBuilder;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.model.JavaSymbolName;
-import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.CollectionUtils;
 
 /**
@@ -226,11 +226,11 @@ public class MemberTypeAdditions {
 
     @Override
     public String toString() {
-        final ToStringCreator tsc = new ToStringCreator(this);
-        tsc.append("classOrInterfaceDetailsBuilder",
+        final ToStringBuilder builder = new ToStringBuilder(this);
+        builder.append("classOrInterfaceDetailsBuilder",
                 classOrInterfaceDetailsBuilder);
-        tsc.append("methodName", methodName);
-        tsc.append("methodCall", methodCall);
-        return tsc.toString();
+        builder.append("methodName", methodName);
+        builder.append("methodCall", methodCall);
+        return builder.toString();
     }
 }

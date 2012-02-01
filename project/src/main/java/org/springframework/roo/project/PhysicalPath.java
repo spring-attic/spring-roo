@@ -3,7 +3,7 @@ package org.springframework.roo.project;
 import java.io.File;
 
 import org.apache.commons.lang3.Validate;
-import org.springframework.roo.support.style.ToStringCreator;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.springframework.roo.support.util.FileUtils;
 
 /**
@@ -72,9 +72,9 @@ public class PhysicalPath {
 
     @Override
     public final String toString() {
-        final ToStringCreator tsc = new ToStringCreator(this);
-        tsc.append("logicalPath", logicalPath);
-        tsc.append("location", location);
-        return tsc.toString();
+        final ToStringBuilder builder = new ToStringBuilder(this);
+        builder.append("logicalPath", logicalPath);
+        builder.append("location", location);
+        return builder.toString();
     }
 }
