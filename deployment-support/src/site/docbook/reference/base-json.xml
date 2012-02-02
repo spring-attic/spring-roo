@@ -52,9 +52,8 @@
   <section>
     <title>Adding JSON Functionality to Domain Types</title>
 
-    <para>The add-on offers an annotation as well as two commands that
-    support the integration of JSON support into the project's domain
-    layer:</para>
+    <para>The add-on offers an annotation as well as two commands that support
+    the integration of JSON support into the project's domain layer:</para>
 
     <orderedlist>
       <listitem>
@@ -68,7 +67,7 @@
 </programlisting>This method returns a JSON representation of the current
         object.</para>
 
-        <para><programlisting>public static Owner fromJsonToPet(String json) {
+        <para><programlisting>public static Owner fromJsonToOwner(String json) {
    return new JSONDeserializer&lt;Owner&gt;().use(null, Owner.class).deserialize(json);
 }
 </programlisting>This method has a String parameter representing the JSON
@@ -99,8 +98,8 @@
       </listitem>
 
       <listitem>
-        <para>The <link linkend="command-index-json-add">json add</link>
-        Roo shell command will introduce the @RooJson annotation into the
+        <para>The <link linkend="command-index-json-add">json add</link> Roo
+        shell command will introduce the @RooJson annotation into the
         specified target type.</para>
       </listitem>
 
@@ -303,22 +302,24 @@ public String <emphasis role="bold">jsonFindVisitsByDescriptionAndVisitDate</emp
 
       <listitem>
         <para>The <link linkend="command-index-web-mvc-json-add">web mvc json
-        add</link> Roo shell command introduces the <emphasis role="bold">@RooWebJson</emphasis>
-        annotation into the specified target type.</para>
+        add</link> Roo shell command introduces the <emphasis
+        role="bold">@RooWebJson</emphasis> annotation into the specified
+        target type.</para>
       </listitem>
 
       <listitem>
         <para>The <link linkend="command-index-web-mvc-json-all">web mvc json
-        all</link> Roo shell command finds all JSON-enabled types
-        (<emphasis role="bold">@RooJson</emphasis>) in the project and creates
-        Spring MVC controllers for each (if a controller does not already exist),
-        or adds <emphasis role="bold">@RooWebJson</emphasis> to existing
-        controllers (should they already exist).</para>
+        all</link> Roo shell command finds all JSON-enabled types (<emphasis
+        role="bold">@RooJson</emphasis>) in the project and creates Spring MVC
+        controllers for each (if a controller does not already exist), or adds
+        <emphasis role="bold">@RooWebJson</emphasis> to existing controllers
+        (should they already exist).</para>
       </listitem>
     </orderedlist>
 
     <para>If you need help configuring how FlexJson serializes or deserializes
-    JSON documents, please refer to their
-    <link xlink:href="http://flexjson.sourceforge.net/">reference documentation</link>.</para>
+    JSON documents, please refer to their <link
+    xlink:href="http://flexjson.sourceforge.net/">reference
+    documentation</link>.</para>
   </section>
 </chapter>
