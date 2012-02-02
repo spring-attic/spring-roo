@@ -25,7 +25,7 @@ import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.FileUtils;
-import org.springframework.roo.support.util.IOUtils;
+import org.apache.commons.io.IOUtils;
 
 /**
  * Provides property file configuration operations.

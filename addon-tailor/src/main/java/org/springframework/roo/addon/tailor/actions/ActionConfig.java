@@ -176,7 +176,7 @@ public class ActionConfig {
 
     @Override
     public String toString() {
-        final StringBuffer result = new StringBuffer();
+        final StringBuilder result = new StringBuilder();
         result.append("Type: " + actionTypeId);
         final Iterator<String> iterator = attributes.keySet().iterator();
         while (iterator.hasNext()) {

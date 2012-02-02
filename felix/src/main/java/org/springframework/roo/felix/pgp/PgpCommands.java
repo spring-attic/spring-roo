@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.TimeZone;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -27,9 +28,6 @@ import org.springframework.roo.shell.CommandMarker;
 @Service
 @Component
 public class PgpCommands implements CommandMarker {
-
-    private static final String LINE_SEPARATOR = System
-            .getProperty("line.separator");
 
     private static String getAlgorithm(final int algId) {
         switch (algId) {
@@ -58,7 +56,7 @@ public class PgpCommands implements CommandMarker {
     @Reference PgpService pgpService;
 
     private void appendLine(final StringBuilder sb, final String line) {
-        sb.append(line).append(LINE_SEPARATOR);
+        sb.append(line).append(IOUtils.LINE_SEPARATOR);
     }
 
     @CliCommand(value = "pgp automatic trust", help = "Indicates to automatically trust all keys encountered until the command is invoked again")

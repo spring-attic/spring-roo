@@ -1,5 +1,7 @@
 package org.springframework.roo.shell;
 
+import static org.apache.commons.io.IOUtils.LINE_SEPARATOR;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
@@ -22,13 +24,13 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.springframework.roo.shell.event.AbstractShellStatusPublisher;
 import org.springframework.roo.shell.event.ShellStatus;
 import org.springframework.roo.shell.event.ShellStatus.Status;
 import org.springframework.roo.support.logging.HandlerUtils;
-import org.springframework.roo.support.util.IOUtils;
 
 /**
  * Provides a base {@link Shell} implementation.
@@ -38,8 +40,6 @@ import org.springframework.roo.support.util.IOUtils;
 public abstract class AbstractShell extends AbstractShellStatusPublisher
         implements Shell {
 
-    private static final String LINE_SEPARATOR = System
-            .getProperty("line.separator");
     private static final String MY_SLOT = AbstractShell.class.getName();
     protected static final String ROO_PROMPT = "roo> ";
 
@@ -75,7 +75,13 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher
         catch (final URISyntaxException ignoreAndMoveOn) {
         }
         finally {
-            IOUtils.closeQuietly(jarFile);
+            if (jarFile != null) {
+                try {
+                    jarFile.close();
+                }
+                catch (IOException ignored) {
+                }
+            }
         }
 
         final StringBuilder sb = new StringBuilder();
@@ -480,7 +486,8 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher
             throw new IllegalStateException(e);
         }
         finally {
-            IOUtils.closeQuietly(inputStream, in);
+            IOUtils.closeQuietly(inputStream);
+            IOUtils.closeQuietly(in);
             final double executionDurationInSeconds = (System.nanoTime() - startedNanoseconds) / 1000000000D;
             logger.fine("Script required "
                     + round(executionDurationInSeconds, 3)

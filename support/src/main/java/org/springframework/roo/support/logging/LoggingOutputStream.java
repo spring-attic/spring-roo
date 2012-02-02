@@ -7,8 +7,8 @@ import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
-import org.springframework.roo.support.util.IOUtils;
 
 /**
  * Wraps an {@link OutputStream} and automatically passes each line to the

@@ -1,12 +1,14 @@
 package org.springframework.roo.addon.oscommands;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Reader;
+import java.util.List;
 import java.util.logging.Logger;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -15,7 +17,6 @@ import org.springframework.roo.process.manager.ActiveProcessManager;
 import org.springframework.roo.process.manager.ProcessManager;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.support.logging.HandlerUtils;
-import org.springframework.roo.support.util.IOUtils;
 
 /**
  * Implementation of {@link OsOperations} interface.
@@ -29,22 +30,23 @@ public class OsOperationsImpl implements OsOperations {
 
     private static class LoggingInputStream extends Thread {
         private final ProcessManager processManager;
-        private final BufferedReader reader;
+        private final Reader reader;
 
         public LoggingInputStream(final InputStream inputStream,
                 final ProcessManager processManager) {
-            reader = new BufferedReader(new InputStreamReader(inputStream));
+
+            reader = new InputStreamReader(inputStream);
             this.processManager = processManager;
         }
 
         @Override
         public void run() {
             ActiveProcessManager.setActiveProcessManager(processManager);
-            Thread.currentThread().setName(""); // Prevent thread name from
-                                                // being presented in Roo shell
-            String line;
+            // Prevent thread name from being presented in Roo shell
+            Thread.currentThread().setName("");
             try {
-                while ((line = reader.readLine()) != null) {
+                List<String> lines = IOUtils.readLines(reader);
+                for (String line : lines) {
                     if (line.startsWith("[ERROR]")) {
                         LOGGER.severe(line);
                     }
@@ -57,10 +59,8 @@ public class OsOperationsImpl implements OsOperations {
                 }
             }
             catch (final IOException e) {
-                if (e.getMessage().contains("No such file or directory") || // For
-                                                                            // *nix/Mac
-                        e.getMessage().contains("CreateProcess error=2")) { // For
-                                                                            // Windows
+                if (e.getMessage().contains("No such file or directory")
+                        || e.getMessage().contains("CreateProcess error=2")) {
                     LOGGER.severe("Could not locate executable; please ensure command is in your path");
                 }
             }

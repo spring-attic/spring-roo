@@ -17,7 +17,7 @@ import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.FileUtils;
-import org.springframework.roo.support.util.IOUtils;
+import org.apache.commons.io.IOUtils;
 
 /**
  * Implementation of {@link LoggingOperations}.

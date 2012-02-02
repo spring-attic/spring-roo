@@ -30,6 +30,7 @@ import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.w3c.dom.DOMConfiguration;
@@ -59,8 +60,6 @@ public final class XmlUtils {
     private static final Map<String, XPathExpression> COMPILED_EXPRESSION_CACHE = new HashMap<String, XPathExpression>();
     private static final DocumentBuilderFactory FACTORY = DocumentBuilderFactory
             .newInstance();
-    private static final String LINE_SEPARATOR = System
-            .getProperty("line.separator");
     private static final TransformerFactory TRANSFORMER_FACTORY = TransformerFactory
             .newInstance();
     private static final XPath XPATH = XPathFactory.newInstance().newXPath();
@@ -180,7 +179,7 @@ public final class XmlUtils {
             final OutputStream outputStream)
             throws UnsupportedEncodingException {
         final Writer writer;
-        if (LINE_SEPARATOR.equals("\r\n")) {
+        if (IOUtils.LINE_SEPARATOR.equals("\r\n")) {
             writer = new OutputStreamWriter(outputStream, "ISO-8859-1") {
                 @Override
                 public void write(final char[] cbuf, final int off,

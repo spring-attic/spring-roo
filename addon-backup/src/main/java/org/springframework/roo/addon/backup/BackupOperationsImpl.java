@@ -1,6 +1,5 @@
 package org.springframework.roo.addon.backup;
 
-import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -14,6 +13,7 @@ import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -24,7 +24,6 @@ import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.FileUtils;
-import org.springframework.roo.support.util.IOUtils;
 
 /**
  * Operations for the 'backup' add-on.
@@ -102,8 +101,6 @@ public class BackupOperationsImpl implements BackupOperations {
             }
         });
 
-        final byte[] buffer = new byte[8192];
-        int read = 0;
         for (final File file : files) {
             if (file.isDirectory()) {
                 if (file.listFiles().length == 0) {
@@ -117,14 +114,12 @@ public class BackupOperationsImpl implements BackupOperations {
             else {
                 InputStream inputStream = null;
                 try {
-                    inputStream = new BufferedInputStream(new FileInputStream(
-                            file));
                     final ZipEntry entry = new ZipEntry(file.getPath()
                             .substring(base.getPath().length() + 1));
                     zos.putNextEntry(entry);
-                    while ((read = inputStream.read(buffer)) != -1) {
-                        zos.write(buffer, 0, read);
-                    }
+
+                    inputStream = new FileInputStream(file);
+                    IOUtils.write(IOUtils.toByteArray(inputStream), zos);
                 }
                 finally {
                     IOUtils.closeQuietly(inputStream);

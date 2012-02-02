@@ -1,5 +1,7 @@
 package org.springframework.roo.shell;
 
+import static org.apache.commons.io.IOUtils.LINE_SEPARATOR;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileFilter;
@@ -50,8 +52,6 @@ import org.w3c.dom.Element;
 public class SimpleParser implements Parser {
 
     private static final Comparator<Object> COMPARATOR = new NaturalOrderComparator<Object>();
-    private static final String LINE_SEPARATOR = System
-            .getProperty("line.separator");
     private static final Logger LOGGER = HandlerUtils
             .getLogger(SimpleParser.class);
 

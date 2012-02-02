@@ -16,7 +16,7 @@ import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.FileUtils;
-import org.springframework.roo.support.util.IOUtils;
+import org.apache.commons.io.IOUtils;
 import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.url.stream.UrlInputStreamService;
 import org.w3c.dom.Document;
@@ -187,7 +187,7 @@ public abstract class AbstractEmbeddedProvider implements EmbeddedProvider {
                 final URL url = new URL(urlStr);
                 rd = new BufferedReader(new InputStreamReader(
                         httpService.openConnection(url)));
-                final StringBuffer sb = new StringBuffer();
+                final StringBuilder sb = new StringBuilder();
                 String line;
                 while ((line = rd.readLine()) != null) {
                     sb.append(line);

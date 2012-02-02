@@ -17,6 +17,7 @@ import java.io.Reader;
 import java.io.StringWriter;
 import java.io.Writer;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
 
 /**
@@ -122,7 +123,8 @@ public final class FileCopyUtils {
             return byteCount;
         }
         finally {
-            IOUtils.closeQuietly(in, out);
+            IOUtils.closeQuietly(in);
+            IOUtils.closeQuietly(out);
         }
     }
 
@@ -156,7 +158,8 @@ public final class FileCopyUtils {
             return byteCount;
         }
         finally {
-            IOUtils.closeQuietly(in, out);
+            IOUtils.closeQuietly(in);
+            IOUtils.closeQuietly(out);
         }
     }
 

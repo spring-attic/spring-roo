@@ -1,5 +1,7 @@
 package org.springframework.roo.shell.jline;
 
+import static org.apache.commons.io.IOUtils.LINE_SEPARATOR;
+
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.logging.Formatter;
@@ -12,7 +14,7 @@ import jline.ConsoleReader;
 
 import org.apache.commons.lang3.Validate;
 import org.springframework.roo.shell.ShellPromptAccessor;
-import org.springframework.roo.support.util.IOUtils;
+import org.apache.commons.io.IOUtils;
 import org.springframework.roo.support.util.OsUtils;
 
 /**
@@ -26,8 +28,6 @@ public class JLineLogHandler extends Handler {
 
     private static final boolean BRIGHT_COLORS = Boolean
             .getBoolean("roo.bright");
-    private static final String LINE_SEPARATOR = System
-            .getProperty("line.separator");
     private static boolean includeThreadName = false;
     private static String lastMessage;
     private static ThreadLocal<Boolean> redrawProhibit = new ThreadLocal<Boolean>();
@@ -108,7 +108,7 @@ public class JLineLogHandler extends Handler {
         setFormatter(new Formatter() {
             @Override
             public String format(final LogRecord record) {
-                final StringBuffer sb = new StringBuffer();
+                final StringBuilder sb = new StringBuilder();
                 if (record.getMessage() != null) {
                     sb.append(record.getMessage()).append(LINE_SEPARATOR);
                 }

@@ -144,7 +144,7 @@ public final class JdkJavaType {
         javaLangSimpleTypeNames.add("StackTraceElement");
         javaLangSimpleTypeNames.add("StrictMath");
         javaLangSimpleTypeNames.add("String");
-        javaLangSimpleTypeNames.add("StringBuffer");
+        javaLangSimpleTypeNames.add("StringBuilder");
         javaLangSimpleTypeNames.add("StringBuilder");
         javaLangSimpleTypeNames.add("System");
         javaLangSimpleTypeNames.add("Thread");

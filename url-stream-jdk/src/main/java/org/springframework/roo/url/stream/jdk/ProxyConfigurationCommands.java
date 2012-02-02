@@ -1,5 +1,7 @@
 package org.springframework.roo.url.stream.jdk;
 
+import static org.apache.commons.io.IOUtils.LINE_SEPARATOR;
+
 import java.net.MalformedURLException;
 import java.net.Proxy;
 import java.net.URL;
@@ -21,9 +23,6 @@ import org.springframework.uaa.client.ProxyService;
 @Component
 @Service
 public class ProxyConfigurationCommands implements CommandMarker {
-
-    private static final String LINE_SEPARATOR = System
-            .getProperty("line.separator");
 
     @Reference private ProxyService proxyService;
 

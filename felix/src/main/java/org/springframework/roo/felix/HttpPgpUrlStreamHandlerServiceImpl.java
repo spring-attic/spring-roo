@@ -11,6 +11,7 @@ import java.util.Hashtable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -23,7 +24,6 @@ import org.springframework.roo.felix.pgp.PgpService;
 import org.springframework.roo.felix.pgp.SignatureDecision;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.FileCopyUtils;
-import org.springframework.roo.support.util.IOUtils;
 import org.springframework.roo.url.stream.UrlInputStreamService;
 
 /**
@@ -143,7 +143,8 @@ public class HttpPgpUrlStreamHandlerServiceImpl extends
             return resourceFile.toURI().toURL().openConnection();
         }
         finally {
-            IOUtils.closeQuietly(resource, signature);
+            IOUtils.closeQuietly(resource);
+            IOUtils.closeQuietly(signature);
         }
     }
 }

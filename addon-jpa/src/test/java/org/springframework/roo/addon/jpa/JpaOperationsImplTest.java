@@ -13,6 +13,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.Properties;
 
+import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -91,8 +92,6 @@ public class JpaOperationsImplTest {
             + "    </persistence-unit>\n"
             + "</persistence>\n";
 
-    private static final String LINE_SEPARATOR = System
-            .getProperty("line.separator");
     private static final String PERSISTENCE_PATH = "/path/to/persistence";
     private static final String PERSISTENCE_UNIT = "myPersistenceUnit";
     private static final String POM = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
@@ -214,10 +213,8 @@ public class JpaOperationsImplTest {
         when(
                 mockPathResolver.getFocusedIdentifier(Path.SRC_MAIN_RESOURCES,
                         PERSISTENCE_XML)).thenReturn(PERSISTENCE_PATH);
-        when(mockFileManager.exists(PERSISTENCE_PATH)).thenReturn(false); // i.e.
-                                                                          // no
-                                                                          // existing
-                                                                          // persistence.xml
+        // i.e. no existing persistence.xml
+        when(mockFileManager.exists(PERSISTENCE_PATH)).thenReturn(false);
         when(
                 mockPropFileOperations.loadProperties(JPA_DIALECTS_FILE,
                         JpaOperationsImpl.class)).thenReturn(dialects);
@@ -254,7 +251,7 @@ public class JpaOperationsImplTest {
         // Replace the dummy line terminator with the platform-specific one that
         // will be applied by XmlUtils.nodeToString.
         final String normalisedContents = expectedContents.replace("\n",
-                LINE_SEPARATOR);
+                IOUtils.LINE_SEPARATOR);
         assertEquals(normalisedContents, textCaptor.getValue());
     }
 }

@@ -1,5 +1,7 @@
 package org.springframework.roo.url.stream;
 
+import static org.apache.commons.io.IOUtils.LINE_SEPARATOR;
+
 /**
  * Represents utility members for implementation of
  * {@link UrlInputStreamService}s.
@@ -8,9 +10,6 @@ package org.springframework.roo.url.stream;
  * @since 1.1.1
  */
 public final class UrlInputStreamUtils {
-
-    private static final String LINE_SEPARATOR = System
-            .getProperty("line.separator");
 
     public static final String SETUP_UAA_REQUIRED = LINE_SEPARATOR
             + "At this time you have not authorized Spring Roo to download resources from"

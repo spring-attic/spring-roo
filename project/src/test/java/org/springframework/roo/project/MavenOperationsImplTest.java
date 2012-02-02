@@ -1,5 +1,6 @@
 package org.springframework.roo.project;
 
+import static org.apache.commons.io.IOUtils.LINE_SEPARATOR;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.any;
@@ -31,8 +32,6 @@ public class MavenOperationsImplTest {
     private static final String ARTIFACT_ID = "foo-lib";
     private static final String CLASSIFIER = "exe";
     private static final String GROUP_ID = "com.example";
-    private static final String LINE_SEPARATOR = System
-            .getProperty("line.separator");
     private static final String VERSION = "1.0.Final";
     private static final String POM_AFTER_DEPENDENCY_REMOVED = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n"
             + "<project>    <dependencies>\n"

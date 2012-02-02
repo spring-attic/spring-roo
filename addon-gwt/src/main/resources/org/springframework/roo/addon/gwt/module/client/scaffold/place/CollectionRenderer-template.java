@@ -22,7 +22,7 @@ public class CollectionRenderer<E, R extends Renderer<E>, T extends Collection<E
 
 	@Override
 	public String render(T t) {
-		StringBuffer toReturn = new StringBuffer();
+		StringBuilder toReturn = new StringBuilder();
 		boolean first = true;
 		if (t != null) {
 			for (E e : t) {

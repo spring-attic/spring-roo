@@ -37,7 +37,7 @@ import org.bouncycastle.openpgp.PGPUtil;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.support.osgi.OSGiUtils;
-import org.springframework.roo.support.util.IOUtils;
+import org.apache.commons.io.IOUtils;
 import org.springframework.roo.url.stream.UrlInputStreamService;
 
 /**

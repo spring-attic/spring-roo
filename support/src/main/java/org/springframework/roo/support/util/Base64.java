@@ -14,6 +14,8 @@ import java.io.UnsupportedEncodingException;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
+import org.apache.commons.io.IOUtils;
+
 /**
  * <p>Encodes and decodes to and from Base64 notation.</p>
  * <p>Homepage: <a href="http://iharder.net/base64">http://iharder.net/base64</a>.</p>
@@ -961,7 +963,9 @@ public class Base64 {
                     e.printStackTrace();
                     // Just return originally-decoded bytes
                 } finally {
-                	IOUtils.closeQuietly(baos, gzis, bais);
+                	IOUtils.closeQuietly(baos);
+                	IOUtils.closeQuietly(gzis);
+                	IOUtils.closeQuietly(bais);
                 }
 
             }   // end if: gzipped
@@ -1241,7 +1245,8 @@ public class Base64 {
             throw e;    // Catch and throw in order to execute finally{}
         }   // end catch
         finally {
-        	IOUtils.closeQuietly(bais, ois);
+            IOUtils.closeQuietly(bais);
+            IOUtils.closeQuietly(ois);
         }
 
         return obj;
@@ -1585,7 +1590,9 @@ public class Base64 {
             } catch (final IOException e) {
                 throw e;
             } finally {
-            	IOUtils.closeQuietly(gzos, b64os, baos);
+            	IOUtils.closeQuietly(gzos);
+                IOUtils.closeQuietly(b64os);
+                IOUtils.closeQuietly(baos);
             }
 
             return baos.toByteArray();
@@ -1789,7 +1796,10 @@ public class Base64 {
             // the finally{} block is called for cleanup.
             throw e;
         } finally {
-        	IOUtils.closeQuietly(oos, gzos, b64os, baos);
+        	IOUtils.closeQuietly(oos);
+            IOUtils.closeQuietly(gzos);
+            IOUtils.closeQuietly(b64os);
+            IOUtils.closeQuietly(baos);
         }
 
         // Return value according to relevant encoding.

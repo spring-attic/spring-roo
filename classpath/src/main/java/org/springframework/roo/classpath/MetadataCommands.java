@@ -1,5 +1,8 @@
 package org.springframework.roo.classpath;
 
+import static org.apache.commons.io.IOUtils.LINE_SEPARATOR;
+
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
@@ -27,8 +30,6 @@ import org.springframework.roo.shell.CommandMarker;
 @Service
 public class MetadataCommands implements CommandMarker {
 
-    private static final String LINE_SEPARATOR = System
-            .getProperty("line.separator");
     private static final String METADATA_FOR_MODULE_COMMAND = "metadata for module";
 
     @Reference private MemberDetailsScanner memberDetailsScanner;
@@ -57,7 +58,8 @@ public class MetadataCommands implements CommandMarker {
     public String metadataForId(
             @CliOption(key = { "", "metadataId" }, mandatory = true, help = "The metadata ID (should start with MID:)") final String metadataId) {
         final StringBuilder sb = new StringBuilder();
-        sb.append("Identifier : ").append(metadataId).append(LINE_SEPARATOR);
+        sb.append("Identifier : ").append(metadataId)
+                .append(IOUtils.LINE_SEPARATOR);
 
         for (final String upstreamId : metadataDependencyRegistry
                 .getUpstream(metadataId)) {

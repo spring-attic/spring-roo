@@ -8,15 +8,14 @@ import static org.springframework.roo.support.util.AnsiEscapeCode.REVERSE;
 import static org.springframework.roo.support.util.AnsiEscapeCode.UNDERSCORE;
 import static org.springframework.roo.support.util.AnsiEscapeCode.decorate;
 
-import java.io.BufferedReader;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -29,7 +28,6 @@ import org.springframework.roo.shell.ExecutionStrategy;
 import org.springframework.roo.shell.Parser;
 import org.springframework.roo.shell.jline.JLineShell;
 import org.springframework.roo.support.osgi.OSGiUtils;
-import org.springframework.roo.support.util.IOUtils;
 import org.springframework.roo.support.util.OsUtils;
 import org.springframework.roo.url.stream.UrlInputStreamService;
 
@@ -43,8 +41,6 @@ import org.springframework.roo.url.stream.UrlInputStreamService;
 @Service
 public class JLineShellComponent extends JLineShell {
 
-    private static final String LINE_SEPARATOR = System
-            .getProperty("line.separator");
     @Reference private ExecutionStrategy executionStrategy;
     @Reference private Parser parser;
     // @Reference private Tailor tailor;
@@ -101,7 +97,7 @@ public class JLineShellComponent extends JLineShell {
                 .get("screen_name");
         String tweet = (String) jsonObject.get("text");
         // We only want one line
-        tweet = tweet.replace(LINE_SEPARATOR, " ");
+        tweet = tweet.replace(IOUtils.LINE_SEPARATOR, " ");
         final List<String> words = Arrays.asList(tweet.split(" "));
         final StringBuilder sb = new StringBuilder();
         // Add in Roo's twitter account to give context to the notification
@@ -171,7 +167,6 @@ public class JLineShellComponent extends JLineShell {
 
         // Send a GET request to the servlet
         InputStream inputStream = null;
-        BufferedReader reader = null;
         try {
             // Send data
             String urlStr = endpoint;
@@ -181,19 +176,14 @@ public class JLineShellComponent extends JLineShell {
             final URL url = new URL(urlStr);
             inputStream = urlInputStreamService.openConnection(url);
             // Get the response
-            reader = new BufferedReader(new InputStreamReader(inputStream));
-            final StringBuilder sb = new StringBuilder();
-            String line;
-            while ((line = reader.readLine()) != null) {
-                sb.append(line);
-            }
-            return sb.toString();
+            final List<String> lines = IOUtils.readLines(inputStream);
+            return StringUtils.join(lines.toArray());
         }
         catch (final Exception e) {
             return null;
         }
         finally {
-            IOUtils.closeQuietly(reader, inputStream);
+            IOUtils.closeQuietly(inputStream);
         }
     }
 }

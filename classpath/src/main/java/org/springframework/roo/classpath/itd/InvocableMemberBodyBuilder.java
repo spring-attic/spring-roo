@@ -106,7 +106,6 @@ public class InvocableMemberBodyBuilder {
         // We use \n for consistency with JavaParser's DumpVisitor, which always
         // uses \n
         stringBuilder.append("\n");
-        // stringBuilder.append(StringUtils.LINE_SEPARATOR);
         return this;
     }
 

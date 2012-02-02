@@ -1,5 +1,7 @@
 package org.springframework.roo.uaa;
 
+import static org.apache.commons.io.IOUtils.LINE_SEPARATOR;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -27,9 +29,6 @@ import org.springframework.uaa.client.protobuf.UaaClient.Privacy.PrivacyLevel;
 @Service
 @Component
 public class UaaCommands implements CommandMarker {
-
-    private static final String LINE_SEPARATOR = System
-            .getProperty("line.separator");
 
     @Reference private StaticFieldConverter staticFieldConverter;
     @Reference private UaaRegistrationService uaaRegistrationService;

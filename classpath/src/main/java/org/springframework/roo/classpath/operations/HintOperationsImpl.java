@@ -8,6 +8,7 @@ import java.util.ResourceBundle;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.felix.scr.annotations.Component;
@@ -37,8 +38,6 @@ public class HintOperationsImpl implements HintOperations {
 
     private static final String ANT_MATCH_DIRECTORY_PATTERN = File.separator
             + "**" + File.separator;
-    private static final String LINE_SEPARATOR = System
-            .getProperty("line.separator");
     private static ResourceBundle bundle = ResourceBundle
             .getBundle(HintCommands.class.getName());
 
@@ -103,7 +102,7 @@ public class HintOperationsImpl implements HintOperations {
         }
         try {
             final String message = bundle.getString(topic);
-            return message.replace("\r", LINE_SEPARATOR).replace(
+            return message.replace("\r", IOUtils.LINE_SEPARATOR).replace(
                     "${completion_key}", AbstractShell.completionKeys);
         }
         catch (final MissingResourceException exception) {

@@ -15,6 +15,7 @@ import java.util.Locale;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
@@ -30,7 +31,6 @@ import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.FileUtils;
-import org.springframework.roo.support.util.IOUtils;
 import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlUtils;
 import org.springframework.roo.url.stream.UrlInputStreamService;
@@ -138,7 +138,7 @@ public class CreatorOperationsImpl implements CreatorOperations {
                                     split[0].indexOf(",") - 1);
                         }
                         final String[] langWords = split[0].split("\\s");
-                        final StringBuffer b = new StringBuffer();
+                        final StringBuilder b = new StringBuilder();
                         for (final String word : langWords) {
                             b.append(StringUtils.capitalize(word.toLowerCase()))
                                     .append(" ");
@@ -152,16 +152,17 @@ public class CreatorOperationsImpl implements CreatorOperations {
                         "Could not parse ISO 3166 language list, please use --language option in command");
             }
             finally {
-                IOUtils.closeQuietly(br, is);
+                IOUtils.closeQuietly(br);
+                IOUtils.closeQuietly(is);
             }
         }
 
         final String[] langWords = language.split("\\s");
-        final StringBuffer b = new StringBuffer();
+        final StringBuilder builder = new StringBuilder();
         for (final String word : langWords) {
-            b.append(StringUtils.capitalize(word.toLowerCase()));
+            builder.append(StringUtils.capitalize(word.toLowerCase()));
         }
-        final String languageName = b.toString();
+        final String languageName = builder.toString();
         final String packagePath = topLevelPackage
                 .getFullyQualifiedPackageName().replace('.', separatorChar);
 
@@ -524,7 +525,8 @@ public class CreatorOperationsImpl implements CreatorOperations {
             throw new IllegalStateException(getErrorMsg(locale.getCountry()), e);
         }
         finally {
-            IOUtils.closeQuietly(zis, bis);
+            IOUtils.closeQuietly(bis);
+            IOUtils.closeQuietly(zis);
         }
 
         if (!success) {

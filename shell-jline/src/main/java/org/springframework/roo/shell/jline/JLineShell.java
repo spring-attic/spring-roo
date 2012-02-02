@@ -24,6 +24,7 @@ import jline.ANSIBuffer.ANSICodes;
 import jline.ConsoleReader;
 import jline.WindowsTerminal;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.springframework.roo.shell.AbstractShell;
@@ -36,7 +37,6 @@ import org.springframework.roo.shell.event.ShellStatus.Status;
 import org.springframework.roo.shell.event.ShellStatusListener;
 import org.springframework.roo.support.util.ClassUtils;
 import org.springframework.roo.support.util.FileCopyUtils;
-import org.springframework.roo.support.util.IOUtils;
 import org.springframework.roo.support.util.OsUtils;
 
 /**
@@ -72,8 +72,6 @@ public abstract class JLineShell extends AbstractShell implements
 
     private static final boolean JANSI_AVAILABLE = ClassUtils.isPresent(
             ANSI_CONSOLE_CLASSNAME, JLineShell.class.getClassLoader());
-    private static final String LINE_SEPARATOR = System
-            .getProperty("line.separator");
 
     private boolean developmentMode = false;
     private final DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -497,7 +495,8 @@ public abstract class JLineShell extends AbstractShell implements
         try {
             final String logFileContents = FileCopyUtils.copyToString(new File(
                     "log.roo"));
-            final String[] logEntries = logFileContents.split(LINE_SEPARATOR);
+            final String[] logEntries = logFileContents
+                    .split(IOUtils.LINE_SEPARATOR);
             // LIFO
             for (final String logEntry : logEntries) {
                 if (!logEntry.startsWith("//")) {

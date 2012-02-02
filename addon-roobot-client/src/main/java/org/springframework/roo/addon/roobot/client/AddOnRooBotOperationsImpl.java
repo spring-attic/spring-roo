@@ -21,6 +21,7 @@ import java.util.zip.ZipInputStream;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
@@ -41,7 +42,6 @@ import org.springframework.roo.felix.pgp.PgpKeyId;
 import org.springframework.roo.felix.pgp.PgpService;
 import org.springframework.roo.shell.Shell;
 import org.springframework.roo.support.logging.HandlerUtils;
-import org.springframework.roo.support.util.IOUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.springframework.roo.uaa.UaaRegistrationService;
 import org.springframework.roo.url.stream.UrlInputStreamService;
@@ -757,7 +757,9 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
             // Ignore
         }
         finally {
-            IOUtils.closeQuietly(is, baos, bais);
+            IOUtils.closeQuietly(is);
+            IOUtils.closeQuietly(baos);
+            IOUtils.closeQuietly(bais);
         }
         if (success && startupTime) {
             printAddonStats();
@@ -1060,7 +1062,9 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
                     doc = db.parse(bais);
                 }
                 finally {
-                    IOUtils.closeQuietly(zip, bais, baos);
+                    IOUtils.closeQuietly(zip);
+                    IOUtils.closeQuietly(bais);
+                    IOUtils.closeQuietly(baos);
                 }
             }
             else {

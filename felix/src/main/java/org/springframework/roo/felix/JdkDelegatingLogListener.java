@@ -1,5 +1,7 @@
 package org.springframework.roo.felix;
 
+import static org.apache.commons.io.IOUtils.LINE_SEPARATOR;
+
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Enumeration;
@@ -38,8 +40,6 @@ public class JdkDelegatingLogListener extends AbstractFlashingObject implements
         LogListener {
 
     public static final String DO_NOT_LOG = "#DO_NOT_LOG";
-    private static final String LINE_SEPARATOR = System
-            .getProperty("line.separator");
     private final static Logger LOGGER = HandlerUtils
             .getLogger(JdkDelegatingLogListener.class);
 

@@ -9,6 +9,7 @@ import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
 
 /**
@@ -18,9 +19,6 @@ import org.apache.commons.lang3.Validate;
  * @since 1.0
  */
 public final class HandlerUtils {
-
-    private static final String LINE_SEPARATOR = System
-            .getProperty("line.separator");
 
     /**
      * Forces all {@link Handler} instances registered in the presented
@@ -146,7 +144,7 @@ public final class HandlerUtils {
             consoleHandler.setFormatter(new Formatter() {
                 @Override
                 public String format(final LogRecord record) {
-                    return record.getMessage() + LINE_SEPARATOR;
+                    return record.getMessage() + IOUtils.LINE_SEPARATOR;
                 }
             });
             newHandlers.add(new DeferredLogHandler(consoleHandler,
