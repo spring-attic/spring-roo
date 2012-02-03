@@ -7,7 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 
 /**
- * The combination of Maven-style groupId, artifactId, and version
+ * The combination of Maven-style groupId, artifactId, and version.
  * 
  * @author Andrew Swan
  * @since 1.2.0
@@ -15,7 +15,7 @@ import org.apache.commons.lang3.Validate;
 public class GAV implements Comparable<GAV> {
 
     /**
-     * Returns an instance based on the given concatenated Maven coordinates
+     * Returns an instance based on the given concatenated Maven coordinates.
      * 
      * @param coordinates the groupId, artifactId, and version, separated by
      *            {@link MavenUtils#COORDINATE_SEPARATOR}

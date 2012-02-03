@@ -1,7 +1,9 @@
 package org.springframework.roo.support.util;
 
+import org.apache.commons.lang3.StringUtils;
+
 /**
- * ANSI escape codes supported by JLine
+ * ANSI escape codes supported by JLine.
  * 
  * @author Andrew Swan
  * @since 1.2.0
@@ -28,7 +30,7 @@ public enum AnsiEscapeCode {
      */
     public static String decorate(final String text,
             final AnsiEscapeCode... codes) {
-        if (text == null || "".equals(text)) {
+        if (StringUtils.isEmpty(text)) {
             return text;
         }
 

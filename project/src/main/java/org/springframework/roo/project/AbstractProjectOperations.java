@@ -84,12 +84,12 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
     }
 
     private final Map<String, Feature> features = new HashMap<String, Feature>();
+
     @Reference FileManager fileManager;
     @Reference MetadataService metadataService;
     @Reference PathResolver pathResolver;
 
     @Reference protected PomManagementService pomManagementService;
-
     @Reference protected Shell shell;
 
     public void addBuildPlugin(final String moduleName, final Plugin plugin) {
@@ -543,7 +543,7 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
                 iter.remove();
             }
         }
-        return StringUtils.join(changes, ";");
+        return StringUtils.join(changes, "; ");
     }
 
     public final ProjectMetadata getProjectMetadata(final String moduleName) {

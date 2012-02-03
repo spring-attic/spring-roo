@@ -104,7 +104,7 @@ public class JLineShellComponent extends JLineShell {
         sb.append(decorate("@" + screenName + ":",
                 SystemUtils.IS_OS_WINDOWS ? FG_YELLOW : REVERSE));
         sb.append(" ");
-        
+
         // We want to colourise certain words. The codes used here should be
         // moved to a ShellUtils and include a few helper methods
         // This is a basic attempt at pattern identification, it should be
