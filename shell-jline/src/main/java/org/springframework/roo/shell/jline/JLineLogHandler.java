@@ -12,10 +12,10 @@ import java.util.logging.LogRecord;
 import jline.ANSIBuffer;
 import jline.ConsoleReader;
 
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.SystemUtils;
 import org.apache.commons.lang3.Validate;
 import org.springframework.roo.shell.ShellPromptAccessor;
-import org.apache.commons.io.IOUtils;
-import org.springframework.roo.support.util.OsUtils;
 
 /**
  * JDK logging {@link Handler} that emits log messages to a JLine
@@ -59,7 +59,7 @@ public class JLineLogHandler extends Handler {
 
             @Override
             public ANSIBuffer reverse(final String str) {
-                if (OsUtils.isWindows()) {
+                if (SystemUtils.IS_OS_WINDOWS) {
                     return super.reverse(str).append(ANSICodes.attrib(esc));
                 }
                 return super.reverse(str);

@@ -26,6 +26,7 @@ import jline.WindowsTerminal;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.SystemUtils;
 import org.apache.commons.lang3.Validate;
 import org.springframework.roo.shell.AbstractShell;
 import org.springframework.roo.shell.CommandMarker;
@@ -37,7 +38,6 @@ import org.springframework.roo.shell.event.ShellStatus.Status;
 import org.springframework.roo.shell.event.ShellStatusListener;
 import org.springframework.roo.support.util.ClassUtils;
 import org.springframework.roo.support.util.FileCopyUtils;
-import org.springframework.roo.support.util.OsUtils;
 
 /**
  * Uses the feature-rich <a
@@ -453,7 +453,7 @@ public abstract class JLineShell extends AbstractShell implements
 
     public void run() {
         try {
-            if (JANSI_AVAILABLE && OsUtils.isWindows()) {
+            if (JANSI_AVAILABLE && SystemUtils.IS_OS_WINDOWS) {
                 try {
                     reader = createAnsiWindowsReader();
                 }

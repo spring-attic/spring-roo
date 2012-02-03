@@ -10,6 +10,7 @@ import java.util.TreeSet;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.apache.commons.io.IOUtils;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -107,13 +108,7 @@ public class Activator implements BundleActivator {
             throw new IllegalStateException("Could not open " + url, ex);
         }
         finally {
-            try {
-                if (is != null) {
-                    is.close();
-                }
-            }
-            catch (final IOException ignored) {
-            }
+            IOUtils.closeQuietly(is);
         }
 
         final Element rootElement = (Element) document.getFirstChild();

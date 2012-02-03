@@ -10,6 +10,7 @@ import java.util.Collection;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.SystemUtils;
 import org.apache.commons.lang3.Validate;
 import org.springframework.roo.support.ant.AntPathMatcher;
 import org.springframework.roo.support.ant.PathMatcher;
@@ -155,7 +156,7 @@ public final class FileUtils {
      *         OS
      */
     public static boolean denotesAbsolutePath(final String fileName) {
-        if (OsUtils.isWindows()) {
+        if (SystemUtils.IS_OS_WINDOWS) {
             // first check for drive letter
             if (WINDOWS_DRIVE_PATH.matcher(fileName).matches()) {
                 return true;

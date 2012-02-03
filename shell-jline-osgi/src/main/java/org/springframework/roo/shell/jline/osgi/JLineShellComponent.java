@@ -17,6 +17,7 @@ import java.util.Random;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.SystemUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -28,7 +29,6 @@ import org.springframework.roo.shell.ExecutionStrategy;
 import org.springframework.roo.shell.Parser;
 import org.springframework.roo.shell.jline.JLineShell;
 import org.springframework.roo.support.osgi.OSGiUtils;
-import org.springframework.roo.support.util.OsUtils;
 import org.springframework.roo.url.stream.UrlInputStreamService;
 
 /**
@@ -102,8 +102,9 @@ public class JLineShellComponent extends JLineShell {
         final StringBuilder sb = new StringBuilder();
         // Add in Roo's twitter account to give context to the notification
         sb.append(decorate("@" + screenName + ":",
-                OsUtils.isWindows() ? FG_YELLOW : REVERSE));
+                SystemUtils.IS_OS_WINDOWS ? FG_YELLOW : REVERSE));
         sb.append(" ");
+        
         // We want to colourise certain words. The codes used here should be
         // moved to a ShellUtils and include a few helper methods
         // This is a basic attempt at pattern identification, it should be
@@ -112,18 +113,18 @@ public class JLineShellComponent extends JLineShell {
         for (final String word : words) {
             if (word.startsWith("http://") || word.startsWith("https://")) {
                 // It's a URL
-                if (OsUtils.isWindows()) {
+                if (SystemUtils.IS_OS_WINDOWS) {
                     sb.append(decorate(word, FG_GREEN));
                 }
                 else {
                     sb.append(decorate(word, FG_GREEN, UNDERSCORE));
                 }
             }
-            else if (word.startsWith("@")) {
+            else if (word.charAt(0) == '@') {
                 // It's a Twitter username
                 sb.append(decorate(word, FG_MAGENTA));
             }
-            else if (word.startsWith("#")) {
+            else if (word.charAt(0) == '#') {
                 // It's a Twitter hash tag
                 sb.append(decorate(word, FG_CYAN));
             }
