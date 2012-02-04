@@ -84,9 +84,6 @@ public abstract class AbstractPackagingProvider implements PackagingProvider {
             final ProjectOperations projectOperations) {
         final String pomPath = createPom(topLevelPackage, nullableProjectName,
                 javaVersion, parentPom, module, projectOperations);
-        // TODO not sure why or if this is necessary; find out and
-        // document/remove it
-        fileManager.scan();
         createOtherArtifacts(topLevelPackage, module, projectOperations);
         return pomPath;
     }

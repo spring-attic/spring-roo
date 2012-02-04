@@ -108,8 +108,8 @@ public class Pom {
         Validate.notBlank(path, "Invalid path '" + path + "'");
 
         gav = new GAV(groupId, artifactId, version);
-        this.moduleName = StringUtils.trimToEmpty(moduleName);
-        this.name = StringUtils.trimToEmpty(name);
+        this.moduleName = StringUtils.stripToEmpty(moduleName);
+        this.name = StringUtils.stripToEmpty(name);
         this.packaging = packaging;
         this.parent = parent;
         this.path = path;

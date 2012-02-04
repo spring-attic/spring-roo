@@ -45,9 +45,9 @@ public class MethodTarget {
             final String remainingBuffer, final String key) {
         Validate.notNull(method, "Method is required");
         Validate.notNull(target, "Target is required");
-        this.key = StringUtils.trimToEmpty(key);
+        this.key = StringUtils.stripToEmpty(key);
         this.method = method;
-        this.remainingBuffer = StringUtils.trimToEmpty(remainingBuffer);
+        this.remainingBuffer = StringUtils.stripToEmpty(remainingBuffer);
         this.target = target;
     }
 

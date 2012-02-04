@@ -3,6 +3,7 @@ package org.springframework.roo.process.manager.internal;
 import java.io.File;
 import java.util.logging.Logger;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.springframework.roo.file.undo.FilenameResolver;
 import org.springframework.roo.support.logging.HandlerUtils;
@@ -46,7 +47,7 @@ public class ManagedMessageRenderer {
             message.append("Updated ");
         }
         message.append(filenameResolver.getMeaningfulName(file));
-        if (descriptionOfChange != null && descriptionOfChange.length() > 0) {
+        if (StringUtils.isNotBlank(descriptionOfChange)) {
             message.append(" [");
             message.append(descriptionOfChange);
             message.append("]");

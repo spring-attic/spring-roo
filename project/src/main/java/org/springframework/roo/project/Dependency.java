@@ -274,8 +274,8 @@ public class Dependency implements Comparable<Dependency> {
             result = artifactId.compareTo(other.getArtifactId());
         }
         if (result == 0) {
-            result = StringUtils.trimToEmpty(classifier).compareTo(
-                    StringUtils.trimToEmpty(other.getClassifier()));
+            result = StringUtils.stripToEmpty(classifier).compareTo(
+                    StringUtils.stripToEmpty(other.getClassifier()));
         }
         if (result == 0 && type != null) {
             result = type.compareTo(other.getType());

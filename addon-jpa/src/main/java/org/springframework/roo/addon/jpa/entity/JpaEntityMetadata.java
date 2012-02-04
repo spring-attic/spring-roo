@@ -347,7 +347,7 @@ public class JpaEntityMetadata extends
             annotations.add(generatedValueBuilder);
 
             final String identifierColumn = StringUtils
-                    .trimToEmpty(getIdentifierColumn());
+                    .stripToEmpty(getIdentifierColumn());
             String columnName = idField.getSymbolName();
             if (StringUtils.isNotBlank(identifierColumn)) {
                 // User has specified an alternate column name

@@ -314,7 +314,7 @@ public class JavaTypeConverter implements Converter<JavaType> {
     public boolean getAllPossibleValues(final List<Completion> completions,
             final Class<?> requiredType, String existingData,
             final String optionContext, final MethodTarget target) {
-        existingData = StringUtils.trimToEmpty(existingData);
+        existingData = StringUtils.stripToEmpty(existingData);
 
         if (StringUtils.isBlank(optionContext)
                 || optionContext.contains(PROJECT)) {

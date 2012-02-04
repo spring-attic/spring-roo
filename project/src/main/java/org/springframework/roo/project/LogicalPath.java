@@ -67,7 +67,7 @@ public class LogicalPath {
      */
     private LogicalPath(final String module, final Path path) {
         Validate.notNull(path, "Path required");
-        this.module = StringUtils.trimToEmpty(module);
+        this.module = StringUtils.stripToEmpty(module);
         this.path = path;
     }
 

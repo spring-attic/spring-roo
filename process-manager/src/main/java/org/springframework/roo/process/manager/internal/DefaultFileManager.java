@@ -6,11 +6,14 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.SortedSet;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
@@ -31,8 +34,6 @@ import org.springframework.roo.file.undo.UpdateFile;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.process.manager.ProcessManager;
-import org.springframework.roo.support.util.FileCopyUtils;
-import org.springframework.roo.support.util.FileUtils;
 
 /**
  * Default implementation of {@link FileManager}.
@@ -48,9 +49,9 @@ public class DefaultFileManager implements FileManager, UndoListener {
     private final Map<String, String> deferredDescriptionOfChanges = new LinkedHashMap<String, String>();
     /** key: file identifier, value: new textual content */
     private final Map<String, String> deferredFileWrites = new LinkedHashMap<String, String>();
+
     @Reference private NotifiableFileMonitorService fileMonitorService;
     @Reference private FilenameResolver filenameResolver;
-
     @Reference private ProcessManager processManager;
     @Reference private UndoManager undoManager;
 
@@ -74,7 +75,7 @@ public class DefaultFileManager implements FileManager, UndoListener {
                     createOrUpdateTextFileIfRequired(fileIdentifier,
                             newContents,
                             StringUtils
-                                    .trimToEmpty(deferredDescriptionOfChanges
+                                    .stripToEmpty(deferredDescriptionOfChanges
                                             .get(fileIdentifier)));
                 }
                 else if (exists(fileIdentifier)) {
@@ -111,12 +112,12 @@ public class DefaultFileManager implements FileManager, UndoListener {
                 + "' already exists");
         try {
             fileMonitorService.notifyCreated(actual.getCanonicalPath());
+            final File parentDirectory = new File(actual.getParent());
+            if (!parentDirectory.exists()) {
+                createDirectory(parentDirectory.getCanonicalPath());
+            }
         }
         catch (final IOException ignored) {
-        }
-        final File parentDirectory = new File(actual.getParent());
-        if (!parentDirectory.exists()) {
-            createDirectory(FileUtils.getCanonicalPath(parentDirectory));
         }
         new CreateFile(undoManager, filenameResolver, actual);
         final ManagedMessageRenderer renderer = new ManagedMessageRenderer(
@@ -139,7 +140,7 @@ public class DefaultFileManager implements FileManager, UndoListener {
             final File file = new File(fileIdentifier);
             String existing = null;
             try {
-                existing = FileCopyUtils.copyToString(file);
+                existing = FileUtils.readFileToString(file);
             }
             catch (final IOException ignored) {
             }
@@ -155,16 +156,20 @@ public class DefaultFileManager implements FileManager, UndoListener {
         }
 
         if (mutableFile != null) {
+            OutputStream outputStream = null;
             try {
                 if (StringUtils.isNotBlank(descriptionOfChange)) {
                     mutableFile.setDescriptionOfChange(descriptionOfChange);
                 }
-                FileCopyUtils.copy(newContents.getBytes(),
-                        mutableFile.getOutputStream());
+                outputStream = mutableFile.getOutputStream();
+                IOUtils.write(newContents, outputStream);
             }
             catch (final IOException e) {
                 throw new IllegalStateException("Could not output '"
                         + mutableFile.getCanonicalPath() + "'", e);
+            }
+            finally {
+                IOUtils.closeQuietly(outputStream);
             }
         }
     }
@@ -188,7 +193,7 @@ public class DefaultFileManager implements FileManager, UndoListener {
             deferredDescriptionOfChanges.put(
                     fileIdentifier,
                     deferredDescriptionOfChange
-                            + StringUtils.trimToEmpty(descriptionOfChange));
+                            + StringUtils.stripToEmpty(descriptionOfChange));
         }
     }
 

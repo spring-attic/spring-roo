@@ -869,12 +869,12 @@ public class JpaOperationsImpl implements JpaOperations {
                 "database-dot-com-template.properties");
 
         final boolean hasChanged = !props.get("url").equals(
-                StringUtils.trimToEmpty(connectionString));
+                StringUtils.stripToEmpty(connectionString));
         if (!hasChanged) {
             return;
         }
 
-        props.put("url", StringUtils.trimToEmpty(connectionString));
+        props.put("url", StringUtils.stripToEmpty(connectionString));
 
         writeProperties(configPath, configExists, props);
 
@@ -922,9 +922,9 @@ public class JpaOperationsImpl implements JpaOperations {
                 || !driver.equals(jdbcDatabase.getDriverClassName());
         hasChanged |= url == null || !url.equals(connectionString);
         hasChanged |= uname == null
-                || !uname.equals(StringUtils.trimToEmpty(userName));
+                || !uname.equals(StringUtils.stripToEmpty(userName));
         hasChanged |= pwd == null
-                || !pwd.equals(StringUtils.trimToEmpty(password));
+                || !pwd.equals(StringUtils.stripToEmpty(password));
         if (!hasChanged) {
             // No changes from existing database configuration so exit now
             return;
@@ -933,8 +933,8 @@ public class JpaOperationsImpl implements JpaOperations {
         // Write changes to database.properties file
         props.put(DATABASE_URL, connectionString);
         props.put(DATABASE_DRIVER, jdbcDatabase.getDriverClassName());
-        props.put(DATABASE_USERNAME, StringUtils.trimToEmpty(userName));
-        props.put(DATABASE_PASSWORD, StringUtils.trimToEmpty(password));
+        props.put(DATABASE_USERNAME, StringUtils.stripToEmpty(userName));
+        props.put(DATABASE_PASSWORD, StringUtils.stripToEmpty(password));
 
         writeProperties(databasePath, databaseExists, props);
 

@@ -7,9 +7,9 @@ import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.Validate;
 import org.springframework.roo.file.monitor.NotifiableFileMonitorService;
-import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.HexUtils;
 
 /**
@@ -74,7 +74,7 @@ public class MonitoredOutputStream extends ByteArrayOutputStream {
         managedMessageRenderer.logManagedMessage();
 
         // Write the actual file out to disk
-        FileCopyUtils.copy(bytes, file);
+        FileUtils.writeByteArrayToFile(file, bytes);
 
         // Tell the FileMonitorService what happened
         String fileCanonicalPath;
