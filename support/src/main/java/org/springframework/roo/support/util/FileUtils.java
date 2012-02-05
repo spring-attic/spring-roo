@@ -28,7 +28,6 @@ public final class FileUtils {
     public static final String CURRENT_DIRECTORY = ".";
 
     private static final String ESCAPED_BACKSLASH = "\\\\";
-
     private static final PathMatcher PATH_MATCHER;
 
     static {

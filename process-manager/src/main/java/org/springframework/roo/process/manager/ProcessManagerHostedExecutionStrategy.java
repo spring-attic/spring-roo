@@ -10,7 +10,6 @@ import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.process.manager.event.ProcessManagerStatus;
 import org.springframework.roo.shell.ExecutionStrategy;
 import org.springframework.roo.shell.ParseResult;
-import org.springframework.roo.support.util.ReflectionUtils;
 
 /**
  * Used to dispatch shell {@link ExecutionStrategy} requests through
@@ -42,9 +41,17 @@ public class ProcessManagerHostedExecutionStrategy implements ExecutionStrategy 
                     "ProcessManagerHostedExecutionStrategy not yet ready for commands");
             return processManager.execute(new CommandCallback<Object>() {
                 public Object callback() {
-                    return ReflectionUtils.invokeMethod(
-                            parseResult.getMethod(), parseResult.getInstance(),
-                            parseResult.getArguments());
+                    try {
+                        return parseResult.getMethod().invoke(
+                                parseResult.getInstance(),
+                                parseResult.getArguments());
+                    }
+                    catch (Exception e) {
+                        throw new IllegalStateException(
+                                "Unexpected reflection exception - "
+                                        + e.getClass().getName() + ": "
+                                        + e.getMessage());
+                    }
                 }
             });
         }
@@ -57,9 +64,11 @@ public class ProcessManagerHostedExecutionStrategy implements ExecutionStrategy 
                 // if executing a script
                 // TERMINATED added in case of additional commands following a
                 // quit or exit in a script - ROO-2270
-                return processManager.getProcessManagerStatus() == ProcessManagerStatus.AVAILABLE
-                        || processManager.getProcessManagerStatus() == ProcessManagerStatus.BUSY_EXECUTING
-                        || processManager.getProcessManagerStatus() == ProcessManagerStatus.TERMINATED;
+                final ProcessManagerStatus processManagerStatus = processManager
+                        .getProcessManagerStatus();
+                return processManagerStatus == ProcessManagerStatus.AVAILABLE
+                        || processManagerStatus == ProcessManagerStatus.BUSY_EXECUTING
+                        || processManagerStatus == ProcessManagerStatus.TERMINATED;
             }
         }
         return false;

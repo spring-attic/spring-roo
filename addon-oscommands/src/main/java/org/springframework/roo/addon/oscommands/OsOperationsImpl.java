@@ -71,8 +71,8 @@ public class OsOperationsImpl implements OsOperations {
 
     private static final Logger LOGGER = HandlerUtils
             .getLogger(OsOperationsImpl.class);
-    @Reference private PathResolver pathResolver;
 
+    @Reference private PathResolver pathResolver;
     @Reference private ProcessManager processManager;
 
     public void executeCommand(final String command) throws IOException {

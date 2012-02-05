@@ -8,8 +8,8 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
+import org.apache.commons.lang3.Validate;
 import org.junit.Test;
-import org.springframework.roo.support.util.ReflectionUtils;
 
 /**
  * Convenience superclass for unit-testing subclasses of
@@ -45,8 +45,8 @@ public abstract class AnnotationValuesTestCase<A, V extends AbstractAnnotationVa
         for (final Method method : annotationClass.getDeclaredMethods()) {
             // Look for a field of this name in the values class or any
             // superclass
-            final Field valueField = ReflectionUtils.findField(
-                    getValuesClass(), method.getName());
+            final Field valueField = findField(getValuesClass(),
+                    method.getName());
             assertNotNull("No value field found for annotation attribute "
                     + method, valueField);
             final int fieldModifiers = valueField.getModifiers();
@@ -56,5 +56,22 @@ public abstract class AnnotationValuesTestCase<A, V extends AbstractAnnotationVa
                     + " is not auto-populated",
                     valueField.getAnnotation(AutoPopulate.class));
         }
+    }
+
+    private Field findField(final Class<?> clazz, final String name) {
+        Validate.notNull(clazz, "Class must not be null");
+        Validate.isTrue(name != null,
+                "Either name or type of the field must be specified");
+        Class<?> searchType = clazz;
+        while (!Object.class.equals(searchType) && searchType != null) {
+            final Field[] fields = searchType.getDeclaredFields();
+            for (final Field field : fields) {
+                if ((name == null || name.equals(field.getName()))) {
+                    return field;
+                }
+            }
+            searchType = searchType.getSuperclass();
+        }
+        return null;
     }
 }
