@@ -4,9 +4,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.logging.Logger;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.Validate;
 import org.springframework.roo.support.logging.HandlerUtils;
-import org.springframework.roo.support.util.FileCopyUtils;
 
 /**
  * {@link UndoableOperation} to update a file.
@@ -42,7 +42,7 @@ public class UpdateFile implements UndoableOperation {
         this.filenameResolver = filenameResolver;
         try {
             backup = File.createTempFile("UpdateFile", "tmp");
-            FileCopyUtils.copy(actual, backup);
+            FileUtils.copyFile(actual, backup);
         }
         catch (final IOException ioe) {
             throw new IllegalStateException("Unable to make a backup of file '"
@@ -74,7 +74,7 @@ public class UpdateFile implements UndoableOperation {
 
     public boolean undo() {
         try {
-            FileCopyUtils.copy(backup, actual);
+            FileUtils.copyFile(backup, actual);
             LOGGER.fine("Undo manage "
                     + filenameResolver.getMeaningfulName(actual));
             return true;

@@ -24,6 +24,7 @@ import jline.ANSIBuffer.ANSICodes;
 import jline.ConsoleReader;
 import jline.WindowsTerminal;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
@@ -37,7 +38,6 @@ import org.springframework.roo.shell.event.ShellStatus;
 import org.springframework.roo.shell.event.ShellStatus.Status;
 import org.springframework.roo.shell.event.ShellStatusListener;
 import org.springframework.roo.support.util.ClassUtils;
-import org.springframework.roo.support.util.FileCopyUtils;
 
 /**
  * Uses the feature-rich <a
@@ -493,7 +493,7 @@ public abstract class JLineShell extends AbstractShell implements
 
         // Try to build previous command history from the project's log
         try {
-            final String logFileContents = FileCopyUtils.copyToString(new File(
+            final String logFileContents = FileUtils.readFileToString(new File(
                     "log.roo"));
             final String[] logEntries = logFileContents
                     .split(IOUtils.LINE_SEPARATOR);

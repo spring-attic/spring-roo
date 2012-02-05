@@ -1,6 +1,8 @@
 package org.springframework.roo.addon.web.mvc.jsp;
 
 import java.io.File;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -9,6 +11,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
@@ -51,7 +54,6 @@ import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
-import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.FileUtils;
 import org.springframework.roo.support.util.XmlUtils;
 
@@ -470,17 +472,23 @@ public class JspMetadataListener implements MetadataProvider,
         final PathResolver pathResolver = projectOperations.getPathResolver();
         final String imageFile = pathResolver.getIdentifier(path, imagePath);
         if (!fileManager.exists(imageFile)) {
+            InputStream inputStream = null;
+            OutputStream outputStream = null;
             try {
-                FileCopyUtils.copy(
-                        FileUtils.getInputStream(getClass(), imagePath),
-                        fileManager.createFile(
-                                pathResolver.getIdentifier(path, imagePath))
-                                .getOutputStream());
+                inputStream = FileUtils.getInputStream(getClass(), imagePath);
+                outputStream = fileManager.createFile(
+                        pathResolver.getIdentifier(path, imagePath))
+                        .getOutputStream();
+                IOUtils.copy(inputStream, outputStream);
             }
             catch (final Exception e) {
                 throw new IllegalStateException(
                         "Encountered an error during copying of resources for MVC JSP addon.",
                         e);
+            }
+            finally {
+                IOUtils.closeQuietly(inputStream);
+                IOUtils.closeQuietly(outputStream);
             }
         }
     }

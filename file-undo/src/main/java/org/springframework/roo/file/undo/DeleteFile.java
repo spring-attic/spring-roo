@@ -4,10 +4,10 @@ import java.io.File;
 import java.io.IOException;
 import java.util.logging.Logger;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.springframework.roo.support.logging.HandlerUtils;
-import org.springframework.roo.support.util.FileCopyUtils;
 
 /**
  * {@link UndoableOperation} to delete a file.
@@ -61,7 +61,7 @@ public class DeleteFile implements UndoableOperation {
 
         try {
             backup = File.createTempFile("DeleteFile", "tmp");
-            FileCopyUtils.copy(actual, backup);
+            FileUtils.copyFile(actual, backup);
         }
         catch (final IOException ioe) {
             throw new IllegalStateException("Unable to make a backup of file '"
@@ -101,7 +101,7 @@ public class DeleteFile implements UndoableOperation {
 
     public boolean undo() {
         try {
-            FileCopyUtils.copy(backup, actual);
+            FileUtils.copyFile(backup, actual);
             LOGGER.fine("Undo delete "
                     + filenameResolver.getMeaningfulName(actual));
             return true;

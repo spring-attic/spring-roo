@@ -7,12 +7,14 @@ import static org.springframework.roo.model.SpringJavaType.REQUEST_MAPPING;
 import static org.springframework.roo.model.SpringJavaType.REQUEST_METHOD;
 import static org.springframework.roo.project.Path.SRC_MAIN_WEBAPP;
 
-import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
@@ -47,7 +49,6 @@ import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.osgi.BundleFindingUtils;
-import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.Pair;
 import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlUtils;
@@ -361,14 +362,22 @@ public class JspOperationsImpl extends AbstractOperations implements
                     + "/WEB-INF/i18n/messages.properties";
         }
         if (!fileManager.exists(messageBundle)) {
+            InputStream inputStream = null;
+            OutputStream outputStream = null;
             try {
-                FileCopyUtils.copy(i18n.getMessageBundle(), fileManager
-                        .createFile(messageBundle).getOutputStream());
+                inputStream = i18n.getMessageBundle();
+                outputStream = fileManager.createFile(messageBundle)
+                        .getOutputStream();
+                IOUtils.copy(inputStream, outputStream);
             }
-            catch (final IOException e) {
+            catch (final Exception e) {
                 throw new IllegalStateException(
                         "Encountered an error during copying of message bundle MVC JSP addon.",
                         e);
+            }
+            finally {
+                IOUtils.closeQuietly(inputStream);
+                IOUtils.closeQuietly(outputStream);
             }
         }
 
@@ -376,14 +385,22 @@ public class JspOperationsImpl extends AbstractOperations implements
         final String flagGraphic = targetDirectory + "/images/"
                 + i18n.getLocale().getLanguage() /* + country */+ ".png";
         if (!fileManager.exists(flagGraphic)) {
+            InputStream inputStream = null;
+            OutputStream outputStream = null;
             try {
-                FileCopyUtils.copy(i18n.getFlagGraphic(), fileManager
-                        .createFile(flagGraphic).getOutputStream());
+                inputStream = i18n.getFlagGraphic();
+                outputStream = fileManager.createFile(flagGraphic)
+                        .getOutputStream();
+                IOUtils.copy(inputStream, outputStream);
             }
-            catch (final IOException e) {
+            catch (final Exception e) {
                 throw new IllegalStateException(
                         "Encountered an error during copying of flag graphic for MVC JSP addon.",
                         e);
+            }
+            finally {
+                IOUtils.closeQuietly(inputStream);
+                IOUtils.closeQuietly(outputStream);
             }
         }
 

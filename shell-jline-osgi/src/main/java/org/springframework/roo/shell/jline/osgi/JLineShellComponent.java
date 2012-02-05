@@ -174,11 +174,10 @@ public class JLineShellComponent extends JLineShell {
             if (StringUtils.isNotBlank(requestParameters)) {
                 urlStr += "?" + requestParameters;
             }
+            // Get the response
             final URL url = new URL(urlStr);
             inputStream = urlInputStreamService.openConnection(url);
-            // Get the response
-            final List<String> lines = IOUtils.readLines(inputStream);
-            return StringUtils.join(lines.toArray());
+            return IOUtils.toString(inputStream);
         }
         catch (final Exception e) {
             return null;

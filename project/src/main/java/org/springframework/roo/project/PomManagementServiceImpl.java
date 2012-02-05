@@ -1,8 +1,7 @@
 package org.springframework.roo.project;
 
-import static org.springframework.roo.support.util.FileUtils.CURRENT_DIRECTORY;
-
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -39,7 +38,6 @@ import org.w3c.dom.Element;
 public class PomManagementServiceImpl implements PomManagementService {
 
     private static class PomComparator implements Comparator<String> {
-
         private final Map<String, Pom> pomMap;
 
         /**
@@ -52,8 +50,8 @@ public class PomManagementServiceImpl implements PomManagementService {
         }
 
         public int compare(final String s1, final String s2) {
-            final String p1 = pomMap.get(s1).getRoot() + File.separator;
-            final String p2 = pomMap.get(s2).getRoot() + File.separator;
+            final String p1 = pomMap.get(s1).getRoot() + SEPARATOR;
+            final String p2 = pomMap.get(s2).getRoot() + SEPARATOR;
             if (p1.startsWith(p2)) {
                 return -1;
             }
@@ -64,30 +62,27 @@ public class PomManagementServiceImpl implements PomManagementService {
         }
     }
 
+    private static final String SEPARATOR = File.separator;
     private static final String DEFAULT_POM_NAME = "pom.xml";
-
-    private static final String DEFAULT_RELATIVE_PATH = ".." + File.separator
+    private static final String DEFAULT_RELATIVE_PATH = ".." + SEPARATOR
             + DEFAULT_POM_NAME;
+
     @Reference FileManager fileManager;
     @Reference FileMonitorService fileMonitorService;
-    private String focusedModulePath;
     @Reference MetadataDependencyRegistry metadataDependencyRegistry;
     @Reference MetadataService metadataService;
-
     @Reference PomFactory pomFactory;
-    private final Map<String, Pom> pomMap = new LinkedHashMap<String, Pom>();
-    private String projectRootDirectory;
     @Reference Shell shell;
 
-    // ------------------------ OSGi lifecycle callbacks -----------------------
-
+    private String focusedModulePath;
+    private final Map<String, Pom> pomMap = new LinkedHashMap<String, Pom>();
+    private String projectRootDirectory;
     private final Set<String> toBeParsed = new HashSet<String>();
-
-    // --------------------- PomManagementService methods ----------------------
 
     protected void activate(final ComponentContext context) {
         final File projectDirectory = new File(StringUtils.defaultIfEmpty(
-                OSGiUtils.getRooWorkingDirectory(context), CURRENT_DIRECTORY));
+                OSGiUtils.getRooWorkingDirectory(context),
+                FileUtils.CURRENT_DIRECTORY));
         projectRootDirectory = FileUtils.getCanonicalPath(projectDirectory);
     }
 
@@ -131,10 +126,14 @@ public class PomManagementServiceImpl implements PomManagementService {
                 + DEFAULT_POM_NAME;
         File pom = new File(pomPath);
         while (!pom.exists()) {
-            if (startingPoint.equals(File.separator)) {
+            if (startingPoint.equals(SEPARATOR)) {
                 break;
             }
-            startingPoint = FileUtils.backOneDirectory(startingPoint);
+            startingPoint = StringUtils.removeEnd(startingPoint, SEPARATOR);
+            startingPoint = startingPoint.substring(0,
+                    startingPoint.lastIndexOf(SEPARATOR));
+            startingPoint = StringUtils.removeEnd(startingPoint, SEPARATOR);
+
             pomPath = FileUtils.ensureTrailingSeparator(startingPoint)
                     + DEFAULT_POM_NAME;
             pom = new File(pomPath);
@@ -149,7 +148,7 @@ public class PomManagementServiceImpl implements PomManagementService {
                 .ensureTrailingSeparator(pomDirectory);
         final String moduleName = StringUtils.removeStart(
                 normalisedPomDirectory, normalisedRootPath);
-        return FileUtils.removeTrailingSeparator(moduleName);
+        return StringUtils.stripEnd(moduleName, SEPARATOR);
     }
 
     public Collection<String> getModuleNames() {
@@ -181,8 +180,7 @@ public class PomManagementServiceImpl implements PomManagementService {
 
     public Pom getRootPom() {
         updatePomCache();
-        return pomMap.get(projectRootDirectory + File.separator
-                + DEFAULT_POM_NAME);
+        return pomMap.get(projectRootDirectory + SEPARATOR + DEFAULT_POM_NAME);
     }
 
     private Set<Pom> parseUnparsedPoms() {
@@ -192,8 +190,13 @@ public class PomManagementServiceImpl implements PomManagementService {
                 .hasNext();) {
             final String pathToChangedPom = iter.next();
             if (new File(pathToChangedPom).exists()) {
-                final String pomContents = FileUtils.read(new File(
-                        pathToChangedPom));
+                String pomContents = "";
+                try {
+                    pomContents = org.apache.commons.io.FileUtils
+                            .readFileToString(new File(pathToChangedPom));
+                }
+                catch (IOException ignored) {
+                }
                 if (StringUtils.isNotBlank(pomContents)) {
                     final Element rootElement = XmlUtils
                             .stringToElement(pomContents);
@@ -267,12 +270,12 @@ public class PomManagementServiceImpl implements PomManagementService {
 
     private String resolveRelativePath(String relativeTo,
             final String relativePath) {
-        if (relativeTo.endsWith(File.separator)) {
+        if (relativeTo.endsWith(SEPARATOR)) {
             relativeTo = relativeTo.substring(0, relativeTo.length() - 1);
         }
         while (new File(relativeTo).isFile()) {
             relativeTo = relativeTo.substring(0,
-                    relativeTo.lastIndexOf(File.separator));
+                    relativeTo.lastIndexOf(SEPARATOR));
         }
         final String[] relativePathSegments = relativePath.split(FileUtils
                 .getFileSeparatorAsRegex());
@@ -289,19 +292,19 @@ public class PomManagementServiceImpl implements PomManagementService {
         final StringBuilder sb = new StringBuilder();
         for (int i = backCount; i < relativePathSegments.length; i++) {
             sb.append(relativePathSegments[i]);
-            sb.append(File.separatorChar);
+            sb.append(SEPARATOR);
         }
 
         while (backCount > 0) {
             relativeTo = relativeTo.substring(0,
-                    relativeTo.lastIndexOf(File.separatorChar));
+                    relativeTo.lastIndexOf(SEPARATOR));
             backCount--;
         }
-        String path = relativeTo + File.separator + sb.toString();
+        String path = relativeTo + SEPARATOR + sb.toString();
         if (new File(path).isDirectory()) {
             path = path + DEFAULT_POM_NAME;
         }
-        if (path.endsWith(File.separator)) {
+        if (path.endsWith(SEPARATOR)) {
             path = path.substring(0, path.length() - 1);
         }
         return path;

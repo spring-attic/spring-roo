@@ -3,6 +3,7 @@ package __TOP_LEVEL_PACKAGE__;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -18,7 +19,6 @@ import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.DependencyScope;
 import org.springframework.roo.project.DependencyType;
 import org.springframework.roo.project.Repository;
-import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Element;
 
@@ -30,78 +30,78 @@ import org.w3c.dom.Element;
 @Component // Use these Apache Felix annotations to register your commands class in the Roo container
 @Service
 public class __APP_NAME__OperationsImpl implements __APP_NAME__Operations {
-	
-	/**
-	 * Use ProjectOperations to install new dependencies, plugins, properties, etc into the project configuration
-	 */
-	@Reference private ProjectOperations projectOperations;
+    
+    /**
+     * Use ProjectOperations to install new dependencies, plugins, properties, etc into the project configuration
+     */
+    @Reference private ProjectOperations projectOperations;
 
-	/**
-	 * Use TypeLocationService to find types which are annotated with a given annotation in the project
-	 */
-	@Reference private TypeLocationService typeLocationService;
-	
-	/**
-	 * Use TypeManagementService to change types
-	 */
-	@Reference private TypeManagementService typeManagementService;
+    /**
+     * Use TypeLocationService to find types which are annotated with a given annotation in the project
+     */
+    @Reference private TypeLocationService typeLocationService;
+    
+    /**
+     * Use TypeManagementService to change types
+     */
+    @Reference private TypeManagementService typeManagementService;
 
-	/** {@inheritDoc} */
-	public boolean isCommandAvailable() {
-		// Check if a project has been created
-		return projectOperations.isFocusedProjectAvailable();
-	}
+    /** {@inheritDoc} */
+    public boolean isCommandAvailable() {
+        // Check if a project has been created
+        return projectOperations.isFocusedProjectAvailable();
+    }
 
-	/** {@inheritDoc} */
-	public void annotateType(JavaType javaType) {
-		// Use Roo's Assert type for null checks
-		Assert.notNull(javaType, "Java type required");
+    /** {@inheritDoc} */
+    public void annotateType(JavaType javaType) {
+        // Use Roo's Assert type for null checks
+        Validate.notNull(javaType, "Java type required");
 
-		// Obtain ClassOrInterfaceTypeDetails for this java type
-		ClassOrInterfaceTypeDetails existing = typeLocationService.getTypeDetails(javaType);
+        // Obtain ClassOrInterfaceTypeDetails for this java type
+        ClassOrInterfaceTypeDetails existing = typeLocationService.getTypeDetails(javaType);
 
-		// Test if the annotation already exists on the target type
-		if (existing != null && MemberFindingUtils.getAnnotationOfType(existing.getAnnotations(), new JavaType(Roo__APP_NAME__.class.getName())) == null) {
-			ClassOrInterfaceTypeDetailsBuilder classOrInterfaceTypeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(existing);
-			
-			// Create JavaType instance for the add-ons trigger annotation
-			JavaType rooRoo__APP_NAME__ = new JavaType(Roo__APP_NAME__.class.getName());
+        // Test if the annotation already exists on the target type
+        if (existing != null && MemberFindingUtils.getAnnotationOfType(existing.getAnnotations(), new JavaType(Roo__APP_NAME__.class.getName())) == null) {
+            ClassOrInterfaceTypeDetailsBuilder classOrInterfaceTypeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(existing);
+            
+            // Create JavaType instance for the add-ons trigger annotation
+            JavaType rooRoo__APP_NAME__ = new JavaType(Roo__APP_NAME__.class.getName());
 
-			// Create Annotation metadata
-			AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(rooRoo__APP_NAME__);
-			
-			// Add annotation to target type
-			classOrInterfaceTypeDetailsBuilder.addAnnotation(annotationBuilder.build());
-			
-			// Save changes to disk
-			typeManagementService.createOrUpdateTypeOnDisk(classOrInterfaceTypeDetailsBuilder.build());
-		}
-	}
+            // Create Annotation metadata
+            AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(rooRoo__APP_NAME__);
+            
+            // Add annotation to target type
+            classOrInterfaceTypeDetailsBuilder.addAnnotation(annotationBuilder.build());
+            
+            // Save changes to disk
+            typeManagementService.createOrUpdateTypeOnDisk(classOrInterfaceTypeDetailsBuilder.build());
+        }
+    }
 
-	/** {@inheritDoc} */
-	public void annotateAll() {
-		// Use the TypeLocationService to scan project for all types with a specific annotation
-		for (JavaType type: typeLocationService.findTypesWithAnnotation(new JavaType("org.springframework.roo.addon.javabean.RooJavaBean"))) {
-			annotateType(type);
-		}
-	}
-	
-	/** {@inheritDoc} */
-	public void setup() {
-		// Install the add-on Google code repository needed to get the annotation 
-		projectOperations.addRepository("", new Repository("__APP_NAME__ Roo add-on repository", "__APP_NAME__ Roo add-on repository", "https://__PROJECT_NAME__.googlecode.com/svn/repo"));
-		
-		List<Dependency> dependencies = new ArrayList<Dependency>();
-		
-		// Install the dependency on the add-on jar (
-		dependencies.add(new Dependency("__TOP_LEVEL_PACKAGE__", "__TOP_LEVEL_PACKAGE__", "0.1.0.BUILD-SNAPSHOT", DependencyType.JAR, DependencyScope.PROVIDED));
-		
-		// Install dependencies defined in external XML file
-		for (Element dependencyElement : XmlUtils.findElements("/configuration/batch/dependencies/dependency", XmlUtils.getConfiguration(getClass()))) {
-			dependencies.add(new Dependency(dependencyElement));
-		}
+    /** {@inheritDoc} */
+    public void annotateAll() {
+        // Use the TypeLocationService to scan project for all types with a specific annotation
+        for (JavaType type: typeLocationService.findTypesWithAnnotation(new JavaType("org.springframework.roo.addon.javabean.RooJavaBean"))) {
+            annotateType(type);
+        }
+    }
+    
+    /** {@inheritDoc} */
+    public void setup() {
+        // Install the add-on Google code repository needed to get the annotation 
+        projectOperations.addRepository("", new Repository("__APP_NAME__ Roo add-on repository", "__APP_NAME__ Roo add-on repository", "https://__PROJECT_NAME__.googlecode.com/svn/repo"));
+        
+        List<Dependency> dependencies = new ArrayList<Dependency>();
+        
+        // Install the dependency on the add-on jar (
+        dependencies.add(new Dependency("__TOP_LEVEL_PACKAGE__", "__TOP_LEVEL_PACKAGE__", "0.1.0.BUILD-SNAPSHOT", DependencyType.JAR, DependencyScope.PROVIDED));
+        
+        // Install dependencies defined in external XML file
+        for (Element dependencyElement : XmlUtils.findElements("/configuration/batch/dependencies/dependency", XmlUtils.getConfiguration(getClass()))) {
+            dependencies.add(new Dependency(dependencyElement));
+        }
 
-		// Add all new dependencies to pom.xml
-		projectOperations.addDependencies("", dependencies);
-	}
+        // Add all new dependencies to pom.xml
+        projectOperations.addDependencies("", dependencies);
+    }
 }

@@ -62,7 +62,6 @@ import org.springframework.roo.project.Repository;
 import org.springframework.roo.project.Resource;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.DomUtils;
-import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.FileUtils;
 import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlUtils;
@@ -501,16 +500,15 @@ public class JpaOperationsImpl implements JpaOperations {
             return;
         }
 
-        final InputStream in;
+        final InputStream inputStream;
         if (appenginePathExists) {
-            in = fileManager.getInputStream(appenginePath);
+            inputStream = fileManager.getInputStream(appenginePath);
         }
         else {
-            in = FileUtils.getInputStream(getClass(),
+            inputStream = FileUtils.getInputStream(getClass(),
                     "appengine-web-template.xml");
-            Validate.notNull(in, "Could not acquire appengine-web.xml template");
         }
-        final Document appengine = XmlUtils.readXml(in);
+        final Document appengine = XmlUtils.readXml(inputStream);
 
         final Element root = appengine.getDocumentElement();
         final Element applicationElement = XmlUtils.findFirstElement(
@@ -525,15 +523,21 @@ public class JpaOperationsImpl implements JpaOperations {
         }
 
         if (!loggingPropertiesPathExists) {
+            InputStream templateInputStream = null;
+            OutputStream outputStream = null;
             try {
-                final InputStream templateInputStream = FileUtils
-                        .getInputStream(getClass(), "logging.properties");
-                FileCopyUtils.copy(templateInputStream,
-                        fileManager.createFile(loggingPropertiesPath)
-                                .getOutputStream());
+                templateInputStream = FileUtils.getInputStream(getClass(),
+                        "logging.properties");
+                outputStream = fileManager.createFile(loggingPropertiesPath)
+                        .getOutputStream();
+                IOUtils.copy(templateInputStream, outputStream);
             }
             catch (final IOException e) {
                 throw new IllegalStateException(e);
+            }
+            finally {
+                IOUtils.closeQuietly(templateInputStream);
+                IOUtils.closeQuietly(outputStream);
             }
         }
     }
@@ -627,8 +631,6 @@ public class JpaOperationsImpl implements JpaOperations {
             else {
                 inputStream = FileUtils.getInputStream(getClass(),
                         templateFilename);
-                Validate.notNull(inputStream, "Could not acquire "
-                        + templateFilename);
             }
             props.load(inputStream);
         }
@@ -1170,9 +1172,8 @@ public class JpaOperationsImpl implements JpaOperations {
             // Use the addon's template file
             inputStream = FileUtils.getInputStream(getClass(),
                     "persistence-template.xml");
-            Validate.notNull(inputStream,
-                    "Could not acquire persistence.xml template");
         }
+
         final Document persistence = XmlUtils.readXml(inputStream);
         final Element root = persistence.getDocumentElement();
         final Element persistenceElement = XmlUtils.findFirstElement(

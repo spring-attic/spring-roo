@@ -11,10 +11,10 @@ import static org.springframework.roo.model.SpringJavaType.OPEN_ENTITY_MANAGER_I
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
@@ -33,9 +33,7 @@ import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.ProjectType;
 import org.springframework.roo.support.util.DomUtils;
-import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.springframework.roo.support.util.WebXmlUtils;
 import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlUtils;
@@ -159,12 +157,12 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
         if (fileManager.exists(physicalPath)) {
             return;
         }
+        InputStream inputStream = null;
         try {
-            final InputStream template = FileUtils
+            inputStream = FileUtils
                     .getInputStream(getClass(),
                             "converter/ApplicationConversionServiceFactoryBean-template._java");
-            String input = FileCopyUtils.copyToString(new InputStreamReader(
-                    template));
+            String input = IOUtils.toString(inputStream);
             input = input.replace("__PACKAGE__",
                     thePackage.getFullyQualifiedPackageName());
             fileManager.createOrUpdateTextFileIfRequired(physicalPath, input,
@@ -173,6 +171,9 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
         catch (final IOException e) {
             throw new IllegalStateException("Unable to create '" + physicalPath
                     + "'", e);
+        }
+        finally {
+            IOUtils.closeQuietly(inputStream);
         }
     }
 

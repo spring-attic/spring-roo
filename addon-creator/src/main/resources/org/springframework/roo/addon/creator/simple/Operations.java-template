@@ -7,21 +7,21 @@ package __TOP_LEVEL_PACKAGE__;
  */
 public interface __APP_NAME__Operations {
 
-	/**
-	 * Indicate of the install tags command should be available
-	 * 
-	 * @return true if it should be available, otherwise false
-	 */
-	boolean isInstallTagsCommandAvailable();
+    /**
+     * Indicate of the install tags command should be available
+     * 
+     * @return true if it should be available, otherwise false
+     */
+    boolean isInstallTagsCommandAvailable();
 
-	/**
-	 * @param propertyName to obtain (required)
-	 * @return a message that will ultimately be displayed on the shell
-	 */
-	String getProperty(String propertyName);
-	
-	/**
-	 * Install tags used for MVC scaffolded apps into the target project.
-	 */
-	void installTags();
+    /**
+     * @param propertyName to obtain (required)
+     * @return a message that will ultimately be displayed on the shell
+     */
+    String getProperty(String propertyName);
+    
+    /**
+     * Install tags used for MVC scaffolded apps into the target project.
+     */
+    void installTags();
 }

@@ -3,9 +3,9 @@ package org.springframework.roo.uaa;
 import static org.apache.commons.io.IOUtils.LINE_SEPARATOR;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -14,7 +14,6 @@ import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
 import org.springframework.roo.shell.CommandMarker;
 import org.springframework.roo.shell.converters.StaticFieldConverter;
-import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.MessageDisplayUtils;
 import org.springframework.uaa.client.UaaService;
 import org.springframework.uaa.client.protobuf.UaaClient.Privacy.PrivacyLevel;
@@ -97,8 +96,7 @@ public class UaaCommands implements CommandMarker {
 
         if (file != null) {
             try {
-                final FileWriter writer = new FileWriter(file);
-                FileCopyUtils.copy(sb.toString(), writer);
+                FileUtils.write(file, sb.toString());
             }
             catch (final IOException ioe) {
                 throw new IllegalStateException(ioe);

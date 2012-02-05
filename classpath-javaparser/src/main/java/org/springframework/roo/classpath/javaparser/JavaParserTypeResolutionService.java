@@ -7,7 +7,9 @@ import japa.parser.ast.body.TypeDeclaration;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.IOException;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
@@ -15,7 +17,6 @@ import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.classpath.TypeResolutionService;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.support.util.FileUtils;
 
 @Component(immediate = true)
 @Service
@@ -29,7 +30,15 @@ public class JavaParserTypeResolutionService implements TypeResolutionService {
                 "The identifier doesn't represent a file");
         try {
             final File file = new File(fileIdentifier);
-            final String typeContents = FileUtils.read(file);
+            String typeContents = "";
+            try {
+                typeContents = FileUtils.readFileToString(file);
+            }
+            catch (IOException ignored) {
+            }
+            if (StringUtils.isBlank(typeContents)) {
+                return null;
+            }
             final CompilationUnit compilationUnit = JavaParser
                     .parse(new ByteArrayInputStream(typeContents.getBytes()));
             final String typeName = fileIdentifier.substring(
@@ -58,7 +67,12 @@ public class JavaParserTypeResolutionService implements TypeResolutionService {
                 "The identifier doesn't represent a file");
         try {
             final File file = new File(fileIdentifier);
-            final String typeContents = FileUtils.read(file);
+            String typeContents = "";
+            try {
+                typeContents = FileUtils.readFileToString(file);
+            }
+            catch (IOException ignored) {
+            }
             if (StringUtils.isBlank(typeContents)) {
                 return null;
             }

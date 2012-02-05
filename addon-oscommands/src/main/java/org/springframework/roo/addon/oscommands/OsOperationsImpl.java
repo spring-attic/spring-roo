@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.util.List;
 import java.util.logging.Logger;
 
 import org.apache.commons.io.IOUtils;
@@ -45,8 +44,7 @@ public class OsOperationsImpl implements OsOperations {
             // Prevent thread name from being presented in Roo shell
             Thread.currentThread().setName("");
             try {
-                List<String> lines = IOUtils.readLines(reader);
-                for (String line : lines) {
+                for (String line : IOUtils.readLines(reader)) {
                     if (line.startsWith("[ERROR]")) {
                         LOGGER.severe(line);
                     }

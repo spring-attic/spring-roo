@@ -18,13 +18,15 @@ import static org.springframework.roo.project.Path.SRC_MAIN_WEBAPP;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
@@ -63,7 +65,6 @@ import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.support.osgi.OSGiUtils;
 import org.springframework.roo.support.util.CollectionUtils;
 import org.springframework.roo.support.util.DomUtils;
-import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.FileUtils;
 import org.springframework.roo.support.util.WebXmlUtils;
 import org.springframework.roo.support.util.XmlElementBuilder;
@@ -91,7 +92,6 @@ public class GwtOperationsImpl implements GwtOperations {
     private static final String OUTPUT_DIRECTORY = "${project.build.directory}/${project.build.finalName}/WEB-INF/classes";
     private static final JavaSymbolName VALUE = new JavaSymbolName("value");
 
-    private ComponentContext context;
     @Reference protected FileManager fileManager;
     @Reference protected GwtTemplateService gwtTemplateService;
     @Reference protected GwtTypeService gwtTypeService;
@@ -100,9 +100,10 @@ public class GwtOperationsImpl implements GwtOperations {
     @Reference protected ProjectOperations projectOperations;
     @Reference protected TypeLocationService typeLocationService;
     @Reference protected TypeManagementService typeManagementService;
+    @Reference protected WebMvcOperations webMvcOperations;
 
     private Boolean wasGaeEnabled;
-    @Reference protected WebMvcOperations webMvcOperations;
+    private ComponentContext context;
 
     protected void activate(final ComponentContext context) {
         this.context = context;
@@ -111,8 +112,7 @@ public class GwtOperationsImpl implements GwtOperations {
     private void addPackageToGwtXml(final JavaPackage sourcePackage) {
         String gwtConfig = gwtTypeService.getGwtModuleXml(projectOperations
                 .getFocusedModuleName());
-        gwtConfig = FileUtils.removeTrailingSeparator(gwtConfig).substring(0,
-                gwtConfig.lastIndexOf(File.separator));
+        gwtConfig = StringUtils.stripEnd(gwtConfig, File.separator);
         final String moduleRoot = projectOperations.getPathResolver()
                 .getFocusedRoot(SRC_MAIN_JAVA);
         final String topLevelPackage = gwtConfig.replace(
@@ -306,11 +306,10 @@ public class GwtOperationsImpl implements GwtOperations {
                 continue;
             }
             try {
-                String input = FileCopyUtils
-                        .copyToString(new InputStreamReader(url.openStream()));
+                String input = IOUtils.toString(url);
                 input = processTemplate(input, null);
-                final String existing = FileCopyUtils.copyToString(new File(
-                        targetFilename));
+                final String existing = org.apache.commons.io.FileUtils
+                        .readFileToString(new File(targetFilename));
                 if (existing.equals(input)) {
                     // new File(targetFilename).delete();
                     fileManager.delete(targetFilename);
@@ -711,19 +710,22 @@ public class GwtOperationsImpl implements GwtOperations {
                     url.getPath().lastIndexOf('/') + 1);
             fileName = fileName.replace("-template", "");
             final String targetFilename = targetDirectory + fileName;
+
+            InputStream inputStream = null;
+            OutputStream outputStream = null;
             try {
                 if (fileManager.exists(targetFilename) && !overwrite) {
                     continue;
                 }
                 if (targetFilename.endsWith("png")) {
-                    FileCopyUtils.copy(url.openStream(), fileManager
-                            .createFile(targetFilename).getOutputStream());
+                    inputStream = url.openStream();
+                    outputStream = fileManager.createFile(targetFilename)
+                            .getOutputStream();
+                    IOUtils.copy(inputStream, outputStream);
                 }
                 else {
                     // Read template and insert the user's package
-                    String input = FileCopyUtils
-                            .copyToString(new InputStreamReader(url
-                                    .openStream()));
+                    String input = IOUtils.toString(url);
                     input = processTemplate(input, segmentPackage);
 
                     // Output the file for the user
@@ -734,6 +736,10 @@ public class GwtOperationsImpl implements GwtOperations {
             catch (final IOException e) {
                 throw new IllegalStateException("Unable to create '"
                         + targetFilename + "'", e);
+            }
+            finally {
+                IOUtils.closeQuietly(inputStream);
+                IOUtils.closeQuietly(outputStream);
             }
         }
     }

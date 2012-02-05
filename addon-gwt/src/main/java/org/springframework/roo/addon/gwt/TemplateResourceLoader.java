@@ -5,15 +5,13 @@ import hapax.TemplateException;
 import hapax.TemplateLoader;
 import hapax.parser.TemplateParser;
 
-import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
-import org.springframework.roo.support.util.FileCopyUtils;
 
 /**
  * Loads hapax templates from the classpath.
@@ -78,16 +76,18 @@ public class TemplateResourceLoader implements TemplateLoader {
             return cache.get(templatePath);
         }
 
-        final InputStream is = getClass().getClassLoader().getResourceAsStream(
-                templatePath);
-        Validate.notNull(is, "template path required");
+        final InputStream inputStream = getClass().getClassLoader()
+                .getResourceAsStream(templatePath);
+        Validate.notNull(inputStream, "template path required");
         String contents;
         try {
-            contents = FileCopyUtils.copyToString(new InputStreamReader(
-                    new BufferedInputStream(is)));
+            contents = IOUtils.toString(inputStream);
         }
         catch (final IOException e) {
             throw new IllegalStateException(e);
+        }
+        finally {
+            IOUtils.closeQuietly(inputStream);
         }
 
         final Template template = parser == null ? new Template(contents,

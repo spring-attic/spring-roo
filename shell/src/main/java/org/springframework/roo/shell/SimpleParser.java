@@ -31,12 +31,13 @@ import java.util.regex.Pattern;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.transform.Transformer;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.CollectionUtils;
-import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.CDATASection;
@@ -1016,10 +1017,14 @@ public class SimpleParser implements Parser {
             XmlUtils.writeXml(transformer, byteArrayOutputStream, document);
             try {
                 final File output = new File(f, "appendix-command-index.xml");
-                FileCopyUtils.copy(byteArrayOutputStream.toByteArray(), output);
+                FileUtils.writeByteArrayToFile(output,
+                        byteArrayOutputStream.toByteArray());
             }
             catch (final IOException ioe) {
                 throw new IllegalStateException(ioe);
+            }
+            finally {
+                IOUtils.closeQuietly(byteArrayOutputStream);
             }
         }
     }

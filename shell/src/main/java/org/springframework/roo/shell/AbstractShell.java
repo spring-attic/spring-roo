@@ -3,13 +3,11 @@ package org.springframework.roo.shell;
 import static org.apache.commons.io.IOUtils.LINE_SEPARATOR;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.DateFormat;
@@ -453,13 +451,9 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher
         Validate.notNull(script, "Script file to parse is required");
         final double startedNanoseconds = System.nanoTime();
         final InputStream inputStream = openScript(script);
-
-        BufferedReader in = null;
         try {
-            in = new BufferedReader(new InputStreamReader(inputStream));
-            String line;
             int i = 0;
-            while ((line = in.readLine()) != null) {
+            for (String line : IOUtils.readLines(inputStream)) {
                 i++;
                 if (lineNumbers) {
                     logger.fine("Line " + i + ": " + line);
@@ -487,7 +481,6 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher
         }
         finally {
             IOUtils.closeQuietly(inputStream);
-            IOUtils.closeQuietly(in);
             final double executionDurationInSeconds = (System.nanoTime() - startedNanoseconds) / 1000000000D;
             logger.fine("Script required "
                     + round(executionDurationInSeconds, 3)

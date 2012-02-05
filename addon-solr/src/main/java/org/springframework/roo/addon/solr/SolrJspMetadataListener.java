@@ -1,10 +1,13 @@
 package org.springframework.roo.addon.solr;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -35,7 +38,6 @@ import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
-import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.FileUtils;
 import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlRoundTripUtils;
@@ -83,15 +85,22 @@ public class SolrJspMetadataListener implements MetadataProvider,
         final String projectFileLocation = pathResolver.getFocusedIdentifier(
                 Path.SRC_MAIN_WEBAPP, relativeProjectFileLocation);
         if (!fileManager.exists(projectFileLocation)) {
+            InputStream inputStream = null;
+            OutputStream outputStream = null;
             try {
-                FileCopyUtils.copy(FileUtils.getInputStream(getClass(),
-                        relativeTemplateLocation),
-                        fileManager.createFile(projectFileLocation)
-                                .getOutputStream());
+                inputStream = FileUtils.getInputStream(getClass(),
+                        relativeTemplateLocation);
+                outputStream = fileManager.createFile(projectFileLocation)
+                        .getOutputStream();
+                IOUtils.copy(inputStream, outputStream);
             }
             catch (final IOException e) {
                 throw new IllegalStateException("Could not copy "
                         + relativeProjectFileLocation + " into project", e);
+            }
+            finally {
+                IOUtils.closeQuietly(inputStream);
+                IOUtils.closeQuietly(outputStream);
             }
         }
     }

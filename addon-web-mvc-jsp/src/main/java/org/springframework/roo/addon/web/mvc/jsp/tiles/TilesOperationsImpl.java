@@ -3,12 +3,13 @@ package org.springframework.roo.addon.web.mvc.jsp.tiles;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
+import java.io.OutputStream;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
@@ -18,7 +19,6 @@ import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.PathResolver;
-import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.FileUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
@@ -184,10 +184,11 @@ public class TilesOperationsImpl implements TilesOperations {
         MutableFile mutableFile = null;
         if (fileManager.exists(tilesDefinitionFile)) {
             // First verify if the file has even changed
-            final File f = new File(tilesDefinitionFile);
+            final File file = new File(tilesDefinitionFile);
             String existing = null;
             try {
-                existing = FileCopyUtils.copyToString(f);
+                existing = org.apache.commons.io.FileUtils
+                        .readFileToString(file);
             }
             catch (final IOException ignored) {
             }
@@ -204,11 +205,12 @@ public class TilesOperationsImpl implements TilesOperations {
         }
 
         if (mutableFile != null) {
+            OutputStream outputStream = null;
             try {
                 // We need to write the file out (it's a new file, or the
                 // existing file has different contents)
-                FileCopyUtils.copy(viewContent, new OutputStreamWriter(
-                        mutableFile.getOutputStream()));
+                outputStream = mutableFile.getOutputStream();
+                IOUtils.write(viewContent, outputStream);
 
                 // Return and indicate we wrote out the file
                 return true;
@@ -216,6 +218,9 @@ public class TilesOperationsImpl implements TilesOperations {
             catch (final IOException ioe) {
                 throw new IllegalStateException("Could not output '"
                         + mutableFile.getCanonicalPath() + "'", ioe);
+            }
+            finally {
+                IOUtils.closeQuietly(outputStream);
             }
         }
 

@@ -1,6 +1,7 @@
 package org.springframework.roo.file.undo;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Date;
 import java.util.logging.Logger;
 
@@ -72,7 +73,10 @@ public class DeleteDirectory implements UndoableOperation {
                     "Unable to create a complete backup of directory '"
                             + directory + "'");
         }
-        if (!FileUtils.deleteRecursively(directory)) {
+        try {
+            org.apache.commons.io.FileUtils.deleteDirectory(directory);
+        }
+        catch (IOException e) {
             throw new IllegalStateException(
                     "Unable to completely delete directory '" + directory + "'");
         }
@@ -87,8 +91,16 @@ public class DeleteDirectory implements UndoableOperation {
 
     public void reset() {
         // Fix for ROO-1555
+        boolean success = true;
         try {
-            if (FileUtils.deleteRecursively(backup)) {
+            org.apache.commons.io.FileUtils.deleteDirectory(backup);
+        }
+        catch (IOException e) {
+            success = false;
+        }
+
+        try {
+            if (success) {
                 LOGGER.finest("Reset manage "
                         + filenameResolver.getMeaningfulName(backup));
             }
@@ -108,14 +120,8 @@ public class DeleteDirectory implements UndoableOperation {
     public boolean undo() {
         final boolean success = FileUtils
                 .copyRecursively(backup, actual, false);
-        if (success) {
-            LOGGER.fine("Undo delete "
-                    + filenameResolver.getMeaningfulName(actual));
-        }
-        else {
-            LOGGER.fine("Undo failed "
-                    + filenameResolver.getMeaningfulName(actual));
-        }
+        LOGGER.fine((success ? "Undo delete " : "Undo failed ")
+                + filenameResolver.getMeaningfulName(actual));
         return success;
     }
 }

@@ -16,19 +16,19 @@ import org.springframework.roo.support.util.FileUtils;
 @Service
 public class __APP_NAME__Language extends AbstractLanguage {
 
-	public Locale getLocale() {
-		return new Locale("__LOCALE__");
-	}
-	
-	public String getLanguage() {
-		return "__LANGUAGE__";
-	}
+    public Locale getLocale() {
+        return new Locale("__LOCALE__");
+    }
+    
+    public String getLanguage() {
+        return "__LANGUAGE__";
+    }
 
-	public InputStream getFlagGraphic() {
-		return FileUtils.getInputStream(getClass(), "__FLAG_FILE__");
-	}
+    public InputStream getFlagGraphic() {
+        return FileUtils.getInputStream(getClass(), "__FLAG_FILE__");
+    }
 
-	public InputStream getMessageBundle() {
-		return FileUtils.getInputStream(getClass(), "__MESSAGE_BUNDLE__");
-	}
+    public InputStream getMessageBundle() {
+        return FileUtils.getInputStream(getClass(), "__MESSAGE_BUNDLE__");
+    }
 }

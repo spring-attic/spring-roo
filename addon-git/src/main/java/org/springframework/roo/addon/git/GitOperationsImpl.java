@@ -2,8 +2,11 @@ package org.springframework.roo.addon.git;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.logging.Logger;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -22,7 +25,6 @@ import org.eclipse.jgit.transport.PushResult;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
-import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.FileUtils;
 
 /**
@@ -240,14 +242,22 @@ public class GitOperationsImpl implements GitOperations {
                 Constants.GITIGNORE_FILENAME);
 
         if (!fileManager.exists(gitIgnore)) {
+            InputStream inputStream = null;
+            OutputStream outputStream = null;
             try {
-                FileCopyUtils.copy(FileUtils.getInputStream(getClass(),
-                        "gitignore-template"), fileManager
-                        .createFile(gitIgnore).getOutputStream());
+                inputStream = FileUtils.getInputStream(getClass(),
+                        "gitignore-template");
+                outputStream = fileManager.createFile(gitIgnore)
+                        .getOutputStream();
+                IOUtils.copy(inputStream, outputStream);
             }
             catch (final IOException e) {
                 throw new IllegalStateException("Could not install "
                         + Constants.GITIGNORE_FILENAME + " file in project", e);
+            }
+            finally {
+                IOUtils.closeQuietly(inputStream);
+                IOUtils.closeQuietly(outputStream);
             }
         }
     }

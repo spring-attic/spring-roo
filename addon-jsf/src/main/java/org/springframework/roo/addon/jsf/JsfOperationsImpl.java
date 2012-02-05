@@ -7,7 +7,6 @@ import static org.springframework.roo.model.RooJavaType.ROO_SERIALIZABLE;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -47,7 +46,6 @@ import org.springframework.roo.project.Repository;
 import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.shell.Shell;
 import org.springframework.roo.support.util.DomUtils;
-import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.FileUtils;
 import org.springframework.roo.support.util.WebXmlUtils;
 import org.springframework.roo.support.util.XmlElementBuilder;
@@ -195,11 +193,11 @@ public class JsfOperationsImpl extends AbstractOperations implements
                                 + JavaSymbolName
                                         .getReservedWordSafeName(entity)
                                 + ".xhtml");
+        InputStream inputStream = null;
         try {
-            final InputStream inputStream = FileUtils.getInputStream(
-                    getClass(), "pages/content-template.xhtml");
-            String input = FileCopyUtils.copyToString(new InputStreamReader(
-                    inputStream));
+            inputStream = FileUtils.getInputStream(getClass(),
+                    "pages/content-template.xhtml");
+            String input = IOUtils.toString(inputStream);
             input = input.replace("__BEAN_NAME__", beanName);
             input = input
                     .replace("__DOMAIN_TYPE__", entity.getSimpleTypeName());
@@ -213,6 +211,9 @@ public class JsfOperationsImpl extends AbstractOperations implements
         catch (final IOException e) {
             throw new IllegalStateException("Unable to create '"
                     + domainTypeFile + "'", e);
+        }
+        finally {
+            IOUtils.closeQuietly(inputStream);
         }
     }
 
@@ -523,8 +524,7 @@ public class JsfOperationsImpl extends AbstractOperations implements
         InputStream inputStream = null;
         try {
             inputStream = FileUtils.getInputStream(getClass(), templateName);
-            String input = FileCopyUtils.copyToString(new InputStreamReader(
-                    inputStream));
+            String input = IOUtils.toString(inputStream);
             input = input.replace("__PACKAGE__",
                     destinationPackage.getFullyQualifiedPackageName());
             fileManager.createOrUpdateTextFileIfRequired(physicalPath, input,
@@ -555,8 +555,7 @@ public class JsfOperationsImpl extends AbstractOperations implements
         try {
             inputStream = FileUtils.getInputStream(getClass(),
                     "WEB-INF/faces-config-template.xml");
-            String input = FileCopyUtils.copyToString(new InputStreamReader(
-                    inputStream));
+            String input = IOUtils.toString(inputStream);
             input = input.replace("__PACKAGE__",
                     destinationPackage.getFullyQualifiedPackageName());
             fileManager.createOrUpdateTextFileIfRequired(getFacesConfigFile(),

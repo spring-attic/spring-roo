@@ -1,11 +1,12 @@
 package org.springframework.roo.file.undo;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.logging.Logger;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.Validate;
 import org.springframework.roo.support.logging.HandlerUtils;
-import org.springframework.roo.support.util.FileUtils;
 
 /**
  * {@link UndoableOperation} to create a directory, including any parents.
@@ -57,15 +58,15 @@ public class CreateDirectory implements UndoableOperation {
     }
 
     public boolean undo() {
-        final boolean success = FileUtils.deleteRecursively(deleteFrom);
-        if (success) {
-            LOGGER.fine("Undo create "
-                    + filenameResolver.getMeaningfulName(actual));
+        boolean success = true;
+        try {
+            FileUtils.deleteDirectory(deleteFrom);
         }
-        else {
-            LOGGER.fine("Undo failed "
-                    + filenameResolver.getMeaningfulName(actual));
+        catch (IOException e) {
+            success = false;
         }
+        LOGGER.fine((success ? "Undo create " : "Undo failed ")
+                + filenameResolver.getMeaningfulName(actual));
         return success;
     }
 }

@@ -1,9 +1,12 @@
 package org.springframework.roo.addon.security;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -18,7 +21,6 @@ import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.Property;
 import org.springframework.roo.support.util.DomUtils;
-import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.FileUtils;
 import org.springframework.roo.support.util.WebXmlUtils;
 import org.springframework.roo.support.util.XmlElementBuilder;
@@ -63,13 +65,21 @@ public class SecurityOperationsImpl implements SecurityOperations {
         final String destination = pathResolver.getFocusedIdentifier(
                 Path.SPRING_CONFIG_ROOT, "applicationContext-security.xml");
         if (!fileManager.exists(destination)) {
+            InputStream inputStream = null;
+            OutputStream outputStream = null;
             try {
-                FileCopyUtils.copy(FileUtils.getInputStream(getClass(),
-                        "applicationContext-security-template.xml"),
-                        fileManager.createFile(destination).getOutputStream());
+                inputStream = FileUtils.getInputStream(getClass(),
+                        "applicationContext-security-template.xml");
+                outputStream = fileManager.createFile(destination)
+                        .getOutputStream();
+                IOUtils.copy(inputStream, outputStream);
             }
             catch (final IOException ioe) {
                 throw new IllegalStateException(ioe);
+            }
+            finally {
+                IOUtils.closeQuietly(inputStream);
+                IOUtils.closeQuietly(outputStream);
             }
         }
 
@@ -77,13 +87,21 @@ public class SecurityOperationsImpl implements SecurityOperations {
         final String loginPage = pathResolver.getFocusedIdentifier(
                 Path.SRC_MAIN_WEBAPP, "WEB-INF/views/login.jspx");
         if (!fileManager.exists(loginPage)) {
+            InputStream inputStream = null;
+            OutputStream outputStream = null;
             try {
-                FileCopyUtils.copy(
-                        FileUtils.getInputStream(getClass(), "login.jspx"),
-                        fileManager.createFile(loginPage).getOutputStream());
+                inputStream = FileUtils
+                        .getInputStream(getClass(), "login.jspx");
+                outputStream = fileManager.createFile(loginPage)
+                        .getOutputStream();
+                IOUtils.copy(inputStream, outputStream);
             }
             catch (final IOException ioe) {
                 throw new IllegalStateException(ioe);
+            }
+            finally {
+                IOUtils.closeQuietly(inputStream);
+                IOUtils.closeQuietly(outputStream);
             }
         }
 

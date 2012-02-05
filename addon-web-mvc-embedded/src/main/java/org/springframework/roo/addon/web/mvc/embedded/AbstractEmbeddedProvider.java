@@ -1,11 +1,12 @@
 package org.springframework.roo.addon.web.mvc.embedded;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URL;
 import java.util.logging.Logger;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
@@ -14,9 +15,7 @@ import org.springframework.roo.addon.web.mvc.jsp.JspOperations;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
-import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.url.stream.UrlInputStreamService;
 import org.w3c.dom.Document;
@@ -36,7 +35,7 @@ public abstract class AbstractEmbeddedProvider implements EmbeddedProvider {
             .getLogger(AbstractEmbeddedProvider.class.getName());
 
     @Reference private FileManager fileManager;
-    @Reference private UrlInputStreamService httpService;
+    @Reference private UrlInputStreamService urlInputStreamService;
     @Reference private JspOperations jspOperations;
     @Reference private PathResolver pathResolver;
 
@@ -140,14 +139,20 @@ public abstract class AbstractEmbeddedProvider implements EmbeddedProvider {
         final String tagx = pathResolver.getFocusedIdentifier(
                 Path.SRC_MAIN_WEBAPP, "WEB-INF/tags/embed/" + tagName);
         if (!fileManager.exists(tagx)) {
+            InputStream inputStream = null;
+            OutputStream outputStream = null;
             try {
-                FileCopyUtils
-                        .copy(FileUtils.getInputStream(getClass(), "tags/"
-                                + tagName), fileManager.createFile(tagx)
-                                .getOutputStream());
+                inputStream = FileUtils.getInputStream(getClass(), "tags/"
+                        + tagName);
+                outputStream = fileManager.createFile(tagx).getOutputStream();
+                IOUtils.copy(inputStream, outputStream);
             }
             catch (final IOException e) {
                 throw new IllegalStateException("Could not install " + tagx);
+            }
+            finally {
+                IOUtils.closeQuietly(inputStream);
+                IOUtils.closeQuietly(outputStream);
             }
         }
     }
@@ -182,23 +187,17 @@ public abstract class AbstractEmbeddedProvider implements EmbeddedProvider {
 
         String result = null;
         if (urlStr.startsWith("http://")) {
-            BufferedReader rd = null;
+            InputStream inputStream = null;
             try {
                 final URL url = new URL(urlStr);
-                rd = new BufferedReader(new InputStreamReader(
-                        httpService.openConnection(url)));
-                final StringBuilder sb = new StringBuilder();
-                String line;
-                while ((line = rd.readLine()) != null) {
-                    sb.append(line);
-                }
-                result = sb.toString();
+                inputStream = urlInputStreamService.openConnection(url);
+                return IOUtils.toString(inputStream);
             }
             catch (final IOException e) {
                 LOGGER.warning("Unable to connect to " + urlStr);
             }
             finally {
-                IOUtils.closeQuietly(rd);
+                IOUtils.closeQuietly(inputStream);
             }
         }
         return result;

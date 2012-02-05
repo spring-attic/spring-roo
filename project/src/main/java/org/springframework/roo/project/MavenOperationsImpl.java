@@ -1,13 +1,12 @@
 package org.springframework.roo.project;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.Collections;
 import java.util.logging.Logger;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
@@ -20,7 +19,6 @@ import org.springframework.roo.project.packaging.PackagingProvider;
 import org.springframework.roo.project.packaging.PackagingProviderRegistry;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.DomUtils;
-import org.apache.commons.io.IOUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -38,9 +36,8 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements
         MavenOperations {
 
     private static class LoggingInputStream extends Thread {
-
+        private InputStream inputStream;
         private final ProcessManager processManager;
-        private final BufferedReader reader;
 
         /**
          * Constructor
@@ -50,16 +47,15 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements
          */
         public LoggingInputStream(final InputStream inputStream,
                 final ProcessManager processManager) {
-            reader = new BufferedReader(new InputStreamReader(inputStream));
+            this.inputStream = inputStream;
             this.processManager = processManager;
         }
 
         @Override
         public void run() {
             ActiveProcessManager.setActiveProcessManager(processManager);
-            String line;
             try {
-                while ((line = reader.readLine()) != null) {
+                for (String line : IOUtils.readLines(inputStream)) {
                     if (line.startsWith("[ERROR]")) {
                         LOGGER.severe(line);
                     }
@@ -79,7 +75,7 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements
                 }
             }
             finally {
-                IOUtils.closeQuietly(reader);
+                IOUtils.closeQuietly(inputStream);
                 ActiveProcessManager.clearActiveProcessManager();
             }
         }

@@ -1,8 +1,6 @@
 package org.springframework.roo.support.util;
 
-import java.io.BufferedInputStream;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -61,9 +59,7 @@ public abstract class MessageDisplayUtils {
                     + "'");
         }
         try {
-            final String message = FileCopyUtils
-                    .copyToString(new InputStreamReader(
-                            new BufferedInputStream(inputStream)));
+            final String message = IOUtils.toString(inputStream);
             LOGGER.log(level, message);
         }
         catch (final Exception e) {

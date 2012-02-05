@@ -45,14 +45,8 @@ public class CreateFile implements UndoableOperation {
 
     public boolean undo() {
         final boolean success = actual.delete();
-        if (success) {
-            LOGGER.fine("Undo create "
-                    + filenameResolver.getMeaningfulName(actual));
-        }
-        else {
-            LOGGER.fine("Undo failed "
-                    + filenameResolver.getMeaningfulName(actual));
-        }
+        LOGGER.fine((success ? "Undo create " : "Undo failed ")
+                + filenameResolver.getMeaningfulName(actual));
         return success;
     }
 }

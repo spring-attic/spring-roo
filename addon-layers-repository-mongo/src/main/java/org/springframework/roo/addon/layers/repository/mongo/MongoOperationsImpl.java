@@ -4,7 +4,7 @@ import static org.springframework.roo.model.RooJavaType.ROO_REPOSITORY_MONGO;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
@@ -43,7 +44,6 @@ import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.Repository;
-import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.FileUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
@@ -137,22 +137,26 @@ public class MongoOperationsImpl implements MongoOperations {
         final String appCtxId = pathResolver.getFocusedIdentifier(
                 Path.SPRING_CONFIG_ROOT, MONGO_XML);
         if (!fileManager.exists(appCtxId)) {
+            InputStream inputStream = null;
+            OutputStream outputStream = null;
             try {
-                final InputStream inputStream = FileUtils.getInputStream(
-                        getClass(), MONGO_XML);
+                inputStream = FileUtils.getInputStream(getClass(), MONGO_XML);
                 final MutableFile mutableFile = fileManager
                         .createFile(appCtxId);
-                String input = FileCopyUtils
-                        .copyToString(new InputStreamReader(inputStream));
+                String input = IOUtils.toString(inputStream);
                 input = input.replace("TO_BE_CHANGED_BY_ADDON",
                         projectOperations.getTopLevelPackage(moduleName)
                                 .getFullyQualifiedPackageName());
-                FileCopyUtils.copy(input.getBytes(),
-                        mutableFile.getOutputStream());
+                outputStream = mutableFile.getOutputStream();
+                IOUtils.write(input, outputStream);
             }
             catch (final IOException e) {
                 throw new IllegalStateException("Unable to create file "
                         + appCtxId);
+            }
+            finally {
+                IOUtils.closeQuietly(inputStream);
+                IOUtils.closeQuietly(outputStream);
             }
         }
 

@@ -273,7 +273,7 @@ public class TypeLocationServiceImpl implements TypeLocationService {
 
         String reducedPath = fileCanonicalPath.replace(
                 javaType.getRelativeFileName(), "");
-        reducedPath = FileUtils.removeTrailingSeparator(reducedPath);
+        reducedPath = StringUtils.stripEnd(reducedPath, File.separator);
 
         for (final PhysicalPath physicalPath : module.getPhysicalPaths()) {
             if (physicalPath.getLocationPath().startsWith(reducedPath)) {

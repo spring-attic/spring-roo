@@ -97,6 +97,12 @@
             <artifactId>org.springframework.roo.classpath</artifactId>
             <version>${roo.version}</version>
         </dependency>
+        <!-- Apache commons -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.1</version>
+        </dependency>
     </dependencies>
     <scm>
         <connection>scm:svn:https://${google.code.project.name}.googlecode.com/svn/trunk</connection>

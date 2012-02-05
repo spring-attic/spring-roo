@@ -3,9 +3,11 @@ package org.springframework.roo.project.packaging;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.List;
 import java.util.logging.Logger;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
@@ -19,7 +21,6 @@ import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.DomUtils;
-import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.FileUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
@@ -350,14 +351,20 @@ public abstract class AbstractPackagingProvider implements PackagingProvider {
     private void setUpLog4jConfiguration() {
         final String log4jConfigFile = pathResolver.getFocusedIdentifier(
                 Path.SRC_MAIN_RESOURCES, "log4j.properties");
-        final InputStream template = FileUtils.getInputStream(getClass(),
-                "log4j.properties-template");
+        final InputStream templateInputStream = FileUtils.getInputStream(
+                getClass(), "log4j.properties-template");
+        OutputStream outputStream = null;
         try {
-            FileCopyUtils.copy(template, fileManager
-                    .createFile(log4jConfigFile).getOutputStream());
+            outputStream = fileManager.createFile(log4jConfigFile)
+                    .getOutputStream();
+            IOUtils.copy(templateInputStream, outputStream);
         }
         catch (final IOException e) {
             LOGGER.warning("Unable to install log4j logging configuration");
+        }
+        finally {
+            IOUtils.closeQuietly(templateInputStream);
+            IOUtils.closeQuietly(outputStream);
         }
     }
 }

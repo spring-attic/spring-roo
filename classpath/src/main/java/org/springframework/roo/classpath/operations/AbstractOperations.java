@@ -1,11 +1,13 @@
 package org.springframework.roo.classpath.operations;
 
 import java.io.BufferedReader;
-import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.URL;
 import java.util.logging.Logger;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -13,9 +15,7 @@ import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.osgi.OSGiUtils;
-import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 
@@ -92,15 +92,22 @@ public abstract class AbstractOperations {
             }
             else {
                 if (!fileManager.exists(targetDirectory + fileName)) {
+                    InputStream inputStream = null;
+                    OutputStream outputStream = null;
                     try {
-                        FileCopyUtils.copy(url.openStream(), fileManager
-                                .createFile(targetDirectory + fileName)
-                                .getOutputStream());
+                        inputStream = url.openStream();
+                        outputStream = fileManager.createFile(
+                                targetDirectory + fileName).getOutputStream();
+                        IOUtils.copy(inputStream, outputStream);
                     }
-                    catch (final IOException e) {
+                    catch (final Exception e) {
                         throw new IllegalStateException(
                                 "Encountered an error during copying of resources for the add-on.",
                                 e);
+                    }
+                    finally {
+                        IOUtils.closeQuietly(inputStream);
+                        IOUtils.closeQuietly(outputStream);
                     }
                 }
             }

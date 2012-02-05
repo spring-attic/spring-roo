@@ -1,9 +1,12 @@
 package org.springframework.roo.addon.web.flow;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -22,7 +25,6 @@ import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.ProjectType;
 import org.springframework.roo.project.Repository;
-import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.FileUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
@@ -49,17 +51,24 @@ public class WebFlowOperationsImpl implements WebFlowOperations {
 
     private void copyTemplate(final String templateFileName,
             final String resolvedTargetDirectoryPath) {
+        InputStream inputStream = null;
+        OutputStream outputStream = null;
         try {
-            FileCopyUtils.copy(
-                    FileUtils.getInputStream(getClass(), templateFileName),
-                    fileManager.createFile(
-                            resolvedTargetDirectoryPath + "/"
-                                    + templateFileName).getOutputStream());
+            inputStream = FileUtils
+                    .getInputStream(getClass(), templateFileName);
+            outputStream = fileManager.createFile(
+                    resolvedTargetDirectoryPath + "/" + templateFileName)
+                    .getOutputStream();
+            IOUtils.copy(inputStream, outputStream);
         }
         catch (final IOException e) {
             throw new IllegalStateException(
                     "Encountered an error during copying of resources for Web Flow addon.",
                     e);
+        }
+        finally {
+            IOUtils.closeQuietly(inputStream);
+            IOUtils.closeQuietly(outputStream);
         }
     }
 

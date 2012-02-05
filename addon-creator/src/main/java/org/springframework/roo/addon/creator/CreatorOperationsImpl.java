@@ -4,12 +4,10 @@ import static java.io.File.separatorChar;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.URL;
 import java.util.Locale;
 import java.util.zip.ZipEntry;
@@ -29,7 +27,6 @@ import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
-import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.FileUtils;
 import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlUtils;
@@ -124,13 +121,11 @@ public class CreatorOperationsImpl implements CreatorOperations {
 
         if (StringUtils.isBlank(language)) {
             language = "";
-            final InputStreamReader is = new InputStreamReader(
-                    FileUtils.getInputStream(getClass(), Type.I18N.name()
-                            .toLowerCase() + "/iso3166.txt"));
-            final BufferedReader br = new BufferedReader(is);
-            String line;
+            final InputStream inputStream = FileUtils
+                    .getInputStream(getClass(), Type.I18N.name().toLowerCase()
+                            + "/iso3166.txt");
             try {
-                while ((line = br.readLine()) != null) {
+                for (String line : IOUtils.readLines(inputStream)) {
                     final String[] split = line.split(";");
                     if (split[1].startsWith(locale.getCountry().toUpperCase())) {
                         if (split[0].contains(",")) {
@@ -152,8 +147,7 @@ public class CreatorOperationsImpl implements CreatorOperations {
                         "Could not parse ISO 3166 language list, please use --language option in command");
             }
             finally {
-                IOUtils.closeQuietly(br);
-                IOUtils.closeQuietly(is);
+                IOUtils.closeQuietly(inputStream);
             }
         }
 
@@ -181,24 +175,26 @@ public class CreatorOperationsImpl implements CreatorOperations {
         install("assembly.xml", topLevelPackage, Path.ROOT, Type.I18N,
                 projectName);
 
+        OutputStream outputStream = null;
         try {
-            FileCopyUtils.copy(
-                    new FileInputStream(messageBundle),
-                    fileManager.createFile(
-                            pathResolver.getFocusedIdentifier(
-                                    Path.SRC_MAIN_RESOURCES,
-                                    packagePath + separatorChar
-                                            + messageBundle.getName()))
-                            .getOutputStream());
+            outputStream = fileManager.createFile(
+                    pathResolver.getFocusedIdentifier(
+                            Path.SRC_MAIN_RESOURCES,
+                            packagePath + separatorChar
+                                    + messageBundle.getName()))
+                    .getOutputStream();
+            org.apache.commons.io.FileUtils.copyFile(messageBundle,
+                    outputStream);
             if (flagGraphic != null) {
-                FileCopyUtils.copy(
-                        new FileInputStream(flagGraphic),
-                        fileManager.createFile(
+                outputStream = fileManager
+                        .createFile(
                                 pathResolver.getFocusedIdentifier(
                                         Path.SRC_MAIN_RESOURCES,
                                         packagePath + separatorChar
                                                 + flagGraphic.getName()))
-                                .getOutputStream());
+                        .getOutputStream();
+                org.apache.commons.io.FileUtils.copyFile(flagGraphic,
+                        outputStream);
             }
             else {
                 installFlagGraphic(locale, packagePath);
@@ -207,6 +203,9 @@ public class CreatorOperationsImpl implements CreatorOperations {
         catch (final IOException e) {
             throw new IllegalStateException(
                     "Could not copy addon resources into project", e);
+        }
+        finally {
+            IOUtils.closeQuietly(outputStream);
         }
 
         final String destinationFile = pathResolver.getFocusedIdentifier(
@@ -219,8 +218,7 @@ public class CreatorOperationsImpl implements CreatorOperations {
                             + "/Language.java-template");
             try {
                 // Read template and insert the user's package
-                String input = FileCopyUtils
-                        .copyToString(new InputStreamReader(templateInputStream));
+                String input = IOUtils.toString(templateInputStream);
                 input = input.replace("__TOP_LEVEL_PACKAGE__",
                         topLevelPackage.getFullyQualifiedPackageName());
                 input = input.replace("__APP_NAME__", languageName);
@@ -241,12 +239,16 @@ public class CreatorOperationsImpl implements CreatorOperations {
                 // Output the file for the user
                 final MutableFile mutableFile = fileManager
                         .createFile(destinationFile);
-                FileCopyUtils.copy(input.getBytes(),
-                        mutableFile.getOutputStream());
+                outputStream = mutableFile.getOutputStream();
+                IOUtils.write(input, outputStream);
             }
             catch (final IOException ioe) {
                 throw new IllegalStateException("Unable to create '"
                         + languageName + "Language.java'", ioe);
+            }
+            finally {
+                IOUtils.closeQuietly(templateInputStream);
+                IOUtils.closeQuietly(outputStream);
             }
         }
     }
@@ -273,10 +275,10 @@ public class CreatorOperationsImpl implements CreatorOperations {
         }
 
         // Load the POM template
-        final String pomTemplate = type.name().toLowerCase() + "/roo-addon-"
-                + type.name().toLowerCase() + "-template.xml";
-        final Document pom = XmlUtils.readXml(FileUtils.getInputStream(
-                getClass(), pomTemplate));
+        final InputStream templateInputStream = FileUtils.getInputStream(
+                getClass(), type.name().toLowerCase() + "/roo-addon-"
+                        + type.name().toLowerCase() + "-template.xml");
+        final Document pom = XmlUtils.readXml(templateInputStream);
         final Element root = pom.getDocumentElement();
 
         // Populate it from the given inputs
@@ -341,8 +343,10 @@ public class CreatorOperationsImpl implements CreatorOperations {
         }
         final String wrapperGroupId = topLevelPackage
                 .getFullyQualifiedPackageName();
-        final Document pom = XmlUtils.readXml(FileUtils.getInputStream(
-                getClass(), "wrapper/roo-addon-wrapper-template.xml"));
+
+        final InputStream templateInputStream = FileUtils.getInputStream(
+                getClass(), "wrapper/roo-addon-wrapper-template.xml");
+        final Document pom = XmlUtils.readXml(templateInputStream);
         final Element root = pom.getDocumentElement();
 
         XmlUtils.findRequiredElement("/project/name", root).setTextContent(
@@ -435,9 +439,8 @@ public class CreatorOperationsImpl implements CreatorOperations {
                     + separatorChar + "main" + separatorChar + "assembly"
                     + separatorChar + targetFilename);
         }
-        else if (targetFilename.startsWith("RooAnnotation")) { // Adjust name
-                                                               // for Roo
-                                                               // Annotation
+        // Adjust name for Roo Annotation
+        else if (targetFilename.startsWith("RooAnnotation")) {
             destinationFile = pathResolver.getFocusedIdentifier(
                     path,
                     packagePath
@@ -452,10 +455,10 @@ public class CreatorOperationsImpl implements CreatorOperations {
             final InputStream templateInputStream = FileUtils.getInputStream(
                     getClass(), type.name().toLowerCase() + "/"
                             + targetFilename + "-template");
+            OutputStream outputStream = null;
             try {
                 // Read template and insert the user's package
-                String input = FileCopyUtils
-                        .copyToString(new InputStreamReader(templateInputStream));
+                String input = IOUtils.toString(templateInputStream);
                 input = input.replace("__TOP_LEVEL_PACKAGE__",
                         topLevelPackage.getFullyQualifiedPackageName());
                 input = input
@@ -474,12 +477,16 @@ public class CreatorOperationsImpl implements CreatorOperations {
                 // Output the file for the user
                 final MutableFile mutableFile = fileManager
                         .createFile(destinationFile);
-                FileCopyUtils.copy(input.getBytes(),
-                        mutableFile.getOutputStream());
+                outputStream = mutableFile.getOutputStream();
+                IOUtils.write(input, outputStream);
             }
             catch (final IOException ioe) {
                 throw new IllegalStateException("Unable to create '"
                         + targetFilename + "'", ioe);
+            }
+            finally {
+                IOUtils.closeQuietly(templateInputStream);
+                IOUtils.closeQuietly(outputStream);
             }
         }
     }
@@ -559,12 +566,16 @@ public class CreatorOperationsImpl implements CreatorOperations {
                 fullPathFromRoot);
         final MutableFile mutableFile = fileManager.exists(path) ? fileManager
                 .updateFile(path) : fileManager.createFile(path);
-        final byte[] input = message.getBytes();
+        OutputStream outputStream = null;
         try {
-            FileCopyUtils.copy(input, mutableFile.getOutputStream());
+            outputStream = mutableFile.getOutputStream();
+            IOUtils.write(message, outputStream);
         }
         catch (final IOException ioe) {
             throw new IllegalStateException(ioe);
+        }
+        finally {
+            IOUtils.closeQuietly(outputStream);
         }
     }
 }

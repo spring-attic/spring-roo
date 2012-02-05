@@ -2,12 +2,13 @@ package org.springframework.roo.shell.converters;
 
 import java.io.File;
 import java.util.List;
+import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.SystemUtils;
 import org.apache.commons.lang3.Validate;
 import org.springframework.roo.shell.Completion;
 import org.springframework.roo.shell.Converter;
 import org.springframework.roo.shell.MethodTarget;
-import org.springframework.roo.support.util.FileUtils;
 
 /**
  * {@link Converter} for {@link File}.
@@ -21,10 +22,16 @@ public abstract class FileConverter implements Converter<File> {
 
     private static final String HOME_DIRECTORY_SYMBOL = "~";
     private static final String home = System.getProperty("user.home");
+    private static final String WINDOWS_DRIVE_PREFIX = "^[A-Za-z]:";
+
+    // Doesn't check for backslash after the colon, since Java has no issues
+    // with paths like c:/Windows
+    private static final Pattern WINDOWS_DRIVE_PATH = Pattern
+            .compile(WINDOWS_DRIVE_PREFIX + ".*");
 
     private String convertCompletionBackIntoUserInputStyle(
             final String originalUserInput, final String completion) {
-        if (FileUtils.denotesAbsolutePath(originalUserInput)) {
+        if (denotesAbsolutePath(originalUserInput)) {
             // Input was originally as a fully-qualified path, so we just keep
             // the completion in that form
             return completion;
@@ -61,7 +68,7 @@ public abstract class FileConverter implements Converter<File> {
      */
     private String convertUserInputIntoAFullyQualifiedPath(
             final String userInput) {
-        if (FileUtils.denotesAbsolutePath(userInput)) {
+        if (denotesAbsolutePath(userInput)) {
             // Input is already in a fully-qualified path form
             return userInput;
         }
@@ -77,6 +84,26 @@ public abstract class FileConverter implements Converter<File> {
         // directory
         final String fullPath = getWorkingDirectoryAsString() + userInput;
         return fullPath;
+    }
+
+    /**
+     * Checks if the provided fileName denotes an absolute path on the file
+     * system. On Windows, this includes both paths with and without drive
+     * letters, where the latter have to start with '\'. No check is performed
+     * to see if the file actually exists!
+     * 
+     * @param fileName name of a file, which could be an absolute path
+     * @return true if the fileName looks like an absolute path for the current
+     *         OS
+     */
+    private boolean denotesAbsolutePath(final String fileName) {
+        if (SystemUtils.IS_OS_WINDOWS) {
+            // first check for drive letter
+            if (WINDOWS_DRIVE_PATH.matcher(fileName).matches()) {
+                return true;
+            }
+        }
+        return fileName.startsWith(File.separator);
     }
 
     public boolean getAllPossibleValues(final List<Completion> completions,

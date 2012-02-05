@@ -7,13 +7,13 @@ import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.support.util.DomUtils;
-import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.HexUtils;
 import org.springframework.roo.support.util.XmlRoundTripUtils;
 import org.springframework.roo.support.util.XmlUtils;
@@ -49,8 +49,8 @@ public class DefaultXmlRoundTripFileManager implements XmlRoundTripFileManager {
             final String proposedContents = XmlUtils.nodeToString(proposed);
             try {
                 if (sha != null) {
-                    final String contents = FileCopyUtils
-                            .copyToString(new File(filename))
+                    final String contents = FileUtils
+                            .readFileToString(new File(filename))
                             + proposedContents;
                     final byte[] digest = sha.digest(contents.getBytes());
                     final String contentsSha = HexUtils.toHex(digest);

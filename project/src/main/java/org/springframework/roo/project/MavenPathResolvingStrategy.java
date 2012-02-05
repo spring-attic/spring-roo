@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -18,10 +19,6 @@ import org.springframework.roo.support.util.FileUtils;
 public class MavenPathResolvingStrategy extends AbstractPathResolvingStrategy {
 
     @Reference protected PomManagementService pomManagementService;
-
-    // ------------ OSGi component methods ----------------
-
-    // ------------ PathResolvingStrategy methods ----------------
 
     /**
      * Locates the first {@link PhysicalPath} which can be construed as a parent
@@ -97,8 +94,7 @@ public class MavenPathResolvingStrategy extends AbstractPathResolvingStrategy {
 
         String initialPath = FileUtils.getCanonicalPath(getPath(logicalPath));
         initialPath = FileUtils.ensureTrailingSeparator(initialPath);
-        return initialPath
-                + FileUtils.removeLeadingAndTrailingSeparators(relativePath);
+        return initialPath + StringUtils.strip(relativePath, File.separator);
     }
 
     private File getModuleRoot(final String module, final Pom pom) {

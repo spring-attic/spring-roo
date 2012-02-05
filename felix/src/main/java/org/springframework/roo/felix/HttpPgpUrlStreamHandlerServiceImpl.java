@@ -23,7 +23,6 @@ import org.osgi.service.url.URLStreamHandlerService;
 import org.springframework.roo.felix.pgp.PgpService;
 import org.springframework.roo.felix.pgp.SignatureDecision;
 import org.springframework.roo.support.logging.HandlerUtils;
-import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.url.stream.UrlInputStreamService;
 
 /**
@@ -78,14 +77,21 @@ public class HttpPgpUrlStreamHandlerServiceImpl extends
         final File ascUrlFile = File.createTempFile("roo_asc", null);
         ascUrlFile.deleteOnExit();
 
+        InputStream inputStream = null;
+        FileOutputStream outputStream = null;
         try {
-            FileCopyUtils.copy(urlInputStreamService.openConnection(ascUrl),
-                    new FileOutputStream(ascUrlFile));
+            outputStream = new FileOutputStream(ascUrlFile);
+            inputStream = urlInputStreamService.openConnection(ascUrl);
+            IOUtils.copy(inputStream, outputStream);
         }
         catch (final IOException ioe) {
             // This is not considered fatal; it is likely the ASC isn't
             // available, so we will continue
             ascUrlFile.delete();
+        }
+        finally {
+            IOUtils.closeQuietly(inputStream);
+            IOUtils.closeQuietly(outputStream);
         }
 
         // Abort if a signature wasn't downloaded (this is a httppgp:// URL
@@ -125,9 +131,10 @@ public class HttpPgpUrlStreamHandlerServiceImpl extends
             // ASC file really did sign it
             final File resourceFile = File.createTempFile("roo_resource", null);
             resourceFile.deleteOnExit();
-            FileCopyUtils.copy(
-                    urlInputStreamService.openConnection(resourceUrl),
-                    new FileOutputStream(resourceFile));
+
+            inputStream = urlInputStreamService.openConnection(resourceUrl);
+            outputStream = new FileOutputStream(resourceFile);
+            IOUtils.copy(inputStream, outputStream);
 
             resource = new FileInputStream(resourceFile);
             signature = new FileInputStream(ascUrlFile);
@@ -145,6 +152,8 @@ public class HttpPgpUrlStreamHandlerServiceImpl extends
         finally {
             IOUtils.closeQuietly(resource);
             IOUtils.closeQuietly(signature);
+            IOUtils.closeQuietly(inputStream);
+            IOUtils.closeQuietly(outputStream);
         }
     }
 }

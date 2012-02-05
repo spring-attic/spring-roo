@@ -9,8 +9,9 @@ import static org.mockito.Mockito.when;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.net.URL;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 import org.springframework.roo.support.util.loader.Loader;
@@ -105,11 +106,6 @@ public class FileUtilsTest {
     }
 
     @Test
-    public void testGetFile() {
-        assertTrue(FileUtils.getFile(Loader.class, TEST_FILE).isFile());
-    }
-
-    @Test
     public void testGetFileSeparatorAsRegex() throws Exception {
         // Set up
         final String regex = FileUtils.getFileSeparatorAsRegex();
@@ -124,10 +120,12 @@ public class FileUtilsTest {
     }
 
     @Test
-    public void testGetFirstDirectoryOfExistingDirectory() {
+    public void testGetFirstDirectoryOfExistingDirectory() throws Exception {
         // Set up
-        final String directory = FileUtils.getFile(Loader.class, TEST_FILE)
-                .getParent();
+
+        final URL url = Loader.class.getResource(TEST_FILE);
+        final File file = org.apache.commons.io.FileUtils.toFile(url);
+        final String directory = file.getParent();
 
         // Invoke
         final String firstDirectory = FileUtils.getFirstDirectory(directory);
@@ -148,8 +146,7 @@ public class FileUtilsTest {
                 TEST_FILE);
 
         // Check
-        final String contents = FileCopyUtils
-                .copyToString(new InputStreamReader(inputStream));
+        final String contents = IOUtils.toString(inputStream);
         assertEquals("This file is required for FileUtilsTest.", contents);
     }
 
@@ -185,53 +182,5 @@ public class FileUtilsTest {
     @Test
     public void testGetSystemDependentPathFromOneElement() {
         assertEquals("foo", FileUtils.getSystemDependentPath("foo"));
-    }
-
-    @Test
-    public void testRemoveLeadingAndTrailingSeparatorsFromEmptyPath() {
-        assertEquals("", FileUtils.removeLeadingAndTrailingSeparators(""));
-    }
-
-    @Test
-    public void testRemoveLeadingAndTrailingSeparatorsFromNullPath() {
-        assertNull(FileUtils.removeLeadingAndTrailingSeparators(null));
-    }
-
-    @Test
-    public void testRemoveLeadingAndTrailingSeparatorsFromPathWithBoth() {
-        // Set up
-        final String separators = StringUtils.repeat(File.separator, 4);
-        final String path = separators + "foo" + separators;
-
-        // Invoke and check
-        assertEquals("foo", FileUtils.removeLeadingAndTrailingSeparators(path));
-    }
-
-    @Test
-    public void testRemoveLeadingAndTrailingSeparatorsFromPlainPath() {
-        final String path = "foo";
-        assertEquals(path, FileUtils.removeLeadingAndTrailingSeparators(path));
-    }
-
-    @Test
-    public void testRemoveTrailingSeparatorFromEmptyPath() {
-        assertEquals("", FileUtils.removeTrailingSeparator(""));
-    }
-
-    @Test
-    public void testRemoveTrailingSeparatorFromNullPath() {
-        assertNull(FileUtils.removeTrailingSeparator(null));
-    }
-
-    @Test
-    public void testRemoveTrailingSeparatorFromPathWithLeadingSeparator() {
-        final String path = File.separator + "foo";
-        assertEquals(path, FileUtils.removeTrailingSeparator(path));
-    }
-
-    @Test
-    public void testRemoveTrailingSeparatorFromPathWithMultipleTrailingSeparators() {
-        final String path = "foo" + StringUtils.repeat(File.separator, 3);
-        assertEquals("foo", FileUtils.removeTrailingSeparator(path));
     }
 }

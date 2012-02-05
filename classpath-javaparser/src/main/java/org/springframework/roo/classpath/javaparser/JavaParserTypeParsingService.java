@@ -20,12 +20,14 @@ import japa.parser.ast.type.ClassOrInterfaceType;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
@@ -49,7 +51,6 @@ import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.support.util.FileUtils;
 
 @Component(immediate = true)
 @Service
@@ -105,7 +106,12 @@ public class JavaParserTypeParsingService implements TypeParsingService {
                 "Declaring metadata ID required");
         Validate.notNull(typeName, "Java type to locate required");
         final File file = new File(fileIdentifier);
-        final String typeContents = FileUtils.read(file);
+        String typeContents = "";
+        try {
+            typeContents = FileUtils.readFileToString(file);
+        }
+        catch (IOException ignored) {
+        }
         if (StringUtils.isBlank(typeContents)) {
             return null;
         }

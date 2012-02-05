@@ -4,11 +4,12 @@ import static org.springframework.roo.model.RooJavaType.ROO_REPOSITORY_JPA;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -29,8 +30,6 @@ import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
-import org.springframework.roo.support.util.FileCopyUtils;
-import org.springframework.roo.support.util.FileUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Element;
 
@@ -69,23 +68,30 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
             return;
         }
         else {
+            InputStream templateInputStream = null;
+            OutputStream outputStream = null;
             try {
-                final InputStream templateInputStream = FileUtils
-                        .getInputStream(getClass(),
-                                "applicationContext-jpa.xml");
-                String input = FileCopyUtils
-                        .copyToString(new InputStreamReader(templateInputStream));
+                templateInputStream = getClass().getResourceAsStream(
+                        "applicationContext-jpa.xml");
+                Validate.notNull(templateInputStream,
+                        "Could not acquire 'applicationContext-jpa.xml' template");
+
+                String input = IOUtils.toString(templateInputStream);
                 input = input.replace("TO_BE_CHANGED_BY_ADDON",
                         projectOperations.getFocusedTopLevelPackage()
                                 .getFullyQualifiedPackageName());
                 final MutableFile mutableFile = fileManager
                         .createFile(appCtxId);
-                FileCopyUtils.copy(input.getBytes(),
-                        mutableFile.getOutputStream());
+                outputStream = mutableFile.getOutputStream();
+                IOUtils.write(input, outputStream);
             }
             catch (final IOException e) {
                 throw new IllegalStateException("Unable to create '" + appCtxId
                         + "'", e);
+            }
+            finally {
+                IOUtils.closeQuietly(templateInputStream);
+                IOUtils.closeQuietly(outputStream);
             }
         }
     }
