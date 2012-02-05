@@ -1021,12 +1021,18 @@ public class JsfManagedBeanMetadata extends
             final BigDecimal minValue = ObjectUtils.max(
                     getMinOrMaxValue(field, MIN),
                     getMinOrMaxValue(field, DECIMAL_MIN));
+
             final BigDecimal maxValue = ObjectUtils.min(
                     getMinOrMaxValue(field, MAX),
                     getMinOrMaxValue(field, DECIMAL_MAX));
+
             final Integer sizeMinValue = getSizeMinOrMax(field, "min");
-            final BigDecimal sizeMaxValue = new BigDecimal(ObjectUtils.min(
-                    getSizeMinOrMax(field, "max"), getColumnLength(field)));
+
+            final Integer min = ObjectUtils.min(getSizeMinOrMax(field, "max"),
+                    getColumnLength(field));
+            final BigDecimal sizeMaxValue = min != null ? new BigDecimal(min)
+                    : null;
+
             final boolean required = action != Action.VIEW
                     && (!isNullable(field) || minValue != null
                             || maxValue != null || sizeMinValue != null || sizeMaxValue != null);
