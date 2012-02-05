@@ -26,6 +26,7 @@ import jline.WindowsTerminal;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.commons.lang3.Validate;
@@ -37,7 +38,6 @@ import org.springframework.roo.shell.Tailor;
 import org.springframework.roo.shell.event.ShellStatus;
 import org.springframework.roo.shell.event.ShellStatus.Status;
 import org.springframework.roo.shell.event.ShellStatusListener;
-import org.springframework.roo.support.util.ClassUtils;
 
 /**
  * Uses the feature-rich <a
@@ -70,9 +70,19 @@ public abstract class JLineShell extends AbstractShell implements
     private static final String BEL = "\007";
     private static final char ESCAPE = 27;
 
-    private static final boolean JANSI_AVAILABLE = ClassUtils.isPresent(
+    private static final boolean JANSI_AVAILABLE = isPresent(
             ANSI_CONSOLE_CLASSNAME, JLineShell.class.getClassLoader());
 
+    private static boolean isPresent(final String className,
+            final ClassLoader classLoader) {
+        try {
+            return classLoader.loadClass(className) != null;
+        }
+        catch (final Throwable t) {
+            // Class or one of its dependencies is not present...
+            return false;
+        }
+    }
     private boolean developmentMode = false;
     private final DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     private FileWriter fileLog;
@@ -81,6 +91,7 @@ public abstract class JLineShell extends AbstractShell implements
     private ConsoleReader reader;
     /** key: row number, value: eraseLineFromPosition */
     private final Map<Integer, Integer> rowErasureMap = new HashMap<Integer, Integer>();
+
     private boolean shutdownHookFired = false; // ROO-1599
 
     protected ShellStatusListener statusListener; // ROO-836
@@ -101,9 +112,8 @@ public abstract class JLineShell extends AbstractShell implements
     private ConsoleReader createAnsiWindowsReader() throws Exception {
         // Get decorated OutputStream that parses ANSI-codes
         final PrintStream ansiOut = (PrintStream) ClassUtils
-                .forName(ANSI_CONSOLE_CLASSNAME,
-                        JLineShell.class.getClassLoader()).getMethod("out")
-                .invoke(null);
+                .getClass(JLineShell.class.getClassLoader(),
+                        ANSI_CONSOLE_CLASSNAME).getMethod("out").invoke(null);
         final WindowsTerminal ansiTerminal = new WindowsTerminal() {
             @Override
             public boolean isANSISupported() {

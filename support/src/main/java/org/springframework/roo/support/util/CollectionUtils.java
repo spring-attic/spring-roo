@@ -19,41 +19,18 @@ package org.springframework.roo.support.util;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Enumeration;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
 /**
  * Miscellaneous collection utility methods. Mainly for internal use within the
  * framework.
  * 
- * @author Juergen Hoeller
- * @author Rob Harrop
+ * @author Alan Stewart
  * @author Andrew Swan
  * @since 1.1.3
  */
 public final class CollectionUtils {
-
-    /**
-     * Adds the given items to the given collection
-     * 
-     * @param <T> the type of item in the collection being updated
-     * @param newItems the items being added; can be <code>null</code> for none
-     * @param existingItems the items being added to; must be modifiable
-     * @return <code>true</code> if the existing collection was modified
-     * @throws UnsupportedOperationException if there are items to add and the
-     *             existing collection is not modifiable
-     * @since 1.2.0
-     */
-    public static <T> boolean addAll(final Collection<? extends T> newItems,
-            final Collection<T> existingItems) {
-        if (existingItems != null && newItems != null) {
-            return existingItems.addAll(newItems);
-        }
-        return false;
-    }
 
     /**
      * Convert the supplied array into a List. A primitive array gets converted
@@ -63,93 +40,10 @@ public final class CollectionUtils {
      * 
      * @param source the (potentially primitive) array
      * @return the converted List result
-     * @see RooObjectUtils#toObjectArray(Object)
+     * @see ObjectUtils#toObjectArray(Object)
      */
     public static List<?> arrayToList(final Object source) {
-        return Arrays.asList(RooObjectUtils.toObjectArray(source));
-    }
-
-    /**
-     * Check whether the given Enumeration contains the given element.
-     * 
-     * @param enumeration the Enumeration to check
-     * @param element the element to look for
-     * @return <code>true</code> if found, <code>false</code> else
-     */
-    public static boolean contains(final Enumeration<?> enumeration,
-            final Object element) {
-        if (enumeration != null) {
-            while (enumeration.hasMoreElements()) {
-                final Object candidate = enumeration.nextElement();
-                if (RooObjectUtils.nullSafeEquals(candidate, element)) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Check whether the given Iterator contains the given element.
-     * 
-     * @param iterator the Iterator to check
-     * @param element the element to look for
-     * @return <code>true</code> if found, <code>false</code> else
-     */
-    public static boolean contains(final Iterator<?> iterator,
-            final Object element) {
-        if (iterator != null) {
-            while (iterator.hasNext()) {
-                final Object candidate = iterator.next();
-                if (RooObjectUtils.nullSafeEquals(candidate, element)) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Return <code>true</code> if any element in '<code>candidates</code>' is
-     * contained in '<code>source</code>'; otherwise returns <code>false</code>.
-     * 
-     * @param source the source Collection
-     * @param candidates the candidates to search for
-     * @return whether any of the candidates has been found
-     */
-    public static boolean containsAny(final Collection<?> source,
-            final Collection<?> candidates) {
-        if (isEmpty(source) || isEmpty(candidates)) {
-            return false;
-        }
-        for (final Object candidate : candidates) {
-            if (source.contains(candidate)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Check whether the given Collection contains the given element instance.
-     * <p>
-     * Enforces the given instance to be present, rather than returning
-     * <code>true</code> for an equal element as well.
-     * 
-     * @param collection the Collection to check
-     * @param element the element to look for
-     * @return <code>true</code> if found, <code>false</code> else
-     */
-    public static boolean containsInstance(final Collection<?> collection,
-            final Object element) {
-        if (collection != null) {
-            for (final Object candidate : collection) {
-                if (candidate == element) {
-                    return true;
-                }
-            }
-        }
-        return false;
+        return Arrays.asList(ObjectUtils.toObjectArray(source));
     }
 
     /**
@@ -175,81 +69,6 @@ public final class CollectionUtils {
     }
 
     /**
-     * Return the first element in '<code>candidates</code>' that is contained
-     * in '<code>source</code>'. If no element in '<code>candidates</code>' is
-     * present in '<code>source</code>' returns <code>null</code>. Iteration
-     * order is {@link Collection} implementation specific.
-     * 
-     * @param source the source Collection
-     * @param candidates the candidates to search for
-     * @return the first present object, or <code>null</code> if not found
-     */
-    public static Object findFirstMatch(final Collection<?> source,
-            final Collection<?> candidates) {
-        if (isEmpty(source) || isEmpty(candidates)) {
-            return null;
-        }
-        for (final Object candidate : candidates) {
-            if (source.contains(candidate)) {
-                return candidate;
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Find a single value of one of the given types in the given Collection:
-     * searching the Collection for a value of the first type, then searching
-     * for a value of the second type, etc.
-     * 
-     * @param collection the collection to search
-     * @param types the types to look for, in prioritized order
-     * @return a value of one of the given types found if there is a clear
-     *         match, or <code>null</code> if none or more than one such value
-     *         found
-     */
-    public static Object findValueOfType(final Collection<?> collection,
-            final Class<?>... types) {
-        if (isEmpty(collection) || RooObjectUtils.isEmpty(types)) {
-            return null;
-        }
-        for (final Class<?> type : types) {
-            final Object value = findValueOfType(collection, type);
-            if (value != null) {
-                return value;
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Find a single value of the given type in the given Collection.
-     * 
-     * @param collection the Collection to search
-     * @param type the type to look for
-     * @return a value of the given type found if there is a clear match, or
-     *         <code>null</code> if none or more than one such value found
-     */
-    @SuppressWarnings("unchecked")
-    public static <T> T findValueOfType(final Collection<?> collection,
-            final Class<T> type) {
-        if (isEmpty(collection)) {
-            return null;
-        }
-        T value = null;
-        for (final Object element : collection) {
-            if (type == null || type.isInstance(element)) {
-                if (value != null) {
-                    // More than one value found... no clear single value.
-                    return null;
-                }
-                value = (T) element;
-            }
-        }
-        return value;
-    }
-
-    /**
      * Returns the first element of the given collection
      * 
      * @param <T>
@@ -262,33 +81,6 @@ public final class CollectionUtils {
             return null;
         }
         return collection.iterator().next();
-    }
-
-    /**
-     * Determine whether the given Collection only contains a single unique
-     * object.
-     * 
-     * @param collection the Collection to check
-     * @return <code>true</code> if the collection contains a single reference
-     *         or multiple references to the same instance, <code>false</code>
-     *         else
-     */
-    public static boolean hasUniqueObject(final Collection<?> collection) {
-        if (isEmpty(collection)) {
-            return false;
-        }
-        boolean hasCandidate = false;
-        Object candidate = null;
-        for (final Object elem : collection) {
-            if (!hasCandidate) {
-                hasCandidate = true;
-                candidate = elem;
-            }
-            else if (candidate != elem) {
-                return false;
-            }
-        }
-        return true;
     }
 
     /**
@@ -311,47 +103,6 @@ public final class CollectionUtils {
      */
     public static boolean isEmpty(final Map<?, ?> map) {
         return map == null || map.isEmpty();
-    }
-
-    /**
-     * Merge the given array into the given Collection.
-     * 
-     * @param array the array to merge (may be <code>null</code>)
-     * @param collection the target Collection to merge the array into
-     */
-    public static void mergeArrayIntoCollection(final Object array,
-            final Collection<Object> collection) {
-        if (collection == null) {
-            throw new IllegalArgumentException("Collection must not be null");
-        }
-        final Object[] arr = RooObjectUtils.toObjectArray(array);
-        for (final Object elem : arr) {
-            collection.add(elem);
-        }
-    }
-
-    /**
-     * Merge the given Properties instance into the given Map, copying all
-     * properties (key-value pairs) over.
-     * <p>
-     * Uses <code>Properties.propertyNames()</code> to even catch default
-     * properties linked into the original Properties instance.
-     * 
-     * @param props the Properties instance to merge (may be <code>null</code>)
-     * @param map the target Map to merge the properties into
-     */
-    public static void mergePropertiesIntoMap(final Properties props,
-            final Map<String, String> map) {
-        if (map == null) {
-            throw new IllegalArgumentException("Map must not be null");
-        }
-        if (props != null) {
-            for (final Enumeration<?> en = props.propertyNames(); en
-                    .hasMoreElements();) {
-                final String key = (String) en.nextElement();
-                map.put(key, props.getProperty(key));
-            }
-        }
     }
 
     /**

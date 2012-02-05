@@ -1,9 +1,7 @@
 package org.springframework.roo.support.util;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -38,41 +36,6 @@ public class CollectionUtilsTest {
             return StringUtils.isNotBlank(instance);
         }
     };
-
-    @Test
-    public void testAddNonNullCollectionToNonNullCollection() {
-        // Set up
-        final Parent parent = new Parent();
-        final Child child = new Child();
-        final Collection<Parent> parents = new ArrayList<Parent>();
-        parents.add(parent);
-
-        // Invoke
-        final boolean added = CollectionUtils.addAll(Arrays.asList(child),
-                parents);
-
-        // Check
-        assertTrue(added);
-        assertEquals(Arrays.asList(parent, child), parents);
-    }
-
-    @Test
-    public void testAddNullCollectionToNonNullCollection() {
-        // Set up
-        final Parent parent = new Parent();
-        final Collection<Parent> parents = Arrays.asList(parent);
-
-        // Invoke
-        final boolean added = CollectionUtils.addAll(null, parents);
-
-        // Check
-        assertFalse(added);
-    }
-
-    @Test
-    public void testAddNullCollectionToNullCollection() {
-        assertFalse(CollectionUtils.addAll(null, null));
-    }
 
     @Test
     public void testFilterNonNullIterableWithNonNullFilter() {
