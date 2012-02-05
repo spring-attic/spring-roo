@@ -83,6 +83,7 @@ public abstract class JLineShell extends AbstractShell implements
             return false;
         }
     }
+
     private boolean developmentMode = false;
     private final DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     private FileWriter fileLog;

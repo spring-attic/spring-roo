@@ -7,6 +7,7 @@ import java.util.Map.Entry;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.Validate;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -159,10 +160,6 @@ public final class XmlRoundTripUtils {
         return originalDocumentChanged;
     }
 
-    private static String base64(final byte[] data) {
-        return Base64.encodeBytes(data);
-    }
-
     /**
      * Create a base 64 encoded SHA1 hash key for a given XML element. The key
      * is based on the element name, the attribute names and their values. Child
@@ -188,7 +185,7 @@ public final class XmlRoundTripUtils {
         for (final Entry<String, String> entry : attrKVStore.entrySet()) {
             sb.append(entry.getKey()).append(entry.getValue());
         }
-        return base64(sha1(sb.toString().getBytes()));
+        return Base64.encodeBase64String(sha1(sb.toString().getBytes()));
     }
 
     /**

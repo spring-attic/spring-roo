@@ -2,11 +2,10 @@ package org.springframework.roo.addon.web.mvc.jsp.roundtrip;
 
 import java.io.File;
 import java.io.IOException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
@@ -14,7 +13,6 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.support.util.DomUtils;
-import org.springframework.roo.support.util.HexUtils;
 import org.springframework.roo.support.util.XmlRoundTripUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
@@ -29,15 +27,6 @@ import org.w3c.dom.Document;
 @Service
 public class DefaultXmlRoundTripFileManager implements XmlRoundTripFileManager {
 
-    private static MessageDigest sha = null;
-    static {
-        try {
-            sha = MessageDigest.getInstance("SHA1");
-        }
-        catch (final NoSuchAlgorithmException ignored) {
-        }
-    }
-
     @Reference private FileManager fileManager;
     private final Map<String, String> fileContentsMap = new HashMap<String, String>();
 
@@ -48,19 +37,14 @@ public class DefaultXmlRoundTripFileManager implements XmlRoundTripFileManager {
         if (fileManager.exists(filename)) {
             final String proposedContents = XmlUtils.nodeToString(proposed);
             try {
-                if (sha != null) {
-                    final String contents = FileUtils
-                            .readFileToString(new File(filename))
-                            + proposedContents;
-                    final byte[] digest = sha.digest(contents.getBytes());
-                    final String contentsSha = HexUtils.toHex(digest);
-                    final String lastContents = fileContentsMap.get(filename);
-                    if (lastContents != null
-                            && contentsSha.equals(lastContents)) {
-                        return;
-                    }
-                    fileContentsMap.put(filename, contentsSha);
+                final String contents = FileUtils.readFileToString(new File(
+                        filename)) + proposedContents;
+                final String contentsSha = DigestUtils.shaHex(contents);
+                final String lastContents = fileContentsMap.get(filename);
+                if (lastContents != null && contentsSha.equals(lastContents)) {
+                    return;
                 }
+                fileContentsMap.put(filename, contentsSha);
             }
             catch (final IOException ignored) {
             }
@@ -75,12 +59,8 @@ public class DefaultXmlRoundTripFileManager implements XmlRoundTripFileManager {
         }
         else {
             final String contents = XmlUtils.nodeToString(proposed);
-            if (sha != null) {
-                final byte[] digest = sha.digest((contents + contents)
-                        .getBytes());
-                final String contentsSha = HexUtils.toHex(digest);
-                fileContentsMap.put(filename, contentsSha);
-            }
+            final String contentsSha = DigestUtils.shaHex(contents + contents);
+            fileContentsMap.put(filename, contentsSha);
             fileManager.createOrUpdateTextFileIfRequired(filename, contents,
                     false);
         }

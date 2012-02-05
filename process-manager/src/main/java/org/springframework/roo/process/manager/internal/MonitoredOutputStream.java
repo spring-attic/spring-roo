@@ -4,13 +4,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.Validate;
 import org.springframework.roo.file.monitor.NotifiableFileMonitorService;
-import org.springframework.roo.support.util.HexUtils;
 
 /**
  * Ensures the {@link NotifiableFileMonitorService#notifyChanged(String)} method
@@ -25,14 +23,6 @@ import org.springframework.roo.support.util.HexUtils;
  */
 public class MonitoredOutputStream extends ByteArrayOutputStream {
 
-    private static MessageDigest sha;
-    static {
-        try {
-            sha = MessageDigest.getInstance("SHA1");
-        }
-        catch (final NoSuchAlgorithmException ignored) {
-        }
-    }
     private final File file;
     private final NotifiableFileMonitorService fileMonitorService;
 
@@ -65,10 +55,7 @@ public class MonitoredOutputStream extends ByteArrayOutputStream {
         final byte[] bytes = toByteArray();
 
         // Try to calculate the SHA hash code
-        if (sha != null) {
-            final byte[] digest = sha.digest(bytes);
-            managedMessageRenderer.setHashCode(HexUtils.toHex(digest));
-        }
+        managedMessageRenderer.setHashCode(DigestUtils.shaHex(bytes));
 
         // Log that we're writing the file
         managedMessageRenderer.logManagedMessage();

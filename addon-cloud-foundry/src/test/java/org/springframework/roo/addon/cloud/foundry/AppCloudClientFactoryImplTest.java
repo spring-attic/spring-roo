@@ -38,8 +38,9 @@ public class AppCloudClientFactoryImplTest {
     public void testGetInstance() throws Exception {
         // Set up
         final CloudCredentials mockCredentials = mock(CloudCredentials.class);
-        final URL url = new URL("http://www.springsource.org"); // final, can't
-                                                                // be mocked
+        
+        // final, can't be mocked
+        final URL url = new URL("http://www.springsource.org");
         when(mockCredentials.getUrlObject()).thenReturn(url);
 
         // Invoke

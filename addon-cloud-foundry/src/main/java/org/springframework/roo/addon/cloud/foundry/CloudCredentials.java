@@ -1,13 +1,12 @@
 package org.springframework.roo.addon.cloud.foundry;
 
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.roo.support.util.Base64;
 
 /**
  * The credentials for logging into a cloud.
@@ -28,14 +27,9 @@ public class CloudCredentials {
         for (final String encodedField : encodedFields) {
             final String[] valuePair = encodedField.split(":");
             if (valuePair.length == 2) {
-                try {
-                    map.put(valuePair[0],
-                            new String(Base64.decode(valuePair[1],
-                                    Base64.DO_BREAK_LINES)));
-                }
-                catch (final IOException e) {
-                    throw new IllegalStateException(e);
-                }
+                final String decoded = new String(
+                        Base64.decodeBase64(valuePair[1]));
+                map.put(valuePair[0], decoded);
             }
         }
         return new CloudCredentials(map);
@@ -43,7 +37,6 @@ public class CloudCredentials {
 
     private final String email;
     private final String password;
-
     private final String url;
 
     /**
@@ -75,25 +68,16 @@ public class CloudCredentials {
             throw new IllegalStateException(
                     "Credentials invalid; cannot continue");
         }
-        final StringBuilder sb = new StringBuilder();
-        try {
-            sb.append(EMAIL_KEY)
-                    .append(":")
-                    .append(Base64.encodeBytes(getEmail().getBytes(),
-                            Base64.DO_BREAK_LINES)).append(",");
-            sb.append(PASSWORD_KEY)
-                    .append(":")
-                    .append(Base64.encodeBytes(getPassword().getBytes(),
-                            Base64.DO_BREAK_LINES)).append(",");
-            sb.append(URL_KEY)
-                    .append(":")
-                    .append(Base64.encodeBytes(getUrl().getBytes(),
-                            Base64.DO_BREAK_LINES));
-        }
-        catch (final IOException e) {
-            throw new IllegalStateException(e);
-        }
-        return sb.toString();
+        final StringBuilder builder = new StringBuilder();
+        builder.append(EMAIL_KEY).append(":")
+                .append(Base64.encodeBase64String(getEmail().getBytes()))
+                .append(",");
+        builder.append(PASSWORD_KEY).append(":")
+                .append(Base64.encodeBase64String(getPassword().getBytes()))
+                .append(",");
+        builder.append(URL_KEY).append(":")
+                .append(Base64.encodeBase64String(getUrl().getBytes()));
+        return builder.toString();
     }
 
     @Override
@@ -106,7 +90,6 @@ public class CloudCredentials {
         }
 
         final CloudCredentials clouldCredentials = (CloudCredentials) o;
-
         if (email != null ? !email.equals(clouldCredentials.email)
                 : clouldCredentials.email != null) {
             return false;
@@ -115,7 +98,6 @@ public class CloudCredentials {
                 : clouldCredentials.url != null) {
             return false;
         }
-
         return true;
     }
 
