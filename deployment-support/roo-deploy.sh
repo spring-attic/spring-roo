@@ -156,6 +156,45 @@ tomcat_stop_start_get_stop() {
     popd &>/dev/null
 }
 
+jetty_stop_start_get_stop() {
+    type -P wget &>/dev/null || { l_error "wget not found. Aborting." >&2; exit 1; }
+    log "Performing JSF testing; expecting GET success for URL: $@"
+    pushd /tmp/rootest &>/dev/null
+    if [ "$TERM_PROGRAM" = "Apple_Terminal" ]; then
+        MVN_JETTY_PID=`ps -e | grep Launcher | grep jetty:run-exploded | cut -b "1-6" | sed "s/ //g"`
+    else
+        MVN_JETTY_PID=`ps -eo "%p %c %a" | grep Launcher | grep jetty:run-exploded | cut -b "1-6" | sed "s/ //g"`
+    fi
+    if [ ! "$MVN_JETTY_PID" = "" ]; then
+        # doing a kill -9 as it was hanging around for some reason, when it really should have been killed by now
+        log "kill -9 of old mvn jetty:run-exploded with PID $MVN_JETTY_PID"
+        kill -9 $MVN_JETTY_PID
+        sleep 5
+    fi
+    log "Invoking mvn jetty:run-exploded in background"
+    $MVN_CMD -e -B -Djetty.port=8888 jetty:run-exploded &>/dev/null 2>&1 &
+    WGET_OPTS="-q"
+    if [ "$VERBOSE" = "1" ]; then
+        WGET_OPTS="-v"
+    fi
+    wget $WGET_OPTS --retry-connrefused --tries=30 -O /tmp/rootest/wget.html $@
+    EXITED=$?
+    if [[ ! "$EXITED" = "0" ]]; then
+        l_error "wget failed: $@ (returned code $EXITED)" >&2; exit 1;
+    fi
+    if [ "$TERM_PROGRAM" = "Apple_Terminal" ]; then
+        MVN_JETTY_PID=`ps -e | grep Launcher | grep jetty:run-exploded | cut -b "1-6" | sed "s/ //g"`
+    else
+        MVN_JETTY_PID=`ps -eo "%p %c %a" | grep Launcher | grep jetty:run-exploded | cut -b "1-6" | sed "s/ //g"`
+    fi
+    if [ ! "$MVN_JETTY_PID" = "" ]; then
+        log "Terminating background mvn grep jetty:run-exploded process with PID $MVN_JETTY_PID"
+        kill $MVN_JETTY_PID
+        # no need to sleep, as we'll be at least running Roo between now and the next Jetty start
+    fi
+    popd &>/dev/null
+}
+
 pizzashop_tests() {
 	type -P curl &>/dev/null || { l_error "curl not found. Aborting." >&2; exit 1; }
 	log "Performing MVC REST testing;"
@@ -534,7 +573,7 @@ if [[ "$COMMAND" = "assembly" ]]; then
         load_roo_build_and_test script expenses.roo	
         
         load_roo_build_and_test script bikeshop.roo
-        tomcat_stop_start_get_stop http://localhost:8888/bikeshop
+        jetty_stop_start_get_stop http://localhost:8888/bikeshop/pages/main.jsf
 
         load_roo_build_and_test script multimodule.roo
         tomcat_stop_start_get_stop http://localhost:8888/mvc
