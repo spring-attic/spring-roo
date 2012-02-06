@@ -450,6 +450,7 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher
 
         Validate.notNull(script, "Script file to parse is required");
         final double startedNanoseconds = System.nanoTime();
+
         final InputStream inputStream = openScript(script);
         try {
             int i = 0;

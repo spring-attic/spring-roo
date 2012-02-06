@@ -1,6 +1,7 @@
 package org.springframework.roo.process.manager;
 
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
@@ -47,10 +48,8 @@ public class ProcessManagerHostedExecutionStrategy implements ExecutionStrategy 
                                 parseResult.getArguments());
                     }
                     catch (Exception e) {
-                        throw new IllegalStateException(
-                                "Unexpected reflection exception - "
-                                        + e.getClass().getName() + ": "
-                                        + e.getMessage());
+                        throw new RuntimeException(ExceptionUtils
+                                .getRootCause(e));
                     }
                 }
             });

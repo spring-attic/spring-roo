@@ -412,7 +412,7 @@ public abstract class JLineShell extends AbstractShell implements
                 fileLog = null;
             }
         }
-        catch (final IOException ignoreIt) {
+        catch (final IOException ignored) {
         }
     }
 
