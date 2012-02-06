@@ -81,9 +81,9 @@ public class AddOnFeedbackOperationsImpl implements AddOnFeedbackOperations {
                 + "." + UaaRegistrationService.SPRING_ROO.getMajorVersion()
                 + "." + UaaRegistrationService.SPRING_ROO.getPatchVersion());
         o.put("type", "bundle_feedback");
-        o.put("bsn", JSONObject.escape(bsn.getKey())); // A BSN shouldn't need
-                                                       // escaping, but
-                                                       // anyway...
+
+        // A BSN shouldn't need escaping, but anyway...
+        o.put("bsn", JSONObject.escape(bsn.getKey()));
         o.put("rating", rating.getKey());
         o.put("comment", comment == null ? "" : JSONObject.escape(comment));
         final String customJson = o.toJSONString();

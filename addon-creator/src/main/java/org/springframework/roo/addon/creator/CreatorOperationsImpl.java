@@ -3,7 +3,6 @@ package org.springframework.roo.addon.creator;
 import static java.io.File.separatorChar;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -507,23 +506,18 @@ public class CreatorOperationsImpl implements CreatorOperations {
             final String expectedEntryName = "png/" + countryCode + ".png";
             while ((entry = zis.getNextEntry()) != null) {
                 if (entry.getName().equals(expectedEntryName)) {
-                    int size;
-                    final byte[] buffer = new byte[2048];
                     final MutableFile target = fileManager
                             .createFile(pathResolver.getFocusedIdentifier(
                                     Path.SRC_MAIN_RESOURCES, packagePath + "/"
                                             + countryCode + ".png"));
-                    BufferedOutputStream bos = null;
+                    OutputStream outputStream = null;
                     try {
-                        bos = new BufferedOutputStream(
-                                target.getOutputStream(), buffer.length);
-                        while ((size = zis.read(buffer, 0, buffer.length)) != -1) {
-                            bos.write(buffer, 0, size);
-                        }
+                        outputStream = target.getOutputStream();
+                        IOUtils.copy(zis, outputStream);
                         success = true;
                     }
                     finally {
-                        IOUtils.closeQuietly(bos);
+                        IOUtils.closeQuietly(outputStream);
                     }
                 }
             }

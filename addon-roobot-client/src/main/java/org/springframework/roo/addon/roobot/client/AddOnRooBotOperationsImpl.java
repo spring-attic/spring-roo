@@ -5,6 +5,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.net.URL;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -634,127 +635,17 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
             zip.getNextEntry();
 
             baos = new ByteArrayOutputStream();
-            final byte[] buffer = new byte[8192];
-            int length = -1;
-            while (zip.available() > 0) {
-                length = zip.read(buffer, 0, 8192);
-                if (length > 0) {
-                    baos.write(buffer, 0, length);
-                }
-            }
+            IOUtils.copy(zip, baos);
 
             bais = new ByteArrayInputStream(baos.toByteArray());
             final Document roobotXml = db.parse(bais);
-
             if (roobotXml != null) {
-                bundleCache.clear();
-                for (final Element bundleElement : XmlUtils.findElements(
-                        "/roobot/bundles/bundle",
-                        roobotXml.getDocumentElement())) {
-                    final String bsn = bundleElement.getAttribute("bsn");
-                    if (NO_UPGRADE_BSN_LIST.contains(bsn)) {
-                        // List only add-ons which are not core (see ROO-2190)
-                        continue;
-                    }
-                    final List<Comment> comments = new ArrayList<Comment>();
-                    for (final Element commentElement : XmlUtils.findElements(
-                            "comments/comment", bundleElement)) {
-                        comments.add(new Comment(Rating.fromInt(new Integer(
-                                commentElement.getAttribute("rating"))),
-                                commentElement.getAttribute("comment"),
-                                dateFormat.parse(commentElement
-                                        .getAttribute("date"))));
-                    }
-                    final Bundle bundle = new Bundle(
-                            bundleElement.getAttribute("bsn"), new Float(
-                                    bundleElement.getAttribute("uaa-ranking")),
-                            comments);
-                    for (final Element versionElement : XmlUtils.findElements(
-                            "versions/version", bundleElement)) {
-                        if (bsn != null && bsn.length() > 0
-                                && versionElement != null) {
-                            String signedBy = "";
-                            final String pgpKey = versionElement
-                                    .getAttribute("pgp-key-id");
-                            if (pgpKey != null && pgpKey.length() > 0) {
-                                final Element pgpSigned = XmlUtils
-                                        .findFirstElement(
-                                                "/roobot/pgp-keys/pgp-key[@id='"
-                                                        + pgpKey
-                                                        + "']/pgp-key-description",
-                                                roobotXml.getDocumentElement());
-                                if (pgpSigned != null) {
-                                    signedBy = pgpSigned.getAttribute("text");
-                                }
-                            }
-
-                            final Map<String, String> commands = new HashMap<String, String>();
-                            for (final Element shell : XmlUtils.findElements(
-                                    "shell-commands/shell-command",
-                                    versionElement)) {
-                                commands.put(shell.getAttribute("command"),
-                                        shell.getAttribute("help"));
-                            }
-
-                            final StringBuilder versionBuilder = new StringBuilder();
-                            versionBuilder
-                                    .append(versionElement
-                                            .getAttribute("major"))
-                                    .append(".")
-                                    .append(versionElement
-                                            .getAttribute("minor"));
-                            final String versionMicro = versionElement
-                                    .getAttribute("micro");
-                            if (versionMicro != null
-                                    && versionMicro.length() > 0) {
-                                versionBuilder.append(".").append(versionMicro);
-                            }
-                            final String versionQualifier = versionElement
-                                    .getAttribute("qualifier");
-                            if (versionQualifier != null
-                                    && versionQualifier.length() > 0) {
-                                versionBuilder.append(".").append(
-                                        versionQualifier);
-                            }
-
-                            String rooVersion = versionElement
-                                    .getAttribute("roo-version");
-                            if (rooVersion.equals("*")
-                                    || rooVersion.length() == 0) {
-                                rooVersion = getVersionForCompatibility();
-                            }
-                            else {
-                                final String[] split = rooVersion.split("\\.");
-                                if (split.length > 2) {
-                                    // Only interested in major.minor
-                                    rooVersion = split[0] + "." + split[1];
-                                }
-                            }
-                            final BundleVersion version = new BundleVersion(
-                                    versionElement.getAttribute("url"),
-                                    versionElement.getAttribute("obr-url"),
-                                    versionBuilder.toString(),
-                                    versionElement.getAttribute("name"),
-                                    new Long(versionElement
-                                            .getAttribute("size")).longValue(),
-                                    versionElement.getAttribute("description"),
-                                    pgpKey, signedBy, rooVersion, commands);
-                            // For security reasons we ONLY accept httppgp://
-                            // add-on versions
-                            if (!version.getUri().startsWith("httppgp://")) {
-                                continue;
-                            }
-                            bundle.addVersion(version);
-                        }
-                        bundleCache.put(bsn, bundle);
-                    }
-                }
+                populateBundleCache(roobotXml);
                 success = true;
             }
             zip.close();
         }
-        catch (final Throwable ignore) {
-            // Ignore
+        catch (final Throwable ignored) {
         }
         finally {
             IOUtils.closeQuietly(is);
@@ -765,6 +656,99 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
             printAddonStats();
         }
         return success;
+    }
+
+    private void populateBundleCache(final Document roobotXml)
+            throws ParseException {
+        bundleCache.clear();
+        for (final Element bundleElement : XmlUtils.findElements(
+                "/roobot/bundles/bundle", roobotXml.getDocumentElement())) {
+            final String bsn = bundleElement.getAttribute("bsn");
+            if (NO_UPGRADE_BSN_LIST.contains(bsn)) {
+                // List only add-ons which are not core (see ROO-2190)
+                continue;
+            }
+            final List<Comment> comments = new ArrayList<Comment>();
+            for (final Element commentElement : XmlUtils.findElements(
+                    "comments/comment", bundleElement)) {
+                comments.add(new Comment(Rating.fromInt(new Integer(
+                        commentElement.getAttribute("rating"))), commentElement
+                        .getAttribute("comment"), dateFormat
+                        .parse(commentElement.getAttribute("date"))));
+            }
+            final Bundle bundle = new Bundle(bundleElement.getAttribute("bsn"),
+                    new Float(bundleElement.getAttribute("uaa-ranking")),
+                    comments);
+            for (final Element versionElement : XmlUtils.findElements(
+                    "versions/version", bundleElement)) {
+                if (bsn != null && bsn.length() > 0 && versionElement != null) {
+                    String signedBy = "";
+                    final String pgpKey = versionElement
+                            .getAttribute("pgp-key-id");
+                    if (pgpKey != null && pgpKey.length() > 0) {
+                        final Element pgpSigned = XmlUtils.findFirstElement(
+                                "/roobot/pgp-keys/pgp-key[@id='" + pgpKey
+                                        + "']/pgp-key-description",
+                                roobotXml.getDocumentElement());
+                        if (pgpSigned != null) {
+                            signedBy = pgpSigned.getAttribute("text");
+                        }
+                    }
+
+                    final Map<String, String> commands = new HashMap<String, String>();
+                    for (final Element shell : XmlUtils.findElements(
+                            "shell-commands/shell-command", versionElement)) {
+                        commands.put(shell.getAttribute("command"),
+                                shell.getAttribute("help"));
+                    }
+
+                    final StringBuilder versionBuilder = new StringBuilder();
+                    versionBuilder.append(versionElement.getAttribute("major"))
+                            .append(".")
+                            .append(versionElement.getAttribute("minor"));
+                    final String versionMicro = versionElement
+                            .getAttribute("micro");
+                    if (versionMicro != null && versionMicro.length() > 0) {
+                        versionBuilder.append(".").append(versionMicro);
+                    }
+                    final String versionQualifier = versionElement
+                            .getAttribute("qualifier");
+                    if (versionQualifier != null
+                            && versionQualifier.length() > 0) {
+                        versionBuilder.append(".").append(versionQualifier);
+                    }
+
+                    String rooVersion = versionElement
+                            .getAttribute("roo-version");
+                    if (rooVersion.equals("*") || rooVersion.length() == 0) {
+                        rooVersion = getVersionForCompatibility();
+                    }
+                    else {
+                        final String[] split = rooVersion.split("\\.");
+                        if (split.length > 2) {
+                            // Only interested in major.minor
+                            rooVersion = split[0] + "." + split[1];
+                        }
+                    }
+                    final BundleVersion version = new BundleVersion(
+                            versionElement.getAttribute("url"),
+                            versionElement.getAttribute("obr-url"),
+                            versionBuilder.toString(),
+                            versionElement.getAttribute("name"),
+                            new Long(versionElement.getAttribute("size"))
+                                    .longValue(),
+                            versionElement.getAttribute("description"), pgpKey,
+                            signedBy, rooVersion, commands);
+                    // For security reasons we ONLY accept httppgp://
+                    // add-on versions
+                    if (!version.getUri().startsWith("httppgp://")) {
+                        continue;
+                    }
+                    bundle.addVersion(version);
+                }
+                bundleCache.put(bsn, bundle);
+            }
+        }
     }
 
     private void printAddonStats() {

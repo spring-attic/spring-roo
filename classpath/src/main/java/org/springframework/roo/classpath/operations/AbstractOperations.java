@@ -1,8 +1,6 @@
 package org.springframework.roo.classpath.operations;
 
-import java.io.BufferedReader;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.URL;
 import java.util.logging.Logger;
@@ -31,8 +29,9 @@ public abstract class AbstractOperations {
     protected static Logger LOGGER = HandlerUtils
             .getLogger(AbstractOperations.class);
 
-    protected ComponentContext context;
     @Reference protected FileManager fileManager;
+
+    protected ComponentContext context;
 
     protected void activate(final ComponentContext context) {
         this.context = context;
@@ -68,27 +67,14 @@ public abstract class AbstractOperations {
             final String fileName = url.getPath().substring(
                     url.getPath().lastIndexOf("/") + 1);
             if (replace) {
-                BufferedReader in = null;
-                final StringBuilder sb = new StringBuilder();
                 try {
-                    in = new BufferedReader(new InputStreamReader(url
-                            .openConnection().getInputStream()));
-                    while (true) {
-                        final int ch = in.read();
-                        if (ch < 0) {
-                            break;
-                        }
-                        sb.append((char) ch);
-                    }
+                    String contents = IOUtils.toString(url);
+                    fileManager.createOrUpdateTextFileIfRequired(
+                            targetDirectory + fileName, contents, false);
                 }
                 catch (final Exception e) {
                     throw new IllegalStateException(e);
                 }
-                finally {
-                    IOUtils.closeQuietly(in);
-                }
-                fileManager.createOrUpdateTextFileIfRequired(targetDirectory
-                        + fileName, sb.toString(), false);
             }
             else {
                 if (!fileManager.exists(targetDirectory + fileName)) {
