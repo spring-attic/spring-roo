@@ -216,7 +216,7 @@ public class JsfApplicationBeanMetadata extends
                     + "\");");
             bodyBuilder.appendFormalLine("item.setAjax(false);");
             bodyBuilder.appendFormalLine("item.setAsync(false);");
-            bodyBuilder.appendFormalLine("item.setUpdate(\"data\");");
+            bodyBuilder.appendFormalLine("item.setUpdate(\":dataForm:data\");");
             bodyBuilder.appendFormalLine("submenu.getChildren().add(item);");
 
             bodyBuilder.appendFormalLine("item = new MenuItem();");
@@ -234,7 +234,7 @@ public class JsfApplicationBeanMetadata extends
                     .appendFormalLine("item.setIcon(\"" + LIST_ICON + "\");");
             bodyBuilder.appendFormalLine("item.setAjax(false);");
             bodyBuilder.appendFormalLine("item.setAsync(false);");
-            bodyBuilder.appendFormalLine("item.setUpdate(\"data\");");
+            bodyBuilder.appendFormalLine("item.setUpdate(\":dataForm:data\");");
             bodyBuilder.appendFormalLine("submenu.getChildren().add(item);");
 
             bodyBuilder.appendFormalLine("menuModel.addSubmenu(submenu);");

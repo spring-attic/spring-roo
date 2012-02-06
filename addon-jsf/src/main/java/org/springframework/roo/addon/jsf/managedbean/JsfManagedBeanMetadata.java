@@ -1148,7 +1148,7 @@ public class JsfManagedBeanMetadata extends
                             + ".setAllowTypes(\"/(\\\\.|\\\\/)("
                             + getAllowTypeRegex(allowedType) + ")$/\");");
                     bodyBuilder.appendFormalLine(fieldValueId
-                            + ".setUpdate(\"messages\");");
+                            + ".setUpdate(\":growlForm:growl\");");
 
                     final AnnotationAttributeValue<?> autoUploadAttr = annotation
                             .getAttribute("autoUpload");
@@ -1322,8 +1322,6 @@ public class JsfManagedBeanMetadata extends
                     bodyBuilder.appendFormalLine("InputTextarea "
                             + fieldValueId + " = "
                             + getComponentCreation("InputTextarea"));
-                    bodyBuilder.appendFormalLine(fieldValueId
-                            + ".setMaxHeight(100);");
                 }
                 else {
                     if (action == Action.VIEW) {
