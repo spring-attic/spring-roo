@@ -977,7 +977,6 @@
                     <excludes>
                         <exclude>org/springframework/roo/bootstrap/Main.java</exclude>
                         <exclude>org/springframework/roo/bootstrap/AutoProcessor.java</exclude>
-                        <exclude>org/springframework/roo/support/util/Base64.java</exclude>
                     </excludes>
                 </configuration>
                 <executions>
@@ -1012,6 +1011,6 @@
     </build>
     <properties>
         <powermock.version>1.4.10</powermock.version>
-        <spring.version>3.0.6.RELEASE</spring.version>
+        <spring.version>3.1.0.RELEASE</spring.version>
     </properties>
 </project>

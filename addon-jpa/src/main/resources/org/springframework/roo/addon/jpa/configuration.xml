@@ -6,7 +6,7 @@
                 <dependency>
                     <groupId>com.h2database</groupId>
                     <artifactId>h2</artifactId>
-                    <version>1.3.161</version>
+                    <version>1.3.164</version>
                 </dependency>
             </dependencies>
         </database>
@@ -24,7 +24,7 @@
                 <dependency>
                     <groupId>postgresql</groupId>
                     <artifactId>postgresql</artifactId>
-                    <version>9.0-801.jdbc3</version>
+                    <version>9.1-901.jdbc3</version>
                 </dependency>
             </dependencies>
         </database>
