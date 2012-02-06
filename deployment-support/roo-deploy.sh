@@ -536,6 +536,9 @@ if [[ "$COMMAND" = "assembly" ]]; then
         load_roo_build_and_test script bikeshop.roo
         tomcat_stop_start_get_stop http://localhost:8888/bikeshop
 
+        load_roo_build_and_test script multimodule.roo
+        tomcat_stop_start_get_stop http://localhost:8888/mvc
+
         load_roo_build_and_test script embedding.roo
         tomcat_stop_start_get_stop http://localhost:8888/embedding
 
