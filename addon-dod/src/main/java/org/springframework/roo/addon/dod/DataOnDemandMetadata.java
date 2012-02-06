@@ -39,6 +39,7 @@ import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.customdata.CustomDataKeys;
@@ -768,11 +769,15 @@ public class DataOnDemandMetadata extends
                     final AnnotationAttributeValue<?> maxValue = sizeAnnotation
                             .getAttribute(MAX_SYMBOL);
                     if (maxValue != null) {
+                        validateNumericAnnotationAttribute(fieldName, "@Size",
+                                "max", maxValue.getValue());
                         maxLength = ((Integer) maxValue.getValue()).intValue();
                     }
                     final AnnotationAttributeValue<?> minValue = sizeAnnotation
                             .getAttribute(MIN_SYMBOL);
                     if (minValue != null) {
+                        validateNumericAnnotationAttribute(fieldName, "@Size",
+                                "min", minValue.getValue());
                         final int minLength = ((Integer) minValue.getValue())
                                 .intValue();
                         Validate.isTrue(
@@ -795,8 +800,11 @@ public class DataOnDemandMetadata extends
                                 .getCustomData().get(
                                         CustomDataKeys.COLUMN_FIELD);
                         if (columnValues.keySet().contains("length")) {
-                            maxLength = ((Integer) columnValues.get("length"))
-                                    .intValue();
+                            final Object lengthValue = columnValues
+                                    .get("length");
+                            validateNumericAnnotationAttribute(fieldName,
+                                    "@Column", "length", lengthValue);
+                            maxLength = ((Integer) lengthValue).intValue();
                         }
                     }
                 }
@@ -1678,5 +1686,14 @@ public class DataOnDemandMetadata extends
         builder.append("governor", governorPhysicalTypeMetadata.getId());
         builder.append("itdTypeDetails", itdTypeDetails);
         return builder.toString();
+    }
+
+    private void validateNumericAnnotationAttribute(final String fieldName,
+            final String annotationName, final String attributeName,
+            final Object object) {
+        Validate.isTrue(NumberUtils.isNumber(object.toString()), annotationName
+                + " '" + attributeName + "' attribute for field '" + fieldName
+                + "' in backing type " + entity.getFullyQualifiedTypeName()
+                + " muust be numeric");
     }
 }
