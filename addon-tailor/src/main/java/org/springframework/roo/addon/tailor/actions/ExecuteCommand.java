@@ -4,12 +4,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.addon.tailor.CommandTransformation;
-import org.springframework.roo.addon.tailor.utils.TailorHelper;
+import org.springframework.roo.addon.tailor.util.TailorHelper;
 
 /**
- * Schedules command for execution
+ * Schedules command for execution.
  * 
- * @author vladimir.tihomirov
+ * @author Vladimir Tihomirov
+ * @since 1.3.0
  */
 @Component
 @Service

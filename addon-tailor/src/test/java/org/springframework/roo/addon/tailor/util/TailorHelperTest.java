@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.tailor.utils;
+package org.springframework.roo.addon.tailor.util;
 
 import junit.framework.Assert;
 
@@ -6,7 +6,7 @@ import org.junit.Test;
 import org.springframework.roo.addon.tailor.CommandTransformation;
 
 /**
- * Tests for {@link TailorHelper#replaceVars(CommandTransformation, String)}
+ * Tests for {@link TailorHelper#replaceVars(CommandTransformation, String)}.
  * 
  * @author Birgitta Boeckeler
  */
@@ -52,7 +52,6 @@ public class TailorHelperTest {
      */
     @Test
     public void testReplaceVarsForUnnamedArgument() {
-
         final CommandTransformation rooCommand = new CommandTransformation(
                 "cd test-data");
         final String result = TailorHelper.replaceVars(rooCommand,

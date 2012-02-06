@@ -6,18 +6,18 @@ import java.util.List;
 import org.springframework.roo.addon.tailor.actions.ActionConfig;
 
 /**
- * Contains configuration (list of actions) for certain roo command
+ * Contains configuration (list of actions) for a Roo command.
  * 
- * @author birgitta.boeckeler
+ * @author Birgitta Boeckeler
  */
 public class CommandConfiguration {
-
-    private final List<ActionConfig> actions = new ArrayList<ActionConfig>();
 
     /**
      * Name of the command that will trigger this configuration
      */
     private String commandName;
+
+    private final List<ActionConfig> actions = new ArrayList<ActionConfig>();
 
     public void addAction(final ActionConfig actionConfig) {
         actions.add(actionConfig);

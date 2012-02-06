@@ -9,17 +9,29 @@ import org.springframework.roo.project.ProjectOperations;
 
 /**
  * Focuses on a module with a given name. This action does not check for the
- * EXACT name, but looks for a module that contains that string.
+ * EXACT name, but looks for a module that contains that string. This makes
+ * tailor configurations portable over projects with different names that have
+ * naming conventions for their modules and can match for certain patterns in
+ * modules.
+ * <p />
+ * Advanced feature: <br />
+ * Imagine the case that there are 2 modules named "projectname-domain" and
+ * "projectname-domain-test". <br/>
+ * For these cases, the match string can also be a comma-separated list, e.g.
+ * "domain,test". <br/>
+ * Each of the members of that list can start with a "/" to indicate that this
+ * member must NOT be present in the module to match, e.g. "domain,/test".
  * 
- * @author vladimir.tihomirov
+ * @author Vladimir Tihomirov
+ * @author Birgitta Boeckeler
  */
 @Component
 @Service
 public class FocusModule extends AbstractAction {
 
-    private final String baseCommand = "module focus --moduleName ";
-
     @Reference ProjectOperations projectOperations;
+
+    private final String baseCommand = "module focus --moduleName ";
 
     @Override
     public void executeImpl(final CommandTransformation trafo,
@@ -28,9 +40,27 @@ public class FocusModule extends AbstractAction {
             trafo.addOutputCommand(baseCommand, "~");
             return;
         }
+
+        // If comma-separated list: Module name will be checked against both
+        // those values
+        final String[] matches = config.getModule().split(",");
+
         // If not root: Check if module name actually exists
         for (final String moduleName : projectOperations.getModuleNames()) {
-            if (moduleName.contains(config.getModule())) {
+            boolean matchesAll = true;
+            for (final String matche : matches) {
+                final String match = matche;
+                if (match.startsWith("/")
+                        && moduleName.contains(match.substring(1))) {
+                    matchesAll = false;
+                    break;
+                }
+                else if (!match.startsWith("/") && !moduleName.contains(match)) {
+                    matchesAll = false;
+                    break;
+                }
+            }
+            if (matchesAll) {
                 trafo.addOutputCommand(baseCommand, moduleName);
                 return;
             }

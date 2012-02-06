@@ -5,9 +5,9 @@ import java.util.Map;
 import org.springframework.roo.addon.tailor.actions.Action;
 
 /**
- * Locates all actions
+ * Locates all actions.
  * 
- * @author vladimir.tihomirov
+ * @author Vladimir Tihomirov
  */
 public interface ActionLocator {
 

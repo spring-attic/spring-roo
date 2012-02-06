@@ -16,15 +16,6 @@ import org.springframework.roo.shell.ParserUtils;
 public class CommandTransformation {
 
     /**
-     * Parsed tokens of the command <br>
-     * - Arguments will be represented with key=argumentname without "--",
-     * value=argumentvalue <br>
-     * - The command elements before the actual "--" arguments will be in an
-     * entry without a key
-     */
-    private Map<String, String> arguments;
-
-    /**
      * The full input command string, incl. arguments
      */
     private String inputCommand;
@@ -34,6 +25,15 @@ public class CommandTransformation {
      * goes through by action executions.
      */
     private final List<String> outputCommands = new ArrayList<String>();
+
+    /**
+     * Parsed tokens of the command <br>
+     * - Arguments will be represented with key=argumentname without "--",
+     * value=argumentvalue <br>
+     * - The command elements before the actual "--" arguments will be in an
+     * entry without a key
+     */
+    private Map<String, String> arguments;
 
     public CommandTransformation(final String command) {
         setInputCommand(command.trim());

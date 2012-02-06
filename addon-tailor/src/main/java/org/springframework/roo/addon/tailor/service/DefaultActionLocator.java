@@ -38,9 +38,6 @@ public class DefaultActionLocator implements ActionLocator {
         return actionsMap.get(caseInsensitiveKey.toLowerCase());
     }
 
-    /**
-     * @Inheritdoc
-     */
     public Map<String, Action> getAllActions() {
         return actionsMap;
     }
@@ -50,4 +47,5 @@ public class DefaultActionLocator implements ActionLocator {
                 .toLowerCase();
         actionsMap.remove(actionClassName);
     }
+
 }

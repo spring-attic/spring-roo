@@ -1,14 +1,15 @@
-package org.springframework.roo.addon.tailor.utils;
+package org.springframework.roo.addon.tailor.util;
 
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.roo.addon.tailor.CommandTransformation;
 import org.springframework.roo.addon.tailor.actions.ActionConfig;
 
 /**
- * Helper static operations
+ * Helper static operations.
  * 
  * @author Birgitta Boeckeler
  * @author Vladimir Tihomirov
@@ -18,8 +19,39 @@ public class TailorHelper {
     /**
      * Pattern to look for ${xxx} usage in a command string
      */
-    private static final Pattern varPattern = Pattern
+    private static final Pattern VAR_PATTERN = Pattern
             .compile("\\$\\{([\\w\\*]*)\\}");
+
+    public static void removeComment(final CommentedLine commentedLine) {
+        String line = commentedLine.getLine();
+        boolean inBlockComment = commentedLine.getInBlockComment();
+        if (StringUtils.isBlank(line)) {
+            return;
+        }
+        if (line.contains("/*")) {
+            inBlockComment = true;
+            final String lhs = line.substring(0, line.lastIndexOf("/*"));
+            if (line.contains("*/")) {
+                line = lhs + line.substring(line.lastIndexOf("*/") + 2);
+                inBlockComment = false;
+            }
+            else {
+                line = lhs;
+            }
+        }
+        else if (inBlockComment && line.contains("*/")) {
+            line = line.substring(line.lastIndexOf("*/") + 2);
+            inBlockComment = false;
+        }
+        else if (inBlockComment) {
+            line = "";
+        }
+        else if (line.trim().startsWith("//") || line.trim().startsWith("#")) {
+            line = "";
+        }
+        commentedLine.setLine(line.replace('\t', ' '));
+        commentedLine.setInBlockComment(inBlockComment);
+    }
 
     /**
      * Looks for ${xxx} pattern in {@link ActionConfig#getCommand()} and
@@ -40,7 +72,7 @@ public class TailorHelper {
          */
         final Map<String, String> inputArguments = trafo.getArguments();
 
-        final Matcher matcher = varPattern.matcher(text);
+        final Matcher matcher = VAR_PATTERN.matcher(text);
         while (matcher.find()) {
             // Placeholder name between ${}
             final String placeholder = matcher.group(1);
@@ -68,5 +100,4 @@ public class TailorHelper {
         }
         return text;
     }
-
 }

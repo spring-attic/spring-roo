@@ -9,13 +9,14 @@ import java.util.List;
  * triggered by which commands when this configuration is activated
  * 
  * @author Birgitta Boeckeler
- * @since 1.2.0
+ * @since 1.3.0
  */
 public class TailorConfiguration {
 
     private final List<CommandConfiguration> commandConfigs = new ArrayList<CommandConfiguration>();
-    private String description;
     private final String name;
+    private String description;
+    private boolean isActive = false;
 
     /**
      * Constructor
@@ -64,4 +65,13 @@ public class TailorConfiguration {
     public String getName() {
         return name;
     }
+
+    public boolean isActive() {
+        return isActive;
+    }
+
+    public void setActive(final boolean isActive) {
+        this.isActive = isActive;
+    }
+
 }

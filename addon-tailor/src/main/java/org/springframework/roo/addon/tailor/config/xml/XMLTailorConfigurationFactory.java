@@ -40,9 +40,9 @@ public class XMLTailorConfigurationFactory implements
     private static final Logger LOGGER = HandlerUtils
             .getLogger(XMLTailorConfigurationFactory.class);
 
-    @Reference FileManager fileManager;
+    @Reference private FileManager fileManager;
 
-    String shellRootPath = null;
+    private String shellRootPath = null;
 
     // ------------ OSGi component methods ----------------
     protected void activate(final ComponentContext context) {
@@ -63,20 +63,20 @@ public class XMLTailorConfigurationFactory implements
      * 
      * <pre>
      * <tailorconfiguration>
-     * 	<tailor name="tailorname" description="Tailor description">
-     * 		<config command="inputcommand">
-     * 			<action type="actionname" attribute="value"/>
-     * 		</config>
+     *   <tailor name="tailorname" description="Tailor description">
+     *     <config command="inputcommand">
+     *       <action type="actionname" attribute="value"/>
+     *     </config>
      * </pre>
      */
     public TailorConfiguration createTailorConfiguration() {
-
-        // TODO: This factory could also look for this file in the user.dir:
-        // So that wherever the user starts the shell, he would always have his
-        // central "tailors" available
-        final String configFileIdentifier = shellRootPath + "/tailor.xml";
+        String configFileIdentifier = shellRootPath + "/tailor.xml";
         if (!fileManager.exists(configFileIdentifier)) {
-            return null;
+            configFileIdentifier = System.getProperty("user.home")
+                    + "/tailor.xml";
+            if (!fileManager.exists(configFileIdentifier)) {
+                return null;
+            }
         }
 
         try {
@@ -88,7 +88,6 @@ public class XMLTailorConfigurationFactory implements
         catch (final Exception e) {
             // Make sure that an invalid tailor.xml file does not crash the
             // whole shell
-            // TODO: Log exception only in development mode
             logTailorXMLInvalid("Error reading file ("
                     + e.getLocalizedMessage());
         }
@@ -103,7 +102,8 @@ public class XMLTailorConfigurationFactory implements
     }
 
     /**
-     * Maps the XML file contents to a TailorConfiguration object
+     * Maps the XML file contents to a TailorConfiguration object Currently only
+     * one tailor supported in the configuration file.
      * 
      * @param root
      * @return
@@ -111,16 +111,13 @@ public class XMLTailorConfigurationFactory implements
     private TailorConfiguration mapXmlToTailorConfiguration(final Element root) {
         final List<Element> elTailors = XmlUtils.findElements(
                 "/tailorconfiguration/tailor", root);
-        // TODO: Currently only one tailor supported in the configuration file
-        // > Should be extended to support multiple tailors, the XML already
-        // supports this, but is not evaluated
         if (elTailors.isEmpty()) {
             logTailorXMLInvalid("no <tailor> definitions found in <tailorconfiguration> root element");
             return null;
         }
 
         final Element elTailor = elTailors.get(0);
-        if (StringUtils.isEmpty(elTailor.getAttribute("name"))) {
+        if (StringUtils.isBlank(elTailor.getAttribute("name"))) {
             logTailorXMLInvalid("<tailor> must have a name attribute");
             return null;
         }
@@ -128,6 +125,13 @@ public class XMLTailorConfigurationFactory implements
         final TailorConfiguration result = new TailorConfiguration(
                 elTailor.getAttribute("name"),
                 elTailor.getAttribute("description"));
+
+        final String activeAttribute = elTailor.getAttribute("activate");
+        if (StringUtils.isNotBlank(activeAttribute)) {
+            final boolean isActive = "true".equalsIgnoreCase(activeAttribute)
+                    || "yes".equalsIgnoreCase(activeAttribute);
+            result.setActive(isActive);
+        }
 
         final List<Element> elConfigs = XmlUtils.findElements(
                 "/tailorconfiguration/tailor/config", root);
@@ -138,7 +142,7 @@ public class XMLTailorConfigurationFactory implements
 
         for (final Element elConfig : elConfigs) {
             final String command = elConfig.getAttribute("command");
-            if (!StringUtils.isNotBlank(command)) {
+            if (StringUtils.isBlank(command)) {
                 logTailorXMLInvalid("found <config> without command attribute");
                 return null;
             }
@@ -149,7 +153,7 @@ public class XMLTailorConfigurationFactory implements
                     elConfig);
             for (final Element elAction : elActions) {
                 // Determine the action type
-                if (!StringUtils.isNotBlank(elAction.getAttribute("type"))) {
+                if (StringUtils.isBlank(elAction.getAttribute("type"))) {
                     logTailorXMLInvalid("found <action> without type attribute");
                     return null;
                 }
@@ -167,8 +171,8 @@ public class XMLTailorConfigurationFactory implements
                 newCmdConfig.addAction(newAction);
             }
             result.addCommandConfig(newCmdConfig);
-
         }
         return result;
     }
+
 }

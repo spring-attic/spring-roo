@@ -77,7 +77,7 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher
                 try {
                     jarFile.close();
                 }
-                catch (IOException ignored) {
+                catch (final IOException ignored) {
                 }
             }
         }
@@ -106,8 +106,9 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher
 
     protected final Logger logger = HandlerUtils.getLogger(getClass());
     protected boolean inBlockComment;
-
     protected ExitShellRequest exitShellRequest;
+
+    // private Tailor tailor;
 
     @CliCommand(value = { "/*" }, help = "Start of block comment")
     public void blockCommentBegin() {
@@ -129,9 +130,34 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher
                 .format(new Date());
     }
 
-    // protected abstract Tailor getTailor();
+    public boolean executeCommand(final String line) {
+        // if (tailor == null) {
+        return executeCommandImpl(line);
+        // }
+        /*
+         * If getTailor() is not null, then try to transform input command and
+         * execute all outputs sequentially
+         */
+        // List<String> commands = null;
+        // commands = tailor.sew(line);
+        //
+        // if (CollectionUtils.isEmpty(commands)) {
+        // return executeCommandImpl(line);
+        // }
+        // for (final String command : commands) {
+        // logger.info("roo-tailor> " + command);
+        // if (!executeCommandImpl(command)) {
+        // return false;
+        // }
+        // }
+        // return true;
+    }
 
-    public boolean executeCommand(String line) {
+    /**
+     * Runs the specified command. Control will return to the caller after the
+     * command is run.
+     */
+    private boolean executeCommandImpl(String line) {
         // Another command was attempted
         setShellStatus(ShellStatus.Status.PARSING);
 
@@ -454,7 +480,7 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher
         final InputStream inputStream = openScript(script);
         try {
             int i = 0;
-            for (String line : IOUtils.readLines(inputStream)) {
+            for (final String line : IOUtils.readLines(inputStream)) {
                 i++;
                 if (lineNumbers) {
                     logger.fine("Line " + i + ": " + line);
@@ -518,12 +544,16 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher
         setPromptPath(path);
     }
 
+    // public void setTailor(final Tailor tailor) {
+    // this.tailor = tailor;
+    // }
+
     @CliCommand(value = { "version" }, help = "Displays shell version")
     public String version(
             @CliOption(key = "", help = "Special version flags") final String extra) {
         final StringBuilder sb = new StringBuilder();
 
-        if ("jaime".equals(extra)) {
+        if ("roorocks".equals(extra)) {
             sb.append("               /\\ /l").append(LINE_SEPARATOR);
             sb.append("               ((.Y(!").append(LINE_SEPARATOR);
             sb.append("                \\ |/").append(LINE_SEPARATOR);

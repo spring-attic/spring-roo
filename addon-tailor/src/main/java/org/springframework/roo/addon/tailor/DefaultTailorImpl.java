@@ -9,29 +9,51 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.tailor.actions.Action;
 import org.springframework.roo.addon.tailor.actions.ActionConfig;
 import org.springframework.roo.addon.tailor.config.CommandConfiguration;
 import org.springframework.roo.addon.tailor.config.TailorConfiguration;
 import org.springframework.roo.addon.tailor.service.ActionLocator;
 import org.springframework.roo.addon.tailor.service.ConfigurationLocator;
+import org.springframework.roo.addon.tailor.util.CommentedLine;
+import org.springframework.roo.addon.tailor.util.TailorHelper;
 import org.springframework.roo.shell.AbstractShell;
+import org.springframework.roo.shell.Shell;
 import org.springframework.roo.shell.Tailor;
 import org.springframework.roo.support.logging.HandlerUtils;
 
 /**
- * Executed by {@link AbstractShell} Triggers action execution
+ * Executed by {@link AbstractShell}. Triggers execution of configured actions.
  * 
- * @author vladimir.tihomirov
+ * @author Vladimir Tihomirov
  */
 @Service
-@Component
+@Component(immediate = true)
 public class DefaultTailorImpl implements Tailor {
+
     private static final Logger LOGGER = HandlerUtils
             .getLogger(DefaultTailorImpl.class);
-    @Reference private ActionLocator actionLocator;
 
+    @Reference private ActionLocator actionLocator;
     @Reference private ConfigurationLocator configLocator;
+    @Reference private Shell shell;
+
+    protected boolean inBlockComment = false;
+
+    // We have to done explicit injection to support API compatibility with STS
+    // shell.
+    protected void activate(final ComponentContext context) {
+        if (shell != null) {
+            // shell.setTailor(this);
+        }
+    }
+
+    protected void deactivate(final ComponentContext context) {
+        if (shell != null) {
+            // shell.setTailor(null);
+        }
+    }
 
     private void execute(final CommandTransformation commandTrafo) {
         final TailorConfiguration configuration = configLocator
@@ -65,28 +87,35 @@ public class DefaultTailorImpl implements Tailor {
     }
 
     protected void logInDevelopmentMode(final Level level, final String logMsg) {
-        LOGGER.log(level, logMsg);
+        if (shell.isDevelopmentMode()) {
+            LOGGER.log(level, logMsg);
+        }
     }
 
-    /**
-     * @Inheritdoc
-     */
-    public List<String> sew(final String command) {
-        if (StringUtils.isNotBlank(command)) {
+    public List<String> sew(String command) {
+        if (StringUtils.isBlank(command)) {
+            return Collections.emptyList();
+        }
+        try {
+            // validate if it is commented
+            final CommentedLine comment = new CommentedLine(command,
+                    inBlockComment);
+            TailorHelper.removeComment(comment);
+            inBlockComment = comment.getInBlockComment();
+            command = comment.getLine();
+            if (StringUtils.isBlank(command)) {
+                return Collections.emptyList();
+            }
+            // parse and tailor
             final CommandTransformation commandTrafo = new CommandTransformation(
                     command);
-            try {
-                execute(commandTrafo);
-            }
-            catch (final RuntimeException e) {
-                commandTrafo.clearCommands();
-                commandTrafo
-                        .addOutputCommand("/* Unable to tailor this command. Please check the command syntax */");
-                logInDevelopmentMode(Level.WARNING, e.toString());
-            }
+            execute(commandTrafo);
             return commandTrafo.getOutputCommands();
         }
-        return Collections.emptyList();
+        catch (final Exception e) {
+            // Do nothing if exception happened
+            logInDevelopmentMode(Level.WARNING, e.toString());
+            return Collections.emptyList();
+        }
     }
-
 }

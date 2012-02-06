@@ -3,7 +3,7 @@ package org.springframework.roo.addon.tailor.actions;
 import org.springframework.roo.addon.tailor.CommandTransformation;
 
 /**
- * Base interface of action hierarchy Used for dynamic binding of available
+ * Base interface of action hierarchy. Used for dynamic binding of available
  * actions.
  * 
  * <pre>

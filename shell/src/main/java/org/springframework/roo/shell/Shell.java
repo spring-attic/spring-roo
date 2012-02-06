@@ -104,4 +104,12 @@ public interface Shell extends ShellStatusProvider, ShellPromptAccessor {
     void setPromptPath(String path);
 
     void setPromptPath(String path, boolean overrideStyle);
+
+    /**
+     * To support API compatibility with STS shell, tailor implementation should
+     * be injected explicitly when activated.
+     * 
+     * @param tailor the tailor implementation
+     */
+    // void setTailor(Tailor tailor);
 }

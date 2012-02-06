@@ -21,14 +21,14 @@ import org.springframework.roo.addon.tailor.service.ActionLocator;
  */
 public class ActionConfig {
 
-    private static final String ATTR_ARGUMENT = "argument";
+    private final String actionTypeId;
 
-    private static final String ATTR_COMMAND = "command";
-    private static final String ATTR_MANDATORY = "mandatory";
     /* A set of attributes for the default actions delivered with tailor.core */
     private static final String ATTR_MODULE = "module";
+    private static final String ATTR_ARGUMENT = "argument";
     private static final String ATTR_VALUE = "value";
-    private final String actionTypeId;
+    private static final String ATTR_MANDATORY = "mandatory";
+    private static final String ATTR_COMMAND = "command";
 
     /**
      * A map to flexibly define additional attributes for actions not delivered
@@ -176,7 +176,7 @@ public class ActionConfig {
 
     @Override
     public String toString() {
-        final StringBuilder result = new StringBuilder();
+        final StringBuffer result = new StringBuffer();
         result.append("Type: " + actionTypeId);
         final Iterator<String> iterator = attributes.keySet().iterator();
         while (iterator.hasNext()) {

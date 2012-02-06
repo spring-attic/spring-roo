@@ -34,7 +34,6 @@ import org.springframework.roo.shell.AbstractShell;
 import org.springframework.roo.shell.CommandMarker;
 import org.springframework.roo.shell.ExitShellRequest;
 import org.springframework.roo.shell.Shell;
-import org.springframework.roo.shell.Tailor;
 import org.springframework.roo.shell.event.ShellStatus;
 import org.springframework.roo.shell.event.ShellStatus.Status;
 import org.springframework.roo.shell.event.ShellStatusListener;
@@ -210,31 +209,6 @@ public abstract class JLineShell extends AbstractShell implements
         catch (final IOException ignored) {
         }
     }
-
-    /**
-     * Executes the single command. There is possibility to adjust command by
-     * implementation of {@link Tailor} interface. The output of Tailor can be
-     * one or many commands that are executed one by one.
-     * 
-     * @param line - command line
-     */
-    // @Override
-    // public boolean executeCommand(final String line) {
-    // List<String> commands = null;
-    // if (getTailor() != null) {
-    // commands = getTailor().sew(line);
-    // }
-    // if (CollectionUtils.isEmpty(commands)) {
-    // return super.executeCommand(line);
-    // }
-    // for (final String command : commands) {
-    // logger.info("Tailored: " + command);
-    // if (!super.executeCommand(command)) {
-    // return false;
-    // }
-    // }
-    // return true;
-    // }
 
     @Override
     public void flash(final Level level, final String message, final String slot) {

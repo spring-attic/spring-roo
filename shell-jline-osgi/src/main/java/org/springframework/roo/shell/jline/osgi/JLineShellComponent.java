@@ -43,7 +43,6 @@ public class JLineShellComponent extends JLineShell {
 
     @Reference private ExecutionStrategy executionStrategy;
     @Reference private Parser parser;
-    // @Reference private Tailor tailor;
     @Reference private UrlInputStreamService urlInputStreamService;
 
     private ComponentContext context;
@@ -152,11 +151,6 @@ public class JLineShellComponent extends JLineShell {
             return null;
         }
     }
-
-    // @Override
-    // protected Tailor getTailor() {
-    // return tailor;
-    // }
 
     // TODO: This should probably be moved to a HTTP service of some sort - JTT
     // 29/08/11

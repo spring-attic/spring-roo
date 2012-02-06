@@ -15,7 +15,7 @@ import org.springframework.roo.addon.tailor.config.TailorConfigurationFactory;
 import org.springframework.roo.support.logging.HandlerUtils;
 
 /**
- * Default implementation of {@link ConfigurationLocator}
+ * Default implementation of {@link ConfigurationLocator}.
  * 
  * @author Birgitta Boeckeler
  * @since 1.2.0
@@ -47,15 +47,20 @@ public class DefaultConfigurationLocator implements ConfigurationLocator {
                         + config.getName() + "', not binding again: "
                         + config.toString());
             }
+            if (config.isActive()) {
+                activatedTailorConfigName = config.getName();
+            }
             configurations.put(config.getName(), config);
         }
     }
 
     public TailorConfiguration getActiveTailorConfiguration() {
+
         return configurations.get(activatedTailorConfigName);
     }
 
     public Map<String, TailorConfiguration> getAvailableConfigurations() {
+
         return configurations;
     }
 
@@ -75,11 +80,12 @@ public class DefaultConfigurationLocator implements ConfigurationLocator {
     }
 
     protected void unbindConfig(final TailorConfigurationFactory factory) {
-        // TODO: It's a little unelegant to call "create" method here again, but
+        // TODO It's a little unelegant to call "create" method here again, but
         // we need the name...
         final TailorConfiguration config = factory.createTailorConfiguration();
         if (config != null) {
             configurations.remove(config.getName());
         }
     }
+
 }

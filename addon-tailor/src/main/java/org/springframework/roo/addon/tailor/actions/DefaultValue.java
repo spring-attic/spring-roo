@@ -7,9 +7,9 @@ import org.springframework.roo.addon.tailor.CommandTransformation;
 
 /**
  * Adds default argument to the command If default argument is mandatory it will
- * be always replaced
+ * be always replaced.
  * 
- * @author vladimir.tihomirov
+ * @author Vladimir Tihomirov
  */
 @Component
 @Service
@@ -33,7 +33,14 @@ public class DefaultValue extends AbstractAction {
             arg.getArguments().put(argumentName, config.getDefaultValue());
         }
         else if (config.isMandatory()) {
-            // TODO replace value instead of appending it
+            final String oldValue = arg.getArguments().get(argumentName);
+            if (StringUtils.isNotBlank(oldValue)) {
+                // Replace the old value with the default one
+                arg.setInputCommand(arg.getInputCommand().replace(
+                        "--" + argumentName + " " + oldValue,
+                        "--" + argumentName + " " + config.getDefaultValue()));
+                arg.getArguments().put(argumentName, config.getDefaultValue());
+            }
         }
 
     }

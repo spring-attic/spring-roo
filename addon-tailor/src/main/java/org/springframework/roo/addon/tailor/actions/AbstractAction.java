@@ -5,22 +5,19 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 import org.springframework.roo.addon.tailor.CommandTransformation;
-import org.springframework.roo.addon.tailor.utils.TailorHelper;
+import org.springframework.roo.addon.tailor.util.TailorHelper;
 import org.springframework.roo.support.logging.HandlerUtils;
 
 /**
  * Performs actual action in application logic.
  * 
- * @author vladimir.tihomirov
+ * @author Vladimir Tihomirov
  */
 public abstract class AbstractAction implements Action {
 
     private static final Logger LOGGER = HandlerUtils
             .getLogger(AbstractAction.class);
 
-    /**
-     * {@inheritDoc}
-     */
     public void execute(final CommandTransformation command,
             final ActionConfig config) {
         if (isValid(config)) {
@@ -33,9 +30,6 @@ public abstract class AbstractAction implements Action {
         }
     }
 
-    /*
-     * @see #execute(RooCommand, ActionConfig)
-     */
     protected abstract void executeImpl(CommandTransformation command,
             ActionConfig config);
 

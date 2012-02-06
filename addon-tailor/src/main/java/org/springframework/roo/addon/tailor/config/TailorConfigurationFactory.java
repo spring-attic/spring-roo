@@ -1,14 +1,14 @@
 package org.springframework.roo.addon.tailor.config;
 
 /**
- * Creates Tailor configuration
+ * Creates a Tailor configuration.
  * 
- * @author birgitta.boeckeler
+ * @author Birgitta Boeckeler
  */
 public interface TailorConfigurationFactory {
 
     /**
-     * Creates tailor configuration
+     * Creates a tailor configuration.
      * 
      * @param name - configuration name
      * @return - tailor configuration
