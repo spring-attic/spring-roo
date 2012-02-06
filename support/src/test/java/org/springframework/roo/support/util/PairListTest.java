@@ -4,6 +4,8 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.Arrays;
 
+import org.apache.commons.lang3.tuple.MutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Test;
 
 /**
@@ -18,9 +20,9 @@ public class PairListTest {
     private static final int KEY_2 = 20;
     private static final String VALUE_1 = "a";
     private static final String VALUE_2 = "b";
-    private static final Pair<Integer, String> PAIR_1 = new Pair<Integer, String>(
+    private static final MutablePair<Integer, String> PAIR_1 = new MutablePair<Integer, String>(
             KEY_1, VALUE_1);
-    private static final Pair<Integer, String> PAIR_2 = new Pair<Integer, String>(
+    private static final MutablePair<Integer, String> PAIR_2 = new MutablePair<Integer, String>(
             KEY_2, VALUE_2);
 
     @Test

@@ -6,9 +6,9 @@ import java.util.Stack;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.roo.addon.dbre.model.DatabaseXmlUtils.IndexType;
 import org.springframework.roo.model.JavaPackage;
-import org.springframework.roo.support.util.Pair;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
@@ -25,14 +25,28 @@ public class DatabaseContentHandler extends DefaultHandler {
 
     private static class Option extends Pair<String, String> {
 
-        /**
-         * Constructor
-         * 
-         * @param key
-         * @param value
-         */
+        private static final long serialVersionUID = 3471455277824528758L;
+        private final String key;
+        private final String value;
+
         public Option(final String key, final String value) {
-            super(key, value);
+            this.key = key;
+            this.value = value;
+
+        }
+
+        @Override
+        public String getLeft() {
+            return key;
+        }
+
+        @Override
+        public String getRight() {
+            return value;
+        }
+
+        public String setValue(final String value) {
+            throw new UnsupportedOperationException();
         }
     }
 

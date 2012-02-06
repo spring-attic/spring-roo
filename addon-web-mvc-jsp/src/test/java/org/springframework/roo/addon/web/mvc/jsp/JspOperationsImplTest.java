@@ -4,9 +4,9 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.junit.Test;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.support.util.Pair;
 
 /**
  * Unit test of {@link JspOperationsImpl}
@@ -31,7 +31,7 @@ public class JspOperationsImplTest {
         when(mockController.getSimpleTypeName()).thenReturn("FooController");
 
         // Invoke
-        final Pair<String, String> pair = JspOperationsImpl
+        final ImmutablePair<String, String> pair = JspOperationsImpl
                 .getFolderAndMapping(preferredMapping, mockController);
 
         // Check

@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.tuple.Pair;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -85,23 +86,31 @@ public final class WebXmlUtils {
      */
     public static class WebXmlParam extends Pair<String, String> {
 
-        /**
-         * Constructor
-         * 
-         * @param name
-         * @param value
-         */
+        private static final long serialVersionUID = -1134907409024055399L;
+        private final String name;
+        private final String value;
+
         public WebXmlParam(final String name, final String value) {
-            super(name, value);
+            this.name = name;
+            this.value = value;
         }
 
-        /**
-         * Returns the name of this parameter
-         * 
-         * @return
-         */
+        @Override
+        public String getLeft() {
+            return name;
+        }
+
+        @Override
+        public String getRight() {
+            return value;
+        }
+
         public String getName() {
-            return getKey();
+            return getLeft();
+        }
+
+        public String setValue(final String value) {
+            throw new UnsupportedOperationException();
         }
     }
 

@@ -13,6 +13,7 @@ import java.net.URL;
 import java.util.Collection;
 import java.util.Iterator;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -20,7 +21,6 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.packaging.PackagingProvider;
 import org.springframework.roo.project.packaging.PackagingProviderRegistry;
-import org.springframework.roo.support.util.Pair;
 import org.springframework.uaa.client.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -62,13 +62,13 @@ public class PomFactoryImplTest {
      * @return a non-<code>null</code> pair
      * @throws Exception
      */
-    private Pair<Element, String> getPom(final String pomFileName)
+    private ImmutablePair<Element, String> getPom(final String pomFileName)
             throws Exception {
         final URL pomUrl = getPomUrl(pomFileName);
         final File pomFile = new File(pomUrl.toURI());
         final Document pomDocument = XmlUtils.parse(pomUrl.openStream());
-        return new Pair<Element, String>(pomDocument.getDocumentElement(),
-                pomFile.getCanonicalPath());
+        return new ImmutablePair<Element, String>(
+                pomDocument.getDocumentElement(), pomFile.getCanonicalPath());
     }
 
     private File getPomFile(final String pomFileName) throws Exception {
@@ -91,7 +91,7 @@ public class PomFactoryImplTest {
     }
 
     private Pom invokeFactory(final String pomFile) throws Exception {
-        final Pair<Element, String> pomDetails = getPom(pomFile);
+        final ImmutablePair<Element, String> pomDetails = getPom(pomFile);
         return factory.getInstance(pomDetails.getKey(), pomDetails.getValue(),
                 MODULE_NAME);
     }

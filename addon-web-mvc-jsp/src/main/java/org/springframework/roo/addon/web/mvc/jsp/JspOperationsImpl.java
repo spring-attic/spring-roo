@@ -17,6 +17,7 @@ import java.util.Locale;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -49,7 +50,6 @@ import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.osgi.BundleFindingUtils;
-import org.springframework.roo.support.util.Pair;
 import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlUtils;
 import org.springframework.roo.uaa.UaaRegistrationService;
@@ -81,7 +81,7 @@ public class JspOperationsImpl extends AbstractOperations implements
      * @param controller the associated controller type (required)
      * @return a non-<code>null</code> pair
      */
-    static Pair<String, String> getFolderAndMapping(
+    static ImmutablePair<String, String> getFolderAndMapping(
             final String preferredMapping, final JavaType controller) {
         if (StringUtils.isNotBlank(preferredMapping)) {
             String folderName = StringUtils.removeStart(preferredMapping, "/");
@@ -93,14 +93,14 @@ public class JspOperationsImpl extends AbstractOperations implements
             mapping = StringUtils.removeEnd(mapping, "/");
             mapping = mapping + (mapping.endsWith("/**") ? "" : "/**");
 
-            return new Pair<String, String>(folderName, mapping);
+            return new ImmutablePair<String, String>(folderName, mapping);
         }
 
         // Use sensible defaults
         final String typeNameLower = StringUtils.removeEnd(
                 controller.getSimpleTypeName(), "Controller").toLowerCase();
-        return new Pair<String, String>(typeNameLower, "/" + typeNameLower
-                + "/**");
+        return new ImmutablePair<String, String>(typeNameLower, "/"
+                + typeNameLower + "/**");
     }
 
     @Reference private BackupOperations backupOperations;
@@ -152,7 +152,7 @@ public class JspOperationsImpl extends AbstractOperations implements
         Validate.notNull(controller, "Controller Java Type required");
 
         // Create annotation @RequestMapping("/myobject/**")
-        final Pair<String, String> folderAndMapping = getFolderAndMapping(
+        final ImmutablePair<String, String> folderAndMapping = getFolderAndMapping(
                 preferredMapping, controller);
         final String folderName = folderAndMapping.getKey();
 

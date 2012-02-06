@@ -5,17 +5,19 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.MutablePair;
 
 /**
- * A {@link List} of {@link Pair}s. Unlike a {@link java.util.Map}, it can have
- * duplicate and/or <code>null</code> keys.
+ * A {@link List} of {@link ImmutablePair}s. Unlike a {@link java.util.Map}, it
+ * can have duplicate and/or <code>null</code> keys.
  * 
  * @author Andrew Swan
  * @since 1.2.0
  * @param <K> the type of key
  * @param <V> the type of value
  */
-public class PairList<K, V> extends ArrayList<Pair<K, V>> {
+public class PairList<K, V> extends ArrayList<MutablePair<K, V>> {
 
     // For serialisation
     private static final long serialVersionUID = 5990417235907246300L;
@@ -55,14 +57,14 @@ public class PairList<K, V> extends ArrayList<Pair<K, V>> {
     }
 
     /**
-     * Returns the given array of pairs as a modifiable list
+     * Returns the given array of pairs as a modifiable list.
      * 
      * @param <K> the type of key
      * @param <V> the type of value
      * @param pairs the pairs to put in a list
      * @return a non-<code>null</code> list
      */
-    public PairList(final Pair<K, V>... pairs) {
+    public PairList(final MutablePair<K, V>... pairs) {
         addAll(Arrays.asList(pairs));
     }
 
@@ -74,30 +76,30 @@ public class PairList<K, V> extends ArrayList<Pair<K, V>> {
      * @return true (as specified by Collection.add(E))
      */
     public boolean add(final K key, final V value) {
-        return add(new Pair<K, V>(key, value));
+        return add(new MutablePair<K, V>(key, value));
     }
 
     /**
-     * Returns the keys of each {@link Pair} in this list
+     * Returns the keys of each {@link MutablePair} in this list
      * 
      * @return a non-<code>null</code> list
      */
     public List<K> getKeys() {
         final List<K> keys = new ArrayList<K>();
-        for (final Pair<K, ?> pair : this) {
+        for (final MutablePair<K, ?> pair : this) {
             keys.add(pair.getKey());
         }
         return keys;
     }
 
     /**
-     * Returns the values of each {@link Pair} in this list
+     * Returns the values of each {@link MutablePair} in this list
      * 
      * @return a non-<code>null</code> modifiable copy of this list
      */
     public List<V> getValues() {
         final List<V> values = new ArrayList<V>();
-        for (final Pair<?, V> pair : this) {
+        for (final MutablePair<?, V> pair : this) {
             values.add(pair.getValue());
         }
         return values;
@@ -105,7 +107,7 @@ public class PairList<K, V> extends ArrayList<Pair<K, V>> {
 
     @SuppressWarnings("unchecked")
     @Override
-    public Pair<K, V>[] toArray() {
-        return super.toArray(new Pair[size()]);
+    public MutablePair<K, V>[] toArray() {
+        return super.toArray(new MutablePair[size()]);
     }
 }
