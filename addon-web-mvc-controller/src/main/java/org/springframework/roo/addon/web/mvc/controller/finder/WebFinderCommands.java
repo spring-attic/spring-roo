@@ -29,7 +29,7 @@ public class WebFinderCommands implements CommandMarker {
         webFinderOperations.annotateType(controllerType, finderType);
     }
 
-    @CliCommand(value = "web mvc finder all", help = "Adds  @RooWebFinder annotation to existing MVC controllers")
+    @CliCommand(value = "web mvc finder all", help = "Adds @RooWebFinder annotation to existing MVC controllers")
     public void all() {
         webFinderOperations.annotateAll();
     }
