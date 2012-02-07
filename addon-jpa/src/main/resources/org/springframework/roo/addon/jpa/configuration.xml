@@ -117,7 +117,7 @@
         </database>
         <database id="GAE">
             <properties>
-                <gae.home>${user.home}/.m2/repository/com/google/appengine/appengine-java-sdk/1.6.0/appengine-java-sdk-1.6.0</gae.home>
+                <gae.home>${user.home}/.m2/repository/com/google/appengine/appengine-java-sdk/1.6.2.1/appengine-java-sdk-1.6.2.1</gae.home>
             </properties>
             <repositories>
                 <repository>
@@ -137,29 +137,29 @@
                 <dependency>
                     <groupId>com.google.appengine.orm</groupId>
                     <artifactId>datanucleus-appengine</artifactId>
-                    <version>2.0.0-RC2</version>
+                    <version>2.0.0-final</version>
                 </dependency>
                 <dependency>
                     <groupId>com.google.appengine</groupId>
                     <artifactId>appengine-api-1.0-sdk</artifactId>
-                    <version>1.6.0</version>
+                    <version>1.6.2.1</version>
                 </dependency>
                 <dependency>
                     <groupId>com.google.appengine</groupId>
                     <artifactId>appengine-testing</artifactId>
-                    <version>1.6.0</version>
+                    <version>1.6.2.1</version>
                     <scope>test</scope>
                 </dependency>
                 <dependency>
                     <groupId>com.google.appengine</groupId>
                     <artifactId>appengine-api-stubs</artifactId>
-                    <version>1.6.0</version>
+                    <version>1.6.2.1</version>
                     <scope>test</scope>
                 </dependency>
                 <dependency>
                     <groupId>com.google.appengine</groupId>
                     <artifactId>appengine-api-labs</artifactId>
-                    <version>1.6.0</version>
+                    <version>1.6.2.1</version>
                     <scope>test</scope>
                 </dependency>
             </dependencies>
@@ -169,7 +169,7 @@
                     <artifactId>maven-gae-plugin</artifactId>
                     <version>0.9.2</version>
                     <configuration>
-                        <unpackVersion>1.6.0</unpackVersion>
+                        <unpackVersion>1.6.2.1</unpackVersion>
                     </configuration>
                     <executions>
                         <execution>
@@ -311,6 +311,9 @@
                     <id>DataNucleus_Repos2</id>
                     <name>DataNucleus Repository</name>
                     <url>http://www.datanucleus.org/downloads/maven2</url>
+                    <snapshots>
+                        <enabled>true</enabled>
+                    </snapshots>
                 </repository>
             </repositories>
             <pluginRepositories>
@@ -328,17 +331,17 @@
                 <dependency>
                     <groupId>org.datanucleus</groupId>
                     <artifactId>datanucleus-core</artifactId>
-                    <version>3.0.5</version>
+                    <version>3.0.7</version>
                 </dependency>
                 <dependency>
                     <groupId>org.datanucleus</groupId>
                     <artifactId>datanucleus-api-jpa</artifactId>
-                    <version>3.0.5</version>
+                    <version>3.0.6</version>
                 </dependency>
                 <dependency>
                     <groupId>org.datanucleus</groupId>
                     <artifactId>datanucleus-rdbms</artifactId>
-                    <version>3.0.5</version>
+                    <version>3.0.6</version>
                 </dependency>
             </dependencies>
             <plugins>
