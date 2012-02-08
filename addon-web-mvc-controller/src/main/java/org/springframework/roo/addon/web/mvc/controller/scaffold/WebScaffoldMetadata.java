@@ -292,8 +292,7 @@ public class WebScaffoldMetadata extends
 
         final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
         bodyBuilder.appendFormalLine("populateEditForm(uiModel, new "
-                + formBackingType.getNameIncludingTypeParameters(false,
-                        builder.getImportRegistrationResolver()) + "());");
+                + getShortName(formBackingType) + "());");
         boolean listAdded = false;
         for (final JavaTypeMetadataDetails dependentType : dependentTypes) {
             if (dependentType.getPersistenceDetails().getCountMethod() == null) {
@@ -307,19 +306,13 @@ public class WebScaffoldMetadata extends
                 final JavaType listType = new JavaType(
                         LIST.getFullyQualifiedTypeName(), 0, DataType.TYPE,
                         null, Arrays.asList(stringArrayType));
-                final String listShort = listType
-                        .getNameIncludingTypeParameters(false,
-                                builder.getImportRegistrationResolver());
 
                 final JavaType arrayListType = new JavaType(
                         ARRAY_LIST.getFullyQualifiedTypeName(), 0,
                         DataType.TYPE, null, Arrays.asList(stringArrayType));
-                final String arrayListShort = arrayListType
-                        .getNameIncludingTypeParameters(false,
-                                builder.getImportRegistrationResolver());
-
-                bodyBuilder.appendFormalLine(listShort + " dependencies = new "
-                        + arrayListShort + "();");
+                bodyBuilder.appendFormalLine(getShortName(listType)
+                        + " dependencies = new " + getShortName(arrayListType)
+                        + "();");
                 listAdded = true;
             }
             bodyBuilder.appendFormalLine("if ("
@@ -440,16 +433,11 @@ public class WebScaffoldMetadata extends
             else {
                 final JavaType dateTimeFormat = new JavaType(
                         "org.joda.time.format.DateTimeFormat");
-                final String dateTimeFormatSimple = dateTimeFormat
-                        .getNameIncludingTypeParameters(false,
-                                builder.getImportRegistrationResolver());
-                final String localeContextHolderSimple = LOCALE_CONTEXT_HOLDER
-                        .getNameIncludingTypeParameters(false,
-                                builder.getImportRegistrationResolver());
-                pattern = dateTimeFormatSimple
+                pattern = getShortName(dateTimeFormat)
                         + ".patternForStyle(\""
                         + javaSymbolNameDateTimeFormatDetailsEntry.getValue().style
-                        + "\", " + localeContextHolderSimple + ".getLocale())";
+                        + "\", " + getShortName(LOCALE_CONTEXT_HOLDER)
+                        + ".getLocale())";
             }
             bodyBuilder.appendFormalLine("uiModel.addAttribute(\""
                     + entityName
@@ -526,13 +514,9 @@ public class WebScaffoldMetadata extends
         final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
         annotations.add(requestMapping);
 
-        final String formBackingTypeName = formBackingType
-                .getNameIncludingTypeParameters(false,
-                        builder.getImportRegistrationResolver());
-
         final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-        bodyBuilder.appendFormalLine(formBackingTypeName + " " + entityName
-                + " = " + findMethod.getMethodCall() + ";");
+        bodyBuilder.appendFormalLine(getShortName(formBackingType) + " "
+                + entityName + " = " + findMethod.getMethodCall() + ";");
         bodyBuilder.appendFormalLine(deleteMethodAdditions.getMethodCall()
                 + ";");
         bodyBuilder.appendFormalLine("uiModel.asMap().clear();");
@@ -571,24 +555,17 @@ public class WebScaffoldMetadata extends
                 .appendFormalLine("String enc = httpServletRequest.getCharacterEncoding();");
         bodyBuilder.appendFormalLine("if (enc == null) {");
         bodyBuilder.indent();
-        bodyBuilder.appendFormalLine("enc = "
-                + WEB_UTILS.getNameIncludingTypeParameters(false,
-                        builder.getImportRegistrationResolver())
+        bodyBuilder.appendFormalLine("enc = " + getShortName(WEB_UTILS)
                 + ".DEFAULT_CHARACTER_ENCODING;");
         bodyBuilder.indentRemove();
         bodyBuilder.appendFormalLine("}");
         bodyBuilder.appendFormalLine("try {");
         bodyBuilder.indent();
-        bodyBuilder.appendFormalLine("pathSegment = "
-                + URI_UTILS.getNameIncludingTypeParameters(false,
-                        builder.getImportRegistrationResolver())
+        bodyBuilder.appendFormalLine("pathSegment = " + getShortName(URI_UTILS)
                 + ".encodePathSegment(pathSegment, enc);");
         bodyBuilder.indentRemove();
         bodyBuilder.appendFormalLine("} catch ("
-                + UNSUPPORTED_ENCODING_EXCEPTION
-                        .getNameIncludingTypeParameters(false,
-                                builder.getImportRegistrationResolver())
-                + " uee) {}");
+                + getShortName(UNSUPPORTED_ENCODING_EXCEPTION) + " uee) {}");
         bodyBuilder.appendFormalLine("return pathSegment;");
 
         return new MethodMetadataBuilder(getId(), 0, methodName, STRING,
@@ -713,17 +690,11 @@ public class WebScaffoldMetadata extends
                                 builder, governorTypeDetails);
                     }
                     else if (domainType.isEnumType()) {
-                        final String enumTypeName = domainType
-                                .getJavaType()
-                                .getNameIncludingTypeParameters(false,
-                                        builder.getImportRegistrationResolver());
-                        final String arraysTypeName = ARRAYS
-                                .getNameIncludingTypeParameters(false,
-                                        builder.getImportRegistrationResolver());
                         bodyBuilder.appendFormalLine("uiModel.addAttribute(\""
-                                + modelAttribute + "\", " + arraysTypeName
-                                + ".asList(" + enumTypeName + ".values())"
-                                + ");");
+                                + modelAttribute + "\", "
+                                + getShortName(ARRAYS) + ".asList("
+                                + getShortName(domainType.getJavaType())
+                                + ".values())" + ");");
                     }
                 }
             }
@@ -732,6 +703,11 @@ public class WebScaffoldMetadata extends
                 VOID_PRIMITIVE,
                 AnnotatedJavaType.convertFromJavaTypes(parameterTypes),
                 parameterNames, bodyBuilder).build();
+    }
+
+    private String getShortName(final JavaType type) {
+        return type.getNameIncludingTypeParameters(false,
+                builder.getImportRegistrationResolver());
     }
 
     private MethodMetadataBuilder getShowMethod(final FieldMetadata idField,

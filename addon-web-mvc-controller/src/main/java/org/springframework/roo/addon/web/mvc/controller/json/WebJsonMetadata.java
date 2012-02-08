@@ -98,10 +98,11 @@ public class WebJsonMetadata extends
     }
 
     private WebJsonAnnotationValues annotationValues;
-    private String entityName;
     private boolean introduceLayerComponents;
     private JavaType jsonEnabledType;
+    private String jsonEnabledTypeShortName;
     private JsonMetadata jsonMetadata;
+    private String jsonBeanName;
 
     /**
      * Constructor
@@ -143,37 +144,39 @@ public class WebJsonMetadata extends
 
         this.annotationValues = annotationValues;
         jsonEnabledType = annotationValues.getJsonObject();
-        entityName = JavaSymbolName.getReservedWordSafeName(jsonEnabledType)
+        jsonEnabledTypeShortName = getShortName(jsonEnabledType);
+        jsonBeanName = JavaSymbolName.getReservedWordSafeName(jsonEnabledType)
                 .getSymbolName();
+
         this.introduceLayerComponents = introduceLayerComponents;
         this.jsonMetadata = jsonMetadata;
 
         final MemberTypeAdditions findMethod = persistenceAdditions
                 .get(FIND_METHOD);
-        builder.addMethod(getJsonShowMethod(identifierField, findMethod));
+        builder.addMethod(getShowJsonMethod(identifierField, findMethod));
 
         final MemberTypeAdditions findAllMethod = persistenceAdditions
                 .get(FIND_ALL_METHOD);
-        builder.addMethod(getJsonListMethod(findAllMethod));
+        builder.addMethod(getListJsonMethod(findAllMethod));
 
         final MemberTypeAdditions persistMethod = persistenceAdditions
                 .get(PERSIST_METHOD);
-        builder.addMethod(getJsonCreateMethod(persistMethod));
+        builder.addMethod(getCreateFromJsonMethod(persistMethod));
         builder.addMethod(getCreateFromJsonArrayMethod(persistMethod));
 
         final MemberTypeAdditions mergeMethod = persistenceAdditions
                 .get(MERGE_METHOD);
-        builder.addMethod(getJsonUpdateMethod(mergeMethod));
+        builder.addMethod(getUpdateFromJsonMethod(mergeMethod));
         builder.addMethod(getUpdateFromJsonArrayMethod(mergeMethod));
 
         final MemberTypeAdditions removeMethod = persistenceAdditions
                 .get(REMOVE_METHOD);
-        builder.addMethod(getJsonDeleteMethod(removeMethod, identifierField,
-                findMethod));
+        builder.addMethod(getDeleteFromJsonMethod(removeMethod,
+                identifierField, findMethod));
 
         if (annotationValues.isExposeFinders()) {
             for (final FinderMetadataDetails finder : finderDetails) {
-                builder.addMethod(getFinderJsonMethod(finder, plural));
+                builder.addMethod(getJsonFindMethod(finder, plural));
             }
         }
 
@@ -217,14 +220,12 @@ public class WebJsonMetadata extends
         final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
         annotations.add(requestMapping);
 
-        final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-        final String beanName = jsonEnabledType.getNameIncludingTypeParameters(
-                false, builder.getImportRegistrationResolver());
-
         final List<JavaType> params = new ArrayList<JavaType>();
         params.add(jsonEnabledType);
-        bodyBuilder.appendFormalLine("for (" + beanName + " " + entityName
-                + ": " + beanName + "."
+
+        final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+        bodyBuilder.appendFormalLine("for (" + jsonEnabledTypeShortName + " "
+                + jsonBeanName + ": " + jsonEnabledTypeShortName + "."
                 + fromJsonArrayMethodName.getSymbolName() + "(json)) {");
         bodyBuilder.indent();
         bodyBuilder.appendFormalLine(persistMethod.getMethodCall() + ";");
@@ -237,9 +238,7 @@ public class WebJsonMetadata extends
                 + CONTENT_TYPE + "\");");
         bodyBuilder
                 .appendFormalLine("return new ResponseEntity<String>(headers, "
-                        + HTTP_STATUS.getNameIncludingTypeParameters(false,
-                                builder.getImportRegistrationResolver())
-                        + ".CREATED);");
+                        + getShortName(HTTP_STATUS) + ".CREATED);");
 
         if (introduceLayerComponents) {
             persistMethod.copyAdditionsTo(builder, governorTypeDetails);
@@ -252,7 +251,140 @@ public class WebJsonMetadata extends
         return methodBuilder;
     }
 
-    private MethodMetadataBuilder getFinderJsonMethod(
+    private MethodMetadataBuilder getCreateFromJsonMethod(
+            final MemberTypeAdditions persistMethod) {
+        if (StringUtils.isBlank(annotationValues.getCreateFromJsonMethod())
+                || persistMethod == null) {
+            return null;
+        }
+        final JavaSymbolName methodName = new JavaSymbolName(
+                annotationValues.getCreateFromJsonMethod());
+        if (governorHasMethodWithSameName(methodName)) {
+            return null;
+        }
+
+        final JavaSymbolName fromJsonMethodName = jsonMetadata
+                .getFromJsonMethodName();
+
+        final AnnotationMetadataBuilder requestBodyAnnotation = new AnnotationMetadataBuilder(
+                REQUEST_BODY);
+        final List<AnnotatedJavaType> parameterTypes = Arrays
+                .asList(new AnnotatedJavaType(JavaType.STRING,
+                        requestBodyAnnotation.build()));
+        final List<JavaSymbolName> parameterNames = Arrays
+                .asList(new JavaSymbolName("json"));
+
+        final List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
+        requestMappingAttributes.add(new EnumAttributeValue(new JavaSymbolName(
+                "method"), new EnumDetails(REQUEST_METHOD, new JavaSymbolName(
+                "POST"))));
+        requestMappingAttributes.add(new StringAttributeValue(
+                new JavaSymbolName("headers"), "Accept=application/json"));
+        final AnnotationMetadataBuilder requestMapping = new AnnotationMetadataBuilder(
+                REQUEST_MAPPING, requestMappingAttributes);
+        final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+        annotations.add(requestMapping);
+
+        final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+        bodyBuilder.appendFormalLine(jsonEnabledTypeShortName + " "
+                + jsonBeanName + " = " + jsonEnabledTypeShortName + "."
+                + fromJsonMethodName.getSymbolName() + "(json);");
+        bodyBuilder.appendFormalLine(persistMethod.getMethodCall() + ";");
+        final String httpHeadersShortName = getShortName(HTTP_HEADERS);
+        bodyBuilder.appendFormalLine(httpHeadersShortName + " headers = new "
+                + httpHeadersShortName + "();");
+        bodyBuilder.appendFormalLine("headers.add(\"Content-Type\", \""
+                + CONTENT_TYPE + "\");");
+        bodyBuilder
+                .appendFormalLine("return new ResponseEntity<String>(headers, "
+                        + getShortName(HTTP_STATUS) + ".CREATED);");
+
+        if (introduceLayerComponents) {
+            persistMethod.copyAdditionsTo(builder, governorTypeDetails);
+        }
+
+        final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(
+                getId(), PUBLIC, methodName, RESPONSE_ENTITY_STRING,
+                parameterTypes, parameterNames, bodyBuilder);
+        methodBuilder.setAnnotations(annotations);
+        return methodBuilder;
+    }
+
+    private MethodMetadataBuilder getDeleteFromJsonMethod(
+            final MemberTypeAdditions removeMethod,
+            final FieldMetadata identifierField,
+            final MemberTypeAdditions findMethod) {
+        if (StringUtils.isBlank(annotationValues.getDeleteFromJsonMethod())
+                || removeMethod == null || identifierField == null
+                || findMethod == null) {
+            return null;
+        }
+        final JavaSymbolName methodName = new JavaSymbolName(
+                annotationValues.getDeleteFromJsonMethod());
+        if (governorHasMethodWithSameName(methodName)) {
+            return null;
+        }
+
+        final List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
+        attributes.add(new StringAttributeValue(new JavaSymbolName("value"),
+                identifierField.getFieldName().getSymbolName()));
+        final AnnotationMetadataBuilder pathVariableAnnotation = new AnnotationMetadataBuilder(
+                PATH_VARIABLE, attributes);
+
+        final List<AnnotatedJavaType> parameterTypes = Arrays
+                .asList(new AnnotatedJavaType(identifierField.getFieldType(),
+                        pathVariableAnnotation.build()));
+        final List<JavaSymbolName> parameterNames = Arrays
+                .asList(identifierField.getFieldName());
+
+        final List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
+        requestMappingAttributes
+                .add(new StringAttributeValue(new JavaSymbolName("value"), "/{"
+                        + identifierField.getFieldName().getSymbolName() + "}"));
+        requestMappingAttributes.add(new EnumAttributeValue(new JavaSymbolName(
+                "method"), new EnumDetails(REQUEST_METHOD, new JavaSymbolName(
+                "DELETE"))));
+        requestMappingAttributes.add(new StringAttributeValue(
+                new JavaSymbolName("headers"), "Accept=application/json"));
+        final AnnotationMetadataBuilder requestMapping = new AnnotationMetadataBuilder(
+                REQUEST_MAPPING, requestMappingAttributes);
+
+        final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+        annotations.add(requestMapping);
+
+        final String httpHeadersShortName = getShortName(HTTP_HEADERS);
+
+        final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+        bodyBuilder.appendFormalLine(jsonEnabledTypeShortName + " "
+                + jsonBeanName + " = " + findMethod.getMethodCall() + ";");
+        bodyBuilder.appendFormalLine(httpHeadersShortName + " headers = new "
+                + httpHeadersShortName + "();");
+        bodyBuilder.appendFormalLine("headers.add(\"Content-Type\", \""
+                + CONTENT_TYPE + "\");");
+        bodyBuilder.appendFormalLine("if (" + jsonBeanName + " == null) {");
+        bodyBuilder.indent();
+        bodyBuilder.appendFormalLine("return new "
+                + getShortName(RESPONSE_ENTITY) + "<String>(headers, "
+                + getShortName(HTTP_STATUS) + ".NOT_FOUND);");
+        bodyBuilder.indentRemove();
+        bodyBuilder.appendFormalLine("}");
+        bodyBuilder.appendFormalLine(removeMethod.getMethodCall() + ";");
+        bodyBuilder
+                .appendFormalLine("return new ResponseEntity<String>(headers, "
+                        + getShortName(HTTP_STATUS) + ".OK);");
+
+        if (introduceLayerComponents) {
+            removeMethod.copyAdditionsTo(builder, governorTypeDetails);
+            findMethod.copyAdditionsTo(builder, governorTypeDetails);
+        }
+        final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(
+                getId(), PUBLIC, methodName, RESPONSE_ENTITY_STRING,
+                parameterTypes, parameterNames, bodyBuilder);
+        methodBuilder.setAnnotations(annotations);
+        return methodBuilder;
+    }
+
+    private MethodMetadataBuilder getJsonFindMethod(
             final FinderMetadataDetails finderDetails, final String plural) {
         if (finderDetails == null
                 || jsonMetadata.getToJsonArrayMethodName() == null) {
@@ -268,8 +400,6 @@ public class WebJsonMetadata extends
 
         final List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
         final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
-
-        final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
         final StringBuilder methodParams = new StringBuilder();
 
         for (final FieldMetadata field : finderDetails
@@ -332,12 +462,12 @@ public class WebJsonMetadata extends
         final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
         annotations.add(requestMapping);
         annotations.add(new AnnotationMetadataBuilder(RESPONSE_BODY));
-        final String shortBeanName = jsonEnabledType
-                .getNameIncludingTypeParameters(false,
-                        builder.getImportRegistrationResolver());
+
         final String httpHeadersShortName = getShortName(HTTP_HEADERS);
         final String responseEntityShortName = getShortName(RESPONSE_ENTITY);
         final String httpStatusShortName = getShortName(HTTP_STATUS);
+
+        final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
         bodyBuilder.appendFormalLine(httpHeadersShortName + " headers = new "
                 + httpHeadersShortName + "();");
         bodyBuilder.appendFormalLine("headers.add(\"Content-Type\", \""
@@ -345,12 +475,12 @@ public class WebJsonMetadata extends
         bodyBuilder.appendFormalLine("return new "
                 + responseEntityShortName
                 + "<String>("
-                + shortBeanName
+                + jsonEnabledTypeShortName
                 + "."
                 + jsonMetadata.getToJsonArrayMethodName().getSymbolName()
                         .toString()
                 + "("
-                + shortBeanName
+                + jsonEnabledTypeShortName
                 + "."
                 + finderDetails.getFinderMethodMetadata().getMethodName()
                         .getSymbolName() + "(" + methodParams.toString()
@@ -364,153 +494,7 @@ public class WebJsonMetadata extends
         return methodBuilder;
     }
 
-    private MethodMetadataBuilder getJsonCreateMethod(
-            final MemberTypeAdditions persistMethod) {
-        if (StringUtils.isBlank(annotationValues.getCreateFromJsonMethod())
-                || persistMethod == null) {
-            return null;
-        }
-        final JavaSymbolName methodName = new JavaSymbolName(
-                annotationValues.getCreateFromJsonMethod());
-        if (governorHasMethodWithSameName(methodName)) {
-            return null;
-        }
-
-        final JavaSymbolName fromJsonMethodName = jsonMetadata
-                .getFromJsonMethodName();
-
-        final AnnotationMetadataBuilder requestBodyAnnotation = new AnnotationMetadataBuilder(
-                REQUEST_BODY);
-        final List<AnnotatedJavaType> parameterTypes = Arrays
-                .asList(new AnnotatedJavaType(JavaType.STRING,
-                        requestBodyAnnotation.build()));
-        final List<JavaSymbolName> parameterNames = Arrays
-                .asList(new JavaSymbolName("json"));
-
-        final List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
-        requestMappingAttributes.add(new EnumAttributeValue(new JavaSymbolName(
-                "method"), new EnumDetails(REQUEST_METHOD, new JavaSymbolName(
-                "POST"))));
-        requestMappingAttributes.add(new StringAttributeValue(
-                new JavaSymbolName("headers"), "Accept=application/json"));
-        final AnnotationMetadataBuilder requestMapping = new AnnotationMetadataBuilder(
-                REQUEST_MAPPING, requestMappingAttributes);
-        final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
-        annotations.add(requestMapping);
-
-        final String formBackingTypeName = jsonEnabledType
-                .getNameIncludingTypeParameters(false,
-                        builder.getImportRegistrationResolver());
-        final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-        bodyBuilder.appendFormalLine(formBackingTypeName + " "
-                + JavaSymbolName.getReservedWordSafeName(jsonEnabledType)
-                + " = " + formBackingTypeName + "."
-                + fromJsonMethodName.getSymbolName() + "(json);");
-        bodyBuilder.appendFormalLine(persistMethod.getMethodCall() + ";");
-        final String httpHeadersShortName = getShortName(HTTP_HEADERS);
-        bodyBuilder.appendFormalLine(httpHeadersShortName + " headers = new "
-                + httpHeadersShortName + "();");
-        bodyBuilder.appendFormalLine("headers.add(\"Content-Type\", \""
-                + CONTENT_TYPE + "\");");
-        bodyBuilder
-                .appendFormalLine("return new ResponseEntity<String>(headers, "
-                        + HTTP_STATUS.getNameIncludingTypeParameters(false,
-                                builder.getImportRegistrationResolver())
-                        + ".CREATED);");
-
-        if (introduceLayerComponents) {
-            persistMethod.copyAdditionsTo(builder, governorTypeDetails);
-        }
-
-        final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(
-                getId(), PUBLIC, methodName, RESPONSE_ENTITY_STRING,
-                parameterTypes, parameterNames, bodyBuilder);
-        methodBuilder.setAnnotations(annotations);
-        return methodBuilder;
-    }
-
-    private MethodMetadataBuilder getJsonDeleteMethod(
-            final MemberTypeAdditions removeMethod,
-            final FieldMetadata identifierField,
-            final MemberTypeAdditions findMethod) {
-        if (StringUtils.isBlank(annotationValues.getDeleteFromJsonMethod())
-                || removeMethod == null || identifierField == null
-                || findMethod == null) {
-            return null;
-        }
-        final JavaSymbolName methodName = new JavaSymbolName(
-                annotationValues.getDeleteFromJsonMethod());
-        if (governorHasMethodWithSameName(methodName)) {
-            return null;
-        }
-
-        final List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
-        attributes.add(new StringAttributeValue(new JavaSymbolName("value"),
-                identifierField.getFieldName().getSymbolName()));
-        final AnnotationMetadataBuilder pathVariableAnnotation = new AnnotationMetadataBuilder(
-                PATH_VARIABLE, attributes);
-
-        final List<AnnotatedJavaType> parameterTypes = Arrays
-                .asList(new AnnotatedJavaType(identifierField.getFieldType(),
-                        pathVariableAnnotation.build()));
-        final List<JavaSymbolName> parameterNames = Arrays
-                .asList(identifierField.getFieldName());
-
-        final List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
-        requestMappingAttributes
-                .add(new StringAttributeValue(new JavaSymbolName("value"), "/{"
-                        + identifierField.getFieldName().getSymbolName() + "}"));
-        requestMappingAttributes.add(new EnumAttributeValue(new JavaSymbolName(
-                "method"), new EnumDetails(REQUEST_METHOD, new JavaSymbolName(
-                "DELETE"))));
-        requestMappingAttributes.add(new StringAttributeValue(
-                new JavaSymbolName("headers"), "Accept=application/json"));
-        final AnnotationMetadataBuilder requestMapping = new AnnotationMetadataBuilder(
-                REQUEST_MAPPING, requestMappingAttributes);
-
-        final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
-        annotations.add(requestMapping);
-
-        final String beanShortName = jsonEnabledType
-                .getNameIncludingTypeParameters(false,
-                        builder.getImportRegistrationResolver());
-        final String beanShortNameField = StringUtils
-                .uncapitalize(beanShortName);
-        final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-        bodyBuilder.appendFormalLine(beanShortName + " " + beanShortNameField
-                + " = " + findMethod.getMethodCall() + ";");
-        final String httpHeadersShortName = getShortName(HTTP_HEADERS);
-        bodyBuilder.appendFormalLine(httpHeadersShortName + " headers = new "
-                + httpHeadersShortName + "();");
-        bodyBuilder.appendFormalLine("headers.add(\"Content-Type\", \""
-                + CONTENT_TYPE + "\");");
-        bodyBuilder.appendFormalLine("if (" + beanShortNameField
-                + " == null) {");
-        bodyBuilder.indent();
-        bodyBuilder.appendFormalLine("return new "
-                + getShortName(RESPONSE_ENTITY) + "<String>(headers, "
-                + getShortName(HTTP_STATUS) + ".NOT_FOUND);");
-        bodyBuilder.indentRemove();
-        bodyBuilder.appendFormalLine("}");
-        bodyBuilder.appendFormalLine(removeMethod.getMethodCall() + ";");
-        bodyBuilder
-                .appendFormalLine("return new ResponseEntity<String>(headers, "
-                        + HTTP_STATUS.getNameIncludingTypeParameters(false,
-                                builder.getImportRegistrationResolver())
-                        + ".OK);");
-
-        if (introduceLayerComponents) {
-            removeMethod.copyAdditionsTo(builder, governorTypeDetails);
-            findMethod.copyAdditionsTo(builder, governorTypeDetails);
-        }
-        final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(
-                getId(), PUBLIC, methodName, RESPONSE_ENTITY_STRING,
-                parameterTypes, parameterNames, bodyBuilder);
-        methodBuilder.setAnnotations(annotations);
-        return methodBuilder;
-    }
-
-    private MethodMetadataBuilder getJsonListMethod(
+    private MethodMetadataBuilder getListJsonMethod(
             final MemberTypeAdditions findAllMethod) {
         if (StringUtils.isBlank(annotationValues.getListJsonMethod())
                 || findAllMethod == null) {
@@ -535,25 +519,21 @@ public class WebJsonMetadata extends
 
         annotations.add(new AnnotationMetadataBuilder(RESPONSE_BODY));
 
-        final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-        final String entityName = jsonEnabledType
-                .getNameIncludingTypeParameters(false,
-                        builder.getImportRegistrationResolver());
         final String httpHeadersShortName = getShortName(HTTP_HEADERS);
         final String responseEntityShortName = getShortName(RESPONSE_ENTITY);
         final String httpStatusShortName = getShortName(HTTP_STATUS);
+
+        final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
         bodyBuilder.appendFormalLine(httpHeadersShortName + " headers = new "
                 + httpHeadersShortName + "();");
         bodyBuilder.appendFormalLine("headers.add(\"Content-Type\", \""
                 + CONTENT_TYPE + "; charset=utf-8\");");
         final JavaType list = new JavaType(List.class.getName(), 0,
                 DataType.TYPE, null, Arrays.asList(jsonEnabledType));
-        bodyBuilder.appendFormalLine(list.getNameIncludingTypeParameters(false,
-                builder.getImportRegistrationResolver())
-                + " result = "
+        bodyBuilder.appendFormalLine(getShortName(list) + " result = "
                 + findAllMethod.getMethodCall() + ";");
         bodyBuilder.appendFormalLine("return new " + responseEntityShortName
-                + "<String>(" + entityName + "."
+                + "<String>(" + jsonEnabledTypeShortName + "."
                 + toJsonArrayMethodName.getSymbolName() + "(result), headers, "
                 + httpStatusShortName + ".OK);");
 
@@ -568,7 +548,12 @@ public class WebJsonMetadata extends
         return methodBuilder;
     }
 
-    private MethodMetadataBuilder getJsonShowMethod(
+    private String getShortName(final JavaType type) {
+        return type.getNameIncludingTypeParameters(false,
+                builder.getImportRegistrationResolver());
+    }
+
+    private MethodMetadataBuilder getShowJsonMethod(
             final FieldMetadata identifierField,
             final MemberTypeAdditions findMethod) {
         if (StringUtils.isBlank(annotationValues.getShowJsonMethod())
@@ -610,28 +595,25 @@ public class WebJsonMetadata extends
         annotations.add(requestMapping);
         annotations.add(new AnnotationMetadataBuilder(RESPONSE_BODY));
 
-        final String beanShortName = getShortName(jsonEnabledType);
         final String httpHeadersShortName = getShortName(HTTP_HEADERS);
         final String responseEntityShortName = getShortName(RESPONSE_ENTITY);
         final String httpStatusShortName = getShortName(HTTP_STATUS);
 
         final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-        bodyBuilder.appendFormalLine(beanShortName + " "
-                + beanShortName.toLowerCase() + " = "
-                + findMethod.getMethodCall() + ";");
+        bodyBuilder.appendFormalLine(jsonEnabledTypeShortName + " "
+                + jsonBeanName + " = " + findMethod.getMethodCall() + ";");
         bodyBuilder.appendFormalLine(httpHeadersShortName + " headers = new "
                 + httpHeadersShortName + "();");
         bodyBuilder.appendFormalLine("headers.add(\"Content-Type\", \""
                 + CONTENT_TYPE + "; charset=utf-8\");");
-        bodyBuilder.appendFormalLine("if (" + beanShortName.toLowerCase()
-                + " == null) {");
+        bodyBuilder.appendFormalLine("if (" + jsonBeanName + " == null) {");
         bodyBuilder.indent();
         bodyBuilder.appendFormalLine("return new " + responseEntityShortName
                 + "<String>(headers, " + httpStatusShortName + ".NOT_FOUND);");
         bodyBuilder.indentRemove();
         bodyBuilder.appendFormalLine("}");
         bodyBuilder.appendFormalLine("return new " + responseEntityShortName
-                + "<String>(" + beanShortName.toLowerCase() + "."
+                + "<String>(" + jsonBeanName + "."
                 + toJsonMethodName.getSymbolName() + "(), headers, "
                 + httpStatusShortName + ".OK);");
 
@@ -644,87 +626,6 @@ public class WebJsonMetadata extends
                 parameterTypes, parameterNames, bodyBuilder);
         methodBuilder.setAnnotations(annotations);
         return methodBuilder;
-    }
-
-    private MethodMetadataBuilder getJsonUpdateMethod(
-            final MemberTypeAdditions mergeMethod) {
-        if (StringUtils.isBlank(annotationValues.getUpdateFromJsonMethod())
-                || mergeMethod == null) {
-            return null;
-        }
-        final JavaSymbolName methodName = new JavaSymbolName(
-                annotationValues.getUpdateFromJsonMethod());
-        if (governorHasMethodWithSameName(methodName)) {
-            return null;
-        }
-
-        final JavaSymbolName fromJsonMethodName = jsonMetadata
-                .getFromJsonMethodName();
-
-        final AnnotationMetadataBuilder requestBodyAnnotation = new AnnotationMetadataBuilder(
-                REQUEST_BODY);
-
-        final List<AnnotatedJavaType> parameterTypes = Arrays
-                .asList(new AnnotatedJavaType(JavaType.STRING,
-                        requestBodyAnnotation.build()));
-        final List<JavaSymbolName> parameterNames = Arrays
-                .asList(new JavaSymbolName("json"));
-
-        final List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
-        requestMappingAttributes.add(new EnumAttributeValue(new JavaSymbolName(
-                "method"), new EnumDetails(REQUEST_METHOD, new JavaSymbolName(
-                "PUT"))));
-        requestMappingAttributes.add(new StringAttributeValue(
-                new JavaSymbolName("headers"), "Accept=application/json"));
-        final AnnotationMetadataBuilder requestMapping = new AnnotationMetadataBuilder(
-                REQUEST_MAPPING, requestMappingAttributes);
-        final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
-        annotations.add(requestMapping);
-
-        final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-        final String beanShortName = jsonEnabledType
-                .getNameIncludingTypeParameters(false,
-                        builder.getImportRegistrationResolver());
-        final String beanSymbolName = JavaSymbolName.getReservedWordSafeName(
-                jsonEnabledType).getSymbolName();
-        final String httpHeadersShortName = getShortName(HTTP_HEADERS);
-        bodyBuilder.appendFormalLine(httpHeadersShortName + " headers = new "
-                + httpHeadersShortName + "();");
-        bodyBuilder.appendFormalLine("headers.add(\"Content-Type\", \""
-                + CONTENT_TYPE + "\");");
-        bodyBuilder.appendFormalLine(beanShortName + " " + beanSymbolName
-                + " = " + beanShortName + "."
-                + fromJsonMethodName.getSymbolName() + "(json);");
-        bodyBuilder.appendFormalLine("if (" + mergeMethod.getMethodCall()
-                + " == null) {");
-        bodyBuilder.indent();
-        bodyBuilder
-                .appendFormalLine("return new ResponseEntity<String>(headers, "
-                        + HTTP_STATUS.getNameIncludingTypeParameters(false,
-                                builder.getImportRegistrationResolver())
-                        + ".NOT_FOUND);");
-        bodyBuilder.indentRemove();
-        bodyBuilder.appendFormalLine("}");
-        bodyBuilder
-                .appendFormalLine("return new ResponseEntity<String>(headers, "
-                        + HTTP_STATUS.getNameIncludingTypeParameters(false,
-                                builder.getImportRegistrationResolver())
-                        + ".OK);");
-
-        if (introduceLayerComponents) {
-            mergeMethod.copyAdditionsTo(builder, governorTypeDetails);
-        }
-
-        final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(
-                getId(), PUBLIC, methodName, RESPONSE_ENTITY_STRING,
-                parameterTypes, parameterNames, bodyBuilder);
-        methodBuilder.setAnnotations(annotations);
-        return methodBuilder;
-    }
-
-    private String getShortName(final JavaType type) {
-        return type.getNameIncludingTypeParameters(false,
-                builder.getImportRegistrationResolver());
     }
 
     private MethodMetadataBuilder getUpdateFromJsonArrayMethod(
@@ -765,19 +666,18 @@ public class WebJsonMetadata extends
         final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
         annotations.add(requestMapping);
 
-        final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-        final String beanName = jsonEnabledType.getNameIncludingTypeParameters(
-                false, builder.getImportRegistrationResolver());
-
         final List<JavaType> params = new ArrayList<JavaType>();
         params.add(jsonEnabledType);
+
         final String httpHeadersShortName = getShortName(HTTP_HEADERS);
+
+        final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
         bodyBuilder.appendFormalLine(httpHeadersShortName + " headers = new "
                 + httpHeadersShortName + "();");
         bodyBuilder.appendFormalLine("headers.add(\"Content-Type\", \""
                 + CONTENT_TYPE + "\");");
-        bodyBuilder.appendFormalLine("for (" + beanName + " " + entityName
-                + ": " + beanName + "."
+        bodyBuilder.appendFormalLine("for (" + jsonEnabledTypeShortName + " "
+                + jsonBeanName + ": " + jsonEnabledTypeShortName + "."
                 + fromJsonArrayMethodName.getSymbolName() + "(json)) {");
         bodyBuilder.indent();
         bodyBuilder.appendFormalLine("if (" + mergeMethod.getMethodCall()
@@ -785,18 +685,82 @@ public class WebJsonMetadata extends
         bodyBuilder.indent();
         bodyBuilder
                 .appendFormalLine("return new ResponseEntity<String>(headers, "
-                        + HTTP_STATUS.getNameIncludingTypeParameters(false,
-                                builder.getImportRegistrationResolver())
-                        + ".NOT_FOUND);");
+                        + getShortName(HTTP_STATUS) + ".NOT_FOUND);");
         bodyBuilder.indentRemove();
         bodyBuilder.appendFormalLine("}");
         bodyBuilder.indentRemove();
         bodyBuilder.appendFormalLine("}");
         bodyBuilder
                 .appendFormalLine("return new ResponseEntity<String>(headers, "
-                        + HTTP_STATUS.getNameIncludingTypeParameters(false,
-                                builder.getImportRegistrationResolver())
-                        + ".OK);");
+                        + getShortName(HTTP_STATUS) + ".OK);");
+
+        if (introduceLayerComponents) {
+            mergeMethod.copyAdditionsTo(builder, governorTypeDetails);
+        }
+
+        final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(
+                getId(), PUBLIC, methodName, RESPONSE_ENTITY_STRING,
+                parameterTypes, parameterNames, bodyBuilder);
+        methodBuilder.setAnnotations(annotations);
+        return methodBuilder;
+    }
+
+    private MethodMetadataBuilder getUpdateFromJsonMethod(
+            final MemberTypeAdditions mergeMethod) {
+        if (StringUtils.isBlank(annotationValues.getUpdateFromJsonMethod())
+                || mergeMethod == null) {
+            return null;
+        }
+        final JavaSymbolName methodName = new JavaSymbolName(
+                annotationValues.getUpdateFromJsonMethod());
+        if (governorHasMethodWithSameName(methodName)) {
+            return null;
+        }
+
+        final JavaSymbolName fromJsonMethodName = jsonMetadata
+                .getFromJsonMethodName();
+
+        final AnnotationMetadataBuilder requestBodyAnnotation = new AnnotationMetadataBuilder(
+                REQUEST_BODY);
+
+        final List<AnnotatedJavaType> parameterTypes = Arrays
+                .asList(new AnnotatedJavaType(JavaType.STRING,
+                        requestBodyAnnotation.build()));
+        final List<JavaSymbolName> parameterNames = Arrays
+                .asList(new JavaSymbolName("json"));
+
+        final List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
+        requestMappingAttributes.add(new EnumAttributeValue(new JavaSymbolName(
+                "method"), new EnumDetails(REQUEST_METHOD, new JavaSymbolName(
+                "PUT"))));
+        requestMappingAttributes.add(new StringAttributeValue(
+                new JavaSymbolName("headers"), "Accept=application/json"));
+        final AnnotationMetadataBuilder requestMapping = new AnnotationMetadataBuilder(
+                REQUEST_MAPPING, requestMappingAttributes);
+        final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+        annotations.add(requestMapping);
+
+        final String httpHeadersShortName = getShortName(HTTP_HEADERS);
+
+        final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+        bodyBuilder.appendFormalLine(httpHeadersShortName + " headers = new "
+                + httpHeadersShortName + "();");
+        bodyBuilder.appendFormalLine("headers.add(\"Content-Type\", \""
+                + CONTENT_TYPE + "\");");
+        bodyBuilder.appendFormalLine(jsonEnabledTypeShortName + " "
+                + jsonBeanName + " = " + jsonEnabledTypeShortName + "."
+                + fromJsonMethodName.getSymbolName() + "(json);");
+        bodyBuilder.appendFormalLine("if (" + mergeMethod.getMethodCall()
+                + " == null) {");
+        bodyBuilder.indent();
+        bodyBuilder
+                .appendFormalLine("return new ResponseEntity<String>(headers, "
+                        + getShortName(HTTP_STATUS) + ".NOT_FOUND);");
+        bodyBuilder.indentRemove();
+        bodyBuilder.appendFormalLine("}");
+        bodyBuilder
+                .appendFormalLine("return new ResponseEntity<String>(headers, "
+                        + getShortName(HTTP_STATUS) + ".OK);");
 
         if (introduceLayerComponents) {
             mergeMethod.copyAdditionsTo(builder, governorTypeDetails);

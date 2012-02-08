@@ -85,13 +85,9 @@ public class WebFinderMetadata extends
     }
 
     private WebScaffoldAnnotationValues annotationValues;
-
     private String controllerPath;
-
     private JavaType formBackingType;
-
     private JavaTypeMetadataDetails javaTypeMetadataHolder;
-
     private Map<JavaType, JavaTypeMetadataDetails> specialDomainTypes;
 
     /**
@@ -182,8 +178,7 @@ public class WebFinderMetadata extends
                 bodyBuilder.appendFormalLine("uiModel.addAttribute(\""
                         + typeMd.getPlural().toLowerCase()
                         + "\", java.util.Arrays.asList("
-                        + finderParameterType.getNameIncludingTypeParameters(
-                                false, builder.getImportRegistrationResolver())
+                        + getShortName(finderParameterType)
                         + ".class.getEnumConstants()));");
             }
             else if (typeMd != null && typeMd.isApplicationType()) {
@@ -291,8 +286,7 @@ public class WebFinderMetadata extends
                         .getAnnotationOfType(field.getAnnotations(),
                                 DATE_TIME_FORMAT);
                 if (annotation != null) {
-                    DATE_TIME_FORMAT.getNameIncludingTypeParameters(false,
-                            builder.getImportRegistrationResolver());
+                    getShortName(DATE_TIME_FORMAT);
                     annotations.add(annotation);
                 }
             }
@@ -346,8 +340,7 @@ public class WebFinderMetadata extends
         bodyBuilder.appendFormalLine("uiModel.addAttribute(\""
                 + javaTypeMetadataHolder.getPlural().toLowerCase()
                 + "\", "
-                + formBackingType.getNameIncludingTypeParameters(false,
-                        builder.getImportRegistrationResolver())
+                + getShortName(formBackingType)
                 + "."
                 + finderMetadataDetails.getFinderMethodMetadata()
                         .getMethodName().getSymbolName() + "("
@@ -362,6 +355,11 @@ public class WebFinderMetadata extends
                 parameterTypes, newParamNames, bodyBuilder);
         methodBuilder.setAnnotations(annotations);
         return methodBuilder;
+    }
+
+    private String getShortName(final JavaType type) {
+        return type.getNameIncludingTypeParameters(false,
+                builder.getImportRegistrationResolver());
     }
 
     @Override
