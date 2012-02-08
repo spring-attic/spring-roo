@@ -348,10 +348,10 @@ public class JpaOperationsImpl implements JpaOperations {
                 Path.SPRING_CONFIG_ROOT, propertiesFile);
         if (StringUtils.isBlank(path)) {
             final String tmpDir = System.getProperty("java.io.tmpdir");
+            // For unit testing, as path will be nullotherwise
             path = tmpDir
                     + (!tmpDir.endsWith(File.separator) ? File.separator : "")
-                    + propertiesFile; // For unit testing, as path will be null
-                                      // otherwise
+                    + propertiesFile;
         }
         return path;
     }
