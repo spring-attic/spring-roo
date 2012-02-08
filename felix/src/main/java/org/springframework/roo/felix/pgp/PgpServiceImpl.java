@@ -19,8 +19,10 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -37,7 +39,6 @@ import org.bouncycastle.openpgp.PGPUtil;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.support.osgi.OSGiUtils;
-import org.apache.commons.io.IOUtils;
 import org.springframework.roo.url.stream.UrlInputStreamService;
 
 /**
@@ -193,7 +194,8 @@ public class PgpServiceImpl implements PgpService {
             return result;
         }
         catch (final Exception e) {
-            throw new IllegalArgumentException(e);
+            throw new IllegalArgumentException("Unable to get truested keys",
+                    ExceptionUtils.getRootCause(e));
         }
         finally {
             IOUtils.closeQuietly(fis);
