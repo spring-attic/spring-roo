@@ -1694,6 +1694,6 @@ public class DataOnDemandMetadata extends
         Validate.isTrue(NumberUtils.isNumber(object.toString()), annotationName
                 + " '" + attributeName + "' attribute for field '" + fieldName
                 + "' in backing type " + entity.getFullyQualifiedTypeName()
-                + " muust be numeric");
+                + " must be numeric");
     }
 }
