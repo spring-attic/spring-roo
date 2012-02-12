@@ -150,7 +150,7 @@ fi
 # Setup correct options for a dry run vs normal run
 if [[ "$DRY_RUN" = "0" ]]; then
     MAVEN_MAIN_OPTS='-e -B clean install'
-    MAVEN_SITE_OPTS='-e -B clean site site:deploy'
+    MAVEN_SITE_OPTS='-e -B clean site'
     MAVEN_DEPLOY_OPTS='-e -B deploy'
     ROO_DEPLOY_OPTS=''
 else
@@ -179,11 +179,11 @@ fi
 
 # Build reference guide docs (and deploy them; it's not a big deal if the later tests fail but the docs were updated)
 pushd $ROO_HOME/deployment-support &>/dev/null
-# mvn $MAVEN_SITE_OPTS
-# EXITED=$?
-# if [[ ! "$EXITED" = "0" ]]; then
-#     l_error "Maven site build failed (exit code $EXITED)." >&2; exit 1;
-# fi
+mvn $MAVEN_SITE_OPTS
+EXITED=$?
+if [[ ! "$EXITED" = "0" ]]; then
+    l_error "Maven site build failed (exit code $EXITED)." >&2; exit 1;
+fi
 
 # Build (and test if user used -T or -t) the assembly
 ./roo-deploy.sh -c assembly -s $SUFFIX $ROO_DEPLOY_OPTS $TEST
