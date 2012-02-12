@@ -221,6 +221,8 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
     private void addManyToManyFields(final Table table) {
         final Map<Table, Integer> owningSideTables = new LinkedHashMap<Table, Integer>();
+        final Map<JavaSymbolName, FieldMetadataBuilder> uniqueOwningSideFields = new LinkedHashMap<JavaSymbolName, FieldMetadataBuilder>();
+        final Map<JavaSymbolName, FieldMetadataBuilder> uniqueInverseSideFields = new LinkedHashMap<JavaSymbolName, FieldMetadataBuilder>();
 
         for (final Table joinTable : database.getTables()) {
             if (!joinTable.isJoinTable()) {
@@ -262,7 +264,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
                 final FieldMetadataBuilder fieldBuilder = getManyToManyOwningSideField(
                         fieldName, joinTable, inverseSideTable,
                         foreignKey1.getOnUpdate(), foreignKey1.getOnDelete());
-                addToBuilder(fieldBuilder);
+                uniqueOwningSideFields.put(fieldName, fieldBuilder);
             }
 
             if (inverseSideTable.equals(table)) {
@@ -277,8 +279,19 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
                 final FieldMetadataBuilder fieldBuilder = getManyToManyInverseSideField(
                         fieldName, mappedByFieldName, owningSideTable,
                         foreignKey2.getOnUpdate(), foreignKey2.getOnDelete());
-                addToBuilder(fieldBuilder);
+                uniqueInverseSideFields.put(fieldName, fieldBuilder);
             }
+        }
+
+        // Add unique owning-side many-to-one fields
+        for (final FieldMetadataBuilder fieldBuilder : uniqueOwningSideFields
+                .values()) {
+            addToBuilder(fieldBuilder);
+        }
+        // Add unique inverse-side many-to-one fields
+        for (final FieldMetadataBuilder fieldBuilder : uniqueInverseSideFields
+                .values()) {
+            addToBuilder(fieldBuilder);
         }
     }
 
