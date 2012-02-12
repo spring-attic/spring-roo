@@ -178,7 +178,7 @@ if [[ ! "$EXITED" = "0" ]]; then
 fi
 
 # Build reference guide docs (and deploy them; it's not a big deal if the later tests fail but the docs were updated)
-# pushd $ROO_HOME/deployment-support &>/dev/null
+pushd $ROO_HOME/deployment-support &>/dev/null
 # mvn $MAVEN_SITE_OPTS
 # EXITED=$?
 # if [[ ! "$EXITED" = "0" ]]; then

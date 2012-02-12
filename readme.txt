@@ -281,7 +281,6 @@ RELEASE PROCEDURE:
 2. Verify the assembly ZIP ($ROO_HOME/target/roo-deploy/dist/*.zip) looks good:
 
    * Assembly ZIP unzips and is of a sensible size
-   * Assembly ZIP contains both PDF and HTML documentation
    * Assembly ZIP runs correctly when installed on major platforms
    * Create Jira Task ticket "Release Spring Roo x.y.z.aaaaaa"
    * Run the "reference guide" command in the Roo shell, copy the resulting XML file
