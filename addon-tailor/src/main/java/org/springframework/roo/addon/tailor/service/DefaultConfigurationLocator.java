@@ -43,8 +43,8 @@ public class DefaultConfigurationLocator implements ConfigurationLocator {
         final TailorConfiguration config = factory.createTailorConfiguration();
         if (config != null) {
             if (configurations.get(config.getName()) != null) {
-                LOGGER.warning("TailorConfiguration duplicate '"
-                        + config.getName() + "', not binding again: "
+                LOGGER.warning("Tailor configuration '" + config.getName()
+                        + "' duplicated. Unable to bind again: "
                         + config.toString());
             }
             if (config.isActive()) {
@@ -55,12 +55,10 @@ public class DefaultConfigurationLocator implements ConfigurationLocator {
     }
 
     public TailorConfiguration getActiveTailorConfiguration() {
-
         return configurations.get(activatedTailorConfigName);
     }
 
     public Map<String, TailorConfiguration> getAvailableConfigurations() {
-
         return configurations;
     }
 
@@ -74,13 +72,12 @@ public class DefaultConfigurationLocator implements ConfigurationLocator {
             activatedTailorConfigName = name;
         }
         else {
-            LOGGER.severe("Couldn't activate tailor configuration '" + name
-                    + "', not available.");
+            LOGGER.warning("Tailor configuration '" + name + "' unavailable");
         }
     }
 
     protected void unbindConfig(final TailorConfigurationFactory factory) {
-        // TODO It's a little unelegant to call "create" method here again, but
+        // TODO It's a little inelegant to call "create" method here again, but
         // we need the name...
         final TailorConfiguration config = factory.createTailorConfiguration();
         if (config != null) {

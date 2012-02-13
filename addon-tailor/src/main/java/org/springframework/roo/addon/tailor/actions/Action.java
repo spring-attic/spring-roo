@@ -43,5 +43,4 @@ public interface Action {
      * @return true if valid, otherwise false
      */
     boolean isValid(ActionConfig config);
-
 }

@@ -111,5 +111,5 @@ public interface Shell extends ShellStatusProvider, ShellPromptAccessor {
      * 
      * @param tailor the tailor implementation
      */
-    // void setTailor(Tailor tailor);
+    void setTailor(Tailor tailor);
 }

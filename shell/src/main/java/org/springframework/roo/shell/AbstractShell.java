@@ -13,6 +13,7 @@ import java.net.URL;
 import java.text.DateFormat;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
@@ -29,6 +30,7 @@ import org.springframework.roo.shell.event.AbstractShellStatusPublisher;
 import org.springframework.roo.shell.event.ShellStatus;
 import org.springframework.roo.shell.event.ShellStatus.Status;
 import org.springframework.roo.support.logging.HandlerUtils;
+import org.springframework.roo.support.util.CollectionUtils;
 
 /**
  * Provides a base {@link Shell} implementation.
@@ -107,8 +109,7 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher
     protected final Logger logger = HandlerUtils.getLogger(getClass());
     protected boolean inBlockComment;
     protected ExitShellRequest exitShellRequest;
-
-    // private Tailor tailor;
+    private Tailor tailor;
 
     @CliCommand(value = { "/*" }, help = "Start of block comment")
     public void blockCommentBegin() {
@@ -131,26 +132,26 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher
     }
 
     public boolean executeCommand(final String line) {
-        // if (tailor == null) {
-        return executeCommandImpl(line);
-        // }
+        if (tailor == null) {
+            return executeCommandImpl(line);
+        }
         /*
          * If getTailor() is not null, then try to transform input command and
          * execute all outputs sequentially
          */
-        // List<String> commands = null;
-        // commands = tailor.sew(line);
-        //
-        // if (CollectionUtils.isEmpty(commands)) {
-        // return executeCommandImpl(line);
-        // }
-        // for (final String command : commands) {
-        // logger.info("roo-tailor> " + command);
-        // if (!executeCommandImpl(command)) {
-        // return false;
-        // }
-        // }
-        // return true;
+        List<String> commands = null;
+        commands = tailor.sew(line);
+
+        if (CollectionUtils.isEmpty(commands)) {
+            return executeCommandImpl(line);
+        }
+        for (final String command : commands) {
+            logger.info("roo-tailor> " + command);
+            if (!executeCommandImpl(command)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
@@ -544,9 +545,9 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher
         setPromptPath(path);
     }
 
-    // public void setTailor(final Tailor tailor) {
-    // this.tailor = tailor;
-    // }
+    public void setTailor(final Tailor tailor) {
+        this.tailor = tailor;
+    }
 
     @CliCommand(value = { "version" }, help = "Displays shell version")
     public String version(

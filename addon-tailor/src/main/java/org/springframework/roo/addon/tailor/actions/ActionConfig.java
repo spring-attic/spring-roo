@@ -4,6 +4,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.roo.addon.tailor.config.CommandConfiguration;
 import org.springframework.roo.addon.tailor.service.ActionLocator;
@@ -95,8 +96,7 @@ public class ActionConfig {
     }
 
     public boolean isMandatory() {
-        final String isMandatory = attributes.get(ATTR_MANDATORY);
-        return "true".equals(isMandatory) || "yes".equals(isMandatory);
+        return BooleanUtils.toBoolean(attributes.get(ATTR_MANDATORY));
     }
 
     /**
@@ -149,12 +149,8 @@ public class ActionConfig {
      * @see org.springframework.roo.addon.tailor.actions.DefaultValue
      */
     public void setMandatory(final boolean isMandatory) {
-        if (isMandatory) {
-            attributes.put(ATTR_MANDATORY, "true");
-        }
-        else {
-            attributes.put(ATTR_MANDATORY, "false");
-        }
+        attributes.put(ATTR_MANDATORY,
+                BooleanUtils.toStringTrueFalse(isMandatory));
     }
 
     /**
@@ -186,5 +182,4 @@ public class ActionConfig {
         }
         return result.toString();
     }
-
 }

@@ -26,7 +26,7 @@ public abstract class AbstractAction implements Action {
             executeImpl(command, processedConfig);
         }
         else {
-            LOGGER.warning("Invalid configuration for tailor action: " + config);
+            LOGGER.warning("Invalid configuration for tailor action " + config);
         }
     }
 
