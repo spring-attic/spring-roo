@@ -164,7 +164,7 @@ pizza&gt;</programlisting></para>
    / __ \/ __ \/ __ \ 
   / /_/ / / / / / / / 
  / _, _/ /_/ / /_/ /  
-/_/ |_|\____/\____/    1.0.0.RELEASE [rev XXX]
+/_/ |_|\____/\____/    1.2.1.RELEASE [rev 6eae723]
 
 
 Welcome to Spring Roo. For assistance press TAB or type "hint" then hit ENTER.
@@ -198,15 +198,11 @@ roo&gt;
     linkend="command-index-project">project</link></emphasis> command:</para>
 
     <para><programlisting>roo&gt; <emphasis role="bold">project --topLevelPackage com.springsource.roo.pizzashop</emphasis>
-Created /Users/sschmidt/Development/workspaces/test9/pom.xml
-Created SRC_MAIN_JAVA
+Created ROOT/pom.xml
 Created SRC_MAIN_RESOURCES
-Created SRC_TEST_JAVA
-Created SRC_TEST_RESOURCES
-Created SRC_MAIN_WEBAPP
-Created SRC_MAIN_RESOURCES/META-INF/spring
-Created SRC_MAIN_RESOURCES/META-INF/spring/applicationContext.xml
-Created SRC_MAIN_RESOURCES/META-INF/spring/log4j.properties
+Created SRC_MAIN_RESOURCES/log4j.properties
+Created SPRING_CONFIG_ROOT
+Created SPRING_CONFIG_ROOT/applicationContext.xml
 com.springsource.roo.pizzashop roo&gt; 
 </programlisting>When you used the <link
     linkend="command-index-project">project</link> command, Roo created you a
@@ -242,17 +238,17 @@ com.springsource.roo.pizzashop roo&gt;
     achieve object-relational mapping. JPA takes care of mappings between your
     persistent domain objects (entities) and their underlying database tables.
     To install or change the persistence configuration in your project you can
-    use the <emphasis role="bold"><link
-    linkend="command-index-jpa-setup">persistence setup</link></emphasis>
-    command (note: try using the <emphasis role="bold">&lt;TAB&gt;</emphasis>
-    as often as you can to auto-complete your commands, options and even
-    obtain contextual help):</para>
+    use the <emphasis role="bold"><link linkend="command-index-jpa-setup">jpa
+    setup</link></emphasis> command (note: try using the <emphasis
+    role="bold">&lt;TAB&gt;</emphasis> as often as you can to auto-complete
+    your commands, options and even obtain contextual help):</para>
 
     <para><programlisting>com.springsource.roo.pizzashop roo&gt; <emphasis
           role="bold">hint</emphasis>
-Roo requires the installation of a JPA provider and associated database.
+Roo requires the installation of a persistence configuration,
+for example, JPA or MongoDB.
 
-Type 'jpa setup' and then hit TAB three times.
+For JPA, type 'jpa setup' and then hit TAB three times.
 We suggest you type 'H' then TAB to complete "HIBERNATE".
 After the --provider, press TAB twice for database choices.
 For testing purposes, type (or TAB) HYPERSONIC_IN_MEMORY.
@@ -260,21 +256,27 @@ If you press TAB again, you'll see there are no more options.
 As such, you're ready to press ENTER to execute the command.
 
 Once JPA is installed, type 'hint' and ENTER for the next suggestion.
+
+Similarly, for MongoDB persistence, type 'mongo setup' and ENTER.
 com.springsource.roo.pizzashop roo&gt;
 com.springsource.roo.pizzashop roo&gt; <emphasis role="bold">jpa setup --provider HIBERNATE --database HYPERSONIC_IN_MEMORY</emphasis> 
+Created SPRING_CONFIG_ROOT/database.properties
+Updated SPRING_CONFIG_ROOT/applicationContext.xml
 Created SRC_MAIN_RESOURCES/META-INF/persistence.xml
-Created SRC_MAIN_RESOURCES/META-INF/spring/database.properties
-Managed SRC_MAIN_RESOURCES/META-INF/spring/applicationContext.xml
-Managed ROOT/pom.xml
+Updated ROOT/pom.xml [added dependencies org.hsqldb:hsqldb:1.8.0.10, org.hibernate:hibernate-core:3.6.9.Final, 
+org.hibernate:hibernate-entitymanager:3.6.9.Final, org.hibernate.javax.persistence:hibernate-jpa-2.0-api:1.0.1.Final, 
+org.hibernate:hibernate-validator:4.2.0.Final, javax.validation:validation-api:1.0.0.GA, cglib:cglib-nodep:2.2.2, 
+javax.transaction:jta:1.1, org.springframework:spring-jdbc:${spring.version}, 
+org.springframework:spring-orm:${spring.version}, commons-pool:commons-pool:1.5.6, commons-dbcp:commons-dbcp:1.3]
 com.springsource.roo.pizzashop roo&gt; 
 </programlisting>So in this case we have installed Hibernate as the
-    object-relational mapping (ORM)-provider. Hibernate is one of three ORM
-    providers which Roo currently offers. EclipseLink and OpenJPA represent
-    the alternative choices. In a similar fashion we have chosen the
-    Hypersonic in-memory database as our target database. Hypersonic is a
-    convenient database for Roo application development because it relieves
-    the developer from having to install and configure a production scale
-    database.</para>
+    object-relational mapping (ORM)-provider. Hibernate is one of ORM
+    providers which Roo currently offers. EclipseLink, OpenJPA, and
+    DataNucleus represent the alternative choices. In a similar fashion we
+    have chosen the Hypersonic in-memory database as our target database.
+    Hypersonic is a convenient database for Roo application development
+    because it relieves the developer from having to install and configure a
+    production scale database.</para>
 
     <para>When you are ready to test or install your application in a
     production setting, the <emphasis role="bold"><link
@@ -324,10 +326,10 @@ You can create entities either via Roo or your IDE.
 Using the Roo shell is fast and easy, especially thanks to the TAB completion.
 
 Start by typing 'ent' and then hitting TAB twice.
-Enter the --name in the form '~.domain.MyEntityClassName'
+Enter the --class in the form '~.domain.MyEntityClassName'
 In Roo, '~' means the --topLevelPackage you specified via 'create project'.
 
-After specify a --name argument, press SPACE then TAB. Note nothing appears.
+After specify a --class argument, press SPACE then TAB. Note nothing appears.
 Because nothing appears, it means you've entered all mandatory arguments.
 However, optional arguments do exist for this command (and most others in Roo).
 To see the optional arguments, type '--' and then hit TAB. Mostly you won't
@@ -343,13 +345,13 @@ Created SRC_TEST_JAVA/com/springsource/roo/pizzashop/domain
 Created SRC_TEST_JAVA/com/springsource/roo/pizzashop/domain/ToppingDataOnDemand.java
 Created SRC_TEST_JAVA/com/springsource/roo/pizzashop/domain/ToppingIntegrationTest.java
 Created SRC_MAIN_JAVA/com/springsource/roo/pizzashop/domain/Topping_Roo_Configurable.aj
-Created SRC_MAIN_JAVA/com/springsource/roo/pizzashop/domain/Topping_Roo_JpaEntity.aj
-Created SRC_MAIN_JAVA/com/springsource/roo/pizzashop/domain/Topping_Roo_JpaActiveRecord.aj
 Created SRC_MAIN_JAVA/com/springsource/roo/pizzashop/domain/Topping_Roo_ToString.aj
-Created SRC_TEST_JAVA/com/springsource/roo/pizzashop/domain/ToppingIntegrationTest_Roo_Configurable.aj
-Created SRC_TEST_JAVA/com/springsource/roo/pizzashop/domain/ToppingDataOnDemand_Roo_DataOnDemand.aj
-Created SRC_TEST_JAVA/com/springsource/roo/pizzashop/domain/ToppingIntegrationTest_Roo_IntegrationTest.aj
+Created SRC_MAIN_JAVA/com/springsource/roo/pizzashop/domain/Topping_Roo_Jpa_Entity.aj
+Created SRC_MAIN_JAVA/com/springsource/roo/pizzashop/domain/Topping_Roo_Jpa_ActiveRecord.aj
 Created SRC_TEST_JAVA/com/springsource/roo/pizzashop/domain/ToppingDataOnDemand_Roo_Configurable.aj
+Created SRC_TEST_JAVA/com/springsource/roo/pizzashop/domain/ToppingDataOnDemand_Roo_DataOnDemand.aj
+Created SRC_TEST_JAVA/com/springsource/roo/pizzashop/domain/ToppingIntegrationTest_Roo_Configurable.aj
+Created SRC_TEST_JAVA/com/springsource/roo/pizzashop/domain/ToppingIntegrationTest_Roo_IntegrationTest.aj
 </programlisting>You will notice that besides the creation of Java and AspectJ
     sources, the <emphasis role="bold"><link
     linkend="command-index-entity-jpa">entity jpa</link></emphasis> command in
@@ -384,10 +386,9 @@ After adding your fields, type 'hint' for the next suggestion.
 To learn about setting up many-to-one fields, type 'hint relationships'.
 ~.domain.Topping roo&gt;
 ~.domain.Topping roo&gt; <emphasis role="bold">field string --fieldName name --notNull --sizeMin 2</emphasis>
-Managed SRC_MAIN_JAVA/com/springsource/roo/pizzashop/domain/Topping.java
+Updated SRC_MAIN_JAVA/com/springsource/roo/pizzashop/domain/Topping.java
+Updated SRC_TEST_JAVA/com/springsource/roo/pizzashop/domain/ToppingDataOnDemand_Roo_DataOnDemand.aj
 Created SRC_MAIN_JAVA/com/springsource/roo/pizzashop/domain/Topping_Roo_JavaBean.aj
-Managed SRC_TEST_JAVA/com/springsource/roo/pizzashop/domain/ToppingDataOnDemand_Roo_DataOnDemand.aj
-Managed SRC_MAIN_JAVA/com/springsource/roo/pizzashop/domain/Topping_Roo_ToString.aj
 </programlisting>As explained in the documentation by typing the <emphasis
     role="bold"><link
     linkend="command-index-hint-commands">hint</link></emphasis> command you
@@ -401,16 +402,7 @@ Managed SRC_MAIN_JAVA/com/springsource/roo/pizzashop/domain/Topping_Roo_ToString
     linkend="command-index-field-commands">field</link></emphasis> command. It
     knows that you have just created a Topping entity and therefore assumes
     that the field command should be applied to the Topping Java source. Roo's
-    current context is visible in the Shell (enclosed by a red rectangle for
-    illustration):</para>
-
-    <para></para>
-
-    <para><mediaobject>
-        <imageobject>
-          <imagedata fileref="images/shellcontext.png"></imagedata>
-        </imageobject>
-      </mediaobject></para>
+    current context is visible in the shell prompt.</para>
 
     <para>If you wish to add the field to a different target type you can
     specify the <code>--class</code> attribute as part of the <emphasis
@@ -485,25 +477,15 @@ field set --fieldName pizzas --type ~.domain.Pizza
 -------------------------------------------------------
  T E S T S
 -------------------------------------------------------
-Running com.springsource.roo.pizzashop.domain.PizzaOrderIntegrationTest
-Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 5.413 sec
-Running com.springsource.roo.pizzashop.domain.ToppingIntegrationTest
-Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.148 sec
-Running com.springsource.roo.pizzashop.domain.PizzaIntegrationTest
-Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.14 sec
-Running com.springsource.roo.pizzashop.domain.BaseIntegrationTest
-Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.097 sec
-
-Results :
 
 Tests run: 36, Failures: 0, Errors: 0, Skipped: 0
 
 [INFO] ------------------------------------------------------------------------
-[INFO] BUILD SUCCESSFUL
+[INFO] BUILD SUCCESS 
 [INFO] ------------------------------------------------------------------------
-[INFO] Total time: 17 seconds
-[INFO] Finished at: Tue Dec 29 15:58:04 EST 2009
-[INFO] Final Memory: 25M/79M
+[INFO] Total time: 3.860s
+[INFO] Finished at: Tue Feb 14 18:01:45 EST 2012
+[INFO] Final Memory: 6M/81M
 [INFO] ------------------------------------------------------------------------
 </programlisting></para>
 
@@ -538,22 +520,23 @@ Tests run: 36, Failures: 0, Errors: 0, Skipped: 0
 
     <para><programlisting>~.domain.PizzaOrder roo&gt; <emphasis role="bold">perform eclipse</emphasis>
 ...
-[INFO] Preparing eclipse:eclipse
-[INFO] [aspectj:compile {execution: default}]
-[INFO] [eclipse:eclipse {execution: default-cli}]
 [INFO] Adding support for WTP version 2.0.
 [INFO] Using Eclipse Workspace: null
 [INFO] Adding default classpath container: org.eclipse.jdt.launching.JRE_CONTAINER
-[INFO] Wrote settings to /Users/sschmidt/pizza/.settings/org.eclipse.jdt.core.prefs
-[INFO] Wrote Eclipse project for "pizzashop" to /Users/sschmidt/pizza.
+[INFO] Wrote settings to /Users/stewarta/projects/roo-test/pizzashop/.settings/org.eclipse.jdt.core.prefs
+[INFO] Wrote Eclipse project for "pizzashop" to /Users/stewarta/projects/roo-test/pizzashop.
+[INFO] n.PizzaOrder roo&gt; 
+       Javadoc for some artifacts is not available.
+       Please run the same goal with the -DdownloadJavadocs=true parameter in order to check remote repositories for javadoc.
+       List of artifacts without a javadoc archive:
+         o org.springframework.roo:org.springframework.roo.annotations:1.2.1.RELEASE
 ...
-
 [INFO] ------------------------------------------------------------------------
-[INFO] BUILD SUCCESSFUL
+[INFO] BUILD SUCCESS 
 [INFO] ------------------------------------------------------------------------
-[INFO] Total time: 3 seconds
-[INFO] Finished at: Tue Dec 29 16:11:38 EST 2009
-[INFO] Final Memory: 24M/79M
+[INFO] Total time: 1.685s
+[INFO] Finished at: Tue Feb 14 18:04:20 EST 2012
+[INFO] Final Memory: 7M/81M
 [INFO] ------------------------------------------------------------------------
 </programlisting>Note, when issuing this command for the first time you can
     expect delays while Maven downloads the dependencies and their sources
@@ -706,12 +689,16 @@ Tests run: 36, Failures: 0, Errors: 0, Skipped: 0
     role="bold">security setup</emphasis></link> command:</para>
 
     <para><programlisting>~.web roo&gt; <emphasis role="bold">security setup</emphasis>
-Managed ROOT/pom.xml
-Created SRC_MAIN_RESOURCES/META-INF/spring/applicationContext-security.xml
+Created SPRING_CONFIG_ROOT/applicationContext-security.xml
 Created SRC_MAIN_WEBAPP/WEB-INF/views/login.jspx
-Managed SRC_MAIN_WEBAPP/WEB-INF/views/views.xml
-Managed SRC_MAIN_WEBAPP/WEB-INF/web.xml
-Managed SRC_MAIN_WEBAPP/WEB-INF/spring/webmvc-config.xml
+Updated SRC_MAIN_WEBAPP/WEB-INF/views/views.xml
+Updated ROOT/pom.xml [added property 'spring-security.version' = '3.1.0.RELEASE'; added dependencies 
+org.springframework.security:spring-security-core:${spring-security.version}, 
+org.springframework.security:spring-security-config:${spring-security.version}, 
+org.springframework.security:spring-security-web:${spring-security.version}, 
+org.springframework.security:spring-security-taglibs:${spring-security.version}]
+Updated SRC_MAIN_WEBAPP/WEB-INF/web.xml
+Updated SRC_MAIN_WEBAPP/WEB-INF/spring/webmvc-config.xml
 </programlisting>Note, the Roo shell will hide the <link
     linkend="command-index-security-commands"><emphasis role="bold">security
     setup</emphasis></link> command until you have created a Web layer. As
@@ -889,8 +876,8 @@ Managed SRC_MAIN_WEBAPP/WEB-INF/spring/webmvc-config.xml
     directory):</para>
 
     <para><programlisting>~.web roo&gt; <emphasis role="bold">backup</emphasis>
-Created ROOT/pizzashop_2009-12-30_11:23:37.zip
-Backup completed in 516 ms
+Created ROOT/pizzashop_2012-02-14_18:10:19.zip
+Backup completed in 35 ms
 ~.web roo&gt; 
 </programlisting>Finally, you may wish to deploy your application to a
     production Web container. For this you can easily create a war archive by
@@ -907,16 +894,16 @@ Backup completed in 516 ms
 ...
 [INFO] [war:war {execution: default-war}]
 [INFO] Exploding webapp...
-[INFO] Assembling webapp pizzashop in /Users/sschmidt/pizza/target/pizzashop-0.1.0-SNAPSHOT
-[INFO] Copy webapp webResources to /Users/sschmidt/pizza/target/pizzashop-0.1.0-SNAPSHOT
-[INFO] Generating war /Users/sschmidt/pizza/target/pizzashop-0.1.0-SNAPSHOT.war
-[INFO] Building war: /Users/sschmidt/pizza/target/pizzashop-0.1.0-SNAPSHOT.war
+[INFO] Assembling webapp pizzashop in /Users/stewarta/projects/roo-test/pizzashop/target/pizzashop-0.1.0-SNAPSHOT
+[INFO] Copy webapp webResources to /Users/stewarta/projects/roo-test/pizzashop/target/pizzashop-0.1.0-SNAPSHOT
+[INFO] Generating war /Users/stewarta/projects/roo-test/pizza/target/pizzashop-0.1.0-SNAPSHOT.war
+[INFO] Building war: /Users/stewarta/projects/roo-test/pizza/target/pizzashop-0.1.0-SNAPSHOT.war
 [INFO] ------------------------------------------------------------------------
-[INFO] BUILD SUCCESSFUL
+[INFO] BUILD SUCCESS
 [INFO] ------------------------------------------------------------------------
-[INFO] Total time: 17 seconds
-[INFO] Finished at: Wed Dec 30 11:36:40 EST 2009
-[INFO] Final Memory: 26M/79M
+[INFO] Total time: 5.881s
+[INFO] Finished at: Tue Feb 14 18:07:54 EST 2012
+[INFO] Final Memory: 8M/81M
 [INFO] ------------------------------------------------------------------------
 ~.web roo&gt; 
 </programlisting> This command produces your war file which can then be easily
