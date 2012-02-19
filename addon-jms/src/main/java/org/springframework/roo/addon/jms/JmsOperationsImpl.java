@@ -287,6 +287,21 @@ public class JmsOperationsImpl implements JmsOperations {
                 .getFocusedIdentifier(Path.SPRING_CONFIG_ROOT,
                         "applicationContext-jms.xml");
 
+        String amq;
+        String destType;
+        switch (destinationType) {
+        case TOPIC:
+            amq = destType = "topic";
+            break;
+        case DURABLE_TOPIC:
+            amq = "topic";
+            destType = "durableTopic";
+            break;
+        default:
+            amq = destType = "queue";
+            break;
+        }
+
         final InputStream in;
         if (fileManager.exists(jmsContextPath)) {
             in = fileManager.getInputStream(jmsContextPath);
@@ -302,8 +317,7 @@ public class JmsOperationsImpl implements JmsOperations {
         final Element root = document.getDocumentElement();
 
         if (StringUtils.isNotBlank(name)) {
-            final Element destination = document.createElement("amq:"
-                    + destinationType.name().toLowerCase());
+            final Element destination = document.createElement("amq:" + amq);
             destination.setAttribute("physicalName", name);
             destination.setAttribute("id", name);
             root.appendChild(destination);
@@ -311,14 +325,13 @@ public class JmsOperationsImpl implements JmsOperations {
         }
 
         Element listenerContainer = XmlUtils.findFirstElement(
-                "/beans/listener-container[@destination-type = '"
-                        + destinationType.name().toLowerCase() + "']", root);
+                "/beans/listener-container[@destination-type = '" + destType
+                        + "']", root);
         if (listenerContainer == null) {
             listenerContainer = document
                     .createElement("jms:listener-container");
             listenerContainer.setAttribute("connection-factory", "jmsFactory");
-            listenerContainer.setAttribute("destination-type", destinationType
-                    .name().toLowerCase());
+            listenerContainer.setAttribute("destination-type", destType);
             root.appendChild(listenerContainer);
         }
 
@@ -331,8 +344,7 @@ public class JmsOperationsImpl implements JmsOperations {
     }
 
     public boolean isJmsInstallationPossible() {
-        return projectOperations.isFocusedProjectAvailable()
-                && !hasJmsContext();
+        return projectOperations.isFocusedProjectAvailable();
     }
 
     public boolean isManageJmsAvailable() {
