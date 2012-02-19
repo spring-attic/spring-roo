@@ -153,9 +153,9 @@ public class JpaActiveRecordMetadataProviderImpl extends
         if (parent == null
                 && governorPhysicalType.getMemberHoldingTypeDetails()
                         .getSuperclass() != null) {
-            // If the superclass is annotated with the Entity trigger annotation
-            // then we can be pretty sure that we don't have enough information
-            // to proceed
+            // If the superclass is not annotated with the Entity trigger
+            // annotation then we can be pretty sure that we don't have enough
+            // information to proceed
             if (MemberFindingUtils.getAnnotationOfType(governorPhysicalType
                     .getMemberHoldingTypeDetails().getAnnotations(),
                     ROO_JPA_ACTIVE_RECORD) != null) {
