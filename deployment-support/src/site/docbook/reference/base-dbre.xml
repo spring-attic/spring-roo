@@ -223,11 +223,21 @@ JDBC driver not available for 'com.mysql.jdbc.Driver'</programlisting></para>
         <para>The --enableViews option when specified will also retrieve
         database views and display them with the table information.</para>
 
-        <para><emphasis role="bold">Note</emphasis>: the term "schema" is not
-        used by all databases, such as MySQL and Firebird, and for these
-        databases the target database name is contained in the JDBC URL
-        connection string. However the --schema option is still required but
-        Roo's tab assist feature will display "no-schema-required".</para>
+        <para><emphasis role="bold">Notes</emphasis>:</para>
+
+        <itemizedlist>
+          <listitem>
+            <para>The term "schema" is not used by all databases, such as
+            MySQL and Firebird, and for these databases the target database
+            name is contained in the JDBC URL connection string. However the
+            --schema option is still required but Roo's tab assist feature
+            will display "no-schema-required".</para>
+          </listitem>
+
+          <listitem>
+            <para>PostgreSQL upper case schema names are not supported.</para>
+          </listitem>
+        </itemizedlist>
       </listitem>
 
       <listitem>
@@ -680,7 +690,7 @@ public class LineItemPK {
       <para>Roo also ensures the entity's identity field is unique. For
       example if the @Id field is called 'id' but you also add a field with
       the same name to the .java file, DBRE will automatically rename the @Id
-      field by prefixing it with an underscore character. </para>
+      field by prefixing it with an underscore character.</para>
     </section>
   </section>
 
