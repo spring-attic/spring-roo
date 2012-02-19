@@ -194,7 +194,7 @@ public class PgpServiceImpl implements PgpService {
             return result;
         }
         catch (final Exception e) {
-            throw new IllegalArgumentException("Unable to get truested keys",
+            throw new IllegalArgumentException("Unable to get trusted keys",
                     ExceptionUtils.getRootCause(e));
         }
         finally {
