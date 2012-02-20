@@ -203,7 +203,7 @@ public class FinderOperationsImpl implements FinderOperations {
             throw new IllegalArgumentException(
                     "Cannot provide finders because '"
                             + typeName.getFullyQualifiedTypeName()
-                            + "' is not an entity");
+                            + "' is not an 'active record' entity");
         }
 
         // Get the member details
