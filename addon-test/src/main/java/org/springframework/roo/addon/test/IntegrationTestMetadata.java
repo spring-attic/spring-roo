@@ -85,15 +85,10 @@ public class IntegrationTestMetadata extends
     }
 
     private IntegrationTestAnnotationValues annotationValues;
-
     private DataOnDemandMetadata dataOnDemandMetadata;
-
     private boolean entityHasSuperclass;
-
     private boolean hasEmbeddedIdentifier;
-
     private boolean isGaeSupported = false;
-
     private String transactionManager;
 
     public IntegrationTestMetadata(final String identifier,

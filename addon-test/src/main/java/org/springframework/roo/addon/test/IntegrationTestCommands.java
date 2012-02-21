@@ -44,7 +44,7 @@ public class IntegrationTestCommands implements CommandMarker {
                 BeanInfoUtils.isEntityReasonablyNamed(entity),
                 "Cannot create an integration test for an entity named 'Test' or 'TestCase' under any circumstances");
 
-        integrationTestOperations.newIntegrationTest(entity);
+        integrationTestOperations.newIntegrationTest(entity, transactional);
     }
 
     @CliCommand(value = "test mock", help = "Creates a mock test for the specified entity")
