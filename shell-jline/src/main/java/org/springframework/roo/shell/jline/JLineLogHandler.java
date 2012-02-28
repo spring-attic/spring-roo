@@ -16,6 +16,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.commons.lang3.Validate;
 import org.springframework.roo.shell.ShellPromptAccessor;
+import org.springframework.roo.support.util.AnsiEscapeCode;
 
 /**
  * JDK logging {@link Handler} that emits log messages to a JLine
@@ -89,11 +90,8 @@ public class JLineLogHandler extends Handler {
     }
 
     private boolean ansiSupported;
-
     private ConsoleReader reader;
-
     private ShellPromptAccessor shellPromptAccessor;
-
     private String userInterfaceThreadName;
 
     public JLineLogHandler(final ConsoleReader reader,
@@ -103,7 +101,8 @@ public class JLineLogHandler extends Handler {
         this.reader = reader;
         this.shellPromptAccessor = shellPromptAccessor;
         userInterfaceThreadName = Thread.currentThread().getName();
-        ansiSupported = reader.getTerminal().isANSISupported();
+        ansiSupported = reader.getTerminal().isANSISupported()
+                && AnsiEscapeCode.isAnsiEnabled();
 
         setFormatter(new Formatter() {
             @Override

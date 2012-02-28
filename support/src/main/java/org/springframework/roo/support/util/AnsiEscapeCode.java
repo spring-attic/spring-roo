@@ -16,9 +16,13 @@ public enum AnsiEscapeCode {
             7), UNDERSCORE(4);
 
     // Constant for the escape character
-    private static final boolean ANSI_SUPPORTED = Boolean
+    private static final boolean ANSI_ENABLED = Boolean
             .getBoolean("roo.console.ansi");
     private static final char ESC = 27;
+
+    public static boolean isAnsiEnabled() {
+        return ANSI_ENABLED;
+    }
 
     /**
      * Decorates the given text with the given escape codes (turning them off
@@ -35,13 +39,13 @@ public enum AnsiEscapeCode {
         }
 
         final StringBuilder sb = new StringBuilder();
-        if (ANSI_SUPPORTED) {
+        if (ANSI_ENABLED) {
             for (final AnsiEscapeCode code : codes) {
                 sb.append(code.code);
             }
         }
         sb.append(text);
-        if (codes != null && codes.length > 0 && ANSI_SUPPORTED) {
+        if (codes != null && codes.length > 0 && ANSI_ENABLED) {
             sb.append(OFF.code);
         }
         return sb.toString();

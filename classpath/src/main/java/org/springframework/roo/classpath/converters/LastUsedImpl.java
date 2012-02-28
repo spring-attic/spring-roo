@@ -26,13 +26,13 @@ import org.springframework.roo.support.util.AnsiEscapeCode;
 @Service
 public class LastUsedImpl implements LastUsed {
 
+    private JavaPackage topLevelPackage;
     private JavaPackage javaPackage;
     private JavaType javaType;
     private Pom module;
 
     @Reference private ProjectOperations projectOperations;
     @Reference private Shell shell;
-    private JavaPackage topLevelPackage;
     @Reference private TypeLocationService typeLocationService;
 
     public JavaPackage getJavaPackage() {
