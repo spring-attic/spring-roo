@@ -526,12 +526,8 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher
      *            special way eg ANSI codes)
      */
     public void setPromptPath(final String path) {
-        if (path == null || "".equals(path)) {
-            shellPrompt = ROO_PROMPT;
-        }
-        else {
-            shellPrompt = path + " " + ROO_PROMPT;
-        }
+        shellPrompt = (StringUtils.isNotBlank(path) ? path + " " : "")
+                + ROO_PROMPT;
     }
 
     /**

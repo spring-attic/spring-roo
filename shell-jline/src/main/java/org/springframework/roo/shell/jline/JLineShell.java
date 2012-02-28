@@ -37,6 +37,7 @@ import org.springframework.roo.shell.Shell;
 import org.springframework.roo.shell.event.ShellStatus;
 import org.springframework.roo.shell.event.ShellStatus.Status;
 import org.springframework.roo.shell.event.ShellStatusListener;
+import org.springframework.roo.support.util.AnsiEscapeCode;
 
 /**
  * Uses the feature-rich <a
@@ -554,18 +555,22 @@ public abstract class JLineShell extends AbstractShell implements
     @Override
     public void setPromptPath(final String path, final boolean overrideStyle) {
         if (reader.getTerminal().isANSISupported()) {
-            final ANSIBuffer ansi = JLineLogHandler.getANSIBuffer();
-            if (path == null || "".equals(path)) {
-                shellPrompt = ansi.yellow(ROO_PROMPT).toString();
+          //  final ANSIBuffer ansi = JLineLogHandler.getANSIBuffer();
+            if (StringUtils.isBlank(path)) {
+                shellPrompt = AnsiEscapeCode.decorate(ROO_PROMPT,
+                        AnsiEscapeCode.FG_YELLOW);
             }
             else {
                 if (overrideStyle) {
-                    ansi.append(path);
+                  //  ansi.append(path);
+                    AnsiEscapeCode.decorate(path);
                 }
                 else {
-                    ansi.cyan(path);
+               //     ansi.cyan(path);
+                    AnsiEscapeCode.decorate(path, AnsiEscapeCode.FG_CYAN);
                 }
-                shellPrompt = ansi.yellow(" " + ROO_PROMPT).toString();
+                shellPrompt = AnsiEscapeCode.decorate(" " + ROO_PROMPT,
+                        AnsiEscapeCode.FG_YELLOW);
             }
         }
         else {
