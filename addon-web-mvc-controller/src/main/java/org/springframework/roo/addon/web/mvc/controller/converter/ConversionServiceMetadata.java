@@ -346,19 +346,8 @@ public class ConversionServiceMetadata extends
                         + targetType.getSimpleTypeName() + " " + targetTypeName
                         + ") {");
         bodyBuilder.indent();
-        final StringBuilder sb = new StringBuilder("return new StringBuilder()");
-        for (int i = 0; i < toStringMethods.size(); i++) {
-            if (i > 0) {
-                sb.append(".append(\" \")");
-            }
-            sb.append(".append(")
-                    .append(targetTypeName)
-                    .append(".")
-                    .append(toStringMethods.get(i).getMethodName()
-                            .getSymbolName()).append("())");
-        }
-        sb.append(".toString();");
-        bodyBuilder.appendFormalLine(sb.toString());
+        bodyBuilder.appendFormalLine(getTypeToStringLine(targetType,
+                targetTypeName, toStringMethods));
         bodyBuilder.indentRemove();
         bodyBuilder.appendFormalLine("}");
         bodyBuilder.indentRemove();
@@ -366,6 +355,24 @@ public class ConversionServiceMetadata extends
 
         return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName,
                 converterJavaType, bodyBuilder);
+    }
+
+    private String getTypeToStringLine(final JavaType targetType,
+            final String targetTypeName,
+            final List<MethodMetadata> toStringMethods) {
+        final StringBuilder sb = new StringBuilder("return new StringBuilder()");
+        for (int i = 0; i < toStringMethods.size(); i++) {
+            if (i > 0) {
+                sb.append(".append(' ')");
+            }
+            sb.append(".append(");
+            sb.append(targetTypeName);
+            sb.append(".");
+            sb.append(toStringMethods.get(i).getMethodName().getSymbolName());
+            sb.append("())");
+        }
+        sb.append(".toString();");
+        return sb.toString();
     }
 
     private MethodMetadataBuilder getToTypeConverterMethod(
