@@ -84,9 +84,7 @@ public class SolrMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
     }
 
     private SolrSearchAnnotationValues annotationValues;
-
     private String beanPlural;
-
     private String javaBeanFieldName;
 
     public SolrMetadata(final String identifier, final JavaType aspectName,
@@ -472,8 +470,7 @@ public class SolrMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
         bodyBuilder.appendFormalLine("return _solrServer;");
 
         return new MethodMetadataBuilder(getId(), Modifier.PUBLIC
-                | Modifier.STATIC | Modifier.FINAL, methodName, returnType,
-                bodyBuilder);
+                | Modifier.STATIC, methodName, returnType, bodyBuilder);
     }
 
     @Override
