@@ -210,9 +210,15 @@ public class SolrMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
         final String sid = getSimpleName(SOLR_INPUT_DOCUMENT);
         final List<JavaType> sidTypeParams = Arrays.asList(SOLR_INPUT_DOCUMENT);
 
+        String listVar = "documents";
+        if (listVar.equals(beanPlural.toLowerCase())) {
+            listVar += "_";
+        }
         bodyBuilder.appendFormalLine(getSimpleName(new JavaType(List.class
                 .getName(), 0, DataType.TYPE, null, sidTypeParams))
-                + " documents = new "
+                + " "
+                + listVar
+                + " = new "
                 + getSimpleName(new JavaType(ArrayList.class.getName(), 0,
                         DataType.TYPE, null, sidTypeParams)) + "();");
         bodyBuilder.appendFormalLine("for (" + destination.getSimpleTypeName()
@@ -283,14 +289,14 @@ public class SolrMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
         bodyBuilder.appendFormalLine("sid.addField(\""
                 + destination.getSimpleTypeName().toLowerCase()
                 + "_solrsummary_t\", " + textField.toString() + ");");
-        bodyBuilder.appendFormalLine("documents.add(sid);");
+        bodyBuilder.appendFormalLine(listVar + ".add(sid);");
         bodyBuilder.indentRemove();
         bodyBuilder.appendFormalLine("}");
         bodyBuilder.appendFormalLine("try {");
         bodyBuilder.indent();
         bodyBuilder.appendFormalLine(getSimpleName(SOLR_SERVER)
                 + " solrServer = solrServer();");
-        bodyBuilder.appendFormalLine("solrServer.add(documents);");
+        bodyBuilder.appendFormalLine("solrServer.add(" + listVar + ");");
         bodyBuilder.appendFormalLine("solrServer.commit();");
         bodyBuilder.indentRemove();
         bodyBuilder.appendFormalLine("} catch (Exception e) {");
