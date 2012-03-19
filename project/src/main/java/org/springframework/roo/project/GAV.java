@@ -56,7 +56,8 @@ public class GAV implements Comparable<GAV> {
                 + groupId + "'");
         Validate.isTrue(MavenUtils.isValidMavenId(artifactId),
                 "Invalid artifactId '" + artifactId + "'");
-        Validate.notBlank(version, "Version is required");
+        Validate.notBlank(version, "Version is required for %s:%s", groupId,
+                artifactId);
 
         // Assign
         this.groupId = groupId;
