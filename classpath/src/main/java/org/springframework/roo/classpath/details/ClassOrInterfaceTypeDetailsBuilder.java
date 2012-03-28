@@ -133,14 +133,14 @@ public class ClassOrInterfaceTypeDetailsBuilder extends
      * Copies this builder's modifications into the given ITD builder
      * 
      * @param targetBuilder the ITD builder to receive the additions (required)
-     * @param governorDetails the {@link ClassOrInterfaceTypeDetails} of the
+     * @param governorTypeDetails the {@link ClassOrInterfaceTypeDetails} of the
      *            governor (required)
      */
     public void copyTo(
             final AbstractMemberHoldingTypeDetailsBuilder<?> targetBuilder,
-            final ClassOrInterfaceTypeDetails governorDetails) {
+            final ClassOrInterfaceTypeDetails governorTypeDetails) {
         Validate.notNull(targetBuilder, "Target builder required");
-        Validate.notNull(governorDetails,
+        Validate.notNull(governorTypeDetails,
                 "Governor member holding types required");
         // Copy fields
         fieldAdditions: for (final FieldMetadataBuilder field : getDeclaredFields()) {
@@ -153,7 +153,9 @@ public class ClassOrInterfaceTypeDetailsBuilder extends
                     continue fieldAdditions;
                 }
             }
-            targetBuilder.addField(field);
+            if (!governorTypeDetails.declaresField(field.getFieldName())) {
+                targetBuilder.addField(field);
+            }
         }
 
         // Copy methods
