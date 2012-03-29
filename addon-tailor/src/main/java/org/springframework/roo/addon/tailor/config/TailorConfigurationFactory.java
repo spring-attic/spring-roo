@@ -1,5 +1,7 @@
 package org.springframework.roo.addon.tailor.config;
 
+import java.util.List;
+
 /**
  * Creates a Tailor configuration.
  * 
@@ -13,5 +15,6 @@ public interface TailorConfigurationFactory {
      * @param name - configuration name
      * @return - tailor configuration
      */
-    TailorConfiguration createTailorConfiguration();
+    List<TailorConfiguration> createTailorConfiguration();
+
 }

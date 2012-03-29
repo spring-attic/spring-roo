@@ -1,0 +1,61 @@
+tailor activate --name web-simple
+// Create a new project
+project --topLevelPackage com.springsource.pizzashop --projectName pizzashop
+
+// Setup JPA persistence using EclipseLink and H2
+jpa setup --provider ECLIPSELINK --database H2_IN_MEMORY
+
+// Create domain entities
+entity jpa --class ~.domain.Base --activeRecord false --testAutomatically
+field string --fieldName name --sizeMin 2 --notNull
+
+entity jpa --class ~.domain.Topping --activeRecord false --testAutomatically
+field string --fieldName name --sizeMin 2 --notNull
+
+entity jpa --class ~.domain.Pizza --activeRecord false --testAutomatically
+field string --fieldName name --notNull --sizeMin 2
+field number --fieldName price --type java.math.BigDecimal
+field set --fieldName toppings --type ~.domain.Topping
+field reference --fieldName base --type ~.domain.Base
+
+entity jpa --class ~.domain.PizzaOrder --testAutomatically --activeRecord false --identifierType ~.domain.PizzaOrderPk
+field string --fieldName name --notNull --sizeMin 2
+field string --fieldName address --sizeMax 30
+field number --fieldName total --type java.math.BigDecimal
+field date --fieldName deliveryDate --type java.util.Date
+field set --fieldName pizzas --type ~.domain.Pizza
+
+field string --fieldName shopCountry --class ~.domain.PizzaOrderPk
+field string --fieldName shopCity
+field string --fieldName shopName
+
+// Define a repository layer for persistence
+repository jpa --interface ~.repository.ToppingRepository --entity ~.domain.Topping
+repository jpa --interface ~.repository.BaseRepository --entity ~.domain.Base
+repository jpa --interface ~.repository.PizzaRepository --entity ~.domain.Pizza
+repository jpa --interface ~.repository.PizzaOrderRepository --entity ~.domain.PizzaOrder
+
+// Define a service/facade layer
+service --interface ~.service.ToppingService --entity ~.domain.Topping
+service --interface ~.service.BaseService --entity ~.domain.Base
+service --interface ~.service.PizzaService --entity ~.domain.Pizza
+service --interface ~.service.PizzaOrderService --entity ~.domain.PizzaOrder
+
+// Offer JSON remoting for all domain types through Spring MVC
+json all --deepSerialize
+web mvc json setup
+web mvc json all --package ~.web
+
+web mvc setup
+web mvc all --package ~.web
+
+// Example scripts for JSON remoting:
+// curl -i -X POST -H "Content-Type: application/json" -H "Accept: application/json" -d '{name: "Thin Crust"}' http://localhost:8080/pizzashop/bases
+// curl -i -X POST -H "Content-Type: application/json" -H "Accept: application/json" -d '[{name: "Cheesy Crust"},{name: "Thick Crust"}]' http://localhost:8080/pizzashop/bases/jsonArray
+// curl -i -X POST -H "Content-Type: application/json" -H "Accept: application/json" -d '[{name: "Fresh Tomato"},{name: "Prawns"},{name: "Mozarella"},{name: "Bogus"}]' http://localhost:8080/pizzashop/toppings/jsonArray
+// curl -i -X DELETE -H "Accept: application/json" http://localhost:8080/pizzashop/toppings/7
+// curl -i -X PUT -H "Content-Type: application/json" -H "Accept: application/json" -d '{id:6,name:"Mozzarella",version:1}' http://localhost:8080/pizzashop/toppings
+// curl -i -H "Accept: application/json" http://localhost:8080/pizzashop/toppings
+// curl -i -H "Accept: application/json" http://localhost:8080/pizzashop/toppings/6
+// curl -i -X POST -H "Content-Type: application/json" -H "Accept: application/json" -d '{name:"Napolitana",price:7.5,base:{id:1},toppings:[{name: "Anchovy fillets"},{name: "Mozzarella"}]}' http://localhost:8080/pizzashop/pizzas
+// curl -i -X POST -H "Content-Type: application/json" -H "Accept: application/json" -d '{name:"Stefan",total:7.5,address:"Sydney, AU",deliveryDate:1314595427866,id:{shopCountry:"AU",shopCity:"Sydney",shopName:"Pizza Pan 1"},pizzas:[{id:8,version:1}]}' http://localhost:8080/pizzashop/pizzaorders

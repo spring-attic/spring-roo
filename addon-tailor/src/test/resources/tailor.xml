@@ -1,0 +1,103 @@
+<tailorconfiguration>
+	<!-- Simple tailor configuration that works with the pizzashop -->
+	<tailor name="web-simple" description="Web application style with 2 modules DOMAIN, PRESENTATION">
+		<config command="project">
+			<action type="defaultvalue" argument="packaging" value="pom" />
+			<action type="defaultvalue" argument="projectName" value="webapp" />
+			<!-- PARENT -->
+			<action type="execute" />
+			<!-- DOMAIN MODULE -->
+			<action type="execute"
+				command="module create --moduleName ${projectName}-domain --topLevelPackage ${topLevelPackage} --parent ${topLevelPackage}:${projectName}:0.1.0.BUILD-SNAPSHOT" />
+			<!-- WEB MODULE -->
+			<action type="focus" module="~" />
+			<action type="execute"
+				command="module create --moduleName ${projectName}-web --topLevelPackage ${topLevelPackage} --packaging war --parent ${topLevelPackage}:${projectName}:0.1.0.BUILD-SNAPSHOT" />
+			<action type="execute"
+				command="dependency add --groupId ${topLevelPackage} --artifactId ${projectName}-domain --version 0.1.0.BUILD-SNAPSHOT" />
+			<action type="execute" command="module focus --moduleName ~" />
+		</config>
+		<config command="jpa setup">
+			<action type="focus" module="domain" />
+			<!-- action type="defaultvalue" argument="database" value="HYPERSONIC_IN_MEMORY"
+				force="true" / -->
+			<action type="defaultvalue" argument="provider" value="ECLIPSELINK" force="true"/>
+			<action type="execute" />
+		</config>
+		
+		<config command="entity jpa">
+			<action type="focus" module="domain" />
+			<action type="defaultvalue" argument="--activeRecord" value="false" />
+			<!-- Define default for permitReservedWords explicitly, so that it can 
+				be forwarded to all later commands -->
+			<action type="defaultvalue" argument="--permitReservedWords"
+				value="false" />
+			<!-- Set testAutomatically to "false", because tests should never be created 
+				for entities, but for repositories -->
+			<action type="defaultvalue" argument="--testAutomatically"
+				value="false" force="true" />
+			<action type="execute" />
+			
+		</config>
+
+		<config command="repository jpa">
+			<action type="focus" module="domain"/>
+			<action type="execute" />
+			<action type="execute"
+				command="test integration --entity ${entity}" />
+		</config>
+
+		<config command="service">
+			<action type="focus" module="domain" />
+			<action type="defaultvalue" argument="class" value="${entity}ServiceImpl" />
+			<action type="defaultvalue" argument="interface" value="${entity}Service" />
+			<action type="execute" />
+			<action type="execute" command="test stub --class ${entity}ServiceImpl" />
+		</config>
+
+		<config command="json">
+			<action type="focus" module="domain" />
+			<action type="execute" />
+		</config>
+
+		<config command="web mvc">
+			<action type="focus" module="web" />
+			<action type="execute" />
+		</config>
+		
+	</tailor>
+	<!-- Samples used in the documentation -->
+	<tailor name="docsamples">
+		<config command="project">
+			<action type="defaultvalue" argument="packaging" value="pom"/>
+			<action type="execute"/>
+			<action type="execute" command="module create --moduleName ${projectName}-domain --topLevelPackage ${topLevelPackage}"/>
+			<action type="focus" module="~"/>
+			<action type="execute" command="module create --moduleName ${projectName}-web --topLevelPackage ${topLevelPackage} --packaging war"/>
+			<action type="execute"
+				command="dependency add --groupId ${topLevelPackage} --artifactId ${projectName}-domain --version 0.1.0.BUILD-SNAPSHOT" />
+			<action type="execute" command="web mvc setup"/>
+			<action type="focus" module="~"/>
+		</config>
+		<config command="entity jpa">
+			<action type="focus" module="domain" />
+			<action type="defaultvalue" argument="--activeRecord" value="false" />
+			<action type="execute" />
+		</config>
+		<config command="jpa setup">
+			<action type="focus" module="domain" />
+			<action type="defaultvalue" argument="--database" value="HYPERSONIC_IN_MEMORY"/>
+			<action type="defaultvalue" argument="--provider" value="HIBERNATE" />
+			<action type="execute" />
+		</config>
+		<config command="layer">
+			   <action type="focus" module="domain"/>
+			   <!-- Create spring data JPA repository -->
+			   <action type="execute" command="repository jpa --interface ${entity}Repository --entity ${entity}"/>
+			   <!-- Create service interface and implementation class-->
+			   <action type="execute" command="service --interface ${entity}Service --class ${entity}ServiceImpl --entity ${entity}"/>
+			   <action type="focus" module="web"/>
+			   <action type="execute" command="web mvc scaffold --class ${entity}Controller --backingType ${entity}"/>
+		</config>
+	</tailor>
+</tailorconfiguration>

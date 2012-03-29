@@ -24,44 +24,74 @@ import org.springframework.roo.shell.Tailor;
 import org.springframework.roo.support.logging.HandlerUtils;
 
 /**
- * Executed by {@link AbstractShell}. Triggers execution of configured actions.
+ * Executed by {@link AbstractShell}. Triggers execution of configured actions
  * 
  * @author Vladimir Tihomirov
  */
 @Service
 @Component(immediate = true)
 public class DefaultTailorImpl implements Tailor {
+    @Reference protected ActionLocator actionLocator;
+    @Reference protected ConfigurationLocator configLocator;
+    @Reference protected Shell shell;
 
     private static final Logger LOGGER = HandlerUtils
             .getLogger(DefaultTailorImpl.class);
-
-    @Reference private ActionLocator actionLocator;
-    @Reference private ConfigurationLocator configLocator;
-    @Reference private Shell shell;
-
     protected boolean inBlockComment = false;
 
     // We have to done explicit injection to support API compatibility with STS
-    // shell.
+    // shell
     protected void activate(final ComponentContext context) {
         if (shell != null) {
-            // shell.setTailor(this);
+            shell.setTailor(this);
         }
     }
 
     protected void deactivate(final ComponentContext context) {
         if (shell != null) {
-            // shell.setTailor(null);
+            shell.setTailor(null);
         }
     }
 
-    private void execute(final CommandTransformation commandTrafo) {
-        final TailorConfiguration configuration = configLocator
+    /**
+     * @Inheritdoc
+     */
+    public List<String> sew(String command) {
+        if (StringUtils.isBlank(command)) {
+            return Collections.emptyList();
+        }
+        try {
+            // validate if it is commented
+            CommentedLine comment = new CommentedLine(command, inBlockComment);
+            TailorHelper.removeComment(comment);
+            inBlockComment = comment.getInBlockComment();
+            command = comment.getLine();
+            if (StringUtils.isBlank(command)) {
+                return Collections.emptyList();
+            }
+            // parse and tailor
+            CommandTransformation commandTrafo = new CommandTransformation(
+                    command);
+            execute(commandTrafo);
+            return commandTrafo.getOutputCommands();
+        }
+        catch (Exception e) {
+            // Do nothing if exception happened
+            LOGGER.log(
+                    Level.WARNING,
+                    "Error tailoring, cancelled command execution: "
+                            + e.getMessage());
+            return Collections.emptyList();
+        }
+    }
+
+    private void execute(CommandTransformation commandTrafo) {
+        TailorConfiguration configuration = configLocator
                 .getActiveTailorConfiguration();
         if (configuration == null) {
             return;
         }
-        final CommandConfiguration commandConfig = configuration
+        CommandConfiguration commandConfig = configuration
                 .getCommandConfigFor(commandTrafo.getInputCommand());
         if (commandConfig == null) {
             return;
@@ -69,9 +99,9 @@ public class DefaultTailorImpl implements Tailor {
         logInDevelopmentMode(Level.INFO,
                 "Tailor: detected " + commandTrafo.getInputCommand());
 
-        for (final ActionConfig config : commandConfig.getActions()) {
-            final Action component = actionLocator.getAction(config
-                    .getActionTypeId());
+        for (ActionConfig config : commandConfig.getActions()) {
+            Action component = actionLocator
+                    .getAction(config.getActionTypeId());
             if (component != null) {
                 logInDevelopmentMode(Level.INFO,
                         "\tTailoring: " + component.getDescription(config));
@@ -86,36 +116,9 @@ public class DefaultTailorImpl implements Tailor {
         }
     }
 
-    protected void logInDevelopmentMode(final Level level, final String logMsg) {
+    protected void logInDevelopmentMode(Level level, String logMsg) {
         if (shell.isDevelopmentMode()) {
             LOGGER.log(level, logMsg);
-        }
-    }
-
-    public List<String> sew(String command) {
-        if (StringUtils.isBlank(command)) {
-            return Collections.emptyList();
-        }
-        try {
-            // validate if it is commented
-            final CommentedLine comment = new CommentedLine(command,
-                    inBlockComment);
-            TailorHelper.removeComment(comment);
-            inBlockComment = comment.getInBlockComment();
-            command = comment.getLine();
-            if (StringUtils.isBlank(command)) {
-                return Collections.emptyList();
-            }
-            // parse and tailor
-            final CommandTransformation commandTrafo = new CommandTransformation(
-                    command);
-            execute(commandTrafo);
-            return commandTrafo.getOutputCommands();
-        }
-        catch (final Exception e) {
-            // Do nothing if exception happened
-            logInDevelopmentMode(Level.WARNING, e.toString());
-            return Collections.emptyList();
         }
     }
 }

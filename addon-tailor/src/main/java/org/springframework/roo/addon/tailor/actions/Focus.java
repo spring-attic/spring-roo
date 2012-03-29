@@ -13,8 +13,8 @@ import org.springframework.roo.project.ProjectOperations;
  * tailor configurations portable over projects with different names that have
  * naming conventions for their modules and can match for certain patterns in
  * modules.
- * <p />
- * Advanced feature: <br />
+ * <p/>
+ * Advanced feature: <br/>
  * Imagine the case that there are 2 modules named "projectname-domain" and
  * "projectname-domain-test". <br/>
  * For these cases, the match string can also be a comma-separated list, e.g.
@@ -27,29 +27,38 @@ import org.springframework.roo.project.ProjectOperations;
  */
 @Component
 @Service
-public class FocusModule extends AbstractAction {
+public class Focus extends AbstractAction {
 
-    @Reference ProjectOperations projectOperations;
+    @Reference protected ProjectOperations projectOperations;
 
     private final String baseCommand = "module focus --moduleName ";
 
     @Override
-    public void executeImpl(final CommandTransformation trafo,
-            final ActionConfig config) {
+    public void executeImpl(CommandTransformation trafo, ActionConfig config) {
         if ("~".equals(config.getModule())) {
             trafo.addOutputCommand(baseCommand, "~");
             return;
         }
 
+        // If a command is tailored right after the shell was started, sometimes
+        // the module names are not yet loaded
+        if (projectOperations.getModuleNames().isEmpty()) {
+            throw new IllegalStateException(
+                    "Module names not loaded, please try again.");
+        }
+
         // If comma-separated list: Module name will be checked against both
         // those values
-        final String[] matches = config.getModule().split(",");
+        String[] matches = config.getModule().split(",");
 
         // If not root: Check if module name actually exists
-        for (final String moduleName : projectOperations.getModuleNames()) {
+        for (String moduleName : projectOperations.getModuleNames()) {
+            // if (StringUtils.isEmpty(moduleName)) {
+            // continue;
+            // }
             boolean matchesAll = true;
-            for (final String matche : matches) {
-                final String match = matche;
+            for (int i = 0; i < matches.length; i++) {
+                String match = matches[i];
                 if (match.startsWith("/")
                         && moduleName.contains(match.substring(1))) {
                     matchesAll = false;
@@ -67,11 +76,11 @@ public class FocusModule extends AbstractAction {
         }
     }
 
-    public String getDescription(final ActionConfig config) {
-        return "Focusing module: " + config.getModule();
+    public String getDescription(ActionConfig config) {
+        return "Focusing: " + config.getModule();
     }
 
-    public boolean isValid(final ActionConfig config) {
+    public boolean isValid(ActionConfig config) {
         return config != null && StringUtils.isNotBlank(config.getModule());
     }
 

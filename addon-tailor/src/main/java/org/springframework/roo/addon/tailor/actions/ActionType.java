@@ -8,16 +8,15 @@ package org.springframework.roo.addon.tailor.actions;
  */
 public enum ActionType {
 
-    DEFAULTVALUE(DefaultValue.class), EXECUTESELF(ExecuteSelf.class), FOCUSMODULE(
-            FocusModule.class), EXECUTECOMMAND(ExecuteCommand.class);
+    DEFAULTVALUE(DefaultValue.class), FOCUS(Focus.class), EXECUTE(Execute.class);
 
     private Class<?> actionClass;
 
-    ActionType(final Class<?> actionClass) {
+    ActionType(Class<?> actionClass) {
         this.actionClass = actionClass;
     }
 
     public String getActionId() {
-        return actionClass.getSimpleName();
+        return this.actionClass.getSimpleName();
     }
 }

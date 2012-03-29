@@ -1,6 +1,7 @@
 package org.springframework.roo.addon.tailor.service;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -13,9 +14,10 @@ import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.addon.tailor.config.TailorConfiguration;
 import org.springframework.roo.addon.tailor.config.TailorConfigurationFactory;
 import org.springframework.roo.support.logging.HandlerUtils;
+import org.springframework.roo.support.util.CollectionUtils;
 
 /**
- * Default implementation of {@link ConfigurationLocator}.
+ * Default implementation of {@link ConfigurationLocator}
  * 
  * @author Birgitta Boeckeler
  * @since 1.2.0
@@ -37,52 +39,61 @@ public class DefaultConfigurationLocator implements ConfigurationLocator {
      * Map of all available configurations - dynamically bound by Felix on
      * startup
      */
-    private final Map<String, TailorConfiguration> configurations = new LinkedHashMap<String, TailorConfiguration>();
+    private Map<String, TailorConfiguration> configurations = new LinkedHashMap<String, TailorConfiguration>();
 
-    protected void bindConfig(final TailorConfigurationFactory factory) {
-        final TailorConfiguration config = factory.createTailorConfiguration();
-        if (config != null) {
+    protected void bindConfig(TailorConfigurationFactory factory) {
+        List<TailorConfiguration> configs = factory.createTailorConfiguration();
+        if (CollectionUtils.isEmpty(configs)) {
+            return;
+        }
+        for (TailorConfiguration config : configs) {
             if (configurations.get(config.getName()) != null) {
-                LOGGER.warning("Tailor configuration '" + config.getName()
-                        + "' duplicated. Unable to bind again: "
+                LOGGER.warning("TailorConfiguration duplicate '"
+                        + config.getName() + "', not binding again: "
                         + config.toString());
             }
             if (config.isActive()) {
-                activatedTailorConfigName = config.getName();
+                this.activatedTailorConfigName = config.getName();
             }
             configurations.put(config.getName(), config);
         }
     }
 
-    public TailorConfiguration getActiveTailorConfiguration() {
-        return configurations.get(activatedTailorConfigName);
+    protected void unbindConfig(TailorConfigurationFactory factory) {
+        // TODO It's a little unelegant to call "create" method here again, but
+        // we need the name...
+        List<TailorConfiguration> configs = factory.createTailorConfiguration();
+        if (CollectionUtils.isEmpty(configs)) {
+            return;
+        }
+        for (TailorConfiguration config : configs) {
+            configurations.remove(config.getName());
+        }
     }
 
-    public Map<String, TailorConfiguration> getAvailableConfigurations() {
-        return configurations;
-    }
-
-    public void setActiveTailorConfiguration(final String name) {
+    public void setActiveTailorConfiguration(String name) {
         if (name == null) {
-            activatedTailorConfigName = null;
+            this.activatedTailorConfigName = null;
             LOGGER.info("Tailor deactivated");
             return;
         }
-        if (configurations.get(name) != null) {
-            activatedTailorConfigName = name;
+        if (this.configurations.get(name) != null) {
+            this.activatedTailorConfigName = name;
         }
         else {
-            LOGGER.warning("Tailor configuration '" + name + "' unavailable");
+            LOGGER.severe("Couldn't activate tailor configuration '" + name
+                    + "', not available.");
         }
     }
 
-    protected void unbindConfig(final TailorConfigurationFactory factory) {
-        // TODO It's a little inelegant to call "create" method here again, but
-        // we need the name...
-        final TailorConfiguration config = factory.createTailorConfiguration();
-        if (config != null) {
-            configurations.remove(config.getName());
-        }
+    public TailorConfiguration getActiveTailorConfiguration() {
+
+        return this.configurations.get(this.activatedTailorConfigName);
+    }
+
+    public Map<String, TailorConfiguration> getAvailableConfigurations() {
+
+        return this.configurations;
     }
 
 }

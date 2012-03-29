@@ -24,7 +24,7 @@ public class CommandTransformation {
      * A list of output commands, result of the transformation the inputCommand
      * goes through by action executions.
      */
-    private final List<String> outputCommands = new ArrayList<String>();
+    private List<String> outputCommands = new ArrayList<String>();
 
     /**
      * Parsed tokens of the command <br>
@@ -35,40 +35,45 @@ public class CommandTransformation {
      */
     private Map<String, String> arguments;
 
-    public CommandTransformation(final String command) {
-        setInputCommand(command.trim());
-        setArguments(ParserUtils.tokenize(inputCommand));
-    }
-
-    public void addOutputCommand(final String... commandFragments) {
-        String outputCommand = "";
-        for (final String arg : commandFragments) {
-            outputCommand = outputCommand.concat(arg);
+    public CommandTransformation(String command) {
+        this.setInputCommand(command.trim());
+        // ParserUtils.tokenize expects single blanks to split the command:
+        // Make sure that there are no obsolete blanks in the command string
+        while (this.inputCommand.contains("  ")) {
+            this.inputCommand = this.inputCommand.replace("  ", " ");
         }
-        outputCommands.add(outputCommand);
-    }
-
-    public void clearCommands() {
-        outputCommands.clear();
-    }
-
-    public Map<String, String> getArguments() {
-        return arguments;
+        this.setArguments(ParserUtils.tokenize(this.inputCommand));
     }
 
     public String getInputCommand() {
         return inputCommand;
     }
 
+    public void setInputCommand(String command) {
+        this.inputCommand = command;
+    }
+
+    public Map<String, String> getArguments() {
+        return arguments;
+    }
+
+    public void setArguments(Map<String, String> options) {
+        this.arguments = options;
+    }
+
+    public void addOutputCommand(String... commandFragments) {
+        String outputCommand = "";
+        for (String arg : commandFragments) {
+            outputCommand = outputCommand.concat(arg);
+        }
+        this.outputCommands.add(outputCommand);
+    }
+
     public List<String> getOutputCommands() {
-        return outputCommands;
+        return this.outputCommands;
     }
 
-    public void setArguments(final Map<String, String> options) {
-        arguments = options;
-    }
-
-    public void setInputCommand(final String command) {
-        inputCommand = command;
+    public void clearCommands() {
+        this.outputCommands.clear();
     }
 }

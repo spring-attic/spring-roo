@@ -2,6 +2,7 @@ package org.springframework.roo.addon.tailor.actions;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import org.junit.Assert;
@@ -10,44 +11,35 @@ import org.springframework.roo.addon.tailor.CommandTransformation;
 import org.springframework.roo.project.MavenOperationsImpl;
 
 /**
- * Tests for {@link FocusModule}.
+ * Tests for {@link Focus}
  * 
  * @author Birgitta Boeckeler
  */
 public class TestFocusModule {
 
-    /**
-     * Mock ProjectOperations to return a list of test module names
-     */
-    private class MockProjectOperations extends MavenOperationsImpl {
-
-        @Override
-        public Collection<String> getModuleNames() {
-            final List<String> result = new ArrayList<String>();
-            result.add("domain-it");
-            result.add("domain");
-            result.add("data");
-            result.add("data-it");
-            return result;
-        }
-
-    }
-
-    private FocusModule createTestActionObject() {
-        final FocusModule action = new FocusModule();
-        action.projectOperations = new MockProjectOperations();
-        return action;
+    @Test
+    public void testStandard() {
+        Focus action = createTestActionObject();
+        ActionConfig config = ActionConfigFactory.focusModuleAction("domain");
+        CommandTransformation trafo = new CommandTransformation(
+                "command not relevant for this test");
+        action.execute(trafo, config);
+        // Test data: "domain-it" module is first, "domain" second.
+        // Expected that action will choose "domain-it" as the first positive
+        // match
+        Assert.assertTrue(trafo.getOutputCommands().contains(
+                "module focus --moduleName domain-it"));
     }
 
     /**
-     * Tests a list of match strings for the module name.
+     * Tests a list of match strings for the module name
      */
     @Test
     public void testList() {
-        final FocusModule action = createTestActionObject();
-        final ActionConfig config = ActionConfigFactory
-                .focusModuleAction("data,it");
-        final CommandTransformation trafo = new CommandTransformation(
+
+        Focus action = createTestActionObject();
+        ActionConfig config = ActionConfigFactory.focusModuleAction("data,it");
+        CommandTransformation trafo = new CommandTransformation(
                 "command not relevant for this test");
         action.execute(trafo, config);
         // Test data: "data" module is first, "data-it" second.
@@ -58,10 +50,10 @@ public class TestFocusModule {
 
     @Test
     public void testListWithout() {
-        final FocusModule action = createTestActionObject();
-        final ActionConfig config = ActionConfigFactory
+        Focus action = createTestActionObject();
+        ActionConfig config = ActionConfigFactory
                 .focusModuleAction("domain,/it");
-        final CommandTransformation trafo = new CommandTransformation(
+        CommandTransformation trafo = new CommandTransformation(
                 "command not relevant for this test");
         action.execute(trafo, config);
         // Test data: "domain-it" module is first, "domain" second.
@@ -72,18 +64,55 @@ public class TestFocusModule {
     }
 
     @Test
-    public void testStandard() {
-        final FocusModule action = createTestActionObject();
-        final ActionConfig config = ActionConfigFactory
-                .focusModuleAction("domain");
-        final CommandTransformation trafo = new CommandTransformation(
+    public void testModulesNotLoadedYet() {
+        Focus action = new Focus();
+        action.projectOperations = new MockProjectOperationsEmpty();
+
+        ActionConfig config = ActionConfigFactory.focusModuleAction("domain");
+        CommandTransformation trafo = new CommandTransformation(
                 "command not relevant for this test");
-        action.execute(trafo, config);
-        // Test data: "domain-it" module is first, "domain" second.
-        // Expected that action will choose "domain-it" as the first positive
-        // match
-        Assert.assertTrue(trafo.getOutputCommands().contains(
-                "module focus --moduleName domain-it"));
+
+        try {
+            action.execute(trafo, config);
+            Assert.fail("Should throw exception (is caught by DefaultTailorImpl, but this test goes directly to the action)");
+        }
+        catch (IllegalStateException e) {
+            Assert.assertTrue(trafo.getOutputCommands().isEmpty());
+        }
+
+    }
+
+    private Focus createTestActionObject() {
+        Focus action = new Focus();
+        action.projectOperations = new MockProjectOperations();
+        return action;
+    }
+
+    /**
+     * Mock ProjectOperations to return a list of test module names
+     */
+    private class MockProjectOperations extends MavenOperationsImpl {
+
+        @Override
+        public Collection<String> getModuleNames() {
+            List<String> result = new ArrayList<String>();
+            result.add("");
+            result.add("domain-it");
+            result.add("domain");
+            result.add("data");
+            result.add("data-it");
+            return result;
+        }
+
+    }
+
+    private class MockProjectOperationsEmpty extends MavenOperationsImpl {
+
+        @Override
+        public Collection<String> getModuleNames() {
+            return Collections.emptyList();
+        }
+
     }
 
 }

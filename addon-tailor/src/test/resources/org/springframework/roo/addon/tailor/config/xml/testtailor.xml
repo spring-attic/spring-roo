@@ -1,0 +1,45 @@
+<tailorconfiguration>
+	<tailor name="afpj" description="Afpj XML configuration"
+		activate="true">
+		<config command="project">
+			<action type="defaultvalue" argument="packaging" value="pom" />
+			<action type="defaultvalue" argument="projectName" value="module" />
+		</config>
+		<config command="jpa setup">
+			<action type="focus" module="data,/it" />
+		</config>
+		<config command="entity jpa">
+			<action type="focus" module="domain,/it" />
+		</config>
+	</tailor>
+	<tailor>
+		<config command="cd">
+			<action type="execute" command="module focus --moduleName ${*}" />
+		</config>
+	</tailor>
+	<tailor name="test" description="Test XML configuration">
+		<config command="service">
+			<action type="focus" module="domain,/it" />
+			<action type="defaultvalue" argument="class" value="${interface}Impl" />
+		</config>
+		<config command="web mvc all">
+			<action type="focus" module="presentation" />
+			<action type="execute" />
+		</config>
+	</tailor>
+	<tailor name="helper" description="Helper XML configuration">
+		<config command="cd">
+			<action type="execute" command="module focus --moduleName ${*}" />
+		</config>
+	</tailor>
+	<tailor name="error1" description="Helper XML configuration">
+		<config>
+			<action type="execute" command="module focus --moduleName ${*}" />
+		</config>
+	</tailor>
+	<tailor name="error2" description="Helper XML configuration">
+		<config command="cd">
+			<action />
+		</config>
+	</tailor>
+</tailorconfiguration>

@@ -14,6 +14,13 @@ import org.springframework.roo.addon.tailor.config.TailorConfiguration;
 public interface ConfigurationLocator {
 
     /**
+     * Activate Tailor Configuration with certain name
+     * 
+     * @param name Name of configuration to be activated
+     */
+    void setActiveTailorConfiguration(String name);
+
+    /**
      * @return the currently active TailorConfiguration
      */
     TailorConfiguration getActiveTailorConfiguration();
@@ -23,10 +30,4 @@ public interface ConfigurationLocator {
      */
     Map<String, TailorConfiguration> getAvailableConfigurations();
 
-    /**
-     * Activate Tailor Configuration with certain name
-     * 
-     * @param name Name of configuration to be activated
-     */
-    void setActiveTailorConfiguration(String name);
 }

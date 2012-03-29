@@ -9,13 +9,16 @@ import java.util.List;
  * triggered by which commands when this configuration is activated
  * 
  * @author Birgitta Boeckeler
- * @since 1.3.0
+ * @since 1.2.0
  */
 public class TailorConfiguration {
 
-    private final List<CommandConfiguration> commandConfigs = new ArrayList<CommandConfiguration>();
-    private final String name;
+    private List<CommandConfiguration> commandConfigs = new ArrayList<CommandConfiguration>();
+
+    private String name;
+
     private String description;
+
     private boolean isActive = false;
 
     /**
@@ -24,17 +27,21 @@ public class TailorConfiguration {
      * @param name Name of the configuration. Should be unique over all
      *            TailorConfiguration instances in the container
      */
-    public TailorConfiguration(final String name) {
+    public TailorConfiguration(String name) {
         this.name = name;
     }
 
-    public TailorConfiguration(final String name, final String description) {
+    public boolean isActive() {
+        return isActive;
+    }
+
+    public void setActive(boolean isActive) {
+        this.isActive = isActive;
+    }
+
+    public TailorConfiguration(String name, String description) {
         this.name = name;
         this.description = description;
-    }
-
-    public void addCommandConfig(final CommandConfiguration newConfig) {
-        commandConfigs.add(newConfig);
     }
 
     /**
@@ -44,9 +51,8 @@ public class TailorConfiguration {
      * @return CommandConfiguration for the command in this TailorConfiguration;
      *         null if no configuration present for the command
      */
-    public CommandConfiguration getCommandConfigFor(
-            final String fullCommandString) {
-        for (final CommandConfiguration config : commandConfigs) {
+    public CommandConfiguration getCommandConfigFor(String fullCommandString) {
+        for (CommandConfiguration config : commandConfigs) {
             if (fullCommandString.startsWith(config.getCommandName())) {
                 return config;
             }
@@ -54,24 +60,20 @@ public class TailorConfiguration {
         return null;
     }
 
-    public List<CommandConfiguration> getCommandConfigs() {
-        return commandConfigs;
+    public String getName() {
+        return this.name;
     }
 
     public String getDescription() {
-        return description;
+        return this.description;
     }
 
-    public String getName() {
-        return name;
+    public void addCommandConfig(CommandConfiguration newConfig) {
+        this.commandConfigs.add(newConfig);
     }
 
-    public boolean isActive() {
-        return isActive;
-    }
-
-    public void setActive(final boolean isActive) {
-        this.isActive = isActive;
+    public List<CommandConfiguration> getCommandConfigs() {
+        return this.commandConfigs;
     }
 
 }

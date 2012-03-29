@@ -71,6 +71,9 @@ public class TailorHelper {
          * occurrences. >> Think about which makes more sense.
          */
         final Map<String, String> inputArguments = trafo.getArguments();
+        if (inputArguments == null || inputArguments.isEmpty()) {
+            return text;
+        }
 
         final Matcher matcher = VAR_PATTERN.matcher(text);
         while (matcher.find()) {
