@@ -20,9 +20,9 @@ public abstract class AbstractAction implements Action {
     /**
      * {@inheritDoc}
      */
-    public void execute(CommandTransformation command, ActionConfig config) {
+    public void execute(final CommandTransformation command, final ActionConfig config) {
         if (isValid(config)) {
-            ActionConfig processedConfig = processConfigAttributes(command,
+            final ActionConfig processedConfig = processConfigAttributes(command,
                     config);
             executeImpl(command, processedConfig);
         }
@@ -31,24 +31,24 @@ public abstract class AbstractAction implements Action {
         }
     }
 
-    private ActionConfig processConfigAttributes(CommandTransformation command,
-            ActionConfig config) {
-        // Process variables in config
-        ActionConfig processedConfig = new ActionConfig(
-                config.getActionTypeId());
-        Map<String, String> attributes = config.getAttributes();
-        for (Map.Entry<String, String> entry : attributes.entrySet()) {
-            String processedValue = TailorHelper.replaceVars(command,
-                    entry.getValue());
-            processedConfig.setAttribute(entry.getKey(), processedValue);
-        }
-        return processedConfig;
-    }
-
     /*
      * @see #execute(RooCommand, ActionConfig)
      */
     protected abstract void executeImpl(CommandTransformation command,
             ActionConfig config);
+
+    private ActionConfig processConfigAttributes(final CommandTransformation command,
+            final ActionConfig config) {
+        // Process variables in config
+        final ActionConfig processedConfig = new ActionConfig(
+                config.getActionTypeId());
+        final Map<String, String> attributes = config.getAttributes();
+        for (final Map.Entry<String, String> entry : attributes.entrySet()) {
+            final String processedValue = TailorHelper.replaceVars(command,
+                    entry.getValue());
+            processedConfig.setAttribute(entry.getKey(), processedValue);
+        }
+        return processedConfig;
+    }
 
 }

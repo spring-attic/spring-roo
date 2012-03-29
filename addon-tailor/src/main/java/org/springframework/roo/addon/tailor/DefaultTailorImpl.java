@@ -39,6 +39,38 @@ public class DefaultTailorImpl implements Tailor {
             .getLogger(DefaultTailorImpl.class);
     protected boolean inBlockComment = false;
 
+    /**
+     * @Inheritdoc
+     */
+    public List<String> sew(String command) {
+        if (StringUtils.isBlank(command)) {
+            return Collections.emptyList();
+        }
+        try {
+            // validate if it is commented
+            final CommentedLine comment = new CommentedLine(command, inBlockComment);
+            TailorHelper.removeComment(comment);
+            inBlockComment = comment.getInBlockComment();
+            command = comment.getLine();
+            if (StringUtils.isBlank(command)) {
+                return Collections.emptyList();
+            }
+            // parse and tailor
+            final CommandTransformation commandTrafo = new CommandTransformation(
+                    command);
+            execute(commandTrafo);
+            return commandTrafo.getOutputCommands();
+        }
+        catch (final Exception e) {
+            // Do nothing if exception happened
+            LOGGER.log(
+                    Level.WARNING,
+                    "Error tailoring, cancelled command execution: "
+                            + e.getMessage());
+            return Collections.emptyList();
+        }
+    }
+
     // We have to done explicit injection to support API compatibility with STS
     // shell
     protected void activate(final ComponentContext context) {
@@ -53,45 +85,19 @@ public class DefaultTailorImpl implements Tailor {
         }
     }
 
-    /**
-     * @Inheritdoc
-     */
-    public List<String> sew(String command) {
-        if (StringUtils.isBlank(command)) {
-            return Collections.emptyList();
-        }
-        try {
-            // validate if it is commented
-            CommentedLine comment = new CommentedLine(command, inBlockComment);
-            TailorHelper.removeComment(comment);
-            inBlockComment = comment.getInBlockComment();
-            command = comment.getLine();
-            if (StringUtils.isBlank(command)) {
-                return Collections.emptyList();
-            }
-            // parse and tailor
-            CommandTransformation commandTrafo = new CommandTransformation(
-                    command);
-            execute(commandTrafo);
-            return commandTrafo.getOutputCommands();
-        }
-        catch (Exception e) {
-            // Do nothing if exception happened
-            LOGGER.log(
-                    Level.WARNING,
-                    "Error tailoring, cancelled command execution: "
-                            + e.getMessage());
-            return Collections.emptyList();
+    protected void logInDevelopmentMode(final Level level, final String logMsg) {
+        if (shell.isDevelopmentMode()) {
+            LOGGER.log(level, logMsg);
         }
     }
 
-    private void execute(CommandTransformation commandTrafo) {
-        TailorConfiguration configuration = configLocator
+    private void execute(final CommandTransformation commandTrafo) {
+        final TailorConfiguration configuration = configLocator
                 .getActiveTailorConfiguration();
         if (configuration == null) {
             return;
         }
-        CommandConfiguration commandConfig = configuration
+        final CommandConfiguration commandConfig = configuration
                 .getCommandConfigFor(commandTrafo.getInputCommand());
         if (commandConfig == null) {
             return;
@@ -99,8 +105,8 @@ public class DefaultTailorImpl implements Tailor {
         logInDevelopmentMode(Level.INFO,
                 "Tailor: detected " + commandTrafo.getInputCommand());
 
-        for (ActionConfig config : commandConfig.getActions()) {
-            Action component = actionLocator
+        for (final ActionConfig config : commandConfig.getActions()) {
+            final Action component = actionLocator
                     .getAction(config.getActionTypeId());
             if (component != null) {
                 logInDevelopmentMode(Level.INFO,
@@ -113,12 +119,6 @@ public class DefaultTailorImpl implements Tailor {
                         "\tTailoring: Couldn't find action '"
                                 + config.getActionTypeId());
             }
-        }
-    }
-
-    protected void logInDevelopmentMode(Level level, String logMsg) {
-        if (shell.isDevelopmentMode()) {
-            LOGGER.log(level, logMsg);
         }
     }
 }

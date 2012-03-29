@@ -17,29 +17,15 @@ import org.springframework.roo.project.MavenOperationsImpl;
  */
 public class TestFocusModule {
 
-    @Test
-    public void testStandard() {
-        Focus action = createTestActionObject();
-        ActionConfig config = ActionConfigFactory.focusModuleAction("domain");
-        CommandTransformation trafo = new CommandTransformation(
-                "command not relevant for this test");
-        action.execute(trafo, config);
-        // Test data: "domain-it" module is first, "domain" second.
-        // Expected that action will choose "domain-it" as the first positive
-        // match
-        Assert.assertTrue(trafo.getOutputCommands().contains(
-                "module focus --moduleName domain-it"));
-    }
-
     /**
      * Tests a list of match strings for the module name
      */
     @Test
     public void testList() {
 
-        Focus action = createTestActionObject();
-        ActionConfig config = ActionConfigFactory.focusModuleAction("data,it");
-        CommandTransformation trafo = new CommandTransformation(
+        final Focus action = createTestActionObject();
+        final ActionConfig config = ActionConfigFactory.focusModuleAction("data,it");
+        final CommandTransformation trafo = new CommandTransformation(
                 "command not relevant for this test");
         action.execute(trafo, config);
         // Test data: "data" module is first, "data-it" second.
@@ -50,10 +36,10 @@ public class TestFocusModule {
 
     @Test
     public void testListWithout() {
-        Focus action = createTestActionObject();
-        ActionConfig config = ActionConfigFactory
+        final Focus action = createTestActionObject();
+        final ActionConfig config = ActionConfigFactory
                 .focusModuleAction("domain,/it");
-        CommandTransformation trafo = new CommandTransformation(
+        final CommandTransformation trafo = new CommandTransformation(
                 "command not relevant for this test");
         action.execute(trafo, config);
         // Test data: "domain-it" module is first, "domain" second.
@@ -65,25 +51,39 @@ public class TestFocusModule {
 
     @Test
     public void testModulesNotLoadedYet() {
-        Focus action = new Focus();
+        final Focus action = new Focus();
         action.projectOperations = new MockProjectOperationsEmpty();
 
-        ActionConfig config = ActionConfigFactory.focusModuleAction("domain");
-        CommandTransformation trafo = new CommandTransformation(
+        final ActionConfig config = ActionConfigFactory.focusModuleAction("domain");
+        final CommandTransformation trafo = new CommandTransformation(
                 "command not relevant for this test");
 
         try {
             action.execute(trafo, config);
             Assert.fail("Should throw exception (is caught by DefaultTailorImpl, but this test goes directly to the action)");
         }
-        catch (IllegalStateException e) {
+        catch (final IllegalStateException e) {
             Assert.assertTrue(trafo.getOutputCommands().isEmpty());
         }
 
     }
 
+    @Test
+    public void testStandard() {
+        final Focus action = createTestActionObject();
+        final ActionConfig config = ActionConfigFactory.focusModuleAction("domain");
+        final CommandTransformation trafo = new CommandTransformation(
+                "command not relevant for this test");
+        action.execute(trafo, config);
+        // Test data: "domain-it" module is first, "domain" second.
+        // Expected that action will choose "domain-it" as the first positive
+        // match
+        Assert.assertTrue(trafo.getOutputCommands().contains(
+                "module focus --moduleName domain-it"));
+    }
+
     private Focus createTestActionObject() {
-        Focus action = new Focus();
+        final Focus action = new Focus();
         action.projectOperations = new MockProjectOperations();
         return action;
     }
@@ -95,7 +95,7 @@ public class TestFocusModule {
 
         @Override
         public Collection<String> getModuleNames() {
-            List<String> result = new ArrayList<String>();
+            final List<String> result = new ArrayList<String>();
             result.add("");
             result.add("domain-it");
             result.add("domain");

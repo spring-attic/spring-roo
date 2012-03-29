@@ -16,7 +16,7 @@ import org.springframework.roo.addon.tailor.CommandTransformation;
 public class DefaultValue extends AbstractAction {
 
     @Override
-    public void executeImpl(CommandTransformation arg, ActionConfig config) {
+    public void executeImpl(final CommandTransformation arg, final ActionConfig config) {
         // Allow argument name with and without "--" in config
         String argumentName = config.getArgument();
         if (argumentName.startsWith("--")) {
@@ -32,7 +32,7 @@ public class DefaultValue extends AbstractAction {
             arg.getArguments().put(argumentName, config.getDefaultValue());
         }
         else if (config.isForced()) {
-            String oldValue = arg.getArguments().get(argumentName);
+            final String oldValue = arg.getArguments().get(argumentName);
             if (StringUtils.isNotBlank(oldValue)) {
                 // Replace the old value with the default one
                 arg.setInputCommand(arg.getInputCommand().replace(
@@ -44,12 +44,12 @@ public class DefaultValue extends AbstractAction {
 
     }
 
-    public String getDescription(ActionConfig config) {
+    public String getDescription(final ActionConfig config) {
         return "Setting default argument: " + config.getArgument() + " = "
                 + config.getDefaultValue();
     }
 
-    public boolean isValid(ActionConfig config) {
+    public boolean isValid(final ActionConfig config) {
         return config != null && StringUtils.isNotBlank(config.getArgument())
                 && StringUtils.isNotBlank(config.getDefaultValue());
     }

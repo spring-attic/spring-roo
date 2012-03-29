@@ -34,7 +34,7 @@ public class Focus extends AbstractAction {
     private final String baseCommand = "module focus --moduleName ";
 
     @Override
-    public void executeImpl(CommandTransformation trafo, ActionConfig config) {
+    public void executeImpl(final CommandTransformation trafo, final ActionConfig config) {
         if ("~".equals(config.getModule())) {
             trafo.addOutputCommand(baseCommand, "~");
             return;
@@ -49,16 +49,16 @@ public class Focus extends AbstractAction {
 
         // If comma-separated list: Module name will be checked against both
         // those values
-        String[] matches = config.getModule().split(",");
+        final String[] matches = config.getModule().split(",");
 
         // If not root: Check if module name actually exists
-        for (String moduleName : projectOperations.getModuleNames()) {
+        for (final String moduleName : projectOperations.getModuleNames()) {
             // if (StringUtils.isEmpty(moduleName)) {
             // continue;
             // }
             boolean matchesAll = true;
-            for (int i = 0; i < matches.length; i++) {
-                String match = matches[i];
+            for (final String matche : matches) {
+                final String match = matche;
                 if (match.startsWith("/")
                         && moduleName.contains(match.substring(1))) {
                     matchesAll = false;
@@ -76,11 +76,11 @@ public class Focus extends AbstractAction {
         }
     }
 
-    public String getDescription(ActionConfig config) {
+    public String getDescription(final ActionConfig config) {
         return "Focusing: " + config.getModule();
     }
 
-    public boolean isValid(ActionConfig config) {
+    public boolean isValid(final ActionConfig config) {
         return config != null && StringUtils.isNotBlank(config.getModule());
     }
 

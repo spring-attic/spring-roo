@@ -26,26 +26,26 @@ public class DefaultActionLocator implements ActionLocator {
      * by Felix, keys are the simple class names in lower case, values the
      * respective OSGi services.
      */
-    private Map<String, Action> actionsMap = new LinkedHashMap<String, Action>();
+    private final Map<String, Action> actionsMap = new LinkedHashMap<String, Action>();
 
-    protected void bindAction(Action action) {
-        String actionClassName = action.getClass().getSimpleName()
-                .toLowerCase();
-        actionsMap.put(actionClassName, action);
-    }
-
-    protected void unbindAction(Action action) {
-        String actionClassName = action.getClass().getSimpleName()
-                .toLowerCase();
-        actionsMap.remove(actionClassName);
+    public Action getAction(final String caseInsensitiveKey) {
+        return actionsMap.get(caseInsensitiveKey.toLowerCase());
     }
 
     public Map<String, Action> getAllActions() {
         return actionsMap;
     }
 
-    public Action getAction(String caseInsensitiveKey) {
-        return actionsMap.get(caseInsensitiveKey.toLowerCase());
+    protected void bindAction(final Action action) {
+        final String actionClassName = action.getClass().getSimpleName()
+                .toLowerCase();
+        actionsMap.put(actionClassName, action);
+    }
+
+    protected void unbindAction(final Action action) {
+        final String actionClassName = action.getClass().getSimpleName()
+                .toLowerCase();
+        actionsMap.remove(actionClassName);
     }
 
 }

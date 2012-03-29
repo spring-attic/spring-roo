@@ -12,11 +12,11 @@ public enum ActionType {
 
     private Class<?> actionClass;
 
-    ActionType(Class<?> actionClass) {
+    ActionType(final Class<?> actionClass) {
         this.actionClass = actionClass;
     }
 
     public String getActionId() {
-        return this.actionClass.getSimpleName();
+        return actionClass.getSimpleName();
     }
 }

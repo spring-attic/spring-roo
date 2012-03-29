@@ -22,15 +22,30 @@ public class Execute extends AbstractAction {
     public static final String ACTIONATTR_REMOVEARGS = "exclude";
 
     @Override
-    public void executeImpl(CommandTransformation trafo, ActionConfig config) {
+    public void executeImpl(final CommandTransformation trafo, final ActionConfig config) {
         if (StringUtils.isBlank(config.getCommand())) {
             // If no command specified, this will execute the original command
-            String processedCommand = removeArgumentsFromInputCmd(trafo, config);
+            final String processedCommand = removeArgumentsFromInputCmd(trafo, config);
             trafo.addOutputCommand(processedCommand);
         }
         else {
             trafo.addOutputCommand(config.getCommand());
         }
+    }
+
+    public String getDescription(final ActionConfig config) {
+        if (StringUtils.isEmpty(config.getCommand())) {
+            return "Executing original command";
+        }
+        return "Executing command: " + config.getCommand();
+    }
+
+    public boolean isValid(final ActionConfig config) {
+        return config != null
+                // "excludes" option only valid if "command" is empty
+                && !(StringUtils.isNotBlank(config
+                        .getAttribute(ACTIONATTR_REMOVEARGS)) && StringUtils
+                        .isNotBlank(config.getCommand()));
     }
 
     /**
@@ -42,9 +57,9 @@ public class Execute extends AbstractAction {
      * @param config Action configuration
      * @return Processed input command
      */
-    private String removeArgumentsFromInputCmd(CommandTransformation trafo,
-            ActionConfig config) {
-        String removeArgumentsAttribute = config
+    private String removeArgumentsFromInputCmd(final CommandTransformation trafo,
+            final ActionConfig config) {
+        final String removeArgumentsAttribute = config
                 .getAttribute(ACTIONATTR_REMOVEARGS);
         if (StringUtils.isBlank(removeArgumentsAttribute)) {
             return trafo.getInputCommand();
@@ -52,18 +67,18 @@ public class Execute extends AbstractAction {
 
         String inputCommandString = trafo.getInputCommand();
 
-        String[] removeArgumentsList = removeArgumentsAttribute.split(",");
-        for (int i = 0; i < removeArgumentsList.length; i++) {
-            String argToRemove = removeArgumentsList[i];
+        final String[] removeArgumentsList = removeArgumentsAttribute.split(",");
+        for (final String element : removeArgumentsList) {
+            String argToRemove = element;
 
             if (argToRemove.startsWith("--")) {
                 argToRemove = argToRemove.substring(2);
             }
 
-            Map<String, String> cmdArguments = trafo.getArguments();
-            Iterator<String> keyIterator = cmdArguments.keySet().iterator();
+            final Map<String, String> cmdArguments = trafo.getArguments();
+            final Iterator<String> keyIterator = cmdArguments.keySet().iterator();
             while (keyIterator.hasNext()) {
-                String argName = keyIterator.next();
+                final String argName = keyIterator.next();
                 if (argName.equals(argToRemove)) {
                     inputCommandString = inputCommandString.replace("--"
                             + argName + " " + cmdArguments.get(argName), "");
@@ -72,20 +87,5 @@ public class Execute extends AbstractAction {
         }
 
         return inputCommandString;
-    }
-
-    public String getDescription(ActionConfig config) {
-        if (StringUtils.isEmpty(config.getCommand())) {
-            return "Executing original command";
-        }
-        return "Executing command: " + config.getCommand();
-    }
-
-    public boolean isValid(ActionConfig config) {
-        return config != null
-                // "excludes" option only valid if "command" is empty
-                && !(StringUtils.isNotBlank(config
-                        .getAttribute(ACTIONATTR_REMOVEARGS)) && StringUtils
-                        .isNotBlank(config.getCommand()));
     }
 }

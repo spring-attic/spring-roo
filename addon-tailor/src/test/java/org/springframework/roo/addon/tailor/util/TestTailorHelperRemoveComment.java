@@ -3,8 +3,6 @@ package org.springframework.roo.addon.tailor.util;
 import junit.framework.Assert;
 
 import org.junit.Test;
-import org.springframework.roo.addon.tailor.util.CommentedLine;
-import org.springframework.roo.addon.tailor.util.TailorHelper;
 
 /**
  * Tests for {@link TailorHelper#removeComment(String, boolean)}

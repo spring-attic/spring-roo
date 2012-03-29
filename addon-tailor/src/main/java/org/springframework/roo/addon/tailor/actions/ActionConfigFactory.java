@@ -11,26 +11,17 @@ package org.springframework.roo.addon.tailor.actions;
 public class ActionConfigFactory {
 
     /**
-     * @see Focus
-     */
-    public static ActionConfig focusModuleAction(String module) {
-        ActionConfig config = new ActionConfig(ActionType.FOCUS.getActionId());
-        config.setModule(module);
-        return config;
-    }
-
-    /**
      * @see ActionConfig#setArgument(String)
      * @see ActionConfig#setValue(String)
      */
-    public static ActionConfig defaultArgumentAction(String argument,
-            String defaultValue) {
+    public static ActionConfig defaultArgumentAction(final String argument,
+            final String defaultValue) {
         return defaultArgumentAction(argument, defaultValue, false);
     }
 
-    public static ActionConfig defaultArgumentAction(String argument,
-            String defaultValue, boolean force) {
-        ActionConfig config = new ActionConfig(
+    public static ActionConfig defaultArgumentAction(final String argument,
+            final String defaultValue, final boolean force) {
+        final ActionConfig config = new ActionConfig(
                 ActionType.DEFAULTVALUE.getActionId());
         config.setArgument(argument);
         config.setValue(defaultValue);
@@ -45,13 +36,22 @@ public class ActionConfigFactory {
      * @return new ActionConfig
      */
     public static ActionConfig executeAction() {
-        ActionConfig config = new ActionConfig(ActionType.EXECUTE.getActionId());
+        final ActionConfig config = new ActionConfig(ActionType.EXECUTE.getActionId());
         return config;
     }
 
-    public static ActionConfig executeAction(String command) {
-        ActionConfig config = new ActionConfig(ActionType.EXECUTE.getActionId());
+    public static ActionConfig executeAction(final String command) {
+        final ActionConfig config = new ActionConfig(ActionType.EXECUTE.getActionId());
         config.setCommand(command);
+        return config;
+    }
+
+    /**
+     * @see Focus
+     */
+    public static ActionConfig focusModuleAction(final String module) {
+        final ActionConfig config = new ActionConfig(ActionType.FOCUS.getActionId());
+        config.setModule(module);
         return config;
     }
 

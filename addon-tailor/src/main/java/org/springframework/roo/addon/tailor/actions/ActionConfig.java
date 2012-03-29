@@ -21,7 +21,7 @@ import org.springframework.roo.addon.tailor.service.ActionLocator;
  */
 public class ActionConfig {
 
-    private String actionTypeId;
+    private final String actionTypeId;
 
     /* A set of attributes for the default actions delivered with tailor.core */
     private static final String ATTR_MODULE = "module";
@@ -34,7 +34,16 @@ public class ActionConfig {
      * A map to flexibly define additional attributes for actions not delivered
      * with tailor-core.
      */
-    private Map<String, String> attributes = new LinkedHashMap<String, String>();
+    private final Map<String, String> attributes = new LinkedHashMap<String, String>();
+
+    /**
+     * Constructor
+     * 
+     * @param actionClass Action class to be executed
+     */
+    public ActionConfig(final Class<?> actionClass) {
+        actionTypeId = actionClass.getSimpleName();
+    }
 
     /**
      * Constructor
@@ -43,37 +52,51 @@ public class ActionConfig {
      *            actionClass#getSimpleName(), as the actions are bound to the
      *            {@link ActionLocator} by class name.
      */
-    public ActionConfig(String actionTypeId) {
+    public ActionConfig(final String actionTypeId) {
         this.actionTypeId = actionTypeId;
-    }
-
-    /**
-     * Constructor
-     * 
-     * @param actionClass Action class to be executed
-     */
-    public ActionConfig(Class<?> actionClass) {
-        this.actionTypeId = actionClass.getSimpleName();
     }
 
     public String getActionTypeId() {
         return actionTypeId;
     }
 
+    public String getArgument() {
+        return attributes.get(ATTR_ARGUMENT);
+    }
+
+    /**
+     * Get an attribute from this configuration
+     * 
+     * @param key Key of the attribute
+     * @return Value of the attribute
+     */
+    public String getAttribute(final String key) {
+        return attributes.get(key);
+    }
+
+    /**
+     * @return A map to flexibly define additional attributes for actions not
+     *         delivered with tailor-core.
+     */
+    public Map<String, String> getAttributes() {
+        return attributes;
+    }
+
+    public String getCommand() {
+        return attributes.get(ATTR_COMMAND);
+    }
+
+    public String getDefaultValue() {
+        return attributes.get(ATTR_VALUE);
+    }
+
     public String getModule() {
         return attributes.get(ATTR_MODULE);
     }
 
-    /**
-     * @param module Name of a module (e.g. used for Focus)
-     * @see org.springframework.roo.addon.tailor.actions.Focus
-     */
-    public void setModule(String module) {
-        this.attributes.put(ATTR_MODULE, module);
-    }
-
-    public String getArgument() {
-        return attributes.get(ATTR_ARGUMENT);
+    public boolean isForced() {
+        final String isForced = attributes.get(ATTR_FORCE);
+        return "true".equals(isForced) || "yes".equals(isForced);
     }
 
     /**
@@ -87,7 +110,7 @@ public class ActionConfig {
      *            define a default value for an argument with this name)
      * @see org.springframework.roo.addon.tailor.actions.DefaultValue
      */
-    public void setArgument(String argument) {
+    public void setArgument(final String argument) {
         // Don't allow overriding of arguments!
         // The ActionConfig will be reused for all action executions,
         // so it should stay the same after instantiation.
@@ -98,41 +121,14 @@ public class ActionConfig {
         attributes.put(ATTR_ARGUMENT, argument);
     }
 
-    public String getDefaultValue() {
-        return attributes.get(ATTR_VALUE);
-    }
-
     /**
-     * @param value Sets an attribute called value, e.g. used for DefaultValue
-     *            action as default value
-     * @see org.springframework.roo.addon.tailor.actions.DefaultValue
+     * Add an additional attribute to this configuration
+     * 
+     * @param key Key for the attribute
+     * @param value Value to set for the attribute
      */
-    public void setValue(String value) {
-        attributes.put(ATTR_VALUE, value);
-    }
-
-    public boolean isForced() {
-        String isForced = attributes.get(ATTR_FORCE);
-        return "true".equals(isForced) || "yes".equals(isForced);
-    }
-
-    /**
-     * @param isForced Sets an attribute called force, e.g. used for
-     *            DefaultValue action to determine if a default value is forced
-     *            or only applies when not specified. Default is false.
-     * @see org.springframework.roo.addon.tailor.actions.DefaultValue
-     */
-    public void setForce(boolean isForced) {
-        if (isForced) {
-            attributes.put(ATTR_FORCE, "true");
-        }
-        else {
-            attributes.put(ATTR_FORCE, "false");
-        }
-    }
-
-    public String getCommand() {
-        return attributes.get(ATTR_COMMAND);
+    public void setAttribute(final String key, final String value) {
+        attributes.put(key, value);
     }
 
     /**
@@ -141,45 +137,49 @@ public class ActionConfig {
      *            arguments of the original command.
      * @see org.springframework.roo.addon.tailor.actions.Execute
      */
-    public void setCommand(String command) {
+    public void setCommand(final String command) {
         attributes.put(ATTR_COMMAND, command);
     }
 
     /**
-     * @return A map to flexibly define additional attributes for actions not
-     *         delivered with tailor-core.
+     * @param isForced Sets an attribute called force, e.g. used for
+     *            DefaultValue action to determine if a default value is forced
+     *            or only applies when not specified. Default is false.
+     * @see org.springframework.roo.addon.tailor.actions.DefaultValue
      */
-    public Map<String, String> getAttributes() {
-        return attributes;
+    public void setForce(final boolean isForced) {
+        if (isForced) {
+            attributes.put(ATTR_FORCE, "true");
+        }
+        else {
+            attributes.put(ATTR_FORCE, "false");
+        }
     }
 
     /**
-     * Add an additional attribute to this configuration
-     * 
-     * @param key Key for the attribute
-     * @param value Value to set for the attribute
+     * @param module Name of a module (e.g. used for Focus)
+     * @see org.springframework.roo.addon.tailor.actions.Focus
      */
-    public void setAttribute(String key, String value) {
-        attributes.put(key, value);
+    public void setModule(final String module) {
+        attributes.put(ATTR_MODULE, module);
     }
 
     /**
-     * Get an attribute from this configuration
-     * 
-     * @param key Key of the attribute
-     * @return Value of the attribute
+     * @param value Sets an attribute called value, e.g. used for DefaultValue
+     *            action as default value
+     * @see org.springframework.roo.addon.tailor.actions.DefaultValue
      */
-    public String getAttribute(String key) {
-        return attributes.get(key);
+    public void setValue(final String value) {
+        attributes.put(ATTR_VALUE, value);
     }
 
     @Override
     public String toString() {
-        StringBuffer result = new StringBuffer();
+        final StringBuffer result = new StringBuffer();
         result.append("Type: " + actionTypeId);
-        Iterator<String> iterator = attributes.keySet().iterator();
+        final Iterator<String> iterator = attributes.keySet().iterator();
         while (iterator.hasNext()) {
-            String attribute = iterator.next();
+            final String attribute = iterator.next();
             result.append(" | ").append(attribute).append(" = ")
                     .append(attributes.get(attribute));
         }
