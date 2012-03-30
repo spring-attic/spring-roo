@@ -331,24 +331,31 @@
                 <dependency>
                     <groupId>org.datanucleus</groupId>
                     <artifactId>datanucleus-core</artifactId>
-                    <version>3.0.8</version>
+                    <version>3.0.10</version>
                 </dependency>
                 <dependency>
                     <groupId>org.datanucleus</groupId>
                     <artifactId>datanucleus-api-jpa</artifactId>
-                    <version>3.0.7</version>
+                    <version>3.0.9</version>
                 </dependency>
                 <dependency>
                     <groupId>org.datanucleus</groupId>
                     <artifactId>datanucleus-rdbms</artifactId>
-                    <version>3.0.7</version>
+                    <version>3.0.9</version>
                 </dependency>
             </dependencies>
             <plugins>
                 <plugin>
                     <groupId>org.datanucleus</groupId>
                     <artifactId>maven-datanucleus-plugin</artifactId>
-                    <version>3.0.1</version>
+                    <version>3.0.2</version>
+                    <dependencies>
+                        <dependency>
+                            <groupId>org.datanucleus</groupId>
+                            <artifactId>datanucleus-core</artifactId>
+                            <version>3.0.10</version>
+                        </dependency>
+                    </dependencies>
                     <configuration>
                         <fork>false</fork>
                         <log4jConfiguration>${basedir}/src/main/resources/log4j.properties</log4jConfiguration>
