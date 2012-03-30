@@ -45,9 +45,9 @@ public class Execution implements Comparable<Execution> {
             final Configuration configuration, final String... goals) {
         Validate.notNull(id, "execution id must be specified");
         Validate.notNull(phase, "execution phase must be specified");
-        Validate.notEmpty(goals, "at least one goal must be specified");
         this.configuration = configuration;
-        this.goals = Collections.unmodifiableList(Arrays.asList(goals));
+        this.goals = goals == null ? Collections.<String> emptyList()
+                : Collections.unmodifiableList(Arrays.asList(goals));
         this.id = id.trim();
         this.phase = phase.trim();
     }
