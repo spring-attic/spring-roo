@@ -10,6 +10,7 @@ import java.util.Date;
 import java.util.Properties;
 import java.util.Set;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -28,7 +29,6 @@ import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.DomUtils;
-import org.apache.commons.io.IOUtils;
 import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
@@ -120,10 +120,11 @@ public class SolrOperationsImpl implements SolrOperations {
                 root.setAttribute(
                         "xsi:schemaLocation",
                         root.getAttribute("xsi:schemaLocation")
-                                + "  http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-3.1.xsd");
+                                + "  http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-3.0.xsd");
             }
             root.appendChild(new XmlElementBuilder("task:annotation-driven",
-                    appCtx).addAttribute("executor", "asyncExecutor").build());
+                    appCtx).addAttribute("executor", "asyncExecutor")
+                    .addAttribute("mode", "aspectj").build());
             root.appendChild(new XmlElementBuilder("task:executor", appCtx)
                     .addAttribute("id", "asyncExecutor")
                     .addAttribute("pool-size", "${executor.poolSize}").build());

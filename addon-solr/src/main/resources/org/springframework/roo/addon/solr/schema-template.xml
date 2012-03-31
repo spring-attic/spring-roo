@@ -40,7 +40,6 @@
          All other components are mandatory.
       -->
     <fieldType name="date" class="solr.TrieDateField" omitNorms="true" precisionStep="0" positionIncrementGap="0"/>
-
     <fieldType name="text" class="solr.TextField" positionIncrementGap="100">
       <analyzer type="index">
         <tokenizer class="solr.WhitespaceTokenizerFactory"/>
@@ -67,13 +66,8 @@
       </analyzer>
     </fieldType>
  </types>
-
-
  <fields>
-   
  </fields>
-
-
  <!-- SolrQueryParser configuration: defaultOperator="AND|OR" -->
  <solrQueryParser defaultOperator="OR"/>
 </schema>
