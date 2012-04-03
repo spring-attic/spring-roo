@@ -20,6 +20,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -194,8 +195,9 @@ public class PgpServiceImpl implements PgpService {
             return result;
         }
         catch (final Exception e) {
-            throw new IllegalArgumentException("Unable to get trusted keys",
-                    ExceptionUtils.getRootCause(e));
+            throw new IllegalArgumentException(
+                    "Unable to get trusted keys",
+                    ObjectUtils.defaultIfNull(ExceptionUtils.getRootCause(e), e));
         }
         finally {
             IOUtils.closeQuietly(fis);

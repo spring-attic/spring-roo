@@ -3,6 +3,7 @@ package org.springframework.roo.process.manager.internal;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -295,8 +296,9 @@ public class DefaultProcessManager extends
                 else {
                     fileMonitorService.scanAll();
                 }
-                undoManager.flush(); // In case something else happened as a
-                                     // result of event notifications above
+                // In case something else happened as a result of event
+                // notifications above
+                undoManager.flush();
             }
 
             // It all seems to have worked, so clear the undo history
@@ -325,10 +327,8 @@ public class DefaultProcessManager extends
     }
 
     private void logException(final Throwable t) {
-        Throwable root = ExceptionUtils.getRootCause(t);
-        if (root == null) {
-            root = t;
-        }
+        final Throwable root = ObjectUtils.defaultIfNull(
+                ExceptionUtils.getRootCause(t), t);
         if (developmentMode) {
             LOGGER.log(Level.FINE, root.getMessage(), root);
         }

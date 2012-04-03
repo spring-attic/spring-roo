@@ -1,5 +1,6 @@
 package org.springframework.roo.process.manager;
 
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.felix.scr.annotations.Component;
@@ -48,8 +49,8 @@ public class ProcessManagerHostedExecutionStrategy implements ExecutionStrategy 
                                 parseResult.getArguments());
                     }
                     catch (Exception e) {
-                        throw new RuntimeException(ExceptionUtils
-                                .getRootCause(e));
+                        throw new RuntimeException(ObjectUtils.defaultIfNull(
+                                ExceptionUtils.getRootCause(e), e));
                     }
                 }
             });

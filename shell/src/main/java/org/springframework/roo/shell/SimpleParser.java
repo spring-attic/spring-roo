@@ -1253,7 +1253,8 @@ public class SimpleParser implements Parser {
                         .getRemainingBuffer());
             }
             catch (final IllegalArgumentException e) {
-                LOGGER.warning(ExceptionUtils.getRootCauseMessage(e));
+                LOGGER.warning(StringUtils.defaultIfBlank(
+                        ExceptionUtils.getRootCauseMessage(e), e.getMessage()));
                 return null;
             }
 
