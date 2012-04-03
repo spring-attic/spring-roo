@@ -49,7 +49,8 @@ public class TailorParser {
      * @param tailor element
      * @return tailor configurations
      */
-    public static TailorConfiguration parseTailorConfiguration(final Element elTailor) {
+    public static TailorConfiguration parseTailorConfiguration(
+            final Element elTailor) {
 
         if (StringUtils.isBlank(elTailor.getAttribute("name"))) {
             logTailorXMLInvalid("<tailor> must have a name attribute");
@@ -67,7 +68,8 @@ public class TailorParser {
             result.setActive(isActive);
         }
 
-        final List<Element> elConfigs = XmlUtils.findElements("config", elTailor);
+        final List<Element> elConfigs = XmlUtils.findElements("config",
+                elTailor);
         if (elConfigs.isEmpty()) {
             logTailorXMLInvalid("<tailor> must have <config> child elements");
             return null;
@@ -82,7 +84,8 @@ public class TailorParser {
 
             final CommandConfiguration newCmdConfig = new CommandConfiguration();
             newCmdConfig.setCommandName(command);
-            final List<Element> elActions = XmlUtils.findElements("action", elConfig);
+            final List<Element> elActions = XmlUtils.findElements("action",
+                    elConfig);
             for (final Element elAction : elActions) {
                 // Determine the action type
                 if (StringUtils.isBlank(elAction.getAttribute("type"))) {

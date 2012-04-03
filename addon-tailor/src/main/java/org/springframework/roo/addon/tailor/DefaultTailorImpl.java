@@ -48,7 +48,8 @@ public class DefaultTailorImpl implements Tailor {
         }
         try {
             // validate if it is commented
-            final CommentedLine comment = new CommentedLine(command, inBlockComment);
+            final CommentedLine comment = new CommentedLine(command,
+                    inBlockComment);
             TailorHelper.removeComment(comment);
             inBlockComment = comment.getInBlockComment();
             command = comment.getLine();
@@ -106,8 +107,8 @@ public class DefaultTailorImpl implements Tailor {
                 "Tailor: detected " + commandTrafo.getInputCommand());
 
         for (final ActionConfig config : commandConfig.getActions()) {
-            final Action component = actionLocator
-                    .getAction(config.getActionTypeId());
+            final Action component = actionLocator.getAction(config
+                    .getActionTypeId());
             if (component != null) {
                 logInDevelopmentMode(Level.INFO,
                         "\tTailoring: " + component.getDescription(config));

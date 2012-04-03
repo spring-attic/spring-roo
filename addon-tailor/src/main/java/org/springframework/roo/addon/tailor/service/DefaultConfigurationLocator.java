@@ -67,7 +67,8 @@ public class DefaultConfigurationLocator implements ConfigurationLocator {
     }
 
     protected void bindConfig(final TailorConfigurationFactory factory) {
-        final List<TailorConfiguration> configs = factory.createTailorConfiguration();
+        final List<TailorConfiguration> configs = factory
+                .createTailorConfiguration();
         if (CollectionUtils.isEmpty(configs)) {
             return;
         }
@@ -87,7 +88,8 @@ public class DefaultConfigurationLocator implements ConfigurationLocator {
     protected void unbindConfig(final TailorConfigurationFactory factory) {
         // TODO It's a little unelegant to call "create" method here again, but
         // we need the name...
-        final List<TailorConfiguration> configs = factory.createTailorConfiguration();
+        final List<TailorConfiguration> configs = factory
+                .createTailorConfiguration();
         if (CollectionUtils.isEmpty(configs)) {
             return;
         }

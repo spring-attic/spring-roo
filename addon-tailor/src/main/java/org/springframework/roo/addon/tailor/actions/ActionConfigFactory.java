@@ -36,12 +36,14 @@ public class ActionConfigFactory {
      * @return new ActionConfig
      */
     public static ActionConfig executeAction() {
-        final ActionConfig config = new ActionConfig(ActionType.EXECUTE.getActionId());
+        final ActionConfig config = new ActionConfig(
+                ActionType.EXECUTE.getActionId());
         return config;
     }
 
     public static ActionConfig executeAction(final String command) {
-        final ActionConfig config = new ActionConfig(ActionType.EXECUTE.getActionId());
+        final ActionConfig config = new ActionConfig(
+                ActionType.EXECUTE.getActionId());
         config.setCommand(command);
         return config;
     }
@@ -50,7 +52,8 @@ public class ActionConfigFactory {
      * @see Focus
      */
     public static ActionConfig focusModuleAction(final String module) {
-        final ActionConfig config = new ActionConfig(ActionType.FOCUS.getActionId());
+        final ActionConfig config = new ActionConfig(
+                ActionType.FOCUS.getActionId());
         config.setModule(module);
         return config;
     }

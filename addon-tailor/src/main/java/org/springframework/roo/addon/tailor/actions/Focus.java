@@ -34,7 +34,8 @@ public class Focus extends AbstractAction {
     private final String baseCommand = "module focus --moduleName ";
 
     @Override
-    public void executeImpl(final CommandTransformation trafo, final ActionConfig config) {
+    public void executeImpl(final CommandTransformation trafo,
+            final ActionConfig config) {
         if ("~".equals(config.getModule())) {
             trafo.addOutputCommand(baseCommand, "~");
             return;

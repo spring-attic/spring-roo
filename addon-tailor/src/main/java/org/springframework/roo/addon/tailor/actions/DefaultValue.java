@@ -16,7 +16,8 @@ import org.springframework.roo.addon.tailor.CommandTransformation;
 public class DefaultValue extends AbstractAction {
 
     @Override
-    public void executeImpl(final CommandTransformation arg, final ActionConfig config) {
+    public void executeImpl(final CommandTransformation arg,
+            final ActionConfig config) {
         // Allow argument name with and without "--" in config
         String argumentName = config.getArgument();
         if (argumentName.startsWith("--")) {

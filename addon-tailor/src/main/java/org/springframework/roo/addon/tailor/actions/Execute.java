@@ -22,10 +22,12 @@ public class Execute extends AbstractAction {
     public static final String ACTIONATTR_REMOVEARGS = "exclude";
 
     @Override
-    public void executeImpl(final CommandTransformation trafo, final ActionConfig config) {
+    public void executeImpl(final CommandTransformation trafo,
+            final ActionConfig config) {
         if (StringUtils.isBlank(config.getCommand())) {
             // If no command specified, this will execute the original command
-            final String processedCommand = removeArgumentsFromInputCmd(trafo, config);
+            final String processedCommand = removeArgumentsFromInputCmd(trafo,
+                    config);
             trafo.addOutputCommand(processedCommand);
         }
         else {
@@ -57,8 +59,8 @@ public class Execute extends AbstractAction {
      * @param config Action configuration
      * @return Processed input command
      */
-    private String removeArgumentsFromInputCmd(final CommandTransformation trafo,
-            final ActionConfig config) {
+    private String removeArgumentsFromInputCmd(
+            final CommandTransformation trafo, final ActionConfig config) {
         final String removeArgumentsAttribute = config
                 .getAttribute(ACTIONATTR_REMOVEARGS);
         if (StringUtils.isBlank(removeArgumentsAttribute)) {
@@ -67,7 +69,8 @@ public class Execute extends AbstractAction {
 
         String inputCommandString = trafo.getInputCommand();
 
-        final String[] removeArgumentsList = removeArgumentsAttribute.split(",");
+        final String[] removeArgumentsList = removeArgumentsAttribute
+                .split(",");
         for (final String element : removeArgumentsList) {
             String argToRemove = element;
 
@@ -76,7 +79,8 @@ public class Execute extends AbstractAction {
             }
 
             final Map<String, String> cmdArguments = trafo.getArguments();
-            final Iterator<String> keyIterator = cmdArguments.keySet().iterator();
+            final Iterator<String> keyIterator = cmdArguments.keySet()
+                    .iterator();
             while (keyIterator.hasNext()) {
                 final String argName = keyIterator.next();
                 if (argName.equals(argToRemove)) {

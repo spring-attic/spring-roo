@@ -20,10 +20,11 @@ public abstract class AbstractAction implements Action {
     /**
      * {@inheritDoc}
      */
-    public void execute(final CommandTransformation command, final ActionConfig config) {
+    public void execute(final CommandTransformation command,
+            final ActionConfig config) {
         if (isValid(config)) {
-            final ActionConfig processedConfig = processConfigAttributes(command,
-                    config);
+            final ActionConfig processedConfig = processConfigAttributes(
+                    command, config);
             executeImpl(command, processedConfig);
         }
         else {
@@ -37,8 +38,8 @@ public abstract class AbstractAction implements Action {
     protected abstract void executeImpl(CommandTransformation command,
             ActionConfig config);
 
-    private ActionConfig processConfigAttributes(final CommandTransformation command,
-            final ActionConfig config) {
+    private ActionConfig processConfigAttributes(
+            final CommandTransformation command, final ActionConfig config) {
         // Process variables in config
         final ActionConfig processedConfig = new ActionConfig(
                 config.getActionTypeId());

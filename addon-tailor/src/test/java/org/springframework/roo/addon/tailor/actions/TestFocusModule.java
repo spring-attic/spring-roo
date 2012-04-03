@@ -24,7 +24,8 @@ public class TestFocusModule {
     public void testList() {
 
         final Focus action = createTestActionObject();
-        final ActionConfig config = ActionConfigFactory.focusModuleAction("data,it");
+        final ActionConfig config = ActionConfigFactory
+                .focusModuleAction("data,it");
         final CommandTransformation trafo = new CommandTransformation(
                 "command not relevant for this test");
         action.execute(trafo, config);
@@ -54,7 +55,8 @@ public class TestFocusModule {
         final Focus action = new Focus();
         action.projectOperations = new MockProjectOperationsEmpty();
 
-        final ActionConfig config = ActionConfigFactory.focusModuleAction("domain");
+        final ActionConfig config = ActionConfigFactory
+                .focusModuleAction("domain");
         final CommandTransformation trafo = new CommandTransformation(
                 "command not relevant for this test");
 
@@ -71,7 +73,8 @@ public class TestFocusModule {
     @Test
     public void testStandard() {
         final Focus action = createTestActionObject();
-        final ActionConfig config = ActionConfigFactory.focusModuleAction("domain");
+        final ActionConfig config = ActionConfigFactory
+                .focusModuleAction("domain");
         final CommandTransformation trafo = new CommandTransformation(
                 "command not relevant for this test");
         action.execute(trafo, config);

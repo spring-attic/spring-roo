@@ -47,7 +47,8 @@ public class TailorConfiguration {
      * @return CommandConfiguration for the command in this TailorConfiguration;
      *         null if no configuration present for the command
      */
-    public CommandConfiguration getCommandConfigFor(final String fullCommandString) {
+    public CommandConfiguration getCommandConfigFor(
+            final String fullCommandString) {
         for (final CommandConfiguration config : commandConfigs) {
             if (fullCommandString.startsWith(config.getCommandName())) {
                 return config;
