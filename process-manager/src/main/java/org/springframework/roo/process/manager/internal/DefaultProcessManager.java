@@ -3,6 +3,7 @@ package org.springframework.roo.process.manager.internal;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.felix.scr.annotations.Component;
@@ -40,176 +41,12 @@ public class DefaultProcessManager extends
 
     private boolean developmentMode = false;
     @Reference private FileMonitorService fileMonitorService;
-    private long lastPollDuration = 0; // How many ms the last poll actually
-    // minimum between each poll
-    // (negative denotes
-    // auto-scaling; 0 = never)
+    private long lastPollDuration = 0;
     private long lastPollTime = 0; // What time the last poll was completed
     private long minimumDelayBetweenPoll = -1; // How many ms must pass at
     @Reference private StartLevel startLevel;
     @Reference private UndoManager undoManager;
-    // took
-    private String workingDir; // The working directory of the current roo
-                               // project
-
-    protected void activate(final ComponentContext context) {
-        workingDir = OSGiUtils.getRooWorkingDirectory(context);
-        context.getBundleContext().addFrameworkListener(
-                new FrameworkListener() {
-                    public void frameworkEvent(final FrameworkEvent event) {
-                        if (startLevel.getStartLevel() >= 99) {
-                            // We check we haven't already started, as this
-                            // event listener will be called several times at SL
-                            // >= 99
-                            if (getProcessManagerStatus() == ProcessManagerStatus.STARTING) {
-                                // A proper synchronized process manager status
-                                // check will take place in the
-                                // completeStartup() method
-                                completeStartup();
-                            }
-                        }
-                    }
-                });
-
-        // Now start a thread that will undertake a background poll every second
-        final Thread t = new Thread(new Runnable() {
-            public void run() {
-                // Unsynchronized lookup of terminated status to avoid anything
-                // blocking the termination of the thread
-                while (getProcessManagerStatus() != ProcessManagerStatus.TERMINATED) {
-                    // We only bother doing a poll if we seem to be available (a
-                    // proper synchronized check happens later)
-                    if (getProcessManagerStatus() == ProcessManagerStatus.AVAILABLE) {
-                        timerBasedPoll();
-                    }
-                    try {
-                        Thread.sleep(1000);
-                    }
-                    catch (final InterruptedException ignoreAndContinue) {
-                    }
-                }
-            }
-        }, "Spring Roo Process Manager Background Polling Thread");
-        t.start();
-    }
-
-    private boolean backgroundPoll() {
-        // Quickly determine if another thread is running; we don't need to sit
-        // around and wait (we'll get called again in a few hundred milliseconds
-        // anyway)
-        if (getProcessManagerStatus() != ProcessManagerStatus.AVAILABLE) {
-            return false;
-        }
-        synchronized (processManagerStatus) {
-            // Do the check again, now this thread has a lock on
-            // processManagerStatus
-            if (getProcessManagerStatus() != ProcessManagerStatus.AVAILABLE) {
-                throw new IllegalStateException(
-                        "Process manager status "
-                                + getProcessManagerStatus()
-                                + " but background thread acquired synchronization lock");
-            }
-
-            setProcessManagerStatus(ProcessManagerStatus.BUSY_POLLING);
-
-            try {
-                doTransactionally(null);
-            }
-            catch (final Throwable t) {
-                // We don't want a poll failure to cause the background polling
-                // thread to die
-                logException(t);
-            }
-            finally {
-                setProcessManagerStatus(ProcessManagerStatus.AVAILABLE);
-            }
-        }
-        return true;
-    }
-
-    private void completeStartup() {
-        synchronized (processManagerStatus) {
-            if (getProcessManagerStatus() != ProcessManagerStatus.STARTING) {
-                throw new IllegalStateException("Process manager status "
-                        + getProcessManagerStatus() + " but should be STARTING");
-            }
-            setProcessManagerStatus(ProcessManagerStatus.COMPLETING_STARTUP);
-            try {
-                // Register the initial monitoring request
-                doTransactionally(new MonitoringRequestCommand(
-                        fileMonitorService,
-                        MonitoringRequest
-                                .getInitialSubTreeMonitoringRequest(workingDir),
-                        true));
-            }
-            catch (final Throwable t) {
-                logException(t);
-            }
-            finally {
-                setProcessManagerStatus(ProcessManagerStatus.AVAILABLE);
-            }
-        }
-    }
-
-    protected void deactivate(final ComponentContext context) {
-        // We have lost a required component (eg UndoManager; ROO-1037)
-        terminate(); // Safe to call even if we'd terminated earlier
-    }
-
-    private <T> T doTransactionally(final CommandCallback<T> callback) {
-        T result = null;
-        try {
-            ActiveProcessManager.setActiveProcessManager(this);
-
-            // Run the requested operation
-            if (callback == null) {
-                fileMonitorService.scanAll();
-            }
-            else {
-                result = callback.callback();
-            }
-
-            // Flush the undo manager so that any changes it has been holding
-            // are written to disk and the file monitor service
-            undoManager.flush();
-
-            // Guarantee scans repeat until there are no more changes detected
-            while (fileMonitorService.isDirty()) {
-                if (fileMonitorService instanceof NotifiableFileMonitorService) {
-                    ((NotifiableFileMonitorService) fileMonitorService)
-                            .scanNotified();
-                }
-                else {
-                    fileMonitorService.scanAll();
-                }
-                undoManager.flush(); // In case something else happened as a
-                                     // result of event notifications above
-            }
-
-            // It all seems to have worked, so clear the undo history
-            setProcessManagerStatus(ProcessManagerStatus.RESETTING_UNDOS);
-
-            undoManager.reset();
-
-        }
-        catch (final RuntimeException e) {
-            // Something went wrong, so attempt to undo
-            try {
-                setProcessManagerStatus(ProcessManagerStatus.UNDOING);
-                throw e;
-            }
-            finally {
-                undoManager.undo();
-            }
-        }
-        finally {
-            // TODO: Review in consultation with Christian as STS is clearing
-            // active process manager itself
-            // ActiveProcessManager.clearActiveProcessManager();
-        }
-
-        return result;
-    }
+    private String workingDir;
 
     public <T> T execute(final CommandCallback<T> callback) {
         Validate.notNull(callback, "Callback required");
@@ -253,27 +90,6 @@ public class DefaultProcessManager extends
 
     public boolean isDevelopmentMode() {
         return developmentMode;
-    }
-
-    private void logException(final Throwable t) {
-        final Throwable root = ExceptionUtils.getRootCause(t);
-        if (developmentMode) {
-            LOGGER.log(Level.FINE, root.getMessage(), root);
-        }
-        else {
-            String message = root.getMessage();
-            if (message == null || "".equals(message)) {
-                final StackTraceElement[] trace = root.getStackTrace();
-                if (trace != null && trace.length > 0) {
-                    message = root.getClass().getSimpleName() + " at "
-                            + trace[0].toString();
-                }
-                else {
-                    message = root.getClass().getSimpleName();
-                }
-            }
-            LOGGER.log(Level.FINE, message);
-        }
     }
 
     public void setDevelopmentMode(final boolean developmentMode) {
@@ -346,6 +162,189 @@ public class DefaultProcessManager extends
         }
         catch (final Throwable t) {
             LOGGER.log(Level.SEVERE, t.getMessage(), t);
+        }
+    }
+
+    protected void activate(final ComponentContext context) {
+        workingDir = OSGiUtils.getRooWorkingDirectory(context);
+        context.getBundleContext().addFrameworkListener(
+                new FrameworkListener() {
+                    public void frameworkEvent(final FrameworkEvent event) {
+                        if (startLevel.getStartLevel() >= 99) {
+                            // We check we haven't already started, as this
+                            // event listener will be called several times at SL
+                            // >= 99
+                            if (getProcessManagerStatus() == ProcessManagerStatus.STARTING) {
+                                // A proper synchronized process manager status
+                                // check will take place in the
+                                // completeStartup() method
+                                completeStartup();
+                            }
+                        }
+                    }
+                });
+
+        // Now start a thread that will undertake a background poll every second
+        final Thread t = new Thread(new Runnable() {
+            public void run() {
+                // Unsynchronized lookup of terminated status to avoid anything
+                // blocking the termination of the thread
+                while (getProcessManagerStatus() != ProcessManagerStatus.TERMINATED) {
+                    // We only bother doing a poll if we seem to be available (a
+                    // proper synchronized check happens later)
+                    if (getProcessManagerStatus() == ProcessManagerStatus.AVAILABLE) {
+                        timerBasedPoll();
+                    }
+                    try {
+                        Thread.sleep(1000);
+                    }
+                    catch (final InterruptedException ignoreAndContinue) {
+                    }
+                }
+            }
+        }, "Spring Roo Process Manager Background Polling Thread");
+        t.start();
+    }
+
+    protected void deactivate(final ComponentContext context) {
+        // We have lost a required component (eg UndoManager; ROO-1037)
+        terminate(); // Safe to call even if we'd terminated earlier
+    }
+
+    private boolean backgroundPoll() {
+        // Quickly determine if another thread is running; we don't need to sit
+        // around and wait (we'll get called again in a few hundred milliseconds
+        // anyway)
+        if (getProcessManagerStatus() != ProcessManagerStatus.AVAILABLE) {
+            return false;
+        }
+        synchronized (processManagerStatus) {
+            // Do the check again, now this thread has a lock on
+            // processManagerStatus
+            if (getProcessManagerStatus() != ProcessManagerStatus.AVAILABLE) {
+                throw new IllegalStateException(
+                        "Process manager status "
+                                + getProcessManagerStatus()
+                                + " but background thread acquired synchronization lock");
+            }
+
+            setProcessManagerStatus(ProcessManagerStatus.BUSY_POLLING);
+
+            try {
+                doTransactionally(null);
+            }
+            catch (final Throwable t) {
+                // We don't want a poll failure to cause the background polling
+                // thread to die
+                logException(t);
+            }
+            finally {
+                setProcessManagerStatus(ProcessManagerStatus.AVAILABLE);
+            }
+        }
+        return true;
+    }
+
+    private void completeStartup() {
+        synchronized (processManagerStatus) {
+            if (getProcessManagerStatus() != ProcessManagerStatus.STARTING) {
+                throw new IllegalStateException("Process manager status "
+                        + getProcessManagerStatus() + " but should be STARTING");
+            }
+            setProcessManagerStatus(ProcessManagerStatus.COMPLETING_STARTUP);
+            try {
+                // Register the initial monitoring request
+                doTransactionally(new MonitoringRequestCommand(
+                        fileMonitorService,
+                        MonitoringRequest
+                                .getInitialSubTreeMonitoringRequest(workingDir),
+                        true));
+            }
+            catch (final Throwable t) {
+                logException(t);
+            }
+            finally {
+                setProcessManagerStatus(ProcessManagerStatus.AVAILABLE);
+            }
+        }
+    }
+
+    private <T> T doTransactionally(final CommandCallback<T> callback) {
+        T result = null;
+        try {
+            ActiveProcessManager.setActiveProcessManager(this);
+
+            // Run the requested operation
+            if (callback == null) {
+                fileMonitorService.scanAll();
+            }
+            else {
+                result = callback.callback();
+            }
+
+            // Flush the undo manager so that any changes it has been holding
+            // are written to disk and the file monitor service
+            undoManager.flush();
+
+            // Guarantee scans repeat until there are no more changes detected
+            while (fileMonitorService.isDirty()) {
+                if (fileMonitorService instanceof NotifiableFileMonitorService) {
+                    ((NotifiableFileMonitorService) fileMonitorService)
+                            .scanNotified();
+                }
+                else {
+                    fileMonitorService.scanAll();
+                }
+                undoManager.flush(); // In case something else happened as a
+                                     // result of event notifications above
+            }
+
+            // It all seems to have worked, so clear the undo history
+            setProcessManagerStatus(ProcessManagerStatus.RESETTING_UNDOS);
+
+            undoManager.reset();
+
+        }
+        catch (final RuntimeException e) {
+            // Something went wrong, so attempt to undo
+            try {
+                setProcessManagerStatus(ProcessManagerStatus.UNDOING);
+                throw e;
+            }
+            finally {
+                undoManager.undo();
+            }
+        }
+        finally {
+            // TODO: Review in consultation with Christian as STS is clearing
+            // active process manager itself
+            // ActiveProcessManager.clearActiveProcessManager();
+        }
+
+        return result;
+    }
+
+    private void logException(final Throwable t) {
+        Throwable root = ExceptionUtils.getRootCause(t);
+        if (root == null) {
+            root = t;
+        }
+        if (developmentMode) {
+            LOGGER.log(Level.FINE, root.getMessage(), root);
+        }
+        else {
+            String message = root.getMessage();
+            if (StringUtils.isBlank(message)) {
+                final StackTraceElement[] trace = root.getStackTrace();
+                if (trace != null && trace.length > 0) {
+                    message = root.getClass().getSimpleName() + " at "
+                            + trace[0].toString();
+                }
+                else {
+                    message = root.getClass().getSimpleName();
+                }
+            }
+            LOGGER.log(Level.FINE, message);
         }
     }
 }
