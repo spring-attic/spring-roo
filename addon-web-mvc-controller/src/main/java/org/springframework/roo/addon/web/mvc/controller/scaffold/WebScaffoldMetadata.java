@@ -86,31 +86,6 @@ public class WebScaffoldMetadata extends
     private static final String PROVIDES_TYPE = MetadataIdentificationUtils
             .create(PROVIDES_TYPE_STRING);
 
-    public static String createIdentifier(final JavaType javaType,
-            final LogicalPath path) {
-        return PhysicalTypeIdentifierNamingUtils.createIdentifier(
-                PROVIDES_TYPE_STRING, javaType, path);
-    }
-
-    public static JavaType getJavaType(final String metadataIdentificationString) {
-        return PhysicalTypeIdentifierNamingUtils.getJavaType(
-                PROVIDES_TYPE_STRING, metadataIdentificationString);
-    }
-
-    public static String getMetadataIdentiferType() {
-        return PROVIDES_TYPE;
-    }
-
-    public static LogicalPath getPath(final String metadataIdentificationString) {
-        return PhysicalTypeIdentifierNamingUtils.getPath(PROVIDES_TYPE_STRING,
-                metadataIdentificationString);
-    }
-
-    public static boolean isValid(final String metadataIdentificationString) {
-        return PhysicalTypeIdentifierNamingUtils.isValid(PROVIDES_TYPE_STRING,
-                metadataIdentificationString);
-    }
-
     private WebScaffoldAnnotationValues annotationValues;
     private boolean compositePk;
     private String controllerPath;
@@ -241,8 +216,45 @@ public class WebScaffoldMetadata extends
         itdTypeDetails = builder.build();
     }
 
+    public static String createIdentifier(final JavaType javaType,
+            final LogicalPath path) {
+        return PhysicalTypeIdentifierNamingUtils.createIdentifier(
+                PROVIDES_TYPE_STRING, javaType, path);
+    }
+
+    public static JavaType getJavaType(final String metadataIdentificationString) {
+        return PhysicalTypeIdentifierNamingUtils.getJavaType(
+                PROVIDES_TYPE_STRING, metadataIdentificationString);
+    }
+
+    public static String getMetadataIdentiferType() {
+        return PROVIDES_TYPE;
+    }
+
+    public static LogicalPath getPath(final String metadataIdentificationString) {
+        return PhysicalTypeIdentifierNamingUtils.getPath(PROVIDES_TYPE_STRING,
+                metadataIdentificationString);
+    }
+
+    public static boolean isValid(final String metadataIdentificationString) {
+        return PhysicalTypeIdentifierNamingUtils.isValid(PROVIDES_TYPE_STRING,
+                metadataIdentificationString);
+    }
+
     public WebScaffoldAnnotationValues getAnnotationValues() {
         return annotationValues;
+    }
+
+    @Override
+    public String toString() {
+        final ToStringBuilder builder = new ToStringBuilder(this);
+        builder.append("identifier", getId());
+        builder.append("valid", valid);
+        builder.append("aspectName", aspectName);
+        builder.append("destinationType", destination);
+        builder.append("governor", governorPhysicalTypeMetadata.getId());
+        builder.append("itdTypeDetails", itdTypeDetails);
+        return builder.toString();
     }
 
     private ConstructorMetadataBuilder getConstructor() {
@@ -878,17 +890,5 @@ public class WebScaffoldMetadata extends
                 parameterNames, bodyBuilder);
         methodBuilder.setAnnotations(annotations);
         return methodBuilder;
-    }
-
-    @Override
-    public String toString() {
-        final ToStringBuilder builder = new ToStringBuilder(this);
-        builder.append("identifier", getId());
-        builder.append("valid", valid);
-        builder.append("aspectName", aspectName);
-        builder.append("destinationType", destination);
-        builder.append("governor", governorPhysicalTypeMetadata.getId());
-        builder.append("itdTypeDetails", itdTypeDetails);
-        return builder.toString();
     }
 }

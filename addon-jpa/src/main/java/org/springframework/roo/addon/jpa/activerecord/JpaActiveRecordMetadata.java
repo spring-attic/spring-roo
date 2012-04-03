@@ -79,9 +79,7 @@ public class JpaActiveRecordMetadata extends
     }
 
     private JpaCrudAnnotationValues crudAnnotationValues;
-
     private MethodMetadata entityManagerMethod;
-
     private String entityName;
     private MethodMetadata findMethod;
     private FieldMetadata identifierField;
