@@ -95,41 +95,11 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
             .create(PROVIDES_TYPE_STRING);
     private static final String VALUE = "value";
 
-    public static String createIdentifier(final JavaType javaType,
-            final LogicalPath path) {
-        return PhysicalTypeIdentifierNamingUtils.createIdentifier(
-                PROVIDES_TYPE_STRING, javaType, path);
-    }
-
-    public static JavaType getJavaType(final String metadataIdentificationString) {
-        return PhysicalTypeIdentifierNamingUtils.getJavaType(
-                PROVIDES_TYPE_STRING, metadataIdentificationString);
-    }
-
-    public static String getMetadataIdentiferType() {
-        return PROVIDES_TYPE;
-    }
-
-    public static LogicalPath getPath(final String metadataIdentificationString) {
-        return PhysicalTypeIdentifierNamingUtils.getPath(PROVIDES_TYPE_STRING,
-                metadataIdentificationString);
-    }
-
-    public static boolean isValid(final String metadataIdentificationString) {
-        return PhysicalTypeIdentifierNamingUtils.isValid(PROVIDES_TYPE_STRING,
-                metadataIdentificationString);
-    }
-
     private DbManagedAnnotationValues annotationValues;
-
     private Database database;
-
     private IdentifierHolder identifierHolder;
-
     private Iterable<ClassOrInterfaceTypeDetails> managedEntities;
-
     private ClassOrInterfaceTypeDetailsBuilder updatedGovernorBuilder;
-
     private FieldMetadata versionField;
 
     public DbreMetadata(final String identifier, final JavaType aspectName,
@@ -140,8 +110,10 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
             final Iterable<ClassOrInterfaceTypeDetails> managedEntities,
             final Database database) {
         super(identifier, aspectName, governorPhysicalTypeMetadata);
-        Validate.isTrue(isValid(identifier), "Metadata identification string '"
-                + identifier + "' does not appear to be a valid");
+        Validate.isTrue(
+                isValid(identifier),
+                "Metadata identification string '%s' does not appear to be a valid",
+                identifier);
         Validate.notNull(annotationValues, "Annotation values required");
         Validate.notNull(identifierHolder, "Identifier holder required");
         Validate.notNull(managedEntities, "Managed entities required");
@@ -181,6 +153,40 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
         // Create a representation of the desired output ITD
         itdTypeDetails = builder.build();
+    }
+
+    public static String createIdentifier(final JavaType javaType,
+            final LogicalPath path) {
+        return PhysicalTypeIdentifierNamingUtils.createIdentifier(
+                PROVIDES_TYPE_STRING, javaType, path);
+    }
+
+    public static JavaType getJavaType(final String metadataIdentificationString) {
+        return PhysicalTypeIdentifierNamingUtils.getJavaType(
+                PROVIDES_TYPE_STRING, metadataIdentificationString);
+    }
+
+    public static String getMetadataIdentiferType() {
+        return PROVIDES_TYPE;
+    }
+
+    public static LogicalPath getPath(final String metadataIdentificationString) {
+        return PhysicalTypeIdentifierNamingUtils.getPath(PROVIDES_TYPE_STRING,
+                metadataIdentificationString);
+    }
+
+    public static boolean isValid(final String metadataIdentificationString) {
+        return PhysicalTypeIdentifierNamingUtils.isValid(PROVIDES_TYPE_STRING,
+                metadataIdentificationString);
+    }
+
+    public ClassOrInterfaceTypeDetails getUpdatedGovernor() {
+        return updatedGovernorBuilder == null ? null : updatedGovernorBuilder
+                .build();
+    }
+
+    public boolean isAutomaticallyDelete() {
+        return annotationValues.isAutomaticallyDelete();
     }
 
     private void addCascadeType(
@@ -375,10 +381,11 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
                     .getSchema().getName();
             final Table foreignTable = database.getTable(foreignTableName,
                     foreignSchemaName);
-            Validate.notNull(foreignTable, "Related table '"
-                    + exportedKeyForeignTable.getFullyQualifiedTableName()
-                    + "' could not be found but was referenced by table '"
-                    + table.getFullyQualifiedTableName() + "'");
+            Validate.notNull(
+                    foreignTable,
+                    "Related table '%s' could not be found but was referenced by table '%s'",
+                    exportedKeyForeignTable.getFullyQualifiedTableName(),
+                    table.getFullyQualifiedTableName() + "'");
 
             if (isOneToOne(foreignTable,
                     foreignTable.getImportedKey(exportedKey.getName()))) {
@@ -568,7 +575,6 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
                 fieldName = governorTypeDetails.getUniqueFieldName(fieldName
                         .getSymbolName());
             }
-
             final FieldMetadataBuilder fieldBuilder = getField(fieldName,
                     column, table.getName(),
                     table.isIncludeNonPortableAttributes());
@@ -585,21 +591,20 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
     }
 
     private void addToBuilder(final FieldMetadataBuilder fieldBuilder) {
-        if (fieldBuilder == null
-                || hasField(fieldBuilder.getFieldName(),
-                        fieldBuilder.buildAnnotations())) {
+        final JavaSymbolName fieldName = fieldBuilder.getFieldName();
+        if (hasField(fieldName, fieldBuilder.buildAnnotations())
+                || hasFieldInItd(fieldName)) {
             return;
         }
 
         builder.addField(fieldBuilder);
 
         // Check for an existing accessor in the governor
-        builder.addMethod(getAccessorMethod(fieldBuilder.getFieldName(),
-                fieldBuilder.getFieldType()));
+        final JavaType fieldType = fieldBuilder.getFieldType();
+        builder.addMethod(getAccessorMethod(fieldName, fieldType));
 
         // Check for an existing mutator in the governor
-        builder.addMethod(getMutatorMethod(fieldBuilder.getFieldName(),
-                fieldBuilder.getFieldType()));
+        builder.addMethod(getMutatorMethod(fieldName, fieldType));
     }
 
     private void excludeFieldsInToStringAnnotation(final String fieldName) {
@@ -1000,11 +1005,6 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
                 fieldName, fieldType);
     }
 
-    public ClassOrInterfaceTypeDetails getUpdatedGovernor() {
-        return updatedGovernorBuilder == null ? null : updatedGovernorBuilder
-                .build();
-    }
-
     private boolean hasField(final JavaSymbolName fieldName,
             final List<AnnotationMetadata> annotations) {
         // Check governor for field
@@ -1057,10 +1057,6 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
             }
         }
         return false;
-    }
-
-    public boolean isAutomaticallyDelete() {
-        return annotationValues.isAutomaticallyDelete();
     }
 
     private boolean isCompositeKeyColumn(final Column column) {
