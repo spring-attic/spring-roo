@@ -89,7 +89,8 @@ public class JspViewManager {
         this.webScaffoldAnnotationValues = webScaffoldAnnotationValues;
         formBackingType = webScaffoldAnnotationValues.getFormBackingObject();
         this.relatedDomainTypes = relatedDomainTypes;
-        entityName = uncapitalize(formBackingType.getSimpleTypeName());
+        entityName = JavaSymbolName.getReservedWordSafeName(formBackingType)
+                .getSymbolName();
         formBackingTypeMetadata = relatedDomainTypes.get(formBackingType);
         Validate.notNull(formBackingTypeMetadata,
                 "Form backing type metadata required");
