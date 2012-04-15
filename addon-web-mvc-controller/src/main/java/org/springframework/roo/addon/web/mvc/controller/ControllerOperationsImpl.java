@@ -28,6 +28,7 @@ import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuil
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
+import org.springframework.roo.classpath.details.annotations.ArrayAttributeValue;
 import org.springframework.roo.classpath.details.annotations.BooleanAttributeValue;
 import org.springframework.roo.classpath.details.annotations.ClassAttributeValue;
 import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
@@ -164,6 +165,22 @@ public class ControllerOperationsImpl implements ControllerOperations {
         }
     }
 
+    public boolean isControllerInstallationPossible() {
+        return projectOperations.isFocusedProjectAvailable()
+                && projectOperations
+                        .isFeatureInstalledInFocusedModule(FeatureNames.MVC)
+                && !projectOperations
+                        .isFeatureInstalledInFocusedModule(FeatureNames.JSF);
+    }
+
+    public boolean isNewControllerAvailable() {
+        return projectOperations.isFocusedProjectAvailable();
+    }
+
+    public void setup() {
+        webMvcOperations.installAllWebMvcArtifacts();
+    }
+
     /**
      * Looks for an existing controller mapped to the given path
      * 
@@ -173,17 +190,35 @@ public class ControllerOperationsImpl implements ControllerOperations {
     private ClassOrInterfaceTypeDetails getExistingController(final String path) {
         for (final ClassOrInterfaceTypeDetails cid : typeLocationService
                 .findClassesOrInterfaceDetailsWithAnnotation(REQUEST_MAPPING)) {
-            final StringAttributeValue mappingAttribute = (StringAttributeValue) MemberFindingUtils
+            final AnnotationAttributeValue<?> attribute = MemberFindingUtils
                     .getAnnotationOfType(cid.getAnnotations(), REQUEST_MAPPING)
                     .getAttribute(VALUE);
-            if (mappingAttribute != null) {
-                final String mapping = mappingAttribute.getValue();
-                if (StringUtils.isNotBlank(mapping)
-                        && mapping.equalsIgnoreCase("/" + path)) {
-                    LOGGER.info("Introducing into existing controller '"
+            if (attribute instanceof ArrayAttributeValue) {
+                final ArrayAttributeValue<?> mappingAttribute = (ArrayAttributeValue<?>) attribute;
+                if (mappingAttribute.getValue().size() > 1) {
+                    LOGGER.warning("Skipping controller '"
                             + cid.getName().getFullyQualifiedTypeName()
-                            + "' mapped to '/" + path);
-                    return cid;
+                            + "' as it contains more than one path");
+                    continue;
+                }
+                else if (mappingAttribute.getValue().size() == 1) {
+                    final StringAttributeValue attr = (StringAttributeValue) mappingAttribute
+                            .getValue().get(0);
+                    final String mapping = attr.getValue();
+                    if (StringUtils.isNotBlank(mapping)
+                            && mapping.equalsIgnoreCase("/" + path)) {
+                        return cid;
+                    }
+                }
+            }
+            else if (attribute instanceof StringAttributeValue) {
+                final StringAttributeValue mappingAttribute = (StringAttributeValue) attribute;
+                if (mappingAttribute != null) {
+                    final String mapping = mappingAttribute.getValue();
+                    if (StringUtils.isNotBlank(mapping)
+                            && mapping.equalsIgnoreCase("/" + path)) {
+                        return cid;
+                    }
                 }
             }
         }
@@ -203,21 +238,5 @@ public class ControllerOperationsImpl implements ControllerOperations {
         }
         return new AnnotationMetadataBuilder(ROO_WEB_SCAFFOLD,
                 rooWebScaffoldAttributes);
-    }
-
-    public boolean isControllerInstallationPossible() {
-        return projectOperations.isFocusedProjectAvailable()
-                && projectOperations
-                        .isFeatureInstalledInFocusedModule(FeatureNames.MVC)
-                && !projectOperations
-                        .isFeatureInstalledInFocusedModule(FeatureNames.JSF);
-    }
-
-    public boolean isNewControllerAvailable() {
-        return projectOperations.isFocusedProjectAvailable();
-    }
-
-    public void setup() {
-        webMvcOperations.installAllWebMvcArtifacts();
     }
 }
