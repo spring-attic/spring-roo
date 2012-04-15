@@ -53,31 +53,6 @@ public class JpaActiveRecordMetadata extends
     private static final String PROVIDES_TYPE = MetadataIdentificationUtils
             .create(PROVIDES_TYPE_STRING);
 
-    public static String createIdentifier(final JavaType javaType,
-            final LogicalPath path) {
-        return PhysicalTypeIdentifierNamingUtils.createIdentifier(
-                PROVIDES_TYPE_STRING, javaType, path);
-    }
-
-    public static JavaType getJavaType(final String metadataIdentificationString) {
-        return PhysicalTypeIdentifierNamingUtils.getJavaType(
-                PROVIDES_TYPE_STRING, metadataIdentificationString);
-    }
-
-    public static String getMetadataIdentifierType() {
-        return PROVIDES_TYPE;
-    }
-
-    public static LogicalPath getPath(final String metadataIdentificationString) {
-        return PhysicalTypeIdentifierNamingUtils.getPath(PROVIDES_TYPE_STRING,
-                metadataIdentificationString);
-    }
-
-    public static boolean isValid(final String metadataIdentificationString) {
-        return PhysicalTypeIdentifierNamingUtils.isValid(PROVIDES_TYPE_STRING,
-                metadataIdentificationString);
-    }
-
     private JpaCrudAnnotationValues crudAnnotationValues;
     private MethodMetadata entityManagerMethod;
     private String entityName;
@@ -109,18 +84,18 @@ public class JpaActiveRecordMetadata extends
             final String entityName, final boolean isGaeEnabled) {
         super(metadataIdentificationString, aspectName,
                 governorPhysicalTypeMetadata);
-        Validate.isTrue(isValid(metadataIdentificationString),
-                "Metadata identification string '"
-                        + metadataIdentificationString
-                        + "' does not appear to be a valid");
+        Validate.isTrue(
+                isValid(metadataIdentificationString),
+                "Metadata identification string '%s' does not appear to be a valid",
+                metadataIdentificationString);
         Validate.notNull(crudAnnotationValues,
                 "CRUD-related annotation values required");
-        Validate.notNull(identifierField, "Identifier required for '"
-                + metadataIdentificationString + "'");
-        Validate.notBlank(entityName, "Entity name required for '"
-                + metadataIdentificationString + "'");
-        Validate.notBlank(plural, "Plural required for '"
-                + metadataIdentificationString + "'");
+        Validate.notNull(identifierField, "Identifier required for '%s'",
+                metadataIdentificationString);
+        Validate.notBlank(entityName, "Entity name required for '%s'",
+                metadataIdentificationString);
+        Validate.notBlank(plural, "Plural required for '%s'",
+                metadataIdentificationString);
 
         if (!isValid()) {
             return;
@@ -158,176 +133,29 @@ public class JpaActiveRecordMetadata extends
         itdTypeDetails = builder.build();
     }
 
-    private void addTransactionalAnnotation(
-            final List<AnnotationMetadataBuilder> annotations) {
-        addTransactionalAnnotation(annotations, false);
+    public static String createIdentifier(final JavaType javaType,
+            final LogicalPath path) {
+        return PhysicalTypeIdentifierNamingUtils.createIdentifier(
+                PROVIDES_TYPE_STRING, javaType, path);
     }
 
-    private void addTransactionalAnnotation(
-            final List<AnnotationMetadataBuilder> annotations,
-            final boolean isPersistMethod) {
-        final AnnotationMetadataBuilder transactionalBuilder = new AnnotationMetadataBuilder(
-                TRANSACTIONAL);
-        if (StringUtils
-                .isNotBlank(crudAnnotationValues.getTransactionManager())) {
-            transactionalBuilder.addStringAttribute("value",
-                    crudAnnotationValues.getTransactionManager());
-        }
-        if (isGaeEnabled && isPersistMethod) {
-            transactionalBuilder.addEnumAttribute("propagation",
-                    new EnumDetails(PROPAGATION, new JavaSymbolName(
-                            "REQUIRES_NEW")));
-        }
-        annotations.add(transactionalBuilder);
+    public static JavaType getJavaType(final String metadataIdentificationString) {
+        return PhysicalTypeIdentifierNamingUtils.getJavaType(
+                PROVIDES_TYPE_STRING, metadataIdentificationString);
     }
 
-    /**
-     * @return the clear method (never returns null)
-     */
-    private MethodMetadataBuilder getClearMethod() {
-        if (parent != null) {
-            final MethodMetadataBuilder found = parent.getClearMethod();
-            if (found != null) {
-                return found;
-            }
-        }
-        if ("".equals(crudAnnotationValues.getClearMethod())) {
-            return null;
-        }
-        return getDelegateMethod(
-                new JavaSymbolName(crudAnnotationValues.getClearMethod()),
-                "clear");
+    public static String getMetadataIdentifierType() {
+        return PROVIDES_TYPE;
     }
 
-    /**
-     * Finds (creating if necessary) the method that counts entities of this
-     * type
-     * 
-     * @return the count method (never null)
-     */
-    private MethodMetadata getCountMethod() {
-        // Method definition to find or build
-        final JavaSymbolName methodName = new JavaSymbolName(
-                crudAnnotationValues.getCountMethod() + plural);
-        final JavaType[] parameterTypes = {};
-        final List<JavaSymbolName> parameterNames = Collections
-                .<JavaSymbolName> emptyList();
-
-        // Locate user-defined method
-        final MethodMetadata userMethod = getGovernorMethod(methodName,
-                parameterTypes);
-        if (userMethod != null) {
-            Validate.isTrue(userMethod.getReturnType()
-                    .equals(COUNT_RETURN_TYPE), "Method '" + methodName
-                    + "' on '" + destination + "' must return '"
-                    + COUNT_RETURN_TYPE.getNameIncludingTypeParameters() + "'");
-            return userMethod;
-        }
-
-        // Create method
-        final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
-        if (isGaeEnabled) {
-            addTransactionalAnnotation(annotations);
-        }
-
-        final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-        bodyBuilder.appendFormalLine("return " + ENTITY_MANAGER_METHOD_NAME
-                + "().createQuery(\"SELECT COUNT(o) FROM " + entityName
-                + " o\", Long.class).getSingleResult();");
-
-        final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(
-                getId(), Modifier.PUBLIC | Modifier.STATIC, methodName,
-                COUNT_RETURN_TYPE,
-                AnnotatedJavaType.convertFromJavaTypes(parameterTypes),
-                parameterNames, bodyBuilder);
-        methodBuilder.setAnnotations(annotations);
-        return methodBuilder.build();
+    public static LogicalPath getPath(final String metadataIdentificationString) {
+        return PhysicalTypeIdentifierNamingUtils.getPath(PROVIDES_TYPE_STRING,
+                metadataIdentificationString);
     }
 
-    private MethodMetadataBuilder getDelegateMethod(
-            final JavaSymbolName methodName, final String methodDelegateName) {
-        // Method definition to find or build
-        final JavaType[] parameterTypes = {};
-
-        // Locate user-defined method
-        final MethodMetadata userMethod = getGovernorMethod(methodName,
-                parameterTypes);
-        if (userMethod != null) {
-            return new MethodMetadataBuilder(userMethod);
-        }
-
-        // Create the method
-        final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
-
-        final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-
-        // Address non-injected entity manager field
-        final MethodMetadata entityManagerMethod = getEntityManagerMethod();
-        Validate.notNull(entityManagerMethod,
-                "Entity manager method should not have returned null");
-
-        // Use the getEntityManager() method to acquire an entity manager (the
-        // method will throw an exception if it cannot be acquired)
-        final String entityManagerFieldName = getEntityManagerField()
-                .getFieldName().getSymbolName();
-        bodyBuilder.appendFormalLine("if (this." + entityManagerFieldName
-                + " == null) this." + entityManagerFieldName + " = "
-                + entityManagerMethod.getMethodName().getSymbolName() + "();");
-
-        JavaType returnType = JavaType.VOID_PRIMITIVE;
-        if ("flush".equals(methodDelegateName)) {
-            addTransactionalAnnotation(annotations);
-            bodyBuilder.appendFormalLine("this." + entityManagerFieldName
-                    + ".flush();");
-        }
-        else if ("clear".equals(methodDelegateName)) {
-            addTransactionalAnnotation(annotations);
-            bodyBuilder.appendFormalLine("this." + entityManagerFieldName
-                    + ".clear();");
-        }
-        else if ("merge".equals(methodDelegateName)) {
-            addTransactionalAnnotation(annotations);
-            returnType = new JavaType(destination.getSimpleTypeName());
-            bodyBuilder.appendFormalLine(destination.getSimpleTypeName()
-                    + " merged = this." + entityManagerFieldName
-                    + ".merge(this);");
-            bodyBuilder.appendFormalLine("this." + entityManagerFieldName
-                    + ".flush();");
-            bodyBuilder.appendFormalLine("return merged;");
-        }
-        else if ("remove".equals(methodDelegateName)) {
-            addTransactionalAnnotation(annotations);
-            bodyBuilder.appendFormalLine("if (this." + entityManagerFieldName
-                    + ".contains(this)) {");
-            bodyBuilder.indent();
-            bodyBuilder.appendFormalLine("this." + entityManagerFieldName
-                    + ".remove(this);");
-            bodyBuilder.indentRemove();
-            bodyBuilder.appendFormalLine("} else {");
-            bodyBuilder.indent();
-            bodyBuilder.appendFormalLine(destination.getSimpleTypeName()
-                    + " attached = " + destination.getSimpleTypeName() + "."
-                    + getFindMethod().getMethodName().getSymbolName()
-                    + "(this." + identifierField.getFieldName().getSymbolName()
-                    + ");");
-            bodyBuilder.appendFormalLine("this." + entityManagerFieldName
-                    + ".remove(attached);");
-            bodyBuilder.indentRemove();
-            bodyBuilder.appendFormalLine("}");
-        }
-        else {
-            // Persist
-            addTransactionalAnnotation(annotations, true);
-            bodyBuilder.appendFormalLine("this." + entityManagerFieldName + "."
-                    + methodDelegateName + "(this);");
-        }
-
-        final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(
-                getId(), Modifier.PUBLIC, methodName, returnType,
-                AnnotatedJavaType.convertFromJavaTypes(parameterTypes),
-                new ArrayList<JavaSymbolName>(), bodyBuilder);
-        methodBuilder.setAnnotations(annotations);
-        return methodBuilder;
+    public static boolean isValid(final String metadataIdentificationString) {
+        return PhysicalTypeIdentifierNamingUtils.isValid(PROVIDES_TYPE_STRING,
+                metadataIdentificationString);
     }
 
     /**
@@ -432,6 +260,212 @@ public class JpaActiveRecordMetadata extends
      */
     public String getEntityName() {
         return entityName;
+    }
+
+    /**
+     * @return the find (by ID) method (may return null)
+     */
+    public MethodMetadata getFindMethod() {
+        return findMethod;
+    }
+
+    /**
+     * @return the pluralised name (never returns null or an empty string)
+     */
+    public String getPlural() {
+        return plural;
+    }
+
+    @Override
+    public String toString() {
+        final ToStringBuilder builder = new ToStringBuilder(this);
+        builder.append("identifier", getId());
+        builder.append("valid", valid);
+        builder.append("aspectName", aspectName);
+        builder.append("destinationType", destination);
+        builder.append("finders", crudAnnotationValues.getFinders());
+        builder.append("governor", governorPhysicalTypeMetadata.getId());
+        builder.append("itdTypeDetails", itdTypeDetails);
+        return builder.toString();
+    }
+
+    private void addTransactionalAnnotation(
+            final List<AnnotationMetadataBuilder> annotations) {
+        addTransactionalAnnotation(annotations, false);
+    }
+
+    private void addTransactionalAnnotation(
+            final List<AnnotationMetadataBuilder> annotations,
+            final boolean isPersistMethod) {
+        final AnnotationMetadataBuilder transactionalBuilder = new AnnotationMetadataBuilder(
+                TRANSACTIONAL);
+        if (StringUtils
+                .isNotBlank(crudAnnotationValues.getTransactionManager())) {
+            transactionalBuilder.addStringAttribute("value",
+                    crudAnnotationValues.getTransactionManager());
+        }
+        if (isGaeEnabled && isPersistMethod) {
+            transactionalBuilder.addEnumAttribute("propagation",
+                    new EnumDetails(PROPAGATION, new JavaSymbolName(
+                            "REQUIRES_NEW")));
+        }
+        annotations.add(transactionalBuilder);
+    }
+
+    /**
+     * @return the clear method (never returns null)
+     */
+    private MethodMetadataBuilder getClearMethod() {
+        if (parent != null) {
+            final MethodMetadataBuilder found = parent.getClearMethod();
+            if (found != null) {
+                return found;
+            }
+        }
+        if ("".equals(crudAnnotationValues.getClearMethod())) {
+            return null;
+        }
+        return getDelegateMethod(
+                new JavaSymbolName(crudAnnotationValues.getClearMethod()),
+                "clear");
+    }
+
+    /**
+     * Finds (creating if necessary) the method that counts entities of this
+     * type
+     * 
+     * @return the count method (never null)
+     */
+    private MethodMetadata getCountMethod() {
+        // Method definition to find or build
+        final JavaSymbolName methodName = new JavaSymbolName(
+                crudAnnotationValues.getCountMethod() + plural);
+        final JavaType[] parameterTypes = {};
+        final List<JavaSymbolName> parameterNames = Collections
+                .<JavaSymbolName> emptyList();
+
+        // Locate user-defined method
+        final MethodMetadata userMethod = getGovernorMethod(methodName,
+                parameterTypes);
+        if (userMethod != null) {
+            Validate.isTrue(userMethod.getReturnType()
+                    .equals(COUNT_RETURN_TYPE),
+                    "Method '%s' on %s must return '%s'", methodName,
+                    destination,
+                    COUNT_RETURN_TYPE.getNameIncludingTypeParameters() + "'");
+            return userMethod;
+        }
+
+        // Create method
+        final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+        if (isGaeEnabled) {
+            addTransactionalAnnotation(annotations);
+        }
+
+        final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+        if (isGaeEnabled) {
+            bodyBuilder.appendFormalLine("return "
+                    + getFindAllMethod().getMethodName() + "().size();");
+        }
+        else {
+            bodyBuilder.appendFormalLine("return " + ENTITY_MANAGER_METHOD_NAME
+                    + "().createQuery(\"SELECT COUNT(o) FROM " + entityName
+                    + " o\", Long.class).getSingleResult();");
+        }
+
+        final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(
+                getId(), Modifier.PUBLIC | Modifier.STATIC, methodName,
+                COUNT_RETURN_TYPE,
+                AnnotatedJavaType.convertFromJavaTypes(parameterTypes),
+                parameterNames, bodyBuilder);
+        methodBuilder.setAnnotations(annotations);
+        return methodBuilder.build();
+    }
+
+    private MethodMetadataBuilder getDelegateMethod(
+            final JavaSymbolName methodName, final String methodDelegateName) {
+        // Method definition to find or build
+        final JavaType[] parameterTypes = {};
+
+        // Locate user-defined method
+        final MethodMetadata userMethod = getGovernorMethod(methodName,
+                parameterTypes);
+        if (userMethod != null) {
+            return new MethodMetadataBuilder(userMethod);
+        }
+
+        // Create the method
+        final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+
+        final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+
+        // Address non-injected entity manager field
+        final MethodMetadata entityManagerMethod = getEntityManagerMethod();
+        Validate.notNull(entityManagerMethod,
+                "Entity manager method should not have returned null");
+
+        // Use the getEntityManager() method to acquire an entity manager (the
+        // method will throw an exception if it cannot be acquired)
+        final String entityManagerFieldName = getEntityManagerField()
+                .getFieldName().getSymbolName();
+        bodyBuilder.appendFormalLine("if (this." + entityManagerFieldName
+                + " == null) this." + entityManagerFieldName + " = "
+                + entityManagerMethod.getMethodName().getSymbolName() + "();");
+
+        JavaType returnType = JavaType.VOID_PRIMITIVE;
+        if ("flush".equals(methodDelegateName)) {
+            addTransactionalAnnotation(annotations);
+            bodyBuilder.appendFormalLine("this." + entityManagerFieldName
+                    + ".flush();");
+        }
+        else if ("clear".equals(methodDelegateName)) {
+            addTransactionalAnnotation(annotations);
+            bodyBuilder.appendFormalLine("this." + entityManagerFieldName
+                    + ".clear();");
+        }
+        else if ("merge".equals(methodDelegateName)) {
+            addTransactionalAnnotation(annotations);
+            returnType = new JavaType(destination.getSimpleTypeName());
+            bodyBuilder.appendFormalLine(destination.getSimpleTypeName()
+                    + " merged = this." + entityManagerFieldName
+                    + ".merge(this);");
+            bodyBuilder.appendFormalLine("this." + entityManagerFieldName
+                    + ".flush();");
+            bodyBuilder.appendFormalLine("return merged;");
+        }
+        else if ("remove".equals(methodDelegateName)) {
+            addTransactionalAnnotation(annotations);
+            bodyBuilder.appendFormalLine("if (this." + entityManagerFieldName
+                    + ".contains(this)) {");
+            bodyBuilder.indent();
+            bodyBuilder.appendFormalLine("this." + entityManagerFieldName
+                    + ".remove(this);");
+            bodyBuilder.indentRemove();
+            bodyBuilder.appendFormalLine("} else {");
+            bodyBuilder.indent();
+            bodyBuilder.appendFormalLine(destination.getSimpleTypeName()
+                    + " attached = " + destination.getSimpleTypeName() + "."
+                    + getFindMethod().getMethodName().getSymbolName()
+                    + "(this." + identifierField.getFieldName().getSymbolName()
+                    + ");");
+            bodyBuilder.appendFormalLine("this." + entityManagerFieldName
+                    + ".remove(attached);");
+            bodyBuilder.indentRemove();
+            bodyBuilder.appendFormalLine("}");
+        }
+        else {
+            // Persist
+            addTransactionalAnnotation(annotations, true);
+            bodyBuilder.appendFormalLine("this." + entityManagerFieldName + "."
+                    + methodDelegateName + "(this);");
+        }
+
+        final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(
+                getId(), Modifier.PUBLIC, methodName, returnType,
+                AnnotatedJavaType.convertFromJavaTypes(parameterTypes),
+                new ArrayList<JavaSymbolName>(), bodyBuilder);
+        methodBuilder.setAnnotations(annotations);
+        return methodBuilder;
     }
 
     /**
@@ -541,13 +575,6 @@ public class JpaActiveRecordMetadata extends
     }
 
     /**
-     * @return the find (by ID) method (may return null)
-     */
-    public MethodMetadata getFindMethod() {
-        return findMethod;
-    }
-
-    /**
      * @return the flush method (never returns null)
      */
     private MethodMetadataBuilder getFlushMethod() {
@@ -593,13 +620,6 @@ public class JpaActiveRecordMetadata extends
         return getDelegateMethod(
                 new JavaSymbolName(crudAnnotationValues.getPersistMethod()),
                 "persist");
-    }
-
-    /**
-     * @return the pluralised name (never returns null or an empty string)
-     */
-    public String getPlural() {
-        return plural;
     }
 
     /**
@@ -780,18 +800,5 @@ public class JpaActiveRecordMetadata extends
         methodBuilder.setAnnotations(annotations);
         builder.addMethod(methodBuilder);
         findMethod = methodBuilder.build();
-    }
-
-    @Override
-    public String toString() {
-        final ToStringBuilder builder = new ToStringBuilder(this);
-        builder.append("identifier", getId());
-        builder.append("valid", valid);
-        builder.append("aspectName", aspectName);
-        builder.append("destinationType", destination);
-        builder.append("finders", crudAnnotationValues.getFinders());
-        builder.append("governor", governorPhysicalTypeMetadata.getId());
-        builder.append("itdTypeDetails", itdTypeDetails);
-        return builder.toString();
     }
 }
