@@ -15,7 +15,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
@@ -451,20 +450,7 @@ public class TypeLocationServiceImpl implements TypeLocationService {
     }
 
     public String getTopLevelPackageForModule(final Pom module) {
-        final Set<String> typesInModule = getTypesForModule(module.getPath());
-        if (typesInModule.isEmpty()) {
-            return module.getGroupId();
-        }
-        final Set<String> typePackages = new HashSet<String>();
-        final Map<String, Collection<String>> typesByPackage = getTypesByPackage(
-                typesInModule, typePackages);
-        if (typePackages.size() == 1) {
-            return module.getGroupId(); // why not use this type's package?
-        }
-        final String lowestCommonPackage = getLowestCommonPackage(
-                typesInModule.size(), typesByPackage);
-        return ObjectUtils.defaultIfNull(lowestCommonPackage,
-                module.getGroupId());
+        return module.getGroupId();
     }
 
     /**
