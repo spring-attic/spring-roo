@@ -12,8 +12,10 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
@@ -53,8 +55,84 @@ import org.springframework.roo.support.util.FileUtils;
 @Service
 public class TypeLocationServiceImpl implements TypeLocationService {
 
+    private static final Comparator<String> LENGTH_COMPARATOR = new Comparator<String>() {
+        public int compare(final String key1, final String key2) {
+            return Integer.valueOf(key1.length()).compareTo(key2.length());
+        }
+    };
+
     private static final String JAVA_FILES_ANT_PATH = "**" + File.separatorChar
             + "*.java";
+
+    /**
+     * Returns all packages leading up to the given package, e.g. if the given
+     * package is "com.foo.bar", returns ["com", "com.foo", "com.foo.bar"].
+     * 
+     * @param leafPackage the fully-qualified package to parse (required)
+     * @return a non-<code>null</code> iterable
+     */
+    static Set<String> getAllPackages(final String leafPackage) {
+        final Set<String> discoveredPackages = new HashSet<String>();
+        final String[] typeSegments = leafPackage.split("\\.");
+        final StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < typeSegments.length; i++) {
+            final String typeSegment = typeSegments[i];
+            if (i > 0) {
+                sb.append(".");
+            }
+            sb.append(typeSegment);
+            discoveredPackages.add(sb.toString());
+        }
+        return discoveredPackages;
+    }
+
+    /**
+     * Returns the lowest-level package that contains the given number of types.
+     * 
+     * @param typeCount the number of types to look for
+     * @param typesByPackage maps package names to type names; a given type will
+     *            appear under all of its parent packages (required)
+     * @return <code>null</code> if no package contains the given number of
+     *         types
+     */
+    static String getLowestCommonPackage(final int typeCount,
+            final Map<String, Collection<String>> typesByPackage) {
+        final Map<String, Collection<String>> typesBySortedPackage = sortByKeyLength(typesByPackage);
+        int longestPackage = 0;
+        String topLevelPackage = null;
+        for (final Entry<String, Collection<String>> entry : typesBySortedPackage
+                .entrySet()) {
+            final String thisPackage = entry.getKey();
+            final Collection<String> typesInPackage = entry.getValue();
+            if (typesInPackage.size() == typeCount
+                    && thisPackage.length() > longestPackage) {
+                longestPackage = thisPackage.length();
+                topLevelPackage = thisPackage;
+            }
+        }
+        return topLevelPackage;
+    }
+
+    static String getPackageFromType(final String typeName) {
+        return typeName.substring(0, typeName.lastIndexOf('.'));
+    }
+
+    /**
+     * Sorts the given string-keyed map by the length of its keys.
+     * 
+     * @param <V> the type of the map's values
+     * @param mapToSort the map to sort (not changed)
+     * @return the sorted version of the map
+     */
+    static <V> Map<String, V> sortByKeyLength(final Map<String, V> mapToSort) {
+        final List<String> keys = new ArrayList<String>(mapToSort.keySet());
+        Collections.sort(keys, LENGTH_COMPARATOR);
+        final Map<String, V> sortedMap = new LinkedHashMap<String, V>();
+        for (final String key : keys) {
+            sortedMap.put(key, mapToSort.get(key));
+        }
+        return sortedMap;
+    }
 
     @Reference private FileManager fileManager;
     @Reference private FileMonitorService fileMonitorService;
@@ -302,8 +380,7 @@ public class TypeLocationServiceImpl implements TypeLocationService {
         }
         for (final String typeName : moduleTypes) {
             final StringBuilder sb = new StringBuilder();
-            final String type = typeName
-                    .substring(0, typeName.lastIndexOf('.'));
+            final String type = getPackageFromType(typeName);
             final String[] typeSegments = type.split("\\.");
             final Set<String> discoveredPackages = new HashSet<String>();
             for (int i = 0; i < typeSegments.length; i++) {
@@ -374,67 +451,49 @@ public class TypeLocationServiceImpl implements TypeLocationService {
     }
 
     public String getTopLevelPackageForModule(final Pom module) {
-        Validate.notNull(module, "Module required");
-
-        final Map<String, Set<String>> packageMap = new HashMap<String, Set<String>>();
-        final Set<String> moduleTypes = getTypesForModule(module.getPath());
-        if (moduleTypes.isEmpty()) {
+        final Set<String> typesInModule = getTypesForModule(module.getPath());
+        if (typesInModule.isEmpty()) {
             return module.getGroupId();
         }
-        final Set<String> uniqueTypePackages = new HashSet<String>();
-        for (final String typeName : moduleTypes) {
-            final StringBuilder sb = new StringBuilder();
-            final String typePackage = typeName.substring(0,
-                    typeName.lastIndexOf('.'));
-            uniqueTypePackages.add(typePackage);
-            final String[] typeSegments = typePackage.split("\\.");
-            final Set<String> discoveredPackages = new HashSet<String>();
-            for (int i = 0; i < typeSegments.length; i++) {
-                final String typeSegment = typeSegments[i];
-                if (i > 0) {
-                    sb.append(".");
+        final Set<String> typePackages = new HashSet<String>();
+        final Map<String, Collection<String>> typesByPackage = getTypesByPackage(
+                typesInModule, typePackages);
+        if (typePackages.size() == 1) {
+            return module.getGroupId(); // why not use this type's package?
+        }
+        final String lowestCommonPackage = getLowestCommonPackage(
+                typesInModule.size(), typesByPackage);
+        return ObjectUtils.defaultIfNull(lowestCommonPackage,
+                module.getGroupId());
+    }
+
+    /**
+     * Builds a map of a module's packages and all types anywhere within them,
+     * e.g. if there's two types com.foo.bar.A and com.foo.baz.B, the map will
+     * look like this: "com": {"com.foo.bar.A", "com.foo.baz.B"} "com.foo":
+     * {"com.foo.bar.A", "com.foo.baz.B"}, "com.foo.bar": {"com.foo.bar.A"},
+     * "com.foo.baz": {"com.foo.baz.B"} All packages that directly contain a
+     * type are added to the given set.
+     * 
+     * @param typesInModule the Java types within the module in question
+     * @param typePackages the set to which to add each type's package
+     * @return a non-<code>null</code> map laid out as above
+     */
+    private Map<String, Collection<String>> getTypesByPackage(
+            final Iterable<String> typesInModule, final Set<String> typePackages) {
+        final Map<String, Collection<String>> typesByPackage = new HashMap<String, Collection<String>>();
+        for (final String typeName : typesInModule) {
+            final String typePackage = getPackageFromType(typeName);
+            typePackages.add(typePackage);
+            for (final String discoveredPackage : getAllPackages(typePackage)) {
+                if (typesByPackage.get(discoveredPackage) == null) {
+                    typesByPackage
+                            .put(discoveredPackage, new HashSet<String>());
                 }
-                sb.append(typeSegment);
-                discoveredPackages.add(sb.toString());
-            }
-
-            for (final String discoveredPackage : discoveredPackages) {
-                if (!packageMap.containsKey(discoveredPackage)) {
-                    packageMap.put(discoveredPackage, new HashSet<String>());
-                }
-                packageMap.get(discoveredPackage).add(typeName);
+                typesByPackage.get(discoveredPackage).add(typeName);
             }
         }
-
-        if (uniqueTypePackages.size() == 1) {
-            return module.getGroupId();
-        }
-
-        final List<String> packageList = new ArrayList<String>(
-                packageMap.keySet());
-        Collections.sort(packageList, new Comparator<String>() {
-            public int compare(final String s1, final String s2) {
-                return Integer.valueOf(s1.length()).compareTo(s2.length());
-            }
-        });
-        final Map<String, Set<String>> sortedPackageMap = new LinkedHashMap<String, Set<String>>();
-        for (final String discoveredPackage : packageList) {
-            sortedPackageMap.put(discoveredPackage,
-                    packageMap.get(discoveredPackage));
-        }
-
-        int longestPackage = 0;
-        String topLevelPackage = module.getGroupId();
-        for (final Map.Entry<String, Set<String>> entry : sortedPackageMap
-                .entrySet()) {
-            if (entry.getValue().size() == moduleTypes.size()) {
-                if (entry.getKey().length() > longestPackage) {
-                    longestPackage = entry.getKey().length();
-                    topLevelPackage = entry.getKey();
-                }
-            }
-        }
-        return topLevelPackage;
+        return typesByPackage;
     }
 
     public ClassOrInterfaceTypeDetails getTypeDetails(final JavaType type) {
