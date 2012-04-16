@@ -26,6 +26,7 @@ import org.springframework.roo.classpath.details.annotations.AnnotationMetadataB
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.JdkJavaType;
 import org.springframework.roo.model.ReservedWords;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Path;
@@ -50,16 +51,17 @@ public class ClasspathOperationsImpl implements ClasspathOperations {
     @Reference TypeLocationService typeLocationService;
     @Reference TypeManagementService typeManagementService;
 
-    protected void activate(final ComponentContext context) {
-        staticFieldConverter.add(InheritanceType.class);
-    }
-
     public void createClass(final JavaType name, final boolean rooAnnotations,
             final LogicalPath path, final JavaType superclass,
             final boolean createAbstract, final boolean permitReservedWords) {
         if (!permitReservedWords) {
             ReservedWords.verifyReservedWordsNotPresent(name);
         }
+
+        Validate.isTrue(
+                !JdkJavaType.isPartOfJavaLang(name.getSimpleTypeName()),
+                "Class name '%s' is part of java.lang",
+                name.getSimpleTypeName());
 
         final String declaredByMetadataId = PhysicalTypeIdentifier
                 .createIdentifier(name, path);
@@ -125,10 +127,6 @@ public class ClasspathOperationsImpl implements ClasspathOperations {
         typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
     }
 
-    protected void deactivate(final ComponentContext context) {
-        staticFieldConverter.remove(InheritanceType.class);
-    }
-
     public void enumConstant(final JavaType name,
             final JavaSymbolName fieldName, final boolean permitReservedWords) {
         if (!permitReservedWords) {
@@ -161,5 +159,13 @@ public class ClasspathOperationsImpl implements ClasspathOperations {
 
     public boolean isProjectAvailable() {
         return projectOperations.isFocusedProjectAvailable();
+    }
+
+    protected void activate(final ComponentContext context) {
+        staticFieldConverter.add(InheritanceType.class);
+    }
+
+    protected void deactivate(final ComponentContext context) {
+        staticFieldConverter.remove(InheritanceType.class);
     }
 }
