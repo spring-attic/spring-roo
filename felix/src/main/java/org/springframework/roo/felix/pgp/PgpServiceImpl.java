@@ -19,6 +19,7 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -62,14 +63,12 @@ import org.springframework.roo.url.stream.UrlInputStreamService;
 public class PgpServiceImpl implements PgpService {
 
     private static final int BUFFER_SIZE = 1024;
-    // Class (static) fields
     private static String defaultKeyServerUrl = "http://keyserver.ubuntu.com/pks/lookup?op=get&search=";
     // private static String defaultKeyServerUrl =
     // "http://pgp.mit.edu/pks/lookup?op=get&search=";
 
-    private static final File ROO_PGP_FILE = new File(
-            System.getProperty("user.home") + File.separatorChar
-                    + ".spring_roo_pgp.bpg");
+    private static final File ROO_PGP_FILE = FileUtils.getFile(
+            FileUtils.getUserDirectory(), ".spring_roo_pgp.bpg");
 
     static {
         Security.addProvider(new BouncyCastleProvider());
@@ -78,41 +77,10 @@ public class PgpServiceImpl implements PgpService {
     private boolean automaticTrust;
     private BundleContext context;
     private final SortedSet<PgpKeyId> discoveredKeyIds = new TreeSet<PgpKeyId>();
-    // Instance fields
     @Reference private UrlInputStreamService urlInputStreamService;
-
-    protected void activate(final ComponentContext context) {
-        this.context = context.getBundleContext();
-        final String keyserver = context.getBundleContext().getProperty(
-                "pgp.keyserver.url");
-        if (StringUtils.isNotBlank(keyserver)) {
-            defaultKeyServerUrl = keyserver;
-        }
-        trustDefaultKeysIfRequired();
-        // Seed the discovered keys database
-        getTrustedKeys();
-    }
 
     public SortedSet<PgpKeyId> getDiscoveredKeyIds() {
         return Collections.unmodifiableSortedSet(discoveredKeyIds);
-    }
-
-    /**
-     * Obtains a URL that should allow the download of the specified public key.
-     * <p>
-     * The key server may not contain the specified public key if it has never
-     * been uploaded.
-     * 
-     * @param keyId hex-encoded key ID to download (required)
-     * @return the URL (never null)
-     */
-    private URL getKeyServerUrlToRetrieveKeyId(final PgpKeyId keyId) {
-        try {
-            return new URL(defaultKeyServerUrl + keyId);
-        }
-        catch (final MalformedURLException e) {
-            throw new IllegalStateException(e);
-        }
     }
 
     public URL getKeyServerUrlToRetrieveKeyInformation(final PgpKeyId keyId) {
@@ -225,8 +193,8 @@ public class PgpServiceImpl implements PgpService {
             publicKey = keyRing.getPublicKey();
 
             Validate.notNull(publicKey,
-                    "Could not obtain public key for signer key ID '"
-                            + pgpSignature + "'");
+                    "Could not obtain public key for signer key ID '%s'",
+                    pgpSignature);
 
             pgpSignature.initVerify(publicKey, "BC");
 
@@ -356,6 +324,101 @@ public class PgpServiceImpl implements PgpService {
         return result;
     }
 
+    public void setAutomaticTrust(final boolean automaticTrust) {
+        this.automaticTrust = automaticTrust;
+    }
+
+    public PGPPublicKeyRing trust(final PgpKeyId keyId) {
+        Validate.notNull(keyId, "Key ID required");
+        final PGPPublicKeyRing keyRing = getPublicKey(keyId);
+        return trust(keyRing);
+    }
+
+    @SuppressWarnings("unchecked")
+    public PGPPublicKeyRing untrust(final PgpKeyId keyId) {
+        Validate.notNull(keyId, "Key ID required");
+        // Get the keys we currently trust
+        final List<PGPPublicKeyRing> trusted = getTrustedKeys();
+
+        // Build a new list of keys we'll continue to trust after this method
+        // ends
+        final List<PGPPublicKeyRing> stillTrusted = new ArrayList<PGPPublicKeyRing>();
+
+        // Locate the element to remove (we need to record it so the method can
+        // return it)
+        PGPPublicKeyRing removed = null;
+        for (final PGPPublicKeyRing candidate : trusted) {
+            boolean stillTrust = true;
+            final Iterator<PGPPublicKey> it = candidate.getPublicKeys();
+            while (it.hasNext()) {
+                final PGPPublicKey pgpKey = it.next();
+                final PgpKeyId candidateKeyId = new PgpKeyId(pgpKey);
+                if (removed == null && candidateKeyId.equals(keyId)) {
+                    stillTrust = false;
+                    removed = candidate;
+                    break;
+                }
+            }
+            if (stillTrust) {
+                stillTrusted.add(candidate);
+            }
+        }
+
+        Validate.notNull(removed,
+                "The public key ID '%s' is not currently trusted", keyId);
+
+        // Write back to disk
+        OutputStream fos = null;
+        try {
+            final PGPPublicKeyRingCollection newCollection = new PGPPublicKeyRingCollection(
+                    stillTrusted);
+            fos = new FileOutputStream(ROO_PGP_FILE);
+            newCollection.encode(fos);
+        }
+        catch (final Exception e) {
+            throw new IllegalStateException(e);
+        }
+        finally {
+            IOUtils.closeQuietly(fos);
+        }
+        return removed;
+    }
+
+    protected void activate(final ComponentContext context) {
+        this.context = context.getBundleContext();
+        final String keyserver = context.getBundleContext().getProperty(
+                "pgp.keyserver.url");
+        if (StringUtils.isNotBlank(keyserver)) {
+            defaultKeyServerUrl = keyserver;
+        }
+        trustDefaultKeysIfRequired();
+        // Seed the discovered keys database
+        getTrustedKeys();
+    }
+
+    protected void trustDefaultKeysIfRequired() {
+        // Setup default keys we trust automatically
+        trustDefaultKeys();
+    }
+
+    /**
+     * Obtains a URL that should allow the download of the specified public key.
+     * <p>
+     * The key server may not contain the specified public key if it has never
+     * been uploaded.
+     * 
+     * @param keyId hex-encoded key ID to download (required)
+     * @return the URL (never null)
+     */
+    private URL getKeyServerUrlToRetrieveKeyId(final PgpKeyId keyId) {
+        try {
+            return new URL(defaultKeyServerUrl + keyId);
+        }
+        catch (final MalformedURLException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
     /**
      * Simply stores the key ID in {@link #discoveredKeyIds} for future
      * reference of all Key IDs we've come across. This method uses a
@@ -387,16 +450,6 @@ public class PgpServiceImpl implements PgpService {
         }
     }
 
-    public void setAutomaticTrust(final boolean automaticTrust) {
-        this.automaticTrust = automaticTrust;
-    }
-
-    public PGPPublicKeyRing trust(final PgpKeyId keyId) {
-        Validate.notNull(keyId, "Key ID required");
-        final PGPPublicKeyRing keyRing = getPublicKey(keyId);
-        return trust(keyRing);
-    }
-
     private PGPPublicKeyRing trust(final PGPPublicKeyRing keyRing) {
         rememberKey(keyRing);
 
@@ -404,9 +457,10 @@ public class PgpServiceImpl implements PgpService {
         final List<PGPPublicKeyRing> trusted = getTrustedKeys();
 
         // Do not store if the first key is revoked
-        Validate.validState(!keyRing.getPublicKey().isRevoked(),
-                "The public key ID '" + new PgpKeyId(keyRing.getPublicKey())
-                        + "' has been revoked and cannot be trusted");
+        Validate.validState(
+                !keyRing.getPublicKey().isRevoked(),
+                "The public key ID '%s' has been revoked and cannot be trusted",
+                new PgpKeyId(keyRing.getPublicKey()));
 
         // trust it and write back to disk
         trusted.add(keyRing);
@@ -450,60 +504,5 @@ public class PgpServiceImpl implements PgpService {
                 IOUtils.closeQuietly(inputStream);
             }
         }
-    }
-
-    protected void trustDefaultKeysIfRequired() {
-        // Setup default keys we trust automatically
-        trustDefaultKeys();
-    }
-
-    @SuppressWarnings("unchecked")
-    public PGPPublicKeyRing untrust(final PgpKeyId keyId) {
-        Validate.notNull(keyId, "Key ID required");
-        // Get the keys we currently trust
-        final List<PGPPublicKeyRing> trusted = getTrustedKeys();
-
-        // Build a new list of keys we'll continue to trust after this method
-        // ends
-        final List<PGPPublicKeyRing> stillTrusted = new ArrayList<PGPPublicKeyRing>();
-
-        // Locate the element to remove (we need to record it so the method can
-        // return it)
-        PGPPublicKeyRing removed = null;
-        for (final PGPPublicKeyRing candidate : trusted) {
-            boolean stillTrust = true;
-            final Iterator<PGPPublicKey> it = candidate.getPublicKeys();
-            while (it.hasNext()) {
-                final PGPPublicKey pgpKey = it.next();
-                final PgpKeyId candidateKeyId = new PgpKeyId(pgpKey);
-                if (removed == null && candidateKeyId.equals(keyId)) {
-                    stillTrust = false;
-                    removed = candidate;
-                    break;
-                }
-            }
-            if (stillTrust) {
-                stillTrusted.add(candidate);
-            }
-        }
-
-        Validate.notNull(removed, "The public key ID '" + keyId
-                + "' is not currently trusted");
-
-        // Write back to disk
-        OutputStream fos = null;
-        try {
-            final PGPPublicKeyRingCollection newCollection = new PGPPublicKeyRingCollection(
-                    stillTrusted);
-            fos = new FileOutputStream(ROO_PGP_FILE);
-            newCollection.encode(fos);
-        }
-        catch (final Exception e) {
-            throw new IllegalStateException(e);
-        }
-        finally {
-            IOUtils.closeQuietly(fos);
-        }
-        return removed;
     }
 }
