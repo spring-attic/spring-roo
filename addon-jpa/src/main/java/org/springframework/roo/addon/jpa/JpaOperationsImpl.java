@@ -46,6 +46,7 @@ import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.JdkJavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.project.Dependency;
@@ -572,6 +573,11 @@ public class JpaOperationsImpl implements JpaOperations {
             final JavaType superclass,
             final List<AnnotationMetadataBuilder> annotations) {
         Validate.notNull(name, "Entity name required");
+
+        Validate.isTrue(
+                !JdkJavaType.isPartOfJavaLang(name.getSimpleTypeName()),
+                "Entity name '%s' must not be part of java.lang",
+                name.getSimpleTypeName());
 
         int modifier = Modifier.PUBLIC;
         if (createAbstract) {
