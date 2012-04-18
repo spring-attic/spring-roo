@@ -222,7 +222,7 @@ public class JpaEntityMetadataProviderImpl extends
          * don't need to monitor any such parent, as any changes to its Java
          * type will trickle down to the governing java type.
          */
-        final JpaEntityMetadata parentEntity = getParentMetadata(governorPhysicalType
+        final JpaEntityMetadata parent = getParentMetadata(governorPhysicalType
                 .getMemberHoldingTypeDetails());
 
         // Get the governor's members
@@ -248,7 +248,7 @@ public class JpaEntityMetadataProviderImpl extends
         }
 
         return new JpaEntityMetadata(metadataIdentificationString, aspectName,
-                governorPhysicalType, parentEntity, governorMemberDetails,
+                governorPhysicalType, parent, governorMemberDetails,
                 identifier, jpaEntityAnnotationValues, isGaeEnabled,
                 isDatabaseDotComEnabled);
     }

@@ -64,7 +64,9 @@ public class JpaEntityMetadata extends
     private final Identifier identifier;
     private final boolean isDatabaseDotComEnabled;
     private final boolean isGaeEnabled;
-    private final JpaEntityMetadata parentEntity;
+    private final JpaEntityMetadata parent;
+    private FieldMetadata identifierField;
+    private FieldMetadata versionField;
 
     /**
      * Constructor
@@ -73,7 +75,7 @@ public class JpaEntityMetadata extends
      *            {@link MetadataItem}
      * @param itdName the ITD's {@link JavaType} (required)
      * @param entityPhysicalType the entity's physical type (required)
-     * @param parentEntity can be <code>null</code> if none of the governor's
+     * @param parent can be <code>null</code> if none of the governor's
      *            ancestors provide {@link JpaEntityMetadata}
      * @param entityMemberDetails details of the entity's members (required)
      * @param identifier information about the entity's identifier field in the
@@ -86,7 +88,7 @@ public class JpaEntityMetadata extends
     public JpaEntityMetadata(final String metadataIdentificationString,
             final JavaType itdName,
             final PhysicalTypeMetadata entityPhysicalType,
-            final JpaEntityMetadata parentEntity,
+            final JpaEntityMetadata parent,
             final MemberDetails entityMemberDetails,
             final Identifier identifier,
             final JpaEntityAnnotationValues annotationValues,
@@ -104,7 +106,7 @@ public class JpaEntityMetadata extends
         this.annotationValues = annotationValues;
         this.entityMemberDetails = entityMemberDetails;
         this.identifier = identifier;
-        this.parentEntity = parentEntity;
+        this.parent = parent;
         this.isGaeEnabled = isGaeEnabled;
         this.isDatabaseDotComEnabled = isDatabaseDotComEnabled;
 
@@ -125,12 +127,14 @@ public class JpaEntityMetadata extends
         builder.addConstructor(getNoArgConstructor());
 
         // Add identifier field and accessor
-        builder.addField(getIdentifierField());
+        identifierField = getIdentifierField();
+        builder.addField(identifierField);
         builder.addMethod(getIdentifierAccessor());
         builder.addMethod(getIdentifierMutator());
 
         // Add version field and accessor
-        builder.addField(getVersionField());
+        versionField = getVersionField();
+        builder.addField(versionField);
         builder.addMethod(getVersionAccessor());
         builder.addMethod(getVersionMutator());
 
@@ -181,18 +185,17 @@ public class JpaEntityMetadata extends
      * @return the accessor (never returns null)
      */
     private MethodMetadataBuilder getIdentifierAccessor() {
-        if (parentEntity != null) {
-            return parentEntity.getIdentifierAccessor();
+        if (parent != null) {
+            return parent.getIdentifierAccessor();
         }
 
         // Locate the identifier field, and compute the name of the accessor
         // that will be produced
-        final FieldMetadata id = getIdentifierField();
         JavaSymbolName requiredAccessorName = BeanInfoUtils
-                .getAccessorMethodName(id);
+                .getAccessorMethodName(identifierField);
 
         // See if the user provided the field
-        if (!getId().equals(id.getDeclaredByMetadataId())) {
+        if (!getId().equals(identifierField.getDeclaredByMetadataId())) {
             // Locate an existing accessor
             final MethodMetadata method = entityMemberDetails.getMethod(
                     requiredAccessorName, new ArrayList<JavaType>());
@@ -213,10 +216,11 @@ public class JpaEntityMetadata extends
         // it
         final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
         bodyBuilder.appendFormalLine("return this."
-                + id.getFieldName().getSymbolName() + ";");
+                + identifierField.getFieldName().getSymbolName() + ";");
 
         return new MethodMetadataBuilder(getId(), Modifier.PUBLIC,
-                requiredAccessorName, id.getFieldType(), bodyBuilder);
+                requiredAccessorName, identifierField.getFieldType(),
+                bodyBuilder);
     }
 
     private String getIdentifierColumn() {
@@ -250,8 +254,8 @@ public class JpaEntityMetadata extends
      * @return the identifier (never returns null)
      */
     private FieldMetadata getIdentifierField() {
-        if (parentEntity != null) {
-            final FieldMetadata idField = parentEntity.getIdentifierField();
+        if (parent != null) {
+            final FieldMetadata idField = parent.getIdentifierField();
             if (idField != null) {
                 if (MemberFindingUtils.getAnnotationOfType(
                         idField.getAnnotations(), ID) != null) {
@@ -262,7 +266,7 @@ public class JpaEntityMetadata extends
                     return idField;
                 }
             }
-            return parentEntity.getIdentifierField();
+            return parent.getIdentifierField();
         }
 
         // Try to locate an existing field with @javax.persistence.Id
@@ -424,22 +428,22 @@ public class JpaEntityMetadata extends
     private MethodMetadataBuilder getIdentifierMutator() {
         // TODO: This is a temporary workaround to support web data binding
         // approaches; to be reviewed more thoroughly in future
-        if (parentEntity != null) {
-            return parentEntity.getIdentifierMutator();
+        if (parent != null) {
+            return parent.getIdentifierMutator();
         }
 
         // Locate the identifier field, and compute the name of the accessor
         // that will be produced
-        final FieldMetadata id = getIdentifierField();
         JavaSymbolName requiredMutatorName = BeanInfoUtils
-                .getMutatorMethodName(id);
+                .getMutatorMethodName(identifierField);
 
-        final List<JavaType> parameterTypes = Arrays.asList(id.getFieldType());
+        final List<JavaType> parameterTypes = Arrays.asList(identifierField
+                .getFieldType());
         final List<JavaSymbolName> parameterNames = Arrays
                 .asList(new JavaSymbolName("id"));
 
         // See if the user provided the field
-        if (!getId().equals(id.getDeclaredByMetadataId())) {
+        if (!getId().equals(identifierField.getDeclaredByMetadataId())) {
             // Locate an existing mutator
             final MethodMetadata method = entityMemberDetails.getMethod(
                     requiredMutatorName, parameterTypes);
@@ -458,7 +462,7 @@ public class JpaEntityMetadata extends
         // We declared the field in this ITD, so produce a public mutator for it
         final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
         bodyBuilder.appendFormalLine("this."
-                + id.getFieldName().getSymbolName() + " = id;");
+                + identifierField.getFieldName().getSymbolName() + " = id;");
 
         return new MethodMetadataBuilder(getId(), Modifier.PUBLIC,
                 requiredMutatorName, JavaType.VOID_PRIMITIVE,
@@ -592,28 +596,27 @@ public class JpaEntityMetadata extends
      *         field declared in this class)
      */
     private MethodMetadataBuilder getVersionAccessor() {
-        final FieldMetadata version = getVersionField();
-        if (version == null) {
+        if (versionField == null) {
             // There's no version field, so there certainly won't be an accessor
             // for it
             return null;
         }
 
-        if (parentEntity != null) {
-            final FieldMetadata result = parentEntity.getVersionField();
+        if (parent != null) {
+            final FieldMetadata result = parent.getVersionField();
             if (result != null) {
                 // It's the parent's responsibility to provide the accessor, not
                 // ours
-                return parentEntity.getVersionAccessor();
+                return parent.getVersionAccessor();
             }
         }
 
         // Compute the name of the accessor that will be produced
         JavaSymbolName requiredAccessorName = BeanInfoUtils
-                .getAccessorMethodName(version);
+                .getAccessorMethodName(versionField);
 
         // See if the user provided the field
-        if (!getId().equals(version.getDeclaredByMetadataId())) {
+        if (!getId().equals(versionField.getDeclaredByMetadataId())) {
             // Locate an existing accessor
             final MethodMetadata method = entityMemberDetails.getMethod(
                     requiredAccessorName, new ArrayList<JavaType>(), getId());
@@ -634,10 +637,10 @@ public class JpaEntityMetadata extends
         // it
         final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
         bodyBuilder.appendFormalLine("return this."
-                + version.getFieldName().getSymbolName() + ";");
+                + versionField.getFieldName().getSymbolName() + ";");
 
         return new MethodMetadataBuilder(getId(), Modifier.PUBLIC,
-                requiredAccessorName, version.getFieldType(), bodyBuilder);
+                requiredAccessorName, versionField.getFieldType(), bodyBuilder);
     }
 
     /**
@@ -655,8 +658,8 @@ public class JpaEntityMetadata extends
      * @return the version field (may be null)
      */
     private FieldMetadata getVersionField() {
-        if (parentEntity != null) {
-            final FieldMetadata result = parentEntity.getVersionField();
+        if (parent != null) {
+            final FieldMetadata result = parent.getVersionField();
             if (result != null) {
                 return result;
             }
@@ -717,14 +720,13 @@ public class JpaEntityMetadata extends
     private MethodMetadataBuilder getVersionMutator() {
         // TODO: This is a temporary workaround to support web data binding
         // approaches; to be reviewed more thoroughly in future
-        if (parentEntity != null) {
-            return parentEntity.getVersionMutator();
+        if (parent != null) {
+            return parent.getVersionMutator();
         }
 
         // Locate the version field, and compute the name of the mutator that
         // will be produced
-        final FieldMetadata version = getVersionField();
-        if (version == null) {
+        if (versionField == null) {
             // There's no version field, so there certainly won't be a mutator
             // for it
             return null;
@@ -732,15 +734,15 @@ public class JpaEntityMetadata extends
 
         // Compute the name of the mutator that will be produced
         JavaSymbolName requiredMutatorName = BeanInfoUtils
-                .getMutatorMethodName(version);
+                .getMutatorMethodName(versionField);
 
-        final List<JavaType> parameterTypes = Arrays.asList(version
+        final List<JavaType> parameterTypes = Arrays.asList(versionField
                 .getFieldType());
         final List<JavaSymbolName> parameterNames = Arrays
                 .asList(new JavaSymbolName("version"));
 
         // See if the user provided the field
-        if (!getId().equals(version.getDeclaredByMetadataId())) {
+        if (!getId().equals(versionField.getDeclaredByMetadataId())) {
             // Locate an existing mutator
             final MethodMetadata method = entityMemberDetails.getMethod(
                     requiredMutatorName, parameterTypes, getId());
@@ -759,7 +761,7 @@ public class JpaEntityMetadata extends
         // We declared the field in this ITD, so produce a public mutator for it
         final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
         bodyBuilder.appendFormalLine("this."
-                + version.getFieldName().getSymbolName() + " = version;");
+                + versionField.getFieldName().getSymbolName() + " = version;");
 
         return new MethodMetadataBuilder(getId(), Modifier.PUBLIC,
                 requiredMutatorName, JavaType.VOID_PRIMITIVE,
