@@ -104,6 +104,12 @@ public class MongoEntityMetadataProviderImpl extends
             return null;
         }
 
+        // Get the governor's member details
+        final MemberDetails memberDetails = getMemberDetails(governorPhysicalType);
+        if (memberDetails == null) {
+            return null;
+        }
+
         final MongoEntityMetadata parent = getParentMetadata(governorPhysicalType
                 .getMemberHoldingTypeDetails());
 
@@ -122,9 +128,6 @@ public class MongoEntityMetadataProviderImpl extends
                 return null;
             }
         }
-
-        // Get the governor's member details
-        final MemberDetails memberDetails = getMemberDetails(governorPhysicalType);
 
         return new MongoEntityMetadata(metadataIdentificationString,
                 aspectName, governorPhysicalType, parent, identifierType,

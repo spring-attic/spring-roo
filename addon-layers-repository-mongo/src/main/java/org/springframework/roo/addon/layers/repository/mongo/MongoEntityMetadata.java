@@ -66,10 +66,10 @@ public class MongoEntityMetadata extends
                 metadataIdentificationString);
     }
 
-    private final MemberDetails memberDetails;
-    private final MongoEntityMetadata parent;
-    private final JavaType idType;
-    private final FieldMetadata idField;
+    private MemberDetails memberDetails;
+    private MongoEntityMetadata parent;
+    private JavaType idType;
+    private FieldMetadata idField;
 
     /**
      * Constructor
@@ -90,6 +90,10 @@ public class MongoEntityMetadata extends
         super(identifier, aspectName, governorPhysicalTypeMetadata);
         Validate.notNull(idType, "Id type required");
         Validate.notNull(memberDetails, "Entity MemberDetails required");
+
+        if (!isValid()) {
+            return;
+        }
 
         this.memberDetails = memberDetails;
         this.parent = parent;
@@ -113,8 +117,7 @@ public class MongoEntityMetadata extends
             final MethodMetadataBuilder parentIdAccessor = parent
                     .getIdentifierAccessor();
             if (parentIdAccessor != null
-                    && parentIdAccessor.getReturnType().equals(
-                            idType)) {
+                    && parentIdAccessor.getReturnType().equals(idType)) {
                 return parentIdAccessor;
             }
         }
