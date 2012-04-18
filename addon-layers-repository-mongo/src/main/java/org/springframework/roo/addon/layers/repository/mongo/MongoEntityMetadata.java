@@ -67,6 +67,9 @@ public class MongoEntityMetadata extends
     }
 
     private final MemberDetails memberDetails;
+    private final MongoEntityMetadata parent;
+    private final JavaType idType;
+    private final FieldMetadata idField;
 
     /**
      * Constructor
@@ -75,34 +78,47 @@ public class MongoEntityMetadata extends
      * @param aspectName the Java type of the ITD (required)
      * @param governorPhysicalTypeMetadata the governor, which is expected to
      *            contain a {@link ClassOrInterfaceTypeDetails} (required)
+     * @param parent
      * @param idType the type of the entity's identifier field (required)
      * @param governorMemberDetails the member details of the entity
      */
     public MongoEntityMetadata(final String identifier,
             final JavaType aspectName,
             final PhysicalTypeMetadata governorPhysicalTypeMetadata,
-            final JavaType idType, final MemberDetails memberDetails) {
+            MongoEntityMetadata parent, final JavaType idType,
+            final MemberDetails memberDetails) {
         super(identifier, aspectName, governorPhysicalTypeMetadata);
         Validate.notNull(idType, "Id type required");
         Validate.notNull(memberDetails, "Entity MemberDetails required");
 
         this.memberDetails = memberDetails;
+        this.parent = parent;
+        this.idType = idType;
 
         builder.addAnnotation(getTypeAnnotation(SpringJavaType.PERSISTENT));
 
-        final FieldMetadata idField = getIdentifierField(idType);
+        idField = getIdentifierField();
         if (idField != null) {
             builder.addField(idField);
-            builder.addMethod(getIdentifierAccessor(idField));
-            builder.addMethod(getIdentifierMutator(idField));
+            builder.addMethod(getIdentifierAccessor());
+            builder.addMethod(getIdentifierMutator());
         }
 
         // Build the ITD
         itdTypeDetails = builder.build();
     }
 
-    private MethodMetadataBuilder getIdentifierAccessor(
-            final FieldMetadata idField) {
+    private MethodMetadataBuilder getIdentifierAccessor() {
+        if (parent != null) {
+            final MethodMetadataBuilder parentIdAccessor = parent
+                    .getIdentifierAccessor();
+            if (parentIdAccessor != null
+                    && parentIdAccessor.getReturnType().equals(
+                            idType)) {
+                return parentIdAccessor;
+            }
+        }
+
         JavaSymbolName requiredAccessorName = BeanInfoUtils
                 .getAccessorMethodName(idField);
 
@@ -134,8 +150,15 @@ public class MongoEntityMetadata extends
                 requiredAccessorName, idField.getFieldType(), bodyBuilder);
     }
 
-    private FieldMetadata getIdentifierField(final JavaType idType) {
-        // Try to locate an existing field with SPRING_DATA_ID
+    private FieldMetadata getIdentifierField() {
+        if (parent != null) {
+            final FieldMetadata parentIdField = parent.getIdentifierField();
+            if (parentIdField.getFieldType().equals(idType)) {
+                return parentIdField;
+            }
+        }
+
+        // Try to locate an existing field with DATA_ID
         final List<FieldMetadata> idFields = governorTypeDetails
                 .getFieldsWithAnnotation(SpringJavaType.DATA_ID);
         if (!idFields.isEmpty()) {
@@ -150,8 +173,17 @@ public class MongoEntityMetadata extends
         return fieldBuilder.build();
     }
 
-    private MethodMetadataBuilder getIdentifierMutator(
-            final FieldMetadata idField) {
+    private MethodMetadataBuilder getIdentifierMutator() {
+        if (parent != null) {
+            final MethodMetadataBuilder parentIdMutator = parent
+                    .getIdentifierMutator();
+            if (parentIdMutator != null
+                    && parentIdMutator.getParameterTypes().get(0).getJavaType()
+                            .equals(idType)) {
+                return parentIdMutator;
+            }
+        }
+
         JavaSymbolName requiredMutatorName = BeanInfoUtils
                 .getMutatorMethodName(idField);
 

@@ -18,12 +18,12 @@ import org.springframework.roo.classpath.customdata.taggers.AnnotatedTypeMatcher
 import org.springframework.roo.classpath.customdata.taggers.CustomDataKeyDecorator;
 import org.springframework.roo.classpath.customdata.taggers.FieldMatcher;
 import org.springframework.roo.classpath.customdata.taggers.MethodMatcher;
+import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.model.SpringJavaType;
 import org.springframework.roo.project.LogicalPath;
 
@@ -47,7 +47,7 @@ public class MongoEntityMetadataProviderImpl extends
     private static final MethodMatcher ID_MUTATOR_MATCHER = new MethodMatcher(
             Arrays.asList(ID_FIELD_MATCHER), IDENTIFIER_MUTATOR_METHOD, false);
     private static final AnnotatedTypeMatcher PERSISTENT_TYPE_MATCHER = new AnnotatedTypeMatcher(
-            PERSISTENT_TYPE, RooJavaType.ROO_MONGO_ENTITY);
+            PERSISTENT_TYPE, ROO_MONGO_ENTITY);
 
     @Reference private CustomDataKeyDecorator customDataKeyDecorator;
 
@@ -95,20 +95,39 @@ public class MongoEntityMetadataProviderImpl extends
     protected ItdTypeDetailsProvidingMetadataItem getMetadata(
             final String metadataIdentificationString,
             final JavaType aspectName,
-            final PhysicalTypeMetadata governorPhysicalTypeMetadata,
+            final PhysicalTypeMetadata governorPhysicalType,
             final String itdFilename) {
         final MongoEntityAnnotationValues annotationValues = new MongoEntityAnnotationValues(
-                governorPhysicalTypeMetadata);
+                governorPhysicalType);
         final JavaType identifierType = annotationValues.getIdentifierType();
         if (!annotationValues.isAnnotationFound() || identifierType == null) {
             return null;
         }
 
+        final MongoEntityMetadata parent = getParentMetadata(governorPhysicalType
+                .getMemberHoldingTypeDetails());
+
+        // If the parent is null, but the type has a super class it is likely
+        // that the we don't have information to proceed
+        if (parent == null
+                && governorPhysicalType.getMemberHoldingTypeDetails()
+                        .getSuperclass() != null) {
+            // If the superclass is not annotated with the RooMongoEntity
+            // trigger
+            // annotation then we can be pretty sure that we don't have enough
+            // information to proceed
+            if (MemberFindingUtils.getAnnotationOfType(governorPhysicalType
+                    .getMemberHoldingTypeDetails().getAnnotations(),
+                    ROO_MONGO_ENTITY) != null) {
+                return null;
+            }
+        }
+
         // Get the governor's member details
-        final MemberDetails memberDetails = getMemberDetails(governorPhysicalTypeMetadata);
+        final MemberDetails memberDetails = getMemberDetails(governorPhysicalType);
 
         return new MongoEntityMetadata(metadataIdentificationString,
-                aspectName, governorPhysicalTypeMetadata, identifierType,
+                aspectName, governorPhysicalType, parent, identifierType,
                 memberDetails);
     }
 
