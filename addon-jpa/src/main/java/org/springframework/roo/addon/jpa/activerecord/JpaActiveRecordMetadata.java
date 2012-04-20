@@ -172,7 +172,8 @@ public class JpaActiveRecordMetadata extends
     /**
      * Locates the entity manager field that should be used.
      * <p>
-     * If a parent is defined, it must provide the field.
+     * If a parent is defined, it must provide the field unless a persistent
+     * unit name is supplied on the child entity.
      * <p>
      * We generally expect the field to be named "entityManager" and be of type
      * javax.persistence.EntityManager. We also require it to be public or
@@ -185,7 +186,9 @@ public class JpaActiveRecordMetadata extends
      * @return the entity manager field (never returns null)
      */
     public FieldMetadata getEntityManagerField() {
-        if (parent != null) {
+        if (parent != null
+                && StringUtils.isBlank(crudAnnotationValues
+                        .getPersistenceUnit())) {
             // The parent is required to guarantee this is available
             return parent.getEntityManagerField();
         }
