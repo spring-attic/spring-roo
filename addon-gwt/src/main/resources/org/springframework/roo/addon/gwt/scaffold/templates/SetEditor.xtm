@@ -8,6 +8,7 @@ import com.google.gwt.editor.client.ValueAwareEditor;
 import com.google.gwt.editor.client.adapters.EditorSource;
 import com.google.gwt.editor.client.adapters.ListEditor;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.web.bindery.requestfactory.gwt.client.RequestFactoryEditorDriver;
@@ -17,6 +18,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -90,7 +92,7 @@ public class {{=className}} extends Composite implements ValueAwareEditor<Set<{{
     @Override
     public NameLabel create(int index) {
       NameLabel label = new NameLabel();
-      container.insert(label, index);
+      addToTable(label.getValue(), index);
       return label;
     }
 
@@ -101,12 +103,12 @@ public class {{=className}} extends Composite implements ValueAwareEditor<Set<{{
 
     @Override
     public void setIndex(NameLabel editor, int index) {
-      container.insert(editor, index);
+      addToTable(editor.getValue(), index);
     }
   }
 
   @UiField
-  FlowPanel container;
+  FlexTable table;
 
   @UiField(provided = true)
   @Editor.Ignore
@@ -178,6 +180,7 @@ public class {{=className}} extends Composite implements ValueAwareEditor<Set<{{
 	}
     displayedList.add(picker.getValue());
     viewLabel.setText(makeFlatList(displayedList));
+    addToTable(picker.getValue());
   }
 
   @UiHandler("clickToEdit")
@@ -220,13 +223,35 @@ public class {{=className}} extends Composite implements ValueAwareEditor<Set<{{
     makeEditable(editing = false);
     if (displayedList != null) {
       displayedList.clear();
+      table.clear();
       if (values != null) {
       for ({{=proxy}} e : values) {
         displayedList.add(e);
+        addToTable(e);
       }
     }
     }
     viewLabel.setText(makeFlatList(values));
+  }
+  
+  private void addToTable({{=proxy}} value) {
+    addToTable(value, displayedList.size() - 1);
+  }
+    
+  private void addToTable({{=proxy}} value, int index){
+    final int finalIndex = index;
+    if(value != null){
+      table.setText(finalIndex, 0, {{=proxyRenderer}}.instance().render(value));
+      Button removeEntryButton = new Button("x");
+      removeEntryButton.addClickHandler(new ClickHandler(){
+        public void onClick(final ClickEvent event){
+          displayedList.remove(finalIndex);
+          table.removeRow(finalIndex);
+          viewLabel.setText(makeFlatList(displayedList));
+        }
+      });
+      table.setWidget(finalIndex, 1, removeEntryButton);
+    }
   }
 
   private void makeEditable(boolean editable) {
