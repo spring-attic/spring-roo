@@ -395,7 +395,8 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
             final BundleVersion bundleVersion, final String bsn) {
         final InstallOrUpgradeStatus status = installOrUpgradeAddOn(
                 bundleVersion, bsn, true);
-        if (status.equals(InstallOrUpgradeStatus.SUCCESS)) {
+        switch (status) {
+        case SUCCESS:
             LOGGER.info("Successfully installed add-on: "
                     + bundleVersion.getPresentationName() + " [version: "
                     + bundleVersion.getVersion() + "]");
@@ -406,15 +407,20 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
                             bsn.indexOf(";") != -1 ? bsn.indexOf(";") : bsn
                                     .length())
                     + " --rating ... --comment \"...\"");
-        }
-        else if (status.equals(InstallOrUpgradeStatus.SHELL_RESTART_NEEDED)) {
+            break;
+        case SHELL_RESTART_NEEDED:
             LOGGER.warning("You have upgraded a Roo core addon. To complete this installation please restart the Roo shell.");
-        }
-        else {
+            break;
+        case PGP_VERIFICATION_NEEDED:
+            LOGGER.warning("PGP verification of the bundle required");
+            break;
+        default:
             LOGGER.warning("Unable to install add-on: "
                     + bundleVersion.getPresentationName() + " [version: "
                     + bundleVersion.getVersion() + "]");
+            break;
         }
+
         return status;
     }
 
@@ -477,18 +483,10 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
                 .executeCommand("osgi obr url remove --url http://spring-roo-repository.springsource.org/repository.xml"));
 
         if (install && count == countBundles()) {
-            return InstallOrUpgradeStatus.PGP_VERIFICATION_NEEDED; // Most
-                                                                   // likely PgP
-                                                                   // verification
-                                                                   // required
-                                                                   // before the
-                                                                   // bundle can
-                                                                   // be
-                                                                   // installed,
-                                                                   // no log
-                                                                   // needed
+            // Most likely PgP verification required before the bundle can be
+            // installed, no log needed
+            return InstallOrUpgradeStatus.PGP_VERIFICATION_NEEDED;
         }
-
         return success ? InstallOrUpgradeStatus.SUCCESS
                 : InstallOrUpgradeStatus.FAILED;
     }
