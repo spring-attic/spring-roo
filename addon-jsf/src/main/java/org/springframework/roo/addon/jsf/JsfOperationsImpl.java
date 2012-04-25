@@ -68,7 +68,7 @@ public class JsfOperationsImpl extends AbstractOperations implements
     private static final String JSF_IMPLEMENTATION_XPATH = "/configuration/jsf-implementations/jsf-implementation";
     private static final String JSF_LIBRARY_XPATH = "/configuration/jsf-libraries/jsf-library";
     private static final String MYFACES_LISTENER = "org.apache.myfaces.webapp.StartupServletContextListener";
-    private static final String PRIMEFACES_THEMES_VERSION = "1.0.3";
+    private static final String PRIMEFACES_THEMES_VERSION = "1.0.4";
     private static final String REPOSITORY_XPATH = "/repositories/repository";
 
     @Reference private MetadataDependencyRegistry metadataDependencyRegistry;

@@ -551,10 +551,10 @@ public class JpaOperationsImpl implements JpaOperations {
                 .createIdentifier(name,
                         pathResolver.getFocusedPath(Path.SRC_MAIN_JAVA));
 
-        final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
-        annotations.add(new AnnotationMetadataBuilder(ROO_JAVA_BEAN));
-        annotations.add(new AnnotationMetadataBuilder(ROO_TO_STRING));
-        annotations.add(new AnnotationMetadataBuilder(EMBEDDABLE));
+        final List<AnnotationMetadataBuilder> annotations = Arrays.asList(
+                new AnnotationMetadataBuilder(ROO_JAVA_BEAN),
+                new AnnotationMetadataBuilder(ROO_TO_STRING),
+                new AnnotationMetadataBuilder(EMBEDDABLE));
 
         if (serializable) {
             annotations.add(new AnnotationMetadataBuilder(ROO_SERIALIZABLE));

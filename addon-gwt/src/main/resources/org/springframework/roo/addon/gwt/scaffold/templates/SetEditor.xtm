@@ -63,14 +63,14 @@ public class {{=className}} extends Composite implements ValueAwareEditor<Set<{{
     }
 
     public void setValue({{=proxy}} proxy) {
-		this.proxy = proxy;
-		{{=primaryProp}}Editor.setText({{=proxyRenderer}}.instance().render(proxy));
-	}
+        this.proxy = proxy;
+        {{=primaryProp}}Editor.setText({{=proxyRenderer}}.instance().render(proxy));
+    }
 
-	@Override
-	public {{=proxy}} getValue() {
-		return proxy;
-	}
+    @Override
+    public {{=proxy}} getValue() {
+        return proxy;
+    }
   }
 
   interface Style extends CssResource {
@@ -171,13 +171,13 @@ public class {{=className}} extends Composite implements ValueAwareEditor<Set<{{
   @UiHandler("add")
   public void addClicked(ClickEvent e) {
     if (picker.getValue() == null){
-		return;
-	}
-	for ({{=proxy}} proxy : displayedList) {
-		if (proxy.{{=primaryPropGetter}}().equals(picker.getValue().{{=primaryPropGetter}}())) {
-			return;
-		}
-	}
+      return;
+    }
+    for ({{=proxy}} proxy : displayedList) {
+        if (proxy.{{=primaryPropGetter}}().equals(picker.getValue().{{=primaryPropGetter}}())) {
+            return;
+        }
+    }
     displayedList.add(picker.getValue());
     viewLabel.setText(makeFlatList(displayedList));
     addToTable(picker.getValue());
@@ -240,10 +240,10 @@ public class {{=className}} extends Composite implements ValueAwareEditor<Set<{{
     
   private void addToTable({{=proxy}} value, int index){
     final int finalIndex = index;
-    if(value != null){
+    if (value != null) {
       table.setText(finalIndex, 0, {{=proxyRenderer}}.instance().render(value));
       Button removeEntryButton = new Button("x");
-      removeEntryButton.addClickHandler(new ClickHandler(){
+      removeEntryButton.addClickHandler(new ClickHandler() {
         public void onClick(final ClickEvent event){
           displayedList.remove(finalIndex);
           table.removeRow(finalIndex);
