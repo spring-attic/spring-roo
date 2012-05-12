@@ -596,7 +596,7 @@ public class JpaActiveRecordMetadata extends
     }
 
     /**
-     * @return the merge method (never returns null)
+     * @return the merge method (may return null)
      */
     private MethodMetadataBuilder getMergeMethod() {
         if ("".equals(crudAnnotationValues.getMergeMethod())) {

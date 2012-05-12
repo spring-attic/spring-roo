@@ -464,12 +464,9 @@ public class Person {
 
         <para>Similar to the @RooToString annotation you can change the
         default method name for all persistence-related methods generated
-        through the @RooJpaActiveRecord annotation. Furthermore, if you don't
-        want Roo to generate certain methods as part of this addon at all you
-        can assign an empty String as the method name which will instruct Roo
-        to not generate the method:</para>
+        through the @RooJpaActiveRecord annotation. For example:</para>
 
-        <para><programlisting>@RooJpaActiveRecord(countMethod = "")</programlisting></para>
+        <para><programlisting>@RooJpaActiveRecord(persistMethod = "save")</programlisting></para>
       </listitem>
     </orderedlist>
 
