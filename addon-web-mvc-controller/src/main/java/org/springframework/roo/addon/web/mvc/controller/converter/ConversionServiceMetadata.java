@@ -360,6 +360,10 @@ public class ConversionServiceMetadata extends
     private String getTypeToStringLine(final JavaType targetType,
             final String targetTypeName,
             final List<MethodMetadata> toStringMethods) {
+        if (toStringMethods.isEmpty()) {
+            return "return \"(no displayable fields)\";";
+        }
+
         final StringBuilder sb = new StringBuilder("return new StringBuilder()");
         for (int i = 0; i < toStringMethods.size(); i++) {
             if (i > 0) {
