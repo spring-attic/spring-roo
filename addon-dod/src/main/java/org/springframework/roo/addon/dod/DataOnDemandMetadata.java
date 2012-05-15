@@ -20,6 +20,7 @@ import static org.springframework.roo.model.Jsr303JavaType.DIGITS;
 import static org.springframework.roo.model.Jsr303JavaType.FUTURE;
 import static org.springframework.roo.model.Jsr303JavaType.MAX;
 import static org.springframework.roo.model.Jsr303JavaType.MIN;
+import static org.springframework.roo.model.Jsr303JavaType.NOT_NULL;
 import static org.springframework.roo.model.Jsr303JavaType.PAST;
 import static org.springframework.roo.model.Jsr303JavaType.SIZE;
 import static org.springframework.roo.model.SpringJavaType.AUTOWIRED;
@@ -989,12 +990,16 @@ public class DataOnDemandMetadata extends
     private String getFieldInitializerForRelatedEntity(
             final FieldMetadata field,
             final DataOnDemandMetadata collaboratingMetadata,
-            final Set<Object> fieldCustomDataKeys) {
+            final Set<?> fieldCustomDataKeys) {
+        // To avoid circular references, we don't try to set nullable fields
+        final boolean nullableField = field.getAnnotation(NOT_NULL) == null;
+        if (nullableField) {
+            return null;
+        }
         final String collaboratingFieldName = getCollaboratingFieldName(
                 field.getFieldType()).getSymbolName();
-        // Decide if we're dealing with a one-to-one and therefore should
-        // _try_ to keep the same id (ROO-568)
         if (fieldCustomDataKeys.contains(CustomDataKeys.ONE_TO_ONE_FIELD)) {
+            // We try to keep the same ID (ROO-568)
             return collaboratingFieldName
                     + "."
                     + collaboratingMetadata.getSpecificPersistentEntityMethod()
