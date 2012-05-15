@@ -193,7 +193,9 @@ public class DataOnDemandMetadata extends
             final FieldMetadata field = entry.getKey();
             final String initializer = getFieldInitializer(field,
                     entry.getValue());
-            fieldInitializers.put(field, initializer);
+            if (!StringUtils.isBlank(initializer)) {
+                fieldInitializers.put(field, initializer);
+            }
         }
 
         for (final EmbeddedHolder embeddedHolder : embeddedHolders) {
@@ -977,29 +979,32 @@ public class DataOnDemandMetadata extends
         else if (collaboratingMetadata != null
                 && collaboratingMetadata.getEntityType() != null) {
             requiredDataOnDemandCollaborators.add(fieldType);
-
-            final String collaboratingFieldName = getCollaboratingFieldName(
-                    field.getFieldType()).getSymbolName();
-            // Decide if we're dealing with a one-to-one and therefore should
-            // _try_ to keep the same id (ROO-568)
-            if (fieldCustomDataKeys.contains(CustomDataKeys.ONE_TO_ONE_FIELD)) {
-                initializer = collaboratingFieldName
-                        + "."
-                        + collaboratingMetadata
-                                .getSpecificPersistentEntityMethod()
-                                .getMethodName().getSymbolName() + "("
-                        + INDEX_VAR + ")";
-            }
-            else {
-                initializer = collaboratingFieldName
-                        + "."
-                        + collaboratingMetadata
-                                .getRandomPersistentEntityMethod()
-                                .getMethodName().getSymbolName() + "()";
-            }
+            initializer = getFieldInitializerForRelatedEntity(field,
+                    collaboratingMetadata, fieldCustomDataKeys);
         }
 
         return initializer;
+    }
+
+    private String getFieldInitializerForRelatedEntity(
+            final FieldMetadata field,
+            final DataOnDemandMetadata collaboratingMetadata,
+            final Set<Object> fieldCustomDataKeys) {
+        final String collaboratingFieldName = getCollaboratingFieldName(
+                field.getFieldType()).getSymbolName();
+        // Decide if we're dealing with a one-to-one and therefore should
+        // _try_ to keep the same id (ROO-568)
+        if (fieldCustomDataKeys.contains(CustomDataKeys.ONE_TO_ONE_FIELD)) {
+            return collaboratingFieldName
+                    + "."
+                    + collaboratingMetadata.getSpecificPersistentEntityMethod()
+                            .getMethodName().getSymbolName() + "(" + INDEX_VAR
+                    + ")";
+        }
+        return collaboratingFieldName
+                + "."
+                + collaboratingMetadata.getRandomPersistentEntityMethod()
+                        .getMethodName().getSymbolName() + "()";
     }
 
     private List<MethodMetadataBuilder> getFieldMutatorMethods() {
@@ -1022,18 +1027,16 @@ public class DataOnDemandMetadata extends
 
             // Method not on governor so need to create it
             final String initializer = entry.getValue();
-            Validate.notBlank(initializer,
-                    "Internal error: unable to locate initializer for "
-                            + mutatorName.getSymbolName());
+            if (!StringUtils.isBlank(initializer)) {
+                final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+                bodyBuilder.append(getFieldValidationBody(field, initializer,
+                        mutatorName, false));
 
-            final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-            bodyBuilder.append(getFieldValidationBody(field, initializer,
-                    mutatorName, false));
-
-            fieldMutatorMethods.add(new MethodMetadataBuilder(getId(),
-                    Modifier.PUBLIC, mutatorName, JavaType.VOID_PRIMITIVE,
-                    AnnotatedJavaType.convertFromJavaTypes(parameterTypes),
-                    parameterNames, bodyBuilder));
+                fieldMutatorMethods.add(new MethodMetadataBuilder(getId(),
+                        Modifier.PUBLIC, mutatorName, JavaType.VOID_PRIMITIVE,
+                        AnnotatedJavaType.convertFromJavaTypes(parameterTypes),
+                        parameterNames, bodyBuilder));
+            }
         }
 
         return fieldMutatorMethods;
