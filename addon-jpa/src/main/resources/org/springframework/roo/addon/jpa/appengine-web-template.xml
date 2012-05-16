@@ -3,6 +3,7 @@
     <application>TO_BE_CHANGED_BY_ADDON</application>
     <version>1</version>
     <sessions-enabled>true</sessions-enabled>
+    <threadsafe>true</threadsafe>
     <!-- Configure java.util.logging -->
     <system-properties>
         <property name="java.util.logging.config.file" value="WEB-INF/logging.properties" />

@@ -117,7 +117,7 @@
         </database>
         <database id="GAE">
             <properties>
-                <gae.home>${user.home}/.m2/repository/com/google/appengine/appengine-java-sdk/1.6.4.1/appengine-java-sdk-1.6.4.1</gae.home>
+                <gae.home>${user.home}/.m2/repository/com/google/appengine/appengine-java-sdk/1.6.5/appengine-java-sdk-1.6.5</gae.home>
             </properties>
             <repositories>
                 <repository>
@@ -142,24 +142,24 @@
                 <dependency>
                     <groupId>com.google.appengine</groupId>
                     <artifactId>appengine-api-1.0-sdk</artifactId>
-                    <version>1.6.4.1</version>
+                    <version>1.6.5</version>
                 </dependency>
                 <dependency>
                     <groupId>com.google.appengine</groupId>
                     <artifactId>appengine-testing</artifactId>
-                    <version>1.6.4.1</version>
+                    <version>1.6.5</version>
                     <scope>test</scope>
                 </dependency>
                 <dependency>
                     <groupId>com.google.appengine</groupId>
                     <artifactId>appengine-api-stubs</artifactId>
-                    <version>1.6.4.1</version>
+                    <version>1.6.5</version>
                     <scope>test</scope>
                 </dependency>
                 <dependency>
                     <groupId>com.google.appengine</groupId>
                     <artifactId>appengine-api-labs</artifactId>
-                    <version>1.6.4.1</version>
+                    <version>1.6.5</version>
                     <scope>test</scope>
                 </dependency>
             </dependencies>
@@ -169,7 +169,7 @@
                     <artifactId>maven-gae-plugin</artifactId>
                     <version>0.9.2</version>
                     <configuration>
-                        <unpackVersion>1.6.4.1</unpackVersion>
+                        <unpackVersion>1.6.5</unpackVersion>
                     </configuration>
                     <executions>
                         <execution>
