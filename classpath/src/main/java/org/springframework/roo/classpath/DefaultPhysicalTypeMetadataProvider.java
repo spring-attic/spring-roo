@@ -54,16 +54,16 @@ public class DefaultPhysicalTypeMetadataProvider implements
                             .compareTo(o2.getClass().getName());
                 }
             });
+
     @Reference private FileManager fileManager;
-    // Mutex
-    private final Object lock = new Object();
     @Reference private MetadataDependencyRegistry metadataDependencyRegistry;
     @Reference private MetadataService metadataService;
     @Reference private ProjectOperations projectOperations;
-
     @Reference private TypeLocationService typeLocationService;
-
     @Reference private TypeParsingService typeParsingService;
+
+    // Mutex
+    private final Object lock = new Object();
 
     protected void bindMemberHoldingDecorator(
             final MemberDetailsDecorator decorator) {
