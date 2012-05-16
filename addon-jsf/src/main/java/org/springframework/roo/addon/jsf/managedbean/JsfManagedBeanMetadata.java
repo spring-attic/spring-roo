@@ -867,23 +867,28 @@ public class JsfManagedBeanMetadata extends
         builder.getImportRegistrationResolver().addImport(HTML_PANEL_GRID);
 
         final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-        bodyBuilder.appendFormalLine("if (" + fieldName + " == null) {");
-        bodyBuilder.indent();
         switch (action) {
         case CREATE:
+            bodyBuilder.appendFormalLine("if (" + fieldName + " == null) {");
+            bodyBuilder.indent();
             bodyBuilder.appendFormalLine(fieldName
                     + " = populateCreatePanel();");
+            bodyBuilder.indentRemove();
+            bodyBuilder.appendFormalLine("}");
+            bodyBuilder.appendFormalLine("return " + fieldName + ";");
             break;
         case EDIT:
+            bodyBuilder.appendFormalLine("if (" + fieldName + " == null) {");
+            bodyBuilder.indent();
             bodyBuilder.appendFormalLine(fieldName + " = populateEditPanel();");
+            bodyBuilder.indentRemove();
+            bodyBuilder.appendFormalLine("}");
+            bodyBuilder.appendFormalLine("return " + fieldName + ";");
             break;
         default:
-            bodyBuilder.appendFormalLine(fieldName + " = populateViewPanel();");
+            bodyBuilder.appendFormalLine("return populateViewPanel();");
             break;
         }
-        bodyBuilder.indentRemove();
-        bodyBuilder.appendFormalLine("}");
-        bodyBuilder.appendFormalLine("return " + fieldName + ";");
 
         return new MethodMetadataBuilder(getId(), PUBLIC, methodName,
                 HTML_PANEL_GRID, new ArrayList<AnnotatedJavaType>(),
