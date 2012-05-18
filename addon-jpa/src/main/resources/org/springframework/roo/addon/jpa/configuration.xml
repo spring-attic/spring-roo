@@ -220,12 +220,12 @@
                     <artifactId>hibernate-jpa-2.0-api</artifactId>
                     <version>1.0.1.Final</version>
                 </dependency>
+	            <dependency>
+	                <groupId>commons-collections</groupId>
+	                <artifactId>commons-collections</artifactId>
+	                <version>3.2.1</version>
+	            </dependency>
             </dependencies>
-            <dependency>
-                <groupId>commons-collections</groupId>
-                <artifactId>commons-collections</artifactId>
-                <version>3.2.1</version>
-            </dependency>
         </provider>
         <provider id="OPENJPA">
             <dependencies>
