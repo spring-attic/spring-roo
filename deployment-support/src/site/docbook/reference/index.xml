@@ -37,7 +37,7 @@
     </authorgroup>
 
     <legalnotice>
-      <para>Copyright 2009, 2010, 2011 VMware, Inc. All Rights
+      <para>Copyright 2009, 2010, 2011, 2012 VMware, Inc. All Rights
       Reserved.</para>
 
       <para>Copies of this document may be made for your own use and for
@@ -97,7 +97,7 @@
 
     <xi:include href="base-dbre.xml" />
 
-	<xi:include href="base-layers.xml" />
+    <xi:include href="base-layers.xml" />
 
     <xi:include href="base-web.xml" />
 
@@ -131,6 +131,16 @@
     <xi:include href="internals-simple-add-ons.xml" />
 
     <xi:include href="internals-advanced-add-ons.xml" />
+  </part>
+
+  <part xml:id="external-addons">
+    <title>External Add-Ons</title>
+
+    <partintro>
+      <para>In this part of the guide we detail external Roo add-ons.</para>
+    </partintro>
+
+    <xi:include href="add-on-tailor.xml" />
   </part>
 
   <part xml:id="appendices">
