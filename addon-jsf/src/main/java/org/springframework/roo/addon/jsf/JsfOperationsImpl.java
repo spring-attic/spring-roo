@@ -68,6 +68,7 @@ public class JsfOperationsImpl extends AbstractOperations implements
     private static final String JSF_IMPLEMENTATION_XPATH = "/configuration/jsf-implementations/jsf-implementation";
     private static final String JSF_LIBRARY_XPATH = "/configuration/jsf-libraries/jsf-library";
     private static final String MYFACES_LISTENER = "org.apache.myfaces.webapp.StartupServletContextListener";
+    private static final String MOJARRA_LISTENER = "com.sun.faces.config.ConfigureListener";
     private static final String PRIMEFACES_THEMES_VERSION = "1.0.4";
     private static final String REPOSITORY_XPATH = "/repositories/repository";
 
@@ -129,25 +130,43 @@ public class JsfOperationsImpl extends AbstractOperations implements
                 XmlUtils.nodeToString(document), false);
     }
 
-    private void addOrRemoveMyFacesListener(
-            final JsfImplementation jsfImplementation, final Document document) {
+    private void addOrRemoveListener(final JsfImplementation jsfImplementation,
+            final Document document) {
         Validate.notNull(jsfImplementation, "JSF implementation required");
         Validate.notNull(document, "web.xml document required");
 
         final Element root = document.getDocumentElement();
         final Element webAppElement = XmlUtils.findFirstElement("/web-app",
                 root);
-        final Element listenerElement = XmlUtils.findFirstElement(
-                "listener[listener-class = '" + MYFACES_LISTENER + "']",
-                webAppElement);
+        Element listenerElement;
         switch (jsfImplementation) {
         case ORACLE_MOJARRA:
+            listenerElement = XmlUtils.findFirstElement(
+                    "listener[listener-class = '" + MYFACES_LISTENER + "']",
+                    webAppElement);
             if (listenerElement != null) {
                 webAppElement.removeChild(listenerElement);
                 DomUtils.removeTextNodes(webAppElement);
             }
+            listenerElement = XmlUtils.findFirstElement(
+                    "listener[listener-class = '" + MOJARRA_LISTENER + "']",
+                    webAppElement);
+            if (listenerElement == null) {
+                WebXmlUtils.addListener(MOJARRA_LISTENER, document, "");
+                DomUtils.removeTextNodes(webAppElement);
+            }
             break;
         case APACHE_MYFACES:
+            listenerElement = XmlUtils.findFirstElement(
+                    "listener[listener-class = '" + MOJARRA_LISTENER + "']",
+                    webAppElement);
+            if (listenerElement != null) {
+                webAppElement.removeChild(listenerElement);
+                DomUtils.removeTextNodes(webAppElement);
+            }
+            listenerElement = XmlUtils.findFirstElement(
+                    "listener[listener-class = '" + MYFACES_LISTENER + "']",
+                    webAppElement);
             if (listenerElement == null) {
                 WebXmlUtils.addListener(MYFACES_LISTENER, document, "");
                 DomUtils.removeTextNodes(webAppElement);
@@ -342,7 +361,7 @@ public class JsfOperationsImpl extends AbstractOperations implements
         }
 
         if (jsfImplementation != null) {
-            addOrRemoveMyFacesListener(jsfImplementation, document);
+            addOrRemoveListener(jsfImplementation, document);
         }
         if (theme != null) {
             changePrimeFacesTheme(theme, document);
@@ -600,9 +619,9 @@ public class JsfOperationsImpl extends AbstractOperations implements
                 && fileManager.exists(getWebXmlFile());
     }
 
-    public void setup(final JsfImplementation jsfImplementation,
+    public void setup(JsfImplementation jsfImplementation,
             final JsfLibrary jsfLibrary, final Theme theme) {
-        updateConfiguration(jsfImplementation, jsfLibrary);
+        jsfImplementation = updateConfiguration(jsfImplementation, jsfLibrary);
         createOrUpdateWebXml(jsfImplementation, theme);
 
         final LogicalPath webappPath = Path.SRC_MAIN_WEBAPP
@@ -629,8 +648,8 @@ public class JsfOperationsImpl extends AbstractOperations implements
         fileManager.scan();
     }
 
-    private void updateConfiguration(JsfImplementation jsfImplementation,
-            JsfLibrary jsfLibrary) {
+    private JsfImplementation updateConfiguration(
+            JsfImplementation jsfImplementation, JsfLibrary jsfLibrary) {
         // Update pom.xml with JSF/Primefaces dependencies and repositories
         final Element configuration = XmlUtils.getConfiguration(getClass());
 
@@ -650,6 +669,7 @@ public class JsfOperationsImpl extends AbstractOperations implements
 
         updateDependencies(configuration, jsfImplementation, jsfLibrary);
         updateRepositories(configuration, jsfImplementation, jsfLibrary);
+        return jsfImplementation;
     }
 
     private void updateDependencies(final Element configuration,
