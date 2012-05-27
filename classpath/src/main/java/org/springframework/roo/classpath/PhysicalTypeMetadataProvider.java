@@ -17,5 +17,5 @@ import org.springframework.roo.metadata.MetadataProvider;
  * @author Ben Alex
  * @since 1.0
  */
-public interface PhysicalTypeMetadataProvider extends MetadataProvider { 
+public interface PhysicalTypeMetadataProvider extends MetadataProvider {
 }
