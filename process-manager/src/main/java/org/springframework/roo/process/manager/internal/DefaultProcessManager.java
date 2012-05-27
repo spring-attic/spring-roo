@@ -157,8 +157,8 @@ public class DefaultProcessManager extends
             // Compute how many milliseconds it took to run
             lastPollDuration = lastPollTime - started;
             if (lastPollDuration == 0) {
-                lastPollDuration = 1; // Ensure it correctly reflects that it
-                                      // has ever run
+                // Ensure it correctly reflects that it has ever run
+                lastPollDuration = 1;
             }
         }
         catch (final Throwable t) {
