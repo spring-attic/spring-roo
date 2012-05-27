@@ -180,17 +180,8 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements
                 && majorJavaVersion <= 7) {
             return String.valueOf(majorJavaVersion);
         }
-
-        // No valid version given; detect the major Java version to use
-        final String ver = System.getProperty("java.version");
-        if (ver.contains("1.7.")) {
-            return "1.6"; // This is a workaround for ROO-2824
-        }
-        if (ver.contains("1.6.")) {
-            return "1.6";
-        }
-        // To be running Roo they must be on Java 5 or above
-        return "1.5";
+        // To be running Roo they must be on Java 6 or above
+        return "1.6";
     }
 
     private PackagingProvider getPackagingProvider(
