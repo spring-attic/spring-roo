@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <appendix xmlns="http://docbook.org/ns/docbook" version="5.0" xml:id="command-index">
     <title>Command Index</title>
-    <para>This appendix was automatically built from Roo 1.2.1.RELEASE [rev 2102c3f].</para>
+    <para>This appendix was automatically built from Roo 1.2.2.RELEASE [rev 022477d].</para>
     <para>Commands are listed in alphabetic order, and are shown in monospaced font with any mandatory options you must specify when using the command. Most commands accept a large number of options, and all of the possible options for each command are presented in this appendix.</para>
     <section xml:id="command-index-add-on-commands">
         <title>Add On Commands</title>
@@ -4045,6 +4045,35 @@
                     </listitem>
                 </varlistentry>
             </variablelist>
+        </section>
+    </section>
+    <section xml:id="command-index-tailor-commands">
+        <title>Tailor Commands</title>
+        <para>Tailor Commands are contained in org.springframework.roo.addon.tailor.TailorCommands.</para>
+        <section xml:id="command-index-tailor-activate">
+            <title>tailor activate</title>
+            <para>Activate a tailor configuration.</para>
+            <programlisting><![CDATA[tailor activate --name]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--name</term>
+                    <listitem>
+                        <para>The name of the tailor configuration; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-tailor-deactivate">
+            <title>tailor deactivate</title>
+            <para>Deactivate the tailor.</para>
+            <programlisting><![CDATA[tailor deactivate]]></programlisting>
+            <para>This command does not accept any options.</para>
+        </section>
+        <section xml:id="command-index-tailor-list">
+            <title>tailor list</title>
+            <para>List available tailor configurations.</para>
+            <programlisting><![CDATA[tailor list]]></programlisting>
+            <para>This command does not accept any options.</para>
         </section>
     </section>
     <section xml:id="command-index-uaa-commands">
