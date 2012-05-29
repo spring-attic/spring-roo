@@ -34,8 +34,8 @@ public interface ClasspathOperations {
      * Creates a new constructor in the specified class with the fields
      * provided.
      * <p>
-     * If fields is not specified, a public no-arg constructor will be created
-     * if not already present. If fields is not null but empty or if any of the
+     * If the set of fields is null, a public no-arg constructor will be created
+     * if not already present. If fields is not null but empty or if all of the
      * supplied fields do not exist in the class, the method returns silently.
      * 
      * @param name the name of the class (required).

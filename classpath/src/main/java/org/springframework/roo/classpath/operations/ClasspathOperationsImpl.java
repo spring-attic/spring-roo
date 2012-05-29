@@ -118,26 +118,29 @@ public class ClasspathOperationsImpl implements ClasspathOperations {
         final String declaredByMetadataId = PhysicalTypeIdentifier
                 .createIdentifier(name,
                         pathResolver.getFocusedPath(Path.SRC_MAIN_JAVA));
-        final List<FieldMetadata> eligibleFields = new ArrayList<FieldMetadata>();
+        final List<FieldMetadata> constructorFields = new ArrayList<FieldMetadata>();
         final List<? extends FieldMetadata> declaredFields = javaTypeDetails
                 .getDeclaredFields();
         if (fields != null) {
             for (final String field : fields) {
-                for (final FieldMetadata fieldMetadata : declaredFields) {
-                    if (field.equals(fieldMetadata.getFieldName()
+                declared: for (final FieldMetadata declaredField : declaredFields) {
+                    if (field.equals(declaredField.getFieldName()
                             .getSymbolName())) {
-                        eligibleFields.add(fieldMetadata);
+                        constructorFields.add(declaredField);
+                        break declared;
                     }
                 }
             }
-            if (eligibleFields.isEmpty()) {
+            if (constructorFields.isEmpty()) {
+                // User supplied a set of fields that do not exist in the
+                // class, so return without creating any constructor
                 return;
             }
         }
 
         // Search for an existing constructor
         final List<JavaType> parameterTypes = new ArrayList<JavaType>();
-        for (final FieldMetadata fieldMetadata : eligibleFields) {
+        for (final FieldMetadata fieldMetadata : constructorFields) {
             parameterTypes.add(fieldMetadata.getFieldType());
         }
 
@@ -152,7 +155,7 @@ public class ClasspathOperationsImpl implements ClasspathOperations {
 
         final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
         bodyBuilder.appendFormalLine("super();");
-        for (final FieldMetadata field : eligibleFields) {
+        for (final FieldMetadata field : constructorFields) {
             final String fieldName = field.getFieldName().getSymbolName();
             bodyBuilder.appendFormalLine("this." + fieldName + " = "
                     + fieldName + ";");
