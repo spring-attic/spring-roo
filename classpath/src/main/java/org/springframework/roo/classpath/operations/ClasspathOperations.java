@@ -1,5 +1,7 @@
 package org.springframework.roo.classpath.operations;
 
+import java.util.Set;
+
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.LogicalPath;
@@ -27,6 +29,19 @@ public interface ClasspathOperations {
     void createClass(final JavaType name, final boolean rooAnnotations,
             final LogicalPath path, final JavaType superclass,
             final boolean createAbstract, final boolean permitReservedWords);
+
+    /**
+     * Creates a new constructor in the specified class with the fields
+     * provided.
+     * <p>
+     * If fields is not specified, a public no-arg constructor will be created
+     * if not already present. If fields is not null but empty or if any of the
+     * supplied fields do not exist in the class, the method returns silently.
+     * 
+     * @param name the name of the class (required).
+     * @param fields the fields to include in the constructor.
+     */
+    void createConstructor(final JavaType name, final Set<String> fields);
 
     /**
      * Creates a new Java enum source file in any project path.

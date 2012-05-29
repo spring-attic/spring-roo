@@ -9,6 +9,7 @@ import static org.springframework.roo.model.RooJavaType.ROO_TO_STRING;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
@@ -22,7 +23,12 @@ import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.TypeManagementService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
+import org.springframework.roo.classpath.details.ConstructorMetadata;
+import org.springframework.roo.classpath.details.ConstructorMetadataBuilder;
+import org.springframework.roo.classpath.details.FieldMetadata;
+import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
+import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
@@ -51,6 +57,7 @@ public class ClasspathOperationsImpl implements ClasspathOperations {
     @Reference TypeLocationService typeLocationService;
     @Reference TypeManagementService typeManagementService;
 
+    @Override
     public void createClass(final JavaType name, final boolean rooAnnotations,
             final LogicalPath path, final JavaType superclass,
             final boolean createAbstract, final boolean permitReservedWords) {
@@ -100,6 +107,74 @@ public class ClasspathOperationsImpl implements ClasspathOperations {
         typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
     }
 
+    @Override
+    public void createConstructor(final JavaType name, final Set<String> fields) {
+        final ClassOrInterfaceTypeDetails javaTypeDetails = typeLocationService
+                .getTypeDetails(name);
+        Validate.notNull(javaTypeDetails,
+                "The type specified, '%s', doesn't exist",
+                name.getFullyQualifiedTypeName());
+
+        final String declaredByMetadataId = PhysicalTypeIdentifier
+                .createIdentifier(name,
+                        pathResolver.getFocusedPath(Path.SRC_MAIN_JAVA));
+        final List<FieldMetadata> eligibleFields = new ArrayList<FieldMetadata>();
+        final List<? extends FieldMetadata> declaredFields = javaTypeDetails
+                .getDeclaredFields();
+        if (fields != null) {
+            for (final String field : fields) {
+                for (final FieldMetadata fieldMetadata : declaredFields) {
+                    if (field.equals(fieldMetadata.getFieldName()
+                            .getSymbolName())) {
+                        eligibleFields.add(fieldMetadata);
+                    }
+                }
+            }
+            if (eligibleFields.isEmpty()) {
+                return;
+            }
+        }
+
+        // Search for an existing constructor
+        final List<JavaType> parameterTypes = new ArrayList<JavaType>();
+        for (final FieldMetadata fieldMetadata : eligibleFields) {
+            parameterTypes.add(fieldMetadata.getFieldType());
+        }
+
+        final ConstructorMetadata result = javaTypeDetails
+                .getDeclaredConstructor(parameterTypes);
+        if (result != null) {
+            // Found an existing constructor on this class
+            return;
+        }
+
+        final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+
+        final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+        bodyBuilder.appendFormalLine("super();");
+        for (final FieldMetadata field : eligibleFields) {
+            final String fieldName = field.getFieldName().getSymbolName();
+            bodyBuilder.appendFormalLine("this." + fieldName + " = "
+                    + fieldName + ";");
+            parameterNames.add(field.getFieldName());
+        }
+
+        // Create the constructor
+        final ConstructorMetadataBuilder constructorBuilder = new ConstructorMetadataBuilder(
+                declaredByMetadataId);
+        constructorBuilder.setModifier(Modifier.PUBLIC);
+        constructorBuilder.setParameterTypes(AnnotatedJavaType
+                .convertFromJavaTypes(parameterTypes));
+        constructorBuilder.setParameterNames(parameterNames);
+        constructorBuilder.setBodyBuilder(bodyBuilder);
+
+        final ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(
+                javaTypeDetails);
+        cidBuilder.addConstructor(constructorBuilder);
+        typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
+    }
+
+    @Override
     public void createEnum(final JavaType name, final LogicalPath path,
             final boolean permitReservedWords) {
         if (!permitReservedWords) {
@@ -113,6 +188,7 @@ public class ClasspathOperationsImpl implements ClasspathOperations {
         typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
     }
 
+    @Override
     public void createInterface(final JavaType name, final LogicalPath path,
             final boolean permitReservedWords) {
         if (!permitReservedWords) {
@@ -127,6 +203,7 @@ public class ClasspathOperationsImpl implements ClasspathOperations {
         typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
     }
 
+    @Override
     public void enumConstant(final JavaType name,
             final JavaSymbolName fieldName, final boolean permitReservedWords) {
         if (!permitReservedWords) {
@@ -141,6 +218,7 @@ public class ClasspathOperationsImpl implements ClasspathOperations {
         typeManagementService.addEnumConstant(declaredByMetadataId, fieldName);
     }
 
+    @Override
     public void focus(final JavaType type) {
         Validate.notNull(type, "Specify the type to focus on");
         final String physicalTypeIdentifier = typeLocationService
@@ -157,6 +235,7 @@ public class ClasspathOperationsImpl implements ClasspathOperations {
                         + " does not exist");
     }
 
+    @Override
     public boolean isProjectAvailable() {
         return projectOperations.isFocusedProjectAvailable();
     }

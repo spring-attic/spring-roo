@@ -1,5 +1,7 @@
 package org.springframework.roo.classpath.operations;
 
+import java.util.Set;
+
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -37,6 +39,14 @@ public class ClasspathCommands implements CommandMarker {
                 createAbstract, permitReservedWords);
     }
 
+    @CliCommand(value = "constructor", help = "Creates a class constructor")
+    public void createConstructor(
+            @CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*", optionContext = "update,project", help = "The name of the class to receive this constructor") final JavaType name,
+            @CliOption(key = "fields", mandatory = false, specifiedDefaultValue = "", optionContext = "constructor-fields", help = "The fields to include in the constructor. Multiple field names must be a double-quoted list separated by spaces") final Set<String> fields) {
+
+        classpathOperations.createConstructor(name, fields);
+    }
+
     @CliCommand(value = "enum type", help = "Creates a new Java enum source file in any project path")
     public void createEnum(
             @CliOption(key = "class", optionContext = "update,project", mandatory = true, help = "The name of the enum to create") final JavaType name,
@@ -70,8 +80,8 @@ public class ClasspathCommands implements CommandMarker {
         classpathOperations.focus(type);
     }
 
-    @CliAvailabilityIndicator({ "class", "interface", "enum type",
-            "enum constant" })
+    @CliAvailabilityIndicator({ "class", "constructor", "interface",
+            "enum type", "enum constant" })
     public boolean isProjectAvailable() {
         return classpathOperations.isProjectAvailable();
     }
