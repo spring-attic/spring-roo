@@ -59,7 +59,8 @@ public class GitCommands implements CommandMarker {
     }
 
     @CliAvailabilityIndicator({ "git config", "git commit all",
-            "git revert last", "git revert commit", "git log" })
+            "git revert last", "git revert commit", "git log", "git push",
+            "git reset" })
     public boolean isCommandAvailable() {
         return gitOperations.isGitCommandAvailable();
     }

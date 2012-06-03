@@ -33,7 +33,7 @@ public interface PathResolver {
 
     /**
      * Returns the canonical path of the given {@link JavaType} in the given
-     * {@link Path} of the currently focussed module.
+     * {@link Path} of the currently focused module.
      * 
      * @param path
      * @param javaType
@@ -44,7 +44,7 @@ public interface PathResolver {
 
     /**
      * Returns the canonical path of the given path relative to the given
-     * {@link Path} of the currently focussed module.
+     * {@link Path} of the currently focused module.
      * 
      * @param path
      * @param relativePath
