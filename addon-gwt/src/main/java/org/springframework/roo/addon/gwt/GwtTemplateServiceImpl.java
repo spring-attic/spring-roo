@@ -44,6 +44,7 @@ import org.springframework.roo.classpath.TypeParsingService;
 import org.springframework.roo.classpath.customdata.CustomDataKeys;
 import org.springframework.roo.classpath.details.BeanInfoUtils;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
+import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.layers.LayerService;
@@ -68,6 +69,9 @@ import org.w3c.dom.Node;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+
+import com.tvt.roo.gwt.GwtPath;
+import com.tvt.roo.gwt.GwtType;
 
 /**
  * Provides a basic implementation of {@link GwtTemplateService} which is used
@@ -422,6 +426,50 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
         GwtProxyProperty secondaryProperty = null;
         GwtProxyProperty dateProperty = null;
         final Set<String> importSet = new HashSet<String>();
+        
+        List<String> omittedFields = new ArrayList<String>();
+
+        // Adds names of fields in edit view to ommittedFields list
+		if (type == GwtType.EDIT_VIEW) {
+			try {
+				String className = GwtPath.MANAGED_UI
+						.packageName(topLevelPackage)
+						+ "."
+						+ simpleTypeName
+						+ GwtType.EDIT_VIEW.getTemplate();
+
+				ClassOrInterfaceTypeDetails details = typeLocationService
+						.getTypeDetails(new JavaType(className));
+				for (FieldMetadata field : details.getDeclaredFields()) {
+					JavaSymbolName fieldName = field.getFieldName();
+					String name = fieldName.toString();
+					omittedFields.add(name);
+				}
+			} catch (Exception e) {
+				throw new IllegalArgumentException(e);
+			}
+		}
+
+		// Adds names of fields in mobile edit view to ommittedFields list
+		if (type == GwtType.MOBILE_EDIT_VIEW) {
+			try {
+				String className = GwtPath.MANAGED_UI
+						.packageName(topLevelPackage)
+						+ "."
+						+ simpleTypeName
+						+ GwtType.MOBILE_EDIT_VIEW.getTemplate();
+
+				ClassOrInterfaceTypeDetails details = typeLocationService
+						.getTypeDetails(new JavaType(className));
+				for (FieldMetadata field : details.getDeclaredFields()) {
+					JavaSymbolName fieldName = field.getFieldName();
+					String name = fieldName.toString();
+					omittedFields.add(name);
+				}
+			} catch (Exception e) {
+				throw new IllegalArgumentException(e);
+			}
+		}
 
         for (final GwtProxyProperty gwtProxyProperty : clientSideTypeMap
                 .values()) {
@@ -464,8 +512,10 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
             dataDictionary.addSection("fields").setVariable("field",
                     gwtProxyProperty.getName());
             if (!isReadOnly(gwtProxyProperty.getName(), mirroredType)) {
-                dataDictionary.addSection("editViewProps").setVariable("prop",
-                        gwtProxyProperty.forEditView());
+            	// if the property is in the omittedFields list, do not add it
+            	if (!omittedFields.contains(gwtProxyProperty.getName()))
+					dataDictionary.addSection("editViewProps").setVariable(
+							"prop", gwtProxyProperty.forEditView());
             }
 
             final TemplateDataDictionary propertiesSection = dataDictionary
