@@ -342,7 +342,12 @@
                     <groupId>org.datanucleus</groupId>
                     <artifactId>datanucleus-api-jpa</artifactId>
                     <version>3.0.9</version>
-                </dependency>
+                </dependency>                
+		        <dependency>
+		            <groupId>org.datanucleus</groupId>
+		            <artifactId>datanucleus-api-jdo</artifactId>
+		            <version>3.0.8</version>
+		        </dependency>
                 <dependency>
                     <groupId>javax.jdo</groupId>
                     <artifactId>jdo-api</artifactId>
