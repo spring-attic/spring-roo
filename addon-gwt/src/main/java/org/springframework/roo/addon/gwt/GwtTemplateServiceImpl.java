@@ -429,8 +429,8 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
         
         List<String> omittedFields = new ArrayList<String>();
 
-        // Adds names of fields in edit view to ommittedFields list
-		if (type == GwtType.EDIT_VIEW) {
+		// Adds names of fields in edit view to ommittedFields list
+        if (type == GwtType.EDIT_VIEW) {
 			try {
 				String className = GwtPath.MANAGED_UI
 						.packageName(topLevelPackage)
@@ -440,10 +440,13 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
 
 				ClassOrInterfaceTypeDetails details = typeLocationService
 						.getTypeDetails(new JavaType(className));
-				for (FieldMetadata field : details.getDeclaredFields()) {
-					JavaSymbolName fieldName = field.getFieldName();
-					String name = fieldName.toString();
-					omittedFields.add(name);
+
+				if (details != null) {
+					for (FieldMetadata field : details.getDeclaredFields()) {
+						JavaSymbolName fieldName = field.getFieldName();
+						String name = fieldName.toString();
+						omittedFields.add(name);
+					}
 				}
 			} catch (Exception e) {
 				throw new IllegalArgumentException(e);
@@ -451,8 +454,8 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
 		}
 
 		// Adds names of fields in mobile edit view to ommittedFields list
-		if (type == GwtType.MOBILE_EDIT_VIEW) {
-			try {
+        if (type == GwtType.MOBILE_EDIT_VIEW) {
+            try {
 				String className = GwtPath.MANAGED_UI
 						.packageName(topLevelPackage)
 						+ "."
@@ -461,15 +464,18 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
 
 				ClassOrInterfaceTypeDetails details = typeLocationService
 						.getTypeDetails(new JavaType(className));
-				for (FieldMetadata field : details.getDeclaredFields()) {
-					JavaSymbolName fieldName = field.getFieldName();
-					String name = fieldName.toString();
-					omittedFields.add(name);
+
+				if (details != null) {
+					for (FieldMetadata field : details.getDeclaredFields()) {
+						JavaSymbolName fieldName = field.getFieldName();
+						String name = fieldName.toString();
+						omittedFields.add(name);
+					}
 				}
-			} catch (Exception e) {
+            } catch (Exception e) {
 				throw new IllegalArgumentException(e);
-			}
-		}
+            }
+        }
 
         for (final GwtProxyProperty gwtProxyProperty : clientSideTypeMap
                 .values()) {
