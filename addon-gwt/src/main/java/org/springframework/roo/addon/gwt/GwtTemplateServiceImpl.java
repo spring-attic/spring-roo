@@ -232,8 +232,10 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
                         && !Modifier.isAbstract(entity.getModifier())) {
                     final String entitySimpleName = entity.getName()
                             .getSimpleTypeName();
-                    final ClassOrInterfaceTypeDetails request = gwtTypeService
-                            .lookupRequestFromProxy(proxy);
+                    ClassOrInterfaceTypeDetails request = gwtTypeService
+							.lookupUnmanagedRequestFromProxy(proxy);
+					if (request == null)
+						request = gwtTypeService.lookupRequestFromProxy(proxy);					
                     if (request != null) {
                         final String requestExpression = new StringBuilder("\t")
                                 .append(request.getName().getSimpleTypeName())
