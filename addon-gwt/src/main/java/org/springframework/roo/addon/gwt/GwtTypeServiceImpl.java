@@ -78,6 +78,8 @@ import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+import com.tvt.roo.gwt.GwtUtils;
+
 /**
  * Provides a basic implementation of {@link GwtTypeService}.
  * 
@@ -818,6 +820,25 @@ public class GwtTypeServiceImpl implements GwtTypeService {
         return lookupRequestFromEntity(typeLocationService
                 .getTypeDetails(serviceNameType));
     }
+    
+    public ClassOrInterfaceTypeDetails lookupUnmanagedRequestFromProxy(
+			final ClassOrInterfaceTypeDetails proxy) {
+		final AnnotationMetadata annotation = GwtUtils.getFirstAnnotation(
+				proxy, RooJavaType.ROO_GWT_PROXY);
+		Validate.notNull(annotation, "Proxy '" + proxy.getName()
+				+ "' isn't annotated with '" + RooJavaType.ROO_GWT_PROXY + "'");
+		final AnnotationAttributeValue<?> attributeValue = annotation
+				.getAttribute("value");
+		final JavaType serviceNameType = new JavaType(
+				GwtUtils.getStringValue(attributeValue));
+		return lookupUnmanagedRequestFromEntity(typeLocationService
+				.getTypeDetails(serviceNameType));
+	}
+
+	public ClassOrInterfaceTypeDetails lookupUnmanagedRequestFromEntity(
+			final ClassOrInterfaceTypeDetails entity) {
+		return lookupXFromEntity(entity, RooJavaType.ROO_GWT_UNMANAGED_REQUEST);
+	}
 
     public ClassOrInterfaceTypeDetails lookupTargetFromX(
             final ClassOrInterfaceTypeDetails annotatedType,
