@@ -104,4 +104,10 @@ public interface GwtTypeService {
 
     ClassOrInterfaceTypeDetails lookupTargetServiceFromRequest(
             ClassOrInterfaceTypeDetails request);
+    
+	ClassOrInterfaceTypeDetails lookupUnmanagedRequestFromProxy(
+			ClassOrInterfaceTypeDetails proxy);
+
+	ClassOrInterfaceTypeDetails lookupUnmanagedRequestFromEntity(
+			ClassOrInterfaceTypeDetails entity);
 }

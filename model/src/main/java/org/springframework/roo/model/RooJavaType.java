@@ -30,6 +30,8 @@ public final class RooJavaType {
             "org.springframework.roo.addon.gwt.RooGwtProxy");
     public static final JavaType ROO_GWT_REQUEST = new JavaType(
             "org.springframework.roo.addon.gwt.RooGwtRequest");
+    public static final JavaType ROO_GWT_UNMANAGED_REQUEST = new JavaType(
+            "org.springframework.roo.addon.gwt.RooGwtUnmanagedRequest");
     public static final JavaType ROO_IDENTIFIER = new JavaType(
             "org.springframework.roo.addon.jpa.identifier.RooIdentifier");
     public static final JavaType ROO_INTEGRATION_TEST = new JavaType(
