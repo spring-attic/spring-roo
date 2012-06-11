@@ -1,8 +1,5 @@
 package org.springframework.roo.addon.gwt;
 
-import static org.springframework.roo.addon.gwt.GwtJavaType.REQUEST_CONTEXT;
-import static org.springframework.roo.addon.gwt.RooJavaType.ROO_GWT_REQUEST;
-import static org.springframework.roo.addon.gwt.RooJavaType.ROO_GWT_UNMANAGED_REQUEST;
 import static java.lang.reflect.Modifier.PUBLIC;
 import static org.springframework.roo.addon.gwt.GwtJavaType.ENTITY_PROXY;
 import static org.springframework.roo.addon.gwt.GwtJavaType.OLD_ENTITY_PROXY;
@@ -13,6 +10,7 @@ import static org.springframework.roo.classpath.PhysicalTypeCategory.INTERFACE;
 import static org.springframework.roo.model.RooJavaType.ROO_GWT_MIRRORED_FROM;
 import static org.springframework.roo.model.RooJavaType.ROO_GWT_PROXY;
 import static org.springframework.roo.model.RooJavaType.ROO_GWT_REQUEST;
+import static org.springframework.roo.model.RooJavaType.ROO_GWT_UNMANAGED_REQUEST;
 import static org.springframework.roo.model.RooJavaType.ROO_JPA_ACTIVE_RECORD;
 import static org.springframework.roo.model.RooJavaType.ROO_JPA_ENTITY;
 import static org.springframework.roo.project.Path.ROOT;
@@ -74,8 +72,6 @@ import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
-import com.tvt.roo.gwt.GwtJavaType;
 
 /**
  * Implementation of {@link GwtOperations}.
@@ -212,98 +208,94 @@ public class GwtOperationsImpl implements GwtOperations {
     }
 
     /**
-	 * Builds the given entity's managed RequestContext interface. Note that we
-	 * don't generate the entire interface here, only the @RooGwtRequest
-	 * annotation; we then invoke the metadata provider, which takes over and
-	 * generates the remaining code, namely the method declarations and the @ServiceName
-	 * annotation. This is analogous to how ITD-based addons work, e.g. adding a
-	 * trigger annotation and letting the metadata provider do the rest. This
-	 * allows for the metadata provider to correctly respond to project changes.
-	 * 
-	 * @param entity
-	 *            the entity for which to create the GWT request interface
-	 *            (required)
-	 * @param destinationPackage
-	 *            the package in which to create the request interface
-	 *            (required)
-	 */
-	private void createRequestInterface(
-			final ClassOrInterfaceTypeDetails entity,
-			final JavaPackage destinationPackage) {
-		final JavaType requestType = new JavaType(
-				destinationPackage.getFullyQualifiedPackageName() + "."
-						+ entity.getType().getSimpleTypeName()
-						+ "Request_Roo_Gwt");
-		final LogicalPath focusedSrcMainJava = LogicalPath.getInstance(
-				SRC_MAIN_JAVA, projectOperations.getFocusedModuleName());
-		final ClassOrInterfaceTypeDetailsBuilder requestBuilder = new ClassOrInterfaceTypeDetailsBuilder(
-				PhysicalTypeIdentifier.createIdentifier(requestType,
-						focusedSrcMainJava));
-		requestBuilder.setName(requestType);
-		requestBuilder.addExtendsTypes(REQUEST_CONTEXT);
-		requestBuilder.setPhysicalTypeCategory(INTERFACE);
-		requestBuilder.setModifier(PUBLIC);
-		requestBuilder.addAnnotation(getRooGwtRequestAnnotation(entity));
-		typeManagementService.createOrUpdateTypeOnDisk(requestBuilder.build());
-		addPackageToGwtXml(destinationPackage);
-		// Trigger the GwtRequestMetadataProvider to finish generating the code
-		metadataService.get(GwtRequestMetadata.createIdentifier(requestType,
-				focusedSrcMainJava));
-	}
+     * Builds the given entity's managed RequestContext interface. Note that we
+     * don't generate the entire interface here, only the @RooGwtRequest
+     * annotation; we then invoke the metadata provider, which takes over and
+     * generates the remaining code, namely the method declarations and the @ServiceName
+     * annotation. This is analogous to how ITD-based addons work, e.g. adding a
+     * trigger annotation and letting the metadata provider do the rest. This
+     * allows for the metadata provider to correctly respond to project changes.
+     * 
+     * @param entity the entity for which to create the GWT request interface
+     *            (required)
+     * @param destinationPackage the package in which to create the request
+     *            interface (required)
+     */
+    private void createRequestInterface(
+            final ClassOrInterfaceTypeDetails entity,
+            final JavaPackage destinationPackage) {
+        final JavaType requestType = new JavaType(
+                destinationPackage.getFullyQualifiedPackageName() + "."
+                        + entity.getType().getSimpleTypeName()
+                        + "Request_Roo_Gwt");
+        final LogicalPath focusedSrcMainJava = LogicalPath.getInstance(
+                SRC_MAIN_JAVA, projectOperations.getFocusedModuleName());
+        final ClassOrInterfaceTypeDetailsBuilder requestBuilder = new ClassOrInterfaceTypeDetailsBuilder(
+                PhysicalTypeIdentifier.createIdentifier(requestType,
+                        focusedSrcMainJava));
+        requestBuilder.setName(requestType);
+        requestBuilder.addExtendsTypes(REQUEST_CONTEXT);
+        requestBuilder.setPhysicalTypeCategory(INTERFACE);
+        requestBuilder.setModifier(PUBLIC);
+        requestBuilder.addAnnotation(getRooGwtRequestAnnotation(entity));
+        typeManagementService.createOrUpdateTypeOnDisk(requestBuilder.build());
+        addPackageToGwtXml(destinationPackage);
+        // Trigger the GwtRequestMetadataProvider to finish generating the code
+        metadataService.get(GwtRequestMetadata.createIdentifier(requestType,
+                focusedSrcMainJava));
+    }
 
-	/**
-	 * Builds the given entity's unmanaged RequestContext interface used for
-	 * adding custom methods. This interface extends the RequestContext
-	 * interface managed by Roo.
-	 * 
-	 * @param entity
-	 *            the entity for which to create the GWT request interface
-	 *            (required)
-	 * @param destinationPackage
-	 *            the package in which to create the request interface
-	 *            (required)
-	 */
-	private void createUnmanagedRequestInterface(
-			final ClassOrInterfaceTypeDetails entity,
-			JavaPackage destinationPackage) {
-		final ClassOrInterfaceTypeDetails managedRequest = gwtTypeService
-				.lookupRequestFromEntity(entity);
+    /**
+     * Builds the given entity's unmanaged RequestContext interface used for
+     * adding custom methods. This interface extends the RequestContext
+     * interface managed by Roo.
+     * 
+     * @param entity the entity for which to create the GWT request interface
+     *            (required)
+     * @param destinationPackage the package in which to create the request
+     *            interface (required)
+     */
+    private void createUnmanagedRequestInterface(
+            final ClassOrInterfaceTypeDetails entity,
+            JavaPackage destinationPackage) {
+        final ClassOrInterfaceTypeDetails managedRequest = gwtTypeService
+                .lookupRequestFromEntity(entity);
 
-		if (managedRequest == null)
-			return;
+        if (managedRequest == null)
+            return;
 
-		final JavaType unmanagedRequestType = new JavaType(
-				destinationPackage.getFullyQualifiedPackageName() + "."
-						+ entity.getType().getSimpleTypeName() + "Request");
+        final JavaType unmanagedRequestType = new JavaType(
+                destinationPackage.getFullyQualifiedPackageName() + "."
+                        + entity.getType().getSimpleTypeName() + "Request");
 
-		final LogicalPath focusedSrcMainJava = LogicalPath.getInstance(
-				SRC_MAIN_JAVA, projectOperations.getFocusedModuleName());
-		final ClassOrInterfaceTypeDetailsBuilder unmanagedRequestBuilder = new ClassOrInterfaceTypeDetailsBuilder(
-				PhysicalTypeIdentifier.createIdentifier(unmanagedRequestType,
-						focusedSrcMainJava));
-		unmanagedRequestBuilder.setName(unmanagedRequestType);
-		unmanagedRequestBuilder.addExtendsTypes(managedRequest.getType());
-		unmanagedRequestBuilder.setPhysicalTypeCategory(INTERFACE);
-		unmanagedRequestBuilder.setModifier(PUBLIC);
-		unmanagedRequestBuilder
-				.addAnnotation(getRooGwtUnmanagedRequestAnnotation(entity));
-		unmanagedRequestBuilder.addAnnotation(managedRequest
-				.getAnnotation(GwtJavaType.SERVICE_NAME));
-		typeManagementService.createOrUpdateTypeOnDisk(unmanagedRequestBuilder
-				.build());
+        final LogicalPath focusedSrcMainJava = LogicalPath.getInstance(
+                SRC_MAIN_JAVA, projectOperations.getFocusedModuleName());
+        final ClassOrInterfaceTypeDetailsBuilder unmanagedRequestBuilder = new ClassOrInterfaceTypeDetailsBuilder(
+                PhysicalTypeIdentifier.createIdentifier(unmanagedRequestType,
+                        focusedSrcMainJava));
+        unmanagedRequestBuilder.setName(unmanagedRequestType);
+        unmanagedRequestBuilder.addExtendsTypes(managedRequest.getType());
+        unmanagedRequestBuilder.setPhysicalTypeCategory(INTERFACE);
+        unmanagedRequestBuilder.setModifier(PUBLIC);
+        unmanagedRequestBuilder
+                .addAnnotation(getRooGwtUnmanagedRequestAnnotation(entity));
+        unmanagedRequestBuilder.addAnnotation(managedRequest
+                .getAnnotation(GwtJavaType.SERVICE_NAME));
+        typeManagementService.createOrUpdateTypeOnDisk(unmanagedRequestBuilder
+                .build());
 
-	}
+    }
 
     private void createRequestInterfaceIfNecessary(
-			final ClassOrInterfaceTypeDetails entity,
-			final JavaPackage destinationPackage) {
-		if (entity != null && !entity.isAbstract()
-				&& gwtTypeService.lookupRequestFromEntity(entity) == null) {
-			createRequestInterface(entity, destinationPackage);
+            final ClassOrInterfaceTypeDetails entity,
+            final JavaPackage destinationPackage) {
+        if (entity != null && !entity.isAbstract()
+                && gwtTypeService.lookupRequestFromEntity(entity) == null) {
+            createRequestInterface(entity, destinationPackage);
 
-			createUnmanagedRequestInterface(entity, destinationPackage);
-		}
-	}
+            createUnmanagedRequestInterface(entity, destinationPackage);
+        }
+    }
 
     private void createScaffold(final ClassOrInterfaceTypeDetails proxy) {
         final AnnotationMetadata annotationMetadata = GwtUtils
@@ -391,26 +383,26 @@ public class GwtOperationsImpl implements GwtOperations {
     }
 
     private AnnotationMetadata getRooGwtRequestAnnotation(
-			final ClassOrInterfaceTypeDetails entity) {
-		// The GwtRequestMetadataProvider doesn't need to know excluded methods
-		// any more because it actively adds the required CRUD methods itself.
-		final StringAttributeValue entityAttributeValue = new StringAttributeValue(
-				VALUE, entity.getType().getFullyQualifiedTypeName());
-		final List<AnnotationAttributeValue<?>> gwtRequestAttributeValues = new ArrayList<AnnotationAttributeValue<?>>();
-		gwtRequestAttributeValues.add(entityAttributeValue);
-		return new AnnotationMetadataBuilder(ROO_GWT_REQUEST,
-				gwtRequestAttributeValues).build();
-	}
+            final ClassOrInterfaceTypeDetails entity) {
+        // The GwtRequestMetadataProvider doesn't need to know excluded methods
+        // any more because it actively adds the required CRUD methods itself.
+        final StringAttributeValue entityAttributeValue = new StringAttributeValue(
+                VALUE, entity.getType().getFullyQualifiedTypeName());
+        final List<AnnotationAttributeValue<?>> gwtRequestAttributeValues = new ArrayList<AnnotationAttributeValue<?>>();
+        gwtRequestAttributeValues.add(entityAttributeValue);
+        return new AnnotationMetadataBuilder(ROO_GWT_REQUEST,
+                gwtRequestAttributeValues).build();
+    }
 
-	private AnnotationMetadata getRooGwtUnmanagedRequestAnnotation(
-			final ClassOrInterfaceTypeDetails entity) {
-		final StringAttributeValue entityAttributeValue = new StringAttributeValue(
-				VALUE, entity.getType().getFullyQualifiedTypeName());
-		final List<AnnotationAttributeValue<?>> gwtRequestAttributeValues = new ArrayList<AnnotationAttributeValue<?>>();
-		gwtRequestAttributeValues.add(entityAttributeValue);
-		return new AnnotationMetadataBuilder(ROO_GWT_UNMANAGED_REQUEST,
-				gwtRequestAttributeValues).build();
-	}
+    private AnnotationMetadata getRooGwtUnmanagedRequestAnnotation(
+            final ClassOrInterfaceTypeDetails entity) {
+        final StringAttributeValue entityAttributeValue = new StringAttributeValue(
+                VALUE, entity.getType().getFullyQualifiedTypeName());
+        final List<AnnotationAttributeValue<?>> gwtRequestAttributeValues = new ArrayList<AnnotationAttributeValue<?>>();
+        gwtRequestAttributeValues.add(entityAttributeValue);
+        return new AnnotationMetadataBuilder(ROO_GWT_UNMANAGED_REQUEST,
+                gwtRequestAttributeValues).build();
+    }
 
     public boolean isGwtInstallationPossible() {
         return projectOperations.isFocusedProjectAvailable()
