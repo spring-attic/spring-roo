@@ -275,9 +275,8 @@ public class DataOnDemandMetadata extends
                 // Must make the field
                 final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
                 annotations.add(new AnnotationMetadataBuilder(AUTOWIRED));
-                builder.addField(new FieldMetadataBuilder(getId(),
-                        Modifier.PRIVATE, annotations, fieldSymbolName,
-                        collaboratorType));
+                builder.addField(new FieldMetadataBuilder(getId(), 0,
+                        annotations, fieldSymbolName, collaboratorType));
                 fields.add(fieldSymbolName);
             }
         }

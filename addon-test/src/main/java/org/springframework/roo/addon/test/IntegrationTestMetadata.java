@@ -309,8 +309,8 @@ public class IntegrationTestMetadata extends
             final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
             annotations.add(new AnnotationMetadataBuilder(AUTOWIRED));
             final FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(
-                    getId(), Modifier.PRIVATE, annotations, new JavaSymbolName(
-                            "dod"), dodGovernor);
+                    getId(), 0, annotations, new JavaSymbolName("dod"),
+                    dodGovernor);
             builder.addField(fieldBuilder);
         }
 
