@@ -615,19 +615,16 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
 
         // Add a section for the mobile properties.
         if (primaryProperty != null) {
-            dataDictionary
-                    .setVariable("primaryProp", primaryProperty.getName());
-            dataDictionary.setVariable("primaryPropGetter",
-                    primaryProperty.getGetter());
-            dataDictionary.setVariable("primaryPropBuilder",
-                    primaryProperty.forMobileListView("primaryRenderer"));
-            final TemplateDataDictionary section = dataDictionary
-                    .addSection("mobileProperties");
-            section.setVariable("prop", primaryProperty.getName());
-            section.setVariable("propGetter", primaryProperty.getGetter());
-            section.setVariable("propType", primaryProperty.getType());
-            section.setVariable("propRenderer", primaryProperty.getRenderer());
-            section.setVariable("propRendererName", "primaryRenderer");
+        	dataDictionary
+			.setVariable("primaryProp", primaryProperty.getName());
+        		dataDictionary.setVariable("primaryPropGetter",
+			primaryProperty.getGetter());
+        		String primaryPropBuilder = new StringBuilder(
+			"if (value != null) {\n\t\t\t\tsb.appendEscaped(")
+			.append("primaryRenderer")
+			.append(".render(value));\n\t\t\t}").toString();
+        		dataDictionary
+			.setVariable("primaryPropBuilder", primaryPropBuilder);
         }
         else {
             dataDictionary.setVariable("primaryProp", "id");
