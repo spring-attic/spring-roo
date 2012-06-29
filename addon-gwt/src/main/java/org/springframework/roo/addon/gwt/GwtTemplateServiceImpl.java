@@ -70,9 +70,6 @@ import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import com.tvt.roo.gwt.GwtPath;
-import com.tvt.roo.gwt.GwtType;
-
 /**
  * Provides a basic implementation of {@link GwtTemplateService} which is used
  * to create {@link ClassOrInterfaceTypeDetails} objects from source files
