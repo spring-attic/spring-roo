@@ -204,9 +204,9 @@ public class GwtTypeServiceImpl implements GwtTypeService {
                             .getDeclaredInnerTypes()) {
                         if (innerTypeBuilder
                                 .getName()
-                                .getFullyQualifiedTypeName()
+                                .getSimpleTypeName()
                                 .equals(innerTypeName
-                                        .getFullyQualifiedTypeName())) {
+                                        .getSimpleTypeName())) {
                             final ClassOrInterfaceTypeDetailsBuilder builder = new ClassOrInterfaceTypeDetailsBuilder(
                                     abstractClassBuilder
                                             .getDeclaredByMetadataId(),
