@@ -70,6 +70,10 @@ import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+import com.tvt.roo.gwt.GwtPath;
+import com.tvt.roo.gwt.GwtProxyProperty;
+import com.tvt.roo.gwt.GwtType;
+
 /**
  * Provides a basic implementation of {@link GwtTemplateService} which is used
  * to create {@link ClassOrInterfaceTypeDetails} objects from source files
@@ -428,186 +432,182 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
         
         List<String> existingFields = new ArrayList<String>();
 
-		// Adds names of fields in edit view to ommittedFields list
-        if (type == GwtType.EDIT_VIEW) {
-			try {
-				String className = GwtPath.MANAGED_UI
-						.packageName(topLevelPackage)
-						+ "."
-						+ simpleTypeName
-						+ GwtType.EDIT_VIEW.getTemplate();
+		List<String> fieldsInBothViewAndMobileView = new ArrayList<String>();
+		
+		if (type == GwtType.EDIT_ACTIVITY_WRAPPER || type == GwtType.MOBILE_EDIT_VIEW || type == GwtType.EDIT_VIEW)
+		{
+			List<String> existingViewFields = new ArrayList<String>();
+			List<String> existingMobileViewFields = new ArrayList<String>();
 
-				ClassOrInterfaceTypeDetails details = typeLocationService
-						.getTypeDetails(new JavaType(className));
+			try
+			{
+				String className = GwtPath.MANAGED_UI_IMPL.packageName(topLevelPackage) + "." + simpleTypeName + GwtType.EDIT_VIEW.getTemplate();
 
-				if (details != null) {
-					for (FieldMetadata field : details.getDeclaredFields()) {
+				ClassOrInterfaceTypeDetails details = typeLocationService.getTypeDetails(new JavaType(className));
+
+				if (details != null)
+				{
+					for (FieldMetadata field : details.getDeclaredFields())
+					{
 						JavaSymbolName fieldName = field.getFieldName();
 						String name = fieldName.toString();
-						existingFields.add(name);
+						existingViewFields.add(name);
 					}
 				}
-			} catch (Exception e) {
+
+				className = GwtPath.MANAGED_UI_MOBILE.packageName(topLevelPackage) + "." + simpleTypeName + GwtType.MOBILE_EDIT_VIEW.getTemplate();
+
+				details = typeLocationService.getTypeDetails(new JavaType(className));
+
+				if (details != null)
+				{
+					for (FieldMetadata field : details.getDeclaredFields())
+					{
+						JavaSymbolName fieldName = field.getFieldName();
+						String name = fieldName.toString();
+						existingMobileViewFields.add(name);
+					}
+				}
+
+				// Adds names of fields in MobileEditView to existingFields list
+				if (type == GwtType.MOBILE_EDIT_VIEW)
+					existingFields = existingMobileViewFields;
+
+				// Adds names of fields in EditView to existingFields list
+				if (type == GwtType.EDIT_VIEW)
+					existingFields = existingViewFields;
+
+			}
+			catch (Exception e)
+			{
 				throw new IllegalArgumentException(e);
+			}
+
+			// Adds names of fields the are found in both the unmanaged EditView and
+			// MobileEditView to fieldsInBothViewAndMobileView list
+			for (String mobileViewField : existingMobileViewFields)
+			{
+				for (String viewField : existingViewFields)
+				{
+					if (viewField.equals(mobileViewField))
+					{
+						fieldsInBothViewAndMobileView.add(viewField);
+						break;
+					}
+				}
 			}
 		}
 
-		// Adds names of fields in mobile edit view to ommittedFields list
-        if (type == GwtType.MOBILE_EDIT_VIEW) {
-            try {
-				String className = GwtPath.MANAGED_UI
-						.packageName(topLevelPackage)
-						+ "."
-						+ simpleTypeName
-						+ GwtType.MOBILE_EDIT_VIEW.getTemplate();
+		for (final GwtProxyProperty gwtProxyProperty : clientSideTypeMap.values())
+		{
+			// Determine if this is the primary property.
+			if (primaryProperty == null)
+			{
+				// Choose the first available field.
+				primaryProperty = gwtProxyProperty;
+			}
+			else if (gwtProxyProperty.isString() && !primaryProperty.isString())
+			{
+				// Favor String properties over other types.
+				secondaryProperty = primaryProperty;
+				primaryProperty = gwtProxyProperty;
+			}
+			else if (secondaryProperty == null)
+			{
+				// Choose the next available property.
+				secondaryProperty = gwtProxyProperty;
+			}
+			else if (gwtProxyProperty.isString() && !secondaryProperty.isString())
+			{
+				// Favor String properties over other types.
+				secondaryProperty = gwtProxyProperty;
+			}
 
-				ClassOrInterfaceTypeDetails details = typeLocationService
-						.getTypeDetails(new JavaType(className));
+			// Determine if this is the first date property.
+			if (dateProperty == null && gwtProxyProperty.isDate())
+			{
+				dateProperty = gwtProxyProperty;
+			}
 
-				if (details != null) {
-					for (FieldMetadata field : details.getDeclaredFields()) {
-						JavaSymbolName fieldName = field.getFieldName();
-						String name = fieldName.toString();
-						existingFields.add(name);
+			if (gwtProxyProperty.isProxy() || gwtProxyProperty.isCollectionOfProxy())
+			{
+				if (proxyFields != null)
+				{
+					proxyFields += ", ";
+				}
+				else
+				{
+					proxyFields = "";
+				}
+				proxyFields += "\"" + gwtProxyProperty.getName() + "\"";
+			}
+
+			dataDictionary.addSection("fields").setVariable("field", gwtProxyProperty.getName());
+			if (!isReadOnly(gwtProxyProperty.getName(), mirroredType))
+			{
+				// if the property is in the omittedFields list, do not add it
+				if (!existingFields.contains(gwtProxyProperty.getName()))
+					dataDictionary.addSection("editViewProps").setVariable("prop", gwtProxyProperty.forEditView());
+			}
+
+			final TemplateDataDictionary propertiesSection = dataDictionary.addSection("properties");
+			propertiesSection.setVariable("prop", gwtProxyProperty.getName());
+			propertiesSection.setVariable("propId", proxyType.getSimpleTypeName() + "_" + gwtProxyProperty.getName());
+			propertiesSection.setVariable("propGetter", gwtProxyProperty.getGetter());
+			propertiesSection.setVariable("propType", gwtProxyProperty.getType());
+			propertiesSection.setVariable("propFormatter", gwtProxyProperty.getFormatter());
+			propertiesSection.setVariable("propRenderer", gwtProxyProperty.getRenderer());
+			propertiesSection.setVariable("propReadable", gwtProxyProperty.getReadableName());
+
+			if (!isReadOnly(gwtProxyProperty.getName(), mirroredType))
+			{
+				final TemplateDataDictionary editableSection = dataDictionary.addSection("editableProperties");
+				editableSection.setVariable("prop", gwtProxyProperty.getName());
+				editableSection.setVariable("propId", proxyType.getSimpleTypeName() + "_" + gwtProxyProperty.getName());
+				editableSection.setVariable("propGetter", gwtProxyProperty.getGetter());
+				editableSection.setVariable("propType", gwtProxyProperty.getType());
+				editableSection.setVariable("propFormatter", gwtProxyProperty.getFormatter());
+				editableSection.setVariable("propRenderer", gwtProxyProperty.getRenderer());
+				editableSection.setVariable("propBinder", gwtProxyProperty.getBinder());
+				editableSection.setVariable("propReadable", gwtProxyProperty.getReadableName());
+			}
+
+			dataDictionary.setVariable("proxyRendererType", proxyType.getSimpleTypeName() + "Renderer");
+
+			// If the field is not added to the managed MobileEditView and the
+			// managed EditView then it there is no reason to add it to the
+			// interface nor the start method in the EditActivityWrapper
+			if (!fieldsInBothViewAndMobileView.contains(gwtProxyProperty.getName()))
+			{
+				if (gwtProxyProperty.isProxy() || gwtProxyProperty.isEnum() || gwtProxyProperty.isCollectionOfProxy())
+				{
+					final TemplateDataDictionary section = dataDictionary.addSection(gwtProxyProperty.isEnum() ? "setEnumValuePickers" : "setProxyValuePickers");
+					// The methods is required to satisfy the interface.
+					// However, if the field is in the existingFields lists, the
+					// method must be empty because the field will not be added
+					// to the managed view.
+					section.setVariable("setValuePicker",
+							existingFields.contains(gwtProxyProperty.getName()) ? gwtProxyProperty.getSetEmptyValuePickerMethod() : gwtProxyProperty.getSetValuePickerMethod());
+					section.setVariable("setValuePickerName", gwtProxyProperty.getSetValuePickerMethodName());
+					section.setVariable("valueType", gwtProxyProperty.getValueType().getSimpleTypeName());
+					section.setVariable("rendererType", gwtProxyProperty.getProxyRendererType());
+					if (gwtProxyProperty.isProxy() || gwtProxyProperty.isCollectionOfProxy())
+					{
+						String propTypeName = StringUtils.uncapitalize(gwtProxyProperty.isCollectionOfProxy() ? gwtProxyProperty.getPropertyType().getParameters().get(0).getSimpleTypeName()
+								: gwtProxyProperty.getPropertyType().getSimpleTypeName());
+						propTypeName = propTypeName.substring(0, propTypeName.indexOf("Proxy"));
+						section.setVariable("requestInterface", propTypeName + "Request");
+						section.setVariable("findMethod", "find" + StringUtils.capitalize(propTypeName) + "Entries(0, 50)");
+					}
+					maybeAddImport(dataDictionary, importSet, gwtProxyProperty.getPropertyType());
+					maybeAddImport(dataDictionary, importSet, gwtProxyProperty.getValueType());
+					if (gwtProxyProperty.isCollectionOfProxy())
+					{
+						maybeAddImport(dataDictionary, importSet, gwtProxyProperty.getPropertyType().getParameters().get(0));
+						maybeAddImport(dataDictionary, importSet, gwtProxyProperty.getSetEditorType());
 					}
 				}
-            } catch (Exception e) {
-				throw new IllegalArgumentException(e);
-            }
-        }
-
-        for (final GwtProxyProperty gwtProxyProperty : clientSideTypeMap
-                .values()) {
-            // Determine if this is the primary property.
-            if (primaryProperty == null) {
-                // Choose the first available field.
-                primaryProperty = gwtProxyProperty;
-            }
-            else if (gwtProxyProperty.isString() && !primaryProperty.isString()) {
-                // Favor String properties over other types.
-                secondaryProperty = primaryProperty;
-                primaryProperty = gwtProxyProperty;
-            }
-            else if (secondaryProperty == null) {
-                // Choose the next available property.
-                secondaryProperty = gwtProxyProperty;
-            }
-            else if (gwtProxyProperty.isString()
-                    && !secondaryProperty.isString()) {
-                // Favor String properties over other types.
-                secondaryProperty = gwtProxyProperty;
-            }
-
-            // Determine if this is the first date property.
-            if (dateProperty == null && gwtProxyProperty.isDate()) {
-                dateProperty = gwtProxyProperty;
-            }
-
-            if (gwtProxyProperty.isProxy()
-                    || gwtProxyProperty.isCollectionOfProxy()) {
-                if (proxyFields != null) {
-                    proxyFields += ", ";
-                }
-                else {
-                    proxyFields = "";
-                }
-                proxyFields += "\"" + gwtProxyProperty.getName() + "\"";
-            }
-
-            dataDictionary.addSection("fields").setVariable("field",
-                    gwtProxyProperty.getName());
-            if (!isReadOnly(gwtProxyProperty.getName(), mirroredType)) {
-            	// if the property is in the existingFields list, do not add it
-            	if (!existingFields.contains(gwtProxyProperty.getName()))
-					dataDictionary.addSection("editViewProps").setVariable(
-							"prop", gwtProxyProperty.forEditView());
-            }
-
-            final TemplateDataDictionary propertiesSection = dataDictionary
-                    .addSection("properties");
-            propertiesSection.setVariable("prop", gwtProxyProperty.getName());
-            propertiesSection.setVariable(
-                    "propId",
-                    proxyType.getSimpleTypeName() + "_"
-                            + gwtProxyProperty.getName());
-            propertiesSection.setVariable("propGetter",
-                    gwtProxyProperty.getGetter());
-            propertiesSection.setVariable("propType",
-                    gwtProxyProperty.getType());
-            propertiesSection.setVariable("propFormatter",
-                    gwtProxyProperty.getFormatter());
-            propertiesSection.setVariable("propRenderer",
-                    gwtProxyProperty.getRenderer());
-            propertiesSection.setVariable("propReadable",
-                    gwtProxyProperty.getReadableName());
-
-            if (!isReadOnly(gwtProxyProperty.getName(), mirroredType)) {
-                final TemplateDataDictionary editableSection = dataDictionary
-                        .addSection("editableProperties");
-                editableSection.setVariable("prop", gwtProxyProperty.getName());
-                editableSection.setVariable(
-                        "propId",
-                        proxyType.getSimpleTypeName() + "_"
-                                + gwtProxyProperty.getName());
-                editableSection.setVariable("propGetter",
-                        gwtProxyProperty.getGetter());
-                editableSection.setVariable("propType",
-                        gwtProxyProperty.getType());
-                editableSection.setVariable("propFormatter",
-                        gwtProxyProperty.getFormatter());
-                editableSection.setVariable("propRenderer",
-                        gwtProxyProperty.getRenderer());
-                editableSection.setVariable("propBinder",
-                        gwtProxyProperty.getBinder());
-                editableSection.setVariable("propReadable",
-                        gwtProxyProperty.getReadableName());
-            }
-
-            dataDictionary.setVariable("proxyRendererType",
-                    proxyType.getSimpleTypeName() + "Renderer");
-
-            if (gwtProxyProperty.isProxy() || gwtProxyProperty.isEnum()
-                    || gwtProxyProperty.isCollectionOfProxy()) {
-                final TemplateDataDictionary section = dataDictionary
-                        .addSection(gwtProxyProperty.isEnum() ? "setEnumValuePickers"
-                                : "setProxyValuePickers");
-                section.setVariable("setValuePicker",
-						existingFields.contains(gwtProxyProperty.getName()) ? 
-								gwtProxyProperty.getSetEmptyValuePickerMethod()
-								: gwtProxyProperty.getSetValuePickerMethod());
-                section.setVariable("setValuePickerName",
-                        gwtProxyProperty.getSetValuePickerMethodName());
-                section.setVariable("valueType", gwtProxyProperty
-                        .getValueType().getSimpleTypeName());
-                section.setVariable("rendererType",
-                        gwtProxyProperty.getProxyRendererType());
-                if (gwtProxyProperty.isProxy()
-                        || gwtProxyProperty.isCollectionOfProxy()) {
-                    String propTypeName = StringUtils
-                            .uncapitalize(gwtProxyProperty
-                                    .isCollectionOfProxy() ? gwtProxyProperty
-                                    .getPropertyType().getParameters().get(0)
-                                    .getSimpleTypeName() : gwtProxyProperty
-                                    .getPropertyType().getSimpleTypeName());
-                    propTypeName = propTypeName.substring(0,
-                            propTypeName.indexOf("Proxy"));
-                    section.setVariable("requestInterface", propTypeName
-                            + "Request");
-                    section.setVariable("findMethod",
-                            "find" + StringUtils.capitalize(propTypeName)
-                                    + "Entries(0, 50)");
-                }
-                maybeAddImport(dataDictionary, importSet,
-                        gwtProxyProperty.getPropertyType());
-                maybeAddImport(dataDictionary, importSet,
-                        gwtProxyProperty.getValueType());
-                if (gwtProxyProperty.isCollectionOfProxy()) {
-                    maybeAddImport(dataDictionary, importSet, gwtProxyProperty
-                            .getPropertyType().getParameters().get(0));
-                    maybeAddImport(dataDictionary, importSet,
-                            gwtProxyProperty.getSetEditorType());
-                }
-            }
+			}
         }
 
         dataDictionary.setVariable("proxyFields", proxyFields);
