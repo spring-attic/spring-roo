@@ -9,6 +9,10 @@ import com.google.web.bindery.requestfactory.gwt.client.RequestFactoryEditorDriv
 import com.google.web.bindery.requestfactory.shared.*;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
+import __TOP_LEVEL_PACKAGE__.client.managed.request.ApplicationRequestFactory;
+import __TOP_LEVEL_PACKAGE__.client.scaffold.place.AbstractProxyEditActivity;
+import __TOP_LEVEL_PACKAGE__.client.scaffold.place.ProxyEditView;
+import __TOP_LEVEL_PACKAGE__.client.scaffold.place.ProxyListPlace;
 
 import java.util.Set;
 
@@ -21,149 +25,232 @@ import java.util.Set;
  *
  * @param <P> the type of Proxy being edited
  */
-public abstract class AbstractProxyEditActivity<P extends EntityProxy> implements Activity, ProxyEditView.Delegate {
-	protected final ProxyEditView<P, ?> view;
-	private final PlaceController placeController;
-	private RequestFactoryEditorDriver<P, ?> editorDriver;
+public abstract class AbstractProxyEditActivity<P extends EntityProxy> implements Activity, ProxyEditView.Delegate
+{
+	protected final PlaceController placeController;
+	protected final ApplicationRequestFactory factory;
+	protected final EntityProxyId<P> proxyId;
+
+	protected RequestFactoryEditorDriver<P, ?> editorDriver;
+	protected P proxy;
+	protected AcceptsOneWidget display;
+	protected EventBus eventBus;
+
 	private boolean waiting;
 
-	public AbstractProxyEditActivity(ProxyEditView<P, ?> view, PlaceController placeController) {
-		this.view = view;
+	public AbstractProxyEditActivity(EntityProxyId<P> proxyId, ApplicationRequestFactory factory, PlaceController placeController)
+	{
+		this.factory = factory;
+		this.proxyId = proxyId;
 		this.placeController = placeController;
 	}
 
-	public void cancelClicked() {
-		String unsavedChangesWarning = mayStop();
-		if ((unsavedChangesWarning == null) || Window.confirm(unsavedChangesWarning)) {
-			editorDriver = null;
-			exit(false);
-		}
-	}
+	protected abstract ProxyEditView<P, ?> getView();
 
-	public String mayStop() {
-		if (isWaiting() || changed()) {
-			return "Are you sure you want to abandon your changes?";
-		}
-
-		return null;
-	}
-
-	public void onCancel() {
-		onStop();
-	}
-
-	public void onStop() {
-		view.setDelegate(null);
-		editorDriver = null;
-	}
-
-	public void saveClicked() {
-		if (!changed()) {
-			return;
-		}
-
-		RequestContext request = editorDriver.flush();
-		if (editorDriver.hasErrors()) {
-			return;
-		}
-
-		setWaiting(true);
-		request.fire(new Receiver<Void>() {
-			/*
-			 * Callbacks do nothing if editorDriver is null, we were stopped in
-			 * midflight
-			*/
-			@Override
-			public void onFailure(ServerFailure error) {
-				if (editorDriver != null) {
-					setWaiting(false);
-					super.onFailure(error);
-				}
-			}
-
-			@Override
-			public void onSuccess(Void ignore) {
-				if (editorDriver != null) {
-					// We want no warnings from mayStop, so:
-
-					// Defeat isChanged check
-					editorDriver = null;
-
-					// Defeat call-in-flight check
-					setWaiting(false);
-
-					exit(true);
-				}
-			}
-
-			@Override
-			public void onConstraintViolation(Set<ConstraintViolation<?>> violations) {
-				if (editorDriver != null) {
-					setWaiting(false);
-					editorDriver.setConstraintViolations(violations);
-				}
-			}
-		});
-	}
-
-	public void start(AcceptsOneWidget display, EventBus eventBus) {
-		editorDriver = view.createEditorDriver();
-		view.setDelegate(this);
-		editorDriver.edit(getProxy(), createSaveRequest(getProxy()));
-		editorDriver.flush();
-		display.setWidget(view);
-	}
+	protected abstract P createProxy();
 
 	/**
-	 * Called once to create the appropriate request to save
-	 * changes.
-	 *
+	 * Called once to create the appropriate request to save changes.
+	 * 
 	 * @return the request context to fire when the save button is clicked
 	 */
 	protected abstract RequestContext createSaveRequest(P proxy);
-
-	/**
-	 * Called when the user cancels or has successfully saved. This default
-	 * implementation tells the {@link PlaceController} to show the details of the
-	 * edited record.
-	 *
-	 * @param saved true if changes were comitted, false if user canceled
-	 */
-	protected void exit(@SuppressWarnings("unused") boolean saved) {
-		placeController.goTo(new ProxyPlace(getProxyId(), ProxyPlace.Operation.DETAILS));
-	}
 
 	/**
 	 * Get the proxy to be edited. Must be mutable, typically via a call to
 	 * {@link RequestContext#edit(EntityProxy)}, or
 	 * {@link RequestContext#create(Class)}.
 	 */
-	protected abstract P getProxy();
+	protected P getProxy()
+	{
+		return proxy;
+	}
+
+	@Override
+	public void start(AcceptsOneWidget display, EventBus eventBus)
+	{
+		this.display = display;
+		this.eventBus = eventBus;
+		if (proxyId != null)
+		{
+			createFindRequest().fire(new Receiver<P>()
+			{
+
+				@Override
+				public void onSuccess(P response)
+				{
+					AbstractProxyEditActivity.this.proxy = response;
+					bindToView();
+				}
+			});
+		}
+		else
+		{
+			this.proxy = createProxy();
+			bindToView();
+		}
+	}
+
+	protected Request<P> createFindRequest()
+	{
+		return this.factory.find(this.proxyId).with(getView().createEditorDriver().getPaths());
+	}
+
+	public void cancelClicked()
+	{
+		String unsavedChangesWarning = mayStop();
+		if ((unsavedChangesWarning == null) || Window.confirm(unsavedChangesWarning))
+		{
+			this.editorDriver = null;
+			exit(false);
+		}
+	}
+
+	public String mayStop()
+	{
+		if (isWaiting() || changed())
+		{
+			return "Are you sure you want to abandon your changes?";
+		}
+
+		return null;
+	}
+
+	public void onCancel()
+	{
+		onStop();
+	}
+
+	public void onStop()
+	{
+		this.editorDriver = null;
+	}
+
+	public void saveClicked()
+	{
+		if (!changed())
+		{
+			return;
+		}
+
+		RequestContext request = this.editorDriver.flush();
+		if (this.editorDriver.hasErrors())
+		{
+			return;
+		}
+
+		setWaiting(true);
+		request.fire(new Receiver<Void>()
+		{
+			/*
+			 * Callbacks do nothing if editorDriver is null, we were stopped in
+			 * midflight
+			 */
+			@Override
+			public void onFailure(ServerFailure error)
+			{
+				if (AbstractProxyEditActivity.this.editorDriver != null)
+				{
+					setWaiting(false);
+					super.onFailure(error);
+				}
+			}
+
+			@Override
+			public void onSuccess(Void ignore)
+			{
+				executePostSaveActions();
+			}
+
+			@Override
+			public void onConstraintViolation(Set<ConstraintViolation<?>> violations)
+			{
+				if (AbstractProxyEditActivity.this.editorDriver != null)
+				{
+					setWaiting(false);
+					AbstractProxyEditActivity.this.editorDriver.setConstraintViolations(violations);
+				}
+			}
+		});
+	}
+
+	protected void executePostSaveActions()
+	{
+		if (this.editorDriver != null)
+		{
+			// We want no warnings from mayStop, so:
+
+			// Defeat isChanged check
+			this.editorDriver = null;
+
+			// Defeat call-in-flight check
+			setWaiting(false);
+
+			exit(true);
+		}
+	}
+
+	public void bindToView()
+	{
+		this.editorDriver = getView().createEditorDriver();
+		executeBeforeBind();
+		this.editorDriver.edit(getProxy(), createSaveRequest(getProxy()));
+		this.editorDriver.flush();
+		executeAfterBind();
+		this.display.setWidget(getView());
+	}
+
+	protected void executeBeforeBind()
+	{
+
+	}
+
+	protected void executeAfterBind()
+	{
+
+	}
 
 	@SuppressWarnings("unchecked")
 	// id type always matches proxy type
-	protected EntityProxyId<P> getProxyId() {
+	protected EntityProxyId<P> getProxyId()
+	{
 		return (EntityProxyId<P>) getProxy().stableId();
 	}
 
-	private boolean changed() {
-		return editorDriver != null && editorDriver.flush().isChanged();
+	protected boolean changed()
+	{
+		return this.editorDriver != null && this.editorDriver.flush().isChanged();
+	}
+
+	/**
+	 * Called when the user cancels or has successfully saved. This default
+	 * implementation tells the {@link PlaceController} to show the details of
+	 * the edited record.
+	 * 
+	 * @param saved
+	 *            true if changes were comitted, false if user canceled
+	 */
+	protected void exit(boolean saved)
+	{
+		this.placeController.goTo(new ProxyListPlace(getProxyId().getProxyClass()));
 	}
 
 	/**
 	 * @return true if we're waiting for an rpc response.
 	 */
-	private boolean isWaiting() {
-		return waiting;
+	protected boolean isWaiting()
+	{
+		return this.waiting;
 	}
 
 	/**
 	 * While we are waiting for a response, we cannot poke setters on the proxy
-	 * (that is, we cannot call editorDriver.flush). So we set the waiting flag to
-	 * warn ourselves not to, and to disable the view.
+	 * (that is, we cannot call editorDriver.flush). So we set the waiting flag
+	 * to warn ourselves not to, and to disable the view.
 	 */
-	private void setWaiting(boolean wait) {
+	protected void setWaiting(boolean wait)
+	{
 		this.waiting = wait;
-		view.setEnabled(!wait);
+		getView().setEnabled(!wait);
 	}
 }
