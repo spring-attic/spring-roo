@@ -316,6 +316,16 @@ public class GwtProxyProperty {
                 + "> values) {\n" + "\t\t" + getName()
                 + ".setAcceptableValues(values);\n" + "\t}\n";
     }
+    
+    public String getSetEmptyValuePickerMethod()
+	{
+		return "\tpublic void " 
+				+ getSetValuePickerMethodName() 
+				+ "(Collection<" 
+				+ (isCollection() ? type.getParameters().get(0)
+						.getSimpleTypeName() : type.getSimpleTypeName()) 
+				+ "> values) { }";
+	}
 
     String getSetValuePickerMethodName() {
         return "set" + StringUtils.capitalize(getName()) + "PickerValues";

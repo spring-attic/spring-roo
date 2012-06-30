@@ -426,7 +426,7 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
         GwtProxyProperty dateProperty = null;
         final Set<String> importSet = new HashSet<String>();
         
-        List<String> omittedFields = new ArrayList<String>();
+        List<String> existingFields = new ArrayList<String>();
 
 		// Adds names of fields in edit view to ommittedFields list
         if (type == GwtType.EDIT_VIEW) {
@@ -444,7 +444,7 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
 					for (FieldMetadata field : details.getDeclaredFields()) {
 						JavaSymbolName fieldName = field.getFieldName();
 						String name = fieldName.toString();
-						omittedFields.add(name);
+						existingFields.add(name);
 					}
 				}
 			} catch (Exception e) {
@@ -468,7 +468,7 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
 					for (FieldMetadata field : details.getDeclaredFields()) {
 						JavaSymbolName fieldName = field.getFieldName();
 						String name = fieldName.toString();
-						omittedFields.add(name);
+						existingFields.add(name);
 					}
 				}
             } catch (Exception e) {
@@ -517,8 +517,8 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
             dataDictionary.addSection("fields").setVariable("field",
                     gwtProxyProperty.getName());
             if (!isReadOnly(gwtProxyProperty.getName(), mirroredType)) {
-            	// if the property is in the omittedFields list, do not add it
-            	if (!omittedFields.contains(gwtProxyProperty.getName()))
+            	// if the property is in the existingFields list, do not add it
+            	if (!existingFields.contains(gwtProxyProperty.getName()))
 					dataDictionary.addSection("editViewProps").setVariable(
 							"prop", gwtProxyProperty.forEditView());
             }
@@ -572,7 +572,9 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
                         .addSection(gwtProxyProperty.isEnum() ? "setEnumValuePickers"
                                 : "setProxyValuePickers");
                 section.setVariable("setValuePicker",
-                        gwtProxyProperty.getSetValuePickerMethod());
+						existingFields.contains(gwtProxyProperty.getName()) ? 
+								gwtProxyProperty.getSetEmptyValuePickerMethod()
+								: gwtProxyProperty.getSetValuePickerMethod());
                 section.setVariable("setValuePickerName",
                         gwtProxyProperty.getSetValuePickerMethodName());
                 section.setVariable("valueType", gwtProxyProperty
