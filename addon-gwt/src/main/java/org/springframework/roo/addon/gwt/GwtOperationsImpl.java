@@ -75,8 +75,6 @@ import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import com.tvt.roo.gwt.GwtJavaType;
-
 /**
  * Implementation of {@link GwtOperations}.
  * 
