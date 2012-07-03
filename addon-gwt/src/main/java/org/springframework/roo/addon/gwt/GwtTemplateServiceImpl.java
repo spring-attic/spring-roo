@@ -1,6 +1,5 @@
 package org.springframework.roo.addon.gwt;
 
-import static com.tvt.roo.gwt.GwtJavaType.INSTANCE_REQUEST;
 import static org.springframework.roo.addon.gwt.GwtJavaType.INSTANCE_REQUEST;
 import static org.springframework.roo.model.JdkJavaType.ARRAY_LIST;
 import static org.springframework.roo.model.JdkJavaType.HASH_SET;
@@ -70,15 +69,6 @@ import org.w3c.dom.Node;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-
-import com.tvt.roo.gwt.GwtPath;
-import com.tvt.roo.gwt.GwtProxyProperty;
-import com.tvt.roo.gwt.GwtTemplateDataHolder;
-import com.tvt.roo.gwt.GwtTemplateService;
-import com.tvt.roo.gwt.GwtType;
-import com.tvt.roo.gwt.GwtTypeService;
-import com.tvt.roo.gwt.GwtUtils;
-import com.tvt.roo.gwt.TemplateResourceLoader;
 
 /**
  * Provides a basic implementation of {@link GwtTemplateService} which is used

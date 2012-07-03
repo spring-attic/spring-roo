@@ -78,8 +78,6 @@ import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import com.tvt.roo.gwt.GwtUtils;
-
 /**
  * Provides a basic implementation of {@link GwtTypeService}.
  * 

@@ -1,8 +1,5 @@
 package org.springframework.roo.addon.gwt;
 
-import static org.springframework.roo.addon.gwt.GwtJavaType.REQUEST_CONTEXT;
-import static org.springframework.roo.addon.gwt.RooJavaType.ROO_GWT_REQUEST;
-import static org.springframework.roo.addon.gwt.RooJavaType.ROO_GWT_UNMANAGED_REQUEST;
 import static java.lang.reflect.Modifier.PUBLIC;
 import static org.springframework.roo.addon.gwt.GwtJavaType.ENTITY_PROXY;
 import static org.springframework.roo.addon.gwt.GwtJavaType.OLD_ENTITY_PROXY;
@@ -13,6 +10,7 @@ import static org.springframework.roo.classpath.PhysicalTypeCategory.INTERFACE;
 import static org.springframework.roo.model.RooJavaType.ROO_GWT_MIRRORED_FROM;
 import static org.springframework.roo.model.RooJavaType.ROO_GWT_PROXY;
 import static org.springframework.roo.model.RooJavaType.ROO_GWT_REQUEST;
+import static org.springframework.roo.model.RooJavaType.ROO_GWT_UNMANAGED_REQUEST;
 import static org.springframework.roo.model.RooJavaType.ROO_JPA_ACTIVE_RECORD;
 import static org.springframework.roo.model.RooJavaType.ROO_JPA_ENTITY;
 import static org.springframework.roo.project.Path.ROOT;
