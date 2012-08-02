@@ -27,7 +27,6 @@ import org.springframework.roo.project.LogicalPath;
  */
 public class ServiceInterfaceMetadata extends
         AbstractItdTypeDetailsProvidingMetadataItem {
-
     private static final InvocableMemberBodyBuilder BODY = new InvocableMemberBodyBuilder();
     private static final String PROVIDES_TYPE_STRING = ServiceInterfaceMetadata.class
             .getName();

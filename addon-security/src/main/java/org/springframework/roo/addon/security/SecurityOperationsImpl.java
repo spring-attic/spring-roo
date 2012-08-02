@@ -20,6 +20,7 @@ import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.Property;
+import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.support.util.DomUtils;
 import org.springframework.roo.support.util.FileUtils;
 import org.springframework.roo.support.util.WebXmlUtils;
@@ -153,8 +154,8 @@ public class SecurityOperationsImpl implements SecurityOperations {
                         Path.SRC_MAIN_WEBAPP, "WEB-INF/web.xml"))
                 && !projectOperations.getFocusedModule()
                         .hasDependencyExcludingVersion(SPRING_SECURITY)
-                && !projectOperations.isFeatureInstalledInFocusedModule(
-                        FeatureNames.JSF, FeatureNames.GWT);
+                && !projectOperations
+                        .isFeatureInstalledInFocusedModule(FeatureNames.JSF);
     }
 
     private void updateDependencies(final Element configuration,
@@ -176,5 +177,24 @@ public class SecurityOperationsImpl implements SecurityOperations {
         for (final Element property : databaseProperties) {
             projectOperations.addProperty(moduleName, new Property(property));
         }
+    }
+
+    @Override
+    public String getName() {
+        return FeatureNames.SECURITY;
+    }
+
+    @Override
+    public boolean isInstalledInModule(String moduleName) {
+        final Pom pom = projectOperations.getPomFromModuleName(moduleName);
+        if (pom == null) {
+            return false;
+        }
+        for (final Dependency dependency : pom.getDependencies()) {
+            if ("spring-security-core".equals(dependency.getArtifactId())) {
+                return true;
+            }
+        }
+        return false;
     }
 }

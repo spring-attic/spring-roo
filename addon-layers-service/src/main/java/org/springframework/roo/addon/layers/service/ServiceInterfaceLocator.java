@@ -12,7 +12,6 @@ import org.springframework.roo.model.JavaType;
  * @since 1.2.0
  */
 public interface ServiceInterfaceLocator {
-
     /**
      * Returns the details of any interfaces annotated with {@link RooService}
      * that claim to support the given type of entity.

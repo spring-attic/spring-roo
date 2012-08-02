@@ -1,9 +1,11 @@
 package org.springframework.roo.addon.layers.service;
 
+import static org.springframework.roo.model.SpringJavaType.PRE_AUTHORIZE;
 import static org.springframework.roo.model.SpringJavaType.SERVICE;
 import static org.springframework.roo.model.SpringJavaType.TRANSACTIONAL;
 
 import java.lang.reflect.Modifier;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -31,7 +33,6 @@ import org.springframework.roo.project.LogicalPath;
  */
 public class ServiceClassMetadata extends
         AbstractItdTypeDetailsProvidingMetadataItem {
-
     private static final String PROVIDES_TYPE_STRING = ServiceClassMetadata.class
             .getName();
     private static final String PROVIDES_TYPE = MetadataIdentificationUtils
@@ -85,7 +86,7 @@ public class ServiceClassMetadata extends
             final ServiceAnnotationValues annotationValues,
             final Map<JavaType, JavaType> domainTypeToIdTypeMap,
             final Map<JavaType, Map<ServiceLayerMethod, MemberTypeAdditions>> allCrudAdditions,
-            final Map<JavaType, String> domainTypePlurals) {
+            final Map<JavaType, String> domainTypePlurals, String serviceName) {
         super(identifier, aspectName, governorPhysicalTypeMetadata);
         Validate.notNull(allCrudAdditions, "CRUD additions required");
         Validate.notNull(annotationValues, "Annotation values required");
@@ -102,6 +103,9 @@ public class ServiceClassMetadata extends
                 final JavaSymbolName methodName = method.getSymbolName(
                         annotationValues, domainType,
                         domainTypePlurals.get(domainType));
+                final String permissionName = method.getPermissionName(
+                        annotationValues, domainType,
+                        domainTypePlurals.get(domainType));
                 if (methodName != null
                         && !governorDetails.isMethodDeclaredByAnother(
                                 methodName,
@@ -115,17 +119,66 @@ public class ServiceClassMetadata extends
                         // A lower layer implements it
                         lowerLayerCallAdditions.copyAdditionsTo(builder,
                                 governorTypeDetails);
+
                     }
                     final String body = method.getBody(lowerLayerCallAdditions);
                     final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
                     bodyBuilder.appendFormalLine(body);
-                    builder.addMethod(new MethodMetadataBuilder(getId(),
-                            Modifier.PUBLIC, methodName, method
-                                    .getReturnType(domainType),
+                    List<JavaSymbolName> parameterNames = method
+                            .getParameterNames(domainType, idType);
+                    MethodMetadataBuilder methodMetadataBuilder = new MethodMetadataBuilder(
+                            getId(), Modifier.PUBLIC, methodName,
+                            method.getReturnType(domainType),
                             AnnotatedJavaType.convertFromJavaTypes(method
                                     .getParameterTypes(domainType, idType)),
-                            method.getParameterNames(domainType, idType),
-                            bodyBuilder));
+                            parameterNames, bodyBuilder);
+
+                    StringBuilder preAuthorizeValue = new StringBuilder();
+
+                    if (annotationValues.requireAuthentication()
+                            || annotationValues.getAuthorizedRoles().length > 0
+                            || annotationValues.usePermissionEvaluator()) {
+                        preAuthorizeValue.append("isAuthenticated()");
+                    }
+
+                    if (annotationValues.getAuthorizedRoles().length > 0) {
+                        preAuthorizeValue.append(" && (");
+                        int i = 0;
+                        for (String role : annotationValues
+                                .getAuthorizedRoles()) {
+                            if (i > 0)
+                                preAuthorizeValue.append(" || ");
+
+                            preAuthorizeValue.append("hasRole('" + role + "')");
+                            i++;
+                        }
+
+                        preAuthorizeValue.append(")");
+                    }
+
+                    if (annotationValues.usePermissionEvaluator()) {
+                        preAuthorizeValue
+                                .append(" && hasPermission("
+                                        + (parameterNames.size() == 0 ? "#"
+                                                : "#"
+                                                        + parameterNames
+                                                                .get(0)
+                                                                .getSymbolName())
+                                        + ", '" + serviceName + ":"
+                                        + permissionName + "'" + ")");
+                    }
+
+                    if (!preAuthorizeValue.toString().equals("")) {
+                        final AnnotationMetadataBuilder annotationMetadataBuilder = new AnnotationMetadataBuilder(
+                                PRE_AUTHORIZE);
+                        annotationMetadataBuilder.addStringAttribute("value",
+                                preAuthorizeValue.toString());
+                        methodMetadataBuilder
+                                .addAnnotation(annotationMetadataBuilder
+                                        .build());
+                    }
+
+                    builder.addMethod(methodMetadataBuilder);
                 }
             }
         }

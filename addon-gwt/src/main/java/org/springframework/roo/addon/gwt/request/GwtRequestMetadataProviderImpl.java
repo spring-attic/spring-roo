@@ -211,7 +211,12 @@ public class GwtRequestMetadataProviderImpl extends
             final MemberTypeAdditions memberTypeAdditions,
             final String declaredByMetadataId) {
         final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(
-                declaredByMetadataId); // wrong MID, but doesn't matter here
+                declaredByMetadataId); // wrong
+                                       // MID,
+                                       // but
+                                       // doesn't
+                                       // matter
+                                       // here
         methodBuilder.setMethodName(new JavaSymbolName(memberTypeAdditions
                 .getMethodName()));
         if (memberTypeAdditions.isStatic()) {

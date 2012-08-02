@@ -36,7 +36,6 @@ import org.springframework.roo.support.util.PairList;
 @Component
 @Service
 public class ServiceLayerProvider extends CoreLayerProvider {
-
     @Reference private MetadataService metadataService;
     @Reference private ServiceAnnotationValuesFactory serviceAnnotationValuesFactory;
     @Reference private ServiceInterfaceLocator serviceInterfaceLocator;

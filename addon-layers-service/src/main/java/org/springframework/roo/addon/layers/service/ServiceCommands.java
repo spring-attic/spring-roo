@@ -4,6 +4,7 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.classpath.converters.JavaTypeConverter;
+import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
@@ -19,12 +20,22 @@ import org.springframework.roo.shell.CommandMarker;
 @Component
 @Service
 public class ServiceCommands implements CommandMarker {
-
     @Reference private ServiceOperations serviceOperations;
 
-    @CliAvailabilityIndicator("service")
+    @CliAvailabilityIndicator({ "service", "serviceAll" })
     public boolean isServiceCommandAvailable() {
         return serviceOperations.isServiceInstallationPossible();
+    }
+
+    @CliAvailabilityIndicator({ "secureService", "secureServiceAll" })
+    public boolean isSecureServiceCommandAvailable() {
+        return serviceOperations.isSecureServiceInstallationPossible();
+    }
+
+    @CliAvailabilityIndicator("permissionEvaluator")
+    public boolean isPermissionEvaluatorCommandAvailable() {
+        return serviceOperations
+                .isServicePermissionEvaluatorInstallationPossible();
     }
 
     @CliCommand(value = "service", help = "Adds @RooService annotation to target type")
@@ -37,6 +48,57 @@ public class ServiceCommands implements CommandMarker {
             classType = new JavaType(interfaceType.getFullyQualifiedTypeName()
                     + "Impl");
         }
-        serviceOperations.setupService(interfaceType, classType, domainType);
+        serviceOperations.setupService(interfaceType, classType, domainType,
+                false, "", false);
+    }
+
+    @CliCommand(value = "serviceAll", help = "Adds @RooService annotation to all entities")
+    public void service(
+            @CliOption(key = "interfacePackage", mandatory = true, help = "The java interface package") final JavaPackage interfacePackage,
+            @CliOption(key = "classPackage", mandatory = false, help = "The java package of the implementation classes for the interfaces") JavaPackage classPackage) {
+
+        if (classPackage == null) {
+            classPackage = interfacePackage;
+        }
+        serviceOperations.setupAllServices(interfacePackage, classPackage,
+                false, "", false);
+    }
+
+    @CliCommand(value = "secureService", help = "Adds @RooService annotation to target type")
+    public void secureService(
+            @CliOption(key = "interface", mandatory = true, help = "The java interface to apply this annotation to") final JavaType interfaceType,
+            @CliOption(key = "class", mandatory = false, help = "Implementation class for the specified interface") JavaType classType,
+            @CliOption(key = "entity", unspecifiedDefaultValue = "*", optionContext = JavaTypeConverter.PROJECT, mandatory = false, help = "The domain entity this service should expose") final JavaType domainType,
+            @CliOption(key = "requireAuthentication", unspecifiedDefaultValue = "false", specifiedDefaultValue = "ture", mandatory = false, help = "Whether or not users must be authenticated to use the service") final boolean requireAuthentication,
+            @CliOption(key = "authorizedRoles", mandatory = false, help = "The role authorized the use the methods in the service") final String role,
+            @CliOption(key = "usePermissionEvaluator", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", mandatory = false, help = "Whether or not to use a PermissionEvaluator") final boolean usePermissionEvaluator) {
+
+        if (classType == null) {
+            classType = new JavaType(interfaceType.getFullyQualifiedTypeName()
+                    + "Impl");
+        }
+        serviceOperations.setupService(interfaceType, classType, domainType,
+                requireAuthentication, role, usePermissionEvaluator);
+    }
+
+    @CliCommand(value = "secureServiceAll", help = "Adds @RooService annotation to all entities")
+    public void secureServiceAll(
+            @CliOption(key = "interfacePackage", mandatory = true, help = "The java interface package") final JavaPackage interfacePackage,
+            @CliOption(key = "classPackage", mandatory = false, help = "The java package of the implementation classes for the interfaces") JavaPackage classPackage,
+            @CliOption(key = "requireAuthentication", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", mandatory = false, help = "Whether or not users must be authenticated to use the service") final boolean requireAuthentication,
+            @CliOption(key = "authorizedRole", mandatory = false, help = "The role authorized the use the methods in the service (additional roles can be added after creation)") final String role,
+            @CliOption(key = "usePermissionEvaluator", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", mandatory = false, help = "Whether or not to use a PermissionEvaluator") final boolean usePermissionEvaluator) {
+
+        if (classPackage == null) {
+            classPackage = interfacePackage;
+        }
+        serviceOperations.setupAllServices(interfacePackage, classPackage,
+                requireAuthentication, role, usePermissionEvaluator);
+    }
+
+    @CliCommand(value = "permissionEvaluator", help = "Create a permission evaluator")
+    public void setupPermissionEvaluator(
+            @CliOption(key = "package", mandatory = true, optionContext = JavaTypeConverter.PROJECT, help = "The package to add the permission evaluator to") final JavaPackage evaluatorPackage) {
+        serviceOperations.setupPermissionEvaluator(evaluatorPackage);
     }
 }

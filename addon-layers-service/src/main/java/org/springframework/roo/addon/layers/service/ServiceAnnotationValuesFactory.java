@@ -10,7 +10,6 @@ import org.springframework.roo.project.Path;
  * @since 1.2.0
  */
 public interface ServiceAnnotationValuesFactory {
-
     /**
      * Returns the values of the {@link RooService} annotation on the given
      * service interface (assumed to be in {@link Path#SRC_MAIN_JAVA}).

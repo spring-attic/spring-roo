@@ -26,7 +26,6 @@ import org.springframework.roo.model.RooJavaType;
 @Component
 @Service
 public class ServiceInterfaceLocatorImpl implements ServiceInterfaceLocator {
-
     @Reference private TypeLocationService typeLocationService;
 
     public Collection<ClassOrInterfaceTypeDetails> getServiceInterfaces(

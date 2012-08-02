@@ -17,7 +17,6 @@ import org.springframework.roo.metadata.MetadataService;
 @Service
 public class ServiceAnnotationValuesFactoryImpl implements
         ServiceAnnotationValuesFactory {
-
     @Reference private MetadataService metadataService;
 
     public ServiceAnnotationValues getInstance(

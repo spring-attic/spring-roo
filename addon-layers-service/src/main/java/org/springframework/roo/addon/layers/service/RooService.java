@@ -15,7 +15,6 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.SOURCE)
 public @interface RooService {
-
     /**
      * The default prefix of the "count all" method
      */
@@ -110,7 +109,7 @@ public @interface RooService {
      * 
      * @return see above
      */
-    boolean transactional() default true;
+    boolean transactional() default false;
 
     /**
      * Returns the name of the "update" method
@@ -118,4 +117,11 @@ public @interface RooService {
      * @return a blank string if the annotated type doesn't support this method
      */
     String updateMethod() default UPDATE_METHOD;
+
+    boolean requireAuthentication() default false;
+
+    boolean usePermissionEvaluator() default false;
+
+    String[] authorizedRoles();
+
 }
