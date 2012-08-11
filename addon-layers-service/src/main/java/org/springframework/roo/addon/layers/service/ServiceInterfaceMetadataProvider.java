@@ -11,6 +11,7 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.plural.PluralMetadata;
+import org.springframework.roo.addon.security.PermissionEvaluatorMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.customdata.taggers.CustomDataKeyDecorator;
@@ -154,27 +155,28 @@ public class ServiceInterfaceMetadataProvider extends
                     metadataIdentificationString);
             domainTypePlurals.put(type, pluralMetadata.getPlural());
         }
-        ServicePermissionEvaluatorMetadata servicePermissionEvaluatorMetadata = null;
+
+        PermissionEvaluatorMetadata permissionEvaluatorMetadata = null;
         for (final ClassOrInterfaceTypeDetails permissionEvaluator : typeLocationService
                 .findClassesOrInterfaceDetailsWithAnnotation(ROO_PERMISSION_EVALUATOR)) {
             if (permissionEvaluator != null) {
                 final LogicalPath path = PhysicalTypeIdentifier
                         .getPath(permissionEvaluator.getDeclaredByMetadataId());
-                final String permissionEvaluatorId = ServicePermissionEvaluatorMetadata
+                final String permissionEvaluatorId = PermissionEvaluatorMetadata
                         .createIdentifier(permissionEvaluator.getName(), path);
-                servicePermissionEvaluatorMetadata = (ServicePermissionEvaluatorMetadata) metadataService
+                permissionEvaluatorMetadata = (PermissionEvaluatorMetadata) metadataService
                         .get(permissionEvaluatorId);
-                if (servicePermissionEvaluatorMetadata != null
-                        && servicePermissionEvaluatorMetadata.isValid()) {
+                if (permissionEvaluatorMetadata != null
+                        && permissionEvaluatorMetadata.isValid()) {
                     if (annotationValues.usePermissionEvaluator()) {
-                        metadataDependencyRegistry.deregisterDependency(
-                                metadataIdentificationString,
-                                servicePermissionEvaluatorMetadata.getId());
-                    }
-                    else {
                         metadataDependencyRegistry.registerDependency(
                                 metadataIdentificationString,
-                                servicePermissionEvaluatorMetadata.getId());
+                                permissionEvaluatorMetadata.getId());
+                    }
+                    else {
+                        metadataDependencyRegistry.deregisterDependency(
+                                metadataIdentificationString,
+                                permissionEvaluatorMetadata.getId());
                     }
 
                 }

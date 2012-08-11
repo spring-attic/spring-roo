@@ -122,6 +122,10 @@ public @interface RooService {
 
     boolean usePermissionEvaluator() default false;
 
-    String[] authorizedRoles();
+    String[] authorizedCreateOrUpdateRoles() default "";
+
+    String[] authorizedDeleteRoles() default "";
+
+    String[] authorizedReadRoles() default "";
 
 }

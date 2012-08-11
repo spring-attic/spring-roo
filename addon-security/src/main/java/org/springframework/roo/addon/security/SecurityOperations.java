@@ -1,5 +1,6 @@
 package org.springframework.roo.addon.security;
 
+import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.project.Feature;
 
 /**
@@ -14,5 +15,9 @@ public interface SecurityOperations extends Feature {
 
     void installSecurity();
 
+    void installPermissionEvaluator(JavaPackage permissionEvaluatorPackage);
+
     boolean isSecurityInstallationPossible();
+
+    boolean isServicePermissionEvaluatorInstallationPossible();
 }

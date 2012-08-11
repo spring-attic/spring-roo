@@ -57,7 +57,7 @@ public final class RooJavaType {
     public static final JavaType ROO_OP4J = new JavaType(
             "org.springframework.roo.addon.op4j.RooOp4j");
     public static final JavaType ROO_PERMISSION_EVALUATOR = new JavaType(
-            "org.springframework.roo.addon.layers.service.RooPermissionEvaluator");
+            "org.springframework.roo.addon.security.RooPermissionEvaluator");
     public static final JavaType ROO_PLURAL = new JavaType(
             "org.springframework.roo.addon.plural.RooPlural");
     public static final JavaType ROO_REPOSITORY_JPA = new JavaType(
@@ -70,10 +70,6 @@ public final class RooJavaType {
             "org.springframework.roo.addon.serializable.RooSerializable");
     public static final JavaType ROO_SERVICE = new JavaType(
             "org.springframework.roo.addon.layers.service.RooService");
-    // public static final JavaType ROO_SERVICE_IMPL = new
-    // JavaType("org.springframework.roo.addon.layers.service.RooServiceImpl");
-    public static final JavaType ROO_SERVICE_PERMISSION = new JavaType(
-            "org.springframework.roo.addon.layers.service.RooServicePermission");
     public static final JavaType ROO_SOLR_SEARCHABLE = new JavaType(
             "org.springframework.roo.addon.solr.RooSolrSearchable");
     public static final JavaType ROO_SOLR_WEB_SEARCHABLE = new JavaType(

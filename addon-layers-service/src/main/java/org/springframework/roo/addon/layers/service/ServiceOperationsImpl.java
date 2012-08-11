@@ -7,15 +7,10 @@ import static org.springframework.roo.model.RooJavaType.ROO_JPA_ACTIVE_RECORD;
 import static org.springframework.roo.model.RooJavaType.ROO_JPA_ENTITY;
 import static org.springframework.roo.model.RooJavaType.ROO_PERMISSION_EVALUATOR;
 import static org.springframework.roo.model.RooJavaType.ROO_SERVICE;
-import static org.springframework.roo.model.SpringJavaType.PERMISSION_EVALUATOR;
-import static org.springframework.roo.project.Path.SRC_MAIN_JAVA;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Set;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -29,17 +24,14 @@ import org.springframework.roo.classpath.details.annotations.AnnotationMetadataB
 import org.springframework.roo.classpath.details.annotations.ArrayAttributeValue;
 import org.springframework.roo.classpath.details.annotations.ClassAttributeValue;
 import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
-import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.FeatureNames;
-import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
-import org.springframework.roo.support.util.FileUtils;
 
 /**
  * The {@link ServiceOperations} implementation.
@@ -55,7 +47,6 @@ public class ServiceOperationsImpl implements ServiceOperations {
     @Reference private ProjectOperations projectOperations;
     @Reference private TypeManagementService typeManagementService;
     @Reference private TypeLocationService typeLocationService;
-    @Reference private MetadataService metadataService;
 
     private void createServiceClass(final JavaType interfaceType,
             final JavaType classType) {
@@ -91,15 +82,34 @@ public class ServiceOperationsImpl implements ServiceOperations {
                         new JavaSymbolName("domainTypes"), Arrays
                                 .asList(new ClassAttributeValue(
                                         new JavaSymbolName("foo"), domainType))));
-        interfaceAnnotationMetadata
-                .addAttribute(new ArrayAttributeValue<StringAttributeValue>(
-                        new JavaSymbolName("authorizedRole"), Arrays
-                                .asList(new StringAttributeValue(
-                                        new JavaSymbolName("bar"), role))));
-        interfaceAnnotationMetadata.addBooleanAttribute(
-                "requireAuthentication", requireAuthentication);
-        interfaceAnnotationMetadata.addBooleanAttribute(
-                "usePermissionEvaluator", usePermissionEvaluator);
+        if (role == null) {
+            role = "";
+        }
+        if (requireAuthentication || usePermissionEvaluator || !role.equals("")) {
+            interfaceAnnotationMetadata.addBooleanAttribute(
+                    "requireAuthentication", requireAuthentication);
+        }
+        if (!role.equals("")) {
+            interfaceAnnotationMetadata
+                    .addAttribute(new ArrayAttributeValue<StringAttributeValue>(
+                            new JavaSymbolName("authorizedCreateOrUpdateRoles"),
+                            Arrays.asList(new StringAttributeValue(
+                                    new JavaSymbolName("bar"), role))));
+            interfaceAnnotationMetadata
+                    .addAttribute(new ArrayAttributeValue<StringAttributeValue>(
+                            new JavaSymbolName("authorizedReadRoles"), Arrays
+                                    .asList(new StringAttributeValue(
+                                            new JavaSymbolName("bar"), role))));
+            interfaceAnnotationMetadata
+                    .addAttribute(new ArrayAttributeValue<StringAttributeValue>(
+                            new JavaSymbolName("authorizedDeleteRoles"), Arrays
+                                    .asList(new StringAttributeValue(
+                                            new JavaSymbolName("bar"), role))));
+        }
+        if (usePermissionEvaluator) {
+            interfaceAnnotationMetadata.addBooleanAttribute(
+                    "usePermissionEvaluator", true);
+        }
         final String interfaceMid = PhysicalTypeIdentifier.createIdentifier(
                 interfaceType, pathResolver.getPath(interfaceIdentifier));
         final ClassOrInterfaceTypeDetailsBuilder interfaceTypeBuilder = new ClassOrInterfaceTypeDetailsBuilder(
@@ -107,60 +117,6 @@ public class ServiceOperationsImpl implements ServiceOperations {
         interfaceTypeBuilder.addAnnotation(interfaceAnnotationMetadata.build());
         typeManagementService.createOrUpdateTypeOnDisk(interfaceTypeBuilder
                 .build());
-    }
-
-    private void createPermissionEvaluator(
-            final JavaPackage permissionEvaluatorPackage) {
-        installPermissionEvaluatorTemplate(permissionEvaluatorPackage);
-        final LogicalPath focusedSrcMainJava = LogicalPath.getInstance(
-                SRC_MAIN_JAVA, projectOperations.getFocusedModuleName());
-        JavaType permissionEvaluatorClass = new JavaType(
-                permissionEvaluatorPackage.getFullyQualifiedPackageName()
-                        + ".ServicePermissionEvaluator");
-        final String identifier = pathResolver.getFocusedCanonicalPath(
-                Path.SRC_MAIN_JAVA, permissionEvaluatorClass);
-        if (fileManager.exists(identifier)) {
-            return; // Type already exists - nothing to do
-        }
-
-        final AnnotationMetadataBuilder classAnnotationMetadata = new AnnotationMetadataBuilder(
-                ROO_PERMISSION_EVALUATOR);
-        final String classMid = PhysicalTypeIdentifier.createIdentifier(
-                permissionEvaluatorClass, pathResolver.getPath(identifier));
-        final ClassOrInterfaceTypeDetailsBuilder classBuilder = new ClassOrInterfaceTypeDetailsBuilder(
-                classMid, PUBLIC, permissionEvaluatorClass, CLASS);
-        classBuilder.addAnnotation(classAnnotationMetadata.build());
-        classBuilder.addImplementsType(PERMISSION_EVALUATOR);
-        typeManagementService.createOrUpdateTypeOnDisk(classBuilder.build());
-
-        metadataService
-                .get(ServicePermissionEvaluatorMetadata.createIdentifier(
-                        permissionEvaluatorClass, focusedSrcMainJava));
-    }
-
-    private void installPermissionEvaluatorTemplate(
-            JavaPackage permissionEvaluatorPackage) {
-        // Copy the template across
-        final String destination = pathResolver.getFocusedIdentifier(
-                Path.SPRING_CONFIG_ROOT,
-                "applicationContext-security-permissionEvaluator.xml");
-        if (!fileManager.exists(destination)) {
-            try {
-                InputStream inputStream = FileUtils
-                        .getInputStream(getClass(),
-                                "applicationContext-security-permissionEvaluator-template.xml");
-                String content = IOUtils.toString(inputStream);
-                content = content.replace("__PERMISSION_EVALUATOR_PACKAGE__",
-                        permissionEvaluatorPackage
-                                .getFullyQualifiedPackageName());
-
-                fileManager.createOrUpdateTextFileIfRequired(destination,
-                        content, true);
-            }
-            catch (final IOException ioe) {
-                throw new IllegalStateException(ioe);
-            }
-        }
     }
 
     private boolean isPermissionEvaluatorInstalled() {
@@ -172,12 +128,6 @@ public class ServiceOperationsImpl implements ServiceOperations {
     @Override
     public boolean isServiceInstallationPossible() {
         return projectOperations.isFocusedProjectAvailable();
-    }
-
-    @Override
-    public boolean isServicePermissionEvaluatorInstallationPossible() {
-        return projectOperations.isFocusedProjectAvailable()
-                && projectOperations.isFeatureInstalled(FeatureNames.SECURITY);
     }
 
     @Override
@@ -226,16 +176,6 @@ public class ServiceOperationsImpl implements ServiceOperations {
             setupService(interfaceType, classType, domainType.getName(),
                     requireAuthentication, role, usePermissionEvaluator);
         }
-    }
-
-    @Override
-    public void setupPermissionEvaluator(
-            final JavaPackage permissionEvaluatorPackage) {
-        Validate.isTrue(
-                projectOperations.isFeatureInstalled(FeatureNames.SECURITY),
-                "Security must first be setup before securing a method");
-        Validate.notNull(permissionEvaluatorPackage, "Package required");
-        createPermissionEvaluator(permissionEvaluatorPackage);
     }
 
 }

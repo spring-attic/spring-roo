@@ -32,12 +32,6 @@ public class ServiceCommands implements CommandMarker {
         return serviceOperations.isSecureServiceInstallationPossible();
     }
 
-    @CliAvailabilityIndicator("permissionEvaluator")
-    public boolean isPermissionEvaluatorCommandAvailable() {
-        return serviceOperations
-                .isServicePermissionEvaluatorInstallationPossible();
-    }
-
     @CliCommand(value = "service", help = "Adds @RooService annotation to target type")
     public void service(
             @CliOption(key = "interface", mandatory = true, help = "The java interface to apply this annotation to") final JavaType interfaceType,
@@ -94,11 +88,5 @@ public class ServiceCommands implements CommandMarker {
         }
         serviceOperations.setupAllServices(interfacePackage, classPackage,
                 requireAuthentication, role, usePermissionEvaluator);
-    }
-
-    @CliCommand(value = "permissionEvaluator", help = "Create a permission evaluator")
-    public void setupPermissionEvaluator(
-            @CliOption(key = "package", mandatory = true, optionContext = JavaTypeConverter.PROJECT, help = "The package to add the permission evaluator to") final JavaPackage evaluatorPackage) {
-        serviceOperations.setupPermissionEvaluator(evaluatorPackage);
     }
 }

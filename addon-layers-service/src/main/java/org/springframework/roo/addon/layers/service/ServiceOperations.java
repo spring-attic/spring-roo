@@ -12,8 +12,6 @@ public interface ServiceOperations {
 
     boolean isSecureServiceInstallationPossible();
 
-    boolean isServicePermissionEvaluatorInstallationPossible();
-
     void setupService(JavaType interfaceType, JavaType classType,
             JavaType domainType, boolean requireAuthentication,
             String authorizedRole, boolean usePermissionEvalutor);
@@ -22,5 +20,4 @@ public interface ServiceOperations {
             JavaPackage classPackage, boolean requireAuthentication,
             String authorizedRole, boolean usePermissionEvalutor);
 
-    void setupPermissionEvaluator(JavaPackage permissionEvaluatorPackage);
 }

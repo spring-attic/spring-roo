@@ -26,7 +26,9 @@ public class ServiceAnnotationValues extends AbstractAnnotationValues {
     @AutoPopulate private String updateMethod = RooService.UPDATE_METHOD;
     @AutoPopulate private boolean requireAuthentication = false;
     @AutoPopulate private boolean usePermissionEvaluator = false;
-    @AutoPopulate private String[] authorizedRoles = new String[0];
+    @AutoPopulate private String[] authorizedCreateOrUpdateRoles = new String[0];
+    @AutoPopulate private String[] authorizedReadRoles = new String[0];
+    @AutoPopulate private String[] authorizedDeleteRoles = new String[0];
 
     /**
      * Constructor
@@ -83,7 +85,15 @@ public class ServiceAnnotationValues extends AbstractAnnotationValues {
         return usePermissionEvaluator;
     }
 
-    public String[] getAuthorizedRoles() {
-        return authorizedRoles;
+    public String[] getAuthorizedCreateOrUpdateRoles() {
+        return authorizedCreateOrUpdateRoles;
+    }
+
+    public String[] getAuthorizedReadRoles() {
+        return authorizedReadRoles;
+    }
+
+    public String[] getAuthorizedDeleteRoles() {
+        return authorizedDeleteRoles;
     }
 }

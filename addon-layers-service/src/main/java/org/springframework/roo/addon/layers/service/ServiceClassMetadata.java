@@ -13,6 +13,7 @@ import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
+import org.springframework.roo.classpath.customdata.CustomDataKeys;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
@@ -135,28 +136,92 @@ public class ServiceClassMetadata extends
 
                     StringBuilder preAuthorizeValue = new StringBuilder();
 
-                    if (annotationValues.requireAuthentication()
-                            || annotationValues.getAuthorizedRoles().length > 0
-                            || annotationValues.usePermissionEvaluator()) {
-                        preAuthorizeValue.append("isAuthenticated()");
+                    boolean isCreateOrUpdateMethod = false;
+                    boolean isReadMethod = false;
+                    boolean isDeleteMethod = false;
+                    boolean isAuthenticatedAdded = false;
+                    boolean usesDomainTypeMethod = false;
+
+                    if (method.getKey().equals(
+                            CustomDataKeys.PERSIST_METHOD.name())
+                            || method.getKey().equals(
+                                    CustomDataKeys.MERGE_METHOD.name())) {
+                        isCreateOrUpdateMethod = true;
                     }
 
-                    if (annotationValues.getAuthorizedRoles().length > 0) {
-                        preAuthorizeValue.append(" && (");
-                        int i = 0;
-                        for (String role : annotationValues
-                                .getAuthorizedRoles()) {
-                            if (i > 0)
-                                preAuthorizeValue.append(" || ");
+                    if (method.getKey().equals(
+                            CustomDataKeys.REMOVE_METHOD.name())) {
+                        isDeleteMethod = true;
+                    }
 
-                            preAuthorizeValue.append("hasRole('" + role + "')");
-                            i++;
+                    if (method.getKey().equals(
+                            CustomDataKeys.FIND_ALL_METHOD.name())
+                            || method.getKey().equals(
+                                    CustomDataKeys.FIND_ENTRIES_METHOD.name())
+                            || method.getKey().equals(
+                                    CustomDataKeys.FIND_METHOD.name())
+                            || method.getKey().equals(
+                                    CustomDataKeys.COUNT_ALL_METHOD)) {
+                        isReadMethod = true;
+                    }
+
+                    if (method.getKey().equals(
+                            CustomDataKeys.PERSIST_METHOD.name())
+                            || method.getKey().equals(
+                                    CustomDataKeys.MERGE_METHOD.name())
+                            || method.getKey().equals(
+                                    CustomDataKeys.REMOVE_METHOD.name())
+                            || method.getKey().equals(
+                                    CustomDataKeys.FIND_METHOD.name())) {
+                        usesDomainTypeMethod = true;
+                    }
+
+                    if (annotationValues.requireAuthentication()) {
+                        preAuthorizeValue.append("isAuthenticated()");
+                        isAuthenticatedAdded = true;
+                    }
+
+                    if (annotationValues.getAuthorizedCreateOrUpdateRoles().length > 0
+                            && isCreateOrUpdateMethod) {
+                        if (!isAuthenticatedAdded) {
+                            preAuthorizeValue.append("isAuthenticated()");
+                            isAuthenticatedAdded = true;
                         }
 
-                        preAuthorizeValue.append(")");
+                        addRoles(preAuthorizeValue,
+                                annotationValues
+                                        .getAuthorizedCreateOrUpdateRoles());
                     }
 
-                    if (annotationValues.usePermissionEvaluator()) {
+                    if (annotationValues.getAuthorizedReadRoles().length > 0
+                            && isReadMethod) {
+                        if (!isAuthenticatedAdded) {
+                            preAuthorizeValue.append("isAuthenticated()");
+                            isAuthenticatedAdded = true;
+                        }
+
+                        addRoles(preAuthorizeValue,
+                                annotationValues.getAuthorizedReadRoles());
+                    }
+
+                    if (annotationValues.getAuthorizedDeleteRoles().length > 0
+                            && isDeleteMethod) {
+                        if (!isAuthenticatedAdded) {
+                            preAuthorizeValue.append("isAuthenticated()");
+                            isAuthenticatedAdded = true;
+                        }
+
+                        addRoles(preAuthorizeValue,
+                                annotationValues.getAuthorizedDeleteRoles());
+                    }
+
+                    if (annotationValues.usePermissionEvaluator()
+                            && usesDomainTypeMethod) {
+                        if (!isAuthenticatedAdded) {
+                            preAuthorizeValue.append("isAuthenticated()");
+                            isAuthenticatedAdded = true;
+                        }
+
                         preAuthorizeValue
                                 .append(" && hasPermission("
                                         + (parameterNames.size() == 0 ? "#"
@@ -205,6 +270,20 @@ public class ServiceClassMetadata extends
 
         // Create a representation of the desired output ITD
         itdTypeDetails = builder.build();
+    }
+
+    private void addRoles(StringBuilder preAuthorizeValue, String[] roles) {
+        preAuthorizeValue.append(" && (");
+        int i = 0;
+        for (String role : roles) {
+            if (i > 0)
+                preAuthorizeValue.append(" || ");
+
+            preAuthorizeValue.append("hasRole('" + role + "')");
+            i++;
+        }
+
+        preAuthorizeValue.append(")");
     }
 
     @Override

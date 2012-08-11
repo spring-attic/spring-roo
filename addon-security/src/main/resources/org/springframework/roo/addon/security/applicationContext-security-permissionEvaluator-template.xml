@@ -13,6 +13,6 @@
         <beans:property name="permissionEvaluator" ref="permissionEvaluator"/>
     </beans:bean>
     
-    <bean id="permissionEvaluator" class="__PERMISSION_EVALUATOR_PACKAGE__.ServicePermissionEvaluator" />
+    <bean id="permissionEvaluator" class="__PERMISSION_EVALUATOR_PACKAGE__.ApplicationPermissionEvaluator" />
         
 </beans:beans>
