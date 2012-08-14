@@ -411,6 +411,8 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
                 GwtPath.SHARED_SCAFFOLD.packageName(topLevelPackage));
         dataDictionary.setVariable("uiPackage",
                 GwtPath.MANAGED_UI.packageName(topLevelPackage));
+        dataDictionary.setVariable("uiEditorPackage",
+                GwtPath.MANAGED_UI_EDITOR.packageName(topLevelPackage));
         dataDictionary.setVariable("name", simpleTypeName);
         dataDictionary.setVariable("pluralName", plural);
         dataDictionary.setVariable("nameUncapitalized",

@@ -3,7 +3,8 @@
   xmlns:g='urn:import:com.google.gwt.user.client.ui'
   xmlns:d='urn:import:com.google.gwt.user.datepicker.client'
   xmlns:r='urn:import:{{=scaffoldUiPackage}}'
-  xmlns:a='urn:import:{{=uiPackage}}'>
+  xmlns:a='urn:import:{{=uiPackage}}'
+  xmlns:e='urn:import:{{=uiEditorPackage}}'>
   <ui:style>
     .outer {
       padding: 10px;
