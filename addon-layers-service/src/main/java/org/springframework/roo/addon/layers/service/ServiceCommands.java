@@ -22,7 +22,7 @@ import org.springframework.roo.shell.CommandMarker;
 public class ServiceCommands implements CommandMarker {
     @Reference private ServiceOperations serviceOperations;
 
-    @CliAvailabilityIndicator({ "service", "serviceAll" })
+    @CliAvailabilityIndicator({ "service ", "serviceAll" })
     public boolean isServiceCommandAvailable() {
         return serviceOperations.isServiceInstallationPossible();
     }
@@ -32,7 +32,7 @@ public class ServiceCommands implements CommandMarker {
         return serviceOperations.isSecureServiceInstallationPossible();
     }
 
-    @CliCommand(value = "service", help = "Adds @RooService annotation to target type")
+    @CliCommand(value = "service type", help = "Adds @RooService annotation to target type")
     public void service(
             @CliOption(key = "interface", mandatory = true, help = "The java interface to apply this annotation to") final JavaType interfaceType,
             @CliOption(key = "class", mandatory = false, help = "Implementation class for the specified interface") JavaType classType,
@@ -46,7 +46,7 @@ public class ServiceCommands implements CommandMarker {
                 false, "", false);
     }
 
-    @CliCommand(value = "serviceAll", help = "Adds @RooService annotation to all entities")
+    @CliCommand(value = "service all", help = "Adds @RooService annotation to all entities")
     public void service(
             @CliOption(key = "interfacePackage", mandatory = true, help = "The java interface package") final JavaPackage interfacePackage,
             @CliOption(key = "classPackage", mandatory = false, help = "The java package of the implementation classes for the interfaces") JavaPackage classPackage) {
@@ -58,7 +58,7 @@ public class ServiceCommands implements CommandMarker {
                 false, "", false);
     }
 
-    @CliCommand(value = "secureService", help = "Adds @RooService annotation to target type")
+    @CliCommand(value = "service secure type", help = "Adds @RooService annotation to target type with options for authentication, authorization, and a permission evaluator")
     public void secureService(
             @CliOption(key = "interface", mandatory = true, help = "The java interface to apply this annotation to") final JavaType interfaceType,
             @CliOption(key = "class", mandatory = false, help = "Implementation class for the specified interface") JavaType classType,
@@ -75,7 +75,7 @@ public class ServiceCommands implements CommandMarker {
                 requireAuthentication, role, usePermissionEvaluator);
     }
 
-    @CliCommand(value = "secureServiceAll", help = "Adds @RooService annotation to all entities")
+    @CliCommand(value = "service secure all", help = "Adds @RooService annotation to all entities with options for authentication, authorization, and a permission evaluator")
     public void secureServiceAll(
             @CliOption(key = "interfacePackage", mandatory = true, help = "The java interface package") final JavaPackage interfacePackage,
             @CliOption(key = "classPackage", mandatory = false, help = "The java package of the implementation classes for the interfaces") JavaPackage classPackage,

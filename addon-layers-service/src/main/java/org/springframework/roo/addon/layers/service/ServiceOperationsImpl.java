@@ -141,7 +141,7 @@ public class ServiceOperationsImpl implements ServiceOperations {
             final JavaType classType, final JavaType domainType,
             boolean requireAuthentication, String role,
             boolean usePermissionEvaluator) {
-        if (requireAuthentication || role.equals("") || usePermissionEvaluator) {
+        if (requireAuthentication || !role.equals("") || usePermissionEvaluator) {
             Validate.isTrue(
                     projectOperations.isFeatureInstalled(FeatureNames.SECURITY),
                     "Security must first be setup before securing a method");
