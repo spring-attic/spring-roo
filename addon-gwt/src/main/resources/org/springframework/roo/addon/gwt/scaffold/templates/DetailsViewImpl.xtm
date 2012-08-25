@@ -76,8 +76,10 @@ public class {{=className}} extends Composite implements {{=detailsView}} {
 	}
 
 	public void setValue({{=proxy}} proxy) {
-		this.proxy = proxy;{{#properties}}
-		{{=prop}}.setInnerText(proxy.{{=propGetter}}() == null ? "" : {{=propFormatter}}(proxy.{{=propGetter}}()));{{/properties}}
+		this.proxy = proxy;
+		{{#managedProperties}}
+		{{=prop}}.setInnerText(proxy.{{=propGetter}}() == null ? "" : {{=propFormatter}}(proxy.{{=propGetter}}()));
+		{{/managedProperties}}
 
 		displayRenderer.setInnerText({{=proxyRenderer}}.instance().render(proxy));
 	}

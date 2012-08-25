@@ -35,7 +35,8 @@ public class {{=className}} extends Composite implements {{=detailsView}} {
 
 	{{=proxy}} proxy;
 	{{#fields}}
-	@UiField Element {{=field}};{{/fields}}	
+	@UiField Element {{=field}};
+	{{/fields}}	
 	@UiField HasClickHandlers delete;
 
 	private Delegate delegate;
@@ -66,7 +67,8 @@ public class {{=className}} extends Composite implements {{=detailsView}} {
 	}
 
 	public void setValue({{=proxy}} proxy) {
-		this.proxy = proxy;{{#properties}}
-		{{=prop}}.setInnerText(proxy.{{=propGetter}}() == null ? "" : {{=propFormatter}}(proxy.{{=propGetter}}()));{{/properties}}
+		this.proxy = proxy;{{#managedProperties}}
+		{{=prop}}.setInnerText(proxy.{{=propGetter}}() == null ? "" : {{=propFormatter}}(proxy.{{=propGetter}}()));
+		{{/managedProperties}}
 	}
 }

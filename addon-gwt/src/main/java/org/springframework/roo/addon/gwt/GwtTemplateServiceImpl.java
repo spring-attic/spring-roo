@@ -428,18 +428,19 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
         GwtProxyProperty dateProperty = null;
         final Set<String> importSet = new HashSet<String>();
 
-        List<String> existingFields = new ArrayList<String>();
+        List<String> existingEditViewFields = new ArrayList<String>();
 
-        List<String> fieldsInBothViewAndMobileView = new ArrayList<String>();
+        List<String> fieldsInBothViewAndMobileEditView = new ArrayList<String>();
+
+        List<String> existingDetailsViewFields = new ArrayList<String>();
 
         // Adds names of fields the are found in both the unmanaged EditView and
         // MobileEditView to fieldsInBothViewAndMobileView list
         if (type == GwtType.EDIT_ACTIVITY_WRAPPER
                 || type == GwtType.MOBILE_EDIT_VIEW
                 || type == GwtType.EDIT_VIEW_IMPL) {
-
-            List<String> existingViewFields = new ArrayList<String>();
-            List<String> existingMobileViewFields = new ArrayList<String>();
+            List<String> existingImplFields = new ArrayList<String>();
+            List<String> existingMobileFields = new ArrayList<String>();
 
             try {
                 String className = GwtPath.MANAGED_UI_IMPL
@@ -455,7 +456,7 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
                     for (FieldMetadata field : details.getDeclaredFields()) {
                         JavaSymbolName fieldName = field.getFieldName();
                         String name = fieldName.toString();
-                        existingViewFields.add(name);
+                        existingImplFields.add(name);
                     }
                 }
 
@@ -472,30 +473,86 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
                     for (FieldMetadata field : details.getDeclaredFields()) {
                         JavaSymbolName fieldName = field.getFieldName();
                         String name = fieldName.toString();
-                        existingMobileViewFields.add(name);
+                        existingMobileFields.add(name);
                     }
                 }
 
                 // Adds names of fields in MobileEditView to existingFields list
                 if (type == GwtType.MOBILE_EDIT_VIEW)
-                    existingFields = existingMobileViewFields;
+                    existingEditViewFields = existingMobileFields;
 
-                // Adds names of fields in EditView to existingFields list
+                // Adds names of fields in EditViewImpl to existingFields list
                 if (type == GwtType.EDIT_VIEW_IMPL)
-                    existingFields = existingViewFields;
+                    existingEditViewFields = existingImplFields;
 
             }
             catch (Exception e) {
                 throw new IllegalArgumentException(e);
             }
 
-            for (String mobileViewField : existingMobileViewFields) {
-                for (String viewField : existingViewFields) {
+            for (String mobileViewField : existingMobileFields) {
+                for (String viewField : existingImplFields) {
                     if (viewField.equals(mobileViewField)) {
-                        fieldsInBothViewAndMobileView.add(viewField);
+                        fieldsInBothViewAndMobileEditView.add(viewField);
                         break;
                     }
                 }
+            }
+        }
+
+        if (type == GwtType.MOBILE_DETAILS_VIEW
+                || type == GwtType.DETAILS_VIEW_IMPL) {
+            List<String> existingImplFields = new ArrayList<String>();
+            List<String> existingMobileFields = new ArrayList<String>();
+
+            try {
+                String className = GwtPath.MANAGED_UI_IMPL
+                        .packageName(topLevelPackage)
+                        + "."
+                        + simpleTypeName
+                        + GwtType.DETAILS_VIEW_IMPL.getTemplate();
+
+                ClassOrInterfaceTypeDetails details = typeLocationService
+                        .getTypeDetails(new JavaType(className));
+
+                if (details != null) {
+                    for (FieldMetadata field : details.getDeclaredFields()) {
+                        JavaSymbolName fieldName = field.getFieldName();
+                        String name = fieldName.toString();
+                        existingImplFields.add(name);
+                    }
+                }
+
+                className = GwtPath.MANAGED_UI_MOBILE
+                        .packageName(topLevelPackage)
+                        + "."
+                        + simpleTypeName
+                        + GwtType.MOBILE_DETAILS_VIEW.getTemplate();
+
+                details = typeLocationService.getTypeDetails(new JavaType(
+                        className));
+
+                if (details != null) {
+                    for (FieldMetadata field : details.getDeclaredFields()) {
+                        JavaSymbolName fieldName = field.getFieldName();
+                        String name = fieldName.toString();
+                        existingMobileFields.add(name);
+                    }
+                }
+
+                // Adds names of fields in MobileDetailsView to existingFields
+                // list
+                if (type == GwtType.MOBILE_DETAILS_VIEW)
+                    existingDetailsViewFields = existingMobileFields;
+
+                // Adds names of fields in DetailsViewImpl to existingFields
+                // list
+                if (type == GwtType.DETAILS_VIEW_IMPL)
+                    existingDetailsViewFields = existingImplFields;
+
+            }
+            catch (Exception e) {
+                throw new IllegalArgumentException(e);
             }
         }
 
@@ -537,13 +594,29 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
                 proxyFields += "\"" + gwtProxyProperty.getName() + "\"";
             }
 
-            dataDictionary.addSection("fields").setVariable("field",
-                    gwtProxyProperty.getName());
-            if (!isReadOnly(gwtProxyProperty.getName(), mirroredType)) {
-                // if the property is in the omittedFields list, do not add it
-                if (!existingFields.contains(gwtProxyProperty.getName()))
-                    dataDictionary.addSection("editViewProps").setVariable(
-                            "prop", gwtProxyProperty.forEditView());
+            // if the property is in the existingFields list, do not add it
+            if (!existingDetailsViewFields.contains(gwtProxyProperty.getName())) {
+                dataDictionary.addSection("fields").setVariable("field",
+                        gwtProxyProperty.getName());
+
+                final TemplateDataDictionary managedPropertiesSection = dataDictionary
+                        .addSection("managedProperties");
+                managedPropertiesSection.setVariable("prop",
+                        gwtProxyProperty.getName());
+                managedPropertiesSection.setVariable(
+                        "propId",
+                        proxyType.getSimpleTypeName() + "_"
+                                + gwtProxyProperty.getName());
+                managedPropertiesSection.setVariable("propGetter",
+                        gwtProxyProperty.getGetter());
+                managedPropertiesSection.setVariable("propType",
+                        gwtProxyProperty.getType());
+                managedPropertiesSection.setVariable("propFormatter",
+                        gwtProxyProperty.getFormatter());
+                managedPropertiesSection.setVariable("propRenderer",
+                        gwtProxyProperty.getRenderer());
+                managedPropertiesSection.setVariable("propReadable",
+                        gwtProxyProperty.getReadableName());
             }
 
             final TemplateDataDictionary propertiesSection = dataDictionary
@@ -565,6 +638,12 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
                     gwtProxyProperty.getReadableName());
 
             if (!isReadOnly(gwtProxyProperty.getName(), mirroredType)) {
+                // if the property is in the existingFields list, do not add it
+                if (!existingEditViewFields
+                        .contains(gwtProxyProperty.getName()))
+                    dataDictionary.addSection("editViewProps").setVariable(
+                            "prop", gwtProxyProperty.forEditView());
+
                 final TemplateDataDictionary editableSection = dataDictionary
                         .addSection("editableProperties");
                 editableSection.setVariable("prop", gwtProxyProperty.getName());
@@ -592,7 +671,7 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
             // If the field is not added to the managed MobileEditView and the
             // managed EditView then it there is no reason to add it to the
             // interface nor the start method in the EditActivityWrapper
-            if (!fieldsInBothViewAndMobileView.contains(gwtProxyProperty
+            if (!fieldsInBothViewAndMobileEditView.contains(gwtProxyProperty
                     .getName())) {
                 if (gwtProxyProperty.isProxy() || gwtProxyProperty.isEnum()
                         || gwtProxyProperty.isCollectionOfProxy()) {
@@ -605,7 +684,8 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
                     // to the managed view.
                     section.setVariable(
                             "setValuePicker",
-                            existingFields.contains(gwtProxyProperty.getName()) ? gwtProxyProperty
+                            existingEditViewFields.contains(gwtProxyProperty
+                                    .getName()) ? gwtProxyProperty
                                     .getSetEmptyValuePickerMethod()
                                     : gwtProxyProperty
                                             .getSetValuePickerMethod());
