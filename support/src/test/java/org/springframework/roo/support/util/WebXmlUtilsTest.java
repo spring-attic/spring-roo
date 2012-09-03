@@ -338,35 +338,4 @@ public class WebXmlUtilsTest {
                 .getElementsByTagName("transport-guarantee").item(0)
                 .getTextContent());
     }
-
-    @Test
-    public void validateElementSequence() {
-        final List<Element> contents = XmlUtils.findElements("/web-app/*",
-                webXml.getDocumentElement());
-
-        assertEquals(17, contents.size());
-        assertEquals("display-name", contents.get(0).getNodeName());
-        assertEquals("description", contents.get(1).getNodeName());
-        assertEquals("context-param", contents.get(2).getNodeName());
-        assertEquals("filter2", contents.get(3).getChildNodes().item(0)
-                .getTextContent());
-        assertEquals("filter3", contents.get(4).getChildNodes().item(0)
-                .getTextContent());
-        assertEquals("filter1", contents.get(5).getChildNodes().item(0)
-                .getTextContent());
-        assertEquals("filter2", contents.get(6).getChildNodes().item(0)
-                .getTextContent());
-        assertEquals("filter3", contents.get(7).getChildNodes().item(0)
-                .getTextContent());
-        assertEquals("filter1", contents.get(8).getChildNodes().item(0)
-                .getTextContent());
-        assertEquals("listener", contents.get(9).getNodeName());
-        assertEquals("servlet", contents.get(10).getNodeName());
-        assertEquals("servlet-mapping", contents.get(11).getNodeName());
-        assertEquals("session-config", contents.get(12).getNodeName());
-        assertEquals("welcome-file-list", contents.get(13).getNodeName());
-        assertEquals("error-page", contents.get(14).getNodeName());
-        assertEquals("error-page", contents.get(15).getNodeName());
-        assertEquals("security-constraint", contents.get(16).getNodeName());
-    }
 }
