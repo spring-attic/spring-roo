@@ -2,6 +2,7 @@ package org.springframework.roo.addon.dbre;
 
 import static org.springframework.roo.model.JdkJavaType.DATE;
 import static org.springframework.roo.model.JdkJavaType.SET;
+import static org.springframework.roo.model.JdkJavaType.TIMESTAMP;
 import static org.springframework.roo.model.JpaJavaType.CASCADE_TYPE;
 import static org.springframework.roo.model.JpaJavaType.COLUMN;
 import static org.springframework.roo.model.JpaJavaType.JOIN_COLUMN;
@@ -719,7 +720,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
         }
 
         // Add JSR 220 @Temporal annotation to date fields
-        if (fieldType.equals(DATE)) {
+        if (fieldType.equals(DATE) || fieldType.equals(TIMESTAMP)) {
             final AnnotationMetadataBuilder temporalBuilder = new AnnotationMetadataBuilder(
                     TEMPORAL);
             temporalBuilder.addEnumAttribute(VALUE, new EnumDetails(
@@ -728,7 +729,12 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
             final AnnotationMetadataBuilder dateTimeFormatBuilder = new AnnotationMetadataBuilder(
                     DATE_TIME_FORMAT);
-            dateTimeFormatBuilder.addStringAttribute("style", "M-");
+            if (fieldType.equals(DATE)) {
+                dateTimeFormatBuilder.addStringAttribute("style", "M-");
+            }
+            else {
+                dateTimeFormatBuilder.addStringAttribute("style", "MM");
+            }
 
             if (fieldName.getSymbolName().equals(CREATED)) {
                 columnBuilder.addBooleanAttribute("updatable", false);
@@ -744,7 +750,13 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
         final FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(
                 getId(), Modifier.PRIVATE, annotations, fieldName, fieldType);
         if (fieldName.getSymbolName().equals(CREATED)) {
-            fieldBuilder.setFieldInitializer("new java.util.Date()");
+            if (fieldType.equals(DATE)) {
+                fieldBuilder.setFieldInitializer("new java.util.Date()");
+            }
+            else {
+                fieldBuilder
+                        .setFieldInitializer("new java.sql.Timestamp(new java.util.Date().getTime())");
+            }
         }
         return fieldBuilder;
     }

@@ -12,6 +12,7 @@ import static org.springframework.roo.model.JdkJavaType.ITERATOR;
 import static org.springframework.roo.model.JdkJavaType.LIST;
 import static org.springframework.roo.model.JdkJavaType.RANDOM;
 import static org.springframework.roo.model.JdkJavaType.SECURE_RANDOM;
+import static org.springframework.roo.model.JdkJavaType.TIMESTAMP;
 import static org.springframework.roo.model.Jsr303JavaType.CONSTRAINT_VIOLATION;
 import static org.springframework.roo.model.Jsr303JavaType.CONSTRAINT_VIOLATION_EXCEPTION;
 import static org.springframework.roo.model.Jsr303JavaType.DECIMAL_MAX;
@@ -745,6 +746,11 @@ public class DataOnDemandMetadata extends
             else {
                 initializer = "Calendar.getInstance()";
             }
+        }
+        else if (fieldType.equals(TIMESTAMP)) {
+            builder.getImportRegistrationResolver().addImports(CALENDAR,
+                    GREGORIAN_CALENDAR, TIMESTAMP);
+            initializer = "new Timestamp(new GregorianCalendar(Calendar.getInstance().get(Calendar.YEAR), Calendar.getInstance().get(Calendar.MONTH), Calendar.getInstance().get(Calendar.DAY_OF_MONTH), Calendar.getInstance().get(Calendar.HOUR_OF_DAY), Calendar.getInstance().get(Calendar.MINUTE), Calendar.getInstance().get(Calendar.SECOND) + new Double(Math.random() * 1000).intValue()).getTime().getTime())";
         }
         else if (fieldType.equals(STRING)) {
             if (fieldInitializer != null && fieldInitializer.contains("\"")) {

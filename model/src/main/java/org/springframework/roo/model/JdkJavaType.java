@@ -23,6 +23,7 @@ import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.Ref;
 import java.sql.Struct;
+import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -105,6 +106,8 @@ public final class JdkJavaType {
     public static final JavaType STRUCT = new JavaType(Struct.class);
     public static final JavaType SUPPRESS_WARNINGS = new JavaType(
             SuppressWarnings.class);
+    // java.sql
+    public static final JavaType TIMESTAMP = new JavaType(Timestamp.class);
 
     public static final JavaType UNSUPPORTED_ENCODING_EXCEPTION = new JavaType(
             UnsupportedEncodingException.class);

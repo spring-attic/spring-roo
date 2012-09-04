@@ -1,6 +1,15 @@
 package org.springframework.roo.addon.dbre.model;
 
+import static org.springframework.roo.model.JavaType.BOOLEAN_OBJECT;
+import static org.springframework.roo.model.JavaType.BYTE_ARRAY_PRIMITIVE;
+import static org.springframework.roo.model.JavaType.CHAR_OBJECT;
+import static org.springframework.roo.model.JavaType.DOUBLE_OBJECT;
+import static org.springframework.roo.model.JavaType.FLOAT_OBJECT;
+import static org.springframework.roo.model.JavaType.INT_OBJECT;
+import static org.springframework.roo.model.JavaType.LONG_OBJECT;
 import static org.springframework.roo.model.JavaType.OBJECT;
+import static org.springframework.roo.model.JavaType.SHORT_OBJECT;
+import static org.springframework.roo.model.JavaType.STRING;
 import static org.springframework.roo.model.JdkJavaType.ARRAY;
 import static org.springframework.roo.model.JdkJavaType.BIG_DECIMAL;
 import static org.springframework.roo.model.JdkJavaType.BLOB;
@@ -122,20 +131,20 @@ public class Column {
         case Types.CHAR:
             if (columnSize > 1) {
                 jdbcType = "VARCHAR";
-                javaType = JavaType.STRING;
+                javaType = STRING;
             }
             else {
                 jdbcType = "CHAR";
-                javaType = JavaType.CHAR_OBJECT;
+                javaType = CHAR_OBJECT;
             }
             break;
         case Types.VARCHAR:
             jdbcType = "VARCHAR";
-            javaType = JavaType.STRING;
+            javaType = STRING;
             break;
         case Types.LONGVARCHAR:
             jdbcType = "LONGVARCHAR";
-            javaType = JavaType.STRING;
+            javaType = STRING;
             break;
         case Types.NUMERIC:
             jdbcType = "NUMERIC";
@@ -147,52 +156,51 @@ public class Column {
             break;
         case Types.BOOLEAN:
             jdbcType = "BOOLEAN";
-            javaType = JavaType.BOOLEAN_OBJECT;
+            javaType = BOOLEAN_OBJECT;
             break;
         case Types.BIT:
             jdbcType = "BIT";
-            javaType = JavaType.BOOLEAN_OBJECT;
+            javaType = BOOLEAN_OBJECT;
             break;
         case Types.TINYINT:
             jdbcType = "TINYINT";
-            javaType = columnSize > 1 ? JavaType.SHORT_OBJECT
-                    : JavaType.BOOLEAN_OBJECT; // ROO-1860
+            javaType = columnSize > 1 ? SHORT_OBJECT : BOOLEAN_OBJECT; // ROO-1860
             break;
         case Types.SMALLINT:
             jdbcType = "SMALLINT";
-            javaType = JavaType.SHORT_OBJECT;
+            javaType = SHORT_OBJECT;
             break;
         case Types.INTEGER:
             jdbcType = "INTEGER";
-            javaType = JavaType.INT_OBJECT;
+            javaType = INT_OBJECT;
             break;
         case Types.BIGINT:
             jdbcType = "BIGINT";
-            javaType = JavaType.LONG_OBJECT;
+            javaType = LONG_OBJECT;
             break;
         case Types.REAL:
             jdbcType = "REAL";
-            javaType = JavaType.FLOAT_OBJECT;
+            javaType = FLOAT_OBJECT;
             break;
         case Types.FLOAT:
             jdbcType = "FLOAT";
-            javaType = JavaType.DOUBLE_OBJECT;
+            javaType = DOUBLE_OBJECT;
             break;
         case Types.DOUBLE:
             jdbcType = "DOUBLE";
-            javaType = JavaType.DOUBLE_OBJECT;
+            javaType = DOUBLE_OBJECT;
             break;
         case Types.BINARY:
             jdbcType = "BINARY";
-            javaType = JavaType.BYTE_ARRAY_PRIMITIVE;
+            javaType = BYTE_ARRAY_PRIMITIVE;
             break;
         case Types.VARBINARY:
             jdbcType = "VARBINARY";
-            javaType = JavaType.BYTE_ARRAY_PRIMITIVE;
+            javaType = BYTE_ARRAY_PRIMITIVE;
             break;
         case Types.LONGVARBINARY:
             jdbcType = "LONGVARBINARY";
-            javaType = JavaType.BYTE_ARRAY_PRIMITIVE;
+            javaType = BYTE_ARRAY_PRIMITIVE;
             break;
         case Types.DATE:
             jdbcType = "DATE";
@@ -204,7 +212,7 @@ public class Column {
             break;
         case Types.TIMESTAMP:
             jdbcType = "TIMESTAMP";
-            javaType = DATE;
+            javaType = new JavaType("java.sql.Timestamp");
             break;
         case Types.CLOB:
             jdbcType = "CLOB";
@@ -220,7 +228,7 @@ public class Column {
             break;
         case Types.DISTINCT:
             jdbcType = "DISTINCT";
-            javaType = JavaType.STRING;
+            javaType = STRING;
             break;
         case Types.REF:
             jdbcType = "REF";
@@ -239,11 +247,11 @@ public class Column {
             break;
         case Types.OTHER:
             jdbcType = "OTHER";
-            javaType = JavaType.STRING;
+            javaType = STRING;
             break;
         default:
             jdbcType = "VARCHAR";
-            javaType = JavaType.STRING;
+            javaType = STRING;
             break;
         }
     }
