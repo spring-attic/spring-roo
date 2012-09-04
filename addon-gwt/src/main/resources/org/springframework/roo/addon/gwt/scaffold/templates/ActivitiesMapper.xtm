@@ -24,7 +24,7 @@ public class {{=className}} {
     switch (place.getOperation()) {
       case DETAILS:
         return new {{=detailsActivity}}((EntityProxyId<{{=proxy}}>)place.getProxyId(), factory, 
-          placeController, ScaffoldApp.isMobile() ? {{=mobileDetailsView}}.instance() : {{=detailsViewImpl}}.instance());
+          placeController, ScaffoldApp.isMobile() ? {{=mobileDetailsView}}.instance() : {{=desktopDetailsView}}.instance());
 
       case EDIT:
         return makeEditActivity(place);
@@ -42,17 +42,17 @@ public class {{=className}} {
   }
 
   private Activity makeCreateActivity() {
-    {{=editViewImpl}}.instance().setCreating(true);
-    Activity activity = new {{=editActivity}}({{=proxy}}.class, null, factory, ScaffoldApp.isMobile() ? {{=mobileEditView}}.instance() : {{=editViewImpl}}.instance(), placeController);
+    {{=desktopEditView}}.instance().setCreating(true);
+    Activity activity = new {{=editActivity}}({{=proxy}}.class, null, factory, ScaffoldApp.isMobile() ? {{=mobileEditView}}.instance() : {{=desktopEditView}}.instance(), placeController);
 
-    return new {{=editActivityWrapper}}(factory, ScaffoldApp.isMobile() ? {{=mobileEditView}}.instance() : {{=editViewImpl}}.instance(), activity, null);
+    return new {{=editActivityWrapper}}(factory, ScaffoldApp.isMobile() ? {{=mobileEditView}}.instance() : {{=desktopEditView}}.instance(), activity, null);
   }
 
   private Activity makeEditActivity(ProxyPlace place) {
-    {{=editViewImpl}}.instance().setCreating(false);
+    {{=desktopEditView}}.instance().setCreating(false);
     EntityProxyId<{{=proxy}}> proxyId = coerceId(place);
-    Activity activity = new {{=editActivity}}({{=proxy}}.class, proxyId, factory, ScaffoldApp.isMobile() ? {{=mobileEditView}}.instance() : {{=editViewImpl}}.instance(), placeController);
+    Activity activity = new {{=editActivity}}({{=proxy}}.class, proxyId, factory, ScaffoldApp.isMobile() ? {{=mobileEditView}}.instance() : {{=desktopEditView}}.instance(), placeController);
 
-    return new {{=editActivityWrapper}}(factory,  ScaffoldApp.isMobile() ? {{=mobileEditView}}.instance() : {{=editViewImpl}}.instance(), activity, proxyId);
+    return new {{=editActivityWrapper}}(factory,  ScaffoldApp.isMobile() ? {{=mobileEditView}}.instance() : {{=desktopEditView}}.instance(), activity, proxyId);
   }
 }
