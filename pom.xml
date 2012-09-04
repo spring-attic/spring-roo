@@ -109,14 +109,6 @@
                 <enabled>true</enabled>
             </snapshots>
         </repository>
-        <repository>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-            <id>elastic-runtime-libs-release</id>
-            <name>Elastic Runtime Repository - Library Releases</name>
-            <url>https://repo.elasticruntime.org/libs-release</url>
-        </repository>
     </repositories>
     <pluginRepositories>
         <pluginRepository>
@@ -128,14 +120,6 @@
             <id>spring-roo-repository-release</id>
             <name>Spring Roo Repository</name>
             <url>http://spring-roo-repository.springsource.org/release</url>
-        </pluginRepository>
-        <pluginRepository>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-            <id>elastic-runtime-plugin-release</id>
-            <name>Elastic Runtime Repository - Plugin Releases</name>
-            <url>https://repo.elasticruntime.org/plugins-release</url>
         </pluginRepository>
     </pluginRepositories>
     <developers>
@@ -977,26 +961,6 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-deploy-plugin</artifactId>
                 <version>2.7</version>
-            </plugin>
-            <plugin>
-                <groupId>com.googlecode.maven-java-formatter-plugin</groupId>
-                <artifactId>maven-java-formatter-plugin</artifactId>
-                <version>0.4.0.e371sr1</version>
-                <configuration>
-                    <configFile>../deployment-support/eclipse-formatter-config.xml</configFile>
-                    <lineEnding>LF</lineEnding>
-                    <excludes>
-                        <exclude>org/springframework/roo/bootstrap/Main.java</exclude>
-                        <exclude>org/springframework/roo/bootstrap/AutoProcessor.java</exclude>
-                    </excludes>
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>format</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
             <!-- IDE -->
             <plugin>
