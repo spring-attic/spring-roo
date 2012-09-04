@@ -20,8 +20,8 @@ public enum GwtPath {
             + GwtPath.templateSelector), // GWT_SCAFFOLD_GENERATED
     MANAGED_UI("/client/managed/ui", "module/client/managed/ui/"
             + GwtPath.templateSelector), // GWT_SCAFFOLD_UI
-    MANAGED_UI_IMPL("/client/managed/ui/impl", "module/client/managed/ui/impl/"
-            + GwtPath.templateSelector), // GWT_SCAFFOLD_UI
+    MANAGED_UI_DESKTOP("/client/managed/ui/desktop",
+            "module/client/managed/ui/desktop/" + GwtPath.templateSelector), // GWT_SCAFFOLD_UI
     MANAGED_UI_MOBILE("/client/managed/ui/mobile",
             "module/client/managed/ui/mobile/" + GwtPath.templateSelector), // GWT_SCAFFOLD_UI
     MANAGED_UI_RENDERER("/client/managed/ui/renderer",
