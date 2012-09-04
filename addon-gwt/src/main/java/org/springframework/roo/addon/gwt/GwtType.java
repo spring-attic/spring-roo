@@ -31,17 +31,17 @@ public enum GwtType
 	DETAIL_ACTIVITY(GwtPath.MANAGED_ACTIVITY, true, "DetailsActivity", "detailsActivity", "DetailsActivity", false, true, false),
 	DETAILS_ACTIVITIES(GwtPath.MANAGED_ACTIVITY, false, "", "detailsActivities", "ApplicationDetailsActivities", false, true, false),
 	DETAILS_VIEW(GwtPath.MANAGED_UI, true, "DetailsView", "detailsView", "DetailsView", false, false, false),
-	DETAILS_VIEW_IMPL(GwtPath.MANAGED_UI_DESKTOP, true, "DetailsViewImpl", "detailsViewImpl", "DetailsViewImpl", true, true, false),
+	DESKTOP_DETAILS_VIEW(GwtPath.MANAGED_UI_DESKTOP, true, "DesktopDetailsView", "desktopDetailsView", "DesktopDetailsView", true, true, false),
 	EDIT_ACTIVITY(GwtPath.MANAGED_ACTIVITY, true, "EditActivity", "editActivity", "EditActivity", false, false, false),
 	EDIT_ACTIVITY_WRAPPER(GwtPath.MANAGED_ACTIVITY, true, "EditActivityWrapper", "editActivityWrapper", "EditActivityWrapper", false, true, false),
 	EDIT_RENDERER(GwtPath.MANAGED_UI_RENDERER, true, "ProxyRenderer", "renderer", "EditRenderer", false, false, false),
 	EDIT_VIEW(GwtPath.MANAGED_UI, true, "EditView", "editView", "EditView", false, false, false),
-	EDIT_VIEW_IMPL(GwtPath.MANAGED_UI_DESKTOP, true, "EditViewImpl", "editViewImpl", "EditViewImpl", true, true, false),
+	DESKTOP_EDIT_VIEW(GwtPath.MANAGED_UI_DESKTOP, true, "DesktopEditView", "desktopEditView", "DesktopEditView", true, true, false),
 	IS_SCAFFOLD_MOBILE_ACTIVITY(GwtPath.SCAFFOLD_ACTIVITY, false, "", "isScaffoldMobileActivity", "IsScaffoldMobileActivity", false, false, false),
 	LIST_ACTIVITY(GwtPath.MANAGED_ACTIVITY, true, "ListActivity", "listActivity", "ListActivity", false, true, false),
 	LIST_EDITOR(GwtPath.MANAGED_UI_EDITOR, true, "ListEditor", "listEditor", "ListEditor", true, true, false),
 	LIST_PLACE_RENDERER(GwtPath.MANAGED_UI_RENDERER, false, "", "listPlaceRenderer", "ApplicationListPlaceRenderer", false, true, false),
-	LIST_VIEW_IMPL(GwtPath.MANAGED_UI_DESKTOP, true, "ListViewImpl", "listViewImpl", "ListViewImpl", true, true, false),
+	DESKTOP_LIST_VIEW(GwtPath.MANAGED_UI_DESKTOP, true, "DesktopListView", "desktopListView", "DesktopListView", true, true, false),
 	MASTER_ACTIVITIES(GwtPath.MANAGED_ACTIVITY, false, "", "masterActivities", "ApplicationMasterActivities", false, true, false),
 
 	MOBILE_ACTIVITIES(GwtPath.MANAGED_ACTIVITY, false, "", "mobileActivities", "ScaffoldMobileActivities", false, false, false),
@@ -114,7 +114,7 @@ public enum GwtType
 		watchedFieldNames = resolveWatchedFieldNames(this);
 		switch (this)
 		{
-		case DETAILS_VIEW_IMPL:
+		case DESKTOP_DETAILS_VIEW:
 			watchedFieldNames.addAll(proxyFieldTypeMap.keySet());
 			watchedFieldNames.addAll(convertToJavaSymbolNames("proxy", "displayRenderer"));
 			break;
@@ -122,7 +122,7 @@ public enum GwtType
 			watchedFieldNames.addAll(proxyFieldTypeMap.keySet());
 			watchedFieldNames.addAll(convertToJavaSymbolNames("proxy", "displayRenderer"));
 			break;
-		case EDIT_VIEW_IMPL:
+		case DESKTOP_EDIT_VIEW:
 			watchedFieldNames.addAll(proxyFieldTypeMap.keySet());
 			break;
 		case MOBILE_EDIT_VIEW:
@@ -136,13 +136,13 @@ public enum GwtType
 		watchedMethods = resolveMethodsToWatch(this);
 		switch (this)
 		{
-		case DETAILS_VIEW_IMPL:
+		case DESKTOP_DETAILS_VIEW:
 			watchedMethods.put(new JavaSymbolName("setValue"), Collections.singletonList(proxy));
 			break;
 		case MOBILE_DETAILS_VIEW:
 			watchedMethods.put(new JavaSymbolName("setValue"), Collections.singletonList(proxy));
 			break;
-		case EDIT_VIEW_IMPL:
+		case DESKTOP_EDIT_VIEW:
 			for (final GwtProxyProperty property : proxyFieldTypeMap.values())
 			{
 				if (property.isEnum() || property.isProxy() || property.isEmbeddable() || property.isCollectionOfProxy())
@@ -278,7 +278,7 @@ public enum GwtType
 		case MOBILE_LIST_VIEW:
 			watchedMethods.put(new JavaSymbolName("init"), new ArrayList<JavaType>());
 			break;
-		case LIST_VIEW_IMPL:
+		case DESKTOP_LIST_VIEW:
 			watchedMethods.put(new JavaSymbolName("init"), new ArrayList<JavaType>());
 			break;
 		case MASTER_ACTIVITIES:
@@ -299,8 +299,8 @@ public enum GwtType
 		switch (type)
 		{
 		case ACTIVITIES_MAPPER:
-			return Arrays.asList(GwtType.APP_REQUEST_FACTORY, GwtType.SCAFFOLD_APP, GwtType.DETAIL_ACTIVITY, GwtType.EDIT_ACTIVITY, GwtType.EDIT_ACTIVITY_WRAPPER, GwtType.LIST_VIEW_IMPL,
-					GwtType.DETAILS_VIEW_IMPL, GwtType.MOBILE_DETAILS_VIEW, GwtType.EDIT_VIEW_IMPL, GwtType.MOBILE_EDIT_VIEW, GwtType.REQUEST);
+			return Arrays.asList(GwtType.APP_REQUEST_FACTORY, GwtType.SCAFFOLD_APP, GwtType.DETAIL_ACTIVITY, GwtType.EDIT_ACTIVITY, GwtType.EDIT_ACTIVITY_WRAPPER, GwtType.DESKTOP_LIST_VIEW,
+					GwtType.DESKTOP_DETAILS_VIEW, GwtType.MOBILE_DETAILS_VIEW, GwtType.DESKTOP_EDIT_VIEW, GwtType.MOBILE_EDIT_VIEW, GwtType.REQUEST);
 		case DETAIL_ACTIVITY:
 			return Arrays.asList(GwtType.APP_REQUEST_FACTORY, GwtType.IS_SCAFFOLD_MOBILE_ACTIVITY, GwtType.DETAILS_VIEW);
 		case EDIT_ACTIVITY:
@@ -311,11 +311,11 @@ public enum GwtType
 			return Arrays.asList(GwtType.APP_REQUEST_FACTORY, GwtType.IS_SCAFFOLD_MOBILE_ACTIVITY, GwtType.SCAFFOLD_MOBILE_APP);
 		case MOBILE_LIST_VIEW:
 			return Arrays.asList(GwtType.MOBILE_PROXY_LIST_VIEW, GwtType.SCAFFOLD_MOBILE_APP);
-		case EDIT_VIEW_IMPL:
+		case DESKTOP_EDIT_VIEW:
 			return Arrays.asList(GwtType.EDIT_ACTIVITY_WRAPPER, GwtType.EDIT_VIEW);
 		case MOBILE_EDIT_VIEW:
 			return Arrays.asList(GwtType.EDIT_ACTIVITY_WRAPPER, GwtType.EDIT_VIEW);
-		case DETAILS_VIEW_IMPL:
+		case DESKTOP_DETAILS_VIEW:
 			return Arrays.asList(GwtType.DETAILS_VIEW);
 		case MOBILE_DETAILS_VIEW:
 			return Arrays.asList(GwtType.DETAILS_VIEW);
@@ -350,7 +350,7 @@ public enum GwtType
 		case MOBILE_LIST_VIEW:
 			watchedFieldNames = convertToJavaSymbolNames("paths");
 			break;
-		case LIST_VIEW_IMPL:
+		case DESKTOP_LIST_VIEW:
 			watchedFieldNames = convertToJavaSymbolNames("table", "paths");
 			break;
 		case MASTER_ACTIVITIES:

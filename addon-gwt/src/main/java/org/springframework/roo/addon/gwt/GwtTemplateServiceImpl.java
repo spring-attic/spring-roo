@@ -184,7 +184,7 @@ public class GwtTemplateServiceImpl implements GwtTemplateService
 					section.setVariable("entityFullPath", proxySimpleName);
 					addImport(dataDictionary, entitySimpleName, GwtType.LIST_ACTIVITY, moduleName);
 					addImport(dataDictionary, proxy.getName().getFullyQualifiedTypeName());
-					addImport(dataDictionary, entitySimpleName, GwtType.LIST_VIEW_IMPL, moduleName);
+					addImport(dataDictionary, entitySimpleName, GwtType.DESKTOP_LIST_VIEW, moduleName);
 					addImport(dataDictionary, entitySimpleName, GwtType.MOBILE_LIST_VIEW, moduleName);
 				}
 			}
@@ -342,14 +342,14 @@ public class GwtTemplateServiceImpl implements GwtTemplateService
 
 		// Adds names of fields the are found in both the unmanaged EditView and
 		// MobileEditView to fieldsInBothViewAndMobileView list
-		if (type == GwtType.EDIT_ACTIVITY_WRAPPER || type == GwtType.MOBILE_EDIT_VIEW || type == GwtType.EDIT_VIEW_IMPL)
+		if (type == GwtType.EDIT_ACTIVITY_WRAPPER || type == GwtType.MOBILE_EDIT_VIEW || type == GwtType.DESKTOP_EDIT_VIEW)
 		{
-			List<String> existingImplFields = new ArrayList<String>();
+			List<String> existingDesktopFields = new ArrayList<String>();
 			List<String> existingMobileFields = new ArrayList<String>();
 
 			try
 			{
-				String className = GwtPath.MANAGED_UI_DESKTOP.packageName(topLevelPackage) + "." + simpleTypeName + GwtType.EDIT_VIEW_IMPL.getTemplate();
+				String className = GwtPath.MANAGED_UI_DESKTOP.packageName(topLevelPackage) + "." + simpleTypeName + GwtType.DESKTOP_EDIT_VIEW.getTemplate();
 
 				ClassOrInterfaceTypeDetails details = typeLocationService.getTypeDetails(new JavaType(className));
 
@@ -359,7 +359,7 @@ public class GwtTemplateServiceImpl implements GwtTemplateService
 					{
 						JavaSymbolName fieldName = field.getFieldName();
 						String name = fieldName.toString();
-						existingImplFields.add(name);
+						existingDesktopFields.add(name);
 					}
 				}
 
@@ -381,9 +381,10 @@ public class GwtTemplateServiceImpl implements GwtTemplateService
 				if (type == GwtType.MOBILE_EDIT_VIEW)
 					existingEditViewFields = existingMobileFields;
 
-				// Adds names of fields in EditViewImpl to existingFields list
-				if (type == GwtType.EDIT_VIEW_IMPL)
-					existingEditViewFields = existingImplFields;
+				// Adds names of fields in DesktopEditView to existingFields
+				// list
+				if (type == GwtType.DESKTOP_EDIT_VIEW)
+					existingEditViewFields = existingDesktopFields;
 
 			}
 			catch (Exception e)
@@ -393,7 +394,7 @@ public class GwtTemplateServiceImpl implements GwtTemplateService
 
 			for (String mobileViewField : existingMobileFields)
 			{
-				for (String viewField : existingImplFields)
+				for (String viewField : existingDesktopFields)
 				{
 					if (viewField.equals(mobileViewField))
 					{
@@ -404,14 +405,14 @@ public class GwtTemplateServiceImpl implements GwtTemplateService
 			}
 		}
 
-		if (type == GwtType.MOBILE_DETAILS_VIEW || type == GwtType.DETAILS_VIEW_IMPL)
+		if (type == GwtType.MOBILE_DETAILS_VIEW || type == GwtType.DESKTOP_DETAILS_VIEW)
 		{
-			List<String> existingImplFields = new ArrayList<String>();
+			List<String> existingDesktopFields = new ArrayList<String>();
 			List<String> existingMobileFields = new ArrayList<String>();
 
 			try
 			{
-				String className = GwtPath.MANAGED_UI_DESKTOP.packageName(topLevelPackage) + "." + simpleTypeName + GwtType.DETAILS_VIEW_IMPL.getTemplate();
+				String className = GwtPath.MANAGED_UI_DESKTOP.packageName(topLevelPackage) + "." + simpleTypeName + GwtType.DESKTOP_DETAILS_VIEW.getTemplate();
 
 				ClassOrInterfaceTypeDetails details = typeLocationService.getTypeDetails(new JavaType(className));
 
@@ -421,7 +422,7 @@ public class GwtTemplateServiceImpl implements GwtTemplateService
 					{
 						JavaSymbolName fieldName = field.getFieldName();
 						String name = fieldName.toString();
-						existingImplFields.add(name);
+						existingDesktopFields.add(name);
 					}
 				}
 
@@ -444,10 +445,10 @@ public class GwtTemplateServiceImpl implements GwtTemplateService
 				if (type == GwtType.MOBILE_DETAILS_VIEW)
 					existingDetailsViewFields = existingMobileFields;
 
-				// Adds names of fields in DetailsViewImpl to existingFields
+				// Adds names of fields in DesktopDetailsView to existingFields
 				// list
-				if (type == GwtType.DETAILS_VIEW_IMPL)
-					existingDetailsViewFields = existingImplFields;
+				if (type == GwtType.DESKTOP_DETAILS_VIEW)
+					existingDetailsViewFields = existingDesktopFields;
 
 			}
 			catch (Exception e)
