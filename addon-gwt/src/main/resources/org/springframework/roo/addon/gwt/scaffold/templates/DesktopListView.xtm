@@ -1,0 +1,69 @@
+package {{=packageName}};
+
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.i18n.client.NumberFormat;
+import com.google.gwt.text.client.DateTimeFormatRenderer;
+import com.google.gwt.text.shared.AbstractRenderer;
+import com.google.gwt.text.shared.Renderer;
+import com.google.gwt.uibinder.client.UiBinder;
+import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.cellview.client.CellTable;
+import com.google.gwt.user.cellview.client.HasKeyboardSelectionPolicy.KeyboardSelectionPolicy;
+import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.HTMLPanel;
+
+import {{=placePackage}}.AbstractProxyListView;
+{{#imports}}import {{=import}};
+{{/imports}}
+
+import java.util.HashSet;
+import java.util.Set;
+
+/**
+ * {@link AbstractProxyListView} specialized to {@link {{=name}}Key}} values.
+ */
+public class {{=className}} extends AbstractProxyListView<{{=proxy}}> {
+	interface Binder extends UiBinder<HTMLPanel, {{=className}}> {
+	}
+
+	private static final Binder BINDER = GWT.create(Binder.class);
+  
+  private static {{=className}} instance;
+
+	@UiField CellTable<{{=proxy}}> table;
+	@UiField Button newButton;
+  
+  private Set<String> paths = new HashSet<String>();
+
+  public static {{=className}} instance() {
+    if (instance == null) {
+      instance = new {{=className}}();
+    }
+    
+    return instance;
+  }
+  
+	public {{=className}}() {
+		init(BINDER.createAndBindUi(this), table, newButton);
+		table.setKeyboardSelectionPolicy(KeyboardSelectionPolicy.DISABLED);
+    	init();
+ 	}
+
+	public void init() {
+		{{#properties}}
+    paths.add("{{=prop}}");
+    table.addColumn(new TextColumn<{{=proxy}}>() {
+      Renderer<{{=propType}}> renderer = {{=propRenderer}};
+      
+      @Override
+      public String getValue({{=proxy}} object) {
+        return renderer.render(object.{{=propGetter}}());
+      }
+    }, "{{=propReadable}}");{{/properties}}
+	}
+  public String[] getPaths() {
+    return paths.toArray(new String[paths.size()]);
+  }
+}
