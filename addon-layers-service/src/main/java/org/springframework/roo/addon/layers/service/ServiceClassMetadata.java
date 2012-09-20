@@ -139,8 +139,9 @@ public class ServiceClassMetadata extends
                     boolean isCreateOrUpdateMethod = false;
                     boolean isReadMethod = false;
                     boolean isDeleteMethod = false;
-                    boolean isAuthenticatedAdded = false;
                     boolean usesDomainTypeMethod = false;
+                    boolean requireAuthentication = annotationValues
+                            .requireAuthentication();
 
                     if (method.getKey().equals(
                             CustomDataKeys.PERSIST_METHOD.name())
@@ -176,18 +177,9 @@ public class ServiceClassMetadata extends
                         usesDomainTypeMethod = true;
                     }
 
-                    if (annotationValues.requireAuthentication()) {
-                        preAuthorizeValue.append("isAuthenticated()");
-                        isAuthenticatedAdded = true;
-                    }
-
                     if (annotationValues.getAuthorizedCreateOrUpdateRoles().length > 0
                             && isCreateOrUpdateMethod) {
-                        if (!isAuthenticatedAdded) {
-                            preAuthorizeValue.append("isAuthenticated()");
-                            isAuthenticatedAdded = true;
-                        }
-
+                        requireAuthentication = true;
                         addRoles(preAuthorizeValue,
                                 annotationValues
                                         .getAuthorizedCreateOrUpdateRoles());
@@ -195,35 +187,23 @@ public class ServiceClassMetadata extends
 
                     if (annotationValues.getAuthorizedReadRoles().length > 0
                             && isReadMethod) {
-                        if (!isAuthenticatedAdded) {
-                            preAuthorizeValue.append("isAuthenticated()");
-                            isAuthenticatedAdded = true;
-                        }
-
+                        requireAuthentication = true;
                         addRoles(preAuthorizeValue,
                                 annotationValues.getAuthorizedReadRoles());
                     }
 
                     if (annotationValues.getAuthorizedDeleteRoles().length > 0
                             && isDeleteMethod) {
-                        if (!isAuthenticatedAdded) {
-                            preAuthorizeValue.append("isAuthenticated()");
-                            isAuthenticatedAdded = true;
-                        }
-
+                        requireAuthentication = true;
                         addRoles(preAuthorizeValue,
                                 annotationValues.getAuthorizedDeleteRoles());
                     }
 
                     if (annotationValues.usePermissionEvaluator()
                             && usesDomainTypeMethod) {
-                        if (!isAuthenticatedAdded) {
-                            preAuthorizeValue.append("isAuthenticated()");
-                            isAuthenticatedAdded = true;
-                        }
-
+                        requireAuthentication = true;
                         preAuthorizeValue
-                                .append(" && hasPermission("
+                                .append(" || hasPermission("
                                         + (parameterNames.size() == 0 ? "#"
                                                 : "#"
                                                         + parameterNames
@@ -231,6 +211,17 @@ public class ServiceClassMetadata extends
                                                                 .getSymbolName())
                                         + ", '" + serviceName + ":"
                                         + permissionName + "'" + ")");
+                    }
+
+                    if (!preAuthorizeValue.toString().equals("")
+                            && annotationValues.getAuthorizedDeleteRoles().length > 0
+                            && usesDomainTypeMethod) {
+                        preAuthorizeValue.insert(0, "(");
+                        preAuthorizeValue.append(")");
+                    }
+
+                    if (requireAuthentication) {
+                        preAuthorizeValue.append("&& isAuthenticated()");
                     }
 
                     if (!preAuthorizeValue.toString().equals("")) {
@@ -273,7 +264,7 @@ public class ServiceClassMetadata extends
     }
 
     private void addRoles(StringBuilder preAuthorizeValue, String[] roles) {
-        preAuthorizeValue.append(" && (");
+        preAuthorizeValue.append("(");
         int i = 0;
         for (String role : roles) {
             if (i > 0)
