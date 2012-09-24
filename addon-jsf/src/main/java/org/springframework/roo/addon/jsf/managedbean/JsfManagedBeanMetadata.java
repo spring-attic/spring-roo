@@ -939,8 +939,8 @@ public class JsfManagedBeanMetadata extends
         bodyBuilder
                 .appendFormalLine("RequestContext context = RequestContext.getCurrentInstance();");
         bodyBuilder
-                .appendFormalLine("context.execute(\"createDialog.hide()\");");
-        bodyBuilder.appendFormalLine("context.execute(\"editDialog.hide()\");");
+                .appendFormalLine("context.execute(\"createDialogWidget.hide()\");");
+        bodyBuilder.appendFormalLine("context.execute(\"editDialogWidget.hide()\");");
         bodyBuilder.appendFormalLine("");
         bodyBuilder
                 .appendFormalLine("FacesMessage facesMessage = new FacesMessage(message);");
