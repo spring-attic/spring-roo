@@ -29,6 +29,7 @@ import static org.springframework.roo.addon.jsf.JsfJavaType.PRIMEFACES_FILE_UPLO
 import static org.springframework.roo.addon.jsf.JsfJavaType.PRIMEFACES_INPUT_TEXT;
 import static org.springframework.roo.addon.jsf.JsfJavaType.PRIMEFACES_INPUT_TEXTAREA;
 import static org.springframework.roo.addon.jsf.JsfJavaType.PRIMEFACES_MESSAGE;
+import static org.springframework.roo.addon.jsf.JsfJavaType.PRIMEFACES_OUTPUT_LABEL;
 import static org.springframework.roo.addon.jsf.JsfJavaType.PRIMEFACES_REQUEST_CONTEXT;
 import static org.springframework.roo.addon.jsf.JsfJavaType.PRIMEFACES_SELECT_BOOLEAN_CHECKBOX;
 import static org.springframework.roo.addon.jsf.JsfJavaType.PRIMEFACES_SELECT_MANY_MENU;
@@ -1007,7 +1008,7 @@ public class JsfManagedBeanMetadata extends
         }
 
         builder.getImportRegistrationResolver().addImports(EL_CONTEXT,
-                EXPRESSION_FACTORY, HTML_OUTPUT_TEXT);
+                EXPRESSION_FACTORY, HTML_OUTPUT_TEXT, PRIMEFACES_OUTPUT_LABEL);
 
         bodyBuilder
                 .appendFormalLine("ExpressionFactory expressionFactory = application.getExpressionFactory();");
@@ -1024,6 +1025,7 @@ public class JsfManagedBeanMetadata extends
             final String simpleTypeName = fieldType.getSimpleTypeName();
             final String fieldName = field.getFieldName().getSymbolName();
             final String fieldLabelId = fieldName + suffix1;
+            final String fieldValueId = fieldName + suffix2;
 
             final BigDecimal minValue = ObjectUtils.max(
                     getMinOrMaxValue(field, MIN),
@@ -1049,18 +1051,22 @@ public class JsfManagedBeanMetadata extends
                     || customData.keySet().contains(CustomDataKeys.LOB_FIELD);
 
             // Field label
-            bodyBuilder.appendFormalLine("HtmlOutputText " + fieldLabelId
-                    + " = " + getComponentCreation("HtmlOutputText"));
+            if (action == Action.VIEW) {
+	            bodyBuilder.appendFormalLine("HtmlOutputText " + fieldLabelId
+	                    + " = " + getComponentCreation("HtmlOutputText"));
+            } else {
+                bodyBuilder.appendFormalLine("OutputLabel " + fieldLabelId
+                        + " = " + getComponentCreation("OutputLabel"));
+                bodyBuilder.appendFormalLine(fieldLabelId + ".setFor(\"" + fieldValueId + "\");");
+            }
             bodyBuilder.appendFormalLine(fieldLabelId + ".setId(\""
                     + fieldLabelId + "\");");
             bodyBuilder.appendFormalLine(fieldLabelId + ".setValue(\""
-                    + field.getFieldName().getReadableSymbolName() + ": "
-                    + (required ? "* " : "  ") + "\");");
+                    + field.getFieldName().getReadableSymbolName() + ":\");");
             bodyBuilder.appendFormalLine(getAddToPanelText(fieldLabelId));
             bodyBuilder.appendFormalLine("");
 
             // Field value
-            final String fieldValueId = fieldName + suffix2;
             final String converterName = fieldValueId + "Converter";
             final String htmlOutputTextStr = "HtmlOutputText " + fieldValueId
                     + " = " + getComponentCreation("HtmlOutputText");
@@ -1164,6 +1170,7 @@ public class JsfManagedBeanMetadata extends
                         bodyBuilder.appendFormalLine(fieldValueId
                                 + ".setAuto(true);");
                     }
+                    bodyBuilder.appendFormalLine(requiredStr);
                 }
             }
             else if (fieldType.equals(BOOLEAN_OBJECT)
@@ -1356,10 +1363,10 @@ public class JsfManagedBeanMetadata extends
                     if (sizeMinValue != null || sizeMaxValue != null) {
                         bodyBuilder.append(getLengthValdatorString(
                                 fieldValueId, sizeMinValue, sizeMaxValue));
-                        bodyBuilder.appendFormalLine(requiredStr);
                     }
                     setRegexPatternValidationString(field, fieldValueId,
                             bodyBuilder);
+                    bodyBuilder.appendFormalLine(requiredStr);
                 }
             }
             else if (customData.keySet().contains(PARAMETER_TYPE_KEY)) {

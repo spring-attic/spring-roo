@@ -81,6 +81,8 @@ public class JsfJavaType {
             "org.primefaces.model.MenuModel");
     public static final JavaType PRIMEFACES_MESSAGE = new JavaType(
             "org.primefaces.component.message.Message");
+    public static final JavaType PRIMEFACES_OUTPUT_LABEL = new JavaType(
+            "org.primefaces.component.outputlabel.OutputLabel");
     public static final JavaType PRIMEFACES_REQUEST_CONTEXT = new JavaType(
             "org.primefaces.context.RequestContext");
     public static final JavaType PRIMEFACES_SELECT_BOOLEAN_CHECKBOX = new JavaType(
