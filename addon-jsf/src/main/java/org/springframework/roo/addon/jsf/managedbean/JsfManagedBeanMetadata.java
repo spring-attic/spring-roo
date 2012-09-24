@@ -175,6 +175,7 @@ public class JsfManagedBeanMetadata extends
     private JavaSymbolName entityName;
     private Set<FieldMetadata> locatedFields;
     private String plural;
+    private JavaType messageFactory;
 
     public JsfManagedBeanMetadata(
             final String identifier,
@@ -217,7 +218,8 @@ public class JsfManagedBeanMetadata extends
         beanName = annotationValues.getBeanName();
         this.plural = plural;
         entityName = JavaSymbolName.getReservedWordSafeName(entity);
-
+        messageFactory = new JavaType(destination.getPackage().getFullyQualifiedPackageName() + ".util.MessageFactory");
+        
         final JavaSymbolName allEntitiesFieldName = new JavaSymbolName("all"
                 + plural);
         final JavaType entityListType = getListType(entity);
@@ -557,15 +559,15 @@ public class JsfManagedBeanMetadata extends
         if (governorHasMethod(methodName)) {
             return null;
         }
-
+        
         builder.getImportRegistrationResolver().addImports(FACES_MESSAGE,
-                FACES_CONTEXT);
+                FACES_CONTEXT, messageFactory);
 
         final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
         bodyBuilder.appendFormalLine(removeMethod.getMethodCall() + ";");
         removeMethod.copyAdditionsTo(builder, governorTypeDetails);
         bodyBuilder
-                .appendFormalLine("FacesMessage facesMessage = new FacesMessage(\"Successfully deleted\");");
+                .appendFormalLine("FacesMessage facesMessage = MessageFactory.getMessage(\"label_successfully_deleted\", " + entityName + ");");
         bodyBuilder
                 .appendFormalLine("FacesContext.getCurrentInstance().addMessage(null, facesMessage);");
         bodyBuilder.appendFormalLine("reset();");
@@ -649,9 +651,9 @@ public class JsfManagedBeanMetadata extends
         if (governorHasMethod(methodName, parameterType)) {
             return null;
         }
-
+        
         builder.getImportRegistrationResolver().addImports(FACES_CONTEXT,
-                FACES_MESSAGE, PRIMEFACES_FILE_UPLOAD_EVENT);
+                FACES_MESSAGE, PRIMEFACES_FILE_UPLOAD_EVENT, messageFactory);
 
         final List<JavaSymbolName> parameterNames = Arrays
                 .asList(new JavaSymbolName("event"));
@@ -661,7 +663,7 @@ public class JsfManagedBeanMetadata extends
                 + StringUtils.capitalize(fieldName)
                 + "(event.getFile().getContents());");
         bodyBuilder
-                .appendFormalLine("FacesMessage facesMessage = new FacesMessage(\"Successful\", event.getFile().getFileName() + \" is uploaded.\");");
+                .appendFormalLine("FacesMessage facesMessage = MessageFactory.getMessage(\"message_successfully_uploaded\", event.getFile().getFileName());");
         bodyBuilder
                 .appendFormalLine("FacesContext.getCurrentInstance().addMessage(null, facesMessage);");
 
@@ -917,7 +919,7 @@ public class JsfManagedBeanMetadata extends
         }
 
         builder.getImportRegistrationResolver().addImports(FACES_MESSAGE,
-                PRIMEFACES_REQUEST_CONTEXT);
+                PRIMEFACES_REQUEST_CONTEXT, FACES_CONTEXT, messageFactory);
 
         final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
         bodyBuilder.appendFormalLine("String message = \"\";");
@@ -927,13 +929,13 @@ public class JsfManagedBeanMetadata extends
         bodyBuilder.indent();
         bodyBuilder.appendFormalLine(mergeMethod.getMethodCall() + ";");
         mergeMethod.copyAdditionsTo(builder, governorTypeDetails);
-        bodyBuilder.appendFormalLine("message = \"Successfully updated\";");
+        bodyBuilder.appendFormalLine("message = \"message_successfully_updated\";");
         bodyBuilder.indentRemove();
         bodyBuilder.appendFormalLine("} else {");
         bodyBuilder.indent();
         bodyBuilder.appendFormalLine(persistMethod.getMethodCall() + ";");
         persistMethod.copyAdditionsTo(builder, governorTypeDetails);
-        bodyBuilder.appendFormalLine("message = \"Successfully created\";");
+        bodyBuilder.appendFormalLine("message = \"message_successfully_created\";");
         bodyBuilder.indentRemove();
         bodyBuilder.appendFormalLine("}");
         bodyBuilder
@@ -943,7 +945,7 @@ public class JsfManagedBeanMetadata extends
         bodyBuilder.appendFormalLine("context.execute(\"editDialogWidget.hide()\");");
         bodyBuilder.appendFormalLine("");
         bodyBuilder
-                .appendFormalLine("FacesMessage facesMessage = new FacesMessage(message);");
+                .appendFormalLine("FacesMessage facesMessage = MessageFactory.getMessage(message, " + entityName + ");");
         bodyBuilder
                 .appendFormalLine("FacesContext.getCurrentInstance().addMessage(null, facesMessage);");
         bodyBuilder.appendFormalLine("reset();");

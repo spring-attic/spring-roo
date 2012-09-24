@@ -278,7 +278,8 @@ public class JsfOperationsImpl extends AbstractOperations implements
                 utilPackage);
         installBean("ViewExpiredExceptionExceptionHandler-template.java",
                 utilPackage);
-
+        installBean("MessageFactory-template.java", utilPackage);
+        
         if (fileManager.exists(typeLocationService
                 .getPhysicalTypeCanonicalPath(managedBean,
                         pathResolver.getFocusedPath(Path.SRC_MAIN_JAVA)))) {
