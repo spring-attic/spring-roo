@@ -478,10 +478,18 @@ public class WebScaffoldMetadata extends
             return null;
         }
 
-        final String idFieldName = idField.getFieldName().getSymbolName();
+        final JavaSymbolName idFieldName = idField.getFieldName();
+        String fieldName = entityName;
+        String deleteMethodCall = deleteMethodAdditions.getMethodCall();
+        if (idFieldName.getSymbolName().equals(entityName)) {
+            fieldName += "_";
+            deleteMethodCall = fieldName + "."
+                    + deleteMethodAdditions.getMethodName() + "()";
+        }
+
         final List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
         attributes.add(new StringAttributeValue(new JavaSymbolName("value"),
-                idFieldName));
+                idFieldName.getSymbolName()));
         final AnnotationMetadataBuilder pathVariableAnnotation = new AnnotationMetadataBuilder(
                 PATH_VARIABLE, attributes);
 
@@ -509,13 +517,14 @@ public class WebScaffoldMetadata extends
                         new JavaType(Integer.class.getName()),
                         maxResultAnnotation.build()), new AnnotatedJavaType(
                         MODEL));
-        final List<JavaSymbolName> parameterNames = Arrays.asList(
-                new JavaSymbolName(idFieldName), new JavaSymbolName("page"),
-                new JavaSymbolName("size"), new JavaSymbolName("uiModel"));
+        final List<JavaSymbolName> parameterNames = Arrays.asList(idFieldName,
+                new JavaSymbolName("page"), new JavaSymbolName("size"),
+                new JavaSymbolName("uiModel"));
 
         final List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
         requestMappingAttributes.add(new StringAttributeValue(
-                new JavaSymbolName("value"), "/{" + idFieldName + "}"));
+                new JavaSymbolName("value"), "/{" + idFieldName.getSymbolName()
+                        + "}"));
         requestMappingAttributes.add(new EnumAttributeValue(new JavaSymbolName(
                 "method"), new EnumDetails(REQUEST_METHOD, new JavaSymbolName(
                 "DELETE"))));
@@ -528,9 +537,8 @@ public class WebScaffoldMetadata extends
 
         final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
         bodyBuilder.appendFormalLine(getShortName(formBackingType) + " "
-                + entityName + " = " + findMethod.getMethodCall() + ";");
-        bodyBuilder.appendFormalLine(deleteMethodAdditions.getMethodCall()
-                + ";");
+                + fieldName + " = " + findMethod.getMethodCall() + ";");
+        bodyBuilder.appendFormalLine(deleteMethodCall + ";");
         bodyBuilder.appendFormalLine("uiModel.asMap().clear();");
         bodyBuilder
                 .appendFormalLine("uiModel.addAttribute(\"page\", (page == null) ? \"1\" : page.toString());");
