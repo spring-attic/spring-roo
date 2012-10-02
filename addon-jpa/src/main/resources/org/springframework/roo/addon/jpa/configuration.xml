@@ -187,7 +187,7 @@
                 <dependency>
                     <groupId>com.force.sdk</groupId>
                     <artifactId>force-jpa</artifactId>
-                    <version>22.0.5-BETA</version>
+                    <version>22.0.9-BETA</version>
                 </dependency>
             </dependencies>
         </database>
