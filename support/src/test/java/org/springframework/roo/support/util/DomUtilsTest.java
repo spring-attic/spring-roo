@@ -20,31 +20,8 @@ public class DomUtilsTest {
 
     private static final String DEFAULT_TEXT = "foo";
     private static final String NODE_TEXT = "bar";
-    private static final String XML_AFTER_REMOVAL = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-            + "<top>    <middle/>\n" + "</top>";
-    private static final String XML_BEFORE_REMOVAL = "<top>" + "    <middle>"
-            + "        <bottom id=\"1\" />" + "        <bottom id=\"2\" />"
-            + "    </middle>" + "</top>";
-
-    /**
-     * Asserts that the given XML node contains the expected content
-     * 
-     * @param expectedLines the expected lines of XML (required); separate each
-     *            line with "\n" regardless of the platform
-     * @param actualNode the actual XML node (required)
-     * @throws AssertionError if they are not equal
-     */
-    private void assertXmlEquals(final String expectedXml, final Node actualNode) {
-        // Replace the dummy line terminator with the platform-specific one that
-        // will be applied by XmlUtils.nodeToString.
-        final String normalisedXml = expectedXml.replace("\n",
-                IOUtils.LINE_SEPARATOR);
-        // Trim trailing whitespace as XmlUtils.nodeToString appends an extra
-        // newline.
-        final String actualXml = StringUtils.stripEnd(
-                XmlUtils.nodeToString(actualNode), null);
-        assertEquals(normalisedXml, actualXml);
-    }
+    private static final String XML_AFTER_REMOVAL = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><top><middle/></top>";
+    private static final String XML_BEFORE_REMOVAL = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><top><middle><bottom id=\"1\" /><bottom id=\"2\" /></middle></top>";
 
     @Test
     public void testGetTextContentOfNonNullNode() {
@@ -71,6 +48,8 @@ public class DomUtilsTest {
         DomUtils.removeElements("bottom", middle);
 
         // Check
-        assertXmlEquals(XML_AFTER_REMOVAL, root);
+        assertEquals(XmlUtils.nodeToString(XmlUtils
+                .stringToElement(XML_AFTER_REMOVAL)),
+                XmlUtils.nodeToString(root));
     }
 }
