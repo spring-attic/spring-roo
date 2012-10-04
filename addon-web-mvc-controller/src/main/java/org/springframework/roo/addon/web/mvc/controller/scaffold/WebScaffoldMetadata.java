@@ -327,6 +327,7 @@ public class WebScaffoldMetadata extends
                         + "();");
                 listAdded = true;
             }
+            builder.getImportRegistrationResolver().addImport(dependentType.getJavaType());
             bodyBuilder.appendFormalLine("if ("
                     + dependentType.getPersistenceDetails().getCountMethod()
                             .getMethodCall() + " == 0) {");
