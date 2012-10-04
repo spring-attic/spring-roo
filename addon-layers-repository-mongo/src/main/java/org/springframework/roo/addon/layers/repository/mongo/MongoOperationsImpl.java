@@ -291,7 +291,7 @@ public class MongoOperationsImpl implements MongoOperations {
         final Map<String, String> properties = new HashMap<String, String>();
         properties.put("mongo.username", username);
         properties.put("mongo.password", password);
-        properties.put("mongo.name", name);
+        properties.put("mongo.database", name);
         properties.put("mongo.port", port);
         properties.put("mongo.host", host);
         propFileOperations.addProperties(Path.SPRING_CONFIG_ROOT
