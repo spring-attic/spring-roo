@@ -327,7 +327,8 @@ public class WebScaffoldMetadata extends
                         + "();");
                 listAdded = true;
             }
-            builder.getImportRegistrationResolver().addImport(dependentType.getJavaType());
+            builder.getImportRegistrationResolver().addImport(
+                    dependentType.getJavaType());
             bodyBuilder.appendFormalLine("if ("
                     + dependentType.getPersistenceDetails().getCountMethod()
                             .getMethodCall() + " == 0) {");
@@ -337,7 +338,7 @@ public class WebScaffoldMetadata extends
             bodyBuilder.appendFormalLine("dependencies.add(new String[] { \""
                     + dependentType.getJavaType().getSimpleTypeName()
                             .toLowerCase() + "\", \""
-                    + dependentType.getPlural().toLowerCase() + "\" });");
+                    + dependentType.getControllerPath() + "\" });");
             bodyBuilder.indentRemove();
             bodyBuilder.appendFormalLine("}");
         }
