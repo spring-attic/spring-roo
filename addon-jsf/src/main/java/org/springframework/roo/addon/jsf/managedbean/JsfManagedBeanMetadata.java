@@ -569,8 +569,8 @@ public class JsfManagedBeanMetadata extends
         bodyBuilder.appendFormalLine(removeMethod.getMethodCall() + ";");
         removeMethod.copyAdditionsTo(builder, governorTypeDetails);
         bodyBuilder
-                .appendFormalLine("FacesMessage facesMessage = MessageFactory.getMessage(\"label_successfully_deleted\", "
-                        + entityName + ");");
+                .appendFormalLine("FacesMessage facesMessage = MessageFactory.getMessage(\"label_successfully_deleted\", \""
+                        + entity.getSimpleTypeName() + "\");");
         bodyBuilder
                 .appendFormalLine("FacesContext.getCurrentInstance().addMessage(null, facesMessage);");
         bodyBuilder.appendFormalLine("reset();");
@@ -951,8 +951,8 @@ public class JsfManagedBeanMetadata extends
                 .appendFormalLine("context.execute(\"editDialogWidget.hide()\");");
         bodyBuilder.appendFormalLine("");
         bodyBuilder
-                .appendFormalLine("FacesMessage facesMessage = MessageFactory.getMessage(message, "
-                        + entityName + ");");
+                .appendFormalLine("FacesMessage facesMessage = MessageFactory.getMessage(message, \""
+                        + entity.getSimpleTypeName() + "\");");
         bodyBuilder
                 .appendFormalLine("FacesContext.getCurrentInstance().addMessage(null, facesMessage);");
         bodyBuilder.appendFormalLine("reset();");
