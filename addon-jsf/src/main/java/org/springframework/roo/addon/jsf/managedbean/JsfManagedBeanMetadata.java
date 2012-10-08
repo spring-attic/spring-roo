@@ -569,7 +569,7 @@ public class JsfManagedBeanMetadata extends
         bodyBuilder.appendFormalLine(removeMethod.getMethodCall() + ";");
         removeMethod.copyAdditionsTo(builder, governorTypeDetails);
         bodyBuilder
-                .appendFormalLine("FacesMessage facesMessage = MessageFactory.getMessage(\"label_successfully_deleted\", \""
+                .appendFormalLine("FacesMessage facesMessage = MessageFactory.getMessage(\"message_successfully_deleted\", \""
                         + entity.getSimpleTypeName() + "\");");
         bodyBuilder
                 .appendFormalLine("FacesContext.getCurrentInstance().addMessage(null, facesMessage);");
