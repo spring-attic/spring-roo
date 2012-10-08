@@ -15,37 +15,26 @@ public class MessageFactory {
     private MessageFactory() {
     }
 
-    public static FacesMessage getMessage(Locale locale, String messageId,
-            FacesMessage.Severity severity, Object... params) {
-        FacesMessage facesMessage = getMessage(locale, messageId, params);
+    public static FacesMessage getMessage(final Locale locale, final String messageId,
+            final FacesMessage.Severity severity, final Object... params) {
+        final FacesMessage facesMessage = getMessage(locale, messageId, params);
         facesMessage.setSeverity(severity);
         return facesMessage;
     }
 
-    public static FacesMessage getMessage(String messageId,
-            FacesMessage.Severity severity, Object... params) {
-        FacesMessage facesMessage = getMessage(getLocale(), messageId, params);
-        facesMessage.setSeverity(severity);
-        return facesMessage;
-    }
-
-    public static FacesMessage getMessage(String messageId, Object... params) {
-        return getMessage(getLocale(), messageId, params);
-    }
-
-    public static FacesMessage getMessage(Locale locale, String messageId,
-            Object... params) {
+    public static FacesMessage getMessage(final Locale locale, final String messageId,
+            final Object... params) {
         String summary = null;
         String detail = null;
-        FacesContext context = FacesContext.getCurrentInstance();
-        ResourceBundle bundle = context.getApplication().getResourceBundle(
-                context, "messages");
+        final FacesContext context = FacesContext.getCurrentInstance();
+        final ResourceBundle bundle = context.getApplication()
+                .getResourceBundle(context, "messages");
 
         try {
             summary = getFormattedText(locale, bundle.getString(messageId),
                     params);
         }
-        catch (MissingResourceException e) {
+        catch (final MissingResourceException e) {
             summary = messageId;
         }
 
@@ -53,38 +42,45 @@ public class MessageFactory {
             detail = getFormattedText(locale,
                     bundle.getString(messageId + DEFAULT_DETAIL_SUFFIX), params);
         }
-        catch (MissingResourceException e) {
+        catch (final MissingResourceException e) {
             // NoOp
         }
 
         return new FacesMessage(summary, detail);
     }
 
-    private static String getFormattedText(Locale locale, String message,
-            Object params[]) {
+    public static FacesMessage getMessage(final String messageId,
+            final FacesMessage.Severity severity, final Object... params) {
+        final FacesMessage facesMessage = getMessage(getLocale(), messageId, params);
+        facesMessage.setSeverity(severity);
+        return facesMessage;
+    }
+
+    public static FacesMessage getMessage(final String messageId, final Object... params) {
+        return getMessage(getLocale(), messageId, params);
+    }
+
+    private static String getFormattedText(final Locale locale, final String message,
+            final Object params[]) {
         MessageFormat messageFormat = null;
 
         if (params == null || message == null) {
             return message;
         }
 
-        if (locale != null) {
-            messageFormat = new MessageFormat(message, locale);
-        }
-        else {
-            messageFormat = new MessageFormat(message);
-        }
-
+        messageFormat = locale == null ? new MessageFormat(message)
+                : new MessageFormat(message, locale);
         return messageFormat.format(params);
     }
 
     private static Locale getLocale() {
         Locale locale = null;
-        FacesContext facesContext = FacesContext.getCurrentInstance();
+        final FacesContext facesContext = FacesContext.getCurrentInstance();
         if (facesContext != null && facesContext.getViewRoot() != null) {
             locale = facesContext.getViewRoot().getLocale();
-            if (locale == null)
+            if (locale == null) {
                 locale = Locale.getDefault();
+            }
         }
         else {
             locale = Locale.getDefault();
