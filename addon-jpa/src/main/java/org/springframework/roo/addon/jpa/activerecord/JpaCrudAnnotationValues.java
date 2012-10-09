@@ -11,7 +11,6 @@ import static org.springframework.roo.addon.jpa.activerecord.RooJpaActiveRecord.
 import static org.springframework.roo.addon.jpa.activerecord.RooJpaActiveRecord.REMOVE_METHOD_DEFAULT;
 import static org.springframework.roo.model.RooJavaType.ROO_JPA_ACTIVE_RECORD;
 
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.roo.classpath.details.annotations.populator.AbstractAnnotationValues;
 import org.springframework.roo.classpath.details.annotations.populator.AutoPopulate;
 import org.springframework.roo.classpath.details.annotations.populator.AutoPopulationUtils;
@@ -51,16 +50,15 @@ public class JpaCrudAnnotationValues extends AbstractAnnotationValues {
     }
 
     public String getClearMethod() {
-        return StringUtils.defaultIfEmpty(clearMethod, CLEAR_METHOD_DEFAULT);
+        return clearMethod;
     }
 
     public String getCountMethod() {
-        return StringUtils.defaultIfEmpty(countMethod, COUNT_METHOD_DEFAULT);
+        return countMethod;
     }
 
     public String getFindAllMethod() {
-        return StringUtils.defaultIfEmpty(findAllMethod,
-                FIND_ALL_METHOD_DEFAULT);
+        return findAllMethod;
     }
 
     /**
@@ -83,15 +81,15 @@ public class JpaCrudAnnotationValues extends AbstractAnnotationValues {
     }
 
     public String getFindMethod() {
-        return StringUtils.defaultIfEmpty(findMethod, FIND_METHOD_DEFAULT);
+        return findMethod;
     }
 
     public String getFlushMethod() {
-        return StringUtils.defaultIfEmpty(flushMethod, FLUSH_METHOD_DEFAULT);
+        return flushMethod;
     }
 
     public String getMergeMethod() {
-        return StringUtils.defaultIfEmpty(mergeMethod, MERGE_METHOD_DEFAULT);
+        return mergeMethod;
     }
 
     public String getPersistenceUnit() {
@@ -99,12 +97,11 @@ public class JpaCrudAnnotationValues extends AbstractAnnotationValues {
     }
 
     public String getPersistMethod() {
-        return StringUtils
-                .defaultIfEmpty(persistMethod, PERSIST_METHOD_DEFAULT);
+        return persistMethod;
     }
 
     public String getRemoveMethod() {
-        return StringUtils.defaultIfEmpty(removeMethod, REMOVE_METHOD_DEFAULT);
+        return removeMethod;
     }
 
     public String getTransactionManager() {
