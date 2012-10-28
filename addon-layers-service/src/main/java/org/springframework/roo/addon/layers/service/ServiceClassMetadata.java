@@ -176,12 +176,6 @@ public class ServiceClassMetadata extends AbstractItdTypeDetailsProvidingMetadat
 								+ "'" + ")");
 					}
 
-					if (!preAuthorizeValue.toString().equals("") && annotationValues.getAuthorizedDeleteRoles().length > 0 && usesDomainTypeMethod)
-					{
-						preAuthorizeValue.insert(0, "(");
-						preAuthorizeValue.append(")");
-					}
-
 					if (requireAuthentication)
 					{
 						preAuthorizeValue.insert(0, "isAuthenticated() AND ");
