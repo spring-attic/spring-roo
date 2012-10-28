@@ -64,6 +64,8 @@ public class JavaType implements Comparable<JavaType> {
     public static final JavaType LONG_PRIMITIVE = new JavaType(
             "java.lang.Long", 0, DataType.PRIMITIVE, null, null);
     public static final JavaType OBJECT = new JavaType("java.lang.Object");
+    public static final JavaType SERIALIZABLE = new JavaType(
+            "java.io.Serializable");
     public static final JavaType SHORT_OBJECT = new JavaType("java.lang.Short");
     public static final JavaType SHORT_PRIMITIVE = new JavaType(
             "java.lang.Short", 0, DataType.PRIMITIVE, null, null);
@@ -79,13 +81,17 @@ public class JavaType implements Comparable<JavaType> {
             "java.lang.Void", 0, DataType.PRIMITIVE, null, null);
     // Used for wildcard type parameters; it must be one or the other
     public static final JavaSymbolName WILDCARD_EXTENDS = new JavaSymbolName(
-            "_ROO_WILDCARD_EXTENDS_"); // List<? extends YY>
+            "_ROO_WILDCARD_EXTENDS_"); // List<?
+                                       // extends
+                                       // YY>
 
     public static final JavaSymbolName WILDCARD_NEITHER = new JavaSymbolName(
             "_ROO_WILDCARD_NEITHER_"); // List<?>
 
     public static final JavaSymbolName WILDCARD_SUPER = new JavaSymbolName(
-            "_ROO_WILDCARD_SUPER_"); // List<? super XXXX>
+            "_ROO_WILDCARD_SUPER_"); // List<?
+                                     // super
+                                     // XXXX>
 
     static {
         COMMON_COLLECTION_TYPES.add(ArrayList.class.getName());

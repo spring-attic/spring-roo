@@ -1,5 +1,11 @@
 package org.springframework.roo.addon.security;
 
+import static java.lang.reflect.Modifier.PUBLIC;
+import static org.springframework.roo.classpath.PhysicalTypeCategory.CLASS;
+import static org.springframework.roo.model.RooJavaType.ROO_PERMISSION_EVALUATOR;
+import static org.springframework.roo.model.SpringJavaType.PERMISSION_EVALUATOR;
+import static org.springframework.roo.project.Path.SRC_MAIN_JAVA;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -13,13 +19,22 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.addon.web.mvc.controller.WebMvcOperations;
 import org.springframework.roo.addon.web.mvc.jsp.tiles.TilesOperations;
+import org.springframework.roo.classpath.PhysicalTypeIdentifier;
+import org.springframework.roo.classpath.TypeManagementService;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
+import org.springframework.roo.metadata.MetadataService;
+import org.springframework.roo.model.JavaPackage;
+import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.FeatureNames;
+import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.Property;
+import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.support.util.DomUtils;
 import org.springframework.roo.support.util.FileUtils;
 import org.springframework.roo.support.util.WebXmlUtils;
@@ -48,7 +63,10 @@ public class SecurityOperationsImpl implements SecurityOperations {
     @Reference private PathResolver pathResolver;
     @Reference private ProjectOperations projectOperations;
     @Reference private TilesOperations tilesOperations;
+    @Reference private TypeManagementService typeManagementService;
+    @Reference private MetadataService metadataService;
 
+    @Override
     public void installSecurity() {
         // Parse the configuration.xml file
         final Element configuration = XmlUtils.getConfiguration(getClass());
@@ -145,6 +163,70 @@ public class SecurityOperationsImpl implements SecurityOperations {
                 XmlUtils.nodeToString(webConfigDocument), false);
     }
 
+    private void createPermissionEvaluator(
+            final JavaPackage permissionEvaluatorPackage) {
+        installPermissionEvaluatorTemplate(permissionEvaluatorPackage);
+        final LogicalPath focusedSrcMainJava = LogicalPath.getInstance(
+                SRC_MAIN_JAVA, projectOperations.getFocusedModuleName());
+        JavaType permissionEvaluatorClass = new JavaType(
+                permissionEvaluatorPackage.getFullyQualifiedPackageName()
+                        + ".ApplicationPermissionEvaluator");
+        final String identifier = pathResolver.getFocusedCanonicalPath(
+                Path.SRC_MAIN_JAVA, permissionEvaluatorClass);
+        if (fileManager.exists(identifier)) {
+            return; // Type already exists - nothing to do
+        }
+
+        final AnnotationMetadataBuilder classAnnotationMetadata = new AnnotationMetadataBuilder(
+                ROO_PERMISSION_EVALUATOR);
+        final String classMid = PhysicalTypeIdentifier.createIdentifier(
+                permissionEvaluatorClass, pathResolver.getPath(identifier));
+        final ClassOrInterfaceTypeDetailsBuilder classBuilder = new ClassOrInterfaceTypeDetailsBuilder(
+                classMid, PUBLIC, permissionEvaluatorClass, CLASS);
+        classBuilder.addAnnotation(classAnnotationMetadata.build());
+        classBuilder.addImplementsType(PERMISSION_EVALUATOR);
+        typeManagementService.createOrUpdateTypeOnDisk(classBuilder.build());
+
+        metadataService.get(PermissionEvaluatorMetadata.createIdentifier(
+                permissionEvaluatorClass, focusedSrcMainJava));
+    }
+
+    private void installPermissionEvaluatorTemplate(
+            JavaPackage permissionEvaluatorPackage) {
+        // Copy the template across
+        final String destination = pathResolver.getFocusedIdentifier(
+                Path.SPRING_CONFIG_ROOT,
+                "applicationContext-security-permissionEvaluator.xml");
+        if (!fileManager.exists(destination)) {
+            try {
+                InputStream inputStream = FileUtils
+                        .getInputStream(getClass(),
+                                "applicationContext-security-permissionEvaluator-template.xml");
+                String content = IOUtils.toString(inputStream);
+                content = content.replace("__PERMISSION_EVALUATOR_PACKAGE__",
+                        permissionEvaluatorPackage
+                                .getFullyQualifiedPackageName());
+
+                fileManager.createOrUpdateTextFileIfRequired(destination,
+                        content, true);
+            }
+            catch (final IOException ioe) {
+                throw new IllegalStateException(ioe);
+            }
+        }
+    }
+
+    @Override
+    public void installPermissionEvaluator(
+            final JavaPackage permissionEvaluatorPackage) {
+        Validate.isTrue(
+                projectOperations.isFeatureInstalled(FeatureNames.SECURITY),
+                "Security must first be setup before securing a method");
+        Validate.notNull(permissionEvaluatorPackage, "Package required");
+        createPermissionEvaluator(permissionEvaluatorPackage);
+    }
+
+    @Override
     public boolean isSecurityInstallationPossible() {
         // Permit installation if they have a web project (as per ROO-342) and
         // no version of Spring Security is already installed.
@@ -153,8 +235,14 @@ public class SecurityOperationsImpl implements SecurityOperations {
                         Path.SRC_MAIN_WEBAPP, "WEB-INF/web.xml"))
                 && !projectOperations.getFocusedModule()
                         .hasDependencyExcludingVersion(SPRING_SECURITY)
-                && !projectOperations.isFeatureInstalledInFocusedModule(
-                        FeatureNames.JSF, FeatureNames.GWT);
+                && !projectOperations
+                        .isFeatureInstalledInFocusedModule(FeatureNames.JSF);
+    }
+
+    @Override
+    public boolean isServicePermissionEvaluatorInstallationPossible() {
+        return projectOperations.isFocusedProjectAvailable()
+                && projectOperations.isFeatureInstalled(FeatureNames.SECURITY);
     }
 
     private void updateDependencies(final Element configuration,
@@ -176,5 +264,24 @@ public class SecurityOperationsImpl implements SecurityOperations {
         for (final Element property : databaseProperties) {
             projectOperations.addProperty(moduleName, new Property(property));
         }
+    }
+
+    @Override
+    public String getName() {
+        return FeatureNames.SECURITY;
+    }
+
+    @Override
+    public boolean isInstalledInModule(String moduleName) {
+        final Pom pom = projectOperations.getPomFromModuleName(moduleName);
+        if (pom == null) {
+            return false;
+        }
+        for (final Dependency dependency : pom.getDependencies()) {
+            if ("spring-security-core".equals(dependency.getArtifactId())) {
+                return true;
+            }
+        }
+        return false;
     }
 }

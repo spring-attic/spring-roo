@@ -28,15 +28,12 @@ import java.util.List;
  */
 public class {{=className}} extends AbstractProxyEditActivity<{{=proxy}}> implements {{=editView}}.Delegate 
 {
+	private final {{=editView}}<?> view;
+	private final {{=request}} request;
 
-	private Class<{{=proxy}}> proxyClass;
-	private {{=editView}}<?> view;
-	private {{=request}} request;
-
-	public {{=className}}(Class<{{=proxy}}> proxyClass, EntityProxyId<{{=proxy}}> proxyId, ApplicationRequestFactory factory, {{=editView}}<?> view, PlaceController placeController) 
+	public {EntityProxyId<{{=proxy}}> proxyId, ApplicationRequestFactory factory, {{=editView}}<?> view, PlaceController placeController) 
 	{
 		super(proxyId, factory, placeController);
-		this.proxyClass = proxyClass;
 		this.view = view;
 		this.request = factory.{{=nameUncapitalized}}Request();
 	}

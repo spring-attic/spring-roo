@@ -37,10 +37,10 @@ import org.springframework.roo.project.LogicalPath;
 @Service
 public class ServiceClassMetadataProvider extends
         AbstractMemberDiscoveringItdMetadataProvider {
-
     private static final int LAYER_POSITION = LayerType.SERVICE.getPosition();
 
     @Reference private LayerService layerService;
+
     private final Map<JavaType, String> managedEntityTypes = new HashMap<JavaType, String>();
 
     protected void activate(final ComponentContext context) {
@@ -113,7 +113,9 @@ public class ServiceClassMetadataProvider extends
         if (serviceClass == null) {
             return null;
         }
+
         ServiceInterfaceMetadata serviceInterfaceMetadata = null;
+        ClassOrInterfaceTypeDetails serviceInterface = null;
         for (final JavaType implementedType : serviceClass.getImplementsTypes()) {
             final ClassOrInterfaceTypeDetails potentialServiceInterfaceTypeDetails = typeLocationService
                     .getTypeDetails(implementedType);
@@ -126,11 +128,12 @@ public class ServiceClassMetadataProvider extends
                 if ((serviceInterfaceMetadata = (ServiceInterfaceMetadata) metadataService
                         .get(implementedTypeId)) != null) {
                     // Found the metadata for the service interface
+                    serviceInterface = potentialServiceInterfaceTypeDetails;
                     break;
                 }
             }
         }
-        if (serviceInterfaceMetadata == null
+        if (serviceInterface == null || serviceInterfaceMetadata == null
                 || !serviceInterfaceMetadata.isValid()) {
             return null;
         }
@@ -211,12 +214,15 @@ public class ServiceClassMetadataProvider extends
             metadataDependencyRegistry.registerDependency(pluralId,
                     metadataIdentificationString);
         }
+
         final MemberDetails serviceClassDetails = memberDetailsScanner
                 .getMemberDetails(getClass().getName(), serviceClass);
         return new ServiceClassMetadata(metadataIdentificationString,
                 aspectName, governorPhysicalTypeMetadata, serviceClassDetails,
                 serviceAnnotationValues, domainTypeToIdTypeMap,
-                allCrudAdditions, domainTypePlurals);
+                allCrudAdditions, domainTypePlurals, serviceInterface.getName()
+                        .getSimpleTypeName());
+
     }
 
     public String getProvidesType() {

@@ -15,7 +15,6 @@ import org.springframework.roo.model.RooJavaType;
  * @since 1.2.0
  */
 public class ServiceAnnotationValues extends AbstractAnnotationValues {
-
     @AutoPopulate private String countAllMethod = RooService.COUNT_ALL_METHOD;
     @AutoPopulate private String deleteMethod = RooService.DELETE_METHOD;
     @AutoPopulate private JavaType[] domainTypes;
@@ -23,8 +22,13 @@ public class ServiceAnnotationValues extends AbstractAnnotationValues {
     @AutoPopulate private String findEntriesMethod = RooService.FIND_ENTRIES_METHOD;
     @AutoPopulate private String findMethod = RooService.FIND_METHOD;
     @AutoPopulate private String saveMethod = RooService.SAVE_METHOD;
-    @AutoPopulate private boolean transactional = true;
+    @AutoPopulate private boolean transactional = false;
     @AutoPopulate private String updateMethod = RooService.UPDATE_METHOD;
+    @AutoPopulate private boolean requireAuthentication = false;
+    @AutoPopulate private boolean usePermissionEvaluator = false;
+    @AutoPopulate private String[] authorizedCreateOrUpdateRoles = new String[0];
+    @AutoPopulate private String[] authorizedReadRoles = new String[0];
+    @AutoPopulate private String[] authorizedDeleteRoles = new String[0];
 
     /**
      * Constructor
@@ -71,5 +75,25 @@ public class ServiceAnnotationValues extends AbstractAnnotationValues {
 
     public boolean isTransactional() {
         return transactional;
+    }
+
+    public boolean requireAuthentication() {
+        return requireAuthentication;
+    }
+
+    public boolean usePermissionEvaluator() {
+        return usePermissionEvaluator;
+    }
+
+    public String[] getAuthorizedCreateOrUpdateRoles() {
+        return authorizedCreateOrUpdateRoles;
+    }
+
+    public String[] getAuthorizedReadRoles() {
+        return authorizedReadRoles;
+    }
+
+    public String[] getAuthorizedDeleteRoles() {
+        return authorizedDeleteRoles;
     }
 }
