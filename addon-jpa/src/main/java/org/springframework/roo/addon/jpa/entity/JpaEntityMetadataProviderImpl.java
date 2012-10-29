@@ -242,7 +242,7 @@ public class JpaEntityMetadataProviderImpl extends
                     ProjectMetadata.getProjectIdentifier(moduleName),
                     metadataIdentificationString);
             isGaeEnabled = projectOperations
-                    .isFeatureInstalledInFocusedModule(FeatureNames.GAE);
+                    .isFeatureInstalledInModule(FeatureNames.GAE, moduleName);
             isDatabaseDotComEnabled = projectOperations
                     .isFeatureInstalledInFocusedModule(FeatureNames.DATABASE_DOT_COM);
         }

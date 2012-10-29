@@ -354,6 +354,17 @@ public interface ProjectOperations {
     boolean isFeatureInstalled(String featureName);
 
     /**
+     * Indicates whether the supplied feature is installed in the module with
+     * the supplied name.
+     *
+     * @param featureName the name of the feature (see {@link FeatureNames} for
+     *            available features)
+     * @param moduleName the name of the module to be checked
+     * @return true if the feature is installed the module, otherwise false
+     */
+    boolean isFeatureInstalledInModule(String featureName, String moduleName);
+
+    /**
      * Indicates whether any of the supplied features are installed in the
      * focused module.
      * 

@@ -306,7 +306,7 @@ public class IntegrationTestMetadataProviderImpl extends
         final boolean isGaeEnabled = projectOperations
                 .isProjectAvailable(moduleName)
                 && projectOperations
-                        .isFeatureInstalledInFocusedModule(FeatureNames.GAE);
+                        .isFeatureInstalledInModule(FeatureNames.GAE, moduleName);
 
         return new IntegrationTestMetadata(metadataIdentificationString,
                 aspectName, governorPhysicalTypeMetadata, annotationValues,
@@ -364,7 +364,7 @@ public class IntegrationTestMetadataProviderImpl extends
                 .getProjectMetadata(moduleName);
         if (projectMetadata != null && projectMetadata.isValid()) {
             final boolean isGaeEnabled = projectOperations
-                    .isFeatureInstalledInFocusedModule(FeatureNames.GAE);
+                    .isFeatureInstalledInModule(FeatureNames.GAE, moduleName);
             // We need to determine if the persistence state has changed, we do
             // this by comparing the last known state to the current state
             final boolean hasGaeStateChanged = wasGaeEnabled == null
