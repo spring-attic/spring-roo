@@ -251,8 +251,7 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
                                 .getTopLevelPackage(moduleName)));
             }
 
-            if (projectOperations
-                    .isFeatureInstalledInFocusedModule(FeatureNames.GAE)) {
+            if (projectOperations.isFeatureInstalled(FeatureNames.GAE)) { 
                 dataDictionary.showSection("gae");
             }
             break;
