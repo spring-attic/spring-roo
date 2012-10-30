@@ -199,7 +199,7 @@ public class JpaActiveRecordMetadataProviderImpl extends
                     ProjectMetadata.getProjectIdentifier(moduleName),
                     metadataIdentificationString);
             isGaeEnabled = projectOperations
-                    .isFeatureInstalledInFocusedModule(FeatureNames.GAE);
+                    .isFeatureInstalledInModule(FeatureNames.GAE, moduleName);
         }
 
         return new JpaActiveRecordMetadata(metadataIdentificationString,
