@@ -100,41 +100,73 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
     }
 
     public void addBuildPlugins(final String moduleName,
-            final Collection<? extends Plugin> plugins) {
+            final Collection<? extends Plugin> newPlugins) {
         Validate.isTrue(isProjectAvailable(moduleName),
                 "Plugin modification prohibited at this time");
-        Validate.notNull(plugins, "Plugins required");
-        if (CollectionUtils.isEmpty(plugins)) {
+        Validate.notNull(newPlugins, "Plugins required");
+        if (CollectionUtils.isEmpty(newPlugins)) {
             return;
         }
         final Pom pom = getPomFromModuleName(moduleName);
         Validate.notNull(pom,
                 "The pom is not available, so plugin addition cannot be performed");
-        if (pom.isAllPluginsRegistered(plugins)) {
-            return;
-        }
 
         final Document document = XmlUtils.readXml(fileManager
                 .getInputStream(pom.getPath()));
         final Element root = document.getDocumentElement();
         final Element pluginsElement = DomUtils.createChildIfNotExists(
                 "/project/build/plugins", root, document);
+        final List<Element> existingPluginElements = XmlUtils.findElements(
+            "plugin", pluginsElement);
 
-        final List<String> newPlugins = new ArrayList<String>();
-        for (final Plugin plugin : plugins) {
-            if (plugin != null && !pom.isPluginRegistered(plugin.getGAV())) {
-                pluginsElement.appendChild(plugin.getElement(document));
-                newPlugins.add(plugin.getSimpleDescription());
+        final List<String> addedPlugins = new ArrayList<String>();
+        final List<String> removedPlugins = new ArrayList<String>();
+        for (final Plugin newPlugin : newPlugins) {
+            if (newPlugin != null) {
+   
+	              // Look for any existing instances of this plugin
+	              boolean inserted = false;
+	              for (final Element existingPluginElement : existingPluginElements) {
+	                  final Plugin existingPlugin = new Plugin(existingPluginElement);
+	                  if (existingPlugin.hasSameCoordinates(newPlugin)) {
+	                      // It's the same artifact, but might have a different
+	                      // version, exclusions, etc.
+	                      if (!inserted) {
+	                          // We haven't added the new one yet; do so now
+	                          pluginsElement.insertBefore(
+	                                  newPlugin.getElement(document),
+	                                  existingPluginElement);
+	                          inserted = true;
+	                          if (!newPlugin.getVersion().equals(
+	                                  existingPlugin.getVersion())) {
+	                              // It's a genuine version change => mention the
+	                              // old and new versions in the message
+	                              addedPlugins.add(newPlugin.getSimpleDescription());
+	                              removedPlugins.add(existingPlugin
+	                                      .getSimpleDescription());
+	                          }
+	                      }
+	                      // Either way, we remove the previous one in case it was
+	                      // different in any way
+	                      pluginsElement.removeChild(existingPluginElement);
+	                  }
+	                  // Keep looping in case it's present more than once
+	              }
+	              if (!inserted) {
+	                  // We didn't encounter any existing dependencies with the
+	                  // same coordinates; add it now
+	                  pluginsElement.appendChild(newPlugin.getElement(document));
+	                  addedPlugins.add(newPlugin.getSimpleDescription());
+	              }
             }
         }
-        if (newPlugins.isEmpty()) {
-            return;
-        }
-        final String message = getDescriptionOfChange(ADDED, newPlugins,
-                "plugin", "plugins");
-
-        fileManager.createOrUpdateTextFileIfRequired(pom.getPath(),
-                XmlUtils.nodeToString(document), message, false);
+        
+        if (!newPlugins.isEmpty()) {
+            final String message = getPomPluginsUpdateMessage(addedPlugins,
+                    removedPlugins);
+            fileManager.createOrUpdateTextFileIfRequired(pom.getPath(),
+                    XmlUtils.nodeToString(document), message, false);
+        }        
     }
 
     public void addDependencies(final String moduleName,
@@ -145,9 +177,6 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
         final Pom pom = getPomFromModuleName(moduleName);
         Validate.notNull(pom,
                 "The pom is not available, so dependencies cannot be added");
-        if (pom.isAllDependenciesRegistered(newDependencies)) {
-            return;
-        }
 
         final Document document = XmlUtils.readXml(fileManager
                 .getInputStream(pom.getPath()));
@@ -205,7 +234,7 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
             }
         }
         if (!newDependencies.isEmpty() || !skippedDependencies.isEmpty()) {
-            final String message = getPomUpdateMessage(addedDependencies,
+            final String message = getPomDependenciesUpdateMessage(addedDependencies,
                     removedDependencies, skippedDependencies);
             fileManager.createOrUpdateTextFileIfRequired(pom.getPath(),
                     XmlUtils.nodeToString(document), message, false);
@@ -527,7 +556,7 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
         return pomManagementService.getPoms();
     }
 
-    private String getPomUpdateMessage(
+    private String getPomDependenciesUpdateMessage(
             final Collection<String> addedDependencies,
             final Collection<String> removedDependencies,
             final Collection<String> skippedDependencies) {
@@ -538,6 +567,22 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
                 "dependency", "dependencies"));
         changes.add(getDescriptionOfChange(SKIPPED, skippedDependencies,
                 "dependency", "dependencies"));
+        for (final Iterator<String> iter = changes.iterator(); iter.hasNext();) {
+            if (StringUtils.isBlank(iter.next())) {
+                iter.remove();
+            }
+        }
+        return StringUtils.join(changes, "; ");
+    }
+
+    private String getPomPluginsUpdateMessage(
+                final Collection<String> addedPlugins,
+                final Collection<String> removedPlugins) {
+        final List<String> changes = new ArrayList<String>();
+        changes.add(getDescriptionOfChange(ADDED, addedPlugins,
+                "plugin", "plugins"));
+        changes.add(getDescriptionOfChange(REMOVED, removedPlugins,
+                "plugin", "plugins"));
         for (final Iterator<String> iter = changes.iterator(); iter.hasNext();) {
             if (StringUtils.isBlank(iter.next())) {
                 iter.remove();
@@ -692,7 +737,7 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
         fileManager.createOrUpdateTextFileIfRequired(pom.getPath(),
                 XmlUtils.nodeToString(document), message, writeImmediately);
     }
-
+    
     public void removeDependencies(final String moduleName,
             final Collection<? extends Dependency> dependenciesToRemove) {
         Validate.isTrue(isProjectAvailable(moduleName),
