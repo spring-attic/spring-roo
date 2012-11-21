@@ -41,9 +41,13 @@ public class ServiceInterfaceLocatorImpl implements ServiceInterfaceLocator {
                             typeLocationService
                                     .getPhysicalTypeCanonicalPath(cid
                                             .getDeclaredByMetadataId()), cid));
-            for (final JavaType javaType : annotationValues.getDomainTypes()) {
-                if (javaType != null && javaType.equals(domainType)) {
-                    toReturn.put(cid.getDeclaredByMetadataId(), cid);
+            if (annotationValues != null
+                    && annotationValues.getDomainTypes() != null) {
+                for (final JavaType javaType : annotationValues
+                        .getDomainTypes()) {
+                    if (javaType != null && javaType.equals(domainType)) {
+                        toReturn.put(cid.getDeclaredByMetadataId(), cid);
+                    }
                 }
             }
         }
