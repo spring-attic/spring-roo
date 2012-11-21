@@ -46,7 +46,6 @@ public class SolrCommands implements CommandMarker {
     @CliCommand(value = "solr setup", help = "Install support for Solr search integration")
     public void solrSetup(
             @CliOption(key = { "searchServerUrl" }, mandatory = false, unspecifiedDefaultValue = "http://localhost:8983/solr", specifiedDefaultValue = "http://localhost:8983/solr", help = "The URL of the Solr search server") final String searchServerUrl) {
-
         solrOperations.setupConfig(searchServerUrl);
     }
 }

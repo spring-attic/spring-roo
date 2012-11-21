@@ -6,7 +6,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 
@@ -43,9 +45,6 @@ import org.w3c.dom.Element;
 @Component
 @Service
 public class SolrOperationsImpl implements SolrOperations {
-
-    private static final Dependency SOLRJ = new Dependency("org.apache.solr",
-            "solr-solrj", "1.4.1");
 
     @Reference private FileManager fileManager;
     @Reference private ProjectOperations projectOperations;
@@ -101,9 +100,7 @@ public class SolrOperationsImpl implements SolrOperations {
     }
 
     public void setupConfig(final String solrServerUrl) {
-        projectOperations.addDependency(
-                projectOperations.getFocusedModuleName(), SOLRJ);
-
+        updateConfiguration(projectOperations.getFocusedModuleName());
         updateSolrProperties(solrServerUrl);
 
         final String contextPath = projectOperations.getPathResolver()
@@ -193,5 +190,17 @@ public class SolrOperationsImpl implements SolrOperations {
         finally {
             IOUtils.closeQuietly(outputStream);
         }
+    }
+
+    private void updateConfiguration(final String moduleName) {
+        final Element configuration = XmlUtils.getConfiguration(getClass());
+
+        final List<Dependency> dependencies = new ArrayList<Dependency>();
+        final List<Element> emailDependencies = XmlUtils.findElements(
+                "/configuration/solr/dependencies/dependency", configuration);
+        for (final Element dependencyElement : emailDependencies) {
+            dependencies.add(new Dependency(dependencyElement));
+        }
+        projectOperations.addDependencies(moduleName, dependencies);
     }
 }
