@@ -290,6 +290,9 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
             return; // No need to ever add a dependency upon the root POM
         }
         final Pom focusedModule = getFocusedModule();
+        Validate.notNull(
+                focusedModule,
+                "Focused module is not available - did you start Roo in the correct project directory?");
         if (StringUtils.isNotBlank(focusedModule.getModuleName())
                 && !moduleToDependUpon.equals(focusedModule.getModuleName())) {
             final ProjectMetadata dependencyProject = getProjectMetadata(moduleToDependUpon);
@@ -579,7 +582,8 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
         return false;
     }
 
-    public boolean isFeatureInstalledInModule(String featureName, String moduleName) {
+    public boolean isFeatureInstalledInModule(String featureName,
+            String moduleName) {
         final Feature feature = features.get(featureName);
         if (feature == null) {
             return false;
