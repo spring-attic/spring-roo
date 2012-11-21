@@ -48,7 +48,6 @@ import org.springframework.roo.project.ProjectOperations;
 @Service
 public class GwtLocatorMetadataProviderImpl implements
         GwtLocatorMetadataProvider {
-
     private static final int LAYER_POSITION = LayerType.HIGHEST.getPosition();
 
     @Reference GwtTypeService gwtTypeService;
