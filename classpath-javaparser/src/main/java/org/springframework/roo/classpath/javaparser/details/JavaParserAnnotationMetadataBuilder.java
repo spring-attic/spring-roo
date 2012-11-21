@@ -116,9 +116,11 @@ public class JavaParserAnnotationMetadataBuilder implements
             Validate.notNull(value, "Unable to acquire value '" + attributeName
                     + "' from annotation");
             final MemberValuePair memberValuePair = convert(value);
-            Validate.notNull(memberValuePair,
-                    "Member value pair should have been set");
-            memberValuePairs.add(memberValuePair);
+            // Validate.notNull(memberValuePair,
+            // "Member value pair should have been set");
+            if (memberValuePair != null) {
+                memberValuePairs.add(memberValuePair);
+            }
         }
 
         // Create the AnnotationExpr; it varies depending on how many
@@ -229,9 +231,9 @@ public class JavaParserAnnotationMetadataBuilder implements
             final AnnotationAttributeValue<?> value) {
         if (value instanceof NestedAnnotationAttributeValue) {
             final NestedAnnotationAttributeValue castValue = (NestedAnnotationAttributeValue) value;
-            Validate.isInstanceOf(JavaParserAnnotationMetadataBuilder.class,
-                    castValue.getValue(),
-                    "Cannot present nested annotations unless created by this class");
+            if (!(castValue.getValue() instanceof JavaParserAnnotationMetadataBuilder)) {
+                return null;
+            }
             AnnotationExpr annotationExpr;
             final AnnotationMetadata nestedAnnotation = castValue.getValue();
             if (castValue.getValue().getAttributeNames().size() == 0) {
@@ -353,7 +355,10 @@ public class JavaParserAnnotationMetadataBuilder implements
 
             final List<Expression> arrayElements = new ArrayList<Expression>();
             for (final AnnotationAttributeValue<?> v : castValue.getValue()) {
-                arrayElements.add(convert(v).getValue());
+                MemberValuePair converted = convert(v);
+                if (converted != null) {
+                    arrayElements.add(converted.getValue());
+                }
             }
             return new MemberValuePair(value.getName().getSymbolName(),
                     new ArrayInitializerExpr(arrayElements));
