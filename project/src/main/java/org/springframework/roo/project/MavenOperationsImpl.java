@@ -100,12 +100,13 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements
     public void createModule(final JavaPackage topLevelPackage,
             final GAV parentPom, final String moduleName,
             final PackagingProvider selectedPackagingProvider,
-            final Integer majorJavaVersion) {
+            final Integer majorJavaVersion,
+            final String artifactId) {
         Validate.isTrue(isCreateModuleAvailable(),
                 "Cannot create modules at this time");
         final PackagingProvider packagingProvider = getPackagingProvider(selectedPackagingProvider);
         final String pathToNewPom = packagingProvider.createArtifacts(
-                topLevelPackage, "", getJavaVersion(majorJavaVersion),
+                topLevelPackage, artifactId, getJavaVersion(majorJavaVersion),
                 parentPom, moduleName, this);
         updateParentModulePom(moduleName);
         setModule(pomManagementService.getPomFromPath(pathToNewPom));
