@@ -31,7 +31,7 @@ public class {{=className}} extends AbstractProxyEditActivity<{{=proxy}}> implem
 	private final {{=editView}}<?> view;
 	private final {{=request}} request;
 
-	public {EntityProxyId<{{=proxy}}> proxyId, ApplicationRequestFactory factory, {{=editView}}<?> view, PlaceController placeController) 
+	public {{=className}}(EntityProxyId<{{=proxy}}> proxyId, ApplicationRequestFactory factory, {{=editView}}<?> view, PlaceController placeController) 
 	{
 		super(proxyId, factory, placeController);
 		this.view = view;
