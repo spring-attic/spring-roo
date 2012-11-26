@@ -221,9 +221,11 @@ public class GitOperationsImpl implements GitOperations {
             person = new PersonIdent("Roo Git Add-On", "s2-roo@vmware.com");
         }
         try {
+            String repositoryPath = pathResolver.getFocusedIdentifier(Path.ROOT,
+                    Constants.DOT_GIT);
             final Repository repository = new FileRepositoryBuilder()
                     .readEnvironment()
-                    .setGitDir(new File(".", Constants.DOT_GIT)).build();
+                    .setGitDir(new File(repositoryPath)).build();
             repository.create();
         }
         catch (final Exception e) {
