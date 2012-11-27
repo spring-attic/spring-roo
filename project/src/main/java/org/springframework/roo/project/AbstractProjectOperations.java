@@ -123,44 +123,42 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
         final List<String> removedPlugins = new ArrayList<String>();
         for (final Plugin newPlugin : newPlugins) {
             if (newPlugin != null) {
-   
-	              // Look for any existing instances of this plugin
-	              boolean inserted = false;
-	              for (final Element existingPluginElement : existingPluginElements) {
-	                  final Plugin existingPlugin = new Plugin(existingPluginElement);
-	                  if (existingPlugin.hasSameCoordinates(newPlugin)) {
-	                      // It's the same artifact, but might have a different
-	                      // version, exclusions, etc.
-	                      if (!inserted) {
-	                          // We haven't added the new one yet; do so now
-	                          pluginsElement.insertBefore(
-	                                  newPlugin.getElement(document),
-	                                  existingPluginElement);
-	                          inserted = true;
-	                          if (!newPlugin.getVersion().equals(
-	                                  existingPlugin.getVersion())) {
-	                              // It's a genuine version change => mention the
-	                              // old and new versions in the message
-	                              addedPlugins.add(newPlugin.getSimpleDescription());
-	                              removedPlugins.add(existingPlugin
-	                                      .getSimpleDescription());
-	                          }
-	                      }
-	                      // Either way, we remove the previous one in case it was
-	                      // different in any way
-	                      pluginsElement.removeChild(existingPluginElement);
-	                  }
-	                  // Keep looping in case it's present more than once
-	              }
-	              if (!inserted) {
-	                  // We didn't encounter any existing dependencies with the
-	                  // same coordinates; add it now
-	                  pluginsElement.appendChild(newPlugin.getElement(document));
-	                  addedPlugins.add(newPlugin.getSimpleDescription());
-	              }
+                // Look for any existing instances of this plugin
+                boolean inserted = false;
+                for (final Element existingPluginElement : existingPluginElements) {
+                    final Plugin existingPlugin = new Plugin(existingPluginElement);
+                    if (existingPlugin.hasSameCoordinates(newPlugin)) {
+                        // It's the same artifact, but might have a different
+                        // version, exclusions, etc.
+                        if (!inserted) {
+                            // We haven't added the new one yet; do so now
+                            pluginsElement.insertBefore(
+                                    newPlugin.getElement(document),
+                                    existingPluginElement);
+                            inserted = true;
+                            if (!newPlugin.getVersion().equals(
+                                    existingPlugin.getVersion())) {
+                                // It's a genuine version change => mention the
+                                // old and new versions in the message
+                                addedPlugins.add(newPlugin.getSimpleDescription());
+                                removedPlugins.add(existingPlugin
+                                        .getSimpleDescription());
+                            }
+                        }
+                        // Either way, we remove the previous one in case it was
+                        // different in any way
+                        pluginsElement.removeChild(existingPluginElement);
+                    }
+                    // Keep looping in case it's present more than once
+                }
+                if (!inserted) {
+                    // We didn't encounter any existing dependencies with the
+                    // same coordinates; add it now
+                    pluginsElement.appendChild(newPlugin.getElement(document));
+                    addedPlugins.add(newPlugin.getSimpleDescription());
+                }
             }
         }
-        
         if (!newPlugins.isEmpty()) {
             final String message = getPomPluginsUpdateMessage(addedPlugins,
                     removedPlugins);
@@ -737,7 +735,7 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
         fileManager.createOrUpdateTextFileIfRequired(pom.getPath(),
                 XmlUtils.nodeToString(document), message, writeImmediately);
     }
-    
+
     public void removeDependencies(final String moduleName,
             final Collection<? extends Dependency> dependenciesToRemove) {
         Validate.isTrue(isProjectAvailable(moduleName),
