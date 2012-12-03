@@ -59,7 +59,6 @@ import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Plugin;
-import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.Repository;
 import org.springframework.roo.project.maven.Pom;
@@ -661,24 +660,16 @@ public class GwtOperationsImpl implements GwtOperations {
 
     private void updateBuildPlugins(final boolean isGaeEnabled) {
         // Update the POM
+        final List<Plugin> plugins = new ArrayList<Plugin>();
         final String xPathExpression = "/configuration/"
                 + (isGaeEnabled ? "gae" : "gwt") + "/plugins/plugin";
         final List<Element> pluginElements = XmlUtils.findElements(
                 xPathExpression, XmlUtils.getConfiguration(getClass()));
         for (final Element pluginElement : pluginElements) {
-            final Plugin defaultPlugin = new Plugin(pluginElement);
-            for (final Plugin plugin : projectOperations.getFocusedModule()
-                    .getBuildPlugins()) {
-                if ("gwt-maven-plugin".equals(plugin.getArtifactId())) {
-                    projectOperations.removeBuildPluginImmediately(
-                            projectOperations.getFocusedModuleName(),
-                            defaultPlugin);
-                    break;
-                }
-            }
-            projectOperations.addBuildPlugin(
-                    projectOperations.getFocusedModuleName(), defaultPlugin);
+        	  plugins.add(new Plugin(pluginElement));
         }
+        projectOperations.addBuildPlugins(
+        		projectOperations.getFocusedModuleName(), plugins);
     }
 
     private void updateDependencies(final Element configuration) {
@@ -688,60 +679,61 @@ public class GwtOperationsImpl implements GwtOperations {
         for (final Element dependencyElement : gwtDependencies) {
             dependencies.add(new Dependency(dependencyElement));
         }
-        projectOperations.removeDependencies(
-                projectOperations.getFocusedModuleName(), dependencies);
-        metadataService
-                .evict(ProjectMetadata.getProjectIdentifier(projectOperations
-                        .getFocusedModuleName()));
         projectOperations.addDependencies(
-                projectOperations.getFocusedModuleName(), dependencies);
+            projectOperations.getFocusedModuleName(), dependencies);
     }
 
     /**
      * Updates the Eclipse plugin in the POM with the necessary GWT details
      */
     private void updateEclipsePlugin() {
-        // Load the POM
-        final String pom = getPomPath();
-        final Document document = XmlUtils.readXml(fileManager
-                .getInputStream(pom));
-        final Element root = document.getDocumentElement();
+  		// Load the POM
+  		final String pom = getPomPath();
+  		final Document document = XmlUtils.readXml(fileManager
+  				.getInputStream(pom));
+  		final Element root = document.getDocumentElement();
 
-        // Add the GWT "buildCommand"
-        final Element additionalBuildCommandsElement = XmlUtils
-                .findFirstElement(MAVEN_ECLIPSE_PLUGIN
-                        + "/configuration/additionalBuildcommands", root);
-        Validate.notNull(additionalBuildCommandsElement,
-                "additionalBuildcommands element of the maven-eclipse-plugin required");
-        Element gwtBuildCommandElement = XmlUtils.findFirstElement(
-                "buildCommand[name = '" + GWT_BUILD_COMMAND + "']",
-                additionalBuildCommandsElement);
-        if (gwtBuildCommandElement == null) {
-            gwtBuildCommandElement = DomUtils.createChildElement(
-                    "buildCommand", additionalBuildCommandsElement, document);
-            final Element nameElement = DomUtils.createChildElement("name",
-                    gwtBuildCommandElement, document);
-            nameElement.setTextContent(GWT_BUILD_COMMAND);
-        }
+  		// Add the GWT "buildCommand"
+  		final Element additionalBuildCommandsElement = XmlUtils
+  				.findFirstElement(MAVEN_ECLIPSE_PLUGIN
+  						+ "/configuration/additionalBuildcommands", root);
+  		Validate.notNull(additionalBuildCommandsElement,
+  				"additionalBuildcommands element of the maven-eclipse-plugin required");
+  		Element gwtBuildCommandElement = XmlUtils.findFirstElement(
+  				"buildCommand[name = '" + GWT_BUILD_COMMAND + "']",
+  				additionalBuildCommandsElement);
+  		if (gwtBuildCommandElement == null) {
+  			gwtBuildCommandElement = DomUtils.createChildElement(
+  					"buildCommand", additionalBuildCommandsElement, document);
+  			final Element nameElement = DomUtils.createChildElement("name",
+  					gwtBuildCommandElement, document);
+  			nameElement.setTextContent(GWT_BUILD_COMMAND);
+  		}
 
-        // Add the GWT "projectnature"
-        final Element additionalProjectNaturesElement = XmlUtils
-                .findFirstElement(MAVEN_ECLIPSE_PLUGIN
-                        + "/configuration/additionalProjectnatures", root);
-        Validate.notNull(additionalProjectNaturesElement,
-                "additionalProjectnatures element of the maven-eclipse-plugin required");
-        Element gwtProjectNatureElement = XmlUtils.findFirstElement(
-                "projectnature[name = '" + GWT_PROJECT_NATURE + "']",
-                additionalProjectNaturesElement);
-        if (gwtProjectNatureElement == null) {
-            gwtProjectNatureElement = new XmlElementBuilder("projectnature",
-                    document).setText(GWT_PROJECT_NATURE).build();
-            additionalProjectNaturesElement
-                    .appendChild(gwtProjectNatureElement);
-        }
+  		// Add the GWT "projectnature"
+  		final Element additionalProjectNaturesElement = XmlUtils
+  				.findFirstElement(MAVEN_ECLIPSE_PLUGIN
+  						+ "/configuration/additionalProjectnatures", root);
+  		Validate.notNull(additionalProjectNaturesElement,
+  				"additionalProjectnatures element of the maven-eclipse-plugin required");
+  		Element gwtProjectNatureElement = null;
+  		List<Element> gwtProjectNatureElements = XmlUtils.findElements("projectnature",
+  				additionalProjectNaturesElement);
+  		for (Element element: gwtProjectNatureElements) {
+  			if (GWT_PROJECT_NATURE.equals(element.getTextContent())) {
+  				gwtProjectNatureElement = element;
+  				break;
+  			}
+  		}
+  		if (gwtProjectNatureElement == null) {
+  			gwtProjectNatureElement = new XmlElementBuilder("projectnature",
+  					document).setText(GWT_PROJECT_NATURE).build();
+  			additionalProjectNaturesElement
+  					.appendChild(gwtProjectNatureElement);
+  		}
 
-        fileManager.createOrUpdateTextFileIfRequired(pom,
-                XmlUtils.nodeToString(document), false);
+  		fileManager.createOrUpdateTextFileIfRequired(pom,
+  				XmlUtils.nodeToString(document), false);
     }
 
     private void updateFile(final String sourceAntPath, String targetDirectory,
