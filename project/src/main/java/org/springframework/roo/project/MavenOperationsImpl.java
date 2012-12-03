@@ -177,7 +177,7 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements
      * @return a non-blank string
      */
     private String getJavaVersion(final Integer majorJavaVersion) {
-        if (majorJavaVersion != null && majorJavaVersion >= 5
+        if (majorJavaVersion != null && majorJavaVersion >= 6
                 && majorJavaVersion <= 7) {
             return String.valueOf(majorJavaVersion);
         }
