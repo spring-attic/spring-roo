@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -41,6 +42,10 @@ public class ServiceInterfaceLocatorImpl implements ServiceInterfaceLocator {
                             typeLocationService
                                     .getPhysicalTypeCanonicalPath(cid
                                             .getDeclaredByMetadataId()), cid));
+            Validate.notNull(
+                    annotationValues.getDomainTypes(),
+                    "The \"domainTypes\" attribute of @RooService for type %s must be an array of types",
+                    cid.getName().getFullyQualifiedTypeName());
             for (final JavaType javaType : annotationValues.getDomainTypes()) {
                 if (javaType != null && javaType.equals(domainType)) {
                     toReturn.put(cid.getDeclaredByMetadataId(), cid);

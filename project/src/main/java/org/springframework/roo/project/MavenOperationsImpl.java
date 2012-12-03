@@ -100,12 +100,13 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements
     public void createModule(final JavaPackage topLevelPackage,
             final GAV parentPom, final String moduleName,
             final PackagingProvider selectedPackagingProvider,
-            final Integer majorJavaVersion) {
+            final Integer majorJavaVersion,
+            final String artifactId) {
         Validate.isTrue(isCreateModuleAvailable(),
                 "Cannot create modules at this time");
         final PackagingProvider packagingProvider = getPackagingProvider(selectedPackagingProvider);
         final String pathToNewPom = packagingProvider.createArtifacts(
-                topLevelPackage, "", getJavaVersion(majorJavaVersion),
+                topLevelPackage, artifactId, getJavaVersion(majorJavaVersion),
                 parentPom, moduleName, this);
         updateParentModulePom(moduleName);
         setModule(pomManagementService.getPomFromPath(pathToNewPom));
@@ -176,7 +177,7 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements
      * @return a non-blank string
      */
     private String getJavaVersion(final Integer majorJavaVersion) {
-        if (majorJavaVersion != null && majorJavaVersion >= 5
+        if (majorJavaVersion != null && majorJavaVersion >= 6
                 && majorJavaVersion <= 7) {
             return String.valueOf(majorJavaVersion);
         }

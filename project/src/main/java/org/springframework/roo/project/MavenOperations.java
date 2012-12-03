@@ -24,10 +24,12 @@ public interface MavenOperations extends ProjectOperations {
      *            <code>null</code> to use the default)
      * @param majorJavaVersion the major Java version to which this module is
      *            targetted (can be <code>null</code> to autodetect)
+     * @param artifactId the artifact ID of the module (defaults to
+     *            moduleName)
      */
     void createModule(JavaPackage topLevelPackage, GAV parentPom,
             String moduleName, PackagingProvider packagingType,
-            Integer majorJavaVersion);
+            Integer majorJavaVersion, String artifactId);
 
     /**
      * Creates a Maven-based project

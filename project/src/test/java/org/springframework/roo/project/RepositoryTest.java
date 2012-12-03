@@ -1,7 +1,9 @@
 package org.springframework.roo.project;
 
+import org.apache.commons.lang3.SystemUtils;
 import org.junit.Test;
 import org.w3c.dom.Element;
+import static org.junit.Assume.assumeTrue;
 
 /**
  * Unit test of the {@link Repository} class
@@ -25,6 +27,10 @@ public class RepositoryTest extends XmlTestCase {
     private static final String PATH = "pluginRepo";
 
     private static final String URL = "the-url";
+
+    public void setUp() {
+        assumeTrue(SystemUtils.IS_JAVA_1_6);
+    }
 
     @Test
     public void testGetElement() {
