@@ -570,12 +570,8 @@ public class JavaParserAnnotationMetadataBuilder implements
         if (expression instanceof NameExpr) {
             final NameExpr field = (NameExpr) expression;
             final String name = field.getName();
-            final JavaType fieldType = new JavaType("unknown.Object"); // As we
-                                                                       // have
-            // no way of
-            // finding out
-            // the real
-            // type
+            // As we have no way of finding out the real type
+            final JavaType fieldType = new JavaType("unknown.Object");
             final EnumDetails enumDetails = new EnumDetails(fieldType,
                     new JavaSymbolName(name));
             return new EnumAttributeValue(annotationName, enumDetails);
