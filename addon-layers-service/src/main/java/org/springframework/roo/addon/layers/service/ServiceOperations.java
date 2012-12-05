@@ -14,10 +14,12 @@ public interface ServiceOperations {
 
     void setupService(JavaType interfaceType, JavaType classType,
             JavaType domainType, boolean requireAuthentication,
-            String authorizedRole, boolean usePermissionEvalutor);
+            String authorizedRole, boolean usePermissionEvalutor,
+            boolean useXmlConfiguration);
 
     void setupAllServices(JavaPackage interfacePackage,
             JavaPackage classPackage, boolean requireAuthentication,
-            String authorizedRole, boolean usePermissionEvalutor);
+            String authorizedRole, boolean usePermissionEvalutor,
+            boolean useXmlConfiguration);
 
 }

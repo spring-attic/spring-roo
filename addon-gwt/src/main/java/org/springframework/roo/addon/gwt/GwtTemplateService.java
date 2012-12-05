@@ -13,16 +13,14 @@ import org.springframework.roo.model.JavaSymbolName;
  * @author James Tyrrell
  * @since 1.1.2
  */
-public interface GwtTemplateService {
+public interface GwtTemplateService
+{
 
-    String buildUiXml(String templateContents, String destFile,
-            List<MethodMetadata> proxyMethods);
+	String buildUiXml(String templateContents, String destFile, List<MethodMetadata> proxyMethods);
 
-    GwtTemplateDataHolder getMirrorTemplateTypeDetails(
-            ClassOrInterfaceTypeDetails governorTypeDetails,
-            Map<JavaSymbolName, GwtProxyProperty> clientSideTypeMap,
-            String moduleName);
+	GwtTemplateDataHolder getMirrorTemplateTypeDetails(ClassOrInterfaceTypeDetails governorTypeDetails, Map<JavaSymbolName, GwtProxyProperty> clientSideTypeMap, String moduleName);
 
-    List<ClassOrInterfaceTypeDetails> getStaticTemplateTypeDetails(
-            GwtType type, String moduleName);
+	List<ClassOrInterfaceTypeDetails> getStaticTemplateTypeDetails(GwtType type, String moduleName);
+
+	public void buildLocatorXmlConfiguration(ClassOrInterfaceTypeDetails serviceInterface, ClassOrInterfaceTypeDetails locator);
 }

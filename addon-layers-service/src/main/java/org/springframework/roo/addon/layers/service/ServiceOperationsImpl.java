@@ -68,7 +68,8 @@ public class ServiceOperationsImpl implements ServiceOperations {
 
     private void createServiceInterface(final JavaType interfaceType,
             final JavaType domainType, boolean requireAuthentication,
-            String role, boolean usePermissionEvaluator) {
+            String role, boolean usePermissionEvaluator,
+            boolean useXmlConfiguration) {
         final String interfaceIdentifier = pathResolver
                 .getFocusedCanonicalPath(Path.SRC_MAIN_JAVA, interfaceType);
         if (fileManager.exists(interfaceIdentifier)) {
@@ -110,6 +111,10 @@ public class ServiceOperationsImpl implements ServiceOperations {
             interfaceAnnotationMetadata.addBooleanAttribute(
                     "usePermissionEvaluator", true);
         }
+        if (useXmlConfiguration) {
+            interfaceAnnotationMetadata.addBooleanAttribute(
+                    "useXmlConfiguration", true);
+        }
         final String interfaceMid = PhysicalTypeIdentifier.createIdentifier(
                 interfaceType, pathResolver.getPath(interfaceIdentifier));
         final ClassOrInterfaceTypeDetailsBuilder interfaceTypeBuilder = new ClassOrInterfaceTypeDetailsBuilder(
@@ -140,7 +145,7 @@ public class ServiceOperationsImpl implements ServiceOperations {
     public void setupService(final JavaType interfaceType,
             final JavaType classType, final JavaType domainType,
             boolean requireAuthentication, String role,
-            boolean usePermissionEvaluator) {
+            boolean usePermissionEvaluator, boolean useXmlConfiguration) {
         if (requireAuthentication || !role.equals("") || usePermissionEvaluator) {
             Validate.isTrue(
                     projectOperations.isFeatureInstalled(FeatureNames.SECURITY),
@@ -154,14 +159,16 @@ public class ServiceOperationsImpl implements ServiceOperations {
 
         Validate.notNull(interfaceType, "Interface type required");
         createServiceInterface(interfaceType, domainType,
-                requireAuthentication, role, usePermissionEvaluator);
+                requireAuthentication, role, usePermissionEvaluator,
+                useXmlConfiguration);
         createServiceClass(interfaceType, classType);
     }
 
     @Override
     public void setupAllServices(JavaPackage interfacePackage,
             JavaPackage classPackage, boolean requireAuthentication,
-            String role, boolean usePermissionEvaluator) {
+            String role, boolean usePermissionEvaluator,
+            boolean useXmlConfiguration) {
         for (final ClassOrInterfaceTypeDetails domainType : typeLocationService
                 .findClassesOrInterfaceDetailsWithAnnotation(ROO_JPA_ENTITY,
                         ROO_JPA_ACTIVE_RECORD)) {
@@ -174,7 +181,8 @@ public class ServiceOperationsImpl implements ServiceOperations {
                             + domainType.getName().getSimpleTypeName()
                             + "ServiceImpl");
             setupService(interfaceType, classType, domainType.getName(),
-                    requireAuthentication, role, usePermissionEvaluator);
+                    requireAuthentication, role, usePermissionEvaluator,
+                    useXmlConfiguration);
         }
     }
 

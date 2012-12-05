@@ -128,4 +128,6 @@ public @interface RooService {
 
     String[] authorizedReadRoles() default "";
 
+    boolean useXmlConfiguration() default false;
+
 }

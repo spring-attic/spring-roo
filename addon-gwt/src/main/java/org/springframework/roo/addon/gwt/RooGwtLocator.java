@@ -7,10 +7,14 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.SOURCE)
 @Target(ElementType.TYPE)
-public @interface RooGwtLocator {
+public @interface RooGwtLocator
+{
 
-    /**
-     * @return the fully-qualified type name this key instance was mirrored from
-     */
-    String value();
+	/**
+	 * @return the fully-qualified type name this key instance was mirrored from
+	 */
+	String value();
+
+	boolean useXmlConfiguration() default false;
+
 }

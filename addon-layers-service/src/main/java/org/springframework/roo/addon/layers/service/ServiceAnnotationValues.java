@@ -29,6 +29,7 @@ public class ServiceAnnotationValues extends AbstractAnnotationValues {
     @AutoPopulate private String[] authorizedCreateOrUpdateRoles = new String[0];
     @AutoPopulate private String[] authorizedReadRoles = new String[0];
     @AutoPopulate private String[] authorizedDeleteRoles = new String[0];
+    @AutoPopulate private boolean useXmlConfiguration = false;
 
     /**
      * Constructor
@@ -96,4 +97,9 @@ public class ServiceAnnotationValues extends AbstractAnnotationValues {
     public String[] getAuthorizedDeleteRoles() {
         return authorizedDeleteRoles;
     }
+
+    public boolean useXmlConfiguration() {
+        return useXmlConfiguration;
+    }
+
 }

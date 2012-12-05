@@ -34,6 +34,7 @@ import org.springframework.roo.project.LogicalPath;
  */
 public class ServiceClassMetadata extends
         AbstractItdTypeDetailsProvidingMetadataItem {
+
     private static final String PROVIDES_TYPE_STRING = ServiceClassMetadata.class
             .getName();
     private static final String PROVIDES_TYPE = MetadataIdentificationUtils
@@ -232,13 +233,16 @@ public class ServiceClassMetadata extends
             }
         }
 
-        // Introduce the @Service annotation via the ITD if it's not already on
-        // the service's Java class
-        final AnnotationMetadata serviceAnnotation = new AnnotationMetadataBuilder(
-                SERVICE).build();
-        if (!governorDetails.isRequestingAnnotatedWith(serviceAnnotation,
-                getId())) {
-            builder.addAnnotation(serviceAnnotation);
+        if (!annotationValues.useXmlConfiguration()) {
+            // Introduce the @Service annotation via the ITD if it's not already
+            // on
+            // the service's Java class
+            final AnnotationMetadata serviceAnnotation = new AnnotationMetadataBuilder(
+                    SERVICE).build();
+            if (!governorDetails.isRequestingAnnotatedWith(serviceAnnotation,
+                    getId())) {
+                builder.addAnnotation(serviceAnnotation);
+            }
         }
 
         // Introduce the @Transactional annotation via the ITD if it's not
@@ -246,10 +250,11 @@ public class ServiceClassMetadata extends
         if (annotationValues.isTransactional()) {
             final AnnotationMetadata transactionalAnnotation = new AnnotationMetadataBuilder(
                     TRANSACTIONAL).build();
-            if (!governorDetails.isRequestingAnnotatedWith(serviceAnnotation,
-                    getId())) {
-                builder.addAnnotation(transactionalAnnotation);
-            }
+            // if (!governorDetails.isRequestingAnnotatedWith(serviceAnnotation,
+            // getId()))
+            // {
+            builder.addAnnotation(transactionalAnnotation);
+            // }
         }
 
         // Create a representation of the desired output ITD
