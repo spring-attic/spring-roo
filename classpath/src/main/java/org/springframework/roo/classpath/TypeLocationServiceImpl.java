@@ -313,10 +313,7 @@ public class TypeLocationServiceImpl implements TypeLocationService {
         if (containingPhysicalPath == null) {
             return null;
         }
-        // N.B. as a side-effect, we make the currently focused module depend on
-        // the given type's module
         final LogicalPath logicalPath = containingPhysicalPath.getLogicalPath();
-        projectOperations.addModuleDependency(logicalPath.getModule());
         return PhysicalTypeIdentifier.createIdentifier(type, logicalPath);
     }
 
