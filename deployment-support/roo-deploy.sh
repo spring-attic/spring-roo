@@ -281,28 +281,28 @@ pizzashop_tests() {
     if [[ ! "$EXITED" = "0" ]]; then
         l_error "RESTful GET to PizzaShop application failed" >&2; exit 1;
     fi
-	log "Testing RESTful complex POST to PizzaShop application"
-	curl -i -s -X POST -H "Content-Type: application/json" -H "Accept: application/json"  -o /tmp/rootest/curl.txt -d "{name:\"Napolitana\",price:7.5,base:{id:1},toppings:[{name: \"Anchovy fillets\"},{name: \"Mozzarella\"}]}" http://localhost:8888/pizzashop/pizzas
-	EXITED=$?
-    if [[ ! "$EXITED" = "0" ]]; then
-        l_error "curl failed: $@ (returned code $EXITED)" >&2; exit 1;
-    fi
-	head /tmp/rootest/curl.txt | grep "201 Created"
-	EXITED=$?
-    if [[ ! "$EXITED" = "0" ]]; then
-        l_error "RESTful complex POST to PizzaShop application failed" >&2; exit 1;
-    fi
-	log "Testing RESTful complex POST to PizzaShop application"
-	curl -i -s -X POST -H "Content-Type: application/json" -H "Accept: application/json" -o /tmp/rootest/curl.txt -d "{name:\"Stefan\",total:7.5,address:\"Sydney, AU\",deliveryDate:1314595427866,id:{shopCountry:\"AU\",shopCity:\"Sydney\",shopName:\"Pizza Pan 1\"},pizzas:[{id:8,version:1}]}" http://localhost:8888/pizzashop/pizzaorders	
-	EXITED=$?
-    if [[ ! "$EXITED" = "0" ]]; then
-        l_error "curl failed: $@ (returned code $EXITED)" >&2; exit 1;
-    fi
-	head /tmp/rootest/curl.txt | grep "201 Created"
-	EXITED=$?
-    if [[ ! "$EXITED" = "0" ]]; then
-        l_error "RESTful complex POST to PizzaShop application failed" >&2; exit 1;
-    fi
+	#log "Testing RESTful complex POST to PizzaShop application"
+	#curl -i -s -X POST -H "Content-Type: application/json" -H "Accept: application/json"  -o /tmp/rootest/curl.txt -d "{name:\"Napolitana\",price:7.5,base:{id:1},toppings:[{name: \"Anchovy fillets\"},{name: \"Mozzarella\"}]}" http://localhost:8888/pizzashop/pizzas
+	#EXITED=$?
+    #if [[ ! "$EXITED" = "0" ]]; then
+    #    l_error "curl failed: $@ (returned code $EXITED)" >&2; exit 1;
+    #fi
+	#head /tmp/rootest/curl.txt | grep "201 Created"
+	#EXITED=$?
+    #if [[ ! "$EXITED" = "0" ]]; then
+    #    l_error "RESTful complex POST to PizzaShop application failed" >&2; exit 1;
+    #fi
+	#log "Testing RESTful complex POST to PizzaShop application"
+	#curl -i -s -X POST -H "Content-Type: application/json" -H "Accept: application/json" -o /tmp/rootest/curl.txt -d "{name:\"Stefan\",total:7.5,address:\"Sydney, AU\",deliveryDate:1314595427866,id:{shopCountry:\"AU\",shopCity:\"Sydney\",shopName:\"Pizza Pan 1\"},pizzas:[{id:8,version:1}]}" http://localhost:8888/pizzashop/pizzaorders	
+	#EXITED=$?
+    #if [[ ! "$EXITED" = "0" ]]; then
+    #    l_error "curl failed: $@ (returned code $EXITED)" >&2; exit 1;
+    #fi
+	#head /tmp/rootest/curl.txt | grep "201 Created"
+	#EXITED=$?
+    #if [[ ! "$EXITED" = "0" ]]; then
+    #    l_error "RESTful complex POST to PizzaShop application failed" >&2; exit 1;
+    #fi
     if [ "$TERM_PROGRAM" = "Apple_Terminal" ]; then
         MVN_TOMCAT_PID=`ps -e | grep Launcher | grep tomcat:run | cut -b "1-6" | sed "s/ //g"`
     else
