@@ -83,6 +83,17 @@ public interface TypeLocationService {
 
     /**
      * Looks for the given {@link JavaType} within the user project, and if
+     * found, returns the id for its {@link PhysicalTypeMetadata}. Makes the
+     * currently focused module depend on the given type's module.
+     *
+     * @param javaType javaType the type to locate (required)
+     * @return the string (in {@link PhysicalTypeIdentifier} format) if found,
+     *         or <code>null</code> if not found
+     */
+    String getPhysicalTypeIdentifier(JavaType javaType);
+
+    /**
+     * Looks for the given {@link JavaType} within the user project, and if
      * found, returns the id for its {@link PhysicalTypeMetadata}. Use this
      * method if you know that the {@link JavaType} exists but don't know its
      * {@link LogicalPath}.
@@ -92,12 +103,14 @@ public interface TypeLocationService {
      * dependent (i.e. a {@link PhysicalTypeIdentifier} relates to a given
      * physical file, whereas a {@link JavaType} simply represents a type on the
      * classpath).
-     * 
+     *
      * @param javaType the type to locate (required)
+     * @param addDependency make the currently focused module depend on the
+     *         given type's module
      * @return the string (in {@link PhysicalTypeIdentifier} format) if found,
      *         or <code>null</code> if not found
      */
-    String getPhysicalTypeIdentifier(JavaType javaType);
+    String getPhysicalTypeIdentifier(JavaType javaType, boolean addDependency);
 
     /**
      * Returns the physical type identifier for the Java source file with the
