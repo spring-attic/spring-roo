@@ -309,14 +309,19 @@ public class TypeLocationServiceImpl implements TypeLocationService {
     }
 
     public String getPhysicalTypeIdentifier(final JavaType type) {
+        return getPhysicalTypeIdentifier(type, true);
+    }
+
+    public String getPhysicalTypeIdentifier(final JavaType type,
+            final boolean addDependency) {
         final PhysicalPath containingPhysicalPath = getPhysicalPath(type);
         if (containingPhysicalPath == null) {
             return null;
         }
-        // N.B. as a side-effect, we make the currently focused module depend on
-        // the given type's module
         final LogicalPath logicalPath = containingPhysicalPath.getLogicalPath();
-        projectOperations.addModuleDependency(logicalPath.getModule());
+        if (addDependency) {
+            projectOperations.addModuleDependency(logicalPath.getModule());
+        }
         return PhysicalTypeIdentifier.createIdentifier(type, logicalPath);
     }
 
