@@ -231,9 +231,6 @@ public class JavaParserAnnotationMetadataBuilder implements
             final AnnotationAttributeValue<?> value) {
         if (value instanceof NestedAnnotationAttributeValue) {
             final NestedAnnotationAttributeValue castValue = (NestedAnnotationAttributeValue) value;
-            if (!(castValue.getValue() instanceof JavaParserAnnotationMetadataBuilder)) {
-                return null;
-            }
             AnnotationExpr annotationExpr;
             final AnnotationMetadata nestedAnnotation = castValue.getValue();
             if (castValue.getValue().getAttributeNames().size() == 0) {
