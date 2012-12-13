@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <appendix xmlns="http://docbook.org/ns/docbook" version="5.0" xml:id="command-index">
     <title>Command Index</title>
-    <para>This appendix was automatically built from Roo 1.2.2.RELEASE [rev 022477d].</para>
+    <para>This appendix was automatically built from Roo 1.2.3.RELEASE [rev 529366a].</para>
     <para>Commands are listed in alphabetic order, and are shown in monospaced font with any mandatory options you must specify when using the command. Most commands accept a large number of options, and all of the possible options for each command are presented in this appendix.</para>
     <section xml:id="command-index-add-on-commands">
         <title>Add On Commands</title>
@@ -305,6 +305,25 @@
                     <term>--permitReservedWords</term>
                     <listitem>
                         <para>Indicates whether reserved words are ignored by Roo; default if option present: 'true'; default if option not present: 'false'</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-constructor">
+            <title>constructor</title>
+            <para>Creates a class constructor</para>
+            <programlisting><![CDATA[constructor]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--class</term>
+                    <listitem>
+                        <para>The name of the class to receive this constructor; default if option not present: '*'</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--fields</term>
+                    <listitem>
+                        <para>The fields to include in the constructor. Multiple field names must be a double-quoted list separated by spaces</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -3388,7 +3407,7 @@
                 <varlistentry>
                     <term>--java</term>
                     <listitem>
-                        <para>Forces a particular major version of Java to be used (will be auto-detected if unspecified; specify 5 or 6 or 7 only); no default value</para>
+                        <para>Forces a particular major version of Java to be used (will be auto-detected if unspecified; specify 6 or 7 only); no default value</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -3401,6 +3420,12 @@
                     <term>--packaging</term>
                     <listitem>
                         <para>The Maven packaging of this module; default if option not present: 'jar'</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--artifactId</term>
+                    <listitem>
+                        <para>The artifact ID of this module (defaults to moduleName if not specified); no default value</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
