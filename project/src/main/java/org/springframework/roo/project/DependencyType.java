@@ -13,7 +13,7 @@ import org.w3c.dom.Element;
  */
 public enum DependencyType {
 
-    JAR, OTHER, WAR, ZIP;
+    JAR, OTHER, WAR, ZIP, APKLIB;
 
     /**
      * Returns the type of the dependency represented by the given XML element
