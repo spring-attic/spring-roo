@@ -1,6 +1,7 @@
 package org.springframework.roo.addon.jpa.entity;
 
 import static org.springframework.roo.model.GoogleJavaType.GAE_DATASTORE_KEY;
+import static org.springframework.roo.model.GoogleJavaType.DATANUCLEUS_JPA_EXTENSION;
 import static org.springframework.roo.model.JavaType.LONG_OBJECT;
 import static org.springframework.roo.model.JdkJavaType.BIG_DECIMAL;
 import static org.springframework.roo.model.JdkJavaType.CALENDAR;
@@ -296,6 +297,16 @@ public class JpaEntityMetadata extends
                 .equals(GAE_DATASTORE_KEY));
         final JavaType annotationType = hasIdClass ? EMBEDDED_ID : ID;
         annotations.add(new AnnotationMetadataBuilder(annotationType));
+
+        // Encode keys as strings on GAE to support entity group hierarchies
+        if (isGaeEnabled && identifierType.equals(JavaType.STRING)) {
+            AnnotationMetadataBuilder extensionBuilder = new AnnotationMetadataBuilder(
+                    DATANUCLEUS_JPA_EXTENSION);
+            extensionBuilder.addStringAttribute("vendorName", "datanucleus");
+            extensionBuilder.addStringAttribute("key", "gae.encoded-pk");
+            extensionBuilder.addStringAttribute("value", "true");
+            annotations.add(extensionBuilder);
+        }
 
         // Compute the column name, as required
         if (!hasIdClass) {

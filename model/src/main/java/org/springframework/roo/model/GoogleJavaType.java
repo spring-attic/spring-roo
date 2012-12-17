@@ -16,6 +16,9 @@ public final class GoogleJavaType {
             "com.google.appengine.api.datastore.KeyFactory");
     public static final JavaType GAE_LOCAL_SERVICE_TEST_HELPER = new JavaType(
             "com.google.appengine.tools.development.testing.LocalServiceTestHelper");
+    // org.datanucleus
+    public static final JavaType DATANUCLEUS_JPA_EXTENSION = new JavaType(
+            "org.datanucleus.api.jpa.annotations.Extension");
 
     /**
      * Constructor is private to prevent instantiation
