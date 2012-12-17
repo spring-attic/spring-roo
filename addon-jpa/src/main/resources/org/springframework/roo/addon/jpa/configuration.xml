@@ -117,7 +117,7 @@
         </database>
         <database id="GAE">
             <properties>
-                <gae.home>${user.home}/.m2/repository/com/google/appengine/appengine-java-sdk/1.7.3/appengine-java-sdk-1.7.3</gae.home>
+                <gae.home>${user.home}/.m2/repository/com/google/appengine/appengine-java-sdk/1.7.4/appengine-java-sdk/appengine-java-sdk-1.7.4</gae.home>
             </properties>
             <dependencies>
                 <dependency>
@@ -128,43 +128,32 @@
                 <dependency>
                     <groupId>com.google.appengine</groupId>
                     <artifactId>appengine-api-1.0-sdk</artifactId>
-                    <version>1.7.3</version>
+                    <version>1.7.4</version>
                 </dependency>
                 <dependency>
                     <groupId>com.google.appengine</groupId>
                     <artifactId>appengine-testing</artifactId>
-                    <version>1.7.3</version>
+                    <version>1.7.4</version>
                     <scope>test</scope>
                 </dependency>
                 <dependency>
                     <groupId>com.google.appengine</groupId>
                     <artifactId>appengine-api-stubs</artifactId>
-                    <version>1.7.3</version>
+                    <version>1.7.4</version>
                     <scope>test</scope>
                 </dependency>
                 <dependency>
                     <groupId>com.google.appengine</groupId>
                     <artifactId>appengine-api-labs</artifactId>
-                    <version>1.7.3</version>
+                    <version>1.7.4</version>
                     <scope>test</scope>
                 </dependency>
             </dependencies>
             <plugins>
                 <plugin>
-                    <groupId>net.kindleit</groupId>
-                    <artifactId>maven-gae-plugin</artifactId>
-                    <version>0.9.4</version>
-                    <configuration>
-                        <unpackVersion>1.7.3</unpackVersion>
-                    </configuration>
-                    <executions>
-                        <execution>
-                            <phase>validate</phase>
-                            <goals>
-                                <goal>unpack</goal>
-                            </goals>
-                        </execution>
-                    </executions>
+                    <groupId>com.google.appengine</groupId>
+                    <artifactId>appengine-maven-plugin</artifactId>
+                    <version>1.7.4</version>
                 </plugin>
             </plugins>
         </database>
@@ -339,7 +328,7 @@
                 <plugin>
                     <groupId>org.datanucleus</groupId>
                     <artifactId>maven-datanucleus-plugin</artifactId>
-                    <version>3.1.2</version>
+                    <version>3.1.3</version>
                     <dependencies>
                         <dependency>
                             <groupId>org.datanucleus</groupId>
