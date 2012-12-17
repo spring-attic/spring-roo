@@ -347,6 +347,35 @@ public class Plugin implements Comparable<Plugin> {
                 + (configuration == null ? 0 : configuration.hashCode());
     }
 
+    /**
+     * Indicates whether the given {@link Plugin} has the same Maven
+     * coordinates as this one; this is not necessarily the same as calling
+     * {@link #equals(Object)}, which may compare more fields beyond the basic
+     * coordinates.
+     * 
+     * @param plugin the plugin to check (can be <code>null</code>)
+     * @return <code>false</code> if any coordinates are different
+     */
+    public boolean hasSameCoordinates(final Plugin dependency) {
+        return dependency != null && compareCoordinates(dependency) == 0;
+    }
+
+    /**
+     * Compares this plugin's identifying coordinates (i.e. not the version)
+     * to those of the given plugin
+     * 
+     * @param other the plugin being compared to (required)
+     * @return see {@link Comparable#compareTo(Object)}
+     */
+    private int compareCoordinates(final Plugin other) {
+        Validate.notNull(other, "Plugin being compared to cannot be null");
+        int result = getGroupId().compareTo(other.getGroupId());
+        if (result == 0) {
+            result = getArtifactId().compareTo(other.getArtifactId());
+        }
+        return result;
+    }
+
     @Override
     public String toString() {
         final ToStringBuilder builder = new ToStringBuilder(this);

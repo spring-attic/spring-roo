@@ -2,7 +2,7 @@
 <configuration>
     <spring-data-jpa>
         <dependencies>
-            <dependency org="org.springframework.data" name="spring-data-jpa" rev="1.1.0.RELEASE" />
+            <dependency org="org.springframework.data" name="spring-data-jpa" rev="1.2.0.RELEASE" />
         </dependencies>
     </spring-data-jpa>
 </configuration>

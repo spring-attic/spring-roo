@@ -51,8 +51,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>gwt-maven-plugin</artifactId>
-                <!-- Do not upgrade to 2.3.0+ as it does not work in Windows -->
-                <version>2.2.0</version>
+                <version>2.5.0</version>
                 <dependencies>
                     <dependency>
                         <groupId>com.google.gwt</groupId>
@@ -117,15 +116,14 @@
             <dependency>
                 <groupId>com.google.appengine</groupId>
                 <artifactId>appengine-api-1.0-sdk</artifactId>
-                <version>1.6.5</version>
+                <version>1.7.4</version>
             </dependency>
         </dependencies>
         <plugins>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>gwt-maven-plugin</artifactId>
-                <!-- Do not upgrade to 2.3.0+ as it does not work in Windows -->
-                <version>2.2.0</version>
+                <version>2.5.0</version>
                 <dependencies>
                     <dependency>
                         <groupId>com.google.gwt</groupId>
@@ -150,7 +148,7 @@
                     <server>com.google.appengine.tools.development.gwt.AppEngineLauncher</server>
                     <extraJvmArgs>"-javaagent:${gae.home}/lib/agent/appengine-agent.jar" -Xmx1024m</extraJvmArgs>
                     <copyWebapp>true</copyWebapp>
-                    <appEngineVersion>1.6.5</appEngineVersion>
+                    <appEngineVersion>1.7.4</appEngineVersion>
                 </configuration>
                 <executions>
                     <execution>

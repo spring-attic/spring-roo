@@ -30,7 +30,7 @@ public class GaeOperationsImpl implements GaeOperations {
             return false;
         }
         for (final Plugin buildPlugin : pom.getBuildPlugins()) {
-            if ("maven-gae-plugin".equals(buildPlugin.getArtifactId())) {
+            if ("appengine-maven-plugin".equals(buildPlugin.getArtifactId())) {
                 return true;
             }
         }

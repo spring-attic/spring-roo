@@ -13,6 +13,7 @@ import static org.springframework.roo.model.JavaType.STRING;
 import static org.springframework.roo.model.JdkJavaType.ARRAY;
 import static org.springframework.roo.model.JdkJavaType.BIG_DECIMAL;
 import static org.springframework.roo.model.JdkJavaType.BLOB;
+import static org.springframework.roo.model.JdkJavaType.CALENDAR;
 import static org.springframework.roo.model.JdkJavaType.CLOB;
 import static org.springframework.roo.model.JdkJavaType.DATE;
 import static org.springframework.roo.model.JdkJavaType.REF;
@@ -212,7 +213,7 @@ public class Column {
             break;
         case Types.TIMESTAMP:
             jdbcType = "TIMESTAMP";
-            javaType = new JavaType("java.sql.Timestamp");
+            javaType = CALENDAR;
             break;
         case Types.CLOB:
             jdbcType = "CLOB";

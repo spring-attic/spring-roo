@@ -290,7 +290,7 @@ RELEASE PROCEDURE:
 3. Tag the release (update the key ID, Jira ID and tag ID):
 
    cd $ROO_HOME
-   git tag -u 00B5050F -a -m "ROO-XXXX: Release 3.4.5.RELEASE"
+   git tag -a -m "ROO-XXXX: Release Spring Roo 4.5.6.RELEASE" 4.5.6.RELEASE
 
 4. Build JARs:
 

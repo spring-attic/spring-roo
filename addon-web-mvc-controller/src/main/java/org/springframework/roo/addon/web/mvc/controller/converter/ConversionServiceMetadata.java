@@ -181,18 +181,22 @@ public class ConversionServiceMetadata extends
             final MethodMetadataBuilder jsonToConverterMethod = getJsonToConverterMethod(
                     targetType,
                     jsonMethodNames.get(CustomDataJsonTags.FROM_JSON_METHOD));
-            builder.addMethod(jsonToConverterMethod);
-            bodyBuilder.appendFormalLine("registry.addConverter("
-                    + jsonToConverterMethod.getMethodName().getSymbolName()
-                    + "());");
+            if (jsonToConverterMethod != null) {
+                builder.addMethod(jsonToConverterMethod);
+                bodyBuilder.appendFormalLine("registry.addConverter("
+                        + jsonToConverterMethod.getMethodName().getSymbolName()
+                        + "());");
+            }
 
             final MethodMetadataBuilder toJsonConverterMethod = getToJsonConverterMethod(
                     targetType,
                     jsonMethodNames.get(CustomDataJsonTags.TO_JSON_METHOD));
-            builder.addMethod(toJsonConverterMethod);
-            bodyBuilder.appendFormalLine("registry.addConverter("
-                    + toJsonConverterMethod.getMethodName().getSymbolName()
-                    + "());");
+            if (toJsonConverterMethod != null) {
+                builder.addMethod(toJsonConverterMethod);
+                bodyBuilder.appendFormalLine("registry.addConverter("
+                        + toJsonConverterMethod.getMethodName().getSymbolName()
+                        + "());");
+            }
         }
 
         final JavaType parameterType = FORMATTER_REGISTRY;

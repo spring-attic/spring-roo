@@ -52,6 +52,7 @@ public abstract class XmlTestCase {
         // newline.
         final String actualXml = StringUtils.stripEnd(
                 XmlUtils.nodeToString(actualNode), null);
-        assertEquals(normalisedXml, actualXml);
+        assertEquals(StringUtils.replace(normalisedXml, "\n", ""),
+                StringUtils.replace(actualXml, "\n", ""));
     }
 }

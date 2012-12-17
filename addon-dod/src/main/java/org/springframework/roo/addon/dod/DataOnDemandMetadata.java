@@ -13,6 +13,7 @@ import static org.springframework.roo.model.JdkJavaType.LIST;
 import static org.springframework.roo.model.JdkJavaType.RANDOM;
 import static org.springframework.roo.model.JdkJavaType.SECURE_RANDOM;
 import static org.springframework.roo.model.JdkJavaType.TIMESTAMP;
+import static org.springframework.roo.model.JpaJavaType.JOIN_COLUMN;
 import static org.springframework.roo.model.Jsr303JavaType.CONSTRAINT_VIOLATION;
 import static org.springframework.roo.model.Jsr303JavaType.CONSTRAINT_VIOLATION_EXCEPTION;
 import static org.springframework.roo.model.Jsr303JavaType.DECIMAL_MAX;
@@ -997,7 +998,8 @@ public class DataOnDemandMetadata extends
             final DataOnDemandMetadata collaboratingMetadata,
             final Set<?> fieldCustomDataKeys) {
         // To avoid circular references, we don't try to set nullable fields
-        final boolean nullableField = field.getAnnotation(NOT_NULL) == null;
+        final boolean nullableField = field.getAnnotation(NOT_NULL) == null
+                && isNullableJoinColumn(field);
         if (nullableField) {
             return null;
         }
@@ -1015,6 +1017,17 @@ public class DataOnDemandMetadata extends
                 + "."
                 + collaboratingMetadata.getRandomPersistentEntityMethod()
                         .getMethodName().getSymbolName() + "()";
+    }
+
+    private boolean isNullableJoinColumn(final FieldMetadata field) {
+        final AnnotationMetadata joinColumnAnnotation = field
+                .getAnnotation(JOIN_COLUMN);
+        if (joinColumnAnnotation == null) {
+            return true;
+        }
+        final AnnotationAttributeValue<?> nullableAttr = joinColumnAnnotation
+                .getAttribute(new JavaSymbolName("nullable"));
+        return nullableAttr == null || (Boolean) nullableAttr.getValue();
     }
 
     private List<MethodMetadataBuilder> getFieldMutatorMethods() {

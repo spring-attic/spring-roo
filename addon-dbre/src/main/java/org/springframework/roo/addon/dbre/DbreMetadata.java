@@ -1,8 +1,8 @@
 package org.springframework.roo.addon.dbre;
 
+import static org.springframework.roo.model.JdkJavaType.CALENDAR;
 import static org.springframework.roo.model.JdkJavaType.DATE;
 import static org.springframework.roo.model.JdkJavaType.SET;
-import static org.springframework.roo.model.JdkJavaType.TIMESTAMP;
 import static org.springframework.roo.model.JpaJavaType.CASCADE_TYPE;
 import static org.springframework.roo.model.JpaJavaType.COLUMN;
 import static org.springframework.roo.model.JpaJavaType.JOIN_COLUMN;
@@ -722,7 +722,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
         }
 
         // Add JSR 220 @Temporal annotation to date fields
-        if (fieldType.equals(DATE) || fieldType.equals(TIMESTAMP)) {
+        if (fieldType.equals(DATE) || fieldType.equals(CALENDAR)) {
             final AnnotationMetadataBuilder temporalBuilder = new AnnotationMetadataBuilder(
                     TEMPORAL);
             temporalBuilder.addEnumAttribute(VALUE, new EnumDetails(
@@ -757,7 +757,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
             }
             else {
                 fieldBuilder
-                        .setFieldInitializer("new java.sql.Timestamp(new java.util.Date().getTime())");
+                        .setFieldInitializer("java.util.Calendar.getInstance()");
             }
         }
         return fieldBuilder;
