@@ -24,6 +24,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
@@ -397,7 +398,7 @@ public class JpaOperationsImpl implements JpaOperations {
 
     private List<OrmProvider> getUnwantedOrmProviders(
             final OrmProvider ormProvider) {
-        final List<OrmProvider> unwantedOrmProviders = new ArrayList<OrmProvider>(
+        final List<OrmProvider> unwantedOrmProviders = new LinkedList<OrmProvider>(
                 Arrays.asList(OrmProvider.values()));
         unwantedOrmProviders.remove(ormProvider);
         return unwantedOrmProviders;
@@ -551,10 +552,10 @@ public class JpaOperationsImpl implements JpaOperations {
                 .createIdentifier(name,
                         pathResolver.getFocusedPath(Path.SRC_MAIN_JAVA));
 
-        final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
-        annotations.add(new AnnotationMetadataBuilder(ROO_JAVA_BEAN));
-        annotations.add(new AnnotationMetadataBuilder(ROO_TO_STRING));
-        annotations.add(new AnnotationMetadataBuilder(EMBEDDABLE));
+        final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>(
+                Arrays.asList(new AnnotationMetadataBuilder(ROO_JAVA_BEAN),
+                        new AnnotationMetadataBuilder(ROO_TO_STRING),
+                        new AnnotationMetadataBuilder(EMBEDDABLE)));
 
         if (serializable) {
             annotations.add(new AnnotationMetadataBuilder(ROO_SERIALIZABLE));
