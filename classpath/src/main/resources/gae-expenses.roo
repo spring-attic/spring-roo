@@ -1,0 +1,41 @@
+project --topLevelPackage roo.extrack
+
+jpa setup --database GOOGLE_APP_ENGINE --provider DATANUCLEUS
+
+enum type --class ~.shared.domain.Gender
+enum constant --name MALE
+enum constant --name FEMALE
+
+entity jpa --class ~.server.domain.Employee --identifierType java.lang.String --versionType java.lang.Long
+field string --fieldName displayName --notNull
+field string --fieldName userName --sizeMin 3 --sizeMax 30 --notNull
+field string --fieldName department
+field enum --fieldName gender --type ~.shared.domain.Gender --enumType STRING
+field boolean --fieldName admin --notNull
+
+entity jpa --class ~.server.domain.Report --identifierType java.lang.String --versionType java.lang.Long
+field string --fieldName purpose
+field string --fieldName notes
+field date --fieldName created --type java.util.Date
+field string --fieldName department
+field reference --type Employee reporter --fetch LAZY
+field reference --type Employee approvedSupervisor
+
+entity jpa --class ~.server.domain.Expense --identifierType java.lang.String --versionType java.lang.Long
+field number --type java.lang.Double amount
+field string --fieldName description
+field reference --type Report report --fetch LAZY
+field string --fieldName approval
+field string --fieldName category
+field date --fieldName created --type java.util.Date
+field string --fieldName reasonDenied
+
+// Owned many-to-one relationships defining GAE entity group hierarchy
+// field list --class ~.server.domain.Employee --fieldName reports --type ~.server.domain.Report --mappedBy reporter --cardinality ONE_TO_MANY
+// field list --class ~.server.domain.Report --fieldName expenses --type ~.server.domain.Expense --mappedBy report --cardinality ONE_TO_MANY
+
+web gwt setup
+web gwt all --proxyPackage ~.client.proxy --requestPackage ~.client.request
+
+logging setup --level INFO
+
