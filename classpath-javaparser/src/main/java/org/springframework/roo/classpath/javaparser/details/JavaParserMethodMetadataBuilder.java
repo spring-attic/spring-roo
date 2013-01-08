@@ -1,28 +1,20 @@
 package org.springframework.roo.classpath.javaparser.details;
 
-import japa.parser.JavaParser;
-import japa.parser.ParseException;
-import japa.parser.ast.CompilationUnit;
-import japa.parser.ast.TypeParameter;
-import japa.parser.ast.body.BodyDeclaration;
-import japa.parser.ast.body.MethodDeclaration;
-import japa.parser.ast.body.Parameter;
-import japa.parser.ast.body.TypeDeclaration;
-import japa.parser.ast.body.VariableDeclaratorId;
-import japa.parser.ast.expr.AnnotationExpr;
-import japa.parser.ast.expr.NameExpr;
-import japa.parser.ast.stmt.BlockStmt;
-import japa.parser.ast.type.ClassOrInterfaceType;
-import japa.parser.ast.type.ReferenceType;
-import japa.parser.ast.type.Type;
-
-import java.io.ByteArrayInputStream;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
+import com.github.antlrjavaparser.JavaParser;
+import com.github.antlrjavaparser.ParseException;
+import com.github.antlrjavaparser.api.CompilationUnit;
+import com.github.antlrjavaparser.api.TypeParameter;
+import com.github.antlrjavaparser.api.body.BodyDeclaration;
+import com.github.antlrjavaparser.api.body.MethodDeclaration;
+import com.github.antlrjavaparser.api.body.Parameter;
+import com.github.antlrjavaparser.api.body.TypeDeclaration;
+import com.github.antlrjavaparser.api.body.VariableDeclaratorId;
+import com.github.antlrjavaparser.api.expr.AnnotationExpr;
+import com.github.antlrjavaparser.api.expr.NameExpr;
+import com.github.antlrjavaparser.api.stmt.BlockStmt;
+import com.github.antlrjavaparser.api.type.ClassOrInterfaceType;
+import com.github.antlrjavaparser.api.type.ReferenceType;
+import com.github.antlrjavaparser.api.type.Type;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
@@ -36,6 +28,14 @@ import org.springframework.roo.classpath.javaparser.JavaParserUtils;
 import org.springframework.roo.model.Builder;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Java Parser implementation of {@link MethodMetadata}.
@@ -221,6 +221,10 @@ public class JavaParserMethodMetadataBuilder implements Builder<MethodMetadata> 
             CompilationUnit ci;
             try {
                 ci = JavaParser.parse(bais);
+            }
+            catch (final IOException e) {
+                throw new IllegalStateException(
+                        "Illegal state: Unable to parse input stream", e);
             }
             catch (final ParseException pe) {
                 throw new IllegalStateException(

@@ -1,14 +1,9 @@
 package org.springframework.roo.classpath.javaparser;
 
-import japa.parser.JavaParser;
-import japa.parser.ParseException;
-import japa.parser.ast.CompilationUnit;
-import japa.parser.ast.body.TypeDeclaration;
-
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.IOException;
-
+import com.github.antlrjavaparser.JavaParser;
+import com.github.antlrjavaparser.ParseException;
+import com.github.antlrjavaparser.api.CompilationUnit;
+import com.github.antlrjavaparser.api.body.TypeDeclaration;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -17,6 +12,10 @@ import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.classpath.TypeResolutionService;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaType;
+
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
 
 @Component(immediate = true)
 @Service
@@ -54,6 +53,9 @@ public class JavaParserTypeResolutionService implements TypeResolutionService {
             }
             return null;
         }
+        catch (final IOException e) {
+            throw new IllegalStateException(e);
+        }
         catch (final ParseException e) {
             throw new IllegalStateException(e);
         }
@@ -83,6 +85,9 @@ public class JavaParserTypeResolutionService implements TypeResolutionService {
             }
             return new JavaPackage(compilationUnit.getPackage().getName()
                     .toString());
+        }
+        catch (final IOException e) {
+            throw new IllegalStateException(e);
         }
         catch (final ParseException e) {
             throw new IllegalStateException(e);

@@ -65,7 +65,11 @@
         <!-- External modules -->
         <dependency>
             <groupId>org.springframework.roo.wrapping</groupId>
-            <artifactId>org.springframework.roo.wrapping.javaparser</artifactId>
+            <artifactId>org.springframework.roo.wrapping.antlr-java-parser</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo.wrapping</groupId>
+            <artifactId>org.springframework.roo.wrapping.antlr4-runtime</artifactId>
         </dependency>
     </dependencies>
 </project>

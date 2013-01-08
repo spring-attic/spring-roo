@@ -1,25 +1,19 @@
 package org.springframework.roo.classpath.javaparser.details;
 
-import japa.parser.ast.CompilationUnit;
-import japa.parser.ast.ImportDeclaration;
-import japa.parser.ast.body.BodyDeclaration;
-import japa.parser.ast.body.ClassOrInterfaceDeclaration;
-import japa.parser.ast.body.ConstructorDeclaration;
-import japa.parser.ast.body.EnumConstantDeclaration;
-import japa.parser.ast.body.EnumDeclaration;
-import japa.parser.ast.body.FieldDeclaration;
-import japa.parser.ast.body.MethodDeclaration;
-import japa.parser.ast.body.TypeDeclaration;
-import japa.parser.ast.body.VariableDeclarator;
-import japa.parser.ast.expr.AnnotationExpr;
-import japa.parser.ast.expr.QualifiedNameExpr;
-import japa.parser.ast.type.ClassOrInterfaceType;
-
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
+import com.github.antlrjavaparser.api.CompilationUnit;
+import com.github.antlrjavaparser.api.ImportDeclaration;
+import com.github.antlrjavaparser.api.body.BodyDeclaration;
+import com.github.antlrjavaparser.api.body.ClassOrInterfaceDeclaration;
+import com.github.antlrjavaparser.api.body.ConstructorDeclaration;
+import com.github.antlrjavaparser.api.body.EnumConstantDeclaration;
+import com.github.antlrjavaparser.api.body.EnumDeclaration;
+import com.github.antlrjavaparser.api.body.FieldDeclaration;
+import com.github.antlrjavaparser.api.body.MethodDeclaration;
+import com.github.antlrjavaparser.api.body.TypeDeclaration;
+import com.github.antlrjavaparser.api.body.VariableDeclarator;
+import com.github.antlrjavaparser.api.expr.AnnotationExpr;
+import com.github.antlrjavaparser.api.expr.QualifiedNameExpr;
+import com.github.antlrjavaparser.api.type.ClassOrInterfaceType;
 import org.apache.commons.lang3.Validate;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
@@ -39,6 +33,11 @@ import org.springframework.roo.model.Builder;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class JavaParserClassOrInterfaceTypeDetailsBuilder implements
         Builder<ClassOrInterfaceTypeDetails> {
