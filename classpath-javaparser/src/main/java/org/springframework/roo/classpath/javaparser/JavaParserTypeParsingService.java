@@ -1,32 +1,21 @@
 package org.springframework.roo.classpath.javaparser;
 
-import static org.springframework.roo.model.JavaType.OBJECT;
-import japa.parser.ASTHelper;
-import japa.parser.JavaParser;
-import japa.parser.ParseException;
-import japa.parser.ast.CompilationUnit;
-import japa.parser.ast.ImportDeclaration;
-import japa.parser.ast.PackageDeclaration;
-import japa.parser.ast.TypeParameter;
-import japa.parser.ast.body.BodyDeclaration;
-import japa.parser.ast.body.ClassOrInterfaceDeclaration;
-import japa.parser.ast.body.EnumConstantDeclaration;
-import japa.parser.ast.body.EnumDeclaration;
-import japa.parser.ast.body.TypeDeclaration;
-import japa.parser.ast.expr.AnnotationExpr;
-import japa.parser.ast.expr.NameExpr;
-import japa.parser.ast.expr.QualifiedNameExpr;
-import japa.parser.ast.type.ClassOrInterfaceType;
-
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-
+import com.github.antlrjavaparser.ASTHelper;
+import com.github.antlrjavaparser.JavaParser;
+import com.github.antlrjavaparser.ParseException;
+import com.github.antlrjavaparser.api.CompilationUnit;
+import com.github.antlrjavaparser.api.ImportDeclaration;
+import com.github.antlrjavaparser.api.PackageDeclaration;
+import com.github.antlrjavaparser.api.TypeParameter;
+import com.github.antlrjavaparser.api.body.BodyDeclaration;
+import com.github.antlrjavaparser.api.body.ClassOrInterfaceDeclaration;
+import com.github.antlrjavaparser.api.body.EnumConstantDeclaration;
+import com.github.antlrjavaparser.api.body.EnumDeclaration;
+import com.github.antlrjavaparser.api.body.TypeDeclaration;
+import com.github.antlrjavaparser.api.expr.AnnotationExpr;
+import com.github.antlrjavaparser.api.expr.NameExpr;
+import com.github.antlrjavaparser.api.expr.QualifiedNameExpr;
+import com.github.antlrjavaparser.api.type.ClassOrInterfaceType;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -51,6 +40,17 @@ import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+
+import static org.springframework.roo.model.JavaType.OBJECT;
 
 @Component(immediate = true)
 @Service
@@ -140,6 +140,9 @@ public class JavaParserTypeParsingService implements TypeParsingService {
                     compilationUnit, null, typeDeclaration,
                     declaredByMetadataId, typeName, metadataService,
                     typeLocationService).build();
+        }
+        catch (final IOException e) {
+            throw new IllegalStateException(e);
         }
         catch (final ParseException e) {
             throw new IllegalStateException(e);

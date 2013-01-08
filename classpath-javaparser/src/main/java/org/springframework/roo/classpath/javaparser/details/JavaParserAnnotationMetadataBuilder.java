@@ -1,29 +1,25 @@
 package org.springframework.roo.classpath.javaparser.details;
 
-import japa.parser.ast.expr.AnnotationExpr;
-import japa.parser.ast.expr.ArrayInitializerExpr;
-import japa.parser.ast.expr.BinaryExpr;
-import japa.parser.ast.expr.BooleanLiteralExpr;
-import japa.parser.ast.expr.CharLiteralExpr;
-import japa.parser.ast.expr.ClassExpr;
-import japa.parser.ast.expr.DoubleLiteralExpr;
-import japa.parser.ast.expr.Expression;
-import japa.parser.ast.expr.FieldAccessExpr;
-import japa.parser.ast.expr.IntegerLiteralExpr;
-import japa.parser.ast.expr.LongLiteralExpr;
-import japa.parser.ast.expr.MarkerAnnotationExpr;
-import japa.parser.ast.expr.MemberValuePair;
-import japa.parser.ast.expr.NameExpr;
-import japa.parser.ast.expr.NormalAnnotationExpr;
-import japa.parser.ast.expr.SingleMemberAnnotationExpr;
-import japa.parser.ast.expr.StringLiteralExpr;
-import japa.parser.ast.expr.UnaryExpr;
-import japa.parser.ast.expr.UnaryExpr.Operator;
-import japa.parser.ast.type.Type;
-
-import java.util.ArrayList;
-import java.util.List;
-
+import com.github.antlrjavaparser.api.expr.AnnotationExpr;
+import com.github.antlrjavaparser.api.expr.ArrayInitializerExpr;
+import com.github.antlrjavaparser.api.expr.BinaryExpr;
+import com.github.antlrjavaparser.api.expr.BooleanLiteralExpr;
+import com.github.antlrjavaparser.api.expr.CharLiteralExpr;
+import com.github.antlrjavaparser.api.expr.ClassExpr;
+import com.github.antlrjavaparser.api.expr.DoubleLiteralExpr;
+import com.github.antlrjavaparser.api.expr.Expression;
+import com.github.antlrjavaparser.api.expr.FieldAccessExpr;
+import com.github.antlrjavaparser.api.expr.IntegerLiteralExpr;
+import com.github.antlrjavaparser.api.expr.LongLiteralExpr;
+import com.github.antlrjavaparser.api.expr.MarkerAnnotationExpr;
+import com.github.antlrjavaparser.api.expr.MemberValuePair;
+import com.github.antlrjavaparser.api.expr.NameExpr;
+import com.github.antlrjavaparser.api.expr.NormalAnnotationExpr;
+import com.github.antlrjavaparser.api.expr.SingleMemberAnnotationExpr;
+import com.github.antlrjavaparser.api.expr.StringLiteralExpr;
+import com.github.antlrjavaparser.api.expr.UnaryExpr;
+import com.github.antlrjavaparser.api.expr.UnaryExpr.Operator;
+import com.github.antlrjavaparser.api.type.Type;
 import org.apache.commons.lang3.Validate;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
@@ -44,6 +40,9 @@ import org.springframework.roo.model.Builder;
 import org.springframework.roo.model.EnumDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Java Parser implementation of {@link AnnotationMetadata}.

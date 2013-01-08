@@ -1,35 +1,27 @@
 package org.springframework.roo.classpath.javaparser;
 
-import static org.springframework.roo.model.JavaType.OBJECT;
-import japa.parser.ast.CompilationUnit;
-import japa.parser.ast.ImportDeclaration;
-import japa.parser.ast.TypeParameter;
-import japa.parser.ast.body.ClassOrInterfaceDeclaration;
-import japa.parser.ast.body.ModifierSet;
-import japa.parser.ast.body.TypeDeclaration;
-import japa.parser.ast.expr.AnnotationExpr;
-import japa.parser.ast.expr.ClassExpr;
-import japa.parser.ast.expr.Expression;
-import japa.parser.ast.expr.FieldAccessExpr;
-import japa.parser.ast.expr.MarkerAnnotationExpr;
-import japa.parser.ast.expr.NameExpr;
-import japa.parser.ast.expr.NormalAnnotationExpr;
-import japa.parser.ast.expr.QualifiedNameExpr;
-import japa.parser.ast.expr.SingleMemberAnnotationExpr;
-import japa.parser.ast.type.ClassOrInterfaceType;
-import japa.parser.ast.type.PrimitiveType;
-import japa.parser.ast.type.PrimitiveType.Primitive;
-import japa.parser.ast.type.ReferenceType;
-import japa.parser.ast.type.Type;
-import japa.parser.ast.type.VoidType;
-import japa.parser.ast.type.WildcardType;
-
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
+import com.github.antlrjavaparser.api.CompilationUnit;
+import com.github.antlrjavaparser.api.ImportDeclaration;
+import com.github.antlrjavaparser.api.TypeParameter;
+import com.github.antlrjavaparser.api.body.ClassOrInterfaceDeclaration;
+import com.github.antlrjavaparser.api.body.ModifierSet;
+import com.github.antlrjavaparser.api.body.TypeDeclaration;
+import com.github.antlrjavaparser.api.expr.AnnotationExpr;
+import com.github.antlrjavaparser.api.expr.ClassExpr;
+import com.github.antlrjavaparser.api.expr.Expression;
+import com.github.antlrjavaparser.api.expr.FieldAccessExpr;
+import com.github.antlrjavaparser.api.expr.MarkerAnnotationExpr;
+import com.github.antlrjavaparser.api.expr.NameExpr;
+import com.github.antlrjavaparser.api.expr.NormalAnnotationExpr;
+import com.github.antlrjavaparser.api.expr.QualifiedNameExpr;
+import com.github.antlrjavaparser.api.expr.SingleMemberAnnotationExpr;
+import com.github.antlrjavaparser.api.type.ClassOrInterfaceType;
+import com.github.antlrjavaparser.api.type.PrimitiveType;
+import com.github.antlrjavaparser.api.type.PrimitiveType.Primitive;
+import com.github.antlrjavaparser.api.type.ReferenceType;
+import com.github.antlrjavaparser.api.type.Type;
+import com.github.antlrjavaparser.api.type.VoidType;
+import com.github.antlrjavaparser.api.type.WildcardType;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.springframework.roo.model.DataType;
@@ -37,6 +29,14 @@ import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.JdkJavaType;
+
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import static org.springframework.roo.model.JavaType.OBJECT;
 
 /**
  * Assists with the usage of Java Parser.

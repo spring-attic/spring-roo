@@ -1,16 +1,8 @@
 package org.springframework.roo.classpath.javaparser;
 
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
-import static org.powermock.api.mockito.PowerMockito.mock;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
-import static org.powermock.api.mockito.PowerMockito.when;
-import japa.parser.JavaParser;
-import japa.parser.ast.CompilationUnit;
-import japa.parser.ast.body.TypeDeclaration;
-
+import com.github.antlrjavaparser.JavaParser;
+import com.github.antlrjavaparser.api.CompilationUnit;
+import com.github.antlrjavaparser.api.body.TypeDeclaration;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -23,6 +15,14 @@ import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.javaparser.details.JavaParserClassOrInterfaceTypeDetailsBuilder;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaType;
+
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
+import static org.powermock.api.mockito.PowerMockito.mock;
+import static org.powermock.api.mockito.PowerMockito.mockStatic;
+import static org.powermock.api.mockito.PowerMockito.when;
 
 /**
  * Unit test of {@link JavaParserTypeParsingService}
