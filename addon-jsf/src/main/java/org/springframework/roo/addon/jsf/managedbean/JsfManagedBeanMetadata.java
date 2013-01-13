@@ -998,13 +998,13 @@ public class JsfManagedBeanMetadata extends
         methodBuilder.setParameterNames(new ArrayList<JavaSymbolName>());
 
         builder.getImportRegistrationResolver().addImports(FACES_CONTEXT,
-                APPLICATION, HTML_PANEL_GRID);
+                HTML_PANEL_GRID);
 
         final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
         bodyBuilder
                 .appendFormalLine("FacesContext facesContext = FacesContext.getCurrentInstance();");
-        bodyBuilder
-                .appendFormalLine("Application application = facesContext.getApplication();");
+        bodyBuilder.appendFormalLine(APPLICATION.getFullyQualifiedTypeName()
+                + " application = facesContext.getApplication();");
 
         if (locatedFields.isEmpty()) {
             bodyBuilder.appendFormalLine("return "
