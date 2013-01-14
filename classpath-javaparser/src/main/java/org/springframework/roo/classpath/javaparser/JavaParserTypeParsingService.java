@@ -182,7 +182,7 @@ public class JavaParserTypeParsingService implements TypeParsingService {
                             .getImportType().getSimpleTypeName());
                 }
                 compilationUnit.getImports().add(
-                        new ImportDeclaration(typeToImportExpr, false, false));
+                        new ImportDeclaration(typeToImportExpr, importType.isStatic(), false));
             }
             else {
                 compilationUnit.getImports().add(
