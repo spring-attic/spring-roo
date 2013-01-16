@@ -50,11 +50,9 @@ public class JavaParserFieldMetadataBuilder implements Builder<FieldMetadata> {
         JavaParserUtils.importTypeIfRequired(
                 compilationUnitServices.getEnclosingTypeName(),
                 compilationUnitServices.getImports(), field.getFieldType());
-        final Type initType = JavaParserUtils.getResolvedName(
+        final ClassOrInterfaceType initType = JavaParserUtils.getResolvedName(
                 compilationUnitServices.getEnclosingTypeName(),
                 field.getFieldType(), compilationUnitServices);
-        ClassOrInterfaceType finalType = JavaParserUtils
-                .getClassOrInterfaceType(initType);
 
         final FieldDeclaration newField = ASTHelper.createFieldDeclaration(
                 JavaParserUtils.getJavaParserModifier(field.getModifier()),
@@ -63,7 +61,7 @@ public class JavaParserFieldMetadataBuilder implements Builder<FieldMetadata> {
         // Add parameterized types for the field type (not initializer)
         if (field.getFieldType().getParameters().size() > 0) {
             final List<Type> fieldTypeArgs = new ArrayList<Type>();
-            finalType.setTypeArgs(fieldTypeArgs);
+            initType.setTypeArgs(fieldTypeArgs);
             for (final JavaType parameter : field.getFieldType()
                     .getParameters()) {
                 final NameExpr importedParameterType = JavaParserUtils
@@ -140,7 +138,7 @@ public class JavaParserFieldMetadataBuilder implements Builder<FieldMetadata> {
 
                 if (typeToImport.getParameters().size() > 0) {
                     final List<Type> initTypeArgs = new ArrayList<Type>();
-                    finalType.setTypeArgs(initTypeArgs);
+                    initType.setTypeArgs(initTypeArgs);
                     for (final JavaType parameter : typeToImport
                             .getParameters()) {
                         final NameExpr importedParameterType = JavaParserUtils

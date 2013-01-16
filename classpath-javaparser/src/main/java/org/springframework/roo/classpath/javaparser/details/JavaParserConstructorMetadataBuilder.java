@@ -10,6 +10,7 @@ import japa.parser.ast.body.Parameter;
 import japa.parser.ast.body.TypeDeclaration;
 import japa.parser.ast.body.VariableDeclaratorId;
 import japa.parser.ast.expr.AnnotationExpr;
+import japa.parser.ast.expr.NameExpr;
 import japa.parser.ast.stmt.BlockStmt;
 import japa.parser.ast.type.ClassOrInterfaceType;
 import japa.parser.ast.type.Type;
@@ -100,12 +101,13 @@ public class JavaParserConstructorMetadataBuilder implements
                         .getJavaType());
             }
             else {
-                final Type finalType = JavaParserUtils.getResolvedName(
-                        constructorParameter.getJavaType(),
-                        constructorParameter.getJavaType(),
-                        compilationUnitServices);
+                final NameExpr importedType = JavaParserUtils
+                        .importTypeIfRequired(
+                                compilationUnitServices.getEnclosingTypeName(),
+                                compilationUnitServices.getImports(),
+                                constructorParameter.getJavaType());
                 final ClassOrInterfaceType cit = JavaParserUtils
-                        .getClassOrInterfaceType(finalType);
+                        .getClassOrInterfaceType(importedType);
 
                 // Add any type arguments presented for the return type
                 if (constructorParameter.getJavaType().getParameters().size() > 0) {
@@ -123,7 +125,7 @@ public class JavaParserConstructorMetadataBuilder implements
                     }
 
                 }
-                parameterType = finalType;
+                parameterType = cit;
             }
 
             // Create a Java Parser constructor parameter and add it to the list
