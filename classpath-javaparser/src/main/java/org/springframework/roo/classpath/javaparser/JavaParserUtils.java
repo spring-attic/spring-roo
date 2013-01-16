@@ -681,7 +681,7 @@ public final class JavaParserUtils {
         return resolvedName;
     }
 
-    public static ClassOrInterfaceType getResolvedName(final JavaType target,
+    public static Type getResolvedName(final JavaType target,
             final JavaType current,
             final CompilationUnitServices compilationUnit) {
         final NameExpr nameExpr = JavaParserUtils.importTypeIfRequired(target,
@@ -695,6 +695,10 @@ public final class JavaParserUtils {
                 resolvedName.getTypeArgs().add(
                         getResolvedName(target, param, compilationUnit));
             }
+        }
+        
+        if (current.getArray() > 0) {
+            return new ReferenceType(resolvedName, current.getArray());
         }
 
         return resolvedName;
@@ -826,9 +830,8 @@ public final class JavaParserUtils {
         Validate.notNull(imports, "Compilation unit imports required");
         Validate.notNull(typeToImport, "Java type to import is required");
 
-        // TODO: Do the import magic, but we'll defer that
-        return new ReferenceType(getClassOrInterfaceType(new NameExpr(
-                typeToImport.toString())));
+        return new ReferenceType(getClassOrInterfaceType(importTypeIfRequired(
+                targetType, imports, typeToImport)));
     }
 
     /**
@@ -1018,4 +1021,22 @@ public final class JavaParserUtils {
      */
     private JavaParserUtils() {
     }
+    
+    /**
+     * Returns the final {@link ClassOrInterfaceType} from a {@link Type}
+     * 
+     * @param initType
+     * @return the final {@link ClassOrInterfaceType} or null if no {@link ClassOrInterfaceType} found
+     * 
+     */
+    public static ClassOrInterfaceType getClassOrInterfaceType(Type type) {
+        Type tmp = type;
+        while (tmp instanceof ReferenceType) {
+               tmp = ((ReferenceType) tmp).getType();
+        };
+        if (tmp instanceof ClassOrInterfaceType){
+        	return (ClassOrInterfaceType) tmp;
+        }
+        return null;
+    }    
 }
