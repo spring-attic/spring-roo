@@ -1,0 +1,19 @@
+======================================================================
+LEGAL NOTICES
+======================================================================
+
+All code in this project is original work, except as disclosed below.
+
+-----------------------------------------------------------------------
+
+Licensed Software: Antlr Java Parser
+Software Web Site: https://github.com/antlrjavaparser/antlr-java-parser/
+Effective License: GNU Lesser General Public License
+License Info Page: http://www.gnu.org/licenses/lgpl-3.0.txt
+
+Antlr Java Parser is a runtime dependency of this module. It provides an
+abstract syntax tree (AST) model for parsing Java source code.
+
+-----------------------------------------------------------------------
+
+[end]
