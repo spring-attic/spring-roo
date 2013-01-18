@@ -280,6 +280,13 @@ public final class JavaParserUtils {
             return new JavaType(nameToFind.getName(), 0, DataType.VARIABLE,
                     null, null);
         }
+        
+        // Check if we are looking for the enclosingType itself
+        final NameExpr enclosingTypeName = getNameExpr(compilationUnitServices
+                .getEnclosingTypeName().getSimpleTypeName());
+        if (isEqual(enclosingTypeName, nameToFind)) {
+            return compilationUnitServices.getEnclosingTypeName();
+        }
 
         // We are searching for a non-qualified name expression (nameToFind), so
         // check if the compilation unit itself declares that type
@@ -698,7 +705,10 @@ public final class JavaParserUtils {
         }
         
         if (current.getArray() > 0) {
-            return new ReferenceType(resolvedName, current.getArray());
+        	// Primitives includes array declaration in resolvedName
+        	if (!current.isPrimitive()){
+        		return new ReferenceType(resolvedName, current.getArray());
+        	}
         }
 
         return resolvedName;
@@ -830,8 +840,21 @@ public final class JavaParserUtils {
         Validate.notNull(imports, "Compilation unit imports required");
         Validate.notNull(typeToImport, "Java type to import is required");
 
-        return new ReferenceType(getClassOrInterfaceType(importTypeIfRequired(
-                targetType, imports, typeToImport)));
+        final ClassOrInterfaceType cit = getClassOrInterfaceType(importTypeIfRequired(
+                targetType, imports, typeToImport));
+        
+        // Add any type arguments presented for the return type
+        if (typeToImport.getParameters().size() > 0) {
+            final List<Type> typeArgs = new ArrayList<Type>();
+            cit.setTypeArgs(typeArgs);
+            for (final JavaType parameter : typeToImport
+                    .getParameters()) {
+                typeArgs.add(JavaParserUtils.importParametersForType(
+                        targetType,
+                        imports, parameter));
+            }
+        }
+        return  new ReferenceType(cit);
     }
 
     /**
@@ -873,7 +896,8 @@ public final class JavaParserUtils {
             return new NameExpr(typeToImport.getSimpleTypeName());
         }
 
-        if (typeToImport.isDefaultPackage()) {
+        final JavaPackage typeToImportPackage = typeToImport.getPackage();
+        if (typeToImportPackage.equals(compilationUnitPackage)) {        	
             return new NameExpr(typeToImport.getSimpleTypeName());
         }
 
@@ -965,7 +989,7 @@ public final class JavaParserUtils {
                 .getFullyQualifiedPackageName()),
                 typeToImport.getSimpleTypeName());
     }
-
+    
     /**
      * Indicates whether two {@link NameExpr} expressions are equal.
      * <p>
