@@ -1,0 +1,130 @@
+/**
+ * File header
+ */
+package org.myPackage;
+
+// Simple comment1
+
+import java.lang.annotation.Documented;
+
+import test.importtest.pkg;
+
+/**
+ * Comment about import
+ */
+import static test.importtest.pkg.Hola.proofMethod;
+import java.util.*;
+
+/**
+ * @author DiSiD Technologies
+ */
+public class SimpleClass extends OtheClass<String, Boolean> implements SimpleInterface{
+	
+	/*
+	 * =========== Comment in code ================
+	 */
+
+	/**
+	 * Javadoc for field
+	 */
+	private final String[] params;
+	protected Double param1 = new Double(12);
+	private List<String>[] listArray = new List<String>[3];
+	Set<String>[] setArray = new Set<String>[] {null, null, null};
+	
+	/**
+	 * Enum javaDoc
+	 */
+	public enum theNumbers {uno, dos, tres};
+	
+	/**
+	 * Public constructor
+	 */
+	@Documented("aaadbbbdd")
+	// Not supported varing arguments public SimpleClass(Double param1, String...params) {
+	public SimpleClass(Double param1, String[] params, Set<String>[] setArrayParam) {
+		// Comment in public constructor
+		this.param1 = param1;
+		this.params = params;
+	}
+	
+	/**
+	 * methodVoid JavaDoc
+	 */
+	void methodVoid(Double param1, String[] params, Map<String,Object>[] mapArrayParam){
+		// Comment before for
+		for (Map<String,Object> map : mapArrayParam){
+			// comment inside for
+			map.isEmpty();
+		}
+	}
+
+	/**
+	 * Private constructor
+	 */
+	private SimpleClass() {
+		/*
+		 * Comment in private constructor
+		 */
+		this.param1 = null; // Comment inline1
+		// other comment between inline
+		this.params = null; // Comment inline2
+	}
+	
+	/**
+	 * Javadoc of hello method
+	 * 
+	 * @param value
+	 * @return
+	 */
+	@Deprecated(message="Do not use",more="Nothing")
+	@Override
+	public Sting hello(String value){
+		/*
+		 * Comment block inside method
+		 */
+		
+		// Simple comment inside method
+		// Simple comment inside method (2nd line)
+		
+		
+		return "Hello";
+	}
+	
+	private <T,X> Map<T,X> privateMethod(@ParameterAnnotation("xXX")T tValue, X xValue){
+		// Second method comment
+		return null;
+	}
+	
+	/**
+	 * SubClass JavaDoc
+	 */
+	private static class SubClass {
+		String string1;
+		final theNumbers enumValue = dos;
+		int aInteger = 2;
+		long aLong = 10l;
+		
+		SubClass(theNumbers enumValue) {
+			super();
+			// if comment
+			if (enumValue.equals(this.enumValue)) { 
+				// comment 'if' true
+				string1 = "equals"; // comment inline 'if' true 
+			} else if (theNumbers.tres.equals(enumValue)){
+				// comment 'elseif' true
+				string1 = "elseif"; // comment inline elseif true
+			} else {
+				/* comment in 'else' */
+				string1 = "else"; /* comment inline else*/
+			}
+		}
+		
+	}
+	
+	List<List<Map<String,Iterator<Long>>>> newList(List<Map<String,Iterator<Long>>> theList){
+        List<List<Map<String,Iterator<Long>>>> newListResult = new ArrayList<List<Map<String,Iterator<Long>>>>();
+        newListResult.add(theList);
+    	return newListResult;
+    }
+}

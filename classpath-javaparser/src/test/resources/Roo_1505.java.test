@@ -1,0 +1,23 @@
+package com.pet;
+
+import javax.persistence.Entity;
+import org.springframework.roo.addon.javabean.RooJavaBean;
+import org.springframework.roo.addon.tostring.RooToString;
+import org.springframework.roo.addon.entity.RooEntity;
+import javax.validation.constraints.NotNull;
+import java.util.Set;
+import javax.persistence.OneToMany;
+import javax.persistence.CascadeType;
+
+@Entity
+@RooJavaBean
+@RooToString
+@RooEntity
+public class Roo_1505 {
+
+    @NotNull
+    private String name;
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "owner")
+    private Set<Pet> pets = new HashSet();
+}

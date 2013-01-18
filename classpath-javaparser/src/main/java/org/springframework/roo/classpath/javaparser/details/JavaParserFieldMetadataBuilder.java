@@ -66,12 +66,9 @@ public class JavaParserFieldMetadataBuilder implements Builder<FieldMetadata> {
             finalType.setTypeArgs(fieldTypeArgs);
             for (final JavaType parameter : field.getFieldType()
                     .getParameters()) {
-                final NameExpr importedParameterType = JavaParserUtils
-                        .importTypeIfRequired(
-                                compilationUnitServices.getEnclosingTypeName(),
-                                compilationUnitServices.getImports(), parameter);
-                fieldTypeArgs.add(JavaParserUtils
-                        .getReferenceType(importedParameterType));
+                fieldTypeArgs.add(JavaParserUtils.importParametersForType(
+                        compilationUnitServices.getEnclosingTypeName(),
+                        compilationUnitServices.getImports(), parameter));
             }
         }
 
@@ -143,13 +140,9 @@ public class JavaParserFieldMetadataBuilder implements Builder<FieldMetadata> {
                     finalType.setTypeArgs(initTypeArgs);
                     for (final JavaType parameter : typeToImport
                             .getParameters()) {
-                        final NameExpr importedParameterType = JavaParserUtils
-                                .importTypeIfRequired(compilationUnitServices
-                                        .getEnclosingTypeName(),
-                                        compilationUnitServices.getImports(),
-                                        parameter);
-                        initTypeArgs.add(JavaParserUtils
-                                .getReferenceType(importedParameterType));
+                        initTypeArgs.add(JavaParserUtils.importParametersForType(
+                                compilationUnitServices.getEnclosingTypeName(),
+                                compilationUnitServices.getImports(), parameter));
                     }
                     classOrInterfaceType.setTypeArgs(initTypeArgs);
                 }
