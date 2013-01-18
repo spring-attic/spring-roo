@@ -267,7 +267,7 @@ public class IntegrationTestMetadata extends
             final AnnotationMetadataBuilder contextConfigurationBuilder = new AnnotationMetadataBuilder(
                     CONTEXT_CONFIGURATION);
             contextConfigurationBuilder.addStringAttribute("locations",
-                    "classpath:/META-INF/spring/applicationContext*.xml");
+                    "classpath*:/META-INF/spring/applicationContext*.xml");
             builder.addAnnotation(contextConfigurationBuilder);
         }
 
