@@ -9,6 +9,7 @@ import com.google.gwt.text.client.DateTimeFormatRenderer;
 import com.google.gwt.text.shared.AbstractRenderer;
 import com.google.gwt.text.shared.AbstractSafeHtmlRenderer;
 import com.google.gwt.text.shared.Renderer;
+import com.google.gwt.text.shared.SafeHtmlRenderer;
 
 {{#imports}}import {{=import}};
 {{/imports}}
