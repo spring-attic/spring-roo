@@ -1,5 +1,41 @@
 package org.springframework.roo.classpath.antlrjavaparser;
 
+import static org.springframework.roo.model.JavaType.OBJECT;
+
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
+import org.springframework.roo.classpath.PhysicalTypeCategory;
+import org.springframework.roo.classpath.TypeLocationService;
+import org.springframework.roo.classpath.TypeParsingService;
+import org.springframework.roo.classpath.antlrjavaparser.details.JavaParserAnnotationMetadataBuilder;
+import org.springframework.roo.classpath.antlrjavaparser.details.JavaParserClassOrInterfaceTypeDetailsBuilder;
+import org.springframework.roo.classpath.antlrjavaparser.details.JavaParserConstructorMetadataBuilder;
+import org.springframework.roo.classpath.antlrjavaparser.details.JavaParserFieldMetadataBuilder;
+import org.springframework.roo.classpath.antlrjavaparser.details.JavaParserMethodMetadataBuilder;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
+import org.springframework.roo.classpath.details.ConstructorMetadata;
+import org.springframework.roo.classpath.details.FieldMetadata;
+import org.springframework.roo.classpath.details.ImportMetadata;
+import org.springframework.roo.classpath.details.MethodMetadata;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
+import org.springframework.roo.metadata.MetadataService;
+import org.springframework.roo.model.JavaPackage;
+import org.springframework.roo.model.JavaSymbolName;
+import org.springframework.roo.model.JavaType;
+
 import com.github.antlrjavaparser.ASTHelper;
 import com.github.antlrjavaparser.JavaParser;
 import com.github.antlrjavaparser.ParseException;
@@ -16,41 +52,6 @@ import com.github.antlrjavaparser.api.expr.AnnotationExpr;
 import com.github.antlrjavaparser.api.expr.NameExpr;
 import com.github.antlrjavaparser.api.expr.QualifiedNameExpr;
 import com.github.antlrjavaparser.api.type.ClassOrInterfaceType;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.Validate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
-import org.springframework.roo.classpath.PhysicalTypeCategory;
-import org.springframework.roo.classpath.TypeLocationService;
-import org.springframework.roo.classpath.TypeParsingService;
-import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
-import org.springframework.roo.classpath.details.ConstructorMetadata;
-import org.springframework.roo.classpath.details.FieldMetadata;
-import org.springframework.roo.classpath.details.ImportMetadata;
-import org.springframework.roo.classpath.details.MethodMetadata;
-import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
-import org.springframework.roo.classpath.antlrjavaparser.details.JavaParserAnnotationMetadataBuilder;
-import org.springframework.roo.classpath.antlrjavaparser.details.JavaParserClassOrInterfaceTypeDetailsBuilder;
-import org.springframework.roo.classpath.antlrjavaparser.details.JavaParserConstructorMetadataBuilder;
-import org.springframework.roo.classpath.antlrjavaparser.details.JavaParserFieldMetadataBuilder;
-import org.springframework.roo.classpath.antlrjavaparser.details.JavaParserMethodMetadataBuilder;
-import org.springframework.roo.metadata.MetadataService;
-import org.springframework.roo.model.JavaPackage;
-import org.springframework.roo.model.JavaSymbolName;
-import org.springframework.roo.model.JavaType;
-
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-
-import static org.springframework.roo.model.JavaType.OBJECT;
 
 @Component(immediate = true)
 @Service
@@ -145,7 +146,8 @@ public class JavaParserTypeParsingService implements TypeParsingService {
             throw new IllegalStateException(e);
         }
         catch (final ParseException e) {
-            throw new IllegalStateException(e);
+            throw new IllegalStateException("Failed to parse " + typeName
+                    + " : " + e.getMessage());
         }
     }
 
@@ -185,7 +187,8 @@ public class JavaParserTypeParsingService implements TypeParsingService {
                             .getImportType().getSimpleTypeName());
                 }
                 compilationUnit.getImports().add(
-                        new ImportDeclaration(typeToImportExpr, importType.isStatic(), false));
+                        new ImportDeclaration(typeToImportExpr, importType
+                                .isStatic(), false));
             }
             else {
                 compilationUnit.getImports().add(

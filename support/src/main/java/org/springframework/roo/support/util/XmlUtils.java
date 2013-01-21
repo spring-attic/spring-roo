@@ -457,7 +457,7 @@ public final class XmlUtils {
      * @param inputStream the input stream to read from (required). The stream
      *            is closed upon completion.
      * @return a document.
-     * @throws IllegalStateException if the stream could not be read
+     * @throws IllegalStateException if the stream could not be read or parsed
      */
     public static Document readXml(InputStream inputStream) {
         Validate.notNull(inputStream, "InputStream required");
@@ -468,7 +468,7 @@ public final class XmlUtils {
             return getDocumentBuilder().parse(inputStream);
         }
         catch (final Exception e) {
-            throw new IllegalStateException("Could not open input stream", e);
+            throw new IllegalStateException(e);
         }
         finally {
             IOUtils.closeQuietly(inputStream);

@@ -55,7 +55,8 @@ public class JavaParserTypeResolutionService implements TypeResolutionService {
             return null;
         }
         catch (final ParseException e) {
-            throw new IllegalStateException(e);
+            throw new IllegalStateException("Failed to parse " + fileIdentifier
+                    + " : " + e.getMessage());
         }
     }
 
@@ -86,7 +87,7 @@ public class JavaParserTypeResolutionService implements TypeResolutionService {
         }
         catch (final ParseException e) {
             throw new IllegalStateException("Failed to parse " + fileIdentifier
-                    + ": " + e.getMessage(), e);
+                    + " : " + e.getMessage());
         }
     }
 }

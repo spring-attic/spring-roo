@@ -48,13 +48,20 @@ public class DefaultXmlRoundTripFileManager implements XmlRoundTripFileManager {
             }
             catch (final IOException ignored) {
             }
-            final Document original = XmlUtils.readXml(fileManager
-                    .getInputStream(filename));
-            if (XmlRoundTripUtils.compareDocuments(original, proposed)) {
-                DomUtils.removeTextNodes(original);
-                final String updateContents = XmlUtils.nodeToString(original);
-                fileManager.createOrUpdateTextFileIfRequired(filename,
-                        updateContents, false);
+            try {
+                final Document original = XmlUtils.readXml(fileManager
+                        .getInputStream(filename));
+                if (XmlRoundTripUtils.compareDocuments(original, proposed)) {
+                    DomUtils.removeTextNodes(original);
+                    final String updateContents = XmlUtils
+                            .nodeToString(original);
+                    fileManager.createOrUpdateTextFileIfRequired(filename,
+                            updateContents, false);
+                }
+            }
+            catch (final Exception e) {
+                throw new IllegalStateException("Failed to write " + filename
+                        + " : " + e.getMessage());
             }
         }
         else {

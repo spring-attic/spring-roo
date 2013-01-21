@@ -142,7 +142,8 @@ public class JavaParserTypeParsingService implements TypeParsingService {
                     typeLocationService).build();
         }
         catch (final ParseException e) {
-            throw new IllegalStateException("Failed to parse " + typeName, e);
+            throw new IllegalStateException("Failed to parse " + typeName
+                    + " : " + e.getMessage());
         }
     }
 
@@ -182,7 +183,8 @@ public class JavaParserTypeParsingService implements TypeParsingService {
                             .getImportType().getSimpleTypeName());
                 }
                 compilationUnit.getImports().add(
-                        new ImportDeclaration(typeToImportExpr, importType.isStatic(), false));
+                        new ImportDeclaration(typeToImportExpr, importType
+                                .isStatic(), false));
             }
             else {
                 compilationUnit.getImports().add(
