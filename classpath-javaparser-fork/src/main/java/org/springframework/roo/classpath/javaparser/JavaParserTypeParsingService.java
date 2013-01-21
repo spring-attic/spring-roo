@@ -447,10 +447,63 @@ public class JavaParserTypeParsingService implements TypeParsingService {
 
         compilationUnit.setImports(imports);
     }
+    
     @Override
     public String updateAndGetCompilationUnitContents(String fileIdentifier,
             ClassOrInterfaceTypeDetails cid) {
 
-    	return getCompilationUnitContents(cid);
-    }
+        // Validate parameters
+        Validate.notBlank(fileIdentifier, "Oringinal unit path required");
+        Validate.notNull(cid, "Type details required");
+
+        // Load original compilation unit from file
+        final File file = new File(fileIdentifier);
+        String fileContents = "";
+        try {
+            fileContents = FileUtils.readFileToString(file);
+        }
+        catch (IOException ignored) {
+        }
+        if (StringUtils.isBlank(fileContents)) {
+            return getCompilationUnitContents(cid);
+        }
+        CompilationUnit compilationUnit;
+        try {
+            compilationUnit = JavaParser.parse(new ByteArrayInputStream(
+                    fileContents.getBytes()));
+
+        }
+        catch (final ParseException e) {
+            throw new IllegalStateException(e);
+        }
+
+        // Load new compilation unit from cid information
+        final String cidContents = getCompilationUnitContents(cid);
+        CompilationUnit cidCompilationUnit;
+        try {
+            cidCompilationUnit = JavaParser.parse(new ByteArrayInputStream(
+                    cidContents.getBytes()));
+
+        }
+        catch (final ParseException e) {
+            throw new IllegalStateException(e);
+        }
+
+        // Update package
+        if (!compilationUnit.getPackage().getName().getName()
+                .equals(cidCompilationUnit.getPackage().getName().getName())) {
+            compilationUnit.setPackage(cidCompilationUnit.getPackage());
+        }
+
+        // Update imports
+        UpdateCompilationUnitUtils.updateCompilationUnitImports(
+                compilationUnit, cidCompilationUnit);
+
+        // Update types
+        UpdateCompilationUnitUtils.updateCompilationUnitTypes(compilationUnit,
+                cidCompilationUnit);
+
+        // Return new contents
+        return compilationUnit.toString();
+    }    
 }

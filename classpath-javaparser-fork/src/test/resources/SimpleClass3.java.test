@@ -1,0 +1,36 @@
+package org.myPackage;
+
+import java.util.*;
+
+public class SimpleClass3{
+
+	int mInteger = 0;
+	int[] mIntegerArray;
+	int[][] mIntegerArray2;
+	int[][][] mIntegerArray3;
+	
+	byte mByte;
+	byte mByteArray[];
+    byte mByteArray2[][];
+    byte mByteArray3[][][];
+    
+    Long mLongObject;
+    Long[] mLongObjectArray;
+    Long[][] mLongObjectArray2;
+    Long[][][] mLongObjectArray3;
+    
+    Set<String> mSetString;
+    Set<String>[] mSetStringArray;
+    Set<String>[][] mSetStringArray2;
+    Set<String>[][][] mSetStringArray3;
+
+    Map<String,Double> mMapStringDouble;
+    Map<String,Double>[] mMapStringDoubleArray;
+    Map<String,Double>[][] mMapStringDoubleArray2;
+    Map<String,Double>[][][] mMapStringDoubleArray3;    
+    
+    List<Map<String,Iterator<Double>>> mListMapStringIteratorDouble;
+    List<Map<String,Iterator<Double>>>[] mListMapStringIteratorDoubleArray;
+    List<Map<String,Iterator<Double>>>[][] mListMapStringIteratorDoubleArray2;
+    List<Map<String,Iterator<Double>>>[][][] mListMapStringIteratorDoubleArray3;
+}
