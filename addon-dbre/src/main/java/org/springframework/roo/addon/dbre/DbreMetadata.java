@@ -561,7 +561,8 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
             final boolean isIdField = isIdField(fieldName)
                     || column.isPrimaryKey();
             final boolean isVersionField = isVersionField(fieldName)
-                    || columnName.equals("version");
+                    || (columnName.equals("version") && !database
+                            .isDisableVersionFields());
             final boolean isCompositeKeyField = isCompositeKeyField(fieldName);
             final boolean isForeignKey = table
                     .findImportedKeyByLocalColumnName(columnName) != null;

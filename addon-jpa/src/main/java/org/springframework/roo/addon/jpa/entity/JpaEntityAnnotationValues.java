@@ -26,7 +26,7 @@ public class JpaEntityAnnotationValues extends AbstractAnnotationValues {
     @AutoPopulate private String inheritanceType = "";
     @AutoPopulate private boolean mappedSuperclass;
     @AutoPopulate private String schema = "";
-    @AutoPopulate private String sequenceName = "";
+    @AutoPopulate private String sequenceName = null;
     @AutoPopulate private String table = "";
     @AutoPopulate private String versionColumn = "";
     @AutoPopulate private String versionField = VERSION_FIELD_DEFAULT;

@@ -45,6 +45,7 @@ import org.springframework.roo.classpath.details.annotations.AnnotationAttribute
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.JpaJavaType;
 import org.springframework.roo.support.util.DomUtils;
 import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlRoundTripUtils;
@@ -290,12 +291,11 @@ public class JspViewManager {
                     .contains(CustomDataKeys.ONE_TO_MANY_FIELD)) {
                 // OneToMany relationships are managed from the 'many' side of
                 // the relationship, therefore we provide a link to the relevant
-                // form
-                // the link URL is determined as a best effort attempt following
-                // Roo REST conventions, this link might be wrong if custom
-                // paths are used
-                // if custom paths are used the developer can adjust the path
-                // attribute in the field:reference tag accordingly
+                // form the link URL is determined as a best effort attempt
+                // following Roo REST conventions, this link might be wrong if
+                // custom paths are used if custom paths are used the developer
+                // can adjust the path attribute in the field:reference tag
+                // accordingly
                 if (typePersistenceMetadataHolder != null) {
                     fieldElement = new XmlElementBuilder("field:simple",
                             document)
@@ -395,6 +395,14 @@ public class JspViewManager {
                     XmlUtils.convertId("c:"
                             + formBackingType.getFullyQualifiedTypeName() + "."
                             + field.getFieldName().getSymbolName()));
+
+            // If identifier manually assigned, then add 'required=true'
+            if (formBackingTypePersistenceMetadata.getIdentifierField()
+                    .getFieldName().equals(field.getFieldName())
+                    && field.getAnnotation(JpaJavaType.GENERATED_VALUE) == null) {
+                fieldElement.setAttribute("required", "true");
+            }
+
             fieldElement.setAttribute("z",
                     XmlRoundTripUtils.calculateUniqueKeyFor(fieldElement));
 
@@ -475,6 +483,14 @@ public class JspViewManager {
             }
         }
         formFields.addAll(fieldCopy);
+
+        // If identifier manually assigned, show it in creation
+        if (formBackingTypePersistenceMetadata.getIdentifierField()
+                .getAnnotation(JpaJavaType.GENERATED_VALUE) == null) {
+
+            formFields.add(formBackingTypePersistenceMetadata
+                    .getIdentifierField());
+        }
 
         createFieldsForCreateAndUpdate(formFields, document, formCreate, true);
         formCreate.setAttribute("z",

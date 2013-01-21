@@ -19,6 +19,8 @@ public class Table {
     private final Set<ForeignKey> exportedKeys = new LinkedHashSet<ForeignKey>();
     private final Set<ForeignKey> importedKeys = new LinkedHashSet<ForeignKey>();
     private boolean includeNonPortableAttributes;
+    private boolean disableVersionFields;
+    private boolean disableGeneratedIdentifiers;
     private final Set<Index> indices = new LinkedHashSet<Index>();
     private boolean joinTable;
     private final String name;
@@ -211,6 +213,14 @@ public class Table {
         return includeNonPortableAttributes;
     }
 
+    public boolean isDisableVersionFields() {
+        return disableVersionFields;
+    }
+
+    public boolean isDisableGeneratedIdentifiers() {
+        return disableGeneratedIdentifiers;
+    }
+
     public boolean isJoinTable() {
         return joinTable;
     }
@@ -228,6 +238,15 @@ public class Table {
         this.includeNonPortableAttributes = includeNonPortableAttributes;
     }
 
+    public void setDisableVersionFields(final boolean disableVersionFields) {
+        this.disableVersionFields = disableVersionFields;
+    }
+
+    public void setDisableGeneratedIdentifiers(
+            final boolean disableGeneratedIdentifiers) {
+        this.disableGeneratedIdentifiers = disableGeneratedIdentifiers;
+    }
+
     public void setJoinTable(final boolean joinTable) {
         this.joinTable = joinTable;
     }
@@ -235,9 +254,10 @@ public class Table {
     @Override
     public String toString() {
         return String
-                .format("Table [name=%s, schema=%s, catalog=%s, description=%s, columns=%s, importedKeys=%s, exportedKeys=%s, indices=%s, includeNonPortableAttributes=%s]",
+                .format("Table [name=%s, schema=%s, catalog=%s, description=%s, columns=%s, importedKeys=%s, exportedKeys=%s, indices=%s, includeNonPortableAttributes=%s, disableVersionFields=%s, disableGeneratedIdentifiers=%s]",
                         name, schema.getName(), catalog, description, columns,
                         importedKeys, exportedKeys, indices,
-                        includeNonPortableAttributes);
+                        includeNonPortableAttributes, disableVersionFields,
+                        disableGeneratedIdentifiers);
     }
 }
