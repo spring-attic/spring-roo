@@ -217,8 +217,8 @@ public class JavaParserFieldMetadataBuilder implements Builder<FieldMetadata> {
             }
         }
 
-        Validate.isTrue(toDelete > -1, "Could not locate field '" + fieldName
-                + "' to delete");
+        Validate.isTrue(toDelete > -1, "Could not locate field '%s' to delete",
+                fieldName);
 
         // Do removal outside iteration of body declaration members, to avoid
         // concurrent modification exceptions

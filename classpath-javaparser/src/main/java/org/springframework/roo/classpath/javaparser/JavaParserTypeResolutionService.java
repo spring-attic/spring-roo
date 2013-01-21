@@ -71,7 +71,7 @@ public class JavaParserTypeResolutionService implements TypeResolutionService {
             try {
                 typeContents = FileUtils.readFileToString(file);
             }
-            catch (IOException ignored) {
+            catch (final IOException ignored) {
             }
             if (StringUtils.isBlank(typeContents)) {
                 return null;
@@ -85,7 +85,8 @@ public class JavaParserTypeResolutionService implements TypeResolutionService {
                     .toString());
         }
         catch (final ParseException e) {
-            throw new IllegalStateException(e);
+            throw new IllegalStateException("Failed to parse " + fileIdentifier
+                    + ": " + e.getMessage(), e);
         }
     }
 }

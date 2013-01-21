@@ -142,7 +142,7 @@ public class JavaParserTypeParsingService implements TypeParsingService {
                     typeLocationService).build();
         }
         catch (final ParseException e) {
-            throw new IllegalStateException(e);
+            throw new IllegalStateException("Failed to parse " + typeName, e);
         }
     }
 

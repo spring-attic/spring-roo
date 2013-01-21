@@ -1,5 +1,22 @@
 package org.springframework.roo.classpath.antlrjavaparser.details;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
+import org.springframework.roo.classpath.antlrjavaparser.CompilationUnitServices;
+import org.springframework.roo.classpath.antlrjavaparser.JavaParserUtils;
+import org.springframework.roo.classpath.details.FieldMetadata;
+import org.springframework.roo.classpath.details.FieldMetadataBuilder;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
+import org.springframework.roo.model.Builder;
+import org.springframework.roo.model.JavaSymbolName;
+import org.springframework.roo.model.JavaType;
+
 import com.github.antlrjavaparser.ASTHelper;
 import com.github.antlrjavaparser.JavaParser;
 import com.github.antlrjavaparser.ParseException;
@@ -14,22 +31,6 @@ import com.github.antlrjavaparser.api.expr.NameExpr;
 import com.github.antlrjavaparser.api.expr.ObjectCreationExpr;
 import com.github.antlrjavaparser.api.type.ClassOrInterfaceType;
 import com.github.antlrjavaparser.api.type.Type;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.Validate;
-import org.springframework.roo.classpath.details.FieldMetadata;
-import org.springframework.roo.classpath.details.FieldMetadataBuilder;
-import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
-import org.springframework.roo.classpath.antlrjavaparser.CompilationUnitServices;
-import org.springframework.roo.classpath.antlrjavaparser.JavaParserUtils;
-import org.springframework.roo.model.Builder;
-import org.springframework.roo.model.JavaSymbolName;
-import org.springframework.roo.model.JavaType;
-
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
 
 /**
  * Java Parser implementation of {@link FieldMetadata}.
@@ -228,8 +229,8 @@ public class JavaParserFieldMetadataBuilder implements Builder<FieldMetadata> {
             }
         }
 
-        Validate.isTrue(toDelete > -1, "Could not locate field '" + fieldName
-                + "' to delete");
+        Validate.isTrue(toDelete > -1, "Could not locate field '%s' to delete",
+                fieldName);
 
         // Do removal outside iteration of body declaration members, to avoid
         // concurrent modification exceptions
