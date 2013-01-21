@@ -31,6 +31,8 @@ import org.springframework.roo.addon.dbre.model.DbreModelService;
 import org.springframework.roo.addon.dbre.model.Table;
 import org.springframework.roo.addon.jpa.identifier.Identifier;
 import org.springframework.roo.addon.jpa.identifier.IdentifierService;
+import org.springframework.roo.addon.layers.repository.jpa.RepositoryJpaOperations;
+import org.springframework.roo.addon.layers.service.ServiceOperations;
 import org.springframework.roo.addon.test.IntegrationTestOperations;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
@@ -81,6 +83,8 @@ public class DbreDatabaseListenerImpl extends
     @Reference private FileManager fileManager;
     @Reference private IntegrationTestOperations integrationTestOperations;
     @Reference private ProjectOperations projectOperations;
+    @Reference private RepositoryJpaOperations repositoryJpaOperations;
+    @Reference private ServiceOperations serviceOperations;
     @Reference private Shell shell;
     @Reference private TypeLocationService typeLocationService;
     @Reference private TypeManagementService typeManagementService;
@@ -612,6 +616,8 @@ public class DbreDatabaseListenerImpl extends
                 final JavaType javaType = DbreTypeUtils
                         .suggestTypeNameForNewTable(table.getName(),
                                 schemaPackage);
+                final boolean activeRecord = database.isActiveRecord()
+                        && !database.isRepository();
                 if (typeLocationService.getTypeDetails(javaType) == null) {
                     table.setIncludeNonPortableAttributes(database
                             .isIncludeNonPortableAttributes());
@@ -620,15 +626,36 @@ public class DbreDatabaseListenerImpl extends
                     table.setDisableGeneratedIdentifiers(database
                             .isDisableGeneratedIdentifiers());
                     newEntities.add(createNewManagedEntityFromTable(javaType,
-                            table, database.isActiveRecord()));
+                            table, activeRecord));
                 }
+            }
+        }
+
+        // Create repositories if required
+        if (database.isRepository()) {
+            for (final ClassOrInterfaceTypeDetails entity : newEntities) {
+                final JavaType type = entity.getType();
+                repositoryJpaOperations.setupRepository(
+                        new JavaType(type.getFullyQualifiedTypeName()
+                                + "Repository"), type);
+            }
+        }
+
+        // Create services if required
+        if (database.isService()) {
+            for (final ClassOrInterfaceTypeDetails entity : newEntities) {
+                final JavaType type = entity.getType();
+                final String typeName = type.getFullyQualifiedTypeName();
+                serviceOperations.setupService(new JavaType(typeName
+                        + "Service"), new JavaType(typeName + "ServiceImpl"),
+                        type);
             }
         }
 
         // Create integration tests if required
         if (database.isTestAutomatically()) {
             for (final ClassOrInterfaceTypeDetails entity : newEntities) {
-                integrationTestOperations.newIntegrationTest(entity.getName());
+                integrationTestOperations.newIntegrationTest(entity.getType());
             }
         }
 

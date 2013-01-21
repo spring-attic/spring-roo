@@ -20,11 +20,17 @@ import org.springframework.roo.model.JavaPackage;
  */
 public class Database {
 
-    // Whether to generate active record CRUD methods for each entity
+    /** Whether or not to generate active record CRUD methods for each entity */
     private boolean activeRecord;
 
     /** The JavaPackage where entities are created */
     private JavaPackage destinationPackage;
+
+    /** Whether or not to disable identifier auto generation */
+    private boolean disableGeneratedIdentifiers;
+
+    /** Whether or not to disable version fields */
+    private boolean disableVersionFields;
 
     /**
      * Whether or not to included non-portable JPA attributes in the @Column
@@ -32,17 +38,17 @@ public class Database {
      */
     private boolean includeNonPortableAttributes;
 
-    /** Whether or not to disable tables version column as concurrency control */
-    private boolean disableVersionFields;
-
-    /** Whether or not to disable tables identifier auto generation */
-    private boolean disableGeneratedIdentifiers;
-
     /** The module where the entities are created */
     private String moduleName;
 
     /** Whether or not this database has multiple schemas */
     private boolean multipleSchemas;
+
+    /** Whether or not to generate a repository layer for each entity */
+    private boolean repository;
+
+    /** Whether or not to generate a service layer for each entity */
+    private boolean service;
 
     /** All tables. */
     private final Set<Table> tables;
@@ -127,7 +133,98 @@ public class Database {
     }
 
     /**
-     * Initialises the model by establishing the relationships between elements
+     * Indicates whether active record CRUD methods should be generated for each
+     * entity
+     * 
+     * @return see above
+     * @since 1.2.0
+     */
+    public boolean isActiveRecord() {
+        return activeRecord;
+    }
+
+    public boolean isDisableGeneratedIdentifiers() {
+        return disableGeneratedIdentifiers;
+    }
+
+    public boolean isDisableVersionFields() {
+        return disableVersionFields;
+    }
+
+    public boolean isIncludeNonPortableAttributes() {
+        return includeNonPortableAttributes;
+    }
+
+    public boolean isRepository() {
+        return repository;
+    }
+
+    public boolean isService() {
+        return service;
+    }
+
+    public boolean isTestAutomatically() {
+        return testAutomatically;
+    }
+
+    /**
+     * Sets whether active record CRUD methods should be generated for each
+     * entity
+     * 
+     * @param activeRecord
+     * @since 1.2.0
+     */
+    public void setActiveRecord(final boolean activeRecord) {
+        this.activeRecord = activeRecord;
+    }
+
+    public void setDestinationPackage(final JavaPackage destinationPackage) {
+        this.destinationPackage = destinationPackage;
+    }
+
+    public void setDisableGeneratedIdentifiers(
+            final boolean disableGeneratedIdentifiers) {
+        this.disableGeneratedIdentifiers = disableGeneratedIdentifiers;
+    }
+
+    public void setDisableVersionFields(final boolean disableVersionFields) {
+        this.disableVersionFields = disableVersionFields;
+    }
+
+    public void setIncludeNonPortableAttributes(
+            final boolean includeNonPortableAttributes) {
+        this.includeNonPortableAttributes = includeNonPortableAttributes;
+    }
+
+    public void setModuleName(final String moduleName) {
+        this.moduleName = moduleName;
+    }
+
+    public void setRepository(final boolean repository) {
+        this.repository = repository;
+    }
+
+    public void setService(final boolean service) {
+        this.service = service;
+    }
+
+    public void setTestAutomatically(final boolean testAutomatically) {
+        this.testAutomatically = testAutomatically;
+    }
+
+    @Override
+    public String toString() {
+        return String
+                .format("Database [activeRecord=%s, destinationPackage=%s, disableGeneratedIdentifiers=%s, disableVersionFields=%s, includeNonPortableAttributes=%s, moduleName=%s, multipleSchemas=%s, repository=%s, service=%s, tables=%s, testAutomatically=%s]",
+                        activeRecord, destinationPackage,
+                        disableGeneratedIdentifiers, disableVersionFields,
+                        includeNonPortableAttributes, moduleName,
+                        multipleSchemas, repository, service, tables,
+                        testAutomatically);
+    }
+
+    /**
+     * Initializes the model by establishing the relationships between elements
      * in this model eg. in foreign keys etc.
      */
     private void init() {
@@ -292,76 +389,4 @@ public class Database {
         }
     }
 
-    /**
-     * Indicates whether active record CRUD methods should be generated for each
-     * entity
-     * 
-     * @return see above
-     * @since 1.2.0
-     */
-    public boolean isActiveRecord() {
-        return activeRecord;
-    }
-
-    public boolean isIncludeNonPortableAttributes() {
-        return includeNonPortableAttributes;
-    }
-
-    public boolean isDisableVersionFields() {
-        return disableVersionFields;
-    }
-
-    public boolean isDisableGeneratedIdentifiers() {
-        return disableGeneratedIdentifiers;
-    }
-
-    public boolean isTestAutomatically() {
-        return testAutomatically;
-    }
-
-    /**
-     * Sets whether active record CRUD methods should be generated for each
-     * entity
-     * 
-     * @param activeRecord
-     * @since 1.2.0
-     */
-    public void setActiveRecord(final boolean activeRecord) {
-        this.activeRecord = activeRecord;
-    }
-
-    public void setDestinationPackage(final JavaPackage destinationPackage) {
-        this.destinationPackage = destinationPackage;
-    }
-
-    public void setIncludeNonPortableAttributes(
-            final boolean includeNonPortableAttributes) {
-        this.includeNonPortableAttributes = includeNonPortableAttributes;
-    }
-
-    public void setDisableVersionFields(final boolean disableVersionFields) {
-        this.disableVersionFields = disableVersionFields;
-    }
-
-    public void setDisableGeneratedIdentifiers(
-            final boolean disableGeneratedIdentifiers) {
-        this.disableGeneratedIdentifiers = disableGeneratedIdentifiers;
-    }
-
-    public void setModuleName(final String moduleName) {
-        this.moduleName = moduleName;
-    }
-
-    public void setTestAutomatically(final boolean testAutomatically) {
-        this.testAutomatically = testAutomatically;
-    }
-
-    @Override
-    public String toString() {
-        return String
-                .format("Database [tables=%s, destinationPackage=%s, testAutomatically=%s, includeNonPortableAttributes=%s, disableVersionFields=%s, disableGeneratedIdentifiers=%s]",
-                        tables, destinationPackage, testAutomatically,
-                        includeNonPortableAttributes, disableVersionFields,
-                        disableGeneratedIdentifiers);
-    }
 }

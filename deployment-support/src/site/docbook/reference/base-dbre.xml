@@ -241,8 +241,11 @@ JDBC driver not available for 'com.mysql.jdbc.Driver'</programlisting></para>
       </listitem>
 
       <listitem>
-        <para><programlisting>roo&gt; <emphasis role="bold">database reverse engineer --schema</emphasis> --package --testAutomatically --enableViews 
-                               --includeTables --excludeTables --includeNonPortableAttributes</programlisting></para>
+        <para><programlisting>roo&gt; <emphasis role="bold">database reverse engineer --schema</emphasis> --package --activeRecord --repository 
+                               --service --testAutomatically --enableViews 
+                               --includeTables --excludeTables 
+                               --includeNonPortableAttributes 
+                               --disableVersionFields --disableGeneratedIdentifiers </programlisting></para>
 
         <para>This command creates JPA entities in your project representing
         the tables and columns in your database. As for the database
@@ -252,6 +255,13 @@ JDBC driver not available for 'com.mysql.jdbc.Driver'</programlisting></para>
         --package option on second and subsequent executions of the database
         reverse engineer command, new entities will be created in the same
         package as they were previously created in.</para>
+
+        <para>Use the --activeRecord option to create 'Active Record' entities (default if not specified).</para>
+
+        <para>Use the --repository option to create Spring Data JPA Repositories for each entity. 
+        If specified as true, the --activeRecord option is ignored.</para>
+
+        <para>Use the --service option to create a service layer for each entity.</para>
 
         <para>Use the --testAutomatically option to create integration tests
         automatically for each new entity created by reverse
@@ -265,6 +275,10 @@ JDBC driver not available for 'com.mysql.jdbc.Driver'</programlisting></para>
         <para>You can generate non-portable JPA @Column attributes, such as
         'columnDefinition' by specifying the --includeNonPortableAttributes
         option.</para>
+
+        <para>Use the --disableVersionFields option to disable the generation of 'version' fields.</para>
+
+        <para>Use the --disableGeneratedIdentifiers option to disable auto generated identifiers.</para>
 
         <para>Since the DBRE Add-on provides incremental database reverse
         engineering, you can execute the command as many times as you want and

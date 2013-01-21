@@ -108,12 +108,15 @@ public class DbreOperationsImpl implements DbreOperations {
             final boolean includeNonPortableAttributes,
             final boolean disableVersionFields,
             final boolean disableGeneratedIdentifiers,
-            final boolean activeRecord) {
+            final boolean activeRecord, final boolean repository,
+            final boolean service) {
         // Force it to refresh the database from the actual JDBC connection
         final Database database = dbreModelService.refreshDatabase(schemas,
                 view, includeTables, excludeTables);
         database.setModuleName(projectOperations.getFocusedModuleName());
         database.setActiveRecord(activeRecord);
+        database.setRepository(repository);
+        database.setService(service);
         database.setDestinationPackage(destinationPackage);
         database.setIncludeNonPortableAttributes(includeNonPortableAttributes);
         database.setDisableVersionFields(disableVersionFields);
