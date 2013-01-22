@@ -75,7 +75,7 @@ public class JavaParserTypeResolutionService implements TypeResolutionService {
             try {
                 typeContents = FileUtils.readFileToString(file);
             }
-            catch (IOException ignored) {
+            catch (final IOException ignored) {
             }
             if (StringUtils.isBlank(typeContents)) {
                 return null;
