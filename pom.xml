@@ -34,8 +34,8 @@
         <module>project</module>
         <module>process-manager</module>
         <module>classpath</module>
-        <module>classpath-javaparser</module>
-        <!-- module>classpath-antlrjavaparser</module -->
+        <!-- module>classpath-javaparser</module -->
+        <module>classpath-antlrjavaparser</module>
         <module>addon-tostring</module>
         <module>addon-equals</module>
         <module>addon-javabean</module>
@@ -494,12 +494,13 @@
                 <artifactId>org.springframework.roo.wrapping.cloud-foundry-api</artifactId>
                 <version>0.0.1.0010</version>
             </dependency>
+            <!--
             <dependency>
                 <groupId>org.springframework.roo.wrapping</groupId>
                 <artifactId>org.springframework.roo.wrapping.javaparser</artifactId>
                 <version>1.0.7.0010</version>
             </dependency>
-            <!--
+            -->
             <dependency>
                 <groupId>org.springframework.roo.wrapping</groupId>
                 <artifactId>org.springframework.roo.wrapping.antlr-java-parser</artifactId>
@@ -510,7 +511,6 @@
                 <artifactId>org.springframework.roo.wrapping.antlr4-runtime</artifactId>
                 <version>4.0-rc-1.0001</version>
             </dependency>
-            -->
             <dependency>
                 <groupId>org.springframework.roo.wrapping</groupId>
                 <artifactId>org.springframework.roo.wrapping.hapax</artifactId>
@@ -707,18 +707,18 @@
                 <artifactId>org.springframework.roo.classpath</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <!--
             <dependency>
                 <groupId>org.springframework.roo</groupId>
                 <artifactId>org.springframework.roo.classpath.javaparser</artifactId>
                 <version>${project.version}</version>
             </dependency>
-            <!--
+           -->
             <dependency>
                 <groupId>org.springframework.roo</groupId>
                 <artifactId>org.springframework.roo.classpath.antlrjavaparser</artifactId>
                 <version>${project.version}</version>
             </dependency>
-           -->
              <dependency>
                 <groupId>org.springframework.roo</groupId>
                 <artifactId>org.springframework.roo.deployment.support</artifactId>
