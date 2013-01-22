@@ -1223,7 +1223,7 @@ public class DataOnDemandMetadata extends
         final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
         final String dataField = getDataFieldName().getSymbolName();
         bodyBuilder.appendFormalLine("int from = 0;");
-        bodyBuilder.appendFormalLine("int to = 10;");
+        bodyBuilder.appendFormalLine("int to = " + quantity + ";");
         bodyBuilder.appendFormalLine(dataField + " = "
                 + findEntriesMethod.getMethodCall() + ";");
         bodyBuilder.appendFormalLine("if (" + dataField + " == null) {");
