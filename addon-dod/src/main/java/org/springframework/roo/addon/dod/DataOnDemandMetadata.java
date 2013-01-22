@@ -141,9 +141,9 @@ public class DataOnDemandMetadata extends
      * @param governorPhysicalTypeMetadata
      * @param annotationValues
      * @param identifierAccessor
-     * @param findMethodAdditions
+     * @param findMethod
      * @param findEntriesMethod
-     * @param persistMethodAdditions
+     * @param persistMethod
      * @param flushMethod
      * @param locatedFields
      * @param entity
@@ -155,9 +155,9 @@ public class DataOnDemandMetadata extends
             final PhysicalTypeMetadata governorPhysicalTypeMetadata,
             final DataOnDemandAnnotationValues annotationValues,
             final MethodMetadata identifierAccessor,
-            final MemberTypeAdditions findMethodAdditions,
-            final MemberTypeAdditions findEntriesMethodAdditions,
-            final MemberTypeAdditions persistMethodAdditions,
+            final MemberTypeAdditions findMethod,
+            final MemberTypeAdditions findEntriesMethod,
+            final MemberTypeAdditions persistMethod,
             final MemberTypeAdditions flushMethod,
             final Map<FieldMetadata, DataOnDemandMetadata> locatedFields,
             final JavaType identifierType,
@@ -176,9 +176,9 @@ public class DataOnDemandMetadata extends
             return;
         }
 
-        if (findEntriesMethodAdditions == null
-                || persistMethodAdditions == null
-                || findMethodAdditions == null) {
+        if (findEntriesMethod == null
+                || persistMethod == null
+                || findMethod == null) {
             valid = false;
             return;
         }
@@ -186,7 +186,7 @@ public class DataOnDemandMetadata extends
         this.embeddedIdHolder = embeddedIdHolder;
         this.embeddedHolders = embeddedHolders;
         this.identifierAccessor = identifierAccessor;
-        findMethod = findMethodAdditions;
+        this.findMethod = findMethod;
         this.identifierType = identifierType;
         entity = annotationValues.getEntity();
 
@@ -232,7 +232,7 @@ public class DataOnDemandMetadata extends
         setRandomPersistentEntityMethod();
         setModifyMethod();
         builder.addMethod(getInitMethod(annotationValues.getQuantity(),
-                findEntriesMethodAdditions, persistMethodAdditions, flushMethod));
+                findEntriesMethod, persistMethod, flushMethod));
 
         itdTypeDetails = builder.build();
     }
@@ -1184,15 +1184,15 @@ public class DataOnDemandMetadata extends
     /**
      * Returns the DoD type's "void init()" method (existing or generated)
      * 
-     * @param findEntriesMethodAdditions (required)
-     * @param persistMethodAdditions (required)
-     * @param flushAdditions (required)
+     * @param findEntriesMethod (required)
+     * @param persistMethod (required)
+     * @param flushMethod (required)
      * @return never <code>null</code>
      */
     private MethodMetadataBuilder getInitMethod(final int quantity,
-            final MemberTypeAdditions findEntriesMethodAdditions,
-            final MemberTypeAdditions persistMethodAdditions,
-            final MemberTypeAdditions flushAdditions) {
+            final MemberTypeAdditions findEntriesMethod,
+            final MemberTypeAdditions persistMethod,
+            final MemberTypeAdditions flushMethod) {
         // Method definition to find or build
         final JavaSymbolName methodName = new JavaSymbolName("init");
         final JavaType[] parameterTypes = {};
@@ -1216,16 +1216,16 @@ public class DataOnDemandMetadata extends
         builder.getImportRegistrationResolver().addImports(ARRAY_LIST,
                 ITERATOR, CONSTRAINT_VIOLATION_EXCEPTION, CONSTRAINT_VIOLATION);
 
-        findEntriesMethodAdditions
+        findEntriesMethod
                 .copyAdditionsTo(builder, governorTypeDetails);
-        persistMethodAdditions.copyAdditionsTo(builder, governorTypeDetails);
+        persistMethod.copyAdditionsTo(builder, governorTypeDetails);
 
         final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
         final String dataField = getDataFieldName().getSymbolName();
         bodyBuilder.appendFormalLine("int from = 0;");
         bodyBuilder.appendFormalLine("int to = 10;");
         bodyBuilder.appendFormalLine(dataField + " = "
-                + findEntriesMethodAdditions.getMethodCall() + ";");
+                + findEntriesMethod.getMethodCall() + ";");
         bodyBuilder.appendFormalLine("if (" + dataField + " == null) {");
         bodyBuilder.indent();
         bodyBuilder
@@ -1251,30 +1251,30 @@ public class DataOnDemandMetadata extends
                 + "(i);");
         bodyBuilder.appendFormalLine("try {");
         bodyBuilder.indent();
-        bodyBuilder.appendFormalLine(persistMethodAdditions.getMethodCall()
+        bodyBuilder.appendFormalLine(persistMethod.getMethodCall()
                 + ";");
         bodyBuilder.indentRemove();
         bodyBuilder
-                .appendFormalLine("} catch (ConstraintViolationException e) {");
+                .appendFormalLine("} catch (final ConstraintViolationException e) {");
         bodyBuilder.indent();
         bodyBuilder
-                .appendFormalLine("StringBuilder msg = new StringBuilder();");
+                .appendFormalLine("final StringBuilder msg = new StringBuilder();");
         bodyBuilder
                 .appendFormalLine("for (Iterator<ConstraintViolation<?>> iter = e.getConstraintViolations().iterator(); iter.hasNext();) {");
         bodyBuilder.indent();
         bodyBuilder
-                .appendFormalLine("ConstraintViolation<?> cv = iter.next();");
+                .appendFormalLine("final ConstraintViolation<?> cv = iter.next();");
         bodyBuilder
-                .appendFormalLine("msg.append(\"[\").append(cv.getConstraintDescriptor()).append(\":\").append(cv.getMessage()).append(\"=\").append(cv.getInvalidValue()).append(\"]\");");
+                .appendFormalLine("msg.append(\"[\").append(cv.getRootBean().getClass().getName()).append(\".\").append(cv.getPropertyPath()).append(\": \").append(cv.getMessage()).append(\" (invalid value = \").append(cv.getInvalidValue()).append(\")\").append(\"]\");");
         bodyBuilder.indentRemove();
         bodyBuilder.appendFormalLine("}");
         bodyBuilder
-                .appendFormalLine("throw new RuntimeException(msg.toString(), e);");
+                .appendFormalLine("throw new IllegalStateException(msg.toString(), e);");
         bodyBuilder.indentRemove();
         bodyBuilder.appendFormalLine("}");
-        if (flushAdditions != null) {
-            bodyBuilder.appendFormalLine(flushAdditions.getMethodCall() + ";");
-            flushAdditions.copyAdditionsTo(builder, governorTypeDetails);
+        if (flushMethod != null) {
+            bodyBuilder.appendFormalLine(flushMethod.getMethodCall() + ";");
+            flushMethod.copyAdditionsTo(builder, governorTypeDetails);
         }
         bodyBuilder.appendFormalLine(dataField + ".add(" + OBJ_VAR + ");");
         bodyBuilder.indentRemove();
