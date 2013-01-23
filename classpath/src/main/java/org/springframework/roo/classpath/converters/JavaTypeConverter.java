@@ -214,7 +214,7 @@ public class JavaTypeConverter implements Converter<JavaType> {
         }
     }
 
-    protected Collection<JavaType> getTypesForModule(
+    private Collection<JavaType> getTypesForModule(
             final String optionContext, final Pom targetModule) {
         final Collection<JavaType> typesForModule = typeLocationService
                 .getTypesForModule(targetModule);
