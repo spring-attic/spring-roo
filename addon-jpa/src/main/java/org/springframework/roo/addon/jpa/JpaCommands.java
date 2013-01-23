@@ -8,6 +8,9 @@ import static org.springframework.roo.model.RooJavaType.ROO_JPA_ACTIVE_RECORD;
 import static org.springframework.roo.model.RooJavaType.ROO_JPA_ENTITY;
 import static org.springframework.roo.model.RooJavaType.ROO_SERIALIZABLE;
 import static org.springframework.roo.model.RooJavaType.ROO_TO_STRING;
+import static org.springframework.roo.shell.OptionContexts.INTERFACE;
+import static org.springframework.roo.shell.OptionContexts.SUPERCLASS;
+import static org.springframework.roo.shell.OptionContexts.UPDATE_PROJECT;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,6 +36,7 @@ import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
 import org.springframework.roo.shell.CommandMarker;
+import org.springframework.roo.shell.OptionContexts;
 import org.springframework.roo.shell.converters.StaticFieldConverter;
 import org.springframework.roo.support.logging.HandlerUtils;
 
@@ -66,7 +70,7 @@ public class JpaCommands implements CommandMarker {
 
     @CliCommand(value = "embeddable", help = "Creates a new Java class source file with the JPA @Embeddable annotation in SRC_MAIN_JAVA")
     public void createEmbeddableClass(
-            @CliOption(key = "class", optionContext = "update,project", mandatory = true, help = "The name of the class to create") final JavaType name,
+            @CliOption(key = "class", optionContext = UPDATE_PROJECT, mandatory = true, help = "The name of the class to create") final JavaType name,
             @CliOption(key = "serializable", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Whether the generated class should implement java.io.Serializable") final boolean serializable,
             @CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") final boolean permitReservedWords) {
 
@@ -176,8 +180,9 @@ public class JpaCommands implements CommandMarker {
 
     @CliCommand(value = "entity jpa", help = "Creates a new JPA persistent entity in SRC_MAIN_JAVA")
     public void newPersistenceClassJpa(
-            @CliOption(key = "class", optionContext = "update,project", mandatory = true, help = "Name of the entity to create") final JavaType name,
-            @CliOption(key = "extends", mandatory = false, unspecifiedDefaultValue = "java.lang.Object", help = "The superclass (defaults to java.lang.Object)") final JavaType superclass,
+            @CliOption(key = "class", optionContext = OptionContexts.UPDATE_PROJECT, mandatory = true, help = "Name of the entity to create") final JavaType name,
+            @CliOption(key = "extends", mandatory = false, unspecifiedDefaultValue = "java.lang.Object", optionContext = SUPERCLASS, help = "The superclass (defaults to java.lang.Object)") final JavaType superclass,
+            @CliOption(key = "implements", mandatory = false, optionContext = INTERFACE, help = "The interface to implement") final JavaType implementsType,
             @CliOption(key = "abstract", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Whether the generated class should be marked as abstract") final boolean createAbstract,
             @CliOption(key = "testAutomatically", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Create automatic integration tests for this entity") final boolean testAutomatically,
             @CliOption(key = "table", mandatory = false, help = "The JPA table name to use for this entity") final String table,
@@ -244,7 +249,7 @@ public class JpaCommands implements CommandMarker {
 
         // Produce the entity itself
         jpaOperations.newEntity(name, createAbstract, superclass,
-                annotationBuilder);
+                implementsType, annotationBuilder);
 
         // Create entity identifier class if required
         if (!(identifierType.getPackage().getFullyQualifiedPackageName()

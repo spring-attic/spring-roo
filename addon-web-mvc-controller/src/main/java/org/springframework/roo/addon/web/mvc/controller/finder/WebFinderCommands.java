@@ -1,5 +1,7 @@
 package org.springframework.roo.addon.web.mvc.controller.finder;
 
+import static org.springframework.roo.shell.OptionContexts.UPDATE_PROJECT;
+
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -24,7 +26,7 @@ public class WebFinderCommands implements CommandMarker {
     @CliCommand(value = "web mvc finder add", help = "Adds @RooWebFinder annotation to MVC controller type")
     public void add(
             @CliOption(key = "formBackingType", mandatory = true, help = "The finder-enabled type") final JavaType finderType,
-            @CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*", optionContext = "update,project", help = "The controller java type to apply this annotation to") final JavaType controllerType) {
+            @CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*", optionContext = UPDATE_PROJECT, help = "The controller java type to apply this annotation to") final JavaType controllerType) {
 
         webFinderOperations.annotateType(controllerType, finderType);
     }

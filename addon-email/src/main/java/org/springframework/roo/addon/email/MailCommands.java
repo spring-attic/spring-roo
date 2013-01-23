@@ -1,5 +1,7 @@
 package org.springframework.roo.addon.email;
 
+import static org.springframework.roo.shell.OptionContexts.UPDATE_PROJECT;
+
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -44,7 +46,7 @@ public class MailCommands implements CommandMarker {
     @CliCommand(value = "field email template", help = "Inserts a MailTemplate field into an existing type")
     public void injectEmailTemplate(
             @CliOption(key = { "", "fieldName" }, mandatory = false, specifiedDefaultValue = "mailTemplate", unspecifiedDefaultValue = "mailTemplate", help = "The name of the field to add") final JavaSymbolName fieldName,
-            @CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*", optionContext = "update,project", help = "The name of the class to receive this field") final JavaType typeName,
+            @CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*", optionContext = UPDATE_PROJECT, help = "The name of the class to receive this field") final JavaType typeName,
             @CliOption(key = "async", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates if the injected method should be executed asynchronously") final boolean async) {
 
         mailOperations.injectEmailTemplate(typeName, fieldName, async);

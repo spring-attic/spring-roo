@@ -7,5 +7,6 @@ package org.springframework.roo.classpath;
  * @since 1.0
  */
 public enum PhysicalTypeCategory {
+
     ANNOTATION, CLASS, ENUMERATION, INTERFACE, ITD, OTHER;
 }

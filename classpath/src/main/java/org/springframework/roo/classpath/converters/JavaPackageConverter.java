@@ -1,5 +1,7 @@
 package org.springframework.roo.classpath.converters;
 
+import static org.springframework.roo.shell.OptionContexts.UPDATE;
+
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -47,7 +49,7 @@ public class JavaPackageConverter implements Converter<JavaPackage> {
         }
         final JavaPackage result = new JavaPackage(
                 convertToFullyQualifiedPackageName(value));
-        if (optionContext != null && optionContext.contains("update")) {
+        if (optionContext != null && optionContext.contains(UPDATE)) {
             lastUsed.setPackage(result);
         }
         return result;

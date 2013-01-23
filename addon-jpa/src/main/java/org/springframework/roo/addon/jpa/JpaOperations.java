@@ -76,10 +76,11 @@ public interface JpaOperations extends Feature {
      * @param createAbstract indicates whether the entity will be an abstract
      *            class
      * @param superclass the super class of the entity
+     * @param implementsType the interface to implement
      * @param annotations the entity's annotations
      */
     void newEntity(JavaType name, boolean createAbstract, JavaType superclass,
-            List<AnnotationMetadataBuilder> annotations);
+            JavaType implementsType, List<AnnotationMetadataBuilder> annotations);
 
     /**
      * Creates a new JPA identifier class.

@@ -8,6 +8,7 @@ import static org.springframework.roo.model.RooJavaType.ROO_TO_STRING;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -60,7 +61,8 @@ public class ClasspathOperationsImpl implements ClasspathOperations {
     @Override
     public void createClass(final JavaType name, final boolean rooAnnotations,
             final LogicalPath path, final JavaType superclass,
-            final boolean createAbstract, final boolean permitReservedWords) {
+            final JavaType implementsType, final boolean createAbstract,
+            final boolean permitReservedWords) {
         if (!permitReservedWords) {
             ReservedWords.verifyReservedWordsNotPresent(name);
         }
@@ -70,14 +72,13 @@ public class ClasspathOperationsImpl implements ClasspathOperations {
                 "Class name '%s' is part of java.lang",
                 name.getSimpleTypeName());
 
-        final String declaredByMetadataId = PhysicalTypeIdentifier
-                .createIdentifier(name, path);
-
         int modifier = Modifier.PUBLIC;
         if (createAbstract) {
             modifier |= Modifier.ABSTRACT;
         }
 
+        final String declaredByMetadataId = PhysicalTypeIdentifier
+                .createIdentifier(name, path);
         final ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(
                 declaredByMetadataId, modifier, name,
                 PhysicalTypeCategory.CLASS);
@@ -95,6 +96,17 @@ public class ClasspathOperationsImpl implements ClasspathOperations {
         final List<JavaType> extendsTypes = new ArrayList<JavaType>();
         extendsTypes.add(superclass);
         cidBuilder.setExtendsTypes(extendsTypes);
+
+        if (implementsType != null) {
+            final Set<JavaType> implementsTypes = new LinkedHashSet<JavaType>();
+            final ClassOrInterfaceTypeDetails typeDetails = typeLocationService
+                    .getTypeDetails(declaredByMetadataId);
+            if (typeDetails != null) {
+                implementsTypes.addAll(typeDetails.getImplementsTypes());
+            }
+            implementsTypes.add(implementsType);
+            cidBuilder.setImplementsTypes(implementsTypes);
+        }
 
         if (rooAnnotations) {
             final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();

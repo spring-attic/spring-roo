@@ -1,5 +1,7 @@
 package org.springframework.roo.addon.equals;
 
+import static org.springframework.roo.shell.OptionContexts.UPDATE_PROJECT;
+
 import java.util.Set;
 
 import org.apache.felix.scr.annotations.Component;
@@ -24,7 +26,7 @@ public class EqualsCommands implements CommandMarker {
 
     @CliCommand(value = "equals", help = "Add equals and hashCode methods to a class")
     public void addEquals(
-            @CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*", optionContext = "update,project", help = "The name of the class") final JavaType javaType,
+            @CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*", optionContext = UPDATE_PROJECT, help = "The name of the class") final JavaType javaType,
             @CliOption(key = "appendSuper", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Whether to call the super class equals and hashCode methods") final boolean appendSuper,
             @CliOption(key = "excludeFields", mandatory = false, specifiedDefaultValue = "", optionContext = "exclude-fields", help = "The fields to exclude in the equals and hashcode methods. Multiple field names must be a double-quoted list separated by spaces") final Set<String> excludeFields) {
 

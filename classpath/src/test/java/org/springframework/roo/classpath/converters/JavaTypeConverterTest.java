@@ -24,6 +24,7 @@ import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.shell.Completion;
+import org.springframework.roo.shell.OptionContexts;
 import org.springframework.roo.support.util.AnsiEscapeCode;
 
 /**
@@ -189,7 +190,7 @@ public class JavaTypeConverterTest {
         // Invoke
         converter.getAllPossibleValues(mockCompletions, JavaType.class,
                 otherModuleName + MODULE_PATH_SEPARATOR + "~.web",
-                JavaTypeConverter.PROJECT, null);
+                OptionContexts.PROJECT, null);
 
         // Check
         verify(mockCompletions).add(
@@ -219,7 +220,7 @@ public class JavaTypeConverterTest {
 
         // Invoke
         converter.getAllPossibleValues(mockCompletions, JavaType.class, "",
-                JavaTypeConverter.PROJECT, null);
+                OptionContexts.PROJECT, null);
 
         // Check
         verifyNoMoreInteractions(mockCompletions);
@@ -254,7 +255,7 @@ public class JavaTypeConverterTest {
 
         // Invoke
         converter.getAllPossibleValues(mockCompletions, JavaType.class, "",
-                JavaTypeConverter.PROJECT, null);
+                OptionContexts.PROJECT, null);
 
         // Check
         verify(mockCompletions).add(

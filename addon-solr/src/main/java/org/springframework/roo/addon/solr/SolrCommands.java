@@ -1,5 +1,7 @@
 package org.springframework.roo.addon.solr;
 
+import static org.springframework.roo.shell.OptionContexts.UPDATE_PROJECT;
+
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -28,7 +30,7 @@ public class SolrCommands implements CommandMarker {
 
     @CliCommand(value = "solr add", help = "Make target type searchable")
     public void solrAdd(
-            @CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*", optionContext = "update,project", help = "The type to be made searchable") final JavaType javaType) {
+            @CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*", optionContext = UPDATE_PROJECT, help = "The type to be made searchable") final JavaType javaType) {
 
         solrOperations.addSearch(javaType);
     }
