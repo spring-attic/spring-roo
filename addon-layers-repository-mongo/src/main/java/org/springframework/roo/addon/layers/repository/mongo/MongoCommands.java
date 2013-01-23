@@ -1,5 +1,6 @@
 package org.springframework.roo.addon.layers.repository.mongo;
 
+import static org.springframework.roo.shell.OptionContexts.PROJECT;
 import static org.springframework.roo.shell.OptionContexts.UPDATE_PROJECT;
 
 import java.math.BigInteger;
@@ -12,7 +13,6 @@ import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
 import org.springframework.roo.shell.CommandMarker;
-import org.springframework.roo.shell.OptionContexts;
 
 /**
  * Commands for the MongoDB repository add-on.
@@ -39,7 +39,7 @@ public class MongoCommands implements CommandMarker {
     @CliCommand(value = "repository mongo", help = "Adds @RooMongoRepository annotation to target type")
     public void repository(
             @CliOption(key = "interface", mandatory = true, help = "The java interface to apply this annotation to") final JavaType interfaceType,
-            @CliOption(key = "entity", unspecifiedDefaultValue = "*", optionContext = OptionContexts.PROJECT, mandatory = false, help = "The domain entity this repository should expose") final JavaType domainType) {
+            @CliOption(key = "entity", unspecifiedDefaultValue = "*", optionContext = PROJECT, mandatory = false, help = "The domain entity this repository should expose") final JavaType domainType) {
 
         mongoOperations.setupRepository(interfaceType, domainType);
     }

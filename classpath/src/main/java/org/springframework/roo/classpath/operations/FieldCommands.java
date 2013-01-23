@@ -4,6 +4,7 @@ import static org.springframework.roo.model.JdkJavaType.SET;
 import static org.springframework.roo.model.JpaJavaType.EMBEDDABLE;
 import static org.springframework.roo.model.JpaJavaType.ENTITY;
 import static org.springframework.roo.model.SpringJavaType.PERSISTENT;
+import static org.springframework.roo.shell.OptionContexts.PROJECT;
 import static org.springframework.roo.shell.OptionContexts.UPDATE_PROJECT;
 
 import java.lang.reflect.Modifier;
@@ -54,7 +55,6 @@ import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
 import org.springframework.roo.shell.CommandMarker;
-import org.springframework.roo.shell.OptionContexts;
 import org.springframework.roo.shell.converters.StaticFieldConverter;
 
 /**
@@ -194,7 +194,7 @@ public class FieldCommands implements CommandMarker {
     @CliCommand(value = "field embedded", help = "Adds a private @Embedded field to an existing Java source file ")
     public void addFieldEmbeddedJpa(
             @CliOption(key = { "", "fieldName" }, mandatory = true, help = "The name of the field to add") final JavaSymbolName fieldName,
-            @CliOption(key = "type", mandatory = true, optionContext = OptionContexts.PROJECT, help = "The Java type of the @Embeddable class") final JavaType fieldType,
+            @CliOption(key = "type", mandatory = true, optionContext = PROJECT, help = "The Java type of the @Embeddable class") final JavaType fieldType,
             @CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*", optionContext = UPDATE_PROJECT, help = "The name of the @Entity class to receive this field") final JavaType typeName,
             @CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") final boolean permitReservedWords) {
 
@@ -353,7 +353,7 @@ public class FieldCommands implements CommandMarker {
     @CliCommand(value = "field reference", help = "Adds a private reference field to an existing Java source file (eg the 'many' side of a many-to-one)")
     public void addFieldReferenceJpa(
             @CliOption(key = { "", "fieldName" }, mandatory = true, help = "The name of the field to add") final JavaSymbolName fieldName,
-            @CliOption(key = "type", mandatory = true, optionContext = OptionContexts.PROJECT, help = "The Java type of the entity to reference") final JavaType fieldType,
+            @CliOption(key = "type", mandatory = true, optionContext = PROJECT, help = "The Java type of the entity to reference") final JavaType fieldType,
             @CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*", optionContext = UPDATE_PROJECT, help = "The name of the class to receive this field") final JavaType typeName,
             @CliOption(key = "notNull", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Whether this value cannot be null") final boolean notNull,
             @CliOption(key = "nullRequired", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Whether this value must be null") final boolean nullRequired,

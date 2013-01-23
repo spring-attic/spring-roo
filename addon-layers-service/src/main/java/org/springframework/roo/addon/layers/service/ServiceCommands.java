@@ -1,5 +1,7 @@
 package org.springframework.roo.addon.layers.service;
 
+import static org.springframework.roo.shell.OptionContexts.PROJECT;
+
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -8,7 +10,6 @@ import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
 import org.springframework.roo.shell.CommandMarker;
-import org.springframework.roo.shell.OptionContexts;
 
 /**
  * Shell commands that create domain services.
@@ -31,7 +32,7 @@ public class ServiceCommands implements CommandMarker {
     public void service(
             @CliOption(key = "interface", mandatory = true, help = "The java interface to apply this annotation to") final JavaType interfaceType,
             @CliOption(key = "class", mandatory = false, help = "Implementation class for the specified interface") JavaType classType,
-            @CliOption(key = "entity", unspecifiedDefaultValue = "*", optionContext = OptionContexts.PROJECT, mandatory = false, help = "The domain entity this service should expose") final JavaType domainType) {
+            @CliOption(key = "entity", unspecifiedDefaultValue = "*", optionContext = PROJECT, mandatory = false, help = "The domain entity this service should expose") final JavaType domainType) {
 
         if (classType == null) {
             classType = new JavaType(interfaceType.getFullyQualifiedTypeName()

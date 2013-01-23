@@ -36,7 +36,6 @@ import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
 import org.springframework.roo.shell.CommandMarker;
-import org.springframework.roo.shell.OptionContexts;
 import org.springframework.roo.shell.converters.StaticFieldConverter;
 import org.springframework.roo.support.logging.HandlerUtils;
 
@@ -180,7 +179,7 @@ public class JpaCommands implements CommandMarker {
 
     @CliCommand(value = "entity jpa", help = "Creates a new JPA persistent entity in SRC_MAIN_JAVA")
     public void newPersistenceClassJpa(
-            @CliOption(key = "class", optionContext = OptionContexts.UPDATE_PROJECT, mandatory = true, help = "Name of the entity to create") final JavaType name,
+            @CliOption(key = "class", optionContext = UPDATE_PROJECT, mandatory = true, help = "Name of the entity to create") final JavaType name,
             @CliOption(key = "extends", mandatory = false, unspecifiedDefaultValue = "java.lang.Object", optionContext = SUPERCLASS, help = "The superclass (defaults to java.lang.Object)") final JavaType superclass,
             @CliOption(key = "implements", mandatory = false, optionContext = INTERFACE, help = "The interface to implement") final JavaType implementsType,
             @CliOption(key = "abstract", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Whether the generated class should be marked as abstract") final boolean createAbstract,
