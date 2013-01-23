@@ -41,7 +41,7 @@
 
     <para>The other aspect of how Roo avoids lock-in is using annotations with
     <link
-    xlink:href="http://www.j2ee.me/j2se/1.5.0/docs/api/java/lang/annotation/RetentionPolicy.html#SOURCE">source-level
+    xlink:href="http://docs.oracle.com/javase/7/docs/api/java/lang/annotation/RetentionPolicy.html#SOURCE">source-level
     retention</link>. What this means is the annotations are not preserved in
     your <code>.class</code> files by the time they are compiled. This in turn
     means you do not need the Roo annotation library in your runtime

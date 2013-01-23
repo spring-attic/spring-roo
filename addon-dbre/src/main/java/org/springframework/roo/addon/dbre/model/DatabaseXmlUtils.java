@@ -35,7 +35,6 @@ public abstract class DatabaseXmlUtils {
     public static final String NAME = "name";
     public static final String ON_DELETE = "onDelete";
     public static final String ON_UPDATE = "onUpdate";
-
     public static final String REFERENCE = "reference";
 
     /**
@@ -134,6 +133,10 @@ public abstract class DatabaseXmlUtils {
                 database.getModuleName(), document));
         addBooleanOptionElement(document, databaseElement, "activeRecord",
                 database.isActiveRecord());
+        addBooleanOptionElement(document, databaseElement, "repository",
+                database.isRepository());
+        addBooleanOptionElement(document, databaseElement, "service",
+                database.isService());
         addBooleanOptionElement(document, databaseElement,
                 "includeNonPortableAttributes",
                 database.isIncludeNonPortableAttributes());
@@ -293,15 +296,13 @@ public abstract class DatabaseXmlUtils {
                 final List<Element> optionElements = XmlUtils.findElements(
                         "option", foreignKeyElement);
                 for (final Element optionElement : optionElements) {
-                    if (optionElement.getAttribute("key").equals("exported")) {
-                        foreignKey.setExported(Boolean
-                                .parseBoolean(optionElement
-                                        .getAttribute("value")));
+                    final String key = optionElement.getAttribute("key");
+                    final String value = optionElement.getAttribute("value");
+                    if (key.equals("exported")) {
+                        foreignKey.setExported(Boolean.parseBoolean(value));
                     }
-                    if (optionElement.getAttribute("key").equals(
-                            "foreignSchemaName")) {
-                        foreignKey.setForeignSchemaName(optionElement
-                                .getAttribute("value"));
+                    if (key.equals("foreignSchemaName")) {
+                        foreignKey.setForeignSchemaName(value);
                     }
                 }
 
@@ -334,31 +335,33 @@ public abstract class DatabaseXmlUtils {
         final List<Element> optionElements = XmlUtils.findElements("option",
                 databaseElement);
         for (final Element optionElement : optionElements) {
-            if (optionElement.getAttribute("key").equals("moduleName")) {
-                database.setModuleName(optionElement.getAttribute("value"));
+            final String key = optionElement.getAttribute("key");
+            final String value = optionElement.getAttribute("value");
+            if (key.equals("moduleName")) {
+                database.setModuleName(value);
             }
-            if (optionElement.getAttribute("key").equals("activeRecord")) {
-                database.setActiveRecord(Boolean.parseBoolean(optionElement
-                        .getAttribute("value")));
+            if (key.equals("activeRecord")) {
+                database.setActiveRecord(Boolean.parseBoolean(value));
             }
-            if (optionElement.getAttribute("key").equals("testAutomatically")) {
-                database.setTestAutomatically(Boolean
-                        .parseBoolean(optionElement.getAttribute("value")));
+            if (key.equals("repository")) {
+                database.setRepository(Boolean.parseBoolean(value));
             }
-            if (optionElement.getAttribute("key").equals(
-                    "includeNonPortableAttributes")) {
+            if (key.equals("service")) {
+                database.setService(Boolean.parseBoolean(value));
+            }
+            if (key.equals("testAutomatically")) {
+                database.setTestAutomatically(Boolean.parseBoolean(value));
+            }
+            if (key.equals("includeNonPortableAttributes")) {
                 database.setIncludeNonPortableAttributes(Boolean
-                        .parseBoolean(optionElement.getAttribute("value")));
+                        .parseBoolean(value));
             }
-            if (optionElement.getAttribute("key")
-                    .equals("disableVersionFields")) {
-                database.setDisableVersionFields(Boolean
-                        .parseBoolean(optionElement.getAttribute("value")));
+            if (key.equals("disableVersionFields")) {
+                database.setDisableVersionFields(Boolean.parseBoolean(value));
             }
-            if (optionElement.getAttribute("key").equals(
-                    "disableGeneratedIdentifiers")) {
+            if (key.equals("disableGeneratedIdentifiers")) {
                 database.setDisableGeneratedIdentifiers(Boolean
-                        .parseBoolean(optionElement.getAttribute("value")));
+                        .parseBoolean(value));
             }
         }
 

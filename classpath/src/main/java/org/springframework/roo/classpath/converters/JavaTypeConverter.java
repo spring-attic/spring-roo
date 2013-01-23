@@ -2,11 +2,17 @@ package org.springframework.roo.classpath.converters;
 
 import static org.springframework.roo.classpath.converters.JavaPackageConverter.TOP_LEVEL_PACKAGE_SYMBOL;
 import static org.springframework.roo.project.LogicalPath.MODULE_PATH_SEPARATOR;
+import static org.springframework.roo.shell.OptionContexts.INTERFACE;
+import static org.springframework.roo.shell.OptionContexts.PROJECT;
+import static org.springframework.roo.shell.OptionContexts.SUPERCLASS;
+import static org.springframework.roo.shell.OptionContexts.UPDATE;
 import static org.springframework.roo.support.util.AnsiEscapeCode.FG_CYAN;
 import static org.springframework.roo.support.util.AnsiEscapeCode.decorate;
 
+import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
@@ -22,8 +28,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.TypeLocationService;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
@@ -53,22 +61,120 @@ public class JavaTypeConverter implements Converter<JavaType> {
     private static final List<String> NUMBER_PRIMITIVES = Arrays.asList("byte",
             "short", "int", "long", "float", "double");
 
-    /**
-     * If this String appears in an option context, this converter will return
-     * {@link JavaType}s appearing in any module of the user's project.
-     */
-    public static final String PROJECT = "project";
-
-    /**
-     * If this String appears in an option context, this converter will update
-     * the last used type and the focused module as applicable.
-     */
-    public static final String UPDATE = "update";
-
     @Reference FileManager fileManager;
     @Reference LastUsed lastUsed;
     @Reference ProjectOperations projectOperations;
     @Reference TypeLocationService typeLocationService;
+
+    public JavaType convertFromText(String value, final Class<?> requiredType,
+            final String optionContext) {
+        if (StringUtils.isBlank(value)) {
+            return null;
+        }
+
+        // Check for number primitives
+        if (NUMBER_PRIMITIVES.contains(value)) {
+            return getNumberPrimitiveType(value);
+        }
+
+        if (LAST_USED_INDICATOR.equals(value)) {
+            final JavaType result = lastUsed.getJavaType();
+            if (result == null) {
+                throw new IllegalStateException(
+                        "Unknown type; please indicate the type as a command option (ie --xxxx)");
+            }
+            return result;
+        }
+
+        String topLevelPath;
+        Pom module = projectOperations.getFocusedModule();
+
+        if (value.contains(MODULE_PATH_SEPARATOR)) {
+            final String moduleName = value.substring(0,
+                    value.indexOf(MODULE_PATH_SEPARATOR));
+            module = projectOperations.getPomFromModuleName(moduleName);
+            topLevelPath = typeLocationService
+                    .getTopLevelPackageForModule(module);
+            value = value.substring(value.indexOf(MODULE_PATH_SEPARATOR) + 1,
+                    value.length()).trim();
+            if (StringUtils.contains(optionContext, UPDATE)) {
+                projectOperations.setModule(module);
+            }
+        }
+        else {
+            topLevelPath = typeLocationService
+                    .getTopLevelPackageForModule(projectOperations
+                            .getFocusedModule());
+        }
+
+        if (value.equals(topLevelPath)) {
+            return null;
+        }
+
+        String newValue = locateExisting(value, topLevelPath);
+        if (newValue == null) {
+            newValue = locateNew(value, topLevelPath);
+        }
+
+        if (StringUtils.isNotBlank(newValue)) {
+            final String physicalTypeIdentifier = typeLocationService
+                    .getPhysicalTypeIdentifier(new JavaType(newValue));
+            if (StringUtils.isNotBlank(physicalTypeIdentifier)) {
+                module = projectOperations
+                        .getPomFromModuleName(PhysicalTypeIdentifier.getPath(
+                                physicalTypeIdentifier).getModule());
+            }
+        }
+
+        // If the user did not provide a java type name containing a dot, it's
+        // taken as relative to the current package directory
+        if (!newValue.contains(".")) {
+            newValue = (lastUsed.getJavaPackage() == null ? lastUsed
+                    .getTopLevelPackage().getFullyQualifiedPackageName()
+                    : lastUsed.getJavaPackage().getFullyQualifiedPackageName())
+                    + "." + newValue;
+        }
+
+        // Automatically capitalise the first letter of the last name segment
+        // (i.e. capitalise the type name, but not the package)
+        final int index = newValue.lastIndexOf(".");
+        if (index > -1 && !newValue.endsWith(".")) {
+            String typeName = newValue.substring(index + 1);
+            typeName = StringUtils.capitalize(typeName);
+            newValue = newValue.substring(0, index).toLowerCase() + "."
+                    + typeName;
+        }
+        final JavaType result = new JavaType(newValue);
+        if (StringUtils.contains(optionContext, UPDATE)) {
+            lastUsed.setType(result, module);
+        }
+        return result;
+    }
+
+    public boolean getAllPossibleValues(final List<Completion> completions,
+            final Class<?> requiredType, String existingData,
+            final String optionContext, final MethodTarget target) {
+        existingData = StringUtils.stripToEmpty(existingData);
+
+        if (StringUtils.isBlank(optionContext)
+                || optionContext.contains(PROJECT)
+                || optionContext.contains(SUPERCLASS)
+                || optionContext.contains(INTERFACE)) {
+            completeProjectSpecificPaths(completions, existingData,
+                    optionContext);
+        }
+
+        if (StringUtils.contains(optionContext, "java")) {
+            completeJavaSpecificPaths(completions, existingData, optionContext);
+        }
+
+        return false;
+    }
+
+    public boolean supports(final Class<?> requiredType,
+            final String optionContext) {
+        return JavaType.class.isAssignableFrom(requiredType);
+    }
 
     private void addCompletionsForOtherModuleNames(
             final List<Completion> completions, final Pom targetModule) {
@@ -83,12 +189,12 @@ public class JavaTypeConverter implements Converter<JavaType> {
     }
 
     private void addCompletionsForTypesInTargetModule(
-            final List<Completion> completions, final Pom targetModule,
-            final String heading, final String prefix,
+            final List<Completion> completions, final String optionContext,
+            final Pom targetModule, final String heading, final String prefix,
             final String formattedPrefix, final String topLevelPackage,
             final String basePackage) {
-        final Collection<JavaType> typesInModule = typeLocationService
-                .getTypesForModule(targetModule);
+        final Collection<JavaType> typesInModule = getTypesForModule(
+                optionContext, targetModule);
         if (typesInModule.isEmpty()) {
             completions.add(new Completion(prefix + targetModule.getGroupId(),
                     formattedPrefix + targetModule.getGroupId(), heading, 1));
@@ -106,6 +212,31 @@ public class JavaTypeConverter implements Converter<JavaType> {
                 }
             }
         }
+    }
+
+    private Collection<JavaType> getTypesForModule(
+            final String optionContext, final Pom targetModule) {
+        final Collection<JavaType> typesForModule = typeLocationService
+                .getTypesForModule(targetModule);
+        if (!(optionContext.contains(SUPERCLASS) || optionContext
+                .contains(INTERFACE))) {
+            return typesForModule;
+        }
+
+        final Collection<JavaType> types = new ArrayList<JavaType>();
+        for (final JavaType javaType : typesForModule) {
+            final ClassOrInterfaceTypeDetails typeDetails = typeLocationService
+                    .getTypeDetails(javaType);
+            if ((optionContext.contains(SUPERCLASS) && (Modifier
+                    .isFinal(typeDetails.getModifier()) || typeDetails
+                    .getPhysicalTypeCategory() == PhysicalTypeCategory.INTERFACE))
+                    || (optionContext.contains(INTERFACE) && typeDetails
+                            .getPhysicalTypeCategory() != PhysicalTypeCategory.INTERFACE)) {
+                continue;
+            }
+            types.add(javaType);
+        }
+        return types;
     }
 
     /**
@@ -181,7 +312,8 @@ public class JavaTypeConverter implements Converter<JavaType> {
     }
 
     private void completeProjectSpecificPaths(
-            final List<Completion> completions, final String existingData) {
+            final List<Completion> completions, final String existingData,
+            final String optionContext) {
         if (!projectOperations.isFocusedProjectAvailable()) {
             return;
         }
@@ -219,113 +351,10 @@ public class JavaTypeConverter implements Converter<JavaType> {
         addCompletionsForOtherModuleNames(completions, targetModule);
 
         if (!"pom".equals(targetModule.getPackaging())) {
-            addCompletionsForTypesInTargetModule(completions, targetModule,
-                    heading, prefix, formattedPrefix, topLevelPackage,
-                    basePackage);
+            addCompletionsForTypesInTargetModule(completions, optionContext,
+                    targetModule, heading, prefix, formattedPrefix,
+                    topLevelPackage, basePackage);
         }
-    }
-
-    public JavaType convertFromText(String value, final Class<?> requiredType,
-            final String optionContext) {
-        if (StringUtils.isBlank(value)) {
-            return null;
-        }
-
-        // Check for number primitives
-        if (NUMBER_PRIMITIVES.contains(value)) {
-            return getNumberPrimitiveType(value);
-        }
-
-        if (LAST_USED_INDICATOR.equals(value)) {
-            final JavaType result = lastUsed.getJavaType();
-            if (result == null) {
-                throw new IllegalStateException(
-                        "Unknown type; please indicate the type as a command option (ie --xxxx)");
-            }
-            return result;
-        }
-
-        String topLevelPath;
-
-        Pom module = projectOperations.getFocusedModule();
-
-        if (value.contains(MODULE_PATH_SEPARATOR)) {
-            final String moduleName = value.substring(0,
-                    value.indexOf(MODULE_PATH_SEPARATOR));
-            module = projectOperations.getPomFromModuleName(moduleName);
-            topLevelPath = typeLocationService
-                    .getTopLevelPackageForModule(module);
-            value = value.substring(value.indexOf(MODULE_PATH_SEPARATOR) + 1,
-                    value.length()).trim();
-            if (StringUtils.contains(optionContext, UPDATE)) {
-                projectOperations.setModule(module);
-            }
-        }
-        else {
-            topLevelPath = typeLocationService
-                    .getTopLevelPackageForModule(projectOperations
-                            .getFocusedModule());
-        }
-
-        if (value.equals(topLevelPath)) {
-            return null;
-        }
-
-        String newValue = locateExisting(value, topLevelPath);
-        if (newValue == null) {
-            newValue = locateNew(value, topLevelPath);
-        }
-
-        if (StringUtils.isNotBlank(newValue)) {
-            final String physicalTypeIdentifier = typeLocationService
-                    .getPhysicalTypeIdentifier(new JavaType(newValue));
-            if (StringUtils.isNotBlank(physicalTypeIdentifier)) {
-                module = projectOperations
-                        .getPomFromModuleName(PhysicalTypeIdentifier.getPath(
-                                physicalTypeIdentifier).getModule());
-            }
-        }
-
-        // If the user did not provide a java type name containing a dot, it's
-        // taken as relative to the current package directory
-        if (!newValue.contains(".")) {
-            newValue = (lastUsed.getJavaPackage() == null ? lastUsed
-                    .getTopLevelPackage().getFullyQualifiedPackageName()
-                    : lastUsed.getJavaPackage().getFullyQualifiedPackageName())
-                    + "." + newValue;
-        }
-
-        // Automatically capitalise the first letter of the last name segment
-        // (i.e. capitalise the type name, but not the package)
-        final int index = newValue.lastIndexOf(".");
-        if (index > -1 && !newValue.endsWith(".")) {
-            String typeName = newValue.substring(index + 1);
-            typeName = StringUtils.capitalize(typeName);
-            newValue = newValue.substring(0, index).toLowerCase() + "."
-                    + typeName;
-        }
-        final JavaType result = new JavaType(newValue);
-        if (StringUtils.contains(optionContext, UPDATE)) {
-            lastUsed.setType(result, module);
-        }
-        return result;
-    }
-
-    public boolean getAllPossibleValues(final List<Completion> completions,
-            final Class<?> requiredType, String existingData,
-            final String optionContext, final MethodTarget target) {
-        existingData = StringUtils.stripToEmpty(existingData);
-
-        if (StringUtils.isBlank(optionContext)
-                || optionContext.contains(PROJECT)) {
-            completeProjectSpecificPaths(completions, existingData);
-        }
-
-        if (StringUtils.contains(optionContext, "java")) {
-            completeJavaSpecificPaths(completions, existingData, optionContext);
-        }
-
-        return false;
     }
 
     private JavaType getNumberPrimitiveType(final String value) {
@@ -403,9 +432,7 @@ public class JavaTypeConverter implements Converter<JavaType> {
                 newValue = topLevelPath + ".";
             }
         }
-
         lastUsed.setTopLevelPackage(new JavaPackage(topLevelPath));
-
         return newValue;
     }
 
@@ -421,10 +448,5 @@ public class JavaTypeConverter implements Converter<JavaType> {
                     + existingData.substring(1);
         }
         return existingData;
-    }
-
-    public boolean supports(final Class<?> requiredType,
-            final String optionContext) {
-        return JavaType.class.isAssignableFrom(requiredType);
     }
 }

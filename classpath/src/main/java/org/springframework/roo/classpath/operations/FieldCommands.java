@@ -4,6 +4,8 @@ import static org.springframework.roo.model.JdkJavaType.SET;
 import static org.springframework.roo.model.JpaJavaType.EMBEDDABLE;
 import static org.springframework.roo.model.JpaJavaType.ENTITY;
 import static org.springframework.roo.model.SpringJavaType.PERSISTENT;
+import static org.springframework.roo.shell.OptionContexts.PROJECT;
+import static org.springframework.roo.shell.OptionContexts.UPDATE_PROJECT;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -91,7 +93,7 @@ public class FieldCommands implements CommandMarker {
     @CliCommand(value = "field boolean", help = "Adds a private boolean field to an existing Java source file")
     public void addFieldBoolean(
             @CliOption(key = { "", "fieldName" }, mandatory = true, help = "The name of the field to add") final JavaSymbolName fieldName,
-            @CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*", optionContext = "update,project", help = "The name of the class to receive this field") final JavaType typeName,
+            @CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*", optionContext = UPDATE_PROJECT, help = "The name of the class to receive this field") final JavaType typeName,
             @CliOption(key = "notNull", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Whether this value cannot be null") final boolean notNull,
             @CliOption(key = "nullRequired", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Whether this value must be null") final boolean nullRequired,
             @CliOption(key = "assertFalse", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Whether this value must assert false") final boolean assertFalse,
@@ -135,7 +137,7 @@ public class FieldCommands implements CommandMarker {
             @CliOption(key = { "", "fieldName" }, mandatory = true, help = "The name of the field to add") final JavaSymbolName fieldName,
             @CliOption(key = "type", mandatory = true, optionContext = "java-date", help = "The Java type of the entity") final JavaType fieldType,
             @CliOption(key = "persistenceType", mandatory = false, help = "The type of persistent storage to be used") final DateFieldPersistenceType persistenceType,
-            @CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*", optionContext = "update,project", help = "The name of the class to receive this field") final JavaType typeName,
+            @CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*", optionContext = UPDATE_PROJECT, help = "The name of the class to receive this field") final JavaType typeName,
             @CliOption(key = "notNull", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Whether this value cannot be null") final boolean notNull,
             @CliOption(key = "nullRequired", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Whether this value must be null") final boolean nullRequired,
             @CliOption(key = "future", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Whether this value must be in the future") final boolean future,
@@ -192,8 +194,8 @@ public class FieldCommands implements CommandMarker {
     @CliCommand(value = "field embedded", help = "Adds a private @Embedded field to an existing Java source file ")
     public void addFieldEmbeddedJpa(
             @CliOption(key = { "", "fieldName" }, mandatory = true, help = "The name of the field to add") final JavaSymbolName fieldName,
-            @CliOption(key = "type", mandatory = true, optionContext = "project", help = "The Java type of the @Embeddable class") final JavaType fieldType,
-            @CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*", optionContext = "update,project", help = "The name of the @Entity class to receive this field") final JavaType typeName,
+            @CliOption(key = "type", mandatory = true, optionContext = PROJECT, help = "The Java type of the @Embeddable class") final JavaType fieldType,
+            @CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*", optionContext = UPDATE_PROJECT, help = "The name of the @Entity class to receive this field") final JavaType typeName,
             @CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") final boolean permitReservedWords) {
 
         // Check if the field type is a JPA @Embeddable class
@@ -240,7 +242,7 @@ public class FieldCommands implements CommandMarker {
     public void addFieldEnum(
             @CliOption(key = { "", "fieldName" }, mandatory = true, help = "The name of the field to add") final JavaSymbolName fieldName,
             @CliOption(key = "type", mandatory = true, help = "The enum type of this field") final JavaType fieldType,
-            @CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*", optionContext = "update,project", help = "The name of the class to receive this field") final JavaType typeName,
+            @CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*", optionContext = UPDATE_PROJECT, help = "The name of the class to receive this field") final JavaType typeName,
             @CliOption(key = "column", mandatory = false, help = "The JPA @Column name") final String column,
             @CliOption(key = "notNull", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Whether this value cannot be null") final boolean notNull,
             @CliOption(key = "nullRequired", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Whether this value must be null") final boolean nullRequired,
@@ -276,7 +278,7 @@ public class FieldCommands implements CommandMarker {
     public void addFieldNumber(
             @CliOption(key = { "", "fieldName" }, mandatory = true, help = "The name of the field to add") final JavaSymbolName fieldName,
             @CliOption(key = "type", mandatory = true, optionContext = "java-number", help = "The Java type of the entity") JavaType fieldType,
-            @CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*", optionContext = "update,project", help = "The name of the class to receive this field") final JavaType typeName,
+            @CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*", optionContext = UPDATE_PROJECT, help = "The name of the class to receive this field") final JavaType typeName,
             @CliOption(key = "notNull", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Whether this value cannot be null") final boolean notNull,
             @CliOption(key = "nullRequired", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Whether this value must be null") final boolean nullRequired,
             @CliOption(key = "decimalMin", mandatory = false, help = "The BigDecimal string-based representation of the minimum value") final String decimalMin,
@@ -351,8 +353,8 @@ public class FieldCommands implements CommandMarker {
     @CliCommand(value = "field reference", help = "Adds a private reference field to an existing Java source file (eg the 'many' side of a many-to-one)")
     public void addFieldReferenceJpa(
             @CliOption(key = { "", "fieldName" }, mandatory = true, help = "The name of the field to add") final JavaSymbolName fieldName,
-            @CliOption(key = "type", mandatory = true, optionContext = "project", help = "The Java type of the entity to reference") final JavaType fieldType,
-            @CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*", optionContext = "update,project", help = "The name of the class to receive this field") final JavaType typeName,
+            @CliOption(key = "type", mandatory = true, optionContext = PROJECT, help = "The Java type of the entity to reference") final JavaType fieldType,
+            @CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*", optionContext = UPDATE_PROJECT, help = "The name of the class to receive this field") final JavaType typeName,
             @CliOption(key = "notNull", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Whether this value cannot be null") final boolean notNull,
             @CliOption(key = "nullRequired", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Whether this value must be null") final boolean nullRequired,
             @CliOption(key = "joinColumnName", mandatory = false, help = "The JPA @JoinColumn name") final String joinColumnName,
@@ -417,7 +419,7 @@ public class FieldCommands implements CommandMarker {
     public void addFieldSetJpa(
             @CliOption(key = { "", "fieldName" }, mandatory = true, help = "The name of the field to add") final JavaSymbolName fieldName,
             @CliOption(key = "type", mandatory = true, help = "The entity which will be contained within the Set") final JavaType fieldType,
-            @CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*", optionContext = "update,project", help = "The name of the class to receive this field") final JavaType typeName,
+            @CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*", optionContext = UPDATE_PROJECT, help = "The name of the class to receive this field") final JavaType typeName,
             @CliOption(key = "mappedBy", mandatory = false, help = "The field name on the referenced type which owns the relationship") final JavaSymbolName mappedBy,
             @CliOption(key = "notNull", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Whether this value cannot be null") final boolean notNull,
             @CliOption(key = "nullRequired", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Whether this value must be null") final boolean nullRequired,
@@ -494,7 +496,7 @@ public class FieldCommands implements CommandMarker {
     @CliCommand(value = "field string", help = "Adds a private string field to an existing Java source file")
     public void addFieldString(
             @CliOption(key = { "", "fieldName" }, mandatory = true, help = "The name of the field to add") final JavaSymbolName fieldName,
-            @CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*", optionContext = "update,project", help = "The name of the class to receive this field") final JavaType typeName,
+            @CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*", optionContext = UPDATE_PROJECT, help = "The name of the class to receive this field") final JavaType typeName,
             @CliOption(key = "notNull", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Whether this value cannot be null") final boolean notNull,
             @CliOption(key = "nullRequired", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Whether this value must be null") final boolean nullRequired,
             @CliOption(key = "decimalMin", mandatory = false, help = "The BigDecimal string-based representation of the minimum value") final String decimalMin,
@@ -554,7 +556,7 @@ public class FieldCommands implements CommandMarker {
     @CliCommand(value = "field file", help = "Adds a byte array field for storing uploaded file contents (JSF-scaffolded UIs only)")
     public void addFileUploadField(
             @CliOption(key = { "", "fieldName" }, mandatory = true, help = "The name of the file upload field to add") final JavaSymbolName fieldName,
-            @CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*", optionContext = "update,project", help = "The name of the class to receive this field") final JavaType typeName,
+            @CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*", optionContext = UPDATE_PROJECT, help = "The name of the class to receive this field") final JavaType typeName,
             @CliOption(key = "contentType", mandatory = true, help = "The content type of the file") final UploadedFileContentType contentType,
             @CliOption(key = "autoUpload", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Whether the file is uploaded automatically when selected") final boolean autoUpload,
             @CliOption(key = "column", mandatory = false, help = "The JPA @Column name") final String column,
@@ -625,7 +627,7 @@ public class FieldCommands implements CommandMarker {
     public void insertField(
             @CliOption(key = "fieldName", mandatory = true, help = "The name of the field") final JavaSymbolName fieldName,
             @CliOption(key = "type", mandatory = true, help = "The Java type of this field") final JavaType fieldType,
-            @CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*", optionContext = "update,project", help = "The name of the class to receive this field") final JavaType typeName,
+            @CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*", optionContext = UPDATE_PROJECT, help = "The name of the class to receive this field") final JavaType typeName,
             @CliOption(key = "notNull", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Whether this value cannot be null") final boolean notNull,
             @CliOption(key = "nullRequired", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Whether this value must be null") final boolean nullRequired,
             @CliOption(key = "comment", mandatory = false, help = "An optional comment for JavaDocs") final String comment,

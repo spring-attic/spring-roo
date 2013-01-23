@@ -465,6 +465,7 @@ public class TypeLocationServiceImpl implements TypeLocationService {
      * @param typePackages the set to which to add each type's package
      * @return a non-<code>null</code> map laid out as above
      */
+    @SuppressWarnings("unused")
     private Map<String, Collection<String>> getTypesByPackage(
             final Iterable<String> typesInModule, final Set<String> typePackages) {
         final Map<String, Collection<String>> typesByPackage = new HashMap<String, Collection<String>>();
@@ -485,8 +486,6 @@ public class TypeLocationServiceImpl implements TypeLocationService {
     public ClassOrInterfaceTypeDetails getTypeDetails(final JavaType type) {
         return getTypeDetails(getPhysicalTypeIdentifier(type));
     }
-
-    // -------------------------- Private methods ------------------------------
 
     public ClassOrInterfaceTypeDetails getTypeDetails(
             final String physicalTypeId) {

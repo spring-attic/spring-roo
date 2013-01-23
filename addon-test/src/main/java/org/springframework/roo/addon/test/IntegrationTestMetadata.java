@@ -1,7 +1,10 @@
 package org.springframework.roo.addon.test;
 
 import static org.springframework.roo.model.GoogleJavaType.GAE_LOCAL_SERVICE_TEST_HELPER;
+import static org.springframework.roo.model.JdkJavaType.ITERATOR;
 import static org.springframework.roo.model.JdkJavaType.LIST;
+import static org.springframework.roo.model.Jsr303JavaType.CONSTRAINT_VIOLATION;
+import static org.springframework.roo.model.Jsr303JavaType.CONSTRAINT_VIOLATION_EXCEPTION;
 import static org.springframework.roo.model.SpringJavaType.AUTOWIRED;
 import static org.springframework.roo.model.SpringJavaType.CONTEXT_CONFIGURATION;
 import static org.springframework.roo.model.SpringJavaType.PROPAGATION;
@@ -773,6 +776,9 @@ public class IntegrationTestMetadata extends
             return null;
         }
 
+        builder.getImportRegistrationResolver().addImports(ITERATOR,
+                CONSTRAINT_VIOLATION_EXCEPTION, CONSTRAINT_VIOLATION);
+
         // Prepare method signature
         final JavaSymbolName methodName = new JavaSymbolName("test"
                 + StringUtils.capitalize(persistMethod.getMethodName()));
@@ -811,7 +817,29 @@ public class IntegrationTestMetadata extends
                     + "());");
         }
 
+        bodyBuilder.appendFormalLine("try {");
+        bodyBuilder.indent();
         bodyBuilder.appendFormalLine(persistMethod.getMethodCall() + ";");
+        bodyBuilder.indentRemove();
+        bodyBuilder
+                .appendFormalLine("} catch (final ConstraintViolationException e) {");
+        bodyBuilder.indent();
+        bodyBuilder
+                .appendFormalLine("final StringBuilder msg = new StringBuilder();");
+        bodyBuilder
+                .appendFormalLine("for (Iterator<ConstraintViolation<?>> iter = e.getConstraintViolations().iterator(); iter.hasNext();) {");
+        bodyBuilder.indent();
+        bodyBuilder
+                .appendFormalLine("final ConstraintViolation<?> cv = iter.next();");
+        bodyBuilder
+                .appendFormalLine("msg.append(\"[\").append(cv.getRootBean().getClass().getName()).append(\".\").append(cv.getPropertyPath()).append(\": \").append(cv.getMessage()).append(\" (invalid value = \").append(cv.getInvalidValue()).append(\")\").append(\"]\");");
+        bodyBuilder.indentRemove();
+        bodyBuilder.appendFormalLine("}");
+        bodyBuilder
+                .appendFormalLine("throw new IllegalStateException(msg.toString(), e);");
+        bodyBuilder.indentRemove();
+        bodyBuilder.appendFormalLine("}");
+
         if (flushMethod != null) {
             bodyBuilder.appendFormalLine(flushMethod.getMethodCall() + ";");
             flushMethod.copyAdditionsTo(builder, governorTypeDetails);

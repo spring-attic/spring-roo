@@ -1,9 +1,11 @@
 package org.springframework.roo.addon.jsf;
 
+import static org.springframework.roo.shell.OptionContexts.PROJECT;
+import static org.springframework.roo.shell.OptionContexts.UPDATE;
+
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.springframework.roo.classpath.converters.JavaTypeConverter;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
@@ -36,7 +38,7 @@ public class JsfCommands implements CommandMarker {
 
     @CliCommand(value = "web jsf all", help = "Create JSF managed beans for all entities")
     public void webJsfAll(
-            @CliOption(key = "package", mandatory = true, optionContext = "update", help = "The package in which new JSF managed beans will be placed") final JavaPackage destinationPackage) {
+            @CliOption(key = "package", mandatory = true, optionContext = UPDATE, help = "The package in which new JSF managed beans will be placed") final JavaPackage destinationPackage) {
 
         jsfOperations.generateAll(destinationPackage);
     }
@@ -52,7 +54,7 @@ public class JsfCommands implements CommandMarker {
     @CliCommand(value = "web jsf scaffold", help = "Create JSF managed bean for an entity")
     public void webJsfScaffold(
             @CliOption(key = { "class", "" }, mandatory = true, help = "The path and name of the JSF managed bean to be created") final JavaType managedBean,
-            @CliOption(key = "entity", mandatory = false, unspecifiedDefaultValue = "*", optionContext = JavaTypeConverter.PROJECT, help = "The entity which this JSF managed bean class will create and modify as required") final JavaType entity,
+            @CliOption(key = "entity", mandatory = false, unspecifiedDefaultValue = "*", optionContext = PROJECT, help = "The entity which this JSF managed bean class will create and modify as required") final JavaType entity,
             @CliOption(key = "beanName", mandatory = false, help = "The name of the managed bean to use in the 'name' attribute of the @ManagedBean annotation") final String beanName,
             @CliOption(key = "includeOnMenu", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "true", help = "Include this entity on the generated JSF menu") final boolean includeOnMenu) {
 

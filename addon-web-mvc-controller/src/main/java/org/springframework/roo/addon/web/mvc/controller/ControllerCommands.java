@@ -1,5 +1,8 @@
 package org.springframework.roo.addon.web.mvc.controller;
 
+import static org.springframework.roo.shell.OptionContexts.PROJECT;
+import static org.springframework.roo.shell.OptionContexts.UPDATE;
+
 import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Logger;
@@ -13,7 +16,6 @@ import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.addon.plural.PluralMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.TypeLocationService;
-import org.springframework.roo.classpath.converters.JavaTypeConverter;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaPackage;
@@ -47,7 +49,7 @@ public class ControllerCommands implements CommandMarker {
     @Deprecated
     @CliCommand(value = "controller all", help = "Scaffold controllers for all project entities without an existing controller - deprecated, use 'web mvc setup' + 'web mvc all' instead")
     public void generateAll(
-            @CliOption(key = "package", mandatory = true, optionContext = "update", help = "The package in which new controllers will be placed") final JavaPackage javaPackage) {
+            @CliOption(key = "package", mandatory = true, optionContext = UPDATE, help = "The package in which new controllers will be placed") final JavaPackage javaPackage) {
 
         LOGGER.warning("This command has been deprecated and will be disabled soon! Please use 'web mvc setup' followed by 'web mvc all --package ' instead.");
         controllerOperations.setup();
@@ -69,7 +71,7 @@ public class ControllerCommands implements CommandMarker {
     @CliCommand(value = "controller scaffold", help = "Create a new scaffold Controller (ie where we maintain CRUD automatically) - deprecated, use 'web mvc scaffold' instead")
     public void newController(
             @CliOption(key = { "class", "" }, mandatory = true, help = "The path and name of the controller object to be created") final JavaType controller,
-            @CliOption(key = "entity", mandatory = false, optionContext = JavaTypeConverter.PROJECT, unspecifiedDefaultValue = "*", help = "The name of the entity object which the controller exposes to the web tier") final JavaType entity,
+            @CliOption(key = "entity", mandatory = false, optionContext = PROJECT, unspecifiedDefaultValue = "*", help = "The name of the entity object which the controller exposes to the web tier") final JavaType entity,
             @CliOption(key = "path", mandatory = false, help = "The base path under which the controller listens for RESTful requests (defaults to the simple name of the form backing object)") final String path,
             @CliOption(key = "disallowedOperations", mandatory = false, help = "A comma separated list of operations (only create, update, delete allowed) that should not be generated in the controller") final String disallowedOperations) {
 
@@ -80,7 +82,7 @@ public class ControllerCommands implements CommandMarker {
 
     @CliCommand(value = "web mvc all", help = "Scaffold Spring MVC controllers for all project entities without an existing controller")
     public void webMvcAll(
-            @CliOption(key = "package", mandatory = true, optionContext = "update", help = "The package in which new controllers will be placed") final JavaPackage javaPackage) {
+            @CliOption(key = "package", mandatory = true, optionContext = UPDATE, help = "The package in which new controllers will be placed") final JavaPackage javaPackage) {
 
         if (!javaPackage.getFullyQualifiedPackageName().startsWith(
                 projectOperations.getTopLevelPackage(
@@ -94,7 +96,7 @@ public class ControllerCommands implements CommandMarker {
     @CliCommand(value = "web mvc scaffold", help = "Create a new scaffold Controller (ie where Roo maintains CRUD functionality automatically)")
     public void webMvcScaffold(
             @CliOption(key = { "class", "" }, mandatory = true, help = "The path and name of the controller object to be created") final JavaType controller,
-            @CliOption(key = "backingType", mandatory = false, optionContext = JavaTypeConverter.PROJECT, unspecifiedDefaultValue = "*", help = "The name of the form backing type which the controller exposes to the web tier") final JavaType backingType,
+            @CliOption(key = "backingType", mandatory = false, optionContext = PROJECT, unspecifiedDefaultValue = "*", help = "The name of the form backing type which the controller exposes to the web tier") final JavaType backingType,
             @CliOption(key = "path", mandatory = false, help = "The base path under which the controller listens for RESTful requests (defaults to the simple name of the form backing object)") String path,
             @CliOption(key = "disallowedOperations", mandatory = false, help = "A comma separated list of operations (only create, update, delete allowed) that should not be generated in the controller") final String disallowedOperations) {
 

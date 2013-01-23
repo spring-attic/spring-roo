@@ -1,11 +1,13 @@
 package org.springframework.roo.addon.layers.repository.mongo;
 
+import static org.springframework.roo.shell.OptionContexts.PROJECT;
+import static org.springframework.roo.shell.OptionContexts.UPDATE_PROJECT;
+
 import java.math.BigInteger;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.springframework.roo.classpath.converters.JavaTypeConverter;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
@@ -37,7 +39,7 @@ public class MongoCommands implements CommandMarker {
     @CliCommand(value = "repository mongo", help = "Adds @RooMongoRepository annotation to target type")
     public void repository(
             @CliOption(key = "interface", mandatory = true, help = "The java interface to apply this annotation to") final JavaType interfaceType,
-            @CliOption(key = "entity", unspecifiedDefaultValue = "*", optionContext = JavaTypeConverter.PROJECT, mandatory = false, help = "The domain entity this repository should expose") final JavaType domainType) {
+            @CliOption(key = "entity", unspecifiedDefaultValue = "*", optionContext = PROJECT, mandatory = false, help = "The domain entity this repository should expose") final JavaType domainType) {
 
         mongoOperations.setupRepository(interfaceType, domainType);
     }
@@ -57,7 +59,7 @@ public class MongoCommands implements CommandMarker {
 
     @CliCommand(value = "entity mongo", help = "Creates a domain entity which can be backed by a MongoDB repository")
     public void type(
-            @CliOption(key = "class", mandatory = true, optionContext = "update,project", help = "Implementation class for the specified interface") final JavaType classType,
+            @CliOption(key = "class", mandatory = true, optionContext = UPDATE_PROJECT, help = "Implementation class for the specified interface") final JavaType classType,
             @CliOption(key = "identifierType", mandatory = false, help = "The ID type to be used for this domain type (defaults to BigInteger)") MongoIdType idType,
             @CliOption(key = "testAutomatically", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Create automatic integration tests for this entity") final boolean testAutomatically) {
 

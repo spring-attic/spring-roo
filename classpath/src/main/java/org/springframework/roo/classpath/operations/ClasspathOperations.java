@@ -22,13 +22,15 @@ public interface ClasspathOperations {
      *            annotations
      * @param path the source directory in which to create the class
      * @param superclass the superclass (defaults to {@link Object})
+     * @param implementsType the interface to implement
      * @param createAbstract whether the generated class should be marked as
      *            abstract
      * @param permitReservedWords whether reserved words are ignored by Roo
      */
     void createClass(final JavaType name, final boolean rooAnnotations,
             final LogicalPath path, final JavaType superclass,
-            final boolean createAbstract, final boolean permitReservedWords);
+            final JavaType implementsType, final boolean createAbstract,
+            final boolean permitReservedWords);
 
     /**
      * Creates a new constructor in the specified class with the fields

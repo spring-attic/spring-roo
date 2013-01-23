@@ -23,40 +23,16 @@ import org.xml.sax.helpers.DefaultHandler;
  */
 public class DatabaseContentHandler extends DefaultHandler {
 
-    private static class Option extends Pair<String, String> {
-
-        private static final long serialVersionUID = 3471455277824528758L;
-        private final String key;
-        private final String value;
-
-        public Option(final String key, final String value) {
-            this.key = key;
-            this.value = value;
-
-        }
-
-        @Override
-        public String getLeft() {
-            return key;
-        }
-
-        @Override
-        public String getRight() {
-            return value;
-        }
-
-        public String setValue(final String value) {
-            throw new UnsupportedOperationException();
-        }
-    }
-
     private boolean activeRecord;
+
     private Database database;
     private JavaPackage destinationPackage;
-    private boolean includeNonPortableAttributes;
-    private boolean disableVersionFields;
     private boolean disableGeneratedIdentifiers;
+    private boolean disableVersionFields;
+    private boolean includeNonPortableAttributes;
     private String moduleName;
+    private boolean repository;
+    private boolean service;
     private final Stack<Object> stack = new Stack<Object>();
     private final Set<Table> tables = new LinkedHashSet<Table>();
     private boolean testAutomatically;
@@ -102,6 +78,12 @@ public class DatabaseContentHandler extends DefaultHandler {
             if (option.getKey().equals("activeRecord")) {
                 activeRecord = Boolean.parseBoolean(option.getValue());
             }
+            if (option.getKey().equals("repository")) {
+                repository = Boolean.parseBoolean(option.getValue());
+            }
+            if (option.getKey().equals("service")) {
+                service = Boolean.parseBoolean(option.getValue());
+            }
             if (option.getKey().equals("testAutomatically")) {
                 testAutomatically = Boolean.parseBoolean(option.getValue());
             }
@@ -139,10 +121,54 @@ public class DatabaseContentHandler extends DefaultHandler {
             database.setDisableVersionFields(disableVersionFields);
             database.setDisableGeneratedIdentifiers(disableGeneratedIdentifiers);
             database.setActiveRecord(activeRecord);
+            database.setRepository(repository);
+            database.setService(service);
             database.setTestAutomatically(testAutomatically);
         }
         else {
             stack.push(tmp);
+        }
+    }
+
+    public Database getDatabase() {
+        return database;
+    }
+
+    @Override
+    public void startElement(final String uri, final String localName,
+            final String qName, final Attributes attributes)
+            throws SAXException {
+        if (qName.equals("database")) {
+            stack.push(new Object());
+            if (StringUtils.isNotBlank(attributes.getValue("package"))) {
+                destinationPackage = new JavaPackage(
+                        attributes.getValue("package"));
+            }
+        }
+        else if (qName.equals("option")) {
+            stack.push(new Option(attributes.getValue("key"), attributes
+                    .getValue("value")));
+        }
+        else if (qName.equals("table")) {
+            stack.push(getTable(attributes));
+        }
+        else if (qName.equals("column")) {
+            stack.push(getColumn(attributes));
+        }
+        else if (qName.equals("foreign-key")) {
+            stack.push(getForeignKey(attributes));
+        }
+        else if (qName.equals("reference")) {
+            stack.push(getReference(attributes));
+        }
+        else if (qName.equals("unique")) {
+            stack.push(getIndex(attributes, IndexType.UNIQUE));
+        }
+        else if (qName.equals("index")) {
+            stack.push(getIndex(attributes, IndexType.INDEX));
+        }
+        else if (qName.equals("unique-column") || qName.equals("index-column")) {
+            stack.push(getIndexColumn(attributes));
         }
     }
 
@@ -181,10 +207,6 @@ public class DatabaseContentHandler extends DefaultHandler {
         column.setRequired(Boolean.parseBoolean(attributes.getValue("required")));
 
         return column;
-    }
-
-    public Database getDatabase() {
-        return database;
     }
 
     private String getErrorMessage() {
@@ -230,41 +252,30 @@ public class DatabaseContentHandler extends DefaultHandler {
         return table;
     }
 
-    @Override
-    public void startElement(final String uri, final String localName,
-            final String qName, final Attributes attributes)
-            throws SAXException {
-        if (qName.equals("database")) {
-            stack.push(new Object());
-            if (StringUtils.isNotBlank(attributes.getValue("package"))) {
-                destinationPackage = new JavaPackage(
-                        attributes.getValue("package"));
-            }
+    private static class Option extends Pair<String, String> {
+
+        private static final long serialVersionUID = 3471455277824528758L;
+        private final String key;
+        private final String value;
+
+        public Option(final String key, final String value) {
+            this.key = key;
+            this.value = value;
         }
-        else if (qName.equals("option")) {
-            stack.push(new Option(attributes.getValue("key"), attributes
-                    .getValue("value")));
+
+        @Override
+        public String getLeft() {
+            return key;
         }
-        else if (qName.equals("table")) {
-            stack.push(getTable(attributes));
+
+        @Override
+        public String getRight() {
+            return value;
         }
-        else if (qName.equals("column")) {
-            stack.push(getColumn(attributes));
-        }
-        else if (qName.equals("foreign-key")) {
-            stack.push(getForeignKey(attributes));
-        }
-        else if (qName.equals("reference")) {
-            stack.push(getReference(attributes));
-        }
-        else if (qName.equals("unique")) {
-            stack.push(getIndex(attributes, IndexType.UNIQUE));
-        }
-        else if (qName.equals("index")) {
-            stack.push(getIndex(attributes, IndexType.INDEX));
-        }
-        else if (qName.equals("unique-column") || qName.equals("index-column")) {
-            stack.push(getIndexColumn(attributes));
+
+        @Override
+        public String setValue(final String value) {
+            throw new UnsupportedOperationException();
         }
     }
 }
