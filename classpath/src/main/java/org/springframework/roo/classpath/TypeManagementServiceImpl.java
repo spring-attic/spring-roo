@@ -14,6 +14,8 @@ import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.ProjectOperations;
 
+import java.io.File;
+
 /**
  * Implementation of {@link TypeManagementService}.
  * 
@@ -110,8 +112,20 @@ public class TypeManagementServiceImpl implements TypeManagementService {
     public void createOrUpdateTypeOnDisk(final ClassOrInterfaceTypeDetails cid) {
         final String fileCanonicalPath = typeLocationService
                 .getPhysicalTypeCanonicalPath(cid.getDeclaredByMetadataId());
-        final String newContents = typeParsingService
-                .getCompilationUnitContents(cid);
+        String newContents;
+        File file;
+        boolean existsFile = false;
+        if (fileCanonicalPath != null) {
+            file = new File(fileCanonicalPath);
+            existsFile = file.exists() && file.isFile();
+        }
+        if (existsFile) {
+            newContents = typeParsingService
+                    .updateAndGetCompilationUnitContents(fileCanonicalPath, cid);
+        }
+        else {
+            newContents = typeParsingService.getCompilationUnitContents(cid);
+        }
         fileManager.createOrUpdateTextFileIfRequired(fileCanonicalPath,
                 newContents, true);
     }
