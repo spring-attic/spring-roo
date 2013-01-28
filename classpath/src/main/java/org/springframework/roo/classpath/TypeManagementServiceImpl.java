@@ -1,5 +1,7 @@
 package org.springframework.roo.classpath;
 
+import java.io.File;
+
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -110,8 +112,20 @@ public class TypeManagementServiceImpl implements TypeManagementService {
     public void createOrUpdateTypeOnDisk(final ClassOrInterfaceTypeDetails cid) {
         final String fileCanonicalPath = typeLocationService
                 .getPhysicalTypeCanonicalPath(cid.getDeclaredByMetadataId());
-        final String newContents = typeParsingService
-                .getCompilationUnitContents(cid);
+        String newContents;
+        File file;
+        boolean existsFile = false;
+        if (fileCanonicalPath != null) {
+            file = new File(fileCanonicalPath);
+            existsFile = file.exists() && file.isFile();
+        }
+        if (existsFile) {
+            newContents = typeParsingService
+                    .updateAndGetCompilationUnitContents(fileCanonicalPath, cid);
+        }
+        else {
+            newContents = typeParsingService.getCompilationUnitContents(cid);
+        }
         fileManager.createOrUpdateTextFileIfRequired(fileCanonicalPath,
                 newContents, true);
     }

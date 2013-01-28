@@ -451,4 +451,10 @@ public class JavaParserTypeParsingService implements TypeParsingService {
 
         compilationUnit.setImports(imports);
     }
+    
+    @Override
+    public String updateAndGetCompilationUnitContents(String fileIdentifier,
+            ClassOrInterfaceTypeDetails cid) {
+        return getCompilationUnitContents(cid);
+    }
 }

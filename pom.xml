@@ -35,6 +35,7 @@
         <module>process-manager</module>
         <module>classpath</module>
         <!-- module>classpath-javaparser</module -->
+        <!-- module>classpath-javaparser-fork</module -->
         <module>classpath-antlrjavaparser</module>
         <module>addon-tostring</module>
         <module>addon-equals</module>
@@ -505,6 +506,11 @@
                 <artifactId>org.springframework.roo.wrapping.javaparser</artifactId>
                 <version>1.0.7.0010</version>
             </dependency>
+            <dependency>
+                <groupId>org.springframework.roo.wrapping</groupId>
+                <artifactId>org.springframework.roo.wrapping.javaparser</artifactId>
+                <version>1.0.9.0010</version>
+            </dependency>
             -->
             <dependency>
                 <groupId>org.springframework.roo.wrapping</groupId>
@@ -713,7 +719,12 @@
                 <artifactId>org.springframework.roo.classpath.javaparser</artifactId>
                 <version>${project.version}</version>
             </dependency>
-           -->
+            <dependency>
+                <groupId>org.springframework.roo</groupId>
+                <artifactId>org.springframework.roo.classpath.javaparser-fork</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            -->
             <dependency>
                 <groupId>org.springframework.roo</groupId>
                 <artifactId>org.springframework.roo.classpath.antlrjavaparser</artifactId>
