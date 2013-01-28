@@ -22,6 +22,7 @@ import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.TypeParsingService;
 import org.springframework.roo.classpath.antlrjavaparser.details.JavaParserAnnotationMetadataBuilder;
 import org.springframework.roo.classpath.antlrjavaparser.details.JavaParserClassOrInterfaceTypeDetailsBuilder;
+import org.springframework.roo.classpath.antlrjavaparser.details.JavaParserCommentMetadataBuilder;
 import org.springframework.roo.classpath.antlrjavaparser.details.JavaParserConstructorMetadataBuilder;
 import org.springframework.roo.classpath.antlrjavaparser.details.JavaParserFieldMetadataBuilder;
 import org.springframework.roo.classpath.antlrjavaparser.details.JavaParserMethodMetadataBuilder;
@@ -172,6 +173,9 @@ public class JavaParserTypeParsingService implements TypeParsingService {
                 "Compilation unit imports should be non-null when producing type '"
                         + cid.getName() + "'");
         for (final ImportMetadata importType : cid.getRegisteredImports()) {
+
+            ImportDeclaration importDeclaration;
+
             if (!importType.isAsterisk()) {
                 NameExpr typeToImportExpr;
                 if (importType.getImportType().getEnclosingType() == null) {
@@ -186,17 +190,21 @@ public class JavaParserTypeParsingService implements TypeParsingService {
                                     .getFullyQualifiedTypeName()), importType
                             .getImportType().getSimpleTypeName());
                 }
-                compilationUnit.getImports().add(
-                        new ImportDeclaration(typeToImportExpr, importType
-                                .isStatic(), false));
+
+                importDeclaration = new ImportDeclaration(typeToImportExpr, importType
+                        .isStatic(), false);
             }
             else {
-                compilationUnit.getImports().add(
-                        new ImportDeclaration(new NameExpr(importType
-                                .getImportPackage()
-                                .getFullyQualifiedPackageName()), importType
-                                .isStatic(), importType.isAsterisk()));
+                importDeclaration = new ImportDeclaration(new NameExpr(importType
+                        .getImportPackage()
+                        .getFullyQualifiedPackageName()), importType
+                        .isStatic(), importType.isAsterisk());
             }
+
+            JavaParserCommentMetadataBuilder.updateCommentsToJavaParser(importDeclaration,
+                    importType.getCommentStructure());
+
+            compilationUnit.getImports().add(importDeclaration);
         }
 
         // Create a class or interface declaration to represent this actual type
@@ -451,7 +459,7 @@ public class JavaParserTypeParsingService implements TypeParsingService {
 
         compilationUnit.setImports(imports);
     }
-    
+
     @Override
     public String updateAndGetCompilationUnitContents(String fileIdentifier,
             ClassOrInterfaceTypeDetails cid) {

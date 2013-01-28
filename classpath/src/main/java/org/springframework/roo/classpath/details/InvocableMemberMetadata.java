@@ -3,6 +3,7 @@ package org.springframework.roo.classpath.details;
 import java.util.List;
 
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
+import org.springframework.roo.classpath.details.comments.CommentedJavaStructure;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 
@@ -13,7 +14,7 @@ import org.springframework.roo.model.JavaType;
  * @since 1.0
  */
 public interface InvocableMemberMetadata extends
-        IdentifiableAnnotatedJavaStructure {
+        IdentifiableAnnotatedJavaStructure, CommentedJavaStructure {
 
     /**
      * @return the body of the method, if available (can be null if unavailable)

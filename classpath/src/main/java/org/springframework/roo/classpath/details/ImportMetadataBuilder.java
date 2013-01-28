@@ -1,5 +1,6 @@
 package org.springframework.roo.classpath.details;
 
+import org.springframework.roo.classpath.details.comments.CommentStructure;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaType;
 
@@ -33,6 +34,7 @@ public class ImportMetadataBuilder extends
     private boolean isAsterisk;
 
     private boolean isStatic;
+    private CommentStructure commentStructure;
 
     public ImportMetadataBuilder(final ImportMetadata existing) {
         super(existing);
@@ -40,6 +42,7 @@ public class ImportMetadataBuilder extends
         importType = existing.getImportType();
         isStatic = existing.isStatic();
         isAsterisk = existing.isAsterisk();
+        commentStructure = existing.getCommentStructure();
     }
 
     public ImportMetadataBuilder(final String declaredbyMetadataId) {
@@ -94,5 +97,13 @@ public class ImportMetadataBuilder extends
 
     public void setStatic(final boolean aStatic) {
         isStatic = aStatic;
+    }
+
+    public CommentStructure getCommentStructure() {
+        return commentStructure;
+    }
+
+    public void setCommentStructure(CommentStructure commentStructure) {
+        this.commentStructure = commentStructure;
     }
 }

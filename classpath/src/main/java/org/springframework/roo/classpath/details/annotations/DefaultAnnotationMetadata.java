@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.springframework.roo.classpath.details.comments.CommentStructure;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 
@@ -21,6 +22,7 @@ public class DefaultAnnotationMetadata implements AnnotationMetadata {
     private final JavaType annotationType;
     private final Map<JavaSymbolName, AnnotationAttributeValue<?>> attributeMap;
     private final List<AnnotationAttributeValue<?>> attributes;
+    private CommentStructure commentStructure;
 
     /**
      * Constructor
@@ -65,6 +67,14 @@ public class DefaultAnnotationMetadata implements AnnotationMetadata {
             result.add(value.getName());
         }
         return result;
+    }
+
+    public CommentStructure getCommentStructure() {
+        return commentStructure;
+    }
+
+    public void setCommentStructure(CommentStructure commentStructure) {
+        this.commentStructure = commentStructure;
     }
 
     @Override

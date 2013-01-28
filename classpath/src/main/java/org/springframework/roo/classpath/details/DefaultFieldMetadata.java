@@ -6,6 +6,7 @@ import java.util.List;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
+import org.springframework.roo.classpath.details.comments.CommentStructure;
 import org.springframework.roo.model.CustomData;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
@@ -23,6 +24,7 @@ public class DefaultFieldMetadata extends
     private final String fieldInitializer;
     private final JavaSymbolName fieldName;
     private final JavaType fieldType;
+    private CommentStructure commentStructure;
 
     // Package protected to mandate the use of FieldMetadataBuilder
     DefaultFieldMetadata(final CustomData customData,
@@ -38,6 +40,16 @@ public class DefaultFieldMetadata extends
         this.fieldName = fieldName;
         this.fieldType = fieldType;
         this.fieldInitializer = fieldInitializer;
+    }
+
+    @Override
+    public CommentStructure getCommentStructure() {
+        return commentStructure;
+    }
+
+    @Override
+    public void setCommentStructure(CommentStructure commentStructure) {
+        this.commentStructure = commentStructure;
     }
 
     public String getFieldInitializer() {
