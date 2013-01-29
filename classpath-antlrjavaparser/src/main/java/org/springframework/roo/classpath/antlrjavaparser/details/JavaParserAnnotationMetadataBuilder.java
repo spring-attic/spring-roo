@@ -1,5 +1,30 @@
 package org.springframework.roo.classpath.antlrjavaparser.details;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.commons.lang3.Validate;
+import org.springframework.roo.classpath.antlrjavaparser.CompilationUnitServices;
+import org.springframework.roo.classpath.antlrjavaparser.JavaParserUtils;
+import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
+import org.springframework.roo.classpath.details.annotations.ArrayAttributeValue;
+import org.springframework.roo.classpath.details.annotations.BooleanAttributeValue;
+import org.springframework.roo.classpath.details.annotations.CharAttributeValue;
+import org.springframework.roo.classpath.details.annotations.ClassAttributeValue;
+import org.springframework.roo.classpath.details.annotations.DoubleAttributeValue;
+import org.springframework.roo.classpath.details.annotations.EnumAttributeValue;
+import org.springframework.roo.classpath.details.annotations.IntegerAttributeValue;
+import org.springframework.roo.classpath.details.annotations.LongAttributeValue;
+import org.springframework.roo.classpath.details.annotations.NestedAnnotationAttributeValue;
+import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
+import org.springframework.roo.classpath.details.comments.CommentStructure;
+import org.springframework.roo.model.Builder;
+import org.springframework.roo.model.EnumDetails;
+import org.springframework.roo.model.JavaSymbolName;
+import org.springframework.roo.model.JavaType;
+
 import com.github.antlrjavaparser.api.expr.AnnotationExpr;
 import com.github.antlrjavaparser.api.expr.ArrayInitializerExpr;
 import com.github.antlrjavaparser.api.expr.BinaryExpr;
@@ -20,30 +45,6 @@ import com.github.antlrjavaparser.api.expr.StringLiteralExpr;
 import com.github.antlrjavaparser.api.expr.UnaryExpr;
 import com.github.antlrjavaparser.api.expr.UnaryExpr.Operator;
 import com.github.antlrjavaparser.api.type.Type;
-import org.apache.commons.lang3.Validate;
-import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
-import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
-import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
-import org.springframework.roo.classpath.details.annotations.ArrayAttributeValue;
-import org.springframework.roo.classpath.details.annotations.BooleanAttributeValue;
-import org.springframework.roo.classpath.details.annotations.CharAttributeValue;
-import org.springframework.roo.classpath.details.annotations.ClassAttributeValue;
-import org.springframework.roo.classpath.details.annotations.DoubleAttributeValue;
-import org.springframework.roo.classpath.details.annotations.EnumAttributeValue;
-import org.springframework.roo.classpath.details.annotations.IntegerAttributeValue;
-import org.springframework.roo.classpath.details.annotations.LongAttributeValue;
-import org.springframework.roo.classpath.details.annotations.NestedAnnotationAttributeValue;
-import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
-import org.springframework.roo.classpath.antlrjavaparser.CompilationUnitServices;
-import org.springframework.roo.classpath.antlrjavaparser.JavaParserUtils;
-import org.springframework.roo.classpath.details.comments.CommentStructure;
-import org.springframework.roo.model.Builder;
-import org.springframework.roo.model.EnumDetails;
-import org.springframework.roo.model.JavaSymbolName;
-import org.springframework.roo.model.JavaType;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Java Parser implementation of {@link AnnotationMetadata}.
@@ -148,7 +149,8 @@ public class JavaParserAnnotationMetadataBuilder implements
 
         // Add our AnnotationExpr to the actual annotations that will eventually
         // be flushed through to the compilation unit
-        JavaParserCommentMetadataBuilder.updateCommentsToJavaParser(annotationExpression, annotation.getCommentStructure());
+        JavaParserCommentMetadataBuilder.updateCommentsToJavaParser(
+                annotationExpression, annotation.getCommentStructure());
         annotations.add(annotationExpression);
 
         // Add member-value pairs to our AnnotationExpr
@@ -171,14 +173,18 @@ public class JavaParserAnnotationMetadataBuilder implements
                                     memberValuePairs.get(0).getValue());
                     annotationExpression = new SingleMemberAnnotationExpr(
                             nameToUse, toUse);
-                    JavaParserCommentMetadataBuilder.updateCommentsToJavaParser(annotationExpression, annotation.getCommentStructure());
+                    JavaParserCommentMetadataBuilder
+                            .updateCommentsToJavaParser(annotationExpression,
+                                    annotation.getCommentStructure());
                     annotations.add(annotationExpression);
                 }
                 else {
                     // We have a number of pairs being presented
                     annotationExpression = new NormalAnnotationExpr(nameToUse,
                             new ArrayList<MemberValuePair>());
-                    JavaParserCommentMetadataBuilder.updateCommentsToJavaParser(annotationExpression, annotation.getCommentStructure());
+                    JavaParserCommentMetadataBuilder
+                            .updateCommentsToJavaParser(annotationExpression,
+                                    annotation.getCommentStructure());
                     annotations.add(annotationExpression);
                 }
             }
@@ -355,7 +361,7 @@ public class JavaParserAnnotationMetadataBuilder implements
 
             final List<Expression> arrayElements = new ArrayList<Expression>();
             for (final AnnotationAttributeValue<?> v : castValue.getValue()) {
-                MemberValuePair converted = convert(v);
+                final MemberValuePair converted = convert(v);
                 if (converted != null) {
                     arrayElements.add(converted.getValue());
                 }
@@ -440,15 +446,17 @@ public class JavaParserAnnotationMetadataBuilder implements
         }
         this.attributeValues = attributeValues;
 
-        this.commentStructure = new CommentStructure();
-        JavaParserCommentMetadataBuilder.updateCommentsToRoo(commentStructure, annotationExpr);
+        commentStructure = new CommentStructure();
+        JavaParserCommentMetadataBuilder.updateCommentsToRoo(commentStructure,
+                annotationExpr);
     }
 
+    @Override
     public AnnotationMetadata build() {
         final AnnotationMetadataBuilder annotationMetadataBuilder = new AnnotationMetadataBuilder(
                 annotationType, attributeValues);
 
-        AnnotationMetadata md = annotationMetadataBuilder.build();
+        final AnnotationMetadata md = annotationMetadataBuilder.build();
         md.setCommentStructure(commentStructure);
 
         return md;

@@ -22,6 +22,7 @@ import com.github.antlrjavaparser.api.body.TypeDeclaration;
 @Service
 public class JavaParserTypeResolutionService implements TypeResolutionService {
 
+    @Override
     public final JavaType getJavaType(final String fileIdentifier) {
         Validate.notBlank(fileIdentifier, "Compilation unit path required");
         Validate.isTrue(new File(fileIdentifier).exists(),
@@ -34,7 +35,7 @@ public class JavaParserTypeResolutionService implements TypeResolutionService {
             try {
                 typeContents = FileUtils.readFileToString(file);
             }
-            catch (IOException ignored) {
+            catch (final IOException ignored) {
             }
             if (StringUtils.isBlank(typeContents)) {
                 return null;
@@ -63,6 +64,7 @@ public class JavaParserTypeResolutionService implements TypeResolutionService {
         }
     }
 
+    @Override
     public final JavaPackage getPackage(final String fileIdentifier) {
         Validate.notBlank(fileIdentifier, "Compilation unit path required");
         Validate.isTrue(new File(fileIdentifier).exists(),

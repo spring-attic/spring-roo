@@ -1,14 +1,15 @@
 package org.springframework.roo.classpath.antlrjavaparser.details;
 
+import java.util.LinkedList;
+import java.util.List;
+
+import org.springframework.roo.classpath.details.comments.CommentStructure;
+
 import com.github.antlrjavaparser.api.BlockComment;
 import com.github.antlrjavaparser.api.Comment;
 import com.github.antlrjavaparser.api.LineComment;
 import com.github.antlrjavaparser.api.Node;
 import com.github.antlrjavaparser.api.body.JavadocComment;
-import org.springframework.roo.classpath.details.comments.CommentStructure;
-
-import java.util.LinkedList;
-import java.util.List;
 
 /**
  * @author Mike De Haan
@@ -17,54 +18,68 @@ public class JavaParserCommentMetadataBuilder {
 
     /**
      * Adapt the any comments to the roo interface
-     * @param parserNode The antlr-java-parser node from which the comments will be read
+     * 
+     * @param parserNode The antlr-java-parser node from which the comments will
+     *            be read
      * @param commentStructure The roo structure from which to retrieve comments
      * @return List of comments from the antlr-java-parser package
      */
-    public static void updateCommentsToRoo(CommentStructure commentStructure, Node parserNode) {
+    public static void updateCommentsToRoo(
+            final CommentStructure commentStructure, final Node parserNode) {
 
         // Nothing to do here
         if (parserNode == null || commentStructure == null) {
             return;
         }
 
-        commentStructure.setBeginComments(adaptToRooComments(parserNode.getBeginComments()));
-        commentStructure.setInternalComments(adaptToRooComments(parserNode.getInternalComments()));
-        commentStructure.setEndComments(adaptToRooComments(parserNode.getEndComments()));
+        commentStructure.setBeginComments(adaptToRooComments(parserNode
+                .getBeginComments()));
+        commentStructure.setInternalComments(adaptToRooComments(parserNode
+                .getInternalComments()));
+        commentStructure.setEndComments(adaptToRooComments(parserNode
+                .getEndComments()));
     }
 
     /**
      * Adapt the any comments to the antlr-java-parser interface
-     * @param parserNode The antlr-java-parser node to where the comments will be set
+     * 
+     * @param parserNode The antlr-java-parser node to where the comments will
+     *            be set
      * @param commentStructure The roo structure from which to retrieve comments
      * @return List of comments from the antlr-java-parser package
      */
-    public static void updateCommentsToJavaParser(Node parserNode, CommentStructure commentStructure) {
+    public static void updateCommentsToJavaParser(final Node parserNode,
+            final CommentStructure commentStructure) {
 
         // Nothing to do here
         if (parserNode == null || commentStructure == null) {
             return;
         }
 
-        parserNode.setBeginComments(adaptComments(commentStructure.getBeginComments()));
-        parserNode.setInternalComments(adaptComments(commentStructure.getInternalComments()));
-        parserNode.setEndComments(adaptComments(commentStructure.getEndComments()));
+        parserNode.setBeginComments(adaptComments(commentStructure
+                .getBeginComments()));
+        parserNode.setInternalComments(adaptComments(commentStructure
+                .getInternalComments()));
+        parserNode.setEndComments(adaptComments(commentStructure
+                .getEndComments()));
     }
 
     /**
      * Adapt a roo comment to antlr-java-parser comment
+     * 
      * @param antlrComments List of comments from the antlr-java-parser package
      * @return List of comments from the roo package
      */
-    private static List<org.springframework.roo.classpath.details.comments.Comment> adaptToRooComments(List<Comment> antlrComments) {
+    private static List<org.springframework.roo.classpath.details.comments.Comment> adaptToRooComments(
+            final List<Comment> antlrComments) {
 
         // Nothing to do here
         if (antlrComments == null || antlrComments.size() == 0) {
             return null;
         }
 
-        List<org.springframework.roo.classpath.details.comments.Comment> comments = new LinkedList<org.springframework.roo.classpath.details.comments.Comment>();
-        for (Comment antlrComment : antlrComments) {
+        final List<org.springframework.roo.classpath.details.comments.Comment> comments = new LinkedList<org.springframework.roo.classpath.details.comments.Comment>();
+        for (final Comment antlrComment : antlrComments) {
             comments.add(adaptToRooComment(antlrComment));
         }
 
@@ -73,17 +88,21 @@ public class JavaParserCommentMetadataBuilder {
 
     /**
      * Adapt a roo comment to antlr-java-parser comment
+     * 
      * @param antlrComment
      * @return
      */
-    private static org.springframework.roo.classpath.details.comments.Comment adaptToRooComment(Comment antlrComment) {
+    private static org.springframework.roo.classpath.details.comments.Comment adaptToRooComment(
+            final Comment antlrComment) {
         org.springframework.roo.classpath.details.comments.Comment comment;
 
         if (antlrComment instanceof LineComment) {
             comment = new org.springframework.roo.classpath.details.comments.LineComment();
-        } else if (antlrComment instanceof JavadocComment) {
+        }
+        else if (antlrComment instanceof JavadocComment) {
             comment = new org.springframework.roo.classpath.details.comments.JavadocComment();
-        } else {
+        }
+        else {
             comment = new org.springframework.roo.classpath.details.comments.BlockComment();
         }
 
@@ -94,18 +113,20 @@ public class JavaParserCommentMetadataBuilder {
 
     /**
      * Adapt the roo interface to the antlr-java-parser interface
+     * 
      * @param rooComments List of comments from the roo package
      * @return List of comments from the antlr-java-parser package
      */
-    private static List<Comment> adaptComments(List<org.springframework.roo.classpath.details.comments.Comment> rooComments) {
+    private static List<Comment> adaptComments(
+            final List<org.springframework.roo.classpath.details.comments.Comment> rooComments) {
 
         // Nothing to do here
         if (rooComments == null || rooComments.size() == 0) {
             return null;
         }
 
-        List<Comment> comments = new LinkedList<Comment>();
-        for (org.springframework.roo.classpath.details.comments.Comment rooComment : rooComments) {
+        final List<Comment> comments = new LinkedList<Comment>();
+        for (final org.springframework.roo.classpath.details.comments.Comment rooComment : rooComments) {
             comments.add(adaptComment(rooComment));
         }
 
@@ -114,17 +135,21 @@ public class JavaParserCommentMetadataBuilder {
 
     /**
      * Adapt the roo interface to the antlr-java-parser interface
+     * 
      * @param rooComment
      * @return
      */
-    private static Comment adaptComment(org.springframework.roo.classpath.details.comments.Comment rooComment) {
+    private static Comment adaptComment(
+            final org.springframework.roo.classpath.details.comments.Comment rooComment) {
         Comment comment;
 
         if (rooComment instanceof org.springframework.roo.classpath.details.comments.LineComment) {
             comment = new LineComment();
-        } else if (rooComment instanceof org.springframework.roo.classpath.details.comments.JavadocComment) {
+        }
+        else if (rooComment instanceof org.springframework.roo.classpath.details.comments.JavadocComment) {
             comment = new JavadocComment();
-        } else {
+        }
+        else {
             comment = new BlockComment();
         }
 

@@ -1,5 +1,21 @@
 package org.springframework.roo.classpath.antlrjavaparser;
 
+import static org.springframework.roo.model.JavaType.OBJECT;
+
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
+import org.springframework.roo.model.DataType;
+import org.springframework.roo.model.JavaPackage;
+import org.springframework.roo.model.JavaSymbolName;
+import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.JdkJavaType;
+
 import com.github.antlrjavaparser.api.CompilationUnit;
 import com.github.antlrjavaparser.api.ImportDeclaration;
 import com.github.antlrjavaparser.api.TypeParameter;
@@ -22,21 +38,6 @@ import com.github.antlrjavaparser.api.type.ReferenceType;
 import com.github.antlrjavaparser.api.type.Type;
 import com.github.antlrjavaparser.api.type.VoidType;
 import com.github.antlrjavaparser.api.type.WildcardType;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.Validate;
-import org.springframework.roo.model.DataType;
-import org.springframework.roo.model.JavaPackage;
-import org.springframework.roo.model.JavaSymbolName;
-import org.springframework.roo.model.JavaType;
-import org.springframework.roo.model.JdkJavaType;
-
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import static org.springframework.roo.model.JavaType.OBJECT;
 
 /**
  * Assists with the usage of Java Parser.
@@ -48,6 +49,12 @@ import static org.springframework.roo.model.JavaType.OBJECT;
  * @since 1.0
  */
 public final class JavaParserUtils {
+
+    /**
+     * Constructor is private to prevent instantiation
+     */
+    private JavaParserUtils() {
+    }
 
     /**
      * Converts the indicated {@link NameExpr} into a
@@ -705,10 +712,10 @@ public final class JavaParserUtils {
         }
 
         if (current.getArray() > 0) {
-           // Primitives includes array declaration in resolvedName
-           if (!current.isPrimitive()){
-            return new ReferenceType(resolvedName, current.getArray());
-        }
+            // Primitives includes array declaration in resolvedName
+            if (!current.isPrimitive()) {
+                return new ReferenceType(resolvedName, current.getArray());
+            }
         }
 
         return resolvedName;
@@ -847,14 +854,12 @@ public final class JavaParserUtils {
         if (typeToImport.getParameters().size() > 0) {
             final List<Type> typeArgs = new ArrayList<Type>();
             cit.setTypeArgs(typeArgs);
-            for (final JavaType parameter : typeToImport
-                    .getParameters()) {
+            for (final JavaType parameter : typeToImport.getParameters()) {
                 typeArgs.add(JavaParserUtils.importParametersForType(
-                        targetType,
-                        imports, parameter));
+                        targetType, imports, parameter));
             }
         }
-        return  new ReferenceType(cit);
+        return new ReferenceType(cit);
     }
 
     /**
@@ -897,7 +902,7 @@ public final class JavaParserUtils {
         }
 
         final JavaPackage typeToImportPackage = typeToImport.getPackage();
-        if (typeToImportPackage.equals(compilationUnitPackage)) {          
+        if (typeToImportPackage.equals(compilationUnitPackage)) {
             return new NameExpr(typeToImport.getSimpleTypeName());
         }
 
@@ -1041,24 +1046,18 @@ public final class JavaParserUtils {
     }
 
     /**
-     * Constructor is private to prevent instantiation
-     */
-    private JavaParserUtils() {
-    }
-
-    /**
      * Returns the final {@link ClassOrInterfaceType} from a {@link Type}
-     *
+     * 
      * @param initType
-     * @return the final {@link ClassOrInterfaceType} or null if no {@link ClassOrInterfaceType} found
-     *
+     * @return the final {@link ClassOrInterfaceType} or null if no
+     *         {@link ClassOrInterfaceType} found
      */
-    public static ClassOrInterfaceType getClassOrInterfaceType(Type type) {
+    public static ClassOrInterfaceType getClassOrInterfaceType(final Type type) {
         Type tmp = type;
         while (tmp instanceof ReferenceType) {
-               tmp = ((ReferenceType) tmp).getType();
+            tmp = ((ReferenceType) tmp).getType();
         }
-        if (tmp instanceof ClassOrInterfaceType){
+        if (tmp instanceof ClassOrInterfaceType) {
             return (ClassOrInterfaceType) tmp;
         }
         return null;

@@ -1,5 +1,27 @@
 package org.springframework.roo.classpath.antlrjavaparser.details;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
+import org.springframework.roo.classpath.PhysicalTypeCategory;
+import org.springframework.roo.classpath.antlrjavaparser.CompilationUnitServices;
+import org.springframework.roo.classpath.antlrjavaparser.JavaParserUtils;
+import org.springframework.roo.classpath.details.MethodMetadata;
+import org.springframework.roo.classpath.details.MethodMetadataBuilder;
+import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
+import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
+import org.springframework.roo.model.Builder;
+import org.springframework.roo.model.JavaSymbolName;
+import org.springframework.roo.model.JavaType;
+
 import com.github.antlrjavaparser.JavaParser;
 import com.github.antlrjavaparser.ParseException;
 import com.github.antlrjavaparser.api.CompilationUnit;
@@ -15,27 +37,6 @@ import com.github.antlrjavaparser.api.stmt.BlockStmt;
 import com.github.antlrjavaparser.api.type.ClassOrInterfaceType;
 import com.github.antlrjavaparser.api.type.ReferenceType;
 import com.github.antlrjavaparser.api.type.Type;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.Validate;
-import org.springframework.roo.classpath.PhysicalTypeCategory;
-import org.springframework.roo.classpath.details.MethodMetadata;
-import org.springframework.roo.classpath.details.MethodMetadataBuilder;
-import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
-import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
-import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
-import org.springframework.roo.classpath.antlrjavaparser.CompilationUnitServices;
-import org.springframework.roo.classpath.antlrjavaparser.JavaParserUtils;
-import org.springframework.roo.model.Builder;
-import org.springframework.roo.model.JavaSymbolName;
-import org.springframework.roo.model.JavaType;
-
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 /**
  * Java Parser implementation of {@link MethodMetadata}.
@@ -412,6 +413,7 @@ public class JavaParserMethodMetadataBuilder implements Builder<MethodMetadata> 
         }
     }
 
+    @Override
     public MethodMetadata build() {
         final MethodMetadataBuilder methodMetadataBuilder = new MethodMetadataBuilder(
                 declaredByMetadataId);

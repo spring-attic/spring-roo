@@ -54,7 +54,7 @@ public class JavaParserFieldMetadataBuilder implements Builder<FieldMetadata> {
         final Type initType = JavaParserUtils.getResolvedName(
                 compilationUnitServices.getEnclosingTypeName(),
                 field.getFieldType(), compilationUnitServices);
-        ClassOrInterfaceType finalType = JavaParserUtils
+        final ClassOrInterfaceType finalType = JavaParserUtils
                 .getClassOrInterfaceType(initType);
 
         final FieldDeclaration newField = ASTHelper.createFieldDeclaration(
@@ -68,7 +68,7 @@ public class JavaParserFieldMetadataBuilder implements Builder<FieldMetadata> {
             for (final JavaType parameter : field.getFieldType()
                     .getParameters()) {
                 fieldTypeArgs.add(JavaParserUtils.importParametersForType(
-                                compilationUnitServices.getEnclosingTypeName(),
+                        compilationUnitServices.getEnclosingTypeName(),
                         compilationUnitServices.getImports(), parameter));
             }
         }
@@ -145,9 +145,12 @@ public class JavaParserFieldMetadataBuilder implements Builder<FieldMetadata> {
                     finalType.setTypeArgs(initTypeArgs);
                     for (final JavaType parameter : typeToImport
                             .getParameters()) {
-                        initTypeArgs.add(JavaParserUtils.importParametersForType(
-                                compilationUnitServices.getEnclosingTypeName(),
-                                compilationUnitServices.getImports(), parameter));
+                        initTypeArgs.add(JavaParserUtils
+                                .importParametersForType(
+                                        compilationUnitServices
+                                                .getEnclosingTypeName(),
+                                        compilationUnitServices.getImports(),
+                                        parameter));
                     }
                     classOrInterfaceType.setTypeArgs(initTypeArgs);
                 }
@@ -291,6 +294,7 @@ public class JavaParserFieldMetadataBuilder implements Builder<FieldMetadata> {
         }
     }
 
+    @Override
     public FieldMetadata build() {
         final FieldMetadataBuilder fieldMetadataBuilder = new FieldMetadataBuilder(
                 declaredByMetadataId);

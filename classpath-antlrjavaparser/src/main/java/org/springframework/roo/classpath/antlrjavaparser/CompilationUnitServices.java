@@ -1,12 +1,13 @@
 package org.springframework.roo.classpath.antlrjavaparser;
 
-import com.github.antlrjavaparser.api.ImportDeclaration;
-import com.github.antlrjavaparser.api.body.TypeDeclaration;
+import java.util.List;
+
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaType;
 
-import java.util.List;
+import com.github.antlrjavaparser.api.ImportDeclaration;
+import com.github.antlrjavaparser.api.body.TypeDeclaration;
 
 /**
  * An interface that enables Java Parser types to query relevant information

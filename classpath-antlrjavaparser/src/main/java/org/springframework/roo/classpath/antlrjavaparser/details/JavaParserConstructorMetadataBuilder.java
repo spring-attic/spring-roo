@@ -314,6 +314,7 @@ public class JavaParserConstructorMetadataBuilder implements
         }
     }
 
+    @Override
     public ConstructorMetadata build() {
         final ConstructorMetadataBuilder constructorBuilder = new ConstructorMetadataBuilder(
                 declaredByMetadataId);

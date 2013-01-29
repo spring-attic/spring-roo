@@ -75,6 +75,7 @@ public class JavaParserTypeParsingService implements TypeParsingService {
         constants.add(constants.size(), newEntry);
     }
 
+    @Override
     public final String getCompilationUnitContents(
             final ClassOrInterfaceTypeDetails cid) {
         Validate.notNull(cid, "Class or interface type details are required");
@@ -100,6 +101,7 @@ public class JavaParserTypeParsingService implements TypeParsingService {
         return compilationUnit.toString();
     }
 
+    @Override
     public ClassOrInterfaceTypeDetails getTypeAtLocation(
             final String fileIdentifier, final String declaredByMetadataId,
             final JavaType typeName) {
@@ -112,7 +114,7 @@ public class JavaParserTypeParsingService implements TypeParsingService {
         try {
             typeContents = FileUtils.readFileToString(file);
         }
-        catch (IOException ignored) {
+        catch (final IOException ignored) {
         }
         if (StringUtils.isBlank(typeContents)) {
             return null;
@@ -120,6 +122,7 @@ public class JavaParserTypeParsingService implements TypeParsingService {
         return getTypeFromString(typeContents, declaredByMetadataId, typeName);
     }
 
+    @Override
     public ClassOrInterfaceTypeDetails getTypeFromString(
             final String fileContents, final String declaredByMetadataId,
             final JavaType typeName) {
@@ -173,7 +176,6 @@ public class JavaParserTypeParsingService implements TypeParsingService {
                 "Compilation unit imports should be non-null when producing type '"
                         + cid.getName() + "'");
         for (final ImportMetadata importType : cid.getRegisteredImports()) {
-
             ImportDeclaration importDeclaration;
 
             if (!importType.isAsterisk()) {
@@ -191,18 +193,18 @@ public class JavaParserTypeParsingService implements TypeParsingService {
                             .getImportType().getSimpleTypeName());
                 }
 
-                importDeclaration = new ImportDeclaration(typeToImportExpr, importType
-                        .isStatic(), false);
+                importDeclaration = new ImportDeclaration(typeToImportExpr,
+                        importType.isStatic(), false);
             }
             else {
-                importDeclaration = new ImportDeclaration(new NameExpr(importType
-                        .getImportPackage()
-                        .getFullyQualifiedPackageName()), importType
-                        .isStatic(), importType.isAsterisk());
+                importDeclaration = new ImportDeclaration(new NameExpr(
+                        importType.getImportPackage()
+                                .getFullyQualifiedPackageName()),
+                        importType.isStatic(), importType.isAsterisk());
             }
 
-            JavaParserCommentMetadataBuilder.updateCommentsToJavaParser(importDeclaration,
-                    importType.getCommentStructure());
+            JavaParserCommentMetadataBuilder.updateCommentsToJavaParser(
+                    importDeclaration, importType.getCommentStructure());
 
             compilationUnit.getImports().add(importDeclaration);
         }
@@ -312,22 +314,27 @@ public class JavaParserTypeParsingService implements TypeParsingService {
             // Create a compilation unit so that we can use JavaType*Metadata
             // static methods directly
             enclosingCompilationUnitServices = new CompilationUnitServices() {
+                @Override
                 public JavaPackage getCompilationUnitPackage() {
                     return cid.getName().getPackage();
                 }
 
+                @Override
                 public JavaType getEnclosingTypeName() {
                     return cid.getName();
                 }
 
+                @Override
                 public List<ImportDeclaration> getImports() {
                     return compilationUnit.getImports();
                 }
 
+                @Override
                 public List<TypeDeclaration> getInnerTypes() {
                     return compilationUnit.getTypes();
                 }
 
+                @Override
                 public PhysicalTypeCategory getPhysicalTypeCategory() {
                     return cid.getPhysicalTypeCategory();
                 }
@@ -338,22 +345,27 @@ public class JavaParserTypeParsingService implements TypeParsingService {
         // A hybrid CompilationUnitServices must be provided that references the
         // enclosing types imports and package
         final CompilationUnitServices compilationUnitServices = new CompilationUnitServices() {
+            @Override
             public JavaPackage getCompilationUnitPackage() {
                 return finalCompilationUnitServices.getCompilationUnitPackage();
             }
 
+            @Override
             public JavaType getEnclosingTypeName() {
                 return cid.getName();
             }
 
+            @Override
             public List<ImportDeclaration> getImports() {
                 return finalCompilationUnitServices.getImports();
             }
 
+            @Override
             public List<TypeDeclaration> getInnerTypes() {
                 return compilationUnit.getTypes();
             }
 
+            @Override
             public PhysicalTypeCategory getPhysicalTypeCategory() {
                 return cid.getPhysicalTypeCategory();
             }
@@ -450,6 +462,7 @@ public class JavaParserTypeParsingService implements TypeParsingService {
         }
 
         Collections.sort(imports, new Comparator<ImportDeclaration>() {
+            @Override
             public int compare(final ImportDeclaration importDeclaration,
                     final ImportDeclaration importDeclaration1) {
                 return importDeclaration.getName().toString()
@@ -461,9 +474,8 @@ public class JavaParserTypeParsingService implements TypeParsingService {
     }
 
     @Override
-    public String updateAndGetCompilationUnitContents(String fileIdentifier,
-            ClassOrInterfaceTypeDetails cid) {
-
+    public String updateAndGetCompilationUnitContents(
+            final String fileIdentifier, final ClassOrInterfaceTypeDetails cid) {
         // Validate parameters
         Validate.notBlank(fileIdentifier, "Oringinal unit path required");
         Validate.notNull(cid, "Type details required");
@@ -474,7 +486,7 @@ public class JavaParserTypeParsingService implements TypeParsingService {
         try {
             fileContents = FileUtils.readFileToString(file);
         }
-        catch (IOException ignored) {
+        catch (final IOException ignored) {
         }
         if (StringUtils.isBlank(fileContents)) {
             return getCompilationUnitContents(cid);
@@ -523,5 +535,5 @@ public class JavaParserTypeParsingService implements TypeParsingService {
 
         // Return new contents
         return compilationUnit.toString();
-    }    
+    }
 }

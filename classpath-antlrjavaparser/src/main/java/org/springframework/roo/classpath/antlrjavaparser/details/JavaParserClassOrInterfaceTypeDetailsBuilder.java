@@ -1,7 +1,31 @@
 package org.springframework.roo.classpath.antlrjavaparser.details;
 
-import com.github.antlrjavaparser.api.BlockComment;
-import com.github.antlrjavaparser.api.Comment;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import org.apache.commons.lang3.Validate;
+import org.springframework.roo.classpath.PhysicalTypeCategory;
+import org.springframework.roo.classpath.PhysicalTypeIdentifier;
+import org.springframework.roo.classpath.PhysicalTypeMetadata;
+import org.springframework.roo.classpath.TypeLocationService;
+import org.springframework.roo.classpath.antlrjavaparser.CompilationUnitServices;
+import org.springframework.roo.classpath.antlrjavaparser.JavaParserUtils;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
+import org.springframework.roo.classpath.details.ConstructorMetadata;
+import org.springframework.roo.classpath.details.FieldMetadata;
+import org.springframework.roo.classpath.details.ImportMetadataBuilder;
+import org.springframework.roo.classpath.details.MethodMetadata;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
+import org.springframework.roo.classpath.details.comments.CommentStructure;
+import org.springframework.roo.metadata.MetadataService;
+import org.springframework.roo.model.Builder;
+import org.springframework.roo.model.JavaPackage;
+import org.springframework.roo.model.JavaSymbolName;
+import org.springframework.roo.model.JavaType;
+
 import com.github.antlrjavaparser.api.CompilationUnit;
 import com.github.antlrjavaparser.api.ImportDeclaration;
 import com.github.antlrjavaparser.api.body.BodyDeclaration;
@@ -16,31 +40,6 @@ import com.github.antlrjavaparser.api.body.VariableDeclarator;
 import com.github.antlrjavaparser.api.expr.AnnotationExpr;
 import com.github.antlrjavaparser.api.expr.QualifiedNameExpr;
 import com.github.antlrjavaparser.api.type.ClassOrInterfaceType;
-import org.apache.commons.lang3.Validate;
-import org.springframework.roo.classpath.PhysicalTypeCategory;
-import org.springframework.roo.classpath.PhysicalTypeIdentifier;
-import org.springframework.roo.classpath.PhysicalTypeMetadata;
-import org.springframework.roo.classpath.TypeLocationService;
-import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
-import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
-import org.springframework.roo.classpath.details.ConstructorMetadata;
-import org.springframework.roo.classpath.details.FieldMetadata;
-import org.springframework.roo.classpath.details.ImportMetadataBuilder;
-import org.springframework.roo.classpath.details.MethodMetadata;
-import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
-import org.springframework.roo.classpath.antlrjavaparser.CompilationUnitServices;
-import org.springframework.roo.classpath.antlrjavaparser.JavaParserUtils;
-import org.springframework.roo.classpath.details.comments.CommentStructure;
-import org.springframework.roo.metadata.MetadataService;
-import org.springframework.roo.model.Builder;
-import org.springframework.roo.model.JavaPackage;
-import org.springframework.roo.model.JavaSymbolName;
-import org.springframework.roo.model.JavaType;
-
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 public class JavaParserClassOrInterfaceTypeDetailsBuilder implements
         Builder<ClassOrInterfaceTypeDetails> {
@@ -122,6 +121,7 @@ public class JavaParserClassOrInterfaceTypeDetailsBuilder implements
         this.typeLocationService = typeLocationService;
     }
 
+    @Override
     public ClassOrInterfaceTypeDetails build() {
         Validate.notEmpty(compilationUnit.getTypes(),
                 "No types in compilation unit, so unable to continue parsing");
@@ -190,12 +190,13 @@ public class JavaParserClassOrInterfaceTypeDetailsBuilder implements
                 // We want to calculate these...
 
                 final JavaType type = new JavaType(fullName);
-                final JavaPackage typePackage = importDeclaration.isAsterisk()
-                        ? new JavaPackage(fullName) : type.getPackage();
+                final JavaPackage typePackage = importDeclaration.isAsterisk() ? new JavaPackage(
+                        fullName) : type.getPackage();
 
                 // Process any comments for the import
-                CommentStructure commentStructure = new CommentStructure();
-                JavaParserCommentMetadataBuilder.updateCommentsToRoo(commentStructure, importDeclaration);
+                final CommentStructure commentStructure = new CommentStructure();
+                JavaParserCommentMetadataBuilder.updateCommentsToRoo(
+                        commentStructure, importDeclaration);
 
                 final ImportMetadataBuilder newImport = new ImportMetadataBuilder(
                         declaredByMetadataId, 0, typePackage, type,
@@ -293,8 +294,9 @@ public class JavaParserClassOrInterfaceTypeDetailsBuilder implements
                         .getInstance(candidate, compilationUnitServices)
                         .build();
 
-                CommentStructure commentStructure = new CommentStructure();
-                JavaParserCommentMetadataBuilder.updateCommentsToRoo(commentStructure, candidate);
+                final CommentStructure commentStructure = new CommentStructure();
+                JavaParserCommentMetadataBuilder.updateCommentsToRoo(
+                        commentStructure, candidate);
                 md.setCommentStructure(commentStructure);
 
                 cidBuilder.addAnnotation(md);
@@ -324,8 +326,9 @@ public class JavaParserClassOrInterfaceTypeDetailsBuilder implements
                                         var, compilationUnitServices,
                                         typeParameterNames).build();
 
-                        CommentStructure commentStructure = new CommentStructure();
-                        JavaParserCommentMetadataBuilder.updateCommentsToRoo(commentStructure, member);
+                        final CommentStructure commentStructure = new CommentStructure();
+                        JavaParserCommentMetadataBuilder.updateCommentsToRoo(
+                                commentStructure, member);
                         field.setCommentStructure(commentStructure);
 
                         cidBuilder.addField(field);
@@ -338,8 +341,9 @@ public class JavaParserClassOrInterfaceTypeDetailsBuilder implements
                                     compilationUnitServices, typeParameterNames)
                             .build();
 
-                    CommentStructure commentStructure = new CommentStructure();
-                    JavaParserCommentMetadataBuilder.updateCommentsToRoo(commentStructure, member);
+                    final CommentStructure commentStructure = new CommentStructure();
+                    JavaParserCommentMetadataBuilder.updateCommentsToRoo(
+                            commentStructure, member);
                     method.setCommentStructure(commentStructure);
 
                     cidBuilder.addMethod(method);
@@ -351,8 +355,9 @@ public class JavaParserClassOrInterfaceTypeDetailsBuilder implements
                                     compilationUnitServices, typeParameterNames)
                             .build();
 
-                    CommentStructure commentStructure = new CommentStructure();
-                    JavaParserCommentMetadataBuilder.updateCommentsToRoo(commentStructure, member);
+                    final CommentStructure commentStructure = new CommentStructure();
+                    JavaParserCommentMetadataBuilder.updateCommentsToRoo(
+                            commentStructure, member);
                     constructor.setCommentStructure(commentStructure);
 
                     cidBuilder.addConstructor(constructor);
@@ -378,22 +383,27 @@ public class JavaParserClassOrInterfaceTypeDetailsBuilder implements
 
     private CompilationUnitServices getDefaultCompilationUnitServices() {
         return new CompilationUnitServices() {
+            @Override
             public JavaPackage getCompilationUnitPackage() {
                 return compilationUnitPackage;
             }
 
+            @Override
             public JavaType getEnclosingTypeName() {
                 return name;
             }
 
+            @Override
             public List<ImportDeclaration> getImports() {
                 return imports;
             }
 
+            @Override
             public List<TypeDeclaration> getInnerTypes() {
                 return innerTypes;
             }
 
+            @Override
             public PhysicalTypeCategory getPhysicalTypeCategory() {
                 return physicalTypeCategory;
             }
