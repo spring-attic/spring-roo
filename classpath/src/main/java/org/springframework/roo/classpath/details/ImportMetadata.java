@@ -1,5 +1,6 @@
 package org.springframework.roo.classpath.details;
 
+import org.springframework.roo.classpath.details.comments.CommentedJavaStructure;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaType;
 
@@ -12,7 +13,7 @@ import org.springframework.roo.model.JavaType;
  * @author James Tyrrell
  * @since 1.1.1
  */
-public interface ImportMetadata extends IdentifiableJavaStructure {
+public interface ImportMetadata extends IdentifiableJavaStructure, CommentedJavaStructure {
 
     /**
      * @return the import package (null if type import)

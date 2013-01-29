@@ -1,6 +1,8 @@
 package org.springframework.roo.classpath.details;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.springframework.roo.classpath.details.comments.CommentStructure;
+import org.springframework.roo.classpath.details.comments.CommentedJavaStructure;
 import org.springframework.roo.model.CustomData;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaType;
@@ -12,10 +14,11 @@ import org.springframework.roo.model.JavaType;
  * @since 1.1.1
  */
 public class DefaultImportMetadata extends
-        AbstractIdentifiableJavaStructureProvider implements ImportMetadata {
+        AbstractIdentifiableJavaStructureProvider implements ImportMetadata, CommentedJavaStructure {
 
     private final JavaPackage importPackage;
     private final JavaType importType;
+    private CommentStructure commentStructure;
     private boolean isAsterisk = false;
     private boolean isStatic = false;
 
@@ -56,5 +59,15 @@ public class DefaultImportMetadata extends
         builder.append("isStatic", isStatic);
         builder.append("isAsterisk", isAsterisk);
         return builder.toString();
+    }
+
+    @Override
+    public CommentStructure getCommentStructure() {
+        return commentStructure;
+    }
+
+    @Override
+    public void setCommentStructure(CommentStructure commentStructure) {
+        this.commentStructure = commentStructure;
     }
 }

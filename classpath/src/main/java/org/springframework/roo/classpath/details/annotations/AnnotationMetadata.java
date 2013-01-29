@@ -2,6 +2,7 @@ package org.springframework.roo.classpath.details.annotations;
 
 import java.util.List;
 
+import org.springframework.roo.classpath.details.comments.CommentedJavaStructure;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 
@@ -12,7 +13,7 @@ import org.springframework.roo.model.JavaType;
  * @author Andrew Swan
  * @since 1.0
  */
-public interface AnnotationMetadata {
+public interface AnnotationMetadata extends CommentedJavaStructure {
 
     /**
      * @return the annotation type (never null)

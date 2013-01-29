@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
+import org.springframework.roo.classpath.details.comments.CommentStructure;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
@@ -22,6 +23,7 @@ public abstract class AbstractInvocableMemberMetadataBuilder<T extends Invocable
     private List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
     private List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
     private List<JavaType> throwsTypes = new ArrayList<JavaType>();
+    private CommentStructure commentStructure;
 
     protected AbstractInvocableMemberMetadataBuilder(
             final InvocableMemberMetadata existing) {
@@ -109,5 +111,13 @@ public abstract class AbstractInvocableMemberMetadataBuilder<T extends Invocable
 
     public void setThrowsTypes(final List<JavaType> throwsTypes) {
         this.throwsTypes = throwsTypes;
+    }
+
+    public CommentStructure getCommentStructure() {
+        return commentStructure;
+    }
+
+    public void setCommentStructure(CommentStructure commentStructure) {
+        this.commentStructure = commentStructure;
     }
 }

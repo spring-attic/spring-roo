@@ -1,5 +1,7 @@
 package org.springframework.roo.classpath.antlrjavaparser.details;
 
+import com.github.antlrjavaparser.api.BlockComment;
+import com.github.antlrjavaparser.api.Comment;
 import com.github.antlrjavaparser.api.CompilationUnit;
 import com.github.antlrjavaparser.api.ImportDeclaration;
 import com.github.antlrjavaparser.api.body.BodyDeclaration;
@@ -28,6 +30,7 @@ import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.antlrjavaparser.CompilationUnitServices;
 import org.springframework.roo.classpath.antlrjavaparser.JavaParserUtils;
+import org.springframework.roo.classpath.details.comments.CommentStructure;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.Builder;
 import org.springframework.roo.model.JavaPackage;
@@ -189,10 +192,18 @@ public class JavaParserClassOrInterfaceTypeDetailsBuilder implements
                 final JavaType type = new JavaType(fullName);
                 final JavaPackage typePackage = importDeclaration.isAsterisk()
                         ? new JavaPackage(fullName) : type.getPackage();
+
+                // Process any comments for the import
+                CommentStructure commentStructure = new CommentStructure();
+                JavaParserCommentMetadataBuilder.updateCommentsToRoo(commentStructure, importDeclaration);
+
                 final ImportMetadataBuilder newImport = new ImportMetadataBuilder(
                         declaredByMetadataId, 0, typePackage, type,
                         importDeclaration.isStatic(),
                         importDeclaration.isAsterisk());
+
+                newImport.setCommentStructure(commentStructure);
+
                 cidBuilder.add(newImport.build());
             }
         }
@@ -281,6 +292,11 @@ public class JavaParserClassOrInterfaceTypeDetailsBuilder implements
                 final AnnotationMetadata md = JavaParserAnnotationMetadataBuilder
                         .getInstance(candidate, compilationUnitServices)
                         .build();
+
+                CommentStructure commentStructure = new CommentStructure();
+                JavaParserCommentMetadataBuilder.updateCommentsToRoo(commentStructure, candidate);
+                md.setCommentStructure(commentStructure);
+
                 cidBuilder.addAnnotation(md);
             }
         }
@@ -307,6 +323,11 @@ public class JavaParserClassOrInterfaceTypeDetailsBuilder implements
                                 .getInstance(declaredByMetadataId, castMember,
                                         var, compilationUnitServices,
                                         typeParameterNames).build();
+
+                        CommentStructure commentStructure = new CommentStructure();
+                        JavaParserCommentMetadataBuilder.updateCommentsToRoo(commentStructure, member);
+                        field.setCommentStructure(commentStructure);
+
                         cidBuilder.addField(field);
                     }
                 }
@@ -316,6 +337,11 @@ public class JavaParserClassOrInterfaceTypeDetailsBuilder implements
                             .getInstance(declaredByMetadataId, castMember,
                                     compilationUnitServices, typeParameterNames)
                             .build();
+
+                    CommentStructure commentStructure = new CommentStructure();
+                    JavaParserCommentMetadataBuilder.updateCommentsToRoo(commentStructure, member);
+                    method.setCommentStructure(commentStructure);
+
                     cidBuilder.addMethod(method);
                 }
                 if (member instanceof ConstructorDeclaration) {
@@ -324,6 +350,11 @@ public class JavaParserClassOrInterfaceTypeDetailsBuilder implements
                             .getInstance(declaredByMetadataId, castMember,
                                     compilationUnitServices, typeParameterNames)
                             .build();
+
+                    CommentStructure commentStructure = new CommentStructure();
+                    JavaParserCommentMetadataBuilder.updateCommentsToRoo(commentStructure, member);
+                    constructor.setCommentStructure(commentStructure);
+
                     cidBuilder.addConstructor(constructor);
                 }
                 if (member instanceof TypeDeclaration) {

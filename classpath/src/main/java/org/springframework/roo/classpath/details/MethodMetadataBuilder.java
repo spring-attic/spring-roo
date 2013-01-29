@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
+import org.springframework.roo.classpath.details.comments.CommentStructure;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
@@ -20,6 +21,7 @@ public final class MethodMetadataBuilder extends
 
     private JavaSymbolName methodName;
     private JavaType returnType;
+    private CommentStructure commentStructure;
 
     public MethodMetadataBuilder(final MethodMetadata existing) {
         super(existing);
@@ -80,11 +82,15 @@ public final class MethodMetadataBuilder extends
     }
 
     public MethodMetadata build() {
-        return new DefaultMethodMetadata(getCustomData().build(),
+        DefaultMethodMetadata methodMetadata = new DefaultMethodMetadata(getCustomData().build(),
                 getDeclaredByMetadataId(), getModifier(), buildAnnotations(),
                 getMethodName(), getReturnType(), getParameterTypes(),
                 getParameterNames(), getThrowsTypes(), getBodyBuilder()
                         .getOutput());
+
+        methodMetadata.setCommentStructure(this.commentStructure);
+
+        return methodMetadata;
     }
 
     public JavaSymbolName getMethodName() {
@@ -106,6 +112,14 @@ public final class MethodMetadataBuilder extends
 
     public void setReturnType(final JavaType returnType) {
         this.returnType = returnType;
+    }
+
+    public CommentStructure getCommentStructure() {
+        return commentStructure;
+    }
+
+    public void setCommentStructure(CommentStructure commentStructure) {
+        this.commentStructure = commentStructure;
     }
 
     @Override

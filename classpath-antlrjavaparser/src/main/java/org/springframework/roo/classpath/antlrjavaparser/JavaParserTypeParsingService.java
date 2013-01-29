@@ -22,6 +22,7 @@ import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.TypeParsingService;
 import org.springframework.roo.classpath.antlrjavaparser.details.JavaParserAnnotationMetadataBuilder;
 import org.springframework.roo.classpath.antlrjavaparser.details.JavaParserClassOrInterfaceTypeDetailsBuilder;
+import org.springframework.roo.classpath.antlrjavaparser.details.JavaParserCommentMetadataBuilder;
 import org.springframework.roo.classpath.antlrjavaparser.details.JavaParserConstructorMetadataBuilder;
 import org.springframework.roo.classpath.antlrjavaparser.details.JavaParserFieldMetadataBuilder;
 import org.springframework.roo.classpath.antlrjavaparser.details.JavaParserMethodMetadataBuilder;
@@ -172,6 +173,9 @@ public class JavaParserTypeParsingService implements TypeParsingService {
                 "Compilation unit imports should be non-null when producing type '"
                         + cid.getName() + "'");
         for (final ImportMetadata importType : cid.getRegisteredImports()) {
+
+            ImportDeclaration importDeclaration;
+
             if (!importType.isAsterisk()) {
                 NameExpr typeToImportExpr;
                 if (importType.getImportType().getEnclosingType() == null) {
@@ -186,17 +190,21 @@ public class JavaParserTypeParsingService implements TypeParsingService {
                                     .getFullyQualifiedTypeName()), importType
                             .getImportType().getSimpleTypeName());
                 }
-                compilationUnit.getImports().add(
-                        new ImportDeclaration(typeToImportExpr, importType
-                                .isStatic(), false));
+
+                importDeclaration = new ImportDeclaration(typeToImportExpr, importType
+                        .isStatic(), false);
             }
             else {
-                compilationUnit.getImports().add(
-                        new ImportDeclaration(new NameExpr(importType
-                                .getImportPackage()
-                                .getFullyQualifiedPackageName()), importType
-                                .isStatic(), importType.isAsterisk()));
+                importDeclaration = new ImportDeclaration(new NameExpr(importType
+                        .getImportPackage()
+                        .getFullyQualifiedPackageName()), importType
+                        .isStatic(), importType.isAsterisk());
             }
+
+            JavaParserCommentMetadataBuilder.updateCommentsToJavaParser(importDeclaration,
+                    importType.getCommentStructure());
+
+            compilationUnit.getImports().add(importDeclaration);
         }
 
         // Create a class or interface declaration to represent this actual type
@@ -451,4 +459,69 @@ public class JavaParserTypeParsingService implements TypeParsingService {
 
         compilationUnit.setImports(imports);
     }
+
+    @Override
+    public String updateAndGetCompilationUnitContents(String fileIdentifier,
+            ClassOrInterfaceTypeDetails cid) {
+
+        // Validate parameters
+        Validate.notBlank(fileIdentifier, "Oringinal unit path required");
+        Validate.notNull(cid, "Type details required");
+
+        // Load original compilation unit from file
+        final File file = new File(fileIdentifier);
+        String fileContents = "";
+        try {
+            fileContents = FileUtils.readFileToString(file);
+        }
+        catch (IOException ignored) {
+        }
+        if (StringUtils.isBlank(fileContents)) {
+            return getCompilationUnitContents(cid);
+        }
+        CompilationUnit compilationUnit;
+        try {
+            compilationUnit = JavaParser.parse(new ByteArrayInputStream(
+                    fileContents.getBytes()));
+
+        }
+        catch (final IOException e) {
+            throw new IllegalStateException(e);
+        }
+        catch (final ParseException e) {
+            throw new IllegalStateException(e);
+        }
+
+        // Load new compilation unit from cid information
+        final String cidContents = getCompilationUnitContents(cid);
+        CompilationUnit cidCompilationUnit;
+        try {
+            cidCompilationUnit = JavaParser.parse(new ByteArrayInputStream(
+                    cidContents.getBytes()));
+
+        }
+        catch (final IOException e) {
+            throw new IllegalStateException(e);
+        }
+        catch (final ParseException e) {
+            throw new IllegalStateException(e);
+        }
+
+        // Update package
+        if (!compilationUnit.getPackage().getName().getName()
+                .equals(cidCompilationUnit.getPackage().getName().getName())) {
+            compilationUnit.setPackage(cidCompilationUnit.getPackage());
+        }
+
+        // Update imports
+        UpdateCompilationUnitUtils.updateCompilationUnitImports(
+                compilationUnit, cidCompilationUnit);
+
+        // Update types
+        UpdateCompilationUnitUtils.updateCompilationUnitTypes(compilationUnit,
+                cidCompilationUnit);
+
+        // Return new contents
+        return compilationUnit.toString();
+    }    
 }

@@ -19,6 +19,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.apache.commons.lang3.Validate;
+import org.springframework.roo.classpath.details.comments.CommentStructure;
 import org.springframework.roo.model.Builder;
 import org.springframework.roo.model.EnumDetails;
 import org.springframework.roo.model.JavaSymbolName;
@@ -86,6 +87,7 @@ public class AnnotationMetadataBuilder implements Builder<AnnotationMetadata> {
 
     private JavaType annotationType;
     private final Map<String, AnnotationAttributeValue<?>> attributeValues = new LinkedHashMap<String, AnnotationAttributeValue<?>>();
+    private CommentStructure commentStructure;
 
     /**
      * Constructor. The caller must set the annotation type via
@@ -107,6 +109,7 @@ public class AnnotationMetadataBuilder implements Builder<AnnotationMetadata> {
             attributeValues.put(attributeName.getSymbolName(),
                     existing.getAttribute(attributeName));
         }
+        this.setCommentStructure(existing.getCommentStructure());
     }
 
     /**
@@ -222,9 +225,14 @@ public class AnnotationMetadataBuilder implements Builder<AnnotationMetadata> {
     }
 
     public AnnotationMetadata build() {
-        return new DefaultAnnotationMetadata(getAnnotationType(),
+
+        DefaultAnnotationMetadata annotationMetadata = new DefaultAnnotationMetadata(getAnnotationType(),
                 new ArrayList<AnnotationAttributeValue<?>>(getAttributes()
                         .values()));
+
+        annotationMetadata.setCommentStructure(commentStructure);
+
+        return annotationMetadata;
     }
 
     public JavaType getAnnotationType() {
@@ -247,7 +255,7 @@ public class AnnotationMetadataBuilder implements Builder<AnnotationMetadata> {
     /**
      * Sets the attribute values
      * 
-     * @param attributeValue's the values to set; can be <code>null</code> for
+     * @param attributeValues the values to set; can be <code>null</code> for
      *            none
      */
     public void setAttributes(
@@ -258,5 +266,13 @@ public class AnnotationMetadataBuilder implements Builder<AnnotationMetadata> {
                 addAttribute(attributeValue);
             }
         }
+    }
+
+    public CommentStructure getCommentStructure() {
+        return commentStructure;
+    }
+
+    public void setCommentStructure(CommentStructure commentStructure) {
+        this.commentStructure = commentStructure;
     }
 }
