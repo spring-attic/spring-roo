@@ -543,15 +543,15 @@ public class FieldCommands implements CommandMarker {
 
         final ClassOrInterfaceTypeDetails javaTypeDetails = typeLocationService
                 .getTypeDetails(typeName);
-        Validate.notNull(javaTypeDetails, "The type specified, '" + typeName
-                + "'doesn't exist");
+        Validate.notNull(javaTypeDetails,
+                "The type specified, '%s' doesn't exist", typeName);
 
         final String physicalTypeIdentifier = javaTypeDetails
                 .getDeclaredByMetadataId();
         final ListField fieldDetails = new ListField(physicalTypeIdentifier,
-                new JavaType(LIST.getFullyQualifiedTypeName(), 0, DataType.TYPE,
-                        null, Arrays.asList(fieldType)), fieldName, fieldType,
-                cardinality);
+                new JavaType(LIST.getFullyQualifiedTypeName(), 0,
+                        DataType.TYPE, null, Arrays.asList(fieldType)),
+                fieldName, fieldType, cardinality);
         fieldDetails.setNotNull(notNull);
         fieldDetails.setNullRequired(nullRequired);
         if (sizeMin != null) {
@@ -717,11 +717,10 @@ public class FieldCommands implements CommandMarker {
 
         final ClassOrInterfaceTypeDetails cid = typeLocationService
                 .getTypeDetails(typeName);
-        Validate.notNull(cid,
-                "The type specified, '%s', doesn't exist", typeName);
+        Validate.notNull(cid, "The type specified, '%s', doesn't exist",
+                typeName);
 
-        final String physicalTypeIdentifier = cid
-                .getDeclaredByMetadataId();
+        final String physicalTypeIdentifier = cid.getDeclaredByMetadataId();
         final FieldDetails fieldDetails = new FieldDetails(
                 physicalTypeIdentifier, fieldType, fieldName);
         fieldDetails.setNotNull(notNull);
