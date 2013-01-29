@@ -1,5 +1,6 @@
 package org.springframework.roo.classpath.operations;
 
+import static org.springframework.roo.model.JdkJavaType.LIST;
 import static org.springframework.roo.model.JdkJavaType.SET;
 import static org.springframework.roo.model.JpaJavaType.EMBEDDABLE;
 import static org.springframework.roo.model.JpaJavaType.ENTITY;
@@ -36,6 +37,7 @@ import org.springframework.roo.classpath.operations.jsr303.DateFieldPersistenceT
 import org.springframework.roo.classpath.operations.jsr303.EmbeddedField;
 import org.springframework.roo.classpath.operations.jsr303.EnumField;
 import org.springframework.roo.classpath.operations.jsr303.FieldDetails;
+import org.springframework.roo.classpath.operations.jsr303.ListField;
 import org.springframework.roo.classpath.operations.jsr303.NumericField;
 import org.springframework.roo.classpath.operations.jsr303.ReferenceField;
 import org.springframework.roo.classpath.operations.jsr303.SetField;
@@ -493,6 +495,84 @@ public class FieldCommands implements CommandMarker {
         insertField(fieldDetails, permitReservedWords, transientModifier);
     }
 
+    @CliCommand(value = "field list", help = "Adds a private List field to an existing Java source file (eg the 'one' side of a many-to-one)")
+    public void addFieldListJpa(
+            @CliOption(key = { "", "fieldName" }, mandatory = true, help = "The name of the field to add") final JavaSymbolName fieldName,
+            @CliOption(key = "type", mandatory = true, help = "The entity which will be contained within the Set") final JavaType fieldType,
+            @CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*", optionContext = "update,project", help = "The name of the class to receive this field") final JavaType typeName,
+            @CliOption(key = "mappedBy", mandatory = false, help = "The field name on the referenced type which owns the relationship") final JavaSymbolName mappedBy,
+            @CliOption(key = "notNull", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Whether this value cannot be null") final boolean notNull,
+            @CliOption(key = "nullRequired", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Whether this value must be null") final boolean nullRequired,
+            @CliOption(key = "sizeMin", mandatory = false, help = "The minimum number of elements in the collection") final Integer sizeMin,
+            @CliOption(key = "sizeMax", mandatory = false, help = "The maximum number of elements in the collection") final Integer sizeMax,
+            @CliOption(key = "cardinality", mandatory = false, unspecifiedDefaultValue = "MANY_TO_MANY", specifiedDefaultValue = "MANY_TO_MANY", help = "The relationship cardinality at a JPA level") Cardinality cardinality,
+            @CliOption(key = "fetch", mandatory = false, help = "The fetch semantics at a JPA level") final Fetch fetch,
+            @CliOption(key = "comment", mandatory = false, help = "An optional comment for JavaDocs") final String comment,
+            @CliOption(key = "transient", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates to mark the field as transient") final boolean transientModifier,
+            @CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") final boolean permitReservedWords) {
+
+        final ClassOrInterfaceTypeDetails cid = typeLocationService
+                .getTypeDetails(fieldType);
+        Validate.notNull(
+                cid,
+                "The specified target '--type' does not exist or can not be found. Please create this type first.");
+
+        // Check if the requested entity is a JPA @Entity
+        final MemberDetails memberDetails = memberDetailsScanner
+                .getMemberDetails(this.getClass().getName(), cid);
+        final AnnotationMetadata entityAnnotation = memberDetails
+                .getAnnotation(ENTITY);
+        final AnnotationMetadata persistentAnnotation = memberDetails
+                .getAnnotation(PERSISTENT);
+
+        if (entityAnnotation != null) {
+            Validate.isTrue(cardinality == Cardinality.ONE_TO_MANY
+                    || cardinality == Cardinality.MANY_TO_MANY,
+                    "Cardinality must be ONE_TO_MANY or MANY_TO_MANY for the field list command");
+        }
+        else if (cid.getPhysicalTypeCategory() == PhysicalTypeCategory.ENUMERATION) {
+            cardinality = null;
+        }
+        else if (persistentAnnotation != null) {
+            // Yes, we can deal with that
+        }
+        else {
+            throw new IllegalStateException(
+                    "The field list command is only applicable to enum, JPA @Entity or Spring Data @Persistence elements");
+        }
+
+        final ClassOrInterfaceTypeDetails javaTypeDetails = typeLocationService
+                .getTypeDetails(typeName);
+        Validate.notNull(javaTypeDetails, "The type specified, '" + typeName
+                + "'doesn't exist");
+
+        final String physicalTypeIdentifier = javaTypeDetails
+                .getDeclaredByMetadataId();
+        final ListField fieldDetails = new ListField(physicalTypeIdentifier,
+                new JavaType(LIST.getFullyQualifiedTypeName(), 0, DataType.TYPE,
+                        null, Arrays.asList(fieldType)), fieldName, fieldType,
+                cardinality);
+        fieldDetails.setNotNull(notNull);
+        fieldDetails.setNullRequired(nullRequired);
+        if (sizeMin != null) {
+            fieldDetails.setSizeMin(sizeMin);
+        }
+        if (sizeMax != null) {
+            fieldDetails.setSizeMax(sizeMax);
+        }
+        if (mappedBy != null) {
+            fieldDetails.setMappedBy(mappedBy);
+        }
+        if (fetch != null) {
+            fieldDetails.setFetch(fetch);
+        }
+        if (comment != null) {
+            fieldDetails.setComment(comment);
+        }
+
+        insertField(fieldDetails, permitReservedWords, transientModifier);
+    }
+
     @CliCommand(value = "field string", help = "Adds a private string field to an existing Java source file")
     public void addFieldString(
             @CliOption(key = { "", "fieldName" }, mandatory = true, help = "The name of the field to add") final JavaSymbolName fieldName,
@@ -663,7 +743,7 @@ public class FieldCommands implements CommandMarker {
         return projectOperations.isFocusedProjectAvailable();
     }
 
-    @CliAvailabilityIndicator({ "field reference", "field set" })
+    @CliAvailabilityIndicator({ "field reference", "field set", "field list" })
     public boolean isJpaFieldManagementAvailable() {
         // In a separate method in case we decide to check for JPA registration
         // in the future
