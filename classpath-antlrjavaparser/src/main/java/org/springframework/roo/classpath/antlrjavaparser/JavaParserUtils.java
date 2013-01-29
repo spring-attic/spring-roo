@@ -110,9 +110,11 @@ public final class JavaParserUtils {
         for (final ImportDeclaration candidate : imports) {
             final NameExpr candidateNameExpr = candidate.getName();
             if (!candidate.toString().contains("*")) {
-                Validate.isInstanceOf(QualifiedNameExpr.class,
-                        candidateNameExpr, "Expected import '" + candidate
-                                + "' to use a fully-qualified type name");
+                Validate.isInstanceOf(
+                        QualifiedNameExpr.class,
+                        candidateNameExpr,
+                        "Expected import '%s' to use a fully-qualified type name",
+                        candidate);
             }
             if (nameExpr instanceof QualifiedNameExpr) {
                 // User is asking for a fully-qualified name; let's see if there
@@ -619,24 +621,24 @@ public final class JavaParserUtils {
             final MarkerAnnotationExpr a = (MarkerAnnotationExpr) annotationExpr;
             final NameExpr nameToFind = a.getName();
             Validate.notNull(nameToFind,
-                    "Unable to determine annotation name from '"
-                            + annotationExpr + "'");
+                    "Unable to determine annotation name from '%s'",
+                    annotationExpr);
             return nameToFind;
         }
         else if (annotationExpr instanceof SingleMemberAnnotationExpr) {
             final SingleMemberAnnotationExpr a = (SingleMemberAnnotationExpr) annotationExpr;
             final NameExpr nameToFind = a.getName();
             Validate.notNull(nameToFind,
-                    "Unable to determine annotation name from '"
-                            + annotationExpr + "'");
+                    "Unable to determine annotation name from '%s'",
+                    annotationExpr);
             return nameToFind;
         }
         else if (annotationExpr instanceof NormalAnnotationExpr) {
             final NormalAnnotationExpr a = (NormalAnnotationExpr) annotationExpr;
             final NameExpr nameToFind = a.getName();
             Validate.notNull(nameToFind,
-                    "Unable to determine annotation name from '"
-                            + annotationExpr + "'");
+                    "Unable to determine annotation name from '%s'",
+                    annotationExpr);
             return nameToFind;
         }
         throw new UnsupportedOperationException(

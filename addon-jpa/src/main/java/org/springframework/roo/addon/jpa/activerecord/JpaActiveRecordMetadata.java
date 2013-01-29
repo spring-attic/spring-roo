@@ -353,9 +353,9 @@ public class JpaActiveRecordMetadata extends
         if (userMethod != null) {
             Validate.isTrue(userMethod.getReturnType()
                     .equals(COUNT_RETURN_TYPE),
-                    "Method '%s' on %s must return '%s'", methodName,
-                    destination,
-                    COUNT_RETURN_TYPE.getNameIncludingTypeParameters() + "'");
+                    "Method '%s' on '%s' must return '%s'", methodName,
+                    destination, COUNT_RETURN_TYPE
+                            .getNameIncludingTypeParameters());
             return userMethod;
         }
 
@@ -492,11 +492,9 @@ public class JpaActiveRecordMetadata extends
         final MethodMetadata userMethod = getGovernorMethod(methodName,
                 parameterTypes);
         if (userMethod != null) {
-            Validate.isTrue(
-                    userMethod.getReturnType().equals(returnType),
-                    "Method '" + methodName + "' on '" + destination
-                            + "' must return '"
-                            + returnType.getNameIncludingTypeParameters() + "'");
+            Validate.isTrue(userMethod.getReturnType().equals(returnType),
+                    "Method '%s' on '%s' must return '%s'", methodName,
+                    destination, returnType.getNameIncludingTypeParameters());
             return userMethod;
         }
 
@@ -544,11 +542,9 @@ public class JpaActiveRecordMetadata extends
         final MethodMetadata userMethod = getGovernorMethod(methodName,
                 parameterTypes);
         if (userMethod != null) {
-            Validate.isTrue(
-                    userMethod.getReturnType().equals(returnType),
-                    "Method '" + methodName + "' on '" + destination
-                            + "' must return '"
-                            + returnType.getNameIncludingTypeParameters() + "'");
+            Validate.isTrue(userMethod.getReturnType().equals(returnType),
+                    "Method '%s' on '%s' must return '%s'", methodName,
+                    destination, returnType.getNameIncludingTypeParameters());
             return userMethod;
         }
 
@@ -660,11 +656,9 @@ public class JpaActiveRecordMetadata extends
         final MethodMetadata userMethod = getGovernorMethod(methodName,
                 parameterTypes);
         if (userMethod != null) {
-            Validate.isTrue(
-                    userMethod.getReturnType().equals(returnType),
-                    "Method '" + methodName + "' on '" + destination
-                            + "' must return '"
-                            + returnType.getNameIncludingTypeParameters() + "'");
+            Validate.isTrue(userMethod.getReturnType().equals(returnType),
+                    "Method '%s' on '%s' must return '%s'", methodName,
+                    destination, returnType.getNameIncludingTypeParameters());
             entityManagerMethod = userMethod;
             return;
         }

@@ -160,10 +160,9 @@ public class IdentifierMetadata extends
             else {
                 Validate.isTrue(
                         Modifier.isPublic(accessor.getModifier()),
-                        "User provided field but failed to provide a public '"
-                                + requiredAccessorName.getSymbolName()
-                                + "()' method in '"
-                                + destination.getFullyQualifiedTypeName() + "'");
+                        "User provided field but failed to provide a public '%s()' method in '%s'",
+                        requiredAccessorName.getSymbolName(),
+                        destination.getFullyQualifiedTypeName());
                 accessors.add(new MethodMetadataBuilder(accessor));
             }
         }
@@ -317,11 +316,10 @@ public class IdentifierMetadata extends
             else {
                 Validate.isTrue(
                         Modifier.isPublic(mutator.getModifier()),
-                        "User provided field but failed to provide a public '"
-                                + requiredMutatorName + "("
-                                + field.getFieldName().getSymbolName()
-                                + ")' method in '"
-                                + destination.getFullyQualifiedTypeName() + "'");
+                        "User provided field but failed to provide a public '%s(%s)' method in '%s'",
+                        requiredMutatorName.getSymbolName(), field
+                                .getFieldName().getSymbolName(), destination
+                                .getFullyQualifiedTypeName());
                 mutators.add(new MethodMetadataBuilder(mutator));
             }
         }

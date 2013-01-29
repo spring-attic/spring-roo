@@ -74,8 +74,10 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
             final MethodMetadata entityManagerMethod,
             final Map<JavaSymbolName, QueryHolder> queryHolders) {
         super(identifier, aspectName, governorPhysicalTypeMetadata);
-        Validate.isTrue(isValid(identifier), "Metadata identification string '"
-                + identifier + "' does not appear to be a valid");
+        Validate.isTrue(
+                isValid(identifier),
+                "Metadata identification string '%s' does not appear to be a valid",
+                identifier);
         Validate.isTrue(entityManagerMethod != null || queryHolders.isEmpty(),
                 "EntityManager method required if any query holders are provided");
         Validate.notNull(queryHolders, "Query holders required");
@@ -131,7 +133,7 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
             final MethodMetadata entityManagerMethod) {
         Validate.notNull(finderName, "Dynamic finder method name is required");
         Validate.isTrue(queryHolders.containsKey(finderName),
-                "Undefined method name '" + finderName.getSymbolName() + "'");
+                "Undefined method name '%s'", finderName.getSymbolName());
 
         // We have no access to method parameter information, so we scan by name
         // alone and treat any match as authoritative

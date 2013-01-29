@@ -93,32 +93,24 @@ public class ItdTypeDetailsBuilder extends
         if (!declaredFieldAnnotationDetails.isRemoveAnnotation()) {
             Validate.isTrue(
                     !hasAnnotation,
-                    "Field annotation '@"
-                            + declaredFieldAnnotationDetails
-                                    .getFieldAnnotation().getAnnotationType()
-                                    .getSimpleTypeName()
-                            + "' is already present on the target field '"
-                            + declaredBy.getFullyQualifiedTypeName()
-                            + "."
-                            + declaredFieldAnnotationDetails.getField()
-                                    .getFieldName().getSymbolName()
-                            + "' (ITD target '"
-                            + aspect.getFullyQualifiedTypeName() + "')");
+                    "Field annotation '@%s' is already present on the target field '%s.%s' (ITD target '%s')",
+                    declaredFieldAnnotationDetails.getFieldAnnotation()
+                            .getAnnotationType().getSimpleTypeName(),
+                    declaredBy.getFullyQualifiedTypeName(),
+                    declaredFieldAnnotationDetails.getField().getFieldName()
+                            .getSymbolName(),
+                    aspect.getFullyQualifiedTypeName());
         }
         else {
             Validate.isTrue(
                     hasAnnotation,
-                    "Field annotation '@"
-                            + declaredFieldAnnotationDetails
-                                    .getFieldAnnotation().getAnnotationType()
-                                    .getSimpleTypeName()
-                            + "' cannot be removed as it is not present on the target field '"
-                            + declaredBy.getFullyQualifiedTypeName()
-                            + "."
-                            + declaredFieldAnnotationDetails.getField()
-                                    .getFieldName().getSymbolName()
-                            + "' (ITD target '"
-                            + aspect.getFullyQualifiedTypeName() + "')");
+                    "Field annotation '@%s' cannot be removed as it is not present on the target field '%s.%s' (ITD target '%s')",
+                    declaredFieldAnnotationDetails.getFieldAnnotation()
+                            .getAnnotationType().getSimpleTypeName(),
+                    declaredBy.getFullyQualifiedTypeName(),
+                    declaredFieldAnnotationDetails.getField().getFieldName()
+                            .getSymbolName(),
+                    aspect.getFullyQualifiedTypeName());
         }
         fieldAnnotations.add(declaredFieldAnnotationDetails);
     }
@@ -146,16 +138,13 @@ public class ItdTypeDetailsBuilder extends
                         .getMethodAnnotation().getAnnotationType()) != null;
         Validate.isTrue(
                 !hasAnnotation,
-                "Method annotation '@"
-                        + declaredMethodAnnotationDetails.getMethodAnnotation()
-                                .getAnnotationType().getSimpleTypeName()
-                        + "' is already present on the target method '"
-                        + declaredBy.getFullyQualifiedTypeName()
-                        + "."
-                        + declaredMethodAnnotationDetails.getMethodMetadata()
-                                .getMethodName().getSymbolName()
-                        + "()' (ITD target '"
-                        + aspect.getFullyQualifiedTypeName() + "')");
+                "Method annotation '@%s' is already present on the target field '%s.%s' (ITD target '%s')",
+                declaredMethodAnnotationDetails.getMethodAnnotation()
+                        .getAnnotationType().getSimpleTypeName(),
+                declaredBy.getFullyQualifiedTypeName(),
+                declaredMethodAnnotationDetails.getMethodMetadata()
+                        .getMethodName().getSymbolName(),
+                aspect.getFullyQualifiedTypeName());
         methodAnnotations.add(declaredMethodAnnotationDetails);
     }
 
@@ -183,16 +172,14 @@ public class ItdTypeDetailsBuilder extends
     protected void onAddAnnotation(final AnnotationMetadataBuilder md) {
         Validate.isTrue(
                 governor.getAnnotation(md.getAnnotationType()) == null,
-                "Type annotation '" + md.getAnnotationType()
-                        + "' already defined in target type '"
-                        + governor.getName().getFullyQualifiedTypeName()
-                        + "' (ITD target '"
-                        + aspect.getFullyQualifiedTypeName() + "')");
+                "Type annotation '%s' already defined in target type '%s' (ITD target '%s')",
+                md.getAnnotationType(), governor.getName()
+                        .getFullyQualifiedTypeName(), aspect
+                        .getFullyQualifiedTypeName());
         Validate.isTrue(
                 build().getAnnotation(md.getAnnotationType()) == null,
-                "Type annotation '" + md.getAnnotationType()
-                        + "' already defined in ITD (ITD target '"
-                        + aspect.getFullyQualifiedTypeName() + "'");
+                "Type annotation '%s' already defined in ITD (ITD target '%s')",
+                md.getAnnotationType(), aspect.getFullyQualifiedTypeName());
     }
 
     @Override
@@ -200,72 +187,60 @@ public class ItdTypeDetailsBuilder extends
         Validate.isTrue(
                 governor.getDeclaredConstructor(AnnotatedJavaType
                         .convertFromAnnotatedJavaTypes(md.getParameterTypes())) == null,
-                "Constructor with " + md.getParameterTypes().size()
-                        + " parameters already defined in target type '"
-                        + governor.getName().getFullyQualifiedTypeName()
-                        + "' (ITD target '"
-                        + aspect.getFullyQualifiedTypeName() + "')");
+                "Constructor with %d parameters already defined in target type '%s' (ITD target '%s')",
+                md.getParameterTypes().size(), governor.getName()
+                        .getFullyQualifiedTypeName(), aspect
+                        .getFullyQualifiedTypeName());
         Validate.isTrue(
                 build().getDeclaredConstructor(
                         AnnotatedJavaType.convertFromAnnotatedJavaTypes(md
                                 .getParameterTypes())) == null,
-                "Constructor with " + md.getParameterTypes().size()
-                        + " parameters already defined in ITD (ITD target '"
-                        + aspect.getFullyQualifiedTypeName() + "'");
+                "Constructor with %d parameters already defined in ITD (ITD target '%s')",
+                md.getParameterTypes().size(), aspect
+                        .getFullyQualifiedTypeName());
         Validate.notBlank(
                 md.getBody(),
-                "Constructor '"
-                        + md
-                        + "' failed to provide a body, despite being identified for ITD inclusion");
+                "Constructor '%s' failed to provide a body, despite being identified for ITD inclusion",
+                md);
     }
 
     @Override
     protected void onAddExtendsTypes(final JavaType type) {
-        Validate.isTrue(!governor.getExtendsTypes().contains(type), "Type '"
-                + type
-                + "' already declared in extends types list in target type '"
-                + governor.getName().getFullyQualifiedTypeName()
-                + "' (ITD target '" + aspect.getFullyQualifiedTypeName() + "')");
+        Validate.isTrue(
+                !governor.getExtendsTypes().contains(type),
+                "Type '%s' already declared in extends types list in target type '%s' (ITD target '%s')",
+                type, governor.getName().getFullyQualifiedTypeName(),
+                aspect.getFullyQualifiedTypeName());
         Validate.isTrue(
                 !getExtendsTypes().contains(type),
-                "Type '"
-                        + type
-                        + "' already declared in extends types list in ITD (ITD target '"
-                        + aspect.getFullyQualifiedTypeName() + "'");
+                "Type '%s' already declared in extends types list in ITD (ITD target '%s')",
+                type, aspect.getFullyQualifiedTypeName());
     }
 
     @Override
     protected void onAddField(final FieldMetadataBuilder md) {
         Validate.isTrue(
                 governor.getDeclaredField(md.getFieldName()) == null,
-                "Field '" + md.getFieldName()
-                        + "' already defined in target type '"
-                        + governor.getName().getFullyQualifiedTypeName()
-                        + "' (ITD target '"
-                        + aspect.getFullyQualifiedTypeName() + "')");
-        Validate.isTrue(
-                build().getDeclaredField(md.getFieldName()) == null,
-                "Field '" + md.getFieldName()
-                        + "' already defined in ITD (ITD target '"
-                        + aspect.getFullyQualifiedTypeName() + ")'");
+                "Field '%s' already defined in target type '%s' (ITD target '%s')",
+                md.getFieldName(), governor.getName()
+                        .getFullyQualifiedTypeName(), aspect
+                        .getFullyQualifiedTypeName());
+        Validate.isTrue(build().getDeclaredField(md.getFieldName()) == null,
+                "Field '%s' already defined in ITD (ITD target '%s')",
+                md.getFieldName(), aspect.getFullyQualifiedTypeName());
     }
 
     @Override
     protected void onAddImplementType(final JavaType type) {
         Validate.isTrue(
                 !governor.getImplementsTypes().contains(type),
-                "Type '"
-                        + type
-                        + "' already declared in implements types list in target type '"
-                        + governor.getName().getFullyQualifiedTypeName()
-                        + "' (ITD target '"
-                        + aspect.getFullyQualifiedTypeName() + "')");
+                "Type '%s' already declared in implements types list in target type '%s' (ITD target '%s')",
+                type, governor.getName().getFullyQualifiedTypeName(),
+                aspect.getFullyQualifiedTypeName());
         Validate.isTrue(
                 !getImplementsTypes().contains(type),
-                "Type '"
-                        + type
-                        + "' already declared in implements types list in ITD (ITD target '"
-                        + aspect.getFullyQualifiedTypeName() + "'");
+                "Type '%s' already declared in implements types list in ITD (ITD target '%s')",
+                type, aspect.getFullyQualifiedTypeName());
     }
 
     @Override
@@ -283,24 +258,21 @@ public class ItdTypeDetailsBuilder extends
                 MemberFindingUtils.getDeclaredMethod(governor, md
                         .getMethodName(), AnnotatedJavaType
                         .convertFromAnnotatedJavaTypes(md.getParameterTypes())) == null,
-                "Method '" + md.getMethodName()
-                        + "' already defined in target type '"
-                        + governor.getName().getFullyQualifiedTypeName()
-                        + "' (ITD target '"
-                        + aspect.getFullyQualifiedTypeName() + "')");
+                "Method '%s' already defined in target type '%s' (ITD target '%s')",
+                md.getMethodName(), governor.getName()
+                        .getFullyQualifiedTypeName(), aspect
+                        .getFullyQualifiedTypeName());
         Validate.isTrue(
                 MemberFindingUtils.getDeclaredMethod(build(), md
                         .getMethodName(), AnnotatedJavaType
                         .convertFromAnnotatedJavaTypes(md.getParameterTypes())) == null,
-                "Method '" + md.getMethodName()
-                        + "' already defined in ITD (ITD target '"
-                        + aspect.getFullyQualifiedTypeName() + "'");
+                "Method '%s' already defined in ITD (ITD target '%s')", md
+                        .getMethodName(), aspect.getFullyQualifiedTypeName());
         if (!Modifier.isAbstract(md.getModifier())) {
             Validate.notBlank(
                     md.getBody(),
-                    "Method '"
-                            + md
-                            + "' failed to provide a body, despite being identified for ITD inclusion");
+                    "Method '%s' failed to provide a body, despite being identified for ITD inclusion",
+                    md);
         }
     }
 }

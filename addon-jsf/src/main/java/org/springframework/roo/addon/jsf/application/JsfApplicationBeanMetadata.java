@@ -92,11 +92,12 @@ public class JsfApplicationBeanMetadata extends
             final Set<ClassOrInterfaceTypeDetails> managedBeans,
             final String projectName) {
         super(identifier, aspectName, governorPhysicalTypeMetadata);
-        Validate.isTrue(isValid(identifier), "Metadata identification string '"
-                + identifier + "' does not appear to be a valid");
+        Validate.isTrue(
+                isValid(identifier),
+                "Metadata identification string '%s' does not appear to be a valid",
+                identifier);
         Validate.notNull(managedBeans, "Managed beans required");
-        Validate.isTrue(StringUtils.isNotBlank(projectName),
-                "Project name required");
+        Validate.notBlank(projectName, "Project name required");
 
         if (!isValid()) {
             return;

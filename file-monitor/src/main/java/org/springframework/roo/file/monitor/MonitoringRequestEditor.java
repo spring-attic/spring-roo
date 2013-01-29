@@ -102,19 +102,20 @@ public class MonitoringRequestEditor extends PropertyEditorSupport {
         }
 
         final String[] segments = StringUtils.split(text, ",");
-        Validate.isTrue(segments.length == 2 || segments.length == 3, "Text '"
-                + text + "' is invalid for a MonitoringRequest");
+        Validate.isTrue(segments.length == 2 || segments.length == 3,
+                "Text '%s' is invalid for a MonitoringRequest", text);
         final File file = new File(segments[0]);
-        Validate.isTrue(file.exists(), "File '" + file + "' does not exist");
+        Validate.isTrue(file.exists(), "File '%s' does not exist", file);
 
         final Collection<FileOperation> fileOperations = parseFileOperations(segments[1]);
-        Validate.notEmpty(fileOperations,
-                "One or more valid operation codes ('CRUD') required for file '"
-                        + file + "'");
+        Validate.notEmpty(
+                fileOperations,
+                "One or more valid operation codes ('CRUD') required for file '%s'",
+                file);
 
         if (file.isFile()) {
             Validate.isTrue(segments.length == 2,
-                    "Can only have two values for file '" + file + "'");
+                    "Can only have two values for file '%s'", file);
             setValue(new FileMonitoringRequest(file, fileOperations));
         }
         else {
@@ -127,11 +128,8 @@ public class MonitoringRequestEditor extends PropertyEditorSupport {
         if (segments.length == 3) {
             Validate.isTrue(
                     SUBTREE_WILDCARD.equals(segments[2]),
-                    "The third value for directory '"
-                            + file
-                            + "' can only be '"
-                            + SUBTREE_WILDCARD
-                            + "' (or completely remove the third parameter if you do not want to watch the subtree)");
+                    "The third value for directory '%s' can only be '%s' (or completely remove the third parameter if you do not want to watch the subtree)",
+                    file, SUBTREE_WILDCARD);
             setValue(new DirectoryMonitoringRequest(file, true, fileOperations));
         }
         else {

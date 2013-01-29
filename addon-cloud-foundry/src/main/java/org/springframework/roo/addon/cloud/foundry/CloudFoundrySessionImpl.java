@@ -197,8 +197,8 @@ public class CloudFoundrySessionImpl implements CloudFoundrySession,
      * @param credentials the credentials to use (must be valid)
      */
     private void login(final CloudCredentials credentials) {
-        Validate.isTrue(credentials.isValid(), "Invalid credentials "
-                + credentials);
+        Validate.isTrue(credentials.isValid(), "Invalid credentials %s",
+                credentials);
         if (client != null) {
             client.deactivate();
         }

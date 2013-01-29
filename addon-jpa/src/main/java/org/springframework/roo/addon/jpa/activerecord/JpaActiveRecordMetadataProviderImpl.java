@@ -139,8 +139,8 @@ public class JpaActiveRecordMetadataProviderImpl extends
             jpaEntityAnnotationValues = new JpaEntityAnnotationValues(
                     governorPhysicalType, ROO_JPA_ACTIVE_RECORD);
             Validate.validState(jpaEntityAnnotationValues.isAnnotationFound(),
-                    "No @RooJpaEntity or @RooJpaActiveRecord on "
-                            + metadataIdentificationString);
+                    "No @RooJpaEntity or @RooJpaActiveRecord on %s",
+                    metadataIdentificationString);
         }
 
         // Look up the inheritance hierarchy for existing
@@ -198,8 +198,8 @@ public class JpaActiveRecordMetadataProviderImpl extends
             metadataDependencyRegistry.registerDependency(
                     ProjectMetadata.getProjectIdentifier(moduleName),
                     metadataIdentificationString);
-            isGaeEnabled = projectOperations
-                    .isFeatureInstalledInModule(FeatureNames.GAE, moduleName);
+            isGaeEnabled = projectOperations.isFeatureInstalledInModule(
+                    FeatureNames.GAE, moduleName);
         }
 
         return new JpaActiveRecordMetadata(metadataIdentificationString,

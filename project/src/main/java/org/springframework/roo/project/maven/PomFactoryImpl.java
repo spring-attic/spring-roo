@@ -140,8 +140,8 @@ public class PomFactoryImpl implements PomFactory {
         final PackagingProvider packagingProvider = packagingProviderRegistry
                 .getPackagingProvider(packagingProviderId);
         Validate.notNull(packagingProvider,
-                "No PackagingProvider found with the ID '"
-                        + packagingProviderId + "'");
+                "No PackagingProvider found with the ID '%s'",
+                packagingProviderId);
         return packagingProvider.getPaths();
     }
 

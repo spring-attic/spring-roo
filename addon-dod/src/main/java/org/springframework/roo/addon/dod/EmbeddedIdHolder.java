@@ -22,9 +22,8 @@ public class EmbeddedIdHolder {
     public EmbeddedIdHolder(final FieldMetadata embeddedIdField,
             final List<FieldMetadata> idFields) {
         Validate.notNull(embeddedIdField, "Identifier type required");
-        Validate.notNull(idFields, "Fields for "
-                + embeddedIdField.getFieldType().getFullyQualifiedTypeName()
-                + " required");
+        Validate.notNull(idFields, "Fields for %s required", embeddedIdField
+                .getFieldType().getFullyQualifiedTypeName());
         this.embeddedIdField = embeddedIdField;
         this.idFields = idFields;
     }

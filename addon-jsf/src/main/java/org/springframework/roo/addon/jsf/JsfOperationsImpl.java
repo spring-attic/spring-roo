@@ -81,8 +81,7 @@ public class JsfOperationsImpl extends AbstractOperations implements
     @Reference private TypeManagementService typeManagementService;
 
     public void addMediaSuurce(final String url, MediaPlayer mediaPlayer) {
-        Validate.isTrue(StringUtils.isNotBlank(url),
-                "Media source url required");
+        Validate.notBlank(url, "Media source url required");
 
         final String mainPage = projectOperations.getPathResolver()
                 .getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, "pages/main.xhtml");
@@ -279,7 +278,7 @@ public class JsfOperationsImpl extends AbstractOperations implements
         installBean("ViewExpiredExceptionExceptionHandler-template.java",
                 utilPackage);
         installBean("MessageFactory-template.java", utilPackage);
-        
+
         if (fileManager.exists(typeLocationService
                 .getPhysicalTypeCanonicalPath(managedBean,
                         pathResolver.getFocusedPath(Path.SRC_MAIN_JAVA)))) {
@@ -289,15 +288,15 @@ public class JsfOperationsImpl extends AbstractOperations implements
 
         final ClassOrInterfaceTypeDetails entityTypeDetails = typeLocationService
                 .getTypeDetails(entity);
-        Validate.notNull(entityTypeDetails, "The type '" + entity
-                + "' could not be resolved");
+        Validate.notNull(entityTypeDetails,
+                "The type '%s' could not be resolved", entity);
 
         final PluralMetadata pluralMetadata = (PluralMetadata) metadataService
                 .get(PluralMetadata.createIdentifier(entity,
                         PhysicalTypeIdentifier.getPath(entityTypeDetails
                                 .getDeclaredByMetadataId())));
-        Validate.notNull(pluralMetadata, "The plural for type '" + entity
-                + "' could not be resolved");
+        Validate.notNull(pluralMetadata,
+                "The plural for type '%s' could not be resolved", entity);
 
         // Create type annotation for new managed bean
         final AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(

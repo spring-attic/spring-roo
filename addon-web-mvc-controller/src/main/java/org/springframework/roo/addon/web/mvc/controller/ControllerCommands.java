@@ -134,8 +134,9 @@ public class ControllerCommands implements CommandMarker {
             final PluralMetadata pluralMetadata = (PluralMetadata) metadataService
                     .get(PluralMetadata.createIdentifier(backingType,
                             targetPath));
-            Validate.notNull(pluralMetadata, "Could not determine plural for '"
-                    + backingType.getSimpleTypeName() + "'");
+            Validate.notNull(pluralMetadata,
+                    "Could not determine plural for '%s'",
+                    backingType.getSimpleTypeName());
             path = pluralMetadata.getPlural().toLowerCase();
         }
         else if (path.equals("/") || path.equals("/*")) {

@@ -78,12 +78,13 @@ public class OsOperationsImpl implements OsOperations {
     public void executeCommand(final String command) throws IOException {
         final File root = new File(getProjectRoot());
         Validate.isTrue(root.isDirectory() && root.exists(),
-                "Project root does not currently exist as a directory ('"
-                        + root.getCanonicalPath() + "')");
+                "Project root does not currently exist as a directory ('%s')",
+                root.getCanonicalPath());
 
-        Thread.currentThread().setName(""); // Prevent thread name from being
-                                            // presented in Roo shell
+        // Prevent thread name from being presented in Roo shell
+        Thread.currentThread().setName("");
         final Process p = Runtime.getRuntime().exec(command, null, root);
+
         // Ensure separate threads are used for logging, as per ROO-652
         final LoggingInputStream input = new LoggingInputStream(
                 p.getInputStream(), processManager);

@@ -57,8 +57,10 @@ public class SolrJspMetadata extends AbstractMetadataItem {
     public SolrJspMetadata(final String identifier,
             final SolrWebSearchMetadata solrWebSearchMetadata) {
         super(identifier);
-        Validate.isTrue(isValid(identifier), "Metadata identification string '"
-                + identifier + "' does not appear to be a valid");
+        Validate.isTrue(
+                isValid(identifier),
+                "Metadata identification string '%s' does not appear to be a valid",
+                identifier);
         Validate.notNull(solrWebSearchMetadata,
                 "Solr web search metadata required");
         this.solrWebSearchMetadata = solrWebSearchMetadata;

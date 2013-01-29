@@ -168,9 +168,8 @@ public abstract class AbstractItdMetadataProvider extends
                         metadataIdentificationString).equals(
                         MetadataIdentificationUtils
                                 .getMetadataClass(getProvidesType())),
-                "Unexpected request for '" + metadataIdentificationString
-                        + "' to this provider (which uses '"
-                        + getProvidesType() + "'");
+                "Unexpected request for '%s' to this provider (which uses '%s')",
+                metadataIdentificationString, getProvidesType());
 
         // Remove the upstream dependencies for this instance (we'll be
         // recreating them later, if needed)
@@ -332,8 +331,8 @@ public abstract class AbstractItdMetadataProvider extends
                         MetadataIdentificationUtils
                                 .getMetadataClass(PhysicalTypeIdentifier
                                         .getMetadataIdentiferType())),
-                "Expected a valid physical Java type instance identifier (not '"
-                        + physicalJavaTypeIdentifier + "')");
+                "Expected a valid physical Java type instance identifier (not '%s')",
+                physicalJavaTypeIdentifier);
         final JavaType javaType = PhysicalTypeIdentifier
                 .getJavaType(physicalJavaTypeIdentifier);
         final LogicalPath path = PhysicalTypeIdentifier
@@ -533,11 +532,11 @@ public abstract class AbstractItdMetadataProvider extends
                 return;
             }
 
-            Validate.isTrue(MetadataIdentificationUtils
-                    .isIdentifyingInstance(downstreamDependency),
-                    "An instance-specific downstream MID was required by '"
-                            + getClass().getName() + "' (not '"
-                            + downstreamDependency + "')");
+            Validate.isTrue(
+                    MetadataIdentificationUtils
+                            .isIdentifyingInstance(downstreamDependency),
+                    "An instance-specific downstream MID was required by '%s' (not '%s')",
+                    getClass().getName(), downstreamDependency);
 
             // We only need to proceed if the downstream dependency relationship
             // is not already registered.
@@ -557,10 +556,8 @@ public abstract class AbstractItdMetadataProvider extends
                         downstreamDependency).equals(
                         MetadataIdentificationUtils
                                 .getMetadataClass(getProvidesType())),
-                "Unexpected downstream notification for '"
-                        + downstreamDependency
-                        + "' to this provider (which uses '"
-                        + getProvidesType() + "'");
+                "Unexpected downstream notification for '%s' to this provider (which uses '%s')",
+                downstreamDependency, getProvidesType());
 
         // We no longer notify downstreams here, as the "get" operation with
         // eviction will ensure the main get(String) method below will be fired

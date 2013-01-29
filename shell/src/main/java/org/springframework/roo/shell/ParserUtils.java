@@ -25,10 +25,10 @@ public class ParserUtils {
         }
         else {
             // There was no option marker, so verify this isn't the first
-            Validate.isTrue(!results.containsKey(""),
-                    "You cannot add more than one default option ('"
-                            + currentValue.toString()
-                            + "') in a single command");
+            Validate.isTrue(
+                    !results.containsKey(""),
+                    "You cannot add more than one default option ('%s') in a single command",
+                    currentValue.toString());
             results.put("", currentValue.toString());
         }
     }

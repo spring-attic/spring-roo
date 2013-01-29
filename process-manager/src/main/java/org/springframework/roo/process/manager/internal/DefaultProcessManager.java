@@ -57,8 +57,8 @@ public class DefaultProcessManager extends
             Validate.isTrue(
                     getProcessManagerStatus() == ProcessManagerStatus.AVAILABLE
                             || getProcessManagerStatus() == ProcessManagerStatus.BUSY_EXECUTING,
-                    "Unable to execute as another thread has set status to "
-                            + getProcessManagerStatus());
+                    "Unable to execute as another thread has set status to %s",
+                    getProcessManagerStatus());
             setProcessManagerStatus(ProcessManagerStatus.BUSY_EXECUTING);
             try {
                 return doTransactionally(callback);

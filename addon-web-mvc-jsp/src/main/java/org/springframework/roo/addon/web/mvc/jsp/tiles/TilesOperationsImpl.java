@@ -200,8 +200,8 @@ public class TilesOperationsImpl implements TilesOperations {
         else {
             mutableFile = fileManager.createFile(tilesDefinitionFile);
             Validate.notNull(mutableFile,
-                    "Could not create tiles view definition '"
-                            + tilesDefinitionFile + "'");
+                    "Could not create tiles view definition '%s'",
+                    tilesDefinitionFile);
         }
 
         if (mutableFile != null) {

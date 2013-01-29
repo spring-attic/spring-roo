@@ -188,10 +188,10 @@ public class JsfManagedBeanMetadata extends
             final Set<FieldMetadata> locatedFields,
             final MethodMetadata identifierAccessor) {
         super(identifier, aspectName, governorPhysicalTypeMetadata);
-        Validate.isTrue(isValid(identifier), "Metadata identification string '"
-                + identifier + "' is invalid");
+        Validate.isTrue(isValid(identifier),
+                "Metadata identification string '%s' is invalid", identifier);
         Validate.notNull(annotationValues, "Annotation values required");
-        Validate.isTrue(StringUtils.isNotBlank(plural), "Plural required");
+        Validate.notBlank(plural, "Plural required");
         Validate.notNull(crudAdditions, "Crud additions map required");
         Validate.notNull(locatedFields, "Located fields required");
 

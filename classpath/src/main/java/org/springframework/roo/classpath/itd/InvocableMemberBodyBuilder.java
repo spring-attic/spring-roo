@@ -64,13 +64,16 @@ public class InvocableMemberBodyBuilder {
 
     public String getOutput() {
         if (reset) {
-            Validate.isTrue(indentLevel == 0, "Indent level must be 0 (not "
-                    + indentLevel + ") to terminate following a reset!");
+            Validate.isTrue(
+                    indentLevel == 0,
+                    "Indent level must be 0 (not %d) to terminate following a reset",
+                    indentLevel);
         }
         else {
-            Validate.isTrue(indentLevel == 2, "Indent level must be 2 (not "
-                    + indentLevel
-                    + ") to terminate (use reset to indent to level 0)!");
+            Validate.isTrue(
+                    indentLevel == 2,
+                    "Indent level must be 2 (not %d) to terminate (use reset to indent to level 0)",
+                    indentLevel);
         }
         return stringBuilder.toString();
     }

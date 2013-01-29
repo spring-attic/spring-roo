@@ -35,8 +35,8 @@ public class PackagingProviderRegistryImpl implements PackagingProviderRegistry 
             final PackagingProvider previousPackagingProvider = packagingProviders
                     .put(packagingProvider.getId(), packagingProvider);
             Validate.isTrue(previousPackagingProvider == null,
-                    "More than one PackagingProvider with ID = '"
-                            + packagingProvider.getId() + "'");
+                    "More than one PackagingProvider with ID = '%s'",
+                    packagingProvider.getId());
         }
     }
 

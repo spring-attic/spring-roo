@@ -434,16 +434,17 @@ public class TypeLocationServiceImpl implements TypeLocationService {
             }
         }
         Validate.notBlank(relativePath,
-                "Could not determine compilation unit name for file '"
-                        + fileCanonicalPath + "'");
-        Validate.isTrue(relativePath.startsWith(File.separator),
-                "Relative path unexpectedly dropped the '" + File.separator
-                        + "' prefix (received '" + relativePath + "' from '"
-                        + fileCanonicalPath + "'");
+                "Could not determine compilation unit name for file '%s'",
+                fileCanonicalPath);
+        Validate.isTrue(
+                relativePath.startsWith(File.separator),
+                "Relative path unexpectedly dropped the '%s' prefix (received '%s' from '%s')",
+                File.separator, relativePath, fileCanonicalPath);
         relativePath = relativePath.substring(1);
-        Validate.isTrue(relativePath.endsWith(".java"),
-                "The relative path unexpectedly dropped the .java extension for file '"
-                        + fileCanonicalPath + "'");
+        Validate.isTrue(
+                relativePath.endsWith(".java"),
+                "The relative path unexpectedly dropped the .java extension for file '%s'",
+                fileCanonicalPath);
         relativePath = relativePath.substring(0,
                 relativePath.lastIndexOf(".java"));
         return relativePath.replace(File.separatorChar, '.');
@@ -493,8 +494,8 @@ public class TypeLocationServiceImpl implements TypeLocationService {
             return null;
         }
         Validate.isTrue(PhysicalTypeIdentifier.isValid(physicalTypeId),
-                "Metadata id '" + physicalTypeId
-                        + "' is not a valid physical type id");
+                "Metadata id '%s' is not a valid physical type id",
+                physicalTypeId);
         updateTypeCache();
         final ClassOrInterfaceTypeDetails cachedDetails = typeCache
                 .getTypeDetails(physicalTypeId);

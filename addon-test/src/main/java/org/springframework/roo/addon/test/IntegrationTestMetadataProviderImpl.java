@@ -142,23 +142,15 @@ public class IntegrationTestMetadataProviderImpl extends
                         typeLocationService.getTypePath(entity));
         final PhysicalTypeMetadata ptm = (PhysicalTypeMetadata) metadataService
                 .get(physicalTypeIdentifier);
-        Validate.notNull(
-                ptm,
-                "Java source code unavailable for type "
-                        + PhysicalTypeIdentifier
-                                .getFriendlyName(physicalTypeIdentifier));
+        Validate.notNull(ptm, "Java source code unavailable for type %s",
+                PhysicalTypeIdentifier.getFriendlyName(physicalTypeIdentifier));
         final PhysicalTypeDetails ptd = ptm.getMemberHoldingTypeDetails();
-        Validate.notNull(
-                ptd,
-                "Java source code details unavailable for type "
-                        + PhysicalTypeIdentifier
-                                .getFriendlyName(physicalTypeIdentifier));
-        Validate.isInstanceOf(
-                ClassOrInterfaceTypeDetails.class,
-                ptd,
-                "Java source code is immutable for type "
-                        + PhysicalTypeIdentifier
-                                .getFriendlyName(physicalTypeIdentifier));
+        Validate.notNull(ptd,
+                "Java source code details unavailable for type %s",
+                PhysicalTypeIdentifier.getFriendlyName(physicalTypeIdentifier));
+        Validate.isInstanceOf(ClassOrInterfaceTypeDetails.class, ptd,
+                "Java source code is immutable for type %s",
+                PhysicalTypeIdentifier.getFriendlyName(physicalTypeIdentifier));
         final ClassOrInterfaceTypeDetails cid = (ClassOrInterfaceTypeDetails) ptd;
         return cid.getSuperclass();
     }
@@ -305,8 +297,8 @@ public class IntegrationTestMetadataProviderImpl extends
                 metadataIdentificationString).getModule();
         final boolean isGaeEnabled = projectOperations
                 .isProjectAvailable(moduleName)
-                && projectOperations
-                        .isFeatureInstalledInModule(FeatureNames.GAE, moduleName);
+                && projectOperations.isFeatureInstalledInModule(
+                        FeatureNames.GAE, moduleName);
 
         return new IntegrationTestMetadata(metadataIdentificationString,
                 aspectName, governorPhysicalTypeMetadata, annotationValues,

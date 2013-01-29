@@ -31,9 +31,10 @@ public abstract class AbstractMetadataItem implements MetadataItem {
      *            )
      */
     protected AbstractMetadataItem(final String id) {
-        Validate.isTrue(MetadataIdentificationUtils.isIdentifyingInstance(id),
-                "Metadata identification string '" + id
-                        + "' does not identify a metadata instance");
+        Validate.isTrue(
+                MetadataIdentificationUtils.isIdentifyingInstance(id),
+                "Metadata identification string '%s' does not identify a metadata instance",
+                id);
         this.id = id;
     }
 

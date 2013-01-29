@@ -165,7 +165,7 @@ public class GwtRequestMetadataProviderImpl extends
             }
         }
         Validate.isTrue(distinctInvokedTypes.size() == 1,
-                "Expected one invoked type but found: " + distinctInvokedTypes);
+                "Expected one invoked type but found: %s", distinctInvokedTypes);
         return distinctInvokedTypes.iterator().next();
     }
 
@@ -270,8 +270,9 @@ public class GwtRequestMetadataProviderImpl extends
                     .getMemberTypeAdditions(requestMetadataId, methodId,
                             entity, idType, LAYER_POSITION,
                             methodSignature.getValue());
-            Validate.notNull(memberTypeAdditions, "No support for " + methodId
-                    + " method for domain type " + entity);
+            Validate.notNull(memberTypeAdditions,
+                    "No support for %s method for domain type %s", methodId,
+                    entity);
             final MethodMetadata requestMethod = getRequestMethod(entity,
                     methodSignature.getKey(), memberTypeAdditions,
                     requestMetadataId);

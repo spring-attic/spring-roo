@@ -106,7 +106,7 @@ public class DbreModelServiceImpl implements DbreModelService {
                 "/persistence/persistence-unit/properties/property",
                 document.getDocumentElement());
         Validate.notEmpty(propertyElements,
-                "Failed to find property elements in " + persistenceXmlPath);
+                "Failed to find property elements in %s", persistenceXmlPath);
         final Properties properties = new Properties();
 
         for (final Element propertyElement : propertyElements) {

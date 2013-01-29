@@ -104,8 +104,8 @@ public class Pom {
             final Collection<? extends Plugin> buildPlugins,
             final Collection<? extends Resource> resources, final String path,
             final String moduleName, final Collection<Path> paths) {
-        Validate.notBlank(packaging, "Invalid packaging '" + packaging + "'");
-        Validate.notBlank(path, "Invalid path '" + path + "'");
+        Validate.notBlank(packaging, "Invalid packaging '%s'", packaging);
+        Validate.notBlank(path, "Invalid path '%s'", path);
 
         gav = new GAV(groupId, artifactId, version);
         this.moduleName = StringUtils.stripToEmpty(moduleName);

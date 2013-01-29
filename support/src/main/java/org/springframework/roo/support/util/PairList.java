@@ -46,10 +46,9 @@ public class PairList<K, V> extends ArrayList<MutablePair<K, V>> {
         else {
             Validate.isTrue(values != null,
                     "Parameter names are required if types are provided");
-            Validate.isTrue(
-                    keys.size() == values.size(),
-                    "Expected " + keys.size() + " values but found "
-                            + values.size());
+            Validate.isTrue(keys.size() == values.size(),
+                    "Expected %d values but found %d", keys.size(),
+                    values.size());
             for (int i = 0; i < keys.size(); i++) {
                 add(keys.get(i), values.get(i));
             }

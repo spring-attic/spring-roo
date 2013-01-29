@@ -78,8 +78,10 @@ public class JsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
         super(identifier, aspectName, governorPhysicalTypeMetadata);
         Validate.notNull(annotationValues, "Annotation values required");
         Validate.notBlank(typeNamePlural, "Plural of the target type required");
-        Validate.isTrue(isValid(identifier), "Metadata identification string '"
-                + identifier + "' does not appear to be a valid");
+        Validate.isTrue(
+                isValid(identifier),
+                "Metadata identification string '%s' does not appear to be a valid",
+                identifier);
 
         if (!isValid()) {
             return;

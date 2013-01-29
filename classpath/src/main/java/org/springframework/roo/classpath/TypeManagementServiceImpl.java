@@ -1,5 +1,7 @@
 package org.springframework.roo.classpath;
 
+import java.io.File;
+
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -13,8 +15,6 @@ import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.ProjectOperations;
-
-import java.io.File;
 
 /**
  * Implementation of {@link TypeManagementService}.
@@ -41,25 +41,20 @@ public class TypeManagementServiceImpl implements TypeManagementService {
         // Obtain the physical type and itd mutable details
         final PhysicalTypeMetadata ptm = (PhysicalTypeMetadata) metadataService
                 .get(physicalTypeIdentifier);
-        Validate.notNull(
-                ptm,
-                "Java source code unavailable for type "
-                        + PhysicalTypeIdentifier
-                                .getFriendlyName(physicalTypeIdentifier));
+        Validate.notNull(ptm, "Java source code unavailable for type %s",
+                PhysicalTypeIdentifier.getFriendlyName(physicalTypeIdentifier));
         final PhysicalTypeDetails ptd = ptm.getMemberHoldingTypeDetails();
-        Validate.notNull(
-                ptd,
-                "Java source code details unavailable for type "
-                        + PhysicalTypeIdentifier
-                                .getFriendlyName(physicalTypeIdentifier));
+        Validate.notNull(ptd,
+                "Java source code details unavailable for type %s",
+                PhysicalTypeIdentifier.getFriendlyName(physicalTypeIdentifier));
         final ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(
                 (ClassOrInterfaceTypeDetails) ptd);
 
         // Ensure it's an enum
         Validate.isTrue(
                 cidBuilder.getPhysicalTypeCategory() == PhysicalTypeCategory.ENUMERATION,
-                PhysicalTypeIdentifier.getFriendlyName(physicalTypeIdentifier)
-                        + " is not an enum");
+                "%s is not an enum",
+                PhysicalTypeIdentifier.getFriendlyName(physicalTypeIdentifier));
 
         cidBuilder.addEnumConstant(constantName);
         createOrUpdateTypeOnDisk(cidBuilder.build());
@@ -71,17 +66,14 @@ public class TypeManagementServiceImpl implements TypeManagementService {
         // Obtain the physical type and ITD mutable details
         final PhysicalTypeMetadata ptm = (PhysicalTypeMetadata) metadataService
                 .get(field.getDeclaredByMetadataId());
-        Validate.notNull(
-                ptm,
-                "Java source code unavailable for type "
-                        + PhysicalTypeIdentifier.getFriendlyName(field
-                                .getDeclaredByMetadataId()));
+        Validate.notNull(ptm, "Java source code unavailable for type %s",
+                PhysicalTypeIdentifier.getFriendlyName(field
+                        .getDeclaredByMetadataId()));
         final PhysicalTypeDetails ptd = ptm.getMemberHoldingTypeDetails();
-        Validate.notNull(
-                ptd,
-                "Java source code details unavailable for type "
-                        + PhysicalTypeIdentifier.getFriendlyName(field
-                                .getDeclaredByMetadataId()));
+        Validate.notNull(ptd,
+                "Java source code details unavailable for type %s",
+                PhysicalTypeIdentifier.getFriendlyName(field
+                        .getDeclaredByMetadataId()));
         final ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(
                 (ClassOrInterfaceTypeDetails) ptd);
 

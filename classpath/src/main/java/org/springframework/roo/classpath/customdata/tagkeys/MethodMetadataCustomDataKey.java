@@ -21,7 +21,7 @@ public class MethodMetadataCustomDataKey extends
      * @param tag
      */
     public MethodMetadataCustomDataKey(final String tag) {
-        Validate.notBlank(tag, "Invalid tag '" + tag + "'");
+        Validate.notBlank(tag, "Invalid tag '%s'", tag);
         this.tag = tag;
     }
 

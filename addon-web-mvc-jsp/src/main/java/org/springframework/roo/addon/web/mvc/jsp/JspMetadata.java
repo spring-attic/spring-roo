@@ -61,8 +61,10 @@ public class JspMetadata extends AbstractMetadataItem {
     public JspMetadata(final String identifier,
             final WebScaffoldMetadata webScaffoldMetadata) {
         super(identifier);
-        Validate.isTrue(isValid(identifier), "Metadata identification string '"
-                + identifier + "' does not appear to be a valid");
+        Validate.isTrue(
+                isValid(identifier),
+                "Metadata identification string '%s' does not appear to be a valid",
+                identifier);
         Validate.notNull(webScaffoldMetadata, "Web scaffold metadata required");
 
         this.webScaffoldMetadata = webScaffoldMetadata;

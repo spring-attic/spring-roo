@@ -35,9 +35,9 @@ public class UpdateFile implements UndoableOperation {
             final FilenameResolver filenameResolver, final File actual) {
         Validate.notNull(undoManager, "Undo manager required");
         Validate.notNull(actual, "File required");
-        Validate.isTrue(actual.exists(), "File '" + actual + "' must exist");
-        Validate.isTrue(actual.isFile(), "Path '" + actual
-                + "' must be a file (not a directory)");
+        Validate.isTrue(actual.exists(), "File '%s' must exist", actual);
+        Validate.isTrue(actual.isFile(),
+                "Path '%s' must be a file (not a directory)", actual);
         Validate.notNull(filenameResolver, "Filename resolver required");
         this.filenameResolver = filenameResolver;
         try {

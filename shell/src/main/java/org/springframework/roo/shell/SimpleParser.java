@@ -158,18 +158,19 @@ public class SimpleParser implements Parser {
                 final CliAvailabilityIndicator availability = method
                         .getAnnotation(CliAvailabilityIndicator.class);
                 if (availability != null) {
-                    Validate.isTrue(method.getParameterTypes().length == 0,
-                            "CliAvailabilityIndicator is only legal for 0 parameter methods ("
-                                    + method.toGenericString() + ")");
+                    Validate.isTrue(
+                            method.getParameterTypes().length == 0,
+                            "CliAvailabilityIndicator is only legal for 0 parameter methods ('%s')",
+                            method.toGenericString());
                     Validate.isTrue(
                             method.getReturnType().equals(Boolean.TYPE),
-                            "CliAvailabilityIndicator is only legal for primitive boolean return types ("
-                                    + method.toGenericString() + ")");
+                            "CliAvailabilityIndicator is only legal for primitive boolean return types (%s)",
+                            method.toGenericString());
                     for (final String cmd : availability.value()) {
                         Validate.isTrue(
                                 !availabilityIndicators.containsKey(cmd),
-                                "Cannot specify an availability indicator for '"
-                                        + cmd + "' more than once");
+                                "Cannot specify an availability indicator for '%s' more than once",
+                                cmd);
                         availabilityIndicators.put(cmd, new MethodTarget(
                                 method, command));
                     }
@@ -260,8 +261,8 @@ public class SimpleParser implements Parser {
             // Identify the command we're working with
             final CliCommand cmd = methodTarget.getMethod().getAnnotation(
                     CliCommand.class);
-            Validate.notNull(cmd, "CliCommand unavailable for '"
-                    + methodTarget.getMethod().toGenericString() + "'");
+            Validate.notNull(cmd, "CliCommand unavailable for '%s'",
+                    methodTarget.getMethod().toGenericString());
 
             // Make a reasonable attempt at parsing the remainingBuffer
             Map<String, String> options;
@@ -329,10 +330,9 @@ public class SimpleParser implements Parser {
                         cliOption = (CliOption) a;
                     }
                 }
-                Validate.notNull(
-                        cliOption,
-                        "CliOption not found for parameter '"
-                                + Arrays.toString(annotations) + "'");
+                Validate.notNull(cliOption,
+                        "CliOption not found for parameter '%s'",
+                        Arrays.toString(annotations));
                 cliOptions.add(cliOption);
             }
 
@@ -1163,10 +1163,9 @@ public class SimpleParser implements Parser {
                             }
 
                         }
-                        Validate.notNull(
-                                cliOption,
-                                "CliOption not found for parameter '"
-                                        + Arrays.toString(annotations) + "'");
+                        Validate.notNull(cliOption,
+                                "CliOption not found for parameter '%s'",
+                                Arrays.toString(annotations));
                     }
                 }
                 // Only a single argument, so default to the normal help

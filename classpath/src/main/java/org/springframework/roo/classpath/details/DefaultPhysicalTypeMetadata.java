@@ -33,8 +33,8 @@ public class DefaultPhysicalTypeMetadata extends AbstractMetadataItem implements
         super(metadataIdentificationString);
         Validate.isTrue(
                 PhysicalTypeIdentifier.isValid(metadataIdentificationString),
-                "Metadata id '" + metadataIdentificationString
-                        + "' is not a valid physical type identifier");
+                "Metadata id '%s' is not a valid physical type identifier",
+                metadataIdentificationString);
         Validate.notBlank(physicalLocationCanonicalPath,
                 "Physical location canonical path required");
         Validate.notNull(cid, "Class or interface type details required");

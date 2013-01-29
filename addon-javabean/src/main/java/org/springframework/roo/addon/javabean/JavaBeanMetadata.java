@@ -101,8 +101,10 @@ public class JavaBeanMetadata extends
             final JavaBeanAnnotationValues annotationValues,
             final Map<FieldMetadata, JavaSymbolName> declaredFields) {
         super(identifier, aspectName, governorPhysicalTypeMetadata);
-        Validate.isTrue(isValid(identifier), "Metadata identification string '"
-                + identifier + "' does not appear to be a valid");
+        Validate.isTrue(
+                isValid(identifier),
+                "Metadata identification string '%s' does not appear to be a valid",
+                identifier);
         Validate.notNull(annotationValues, "Annotation values required");
         Validate.notNull(declaredFields, "Declared fields required");
 

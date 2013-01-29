@@ -30,8 +30,8 @@ public class ParseResult {
         Validate.notNull(instance, "Instance required");
         final int length = arguments == null ? 0 : arguments.length;
         Validate.isTrue(method.getParameterTypes().length == length,
-                "Required " + method.getParameterTypes().length
-                        + " arguments, but received " + length);
+                "Required %d arguments, but received %d",
+                method.getParameterTypes().length, length);
         this.method = method;
         this.instance = instance;
         this.arguments = arguments;

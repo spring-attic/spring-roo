@@ -120,8 +120,8 @@ public class WebScaffoldMetadata extends
             final Map<MethodMetadataCustomDataKey, MemberTypeAdditions> crudAdditions,
             final Collection<JavaType> editableFieldTypes) {
         super(identifier, aspectName, governorPhysicalType);
-        Validate.isTrue(isValid(identifier), "Metadata identification string '"
-                + identifier + "' is invalid");
+        Validate.isTrue(isValid(identifier),
+                "Metadata identification string '%s' is invalid", identifier);
         Validate.notNull(annotationValues, "Annotation values required");
         Validate.notNull(specialDomainTypes,
                 "Special domain types map required");
@@ -140,8 +140,8 @@ public class WebScaffoldMetadata extends
         javaTypeMetadataHolder = specialDomainTypes.get(formBackingType);
 
         Validate.notNull(javaTypeMetadataHolder,
-                "Metadata holder required for form backing type: "
-                        + formBackingType);
+                "Metadata holder required for form backing type %s",
+                formBackingType);
 
         if (javaTypeMetadataHolder.getPersistenceDetails() != null
                 && !javaTypeMetadataHolder.getPersistenceDetails()

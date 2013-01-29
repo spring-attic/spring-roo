@@ -37,10 +37,11 @@ public abstract class AbstractIdentifiableJavaStructureBuilder<T extends Identif
      */
     protected AbstractIdentifiableJavaStructureBuilder(
             final String declaredByMetadataId) {
-        Validate.isTrue(MetadataIdentificationUtils
-                .isIdentifyingInstance(declaredByMetadataId),
-                "Declared by metadata ID must identify a specific instance (not '"
-                        + declaredByMetadataId + "')");
+        Validate.isTrue(
+                MetadataIdentificationUtils
+                        .isIdentifyingInstance(declaredByMetadataId),
+                "Declared by metadata ID must identify a specific instance (not '%s')",
+                declaredByMetadataId);
         this.declaredByMetadataId = declaredByMetadataId;
     }
 

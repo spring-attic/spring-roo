@@ -99,11 +99,10 @@ public class JspViewManager {
                 .getPersistenceDetails();
         Validate.notNull(formBackingTypePersistenceMetadata,
                 "Persistence metadata required for form backing type");
-
-        Validate.notNull(webScaffoldAnnotationValues.getPath(),
-                "Path is not specified in the @RooWebScaffold annotation for '"
-                        + webScaffoldAnnotationValues.getGovernorTypeDetails()
-                                .getName() + "'");
+        Validate.notNull(
+                webScaffoldAnnotationValues.getPath(),
+                "Path is not specified in the @RooWebScaffold annotation for '%s'",
+                webScaffoldAnnotationValues.getGovernorTypeDetails().getName());
 
         if (webScaffoldAnnotationValues.getPath().startsWith("/")) {
             controllerPath = webScaffoldAnnotationValues.getPath();
@@ -567,8 +566,8 @@ public class JspViewManager {
             if (type.equals(new JavaType(Map.class.getName()))) {
                 continue;
             }
-            Validate.notNull(paramName, "Could not find field '" + paramName
-                    + "' in '" + type.getFullyQualifiedTypeName() + "'");
+            Validate.notNull(paramName, "Could not find field '%s' in '%s'",
+                    paramName, type.getFullyQualifiedTypeName());
             Element fieldElement = null;
 
             final JavaTypeMetadataDetails typeMetadataHolder = relatedDomainTypes
@@ -813,10 +812,9 @@ public class JspViewManager {
     private String getPathForType(final JavaType type) {
         final JavaTypeMetadataDetails javaTypeMetadataHolder = relatedDomainTypes
                 .get(type);
-        Validate.notNull(
-                javaTypeMetadataHolder,
-                "Unable to obtain metadata for type "
-                        + type.getFullyQualifiedTypeName());
+        Validate.notNull(javaTypeMetadataHolder,
+                "Unable to obtain metadata for type %s",
+                type.getFullyQualifiedTypeName());
         return javaTypeMetadataHolder.getControllerPath();
     }
 

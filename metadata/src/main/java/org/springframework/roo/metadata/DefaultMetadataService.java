@@ -64,13 +64,12 @@ public class DefaultMetadataService extends AbstractMetadataCache implements
             final String mid = mp.getProvidesType();
             Validate.isTrue(
                     MetadataIdentificationUtils.isIdentifyingClass(mid),
-                    "Metadata provider '" + mp
-                            + "' violated interface contract by returning '"
-                            + mid + "'");
-            Validate.isTrue(!providerMap.containsKey(mid),
-                    "Metadata provider '" + providerMap.get(mid)
-                            + "' already is providing metadata for '" + mid
-                            + "'");
+                    "Metadata provider '%s' violated interface contract by returning '%s'",
+                    mp, mid);
+            Validate.isTrue(
+                    !providerMap.containsKey(mid),
+                    "Metadata provider '%s' already is providing metadata for '%s'",
+                    providerMap.get(mid), mid);
             providers.add(mp);
             providerMap.put(mid, mp);
         }
@@ -132,11 +131,11 @@ public class DefaultMetadataService extends AbstractMetadataCache implements
 
     private MetadataItem getInternal(final String metadataIdentificationString,
             final boolean evictCache, final boolean cacheRetrievalAllowed) {
-        Validate.isTrue(MetadataIdentificationUtils
-                .isIdentifyingInstance(metadataIdentificationString),
-                "Metadata identification string '"
-                        + metadataIdentificationString
-                        + "' does not identify a metadata instance");
+        Validate.isTrue(
+                MetadataIdentificationUtils
+                        .isIdentifyingInstance(metadataIdentificationString),
+                "Metadata identification string '%s' does not identify a metadata instance",
+                metadataIdentificationString);
 
         synchronized (lock) {
             validGets++;
@@ -195,10 +194,8 @@ public class DefaultMetadataService extends AbstractMetadataCache implements
                 final MetadataProvider p = providerMap.get(mdClassId);
                 Validate.notNull(
                         p,
-                        "No metadata provider is currently registered to provide metadata for identifier '"
-                                + metadataIdentificationString
-                                + "' (class '"
-                                + mdClassId + "')");
+                        "No metadata provider is currently registered to provide metadata for identifier '%s' (class '%s')",
+                        metadataIdentificationString, mdClassId);
 
                 // Infinite loop management
                 activeRequests.add(metadataIdentificationString);
@@ -296,12 +293,12 @@ public class DefaultMetadataService extends AbstractMetadataCache implements
             final String downstreamDependency) {
         Validate.isTrue(
                 MetadataIdentificationUtils.isValid(upstreamDependency),
-                "Upstream dependency is an invalid metadata identification string ('"
-                        + upstreamDependency + "')");
+                "Upstream dependency is an invalid metadata identification string ('%s')",
+                upstreamDependency);
         Validate.isTrue(
                 MetadataIdentificationUtils.isValid(downstreamDependency),
-                "Downstream dependency is an invalid metadata identification string ('"
-                        + downstreamDependency + "')");
+                "Downstream dependency is an invalid metadata identification string ('%s')",
+                downstreamDependency);
 
         synchronized (lock) {
             // Get the destination

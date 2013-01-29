@@ -87,8 +87,8 @@ public class ConversionServiceMetadata extends
         Validate.notNull(relevantDomainTypes,
                 "List of relevant domain types required");
         Validate.isTrue(relevantDomainTypes.size() == idTypes.size(),
-                "Expected " + relevantDomainTypes.size()
-                        + " ID types, but was " + idTypes.size());
+                "Expected %d ID types, but was %d", relevantDomainTypes.size(),
+                idTypes.size());
         Validate.notNull(toStringMethods, "ToString methods required");
 
         if (!isValid() || relevantDomainTypes.isEmpty()

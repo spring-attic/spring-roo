@@ -49,8 +49,7 @@ public class ServiceLayerProvider extends CoreLayerProvider {
     public MemberTypeAdditions getMemberTypeAdditions(final String callerMID,
             final String methodIdentifier, final JavaType targetEntity,
             final JavaType idType, final MethodParameter... methodParameters) {
-        Validate.isTrue(StringUtils.isNotBlank(callerMID),
-                "Caller's metadata identifier required");
+        Validate.notBlank(callerMID, "Caller's metadata identifier required");
         Validate.notNull(methodIdentifier, "Method identifier required");
         Validate.notNull(targetEntity, "Target entity type required");
         Validate.notNull(methodParameters,

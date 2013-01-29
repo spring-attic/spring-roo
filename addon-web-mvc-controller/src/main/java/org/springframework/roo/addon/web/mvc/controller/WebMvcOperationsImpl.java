@@ -69,8 +69,8 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
         // Verify the servlet application context already exists
         final String servletCtxFilename = WEBMVC_CONFIG_XML;
         Validate.isTrue(fileManager.exists(pathResolver.getFocusedIdentifier(
-                Path.SRC_MAIN_WEBAPP, servletCtxFilename)), "'"
-                + servletCtxFilename + "' does not exist");
+                Path.SRC_MAIN_WEBAPP, servletCtxFilename)),
+                "'%s' does not exist", servletCtxFilename);
 
         final String webXmlPath = pathResolver.getFocusedIdentifier(
                 Path.SRC_MAIN_WEBAPP, WEB_XML);
@@ -115,8 +115,8 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
     public void installConversionService(final JavaPackage destinationPackage) {
         final String webMvcConfigPath = pathResolver.getFocusedIdentifier(
                 Path.SRC_MAIN_WEBAPP, WEBMVC_CONFIG_XML);
-        Validate.isTrue(fileManager.exists(webMvcConfigPath), "'"
-                + webMvcConfigPath + "' does not exist");
+        Validate.isTrue(fileManager.exists(webMvcConfigPath),
+                "'%s' does not exist", webMvcConfigPath);
 
         final Document document = XmlUtils.readXml(fileManager
                 .getInputStream(webMvcConfigPath));
@@ -187,8 +187,8 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
     private boolean isConversionServiceConfigured() {
         final String webMvcConfigPath = pathResolver.getFocusedIdentifier(
                 Path.SRC_MAIN_WEBAPP, WEBMVC_CONFIG_XML);
-        Validate.isTrue(fileManager.exists(webMvcConfigPath), webMvcConfigPath
-                + " doesn't exist");
+        Validate.isTrue(fileManager.exists(webMvcConfigPath),
+                "'%s'  doesn't exist", webMvcConfigPath);
 
         final MutableFile mutableFile = fileManager
                 .updateFile(webMvcConfigPath);
@@ -229,8 +229,8 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
         // Verify that the web.xml already exists
         final String webXmlPath = pathResolver.getFocusedIdentifier(
                 Path.SRC_MAIN_WEBAPP, WEB_XML);
-        Validate.isTrue(fileManager.exists(webXmlPath), "'" + webXmlPath
-                + "' does not exist");
+        Validate.isTrue(fileManager.exists(webXmlPath), "'%s' does not exist",
+                webXmlPath);
 
         final Document document = XmlUtils.readXml(fileManager
                 .getInputStream(webXmlPath));
@@ -366,7 +366,7 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
         final String webConfigFile = pathResolver.getFocusedIdentifier(
                 Path.SRC_MAIN_WEBAPP, WEBMVC_CONFIG_XML);
         Validate.isTrue(fileManager.exists(webConfigFile),
-                "Aborting: Unable to find " + webConfigFile);
+                "Aborting: Unable to find %s", webConfigFile);
         InputStream webMvcConfigInputStream = null;
         try {
             webMvcConfigInputStream = fileManager.getInputStream(webConfigFile);

@@ -60,13 +60,13 @@ public abstract class AnnotationValuesTestCase<A, V extends AbstractAnnotationVa
 
     private Field findField(final Class<?> clazz, final String name) {
         Validate.notNull(clazz, "Class must not be null");
-        Validate.isTrue(name != null,
+        Validate.notNull(name,
                 "Either name or type of the field must be specified");
         Class<?> searchType = clazz;
         while (!Object.class.equals(searchType) && searchType != null) {
             final Field[] fields = searchType.getDeclaredFields();
             for (final Field field : fields) {
-                if ((name == null || name.equals(field.getName()))) {
+                if (name.equals(field.getName())) {
                     return field;
                 }
             }

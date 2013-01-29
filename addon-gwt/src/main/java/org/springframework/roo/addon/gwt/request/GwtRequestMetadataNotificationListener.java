@@ -83,8 +83,8 @@ public class GwtRequestMetadataNotificationListener implements
                 final AnnotationAttributeValue<?> attributeValue = gwtRequestAnnotation
                         .getAttribute("value");
                 Validate.validState(attributeValue != null,
-                        "The x annotation should have a '" + "value"
-                                + "' attribute");
+                        "The x annotation should have a '%s' attribute",
+                        "value");
                 final String entityClass = GwtUtils
                         .getStringValue(attributeValue);
                 if (upstreamType.getFullyQualifiedTypeName()

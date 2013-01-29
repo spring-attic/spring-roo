@@ -129,8 +129,9 @@ public class FileDetails implements Comparable<FileDetails> {
      */
     public String getRelativeSegment(final String childCanonicalPath) {
         Validate.notNull(childCanonicalPath, "Child identifier is required");
-        Validate.isTrue(isParentOf(childCanonicalPath), "Identifier '"
-                + childCanonicalPath + "' is not a child of '" + this + "'");
+        Validate.isTrue(isParentOf(childCanonicalPath),
+                "Identifier '%s' is not a child of '%s'", childCanonicalPath,
+                this);
         return childCanonicalPath.substring(getCanonicalPath().length());
     }
 

@@ -277,8 +277,8 @@ public class GwtScaffoldMetadataProviderImpl implements
                             MetadataIdentificationUtils
                                     .getMetadataClass(PhysicalTypeIdentifier
                                             .getMetadataIdentiferType())),
-                    "Expected class-level notifications only for PhysicalTypeIdentifier (not '"
-                            + upstreamDependency + "')");
+                    "Expected class-level notifications only for PhysicalTypeIdentifier (not '%s')",
+                    upstreamDependency);
             final ClassOrInterfaceTypeDetails cid = typeLocationService
                     .getTypeDetails(upstreamDependency);
             if (cid == null) {
@@ -333,10 +333,8 @@ public class GwtScaffoldMetadataProviderImpl implements
                         downstreamDependency).equals(
                         MetadataIdentificationUtils
                                 .getMetadataClass(getProvidesType())),
-                "Unexpected downstream notification for '"
-                        + downstreamDependency
-                        + "' to this provider (which uses '"
-                        + getProvidesType() + "'");
+                "Unexpected downstream notification for '%s' to this provider (which uses '%s')",
+                downstreamDependency, getProvidesType());
 
         metadataService.evictAndGet(downstreamDependency);
     }

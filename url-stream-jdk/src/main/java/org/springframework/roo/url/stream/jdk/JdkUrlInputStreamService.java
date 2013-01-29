@@ -125,7 +125,7 @@ public class JdkUrlInputStreamService extends AbstractFlashingObject implements
     public InputStream openConnection(final URL httpUrl) throws IOException {
         Validate.notNull(httpUrl, "HTTP URL is required");
         Validate.isTrue(httpUrl.getProtocol().equals("http"),
-                "Only HTTP is supported (not " + httpUrl + ")");
+                "Only HTTP is supported (not %s)", httpUrl);
 
         // Fail if we're banned from accessing this domain
         Validate.isTrue(getUrlCannotBeOpenedMessage(httpUrl) == null,

@@ -164,8 +164,10 @@ public class DataOnDemandMetadata extends
             final EmbeddedIdHolder embeddedIdHolder,
             final List<EmbeddedHolder> embeddedHolders) {
         super(identifier, aspectName, governorPhysicalTypeMetadata);
-        Validate.isTrue(isValid(identifier), "Metadata identification string '"
-                + identifier + "' does not appear to be a valid");
+        Validate.isTrue(
+                isValid(identifier),
+                "Metadata identification string '%s' does not appear to be a valid",
+                identifier);
         Validate.notNull(annotationValues, "Annotation values required");
         Validate.notNull(identifierAccessor,
                 "Identifier accessor method required");
@@ -176,8 +178,7 @@ public class DataOnDemandMetadata extends
             return;
         }
 
-        if (findEntriesMethod == null
-                || persistMethod == null
+        if (findEntriesMethod == null || persistMethod == null
                 || findMethod == null) {
             valid = false;
             return;
@@ -253,21 +254,20 @@ public class DataOnDemandMetadata extends
                 // rely on it
                 Validate.isTrue(
                         candidate.getFieldType().equals(collaboratorType),
-                        "Field '" + collaboratingFieldName + "' on '"
-                                + destination.getFullyQualifiedTypeName()
-                                + "' must be of type '"
-                                + collaboratorType.getFullyQualifiedTypeName()
-                                + "'");
+                        "Field '%s' on '%s' must be of type '%s'",
+                        collaboratingFieldName,
+                        destination.getFullyQualifiedTypeName(),
+                        collaboratorType.getFullyQualifiedTypeName());
                 Validate.isTrue(Modifier.isPrivate(candidate.getModifier()),
-                        "Field '" + collaboratingFieldName + "' on '"
-                                + destination.getFullyQualifiedTypeName()
-                                + "' must be private");
+                        "Field '%s' on '%s' must be private",
+                        collaboratingFieldName,
+                        destination.getFullyQualifiedTypeName());
                 Validate.notNull(
                         MemberFindingUtils.getAnnotationOfType(
                                 candidate.getAnnotations(), AUTOWIRED),
-                        "Field '" + collaboratingFieldName + "' on '"
-                                + destination.getFullyQualifiedTypeName()
-                                + "' must be @Autowired");
+                        "Field '%s' on '%s' must be @Autowired",
+                        collaboratingFieldName,
+                        destination.getFullyQualifiedTypeName());
                 // It's ok, so we can move onto the new field
                 continue;
             }
@@ -503,8 +503,8 @@ public class DataOnDemandMetadata extends
             Validate.isTrue(
                     Double.parseDouble(maxValue) >= Double
                             .parseDouble(minValue),
-                    "The value of @DecimalMax must be greater or equal to the value of @DecimalMin for field "
-                            + fieldName);
+                    "The value of @DecimalMax must be greater or equal to the value of @DecimalMin for field %s",
+                    fieldName);
 
             if (fieldType.equals(BIG_DECIMAL)) {
                 bodyBuilder.appendFormalLine("if (" + fieldName
@@ -791,9 +791,8 @@ public class DataOnDemandMetadata extends
                                 .intValue();
                         Validate.isTrue(
                                 maxLength >= minLength,
-                                "@Size attribute 'max' must be greater than 'min' for field '"
-                                        + fieldName + "' in "
-                                        + entity.getFullyQualifiedTypeName());
+                                "@Size attribute 'max' must be greater than 'min' for field '%s' in %s",
+                                fieldName, entity.getFullyQualifiedTypeName());
                         if (initializer.length() + 2 < minLength) {
                             initializer = String
                                     .format("%1$-" + (minLength - 2) + "s",
@@ -1204,11 +1203,9 @@ public class DataOnDemandMetadata extends
         final MethodMetadata userMethod = getGovernorMethod(methodName,
                 parameterTypes);
         if (userMethod != null) {
-            Validate.isTrue(
-                    userMethod.getReturnType().equals(returnType),
-                    "Method '" + methodName + "' on '" + destination
-                            + "' must return '"
-                            + returnType.getNameIncludingTypeParameters() + "'");
+            Validate.isTrue(userMethod.getReturnType().equals(returnType),
+                    "Method '%s' on '%s' must return '%s'", methodName,
+                    destination, returnType.getNameIncludingTypeParameters());
             return new MethodMetadataBuilder(userMethod);
         }
 
@@ -1216,8 +1213,7 @@ public class DataOnDemandMetadata extends
         builder.getImportRegistrationResolver().addImports(ARRAY_LIST,
                 ITERATOR, CONSTRAINT_VIOLATION_EXCEPTION, CONSTRAINT_VIOLATION);
 
-        findEntriesMethod
-                .copyAdditionsTo(builder, governorTypeDetails);
+        findEntriesMethod.copyAdditionsTo(builder, governorTypeDetails);
         persistMethod.copyAdditionsTo(builder, governorTypeDetails);
 
         final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
@@ -1251,8 +1247,7 @@ public class DataOnDemandMetadata extends
                 + "(i);");
         bodyBuilder.appendFormalLine("try {");
         bodyBuilder.indent();
-        bodyBuilder.appendFormalLine(persistMethod.getMethodCall()
-                + ";");
+        bodyBuilder.appendFormalLine(persistMethod.getMethodCall() + ";");
         bodyBuilder.indentRemove();
         bodyBuilder
                 .appendFormalLine("} catch (final ConstraintViolationException e) {");
@@ -1351,9 +1346,10 @@ public class DataOnDemandMetadata extends
                     .getValue();
             final Number maxValue = (Number) maxAnnotation.getAttribute(VALUE)
                     .getValue();
-            Validate.isTrue(maxValue.longValue() >= minValue.longValue(),
-                    "The value of @Max must be greater or equal to the value of @Min for field "
-                            + fieldName);
+            Validate.isTrue(
+                    maxValue.longValue() >= minValue.longValue(),
+                    "The value of @Max must be greater or equal to the value of @Min for field %s",
+                    fieldName);
 
             if (fieldType.equals(BIG_INTEGER)) {
                 bodyBuilder.appendFormalLine("if (" + fieldName
@@ -1520,11 +1516,9 @@ public class DataOnDemandMetadata extends
         final MethodMetadata userMethod = getGovernorMethod(methodName,
                 parameterType);
         if (userMethod != null) {
-            Validate.isTrue(
-                    userMethod.getReturnType().equals(returnType),
-                    "Method '" + methodName + "' on '" + destination
-                            + "' must return '"
-                            + returnType.getNameIncludingTypeParameters() + "'");
+            Validate.isTrue(userMethod.getReturnType().equals(returnType),
+                    "Method '%s' on '%s' must return '%s'", methodName,
+                    destination, returnType.getNameIncludingTypeParameters());
             modifyMethod = userMethod;
             return;
         }
@@ -1553,11 +1547,9 @@ public class DataOnDemandMetadata extends
         final MethodMetadata userMethod = getGovernorMethod(methodName,
                 parameterType);
         if (userMethod != null) {
-            Validate.isTrue(
-                    userMethod.getReturnType().equals(entity),
-                    "Method '" + methodName + "' on '" + destination
-                            + "' must return '"
-                            + entity.getNameIncludingTypeParameters() + "'");
+            Validate.isTrue(userMethod.getReturnType().equals(entity),
+                    "Method '%s' on '%s' must return '%s'", methodName,
+                    destination, entity.getNameIncludingTypeParameters());
             newTransientEntityMethod = userMethod;
             return;
         }
@@ -1614,11 +1606,9 @@ public class DataOnDemandMetadata extends
         // Locate user-defined method
         final MethodMetadata userMethod = getGovernorMethod(methodName);
         if (userMethod != null) {
-            Validate.isTrue(
-                    userMethod.getReturnType().equals(entity),
-                    "Method '" + methodName + "' on '" + destination
-                            + "' must return '"
-                            + entity.getNameIncludingTypeParameters() + "'");
+            Validate.isTrue(userMethod.getReturnType().equals(entity),
+                    "Method '%s' on '%s' must return '%s'", methodName,
+                    destination, entity.getNameIncludingTypeParameters());
             randomPersistentEntityMethod = userMethod;
             return;
         }
@@ -1657,11 +1647,9 @@ public class DataOnDemandMetadata extends
         final MethodMetadata userMethod = getGovernorMethod(methodName,
                 parameterType);
         if (userMethod != null) {
-            Validate.isTrue(
-                    userMethod.getReturnType().equals(entity),
-                    "Method '" + methodName + "' on '" + destination
-                            + "' must return '"
-                            + entity.getNameIncludingTypeParameters() + "'");
+            Validate.isTrue(userMethod.getReturnType().equals(entity),
+                    "Method '%s on '%s' must return '%s'", methodName,
+                    destination, entity.getNameIncludingTypeParameters());
             specificPersistentEntityMethod = userMethod;
             return;
         }
@@ -1717,9 +1705,10 @@ public class DataOnDemandMetadata extends
     private void validateNumericAnnotationAttribute(final String fieldName,
             final String annotationName, final String attributeName,
             final Object object) {
-        Validate.isTrue(NumberUtils.isNumber(object.toString()), annotationName
-                + " '" + attributeName + "' attribute for field '" + fieldName
-                + "' in backing type " + entity.getFullyQualifiedTypeName()
-                + " must be numeric");
+        Validate.isTrue(
+                NumberUtils.isNumber(object.toString()),
+                "%s '%s' attribute for field '%s' in backing type %s must be numeric",
+                annotationName, attributeName, fieldName,
+                entity.getFullyQualifiedTypeName());
     }
 }

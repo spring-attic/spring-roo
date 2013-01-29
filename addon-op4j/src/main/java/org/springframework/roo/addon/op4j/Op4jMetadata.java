@@ -69,8 +69,10 @@ public class Op4jMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
     public Op4jMetadata(final String identifier, final JavaType aspectName,
             final PhysicalTypeMetadata governorPhysicalTypeMetadata) {
         super(identifier, aspectName, governorPhysicalTypeMetadata);
-        Validate.isTrue(isValid(identifier), "Metadata identification string '"
-                + identifier + "' does not appear to be a valid");
+        Validate.isTrue(
+                isValid(identifier),
+                "Metadata identification string '%s' does not appear to be a valid",
+                identifier);
 
         if (!isValid()) {
             return;

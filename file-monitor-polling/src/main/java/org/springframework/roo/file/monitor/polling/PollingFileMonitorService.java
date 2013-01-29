@@ -176,12 +176,15 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
         int index = antPath.indexOf("*");
         // Conditionals are based on an index of 0 (not -1) to ensure the
         // detected character is not the only character in the string
-        Validate.isTrue(index > 0, "'" + antPath
-                + "' is not an Ant Path as it fails to include an * character");
+        Validate.isTrue(
+                index > 0,
+                "'%s' is not an Ant Path as it fails to include an * character",
+                antPath);
         String newPath = antPath.substring(0, index);
         index = newPath.lastIndexOf(File.separatorChar);
-        Validate.isTrue(index > 0, "'" + antPath + "' fails to include any '"
-                + File.separatorChar + "' directory separator");
+        Validate.isTrue(index > 0,
+                "'%s' fails to include any '%s' directory separator", antPath,
+                File.separatorChar);
         newPath = newPath.substring(0, index);
         final File somePath = new File(newPath);
         if (!somePath.exists()) {
@@ -189,9 +192,10 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
             // no way we'll find anything via a search
             return result;
         }
-        Validate.isTrue(somePath.isDirectory(), "Ant path '" + antPath
-                + "' appears under file system path '" + somePath
-                + "' but this is not a directory that can be searched");
+        Validate.isTrue(
+                somePath.isDirectory(),
+                "Ant path '%s' appears under file system path '%s' but this is not a directory that can be searched",
+                antPath, somePath);
         recursiveAntMatch(antPath, somePath, result);
         return result;
     }
@@ -468,8 +472,8 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
         Validate.notNull(currentDirectory, "Current directory required");
         Validate.isTrue(
                 currentDirectory.exists() && currentDirectory.isDirectory(),
-                "Path '" + currentDirectory
-                        + "' does not exist or is not a directory");
+                "Path '%s' does not exist or is not a directory",
+                currentDirectory);
         Validate.notBlank(antPath, "Ant path required");
         Validate.notNull(result, "Result required");
 

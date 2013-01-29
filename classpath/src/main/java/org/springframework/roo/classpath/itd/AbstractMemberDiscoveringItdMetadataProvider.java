@@ -104,19 +104,16 @@ public abstract class AbstractMemberDiscoveringItdMetadataProvider extends
         if (localMid != null) {
             Validate.isTrue(
                     MetadataIdentificationUtils.isIdentifyingInstance(localMid),
-                    "Metadata identification string '"
-                            + localMid
-                            + "' should identify a specific instance to request");
+                    "Metadata identification string '%s' should identify a specific instance to request",
+                    localMid);
             Validate.isTrue(
                     MetadataIdentificationUtils.getMetadataClass(localMid)
                             .equals(MetadataIdentificationUtils
                                     .getMetadataClass(getProvidesType())),
-                    "Metadata identication string '"
-                            + MetadataIdentificationUtils
-                                    .getMetadataClass(localMid)
-                            + "' is incompatible with this metadata provider's class '"
-                            + MetadataIdentificationUtils
-                                    .getMetadataClass(getProvidesType()) + "'");
+                    "Metadata identification string '%s' is incompatible with this metadata provider's class '%s'",
+                    MetadataIdentificationUtils.getMetadataClass(localMid),
+                    MetadataIdentificationUtils
+                            .getMetadataClass(getProvidesType()));
             metadataService.evictAndGet(localMid);
         }
     }

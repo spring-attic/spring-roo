@@ -93,6 +93,286 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
     @Reference TypeLocationService typeLocationService;
     @Reference TypeParsingService typeParsingService;
 
+    @Override
+    public String buildUiXml(final String templateContents,
+            final String destFile, final List<MethodMetadata> proxyMethods) {
+        FileReader fileReader = null;
+        try {
+            final DocumentBuilder builder = XmlUtils.getDocumentBuilder();
+            builder.setEntityResolver(new EntityResolver() {
+                @Override
+                public InputSource resolveEntity(final String publicId,
+                        final String systemId) throws SAXException, IOException {
+                    if (systemId
+                            .equals("http://dl.google.com/gwt/DTD/xhtml.ent")) {
+                        return new InputSource(FileUtils.getInputStream(
+                                GwtScaffoldMetadata.class,
+                                "templates/xhtml.ent"));
+                    }
+
+                    // Use the default behaviour
+                    return null;
+                }
+            });
+
+            InputSource source = new InputSource();
+            source.setCharacterStream(new StringReader(templateContents));
+
+            final Document templateDocument = builder.parse(source);
+
+            if (!new File(destFile).exists()) {
+                return transformXml(templateDocument);
+            }
+
+            source = new InputSource();
+            fileReader = new FileReader(destFile);
+            source.setCharacterStream(fileReader);
+            final Document existingDocument = builder.parse(source);
+
+            // Look for the element holder denoted by the 'debugId' attribute
+            // first
+            Element existingHoldingElement = XmlUtils.findFirstElement(
+                    "//*[@debugId='" + "boundElementHolder" + "']",
+                    existingDocument.getDocumentElement());
+            Element templateHoldingElement = XmlUtils.findFirstElement(
+                    "//*[@debugId='" + "boundElementHolder" + "']",
+                    templateDocument.getDocumentElement());
+
+            // If holding element isn't found then the holding element is either
+            // not widget based or using the old convention of 'id' so look for
+            // the element holder with an 'id' attribute
+            if (existingHoldingElement == null) {
+                existingHoldingElement = XmlUtils.findFirstElement("//*[@id='"
+                        + "boundElementHolder" + "']",
+                        existingDocument.getDocumentElement());
+            }
+            if (templateHoldingElement == null) {
+                templateHoldingElement = XmlUtils.findFirstElement("//*[@id='"
+                        + "boundElementHolder" + "']",
+                        templateDocument.getDocumentElement());
+            }
+
+            if (existingHoldingElement != null) {
+                final Map<String, Element> templateElementMap = new LinkedHashMap<String, Element>();
+                for (final Element element : XmlUtils.findElements("//*[@id]",
+                        templateHoldingElement)) {
+                    templateElementMap.put(element.getAttribute("id"), element);
+                }
+
+                final Map<String, Element> existingElementMap = new LinkedHashMap<String, Element>();
+                for (final Element element : XmlUtils.findElements("//*[@id]",
+                        existingHoldingElement)) {
+                    existingElementMap.put(element.getAttribute("id"), element);
+                }
+
+                if (existingElementMap.keySet().containsAll(
+                        templateElementMap.values())) {
+                    return transformXml(existingDocument);
+                }
+
+                final List<Element> elementsToAdd = new ArrayList<Element>();
+                for (final Map.Entry<String, Element> entry : templateElementMap
+                        .entrySet()) {
+                    if (!existingElementMap.keySet().contains(entry.getKey())) {
+                        elementsToAdd.add(entry.getValue());
+                    }
+                }
+
+                final List<Element> elementsToRemove = new ArrayList<Element>();
+                for (final Map.Entry<String, Element> entry : existingElementMap
+                        .entrySet()) {
+                    if (!templateElementMap.keySet().contains(entry.getKey())) {
+                        elementsToRemove.add(entry.getValue());
+                    }
+                }
+
+                for (final Element element : elementsToAdd) {
+                    final Node importedNode = existingDocument.importNode(
+                            element, true);
+                    existingHoldingElement.appendChild(importedNode);
+                }
+
+                for (final Element element : elementsToRemove) {
+                    existingHoldingElement.removeChild(element);
+                }
+
+                if (elementsToAdd.size() > 0) {
+                    final List<Element> sortedElements = new ArrayList<Element>();
+                    for (final MethodMetadata method : proxyMethods) {
+                        final String propertyName = StringUtils
+                                .uncapitalize(BeanInfoUtils
+                                        .getPropertyNameForJavaBeanMethod(
+                                                method).getSymbolName());
+                        final Element element = XmlUtils.findFirstElement(
+                                "//*[@id='" + propertyName + "']",
+                                existingHoldingElement);
+                        if (element != null) {
+                            sortedElements.add(element);
+                        }
+                    }
+                    for (final Element el : sortedElements) {
+                        if (el.getParentNode() != null
+                                && el.getParentNode().equals(
+                                        existingHoldingElement)) {
+                            existingHoldingElement.removeChild(el);
+                        }
+                    }
+                    for (final Element el : sortedElements) {
+                        existingHoldingElement.appendChild(el);
+                    }
+                }
+
+                return transformXml(existingDocument);
+            }
+
+            return transformXml(templateDocument);
+        }
+        catch (final Exception e) {
+            throw new IllegalStateException(e);
+        }
+        finally {
+            IOUtils.closeQuietly(fileReader);
+        }
+    }
+
+    @Override
+    public GwtTemplateDataHolder getMirrorTemplateTypeDetails(
+            final ClassOrInterfaceTypeDetails mirroredType,
+            final Map<JavaSymbolName, GwtProxyProperty> clientSideTypeMap,
+            final String moduleName) {
+        final ClassOrInterfaceTypeDetails proxy = gwtTypeService
+                .lookupProxyFromEntity(mirroredType);
+        final ClassOrInterfaceTypeDetails request = gwtTypeService
+                .lookupRequestFromEntity(mirroredType);
+        final JavaPackage topLevelPackage = projectOperations
+                .getTopLevelPackage(moduleName);
+        final Map<GwtType, JavaType> mirrorTypeMap = GwtUtils.getMirrorTypeMap(
+                mirroredType.getName(), topLevelPackage);
+        mirrorTypeMap.put(GwtType.PROXY, proxy.getName());
+        mirrorTypeMap.put(GwtType.REQUEST, request.getName());
+
+        final Map<GwtType, ClassOrInterfaceTypeDetails> templateTypeDetailsMap = new LinkedHashMap<GwtType, ClassOrInterfaceTypeDetails>();
+        final Map<GwtType, String> xmlTemplates = new LinkedHashMap<GwtType, String>();
+        for (final GwtType gwtType : GwtType.getMirrorTypes()) {
+            if (gwtType.getTemplate() == null) {
+                continue;
+            }
+            TemplateDataDictionary dataDictionary = buildMirrorDataDictionary(
+                    gwtType, mirroredType, proxy, mirrorTypeMap,
+                    clientSideTypeMap, moduleName);
+            gwtType.dynamicallyResolveFieldsToWatch(clientSideTypeMap);
+            gwtType.dynamicallyResolveMethodsToWatch(mirroredType.getName(),
+                    clientSideTypeMap, topLevelPackage);
+            templateTypeDetailsMap.put(
+                    gwtType,
+                    getTemplateDetails(dataDictionary, gwtType.getTemplate(),
+                            mirrorTypeMap.get(gwtType), moduleName));
+
+            if (gwtType.isCreateUiXml()) {
+                dataDictionary = buildMirrorDataDictionary(gwtType,
+                        mirroredType, proxy, mirrorTypeMap, clientSideTypeMap,
+                        moduleName);
+                final String contents = getTemplateContents(
+                        gwtType.getTemplate() + "UiXml", dataDictionary);
+                xmlTemplates.put(gwtType, contents);
+            }
+        }
+
+        final Map<String, String> xmlMap = new LinkedHashMap<String, String>();
+        final List<ClassOrInterfaceTypeDetails> typeDetails = new ArrayList<ClassOrInterfaceTypeDetails>();
+        for (final GwtProxyProperty proxyProperty : clientSideTypeMap.values()) {
+            if (!proxyProperty.isCollection()
+                    || proxyProperty.isCollectionOfProxy()) {
+                continue;
+            }
+
+            TemplateDataDictionary dataDictionary = TemplateDictionary.create();
+            dataDictionary.setVariable("packageName",
+                    GwtPath.MANAGED_UI.packageName(topLevelPackage));
+            dataDictionary.setVariable("scaffoldUiPackage",
+                    GwtPath.SCAFFOLD_UI.packageName(topLevelPackage));
+            final JavaType collectionTypeImpl = getCollectionImplementation(proxyProperty
+                    .getPropertyType());
+            addImport(dataDictionary, collectionTypeImpl);
+            addImport(dataDictionary, proxyProperty.getPropertyType());
+
+            final String collectionType = proxyProperty.getPropertyType()
+                    .getSimpleTypeName();
+            final String boundCollectionType = proxyProperty.getPropertyType()
+                    .getParameters().get(0).getSimpleTypeName();
+
+            dataDictionary.setVariable("collectionType", collectionType);
+            dataDictionary.setVariable("collectionTypeImpl",
+                    collectionTypeImpl.getSimpleTypeName());
+            dataDictionary.setVariable("boundCollectionType",
+                    boundCollectionType);
+
+            final JavaType collectionEditorType = new JavaType(
+                    GwtPath.MANAGED_UI.packageName(topLevelPackage) + "."
+                            + boundCollectionType + collectionType + "Editor");
+            typeDetails.add(getTemplateDetails(dataDictionary,
+                    "CollectionEditor", collectionEditorType, moduleName));
+
+            dataDictionary = TemplateDictionary.create();
+            dataDictionary.setVariable("packageName",
+                    GwtPath.MANAGED_UI.packageName(topLevelPackage));
+            dataDictionary.setVariable("scaffoldUiPackage",
+                    GwtPath.SCAFFOLD_UI.packageName(topLevelPackage));
+            dataDictionary.setVariable("collectionType", collectionType);
+            dataDictionary.setVariable("collectionTypeImpl",
+                    collectionTypeImpl.getSimpleTypeName());
+            dataDictionary.setVariable("boundCollectionType",
+                    boundCollectionType);
+            addImport(dataDictionary, proxyProperty.getPropertyType());
+
+            final String contents = getTemplateContents("CollectionEditor"
+                    + "UiXml", dataDictionary);
+            final String packagePath = projectOperations.getPathResolver()
+                    .getFocusedIdentifier(Path.SRC_MAIN_JAVA,
+                            GwtPath.MANAGED_UI.getPackagePath(topLevelPackage));
+            xmlMap.put(packagePath + "/" + boundCollectionType + collectionType
+                    + "Editor.ui.xml", contents);
+        }
+
+        return new GwtTemplateDataHolder(templateTypeDetailsMap, xmlTemplates,
+                typeDetails, xmlMap);
+    }
+
+    @Override
+    public List<ClassOrInterfaceTypeDetails> getStaticTemplateTypeDetails(
+            final GwtType type, final String moduleName) {
+        final List<ClassOrInterfaceTypeDetails> templateTypeDetails = new ArrayList<ClassOrInterfaceTypeDetails>();
+        final TemplateDataDictionary dataDictionary = buildDictionary(type,
+                moduleName);
+        templateTypeDetails.add(getTemplateDetails(dataDictionary,
+                type.getTemplate(), getDestinationJavaType(type, moduleName),
+                moduleName));
+        return templateTypeDetails;
+    }
+
+    public ClassOrInterfaceTypeDetails getTemplateDetails(
+            final TemplateDataDictionary dataDictionary,
+            final String templateFile, final JavaType templateType,
+            final String moduleName) {
+        try {
+            final TemplateLoader templateLoader = TemplateResourceLoader
+                    .create();
+            final Template template = templateLoader.getTemplate(templateFile);
+            Validate.notNull(template, "Template required for '%s'",
+                    templateFile);
+            final String templateContents = template
+                    .renderToString(dataDictionary);
+            final String templateId = PhysicalTypeIdentifier.createIdentifier(
+                    templateType,
+                    LogicalPath.getInstance(Path.SRC_MAIN_JAVA, moduleName));
+            return typeParsingService.getTypeFromString(templateContents,
+                    templateId, templateType);
+        }
+        catch (final Exception e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
     private void addImport(final TemplateDataDictionary dataDictionary,
             final JavaType type) {
         dataDictionary.addSection("imports").setVariable("import",
@@ -231,8 +511,9 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
                             .getSimpleTypeName();
                     ClassOrInterfaceTypeDetails request = gwtTypeService
                             .lookupUnmanagedRequestFromProxy(proxy);
-                    if (request == null)
+                    if (request == null) {
                         request = gwtTypeService.lookupRequestFromProxy(proxy);
+                    }
                     if (request != null) {
                         final String requestExpression = new StringBuilder("\t")
                                 .append(request.getName().getSimpleTypeName())
@@ -341,8 +622,7 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
         final JavaType idType = persistenceMemberLocator
                 .getIdentifierType(entity);
         Validate.notNull(idType,
-                "Identifier type is not available for entity '" + entityName
-                        + "'");
+                "Identifier type is not available for entity '%s'", entityName);
 
         final MethodParameter entityParameter = new MethodParameter(entity,
                 "proxy");
@@ -354,8 +634,7 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
                         CustomDataKeys.PERSIST_METHOD.name(), entity, idType,
                         LAYER_POSITION, entityParameter);
         Validate.notNull(persistMethodAdditions,
-                "Persist method is not available for entity '" + entityName
-                        + "'");
+                "Persist method is not available for entity '%s'", entityName);
         final String persistMethodSignature = getRequestMethodCall(request,
                 persistMethodAdditions);
         dataDictionary.setVariable("persistMethodSignature",
@@ -366,8 +645,7 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
                         CustomDataKeys.REMOVE_METHOD.name(), entity, idType,
                         LAYER_POSITION, entityParameter);
         Validate.notNull(removeMethodAdditions,
-                "Remove method is not available for entity '" + entityName
-                        + "'");
+                "Remove method is not available for entity '%s'", entityName);
         final String removeMethodSignature = getRequestMethodCall(request,
                 removeMethodAdditions);
         dataDictionary.setVariable("removeMethodSignature",
@@ -378,7 +656,7 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
                         CustomDataKeys.COUNT_ALL_METHOD.name(), entity, idType,
                         LAYER_POSITION);
         Validate.notNull(countMethodAdditions,
-                "Count method is not available for entity '" + entityName + "'");
+                "Count method is not available for entity '%s'", entityName);
         dataDictionary.setVariable("countEntitiesMethod",
                 countMethodAdditions.getMethodName());
 
@@ -425,29 +703,28 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
         GwtProxyProperty dateProperty = null;
         final Set<String> importSet = new HashSet<String>();
 
-        List<String> omittedFields = new ArrayList<String>();
+        final List<String> omittedFields = new ArrayList<String>();
 
         // Adds names of fields in edit view to ommittedFields list
         if (type == GwtType.EDIT_VIEW) {
             try {
-                String className = GwtPath.MANAGED_UI
+                final String className = GwtPath.MANAGED_UI
                         .packageName(topLevelPackage)
                         + "."
                         + simpleTypeName
                         + GwtType.EDIT_VIEW.getTemplate();
 
-                ClassOrInterfaceTypeDetails details = typeLocationService
+                final ClassOrInterfaceTypeDetails details = typeLocationService
                         .getTypeDetails(new JavaType(className));
-
                 if (details != null) {
-                    for (FieldMetadata field : details.getDeclaredFields()) {
-                        JavaSymbolName fieldName = field.getFieldName();
-                        String name = fieldName.toString();
+                    for (final FieldMetadata field : details.getDeclaredFields()) {
+                        final JavaSymbolName fieldName = field.getFieldName();
+                        final String name = fieldName.toString();
                         omittedFields.add(name);
                     }
                 }
             }
-            catch (Exception e) {
+            catch (final Exception e) {
                 throw new IllegalArgumentException(e);
             }
         }
@@ -455,24 +732,23 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
         // Adds names of fields in mobile edit view to ommittedFields list
         if (type == GwtType.MOBILE_EDIT_VIEW) {
             try {
-                String className = GwtPath.MANAGED_UI
+                final String className = GwtPath.MANAGED_UI
                         .packageName(topLevelPackage)
                         + "."
                         + simpleTypeName
                         + GwtType.MOBILE_EDIT_VIEW.getTemplate();
 
-                ClassOrInterfaceTypeDetails details = typeLocationService
+                final ClassOrInterfaceTypeDetails details = typeLocationService
                         .getTypeDetails(new JavaType(className));
-
                 if (details != null) {
-                    for (FieldMetadata field : details.getDeclaredFields()) {
-                        JavaSymbolName fieldName = field.getFieldName();
-                        String name = fieldName.toString();
+                    for (final FieldMetadata field : details.getDeclaredFields()) {
+                        final JavaSymbolName fieldName = field.getFieldName();
+                        final String name = fieldName.toString();
                         omittedFields.add(name);
                     }
                 }
             }
-            catch (Exception e) {
+            catch (final Exception e) {
                 throw new IllegalArgumentException(e);
             }
         }
@@ -519,9 +795,10 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
                     gwtProxyProperty.getName());
             if (!isReadOnly(gwtProxyProperty.getName(), mirroredType)) {
                 // if the property is in the omittedFields list, do not add it
-                if (!omittedFields.contains(gwtProxyProperty.getName()))
+                if (!omittedFields.contains(gwtProxyProperty.getName())) {
                     dataDictionary.addSection("editViewProps").setVariable(
                             "prop", gwtProxyProperty.forEditView());
+                }
             }
 
             final TemplateDataDictionary propertiesSection = dataDictionary
@@ -685,146 +962,6 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
         return dataDictionary;
     }
 
-    public String buildUiXml(final String templateContents,
-            final String destFile, final List<MethodMetadata> proxyMethods) {
-        FileReader fileReader = null;
-        try {
-            final DocumentBuilder builder = XmlUtils.getDocumentBuilder();
-            builder.setEntityResolver(new EntityResolver() {
-                public InputSource resolveEntity(final String publicId,
-                        final String systemId) throws SAXException, IOException {
-                    if (systemId
-                            .equals("http://dl.google.com/gwt/DTD/xhtml.ent")) {
-                        return new InputSource(FileUtils.getInputStream(
-                                GwtScaffoldMetadata.class,
-                                "templates/xhtml.ent"));
-                    }
-
-                    // Use the default behaviour
-                    return null;
-                }
-            });
-
-            InputSource source = new InputSource();
-            source.setCharacterStream(new StringReader(templateContents));
-
-            final Document templateDocument = builder.parse(source);
-
-            if (!new File(destFile).exists()) {
-                return transformXml(templateDocument);
-            }
-
-            source = new InputSource();
-            fileReader = new FileReader(destFile);
-            source.setCharacterStream(fileReader);
-            final Document existingDocument = builder.parse(source);
-
-            // Look for the element holder denoted by the 'debugId' attribute
-            // first
-            Element existingHoldingElement = XmlUtils.findFirstElement(
-                    "//*[@debugId='" + "boundElementHolder" + "']",
-                    existingDocument.getDocumentElement());
-            Element templateHoldingElement = XmlUtils.findFirstElement(
-                    "//*[@debugId='" + "boundElementHolder" + "']",
-                    templateDocument.getDocumentElement());
-
-            // If holding element isn't found then the holding element is either
-            // not widget based or using the old convention of 'id' so look for
-            // the element holder with an 'id' attribute
-            if (existingHoldingElement == null) {
-                existingHoldingElement = XmlUtils.findFirstElement("//*[@id='"
-                        + "boundElementHolder" + "']",
-                        existingDocument.getDocumentElement());
-            }
-            if (templateHoldingElement == null) {
-                templateHoldingElement = XmlUtils.findFirstElement("//*[@id='"
-                        + "boundElementHolder" + "']",
-                        templateDocument.getDocumentElement());
-            }
-
-            if (existingHoldingElement != null) {
-                final Map<String, Element> templateElementMap = new LinkedHashMap<String, Element>();
-                for (final Element element : XmlUtils.findElements("//*[@id]",
-                        templateHoldingElement)) {
-                    templateElementMap.put(element.getAttribute("id"), element);
-                }
-
-                final Map<String, Element> existingElementMap = new LinkedHashMap<String, Element>();
-                for (final Element element : XmlUtils.findElements("//*[@id]",
-                        existingHoldingElement)) {
-                    existingElementMap.put(element.getAttribute("id"), element);
-                }
-
-                if (existingElementMap.keySet().containsAll(
-                        templateElementMap.values())) {
-                    return transformXml(existingDocument);
-                }
-
-                final List<Element> elementsToAdd = new ArrayList<Element>();
-                for (final Map.Entry<String, Element> entry : templateElementMap
-                        .entrySet()) {
-                    if (!existingElementMap.keySet().contains(entry.getKey())) {
-                        elementsToAdd.add(entry.getValue());
-                    }
-                }
-
-                final List<Element> elementsToRemove = new ArrayList<Element>();
-                for (final Map.Entry<String, Element> entry : existingElementMap
-                        .entrySet()) {
-                    if (!templateElementMap.keySet().contains(entry.getKey())) {
-                        elementsToRemove.add(entry.getValue());
-                    }
-                }
-
-                for (final Element element : elementsToAdd) {
-                    final Node importedNode = existingDocument.importNode(
-                            element, true);
-                    existingHoldingElement.appendChild(importedNode);
-                }
-
-                for (final Element element : elementsToRemove) {
-                    existingHoldingElement.removeChild(element);
-                }
-
-                if (elementsToAdd.size() > 0) {
-                    final List<Element> sortedElements = new ArrayList<Element>();
-                    for (final MethodMetadata method : proxyMethods) {
-                        final String propertyName = StringUtils
-                                .uncapitalize(BeanInfoUtils
-                                        .getPropertyNameForJavaBeanMethod(
-                                                method).getSymbolName());
-                        final Element element = XmlUtils.findFirstElement(
-                                "//*[@id='" + propertyName + "']",
-                                existingHoldingElement);
-                        if (element != null) {
-                            sortedElements.add(element);
-                        }
-                    }
-                    for (final Element el : sortedElements) {
-                        if (el.getParentNode() != null
-                                && el.getParentNode().equals(
-                                        existingHoldingElement)) {
-                            existingHoldingElement.removeChild(el);
-                        }
-                    }
-                    for (final Element el : sortedElements) {
-                        existingHoldingElement.appendChild(el);
-                    }
-                }
-
-                return transformXml(existingDocument);
-            }
-
-            return transformXml(templateDocument);
-        }
-        catch (final Exception e) {
-            throw new IllegalStateException(e);
-        }
-        finally {
-            IOUtils.closeQuietly(fileReader);
-        }
-    }
-
     private JavaType getCollectionImplementation(final JavaType javaType) {
         if (isSameBaseType(javaType, SET)) {
             return new JavaType(HASH_SET.getFullyQualifiedTypeName(),
@@ -851,108 +988,6 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
                 + "." + gwtType.getTemplate();
     }
 
-    public GwtTemplateDataHolder getMirrorTemplateTypeDetails(
-            final ClassOrInterfaceTypeDetails mirroredType,
-            final Map<JavaSymbolName, GwtProxyProperty> clientSideTypeMap,
-            final String moduleName) {
-        final ClassOrInterfaceTypeDetails proxy = gwtTypeService
-                .lookupProxyFromEntity(mirroredType);
-        final ClassOrInterfaceTypeDetails request = gwtTypeService
-                .lookupRequestFromEntity(mirroredType);
-        final JavaPackage topLevelPackage = projectOperations
-                .getTopLevelPackage(moduleName);
-        final Map<GwtType, JavaType> mirrorTypeMap = GwtUtils.getMirrorTypeMap(
-                mirroredType.getName(), topLevelPackage);
-        mirrorTypeMap.put(GwtType.PROXY, proxy.getName());
-        mirrorTypeMap.put(GwtType.REQUEST, request.getName());
-
-        final Map<GwtType, ClassOrInterfaceTypeDetails> templateTypeDetailsMap = new LinkedHashMap<GwtType, ClassOrInterfaceTypeDetails>();
-        final Map<GwtType, String> xmlTemplates = new LinkedHashMap<GwtType, String>();
-        for (final GwtType gwtType : GwtType.getMirrorTypes()) {
-            if (gwtType.getTemplate() == null) {
-                continue;
-            }
-            TemplateDataDictionary dataDictionary = buildMirrorDataDictionary(
-                    gwtType, mirroredType, proxy, mirrorTypeMap,
-                    clientSideTypeMap, moduleName);
-            gwtType.dynamicallyResolveFieldsToWatch(clientSideTypeMap);
-            gwtType.dynamicallyResolveMethodsToWatch(mirroredType.getName(),
-                    clientSideTypeMap, topLevelPackage);
-            templateTypeDetailsMap.put(
-                    gwtType,
-                    getTemplateDetails(dataDictionary, gwtType.getTemplate(),
-                            mirrorTypeMap.get(gwtType), moduleName));
-
-            if (gwtType.isCreateUiXml()) {
-                dataDictionary = buildMirrorDataDictionary(gwtType,
-                        mirroredType, proxy, mirrorTypeMap, clientSideTypeMap,
-                        moduleName);
-                final String contents = getTemplateContents(
-                        gwtType.getTemplate() + "UiXml", dataDictionary);
-                xmlTemplates.put(gwtType, contents);
-            }
-        }
-
-        final Map<String, String> xmlMap = new LinkedHashMap<String, String>();
-        final List<ClassOrInterfaceTypeDetails> typeDetails = new ArrayList<ClassOrInterfaceTypeDetails>();
-        for (final GwtProxyProperty proxyProperty : clientSideTypeMap.values()) {
-            if (!proxyProperty.isCollection()
-                    || proxyProperty.isCollectionOfProxy()) {
-                continue;
-            }
-
-            TemplateDataDictionary dataDictionary = TemplateDictionary.create();
-            dataDictionary.setVariable("packageName",
-                    GwtPath.MANAGED_UI.packageName(topLevelPackage));
-            dataDictionary.setVariable("scaffoldUiPackage",
-                    GwtPath.SCAFFOLD_UI.packageName(topLevelPackage));
-            final JavaType collectionTypeImpl = getCollectionImplementation(proxyProperty
-                    .getPropertyType());
-            addImport(dataDictionary, collectionTypeImpl);
-            addImport(dataDictionary, proxyProperty.getPropertyType());
-
-            final String collectionType = proxyProperty.getPropertyType()
-                    .getSimpleTypeName();
-            final String boundCollectionType = proxyProperty.getPropertyType()
-                    .getParameters().get(0).getSimpleTypeName();
-
-            dataDictionary.setVariable("collectionType", collectionType);
-            dataDictionary.setVariable("collectionTypeImpl",
-                    collectionTypeImpl.getSimpleTypeName());
-            dataDictionary.setVariable("boundCollectionType",
-                    boundCollectionType);
-
-            final JavaType collectionEditorType = new JavaType(
-                    GwtPath.MANAGED_UI.packageName(topLevelPackage) + "."
-                            + boundCollectionType + collectionType + "Editor");
-            typeDetails.add(getTemplateDetails(dataDictionary,
-                    "CollectionEditor", collectionEditorType, moduleName));
-
-            dataDictionary = TemplateDictionary.create();
-            dataDictionary.setVariable("packageName",
-                    GwtPath.MANAGED_UI.packageName(topLevelPackage));
-            dataDictionary.setVariable("scaffoldUiPackage",
-                    GwtPath.SCAFFOLD_UI.packageName(topLevelPackage));
-            dataDictionary.setVariable("collectionType", collectionType);
-            dataDictionary.setVariable("collectionTypeImpl",
-                    collectionTypeImpl.getSimpleTypeName());
-            dataDictionary.setVariable("boundCollectionType",
-                    boundCollectionType);
-            addImport(dataDictionary, proxyProperty.getPropertyType());
-
-            final String contents = getTemplateContents("CollectionEditor"
-                    + "UiXml", dataDictionary);
-            final String packagePath = projectOperations.getPathResolver()
-                    .getFocusedIdentifier(Path.SRC_MAIN_JAVA,
-                            GwtPath.MANAGED_UI.getPackagePath(topLevelPackage));
-            xmlMap.put(packagePath + "/" + boundCollectionType + collectionType
-                    + "Editor.ui.xml", contents);
-        }
-
-        return new GwtTemplateDataHolder(templateTypeDetailsMap, xmlTemplates,
-                typeDetails, xmlMap);
-    }
-
     private String getRequestMethodCall(
             final ClassOrInterfaceTypeDetails request,
             final MemberTypeAdditions memberTypeAdditions) {
@@ -969,17 +1004,6 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
         return requestMethodCall;
     }
 
-    public List<ClassOrInterfaceTypeDetails> getStaticTemplateTypeDetails(
-            final GwtType type, final String moduleName) {
-        final List<ClassOrInterfaceTypeDetails> templateTypeDetails = new ArrayList<ClassOrInterfaceTypeDetails>();
-        final TemplateDataDictionary dataDictionary = buildDictionary(type,
-                moduleName);
-        templateTypeDetails.add(getTemplateDetails(dataDictionary,
-                type.getTemplate(), getDestinationJavaType(type, moduleName),
-                moduleName));
-        return templateTypeDetails;
-    }
-
     private String getTemplateContents(final String templateName,
             final TemplateDataDictionary dataDictionary) {
         try {
@@ -989,29 +1013,6 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
             return template.renderToString(dataDictionary);
         }
         catch (final TemplateException e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
-    public ClassOrInterfaceTypeDetails getTemplateDetails(
-            final TemplateDataDictionary dataDictionary,
-            final String templateFile, final JavaType templateType,
-            final String moduleName) {
-        try {
-            final TemplateLoader templateLoader = TemplateResourceLoader
-                    .create();
-            final Template template = templateLoader.getTemplate(templateFile);
-            Validate.notNull(template, "Template required for '" + templateFile
-                    + "'");
-            final String templateContents = template
-                    .renderToString(dataDictionary);
-            final String templateId = PhysicalTypeIdentifier.createIdentifier(
-                    templateType,
-                    LogicalPath.getInstance(Path.SRC_MAIN_JAVA, moduleName));
-            return typeParsingService.getTypeFromString(templateContents,
-                    templateId, templateType);
-        }
-        catch (final Exception e) {
             throw new IllegalStateException(e);
         }
     }

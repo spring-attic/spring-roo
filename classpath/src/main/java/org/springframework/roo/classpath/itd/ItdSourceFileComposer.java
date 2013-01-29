@@ -471,8 +471,8 @@ public class ItdSourceFileComposer {
     }
 
     private void appendTerminator() {
-        Validate.isTrue(indentLevel == 1, "Indent level must be 1 (not "
-                + indentLevel + ") to conclude!");
+        Validate.isTrue(indentLevel == 1,
+                "Indent level must be 1 (not %d) to conclude", indentLevel);
         indentRemove();
 
         // Ensure we present the content flag, as it will be set true during the
@@ -630,10 +630,11 @@ public class ItdSourceFileComposer {
     private void writeMethods(final List<? extends MethodMetadata> methods,
             final boolean defineTarget, final boolean isInterfaceMethod) {
         for (final MethodMetadata method : methods) {
-            Validate.isTrue(method.getParameterTypes().size() == method
-                    .getParameterNames().size(), "Method "
-                    + method.getMethodName().getSymbolName()
-                    + " has mismatched parameter names against parameter types");
+            Validate.isTrue(
+                    method.getParameterTypes().size() == method
+                            .getParameterNames().size(),
+                    "Method %s has mismatched parameter names against parameter types",
+                    method.getMethodName().getSymbolName());
 
             // Append annotations
             for (final AnnotationMetadata annotation : method.getAnnotations()) {

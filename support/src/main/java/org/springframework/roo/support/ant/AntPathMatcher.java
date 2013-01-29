@@ -231,8 +231,8 @@ public class AntPathMatcher implements PathMatcher {
             final String pattern, final String path) {
         final Map<String, String> variables = new LinkedHashMap<String, String>();
         final boolean result = doMatch(pattern, path, true, variables);
-        Validate.validState(result, "Pattern \"" + pattern
-                + "\" is not a match for \"" + path + "\"");
+        Validate.validState(result, "Pattern \"%s\" is not a match for \"%s\"",
+                pattern, path);
         return variables;
     }
 

@@ -21,8 +21,8 @@ public class Module {
      *            blank)
      */
     public Module(final String name, final String pomPath) {
-        Validate.notBlank(name, "Invalid module name '" + name + "'");
-        Validate.notBlank(pomPath, "Invalid path '" + pomPath + "'");
+        Validate.notBlank(name, "Invalid module name '%s'", name);
+        Validate.notBlank(pomPath, "Invalid path '%s'", pomPath);
         this.name = name;
         this.pomPath = pomPath;
     }

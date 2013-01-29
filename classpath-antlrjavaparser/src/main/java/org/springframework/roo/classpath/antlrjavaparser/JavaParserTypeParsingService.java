@@ -172,9 +172,10 @@ public class JavaParserTypeParsingService implements TypeParsingService {
             final ClassOrInterfaceTypeDetails cid,
             final List<BodyDeclaration> parent) {
         // Append the new imports this class declares
-        Validate.notNull(compilationUnit.getImports(),
-                "Compilation unit imports should be non-null when producing type '"
-                        + cid.getName() + "'");
+        Validate.notNull(
+                compilationUnit.getImports(),
+                "Compilation unit imports should be non-null when producing type '%s'",
+                cid.getName());
         for (final ImportMetadata importType : cid.getRegisteredImports()) {
             ImportDeclaration importDeclaration;
 
@@ -291,13 +292,14 @@ public class JavaParserTypeParsingService implements TypeParsingService {
         typeDeclaration.setMembers(new ArrayList<BodyDeclaration>());
 
         Validate.notNull(typeDeclaration.getName(),
-                "Missing type declaration name for '" + cid.getName() + "'");
+                "Missing type declaration name for '%s'", cid.getName());
 
         // If adding a new top-level type, must add it to the compilation unit
         // types
-        Validate.notNull(compilationUnit.getTypes(),
-                "Compilation unit types must not be null when attempting to add '"
-                        + cid.getName() + "'");
+        Validate.notNull(
+                compilationUnit.getTypes(),
+                "Compilation unit types must not be null when attempting to add '%s'",
+                cid.getName());
 
         if (parent == null) {
             // Top-level class

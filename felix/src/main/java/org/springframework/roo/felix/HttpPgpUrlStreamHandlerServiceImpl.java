@@ -98,8 +98,8 @@ public class HttpPgpUrlStreamHandlerServiceImpl extends
         // after all, so it should be available)
         Validate.isTrue(
                 ascUrlFile.exists(),
-                "Signature verification file is not available at '"
-                        + ascUrl.toExternalForm() + "'; continuing");
+                "Signature verification file is not available at '%s'; continuing",
+                ascUrl.toExternalForm());
 
         // Decide if this signature file is well-formed and of a key ID that is
         // trusted by the user
@@ -140,8 +140,8 @@ public class HttpPgpUrlStreamHandlerServiceImpl extends
             signature = new FileInputStream(ascUrlFile);
             Validate.isTrue(
                     pgpService.isResourceSignedBySignature(resource, signature),
-                    "PGP signature illegal for URL '"
-                            + resourceUrl.toExternalForm() + "'");
+                    "PGP signature illegal for URL '%s'",
+                    resourceUrl.toExternalForm());
 
             // Excellent it worked! We don't need the ASC file anymore, so get
             // rid of it

@@ -107,8 +107,8 @@ public class FieldCommands implements CommandMarker {
 
         final ClassOrInterfaceTypeDetails javaTypeDetails = typeLocationService
                 .getTypeDetails(typeName);
-        Validate.notNull(javaTypeDetails, "The type specified, '" + typeName
-                + "'doesn't exist");
+        Validate.notNull(javaTypeDetails,
+                "The type specified, '%s', doesn't exist", typeName);
 
         final String physicalTypeIdentifier = javaTypeDetails
                 .getDeclaredByMetadataId();
@@ -153,8 +153,8 @@ public class FieldCommands implements CommandMarker {
 
         final ClassOrInterfaceTypeDetails javaTypeDetails = typeLocationService
                 .getTypeDetails(typeName);
-        Validate.notNull(javaTypeDetails, "The type specified, '" + typeName
-                + "'doesn't exist");
+        Validate.notNull(javaTypeDetails,
+                "The type specified, '%s', doesn't exist", typeName);
 
         final String physicalTypeIdentifier = javaTypeDetails
                 .getDeclaredByMetadataId();
@@ -210,8 +210,8 @@ public class FieldCommands implements CommandMarker {
         // Check if the requested entity is a JPA @Entity
         final ClassOrInterfaceTypeDetails javaTypeDetails = typeLocationService
                 .getTypeDetails(typeName);
-        Validate.notNull(javaTypeDetails, "The type specified, '" + typeName
-                + "'doesn't exist");
+        Validate.notNull(javaTypeDetails,
+                "The type specified, '%s', doesn't exist", typeName);
 
         final String physicalTypeIdentifier = javaTypeDetails
                 .getDeclaredByMetadataId();
@@ -253,8 +253,8 @@ public class FieldCommands implements CommandMarker {
 
         final ClassOrInterfaceTypeDetails cid = typeLocationService
                 .getTypeDetails(typeName);
-        Validate.notNull(cid, "The type specified, '" + typeName
-                + "'doesn't exist");
+        Validate.notNull(cid, "The type specified, '%s', doesn't exist",
+                typeName);
 
         final String physicalTypeIdentifier = cid.getDeclaredByMetadataId();
         final EnumField fieldDetails = new EnumField(physicalTypeIdentifier,
@@ -297,8 +297,8 @@ public class FieldCommands implements CommandMarker {
 
         final ClassOrInterfaceTypeDetails javaTypeDetails = typeLocationService
                 .getTypeDetails(typeName);
-        Validate.notNull(javaTypeDetails, "The type specified, '" + typeName
-                + "'doesn't exist");
+        Validate.notNull(javaTypeDetails,
+                "The type specified, '%s', doesn't exist", typeName);
 
         final String physicalTypeIdentifier = javaTypeDetails
                 .getDeclaredByMetadataId();
@@ -388,8 +388,8 @@ public class FieldCommands implements CommandMarker {
 
         final ClassOrInterfaceTypeDetails javaTypeDetails = typeLocationService
                 .getTypeDetails(typeName);
-        Validate.notNull(javaTypeDetails, "The type specified, '" + typeName
-                + "'doesn't exist");
+        Validate.notNull(javaTypeDetails,
+                "The type specified, '%s', doesn't exist", typeName);
 
         final String physicalTypeIdentifier = javaTypeDetails
                 .getDeclaredByMetadataId();
@@ -463,8 +463,8 @@ public class FieldCommands implements CommandMarker {
 
         final ClassOrInterfaceTypeDetails javaTypeDetails = typeLocationService
                 .getTypeDetails(typeName);
-        Validate.notNull(javaTypeDetails, "The type specified, '" + typeName
-                + "'doesn't exist");
+        Validate.notNull(javaTypeDetails,
+                "The type specified, '%s', doesn't exist", typeName);
 
         final String physicalTypeIdentifier = javaTypeDetails
                 .getDeclaredByMetadataId();
@@ -511,13 +511,12 @@ public class FieldCommands implements CommandMarker {
             @CliOption(key = "unique", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether to mark the field with a unique constraint") final boolean unique,
             @CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") final boolean permitReservedWords) {
 
-        final ClassOrInterfaceTypeDetails javaTypeDetails = typeLocationService
+        final ClassOrInterfaceTypeDetails cid = typeLocationService
                 .getTypeDetails(typeName);
-        Validate.notNull(javaTypeDetails, "The type specified, '" + typeName
-                + "'doesn't exist");
+        Validate.notNull(cid, "The type specified, '%s', doesn't exist",
+                typeName);
 
-        final String physicalTypeIdentifier = javaTypeDetails
-                .getDeclaredByMetadataId();
+        final String physicalTypeIdentifier = cid.getDeclaredByMetadataId();
         final StringField fieldDetails = new StringField(
                 physicalTypeIdentifier, fieldName);
         fieldDetails.setNotNull(notNull);
@@ -565,8 +564,8 @@ public class FieldCommands implements CommandMarker {
 
         final ClassOrInterfaceTypeDetails cid = typeLocationService
                 .getTypeDetails(typeName);
-        Validate.notNull(cid, "The type specified, '" + typeName
-                + "'doesn't exist");
+        Validate.notNull(cid, "The type specified, '%s', doesn't exist",
+                typeName);
 
         final String physicalTypeIdentifier = cid.getDeclaredByMetadataId();
         final UploadedFileField fieldDetails = new UploadedFileField(
@@ -636,12 +635,12 @@ public class FieldCommands implements CommandMarker {
             @CliOption(key = "transient", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates to mark the field as transient") final boolean transientModifier,
             @CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") final boolean permitReservedWords) {
 
-        final ClassOrInterfaceTypeDetails javaTypeDetails = typeLocationService
+        final ClassOrInterfaceTypeDetails cid = typeLocationService
                 .getTypeDetails(typeName);
-        Validate.notNull(javaTypeDetails, "The type specified, '" + typeName
-                + "'doesn't exist");
+        Validate.notNull(cid,
+                "The type specified, '%s', doesn't exist", typeName);
 
-        final String physicalTypeIdentifier = javaTypeDetails
+        final String physicalTypeIdentifier = cid
                 .getDeclaredByMetadataId();
         final FieldDetails fieldDetails = new FieldDetails(
                 physicalTypeIdentifier, fieldType, fieldName);

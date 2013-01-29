@@ -191,8 +191,8 @@ public class WebJsonOperationsImpl implements WebJsonOperations {
         // Verify that the web.xml already exists
         final String webXmlPath = pathResolver.getFocusedIdentifier(
                 Path.SRC_MAIN_WEBAPP, "WEB-INF/web.xml");
-        Validate.isTrue(fileManager.exists(webXmlPath), "'" + webXmlPath
-                + "' does not exist");
+        Validate.isTrue(fileManager.exists(webXmlPath), "'%s' does not exist",
+                webXmlPath);
 
         final Document document = XmlUtils.readXml(fileManager
                 .getInputStream(webXmlPath));

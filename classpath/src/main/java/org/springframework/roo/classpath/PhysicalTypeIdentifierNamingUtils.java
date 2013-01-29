@@ -54,17 +54,17 @@ public final class PhysicalTypeIdentifierNamingUtils {
      */
     private static String getInstanceKey(final String metadataClass,
             final String metadataId) {
-        Validate.isTrue(isValid(metadataClass, metadataId), "Metadata id '"
-                + metadataId + "' is not a valid " + metadataClass
-                + " identifier");
+        Validate.isTrue(isValid(metadataClass, metadataId),
+                "Metadata id '%s' is not a valid %s identifier", metadataId,
+                metadataClass);
         return MetadataIdentificationUtils.getMetadataInstance(metadataId);
     }
 
     public static JavaType getJavaType(final String metadataIdentificationString) {
-        Validate.isTrue(metadataIdentificationString.contains("#"),
-                "Metadata identification string '"
-                        + metadataIdentificationString
-                        + "' does not appear to be a valid identifier");
+        Validate.isTrue(
+                metadataIdentificationString.contains("#"),
+                "Metadata identification string '%s' does not appear to be a valid identifier",
+                metadataIdentificationString);
         final String instance = MetadataIdentificationUtils
                 .getMetadataInstance(metadataIdentificationString);
         final int index = instance.indexOf("?");
@@ -110,8 +110,8 @@ public final class PhysicalTypeIdentifierNamingUtils {
     public static LogicalPath getPath(final String metadataId) {
         Validate.isTrue(
                 MetadataIdentificationUtils.isIdentifyingInstance(metadataId),
-                "Metadata id '" + metadataId
-                        + "' does not appear to be a valid identifier");
+                "Metadata id '%s' does not appear to be a valid identifier",
+                metadataId);
         final String instanceKey = MetadataIdentificationUtils
                 .getMetadataInstance(metadataId);
         final int index = instanceKey.indexOf("?");
@@ -131,9 +131,8 @@ public final class PhysicalTypeIdentifierNamingUtils {
             final String metadataIdentificationString) {
         Validate.isTrue(
                 isValid(providesType, metadataIdentificationString),
-                "Metadata identification string '"
-                        + metadataIdentificationString
-                        + "' does not appear to be a valid physical type identifier");
+                "Metadata identification string '%s' does not appear to be a valid physical type identifier",
+                metadataIdentificationString);
         final String instance = MetadataIdentificationUtils
                 .getMetadataInstance(metadataIdentificationString);
         final int index = instance.indexOf("?");

@@ -75,8 +75,8 @@ public class DefaultPhysicalTypeMetadataProvider implements
     public MetadataItem get(final String metadataIdentificationString) {
         Validate.isTrue(
                 PhysicalTypeIdentifier.isValid(metadataIdentificationString),
-                "Metadata id '" + metadataIdentificationString
-                        + "' is not valid for this metadata provider");
+                "Metadata id '%s' is not valid for this metadata provider",
+                metadataIdentificationString);
         final String canonicalPath = typeLocationService
                 .getPhysicalTypeCanonicalPath(metadataIdentificationString);
         if (StringUtils.isBlank(canonicalPath)) {
@@ -145,9 +145,9 @@ public class DefaultPhysicalTypeMetadataProvider implements
                 final MemberDetails newResult = decorator.decorateTypes(
                         DefaultPhysicalTypeMetadataProvider.class.getName(),
                         memberDetails);
-                Validate.isTrue(newResult != null, "Decorator '"
-                        + decorator.getClass().getName()
-                        + "' returned an illegal result");
+                Validate.isTrue(newResult != null,
+                        "Decorator '%s' returned an illegal result", decorator
+                                .getClass().getName());
                 if (!newResult.equals(memberDetails)) {
                     additionalLoopRequired = true;
                     memberDetails = newResult;

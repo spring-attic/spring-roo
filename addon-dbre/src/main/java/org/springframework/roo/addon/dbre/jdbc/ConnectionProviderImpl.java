@@ -64,8 +64,8 @@ public class ConnectionProviderImpl implements ConnectionProvider {
                 .getProperty("database.driverClassName");
         final Driver driver = jdbcDriverManager.loadDriver(driverClassName,
                 displayAddOns);
-        Validate.notNull(driver, "JDBC driver not available for '"
-                + driverClassName + "'");
+        Validate.notNull(driver, "JDBC driver not available for '%s'",
+                driverClassName);
         try {
             return driver.connect(props.getProperty("database.url"), props);
         }

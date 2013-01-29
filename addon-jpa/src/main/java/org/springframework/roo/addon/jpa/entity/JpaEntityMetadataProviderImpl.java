@@ -176,11 +176,8 @@ public class JpaEntityMetadataProviderImpl extends
         // ANY identifier-related attributes on @RooJpaEntity....
         Validate.isTrue(
                 identifiers.size() == 1,
-                "Identifier service indicates "
-                        + identifiers.size()
-                        + " fields illegally for the entity '"
-                        + entity.getSimpleTypeName()
-                        + "' (should only be one identifier field given this is an entity, not an Identifier class)");
+                "Identifier service indicates %d fields illegally for the entity '%s' (should only be one identifier field given this is an entity, not an Identifier class)",
+                identifiers.size(), entity.getSimpleTypeName() );
         return identifiers.iterator().next();
     }
 
@@ -241,8 +238,8 @@ public class JpaEntityMetadataProviderImpl extends
             metadataDependencyRegistry.registerDependency(
                     ProjectMetadata.getProjectIdentifier(moduleName),
                     metadataIdentificationString);
-            isGaeEnabled = projectOperations
-                    .isFeatureInstalledInModule(FeatureNames.GAE, moduleName);
+            isGaeEnabled = projectOperations.isFeatureInstalledInModule(
+                    FeatureNames.GAE, moduleName);
             isDatabaseDotComEnabled = projectOperations
                     .isFeatureInstalledInFocusedModule(FeatureNames.DATABASE_DOT_COM);
         }

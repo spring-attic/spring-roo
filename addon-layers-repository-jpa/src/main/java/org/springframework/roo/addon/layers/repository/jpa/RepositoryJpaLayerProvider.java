@@ -46,8 +46,7 @@ public class RepositoryJpaLayerProvider extends CoreLayerProvider {
             final JavaType idType, final MethodParameter... callerParameters) {
         Validate.isTrue(StringUtils.isNotBlank(callerMID),
                 "Caller's metadata ID required");
-        Validate.isTrue(StringUtils.isNotBlank(methodIdentifier),
-                "Method identifier required");
+        Validate.notBlank(methodIdentifier, "Method identifier required");
         Validate.notNull(targetEntity, "Target enitity type required");
         Validate.notNull(idType, "Enitity Id type required");
 

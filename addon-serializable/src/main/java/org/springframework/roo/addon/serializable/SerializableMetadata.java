@@ -73,8 +73,8 @@ public class SerializableMetadata extends
             final JavaType aspectName,
             final PhysicalTypeMetadata governorPhysicalTypeMetadata) {
         super(identifier, aspectName, governorPhysicalTypeMetadata);
-        Validate.isTrue(isValid(identifier), "Metadata id '" + identifier
-                + "' is invalid");
+        Validate.isTrue(isValid(identifier), "Metadata id '%s' is invalid",
+                identifier);
 
         if (isValid()) {
             ensureGovernorImplements(SERIALIZABLE);

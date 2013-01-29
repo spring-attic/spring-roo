@@ -238,16 +238,12 @@ public class ClasspathOperationsImpl implements ClasspathOperations {
         Validate.notNull(type, "Specify the type to focus on");
         final String physicalTypeIdentifier = typeLocationService
                 .getPhysicalTypeIdentifier(type);
-        Validate.notNull(physicalTypeIdentifier, "Cannot locate the type "
-                + type.getFullyQualifiedTypeName());
+        Validate.notNull(physicalTypeIdentifier, "Cannot locate the type %s",
+                type.getFullyQualifiedTypeName());
         final PhysicalTypeMetadata ptm = (PhysicalTypeMetadata) metadataService
                 .get(physicalTypeIdentifier);
-        Validate.notNull(
-                ptm,
-                "Class "
-                        + PhysicalTypeIdentifier
-                                .getFriendlyName(physicalTypeIdentifier)
-                        + " does not exist");
+        Validate.notNull(ptm, "Class %s does not exist",
+                PhysicalTypeIdentifier.getFriendlyName(physicalTypeIdentifier));
     }
 
     @Override

@@ -95,8 +95,8 @@ public class EqualsMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
             final EqualsAnnotationValues annotationValues,
             final List<FieldMetadata> equalityFields) {
         super(identifier, aspectName, governorPhysicalTypeMetadata);
-        Validate.isTrue(isValid(identifier), "Metadata id '" + identifier
-                + "' is invalid");
+        Validate.isTrue(isValid(identifier), "Metadata id '%s' is invalid",
+                identifier);
         Validate.notNull(annotationValues, "Annotation values required");
 
         this.annotationValues = annotationValues;

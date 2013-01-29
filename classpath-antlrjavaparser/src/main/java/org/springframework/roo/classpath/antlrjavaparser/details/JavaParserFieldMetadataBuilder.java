@@ -179,9 +179,9 @@ public class JavaParserFieldMetadataBuilder implements Builder<FieldMetadata> {
                 final FieldDeclaration bdf = (FieldDeclaration) bd;
                 for (final VariableDeclarator v : bdf.getVariables()) {
                     Validate.isTrue(!field.getFieldName().getSymbolName()
-                            .equals(v.getId().getName()), "A field with name '"
-                            + field.getFieldName().getSymbolName()
-                            + "' already exists");
+                            .equals(v.getId().getName()),
+                            "A field with name '%s' already exists", field
+                                    .getFieldName().getSymbolName());
                 }
             }
         }

@@ -100,8 +100,7 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements
     public void createModule(final JavaPackage topLevelPackage,
             final GAV parentPom, final String moduleName,
             final PackagingProvider selectedPackagingProvider,
-            final Integer majorJavaVersion,
-            final String artifactId) {
+            final Integer majorJavaVersion, final String artifactId) {
         Validate.isTrue(isCreateModuleAvailable(),
                 "Cannot create modules at this time");
         final PackagingProvider packagingProvider = getPackagingProvider(selectedPackagingProvider);
@@ -139,8 +138,8 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements
     public void executeMvnCommand(final String extra) throws IOException {
         final File root = new File(getProjectRoot());
         Validate.isTrue(root.isDirectory() && root.exists(),
-                "Project root does not currently exist as a directory ('"
-                        + root.getCanonicalPath() + "')");
+                "Project root does not currently exist as a directory ('%s')",
+                root.getCanonicalPath());
 
         final String cmd = (File.separatorChar == '\\' ? "mvn.bat " : "mvn ")
                 + extra;

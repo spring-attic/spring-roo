@@ -26,8 +26,8 @@ public class CreateFile implements UndoableOperation {
         Validate.notNull(undoManager, "Undo manager required");
         Validate.notNull(actual, "Actual file required");
         Validate.notNull(filenameResolver, "Filename resolver required");
-        Validate.isTrue(!actual.exists(), "Actual file '" + actual
-                + "' cannot exist");
+        Validate.isTrue(!actual.exists(), "Actual file '%s' cannot exist",
+                actual);
         this.filenameResolver = filenameResolver;
         this.actual = actual;
         try {

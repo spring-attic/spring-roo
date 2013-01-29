@@ -56,8 +56,8 @@ public class DataOnDemandOperationsImpl implements DataOnDemandOperations {
     private ClassOrInterfaceTypeDetails getEntity(final JavaType entity) {
         final ClassOrInterfaceTypeDetails cid = typeLocationService
                 .getTypeDetails(entity);
-        Validate.notNull(cid, "Java source code details unavailable for type '"
-                + entity + "'");
+        Validate.notNull(cid,
+                "Java source code details unavailable for type '%s'", entity);
         return cid;
     }
 
@@ -83,10 +83,9 @@ public class DataOnDemandOperationsImpl implements DataOnDemandOperations {
         final ClassOrInterfaceTypeDetails cid = getEntity(entity);
         Validate.isTrue(
                 cid.getPhysicalTypeCategory() == PhysicalTypeCategory.CLASS,
-                "Type " + entity.getFullyQualifiedTypeName()
-                        + " is not a class");
-        Validate.isTrue(!Modifier.isAbstract(cid.getModifier()), "Type "
-                + entity.getFullyQualifiedTypeName() + " is abstract");
+                "Type %s is not a class", entity.getFullyQualifiedTypeName());
+        Validate.isTrue(!Modifier.isAbstract(cid.getModifier()),
+                "Type %s is abstract", entity.getFullyQualifiedTypeName());
 
         // Check if the requested entity is a JPA @Entity
         final MemberDetails memberDetails = memberDetailsScanner
@@ -98,8 +97,8 @@ public class DataOnDemandOperationsImpl implements DataOnDemandOperations {
                 .getAnnotation(PERSISTENT);
         Validate.isTrue(entityAnnotation != null
                 || persistentAnnotation != null,
-                "Type " + entity.getFullyQualifiedTypeName()
-                        + " must be a persistent type");
+                "Type %s must be a persistent type",
+                entity.getFullyQualifiedTypeName());
 
         // Everything is OK to proceed
         final String declaredByMetadataId = PhysicalTypeIdentifier

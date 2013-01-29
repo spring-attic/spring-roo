@@ -108,10 +108,9 @@ public class SolrWebSearchMetadataProvider extends AbstractItdMetadataProvider {
                 .getFormBackingObject();
         Validate.notNull(
                 targetObject,
-                "Could not acquire form backing object for the '"
-                        + WebScaffoldMetadata.getJavaType(
-                                webScaffoldMetadata.getId())
-                                .getFullyQualifiedTypeName() + "' controller");
+                "Could not acquire form backing object for the '%s' controller",
+                WebScaffoldMetadata.getJavaType(webScaffoldMetadata.getId())
+                        .getFullyQualifiedTypeName());
 
         final String targetObjectMid = typeLocationService
                 .getPhysicalTypeIdentifier(targetObject);
@@ -121,10 +120,9 @@ public class SolrWebSearchMetadataProvider extends AbstractItdMetadataProvider {
         final SolrMetadata solrMetadata = (SolrMetadata) metadataService
                 .get(SolrMetadata.createIdentifier(targetObject,
                         targetObjectPath));
-        Validate.notNull(
-                solrMetadata,
-                "Could not determine SolrMetadata for type '"
-                        + targetObject.getFullyQualifiedTypeName() + "'");
+        Validate.notNull(solrMetadata,
+                "Could not determine SolrMetadata for type '%s'",
+                targetObject.getFullyQualifiedTypeName());
 
         // Otherwise go off and create the to String metadata
         return new SolrWebSearchMetadata(metadataIdentificationString,

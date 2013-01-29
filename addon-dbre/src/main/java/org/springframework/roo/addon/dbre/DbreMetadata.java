@@ -249,10 +249,10 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
             final ForeignKey foreignKey2 = iter.next();
 
             final Table owningSideTable = foreignKey1.getForeignTable();
-            Validate.notNull(owningSideTable, "Owning-side " + errMsg);
+            Validate.notNull(owningSideTable, "Owning-side %s", errMsg);
 
             final Table inverseSideTable = foreignKey2.getForeignTable();
-            Validate.notNull(inverseSideTable, "Inverse-side " + errMsg);
+            Validate.notNull(inverseSideTable, "Inverse-side %s", errMsg);
 
             final Integer tableCount = owningSideTables
                     .containsKey(owningSideTable) ? owningSideTables
@@ -335,14 +335,11 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
                     managedEntities, foreignTableName, foreignSchemaName);
             Validate.notNull(
                     fieldType,
-                    "Attempted to create many-to-one field '"
-                            + fieldName
-                            + "' in '"
-                            + destination.getFullyQualifiedTypeName()
-                            + "'"
-                            + getErrorMsg(
-                                    foreignTable.getFullyQualifiedTableName(),
-                                    table.getFullyQualifiedTableName()));
+                    "Attempted to create many-to-one field '%s' in '%s' %s",
+                    fieldName,
+                    destination.getFullyQualifiedTypeName(),
+                    getErrorMsg(foreignTable.getFullyQualifiedTableName(),
+                            table.getFullyQualifiedTableName()));
 
             // Fields are stored in a field-keyed map first before adding them
             // to the builder.
@@ -368,11 +365,8 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
             final Table exportedKeyForeignTable = exportedKey.getForeignTable();
             Validate.notNull(
                     exportedKeyForeignTable,
-                    "Foreign key table for foreign key '"
-                            + exportedKey.getName()
-                            + "' in table '"
-                            + table.getFullyQualifiedTableName()
-                            + "' does not exist. One-to-many relationship not created");
+                    "Foreign key table for foreign key '%s' in table '%s' does not exist. One-to-many relationship not created",
+                    exportedKey.getName(), table.getFullyQualifiedTableName());
             if (exportedKeyForeignTable.isJoinTable()) {
                 continue;
             }
@@ -386,7 +380,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
                     foreignTable,
                     "Related table '%s' could not be found but was referenced by table '%s'",
                     exportedKeyForeignTable.getFullyQualifiedTableName(),
-                    table.getFullyQualifiedTableName() + "'");
+                    table.getFullyQualifiedTableName());
 
             if (isOneToOne(foreignTable,
                     foreignTable.getImportedKey(exportedKey.getName()))) {
@@ -451,14 +445,12 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
                     managedEntities, foreignTableName, foreignSchemaName);
             Validate.notNull(
                     fieldType,
-                    "Attempted to create one-to-one field '"
-                            + fieldName
-                            + "' in '"
-                            + destination.getFullyQualifiedTypeName()
-                            + "'"
-                            + getErrorMsg(importedKeyForeignTable
-                                    .getFullyQualifiedTableName(), table
-                                    .getFullyQualifiedTableName()));
+                    "Attempted to create one-to-one field '%s' in '%s' %s",
+                    fieldName,
+                    destination.getFullyQualifiedTypeName(),
+                    getErrorMsg(importedKeyForeignTable
+                            .getFullyQualifiedTableName(), table
+                            .getFullyQualifiedTableName()));
 
             // Fields are stored in a field-keyed map first before adding them
             // to the builder.
@@ -487,11 +479,8 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
             final Table exportedKeyForeignTable = exportedKey.getForeignTable();
             Validate.notNull(
                     exportedKeyForeignTable,
-                    "Foreign key table for foreign key '"
-                            + exportedKey.getName()
-                            + "' in table '"
-                            + table.getFullyQualifiedTableName()
-                            + "' does not exist. One-to-one relationship not created");
+                    "Foreign key table for foreign key '%s' in table '%s' does not exist. One-to-one relationship not created",
+                    exportedKey.getName(), table.getFullyQualifiedTableName());
             if (exportedKeyForeignTable.isJoinTable()) {
                 continue;
             }
@@ -503,11 +492,9 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
                     foreignSchemaName);
             Validate.notNull(
                     foreignTable,
-                    "Related table '"
-                            + exportedKeyForeignTable
-                                    .getFullyQualifiedTableName()
-                            + "' could not be found but has a foreign-key reference to table '"
-                            + table.getFullyQualifiedTableName() + "'");
+                    "Related table '%s' could not be found but has a foreign-key reference to table '%s'",
+                    exportedKeyForeignTable.getFullyQualifiedTableName(),
+                    table.getFullyQualifiedTableName());
             if (!isOneToOne(foreignTable,
                     foreignTable.getImportedKey(exportedKey.getName()))) {
                 continue;
@@ -523,13 +510,9 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
                     managedEntities, foreignTableName, foreignSchemaName);
             Validate.notNull(
                     fieldType,
-                    "Attempted to create one-to-one mapped-by field '"
-                            + fieldName
-                            + "' in '"
-                            + destination.getFullyQualifiedTypeName()
-                            + "'"
-                            + getErrorMsg(foreignTable
-                                    .getFullyQualifiedTableName()));
+                    "Attempted to create one-to-one mapped-by field '%s' in '%s' %s",
+                    fieldName, destination.getFullyQualifiedTypeName(),
+                    getErrorMsg(foreignTable.getFullyQualifiedTableName()));
 
             // Check for existence of same field - ROO-1691
             while (true) {
@@ -660,16 +643,17 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
     }
 
     private String getErrorMsg(final String tableName) {
-        return " but type for table '"
-                + tableName
-                + "' could not be found or is not database managed (not annotated with @RooDbManaged)";
+        return String
+                .format(" but type for table '%s' could not be found or is not database managed (not annotated with @RooDbManaged)",
+                        tableName);
     }
 
     private String getErrorMsg(final String foreignTableName,
             final String tableName) {
-        return getErrorMsg(foreignTableName) + " and table '" + tableName
-                + "' has a foreign-key reference to table '" + foreignTableName
-                + "'";
+        return getErrorMsg(foreignTableName)
+                + String.format(
+                        " and table '%s' has a foreign-key reference to table '%s'",
+                        tableName, foreignTableName);
     }
 
     private FieldMetadataBuilder getField(final JavaSymbolName fieldName,
@@ -677,8 +661,8 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
             final boolean includeNonPortable) {
         JavaType fieldType = column.getJavaType();
         Validate.notNull(fieldType,
-                "Field type for column '" + column.getName() + "' in table '"
-                        + tableName + "' is null");
+                "Field type for column '%s' in table '%s' is null",
+                column.getName(), tableName);
 
         // Check if field is a Boolean object and is required, then change to
         // boolean primitive
@@ -801,9 +785,8 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
             final Column foreignColumn = reference.getForeignColumn();
             Validate.notNull(
                     foreignColumn,
-                    "Foreign-key reference foreign column '"
-                            + reference.getForeignColumnName()
-                            + "' must not be null");
+                    "Foreign-key reference foreign column '%s' must not be null",
+                    reference.getForeignColumnName());
             joinColumnBuilder.addStringAttribute("referencedColumnName",
                     foreignColumn.getEscapedName());
         }
@@ -832,7 +815,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
             final Set<Reference> references, final JavaType fieldType) {
         final List<NestedAnnotationAttributeValue> arrayValues = new ArrayList<NestedAnnotationAttributeValue>();
 
-        // XXX DiSiD: Nullable attribute will have same value for each
+        // Nullable attribute will have same value for each
         // If some column not required, all JoinColumn will be nullable
         boolean nullable = false;
         for (final Reference reference : references) {
@@ -862,13 +845,9 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
                 managedEntities, owningSideTable);
         Validate.notNull(
                 element,
-                "Attempted to create many-to-many inverse-side field '"
-                        + fieldName
-                        + "' in '"
-                        + destination.getFullyQualifiedTypeName()
-                        + "'"
-                        + getErrorMsg(owningSideTable
-                                .getFullyQualifiedTableName()));
+                "Attempted to create many-to-many inverse-side field '%s' in '%s' %s",
+                fieldName, destination.getFullyQualifiedTypeName(),
+                getErrorMsg(owningSideTable.getFullyQualifiedTableName()));
 
         final List<JavaType> params = Arrays.asList(element);
         final JavaType fieldType = new JavaType(
@@ -895,13 +874,9 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
                 managedEntities, inverseSideTable);
         Validate.notNull(
                 element,
-                "Attempted to create many-to-many owning-side field '"
-                        + fieldName
-                        + "' in '"
-                        + destination.getFullyQualifiedTypeName()
-                        + "' "
-                        + getErrorMsg(inverseSideTable
-                                .getFullyQualifiedTableName()));
+                "Attempted to create many-to-many owning-side field '%s' in '%s' %s",
+                fieldName, destination.getFullyQualifiedTypeName(),
+                getErrorMsg(inverseSideTable.getFullyQualifiedTableName()));
 
         final List<JavaType> params = Arrays.asList(element);
         final JavaType fieldType = new JavaType(
@@ -970,14 +945,11 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
             final CascadeAction onUpdate, final CascadeAction onDelete) {
         final JavaType element = DbreTypeUtils.findTypeForTableName(
                 managedEntities, foreignTableName, foreignSchemaName);
-        Validate.notNull(element,
-                "Attempted to create one-to-many mapped-by field '"
-                        + fieldName
-                        + "' in '"
-                        + destination.getFullyQualifiedTypeName()
-                        + "'"
-                        + getErrorMsg(foreignTableName + "."
-                                + foreignSchemaName));
+        Validate.notNull(
+                element,
+                "Attempted to create one-to-many mapped-by field '%s' in '%s' %s",
+                fieldName, destination.getFullyQualifiedTypeName(),
+                getErrorMsg(foreignTableName + "." + foreignSchemaName));
 
         final JavaType fieldType = new JavaType(
                 SET.getFullyQualifiedTypeName(), 0, DataType.TYPE, null,

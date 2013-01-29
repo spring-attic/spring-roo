@@ -338,8 +338,8 @@ public class GwtOperationsImpl implements GwtOperations {
         final Iterable<URL> uris = OSGiUtils.findEntriesByPattern(
                 context.getBundleContext(), path);
         Validate.notNull(uris,
-                "Could not search bundles for resources for Ant Path '" + path
-                        + "'");
+                "Could not search bundles for resources for Ant Path '%s'",
+                path);
 
         for (final URL url : uris) {
             String fileName = url.getPath().substring(
@@ -666,10 +666,10 @@ public class GwtOperationsImpl implements GwtOperations {
         final List<Element> pluginElements = XmlUtils.findElements(
                 xPathExpression, XmlUtils.getConfiguration(getClass()));
         for (final Element pluginElement : pluginElements) {
-        	  plugins.add(new Plugin(pluginElement));
+            plugins.add(new Plugin(pluginElement));
         }
         projectOperations.addBuildPlugins(
-        		projectOperations.getFocusedModuleName(), plugins);
+                projectOperations.getFocusedModuleName(), plugins);
     }
 
     private void updateDependencies(final Element configuration) {
@@ -680,60 +680,60 @@ public class GwtOperationsImpl implements GwtOperations {
             dependencies.add(new Dependency(dependencyElement));
         }
         projectOperations.addDependencies(
-            projectOperations.getFocusedModuleName(), dependencies);
+                projectOperations.getFocusedModuleName(), dependencies);
     }
 
     /**
      * Updates the Eclipse plugin in the POM with the necessary GWT details
      */
     private void updateEclipsePlugin() {
-  		// Load the POM
-  		final String pom = getPomPath();
-  		final Document document = XmlUtils.readXml(fileManager
-  				.getInputStream(pom));
-  		final Element root = document.getDocumentElement();
+        // Load the POM
+        final String pom = getPomPath();
+        final Document document = XmlUtils.readXml(fileManager
+                .getInputStream(pom));
+        final Element root = document.getDocumentElement();
 
-  		// Add the GWT "buildCommand"
-  		final Element additionalBuildCommandsElement = XmlUtils
-  				.findFirstElement(MAVEN_ECLIPSE_PLUGIN
-  						+ "/configuration/additionalBuildcommands", root);
-  		Validate.notNull(additionalBuildCommandsElement,
-  				"additionalBuildcommands element of the maven-eclipse-plugin required");
-  		Element gwtBuildCommandElement = XmlUtils.findFirstElement(
-  				"buildCommand[name = '" + GWT_BUILD_COMMAND + "']",
-  				additionalBuildCommandsElement);
-  		if (gwtBuildCommandElement == null) {
-  			gwtBuildCommandElement = DomUtils.createChildElement(
-  					"buildCommand", additionalBuildCommandsElement, document);
-  			final Element nameElement = DomUtils.createChildElement("name",
-  					gwtBuildCommandElement, document);
-  			nameElement.setTextContent(GWT_BUILD_COMMAND);
-  		}
+        // Add the GWT "buildCommand"
+        final Element additionalBuildCommandsElement = XmlUtils
+                .findFirstElement(MAVEN_ECLIPSE_PLUGIN
+                        + "/configuration/additionalBuildcommands", root);
+        Validate.notNull(additionalBuildCommandsElement,
+                "additionalBuildcommands element of the maven-eclipse-plugin required");
+        Element gwtBuildCommandElement = XmlUtils.findFirstElement(
+                "buildCommand[name = '" + GWT_BUILD_COMMAND + "']",
+                additionalBuildCommandsElement);
+        if (gwtBuildCommandElement == null) {
+            gwtBuildCommandElement = DomUtils.createChildElement(
+                    "buildCommand", additionalBuildCommandsElement, document);
+            final Element nameElement = DomUtils.createChildElement("name",
+                    gwtBuildCommandElement, document);
+            nameElement.setTextContent(GWT_BUILD_COMMAND);
+        }
 
-  		// Add the GWT "projectnature"
-  		final Element additionalProjectNaturesElement = XmlUtils
-  				.findFirstElement(MAVEN_ECLIPSE_PLUGIN
-  						+ "/configuration/additionalProjectnatures", root);
-  		Validate.notNull(additionalProjectNaturesElement,
-  				"additionalProjectnatures element of the maven-eclipse-plugin required");
-  		Element gwtProjectNatureElement = null;
-  		List<Element> gwtProjectNatureElements = XmlUtils.findElements("projectnature",
-  				additionalProjectNaturesElement);
-  		for (Element element: gwtProjectNatureElements) {
-  			if (GWT_PROJECT_NATURE.equals(element.getTextContent())) {
-  				gwtProjectNatureElement = element;
-  				break;
-  			}
-  		}
-  		if (gwtProjectNatureElement == null) {
-  			gwtProjectNatureElement = new XmlElementBuilder("projectnature",
-  					document).setText(GWT_PROJECT_NATURE).build();
-  			additionalProjectNaturesElement
-  					.appendChild(gwtProjectNatureElement);
-  		}
+        // Add the GWT "projectnature"
+        final Element additionalProjectNaturesElement = XmlUtils
+                .findFirstElement(MAVEN_ECLIPSE_PLUGIN
+                        + "/configuration/additionalProjectnatures", root);
+        Validate.notNull(additionalProjectNaturesElement,
+                "additionalProjectnatures element of the maven-eclipse-plugin required");
+        Element gwtProjectNatureElement = null;
+        List<Element> gwtProjectNatureElements = XmlUtils.findElements(
+                "projectnature", additionalProjectNaturesElement);
+        for (Element element : gwtProjectNatureElements) {
+            if (GWT_PROJECT_NATURE.equals(element.getTextContent())) {
+                gwtProjectNatureElement = element;
+                break;
+            }
+        }
+        if (gwtProjectNatureElement == null) {
+            gwtProjectNatureElement = new XmlElementBuilder("projectnature",
+                    document).setText(GWT_PROJECT_NATURE).build();
+            additionalProjectNaturesElement
+                    .appendChild(gwtProjectNatureElement);
+        }
 
-  		fileManager.createOrUpdateTextFileIfRequired(pom,
-  				XmlUtils.nodeToString(document), false);
+        fileManager.createOrUpdateTextFileIfRequired(pom,
+                XmlUtils.nodeToString(document), false);
     }
 
     private void updateFile(final String sourceAntPath, String targetDirectory,
@@ -749,8 +749,8 @@ public class GwtOperationsImpl implements GwtOperations {
         final Iterable<URL> urls = OSGiUtils.findEntriesByPattern(
                 context.getBundleContext(), path);
         Validate.notNull(urls,
-                "Could not search bundles for resources for Ant Path '" + path
-                        + "'");
+                "Could not search bundles for resources for Ant Path '%s'",
+                path);
 
         for (final URL url : urls) {
             String fileName = url.getPath().substring(

@@ -135,10 +135,9 @@ public class MemberTypeAdditions {
             final ClassOrInterfaceTypeDetailsBuilder builder,
             final String methodName, final String methodCall,
             final boolean isStatic, final List<MethodParameter> methodParameters) {
-        Validate.notBlank(methodName, "Invalid method name '" + methodName
-                + "'");
-        Validate.notBlank(methodCall, "Invalid method signature '" + methodCall
-                + "'");
+        Validate.notBlank(methodName, "Invalid method name '%s'", methodName);
+        Validate.notBlank(methodCall, "Invalid method signature '%s'",
+                methodCall);
         classOrInterfaceDetailsBuilder = builder;
         this.methodCall = methodCall;
         this.methodName = methodName;

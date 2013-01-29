@@ -67,8 +67,10 @@ public class EditorMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
             final MethodMetadata identifierAccessorMethod,
             final MethodMetadata findMethod) {
         super(identifier, aspectName, governorPhysicalTypeMetadata);
-        Validate.isTrue(isValid(identifier), "Metadata identification string '"
-                + identifier + "' does not appear to be a valid");
+        Validate.isTrue(
+                isValid(identifier),
+                "Metadata identification string '%s' does not appear to be a valid",
+                identifier);
         Validate.notNull(javaType, "Java type required");
         Validate.notNull(idType, "Identifier field metadata required");
         Validate.notNull(identifierAccessorMethod,
@@ -101,11 +103,9 @@ public class EditorMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
         final FieldMetadata userField = governorTypeDetails.getField(fieldName);
         final JavaType fieldType = SpringJavaType.SIMPLE_TYPE_CONVERTER;
         if (userField != null) {
-            Validate.isTrue(
-                    userField.getFieldType().equals(fieldType),
-                    "Field '" + fieldName + "' on '" + destination
-                            + "' must be of type '"
-                            + fieldType.getNameIncludingTypeParameters() + "'");
+            Validate.isTrue(userField.getFieldType().equals(fieldType),
+                    "Field '%s' on '%s' must be of type '%s'", fieldName,
+                    destination, fieldType.getNameIncludingTypeParameters());
             return new FieldMetadataBuilder(userField);
         }
 
@@ -123,11 +123,9 @@ public class EditorMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
         final MethodMetadata userMethod = getGovernorMethod(methodName,
                 parameterTypes);
         if (userMethod != null) {
-            Validate.isTrue(
-                    userMethod.getReturnType().equals(returnType),
-                    "Method '" + methodName + "' on '" + destination
-                            + "' must return '"
-                            + returnType.getNameIncludingTypeParameters() + "'");
+            Validate.isTrue(userMethod.getReturnType().equals(returnType),
+                    "Method '%s' on '%s' must return '%s'", methodName,
+                    destination, returnType.getNameIncludingTypeParameters());
             return new MethodMetadataBuilder(userMethod);
         }
 
@@ -167,11 +165,9 @@ public class EditorMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
         final MethodMetadata userMethod = getGovernorMethod(methodName,
                 parameterType);
         if (userMethod != null) {
-            Validate.isTrue(
-                    userMethod.getReturnType().equals(returnType),
-                    "Method '" + methodName + "' on '" + destination
-                            + "' must return '"
-                            + returnType.getNameIncludingTypeParameters() + "'");
+            Validate.isTrue(userMethod.getReturnType().equals(returnType),
+                    "Method '%s' on '%s' must return '%s'", methodName,
+                    destination, returnType.getNameIncludingTypeParameters());
             return new MethodMetadataBuilder(userMethod);
         }
 

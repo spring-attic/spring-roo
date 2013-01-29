@@ -69,8 +69,8 @@ public class DefaultMetadataDependencyRegistry implements
     public void deregisterDependencies(final String downstreamDependency) {
         Validate.isTrue(
                 MetadataIdentificationUtils.isValid(downstreamDependency),
-                "Downstream dependency is an invalid metadata identification string ('"
-                        + downstreamDependency + "')");
+                "Downstream dependency is an invalid metadata identification string ('%s')",
+                downstreamDependency);
 
         // Acquire the keys to delete
         final Set<String> upstream = downstreamKeyed.get(downstreamDependency);
@@ -90,12 +90,12 @@ public class DefaultMetadataDependencyRegistry implements
             final String downstreamDependency) {
         Validate.isTrue(
                 MetadataIdentificationUtils.isValid(upstreamDependency),
-                "Upstream dependency is an invalid metadata identification string ('"
-                        + upstreamDependency + "')");
+                "Upstream dependency is an invalid metadata identification string ('%s')",
+                upstreamDependency);
         Validate.isTrue(
                 MetadataIdentificationUtils.isValid(downstreamDependency),
-                "Downstream dependency is an invalid metadata identification string ('"
-                        + downstreamDependency + "')");
+                "Downstream dependency is an invalid metadata identification string ('%s')",
+                downstreamDependency);
 
         // Maintain the upstream-keyed map, if it even exists
         final Set<String> downstream = upstreamKeyed.get(upstreamDependency);
@@ -113,8 +113,8 @@ public class DefaultMetadataDependencyRegistry implements
     public Set<String> getDownstream(final String upstreamDependency) {
         Validate.isTrue(
                 MetadataIdentificationUtils.isValid(upstreamDependency),
-                "Upstream dependency is an invalid metadata identification string ('"
-                        + upstreamDependency + "')");
+                "Upstream dependency is an invalid metadata identification string ('%s')",
+                upstreamDependency);
 
         final Set<String> downstream = upstreamKeyed.get(upstreamDependency);
         if (downstream == null) {
@@ -128,8 +128,8 @@ public class DefaultMetadataDependencyRegistry implements
     public Set<String> getUpstream(final String downstreamDependency) {
         Validate.isTrue(
                 MetadataIdentificationUtils.isValid(downstreamDependency),
-                "Downstream dependency is an invalid metadata identification string ('"
-                        + downstreamDependency + "')");
+                "Downstream dependency is an invalid metadata identification string ('%s')",
+                downstreamDependency);
 
         final Set<String> upstream = downstreamKeyed.get(downstreamDependency);
         if (upstream == null) {
@@ -143,15 +143,16 @@ public class DefaultMetadataDependencyRegistry implements
             final String downstreamDependency) {
         Validate.isTrue(
                 MetadataIdentificationUtils.isValid(upstreamDependency),
-                "Upstream dependency is an invalid metadata identification string ('"
-                        + upstreamDependency + "')");
+                "Upstream dependency is an invalid metadata identification string ('%s')",
+                upstreamDependency);
         Validate.isTrue(
                 MetadataIdentificationUtils.isValid(downstreamDependency),
-                "Downstream dependency is an invalid metadata identification string ('"
-                        + downstreamDependency + "')");
-        Validate.isTrue(!upstreamDependency.equals(downstreamDependency),
-                "Upstream dependency cannot be the same as the downstream dependency ('"
-                        + upstreamDependency + "')");
+                "Downstream dependency is an invalid metadata identification string ('%s')",
+                downstreamDependency);
+        Validate.isTrue(
+                !upstreamDependency.equals(downstreamDependency),
+                "Upstream dependency cannot be the same as the downstream dependency ('%s')",
+                downstreamDependency);
 
         // The simplest possible outcome is the relationship already exists, so
         // quickly return in that case
@@ -274,8 +275,8 @@ public class DefaultMetadataDependencyRegistry implements
             final String downstreamDependency) {
         Validate.isTrue(
                 isValidDependency(upstreamDependency, downstreamDependency),
-                "Invalid dependency between upstream '" + upstreamDependency
-                        + "' and downstream '" + downstreamDependency + "'");
+                "Invalid dependency between upstream '%s' and downstream '%s'",
+                upstreamDependency, downstreamDependency);
 
         // Maintain the upstream-keyed map
         Set<String> downstream = upstreamKeyed.get(upstreamDependency);

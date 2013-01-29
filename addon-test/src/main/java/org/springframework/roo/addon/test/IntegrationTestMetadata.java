@@ -113,8 +113,10 @@ public class IntegrationTestMetadata extends
             final boolean hasEmbeddedIdentifier,
             final boolean entityHasSuperclass, final boolean isGaeEnabled) {
         super(identifier, aspectName, governorPhysicalTypeMetadata);
-        Validate.isTrue(isValid(identifier), "Metadata identification string '"
-                + identifier + "' does not appear to be a valid");
+        Validate.isTrue(
+                isValid(identifier),
+                "Metadata identification string '%s' does not appear to be a valid",
+                identifier);
         Validate.notNull(annotationValues, "Annotation values required");
         Validate.notNull(dataOnDemandMetadata,
                 "Data on demand metadata required");
@@ -169,10 +171,9 @@ public class IntegrationTestMetadata extends
             Validate.isTrue(
                     helperField.getFieldType().getFullyQualifiedTypeName()
                             .equals(helperType.getFullyQualifiedTypeName()),
-                    "Field 'helper' on '"
-                            + destination.getFullyQualifiedTypeName()
-                            + "' must be of type '"
-                            + helperType.getFullyQualifiedTypeName() + "'");
+                    "Field 'helper' on '%s' must be of type '%s'",
+                    destination.getFullyQualifiedTypeName(),
+                    helperType.getFullyQualifiedTypeName());
         }
         else {
             // Add the field via the ITD
@@ -192,9 +193,8 @@ public class IntegrationTestMetadata extends
             Validate.notNull(
                     MemberFindingUtils.getAnnotationOfType(
                             setUpMethod.getAnnotations(), BEFORE_CLASS),
-                    "Method 'setUp' on '"
-                            + destination.getFullyQualifiedTypeName()
-                            + "' must be annotated with @BeforeClass");
+                    "Method 'setUp' on '%s' must be annotated with @BeforeClass",
+                    destination.getFullyQualifiedTypeName());
         }
         else {
             // Add the method via the ITD
@@ -221,9 +221,8 @@ public class IntegrationTestMetadata extends
             Validate.notNull(
                     MemberFindingUtils.getAnnotationOfType(
                             tearDownMethod.getAnnotations(), AFTER_CLASS),
-                    "Method 'tearDown' on '"
-                            + destination.getFullyQualifiedTypeName()
-                            + "' must be annotated with @AfterClass");
+                    "Method 'tearDown' on '%s' must be annotated with @AfterClass",
+                    destination.getFullyQualifiedTypeName());
         }
         else {
             // Add the method via the ITD
@@ -294,18 +293,15 @@ public class IntegrationTestMetadata extends
         final FieldMetadata field = governorTypeDetails
                 .getField(new JavaSymbolName("dod"));
         if (field != null) {
-            Validate.isTrue(
-                    field.getFieldType().equals(dodGovernor),
-                    "Field 'dod' on '"
-                            + destination.getFullyQualifiedTypeName()
-                            + "' must be of type '"
-                            + dodGovernor.getFullyQualifiedTypeName() + "'");
+            Validate.isTrue(field.getFieldType().equals(dodGovernor),
+                    "Field 'dod' on '%s' must be of type '%s'",
+                    destination.getFullyQualifiedTypeName(),
+                    dodGovernor.getFullyQualifiedTypeName());
             Validate.notNull(
                     MemberFindingUtils.getAnnotationOfType(
                             field.getAnnotations(), AUTOWIRED),
-                    "Field 'dod' on '"
-                            + destination.getFullyQualifiedTypeName()
-                            + "' must be annotated with @Autowired");
+                    "Field 'dod' on '%s' must be annotated with @Autowired",
+                    destination.getFullyQualifiedTypeName());
         }
         else {
             // Add the field via the ITD

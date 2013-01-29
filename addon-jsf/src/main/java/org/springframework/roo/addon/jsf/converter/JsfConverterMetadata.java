@@ -76,8 +76,8 @@ public class JsfConverterMetadata extends
             final MemberTypeAdditions findMethod,
             final MethodMetadata identifierAccessor) {
         super(identifier, aspectName, governorPhysicalTypeMetadata);
-        Validate.isTrue(isValid(identifier), "Metadata identification string '"
-                + identifier + "' is invalid");
+        Validate.isTrue(isValid(identifier),
+                "Metadata identification string '%s' is invalid", identifier);
         Validate.notNull(annotationValues, "Annotation values required");
 
         if (!isValid()) {

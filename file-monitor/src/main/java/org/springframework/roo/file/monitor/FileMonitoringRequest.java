@@ -18,7 +18,7 @@ public class FileMonitoringRequest extends MonitoringRequest {
     public FileMonitoringRequest(final File file,
             final Collection<FileOperation> notifyOn) {
         super(file, notifyOn);
-        Validate.isTrue(file.isFile(), "File '" + file + "' must be a file");
+        Validate.isTrue(file.isFile(), "File '%s' must be a file", file);
     }
 
     @Override

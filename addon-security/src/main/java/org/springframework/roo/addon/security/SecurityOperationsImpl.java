@@ -135,7 +135,7 @@ public class SecurityOperationsImpl implements SecurityOperations {
         final Element viewController = DomUtils.findFirstElementByName(
                 "mvc:view-controller", webConfig);
         Validate.notNull(viewController,
-                "Could not find mvc:view-controller in " + webConfig);
+                "Could not find mvc:view-controller in %s", webConfig);
         viewController.getParentNode()
                 .insertBefore(
                         new XmlElementBuilder("mvc:view-controller",

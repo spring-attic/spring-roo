@@ -671,11 +671,11 @@ public class DbreDatabaseListenerImpl extends
             final Database database) {
         // Update the attributes of the existing JPA-related annotation
         final AnnotationMetadata jpaAnnotation = getJpaAnnotation(managedEntity);
-        Validate.validState(jpaAnnotation != null, "Neither @"
-                + ROO_JPA_ACTIVE_RECORD.getSimpleTypeName() + " nor @"
-                + ROO_JPA_ENTITY.getSimpleTypeName()
-                + " found on existing DBRE-managed entity "
-                + managedEntity.getName().getFullyQualifiedTypeName());
+        Validate.validState(jpaAnnotation != null,
+                "Neither @%s nor @%s found on existing DBRE-managed entity %s",
+                ROO_JPA_ACTIVE_RECORD.getSimpleTypeName(), ROO_JPA_ENTITY
+                        .getSimpleTypeName(), managedEntity.getName()
+                        .getFullyQualifiedTypeName());
 
         // Find table in database using 'table' and 'schema' attributes from the
         // JPA annotation

@@ -30,10 +30,9 @@ public class EnumAttributeValue extends
     public Enum<?> getAsEnum() throws ClassNotFoundException {
         final Class<?> enumType = getClass().getClassLoader().loadClass(
                 value.getType().getFullyQualifiedTypeName());
-        Validate.isTrue(
-                enumType.isEnum(),
-                "Should have obtained an Enum but failed for type '"
-                        + enumType.getName() + "'");
+        Validate.isTrue(enumType.isEnum(),
+                "Should have obtained an Enum but failed for type '%s'",
+                enumType.getName());
         final String name = value.getField().getSymbolName();
         return Enum.valueOf((Class<? extends Enum>) enumType, name);
     }

@@ -66,14 +66,14 @@ public final class FileUtils {
             final File destination, final boolean deleteDestinationOnExit) {
         Validate.notNull(source, "Source directory required");
         Validate.notNull(destination, "Destination directory required");
-        Validate.isTrue(source.exists(), "Source directory '" + source
-                + "' must exist");
-        Validate.isTrue(source.isDirectory(), "Source directory '" + source
-                + "' must be a directory");
+        Validate.isTrue(source.exists(), "Source directory '%s' must exist",
+                source);
+        Validate.isTrue(source.isDirectory(),
+                "Source directory '%s' must be a directory", source);
         if (destination.exists()) {
             Validate.isTrue(destination.isDirectory(),
-                    "Destination directory '" + destination
-                            + "' must be a directory");
+                    "Destination directory '%s' must be a directory",
+                    destination);
         }
         else {
             destination.mkdirs();
@@ -187,8 +187,9 @@ public final class FileUtils {
             final String filename) {
         final InputStream inputStream = loadingClass
                 .getResourceAsStream(filename);
-        Validate.notNull(inputStream, "Could not locate '" + filename
-                + "' in classpath of " + loadingClass.getName());
+        Validate.notNull(inputStream,
+                "Could not locate '%s' in classpath of %s", filename,
+                loadingClass.getName());
         return inputStream;
     }
 

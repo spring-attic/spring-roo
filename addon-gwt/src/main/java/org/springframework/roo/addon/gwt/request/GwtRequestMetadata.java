@@ -47,8 +47,8 @@ public class GwtRequestMetadata extends AbstractMetadataItem {
      */
     public GwtRequestMetadata(final String id, final String requestTypeContents) {
         super(id);
-        Validate.notBlank(requestTypeContents, "Invalid contents '"
-                + requestTypeContents + "'");
+        Validate.notBlank(requestTypeContents, "Invalid contents '%s'",
+                requestTypeContents);
         this.requestTypeContents = requestTypeContents;
     }
 

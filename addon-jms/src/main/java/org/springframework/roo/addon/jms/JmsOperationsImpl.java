@@ -113,11 +113,9 @@ public class JmsOperationsImpl implements JmsOperations {
         final String physicalLocationCanonicalPath = getPhysicalLocationCanonicalPath(declaredByMetadataId);
 
         // Check the file doesn't already exist
-        Validate.isTrue(
-                !fileManager.exists(physicalLocationCanonicalPath),
-                projectOperations.getPathResolver().getFriendlyName(
-                        physicalLocationCanonicalPath)
-                        + " already exists");
+        Validate.isTrue(!fileManager.exists(physicalLocationCanonicalPath),
+                "%s already exists", projectOperations.getPathResolver()
+                        .getFriendlyName(physicalLocationCanonicalPath));
 
         typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
 
@@ -253,8 +251,9 @@ public class JmsOperationsImpl implements JmsOperations {
 
         final ClassOrInterfaceTypeDetails targetTypeDetails = typeLocationService
                 .getTypeDetails(targetType);
-        Validate.isTrue(targetTypeDetails != null, "Cannot locate source for '"
-                + targetType.getFullyQualifiedTypeName() + "'");
+        Validate.isTrue(targetTypeDetails != null,
+                "Cannot locate source for '%s'",
+                targetType.getFullyQualifiedTypeName());
 
         final String declaredByMetadataId = targetTypeDetails
                 .getDeclaredByMetadataId();

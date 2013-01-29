@@ -58,12 +58,11 @@ public class DeleteDirectory implements UndoableOperation {
         Validate.notNull(undoManager, "Undo manager required");
         Validate.notNull(directory, "Actual file required");
         Validate.notNull(filenameResolver, "Filename resolver required");
-        Validate.isTrue(directory.exists(), "File '" + directory
-                + "' must exist");
-        Validate.isTrue(directory.isDirectory(), "Path '" + directory
-                + "' must be a directory (not a file)");
-        Validate.isTrue(TEMP_DIRECTORY.isDirectory(), "Temporary directory '"
-                + TEMP_DIRECTORY + "' is not a directory");
+        Validate.isTrue(directory.exists(), "File '%s' must exist", directory);
+        Validate.isTrue(directory.isDirectory(),
+                "Path '%s' must be a directory (not a file)", directory);
+        Validate.isTrue(TEMP_DIRECTORY.isDirectory(),
+                "Temporary directory '%s' is not a directory", TEMP_DIRECTORY);
         actual = directory;
         backup = new File(TEMP_DIRECTORY, "tmp_" + new Date().getTime()
                 + "_dir");

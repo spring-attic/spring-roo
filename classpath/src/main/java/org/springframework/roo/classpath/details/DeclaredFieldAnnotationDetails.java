@@ -49,14 +49,10 @@ public class DeclaredFieldAnnotationDetails {
         if (removeAnnotation) {
             Validate.isTrue(
                     fieldAnnotation.getAttributeNames().isEmpty(),
-                    "Field annotation '@"
-                            + fieldAnnotation.getAnnotationType()
-                                    .getSimpleTypeName()
-                            + "' (on the target field '"
-                            + field.getFieldType().getFullyQualifiedTypeName()
-                            + "."
-                            + field.getFieldName().getSymbolName()
-                            + ") must not have any attributes when requesting its removal");
+                    "Field annotation '@%s' (on target field %s.%s) must not have any attributes when requesting its removal",
+                    fieldAnnotation.getAnnotationType().getSimpleTypeName(),
+                    field.getFieldType().getFullyQualifiedTypeName(), field
+                            .getFieldName().getSymbolName());
         }
         this.field = field;
         this.fieldAnnotation = fieldAnnotation;

@@ -108,8 +108,10 @@ public class WebFinderMetadata extends
             final SortedMap<JavaType, JavaTypeMetadataDetails> specialDomainTypes,
             final Set<FinderMetadataDetails> dynamicFinderMethods) {
         super(identifier, aspectName, governorPhysicalTypeMetadata);
-        Validate.isTrue(isValid(identifier), "Metadata identification string '"
-                + identifier + "' does not appear to be a valid");
+        Validate.isTrue(
+                isValid(identifier),
+                "Metadata identification string '%s' does not appear to be a valid",
+                identifier);
         Validate.notNull(annotationValues, "Annotation values required");
         Validate.notNull(specialDomainTypes, "Special domain type map required");
         Validate.notNull(dynamicFinderMethods,
@@ -131,8 +133,8 @@ public class WebFinderMetadata extends
 
         javaTypeMetadataHolder = specialDomainTypes.get(formBackingType);
         Validate.notNull(javaTypeMetadataHolder,
-                "Metadata holder required for form backing type: "
-                        + formBackingType);
+                "Metadata holder required for form backing type %s",
+                formBackingType);
 
         for (final FinderMetadataDetails finder : dynamicFinderMethods) {
             builder.addMethod(getFinderFormMethod(finder));

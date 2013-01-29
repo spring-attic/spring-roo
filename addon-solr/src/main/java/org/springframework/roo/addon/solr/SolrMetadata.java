@@ -97,8 +97,8 @@ public class SolrMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
         super(identifier, aspectName, governorPhysicalTypeMetadata);
         Validate.notNull(annotationValues,
                 "Solr search annotation values required");
-        Validate.isTrue(isValid(identifier), "Metadata identification string '"
-                + identifier + "' is invalid");
+        Validate.isTrue(isValid(identifier),
+                "Metadata identification string '%s' is invalid", identifier);
         Validate.notNull(identifierAccessor,
                 "Persistence identifier method required");
         Validate.notNull(accessorDetails, "Public accessors requred");

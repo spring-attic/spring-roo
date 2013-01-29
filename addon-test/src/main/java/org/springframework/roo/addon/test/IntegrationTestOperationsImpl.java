@@ -70,8 +70,8 @@ public class IntegrationTestOperationsImpl implements IntegrationTestOperations 
     private ClassOrInterfaceTypeDetails getEntity(final JavaType entity) {
         final ClassOrInterfaceTypeDetails cid = typeLocationService
                 .getTypeDetails(entity);
-        Validate.notNull(cid, "Java source code details unavailable for type "
-                + cid);
+        Validate.notNull(cid,
+                "Java source code details unavailable for type %s", cid);
         return cid;
     }
 
@@ -93,8 +93,8 @@ public class IntegrationTestOperationsImpl implements IntegrationTestOperations 
         // Verify the requested entity actually exists as a class and is not
         // abstract
         final ClassOrInterfaceTypeDetails cid = getEntity(entity);
-        Validate.isTrue(!Modifier.isAbstract(cid.getModifier()), "Type "
-                + entity.getFullyQualifiedTypeName() + " is abstract");
+        Validate.isTrue(!Modifier.isAbstract(cid.getModifier()),
+                "Type %s is abstract", entity.getFullyQualifiedTypeName());
 
         final LogicalPath path = PhysicalTypeIdentifier.getPath(cid
                 .getDeclaredByMetadataId());

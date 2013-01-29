@@ -97,10 +97,9 @@ public class JavaParserAnnotationMetadataBuilder implements
                 break;
             }
         }
-        Validate.isTrue(
-                !foundExisting,
-                "Found an existing annotation for type '"
-                        + annotation.getAnnotationType() + "'");
+        Validate.isTrue(!foundExisting,
+                "Found an existing annotation for type '%s'",
+                annotation.getAnnotationType());
 
         // Import the annotation type, if needed
         final NameExpr nameToUse = JavaParserUtils.importTypeIfRequired(
@@ -114,8 +113,9 @@ public class JavaParserAnnotationMetadataBuilder implements
                 .getAttributeNames()) {
             final AnnotationAttributeValue<?> value = annotation
                     .getAttribute(attributeName);
-            Validate.notNull(value, "Unable to acquire value '" + attributeName
-                    + "' from annotation");
+            Validate.notNull(value,
+                    "Unable to acquire value '%s' from annotation",
+                    attributeName);
             final MemberValuePair memberValuePair = convert(value);
             // Validate.notNull(memberValuePair,
             // "Member value pair should have been set");
@@ -483,19 +483,20 @@ public class JavaParserAnnotationMetadataBuilder implements
 
         if (expression instanceof CharLiteralExpr) {
             final String value = ((CharLiteralExpr) expression).getValue();
-            Validate.isTrue(value.length() == 1,
-                    "Expected a char expression, but instead received '"
-                            + value + "' for attribute '" + annotationName
-                            + "'");
+            Validate.isTrue(
+                    value.length() == 1,
+                    "Expected a char expression, but instead received '%s' for attribute '%s'",
+                    value, annotationName);
             final char c = value.charAt(0);
             return new CharAttributeValue(annotationName, c);
         }
 
         if (expression instanceof LongLiteralExpr) {
             String value = ((LongLiteralExpr) expression).getValue();
-            Validate.isTrue(value.toUpperCase().endsWith("L"),
-                    "Expected long literal expression '" + value
-                            + "' to end in 'l' or 'L'");
+            Validate.isTrue(
+                    value.toUpperCase().endsWith("L"),
+                    "Expected long literal expression '%s' to end in 'l' or 'L'",
+                    value);
             value = value.substring(0, value.length() - 1);
             final long l = new Long(value);
             return new LongAttributeValue(annotationName, l);

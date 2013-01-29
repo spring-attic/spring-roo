@@ -29,8 +29,8 @@ public abstract class AbstractMetadataCache implements MetadataCache {
     public void evict(final String metadataIdentificationString) {
         Validate.isTrue(MetadataIdentificationUtils
                 .isIdentifyingInstance(metadataIdentificationString),
-                "Only metadata instances can be cached (not '"
-                        + metadataIdentificationString + "')");
+                "Only metadata instances can be cached (not '%s')",
+                metadataIdentificationString);
         map.remove(metadataIdentificationString);
     }
 
@@ -46,8 +46,8 @@ public abstract class AbstractMetadataCache implements MetadataCache {
             final String metadataIdentificationString) {
         Validate.isTrue(MetadataIdentificationUtils
                 .isIdentifyingInstance(metadataIdentificationString),
-                "Only metadata instances can be cached (not '"
-                        + metadataIdentificationString + "')");
+                "Only metadata instances can be cached (not '%s')",
+                metadataIdentificationString);
         return map.get(metadataIdentificationString);
     }
 

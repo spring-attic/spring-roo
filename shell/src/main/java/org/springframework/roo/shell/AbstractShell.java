@@ -350,17 +350,16 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher
     public File getHome() {
         final String rooHome = getHomeAsString();
         final File f = new File(rooHome);
-        Validate.isTrue(!f.exists() || f.exists() && f.isDirectory(), "Path '"
-                + f.getAbsolutePath()
-                + "' must be a directory, or it must not exist");
+        Validate.isTrue(!f.exists() || f.exists() && f.isDirectory(),
+                "Path '%s' must be a directory, or it must not exist",
+                f.getAbsolutePath());
         if (!f.exists()) {
             f.mkdirs();
         }
         Validate.isTrue(
                 f.exists() && f.isDirectory(),
-                "Path '"
-                        + f.getAbsolutePath()
-                        + "' is not a directory; please specify roo.home system property correctly");
+                "Path '%s' is not a directory; please specify roo.home system property correctly",
+                f.getAbsolutePath());
         return f;
     }
 
@@ -435,14 +434,16 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher
             final Collection<URL> urls = findResources(script.getName());
 
             // Handle search failure
-            Validate.notNull(urls,
-                    "Unexpected error looking for '" + script.getName() + "'");
+            Validate.notNull(urls, "Unexpected error looking for '%s'",
+                    script.getName());
 
             // Handle the search being OK but the file simply not being present
-            Validate.notEmpty(urls, "Script '" + script
-                    + "' not found on disk or in classpath");
-            Validate.isTrue(urls.size() == 1, "More than one '" + script
-                    + "' was found in the classpath; unable to continue");
+            Validate.notEmpty(urls,
+                    "Script '%s' not found on disk or in classpath", script);
+            Validate.isTrue(
+                    urls.size() == 1,
+                    "More than one '%s' was found in the classpath; unable to continue",
+                    script);
             try {
                 return urls.iterator().next().openStream();
             }

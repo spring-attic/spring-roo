@@ -27,8 +27,9 @@ public class StaticFieldConverterImpl implements StaticFieldConverter {
     public void add(final Class<?> clazz) {
         Validate.notNull(clazz,
                 "A class to provide conversion services is required");
-        Validate.isTrue(fields.get(clazz) == null, "Class '" + clazz
-                + "' is already registered for completion services");
+        Validate.isTrue(fields.get(clazz) == null,
+                "Class '%s' is already registered for completion services",
+                clazz);
         final Map<String, Field> ffields = new HashMap<String, Field>();
         for (final Field field : clazz.getFields()) {
             final int modifier = field.getModifiers();
@@ -36,8 +37,8 @@ public class StaticFieldConverterImpl implements StaticFieldConverter {
                 ffields.put(field.getName(), field);
             }
         }
-        Validate.notEmpty(ffields, "Zero public static fields accessible in '"
-                + clazz + "'");
+        Validate.notEmpty(ffields,
+                "Zero public static fields accessible in '%s'", clazz);
         fields.put(clazz, ffields);
     }
 

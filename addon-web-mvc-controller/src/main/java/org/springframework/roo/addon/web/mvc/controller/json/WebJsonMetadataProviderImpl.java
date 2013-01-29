@@ -141,8 +141,8 @@ public class WebJsonMetadataProviderImpl extends
                 .get(PhysicalTypeIdentifier.createIdentifier(jsonObject,
                         typeLocationService.getTypePath(jsonObject)));
         Validate.notNull(backingObjectPhysicalTypeMetadata,
-                "Unable to obtain physical type metadata for type "
-                        + jsonObject.getFullyQualifiedTypeName());
+                "Unable to obtain physical type metadata for type %s",
+                jsonObject.getFullyQualifiedTypeName());
         final MemberDetails formBackingObjectMemberDetails = getMemberDetails(backingObjectPhysicalTypeMetadata);
         final MemberHoldingTypeDetails backingMemberHoldingTypeDetails = MemberFindingUtils
                 .getMostConcreteMemberHoldingTypeDetailsWithTag(

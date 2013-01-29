@@ -262,8 +262,8 @@ public class JsfManagedBeanMetadataProviderImpl extends
                 .getPath(physicalTypeIdentifier);
         final PluralMetadata pluralMetadata = (PluralMetadata) metadataService
                 .get(PluralMetadata.createIdentifier(entity, path));
-        Validate.notNull(pluralMetadata, "Could not determine plural for '"
-                + entity.getSimpleTypeName() + "'");
+        Validate.notNull(pluralMetadata, "Could not determine plural for '%s'",
+                entity.getSimpleTypeName());
         final String plural = pluralMetadata.getPlural();
 
         final Map<MethodMetadataCustomDataKey, MemberTypeAdditions> crudAdditions = getCrudAdditions(

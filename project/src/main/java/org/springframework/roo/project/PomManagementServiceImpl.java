@@ -205,9 +205,9 @@ public class PomManagementServiceImpl implements PomManagementService {
                             .getFirstDirectory(pathToChangedPom));
                     final Pom pom = pomFactory.getInstance(rootElement,
                             pathToChangedPom, moduleName);
-                    Validate.notNull(pom, "POM is null for module = '"
-                            + moduleName + "' and path = '" + pathToChangedPom
-                            + "'");
+                    Validate.notNull(pom,
+                            "POM is null for module '%s' and path '%s'",
+                            moduleName, pathToChangedPom);
                     pomMap.put(pathToChangedPom, pom);
                     newPoms.add(pom);
                     iter.remove();

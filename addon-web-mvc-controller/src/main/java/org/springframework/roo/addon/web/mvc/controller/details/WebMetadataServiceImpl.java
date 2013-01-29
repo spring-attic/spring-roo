@@ -299,9 +299,10 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 
         final ClassOrInterfaceTypeDetails javaTypeDetails = typeLocationService
                 .getTypeDetails(formBackingType);
-        Validate.notNull(formBackingType,
-                "Class or interface type details isn't available for type '"
-                        + formBackingType + "'");
+        Validate.notNull(
+                formBackingType,
+                "Class or interface type details isn't available for type '%s'",
+                formBackingType);
         final LogicalPath logicalPath = PhysicalTypeIdentifier
                 .getPath(javaTypeDetails.getDeclaredByMetadataId());
         final String finderMetadataKey = FinderMetadata.createIdentifier(
@@ -454,10 +455,9 @@ public class WebMetadataServiceImpl implements WebMetadataService {
     public MemberDetails getMemberDetails(final JavaType javaType) {
         final ClassOrInterfaceTypeDetails cid = typeLocationService
                 .getTypeDetails(javaType);
-        Validate.notNull(
-                cid,
-                "Unable to obtain physical type metadata for type "
-                        + javaType.getFullyQualifiedTypeName());
+        Validate.notNull(cid,
+                "Unable to obtain physical type metadata for type %s",
+                javaType.getFullyQualifiedTypeName());
         return memberDetailsScanner.getMemberDetails(
                 WebMetadataServiceImpl.class.getName(), cid);
     }
@@ -469,9 +469,10 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 
         final ClassOrInterfaceTypeDetails javaTypeDetails = typeLocationService
                 .getTypeDetails(javaType);
-        Validate.notNull(javaType,
-                "Class or interface type details isn't available for type '"
-                        + javaType + "'");
+        Validate.notNull(
+                javaTypeDetails,
+                "Class or interface type details isn't available for type '%s'",
+                javaType);
         final LogicalPath logicalPath = PhysicalTypeIdentifier
                 .getPath(javaTypeDetails.getDeclaredByMetadataId());
         final String pluralMetadataKey = PluralMetadata.createIdentifier(
@@ -497,8 +498,8 @@ public class WebMetadataServiceImpl implements WebMetadataService {
             final String metadataIdentificationString) {
         Validate.notNull(baseType, "Java type required");
         Validate.notNull(baseTypeDetails, "Member details required");
-        Validate.isTrue(isApplicationType(baseType), "The type " + baseType
-                + " does not belong to this application");
+        Validate.isTrue(isApplicationType(baseType),
+                "The type %s does not belong to this application", baseType);
 
         final SortedMap<JavaType, JavaTypeMetadataDetails> specialTypes = new TreeMap<JavaType, JavaTypeMetadataDetails>();
         specialTypes.put(

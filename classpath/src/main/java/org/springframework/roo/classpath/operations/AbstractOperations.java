@@ -61,8 +61,8 @@ public abstract class AbstractOperations {
         final Iterable<URL> urls = OSGiUtils.findEntriesByPattern(
                 context.getBundleContext(), path);
         Validate.notNull(urls,
-                "Could not search bundles for resources for Ant Path '" + path
-                        + "'");
+                "Could not search bundles for resources for Ant Path '%s'",
+                path);
         for (final URL url : urls) {
             final String fileName = url.getPath().substring(
                     url.getPath().lastIndexOf("/") + 1);

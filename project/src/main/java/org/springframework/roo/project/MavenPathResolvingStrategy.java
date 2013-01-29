@@ -77,8 +77,8 @@ public class MavenPathResolvingStrategy extends AbstractPathResolvingStrategy {
     public LogicalPath getFocusedPath(final Path path) {
         final PhysicalPath physicalPath = pomManagementService
                 .getFocusedModule().getPhysicalPath(path);
-        Validate.notNull(physicalPath, "Physical path for '" + path.name()
-                + "' not found");
+        Validate.notNull(physicalPath, "Physical path for '%s' not found",
+                path.name());
         return physicalPath.getLogicalPath();
     }
 

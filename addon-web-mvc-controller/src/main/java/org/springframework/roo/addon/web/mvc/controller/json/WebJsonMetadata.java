@@ -130,8 +130,8 @@ public class WebJsonMetadata extends
             final JsonMetadata jsonMetadata,
             final boolean introduceLayerComponents) {
         super(identifier, aspectName, governorPhysicalTypeMetadata);
-        Validate.isTrue(isValid(identifier), "Metadata identification string '"
-                + identifier + "' is invalid");
+        Validate.isTrue(isValid(identifier),
+                "Metadata identification string '%s' is invalid", identifier);
         Validate.notNull(annotationValues, "Annotation values required");
         Validate.notNull(persistenceAdditions, "Persistence additions required");
         Validate.notNull(finderDetails,

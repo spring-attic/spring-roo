@@ -26,8 +26,8 @@ public class PackagingProviderConverter implements Converter<PackagingProvider> 
             final Class<?> targetType, final String optionContext) {
         final PackagingProvider packagingProvider = packagingProviderRegistry
                 .getPackagingProvider(value);
-        Validate.notNull(packagingProvider, "Unsupported packaging id '"
-                + value + "'");
+        Validate.notNull(packagingProvider, "Unsupported packaging id '%s'",
+                value);
         return packagingProvider;
     }
 

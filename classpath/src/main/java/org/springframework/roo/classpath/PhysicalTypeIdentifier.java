@@ -41,8 +41,8 @@ public final class PhysicalTypeIdentifier {
     }
 
     public static String getFriendlyName(final String metadataId) {
-        Validate.isTrue(isValid(metadataId), "Invalid metadata id '"
-                + metadataId + "'");
+        Validate.isTrue(isValid(metadataId), "Invalid metadata id '%s'",
+                metadataId);
         return getPath(metadataId) + "/" + getJavaType(metadataId);
     }
 

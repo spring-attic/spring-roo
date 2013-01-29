@@ -84,9 +84,8 @@ public class MemberDetailsScannerImpl implements MemberDetailsScanner {
             final String mid = mp.getProvidesType();
             Validate.isTrue(
                     MetadataIdentificationUtils.isIdentifyingClass(mid),
-                    "Metadata provider '" + mp
-                            + "' violated interface contract by returning '"
-                            + mid + "'");
+                    "Metadata provider '%s' violated interface contract by returning '%s'",
+                    mp, mid);
             providers.add(mp);
         }
     }
@@ -134,11 +133,11 @@ public class MemberDetailsScannerImpl implements MemberDetailsScanner {
                     final String key = ((ItdMetadataProvider) mp)
                             .getIdForPhysicalJavaType(currentClass
                                     .getDeclaredByMetadataId());
-                    Validate.isTrue(MetadataIdentificationUtils
-                            .isIdentifyingInstance(key),
-                            "ITD metadata provider '" + mp
-                                    + "' returned an illegal key ('" + key
-                                    + "'");
+                    Validate.isTrue(
+                            MetadataIdentificationUtils
+                                    .isIdentifyingInstance(key),
+                            "ITD metadata provider '%s' returned an illegal key ('%s')",
+                            mp, key);
 
                     // Get the metadata and ensure we have ITD type details
                     // available
@@ -149,9 +148,8 @@ public class MemberDetailsScannerImpl implements MemberDetailsScanner {
                     Validate.isInstanceOf(
                             ItdTypeDetailsProvidingMetadataItem.class,
                             metadataItem,
-                            "ITD metadata provider '"
-                                    + mp
-                                    + "' failed to return the correct metadata type");
+                            "ITD metadata provider '%s' failed to return the correct metadata type",
+                            mp);
                     final ItdTypeDetailsProvidingMetadataItem itdTypeDetailsMd = (ItdTypeDetailsProvidingMetadataItem) metadataItem;
                     if (itdTypeDetailsMd.getMemberHoldingTypeDetails() == null) {
                         continue;
@@ -175,9 +173,9 @@ public class MemberDetailsScannerImpl implements MemberDetailsScanner {
                 for (final MemberDetailsDecorator decorator : decorators) {
                     final MemberDetails newResult = decorator.decorate(
                             requestingClass, result);
-                    Validate.isTrue(newResult != null, "Decorator '"
-                            + decorator.getClass().getName()
-                            + "' returned an illegal result");
+                    Validate.isTrue(newResult != null,
+                            "Decorator '%s' returned an illegal result",
+                            decorator.getClass().getName());
                     if (newResult != null && !newResult.equals(result)) {
                         additionalLoopRequired = true;
                     }

@@ -54,8 +54,8 @@ public class WebFinderOperationsImpl implements WebFinderOperations {
             final PhysicalTypeMetadata ptm = (PhysicalTypeMetadata) metadataService
                     .get(typeLocationService.getPhysicalTypeIdentifier(cod
                             .getName()));
-            Validate.notNull(ptm, "Java source code unavailable for type "
-                    + cod.getName().getFullyQualifiedTypeName());
+            Validate.notNull(ptm, "Java source code unavailable for type %s",
+                    cod.getName().getFullyQualifiedTypeName());
             final WebScaffoldAnnotationValues webScaffoldAnnotationValues = new WebScaffoldAnnotationValues(
                     ptm);
             for (final JavaType finderEntity : finderEntities) {
@@ -83,8 +83,8 @@ public class WebFinderOperationsImpl implements WebFinderOperations {
         // Obtain the physical type and itd mutable details
         final PhysicalTypeMetadata ptm = (PhysicalTypeMetadata) metadataService
                 .get(id);
-        Validate.notNull(ptm, "Java source code unavailable for type "
-                + PhysicalTypeIdentifier.getFriendlyName(id));
+        Validate.notNull(ptm, "Java source code unavailable for type %s",
+                PhysicalTypeIdentifier.getFriendlyName(id));
         final WebScaffoldAnnotationValues webScaffoldAnnotationValues = new WebScaffoldAnnotationValues(
                 ptm);
         if (!webScaffoldAnnotationValues.isAnnotationFound()
@@ -97,8 +97,9 @@ public class WebFinderOperationsImpl implements WebFinderOperations {
         }
 
         final PhysicalTypeDetails ptd = ptm.getMemberHoldingTypeDetails();
-        Validate.notNull(ptd, "Java source code details unavailable for type "
-                + PhysicalTypeIdentifier.getFriendlyName(id));
+        Validate.notNull(ptd,
+                "Java source code details unavailable for type %s",
+                PhysicalTypeIdentifier.getFriendlyName(id));
         final ClassOrInterfaceTypeDetails cid = (ClassOrInterfaceTypeDetails) ptd;
         if (null == MemberFindingUtils.getAnnotationOfType(
                 cid.getAnnotations(), RooJavaType.ROO_WEB_FINDER)) {

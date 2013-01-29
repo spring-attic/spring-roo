@@ -317,7 +317,7 @@ public class JpaOperationsImpl implements JpaOperations {
         final List<Element> propertyElements = XmlUtils.findElements(
                 "/persistence/persistence-unit/properties/property", root);
         Validate.notEmpty(propertyElements,
-                "Failed to find property elements in " + persistenceXmlPath);
+                "Failed to find property elements in %s", persistenceXmlPath);
         final SortedSet<String> properties = new TreeSet<String>();
 
         for (final Element propertyElement : propertyElements) {
@@ -574,7 +574,6 @@ public class JpaOperationsImpl implements JpaOperations {
             final JavaType superclass, final JavaType implementsType,
             final List<AnnotationMetadataBuilder> annotations) {
         Validate.notNull(name, "Entity name required");
-
         Validate.isTrue(
                 !JdkJavaType.isPartOfJavaLang(name.getSimpleTypeName()),
                 "Entity name '%s' must not be part of java.lang",

@@ -413,8 +413,8 @@ public final class XmlUtils {
             final String xmlFilePath) {
         final InputStream inputStream = FileUtils.getInputStream(clazz,
                 xmlFilePath);
-        Validate.notNull(inputStream, "Could not open the file '" + xmlFilePath
-                + "'");
+        Validate.notNull(inputStream, "Could not open the file '%s'",
+                xmlFilePath);
         return readXml(inputStream).getDocumentElement();
     }
 

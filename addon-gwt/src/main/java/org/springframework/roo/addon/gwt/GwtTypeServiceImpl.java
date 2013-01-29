@@ -789,9 +789,8 @@ public class GwtTypeServiceImpl implements GwtTypeService {
             final ClassOrInterfaceTypeDetails request) {
         final AnnotationMetadata annotation = GwtUtils.getFirstAnnotation(
                 request, RooJavaType.ROO_GWT_REQUEST);
-        Validate.notNull(annotation, "Request '" + request.getName()
-                + "' isn't annotated with '" + RooJavaType.ROO_GWT_REQUEST
-                + "'");
+        Validate.notNull(annotation, "Request '%s' isn't annotated with '%s'",
+                request.getName(), RooJavaType.ROO_GWT_REQUEST);
         final AnnotationAttributeValue<?> attributeValue = annotation
                 .getAttribute("value");
         final JavaType proxyType = new JavaType(
@@ -809,8 +808,8 @@ public class GwtTypeServiceImpl implements GwtTypeService {
             final ClassOrInterfaceTypeDetails proxy) {
         final AnnotationMetadata annotation = GwtUtils.getFirstAnnotation(
                 proxy, RooJavaType.ROO_GWT_PROXY);
-        Validate.notNull(annotation, "Proxy '" + proxy.getName()
-                + "' isn't annotated with '" + RooJavaType.ROO_GWT_PROXY + "'");
+        Validate.notNull(annotation, "Proxy '%s' isn't annotated with '%s'",
+                proxy.getName(), RooJavaType.ROO_GWT_PROXY);
         final AnnotationAttributeValue<?> attributeValue = annotation
                 .getAttribute("value");
         final JavaType serviceNameType = new JavaType(
@@ -823,8 +822,8 @@ public class GwtTypeServiceImpl implements GwtTypeService {
             final ClassOrInterfaceTypeDetails proxy) {
         final AnnotationMetadata annotation = GwtUtils.getFirstAnnotation(
                 proxy, RooJavaType.ROO_GWT_PROXY);
-        Validate.notNull(annotation, "Proxy '" + proxy.getName()
-                + "' isn't annotated with '" + RooJavaType.ROO_GWT_PROXY + "'");
+        Validate.notNull(annotation, "Proxy '%s' isn't annotated with '%s'",
+                proxy.getName(), RooJavaType.ROO_GWT_PROXY);
         final AnnotationAttributeValue<?> attributeValue = annotation
                 .getAttribute("value");
         final JavaType serviceNameType = new JavaType(

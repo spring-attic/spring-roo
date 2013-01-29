@@ -50,8 +50,8 @@ public class MavenProjectMetadataProvider implements MetadataProvider,
 
     public MetadataItem get(final String metadataId) {
         Validate.isTrue(ProjectMetadata.isValid(metadataId),
-                "Unexpected metadata request '" + metadataId
-                        + "' for this provider");
+                "Unexpected metadata request '%s' for this provider",
+                metadataId);
         // Just rebuild on demand. We always do this as we expect
         // MetadataService to cache on our behalf
 

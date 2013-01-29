@@ -413,11 +413,10 @@ public class JpaEntityMetadata extends
     private FieldMetadata getIdentifierField(
             final List<FieldMetadata> identifierFields,
             final JavaType identifierType) {
-        Validate.isTrue(
-                identifierFields.size() == 1,
-                "More than one field was annotated with @"
-                        + identifierType.getSimpleTypeName() + " in '"
-                        + destination.getFullyQualifiedTypeName() + "'");
+        Validate.isTrue(identifierFields.size() == 1,
+                "More than one field was annotated with @%s in '%s'",
+                identifierType.getSimpleTypeName(),
+                destination.getFullyQualifiedTypeName());
         return new FieldMetadataBuilder(identifierFields.get(0)).build();
     }
 
@@ -686,8 +685,8 @@ public class JpaEntityMetadata extends
                 .getFieldsWithAnnotation(VERSION);
         if (!versionFields.isEmpty()) {
             Validate.isTrue(versionFields.size() == 1,
-                    "More than 1 field was annotated with @Version in '"
-                            + destination.getFullyQualifiedTypeName() + "'");
+                    "More than 1 field was annotated with @Version in '%s'",
+                    destination.getFullyQualifiedTypeName());
             return versionFields.get(0);
         }
 

@@ -75,8 +75,10 @@ public class ToStringMetadata extends
             final PhysicalTypeMetadata governorPhysicalTypeMetadata,
             final ToStringAnnotationValues annotationValues) {
         super(identifier, aspectName, governorPhysicalTypeMetadata);
-        Validate.isTrue(isValid(identifier), "Metadata identification string '"
-                + identifier + "' does not appear to be a valid");
+        Validate.isTrue(
+                isValid(identifier),
+                "Metadata identification string '%s' does not appear to be a valid",
+                identifier);
         Validate.notNull(annotationValues, "Annotation values required");
 
         this.annotationValues = annotationValues;

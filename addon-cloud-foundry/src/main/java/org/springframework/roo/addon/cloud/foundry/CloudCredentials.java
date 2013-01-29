@@ -17,28 +17,9 @@ public class CloudCredentials {
     private static final String PASSWORD_KEY = "password";
     private static final String URL_KEY = "url";
 
-    public static CloudCredentials decode(final String encoded) {
-        if (StringUtils.isBlank(encoded)) {
-            throw new IllegalStateException(
-                    "Stored login invalid; cannot continue");
-        }
-        final Map<String, String> map = new HashMap<String, String>();
-        final String[] encodedFields = encoded.split(",");
-        for (final String encodedField : encodedFields) {
-            final String[] valuePair = encodedField.split(":");
-            if (valuePair.length == 2) {
-                final String decoded = new String(
-                        Base64.decodeBase64(valuePair[1]));
-                map.put(valuePair[0], decoded);
-            }
-        }
-        return new CloudCredentials(map);
-    }
-
     private final String email;
     private final String password;
     private final String url;
-
     /**
      * Constructor that reads the relevant entries of the given map
      * 
@@ -61,6 +42,24 @@ public class CloudCredentials {
         this.email = email;
         this.password = password;
         this.url = url;
+    }
+
+    public static CloudCredentials decode(final String encoded) {
+        if (StringUtils.isBlank(encoded)) {
+            throw new IllegalStateException(
+                    "Stored login invalid; cannot continue");
+        }
+        final Map<String, String> map = new HashMap<String, String>();
+        final String[] encodedFields = encoded.split(",");
+        for (final String encodedField : encodedFields) {
+            final String[] valuePair = encodedField.split(":");
+            if (valuePair.length == 2) {
+                final String decoded = new String(
+                        Base64.decodeBase64(valuePair[1]));
+                map.put(valuePair[0], decoded);
+            }
+        }
+        return new CloudCredentials(map);
     }
 
     public String encode() {
@@ -159,5 +158,10 @@ public class CloudCredentials {
         return StringUtils.isNotBlank(email)
                 && StringUtils.isNotBlank(password)
                 && StringUtils.isNotBlank(url);
+    }
+
+    @Override
+    public String toString() {
+        return String.format("CloudCredentials [email=%s, url=%s]", email, url);
     }
 }

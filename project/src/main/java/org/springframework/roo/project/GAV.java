@@ -52,10 +52,10 @@ public class GAV implements Comparable<GAV> {
     public GAV(final String groupId, final String artifactId,
             final String version) {
         // Check
-        Validate.isTrue(MavenUtils.isValidMavenId(groupId), "Invalid groupId '"
-                + groupId + "'");
+        Validate.isTrue(MavenUtils.isValidMavenId(groupId),
+                "Invalid groupId '%s'", groupId);
         Validate.isTrue(MavenUtils.isValidMavenId(artifactId),
-                "Invalid artifactId '" + artifactId + "'");
+                "Invalid artifactId '%s'", artifactId);
         Validate.notBlank(version, "Version is required for %s:%s", groupId,
                 artifactId);
 
@@ -66,7 +66,7 @@ public class GAV implements Comparable<GAV> {
     }
 
     public int compareTo(final GAV other) {
-        Validate.notNull(other, "Cannot compare " + this + " to null");
+        Validate.notNull(other, "Cannot compare %s to null", this);
         int result = groupId.compareTo(other.getGroupId());
         if (result == 0) {
             result = artifactId.compareTo(other.getArtifactId());

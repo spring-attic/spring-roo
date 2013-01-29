@@ -163,9 +163,9 @@ public class JavaParserClassOrInterfaceTypeDetailsBuilder implements
             physicalTypeCategory = PhysicalTypeCategory.ENUMERATION;
         }
 
-        Validate.notNull(physicalTypeCategory, UNSUPPORTED_MESSAGE_PREFIX
-                + " (" + typeDeclaration.getClass().getSimpleName() + " for "
-                + name + ")");
+        Validate.notNull(physicalTypeCategory, "%s (%s for %s)",
+                UNSUPPORTED_MESSAGE_PREFIX, typeDeclaration.getClass()
+                        .getSimpleName(), name);
 
         cidBuilder.setName(name);
         cidBuilder.setPhysicalTypeCategory(physicalTypeCategory);
@@ -178,8 +178,8 @@ public class JavaParserClassOrInterfaceTypeDetailsBuilder implements
 
         // Verify the package declaration appears to be correct
         Validate.isTrue(compilationUnitPackage.equals(name.getPackage()),
-                "Compilation unit package '" + compilationUnitPackage
-                        + "' unexpected for type '" + name.getPackage() + "'");
+                "Compilation unit package '%s' unexpected for type '%s'",
+                compilationUnitPackage, name.getPackage());
 
         for (final ImportDeclaration importDeclaration : imports) {
             if (importDeclaration.getName() instanceof QualifiedNameExpr) {

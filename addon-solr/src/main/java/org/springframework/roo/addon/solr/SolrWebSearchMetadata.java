@@ -81,8 +81,10 @@ public class SolrWebSearchMetadata extends
                 "Solr web searchable annotation values required");
         Validate.notNull(solrSearchAnnotationValues,
                 "Solr search annotation values required");
-        Validate.isTrue(isValid(identifier), "Metadata identification string '"
-                + identifier + "' does not appear to be a valid");
+        Validate.isTrue(
+                isValid(identifier),
+                "Metadata identification string '%s' does not appear to be a valid",
+                identifier);
 
         if (!isValid()) {
             return;
@@ -215,10 +217,9 @@ public class SolrWebSearchMetadata extends
         final JavaType targetObject = webScaffoldAnnotationValues
                 .getFormBackingObject();
         Validate.notNull(targetObject,
-                "Could not aquire form backing object for the '"
-                        + webScaffoldAnnotationValues.getGovernorTypeDetails()
-                                .getName().getFullyQualifiedTypeName()
-                        + "' controller");
+                "Could not aquire form backing object for the '%s' controller",
+                webScaffoldAnnotationValues.getGovernorTypeDetails().getName()
+                        .getFullyQualifiedTypeName());
 
         final JavaSymbolName methodName = new JavaSymbolName(
                 solrWebSearchAnnotationValues.getSearchMethod());

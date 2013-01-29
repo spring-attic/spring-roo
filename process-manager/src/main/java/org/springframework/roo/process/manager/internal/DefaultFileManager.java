@@ -94,8 +94,8 @@ public class DefaultFileManager implements FileManager, UndoListener {
     public FileDetails createDirectory(final String fileIdentifier) {
         Validate.notNull(fileIdentifier, "File identifier required");
         final File actual = new File(fileIdentifier);
-        Validate.isTrue(!actual.exists(), "File '" + fileIdentifier
-                + "' already exists");
+        Validate.isTrue(!actual.exists(), "File '%s' already exists",
+                fileIdentifier);
         try {
             fileMonitorService.notifyCreated(actual.getCanonicalPath());
         }
@@ -108,8 +108,8 @@ public class DefaultFileManager implements FileManager, UndoListener {
     public MutableFile createFile(final String fileIdentifier) {
         Validate.notNull(fileIdentifier, "File identifier required");
         final File actual = new File(fileIdentifier);
-        Validate.isTrue(!actual.exists(), "File '" + fileIdentifier
-                + "' already exists");
+        Validate.isTrue(!actual.exists(), "File '%s' already exists",
+                fileIdentifier);
         try {
             fileMonitorService.notifyCreated(actual.getCanonicalPath());
             final File parentDirectory = new File(actual.getParent());
@@ -151,8 +151,8 @@ public class DefaultFileManager implements FileManager, UndoListener {
         }
         else {
             mutableFile = createFile(fileIdentifier);
-            Validate.notNull(mutableFile, "Could not create file '"
-                    + fileIdentifier + "'");
+            Validate.notNull(mutableFile, "Could not create file '%s'",
+                    fileIdentifier);
         }
 
         if (mutableFile != null) {
@@ -212,8 +212,8 @@ public class DefaultFileManager implements FileManager, UndoListener {
         }
 
         final File actual = new File(fileIdentifier);
-        Validate.isTrue(actual.exists(), "File '" + fileIdentifier
-                + "' does not exist");
+        Validate.isTrue(actual.exists(), "File '%s' does not exist",
+                fileIdentifier);
         try {
             fileMonitorService.notifyDeleted(actual.getCanonicalPath());
         }
@@ -245,10 +245,10 @@ public class DefaultFileManager implements FileManager, UndoListener {
         }
 
         final File file = new File(fileIdentifier);
-        Validate.isTrue(file.exists(), "File '" + fileIdentifier
-                + "' does not exist");
-        Validate.isTrue(file.isFile(), "Path '" + fileIdentifier
-                + "' is not a file");
+        Validate.isTrue(file.exists(), "File '%s' does not exist",
+                fileIdentifier);
+        Validate.isTrue(file.isFile(), "Path '%s' is not a file",
+                fileIdentifier);
         try {
             return new BufferedInputStream(new FileInputStream(new File(
                     fileIdentifier)));
@@ -286,8 +286,8 @@ public class DefaultFileManager implements FileManager, UndoListener {
     public MutableFile updateFile(final String fileIdentifier) {
         Validate.notNull(fileIdentifier, "File identifier required");
         final File actual = new File(fileIdentifier);
-        Validate.isTrue(actual.exists(), "File '" + fileIdentifier
-                + "' does not exist");
+        Validate.isTrue(actual.exists(), "File '%s' does not exist",
+                fileIdentifier);
         new UpdateFile(undoManager, filenameResolver, actual);
         final ManagedMessageRenderer renderer = new ManagedMessageRenderer(
                 filenameResolver, actual, false);

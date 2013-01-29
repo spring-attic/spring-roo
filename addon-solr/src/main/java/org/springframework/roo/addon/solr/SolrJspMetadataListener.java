@@ -126,10 +126,9 @@ public class SolrJspMetadataListener implements MetadataProvider,
         jpaActiveRecordMetadata = (JpaActiveRecordMetadata) metadataService
                 .get(JpaActiveRecordMetadata.createIdentifier(
                         formbackingObject, path));
-        Validate.notNull(
-                jpaActiveRecordMetadata,
-                "Could not determine entity metadata for type: "
-                        + javaType.getFullyQualifiedTypeName());
+        Validate.notNull(jpaActiveRecordMetadata,
+                "Could not determine entity metadata for type: %s",
+                javaType.getFullyQualifiedTypeName());
 
         installMvcArtifacts(webScaffoldMetadata);
 
@@ -211,8 +210,8 @@ public class SolrJspMetadataListener implements MetadataProvider,
         final ClassOrInterfaceTypeDetails formbackingClassOrInterfaceDetails = typeLocationService
                 .getTypeDetails(formbackingObject);
         Validate.notNull(formbackingClassOrInterfaceDetails,
-                "Unable to obtain physical type metadata for type "
-                        + formbackingObject.getFullyQualifiedTypeName());
+                "Unable to obtain physical type metadata for type %s",
+                formbackingObject.getFullyQualifiedTypeName());
         final MemberDetails memberDetails = memberDetailsScanner
                 .getMemberDetails(getClass().getName(),
                         formbackingClassOrInterfaceDetails);
@@ -352,8 +351,8 @@ public class SolrJspMetadataListener implements MetadataProvider,
                             MetadataIdentificationUtils
                                     .getMetadataClass(SolrWebSearchMetadata
                                             .getMetadataIdentiferType())),
-                    "Expected class-level notifications only for Solr web search metadata (not '"
-                            + upstreamDependency + "')");
+                    "Expected class-level notifications only for Solr web search metadata (not '%s')",
+                    upstreamDependency);
 
             // A physical Java type has changed, and determine what the
             // corresponding local metadata identification string would have
@@ -382,10 +381,8 @@ public class SolrJspMetadataListener implements MetadataProvider,
                         downstreamDependency).equals(
                         MetadataIdentificationUtils
                                 .getMetadataClass(getProvidesType())),
-                "Unexpected downstream notification for '"
-                        + downstreamDependency
-                        + "' to this provider (which uses '"
-                        + getProvidesType() + "'");
+                "Unexpected downstream notification for '%s' to this provider (which uses '%s')",
+                downstreamDependency, getProvidesType());
 
         metadataService.evict(downstreamDependency);
         if (get(downstreamDependency) != null) {

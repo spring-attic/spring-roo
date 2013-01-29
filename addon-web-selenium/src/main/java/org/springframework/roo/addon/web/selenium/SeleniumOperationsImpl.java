@@ -209,9 +209,10 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 
         final ClassOrInterfaceTypeDetails controllerTypeDetails = typeLocationService
                 .getTypeDetails(controller);
-        Validate.notNull(controllerTypeDetails,
-                "Class or interface type details for type '" + controller
-                        + "' could not be resolved");
+        Validate.notNull(
+                controllerTypeDetails,
+                "Class or interface type details for type '%s' could not be resolved",
+                controller);
 
         final LogicalPath path = PhysicalTypeIdentifier
                 .getPath(controllerTypeDetails.getDeclaredByMetadataId());
@@ -221,9 +222,8 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
                 .get(webScaffoldMetadataIdentifier);
         Validate.notNull(
                 webScaffoldMetadata,
-                "Web controller '"
-                        + controller.getFullyQualifiedTypeName()
-                        + "' does not appear to be an automatic, scaffolded controller");
+                "Web controller '%s' does not appear to be an automatic, scaffolded controller",
+                controller.getFullyQualifiedTypeName());
 
         // We abort the creation of a selenium test if the controller does not
         // allow the creation of new instances for the form backing object
@@ -275,9 +275,10 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 
         final ClassOrInterfaceTypeDetails formBackingTypeDetails = typeLocationService
                 .getTypeDetails(formBackingType);
-        Validate.notNull(formBackingType,
-                "Class or interface type details for type '" + formBackingType
-                        + "' could not be resolved");
+        Validate.notNull(
+                formBackingType,
+                "Class or interface type details for type '%s' could not be resolved",
+                formBackingType);
         final MemberDetails memberDetails = memberDetailsScanner
                 .getMemberDetails(getClass().getName(), formBackingTypeDetails);
 
