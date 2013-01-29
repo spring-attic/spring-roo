@@ -30,9 +30,8 @@ field string --fieldName category
 field date --fieldName created --type java.util.Date
 field string --fieldName reasonDenied
 
-// Owned many-to-one relationships defining GAE entity group hierarchy
-// field list --class ~.server.domain.Employee --fieldName reports --type ~.server.domain.Report --mappedBy reporter --cardinality ONE_TO_MANY
-// field list --class ~.server.domain.Report --fieldName expenses --type ~.server.domain.Expense --mappedBy report --cardinality ONE_TO_MANY
+field set --class ~.server.domain.Employee --fieldName reports --type ~.server.domain.Report --mappedBy reporter --cardinality ONE_TO_MANY
+field set --class ~.server.domain.Report --fieldName expenses --type ~.server.domain.Expense --mappedBy report --cardinality ONE_TO_MANY
 
 web gwt setup
 web gwt all --proxyPackage ~.client.proxy --requestPackage ~.client.request
