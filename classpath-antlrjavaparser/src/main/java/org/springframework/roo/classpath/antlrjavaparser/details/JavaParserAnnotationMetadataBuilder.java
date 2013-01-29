@@ -36,6 +36,7 @@ import org.springframework.roo.classpath.details.annotations.NestedAnnotationAtt
 import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
 import org.springframework.roo.classpath.antlrjavaparser.CompilationUnitServices;
 import org.springframework.roo.classpath.antlrjavaparser.JavaParserUtils;
+import org.springframework.roo.classpath.details.comments.CommentStructure;
 import org.springframework.roo.model.Builder;
 import org.springframework.roo.model.EnumDetails;
 import org.springframework.roo.model.JavaSymbolName;
@@ -147,6 +148,7 @@ public class JavaParserAnnotationMetadataBuilder implements
 
         // Add our AnnotationExpr to the actual annotations that will eventually
         // be flushed through to the compilation unit
+        JavaParserCommentMetadataBuilder.updateCommentsToJavaParser(annotationExpression, annotation.getCommentStructure());
         annotations.add(annotationExpression);
 
         // Add member-value pairs to our AnnotationExpr
@@ -169,12 +171,14 @@ public class JavaParserAnnotationMetadataBuilder implements
                                     memberValuePairs.get(0).getValue());
                     annotationExpression = new SingleMemberAnnotationExpr(
                             nameToUse, toUse);
+                    JavaParserCommentMetadataBuilder.updateCommentsToJavaParser(annotationExpression, annotation.getCommentStructure());
                     annotations.add(annotationExpression);
                 }
                 else {
                     // We have a number of pairs being presented
                     annotationExpression = new NormalAnnotationExpr(nameToUse,
                             new ArrayList<MemberValuePair>());
+                    JavaParserCommentMetadataBuilder.updateCommentsToJavaParser(annotationExpression, annotation.getCommentStructure());
                     annotations.add(annotationExpression);
                 }
             }
@@ -376,6 +380,8 @@ public class JavaParserAnnotationMetadataBuilder implements
 
     private final List<AnnotationAttributeValue<?>> attributeValues;
 
+    private final CommentStructure commentStructure;
+
     /**
      * Factory method
      * 
@@ -433,12 +439,19 @@ public class JavaParserAnnotationMetadataBuilder implements
             attributeValues.add(value);
         }
         this.attributeValues = attributeValues;
+
+        this.commentStructure = new CommentStructure();
+        JavaParserCommentMetadataBuilder.updateCommentsToRoo(commentStructure, annotationExpr);
     }
 
     public AnnotationMetadata build() {
         final AnnotationMetadataBuilder annotationMetadataBuilder = new AnnotationMetadataBuilder(
                 annotationType, attributeValues);
-        return annotationMetadataBuilder.build();
+
+        AnnotationMetadata md = annotationMetadataBuilder.build();
+        md.setCommentStructure(commentStructure);
+
+        return md;
     }
 
     private AnnotationAttributeValue<?> convert(JavaSymbolName annotationName,

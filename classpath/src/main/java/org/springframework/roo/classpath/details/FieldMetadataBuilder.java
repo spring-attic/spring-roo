@@ -3,6 +3,7 @@ package org.springframework.roo.classpath.details;
 import java.util.List;
 
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
+import org.springframework.roo.classpath.details.comments.CommentStructure;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 
@@ -18,11 +19,14 @@ public class FieldMetadataBuilder extends
     private String fieldInitializer;
     private JavaSymbolName fieldName;
     private JavaType fieldType;
+    private CommentStructure commentStructure;
 
     public FieldMetadataBuilder(final FieldMetadata existing) {
         super(existing);
         init(existing.getFieldName(), existing.getFieldType(),
                 existing.getFieldInitializer());
+
+        this.commentStructure = existing.getCommentStructure();
     }
 
     public FieldMetadataBuilder(final String declaredbyMetadataId) {
@@ -34,6 +38,8 @@ public class FieldMetadataBuilder extends
         super(declaredbyMetadataId, existing);
         init(existing.getFieldName(), existing.getFieldType(),
                 existing.getFieldInitializer());
+
+        this.commentStructure = existing.getCommentStructure();
     }
 
     /**
@@ -109,5 +115,13 @@ public class FieldMetadataBuilder extends
 
     public void setFieldType(final JavaType fieldType) {
         this.fieldType = fieldType;
+    }
+
+    public CommentStructure getCommentStructure() {
+        return commentStructure;
+    }
+
+    public void setCommentStructure(CommentStructure commentStructure) {
+        this.commentStructure = commentStructure;
     }
 }
