@@ -46,7 +46,7 @@
         </p:dataTable>
       </p:panel>
     </h:form>
-    <p:dialog id="createDialog" header="#{messages.label_create} __DOMAIN_TYPE__" modal="true" widgetVar="createDialogWidget" dynamic="true" visible="#{__BEAN_NAME__.createDialogVisible}" resizable="true" maximizable="true" showEffect="fade" hideEffect="explode">
+    <p:dialog id="createDialog" header="#{messages.label_create} __DOMAIN_TYPE__" modal="true" widgetVar="createDialogWidget" height="600" dynamic="true" visible="#{__BEAN_NAME__.createDialogVisible}" resizable="true" maximizable="true" showEffect="fade" hideEffect="explode">
       <p:ajax event="close" update=":dataForm:data" listener="#{__BEAN_NAME__.handleDialogClose}" />
       <p:outputPanel id="createPanel">
         <h:form id="createForm" enctype="multipart/form-data">
@@ -56,7 +56,7 @@
         </h:form>
       </p:outputPanel>
     </p:dialog>
-    <p:dialog id="editDialog" header="#{messages.label_edit} __DOMAIN_TYPE__" modal="true" widgetVar="editDialogWidget" dynamic="true" resizable="true" maximizable="true" showEffect="fade" hideEffect="explode">
+    <p:dialog id="editDialog" header="#{messages.label_edit} __DOMAIN_TYPE__" modal="true" widgetVar="editDialogWidget" height="600" dynamic="true" resizable="true" maximizable="true" showEffect="fade" hideEffect="explode">
       <p:ajax event="close" update=":dataForm:data" listener="#{__BEAN_NAME__.handleDialogClose}" />
       <p:outputPanel id="editPanel">
         <h:form id="editForm" enctype="multipart/form-data">
@@ -66,7 +66,7 @@
         </h:form>
       </p:outputPanel>
     </p:dialog>
-    <p:dialog id="viewDialog" header="#{messages.label_view} __DOMAIN_TYPE__" modal="true" widgetVar="viewDialogWidget" dynamic="true" resizable="true" maximizable="true" showEffect="fade" hideEffect="explode">
+    <p:dialog id="viewDialog" header="#{messages.label_view} __DOMAIN_TYPE__" modal="true" widgetVar="viewDialogWidget" height="600" dynamic="true" resizable="true" maximizable="true" showEffect="fade" hideEffect="explode">
       <p:outputPanel id="viewPanel">
         <h:form id="viewForm" enctype="multipart/form-data">
           <h:panelGrid id="viewPanelGrid" columns="2" binding="#{__BEAN_NAME__.viewPanelGrid}" styleClass="dialog" columnClasses="col1,col2" />
