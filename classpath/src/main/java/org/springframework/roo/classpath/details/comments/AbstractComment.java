@@ -3,14 +3,14 @@ package org.springframework.roo.classpath.details.comments;
 /**
  * @author Mike De Haan
  */
-public abstract class Comment {
+public abstract class AbstractComment {
+
     private String comment;
 
-    protected Comment() {
-
+    protected AbstractComment() {
     }
 
-    protected Comment(String comment) {
+    protected AbstractComment(String comment) {
         this.comment = comment;
     }
 

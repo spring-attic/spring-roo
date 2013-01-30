@@ -3,7 +3,7 @@ package org.springframework.roo.classpath.details.comments;
 /**
  * @author Mike De Haan
  */
-public class JavadocComment extends Comment {
+public class JavadocComment extends AbstractComment {
 
     public JavadocComment() {
     }

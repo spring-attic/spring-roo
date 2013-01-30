@@ -7,31 +7,31 @@ import java.util.List;
  */
 public class CommentStructure {
 
-    private List<Comment> beginComments;
-    private List<Comment> internalComments;
-    private List<Comment> endComments;
+    private List<AbstractComment> beginComments;
+    private List<AbstractComment> endComments;
+    private List<AbstractComment> internalComments;
 
-    public List<Comment> getBeginComments() {
+    public List<AbstractComment> getBeginComments() {
         return beginComments;
     }
 
-    public void setBeginComments(List<Comment> beginComments) {
-        this.beginComments = beginComments;
-    }
-
-    public List<Comment> getInternalComments() {
-        return internalComments;
-    }
-
-    public void setInternalComments(List<Comment> internalComments) {
-        this.internalComments = internalComments;
-    }
-
-    public List<Comment> getEndComments() {
+    public List<AbstractComment> getEndComments() {
         return endComments;
     }
 
-    public void setEndComments(List<Comment> endComments) {
+    public List<AbstractComment> getInternalComments() {
+        return internalComments;
+    }
+
+    public void setBeginComments(final List<AbstractComment> beginComments) {
+        this.beginComments = beginComments;
+    }
+
+    public void setEndComments(final List<AbstractComment> endComments) {
         this.endComments = endComments;
+    }
+
+    public void setInternalComments(final List<AbstractComment> internalComments) {
+        this.internalComments = internalComments;
     }
 }

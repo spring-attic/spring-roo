@@ -3,7 +3,7 @@ package org.springframework.roo.classpath.details.comments;
 /**
  * @author Mike De Haan
  */
-public class BlockComment extends Comment {
+public class BlockComment extends AbstractComment {
 
     public BlockComment() {
     }

@@ -70,7 +70,7 @@ public class JavaParserCommentMetadataBuilder {
      * @param antlrComments List of comments from the antlr-java-parser package
      * @return List of comments from the roo package
      */
-    private static List<org.springframework.roo.classpath.details.comments.Comment> adaptToRooComments(
+    private static List<org.springframework.roo.classpath.details.comments.AbstractComment> adaptToRooComments(
             final List<Comment> antlrComments) {
 
         // Nothing to do here
@@ -78,7 +78,7 @@ public class JavaParserCommentMetadataBuilder {
             return null;
         }
 
-        final List<org.springframework.roo.classpath.details.comments.Comment> comments = new LinkedList<org.springframework.roo.classpath.details.comments.Comment>();
+        final List<org.springframework.roo.classpath.details.comments.AbstractComment> comments = new LinkedList<org.springframework.roo.classpath.details.comments.AbstractComment>();
         for (final Comment antlrComment : antlrComments) {
             comments.add(adaptToRooComment(antlrComment));
         }
@@ -92,9 +92,9 @@ public class JavaParserCommentMetadataBuilder {
      * @param antlrComment
      * @return
      */
-    private static org.springframework.roo.classpath.details.comments.Comment adaptToRooComment(
+    private static org.springframework.roo.classpath.details.comments.AbstractComment adaptToRooComment(
             final Comment antlrComment) {
-        org.springframework.roo.classpath.details.comments.Comment comment;
+        org.springframework.roo.classpath.details.comments.AbstractComment comment;
 
         if (antlrComment instanceof LineComment) {
             comment = new org.springframework.roo.classpath.details.comments.LineComment();
@@ -118,7 +118,7 @@ public class JavaParserCommentMetadataBuilder {
      * @return List of comments from the antlr-java-parser package
      */
     private static List<Comment> adaptComments(
-            final List<org.springframework.roo.classpath.details.comments.Comment> rooComments) {
+            final List<org.springframework.roo.classpath.details.comments.AbstractComment> rooComments) {
 
         // Nothing to do here
         if (rooComments == null || rooComments.size() == 0) {
@@ -126,7 +126,7 @@ public class JavaParserCommentMetadataBuilder {
         }
 
         final List<Comment> comments = new LinkedList<Comment>();
-        for (final org.springframework.roo.classpath.details.comments.Comment rooComment : rooComments) {
+        for (final org.springframework.roo.classpath.details.comments.AbstractComment rooComment : rooComments) {
             comments.add(adaptComment(rooComment));
         }
 
@@ -140,7 +140,7 @@ public class JavaParserCommentMetadataBuilder {
      * @return
      */
     private static Comment adaptComment(
-            final org.springframework.roo.classpath.details.comments.Comment rooComment) {
+            final org.springframework.roo.classpath.details.comments.AbstractComment rooComment) {
         Comment comment;
 
         if (rooComment instanceof org.springframework.roo.classpath.details.comments.LineComment) {
