@@ -57,7 +57,7 @@ public interface TypeParsingService {
      */
     ClassOrInterfaceTypeDetails getTypeFromString(String typeContents,
             String declaredByMetadataId, JavaType javaType);
-    
+
     /**
      * Returns the compilation unit contents that represents the java file
      * updated with the passed class or interface details. The difference with
@@ -67,9 +67,7 @@ public interface TypeParsingService {
      * 
      * @param fileIdentifier canonical path of file
      * @param cid a parsed representation of a class or interface (required)
-     * @return a valid Java compilation unit contents (never null or empty) XXX
-     *         DiSiD: try to solve problems about lost of comments and javadoc
-     *         in java files. http://projects.disid.com/issues/7728
+     * @return a valid Java compilation unit contents (never null or empty)
      */
     String updateAndGetCompilationUnitContents(String fileIdentifier,
             ClassOrInterfaceTypeDetails cid);

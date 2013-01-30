@@ -8,6 +8,7 @@ import static org.springframework.roo.model.SpringJavaType.VALUE;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
@@ -160,7 +161,7 @@ public class FieldDetails {
     }
 
     public void setComment(final String comment) {
-        if (comment != null) {
+        if (StringUtils.isNotBlank(comment)) {
             this.comment = comment;
         }
     }
