@@ -214,8 +214,8 @@ public class JavaTypeConverter implements Converter<JavaType> {
         }
     }
 
-    private Collection<JavaType> getTypesForModule(
-            final String optionContext, final Pom targetModule) {
+    private Collection<JavaType> getTypesForModule(final String optionContext,
+            final Pom targetModule) {
         final Collection<JavaType> typesForModule = typeLocationService
                 .getTypesForModule(targetModule);
         if (!(optionContext.contains(SUPERCLASS) || optionContext

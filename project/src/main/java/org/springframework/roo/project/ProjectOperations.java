@@ -356,7 +356,7 @@ public interface ProjectOperations {
     /**
      * Indicates whether the supplied feature is installed in the module with
      * the supplied name.
-     *
+     * 
      * @param featureName the name of the feature (see {@link FeatureNames} for
      *            available features)
      * @param moduleName the name of the module to be checked

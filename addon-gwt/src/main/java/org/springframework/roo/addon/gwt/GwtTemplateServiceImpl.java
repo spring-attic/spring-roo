@@ -717,7 +717,8 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
                 final ClassOrInterfaceTypeDetails details = typeLocationService
                         .getTypeDetails(new JavaType(className));
                 if (details != null) {
-                    for (final FieldMetadata field : details.getDeclaredFields()) {
+                    for (final FieldMetadata field : details
+                            .getDeclaredFields()) {
                         final JavaSymbolName fieldName = field.getFieldName();
                         final String name = fieldName.toString();
                         omittedFields.add(name);
@@ -741,7 +742,8 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
                 final ClassOrInterfaceTypeDetails details = typeLocationService
                         .getTypeDetails(new JavaType(className));
                 if (details != null) {
-                    for (final FieldMetadata field : details.getDeclaredFields()) {
+                    for (final FieldMetadata field : details
+                            .getDeclaredFields()) {
                         final JavaSymbolName fieldName = field.getFieldName();
                         final String name = fieldName.toString();
                         omittedFields.add(name);

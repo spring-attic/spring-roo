@@ -82,11 +82,11 @@ public final class MethodMetadataBuilder extends
     }
 
     public MethodMetadata build() {
-        DefaultMethodMetadata methodMetadata = new DefaultMethodMetadata(getCustomData().build(),
-                getDeclaredByMetadataId(), getModifier(), buildAnnotations(),
-                getMethodName(), getReturnType(), getParameterTypes(),
-                getParameterNames(), getThrowsTypes(), getBodyBuilder()
-                        .getOutput());
+        DefaultMethodMetadata methodMetadata = new DefaultMethodMetadata(
+                getCustomData().build(), getDeclaredByMetadataId(),
+                getModifier(), buildAnnotations(), getMethodName(),
+                getReturnType(), getParameterTypes(), getParameterNames(),
+                getThrowsTypes(), getBodyBuilder().getOutput());
 
         methodMetadata.setCommentStructure(this.commentStructure);
 

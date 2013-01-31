@@ -177,7 +177,7 @@ public class JpaEntityMetadataProviderImpl extends
         Validate.isTrue(
                 identifiers.size() == 1,
                 "Identifier service indicates %d fields illegally for the entity '%s' (should only be one identifier field given this is an entity, not an Identifier class)",
-                identifiers.size(), entity.getSimpleTypeName() );
+                identifiers.size(), entity.getSimpleTypeName());
         return identifiers.iterator().next();
     }
 

@@ -226,7 +226,8 @@ public class AnnotationMetadataBuilder implements Builder<AnnotationMetadata> {
 
     public AnnotationMetadata build() {
 
-        DefaultAnnotationMetadata annotationMetadata = new DefaultAnnotationMetadata(getAnnotationType(),
+        DefaultAnnotationMetadata annotationMetadata = new DefaultAnnotationMetadata(
+                getAnnotationType(),
                 new ArrayList<AnnotationAttributeValue<?>>(getAttributes()
                         .values()));
 

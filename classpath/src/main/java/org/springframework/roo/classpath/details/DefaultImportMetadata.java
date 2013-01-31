@@ -14,7 +14,8 @@ import org.springframework.roo.model.JavaType;
  * @since 1.1.1
  */
 public class DefaultImportMetadata extends
-        AbstractIdentifiableJavaStructureProvider implements ImportMetadata, CommentedJavaStructure {
+        AbstractIdentifiableJavaStructureProvider implements ImportMetadata,
+        CommentedJavaStructure {
 
     private final JavaPackage importPackage;
     private final JavaType importType;

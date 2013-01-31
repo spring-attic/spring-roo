@@ -10,7 +10,8 @@ import org.springframework.roo.model.JavaType;
  * @author Ben Alex
  * @since 1.0
  */
-public interface FieldMetadata extends IdentifiableAnnotatedJavaStructure, CommentedJavaStructure {
+public interface FieldMetadata extends IdentifiableAnnotatedJavaStructure,
+        CommentedJavaStructure {
 
     /**
      * @return the field initializer, if known (may be null if there is no

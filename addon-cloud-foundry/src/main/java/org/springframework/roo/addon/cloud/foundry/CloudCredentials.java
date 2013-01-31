@@ -20,6 +20,7 @@ public class CloudCredentials {
     private final String email;
     private final String password;
     private final String url;
+
     /**
      * Constructor that reads the relevant entries of the given map
      * 

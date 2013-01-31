@@ -348,8 +348,8 @@ public class Plugin implements Comparable<Plugin> {
     }
 
     /**
-     * Indicates whether the given {@link Plugin} has the same Maven
-     * coordinates as this one; this is not necessarily the same as calling
+     * Indicates whether the given {@link Plugin} has the same Maven coordinates
+     * as this one; this is not necessarily the same as calling
      * {@link #equals(Object)}, which may compare more fields beyond the basic
      * coordinates.
      * 
@@ -361,8 +361,8 @@ public class Plugin implements Comparable<Plugin> {
     }
 
     /**
-     * Compares this plugin's identifying coordinates (i.e. not the version)
-     * to those of the given plugin
+     * Compares this plugin's identifying coordinates (i.e. not the version) to
+     * those of the given plugin
      * 
      * @param other the plugin being compared to (required)
      * @return see {@link Comparable#compareTo(Object)}
