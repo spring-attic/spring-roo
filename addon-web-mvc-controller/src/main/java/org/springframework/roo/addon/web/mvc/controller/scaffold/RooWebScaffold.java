@@ -115,4 +115,12 @@ public @interface RooWebScaffold {
      *         "true"; optional)
      */
     boolean update() default true;
+
+    /**
+     * Indicates whether the annotated controller should be instantiated using
+     * XML configuration
+     * 
+     * @return see above
+     */
+    boolean useXmlConfiguration() default false;
 }

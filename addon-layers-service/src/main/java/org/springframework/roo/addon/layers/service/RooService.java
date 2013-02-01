@@ -128,6 +128,12 @@ public @interface RooService {
 
     String[] authorizedReadRoles() default "";
 
+    /**
+     * Indicates whether the annotated service should be instantiated using XML
+     * configuration
+     * 
+     * @return see above
+     */
     boolean useXmlConfiguration() default false;
 
 }
