@@ -72,3 +72,4 @@ selenium test --controller ~.VisitController
 
 module focus --moduleName ui/mvc
 logging setup --level INFO
+dependency add --groupId com.example.petclinic --artifactId core --version 0.1.0.BUILD-SNAPSHOT
