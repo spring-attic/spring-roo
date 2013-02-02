@@ -118,11 +118,6 @@
             <url>http://maven.springframework.org/release</url>
         </pluginRepository>
         <pluginRepository>
-            <id>spring-roo-repository-release</id>
-            <name>Spring Roo Repository</name>
-            <url>http://spring-roo-repository.springsource.org/release</url>
-        </pluginRepository>
-        <pluginRepository>
             <id>spring-roo-repository-bundles</id>
             <name>Spring Roo Repository</name>
             <url>http://spring-roo-repository.springsource.org/bundles</url>
