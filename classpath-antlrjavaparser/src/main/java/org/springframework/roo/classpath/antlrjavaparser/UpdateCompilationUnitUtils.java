@@ -806,6 +806,10 @@ public class UpdateCompilationUnitUtils {
             field = new FieldDeclaration(entry.fieldDeclaration.getModifiers(),
                     entry.fieldDeclaration.getType(), variables);
             field.setAnnotations(entry.fieldDeclaration.getAnnotations());
+            field.setBeginComments(entry.fieldDeclaration.getBeginComments());
+            field.setInternalComments(entry.fieldDeclaration
+                    .getInternalComments());
+            field.setEndComments(entry.fieldDeclaration.getEndComments());
             originalType.getMembers().add(field);
         }
     }

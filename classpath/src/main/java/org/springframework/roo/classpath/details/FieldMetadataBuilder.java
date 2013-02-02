@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.details.comments.CommentStructure;
+import org.springframework.roo.classpath.details.comments.JavadocComment;
+import org.springframework.roo.classpath.operations.jsr303.FieldDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 
@@ -80,10 +82,33 @@ public class FieldMetadataBuilder extends
         this.fieldType = fieldType;
     }
 
+    /**
+     * Constructor
+     * 
+     * @param fieldDetails
+     */
+    public FieldMetadataBuilder(final FieldDetails fieldDetails) {
+        this(fieldDetails.getPhysicalTypeIdentifier(), fieldDetails
+                .getModifiers(), fieldDetails.getAnnotations(), fieldDetails
+                .getFieldName(), fieldDetails.getFieldType());
+
+        if (fieldDetails.getComment() != null) {
+            commentStructure = new CommentStructure();
+            JavadocComment javadocComment = new JavadocComment(
+                    fieldDetails.getComment());
+            commentStructure.addComment(javadocComment,
+                    CommentStructure.CommentLocation.BEGINNING);
+        }
+    }
+
     public FieldMetadata build() {
-        return new DefaultFieldMetadata(getCustomData().build(),
-                getDeclaredByMetadataId(), getModifier(), buildAnnotations(),
-                getFieldName(), getFieldType(), getFieldInitializer());
+        DefaultFieldMetadata md = new DefaultFieldMetadata(getCustomData()
+                .build(), getDeclaredByMetadataId(), getModifier(),
+                buildAnnotations(), getFieldName(), getFieldType(),
+                getFieldInitializer());
+        md.setCommentStructure(getCommentStructure());
+
+        return md;
     }
 
     public String getFieldInitializer() {
