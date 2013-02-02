@@ -122,6 +122,14 @@
             <name>Spring Roo Repository</name>
             <url>http://spring-roo-repository.springsource.org/release</url>
         </pluginRepository>
+        <pluginRepository>
+            <id>spring-roo-repository-bundles</id>
+            <name>Spring Roo Repository</name>
+            <url>http://spring-roo-repository.springsource.org/bundles</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </pluginRepository>
     </pluginRepositories>
     <developers>
         <developer>
