@@ -4,7 +4,7 @@
     <groupId>org.springframework.roo</groupId>
     <artifactId>org.springframework.roo.root</artifactId>
     <packaging>pom</packaging>
-    <version>1.2.4.BUILD-SNAPSHOT</version>
+    <version>1.2.3.BUILD-SNAPSHOT</version>
     <name>Spring Roo</name>
     <description>Spring Roo is a next-generation rapid application development tool for Java developers. It focuses on higher productivity, stock-standard Java APIs, high usability, avoiding engineering trade-offs and facilitating easy Roo removal.</description>
     <inceptionYear>2009</inceptionYear>
@@ -34,7 +34,7 @@
         <module>project</module>
         <module>process-manager</module>
         <module>classpath</module>
-        <!-- module>classpath-javaparser</module -->
+        <module>classpath-javaparser</module>
         <module>addon-tostring</module>
         <module>addon-equals</module>
         <module>addon-javabean</module>
@@ -120,6 +120,11 @@
             <id>spring-roo-repository-release</id>
             <name>Spring Roo Repository</name>
             <url>http://spring-roo-repository.springsource.org/release</url>
+        </pluginRepository>
+        <pluginRepository>
+            <id>maven-java-formatter-plugin</id>
+            <name>Maven2 Java Formatter Plugin repository</name>
+            <url>https://raw.github.com/benalexau/maven-java-formatter-plugin/master/releases/</url>
         </pluginRepository>
     </pluginRepositories>
     <developers>
@@ -335,17 +340,17 @@
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>
-                <version>1.6.6</version>
+                <version>1.6.4</version>
             </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-nop</artifactId>
-                <version>1.6.6</version>
+                <version>1.6.4</version>
             </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>jcl-over-slf4j</artifactId>
-                <version>1.6.6</version>
+                <version>1.6.4</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.commons</groupId>
@@ -366,11 +371,6 @@
                 <groupId>org.mortbay.jetty</groupId>
                 <artifactId>servlet-api</artifactId>
                 <version>2.5-20081211</version>
-            </dependency>
-            <dependency>
-                <groupId>com.github.antlrjavaparser</groupId>
-                <artifactId>antlr-java-parser</artifactId>
-                <version>1.0.7</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework</groupId>
@@ -498,17 +498,10 @@
                 <artifactId>org.springframework.roo.wrapping.cloud-foundry-api</artifactId>
                 <version>0.0.1.0010</version>
             </dependency>
-            <!--
             <dependency>
                 <groupId>org.springframework.roo.wrapping</groupId>
                 <artifactId>org.springframework.roo.wrapping.javaparser</artifactId>
                 <version>1.0.7.0010</version>
-            </dependency>
-            -->
-            <dependency>
-                <groupId>org.springframework.roo.wrapping</groupId>
-                <artifactId>org.springframework.roo.wrapping.antlr4-runtime</artifactId>
-                <version>4.0-rc-1.0001</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework.roo.wrapping</groupId>
@@ -706,19 +699,12 @@
                 <artifactId>org.springframework.roo.classpath</artifactId>
                 <version>${project.version}</version>
             </dependency>
-            <!--
             <dependency>
                 <groupId>org.springframework.roo</groupId>
                 <artifactId>org.springframework.roo.classpath.javaparser</artifactId>
                 <version>${project.version}</version>
             </dependency>
-           -->
             <dependency>
-                <groupId>org.springframework.roo</groupId>
-                <artifactId>org.springframework.roo.classpath.antlrjavaparser</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-             <dependency>
                 <groupId>org.springframework.roo</groupId>
                 <artifactId>org.springframework.roo.deployment.support</artifactId>
                 <version>${project.version}</version>
@@ -910,7 +896,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>
-                <version>2.6</version>
+                <version>2.5</version>
                 <configuration>
                     <encoding>UTF-8</encoding>
                 </configuration>
@@ -986,9 +972,9 @@
                 <artifactId>maven-java-formatter-plugin</artifactId>
                 <version>0.4.0.e371sr1</version>
                 <configuration>
-                    <lineEnding>LF</lineEnding>
                     <configFile>../deployment-support/eclipse-formatter-config.xml</configFile>
-                     <excludes>
+                    <lineEnding>LF</lineEnding>
+                    <excludes>
                         <exclude>org/springframework/roo/bootstrap/Main.java</exclude>
                         <exclude>org/springframework/roo/bootstrap/AutoProcessor.java</exclude>
                     </excludes>
@@ -1005,7 +991,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-eclipse-plugin</artifactId>
-                <version>2.9</version>
+                <version>2.8</version>
                 <configuration>
                     <downloadSources>true</downloadSources>
                     <downloadJavadocs>false</downloadJavadocs>
@@ -1024,7 +1010,7 @@
         </plugins>
     </build>
     <properties>
-        <powermock.version>1.4.12</powermock.version>
-        <spring.version>3.1.3.RELEASE</spring.version>
+        <powermock.version>1.4.10</powermock.version>
+        <spring.version>3.1.1.RELEASE</spring.version>
     </properties>
 </project>
