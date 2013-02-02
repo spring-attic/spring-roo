@@ -15,6 +15,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -30,6 +31,7 @@ import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
+import org.springframework.roo.classpath.details.comments.CommentFormatter;
 import org.springframework.roo.classpath.operations.jsr303.BooleanField;
 import org.springframework.roo.classpath.operations.jsr303.CollectionField;
 import org.springframework.roo.classpath.operations.jsr303.DateField;
@@ -679,6 +681,8 @@ public class FieldCommands implements CommandMarker {
 
         final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
         fieldDetails.decorateAnnotationsList(annotations);
+        fieldDetails.setAnnotations(annotations);
+
         String initializer = null;
         if (fieldDetails instanceof CollectionField) {
             final CollectionField collectionField = (CollectionField) fieldDetails;
@@ -693,13 +697,35 @@ public class FieldCommands implements CommandMarker {
         if (transientModifier) {
             modifier += Modifier.TRANSIENT;
         }
+        fieldDetails.setModifiers(modifier);
+
+        // Format the passed-in comment (if given)
+        formatFieldComment(fieldDetails);
 
         final FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(
-                fieldDetails.getPhysicalTypeIdentifier(), modifier,
-                annotations, fieldDetails.getFieldName(),
-                fieldDetails.getFieldType());
+                fieldDetails);
         fieldBuilder.setFieldInitializer(initializer);
         typeManagementService.addField(fieldBuilder.build());
+    }
+
+    private void formatFieldComment(FieldDetails fieldDetails) {
+        // If a comment was defined, we need to format it
+        if (fieldDetails.getComment() != null) {
+
+            // First replace all "" with the proper escape sequence \"
+            String unescapedMultiLineComment = fieldDetails.getComment()
+                    .replaceAll("\"\"", "\\\\\"");
+
+            // Then unescape all characters
+            unescapedMultiLineComment = StringEscapeUtils
+                    .unescapeJava(unescapedMultiLineComment);
+
+            CommentFormatter commentFormatter = new CommentFormatter();
+            String javadocComment = commentFormatter
+                    .formatStringAsJavadoc(unescapedMultiLineComment);
+
+            fieldDetails.setComment(commentFormatter.format(javadocComment, 1));
+        }
     }
 
     @CliCommand(value = "field other", help = "Inserts a private field into the specified file")

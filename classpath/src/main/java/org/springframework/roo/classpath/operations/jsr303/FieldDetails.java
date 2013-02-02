@@ -54,6 +54,12 @@ public class FieldDetails {
     /** The Spring @Value value **/
     private String value;
 
+    /** Field Modifiers (e.g. private, transient) */
+    private int modifiers;
+
+    /** Contains field annotations */
+    private List<AnnotationMetadataBuilder> annotations;
+
     /**
      * Constructor
      * 
@@ -156,6 +162,14 @@ public class FieldDetails {
         return unique;
     }
 
+    public int getModifiers() {
+        return modifiers;
+    }
+
+    public List<AnnotationMetadataBuilder> getAnnotations() {
+        return annotations;
+    }
+
     public void setColumn(final String column) {
         this.column = column;
     }
@@ -180,5 +194,13 @@ public class FieldDetails {
 
     public void setValue(final String value) {
         this.value = value;
+    }
+
+    public void setModifiers(int modifiers) {
+        this.modifiers = modifiers;
+    }
+
+    public void setAnnotations(List<AnnotationMetadataBuilder> annotations) {
+        this.annotations = annotations;
     }
 }

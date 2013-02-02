@@ -186,6 +186,24 @@ public class JavaParserFieldMetadataBuilder implements Builder<FieldMetadata> {
             }
         }
 
+        if (field.getCommentStructure() != null) {
+
+            // if the field has annotations, add JavaDoc comments to the first
+            // annotation
+            if (annotations != null && annotations.size() > 0) {
+                AnnotationExpr firstAnnotation = annotations.get(0);
+
+                JavaParserCommentMetadataBuilder.updateCommentsToJavaParser(
+                        firstAnnotation, field.getCommentStructure());
+
+                // Otherwise, add comments to the field declaration line
+            }
+            else {
+                JavaParserCommentMetadataBuilder.updateCommentsToJavaParser(
+                        newField, field.getCommentStructure());
+            }
+        }
+
         // Add the field to the compilation unit
         members.add(nextFieldIndex, newField);
     }
