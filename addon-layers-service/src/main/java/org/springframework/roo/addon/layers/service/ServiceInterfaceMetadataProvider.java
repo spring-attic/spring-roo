@@ -1,5 +1,6 @@
 package org.springframework.roo.addon.layers.service;
 
+import static org.springframework.roo.model.RooJavaType.ROO_PERMISSION_EVALUATOR;
 import static org.springframework.roo.model.RooJavaType.ROO_SERVICE;
 
 import java.util.HashMap;
@@ -10,6 +11,7 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.plural.PluralMetadata;
+import org.springframework.roo.addon.security.PermissionEvaluatorMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.customdata.taggers.CustomDataKeyDecorator;
@@ -153,6 +155,33 @@ public class ServiceInterfaceMetadataProvider extends
             metadataDependencyRegistry.registerDependency(pluralId,
                     metadataIdentificationString);
             domainTypePlurals.put(type, pluralMetadata.getPlural());
+        }
+
+        PermissionEvaluatorMetadata permissionEvaluatorMetadata = null;
+        for (final ClassOrInterfaceTypeDetails permissionEvaluator : typeLocationService
+                .findClassesOrInterfaceDetailsWithAnnotation(ROO_PERMISSION_EVALUATOR)) {
+            if (permissionEvaluator != null) {
+                final LogicalPath path = PhysicalTypeIdentifier
+                        .getPath(permissionEvaluator.getDeclaredByMetadataId());
+                final String permissionEvaluatorId = PermissionEvaluatorMetadata
+                        .createIdentifier(permissionEvaluator.getName(), path);
+                permissionEvaluatorMetadata = (PermissionEvaluatorMetadata) metadataService
+                        .get(permissionEvaluatorId);
+                if (permissionEvaluatorMetadata != null
+                        && permissionEvaluatorMetadata.isValid()) {
+                    if (annotationValues.usePermissionEvaluator()) {
+                        metadataDependencyRegistry.registerDependency(
+                                metadataIdentificationString,
+                                permissionEvaluatorMetadata.getId());
+                    }
+                    else {
+                        metadataDependencyRegistry.deregisterDependency(
+                                metadataIdentificationString,
+                                permissionEvaluatorMetadata.getId());
+                    }
+
+                }
+            }
         }
 
         return new ServiceInterfaceMetadata(metadataIdentificationString,

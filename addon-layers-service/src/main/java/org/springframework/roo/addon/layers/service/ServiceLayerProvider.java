@@ -1,7 +1,10 @@
 package org.springframework.roo.addon.layers.service;
 
+import static java.lang.reflect.Modifier.PRIVATE;
+import static java.lang.reflect.Modifier.PUBLIC;
 import static org.springframework.roo.model.SpringJavaType.AUTOWIRED;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -15,7 +18,10 @@ import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
+import org.springframework.roo.classpath.details.MethodMetadataBuilder;
+import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
+import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.classpath.layers.CoreLayerProvider;
 import org.springframework.roo.classpath.layers.LayerType;
 import org.springframework.roo.classpath.layers.MemberTypeAdditions;
@@ -125,6 +131,28 @@ public class ServiceLayerProvider extends CoreLayerProvider {
         cidBuilder.addField(new FieldMetadataBuilder(callerMID, 0, Arrays
                 .asList(new AnnotationMetadataBuilder(AUTOWIRED)),
                 new JavaSymbolName(fieldName), serviceInterface));
+
+        // JavaSymbolName setMethodName = new JavaSymbolName("set"
+        // + serviceInterface.getSimpleTypeName());
+        // List<JavaType> parameterTypes = new ArrayList<JavaType>();
+        // parameterTypes.add(serviceInterface);
+        // List<JavaSymbolName> parameterNames = new
+        // ArrayList<JavaSymbolName>();
+        // parameterNames.add(new JavaSymbolName(fieldName));
+        // final InvocableMemberBodyBuilder bodyBuilder = new
+        // InvocableMemberBodyBuilder();
+        // bodyBuilder.append("\n\tthis." + fieldName + " = " + fieldName +
+        // ";\n");
+        //
+        // MethodMetadataBuilder setSeviceMethod = new MethodMetadataBuilder(
+        // callerMID, PUBLIC, setMethodName, JavaType.VOID_PRIMITIVE,
+        // AnnotatedJavaType.convertFromJavaTypes(parameterTypes),
+        // parameterNames, bodyBuilder);
+        //
+        // setSeviceMethod.addAnnotation(new
+        // AnnotationMetadataBuilder(AUTOWIRED));
+        //
+        // cidBuilder.addMethod(setSeviceMethod);
 
         // Generate an additions object that includes a call to the method
         return MemberTypeAdditions.getInstance(cidBuilder, fieldName,
