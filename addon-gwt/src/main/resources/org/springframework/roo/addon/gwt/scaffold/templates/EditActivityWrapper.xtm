@@ -30,8 +30,8 @@ public class {{=className}} implements Activity, {{=isScaffoldMobileActivity}} {
    * 
    * @param <V> the type of the ProxyEditView
    */
-  public interface View<V extends ProxyEditView<{{=proxy}}, V>>
-      extends ProxyEditView<{{=proxy}}, V> {
+  public interface View<V extends {{=editView}}<V>> extends {{=editView}}<V>
+  {
     {{#setEnumValuePickers}}
     void {{=setValuePickerName}}(Collection<{{=valueType}}> values);
     {{/setEnumValuePickers}}
@@ -90,10 +90,13 @@ public class {{=className}} implements Activity, {{=isScaffoldMobileActivity}} {
   }
 
   @Override
-  public void start(AcceptsOneWidget display, EventBus eventBus) {{{#setEnumValuePickers}}
-    view.{{=setValuePickerName}}(Arrays.asList({{=valueType}}.values()));{{/setEnumValuePickers}}
+  public void start(AcceptsOneWidget display, EventBus eventBus) 
+  	{{{#setEnumValuePickers}}
+    view.{{=setValuePickerName}}(Arrays.asList({{=valueType}}.values()));
+    {{/setEnumValuePickers}}
 
-    {{#setProxyValuePickers}}view.{{=setValuePickerName}}(Collections.<{{=valueType}}> emptyList());
+    {{#setProxyValuePickers}}
+    view.{{=setValuePickerName}}(Collections.<{{=valueType}}> emptyList());
     requests.{{=requestInterface}}().{{=findMethod}}.with(
         {{=rendererType}}.instance().getPaths()).fire(
             new Receiver<List<{{=valueType}}>>() {

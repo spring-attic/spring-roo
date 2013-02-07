@@ -32,8 +32,10 @@
       <h3 class='{style.header}'><ui:msg><span ui:field='displayRenderer' /></ui:msg></h3>
     </div>
 
-    <table id='boundElementHolder' class='{style.fields}'>{{#properties}}
-      <tr id='{{=prop}}'><td><span class='{style.label}'>{{=propReadable}}:</span></td><td><span ui:field='{{=prop}}'></span></td></tr>{{/properties}}
+    <table id='boundElementHolder' class='{style.fields}'>
+      {{#properties}}
+      <tr id='{{=prop}}'><td><span class='{style.label}'>{{=propReadable}}:</span></td><td><span ui:field='{{=prop}}'></span></td></tr>
+      {{/properties}}
     </table>
 
   <div class="{style.bar}">

@@ -1,7 +1,7 @@
 package {{=packageName}};
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.SpanElement;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.i18n.client.DateTimeFormat;
@@ -14,10 +14,11 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
 
+import {{=placePackage}}.ProxyListView;
 {{#imports}}import {{=import}};
 {{/imports}}
 /**
- * Details view for {{=name}} proxys.
+ * Details view for {{=proxy}}.
  */
 public class {{=className}} extends Composite implements {{=detailsView}} {
 	interface Binder extends UiBinder<HTMLPanel, {{=className}}> {}
@@ -26,28 +27,32 @@ public class {{=className}} extends Composite implements {{=detailsView}} {
 
 	private static {{=className}} instance;
 
+	{{=proxy}} proxy;
+	{{#fields}}
+	@UiField SpanElement {{=field}};{{/fields}}	
+	
+	@UiField SpanElement displayRenderer;
+	@UiField HasClickHandlers edit;
+	@UiField HasClickHandlers delete;
+
+	private Delegate delegate;
+
 	public static {{=className}} instance() {
 		if (instance == null) {
 			instance = new {{=className}}();
 		}
+
 		return instance;
 	}
-
-	{{=proxy}} proxy;
-	{{#fields}}
-	@UiField Element {{=field}};{{/fields}}	
-	@UiField HasClickHandlers delete;
-
-	private Delegate delegate;
 
 	public {{=className}}() {
 		initWidget(BINDER.createAndBindUi(this));
 	}
 
-  	public Widget asWidget() {
+	public Widget asWidget() {
 		return this;
 	}
-  
+
 	public boolean confirm(String msg) {
 		return Window.confirm(msg);
 	}
@@ -61,12 +66,21 @@ public class {{=className}} extends Composite implements {{=detailsView}} {
 		delegate.deleteClicked();
 	}
 
+	@UiHandler("edit")
+	public void onEditClicked(ClickEvent e) {
+		delegate.editClicked();
+	}
+
 	public void setDelegate(Delegate delegate) {
 		this.delegate = delegate;
 	}
 
 	public void setValue({{=proxy}} proxy) {
-		this.proxy = proxy;{{#managedProperties}}
-		{{=prop}}.setInnerText(proxy.{{=propGetter}}() == null ? "" : {{=propFormatter}}(proxy.{{=propGetter}}()));{{/managedProperties}}
+		this.proxy = proxy;
+		{{#managedProperties}}
+		{{=prop}}.setInnerText(proxy.{{=propGetter}}() == null ? "" : {{=propFormatter}}(proxy.{{=propGetter}}()));
+		{{/managedProperties}}
+
+		displayRenderer.setInnerText({{=proxyRenderer}}.instance().render(proxy));
 	}
 }

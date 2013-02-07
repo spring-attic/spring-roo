@@ -7,8 +7,8 @@ import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.editor.client.EditorError;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.shared.EventBus;
-import com.google.web.bindery.requestfactory.gwt.client.RequestFactoryEditorDriver;
 import com.google.web.bindery.requestfactory.shared.RequestFactory;
+import com.google.web.bindery.requestfactory.gwt.client.RequestFactoryEditorDriver;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.text.shared.AbstractRenderer;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -24,9 +24,7 @@ import com.google.gwt.user.client.ui.LongBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.datepicker.client.DateBox;
-import {{=scaffoldUiPackage}}.ui.*;
 
-import {{=placePackage}}.ProxyEditView;
 {{#imports}}import {{=import}};
 {{/imports}}
 
@@ -34,7 +32,7 @@ import java.util.Collection;
 import java.util.List;
 
 /**
- * Edit view for {{=name}} proxys.
+ * Edit view for {{=proxy}}.
  */
 public class {{=className}} extends Composite implements {{=editActivityWrapper}}.View<{{=className}}> {
 
@@ -42,45 +40,55 @@ public class {{=className}} extends Composite implements {{=editActivityWrapper}
 	}
 
 	interface Driver extends
-		RequestFactoryEditorDriver<{{=proxy}}, {{=className}}> {
+      RequestFactoryEditorDriver<{{=proxy}}, {{=className}}> {
 	}
 
 	private static final Binder BINDER = GWT.create(Binder.class);
 
-	private static {{=className}} instance;
-
-	public static {{=className}} instance() {
-		if (instance == null) {
-			instance = new {{=className}}();
-		}
-		return instance;
-	}
-
+  private static {{=className}} instance;
+  
 	{{#editViewProps}}
 	{{=prop}};{{/editViewProps}}	
+
+	@UiField Button cancel;
 	@UiField Button save;
 	@UiField DivElement errors;
 
+	@UiField Element editTitle;
+	@UiField Element createTitle;
+
 	private Delegate delegate;
 
+  public static {{=className}} instance() {
+    if (instance == null) {
+      instance = new {{=className}}();
+    }
+    
+    //Jim
+    return instance;
+  }
+  
 	public {{=className}}() {
 		initWidget(BINDER.createAndBindUi(this));
 	}
 
-	@Override
-	public RequestFactoryEditorDriver<{{=proxy}}, {{=className}}> createEditorDriver() {
-		RequestFactoryEditorDriver<{{=proxy}}, {{=className}}> driver = GWT.create(Driver.class);
-		driver.initialize(this);
-		return driver;
-	}
+  @Override
+  public RequestFactoryEditorDriver<{{=proxy}}, {{=className}}> createEditorDriver() {
+    RequestFactoryEditorDriver<{{=proxy}}, {{=className}}> driver = GWT.create(Driver.class);
+    driver.initialize(this);
+    return driver;
+  }
 
-	{{#setEnumValuePickers}}
-	{{=setValuePicker}}{{/setEnumValuePickers}}
-
-	{{#setProxyValuePickers}}
-	{{=setValuePicker}}{{/setProxyValuePickers}}
-   
+{{#setEnumValuePickers}}{{=setValuePicker}}{{/setEnumValuePickers}}
+{{#setProxyValuePickers}}{{=setValuePicker}}{{/setProxyValuePickers}}
 	public void setCreating(boolean creating) {
+		if (creating) {
+			editTitle.getStyle().setDisplay(Display.NONE);
+			createTitle.getStyle().clearDisplay();
+		} else {
+			editTitle.getStyle().clearDisplay();
+			createTitle.getStyle().setDisplay(Display.NONE);
+		}
 	}
 
 	public void setDelegate(Delegate delegate) {
@@ -91,13 +99,19 @@ public class {{=className}} extends Composite implements {{=editActivityWrapper}
 		save.setEnabled(enabled);
 	}
 
-	public void showErrors(List<EditorError> errors) {
-		SafeHtmlBuilder b = new SafeHtmlBuilder();
-		for (EditorError error : errors) {
+  public void showErrors(List<EditorError> errors) {
+    SafeHtmlBuilder b = new SafeHtmlBuilder();
+    for (EditorError error : errors) {
       b.appendEscaped(error.getPath()).appendEscaped(": ");
-			b.appendEscaped(error.getMessage()).appendHtmlConstant("<br>");
-		}
-		this.errors.setInnerHTML(b.toSafeHtml().asString());
+      b.appendEscaped(error.getMessage()).appendHtmlConstant("<br>");
+    }
+    this.errors.setInnerHTML(b.toSafeHtml().asString());
+  }
+
+	@UiHandler("cancel")
+	void onCancel(ClickEvent event) {
+		//Jimbo
+		delegate.cancelClicked();
 	}
 
 	@UiHandler("save")

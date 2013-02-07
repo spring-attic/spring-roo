@@ -118,4 +118,48 @@ public @interface RooService {
      * @return a blank string if the annotated type doesn't support this method
      */
     String updateMethod() default UPDATE_METHOD;
+
+    /**
+     * Annotates services methods with @PreAuthorize(isAuthenticated())
+     * 
+     * @return a blank string if the annotated type doesn't support this method
+     */
+    boolean requireAuthentication() default false;
+
+    /**
+     * Annotates services methods with @PreAuthorize(hasPermission())
+     * 
+     * @return a blank string if the annotated type doesn't support this method
+     */
+    boolean usePermissionEvaluator() default false;
+
+    /**
+     * Annotates update service methods with @PreAuthorize(hasRole())
+     * 
+     * @return a blank string if the annotated type doesn't support this method
+     */
+    String[] authorizedCreateOrUpdateRoles() default "";
+
+    /**
+     * Annotates delete service methods with @PreAuthorize(hasRole())
+     * 
+     * @return a blank string if the annotated type doesn't support this method
+     */
+    String[] authorizedDeleteRoles() default "";
+
+    /**
+     * Annotates find service methods with @PreAuthorize(hasRole())
+     * 
+     * @return a blank string if the annotated type doesn't support this method
+     */
+    String[] authorizedReadRoles() default "";
+
+    /**
+     * Indicates whether the annotated service should be instantiated using XML
+     * configuration
+     * 
+     * @return see above
+     */
+    boolean useXmlConfiguration() default false;
+
 }
