@@ -9,6 +9,7 @@ import com.google.gwt.text.client.DateTimeFormatRenderer;
 import com.google.gwt.text.shared.AbstractRenderer;
 import com.google.gwt.text.shared.AbstractSafeHtmlRenderer;
 import com.google.gwt.text.shared.Renderer;
+import com.google.gwt.text.shared.SafeHtmlRenderer;
 
 {{#imports}}import {{=import}};
 {{/imports}}
@@ -26,10 +27,8 @@ public class {{=className}} extends MobileProxyListView<{{=proxy}}> {
 	private static class CellRenderer extends AbstractSafeHtmlRenderer<{{proxy}}> {
 		private final String dateStyle = ScaffoldMobileApp.getMobileListResources().cellListStyle().dateProp();
 		private final String secondaryStyle = ScaffoldMobileApp.getMobileListResources().cellListStyle().secondaryProp();
-		private final Renderer<{{=proxy}}> primaryRenderer = {{=proxyRenderer}}.instance();
 		{{#mobileProperties}}
-		private final Renderer<{{=propType}}> {{=propRendererName}} = {{=propRenderer}};
-		{{/mobileProperties}}
+		private final Renderer<{{=propType}}> {{=propRendererName}} = {{=propRenderer}};{{/mobileProperties}}
 
 		@Override
 		public SafeHtml render({{=proxy}} value) {

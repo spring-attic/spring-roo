@@ -25,8 +25,4 @@ public interface GwtTemplateService {
 
     List<ClassOrInterfaceTypeDetails> getStaticTemplateTypeDetails(
             GwtType type, String moduleName);
-
-    public void buildLocatorXmlConfiguration(
-            ClassOrInterfaceTypeDetails serviceInterface,
-            ClassOrInterfaceTypeDetails locator);
 }

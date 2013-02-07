@@ -25,12 +25,6 @@ public class ServiceAnnotationValues extends AbstractAnnotationValues {
     @AutoPopulate private String saveMethod = RooService.SAVE_METHOD;
     @AutoPopulate private boolean transactional = true;
     @AutoPopulate private String updateMethod = RooService.UPDATE_METHOD;
-    @AutoPopulate private boolean requireAuthentication = false;
-    @AutoPopulate private boolean usePermissionEvaluator = false;
-    @AutoPopulate private String[] authorizedCreateOrUpdateRoles = new String[0];
-    @AutoPopulate private String[] authorizedReadRoles = new String[0];
-    @AutoPopulate private String[] authorizedDeleteRoles = new String[0];
-    @AutoPopulate private boolean useXmlConfiguration = false;
 
     /**
      * Constructor
@@ -78,29 +72,4 @@ public class ServiceAnnotationValues extends AbstractAnnotationValues {
     public boolean isTransactional() {
         return transactional;
     }
-
-    public boolean requireAuthentication() {
-        return requireAuthentication;
-    }
-
-    public boolean usePermissionEvaluator() {
-        return usePermissionEvaluator;
-    }
-
-    public String[] getAuthorizedCreateOrUpdateRoles() {
-        return authorizedCreateOrUpdateRoles;
-    }
-
-    public String[] getAuthorizedReadRoles() {
-        return authorizedReadRoles;
-    }
-
-    public String[] getAuthorizedDeleteRoles() {
-        return authorizedDeleteRoles;
-    }
-
-    public boolean useXmlConfiguration() {
-        return useXmlConfiguration;
-    }
-
 }

@@ -14,8 +14,6 @@ import hapax.TemplateLoader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.lang.reflect.Modifier;
@@ -27,10 +25,8 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.xml.parsers.DocumentBuilder;
-import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
@@ -61,11 +57,9 @@ import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
-import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Path;
-import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.FileUtils;
 import org.springframework.roo.support.util.XmlUtils;
@@ -98,7 +92,6 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
     @Reference ProjectOperations projectOperations;
     @Reference TypeLocationService typeLocationService;
     @Reference TypeParsingService typeParsingService;
-    @Reference FileManager fileManager;
 
     @Override
     public String buildUiXml(final String templateContents,
@@ -250,7 +243,7 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
         final ClassOrInterfaceTypeDetails proxy = gwtTypeService
                 .lookupProxyFromEntity(mirroredType);
         final ClassOrInterfaceTypeDetails request = gwtTypeService
-                .lookupUnmanagedRequestFromEntity(mirroredType);
+                .lookupRequestFromEntity(mirroredType);
         final JavaPackage topLevelPackage = projectOperations
                 .getTopLevelPackage(moduleName);
         final Map<GwtType, JavaType> mirrorTypeMap = GwtUtils.getMirrorTypeMap(
@@ -499,7 +492,7 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
                     addImport(dataDictionary, proxy.getName()
                             .getFullyQualifiedTypeName());
                     addImport(dataDictionary, entitySimpleName,
-                            GwtType.DESKTOP_LIST_VIEW, moduleName);
+                            GwtType.LIST_VIEW, moduleName);
                     addImport(dataDictionary, entitySimpleName,
                             GwtType.MOBILE_LIST_VIEW, moduleName);
                 }
@@ -539,8 +532,7 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
                                 .getTopLevelPackage(moduleName)));
             }
 
-            if (projectOperations
-                    .isFeatureInstalledInFocusedModule(FeatureNames.GAE)) {
+            if (projectOperations.isFeatureInstalled(FeatureNames.GAE)) {
                 dataDictionary.showSection("gae");
             }
             break;
@@ -696,8 +688,6 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
                 GwtPath.SHARED_SCAFFOLD.packageName(topLevelPackage));
         dataDictionary.setVariable("uiPackage",
                 GwtPath.MANAGED_UI.packageName(topLevelPackage));
-        dataDictionary.setVariable("uiEditorPackage",
-                GwtPath.MANAGED_UI_EDITOR.packageName(topLevelPackage));
         dataDictionary.setVariable("name", simpleTypeName);
         dataDictionary.setVariable("pluralName", plural);
         dataDictionary.setVariable("nameUncapitalized",
@@ -713,131 +703,52 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
         GwtProxyProperty dateProperty = null;
         final Set<String> importSet = new HashSet<String>();
 
-        List<String> existingEditViewFields = new ArrayList<String>();
+        final List<String> omittedFields = new ArrayList<String>();
 
-        List<String> fieldsInBothViewAndMobileEditView = new ArrayList<String>();
-
-        List<String> existingDetailsViewFields = new ArrayList<String>();
-
-        // Adds names of fields the are found in both the unmanaged EditView and
-        // MobileEditView to fieldsInBothViewAndMobileView list
-        if (type == GwtType.EDIT_ACTIVITY_WRAPPER
-                || type == GwtType.MOBILE_EDIT_VIEW
-                || type == GwtType.DESKTOP_EDIT_VIEW) {
-            List<String> existingDesktopFields = new ArrayList<String>();
-            List<String> existingMobileFields = new ArrayList<String>();
-
+        // Adds names of fields in edit view to ommittedFields list
+        if (type == GwtType.EDIT_VIEW) {
             try {
-                String className = GwtPath.MANAGED_UI_DESKTOP
+                final String className = GwtPath.MANAGED_UI
                         .packageName(topLevelPackage)
                         + "."
                         + simpleTypeName
-                        + GwtType.DESKTOP_EDIT_VIEW.getTemplate();
+                        + GwtType.EDIT_VIEW.getTemplate();
 
-                ClassOrInterfaceTypeDetails details = typeLocationService
+                final ClassOrInterfaceTypeDetails details = typeLocationService
                         .getTypeDetails(new JavaType(className));
-
                 if (details != null) {
                     for (final FieldMetadata field : details
                             .getDeclaredFields()) {
                         final JavaSymbolName fieldName = field.getFieldName();
                         final String name = fieldName.toString();
-                        existingDesktopFields.add(name);
+                        omittedFields.add(name);
                     }
                 }
+            }
+            catch (final Exception e) {
+                throw new IllegalArgumentException(e);
+            }
+        }
 
-                className = GwtPath.MANAGED_UI_MOBILE
+        // Adds names of fields in mobile edit view to ommittedFields list
+        if (type == GwtType.MOBILE_EDIT_VIEW) {
+            try {
+                final String className = GwtPath.MANAGED_UI
                         .packageName(topLevelPackage)
                         + "."
                         + simpleTypeName
                         + GwtType.MOBILE_EDIT_VIEW.getTemplate();
 
-                details = typeLocationService.getTypeDetails(new JavaType(
-                        className));
-
-                if (details != null) {
-                    for (FieldMetadata field : details.getDeclaredFields()) {
-                        JavaSymbolName fieldName = field.getFieldName();
-                        String name = fieldName.toString();
-                        existingMobileFields.add(name);
-                    }
-                }
-
-                // Adds names of fields in MobileEditView to existingFields list
-                if (type == GwtType.MOBILE_EDIT_VIEW)
-                    existingEditViewFields = existingMobileFields;
-
-                // Adds names of fields in DesktopEditView to existingFields
-                // list
-                if (type == GwtType.DESKTOP_EDIT_VIEW)
-                    existingEditViewFields = existingDesktopFields;
-
-            }
-            catch (final Exception e) {
-                throw new IllegalArgumentException(e);
-            }
-
-            for (String mobileViewField : existingMobileFields) {
-                for (String viewField : existingDesktopFields) {
-                    if (viewField.equals(mobileViewField)) {
-                        fieldsInBothViewAndMobileEditView.add(viewField);
-                        break;
-                    }
-                }
-            }
-        }
-
-        if (type == GwtType.MOBILE_DETAILS_VIEW
-                || type == GwtType.DESKTOP_DETAILS_VIEW) {
-            List<String> existingDesktopFields = new ArrayList<String>();
-            List<String> existingMobileFields = new ArrayList<String>();
-
-            try {
-                String className = GwtPath.MANAGED_UI_DESKTOP
-                        .packageName(topLevelPackage)
-                        + "."
-                        + simpleTypeName
-                        + GwtType.DESKTOP_DETAILS_VIEW.getTemplate();
-
-                ClassOrInterfaceTypeDetails details = typeLocationService
+                final ClassOrInterfaceTypeDetails details = typeLocationService
                         .getTypeDetails(new JavaType(className));
-
                 if (details != null) {
                     for (final FieldMetadata field : details
                             .getDeclaredFields()) {
                         final JavaSymbolName fieldName = field.getFieldName();
                         final String name = fieldName.toString();
-                        existingDesktopFields.add(name);
+                        omittedFields.add(name);
                     }
                 }
-
-                className = GwtPath.MANAGED_UI_MOBILE
-                        .packageName(topLevelPackage)
-                        + "."
-                        + simpleTypeName
-                        + GwtType.MOBILE_DETAILS_VIEW.getTemplate();
-
-                details = typeLocationService.getTypeDetails(new JavaType(
-                        className));
-
-                if (details != null) {
-                    for (FieldMetadata field : details.getDeclaredFields()) {
-                        JavaSymbolName fieldName = field.getFieldName();
-                        String name = fieldName.toString();
-                        existingMobileFields.add(name);
-                    }
-                }
-
-                // Adds names of fields in MobileDetailsView to existingFields
-                // list
-                if (type == GwtType.MOBILE_DETAILS_VIEW)
-                    existingDetailsViewFields = existingMobileFields;
-
-                // Adds names of fields in DesktopDetailsView to existingFields
-                // list
-                if (type == GwtType.DESKTOP_DETAILS_VIEW)
-                    existingDetailsViewFields = existingDesktopFields;
-
             }
             catch (final Exception e) {
                 throw new IllegalArgumentException(e);
@@ -882,29 +793,14 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
                 proxyFields += "\"" + gwtProxyProperty.getName() + "\"";
             }
 
-            // if the property is in the existingFields list, do not add it
-            if (!existingDetailsViewFields.contains(gwtProxyProperty.getName())) {
-                dataDictionary.addSection("fields").setVariable("field",
-                        gwtProxyProperty.getName());
-
-                final TemplateDataDictionary managedPropertiesSection = dataDictionary
-                        .addSection("managedProperties");
-                managedPropertiesSection.setVariable("prop",
-                        gwtProxyProperty.getName());
-                managedPropertiesSection.setVariable(
-                        "propId",
-                        proxyType.getSimpleTypeName() + "_"
-                                + gwtProxyProperty.getName());
-                managedPropertiesSection.setVariable("propGetter",
-                        gwtProxyProperty.getGetter());
-                managedPropertiesSection.setVariable("propType",
-                        gwtProxyProperty.getType());
-                managedPropertiesSection.setVariable("propFormatter",
-                        gwtProxyProperty.getFormatter());
-                managedPropertiesSection.setVariable("propRenderer",
-                        gwtProxyProperty.getRenderer());
-                managedPropertiesSection.setVariable("propReadable",
-                        gwtProxyProperty.getReadableName());
+            dataDictionary.addSection("fields").setVariable("field",
+                    gwtProxyProperty.getName());
+            if (!isReadOnly(gwtProxyProperty.getName(), mirroredType)) {
+                // if the property is in the omittedFields list, do not add it
+                if (!omittedFields.contains(gwtProxyProperty.getName())) {
+                    dataDictionary.addSection("editViewProps").setVariable(
+                            "prop", gwtProxyProperty.forEditView());
+                }
             }
 
             final TemplateDataDictionary propertiesSection = dataDictionary
@@ -926,12 +822,6 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
                     gwtProxyProperty.getReadableName());
 
             if (!isReadOnly(gwtProxyProperty.getName(), mirroredType)) {
-                // if the property is in the existingFields list, do not add it
-                if (!existingEditViewFields
-                        .contains(gwtProxyProperty.getName()))
-                    dataDictionary.addSection("editViewProps").setVariable(
-                            "prop", gwtProxyProperty.forEditView());
-
                 final TemplateDataDictionary editableSection = dataDictionary
                         .addSection("editableProperties");
                 editableSection.setVariable("prop", gwtProxyProperty.getName());
@@ -956,61 +846,44 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
             dataDictionary.setVariable("proxyRendererType",
                     proxyType.getSimpleTypeName() + "Renderer");
 
-            // If the field is not added to the managed MobileEditView and the
-            // managed EditView then it there is no reason to add it to the
-            // interface nor the start method in the EditActivityWrapper
-            if (!fieldsInBothViewAndMobileEditView.contains(gwtProxyProperty
-                    .getName())) {
-                if (gwtProxyProperty.isProxy() || gwtProxyProperty.isEnum()
+            if (gwtProxyProperty.isProxy() || gwtProxyProperty.isEnum()
+                    || gwtProxyProperty.isCollectionOfProxy()) {
+                final TemplateDataDictionary section = dataDictionary
+                        .addSection(gwtProxyProperty.isEnum() ? "setEnumValuePickers"
+                                : "setProxyValuePickers");
+                section.setVariable("setValuePicker",
+                        gwtProxyProperty.getSetValuePickerMethod());
+                section.setVariable("setValuePickerName",
+                        gwtProxyProperty.getSetValuePickerMethodName());
+                section.setVariable("valueType", gwtProxyProperty
+                        .getValueType().getSimpleTypeName());
+                section.setVariable("rendererType",
+                        gwtProxyProperty.getProxyRendererType());
+                if (gwtProxyProperty.isProxy()
                         || gwtProxyProperty.isCollectionOfProxy()) {
-                    final TemplateDataDictionary section = dataDictionary
-                            .addSection(gwtProxyProperty.isEnum() ? "setEnumValuePickers"
-                                    : "setProxyValuePickers");
-                    // The methods is required to satisfy the interface.
-                    // However, if the field is in the existingFields lists, the
-                    // method must be empty because the field will not be added
-                    // to the managed view.
-                    section.setVariable(
-                            "setValuePicker",
-                            existingEditViewFields.contains(gwtProxyProperty
-                                    .getName()) ? gwtProxyProperty
-                                    .getSetEmptyValuePickerMethod()
-                                    : gwtProxyProperty
-                                            .getSetValuePickerMethod());
-                    section.setVariable("setValuePickerName",
-                            gwtProxyProperty.getSetValuePickerMethodName());
-                    section.setVariable("valueType", gwtProxyProperty
-                            .getValueType().getSimpleTypeName());
-                    section.setVariable("rendererType",
-                            gwtProxyProperty.getProxyRendererType());
-                    if (gwtProxyProperty.isProxy()
-                            || gwtProxyProperty.isCollectionOfProxy()) {
-                        String propTypeName = StringUtils
-                                .uncapitalize(gwtProxyProperty
-                                        .isCollectionOfProxy() ? gwtProxyProperty
-                                        .getPropertyType().getParameters()
-                                        .get(0).getSimpleTypeName()
-                                        : gwtProxyProperty.getPropertyType()
-                                                .getSimpleTypeName());
-                        propTypeName = propTypeName.substring(0,
-                                propTypeName.indexOf("Proxy"));
-                        section.setVariable("requestInterface", propTypeName
-                                + "Request");
-                        section.setVariable("findMethod",
-                                "find" + StringUtils.capitalize(propTypeName)
-                                        + "Entries(0, 50)");
-                    }
+                    String propTypeName = StringUtils
+                            .uncapitalize(gwtProxyProperty
+                                    .isCollectionOfProxy() ? gwtProxyProperty
+                                    .getPropertyType().getParameters().get(0)
+                                    .getSimpleTypeName() : gwtProxyProperty
+                                    .getPropertyType().getSimpleTypeName());
+                    propTypeName = propTypeName.substring(0,
+                            propTypeName.indexOf("Proxy"));
+                    section.setVariable("requestInterface", propTypeName
+                            + "Request");
+                    section.setVariable("findMethod",
+                            "find" + StringUtils.capitalize(propTypeName)
+                                    + "Entries(0, 50)");
+                }
+                maybeAddImport(dataDictionary, importSet,
+                        gwtProxyProperty.getPropertyType());
+                maybeAddImport(dataDictionary, importSet,
+                        gwtProxyProperty.getValueType());
+                if (gwtProxyProperty.isCollectionOfProxy()) {
+                    maybeAddImport(dataDictionary, importSet, gwtProxyProperty
+                            .getPropertyType().getParameters().get(0));
                     maybeAddImport(dataDictionary, importSet,
-                            gwtProxyProperty.getPropertyType());
-                    maybeAddImport(dataDictionary, importSet,
-                            gwtProxyProperty.getValueType());
-                    if (gwtProxyProperty.isCollectionOfProxy()) {
-                        maybeAddImport(dataDictionary, importSet,
-                                gwtProxyProperty.getPropertyType()
-                                        .getParameters().get(0));
-                        maybeAddImport(dataDictionary, importSet,
-                                gwtProxyProperty.getSetEditorType());
-                    }
+                            gwtProxyProperty.getSetEditorType());
                 }
             }
         }
@@ -1023,23 +896,15 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
                     .setVariable("primaryProp", primaryProperty.getName());
             dataDictionary.setVariable("primaryPropGetter",
                     primaryProperty.getGetter());
-            String primaryPropBuilder = new StringBuilder(
-                    "if (value != null) {\n\t\t\t\tsb.appendEscaped(")
-                    .append("primaryRenderer")
-                    .append(".render(value));\n\t\t\t}").toString();
-            dataDictionary
-                    .setVariable("primaryPropBuilder", primaryPropBuilder);
-
-            // dataDictionary.setVariable("primaryPropBuilder",
-            // primaryProperty.forMobileListView("primaryRenderer"));
-            // final TemplateDataDictionary section = dataDictionary
-            // .addSection("mobileProperties");
-            // section.setVariable("prop", primaryProperty.getName());
-            // section.setVariable("propGetter", primaryProperty.getGetter());
-            // section.setVariable("propType", primaryProperty.getType());
-            // section.setVariable("propRenderer",
-            // primaryProperty.getRenderer());
-            // section.setVariable("propRendererName", "primaryRenderer");
+            dataDictionary.setVariable("primaryPropBuilder",
+                    primaryProperty.forMobileListView("primaryRenderer"));
+            final TemplateDataDictionary section = dataDictionary
+                    .addSection("mobileProperties");
+            section.setVariable("prop", primaryProperty.getName());
+            section.setVariable("propGetter", primaryProperty.getGetter());
+            section.setVariable("propType", primaryProperty.getType());
+            section.setVariable("propRenderer", primaryProperty.getRenderer());
+            section.setVariable("propRendererName", "primaryRenderer");
         }
         else {
             dataDictionary.setVariable("primaryProp", "id");
@@ -1123,87 +988,6 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
         return gwtType.getPath().packageName(
                 projectOperations.getTopLevelPackage(moduleName))
                 + "." + gwtType.getTemplate();
-    }
-
-    public void buildLocatorXmlConfiguration(
-            ClassOrInterfaceTypeDetails serviceInterface,
-            ClassOrInterfaceTypeDetails locator) {
-        final PathResolver pathResolver = projectOperations.getPathResolver();
-
-        final String fileIdentifier = pathResolver.getFocusedIdentifier(
-                Path.SPRING_CONFIG_ROOT, "applicationContext-locators.xml");
-        if (!fileManager.exists(fileIdentifier)) {
-            InputStream inputStream = null;
-            OutputStream outputStream = null;
-            try {
-                inputStream = FileUtils.getInputStream(getClass(),
-                        "applicationContext-locators-template.xml");
-                outputStream = fileManager.createFile(fileIdentifier)
-                        .getOutputStream();
-                IOUtils.copy(inputStream, outputStream);
-            }
-            catch (final IOException ioe) {
-                throw new IllegalStateException(ioe);
-            }
-            finally {
-                IOUtils.closeQuietly(inputStream);
-                IOUtils.closeQuietly(outputStream);
-            }
-        }
-
-        try {
-            final DocumentBuilder builder = XmlUtils.getDocumentBuilder();
-
-            InputSource source = new InputSource();
-            FileReader fileReader = new FileReader(fileIdentifier);
-            source.setCharacterStream(fileReader);
-            final Document document = builder.parse(source);
-
-            final String locatorName = StringUtils.uncapitalize(locator
-                    .getType().getSimpleTypeName());
-            final String serviceName = StringUtils
-                    .uncapitalize(serviceInterface.getType()
-                            .getSimpleTypeName());
-
-            Element locatorElement = XmlUtils.findFirstElement("//*[@id='"
-                    + locatorName + "']", document.getDocumentElement());
-
-            if (locatorElement != null)
-                return;
-
-            locatorElement = document.createElement("bean");
-            locatorElement.setAttribute("id", serviceName);
-            locatorElement.setAttribute("class", locator.getType()
-                    .getFullyQualifiedTypeName());
-
-            Element serviceElement = document.createElement("property");
-            serviceElement.setAttribute("name", serviceName);
-            serviceElement.setAttribute("ref", serviceName);
-
-            locatorElement.appendChild(serviceElement);
-
-            Node beansNode = document.getElementsByTagName("beans").item(0);
-            if (beansNode.getNodeType() == Node.ELEMENT_NODE) {
-                Element beansElement = (Element) beansNode;
-                beansElement.appendChild(locatorElement);
-                // final Transformer transformer =
-                // XmlUtils.createIndentingTransformer();
-                TransformerFactory transfac = TransformerFactory.newInstance();
-                Transformer transformer = transfac.newTransformer();
-                transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-                final DOMSource domSource = new DOMSource(document);
-                final StreamResult result = new StreamResult(new StringWriter());
-                transformer.transform(domSource, result);
-                String output = result.getWriter().toString();
-
-                fileManager.createOrUpdateTextFileIfRequired(fileIdentifier,
-                        output, true);
-            }
-
-        }
-        catch (final Exception e) {
-            throw new IllegalStateException(e);
-        }
     }
 
     private String getRequestMethodCall(

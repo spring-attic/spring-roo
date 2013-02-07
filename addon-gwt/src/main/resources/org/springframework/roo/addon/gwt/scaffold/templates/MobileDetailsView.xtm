@@ -14,12 +14,14 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
 
+
+import {{=placePackage}}.ProxyDetailsView;
 {{#imports}}import {{=import}};
 {{/imports}}
 /**
  * Details view for {{=name}} proxys.
  */
-public class {{=className}} extends Composite implements {{=detailsView}} {
+public class {{=className}} extends Composite implements ProxyDetailsView<{{=proxy}}> {
 	interface Binder extends UiBinder<HTMLPanel, {{=className}}> {}
 
 	private static final Binder BINDER = GWT.create(Binder.class);
@@ -66,7 +68,7 @@ public class {{=className}} extends Composite implements {{=detailsView}} {
 	}
 
 	public void setValue({{=proxy}} proxy) {
-		this.proxy = proxy;{{#managedProperties}}
-		{{=prop}}.setInnerText(proxy.{{=propGetter}}() == null ? "" : {{=propFormatter}}(proxy.{{=propGetter}}()));{{/managedProperties}}
+		this.proxy = proxy;{{#properties}}
+		{{=prop}}.setInnerText(proxy.{{=propGetter}}() == null ? "" : {{=propFormatter}}(proxy.{{=propGetter}}()));{{/properties}}
 	}
 }
