@@ -33,7 +33,7 @@ public final class ApplicationMasterActivities implements ActivityMapper {
 			@Override
       public void handle{{=entitySimpleName}}({{=entityFullPath}} isNull) {
         setResult(new {{=entitySimpleName}}ListActivity(requests,
-          ScaffoldApp.isMobile() ? {{=entitySimpleName}}MobileListView.instance() : {{=entitySimpleName}}ListView.instance(),
+          ScaffoldApp.isMobile() ? {{=entitySimpleName}}MobileListView.instance() : {{=entitySimpleName}}DesktopListView.instance(),
           placeController));
       }
       {{/entities}}

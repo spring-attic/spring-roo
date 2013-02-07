@@ -20,6 +20,14 @@ public enum GwtPath {
             + GwtPath.templateSelector), // GWT_SCAFFOLD_GENERATED
     MANAGED_UI("/client/managed/ui", "module/client/managed/ui/"
             + GwtPath.templateSelector), // GWT_SCAFFOLD_UI
+    MANAGED_UI_DESKTOP("/client/managed/ui/desktop",
+            "module/client/managed/ui/desktop/" + GwtPath.templateSelector), // GWT_SCAFFOLD_UI
+    MANAGED_UI_MOBILE("/client/managed/ui/mobile",
+            "module/client/managed/ui/mobile/" + GwtPath.templateSelector), // GWT_SCAFFOLD_UI
+    MANAGED_UI_RENDERER("/client/managed/ui/renderer",
+            "module/client/managed/ui/renderer/" + GwtPath.templateSelector), // GWT_SCAFFOLD_UI
+    MANAGED_UI_EDITOR("/client/managed/ui/editor",
+            "module/client/managed/ui/editor/" + GwtPath.templateSelector), // GWT_SCAFFOLD_UI
     SCAFFOLD("/client/scaffold", "module/client/scaffold/"
             + GwtPath.templateSelector), SCAFFOLD_ACTIVITY(
             "/client/scaffold/activity", "module/client/scaffold/activity/"

@@ -200,11 +200,8 @@ public class GwtTypeServiceImpl implements GwtTypeService {
                         .getWatchedInnerTypes()) {
                     for (final ClassOrInterfaceTypeDetailsBuilder innerTypeBuilder : templateClassBuilder
                             .getDeclaredInnerTypes()) {
-                        if (innerTypeBuilder
-                                .getName()
-                                .getFullyQualifiedTypeName()
-                                .equals(innerTypeName
-                                        .getFullyQualifiedTypeName())) {
+                        if (innerTypeBuilder.getName().getSimpleTypeName()
+                                .equals(innerTypeName.getSimpleTypeName())) {
                             final ClassOrInterfaceTypeDetailsBuilder builder = new ClassOrInterfaceTypeDetailsBuilder(
                                     abstractClassBuilder
                                             .getDeclaredByMetadataId(),
