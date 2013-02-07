@@ -8,11 +8,15 @@ import java.util.logging.Formatter;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import jline.ANSIBuffer;
 import jline.ConsoleReader;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.commons.lang3.Validate;
 import org.springframework.roo.shell.ShellPromptAccessor;
@@ -108,8 +112,20 @@ public class JLineLogHandler extends Handler {
             @Override
             public String format(final LogRecord record) {
                 final StringBuilder sb = new StringBuilder();
-                if (record.getMessage() != null) {
-                    sb.append(record.getMessage()).append(LINE_SEPARATOR);
+                String message = record.getMessage();
+                if (message != null) {
+                    final Object[] parameters = record.getParameters();
+                    if (!ArrayUtils.isEmpty(parameters)) {
+                        final Pattern pattern = Pattern.compile("\\{.*?\\}");
+                        final Matcher matcher = pattern.matcher(message);
+                        int i = 0;
+                        while (matcher.find()) {
+                            message = StringUtils.replace(message,
+                                    matcher.group(0), parameters[i].toString());
+                            i++;
+                        }
+                    }
+                    sb.append(message).append(LINE_SEPARATOR);
                 }
                 if (record.getThrown() != null) {
                     PrintWriter pw = null;
