@@ -21,6 +21,4 @@ public interface ProxyDetailsView<P> extends TakesValue<P>, IsWidget {
 	}
 
 	boolean confirm(String msg);
-
-	void setDelegate(Delegate delegate);
 }

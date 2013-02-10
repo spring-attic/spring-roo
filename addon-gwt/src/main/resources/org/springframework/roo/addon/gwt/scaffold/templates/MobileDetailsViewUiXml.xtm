@@ -13,8 +13,10 @@
     }
   </ui:style>
 
-  <g:HTMLPanel debugId="boundElementHolder" styleName='{style.outer}'>{{#properties}}
-    <div id='{{=prop}}'><div class='{style.label}'>{{=propReadable}}</div><div class='{style.value}' ui:field='{{=prop}}'></div></div>{{/properties}}
+  <g:HTMLPanel debugId="boundElementHolder" styleName='{style.outer}'>
+  	{{#properties}}
+    <div id='{{=prop}}'><div class='{style.label}'>{{=propReadable}}</div><div class='{style.value}' ui:field='{{=prop}}'></div></div>
+    {{/properties}}
 
     <g:Button ui:field='delete'>Delete</g:Button>
   </g:HTMLPanel>

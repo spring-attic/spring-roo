@@ -60,6 +60,7 @@ import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Plugin;
 import org.springframework.roo.project.ProjectOperations;
+import org.springframework.roo.project.Property;
 import org.springframework.roo.project.Repository;
 import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.support.osgi.OSGiUtils;
@@ -618,6 +619,11 @@ public class GwtOperationsImpl implements GwtOperations {
 
         final Element configuration = XmlUtils.getConfiguration(getClass());
 
+        // Add properties
+        updateProperties(configuration,
+                projectOperations
+                        .isFeatureInstalledInFocusedModule(FeatureNames.GAE));
+
         // Add POM repositories
         updateRepositories(configuration);
 
@@ -681,6 +687,19 @@ public class GwtOperationsImpl implements GwtOperations {
         }
         projectOperations.addDependencies(
                 projectOperations.getFocusedModuleName(), dependencies);
+    }
+
+    private void updateProperties(final Element configuration,
+            final boolean isGaeEnabled) {
+        // Update the POM
+        final String xPathExpression = "/configuration/"
+                + (isGaeEnabled ? "gae" : "gwt") + "/properties/*";
+        final List<Element> propertyElements = XmlUtils.findElements(
+                xPathExpression, configuration);
+        for (final Element property : propertyElements) {
+            projectOperations.addProperty(projectOperations
+                    .getFocusedModuleName(), new Property(property));
+        }
     }
 
     /**
