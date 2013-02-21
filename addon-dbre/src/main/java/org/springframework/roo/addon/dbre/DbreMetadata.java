@@ -103,6 +103,11 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
     private ClassOrInterfaceTypeDetailsBuilder updatedGovernorBuilder;
     private FieldMetadata versionField;
 
+    // XXX DiSiD: Move var from method to class (store successive modifications)
+    // http://projects.disid.com/issues/7455
+    private AnnotationMetadata toStringAnnotation = governorTypeDetails
+            .getAnnotation(ROO_TO_STRING);
+
     public DbreMetadata(final String identifier, final JavaType aspectName,
             final PhysicalTypeMetadata governorPhysicalTypeMetadata,
             final DbManagedAnnotationValues annotationValues,
@@ -294,11 +299,21 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
         for (final FieldMetadataBuilder fieldBuilder : uniqueOwningSideFields
                 .values()) {
             addToBuilder(fieldBuilder);
+
+            // Exclude these fields in @RooToString to avoid circular references
+            // - ROO-1399
+            excludeFieldsInToStringAnnotation(fieldBuilder.getFieldName()
+                    .getSymbolName());
         }
         // Add unique inverse-side many-to-one fields
         for (final FieldMetadataBuilder fieldBuilder : uniqueInverseSideFields
                 .values()) {
             addToBuilder(fieldBuilder);
+
+            // Exclude these fields in @RooToString to avoid circular references
+            // - ROO-1399
+            excludeFieldsInToStringAnnotation(fieldBuilder.getFieldName()
+                    .getSymbolName());
         }
     }
 
@@ -352,6 +367,11 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
         for (final FieldMetadataBuilder fieldBuilder : uniqueFields.values()) {
             addToBuilder(fieldBuilder);
+
+            // Exclude these fields in @RooToString to avoid circular references
+            // - ROO-1399
+            excludeFieldsInToStringAnnotation(fieldBuilder.getFieldName()
+                    .getSymbolName());
         }
     }
 
@@ -419,6 +439,11 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
                     foreignSchemaName, exportedKey.getOnUpdate(),
                     exportedKey.getOnDelete());
             addToBuilder(fieldBuilder);
+
+            // Exclude these fields in @RooToString to avoid circular references
+            // - ROO-1399
+            excludeFieldsInToStringAnnotation(fieldBuilder.getFieldName()
+                    .getSymbolName());
         }
     }
 
@@ -530,6 +555,11 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
                     fieldName, fieldType, mappedByFieldName,
                     exportedKey.getOnUpdate(), exportedKey.getOnDelete());
             addToBuilder(fieldBuilder);
+
+            // Exclude these fields in @RooToString to avoid circular references
+            // - ROO-1399
+            excludeFieldsInToStringAnnotation(fieldBuilder.getFieldName()
+                    .getSymbolName());
         }
     }
 
@@ -592,9 +622,9 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
         builder.addMethod(getMutatorMethod(fieldName, fieldType));
     }
 
+    // XXX DiSiD: Invoke this method when add non other fields to builder
+    // http://projects.disid.com/issues/7455
     private void excludeFieldsInToStringAnnotation(final String fieldName) {
-        final AnnotationMetadata toStringAnnotation = governorTypeDetails
-                .getAnnotation(ROO_TO_STRING);
         if (toStringAnnotation == null) {
             return;
         }
@@ -637,8 +667,8 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
                 ROO_TO_STRING, attributes);
         updatedGovernorBuilder = new ClassOrInterfaceTypeDetailsBuilder(
                 governorTypeDetails);
-        updatedGovernorBuilder.updateTypeAnnotation(
-                toStringAnnotationBuilder.build(),
+        toStringAnnotation = toStringAnnotationBuilder.build();
+        updatedGovernorBuilder.updateTypeAnnotation(toStringAnnotation,
                 new HashSet<JavaSymbolName>());
     }
 
