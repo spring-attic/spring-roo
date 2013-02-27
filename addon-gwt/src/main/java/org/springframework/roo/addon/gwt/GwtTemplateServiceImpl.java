@@ -1138,6 +1138,88 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
                 + "." + gwtType.getTemplate();
     }
 
+    @Override
+    public void buildLocatorXmlConfiguration(
+            ClassOrInterfaceTypeDetails serviceInterface,
+            ClassOrInterfaceTypeDetails locator) {
+        final PathResolver pathResolver = projectOperations.getPathResolver();
+
+        final String fileIdentifier = pathResolver.getFocusedIdentifier(
+                Path.SPRING_CONFIG_ROOT, "applicationContext-locators.xml");
+        if (!fileManager.exists(fileIdentifier)) {
+            InputStream inputStream = null;
+            OutputStream outputStream = null;
+            try {
+                inputStream = FileUtils.getInputStream(getClass(),
+                        "applicationContext-locators-template.xml");
+                outputStream = fileManager.createFile(fileIdentifier)
+                        .getOutputStream();
+                IOUtils.copy(inputStream, outputStream);
+            }
+            catch (final IOException ioe) {
+                throw new IllegalStateException(ioe);
+            }
+            finally {
+                IOUtils.closeQuietly(inputStream);
+                IOUtils.closeQuietly(outputStream);
+            }
+        }
+
+        try {
+            final DocumentBuilder builder = XmlUtils.getDocumentBuilder();
+
+            InputSource source = new InputSource();
+            FileReader fileReader = new FileReader(fileIdentifier);
+            source.setCharacterStream(fileReader);
+            final Document document = builder.parse(source);
+
+            final String locatorName = StringUtils.uncapitalize(locator
+                    .getType().getSimpleTypeName());
+            final String serviceName = StringUtils
+                    .uncapitalize(serviceInterface.getType()
+                            .getSimpleTypeName());
+
+            Element locatorElement = XmlUtils.findFirstElement("//*[@id='"
+                    + locatorName + "']", document.getDocumentElement());
+
+            if (locatorElement != null)
+                return;
+
+            locatorElement = document.createElement("bean");
+            locatorElement.setAttribute("id", serviceName);
+            locatorElement.setAttribute("class", locator.getType()
+                    .getFullyQualifiedTypeName());
+
+            Element serviceElement = document.createElement("property");
+            serviceElement.setAttribute("name", serviceName);
+            serviceElement.setAttribute("ref", serviceName);
+
+            locatorElement.appendChild(serviceElement);
+
+            Node beansNode = document.getElementsByTagName("beans").item(0);
+            if (beansNode.getNodeType() == Node.ELEMENT_NODE) {
+                Element beansElement = (Element) beansNode;
+                beansElement.appendChild(locatorElement);
+                // final Transformer transformer =
+                // XmlUtils.createIndentingTransformer();
+                TransformerFactory transfac = TransformerFactory.newInstance();
+                Transformer transformer = transfac.newTransformer();
+                transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+                final DOMSource domSource = new DOMSource(document);
+                final StreamResult result = new StreamResult(new StringWriter());
+                transformer.transform(domSource, result);
+                String output = result.getWriter().toString();
+
+                fileManager.createOrUpdateTextFileIfRequired(fileIdentifier,
+                        output, true);
+            }
+
+        }
+        catch (final Exception e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
     private String getRequestMethodCall(
             final ClassOrInterfaceTypeDetails request,
             final MemberTypeAdditions memberTypeAdditions) {

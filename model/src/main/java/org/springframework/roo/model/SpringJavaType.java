@@ -16,6 +16,8 @@ public final class SpringJavaType {
     // org.springframework
     public static final JavaType ASYNC = new JavaType(
             "org.springframework.scheduling.annotation.Async");
+    public static final JavaType AUTHENTICATION = new JavaType(
+            "org.springframework.security.core.Authentication");
     public static final JavaType AUTOWIRED = new JavaType(
             "org.springframework.beans.factory.annotation.Autowired");
     public static final JavaType BINDING_RESULT = new JavaType(
@@ -82,8 +84,12 @@ public final class SpringJavaType {
             "org.springframework.orm.jpa.support.OpenEntityManagerInViewFilter");
     public static final JavaType PATH_VARIABLE = new JavaType(
             "org.springframework.web.bind.annotation.PathVariable");
+    public static final JavaType PERMISSION_EVALUATOR = new JavaType(
+            "org.springframework.security.access.PermissionEvaluator");
     public static final JavaType PERSISTENT = new JavaType(
             "org.springframework.data.annotation.Persistent");
+    public static final JavaType PRE_AUTHORIZE = new JavaType(
+            "org.springframework.security.access.prepost.PreAuthorize");
     public static final JavaType PROPAGATION = new JavaType(
             "org.springframework.transaction.annotation.Propagation");
     public static final JavaType REPOSITORY = new JavaType(
