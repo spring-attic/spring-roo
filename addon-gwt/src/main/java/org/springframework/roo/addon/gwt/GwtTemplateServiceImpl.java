@@ -69,6 +69,7 @@ import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.FileUtils;
 import org.springframework.roo.support.util.XmlUtils;
+import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -200,7 +201,17 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
                 }
 
                 for (final Element element : elementsToRemove) {
-                    existingHoldingElement.removeChild(element);
+                    /**
+                     * @todo Sometimes elements are added to elementsToRemove
+                     *       that are not in existingHoldingElements try/catch
+                     *       is a temporary fix
+                     */
+                    try {
+                        existingHoldingElement.removeChild(element);
+                    }
+                    catch (DOMException ex) {
+                        System.out.println(ex.getMessage());
+                    }
                 }
 
                 if (elementsToAdd.size() > 0) {
