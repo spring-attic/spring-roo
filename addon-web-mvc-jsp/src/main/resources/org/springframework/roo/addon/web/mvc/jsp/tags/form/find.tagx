@@ -8,12 +8,20 @@
   <jsp:directive.attribute name="render" type="java.lang.Boolean" required="false" rtexprvalue="true" description="Indicate if the contents of this tag and all enclosed tags should be rendered (default 'true')" />
   <jsp:directive.attribute name="openPane" type="java.lang.Boolean" required="false" rtexprvalue="true" description="Control if the title pane is opened or closed by default (default: true)"/>
   <jsp:directive.attribute name="z" type="java.lang.String" required="false" description="Used for checking if element has been modified (to recalculate simply provide empty string value)"/>
+  <!-- DISID: #8617 added support to labelCode -->
+  <jsp:directive.attribute name="labelCode" type="java.lang.String" required="false" rtexprvalue="true" description="Key for label message bundle if label is not supplied" />
 
   <c:if test="${empty render or render}">
-    <c:if test="${empty label}">
-      <c:set var="entityClass" value="${fn:substringAfter(id,'ff_')}" />
-      <spring:message code="label_${fn:toLowerCase(entityClass)}_plural" var="label" htmlEscape="false" />
-    </c:if>
+    <!-- DISID: #8617 added support to labelCode -->
+    <c:choose>
+      <c:when test="${empty label and empty labelCode}">
+        <c:set var="entityClass" value="${fn:substringAfter(id,'ff_')}" />
+        <spring:message code="label_${fn:toLowerCase(entityClass)}_plural" var="label" htmlEscape="false" />
+      </c:when>
+      <c:when test="${empty label and !empty labelCode}">
+        <spring:message code="${labelCode}" var="label" htmlEscape="false" />
+      </c:when>
+    </c:choose>
     <spring:message arguments="${fn:escapeXml(label)}" code="entity_find" var="title_msg" htmlEscape="false" />
     <util:panel id="${id}" title="${title_msg}" openPane="${openPane}">
       <spring:url value="${path}" var="form_url" />
