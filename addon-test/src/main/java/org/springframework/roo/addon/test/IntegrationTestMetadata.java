@@ -631,6 +631,14 @@ public class IntegrationTestMetadata extends
                                     .getSymbolName()
                             + "().after(currentVersion)) || !modified);");
         }
+        else if (JavaType.STRING.equals(versionType)) {
+            bodyBuilder
+                    .appendFormalLine("Assert.assertTrue(\"Version for '"
+                            + entityName
+                            + "' failed to increment on flush directive\", (currentVersion != null && !currentVersion.equals(obj."
+                            + versionAccessorMethod.getMethodName()
+                                    .getSymbolName() + "())) || !modified);");
+        }
         else {
             bodyBuilder
                     .appendFormalLine("Assert.assertTrue(\"Version for '"
@@ -738,6 +746,14 @@ public class IntegrationTestMetadata extends
                             + versionAccessorMethod.getMethodName()
                                     .getSymbolName()
                             + "().after(currentVersion)) || !modified);");
+        }
+        else if (JavaType.STRING.equals(versionType)) {
+            bodyBuilder
+                    .appendFormalLine("Assert.assertTrue(\"Version for '"
+                            + entityName
+                            + "' failed to increment on flush directive\", (currentVersion != null && !currentVersion.equals(obj."
+                            + versionAccessorMethod.getMethodName()
+                                    .getSymbolName() + "())) || !modified);");
         }
         else {
             bodyBuilder
