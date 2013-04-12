@@ -123,7 +123,8 @@ public class JsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
                         builder.getImportRegistrationResolver());
         bodyBuilder.appendFormalLine("return new " + deserializer + "<" + list
                 + "<" + bean + ">>().use(null, " + arrayList
-                + ".class).use(\"values\", " + bean
+                        + ".class).use(Date.class, new DateTransformer(\"yyyy-MM-dd\")).use(\"values\", "
+                        + bean
                 + ".class).deserialize(json);");
 
         final List<JavaSymbolName> parameterNames = Arrays
@@ -169,7 +170,8 @@ public class JsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
                 .getNameIncludingTypeParameters(false,
                         builder.getImportRegistrationResolver());
         bodyBuilder.appendFormalLine("return new " + deserializer + "<"
-                + destination.getSimpleTypeName() + ">().use(null, "
+                        + destination.getSimpleTypeName()
+                        + ">().use(Date.class, new DateTransformer(\"yyyy-MM-dd\")).use(null, "
                 + destination.getSimpleTypeName()
                 + ".class).deserialize(json);");
 
