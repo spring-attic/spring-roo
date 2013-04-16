@@ -75,8 +75,8 @@ if [ "$TERM_PROGRAM" = "Apple_Terminal" ]; then
 fi
 
 # Hop, hop, hop...
-DEBUG=
-#DEBUG="-Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=y"
+#DEBUG=
+DEBUG="-Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=n"
 PAUSE=
 #PAUSE="-Droo.pause=true"
 METADATA_TRACE=

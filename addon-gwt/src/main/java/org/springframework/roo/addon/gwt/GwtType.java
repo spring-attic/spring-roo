@@ -23,18 +23,10 @@ import org.springframework.roo.model.JavaType;
 public enum GwtType {
 
     ACTIVITIES_MAPPER(GwtPath.MANAGED_ACTIVITY, true, "ActivitiesMapper",
-            "activitiesMapper", "ActivitiesMapper", false, true, false), // Represents
-                                                                         // shared
-                                                                         // types.
-                                                                         // There
-                                                                         // is
-                                                                         // one
-                                                                         // such
-                                                                         // type
-                                                                         // per
-                                                                         // application
-                                                                         // using
-    // Roo's GWT support.
+            "activitiesMapper", "ActivitiesMapper", false, true, false),
+
+    // Represents shared types. There is one such type per application using
+    // Roo's GWT support
     APP_ENTITY_TYPES_PROCESSOR(GwtPath.MANAGED_REQUEST, false, "",
             "entityTypes", "ApplicationEntityTypesProcessor", false, false,
             true), APP_REQUEST_FACTORY(GwtPath.MANAGED_REQUEST, false, "",
@@ -44,37 +36,43 @@ public enum GwtType {
             GwtPath.MANAGED_ACTIVITY, false, "", "detailsActivities",
             "ApplicationDetailsActivities", false, true, false), DETAILS_VIEW(
             GwtPath.MANAGED_UI, true, "DetailsView", "detailsView",
-            "DetailsView", true, true, false), EDIT_ACTIVITY_WRAPPER(
+            "DetailsView", false, false, false), DESKTOP_DETAILS_VIEW(
+            GwtPath.MANAGED_UI_DESKTOP, true, "DesktopDetailsView",
+            "desktopDetailsView", "DesktopDetailsView", true, true, false), EDIT_ACTIVITY(
+            GwtPath.MANAGED_ACTIVITY, true, "EditActivity", "editActivity",
+            "EditActivity", false, false, false), EDIT_ACTIVITY_WRAPPER(
             GwtPath.MANAGED_ACTIVITY, true, "EditActivityWrapper",
             "editActivityWrapper", "EditActivityWrapper", false, true, false), EDIT_RENDERER(
-            GwtPath.MANAGED_UI, true, "ProxyRenderer", "renderer",
+            GwtPath.MANAGED_UI_RENDERER, true, "ProxyRenderer", "renderer",
             "EditRenderer", false, false, false), EDIT_VIEW(GwtPath.MANAGED_UI,
-            true, "EditView", "editView", "EditView", true, true, false), IS_SCAFFOLD_MOBILE_ACTIVITY(
+            true, "EditView", "editView", "EditView", false, false, false), DESKTOP_EDIT_VIEW(
+            GwtPath.MANAGED_UI_DESKTOP, true, "DesktopEditView",
+            "desktopEditView", "DesktopEditView", true, true, false), IS_SCAFFOLD_MOBILE_ACTIVITY(
             GwtPath.SCAFFOLD_ACTIVITY, false, "", "isScaffoldMobileActivity",
             "IsScaffoldMobileActivity", false, false, false), LIST_ACTIVITY(
             GwtPath.MANAGED_ACTIVITY, true, "ListActivity", "listActivity",
             "ListActivity", false, true, false), LIST_EDITOR(
-            GwtPath.MANAGED_UI, true, "ListEditor", "listEditor", "ListEditor",
-            true, true, false), LIST_PLACE_RENDERER(GwtPath.MANAGED_UI, false,
-            "", "listPlaceRenderer", "ApplicationListPlaceRenderer", false,
-            true, false), LIST_VIEW(GwtPath.MANAGED_UI, true, "ListView",
-            "listView", "ListView", true, true, false), MASTER_ACTIVITIES(
+            GwtPath.MANAGED_UI_EDITOR, true, "ListEditor", "listEditor",
+            "ListEditor", true, true, false), LIST_PLACE_RENDERER(
+            GwtPath.MANAGED_UI_RENDERER, false, "", "listPlaceRenderer",
+            "ApplicationListPlaceRenderer", false, true, false), DESKTOP_LIST_VIEW(
+            GwtPath.MANAGED_UI_DESKTOP, true, "DesktopListView",
+            "desktopListView", "DesktopListView", true, true, false), MASTER_ACTIVITIES(
             GwtPath.MANAGED_ACTIVITY, false, "", "masterActivities",
             "ApplicationMasterActivities", false, true, false),
 
     MOBILE_ACTIVITIES(GwtPath.MANAGED_ACTIVITY, false, "", "mobileActivities",
             "ScaffoldMobileActivities", false, false, false), MOBILE_DETAILS_VIEW(
-            GwtPath.MANAGED_UI, true, "MobileDetailsView", "mobileDetailsView",
-            "MobileDetailsView", true, true, false), MOBILE_EDIT_VIEW(
-            GwtPath.MANAGED_UI, true, "MobileEditView", "mobileEditView",
-            "MobileEditView", true, true, false), MOBILE_LIST_VIEW(
-            GwtPath.MANAGED_UI, true, "MobileListView", "mobileListView",
-            "MobileListView", false, true, false), MOBILE_PROXY_LIST_VIEW(
+            GwtPath.MANAGED_UI_MOBILE, true, "MobileDetailsView",
+            "mobileDetailsView", "MobileDetailsView", true, true, false), MOBILE_EDIT_VIEW(
+            GwtPath.MANAGED_UI_MOBILE, true, "MobileEditView",
+            "mobileEditView", "MobileEditView", true, true, false), MOBILE_LIST_VIEW(
+            GwtPath.MANAGED_UI_MOBILE, true, "MobileListView",
+            "mobileListView", "MobileListView", false, true, false), MOBILE_PROXY_LIST_VIEW(
             GwtPath.SCAFFOLD_UI, false, "", "mobileProxyListView",
-            "MobileProxyListView", false, false, false), // Represents mirror
-                                                         // types classes. There
-                                                         // are one of these for
-                                                         // each entity
+            "MobileProxyListView", false, false, false),
+
+    // Represents mirror types classes. There are one of these for each entity
     // mirrored by Roo.
     PROXY(GwtPath.MANAGED_REQUEST, true, "Proxy", "proxy", null, false, false,
             true), REQUEST(GwtPath.MANAGED_REQUEST, true, "Request", "request",
@@ -82,8 +80,8 @@ public enum GwtType {
             "", "scaffoldApp", "ScaffoldApp", false, false, false), SCAFFOLD_MOBILE_APP(
             GwtPath.SCAFFOLD, false, "", "scaffoldMobileApp",
             "ScaffoldMobileApp", false, false, false), SET_EDITOR(
-            GwtPath.MANAGED_UI, true, "SetEditor", "setEditor", "SetEditor",
-            true, true, false);
+            GwtPath.MANAGED_UI_EDITOR, true, "SetEditor", "setEditor",
+            "SetEditor", true, true, false);
 
     public static List<GwtType> getMirrorTypes() {
         final List<GwtType> mirrorTypes = new ArrayList<GwtType>();
@@ -135,7 +133,7 @@ public enum GwtType {
             final Map<JavaSymbolName, GwtProxyProperty> proxyFieldTypeMap) {
         watchedFieldNames = resolveWatchedFieldNames(this);
         switch (this) {
-        case DETAILS_VIEW:
+        case DESKTOP_DETAILS_VIEW:
             watchedFieldNames.addAll(proxyFieldTypeMap.keySet());
             watchedFieldNames.addAll(convertToJavaSymbolNames("proxy",
                     "displayRenderer"));
@@ -145,11 +143,13 @@ public enum GwtType {
             watchedFieldNames.addAll(convertToJavaSymbolNames("proxy",
                     "displayRenderer"));
             break;
-        case EDIT_VIEW:
+        case DESKTOP_EDIT_VIEW:
             watchedFieldNames.addAll(proxyFieldTypeMap.keySet());
             break;
         case MOBILE_EDIT_VIEW:
             watchedFieldNames.addAll(proxyFieldTypeMap.keySet());
+            break;
+        default:
             break;
         }
     }
@@ -159,7 +159,7 @@ public enum GwtType {
             final JavaPackage topLevelPackage) {
         watchedMethods = resolveMethodsToWatch(this);
         switch (this) {
-        case DETAILS_VIEW:
+        case DESKTOP_DETAILS_VIEW:
             watchedMethods.put(new JavaSymbolName("setValue"),
                     Collections.singletonList(proxy));
             break;
@@ -167,7 +167,7 @@ public enum GwtType {
             watchedMethods.put(new JavaSymbolName("setValue"),
                     Collections.singletonList(proxy));
             break;
-        case EDIT_VIEW:
+        case DESKTOP_EDIT_VIEW:
             for (final GwtProxyProperty property : proxyFieldTypeMap.values()) {
                 if (property.isEnum() || property.isProxy()
                         || property.isEmbeddable()
@@ -235,6 +235,8 @@ public enum GwtType {
         case EDIT_RENDERER:
             watchedMethods.put(new JavaSymbolName("render"),
                     Collections.singletonList(proxy));
+            break;
+        default:
             break;
         }
     }
@@ -314,7 +316,7 @@ public enum GwtType {
             watchedMethods.put(new JavaSymbolName("init"),
                     new ArrayList<JavaType>());
             break;
-        case LIST_VIEW:
+        case DESKTOP_LIST_VIEW:
             watchedMethods.put(new JavaSymbolName("init"),
                     new ArrayList<JavaType>());
             break;
@@ -330,6 +332,8 @@ public enum GwtType {
             watchedMethods.put(new JavaSymbolName("fireCountRequest"),
                     Collections.singletonList(RECEIVER));
             break;
+        default:
+            break;
         }
         return watchedMethods;
     }
@@ -339,16 +343,19 @@ public enum GwtType {
         case ACTIVITIES_MAPPER:
             return Arrays.asList(GwtType.APP_REQUEST_FACTORY,
                     GwtType.SCAFFOLD_APP, GwtType.DETAIL_ACTIVITY,
-                    GwtType.EDIT_ACTIVITY_WRAPPER, GwtType.LIST_VIEW,
-                    GwtType.DETAILS_VIEW, GwtType.MOBILE_DETAILS_VIEW,
-                    GwtType.EDIT_VIEW, GwtType.MOBILE_EDIT_VIEW,
-                    GwtType.REQUEST);
+                    GwtType.EDIT_ACTIVITY, GwtType.EDIT_ACTIVITY_WRAPPER,
+                    GwtType.DESKTOP_LIST_VIEW, GwtType.DESKTOP_DETAILS_VIEW,
+                    GwtType.MOBILE_DETAILS_VIEW, GwtType.DESKTOP_EDIT_VIEW,
+                    GwtType.MOBILE_EDIT_VIEW, GwtType.REQUEST);
         case DETAIL_ACTIVITY:
             return Arrays.asList(GwtType.APP_REQUEST_FACTORY,
-                    GwtType.IS_SCAFFOLD_MOBILE_ACTIVITY);
+                    GwtType.IS_SCAFFOLD_MOBILE_ACTIVITY, GwtType.DETAILS_VIEW);
+        case EDIT_ACTIVITY:
+            return Arrays.asList(GwtType.EDIT_VIEW,
+                    GwtType.APP_REQUEST_FACTORY, GwtType.REQUEST);
         case EDIT_ACTIVITY_WRAPPER:
             return Arrays.asList(GwtType.APP_REQUEST_FACTORY,
-                    GwtType.IS_SCAFFOLD_MOBILE_ACTIVITY);
+                    GwtType.IS_SCAFFOLD_MOBILE_ACTIVITY, GwtType.EDIT_VIEW);
         case LIST_ACTIVITY:
             return Arrays.asList(GwtType.APP_REQUEST_FACTORY,
                     GwtType.IS_SCAFFOLD_MOBILE_ACTIVITY,
@@ -356,10 +363,16 @@ public enum GwtType {
         case MOBILE_LIST_VIEW:
             return Arrays.asList(GwtType.MOBILE_PROXY_LIST_VIEW,
                     GwtType.SCAFFOLD_MOBILE_APP);
-        case EDIT_VIEW:
-            return Arrays.asList(GwtType.EDIT_ACTIVITY_WRAPPER);
+        case DESKTOP_EDIT_VIEW:
+            return Arrays.asList(GwtType.EDIT_ACTIVITY_WRAPPER,
+                    GwtType.EDIT_VIEW);
         case MOBILE_EDIT_VIEW:
-            return Arrays.asList(GwtType.EDIT_ACTIVITY_WRAPPER);
+            return Arrays.asList(GwtType.EDIT_ACTIVITY_WRAPPER,
+                    GwtType.EDIT_VIEW);
+        case DESKTOP_DETAILS_VIEW:
+            return Arrays.asList(GwtType.DETAILS_VIEW);
+        case MOBILE_DETAILS_VIEW:
+            return Arrays.asList(GwtType.DETAILS_VIEW);
         case LIST_PLACE_RENDERER:
             return Arrays.asList(GwtType.APP_ENTITY_TYPES_PROCESSOR);
         case MASTER_ACTIVITIES:
@@ -377,7 +390,7 @@ public enum GwtType {
         watchedFieldNames = new ArrayList<JavaSymbolName>();
         switch (type) {
         case ACTIVITIES_MAPPER:
-            watchedFieldNames = convertToJavaSymbolNames("requests",
+            watchedFieldNames = convertToJavaSymbolNames("factory",
                     "placeController");
             break;
         case EDIT_ACTIVITY_WRAPPER:
@@ -394,7 +407,7 @@ public enum GwtType {
         case MOBILE_LIST_VIEW:
             watchedFieldNames = convertToJavaSymbolNames("paths");
             break;
-        case LIST_VIEW:
+        case DESKTOP_LIST_VIEW:
             watchedFieldNames = convertToJavaSymbolNames("table", "paths");
             break;
         case MASTER_ACTIVITIES:

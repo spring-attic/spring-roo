@@ -200,11 +200,8 @@ public class GwtTypeServiceImpl implements GwtTypeService {
                         .getWatchedInnerTypes()) {
                     for (final ClassOrInterfaceTypeDetailsBuilder innerTypeBuilder : templateClassBuilder
                             .getDeclaredInnerTypes()) {
-                        if (innerTypeBuilder
-                                .getName()
-                                .getFullyQualifiedTypeName()
-                                .equals(innerTypeName
-                                        .getFullyQualifiedTypeName())) {
+                        if (innerTypeBuilder.getName().getSimpleTypeName()
+                                .equals(innerTypeName.getSimpleTypeName())) {
                             final ClassOrInterfaceTypeDetailsBuilder builder = new ClassOrInterfaceTypeDetailsBuilder(
                                     abstractClassBuilder
                                             .getDeclaredByMetadataId(),
@@ -835,6 +832,11 @@ public class GwtTypeServiceImpl implements GwtTypeService {
     public ClassOrInterfaceTypeDetails lookupUnmanagedRequestFromEntity(
             final ClassOrInterfaceTypeDetails entity) {
         return lookupXFromEntity(entity, RooJavaType.ROO_GWT_UNMANAGED_REQUEST);
+    }
+
+    public ClassOrInterfaceTypeDetails lookupLocatorFromEntity(
+            final ClassOrInterfaceTypeDetails entity) {
+        return lookupXFromEntity(entity, RooJavaType.ROO_GWT_LOCATOR);
     }
 
     public ClassOrInterfaceTypeDetails lookupTargetFromX(
