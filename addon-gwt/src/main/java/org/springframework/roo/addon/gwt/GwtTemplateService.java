@@ -6,6 +6,7 @@ import java.util.Map;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.model.JavaSymbolName;
+import org.springframework.roo.model.JavaType;
 
 /**
  * Interface for {@link GwtTemplateServiceImpl}.
@@ -26,7 +27,9 @@ public interface GwtTemplateService {
     List<ClassOrInterfaceTypeDetails> getStaticTemplateTypeDetails(
             GwtType type, String moduleName);
 
-    public void buildLocatorXmlConfiguration(
-            ClassOrInterfaceTypeDetails serviceInterface,
+    public void addLocatorToXmlConfiguration(
+            ClassOrInterfaceTypeDetails locator, JavaType service);
+
+    public void removeLocatorFromXmlConfiguration(
             ClassOrInterfaceTypeDetails locator);
 }

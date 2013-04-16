@@ -834,6 +834,11 @@ public class GwtTypeServiceImpl implements GwtTypeService {
         return lookupXFromEntity(entity, RooJavaType.ROO_GWT_UNMANAGED_REQUEST);
     }
 
+    public ClassOrInterfaceTypeDetails lookupLocatorFromEntity(
+            final ClassOrInterfaceTypeDetails entity) {
+        return lookupXFromEntity(entity, RooJavaType.ROO_GWT_LOCATOR);
+    }
+
     public ClassOrInterfaceTypeDetails lookupTargetFromX(
             final ClassOrInterfaceTypeDetails annotatedType,
             final JavaType... annotations) {

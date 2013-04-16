@@ -82,8 +82,30 @@ public class LayerServiceImpl implements LayerService {
     public MemberTypeAdditions getMemberTypeAdditions(
             final String metadataIdentificationString,
             final String methodIdentifier, final JavaType targetEntity,
+            final JavaType idType, final int layerPosition, boolean autowire,
+            final Collection<? extends MethodParameter> methodParameters) {
+        final MethodParameter[] methodParametersArray = methodParameters
+                .toArray(new MethodParameter[methodParameters.size()]);
+        return getMemberTypeAdditions(metadataIdentificationString,
+                methodIdentifier, targetEntity, idType, layerPosition,
+                autowire, methodParametersArray);
+    }
+
+    public MemberTypeAdditions getMemberTypeAdditions(
+            final String metadataIdentificationString,
+            final String methodIdentifier, final JavaType targetEntity,
             final JavaType idType, final int layerPosition,
             final MethodParameter... methodParameters) {
+        return getMemberTypeAdditions(metadataIdentificationString,
+                methodIdentifier, targetEntity, idType, layerPosition, true,
+                methodParameters);
+    }
+
+    public MemberTypeAdditions getMemberTypeAdditions(
+            final String metadataIdentificationString,
+            final String methodIdentifier, final JavaType targetEntity,
+            final JavaType idType, final int layerPosition,
+            final boolean autowire, final MethodParameter... methodParameters) {
         Validate.notBlank(metadataIdentificationString,
                 "metadataIdentificationString is required");
         Validate.notBlank(methodIdentifier, "methodIdentifier is required");
@@ -95,7 +117,7 @@ public class LayerServiceImpl implements LayerService {
             }
             final MemberTypeAdditions additions = provider
                     .getMemberTypeAdditions(metadataIdentificationString,
-                            methodIdentifier, targetEntity, idType,
+                            methodIdentifier, targetEntity, idType, autowire,
                             methodParameters);
             if (additions != null) {
                 return additions;

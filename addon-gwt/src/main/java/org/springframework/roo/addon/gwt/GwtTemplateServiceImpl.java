@@ -89,7 +89,6 @@ import org.xml.sax.SAXException;
 @Component
 @Service
 public class GwtTemplateServiceImpl implements GwtTemplateService {
-
     private static final int LAYER_POSITION = LayerType.HIGHEST.getPosition();
 
     @Reference GwtTypeService gwtTypeService;
@@ -160,7 +159,26 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
                         templateDocument.getDocumentElement());
             }
 
+            // If holding element isn't found then the holding element is either
+            // not widget based or using the old convention of 'id' so look for
+            // the element holder with an 'id' attribute
+            if (existingHoldingElement == null) {
+                existingHoldingElement = XmlUtils.findFirstElement(
+                        "//*[@field]", existingDocument.getDocumentElement());
+            }
+            if (templateHoldingElement == null) {
+                templateHoldingElement = XmlUtils.findFirstElement(
+                        "//*[@field]", templateDocument.getDocumentElement());
+            }
+
             if (existingHoldingElement != null) {
+
+                if (existingHoldingElement.hasAttribute("update")) {
+                    if (existingHoldingElement.getAttribute("update").equals(
+                            "false"))
+                        return transformXml(existingDocument);
+                }
+
                 final Map<String, Element> templateElementMap = new LinkedHashMap<String, Element>();
                 for (final Element element : XmlUtils.findElements("//*[@id]",
                         templateHoldingElement)) {
@@ -222,7 +240,7 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
                                         .getPropertyNameForJavaBeanMethod(
                                                 method).getSymbolName());
                         final Element element = XmlUtils.findFirstElement(
-                                "//*[@id='" + propertyName + "']",
+                                String.format("//*[@id='%s']", propertyName),
                                 existingHoldingElement);
                         if (element != null) {
                             sortedElements.add(element);
@@ -344,8 +362,41 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
                     boundCollectionType);
             addImport(dataDictionary, proxyProperty.getPropertyType());
 
-            final String contents = getTemplateContents("CollectionEditor"
-                    + "UiXml", dataDictionary);
+            String inputType;
+            boolean isSimpleType = false;
+            // If collection is a simple type, e.g. String, Double, Float, a
+            // ValueListBox will not work
+            if (boundCollectionType.equals("String")) {
+                inputType = "TextBox";
+                isSimpleType = true;
+            }
+            else if (boundCollectionType.equals("Double")) {
+                inputType = "DoubleBox";
+                isSimpleType = true;
+            }
+            else if (boundCollectionType.equals("Float")) {
+                inputType = "DoubleBox";
+                isSimpleType = true;
+            }
+            else if (boundCollectionType.equals("Integer")) {
+                inputType = "IntegerBox";
+                isSimpleType = true;
+            }
+            else if (boundCollectionType.equals("Long")) {
+                inputType = "LongBox";
+            }
+            else {
+                inputType = "ValueListBox";
+            }
+
+            dataDictionary.setVariable("inputType", inputType);
+
+            // Different templates for simple and complex editors
+            String editorType = isSimpleType ? "SimpleCollectionEditor"
+                    : "CollectionEditor";
+
+            final String contents = getTemplateContents(editorType + "UiXml",
+                    dataDictionary);
             final String packagePath = projectOperations.getPathResolver()
                     .getFocusedIdentifier(
                             Path.SRC_MAIN_JAVA,
@@ -1150,13 +1201,13 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
     }
 
     @Override
-    public void buildLocatorXmlConfiguration(
-            ClassOrInterfaceTypeDetails serviceInterface,
-            ClassOrInterfaceTypeDetails locator) {
+    public void addLocatorToXmlConfiguration(
+            ClassOrInterfaceTypeDetails locator, JavaType service) {
         final PathResolver pathResolver = projectOperations.getPathResolver();
 
         final String fileIdentifier = pathResolver.getFocusedIdentifier(
                 Path.SPRING_CONFIG_ROOT, "applicationContext-locators.xml");
+
         if (!fileManager.exists(fileIdentifier)) {
             InputStream inputStream = null;
             OutputStream outputStream = null;
@@ -1186,9 +1237,6 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
 
             final String locatorName = StringUtils.uncapitalize(locator
                     .getType().getSimpleTypeName());
-            final String serviceName = StringUtils
-                    .uncapitalize(serviceInterface.getType()
-                            .getSimpleTypeName());
 
             Element locatorElement = XmlUtils.findFirstElement("//*[@id='"
                     + locatorName + "']", document.getDocumentElement());
@@ -1197,15 +1245,18 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
                 return;
 
             locatorElement = document.createElement("bean");
-            locatorElement.setAttribute("id", serviceName);
+            locatorElement.setAttribute("id", locatorName);
             locatorElement.setAttribute("class", locator.getType()
                     .getFullyQualifiedTypeName());
+            if (service != null) {
+                final String serviceName = StringUtils.uncapitalize(service
+                        .getSimpleTypeName());
+                Element serviceElement = document.createElement("property");
+                serviceElement.setAttribute("name", serviceName);
+                serviceElement.setAttribute("ref", serviceName);
 
-            Element serviceElement = document.createElement("property");
-            serviceElement.setAttribute("name", serviceName);
-            serviceElement.setAttribute("ref", serviceName);
-
-            locatorElement.appendChild(serviceElement);
+                locatorElement.appendChild(serviceElement);
+            }
 
             Node beansNode = document.getElementsByTagName("beans").item(0);
             if (beansNode.getNodeType() == Node.ELEMENT_NODE) {
@@ -1229,6 +1280,60 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
         catch (final Exception e) {
             throw new IllegalStateException(e);
         }
+    }
+
+    @Override
+    public void removeLocatorFromXmlConfiguration(
+            ClassOrInterfaceTypeDetails locator) {
+        final PathResolver pathResolver = projectOperations.getPathResolver();
+
+        final String fileIdentifier = pathResolver.getFocusedIdentifier(
+                Path.SPRING_CONFIG_ROOT, "applicationContext-locators.xml");
+
+        if (!fileManager.exists(fileIdentifier)) {
+            return;
+        }
+
+        try {
+            final DocumentBuilder builder = XmlUtils.getDocumentBuilder();
+
+            InputSource source = new InputSource();
+            FileReader fileReader = new FileReader(fileIdentifier);
+            source.setCharacterStream(fileReader);
+            final Document document = builder.parse(source);
+
+            final String locatorName = StringUtils.uncapitalize(locator
+                    .getType().getSimpleTypeName());
+
+            Element locatorElement = XmlUtils.findFirstElement("//*[@id='"
+                    + locatorName + "']", document.getDocumentElement());
+
+            if (locatorElement == null)
+                return;
+
+            Node beansNode = document.getElementsByTagName("beans").item(0);
+            if (beansNode.getNodeType() == Node.ELEMENT_NODE) {
+                Element beansElement = (Element) beansNode;
+                beansElement.removeChild(locatorElement);
+                // final Transformer transformer =
+                // XmlUtils.createIndentingTransformer();
+                TransformerFactory transfac = TransformerFactory.newInstance();
+                Transformer transformer = transfac.newTransformer();
+                transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+                final DOMSource domSource = new DOMSource(document);
+                final StreamResult result = new StreamResult(new StringWriter());
+                transformer.transform(domSource, result);
+                String output = result.getWriter().toString();
+
+                fileManager.createOrUpdateTextFileIfRequired(fileIdentifier,
+                        output, true);
+            }
+
+        }
+        catch (final Exception e) {
+            throw new IllegalStateException(e);
+        }
+
     }
 
     private String getRequestMethodCall(
