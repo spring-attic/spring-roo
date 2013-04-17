@@ -56,6 +56,8 @@ public final class RooJavaType {
             "org.springframework.roo.addon.layers.repository.neo4j.RooNeo4jEntity");
     public static final JavaType ROO_OP4J = new JavaType(
             "org.springframework.roo.addon.op4j.RooOp4j");
+    public static final JavaType ROO_PERMISSION_EVALUATOR = new JavaType(
+            "org.springframework.roo.addon.security.RooPermissionEvaluator");
     public static final JavaType ROO_PLURAL = new JavaType(
             "org.springframework.roo.addon.plural.RooPlural");
     public static final JavaType ROO_REPOSITORY_JPA = new JavaType(

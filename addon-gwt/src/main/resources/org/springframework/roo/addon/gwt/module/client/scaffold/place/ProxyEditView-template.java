@@ -28,7 +28,5 @@ public interface ProxyEditView<P extends EntityProxy, V extends ProxyEditView<P,
 		void saveClicked();
 	}
 
-	void setDelegate(Delegate delegate);
-
 	void setEnabled(boolean b);
 }

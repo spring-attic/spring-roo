@@ -51,6 +51,11 @@ enum ServiceLayerMethod {
         public JavaType getReturnType(final JavaType entityType) {
             return JavaType.LONG_PRIMITIVE;
         }
+
+        @Override
+        public String getBaseName(final ServiceAnnotationValues annotationValues) {
+            return annotationValues.getCountAllMethod();
+        }
     },
 
     DELETE(CustomDataKeys.REMOVE_METHOD) {
@@ -81,6 +86,11 @@ enum ServiceLayerMethod {
         public JavaType getReturnType(final JavaType entityType) {
             return JavaType.VOID_PRIMITIVE;
         }
+
+        @Override
+        public String getBaseName(final ServiceAnnotationValues annotationValues) {
+            return annotationValues.getDeleteMethod();
+        }
     },
 
     FIND(CustomDataKeys.FIND_METHOD) {
@@ -110,6 +120,11 @@ enum ServiceLayerMethod {
         public JavaType getReturnType(final JavaType entityType) {
             return entityType;
         }
+
+        @Override
+        public String getBaseName(final ServiceAnnotationValues annotationValues) {
+            return annotationValues.getFindMethod();
+        }
     },
 
     FIND_ALL(CustomDataKeys.FIND_ALL_METHOD) {
@@ -137,6 +152,11 @@ enum ServiceLayerMethod {
         @Override
         public JavaType getReturnType(final JavaType entityType) {
             return JavaType.listOf(entityType);
+        }
+
+        @Override
+        public String getBaseName(final ServiceAnnotationValues annotationValues) {
+            return annotationValues.getFindAllMethod();
         }
     },
 
@@ -169,6 +189,11 @@ enum ServiceLayerMethod {
         public JavaType getReturnType(final JavaType entityType) {
             return JavaType.listOf(entityType);
         }
+
+        @Override
+        public String getBaseName(final ServiceAnnotationValues annotationValues) {
+            return annotationValues.getFindEntriesMethod();
+        }
     },
 
     SAVE(CustomDataKeys.PERSIST_METHOD) {
@@ -198,6 +223,11 @@ enum ServiceLayerMethod {
         @Override
         public JavaType getReturnType(final JavaType entityType) {
             return JavaType.VOID_PRIMITIVE;
+        }
+
+        @Override
+        public String getBaseName(final ServiceAnnotationValues annotationValues) {
+            return annotationValues.getSaveMethod();
         }
     },
 
@@ -229,6 +259,12 @@ enum ServiceLayerMethod {
         public JavaType getReturnType(final JavaType entityType) {
             return entityType;
         }
+
+        @Override
+        public String getBaseName(final ServiceAnnotationValues annotationValues) {
+            return annotationValues.getUpdateMethod();
+        }
+
     };
 
     /**
@@ -295,6 +331,17 @@ enum ServiceLayerMethod {
     public String getKey() {
         return key.name();
     }
+
+    public String getPermissionName(ServiceAnnotationValues annotationValues,
+            JavaType entityType, final String plural) {
+        if (StringUtils.isNotBlank(annotationValues.getDeleteMethod())) {
+            return getName(annotationValues, entityType, plural) + "IsAllowed";
+        }
+        return null;
+    }
+
+    public abstract String getBaseName(
+            final ServiceAnnotationValues annotationValues);
 
     /**
      * Returns the name of this method, based on the given inputs
@@ -365,6 +412,26 @@ enum ServiceLayerMethod {
             final ServiceAnnotationValues annotationValues,
             final JavaType entityType, final String plural) {
         final String methodName = getName(annotationValues, entityType, plural);
+        if (StringUtils.isNotBlank(methodName)) {
+            return new JavaSymbolName(methodName);
+        }
+        return null;
+    }
+
+    /**
+     * Returns the name of this method, based on the given inputs
+     * 
+     * @param annotationValues the values of the {@link RooService} annotation
+     *            on the service
+     * @param entityType the type of domain entity managed by the service
+     * @param plural the plural form of the entity
+     * @return <code>null</code> if the method is not implemented
+     */
+    public JavaSymbolName getSymbolPermissionName(
+            final ServiceAnnotationValues annotationValues,
+            final JavaType entityType, final String plural) {
+        final String methodName = getPermissionName(annotationValues,
+                entityType, plural);
         if (StringUtils.isNotBlank(methodName)) {
             return new JavaSymbolName(methodName);
         }

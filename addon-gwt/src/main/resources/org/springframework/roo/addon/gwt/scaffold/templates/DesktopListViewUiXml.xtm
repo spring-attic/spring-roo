@@ -2,7 +2,7 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
   xmlns:g='urn:import:com.google.gwt.user.client.ui'
   xmlns:b='urn:import:com.google.gwt.user.cellview.client'>
-<ui:image field="createButton" src="../../style/images/createButton.png"/>
+<ui:image field="createButton" src="../../../style/images/createButton.png"/>
 
 <ui:style>
   .controls {

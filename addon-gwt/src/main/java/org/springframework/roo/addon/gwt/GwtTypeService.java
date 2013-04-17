@@ -110,4 +110,7 @@ public interface GwtTypeService {
 
     ClassOrInterfaceTypeDetails lookupUnmanagedRequestFromEntity(
             ClassOrInterfaceTypeDetails entity);
+
+    ClassOrInterfaceTypeDetails lookupLocatorFromEntity(
+            ClassOrInterfaceTypeDetails entity);
 }

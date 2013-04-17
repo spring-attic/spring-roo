@@ -13,4 +13,13 @@ public @interface RooGwtLocator {
      * @return the fully-qualified type name this key instance was mirrored from
      */
     String value();
+
+    /**
+     * Indicates whether the annotated locator should be instantiated using XML
+     * configuration
+     * 
+     * @return see above
+     */
+    boolean useXmlConfiguration() default false;
+
 }

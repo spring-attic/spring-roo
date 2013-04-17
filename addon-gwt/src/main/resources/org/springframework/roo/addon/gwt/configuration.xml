@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <configuration>
     <gwt>
+    	<properties>
+    		<gwt.version>2.5.0</gwt.version>
+    	</properties>
         <repositories>
             <repository>
                 <id>maven.springframework.org.external</id>
@@ -12,12 +15,12 @@
             <dependency>
                 <groupId>com.google.gwt</groupId>
                 <artifactId>gwt-servlet</artifactId>
-                <version>2.5.0</version>
+                <version>${gwt.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.google.gwt</groupId>
                 <artifactId>gwt-user</artifactId>
-                <version>2.5.0</version>
+                <version>${gwt.version}</version>
                 <scope>provided</scope>
             </dependency>
             <dependency>
@@ -56,12 +59,12 @@
                     <dependency>
                         <groupId>com.google.gwt</groupId>
                         <artifactId>gwt-dev</artifactId>
-                        <version>2.5.0</version>
+                        <version>${gwt.version}</version>
                     </dependency>
                     <dependency>
                         <groupId>com.google.gwt</groupId>
                         <artifactId>gwt-user</artifactId>
-                        <version>2.5.0</version>
+                        <version>${gwt.version}</version>
                     </dependency>
                 </dependencies>
                 <configuration>
@@ -112,11 +115,15 @@
         </plugins>
     </gwt>
     <gae>
+    	<properties>
+    		<gwt.version>2.5.0</gwt.version>
+    		<gae.version>1.7.4</gae.version>
+    	</properties>
         <dependencies>
             <dependency>
                 <groupId>com.google.appengine</groupId>
                 <artifactId>appengine-api-1.0-sdk</artifactId>
-                <version>1.7.4</version>
+                <version>${gae.version}</version>
             </dependency>
         </dependencies>
         <plugins>
@@ -128,12 +135,12 @@
                     <dependency>
                         <groupId>com.google.gwt</groupId>
                         <artifactId>gwt-dev</artifactId>
-                        <version>2.5.0</version>
+                        <version>${gwt.version}</version>
                     </dependency>
                     <dependency>
                         <groupId>com.google.gwt</groupId>
                         <artifactId>gwt-user</artifactId>
-                        <version>2.5.0</version>
+                        <version>${gwt.version}</version>
                     </dependency>
                 </dependencies>
                 <configuration>
@@ -148,7 +155,7 @@
                     <server>com.google.appengine.tools.development.gwt.AppEngineLauncher</server>
                     <extraJvmArgs>"-javaagent:${gae.home}/lib/agent/appengine-agent.jar" -Xmx1024m</extraJvmArgs>
                     <copyWebapp>true</copyWebapp>
-                    <appEngineVersion>1.7.4</appEngineVersion>
+                    <appEngineVersion>${gae.version}</appEngineVersion>
                 </configuration>
                 <executions>
                     <execution>
