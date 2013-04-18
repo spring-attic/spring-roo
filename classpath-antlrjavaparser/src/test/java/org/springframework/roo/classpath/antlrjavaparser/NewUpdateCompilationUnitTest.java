@@ -496,11 +496,22 @@ public class NewUpdateCompilationUnitTest {
 
         // Check newList method
         assertTrue(result
-                .contains("List<List<Map<String, Iterator<Long>>>> newList(List<Map<String, Iterator<Long>>> theList)"));
+        		.contains("List<List<Map<String, Iterator<Long>>>> newList(List<Map<String, Iterator<Long>>> theList)"));
         assertTrue(result
-                .contains("List<List<Map<String, Iterator<Long>>>> newListResult = new ArrayList<List<Map<String, Iterator<Long>>>>();"));
+        		.contains("List<List<Map<String, Iterator<Long>>>> newListResult = new ArrayList<List<Map<String, Iterator<Long>>>>();"));
         assertTrue(result.contains("newListResult.add(theList);"));
         assertTrue(result.contains("return newListResult;"));
+        
+        // Check listStatic method
+        assertTrue(result.contains("* Javadoc listStatic..."));
+        assertTrue(result
+                .contains("public static List<SimpleClass2> listStatic(List<Object[]> objects)"));
+        assertTrue(result
+                .contains("List<SimpleClass2> result = new ArrayList<SimpleClass2>();"));
+        assertTrue(result.contains("for (Object[] object : objects) {"));
+        assertTrue(result.contains("// ..."));
+        assertTrue(result.contains("}"));
+        assertTrue(result.contains("return result;"));
     }
 
     public static void checkSimple3Class(final String result) {
