@@ -1,10 +1,13 @@
 package org.springframework.roo.classpath.itd;
 
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.details.AnnotationMetadataUtils;
@@ -69,6 +72,7 @@ public class ItdSourceFileComposer {
         }
 
         appendTypeDeclaration();
+        appendDeclarePrecedence();
         appendExtendsTypes();
         appendImplementsTypes();
         appendTypeAnnotations();
@@ -168,30 +172,59 @@ public class ItdSourceFileComposer {
     }
 
     private void appendExtendsTypes() {
-        final List<JavaType> extendsTypes = itdTypeDetails.getExtendsTypes();
-        if (extendsTypes == null || extendsTypes.isEmpty()) {
+    	final List<JavaType> extendsTypes = itdTypeDetails.getExtendsTypes();
+    	if (extendsTypes == null || extendsTypes.isEmpty()) {
+    		return;
+    	}
+    	
+    	content = true;
+    	
+    	for (final JavaType extendsType : extendsTypes) {
+    		appendIndent();
+    		append("declare parents: ");
+    		append(introductionTo.getSimpleTypeName());
+    		append(" extends ");
+    		if (resolver
+    				.isFullyQualifiedFormRequiredAfterAutoImport(extendsType)) {
+    			append(extendsType.getNameIncludingTypeParameters());
+    		}
+    		else {
+    			append(extendsType.getNameIncludingTypeParameters(false,
+    					resolver));
+    		}
+    		append(";");
+    		this.newLine(false);
+    		this.newLine();
+    	}
+    }
+    
+    private void appendDeclarePrecedence() {
+        final Set<JavaType> aspects = itdTypeDetails.getDeclarePrecedence();
+        if (aspects == null || aspects.isEmpty()) {
             return;
         }
 
         content = true;
-
-        for (final JavaType extendsType : extendsTypes) {
-            appendIndent();
-            append("declare parents: ");
-            append(introductionTo.getSimpleTypeName());
-            append(" extends ");
+        
+        appendIndent();
+        append("declare precedence: ");
+        
+        List<String> aspectNames = new ArrayList<String>(aspects.size()); 
+        
+        for (final JavaType aspect : aspects) {
             if (resolver
-                    .isFullyQualifiedFormRequiredAfterAutoImport(extendsType)) {
-                append(extendsType.getNameIncludingTypeParameters());
+                    .isFullyQualifiedFormRequiredAfterAutoImport(aspect)) {
+                aspectNames.add(aspect.getNameIncludingTypeParameters());
             }
             else {
-                append(extendsType.getNameIncludingTypeParameters(false,
+            	aspectNames.add(aspect.getNameIncludingTypeParameters(false,
                         resolver));
             }
-            append(";");
-            this.newLine(false);
-            this.newLine();
         }
+        append(StringUtils.join(aspectNames, ", "));
+        append(";");
+        this.newLine(false);
+        this.newLine();
     }
 
     private void appendFieldAnnotations() {

@@ -73,7 +73,7 @@ public class DefaultItdTypeDetailsTest extends ItdTypeDetailsTestCase {
                 mockCustomData, declaredByMetadataId, modifier, mockGovernor,
                 mockAspectType, privilegedAspect,
                 Arrays.asList(mockImportType), null, null, null, null, null,
-                null, null, null, null);
+                null, null, null, null, null);
 
         // Check
         assertEquals(0, itd.getAnnotations().size());
@@ -86,6 +86,7 @@ public class DefaultItdTypeDetailsTest extends ItdTypeDetailsTestCase {
         assertEquals(0, itd.getFieldAnnotations().size());
         assertEquals(0, itd.getImplementsTypes().size());
         assertEquals(0, itd.getInnerTypes().size());
+        assertEquals(0, itd.getDeclarePrecedence().size());
         assertEquals(0, itd.getMethodAnnotations().size());
         assertEquals(1, itd.getRegisteredImports().size());
 
