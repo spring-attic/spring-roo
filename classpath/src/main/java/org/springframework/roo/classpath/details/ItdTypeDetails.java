@@ -75,4 +75,12 @@ public interface ItdTypeDetails extends MemberHoldingTypeDetails {
     Set<JavaType> getRegisteredImports();
 
     boolean isPrivilegedAspect();
+    
+    /**
+     * Set of aspect declared on {@code declare precedence}
+     * AspectJ declaration.
+     * 
+     * @return ordered aspect declared
+     */
+    Set<JavaType> getDeclarePrecedence();
 }

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -46,6 +47,8 @@ public class DefaultItdTypeDetails extends AbstractMemberHoldingTypeDetails
     private final List<DeclaredMethodAnnotationDetails> methodAnnotations = new ArrayList<DeclaredMethodAnnotationDetails>();
     private final boolean privilegedAspect;
     private final Set<JavaType> registeredImports = new HashSet<JavaType>();
+    private final Set<JavaType> declarePrecedence = new LinkedHashSet<JavaType>();
+    
 
     /**
      * Constructor (package protected to enforce the use of the corresponding
@@ -67,6 +70,7 @@ public class DefaultItdTypeDetails extends AbstractMemberHoldingTypeDetails
      * @param fieldAnnotations can be <code>null</code>
      * @param methodAnnotations can be <code>null</code>
      * @param innerTypes can be <code>null</code>
+     * @param declarePrecedence can be <code>null</code>
      */
     DefaultItdTypeDetails(
             final CustomData customData,
@@ -84,7 +88,8 @@ public class DefaultItdTypeDetails extends AbstractMemberHoldingTypeDetails
             final Collection<AnnotationMetadata> typeAnnotations,
             final Collection<? extends DeclaredFieldAnnotationDetails> fieldAnnotations,
             final Collection<? extends DeclaredMethodAnnotationDetails> methodAnnotations,
-            final Collection<ClassOrInterfaceTypeDetails> innerTypes) {
+            final Collection<ClassOrInterfaceTypeDetails> innerTypes,
+            final Collection<? extends JavaType> declarePrecedence) {
 
         super(customData, declaredByMetadataId, modifier, typeAnnotations);
         Validate.notNull(aspect, "Aspect required");
@@ -105,6 +110,7 @@ public class DefaultItdTypeDetails extends AbstractMemberHoldingTypeDetails
         CollectionUtils.populate(this.innerTypes, innerTypes);
         CollectionUtils.populate(this.methodAnnotations, methodAnnotations);
         CollectionUtils.populate(this.registeredImports, registeredImports);
+        CollectionUtils.populate(this.declarePrecedence, declarePrecedence);
     }
 
     public boolean extendsType(final JavaType type) {
@@ -212,6 +218,11 @@ public class DefaultItdTypeDetails extends AbstractMemberHoldingTypeDetails
 
     public boolean isPrivilegedAspect() {
         return privilegedAspect;
+    }
+    
+    @Override
+    public Set<JavaType> getDeclarePrecedence() {
+    	return Collections.unmodifiableSet(declarePrecedence);
     }
 
     @Override
