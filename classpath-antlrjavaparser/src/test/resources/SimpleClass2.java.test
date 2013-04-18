@@ -3,10 +3,23 @@ package org.myPackage;
 import java.util.*;
 
 public class SimpleClass2 extends OtheClass<String, Boolean> implements SimpleInterface{
-	
-	List<List<Map<String, Iterator<Long>>>> newList(List<Map<String, Iterator<Long>>> theList){
+    
+    List<List<Map<String, Iterator<Long>>>> newList(List<Map<String, Iterator<Long>>> theList){
         List<List<Map<String,Iterator<Long>>>> newListResult = new ArrayList<List<Map<String,Iterator<Long>>>>();
         newListResult.add(theList);
     	return newListResult;
+    }
+    
+    /**
+     * 
+     * Javadoc listStatic...
+     * 
+     */
+    public static List<SimpleClass2> listStatic(List<Object[]> objects) {
+        List<SimpleClass2> result = new ArrayList<SimpleClass2>();
+        for (Object[] object : objects) {
+            // ...
+        }
+        return result;
     }
 }
