@@ -215,6 +215,15 @@
                         </aspectLibraries>
                         <source>${java.version}</source>
                         <target>${java.version}</target>
+                        <!--
+                          Aspects in src/main/java and src/main/aspects are added as default in the 
+                          compile goal.
+                          Aspects in src/test/java and src/test/aspects are added as default in the 
+                          test-compile goal.
+                          Aspects in src/main/java are added in the test-compile goal 
+                          if weaveWithAspectsInMainSourceFolder is set to true
+                        -->
+                        <weaveWithAspectsInMainSourceFolder>false</weaveWithAspectsInMainSourceFolder>                        
                     </configuration>
                 </plugin>
                 <plugin>
