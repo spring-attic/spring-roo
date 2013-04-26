@@ -5,6 +5,7 @@ import static org.springframework.roo.model.JdkJavaType.ARRAY_LIST;
 import static org.springframework.roo.model.JdkJavaType.HASH_SET;
 import static org.springframework.roo.model.JdkJavaType.LIST;
 import static org.springframework.roo.model.JdkJavaType.SET;
+import static org.springframework.roo.project.Path.SRC_MAIN_JAVA;
 import hapax.Template;
 import hapax.TemplateDataDictionary;
 import hapax.TemplateDictionary;
@@ -42,12 +43,14 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.addon.gwt.scaffold.GwtScaffoldMetadata;
 import org.springframework.roo.addon.plural.PluralMetadata;
+import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.TypeParsingService;
 import org.springframework.roo.classpath.customdata.CustomDataKeys;
 import org.springframework.roo.classpath.details.BeanInfoUtils;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MethodMetadata;
@@ -91,6 +94,7 @@ import org.xml.sax.SAXException;
 public class GwtTemplateServiceImpl implements GwtTemplateService {
     private static final int LAYER_POSITION = LayerType.HIGHEST.getPosition();
 
+    @Reference GwtFileManager gwtFileManager;
     @Reference GwtTypeService gwtTypeService;
     @Reference LayerService layerService;
     @Reference MetadataService metadataService;
@@ -683,6 +687,7 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
             final Map<GwtType, JavaType> mirrorTypeMap,
             final Map<JavaSymbolName, GwtProxyProperty> clientSideTypeMap,
             final String moduleName) {
+
         final JavaType proxyType = proxy.getName();
         final JavaType javaType = mirrorTypeMap.get(type);
 
@@ -780,14 +785,14 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
         GwtProxyProperty dateProperty = null;
         final Set<String> importSet = new HashSet<String>();
 
+        // cleanUpLegacyProjects(type, topLevelPackage, simpleTypeName);
+
         List<String> existingEditViewFields = new ArrayList<String>();
 
         List<String> existingDetailsViewFields = new ArrayList<String>();
 
-        List<String> fieldsInBothEditViewAndMobileEditView = new ArrayList<String>();
+        List<String> fieldsInBothDesktopAndMobileEditView = new ArrayList<String>();
 
-        // Adds names of fields the are found in both the unmanaged EditView and
-        // MobileEditView to fieldsInBothViewAndMobileView list
         if (type == GwtType.EDIT_ACTIVITY_WRAPPER
                 || type == GwtType.MOBILE_EDIT_VIEW
                 || type == GwtType.DESKTOP_EDIT_VIEW) {
@@ -809,6 +814,9 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
                             .getDeclaredFields()) {
                         final JavaSymbolName fieldName = field.getFieldName();
                         final String name = fieldName.toString();
+                        // Adds names of fields in DesktopEditView to
+                        // existingDesktopFields list. These fields should not
+                        // be added to the *MobileDetailsView_Roo_Gwt class
                         existingDesktopFields.add(name);
                     }
                 }
@@ -826,16 +834,16 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
                     for (FieldMetadata field : details.getDeclaredFields()) {
                         JavaSymbolName fieldName = field.getFieldName();
                         String name = fieldName.toString();
+                        // Adds names of fields in MobileEditView to
+                        // existingMobileFields list. These fields should not be
+                        // added to the *MobileDetailsView_Roo_Gwt class
                         existingMobileFields.add(name);
                     }
                 }
 
-                // Adds names of fields in MobileEditView to existingFields list
                 if (type == GwtType.MOBILE_EDIT_VIEW)
                     existingEditViewFields = existingMobileFields;
 
-                // Adds names of fields in DesktopEditView to existingFields
-                // list
                 if (type == GwtType.DESKTOP_EDIT_VIEW)
                     existingEditViewFields = existingDesktopFields;
 
@@ -847,7 +855,7 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
             for (String mobileViewField : existingMobileFields) {
                 for (String viewField : existingDesktopFields) {
                     if (viewField.equals(mobileViewField)) {
-                        fieldsInBothEditViewAndMobileEditView.add(viewField);
+                        fieldsInBothDesktopAndMobileEditView.add(viewField);
                         break;
                     }
                 }
@@ -1033,8 +1041,8 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
             // If the field is not added to the managed MobileEditView and the
             // managed EditView then it there is no reason to add it to the
             // interface nor the start method in the EditActivityWrapper
-            if (!fieldsInBothEditViewAndMobileEditView
-                    .contains(gwtProxyProperty.getName())
+            if (!fieldsInBothDesktopAndMobileEditView.contains(gwtProxyProperty
+                    .getName())
                     && !isReadOnly(gwtProxyProperty.getName(), mirroredType)) {
                 if (gwtProxyProperty.isProxy() || gwtProxyProperty.isEnum()
                         || gwtProxyProperty.isCollectionOfProxy()) {
@@ -1200,6 +1208,15 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
                 + "." + gwtType.getTemplate();
     }
 
+    /**
+     * If the attribute useXmlConfiguration is set to true in @RooGwtLocator,
+     * this method creates a file called a applicationContext-locators.xml (if
+     * it does not exist) and adds the associated Locator if it has not yet been
+     * added.
+     * 
+     * @param locator The locator to which the annotations applies
+     * @param service The service to be injected (if one exists)
+     */
     @Override
     public void addLocatorToXmlConfiguration(
             ClassOrInterfaceTypeDetails locator, JavaType service) {
@@ -1399,4 +1416,5 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
         transformer.transform(source, result);
         return result.getWriter().toString();
     }
+
 }

@@ -32,4 +32,12 @@ public interface GwtFileManager {
             boolean includeWarning);
 
     void write(String destFile, String newContents);
+
+    void delete(String file);
+
+    void delete(ClassOrInterfaceTypeDetails typeDetails);
+
+    boolean fileExists(ClassOrInterfaceTypeDetails typeDetails);
+
+    boolean fileExists(String file);
 }
