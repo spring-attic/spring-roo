@@ -70,6 +70,8 @@ public class JavaType implements Comparable<JavaType> {
     public static final JavaType SHORT_PRIMITIVE = new JavaType(
             "java.lang.Short", 0, DataType.PRIMITIVE, null, null);
     public static final JavaType STRING = new JavaType("java.lang.String");
+    public static final JavaType STRING_ARRAY = new JavaType(
+            "java.lang.String", 1, DataType.TYPE, null, null);
 
     /**
      * @deprecated use {@link #STRING} instead
@@ -295,6 +297,7 @@ public class JavaType implements Comparable<JavaType> {
         }
     }
 
+    @Override
     public int compareTo(final JavaType o) {
         // NB: If adding more fields to this class ensure the equals(Object)
         // method is updated accordingly

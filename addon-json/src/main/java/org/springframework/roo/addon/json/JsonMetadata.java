@@ -216,12 +216,13 @@ public class JsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
         final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
         parameterNames.add(new JavaSymbolName("collection"));
-        
-        final List<AnnotatedJavaType> parameterTypes = AnnotatedJavaType.convertFromJavaTypes(parameterType);
-        
+
+        final List<AnnotatedJavaType> parameterTypes = AnnotatedJavaType
+                .convertFromJavaTypes(parameterType);
+
         if (includeParams) {
-        	parameterTypes.add(new AnnotatedJavaType(JavaType.STRING_ARRAY));
-        	parameterNames.add(new JavaSymbolName("fields"));
+            parameterTypes.add(new AnnotatedJavaType(JavaType.STRING_ARRAY));
+            parameterNames.add(new JavaSymbolName("fields"));
         }
 
         final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
@@ -243,8 +244,7 @@ public class JsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
         final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(
                 getId(), Modifier.PUBLIC | Modifier.STATIC, methodName, STRING,
-                parameterTypes,
-                parameterNames, bodyBuilder);
+                parameterTypes, parameterNames, bodyBuilder);
         methodBuilder.putCustomData(CustomDataJsonTags.TO_JSON_ARRAY_METHOD,
                 null);
         return methodBuilder;
@@ -288,14 +288,15 @@ public class JsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
         List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
         List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
-        
+
         if (includeParams) {
-        	parameterTypes.add(new AnnotatedJavaType(JavaType.STRING_ARRAY_VARIABLE));
-        	parameterNames.add(new JavaSymbolName("fields"));
+            parameterTypes.add(new AnnotatedJavaType(JavaType.STRING_ARRAY));
+            parameterNames.add(new JavaSymbolName("fields"));
         }
-        
+
         final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(
-                getId(), Modifier.PUBLIC, methodName, STRING, parameterTypes, parameterNames,  bodyBuilder);
+                getId(), Modifier.PUBLIC, methodName, STRING, parameterTypes,
+                parameterNames, bodyBuilder);
         methodBuilder.putCustomData(CustomDataJsonTags.TO_JSON_METHOD, null);
         return methodBuilder;
     }
