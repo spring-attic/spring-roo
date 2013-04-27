@@ -166,8 +166,8 @@ public class WebJsonMetadata extends
 
         final MemberTypeAdditions mergeMethod = persistenceAdditions
                 .get(MERGE_METHOD);
-        builder.addMethod(getUpdateFromJsonMethod(mergeMethod));
-        builder.addMethod(getUpdateFromJsonArrayMethod(mergeMethod));
+        builder.addMethod(getUpdateFromJsonMethod(identifierField, mergeMethod));
+//        builder.addMethod(getUpdateFromJsonArrayMethod(mergeMethod));
 
         final MemberTypeAdditions removeMethod = persistenceAdditions
                 .get(REMOVE_METHOD);
@@ -586,6 +586,10 @@ public class WebJsonMetadata extends
         requestMappingAttributes
                 .add(new StringAttributeValue(new JavaSymbolName("value"), "/{"
                         + identifierField.getFieldName().getSymbolName() + "}"));
+        requestMappingAttributes
+                .add(new EnumAttributeValue(new JavaSymbolName(
+                "method"), new EnumDetails(REQUEST_METHOD, new JavaSymbolName(
+                "GET"))));
         requestMappingAttributes.add(new StringAttributeValue(
                 new JavaSymbolName("headers"), "Accept=application/json"));
         final AnnotationMetadataBuilder requestMapping = new AnnotationMetadataBuilder(
@@ -706,6 +710,7 @@ public class WebJsonMetadata extends
     }
 
     private MethodMetadataBuilder getUpdateFromJsonMethod(
+    		final FieldMetadata identifierField,
             final MemberTypeAdditions mergeMethod) {
         if (StringUtils.isBlank(annotationValues.getUpdateFromJsonMethod())
                 || mergeMethod == null) {
@@ -723,13 +728,24 @@ public class WebJsonMetadata extends
         final AnnotationMetadataBuilder requestBodyAnnotation = new AnnotationMetadataBuilder(
                 REQUEST_BODY);
 
+        final List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
+        attributes.add(new StringAttributeValue(new JavaSymbolName("value"),
+                identifierField.getFieldName().getSymbolName()));
+        final AnnotationMetadataBuilder pathVariableAnnotation = new AnnotationMetadataBuilder(
+                PATH_VARIABLE, attributes);
+
         final List<AnnotatedJavaType> parameterTypes = Arrays
                 .asList(new AnnotatedJavaType(JavaType.STRING,
-                        requestBodyAnnotation.build()));
+                        	requestBodyAnnotation.build()),
+                        new AnnotatedJavaType(identifierField.getFieldType(),
+                            pathVariableAnnotation.build()));
         final List<JavaSymbolName> parameterNames = Arrays
-                .asList(new JavaSymbolName("json"));
+                .asList(new JavaSymbolName("json"),
+                			identifierField.getFieldName());
 
         final List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
+        requestMappingAttributes.add(new StringAttributeValue(new JavaSymbolName("value"),
+        				"/{" + identifierField.getFieldName().getSymbolName() + "}" ));
         requestMappingAttributes.add(new EnumAttributeValue(new JavaSymbolName(
                 "method"), new EnumDetails(REQUEST_METHOD, new JavaSymbolName(
                 "PUT"))));
