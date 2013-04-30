@@ -130,7 +130,7 @@ public class DbreOperationsImpl implements DbreOperations {
 
         // Change the persistence.xml file to prevent tables being created and
         // dropped.
-        updatePersistenceXml();
+        updatePersistenceXml(includeNonPortableAttributes);
     }
 
     private boolean setPropertyValue(final Element root,
@@ -147,7 +147,10 @@ public class DbreOperationsImpl implements DbreOperations {
         return changed;
     }
 
-    private void updatePersistenceXml() {
+    // XXX DiSiD: Added includeNonPortableAttributes.
+    // If false then no validation
+    // http://projects.disid.com/issues/7456
+    private void updatePersistenceXml(final boolean includeNonPortableAttributes) {
         final String persistencePath = pathResolver.getFocusedIdentifier(
                 Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml");
         final Document document = XmlUtils.readXml(fileManager
@@ -164,8 +167,14 @@ public class DbreOperationsImpl implements DbreOperations {
         final Element propertyElement = null;
         boolean changed = false;
         if (provider.contains("hibernate")) {
-            changed = setPropertyValue(root, propertyElement,
-                    "hibernate.hbm2ddl.auto", "validate");
+            if (includeNonPortableAttributes) {
+                changed = setPropertyValue(root, propertyElement,
+                        "hibernate.hbm2ddl.auto", "validate");
+            }
+            else {
+                changed = setPropertyValue(root, propertyElement,
+                        "hibernate.hbm2ddl.auto", "none");
+            }
             changed |= setPropertyValue(root, propertyElement,
                     "hibernate.ejb.naming_strategy",
                     "org.hibernate.cfg.DefaultNamingStrategy");
