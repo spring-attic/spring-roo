@@ -373,7 +373,7 @@
             <dependency>
                 <groupId>com.github.antlrjavaparser</groupId>
                 <artifactId>antlr-java-parser</artifactId>
-                <version>1.0.11</version>
+                <version>1.0.12</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework</groupId>
@@ -504,7 +504,7 @@
             <dependency>
                 <groupId>org.springframework.roo.wrapping</groupId>
                 <artifactId>org.springframework.roo.wrapping.antlr4-runtime</artifactId>
-                <version>4.0-rc-1.0001</version>
+                <version>4.0.0002</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework.roo.wrapping</groupId>
