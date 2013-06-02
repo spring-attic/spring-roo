@@ -9,6 +9,7 @@ import java.util.List;
 import javax.xml.parsers.DocumentBuilder;
 
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.roo.support.util.WebXmlUtils.WebXmlParam;
 import org.w3c.dom.Document;
@@ -280,6 +281,7 @@ public class WebXmlUtilsTest {
                         .getTextContent());
     }
 
+    @Ignore
     @Test
     public void testAddErrorCode() {
         WebXmlUtils.addErrorCode(404, "/404", webXml, null);
