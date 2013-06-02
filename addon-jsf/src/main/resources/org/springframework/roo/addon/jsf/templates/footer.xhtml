@@ -10,7 +10,7 @@
       <p:separator style="margin-top:15px;" />
       <h:panelGrid columns="2" cellspacing="0" cellpadding="0">
         <h:panelGrid width="600" cellspacing="0" cellpadding="0">
-          <h:panelGrid columns="5">
+          <h:panelGrid columns="6">
             <h:outputLink value="../pages/main.jsf">#{messages.label_home}</h:outputLink>
             <h:outputText value="| #{messages.label_language}:" />
             <h:panelGroup>
@@ -46,10 +46,21 @@
                 </h:outputFormat>
               </p:tooltip>
             </h:panelGroup>
+            <h:panelGroup>
+              <h:commandLink id="switchToFrench" action="#{localeBean.setSelectedLocale}">
+                <f:param name="locale" value="fr" />
+                <h:graphicImage library="images" name="fr.png" alt="Switch language to French" />
+              </h:commandLink>
+              <p:tooltip for="switchToFrench">
+                <h:outputFormat value="#{messages.label_language_switch}">
+                  <f:param value="Francais" />
+                </h:outputFormat>
+              </p:tooltip>
+            </h:panelGroup>
           </h:panelGrid>
         </h:panelGrid>
         <h:panelGrid align="right">
-          <h:outputLink value="http://springsource.com">
+          <h:outputLink value="http://springsource.org">
             <h:graphicImage library="images" name="springsource-logo.png" alt="SpringSource" />
           </h:outputLink>
         </h:panelGrid>
