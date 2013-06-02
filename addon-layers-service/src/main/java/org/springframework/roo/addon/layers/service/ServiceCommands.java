@@ -7,7 +7,6 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
@@ -27,12 +26,12 @@ public class ServiceCommands implements CommandMarker {
     @Reference private ServiceOperations serviceOperations;
     @Reference private ProjectOperations projectOperations;
 
-    @CliAvailabilityIndicator({ "service ", "service all" })
+    @CliAvailabilityIndicator({ "service type", "service all" })
     public boolean isServiceCommandAvailable() {
         return serviceOperations.isServiceInstallationPossible();
     }
 
-    @CliAvailabilityIndicator({ "secure service", "secure service all" })
+    @CliAvailabilityIndicator({ "service secure type", "service secure all" })
     public boolean isSecureServiceCommandAvailable() {
         return serviceOperations.isSecureServiceInstallationPossible();
     }

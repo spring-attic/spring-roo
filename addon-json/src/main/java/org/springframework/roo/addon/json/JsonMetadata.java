@@ -6,6 +6,7 @@ import static org.springframework.roo.model.JdkJavaType.COLLECTION;
 import static org.springframework.roo.model.JdkJavaType.LIST;
 
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -90,9 +91,11 @@ public class JsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
         this.annotationValues = annotationValues;
         this.typeNamePlural = typeNamePlural;
 
-        builder.addMethod(getToJsonMethod());
+        builder.addMethod(getToJsonMethod(false));
+        builder.addMethod(getToJsonMethod(true));
         builder.addMethod(getFromJsonMethod());
-        builder.addMethod(getToJsonArrayMethod());
+        builder.addMethod(getToJsonArrayMethod(false));
+        builder.addMethod(getToJsonArrayMethod(true));
         builder.addMethod(getFromJsonArrayMethod());
 
         // Create a representation of the desired output ITD
@@ -196,7 +199,7 @@ public class JsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
                 destination.getSimpleTypeName()));
     }
 
-    private MethodMetadataBuilder getToJsonArrayMethod() {
+    private MethodMetadataBuilder getToJsonArrayMethod(boolean includeParams) {
         // Compute the relevant method name
         final JavaSymbolName methodName = getToJsonArrayMethodName();
         if (methodName == null) {
@@ -211,8 +214,16 @@ public class JsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
             return null;
         }
 
-        final List<JavaSymbolName> parameterNames = Arrays
-                .asList(new JavaSymbolName("collection"));
+        final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+        parameterNames.add(new JavaSymbolName("collection"));
+
+        final List<AnnotatedJavaType> parameterTypes = AnnotatedJavaType
+                .convertFromJavaTypes(parameterType);
+
+        if (includeParams) {
+            parameterTypes.add(new AnnotatedJavaType(JavaType.STRING_ARRAY));
+            parameterNames.add(new JavaSymbolName("fields"));
+        }
 
         final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
         final String serializer = JSON_SERIALIZER
@@ -226,14 +237,14 @@ public class JsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
                         + serializer
                         + "()"
                         + root
+                        + (!includeParams ? "" : ".include(fields)")
                         + ".exclude(\"*.class\")"
                         + (annotationValues.isDeepSerialize() ? ".deepSerialize(collection)"
                                 : ".serialize(collection)") + ";");
 
         final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(
                 getId(), Modifier.PUBLIC | Modifier.STATIC, methodName, STRING,
-                AnnotatedJavaType.convertFromJavaTypes(parameterType),
-                parameterNames, bodyBuilder);
+                parameterTypes, parameterNames, bodyBuilder);
         methodBuilder.putCustomData(CustomDataJsonTags.TO_JSON_ARRAY_METHOD,
                 null);
         return methodBuilder;
@@ -247,7 +258,7 @@ public class JsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
         return new JavaSymbolName(methodLabel);
     }
 
-    private MethodMetadataBuilder getToJsonMethod() {
+    private MethodMetadataBuilder getToJsonMethod(boolean includeParams) {
         // Compute the relevant method name
         final JavaSymbolName methodName = getToJsonMethodName();
         if (methodName == null) {
@@ -270,12 +281,22 @@ public class JsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
                 + serializer
                 + "()"
                 + root
+                + (!includeParams ? "" : ".include(fields)")
                 + ".exclude(\"*.class\")"
                 + (annotationValues.isDeepSerialize() ? ".deepSerialize(this)"
                         : ".serialize(this)") + ";");
 
+        List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+        List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+
+        if (includeParams) {
+            parameterTypes.add(new AnnotatedJavaType(JavaType.STRING_ARRAY));
+            parameterNames.add(new JavaSymbolName("fields"));
+        }
+
         final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(
-                getId(), Modifier.PUBLIC, methodName, STRING, bodyBuilder);
+                getId(), Modifier.PUBLIC, methodName, STRING, parameterTypes,
+                parameterNames, bodyBuilder);
         methodBuilder.putCustomData(CustomDataJsonTags.TO_JSON_METHOD, null);
         return methodBuilder;
     }
