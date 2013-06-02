@@ -26,6 +26,7 @@ public class GwtFileManagerImpl implements GwtFileManager {
     @Reference protected TypeLocationService typeLocationService;
     @Reference protected TypeParsingService typeParsingService;
 
+    @Override
     public String write(final ClassOrInterfaceTypeDetails typeDetails,
             boolean includeWarning) {
         final String destFile = typeLocationService
@@ -45,6 +46,7 @@ public class GwtFileManagerImpl implements GwtFileManager {
         return fileContents;
     }
 
+    @Override
     public String write(final ClassOrInterfaceTypeDetails typeDetails,
             final String warning) {
         final String destFile = typeLocationService
@@ -57,6 +59,7 @@ public class GwtFileManagerImpl implements GwtFileManager {
         return fileContents;
     }
 
+    @Override
     public void write(final List<ClassOrInterfaceTypeDetails> typeDetails,
             final boolean includeWarning) {
         for (final ClassOrInterfaceTypeDetails typeDetail : typeDetails) {
@@ -64,6 +67,7 @@ public class GwtFileManagerImpl implements GwtFileManager {
         }
     }
 
+    @Override
     public void write(final String destFile, final String newContents) {
         write(destFile, newContents, true);
     }
@@ -76,5 +80,38 @@ public class GwtFileManagerImpl implements GwtFileManager {
             fileManager.createOrUpdateTextFileIfRequired(destFile, newContents,
                     true);
         }
+    }
+
+    @Override
+    public void delete(final ClassOrInterfaceTypeDetails typeDetails) {
+        final String file = typeLocationService
+                .getPhysicalTypeCanonicalPath(typeDetails
+                        .getDeclaredByMetadataId());
+
+        delete(file);
+    }
+
+    @Override
+    public void delete(final String file) {
+        // Write to disk, or update a file if it is already present and
+        // overwriting is allowed
+
+        if (fileManager.exists(file)) {
+            fileManager.delete(file);
+        }
+    }
+
+    @Override
+    public boolean fileExists(ClassOrInterfaceTypeDetails typeDetails) {
+        final String file = typeLocationService
+                .getPhysicalTypeCanonicalPath(typeDetails
+                        .getDeclaredByMetadataId());
+        return fileExists(file);
+    }
+
+    @Override
+    public boolean fileExists(String file) {
+        // TODO Auto-generated method stub
+        return fileManager.exists(file);
     }
 }
