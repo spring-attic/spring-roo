@@ -20,6 +20,10 @@ import com.github.antlrjavaparser.api.body.Parameter;
 import com.github.antlrjavaparser.api.body.TypeDeclaration;
 import com.github.antlrjavaparser.api.body.VariableDeclarator;
 import com.github.antlrjavaparser.api.expr.AnnotationExpr;
+import com.github.antlrjavaparser.api.expr.MarkerAnnotationExpr;
+import com.github.antlrjavaparser.api.expr.MemberValuePair;
+import com.github.antlrjavaparser.api.expr.NormalAnnotationExpr;
+import com.github.antlrjavaparser.api.expr.SingleMemberAnnotationExpr;
 import com.github.antlrjavaparser.api.stmt.BlockStmt;
 import com.github.antlrjavaparser.api.stmt.Statement;
 import com.github.antlrjavaparser.api.type.ClassOrInterfaceType;
@@ -887,9 +891,93 @@ public class UpdateCompilationUnitUtils {
                 .equals(annotation2.getName().getName())) {
             return false;
         }
-        // As we has no way (API) to make additional checks
-        // check string representation (to check annotation parameters)
-        return annotation1.toString().equals(annotation2.toString());
+        if (!annotation1.getName().equals(annotation2.getName())){
+            return false;
+        }
+        if (!annotation1.getClass().equals(annotation2.getClass())){
+            return false;
+        }
+        if (annotation1 instanceof SingleMemberAnnotationExpr){
+            // Compare expression
+            String expression1 = ((SingleMemberAnnotationExpr)annotation1).getMemberValue().toString();
+            String expression2 = ((SingleMemberAnnotationExpr)annotation2).getMemberValue().toString();
+            return expression1.equals(expression2);
+        } else if (annotation1 instanceof NormalAnnotationExpr) {
+            // Compare pairs
+            List<MemberValuePair> pairs1 = ((NormalAnnotationExpr)annotation1).getPairs();
+            List<MemberValuePair> pairs2 = ((NormalAnnotationExpr)annotation2).getPairs();
+            
+            return equals(pairs1,pairs2);
+            
+        } else if (annotation1 instanceof MarkerAnnotationExpr) {
+            // just compare name (and already done it)
+            return true;
+        } else {
+            // No other way to check are equals but toString output
+            return annotation1.toString().equals(annotation2.toString());
+        }
+    }
+
+    /**
+     * Compares to {@link MemberValuePair} list
+     * 
+     * @param pairs1
+     * @param pairs2
+     * @return
+     */
+    private static boolean equals(List<MemberValuePair> pairs1,
+            List<MemberValuePair> pairs2) {
+        if (ObjectUtils.equals(pairs1, pairs2)){
+            return true;
+        }
+        if (pairs1 == null || pairs2 == null){
+            return false;
+        }
+        if (pairs1.size() != pairs2.size()) {
+            return false;
+        }
+        
+        // Clone pair2 to better performance
+        List<MemberValuePair> pairs2Cloned = new ArrayList<MemberValuePair>(pairs2);
+        
+        MemberValuePair pair2;
+        Iterator<MemberValuePair> pairIterator;
+        boolean found;
+        // For every pair in 1
+        for (MemberValuePair pair1 : pairs1) {
+            found = false;
+            pairIterator = pairs2Cloned.iterator();
+            // Iterate over remaining pair2 elements
+            while (pairIterator.hasNext()){
+                pair2 = pairIterator.next();
+                if (pair1.getName().equals(pair2.getName())){
+                    // Found name
+                    found = true;
+                    // Remove from remaining pair2 elements
+                    pairIterator.remove();
+                    // compare value
+                    if (ObjectUtils.equals(pair1.getData(), pair2.getData())){
+                        // Equals: check for pair1 finished
+                        break;
+                    } else {
+                        String data1 = ObjectUtils.defaultIfNull(pair1.getData(), "").toString();
+                        String data2 = ObjectUtils.defaultIfNull(pair2.getData(), "").toString();
+                        if (data1.equals(data2)){
+                            // Equals: check for pair1 finished
+                            break;
+                        } else {
+                            // Not equals: return false
+                            return false;
+                        }
+                    }
+                }
+            }
+            if (!found) {
+                // Pair1 not found: return false
+                return false;
+            }
+        }
+        return true;
     }
 
     /**

@@ -387,6 +387,16 @@ public class NewUpdateCompilationUnitTest {
         // Check fields
         assertTrue(result.contains("* Javadoc for field"));
         assertTrue(result.contains("private final String[] params;"));
+        
+        assertTrue(result.contains("* Javadoc for column field"));
+        assertTrue(result.contains("@Column(name = \"VALOR\", length = 500)"));
+        assertTrue(result.contains("@Size(max = 500)"));
+        assertTrue(result.contains("@NotNull"));
+        assertTrue(result.contains("private final String valor;"));
+        
+        
+        assertTrue(result.contains("* Javadoc for transient field"));
+        assertTrue(result.contains("@Transient"));
         assertTrue(result.contains("protected Double param1 = new Double(12);"));
         assertTrue(result
                 .contains("private List<String>[] listArray = new List<String>[3];"));
