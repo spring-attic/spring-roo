@@ -956,13 +956,13 @@ public class UpdateCompilationUnitUtils {
                     // Remove from remaining pair2 elements
                     pairIterator.remove();
                     // compare value
-                    if (ObjectUtils.equals(pair1.getData(), pair2.getData())){
+                    if (ObjectUtils.equals(pair1.getValue(), pair2.getValue())){
                         // Equals: check for pair1 finished
                         break;
                     } else {
-                        String data1 = ObjectUtils.defaultIfNull(pair1.getData(), "").toString();
-                        String data2 = ObjectUtils.defaultIfNull(pair2.getData(), "").toString();
-                        if (data1.equals(data2)){
+                        String value1 = ObjectUtils.defaultIfNull(pair1.getValue(), "").toString();
+                        String value2 = ObjectUtils.defaultIfNull(pair2.getValue(), "").toString();
+                        if (value1.equals(value2)){
                             // Equals: check for pair1 finished
                             break;
                         } else {
