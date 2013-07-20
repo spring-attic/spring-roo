@@ -1,6 +1,7 @@
 package org.springframework.roo.shell;
 
 import static org.apache.commons.io.IOUtils.LINE_SEPARATOR;
+import static org.springframework.roo.shell.CliOption.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -638,7 +639,7 @@ public class SimpleParser implements Parser {
                             if (option.specifiedDefaultValue().equals(
                                     option.unspecifiedDefaultValue())) {
                                 if (option.specifiedDefaultValue().equals(
-                                        "__NULL__")) {
+                                        NULL)) {
                                     help.append("; no default value");
                                 }
                                 else {
@@ -650,7 +651,7 @@ public class SimpleParser implements Parser {
                             }
                             else {
                                 if (!"".equals(option.specifiedDefaultValue())
-                                        && !"__NULL__".equals(option
+                                        && !NULL.equals(option
                                                 .specifiedDefaultValue())) {
                                     help.append(
                                             "; default if option present: '")
@@ -659,7 +660,7 @@ public class SimpleParser implements Parser {
                                             .append("'");
                                 }
                                 if (!"".equals(option.unspecifiedDefaultValue())
-                                        && !"__NULL__".equals(option
+                                        && !NULL.equals(option
                                                 .unspecifiedDefaultValue())) {
                                     help.append(
                                             "; default if option not present: '")
@@ -845,7 +846,7 @@ public class SimpleParser implements Parser {
                                     if (option.specifiedDefaultValue().equals(
                                             option.unspecifiedDefaultValue())) {
                                         if (option.specifiedDefaultValue()
-                                                .equals("__NULL__")) {
+                                                .equals(NULL)) {
                                             help.append("; no default value");
                                         }
                                         else {
@@ -858,7 +859,7 @@ public class SimpleParser implements Parser {
                                     else {
                                         if (!"".equals(option
                                                 .specifiedDefaultValue())
-                                                && !"__NULL__"
+                                                && !NULL
                                                         .equals(option
                                                                 .specifiedDefaultValue())) {
                                             help.append(
@@ -869,7 +870,7 @@ public class SimpleParser implements Parser {
                                         }
                                         if (!"".equals(option
                                                 .unspecifiedDefaultValue())
-                                                && !"__NULL__"
+                                                && !NULL
                                                         .equals(option
                                                                 .unspecifiedDefaultValue())) {
                                             help.append(
@@ -1326,7 +1327,7 @@ public class SimpleParser implements Parser {
 
                 // Special token that denotes a null value is sought (useful for
                 // default values)
-                if ("__NULL__".equals(value)) {
+                if (NULL.equals(value)) {
                     if (requiredType.isPrimitive()) {
                         LOGGER.warning("Nulls cannot be presented to primitive type "
                                 + requiredType.getSimpleName()
@@ -1336,6 +1337,12 @@ public class SimpleParser implements Parser {
                     }
                     arguments.add(null);
                     continue;
+                }
+
+                // Change the empty string marker back into an empty string now
+                // that we are passed the default and null value checks.
+                if (EMPTY.equals(value)) {
+                    value = "";
                 }
 
                 // Now we're ready to perform a conversion
