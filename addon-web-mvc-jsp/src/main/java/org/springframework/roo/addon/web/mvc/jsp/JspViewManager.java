@@ -561,6 +561,19 @@ public class JspViewManager {
                 .getFinderMethodParamFields()) {
             final JavaType type = field.getFieldType();
             final JavaSymbolName paramName = field.getFieldName();
+            JavaSymbolName fieldName = null;
+            if (paramName.getSymbolName().startsWith("max")
+                    || paramName.getSymbolName()
+                            .startsWith("min")) {
+                fieldName = new JavaSymbolName(
+                        Introspector.decapitalize(StringUtils
+                                .capitalize(paramName
+                                        .getSymbolName().substring(3))));
+            }
+            else {
+                fieldName = paramName;
+            }
+            
 
             // Ignoring java.util.Map field types (see ROO-194)
             if (type.equals(new JavaType(Map.class.getName()))) {
@@ -654,7 +667,7 @@ public class JspViewManager {
                                 "${"
                                         + entityName
                                         + "_"
-                                        + paramName.getSymbolName()
+                                        + fieldName.getSymbolName()
                                                 .toLowerCase()
                                         + "_date_format}").build();
             }

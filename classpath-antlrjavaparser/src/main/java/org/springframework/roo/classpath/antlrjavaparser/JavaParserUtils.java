@@ -861,7 +861,14 @@ public final class JavaParserUtils {
                         targetType, imports, parameter));
             }
         }
-        return new ReferenceType(cit);
+        
+        final ReferenceType refType = new ReferenceType(cit);
+        
+        // Handle arrays
+        if (typeToImport.isArray()){
+        	refType.setArrayCount(typeToImport.getArray());
+        }
+        return refType;
     }
 
     /**

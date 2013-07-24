@@ -4,7 +4,7 @@
     <groupId>org.springframework.roo</groupId>
     <artifactId>org.springframework.roo.root</artifactId>
     <packaging>pom</packaging>
-    <version>1.2.4.BUILD-SNAPSHOT</version>
+    <version>1.2.5.BUILD-SNAPSHOT</version>
     <name>Spring Roo</name>
     <description>Spring Roo is a next-generation rapid application development tool for Java developers. It focuses on higher productivity, stock-standard Java APIs, high usability, avoiding engineering trade-offs and facilitating easy Roo removal.</description>
     <inceptionYear>2009</inceptionYear>
@@ -34,7 +34,6 @@
         <module>project</module>
         <module>process-manager</module>
         <module>classpath</module>
-        <!-- module>classpath-javaparser</module -->
         <module>classpath-antlrjavaparser</module>
         <module>addon-tostring</module>
         <module>addon-equals</module>
@@ -178,7 +177,7 @@
             <dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
-                <version>4.10</version>
+                <version>4.11</version>
                 <scope>test</scope>
                 <exclusions>
                     <exclusion>
@@ -339,17 +338,17 @@
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>
-                <version>1.6.6</version>
+                <version>1.7.5</version>
             </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-nop</artifactId>
-                <version>1.6.6</version>
+                <version>1.7.5</version>
             </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>jcl-over-slf4j</artifactId>
-                <version>1.6.6</version>
+                <version>1.7.5</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.commons</groupId>
@@ -374,7 +373,7 @@
             <dependency>
                 <groupId>com.github.antlrjavaparser</groupId>
                 <artifactId>antlr-java-parser</artifactId>
-                <version>1.0.11</version>
+                <version>1.0.12</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework</groupId>
@@ -502,17 +501,10 @@
                 <artifactId>org.springframework.roo.wrapping.cloud-foundry-api</artifactId>
                 <version>0.0.1.0010</version>
             </dependency>
-            <!--
-            <dependency>
-                <groupId>org.springframework.roo.wrapping</groupId>
-                <artifactId>org.springframework.roo.wrapping.javaparser</artifactId>
-                <version>1.0.7.0010</version>
-            </dependency>
-            -->
             <dependency>
                 <groupId>org.springframework.roo.wrapping</groupId>
                 <artifactId>org.springframework.roo.wrapping.antlr4-runtime</artifactId>
-                <version>4.0-rc-1.0001</version>
+                <version>4.0.0002</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework.roo.wrapping</groupId>
@@ -710,13 +702,6 @@
                 <artifactId>org.springframework.roo.classpath</artifactId>
                 <version>${project.version}</version>
             </dependency>
-            <!--
-            <dependency>
-                <groupId>org.springframework.roo</groupId>
-                <artifactId>org.springframework.roo.classpath.javaparser</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-           -->
             <dependency>
                 <groupId>org.springframework.roo</groupId>
                 <artifactId>org.springframework.roo.classpath.antlrjavaparser</artifactId>
@@ -930,7 +915,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>2.5.1</version>
+                <version>3.1</version>
                 <configuration>
                     <source>1.6</source>
                     <target>1.6</target>

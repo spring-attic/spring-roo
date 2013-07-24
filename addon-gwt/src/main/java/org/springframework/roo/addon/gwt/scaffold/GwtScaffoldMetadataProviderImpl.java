@@ -1,12 +1,21 @@
 package org.springframework.roo.addon.gwt.scaffold;
 
+import static org.springframework.roo.project.Path.SRC_MAIN_JAVA;
+
 import java.io.File;
+import java.io.FileReader;
+import java.io.StringWriter;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -22,10 +31,12 @@ import org.springframework.roo.addon.gwt.GwtTemplateService;
 import org.springframework.roo.addon.gwt.GwtType;
 import org.springframework.roo.addon.gwt.GwtTypeService;
 import org.springframework.roo.addon.gwt.GwtUtils;
+import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.details.BeanInfoUtils;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadata;
@@ -42,6 +53,9 @@ import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
+import org.springframework.roo.support.util.XmlUtils;
+import org.w3c.dom.Document;
+import org.xml.sax.InputSource;
 
 /**
  * Monitors Java types and if necessary creates/updates/deletes the GWT files
@@ -102,6 +116,7 @@ public class GwtScaffoldMetadataProviderImpl implements
                 getProvidesType());
     }
 
+    @Override
     public MetadataItem get(final String metadataIdentificationString) {
         // Obtain the governor's information
         final ClassOrInterfaceTypeDetails mirroredType = getGovernor(metadataIdentificationString);
@@ -129,6 +144,13 @@ public class GwtScaffoldMetadataProviderImpl implements
 
         final String moduleName = PhysicalTypeIdentifier.getPath(
                 proxy.getDeclaredByMetadataId()).getModule();
+
+        final JavaPackage topLevelPackage = projectOperations
+                .getTopLevelPackage(moduleName);
+
+        cleanUpLegacyProjects(GwtType.LIST_PLACE_RENDERER, topLevelPackage,
+                "ApplicationListPlaceRenderer");
+
         buildType(GwtType.APP_ENTITY_TYPES_PROCESSOR, moduleName);
         buildType(GwtType.APP_REQUEST_FACTORY, moduleName);
         buildType(GwtType.LIST_PLACE_RENDERER, moduleName);
@@ -140,8 +162,6 @@ public class GwtScaffoldMetadataProviderImpl implements
         final GwtScaffoldMetadata gwtScaffoldMetadata = new GwtScaffoldMetadata(
                 metadataIdentificationString);
 
-        final JavaPackage topLevelPackage = projectOperations
-                .getTopLevelPackage(moduleName);
         final Map<JavaSymbolName, GwtProxyProperty> clientSideTypeMap = new LinkedHashMap<JavaSymbolName, GwtProxyProperty>();
         for (final MethodMetadata proxyMethod : proxy.getDeclaredMethods()) {
             if (!proxyMethod.getMethodName().getSymbolName().startsWith("get")) {
@@ -187,10 +207,15 @@ public class GwtScaffoldMetadataProviderImpl implements
                 .entrySet()) {
             final GwtType gwtType = entry.getKey();
             final JavaType javaType = entry.getValue();
+
             if (!gwtType.isMirrorType() || gwtType.equals(GwtType.PROXY)
                     || gwtType.equals(GwtType.REQUEST)) {
                 continue;
             }
+
+            cleanUpLegacyProjects(gwtType, topLevelPackage,
+                    javaType.getSimpleTypeName());
+
             gwtType.dynamicallyResolveFieldsToWatch(clientSideTypeMap);
             gwtType.dynamicallyResolveMethodsToWatch(proxy.getName(),
                     clientSideTypeMap, topLevelPackage);
@@ -264,10 +289,12 @@ public class GwtScaffoldMetadataProviderImpl implements
         return typeLocationService.getTypeDetails(physicalTypeId);
     }
 
+    @Override
     public String getProvidesType() {
         return GwtScaffoldMetadata.getMetadataIdentifierType();
     }
 
+    @Override
     public void notify(String upstreamDependency, String downstreamDependency) {
         if (MetadataIdentificationUtils
                 .isIdentifyingClass(downstreamDependency)) {
@@ -337,5 +364,108 @@ public class GwtScaffoldMetadataProviderImpl implements
                 downstreamDependency, getProvidesType());
 
         metadataService.evictAndGet(downstreamDependency);
+    }
+
+    private void cleanUpLegacyProjects(GwtType type,
+            JavaPackage topLevelPackage, String simpleTypeName) {
+        if (type.isCreateUiXml() || type == GwtType.MOBILE_LIST_VIEW
+                || type == GwtType.LIST_PLACE_RENDERER
+                || type == GwtType.LIST_PLACE_RENDERER) {
+            String legacySimpleTypeName = simpleTypeName.replace("Desktop", "");
+
+            String legacyClassName = GwtPath.MANAGED_UI
+                    .packageName(topLevelPackage) + "." + legacySimpleTypeName;
+
+            ClassOrInterfaceTypeDetails legacyView = typeLocationService
+                    .getTypeDetails(new JavaType(legacyClassName));
+
+            if (legacyView != null
+                    && legacyView.getPhysicalTypeCategory() == PhysicalTypeCategory.CLASS) {
+                String newClassName = type.getPath().packageName(
+                        topLevelPackage)
+                        + "." + simpleTypeName;
+
+                JavaType newClass = new JavaType(newClassName);
+
+                final String focusedModule = projectOperations
+                        .getFocusedModuleName();
+                final LogicalPath logicalPath = LogicalPath.getInstance(
+                        SRC_MAIN_JAVA, focusedModule);
+
+                ClassOrInterfaceTypeDetailsBuilder builder = new ClassOrInterfaceTypeDetailsBuilder(
+                        PhysicalTypeIdentifier.createIdentifier(newClass,
+                                logicalPath), legacyView);
+                builder.setName(newClass);
+
+                ClassOrInterfaceTypeDetails newView = builder.build();
+
+                gwtFileManager.delete(legacyView);
+                gwtFileManager.write(newView, false);
+
+            }
+
+            String legacyManagedClassName = GwtPath.MANAGED_UI
+                    .packageName(topLevelPackage)
+                    + "."
+                    + legacySimpleTypeName
+                    + "_Roo_Gwt";
+
+            ClassOrInterfaceTypeDetails oldManagedDetailsView = typeLocationService
+                    .getTypeDetails(new JavaType(legacyManagedClassName));
+
+            if (oldManagedDetailsView != null) {
+                gwtFileManager.delete(oldManagedDetailsView);
+            }
+
+            if (type.isCreateUiXml()) {
+                String moduleName = projectOperations.getFocusedModuleName();
+                final GwtPath targetPath = type.getPath();
+                final GwtPath sourcePath = GwtPath.MANAGED_UI;
+                final PathResolver pathResolver = projectOperations
+                        .getPathResolver();
+                final String sourceDirectory = pathResolver
+                        .getIdentifier(LogicalPath.getInstance(
+                                Path.SRC_MAIN_JAVA, moduleName), sourcePath
+                                .getPackagePath(topLevelPackage));
+                final String targetDirectory = pathResolver
+                        .getIdentifier(LogicalPath.getInstance(
+                                Path.SRC_MAIN_JAVA, moduleName), targetPath
+                                .getPackagePath(topLevelPackage));
+
+                final String sourceFile = sourceDirectory + File.separatorChar
+                        + legacySimpleTypeName + ".ui.xml";
+                final String destFile = targetDirectory + File.separatorChar
+                        + simpleTypeName + ".ui.xml";
+
+                if (gwtFileManager.fileExists(sourceFile)) {
+                    FileReader fileReader;
+                    try {
+                        fileReader = new FileReader(sourceFile);
+                        final DocumentBuilder docBuilder = XmlUtils
+                                .getDocumentBuilder();
+                        InputSource source = new InputSource();
+
+                        source.setCharacterStream(fileReader);
+                        final Document existingDocument = docBuilder
+                                .parse(source);
+                        existingDocument.setDocumentURI(destFile);
+                        final Transformer transformer = XmlUtils
+                                .createIndentingTransformer();
+                        final DOMSource domSource = new DOMSource(
+                                existingDocument);
+                        final StreamResult result = new StreamResult(
+                                new StringWriter());
+                        transformer.transform(domSource, result);
+                        String contents = result.getWriter().toString();
+                        gwtFileManager.write(destFile, contents);
+                    }
+                    catch (Exception e) {
+                        System.out.println(e.getMessage());
+                    }
+
+                    gwtFileManager.delete(sourceFile);
+                }
+            }
+        }
     }
 }

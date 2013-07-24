@@ -11,7 +11,6 @@ import com.google.web.bindery.requestfactory.shared.Request;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 
 import {{=placePackage}}.ProxyPlace;
-import {{=placePackage}}.ProxyDetailsView;
 import {{=placePackage}}.ProxyListPlace;
 import {{=placePackage}}.ProxyPlace.Operation;
 {{#imports}}import {{=import}};
@@ -22,15 +21,15 @@ import java.util.Set;
  * An {@link com.google.gwt.activity.shared.Activity Activity} that requests and
  * displays detailed information on a given {{=proxy}}.
  */
-public class {{=className}} extends AbstractActivity implements ProxyDetailsView.Delegate, {{=isScaffoldMobileActivity}} {
+public class {{=className}} extends AbstractActivity implements {{=detailsView}}.Delegate, {{=isScaffoldMobileActivity}} {
 
 	private final ApplicationRequestFactory requests;
 	private final PlaceController placeController;
-	private final ProxyDetailsView<{{=proxy}}> view;
-  private final EntityProxyId<{{=proxy}}> proxyId;
+	private final {{=detailsView}} view;
+  	private final EntityProxyId<{{=proxy}}> proxyId;
 	private AcceptsOneWidget display;
 
-	public {{=className}}(EntityProxyId<{{=proxy}}> proxyId, ApplicationRequestFactory requests, PlaceController placeController, ProxyDetailsView<{{=proxy}}> view) {
+	public {{=className}}(EntityProxyId<{{=proxy}}> proxyId, ApplicationRequestFactory requests, PlaceController placeController, {{=detailsView}} view) {
 		this.placeController = placeController;
 		this.proxyId = proxyId;
 		this.requests = requests;
@@ -112,4 +111,3 @@ public class {{=className}} extends AbstractActivity implements ProxyDetailsView
 	    requests.find(proxyId).with({{=proxyFields}}).fire(callback);
 	}
 }
-

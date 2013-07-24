@@ -12,6 +12,7 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
+import org.springframework.roo.addon.gwt.GwtTemplateService;
 import org.springframework.roo.addon.gwt.GwtTypeService;
 import org.springframework.roo.addon.gwt.GwtUtils;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
@@ -21,6 +22,7 @@ import org.springframework.roo.classpath.TypeManagementService;
 import org.springframework.roo.classpath.customdata.CustomDataKeys;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
+import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
@@ -52,6 +54,7 @@ public class GwtLocatorMetadataProviderImpl implements
     private static final int LAYER_POSITION = LayerType.HIGHEST.getPosition();
 
     @Reference GwtTypeService gwtTypeService;
+    @Reference GwtTemplateService gwtTemplateService;
     @Reference LayerService layerService;
     @Reference MetadataDependencyRegistry metadataDependencyRegistry;
     @Reference MetadataService metadataService;
@@ -96,6 +99,18 @@ public class GwtLocatorMetadataProviderImpl implements
             return null;
         }
 
+        boolean useXmlConfiguration = false;
+        final ClassOrInterfaceTypeDetails existingLocator = gwtTypeService
+                .lookupLocatorFromEntity(entityType);
+        if (existingLocator != null) {
+            AnnotationMetadata annotation = existingLocator
+                    .getAnnotation(RooJavaType.ROO_GWT_LOCATOR);
+            AnnotationAttributeValue<Boolean> attribute = annotation
+                    .getAttribute("useXmlConfiguration");
+            if (attribute != null)
+                useXmlConfiguration = attribute.getValue();
+        }
+
         final JavaType entity = entityType.getName();
         final MethodMetadata identifierAccessor = persistenceMemberLocator
                 .getIdentifierAccessor(entity);
@@ -117,10 +132,17 @@ public class GwtLocatorMetadataProviderImpl implements
                 RooJavaType.ROO_GWT_LOCATOR);
         annotationMetadataBuilder.addStringAttribute("value",
                 entity.getFullyQualifiedTypeName());
+
+        if (useXmlConfiguration) {
+            annotationMetadataBuilder.addBooleanAttribute(
+                    "useXmlConfiguration", true);
+        }
         cidBuilder.addAnnotation(annotationMetadataBuilder);
 
-        cidBuilder.addAnnotation(new AnnotationMetadataBuilder(
-                SpringJavaType.COMPONENT));
+        if (!useXmlConfiguration) {
+            cidBuilder.addAnnotation(new AnnotationMetadataBuilder(
+                    SpringJavaType.COMPONENT));
+        }
         cidBuilder.setName(new JavaType(locatorType));
         cidBuilder.setModifier(Modifier.PUBLIC);
         cidBuilder.setPhysicalTypeCategory(PhysicalTypeCategory.CLASS);
@@ -132,8 +154,15 @@ public class GwtLocatorMetadataProviderImpl implements
         final MemberTypeAdditions findMethodAdditions = layerService
                 .getMemberTypeAdditions(locatorPhysicalTypeId,
                         CustomDataKeys.FIND_METHOD.name(), entity,
-                        identifierType, LAYER_POSITION, new MethodParameter(
-                                identifierType, "id"));
+                        identifierType, LAYER_POSITION, !useXmlConfiguration,
+                        new MethodParameter(identifierType, "id"));
+
+        JavaType potentialService = null;
+        FieldMetadata fieldMetadata = findMethodAdditions.getInvokedField();
+        if (fieldMetadata != null) {
+            potentialService = fieldMetadata.getFieldType();
+        }
+
         Validate.notNull(findMethodAdditions,
                 "Find method not available for entity '%s'",
                 entity.getFullyQualifiedTypeName());
@@ -148,6 +177,17 @@ public class GwtLocatorMetadataProviderImpl implements
                 identifierType));
         cidBuilder.addMethod(getVersionMethod(locatorPhysicalTypeId, entity,
                 versionAccessor));
+
+        ClassOrInterfaceTypeDetails locator = cidBuilder.build();
+
+        // Adds or removes locator from XML configuration
+        if (useXmlConfiguration) {
+            gwtTemplateService.addLocatorToXmlConfiguration(locator,
+                    potentialService);
+        }
+        else {
+            gwtTemplateService.removeLocatorFromXmlConfiguration(locator);
+        }
 
         typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
         return null;

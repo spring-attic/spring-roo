@@ -1,7 +1,10 @@
 package org.springframework.roo.addon.layers.service;
 
+import static java.lang.reflect.Modifier.PRIVATE;
+import static java.lang.reflect.Modifier.PUBLIC;
 import static org.springframework.roo.model.SpringJavaType.AUTOWIRED;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -15,7 +18,10 @@ import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
+import org.springframework.roo.classpath.details.MethodMetadataBuilder;
+import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
+import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.classpath.layers.CoreLayerProvider;
 import org.springframework.roo.classpath.layers.LayerType;
 import org.springframework.roo.classpath.layers.MemberTypeAdditions;
@@ -49,6 +55,14 @@ public class ServiceLayerProvider extends CoreLayerProvider {
     public MemberTypeAdditions getMemberTypeAdditions(final String callerMID,
             final String methodIdentifier, final JavaType targetEntity,
             final JavaType idType, final MethodParameter... methodParameters) {
+        return getMemberTypeAdditions(callerMID, methodIdentifier,
+                targetEntity, idType, true, methodParameters);
+    }
+
+    public MemberTypeAdditions getMemberTypeAdditions(final String callerMID,
+            final String methodIdentifier, final JavaType targetEntity,
+            final JavaType idType, boolean autowire,
+            final MethodParameter... methodParameters) {
         Validate.notBlank(callerMID, "Caller's metadata identifier required");
         Validate.notNull(methodIdentifier, "Method identifier required");
         Validate.notNull(targetEntity, "Target entity type required");
@@ -82,6 +96,7 @@ public class ServiceLayerProvider extends CoreLayerProvider {
             final ServiceAnnotationValues annotationValues = serviceAnnotationValuesFactory
                     .getInstance(serviceInterface);
             if (annotationValues != null) {
+
                 // Check whether this method is implemented by the given service
                 final String methodName = method.getName(annotationValues,
                         targetEntity, pluralMetadata.getPlural());
@@ -90,7 +105,7 @@ public class ServiceLayerProvider extends CoreLayerProvider {
                     // be made by the caller
                     final MemberTypeAdditions methodAdditions = getMethodAdditions(
                             callerMID, methodName, serviceInterface.getName(),
-                            Arrays.asList(methodParameters));
+                            Arrays.asList(methodParameters), autowire);
 
                     // Return these additions
                     return methodAdditions;
@@ -114,17 +129,41 @@ public class ServiceLayerProvider extends CoreLayerProvider {
      */
     private MemberTypeAdditions getMethodAdditions(final String callerMID,
             final String methodName, final JavaType serviceInterface,
-            final List<MethodParameter> parameters) {
+            final List<MethodParameter> parameters, boolean autowire) {
         // The method is supported by this service interface; make a builder
         final ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(
                 callerMID);
 
-        // Add an autowired field of the type of this service
         final String fieldName = StringUtils.uncapitalize(serviceInterface
                 .getSimpleTypeName());
-        cidBuilder.addField(new FieldMetadataBuilder(callerMID, 0, Arrays
-                .asList(new AnnotationMetadataBuilder(AUTOWIRED)),
-                new JavaSymbolName(fieldName), serviceInterface));
+
+        if (autowire) {
+            // Add an autowired field of the type of this service
+            cidBuilder.addField(new FieldMetadataBuilder(callerMID, 0, Arrays
+                    .asList(new AnnotationMetadataBuilder(AUTOWIRED)),
+                    new JavaSymbolName(fieldName), serviceInterface));
+        }
+        else {
+            // Add a set method of the type of this service
+            cidBuilder.addField(new FieldMetadataBuilder(callerMID, 0,
+                    new JavaSymbolName(fieldName), serviceInterface, null));
+            JavaSymbolName setMethodName = new JavaSymbolName("set"
+                    + serviceInterface.getSimpleTypeName());
+            List<JavaType> parameterTypes = new ArrayList<JavaType>();
+            parameterTypes.add(serviceInterface);
+            List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+            parameterNames.add(new JavaSymbolName(fieldName));
+            final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+            bodyBuilder.append("\n\tthis." + fieldName + " = " + fieldName
+                    + ";\n");
+
+            MethodMetadataBuilder setSeviceMethod = new MethodMetadataBuilder(
+                    callerMID, PUBLIC, setMethodName, JavaType.VOID_PRIMITIVE,
+                    AnnotatedJavaType.convertFromJavaTypes(parameterTypes),
+                    parameterNames, bodyBuilder);
+
+            cidBuilder.addMethod(setSeviceMethod);
+        }
 
         // Generate an additions object that includes a call to the method
         return MemberTypeAdditions.getInstance(cidBuilder, fieldName,

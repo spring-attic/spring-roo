@@ -35,10 +35,10 @@ repository jpa --interface ~.repository.PizzaRepository --entity ~.domain.Pizza
 repository jpa --interface ~.repository.PizzaOrderRepository --entity ~.domain.PizzaOrder
 
 // Define a service/facade layer
-service --interface ~.service.ToppingService --entity ~.domain.Topping
-service --interface ~.service.BaseService --entity ~.domain.Base
-service --interface ~.service.PizzaService --entity ~.domain.Pizza
-service --interface ~.service.PizzaOrderService --entity ~.domain.PizzaOrder
+service type --interface ~.service.ToppingService --entity ~.domain.Topping
+service type --interface ~.service.BaseService --entity ~.domain.Base
+service type --interface ~.service.PizzaService --entity ~.domain.Pizza
+service type --interface ~.service.PizzaOrderService --entity ~.domain.PizzaOrder
 
 // Offer JSON remoting for all domain types through Spring MVC
 json all --deepSerialize

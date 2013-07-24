@@ -1,10 +1,10 @@
 project --topLevelPackage com.wedding
-jpa setup --provider HIBERNATE --database HYPERSONIC_PERSISTENT
+jpa setup --provider OPENJPA --database HYPERSONIC_PERSISTENT
 database properties list
 database properties set --key database.url --value jdbc:hsqldb:${user.home}/my-wedding
 database properties list
 
-entity jpa --class ~.domain.Rsvp
+entity jpa --class ~.domain.Rsvp --testAutomatically
 field string code --notNull --sizeMin 1 --sizeMax 30
 field string email --sizeMax 30
 field number attending --type java.lang.Integer

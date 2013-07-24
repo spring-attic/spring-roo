@@ -3,7 +3,7 @@
   xmlns:g='urn:import:com.google.gwt.user.client.ui'
   xmlns:d='urn:import:com.google.gwt.user.datepicker.client'
   xmlns:r='urn:import:{{=scaffoldUiPackage}}'
-  xmlns:a='urn:import:{{=uiPackage}}'>
+  xmlns:e='urn:import:{{=uiEditorPackage}}'>
 
   <ui:style>
    .errors {
@@ -43,11 +43,14 @@
       <h3 class='{style.header}' ui:field='createTitle'><ui:msg>New {{=name}}</ui:msg></h3>
     </div>
     <div ui:field='errors' class='{style.errors}'></div>
-
-    <table id='boundElementHolder' class="{style.fields}">{{#editableProperties}}
-      <tr id='{{=prop}}'><td><div class='{style.label}'>{{=propReadable}}:</div></td><td><{{=propBinder}} ui:field='{{=prop}}'/></td></tr>{{/editableProperties}}
+    <table id='boundElementHolder' class="{style.fields}">
+    	{{#editableProperties}}
+      	<tr id='{{=prop}}'>
+      		<td><div class='{style.label}'>{{=propReadable}}:</div></td>
+      		<td><{{=propBinder}} ui:field='{{=prop}}'/></td>
+      	</tr>
+      	{{/editableProperties}}
     </table>
-
     <div class='{style.bar}'>
       <g:Button addStyleNames='{style.button}' ui:field='save'>Save</g:Button>
       <g:Button addStyleNames='{style.button}' ui:field='cancel'>Cancel</g:Button>

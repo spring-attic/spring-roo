@@ -387,6 +387,16 @@ public class NewUpdateCompilationUnitTest {
         // Check fields
         assertTrue(result.contains("* Javadoc for field"));
         assertTrue(result.contains("private final String[] params;"));
+        
+        assertTrue(result.contains("* Javadoc for column field"));
+        assertTrue(result.contains("@Column(name = \"VALOR\", length = 500)"));
+        assertTrue(result.contains("@Size(max = 500)"));
+        assertTrue(result.contains("@NotNull"));
+        assertTrue(result.contains("private final String valor;"));
+        
+        
+        assertTrue(result.contains("* Javadoc for transient field"));
+        assertTrue(result.contains("@Transient"));
         assertTrue(result.contains("protected Double param1 = new Double(12);"));
         assertTrue(result
                 .contains("private List<String>[] listArray = new List<String>[3];"));
@@ -496,11 +506,22 @@ public class NewUpdateCompilationUnitTest {
 
         // Check newList method
         assertTrue(result
-                .contains("List<List<Map<String, Iterator<Long>>>> newList(List<Map<String, Iterator<Long>>> theList)"));
+        		.contains("List<List<Map<String, Iterator<Long>>>> newList(List<Map<String, Iterator<Long>>> theList)"));
         assertTrue(result
-                .contains("List<List<Map<String, Iterator<Long>>>> newListResult = new ArrayList<List<Map<String, Iterator<Long>>>>();"));
+        		.contains("List<List<Map<String, Iterator<Long>>>> newListResult = new ArrayList<List<Map<String, Iterator<Long>>>>();"));
         assertTrue(result.contains("newListResult.add(theList);"));
         assertTrue(result.contains("return newListResult;"));
+        
+        // Check listStatic method
+        assertTrue(result.contains("* Javadoc listStatic..."));
+        assertTrue(result
+                .contains("public static List<SimpleClass2> listStatic(List<Object[]> objects)"));
+        assertTrue(result
+                .contains("List<SimpleClass2> result = new ArrayList<SimpleClass2>();"));
+        assertTrue(result.contains("for (Object[] object : objects) {"));
+        assertTrue(result.contains("// ..."));
+        assertTrue(result.contains("}"));
+        assertTrue(result.contains("return result;"));
     }
 
     public static void checkSimple3Class(final String result) {

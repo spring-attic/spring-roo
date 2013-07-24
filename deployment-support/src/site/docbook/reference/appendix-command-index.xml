@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <appendix xmlns="http://docbook.org/ns/docbook" version="5.0" xml:id="command-index">
     <title>Command Index</title>
-    <para>This appendix was automatically built from Roo 1.2.3.RELEASE [rev 529366a].</para>
+    <para>This appendix was automatically built from Roo 1.2.4.RELEASE [rev a41c4d1].</para>
     <para>Commands are listed in alphabetic order, and are shown in monospaced font with any mandatory options you must specify when using the command. Most commands accept a large number of options, and all of the possible options for each command are presented in this appendix.</para>
     <section xml:id="command-index-add-on-commands">
         <title>Add On Commands</title>
@@ -293,6 +293,12 @@
                     <term>--extends</term>
                     <listitem>
                         <para>The superclass (defaults to java.lang.Object); default if option not present: 'java.lang.Object'</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--implements</term>
+                    <listitem>
+                        <para>The interface to implement; no default value</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -784,9 +790,33 @@
                     </listitem>
                 </varlistentry>
                 <varlistentry>
+                    <term>--disableVersionFields</term>
+                    <listitem>
+                        <para>Disable 'version' field; default if option present: 'true'; default if option not present: 'false'</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--disableGeneratedIdentifiers</term>
+                    <listitem>
+                        <para>Disable identifier auto generation; default if option present: 'true'; default if option not present: 'false'</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
                     <term>--activeRecord</term>
                     <listitem>
                         <para>Generate CRUD active record methods for each entity; default: 'true'</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--repository</term>
+                    <listitem>
+                        <para>Generate a repository for each entity; default if option present: 'true'; default if option not present: 'false'</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--service</term>
+                    <listitem>
+                        <para>Generate a service for each entity; default if option present: 'true'; default if option not present: 'false'</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -1642,6 +1672,91 @@
                     <term>--notNull</term>
                     <listitem>
                         <para>Whether this value cannot be null; default if option present: 'true'; default if option not present: 'false'</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--permitReservedWords</term>
+                    <listitem>
+                        <para>Indicates whether reserved words are ignored by Roo; default if option present: 'true'; default if option not present: 'false'</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-field-list">
+            <title>field list</title>
+            <para>Adds a private List field to an existing Java source file (eg the 'one' side of a many-to-one)</para>
+            <programlisting><![CDATA[field list --fieldName --type]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--fieldName</term>
+                    <listitem>
+                        <para>The name of the field to add; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--type</term>
+                    <listitem>
+                        <para>The entity which will be contained within the Set; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--class</term>
+                    <listitem>
+                        <para>The name of the class to receive this field; default if option not present: '*'</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--mappedBy</term>
+                    <listitem>
+                        <para>The field name on the referenced type which owns the relationship; no default value</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--notNull</term>
+                    <listitem>
+                        <para>Whether this value cannot be null; default if option present: 'true'; default if option not present: 'false'</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--nullRequired</term>
+                    <listitem>
+                        <para>Whether this value must be null; default if option present: 'true'; default if option not present: 'false'</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--sizeMin</term>
+                    <listitem>
+                        <para>The minimum number of elements in the collection; no default value</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--sizeMax</term>
+                    <listitem>
+                        <para>The maximum number of elements in the collection; no default value</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--cardinality</term>
+                    <listitem>
+                        <para>The relationship cardinality at a JPA level; default: 'MANY_TO_MANY'</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--fetch</term>
+                    <listitem>
+                        <para>The fetch semantics at a JPA level; no default value</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--comment</term>
+                    <listitem>
+                        <para>An optional comment for JavaDocs; no default value</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--transient</term>
+                    <listitem>
+                        <para>Indicates to mark the field as transient; default if option present: 'true'; default if option not present: 'false'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -2622,6 +2737,12 @@
                     <term>--extends</term>
                     <listitem>
                         <para>The superclass (defaults to java.lang.Object); default if option not present: 'java.lang.Object'</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--implements</term>
+                    <listitem>
+                        <para>The interface to implement; no default value</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -3948,6 +4069,19 @@
     <section xml:id="command-index-security-commands">
         <title>Security Commands</title>
         <para>Security Commands are contained in org.springframework.roo.addon.security.SecurityCommands.</para>
+        <section xml:id="command-index-permissionevaluator">
+            <title>permissionEvaluator</title>
+            <para>Create a permission evaluator</para>
+            <programlisting><![CDATA[permissionEvaluator --package]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--package</term>
+                    <listitem>
+                        <para>The package to add the permission evaluator to; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
         <section xml:id="command-index-security-setup">
             <title>security setup</title>
             <para>Install Spring Security into your project</para>
@@ -3987,10 +4121,78 @@
     <section xml:id="command-index-service-commands">
         <title>Service Commands</title>
         <para>Service Commands are contained in org.springframework.roo.addon.layers.service.ServiceCommands.</para>
-        <section xml:id="command-index-service">
-            <title>service</title>
-            <para>Adds @RooService annotation to target type</para>
-            <programlisting><![CDATA[service --interface]]></programlisting>
+        <section xml:id="command-index-service-all">
+            <title>service all</title>
+            <para>Adds @RooService annotation to all entities</para>
+            <programlisting><![CDATA[service all --interfacePackage]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--interfacePackage</term>
+                    <listitem>
+                        <para>The java interface package; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--classPackage</term>
+                    <listitem>
+                        <para>The java package of the implementation classes for the interfaces; no default value</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--useXmlConfiguration</term>
+                    <listitem>
+                        <para>When true, Spring Roo will configure services using XML.  This is the default behavior for services using GAE; no default value</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-service-secure-all">
+            <title>service secure all</title>
+            <para>Adds @RooService annotation to all entities with options for authentication, authorization, and a permission evaluator</para>
+            <programlisting><![CDATA[service secure all --interfacePackage]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--interfacePackage</term>
+                    <listitem>
+                        <para>The java interface package; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--classPackage</term>
+                    <listitem>
+                        <para>The java package of the implementation classes for the interfaces; no default value</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--requireAuthentication</term>
+                    <listitem>
+                        <para>Whether or not users must be authenticated to use the service; default if option present: 'true'; default if option not present: 'false'</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--authorizedRole</term>
+                    <listitem>
+                        <para>The role authorized the use the methods in the service (additional roles can be added after creation); no default value</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--usePermissionEvaluator</term>
+                    <listitem>
+                        <para>Whether or not to use a PermissionEvaluator; default if option present: 'true'; default if option not present: 'false'</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--useXmlConfiguration</term>
+                    <listitem>
+                        <para>When true, Spring Roo will configure services using XML.; no default value</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-service-secure-type">
+            <title>service secure type</title>
+            <para>Adds @RooService annotation to target type with options for authentication, authorization, and a permission evaluator</para>
+            <programlisting><![CDATA[service secure type --interface]]></programlisting>
             <variablelist>
                 <varlistentry>
                     <term>--interface</term>
@@ -4008,6 +4210,61 @@
                     <term>--entity</term>
                     <listitem>
                         <para>The domain entity this service should expose; default if option not present: '*'</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--requireAuthentication</term>
+                    <listitem>
+                        <para>Whether or not users must be authenticated to use the service; default if option present: 'ture'; default if option not present: 'false'</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--authorizedRoles</term>
+                    <listitem>
+                        <para>The role authorized the use the methods in the service; no default value</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--usePermissionEvaluator</term>
+                    <listitem>
+                        <para>Whether or not to use a PermissionEvaluator; default if option present: 'true'; default if option not present: 'false'</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--useXmlConfiguration</term>
+                    <listitem>
+                        <para>When true, Spring Roo will configure services using XML.; no default value</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-service-type">
+            <title>service type</title>
+            <para>Adds @RooService annotation to target type</para>
+            <programlisting><![CDATA[service type --interface]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--interface</term>
+                    <listitem>
+                        <para>The java interface to apply this annotation to; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--class</term>
+                    <listitem>
+                        <para>Implementation class for the specified interface; no default value</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--entity</term>
+                    <listitem>
+                        <para>The domain entity this service should expose; default if option not present: '*'</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--useXmlConfiguration</term>
+                    <listitem>
+                        <para>When true, Spring Roo will configure services using XML.; no default value</para>
                     </listitem>
                 </varlistentry>
             </variablelist>

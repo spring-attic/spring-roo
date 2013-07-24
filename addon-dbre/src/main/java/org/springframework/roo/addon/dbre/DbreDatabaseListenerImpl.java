@@ -648,7 +648,7 @@ public class DbreDatabaseListenerImpl extends
                 final String typeName = type.getFullyQualifiedTypeName();
                 serviceOperations.setupService(new JavaType(typeName
                         + "Service"), new JavaType(typeName + "ServiceImpl"),
-                        type);
+                        type, false, "", false, false);
             }
         }
 

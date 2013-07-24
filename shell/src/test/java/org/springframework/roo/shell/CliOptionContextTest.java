@@ -17,6 +17,7 @@ public class CliOptionContextTest {
 
     @Test
     public void testGetOptionContextWhenNoneSet() {
+        CliOptionContext.setOptionContext(null);
         assertNull(CliOptionContext.getOptionContext());
     }
 

@@ -44,6 +44,15 @@ public class EntityLayerProvider extends CoreLayerProvider {
     public MemberTypeAdditions getMemberTypeAdditions(final String callerMID,
             final String methodIdentifier, final JavaType targetEntity,
             final JavaType idType, final MethodParameter... callerParameters) {
+
+        return getMemberTypeAdditions(callerMID, methodIdentifier,
+                targetEntity, idType, true, callerParameters);
+    }
+
+    public MemberTypeAdditions getMemberTypeAdditions(final String callerMID,
+            final String methodIdentifier, final JavaType targetEntity,
+            final JavaType idType, boolean autowire,
+            final MethodParameter... callerParameters) {
         Validate.isTrue(StringUtils.isNotBlank(callerMID),
                 "Metadata identifier required");
         Validate.notBlank(methodIdentifier, "Method identifier required");
