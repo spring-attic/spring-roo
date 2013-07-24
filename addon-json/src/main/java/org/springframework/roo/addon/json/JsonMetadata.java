@@ -305,7 +305,7 @@ public class JsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
                     + "(\"yyyy-MM-dd\"), java.util.Date.class)");
         }
         bodyBuilder.appendFormalLine(
-                + (!includeParams ? "" : ".include(fields)")
+                (!includeParams ? "" : ".include(fields)")
                 + ".exclude(\"*.class\")"
                 + (annotationValues.isDeepSerialize() ? ".deepSerialize(this)"
                         : ".serialize(this)") + ";");
