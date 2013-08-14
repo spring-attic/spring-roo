@@ -151,9 +151,12 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
         // To get this far we need to create the method...
         final List<JavaType> parameters = new ArrayList<JavaType>();
         parameters.add(destination);
-        final JavaType typedQueryType = new JavaType(
+        JavaType typedQueryType = new JavaType(
                 TYPED_QUERY.getFullyQualifiedTypeName(), 0, DataType.TYPE,
                 null, parameters);
+        if(finderName.getSymbolName().startsWith("count")) {
+        	typedQueryType = new JavaType("Long");
+        }
 
         final QueryHolder queryHolder = queryHolders.get(finderName);
         final String jpaQuery = queryHolder.getJpaQuery();
@@ -218,6 +221,20 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
                 + "."
                 + entityManagerMethod.getMethodName().getSymbolName() + "();");
 
+    	String typeNameIncludingTypeParameters = typedQueryType.getNameIncludingTypeParameters(false,
+                builder.getImportRegistrationResolver());
+        String typeName = destination.getSimpleTypeName();
+        if(methodName.startsWith("count")) {
+            final List<JavaType> parametersCount = new ArrayList<JavaType>();
+            parameters.add(JavaType.LONG_OBJECT);
+            JavaType typedQueryTypeCount = new JavaType(
+                    TYPED_QUERY.getFullyQualifiedTypeName(), 0, DataType.TYPE,
+                    null, parametersCount);
+            typeNameIncludingTypeParameters = typedQueryTypeCount.getNameIncludingTypeParameters(false,
+                    builder.getImportRegistrationResolver());
+            typeName = "Long";
+        }
+        
         final List<JavaSymbolName> collectionTypeNames = new ArrayList<JavaSymbolName>();
         if (containsCollectionType) {
             bodyBuilder
@@ -266,12 +283,10 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
                             + "\");");
                 }
             }
-
-            bodyBuilder.appendFormalLine(typedQueryType
-                    .getNameIncludingTypeParameters(false,
-                            builder.getImportRegistrationResolver())
+                    
+            bodyBuilder.appendFormalLine(typeNameIncludingTypeParameters
                     + " q = em.createQuery(queryBuilder.toString(), "
-                    + destination.getSimpleTypeName() + ".class);");
+                    + typeName + ".class);");
 
             for (int i = 0; i < parameterTypes.size(); i++) {
                 if (parameterTypes.get(i).isCommonCollectionType()) {
@@ -302,14 +317,12 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
                 }
             }
         }
-        else {
-            bodyBuilder.appendFormalLine(typedQueryType
-                    .getNameIncludingTypeParameters(false,
-                            builder.getImportRegistrationResolver())
+        else {               
+            bodyBuilder.appendFormalLine(typeNameIncludingTypeParameters
                     + " q = em.createQuery(\""
                     + jpaQuery
                     + "\", "
-                    + destination.getSimpleTypeName() + ".class);");
+                    + typeName + ".class);");
 
             for (final JavaSymbolName name : parameterNames) {
                 bodyBuilder.appendFormalLine("q.setParameter(\"" + name
@@ -317,7 +330,11 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
             }
         }
 
-        bodyBuilder.appendFormalLine("return q;");
+        if(methodName.startsWith("count")) {
+        	bodyBuilder.appendFormalLine("return ((Long) q.getSingleResult());");
+        } else {
+        	bodyBuilder.appendFormalLine("return q;");
+        }
 
         return new MethodMetadataBuilder(getId(), Modifier.PUBLIC
                 | Modifier.STATIC, finderName, typedQueryType,
