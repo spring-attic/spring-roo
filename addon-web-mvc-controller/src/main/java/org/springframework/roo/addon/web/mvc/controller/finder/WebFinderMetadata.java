@@ -19,6 +19,7 @@ import java.util.SortedMap;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.springframework.roo.addon.web.mvc.controller.details.DateTimeFormatDetails;
 import org.springframework.roo.addon.web.mvc.controller.details.FinderMetadataDetails;
 import org.springframework.roo.addon.web.mvc.controller.details.JavaTypeMetadataDetails;
 import org.springframework.roo.addon.web.mvc.controller.details.JavaTypePersistenceMetadataDetails;
@@ -89,6 +90,8 @@ public class WebFinderMetadata extends
     private JavaType formBackingType;
     private JavaTypeMetadataDetails javaTypeMetadataHolder;
     private Map<JavaType, JavaTypeMetadataDetails> specialDomainTypes;
+    
+    private Map<JavaSymbolName, DateTimeFormatDetails> dateTypes;
 
     /**
      * Constructor
@@ -106,7 +109,8 @@ public class WebFinderMetadata extends
             final PhysicalTypeMetadata governorPhysicalTypeMetadata,
             final WebScaffoldAnnotationValues annotationValues,
             final SortedMap<JavaType, JavaTypeMetadataDetails> specialDomainTypes,
-            final Set<FinderMetadataDetails> dynamicFinderMethods) {
+            final Set<FinderMetadataDetails> dynamicFinderMethods,
+            final Map<JavaSymbolName, DateTimeFormatDetails> dateTypes) {
         super(identifier, aspectName, governorPhysicalTypeMetadata);
         Validate.isTrue(
                 isValid(identifier),
@@ -116,7 +120,9 @@ public class WebFinderMetadata extends
         Validate.notNull(specialDomainTypes, "Special domain type map required");
         Validate.notNull(dynamicFinderMethods,
                 "Dynamoic finder methods required");
-
+        
+        this.dateTypes = dateTypes;
+        
         if (!isValid()) {
             return;
         }
@@ -264,7 +270,7 @@ public class WebFinderMetadata extends
         final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
         final StringBuilder methodParams = new StringBuilder();
 
-        boolean dateFieldPresent = false;
+        boolean dateFieldPresent = !dateTypes.isEmpty();
         for (final FieldMetadata field : finderMetadataDetails
                 .getFinderMethodParamFields()) {
             final JavaSymbolName fieldName = field.getFieldName();
