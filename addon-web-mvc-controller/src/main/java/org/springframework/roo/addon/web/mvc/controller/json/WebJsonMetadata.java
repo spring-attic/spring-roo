@@ -724,13 +724,14 @@ public class WebJsonMetadata extends
 
         final JavaSymbolName fromJsonMethodName = jsonMetadata
                 .getFromJsonMethodName();
+        final JavaSymbolName identifierFieldName = identifierField.getFieldName();
 
         final AnnotationMetadataBuilder requestBodyAnnotation = new AnnotationMetadataBuilder(
                 REQUEST_BODY);
 
         final List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
         attributes.add(new StringAttributeValue(new JavaSymbolName("value"),
-                identifierField.getFieldName().getSymbolName()));
+                identifierFieldName.getSymbolName()));
         final AnnotationMetadataBuilder pathVariableAnnotation = new AnnotationMetadataBuilder(
                 PATH_VARIABLE, attributes);
 
@@ -741,11 +742,11 @@ public class WebJsonMetadata extends
                             pathVariableAnnotation.build()));
         final List<JavaSymbolName> parameterNames = Arrays
                 .asList(new JavaSymbolName("json"),
-                			identifierField.getFieldName());
+                        identifierFieldName);
 
         final List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
         requestMappingAttributes.add(new StringAttributeValue(new JavaSymbolName("value"),
-        				"/{" + identifierField.getFieldName().getSymbolName() + "}" ));
+        				"/{" + identifierFieldName.getSymbolName() + "}" ));
         requestMappingAttributes.add(new EnumAttributeValue(new JavaSymbolName(
                 "method"), new EnumDetails(REQUEST_METHOD, new JavaSymbolName(
                 "PUT"))));
@@ -766,6 +767,9 @@ public class WebJsonMetadata extends
         bodyBuilder.appendFormalLine(jsonEnabledTypeShortName + " "
                 + jsonBeanName + " = " + jsonEnabledTypeShortName + "."
                 + fromJsonMethodName.getSymbolName() + "(json);");
+        bodyBuilder.appendFormalLine(jsonBeanName + "." +
+                getMutatorMethod(identifierFieldName, jsonEnabledType).getMethodName() +
+                "(" + identifierFieldName.getSymbolName() + ");");
         bodyBuilder.appendFormalLine("if (" + mergeMethod.getMethodCall()
                 + " == null) {");
         bodyBuilder.indent();
