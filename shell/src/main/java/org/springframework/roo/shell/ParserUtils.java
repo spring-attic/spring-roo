@@ -5,6 +5,8 @@ import java.util.Map;
 
 import org.apache.commons.lang3.Validate;
 
+import static org.springframework.roo.shell.CliOption.*;
+
 /**
  * Utilities for parsing.
  * 
@@ -83,6 +85,14 @@ public class ParserUtils {
                 final String tokenLessDelimiters = currentToken.substring(1,
                         currentToken.length() - 1);
                 currentValue.append(tokenLessDelimiters);
+
+                // If the current value is an empty string that means the
+                // user has explicitly set it as such so mark it as empty
+                // so that it doesn't get replaced by null or a default
+                // value during parsing.
+                if ("".equals(currentValue.toString())) {
+                    currentValue.append(EMPTY);
+                }
 
                 // Store this token
                 store(result, currentOption, currentValue);
