@@ -155,13 +155,13 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
                 TYPED_QUERY.getFullyQualifiedTypeName(), 0, DataType.TYPE,
                 null, parameters);
         if(finderName.getSymbolName().startsWith("count")) {
-        	typedQueryType = new JavaType("Long");
+            typedQueryType = new JavaType("Long");
         }
 
         final QueryHolder queryHolder = queryHolders.get(finderName);
         final String jpaQuery = queryHolder.getJpaQuery();
-        final List<JavaType> parameterTypes = queryHolder.getParameterTypes();
-        final List<JavaSymbolName> parameterNames = queryHolder
+        List<JavaType> parameterTypes = queryHolder.getParameterTypes();
+        List<JavaSymbolName> parameterNames = queryHolder
                 .getParameterNames();
 
         // We declared the field in this ITD, so produce a public accessor for
@@ -211,7 +211,8 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
                 containsCollectionType = true;
             }
         }
-
+        
+        
         // Get the entityManager() method (as per ROO-216)
         bodyBuilder.appendFormalLine(ENTITY_MANAGER
                 .getNameIncludingTypeParameters(false,
@@ -221,7 +222,7 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
                 + "."
                 + entityManagerMethod.getMethodName().getSymbolName() + "();");
 
-    	String typeNameIncludingTypeParameters = typedQueryType.getNameIncludingTypeParameters(false,
+        String typeNameIncludingTypeParameters = typedQueryType.getNameIncludingTypeParameters(false,
                 builder.getImportRegistrationResolver());
         String typeName = destination.getSimpleTypeName();
         if(methodName.startsWith("count")) {
@@ -284,6 +285,20 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
                 }
             }
                     
+            // sorting part
+            if(!methodName.startsWith("count")) {
+                bodyBuilder.appendFormalLine("if (fieldNames4OrderClauseFilter.contains(sortFieldName)) {");
+                bodyBuilder.indent();
+                bodyBuilder.appendFormalLine("jpaQuery = jpaQuery + \" ORDER BY \" + sortFieldName;");
+                bodyBuilder.appendFormalLine("if (\"ASC\".equalsIgnoreCase(sortOrder) || \"DESC\".equalsIgnoreCase(sortOrder)) {");
+                bodyBuilder.indent();
+                bodyBuilder.appendFormalLine("queryBuilder.append(\" \" + sortOrder);");
+                bodyBuilder.indentRemove();
+                bodyBuilder.appendFormalLine("}");
+                bodyBuilder.indentRemove();
+                bodyBuilder.appendFormalLine("}");
+            }
+            
             bodyBuilder.appendFormalLine(typeNameIncludingTypeParameters
                     + " q = em.createQuery(queryBuilder.toString(), "
                     + typeName + ".class);");
@@ -317,13 +332,31 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
                 }
             }
         }
-        else {               
-            bodyBuilder.appendFormalLine(typeNameIncludingTypeParameters
+        else {        
+            // sorting part
+            if(!methodName.startsWith("count")) {
+                bodyBuilder.appendFormalLine("String jpaQuery = \"" + jpaQuery + "\";");
+                bodyBuilder.appendFormalLine("if (fieldNames4OrderClauseFilter.contains(sortFieldName)) {");
+                bodyBuilder.indent();
+                bodyBuilder.appendFormalLine("jpaQuery = jpaQuery + \" ORDER BY \" + sortFieldName;");
+                bodyBuilder.appendFormalLine("if (\"ASC\".equalsIgnoreCase(sortOrder) || \"DESC\".equalsIgnoreCase(sortOrder)) {");
+                bodyBuilder.indent();
+                bodyBuilder.appendFormalLine("jpaQuery = jpaQuery + \" \" + sortOrder;");
+                bodyBuilder.indentRemove();
+                bodyBuilder.appendFormalLine("}");
+                bodyBuilder.indentRemove();
+                bodyBuilder.appendFormalLine("}");
+                bodyBuilder.appendFormalLine(typeNameIncludingTypeParameters
+                        + " q = em.createQuery(jpaQuery, "
+                        + typeName + ".class);");
+            } else {
+                bodyBuilder.appendFormalLine(typeNameIncludingTypeParameters
                     + " q = em.createQuery(\""
                     + jpaQuery
                     + "\", "
                     + typeName + ".class);");
-
+            }
+            
             for (final JavaSymbolName name : parameterNames) {
                 bodyBuilder.appendFormalLine("q.setParameter(\"" + name
                         + "\", " + name + ");");
@@ -331,9 +364,17 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
         }
 
         if(methodName.startsWith("count")) {
-        	bodyBuilder.appendFormalLine("return ((Long) q.getSingleResult());");
+            bodyBuilder.appendFormalLine("return ((Long) q.getSingleResult());");
         } else {
-        	bodyBuilder.appendFormalLine("return q;");
+            bodyBuilder.appendFormalLine("return q;");
+        }
+        
+        // sort parameters : sortFieldName & sortOrder
+        if(!methodName.startsWith("count")) {
+            parameterTypes.add(STRING);
+            parameterTypes.add(STRING);
+            parameterNames.add(new JavaSymbolName("sortFieldName"));
+            parameterNames.add(new JavaSymbolName("sortOrder"));
         }
 
         return new MethodMetadataBuilder(getId(), Modifier.PUBLIC
