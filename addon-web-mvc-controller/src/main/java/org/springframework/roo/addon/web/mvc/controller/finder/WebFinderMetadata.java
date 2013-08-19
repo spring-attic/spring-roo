@@ -315,7 +315,31 @@ public class WebFinderMetadata extends
             methodParams.delete(methodParams.length() - 2,
                     methodParams.length());
         }
+        
+        final List<AnnotationAttributeValue<?>> firstResultAttributes = new ArrayList<AnnotationAttributeValue<?>>();
+        firstResultAttributes.add(new StringAttributeValue(new JavaSymbolName(
+                "value"), "page"));
+        firstResultAttributes.add(new BooleanAttributeValue(new JavaSymbolName(
+                "required"), false));
+        final AnnotationMetadataBuilder firstResultAnnotation = new AnnotationMetadataBuilder(
+                REQUEST_PARAM, firstResultAttributes);
 
+        final List<AnnotationAttributeValue<?>> maxResultsAttributes = new ArrayList<AnnotationAttributeValue<?>>();
+        maxResultsAttributes.add(new StringAttributeValue(new JavaSymbolName(
+                "value"), "size"));
+        maxResultsAttributes.add(new BooleanAttributeValue(new JavaSymbolName(
+                "required"), false));
+        final AnnotationMetadataBuilder maxResultAnnotation = new AnnotationMetadataBuilder(
+                REQUEST_PARAM, maxResultsAttributes);
+        
+        
+        parameterTypes.add(new AnnotatedJavaType(
+                new JavaType(Integer.class.getName()),
+                firstResultAnnotation.build()));
+        parameterTypes.add(new AnnotatedJavaType(
+                new JavaType(Integer.class.getName()),
+                maxResultAnnotation.build()));
+        
         parameterTypes.add(new AnnotatedJavaType(MODEL));
         if (getGovernorMethod(finderMethodName,
                 AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes)) != null) {
@@ -324,6 +348,8 @@ public class WebFinderMetadata extends
 
         final List<JavaSymbolName> newParamNames = new ArrayList<JavaSymbolName>();
         newParamNames.addAll(parameterNames);
+        newParamNames.add(new JavaSymbolName("page"));
+        newParamNames.add(new JavaSymbolName("size"));
         newParamNames.add(new JavaSymbolName("uiModel"));
 
         final List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
@@ -345,6 +371,36 @@ public class WebFinderMetadata extends
         final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
         annotations.add(requestMapping);
 
+        bodyBuilder.appendFormalLine("if (page != null || size != null) {");
+        bodyBuilder.indent();
+        bodyBuilder
+                .appendFormalLine("int sizeNo = size == null ? 10 : size.intValue();");
+        bodyBuilder
+                .appendFormalLine("final int firstResult = page == null ? 0 : (page.intValue() - 1) * sizeNo;");
+        bodyBuilder.appendFormalLine("uiModel.addAttribute(\""
+                + javaTypeMetadataHolder.getPlural().toLowerCase()
+                + "\", "
+                + getShortName(formBackingType)
+                + "."
+                + finderMetadataDetails.getFinderMethodMetadata()
+                        .getMethodName().getSymbolName() + "("
+                + methodParams.toString() + ").setFirstResult(firstResult).setMaxResults(sizeNo).getResultList());");
+        
+        char[] methodNameArray = finderMetadataDetails.getFinderMethodMetadata()
+                .getMethodName().getSymbolName().toCharArray();
+        methodNameArray[0] = Character.toUpperCase(methodNameArray[0]);
+        String countMethodName = "count" + new String(methodNameArray);
+        
+        bodyBuilder.appendFormalLine("float nrOfPages = (float) "
+        		+ getShortName(formBackingType)
+                + "."
+                + countMethodName + "("
+                + methodParams.toString() + ") / sizeNo;");
+        bodyBuilder
+                .appendFormalLine("uiModel.addAttribute(\"maxPages\", (int) ((nrOfPages > (int) nrOfPages || nrOfPages == 0.0) ? nrOfPages + 1 : nrOfPages));");
+        bodyBuilder.indentRemove();
+        bodyBuilder.appendFormalLine("} else {");
+        bodyBuilder.indent();
         bodyBuilder.appendFormalLine("uiModel.addAttribute(\""
                 + javaTypeMetadataHolder.getPlural().toLowerCase()
                 + "\", "
@@ -353,6 +409,9 @@ public class WebFinderMetadata extends
                 + finderMetadataDetails.getFinderMethodMetadata()
                         .getMethodName().getSymbolName() + "("
                 + methodParams.toString() + ").getResultList());");
+        bodyBuilder.indentRemove();
+        bodyBuilder.appendFormalLine("}");
+        
         if (dateFieldPresent) {
             bodyBuilder.appendFormalLine("addDateTimeFormatPatterns(uiModel);");
         }

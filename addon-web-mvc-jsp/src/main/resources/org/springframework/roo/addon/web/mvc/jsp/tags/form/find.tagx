@@ -27,6 +27,8 @@
       <spring:url value="${path}" var="form_url" />
       <form:form action="${form_url}" method="GET">
         <input type="hidden" name="find" value="${fn:escapeXml(finderName)}" />
+        <input type="hidden" name="page" value="1" />
+        <input type="hidden" name="size" value="${empty param.size ? 10 : param.size}" />
         <jsp:doBody />
         <div class="submit" id="${fn:escapeXml(id)}_${fn:escapeXml(finderName)}_submit">
           <spring:message code="button_find" var="find_button" htmlEscape="false" />

@@ -5,6 +5,7 @@ import java.util.List;
 import org.apache.commons.lang3.Validate;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.MethodMetadata;
+import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 
 /**
  * Aggregates metadata for a given Roo finder which is scaffolded by Web
