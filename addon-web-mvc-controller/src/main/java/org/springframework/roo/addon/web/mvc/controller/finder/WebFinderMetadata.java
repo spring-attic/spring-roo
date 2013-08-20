@@ -332,6 +332,22 @@ public class WebFinderMetadata extends
         final AnnotationMetadataBuilder maxResultAnnotation = new AnnotationMetadataBuilder(
                 REQUEST_PARAM, maxResultsAttributes);
         
+        final List<AnnotationAttributeValue<?>> sortFieldNameAttributes = new ArrayList<AnnotationAttributeValue<?>>();
+        sortFieldNameAttributes.add(new StringAttributeValue(new JavaSymbolName(
+                "value"), "sortFieldName"));
+        sortFieldNameAttributes.add(new BooleanAttributeValue(new JavaSymbolName(
+                "required"), false));
+        final AnnotationMetadataBuilder sortFieldNameAnnotation = new AnnotationMetadataBuilder(
+                REQUEST_PARAM, sortFieldNameAttributes);
+        
+        final List<AnnotationAttributeValue<?>> sortOrderAttributes = new ArrayList<AnnotationAttributeValue<?>>();
+        sortOrderAttributes.add(new StringAttributeValue(new JavaSymbolName(
+                "value"), "sortOrder"));
+        sortOrderAttributes.add(new BooleanAttributeValue(new JavaSymbolName(
+                "required"), false));
+        final AnnotationMetadataBuilder sortOrderAnnotation = new AnnotationMetadataBuilder(
+                REQUEST_PARAM, sortOrderAttributes);
+        
         
         parameterTypes.add(new AnnotatedJavaType(
                 new JavaType(Integer.class.getName()),
@@ -339,6 +355,12 @@ public class WebFinderMetadata extends
         parameterTypes.add(new AnnotatedJavaType(
                 new JavaType(Integer.class.getName()),
                 maxResultAnnotation.build()));
+        parameterTypes.add(new AnnotatedJavaType(
+                new JavaType(String.class.getName()),
+                sortFieldNameAnnotation.build()));
+        parameterTypes.add(new AnnotatedJavaType(
+                new JavaType(String.class.getName()),
+                sortOrderAnnotation.build()));
         
         parameterTypes.add(new AnnotatedJavaType(MODEL));
         if (getGovernorMethod(finderMethodName,
@@ -350,8 +372,10 @@ public class WebFinderMetadata extends
         newParamNames.addAll(parameterNames);
         newParamNames.add(new JavaSymbolName("page"));
         newParamNames.add(new JavaSymbolName("size"));
-        newParamNames.add(new JavaSymbolName("uiModel"));
-
+        newParamNames.add(new JavaSymbolName("sortFieldName"));
+        newParamNames.add(new JavaSymbolName("sortOrder"));
+        newParamNames.add(new JavaSymbolName("uiModel"));     
+        
         final List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
         requestMappingAttributes.add(new StringAttributeValue(
                 new JavaSymbolName("params"), "find="
@@ -384,7 +408,7 @@ public class WebFinderMetadata extends
                 + "."
                 + finderMetadataDetails.getFinderMethodMetadata()
                         .getMethodName().getSymbolName() + "("
-                + methodParams.toString() + ").setFirstResult(firstResult).setMaxResults(sizeNo).getResultList());");
+                + methodParams.toString() + ", sortFieldName, sortOrder).setFirstResult(firstResult).setMaxResults(sizeNo).getResultList());");
         
         char[] methodNameArray = finderMetadataDetails.getFinderMethodMetadata()
                 .getMethodName().getSymbolName().toCharArray();
@@ -408,7 +432,7 @@ public class WebFinderMetadata extends
                 + "."
                 + finderMetadataDetails.getFinderMethodMetadata()
                         .getMethodName().getSymbolName() + "("
-                + methodParams.toString() + ").getResultList());");
+                + methodParams.toString() + ", sortFieldName, sortOrder).getResultList());");
         bodyBuilder.indentRemove();
         bodyBuilder.appendFormalLine("}");
         
