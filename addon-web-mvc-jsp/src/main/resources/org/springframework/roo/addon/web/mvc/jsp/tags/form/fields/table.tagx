@@ -19,7 +19,8 @@
     <c:set var="columnMaxLengths" scope="request" />
     <c:set var="columnTypes" scope="request" />
     <c:set var="columnDatePatterns" scope="request" />
-
+    <c:set var="columnSortProperties" scope="request" />
+    
     <jsp:doBody />
 
     <c:if test="${empty typeIdFieldName}">
@@ -38,17 +39,56 @@
     <c:set var="lengths" value="${fn:split(columnMaxLengths, '&#9999;')}" scope="request" />
     <c:set var="types" value="${fn:split(columnTypes, '&#9999;')}" scope="request" />
     <c:set var="patterns" value="${fn:split(columnDatePatterns, '&#9999;')}" scope="request" />
-
+    <c:set var="properties" value="${fn:split(columnProperties, '&#9999;')}" scope="request" />
+    <c:set var="sortProperties" value="${fn:split(columnSortProperties, '&#9999;')}" scope="request" />
+    
     <spring:eval var="colCounter" expression="1" />
 
     <table>
       <thead>
         <tr>
-          <c:forTokens items="${columnLabels}" delims="${'&#9999;'}" var="columnHeading">
-            <th>
-              <c:out value="${columnHeading}" />
-              <spring:eval var="colCounter" expression="colCounter  + 1" />
-            </th>
+          <c:forTokens items="${columnLabels}" delims="${'&#9999;'}" var="columnHeading" varStatus="num">
+            <c:set var="columnProperty" value="${properties[num.count-1]}" />
+            <c:set var="sort" value="false" />
+            <c:forEach var="sortProperty" items="${sortProperties}">
+                <c:if test="${columnProperty eq sortProperty}">
+                    <c:set var="sort" value="true" />
+                </c:if>
+            </c:forEach>
+            <c:choose>
+                <c:when test="${sort}">
+                    <c:set var="sortOrderSet" value="false" />
+                    <c:set var="sortOrderClass" value="sorting" />
+                    <spring:url value="" var="querySortUrl">
+                        <c:forEach items="${paramValues}" var="p">
+                            <c:if test="${p.key ne 'sortFieldName' and p.key ne 'sortOrder'}">
+                                <c:forEach var='value' items='${p.value}'>
+                                    <spring:param name="${p.key}" value="${value}" />
+                                </c:forEach>
+                            </c:if>
+                            <c:if test="${p.key eq 'sortOrder' and paramValues['sortFieldName'][0] eq columnProperty}">
+                                <c:set var="sortOrderSet" value="true" />
+                                <c:if test="${p.value[0] eq 'asc'}">
+                                    <spring:param name="sortOrder" value="desc" />
+                                    <c:set var="sortOrderClass" value="sorting_desc" />
+                                </c:if>
+                                <c:if test="${p.value[0] eq 'desc'}">
+                                    <spring:param name="sortOrder" value="asc" />
+                                    <c:set var="sortOrderClass" value="sorting_asc" />
+                                </c:if>
+                            </c:if>
+                        </c:forEach>
+                        <spring:param name="sortFieldName" value="${columnProperty}" />
+                        <c:if test="${not sortOrderSet}">
+                            <spring:param name="sortOrder" value="asc" />
+                        </c:if>
+                    </spring:url>
+                    <th><a href="${querySortUrl}" class="${sortOrderClass}"><c:out value="${columnHeading}" /> <spring:eval var="colCounter" expression="colCounter  + 1" /></a></th>
+                </c:when>
+                <c:otherwise>
+                    <th><c:out value="${columnHeading}" /> <spring:eval var="colCounter" expression="colCounter  + 1" /></th>
+                </c:otherwise>
+            </c:choose>
           </c:forTokens>
           <th></th>
           <c:if test="${update}">
