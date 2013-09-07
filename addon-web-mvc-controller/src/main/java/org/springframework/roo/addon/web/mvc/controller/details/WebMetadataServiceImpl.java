@@ -18,6 +18,7 @@ import java.beans.Introspector;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -348,7 +349,15 @@ public class WebMetadataServiceImpl implements WebMetadataService {
                     method.getMethodName().getSymbolName(), method, fields);
             finderMetadataDetails.add(details);
         }
-        return Collections.unmodifiableSortedSet(finderMetadataDetails);
+        
+        SortedSet<FinderMetadataDetails> finderMetadataDetailsWoCountMethods = new TreeSet<FinderMetadataDetails>();
+        for(FinderMetadataDetails dynamicFinderMethod : finderMetadataDetails) {
+        	if(!dynamicFinderMethod.getFinderName().startsWith("count")) {
+        		finderMetadataDetailsWoCountMethods.add(dynamicFinderMethod);
+        	}
+        }
+        
+        return Collections.unmodifiableSortedSet(finderMetadataDetailsWoCountMethods);
     }
 
     public FieldMetadata getIdentifierField(final JavaType javaType) {
