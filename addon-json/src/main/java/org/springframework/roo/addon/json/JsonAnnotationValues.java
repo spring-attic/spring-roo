@@ -15,7 +15,6 @@ import org.springframework.roo.model.RooJavaType;
 public class JsonAnnotationValues extends AbstractAnnotationValues {
 
     @AutoPopulate boolean deepSerialize;
-    @AutoPopulate boolean iso8601Dates;
     @AutoPopulate String fromJsonArrayMethod = "fromJsonArrayTo<TypeNamePlural>";
     @AutoPopulate String fromJsonMethod = "fromJsonTo<TypeName>";
     @AutoPopulate String rootName = "";
@@ -55,9 +54,5 @@ public class JsonAnnotationValues extends AbstractAnnotationValues {
 
     public boolean isDeepSerialize() {
         return deepSerialize;
-    }
-
-    public boolean isIso8601Dates() {
-        return iso8601Dates;
     }
 }
