@@ -31,13 +31,18 @@ public class JsonOperationsImpl implements JsonOperations {
     @Reference private TypeManagementService typeManagementService;
 
     public void annotateAll() {
-        annotateAll(false);
+        annotateAll(false, false);
     }
 
     public void annotateAll(final boolean deepSerialize) {
+        annotateAll(deepSerialize, false);
+    }
+
+    public void annotateAll(final boolean deepSerialize,
+            final boolean iso8601Dates) {
         for (final JavaType type : typeLocationService
                 .findTypesWithAnnotation(ROO_JAVA_BEAN)) {
-            annotateType(type, "", deepSerialize);
+            annotateType(type, "", deepSerialize, iso8601Dates);
         }
     }
 
@@ -47,6 +52,11 @@ public class JsonOperationsImpl implements JsonOperations {
 
     public void annotateType(final JavaType javaType, final String rootName,
             final boolean deepSerialize) {
+        annotateType(javaType, rootName, false, false);
+    }
+
+    public void annotateType(final JavaType javaType, final String rootName,
+            final boolean deepSerialize, final boolean iso8601Dates) {
         Validate.notNull(javaType, "Java type required");
 
         final ClassOrInterfaceTypeDetails cid = typeLocationService
@@ -65,6 +75,9 @@ public class JsonOperationsImpl implements JsonOperations {
             }
             if (deepSerialize) {
                 annotationBuilder.addBooleanAttribute("deepSerialize", true);
+            }
+            if (iso8601Dates) {
+                annotationBuilder.addBooleanAttribute("iso8601Dates", true);
             }
             final ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(
                     cid);
